@@ -49,11 +49,6 @@ module.exports = ( config ) => {
 				gutil.log( gutil.colors.red( 'Linting failed, commit aborted' ) );
 				process.exit( 1 );
 			}
-		},
-
-		register() {
-			gulp.task( 'lint', tasks.lint );
-			gulp.task( 'lint-staged', tasks.lintStaged );
 		}
 	};
 
