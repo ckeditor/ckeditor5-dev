@@ -11,7 +11,11 @@ const ckeditor5Lint = require( './src/lint' )( {
 		'src/lib/**'
 	]
 } );
+const ckeditor5Test = require( './tests/' )();
 
+gulp.task( 'test', ckeditor5Test.test );
+gulp.task( 'test:pre-coverage', ckeditor5Test.prepareCoverage );
+gulp.task( 'test:coverage', [ 'test:pre-coverage' ], ckeditor5Test.test );
 gulp.task( 'lint', ckeditor5Lint.lint );
 gulp.task( 'lint-staged', ckeditor5Lint.lintStaged );
 gulp.task( 'pre-commit', [ 'lint-staged' ] );

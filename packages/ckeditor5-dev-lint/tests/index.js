@@ -7,7 +7,7 @@ const istanbul = require( 'gulp-istanbul' );
 const mocha = require( 'gulp-mocha' );
 const chai = require( 'chai' );
 const sinon = require( 'sinon' );
-const buildUtils = require( 'ckeditor5-dev-utils' );
+const buildUtils = require( 'ckeditor5-dev-utils' ).build;
 
 /**
  * Defines Node.js testing task and development tools testing tasks.
@@ -18,7 +18,7 @@ const buildUtils = require( 'ckeditor5-dev-utils' );
  *
  * To run tests with coverage:
  *
- * 		gulp test:dev:coverage
+ * 		gulp test:coverage
  */
 module.exports = () => {
 	// Inject globals before running tests.
@@ -40,8 +40,8 @@ module.exports = () => {
 		 *
 		 * @returns {Stream}
 		 */
-		devTest() {
-			return gulp.src( 'dev/tests/**/*.js' )
+		test() {
+			return gulp.src( 'tests/**/*.js' )
 				.pipe( mocha() )
 				.pipe( tasks.coverage ? istanbul.writeReports() : buildUtils.noop() );
 		},
@@ -51,10 +51,10 @@ module.exports = () => {
 		 *
 		 * @returns {Stream}
 		 */
-		prepareDevCoverage() {
+		prepareCoverage() {
 			tasks.coverage = true;
 
-			return gulp.src( 'dev/tasks/**/*.js' )
+			return gulp.src( 'tasks/**/*.js' )
 				.pipe( istanbul() )
 				.pipe( istanbul.hookRequire() );
 		}
