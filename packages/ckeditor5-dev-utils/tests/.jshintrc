@@ -1,12 +1,12 @@
 {
-  "browser": true,
+  "node": true,
   "esnext": true,
   "expr": true,
   "immed": true,
   "loopfunc": true,
   "noarg": true,
   "nonbsp": true,
-  "strict": "implied",
+  "strict": true,
   "undef": true,
   "unused": true,
   "varstmt": true,
@@ -16,8 +16,6 @@
     "before": false,
     "beforeEach": false,
     "describe": false,
-    "expect": false,
-    "it": false,
-    "sinon": false
+    "it": false
   }
 }

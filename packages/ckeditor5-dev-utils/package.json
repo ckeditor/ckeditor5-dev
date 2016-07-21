@@ -22,8 +22,10 @@
     "through2": "^2.0.1"
   },
   "devDependencies": {
-  	"jshint": "^2.9.1",
-  	"gulp-jscs": "^3.0.2",
+    "jshint": "^2.9.1",
+    "gulp-istanbul": "^1.0.0",
+    "gulp-mocha": "^2.2.0",
+    "gulp-jscs": "^3.0.2",
     "gulp-jshint": "^2.0.0",
     "jshint-reporter-jscs": "^0.1.0",
     "chai": "^3.5.0",
