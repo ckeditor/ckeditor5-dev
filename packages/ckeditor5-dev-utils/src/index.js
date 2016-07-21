@@ -9,5 +9,6 @@ module.exports = {
 	git: require( './git' ),
 	log: require( './log' ),
 	tools: require( './tools' ),
+	build: require( './build' ),
 	'ckeditor5-dirs': require( './ckeditor5-dirs' )
 };
