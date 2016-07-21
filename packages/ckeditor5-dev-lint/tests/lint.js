@@ -73,7 +73,7 @@ describe( 'lint', () => {
 				} )
 			];
 
-			const tasks = require( '../src/lint' )( config );
+			const tasks = require( '../lib/lint' )( config );
 			const PassThrough = stream.PassThrough;
 
 			sandbox.stub( gulp, 'src', () => {
@@ -102,7 +102,7 @@ describe( 'lint', () => {
 
 	describe( 'lintStaged', () => {
 		it( 'should throw error when linting fails', ( done ) => {
-			const tasks = require( '../src/lint' )( config );
+			const tasks = require( '../lib/lint' )( config );
 			const PassThrough = stream.PassThrough;
 
 			const exitStub = sandbox.stub( process, 'exit' );

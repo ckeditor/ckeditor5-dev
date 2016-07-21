@@ -31,5 +31,9 @@
   "license": "See LICENSE.md",
   "homepage": "",
   "bugs": "",
-  "repository": ""
+  "repository": "",
+  "scripts": {
+    "test": "mocha tests --recursive",
+    "coverage": "istanbul cover _mocha tests/ -- --recursive"
+  }
 }
