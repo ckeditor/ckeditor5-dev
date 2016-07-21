@@ -5,6 +5,7 @@
   "keywords": [],
   "main": "lib/lint.js",
   "dependencies": {
+    "concat-stream": "^1.5.1",
     "git-guppy": "^1.2.1",
     "gulp": "^3.9.1",
     "gulp-filter": "^4.0.0",
@@ -13,8 +14,8 @@
     "gulp-util": "^3.0.7"
   },
   "devDependencies": {
+    "jshint": "^2.9.2",
     "chai": "^3.5.0",
-    "concat-stream": "^1.5.1",
     "gulp-istanbul": "^1.0.0",
     "gulp-mocha": "^2.2.0",
     "jshint-reporter-jscs": "^0.1.0",
