@@ -3,13 +3,11 @@
 'use strict';
 
 const gulp = require( 'gulp' );
-const ckeditor5Lint = require( './src/lint' )( {
+const ckeditor5Lint = require( './lib/lint' )( {
 	ROOT_DIR: '.',
 
 	// Files ignored by jshint and jscs tasks. Files from .gitignore will be added automatically during tasks execution.
-	IGNORED_FILES: [
-		'src/lib/**'
-	]
+	IGNORED_FILES: []
 } );
 const ckeditor5Test = require( './tests/' )();
 
