@@ -391,9 +391,10 @@ require( [ 'tests' ], bender.defer(), function( err ) {
 		// Find all CKEditor5 package directories. Resolve symlinks so we watch real directories
 		// in order to workaround https://github.com/paulmillr/chokidar/issues/419.
 		return fs.readdirSync( path.join( rootDir, 'node_modules' ) )
-			// Look for ckeditor5-* directories.
+			// Look for `ckeditor5-*` directories excluding `ckeditor5-dev-*`.
 			.filter( fileName => {
-				return fileName.indexOf( 'ckeditor5-' ) === 0;
+				return fileName.indexOf( 'ckeditor5-' ) === 0 &&
+					fileName.indexOf( 'ckeditor5-dev-' ) === -1;
 			} )
 			// Resolve symlinks and keep only directories.
 			.map( fileName => {
@@ -520,19 +521,21 @@ require( [ 'tests' ], bender.defer(), function( err ) {
 	 * Given a stream of `.svg` files it returns a stream containing JavaScript
 	 * icon sprite file.
 	 *
+	 * @param {Object} options Customization options for `gulp-svg-sprite`.
 	 * @returns {Stream}
 	 */
-	compileIconSprite() {
-		return sprite( utils.getIconSpriteOptions() );
+	compileIconSprite( options ) {
+		return sprite( utils.getIconSpriteOptions( options ) );
 	},
 
 	/**
 	 * Returns svg-sprite util options to generate <symbol>-based, JavaScript
 	 * sprite file.
 	 *
+	 * @param {Object} options Customization options for `gulp-svg-sprite`.
 	 * @returns {Object}
 	 */
-	getIconSpriteOptions() {
+	getIconSpriteOptions( options ) {
 		return {
 			shape: {
 				id: {
@@ -550,8 +553,8 @@ require( [ 'tests' ], bender.defer(), function( err ) {
 					inline: true,
 					render: {
 						js: {
-							template: path.join( __dirname, 'iconmanagermodel.tpl' ),
-							dest: 'iconmanagermodel.js',
+							template: options.template,
+							dest: options.dest,
 						}
 					}
 				}

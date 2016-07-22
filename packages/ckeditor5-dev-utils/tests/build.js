@@ -741,14 +741,19 @@ describe( 'build-utils', () => {
 	} );
 
 	describe( 'getIconSpriteOptions', () => {
+		const spriteOptions = {
+			template: path.join( __dirname, 'iconmanagermodel.tpl' ),
+			dest: 'iconmanagermodel.js',
+		};
+
 		it( 'returns object with defaults', () => {
-			const options = utils.getIconSpriteOptions();
+			const options = utils.getIconSpriteOptions( spriteOptions );
 
 			expect( options ).to.have.all.keys( [ 'shape', 'svg', 'mode' ] );
 		} );
 
 		it( 'returns icon ids generator out of svg file names', () => {
-			const options = utils.getIconSpriteOptions();
+			const options = utils.getIconSpriteOptions( spriteOptions );
 
 			expect( options.shape.id.generator( 'foo.svg' ) ).to.equal( 'ck-icon-foo' );
 			expect( options.shape.id.generator( 'foo/bar/foo.svg' ) ).to.equal( 'ck-icon-foo' );
@@ -756,9 +761,15 @@ describe( 'build-utils', () => {
 		} );
 
 		it( 'returns configuration to output JavaScript sprite', () => {
-			const options = utils.getIconSpriteOptions();
+			const options = utils.getIconSpriteOptions( spriteOptions );
 
 			expect( options.mode.symbol.render.js.dest ).to.equal( 'iconmanagermodel.js' );
+		} );
+
+		it( 'should throw when correct options are not provided', () => {
+			expect( () => {
+				utils.getIconSpriteOptions();
+			} ).to.throw( Error );
 		} );
 	} );
 
