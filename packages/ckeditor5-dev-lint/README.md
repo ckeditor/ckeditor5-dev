@@ -1,4 +1,4 @@
-CKEditor 5 linting task
+CKEditor 5 Linting Task
 ========================================
 
 [![devDependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-task-lint/dev-status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-task-lint#info=devDependencies)
