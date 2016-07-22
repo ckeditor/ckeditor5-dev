@@ -6,6 +6,8 @@
   "keywords": [],
   "dependencies": {
     "ckeditor5-dev-task-lint": "ckeditor5/ckeditor5-dev-task-lint",
+    "babel-plugin-transform-es2015-modules-amd": "^6.8.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.10.3",
     "del": "^2.2.1",
     "fs-extra": "^0.30.0",
     "git-guppy": "^1.1.0",
