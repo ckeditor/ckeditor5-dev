@@ -1,7 +1,7 @@
-CKEditor 5 linting task Changelog
+CKEditor 5 Linting Task Changelog
 ========================================
 
-## CKEditor 5 linting task 0.0.2
+## CKEditor 5 Linting Task 0.0.2
 
 **Major|Minor|Patch Release** - Build Date: yyyy-mm-dd
 
@@ -20,6 +20,6 @@ Other Changes:
 * Item 1
 * Item 2
 
-## CKEditor 5 linting task 0.0.1
+## CKEditor 5 Linting Task 0.0.1
 
 ...

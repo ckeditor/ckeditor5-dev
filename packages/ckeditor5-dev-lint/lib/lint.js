@@ -14,7 +14,7 @@ module.exports = ( config ) => {
 
 	const tasks = {
 		/**
-		 * Returns stream containing jshint and jscs reporters.
+		 * Returns a stream containing jshint and jscs reporters.
 		 *
 		 * @returns {Stream}
 		 */
@@ -24,7 +24,7 @@ module.exports = ( config ) => {
 		},
 
 		/**
-		 * This method is executed on pre-commit hook, linting only files staged for current commit.
+		 * This method is executed on pre-commit hook, linting only files staged for the current commit.
 		 *
 		 * @returns {Stream}
 		 */
@@ -42,8 +42,8 @@ module.exports = ( config ) => {
 				.on( 'error', errorHandler );
 
 			/**
-			 * Handles error from jscs and jshint fail reporters. Stops node process with error code
-			 * and prints error message to the console.
+			 * Handles errors from jscs and jshint fail reporters. Stops the node process with an error code
+			 * and prints an error message to the console.
 			 */
 			function errorHandler() {
 				gutil.log( gutil.colors.red( 'Linting failed, commit aborted' ) );
@@ -74,7 +74,7 @@ module.exports = ( config ) => {
 	}
 
 	/**
-	 * Returns stream with all linting plugins combined.
+	 * Returns a stream with all linting plugins combined.
 	 *
 	 * @returns {Stream}
 	 */

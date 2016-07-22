@@ -6,7 +6,7 @@ CKEditor 5 Linting Task
 [![npm version](https://badge.fury.io/js/ckeditor5-dev-task-lint.svg)](https://badge.fury.io/js/ckeditor5-dev-task-lint)
 
 
-Gulp linting tasks for CKEditor 5. More information about the project can be found at the following url: <https://github.com/ckeditor/ckeditor5-dev-task-lint>.
+Gulp linting tasks for CKEditor 5. More information about the project can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev-task-lint>.
 
 ## License
 
