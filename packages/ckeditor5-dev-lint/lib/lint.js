@@ -1,5 +1,3 @@
-/* jshint node: true, esnext: true */
-
 'use strict';
 
 const gulp = require( 'gulp' );
