@@ -14,10 +14,11 @@
     "gulp-util": "^3.0.7"
   },
   "devDependencies": {
-    "jshint": "^2.9.2",
     "chai": "^3.5.0",
     "gulp-istanbul": "^1.0.0",
     "gulp-mocha": "^2.2.0",
+    "guppy-pre-commit": "^0.3.0",
+    "jshint": "^2.9.2",
     "jshint-reporter-jscs": "^0.1.0",
     "mockery": "^1.7.0",
     "sinon": "^1.17.4",
