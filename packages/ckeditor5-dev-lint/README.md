@@ -1,4 +1,4 @@
-CKEditor 5 Linting Task
+CKEditor 5 Linting Tasks
 ========================================
 
 [![devDependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-task-lint/dev-status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-task-lint#info=devDependencies)
@@ -33,7 +33,8 @@ const gulp = require( 'gulp' );
 const ckeditor5Lint = require( 'ckeditor5-dev-task-lint' )( {
 	ROOT_DIR: '.',
 
-	// Files ignored by jshint and jscs tasks. Files from .gitignore will be added automatically during tasks execution.
+	// Files ignored by jshint and jscs tasks.
+	// Files from .gitignore will be added automatically during tasks execution.
 	IGNORED_FILES: []
 } );
 
