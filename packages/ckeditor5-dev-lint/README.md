@@ -23,6 +23,8 @@ npm coverage
 
 ## Usage
 
+**Note:** JSHint has to be installed directly in a package which uses `ckeditor5-dev-lint`. See https://github.com/spalger/gulp-jshint/issues/145.
+
 ```js
 /* jshint browser: false, node: true, strict: true */
 

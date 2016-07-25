@@ -11,15 +11,15 @@
     "gulp-filter": "^4.0.0",
     "gulp-jscs": "^4.0.0",
     "gulp-jshint": "^2.0.1",
-    "gulp-util": "^3.0.7"
+    "gulp-util": "^3.0.7",
+    "jshint": "^2.9.2",
+    "jshint-reporter-jscs": "^0.1.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "gulp-istanbul": "^1.0.0",
-    "gulp-mocha": "^2.2.0",
     "guppy-pre-commit": "^0.3.0",
-    "jshint": "^2.9.2",
-    "jshint-reporter-jscs": "^0.1.0",
+    "istanbul": "^0.4.4",
+    "mocha": "^2.5.3",
     "mockery": "^1.7.0",
     "sinon": "^1.17.4",
     "through2": "^2.0.1",
