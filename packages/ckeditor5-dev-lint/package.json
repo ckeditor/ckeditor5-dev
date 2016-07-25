@@ -1,5 +1,5 @@
 {
-  "name": "ckeditor5-dev-task-lint",
+  "name": "ckeditor5-dev-lint",
   "version": "0.0.1",
   "description": "Gulp linting tasks for CKEditor 5.",
   "keywords": [],
@@ -31,9 +31,9 @@
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "See LICENSE.md",
-  "homepage": "https://github.com/ckeditor/ckeditor5-dev-task-lint",
-  "bugs": "https://github.com/ckeditor/ckeditor5-dev-task-lint/issues",
-  "repository": "https://github.com/ckeditor/ckeditor5-dev-task-lint",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev-lint",
+  "bugs": "https://github.com/ckeditor/ckeditor5-dev-lint/issues",
+  "repository": "https://github.com/ckeditor/ckeditor5-dev-lint",
   "scripts": {
     "test": "mocha tests --recursive",
     "coverage": "istanbul cover _mocha tests/ -- --recursive"
