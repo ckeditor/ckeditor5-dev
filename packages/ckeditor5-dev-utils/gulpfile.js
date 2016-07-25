@@ -4,7 +4,7 @@
 
 const gulp = require( 'gulp' );
 
-const ckeditor5Lint = require( 'ckeditor5-dev-task-lint' )( {
+const ckeditor5Lint = require( 'ckeditor5-dev-lint' )( {
 	ROOT_DIR: '.',
 
 	// Files ignored by jshint and jscs tasks. Files from .gitignore will be added automatically during tasks execution.

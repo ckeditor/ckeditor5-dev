@@ -5,7 +5,6 @@
   "main": "lib/index.js",
   "keywords": [],
   "dependencies": {
-    "ckeditor5-dev-task-lint": "ckeditor/ckeditor5-dev-task-lint",
     "babel-plugin-transform-es2015-modules-amd": "^6.8.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.10.3",
     "del": "^2.2.1",
@@ -26,6 +25,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "ckeditor5-dev-lint": "ckeditor/ckeditor5-dev-lint",
     "gulp-istanbul": "^1.0.0",
     "gulp-jscs": "^3.0.2",
     "gulp-jshint": "^2.0.0",
