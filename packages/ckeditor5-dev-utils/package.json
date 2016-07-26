@@ -29,7 +29,6 @@
     "mocha": "^2.5.3",
     "ckeditor5-dev-lint": "ckeditor/ckeditor5-dev-lint",
     "guppy-pre-commit": "^0.3.0",
-    "jshint": "^2.9.2",
     "sinon": "^1.17.4",
     "vinyl": "^1.1.1"
   },
