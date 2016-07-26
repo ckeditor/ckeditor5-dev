@@ -1,0 +1,21 @@
+{
+  "name": "ckeditor5-dev-env",
+  "version": "0.0.1",
+  "description": "Tasks used during development of CKEditor 5.",
+  "keywords": [],
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "guppy-pre-commit": "^0.3.0",
+    "ckeditor5-dev-lint": "ckeditor/ckeditor5-dev-lint"
+  },
+  "engines": {
+    "node": ">=6.0.0",
+    "npm": ">=3.0.0"
+  },
+  "author": "CKSource (http://cksource.com/)",
+  "license": "See LICENSE.md",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev-env",
+  "bugs": "https://github.com/ckeditor/ckeditor5-dev-env/issue",
+  "repository": "https://github.com/ckeditor/ckeditor5-dev-env"
+}
