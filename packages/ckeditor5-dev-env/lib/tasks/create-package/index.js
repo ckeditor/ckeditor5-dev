@@ -28,25 +28,24 @@ const { git, tools, log } = require( 'ckeditor5-dev-utils' );
  */
 module.exports = ( ckeditor5Path, workspaceRoot ) => {
 	const workspaceAbsolutePath = path.join( ckeditor5Path, workspaceRoot );
+
+	// Template files are represented by paths relative to this file location.
 	const fileStructure = {
 		'./': [
-			'.editorconfig',
-			'.jshintrc',
-			'.jscsrc',
-			'.gitattributes',
-			'dev/tasks/dev/templates/.gitignore',
-			'dev/tasks/dev/templates/CHANGES.md',
-			'dev/tasks/dev/templates/CONTRIBUTING.md',
-			'dev/tasks/dev/templates/gulpfile.js',
-			'dev/tasks/dev/templates/LICENSE.md',
-			'dev/tasks/dev/templates/package.json',
-			'dev/tasks/dev/templates/README.md'
+			'../../../.editorconfig',
+			'../../../.jscsrc',
+			'../../../.gitattributes',
+			'templates/.jshintrc',
+			'templates/.gitignore',
+			'templates/CHANGES.md',
+			'templates/CONTRIBUTING.md',
+			'templates/gulpfile.js',
+			'templates/LICENSE.md',
+			'templates/package.json',
+			'templates/README.md'
 		],
 		'tests/': [
-			'tests/.jshintrc'
-		],
-		'dev/': [
-			'dev/.jshintrc'
+			'templates/tests/.jshintrc'
 		]
 	};
 
@@ -91,7 +90,12 @@ module.exports = ( ckeditor5Path, workspaceRoot ) => {
 			log.out( `Copying files into ${ repositoryPath }...` );
 
 			for ( let destination in fileStructure ) {
-				tools.copyTemplateFiles( fileStructure[ destination ], path.join( repositoryPath, destination ), {
+				// Create absolute paths for template files.
+				fileStructure[ destination ] = fileStructure[ destination ].map( src => path.resolve( __dirname, src ) );
+
+				tools.copyTemplateFiles(
+					fileStructure[ destination ],
+					path.join( repositoryPath, destination ), {
 					'{{AppName}}': packageFullName,
 					'{{GitHubRepositoryPath}}': gitHubPath,
 					'{{ProjectDescription}}': packageDescription
