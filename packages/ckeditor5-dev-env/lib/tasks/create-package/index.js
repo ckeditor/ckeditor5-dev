@@ -36,7 +36,7 @@ module.exports = ( ckeditor5Path, workspaceRoot ) => {
 			'../../../.jscsrc',
 			'../../../.gitattributes',
 			'templates/.jshintrc',
-			'templates/.gitignore',
+			{ filePath: 'templates/.gitignore_template', renameTo: '.gitignore' },
 			'templates/CHANGES.md',
 			'templates/CONTRIBUTING.md',
 			'templates/gulpfile.js',
@@ -91,7 +91,15 @@ module.exports = ( ckeditor5Path, workspaceRoot ) => {
 
 			for ( let destination in fileStructure ) {
 				// Create absolute paths for template files.
-				fileStructure[ destination ] = fileStructure[ destination ].map( src => path.resolve( __dirname, src ) );
+				fileStructure[ destination ] = fileStructure[ destination ].map( ( src ) => {
+					if ( typeof src == 'object' ) {
+						src.filePath = path.resolve( __dirname, src.filePath );
+
+						return src;
+					}
+
+					return path.resolve( __dirname, src );
+				} );
 
 				tools.copyTemplateFiles(
 					fileStructure[ destination ],
