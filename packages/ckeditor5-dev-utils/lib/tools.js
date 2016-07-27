@@ -208,33 +208,46 @@ module.exports = {
 	 * Copies source files into destination directory and replaces contents of the file using provided `replace` object.
 	 *
 	 *		// Each occurrence of `{{appName}}` inside README.md and CHANGES.md will be changed to `ckeditor5`.
-	 * 		tools.copyTemplateFiles( [ 'README.md', 'CHANGES.md' ], '/new/path', { '{{AppName}}': 'ckeditor5' } );
+	 *		tools.copyTemplateFiles( [ '/path/to/README.md', '/path/to/CHANGES.md' ], '/new/path', { '{{AppName}}': 'ckeditor5' } );
 	 *
-	 * @param {Array} sources Source files.
+	 * Allows to change name of copied files:
+	 *
+	 *		tools.copyTemplateFiles( [ { filePath: 'path/to/README.md.template', renameTo: 'README.md' ], '/new/path' );
+	 *
+	 * @param {Array.<String|Object} sources Source files. Renaming source file after copying can be done by providing
+	 * an object with two fields: `filePath` and `renameTo`.
 	 * @param {String} destination Path to destination directory.
 	 * @param {Object} [replace] Object with data to fill template. Method will take object's keys and replace their
 	 * occurrences with value stored under that key.
 	 */
 	copyTemplateFiles( sources, destination, replace ) {
+		let regexp, replaceFunction;
 		const path = require( 'path' );
 		const fs = require( 'fs-extra' );
-		replace = replace || {};
 		destination = path.resolve( destination );
 		const regexps = [];
 
-		for ( let variableName in replace ) {
-			regexps.push( variableName );
+		if ( replace ) {
+			for ( let variableName in replace ) {
+				regexps.push( variableName );
+			}
+
+			regexp = new RegExp( regexps.join( '|' ), 'g' );
+			replaceFunction = ( matched ) => replace[ matched ];
 		}
-		const regexp = new RegExp( regexps.join( '|' ), 'g' );
-		const replaceFunction = ( matched ) => replace[ matched ];
 
 		fs.ensureDirSync( destination );
 
-		sources.forEach( source => {
-			source = path.resolve( source );
+		sources.forEach( item => {
+			const rename = typeof item == 'object' && item.filePath && item.filePath;
+			const source = path.resolve( rename ? item.filePath : item );
+			const fileName = rename ? item.renameTo : path.basename( item );
 			let fileData = fs.readFileSync( source, 'utf8' );
-			fileData = fileData.replace( regexp, replaceFunction );
-			fs.writeFileSync( path.join( destination, path.basename( source ) ), fileData, 'utf8' );
+
+			if ( regexp ) {
+				fileData = fileData.replace( regexp, replaceFunction );
+			}
+			fs.writeFileSync( path.join( destination, fileName ), fileData, 'utf8' );
 		} );
 	},
 

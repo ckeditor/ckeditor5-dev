@@ -407,6 +407,31 @@ describe( 'utils', () => {
 				savePath = path.join( destination, path.basename( sources[ 1 ] ) );
 				sinon.assert.calledWithExactly( writeFileStub.secondCall, savePath, 'foo, bar, barfoo', 'utf8' );
 			} );
+			it( 'should allow to rename files', () => {
+				const path = require( 'path' );
+				const fs = require( 'fs-extra' );
+
+				const readFileStub = sandbox.stub( fs, 'readFileSync' );
+				readFileStub.onFirstCall().returns( 'foo bar' );
+
+				const writeFileStub = sandbox.stub( fs, 'writeFileSync' );
+				const ensureDirStub = sandbox.stub( fs, 'ensureDirSync' );
+				const sources = [ { filePath: '/path/to/file1.md', renameTo: 'file2.md' } ];
+				const destination = '/destination/path';
+
+				tools.copyTemplateFiles( sources, destination );
+
+				sinon.assert.calledWithExactly( ensureDirStub, destination );
+				sinon.assert.calledOnce( readFileStub );
+				sinon.assert.calledWithExactly( readFileStub.firstCall, path.resolve( '/path/to/file1.md' ), 'utf8' );
+				sinon.assert.calledOnce( writeFileStub );
+				sinon.assert.calledWithExactly(
+					writeFileStub.firstCall,
+					path.resolve( '/destination/path/file2.md' ),
+					'foo bar',
+					'utf8'
+				);
+			} );
 		} );
 
 		describe( 'getGitUrlFromNpm', () => {
