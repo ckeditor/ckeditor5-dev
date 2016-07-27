@@ -5,7 +5,7 @@
 
 'use strict';
 
-module.exports = ( config ) => {
+module.exports = ( workspaceRelativePath ) => {
 	const cwd = process.cwd();
 	const path = require( 'path' );
 	const packageJSON = require( path.join( cwd, 'package.json' ) );
@@ -21,25 +21,25 @@ module.exports = ( config ) => {
 				}
 			} );
 
-			return updateTask( installTask, cwd, packageJSON, config.WORKSPACE_DIR, options[ 'npm-update' ] );
+			return updateTask( installTask, cwd, packageJSON, workspaceRelativePath, options[ 'npm-update' ] );
 		},
 
 		checkStatus() {
 			const statusTask = require( './tasks/status' );
 
-			return statusTask( cwd, packageJSON, config.WORKSPACE_DIR );
+			return statusTask( cwd, packageJSON, workspaceRelativePath );
 		},
 
 		initRepository() {
 			const initTask = require( './tasks/init' );
 			const installTask = require( './tasks/install' );
 
-			return initTask( installTask, cwd, packageJSON, config.WORKSPACE_DIR );
+			return initTask( installTask, cwd, packageJSON, workspaceRelativePath );
 		},
 
 		createPackage( done ) {
 			const packageCreateTask = require( './tasks/create-package' );
-			packageCreateTask( cwd, config.WORKSPACE_DIR )
+			packageCreateTask( cwd, workspaceRelativePath )
 				.then( done )
 				.catch( ( error ) => done( error ) );
 		},
@@ -47,7 +47,7 @@ module.exports = ( config ) => {
 		relink() {
 			const relinkTask = require( './tasks/relink' );
 
-			return relinkTask( cwd, packageJSON, config.WORKSPACE_DIR );
+			return relinkTask( cwd, packageJSON, workspaceRelativePath );
 		},
 
 		installPackage() {
@@ -61,7 +61,7 @@ module.exports = ( config ) => {
 			} );
 
 			if ( options.package ) {
-				return installTask( cwd, config.WORKSPACE_DIR, options.package );
+				return installTask( cwd, workspaceRelativePath, options.package );
 			} else {
 				throw new Error( 'Please provide a package to install: gulp dev-install --package <path|GitHub URL|name>' );
 			}
@@ -88,7 +88,7 @@ module.exports = ( config ) => {
 				return;
 			}
 
-			return execTask( task, cwd, packageJSON, config.WORKSPACE_DIR, params );
+			return execTask( task, cwd, packageJSON, workspaceRelativePath, params );
 		}
 	};
 
