@@ -18,13 +18,10 @@ const { tools } = require( 'ckeditor5-dev-utils' );
  * @param {Object} params
  */
 module.exports = function executeShellCommand( workdir, params ) {
-	// Needed to see results of commands printing to stdout/stderr.
-	const shouldLogOutput = true;
-	const cmd = params.cmd;
-
-	if ( !cmd ) {
-		throw new Error( 'You must provide command to execute with parameter: --cmd "command"' );
+	if ( !params.cmd ) {
+		throw new Error( 'You must provide command to execute: --cmd "command"' );
 	}
 
-	tools.shExec( cmd, shouldLogOutput );
+	// Log output to stdout/stderr.
+	tools.shExec( `cd ${ workdir } && ${ params.cmd }`, true );
 };
