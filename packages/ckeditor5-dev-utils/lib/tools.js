@@ -214,7 +214,7 @@ module.exports = {
 	 *
 	 *		tools.copyTemplateFiles( [ { filePath: 'path/to/README.md.template', renameTo: 'README.md' ], '/new/path' );
 	 *
-	 * @param {Array.<String|Object} sources Source files. Renaming source file after copying can be done by providing
+	 * @param {Array.<String|Object>} sources Source files. Renaming source file after copying can be done by providing
 	 * an object with two fields: `filePath` and `renameTo`.
 	 * @param {String} destination Path to destination directory.
 	 * @param {Object} [replace] Object with data to fill template. Method will take object's keys and replace their
@@ -239,7 +239,7 @@ module.exports = {
 		fs.ensureDirSync( destination );
 
 		sources.forEach( item => {
-			const rename = typeof item == 'object' && item.filePath && item.filePath;
+			const rename = typeof item == 'object' && item.filePath && item.renameTo;
 			const source = path.resolve( rename ? item.filePath : item );
 			const fileName = rename ? item.renameTo : path.basename( item );
 			let fileData = fs.readFileSync( source, 'utf8' );
