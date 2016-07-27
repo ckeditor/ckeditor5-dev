@@ -10,7 +10,7 @@ const { git, tools, log } = require( 'ckeditor5-dev-utils' );
 
 /**
  * This tasks install specified package in development mode. It can be executed by typing:
- * 		grunt dev-install --package <git_hub_url|npm_name|path_on_disk>
+ * 		gulp dev-install --package <git_hub_url|npm_name|path_on_disk>
  *
  *
  * It performs following steps:
@@ -38,7 +38,7 @@ module.exports = ( ckeditor5Path, workspaceRoot, name ) => {
 		const packageName = tools.readPackageName( repositoryPath );
 
 		if ( packageName ) {
-			log.out( `Plugin located at ${ repositoryPath }.` );
+			log.out( `Package located at ${ repositoryPath }.` );
 			urlInfo = {
 				name: packageName
 			};
