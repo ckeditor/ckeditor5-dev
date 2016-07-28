@@ -14,7 +14,10 @@ const expect = chai.expect;
 
 describe( 'exec-tasks', () => {
 	let sandbox;
-	const workspaceRelativePath = '/path/exec/';
+	const config = {
+		WORKSPACE_DIR: '/path/exec/'
+	};
+
 	const getDevDirectoriesResult = [
 		{
 			repositoryPath: '/path/1',
@@ -49,7 +52,7 @@ describe( 'exec-tasks', () => {
 			mockery.registerMock( 'minimist', () => {
 				return { };
 			} );
-			const tasks = require( '../lib' )( workspaceRelativePath );
+			const tasks = require( '../lib' )( config );
 
 			tasks.execOnRepositories();
 
@@ -65,7 +68,7 @@ describe( 'exec-tasks', () => {
 			mockery.registerMock( 'minimist', () => {
 				return { task: 'task-to-run' };
 			} );
-			const tasks = require( '../lib' )( workspaceRelativePath );
+			const tasks = require( '../lib' )( config );
 
 			tasks.execOnRepositories();
 
@@ -83,7 +86,7 @@ describe( 'exec-tasks', () => {
 				return { task: 'task-to-run' };
 			} );
 			mockery.registerMock( './tasks/exec/functions/task-to-run', () => {} );
-			const tasks = require( '../lib' )( workspaceRelativePath );
+			const tasks = require( '../lib' )( config );
 
 			tasks.execOnRepositories();
 
@@ -102,7 +105,7 @@ describe( 'exec-tasks', () => {
 			} );
 			sandbox.stub( workspace, 'getDevDirectories' ).returns( getDevDirectoriesResult );
 			mockery.registerMock( './tasks/exec/functions/task-to-run', taskStub );
-			const tasks = require( '../lib' )( workspaceRelativePath );
+			const tasks = require( '../lib' )( config );
 
 			tasks.execOnRepositories();
 
@@ -122,7 +125,7 @@ describe( 'exec-tasks', () => {
 			} );
 			sandbox.stub( workspace, 'getDevDirectories' ).returns( getDevDirectoriesResult );
 			mockery.registerMock( './tasks/exec/functions/task-to-run', taskStub );
-			const tasks = require( '../lib' )( workspaceRelativePath );
+			const tasks = require( '../lib' )( config );
 
 			tasks.execOnRepositories();
 
@@ -144,7 +147,7 @@ describe( 'exec-tasks', () => {
 			} );
 			sandbox.stub( workspace, 'getDevDirectories' ).returns( getDevDirectoriesResult );
 			mockery.registerMock( './tasks/exec/functions/task-to-run', taskStub );
-			const tasks = require( '../lib' )( workspaceRelativePath );
+			const tasks = require( '../lib' )( config );
 
 			tasks.execOnRepositories();
 
