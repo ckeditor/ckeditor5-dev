@@ -77,12 +77,12 @@ module.exports = ( ckeditor5Path, workspaceRoot ) => {
 			return inquiries.getPackageDescription();
 		} )
 		.then( result => {
+			packageDescription = result;
 			const replace = {
 				'{{AppName}}': packageFullName,
 				'{{GitHubRepositoryPath}}': gitHubPath,
 				'{{ProjectDescription}}': packageDescription
 			};
-			packageDescription = result;
 
 			log.out( `Initializing repository ${ repositoryPath }...` );
 			git.initializeRepository( repositoryPath );
