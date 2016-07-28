@@ -232,14 +232,14 @@ module.exports = {
 		}
 
 		// When replace object is passed - modify file on the fly.
-		const regexps = [];
+		const regexpList = [];
 
 		for ( let variableName in replace ) {
-			regexps.push( variableName );
+			regexpList.push( variableName );
 		}
 
 		// Create one regexp for all variables to replace.
-		const regexp = new RegExp( regexps.join( '|' ), 'g' );
+		const regexp = new RegExp( regexpList.join( '|' ), 'g' );
 
 		// Read and modify.
 		const inputData = fs.readFileSync( inputPath, 'utf8' );
