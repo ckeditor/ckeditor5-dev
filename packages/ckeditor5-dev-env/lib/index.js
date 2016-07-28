@@ -5,6 +5,12 @@
 
 'use strict';
 
+/**
+ * Exports function returning development tasks.
+ *
+ * @param {String} workspaceRelativePath Relative path to workspace where packages in development mode will be stored.
+ * @returns {Object}
+ */
 module.exports = ( workspaceRelativePath ) => {
 	const cwd = process.cwd();
 	const path = require( 'path' );
