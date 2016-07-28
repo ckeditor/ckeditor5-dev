@@ -63,7 +63,7 @@ module.exports = ( workspaceRelativePath ) => {
 			if ( options.package ) {
 				return installTask( cwd, workspaceRelativePath, options.package );
 			} else {
-				throw new Error( 'Please provide a package to install: gulp dev-install --package <path|GitHub URL|name>' );
+				throw new Error( 'Please provide a package to install: --package <path|GitHub URL|name>' );
 			}
 		},
 

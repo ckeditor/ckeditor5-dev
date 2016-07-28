@@ -10,7 +10,7 @@ const { git, tools, log } = require( 'ckeditor5-dev-utils' );
 
 /**
  * This tasks install specified package in development mode. It can be executed by typing:
- * 		gulp dev-install --package <git_hub_url|npm_name|path_on_disk>
+ * 		gulp install --package <git_hub_url|npm_name|path_on_disk>
  *
  *
  * It performs following steps:
