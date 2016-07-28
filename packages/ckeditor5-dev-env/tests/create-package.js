@@ -40,7 +40,7 @@ describe( 'dev-create-package', () => {
 			getPackageDescription: sinon.stub( inquiries, 'getPackageDescription' ).returns( new Promise( ( r ) => r( packageDescription ) ) ),
 			initializeRepository: sinon.stub( git, 'initializeRepository' ),
 			updateJSONFile: sinon.stub( tools, 'updateJSONFile' ),
-			copy: sinon.stub( tools, 'copyTemplateFiles' ),
+			copy: sinon.stub( tools, 'copyTemplateFile' ),
 			initialCommit: sinon.stub( git, 'initialCommit' ),
 			addRemote: sinon.stub( git, 'addRemote' )
 		};

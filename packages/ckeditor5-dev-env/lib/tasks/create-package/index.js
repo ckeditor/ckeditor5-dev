@@ -29,24 +29,22 @@ const { git, tools, log } = require( 'ckeditor5-dev-utils' );
 module.exports = ( ckeditor5Path, workspaceRoot ) => {
 	const workspaceAbsolutePath = path.join( ckeditor5Path, workspaceRoot );
 
-	// Template files are represented by paths relative to this file location.
+	// Template files to copy.
+	// Object key represents path to template file, relative to location of this file.
+	// Object values are destination paths, relative to new repository root.
 	const fileStructure = {
-		'./': [
-			'../../../.editorconfig',
-			'../../../.jscsrc',
-			'../../../.gitattributes',
-			'templates/.jshintrc',
-			{ filePath: 'templates/.gitignore_template', renameTo: '.gitignore' },
-			'templates/CHANGES.md',
-			'templates/CONTRIBUTING.md',
-			'templates/gulpfile.js',
-			'templates/LICENSE.md',
-			'templates/package.json',
-			'templates/README.md'
-		],
-		'tests/': [
-			'templates/tests/.jshintrc'
-		]
+		'../../../.editorconfig': '.editorconfig',
+		'../../../.jscsrc': '.jscsrc',
+		'../../../.gitattributes': '.gitattributes',
+		'templates/.jshintrc': '.jshintrc',
+		'templates/.gitignore_template': '.gitignore',
+		'templates/CHANGES.md': 'CHANGES.md',
+		'templates/CONTRIBUTING.md': 'CONTRIBUTING.md',
+		'templates/gulpfile.js': 'gulpfile.js',
+		'templates/LICENSE.md': 'LICENSE.md',
+		'templates/package.json': 'package.json',
+		'templates/README.md': 'README.md',
+		'templates/tests/.jshintrc': 'tests/.jshintrc'
 	};
 
 	let packageName;
@@ -89,25 +87,19 @@ module.exports = ( ckeditor5Path, workspaceRoot ) => {
 
 			log.out( `Copying files into ${ repositoryPath }...` );
 
-			for ( let destination in fileStructure ) {
-				// Create absolute paths for template files.
-				fileStructure[ destination ] = fileStructure[ destination ].map( ( src ) => {
-					if ( typeof src == 'object' ) {
-						src.filePath = path.resolve( __dirname, src.filePath );
+			for ( let file in fileStructure ) {
+				const source = path.resolve( __dirname, file );
+				const destination = path.join( repositoryPath, fileStructure[ file ] );
 
-						return src;
+				tools.copyTemplateFile(
+					source,
+					destination,
+					{
+						'{{AppName}}': packageFullName,
+						'{{GitHubRepositoryPath}}': gitHubPath,
+						'{{ProjectDescription}}': packageDescription
 					}
-
-					return path.resolve( __dirname, src );
-				} );
-
-				tools.copyTemplateFiles(
-					fileStructure[ destination ],
-					path.join( repositoryPath, destination ), {
-					'{{AppName}}': packageFullName,
-					'{{GitHubRepositoryPath}}': gitHubPath,
-					'{{ProjectDescription}}': packageDescription
-				} );
+				);
 			}
 
 			log.out( `Updating package.json files...` );
