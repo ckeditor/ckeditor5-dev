@@ -8,17 +8,21 @@
 /**
  * Exports function returning development tasks.
  *
- * @param {String} workspaceRelativePath Relative path to workspace where packages in development mode will be stored.
+ * @param {Object} config Configuration object.
+ * @param {String} config.WORKSPACE_DIR Relative path to workspace where packages in development mode will be stored.
  * @returns {Object}
  */
-module.exports = ( workspaceRelativePath ) => {
+module.exports = ( config ) => {
+	const workspaceRelativePath = config.WORKSPACE_DIR;
 	const cwd = process.cwd();
 	const path = require( 'path' );
 	const packageJSON = require( path.join( cwd, 'package.json' ) );
+
 	const tasks = {
 		updateRepositories() {
 			const updateTask = require( './tasks/update' );
 			const installTask = require( './tasks/install' );
+
 			const minimist = require( 'minimist' );
 			const options = minimist( process.argv.slice( 2 ), {
 				boolean: [ 'npm-update' ],
@@ -45,6 +49,7 @@ module.exports = ( workspaceRelativePath ) => {
 
 		createPackage( done ) {
 			const packageCreateTask = require( './tasks/create-package' );
+
 			packageCreateTask( cwd, workspaceRelativePath )
 				.then( done )
 				.catch( ( error ) => done( error ) );
@@ -59,6 +64,7 @@ module.exports = ( workspaceRelativePath ) => {
 		installPackage() {
 			const installTask = require( './tasks/install' );
 			const minimist = require( 'minimist' );
+
 			const options = minimist( process.argv.slice( 2 ), {
 				string: [ 'package' ],
 				default: {
@@ -77,6 +83,7 @@ module.exports = ( workspaceRelativePath ) => {
 			const execTask = require( './tasks/exec' );
 			const minimist = require( 'minimist' );
 			const { log } = require( 'ckeditor5-dev-utils' );
+
 			const params = minimist( process.argv.slice( 3 ), {
 				stopEarly: false,
 			} );

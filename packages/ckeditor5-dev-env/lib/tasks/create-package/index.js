@@ -77,6 +77,11 @@ module.exports = ( ckeditor5Path, workspaceRoot ) => {
 			return inquiries.getPackageDescription();
 		} )
 		.then( result => {
+			const replace = {
+				'{{AppName}}': packageFullName,
+				'{{GitHubRepositoryPath}}': gitHubPath,
+				'{{ProjectDescription}}': packageDescription
+			};
 			packageDescription = result;
 
 			log.out( `Initializing repository ${ repositoryPath }...` );
@@ -94,11 +99,7 @@ module.exports = ( ckeditor5Path, workspaceRoot ) => {
 				tools.copyTemplateFile(
 					source,
 					destination,
-					{
-						'{{AppName}}': packageFullName,
-						'{{GitHubRepositoryPath}}': gitHubPath,
-						'{{ProjectDescription}}': packageDescription
-					}
+					replace
 				);
 			}
 

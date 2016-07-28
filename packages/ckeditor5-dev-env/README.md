@@ -11,9 +11,12 @@ Tasks used during development of CKEditor 5. More information about the project 
 
 Description of each development task can be found here: <https://github.com/ckeditor/ckeditor5/wiki/Development-Workflow>.
 To include development tasks in your `gulpfile.js`:
+
 ```js
-const workspaceRelativePath = '..';
-const ckeditor5DevEnv = require( 'ckeditor5-dev-env' )( workspaceRelativePath );
+const config = {
+	WORKSPACE_DIR: '..'
+};
+const ckeditor5DevEnv = require( 'ckeditor5-dev-env' )( config );
 
 gulp.task( 'init', ckeditor5DevEnv.initRepository );
 gulp.task( 'create-package', ckeditor5DevEnv.createPackage );
