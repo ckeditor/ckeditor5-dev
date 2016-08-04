@@ -1,0 +1,71 @@
+/**
+ * @license Copyright (c) 2003-2016, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+'use strict';
+
+const path = require( 'path' );
+const PassThrough = require( 'stream' ).PassThrough;
+const through = require( 'through2' );
+
+const stream = {
+	/**
+	 * Creates a simple duplex stream.
+	 *
+	 * @param {Function} [callback] A callback which will be executed with each chunk.
+	 * @returns {Stream}
+	 */
+	noop( callback ) {
+		if ( !callback ) {
+			return new PassThrough( { objectMode: true } );
+		}
+
+		return through( { objectMode: true }, ( file, encoding, throughCallback ) => {
+			callback( file );
+
+			throughCallback( null, file );
+		} );
+	},
+
+	/**
+	 * Checks whether a file is a test file.
+	 *
+	 * @param {Vinyl} file
+	 * @returns {Boolean}
+	 */
+	isTestFile( file ) {
+		// TODO this should be based on bender configuration (config.tests.*.paths).
+		if ( !file.relative.startsWith( 'tests' + path.sep ) ) {
+			return false;
+		}
+
+		const dirFrags = file.relative.split( path.sep );
+
+		return !dirFrags.some( dirFrag => {
+			return dirFrag.startsWith( '_' ) && dirFrag != '_utils-tests';
+		} );
+	},
+
+	/**
+	 * Checks whether a file is a source file.
+	 *
+	 * @param {Vinyl} file
+	 * @returns {Boolean}
+	 */
+	isSourceFile( file ) {
+		return !stream.isTestFile( file );
+	},
+
+	/**
+	 * Checks whether a file is a JS file.
+	 *
+	 * @param {Vinyl} file
+	 * @returns {Boolean}
+	 */
+	isJSFile( file ) {
+		return file.path.endsWith( '.js' );
+	}
+};
+
+module.exports = stream;
