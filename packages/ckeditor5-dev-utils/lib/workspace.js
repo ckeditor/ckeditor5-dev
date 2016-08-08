@@ -84,7 +84,7 @@ module.exports = {
 		for ( let dependency in dependencies ) {
 			const repositoryURL = dependencies[ dependency ];
 			const urlInfo = git.parseRepositoryUrl( repositoryURL );
-			const repositoryPath = path.join( ckeditor5Path, 'node_modules', dependency );
+			const repositoryPath = path.join( workspacePath, dependency );
 
 			// Check if repository's directory already exists.
 			if ( directories.indexOf( urlInfo.name ) > -1 ) {
