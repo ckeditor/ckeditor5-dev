@@ -134,11 +134,11 @@ describe( 'utils', () => {
 				expect( directories.length ).to.equal( 2 );
 				expect( directories[ 0 ] ).to.deep.equal( {
 						repositoryURL: 'ckeditor/ckeditor5-plugin-image',
-						repositoryPath: '/workspace/path/ckeditor5/node_modules/ckeditor5-plugin-image'
+						repositoryPath: '/workspace/path/ckeditor5-plugin-image'
 					} );
 				expect( directories[ 1 ] ).to.deep.equal( {
 						repositoryURL: 'ckeditor/ckeditor5-core',
-						repositoryPath: '/workspace/path/ckeditor5/node_modules/ckeditor5-core'
+						repositoryPath: '/workspace/path/ckeditor5-core'
 					} );
 			} );
 
@@ -157,11 +157,11 @@ describe( 'utils', () => {
 					} );
 				expect( directories[ 1 ] ).to.deep.equal( {
 						repositoryURL: 'ckeditor/ckeditor5-plugin-image',
-						repositoryPath: '/workspace/path/ckeditor5/node_modules/ckeditor5-plugin-image'
+						repositoryPath: '/workspace/path/ckeditor5-plugin-image'
 					} );
 				expect( directories[ 2 ] ).to.deep.equal( {
 						repositoryURL: 'ckeditor/ckeditor5-core',
-						repositoryPath: '/workspace/path/ckeditor5/node_modules/ckeditor5-core'
+						repositoryPath: '/workspace/path/ckeditor5-core'
 					} );
 			} );
 		} );
