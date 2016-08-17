@@ -15,7 +15,10 @@
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "See LICENSE.md",
-  "homepage": "",
-  "bugs": "",
-  "repository": ""
+  "homepage": "https://ckeditor5.github.io",
+  "bugs": "https://github.com/{{GitHubRepositoryPath}}/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/{{GitHubRepositoryPath}}.git"
+  }
 }
