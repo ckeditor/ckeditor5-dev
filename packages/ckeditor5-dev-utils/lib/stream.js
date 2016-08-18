@@ -14,6 +14,7 @@ const stream = {
 	 * Creates a simple duplex stream.
 	 *
 	 * @param {Function} [callback] A callback which will be executed with each chunk.
+	 * The callback can return a Promise to perform async actions before other chunks are accepted.
 	 * @returns {Stream}
 	 */
 	noop( callback ) {
