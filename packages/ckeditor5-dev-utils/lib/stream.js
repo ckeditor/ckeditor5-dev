@@ -22,9 +22,15 @@ const stream = {
 		}
 
 		return through( { objectMode: true }, ( file, encoding, throughCallback ) => {
-			callback( file );
+			const callbackResult = callback( file );
 
-			throughCallback( null, file );
+			if ( callbackResult instanceof Promise ) {
+				callbackResult.then( () => {
+					throughCallback( null, file );
+				} );
+			} else {
+				throughCallback( null, file );
+			}
 		} );
 	},
 

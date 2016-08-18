@@ -42,6 +42,20 @@ describe( 'stream', () => {
 			expect( ret.writable ).to.equal( true );
 			expect( ret.readable ).to.equal( true );
 		} );
+
+		it( 'should return a duplex stream when given a callback and call that callback and that callback returns a Promise', () => {
+			const resolvePromise = new Promise( ( r ) => r() );
+			const stubPromise = sinon.stub( resolvePromise, 'then' );
+			const stub = sinon.stub().returns( resolvePromise );
+			const ret = utils.noop( stub );
+
+			ret.write( 'foo' );
+
+			expect( stub.called ).to.equal( true );
+			expect( stubPromise.called ).to.equal( true );
+			expect( ret.writable ).to.equal( true );
+			expect( ret.readable ).to.equal( true );
+		} );
 	} );
 
 	describe( 'isTestFile', () => {
