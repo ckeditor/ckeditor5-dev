@@ -43,18 +43,52 @@ describe( 'stream', () => {
 			expect( ret.readable ).to.equal( true );
 		} );
 
-		it( 'should return a duplex stream when given a callback and call that callback and that callback returns a Promise', () => {
-			const resolvePromise = new Promise( ( r ) => r() );
-			const stubPromise = sinon.stub( resolvePromise, 'then' );
-			const stub = sinon.stub().returns( resolvePromise );
-			const ret = utils.noop( stub );
+		it( 'should wait until a promise returned by the callback is resolved', ( ) => {
+			let resolve, resolved;
 
-			ret.write( 'foo' );
+			const stream = utils.noop( () => {
+				return new Promise( r => {
+					resolve = r;
+				} );
+			} );
 
-			expect( stub.called ).to.equal( true );
-			expect( stubPromise.called ).to.equal( true );
-			expect( ret.writable ).to.equal( true );
-			expect( ret.readable ).to.equal( true );
+			stream
+				.pipe(
+					utils.noop( () => {
+						expect( resolved ).to.equal( true );
+					} )
+				);
+
+			stream.write( 'foo' );
+
+			resolved = true;
+			resolve();
+		} );
+
+		it( 'should fail when a returned promise is rejected', ( done ) => {
+			const chunks = [];
+			const stream = utils.noop( ( chunk ) => {
+				return new Promise( ( resolve, reject ) => {
+					if ( chunk == 'foo' ) {
+						reject();
+					} else {
+						resolve();
+					}
+				} );
+			} );
+
+			stream.pipe( utils.noop( ( chunk ) => {
+				chunks.push( chunk );
+			} ) );
+
+			stream.on( 'end', () => {
+				expect( chunks.join() ).to.equal( 'bar' );
+				done();
+			} );
+
+			stream.write( 'foo' );
+			stream.write( 'bar' );
+			stream.end();
 		} );
 	} );
 
