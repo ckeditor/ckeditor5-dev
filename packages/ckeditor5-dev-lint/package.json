@@ -1,5 +1,5 @@
 {
-  "name": "ckeditor5-dev-lint",
+  "name": "@ckeditor/ckeditor5-dev-lint",
   "version": "1.0.0",
   "description": "Gulp linting tasks for CKEditor 5.",
   "keywords": [],
