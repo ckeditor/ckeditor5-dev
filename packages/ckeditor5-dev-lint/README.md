@@ -5,7 +5,7 @@ CKEditor 5 Linting Tasks
 [![Dependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-lint/status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-lint#info=dependencies)
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-lint.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-lint)
 
-Gulp linting tasks for CKEditor 5. More information about the project can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev-lint>.
+Gulp linting tasks for [CKEditor 5](https://ckeditor5.github.io). More information about the project can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev-lint>.
 
 ## Testing
 
@@ -18,10 +18,14 @@ npm test
 Code coverage:
 
 ```
-npm coverage
+npm run coverage
 ```
 
 ## Usage
+
+```
+npm i --save-dev @ckeditor/ckeditor5-dev-lint
+```
 
 **Note:** JSHint has to be installed directly in a package which uses `ckeditor5-dev-lint`. See https://github.com/spalger/gulp-jshint/issues/145.
 
@@ -32,7 +36,7 @@ npm coverage
 
 const gulp = require( 'gulp' );
 
-const ckeditor5Lint = require( 'ckeditor5-dev-lint' )( {
+const ckeditor5Lint = require( '@ckeditor/ckeditor5-dev-lint' )( {
 	ROOT_DIR: '.',
 
 	// Files ignored by jshint and jscs tasks.
