@@ -1,5 +1,5 @@
 {
-  "name": "ckeditor5-dev-utils",
+  "name": "@ckeditor/ckeditor5-dev-utils",
   "version": "0.0.1",
   "description": "Utils for CKEditor 5 dev code (such as Gulp tasks).",
   "main": "lib/index.js",
@@ -14,10 +14,10 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "ckeditor5-dev-lint": "ckeditor/ckeditor5-dev-lint",
+    "@ckeditor/ckeditor5-dev-lint": "^1.0.1",
     "guppy-pre-commit": "^0.3.0",
     "istanbul": "^0.4.4",
-    "mocha": "^2.5.3",
+    "mocha": "^3.0.2",
     "sinon": "^1.17.4",
     "vinyl": "^1.1.1"
   },
