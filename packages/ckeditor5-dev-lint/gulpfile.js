@@ -8,6 +8,7 @@
 'use strict';
 
 const gulp = require( 'gulp' );
+
 const ckeditor5Lint = require( './lib/lint' )( {
 	ROOT_DIR: '.',
 
