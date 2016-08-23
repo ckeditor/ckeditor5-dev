@@ -3,7 +3,7 @@ CKEditor 5 Linting Tasks
 
 [![devDependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-lint/dev-status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-lint#info=devDependencies)
 [![Dependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-lint/status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-lint#info=dependencies)
-[![npm version](https://badge.fury.io/js/ckeditor5-dev-lint.svg)](https://badge.fury.io/js/ckeditor5-dev-lint)
+[![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-lint.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-lint)
 
 Gulp linting tasks for CKEditor 5. More information about the project can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev-lint>.
 
