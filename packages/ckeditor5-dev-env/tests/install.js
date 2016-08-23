@@ -12,7 +12,7 @@ const sinon = require( 'sinon' );
 const installTask = require( '../lib/tasks/install' );
 const expect = chai.expect;
 const path = require( 'path' );
-const { tools, git } = require( 'ckeditor5-dev-utils' );
+const { tools, git } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-install', () => {
 	const moduleName = 'ckeditor5-core';

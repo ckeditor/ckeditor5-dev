@@ -10,7 +10,7 @@ const path = require( 'path' );
 const replace = require( 'gulp-replace' );
 const filterGitignore = require( '../../../utils/filtergitignore' );
 const filter = require( 'gulp-filter' );
-const { tools } = require( 'ckeditor5-dev-utils' );
+const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * Removes lines with `'use strict';` directive.

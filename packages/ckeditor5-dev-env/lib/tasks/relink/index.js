@@ -6,7 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
-const { workspace, tools, log } = require( 'ckeditor5-dev-utils' );
+const { workspace, tools, log } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * 1. Get CKEditor5 dependencies from package.json file.

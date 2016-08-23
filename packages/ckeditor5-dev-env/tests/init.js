@@ -8,7 +8,7 @@
 'use strict';
 
 const sinon = require( 'sinon' );
-const { workspace } = require( 'ckeditor5-dev-utils' );
+const { workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-init', () => {
 	const initTask = require( '../lib/tasks/init' );

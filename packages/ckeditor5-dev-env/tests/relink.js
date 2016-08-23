@@ -9,7 +9,7 @@
 
 const sinon = require( 'sinon' );
 const path = require( 'path' );
-const { tools, workspace } = require( 'ckeditor5-dev-utils' );
+const { tools, workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-relink', () => {
 	const task = require( '../lib/tasks/relink' );
@@ -95,7 +95,7 @@ describe( 'dev-relink', () => {
 			}
 		};
 		const writeErrorSpy = sinon.spy();
-		const { log } = require( 'ckeditor5-dev-utils' );
+		const { log } = require( '@ckeditor/ckeditor5-dev-utils' );
 		log.configure( () => {}, writeErrorSpy );
 
 		task( ckeditor5Path, json, workspaceRoot );

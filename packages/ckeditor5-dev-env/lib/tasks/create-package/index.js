@@ -7,7 +7,7 @@
 
 const inquiries = require( '../../utils/inquiries' );
 const path = require( 'path' );
-const { git, tools, log } = require( 'ckeditor5-dev-utils' );
+const { git, tools, log } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * 1. Ask for new package name.

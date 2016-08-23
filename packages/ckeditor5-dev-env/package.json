@@ -1,11 +1,11 @@
 {
-  "name": "ckeditor5-dev-env",
+  "name": "@ckeditor/ckeditor5-dev-env",
   "version": "0.0.1",
   "description": "Tasks used during development of CKEditor 5.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "ckeditor5-dev-utils": "ckeditor/ckeditor5-dev-utils",
+    "@ckeditor/ckeditor5-dev-utils": "^1.0.0",
     "gulp": "^3.9.1",
     "gulp-filter": "^4.0.0",
     "gulp-replace": "^0.5.4",
@@ -16,11 +16,11 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "ckeditor5-dev-lint": "ckeditor/ckeditor5-dev-lint",
+    "@ckeditor/ckeditor5-dev-lint": "^1.0.1",
     "gulp": "^3.9.0",
     "guppy-pre-commit": "^0.3.0",
     "istanbul": "^0.4.4",
-    "mocha": "^2.5.3",
+    "mocha": "^3.0.2",
     "mockery": "^1.7.0",
     "sinon": "^1.17.4"
   },

@@ -3,20 +3,25 @@ CKEditor 5 Development Environment Tasks
 
 [![devDependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-env/dev-status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-env#info=devDependencies)
 [![Dependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-env/status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-env#info=dependencies)
-[![npm version](https://badge.fury.io/js/ckeditor5-dev-env.svg)](https://badge.fury.io/js/ckeditor5-dev-env)
+[![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-env.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)
 
-Tasks used during development of CKEditor 5. More information about the project can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev-env>.
+Tasks used during development of [CKEditor 5](https://ckeditor5.github.io). More information about the project can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev-env>.
 
 ## Usage
 
+```
+npm i --save-dev @ckeditor/ckeditor5-dev-env
+```
+
 Description of each development task can be found here: <https://github.com/ckeditor/ckeditor5/wiki/Development-Workflow>.
+
 To include development tasks in your `gulpfile.js`:
 
 ```js
 const config = {
 	WORKSPACE_DIR: '..'
 };
-const ckeditor5DevEnv = require( 'ckeditor5-dev-env' )( config );
+const ckeditor5DevEnv = require( '@ckeditor/ckeditor5-dev-env' )( config );
 
 gulp.task( 'init', ckeditor5DevEnv.initRepository );
 gulp.task( 'create-package', ckeditor5DevEnv.createPackage );

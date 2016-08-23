@@ -5,7 +5,7 @@
 
 'use strict';
 
-const { git } = require( 'ckeditor5-dev-utils' );
+const { git } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * Adds only modified files to git repository and commits them with provided message.

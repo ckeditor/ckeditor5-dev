@@ -9,7 +9,7 @@
 
 const sinon = require( 'sinon' );
 const path = require( 'path' );
-const { tools, workspace, git } = require( 'ckeditor5-dev-utils' );
+const { tools, workspace, git } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-update', () => {
 	const updateTask = require( '../lib/tasks/update' );
@@ -158,7 +158,7 @@ describe( 'dev-update', () => {
 	} );
 
 	it( 'should catch linking errors', () => {
-		const { log } = require( 'ckeditor5-dev-utils' );
+		const { log } = require( '@ckeditor/ckeditor5-dev-utils' );
 		const dirs = [ 'ckeditor5-core', 'ckeditor5-devtest' ];
 		const installTask = sinon.spy();
 		const outSpy = sinon.spy();

@@ -6,7 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
-const { git, tools, log } = require( 'ckeditor5-dev-utils' );
+const { git, tools, log } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * This tasks install specified package in development mode. It can be executed by typing:

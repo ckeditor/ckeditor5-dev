@@ -5,7 +5,7 @@
 
 'use strict';
 
-const { git } = require( 'ckeditor5-dev-utils' );
+const { git } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * Pushes changes of current branch in repository to default origin.

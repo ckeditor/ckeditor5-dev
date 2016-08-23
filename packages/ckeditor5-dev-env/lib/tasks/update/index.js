@@ -6,7 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
-const { tools, workspace, git, log } = require( 'ckeditor5-dev-utils' );
+const { tools, workspace, git, log } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * 1. Fetch all branches from each origin in main CKEditor 5 repository.

@@ -82,7 +82,7 @@ module.exports = ( config ) => {
 		execOnRepositories() {
 			const execTask = require( './tasks/exec' );
 			const minimist = require( 'minimist' );
-			const { log } = require( 'ckeditor5-dev-utils' );
+			const { log } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 			const params = minimist( process.argv.slice( 3 ), {
 				stopEarly: false,

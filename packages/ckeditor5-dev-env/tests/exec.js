@@ -46,7 +46,7 @@ describe( 'exec-tasks', () => {
 	describe( 'execOnRepositories', () => {
 		it( 'should throw error when there is no specified task', () => {
 			const errorMessage = 'Missing task parameter: --task task-name';
-			const { log } = require( 'ckeditor5-dev-utils' );
+			const { log } = require( '@ckeditor/ckeditor5-dev-utils' );
 			const logErrSpy = sandbox.stub( log, 'err' );
 
 			mockery.registerMock( 'minimist', () => {
@@ -62,7 +62,7 @@ describe( 'exec-tasks', () => {
 		} );
 
 		it( 'should throw error when task cannot be found', () => {
-			const { log } = require( 'ckeditor5-dev-utils' );
+			const { log } = require( '@ckeditor/ckeditor5-dev-utils' );
 			const logErrSpy = sandbox.stub( log, 'err' );
 
 			mockery.registerMock( 'minimist', () => {
@@ -78,7 +78,7 @@ describe( 'exec-tasks', () => {
 		} );
 
 		it( 'should load task module', () => {
-			const { workspace, log } = require( 'ckeditor5-dev-utils' );
+			const { workspace, log } = require( '@ckeditor/ckeditor5-dev-utils' );
 			const logErrSpy = sandbox.stub( log, 'err' );
 
 			sandbox.stub( workspace, 'getDevDirectories' ).returns( [] );
@@ -94,7 +94,7 @@ describe( 'exec-tasks', () => {
 		} );
 
 		it( 'should log error when task is throwing exceptions', () => {
-			const { workspace, log } = require( 'ckeditor5-dev-utils' );
+			const { workspace, log } = require( '@ckeditor/ckeditor5-dev-utils' );
 			const taskStub = sinon.stub();
 			const logErrSpy = sandbox.stub( log, 'err' );
 
@@ -117,7 +117,7 @@ describe( 'exec-tasks', () => {
 		} );
 
 		it( 'should execute task over directories', () => {
-			const { workspace } = require( 'ckeditor5-dev-utils' );
+			const { workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
 			const taskStub = sinon.stub();
 
 			mockery.registerMock( 'minimist', () => {
@@ -136,7 +136,7 @@ describe( 'exec-tasks', () => {
 
 		it( 'should execute task over specific directory', () => {
 			const Stream = require( 'stream' );
-			const { workspace } = require( 'ckeditor5-dev-utils' );
+			const { workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
 			const taskStub = sinon.stub().returns( new Stream() );
 
 			mockery.registerMock( 'minimist', () => {

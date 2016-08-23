@@ -7,7 +7,7 @@
 
 const path = require( 'path' );
 const merge = require( 'merge-stream' );
-const { log, workspace } = require( 'ckeditor5-dev-utils' );
+const { log, workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * Execute given task with provided options and command-line parameters.

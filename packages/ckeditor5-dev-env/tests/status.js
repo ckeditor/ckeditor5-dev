@@ -9,7 +9,7 @@
 
 const sinon = require( 'sinon' );
 const path = require( 'path' );
-const { workspace, git } = require( 'ckeditor5-dev-utils' );
+const { workspace, git } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-status', () => {
 	const statusTask = require( '../lib/tasks/status' );
@@ -94,7 +94,7 @@ describe( 'dev-status', () => {
 			}
 		};
 		const writeErrorSpy = sinon.spy();
-		const { log } = require( 'ckeditor5-dev-utils' );
+		const { log } = require( '@ckeditor/ckeditor5-dev-utils' );
 		log.configure( () => {}, writeErrorSpy );
 
 		statusTask( ckeditor5Path, json, workspaceRoot );
