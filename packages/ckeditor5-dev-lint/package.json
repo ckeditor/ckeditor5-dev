@@ -1,6 +1,6 @@
 {
   "name": "ckeditor5-dev-lint",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Gulp linting tasks for CKEditor 5.",
   "keywords": [],
   "main": "lib/lint.js",
