@@ -8,6 +8,8 @@
 const gutil = require( 'gulp-util' );
 const path = require( 'path' );
 const del = require( 'del' );
+const gulp = require( 'gulp' );
+const gulpRename = require( 'gulp-rename' );
 
 module.exports = {
 	/**
@@ -247,6 +249,29 @@ module.exports = {
 
 		// Save.
 		fs.writeFileSync( outputPath, modifiedData, 'utf8' );
+	},
+
+	/**
+	 * Copies specified file to specified destination.
+	 *
+	 * @param {String} from Source path.
+	 * @param {String} to Destination directory.
+	 * @param {String|null} [newName=null] newName New name for copied file.
+	 * @returns {Promise}
+	 */
+	copyFile( from, to, newName = null ) {
+		return new Promise( ( resolve ) => {
+			const stream = gulp.src( from );
+
+			if ( newName ) {
+				stream.pipe( gulpRename( {
+					basename: newName
+				} ) );
+			}
+
+			stream.pipe( gulp.dest( to ) )
+				.on( 'finish', resolve );
+		} );
 	},
 
 	/**
