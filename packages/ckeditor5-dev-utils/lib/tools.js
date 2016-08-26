@@ -8,8 +8,7 @@
 const gutil = require( 'gulp-util' );
 const path = require( 'path' );
 const del = require( 'del' );
-const gulp = require( 'gulp' );
-const gulpRename = require( 'gulp-rename' );
+const fs = require( 'fs-extra' );
 
 module.exports = {
 	/**
@@ -162,7 +161,7 @@ module.exports = {
 	 * Returns name of the NPM module located under provided path.
 	 *
 	 * @param {String} modulePath Path to NPM module.
-     */
+	 */
 	readPackageName( modulePath ) {
 		const fs = require( 'fs' );
 		const path = require( 'path' );
@@ -255,22 +254,24 @@ module.exports = {
 	 * Copies specified file to specified destination.
 	 *
 	 * @param {String} from Source path.
-	 * @param {String} to Destination directory.
-	 * @param {String|null} [newName=null] newName New name for copied file.
+	 * @param {String} to Destination path (directory with file name).
 	 * @returns {Promise}
 	 */
-	copyFile( from, to, newName = null ) {
-		return new Promise( ( resolve ) => {
-			const stream = gulp.src( from );
+	copyFile( from, to ) {
+		return new Promise( ( resolve, reject ) => {
+			fs.readFile( from, 'utf8', ( err, data ) => {
+				if ( err ) {
+					return reject( err );
+				}
 
-			if ( newName ) {
-				stream.pipe( gulpRename( {
-					basename: newName
-				} ) );
-			}
+				fs.outputFile( to, data, ( err ) => {
+					if ( err ) {
+						return reject( err );
+					}
 
-			stream.pipe( gulp.dest( to ) )
-				.on( 'finish', resolve );
+					return resolve();
+				} );
+			} );
 		} );
 	},
 
@@ -280,7 +281,7 @@ module.exports = {
 	 *
 	 * @param {String} name Name of the module.
 	 * @returns {*}
-     */
+	 */
 	getGitUrlFromNpm( name ) {
 		try {
 			const info = JSON.parse( this.shExec( `npm view ${ name } repository --json`, false ) );

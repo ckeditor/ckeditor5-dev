@@ -476,5 +476,62 @@ describe( 'utils', () => {
 				expect( unlinkStub.firstCall.args[ 0 ] ).to.equal( path );
 			} );
 		} );
+
+		describe( 'copyFile', () => {
+			const fs = require( 'fs-extra' );
+
+			it( 'rejects Promise when file does not exist', () => {
+				const readFileStub = sandbox.stub( fs, 'readFile', ( from, to, callback ) => {
+					callback( 'Some error during readFile.' );
+				} );
+
+				return tools.copyFile( '/tmp/not/existing/file.txt', '/tmp/file.txt' )
+					.catch( ( err ) => {
+						expect( readFileStub.calledOnce ).to.equal( true );
+						expect( readFileStub.firstCall.args[ 0 ] ).to.equal( '/tmp/not/existing/file.txt' );
+						expect( err ).to.equal( 'Some error during readFile.' );
+					} );
+			} );
+
+			it( 'rejects Promise when file cannot be saved', () => {
+				const readFileStub = sandbox.stub( fs, 'readFile', ( from, to, callback ) => {
+					callback( null, 'Some data.' );
+				} );
+
+				const outputFileStub = sandbox.stub( fs, 'outputFile', ( to, data, callback ) => {
+					callback( 'Some error during outputFile.' );
+				} );
+
+				return tools.copyFile( '/tmp/directory/file.txt', '/tmp/file.txt' )
+					.catch( ( err ) => {
+						expect( readFileStub.calledOnce ).to.equal( true );
+						expect( readFileStub.firstCall.args[ 0 ] ).to.equal( '/tmp/directory/file.txt' );
+						expect( outputFileStub.calledOnce ).to.equal( true );
+						expect( outputFileStub.firstCall.args[ 0 ] ).to.equal( '/tmp/file.txt' );
+						expect( outputFileStub.firstCall.args[ 1 ] ).to.equal( 'Some data.' );
+
+						expect( err ).to.equal( 'Some error during outputFile.' );
+					} );
+			} );
+
+			it( 'resolves Promise when file was copied', () => {
+				const readFileStub = sandbox.stub( fs, 'readFile', ( from, to, callback ) => {
+					callback( null, 'Some data.' );
+				} );
+
+				const outputFileStub = sandbox.stub( fs, 'outputFile', ( to, data, callback ) => {
+					callback( null );
+				} );
+
+				return tools.copyFile( '/tmp/directory/file.txt', '/tmp/file.txt' )
+					.then( () => {
+						expect( readFileStub.calledOnce ).to.equal( true );
+						expect( readFileStub.firstCall.args[ 0 ] ).to.equal( '/tmp/directory/file.txt' );
+						expect( outputFileStub.calledOnce ).to.equal( true );
+						expect( outputFileStub.firstCall.args[ 0 ] ).to.equal( '/tmp/file.txt' );
+						expect( outputFileStub.firstCall.args[ 1 ] ).to.equal( 'Some data.' );
+					} );
+			} );
+		} );
 	} );
 } );
