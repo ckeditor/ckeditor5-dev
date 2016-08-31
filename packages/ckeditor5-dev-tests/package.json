@@ -8,13 +8,13 @@
     "@ckeditor/ckeditor5-dev-docs": "ckeditor/ckeditor5-dev-docs",
     "@ckeditor/ckeditor5-dev-utils": "ckeditor/ckeditor5-dev-utils",
     "@ckeditor/ckeditor5-dev-bundler-rollup": "ckeditor/ckeditor5-dev-bundler-rollup",
-    "gulp": "^3.9.0",
     "gulp-filter": "^4.0.0",
     "gulp-rename": "^1.2.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "@ckeditor/ckeditor5-dev-lint": "^1.0.1",
+    "gulp": "^3.9.0",
     "guppy-pre-commit": "^0.3.0",
     "istanbul": "^0.4.4",
     "mocha": "^3.0.2",
