@@ -251,7 +251,7 @@ module.exports = {
 	},
 
 	/**
-	 * Copies specified file to specified destination.
+	 * Copies a file. Takes care of creating parent directory if it doesn't exist.
 	 *
 	 * @param {String} from Source path.
 	 * @param {String} to Destination path (directory with file name).
