@@ -5,6 +5,12 @@
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
+    "@ckeditor/ckeditor5-dev-docs": "ckeditor/ckeditor5-dev-docs",
+    "@ckeditor/ckeditor5-dev-utils": "ckeditor/ckeditor5-dev-utils",
+    "@ckeditor/ckeditor5-dev-bundler-rollup": "ckeditor/ckeditor5-dev-bundler-rollup",
+    "gulp": "^3.9.0",
+    "gulp-filter": "^4.0.0",
+    "gulp-rename": "^1.2.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",
