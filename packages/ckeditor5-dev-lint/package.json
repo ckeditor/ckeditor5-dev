@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "guppy-pre-commit": "^0.3.0",
+    "guppy-pre-commit": "^0.4.0",
     "istanbul": "^0.4.4",
     "mocha": "^3.0.2",
     "mockery": "^1.7.0",
