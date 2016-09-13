@@ -8,14 +8,14 @@
     "del": "^2.2.1",
     "fs-extra": "^0.30.0",
     "gulp-util": "^3.0.7",
-    "shelljs": "^0.7.0",
+    "shelljs": "^0.7.4",
     "through2": "^2.0.1"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
     "@ckeditor/ckeditor5-dev-lint": "^1.0.1",
+    "chai": "^3.5.0",
     "gulp": "^3.9.1",
-    "guppy-pre-commit": "^0.3.0",
+    "guppy-pre-commit": "^0.4.0",
     "istanbul": "^0.4.4",
     "mocha": "^3.0.2",
     "sinon": "^1.17.4",
