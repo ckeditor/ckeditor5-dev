@@ -1,8 +1,8 @@
 CKEditor 5 Development Environment Tasks
 ========================================
 
-[![devDependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-env/dev-status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-env#info=devDependencies)
-[![Dependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-env/status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-env#info=dependencies)
+[![devDependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-env/dev-status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-env?type=dev)
+[![Dependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-env/status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-env)
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-env.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)
 
 Tasks used during development of [CKEditor 5](https://ckeditor5.github.io). More information about the project can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev-env>.
