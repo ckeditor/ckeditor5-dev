@@ -32,7 +32,7 @@ describe( 'dev-create-package', () => {
 	function createSpies() {
 		spies = {
 			linkDirectories: sinon.stub( tools, 'linkDirectories' ),
-			npmInstall: sinon.stub( tools, 'npmInstall' ),
+			shExec: sinon.stub( tools, 'shExec' ),
 			getPackageName: sinon.stub( inquiries, 'getPackageName' ).returns( new Promise( ( r ) => r( packageName ) ) ),
 			getApplicationName: sinon.stub( inquiries, 'getApplicationName' ).returns( new Promise( ( r ) => r( applicationName ) ) ),
 			getPackageVersion: sinon.stub( inquiries, 'getPackageVersion' ).returns( new Promise( ( r ) => r( packageVersion ) ) ),
@@ -87,8 +87,8 @@ describe( 'dev-create-package', () => {
 			expect( spies.linkDirectories.calledOnce ).to.equal( true );
 			expect( spies.linkDirectories.firstCall.args[ 0 ] ).to.equal( repositoryPath );
 			expect( spies.linkDirectories.firstCall.args[ 1 ] ).to.equal( path.join( mainRepositoryPath, 'node_modules', packageName ) );
-			expect( spies.npmInstall.calledOnce ).to.equal( true );
-			expect( spies.npmInstall.firstCall.args[ 0 ] ).to.equal( repositoryPath );
+			expect( spies.shExec.calledOnce ).to.equal( true );
+			expect( spies.shExec.firstCall.args[ 0 ] ).to.match( /^cd [^ ]+ && npm i --save-dev/ );
 		} );
 	} );
 } );

@@ -112,6 +112,9 @@ module.exports = ( ckeditor5Path, workspaceRoot ) => {
 				return json;
 			} );
 
+			log.out( `Running npm install in ${ packageName }.` );
+			tools.shExec( `cd ${ repositoryPath } && npm i --save-dev @ckeditor/ckeditor5-dev-lint gulp guppy-pre-commit` );
+
 			tools.updateJSONFile( path.join( ckeditor5Path, 'package.json' ), ( json ) => {
 				if ( !json.dependencies ) {
 					json.dependencies = {};
@@ -127,8 +130,5 @@ module.exports = ( ckeditor5Path, workspaceRoot ) => {
 
 			log.out( `Linking ${ packageName } to node_modules...` );
 			tools.linkDirectories( repositoryPath, path.join( ckeditor5Path, 'node_modules', packageName ) );
-
-			log.out( `Running npm install in ${ packageName }.` );
-			tools.npmInstall( repositoryPath );
 		} );
 };
