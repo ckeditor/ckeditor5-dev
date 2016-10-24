@@ -8,7 +8,7 @@
     "@ckeditor/ckeditor5-dev-bundler-rollup": "ckeditor/ckeditor5-dev-bundler-rollup",
     "@ckeditor/ckeditor5-dev-docs": "ckeditor/ckeditor5-dev-docs",
     "@ckeditor/ckeditor5-dev-utils": "ckeditor/ckeditor5-dev-utils",
-    "@ckeditor/ckeditor5-dev-compile": "ckeditor/ckeditor5-dev-compile",
+    "@ckeditor/ckeditor5-dev-compiler": "ckeditor/ckeditor5-dev-compiler",
     "babel-loader": "^6.2.5",
     "chai": "^3.5.0",
     "gulp-filter": "^4.0.0",
