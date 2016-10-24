@@ -8,6 +8,7 @@
     "@ckeditor/ckeditor5-dev-bundler-rollup": "ckeditor/ckeditor5-dev-bundler-rollup",
     "@ckeditor/ckeditor5-dev-docs": "ckeditor/ckeditor5-dev-docs",
     "@ckeditor/ckeditor5-dev-utils": "ckeditor/ckeditor5-dev-utils",
+    "@ckeditor/ckeditor5-dev-compile": "ckeditor/ckeditor5-dev-compile",
     "babel-loader": "^6.2.5",
     "chai": "^3.5.0",
     "gulp-filter": "^4.0.0",
@@ -26,6 +27,7 @@
     "minimist": "^1.2.0",
     "mocha": "^3.1.2",
     "sinon": "^1.17.6",
+    "undertaker": "^1.0.0",
     "webpack": "^1.13.2"
   },
   "devDependencies": {

@@ -4,3 +4,8 @@
  */
 
 'use strict';
+
+// Todo: Add tests for methods below:
+// - getKarmaConfig()
+// - getWebpackConfig()
+// - getPackageName()

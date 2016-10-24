@@ -8,18 +8,19 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const minimist = require( 'minimist' );
-const KarmaServer = require( 'karma' ).Server;
 
 const utils = {
 	/**
+	 * Returns an configuration object for Karma.
+	 *
 	 * @param {Object} options
 	 * @param {String} options.rootPath Base path that will be used to resolve all patterns.
 	 * @param {Boolean} options.watch Whether to watch the files and executing tests whenever any file changes.
 	 * @param {Boolean} options.coverage Whether to generate code coverage.
-	 * @param {Boolean} options.sourcemap Whether to generate the source maps.
+	 * @param {Boolean} options.sourceMap Whether to generate the source maps.
 	 * @param {Boolean} options.verbose Whether to informs about Webpack's work.
 	 * @param {Array.<String>} options.browsers Browsers used to run the tests.
-	 * @param {String} [options.packagesOrPaths=null] options.packagesOrPaths Name of packages or paths to the directory to test.
+	 * @param {Array.<String>} options.paths Path of directories to test.
 	 * @returns {Object}
 	 */
 	getKarmaConfig( options ) {
@@ -94,9 +95,9 @@ const utils = {
 			karmaConfig.singleRun = false;
 		}
 
-		if ( options.sourcemap ) {
-			karmaConfig.preprocessors[ 'ckeditor5/**/*.js' ].push( 'sourcemap' );
-			karmaConfig.preprocessors[ 'tests/**/*.js' ].push( 'sourcemap' );
+		if ( options.sourceMap ) {
+			karmaConfig.preprocessors[ 'ckeditor5/**/*.js' ].push( 'sourceMap' );
+			karmaConfig.preprocessors[ 'tests/**/*.js' ].push( 'sourceMap' );
 		}
 
 		if ( options.verbose ) {
@@ -113,26 +114,26 @@ const utils = {
 						type: 'text-summary'
 					},
 					{
-						dir: '../coverage/',
+						dir: path.join( options.rootPath, 'coverage' ),
 						type: 'html'
 					}
 				]
 			};
 		}
 
-		if ( options.packagesOrPaths ) {
+		if ( options.paths ) {
 			karmaConfig.files = [];
 
-			for ( const packagesOrPaths of options.packagesOrPaths.split( ',' ) ) {
-				const resolvedPath = path.join( options.rootPath, packagesOrPaths );
+			for ( const packageOrPath of options.paths ) {
+				const resolvedPath = path.join( options.rootPath, 'tests', packageOrPath );
 
 				// If given path directs to a directory.
 				if ( fs.lstatSync( resolvedPath ).isDirectory() ) {
 					// Then take all files from given path.
-					karmaConfig.files.push( path.join( 'tests', packagesOrPaths, '**', '*.js' ) );
+					karmaConfig.files.push( path.join( 'tests', packageOrPath, '**', '*.js' ) );
 				} else {
 					// Most probably the path directs to single file.
-					karmaConfig.files.push( path.join( 'tests', packagesOrPaths ) );
+					karmaConfig.files.push( path.join( 'tests', packageOrPath ) );
 				}
 			}
 		}
@@ -141,11 +142,13 @@ const utils = {
 	},
 
 	/**
+	 * Returns an configuration object for Webpack.
+	 *
 	 * @param {Object} options
 	 * @param {String} options.rootPath Base path that will be used to resolve all patterns.
 	 * @param {Boolean} options.coverage Whether to generate code coverage.
-	 * @param {Boolean} options.sourcemap Whether to generate the source maps.
-	 * @param {String} [options.packagesOrPaths=null] options.packagesOrPaths Name of package or path to the directory to test.
+	 * @param {Boolean} options.sourceMap Whether to generate the source maps.
+	 * @param {Array.<String>} options.paths Path of directories to test.
 	 * @returns {Object}
 	 */
 	getWebpackConfig( options ) {
@@ -172,13 +175,12 @@ const utils = {
 		if ( options.coverage ) {
 			let excludeTests = [];
 
-			if ( options.packagesOrPaths ) {
+			if ( options.paths ) {
 				// Exclude coverage loader for all the directories except the testing ones.
 				excludeTests = fs.readdirSync( path.join( options.rootPath, 'tests' ) )
 					.filter( ( dirName ) => {
-						return options.packagesOrPaths.split( ',' ).some( ( packageOrPath ) => {
-							return new RegExp( `^${ dirName }` ).match( packageOrPath );
-						} );
+						return !options.paths
+							.some( ( packageOrPath ) => packageOrPath.match( new RegExp( `^${ dirName }` ) ) );
 					} )
 					.map( ( dirName ) => new RegExp( path.join( 'ckeditor5', dirName ) ) );
 			}
@@ -197,7 +199,7 @@ const utils = {
 			} );
 		}
 
-		if ( options.sourcemap ) {
+		if ( options.sourceMap ) {
 			webpackConfig.devtool = 'eval';
 		}
 
@@ -205,29 +207,14 @@ const utils = {
 	},
 
 	/**
-	 * @param {Object} options
-	 * @param {String} options.rootPath Base path that will be used to resolve all patterns.
-	 * @param {Boolean} options.watch Whether to watch the files and executing tests whenever any file changes.
-	 * @param {Boolean} options.coverage Whether to generate code coverage.
-	 * @param {Boolean} options.sourcemap Whether to generate the source maps.
-	 * @param {Boolean} options.verbose Whether to informs about Webpack's work.
-	 * @param {Array.<String>} options.browsers Browsers used to run the tests.
-	 * @param {String} [options.packagesOrPaths=null] options.packagesOrPaths Name of packages or paths to the directory to test.
-	 * @param {Function} [callback=null] Callback which is called when Karma finishes work.
-	 */
-	runKarma( options, callback = null ) {
-		new KarmaServer( options, callback ).start();
-	},
-
-	/**
-	 * Returns a name of package for current work directory.
+	 * Returns a name of package based on current work directory.
 	 *
 	 * @throws {Error}
 	 * @returns {String}
 	 */
 	getPackageName() {
 		let packageJson = require( path.join( process.cwd(), 'package.json' ) );
-		const matchedName = /^ckeditor5-(.*)/.match( packageJson.name );
+		const matchedName = packageJson.name.match( /^ckeditor5-(.*)/ );
 
 		if ( !matchedName ) {
 			throw new Error( 'Cannot find string starting with "ckeditor5-".' );
@@ -238,33 +225,32 @@ const utils = {
 
 	/**
 	 * @returns {Object} options
-	 * @returns {String|null} options.packagesOrPaths
+	 * @returns {Array.<String>|null} options.paths
 	 * @returns {Array.<String>} options.browsers
 	 * @returns {Boolean} [options.watch=false] options.watch
 	 * @returns {Boolean} [options.coverage=false] options.coverage
-	 * @returns {Boolean} [options.sourcemap=false] options.sourcemap
+	 * @returns {Boolean} [options.sourceMap=false] options.sourceMap
 	 * @returns {Boolean} [options.verbose=false] options.verbose
 	 */
 	parseArguments() {
 		const options = minimist( process.argv.slice( 2 ), {
 			string: [
-				'packagesOrPaths',
+				'paths',
 				'browsers'
 			],
 
 			boolean: [
 				'watch',
 				'coverage',
-				'sourcemap',
+				'sourceMap',
 				'verbose'
 			],
 
 			alias: {
 				w: 'watch',
 				c: 'coverage',
-				s: 'sourcemap',
-				v: 'verbose',
-				packages: 'packagesOrPaths'
+				s: 'sourceMap',
+				v: 'verbose'
 			},
 
 			default: {
@@ -278,6 +264,10 @@ const utils = {
 		} );
 
 		options.browsers = options.browsers.split( ',' );
+
+		if ( options.paths ) {
+			options.paths = options.paths.split( ',' );
+		}
 
 		return options;
 	}
