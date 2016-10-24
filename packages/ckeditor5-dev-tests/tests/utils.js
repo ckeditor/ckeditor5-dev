@@ -4,8 +4,3 @@
  */
 
 'use strict';
-
-module.exports = {
-	tests: require( './tests' ),
-	utils: require( './utils' )
-};

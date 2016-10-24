@@ -5,20 +5,34 @@
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
+    "@ckeditor/ckeditor5-dev-bundler-rollup": "ckeditor/ckeditor5-dev-bundler-rollup",
     "@ckeditor/ckeditor5-dev-docs": "ckeditor/ckeditor5-dev-docs",
     "@ckeditor/ckeditor5-dev-utils": "ckeditor/ckeditor5-dev-utils",
-    "@ckeditor/ckeditor5-dev-bundler-rollup": "ckeditor/ckeditor5-dev-bundler-rollup",
+    "babel-loader": "^6.2.5",
+    "chai": "^3.5.0",
     "gulp-filter": "^4.0.0",
-    "gulp-rename": "^1.2.2"
+    "gulp-rename": "^1.2.2",
+    "istanbul-instrumenter-loader": "^1.0.0",
+    "karma": "^1.3.0",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-coverage": "^1.1.1",
+    "karma-firefox-launcher": "^1.0.0",
+    "karma-mocha": "^1.2.0",
+    "karma-mocha-reporter": "^2.2.0",
+    "karma-sinon": "^1.0.5",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^1.8.0",
+    "minimist": "^1.2.0",
+    "mocha": "^3.1.2",
+    "sinon": "^1.17.6",
+    "webpack": "^1.13.2"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
     "@ckeditor/ckeditor5-dev-lint": "^1.0.1",
     "gulp": "^3.9.0",
     "guppy-pre-commit": "^0.3.0",
-    "istanbul": "^0.4.4",
-    "mocha": "^3.0.2",
-    "sinon": "^1.17.5"
+    "istanbul": "^0.4.4"
   },
   "engines": {
     "node": ">=6.0.0",
@@ -29,8 +43,8 @@
   "homepage": "https://github.com/ckeditor/ckeditor5-dev-tests",
   "bugs": "https://github.com/ckeditor/ckeditor5-dev-tests/issue",
   "repository": {
-	  "type": "git",
-	  "url": "https://github.com/ckeditor/ckeditor5-dev-tests"
+    "type": "git",
+    "url": "https://github.com/ckeditor/ckeditor5-dev-tests"
   },
   "scripts": {
     "test": "mocha tests --recursive",
