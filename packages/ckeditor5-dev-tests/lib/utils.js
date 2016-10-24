@@ -87,6 +87,8 @@ const utils = {
 
 			// Concurrency level. How many browser should be started simultaneous.
 			concurrency: Infinity,
+
+			browserNoActivityTimeout: 0
 		};
 
 		if ( options.watch ) {
@@ -209,11 +211,12 @@ const utils = {
 	/**
 	 * Returns a name of package based on current work directory.
 	 *
+	 * @param {String} [cwd=process.cwd()] cwd Current work directory.
 	 * @throws {Error}
 	 * @returns {String}
 	 */
-	getPackageName() {
-		let packageJson = require( path.join( process.cwd(), 'package.json' ) );
+	getPackageName( cwd = process.cwd() ) {
+		let packageJson = require( path.join( cwd, 'package.json' ) );
 		const matchedName = packageJson.name.match( /^ckeditor5-(.*)/ );
 
 		if ( !matchedName ) {
