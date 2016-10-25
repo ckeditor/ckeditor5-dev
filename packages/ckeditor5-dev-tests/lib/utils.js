@@ -193,7 +193,8 @@ const utils = {
 				exclude: excludeTests.concat( [
 					/(node_modules)/,
 					/tests/,
-					/theme/
+					/theme/,
+					/lib/
 				] ),
 				query: {
 					esModules: true
