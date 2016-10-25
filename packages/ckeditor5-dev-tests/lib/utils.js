@@ -224,6 +224,11 @@ const utils = {
 			throw new Error( 'Cannot find string starting with "ckeditor5-".' );
 		}
 
+		// Temporary implementation of the UI lib option. See https://github.com/ckeditor/ckeditor5/issues/88.
+		if ( matchedName[ 1 ] === 'ui-default' ) {
+			return 'ui';
+		}
+
 		return matchedName[ 1 ];
 	},
 
