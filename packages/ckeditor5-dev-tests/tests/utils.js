@@ -200,13 +200,13 @@ describe( 'Utils', () => {
 			expect( args.browsers ).to.deep.equal( [ 'Chrome' ] );
 			expect( args.watch ).to.equal( false );
 			expect( args.coverage ).to.equal( false );
-			expect( args.sourcemap ).to.equal( false );
+			expect( args.sourceMap ).to.equal( false );
 			expect( args.verbose ).to.equal( false );
 
 			// Check the aliases.
 			expect( args.c ).to.equal( args.coverage );
 			expect( args.w ).to.equal( args.watch );
-			expect( args.s ).to.equal( args.sourcemap );
+			expect( args.s ).to.equal( args.sourceMap );
 			expect( args.v ).to.equal( args.verbose );
 		} );
 	} );

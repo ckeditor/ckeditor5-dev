@@ -251,14 +251,14 @@ const utils = {
 			boolean: [
 				'watch',
 				'coverage',
-				'sourcemap',
+				'sourceMap',
 				'verbose'
 			],
 
 			alias: {
 				w: 'watch',
 				c: 'coverage',
-				s: 'sourcemap',
+				s: 'sourceMap',
 				v: 'verbose'
 			},
 
