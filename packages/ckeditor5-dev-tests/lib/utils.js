@@ -98,8 +98,8 @@ const utils = {
 		}
 
 		if ( options.sourceMap ) {
-			karmaConfig.preprocessors[ 'ckeditor5/**/*.js' ].push( 'sourceMap' );
-			karmaConfig.preprocessors[ 'tests/**/*.js' ].push( 'sourceMap' );
+			karmaConfig.preprocessors[ 'ckeditor5/**/*.js' ].push( 'sourcemap' );
+			karmaConfig.preprocessors[ 'tests/**/*.js' ].push( 'sourcemap' );
 		}
 
 		if ( options.verbose ) {
@@ -179,7 +179,7 @@ const utils = {
 
 			if ( options.paths ) {
 				// Exclude coverage loader for all the directories except the testing ones.
-				excludeTests = fs.readdirSync( path.join( options.rootPath, 'tests' ) )
+				excludeTests = fs.readdirSync( path.join( options.rootPath, 'ckeditor5' ) )
 					.filter( ( dirName ) => {
 						return !options.paths
 							.some( ( packageOrPath ) => packageOrPath.match( new RegExp( `^${ dirName }` ) ) );
@@ -218,7 +218,7 @@ const utils = {
 	 */
 	getPackageName( cwd = process.cwd() ) {
 		let packageJson = require( path.join( cwd, 'package.json' ) );
-		const matchedName = packageJson.name.match( /^ckeditor5-(.*)/ );
+		const matchedName = packageJson.name.match( /ckeditor5-(.*)/ );
 
 		if ( !matchedName ) {
 			throw new Error( 'Cannot find string starting with "ckeditor5-".' );
@@ -251,19 +251,19 @@ const utils = {
 			boolean: [
 				'watch',
 				'coverage',
-				'sourceMap',
+				'sourcemap',
 				'verbose'
 			],
 
 			alias: {
 				w: 'watch',
 				c: 'coverage',
-				s: 'sourceMap',
+				s: 'sourcemap',
 				v: 'verbose'
 			},
 
 			default: {
-				packages: null,
+				paths: null,
 				browsers: 'Chrome',
 				watch: false,
 				coverage: false,
