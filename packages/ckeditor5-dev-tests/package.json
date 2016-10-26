@@ -34,7 +34,8 @@
     "@ckeditor/ckeditor5-dev-lint": "^1.0.1",
     "gulp": "^3.9.0",
     "guppy-pre-commit": "^0.3.0",
-    "istanbul": "^0.4.4"
+    "istanbul": "^0.4.4",
+    "mockery": "^2.0.0"
   },
   "engines": {
     "node": ">=6.0.0",

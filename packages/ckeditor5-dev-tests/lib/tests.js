@@ -8,8 +8,6 @@
 const path = require( 'path' );
 const gulpFilter = require( 'gulp-filter' );
 const gulpRename = require( 'gulp-rename' );
-const { stream, tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const { utils: docsUtils } = require( '@ckeditor/ckeditor5-dev-docs' );
 const KarmaServer = require( 'karma' ).Server;
 const Undertaker = require( 'undertaker' );
 const utils = require( './utils' );
@@ -31,6 +29,9 @@ const tasks = {
 	 * @returns {Stream}
 	 */
 	buildEditorsForSamples( rootDir, bundleDir, testPath, samplesGlob ) {
+		const { stream, tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+		const { utils: docsUtils } = require( '@ckeditor/ckeditor5-dev-docs' );
+
 		bundleDir = path.join( rootDir, bundleDir );
 
 		const ckeditor5DevBundler = require( '@ckeditor/ckeditor5-dev-bundler-rollup' )( {
