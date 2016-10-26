@@ -21,6 +21,8 @@ We recommend to use Gulp for running the tests:
 const ckeditor5DevTests = require( '@ckeditor/ckeditor5-dev-tests' );
 
 gulp.task( 'test', () => {
+	const path = require( 'path' );
+	
 	// "ckeditor5DevTests.utils.parseArguments" takes arguments from command line.
 	const options = ckeditor5DevTests.utils.parseArguments();
 	
