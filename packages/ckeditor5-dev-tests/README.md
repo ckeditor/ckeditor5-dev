@@ -46,8 +46,8 @@ gulp.task( 'test', () => {
 * `sourceMap` - Whether to generate the source maps. Also available as an alias: `-s`. 
 * `coverage` - Whether to generate code coverage. Also available as an alias: `-c`.
 * `verbose` - Whether to informs about Webpack's work. Also available as an alias: `-v`.
-* `paths` - Specify path(s) to test.
-* `browsers` - Browsers used to run the tests.
+* `paths` - Specify path(s) to tests.
+* `browsers` - Browsers which will be used to run the tests.
 
 #### Examples
 
