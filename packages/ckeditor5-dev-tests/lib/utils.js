@@ -217,7 +217,7 @@ const utils = {
 	 * @returns {String}
 	 */
 	getPackageName( cwd = process.cwd() ) {
-		let packageJson = require( path.join( cwd, 'package.json' ) );
+		const packageJson = require( path.join( cwd, 'package.json' ) );
 		const matchedName = packageJson.name.match( /ckeditor5-(.*)/ );
 
 		if ( !matchedName ) {
