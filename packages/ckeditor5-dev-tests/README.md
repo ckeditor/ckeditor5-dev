@@ -38,12 +38,12 @@ gulp.task( 'test', () => {
 #### CLI options
 
 * `watch` - Whether to watch the files and executing tests whenever any file changes. Also available as an alias: `-w`.
-* `sourceMap` - Whether to generate the source maps. Also available as an alias: `-s`. 
+* `source-map` - Whether to generate the source maps. Also available as an alias: `-s`. 
 * `coverage` - Whether to generate code coverage. Also available as an alias: `-c`.
 * `verbose` - Whether to informs about Webpack's work. Also available as an alias: `-v`.
 * `paths` - Specify path(s) to tests.
 * `browsers` - Browsers which will be used to run the tests.
-* `rootPath` - A path where compiled files will be saved. Should be relative to root of the package. By default it is `./.build/`.
+* `root-path` - A path where compiled files will be saved. Should be relative to root of the package. By default it is `./.build/`.
 
 #### Examples
 

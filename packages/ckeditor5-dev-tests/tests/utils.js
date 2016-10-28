@@ -200,15 +200,17 @@ describe( 'Utils', () => {
 			expect( args.browsers ).to.deep.equal( [ 'Chrome' ] );
 			expect( args.watch ).to.equal( false );
 			expect( args.coverage ).to.equal( false );
-			expect( args.sourceMap ).to.equal( false );
 			expect( args.verbose ).to.equal( false );
-			expect( args.rootPath ).to.equal( path.resolve( './.build/' ) );
+			expect( args['source-map'] ).to.equal( false );
+			expect( args['root-path'] ).to.equal( path.resolve( './.build/' ) );
 
 			// Check the aliases.
 			expect( args.c ).to.equal( args.coverage );
 			expect( args.w ).to.equal( args.watch );
-			expect( args.s ).to.equal( args.sourceMap );
 			expect( args.v ).to.equal( args.verbose );
+			expect( args.s ).to.equal( args['source-map'] );
+			expect( args.sourceMap ).to.equal( args['source-map'] );
+			expect( args.rootPath ).to.equal( args['root-path'] );
 		} );
 	} );
 } );

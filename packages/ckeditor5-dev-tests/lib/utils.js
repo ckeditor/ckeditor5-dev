@@ -246,41 +246,43 @@ const utils = {
 			string: [
 				'paths',
 				'browsers',
-				'rootPath'
+				'root-path'
 			],
 
 			boolean: [
 				'watch',
 				'coverage',
-				'sourceMap',
+				'source-map',
 				'verbose'
 			],
 
 			alias: {
 				w: 'watch',
 				c: 'coverage',
-				s: 'sourceMap',
+				s: 'source-map',
 				v: 'verbose'
 			},
 
 			default: {
-				rootPath: './.build/',
+				'root-path': './.build/',
 				paths: null,
 				browsers: 'Chrome',
 				watch: false,
 				coverage: false,
 				verbose: false,
-				sourcmap: false
+				'source-map': false
 			}
 		} );
 
+		options[ 'root-path' ] = path.resolve( options[ 'root-path' ] );
 		options.browsers = options.browsers.split( ',' );
 
 		if ( options.paths ) {
 			options.paths = options.paths.split( ',' );
 		}
 
-		options.rootPath = path.resolve( options.rootPath );
+		options.sourceMap = options[ 'source-map' ];
+		options.rootPath = options[ 'root-path' ];
 
 		return options;
 	}
