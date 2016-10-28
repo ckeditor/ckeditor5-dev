@@ -181,7 +181,7 @@ describe( 'Utils', () => {
 				const cwd = path.resolve( __dirname, '_stubs', 'invalid' );
 
 				utils.getPackageName( cwd );
-			} ).to.throw( Error, 'Cannot find string starting with "ckeditor5-".' );
+			} ).to.throw( Error, 'The package name does not start with a "ckeditor5-".' );
 		} );
 
 		it( 'returns temporary implementation of the UI package', () => {
@@ -202,6 +202,7 @@ describe( 'Utils', () => {
 			expect( args.coverage ).to.equal( false );
 			expect( args.sourceMap ).to.equal( false );
 			expect( args.verbose ).to.equal( false );
+			expect( args.rootPath ).to.equal( path.resolve( './.build/' ) );
 
 			// Check the aliases.
 			expect( args.c ).to.equal( args.coverage );

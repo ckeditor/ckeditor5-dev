@@ -41,11 +41,8 @@ const utils = {
 				// Ignore all utils which aren't tests.
 				path.join( 'tests', '**', '_utils', '**', '*.js' ),
 
-				// All manual tests.
+				// And all manual tests.
 				path.join( 'tests', '**', 'manual', '**', '*.js' ),
-
-				// And all tickets tests (most probably they are also the manual tests).
-				path.join( 'tests', '**', 'tickets', '**', '*.js' ),
 			],
 
 			// Preprocess matching files before serving them to the browser.
@@ -88,6 +85,7 @@ const utils = {
 			// Concurrency level. How many browser should be started simultaneous.
 			concurrency: Infinity,
 
+			// How long will Karma wait for a message from a browser before disconnecting from it (in ms).
 			browserNoActivityTimeout: 0
 		};
 
@@ -213,7 +211,6 @@ const utils = {
 	 * Returns a name of package based on current work directory.
 	 *
 	 * @param {String} [cwd=process.cwd()] cwd Current work directory.
-	 * @throws {Error}
 	 * @returns {String}
 	 */
 	getPackageName( cwd = process.cwd() ) {
@@ -221,7 +218,7 @@ const utils = {
 		const matchedName = packageJson.name.match( /ckeditor5-(.*)/ );
 
 		if ( !matchedName ) {
-			throw new Error( 'Cannot find string starting with "ckeditor5-".' );
+			throw new Error( 'The package name does not start with a "ckeditor5-".' );
 		}
 
 		// Temporary implementation of the UI lib option. See https://github.com/ckeditor/ckeditor5/issues/88.
@@ -234,6 +231,7 @@ const utils = {
 
 	/**
 	 * @returns {Object} options
+	 * @returns {String} options.rootPath
 	 * @returns {Array.<String>|null} options.paths
 	 * @returns {Array.<String>} options.browsers
 	 * @returns {Boolean} [options.watch=false] options.watch
@@ -245,7 +243,8 @@ const utils = {
 		const options = minimist( process.argv.slice( 2 ), {
 			string: [
 				'paths',
-				'browsers'
+				'browsers',
+				'rootPath'
 			],
 
 			boolean: [
@@ -263,6 +262,7 @@ const utils = {
 			},
 
 			default: {
+				rootPath: './.build/',
 				paths: null,
 				browsers: 'Chrome',
 				watch: false,
@@ -277,6 +277,8 @@ const utils = {
 		if ( options.paths ) {
 			options.paths = options.paths.split( ',' );
 		}
+
+		options.rootPath = path.resolve( options.rootPath );
 
 		return options;
 	}
