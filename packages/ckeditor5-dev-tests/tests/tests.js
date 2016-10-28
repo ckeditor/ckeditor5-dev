@@ -11,6 +11,7 @@ const sinon = require( 'sinon' );
 const chai = require( 'chai' );
 const expect = chai.expect;
 const mockery = require( 'mockery' );
+const gutil = require( 'gulp-util' );
 
 describe( 'Tests', () => {
 	let sandbox, tasks, seriesSpy;
@@ -85,6 +86,7 @@ describe( 'Tests', () => {
 	describe( 'tasks.runTests()', () => {
 		it( 'runs the tests', ( done ) => {
 			const utils = require( '../lib/utils' );
+			const logStub = sandbox.stub( gutil, 'log' );
 
 			// Config which returns "utils.getKarmaConfig()" method.
 			const karmaOptions = {
@@ -98,7 +100,8 @@ describe( 'Tests', () => {
 
 			// Options which are required by "utils.getKarmaConfig()" method.
 			const karmaConfigUtilsOptions = {
-				rootPath: 'foo'
+				rootPath: 'foo',
+				coverage: true
 			};
 
 			// Run the tests.
@@ -111,6 +114,9 @@ describe( 'Tests', () => {
 
 				// Checks whether Karma.Server constructor was called with proper arguments.
 				expect( karmaConfig ).to.deep.equal( karmaOptions );
+
+				// Checks whether a path to the coverage report has been showed.
+				expect( logStub.calledOnce ).to.equal( true );
 
 				// Mark test as finished.
 				done();

@@ -10,6 +10,8 @@ const path = require( 'path' );
 const minimist = require( 'minimist' );
 
 const utils = {
+	coverageDirectory: 'coverage',
+
 	/**
 	 * Returns an configuration object for Karma.
 	 *
@@ -114,7 +116,7 @@ const utils = {
 						type: 'text-summary'
 					},
 					{
-						dir: path.join( options.rootPath, 'coverage' ),
+						dir: path.join( options.rootPath, utils.coverageDirectory ),
 						type: 'html'
 					}
 				]

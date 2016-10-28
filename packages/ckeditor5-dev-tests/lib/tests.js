@@ -10,6 +10,7 @@ const gulpFilter = require( 'gulp-filter' );
 const gulpRename = require( 'gulp-rename' );
 const KarmaServer = require( 'karma' ).Server;
 const Undertaker = require( 'undertaker' );
+const gutil = require( 'gulp-util' );
 const utils = require( './utils' );
 
 const tasks = {
@@ -102,7 +103,22 @@ const tasks = {
 		// Build config for the test engine.
 		const config = utils.getKarmaConfig( options );
 
-		return new KarmaServer( config, callback ).start();
+		const karmaCallback = () => {
+			if ( options.coverage ) {
+				const coveragePath = path.join( options.rootPath, utils.coverageDirectory );
+
+				gutil.log( `Coverage report saved in '${ gutil.colors.cyan( coveragePath ) }'.` );
+			}
+
+			if ( callback ) {
+				callback();
+			}  else {
+				// `process.exit` is default callback in Karma.
+				process.exit();
+			}
+		};
+
+		return new KarmaServer( config, karmaCallback ).start();
 	},
 
 	/**
