@@ -1,14 +1,12 @@
 {
   "name": "@ckeditor/ckeditor5-dev-tests",
   "version": "1.0.0",
-  "description": "Tasks used to test CKEditor 5.",
+  "description": "Testing environment for CKEditor 5.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-bundler-rollup": "ckeditor/ckeditor5-dev-bundler-rollup",
-    "@ckeditor/ckeditor5-dev-docs": "ckeditor/ckeditor5-dev-docs",
-    "@ckeditor/ckeditor5-dev-utils": "ckeditor/ckeditor5-dev-utils",
-    "@ckeditor/ckeditor5-dev-compiler": "ckeditor/ckeditor5-dev-compiler",
+    "@ckeditor/ckeditor5-dev-utils": "^1.1.0",
+    "@ckeditor/ckeditor5-dev-compiler": "ckeditor/ckeditor5-dev-compiler#t/51",
     "babel-loader": "^6.2.5",
     "chai": "^3.5.0",
     "gulp-util": "^3.0.7",
