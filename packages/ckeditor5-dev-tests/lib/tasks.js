@@ -3,11 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
+/* global setTimeout */
+
 'use strict';
 
 const path = require( 'path' );
 const KarmaServer = require( 'karma' ).Server;
-const Undertaker = require( 'undertaker' );
 const gutil = require( 'gulp-util' );
 const utils = require( './utils' );
 
@@ -26,16 +27,26 @@ const tasks = {
 	 * @returns {Promise}
 	 */
 	runTests( options ) {
-		return new Promise( ( resolve ) => {
+		return new Promise( ( resolve, reject ) => {
 			const config = utils.getKarmaConfig( options );
 
-			const server = new KarmaServer( config, resolve );
+			const server = new KarmaServer( config, ( exitCode ) => {
+				if ( exitCode === 0 ) {
+					resolve();
+				} else {
+					reject();
+					process.exit( exitCode );
+				}
+			} );
 
 			if ( options.coverage ) {
 				const coveragePath = path.join( options.sourcePath, utils.coverageDirectory );
 
 				server.on( 'run_complete', () => {
-					gutil.log( `Coverage report saved in '${ gutil.colors.cyan( coveragePath ) }'.` );
+					// Use timeout to not write to the console in the middle of Karma's status.
+					setTimeout( () => {
+						gutil.log( `Coverage report saved in '${ gutil.colors.cyan( coveragePath ) }'.` );
+					} );
 				} );
 			}
 
@@ -57,31 +68,42 @@ const tasks = {
 	 * @returns {Promise}
 	 */
 	test( options ) {
+		const compiler = require( '@ckeditor/ckeditor5-dev-compiler' );
+		let waitUntil = new Date().getTime() + 500;
+
+		options.sourcePath = path.resolve( './.build/' );
+
 		return new Promise( ( resolve, reject ) => {
-			const taker = new Undertaker();
+			// Give it more time initially to bootstrap.
+			setTimeout( checkWaitUntil, 3000 );
 
-			options.sourcePath = path.resolve( './.build/' );
+			compiler.tasks.compile( {
+				watch: options.watch,
+				packages: options.packages,
 
-			taker.task( 'compile', () => {
-				const compiler = require( '@ckeditor/ckeditor5-dev-compiler' );
+				formats: {
+					esnext: options.sourcePath
+				},
 
-				return compiler.tasks.compile( {
-					packages: options.packages,
-					formats: {
-						esnext: options.sourcePath
-					}
-				} );
+				onChange() {
+					waitUntil = new Date().getTime() + 500;
+				}
 			} );
 
-			taker.task( 'runTests', () => {
-				return tasks.runTests( options );
-			} );
+			// Wait until compiler ends its job and start Karma.
+			function checkWaitUntil() {
+				if ( new Date() < waitUntil ) {
+					return setTimeout( checkWaitUntil, 200 );
+				}
 
-			taker.on( 'error', ( error ) => {
-				reject( error.error );
-			} );
+				tasks.runTests( options )
+					.then( resolve )
+					.catch( ( err ) => {
+						console.log( err );
 
-			taker.series( 'compile', 'runTests', resolve )();
+						reject();
+					} );
+			}
 		} );
 	}
 };
