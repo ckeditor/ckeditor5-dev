@@ -29,17 +29,16 @@ const tasks = {
 		return new Promise( ( resolve ) => {
 			const config = utils.getKarmaConfig( options );
 
-			const karmaCallback = () => {
-				if ( options.coverage ) {
-					const coveragePath = path.join( options.sourcePath, utils.coverageDirectory );
+			const server = new KarmaServer( config, resolve );
 
+			if ( options.coverage ) {
+				const coveragePath = path.join( options.sourcePath, utils.coverageDirectory );
+
+				server.on( 'run_complete', () => {
 					gutil.log( `Coverage report saved in '${ gutil.colors.cyan( coveragePath ) }'.` );
-				}
+				} );
+			}
 
-				resolve();
-			};
-
-			const server = new KarmaServer( config, karmaCallback );
 			server.start();
 		} );
 	},

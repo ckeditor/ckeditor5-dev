@@ -11,7 +11,6 @@ const sinon = require( 'sinon' );
 const chai = require( 'chai' );
 const expect = chai.expect;
 const mockery = require( 'mockery' );
-const gutil = require( 'gulp-util' );
 
 describe( 'Tests', () => {
 	let sandbox, tasks, seriesSpy;
@@ -68,6 +67,8 @@ describe( 'Tests', () => {
 					// Similation of running the tests.
 					setTimeout( karmaCallback );
 				}
+
+				on() {}
 			}
 		} );
 
@@ -82,7 +83,6 @@ describe( 'Tests', () => {
 	describe( 'tasks.runTests()', () => {
 		it( 'runs the tests', () => {
 			const utils = require( '../lib/utils' );
-			const logStub = sandbox.stub( gutil, 'log' );
 
 			// Config which returns "utils.getKarmaConfig()" method.
 			const karmaOptions = {
@@ -111,9 +111,6 @@ describe( 'Tests', () => {
 
 					// Checks whether Karma.Server constructor was called with proper arguments.
 					expect( karmaConfig ).to.deep.equal( karmaOptions );
-
-					// Checks whether a path to the coverage report has been showed.
-					expect( logStub.calledOnce ).to.equal( true );
 				} );
 		} );
 	} );
