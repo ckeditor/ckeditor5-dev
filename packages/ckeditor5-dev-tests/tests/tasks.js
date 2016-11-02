@@ -123,7 +123,7 @@ describe( 'Tests', () => {
 			tasks.runTests = sinon.spy();
 
 			const options = {
-				packages: [ 'ckeditor5-path' ],
+				packages: [ './ckeditor5-package/' ],
 				foo: 'bar'
 			};
 

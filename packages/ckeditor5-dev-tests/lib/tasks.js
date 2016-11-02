@@ -52,6 +52,7 @@ const tasks = {
 	 * @param {Boolean} options.coverage Whether to generate code coverage.
 	 * @param {Boolean} options.sourceMap Whether to generate the source maps.
 	 * @param {Boolean} options.verbose Whether to informs about Webpack's work.
+	 * @param {Array.<String>} options.packages Paths to CKEditor 5 dependencies.
 	 * @param {Array.<String>} options.browsers Browsers which will be used to run the tests.
 	 * @param {Array.<String>} options.paths Specify path(s) to tests.
 	 * @returns {Promise}
