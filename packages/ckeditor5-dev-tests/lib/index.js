@@ -6,6 +6,6 @@
 'use strict';
 
 module.exports = {
-	tests: require( './tests' ),
+	tasks: require( './tasks' ),
 	utils: require( './utils' )
 };

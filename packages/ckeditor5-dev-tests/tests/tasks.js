@@ -28,6 +28,8 @@ describe( 'Tests', () => {
 
 		// Mock of Undertaker is used to check whether `tests.test()` works properly.
 		mockery.registerMock( 'undertaker', class {
+			on() {}
+
 			task( name, fn ) {
 				// "compile" task is not defined in `tests.js` module.
 				// We don't want to call him so we use a spy.
@@ -69,7 +71,7 @@ describe( 'Tests', () => {
 			}
 		} );
 
-		tasks = require( '../lib/tests' );
+		tasks = require( '../lib/tasks' );
 	} );
 
 	afterEach( () => {
@@ -77,14 +79,8 @@ describe( 'Tests', () => {
 		sandbox.restore();
 	} );
 
-	describe( 'tasks.buildEditorsForSamples()', () => {
-		it( 'should be a function', () => {
-			expect( tasks.buildEditorsForSamples ).to.be.a( 'function' );
-		} );
-	} );
-
 	describe( 'tasks.runTests()', () => {
-		it( 'runs the tests', ( done ) => {
+		it( 'runs the tests', () => {
 			const utils = require( '../lib/utils' );
 			const logStub = sandbox.stub( gutil, 'log' );
 
@@ -100,27 +96,25 @@ describe( 'Tests', () => {
 
 			// Options which are required by "utils.getKarmaConfig()" method.
 			const karmaConfigUtilsOptions = {
-				rootPath: 'foo',
+				sourcePath: 'foo',
 				coverage: true
 			};
 
 			// Run the tests.
-			tasks.runTests( karmaConfigUtilsOptions, () => {
-				// Checks whether "utils.getKarmaConfig()" was called...
-				expect( karmaConfigStub.calledOnce ).to.equal( true );
+			return tasks.runTests( karmaConfigUtilsOptions )
+				.then( () => {
+					// Checks whether "utils.getKarmaConfig()" was called...
+					expect( karmaConfigStub.calledOnce ).to.equal( true );
 
-				// ...with the proper arguments.
-				expect( karmaConfigStub.firstCall.args[ 0 ] ).to.equal( karmaConfigUtilsOptions );
+					// ...with the proper arguments.
+					expect( karmaConfigStub.firstCall.args[ 0 ] ).to.equal( karmaConfigUtilsOptions );
 
-				// Checks whether Karma.Server constructor was called with proper arguments.
-				expect( karmaConfig ).to.deep.equal( karmaOptions );
+					// Checks whether Karma.Server constructor was called with proper arguments.
+					expect( karmaConfig ).to.deep.equal( karmaOptions );
 
-				// Checks whether a path to the coverage report has been showed.
-				expect( logStub.calledOnce ).to.equal( true );
-
-				// Mark test as finished.
-				done();
-			} );
+					// Checks whether a path to the coverage report has been showed.
+					expect( logStub.calledOnce ).to.equal( true );
+				} );
 		} );
 	} );
 
@@ -129,29 +123,26 @@ describe( 'Tests', () => {
 			tasks.runTests = sinon.spy();
 
 			const options = {
-				rootPath: 'path',
+				packages: [ 'ckeditor5-path' ],
 				foo: 'bar'
 			};
 
-			const testPromise = tasks.test( options );
-
-			// Check whether the tasks have been registered (in Undertaker registry).
-			expect( takerTasks.compile ).to.be.a( 'function' );
-			expect( takerTasks.tests ).to.be.a( 'function' );
-
-			// Check whether the tasks have been called.
-			expect( takerTasks.compile.calledOnce ).to.equal( true );
-
-			expect( tasks.runTests.calledOnce ).to.equal( true );
-			expect( tasks.runTests.firstCall.args[ 0 ] ).to.deep.equal( options );
-
-			// Check whether the whole task has called.
-			expect( seriesSpy.calledOnce ).to.equal( true );
-
 			// Check whether the task returned a Promise.
-			return testPromise.then( () => {
-				expect( testPromise ).is.an.instanceof( Promise );
-			} );
+			return tasks.test( options )
+				.then( () => {
+					// Check whether the tasks have been registered (in Undertaker registry).
+					expect( takerTasks.compile ).to.be.a( 'function' );
+					expect( takerTasks.runTests ).to.be.a( 'function' );
+
+					// Check whether the tasks have been called.
+					expect( takerTasks.compile.calledOnce ).to.equal( true );
+
+					expect( tasks.runTests.calledOnce ).to.equal( true );
+					expect( tasks.runTests.firstCall.args[ 0 ] ).to.deep.equal( options );
+
+					// Check whether the whole task has called.
+					expect( seriesSpy.calledOnce ).to.equal( true );
+				} );
 		} );
 	} );
 } );

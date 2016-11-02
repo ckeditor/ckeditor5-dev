@@ -13,7 +13,7 @@ const chai = require( 'chai' );
 const expect = chai.expect;
 const fs = require( 'fs' );
 
-describe( 'Utils', () => {
+describe( 'utils', () => {
 	let sandbox, utils;
 
 	beforeEach( () => {
@@ -29,7 +29,7 @@ describe( 'Utils', () => {
 	describe( 'getKarmaConfig()', () => {
 		it( 'checks the whole "tests" directory when test paths are not specified', () => {
 			const karmaConfig = utils.getKarmaConfig( {
-				rootPath: __dirname
+				sourcePath: __dirname
 			} );
 
 			expect( karmaConfig.files ).to.deep.equal( [
@@ -62,7 +62,7 @@ describe( 'Utils', () => {
 			} );
 
 			const karmaConfig = utils.getKarmaConfig( {
-				rootPath: __dirname,
+				sourcePath: __dirname,
 				paths: [
 					'basic-styles',
 					'engine/view',
@@ -80,7 +80,7 @@ describe( 'Utils', () => {
 
 		it( 'generates the coverage for sources', () => {
 			const karmaConfig = utils.getKarmaConfig( {
-				rootPath: __dirname,
+				sourcePath: __dirname,
 				coverage: true
 			} );
 
@@ -89,7 +89,7 @@ describe( 'Utils', () => {
 
 		it( 'runs Karma with the watcher', () => {
 			const karmaConfig = utils.getKarmaConfig( {
-				rootPath: __dirname,
+				sourcePath: __dirname,
 				watch: true
 			} );
 
@@ -115,7 +115,7 @@ describe( 'Utils', () => {
 			] );
 
 			const webpackConfig = utils.getWebpackConfig( {
-				rootPath: __dirname,
+				sourcePath: __dirname,
 				coverage: true,
 				paths: [
 					'engine',
@@ -144,7 +144,7 @@ describe( 'Utils', () => {
 			] );
 
 			const webpackConfig = utils.getWebpackConfig( {
-				rootPath: __dirname,
+				sourcePath: __dirname,
 				coverage: true
 			} );
 
@@ -201,16 +201,14 @@ describe( 'Utils', () => {
 			expect( args.watch ).to.equal( false );
 			expect( args.coverage ).to.equal( false );
 			expect( args.verbose ).to.equal( false );
-			expect( args['source-map'] ).to.equal( false );
-			expect( args['root-path'] ).to.equal( path.resolve( './.build/' ) );
+			expect( args[ 'source-map' ] ).to.equal( false );
 
 			// Check the aliases.
 			expect( args.c ).to.equal( args.coverage );
 			expect( args.w ).to.equal( args.watch );
 			expect( args.v ).to.equal( args.verbose );
-			expect( args.s ).to.equal( args['source-map'] );
-			expect( args.sourceMap ).to.equal( args['source-map'] );
-			expect( args.rootPath ).to.equal( args['root-path'] );
+			expect( args.s ).to.equal( args[ 'source-map' ] );
+			expect( args.sourceMap ).to.equal( args[ 'source-map' ] );
 		} );
 	} );
 } );

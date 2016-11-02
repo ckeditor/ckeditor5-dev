@@ -16,7 +16,7 @@ const utils = {
 	 * Returns an configuration object for Karma.
 	 *
 	 * @param {Object} options
-	 * @param {String} options.rootPath Base path that will be used to resolve all patterns.
+	 * @param {String} options.sourcePath Base path that will be used to resolve all patterns.
 	 * @param {Boolean} options.watch Whether to watch the files and executing tests whenever any file changes.
 	 * @param {Boolean} options.coverage Whether to generate code coverage.
 	 * @param {Boolean} options.sourceMap Whether to generate the source maps.
@@ -28,7 +28,7 @@ const utils = {
 	getKarmaConfig( options ) {
 		const karmaConfig = {
 			// Base path that will be used to resolve all patterns (eg. files, exclude).
-			basePath: options.rootPath,
+			basePath: options.sourcePath,
 
 			// Frameworks to use. Available frameworks: https://npmjs.org/browse/keyword/karma-adapter
 			frameworks: [ 'mocha', 'chai', 'sinon' ],
@@ -116,7 +116,7 @@ const utils = {
 						type: 'text-summary'
 					},
 					{
-						dir: path.join( options.rootPath, utils.coverageDirectory ),
+						dir: path.join( options.sourcePath, utils.coverageDirectory ),
 						type: 'html'
 					}
 				]
@@ -127,7 +127,7 @@ const utils = {
 			karmaConfig.files = [];
 
 			for ( const packageOrPath of options.paths ) {
-				const resolvedPath = path.join( options.rootPath, 'tests', packageOrPath );
+				const resolvedPath = path.join( options.sourcePath, 'tests', packageOrPath );
 
 				// If given path directs to a directory.
 				if ( fs.lstatSync( resolvedPath ).isDirectory() ) {
@@ -147,7 +147,7 @@ const utils = {
 	 * Returns an configuration object for Webpack.
 	 *
 	 * @param {Object} options
-	 * @param {String} options.rootPath Base path that will be used to resolve all patterns.
+	 * @param {String} options.sourcePath Base path that will be used to resolve all patterns.
 	 * @param {Boolean} options.coverage Whether to generate code coverage.
 	 * @param {Boolean} options.sourceMap Whether to generate the source maps.
 	 * @param {Array.<String>} options.paths Path of directories to test.
@@ -156,8 +156,9 @@ const utils = {
 	getWebpackConfig( options ) {
 		const webpackConfig = {
 			resolve: {
-				root: options.rootPath
+				root: options.sourcePath
 			},
+
 			module: {
 				preLoaders: [
 					{
@@ -171,6 +172,7 @@ const utils = {
 					}
 				]
 			},
+
 			plugins: []
 		};
 
@@ -179,7 +181,7 @@ const utils = {
 
 			if ( options.paths ) {
 				// Exclude coverage loader for all the directories except the testing ones.
-				excludeTests = fs.readdirSync( path.join( options.rootPath, 'ckeditor5' ) )
+				excludeTests = fs.readdirSync( path.join( options.sourcePath, 'ckeditor5' ) )
 					.filter( ( dirName ) => {
 						return !options.paths
 							.some( ( packageOrPath ) => packageOrPath.match( new RegExp( `^${ dirName }` ) ) );
@@ -233,7 +235,7 @@ const utils = {
 
 	/**
 	 * @returns {Object} options
-	 * @returns {String} options.rootPath
+	 * @returns {String} options.sourcePath
 	 * @returns {Array.<String>|null} options.paths
 	 * @returns {Array.<String>} options.browsers
 	 * @returns {Boolean} [options.watch=false] options.watch
@@ -245,8 +247,7 @@ const utils = {
 		const options = minimist( process.argv.slice( 2 ), {
 			string: [
 				'paths',
-				'browsers',
-				'root-path'
+				'browsers'
 			],
 
 			boolean: [
@@ -264,7 +265,6 @@ const utils = {
 			},
 
 			default: {
-				'root-path': './.build/',
 				paths: null,
 				browsers: 'Chrome',
 				watch: false,
@@ -274,7 +274,6 @@ const utils = {
 			}
 		} );
 
-		options[ 'root-path' ] = path.resolve( options[ 'root-path' ] );
 		options.browsers = options.browsers.split( ',' );
 
 		if ( options.paths ) {
@@ -282,7 +281,6 @@ const utils = {
 		}
 
 		options.sourceMap = options[ 'source-map' ];
-		options.rootPath = options[ 'root-path' ];
 
 		return options;
 	}
