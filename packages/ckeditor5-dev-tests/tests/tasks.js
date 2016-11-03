@@ -73,10 +73,7 @@ describe( 'Tests', () => {
 		} );
 
 		it( 'rejects the promise if tests ended badly', () => {
-			const options = {
-				// Array with files cannot be empty.
-				files: []
-			};
+			const options = {};
 
 			return tasks.runTests( options )
 				.then(
