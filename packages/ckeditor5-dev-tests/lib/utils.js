@@ -27,7 +27,7 @@ const utils = {
 	 */
 	getKarmaConfig( options ) {
 		if ( !Array.isArray( options.files ) || options.files.length === 0 ) {
-			throw new Error( 'Karma requires files to tests. `options.files` cannot be empty.' );
+			throw new Error( 'Karma requires files to tests. `options.files` has to be non-empty array.' );
 		}
 
 		const karmaConfig = {

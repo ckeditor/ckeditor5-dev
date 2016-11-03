@@ -30,11 +30,11 @@ describe( 'utils', () => {
 		it( 'throws an error when files were not specified', () => {
 			expect( () => {
 				utils.getKarmaConfig( {} );
-			} ).to.throw( Error, 'Karma requires files to tests. `options.files` cannot be empty.' );
+			} ).to.throw( Error, 'Karma requires files to tests. `options.files` has to be non-empty array.' );
 
 			expect( () => {
 				utils.getKarmaConfig( { files: [] } );
-			} ).to.throw( Error, 'Karma requires files to tests. `options.files` cannot be empty.' );
+			} ).to.throw( Error, 'Karma requires files to tests. `options.files` has to be non-empty array.' );
 		} );
 
 		it( 'transforms specified test files to the Karma configuration', () => {
