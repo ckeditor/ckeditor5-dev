@@ -27,72 +27,58 @@ describe( 'utils', () => {
 	} );
 
 	describe( 'getKarmaConfig()', () => {
-		it( 'checks the whole "tests" directory when test paths are not specified', () => {
-			const karmaConfig = utils.getKarmaConfig( {
-				sourcePath: __dirname
-			} );
-
-			expect( karmaConfig.files ).to.deep.equal( [
-				path.join( 'tests', '**', '*.js' )
-			] );
+		it( 'throws an error when files were not specified', () => {
+			expect( () => {
+				utils.getKarmaConfig( { files: [] } );
+			} ).to.throw( Error, 'Karma requires files to tests. `options.files` cannot be empty.' );
 		} );
 
-		it( 'transforms specified test paths to the Karma configuration', () => {
-			const lstatStub = sandbox.stub( fs, 'lstatSync' );
-
-			// The whole `ckeditor5-basic-styles` package.
-			lstatStub.withArgs( path.join( __dirname, 'tests', 'basic-styles' ) ).returns( {
-				isDirectory() {
-					return true;
-				}
-			} );
-
-			// A part of the `ckeditor5-engine` package.
-			lstatStub.withArgs( path.join( __dirname, 'tests', 'engine/view' ) ).returns( {
-				isDirectory() {
-					return true;
-				}
-			} );
-
-			// Single file from `ckeditor5-paragraph` package.
-			lstatStub.withArgs( path.join( __dirname, 'tests', 'paragraph/paragraph.js' ) ).returns( {
-				isDirectory() {
-					return false;
-				}
-			} );
-
+		it( 'transforms specified test files to the Karma configuration', () => {
+			const webpackConfigStub = sandbox.stub( utils, 'getWebpackConfig' );
 			const karmaConfig = utils.getKarmaConfig( {
 				sourcePath: __dirname,
-				paths: [
+				files: [
 					'basic-styles',
 					'engine/view',
+					'core/*.js',
 					'paragraph/paragraph.js'
 				]
 			} );
 
-			expect( lstatStub.calledThrice ).to.equal( true );
+			expect( webpackConfigStub.calledOnce ).to.equal( true );
 			expect( karmaConfig.files ).to.deep.equal( [
 				path.join( 'tests', 'basic-styles', '**', '*.js' ),
 				path.join( 'tests', 'engine', 'view', '**', '*.js' ),
+				path.join( 'tests', 'core', '*.js' ),
 				path.join( 'tests', 'paragraph', 'paragraph.js' ),
 			] );
 		} );
 
 		it( 'generates the coverage for sources', () => {
+			const webpackConfigStub = sandbox.stub( utils, 'getWebpackConfig' );
 			const karmaConfig = utils.getKarmaConfig( {
 				sourcePath: __dirname,
-				coverage: true
+				coverage: true,
+				files: [
+					'basic-styles'
+				]
 			} );
 
+			expect( webpackConfigStub.calledOnce ).to.equal( true );
 			expect( karmaConfig.reporters ).to.contain( 'coverage' );
 		} );
 
 		it( 'runs Karma with the watcher', () => {
+			const webpackConfigStub = sandbox.stub( utils, 'getWebpackConfig' );
 			const karmaConfig = utils.getKarmaConfig( {
 				sourcePath: __dirname,
-				watch: true
+				watch: true,
+				files: [
+					'basic-styles'
+				]
 			} );
 
+			expect( webpackConfigStub.calledOnce ).to.equal( true );
 			expect( karmaConfig.autoWatch ).to.equal( true );
 			expect( karmaConfig.singleRun ).to.equal( false );
 		} );
@@ -117,7 +103,7 @@ describe( 'utils', () => {
 			const webpackConfig = utils.getWebpackConfig( {
 				sourcePath: __dirname,
 				coverage: true,
-				paths: [
+				files: [
 					'engine',
 					'paragraph'
 				]
@@ -196,7 +182,7 @@ describe( 'utils', () => {
 			const args = utils.parseArguments();
 
 			// Checks the parameters.
-			expect( args.paths ).to.equal( null );
+			expect( args.files ).to.deep.equal( [] );
 			expect( args.browsers ).to.deep.equal( [ 'Chrome' ] );
 			expect( args.watch ).to.equal( false );
 			expect( args.coverage ).to.equal( false );

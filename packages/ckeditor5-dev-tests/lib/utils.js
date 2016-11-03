@@ -22,10 +22,14 @@ const utils = {
 	 * @param {Boolean} options.sourceMap Whether to generate the source maps.
 	 * @param {Boolean} options.verbose Whether to informs about Webpack's work.
 	 * @param {Array.<String>} options.browsers Browsers which will be used to run the tests.
-	 * @param {Array.<String>} options.paths Path of directories to test.
+	 * @param {Array.<String>} options.files Path of directories to test.
 	 * @returns {Object}
 	 */
 	getKarmaConfig( options ) {
+		if ( options.files.length === 0 ) {
+			throw new Error( 'Karma requires files to tests. `options.files` cannot be empty.' );
+		}
+
 		const karmaConfig = {
 			// Base path that will be used to resolve all patterns (eg. files, exclude).
 			basePath: options.sourcePath,
@@ -34,9 +38,7 @@ const utils = {
 			frameworks: [ 'mocha', 'chai', 'sinon' ],
 
 			// List of files/patterns to load in the browser.
-			files: [
-				path.join( 'tests', '**', '*.js' )
-			],
+			files: [],
 
 			// List of files to exclude.
 			exclude: [
@@ -123,19 +125,12 @@ const utils = {
 			};
 		}
 
-		if ( options.paths ) {
-			karmaConfig.files = [];
-
-			for ( const packageOrPath of options.paths ) {
-				const resolvedPath = path.join( options.sourcePath, 'tests', packageOrPath );
-
-				// If given path directs to a directory.
-				if ( fs.lstatSync( resolvedPath ).isDirectory() ) {
-					// Then take all files from given path.
-					karmaConfig.files.push( path.join( 'tests', packageOrPath, '**', '*.js' ) );
-				} else {
-					// Most probably the path directs to single file.
+		if ( options.files ) {
+			for ( const packageOrPath of options.files ) {
+				if ( packageOrPath.endsWith( '.js' ) ) {
 					karmaConfig.files.push( path.join( 'tests', packageOrPath ) );
+				} else {
+					karmaConfig.files.push( path.join( 'tests', packageOrPath, '**', '*.js' ) );
 				}
 			}
 		}
@@ -150,7 +145,7 @@ const utils = {
 	 * @param {String} options.sourcePath Base path that will be used to resolve all patterns.
 	 * @param {Boolean} options.coverage Whether to generate code coverage.
 	 * @param {Boolean} options.sourceMap Whether to generate the source maps.
-	 * @param {Array.<String>} options.paths Path of directories to test.
+	 * @param {Array.<String>} options.files Path of directories to test.
 	 * @returns {Object}
 	 */
 	getWebpackConfig( options ) {
@@ -179,11 +174,11 @@ const utils = {
 		if ( options.coverage ) {
 			let excludeTests = [];
 
-			if ( options.paths ) {
+			if ( options.files ) {
 				// Exclude coverage loader for all the directories except the testing ones.
 				excludeTests = fs.readdirSync( path.join( options.sourcePath, 'ckeditor5' ) )
 					.filter( ( dirName ) => {
-						return !options.paths
+						return !options.files
 							.some( ( packageOrPath ) => packageOrPath.match( new RegExp( `^${ dirName }` ) ) );
 					} )
 					.map( ( dirName ) => new RegExp( path.join( 'ckeditor5', dirName ) ) );
@@ -236,7 +231,7 @@ const utils = {
 	/**
 	 * @returns {Object} options
 	 * @returns {String} options.sourcePath
-	 * @returns {Array.<String>|null} options.paths
+	 * @returns {Array.<String>|null} options.files
 	 * @returns {Array.<String>} options.browsers
 	 * @returns {Boolean} [options.watch=false] options.watch
 	 * @returns {Boolean} [options.coverage=false] options.coverage
@@ -246,7 +241,7 @@ const utils = {
 	parseArguments() {
 		const options = minimist( process.argv.slice( 2 ), {
 			string: [
-				'paths',
+				'files',
 				'browsers'
 			],
 
@@ -261,11 +256,11 @@ const utils = {
 				w: 'watch',
 				c: 'coverage',
 				s: 'source-map',
-				v: 'verbose'
+				v: 'verbose',
 			},
 
 			default: {
-				paths: null,
+				files: [],
 				browsers: 'Chrome',
 				watch: false,
 				coverage: false,
@@ -274,13 +269,12 @@ const utils = {
 			}
 		} );
 
+		options.sourceMap = options[ 'source-map' ];
 		options.browsers = options.browsers.split( ',' );
 
-		if ( options.paths ) {
-			options.paths = options.paths.split( ',' );
+		if ( typeof options.files === 'string' ) {
+			options.files = options.files.split( ',' );
 		}
-
-		options.sourceMap = options[ 'source-map' ];
 
 		return options;
 	}

@@ -73,14 +73,9 @@ describe( 'Tests', () => {
 		} );
 
 		it( 'rejects the promise if tests ended badly', () => {
-			const options = {};
-
-			sandbox.stub( process, 'exit' );
-
-			onServer = ( server ) => {
-				server.start = () => {
-					server.callback( -1 );
-				};
+			const options = {
+				// Array with files cannot be empty.
+				files: []
 			};
 
 			return tasks.runTests( options )
@@ -90,7 +85,6 @@ describe( 'Tests', () => {
 					},
 					() => {
 						expect( 'if the promise was resolved the first callback will be called, not this' ).to.be.a( 'string' );
-						expect( process.exit.calledWithExactly( -1 ) ).to.equal( true );
 					}
 				);
 		} );
@@ -120,7 +114,9 @@ describe( 'Tests', () => {
 		} );
 
 		it( 'waits for the compiler', ( done ) => {
-			const options = {};
+			const options = {
+				files: [ 'engine' ]
+			};
 			const serverCount = [];
 
 			sandbox.stub( compiler.tasks, 'compile', ( options ) =>  {
@@ -148,7 +144,9 @@ describe( 'Tests', () => {
 		} );
 
 		it( 'does not resolve the promise until Karma\'s callback is called', () => {
-			const options = {};
+			const options = {
+				files: [ 'engine' ]
+			};
 
 			sandbox.stub( compiler.tasks, 'compile', ( options ) =>  {
 				options.onChange();

@@ -23,9 +23,9 @@ gulp.task( 'test', () => {
 
 	options.packages = compiler.utils.getPackages( '.' )
 
-	// If --paths weren't specified, then test all packages.
-	if ( !options.paths ) {
-		options.paths = options.packages
+	// If --files weren't specified, then test all packages.
+	if ( !options.files ) {
+		options.files = options.packages
 			.map( ( packagePath ) => tests.utils.getPackageName( path.resolve( packagePath ) ) );
 	}
 
@@ -39,7 +39,7 @@ gulp.task( 'test', () => {
 * `source-map` - Whether to generate the source maps. Also available as an alias: `-s`.
 * `coverage` - Whether to generate code coverage. Also available as an alias: `-c`.
 * `verbose` - Whether to informs about Webpack's work. Also available as an alias: `-v`.
-* `paths` - Specify path(s) to tests.
+* `files` - Specify file(s) to tests.
 * `browsers` - Browsers which will be used to run the tests.
 
 #### Examples
@@ -47,19 +47,19 @@ gulp.task( 'test', () => {
 For testing the `ckeditor5-enter` and `ckeditor5-paragraph` packages and generating the code coverage report you can use:
 
 ```bash
-$ gulp test -c --paths=enter,paragraph
+$ gulp test -c --files=enter,paragraph
 ```
 
 For testing *view* module from `ckeditor5-engine` and run the test automatically after changes in compiled code you can use:
 
 ```bash
-$ gulp test -v --paths=engine/view
+$ gulp test -v --files=engine/view
 ```
 
 For testing specified files in `ckeditor5-basic-styles` on two browsers (Chrome and Firefox) you can use:
 
 ```bash
-$ gulp test --browsers=Chrome,Firefox --paths=basic-styles/boldengine.js,basic-styles/italicengine.js
+$ gulp test --browsers=Chrome,Firefox --files=basic-styles/boldengine.js,basic-styles/italicengine.js
 ```
 
 ## License
