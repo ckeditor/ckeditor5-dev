@@ -22,7 +22,7 @@ const utils = {
 	 * @param {Boolean} options.sourceMap Whether to generate the source maps.
 	 * @param {Boolean} options.verbose Whether to informs about Webpack's work.
 	 * @param {Array.<String>} options.browsers Browsers which will be used to run the tests.
-	 * @param {Array.<String>} options.files Path of directories to test.
+	 * @param {Array.<String>} options.files Files to tests.
 	 * @returns {Object}
 	 */
 	getKarmaConfig( options ) {
@@ -145,7 +145,7 @@ const utils = {
 	 * @param {String} options.sourcePath Base path that will be used to resolve all patterns.
 	 * @param {Boolean} options.coverage Whether to generate code coverage.
 	 * @param {Boolean} options.sourceMap Whether to generate the source maps.
-	 * @param {Array.<String>} options.files Path of directories to test.
+	 * @param {Array.<String>} options.files Files to tests.
 	 * @returns {Object}
 	 */
 	getWebpackConfig( options ) {
