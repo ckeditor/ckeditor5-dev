@@ -1,9 +1,12 @@
 CKEditor 5 Development Environment Tasks
 ========================================
 
-[![devDependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-env/dev-status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-env?type=dev)
-[![Dependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-env/status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-env)
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-env.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)
+[![Build Status](https://travis-ci.org/ckeditor/ckeditor5-dev-env.svg)](https://travis-ci.org/ckeditor/ckeditor5-dev-env)
+[![Test Coverage](https://codeclimate.com/github/ckeditor/ckeditor5-dev-env/badges/coverage.svg)](https://codeclimate.com/github/ckeditor/ckeditor5-dev-env/coverage)
+[![Code Climate](https://codeclimate.com/github/ckeditor/ckeditor5-dev-env/badges/gpa.svg)](https://codeclimate.com/github/ckeditor/ckeditor5-dev-env)
+[![Dependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-env/status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-env#info=dependencies)
+[![devDependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-env/dev-status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-env#info=devDependencies)
 
 Tasks used during development of [CKEditor 5](https://ckeditor5.github.io). More information about the project can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev-env>.
 
