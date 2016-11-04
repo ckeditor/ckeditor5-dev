@@ -35,6 +35,7 @@ const tasks = {
 					resolve();
 				} else {
 					reject();
+
 					process.exit( exitCode );
 				}
 			} );
@@ -99,7 +100,7 @@ const tasks = {
 				tasks.runTests( options )
 					.then( resolve )
 					.catch( ( err ) => {
-						console.log( err );
+						gutil.log( gutil.colors.red( err.message ) );
 
 						reject();
 					} );
