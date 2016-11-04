@@ -83,6 +83,13 @@ const utils = {
 			// Available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
 			browsers: options.browsers,
 
+			customLaunchers: {
+				CHROME_TRAVIS_CI: {
+					base: 'Chrome',
+					flags: [ '--no-sandbox' ]
+				}
+			},
+
 			// Continuous Integration mode. If true, Karma captures browsers, runs the tests and exits.
 			singleRun: true,
 
@@ -110,6 +117,8 @@ const utils = {
 		}
 
 		if ( options.coverage ) {
+			const coverageDir = path.join( options.sourcePath, utils.coverageDirectory );
+
 			karmaConfig.reporters.push( 'coverage' );
 
 			karmaConfig.coverageReporter = {
@@ -118,8 +127,20 @@ const utils = {
 						type: 'text-summary'
 					},
 					{
-						dir: path.join( options.sourcePath, utils.coverageDirectory ),
+						dir: coverageDir,
 						type: 'html'
+					},
+					// Generates "./coverage/lcov.info".
+					{
+						type: 'lcovonly',
+						subdir: '.',
+						dir: coverageDir
+					},
+					// Generates "./coverage/coverage-final.json".
+					{
+						type: 'json',
+						subdir: '.',
+						dir: coverageDir
 					}
 				]
 			};
@@ -133,6 +154,10 @@ const utils = {
 					karmaConfig.files.push( path.join( 'tests', packageOrPath, '**', '*.js' ) );
 				}
 			}
+		}
+
+		if ( process.env.TRAVIS ) {
+			karmaConfig.browsers = [ 'CHROME_TRAVIS_CI' ];
 		}
 
 		return karmaConfig;
