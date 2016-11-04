@@ -130,15 +130,9 @@ const utils = {
 						dir: coverageDir,
 						type: 'html'
 					},
-					// Generates "./coverage/lcov.info".
+					// Generates "./coverage/lcov.info". Used by CodeClimate.
 					{
 						type: 'lcovonly',
-						subdir: '.',
-						dir: coverageDir
-					},
-					// Generates "./coverage/coverage-final.json".
-					{
-						type: 'json',
 						subdir: '.',
 						dir: coverageDir
 					}
