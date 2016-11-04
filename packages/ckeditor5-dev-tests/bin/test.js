@@ -10,14 +10,18 @@
 const compiler = require( '@ckeditor/ckeditor5-dev-compiler' );
 const tests = require( '../lib/index' );
 
+const cwd = process.cwd();
 const options = tests.utils.parseArguments();
 
-options.packages = compiler.utils.getPackages( process.cwd() );
+options.packages = compiler.utils.getPackages( cwd );
 
-if ( !options.files ) {
+if ( options.files.length === 0 ) {
 	options.files = [
 		tests.utils.getPackageName()
 	];
+
+	// Add current package as source.
+	options.packages.push( cwd );
 }
 
 tests.tasks.test( options );
