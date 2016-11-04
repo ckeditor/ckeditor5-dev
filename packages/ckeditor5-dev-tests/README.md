@@ -8,7 +8,7 @@ CKEditor 5 Testing Environment
 [![Dependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-tests/status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-tests#info=dependencies)
 [![devDependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-tests/dev-status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-tests#info=devDependencies)
 
-Testing environment for [CKEditor 5](https://ckeditor5.github.io). It's based on [Karma](https://karma-runner.github.io/) and [Webpack](https://webpack.github.io/) and normally it's used from the [CKEditor 5 Development Environment](https://github.com/ckeditor/ckeditor5) package.
+Testing environment for [CKEditor 5](https://ckeditor5.github.io). It's based on [Karma](https://karma-runner.github.io/) and [Webpack](https://webpack.github.io/) and it's normally used from the [CKEditor 5 Development Environment](https://github.com/ckeditor/ckeditor5).
 
 ## Usage
 
