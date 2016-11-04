@@ -1,5 +1,5 @@
-CKEditor 5 Tests
-===================
+CKEditor 5 Testing Environment
+==============================
 
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-tests.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)
 [![Build Status](https://travis-ci.org/ckeditor/ckeditor5-dev-tests.svg)](https://travis-ci.org/ckeditor/ckeditor5-dev-tests)
@@ -8,17 +8,17 @@ CKEditor 5 Tests
 [![Dependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-tests/status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-tests#info=dependencies)
 [![devDependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-tests/dev-status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-tests#info=devDependencies)
 
-Testing environment for [CKEditor 5](https://ckeditor5.github.io). It's based on [Karma](https://karma-runner.github.io/) and [Webpack](https://webpack.github.io/). More information about the project can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev-tests>.
+Testing environment for [CKEditor 5](https://ckeditor5.github.io). It's based on [Karma](https://karma-runner.github.io/) and [Webpack](https://webpack.github.io/) and normally it's used from the [CKEditor 5 Development Environment](https://github.com/ckeditor/ckeditor5) package.
 
 ## Usage
 
-Firstly you need to install the package:
+First, you need to install the package:
 
 ```bash
 npm i --save-dev @ckeditor/ckeditor5-dev-tests
 ```
 
-A [gulp.js](http://gulpjs.com/) task to test CKEditor 5 packages (used e.g. in https://github.com/ckeditor/ckeditor5):
+An example [gulp.js](http://gulpjs.com/) task to test CKEditor 5 packages (used e.g. in https://github.com/ckeditor/ckeditor5) can look like this:
 
 ```js
 gulp.task( 'test', () => {
@@ -42,10 +42,10 @@ You can also use the bin script for testing a package:
 
 ```bash
 # For running all the tests (for the current package and all dependencies).
-node_modules/.bin/ckeditor5-dev-tests --files=**/*.js
- 
+./node_modules/.bin/ckeditor5-dev-tests --files=**/*.js
+
 # For running tests in the current package.
-node_modules/.bin/ckeditor5-dev-tests
+./node_modules/.bin/ckeditor5-dev-tests
 ```
 
 #### CLI options
