@@ -15,13 +15,15 @@ const options = tests.utils.parseArguments();
 
 options.packages = compiler.utils.getPackages( cwd );
 
+if ( !cwd.endsWith( 'ckeditor5' ) ) {
+	// Add current package as source.
+	options.packages.push( cwd );
+}
+
 if ( options.files.length === 0 ) {
 	options.files = [
 		tests.utils.getPackageName()
 	];
-
-	// Add current package as source.
-	options.packages.push( cwd );
 }
 
 tests.tasks.test( options );
