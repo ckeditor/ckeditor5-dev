@@ -48,5 +48,6 @@
   "scripts": {
     "test": "mocha tests --recursive",
     "coverage": "istanbul cover _mocha tests/ -- --recursive"
-  }
+  },
+  "bin": "./bin/test.js"
 }

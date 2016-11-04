@@ -9,7 +9,9 @@ Testing environment for [CKEditor 5](https://ckeditor5.github.io). It's based on
 
 ## Usage
 
-```
+Firstly you need to install the package:
+
+```bash
 npm i --save-dev @ckeditor/ckeditor5-dev-tests
 ```
 
@@ -31,6 +33,16 @@ gulp.task( 'test', () => {
 
 	return tests.tasks.test( options );
 } );
+```
+
+You can also use the bin script for testing a package:
+
+```bash
+# For running all the tests (for the current package and all dependencies).
+node_modules/.bin/ckeditor5-dev-tests --files=**/*.js
+ 
+# For running tests in the current package.
+node_modules/.bin/ckeditor5-dev-tests
 ```
 
 #### CLI options
