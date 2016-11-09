@@ -256,6 +256,9 @@ const utils = {
 	 * @returns {Boolean} [options.coverage=false] options.coverage
 	 * @returns {Boolean} [options.sourceMap=false] options.sourceMap
 	 * @returns {Boolean} [options.verbose=false] options.verbose
+	 * @returns {Boolean} [options.ignoreDuplicates] Whether to ignore duplicated packages. Packages can
+	 * be duplicated if there are conflicts in dependency versions or when one of the packages is installed
+	 * in the development mode (as a cloned repository).
 	 */
 	parseArguments() {
 		const options = minimist( process.argv.slice( 2 ), {
@@ -268,7 +271,8 @@ const utils = {
 				'watch',
 				'coverage',
 				'source-map',
-				'verbose'
+				'verbose',
+				'ignore-duplicates'
 			],
 
 			alias: {
@@ -284,10 +288,12 @@ const utils = {
 				watch: false,
 				coverage: false,
 				verbose: false,
-				'source-map': false
+				'source-map': false,
+				'ignore-duplicates': false
 			}
 		} );
 
+		options.ignoreDuplicates = options[ 'ignore-duplicates' ];
 		options.sourceMap = options[ 'source-map' ];
 		options.browsers = options.browsers.split( ',' );
 

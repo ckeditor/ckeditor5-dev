@@ -192,6 +192,7 @@ describe( 'utils', () => {
 			expect( args.coverage ).to.equal( false );
 			expect( args.verbose ).to.equal( false );
 			expect( args[ 'source-map' ] ).to.equal( false );
+			expect( args[ 'ignore-duplicates' ] ).to.equal( false );
 
 			// Check the aliases.
 			expect( args.c ).to.equal( args.coverage );
@@ -199,6 +200,7 @@ describe( 'utils', () => {
 			expect( args.v ).to.equal( args.verbose );
 			expect( args.s ).to.equal( args[ 'source-map' ] );
 			expect( args.sourceMap ).to.equal( args[ 'source-map' ] );
+			expect( args.ignoreDuplicates ).to.equal( args[ 'ignore-duplicates' ] );
 		} );
 	} );
 } );

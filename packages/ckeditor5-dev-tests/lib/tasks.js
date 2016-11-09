@@ -66,6 +66,7 @@ const tasks = {
 	 * @param {Array.<String>} options.packages Paths to CKEditor 5 dependencies.
 	 * @param {Array.<String>} options.browsers Browsers which will be used to run the tests.
 	 * @param {Array.<String>} options.files Specify path(s) to tests.
+	 * @param {Boolean} options.ignoreDuplicates Whether to ignore duplicated packages.
 	 * @returns {Promise}
 	 */
 	test( options ) {
@@ -81,6 +82,7 @@ const tasks = {
 			compiler.tasks.compile( {
 				watch: options.watch,
 				packages: options.packages,
+				ignoreDuplicates: options.ignoreDuplicates,
 
 				formats: {
 					esnext: options.sourcePath
