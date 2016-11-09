@@ -2,7 +2,7 @@ CKEditor 5 Testing Environment
 ==============================
 
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-tests.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)
-[![Build Status](https://travis-ci.org/ckeditor/ckeditor5-dev-tests.svg)](https://travis-ci.org/ckeditor/ckeditor5-dev-tests)
+[![Build Status](https://travis-ci.org/ckeditor/ckeditor5-dev-tests.svg?branch=master)](https://travis-ci.org/ckeditor/ckeditor5-dev-tests)
 [![Test Coverage](https://codeclimate.com/github/ckeditor/ckeditor5-dev-tests/badges/coverage.svg)](https://codeclimate.com/github/ckeditor/ckeditor5-dev-tests/coverage)
 [![Code Climate](https://codeclimate.com/github/ckeditor/ckeditor5-dev-tests/badges/gpa.svg)](https://codeclimate.com/github/ckeditor/ckeditor5-dev-tests)
 [![Dependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-tests/status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-tests#info=dependencies)
