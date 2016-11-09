@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global setTimeout */
+/* global setTimeout, clearTimeout */
 
 'use strict';
 
@@ -77,7 +77,7 @@ const tasks = {
 
 		return new Promise( ( resolve, reject ) => {
 			// Give it more time initially to bootstrap.
-			setTimeout( checkWaitUntil, 3000 );
+			let timerId = setTimeout( checkWaitUntil, 3000 );
 
 			const compilerOptions = {
 				watch: options.watch,
@@ -95,13 +95,16 @@ const tasks = {
 
 			compiler.tasks.compile( compilerOptions )
 				.catch( ( error ) => {
+					clearTimeout( timerId );
 					reject( error );
 				} );
 
 			// Wait until compiler ends its job and start Karma.
 			function checkWaitUntil() {
 				if ( new Date() < waitUntil ) {
-					return setTimeout( checkWaitUntil, 200 );
+					timerId = setTimeout( checkWaitUntil, 200 );
+
+					return;
 				}
 
 				tasks.runTests( options )

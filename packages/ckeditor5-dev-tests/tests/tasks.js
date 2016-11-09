@@ -189,5 +189,31 @@ describe( 'Tests', () => {
 					}
 				);
 		} );
+
+		it( 'does not run tests when compiler throws an error', () => {
+			sandbox.stub( compiler.tasks, 'compile', () => {
+				return new Promise( ( resolve, reject ) => {
+					clock.tick( 2800 );
+					reject( new Error( 'Something went wrong in the Compiler.' ) );
+				} );
+			} );
+
+			const runTestStub = sandbox.stub( tasks, 'runTests' );
+
+			return tasks.test( {} )
+				.then(
+					() => {
+						throw new Error( 'Promise was supposed to be rejected.' );
+					},
+					( error ) => {
+						// By default, tests start 3 secs after starting the Compiler.
+						clock.tick( 201 );
+
+						expect( new Date().getTime() ).to.equal( 3001 );
+						expect( runTestStub.notCalled ).to.equal( true );
+						expect( error.message ).to.equal( 'Something went wrong in the Compiler.' );
+					}
+				);
+		} );
 	} );
 } );
