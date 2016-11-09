@@ -79,7 +79,7 @@ const tasks = {
 			// Give it more time initially to bootstrap.
 			setTimeout( checkWaitUntil, 3000 );
 
-			compiler.tasks.compile( {
+			const compilerOptions = {
 				watch: options.watch,
 				packages: options.packages,
 				ignoreDuplicates: options.ignoreDuplicates,
@@ -91,7 +91,12 @@ const tasks = {
 				onChange() {
 					waitUntil = new Date().getTime() + 500;
 				}
-			} );
+			};
+
+			compiler.tasks.compile( compilerOptions )
+				.catch( ( error ) => {
+					reject( error );
+				} );
 
 			// Wait until compiler ends its job and start Karma.
 			function checkWaitUntil() {

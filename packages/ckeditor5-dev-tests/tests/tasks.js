@@ -7,6 +7,7 @@
 
 'use strict';
 
+const path = require( 'path' );
 const sinon = require( 'sinon' );
 const chai = require( 'chai' );
 const expect = chai.expect;
@@ -99,6 +100,8 @@ describe( 'Tests', () => {
 				expect( servers.length ).to.equal( 0 );
 
 				clock.tick( 5000 );
+
+				return Promise.resolve();
 			} );
 
 			onServer = ( server ) => {
@@ -130,6 +133,8 @@ describe( 'Tests', () => {
 
 				// Now tick the 600ms from the last change to finish.
 				clock.tick( 300 );
+
+				return Promise.resolve();
 			} );
 
 			onServer = ( server ) => {
@@ -149,6 +154,8 @@ describe( 'Tests', () => {
 				options.onChange();
 
 				clock.tick( 5000 );
+
+				return Promise.resolve();
 			} );
 
 			onServer = ( server ) => {
@@ -158,6 +165,29 @@ describe( 'Tests', () => {
 			};
 
 			return tasks.test( options );
+		} );
+
+		it( 'rejects the task when compiler throws an error', () => {
+			const compilerOptions = {
+				packages: [
+					path.join( 'ckeditor5-foo' ),
+					path.join( 'node_modules', 'ckeditor5-bar' ),
+					path.join( 'node_modules', 'ckeditor5-bar', 'node_modules', 'ckeditor5-foo' )
+				],
+				formats: {
+					esnext: path.join( '.build' )
+				}
+			};
+
+			return tasks.test( compilerOptions )
+				.then(
+					() => {
+						throw new Error( 'Promise was supposed to be rejected.' );
+					},
+					( error ) => {
+						expect( error.message ).to.match( /^One or more packages passed to the compiler have duplicates/ );
+					}
+				);
 		} );
 	} );
 } );
