@@ -207,9 +207,8 @@ describe( 'Tests', () => {
 					},
 					( error ) => {
 						// By default, tests start 3 secs after starting the Compiler.
-						clock.tick( 201 );
+						clock.tick( 500 );
 
-						expect( new Date().getTime() ).to.equal( 3001 );
 						expect( runTestStub.notCalled ).to.equal( true );
 						expect( error.message ).to.equal( 'Something went wrong in the Compiler.' );
 					}
