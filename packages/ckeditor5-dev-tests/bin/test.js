@@ -8,6 +8,7 @@
 'use strict';
 
 const compiler = require( '@ckeditor/ckeditor5-dev-compiler' );
+const gutil = require( 'gulp-util' );
 const tests = require( '../lib/index' );
 
 const cwd = process.cwd();
@@ -26,4 +27,7 @@ if ( options.files.length === 0 ) {
 	];
 }
 
-tests.tasks.test( options );
+tests.tasks.test( options )
+	.catch( ( error ) => {
+		gutil.log( gutil.colors.red( error ) );
+	} );
