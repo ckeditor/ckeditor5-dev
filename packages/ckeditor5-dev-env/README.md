@@ -2,7 +2,7 @@ CKEditor 5 Development Environment Tasks
 ========================================
 
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-env.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)
-[![Build Status](https://travis-ci.org/ckeditor/ckeditor5-dev-env.svg)](https://travis-ci.org/ckeditor/ckeditor5-dev-env)
+[![Build Status](https://travis-ci.org/ckeditor/ckeditor5-dev-env.svg?branch=master)](https://travis-ci.org/ckeditor/ckeditor5-dev-env)
 [![Test Coverage](https://codeclimate.com/github/ckeditor/ckeditor5-dev-env/badges/coverage.svg)](https://codeclimate.com/github/ckeditor/ckeditor5-dev-env/coverage)
 [![Code Climate](https://codeclimate.com/github/ckeditor/ckeditor5-dev-env/badges/gpa.svg)](https://codeclimate.com/github/ckeditor/ckeditor5-dev-env)
 [![Dependency Status](https://david-dm.org/ckeditor/ckeditor5-dev-env/status.svg)](https://david-dm.org/ckeditor/ckeditor5-dev-env#info=dependencies)
