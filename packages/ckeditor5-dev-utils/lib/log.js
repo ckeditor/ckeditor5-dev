@@ -7,52 +7,82 @@
 
 const gutil = require( 'gulp-util' );
 
-let logOut = ( msg ) => gutil.log( msg );
-let logErr = ( msg ) => gutil.log( gutil.colors.red( msg ) );
+const verbosity = {
+	// Displays everything.
+	info: 'info',
 
-module.exports = {
-	/**
-	 * Configure login output functions.
-	 *
-	 * 		log.configure( logOut, logErr );
-	 *
-	 * 		function logOut( message ) {
-	 * 			// Save output to file.
-	 * 			...
-	 * 		}
-	 *
-	 * 		function logErr( message) {
-	 * 			// Save error to file.
-	 * 			...
-	 * 		}
-	 *
-	 * @param {Function} stdout Function to be used to log standard output.
-	 * @param {Function} stderr Function to be used to log standard error.
-	 */
-	configure( stdout, stderr ) {
-		logOut = stdout;
-		logErr = stderr;
-	},
+	// Displays warning and error logs.
+	warning: 'warning',
 
-	/**
-	 * Logs output using function provided in {@link configure}.
-	 *
-	 * @param {String} message Message to be logged.
-	 */
-	out( message ) {
-		if ( logOut ) {
-			logOut( message );
+	// Displays error logs only.
+	error: 'error',
+};
+
+const levels = new Map();
+levels.set( verbosity.info, new Set( [ verbosity.info ] ) );
+levels.set( verbosity.warning, new Set( [ verbosity.info, verbosity.warning ] ) );
+levels.set( verbosity.error, new Set( Object.keys( verbosity ).map( v => verbosity[ v ] ) ) );
+
+/**
+ * See: https://github.com/ckeditor/ckeditor5-dev-utils/issues/27
+ *
+ * @param {String} moduleVerbosity Level of the verbosity for all log methods.
+ * @returns {Object} logger
+ * @returns {Function} logger.info
+ * @returns {Function} logger.warning
+ * @returns {Function} logger.error
+ */
+module.exports = ( moduleVerbosity ) => {
+	return {
+		/**
+		 * Displays a message when verbosity level is equal to `verbosity.info`.
+		 *
+		 * @param {String} message Message to log.
+		 * @param {Object} options
+		 * @param {Boolean} options.raw Whether to display non-modified message.
+		 */
+		info( message, options = { raw: false } ) {
+			this._log( verbosity.info, message, options );
+		},
+
+		/**
+		 * Displays a warning message when verbosity level is equal to `verbosity.info` or `verbosity.warning`.
+		 *
+		 * @param {String} message Message to log.
+		 * @param {Object} options
+		 * @param {Boolean} [options.raw=false] Whether to display non-modified message.
+		 */
+		warning( message, options = { raw: false } ) {
+			this._log( verbosity.warning, gutil.colors.yellow( message ), options );
+		},
+
+		/**
+		 * Displays a error message.
+		 *
+		 * @param {String} message Message to log.
+		 * @param {Object} options
+		 * @param {Boolean} [options.raw=false] Whether to display non-modified message.
+		 */
+		error( message, options = { raw: false } ) {
+			this._log( verbosity.error, gutil.colors.red( message ), options );
+		},
+
+		/**
+		 * @param {String} messageVerbosity Verbosity of particular message.
+		 * @param {String} message Message to log.
+		 * @param {Object} options
+		 * @param {Boolean} [options.raw=false] Whether to display non-modified message.
+		 */
+		_log( messageVerbosity, message, options ) {
+			if ( !levels.get( messageVerbosity ).has( moduleVerbosity ) ) {
+				return;
+			}
+
+			if ( options.raw ) {
+				console.log( message );
+			} else {
+				gutil.log( message );
+			}
 		}
-	},
-
-	/**
-	 * Logs errors using function provided in {@link #configure}.
-	 *
-	 * @param {String} message Message to be logged.
-	 */
-	err( message ) {
-		if ( logErr ) {
-			logErr( message );
-		}
-	}
+	};
 };
