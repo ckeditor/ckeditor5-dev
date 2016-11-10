@@ -6,22 +6,16 @@
 'use strict';
 
 const gutil = require( 'gulp-util' );
-
-const verbosity = {
-	// Displays everything.
-	info: 'info',
-
-	// Displays warning and error logs.
-	warning: 'warning',
-
-	// Displays error logs only.
-	error: 'error',
-};
-
 const levels = new Map();
-levels.set( verbosity.info, new Set( [ verbosity.info ] ) );
-levels.set( verbosity.warning, new Set( [ verbosity.info, verbosity.warning ] ) );
-levels.set( verbosity.error, new Set( Object.keys( verbosity ).map( v => verbosity[ v ] ) ) );
+
+// Displays everything.
+levels.set( 'info', new Set( [ 'info' ] ) );
+
+// Displays warning and error logs.
+levels.set( 'warning', new Set( [ 'info', 'warning' ] ) );
+
+// Displays error logs only.
+levels.set( 'error', new Set( [ 'info', 'warning', 'error' ] ) );
 
 /**
  * See: https://github.com/ckeditor/ckeditor5-dev-utils/issues/27
@@ -35,25 +29,25 @@ levels.set( verbosity.error, new Set( Object.keys( verbosity ).map( v => verbosi
 module.exports = ( moduleVerbosity ) => {
 	return {
 		/**
-		 * Displays a message when verbosity level is equal to `verbosity.info`.
+		 * Displays a message when verbosity level is equal to 'info'.
 		 *
 		 * @param {String} message Message to log.
 		 * @param {Object} options
 		 * @param {Boolean} options.raw Whether to display non-modified message.
 		 */
 		info( message, options = { raw: false } ) {
-			this._log( verbosity.info, message, options );
+			this._log( 'info', message, options );
 		},
 
 		/**
-		 * Displays a warning message when verbosity level is equal to `verbosity.info` or `verbosity.warning`.
+		 * Displays a warning message when verbosity level is equal to 'info' or 'warning'.
 		 *
 		 * @param {String} message Message to log.
 		 * @param {Object} options
 		 * @param {Boolean} [options.raw=false] Whether to display non-modified message.
 		 */
 		warning( message, options = { raw: false } ) {
-			this._log( verbosity.warning, gutil.colors.yellow( message ), options );
+			this._log( 'warning', gutil.colors.yellow( message ), options );
 		},
 
 		/**
@@ -64,7 +58,7 @@ module.exports = ( moduleVerbosity ) => {
 		 * @param {Boolean} [options.raw=false] Whether to display non-modified message.
 		 */
 		error( message, options = { raw: false } ) {
-			this._log( verbosity.error, gutil.colors.red( message ), options );
+			this._log( 'error', gutil.colors.red( message ), options );
 		},
 
 		/**
