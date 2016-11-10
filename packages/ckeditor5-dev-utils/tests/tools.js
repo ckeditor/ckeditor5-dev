@@ -13,19 +13,41 @@ const expect = chai.expect;
 const tools = require( '../lib/tools' );
 const path = require( 'path' );
 const fs = require( 'fs' );
+const mockery = require( 'mockery' );
 let sandbox;
 
 describe( 'utils', () => {
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
+
+		mockery.enable( {
+			warnOnReplace: false,
+			warnOnUnregistered: false
+		} );
 	} );
 
 	afterEach( () => {
 		sandbox.restore();
+		mockery.disable();
 	} );
 
 	describe( 'tools', () => {
 		describe( 'shExec', () => {
+			let infoSpy, errorSpy, loggerVerbosity;
+
+			beforeEach( () => {
+				mockery.registerMock( './log', ( verbosity ) => {
+					loggerVerbosity = verbosity;
+					infoSpy = sinon.spy();
+					errorSpy = sinon.spy();
+
+					return {
+						info: infoSpy,
+						error: errorSpy
+					};
+				} );
+			} );
+
 			it( 'should be defined', () => expect( tools.shExec ).to.be.a( 'function' ) );
 
 			it( 'should execute command', () => {
@@ -51,42 +73,28 @@ describe( 'utils', () => {
 				const sh = require( 'shelljs' );
 				const execStub = sandbox.stub( sh, 'exec' ).returns( { code: 0, stdout: 'out', stderr: 'err' } );
 
-				sandbox.stub( console, 'log' );
-
 				tools.shExec( 'command' );
 
-				sinon.assert.calledOnce( execStub );
-				sinon.assert.calledTwice( console.log );
-			} );
-
-			it( 'should not log when in silent mode', () => {
-				const sh = require( 'shelljs' );
-				const execStub = sandbox.stub( sh, 'exec' ).returns( { code: 0, stdout: 'out', stderr: 'err' } );
-				const log = require( '../lib/log' );
-				const outFn = sandbox.spy();
-				const errFn = sandbox.spy();
-				log.configure( outFn, errFn );
-
-				tools.shExec( 'command', false );
-
-				sinon.assert.calledOnce( execStub );
-				sinon.assert.notCalled( outFn );
-				sinon.assert.notCalled( errFn );
+				expect( loggerVerbosity ).to.equal( 'info' );
+				expect( execStub.calledOnce ).to.equal( true );
+				expect( infoSpy.calledOnce ).to.equal( true );
+				expect( infoSpy.firstCall.args[ 0 ] ).to.match( /out/ );
+				expect( infoSpy.firstCall.args[ 1 ] ).to.deep.equal( { raw: true } );
+				expect( errorSpy.calledOnce ).to.equal( true );
+				expect( errorSpy.firstCall.args[ 0 ] ).to.equal( 'err' );
+				expect( errorSpy.firstCall.args[ 1 ] ).to.deep.equal( { raw: true } );
 			} );
 
 			it( 'should not log if no output from executed command', () => {
 				const sh = require( 'shelljs' );
 				const execStub = sandbox.stub( sh, 'exec' ).returns( { code: 0, stdout: '', stderr: '' } );
-				const log = require( '../lib/log' );
-				const outFn = sandbox.spy();
-				const errFn = sandbox.spy();
-				log.configure( outFn, errFn );
 
-				tools.shExec( 'command' );
+				tools.shExec( 'command', { verbosity: 'error' } );
 
-				sinon.assert.calledOnce( execStub );
-				sinon.assert.notCalled( outFn );
-				sinon.assert.notCalled( errFn );
+				expect( loggerVerbosity ).to.equal( 'error' );
+				expect( execStub.calledOnce ).to.equal( true );
+				expect( infoSpy.calledOnce ).to.equal( false );
+				expect( errorSpy.calledOnce ).to.equal( false );
 			} );
 		} );
 

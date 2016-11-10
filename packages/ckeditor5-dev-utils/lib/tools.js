@@ -15,27 +15,29 @@ module.exports = {
 	 * Executes a shell command.
 	 *
 	 * @param {String} command The command to be executed.
-	 * @param {Boolean} [logOutput] When set to `false` command's output will not be logged. When set to `true`,
-	 * stdout and stderr will be logged. Defaults to `true`.
+	 * @param {Object} options
+	 * @param {String} [options.verbosity='info'] Level of the verbosity. If set as 'info' both outputs (stdout and
+	 * stderr) will be logged. If set as 'error', only stderr output will be logged.
 	 * @returns {String} The command output.
 	 */
-	shExec( command, logOutput ) {
+	shExec( command, options = { verbosity: 'info' } ) {
+		const logger = require( './log' );
 		const sh = require( 'shelljs' );
 
+		const log = logger( options.verbosity );
+
 		sh.config.silent = true;
-		logOutput = logOutput !== false;
 
 		const ret = sh.exec( command );
-		const logColor = ret.code ? gutil.colors.red : gutil.colors.grey;
 
-		if ( logOutput ) {
-			if ( ret.stdout ) {
-				console.log( '\n' + logColor( ret.stdout.trim() ) + '\n' );
-			}
+		if ( ret.stdout ) {
+			const logColor = ret.code ? gutil.colors.red : gutil.colors.grey;
 
-			if ( ret.stderr ) {
-				console.log( '\n' + gutil.colors.grey( ret.stderr.trim() ) + '\n' );
-			}
+			log.info( logColor( ret.stdout ), { raw: true } );
+		}
+
+		if ( ret.stderr ) {
+			log.error( ret.stderr, { raw: true } );
 		}
 
 		if ( ret.code ) {
