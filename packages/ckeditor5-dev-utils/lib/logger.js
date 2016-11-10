@@ -18,6 +18,37 @@ levels.set( 'warning', new Set( [ 'info', 'warning' ] ) );
 levels.set( 'error', new Set( [ 'info', 'warning', 'error' ] ) );
 
 /**
+ * Logger module which allows configuring the verbosity level.
+ *
+ * There are three levels of verbosity:
+ * 1. `info` - all messages will be logged,
+ * 2. `warning` - warning and errors will be logged,
+ * 3. `error` - only errors will be logged.
+ *
+ * Usage:
+ *
+ * ```
+ *      const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger;
+ *
+ *      const infoLog = logger( 'info ');
+ *      infoLog.info( 'Info alert.' ); // This message will be always displayed.
+ *      infoLog.warning( 'Warning alert.' ); // This message will be always displayed.
+ *      infoLog.error( 'Error alert.' ); // This message will be always displayed.
+ *
+ *      const warningLog = logger( 'warning' );
+ *      warningLog.info( 'Info alert.' ); // This message won't be displayed.
+ *      warningLog.warning( 'Warning alert.' ); // This message will be always displayed.
+ *      warningLog.error( 'Error alert.' ); // This message will be always displayed.
+ *
+ *      const errorLog = logger( 'error' );
+ *      errorLog.info( 'Info alert.'); // This message won't be displayed.
+ *      errorLog.warning( 'Warning alert.'); // This message won't be displayed.
+ *      errorLog.error( 'Error alert.' ); // This message will be always displayed.
+ * ```
+ *
+ * It's helpful when you would like to run some process in quiet mode.
+ * You don't have to put the mess of ifs in your code.
+ *
  * See: https://github.com/ckeditor/ckeditor5-dev-utils/issues/27
  *
  * @param {String} moduleVerbosity Level of the verbosity for all log methods.
