@@ -7,7 +7,7 @@
 
 module.exports = {
 	git: require( './git' ),
-	log: require( './log' ),
+	logger: require( './logger' ),
 	tools: require( './tools' ),
 	stream: require( './stream' ),
 	workspace: require( './workspace' )

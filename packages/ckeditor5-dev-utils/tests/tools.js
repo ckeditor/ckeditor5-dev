@@ -36,7 +36,7 @@ describe( 'utils', () => {
 			let infoSpy, errorSpy, loggerVerbosity;
 
 			beforeEach( () => {
-				mockery.registerMock( './log', ( verbosity ) => {
+				mockery.registerMock( './logger', ( verbosity ) => {
 					loggerVerbosity = verbosity;
 					infoSpy = sinon.spy();
 					errorSpy = sinon.spy();

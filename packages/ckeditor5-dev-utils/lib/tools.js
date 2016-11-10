@@ -21,10 +21,9 @@ module.exports = {
 	 * @returns {String} The command output.
 	 */
 	shExec( command, options = { verbosity: 'info' } ) {
-		const logger = require( './log' );
-		const sh = require( 'shelljs' );
-
+		const logger = require( './logger' );
 		const log = logger( options.verbosity );
+		const sh = require( 'shelljs' );
 
 		sh.config.silent = true;
 
@@ -322,7 +321,7 @@ module.exports = {
 	clean( rootDir, glob ) {
 		return del( path.join( rootDir, glob ) ).then( paths => {
 			paths.forEach( p => {
-				gutil.log( `Deleted file '${ gutil.colors.cyan( p ) }'.` );
+				gutil.logger( `Deleted file '${ gutil.colors.cyan( p ) }'.` );
 			} );
 		} );
 	}

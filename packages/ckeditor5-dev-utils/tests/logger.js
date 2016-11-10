@@ -11,11 +11,11 @@ const sinon = require( 'sinon' );
 const chai = require( 'chai' );
 const expect = chai.expect;
 const gutil = require( 'gulp-util' );
-const log = require( '../lib/log' );
+const logger = require( '../lib/logger' );
 
-describe( 'log', () => {
+describe( 'logger', () => {
 	const logMessage = 'An example.';
-	let sandbox, logger;
+	let sandbox, log;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
@@ -26,19 +26,19 @@ describe( 'log', () => {
 	} );
 
 	it( 'provides an API for set verbosity level', () => {
-		expect( log ).to.be.a( 'function' );
+		expect( logger ).to.be.a( 'function' );
 	} );
 
 	describe( 'verbosity = info', () => {
 		beforeEach( () => {
-			logger = log( 'info' );
+			log = logger( 'info' );
 		} );
 
-		describe( 'log.info()', () => {
+		describe( 'loggger.info()', () => {
 			it( 'should log a message', () => {
 				const gutilLog = sandbox.stub( gutil, 'log' );
 
-				logger.info( logMessage );
+				log.info( logMessage );
 
 				expect( gutilLog.calledOnce ).to.equal( true );
 				expect( gutilLog.firstCall.args[ 0 ] ).to.equal( logMessage );
@@ -47,7 +47,7 @@ describe( 'log', () => {
 			it( 'should log a non-modified message', () => {
 				const consoleLog = sandbox.stub( console, 'log' );
 
-				logger.info( logMessage, { raw: true } );
+				log.info( logMessage, { raw: true } );
 
 				expect( consoleLog.calledOnce ).to.equal( true );
 				expect( consoleLog.firstCall.args[ 0 ] ).to.equal( logMessage );
@@ -55,11 +55,11 @@ describe( 'log', () => {
 			} );
 		} );
 
-		describe( 'log.warning()', () => {
+		describe( 'loggger.warning()', () => {
 			it( 'should log a message', () => {
 				const gutilLog = sandbox.stub( gutil, 'log' );
 
-				logger.warning( logMessage );
+				log.warning( logMessage );
 
 				expect( gutilLog.calledOnce ).to.equal( true );
 				expect( gutilLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
@@ -68,7 +68,7 @@ describe( 'log', () => {
 			it( 'should log a non-modified message', () => {
 				const consoleLog = sandbox.stub( console, 'log' );
 
-				logger.warning( logMessage, { raw: true } );
+				log.warning( logMessage, { raw: true } );
 
 				expect( consoleLog.calledOnce ).to.equal( true );
 				expect( consoleLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
@@ -76,11 +76,11 @@ describe( 'log', () => {
 			} );
 		} );
 
-		describe( 'log.error()', () => {
+		describe( 'loggger.error()', () => {
 			it( 'should log a message', () => {
 				const gutilLog = sandbox.stub( gutil, 'log' );
 
-				logger.error( logMessage );
+				log.error( logMessage );
 
 				expect( gutilLog.calledOnce ).to.equal( true );
 				expect( gutilLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
@@ -89,7 +89,7 @@ describe( 'log', () => {
 			it( 'should log a non-modified message', () => {
 				const consoleLog = sandbox.stub( console, 'log' );
 
-				logger.error( logMessage, { raw: true } );
+				log.error( logMessage, { raw: true } );
 
 				expect( consoleLog.calledOnce ).to.equal( true );
 				expect( consoleLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
@@ -100,16 +100,16 @@ describe( 'log', () => {
 
 	describe( 'verbosity = warning', () => {
 		beforeEach( () => {
-			logger = log( 'warning' );
+			log = logger( 'warning' );
 		} );
 
-		describe( 'log.info()', () => {
+		describe( 'loggger.info()', () => {
 			it( 'should not log any message', () => {
 				const gutilLog = sandbox.stub( gutil, 'log' );
 				const consoleLog = sandbox.stub( console, 'log' );
 
-				logger.info( logMessage );
-				logger.info( logMessage, { raw: true } );
+				log.info( logMessage );
+				log.info( logMessage, { raw: true } );
 
 				expect( gutilLog.called ).to.equal( false );
 				expect( consoleLog.called ).to.equal( false );
@@ -118,11 +118,11 @@ describe( 'log', () => {
 			} );
 		} );
 
-		describe( 'log.warning()', () => {
+		describe( 'loggger.warning()', () => {
 			it( 'should log a message', () => {
 				const gutilLog = sandbox.stub( gutil, 'log' );
 
-				logger.warning( logMessage );
+				log.warning( logMessage );
 
 				expect( gutilLog.calledOnce ).to.equal( true );
 				expect( gutilLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
@@ -131,7 +131,7 @@ describe( 'log', () => {
 			it( 'should log a non-modified message', () => {
 				const consoleLog = sandbox.stub( console, 'log' );
 
-				logger.warning( logMessage, { raw: true } );
+				log.warning( logMessage, { raw: true } );
 
 				expect( consoleLog.calledOnce ).to.equal( true );
 				expect( consoleLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
@@ -139,11 +139,11 @@ describe( 'log', () => {
 			} );
 		} );
 
-		describe( 'log.error()', () => {
+		describe( 'loggger.error()', () => {
 			it( 'should log a message', () => {
 				const gutilLog = sandbox.stub( gutil, 'log' );
 
-				logger.error( logMessage );
+				log.error( logMessage );
 
 				expect( gutilLog.calledOnce ).to.equal( true );
 				expect( gutilLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
@@ -152,7 +152,7 @@ describe( 'log', () => {
 			it( 'should log a non-modified message', () => {
 				const consoleLog = sandbox.stub( console, 'log' );
 
-				logger.error( logMessage, { raw: true } );
+				log.error( logMessage, { raw: true } );
 
 				expect( consoleLog.calledOnce ).to.equal( true );
 				expect( consoleLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
@@ -163,16 +163,16 @@ describe( 'log', () => {
 
 	describe( 'verbosity = error', () => {
 		beforeEach( () => {
-			logger = log( 'error' );
+			log = logger( 'error' );
 		} );
 
-		describe( 'log.info()', () => {
+		describe( 'loggger.info()', () => {
 			it( 'should not log any message', () => {
 				const gutilLog = sandbox.stub( gutil, 'log' );
 				const consoleLog = sandbox.stub( console, 'log' );
 
-				logger.info( logMessage );
-				logger.info( logMessage, { raw: true } );
+				log.info( logMessage );
+				log.info( logMessage, { raw: true } );
 
 				expect( gutilLog.called ).to.equal( false );
 				expect( consoleLog.called ).to.equal( false );
@@ -181,13 +181,13 @@ describe( 'log', () => {
 			} );
 		} );
 
-		describe( 'log.warning()', () => {
+		describe( 'loggger.warning()', () => {
 			it( 'should not log any message', () => {
 				const gutilLog = sandbox.stub( gutil, 'log' );
 				const consoleLog = sandbox.stub( console, 'log' );
 
-				logger.warning( logMessage );
-				logger.warning( logMessage, { raw: true } );
+				log.warning( logMessage );
+				log.warning( logMessage, { raw: true } );
 
 				expect( gutilLog.called ).to.equal( false );
 				expect( consoleLog.called ).to.equal( false );
@@ -196,11 +196,11 @@ describe( 'log', () => {
 			} );
 		} );
 
-		describe( 'log.error()', () => {
+		describe( 'loggger.error()', () => {
 			it( 'should log a message', () => {
 				const gutilLog = sandbox.stub( gutil, 'log' );
 
-				logger.error( logMessage );
+				log.error( logMessage );
 
 				expect( gutilLog.calledOnce ).to.equal( true );
 				expect( gutilLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
@@ -209,7 +209,7 @@ describe( 'log', () => {
 			it( 'should log a non-modified message', () => {
 				const consoleLog = sandbox.stub( console, 'log' );
 
-				logger.error( logMessage, { raw: true } );
+				log.error( logMessage, { raw: true } );
 
 				expect( consoleLog.calledOnce ).to.equal( true );
 				expect( consoleLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
