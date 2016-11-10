@@ -319,10 +319,13 @@ module.exports = {
 	 * @returns {Promise}
 	 */
 	clean( rootDir, glob ) {
-		return del( path.join( rootDir, glob ) ).then( paths => {
-			paths.forEach( p => {
-				gutil.logger( `Deleted file '${ gutil.colors.cyan( p ) }'.` );
+		return del( path.join( rootDir, glob ) )
+			.then( ( paths ) => {
+				const log = require( './logger' )( 'info' );
+
+				paths.forEach( p => {
+					log.info( `Deleted file '${ gutil.colors.cyan( p ) }'.` );
+				} );
 			} );
-		} );
 	}
 };
