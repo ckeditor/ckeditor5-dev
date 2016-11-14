@@ -16,33 +16,36 @@ Note: Not all modules exported by this package are covered in this documentation
 
 ### Logger
 
-Logger module which allows configuring the verbosity level.
+Logger functions with configurable verbosity.
 
 There are three levels of verbosity:
- 
+
 1. `info` - all messages will be logged,
 2. `warning` - warning and errors will be logged,
 3. `error` - only errors will be logged.
 
 Usage:
- 
+
 ```js
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger;
 
+// All messages will be displayed.
 const infoLog = logger( 'info' );
-infoLog.info( 'Message.' ); // This message will be always displayed.
-infoLog.warning( 'Message.' ); // This message will be always displayed.
-infoLog.error( 'Message.' ); // This message will be always displayed.
+infoLog.info( 'Message.' );
+infoLog.warning( 'Message.' );
+infoLog.error( 'Message.' );
 
+// This First message won't be displayed..
 const warningLog = logger( 'warning' );
-warningLog.info( 'Message.' ); // This message won't be displayed.
-warningLog.warning( 'Message.' ); // This message will be always displayed.
-warningLog.error( 'Message.' ); // This message will be always displayed.
+warningLog.info( 'Message.' );
+warningLog.warning( 'Message.' );
+warningLog.error( 'Message.' );
 
+// Only the last message will be displayed.
 const errorLog = logger( 'error' );
-errorLog.info( 'Message.' ); // This message won't be displayed.
-errorLog.warning( 'Message.' ); // This message won't be displayed.
-errorLog.error( 'Message.' ); // This message will be always displayed.
+errorLog.info( 'Message.' );
+errorLog.warning( 'Message.' );
+errorLog.error( 'Message.' );
 ```
 
 ## Testing
