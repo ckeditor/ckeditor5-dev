@@ -27,29 +27,22 @@ levels.set( 'error', new Set( [ 'info', 'warning', 'error' ] ) );
  *
  * Usage:
  *
- * ```
  *      const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger;
  *
- *      const infoLog = logger( 'info ');
- *      infoLog.info( 'Info alert.' ); // This message will be always displayed.
+ *      const infoLog = logger( 'info' );
+ *      infoLog.info( 'Message.' ); // This message will be always displayed.
  *      infoLog.warning( 'Warning alert.' ); // This message will be always displayed.
  *      infoLog.error( 'Error alert.' ); // This message will be always displayed.
  *
  *      const warningLog = logger( 'warning' );
- *      warningLog.info( 'Info alert.' ); // This message won't be displayed.
+ *      warningLog.info( 'Message.' ); // This message won't be displayed.
  *      warningLog.warning( 'Warning alert.' ); // This message will be always displayed.
  *      warningLog.error( 'Error alert.' ); // This message will be always displayed.
  *
  *      const errorLog = logger( 'error' );
- *      errorLog.info( 'Info alert.'); // This message won't be displayed.
- *      errorLog.warning( 'Warning alert.'); // This message won't be displayed.
+ *      errorLog.info( 'Message.' ); // This message won't be displayed.
+ *      errorLog.warning( 'Warning alert.' ); // This message won't be displayed.
  *      errorLog.error( 'Error alert.' ); // This message will be always displayed.
- * ```
- *
- * It's helpful when you would like to run some process in quiet mode.
- * You don't have to put the mess of ifs in your code.
- *
- * See: https://github.com/ckeditor/ckeditor5-dev-utils/issues/27
  *
  * @param {String} moduleVerbosity Level of the verbosity for all log methods.
  * @returns {Object} logger
@@ -82,7 +75,7 @@ module.exports = ( moduleVerbosity ) => {
 		},
 
 		/**
-		 * Displays a error message.
+		 * Displays an error message.
 		 *
 		 * @param {String} message Message to log.
 		 * @param {Object} options
@@ -93,6 +86,7 @@ module.exports = ( moduleVerbosity ) => {
 		},
 
 		/**
+		 * @private
 		 * @param {String} messageVerbosity Verbosity of particular message.
 		 * @param {String} message Message to log.
 		 * @param {Object} options

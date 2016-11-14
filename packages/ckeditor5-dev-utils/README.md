@@ -12,7 +12,7 @@ Utils for [CKEditor 5](https://ckeditor5.github.io) dev code (such as Gulp tasks
 
 ## Available modules
 
-This module exports a few modules but not all are described at this moment.
+Note: Not all modules exported by this package are covered in this documentation.
 
 ### Logger
 
@@ -29,19 +29,19 @@ Usage:
 ```js
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger;
 
-const infoLog = logger( 'info ');
-infoLog.info( 'Info alert.' ); // This message will be always displayed.
+const infoLog = logger( 'info' );
+infoLog.info( 'Message.' ); // This message will be always displayed.
 infoLog.warning( 'Warning alert.' ); // This message will be always displayed.
 infoLog.error( 'Error alert.' ); // This message will be always displayed.
 
 const warningLog = logger( 'warning' );
-warningLog.info( 'Info alert.' ); // This message won't be displayed.
+warningLog.info( 'Message.' ); // This message won't be displayed.
 warningLog.warning( 'Warning alert.' ); // This message will be always displayed.
 warningLog.error( 'Error alert.' ); // This message will be always displayed.
 
 const errorLog = logger( 'error' );
-errorLog.info( 'Info alert.'); // This message won't be displayed.
-errorLog.warning( 'Warning alert.'); // This message won't be displayed.
+errorLog.info( 'Message.' ); // This message won't be displayed.
+errorLog.warning( 'Warning alert.' ); // This message won't be displayed.
 errorLog.error( 'Error alert.' ); // This message will be always displayed.
 ```
 
