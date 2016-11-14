@@ -540,7 +540,11 @@ describe( 'utils', () => {
 		} );
 
 		describe( 'clean', () => {
-			let files = [];
+			let files = [
+				path.join( 'test', 'foo', 'bar' ),
+				path.join( 'test', 'bar', 'foo' )
+			];
+
 			let delArg;
 
 			beforeEach( () => {
@@ -552,25 +556,10 @@ describe( 'utils', () => {
 			} );
 
 			it( 'removes files and informs about deletion using a logger', () => {
-				files = [
-					path.join( 'test', 'foo', 'bar' ),
-					path.join( 'test', 'bar', 'foo' )
-				];
-
 				return tools.clean( 'test', '**' )
 					.then( () => {
 						expect( delArg ).to.equal( path.join( 'test', '**' ) );
 						expect( loggerVerbosity ).to.equal( 'info' );
-						expect( infoSpy.calledTwice ).to.equal( true );
-						expect( infoSpy.firstCall.args[ 0 ] ).to.match( new RegExp( files [ 0 ] ) );
-						expect( infoSpy.secondCall.args[ 0 ] ).to.match( new RegExp( files [ 1 ] ) );
-					} );
-			} );
-
-			it( 'allows configuring the verbosity level for logger', () => {
-				return tools.clean( 'test', '**', { verbosity: 'error' } )
-					.then( () => {
-						expect( loggerVerbosity ).to.equal( 'error' );
 						expect( infoSpy.calledTwice ).to.equal( true );
 						expect( infoSpy.firstCall.args[ 0 ] ).to.match( new RegExp( files [ 0 ] ) );
 						expect( infoSpy.secondCall.args[ 0 ] ).to.match( new RegExp( files [ 1 ] ) );
