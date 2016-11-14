@@ -14,15 +14,27 @@ const tools = require( '../lib/tools' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const mockery = require( 'mockery' );
-let sandbox;
 
 describe( 'utils', () => {
+	let sandbox, infoSpy, errorSpy, loggerVerbosity;
+
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
 
 		mockery.enable( {
 			warnOnReplace: false,
 			warnOnUnregistered: false
+		} );
+
+		mockery.registerMock( './logger', ( verbosity ) => {
+			loggerVerbosity = verbosity;
+			infoSpy = sinon.spy();
+			errorSpy = sinon.spy();
+
+			return {
+				info: infoSpy,
+				error: errorSpy
+			};
 		} );
 	} );
 
@@ -33,21 +45,6 @@ describe( 'utils', () => {
 
 	describe( 'tools', () => {
 		describe( 'shExec', () => {
-			let infoSpy, errorSpy, loggerVerbosity;
-
-			beforeEach( () => {
-				mockery.registerMock( './logger', ( verbosity ) => {
-					loggerVerbosity = verbosity;
-					infoSpy = sinon.spy();
-					errorSpy = sinon.spy();
-
-					return {
-						info: infoSpy,
-						error: errorSpy
-					};
-				} );
-			} );
-
 			it( 'should be defined', () => expect( tools.shExec ).to.be.a( 'function' ) );
 
 			it( 'should execute command', () => {
@@ -538,6 +535,45 @@ describe( 'utils', () => {
 						expect( outputFileStub.calledOnce ).to.equal( true );
 						expect( outputFileStub.firstCall.args[ 0 ] ).to.equal( '/tmp/file.txt' );
 						expect( outputFileStub.firstCall.args[ 1 ] ).to.equal( 'Some data.' );
+					} );
+			} );
+		} );
+
+		describe( 'clean', () => {
+			let files = [];
+			let delArg;
+
+			beforeEach( () => {
+				mockery.registerMock( 'del', ( globToDelete ) => {
+					delArg = globToDelete;
+
+					return Promise.resolve( files );
+				} );
+			} );
+
+			it( 'removes files and informs about deletion using a logger', () => {
+				files = [
+					path.join( 'test', 'foo', 'bar' ),
+					path.join( 'test', 'bar', 'foo' )
+				];
+
+				return tools.clean( 'test', '**' )
+					.then( () => {
+						expect( delArg ).to.equal( path.join( 'test', '**' ) );
+						expect( loggerVerbosity ).to.equal( 'info' );
+						expect( infoSpy.calledTwice ).to.equal( true );
+						expect( infoSpy.firstCall.args[ 0 ] ).to.match( new RegExp( files [ 0 ] ) );
+						expect( infoSpy.secondCall.args[ 0 ] ).to.match( new RegExp( files [ 1 ] ) );
+					} );
+			} );
+
+			it( 'allows configuring the verbosity level for logger', () => {
+				return tools.clean( 'test', '**', { verbosity: 'error' } )
+					.then( () => {
+						expect( loggerVerbosity ).to.equal( 'error' );
+						expect( infoSpy.calledTwice ).to.equal( true );
+						expect( infoSpy.firstCall.args[ 0 ] ).to.match( new RegExp( files [ 0 ] ) );
+						expect( infoSpy.secondCall.args[ 0 ] ).to.match( new RegExp( files [ 1 ] ) );
 					} );
 			} );
 		} );

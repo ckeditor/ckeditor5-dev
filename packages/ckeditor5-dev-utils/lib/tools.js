@@ -7,7 +7,6 @@
 
 const gutil = require( 'gulp-util' );
 const path = require( 'path' );
-const del = require( 'del' );
 const fs = require( 'fs-extra' );
 
 module.exports = {
@@ -316,12 +315,16 @@ module.exports = {
 	 *
 	 * @param {String} rootDir The path to the root directory (i.e. "dist/").
 	 * @param {String} glob Glob specifying what to clean.
+	 * @param {Object} options
+	 * @param {String} options.verbosity='info' A level of the verbosity for logger.
 	 * @returns {Promise}
 	 */
-	clean( rootDir, glob ) {
+	clean( rootDir, glob, options = { verbosity: 'info' } ) {
+		const del = require( 'del' );
+
 		return del( path.join( rootDir, glob ) )
 			.then( ( paths ) => {
-				const log = require( './logger' )( 'info' );
+				const log = require( './logger' )( options.verbosity );
 
 				paths.forEach( p => {
 					log.info( `Deleted file '${ gutil.colors.cyan( p ) }'.` );
