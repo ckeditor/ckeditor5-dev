@@ -31,18 +31,18 @@ levels.set( 'error', new Set( [ 'info', 'warning', 'error' ] ) );
  *
  *      const infoLog = logger( 'info' );
  *      infoLog.info( 'Message.' ); // This message will be always displayed.
- *      infoLog.warning( 'Warning alert.' ); // This message will be always displayed.
- *      infoLog.error( 'Error alert.' ); // This message will be always displayed.
+ *      infoLog.warning( 'Message.' ); // This message will be always displayed.
+ *      infoLog.error( 'Message.' ); // This message will be always displayed.
  *
  *      const warningLog = logger( 'warning' );
  *      warningLog.info( 'Message.' ); // This message won't be displayed.
- *      warningLog.warning( 'Warning alert.' ); // This message will be always displayed.
- *      warningLog.error( 'Error alert.' ); // This message will be always displayed.
+ *      warningLog.warning( 'Message.' ); // This message will be always displayed.
+ *      warningLog.error( 'Message.' ); // This message will be always displayed.
  *
  *      const errorLog = logger( 'error' );
  *      errorLog.info( 'Message.' ); // This message won't be displayed.
- *      errorLog.warning( 'Warning alert.' ); // This message won't be displayed.
- *      errorLog.error( 'Error alert.' ); // This message will be always displayed.
+ *      errorLog.warning( 'Message.' ); // This message won't be displayed.
+ *      errorLog.error( 'Message.' ); // This message will be always displayed.
  *
  * @param {String} moduleVerbosity Level of the verbosity for all log methods.
  * @returns {Object} logger
