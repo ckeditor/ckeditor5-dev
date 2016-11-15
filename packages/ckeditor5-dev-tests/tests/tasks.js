@@ -16,11 +16,13 @@ const utils = require( '../lib/utils' );
 const compiler = require( '@ckeditor/ckeditor5-dev-compiler' );
 
 describe( 'Tests', () => {
-	let sandbox, servers, tasks, clock, onServer;
+	let sandbox, servers, tasks, clock, onServer, infoSpy, errorSpy, loggerVerbosity, serverEvents, exitCode;
 
 	beforeEach( () => {
 		servers = [];
+		serverEvents = [];
 		onServer = null;
+		exitCode = 0;
 
 		clock = sinon.useFakeTimers();
 		sandbox = sinon.sandbox.create();
@@ -36,7 +38,11 @@ describe( 'Tests', () => {
 					config,
 					callback,
 					start() {
-						callback( 0 );
+						callback( exitCode );
+					},
+					on( event, callback ) {
+						serverEvents.push( event );
+						callback();
 					}
 				};
 
@@ -47,6 +53,19 @@ describe( 'Tests', () => {
 				}
 
 				return server;
+			}
+		} );
+
+		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
+			logger( verbosity ) {
+				loggerVerbosity = verbosity;
+				infoSpy = sinon.spy();
+				errorSpy = sinon.spy();
+
+				return {
+					info: infoSpy,
+					error: errorSpy
+				};
 			}
 		} );
 
@@ -73,7 +92,26 @@ describe( 'Tests', () => {
 				} );
 		} );
 
-		it( 'rejects the promise if tests ended badly', () => {
+		it( 'displays a path to the coverage report', () => {
+			const options = { coverage: true, sourcePath: './' };
+			const karmaConfig = {};
+			sandbox.stub( utils, 'getKarmaConfig', () => karmaConfig );
+
+			return tasks.runTests( options )
+				.then(
+					() => {
+						clock.tick( 100 );
+
+						expect( serverEvents ).to.deep.equal( [ 'run_complete' ] );
+						expect( infoSpy.calledOnce ).to.equal( true );
+					},
+					() => {
+						throw new Error( 'Promise was supposed to be resolved.' );
+					}
+				);
+		} );
+
+		it( 'rejects the promise if tests ended badly #1', () => {
 			const options = {};
 
 			return tasks.runTests( options )
@@ -83,6 +121,26 @@ describe( 'Tests', () => {
 					},
 					() => {
 						expect( 'if the promise was resolved the first callback will be called, not this' ).to.be.a( 'string' );
+					}
+				);
+		} );
+
+		it( 'rejects the promise if tests ended badly #2', () => {
+			exitCode = 1;
+
+			const options = {};
+			const karmaConfig = {};
+			const processExitStub = sinon.stub( process, 'exit' );
+			sandbox.stub( utils, 'getKarmaConfig', () => karmaConfig );
+
+			return tasks.runTests( options )
+				.then(
+					() => {
+						throw new Error( 'should not be here!' );
+					},
+					() => {
+						expect( processExitStub.calledOnce ).to.equal( true );
+						expect( processExitStub.firstCall.args[ 0 ] ).to.equal( 1 );
 					}
 				);
 		} );
@@ -115,13 +173,16 @@ describe( 'Tests', () => {
 			tasks.test( options );
 		} );
 
-		it( 'waits for the compiler', ( done ) => {
+		it( 'waits for the compiler', () => {
 			const options = {
 				files: [ 'engine' ]
 			};
 			const serverCount = [];
 
 			sandbox.stub( compiler.tasks, 'compile', ( options ) =>  {
+				expect( loggerVerbosity ).to.equal( undefined );
+				expect( infoSpy.callCount ).to.equal( 1 );
+
 				// Get close to the 3000ms limit.
 				clock.tick( 2800 );
 				serverCount.push( servers.length );
@@ -139,12 +200,16 @@ describe( 'Tests', () => {
 				return Promise.resolve();
 			} );
 
-			onServer = ( server ) => {
-				server.start = done;
-				expect( serverCount ).to.deep.equal( [ 0, 0 ] );
-			};
-
-			tasks.test( options );
+			return tasks.test( options )
+				.then(
+					() => {
+						expect( infoSpy.callCount ).to.equal( 2 );
+						expect( serverCount ).to.deep.equal( [ 0, 0 ] );
+					},
+					() => {
+						throw new Error( 'Promise was supposed to be resolved.' );
+					}
+				);
 		} );
 
 		it( 'does not resolve the promise until Karma\'s callback is called', () => {
@@ -213,6 +278,35 @@ describe( 'Tests', () => {
 
 						expect( runTestStub.notCalled ).to.equal( true );
 						expect( error.message ).to.equal( 'Something went wrong in the Compiler.' );
+					}
+				);
+		} );
+
+		it( 'informs about error when runTests will fail', () => {
+			const error = new Error( 'Something went wrong in "runTests".' );
+
+			sandbox.stub( compiler.tasks, 'compile', () => {
+				return new Promise( ( resolve ) => {
+					clock.tick( 3000 );
+					resolve();
+				} );
+			} );
+
+			sandbox.stub( tasks, 'runTests', () => {
+				return new Promise( ( resolve, reject ) => {
+					reject( error );
+				} );
+			} );
+
+			return tasks.test( {} )
+				.then(
+					() => {
+						throw new Error( 'Promise was supposed to be rejected.' );
+					},
+					( err ) => {
+						expect( errorSpy.calledOnce ).to.equal( true );
+						expect( errorSpy.firstCall.args[ 0 ] ).to.equal( error.message );
+						expect( err ).to.equal( error );
 					}
 				);
 		} );

@@ -46,7 +46,10 @@ const tasks = {
 				server.on( 'run_complete', () => {
 					// Use timeout to not write to the console in the middle of Karma's status.
 					setTimeout( () => {
-						gutil.log( `Coverage report saved in '${ gutil.colors.cyan( coveragePath ) }'.` );
+						const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+						const log = logger();
+
+						log.info( `Coverage report saved in '${ gutil.colors.cyan( coveragePath ) }'.` );
 					} );
 				} );
 			}
@@ -71,6 +74,9 @@ const tasks = {
 	 */
 	test( options ) {
 		const compiler = require( '@ckeditor/ckeditor5-dev-compiler' );
+		const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+		const log = logger();
+
 		let waitUntil = new Date().getTime() + 500;
 
 		options.sourcePath = path.resolve( './.build/' );
@@ -94,7 +100,12 @@ const tasks = {
 				}
 			};
 
+			log.info( 'Compiling the editor...' );
+
 			compiler.tasks.compile( compilerOptions )
+				.then( () => {
+					log.info( 'Finished the compilation.' );
+				} )
 				.catch( ( error ) => {
 					clearTimeout( timerId );
 					reject( error );
@@ -111,9 +122,9 @@ const tasks = {
 				tasks.runTests( options )
 					.then( resolve )
 					.catch( ( err ) => {
-						gutil.log( gutil.colors.red( err.message ) );
+						log.error( err.message );
 
-						reject();
+						reject( err );
 					} );
 			}
 		} );
