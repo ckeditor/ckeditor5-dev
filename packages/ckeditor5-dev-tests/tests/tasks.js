@@ -95,6 +95,8 @@ describe( 'Tests', () => {
 			sandbox.stub( utils, 'getKarmaConfig', () => karmaConfig );
 
 			sandbox.stub( compiler.tasks, 'compile', ( options ) =>  {
+				expect( options.verbosity ).to.equal( 'warning' );
+
 				options.onChange();
 
 				expect( servers.length ).to.equal( 0 );

@@ -83,6 +83,7 @@ const tasks = {
 				watch: options.watch,
 				packages: options.packages,
 				ignoreDuplicates: options.ignoreDuplicates,
+				verbosity: 'warning',
 
 				formats: {
 					esnext: options.sourcePath
