@@ -217,4 +217,21 @@ describe( 'logger', () => {
 			} );
 		} );
 	} );
+
+	describe( 'uses default verbosity', () => {
+		beforeEach( () => {
+			log = logger();
+		} );
+
+		describe( 'loggger.info()', () => {
+			it( 'should log a message', () => {
+				const gutilLog = sandbox.stub( gutil, 'log' );
+
+				log.info( logMessage );
+
+				expect( gutilLog.calledOnce ).to.equal( true );
+				expect( gutilLog.firstCall.args[ 0 ] ).to.equal( logMessage );
+			} );
+		} );
+	} );
 } );

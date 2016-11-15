@@ -44,13 +44,13 @@ levels.set( 'error', new Set( [ 'info', 'warning', 'error' ] ) );
  *      errorLog.warning( 'Message.' ); // This message won't be displayed.
  *      errorLog.error( 'Message.' ); // This message will be always displayed.
  *
- * @param {String} moduleVerbosity Level of the verbosity for all log methods.
+ * @param {String} moduleVerbosity='info' Level of the verbosity for all log methods.
  * @returns {Object} logger
  * @returns {Function} logger.info
  * @returns {Function} logger.warning
  * @returns {Function} logger.error
  */
-module.exports = ( moduleVerbosity ) => {
+module.exports = ( moduleVerbosity = 'info' ) => {
 	return {
 		/**
 		 * Displays a message when verbosity level is equal to 'info'.
