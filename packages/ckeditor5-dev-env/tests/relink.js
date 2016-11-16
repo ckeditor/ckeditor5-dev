@@ -3,20 +3,51 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it */
+/* global describe, it, beforeEach, afterEach */
 
 'use strict';
 
 const sinon = require( 'sinon' );
 const path = require( 'path' );
 const { tools, workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-relink', () => {
-	const task = require( '../lib/tasks/relink' );
+	let spies, task;
 	const ckeditor5Path = 'path/to/ckeditor5';
 	const modulesPath = path.join( ckeditor5Path, 'node_modules' );
 	const workspaceRoot = '..';
 	const workspaceAbsolutePath = path.join( ckeditor5Path, workspaceRoot );
+
+	beforeEach( () => {
+		spies = {
+			loggerInfo: sinon.spy(),
+			loggerWarning: sinon.spy(),
+			loggerError: sinon.spy()
+		};
+
+		task = proxyquire( '../lib/tasks/relink', {
+			'@ckeditor/ckeditor5-dev-utils': {
+				logger: () => {
+					return {
+						info: spies.loggerInfo,
+						warning: spies.loggerWarning,
+						error: spies.loggerError
+					};
+				}
+			}
+		} );
+	} );
+
+	afterEach( () => {
+		for ( let spy in spies ) {
+			spy = spies[ spy ];
+
+			if ( spy.restore ) {
+				spy.restore();
+			}
+		}
+	} );
 
 	it( 'should link dev repositories', () => {
 		const dirs = [ 'ckeditor5-core', 'ckeditor5-devtest' ];
@@ -94,9 +125,6 @@ describe( 'dev-relink', () => {
 				'other-plugin': '1.2.3'
 			}
 		};
-		const writeErrorSpy = sinon.spy();
-		const { log } = require( '@ckeditor/ckeditor5-dev-utils' );
-		log.configure( () => {}, writeErrorSpy );
 
 		task( ckeditor5Path, json, workspaceRoot );
 
@@ -105,7 +133,7 @@ describe( 'dev-relink', () => {
 		linkStub.restore();
 
 		sinon.assert.calledOnce( linkStub );
-		sinon.assert.calledOnce( writeErrorSpy );
-		sinon.assert.calledWithExactly( writeErrorSpy, error );
+		sinon.assert.calledOnce( spies.loggerError );
+		sinon.assert.calledWithExactly( spies.loggerError, error );
 	} );
 } );

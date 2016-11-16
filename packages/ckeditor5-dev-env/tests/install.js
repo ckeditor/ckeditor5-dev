@@ -9,12 +9,13 @@
 
 const chai = require( 'chai' );
 const sinon = require( 'sinon' );
-const installTask = require( '../lib/tasks/install' );
 const expect = chai.expect;
 const path = require( 'path' );
 const { tools, git } = require( '@ckeditor/ckeditor5-dev-utils' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-install', () => {
+	let installTask;
 	const moduleName = 'ckeditor5-core';
 	const repositoryUrl = 'git@github.com:ckeditor/ckeditor5-core';
 	const ckeditor5Path = '/path/to/ckeditor';
@@ -32,10 +33,25 @@ describe( 'dev-install', () => {
 		spies.checkout = sinon.stub( git, 'checkout' );
 		spies.getGitUrlFromNpm = sinon.stub( tools, 'getGitUrlFromNpm' );
 		spies.readPackageName = sinon.stub( tools, 'readPackageName' );
+		spies.loggerInfo = sinon.spy();
+		spies.loggerWarning = sinon.spy();
+		spies.loggerError = sinon.spy();
+
+		installTask = proxyquire( '../lib/tasks/install', {
+			'@ckeditor/ckeditor5-dev-utils': {
+				logger: () => {
+					return {
+						info: spies.loggerInfo,
+						warning: spies.loggerWarning,
+						error: spies.loggerError
+					};
+				}
+			}
+		} );
 	} );
 
 	afterEach( () => {
-		Object.keys( spies ).forEach( ( spy ) => spies[ spy ].restore() );
+		Object.keys( spies ).forEach( ( spy ) => spies[ spy ].restore && spies[ spy ].restore() );
 	} );
 
 	it( 'should use GitHub URL', () => {

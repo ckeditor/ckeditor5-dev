@@ -5,23 +5,25 @@
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^1.0.0",
+    "@ckeditor/ckeditor5-dev-utils": "^2.1.0",
     "gulp": "^3.9.1",
     "gulp-filter": "^4.0.0",
     "gulp-replace": "^0.5.4",
+    "gulp-util": "^3.0.7",
     "inquirer": "^0.11.0",
     "merge-stream": "^1.0.0",
     "minimist": "^1.2.0",
     "parse-gitignore": "^0.3.1"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
     "@ckeditor/ckeditor5-dev-lint": "^1.0.1",
+    "chai": "^3.5.0",
     "gulp": "^3.9.0",
     "guppy-pre-commit": "^0.3.0",
     "istanbul": "^0.4.4",
     "mocha": "^3.0.2",
     "mockery": "^1.7.0",
+    "proxyquire": "^1.7.10",
     "sinon": "^1.17.4"
   },
   "engines": {

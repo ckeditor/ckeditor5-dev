@@ -6,7 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
-const { git, tools, log } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { git, tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * This tasks install specified package in development mode. It can be executed by typing:
@@ -26,6 +26,7 @@ const { git, tools, log } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {String} name Name of the NPM package or GitHub URL.
  */
 module.exports = ( ckeditor5Path, workspaceRoot, name ) => {
+	const log = logger();
 	const workspaceAbsolutePath = path.join( ckeditor5Path, workspaceRoot );
 	let repositoryPath;
 	let dependency;
@@ -38,7 +39,7 @@ module.exports = ( ckeditor5Path, workspaceRoot, name ) => {
 		const packageName = tools.readPackageName( repositoryPath );
 
 		if ( packageName ) {
-			log.out( `Package located at ${ repositoryPath }.` );
+			log.info( `Package located at ${ repositoryPath }.` );
 			urlInfo = {
 				name: packageName
 			};
@@ -55,7 +56,7 @@ module.exports = ( ckeditor5Path, workspaceRoot, name ) => {
 
 	// Check if name is NPM package.
 	if ( !urlInfo ) {
-		log.out( `Not a GitHub URL. Trying to get GitHub URL from NPM package...` );
+		log.info( `Not a GitHub URL. Trying to get GitHub URL from NPM package...` );
 		const url = tools.getGitUrlFromNpm( name );
 
 		if ( url ) {
@@ -68,28 +69,28 @@ module.exports = ( ckeditor5Path, workspaceRoot, name ) => {
 		repositoryPath = path.join( workspaceAbsolutePath, urlInfo.name );
 
 		if ( tools.isDirectory( repositoryPath ) ) {
-			log.out( `Directory ${ repositoryPath } already exists.` );
+			log.info( `Directory ${ repositoryPath } already exists.` );
 		} else {
-			log.out( `Cloning ${ urlInfo.name } into ${ repositoryPath }...` );
+			log.info( `Cloning ${ urlInfo.name } into ${ repositoryPath }...` );
 			git.cloneRepository( urlInfo, workspaceAbsolutePath );
 		}
 
 		// Checkout to specified branch if one is provided.
 		if ( urlInfo.branch ) {
-			log.out( `Checking ${ urlInfo.name } to ${ urlInfo.branch }...` );
+			log.info( `Checking ${ urlInfo.name } to ${ urlInfo.branch }...` );
 			git.checkout( repositoryPath, urlInfo.branch );
 		}
 
 		// Run `npm install` in new repository.
-		log.out( `Running "npm install" in ${ urlInfo.name }...` );
+		log.info( `Running "npm install" in ${ urlInfo.name }...` );
 		tools.npmInstall( repositoryPath );
 
 		const linkPath = path.join( ckeditor5Path, 'node_modules', urlInfo.name );
 
-		log.out( `Linking ${ linkPath } to ${ repositoryPath }...` );
+		log.info( `Linking ${ linkPath } to ${ repositoryPath }...` );
 		tools.linkDirectories( repositoryPath, linkPath );
 
-		log.out( `Adding ${ urlInfo.name } dependency to CKEditor5 package.json...` );
+		log.info( `Adding ${ urlInfo.name } dependency to CKEditor5 package.json...` );
 		tools.updateJSONFile( path.join( ckeditor5Path, 'package.json' ), ( json ) => {
 			json.dependencies = json.dependencies || {};
 			json.dependencies[ urlInfo.name ] = dependency;

@@ -5,7 +5,8 @@
 
 'use strict';
 
-const { workspace, log } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { workspace, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const gutil = require( 'gulp-util' );
 
 /**
  * 1. Get CKEditor5 dependencies from package.json file.
@@ -17,16 +18,18 @@ const { workspace, log } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {String} workspaceRoot Relative path to workspace root.
  */
 module.exports = ( installTask, ckeditor5Path, packageJSON, workspaceRoot ) => {
+	const log = logger();
+
 	// Get all CKEditor dependencies from package.json.
 	const dependencies = workspace.getDependencies( packageJSON.dependencies );
 
 	if ( dependencies ) {
 		for ( let dependency in dependencies ) {
 			const repositoryURL = dependencies[ dependency ];
-			log.out( `\x1b[1m\x1b[36m${ dependency }\x1b[0m` );
+			log.info( gutil.colors.cyan( dependency ) );
 			installTask( ckeditor5Path, workspaceRoot, repositoryURL );
 		}
 	} else {
-		log.out( 'No CKEditor5 dependencies (ckeditor5-) found in package.json file.' );
+		log.info( 'No CKEditor5 dependencies (ckeditor5-) found in package.json file.' );
 	}
 };

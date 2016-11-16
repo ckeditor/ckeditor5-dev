@@ -7,7 +7,7 @@
 
 const inquiries = require( '../../utils/inquiries' );
 const path = require( 'path' );
-const { git, tools, log } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { git, tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * 1. Ask for new package name.
@@ -27,6 +27,7 @@ const { git, tools, log } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @returns {Promise} Returns promise fulfilled after task is done.
  */
 module.exports = ( ckeditor5Path, workspaceRoot ) => {
+	const log = logger();
 	const workspaceAbsolutePath = path.join( ckeditor5Path, workspaceRoot );
 
 	// Template files to copy.
@@ -84,13 +85,13 @@ module.exports = ( ckeditor5Path, workspaceRoot ) => {
 				'{{ProjectDescription}}': packageDescription
 			};
 
-			log.out( `Initializing repository ${ repositoryPath }...` );
+			log.info( `Initializing repository ${ repositoryPath }...` );
 			git.initializeRepository( repositoryPath );
 
-			log.out( `Adding remote ${ repositoryPath }...` );
+			log.info( `Adding remote ${ repositoryPath }...` );
 			git.addRemote( repositoryPath, gitHubPath );
 
-			log.out( `Copying files into ${ repositoryPath }...` );
+			log.info( `Copying files into ${ repositoryPath }...` );
 
 			for ( let file in fileStructure ) {
 				const source = path.resolve( __dirname, file );
@@ -103,7 +104,7 @@ module.exports = ( ckeditor5Path, workspaceRoot ) => {
 				);
 			}
 
-			log.out( `Updating package.json files...` );
+			log.info( `Updating package.json files...` );
 			tools.updateJSONFile( path.join( repositoryPath, 'package.json' ), ( json ) => {
 				json.name = packageName;
 				json.version = packageVersion;
@@ -112,7 +113,7 @@ module.exports = ( ckeditor5Path, workspaceRoot ) => {
 				return json;
 			} );
 
-			log.out( `Running npm install in ${ packageName }.` );
+			log.info( `Running npm install in ${ packageName }.` );
 			tools.shExec( `cd ${ repositoryPath } && npm i --save-dev @ckeditor/ckeditor5-dev-lint gulp guppy-pre-commit` );
 
 			tools.updateJSONFile( path.join( ckeditor5Path, 'package.json' ), ( json ) => {
@@ -125,10 +126,10 @@ module.exports = ( ckeditor5Path, workspaceRoot ) => {
 				return json;
 			} );
 
-			log.out( `Creating initial commit...` );
+			log.info( `Creating initial commit...` );
 			git.initialCommit( packageName, repositoryPath );
 
-			log.out( `Linking ${ packageName } to node_modules...` );
+			log.info( `Linking ${ packageName } to node_modules...` );
 			tools.linkDirectories( repositoryPath, path.join( ckeditor5Path, 'node_modules', packageName ) );
 		} );
 };

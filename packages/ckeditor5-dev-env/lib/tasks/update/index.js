@@ -6,7 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
-const { tools, workspace, git, log } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { tools, workspace, git, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * 1. Fetch all branches from each origin in main CKEditor 5 repository.
@@ -29,10 +29,11 @@ const { tools, workspace, git, log } = require( '@ckeditor/ckeditor5-dev-utils' 
  * and inside CKEditor 5 repository.
  */
 module.exports = ( installTask, ckeditor5Path, packageJSON, workspaceRoot, runNpmUpdate ) => {
+	const log = logger();
 	const workspaceAbsolutePath = path.join( ckeditor5Path, workspaceRoot );
 
 	// Fetch main repository
-	log.out( `Fetching branches from ${ packageJSON.name }...` );
+	log.info( `Fetching branches from ${ packageJSON.name }...` );
 	git.fetchAll( ckeditor5Path );
 
 	// Get all CKEditor dependencies from package.json.
@@ -48,25 +49,25 @@ module.exports = ( installTask, ckeditor5Path, packageJSON, workspaceRoot, runNp
 
 			// Check if repository's directory already exists.
 			if ( directories.indexOf( urlInfo.name ) > -1 ) {
-				log.out( `Fetching branches from ${ urlInfo.name }...` );
+				log.info( `Fetching branches from ${ urlInfo.name }...` );
 				git.fetchAll( repositoryAbsolutePath );
 
-				log.out( `Checking out ${ urlInfo.name } to ${ urlInfo.branch }...` );
+				log.info( `Checking out ${ urlInfo.name } to ${ urlInfo.branch }...` );
 				git.checkout( repositoryAbsolutePath, urlInfo.branch );
 
-				log.out( `Pulling changes to ${ urlInfo.name }...` );
+				log.info( `Pulling changes to ${ urlInfo.name }...` );
 				git.pull( repositoryAbsolutePath, urlInfo.branch );
 
 				if ( runNpmUpdate ) {
-					log.out( `Running "npm update" in ${ urlInfo.name }...` );
+					log.info( `Running "npm update" in ${ urlInfo.name }...` );
 					tools.npmUpdate( repositoryAbsolutePath );
 				}
 
 				try {
-					log.out( `Linking ${ repositoryURL }...` );
+					log.info( `Linking ${ repositoryURL }...` );
 					tools.linkDirectories( repositoryAbsolutePath, path.join( ckeditor5Path, 'node_modules', dependency ) );
 				} catch ( error ) {
-					log.err( error );
+					log.error( error );
 				}
 			} else {
 				// Directory does not exits in workspace - install it.
@@ -75,11 +76,11 @@ module.exports = ( installTask, ckeditor5Path, packageJSON, workspaceRoot, runNp
 		}
 
 		if ( runNpmUpdate ) {
-			log.out( `Running "npm update" in CKEditor5 repository...` );
+			log.info( `Running "npm update" in CKEditor5 repository...` );
 			tools.npmUpdate( ckeditor5Path );
 		}
 	} else {
-		log.out( 'No CKEditor5 dependencies found in package.json file.' );
+		log.info( 'No CKEditor5 dependencies found in package.json file.' );
 	}
 
 	// Remove symlinks not used in this configuration.
@@ -88,7 +89,7 @@ module.exports = ( installTask, ckeditor5Path, packageJSON, workspaceRoot, runNp
 	symlinks
 		.filter( dir => typeof dependencies[ dir ] == 'undefined' )
 		.forEach( dir => {
-			log.out( `Removing symbolic link to ${ dir }.` );
+			log.info( `Removing symbolic link to ${ dir }.` );
 			tools.removeSymlink( path.join( nodeModulesPath, dir ) );
 		} );
 };

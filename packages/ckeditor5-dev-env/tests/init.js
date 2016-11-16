@@ -3,21 +3,54 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it */
+/* global describe, it, beforeEach, afterEach */
 
 'use strict';
 
 const sinon = require( 'sinon' );
+const chai = require( 'chai' );
+const expect = chai.expect;
 const { workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-init', () => {
-	const initTask = require( '../lib/tasks/init' );
+	let initTask, spies;
 	const ckeditor5Path = 'path/to/ckeditor5';
 	const workspaceRoot = '..';
 
+	beforeEach( () => {
+		spies = {
+			loggerInfo: sinon.spy(),
+			loggerWarning: sinon.spy(),
+			loggerError: sinon.spy(),
+			getDependencies: sinon.spy( workspace, 'getDependencies' ),
+			installFunction: sinon.spy()
+		};
+
+		initTask = proxyquire( '../lib/tasks/init', {
+			'@ckeditor/ckeditor5-dev-utils': {
+				logger: () => {
+					return {
+						info: spies.loggerInfo,
+						warning: spies.loggerWarning,
+						error: spies.loggerError
+					};
+				}
+			}
+		} );
+	} );
+
+	afterEach( () => {
+		for ( let spy in spies ) {
+			spy = spies[ spy ];
+
+			if ( spy.restore ) {
+				spy.restore();
+			}
+		}
+	} );
+
 	it( 'should get all ckedtior5- dependencies and execute dev-install on them', () => {
-		const getDependenciesSpy = sinon.spy( workspace, 'getDependencies' );
-		const installSpy = sinon.spy();
 		const JSON = {
 			dependencies: {
 				'ckeditor5-core': 'ckeditor/ckeditor5-code',
@@ -27,30 +60,33 @@ describe( 'dev-init', () => {
 		};
 		const deps = JSON.dependencies;
 
-		initTask( installSpy, ckeditor5Path, JSON, workspaceRoot );
+		initTask( spies.installFunction, ckeditor5Path, JSON, workspaceRoot );
 
-		getDependenciesSpy.restore();
-
-		sinon.assert.calledOnce( getDependenciesSpy );
-		sinon.assert.calledWithExactly( getDependenciesSpy, deps );
-		sinon.assert.calledTwice( installSpy );
-		sinon.assert.calledWithExactly( installSpy.firstCall, ckeditor5Path, workspaceRoot, deps[ 'ckeditor5-core' ] );
-		sinon.assert.calledWithExactly( installSpy.secondCall, ckeditor5Path, workspaceRoot, deps[ 'ckeditor5-plugin-devtest' ] );
+		expect( spies.getDependencies.calledOnce ).to.equal( true );
+		expect( spies.getDependencies.firstCall.args[ 0 ] ).to.equal( deps );
+		expect( spies.installFunction.calledTwice ).to.equal( true );
+		expect( spies.installFunction.firstCall.args[ 0 ] ).to.equal( ckeditor5Path );
+		expect( spies.installFunction.firstCall.args[ 1 ] ).to.equal( workspaceRoot );
+		expect( spies.installFunction.firstCall.args[ 2 ] ).to.equal( deps[ 'ckeditor5-core' ] );
+		expect( spies.installFunction.secondCall.args[ 0 ] ).to.equal( ckeditor5Path );
+		expect( spies.installFunction.secondCall.args[ 1 ] ).to.equal( workspaceRoot );
+		expect( spies.installFunction.secondCall.args[ 2 ] ).to.equal( deps[ 'ckeditor5-plugin-devtest' ] );
+		expect( spies.loggerInfo.calledTwice ).to.equal( true );
+		expect( spies.loggerInfo.firstCall.args[ 0 ] ).to.match( /ckeditor5-core/ );
+		expect( spies.loggerInfo.secondCall.args[ 0 ] ).to.match( /ckeditor5-plugin-devtest/ );
 	} );
 
 	it( 'should not call dev-install if no ckedtior5- dependencies', () => {
-		const getDependenciesSpy = sinon.spy( workspace, 'getDependencies' );
-		const installSpy = sinon.spy();
 		const JSON = {
 			dependencies: {}
 		};
 
-		initTask( installSpy, ckeditor5Path, JSON, workspaceRoot );
+		initTask( spies.installFunction, ckeditor5Path, JSON, workspaceRoot );
 
-		getDependenciesSpy.restore();
-
-		sinon.assert.calledOnce( getDependenciesSpy );
-		sinon.assert.calledWithExactly( getDependenciesSpy, JSON.dependencies );
-		sinon.assert.notCalled( installSpy );
+		expect( spies.getDependencies.calledOnce ).to.equal( true );
+		expect( spies.getDependencies.firstCall.args[ 0 ] ).to.deep.equal( {} );
+		expect( spies.installFunction.called ).to.equal( false );
+		expect( spies.loggerInfo.calledOnce ).to.equal( true );
+		expect( spies.loggerInfo.firstCall.args[ 0 ] ).to.equal( 'No CKEditor5 dependencies (ckeditor5-) found in package.json file.' );
 	} );
 } );

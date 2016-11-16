@@ -82,7 +82,8 @@ module.exports = ( config ) => {
 		execOnRepositories() {
 			const execTask = require( './tasks/exec' );
 			const minimist = require( 'minimist' );
-			const { log } = require( '@ckeditor/ckeditor5-dev-utils' );
+			const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+			const log = logger();
 
 			const params = minimist( process.argv.slice( 3 ), {
 				stopEarly: false,
@@ -96,7 +97,7 @@ module.exports = ( config ) => {
 					throw new Error( 'Missing task parameter: --task task-name' );
 				}
 			} catch ( err ) {
-				log.err( err );
+				log.error( err );
 
 				return;
 			}

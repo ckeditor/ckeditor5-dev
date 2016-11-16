@@ -10,9 +10,10 @@
 const sinon = require( 'sinon' );
 const path = require( 'path' );
 const { tools, workspace, git } = require( '@ckeditor/ckeditor5-dev-utils' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-update', () => {
-	const updateTask = require( '../lib/tasks/update' );
+	let updateTask;
 	const ckeditor5Path = 'path/to/ckeditor5';
 	const workspaceRoot = '..';
 	const workspaceAbsolutePath = path.join( ckeditor5Path, workspaceRoot );
@@ -26,10 +27,25 @@ describe( 'dev-update', () => {
 		spies.npmUpdate = sinon.stub( tools, 'npmUpdate' );
 		spies.linkDirectories = sinon.stub( tools, 'linkDirectories' );
 		spies.removeSymlink = sinon.stub( tools, 'removeSymlink' );
+		spies.loggerInfo = sinon.spy();
+		spies.loggerWarning = sinon.spy();
+		spies.loggerError = sinon.spy();
+
+		updateTask = proxyquire( '../lib/tasks/update', {
+			'@ckeditor/ckeditor5-dev-utils': {
+				logger: () => {
+					return {
+						info: spies.loggerInfo,
+						warning: spies.loggerWarning,
+						error: spies.loggerError
+					};
+				}
+			}
+		} );
 	} );
 
 	afterEach( () => {
-		Object.keys( spies ).forEach( ( spy ) => spies[ spy ].restore() );
+		Object.keys( spies ).forEach( ( spy ) => spies[ spy ].restore && spies[ spy ].restore() );
 	} );
 
 	it( 'should update dev repositories', () => {
@@ -158,16 +174,11 @@ describe( 'dev-update', () => {
 	} );
 
 	it( 'should catch linking errors', () => {
-		const { log } = require( '@ckeditor/ckeditor5-dev-utils' );
 		const dirs = [ 'ckeditor5-core', 'ckeditor5-devtest' ];
 		const installTask = sinon.spy();
-		const outSpy = sinon.spy();
-		const errSpy = sinon.spy();
 		spies.getDirectories = sinon.stub( workspace, 'getDirectories' ).returns( dirs );
 		spies.getSymlinks = sinon.stub( workspace, 'getSymlinks' ).returns( [ 'ckeditor5-unused' ] );
 		spies.linkDirectories.throws();
-
-		log.configure( outSpy, errSpy );
 
 		const json = {
 			dependencies: {
@@ -200,7 +211,7 @@ describe( 'dev-update', () => {
 
 		sinon.assert.calledOnce( spies.removeSymlink );
 		sinon.assert.calledWithExactly( spies.removeSymlink, path.join( ckeditor5Path, 'node_modules', 'ckeditor5-unused' ) );
-		sinon.assert.calledTwice( errSpy );
+		sinon.assert.calledTwice( spies.loggerError );
 	} );
 
 	it( 'should skip updating if no dependencies found and fetch only main repository', () => {

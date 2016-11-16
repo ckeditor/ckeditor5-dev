@@ -7,7 +7,7 @@
 
 const path = require( 'path' );
 const merge = require( 'merge-stream' );
-const { log, workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { logger, workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * Execute given task with provided options and command-line parameters.
@@ -21,6 +21,7 @@ const { log, workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
  */
 
 module.exports = ( execTask, cwd, packageJSON, workspaceRoot, params ) => {
+	const log = logger();
 	const workspacePath = path.join( cwd, workspaceRoot );
 	const mergedStream = merge();
 	const specificRepository = params.repository;
@@ -36,7 +37,7 @@ module.exports = ( execTask, cwd, packageJSON, workspaceRoot, params ) => {
 
 	for ( const dir of devDirectories ) {
 		try {
-			log.out( `Executing task on ${ dir.repositoryURL }...` );
+			log.info( `Executing task on ${ dir.repositoryURL }...` );
 
 			const result = execTask( dir.repositoryPath, params );
 
@@ -44,7 +45,7 @@ module.exports = ( execTask, cwd, packageJSON, workspaceRoot, params ) => {
 				mergedStream.add( result );
 			}
 		} catch ( err ) {
-			log.err( err );
+			log.error( err );
 		}
 	}
 

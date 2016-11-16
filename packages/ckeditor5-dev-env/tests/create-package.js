@@ -7,15 +7,16 @@
 
 'use strict';
 
+const path = require( 'path' );
 const chai = require( 'chai' );
 const sinon = require( 'sinon' );
 const expect = chai.expect;
 const inquiries = require( '../lib/utils/inquiries' );
-const path = require( 'path' );
 const { tools, git } = require( '@ckeditor/ckeditor5-dev-utils' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-create-package', () => {
-	let spies;
+	let packageCreateTask, spies;
 
 	const mainRepositoryPath = '/path/to/repository';
 	const workspaceRoot = '..';
@@ -25,9 +26,27 @@ describe( 'dev-create-package', () => {
 	const packageVersion = '0.0.1';
 	const gitHubPath = 'ckeditor5/package-name';
 	const packageDescription = 'Package description.';
+	const repositoryPath = path.join( workspacePath, packageName );
 
-	beforeEach( () => createSpies() );
-	afterEach( () => restoreSpies() );
+	beforeEach( () => {
+		createSpies();
+
+		packageCreateTask = proxyquire( '../lib/tasks/create-package', {
+			'@ckeditor/ckeditor5-dev-utils': {
+				logger: () => {
+					return {
+						info: spies.loggerInfo,
+						warning: spies.loggerWarning,
+						error: spies.loggerError
+					};
+				}
+			}
+		} );
+	} );
+
+	afterEach( () => {
+		restoreSpies();
+	} );
 
 	function createSpies() {
 		spies = {
@@ -42,18 +61,22 @@ describe( 'dev-create-package', () => {
 			updateJSONFile: sinon.stub( tools, 'updateJSONFile' ),
 			copy: sinon.stub( tools, 'copyTemplateFile' ),
 			initialCommit: sinon.stub( git, 'initialCommit' ),
-			addRemote: sinon.stub( git, 'addRemote' )
+			addRemote: sinon.stub( git, 'addRemote' ),
+			loggerInfo: sinon.spy(),
+			loggerWarning: sinon.spy(),
+			loggerError: sinon.spy()
 		};
 	}
 
 	function restoreSpies() {
 		for ( let spy in spies ) {
-			spies[ spy ].restore();
+			spy = spies[ spy ];
+
+			if ( spy.restore ) {
+				spy.restore();
+			}
 		}
 	}
-
-	const packageCreateTask = require( '../lib/tasks/create-package' );
-	const repositoryPath = path.join( workspacePath, packageName );
 
 	it( 'should exist', () => expect( packageCreateTask ).to.be.a( 'function' ) );
 
@@ -89,6 +112,7 @@ describe( 'dev-create-package', () => {
 			expect( spies.linkDirectories.firstCall.args[ 1 ] ).to.equal( path.join( mainRepositoryPath, 'node_modules', packageName ) );
 			expect( spies.shExec.calledOnce ).to.equal( true );
 			expect( spies.shExec.firstCall.args[ 0 ] ).to.match( /^cd [^ ]+ && npm i --save-dev/ );
+			expect( spies.loggerInfo.callCount ).to.equal( 7 );
 		} );
 	} );
 } );

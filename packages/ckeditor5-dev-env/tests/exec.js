@@ -11,9 +11,10 @@ const mockery = require( 'mockery' );
 const sinon = require( 'sinon' );
 const chai = require( 'chai' );
 const expect = chai.expect;
+const proxyquire = require( 'proxyquire' );
 
 describe( 'exec-tasks', () => {
-	let sandbox;
+	let sandbox, spies, execModuleMocks;
 	const config = {
 		WORKSPACE_DIR: '/path/exec/'
 	};
@@ -35,7 +36,26 @@ describe( 'exec-tasks', () => {
 			warnOnReplace: false,
 			warnOnUnregistered: false
 		} );
+
 		sandbox = sinon.sandbox.create();
+
+		spies = {
+			loggerInfo: sandbox.spy(),
+			loggerWarning: sandbox.spy(),
+			loggerError: sandbox.spy()
+		};
+
+		execModuleMocks = {
+			'@ckeditor/ckeditor5-dev-utils': {
+				logger: () => {
+					return {
+						info: spies.loggerInfo,
+						warning: spies.loggerWarning,
+						error: spies.loggerError
+					};
+				}
+			}
+		};
 	} );
 
 	afterEach( () => {
@@ -46,97 +66,101 @@ describe( 'exec-tasks', () => {
 	describe( 'execOnRepositories', () => {
 		it( 'should throw error when there is no specified task', () => {
 			const errorMessage = 'Missing task parameter: --task task-name';
-			const { log } = require( '@ckeditor/ckeditor5-dev-utils' );
-			const logErrSpy = sandbox.stub( log, 'err' );
 
 			mockery.registerMock( 'minimist', () => {
 				return { };
 			} );
-			const tasks = require( '../lib' )( config );
+
+			const tasks = proxyquire( '../lib', execModuleMocks )( config );
 
 			tasks.execOnRepositories();
 
-			sinon.assert.calledOnce( logErrSpy );
-			expect( logErrSpy.firstCall.args[ 0 ] ).to.be.an( 'error' );
-			expect( logErrSpy.firstCall.args[ 0 ].message ).to.equal( errorMessage );
+			expect( spies.loggerError.calledOnce ).to.equal( true );
+			expect( spies.loggerError.firstCall.args[ 0 ] ).to.be.an( 'error' );
+			expect( spies.loggerError.firstCall.args[ 0 ].message ).to.equal( errorMessage );
 		} );
 
 		it( 'should throw error when task cannot be found', () => {
-			const { log } = require( '@ckeditor/ckeditor5-dev-utils' );
-			const logErrSpy = sandbox.stub( log, 'err' );
-
 			mockery.registerMock( 'minimist', () => {
 				return { task: 'task-to-run' };
 			} );
-			const tasks = require( '../lib' )( config );
+
+			const tasks = proxyquire( '../lib', execModuleMocks )( config );
 
 			tasks.execOnRepositories();
 
-			sinon.assert.calledOnce( logErrSpy );
-			expect( logErrSpy.firstCall.args[ 0 ] ).to.be.an( 'error' );
-			expect( logErrSpy.firstCall.args[ 0 ].code ).to.equal( 'MODULE_NOT_FOUND' );
+			expect( spies.loggerError.calledOnce ).to.equal( true );
+			expect( spies.loggerError.firstCall.args[ 0 ] ).to.be.an( 'error' );
+			expect( spies.loggerError.firstCall.args[ 0 ].code ).to.equal( 'MODULE_NOT_FOUND' );
 		} );
 
 		it( 'should load task module', () => {
-			const { workspace, log } = require( '@ckeditor/ckeditor5-dev-utils' );
-			const logErrSpy = sandbox.stub( log, 'err' );
+			const { workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 			sandbox.stub( workspace, 'getDevDirectories' ).returns( [] );
 			mockery.registerMock( 'minimist', () => {
 				return { task: 'task-to-run' };
 			} );
 			mockery.registerMock( './tasks/exec/functions/task-to-run', () => {} );
-			const tasks = require( '../lib' )( config );
+
+			const tasks = proxyquire( '../lib', execModuleMocks )( config );
 
 			tasks.execOnRepositories();
 
-			sinon.assert.notCalled( logErrSpy );
+			expect( spies.loggerError.called ).to.equal( false );
 		} );
 
 		it( 'should log error when task is throwing exceptions', () => {
-			const { workspace, log } = require( '@ckeditor/ckeditor5-dev-utils' );
-			const taskStub = sinon.stub();
-			const logErrSpy = sandbox.stub( log, 'err' );
+			const devUtils = require( '@ckeditor/ckeditor5-dev-utils' );
 
+			const taskStub = sinon.stub();
 			taskStub.onSecondCall().throws();
 
+			sandbox.stub( devUtils.workspace, 'getDevDirectories' ).returns( getDevDirectoriesResult );
+			sandbox.stub( devUtils, 'logger' ).returns( execModuleMocks[ '@ckeditor/ckeditor5-dev-utils' ].logger() );
 			mockery.registerMock( 'minimist', () => {
 				return { task: 'task-to-run' };
 			} );
-			sandbox.stub( workspace, 'getDevDirectories' ).returns( getDevDirectoriesResult );
 			mockery.registerMock( './tasks/exec/functions/task-to-run', taskStub );
-			const tasks = require( '../lib' )( config );
+
+			const tasks = proxyquire( '../lib', execModuleMocks )( config );
 
 			tasks.execOnRepositories();
 
-			sinon.assert.calledOnce( logErrSpy );
-			expect( logErrSpy.firstCall.args[ 0 ] ).to.be.an( 'error' );
-			sinon.assert.calledTwice( taskStub );
-			sinon.assert.calledWith( taskStub, '/path/1', { task: 'task-to-run' } );
-			sinon.assert.calledWith( taskStub, '/path/2', { task: 'task-to-run' } );
+			expect( spies.loggerError.calledOnce ).to.equal( true );
+			expect( spies.loggerError.firstCall.args[ 0 ] ).to.be.an( 'error' );
+			expect( taskStub.calledTwice ).to.equal( true );
+			expect( taskStub.firstCall.args[ 0 ] ).to.equal( '/path/1' );
+			expect( taskStub.firstCall.args[ 1 ] ).to.deep.equal( { task: 'task-to-run' } );
+			expect( taskStub.secondCall.args[ 0 ] ).to.equal( '/path/2' );
+			expect( taskStub.secondCall.args[ 1 ] ).to.deep.equal( { task: 'task-to-run' } );
 		} );
 
 		it( 'should execute task over directories', () => {
-			const { workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
+			const devUtils = require( '@ckeditor/ckeditor5-dev-utils' );
 			const taskStub = sinon.stub();
 
 			mockery.registerMock( 'minimist', () => {
 				return { task: 'task-to-run' };
 			} );
-			sandbox.stub( workspace, 'getDevDirectories' ).returns( getDevDirectoriesResult );
+			sandbox.stub( devUtils.workspace, 'getDevDirectories' ).returns( getDevDirectoriesResult );
+			sandbox.stub( devUtils, 'logger' ).returns( execModuleMocks[ '@ckeditor/ckeditor5-dev-utils' ].logger() );
 			mockery.registerMock( './tasks/exec/functions/task-to-run', taskStub );
-			const tasks = require( '../lib' )( config );
+
+			const tasks = proxyquire( '../lib', execModuleMocks )( config );
 
 			tasks.execOnRepositories();
 
-			sinon.assert.calledTwice( taskStub );
-			sinon.assert.calledWith( taskStub, '/path/1', { task: 'task-to-run' } );
-			sinon.assert.calledWith( taskStub, '/path/2', { task: 'task-to-run' } );
+			expect( taskStub.calledTwice ).to.equal( true );
+			expect( taskStub.firstCall.args[ 0 ] ).to.equal( '/path/1' );
+			expect( taskStub.firstCall.args[ 1 ] ).to.deep.equal( { task: 'task-to-run' } );
+			expect( taskStub.secondCall.args[ 0 ] ).to.equal( '/path/2' );
+			expect( taskStub.secondCall.args[ 1 ] ).to.deep.equal( { task: 'task-to-run' } );
 		} );
 
 		it( 'should execute task over specific directory', () => {
 			const Stream = require( 'stream' );
-			const { workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
+			const devUtils = require( '@ckeditor/ckeditor5-dev-utils' );
 			const taskStub = sinon.stub().returns( new Stream() );
 
 			mockery.registerMock( 'minimist', () => {
@@ -145,15 +169,17 @@ describe( 'exec-tasks', () => {
 					repository: 'test1'
 				};
 			} );
-			sandbox.stub( workspace, 'getDevDirectories' ).returns( getDevDirectoriesResult );
+			sandbox.stub( devUtils.workspace, 'getDevDirectories' ).returns( getDevDirectoriesResult );
+			sandbox.stub( devUtils, 'logger' ).returns( execModuleMocks[ '@ckeditor/ckeditor5-dev-utils' ].logger() );
 			mockery.registerMock( './tasks/exec/functions/task-to-run', taskStub );
-			const tasks = require( '../lib' )( config );
+
+			const tasks = proxyquire( '../lib', execModuleMocks )( config );
 
 			tasks.execOnRepositories();
 
-			sinon.assert.calledOnce( taskStub );
-			sinon.assert.calledWith( taskStub, '/path/1', { task: 'task-to-run', repository: 'test1' } );
-			sinon.assert.neverCalledWith( taskStub, '/path/2', { task: 'task-to-run', repository: 'test1' } );
+			expect( taskStub.calledOnce ).to.equal( true );
+			expect( taskStub.firstCall.args[ 0 ] ).to.equal( '/path/1' );
+			expect( taskStub.firstCall.args[ 1 ] ).to.deep.equal( { task: 'task-to-run', repository: 'test1' } );
 		} );
 	} );
 } );

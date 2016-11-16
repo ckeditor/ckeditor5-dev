@@ -6,7 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
-const { workspace, tools, log } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { workspace, tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * 1. Get CKEditor5 dependencies from package.json file.
@@ -18,6 +18,7 @@ const { workspace, tools, log } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {String} workspaceRoot Relative path to workspace root.
  */
 module.exports = ( ckeditor5Path, packageJSON, workspaceRoot ) => {
+	const log = logger();
 	const workspaceAbsolutePath = path.join( ckeditor5Path, workspaceRoot );
 
 	// Get all CKEditor dependencies from package.json.
@@ -34,17 +35,17 @@ module.exports = ( ckeditor5Path, packageJSON, workspaceRoot ) => {
 				// Check if repository's directory exists.
 				if ( directories.indexOf( dependency ) > -1 ) {
 					try {
-						log.out( `Linking ${ repositoryURL }...` );
+						log.info( `Linking ${ repositoryURL }...` );
 						tools.linkDirectories( repositoryAbsolutePath, path.join( ckeditor5Path, 'node_modules', dependency ) );
 					} catch ( error ) {
-						log.err( error );
+						log.error( error );
 					}
 				}
 			}
 		} else {
-			log.out( 'No CKEditor5 plugins in development mode.' );
+			log.info( 'No CKEditor5 plugins in development mode.' );
 		}
 	} else {
-		log.out( 'No CKEditor5 dependencies found in package.json file.' );
+		log.info( 'No CKEditor5 dependencies found in package.json file.' );
 	}
 };

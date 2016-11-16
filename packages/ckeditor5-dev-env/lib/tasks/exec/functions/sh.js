@@ -23,5 +23,5 @@ module.exports = function executeShellCommand( workdir, params ) {
 	}
 
 	// Log output to stdout/stderr.
-	tools.shExec( `cd ${ workdir } && ${ params.cmd }`, true );
+	tools.shExec( `cd ${ workdir } && ${ params.cmd }` );
 };

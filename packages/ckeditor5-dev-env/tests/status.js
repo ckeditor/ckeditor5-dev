@@ -3,19 +3,50 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it */
+/* global describe, it, beforeEach, afterEach */
 
 'use strict';
 
 const sinon = require( 'sinon' );
 const path = require( 'path' );
 const { workspace, git } = require( '@ckeditor/ckeditor5-dev-utils' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-status', () => {
-	const statusTask = require( '../lib/tasks/status' );
+	let statusTask, spies;
 	const ckeditor5Path = 'path/to/ckeditor5';
 	const workspaceRoot = '..';
 	const workspaceAbsolutePath = path.join( ckeditor5Path, workspaceRoot );
+
+	beforeEach( () => {
+		spies = {
+			loggerInfo: sinon.spy(),
+			loggerWarning: sinon.spy(),
+			loggerError: sinon.spy()
+		};
+
+		statusTask = proxyquire( '../lib/tasks/status', {
+			'@ckeditor/ckeditor5-dev-utils': {
+				logger: () => {
+					return {
+						info: spies.loggerInfo,
+						warning: spies.loggerWarning,
+						error: spies.loggerError
+					};
+				}
+			}
+		} );
+	} );
+
+	afterEach( () => {
+		for ( let spy in spies ) {
+			spy = spies[ spy ];
+
+			if ( spy.restore ) {
+				spy.restore();
+			}
+		}
+	} );
 
 	it( 'should show status of dev repositories', () => {
 		const dirs = [ 'ckeditor5-core', 'ckeditor5-devtest' ];
@@ -93,9 +124,6 @@ describe( 'dev-status', () => {
 				'other-plugin': '1.2.3'
 			}
 		};
-		const writeErrorSpy = sinon.spy();
-		const { log } = require( '@ckeditor/ckeditor5-dev-utils' );
-		log.configure( () => {}, writeErrorSpy );
 
 		statusTask( ckeditor5Path, json, workspaceRoot );
 
@@ -104,7 +132,7 @@ describe( 'dev-status', () => {
 		statusStub.restore();
 
 		sinon.assert.calledOnce( statusStub );
-		sinon.assert.calledOnce( writeErrorSpy );
-		sinon.assert.calledWithExactly( writeErrorSpy, error );
+		sinon.assert.calledOnce( spies.loggerError );
+		sinon.assert.calledWithExactly( spies.loggerError, error );
 	} );
 } );
