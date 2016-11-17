@@ -7,16 +7,22 @@
 
 'use strict';
 
+const readline = require( 'readline' );
 const path = require( 'path' );
+const fs = require( 'fs-extra' );
 const sinon = require( 'sinon' );
 const chai = require( 'chai' );
 const expect = chai.expect;
 const mockery = require( 'mockery' );
-const utils = require( '../lib/utils' );
 const compiler = require( '@ckeditor/ckeditor5-dev-compiler' );
+const proxyquire = require( 'proxyquire' );
+const utils = require( '../lib/utils' );
+const NotifierPlugin = require( '../lib/notifier-plugin' );
 
 describe( 'Tests', () => {
-	let sandbox, servers, tasks, clock, onServer, infoSpy, errorSpy, loggerVerbosity, serverEvents, exitCode;
+	let sandbox, tasks, clock;
+	let servers, serverEvents, exitCode, onServer;
+	let infoSpy, errorSpy, loggerVerbosity;
 
 	beforeEach( () => {
 		servers = [];
@@ -68,8 +74,6 @@ describe( 'Tests', () => {
 				};
 			}
 		} );
-
-		tasks = require( '../lib/tasks' );
 	} );
 
 	afterEach( () => {
@@ -79,6 +83,10 @@ describe( 'Tests', () => {
 	} );
 
 	describe( 'runTests()', () => {
+		beforeEach( () => {
+			tasks = require( '../lib/tasks' );
+		} );
+
 		it( 'starts Karma', () => {
 			const options = {};
 			const karmaConfig = {};
@@ -130,7 +138,7 @@ describe( 'Tests', () => {
 
 			const options = {};
 			const karmaConfig = {};
-			const processExitStub = sinon.stub( process, 'exit' );
+			const processExitStub = sandbox.stub( process, 'exit' );
 			sandbox.stub( utils, 'getKarmaConfig', () => karmaConfig );
 
 			return tasks.runTests( options )
@@ -147,6 +155,10 @@ describe( 'Tests', () => {
 	} );
 
 	describe( 'test()', () => {
+		beforeEach( () => {
+			tasks = require( '../lib/tasks' );
+		} );
+
 		it( 'starts the compiler', ( done ) => {
 			const options = {};
 			const karmaConfig = {};
@@ -240,10 +252,7 @@ describe( 'Tests', () => {
 					path.join( 'ckeditor5-foo' ),
 					path.join( 'node_modules', 'ckeditor5-bar' ),
 					path.join( 'node_modules', 'ckeditor5-bar', 'node_modules', 'ckeditor5-foo' )
-				],
-				formats: {
-					esnext: path.join( '.build' )
-				}
+				]
 			};
 
 			return tasks.test( compilerOptions )
@@ -309,6 +318,388 @@ describe( 'Tests', () => {
 						expect( err ).to.equal( error );
 					}
 				);
+		} );
+	} );
+
+	describe( 'manualTests.compileScripts()', () => {
+		let sourcePath, outputPath, webpackConfig;
+
+		beforeEach( () => {
+			sourcePath = path.resolve( '.' );
+			outputPath = path.join( sourcePath, '.output' );
+		} );
+
+		it( 'compiles the scripts', () => {
+			tasks = proxyquire( '../lib/tasks', {
+				'webpack': ( config, callback ) => {
+					webpackConfig = config;
+
+					callback();
+				}
+			} );
+
+			const getWebpackConfigStub = sandbox.stub( utils, 'getWebpackConfig' )
+				.returns( {
+					plugins: []
+				} );
+			const getEntriesForManualTestsStub = sandbox.stub( utils, 'getEntriesForManualTests' )
+				.returns( { 'a.js': 'a/manual.js' } );
+
+			return tasks.manualTests.compileScripts( sourcePath, outputPath )
+				.then(
+					() => {
+						expect( getWebpackConfigStub.calledOnce ).to.equal( true );
+						expect( getEntriesForManualTestsStub.calledOnce ).to.equal( true );
+
+						expect( webpackConfig.plugins.length ).to.equal( 1 );
+						expect( webpackConfig.plugins[ 0 ] ).to.be.an.instanceof( NotifierPlugin );
+						expect( webpackConfig.watch ).to.equal( true );
+						expect( webpackConfig.entry ).to.deep.equal( { 'a.js': 'a/manual.js' } );
+						expect( webpackConfig.output ).to.deep.equal( {
+							path: outputPath,
+							filename: '[name]'
+						} );
+					},
+					() => {
+						throw new Error( 'Promise was supposed to be resolved.' );
+					}
+				);
+		} );
+
+		it( 'rejects a promise when file cannot be saved', () => {
+			const error = new Error( 'Unexpected error.' );
+
+			tasks = proxyquire( '../lib/tasks', {
+				'webpack': ( config, callback ) => {
+					callback( error );
+				}
+			} );
+
+			sandbox.stub( utils, 'getWebpackConfig' ).returns( { plugins: [] } );
+			sandbox.stub( utils, 'getEntriesForManualTests' ).returns( {} );
+
+			return tasks.manualTests.compileScripts( sourcePath, outputPath )
+				.then(
+					() => {
+						throw new Error( 'Promise was supposed to be rejected.' );
+					},
+					( err ) => {
+						expect( err ).to.equal( error );
+
+						mockery.deregisterMock( 'webpack' );
+					}
+				);
+		} );
+	} );
+
+	describe( 'manualTests.compileViews()', () => {
+		let sourcePath, outputPath, files;
+
+		const template = '<html></html>';
+
+		beforeEach( () => {
+			sourcePath = path.resolve( '.' );
+			outputPath = path.join( sourcePath, '.output' );
+			files = {
+				engine: {
+					js: path.join( 'tests', 'engine', 'manual', 'test-manual.js' ),
+					html: path.join( 'tests', 'engine', 'manual', 'test-manual.html' ),
+					md: path.join( 'tests', 'engine', 'manual', 'test-manual.md' )
+				},
+				core: {
+					js: path.join( 'tests', 'core', 'manual', 'other-name-of-test.js' ),
+					html: path.join( 'tests', 'core', 'manual', 'other-name-of-test.html' ),
+					md: path.join( 'tests', 'core', 'manual', 'other-name-of-test.md' )
+				}
+			};
+
+			tasks = require( '../lib/tasks' );
+		} );
+
+		it( 'saves manual test views', () => {
+			let watchFilesHandler;
+
+			const readFileSyncStub = sandbox.stub( fs, 'readFileSync' )
+				.returns( template );
+			const manualTestPathsStub = sandbox.stub( utils, 'getManualTestPaths' )
+				.returns( [ files.engine.js, files.core.js ] );
+			const compileViewStub = sandbox.stub( utils, 'compileView' )
+				.returns( Promise.resolve() );
+			const watchFilesStub = sandbox.stub( utils, 'watchFiles', ( pathToFiles, handler ) => {
+				watchFilesHandler = handler;
+			} );
+
+			return tasks.manualTests.compileViews( sourcePath, outputPath )
+				.then(
+					( resolvedPromises ) => {
+						expect( readFileSyncStub.calledOnce ).to.equal( true );
+						expect( manualTestPathsStub.calledOnce ).to.equal( true );
+						expect( manualTestPathsStub.firstCall.args[ 0 ] ).to.equal( sourcePath );
+
+						// Checks whether the watchers have been called.
+						expect( watchFilesStub.calledTwice ).to.equal( true );
+
+						expect( watchFilesStub.firstCall.args[ 0 ] ).to.deep.equal( [
+							path.join( sourcePath, files.engine.html ),
+							path.join( sourcePath, files.engine.md )
+						] );
+
+						expect( watchFilesStub.firstCall.args[ 1 ] ).to.be.a( 'function' );
+
+						expect( watchFilesStub.secondCall.args[ 0 ] ).to.deep.equal( [
+							path.join( sourcePath, files.core.html ),
+							path.join( sourcePath, files.core.md )
+						] );
+
+						expect( watchFilesStub.secondCall.args[ 1 ] ).to.be.a( 'function' );
+
+						// Checks whether the views have been compiled.
+						expect( resolvedPromises.length ).to.equal( 2 );
+						expect( compileViewStub.calledTwice ).to.equal( true );
+						expect( compileViewStub.firstCall.args[ 0 ] ).to.equal( sourcePath );
+						expect( compileViewStub.firstCall.args[ 1 ] ).to.equal( outputPath );
+						expect( compileViewStub.firstCall.args[ 2 ] ).to.equal( path.join( sourcePath, files.engine.html ) );
+						expect( compileViewStub.firstCall.args[ 3 ] ).to.equal( template );
+						expect( compileViewStub.secondCall.args[ 0 ] ).to.equal( sourcePath );
+						expect( compileViewStub.secondCall.args[ 1 ] ).to.equal( outputPath );
+						expect( compileViewStub.secondCall.args[ 2 ] ).to.equal( path.join( sourcePath, files.core.html ) );
+						expect( compileViewStub.secondCall.args[ 3 ] ).to.equal( template );
+
+						// Check whether the handler for watched files is correct.
+						expect( watchFilesHandler ).to.be.a( 'function' );
+						watchFilesHandler( path.join( sourcePath, files.engine.md ) );
+
+						expect( compileViewStub.calledThrice ).to.equal( true );
+						expect( compileViewStub.thirdCall.args[ 0 ] ).to.equal( sourcePath );
+						expect( compileViewStub.thirdCall.args[ 1 ] ).to.equal( outputPath );
+						expect( compileViewStub.thirdCall.args[ 2 ] ).to.equal( path.join( sourcePath, files.engine.md ) );
+						expect( compileViewStub.thirdCall.args[ 3 ] ).to.equal( template );
+					},
+					() => {
+						throw new Error( 'Promise was supposed to be resolved.' );
+					}
+				);
+		} );
+
+		it( 'rejects a promise when file cannot be saved', () => {
+			const error = new Error( 'Unknown reason.' );
+
+			sandbox.stub( fs, 'readFileSync' ).returns( template );
+			sandbox.stub( utils, 'getManualTestPaths' ).returns( [
+				files.engine.js,
+				files.core.js
+			] );
+			sandbox.stub( utils, 'watchFiles' );
+
+			const compileViewStub = sandbox.stub( utils, 'compileView' );
+			compileViewStub.onCall( 0 ).returns( Promise.resolve() );
+			compileViewStub.onCall( 1 ).returns( Promise.reject( error ) );
+
+			return tasks.manualTests.compileViews( sourcePath, outputPath )
+				.then(
+					() => {
+						throw new Error( 'Promise was supposed to be rejected.' );
+					},
+					( err ) => {
+						expect( err ).to.equal( error );
+					}
+				);
+		} );
+	} );
+
+	describe( 'manualTests.run()', () => {
+		it( 'waits for the compiler and runs the http server', ( done ) => {
+			tasks = proxyquire( '../lib/tasks', {
+				'./server': () => {
+					done();
+				}
+			} );
+
+			// Resolve promises with compilation scripts and views.
+			const compileScriptsStub = sandbox.stub( tasks.manualTests, 'compileScripts' ).returns( Promise.resolve() );
+			sandbox.stub( tasks.manualTests, 'compileViews' ).returns( Promise.resolve() );
+
+			// Don't attach events.
+			sandbox.stub( process, 'on' );
+
+			// Simulate work of the Compiler.
+			sandbox.stub( compiler.tasks, 'compile', ( options ) => {
+				expect( infoSpy.calledOnce ).to.equal( true );
+
+				// Get close to the 3000ms limit.
+				clock.tick( 2800 );
+
+				// But simulate starts of a compilation (first change).
+				options.onChange();
+				clock.tick( 300 );
+
+				// After 3100ms from the beginning `tasks.manualTests.compileScripts` shouldn't be called.
+				expect( compileScriptsStub.called ).to.equal( false );
+
+				// Now tick the 600ms from the last change to finish.
+				clock.tick( 300 );
+
+				expect( compileScriptsStub.called ).to.equal( true );
+
+				return Promise.resolve();
+			} );
+
+			tasks.manualTests.run( {
+				destinationPath: path.resolve( '.' )
+			}, sandbox.spy() );
+		} );
+
+		it( 'breaks the process when compiler throws an error', ( done ) => {
+			const error = new Error( 'Unexpected error.' );
+			const compileScriptsStub = sandbox.stub( tasks.manualTests, 'compileScripts' );
+
+			// Don't attach events
+			sandbox.stub( process, 'on' );
+
+			// Simulate work of the Compiler.
+			sandbox.stub( compiler.tasks, 'compile', () => {
+				clock.tick( 2800 );
+
+				return Promise.reject( error );
+			} );
+
+			tasks.manualTests.run( {
+				destinationPath: path.resolve( '.' )
+			}, ( err ) => {
+				// By default, compilation for manual tests start 3 secs after starting the Compiler.
+				clock.tick( 500 );
+
+				expect( err ).to.equal( error );
+				expect( compileScriptsStub.called ).to.equal( false );
+
+				done();
+			} );
+		} );
+
+		it( 'closes server and finish task when user breaks it manually', ( done ) => {
+			// Function handles the CTRL+C (SIGINT).
+			let onSigIntHandler;
+
+			// Function which closes the HTTP server.
+			const closeServerSpy = sandbox.spy();
+
+			tasks = proxyquire( '../lib/tasks', {
+				'./server': () => {
+					// After starting the server, user wants to finish.
+					// User pressed CTRL+C and `process` caught this event.
+					process.emit( 'SIGINT' );
+
+					return {
+						close: closeServerSpy
+					};
+				}
+			} );
+
+			// Simulate work of the Compiler.
+			sandbox.stub( compiler.tasks, 'compile', () => {
+				clock.tick( 3500 );
+
+				return Promise.resolve();
+			} );
+
+			// Resolve promises with compilation scripts and views.
+			sandbox.stub( tasks.manualTests, 'compileScripts' ).returns( Promise.resolve() );
+			sandbox.stub( tasks.manualTests, 'compileViews' ).returns( Promise.resolve() );
+
+			// We must stub the `process.emit()` method because other npm scripts (like test)
+			// can also attach its events. If we don't do this, we will break all tests at this moment.
+			sandbox.stub( process, 'emit', () => {
+				// Execute `onSigIntHandler` handler at the end of the test.
+				clock.restore();
+				setTimeout( onSigIntHandler );
+
+				expect( processOnStub.calledOnce ).to.equal( true );
+			} );
+
+			// Execute the `handler` manually.
+			const processOnStub = sandbox.stub( process, 'on', ( event, handler ) => {
+				onSigIntHandler = () => {
+					handler();
+
+					expect( closeServerSpy.calledOnce ).to.equal( true );
+				};
+			} );
+
+			// Prevent to unexpected finish.
+			sandbox.stub( process, 'exit' );
+
+			tasks.manualTests.run( {
+				destinationPath: path.resolve( '.' )
+			}, done );
+		} );
+
+		it( 'closes server and finish task when user breaks it manually (Windows)', ( done ) => {
+			// Function handles the CTRL+C (SIGINT), but doesn't work on Windows proper.
+			let onSigIntProcessHandler;
+
+			// Function handles the CTR+C (SIGINT) on Windows.
+			let onSigIntReadlineHandler;
+
+			// Mock result of `readline.createInterface()` method.
+			const readLineInterface = {
+				on: ( event, handler ) => {
+					onSigIntReadlineHandler = handler;
+				},
+				emit: () => {
+					onSigIntReadlineHandler();
+				}
+			};
+
+			tasks = proxyquire( '../lib/tasks', {
+				'./server': () => {
+					// User pressed CTRL+C faster than server starts and `readline` caught this event.
+					readLineInterface.emit( 'SIGINT' );
+
+					return null;
+				}
+			} );
+
+			// Check whether the readline received correct parameters.
+			sandbox.stub( readline, 'createInterface', ( options ) => {
+				expect( options.input ).to.equal( process.stdin );
+				expect( options.output ).to.equal( process.stdout );
+
+				return readLineInterface;
+			} );
+
+			// Simulate work of the Compiler.
+			sandbox.stub( compiler.tasks, 'compile', () => {
+				clock.tick( 3500 );
+
+				return Promise.resolve();
+			} );
+
+			// Resolve promises with compilation scripts and views.
+			sandbox.stub( tasks.manualTests, 'compileScripts' ).returns( Promise.resolve() );
+			sandbox.stub( tasks.manualTests, 'compileViews' ).returns( Promise.resolve() );
+
+			// Mock user's platform.
+			sandbox.stub( utils, 'getPlatform' ).returns( 'win32' );
+
+			// We must stub the `process.emit()` method because other npm scripts (like test)
+			// can also attach its events. If we don't do this, we will break all tests at this moment.
+			sandbox.stub( process, 'emit', () => {
+				onSigIntProcessHandler();
+
+				expect( processOnStub.calledOnce ).to.equal( true );
+			} );
+
+			// Execute the `handler` manually.
+			const processOnStub = sandbox.stub( process, 'on', ( event, handler ) => {
+				onSigIntProcessHandler = handler;
+			} );
+
+			// Prevent to unexpected finish.
+			sandbox.stub( process, 'exit' );
+
+			tasks.manualTests.run( {
+				destinationPath: path.resolve( '.' )
+			}, done );
 		} );
 	} );
 } );

@@ -8,9 +8,14 @@
 'use strict';
 
 const path = require( 'path' );
-const KarmaServer = require( 'karma' ).Server;
+const fs = require( 'fs-extra' );
 const gutil = require( 'gulp-util' );
+const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const compiler = require( '@ckeditor/ckeditor5-dev-compiler' );
+const webpack = require( 'webpack' );
+const KarmaServer = require( 'karma' ).Server;
 const utils = require( './utils' );
+const NotifierPlugin = require( './notifier-plugin' );
 
 const tasks = {
 	/**
@@ -58,6 +63,162 @@ const tasks = {
 		} );
 	},
 
+	manualTests: {
+		/**
+		 * Compile scripts for manual tests.
+		 *
+		 * @param {String} sourcePath Base path that will be used to resolve all patterns.
+		 * @param {String} outputPath Base path where all files will be saved.
+		 * @returns {Promise}
+		 */
+		compileScripts( sourcePath, outputPath ) {
+			// Prepare configuration for Webpack.
+			const webpackConfig = utils.getWebpackConfig( {
+				sourcePath,
+				coverage: false,
+				sourceMap: false,
+				files: []
+			} );
+
+			// Watch the files by Webpack.
+			webpackConfig.watch = true;
+
+			// Attach NotifierPlugin.
+			webpackConfig.plugins.push( new NotifierPlugin() );
+
+			// Generate entry points for Webpack.
+			webpackConfig.entry = utils.getEntriesForManualTests( sourcePath );
+
+			// Set the output point.
+			webpackConfig.output = {
+				path: outputPath,
+				filename: '[name]'
+			};
+
+			return new Promise( ( resolve, reject ) => {
+				webpack( webpackConfig, ( err ) => {
+					if ( err ) {
+						return reject( err );
+					}
+
+					resolve();
+				} );
+			} );
+		},
+
+		/**
+		 * Concat views and descriptions of the manual tests into a single files.
+		 *
+		 * @param {String} sourcePath Base path that will be used to resolve all patterns.
+		 * @param {String} outputPath Base path where all files will be saved.
+		 * @returns {Promise}
+		 */
+		compileViews( sourcePath, outputPath ) {
+			const promises = [];
+			const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
+
+			utils.getManualTestPaths( sourcePath )
+				.map( ( testPath ) => testPath.replace( /\.js$/, '' ) )
+				.forEach( ( testPath ) => {
+					const htmlPath = path.join( sourcePath, `${ testPath }.html` );
+					const mdPath = path.join( sourcePath, `${ testPath }.md` );
+
+					// Attach watchers.
+					utils.watchFiles( [ htmlPath, mdPath ], ( file ) => {
+						utils.compileView( sourcePath, outputPath, file, viewTemplate );
+					} );
+
+					// Initial compilation.
+					promises.push(
+						utils.compileView( sourcePath, outputPath, htmlPath, viewTemplate )
+					);
+				} );
+
+			return Promise.all( promises );
+		},
+
+		/**
+		 * @param {Object} options
+		 * @param {String} options.destinationPath Base path where all files will be saved.
+		 * @param {Array.<String>} options.packages Paths to CKEditor 5 dependencies.
+		 * @param {Function} done Inform the task runner about finishing the job.
+		 */
+		run( options, done ) {
+			const log = logger();
+			const manualTestsPath = path.join( options.destinationPath, 'manual-tests' );
+			let timerId = setTimeout( checkWaitUntil, 3000 );
+			let waitUntil, httpServer;
+
+			const compilerOptions = {
+				watch: true,
+				ignoreDuplicates: true,
+				packages: options.packages,
+				verbosity: 'warning',
+
+				formats: {
+					esnext: options.destinationPath
+				},
+
+				onChange() {
+					waitUntil = new Date().getTime() + 500;
+				}
+			};
+
+			log.info( 'Compiling the editor...' );
+
+			compiler.tasks.compile( compilerOptions )
+				.catch( ( err ) => {
+					clearTimeout( timerId );
+					done( err );
+				} );
+
+			// Wait until compiler ends its job and compile manual tests..
+			function checkWaitUntil() {
+				if ( new Date() < waitUntil ) {
+					timerId = setTimeout( checkWaitUntil, 200 );
+
+					return;
+				}
+
+				Promise.all( [
+					// Compile the scripts - run Webpack.
+					tasks.manualTests.compileScripts( options.destinationPath, manualTestsPath ),
+
+					// Concat the manual test files into single.
+					tasks.manualTests.compileViews( options.destinationPath, manualTestsPath )
+				] )
+				.then( () => {
+					// Start the server.
+					httpServer = require( './server' )( options.destinationPath, manualTestsPath );
+
+					log.info( 'Ready to test.' );
+				} );
+			}
+
+			// SIGINT isn't caught on Windows in process. However CTRL+C can be catch
+			// by `readline` module. After that we can emit SIGINT to the process manually.
+			if ( utils.getPlatform() === 'win32' ) {
+				const readline = require( 'readline' ).createInterface( {
+					input: process.stdin,
+					output: process.stdout
+				} );
+
+				readline.on( 'SIGINT', () => {
+					process.emit( 'SIGINT' );
+				} );
+			}
+
+			process.on( 'SIGINT', () => {
+				if ( httpServer ) {
+					httpServer.close();
+				}
+
+				done();
+				process.exit();
+			} );
+		},
+	},
+
 	/**
 	 * Compiles the project and runs the tests.
 	 *
@@ -73,7 +234,6 @@ const tasks = {
 	 * @returns {Promise}
 	 */
 	test( options ) {
-		const compiler = require( '@ckeditor/ckeditor5-dev-compiler' );
 		const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 		const log = logger();
 

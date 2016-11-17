@@ -8,21 +8,38 @@
 'use strict';
 
 const path = require( 'path' );
+const fs = require( 'fs-extra' );
+const glob = require( 'glob' );
 const sinon = require( 'sinon' );
 const chai = require( 'chai' );
 const expect = chai.expect;
-const fs = require( 'fs' );
+const should = chai.should();
+const proxyquire = require( 'proxyquire' );
 
 describe( 'utils', () => {
-	let sandbox, utils;
+	let sandbox, clock, utils, infoSpy, errorSpy;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
+		clock = sinon.useFakeTimers();
 
-		utils = require( '../lib/utils' );
+		utils = proxyquire( '../lib/utils', {
+			'@ckeditor/ckeditor5-dev-utils': {
+				logger: () => {
+					infoSpy = sandbox.spy();
+					errorSpy = sandbox.spy();
+
+					return {
+						info: infoSpy,
+						error: errorSpy
+					};
+				}
+			}
+		} );
 	} );
 
 	afterEach( () => {
+		clock.restore();
 		sandbox.restore();
 	} );
 
@@ -201,6 +218,206 @@ describe( 'utils', () => {
 			expect( args.s ).to.equal( args[ 'source-map' ] );
 			expect( args.sourceMap ).to.equal( args[ 'source-map' ] );
 			expect( args.ignoreDuplicates ).to.equal( args[ 'ignore-duplicates' ] );
+		} );
+	} );
+
+	describe( 'getManualTestPaths()', () => {
+		it( 'returns paths to all manual scripts', () => {
+			const sourcePath = path.resolve( '.' );
+
+			const globSyncStub = sandbox.stub( glob, 'sync' ).returns( [
+				path.join( sourcePath, 'tests', 'package', 'manual', 'manual-test.js' ),
+				path.join( sourcePath, 'tests', 'foo', 'manual', 'test-manual.js' ),
+				path.join( sourcePath, 'tests', 'bar', 'manual', 'name-of-test.js' )
+			] );
+
+			const pathsToTests = [
+				path.join( 'tests', 'package', 'manual', 'manual-test.js' ),
+				path.join( 'tests', 'foo', 'manual', 'test-manual.js' ),
+				path.join( 'tests', 'bar', 'manual', 'name-of-test.js' )
+			];
+
+			expect( utils.getManualTestPaths( sourcePath ) ).to.deep.equal( pathsToTests );
+			expect( globSyncStub.calledOnce ).to.equal( true );
+			expect( globSyncStub.firstCall.args[ 0 ] ).to.equal( path.join( sourcePath, 'tests', '*', 'manual', '**', '*.js' ) );
+		} );
+	} );
+
+	describe( 'cleanPath()', () => {
+		it( 'returns a cleaned path', () => {
+			expect(
+				utils.cleanPath( path.join( '..', 'tests', 'package', 'manual', 'ticket', '1.js' ) )
+			).to.equal( path.join( '..', 'tests', 'package', 'ticket', '1.js' ) );
+
+			expect(
+				utils.cleanPath( path.join( '..', 'tests', 'package', 'ticket', '1.js' ) )
+			).to.equal( path.join( '..', 'tests', 'package', 'ticket', '1.js' ) );
+		} );
+	} );
+
+	describe( 'getEntriesForManualTests()', () => {
+		it( 'returns an object with destination and input paths', () => {
+			const sourcePath = path.resolve( '.' );
+			const manualTestPaths = [
+				path.join( 'tests', 'foo', 'manual', 'test-manual.js' ),
+				path.join( 'tests', 'bar', 'manual', 'name-of-test.js' )
+			];
+
+			const manualTestPathsStub = sandbox.stub( utils, 'getManualTestPaths' ).returns( manualTestPaths );
+
+			expect( utils.getEntriesForManualTests( sourcePath ) ).to.deep.equal( {
+				[ path.join( 'tests', 'foo', 'test-manual.js' )]: manualTestPaths[ 0 ],
+				[ path.join( 'tests', 'bar', 'name-of-test.js' )]: manualTestPaths[ 1 ]
+			} );
+			expect( manualTestPathsStub.calledOnce ).to.equal( true );
+			expect( manualTestPathsStub.firstCall.args[ 0 ] ).to.equal( sourcePath );
+		} );
+	} );
+
+	describe( 'watchFiles()', () => {
+		it( 'attaches the watcher', () => {
+			const fsWatchStub = sandbox.stub( fs, 'watch' );
+
+			utils.watchFiles( [ 'path-1', 'path-2' ], sandbox.spy() );
+
+			expect( fsWatchStub.calledTwice ).to.equal( true );
+			expect( fsWatchStub.firstCall.args[ 0 ] ).to.equal( 'path-1' );
+			expect( fsWatchStub.firstCall.args[ 1 ] ).to.be.a( 'function' );
+			expect( fsWatchStub.secondCall.args[ 0 ] ).to.equal( 'path-2' );
+			expect( fsWatchStub.secondCall.args[ 1 ] ).to.be.a( 'function' );
+		} );
+
+		it( 'calls handler function with delay after last change', () => {
+			// Functions used as a handler in `fs.watch( file, handler )`.
+			let handlerForFirstPath, handlerForSecondPath;
+
+			// Function which does something with file when was changed.
+			const functionToCall = sandbox.spy();
+
+			sandbox.stub( fs, 'watch', ( pathToFile, handler ) => {
+				if ( handlerForFirstPath ) {
+					handlerForSecondPath = handler;
+
+					// Checks whether the watcher handler are the same for both files.
+					expect( handlerForFirstPath.toString() ).is.equal( handlerForSecondPath.toString() );
+				} else {
+					handlerForFirstPath = handler;
+				}
+			} );
+
+			utils.watchFiles( [ 'path-1', 'path-2' ], functionToCall );
+
+			should.exist( handlerForFirstPath );
+			should.exist( handlerForSecondPath );
+
+			// At the beginning, a function should not be called.
+			expect( functionToCall.callCount ).to.equal( 0 );
+
+			// Simulates a change in file 'path-1'.
+			handlerForFirstPath();
+			clock.tick( 520 ); // time: 520
+
+			expect( functionToCall.callCount ).to.equal( 1 );
+			expect( functionToCall.getCall( 0 ).args[ 0 ] ).to.equal( 'path-1' );
+
+			// Simulates a change in file `path-2`.
+			handlerForSecondPath();
+			clock.tick( 400 ); // time: 920
+
+			// The function should not be called because it has to wait 500ms.
+			expect( functionToCall.callCount ).to.equal( 1 );
+
+			// Simulates a change in file `path-1` again. It starts the timer from 0.
+			handlerForFirstPath();
+			clock.tick( 220 ); // time: 1140
+
+			// The function should not be called.
+			expect( functionToCall.callCount ).to.equal( 1 );
+
+			// No additional changes in files. The function should be called.
+			clock.tick( 520 ); // time: 1660
+
+			expect( functionToCall.callCount ).to.equal( 2 );
+			expect( functionToCall.getCall( 1 ).args[ 0 ] ).to.equal( 'path-1' );
+
+			// Checks whether the second handler works proper.
+			handlerForSecondPath();
+			clock.tick( 520 ); // time: 2180
+			expect( functionToCall.callCount ).to.equal( 3 );
+			expect( functionToCall.getCall( 2 ).args[ 0 ] ).to.equal( 'path-2' );
+
+			// After all changes handler shouldn't be called.
+			clock.tick( 820 ); // time: 3000
+			expect( functionToCall.callCount ).to.equal( 3 );
+		} );
+	} );
+
+	describe( 'compileView()', () => {
+		let sourcePath, outputPath, mdFilePath, htmlFilePath, template;
+
+		beforeEach( () => {
+			sourcePath = path.resolve( '.' );
+			outputPath = path.join( sourcePath, '.output' );
+			mdFilePath = path.join( sourcePath, 'manual', 'test.md' );
+			htmlFilePath = path.join( sourcePath, 'manual', 'test.html' );
+
+			template = `<html><head></head><body></body></html>`;
+		} );
+
+		it( 'saves the file and resolves a Promise', () => {
+			const readFileSyncStub = sandbox.stub( fs, 'readFileSync' );
+			readFileSyncStub.withArgs( mdFilePath ).returns( `# Some header\nTest description.` );
+			readFileSyncStub.withArgs( htmlFilePath ).returns( '<div>Hello world!</div>' );
+
+			sandbox.stub( fs, 'outputFile', ( pathToSave, content, callback ) => {
+				const compiledManualTest = `<html><head></head><body style="padding-left: 425px;"><div data-sidebar="true"><h1>Some header</h1>
+<p>Test description.</p>
+</div><div>Hello world!</div><script src="./test.js"></script></body></html>`;
+
+				expect( pathToSave ).to.equal( path.join( outputPath, 'test.html' ) );
+				expect( content ).to.equal( compiledManualTest );
+
+				callback();
+			} );
+
+			return utils.compileView( sourcePath, outputPath, mdFilePath, template )
+				.then(
+					() => {
+						expect( readFileSyncStub.calledTwice ).to.equal( true );
+						expect( infoSpy.calledTwice ).to.equal( true );
+					},
+					() => {
+						throw new Error( 'Promise was supposed to be resolved.' );
+					}
+				);
+		} );
+
+		it( 'rejects a Promise when file cannot be saved', () => {
+			const error = new Error( 'Something went wrong during save file.' );
+
+			sandbox.stub( fs, 'readFileSync' ).returns( '<b>Test.</b>' );
+			sandbox.stub( fs, 'outputFile', ( pathToSave, content, callback ) => {
+				callback( error );
+			} );
+
+			return utils.compileView( sourcePath, outputPath, mdFilePath, template )
+				.then(
+					() => {
+						throw new Error( 'Promise was supposed to be rejected.' );
+					},
+					( err ) => {
+						expect( err ).to.equal( error );
+						expect( infoSpy.calledOnce ).to.equal( true );
+						expect( errorSpy.calledOnce ).to.equal( true );
+						expect( errorSpy.firstCall.args[ 0 ] ).to.equal( err );
+					}
+				);
+		} );
+	} );
+
+	describe( 'getPlatform()', () => {
+		it( 'returns a platform', () => {
+			expect( utils.getPlatform() ).to.equal( process.platform );
 		} );
 	} );
 } );

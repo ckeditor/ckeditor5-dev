@@ -5,9 +5,17 @@
 
 'use strict';
 
-const fs = require( 'fs' );
+const fs = require( 'fs-extra' );
 const path = require( 'path' );
 const minimist = require( 'minimist' );
+const glob = require( 'glob' );
+const gutil = require( 'gulp-util' );
+const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const commonmark = require( 'commonmark' );
+const combine = require( 'dom-combiner' );
+
+const reader = new commonmark.Parser();
+const writer = new commonmark.HtmlRenderer();
 
 const utils = {
 	coverageDirectory: 'coverage',
@@ -302,6 +310,124 @@ const utils = {
 		}
 
 		return options;
+	},
+
+	/**
+	 * @param {String} sourcePath Base path to the all sources.
+	 * @return {Array.<String>}
+	 */
+	getManualTestPaths( sourcePath ) {
+		const globPattern = path.join( sourcePath, 'tests', '*', 'manual', '**', '*.js' );
+
+		return glob.sync( globPattern )
+			.map( ( absolutePath ) => absolutePath.replace( `${ sourcePath }${ path.sep }`, '' ) );
+	},
+
+	/**
+	 * Removes `manual/` directories from the path.
+	 *
+	 * @param {String} pathToClean
+	 * @returns {String}
+	 */
+	cleanPath( pathToClean ) {
+		return pathToClean.split( path.sep )
+			.filter( ( dirName ) => dirName !== 'manual' )
+			.join( path.sep );
+	},
+
+	/**
+	 * @param {String} sourcePath Base path to the all sources.
+	 * @return {Object}
+	 */
+	getEntriesForManualTests( sourcePath ) {
+		const entries = {};
+
+		for ( const testPath of utils.getManualTestPaths( sourcePath ) ) {
+			entries[ utils.cleanPath( testPath ) ] = testPath;
+		}
+
+		return entries;
+	},
+
+	/**
+	 * Watches given paths. When a file is modified, the handler will be executed.
+	 * The handler will call 500ms after the last change in file.
+	 *
+	 * @param {Array.<String>} absolutePaths Paths that will be watched.
+	 * @param {Function} handler Handler that will be executed after detected the changes in file.
+	 */
+	watchFiles( absolutePaths, handler ) {
+		let timerId;
+
+		for ( const itemPath of absolutePaths ) {
+			fs.watch( itemPath, () => {
+				if ( timerId ) {
+					clearTimeout( timerId );
+				}
+
+				timerId = setTimeout( () => {
+					timerId = null;
+
+					handler( itemPath );
+				}, 500 );
+			} );
+		}
+	},
+
+	/**
+	 * Saves as single file a parsed Markdown and HTML with manual test.
+	 *
+	 * @param {String} sourcePath Base path to the all sources.
+	 * @param {String} outputPath Path where compiled test will be saved.
+	 * @param {String} pathToFile Absolute path to compiled HTML or Markdown file.
+	 * @param {String} viewTemplate Template with the whole page.
+	 * @returns {Promise}
+	 */
+	compileView( sourcePath, outputPath, pathToFile, viewTemplate ) {
+		const log = logger();
+		log.info( `[View] Processing '${ gutil.colors.cyan( pathToFile ) }'...` );
+
+		const pathWithoutExtension = pathToFile.replace( /\.(md|html)$/, '' );
+
+		// Compile test instruction (Markdown file).
+		const parsedMarkdownTree = reader.parse( fs.readFileSync( `${ pathWithoutExtension }.md`, 'utf-8' ) );
+		const manualTestInstructions = '<div data-sidebar="true">' + writer.render( parsedMarkdownTree ) + '</div>';
+
+		// Load test view (HTML file).
+		const htmlView = fs.readFileSync( `${ pathWithoutExtension }.html`, 'utf-8' );
+
+		// Attach script file to the view.
+		const scriptTag = `<body style="padding-left: 425px;"><script src="./${ path.basename( pathWithoutExtension ) }.js"></script></body>`;
+
+		// Concat the all HTML parts to single one.
+		const preparedHtml = combine( viewTemplate, manualTestInstructions, htmlView, scriptTag );
+
+		// Prepare output path.
+		const outputFilePath = utils.cleanPath( `${ pathWithoutExtension.replace( sourcePath, outputPath ) }.html` );
+
+		return new Promise( ( resolve, reject ) => {
+			fs.outputFile( outputFilePath, preparedHtml, ( err ) => {
+				if ( err ) {
+					log.error( err );
+
+					return reject( err );
+				}
+
+				log.info( `[View] Finished writing '${ gutil.colors.cyan( pathToFile ) }'` );
+				resolve();
+			} );
+		} );
+	},
+
+	/**
+	 * Returns a name of platform which executing this script.
+	 *
+	 * It allows to mock the platform in other tests.
+	 *
+	 * @returns {String}
+	 */
+	getPlatform() {
+		return process.platform;
 	}
 };
 
