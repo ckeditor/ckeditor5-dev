@@ -125,7 +125,7 @@ module.exports = {
 	 * @returns {String} Executed command's result.
 	 */
 	getStatus( repositoryPath ) {
-		return tools.shExec( `cd ${ repositoryPath } && git status --porcelain -sb`, false );
+		return tools.shExec( `cd ${ repositoryPath } && git status --porcelain -sb`, { verbosity: 'error' } );
 	},
 
 	/**

@@ -221,6 +221,7 @@ describe( 'utils', () => {
 
 				expect( shExecStub.calledOnce ).to.equal( true );
 				expect( shExecStub.firstCall.args[ 0 ] ).to.equal( statusCommands );
+				expect( shExecStub.firstCall.args[ 1 ] ).to.deep.equal( { verbosity: 'error' } );
 			} );
 		} );
 
