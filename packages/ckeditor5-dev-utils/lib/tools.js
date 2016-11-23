@@ -27,19 +27,26 @@ module.exports = {
 		sh.config.silent = true;
 
 		const ret = sh.exec( command );
+		const logOptions = { raw: true };
+
+		if ( ret.code ) {
+			if ( ret.stdout ) {
+				log.error( ret.stdout, logOptions );
+			}
+
+			if ( ret.stderr ) {
+				log.error( ret.stderr, logOptions );
+			}
+
+			throw new Error( `Error while executing ${ command }: ${ ret.stderr }` );
+		}
 
 		if ( ret.stdout ) {
-			const logColor = ret.code ? gutil.colors.red : gutil.colors.grey;
-
-			log.info( logColor( ret.stdout ), { raw: true } );
+			log.info( ret.stdout, logOptions );
 		}
 
 		if ( ret.stderr ) {
-			log.error( ret.stderr, { raw: true } );
-		}
-
-		if ( ret.code ) {
-			throw new Error( `Error while executing ${ command }: ${ ret.stderr }` );
+			log.info( ret.stderr, logOptions );
 		}
 
 		return ret.stdout;

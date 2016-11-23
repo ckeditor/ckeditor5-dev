@@ -66,7 +66,7 @@ describe( 'utils', () => {
 				sinon.assert.calledOnce( execStub );
 			} );
 
-			it( 'should output using log functions', () => {
+			it( 'should output using log functions when exit code is equal to 0', () => {
 				const sh = require( 'shelljs' );
 				const execStub = sandbox.stub( sh, 'exec' ).returns( { code: 0, stdout: 'out', stderr: 'err' } );
 
@@ -74,12 +74,30 @@ describe( 'utils', () => {
 
 				expect( loggerVerbosity ).to.equal( 'info' );
 				expect( execStub.calledOnce ).to.equal( true );
-				expect( infoSpy.calledOnce ).to.equal( true );
+				expect( errorSpy.called ).to.equal( false );
+				expect( infoSpy.calledTwice ).to.equal( true );
 				expect( infoSpy.firstCall.args[ 0 ] ).to.match( /out/ );
 				expect( infoSpy.firstCall.args[ 1 ] ).to.deep.equal( { raw: true } );
-				expect( errorSpy.calledOnce ).to.equal( true );
-				expect( errorSpy.firstCall.args[ 0 ] ).to.equal( 'err' );
+				expect( infoSpy.secondCall.args[ 0 ] ).to.match( /err/ );
+				expect( infoSpy.secondCall.args[ 1 ] ).to.deep.equal( { raw: true } );
+			} );
+
+			it( 'should output using log functions when exit code is not equal to 0', () => {
+				const sh = require( 'shelljs' );
+				const execStub = sandbox.stub( sh, 'exec' ).returns( { code: 1, stdout: 'out', stderr: 'err' } );
+
+				expect( () => {
+					tools.shExec( 'command' );
+				} ).to.throw();
+
+				expect( loggerVerbosity ).to.equal( 'info' );
+				expect( infoSpy.called ).to.equal( false );
+				expect( execStub.calledOnce ).to.equal( true );
+				expect( errorSpy.calledTwice ).to.equal( true );
+				expect( errorSpy.firstCall.args[ 0 ] ).to.equal( 'out' );
 				expect( errorSpy.firstCall.args[ 1 ] ).to.deep.equal( { raw: true } );
+				expect( errorSpy.secondCall.args[ 0 ] ).to.equal( 'err' );
+				expect( errorSpy.secondCall.args[ 1 ] ).to.deep.equal( { raw: true } );
 			} );
 
 			it( 'should not log if no output from executed command', () => {
