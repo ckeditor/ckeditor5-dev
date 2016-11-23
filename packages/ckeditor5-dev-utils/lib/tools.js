@@ -28,25 +28,26 @@ module.exports = {
 
 		const ret = sh.exec( command );
 		const logOptions = { raw: true };
+		const grey = gutil.colors.grey;
 
 		if ( ret.code ) {
 			if ( ret.stdout ) {
-				log.error( ret.stdout, logOptions );
+				log.error( grey( ret.stdout ), logOptions );
 			}
 
 			if ( ret.stderr ) {
-				log.error( ret.stderr, logOptions );
+				log.error( grey( ret.stderr ), logOptions );
 			}
 
 			throw new Error( `Error while executing ${ command }: ${ ret.stderr }` );
 		}
 
 		if ( ret.stdout ) {
-			log.info( ret.stdout, logOptions );
+			log.info( grey( ret.stdout ), logOptions );
 		}
 
 		if ( ret.stderr ) {
-			log.info( ret.stderr, logOptions );
+			log.info( grey( ret.stderr ), logOptions );
 		}
 
 		return ret.stdout;

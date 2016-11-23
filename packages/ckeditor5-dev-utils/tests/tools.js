@@ -94,9 +94,9 @@ describe( 'utils', () => {
 				expect( infoSpy.called ).to.equal( false );
 				expect( execStub.calledOnce ).to.equal( true );
 				expect( errorSpy.calledTwice ).to.equal( true );
-				expect( errorSpy.firstCall.args[ 0 ] ).to.equal( 'out' );
+				expect( errorSpy.firstCall.args[ 0 ] ).to.match( /out/ );
 				expect( errorSpy.firstCall.args[ 1 ] ).to.deep.equal( { raw: true } );
-				expect( errorSpy.secondCall.args[ 0 ] ).to.equal( 'err' );
+				expect( errorSpy.secondCall.args[ 0 ] ).to.match( /err/ );
 				expect( errorSpy.secondCall.args[ 1 ] ).to.deep.equal( { raw: true } );
 			} );
 
