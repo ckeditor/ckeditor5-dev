@@ -35,7 +35,8 @@
     "gulp": "^3.9.0",
     "guppy-pre-commit": "^0.4.0",
     "istanbul": "^0.4.4",
-    "mockery": "^2.0.0"
+    "mockery": "^2.0.0",
+    "proxyquire": "^1.7.10"
   },
   "engines": {
     "node": ">=6.0.0",
