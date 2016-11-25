@@ -106,7 +106,7 @@ function generateIndex( sourcePath ) {
 	listElements.unshift( '<ul>' );
 	listElements.push( '</ul>' );
 
-	const headerHtml = `<body><h1>Available manual tests</h1></body>`;
+	const headerHtml = `<body><h1>CKEditor 5 manual tests</h1></body>`;
 
 	return combine( viewTemplate, headerHtml, listElements.join( '\n' ) );
 }

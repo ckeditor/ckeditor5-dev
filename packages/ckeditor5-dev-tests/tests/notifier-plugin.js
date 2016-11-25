@@ -67,7 +67,7 @@ describe( 'Notifier Plugin', () => {
 			compilerEvents.compile();
 
 			expect( infoSpy.calledOnce ).to.equal( true );
-			expect( infoSpy.firstCall.args[ 0 ] ).to.equal( '[Webpack] Starting compilation scripts...' );
+			expect( infoSpy.firstCall.args[ 0 ] ).to.equal( '[Webpack] Starting scripts compilation...' );
 		} );
 
 		it( 'logs when Webpack finishes work without errors', () => {

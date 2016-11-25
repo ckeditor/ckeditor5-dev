@@ -23,7 +23,7 @@ module.exports = class NotifierPlugin {
 	 */
 	apply( compiler ) {
 		compiler.plugin( 'compile', () => {
-			this.log.info( '[Webpack] Starting compilation scripts...' );
+			this.log.info( '[Webpack] Starting scripts compilation...' );
 		} );
 
 		compiler.plugin( 'done', ( stats ) => {

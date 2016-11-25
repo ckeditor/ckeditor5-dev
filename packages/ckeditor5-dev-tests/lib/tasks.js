@@ -148,8 +148,7 @@ const tasks = {
 			// Prepare configuration for Webpack.
 			const webpackConfig = utils._getWebpackConfig( {
 				sourcePath,
-				coverage: false,
-				sourceMap: false,
+				sourceMap: true,
 				files: []
 			} );
 
