@@ -369,7 +369,7 @@ describe( 'utils', () => {
 			readFileSyncStub.withArgs( mdFilePath ).returns( `# Some header\nTest description.` );
 			readFileSyncStub.withArgs( htmlFilePath ).returns( '<div>Hello world!</div>' );
 
-			sandbox.stub( fs, 'outputFile', ( pathToSave, content, callback ) => {
+			const outputSync = sandbox.stub( fs, 'outputFileSync', ( pathToSave, content ) => {
 				const compiledManualTest =
 `<html><head></head><body class="manual-test-container"><div class="manual-test-sidebar"><h1>Some header</h1>
 <p>Test description.</p>
@@ -377,39 +377,13 @@ describe( 'utils', () => {
 
 				expect( pathToSave ).to.equal( path.join( outputPath, 'test.html' ) );
 				expect( content ).to.equal( compiledManualTest );
-
-				callback();
 			} );
 
-			return utils._compileView( sourcePath, outputPath, mdFilePath, template )
-				.then(
-					() => {
-						expect( readFileSyncStub.calledTwice ).to.equal( true );
-						expect( infoSpy.calledTwice ).to.equal( true );
-					}
-				);
-		} );
+			utils._compileView( sourcePath, outputPath, mdFilePath, template );
 
-		it( 'rejects a Promise when file cannot be saved', () => {
-			const error = new Error( 'Something went wrong during save file.' );
-
-			sandbox.stub( fs, 'readFileSync' ).returns( '<b>Test.</b>' );
-			sandbox.stub( fs, 'outputFile', ( pathToSave, content, callback ) => {
-				callback( error );
-			} );
-
-			return utils._compileView( sourcePath, outputPath, mdFilePath, template )
-				.then(
-					() => {
-						throw new Error( 'Promise was supposed to be rejected.' );
-					},
-					( err ) => {
-						expect( err ).to.equal( error );
-						expect( infoSpy.calledOnce ).to.equal( true );
-						expect( errorSpy.calledOnce ).to.equal( true );
-						expect( errorSpy.firstCall.args[ 0 ] ).to.equal( err );
-					}
-				);
+			expect( outputSync.calledOnce ).to.equal( true );
+			expect( readFileSyncStub.calledTwice ).to.equal( true );
+			expect( infoSpy.calledTwice ).to.equal( true );
 		} );
 	} );
 

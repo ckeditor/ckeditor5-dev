@@ -395,7 +395,6 @@ const utils = {
 	 * @param {String} outputPath Path where compiled test will be saved.
 	 * @param {String} pathToFile Absolute path to compiled HTML or Markdown file.
 	 * @param {String} viewTemplate Template with the whole page.
-	 * @returns {Promise}
 	 */
 	_compileView( sourcePath, outputPath, pathToFile, viewTemplate ) {
 		const log = logger();
@@ -419,18 +418,9 @@ const utils = {
 		// Prepare output path.
 		const outputFilePath = utils._cleanManualTestPath( `${ pathWithoutExtension.replace( sourcePath, outputPath ) }.html` );
 
-		return new Promise( ( resolve, reject ) => {
-			fs.outputFile( outputFilePath, preparedHtml, ( err ) => {
-				if ( err ) {
-					log.error( err );
+		fs.outputFileSync( outputFilePath, preparedHtml );
 
-					return reject( err );
-				}
-
-				log.info( `[View] Finished writing '${ gutil.colors.cyan( pathToFile ) }'` );
-				resolve();
-			} );
-		} );
+		log.info( `[View] Finished writing '${ gutil.colors.cyan( pathToFile ) }'` );
 	},
 
 	/**

@@ -182,10 +182,8 @@ const tasks = {
 		 *
 		 * @param {String} sourcePath Base path that will be used to resolve all patterns.
 		 * @param {String} outputPath Base path where all files will be saved.
-		 * @returns {Promise}
 		 */
-		_compileViews( sourcePath, outputPath ) {
-			const promises = [];
+		compileViews( sourcePath, outputPath ) {
 			const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 
 			utils._getManualTestPaths( sourcePath )
@@ -200,12 +198,8 @@ const tasks = {
 					} );
 
 					// Initial compilation.
-					promises.push(
-						utils._compileView( sourcePath, outputPath, htmlPath, viewTemplate )
-					);
+					utils._compileView( sourcePath, outputPath, htmlPath, viewTemplate );
 				} );
-
-			return Promise.all( promises );
 		},
 
 		/**
@@ -251,19 +245,17 @@ const tasks = {
 					return;
 				}
 
-				Promise.all( [
-					// Compile the scripts - run Webpack.
-					tasks.manualTests.compileScripts( options.destinationPath, manualTestsPath ),
+				// Concat the manual test files into single.
+				tasks.manualTests.compileViews( options.destinationPath, manualTestsPath );
 
-					// Concat the manual test files into single.
-					tasks.manualTests._compileViews( options.destinationPath, manualTestsPath )
-				] )
-				.then( () => {
-					// Start the server.
-					httpServer = require( './server' )( options.destinationPath, manualTestsPath );
+				// Compile the scripts - run Webpack.
+				tasks.manualTests.compileScripts( options.destinationPath, manualTestsPath )
+					.then( () => {
+						// Start the server.
+						httpServer = require( './server' )( options.destinationPath, manualTestsPath );
 
-					log.info( 'Ready to test.' );
-				} );
+						log.info( 'Ready to test.' );
+					} );
 			}
 
 			// SIGINT isn't caught on Windows in process. However CTRL+C can be catch

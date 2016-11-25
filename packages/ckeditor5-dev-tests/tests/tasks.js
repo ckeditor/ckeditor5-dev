@@ -382,7 +382,7 @@ describe( 'Tests', () => {
 		} );
 	} );
 
-	describe( 'manualTests._compileViews()', () => {
+	describe( 'manualTests.compileViews()', () => {
 		let sourcePath, outputPath, files;
 
 		const template = '<html></html>';
@@ -407,88 +407,61 @@ describe( 'Tests', () => {
 		} );
 
 		it( 'saves manual test views', () => {
-			let _watchFilesHandler;
+			let watchFilesHandler;
 
 			const readFileSyncStub = sandbox.stub( fs, 'readFileSync' )
 				.returns( template );
 			const manualTestPathsStub = sandbox.stub( utils, '_getManualTestPaths' )
 				.returns( [ files.engine.js, files.core.js ] );
-			const _compileViewStub = sandbox.stub( utils, '_compileView' )
+			const compileViewStub = sandbox.stub( utils, '_compileView' )
 				.returns( Promise.resolve() );
-			const _watchFilesStub = sandbox.stub( utils, '_watchFiles', ( pathToFiles, handler ) => {
-				_watchFilesHandler = handler;
+			const watchFilesStub = sandbox.stub( utils, '_watchFiles', ( pathToFiles, handler ) => {
+				watchFilesHandler = handler;
 			} );
 
-			return tasks.manualTests._compileViews( sourcePath, outputPath )
-				.then( ( resolvedPromises ) => {
-					expect( readFileSyncStub.calledOnce ).to.equal( true );
-					expect( manualTestPathsStub.calledOnce ).to.equal( true );
-					expect( manualTestPathsStub.firstCall.args[ 0 ] ).to.equal( sourcePath );
+			tasks.manualTests.compileViews( sourcePath, outputPath );
 
-					// Checks whether the watchers have been called.
-					expect( _watchFilesStub.calledTwice ).to.equal( true );
+			expect( readFileSyncStub.calledOnce ).to.equal( true );
+			expect( manualTestPathsStub.calledOnce ).to.equal( true );
+			expect( manualTestPathsStub.firstCall.args[ 0 ] ).to.equal( sourcePath );
 
-					expect( _watchFilesStub.firstCall.args[ 0 ] ).to.deep.equal( [
-						path.join( sourcePath, files.engine.html ),
-						path.join( sourcePath, files.engine.md )
-					] );
+			// Checks whether the watchers have been called.
+			expect( watchFilesStub.calledTwice ).to.equal( true );
 
-					expect( _watchFilesStub.firstCall.args[ 1 ] ).to.be.a( 'function' );
-
-					expect( _watchFilesStub.secondCall.args[ 0 ] ).to.deep.equal( [
-						path.join( sourcePath, files.core.html ),
-						path.join( sourcePath, files.core.md )
-					] );
-
-					expect( _watchFilesStub.secondCall.args[ 1 ] ).to.be.a( 'function' );
-
-					// Checks whether the views have been compiled.
-					expect( resolvedPromises.length ).to.equal( 2 );
-					expect( _compileViewStub.calledTwice ).to.equal( true );
-					expect( _compileViewStub.firstCall.args[ 0 ] ).to.equal( sourcePath );
-					expect( _compileViewStub.firstCall.args[ 1 ] ).to.equal( outputPath );
-					expect( _compileViewStub.firstCall.args[ 2 ] ).to.equal( path.join( sourcePath, files.engine.html ) );
-					expect( _compileViewStub.firstCall.args[ 3 ] ).to.equal( template );
-					expect( _compileViewStub.secondCall.args[ 0 ] ).to.equal( sourcePath );
-					expect( _compileViewStub.secondCall.args[ 1 ] ).to.equal( outputPath );
-					expect( _compileViewStub.secondCall.args[ 2 ] ).to.equal( path.join( sourcePath, files.core.html ) );
-					expect( _compileViewStub.secondCall.args[ 3 ] ).to.equal( template );
-
-					// Check whether the handler for watched files is correct.
-					expect( _watchFilesHandler ).to.be.a( 'function' );
-					_watchFilesHandler( path.join( sourcePath, files.engine.md ) );
-
-					expect( _compileViewStub.calledThrice ).to.equal( true );
-					expect( _compileViewStub.thirdCall.args[ 0 ] ).to.equal( sourcePath );
-					expect( _compileViewStub.thirdCall.args[ 1 ] ).to.equal( outputPath );
-					expect( _compileViewStub.thirdCall.args[ 2 ] ).to.equal( path.join( sourcePath, files.engine.md ) );
-					expect( _compileViewStub.thirdCall.args[ 3 ] ).to.equal( template );
-				} );
-		} );
-
-		it( 'rejects a promise when file cannot be saved', () => {
-			const error = new Error( 'Unknown reason.' );
-
-			sandbox.stub( fs, 'readFileSync' ).returns( template );
-			sandbox.stub( utils, '_getManualTestPaths' ).returns( [
-				files.engine.js,
-				files.core.js
+			expect( watchFilesStub.firstCall.args[ 0 ] ).to.deep.equal( [
+				path.join( sourcePath, files.engine.html ),
+				path.join( sourcePath, files.engine.md )
 			] );
-			sandbox.stub( utils, '_watchFiles' );
 
-			const _compileViewStub = sandbox.stub( utils, '_compileView' );
-			_compileViewStub.onCall( 0 ).returns( Promise.resolve() );
-			_compileViewStub.onCall( 1 ).returns( Promise.reject( error ) );
+			expect( watchFilesStub.firstCall.args[ 1 ] ).to.be.a( 'function' );
 
-			return tasks.manualTests._compileViews( sourcePath, outputPath )
-				.then(
-					() => {
-						throw new Error( 'Promise was supposed to be rejected.' );
-					},
-					( err ) => {
-						expect( err ).to.equal( error );
-					}
-				);
+			expect( watchFilesStub.secondCall.args[ 0 ] ).to.deep.equal( [
+				path.join( sourcePath, files.core.html ),
+				path.join( sourcePath, files.core.md )
+			] );
+
+			expect( watchFilesStub.secondCall.args[ 1 ] ).to.be.a( 'function' );
+
+			// Checks whether the views have been compiled.
+			expect( compileViewStub.calledTwice ).to.equal( true );
+			expect( compileViewStub.firstCall.args[ 0 ] ).to.equal( sourcePath );
+			expect( compileViewStub.firstCall.args[ 1 ] ).to.equal( outputPath );
+			expect( compileViewStub.firstCall.args[ 2 ] ).to.equal( path.join( sourcePath, files.engine.html ) );
+			expect( compileViewStub.firstCall.args[ 3 ] ).to.equal( template );
+			expect( compileViewStub.secondCall.args[ 0 ] ).to.equal( sourcePath );
+			expect( compileViewStub.secondCall.args[ 1 ] ).to.equal( outputPath );
+			expect( compileViewStub.secondCall.args[ 2 ] ).to.equal( path.join( sourcePath, files.core.html ) );
+			expect( compileViewStub.secondCall.args[ 3 ] ).to.equal( template );
+
+			// Check whether the handler for watched files is correct.
+			expect( watchFilesHandler ).to.be.a( 'function' );
+			watchFilesHandler( path.join( sourcePath, files.engine.md ) );
+
+			expect( compileViewStub.calledThrice ).to.equal( true );
+			expect( compileViewStub.thirdCall.args[ 0 ] ).to.equal( sourcePath );
+			expect( compileViewStub.thirdCall.args[ 1 ] ).to.equal( outputPath );
+			expect( compileViewStub.thirdCall.args[ 2 ] ).to.equal( path.join( sourcePath, files.engine.md ) );
+			expect( compileViewStub.thirdCall.args[ 3 ] ).to.equal( template );
 		} );
 	} );
 
@@ -506,7 +479,7 @@ describe( 'Tests', () => {
 
 			// Resolve promises with compilation scripts and views.
 			const compileScriptsStub = sandbox.stub( tasks.manualTests, 'compileScripts' ).returns( Promise.resolve() );
-			sandbox.stub( tasks.manualTests, '_compileViews' ).returns( Promise.resolve() );
+			sandbox.stub( tasks.manualTests, 'compileViews' ).returns( Promise.resolve() );
 
 			// Don't attach events.
 			sandbox.stub( process, 'on' );
@@ -593,7 +566,7 @@ describe( 'Tests', () => {
 
 			// Resolve promises with compilation scripts and views.
 			sandbox.stub( tasks.manualTests, 'compileScripts' ).returns( Promise.resolve() );
-			sandbox.stub( tasks.manualTests, '_compileViews' ).returns( Promise.resolve() );
+			sandbox.stub( tasks.manualTests, 'compileViews' ).returns( Promise.resolve() );
 
 			// We must stub the `process.emit()` method because other npm scripts (like test)
 			// can also attach its events. If we don't do this, we will break all tests at this moment.
@@ -665,7 +638,7 @@ describe( 'Tests', () => {
 
 			// Resolve promises with compilation scripts and views.
 			sandbox.stub( tasks.manualTests, 'compileScripts' ).returns( Promise.resolve() );
-			sandbox.stub( tasks.manualTests, '_compileViews' ).returns( Promise.resolve() );
+			sandbox.stub( tasks.manualTests, 'compileViews' ).returns( Promise.resolve() );
 
 			// Mock user's platform.
 			sandbox.stub( utils, '_getPlatform' ).returns( 'win32' );
