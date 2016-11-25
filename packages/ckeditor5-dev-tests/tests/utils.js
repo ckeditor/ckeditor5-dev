@@ -228,18 +228,18 @@ describe( 'utils', () => {
 			const globSyncStub = sandbox.stub( glob, 'sync' ).returns( [
 				path.join( sourcePath, 'tests', 'package', 'manual', 'manual-test.js' ),
 				path.join( sourcePath, 'tests', 'foo', 'manual', 'test-manual.js' ),
-				path.join( sourcePath, 'tests', 'bar', 'manual', 'name-of-test.js' )
+				path.join( sourcePath, 'tests', 'bar', 'view', 'manual', 'name-of-test.js' )
 			] );
 
 			const pathsToTests = [
 				path.join( 'tests', 'package', 'manual', 'manual-test.js' ),
 				path.join( 'tests', 'foo', 'manual', 'test-manual.js' ),
-				path.join( 'tests', 'bar', 'manual', 'name-of-test.js' )
+				path.join( 'tests', 'bar', 'view', 'manual', 'name-of-test.js' )
 			];
 
 			expect( utils.getManualTestPaths( sourcePath ) ).to.deep.equal( pathsToTests );
 			expect( globSyncStub.calledOnce ).to.equal( true );
-			expect( globSyncStub.firstCall.args[ 0 ] ).to.equal( path.join( sourcePath, 'tests', '*', 'manual', '**', '*.js' ) );
+			expect( globSyncStub.firstCall.args[ 0 ] ).to.equal( path.join( sourcePath, 'tests', '**', 'manual', '**', '*.js' ) );
 		} );
 	} );
 
@@ -370,7 +370,7 @@ describe( 'utils', () => {
 			readFileSyncStub.withArgs( htmlFilePath ).returns( '<div>Hello world!</div>' );
 
 			sandbox.stub( fs, 'outputFile', ( pathToSave, content, callback ) => {
-				const compiledManualTest = `<html><head></head><body style="padding-left: 425px;"><div data-sidebar="true"><h1>Some header</h1>
+				const compiledManualTest = `<html><head></head><body style="padding-left: 425px;"><div id="manual-test-sidebar"><h1>Some header</h1>
 <p>Test description.</p>
 </div><div>Hello world!</div><script src="./test.js"></script></body></html>`;
 

@@ -509,8 +509,12 @@ describe( 'Tests', () => {
 
 	describe( 'manualTests.run()', () => {
 		it( 'waits for the compiler and runs the http server', ( done ) => {
+			const destinationPath = path.resolve( '.' );
+
 			tasks = proxyquire( '../lib/tasks', {
-				'./server': () => {
+				'./server': ( sourceRoot, serverRoot ) => {
+					expect( sourceRoot ).to.equal( destinationPath );
+					expect( serverRoot ).to.equal( path.join( destinationPath, 'manual-tests' ) );
 					done();
 				}
 			} );

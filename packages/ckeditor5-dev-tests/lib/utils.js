@@ -317,7 +317,7 @@ const utils = {
 	 * @return {Array.<String>}
 	 */
 	getManualTestPaths( sourcePath ) {
-		const globPattern = path.join( sourcePath, 'tests', '*', 'manual', '**', '*.js' );
+		const globPattern = path.join( sourcePath, 'tests', '**', 'manual', '**', '*.js' );
 
 		return glob.sync( globPattern )
 			.map( ( absolutePath ) => absolutePath.replace( `${ sourcePath }${ path.sep }`, '' ) );
@@ -391,7 +391,7 @@ const utils = {
 
 		// Compile test instruction (Markdown file).
 		const parsedMarkdownTree = reader.parse( fs.readFileSync( `${ pathWithoutExtension }.md`, 'utf-8' ) );
-		const manualTestInstructions = '<div data-sidebar="true">' + writer.render( parsedMarkdownTree ) + '</div>';
+		const manualTestInstructions = '<div id="manual-test-sidebar">' + writer.render( parsedMarkdownTree ) + '</div>';
 
 		// Load test view (HTML file).
 		const htmlView = fs.readFileSync( `${ pathWithoutExtension }.html`, 'utf-8' );
