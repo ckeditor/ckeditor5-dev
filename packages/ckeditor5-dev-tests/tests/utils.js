@@ -43,20 +43,20 @@ describe( 'utils', () => {
 		sandbox.restore();
 	} );
 
-	describe( 'getKarmaConfig()', () => {
+	describe( '_getKarmaConfig()', () => {
 		it( 'throws an error when files were not specified', () => {
 			expect( () => {
-				utils.getKarmaConfig( {} );
+				utils._getKarmaConfig( {} );
 			} ).to.throw( Error, 'Karma requires files to tests. `options.files` has to be non-empty array.' );
 
 			expect( () => {
-				utils.getKarmaConfig( { files: [] } );
+				utils._getKarmaConfig( { files: [] } );
 			} ).to.throw( Error, 'Karma requires files to tests. `options.files` has to be non-empty array.' );
 		} );
 
 		it( 'transforms specified test files to the Karma configuration', () => {
-			const webpackConfigStub = sandbox.stub( utils, 'getWebpackConfig' );
-			const karmaConfig = utils.getKarmaConfig( {
+			const webpackConfigStub = sandbox.stub( utils, '_getWebpackConfig' );
+			const karmaConfig = utils._getKarmaConfig( {
 				sourcePath: __dirname,
 				files: [
 					'basic-styles',
@@ -76,8 +76,8 @@ describe( 'utils', () => {
 		} );
 
 		it( 'generates the coverage for sources', () => {
-			const webpackConfigStub = sandbox.stub( utils, 'getWebpackConfig' );
-			const karmaConfig = utils.getKarmaConfig( {
+			const webpackConfigStub = sandbox.stub( utils, '_getWebpackConfig' );
+			const karmaConfig = utils._getKarmaConfig( {
 				sourcePath: __dirname,
 				coverage: true,
 				files: [
@@ -90,8 +90,8 @@ describe( 'utils', () => {
 		} );
 
 		it( 'runs Karma with the watcher', () => {
-			const webpackConfigStub = sandbox.stub( utils, 'getWebpackConfig' );
-			const karmaConfig = utils.getKarmaConfig( {
+			const webpackConfigStub = sandbox.stub( utils, '_getWebpackConfig' );
+			const karmaConfig = utils._getKarmaConfig( {
 				sourcePath: __dirname,
 				watch: true,
 				files: [
@@ -105,7 +105,7 @@ describe( 'utils', () => {
 		} );
 	} );
 
-	describe( 'getWebpackConfig()', () => {
+	describe( '_getWebpackConfig()', () => {
 		let defaultExcludes = [
 			/(node_modules)/,
 			/tests/,
@@ -121,7 +121,7 @@ describe( 'utils', () => {
 				'paragraph'
 			] );
 
-			const webpackConfig = utils.getWebpackConfig( {
+			const webpackConfig = utils._getWebpackConfig( {
 				sourcePath: __dirname,
 				coverage: true,
 				files: [
@@ -150,7 +150,7 @@ describe( 'utils', () => {
 				'paragraph'
 			] );
 
-			const webpackConfig = utils.getWebpackConfig( {
+			const webpackConfig = utils._getWebpackConfig( {
 				sourcePath: __dirname,
 				coverage: true
 			} );
@@ -221,7 +221,7 @@ describe( 'utils', () => {
 		} );
 	} );
 
-	describe( 'getManualTestPaths()', () => {
+	describe( '_getManualTestPaths()', () => {
 		it( 'returns paths to all manual scripts', () => {
 			const sourcePath = path.resolve( '.' );
 
@@ -237,25 +237,25 @@ describe( 'utils', () => {
 				path.join( 'tests', 'bar', 'view', 'manual', 'name-of-test.js' )
 			];
 
-			expect( utils.getManualTestPaths( sourcePath ) ).to.deep.equal( pathsToTests );
+			expect( utils._getManualTestPaths( sourcePath ) ).to.deep.equal( pathsToTests );
 			expect( globSyncStub.calledOnce ).to.equal( true );
 			expect( globSyncStub.firstCall.args[ 0 ] ).to.equal( path.join( sourcePath, 'tests', '**', 'manual', '**', '*.js' ) );
 		} );
 	} );
 
-	describe( 'cleanManualTestPath()', () => {
+	describe( '_cleanManualTestPath()', () => {
 		it( 'returns a cleaned path', () => {
 			expect(
-				utils.cleanManualTestPath( path.join( '..', 'tests', 'package', 'manual', 'ticket', '1.js' ) )
+				utils._cleanManualTestPath( path.join( '..', 'tests', 'package', 'manual', 'ticket', '1.js' ) )
 			).to.equal( path.join( '..', 'tests', 'package', 'ticket', '1.js' ) );
 
 			expect(
-				utils.cleanManualTestPath( path.join( '..', 'tests', 'package', 'ticket', '1.js' ) )
+				utils._cleanManualTestPath( path.join( '..', 'tests', 'package', 'ticket', '1.js' ) )
 			).to.equal( path.join( '..', 'tests', 'package', 'ticket', '1.js' ) );
 		} );
 	} );
 
-	describe( 'getWebpackEntriesForManualTests()', () => {
+	describe( '_getWebpackEntriesForManualTests()', () => {
 		it( 'returns an object with destination and input paths', () => {
 			const sourcePath = path.resolve( '.' );
 			const manualTestPaths = [
@@ -263,9 +263,9 @@ describe( 'utils', () => {
 				path.join( 'tests', 'bar', 'manual', 'name-of-test.js' )
 			];
 
-			const manualTestPathsStub = sandbox.stub( utils, 'getManualTestPaths' ).returns( manualTestPaths );
+			const manualTestPathsStub = sandbox.stub( utils, '_getManualTestPaths' ).returns( manualTestPaths );
 
-			expect( utils.getWebpackEntriesForManualTests( sourcePath ) ).to.deep.equal( {
+			expect( utils._getWebpackEntriesForManualTests( sourcePath ) ).to.deep.equal( {
 				[ path.join( 'tests', 'foo', 'test-manual.js' )]: manualTestPaths[ 0 ],
 				[ path.join( 'tests', 'bar', 'name-of-test.js' )]: manualTestPaths[ 1 ]
 			} );
@@ -274,11 +274,11 @@ describe( 'utils', () => {
 		} );
 	} );
 
-	describe( 'watchFiles()', () => {
+	describe( '_watchFiles()', () => {
 		it( 'attaches the watcher', () => {
 			const fsWatchStub = sandbox.stub( fs, 'watch' );
 
-			utils.watchFiles( [ 'path-1', 'path-2' ], sandbox.spy() );
+			utils._watchFiles( [ 'path-1', 'path-2' ], sandbox.spy() );
 
 			expect( fsWatchStub.calledTwice ).to.equal( true );
 			expect( fsWatchStub.firstCall.args[ 0 ] ).to.equal( 'path-1' );
@@ -305,7 +305,7 @@ describe( 'utils', () => {
 				}
 			} );
 
-			utils.watchFiles( [ 'path-1', 'path-2' ], functionToCall );
+			utils._watchFiles( [ 'path-1', 'path-2' ], functionToCall );
 
 			should.exist( handlerForFirstPath );
 			should.exist( handlerForSecondPath );
@@ -352,7 +352,7 @@ describe( 'utils', () => {
 		} );
 	} );
 
-	describe( 'compileView()', () => {
+	describe( '_compileView()', () => {
 		let sourcePath, outputPath, mdFilePath, htmlFilePath, template;
 
 		beforeEach( () => {
@@ -381,7 +381,7 @@ describe( 'utils', () => {
 				callback();
 			} );
 
-			return utils.compileView( sourcePath, outputPath, mdFilePath, template )
+			return utils._compileView( sourcePath, outputPath, mdFilePath, template )
 				.then(
 					() => {
 						expect( readFileSyncStub.calledTwice ).to.equal( true );
@@ -398,7 +398,7 @@ describe( 'utils', () => {
 				callback( error );
 			} );
 
-			return utils.compileView( sourcePath, outputPath, mdFilePath, template )
+			return utils._compileView( sourcePath, outputPath, mdFilePath, template )
 				.then(
 					() => {
 						throw new Error( 'Promise was supposed to be rejected.' );
@@ -413,9 +413,9 @@ describe( 'utils', () => {
 		} );
 	} );
 
-	describe( 'getPlatform()', () => {
+	describe( '_getPlatform()', () => {
 		it( 'returns a platform', () => {
-			expect( utils.getPlatform() ).to.equal( process.platform );
+			expect( utils._getPlatform() ).to.equal( process.platform );
 		} );
 	} );
 } );

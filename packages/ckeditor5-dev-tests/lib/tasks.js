@@ -33,7 +33,7 @@ const tasks = {
 	 */
 	runTests( options ) {
 		return new Promise( ( resolve, reject ) => {
-			const config = utils.getKarmaConfig( options );
+			const config = utils._getKarmaConfig( options );
 
 			const server = new KarmaServer( config, ( exitCode ) => {
 				if ( exitCode === 0 ) {
@@ -144,7 +144,7 @@ const tasks = {
 		 */
 		compileScripts( sourcePath, outputPath ) {
 			// Prepare configuration for Webpack.
-			const webpackConfig = utils.getWebpackConfig( {
+			const webpackConfig = utils._getWebpackConfig( {
 				sourcePath,
 				coverage: false,
 				sourceMap: false,
@@ -158,7 +158,7 @@ const tasks = {
 			webpackConfig.plugins.push( new NotifierPlugin() );
 
 			// Generate entry points for Webpack.
-			webpackConfig.entry = utils.getWebpackEntriesForManualTests( sourcePath );
+			webpackConfig.entry = utils._getWebpackEntriesForManualTests( sourcePath );
 
 			// Set the output point.
 			webpackConfig.output = {
@@ -184,24 +184,24 @@ const tasks = {
 		 * @param {String} outputPath Base path where all files will be saved.
 		 * @returns {Promise}
 		 */
-		compileViews( sourcePath, outputPath ) {
+		_compileViews( sourcePath, outputPath ) {
 			const promises = [];
 			const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 
-			utils.getManualTestPaths( sourcePath )
+			utils._getManualTestPaths( sourcePath )
 				.map( ( testPath ) => testPath.replace( /\.js$/, '' ) )
 				.forEach( ( testPath ) => {
 					const htmlPath = path.join( sourcePath, `${ testPath }.html` );
 					const mdPath = path.join( sourcePath, `${ testPath }.md` );
 
 					// Attach watchers.
-					utils.watchFiles( [ htmlPath, mdPath ], ( file ) => {
-						utils.compileView( sourcePath, outputPath, file, viewTemplate );
+					utils._watchFiles( [ htmlPath, mdPath ], ( file ) => {
+						utils._compileView( sourcePath, outputPath, file, viewTemplate );
 					} );
 
 					// Initial compilation.
 					promises.push(
-						utils.compileView( sourcePath, outputPath, htmlPath, viewTemplate )
+						utils._compileView( sourcePath, outputPath, htmlPath, viewTemplate )
 					);
 				} );
 
@@ -256,7 +256,7 @@ const tasks = {
 					tasks.manualTests.compileScripts( options.destinationPath, manualTestsPath ),
 
 					// Concat the manual test files into single.
-					tasks.manualTests.compileViews( options.destinationPath, manualTestsPath )
+					tasks.manualTests._compileViews( options.destinationPath, manualTestsPath )
 				] )
 				.then( () => {
 					// Start the server.
@@ -268,7 +268,7 @@ const tasks = {
 
 			// SIGINT isn't caught on Windows in process. However CTRL+C can be catch
 			// by `readline` module. After that we can emit SIGINT to the process manually.
-			if ( utils.getPlatform() === 'win32' ) {
+			if ( utils._getPlatform() === 'win32' ) {
 				const readline = require( 'readline' ).createInterface( {
 					input: process.stdin,
 					output: process.stdout

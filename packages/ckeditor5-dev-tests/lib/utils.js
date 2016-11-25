@@ -21,8 +21,88 @@ const utils = {
 	coverageDirectory: 'coverage',
 
 	/**
+	 * Returns a name of package based on current work directory.
+	 *
+	 * @param {String} [cwd=process.cwd()] cwd Current work directory.
+	 * @returns {String}
+	 */
+	getPackageName( cwd = process.cwd() ) {
+		const packageJson = require( path.join( cwd, 'package.json' ) );
+		const matchedName = packageJson.name.match( /ckeditor5-(.*)/ );
+
+		if ( !matchedName ) {
+			throw new Error( 'The package name does not start with a "ckeditor5-".' );
+		}
+
+		// Temporary implementation of the UI lib option. See https://github.com/ckeditor/ckeditor5/issues/88.
+		if ( matchedName[ 1 ] === 'ui-default' ) {
+			return 'ui';
+		}
+
+		return matchedName[ 1 ];
+	},
+
+	/**
+	 * @returns {Object} options
+	 * @returns {String} options.sourcePath
+	 * @returns {Array.<String>|null} options.files
+	 * @returns {Array.<String>} options.browsers
+	 * @returns {Boolean} [options.watch=false] options.watch
+	 * @returns {Boolean} [options.coverage=false] options.coverage
+	 * @returns {Boolean} [options.sourceMap=false] options.sourceMap
+	 * @returns {Boolean} [options.verbose=false] options.verbose
+	 * @returns {Boolean} [options.ignoreDuplicates] Whether to ignore duplicated packages. Packages can
+	 * be duplicated if there are conflicts in dependency versions or when one of the packages is installed
+	 * in the development mode (as a cloned repository).
+	 */
+	parseArguments() {
+		const options = minimist( process.argv.slice( 2 ), {
+			string: [
+				'files',
+				'browsers'
+			],
+
+			boolean: [
+				'watch',
+				'coverage',
+				'source-map',
+				'verbose',
+				'ignore-duplicates'
+			],
+
+			alias: {
+				w: 'watch',
+				c: 'coverage',
+				s: 'source-map',
+				v: 'verbose',
+			},
+
+			default: {
+				files: [],
+				browsers: 'Chrome',
+				watch: false,
+				coverage: false,
+				verbose: false,
+				'source-map': false,
+				'ignore-duplicates': false
+			}
+		} );
+
+		options.ignoreDuplicates = options[ 'ignore-duplicates' ];
+		options.sourceMap = options[ 'source-map' ];
+		options.browsers = options.browsers.split( ',' );
+
+		if ( typeof options.files === 'string' ) {
+			options.files = options.files.split( ',' );
+		}
+
+		return options;
+	},
+
+	/**
 	 * Returns an configuration object for Karma.
 	 *
+	 * @protected
 	 * @param {Object} options
 	 * @param {String} options.sourcePath Base path that will be used to resolve all patterns.
 	 * @param {Boolean} options.watch Whether to watch the files and executing tests whenever any file changes.
@@ -33,7 +113,7 @@ const utils = {
 	 * @param {Array.<String>} options.files Files to tests.
 	 * @returns {Object}
 	 */
-	getKarmaConfig( options ) {
+	_getKarmaConfig( options ) {
 		if ( !Array.isArray( options.files ) || options.files.length === 0 ) {
 			throw new Error( 'Karma requires files to tests. `options.files` has to be non-empty array.' );
 		}
@@ -64,7 +144,7 @@ const utils = {
 				'tests/**/*.js': [ 'webpack' ]
 			},
 
-			webpack: utils.getWebpackConfig( options ),
+			webpack: utils._getWebpackConfig( options ),
 
 			webpackMiddleware: {
 				noInfo: true,
@@ -168,6 +248,7 @@ const utils = {
 	/**
 	 * Returns an configuration object for Webpack.
 	 *
+	 * @protected
 	 * @param {Object} options
 	 * @param {String} options.sourcePath Base path that will be used to resolve all patterns.
 	 * @param {Boolean} options.coverage Whether to generate code coverage.
@@ -175,7 +256,7 @@ const utils = {
 	 * @param {Array.<String>} options.files Files to tests.
 	 * @returns {Object}
 	 */
-	getWebpackConfig( options ) {
+	_getWebpackConfig( options ) {
 		const webpackConfig = {
 			resolve: {
 				root: options.sourcePath
@@ -234,93 +315,15 @@ const utils = {
 	},
 
 	/**
-	 * Returns a name of package based on current work directory.
-	 *
-	 * @param {String} [cwd=process.cwd()] cwd Current work directory.
-	 * @returns {String}
-	 */
-	getPackageName( cwd = process.cwd() ) {
-		const packageJson = require( path.join( cwd, 'package.json' ) );
-		const matchedName = packageJson.name.match( /ckeditor5-(.*)/ );
-
-		if ( !matchedName ) {
-			throw new Error( 'The package name does not start with a "ckeditor5-".' );
-		}
-
-		// Temporary implementation of the UI lib option. See https://github.com/ckeditor/ckeditor5/issues/88.
-		if ( matchedName[ 1 ] === 'ui-default' ) {
-			return 'ui';
-		}
-
-		return matchedName[ 1 ];
-	},
-
-	/**
-	 * @returns {Object} options
-	 * @returns {String} options.sourcePath
-	 * @returns {Array.<String>|null} options.files
-	 * @returns {Array.<String>} options.browsers
-	 * @returns {Boolean} [options.watch=false] options.watch
-	 * @returns {Boolean} [options.coverage=false] options.coverage
-	 * @returns {Boolean} [options.sourceMap=false] options.sourceMap
-	 * @returns {Boolean} [options.verbose=false] options.verbose
-	 * @returns {Boolean} [options.ignoreDuplicates] Whether to ignore duplicated packages. Packages can
-	 * be duplicated if there are conflicts in dependency versions or when one of the packages is installed
-	 * in the development mode (as a cloned repository).
-	 */
-	parseArguments() {
-		const options = minimist( process.argv.slice( 2 ), {
-			string: [
-				'files',
-				'browsers'
-			],
-
-			boolean: [
-				'watch',
-				'coverage',
-				'source-map',
-				'verbose',
-				'ignore-duplicates'
-			],
-
-			alias: {
-				w: 'watch',
-				c: 'coverage',
-				s: 'source-map',
-				v: 'verbose',
-			},
-
-			default: {
-				files: [],
-				browsers: 'Chrome',
-				watch: false,
-				coverage: false,
-				verbose: false,
-				'source-map': false,
-				'ignore-duplicates': false
-			}
-		} );
-
-		options.ignoreDuplicates = options[ 'ignore-duplicates' ];
-		options.sourceMap = options[ 'source-map' ];
-		options.browsers = options.browsers.split( ',' );
-
-		if ( typeof options.files === 'string' ) {
-			options.files = options.files.split( ',' );
-		}
-
-		return options;
-	},
-
-	/**
 	 * Returns paths to the JS files of manual tests.
 	 *
 	 * The paths are relative to `sourcePath`.
 	 *
+	 * @protected
 	 * @param {String} sourcePath Base path to the all sources.
 	 * @return {Array.<String>}
 	 */
-	getManualTestPaths( sourcePath ) {
+	_getManualTestPaths( sourcePath ) {
 		const globPattern = path.join( sourcePath, 'tests', '**', 'manual', '**', '*.js' );
 
 		return glob.sync( globPattern )
@@ -330,10 +333,11 @@ const utils = {
 	/**
 	 * Removes `manual/` directories from the path.
 	 *
+	 * @protected
 	 * @param {String} pathToClean
 	 * @returns {String}
 	 */
-	cleanManualTestPath( pathToClean ) {
+	_cleanManualTestPath( pathToClean ) {
 		return pathToClean.split( path.sep )
 			.filter( ( dirName ) => dirName !== 'manual' )
 			.join( path.sep );
@@ -343,14 +347,15 @@ const utils = {
 	 * Get the `config.entries` object for Webpack. The entries represents
 	 * JS files to build.
 	 *
+	 * @protected
 	 * @param {String} sourcePath Base path to the all sources.
 	 * @return {Object}
 	 */
-	getWebpackEntriesForManualTests( sourcePath ) {
+	_getWebpackEntriesForManualTests( sourcePath ) {
 		const entries = {};
 
-		for ( const testPath of utils.getManualTestPaths( sourcePath ) ) {
-			entries[ utils.cleanManualTestPath( testPath ) ] = testPath;
+		for ( const testPath of utils._getManualTestPaths( sourcePath ) ) {
+			entries[ utils._cleanManualTestPath( testPath ) ] = testPath;
 		}
 
 		return entries;
@@ -360,10 +365,11 @@ const utils = {
 	 * Watches given paths. When a file is modified, the handler will be executed.
 	 * The handler will call 500ms after the last change in file.
 	 *
+	 * @protected
 	 * @param {Array.<String>} absolutePaths Paths that will be watched.
 	 * @param {Function} handler Handler that will be executed after detected the changes in file.
 	 */
-	watchFiles( absolutePaths, handler ) {
+	_watchFiles( absolutePaths, handler ) {
 		let timerId;
 
 		for ( const itemPath of absolutePaths ) {
@@ -384,13 +390,14 @@ const utils = {
 	/**
 	 * Compiles an HTML file of a manual tests out of a source Markdown and HTML files.
 	 *
+	 * @protected
 	 * @param {String} sourcePath Base path to the all sources.
 	 * @param {String} outputPath Path where compiled test will be saved.
 	 * @param {String} pathToFile Absolute path to compiled HTML or Markdown file.
 	 * @param {String} viewTemplate Template with the whole page.
 	 * @returns {Promise}
 	 */
-	compileView( sourcePath, outputPath, pathToFile, viewTemplate ) {
+	_compileView( sourcePath, outputPath, pathToFile, viewTemplate ) {
 		const log = logger();
 		log.info( `[View] Processing '${ gutil.colors.cyan( pathToFile ) }'...` );
 
@@ -410,7 +417,7 @@ const utils = {
 		const preparedHtml = combine( viewTemplate, manualTestInstructions, htmlView, scriptTag );
 
 		// Prepare output path.
-		const outputFilePath = utils.cleanManualTestPath( `${ pathWithoutExtension.replace( sourcePath, outputPath ) }.html` );
+		const outputFilePath = utils._cleanManualTestPath( `${ pathWithoutExtension.replace( sourcePath, outputPath ) }.html` );
 
 		return new Promise( ( resolve, reject ) => {
 			fs.outputFile( outputFilePath, preparedHtml, ( err ) => {
@@ -431,9 +438,10 @@ const utils = {
 	 *
 	 * It allows to mock the platform in other tests.
 	 *
+	 * @protected
 	 * @returns {String}
 	 */
-	getPlatform() {
+	_getPlatform() {
 		return process.platform;
 	}
 };

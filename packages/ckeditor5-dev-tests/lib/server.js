@@ -96,9 +96,9 @@ function getContentType( fileExtension ) {
 // @returns {String}
 function generateIndex( sourcePath ) {
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
-	const listElements = utils.getManualTestPaths( sourcePath )
+	const listElements = utils._getManualTestPaths( sourcePath )
 		.map( ( testPath ) => {
-			const htmlPath = utils.cleanManualTestPath( testPath ).replace( /\.js$/, '.html' );
+			const htmlPath = utils._cleanManualTestPath( testPath ).replace( /\.js$/, '.html' );
 
 			return `<li><a href="${ htmlPath }">${ htmlPath }</a></li>`;
 		} );
