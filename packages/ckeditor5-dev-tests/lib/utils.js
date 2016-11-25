@@ -296,10 +296,7 @@ const utils = {
 				test: /\.js$/,
 				loader: 'istanbul-instrumenter',
 				exclude: excludeTests.concat( [
-					/(node_modules)/,
-					/tests/,
-					/theme/,
-					/lib/
+					/\/(node_modules|tests|theme|lib)\//
 				] ),
 				query: {
 					esModules: true

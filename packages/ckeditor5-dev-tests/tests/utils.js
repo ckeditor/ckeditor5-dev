@@ -107,10 +107,7 @@ describe( 'utils', () => {
 
 	describe( '_getWebpackConfig()', () => {
 		let defaultExcludes = [
-			/(node_modules)/,
-			/tests/,
-			/theme/,
-			/lib/
+			/\/(node_modules|tests|theme|lib)\//
 		];
 
 		it( 'generates the coverage for specified sources', () => {

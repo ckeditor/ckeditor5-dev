@@ -84,7 +84,7 @@ const tasks = {
 
 			let waitUntil = new Date().getTime() + 500;
 
-			options.sourcePath = path.resolve( './.build/' );
+			options.sourcePath = path.resolve( 'build', '.automated-tests' );
 
 			return new Promise( ( resolve, reject ) => {
 				// Give it more time initially to bootstrap.
@@ -206,13 +206,14 @@ const tasks = {
 
 		/**
 		 * @param {Object} options
-		 * @param {String} options.destinationPath Base path where all files will be saved.
 		 * @param {Array.<String>} options.packages Paths to CKEditor 5 dependencies.
 		 * @param {Function} done Inform the task runner about finishing the job.
 		 */
 		run( options, done ) {
+			const destinationPath = path.resolve( 'build', '.manual-tests' );
+
 			const log = logger();
-			const manualTestsPath = path.join( options.destinationPath, 'manual-tests' );
+			const manualTestsPath = path.join( destinationPath, 'manual-tests' );
 			let timerId = setTimeout( checkWaitUntil, 3000 );
 			let waitUntil, httpServer;
 
@@ -223,7 +224,7 @@ const tasks = {
 				verbosity: 'warning',
 
 				formats: {
-					esnext: options.destinationPath
+					esnext: destinationPath
 				},
 
 				onChange() {
@@ -248,13 +249,13 @@ const tasks = {
 				}
 
 				// Concat the manual test files into single.
-				tasks.manual.compileViews( options.destinationPath, manualTestsPath );
+				tasks.manual.compileViews( destinationPath, manualTestsPath );
 
 				// Compile the scripts - run Webpack.
-				tasks.manual.compileScripts( options.destinationPath, manualTestsPath )
+				tasks.manual.compileScripts( destinationPath, manualTestsPath )
 					.then( () => {
 						// Start the server.
-						httpServer = require( './server' )( options.destinationPath, manualTestsPath );
+						httpServer = require( './server' )( destinationPath, manualTestsPath );
 
 						log.info( 'Ready to test.' );
 					} );

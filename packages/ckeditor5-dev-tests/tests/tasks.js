@@ -467,7 +467,7 @@ describe( 'Tests', () => {
 
 	describe( 'manual.run()', () => {
 		it( 'waits for the compiler and runs the http server', ( done ) => {
-			const destinationPath = path.resolve( '.' );
+			const destinationPath = path.resolve( 'build', '.manual-tests' );
 
 			tasks = proxyquire( '../lib/tasks', {
 				'./server': ( sourceRoot, serverRoot ) => {
@@ -479,7 +479,7 @@ describe( 'Tests', () => {
 
 			// Resolve promises with compilation scripts and views.
 			const compileScriptsStub = sandbox.stub( tasks.manual, 'compileScripts' ).returns( Promise.resolve() );
-			sandbox.stub( tasks.manual, 'compileViews' ).returns( Promise.resolve() );
+			sandbox.stub( tasks.manual, 'compileViews' );
 
 			// Don't attach events.
 			sandbox.stub( process, 'on' );
@@ -506,9 +506,7 @@ describe( 'Tests', () => {
 				return Promise.resolve();
 			} );
 
-			tasks.manual.run( {
-				destinationPath: path.resolve( '.' )
-			}, sandbox.spy() );
+			tasks.manual.run( {}, sandbox.spy() );
 		} );
 
 		it( 'breaks the process when compiler throws an error', ( done ) => {
@@ -566,7 +564,7 @@ describe( 'Tests', () => {
 
 			// Resolve promises with compilation scripts and views.
 			sandbox.stub( tasks.manual, 'compileScripts' ).returns( Promise.resolve() );
-			sandbox.stub( tasks.manual, 'compileViews' ).returns( Promise.resolve() );
+			sandbox.stub( tasks.manual, 'compileViews' );
 
 			// We must stub the `process.emit()` method because other npm scripts (like test)
 			// can also attach its events. If we don't do this, we will break all tests at this moment.
@@ -638,7 +636,7 @@ describe( 'Tests', () => {
 
 			// Resolve promises with compilation scripts and views.
 			sandbox.stub( tasks.manual, 'compileScripts' ).returns( Promise.resolve() );
-			sandbox.stub( tasks.manual, 'compileViews' ).returns( Promise.resolve() );
+			sandbox.stub( tasks.manual, 'compileViews' );
 
 			// Mock user's platform.
 			sandbox.stub( utils, '_getPlatform' ).returns( 'win32' );
