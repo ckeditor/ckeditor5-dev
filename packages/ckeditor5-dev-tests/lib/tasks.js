@@ -63,6 +63,77 @@ const tasks = {
 		} );
 	},
 
+	/**
+	 * Compiles the project and runs the tests.
+	 *
+	 * @param {Object} options
+	 * @param {Boolean} options.watch Whether to watch the files and executing tests whenever any file changes.
+	 * @param {Boolean} options.coverage Whether to generate code coverage.
+	 * @param {Boolean} options.sourceMap Whether to generate the source maps.
+	 * @param {Boolean} options.verbose Whether to informs about Webpack's work.
+	 * @param {Array.<String>} options.packages Paths to CKEditor 5 dependencies.
+	 * @param {Array.<String>} options.browsers Browsers which will be used to run the tests.
+	 * @param {Array.<String>} options.files Specify path(s) to tests.
+	 * @param {Boolean} options.ignoreDuplicates Whether to ignore duplicated packages.
+	 * @returns {Promise}
+	 */
+	test( options ) {
+		const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+		const log = logger();
+
+		let waitUntil = new Date().getTime() + 500;
+
+		options.sourcePath = path.resolve( './.build/' );
+
+		return new Promise( ( resolve, reject ) => {
+			// Give it more time initially to bootstrap.
+			let timerId = setTimeout( checkWaitUntil, 3000 );
+
+			const compilerOptions = {
+				watch: options.watch,
+				packages: options.packages,
+				ignoreDuplicates: options.ignoreDuplicates,
+				verbosity: 'warning',
+
+				formats: {
+					esnext: options.sourcePath
+				},
+
+				onChange() {
+					waitUntil = new Date().getTime() + 500;
+				}
+			};
+
+			log.info( 'Compiling the editor...' );
+
+			compiler.tasks.compile( compilerOptions )
+				.then( () => {
+					log.info( 'Finished the compilation.' );
+				} )
+				.catch( ( error ) => {
+					clearTimeout( timerId );
+					reject( error );
+				} );
+
+			// Wait until compiler ends its job and start Karma.
+			function checkWaitUntil() {
+				if ( new Date() < waitUntil ) {
+					timerId = setTimeout( checkWaitUntil, 200 );
+
+					return;
+				}
+
+				tasks.runTests( options )
+					.then( resolve )
+					.catch( ( err ) => {
+						log.error( err.message );
+
+						reject( err );
+					} );
+			}
+		} );
+	},
+
 	manualTests: {
 		/**
 		 * Compile scripts for manual tests.
@@ -87,7 +158,7 @@ const tasks = {
 			webpackConfig.plugins.push( new NotifierPlugin() );
 
 			// Generate entry points for Webpack.
-			webpackConfig.entry = utils.getEntriesForManualTests( sourcePath );
+			webpackConfig.entry = utils.getWebpackEntriesForManualTests( sourcePath );
 
 			// Set the output point.
 			webpackConfig.output = {
@@ -217,77 +288,6 @@ const tasks = {
 				process.exit();
 			} );
 		},
-	},
-
-	/**
-	 * Compiles the project and runs the tests.
-	 *
-	 * @param {Object} options
-	 * @param {Boolean} options.watch Whether to watch the files and executing tests whenever any file changes.
-	 * @param {Boolean} options.coverage Whether to generate code coverage.
-	 * @param {Boolean} options.sourceMap Whether to generate the source maps.
-	 * @param {Boolean} options.verbose Whether to informs about Webpack's work.
-	 * @param {Array.<String>} options.packages Paths to CKEditor 5 dependencies.
-	 * @param {Array.<String>} options.browsers Browsers which will be used to run the tests.
-	 * @param {Array.<String>} options.files Specify path(s) to tests.
-	 * @param {Boolean} options.ignoreDuplicates Whether to ignore duplicated packages.
-	 * @returns {Promise}
-	 */
-	test( options ) {
-		const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-		const log = logger();
-
-		let waitUntil = new Date().getTime() + 500;
-
-		options.sourcePath = path.resolve( './.build/' );
-
-		return new Promise( ( resolve, reject ) => {
-			// Give it more time initially to bootstrap.
-			let timerId = setTimeout( checkWaitUntil, 3000 );
-
-			const compilerOptions = {
-				watch: options.watch,
-				packages: options.packages,
-				ignoreDuplicates: options.ignoreDuplicates,
-				verbosity: 'warning',
-
-				formats: {
-					esnext: options.sourcePath
-				},
-
-				onChange() {
-					waitUntil = new Date().getTime() + 500;
-				}
-			};
-
-			log.info( 'Compiling the editor...' );
-
-			compiler.tasks.compile( compilerOptions )
-				.then( () => {
-					log.info( 'Finished the compilation.' );
-				} )
-				.catch( ( error ) => {
-					clearTimeout( timerId );
-					reject( error );
-				} );
-
-			// Wait until compiler ends its job and start Karma.
-			function checkWaitUntil() {
-				if ( new Date() < waitUntil ) {
-					timerId = setTimeout( checkWaitUntil, 200 );
-
-					return;
-				}
-
-				tasks.runTests( options )
-					.then( resolve )
-					.catch( ( err ) => {
-						log.error( err.message );
-
-						reject( err );
-					} );
-			}
-		} );
 	}
 };
 

@@ -313,6 +313,10 @@ const utils = {
 	},
 
 	/**
+	 * Returns paths to the JS files of manual tests.
+	 *
+	 * The paths are relative to `sourcePath`.
+	 *
 	 * @param {String} sourcePath Base path to the all sources.
 	 * @return {Array.<String>}
 	 */
@@ -329,21 +333,24 @@ const utils = {
 	 * @param {String} pathToClean
 	 * @returns {String}
 	 */
-	cleanPath( pathToClean ) {
+	cleanManualTestPath( pathToClean ) {
 		return pathToClean.split( path.sep )
 			.filter( ( dirName ) => dirName !== 'manual' )
 			.join( path.sep );
 	},
 
 	/**
+	 * Get the `config.entries` object for Webpack. The entries represents
+	 * JS files to build.
+	 *
 	 * @param {String} sourcePath Base path to the all sources.
 	 * @return {Object}
 	 */
-	getEntriesForManualTests( sourcePath ) {
+	getWebpackEntriesForManualTests( sourcePath ) {
 		const entries = {};
 
 		for ( const testPath of utils.getManualTestPaths( sourcePath ) ) {
-			entries[ utils.cleanPath( testPath ) ] = testPath;
+			entries[ utils.cleanManualTestPath( testPath ) ] = testPath;
 		}
 
 		return entries;
@@ -375,7 +382,7 @@ const utils = {
 	},
 
 	/**
-	 * Saves as single file a parsed Markdown and HTML with manual test.
+	 * Compiles an HTML file of a manual tests out of a source Markdown and HTML files.
 	 *
 	 * @param {String} sourcePath Base path to the all sources.
 	 * @param {String} outputPath Path where compiled test will be saved.
@@ -391,19 +398,19 @@ const utils = {
 
 		// Compile test instruction (Markdown file).
 		const parsedMarkdownTree = reader.parse( fs.readFileSync( `${ pathWithoutExtension }.md`, 'utf-8' ) );
-		const manualTestInstructions = '<div id="manual-test-sidebar">' + writer.render( parsedMarkdownTree ) + '</div>';
+		const manualTestInstructions = '<div class="manual-test-sidebar">' + writer.render( parsedMarkdownTree ) + '</div>';
 
 		// Load test view (HTML file).
 		const htmlView = fs.readFileSync( `${ pathWithoutExtension }.html`, 'utf-8' );
 
 		// Attach script file to the view.
-		const scriptTag = `<body style="padding-left: 425px;"><script src="./${ path.basename( pathWithoutExtension ) }.js"></script></body>`;
+		const scriptTag = `<body class="manual-test-container"><script src="./${ path.basename( pathWithoutExtension ) }.js"></script></body>`;
 
 		// Concat the all HTML parts to single one.
 		const preparedHtml = combine( viewTemplate, manualTestInstructions, htmlView, scriptTag );
 
 		// Prepare output path.
-		const outputFilePath = utils.cleanPath( `${ pathWithoutExtension.replace( sourcePath, outputPath ) }.html` );
+		const outputFilePath = utils.cleanManualTestPath( `${ pathWithoutExtension.replace( sourcePath, outputPath ) }.html` );
 
 		return new Promise( ( resolve, reject ) => {
 			fs.outputFile( outputFilePath, preparedHtml, ( err ) => {

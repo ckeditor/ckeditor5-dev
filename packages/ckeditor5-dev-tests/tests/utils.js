@@ -243,19 +243,19 @@ describe( 'utils', () => {
 		} );
 	} );
 
-	describe( 'cleanPath()', () => {
+	describe( 'cleanManualTestPath()', () => {
 		it( 'returns a cleaned path', () => {
 			expect(
-				utils.cleanPath( path.join( '..', 'tests', 'package', 'manual', 'ticket', '1.js' ) )
+				utils.cleanManualTestPath( path.join( '..', 'tests', 'package', 'manual', 'ticket', '1.js' ) )
 			).to.equal( path.join( '..', 'tests', 'package', 'ticket', '1.js' ) );
 
 			expect(
-				utils.cleanPath( path.join( '..', 'tests', 'package', 'ticket', '1.js' ) )
+				utils.cleanManualTestPath( path.join( '..', 'tests', 'package', 'ticket', '1.js' ) )
 			).to.equal( path.join( '..', 'tests', 'package', 'ticket', '1.js' ) );
 		} );
 	} );
 
-	describe( 'getEntriesForManualTests()', () => {
+	describe( 'getWebpackEntriesForManualTests()', () => {
 		it( 'returns an object with destination and input paths', () => {
 			const sourcePath = path.resolve( '.' );
 			const manualTestPaths = [
@@ -265,7 +265,7 @@ describe( 'utils', () => {
 
 			const manualTestPathsStub = sandbox.stub( utils, 'getManualTestPaths' ).returns( manualTestPaths );
 
-			expect( utils.getEntriesForManualTests( sourcePath ) ).to.deep.equal( {
+			expect( utils.getWebpackEntriesForManualTests( sourcePath ) ).to.deep.equal( {
 				[ path.join( 'tests', 'foo', 'test-manual.js' )]: manualTestPaths[ 0 ],
 				[ path.join( 'tests', 'bar', 'name-of-test.js' )]: manualTestPaths[ 1 ]
 			} );
@@ -370,7 +370,8 @@ describe( 'utils', () => {
 			readFileSyncStub.withArgs( htmlFilePath ).returns( '<div>Hello world!</div>' );
 
 			sandbox.stub( fs, 'outputFile', ( pathToSave, content, callback ) => {
-				const compiledManualTest = `<html><head></head><body style="padding-left: 425px;"><div id="manual-test-sidebar"><h1>Some header</h1>
+				const compiledManualTest =
+`<html><head></head><body class="manual-test-container"><div class="manual-test-sidebar"><h1>Some header</h1>
 <p>Test description.</p>
 </div><div>Hello world!</div><script src="./test.js"></script></body></html>`;
 
@@ -385,9 +386,6 @@ describe( 'utils', () => {
 					() => {
 						expect( readFileSyncStub.calledTwice ).to.equal( true );
 						expect( infoSpy.calledTwice ).to.equal( true );
-					},
-					() => {
-						throw new Error( 'Promise was supposed to be resolved.' );
 					}
 				);
 		} );

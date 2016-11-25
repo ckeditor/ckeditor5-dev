@@ -13,7 +13,7 @@ const utils = require( './utils' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
- * Basic HTTP server. See http://stackoverflow.com/a/26354478.
+ * Basic HTTP server.
  *
  * @param {String} sourcePath Base path where the compiler saved the files.
  * @param {String} serverRootPath Base path that will be used to find the static files.
@@ -98,9 +98,9 @@ function generateIndex( sourcePath ) {
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 	const listElements = utils.getManualTestPaths( sourcePath )
 		.map( ( testPath ) => {
-			const cleanPath = utils.cleanPath( testPath ).replace( /\.js$/, '.html' );
+			const htmlPath = utils.cleanManualTestPath( testPath ).replace( /\.js$/, '.html' );
 
-			return `<li><a href="${ cleanPath }">${ cleanPath }</a></li>`;
+			return `<li><a href="${ htmlPath }">${ htmlPath }</a></li>`;
 		} );
 
 	listElements.unshift( '<ul>' );

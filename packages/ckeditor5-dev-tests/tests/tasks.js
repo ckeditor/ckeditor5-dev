@@ -213,15 +213,10 @@ describe( 'Tests', () => {
 			} );
 
 			return tasks.test( options )
-				.then(
-					() => {
-						expect( infoSpy.callCount ).to.equal( 2 );
-						expect( serverCount ).to.deep.equal( [ 0, 0 ] );
-					},
-					() => {
-						throw new Error( 'Promise was supposed to be resolved.' );
-					}
-				);
+				.then( () => {
+					expect( infoSpy.callCount ).to.equal( 2 );
+					expect( serverCount ).to.deep.equal( [ 0, 0 ] );
+				} );
 		} );
 
 		it( 'does not resolve the promise until Karma\'s callback is called', () => {
@@ -342,28 +337,23 @@ describe( 'Tests', () => {
 				.returns( {
 					plugins: []
 				} );
-			const getEntriesForManualTestsStub = sandbox.stub( utils, 'getEntriesForManualTests' )
+			const getWebpackEntriesForManualTestsStub = sandbox.stub( utils, 'getWebpackEntriesForManualTests' )
 				.returns( { 'a.js': 'a/manual.js' } );
 
 			return tasks.manualTests.compileScripts( sourcePath, outputPath )
-				.then(
-					() => {
-						expect( getWebpackConfigStub.calledOnce ).to.equal( true );
-						expect( getEntriesForManualTestsStub.calledOnce ).to.equal( true );
+				.then( () => {
+					expect( getWebpackConfigStub.calledOnce ).to.equal( true );
+					expect( getWebpackEntriesForManualTestsStub.calledOnce ).to.equal( true );
 
-						expect( webpackConfig.plugins.length ).to.equal( 1 );
-						expect( webpackConfig.plugins[ 0 ] ).to.be.an.instanceof( NotifierPlugin );
-						expect( webpackConfig.watch ).to.equal( true );
-						expect( webpackConfig.entry ).to.deep.equal( { 'a.js': 'a/manual.js' } );
-						expect( webpackConfig.output ).to.deep.equal( {
-							path: outputPath,
-							filename: '[name]'
-						} );
-					},
-					() => {
-						throw new Error( 'Promise was supposed to be resolved.' );
-					}
-				);
+					expect( webpackConfig.plugins.length ).to.equal( 1 );
+					expect( webpackConfig.plugins[ 0 ] ).to.be.an.instanceof( NotifierPlugin );
+					expect( webpackConfig.watch ).to.equal( true );
+					expect( webpackConfig.entry ).to.deep.equal( { 'a.js': 'a/manual.js' } );
+					expect( webpackConfig.output ).to.deep.equal( {
+						path: outputPath,
+						filename: '[name]'
+					} );
+				} );
 		} );
 
 		it( 'rejects a promise when file cannot be saved', () => {
@@ -376,7 +366,7 @@ describe( 'Tests', () => {
 			} );
 
 			sandbox.stub( utils, 'getWebpackConfig' ).returns( { plugins: [] } );
-			sandbox.stub( utils, 'getEntriesForManualTests' ).returns( {} );
+			sandbox.stub( utils, 'getWebpackEntriesForManualTests' ).returns( {} );
 
 			return tasks.manualTests.compileScripts( sourcePath, outputPath )
 				.then(
@@ -430,55 +420,50 @@ describe( 'Tests', () => {
 			} );
 
 			return tasks.manualTests.compileViews( sourcePath, outputPath )
-				.then(
-					( resolvedPromises ) => {
-						expect( readFileSyncStub.calledOnce ).to.equal( true );
-						expect( manualTestPathsStub.calledOnce ).to.equal( true );
-						expect( manualTestPathsStub.firstCall.args[ 0 ] ).to.equal( sourcePath );
+				.then( ( resolvedPromises ) => {
+					expect( readFileSyncStub.calledOnce ).to.equal( true );
+					expect( manualTestPathsStub.calledOnce ).to.equal( true );
+					expect( manualTestPathsStub.firstCall.args[ 0 ] ).to.equal( sourcePath );
 
-						// Checks whether the watchers have been called.
-						expect( watchFilesStub.calledTwice ).to.equal( true );
+					// Checks whether the watchers have been called.
+					expect( watchFilesStub.calledTwice ).to.equal( true );
 
-						expect( watchFilesStub.firstCall.args[ 0 ] ).to.deep.equal( [
-							path.join( sourcePath, files.engine.html ),
-							path.join( sourcePath, files.engine.md )
-						] );
+					expect( watchFilesStub.firstCall.args[ 0 ] ).to.deep.equal( [
+						path.join( sourcePath, files.engine.html ),
+						path.join( sourcePath, files.engine.md )
+					] );
 
-						expect( watchFilesStub.firstCall.args[ 1 ] ).to.be.a( 'function' );
+					expect( watchFilesStub.firstCall.args[ 1 ] ).to.be.a( 'function' );
 
-						expect( watchFilesStub.secondCall.args[ 0 ] ).to.deep.equal( [
-							path.join( sourcePath, files.core.html ),
-							path.join( sourcePath, files.core.md )
-						] );
+					expect( watchFilesStub.secondCall.args[ 0 ] ).to.deep.equal( [
+						path.join( sourcePath, files.core.html ),
+						path.join( sourcePath, files.core.md )
+					] );
 
-						expect( watchFilesStub.secondCall.args[ 1 ] ).to.be.a( 'function' );
+					expect( watchFilesStub.secondCall.args[ 1 ] ).to.be.a( 'function' );
 
-						// Checks whether the views have been compiled.
-						expect( resolvedPromises.length ).to.equal( 2 );
-						expect( compileViewStub.calledTwice ).to.equal( true );
-						expect( compileViewStub.firstCall.args[ 0 ] ).to.equal( sourcePath );
-						expect( compileViewStub.firstCall.args[ 1 ] ).to.equal( outputPath );
-						expect( compileViewStub.firstCall.args[ 2 ] ).to.equal( path.join( sourcePath, files.engine.html ) );
-						expect( compileViewStub.firstCall.args[ 3 ] ).to.equal( template );
-						expect( compileViewStub.secondCall.args[ 0 ] ).to.equal( sourcePath );
-						expect( compileViewStub.secondCall.args[ 1 ] ).to.equal( outputPath );
-						expect( compileViewStub.secondCall.args[ 2 ] ).to.equal( path.join( sourcePath, files.core.html ) );
-						expect( compileViewStub.secondCall.args[ 3 ] ).to.equal( template );
+					// Checks whether the views have been compiled.
+					expect( resolvedPromises.length ).to.equal( 2 );
+					expect( compileViewStub.calledTwice ).to.equal( true );
+					expect( compileViewStub.firstCall.args[ 0 ] ).to.equal( sourcePath );
+					expect( compileViewStub.firstCall.args[ 1 ] ).to.equal( outputPath );
+					expect( compileViewStub.firstCall.args[ 2 ] ).to.equal( path.join( sourcePath, files.engine.html ) );
+					expect( compileViewStub.firstCall.args[ 3 ] ).to.equal( template );
+					expect( compileViewStub.secondCall.args[ 0 ] ).to.equal( sourcePath );
+					expect( compileViewStub.secondCall.args[ 1 ] ).to.equal( outputPath );
+					expect( compileViewStub.secondCall.args[ 2 ] ).to.equal( path.join( sourcePath, files.core.html ) );
+					expect( compileViewStub.secondCall.args[ 3 ] ).to.equal( template );
 
-						// Check whether the handler for watched files is correct.
-						expect( watchFilesHandler ).to.be.a( 'function' );
-						watchFilesHandler( path.join( sourcePath, files.engine.md ) );
+					// Check whether the handler for watched files is correct.
+					expect( watchFilesHandler ).to.be.a( 'function' );
+					watchFilesHandler( path.join( sourcePath, files.engine.md ) );
 
-						expect( compileViewStub.calledThrice ).to.equal( true );
-						expect( compileViewStub.thirdCall.args[ 0 ] ).to.equal( sourcePath );
-						expect( compileViewStub.thirdCall.args[ 1 ] ).to.equal( outputPath );
-						expect( compileViewStub.thirdCall.args[ 2 ] ).to.equal( path.join( sourcePath, files.engine.md ) );
-						expect( compileViewStub.thirdCall.args[ 3 ] ).to.equal( template );
-					},
-					() => {
-						throw new Error( 'Promise was supposed to be resolved.' );
-					}
-				);
+					expect( compileViewStub.calledThrice ).to.equal( true );
+					expect( compileViewStub.thirdCall.args[ 0 ] ).to.equal( sourcePath );
+					expect( compileViewStub.thirdCall.args[ 1 ] ).to.equal( outputPath );
+					expect( compileViewStub.thirdCall.args[ 2 ] ).to.equal( path.join( sourcePath, files.engine.md ) );
+					expect( compileViewStub.thirdCall.args[ 3 ] ).to.equal( template );
+				} );
 		} );
 
 		it( 'rejects a promise when file cannot be saved', () => {
