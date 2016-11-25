@@ -34,7 +34,7 @@ gulp.task( 'test', () => {
 			.map( ( packagePath ) => tests.utils.getPackageName( path.resolve( packagePath ) ) );
 	}
 
-	return tests.tasks.test( options );
+	return tests.tasks.automated.test( options );
 } );
 ```
 

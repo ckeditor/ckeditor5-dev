@@ -82,7 +82,7 @@ describe( 'Tests', () => {
 		clock.restore();
 	} );
 
-	describe( 'runTests()', () => {
+	describe( 'automated.runTests()', () => {
 		beforeEach( () => {
 			tasks = require( '../lib/tasks' );
 		} );
@@ -92,7 +92,7 @@ describe( 'Tests', () => {
 			const karmaConfig = {};
 			sandbox.stub( utils, '_getKarmaConfig', () => karmaConfig );
 
-			return tasks.runTests( options )
+			return tasks.automated.runTests( options )
 				.then( () => {
 					expect( servers.length ).to.equal( 1 );
 					expect( servers[ 0 ].config ).to.equal( karmaConfig );
@@ -105,7 +105,7 @@ describe( 'Tests', () => {
 			const karmaConfig = {};
 			sandbox.stub( utils, '_getKarmaConfig', () => karmaConfig );
 
-			return tasks.runTests( options )
+			return tasks.automated.runTests( options )
 				.then(
 					() => {
 						clock.tick( 100 );
@@ -122,7 +122,7 @@ describe( 'Tests', () => {
 		it( 'rejects the promise if tests ended badly #1', () => {
 			const options = {};
 
-			return tasks.runTests( options )
+			return tasks.automated.runTests( options )
 				.then(
 					() => {
 						throw new Error( 'should not be here!' );
@@ -141,7 +141,7 @@ describe( 'Tests', () => {
 			const processExitStub = sandbox.stub( process, 'exit' );
 			sandbox.stub( utils, '_getKarmaConfig', () => karmaConfig );
 
-			return tasks.runTests( options )
+			return tasks.automated.runTests( options )
 				.then(
 					() => {
 						throw new Error( 'should not be here!' );
@@ -154,7 +154,7 @@ describe( 'Tests', () => {
 		} );
 	} );
 
-	describe( 'test()', () => {
+	describe( 'automated.test()', () => {
 		beforeEach( () => {
 			tasks = require( '../lib/tasks' );
 		} );
@@ -182,7 +182,7 @@ describe( 'Tests', () => {
 				server.start = done;
 			};
 
-			tasks.test( options );
+			tasks.automated.test( options );
 		} );
 
 		it( 'waits for the compiler', () => {
@@ -212,7 +212,7 @@ describe( 'Tests', () => {
 				return Promise.resolve();
 			} );
 
-			return tasks.test( options )
+			return tasks.automated.test( options )
 				.then( () => {
 					expect( infoSpy.callCount ).to.equal( 2 );
 					expect( serverCount ).to.deep.equal( [ 0, 0 ] );
@@ -238,7 +238,7 @@ describe( 'Tests', () => {
 				} );
 			};
 
-			return tasks.test( options );
+			return tasks.automated.test( options );
 		} );
 
 		it( 'rejects the task when compiler throws an error', () => {
@@ -250,7 +250,7 @@ describe( 'Tests', () => {
 				]
 			};
 
-			return tasks.test( compilerOptions )
+			return tasks.automated.test( compilerOptions )
 				.then(
 					() => {
 						throw new Error( 'Promise was supposed to be rejected.' );
@@ -269,9 +269,9 @@ describe( 'Tests', () => {
 				} );
 			} );
 
-			const runTestStub = sandbox.stub( tasks, 'runTests' );
+			const runTestStub = sandbox.stub( tasks.automated, 'runTests' );
 
-			return tasks.test( {} )
+			return tasks.automated.test( {} )
 				.then(
 					() => {
 						throw new Error( 'Promise was supposed to be rejected.' );
@@ -296,13 +296,13 @@ describe( 'Tests', () => {
 				} );
 			} );
 
-			sandbox.stub( tasks, 'runTests', () => {
+			sandbox.stub( tasks.automated, 'runTests', () => {
 				return new Promise( ( resolve, reject ) => {
 					reject( error );
 				} );
 			} );
 
-			return tasks.test( {} )
+			return tasks.automated.test( {} )
 				.then(
 					() => {
 						throw new Error( 'Promise was supposed to be rejected.' );
@@ -316,7 +316,7 @@ describe( 'Tests', () => {
 		} );
 	} );
 
-	describe( 'manualTests.compileScripts()', () => {
+	describe( 'manual.compileScripts()', () => {
 		let sourcePath, outputPath, webpackConfig;
 
 		beforeEach( () => {
@@ -340,7 +340,7 @@ describe( 'Tests', () => {
 			const _getWebpackEntriesForManualTestsStub = sandbox.stub( utils, '_getWebpackEntriesForManualTests' )
 				.returns( { 'a.js': 'a/manual.js' } );
 
-			return tasks.manualTests.compileScripts( sourcePath, outputPath )
+			return tasks.manual.compileScripts( sourcePath, outputPath )
 				.then( () => {
 					expect( _getWebpackConfigStub.calledOnce ).to.equal( true );
 					expect( _getWebpackEntriesForManualTestsStub.calledOnce ).to.equal( true );
@@ -368,7 +368,7 @@ describe( 'Tests', () => {
 			sandbox.stub( utils, '_getWebpackConfig' ).returns( { plugins: [] } );
 			sandbox.stub( utils, '_getWebpackEntriesForManualTests' ).returns( {} );
 
-			return tasks.manualTests.compileScripts( sourcePath, outputPath )
+			return tasks.manual.compileScripts( sourcePath, outputPath )
 				.then(
 					() => {
 						throw new Error( 'Promise was supposed to be rejected.' );
@@ -382,7 +382,7 @@ describe( 'Tests', () => {
 		} );
 	} );
 
-	describe( 'manualTests.compileViews()', () => {
+	describe( 'manual.compileViews()', () => {
 		let sourcePath, outputPath, files;
 
 		const template = '<html></html>';
@@ -419,7 +419,7 @@ describe( 'Tests', () => {
 				watchFilesHandler = handler;
 			} );
 
-			tasks.manualTests.compileViews( sourcePath, outputPath );
+			tasks.manual.compileViews( sourcePath, outputPath );
 
 			expect( readFileSyncStub.calledOnce ).to.equal( true );
 			expect( manualTestPathsStub.calledOnce ).to.equal( true );
@@ -465,7 +465,7 @@ describe( 'Tests', () => {
 		} );
 	} );
 
-	describe( 'manualTests.run()', () => {
+	describe( 'manual.run()', () => {
 		it( 'waits for the compiler and runs the http server', ( done ) => {
 			const destinationPath = path.resolve( '.' );
 
@@ -478,8 +478,8 @@ describe( 'Tests', () => {
 			} );
 
 			// Resolve promises with compilation scripts and views.
-			const compileScriptsStub = sandbox.stub( tasks.manualTests, 'compileScripts' ).returns( Promise.resolve() );
-			sandbox.stub( tasks.manualTests, 'compileViews' ).returns( Promise.resolve() );
+			const compileScriptsStub = sandbox.stub( tasks.manual, 'compileScripts' ).returns( Promise.resolve() );
+			sandbox.stub( tasks.manual, 'compileViews' ).returns( Promise.resolve() );
 
 			// Don't attach events.
 			sandbox.stub( process, 'on' );
@@ -495,7 +495,7 @@ describe( 'Tests', () => {
 				options.onChange();
 				clock.tick( 300 );
 
-				// After 3100ms from the beginning `tasks.manualTests.compileScripts` shouldn't be called.
+				// After 3100ms from the beginning `tasks.manual.compileScripts` shouldn't be called.
 				expect( compileScriptsStub.called ).to.equal( false );
 
 				// Now tick the 600ms from the last change to finish.
@@ -506,14 +506,14 @@ describe( 'Tests', () => {
 				return Promise.resolve();
 			} );
 
-			tasks.manualTests.run( {
+			tasks.manual.run( {
 				destinationPath: path.resolve( '.' )
 			}, sandbox.spy() );
 		} );
 
 		it( 'breaks the process when compiler throws an error', ( done ) => {
 			const error = new Error( 'Unexpected error.' );
-			const compileScriptsStub = sandbox.stub( tasks.manualTests, 'compileScripts' );
+			const compileScriptsStub = sandbox.stub( tasks.manual, 'compileScripts' );
 
 			// Don't attach events
 			sandbox.stub( process, 'on' );
@@ -525,7 +525,7 @@ describe( 'Tests', () => {
 				return Promise.reject( error );
 			} );
 
-			tasks.manualTests.run( {
+			tasks.manual.run( {
 				destinationPath: path.resolve( '.' )
 			}, ( err ) => {
 				// By default, compilation for manual tests start 3 secs after starting the Compiler.
@@ -565,8 +565,8 @@ describe( 'Tests', () => {
 			} );
 
 			// Resolve promises with compilation scripts and views.
-			sandbox.stub( tasks.manualTests, 'compileScripts' ).returns( Promise.resolve() );
-			sandbox.stub( tasks.manualTests, 'compileViews' ).returns( Promise.resolve() );
+			sandbox.stub( tasks.manual, 'compileScripts' ).returns( Promise.resolve() );
+			sandbox.stub( tasks.manual, 'compileViews' ).returns( Promise.resolve() );
 
 			// We must stub the `process.emit()` method because other npm scripts (like test)
 			// can also attach its events. If we don't do this, we will break all tests at this moment.
@@ -590,7 +590,7 @@ describe( 'Tests', () => {
 			// Prevent to unexpected finish.
 			sandbox.stub( process, 'exit' );
 
-			tasks.manualTests.run( {
+			tasks.manual.run( {
 				destinationPath: path.resolve( '.' )
 			}, done );
 		} );
@@ -637,8 +637,8 @@ describe( 'Tests', () => {
 			} );
 
 			// Resolve promises with compilation scripts and views.
-			sandbox.stub( tasks.manualTests, 'compileScripts' ).returns( Promise.resolve() );
-			sandbox.stub( tasks.manualTests, 'compileViews' ).returns( Promise.resolve() );
+			sandbox.stub( tasks.manual, 'compileScripts' ).returns( Promise.resolve() );
+			sandbox.stub( tasks.manual, 'compileViews' ).returns( Promise.resolve() );
 
 			// Mock user's platform.
 			sandbox.stub( utils, '_getPlatform' ).returns( 'win32' );
@@ -659,7 +659,7 @@ describe( 'Tests', () => {
 			// Prevent to unexpected finish.
 			sandbox.stub( process, 'exit' );
 
-			tasks.manualTests.run( {
+			tasks.manual.run( {
 				destinationPath: path.resolve( '.' )
 			}, done );
 		} );

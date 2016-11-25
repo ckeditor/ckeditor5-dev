@@ -27,7 +27,7 @@ if ( options.files.length === 0 ) {
 	];
 }
 
-tests.tasks.test( options )
+tests.tasks.automated.test( options )
 	.catch( ( error ) => {
 		// Mark result of this task as invalid.
 		process.exitCode = 1;
