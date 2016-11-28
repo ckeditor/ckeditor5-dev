@@ -98,7 +98,11 @@ function generateIndex( sourcePath ) {
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 	const listElements = utils._getManualTestPaths( sourcePath )
 		.map( ( testPath ) => {
-			const htmlPath = utils._cleanManualTestPath( testPath ).replace( /\.js$/, '.html' );
+			let htmlPath = utils._cleanManualTestPath( testPath ).replace( /\.js$/, '.html' );
+
+			if ( utils._getPlatform() === 'win32' ) {
+				htmlPath = htmlPath.replace( /\\/g, '/' );
+			}
 
 			return `<li><a href="${ htmlPath }">${ htmlPath }</a></li>`;
 		} );
