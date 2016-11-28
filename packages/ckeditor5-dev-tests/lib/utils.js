@@ -321,10 +321,15 @@ const utils = {
 	 * @return {Array.<String>}
 	 */
 	_getManualTestPaths( sourcePath ) {
-		const globPattern = path.join( sourcePath, 'tests', '**', 'manual', '**', '*.js' );
+		const globPattern = [ sourcePath, 'tests', '**', 'manual', '**', '*.js' ].join( '/' );
 
-		return glob.sync( globPattern )
-			.map( ( absolutePath ) => absolutePath.replace( `${ sourcePath }${ path.sep }`, '' ) );
+		let files = glob.sync( globPattern );
+
+		if ( utils._getPlatform() === 'win32' ) {
+			files = files.map( ( absolutePath ) => absolutePath.replace( /\//g, '\\' ) );
+		}
+
+		return files.map( ( absolutePath ) => absolutePath.replace( `${ sourcePath }${ utils._getDirectorySeparator() }`, '' ) );
 	},
 
 	/**
@@ -430,6 +435,18 @@ const utils = {
 	 */
 	_getPlatform() {
 		return process.platform;
+	},
+
+	/**
+	 * Returns a separator in paths used on current platform.
+	 *
+	 * It allows to mock the value in other tests.
+	 *
+	 * @protected
+	 * @returns {String}
+	 */
+	_getDirectorySeparator() {
+		return path.sep;
 	}
 };
 

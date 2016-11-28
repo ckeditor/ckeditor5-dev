@@ -220,23 +220,49 @@ describe( 'utils', () => {
 
 	describe( '_getManualTestPaths()', () => {
 		it( 'returns paths to all manual scripts', () => {
+			sandbox.stub( utils, '_getPlatform' ).returns( 'linux' );
+			sandbox.stub( utils, '_getDirectorySeparator' ).returns( '/' );
+
 			const sourcePath = path.resolve( '.' );
 
 			const globSyncStub = sandbox.stub( glob, 'sync' ).returns( [
-				path.join( sourcePath, 'tests', 'package', 'manual', 'manual-test.js' ),
-				path.join( sourcePath, 'tests', 'foo', 'manual', 'test-manual.js' ),
-				path.join( sourcePath, 'tests', 'bar', 'view', 'manual', 'name-of-test.js' )
+				[ sourcePath, 'tests', 'package', 'manual', 'manual-test.js' ].join( '/' ),
+				[ sourcePath, 'tests', 'foo', 'manual', 'test-manual.js' ].join( '/' ),
+				[ sourcePath, 'tests', 'bar', 'view', 'manual', 'name-of-test.js' ].join( '/' )
 			] );
 
 			const pathsToTests = [
-				path.join( 'tests', 'package', 'manual', 'manual-test.js' ),
-				path.join( 'tests', 'foo', 'manual', 'test-manual.js' ),
-				path.join( 'tests', 'bar', 'view', 'manual', 'name-of-test.js' )
+				[ 'tests', 'package', 'manual', 'manual-test.js' ].join( '/' ),
+				[ 'tests', 'foo', 'manual', 'test-manual.js' ].join( '/' ),
+				[ 'tests', 'bar', 'view', 'manual', 'name-of-test.js' ].join( '/' )
 			];
 
 			expect( utils._getManualTestPaths( sourcePath ) ).to.deep.equal( pathsToTests );
 			expect( globSyncStub.calledOnce ).to.equal( true );
-			expect( globSyncStub.firstCall.args[ 0 ] ).to.equal( path.join( sourcePath, 'tests', '**', 'manual', '**', '*.js' ) );
+			expect( globSyncStub.firstCall.args[ 0 ] ).to.equal( [ sourcePath, 'tests', '**', 'manual', '**', '*.js' ].join( '/' ) );
+		} );
+
+		it( 'returns correct paths to manual scripts on Windows', () => {
+			const sourcePath = 'C:\\ckeditor5';
+
+			sandbox.stub( utils, '_getPlatform' ).returns( 'win32' );
+			sandbox.stub( utils, '_getDirectorySeparator' ).returns( '\\' );
+
+			const globSyncStub = sandbox.stub( glob, 'sync' ).returns( [
+				[ sourcePath, 'tests', 'package', 'manual', 'manual-test.js' ].join( '/' ),
+				[ sourcePath, 'tests', 'foo', 'manual', 'test-manual.js' ].join( '/' ),
+				[ sourcePath, 'tests', 'bar', 'view', 'manual', 'name-of-test.js' ].join( '/' )
+			] );
+
+			const pathsToTests = [
+				[ 'tests', 'package', 'manual', 'manual-test.js' ].join( '\\' ),
+				[ 'tests', 'foo', 'manual', 'test-manual.js' ].join( '\\' ),
+				[ 'tests', 'bar', 'view', 'manual', 'name-of-test.js' ].join( '\\' )
+			];
+
+			expect( utils._getManualTestPaths( sourcePath ) ).to.deep.equal( pathsToTests );
+			expect( globSyncStub.calledOnce ).to.equal( true );
+			expect( globSyncStub.firstCall.args[ 0 ] ).to.equal( [ sourcePath, 'tests', '**', 'manual', '**', '*.js' ].join( '/' ) );
 		} );
 	} );
 
@@ -387,6 +413,12 @@ describe( 'utils', () => {
 	describe( '_getPlatform()', () => {
 		it( 'returns a platform', () => {
 			expect( utils._getPlatform() ).to.equal( process.platform );
+		} );
+	} );
+
+	describe( '_getDirectorySeparator()', () => {
+		it( 'returns a separator', () => {
+			expect( utils._getDirectorySeparator() ).to.equal( path.sep );
 		} );
 	} );
 } );
