@@ -223,7 +223,7 @@ describe( 'utils', () => {
 			sandbox.stub( utils, '_getPlatform' ).returns( 'linux' );
 			sandbox.stub( utils, '_getDirectorySeparator' ).returns( '/' );
 
-			const sourcePath = path.resolve( '.' );
+			const sourcePath = '/Users/ckeditor5';
 
 			const globSyncStub = sandbox.stub( glob, 'sync' ).returns( [
 				[ sourcePath, 'tests', 'package', 'manual', 'manual-test.js' ].join( '/' ),
@@ -239,7 +239,7 @@ describe( 'utils', () => {
 
 			expect( utils._getManualTestPaths( sourcePath ) ).to.deep.equal( pathsToTests );
 			expect( globSyncStub.calledOnce ).to.equal( true );
-			expect( globSyncStub.firstCall.args[ 0 ] ).to.equal( [ sourcePath, 'tests', '**', 'manual', '**', '*.js' ].join( '/' ) );
+			expect( globSyncStub.firstCall.args[ 0 ] ).to.equal( [ '', 'Users', 'ckeditor5', 'tests', '**', 'manual', '**', '*.js' ].join( '/' ) );
 		} );
 
 		it( 'returns correct paths to manual scripts on Windows', () => {
@@ -262,7 +262,7 @@ describe( 'utils', () => {
 
 			expect( utils._getManualTestPaths( sourcePath ) ).to.deep.equal( pathsToTests );
 			expect( globSyncStub.calledOnce ).to.equal( true );
-			expect( globSyncStub.firstCall.args[ 0 ] ).to.equal( [ sourcePath, 'tests', '**', 'manual', '**', '*.js' ].join( '/' ) );
+			expect( globSyncStub.firstCall.args[ 0 ] ).to.equal( [ 'C:', 'ckeditor5', 'tests', '**', 'manual', '**', '*.js' ].join( '/' ) );
 		} );
 	} );
 

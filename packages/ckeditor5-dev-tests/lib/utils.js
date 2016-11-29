@@ -321,10 +321,19 @@ const utils = {
 	 * @return {Array.<String>}
 	 */
 	_getManualTestPaths( sourcePath ) {
-		const globPattern = [ sourcePath, 'tests', '**', 'manual', '**', '*.js' ].join( '/' );
+		// Glob does not understand the backslash in paths on Windows.
+		const globPattern = [
+			...sourcePath.split( utils._getDirectorySeparator() ),
+			'tests',
+			'**',
+			'manual',
+			'**',
+			'*.js'
+		].join( '/' );
 
 		let files = glob.sync( globPattern );
 
+		// Glob always returns paths separated by '/'. This is incorrect on Windows.
 		if ( utils._getPlatform() === 'win32' ) {
 			files = files.map( ( absolutePath ) => absolutePath.replace( /\//g, '\\' ) );
 		}
