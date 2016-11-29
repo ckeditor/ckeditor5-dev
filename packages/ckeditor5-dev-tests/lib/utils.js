@@ -283,6 +283,7 @@ const utils = {
 			let excludeTests = [];
 			let sep = utils._getDirectorySeparator();
 
+			// Escape the backslash on Windows.
 			if ( utils._getPlatform() === 'win32' ) {
 				sep = sep.repeat( 2 );
 			}
