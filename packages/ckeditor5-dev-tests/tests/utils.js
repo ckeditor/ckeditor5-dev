@@ -106,11 +106,11 @@ describe( 'utils', () => {
 	} );
 
 	describe( '_getWebpackConfig()', () => {
-		let defaultExcludes = [
-			/\/(node_modules|tests|theme|lib)\//
-		];
-
 		it( 'generates the coverage for specified sources', () => {
+			sandbox.stub( utils, '_getDirectorySeparator' ).returns( '/' );
+			sandbox.stub( utils, '_getPlatform' ).returns( 'linux' );
+
+			const defaultExcludes = [ /\/(node_modules|tests|theme|lib)\// ];
 			const readdirStub = sandbox.stub( fs, 'readdirSync' ).returns( [
 				'engine',
 				'basic-styles',
@@ -139,7 +139,44 @@ describe( 'utils', () => {
 			].concat( defaultExcludes ) );
 		} );
 
+		it( 'generates the coverage for specified sources on Windows', () => {
+			sandbox.stub( utils, '_getDirectorySeparator' ).returns( '\\' );
+			sandbox.stub( utils, '_getPlatform' ).returns( 'win32' );
+
+			const defaultExcludes = [ /\\(node_modules|tests|theme|lib)\\/ ];
+			const readdirStub = sandbox.stub( fs, 'readdirSync' ).returns( [
+				'engine',
+				'basic-styles',
+				'core',
+				'paragraph'
+			] );
+
+			const webpackConfig = utils._getWebpackConfig( {
+				sourcePath: __dirname,
+				coverage: true,
+				files: [
+					'engine',
+					'paragraph'
+				]
+			} );
+
+			expect( readdirStub.calledOnce ).to.equal( true );
+			expect( readdirStub.firstCall.args[ 0 ] ).to.equal( path.join( __dirname, 'ckeditor5' ) );
+
+			const preLoaders = webpackConfig.module.preLoaders;
+
+			expect( preLoaders.length ).to.equal( 2 );
+			expect( preLoaders[ 1 ].exclude ).to.deep.equal( [
+				/ckeditor5\\basic-styles/,
+				/ckeditor5\\core/
+			].concat( defaultExcludes ) );
+		} );
+
 		it( 'generates the coverage for all files when sources are not specified', () => {
+			sandbox.stub( utils, '_getDirectorySeparator' ).returns( '/' );
+			sandbox.stub( utils, '_getPlatform' ).returns( 'linux' );
+
+			const defaultExcludes = [ /\/(node_modules|tests|theme|lib)\// ];
 			const readdirStub = sandbox.stub( fs, 'readdirSync' ).returns( [
 				'engine',
 				'basic-styles',
@@ -158,6 +195,15 @@ describe( 'utils', () => {
 
 			expect( preLoaders.length ).to.equal( 2 );
 			expect( preLoaders[ 1 ].exclude ).to.deep.equal( defaultExcludes );
+		} );
+
+		it( 'does not generate the coverage when flag is set as false', () => {
+			const webpackConfig = utils._getWebpackConfig( {
+				sourcePath: __dirname,
+				coverage: false
+			} );
+
+			expect( webpackConfig.module.preLoaders.length ).to.equal( 1 );
 		} );
 	} );
 

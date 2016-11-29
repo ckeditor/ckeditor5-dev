@@ -281,6 +281,11 @@ const utils = {
 
 		if ( options.coverage ) {
 			let excludeTests = [];
+			let sep = utils._getDirectorySeparator();
+
+			if ( utils._getPlatform() === 'win32' ) {
+				sep = sep.repeat( 2 );
+			}
 
 			if ( options.files ) {
 				// Exclude coverage loader for all the directories except the testing ones.
@@ -289,14 +294,14 @@ const utils = {
 						return !options.files
 							.some( ( packageOrPath ) => packageOrPath.match( new RegExp( `^${ dirName }` ) ) );
 					} )
-					.map( ( dirName ) => new RegExp( path.join( 'ckeditor5', dirName ) ) );
+					.map( ( dirName ) => new RegExp( [ 'ckeditor5', dirName ].join( sep ) ) );
 			}
 
 			webpackConfig.module.preLoaders.push( {
 				test: /\.js$/,
 				loader: 'istanbul-instrumenter',
 				exclude: excludeTests.concat( [
-					/\/(node_modules|tests|theme|lib)\//
+					new RegExp( `${ sep }(node_modules|tests|theme|lib)${ sep }` )
 				] ),
 				query: {
 					esModules: true
