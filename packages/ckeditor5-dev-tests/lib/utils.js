@@ -340,9 +340,11 @@ const utils = {
 	 * @returns {String}
 	 */
 	_cleanManualTestPath( pathToClean ) {
-		return pathToClean.split( path.sep )
+		const sep = utils._getDirectorySeparator();
+
+		return pathToClean.split( sep )
 			.filter( ( dirName ) => dirName !== 'manual' )
-			.join( path.sep );
+			.join( sep );
 	},
 
 	/**

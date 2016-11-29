@@ -268,13 +268,15 @@ describe( 'utils', () => {
 
 	describe( '_cleanManualTestPath()', () => {
 		it( 'returns a cleaned path', () => {
-			expect(
-				utils._cleanManualTestPath( path.join( '..', 'tests', 'package', 'manual', 'ticket', '1.js' ) )
-			).to.equal( path.join( '..', 'tests', 'package', 'ticket', '1.js' ) );
+			const sep = utils._getDirectorySeparator();
 
 			expect(
-				utils._cleanManualTestPath( path.join( '..', 'tests', 'package', 'ticket', '1.js' ) )
-			).to.equal( path.join( '..', 'tests', 'package', 'ticket', '1.js' ) );
+				utils._cleanManualTestPath( [ '..', 'tests', 'package', 'manual', 'ticket', '1.js' ] .join( sep ) )
+			).to.equal( [ '..', 'tests', 'package', 'ticket', '1.js' ].join( sep ) );
+
+			expect(
+				utils._cleanManualTestPath( [ '..', 'tests', 'package', 'ticket', '1.js' ].join( sep ) )
+			).to.equal( [ '..', 'tests', 'package', 'ticket', '1.js' ].join( sep ) );
 		} );
 	} );
 

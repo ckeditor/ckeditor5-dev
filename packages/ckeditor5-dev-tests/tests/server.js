@@ -13,6 +13,7 @@ const sinon = require( 'sinon' );
 const chai = require( 'chai' );
 const expect = chai.expect;
 const proxyquire = require( 'proxyquire' );
+const utils = require( '../lib/utils' );
 
 describe( 'Server', () => {
 	let server, infoSpy, warningSpy, errorSpy;
@@ -129,6 +130,20 @@ describe( 'Server', () => {
 					}
 				);
 		} );
+	} );
+
+	it( 'returns file with proper directory separator', () => {
+		const platformStub = sinon.stub( utils, '_getPlatform' ).returns( 'win32' );
+		const separatorStub = sinon.stub( utils, '_getDirectorySeparator' ).returns( '\\' );
+
+		return sendRequest( '/' )
+			.then( ( data ) => {
+				expect( data.response.statusCode ).to.equal( 200 );
+				expect( data.html ).to.match( new RegExp( 'tests/engine/test.html' ) );
+
+				platformStub.restore();
+				separatorStub.restore();
+			} );
 	} );
 } );
 
