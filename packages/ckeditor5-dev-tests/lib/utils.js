@@ -327,9 +327,11 @@ const utils = {
 	 * @return {Array.<String>}
 	 */
 	_getManualTestPaths( sourcePath ) {
-		// Glob does not understand the backslash in paths on Windows.
+		const sep = utils._getDirectorySeparator();
+
 		const globPattern = [
-			...sourcePath.split( utils._getDirectorySeparator() ),
+			// Glob does not understand the backslash in paths on Windows.
+			...sourcePath.split( sep ),
 			'tests',
 			'**',
 			'manual',
@@ -337,14 +339,49 @@ const utils = {
 			'*.js'
 		].join( '/' );
 
-		let files = glob.sync( globPattern );
+		return utils._glob( globPattern )
+			.map( ( absolutePath ) => absolutePath.replace( `${ sourcePath }${ sep }`, '' ) );
+	},
 
-		// Glob always returns paths separated by '/'. This is incorrect on Windows.
-		if ( utils._getPlatform() === 'win32' ) {
-			files = files.map( ( absolutePath ) => absolutePath.replace( /\//g, '\\' ) );
-		}
+	/**
+	 * Returns paths to all files which are not manual tests. These files
+	 * can be required by manual tests (e.g. images).
+	 *
+	 * The paths are relative to `sourcePath`.
+	 *
+	 * @protected
+	 * @param {String} sourcePath Base path to the all sources.
+	 * @return {Array.<String>}
+	 */
+	_getPathsToNotManualTestFiles( sourcePath ) {
+		const sep = utils._getDirectorySeparator();
 
-		return files.map( ( absolutePath ) => absolutePath.replace( `${ sourcePath }${ utils._getDirectorySeparator() }`, '' ) );
+		const globPattern = [
+			// Glob does not understand the backslash in paths on Windows.
+			...sourcePath.split( sep ),
+			'tests',
+			'**',
+			'manual',
+			'**',
+			'*.*'
+		].join( '/' );
+
+		// All manual test files (including views and scripts).
+		const allFiles = utils._glob( globPattern )
+			.map( ( absolutePath ) => absolutePath.replace( `${ sourcePath }${ sep }`, '' ) );
+
+		// Views, descriptions and scripts with manual tests.
+		const manualTestFiles = utils._getManualTestPaths( sourcePath )
+			.reduce( ( arr, item ) => {
+				arr.push( item );
+				arr.push( item.replace( /\.js$/, '.html' ) );
+				arr.push( item.replace( /\.js$/, '.md' ) );
+
+				return arr;
+			}, [] );
+
+		// In order to get static files, we need to compare two array.
+		return allFiles.filter( ( item ) => !manualTestFiles.includes( item ) );
 	},
 
 	/**
@@ -464,6 +501,25 @@ const utils = {
 	 */
 	_getDirectorySeparator() {
 		return path.sep;
+	},
+
+	/**
+	 * Wraps the `glob.sync` method. Returned array contains fixed paths
+	 * to files on Windows.
+	 *
+	 * @protected
+	 * @param {String} pattern
+	 * @return {Array.<String>}
+	 */
+	_glob( pattern ) {
+		const files = glob.sync( pattern );
+
+		// Glob always returns paths separated by '/'. This is incorrect on Windows.
+		if ( utils._getPlatform() === 'win32' ) {
+			return files.map( ( absolutePath ) => absolutePath.replace( /\//g, '\\' ) );
+		}
+
+		return files;
 	}
 };
 

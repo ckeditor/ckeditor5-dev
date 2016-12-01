@@ -465,6 +465,44 @@ describe( 'Tests', () => {
 		} );
 	} );
 
+	describe( 'manual.copyStaticFiles()', () => {
+		beforeEach( () => {
+			tasks = require( '../lib/tasks' );
+		} );
+
+		it( 'copies the files', () => {
+			const sourcePath = path.resolve( '.' );
+			const outputPath = path.join( sourcePath, '.output' );
+
+			const files = [
+				path.join( 'tests', 'engine', 'manual', 'db.txt' ),
+				path.join( 'tests', 'images', 'manual', 'logo.png' )
+			];
+			const parsedFilePaths = [
+				path.join( 'tests', 'engine', 'db.txt' ),
+				path.join( 'tests', 'images', 'logo.txt' )
+			];
+
+			const staticFilesStub = sandbox.stub( utils, '_getPathsToNotManualTestFiles' ).returns( files );
+			const fsCopyStub = sandbox.stub( fs, 'copySync' );
+			const cleanPathStub = sandbox.stub( utils, '_cleanManualTestPath' );
+
+			cleanPathStub.withArgs( files[ 0 ] ).returns( parsedFilePaths[ 0 ] );
+			cleanPathStub.withArgs( files[ 1 ] ).returns( parsedFilePaths[ 1 ] );
+
+			tasks.manual.copyStaticFiles( sourcePath, outputPath );
+
+			expect( staticFilesStub.calledOnce ).to.equal( true );
+			expect( staticFilesStub.firstCall.args[ 0 ] ).to.equal( sourcePath );
+			expect( fsCopyStub.calledTwice ).to.equal( true );
+			expect( fsCopyStub.firstCall.args[ 0 ] ).to.equal( path.join( sourcePath, files[ 0 ] ) );
+			expect( fsCopyStub.firstCall.args[ 1 ] ).to.equal( path.join( outputPath, parsedFilePaths[ 0 ] ) );
+			expect( fsCopyStub.secondCall.args[ 0 ] ).to.equal( path.join( sourcePath, files[ 1 ] ) );
+			expect( fsCopyStub.secondCall.args[ 1 ] ).to.equal( path.join( outputPath, parsedFilePaths[ 1 ] ) );
+			expect( infoSpy.calledTwice ).to.equal( true );
+		} );
+	} );
+
 	describe( 'manual.run()', () => {
 		it( 'waits for the compiler and runs the http server', ( done ) => {
 			const destinationPath = path.resolve( 'build', '.manual-tests' );
@@ -478,6 +516,7 @@ describe( 'Tests', () => {
 			} );
 
 			// Resolve promises with compilation scripts and views.
+			const copyFilesStub = sandbox.stub( tasks.manual, 'copyStaticFiles' );
 			const compileScriptsStub = sandbox.stub( tasks.manual, 'compileScripts' ).returns( Promise.resolve() );
 			sandbox.stub( tasks.manual, 'compileViews' );
 
@@ -495,13 +534,15 @@ describe( 'Tests', () => {
 				options.onChange();
 				clock.tick( 300 );
 
-				// After 3100ms from the beginning `tasks.manual.compileScripts` shouldn't be called.
+				// After 3100ms from the beginning other methods shouldn't be called.
+				expect( copyFilesStub.called ).to.equal( false );
 				expect( compileScriptsStub.called ).to.equal( false );
 
 				// Now tick the 600ms from the last change to finish.
 				clock.tick( 300 );
 
-				expect( compileScriptsStub.called ).to.equal( true );
+				expect( copyFilesStub.calledOnce ).to.equal( true );
+				expect( compileScriptsStub.calledOnce ).to.equal( true );
 
 				return Promise.resolve();
 			} );
@@ -512,6 +553,7 @@ describe( 'Tests', () => {
 		it( 'breaks the process when compiler throws an error', ( done ) => {
 			const error = new Error( 'Unexpected error.' );
 			const compileScriptsStub = sandbox.stub( tasks.manual, 'compileScripts' );
+			const copyFilesStub = sandbox.stub( tasks.manual, 'copyStaticFiles' );
 
 			// Don't attach events
 			sandbox.stub( process, 'on' );
@@ -530,6 +572,7 @@ describe( 'Tests', () => {
 				clock.tick( 500 );
 
 				expect( err ).to.equal( error );
+				expect( copyFilesStub.called ).to.equal( false );
 				expect( compileScriptsStub.called ).to.equal( false );
 
 				done();
@@ -565,6 +608,7 @@ describe( 'Tests', () => {
 			// Resolve promises with compilation scripts and views.
 			sandbox.stub( tasks.manual, 'compileScripts' ).returns( Promise.resolve() );
 			sandbox.stub( tasks.manual, 'compileViews' );
+			sandbox.stub( tasks.manual, 'copyStaticFiles' );
 
 			// We must stub the `process.emit()` method because other npm scripts (like test)
 			// can also attach its events. If we don't do this, we will break all tests at this moment.
@@ -637,6 +681,7 @@ describe( 'Tests', () => {
 			// Resolve promises with compilation scripts and views.
 			sandbox.stub( tasks.manual, 'compileScripts' ).returns( Promise.resolve() );
 			sandbox.stub( tasks.manual, 'compileViews' );
+			sandbox.stub( tasks.manual, 'copyStaticFiles' );
 
 			// Mock user's platform.
 			sandbox.stub( utils, '_getPlatform' ).returns( 'win32' );

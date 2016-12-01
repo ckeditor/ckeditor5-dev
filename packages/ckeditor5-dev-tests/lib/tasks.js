@@ -204,6 +204,25 @@ const tasks = {
 		},
 
 		/**
+		 * Copies the static files which are required by manual tests.
+		 *
+		 * @param {String} sourcePath Base path that will be used to resolve all patterns.
+		 * @param {String} outputPath Base path where all files will be saved.
+		 */
+		copyStaticFiles( sourcePath, outputPath ) {
+			const log = logger();
+
+			utils._getPathsToNotManualTestFiles( sourcePath )
+				.forEach( ( item ) => {
+					const itemSourcePath = path.join( sourcePath, item );
+					const itemOuputPath = path.join( outputPath, utils._cleanManualTestPath( item ) );
+
+					fs.copySync( itemSourcePath, itemOuputPath );
+					log.info( `[File] Copied static file '${ gutil.colors.cyan( itemSourcePath ) }'.` );
+				} );
+		},
+
+		/**
 		 * @param {Object} options
 		 * @param {Array.<String>} options.packages Paths to CKEditor 5 dependencies.
 		 * @param {Function} done Inform the task runner about finishing the job.
@@ -249,6 +268,9 @@ const tasks = {
 
 				// Concat the manual test files into single.
 				tasks.manual.compileViews( destinationPath, manualTestsPath );
+
+				// Copy static files required by tests.
+				tasks.manual.copyStaticFiles( destinationPath, manualTestsPath );
 
 				// Compile the scripts - run Webpack.
 				tasks.manual.compileScripts( destinationPath, manualTestsPath )
