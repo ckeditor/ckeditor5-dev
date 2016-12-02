@@ -310,7 +310,7 @@ describe( 'utils', () => {
 		} );
 	} );
 
-	describe( '_getPathsToNotManualTestFiles()', () => {
+	describe( '_getManualTestAssetPaths()', () => {
 		it( 'returns paths to all files related to manual tests', () => {
 			const allFiles = [
 				'tests\\engine\\manual\\foo.js',
@@ -336,7 +336,7 @@ describe( 'utils', () => {
 			const utilsManualTestPathsStub = sandbox.stub( utils, '_getManualTestPaths' )
 				.returns( allFiles.slice( 0, 2 ) );
 
-			expect( utils._getPathsToNotManualTestFiles( sourcePath ) ).to.deep.equal( allFiles.slice( -2 ) );
+			expect( utils._getManualTestAssetPaths( sourcePath ) ).to.deep.equal( allFiles.slice( -2 ) );
 			expect( utilsGlobStub.calledOnce ).to.equal( true );
 			expect( utilsGlobStub.firstCall.args[ 0 ] ).to.equal( globPattern );
 			expect( utilsManualTestPathsStub.calledOnce ).to.equal( true );

@@ -212,7 +212,7 @@ const tasks = {
 		copyStaticFiles( sourcePath, outputPath ) {
 			const log = logger();
 
-			utils._getPathsToNotManualTestFiles( sourcePath )
+			utils._getManualTestAssetPaths( sourcePath )
 				.forEach( ( item ) => {
 					const itemSourcePath = path.join( sourcePath, item );
 					const itemOuputPath = path.join( outputPath, utils._cleanManualTestPath( item ) );

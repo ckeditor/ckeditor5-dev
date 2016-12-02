@@ -483,7 +483,7 @@ describe( 'Tests', () => {
 				path.join( 'tests', 'images', 'logo.txt' )
 			];
 
-			const staticFilesStub = sandbox.stub( utils, '_getPathsToNotManualTestFiles' ).returns( files );
+			const staticFilesStub = sandbox.stub( utils, '_getManualTestAssetPaths' ).returns( files );
 			const fsCopyStub = sandbox.stub( fs, 'copySync' );
 			const cleanPathStub = sandbox.stub( utils, '_cleanManualTestPath' );
 

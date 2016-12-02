@@ -353,7 +353,7 @@ const utils = {
 	 * @param {String} sourcePath Base path to the all sources.
 	 * @return {Array.<String>}
 	 */
-	_getPathsToNotManualTestFiles( sourcePath ) {
+	_getManualTestAssetPaths( sourcePath ) {
 		const sep = utils._getDirectorySeparator();
 
 		const globPattern = [
