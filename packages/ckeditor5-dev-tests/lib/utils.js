@@ -21,6 +21,16 @@ const utils = {
 	coverageDirectory: 'coverage',
 
 	/**
+	 * Reporters for Karma.
+	 * - 'mocha' - shows every test case as a long sentence,
+	 * - 'dots' - shows tests as dots.
+	 */
+	reporters: [
+		'mocha',
+		'dots'
+	],
+
+	/**
 	 * Returns a name of package based on current work directory.
 	 *
 	 * @param {String} [cwd=process.cwd()] cwd Current work directory.
@@ -54,12 +64,14 @@ const utils = {
 	 * @returns {Boolean} [options.ignoreDuplicates] Whether to ignore duplicated packages. Packages can
 	 * be duplicated if there are conflicts in dependency versions or when one of the packages is installed
 	 * in the development mode (as a cloned repository).
+	 * @returns {String} [options.reporter]
 	 */
 	parseArguments() {
 		const options = minimist( process.argv.slice( 2 ), {
 			string: [
 				'files',
-				'browsers'
+				'browsers',
+				'reporter'
 			],
 
 			boolean: [
@@ -80,6 +92,7 @@ const utils = {
 			default: {
 				files: [],
 				browsers: 'Chrome',
+				reporter: 'mocha',
 				watch: false,
 				coverage: false,
 				verbose: false,
@@ -109,6 +122,7 @@ const utils = {
 	 * @param {Boolean} options.coverage Whether to generate code coverage.
 	 * @param {Boolean} options.sourceMap Whether to generate the source maps.
 	 * @param {Boolean} options.verbose Whether to informs about Webpack's work.
+	 * @param {String} options.reporter Name of reporter that will be used to tests.
 	 * @param {Array.<String>} options.browsers Browsers which will be used to run the tests.
 	 * @param {Array.<String>} options.files Files to tests.
 	 * @returns {Object}
@@ -116,6 +130,10 @@ const utils = {
 	_getKarmaConfig( options ) {
 		if ( !Array.isArray( options.files ) || options.files.length === 0 ) {
 			throw new Error( 'Karma requires files to tests. `options.files` has to be non-empty array.' );
+		}
+
+		if ( !utils.reporters.includes( options.reporter ) ) {
+			throw new Error( `Given unsupported reporter. Available reporters: ${ utils.reporters.join( ', ' ) }.` );
 		}
 
 		const karmaConfig = {
@@ -155,7 +173,7 @@ const utils = {
 
 			// Test results reporter to use. Possible values: 'dots', 'progress'.
 			// Available reporters: https://npmjs.org/browse/keyword/karma-reporter
-			reporters: [ 'mocha' ],
+			reporters: [ options.reporter ],
 
 			// Web server port.
 			port: 9876,

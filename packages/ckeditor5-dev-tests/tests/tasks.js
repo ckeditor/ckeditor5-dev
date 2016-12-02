@@ -187,7 +187,8 @@ describe( 'Tests', () => {
 
 		it( 'waits for the compiler', () => {
 			const options = {
-				files: [ 'engine' ]
+				files: [ 'engine' ],
+				reporter: 'mocha'
 			};
 			const serverCount = [];
 
@@ -221,7 +222,8 @@ describe( 'Tests', () => {
 
 		it( 'does not resolve the promise until Karma\'s callback is called', () => {
 			const options = {
-				files: [ 'engine' ]
+				files: [ 'engine' ],
+				reporter: 'mocha'
 			};
 
 			sandbox.stub( compiler.tasks, 'compile', ( options ) =>  {

@@ -53,10 +53,17 @@ describe( 'utils', () => {
 			} ).to.throw( Error, 'Karma requires files to tests. `options.files` has to be non-empty array.' );
 		} );
 
+		it( 'throws an error when report is not specified', () => {
+			expect( () => {
+				utils._getKarmaConfig( { files: [ 'foo' ] } );
+			} ).to.throw( Error, 'Given unsupported reporter. Available reporters: mocha, dots.' );
+		} );
+
 		it( 'transforms specified test files to the Karma configuration', () => {
 			const webpackConfigStub = sandbox.stub( utils, '_getWebpackConfig' );
 			const karmaConfig = utils._getKarmaConfig( {
 				sourcePath: __dirname,
+				reporter: 'mocha',
 				files: [
 					'basic-styles',
 					'engine/view',
@@ -78,6 +85,7 @@ describe( 'utils', () => {
 			const webpackConfigStub = sandbox.stub( utils, '_getWebpackConfig' );
 			const karmaConfig = utils._getKarmaConfig( {
 				sourcePath: __dirname,
+				reporter: 'mocha',
 				coverage: true,
 				files: [
 					'basic-styles'
@@ -92,6 +100,7 @@ describe( 'utils', () => {
 			const webpackConfigStub = sandbox.stub( utils, '_getWebpackConfig' );
 			const karmaConfig = utils._getKarmaConfig( {
 				sourcePath: __dirname,
+				reporter: 'mocha',
 				watch: true,
 				files: [
 					'basic-styles'
@@ -109,6 +118,7 @@ describe( 'utils', () => {
 
 			const karmaConfig = utils._getKarmaConfig( {
 				sourcePath: __dirname,
+				reporter: 'mocha',
 				files: [
 					'basic-styles'
 				]
@@ -124,6 +134,7 @@ describe( 'utils', () => {
 
 			const karmaConfig = utils._getKarmaConfig( {
 				sourcePath: __dirname,
+				reporter: 'mocha',
 				sourceMap: true,
 				files: [
 					'basic-styles'
@@ -139,6 +150,7 @@ describe( 'utils', () => {
 
 			const karmaConfig = utils._getKarmaConfig( {
 				sourcePath: __dirname,
+				reporter: 'mocha',
 				verbose: true,
 				files: [
 					'basic-styles'
@@ -302,6 +314,7 @@ describe( 'utils', () => {
 			// Checks the parameters.
 			expect( args.files ).to.deep.equal( [] );
 			expect( args.browsers ).to.deep.equal( [ 'Chrome' ] );
+			expect( args.reporter ).to.equal( 'mocha' );
 			expect( args.watch ).to.equal( false );
 			expect( args.coverage ).to.equal( false );
 			expect( args.verbose ).to.equal( false );
