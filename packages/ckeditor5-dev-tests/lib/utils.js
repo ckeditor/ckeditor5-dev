@@ -188,6 +188,10 @@ const utils = {
 			browserNoActivityTimeout: 0
 		};
 
+		if ( process.env.TRAVIS ) {
+			karmaConfig.browsers = [ 'CHROME_TRAVIS_CI' ];
+		}
+
 		if ( options.watch ) {
 			// Enable/Disable watching file and executing tests whenever any file changes.
 			karmaConfig.autoWatch = true;
@@ -228,18 +232,12 @@ const utils = {
 			};
 		}
 
-		if ( options.files ) {
-			for ( const packageOrPath of options.files ) {
-				if ( packageOrPath.endsWith( '.js' ) ) {
-					karmaConfig.files.push( path.join( 'tests', packageOrPath ) );
-				} else {
-					karmaConfig.files.push( path.join( 'tests', packageOrPath, '**', '*.js' ) );
-				}
+		for ( const packageOrPath of options.files ) {
+			if ( packageOrPath.endsWith( '.js' ) ) {
+				karmaConfig.files.push( path.join( 'tests', packageOrPath ) );
+			} else {
+				karmaConfig.files.push( path.join( 'tests', packageOrPath, '**', '*.js' ) );
 			}
-		}
-
-		if ( process.env.TRAVIS ) {
-			karmaConfig.browsers = [ 'CHROME_TRAVIS_CI' ];
 		}
 
 		return karmaConfig;

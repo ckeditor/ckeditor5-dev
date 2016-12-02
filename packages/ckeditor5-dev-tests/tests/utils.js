@@ -13,7 +13,6 @@ const glob = require( 'glob' );
 const sinon = require( 'sinon' );
 const chai = require( 'chai' );
 const expect = chai.expect;
-const should = chai.should();
 const proxyquire = require( 'proxyquire' );
 
 describe( 'utils', () => {
@@ -102,6 +101,52 @@ describe( 'utils', () => {
 			expect( webpackConfigStub.calledOnce ).to.equal( true );
 			expect( karmaConfig.autoWatch ).to.equal( true );
 			expect( karmaConfig.singleRun ).to.equal( false );
+		} );
+
+		it( 'returns config adjusted for CI', () => {
+			process.env.TRAVIS = true;
+			sandbox.stub( utils, '_getWebpackConfig' );
+
+			const karmaConfig = utils._getKarmaConfig( {
+				sourcePath: __dirname,
+				files: [
+					'basic-styles'
+				]
+			} );
+
+			expect( karmaConfig.browsers ).to.include( 'CHROME_TRAVIS_CI' );
+
+			delete process.env.TRAVIS;
+		} );
+
+		it( 'attaches the source maps', () => {
+			sandbox.stub( utils, '_getWebpackConfig' );
+
+			const karmaConfig = utils._getKarmaConfig( {
+				sourcePath: __dirname,
+				sourceMap: true,
+				files: [
+					'basic-styles'
+				]
+			} );
+
+			expect( karmaConfig.preprocessors[ 'ckeditor5/**/*.js' ] ).to.include( 'sourcemap' );
+			expect( karmaConfig.preprocessors[ 'tests/**/*.js' ] ).to.include( 'sourcemap' );
+		} );
+
+		it( 'shows the Webpack logs', () => {
+			sandbox.stub( utils, '_getWebpackConfig' );
+
+			const karmaConfig = utils._getKarmaConfig( {
+				sourcePath: __dirname,
+				verbose: true,
+				files: [
+					'basic-styles'
+				]
+			} );
+
+			expect( karmaConfig.webpackMiddleware.noInfo ).to.equal( false );
+			expect( karmaConfig.webpackMiddleware.stats ).to.equal( undefined );
 		} );
 	} );
 
@@ -205,6 +250,15 @@ describe( 'utils', () => {
 
 			expect( webpackConfig.module.preLoaders.length ).to.equal( 1 );
 		} );
+
+		it( 'attaches the source maps', () => {
+			const webpackConfig = utils._getWebpackConfig( {
+				sourcePath: __dirname,
+				sourceMap: true
+			} );
+
+			expect( webpackConfig.devtool ).to.equal( 'eval' );
+		} );
 	} );
 
 	describe( 'getPackageName()', () => {
@@ -261,6 +315,18 @@ describe( 'utils', () => {
 			expect( args.s ).to.equal( args[ 'source-map' ] );
 			expect( args.sourceMap ).to.equal( args[ 'source-map' ] );
 			expect( args.ignoreDuplicates ).to.equal( args[ 'ignore-duplicates' ] );
+		} );
+
+		it( 'changes files as string to array', () => {
+			const executedCommand = 'node bin/program argument --files=autoformat,undo'.split( ' ' );
+
+			sandbox.stub( process, 'argv', executedCommand );
+
+			const args = utils.parseArguments();
+
+			expect( args.files ).to.be.a( 'array' );
+			expect( args.files ).to.contain( 'autoformat' );
+			expect( args.files ).to.contain( 'undo' );
 		} );
 	} );
 
@@ -410,8 +476,8 @@ describe( 'utils', () => {
 
 			utils._watchFiles( [ 'path-1', 'path-2' ], functionToCall );
 
-			should.exist( handlerForFirstPath );
-			should.exist( handlerForSecondPath );
+			expect( handlerForFirstPath ).to.not.equal( undefined );
+			expect( handlerForSecondPath ).to.not.equal( undefined );
 
 			// At the beginning, a function should not be called.
 			expect( functionToCall.callCount ).to.equal( 0 );
