@@ -56,7 +56,7 @@ describe( 'utils', () => {
 		it( 'throws an error when report is not specified', () => {
 			expect( () => {
 				utils._getKarmaConfig( { files: [ 'foo' ] } );
-			} ).to.throw( Error, 'Given unsupported reporter. Available reporters: mocha, dots.' );
+			} ).to.throw( Error, 'Given Mocha reporter is not supported. Available reporters: mocha, dots.' );
 		} );
 
 		it( 'transforms specified test files to the Karma configuration', () => {

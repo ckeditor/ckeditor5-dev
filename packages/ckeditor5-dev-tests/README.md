@@ -56,6 +56,7 @@ You can also use the bin script for testing a package:
 * `verbose` - Whether to informs about Webpack's work. Also available as an alias: `-v`.
 * `files` - Specify file(s) to tests.
 * `browsers` - Browsers which will be used to run the tests.
+* `reporter` - Mocha reporter – either `karma` (default) or `dots` (less verbose one).
 
 #### Examples
 
@@ -68,7 +69,7 @@ $ gulp test -c --files=enter,paragraph
 For testing *view* module from `ckeditor5-engine` and run the test automatically after changes in compiled code you can use:
 
 ```bash
-$ gulp test -v --files=engine/view
+$ gulp test -w --files=engine/view
 ```
 
 For testing specified files in `ckeditor5-basic-styles` on two browsers (Chrome and Firefox) you can use:

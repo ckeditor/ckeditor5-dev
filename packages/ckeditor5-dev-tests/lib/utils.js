@@ -133,7 +133,7 @@ const utils = {
 		}
 
 		if ( !utils.reporters.includes( options.reporter ) ) {
-			throw new Error( `Given unsupported reporter. Available reporters: ${ utils.reporters.join( ', ' ) }.` );
+			throw new Error( `Given Mocha reporter is not supported. Available reporters: ${ utils.reporters.join( ', ' ) }.` );
 		}
 
 		const karmaConfig = {
