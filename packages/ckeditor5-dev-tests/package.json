@@ -54,5 +54,8 @@
     "test": "mocha tests --recursive",
     "coverage": "istanbul cover _mocha tests/ -- --recursive"
   },
-  "bin": "./bin/test.js"
+  "bin": {
+    "ckeditor5-dev-tests": "./bin/test.js",
+    "ckeditor5-dev-tests-travis": "./bin/test-travis.sh"
+  }
 }
