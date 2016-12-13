@@ -327,7 +327,7 @@ const utils = {
 		}
 
 		if ( options.sourceMap ) {
-			webpackConfig.devtool = 'eval';
+			webpackConfig.devtool = 'cheap-source-map';
 		}
 
 		return webpackConfig;
