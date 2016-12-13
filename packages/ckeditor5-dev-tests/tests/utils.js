@@ -269,7 +269,7 @@ describe( 'utils', () => {
 				sourceMap: true
 			} );
 
-			expect( webpackConfig.devtool ).to.equal( 'eval' );
+			expect( webpackConfig.devtool ).to.equal( 'cheap-source-map' );
 		} );
 	} );
 
