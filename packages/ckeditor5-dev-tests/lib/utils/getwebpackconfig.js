@@ -15,7 +15,7 @@ const NotifierPlugin = require( './notifier-plugin' );
  * @param {Object} options
  * @returns {Object}
  */
-module.exports = function createWebpackConfig( options ) {
+module.exports = function getWebpackConfig( options ) {
 	const config = {
 		plugins: [
 			new CKEditorWebpackPlugin( {

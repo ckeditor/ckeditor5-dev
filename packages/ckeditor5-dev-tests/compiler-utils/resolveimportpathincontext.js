@@ -10,7 +10,7 @@
 const path = require( 'path' );
 const fs = require( 'fs' );
 
-function resolveImportPathInContext( requesterPath, importPath, contextPackagePath ) {
+module.exports = function resolveImportPathInContext( requesterPath, importPath, contextPackagePath ) {
 	const { packageName, filePath } = getImportPathInfo( importPath );
 
 	if ( !packageName.startsWith( 'ckeditor5-' ) ) {
@@ -30,9 +30,7 @@ function resolveImportPathInContext( requesterPath, importPath, contextPackagePa
 	}
 
 	return null;
-}
-
-module.exports = resolveImportPathInContext;
+};
 
 function getImportPathInfo( importPath ) {
 	const splitPath = importPath.split( path.sep );

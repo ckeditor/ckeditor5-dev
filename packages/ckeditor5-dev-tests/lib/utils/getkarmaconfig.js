@@ -19,24 +19,6 @@ const coverageDir = path.join( process.cwd(), 'build', '.coverage' );
 const workspaceRoot = path.join( process.cwd(), '..' );
 
 /**
- * Gets shortened path to file or package and returns fixed path.
- *
- * @param {String} fileOrPackage
- * @returns {String}
- */
-function fixPathToGlobOrPackage( globOrPackage ) {
-	if ( globOrPackage === '**/*.js' ) {
-		return path.join( workspaceRoot, 'ckeditor5-!(dev)*', 'tests', '**', '*.js' );
-	}
-
-	if ( !globOrPackage.includes( '/' ) ) {
-		return path.join( getPathToPackage( workspaceRoot, globOrPackage ), 'tests', '**', '*.js' );
-	}
-
-	return path.join( workspaceRoot, 'ckeditor5-' + globOrPackage );
-}
-
-/**
  * @param {Object} options
  * @returns {Object}
  */
@@ -167,3 +149,21 @@ module.exports = function getKarmaConfig( options ) {
 
 	return karmaConfig;
 };
+
+/**
+ * Gets shortened path to file or package and returns fixed path.
+ *
+ * @param {String} fileOrPackage
+ * @returns {String}
+ */
+function fixPathToGlobOrPackage( globOrPackage ) {
+	if ( globOrPackage === '**/*.js' ) {
+		return path.join( workspaceRoot, 'ckeditor5-!(dev)*', 'tests', '**', '*.js' );
+	}
+
+	if ( !globOrPackage.includes( '/' ) ) {
+		return path.join( getPathToPackage( workspaceRoot, globOrPackage ), 'tests', '**', '*.js' );
+	}
+
+	return path.join( workspaceRoot, 'ckeditor5-' + globOrPackage );
+}

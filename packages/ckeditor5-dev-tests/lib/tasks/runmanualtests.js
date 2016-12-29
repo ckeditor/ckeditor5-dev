@@ -27,7 +27,7 @@ const writer = new commonmark.HtmlRenderer();
  *
  * @returns {Promise}
  */
-module.exports = function runAutomatedTests() {
+module.exports = function runManualTests() {
 	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
 	const manualTestPattern = path.join( process.cwd(), '..', 'ckeditor5-*', 'tests', 'manual' );
 
