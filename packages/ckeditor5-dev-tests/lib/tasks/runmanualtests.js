@@ -10,14 +10,13 @@
 const path = require( 'path' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const webpack = require( 'webpack' );
-const CKEditorWebpackPlugin = require( '../../ckeditor-webpack-plugin' );
 const globSync = require( '../utils/glob' );
 const createManualTestServer = require( '../utils/createmanualtestserver' );
-const WebpackNotifierPlugin = require( '../utils/webpacknotifierplugin' );
 const fs = require( 'fs-extra' );
 const gutil = require( 'gulp-util' );
 const commonmark = require( 'commonmark' );
 const combine = require( 'dom-combiner' );
+const getWebpackConfigForManualTests = require( '../utils/getwebpackconfigformanualtests' );
 
 const reader = new commonmark.Parser();
 const writer = new commonmark.HtmlRenderer();
@@ -42,47 +41,9 @@ function compileScripts( buildDir, manualTestPattern ) {
 	const entryFiles = globSync( path.join( manualTestPattern, '**', '*.js' ) );
 	const names = entryFiles.map( file => getName( file ) );
 	const entryObject = createEntryObject( names, entryFiles );
+	const webpackConfig = getWebpackConfigForManualTests( entryObject );
 
-	const webpackConfig = {
-		// Use cheap source maps because Safari had problem with ES6 + inline source maps.
-		// We could use cheap source maps every where but karma-webpack doesn't support it:
-		// https://github.com/webpack/karma-webpack/pull/76
-		devtool: 'cheap-source-map',
-
-		watch: true,
-
-		entry: entryObject,
-
-		output: {
-			path: buildDir,
-			filename: path.join( '[name]', '[name].js' )
-		},
-
-		plugins: [
-			new CKEditorWebpackPlugin( {
-				useMainPackageModules: true,
-				mainPackagePath: process.cwd(),
-			} ),
-			new WebpackNotifierPlugin()
-		],
-
-		module: {
-			rules: [
-				{
-					// test: **/ckeditor5-*/theme/icons/*.svg
-					test: /ckeditor5-[^/]+\/theme\/icons\/[^/]+\.svg$/,
-					use: [ 'raw-loader' ]
-				},
-				{
-					// test: **/ckeditor5-*/theme/**/*.scss
-					test: /\.scss$/,
-					use: [ 'style-loader', 'css-loader', 'sass-loader' ]
-				}
-			]
-		}
-	};
-
-	return runWebpack( webpackConfig );
+	return runWebpack( webpackConfig, buildDir );
 }
 
 function createEntryObject( names, entryFiles ) {

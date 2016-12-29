@@ -12,7 +12,7 @@ const CKEditorWebpackPlugin = require( '../../ckeditor-webpack-plugin' );
  * @param {Object} options
  * @returns {Object}
  */
-module.exports = function getWebpackConfig( options ) {
+module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	const config = {
 		plugins: [
 			new CKEditorWebpackPlugin( {

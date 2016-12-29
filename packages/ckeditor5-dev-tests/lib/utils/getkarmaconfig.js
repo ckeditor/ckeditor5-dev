@@ -7,7 +7,7 @@
 'use strict';
 
 const path = require( 'path' );
-const getWebpackConfig = require( './getwebpackconfig' );
+const getWebpackConfigForAutomatedTests = require( './getwebpackconfigforautomatedtests' );
 const getPathToPackage = require( '../../compiler-utils/getpathtopackage' );
 
 const reporters = [
@@ -66,7 +66,7 @@ module.exports = function getKarmaConfig( options ) {
 		// Available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
 		preprocessors: preprocessorMap,
 
-		webpack: getWebpackConfig( options ),
+		webpack: getWebpackConfigForAutomatedTests( options ),
 
 		webpackMiddleware: {
 			noInfo: true,
