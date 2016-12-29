@@ -16,7 +16,7 @@ const reporters = [
 ];
 
 const coverageDir = path.join( process.cwd(), 'build', '.coverage' );
-const workspaceRoot = path.join( process.cwd(), '..' );
+const nodeModulesPath = path.join( process.cwd(), 'node_modules' );
 
 /**
  * @param {Object} options
@@ -45,7 +45,7 @@ module.exports = function getKarmaConfig( options ) {
 
 	const karmaConfig = {
 		// Base path that will be used to resolve all patterns (eg. files, exclude).
-		basePath: path.resolve( process.cwd(), '..' ),
+		basePath: process.cwd(),
 
 		// Frameworks to use. Available frameworks: https://npmjs.org/browse/keyword/karma-adapter
 		frameworks: [ 'mocha', 'chai', 'sinon' ],
@@ -66,7 +66,11 @@ module.exports = function getKarmaConfig( options ) {
 		// Available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
 		preprocessors: preprocessorMap,
 
-		webpack: getWebpackConfigForAutomatedTests( options ),
+		webpack: getWebpackConfigForAutomatedTests( {
+			files,
+			sourceMap: options.sourceMap,
+			coverage: options.coverage
+		} ),
 
 		webpackMiddleware: {
 			noInfo: true,
@@ -158,12 +162,12 @@ module.exports = function getKarmaConfig( options ) {
  */
 function fixPathToGlobOrPackage( globOrPackage ) {
 	if ( globOrPackage === '**/*.js' ) {
-		return path.join( workspaceRoot, 'ckeditor5-!(dev)*', 'tests', '**', '*.js' );
+		return path.join( nodeModulesPath, 'ckeditor5-!(dev)*', 'tests', '**', '*.js' );
 	}
 
 	if ( !globOrPackage.includes( '/' ) ) {
-		return path.join( getPathToPackage( workspaceRoot, globOrPackage ), 'tests', '**', '*.js' );
+		return path.join( getPathToPackage( nodeModulesPath, globOrPackage ), 'tests', '**', '*.js' );
 	}
 
-	return path.join( workspaceRoot, 'ckeditor5-' + globOrPackage );
+	return path.join( nodeModulesPath, 'ckeditor5-' + globOrPackage );
 }
