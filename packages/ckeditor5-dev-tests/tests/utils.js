@@ -275,7 +275,7 @@ describe( 'utils', () => {
 
 	describe( 'getPackageName()', () => {
 		it( 'returns package name from current work directory', () => {
-			expect( utils.getPackageName() ).to.equal( 'dev-tests' );
+			expect( utils.getPackageName() ).to.equal( 'dev' );
 		} );
 
 		it( 'returns package name from specify work directory', () => {

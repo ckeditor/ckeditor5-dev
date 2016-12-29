@@ -32,9 +32,6 @@
   },
   "devDependencies": {
     "@ckeditor/ckeditor5-dev-lint": "^1.0.1",
-    "gulp": "^3.9.0",
-    "guppy-pre-commit": "^0.4.0",
-    "istanbul": "^0.4.4",
     "mockery": "^2.0.0",
     "proxyquire": "^1.7.10"
   },
@@ -42,20 +39,13 @@
     "node": ">=6.0.0",
     "npm": ">=3.0.0"
   },
-  "author": "CKSource (http://cksource.com/)",
-  "license": "See LICENSE.md",
-  "homepage": "https://github.com/ckeditor/ckeditor5-dev-tests",
-  "bugs": "https://github.com/ckeditor/ckeditor5-dev-tests/issue",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ckeditor/ckeditor5-dev-tests"
-  },
-  "scripts": {
-    "test": "mocha tests --recursive",
-    "coverage": "istanbul cover _mocha tests/ -- --recursive"
-  },
   "bin": {
     "ckeditor5-dev-tests": "./bin/test.js",
     "ckeditor5-dev-tests-travis": "./bin/test-travis.sh"
-  }
+  },
+  "author": "CKSource (http://cksource.com/)",
+  "license": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-tests",
+  "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
+  "repository": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-tests"
 }
