@@ -1,0 +1,21 @@
+{
+  "name": "ckeditor5-dev",
+  "version": "1.0.0",
+  "description": "CKEditor 5 development tools.",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ckeditor/ckeditor5-dev.git"
+  },
+  "author": "CKSource (http://cksource.com/)",
+  "license": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",
+  "bugs": {
+    "url": "https://github.com/ckeditor/ckeditor5-dev/issues"
+  },
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme"
+}
