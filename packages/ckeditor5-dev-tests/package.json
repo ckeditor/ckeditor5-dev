@@ -28,10 +28,11 @@
     "minimist": "^1.2.0",
     "mocha": "^3.1.2",
     "sinon": "^1.17.6",
-    "webpack": "^1.13.2"
+    "webpack": "^2.2.0-rc.3"
   },
   "devDependencies": {
     "@ckeditor/ckeditor5-dev-lint": "^1.0.1",
+    "commonmark": "^0.27.0",
     "mockery": "^2.0.0",
     "proxyquire": "^1.7.10"
   },

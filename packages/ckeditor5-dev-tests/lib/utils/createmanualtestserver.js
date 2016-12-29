@@ -3,22 +3,22 @@
  * For licensing, see LICENSE.md.
  */
 
+/* jshint browser: false, node: true, strict: true */
+
 'use strict';
 
 const http = require( 'http' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const combine = require( 'dom-combiner' );
-const utils = require( './utils' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * Basic HTTP server.
  *
  * @param {String} sourcePath Base path where the compiler saved the files.
- * @param {String} serverRootPath Base path that will be used to find the static files.
  */
-module.exports = ( sourcePath, serverRootPath ) => {
+module.exports = function createManualTestServer( sourcePath ) {
 	const log = logger();
 
 	const server = http.createServer( ( request, response ) => {
@@ -33,9 +33,9 @@ module.exports = ( sourcePath, serverRootPath ) => {
 
 		// Proxy for styles.
 		if ( request.url === '/theme/ckeditor.css' ) {
-			const stylesheet = fs.readFileSync( path.join( sourcePath, 'theme', 'ckeditor.css' ) );
-
-			return response.end( stylesheet, 'utf-8' );
+			// const stylesheet = fs.readFileSync( path.join( sourcePath, 'theme', 'ckeditor.css' ) );
+			return response.end( '' );
+			// return response.end( stylesheet, 'utf-8' );
 		}
 
 		// Generate index.html with list of the tests.
@@ -45,7 +45,7 @@ module.exports = ( sourcePath, serverRootPath ) => {
 
 		// In other cases - return a static file.
 		try {
-			const content = fs.readFileSync( path.join( serverRootPath, request.url ) );
+			const content = fs.readFileSync( path.join( sourcePath, request.url ) );
 
 			response.end( content, 'utf-8' );
 		} catch ( error ) {
@@ -96,11 +96,12 @@ function getContentType( fileExtension ) {
 // @returns {String}
 function generateIndex( sourcePath ) {
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
-	const listElements = utils._getManualTestPaths( sourcePath )
-		.map( ( testPath ) => {
-			let htmlPath = utils._cleanManualTestPath( testPath ).replace( /\.js$/, '.html' );
+	const listElements = fs.readdirSync( sourcePath )
+		.filter( f => fs.existsSync( path.join( sourcePath, f ) ) )
+		.map( ( f ) => {
+			let htmlPath = path.join( f, f + '.html' );
 
-			if ( utils._getPlatform() === 'win32' ) {
+			if ( process.platform === 'win32' ) {
 				htmlPath = htmlPath.replace( /\\/g, '/' );
 			}
 

@@ -5,8 +5,8 @@
 
 /* jshint browser: false, node: true, strict: true */
 
+const path = require( 'path' );
+
 module.exports = {
-	runAutomatedTests: require( './tasks/runautomatedtests' ),
-	runManualTests: require( './tasks/runmanualtests' ),
-	parseArguments: require( './utils/parsearguments' ),
+	coverageDir: path.join( process.cwd(), 'tests', 'coverage' ),
 };
