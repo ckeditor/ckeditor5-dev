@@ -37,7 +37,12 @@ module.exports = function getWebpackConfig( options ) {
 	};
 
 	if ( options.sourceMap ) {
-		config.devtool = 'cheap-source-map';
+		// Note: karma-sourcemap-loader works only with inline source maps.
+		// See https://github.com/webpack/karma-webpack/pull/76.
+		// We use cheap source maps for manual tests because Safari
+		// had problems with inline source maps and ES6. This means that
+		// you can't have source maps in automated tests in Safari.
+		config.devtool = 'inline-source-map';
 	}
 
 	if ( options.coverage ) {

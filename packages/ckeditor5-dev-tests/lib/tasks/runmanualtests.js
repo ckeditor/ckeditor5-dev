@@ -44,6 +44,9 @@ function compileScripts( buildDir, manualTestPattern ) {
 	const entryObject = createEntryObject( names, entryFiles );
 
 	const webpackConfig = {
+		// Use cheap source maps because Safari had problem with ES6 + inline source maps.
+		// We could use cheap source maps every where but karma-webpack doesn't support it:
+		// https://github.com/webpack/karma-webpack/pull/76
 		devtool: 'cheap-source-map',
 
 		watch: true,
