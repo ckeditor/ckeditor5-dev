@@ -35,7 +35,7 @@ module.exports = function runManualTests() {
 		compileScripts( buildDir, manualTestPattern ),
 		compileViews( buildDir, manualTestPattern ),
 	] )
-		.then( () => createManualTestServer( buildDir ) );
+	.then( () => createManualTestServer( buildDir ) );
 };
 
 function compileScripts( buildDir, manualTestPattern ) {
@@ -115,7 +115,7 @@ function compileView( buildDir, source, viewTemplate ) {
 	const log = logger();
 	const pathWithoutExtension = path.join( source.dir, source.fileName );
 
-	log.info( `[View] Processing '${ gutil.colors.cyan( source.fileName ) }'...` );
+	log.info( `Processing '${ gutil.colors.cyan( pathWithoutExtension ) }'...` );
 
 	// Compile test instruction (Markdown file).
 	const parsedMarkdownTree = reader.parse( fs.readFileSync( `${ pathWithoutExtension }.md`, 'utf-8' ) );
@@ -135,7 +135,7 @@ function compileView( buildDir, source, viewTemplate ) {
 
 	fs.outputFileSync( outputFilePath, preparedHtml );
 
-	log.info( `[View] Finished writing '${ gutil.colors.cyan( source.fileName ) }'` );
+	log.info( `Finished writing '${ gutil.colors.cyan( outputFilePath ) }'` );
 }
 
 function copyStaticFiles( buildDir, source ) {
