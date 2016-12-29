@@ -6,6 +6,7 @@
 'use strict';
 
 const resolveImportPathInContext = require( './compiler-utils/resolveimportpathincontext' );
+const getWorkspaceRelativePathInfo = require( './compiler-utils/getworkspacerelativepathinfo' );
 const path = require( 'path' );
 
 class CKEditorWebpackPlugin {
@@ -14,13 +15,26 @@ class CKEditorWebpackPlugin {
 	}
 
 	apply( compiler ) {
-		if ( !this.options.useMainPackageModules ) {
+		const { packages } = this.options;
+
+		if ( !packages ) {
 			return;
 		}
 
+		const wildCardPackagePath = packages[ '*' ];
+
 		compiler.plugin( 'after-resolvers', ( compiler ) => {
 			compiler.resolvers.normal.plugin( 'before-resolve', ( obj, done ) => {
-				const resolvedPath = resolveImportPathInContext( obj.context.issuer, obj.request, this.options.mainPackagePath );
+				const packageName = getWorkspaceRelativePathInfo( obj.request ).packageName;
+				const packagePath = packages[ packageName ] || wildCardPackagePath;
+
+				if ( !packagePath ) {
+					done();
+
+					return;
+				}
+
+				const resolvedPath = resolveImportPathInContext( obj.context.issuer, obj.request, packagePath );
 
 				if ( resolvedPath ) {
 					obj.path = resolvedPath.modulesPath;

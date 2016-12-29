@@ -32,8 +32,9 @@ module.exports = function getWebpackConfigFotManualTests( entryObject, buildDir 
 
 		plugins: [
 			new CKEditorWebpackPlugin( {
-				useMainPackageModules: true,
-				mainPackagePath: process.cwd()
+				packages: {
+					'*': path.join( process.cwd(), 'node_modules' ),
+				}
 			} ),
 			new WebpackNotifierPlugin(),
 		],

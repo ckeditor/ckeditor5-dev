@@ -7,16 +7,17 @@
 
 const path = require( 'path' );
 const fs = require( 'fs' );
+const getWorkspaceRelativePathInfo = require( './getworkspacerelativepathinfo' );
 
 module.exports = function resolveImportPathInContext( requesterPath, importPath, contextPackagePath ) {
-	const { packageName, filePath } = getImportPathInfo( importPath );
+	const { packageName, filePath } = getWorkspaceRelativePathInfo( importPath );
 
 	if ( !packageName.startsWith( 'ckeditor5-' ) ) {
 		return null;
 	}
 
-	const packagePath = path.join( contextPackagePath, 'node_modules', packageName );
-	const modulesPath = path.join( contextPackagePath, 'node_modules' );
+	const packagePath = path.join( contextPackagePath, packageName );
+	const modulesPath = path.join( contextPackagePath );
 
 	if ( fs.existsSync( packagePath ) ) {
 		return {
@@ -29,15 +30,6 @@ module.exports = function resolveImportPathInContext( requesterPath, importPath,
 
 	return null;
 };
-
-function getImportPathInfo( importPath ) {
-	const splitPath = importPath.split( path.sep );
-
-	return {
-		packageName: splitPath[ 0 ],
-		filePath: path.join.apply( path, splitPath.slice( 1 ) )
-	};
-}
 
 function ensureExtension( filePath, defaultExt ) {
 	if ( !path.extname( filePath ) ) {
