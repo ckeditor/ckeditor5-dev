@@ -1,9 +1,9 @@
 {
   "name": "@ckeditor/ckeditor5-dev-utils",
   "version": "2.2.3",
-  "description": "Utils for CKEditor 5 dev code (such as Gulp tasks).",
-  "main": "lib/index.js",
+  "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
+  "main": "lib/index.js",
   "dependencies": {
     "del": "^2.2.1",
     "fs-extra": "^0.30.0",
@@ -12,12 +12,7 @@
     "through2": "^2.0.1"
   },
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-lint": "^1.0.1",
     "chai": "^3.5.0",
-    "gulp": "^3.9.1",
-    "guppy-pre-commit": "^0.4.0",
-    "istanbul": "^0.4.4",
-    "mocha": "^3.0.2",
     "mockery": "^2.0.0",
     "sinon": "^1.17.4",
     "vinyl": "^1.1.1"
@@ -27,12 +22,8 @@
     "npm": ">=3.0.0"
   },
   "author": "CKSource (http://cksource.com/)",
-  "license": "See LICENSE.md",
-  "homepage": "https://github.com/ckeditor/ckeditor5-dev-utils",
-  "bugs": "https://github.com/ckeditor/ckeditor5-dev-utils/issues",
-  "repository": "https://github.com/ckeditor/ckeditor5-dev-utils",
-  "scripts": {
-    "test": "mocha tests --recursive",
-    "coverage": "istanbul cover _mocha tests/ -- --recursive"
-  }
+  "license": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-utils",
+  "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
+  "repository": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-utils"
 }
