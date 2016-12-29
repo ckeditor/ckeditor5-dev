@@ -18,7 +18,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 		plugins: [
 			new CKEditorWebpackPlugin( {
 				packages: {
-					'*': path.join( process.cwd(), 'node_modules' ),
+					'*': path.join( process.cwd(), 'node_modules' )
 				}
 			} )
 		],
@@ -64,7 +64,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 					...getPathsToIncludeForCoverage( options.files )
 				],
 				exclude: [
-					new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` ),
+					new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
 				],
 				query: {
 					esModules: true

@@ -32,7 +32,7 @@ module.exports = function runManualTests() {
 
 	return Promise.all( [
 		compileScripts( buildDir, manualTestPattern ),
-		compileViews( buildDir, manualTestPattern ),
+		compileViews( buildDir, manualTestPattern )
 	] )
 	.then( () => createManualTestServer( buildDir ) );
 };
@@ -41,7 +41,7 @@ function compileScripts( buildDir, manualTestPattern ) {
 	const entryFiles = globSync( path.join( manualTestPattern, '**', '*.js' ) );
 	const names = entryFiles.map( file => getName( file ) );
 	const entryObject = createEntryObject( names, entryFiles );
-	const webpackConfig = getWebpackConfigForManualTests( entryObject );
+	const webpackConfig = getWebpackConfigForManualTests( entryObject, buildDir );
 
 	return runWebpack( webpackConfig, buildDir );
 }
@@ -59,7 +59,7 @@ function createEntryObject( names, entryFiles ) {
 function compileViews( buildDir, manualTestPattern ) {
 	const sourceFiles = globSync( path.join( manualTestPattern, '*.md' ) ).map( file => ( {
 		dir: path.dirname( file ),
-		fileName: getName( file ),
+		fileName: getName( file )
 	} ) );
 	const viewTemplate = fs.readFileSync( path.join( __dirname, '..', 'utils', 'template.html' ), 'utf-8' );
 

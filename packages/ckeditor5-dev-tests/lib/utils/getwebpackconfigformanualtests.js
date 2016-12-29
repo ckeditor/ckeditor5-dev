@@ -14,7 +14,7 @@ const WebpackNotifierPlugin = require( './webpacknotifierplugin' );
  * @param {String} buildDir
  * @returns {Object}
  */
-module.exports = function getWebpackConfigFotManualTests( entryObject, buildDir ) {
+module.exports = function getWebpackConfigForManualTests( entryObject, buildDir ) {
 	return {
 		// Use cheap source maps because Safari had problem with ES6 + inline source maps.
 		// We could use cheap source maps every where but karma-webpack doesn't support it:
@@ -33,10 +33,10 @@ module.exports = function getWebpackConfigFotManualTests( entryObject, buildDir 
 		plugins: [
 			new CKEditorWebpackPlugin( {
 				packages: {
-					'*': path.join( process.cwd(), 'node_modules' ),
+					'*': path.join( process.cwd(), 'node_modules' )
 				}
 			} ),
-			new WebpackNotifierPlugin(),
+			new WebpackNotifierPlugin()
 		],
 
 		module: {

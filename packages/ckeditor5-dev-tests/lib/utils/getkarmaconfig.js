@@ -12,7 +12,7 @@ const getPathToPackage = require( '../../compiler-utils/getpathtopackage' );
 
 const reporters = [
 	'mocha',
-	'dots',
+	'dots'
 ];
 
 const coverageDir = path.join( process.cwd(), 'build', '.coverage' );
@@ -59,7 +59,7 @@ module.exports = function getKarmaConfig( options ) {
 			path.join( '**', 'tests', '**', '_utils', '**', '*.js' ),
 
 			// And all manual tests.
-			path.join( '**', 'tests', '**', 'manual', '**', '*.js' ),
+			path.join( '**', 'tests', '**', 'manual', '**', '*.js' )
 		],
 
 		// Preprocess matching files before serving them to the browser.
