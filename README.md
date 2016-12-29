@@ -1,5 +1,5 @@
-CKEditor 5 development tools
-============================
+CKEditor 5 development tools packages
+=====================================
 
 [![Build Status](https://travis-ci.org/ckeditor/ckeditor5-dev.svg?branch=master)](https://travis-ci.org/ckeditor/ckeditor5-dev)
 [![Test Coverage](https://codeclimate.com/github/ckeditor/ckeditor5-dev/badges/coverage.svg)](https://codeclimate.com/github/ckeditor/ckeditor5-dev/coverage)

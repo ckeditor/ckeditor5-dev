@@ -16,12 +16,7 @@
     "parse-gitignore": "^0.3.1"
   },
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-lint": "^1.0.1",
     "chai": "^3.5.0",
-    "gulp": "^3.9.0",
-    "guppy-pre-commit": "^0.3.0",
-    "istanbul": "^0.4.4",
-    "mocha": "^3.0.2",
     "mockery": "^1.7.0",
     "proxyquire": "^1.7.10",
     "sinon": "^1.17.4"
@@ -31,12 +26,8 @@
     "npm": ">=3.0.0"
   },
   "author": "CKSource (http://cksource.com/)",
-  "license": "See LICENSE.md",
-  "homepage": "https://github.com/ckeditor/ckeditor5-dev-env",
-  "bugs": "https://github.com/ckeditor/ckeditor5-dev-env/issue",
-  "repository": "https://github.com/ckeditor/ckeditor5-dev-env",
-  "scripts": {
-    "test": "mocha tests --recursive",
-    "coverage": "istanbul cover _mocha tests/ -- --recursive"
-  }
+  "license": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-env",
+  "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
+  "repository": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-env"
 }
