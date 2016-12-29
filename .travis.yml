@@ -6,6 +6,7 @@ cache:
 install:
   - npm install
   - npm install codeclimate-test-reporter
+  - lerna bootstrap
 script:
   - gulp lint
   - npm run coverage
