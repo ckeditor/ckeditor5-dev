@@ -1,0 +1,5 @@
+# All "dot directories".
+.*/**
+
+**/node_modules/**
+coverage/**

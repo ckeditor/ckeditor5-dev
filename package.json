@@ -5,7 +5,11 @@
   "main": "index.js",
   "dependencies": {},
   "devDependencies": {
-    "lerna": "2.0.0-beta.31"
+    "@ckeditor/ckeditor5-dev-lint": "^1.0.1",
+    "guppy-pre-commit": "^0.4.0",
+    "lerna": "2.0.0-beta.31",
+    "istanbul": "^0.4.4",
+    "mocha": "^3.0.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -16,8 +20,10 @@
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",
-  "bugs": {
-    "url": "https://github.com/ckeditor/ckeditor5-dev/issues"
-  },
-  "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme"
+  "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme",
+  "scripts": {
+    "test": "mocha ./packages/ckeditor5-dev-lint/tests/ --recursive",
+    "coverage": "istanbul cover _mocha ./packages/ckeditor5-dev-lint/tests/ -- --recursive"
+  }
 }
