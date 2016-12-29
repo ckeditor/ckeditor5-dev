@@ -23,7 +23,7 @@
   "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme",
   "scripts": {
-    "test": "mocha ./packages/ckeditor5-dev-lint/tests/ --recursive",
-    "coverage": "istanbul cover _mocha ./packages/ckeditor5-dev-lint/tests/ -- --recursive"
+    "test": "mocha `./scripts/get-test-directories.sh` --recursive",
+    "coverage": "istanbul cover _mocha `./scripts/get-test-directories.sh` -- --recursive"
   }
 }
