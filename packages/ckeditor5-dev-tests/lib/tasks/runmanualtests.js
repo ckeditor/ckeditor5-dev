@@ -62,6 +62,21 @@ function compileScripts( buildDir, manualTestPattern ) {
 			} ),
 			new WebpackNotifierPlugin(),
 		],
+
+		module: {
+			rules: [
+				{
+					// test: **/ckeditor5-*/theme/icons/*.svg
+					test: /ckeditor5-[^/]+\/theme\/icons\/[^/]+\.svg$/,
+					use: [ 'raw-loader' ]
+				},
+				{
+					// test: **/ckeditor5-*/theme/**/*.scss
+					test: /\.scss$/,
+					use: [ 'style-loader', 'css-loader', 'sass-loader' ]
+				}
+			]
+		}
 	};
 
 	return runWebpack( webpackConfig );
