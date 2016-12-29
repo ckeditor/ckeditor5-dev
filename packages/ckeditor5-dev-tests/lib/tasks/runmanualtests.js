@@ -60,7 +60,7 @@ function compileScripts( buildDir, manualTestPattern ) {
 				useMainPackageModules: true,
 				mainPackagePath: process.cwd(),
 			} ),
-			new WebpackNotifierPlugin(),
+			new WebpackNotifierPlugin()
 		],
 
 		module: {

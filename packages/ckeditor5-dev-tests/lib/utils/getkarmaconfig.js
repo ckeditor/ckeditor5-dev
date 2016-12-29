@@ -39,7 +39,7 @@ module.exports = function getKarmaConfig( options ) {
 		preprocessorMap[ file ] = [ 'webpack' ];
 
 		if ( options.sourceMap ) {
-			preprocessorMap[file].push( 'sourcemap' );
+			preprocessorMap[ file ].push( 'sourcemap' );
 		}
 	}
 
