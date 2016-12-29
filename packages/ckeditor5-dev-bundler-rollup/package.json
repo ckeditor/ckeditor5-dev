@@ -1,0 +1,46 @@
+{
+  "name": "@ckeditor/ckeditor5-dev-bundler-rollup",
+  "version": "5.0.0",
+  "description": "Tasks used to create CKEditor 5 bundle.",
+  "keywords": [],
+  "main": "lib/index.js",
+  "dependencies": {
+    "@ckeditor/ckeditor5-dev-compiler": "^6.0.2",
+    "@ckeditor/ckeditor5-dev-utils": "^2.2.3",
+    "babel-plugin-external-helpers": "^6.18.0",
+    "babel-preset-es2015": "^6.18.0",
+    "gulp": "^3.9.1",
+    "gulp-cssnano": "^2.1.2",
+    "gulp-filter": "^4.0.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.5.4",
+    "gulp-uglify": "^2.0.0",
+    "gulp-util": "^3.0.7",
+    "gzip-size": "^3.0.0",
+    "minimist": "^1.2.0",
+    "mkdirp": "^0.5.1",
+    "pretty-bytes": "^4.0.2",
+    "regenerator-runtime": "^0.10.0",
+    "rollup": "^0.36.4",
+    "rollup-plugin-babel": "^2.6.1",
+    "stream-to-promise": "^2.2.0"
+  },
+  "devDependencies": {
+    "@ckeditor/ckeditor5-dev-lint": "^1.0.1",
+    "chai": "^3.5.0",
+    "guppy-pre-commit": "^0.4.0",
+    "istanbul": "^0.4.4",
+    "mocha": "^3.0.2",
+    "mockery": "^2.0.0",
+    "sinon": "^1.17.4"
+  },
+  "engines": {
+    "node": ">=6.0.0",
+    "npm": ">=3.0.0"
+  },
+  "author": "CKSource (http://cksource.com/)",
+  "license": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-bundler-rollup",
+  "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
+  "repository": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-bundler-rollup"
+}
