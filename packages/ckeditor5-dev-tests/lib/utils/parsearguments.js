@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint browser: false, node: true, strict: true */
-
 'use strict';
 
 const minimist = require( 'minimist' );
@@ -25,8 +23,7 @@ module.exports = function parseArguments( args ) {
 			'watch',
 			'coverage',
 			'source-map',
-			'verbose',
-			'ignore-duplicates'
+			'verbose'
 		],
 
 		alias: {
@@ -43,12 +40,10 @@ module.exports = function parseArguments( args ) {
 			watch: false,
 			coverage: false,
 			verbose: false,
-			'source-map': false,
-			'ignore-duplicates': false
+			'source-map': false
 		}
 	} );
 
-	options.ignoreDuplicates = options[ 'ignore-duplicates' ];
 	options.sourceMap = options[ 'source-map' ];
 	options.browsers = options.browsers.split( ',' );
 

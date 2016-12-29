@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint browser: false, node: true, strict: true */
-
 'use strict';
 
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
@@ -12,7 +10,7 @@ const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 /**
  * Plugin for Webpack which helps to inform the developer about processes.
  */
-module.exports = class NotifierPlugin {
+module.exports = class WebpackNotifierPlugin {
 	constructor() {
 		this.log = logger();
 	}
@@ -31,13 +29,13 @@ module.exports = class NotifierPlugin {
 		compiler.plugin( 'done', ( stats ) => {
 			if ( stats.compilation.errors.length ) {
 				for ( const item of stats.compilation.errors ) {
-					this.log.error( item.message );
+					this.log.error( item.message, { raw: true } );
 				}
 			}
 
 			if ( stats.compilation.warnings.length ) {
 				for ( const item of stats.compilation.warnings ) {
-					this.log.warning( item.message );
+					this.log.warning( item.message, { raw: true } );
 				}
 			}
 

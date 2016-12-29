@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint browser: false, node: true, strict: true */
-
 const path = require( 'path' );
 
 module.exports = {

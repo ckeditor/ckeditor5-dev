@@ -13,7 +13,7 @@ const webpack = require( 'webpack' );
 const CKEditorWebpackPlugin = require( '../../ckeditor-webpack-plugin' );
 const globSync = require( '../utils/glob' );
 const createManualTestServer = require( '../utils/createmanualtestserver' );
-const NotifierPlugin = require( '../utils/notifier-plugin' );
+const WebpackNotifierPlugin = require( '../utils/webpacknotifierplugin' );
 const fs = require( 'fs-extra' );
 const gutil = require( 'gulp-util' );
 const commonmark = require( 'commonmark' );
@@ -60,7 +60,7 @@ function compileScripts( buildDir, manualTestPattern ) {
 				useMainPackageModules: true,
 				mainPackagePath: process.cwd(),
 			} ),
-			new NotifierPlugin(),
+			new WebpackNotifierPlugin(),
 		],
 	};
 

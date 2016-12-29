@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint browser: false, node: true, strict: true */
-
 module.exports = {
 	runAutomatedTests: require( './tasks/runautomatedtests' ),
 	runManualTests: require( './tasks/runmanualtests' ),

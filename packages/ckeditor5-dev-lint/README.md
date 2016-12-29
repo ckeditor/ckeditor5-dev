@@ -14,8 +14,6 @@ npm i --save-dev @ckeditor/ckeditor5-dev-lint
 `gulpfile.js`:
 
 ```js
-/* jshint browser: false, node: true, strict: true */
-
 'use strict';
 
 const gulp = require( 'gulp' );

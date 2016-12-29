@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint browser: false, node: true, strict: true */
-
 'use strict';
 
 const http = require( 'http' );
@@ -31,13 +29,6 @@ module.exports = function createManualTestServer( sourcePath ) {
 			return response.end( null, 'utf-8' );
 		}
 
-		// Proxy for styles.
-		if ( request.url === '/theme/ckeditor.css' ) {
-			// const stylesheet = fs.readFileSync( path.join( sourcePath, 'theme', 'ckeditor.css' ) );
-			return response.end( '' );
-			// return response.end( stylesheet, 'utf-8' );
-		}
-
 		// Generate index.html with list of the tests.
 		if ( request.url === '/' ) {
 			return response.end( generateIndex( sourcePath ), 'utf-8' );
@@ -51,7 +42,7 @@ module.exports = function createManualTestServer( sourcePath ) {
 		} catch ( error ) {
 			log.error( `[Server] Cannot find file '${ request.url }'.` );
 
-			response.writeHead( 500 );
+			response.writeHead( 404 );
 			response.end( `Sorry, check with the site admin for error: ${ error.code }...\n`, 'utf-8' );
 		}
 	} ).listen( 8125 );
