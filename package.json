@@ -15,6 +15,10 @@
     "type": "git",
     "url": "git+https://github.com/ckeditor/ckeditor5-dev.git"
   },
+  "engines": {
+    "node": ">=6.0.0",
+    "npm": ">=3.0.0"
+  },
   "author": "CKSource (http://cksource.com/)",
   "license": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",
   "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
