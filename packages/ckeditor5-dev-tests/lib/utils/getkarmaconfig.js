@@ -8,7 +8,6 @@
 
 const path = require( 'path' );
 const getWebpackConfigForAutomatedTests = require( './getwebpackconfigforautomatedtests' );
-const getPathToPackage = require( '../../compiler-utils/getpathtopackage' );
 
 const reporters = [
 	'mocha',
@@ -31,7 +30,7 @@ module.exports = function getKarmaConfig( options ) {
 		throw new Error( `Given Mocha reporter is not supported. Available reporters: ${ reporters.join( ', ' ) }.` );
 	}
 
-	const files = options.files.map( globOrPackage => fixPathToGlobOrPackage( globOrPackage ) );
+	const files = options.files.map( file => fileOptionToGlob( file ) );
 
 	const preprocessorMap = {};
 
@@ -154,20 +153,41 @@ module.exports = function getKarmaConfig( options ) {
 	return karmaConfig;
 };
 
-/**
- * Gets shortened path to file or package and returns fixed path.
- *
- * @param {String} fileOrPackage
- * @returns {String}
- */
-function fixPathToGlobOrPackage( globOrPackage ) {
-	if ( globOrPackage === '**/*.js' ) {
-		return path.join( nodeModulesPath, 'ckeditor5-!(dev)*', 'tests', '**', '*.js' );
+// Converts values of --files argument to proper globs.
+// There are 5 supported types of values now:
+//
+// 1. all files – '*'
+// 2. package name – 'engine'
+// 3. everything except given package – '!engine'
+// 4. path – 'engine/view' -> 'ckeditor5-engine/tests/view/**/*.js'
+// 5. simplified glob – 'engine/view/**/*.js' -> 'ckeditor5-engine/tests/view/**/*.js'
+function fileOptionToGlob( file ) {
+	const chunks = file.split( '/' );
+	const packageName = chunks.shift();
+	const globSuffix = path.join( 'tests', '**', '*.js' );
+
+	// 1. 2. 3.
+	if ( chunks.length === 0 ) {
+		// 1.
+		if ( packageName == '*' ) {
+			return path.join( nodeModulesPath, 'ckeditor5-!(dev)*', globSuffix );
+		}
+
+		// 3.
+		if ( packageName.startsWith( '!' ) ) {
+			return path.join( nodeModulesPath, 'ckeditor5-!(' + packageName.slice( 1 ) + ')*', globSuffix );
+		}
+
+		// 2.
+		return path.join( nodeModulesPath, 'ckeditor5-' + packageName, globSuffix );
 	}
 
-	if ( !globOrPackage.includes( '/' ) ) {
-		return path.join( getPathToPackage( nodeModulesPath, globOrPackage ), 'tests', '**', '*.js' );
+	let glob = chunks.join( '/' );
+
+	// 4.
+	if ( !glob.endsWith( '.js' ) ) {
+		glob = path.join( glob, '**', '*.js' );
 	}
 
-	return path.join( nodeModulesPath, 'ckeditor5-' + globOrPackage );
+	return path.join( nodeModulesPath, 'ckeditor5-' + packageName, 'tests', glob );
 }
