@@ -14,7 +14,7 @@ const reporters = [
 	'dots'
 ];
 
-const coverageDir = path.join( process.cwd(), 'build', '.coverage' );
+const coverageDir = path.join( process.cwd(), 'coverage' );
 const nodeModulesPath = path.join( process.cwd(), 'node_modules' );
 
 /**
