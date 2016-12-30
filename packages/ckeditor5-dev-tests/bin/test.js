@@ -7,27 +7,19 @@
 
 'use strict';
 
-const compiler = require( '@ckeditor/ckeditor5-dev-compiler' );
 const gutil = require( 'gulp-util' );
 const tests = require( '../lib/index' );
 
 const cwd = process.cwd();
-const options = tests.utils.parseArguments();
-
-options.packages = compiler.utils.getPackages( cwd );
+const options = tests.parseArguments( process.argv.slice( 2 ) );
 
 if ( !cwd.endsWith( 'ckeditor5' ) ) {
-	// Add current package as source.
-	options.packages.push( cwd );
+	options.files.push( '/' );
 }
 
-if ( options.files.length === 0 ) {
-	options.files = [
-		tests.utils.getPackageName()
-	];
-}
+console.log( options.files );
 
-tests.tasks.automated.test( options )
+tests.runAutomatedTests( options )
 	.catch( ( error ) => {
 		// Mark result of this task as invalid.
 		process.exitCode = 1;

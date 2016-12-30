@@ -17,9 +17,10 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	const config = {
 		plugins: [
 			new CKEditorWebpackPlugin( {
-				packages: {
-					'*': path.join( process.cwd(), 'node_modules' )
-				}
+				packages: [
+					process.cwd(),
+					path.join( process.cwd(), 'node_modules' ),
+				]
 			} )
 		],
 

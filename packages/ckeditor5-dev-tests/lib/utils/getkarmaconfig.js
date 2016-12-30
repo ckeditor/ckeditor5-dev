@@ -156,6 +156,7 @@ module.exports = function getKarmaConfig( options ) {
 // Converts values of --files argument to proper globs.
 // There are 5 supported types of values now:
 //
+// 0. Current directory - '/'
 // 1. all files – '*'
 // 2. package name – 'engine'
 // 3. everything except given package – '!engine'
@@ -165,6 +166,11 @@ function fileOptionToGlob( file ) {
 	const chunks = file.split( '/' );
 	const packageName = chunks.shift();
 	const globSuffix = path.join( 'tests', '**', '*.js' );
+
+	// 0.
+	if ( file === '/' ) {
+		return path.join( process.cwd(), globSuffix );
+	}
 
 	// 1. 2. 3.
 	if ( chunks.length === 0 ) {
