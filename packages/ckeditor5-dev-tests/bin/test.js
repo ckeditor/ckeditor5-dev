@@ -17,8 +17,6 @@ if ( !cwd.endsWith( 'ckeditor5' ) ) {
 	options.files.push( '/' );
 }
 
-console.log( options.files );
-
 tests.runAutomatedTests( options )
 	.catch( ( error ) => {
 		// Mark result of this task as invalid.

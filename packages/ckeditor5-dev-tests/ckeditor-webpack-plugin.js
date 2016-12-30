@@ -12,7 +12,7 @@ const path = require( 'path' );
 module.exports = class CKEditorWebpackPlugin {
 	/**
 	 * @param {Object} [options]
-	 * @param {Array.<String>} [options.packages] Array of directories where packages will be looking for
+	 * @param {Array.<String>} [options.packages] Array of directories where packages will be looking for.
 	 */
 	constructor( options = {} ) {
 		this.options = options;
@@ -32,9 +32,13 @@ module.exports = class CKEditorWebpackPlugin {
 				let resolvedPath;
 
 				for ( let contextPackagePath of packagePaths ) {
+					if ( resolvedPath ) {
+						break;
+					}
+
 					const chunks = contextPackagePath.split( path.sep );
 
-					// current request package is the main package
+					// Current request package is the main package.
 					if ( chunks[ chunks.length - 1 ] === requestPackageName ) {
 						contextPackagePath = chunks.slice( 0, -1 ).join( path.sep );
 					}
@@ -44,7 +48,7 @@ module.exports = class CKEditorWebpackPlugin {
 
 				if ( resolvedPath ) {
 					obj.path = resolvedPath.modulesPath;
-					obj.request = path.join( '.', resolvedPath.packageName, resolvedPath.filePath );
+					obj.request = '.' + path.sep + path.join( resolvedPath.packageName, resolvedPath.filePath );
 				}
 
 				done();

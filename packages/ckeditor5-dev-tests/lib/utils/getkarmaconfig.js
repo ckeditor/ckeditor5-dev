@@ -156,7 +156,7 @@ module.exports = function getKarmaConfig( options ) {
 // Converts values of --files argument to proper globs.
 // There are 5 supported types of values now:
 //
-// 0. Current directory - '/'
+// 0. main package directory - '/'
 // 1. all files – '*'
 // 2. package name – 'engine'
 // 3. everything except given package – '!engine'
