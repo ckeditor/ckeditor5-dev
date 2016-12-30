@@ -10,6 +10,10 @@ const path = require( 'path' );
 const fs = require( 'fs' );
 const combine = require( 'dom-combiner' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const globSync = require( './glob' );
+
+// TODO this bit repeats in 3 files.
+const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
 
 /**
  * Basic HTTP server.
@@ -87,16 +91,12 @@ function getContentType( fileExtension ) {
 // @returns {String}
 function generateIndex( sourcePath ) {
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
-	const listElements = fs.readdirSync( sourcePath )
-		.filter( f => fs.existsSync( path.join( sourcePath, f ) ) )
-		.map( ( f ) => {
-			let htmlPath = path.join( f, f + '.html' );
+	const listElements = globSync( path.join( sourcePath, '**', '*.html' ) )
+		.map( ( file ) => {
+			// TODO this bit repeates in runmanualtests.js
+			const relativeFilePath = file.replace( new RegExp( '^.+?' + escapedPathSep + 'ckeditor5-' ), 'ckeditor5-' );
 
-			if ( process.platform === 'win32' ) {
-				htmlPath = htmlPath.replace( /\\/g, '/' );
-			}
-
-			return `<li><a href="${ htmlPath }">${ htmlPath }</a></li>`;
+			return `<li><a href="${ relativeFilePath }">${ relativeFilePath }</a></li>`;
 		} );
 
 	listElements.unshift( '<ul>' );

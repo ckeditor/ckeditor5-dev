@@ -26,8 +26,7 @@ module.exports = function getWebpackConfigForManualTests( entryObject, buildDir 
 		entry: entryObject,
 
 		output: {
-			path: buildDir,
-			filename: path.join( '[name]', '[name].js' )
+			path: buildDir
 		},
 
 		plugins: [
