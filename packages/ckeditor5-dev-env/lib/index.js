@@ -13,7 +13,7 @@
  * @returns {Object}
  */
 module.exports = ( config ) => {
-	const workspaceRelativePath = config.WORKSPACE_DIR;
+	const workspaceRelativePath = config.workspaceDir;
 	const cwd = process.cwd();
 	const path = require( 'path' );
 	const packageJSON = require( path.join( cwd, 'package.json' ) );

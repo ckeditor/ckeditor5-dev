@@ -22,9 +22,7 @@ describe( 'lint', () => {
 	'use strict';
 
 	const config = {
-		ROOT_DIR: '.',
-		BUILD_DIR: 'build',
-		IGNORED_FILES: [ 'lib/**' ]
+		ignoredFiled: [ 'lib/**' ]
 	};
 
 	let sandbox;

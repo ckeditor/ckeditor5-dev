@@ -12,8 +12,9 @@ const fs = require( 'fs' );
 const gulpFilter = require( 'gulp-filter' );
 const gutil = require( 'gulp-util' );
 
-module.exports = ( config ) => {
-	const src = [ '**/*.js' ].concat( config.IGNORED_FILES.map( i => '!' + i ), getGitIgnore() );
+module.exports = ( config = {} ) => {
+	const ignoredFiles = config.ignoredFiles || [];
+	const src = [ '**/*.js' ].concat( ignoredFiles.map( i => '!' + i ), getGitIgnore() );
 
 	const tasks = {
 		/**

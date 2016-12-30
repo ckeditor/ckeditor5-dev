@@ -16,7 +16,7 @@ const proxyquire = require( 'proxyquire' );
 describe( 'exec-tasks', () => {
 	let sandbox, spies, execModuleMocks;
 	const config = {
-		WORKSPACE_DIR: '/path/exec/'
+		workspaceDir: '/path/exec/'
 	};
 
 	const getDevDirectoriesResult = [

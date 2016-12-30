@@ -23,7 +23,7 @@ const ckeditor5Lint = require( '@ckeditor/ckeditor5-dev-lint' )( {
 
 	// Files ignored by jshint and jscs tasks.
 	// Files from .gitignore will be added automatically during tasks execution.
-	IGNORED_FILES: []
+	ignoredFiles: []
 } );
 
 gulp.task( 'lint', ckeditor5Lint.lint );
