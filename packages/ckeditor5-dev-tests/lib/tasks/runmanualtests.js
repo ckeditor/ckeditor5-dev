@@ -68,8 +68,6 @@ function compileTestHtmlFiles( buildDir, manualTestPattern ) {
  */
 function runWebpack( webpackConfig ) {
 	return new Promise( ( resolve, reject ) => {
-		logger().info( '[Webpack] Starting JS files compilation...' );
-
 		webpack( webpackConfig, ( err ) => {
 			if ( err ) {
 				reject( err );

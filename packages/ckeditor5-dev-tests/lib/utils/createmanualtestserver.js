@@ -21,40 +21,64 @@ const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
  * @param {String} sourcePath Base path where the compiler saved the files.
  */
 module.exports = function createManualTestServer( sourcePath ) {
-	const log = logger();
+	return new Promise( ( resolve ) => {
+		const server = http.createServer( ( request, response ) => {
+			onRequest( sourcePath, request, response );
+		} ).listen( 8125 );
 
-	const server = http.createServer( ( request, response ) => {
-		response.writeHead( 200, {
-			'Content-Type': getContentType( request.url.endsWith( '/' ) ? '.html' : path.extname( request.url ) )
+		// SIGINT isn't caught on Windows in process. However CTRL+C can be catch
+		// by `readline` module. After that we can emit SIGINT to the process manually.
+		if ( process.platform === 'win32' ) {
+			const readline = require( 'readline' ).createInterface( {
+				input: process.stdin,
+				output: process.stdout
+			} );
+
+			readline.on( 'SIGINT', () => {
+				process.emit( 'SIGINT' );
+			} );
+		}
+
+		process.on( 'SIGINT', () => {
+			if ( server ) {
+				server.close();
+			}
+
+			resolve();
+			process.exit();
 		} );
 
-		// Ignore a 'favicon' request.
-		if ( request.url === '/favicon.ico' ) {
-			return response.end( null, 'utf-8' );
-		}
-
-		// Generate index.html with list of the tests.
-		if ( request.url === '/' ) {
-			return response.end( generateIndex( sourcePath ), 'utf-8' );
-		}
-
-		// In other cases - return a static file.
-		try {
-			const content = fs.readFileSync( path.join( sourcePath, request.url ) );
-
-			response.end( content, 'utf-8' );
-		} catch ( error ) {
-			log.error( `[Server] Cannot find file '${ request.url }'.` );
-
-			response.writeHead( 404 );
-			response.end( `Sorry, check with the site admin for error: ${ error.code }...\n`, 'utf-8' );
-		}
-	} ).listen( 8125 );
-
-	log.info( '[Server] Server running at http://localhost:8125/' );
-
-	return server;
+		logger().info( '[Server] Server running at http://localhost:8125/' );
+	} );
 };
+
+function onRequest( sourcePath, request, response ) {
+	response.writeHead( 200, {
+		'Content-Type': getContentType( request.url.endsWith( '/' ) ? '.html' : path.extname( request.url ) )
+	} );
+
+	// Ignore a 'favicon' request.
+	if ( request.url === '/favicon.ico' ) {
+		return response.end( null, 'utf-8' );
+	}
+
+	// Generate index.html with list of the tests.
+	if ( request.url === '/' ) {
+		return response.end( generateIndex( sourcePath ), 'utf-8' );
+	}
+
+	// In other cases - return a static file.
+	try {
+		const content = fs.readFileSync( path.join( sourcePath, request.url ) );
+
+		response.end( content, 'utf-8' );
+	} catch ( error ) {
+		logger().error( `[Server] Cannot find file '${ request.url }'.` );
+
+		response.writeHead( 404 );
+		response.end( `Sorry, check with the site admin for error: ${ error.code }...\n`, 'utf-8' );
+	}
+}
 
 // Returns content type based on file extension.
 //
