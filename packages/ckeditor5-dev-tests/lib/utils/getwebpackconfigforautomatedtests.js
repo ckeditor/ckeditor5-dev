@@ -22,6 +22,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 				}
 			} )
 		],
+
 		module: {
 			rules: [
 				{
@@ -34,6 +35,12 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 					test: /\.scss$/,
 					use: [ 'style-loader', 'css-loader', 'sass-loader' ]
 				}
+			]
+		},
+
+		resolveLoader: {
+			modules: [
+				path.resolve( __dirname, '..', '..', 'node_modules' )
 			]
 		}
 	};

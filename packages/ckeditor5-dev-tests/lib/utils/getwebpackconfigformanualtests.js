@@ -52,6 +52,12 @@ module.exports = function getWebpackConfigForManualTests( entryObject, buildDir 
 					use: [ 'style-loader', 'css-loader', 'sass-loader' ]
 				}
 			]
+		},
+
+		resolveLoader: {
+			modules: [
+				path.resolve( __dirname, '..', '..', 'node_modules' )
+			]
 		}
 	};
 };
