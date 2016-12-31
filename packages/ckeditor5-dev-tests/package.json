@@ -5,8 +5,8 @@
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-compiler": "^5.1.0",
     "@ckeditor/ckeditor5-dev-utils": "^2.2.0",
+    "@ckeditor/ckeditor5-dev-webpack-plugin": "^1.0.0",
     "babel-loader": "^6.2.5",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.18.0",
     "chai": "^3.5.0",

@@ -6,7 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
-const CKEditorWebpackPlugin = require( '../../ckeditor-webpack-plugin' );
+const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
 const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
 
 /**

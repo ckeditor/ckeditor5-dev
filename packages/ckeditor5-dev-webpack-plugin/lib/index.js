@@ -5,8 +5,8 @@
 
 'use strict';
 
-const resolveImportPathInContext = require( './compiler-utils/resolveimportpathincontext' );
-const getWorkspaceRelativePathInfo = require( './compiler-utils/getworkspacerelativepathinfo' );
+const resolveImportPathInContext = require( '@ckeditor/ckeditor5-dev-utils/lib/compiler/resolveimportpathincontext' );
+const getWorkspaceRelativePathInfo = require( '@ckeditor/ckeditor5-dev-utils/lib/compiler/getworkspacerelativepathinfo' );
 const path = require( 'path' );
 
 module.exports = class CKEditorWebpackPlugin {
