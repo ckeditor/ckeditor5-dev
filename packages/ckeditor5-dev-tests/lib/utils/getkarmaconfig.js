@@ -156,8 +156,8 @@ module.exports = function getKarmaConfig( options ) {
 // Converts values of --files argument to proper globs.
 // There are 5 supported types of values now:
 //
-// 0. main package directory - '/'
-// 1. all files – '*'
+// 0. current package's tests (when run in context of a package – e.g. on CI) - '/'
+// 1. all packages' files – '*'
 // 2. package name – 'engine'
 // 3. everything except given package – '!engine'
 // 4. path – 'engine/view' -> 'ckeditor5-engine/tests/view/**/*.js'

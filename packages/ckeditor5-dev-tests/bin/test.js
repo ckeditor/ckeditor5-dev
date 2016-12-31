@@ -13,8 +13,12 @@ const tests = require( '../lib/index' );
 const cwd = process.cwd();
 const options = tests.parseArguments( process.argv.slice( 2 ) );
 
-if ( !cwd.endsWith( 'ckeditor5' ) ) {
-	options.files.push( '/' );
+if ( options.files.length === 0 ) {
+	if ( cwd.endsWith( 'ckeditor5' ) ) {
+		options.files = [ '*' ];
+	} else {
+		options.files = [ '/' ];
+	}
 }
 
 tests.runAutomatedTests( options )

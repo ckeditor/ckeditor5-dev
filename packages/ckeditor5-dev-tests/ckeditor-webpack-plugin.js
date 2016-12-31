@@ -12,7 +12,7 @@ const path = require( 'path' );
 module.exports = class CKEditorWebpackPlugin {
 	/**
 	 * @param {Object} [options]
-	 * @param {Array.<String>} [options.packages] Array of directories where packages will be looking for.
+	 * @param {Array.<String>} [options.packages] Array of directories in which packages will be looked for.
 	 */
 	constructor( options = {} ) {
 		this.options = options;

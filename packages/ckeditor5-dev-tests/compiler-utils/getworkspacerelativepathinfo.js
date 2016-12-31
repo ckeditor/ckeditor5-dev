@@ -10,7 +10,7 @@ const path = require( 'path' );
 /**
  * Gets path relative to workspace directory and returns its packageName and path to its package.
  *
- * 	getWorkspaceRelativePathInfo('ckeditor5-utils/src/document.js')
+ *		getWorkspaceRelativePathInfo( 'ckeditor5-utils/src/document.js' )
  *
  * @param {String} relativePath
  * @returns {Object}
