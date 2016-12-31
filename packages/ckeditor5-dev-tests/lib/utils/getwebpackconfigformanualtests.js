@@ -31,9 +31,10 @@ module.exports = function getWebpackConfigForManualTests( entryObject, buildDir 
 
 		plugins: [
 			new CKEditorWebpackPlugin( {
-				packages: {
-					'*': path.join( process.cwd(), 'node_modules' )
-				}
+				packages: [
+					process.cwd(),
+					path.join( process.cwd(), 'node_modules' )
+				]
 			} ),
 			new WebpackNotifierPlugin()
 		],

@@ -9,32 +9,42 @@ const resolveImportPathInContext = require( './compiler-utils/resolveimportpathi
 const getWorkspaceRelativePathInfo = require( './compiler-utils/getworkspacerelativepathinfo' );
 const path = require( 'path' );
 
-class CKEditorWebpackPlugin {
+module.exports = class CKEditorWebpackPlugin {
+	/**
+	 * @param {Object} [options]
+	 * @param {Array.<String>} [options.packages] Array of directories where packages will be looking for.
+	 */
 	constructor( options = {} ) {
 		this.options = options;
 	}
 
 	apply( compiler ) {
-		const { packages } = this.options;
+		const packagePaths = this.options.packages;
 
-		if ( !packages ) {
+		if ( !packagePaths || packagePaths.length === 0 ) {
 			return;
 		}
 
-		const wildCardPackagePath = packages[ '*' ];
-
 		compiler.plugin( 'after-resolvers', ( compiler ) => {
 			compiler.resolvers.normal.plugin( 'before-resolve', ( obj, done ) => {
-				const packageName = getWorkspaceRelativePathInfo( obj.request ).packageName;
-				const packagePath = packages[ packageName ] || wildCardPackagePath;
+				const requestPackageName = getWorkspaceRelativePathInfo( obj.request ).packageName;
 
-				if ( !packagePath ) {
-					done();
+				let resolvedPath;
 
-					return;
+				for ( let contextPackagePath of packagePaths ) {
+					if ( resolvedPath ) {
+						break;
+					}
+
+					const chunks = contextPackagePath.split( path.sep );
+
+					// Current request package is the main package.
+					if ( chunks[ chunks.length - 1 ] === requestPackageName ) {
+						contextPackagePath = chunks.slice( 0, -1 ).join( path.sep );
+					}
+
+					resolvedPath = resolveImportPathInContext( obj.context.issuer, obj.request, contextPackagePath );
 				}
-
-				const resolvedPath = resolveImportPathInContext( obj.context.issuer, obj.request, packagePath );
 
 				if ( resolvedPath ) {
 					obj.path = resolvedPath.modulesPath;
@@ -45,6 +55,4 @@ class CKEditorWebpackPlugin {
 			} );
 		} );
 	}
-}
-
-module.exports = CKEditorWebpackPlugin;
+};

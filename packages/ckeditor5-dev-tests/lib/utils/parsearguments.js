@@ -8,7 +8,7 @@
 const minimist = require( 'minimist' );
 
 /**
- * @param {Object} args
+ * @param {Array.<String>} args
  * @returns {Object}
  */
 module.exports = function parseArguments( args ) {
