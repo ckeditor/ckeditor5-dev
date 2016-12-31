@@ -158,8 +158,8 @@ module.exports = function getKarmaConfig( options ) {
 //
 // 0. current package's tests (when run in context of a package – e.g. on CI) - '/'
 // 1. all packages' files – '*'
-// 2. package name – 'engine'
-// 3. everything except given package – '!engine'
+// 2. given package files – 'engine'
+// 3. everything except the given package – '!engine'
 // 4. path – 'engine/view' -> 'ckeditor5-engine/tests/view/**/*.js'
 // 5. simplified glob – 'engine/view/**/*.js' -> 'ckeditor5-engine/tests/view/**/*.js'
 function fileOptionToGlob( file ) {
@@ -195,5 +195,6 @@ function fileOptionToGlob( file ) {
 		glob = path.join( glob, '**', '*.js' );
 	}
 
+	// 5.
 	return path.join( nodeModulesPath, 'ckeditor5-' + packageName, 'tests', glob );
 }

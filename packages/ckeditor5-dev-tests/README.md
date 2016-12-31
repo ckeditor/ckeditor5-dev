@@ -17,27 +17,26 @@ An example [gulp.js](http://gulpjs.com/) task to test CKEditor 5 packages (used 
 
 ```js
 gulp.task( 'test', () => {
-	const tests = require( '@ckeditor/ckeditor5-dev-tests' );
-	const compiler = require( '@ckeditor/ckeditor5-dev-compiler' );
-	const options = tests.utils.parseArguments();
-
-	options.packages = compiler.utils.getPackages( '.' )
-
-	// If --files weren't specified, then test all packages.
-	if ( !options.files ) {
-		options.files = options.packages
-			.map( ( packagePath ) => tests.utils.getPackageName( path.resolve( packagePath ) ) );
-	}
-
-	return tests.tasks.automated.test( options );
+	return require( '@ckeditor/ckeditor5-dev-tests' )
+		.runAutomatedTests( getTestOptions() );
 } );
+
+gulp.task( 'test:manual', () => {
+	return require( '@ckeditor/ckeditor5-dev-tests' )
+		.runManualTests( getTestOptions() );
+} );
+
+function getTestOptions() {
+	return require( '@ckeditor/ckeditor5-dev-tests' )
+		.parseArguments( process.argv.slice( 2 ) );
+}
 ```
 
 You can also use the bin script for testing a package:
 
 ```bash
 # For running all the tests (for the current package and all dependencies).
-./node_modules/.bin/ckeditor5-dev-tests --files=**/*.js
+./node_modules/.bin/ckeditor5-dev-tests --files=*
 
 # For running tests in the current package.
 ./node_modules/.bin/ckeditor5-dev-tests
@@ -55,23 +54,47 @@ You can also use the bin script for testing a package:
 
 #### Examples
 
-For testing the `ckeditor5-enter` and `ckeditor5-paragraph` packages and generating the code coverage report you can use:
+Test the `ckeditor5-enter` and `ckeditor5-paragraph` packages and generate code coverage report:
 
 ```bash
 $ gulp test -c --files=enter,paragraph
 ```
 
-For testing *view* module from `ckeditor5-engine` and run the test automatically after changes in compiled code you can use:
+Run `tests/view/**/*.js` tests from `ckeditor5-engine` and rerun them once any file change (the watch mode):
 
 ```bash
 $ gulp test -w --files=engine/view
 ```
 
-For testing specified files in `ckeditor5-basic-styles` on two browsers (Chrome and Firefox) you can use:
+Test specified files in `ckeditor5-basic-styles` on two browsers (Chrome and Firefox) you can use:
 
 ```bash
 $ gulp test --browsers=Chrome,Firefox --files=basic-styles/boldengine.js,basic-styles/italicengine.js
 ```
+
+Test all installed packages:
+
+```bash
+$ gulp test --files=*
+```
+
+Test all installed packages except one (or more):
+
+```bash
+$ gulp test --files='!(engine)'
+$ gulp test --files='!(engine|ui)'
+```
+
+### Rules for converting `--files` option to glob pattern:
+
+| `--file` | Glob | Description |
+|----------|------|-------------|
+| `engine` | `node_modules/ckeditor5-engine/tests/**/*.js` | |
+| `engine/view` | `node_modules/ckeditor5-engine/tests/view/**/*.js` | |
+| `engine/view/so/**/me/glob.js` | `node_modules/ckeditor5-engine/tests/view/so/**/me/*glob.js` | |
+| `!(engine)` | `node_modules/ckeditor5-!(engine)*/tests/**/*.js` | all tests except of given package(s) – works with multiple names `!(engine|ui|utils)` |
+| `*` | `node_modules/ckeditor5-*/tests/**/*.js` | all installed package's tests |
+| `/` | `tests/**/*.js` | current package's tests only |
 
 ## License
 
