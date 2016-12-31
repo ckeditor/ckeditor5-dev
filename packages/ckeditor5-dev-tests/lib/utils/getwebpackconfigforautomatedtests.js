@@ -41,6 +41,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 
 		resolveLoader: {
 			modules: [
+				'node_modules',
 				path.resolve( __dirname, '..', '..', 'node_modules' )
 			]
 		}

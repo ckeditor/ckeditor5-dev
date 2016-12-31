@@ -56,6 +56,7 @@ module.exports = function getWebpackConfigForManualTests( entryObject, buildDir 
 
 		resolveLoader: {
 			modules: [
+				'node_modules',
 				path.resolve( __dirname, '..', '..', 'node_modules' )
 			]
 		}
