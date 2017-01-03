@@ -69,9 +69,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 			{
 				test: /\.js$/,
 				loader: 'istanbul-instrumenter-loader',
-				include: [
-					...getPathsToIncludeForCoverage( options.files )
-				],
+				include: getPathsToIncludeForCoverage( options.files ),
 				exclude: [
 					new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
 				],
