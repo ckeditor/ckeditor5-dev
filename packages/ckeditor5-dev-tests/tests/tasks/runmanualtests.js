@@ -25,21 +25,29 @@ describe( 'runManualTests', () => {
 	it( 'should run manual tests and return promise', () => {
 		const serverSpy = sandbox.spy( () => Promise.resolve() );
 		const htmlFileCompilerSpy = sandbox.spy( () => Promise.resolve() );
-		const scriptCompiler = sandbox.spy( () => Promise.resolve() );
+		const scriptCompilerSpy = sandbox.spy( () => Promise.resolve() );
 
 		mockery.registerMock( '../utils/createmanualtestserver', serverSpy );
 		mockery.registerMock( '../utils/compilemanualtesthtmlfiles', htmlFileCompilerSpy );
-		mockery.registerMock( '../utils/compilemanualtestscripts', scriptCompiler );
+		mockery.registerMock( '../utils/compilemanualtestscripts', scriptCompilerSpy );
 
 		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 		sandbox.stub( process, 'cwd', () => 'workspace' );
 
-		const runManualTests = require( '../../lib/tasks/runManualTests' );
+		const runManualTests = require( '../../lib/tasks/runmanualtests' );
 
 		return runManualTests().then( () => {
-			sinon.assert.calledWith( serverSpy, 'workspace/build/.manual-tests' );
-			sinon.assert.calledWith( htmlFileCompilerSpy, 'workspace/build/.manual-tests', 'workspace/node_modules/ckeditor5-*/tests/**/manual/**' );
-			sinon.assert.calledWith( scriptCompiler, 'workspace/build/.manual-tests', 'workspace/node_modules/ckeditor5-*/tests/**/manual/**' );
+			sinon.assert.calledWithExactly( serverSpy, 'workspace/build/.manual-tests' );
+			sinon.assert.calledWithExactly(
+				htmlFileCompilerSpy,
+				'workspace/build/.manual-tests',
+				'workspace/node_modules/ckeditor5-*/tests/**/manual/**'
+			);
+			sinon.assert.calledWithExactly(
+				scriptCompilerSpy,
+				'workspace/build/.manual-tests',
+				'workspace/node_modules/ckeditor5-*/tests/**/manual/**'
+			);
 		} );
 	} );
 } );
