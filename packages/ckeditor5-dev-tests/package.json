@@ -1,12 +1,12 @@
 {
   "name": "@ckeditor/ckeditor5-dev-tests",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "Testing environment for CKEditor 5.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^2.3.0",
-    "@ckeditor/ckeditor5-dev-webpack-plugin": "^1.0.1",
+    "@ckeditor/ckeditor5-dev-utils": "^2.3.1",
+    "@ckeditor/ckeditor5-dev-webpack-plugin": "^1.0.2",
     "babel-core": "^6.21.0",
     "babel-loader": "^6.2.5",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.18.0",
