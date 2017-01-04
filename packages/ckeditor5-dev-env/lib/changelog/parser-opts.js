@@ -9,13 +9,20 @@ module.exports = {
 	headerPattern: /^([^\:]+): (.*\.)/,
 	headerCorrespondence: [
 		'type',
-		'title'
+		'subject'
 	],
-	noteKeywords: [ 'BREAKING CHANGE', 'BREAKING CHANGES', 'NOTE' ],
+	noteKeywords: [ 'BREAKING CHANGE', 'NOTE' ],
 	revertPattern: /^Revert:\s([\s\S]*?)\s*This reverts commit (\w*)\./,
 	revertCorrespondence: [ 'header', 'hash' ],
 	referenceActions: [
-		'Fixes:',
+		'Close:',
 		'Closes:',
+		'Closed:',
+		'Fix:',
+		'Fixes:',
+		'Fixed:',
+		'Resolve:',
+		'Resolves:',
+		'Resolved:',
 	]
 };

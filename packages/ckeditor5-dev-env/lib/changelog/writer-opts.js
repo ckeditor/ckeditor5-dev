@@ -24,7 +24,7 @@ const availableTypes = new Map( [
 	[ 'Release', false ],
 ] );
 
-const packageJSON = require( path.resolve( process.cwd(), './package.json' ) );
+const packageJSON = require( path.resolve( process.cwd(), 'package.json' ) );
 
 const templatePath = path.resolve( __dirname, 'templates' );
 
@@ -69,15 +69,11 @@ function transformCommit( commit ) {
 	}
 
 	if ( typeof commit.subject === 'string' ) {
-		// GitHub issue URLs.
-		commit.subject = commit.subject.replace( /#([0-9]+)/g, ( _, issueId ) => {
-			issues.push( issueId );
+		commit.subject = linkGithubIssues( linkGithubUsers( commit.subject ), issues );
+	}
 
-			return `[#${ issueId }](${ packageJSON.bugs }/${ issueId })`;
-		} );
-
-		// GitHub user URLs.
-		commit.subject = commit.subject.replace( /@([a-zA-Z0-9_]+)/g, '[@$1](https://github.com/$1)' );
+	for ( const note of commit.notes ) {
+		note.text = linkGithubIssues( linkGithubUsers( note.text ) );
 	}
 
 	// Removes references that already appear in the subject.
@@ -86,6 +82,20 @@ function transformCommit( commit ) {
 	} );
 
 	return commit;
+}
+
+function linkGithubUsers( value ) {
+	return value.replace( /@([a-zA-Z0-9_]+)/g, '[@$1](https://github.com/$1)' );
+}
+
+function linkGithubIssues( value, issues = null ) {
+	return value.replace( /#([0-9]+)/g, ( _, issueId ) => {
+		if ( issues ) {
+			issues.push( issueId );
+		}
+
+		return `[#${ issueId }](${ packageJSON.bugs }/${ issueId })`;
+	} );
 }
 
 function getCommitType( commit ) {

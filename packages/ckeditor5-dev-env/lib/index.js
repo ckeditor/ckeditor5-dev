@@ -111,17 +111,16 @@ module.exports = ( config ) => {
 		 * This method should be executed before the `tasks.createRelease` method.
 		 *
 		 * @params {Object} options
-		 * @params {String} options.token GitHub token used to authenticate.
-		 * @params {Boolean} options.init Whether to create first release using this package.
 		 * @params {Boolean} options.debug Whether to show additional logs.
 		 * @returns {Promise}
 		 */
 		generateChangeLog( options ) {
 			const conventionalChangelog = require( 'conventional-changelog' );
-			const { tools, stream } = require( '@ckeditor/ckeditor5-dev-utils' );
+			const { tools, stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 			const parserOpts = require( './changelog/parser-opts' );
 			const writerOpts = require( './changelog/writer-opts' );
 			const utils = require( './utils/changelog' );
+			const log = logger( options.debug ? 'info' : 'error' );
 
 			const shExecParams = { verbosity: options.debug ? 'info' : 'error' };
 
@@ -133,7 +132,11 @@ module.exports = ( config ) => {
 				} )
 				.then( ( currentChangelog ) => {
 					return new Promise( ( resolve, reject ) => {
-						conventionalChangelog( {}, null, null, parserOpts, writerOpts )
+						const parameters = {
+							debug: log.info.bind( log )
+						};
+
+						conventionalChangelog( parameters, null, null, parserOpts, writerOpts )
 							.pipe( saveChangelogPipe() );
 
 						function saveChangelogPipe() {
