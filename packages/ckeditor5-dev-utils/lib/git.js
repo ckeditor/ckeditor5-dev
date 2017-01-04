@@ -160,7 +160,7 @@ module.exports = {
 	},
 
 	/*
-	 * Creates commit on repository under specified path
+	 * Creates commit on repository under specified path.
 	 *
 	 * @param {String} message
 	 * @param {String} repositoryPath
@@ -175,7 +175,7 @@ module.exports = {
 	},
 
 	/**
-	 * Pushes changes to repository's default location
+	 * Pushes changes to repository's default location.
 	 *
 	 * @param {String} repositoryPath
 	 */
