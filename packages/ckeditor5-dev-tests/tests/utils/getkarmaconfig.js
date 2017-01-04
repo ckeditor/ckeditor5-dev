@@ -10,10 +10,14 @@ const path = require( 'path' );
 describe( 'getkarmaconfig', () => {
 	let getKarmaConfig;
 	let sandbox;
+	const originalEnv = process.env;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
 		sandbox.stub( process, 'cwd', () => 'workspace' );
+
+		// sinon cannot stub non-existing props.
+		process.env = Object.assign( {}, originalEnv, { TRAVIS: false } );
 		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 
 		mockery.enable( {
@@ -28,6 +32,7 @@ describe( 'getkarmaconfig', () => {
 	afterEach( () => {
 		sandbox.restore();
 		mockery.disable();
+		process.env = originalEnv;
 	} );
 
 	it( 'should return basic karma config for all tested files', () => {
@@ -169,8 +174,7 @@ describe( 'getkarmaconfig', () => {
 
 		try {
 			spy( {
-				reporter: 'mocha',
-				coverage: true,
+				reporter: 'mocha'
 			} );
 		} catch ( err ) {}
 
