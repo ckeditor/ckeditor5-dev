@@ -137,4 +137,43 @@ describe( 'getkarmaconfig', () => {
 			'workspace/node_modules/ckeditor5-engine/tests/model/**/*.js',
 		] );
 	} );
+
+	it( 'should return karma config with coverage reporter', () => {
+		const karmaConfig = getKarmaConfig( {
+			files: [ 'engine/model/**/*.js' ],
+			reporter: 'mocha',
+			coverage: true,
+		} );
+
+		expect( karmaConfig.reporters ).to.deep.eq( [ 'mocha', 'coverage' ] );
+		expect( karmaConfig.coverageReporter ).to.deep.eq( {
+			reporters: [
+				{
+					type: 'text-summary'
+				},
+				{
+					dir: 'workspace/coverage',
+					type: 'html'
+				},
+				{
+					type: 'lcovonly',
+					subdir: '.',
+					dir: 'workspace/coverage'
+				}
+			]
+		} );
+	} );
+
+	it( 'should throw an error if no files are provided', () => {
+		const spy = sandbox.spy( getKarmaConfig );
+
+		try {
+			spy( {
+				reporter: 'mocha',
+				coverage: true,
+			} );
+		} catch ( err ) {}
+
+		expect( spy.threw() ).to.equal( true );
+	} );
 } );

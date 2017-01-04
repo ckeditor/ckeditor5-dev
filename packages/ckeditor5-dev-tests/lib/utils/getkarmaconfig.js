@@ -188,7 +188,7 @@ function fileOptionToGlob( file ) {
 		return path.join( nodeModulesPath, 'ckeditor5-' + packageName, globSuffix );
 	}
 
-	let glob = chunks.join(  path.sep );
+	let glob = chunks.join( path.sep );
 
 	// 4.
 	if ( !glob.endsWith( '.js' ) ) {
