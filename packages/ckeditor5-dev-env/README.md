@@ -225,7 +225,32 @@ Changelog
 * Note which will be inserted to the changelog.
 ```
 
+This tool doesn't commit the changes. You can still provide manual fixes if something was generated incorrectly.
+
 ### Creating a release
+
+This tool creates a new release based on commits in the repository. Commits have to follow the same terms which tool for generating the changelog.
+  
+Required parameters:
+
+- `token` - a GitHub token used for creating a new release on GitHub,
+- `init` - if you create a first release using this package, set this flag on `true`.
+
+Before starting the process, make sure that:
+
+- Current branch is `master`,
+- Current branch is up to date,
+- Working directory is clean (only changelog file can be modified).
+
+The whole process does:
+
+- Commits the changelog and `package.json` as `Release: vX.Y.Z.`,
+- Creates a tag `vX.Y.Z`,
+- Pushes the commits and tags,
+- Creates a [GitHub release](https://help.github.com/articles/creating-releases/).
+
+Note for the release is taken from the changelog. If you set the `init` flag on `true`, the whole changelog will be parsed.
+In other cases, the changelog will be parsed until the last release.
 
 ## License
 
