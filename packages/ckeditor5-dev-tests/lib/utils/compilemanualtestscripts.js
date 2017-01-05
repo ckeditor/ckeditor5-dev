@@ -13,12 +13,12 @@ const globSync = require( '../utils/glob' );
 const getWebpackConfigForManualTests = require( '../utils/getwebpackconfigformanualtests' );
 const getRelativeFilePath = require( './getrelativefilepath' );
 
-module.exports = function compileManualScripts( buildDir, manualTestPattern ) {
+module.exports = function compileManualTestScripts( buildDir, manualTestPattern ) {
 	const entryFiles = globSync( path.join( manualTestPattern, '*.js' ) );
 	const entries = getWebpackEntryPoints( entryFiles );
 	const webpackConfig = getWebpackConfigForManualTests( entries, buildDir );
 
-	return runWebpack( webpackConfig, buildDir );
+	return runWebpack( webpackConfig );
 };
 
 /**

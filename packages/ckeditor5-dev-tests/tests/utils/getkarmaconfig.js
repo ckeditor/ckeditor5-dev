@@ -7,7 +7,7 @@ const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
 const path = require( 'path' );
 
-describe( 'getkarmaconfig', () => {
+describe( 'getKarmaConfig', () => {
 	let getKarmaConfig;
 	let sandbox;
 	const originalEnv = process.env;
@@ -32,6 +32,7 @@ describe( 'getkarmaconfig', () => {
 	afterEach( () => {
 		sandbox.restore();
 		mockery.disable();
+		mockery.deregisterAll();
 		process.env = originalEnv;
 	} );
 

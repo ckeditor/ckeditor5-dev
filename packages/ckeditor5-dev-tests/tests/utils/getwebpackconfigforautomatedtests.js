@@ -21,6 +21,7 @@ describe( 'getWebpackConfigForAutomatedTests', () => {
 
 	afterEach( () => {
 		mockery.disable();
+		mockery.deregisterAll();
 	} );
 
 	it( 'should return basic webpack configutation object', () => {

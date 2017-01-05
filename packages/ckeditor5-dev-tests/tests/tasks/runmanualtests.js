@@ -20,6 +20,7 @@ describe( 'runManualTests', () => {
 	afterEach( () => {
 		sandbox.restore();
 		mockery.disable();
+		mockery.deregisterAll();
 	} );
 
 	it( 'should run manual tests and return promise', () => {
