@@ -8,9 +8,9 @@
 'use strict';
 
 const path = require( 'path' );
-const createManualTestServer = require( '../utils/createmanualtestserver' );
-const compileManualTestScripts = require( '../utils/compilemanualtestscripts' );
-const compileManualTestHtmlFiles = require( '../utils/compilemanualtesthtmlfiles' );
+const createManualTestServer = require( '../utils/manual-tests/createmanualtestserver' );
+const compileManualTestScripts = require( '../utils/manual-tests/compilemanualtestscripts' );
+const compileManualTestHtmlFiles = require( '../utils/manual-tests/compilemanualtesthtmlfiles' );
 
 /**
  * Main function that runs automated tests.

@@ -9,17 +9,17 @@
 
 const path = require( 'path' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const globSync = require( './glob' );
+const globSync = require( '../glob' );
 const fs = require( 'fs-extra' );
 const gutil = require( 'gulp-util' );
 const commonmark = require( 'commonmark' );
 const combine = require( 'dom-combiner' );
-const getRelativeFilePath = require( './getrelativefilepath' );
+const getRelativeFilePath = require( '../getrelativefilepath' );
 
 const reader = new commonmark.Parser();
 const writer = new commonmark.HtmlRenderer();
 
-const viewTemplate = fs.readFileSync( path.join( __dirname, '..', 'utils', 'template.html' ), 'utf-8' );
+const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 
 module.exports = function compileManualTestHtmlFiles( buildDir, manualTestPattern ) {
 	const sourceMDFiles = globSync( path.join( manualTestPattern, '*.md' ) );

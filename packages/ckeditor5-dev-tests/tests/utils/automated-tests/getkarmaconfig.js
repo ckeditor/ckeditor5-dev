@@ -26,7 +26,7 @@ describe( 'getKarmaConfig', () => {
 		} );
 		mockery.registerMock( './getwebpackconfigforautomatedtests', ( options ) => options );
 
-		getKarmaConfig = require( '../../lib/utils/getkarmaconfig' );
+		getKarmaConfig = require( '../../../lib/utils/automated-tests/getkarmaconfig' );
 	} );
 
 	afterEach( () => {

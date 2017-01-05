@@ -2,7 +2,7 @@
 
 'use strict';
 
-const getWebpackConfigForAutomatedTests = require( '../../lib/utils/getwebpackconfigforautomatedtests' );
+const getWebpackConfigForAutomatedTests = require( '../../../lib/utils/automated-tests/getwebpackconfigforautomatedtests' );
 const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 
