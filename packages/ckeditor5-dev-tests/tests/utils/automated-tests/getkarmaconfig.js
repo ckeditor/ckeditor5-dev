@@ -19,6 +19,7 @@ describe( 'getKarmaConfig', () => {
 		// sinon cannot stub non-existing props.
 		process.env = Object.assign( {}, originalEnv, { TRAVIS: false } );
 		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
+		sandbox.stub( path, 'sep', '/' );
 
 		mockery.enable( {
 			warnOnReplace: false,

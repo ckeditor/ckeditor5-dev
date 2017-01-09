@@ -72,7 +72,9 @@ describe( 'getWebpackConfigForAutomatedTests', () => {
 		const istanbulLoader = webpackConfig.module.rules
 			.find( ( rule ) => rule.loader === 'istanbul-instrumenter-loader' );
 
-		expect( istanbulLoader.include ).to.deep.equal( [ /ckeditor5-utils\/src\// ] );
+		const expectedRegExp = new RegExp( [ 'ckeditor5-utils', 'src', '' ].join( escapedPathSep ) );
+
+		expect( istanbulLoader.include ).to.deep.equal( [ expectedRegExp ] );
 	} );
 
 	it( 'should return webpack configutation with istanbul loader containing include regexp', () => {
@@ -84,7 +86,9 @@ describe( 'getWebpackConfigForAutomatedTests', () => {
 		const istanbulLoader = webpackConfig.module.rules
 			.find( ( rule ) => rule.loader === 'istanbul-instrumenter-loader' );
 
-		expect( istanbulLoader.include ).to.deep.equal( [ /ckeditor5-!(utils)\/src\// ] );
+		const expectedRegExp = new RegExp( [ 'ckeditor5-!(utils)', 'src', '' ].join( escapedPathSep ) );
+
+		expect( istanbulLoader.include ).to.deep.equal( [ expectedRegExp ] );
 	} );
 
 	it( 'should return webpack configutation with correct devtool', () => {
