@@ -103,6 +103,20 @@ module.exports = ( config ) => {
 			}
 
 			return execTask( task, cwd, packageJSON, workspaceRelativePath, params );
+		},
+
+		collectTranslations() {
+			const collectTranslations = require( './tasks/translations/collect' );
+
+			return collectTranslations();
+		},
+
+		uploadTranslations() {
+			//
+		},
+
+		downloadTranslations() {
+			//
 		}
 	};
 
