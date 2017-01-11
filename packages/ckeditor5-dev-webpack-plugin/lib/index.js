@@ -5,9 +5,8 @@
 
 'use strict';
 
-const resolveImportPathInContext = require( '@ckeditor/ckeditor5-dev-utils/lib/compiler/resolveimportpathincontext' );
-const getWorkspaceRelativePathInfo = require( '@ckeditor/ckeditor5-dev-utils/lib/compiler/getworkspacerelativepathinfo' );
 const path = require( 'path' );
+const resolveImportPath = require( '@ckeditor/ckeditor5-dev-utils/lib/compiler/resolveimportpath' );
 
 module.exports = class CKEditorWebpackPlugin {
 	/**
@@ -27,24 +26,7 @@ module.exports = class CKEditorWebpackPlugin {
 
 		compiler.plugin( 'after-resolvers', ( compiler ) => {
 			compiler.resolvers.normal.plugin( 'before-resolve', ( obj, done ) => {
-				const requestPackageName = getWorkspaceRelativePathInfo( obj.request ).packageName;
-
-				let resolvedPath;
-
-				for ( let contextPackagePath of packagePaths ) {
-					if ( resolvedPath ) {
-						break;
-					}
-
-					const chunks = contextPackagePath.split( path.sep );
-
-					// Current request package is the main package.
-					if ( chunks[ chunks.length - 1 ] === requestPackageName ) {
-						contextPackagePath = chunks.slice( 0, -1 ).join( path.sep );
-					}
-
-					resolvedPath = resolveImportPathInContext( obj.context.issuer, obj.request, contextPackagePath );
-				}
+				const resolvedPath = resolveImportPath( obj.context.issuer, obj.request, packagePaths );
 
 				if ( resolvedPath ) {
 					obj.path = resolvedPath.modulesPath;
