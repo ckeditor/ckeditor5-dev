@@ -98,4 +98,16 @@ describe( 'getWebpackConfigForAutomatedTests', () => {
 
 		expect( webpackConfig.devtool ).to.equal( 'inline-source-map' );
 	} );
+
+	it( 'should contain a correct paths in resolveLoader', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {} );
+
+		const firstPath = webpackConfig.resolveLoader.modules[ 0 ];
+		const secondPath = webpackConfig.resolveLoader.modules[ 1 ];
+
+		expect( firstPath ).to.equal( 'node_modules' );
+
+		expect( secondPath ).to.match( /node_modules$/ );
+		expect( require( 'fs' ).existsSync( secondPath ) ).to.equal( true );
+	} );
 } );
