@@ -6,6 +6,7 @@
   "dependencies": {},
   "devDependencies": {
     "@ckeditor/ckeditor5-dev-lint": "^2.0.0",
+    "fs-extra": "^1.0.0",
     "guppy-pre-commit": "^0.4.0",
     "lerna": "2.0.0-beta.31",
     "istanbul": "^0.4.4",

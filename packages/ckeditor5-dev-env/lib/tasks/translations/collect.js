@@ -6,7 +6,7 @@
 'use strict';
 
 const glob = require( 'glob' );
-const fs = require( 'fs' );
+const fs = require( 'fs-extra' );
 const path = require( 'path' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 
@@ -23,9 +23,9 @@ module.exports = function collect() {
 	getMissingContexts( contexts, translations )
 		.map( error => logger.error( error ) );
 
-	const poFileContent = createPOFile( contexts, translations );
+	const poFileContent = createPoFileContent( contexts, translations );
 
-	console.log( poFileContent );
+	savePoFile( poFileContent );
 
 	return translations;
 };
@@ -110,7 +110,7 @@ function getMissingContexts( contexts, translations ) {
 	return errors;
 }
 
-function createPOFile( contexts, translations ) {
+function createPoFileContent( contexts, translations ) {
 	const messages = translations.map( ( translation ) => {
 		const msgInfo = getContextMessageInfo( contexts, translation );
 
@@ -141,13 +141,17 @@ function getContextMessageInfo( contexts, translation ) {
 function jsonToPoFile( messages ) {
 	return messages.map( ( msg ) => {
 		return [
-			`msgid ${msg.id}`,
-			`msgstr ${msg.str}`,
-			`msgctxt ${msg.ctxt}`
+			`msgid "${msg.id}"`,
+			`msgstr "${msg.str}"`,
+			`msgctxt "${msg.ctxt}"`
 		].map( x => x + '\n' ).join( '' );
 	} ).join( '\n' );
 }
 
-// function savePOFile( ) {
-//
-// }
+function savePoFile( fileContent ) {
+	const outputFile = path.join( process.cwd(), 'build', '.transifex', 'english.po' );
+
+	fs.outputFileSync( outputFile, fileContent );
+
+	logger.info( `Created file: ${ outputFile }` );
+}
