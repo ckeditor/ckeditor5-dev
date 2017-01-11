@@ -8,7 +8,7 @@ More information about development tools packages can be found at the following 
 ## Usage
 
 ```
-npm i --save-dev @ckeditor/ckeditor5-dev-lint
+npm i --save-dev @ckeditor/ckeditor5-dev-lint guppy-pre-commit
 ```
 
 `gulpfile.js`:
@@ -18,17 +18,23 @@ npm i --save-dev @ckeditor/ckeditor5-dev-lint
 
 const gulp = require( 'gulp' );
 
-const ckeditor5Lint = require( '@ckeditor/ckeditor5-dev-lint' )( {
-	ROOT_DIR: '.',
-
-	// Files ignored by jshint and jscs tasks.
-	// Files from .gitignore will be added automatically during tasks execution.
-	ignoredFiles: []
-} );
+const ckeditor5Lint = require( '@ckeditor/ckeditor5-dev-lint' )();
 
 gulp.task( 'lint', ckeditor5Lint.lint );
 gulp.task( 'lint-staged', ckeditor5Lint.lintStaged );
 gulp.task( 'pre-commit', [ 'lint-staged' ] );
+```
+
+The lint task will skip the files listed in `.gitignore`. You can also pass `option.ignoredFiles`:
+
+```js
+const ckeditor5Lint = require( '@ckeditor/ckeditor5-dev-lint' )( {
+	// Files ignored by `gulp lint` task.
+	// Files from .gitignore will be added automatically during task execution.
+	ignoredFiles: [
+		'src/lib/**'
+	]
+} );
 ```
 
 ## License
