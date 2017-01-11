@@ -28,9 +28,9 @@ describe( 'runManualTests', () => {
 		const htmlFileCompilerSpy = sandbox.spy( () => Promise.resolve() );
 		const scriptCompilerSpy = sandbox.spy( () => Promise.resolve() );
 
-		mockery.registerMock( '../utils/manual-tests/createmanualtestserver', serverSpy );
-		mockery.registerMock( '../utils/manual-tests/compilemanualtesthtmlfiles', htmlFileCompilerSpy );
-		mockery.registerMock( '../utils/manual-tests/compilemanualtestscripts', scriptCompilerSpy );
+		mockery.registerMock( '../utils/manual-tests/createserver', serverSpy );
+		mockery.registerMock( '../utils/manual-tests/compilehtmlfiles', htmlFileCompilerSpy );
+		mockery.registerMock( '../utils/manual-tests/compilescripts', scriptCompilerSpy );
 
 		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 		sandbox.stub( process, 'cwd', () => 'workspace' );

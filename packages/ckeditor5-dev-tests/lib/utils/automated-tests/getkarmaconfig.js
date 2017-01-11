@@ -7,7 +7,7 @@
 'use strict';
 
 const path = require( 'path' );
-const getWebpackConfigForAutomatedTests = require( './getwebpackconfigforautomatedtests' );
+const getWebpackConfigForAutomatedTests = require( './getwebpackconfig' );
 
 const reporters = [
 	'mocha',

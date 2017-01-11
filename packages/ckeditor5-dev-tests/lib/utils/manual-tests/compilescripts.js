@@ -10,7 +10,7 @@
 const path = require( 'path' );
 const webpack = require( 'webpack' );
 const globSync = require( '../glob' );
-const getWebpackConfigForManualTests = require( './getwebpackconfigformanualtests' );
+const getWebpackConfigForManualTests = require( './getwebpackconfig' );
 const getRelativeFilePath = require( '../getrelativefilepath' );
 
 module.exports = function compileManualTestScripts( buildDir, manualTestPattern ) {

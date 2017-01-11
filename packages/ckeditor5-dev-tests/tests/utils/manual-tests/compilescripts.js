@@ -32,12 +32,12 @@ describe( 'compileManualTestScripts', () => {
 		} ) );
 
 		mockery.registerMock( '../glob', () => [ 'file1', 'file2' ] );
-		mockery.registerMock( './getwebpackconfigformanualtests', getWebpackConfigSpy );
+		mockery.registerMock( './getwebpackconfig', getWebpackConfigSpy );
 		mockery.registerMock( '../getrelativefilepath', ( x ) => x );
 		mockery.registerMock( 'webpack', webpackSpy );
 		sandbox.mock( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 
-		const compileManualTestScripts = require( '../../../lib/utils/manual-tests/compilemanualtestscripts' );
+		const compileManualTestScripts = require( '../../../lib/utils/manual-tests/compilescripts' );
 
 		return compileManualTestScripts( 'buildDir', 'manualTestPattern' ).then( () => {
 			expect( getWebpackConfigSpy.getCall( 0 ).args[ 0 ] ).to.deep.equal( { file1: 'file1', file2: 'file2' } );
