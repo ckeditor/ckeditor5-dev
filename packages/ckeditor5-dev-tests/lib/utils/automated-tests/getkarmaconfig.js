@@ -7,7 +7,7 @@
 'use strict';
 
 const path = require( 'path' );
-const getWebpackConfigForAutomatedTests = require( './getwebpackconfigforautomatedtests' );
+const getWebpackConfigForAutomatedTests = require( './getwebpackconfig' );
 
 const reporters = [
 	'mocha',
@@ -188,7 +188,7 @@ function fileOptionToGlob( file ) {
 		return path.join( nodeModulesPath, 'ckeditor5-' + packageName, globSuffix );
 	}
 
-	let glob = chunks.join( '/' );
+	let glob = chunks.join( path.sep );
 
 	// 4.
 	if ( !glob.endsWith( '.js' ) ) {
