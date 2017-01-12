@@ -52,7 +52,7 @@ function collectTranslations() {
 }
 
 function getTranslationCallsFromFile( filePath, fileContent ) {
-	const fullMatches = fileContent.match( /[\s]t\([^)]+?\)/g ) || [];
+	const fullMatches = fileContent.match( / t\([^)]+?\)/gm ) || [];
 
 	return fullMatches.map( ( fullMatch ) => {
 		const stringMatch = fullMatch.match( /'([^']+?)'/ );
@@ -186,7 +186,7 @@ function getContextMessage( contexts, translation ) {
 	const packageContext = contexts.get( translation.package );
 	const corePackageContext = contexts.get( corePackageName );
 
-	return packageContext.content[ translation.key ] || corePackageContext.content[ translation.key ];
+	return corePackageContext.content[ translation.key ] || packageContext.content[ translation.key ];
 }
 
 function jsonToPoFile( messages ) {
@@ -218,5 +218,5 @@ function getUniqueTranslations( translations ) {
 		}
 	}
 
-	return uniqueTranslationKeys;
+	return uniqueTranslations;
 }
