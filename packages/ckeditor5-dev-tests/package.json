@@ -27,7 +27,7 @@
     "karma-mocha-reporter": "^2.2.0",
     "karma-sinon": "^1.0.5",
     "karma-sourcemap-loader": "^0.3.7",
-    "karma-webpack": "^1.8.0",
+    "karma-webpack": "^2.0.1",
     "minimist": "^1.2.0",
     "mocha": "^3.1.2",
     "mockery": "^2.0.0",
@@ -36,7 +36,7 @@
     "sass-loader": "^4.1.1",
     "sinon": "^1.17.6",
     "style-loader": "^0.13.1",
-    "webpack": "^2.2.0-rc.3"
+    "webpack": "^2.2.0-rc.4"
   },
   "devDependencies": {},
   "engines": {
