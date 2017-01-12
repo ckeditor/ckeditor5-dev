@@ -12,22 +12,29 @@ const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 
 const nodeModulesDir = path.join( process.cwd(), 'node_modules' );
 const langContextSuffix = path.join( 'lang', 'contexts.json' );
+const corePackageName = 'ckeditor5-core';
 
 module.exports = function collect() {
 	const contexts = getContexts();
 	const translations = collectTranslations();
 
-	// getUnsedContexts( contexts, translations )
-	// 	.map( error => logger.error( error ) );
+	const errors = [
+		...getUnusedContextErrorMessages( contexts, translations ),
+		...getMissingContextErrorMessages( contexts, translations ),
+		...getRepeatedContextErrorMessages( contexts )
+	];
 
-	getMissingContexts( contexts, translations )
-		.map( error => logger.error( error ) );
+	if ( errors.length > 0 ) {
+		errors.forEach( error => logger.error( error ) );
 
-	const poFileContent = createPoFileContent( contexts, translations );
+		return;
+	}
+
+	const uniqueTranlations = getUniqueTranslations( translations );
+
+	const poFileContent = createPoFileContent( contexts, uniqueTranlations );
 
 	savePoFile( poFileContent );
-
-	return translations;
 };
 
 function collectTranslations() {
@@ -56,14 +63,15 @@ function getTranslationCallsFromFile( filePath, fileContent ) {
 			return;
 		}
 
-		const translationId = stringMatch[1];
+		const key = stringMatch[1];
 
-		const contextMatch = translationId.match( /\[context: ([^\]]+)\]/ );
-		const sentenceMatch = translationId.match( /^[^\[]+/ );
+		const contextMatch = key.match( /\[context: ([^\]]+)\]/ );
+		const sentenceMatch = key.match( /^[^\[]+/ );
 		const packageMatch = filePath.match( /\/(ckeditor5-[^\/]+)\// );
 
 		return {
 			filePath,
+			key,
 			package: packageMatch[1],
 			context: contextMatch ? contextMatch[1] : null,
 			sentence: sentenceMatch[0],
@@ -79,9 +87,7 @@ function getContexts() {
 			const pathToContext = path.join( nodeModulesDir, packageName, langContextSuffix );
 
 			if ( !fs.existsSync( pathToContext ) ) {
-				logger.error( `Context file is missing: ${ pathToContext }` );
-
-				return;
+				return map;
 			}
 
 			return map.set( packageName, {
@@ -93,17 +99,70 @@ function getContexts() {
 
 // @param {Map.<Object>} contexts
 // @param {Array.<Object>} translations
-function getMissingContexts( contexts, translations ) {
+function getMissingContextErrorMessages( contexts, translations ) {
 	const errors = [];
 
 	for ( const translation of translations ) {
-		const msgInfo = getContextMessageInfo( contexts, translation );
+		const errorMessage = maybeGetContextErrorMessage( contexts, translation );
 
-		if ( !( msgInfo.message ) ) {
-			errors.push(
-				`Missing context message for translation key: ${ msgInfo.fullTranslationKey }`,
-				`\tin ${ msgInfo.packageContext.filePath }\n`
-			);
+		if ( errorMessage ) {
+			errors.push( errorMessage );
+		}
+	}
+
+	return errors;
+}
+
+function maybeGetContextErrorMessage( contexts, translation ) {
+	const packageContext = contexts.get( translation.package );
+	const corePackageContext = contexts.get( corePackageName );
+	let error;
+
+	if ( !corePackageContext ) {
+		error = `${corePackageName}/lang/contexts.json file is missing.`;
+	}
+
+	else if ( !corePackageContext.content[ translation.key ] && !packageContext ) {
+		error = `contexts.json file or context for the translation key is missing (${ translation.package }, ${ translation.key }).`;
+	}
+
+	else if ( !corePackageContext.content[ translation.key ] && !packageContext.content[ translation.key ] ) {
+		error = `Context for the translation key is missing (${ translation.package }, ${ translation.key }).`;
+	}
+
+	return error;
+}
+
+function getUnusedContextErrorMessages( contexts, translations ) {
+	const usedContextMap = new Map();
+
+	for ( const [ packageName, context ] of contexts ) {
+		for ( const key in context.content ) {
+			usedContextMap.set( packageName + '/' + key, false );
+		}
+	}
+
+	for ( const translation of translations ) {
+		const translationKey = translation.package + '/' + translation.key;
+
+		usedContextMap.set( translationKey, true );
+	}
+
+	return [ ...usedContextMap ]
+		.filter( ( [ key, usage ] ) => !usage )
+		.map( ( [ key ] ) => `Unused context: ${ key }` );
+}
+
+function getRepeatedContextErrorMessages( contexts ) {
+	const errors = [];
+	const keys = new Set();
+
+	for ( const context of contexts.values() ) {
+		for ( const key in context.content ) {
+			if ( keys.has( key ) ) {
+				errors.push( `Context is duplicated for the key: ${ key }` );
+			}
+			keys.add( key );
 		}
 	}
 
@@ -112,30 +171,23 @@ function getMissingContexts( contexts, translations ) {
 
 function createPoFileContent( contexts, translations ) {
 	const messages = translations.map( ( translation ) => {
-		const msgInfo = getContextMessageInfo( contexts, translation );
+		const ctxtMessage = getContextMessage( contexts, translation );
 
 		return {
 			id: translation.sentence,
 			str: translation.sentence,
-			ctxt: msgInfo.message
+			ctxt: ctxtMessage
 		};
 	} );
 
 	return jsonToPoFile( messages );
 }
 
-function getContextMessageInfo( contexts, translation ) {
+function getContextMessage( contexts, translation ) {
 	const packageContext = contexts.get( translation.package );
+	const corePackageContext = contexts.get( corePackageName );
 
-	const fullTranslationKey = translation.context ?
-		`${translation.sentence} [context: ${translation.context}]` :
-		translation.sentence;
-
-	return {
-		fullTranslationKey,
-		packageContext,
-		message: packageContext.content[ fullTranslationKey ]
-	};
+	return packageContext.content[ translation.key ] || corePackageContext.content[ translation.key ];
 }
 
 function jsonToPoFile( messages ) {
@@ -154,4 +206,18 @@ function savePoFile( fileContent ) {
 	fs.outputFileSync( outputFile, fileContent );
 
 	logger.info( `Created file: ${ outputFile }` );
+}
+
+function getUniqueTranslations( translations ) {
+	const uniqueTranslations = [];
+	const uniqueTranslationKeys = [];
+
+	for ( const translation of translations ) {
+		if ( !uniqueTranslationKeys.includes( translation.key ) ) {
+			uniqueTranslations.push( translation );
+			uniqueTranslationKeys.push( translation.key );
+		}
+	}
+
+	return uniqueTranslationKeys;
 }

@@ -6,6 +6,7 @@
   "main": "lib/index.js",
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "^2.3.1",
+    "fs-extra": "^1.0.0",
     "gulp": "^3.9.1",
     "gulp-filter": "^4.0.0",
     "gulp-replace": "^0.5.4",
