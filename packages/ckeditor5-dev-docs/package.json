@@ -6,21 +6,9 @@
   "main": "lib/index.js",
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "^2.3.2",
-    "@ckeditor/ckeditor5-dev-bundler-rollup": "^4.0.0",
-    "@ckeditor/ckeditor5-dev-compiler": "^5.1.0",
-    "docs-builder": "cksource/docs-builder",
-    "gulp": "^3.9.0",
-    "gulp-jsdoc3": "^0.3.0",
-    "gulp-filter": "^4.0.0",
-    "gulp-rename": "^1.2.2",
-    "gulp-util": "^3.0.7",
-    "minimist": "^1.2.0"
+    "docs-builder": "cksource/docs-builder"
   },
-  "devDependencies": {
-    "chai": "^3.5.0",
-    "sinon": "^1.17.5",
-    "vinyl": "^1.2.0"
-  },
+  "devDependencies": {},
   "engines": {
     "node": ">=6.0.0",
     "npm": ">=3.0.0"
