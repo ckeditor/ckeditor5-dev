@@ -143,9 +143,8 @@ function getUnusedContextErrorMessages( contexts, translations ) {
 	}
 
 	for ( const translation of translations ) {
-		const translationKey = translation.package + '/' + translation.key;
-
-		usedContextMap.set( translationKey, true );
+		usedContextMap.set( translation.package + '/' + translation.key, true );
+		usedContextMap.set( corePackageName + '/' + translation.key, true );
 	}
 
 	return [ ...usedContextMap ]
