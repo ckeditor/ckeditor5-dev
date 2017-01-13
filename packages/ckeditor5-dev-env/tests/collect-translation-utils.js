@@ -193,4 +193,41 @@ describe( 'collect-utils', () => {
 			] );
 		} );
 	} );
+
+	describe( 'createPoFileContent()', () => {
+		it( 'shoud translate json object to po-style text', () => {
+			const contexts = new Map( [
+				[ 'ckeditor5-utils', { content: { util: 'Util' } } ],
+				[ 'ckeditor5-core', { content: {} } ]
+			] );
+
+			const translations = [ {
+				package: 'ckeditor5-utils',
+				key: 'util',
+				sentence: 'util'
+			} ];
+
+			const poContent = utils.createPoFileContent( contexts, translations );
+
+			expect( poContent ).to.be.equal(
+`msgid "util"
+msgstr "util"
+msgctxt "Util"
+`
+			);
+		} );
+	} );
+
+	describe( 'savePoFile()', () => {
+		it( 'should write po file', () => {
+			const outputFileStub = sandbox.stub( fs, 'outputFileSync', () => {} );
+			utils.savePoFile( 'fileContent' );
+
+			sinon.assert.alwaysCalledWith(
+				outputFileStub,
+				path.join( 'workspace', 'ckeditor5', 'build', '.transifex', 'english.po' ),
+				'fileContent'
+			);
+		} );
+	} );
 } );
