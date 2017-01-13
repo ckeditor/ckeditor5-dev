@@ -246,9 +246,10 @@ module.exports = ( config ) => {
 			}
 
 			const packageNames = Object.keys( options.dependencies );
+			const packageJsonPath = path.join( cwd, 'package.json' );
 
 			if ( packageNames.length ) {
-				tools.updateJSONFile( path.join( cwd, 'package.json' ), ( json ) => {
+				tools.updateJSONFile( packageJsonPath, ( json ) => {
 					if ( !json.dependencies ) {
 						return json;
 					}
@@ -287,6 +288,8 @@ module.exports = ( config ) => {
 					tools.shExec( `git push origin ${ version }`, shExecParams );
 
 					log.info( 'Creating GitHub release...' );
+
+					const packageJSON = require( packageJsonPath );
 
 					const repositoryInfo = gitHubUrl(
 						typeof packageJSON.repository === 'object' ? packageJSON.repository.url : packageJSON.repository
