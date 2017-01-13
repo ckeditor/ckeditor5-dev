@@ -6,7 +6,6 @@
 'use strict';
 
 const path = require( 'path' );
-const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
 const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
 
 /**
@@ -15,15 +14,6 @@ const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
  */
 module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	const config = {
-		plugins: [
-			new CKEditorWebpackPlugin( {
-				packages: [
-					process.cwd(),
-					path.join( process.cwd(), 'node_modules' ),
-				]
-			} )
-		],
-
 		module: {
 			rules: [
 				{

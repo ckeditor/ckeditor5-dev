@@ -42,12 +42,12 @@ describe( 'runManualTests', () => {
 			sinon.assert.calledWithExactly(
 				htmlFileCompilerSpy,
 				'workspace/build/.manual-tests',
-				'workspace/node_modules/ckeditor5-*/tests/**/manual/**'
+				'workspace/packages/ckeditor5-*/tests/**/manual/**'
 			);
 			sinon.assert.calledWithExactly(
 				scriptCompilerSpy,
 				'workspace/build/.manual-tests',
-				'workspace/node_modules/ckeditor5-*/tests/**/manual/**'
+				'workspace/packages/ckeditor5-*/tests/**/manual/**'
 			);
 		} );
 	} );

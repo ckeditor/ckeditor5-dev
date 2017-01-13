@@ -6,7 +6,6 @@
 'use strict';
 
 const path = require( 'path' );
-const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
 const WebpackNotifierPlugin = require( './webpacknotifierplugin' );
 
 /**
@@ -30,12 +29,6 @@ module.exports = function getWebpackConfigForManualTests( entryObject, buildDir 
 		},
 
 		plugins: [
-			new CKEditorWebpackPlugin( {
-				packages: [
-					process.cwd(),
-					path.join( process.cwd(), 'node_modules' )
-				]
-			} ),
 			new WebpackNotifierPlugin()
 		],
 

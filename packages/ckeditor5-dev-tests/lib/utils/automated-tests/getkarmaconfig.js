@@ -15,7 +15,7 @@ const reporters = [
 ];
 
 const coverageDir = path.join( process.cwd(), 'coverage' );
-const nodeModulesPath = path.join( process.cwd(), 'node_modules' );
+const nodeModulesPath = path.join( process.cwd(), 'packages' );
 
 /**
  * @param {Object} options
@@ -176,7 +176,7 @@ function fileOptionToGlob( file ) {
 	if ( chunks.length === 0 ) {
 		// 1.
 		if ( packageName == '*' ) {
-			return path.join( nodeModulesPath, 'ckeditor5-!(dev)*', globSuffix );
+			return path.join( nodeModulesPath, 'ckeditor5-*', globSuffix );
 		}
 
 		// 3.

@@ -19,7 +19,7 @@ const compileManualTestHtmlFiles = require( '../utils/manual-tests/compilehtmlfi
  */
 module.exports = function runManualTests() {
 	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
-	const manualTestPattern = path.join( process.cwd(), 'node_modules', 'ckeditor5-*', 'tests', '**', 'manual', '**' );
+	const manualTestPattern = path.join( process.cwd(), 'packages', 'ckeditor5-*', 'tests', '**', 'manual', '**' );
 
 	return Promise.all( [
 		compileManualTestScripts( buildDir, manualTestPattern ),
