@@ -12,7 +12,7 @@ const utils = {
 	/**
 	 * Changelog file name.
 	 */
-	changelogFile: 'CHANGELOG.md',
+	changelogFile: 'CHANGES.md',
 
 	/**
 	 * Changelog header.
@@ -46,12 +46,36 @@ const utils = {
 	/**
 	 * Returns version of current package.
 	 *
+	 * @param {String} [cwd=process.cwd()] Current work directory.
 	 * @returns {String}
 	 */
-	getCurrentVersion() {
-		const packageJSON = require( path.resolve( process.cwd(), 'package.json' ) );
+	getCurrentVersion( cwd = process.cwd() ) {
+		const packageJSON = require( path.resolve( cwd, 'package.json' ) );
 
 		return `v${ packageJSON.version }`;
+	},
+
+	/**
+	 * Returns number of the next version.
+	 *
+	 * @param {String} currentVersion Current version in format "X.Y.Z".
+	 * @param {String} releaseType Type of the next release.
+	 * @returns {String}
+	 */
+	getNextVersion( currentVersion, releaseType ) {
+		if ( currentVersion.startsWith( 'v' ) ) {
+			currentVersion = currentVersion.slice( 1 );
+		}
+
+		const version = currentVersion.split( '.' ).map( ( n ) => parseInt( n ) );
+
+		if ( releaseType === 'major' ) {
+			return `${ version[ 0 ] + 1 }.0.0`;
+		} else if ( releaseType === 'minor' ) {
+			return `${ version[ 0 ] }.${ version[ 1 ] + 1 }.0`;
+		}
+
+		return `${ version[ 0 ] }.${ version[ 1 ] }.${ version[ 2 ] + 1 }`;
 	},
 
 	/**

@@ -240,7 +240,7 @@ Before starting the process, make sure that:
 
 - Current branch is `master`,
 - Current branch is up to date,
-- Working directory is clean (only changelog file can be modified).
+- Working directory is clean (only changelog or `package.json` can be modified).
 
 The whole process does:
 

@@ -5,11 +5,13 @@
 
 'use strict';
 
+const execOnDependencies = require( './utils/exec-on-dependencies' );
+
 /**
  * Exports function returning development tasks.
  *
  * @param {Object} config Configuration object.
- * @param {String} config.WORKSPACE_DIR Relative path to workspace where packages in development mode will be stored.
+ * @param {String} config.workspaceDir Relative path to workspace where packages in development mode will be stored.
  * @returns {Object}
  */
 module.exports = ( config ) => {
@@ -120,9 +122,11 @@ module.exports = ( config ) => {
 			const parserOpts = require( './changelog/parser-opts' );
 			const writerOpts = require( './changelog/writer-opts' );
 			const utils = require( './utils/changelog' );
-			const log = logger( options.debug ? 'info' : 'error' );
+			const log = logger( options.debug ? 'info' : 'warning' );
 
-			const shExecParams = { verbosity: options.debug ? 'info' : 'error' };
+			console.log( `\nParsing: ${ process.cwd() }\n` );
+
+			const shExecParams = { verbosity: options.debug ? 'info' : 'warning' };
 
 			return utils.getNewReleaseType()
 				.then( ( response ) => {
@@ -136,6 +140,7 @@ module.exports = ( config ) => {
 							debug: log.info.bind( log )
 						};
 
+						// conventionalChangelog based on version in `package.json`.
 						conventionalChangelog( parameters, null, null, parserOpts, writerOpts )
 							.pipe( saveChangelogPipe() );
 
@@ -178,14 +183,18 @@ module.exports = ( config ) => {
 		 * @params {String} options.token GitHub token used to authenticate.
 		 * @params {Boolean} options.init Whether to create first release using this package.
 		 * @params {Boolean} options.debug Whether to show additional logs.
+		 * @params {Object} options.dependencies Dependencies with versions of other CKEditor5 package.
 		 * @returns {Promise}
 		 */
 		createRelease( options ) {
 			const gitHubUrl = require( 'parse-github-url' );
 			const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 			const utils = require( './utils/changelog' );
-			const shExecParams = { verbosity: options.debug ? 'info' : 'error' };
+			const shExecParams = { verbosity: options.debug ? 'info' : 'warning' };
 			const log = logger();
+			const cwd = process.cwd();
+
+			console.log( `\nParsing: ${ cwd }\n` );
 
 			if ( !packageJSON.repository ) {
 				throw new Error( 'The "package.json" file must contain URL to the repository.' );
@@ -215,7 +224,7 @@ module.exports = ( config ) => {
 
 			const anyChangedFiles = tools.shExec( `git status -s`, shExecParams )
 				.split( `\n` )
-				.filter( ( fileName ) => !fileName.match( new RegExp( utils.changelogFile ) ) )
+				.filter( ( fileName ) => !fileName.match( new RegExp( `${ utils.changelogFile }|package.json` ) ) )
 				.join( `\n` )
 				.trim();
 
@@ -236,9 +245,31 @@ module.exports = ( config ) => {
 				}
 			}
 
+			const packageNames = Object.keys( options.dependencies );
+
+			if ( packageNames.length ) {
+				tools.updateJSONFile( path.join( cwd, 'package.json' ), ( json ) => {
+					if ( !json.dependencies ) {
+						return json;
+					}
+
+					for ( const item of packageNames ) {
+						if ( !json.dependencies[ item ] ) {
+							continue;
+						}
+
+						json.dependencies[ item ] = `^${ options.dependencies[ item ] }`;
+					}
+
+					json.dependencies = tools.sortObject( json.dependencies );
+
+					return json;
+				} );
+			}
+
 			return utils.getNewReleaseType()
 				.then( ( response ) => {
-					const bumpVersionCommand = `npm version ${ response.releaseType } --no-git-tag-version`;
+					const bumpVersionCommand = `npm version ${ response.releaseType } --no-git-tag-version --force`;
 					version = tools.shExec( bumpVersionCommand, { verbosity: 'error' } ).trim();
 
 					return utils.getLatestChangesFromChangelog( version, lastTag );
@@ -252,8 +283,8 @@ module.exports = ( config ) => {
 					log.info( 'Creating tag...' );
 
 					tools.shExec( `git tag ${ version }`, shExecParams );
-					tools.shExec( `git push`, shExecParams );
-					tools.shExec( `git push --tags`, shExecParams );
+					tools.shExec( `git push origin master`, shExecParams );
+					tools.shExec( `git push origin ${ version }`, shExecParams );
 
 					log.info( 'Creating GitHub release...' );
 
@@ -272,6 +303,64 @@ module.exports = ( config ) => {
 				.then( () => {
 					log.info( `Release "${ version }" has been created and published.` );
 				} );
+		},
+
+		/**
+		 * Generates the changelog for dependencies.
+		 *
+		 * @param {Object} options
+		 * @params {String} options.cwd Current work directory.
+		 * @params {String} options.workspace A relative path to the workspace.
+		 * @params {Boolean} options.debug Whether to show additional logs.
+		 * @returns {Promise}
+		 */
+		generateChangelogForDependencies( options ) {
+			const execOptions = {
+				cwd: options.cwd,
+				workspace: options.workspace
+			};
+
+			const functionToExecute = ( repositoryName, repositoryPath ) => {
+				process.chdir( repositoryPath );
+
+				return tasks.generateChangeLog( {
+					debug: options.debug
+				} );
+			};
+
+			return execOnDependencies( execOptions, functionToExecute );
+		},
+
+		/**
+		 * Generates the changelog for dependencies.
+		 *
+		 * @param {Object} options
+		 * @params {String} options.cwd Current work directory.
+		 * @params {String} options.workspace A relative path to the workspace.
+		 * @params {String} options.token GitHub token used to authenticate.
+		 * @params {Boolean} options.init Whether to create first release using this package.
+		 * @params {Boolean} options.debug Whether to show additional logs.
+		 * @params {Object} options.dependencies Dependencies with versions of other CKEditor5 package.
+		 * @returns {Promise}
+		 */
+		releaseDependencies( options ) {
+			const execOptions = {
+				cwd: options.cwd,
+				workspace: options.workspace
+			};
+
+			const functionToExecute = ( repositoryName, repositoryPath ) => {
+				process.chdir( repositoryPath );
+
+				return tasks.createRelease( {
+					init: options.init,
+					token: options.token,
+					debug: options.debug,
+					dependencies: options.dependencies
+				} );
+			};
+
+			return execOnDependencies( execOptions, functionToExecute );
 		}
 	};
 
