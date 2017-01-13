@@ -27,7 +27,7 @@ module.exports = function collect() {
 
 	const uniqueTranlations = utils.getUniqueTranslations( translations );
 
-	const poFileContent = utils.createPoFileContent( contexts, uniqueTranlations );
+	const potFileContent = utils.createPotFileContent( contexts, uniqueTranlations );
 
-	utils.savePoFile( poFileContent );
+	utils.savePotFile( potFileContent );
 };

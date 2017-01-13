@@ -146,7 +146,7 @@ const utils = {
 		return errors;
 	},
 
-	createPoFileContent( contexts, translations ) {
+	createPotFileContent( contexts, translations ) {
 		const messages = translations.map( ( translation ) => {
 			const ctxtMessage = utils.getContextMessage( contexts, translation );
 
@@ -157,7 +157,7 @@ const utils = {
 			};
 		} );
 
-		return utils.jsonToPoFile( messages );
+		return utils.jsonToPotFile( messages );
 	},
 
 	getContextMessage( contexts, translation ) {
@@ -167,7 +167,7 @@ const utils = {
 		return corePackageContext.content[ translation.key ] || packageContext.content[ translation.key ];
 	},
 
-	jsonToPoFile( messages ) {
+	jsonToPotFile( messages ) {
 		return messages.map( ( msg ) => {
 			return [
 				`msgid "${msg.id}"`,
@@ -177,8 +177,8 @@ const utils = {
 		} ).join( '\n' );
 	},
 
-	savePoFile( fileContent ) {
-		const outputFile = path.join( process.cwd(), 'build', '.transifex', 'english.po' );
+	savePotFile( fileContent ) {
+		const outputFile = path.join( process.cwd(), 'build', '.transifex', 'ckeditor5.pot' );
 
 		fs.outputFileSync( outputFile, fileContent );
 

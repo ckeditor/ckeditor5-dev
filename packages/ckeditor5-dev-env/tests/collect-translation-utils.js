@@ -194,7 +194,7 @@ describe( 'collect-utils', () => {
 		} );
 	} );
 
-	describe( 'createPoFileContent()', () => {
+	describe( 'createPotFileContent()', () => {
 		it( 'shoud translate json object to po-style text', () => {
 			const contexts = new Map( [
 				[ 'ckeditor5-utils', { content: { util: 'Util' } } ],
@@ -207,7 +207,7 @@ describe( 'collect-utils', () => {
 				sentence: 'util'
 			} ];
 
-			const poContent = utils.createPoFileContent( contexts, translations );
+			const poContent = utils.createPotFileContent( contexts, translations );
 
 			expect( poContent ).to.be.equal(
 `msgid "util"
@@ -218,14 +218,14 @@ msgctxt "Util"
 		} );
 	} );
 
-	describe( 'savePoFile()', () => {
-		it( 'should write po file', () => {
+	describe( 'savePotFile()', () => {
+		it( 'should write pot file', () => {
 			const outputFileStub = sandbox.stub( fs, 'outputFileSync', () => {} );
-			utils.savePoFile( 'fileContent' );
+			utils.savePotFile( 'fileContent' );
 
 			sinon.assert.alwaysCalledWith(
 				outputFileStub,
-				path.join( 'workspace', 'ckeditor5', 'build', '.transifex', 'english.po' ),
+				path.join( 'workspace', 'ckeditor5', 'build', '.transifex', 'ckeditor5.pot' ),
 				'fileContent'
 			);
 		} );
