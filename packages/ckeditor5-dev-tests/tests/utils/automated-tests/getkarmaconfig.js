@@ -48,9 +48,9 @@ describe( 'getKarmaConfig', () => {
 			verbose: false
 		} );
 
-		const expectedFile = 'workspace/node_modules/ckeditor5-!(dev)*/tests/**/*.js';
+		const expectedFile = 'workspace/packages/ckeditor5-*/tests/**/*.js';
 
-		expect( karmaConfig ).to.deep.eq( {
+		expect( karmaConfig ).to.deep.equal( {
 			basePath: 'workspace',
 			frameworks: [ 'mocha', 'chai', 'sinon' ],
 			files: [ expectedFile ],
@@ -107,8 +107,8 @@ describe( 'getKarmaConfig', () => {
 		} );
 
 		expect( karmaConfig.files ).to.deep.eq( [
-			'workspace/node_modules/ckeditor5-engine/tests/**/*.js',
-			'workspace/node_modules/ckeditor5-utils/tests/**/*.js',
+			'workspace/packages/ckeditor5-engine/tests/**/*.js',
+			'workspace/packages/ckeditor5-utils/tests/**/*.js',
 		] );
 	} );
 
@@ -119,7 +119,7 @@ describe( 'getKarmaConfig', () => {
 		} );
 
 		expect( karmaConfig.files ).to.deep.eq( [
-			'workspace/node_modules/ckeditor5-!(engine)*/tests/**/*.js',
+			'workspace/packages/ckeditor5-!(engine)*/tests/**/*.js',
 		] );
 	} );
 
@@ -130,7 +130,7 @@ describe( 'getKarmaConfig', () => {
 		} );
 
 		expect( karmaConfig.files ).to.deep.eq( [
-			'workspace/node_modules/ckeditor5-engine/tests/view/**/*.js',
+			'workspace/packages/ckeditor5-engine/tests/view/**/*.js',
 		] );
 	} );
 
@@ -141,7 +141,7 @@ describe( 'getKarmaConfig', () => {
 		} );
 
 		expect( karmaConfig.files ).to.deep.eq( [
-			'workspace/node_modules/ckeditor5-engine/tests/model/**/*.js',
+			'workspace/packages/ckeditor5-engine/tests/model/**/*.js',
 		] );
 	} );
 
