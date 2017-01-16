@@ -115,8 +115,8 @@ const utils = {
 	 * @returns {Boolean} options.init Whether to create first release using this package.
 	 * @returns {Boolean} options.debug Whether to show additional logs.
 	 */
-	parseArguments() {
-		const options = require( 'minimist' )( process.argv.slice( 2 ), {
+	parseArguments( args = process.argv.slice( 2 ) ) {
+		const options = require( 'minimist' )( args, {
 			string: [
 				'token'
 			],
@@ -131,6 +131,8 @@ const utils = {
 				debug: false
 			}
 		} );
+
+		delete options._;
 
 		return options;
 	},
@@ -157,7 +159,7 @@ const utils = {
 					changelog = changelog.match( new RegExp( `(## \\[${ currentTag }\\][\\w\\W]+)## \\[?${ previousTag }\\]?` ) )[ 1 ];
 				}
 
-				changelog = changelog.replace( new RegExp( `^## \\[${ currentTag }\\].*` ), '' ).trim();
+				changelog = changelog.replace( new RegExp( `^## \\[?${ currentTag }\\]?.*` ), '' ).trim();
 
 				return Promise.resolve( changelog );
 			} );

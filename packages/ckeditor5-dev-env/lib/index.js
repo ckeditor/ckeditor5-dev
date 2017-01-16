@@ -116,7 +116,7 @@ module.exports = ( config ) => {
 		 * @params {Boolean} options.debug Whether to show additional logs.
 		 * @returns {Promise}
 		 */
-		generateChangeLog( options ) {
+		generateChangelog( options ) {
 			const conventionalChangelog = require( 'conventional-changelog' );
 			const { tools, stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 			const parserOpts = require( './changelog/parser-opts' );
@@ -177,7 +177,7 @@ module.exports = ( config ) => {
 		 * Commits a new changelog (and package.json), creates a tag,
 		 * pushes the tag to a remote server and creates a note on GitHub releases page.
 		 *
-		 * This method should be executed after the `tasks.generateChangeLog` method.
+		 * This method should be executed after the `tasks.generateChangelog` method.
 		 *
 		 * @params {Object} options
 		 * @params {String} options.token GitHub token used to authenticate.
@@ -326,7 +326,7 @@ module.exports = ( config ) => {
 			const functionToExecute = ( repositoryName, repositoryPath ) => {
 				process.chdir( repositoryPath );
 
-				return tasks.generateChangeLog( {
+				return tasks.generateChangelog( {
 					debug: options.debug
 				} );
 			};

@@ -5,7 +5,7 @@
 
 'use strict';
 
-const changelogUtils = require( './changelog' );
+const utils = require( './changelog' );
 const execOnDependencies = require( './exec-on-dependencies' );
 
 /**
@@ -27,11 +27,11 @@ module.exports = function proposedDepsVersions( options ) {
 	const functionToExecute = ( repositoryName, repositoryPath ) => {
 		process.chdir( repositoryPath );
 
-		const currentVersion = changelogUtils.getCurrentVersion();
+		const currentVersion = utils.getCurrentVersion();
 
-		return changelogUtils.getNewReleaseType()
+		return utils.getNewReleaseType()
 			.then( ( response ) => {
-				versions[ repositoryName ] = changelogUtils.getNextVersion( currentVersion, response.releaseType );
+				versions[ repositoryName ] = utils.getNextVersion( currentVersion, response.releaseType );
 			} );
 	};
 
