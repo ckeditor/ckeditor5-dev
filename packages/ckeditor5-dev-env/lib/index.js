@@ -103,6 +103,172 @@ module.exports = ( config ) => {
 			}
 
 			return execTask( task, cwd, packageJSON, workspaceRelativePath, params );
+		},
+
+		/**
+		 * Generates the release changelog based on commit messages in the repository.
+		 *
+		 * This method should be executed before the `tasks.createRelease` method.
+		 *
+		 * @params {Object} options
+		 * @params {String} options.token GitHub token used to authenticate.
+		 * @params {Boolean} options.init Whether to create first release using this package.
+		 * @params {Boolean} options.debug Whether to show additional logs.
+		 * @returns {Promise}
+		 */
+		generateChangeLog( options ) {
+			const conventionalChangelog = require( 'conventional-changelog' );
+			const { tools, stream } = require( '@ckeditor/ckeditor5-dev-utils' );
+			const parserOpts = require( './changelog/parser-opts' );
+			const writerOpts = require( './changelog/writer-opts' );
+			const utils = require( './utils/changelog' );
+
+			const shExecParams = { verbosity: options.debug ? 'info' : 'error' };
+
+			return utils.getNewReleaseType()
+				.then( ( response ) => {
+					tools.shExec( `npm version ${ response.releaseType } --no-git-tag-version`, shExecParams );
+
+					return utils.getCurrentChangelog();
+				} )
+				.then( ( currentChangelog ) => {
+					return new Promise( ( resolve, reject ) => {
+						conventionalChangelog( {}, null, null, parserOpts, writerOpts )
+							.pipe( saveChangelogPipe() );
+
+						function saveChangelogPipe() {
+							return stream.noop( ( ( changes ) => {
+								// Removes header from current changelog.
+								currentChangelog = currentChangelog.replace( utils.changelogHeader, '' );
+
+								// Concat header, new changelog and current changelog.
+								const newChangelog = [
+										utils.changelogHeader,
+										changes.toString(),
+										currentChangelog.trim(),
+									].join( '' ).trim() + `\n`;
+
+								utils.saveChangelog( newChangelog )
+									.then( () => {
+										tools.shExec( `git checkout -- ./package.json`, shExecParams );
+
+										resolve();
+									} )
+									.catch( ( err ) => {
+										reject( err );
+									} );
+							} ) );
+						}
+					} );
+				} );
+		},
+
+		/**
+		 * Creates a new release.
+		 *
+		 * Commits a new changelog (and package.json), creates a tag,
+		 * pushes the tag to a remote server and creates a note on GitHub releases page.
+		 *
+		 * This method should be executed after the `tasks.generateChangeLog` method.
+		 *
+		 * @params {Object} options
+		 * @params {String} options.token GitHub token used to authenticate.
+		 * @params {Boolean} options.init Whether to create first release using this package.
+		 * @params {Boolean} options.debug Whether to show additional logs.
+		 * @returns {Promise}
+		 */
+		createRelease( options ) {
+			const gitHubUrl = require( 'parse-github-url' );
+			const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+			const utils = require( './utils/changelog' );
+			const shExecParams = { verbosity: options.debug ? 'info' : 'error' };
+			const log = logger();
+
+			if ( !packageJSON.repository ) {
+				throw new Error( 'The "package.json" file must contain URL to the repository.' );
+			}
+
+			if ( !options.token ) {
+				throw new Error( 'GitHub CLI token not found. Use --token=<token>.' );
+			}
+
+			log.info( 'Checking current branch...' );
+
+			const currentBranch = tools.shExec( `git rev-parse --abbrev-ref HEAD`, shExecParams ).trim();
+
+			if ( currentBranch !== 'master' ) {
+				throw new Error( 'Release can be create only from the main branch.' );
+			}
+
+			log.info( 'Checking whether to master is up to date...' );
+
+			const shortStatus = tools.shExec( `git status -sb`, shExecParams ).trim().match( /behind (\d+)/ );
+
+			if ( shortStatus && shortStatus[ 1 ] !== 0 ) {
+				throw new Error( 'Branch "master" is not up to date...' );
+			}
+
+			log.info( 'Checking whether to working directory is clean...' );
+
+			const anyChangedFiles = tools.shExec( `git status -s`, shExecParams )
+				.split( `\n` )
+				.filter( ( fileName ) => !fileName.match( new RegExp( utils.changelogFile ) ) )
+				.join( `\n` )
+				.trim();
+
+			if ( anyChangedFiles.length ) {
+				throw new Error( 'Working directory contains uncommitted changes...' );
+			}
+
+			let lastTag;
+			let version;
+
+			// If the release is not marked as initial.
+			if ( !options.init ) {
+				// Try to find the last tag.
+				const tagList = tools.shExec( `git tag --list`, shExecParams ).trim();
+
+				if ( tagList ) {
+					lastTag = tools.shExec( 'git describe --tags `git rev-list --tags --max-count=1`', shExecParams ).trim();
+				}
+			}
+
+			return utils.getNewReleaseType()
+				.then( ( response ) => {
+					const bumpVersionCommand = `npm version ${ response.releaseType } --no-git-tag-version`;
+					version = tools.shExec( bumpVersionCommand, { verbosity: 'error' } ).trim();
+
+					return utils.getLatestChangesFromChangelog( version, lastTag );
+				} )
+				.then( ( latestChanges ) => {
+					log.info( `Committing "${ utils.changelogFile }" and "package.json"...` );
+
+					tools.shExec( `git add ./package.json ./${ utils.changelogFile }`, shExecParams );
+					tools.shExec( `git commit --message="Release: ${ version }."`, shExecParams );
+
+					log.info( 'Creating tag...' );
+
+					tools.shExec( `git tag ${ version }`, shExecParams );
+					tools.shExec( `git push`, shExecParams );
+					tools.shExec( `git push --tags`, shExecParams );
+
+					log.info( 'Creating GitHub release...' );
+
+					const repositoryInfo = gitHubUrl(
+						typeof packageJSON.repository === 'object' ? packageJSON.repository.url : packageJSON.repository
+					);
+
+					return utils.createGithubRelease( options.token, {
+						repositoryOwner: repositoryInfo.owner,
+						repositoryName: repositoryInfo.name,
+						version: version,
+						description: latestChanges,
+						debug: options.debug
+					} );
+				} )
+				.then( () => {
+					log.info( `Release "${ version }" has been created and published.` );
+				} );
 		}
 	};
 
