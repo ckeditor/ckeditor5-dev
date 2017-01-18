@@ -45,7 +45,7 @@ if ( deps.length ) {
 			packageName = item.split( '/' )[ 1 ];
 		}
 
-		json.dependencies[ packageName ] = ( item.startsWith( '@' ) ) ? item.slice( 1 ) : item;
+		json.dependencies[ packageName ] = ( ( item.startsWith( '@' ) ) ? item.slice( 1 ) : item ) + `#ckeditor5/t/389`;
 	} );
 
 	json.dependencies = sortObject( json.dependencies );
