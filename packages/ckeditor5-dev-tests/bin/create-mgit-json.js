@@ -31,21 +31,15 @@ if ( packageJson.devDependencies ) {
 
 if ( deps.length ) {
 	deps.forEach( ( item ) => {
-		if ( item.indexOf( 'ckeditor5' ) === -1 ) {
+		if ( !item.startsWith( '@ckeditor/ckeditor5' ) ) {
 			return;
 		}
 
-		if ( item.indexOf( 'ckeditor5-dev' ) != -1 ) {
+		if ( item.includes( '/ckeditor5-dev' ) ) {
 			return;
 		}
 
-		let packageName = item;
-
-		if ( item.indexOf( '/' ) !== 1 ) {
-			packageName = item.split( '/' )[ 1 ];
-		}
-
-		json.dependencies[ packageName ] = ( ( item.startsWith( '@' ) ) ? item.slice( 1 ) : item ) + `#ckeditor5/t/389`;
+		json.dependencies[ item.replace( /@ckeditor\//, '' ) ] = item.slice( 1 ) + `#ckeditor5/t/389`;
 	} );
 
 	json.dependencies = sortObject( json.dependencies );

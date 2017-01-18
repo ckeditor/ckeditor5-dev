@@ -19,10 +19,14 @@ const parseRepositoryUrl = require( 'mgit2/lib/utils/parserepositoryurl' );
  */
 module.exports = function repositoryResolver( name, cwd ) {
 	const mgitConf = require( path.join( cwd, 'mgit.json' ) );
-	const repositoryUrl = mgitConf.dependencies[ name ];
+	let repositoryUrl = mgitConf.dependencies[ name ];
 
 	if ( !repositoryUrl ) {
-		return null;
+		if ( name.match( /^@ckeditor\/ckeditor5-(?!dev)/ ) ) {
+			repositoryUrl = name.slice( 1 );
+		} else {
+			return null;
+		}
 	}
 
 	return parseRepositoryUrl( repositoryUrl, {

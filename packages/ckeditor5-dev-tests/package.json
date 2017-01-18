@@ -28,7 +28,7 @@
     "karma-sinon": "^1.0.5",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^2.0.1",
-    "mgit2": "^0.2.1",
+    "mgit2": "^0.3.0",
     "minimist": "^1.2.0",
     "mocha": "^3.1.2",
     "mockery": "^2.0.0",
