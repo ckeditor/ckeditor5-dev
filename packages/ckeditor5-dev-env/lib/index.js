@@ -112,11 +112,17 @@ module.exports = ( config ) => {
 		},
 
 		uploadTranslations() {
-			//
+			const uploadTranslations = require( './tasks/translations/upload' );
+			const loginOptions = require( './tasks/translations/getloginoptions' )( process.argv.slice( 2 ) );
+
+			return uploadTranslations( loginOptions );
 		},
 
 		downloadTranslations() {
-			//
+			const downloadTranslations = require( './tasks/translations/download' );
+			const loginOptions = require( './tasks/translations/getloginoptions' )( process.argv.slice( 2 ) );
+
+			return downloadTranslations( loginOptions );
 		}
 	};
 

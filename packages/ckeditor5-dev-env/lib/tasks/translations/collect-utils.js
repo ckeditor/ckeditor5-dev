@@ -169,20 +169,32 @@ const utils = {
 
 	jsonToPotFile( messages ) {
 		return messages.map( ( msg ) => {
+			// Note that order is important.
 			return [
+				`msgctxt "${msg.ctxt}"`,
 				`msgid "${msg.id}"`,
-				`msgstr "${msg.str}"`,
-				`msgctxt "${msg.ctxt}"`
+				`msgstr "${msg.str}"`
 			].map( x => x + '\n' ).join( '' );
 		} ).join( '\n' );
 	},
 
 	savePotFile( fileContent ) {
-		const outputFile = path.join( process.cwd(), 'build', '.transifex', 'ckeditor5.pot' );
+		const outputFilePath = path.join( process.cwd(), 'build', '.transifex', 'en.pot' );
 
-		fs.outputFileSync( outputFile, fileContent );
+		fs.outputFileSync( outputFilePath, fileContent );
 
-		logger.info( `Created file: ${ outputFile }` );
+		logger.info( `Created file: ${ outputFilePath }` );
+	},
+
+	createPotFileHeader() {
+		return [
+			'# Copyright (c) Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.',
+			// '# This file is distributed under the same license as the PACKAGE package.',
+			// '"Last-Translator: FULL NAME <EMAIL@ADDRESS>"\\n',
+			// '"MIME-Version: 1.0"\\n',
+			// '"Content-Type: text/plain; charset=UTF-8"\\n',
+			// '"Content-Transfer-Encoding: 8bit"\\n',
+		].join( '\n' ) + '\n\n';
 	},
 
 	getUniqueTranslations( translations ) {
