@@ -39,7 +39,7 @@ if ( deps.length ) {
 			return;
 		}
 
-		json.dependencies[ item.replace( /@ckeditor\//, '' ) ] = item.slice( 1 ) + `#ckeditor5/t/389`;
+		json.dependencies[ item.replace( /@ckeditor\//, '' ) ] = item.slice( 1 );
 	} );
 
 	fs.writeFileSync( mgitJson, JSON.stringify( json, null, 2 ) + '\n', 'utf-8' );
