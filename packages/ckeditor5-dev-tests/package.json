@@ -28,6 +28,7 @@
     "karma-sinon": "^1.0.5",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^2.0.1",
+    "mgit2": "^0.3.0",
     "minimist": "^1.2.0",
     "mocha": "^3.1.2",
     "mockery": "^2.0.0",
@@ -45,7 +46,10 @@
   },
   "bin": {
     "ckeditor5-dev-tests": "./bin/test.js",
-    "ckeditor5-dev-tests-travis": "./bin/test-travis.sh"
+    "ckeditor5-dev-tests-travis": "./bin/test-travis.sh",
+    "ckeditor5-dev-tests-create-mgit-json": "./bin/create-mgit-json.js",
+    "ckeditor5-dev-tests-create-lerna-json": "./bin/create-lerna-json.js",
+    "ckeditor5-dev-tests-install-dependencies": "./bin/install-dependencies.sh"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",
