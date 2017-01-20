@@ -11,6 +11,22 @@ const projectSlug = 'test-779';
 const API_BASE = `http://www.transifex.com/api/2/project/${ projectSlug }`;
 
 module.exports = {
+	getResource( { username, password, slug } ) {
+		return new Promise( ( resolve, reject ) => {
+			request.get( `${ API_BASE }/resource/${ slug }/`, {
+				auth: { username, password },
+			}, ( error, response, body ) => {
+				if ( error ) {
+					reject( error );
+				} else if ( response.statusCode !== 200 ) {
+					reject( `Status code: ${ response.statusCode }` );
+				} else {
+					resolve( body );
+				}
+			} );
+		} );
+	},
+
 	postResource( { username, password, name, slug, content } ) {
 		return new Promise( ( resolve, reject ) => {
 			request.post( `${ API_BASE }/resources/`, {
@@ -28,7 +44,7 @@ module.exports = {
 
 	putResourceContent( { username, password, name, slug, content } ) {
 		return new Promise( ( resolve, reject ) => {
-			request.post( `${ API_BASE }/resource/${ slug }/content/`, {
+			request.put( `${ API_BASE }/resource/${ slug }/content/`, {
 				auth: { username, password },
 				formData: { content, 'i18n_type': 'PO' }
 			}, ( error, response, body ) => {
