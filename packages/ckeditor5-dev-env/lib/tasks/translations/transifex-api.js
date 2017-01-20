@@ -57,9 +57,9 @@ module.exports = {
 		} );
 	},
 
-	getTranslation( { username, password, name, lang } ) {
+	getTranslation( { username, password, slug, lang } ) {
 		return new Promise( ( resolve, reject ) => {
-			request.get( `${ API_BASE }/resource/${ name }/translation/${ lang }/`, {
+			request.get( `${ API_BASE }/resource/${ slug }/translation/${ lang }/`, {
 				auth: { username, password }
 			}, ( error, response, body ) => {
 				if ( error ) {
