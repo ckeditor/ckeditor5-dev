@@ -47,7 +47,7 @@ describe( 'collect-utils', () => {
 			const translations = utils.collectTranslations();
 
 			sinon.assert.calledWithExactly( globSyncStub,
-				path.join( 'workspace', 'ckeditor5', 'node_modules' ,'ckeditor5-!(dev)*', 'src', '**', '*.js' )
+				path.join( 'workspace', 'ckeditor5', 'node_modules', '@ckeditor', 'ckeditor5-!(dev)*', 'src', '**', '*.js' )
 			);
 			sinon.assert.calledTwice( readFileStub );
 			sinon.assert.calledWithExactly( readFileStub, path.sep + path.join( 'ckeditor5-core', 'file1.js' ), 'utf-8' );
@@ -71,8 +71,8 @@ describe( 'collect-utils', () => {
 
 	describe( 'getContexts()', () => {
 		it( 'should collect contexts.json files across ckeditor5/node_modules/ckeditor5-* packages', () => {
-			const path1 = path.join( 'workspace', 'ckeditor5', 'node_modules', 'ckeditor5-core', 'lang', 'contexts.json' );
-			const path2 = path.join( 'workspace', 'ckeditor5', 'node_modules', 'ckeditor5-utils', 'lang', 'contexts.json' );
+			const path1 = path.join( 'workspace', 'ckeditor5', 'node_modules', '@ckeditor', 'ckeditor5-core', 'lang', 'contexts.json' );
+			const path2 = path.join( 'workspace', 'ckeditor5', 'node_modules', '@ckeditor', 'ckeditor5-utils', 'lang', 'contexts.json' );
 
 			const fileContents = {
 				[ path1 ]: '{ "italic style": "Italic style" }',
@@ -85,7 +85,7 @@ describe( 'collect-utils', () => {
 
 			const contexts = utils.getContexts();
 
-			sinon.assert.calledWithExactly( readDirStub, path.join( 'workspace', 'ckeditor5', 'node_modules' ) );
+			sinon.assert.calledWithExactly( readDirStub, path.join( 'workspace', 'ckeditor5', 'node_modules', '@ckeditor' ) );
 
 			expect( contexts.constructor.name ).to.equal( 'Map' );
 			expect( [ ...contexts ] ).to.deep.equal( [
@@ -196,23 +196,13 @@ describe( 'collect-utils', () => {
 
 	describe( 'createPotFileContent()', () => {
 		it( 'shoud translate json object to po-style text', () => {
-			const contexts = new Map( [
-				[ 'ckeditor5-utils', { content: { util: 'Util' } } ],
-				[ 'ckeditor5-core', { content: {} } ]
-			] );
-
-			const translations = [ {
-				package: 'ckeditor5-utils',
-				key: 'util',
-				sentence: 'util'
-			} ];
-
-			const poContent = utils.createPotFileContent( contexts, translations );
+			const context = { content: { util: 'Util' } };
+			const poContent = utils.createPotFileContent( context );
 
 			expect( poContent ).to.be.equal(
-`msgid "util"
+`msgctxt "Util"
+msgid "util"
 msgstr "util"
-msgctxt "Util"
 `
 			);
 		} );
@@ -221,11 +211,11 @@ msgctxt "Util"
 	describe( 'savePotFile()', () => {
 		it( 'should write pot file', () => {
 			const outputFileStub = sandbox.stub( fs, 'outputFileSync', () => {} );
-			utils.savePotFile( 'fileContent' );
+			utils.savePotFile( 'packageName', 'fileContent' );
 
 			sinon.assert.alwaysCalledWith(
 				outputFileStub,
-				path.join( 'workspace', 'ckeditor5', 'build', '.transifex', 'ckeditor5.pot' ),
+				path.join( 'workspace', 'ckeditor5', 'build', '.transifex', 'packageName', 'en.pot' ),
 				'fileContent'
 			);
 		} );

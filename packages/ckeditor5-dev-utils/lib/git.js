@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2016, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -21,7 +21,7 @@ module.exports = {
 	 * @returns {String} urlInfo.branch
 	 */
 	parseRepositoryUrl( url ) {
-		const regexp = /^((?:git@|(?:http[s]?|git):\/\/)github\.com(?:\/|:))?(([\w-]+)\/([\w-]+(?:\.git)?))(?:#([\w-\/]+))?$/;
+		const regexp = /^((?:git@|(?:http[s]?|git):\/\/)github\.com(?:\/|:))?(([\w-]+)\/([\w-]+(?:\.git)?))(?:#([\w-\/\.]+))?$/;
 		const match = url.match( regexp );
 		let server;
 		let repository;

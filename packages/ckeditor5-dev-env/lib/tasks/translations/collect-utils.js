@@ -146,25 +146,14 @@ const utils = {
 		return errors;
 	},
 
-	createPotFileContent( contexts, translations ) {
-		const messages = translations.map( ( translation ) => {
-			const ctxtMessage = utils.getContextMessage( contexts, translation );
-
-			return {
-				id: translation.sentence,
-				str: translation.sentence,
-				ctxt: ctxtMessage
-			};
-		} );
+	createPotFileContent( context ) {
+		const messages = Object.keys( context.content ).map( str => ( {
+			id: str,
+			str: str,
+			ctxt: context.content[ str ]
+		} ) );
 
 		return utils.jsonToPotFile( messages );
-	},
-
-	getContextMessage( contexts, translation ) {
-		const packageContext = contexts.get( translation.package );
-		const corePackageContext = contexts.get( corePackageName );
-
-		return corePackageContext.content[ translation.key ] || packageContext.content[ translation.key ];
 	},
 
 	jsonToPotFile( messages ) {
@@ -178,8 +167,8 @@ const utils = {
 		} ).join( '\n' );
 	},
 
-	savePotFile( fileContent ) {
-		const outputFilePath = path.join( process.cwd(), 'build', '.transifex', 'en.pot' );
+	savePotFile( packageName, fileContent ) {
+		const outputFilePath = path.join( process.cwd(), 'build', '.transifex', packageName, 'en.pot' );
 
 		fs.outputFileSync( outputFilePath, fileContent );
 
@@ -195,20 +184,6 @@ const utils = {
 			// '"Content-Type: text/plain; charset=UTF-8"\\n',
 			// '"Content-Transfer-Encoding: 8bit"\\n',
 		].join( '\n' ) + '\n\n';
-	},
-
-	getUniqueTranslations( translations ) {
-		const uniqueTranslations = [];
-		const uniqueTranslationKeys = [];
-
-		for ( const translation of translations ) {
-			if ( !uniqueTranslationKeys.includes( translation.key ) ) {
-				uniqueTranslations.push( translation );
-				uniqueTranslationKeys.push( translation.key );
-			}
-		}
-
-		return uniqueTranslations;
 	},
 };
 

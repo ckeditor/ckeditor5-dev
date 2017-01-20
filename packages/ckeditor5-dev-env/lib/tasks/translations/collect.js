@@ -25,10 +25,9 @@ module.exports = function collect() {
 		return;
 	}
 
-	const uniqueTranlations = utils.getUniqueTranslations( translations );
-
-	const potFileContent = utils.createPotFileContent( contexts, uniqueTranlations );
-	const potFileHeader = utils.createPotFileHeader();
-
-	utils.savePotFile( potFileHeader + potFileContent );
+	for ( const [ packageName, context ] of contexts ) {
+		const potFileHeader = utils.createPotFileHeader();
+		const potFileContent = utils.createPotFileContent( context );
+		utils.savePotFile( packageName, potFileHeader + potFileContent );
+	}
 };

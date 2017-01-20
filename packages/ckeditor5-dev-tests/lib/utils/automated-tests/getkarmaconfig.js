@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2016, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -7,7 +7,7 @@
 'use strict';
 
 const path = require( 'path' );
-const getWebpackConfigForAutomatedTests = require( './getwebpackconfigforautomatedtests' );
+const getWebpackConfigForAutomatedTests = require( './getwebpackconfig' );
 
 const reporters = [
 	'mocha',
@@ -15,7 +15,7 @@ const reporters = [
 ];
 
 const coverageDir = path.join( process.cwd(), 'coverage' );
-const nodeModulesPath = path.join( process.cwd(), 'node_modules' );
+const nodeModulesPath = path.join( process.cwd(), 'packages' );
 
 /**
  * @param {Object} options
@@ -176,7 +176,7 @@ function fileOptionToGlob( file ) {
 	if ( chunks.length === 0 ) {
 		// 1.
 		if ( packageName == '*' ) {
-			return path.join( nodeModulesPath, 'ckeditor5-!(dev)*', globSuffix );
+			return path.join( nodeModulesPath, 'ckeditor5-*', globSuffix );
 		}
 
 		// 3.
@@ -188,7 +188,7 @@ function fileOptionToGlob( file ) {
 		return path.join( nodeModulesPath, 'ckeditor5-' + packageName, globSuffix );
 	}
 
-	let glob = chunks.join( '/' );
+	let glob = chunks.join( path.sep );
 
 	// 4.
 	if ( !glob.endsWith( '.js' ) ) {

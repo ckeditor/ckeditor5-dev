@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2016, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -123,6 +123,16 @@ describe( 'utils', () => {
 
 				urlInfo = git.parseRepositoryUrl( 'https://github.com/info.html' );
 				expect( urlInfo ).to.equal( null );
+			} );
+
+			it( 'should parse short GitHub URL with provided tag', () => {
+				const urlInfo = git.parseRepositoryUrl( 'ckeditor/ckeditor5-core#v1.0.0' );
+
+				expect( urlInfo.server ).to.equal( 'git@github.com:' );
+				expect( urlInfo.repository ).to.equal( 'ckeditor/ckeditor5-core' );
+				expect( urlInfo.user ).to.equal( 'ckeditor' );
+				expect( urlInfo.name ).to.equal( 'ckeditor5-core' );
+				expect( urlInfo.branch ).to.equal( 'v1.0.0' );
 			} );
 		} );
 

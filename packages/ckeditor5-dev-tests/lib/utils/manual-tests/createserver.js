@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2016, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -10,7 +10,7 @@ const path = require( 'path' );
 const fs = require( 'fs' );
 const combine = require( 'dom-combiner' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const globSync = require( './glob' );
+const globSync = require( '../glob' );
 
 // TODO this bit repeats in 3 files.
 const escapedPathSep = path.sep == '/' ? '/' : '\\\\';

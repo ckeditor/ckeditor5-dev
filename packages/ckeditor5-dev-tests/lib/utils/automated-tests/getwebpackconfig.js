@@ -1,12 +1,11 @@
 /**
- * @license Copyright (c) 2003-2016, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
 'use strict';
 
 const path = require( 'path' );
-const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
 const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
 
 /**
@@ -15,15 +14,6 @@ const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
  */
 module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	const config = {
-		plugins: [
-			new CKEditorWebpackPlugin( {
-				packages: [
-					process.cwd(),
-					path.join( process.cwd(), 'node_modules' ),
-				]
-			} )
-		],
-
 		module: {
 			rules: [
 				{
@@ -42,7 +32,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 		resolveLoader: {
 			modules: [
 				'node_modules',
-				path.resolve( __dirname, '..', '..', 'node_modules' )
+				path.resolve( __dirname, '..', '..', '..', 'node_modules' )
 			]
 		}
 	};
@@ -69,9 +59,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 			{
 				test: /\.js$/,
 				loader: 'istanbul-instrumenter-loader',
-				include: [
-					...getPathsToIncludeForCoverage( options.files )
-				],
+				include: getPathsToIncludeForCoverage( options.files ),
 				exclude: [
 					new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
 				],
