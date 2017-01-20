@@ -10,13 +10,13 @@ const fs = require( 'fs-extra' );
 const path = require( 'path' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 
-const nodeModulesDir = path.join( process.cwd(), 'node_modules' );
+const ckeditor5ModulesDir = path.join( process.cwd(), 'node_modules', '@ckeditor' );
 const langContextSuffix = path.join( 'lang', 'contexts.json' );
 const corePackageName = 'ckeditor5-core';
 
 const utils = {
 	collectTranslations() {
-		const srcPaths = [ process.cwd(), 'node_modules', 'ckeditor5-!(dev)*', 'src', '**', '*.js' ].join( '/' );
+		const srcPaths = [ process.cwd(), 'node_modules', '@ckeditor', 'ckeditor5-!(dev)*', 'src', '**', '*.js' ].join( '/' );
 		const files = glob.sync( srcPaths  );
 		const translations = [];
 
@@ -59,10 +59,10 @@ const utils = {
 	},
 
 	getContexts() {
-		return fs.readdirSync( nodeModulesDir )
+		return fs.readdirSync( ckeditor5ModulesDir )
 			.filter( fileOrDirectory => /ckeditor5-[^/\//]+$/.test( fileOrDirectory ) )
 			.reduce( ( map, packageName ) => {
-				const pathToContext = path.join( nodeModulesDir, packageName, langContextSuffix );
+				const pathToContext = path.join( ckeditor5ModulesDir, packageName, langContextSuffix );
 
 				if ( fs.existsSync( pathToContext ) ) {
 					map.set( packageName, {

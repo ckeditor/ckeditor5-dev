@@ -9,7 +9,7 @@
  * Exports function returning development tasks.
  *
  * @param {Object} config Configuration object.
- * @param {String} config.WORKSPACE_DIR Relative path to workspace where packages in development mode will be stored.
+ * @param {String} config.workspaceDir Relative path to workspace where packages in development mode will be stored.
  * @returns {Object}
  */
 module.exports = ( config ) => {
