@@ -22,7 +22,7 @@ describe( 'collect-utils', () => {
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
 		sandbox.stub( process, 'cwd', () => path.join( 'workspace', 'ckeditor5' ) );
-		utils = require( '../lib/tasks/translations/collect-utils' );
+		utils = require( '../../lib/tasks/translations/collect-utils' );
 	} );
 
 	afterEach( () => {
@@ -47,7 +47,7 @@ describe( 'collect-utils', () => {
 			const translations = utils.collectTranslations();
 
 			sinon.assert.calledWithExactly( globSyncStub,
-				path.join( 'workspace', 'ckeditor5', 'node_modules', '@ckeditor', 'ckeditor5-!(dev)*', 'src', '**', '*.js' )
+				path.join( 'workspace', 'ckeditor5', 'packages', '*', 'src', '**', '*.js' )
 			);
 			sinon.assert.calledTwice( readFileStub );
 			sinon.assert.calledWithExactly( readFileStub, path.sep + path.join( 'ckeditor5-core', 'file1.js' ), 'utf-8' );
@@ -70,9 +70,9 @@ describe( 'collect-utils', () => {
 	} );
 
 	describe( 'getContexts()', () => {
-		it( 'should collect contexts.json files across ckeditor5/node_modules/ckeditor5-* packages', () => {
-			const path1 = path.join( 'workspace', 'ckeditor5', 'node_modules', '@ckeditor', 'ckeditor5-core', 'lang', 'contexts.json' );
-			const path2 = path.join( 'workspace', 'ckeditor5', 'node_modules', '@ckeditor', 'ckeditor5-utils', 'lang', 'contexts.json' );
+		it( 'should collect contexts.json files across ckeditor5/packages/ckeditor5-* packages', () => {
+			const path1 = path.join( 'workspace', 'ckeditor5', 'packages', 'ckeditor5-core', 'lang', 'contexts.json' );
+			const path2 = path.join( 'workspace', 'ckeditor5', 'packages', 'ckeditor5-utils', 'lang', 'contexts.json' );
 
 			const fileContents = {
 				[ path1 ]: '{ "italic style": "Italic style" }',
@@ -85,7 +85,7 @@ describe( 'collect-utils', () => {
 
 			const contexts = utils.getContexts();
 
-			sinon.assert.calledWithExactly( readDirStub, path.join( 'workspace', 'ckeditor5', 'node_modules', '@ckeditor' ) );
+			sinon.assert.calledWithExactly( readDirStub, path.join( 'workspace', 'ckeditor5', 'packages' ) );
 
 			expect( contexts.constructor.name ).to.equal( 'Map' );
 			expect( [ ...contexts ] ).to.deep.equal( [
