@@ -13,33 +13,33 @@ const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 /**
  * Adds translations to the Transifex.
  *
- * @param {Object} config
- * @param {String} config.username Username for the Transifex account.
- * @param {String} config.password Password for the Transifex account.
+ * @param {Object} loginConfig
+ * @param {String} loginConfig.username Username for the Transifex account.
+ * @param {String} loginConfig.password Password for the Transifex account.
  */
-module.exports = function upload( config ) {
+module.exports = function upload( loginConfig ) {
 	const pathToPoTranslations = path.join( process.cwd(), 'build', '.transifex' );
 	const potFiles = fs.readdirSync( pathToPoTranslations ).map( ( packageName ) => ( {
 		packageName,
 		path: path.join( pathToPoTranslations, packageName, 'en.pot' )
 	} ) );
 
-	const firstTimeUploadPromises = potFiles.map( ( potFile ) => transifexAPI.getResource( {
-		slug: potFile.packageName,
-		username: config.username,
-		password: config.password
-	} ).then( () => false, () => true ) );
+	const resourceExistPromises = potFiles.map( ( potFile ) => {
+		return transifexAPI.hasResource( Object.assign( {}, loginConfig, {
+			slug: potFile.packageName,
+		} ) );
+	} );
 
-	return Promise.all( firstTimeUploadPromises ).then( ( firstTimeUploads ) => {
-		return Promise.all( firstTimeUploads.map( ( firstTimeUpload, index ) => {
-			return createOrUpdateResource( config, potFiles[ index ], firstTimeUpload );
+	return Promise.all( resourceExistPromises ).then( ( resourcesExist ) => {
+		return Promise.all( resourcesExist.map( ( resourceExists, index ) => {
+			return createOrUpdateResource( loginConfig, potFiles[ index ], resourceExists );
 		} ) );
 	} )
-	.then( () => logger.info( '\n\nSUCCESS\n' ) )
+	.then( () => logger.info( 'All resources uploaded.\n' ) )
 	.catch( ( err ) => logger.error( err ) );
 };
 
-function createOrUpdateResource( config, potFile, firstTimeUpload ) {
+function createOrUpdateResource( config, potFile, resourceExists ) {
 	const { packageName, path } = potFile;
 	const resConfig = Object.assign( {}, config, {
 		name: packageName,
@@ -47,13 +47,13 @@ function createOrUpdateResource( config, potFile, firstTimeUpload ) {
 		content: fs.createReadStream( path )
 	} );
 
-	if ( firstTimeUpload ) {
-		return transifexAPI.postResource( resConfig )
-			.then( ( dataOrMessage ) => tryParsePostResponse( packageName, dataOrMessage ) );
+	if ( resourceExists ) {
+		return transifexAPI.putResourceContent( resConfig )
+			.then( ( dataOrMessage ) => tryParsePutResponse( packageName, dataOrMessage ) );
 	}
 
-	return transifexAPI.putResourceContent( resConfig )
-			.then( ( dataOrMessage ) => tryParsePutResponse( packageName, dataOrMessage ) );
+	return transifexAPI.postResource( resConfig )
+		.then( ( dataOrMessage ) => tryParsePostResponse( packageName, dataOrMessage ) );
 }
 
 function tryParsePutResponse( packageName, dataOrMessage ) {

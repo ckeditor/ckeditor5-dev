@@ -16,17 +16,17 @@ const API_BASE = `http://www.transifex.com/api/2/project/${ projectSlug }`;
  * @see https://docs.transifex.com/api/ for API documentation.
  */
 module.exports = {
-	getResource( { username, password, slug } ) {
-		return new Promise( ( resolve, reject ) => {
+	hasResource( { username, password, slug } ) {
+		return new Promise( ( resolve ) => {
 			request.get( `${ API_BASE }/resource/${ slug }/`, {
 				auth: { username, password },
-			}, ( error, response, body ) => {
+			}, ( error, response ) => {
 				if ( error ) {
-					reject( error );
+					resolve( false );
 				} else if ( response.statusCode !== 200 ) {
-					reject( `Status code: ${ response.statusCode }` );
+					resolve( false );
 				} else {
-					resolve( body );
+					resolve( true );
 				}
 			} );
 		} );

@@ -15,17 +15,17 @@ const path = require( 'path' );
 /**
  * Downloads translations from the Transifex for each package and language.
  *
- * @param {Object} config
- * @param {String} config.username Username for the Transifex account.
- * @param {String} config.password Password for the Transifex account.
+ * @param {Object} loginConfig
+ * @param {String} loginConfig.username Username for the Transifex account.
+ * @param {String} loginConfig.password Password for the Transifex account.
  */
-module.exports = function download( config ) {
+module.exports = function download( loginConfig ) {
 	const languages = [ 'en', 'pl' ];
 
 	const packageNames = [ ...collectUtils.getContexts().keys() ];
 
 	const downlaodAndSaveTranslations = packageNames.map( ( packageName ) => {
-		const translationPromises = downloadAndParsePoFilesForPackage( config, languages, packageName );
+		const translationPromises = downloadAndParsePoFilesForPackage( loginConfig, languages, packageName );
 
 		return translationPromises.then( translations => {
 			saveTranslations( packageName, translations );
@@ -41,9 +41,9 @@ module.exports = function download( config ) {
 		} );
 };
 
-function downloadAndParsePoFilesForPackage( config, languages, packageName ) {
-	const translationsForPackagePromise = languages.map( lang => {
-		const transifexDownloadConfig = Object.assign( {}, config, {
+function downloadAndParsePoFilesForPackage( loginConfig, languages, packageName ) {
+	const translationsForPackagePromises = languages.map( lang => {
+		const transifexDownloadConfig = Object.assign( {}, loginConfig, {
 			lang,
 			slug: packageName
 		} );
@@ -51,7 +51,7 @@ function downloadAndParsePoFilesForPackage( config, languages, packageName ) {
 		return downloadAndParsePoFile( transifexDownloadConfig );
 	} );
 
-	return Promise.all( translationsForPackagePromise ).then( ( translationsForPackage ) => {
+	return Promise.all( translationsForPackagePromises ).then( ( translationsForPackage ) => {
 		const translationMapEntries = translationsForPackage.map( ( translations, index ) => [ languages[ index ], translations ] );
 
 		return new Map( translationMapEntries );
