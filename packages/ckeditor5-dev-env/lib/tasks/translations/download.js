@@ -20,36 +20,42 @@ const path = require( 'path' );
  * @param {String} config.password Password for the Transifex account.
  */
 module.exports = function download( config ) {
-	const languages = [ 'en' ];
+	const languages = [ 'en', 'pl' ];
 
 	const packageNames = [ ...collectUtils.getContexts().keys() ];
 
-	const packagePoFilePromises = packageNames.map( ( packageName ) => {
-		return downloadAndSavePoFilesForPackage( config, languages, packageName );
+	const downlaodAndSaveTranslations = packageNames.map( ( packageName ) => {
+		const translationPromises = downloadAndParsePoFilesForPackage( config, languages, packageName );
+
+		return translationPromises.then( translations => {
+			saveTranslations( packageName, translations );
+		} );
 	} );
 
-	return Promise.all( packagePoFilePromises )
-		.then( () => logger.info( '\nSUCCESS\n' ) )
-		.catch( ( err ) => logger.error( err ) );
+	return Promise.all( downlaodAndSaveTranslations )
+		.then( () => {
+			logger.info( 'Saved all translations.' );
+		} )
+		.catch( ( err ) => {
+			logger.error( err );
+		} );
 };
 
-function downloadAndSavePoFilesForPackage( config, languages, packageName ) {
-	const poFileForPackagePromise = languages.map( lang => {
+function downloadAndParsePoFilesForPackage( config, languages, packageName ) {
+	const translationsForPackagePromise = languages.map( lang => {
 		const transifexDownloadConfig = Object.assign( {}, config, {
 			lang,
 			slug: packageName
 		} );
 
-		const parsedPoFilePromise = downloadAndParsePoFile( transifexDownloadConfig );
-		const pathToSave = path.join( process.cwd(), 'packages', packageName, 'lang', 'translations', lang + '.json' );
-
-		return parsedPoFilePromise.then( ( parsedPoFiles ) => {
-			fs.outputFileSync( pathToSave, JSON.stringify( parsedPoFiles, null, 4 ) );
-			logger.info( `Saved ${ lang }.json at ${ path.dirname( pathToSave ) }` );
-		} );
+		return downloadAndParsePoFile( transifexDownloadConfig );
 	} );
 
-	return Promise.all( poFileForPackagePromise );
+	return Promise.all( translationsForPackagePromise ).then( ( translationsForPackage ) => {
+		const translationMapEntries = translationsForPackage.map( ( translations, index ) => [ languages[ index ], translations ] );
+
+		return new Map( translationMapEntries );
+	} );
 }
 
 function downloadAndParsePoFile( transifexDownloadConfig ) {
@@ -67,16 +73,28 @@ function downloadAndParsePoFile( transifexDownloadConfig ) {
 // @returns {Promise<String>}
 function downloadPoFile( config ) {
 	return transifexAPI.getTranslation( config ).then( ( data ) => {
-		const { content } = JSON.parse( data );
-		logger.info( `Downloaded ${ config.lang } language for ${ config.slug }` );
-
-		return content;
+		return JSON.parse( data ).content;
 	} );
 }
 
+// Fixes weird gettextParser output.
 function getCorrectTranslationFormat( translations ) {
-	return Object.keys( translations )
+	const result = {};
+
+	Object.keys( translations )
 		.filter( key => !!key )
 		.map( ( key ) => translations[key] )
-		.map( ( obj ) => obj[ Object.keys( obj )[0] ] );
+		.map( ( obj ) => obj[ Object.keys( obj )[0] ] )
+		.forEach( ( obj ) => result[ obj.msgid ] = obj.msgstr[0] );
+
+	return result;
+}
+
+function saveTranslations( packageName, translations ) {
+	for ( const [ lang, translationDictionary ] of translations ) {
+		const pathToSave = path.join( process.cwd(), 'packages', packageName, 'lang', 'translations', lang + '.json' );
+
+		fs.outputFileSync( pathToSave, JSON.stringify( translationDictionary, null, 4 ) );
+		logger.info( `Saved ${ lang }.json for ${ packageName }` );
+	}
 }

@@ -25,10 +25,10 @@ module.exports = function upload( config ) {
 	} ) );
 
 	const firstTimeUploadPromises = potFiles.map( ( potFile ) => transifexAPI.getResource( {
-		slug: potFile.path,
+		slug: potFile.packageName,
 		username: config.username,
 		password: config.password
-	} ).then( () => true, () => false ) );
+	} ).then( () => false, () => true ) );
 
 	return Promise.all( firstTimeUploadPromises ).then( ( firstTimeUploads ) => {
 		return Promise.all( firstTimeUploads.map( ( firstTimeUpload, index ) => {
@@ -42,6 +42,7 @@ module.exports = function upload( config ) {
 function createOrUpdateResource( config, potFile, firstTimeUpload ) {
 	const { packageName, path } = potFile;
 	const resConfig = Object.assign( {}, config, {
+		name: packageName,
 		slug: packageName,
 		content: fs.createReadStream( path )
 	} );
