@@ -9,32 +9,26 @@ const transifexAPI = require( './transifex-api' );
 const collectUtils = require( './collect-utils' );
 const gettextParser = require( 'gettext-parser' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
-const fs = require( 'fs' );
+const fs = require( 'fs-extra' );
+const path = require( 'path' );
 
 /**
- * Adds translations to the transifex.
- * Slug must be unique.
+ * Downloads translations from the transifex for each package and language.
  *
  *		Gulp usage:
- 		gulp translations:download -u someUsername -p somePassword -n someName
- *
- * @see https://docs.transifex.com/api/translations for API documentation.
+ *		gulp translations:download -u someUsername -p somePassword
  *
  * @param {Object} config
  * @param {String} config.username
  * @param {String} config.password
- * @param {String} config.name
  */
 module.exports = function download( config ) {
 	const languages = [ 'en' ];
 
-	const packageContexts = collectUtils.getContexts();
+	const packageNames = [ ...collectUtils.getContexts().keys() ];
 
-	const packagePoFilePromises = packageContexts.map( ( [ packageName ] ) => {
-		return downloadPoFilesForPackage( config, languages, packageName )
-			.then( ( translations ) => {
-				return createTranslationFiles( translations, packageContexts );
-			} );
+	const packagePoFilePromises = packageNames.map( ( packageName ) => {
+		return downloadAndSavePoFilesForPackage( config, languages, packageName );
 	} );
 
 	return Promise.all( packagePoFilePromises )
@@ -42,7 +36,7 @@ module.exports = function download( config ) {
 		.catch( ( err ) => logger.error( err ) );
 };
 
-function downloadPoFilesForPackage( config, languages, packageName ) {
+function downloadAndSavePoFilesForPackage( config, languages, packageName ) {
 	const poFileForPackagePromise = languages.map( lang => {
 		const transifexDownloadConfig = Object.assign( {}, config, {
 			lang,
@@ -50,10 +44,11 @@ function downloadPoFilesForPackage( config, languages, packageName ) {
 		} );
 
 		const parsedPoFilePromise = downloadAndParsePoFile( transifexDownloadConfig );
+		const pathToSave = path.join( process.cwd(), 'packages', packageName, 'lang', 'translations', lang + '.json' );
 
 		return parsedPoFilePromise.then( ( parsedPoFiles ) => {
-			// TODO
-			fs.writeFileSync( parsedPoFiles );
+			fs.outputFileSync( pathToSave, JSON.stringify( parsedPoFiles, null, 4 ) );
+			logger.info( `Saved ${ lang }.json at ${ path.dirname( pathToSave ) }` );
 		} );
 	} );
 
@@ -63,25 +58,28 @@ function downloadPoFilesForPackage( config, languages, packageName ) {
 function downloadAndParsePoFile( transifexDownloadConfig ) {
 	return downloadPoFile( transifexDownloadConfig )
 		.then( ( poFileContent ) => gettextParser.po.parse( poFileContent ) )
+		.then( ( json ) => getCorrectTranslationFormat( json.translations ) )
 		.catch( ( err ) => logger.error( err ) );
 }
 
 // @param {Object} config
 // @param {String} config.username
 // @param {String} config.password
-// @param {String} config.packageName
+// @param {String} config.slug
 // @param {String} config.lang
 // @returns {Promise<String>}
 function downloadPoFile( config ) {
 	return transifexAPI.getTranslation( config ).then( ( data ) => {
 		const { content } = JSON.parse( data );
-		logger.info( 'SUCCESS' );
+		logger.info( `Downloaded ${ config.lang } language for ${ config.slug }` );
 
 		return content;
 	} );
 }
 
-function createTranslationFiles() {
-	//
+function getCorrectTranslationFormat( translations ) {
+	return Object.keys( translations )
+		.filter( key => !!key )
+		.map( ( key ) => translations[key] )
+		.map( ( obj ) => obj[ Object.keys( obj )[0] ] );
 }
-

@@ -10,6 +10,11 @@ const request = require( 'request' );
 const projectSlug = 'test-779';
 const API_BASE = `http://www.transifex.com/api/2/project/${ projectSlug }`;
 
+/**
+ * Wrappers of the Transifex API.
+ *
+ * @see https://docs.transifex.com/api/ for API documentation.
+ */
 module.exports = {
 	getResource( { username, password, slug } ) {
 		return new Promise( ( resolve, reject ) => {

@@ -60,7 +60,6 @@ const utils = {
 
 	getContexts() {
 		return fs.readdirSync( ckeditor5PackagesDir )
-			.filter( fileOrDirectory => /ckeditor5-[^/\//]+$/.test( fileOrDirectory ) )
 			.reduce( ( map, packageName ) => {
 				const pathToContext = path.join( ckeditor5PackagesDir, packageName, langContextSuffix );
 
