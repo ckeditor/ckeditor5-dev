@@ -29,12 +29,6 @@ describe( 'utils', () => {
 		it( 'executes a function for each package', () => {
 			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
 
-			const getDependenciesSpy = sandbox.stub( workspace, 'getDependencies' )
-				.returns( {
-					'ckeditor5-core': 'ckeditor/ckeditor5-core',
-					'ckeditor5-engine': 'ckeditor/ckeditor5-engine'
-				} );
-
 			const getDirectoriesStub = sandbox.stub( workspace, 'getDirectories' )
 				.returns( [ 'ckeditor5-core', 'ckeditor5-engine' ] );
 
@@ -53,13 +47,12 @@ describe( 'utils', () => {
 				.then( () => {
 					expect( cwdStub.calledOnce ).to.equal( true );
 
-					expect( getDependenciesSpy.calledOnce ).to.equal( true );
 					expect( getDirectoriesStub.calledOnce ).to.equal( true );
 
 					expect( functionToExecute.calledTwice ).to.equal( true );
 					expect( functionToExecute.firstCall.args[ 0 ] ).to.equal( 'ckeditor5-core' );
 					expect( functionToExecute.firstCall.args[ 1 ] ).to.equal( path.join( workspacePath, 'ckeditor5-core' ) );
-					expect( functionToExecute.secondCall.args[ 0 ] ).to.equal( 'ckeditor5-engine' );
+					expect( functionToExecute.secondCall.args[ 0 ] ).to.equal( '@ckeditor/ckeditor5-engine' );
 					expect( functionToExecute.secondCall.args[ 1 ] ).to.equal( path.join( workspacePath, 'ckeditor5-engine' ) );
 
 					expect( chdirStub.calledOnce ).to.equal( true );
@@ -70,12 +63,6 @@ describe( 'utils', () => {
 		it( 'executes a function for each package and returns called done callback', () => {
 			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
 			const doneCallback = sandbox.stub().returns( 'Done.' );
-
-			const getDependenciesSpy = sandbox.stub( workspace, 'getDependencies' )
-				.returns( {
-					'ckeditor5-core': 'ckeditor/ckeditor5-core',
-					'ckeditor5-engine': 'ckeditor/ckeditor5-engine'
-				} );
 
 			const getDirectoriesStub = sandbox.stub( workspace, 'getDirectories' )
 				.returns( [ 'ckeditor5-core', 'ckeditor5-engine' ] );
@@ -95,14 +82,13 @@ describe( 'utils', () => {
 				.then( ( doneCallbackResult ) => {
 					expect( cwdStub.calledOnce ).to.equal( true );
 
-					expect( getDependenciesSpy.calledOnce ).to.equal( true );
 					expect( getDirectoriesStub.calledOnce ).to.equal( true );
 					expect( doneCallback.calledOnce ).to.equal( true );
 
 					expect( functionToExecute.calledTwice ).to.equal( true );
 					expect( functionToExecute.firstCall.args[ 0 ] ).to.equal( 'ckeditor5-core' );
 					expect( functionToExecute.firstCall.args[ 1 ] ).to.equal( path.join( workspacePath, 'ckeditor5-core' ) );
-					expect( functionToExecute.secondCall.args[ 0 ] ).to.equal( 'ckeditor5-engine' );
+					expect( functionToExecute.secondCall.args[ 0 ] ).to.equal( '@ckeditor/ckeditor5-engine' );
 					expect( functionToExecute.secondCall.args[ 1 ] ).to.equal( path.join( workspacePath, 'ckeditor5-engine' ) );
 
 					expect( chdirStub.calledOnce ).to.equal( true );

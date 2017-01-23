@@ -24,34 +24,23 @@ const { workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
  */
 module.exports = function execOnDependencies( options, functionToExecute, done = null ) {
 	const currentCwd = process.cwd();
-
-	const packageJSON = require( path.join( options.cwd, 'package.json' ) );
 	const workspaceAbsolutePath = path.join( options.cwd, options.workspace );
+	const directories = workspace.getDirectories( workspaceAbsolutePath );
 
 	let promise = Promise.resolve();
-
-	// Get all dependencies from package.json.
-	const dependencies = workspace.getDependencies( packageJSON.dependencies );
-
-	if ( !dependencies ) {
-		return promise;
-	}
-
-	const directories = workspace.getDirectories( workspaceAbsolutePath );
 
 	if ( !directories.length ) {
 		return promise;
 	}
 
-	for ( const dependencyName of Object.keys( dependencies ) ) {
-		const dependencyPath = path.join( workspaceAbsolutePath, dependencyName );
+	for ( const directory of directories ) {
+		const dependencyPath = path.join( workspaceAbsolutePath, directory );
+		const directoryPackageJson = require( path.join( dependencyPath, 'package.json' ) );
+		const dependencyName = directoryPackageJson.name;
 
-		// Check if repository's directory already exists.
-		if ( directories.indexOf( dependencyName ) > -1 ) {
-			promise = promise.then( () => {
-				return functionToExecute( dependencyName, dependencyPath );
-			} );
-		}
+		promise = promise.then( () => {
+			return functionToExecute( dependencyName, dependencyPath );
+		} );
 	}
 
 	return promise.then( () => {
