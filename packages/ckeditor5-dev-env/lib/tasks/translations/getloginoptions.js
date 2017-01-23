@@ -9,7 +9,7 @@ const minimist = require( 'minimist' );
 
 module.exports = function getLoginOptions( args ) {
 	return minimist( args, {
-		string: [ 'password', 'username',' slug', 'name' ],
+		string: [ 'password', 'username', 'name' ],
 		alias: {
 			p: 'password',
 			u: 'username',

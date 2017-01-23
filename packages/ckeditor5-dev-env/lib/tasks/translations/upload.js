@@ -11,18 +11,11 @@ const path = require( 'path' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 
 /**
- * Adds translations to the transifex.
- * Slug must be unique.
- *
- *		Gulp usage
- 		gulp translations:upload --username someUsername --password somePassword --slug someSlug
- *
- * @see https://docs.transifex.com/api/resources for API documentation.
+ * Adds translations to the Transifex.
  *
  * @param {Object} config
- * @param {String} config.username - username to the transifex account.
- * @param {String} config.password - password to the transifex account.
- * @param {String} config.name - name of the translation update.
+ * @param {String} config.username Username for the Transifex account.
+ * @param {String} config.password Password for the Transifex account.
  */
 module.exports = function upload( config ) {
 	const pathToPoTranslations = path.join( process.cwd(), 'build', '.transifex' );

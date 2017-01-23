@@ -13,14 +13,11 @@ const fs = require( 'fs-extra' );
 const path = require( 'path' );
 
 /**
- * Downloads translations from the transifex for each package and language.
- *
- *		Gulp usage:
- *		gulp translations:download -u someUsername -p somePassword
+ * Downloads translations from the Transifex for each package and language.
  *
  * @param {Object} config
- * @param {String} config.username
- * @param {String} config.password
+ * @param {String} config.username Username for the Transifex account.
+ * @param {String} config.password Password for the Transifex account.
  */
 module.exports = function download( config ) {
 	const languages = [ 'en' ];
