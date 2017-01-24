@@ -5,12 +5,12 @@
 
 'use strict';
 
-const transifexAPI = require( './transifex-api' );
-const collectUtils = require( './collect-utils' );
-const gettextParser = require( 'gettext-parser' );
-const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 const fs = require( 'fs-extra' );
 const path = require( 'path' );
+const gettextParser = require( 'gettext-parser' );
+const transifexAPI = require( './transifex-api' );
+const collectUtils = require( './collect-utils' );
+const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 
 /**
  * Downloads translations from the Transifex for each package and language.
@@ -20,7 +20,7 @@ const path = require( 'path' );
  * @param {String} loginConfig.password Password for the Transifex account.
  */
 module.exports = function download( loginConfig ) {
-	const packageNames = [ ...collectUtils.getContexts().keys() ];
+	const packageNames = collectUtils.getPackagesContainingContexts();
 
 	const downlaodAndSaveTranslations = packageNames.map( ( packageName ) => {
 		const translationPromises = downloadAndParsePoFilesForPackage( loginConfig, packageName );

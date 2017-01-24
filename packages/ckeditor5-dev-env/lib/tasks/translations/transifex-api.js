@@ -41,7 +41,7 @@ module.exports = {
 				if ( error ) {
 					reject( error );
 				} else {
-					resolve( body );
+					resolve( JSON.parse( body ) );
 				}
 			} );
 		} );
@@ -56,7 +56,7 @@ module.exports = {
 				if ( error ) {
 					reject( error );
 				} else {
-					resolve( body );
+					resolve( JSON.parse( body ) );
 				}
 			} );
 		} );
@@ -86,7 +86,6 @@ function createJSONResponseHandler( resolve, reject ) {
 		}  else if ( response.statusCode !== 200 ) {
 			return reject( new Error( `Status code: ${response.statusCode}` ) );
 		}
-		const result = JSON.parse( body );
-		resolve( result );
+		resolve( JSON.parse( body ) );
 	};
 }

@@ -6,9 +6,9 @@
 'use strict';
 
 const fs = require( 'fs' );
-const transifexAPI = require( './transifex-api' );
 const path = require( 'path' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
+const transifexAPI = require( './transifex-api' );
 
 /**
  * Adds translations to the Transifex.
@@ -49,35 +49,25 @@ function createOrUpdateResource( config, potFile, resourceExists ) {
 
 	if ( resourceExists ) {
 		return transifexAPI.putResourceContent( resConfig )
-			.then( ( dataOrMessage ) => tryParsePutResponse( packageName, dataOrMessage ) );
+			.then( ( parsedResponse ) => logPutResponse( packageName, parsedResponse ) );
 	}
 
 	return transifexAPI.postResource( resConfig )
-		.then( ( dataOrMessage ) => tryParsePostResponse( packageName, dataOrMessage ) );
+		.then( ( parsedResponse ) => logPostResponse( packageName, parsedResponse ) );
 }
 
-function tryParsePutResponse( packageName, dataOrMessage ) {
-	try {
-		const response = JSON.parse( dataOrMessage );
-		logger.info( `Package: ${ packageName }` );
-		// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
-		logger.info( `New: ${ response.strings_added }` );
-		logger.info( `Updated: ${ response.strings_updated }` );
-		logger.info( `Deleted: ${ response.strings_delete }` );
-		// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
-		process.stdout.write( '\n' );
-	} catch ( err ) {
-		throw new Error( dataOrMessage );
-	}
+function logPutResponse( packageName, parsedResponse ) {
+	logger.info( `Package: ${ packageName }` );
+	// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+	logger.info( `New: ${ parsedResponse.strings_added }` );
+	logger.info( `Updated: ${ parsedResponse.strings_updated }` );
+	logger.info( `Deleted: ${ parsedResponse.strings_delete }` );
+	// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
+	process.stdout.write( '\n' );
 }
 
-function tryParsePostResponse( packageName, dataOrMessage ) {
-	try {
-		const [ newOnes ] = JSON.parse( dataOrMessage );
-		logger.info( `Package: ${ packageName }` );
-		logger.info( `New: ${ newOnes }` );
-		process.stdout.write( '\n' );
-	} catch ( err ) {
-		throw new Error( dataOrMessage );
-	}
+function logPostResponse( packageName, parsedResponse ) {
+	logger.info( `Package: ${ packageName }` );
+	logger.info( `New: ${ parsedResponse[ 0 ] }` );
+	process.stdout.write( '\n' );
 }

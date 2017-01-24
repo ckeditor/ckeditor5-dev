@@ -59,19 +59,23 @@ const utils = {
 	},
 
 	getContexts() {
+		const mapEntries = utils.getPackagesContainingContexts().map( packageName => {
+			const pathToContext = path.join( ckeditor5PackagesDir, packageName, langContextSuffix );
+
+			return [ packageName, {
+				filePath: pathToContext,
+				content: JSON.parse( fs.readFileSync( pathToContext, 'utf-8' ) )
+			} ];
+		} );
+
+		return new Map( mapEntries );
+	},
+
+	getPackagesContainingContexts() {
 		return fs.readdirSync( ckeditor5PackagesDir )
-			.reduce( ( map, packageName ) => {
-				const pathToContext = path.join( ckeditor5PackagesDir, packageName, langContextSuffix );
-
-				if ( fs.existsSync( pathToContext ) ) {
-					map.set( packageName, {
-						filePath: pathToContext,
-						content: JSON.parse( fs.readFileSync( pathToContext, 'utf-8' ) )
-					} );
-				}
-
-				return map;
-			}, new Map() );
+			.filter( ( packageName ) => fs.existsSync(
+				path.join( ckeditor5PackagesDir, packageName, langContextSuffix )
+			) );
 	},
 
 	// @param {Map.<Object>} contexts
