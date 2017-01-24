@@ -5,12 +5,14 @@
 
 'use strict';
 
+const fsExtra = require( 'fs-extra' );
+
 /**
  * Created for testing purpose.
  * You can add / remove this plugin in src/tasks/build-api-docs.js
  */
 exports.handlers = {
 	parseComplete( e ) {
-		console.log( JSON.stringify( e.doclets, null, 4 ) );
+		fsExtra.outputFileSync( process.cwd() + '/build/docs/output.json', JSON.stringify( e, null, 4 ) );
 	}
 };

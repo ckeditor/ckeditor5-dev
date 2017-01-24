@@ -5,8 +5,10 @@
 
 'use strict';
 
-const buildApiDocs = require( 'docs-builder/src/tasks/build-api-docs' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+const path = require( 'path' );
+const gulp = require( 'gulp' );
+const jsdoc = require( 'gulp-jsdoc3' );
 
 module.exports = {
 	build
@@ -29,6 +31,25 @@ function build( config ) {
 				...config.sourceFiles
 			];
 
-			return buildApiDocs( sourceFiles, config.destinationPath, [], [] );
+			const jsDocConfig = {
+				opts: {
+					encoding: 'utf8',
+					destination: path.join( config.destinationPath, 'api' ),
+					recurse: true,
+					access: 'all'
+				},
+				plugins: [
+					'node_modules/jsdoc/plugins/markdown',
+					path.resolve( __dirname, '../node_modules/@ckeditor/jsdoc-plugins/lib/export-fixer/export-fixer' ),
+					path.resolve( __dirname, '../node_modules/@ckeditor/jsdoc-plugins/lib/longname-fixer/longname-fixer' ),
+					path.resolve( __dirname, '../node_modules/@ckeditor/jsdoc-plugins/lib/validator/validator' ),
+					path.resolve( __dirname, '../node_modules/@ckeditor/jsdoc-plugins/lib/utils/doclet-logger' )
+				]
+			};
+
+			return new Promise( ( resolve ) => {
+				gulp.src( sourceFiles, { read: false } )
+					.pipe( jsdoc( jsDocConfig, resolve ) );
+			} );
 		} );
 }

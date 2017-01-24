@@ -6,7 +6,9 @@
   "main": "lib/index.js",
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "^2.3.3",
-    "docs-builder": "cksource/docs-builder"
+    "@ckeditor/jsdoc-plugins": "^1.0.0",
+    "gulp": "^3.9.1",
+    "gulp-jsdoc3": "^1.0.1"
   },
   "devDependencies": {},
   "engines": {
