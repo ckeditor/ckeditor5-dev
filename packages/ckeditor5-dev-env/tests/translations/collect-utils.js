@@ -79,7 +79,7 @@ describe( 'collect-utils', () => {
 				[ path2 ]: '{}'
 			};
 
-			const readDirStub = sandbox.stub( fs, 'readdirSync', () => ( [ 'ckeditor5-core', 'ckeditor5-utils', 'docs-builder' ] ) );
+			const readDirStub = sandbox.stub( fs, 'readdirSync', () => ( [ 'ckeditor5-core', 'ckeditor5-utils' ] ) );
 			sandbox.stub( fs, 'existsSync', () => true );
 			sandbox.stub( fs, 'readFileSync', ( filePath ) => fileContents[ filePath ] );
 

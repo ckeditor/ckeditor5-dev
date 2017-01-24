@@ -20,12 +20,10 @@ const path = require( 'path' );
  * @param {String} loginConfig.password Password for the Transifex account.
  */
 module.exports = function download( loginConfig ) {
-	const languages = [ 'en', 'pl' ];
-
 	const packageNames = [ ...collectUtils.getContexts().keys() ];
 
 	const downlaodAndSaveTranslations = packageNames.map( ( packageName ) => {
-		const translationPromises = downloadAndParsePoFilesForPackage( loginConfig, languages, packageName );
+		const translationPromises = downloadAndParsePoFilesForPackage( loginConfig, packageName );
 
 		return translationPromises.then( translations => {
 			saveTranslations( packageName, translations );
@@ -41,18 +39,30 @@ module.exports = function download( loginConfig ) {
 		} );
 };
 
-function downloadAndParsePoFilesForPackage( loginConfig, languages, packageName ) {
-	const translationsForPackagePromises = languages.map( lang => {
-		const transifexDownloadConfig = Object.assign( {}, loginConfig, {
-			lang,
-			slug: packageName
-		} );
+// @returns {Promise<Map>}
+function downloadAndParsePoFilesForPackage( loginConfig, packageName ) {
+	const resourceDetailsPromise = transifexAPI.getResourceDetails( Object.assign( {}, loginConfig, { slug: packageName } ) );
+	let languageCodes;
 
-		return downloadAndParsePoFile( transifexDownloadConfig );
+	const translationsForPackagePromise = resourceDetailsPromise.then( ( resourceDetails ) => {
+		// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+		languageCodes = resourceDetails.available_languages.map( languageInfo => languageInfo.code );
+		// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
+
+		return Promise.all(
+			languageCodes.map( ( lang ) => {
+				const transifexDownloadConfig = Object.assign( {}, loginConfig, {
+					lang,
+					slug: packageName
+				} );
+
+				return downloadAndParsePoFile( transifexDownloadConfig );
+			} )
+		);
 	} );
 
-	return Promise.all( translationsForPackagePromises ).then( ( translationsForPackage ) => {
-		const translationMapEntries = translationsForPackage.map( ( translations, index ) => [ languages[ index ], translations ] );
+	return translationsForPackagePromise.then( translationsForPackage => {
+		const translationMapEntries = translationsForPackage.map( ( translations, index ) => [ languageCodes[ index ], translations ] );
 
 		return new Map( translationMapEntries );
 	} );
@@ -72,9 +82,7 @@ function downloadAndParsePoFile( transifexDownloadConfig ) {
 // @param {String} config.lang
 // @returns {Promise<String>}
 function downloadPoFile( config ) {
-	return transifexAPI.getTranslation( config ).then( ( data ) => {
-		return JSON.parse( data ).content;
-	} );
+	return transifexAPI.getTranslation( config ).then( ( data ) => data.content );
 }
 
 // Fixes weird gettextParser output.

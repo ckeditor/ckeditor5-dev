@@ -47,7 +47,7 @@ module.exports = {
 		} );
 	},
 
-	putResourceContent( { username, password, name, slug, content } ) {
+	putResourceContent( { username, password, slug, content } ) {
 		return new Promise( ( resolve, reject ) => {
 			request.put( `${ API_BASE }/resource/${ slug }/content/`, {
 				auth: { username, password },
@@ -62,17 +62,31 @@ module.exports = {
 		} );
 	},
 
+	getResourceDetails( { username, password, slug } ) {
+		return new Promise( ( resolve, reject ) => {
+			request.get( `${ API_BASE }/resource/${ slug }/?details`, {
+				auth: { username, password }
+			}, createJSONResponseHandler( resolve, reject ) );
+		} );
+	},
+
 	getTranslation( { username, password, slug, lang } ) {
 		return new Promise( ( resolve, reject ) => {
 			request.get( `${ API_BASE }/resource/${ slug }/translation/${ lang }/`, {
 				auth: { username, password }
-			}, ( error, response, body ) => {
-				if ( error ) {
-					reject( error );
-				} else {
-					resolve( body );
-				}
-			} );
+			}, createJSONResponseHandler( resolve, reject ) );
 		} );
 	}
 };
+
+function createJSONResponseHandler( resolve, reject ) {
+	return function handleJSONResponse( error, response, body ) {
+		if ( error ) {
+			return reject( error );
+		}  else if ( response.statusCode !== 200 ) {
+			return reject( new Error( `Status code: ${response.statusCode}` ) );
+		}
+		const result = JSON.parse( body );
+		resolve( result );
+	};
+}
