@@ -40,10 +40,10 @@ function build( config ) {
 				},
 				plugins: [
 					'node_modules/jsdoc/plugins/markdown',
-					path.resolve( __dirname, '../node_modules/@ckeditor/jsdoc-plugins/lib/export-fixer/export-fixer' ),
-					path.resolve( __dirname, '../node_modules/@ckeditor/jsdoc-plugins/lib/longname-fixer/longname-fixer' ),
-					path.resolve( __dirname, '../node_modules/@ckeditor/jsdoc-plugins/lib/validator/validator' ),
-					path.resolve( __dirname, '../node_modules/@ckeditor/jsdoc-plugins/lib/utils/doclet-logger' )
+					require.resolve( '@ckeditor/jsdoc-plugins/lib/export-fixer/export-fixer' ),
+					require.resolve( '@ckeditor/jsdoc-plugins/lib/longname-fixer/longname-fixer' ),
+					require.resolve( '@ckeditor/jsdoc-plugins/lib/validator/validator' ),
+					require.resolve( '@ckeditor/jsdoc-plugins/lib/utils/doclet-logger' )
 				]
 			};
 
