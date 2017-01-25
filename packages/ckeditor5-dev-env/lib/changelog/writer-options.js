@@ -5,8 +5,8 @@
 
 'use strict';
 
-const path = require( 'path' );
 const fs = require( 'fs' );
+const path = require( 'path' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 // Map of available types of the commits.
@@ -24,10 +24,8 @@ const availableTypes = new Map( [
 	[ 'Release', false ],
 ] );
 
-const packageJSON = require( path.resolve( process.cwd(), 'package.json' ) );
-
-const templatePath = path.resolve( __dirname, 'templates' );
-
+const packageJson = require( path.join( process.cwd(), 'package.json' ) );
+const templatePath = path.join( __dirname, 'templates' );
 const log = logger();
 const logOptions = { raw: true };
 
@@ -44,6 +42,10 @@ module.exports = {
 	footerPartial: fs.readFileSync( path.join( templatePath, 'footer.hbs' ), 'utf-8' )
 };
 
+// Parses a single commit:
+// - displays a log when the commit has invalid format of the message,
+// - filters out the commit if it should not be visible in the changelog,
+// - makes links to issues and user's profiles on GitHub.
 function transformCommit( commit ) {
 	const issues = [];
 
@@ -85,7 +87,7 @@ function transformCommit( commit ) {
 }
 
 function linkGithubUsers( value ) {
-	return value.replace( /@([a-zA-Z0-9_]+)/g, '[@$1](https://github.com/$1)' );
+	return value.replace( /@([\w\d_-]+)/g, '[@$1](https://github.com/$1)' );
 }
 
 function linkGithubIssues( value, issues = null ) {
@@ -94,7 +96,7 @@ function linkGithubIssues( value, issues = null ) {
 			issues.push( issueId );
 		}
 
-		return `[#${ issueId }](${ packageJSON.bugs }/${ issueId })`;
+		return `[#${ issueId }](${ packageJson.bugs }/${ issueId })`;
 	} );
 }
 

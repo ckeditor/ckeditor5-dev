@@ -22,8 +22,7 @@ const { workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {Function|null} done A function that will be called after the whole process.
  * @returns {Promise}
  */
-module.exports = function execOnDependencies( options, functionToExecute, done = null ) {
-	const currentCwd = process.cwd();
+module.exports = function executeOnDependencies( options, functionToExecute, done = null ) {
 	const workspaceAbsolutePath = path.join( options.cwd, options.workspace );
 	const directories = workspace.getDirectories( workspaceAbsolutePath );
 
@@ -44,8 +43,6 @@ module.exports = function execOnDependencies( options, functionToExecute, done =
 	}
 
 	return promise.then( () => {
-		process.chdir( currentCwd );
-
 		if ( done ) {
 			return done();
 		}

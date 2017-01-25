@@ -13,11 +13,11 @@ const sinon = require( 'sinon' );
 const { workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'utils', () => {
-	describe( 'execOnDependencies', () => {
-		let execOnDependencies, sandbox;
+	describe( 'executeOnDependencies', () => {
+		let executeOnDependencies, sandbox;
 
 		beforeEach( () => {
-			execOnDependencies = require( '../../lib/utils/exec-on-dependencies' );
+			executeOnDependencies = require( '../../lib/utils/executeondependencies' );
 
 			sandbox = sinon.sandbox.create();
 		} );
@@ -33,7 +33,7 @@ describe( 'utils', () => {
 				.returns( [ 'ckeditor5-core', 'ckeditor5-engine' ] );
 
 			const options = {
-				cwd: path.join( __dirname, '..', 'fixtures' ),
+				cwd: path.join( __dirname, '..', 'fixtures', 'basic' ),
 				workspace: 'packages/'
 			};
 
@@ -43,7 +43,7 @@ describe( 'utils', () => {
 
 			const workspacePath = path.join( options.cwd, options.workspace );
 
-			return execOnDependencies( options, functionToExecute )
+			return executeOnDependencies( options, functionToExecute )
 				.then( () => {
 					expect( cwdStub.calledOnce ).to.equal( true );
 
@@ -68,7 +68,7 @@ describe( 'utils', () => {
 				.returns( [ 'ckeditor5-core', 'ckeditor5-engine' ] );
 
 			const options = {
-				cwd: path.join( __dirname, '..', 'fixtures' ),
+				cwd: path.join( __dirname, '..', 'fixtures', 'basic' ),
 				workspace: 'packages/'
 			};
 
@@ -78,7 +78,7 @@ describe( 'utils', () => {
 
 			const workspacePath = path.join( options.cwd, options.workspace );
 
-			return execOnDependencies( options, functionToExecute, doneCallback )
+			return executeOnDependencies( options, functionToExecute, doneCallback )
 				.then( ( doneCallbackResult ) => {
 					expect( cwdStub.calledOnce ).to.equal( true );
 

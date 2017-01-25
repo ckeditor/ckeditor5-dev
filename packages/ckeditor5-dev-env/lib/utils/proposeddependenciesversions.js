@@ -5,8 +5,10 @@
 
 'use strict';
 
-const utils = require( './changelog' );
-const execOnDependencies = require( './exec-on-dependencies' );
+const getCurrentVersion = require( './getcurrentversion' );
+const getNewReleaseType = require( './getnewreleasetype' );
+const getNextVersion = require( './getnextversion' );
+const executeOnDependencies = require( './executeondependencies' );
 
 /**
  * Returns an object with proposed new version of the dependencies.
@@ -16,7 +18,7 @@ const execOnDependencies = require( './exec-on-dependencies' );
  * @params {String} options.workspace A relative path to the workspace.
  * @returns {Promise}
  */
-module.exports = function proposedDepsVersions( options ) {
+module.exports = function proposedDependenciesVersions( options ) {
 	const versions = {};
 
 	const execOptions = {
@@ -27,17 +29,18 @@ module.exports = function proposedDepsVersions( options ) {
 	const functionToExecute = ( repositoryName, repositoryPath ) => {
 		process.chdir( repositoryPath );
 
-		const currentVersion = utils.getCurrentVersion();
+		const currentVersion = getCurrentVersion();
 
-		return utils.getNewReleaseType()
-			.then( ( response ) => {
-				versions[ repositoryName ] = utils.getNextVersion( currentVersion, response.releaseType );
-			} );
+		return getNewReleaseType().then( ( response ) => {
+			versions[ repositoryName ] = getNextVersion( currentVersion, response.releaseType );
+		} );
 	};
 
 	const done = () => {
+		process.chdir( options.cwd );
+
 		return Promise.resolve( versions );
 	};
 
-	return execOnDependencies( execOptions, functionToExecute, done );
+	return executeOnDependencies( execOptions, functionToExecute, done );
 };

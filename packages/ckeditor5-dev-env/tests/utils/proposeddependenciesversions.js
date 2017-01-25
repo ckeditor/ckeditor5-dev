@@ -14,7 +14,7 @@ const mockery = require( 'mockery' );
 const utils = require( '../../lib/utils/changelog' );
 
 describe( 'utils', () => {
-	describe( 'proposedDepsVersions', () => {
+	describe( 'proposedDependenciesVersions', () => {
 		let proposedDepsVersion, sandbox, execOptions;
 
 		beforeEach( () => {
@@ -28,18 +28,18 @@ describe( 'utils', () => {
 
 			mockery.registerMock( './changelog', utils );
 
-			mockery.registerMock( './exec-on-dependencies', ( options, functionToExecute, done ) => {
+			mockery.registerMock( './executeondependencies', ( options, functionToExecute, done ) => {
 				execOptions = options;
 
 				const workspacePath = path.join( options.cwd, options.workspace );
 
 				return Promise.resolve()
 					.then( () => functionToExecute( 'ckeditor5-core', path.join( workspacePath, 'ckeditor5-core' ) ) )
-					.then( () => functionToExecute( 'ckeditor5-engine', path.join( workspacePath, 'ckeditor5-engine' ) ) )
+					.then( () => functionToExecute( '@ckeditor/ckeditor5-engine', path.join( workspacePath, 'ckeditor5-engine' ) ) )
 					.then( () => done() );
 			} );
 
-			proposedDepsVersion = require( '../../lib/utils/proposed-deps-version' );
+			proposedDepsVersion = require( '../../lib/utils/proposeddependenciesversions' );
 		} );
 
 		afterEach( () => {
