@@ -15,7 +15,6 @@ const packageJson = require( path.join( cwd, 'package.json' ) );
 const mgitJson = path.resolve( cwd, 'mgit.json' );
 
 const json = {
-	'packages': 'packages/',
 	'dependencies': {}
 };
 
