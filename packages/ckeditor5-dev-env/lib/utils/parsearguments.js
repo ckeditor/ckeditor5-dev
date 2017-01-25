@@ -20,13 +20,11 @@ module.exports = function parseArguments( args = process.argv.slice( 2 ) ) {
 		],
 
 		boolean: [
-			'init',
-			'debug'
+			'init'
 		],
 
 		default: {
-			init: false,
-			debug: false
+			init: false
 		}
 	} );
 

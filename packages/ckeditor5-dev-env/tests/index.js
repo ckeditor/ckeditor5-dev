@@ -11,7 +11,6 @@ const path = require( 'path' );
 const sinon = require( 'sinon' );
 const expect = require( 'chai' ).expect;
 const mockery = require( 'mockery' );
-const utils = require( '../lib/utils/changelog' );
 
 describe( 'index', () => {
 	let tasks, sandbox, execOptions;
@@ -25,9 +24,7 @@ describe( 'index', () => {
 			warnOnUnregistered: false
 		} );
 
-		mockery.registerMock( './utils/changelog', utils );
-
-		mockery.registerMock( './utils/exec-on-dependencies', ( options, functionToExecute, done = null ) => {
+		mockery.registerMock( './utils/executeondependencies', ( options, functionToExecute, done = null ) => {
 			execOptions = options;
 
 			const workspacePath = path.join( options.cwd, options.workspace );
@@ -42,9 +39,7 @@ describe( 'index', () => {
 				} );
 		} );
 
-		tasks = require( '../lib/index' )( {
-			workspaceDir: '..'
-		} );
+		tasks = require( '../lib/index' );
 	} );
 
 	afterEach( () => {
@@ -65,9 +60,8 @@ describe( 'index', () => {
 			const chdirStub = sandbox.stub( process, 'chdir' );
 
 			const options = {
-				cwd: path.join( __dirname, '..', 'fixtures' ),
-				workspace: 'packages/',
-				debug: false
+				cwd: path.join( __dirname, '..', 'fixtures', 'basic' ),
+				workspace: 'packages/'
 			};
 
 			return tasks.generateChangelogForDependencies( options )
@@ -77,18 +71,12 @@ describe( 'index', () => {
 						workspace: options.workspace
 					} );
 
-					expect( chdirStub.calledTwice ).to.equal( true );
+					expect( chdirStub.calledThrice ).to.equal( true );
 					expect( chdirStub.firstCall.args[ 0 ] ).to.match( /ckeditor5-core$/ );
 					expect( chdirStub.secondCall.args[ 0 ] ).to.match( /ckeditor5-engine$/ );
+					expect( chdirStub.thirdCall.args[ 0 ] ).to.equal( options.cwd );
 
 					expect( generateChangelogStub.calledTwice ).to.equal( true );
-
-					const changelogArguments = {
-						debug: options.debug
-					};
-
-					expect( generateChangelogStub.firstCall.args[ 0 ] ).to.deep.equal( changelogArguments );
-					expect( generateChangelogStub.secondCall.args[ 0 ] ).to.deep.equal( changelogArguments );
 				} );
 		} );
 	} );
@@ -106,11 +94,10 @@ describe( 'index', () => {
 			const chdirStub = sandbox.stub( process, 'chdir' );
 
 			const options = {
-				cwd: path.join( __dirname, '..', 'fixtures' ),
+				cwd: path.join( __dirname, '..', 'fixtures', 'basic' ),
 				workspace: 'packages/',
 				token: 'GithubToken',
 				init: true,
-				debug: false,
 				dependencies: {
 					'ckeditor5-core': '0.6.0',
 					'ckeditor5-engine': '1.0.1'
@@ -124,16 +111,16 @@ describe( 'index', () => {
 						workspace: options.workspace
 					} );
 
-					expect( chdirStub.calledTwice ).to.equal( true );
+					expect( chdirStub.calledThrice ).to.equal( true );
 					expect( chdirStub.firstCall.args[ 0 ] ).to.match( /ckeditor5-core$/ );
 					expect( chdirStub.secondCall.args[ 0 ] ).to.match( /ckeditor5-engine$/ );
+					expect( chdirStub.thirdCall.args[ 0 ] ).to.equal( options.cwd );
 
 					expect( createReleaseStub.calledTwice ).to.equal( true );
 
 					const releaseArguments = {
 						init: options.init,
 						token: options.token,
-						debug: options.debug,
 						dependencies: options.dependencies
 					};
 

@@ -42,7 +42,7 @@ module.exports = function createRelease( options ) {
 		throw new Error( 'The "package.json" file must contain URL to the repository.' );
 	}
 
-	const shExecParams = { verbosity: 'info' };
+	const shExecParams = { verbosity: 'error' };
 	const log = logger();
 
 	log.info( 'Checking current branch...' );

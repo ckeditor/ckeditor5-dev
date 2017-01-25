@@ -16,23 +16,49 @@ Description of each development task can be found here: <https://github.com/cked
 To include development tasks in your `gulpfile.js`:
 
 ```js
-const config = {
-	WORKSPACE_DIR: '..'
-};
-const ckeditor5DevEnv = require( '@ckeditor/ckeditor5-dev-env' )( config );
-const utils = require( '@ckeditor/ckeditor5-dev-env/lib/utils/changelog' );
+// Generate changelog for current package.
+gulp.task( 'changelog', () => {
+	const ckeditor5DevEnv = require( '@ckeditor/ckeditor5-dev-env' );
 
-gulp.task( 'init', ckeditor5DevEnv.initRepository );
-gulp.task( 'create-package', ckeditor5DevEnv.createPackage );
-gulp.task( 'update', ckeditor5DevEnv.updateRepositories );
-gulp.task( 'pull', ckeditor5DevEnv.updateRepositories );
-gulp.task( 'status', ckeditor5DevEnv.checkStatus );
-gulp.task( 'st', ckeditor5DevEnv.checkStatus );
-gulp.task( 'relink', ckeditor5DevEnv.relink );
-gulp.task( 'install', ckeditor5DevEnv.installPackage );
-gulp.task( 'exec', ckeditor5DevEnv.execOnRepositories );
-gulp.task( 'changelog', () => ckeditor5Env.generateChangeLog( utils.parseArguments() ) );
-gulp.task( 'release', () => ckeditor5Env.createRelease( utils.parseArguments() ) );
+	return ckeditor5DevEnv.generateChangelog();
+} );
+
+// Generate changelog for all dependencies and current package.
+gulp.task( 'packages-changelog', () => {
+	const ckeditor5DevEnv = require( '@ckeditor/ckeditor5-dev-env' );
+	const options = devTaskOptions();
+	
+	options.cwd = process.cwd();
+	
+	// Directory to the dependencies.
+	options.workspace = 'packages/';
+
+	return ckeditor5DevEnv.generateChangelogForDependencies( options );
+} );
+
+// Create release for current package.
+gulp.task( 'release', () => {
+	const ckeditor5DevEnv = require( '@ckeditor/ckeditor5-dev-env' );
+
+	return ckeditor5DevEnv.createRelease( devTaskOptions() );
+} );
+
+// Create release for all dependencies and current package.
+gulp.task( 'release', () => {
+	const ckeditor5DevEnv = require( '@ckeditor/ckeditor5-dev-env' );
+	const options = devTaskOptions();
+	
+	options.cwd = process.cwd();
+	
+	// Directory to the dependencies.
+	options.workspace = 'packages/';
+	
+	return ckeditor5DevEnv.releaseDependencies( options );
+} );
+
+function devTaskOptions() {
+	return require( '@ckeditor/ckeditor5-dev-env/lib/utils/parsearguments' )();
+}
 ```
 
 ### Generating changelog

@@ -37,16 +37,10 @@ describe( 'utils', () => {
 				workspace: 'packages/'
 			};
 
-			const cwdStub = sandbox.stub( process, 'cwd' ).returns( '/home' );
-
-			const chdirStub = sandbox.stub( process, 'chdir' );
-
 			const workspacePath = path.join( options.cwd, options.workspace );
 
 			return executeOnDependencies( options, functionToExecute )
 				.then( () => {
-					expect( cwdStub.calledOnce ).to.equal( true );
-
 					expect( getDirectoriesStub.calledOnce ).to.equal( true );
 
 					expect( functionToExecute.calledTwice ).to.equal( true );
@@ -54,9 +48,6 @@ describe( 'utils', () => {
 					expect( functionToExecute.firstCall.args[ 1 ] ).to.equal( path.join( workspacePath, 'ckeditor5-core' ) );
 					expect( functionToExecute.secondCall.args[ 0 ] ).to.equal( '@ckeditor/ckeditor5-engine' );
 					expect( functionToExecute.secondCall.args[ 1 ] ).to.equal( path.join( workspacePath, 'ckeditor5-engine' ) );
-
-					expect( chdirStub.calledOnce ).to.equal( true );
-					expect( chdirStub.firstCall.args[ 0 ] ).to.equal( '/home' );
 				} );
 		} );
 
@@ -72,16 +63,10 @@ describe( 'utils', () => {
 				workspace: 'packages/'
 			};
 
-			const cwdStub = sandbox.stub( process, 'cwd' ).returns( '/home' );
-
-			const chdirStub = sandbox.stub( process, 'chdir' );
-
 			const workspacePath = path.join( options.cwd, options.workspace );
 
 			return executeOnDependencies( options, functionToExecute, doneCallback )
 				.then( ( doneCallbackResult ) => {
-					expect( cwdStub.calledOnce ).to.equal( true );
-
 					expect( getDirectoriesStub.calledOnce ).to.equal( true );
 					expect( doneCallback.calledOnce ).to.equal( true );
 
@@ -90,9 +75,6 @@ describe( 'utils', () => {
 					expect( functionToExecute.firstCall.args[ 1 ] ).to.equal( path.join( workspacePath, 'ckeditor5-core' ) );
 					expect( functionToExecute.secondCall.args[ 0 ] ).to.equal( '@ckeditor/ckeditor5-engine' );
 					expect( functionToExecute.secondCall.args[ 1 ] ).to.equal( path.join( workspacePath, 'ckeditor5-engine' ) );
-
-					expect( chdirStub.calledOnce ).to.equal( true );
-					expect( chdirStub.firstCall.args[ 0 ] ).to.equal( '/home' );
 
 					expect( doneCallbackResult ).to.equal( 'Done.' );
 				} );

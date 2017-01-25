@@ -11,11 +11,15 @@ const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
-const utils = require( '../../lib/utils/changelog' );
 
 describe( 'utils', () => {
 	describe( 'proposedDependenciesVersions', () => {
 		let proposedDepsVersion, sandbox, execOptions;
+		let mockCalled = {
+			getNextVersion: false,
+			getNewReleaseType: false,
+			getCurrentVersion: false
+		};
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
@@ -25,8 +29,6 @@ describe( 'utils', () => {
 				warnOnReplace: false,
 				warnOnUnregistered: false
 			} );
-
-			mockery.registerMock( './changelog', utils );
 
 			mockery.registerMock( './executeondependencies', ( options, functionToExecute, done ) => {
 				execOptions = options;
@@ -39,6 +41,36 @@ describe( 'utils', () => {
 					.then( () => done() );
 			} );
 
+			mockery.registerMock( './getnextversion', () => {
+				if ( mockCalled.getNextVersion ) {
+					return '1.0.1';
+				}
+
+				mockCalled.getNextVersion = true;
+
+				return '0.6.0';
+			} );
+
+			mockery.registerMock( './getnewreleasetype', () => {
+				if ( mockCalled.getNewReleaseType ) {
+					return Promise.resolve( { releaseType: 'patch' } );
+				}
+
+				mockCalled.getNewReleaseType = true;
+
+				return Promise.resolve( { releaseType: 'minor' } );
+			} );
+
+			mockery.registerMock( './getcurrentversion', () => {
+				if ( mockCalled.getCurrentVersion ) {
+					return 'v1.0.0';
+				}
+
+				mockCalled.getCurrentVersion = true;
+
+				return 'v0.5.0';
+			} );
+
 			proposedDepsVersion = require( '../../lib/utils/proposeddependenciesversions' );
 		} );
 
@@ -49,39 +81,27 @@ describe( 'utils', () => {
 
 		it( 'returns proposed versions for next release', () => {
 			const chdirStub = sandbox.stub( process, 'chdir' );
-
-			const currentVersionStub = sandbox.stub( utils, 'getCurrentVersion' );
-			const newReleaseTypeStub = sandbox.stub( utils, 'getNewReleaseType' );
-			const nextVersionStub = sandbox.stub( utils, 'getNextVersion' );
-
-			// ckeditor5-core
-			currentVersionStub.onFirstCall().returns( 'v0.5.0' );
-			newReleaseTypeStub.onFirstCall().returns( Promise.resolve( { releaseType: 'minor' } ) );
-			nextVersionStub.onFirstCall().returns( '0.6.0' );
-
-			// ckeditor5-engine
-			currentVersionStub.onSecondCall().returns( 'v1.0.0' );
-			newReleaseTypeStub.onSecondCall().returns( Promise.resolve( { releaseType: 'patch' } ) );
-			nextVersionStub.onSecondCall().returns( '1.0.1' );
+			const cwd = path.join( __dirname, '..', 'fixtures' );
 
 			const options = {
-				cwd: path.join( __dirname, '..', 'fixtures' ),
+				cwd,
 				workspace: 'packages/'
 			};
 
 			return proposedDepsVersion( options )
 				.then( ( versions ) => {
-					expect( chdirStub.calledTwice ).to.equal( true );
+					expect( chdirStub.calledThrice ).to.equal( true );
 					expect( chdirStub.firstCall.args[ 0 ] ).to.match( /ckeditor5-core$/ );
 					expect( chdirStub.secondCall.args[ 0 ] ).to.match( /ckeditor5-engine$/ );
+					expect( chdirStub.thirdCall.args[ 0 ] ).to.equal( cwd );
 
-					expect( currentVersionStub.calledTwice ).to.equal( true );
-					expect( newReleaseTypeStub.calledTwice ).to.equal( true );
-					expect( nextVersionStub.calledTwice ).to.equal( true );
+					expect( mockCalled.getNextVersion ).to.equal( true );
+					expect( mockCalled.getCurrentVersion ).to.equal( true );
+					expect( mockCalled.getNewReleaseType ).to.equal( true );
 
 					expect( versions ).to.deep.equal( {
 						'ckeditor5-core': '0.6.0',
-						'ckeditor5-engine': '1.0.1'
+						'@ckeditor/ckeditor5-engine': '1.0.1'
 					} );
 
 					expect( execOptions ).to.deep.equal( options );
