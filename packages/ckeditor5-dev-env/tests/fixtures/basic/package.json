@@ -2,7 +2,7 @@
 	"version": "3.1.2",
 	"dependencies": {
 		"ckeditor5-core": "ckeditor/ckeditor5-core",
-		"ckeditor5-engine": "ckeditor/ckeditor5-engine",
+		"@ckeditor/ckeditor5-engine": "ckeditor/ckeditor5-engine",
 		"other-plugin": "1.2.3"
 	}
 }

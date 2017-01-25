@@ -9,7 +9,7 @@ const path = require( 'path' );
 const { workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
- * The module allows running a function on their locally installed dependencies.
+ * The function allows running a function on their locally installed dependencies.
  *
  * @param {Object} options
  * @param {String} options.cwd Current work directory.
