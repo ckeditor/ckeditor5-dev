@@ -11,9 +11,7 @@ More information about development tools packages can be found at the following 
 npm i --save-dev @ckeditor/ckeditor5-dev-env
 ```
 
-Description of each development task can be found here: <https://github.com/ckeditor/ckeditor5/wiki/Development-Workflow>.
-
-To include development tasks in your `gulpfile.js`:
+Then add the tasks to `gulpfile.js`
 
 ```js
 // Generate changelog for current package.
