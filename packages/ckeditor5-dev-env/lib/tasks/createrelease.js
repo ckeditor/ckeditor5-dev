@@ -36,7 +36,7 @@ module.exports = function createRelease( options ) {
 	const shExecParams = { verbosity: 'error' };
 	const log = logger();
 
-	log.info( `\nParsing: ${ cwd }\n` );
+	log.info( `Parsing: ${ cwd }` );
 
 	log.info( 'Checking current branch...' );
 	validator.checkCurrentBranch();

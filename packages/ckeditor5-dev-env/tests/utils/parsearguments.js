@@ -12,7 +12,7 @@ const expect = require( 'chai' ).expect;
 describe( 'utils', () => {
 	let parseArguments;
 
-	describe( 'changelog', () => {
+	describe( 'parseArguments', () => {
 		beforeEach( () => {
 			parseArguments = require( '../../lib/utils/parsearguments' );
 		} );

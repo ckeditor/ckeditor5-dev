@@ -12,27 +12,25 @@ const expect = require( 'chai' ).expect;
 describe( 'utils', () => {
 	let getNextVersion;
 
-	describe( 'changelog', () => {
+	describe( 'getNextVersion', () => {
 		beforeEach( () => {
 			getNextVersion = require( '../../lib/utils/getnextversion' );
 		} );
 
-		describe( 'getNextVersion', () => {
-			it( 'bumps the major', () => {
-				expect( getNextVersion( '0.2.3', 'major' ) ).to.equal( '1.0.0' );
-			} );
+		it( 'bumps the major', () => {
+			expect( getNextVersion( '0.2.3', 'major' ) ).to.equal( '1.0.0' );
+		} );
 
-			it( 'bumps the minor', () => {
-				expect( getNextVersion( '1.0.10', 'minor' ) ).to.equal( '1.1.0' );
-			} );
+		it( 'bumps the minor', () => {
+			expect( getNextVersion( '1.0.10', 'minor' ) ).to.equal( '1.1.0' );
+		} );
 
-			it( 'bumps the patch', () => {
-				expect( getNextVersion( '3.2.0', 'patch' ) ).to.equal( '3.2.1' );
-			} );
+		it( 'bumps the patch', () => {
+			expect( getNextVersion( '3.2.0', 'patch' ) ).to.equal( '3.2.1' );
+		} );
 
-			it( 'bumps the version starting with "v"', () => {
-				expect( getNextVersion( 'v1.0.0', 'patch' ) ).to.equal( '1.0.1' );
-			} );
+		it( 'bumps the version starting with "v"', () => {
+			expect( getNextVersion( 'v1.0.0', 'patch' ) ).to.equal( '1.0.1' );
 		} );
 	} );
 } );
