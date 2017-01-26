@@ -6,7 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
-const gitHubUrl = require( 'parse-github-url' );
+const parseGithubUrl = require( 'parse-github-url' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const createGithubRelease = require( './creategithubrelease' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
@@ -38,15 +38,10 @@ module.exports = function createRelease( options ) {
 
 	log.info( `Parsing: ${ cwd }` );
 
-	log.info( 'Checking current branch...' );
-	validator.checkCurrentBranch();
-
-	log.info( 'Checking whether to master is up to date...' );
 	tools.shExec( 'git fetch', shExecParams );
-	validator.checkIsUpToDate();
 
-	log.info( 'Checking whether to working directory is clean...' );
-	validator.checkUncommittedChanges();
+	log.info( 'Checking whether on master and ready to release...' );
+	validator.checkBranch();
 
 	let lastTag;
 	let version;
@@ -67,17 +62,16 @@ module.exports = function createRelease( options ) {
 			const latestChanges = utils.getLatestChangesFromChangelog( version, lastTag );
 
 			log.info( `Committing "${ utils.changelogFile }" and "package.json"...` );
-			tools.shExec( `git add ./package.json ./${ utils.changelogFile }`, shExecParams );
+			tools.shExec( `git add package.json ${ utils.changelogFile }`, shExecParams );
 			tools.shExec( `git commit --message="Release: ${ version }."`, shExecParams );
 
 			log.info( 'Creating tag...' );
 			tools.shExec( `git tag ${ version }`, shExecParams );
-			tools.shExec( 'git push origin master', shExecParams );
-			tools.shExec( `git push origin ${ version }`, shExecParams );
+			tools.shExec( 'git push origin master ${ version }', shExecParams );
 
 			log.info( 'Creating GitHub release...' );
 
-			const repositoryInfo = gitHubUrl(
+			const repositoryInfo = parseGithubUrl(
 				tools.shExec( 'git remote get-url origin --push', shExecParams ).trim()
 			);
 

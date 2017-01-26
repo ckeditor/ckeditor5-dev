@@ -6,7 +6,6 @@
 'use strict';
 
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const utils = require( './changelog' );
 
 const validator = {
 	/**
@@ -24,43 +23,19 @@ const validator = {
 	},
 
 	/**
-	 * Checks whether the current branch is a master.
+	 * Checks whether we're on master and there we're not behind or ahead.
+	 *
+	 * The idea is that the status should be totally clean. If branch has any ucommited,
+	 * unpulled or unpushed changes, abort.
 	 */
-	checkCurrentBranch() {
-		const currentBranch = tools.shExec( 'git rev-parse --abbrev-ref HEAD', { verbosity: 'error' } );
+	checkBranch() {
+		const status = tools.shExec( 'git status -sb', { verbosity: 'error' } ).trim();
 
-		if ( currentBranch.trim() !== 'master' ) {
-			throw new Error( 'Release can be create only from the main branch.' );
+		// This way we'll catch if a branch is behind/ahead or contains uncommited files.
+		if ( status != '## master...origin/master' ) {
+			throw new Error( 'Not on master or master is not clean.' );
 		}
 	},
-
-	/**
-	 * Checks whether master is up to date.
-	 */
-	checkIsUpToDate() {
-		const shortStatus = tools.shExec( 'git status -sb', { verbosity: 'error' } )
-			.trim()
-			.match( /behind (\d+)/ );
-
-		if ( shortStatus && shortStatus[ 1 ] !== 0 ) {
-			throw new Error( 'Branch "master" is not up to date...' );
-		}
-	},
-
-	/**
-	 * Checks whether the branch contains uncommitted changes.
-	 */
-	checkUncommittedChanges() {
-		const anyChangedFiles = tools.shExec( `git status -s`, { verbosity: 'error' } )
-			.split( `\n` )
-			.filter( ( fileName ) => !fileName.match( new RegExp( `${ utils.changelogFile }|package.json` ) ) )
-			.join( `\n` )
-			.trim();
-
-		if ( anyChangedFiles.length ) {
-			throw new Error( 'Working directory contains uncommitted changes...' );
-		}
-	}
 };
 
 module.exports = validator;

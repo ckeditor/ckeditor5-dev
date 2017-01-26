@@ -117,10 +117,10 @@ describe( 'tasks', () => {
 					expect( stubs.utils.getLatestChangesFromChangelog.firstCall.args[ 1 ] ).to.equal( 'v0.5.0' );
 
 					expect( stubs.parseGithubUrl.calledOnce ).to.equal( true );
-					expect( stubs.tools.shExec.callCount ).to.equal( 8 );
+					expect( stubs.tools.shExec.callCount ).to.equal( 7, 'tools.shExec() calls' );
 
-					expect( stubs.logger.info.callCount ).to.equal( 8 );
-					expect( stubs.logger.info.getCall( 7 ).args[ 0 ] ).to.equal( 'Release "v0.6.0" has been created and published.' );
+					expect( stubs.logger.info.callCount ).to.equal( 6, 'logger.info() calls' );
+					expect( stubs.logger.info.getCall( 5 ).args[ 0 ] ).to.equal( 'Release "v0.6.0" has been created and published.' );
 
 					expect( stubs.createGithubRelease.calledOnce ).to.equal( true );
 					expect( stubs.createGithubRelease.firstCall.args[ 0 ] ).to.equal( '123' );
