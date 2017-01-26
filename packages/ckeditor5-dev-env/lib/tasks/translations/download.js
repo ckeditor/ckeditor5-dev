@@ -7,7 +7,6 @@
 
 const fs = require( 'fs-extra' );
 const path = require( 'path' );
-const gettextParser = require( 'gettext-parser' );
 const transifexAPI = require( './transifex-api' );
 const collectUtils = require( './collect-utils' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
@@ -23,7 +22,7 @@ module.exports = function download( loginConfig ) {
 	const packageNames = collectUtils.getPackagesContainingContexts();
 
 	const downlaodAndSaveTranslations = packageNames.map( ( packageName ) => {
-		const translationPromises = downloadAndParsePoFilesForPackage( loginConfig, packageName );
+		const translationPromises = downloadPoFilesForPackage( loginConfig, packageName );
 
 		return translationPromises.then( translations => {
 			saveTranslations( packageName, translations );
@@ -40,7 +39,7 @@ module.exports = function download( loginConfig ) {
 };
 
 // @returns {Promise<Map>}
-function downloadAndParsePoFilesForPackage( loginConfig, packageName ) {
+function downloadPoFilesForPackage( loginConfig, packageName ) {
 	const resourceDetailsPromise = transifexAPI.getResourceDetails( Object.assign( {}, loginConfig, { slug: packageName } ) );
 	let languageCodes;
 
@@ -56,7 +55,7 @@ function downloadAndParsePoFilesForPackage( loginConfig, packageName ) {
 					slug: packageName
 				} );
 
-				return downloadAndParsePoFile( transifexDownloadConfig );
+				return downloadPoFile( transifexDownloadConfig );
 			} )
 		);
 	} );
@@ -68,41 +67,15 @@ function downloadAndParsePoFilesForPackage( loginConfig, packageName ) {
 	} );
 }
 
-function downloadAndParsePoFile( transifexDownloadConfig ) {
-	return downloadPoFile( transifexDownloadConfig )
-		.then( ( poFileContent ) => gettextParser.po.parse( poFileContent ) )
-		.then( ( json ) => getCorrectTranslationFormat( json.translations ) )
-		.catch( ( err ) => logger.error( err ) );
-}
-
-// @param {Object} config
-// @param {String} config.username
-// @param {String} config.password
-// @param {String} config.slug
-// @param {String} config.lang
-// @returns {Promise<String>}
 function downloadPoFile( config ) {
 	return transifexAPI.getTranslation( config ).then( ( data ) => data.content );
 }
 
-// Fixes weird gettextParser output.
-function getCorrectTranslationFormat( translations ) {
-	const result = {};
-
-	Object.keys( translations )
-		.filter( key => !!key )
-		.map( ( key ) => translations[key] )
-		.map( ( obj ) => obj[ Object.keys( obj )[0] ] )
-		.forEach( ( obj ) => result[ obj.msgid ] = obj.msgstr[0] );
-
-	return result;
-}
-
 function saveTranslations( packageName, translations ) {
-	for ( const [ lang, translationDictionary ] of translations ) {
-		const pathToSave = path.join( process.cwd(), 'packages', packageName, 'lang', 'translations', lang + '.json' );
+	for ( const [ lang, poFileContent ] of translations ) {
+		const pathToSave = path.join( process.cwd(), 'packages', packageName, 'lang', 'translations', lang + '.po' );
 
-		fs.outputFileSync( pathToSave, JSON.stringify( translationDictionary, null, 4 ) );
-		logger.info( `Saved ${ lang }.json for ${ packageName }` );
+		fs.outputFileSync( pathToSave, poFileContent );
+		logger.info( `Saved ${ lang }.po for ${ packageName } package` );
 	}
 }
