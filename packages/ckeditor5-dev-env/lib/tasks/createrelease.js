@@ -10,7 +10,10 @@ const gitHubUrl = require( 'parse-github-url' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const createGithubRelease = require( './creategithubrelease' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
+const getLastCreatedTag = require( '../utils/getlastcreatedtag' );
+const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
 const utils = require( '../utils/changelog' );
+const validator = require( '../utils/releasevalidator' );
 
 /**
  * Creates a new release.
@@ -23,118 +26,59 @@ const utils = require( '../utils/changelog' );
  * @params {Object} options
  * @params {String} options.token GitHub token used to authenticate.
  * @params {Boolean} options.init Whether to create first release using this package.
- * @params {Object} options.dependencies Dependencies with versions of other CKEditor5 package.
+ * @params {Object} options.dependencies Packages with versions of CKEditor 5 dependencies.
  * @returns {Promise}
  */
 module.exports = function createRelease( options ) {
-	if ( !options.token ) {
-		throw new Error( 'GitHub CLI token not found. Use --token=<token>.' );
-	}
+	validator.checkOptions( options );
 
 	const cwd = process.cwd();
-
-	console.log( `\nParsing: ${ cwd }\n` );
-
-	const packageJsonPath = path.join( cwd, 'package.json' );
-	const packageJson = require( packageJsonPath );
-
-	if ( !packageJson.repository ) {
-		throw new Error( 'The "package.json" file must contain URL to the repository.' );
-	}
-
 	const shExecParams = { verbosity: 'error' };
 	const log = logger();
 
+	log.info( `\nParsing: ${ cwd }\n` );
+
 	log.info( 'Checking current branch...' );
-
-	const currentBranch = tools.shExec( `git rev-parse --abbrev-ref HEAD`, shExecParams ).trim();
-
-	if ( currentBranch !== 'master' ) {
-		throw new Error( 'Release can be create only from the main branch.' );
-	}
+	validator.checkCurrentBranch();
 
 	log.info( 'Checking whether to master is up to date...' );
-
 	tools.shExec( 'git fetch', shExecParams );
-
-	const shortStatus = tools.shExec( `git status -sb`, shExecParams ).trim().match( /behind (\d+)/ );
-
-	if ( shortStatus && shortStatus[ 1 ] !== 0 ) {
-		throw new Error( 'Branch "master" is not up to date...' );
-	}
+	validator.checkIsUpToDate();
 
 	log.info( 'Checking whether to working directory is clean...' );
-
-	const anyChangedFiles = tools.shExec( `git status -s`, shExecParams )
-		.split( `\n` )
-		.filter( ( fileName ) => !fileName.match( new RegExp( `${ utils.changelogFile }|package.json` ) ) )
-		.join( `\n` )
-		.trim();
-
-	if ( anyChangedFiles.length ) {
-		throw new Error( 'Working directory contains uncommitted changes...' );
-	}
+	validator.checkUncommittedChanges();
 
 	let lastTag;
 	let version;
 
-	// If the release is not marked as initial.
+	// If the release is not marked as initial, find the last created tag.
 	if ( !options.init ) {
-		// Try to find the last tag.
-		const tagList = tools.shExec( 'git tag --list', shExecParams ).trim();
-
-		if ( tagList ) {
-			lastTag = tools.shExec( 'git describe --tags `git rev-list --tags --max-count=1`', shExecParams ).trim();
-		}
+		lastTag = getLastCreatedTag();
 	}
 
-	const packageNames = Object.keys( options.dependencies );
-
-	// Update the package.json dependencies.
-	if ( packageNames.length ) {
-		tools.updateJSONFile( packageJsonPath, ( json ) => {
-			// Package does not have any dependencies.
-			if ( !json.dependencies && !json.devDependencies ) {
-				return json;
-			}
-
-			for ( const item of packageNames ) {
-				if ( json.dependencies[ item ] ) {
-					json.dependencies[ item ] = `^${ options.dependencies[ item ] }`;
-				} else if ( json.devDependencies[ item ] ) {
-					json.devDependencies[ item ] = `^${ options.dependencies[ item ] }`;
-				}
-			}
-
-			return json;
-		} );
-	}
+	const packageJsonPath = path.join( cwd, 'package.json' );
+	updateDependenciesVersions( options.dependencies, packageJsonPath );
 
 	return getNewReleaseType()
 		.then( ( response ) => {
 			const bumpVersionCommand = `npm version ${ response.releaseType } --no-git-tag-version --force`;
-
 			version = tools.shExec( bumpVersionCommand, shExecParams ).trim();
 
 			const latestChanges = utils.getLatestChangesFromChangelog( version, lastTag );
 
 			log.info( `Committing "${ utils.changelogFile }" and "package.json"...` );
-
 			tools.shExec( `git add ./package.json ./${ utils.changelogFile }`, shExecParams );
 			tools.shExec( `git commit --message="Release: ${ version }."`, shExecParams );
 
 			log.info( 'Creating tag...' );
-
 			tools.shExec( `git tag ${ version }`, shExecParams );
-			tools.shExec( `git push origin master`, shExecParams );
+			tools.shExec( 'git push origin master', shExecParams );
 			tools.shExec( `git push origin ${ version }`, shExecParams );
 
 			log.info( 'Creating GitHub release...' );
 
-			const packageJSON = require( packageJsonPath );
-
 			const repositoryInfo = gitHubUrl(
-				typeof packageJSON.repository === 'object' ? packageJSON.repository.url : packageJSON.repository
+				tools.shExec( 'git remote get-url origin --push', shExecParams ).trim()
 			);
 
 			return createGithubRelease( options.token, {
