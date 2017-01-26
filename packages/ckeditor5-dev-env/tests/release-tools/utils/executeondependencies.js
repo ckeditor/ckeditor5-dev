@@ -51,11 +51,21 @@ describe( 'dev-env/release-tools/utils', () => {
 				} );
 		} );
 
-		it( 'executes a function for each package and returns called done callback', () => {
-			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
-			const doneCallback = sandbox.stub().returns( 'Done.' );
+		it( 'waits for each callback', () => {
+			const order = [];
 
-			const getDirectoriesStub = sandbox.stub( workspace, 'getDirectories' )
+			function functionToExecute( dependency ) {
+				return new Promise( ( resolve ) => {
+					order.push( dependency + '-started' );
+
+					setTimeout( () => {
+						order.push( dependency + '-resolved' );
+						resolve();
+					} );
+				} );
+			}
+
+			sandbox.stub( workspace, 'getDirectories' )
 				.returns( [ 'ckeditor5-core', 'ckeditor5-engine' ] );
 
 			const options = {
@@ -63,20 +73,14 @@ describe( 'dev-env/release-tools/utils', () => {
 				workspace: 'packages/'
 			};
 
-			const workspacePath = path.join( options.cwd, options.workspace );
-
-			return executeOnDependencies( options, functionToExecute, doneCallback )
-				.then( ( doneCallbackResult ) => {
-					expect( getDirectoriesStub.calledOnce ).to.equal( true );
-					expect( doneCallback.calledOnce ).to.equal( true );
-
-					expect( functionToExecute.calledTwice ).to.equal( true );
-					expect( functionToExecute.firstCall.args[ 0 ] ).to.equal( 'ckeditor5-core' );
-					expect( functionToExecute.firstCall.args[ 1 ] ).to.equal( path.join( workspacePath, 'ckeditor5-core' ) );
-					expect( functionToExecute.secondCall.args[ 0 ] ).to.equal( '@ckeditor/ckeditor5-engine' );
-					expect( functionToExecute.secondCall.args[ 1 ] ).to.equal( path.join( workspacePath, 'ckeditor5-engine' ) );
-
-					expect( doneCallbackResult ).to.equal( 'Done.' );
+			return executeOnDependencies( options, functionToExecute )
+				.then( () => {
+					expect( order ).to.deep.equal( [
+						'ckeditor5-core-started',
+						'ckeditor5-core-resolved',
+						'@ckeditor/ckeditor5-engine-started',
+						'@ckeditor/ckeditor5-engine-resolved'
+					] );
 				} );
 		} );
 	} );

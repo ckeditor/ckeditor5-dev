@@ -32,11 +32,10 @@ const tasks = {
 			return tasks.generateChangelog();
 		};
 
-		const done = () => {
-			process.chdir( options.cwd );
-		};
-
-		return executeOnDependencies( execOptions, functionToExecute, done );
+		return executeOnDependencies( execOptions, functionToExecute )
+			.then( () => {
+				process.chdir( options.cwd );
+			} );
 	},
 
 	/**
@@ -67,11 +66,10 @@ const tasks = {
 			} );
 		};
 
-		const done = () => {
-			process.chdir( options.cwd );
-		};
-
-		return executeOnDependencies( execOptions, functionToExecute, done );
+		return executeOnDependencies( execOptions, functionToExecute )
+			.then( () => {
+				process.chdir( options.cwd );
+			} );
 	}
 };
 

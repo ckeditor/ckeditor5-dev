@@ -36,11 +36,10 @@ module.exports = function proposedDependenciesVersions( options ) {
 		} );
 	};
 
-	const done = () => {
-		process.chdir( options.cwd );
+	return executeOnDependencies( execOptions, functionToExecute )
+		.then( () => {
+			process.chdir( options.cwd );
 
-		return Promise.resolve( versions );
-	};
-
-	return executeOnDependencies( execOptions, functionToExecute, done );
+			return Promise.resolve( versions );
+		} );
 };

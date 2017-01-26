@@ -18,11 +18,10 @@ const { workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
  * The function receives two arguments:
  *   - `{String} dependencyName Name of current package.`
  *   - `{String dependencyPath An absolute path to the package.`
- * The functions should return an instance of Promise.
- * @param {Function|null} done A function that will be called after the whole process.
+ * The function may return a promise.
  * @returns {Promise}
  */
-module.exports = function executeOnDependencies( options, functionToExecute, done = null ) {
+module.exports = function executeOnDependencies( options, functionToExecute ) {
 	const workspaceAbsolutePath = path.join( options.cwd, options.workspace );
 	const directories = workspace.getDirectories( workspaceAbsolutePath );
 
@@ -42,9 +41,5 @@ module.exports = function executeOnDependencies( options, functionToExecute, don
 		} );
 	}
 
-	return promise.then( () => {
-		if ( done ) {
-			return done();
-		}
-	} );
+	return promise;
 };

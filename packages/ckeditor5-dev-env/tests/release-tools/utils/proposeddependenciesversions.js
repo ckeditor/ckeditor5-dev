@@ -30,15 +30,14 @@ describe( 'dev-env/release-tools/utils', () => {
 				warnOnUnregistered: false
 			} );
 
-			mockery.registerMock( './executeondependencies', ( options, functionToExecute, done ) => {
+			mockery.registerMock( './executeondependencies', ( options, functionToExecute ) => {
 				execOptions = options;
 
 				const workspacePath = path.join( options.cwd, options.workspace );
 
 				return Promise.resolve()
 					.then( () => functionToExecute( 'ckeditor5-core', path.join( workspacePath, 'ckeditor5-core' ) ) )
-					.then( () => functionToExecute( '@ckeditor/ckeditor5-engine', path.join( workspacePath, 'ckeditor5-engine' ) ) )
-					.then( () => done() );
+					.then( () => functionToExecute( '@ckeditor/ckeditor5-engine', path.join( workspacePath, 'ckeditor5-engine' ) ) );
 			} );
 
 			mockery.registerMock( './getnextversion', () => {
