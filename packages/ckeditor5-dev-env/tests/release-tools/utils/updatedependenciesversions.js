@@ -11,14 +11,14 @@ const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
-describe( 'utils', () => {
-	describe( 'updateDependenciesVersions', () => {
+describe( 'dev-env/release-tools/utils', () => {
+	describe( 'updateDependenciesVersions()', () => {
 		let updateDependenciesVersions, sandbox;
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
 
-			updateDependenciesVersions = require( '../../lib/utils/updatedependenciesversions' );
+			updateDependenciesVersions = require( '../../../lib/release-tools/utils/updatedependenciesversions' );
 		} );
 
 		afterEach( () => {

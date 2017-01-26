@@ -9,12 +9,12 @@
 
 const expect = require( 'chai' ).expect;
 
-describe( 'utils', () => {
+describe( 'dev-env/release-tools/utils', () => {
 	let parseArguments;
 
-	describe( 'parseArguments', () => {
+	describe( 'parseArguments()', () => {
 		beforeEach( () => {
-			parseArguments = require( '../../lib/utils/parsearguments' );
+			parseArguments = require( '../../../lib/release-tools/utils/parsearguments' );
 		} );
 
 		it( 'should return default options', () => {

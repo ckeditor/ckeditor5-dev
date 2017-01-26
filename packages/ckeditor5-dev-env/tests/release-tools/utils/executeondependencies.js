@@ -12,12 +12,12 @@ const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const { workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
 
-describe( 'utils', () => {
-	describe( 'executeOnDependencies', () => {
+describe( 'dev-env/release-tools/utils', () => {
+	describe( 'executeOnDependencies()', () => {
 		let executeOnDependencies, sandbox;
 
 		beforeEach( () => {
-			executeOnDependencies = require( '../../lib/utils/executeondependencies' );
+			executeOnDependencies = require( '../../../lib/release-tools/utils/executeondependencies' );
 
 			sandbox = sinon.sandbox.create();
 		} );

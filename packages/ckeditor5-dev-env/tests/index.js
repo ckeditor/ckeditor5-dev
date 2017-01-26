@@ -12,7 +12,7 @@ const sinon = require( 'sinon' );
 const expect = require( 'chai' ).expect;
 const mockery = require( 'mockery' );
 
-describe( 'index', () => {
+describe( 'dev-env/index', () => {
 	let tasks, sandbox, execOptions;
 
 	beforeEach( () => {
@@ -24,7 +24,7 @@ describe( 'index', () => {
 			warnOnUnregistered: false
 		} );
 
-		mockery.registerMock( './utils/executeondependencies', ( options, functionToExecute, done = null ) => {
+		mockery.registerMock( './release-tools/utils/executeondependencies', ( options, functionToExecute, done = null ) => {
 			execOptions = options;
 
 			const workspacePath = path.join( options.cwd, options.workspace );
@@ -47,13 +47,13 @@ describe( 'index', () => {
 		mockery.disable();
 	} );
 
-	describe( 'generateChangelog', () => {
+	describe( 'generateChangelog()', () => {
 		it( 'should be defined', () => {
 			expect( tasks.generateChangelog ).to.be.a( 'function' );
 		} );
 	} );
 
-	describe( 'generateChangelogForDependencies', () => {
+	describe( 'generateChangelogForDependencies()', () => {
 		it( 'executes "generateChangeLog" task on each package', () => {
 			const generateChangelogStub = sandbox.stub( tasks, 'generateChangelog' ).returns( Promise.resolve() );
 
@@ -81,13 +81,13 @@ describe( 'index', () => {
 		} );
 	} );
 
-	describe( 'createRelease', () => {
+	describe( 'createRelease()', () => {
 		it( 'should be defined', () => {
 			expect( tasks.createRelease ).to.be.a( 'function' );
 		} );
 	} );
 
-	describe( 'releaseDependencies', () => {
+	describe( 'releaseDependencies()', () => {
 		it( 'executes "createRelease" task on each package', () => {
 			const createReleaseStub = sandbox.stub( tasks, 'createRelease' ).returns( Promise.resolve() );
 

@@ -11,8 +11,8 @@ const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 
-describe( 'tasks', () => {
-	describe( 'createGithubRelease', () => {
+describe( 'dev-env/release-tools/tasks', () => {
+	describe( 'createGithubRelease()', () => {
 		let createGithubRelease, sandbox, githubOptions, releaseOptions, stubs;
 
 		beforeEach( () => {
@@ -44,7 +44,7 @@ describe( 'tasks', () => {
 				};
 			} );
 
-			createGithubRelease = require( '../../lib/tasks/creategithubrelease' );
+			createGithubRelease = require( '../../../lib/release-tools/tasks/creategithubrelease' );
 		} );
 
 		afterEach( () => {

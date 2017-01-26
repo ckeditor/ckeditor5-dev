@@ -12,8 +12,8 @@ const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 
-describe( 'utils', () => {
-	describe( 'proposedDependenciesVersions', () => {
+describe( 'dev-env/release-tools/utils', () => {
+	describe( 'proposedDependenciesVersions()', () => {
 		let proposedDepsVersion, sandbox, execOptions;
 		let mockCalled = {
 			getNextVersion: false,
@@ -71,7 +71,7 @@ describe( 'utils', () => {
 				return 'v0.5.0';
 			} );
 
-			proposedDepsVersion = require( '../../lib/utils/proposeddependenciesversions' );
+			proposedDepsVersion = require( '../../../lib/release-tools/utils/proposeddependenciesversions' );
 		} );
 
 		afterEach( () => {

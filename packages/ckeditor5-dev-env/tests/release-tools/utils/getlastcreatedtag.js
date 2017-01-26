@@ -11,12 +11,12 @@ const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
-describe( 'utils', () => {
+describe( 'dev-env/release-tools/utils', () => {
 	let getLastCreatedTag, shExecStub;
 
-	describe( 'getLastCreatedTag', () => {
+	describe( 'getLastCreatedTag()', () => {
 		beforeEach( () => {
-			getLastCreatedTag = require( '../../lib/utils/getlastcreatedtag' );
+			getLastCreatedTag = require( '../../../lib/release-tools/utils/getlastcreatedtag' );
 
 			shExecStub = sinon.stub( tools, 'shExec' );
 		} );

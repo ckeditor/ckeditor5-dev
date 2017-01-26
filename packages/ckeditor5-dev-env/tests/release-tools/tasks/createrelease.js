@@ -11,10 +11,10 @@ const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
-const validator = require( '../../lib/utils/releasevalidator' );
+const validator = require( '../../../lib/release-tools/utils/releasevalidator' );
 
-describe( 'tasks', () => {
-	describe( 'createRelease', () => {
+describe( 'dev-env/release-tools/tasks', () => {
+	describe( 'createRelease()', () => {
 		let createRelease, sandbox, stubs;
 
 		beforeEach( () => {
@@ -67,7 +67,7 @@ describe( 'tasks', () => {
 			mockery.registerMock( '../utils/updatedependenciesversions', stubs.updateDependenciesVersions );
 			mockery.registerMock( 'parse-github-url', stubs.parseGithubUrl );
 
-			createRelease = require( '../../lib/tasks/createrelease' );
+			createRelease = require( '../../../lib/release-tools/tasks/createrelease' );
 		} );
 
 		afterEach( () => {

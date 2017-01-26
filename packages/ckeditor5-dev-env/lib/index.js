@@ -5,12 +5,12 @@
 
 'use strict';
 
-const executeOnDependencies = require( './utils/executeondependencies' );
+const executeOnDependencies = require( './release-tools/utils/executeondependencies' );
 
 const tasks = {
-	generateChangelog: require( './tasks/generatechangelog' ),
+	generateChangelog: require( './release-tools/tasks/generatechangelog' ),
 
-	createRelease: require( './tasks/createrelease' ),
+	createRelease: require( './release-tools/tasks/createrelease' ),
 
 	/**
 	 * Generates the changelog for dependencies.

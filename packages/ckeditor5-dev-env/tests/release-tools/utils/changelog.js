@@ -12,12 +12,12 @@ const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 
-describe( 'utils', () => {
+describe( 'dev-env/release-tools/utils', () => {
 	let utils, sandbox;
 
 	describe( 'changelog', () => {
 		beforeEach( () => {
-			utils = require( '../../lib/utils/changelog' );
+			utils = require( '../../../lib/release-tools/utils/changelog' );
 
 			sandbox = sinon.sandbox.create();
 		} );
@@ -31,7 +31,7 @@ describe( 'utils', () => {
 			expect( utils.changelogHeader ).to.be.a( 'string' );
 		} );
 
-		describe( 'getLatestChangesFromChangelog', () => {
+		describe( 'getLatestChangesFromChangelog()', () => {
 			it( 'returns changes for initial tag', () => {
 				const expectedChangelog = [
 					'### Features',
@@ -84,7 +84,7 @@ describe( 'utils', () => {
 			} );
 		} );
 
-		describe( 'getCurrentChangelog', () => {
+		describe( 'getCurrentChangelog()', () => {
 			it( 'resolves the changelog', () => {
 				const resolveStub = sandbox.stub( path, 'resolve' ).returns( 'path-to-changelog' );
 				const readFileStub = sandbox.stub( fs, 'readFileSync' ).returns( 'Content.' );
@@ -98,7 +98,7 @@ describe( 'utils', () => {
 			} );
 		} );
 
-		describe( 'saveChangelog', () => {
+		describe( 'saveChangelog()', () => {
 			it( 'resolves the promise', () => {
 				const resolveStub = sandbox.stub( path, 'resolve' ).returns( 'path-to-changelog' );
 				const writeFileStub = sandbox.stub( fs, 'writeFileSync' );

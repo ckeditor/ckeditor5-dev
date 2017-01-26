@@ -9,12 +9,12 @@
 
 const expect = require( 'chai' ).expect;
 
-describe( 'utils', () => {
+describe( 'dev-env/release-tools/utils', () => {
 	let getNextVersion;
 
-	describe( 'getNextVersion', () => {
+	describe( 'getNextVersion()', () => {
 		beforeEach( () => {
-			getNextVersion = require( '../../lib/utils/getnextversion' );
+			getNextVersion = require( '../../../lib/release-tools/utils/getnextversion' );
 		} );
 
 		it( 'bumps the major', () => {
