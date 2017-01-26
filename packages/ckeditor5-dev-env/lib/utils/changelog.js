@@ -12,7 +12,7 @@ const utils = {
 	/**
 	 * Changelog file name.
 	 */
-	changelogFile: 'CHANGES.md',
+	changelogFile: 'CHANGELOG.md',
 
 	/**
 	 * Changelog header.
