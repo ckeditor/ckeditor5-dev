@@ -16,21 +16,11 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 module.exports = function updateDependenciesVersions( dependencies, packageJsonPath ) {
 	const packageNames = Object.keys( dependencies );
 
-	// Update the package.json dependencies.
-	if ( !packageNames.length ) {
-		return;
-	}
-
 	tools.updateJSONFile( packageJsonPath, ( json ) => {
-		// Package does not have any dependencies.
-		if ( !json.dependencies && !json.devDependencies ) {
-			return json;
-		}
-
 		for ( const item of packageNames ) {
-			if ( json.dependencies[ item ] ) {
+			if ( json.dependencies && json.dependencies[ item ] ) {
 				json.dependencies[ item ] = `^${ dependencies[ item ] }`;
-			} else if ( json.devDependencies[ item ] ) {
+			} else if ( json.devDependencies && json.devDependencies[ item ] ) {
 				json.devDependencies[ item ] = `^${ dependencies[ item ] }`;
 			}
 		}
