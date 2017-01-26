@@ -5,9 +5,8 @@
 
 'use strict';
 
-const resolveImportPathInContext = require( '@ckeditor/ckeditor5-dev-utils/lib/compiler/resolveimportpathincontext' );
-const getWorkspaceRelativePathInfo = require( '@ckeditor/ckeditor5-dev-utils/lib/compiler/getworkspacerelativepathinfo' );
 const path = require( 'path' );
+const fs = require( 'fs' );
 
 module.exports = class CKEditorWebpackPlugin {
 	/**
@@ -19,40 +18,76 @@ module.exports = class CKEditorWebpackPlugin {
 	}
 
 	apply( compiler ) {
-		const packagePaths = this.options.packages;
+		const { languages } = this.options;
 
-		if ( !packagePaths || packagePaths.length === 0 ) {
-			return;
+		if ( languages && languages.length == 1 ) {
+			replaceTranslationCallsForOneLangauge( compiler, languages[0] );
 		}
-
-		compiler.plugin( 'after-resolvers', ( compiler ) => {
-			compiler.resolvers.normal.plugin( 'before-resolve', ( obj, done ) => {
-				const requestPackageName = getWorkspaceRelativePathInfo( obj.request ).packageName;
-
-				let resolvedPath;
-
-				for ( let contextPackagePath of packagePaths ) {
-					if ( resolvedPath ) {
-						break;
-					}
-
-					const chunks = contextPackagePath.split( path.sep );
-
-					// Current request package is the main package.
-					if ( chunks[ chunks.length - 1 ] === requestPackageName ) {
-						contextPackagePath = chunks.slice( 0, -1 ).join( path.sep );
-					}
-
-					resolvedPath = resolveImportPathInContext( obj.context.issuer, obj.request, contextPackagePath );
-				}
-
-				if ( resolvedPath ) {
-					obj.path = resolvedPath.modulesPath;
-					obj.request = '.' + path.sep + path.join( resolvedPath.packageName, resolvedPath.filePath );
-				}
-
-				done();
-			} );
-		} );
 	}
 };
+
+function replaceTranslationCallsForOneLangauge( compiler, language ) {
+	const packageNames = new Set();
+
+	compiler.plugin( 'after-resolvers', ( compiler ) => {
+		compiler.resolvers.normal.plugin( 'before-resolve', ( obj, done ) => {
+			const match = obj.request.match( /@ckeditor[\\\/]([^\\\/]+)/ );
+
+			if ( match ) {
+				packageNames.add( match[ 1 ] );
+			}
+
+			done();
+		} );
+	} );
+
+	compiler.plugin( 'emit', ( options, done ) => {
+		const allTranslations = getTranslationDictionary( packageNames, language );
+		console.log( allTranslations );
+
+		for ( const assetName in options.assets ) {
+			replaceTCalls( options.assets[ assetName ], allTranslations );
+		}
+
+		done();
+	} );
+}
+
+function replaceTCalls( assetContent, allTranslations ) {
+	const source = assetContent.source().replace( / t\([^)]+?\)/gm, ( tCall ) => {
+		const englishString = tCall.match( /'([^']+)/ )[ 1 ];
+
+		const translation = allTranslations.get( englishString );
+
+		if ( !translation ) {
+			console.error( new Error( `Missing translation for: ${ englishString }` ) );
+
+			return ` '${ englishString }'`;
+		}
+
+		return ` '${ translation }'`;
+	} );
+
+	assetContent.source = () => source;
+	assetContent.size = () => source.size;
+}
+
+function getTranslationDictionary( packageNames, language ) {
+	const dictionary = new Map();
+
+	for ( const packageName of packageNames ) {
+		const pathToPackage = path.join( process.cwd(), 'node_modules', '@ckeditor', packageName );
+		const pathToTranslationFile = path.join( pathToPackage, 'lang', 'translations', language + '.json' );
+
+		if ( fs.existsSync( pathToTranslationFile ) ) {
+			const fileData = fs.readFileSync( pathToTranslationFile, 'utf-8' );
+			const parsedTranslationFile = JSON.parse( fileData );
+
+			for ( const translationKey in parsedTranslationFile ) {
+				dictionary.set( translationKey, parsedTranslationFile[ translationKey ] || translationKey );
+			}
+		}
+	}
+
+	return dictionary;
+}
