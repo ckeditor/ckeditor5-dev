@@ -27,11 +27,11 @@ describe( 'dev-env/index', () => {
 		mockery.registerMock( './release-tools/utils/executeondependencies', ( options, functionToExecute ) => {
 			execOptions = options;
 
-			const workspacePath = path.join( options.cwd, options.workspace );
+			const packagesPath = path.join( options.cwd, options.packages );
 
 			return Promise.resolve()
-				.then( () => functionToExecute( 'ckeditor5-core', path.join( workspacePath, 'ckeditor5-core' ) ) )
-				.then( () => functionToExecute( 'ckeditor5-engine', path.join( workspacePath, 'ckeditor5-engine' ) ) );
+				.then( () => functionToExecute( 'ckeditor5-core', path.join( packagesPath, 'ckeditor5-core' ) ) )
+				.then( () => functionToExecute( 'ckeditor5-engine', path.join( packagesPath, 'ckeditor5-engine' ) ) );
 		} );
 
 		tasks = require( '../lib/index' );
@@ -56,14 +56,14 @@ describe( 'dev-env/index', () => {
 
 			const options = {
 				cwd: path.join( __dirname, '..', 'fixtures', 'basic' ),
-				workspace: 'packages/'
+				packages: 'packages/'
 			};
 
 			return tasks.generateChangelogForDependencies( options )
 				.then( () => {
 					expect( execOptions ).to.deep.equal( {
 						cwd: options.cwd,
-						workspace: options.workspace
+						packages: options.packages
 					} );
 
 					expect( chdirStub.calledThrice ).to.equal( true );
@@ -90,9 +90,8 @@ describe( 'dev-env/index', () => {
 
 			const options = {
 				cwd: path.join( __dirname, '..', 'fixtures', 'basic' ),
-				workspace: 'packages/',
+				packages: 'packages/',
 				token: 'GithubToken',
-				init: true,
 				dependencies: {
 					'ckeditor5-core': '0.6.0',
 					'ckeditor5-engine': '1.0.1'
@@ -103,7 +102,7 @@ describe( 'dev-env/index', () => {
 				.then( () => {
 					expect( execOptions ).to.deep.equal( {
 						cwd: options.cwd,
-						workspace: options.workspace
+						packages: options.packages
 					} );
 
 					expect( chdirStub.calledThrice ).to.equal( true );
@@ -114,7 +113,6 @@ describe( 'dev-env/index', () => {
 					expect( createReleaseStub.calledTwice ).to.equal( true );
 
 					const releaseArguments = {
-						init: options.init,
 						token: options.token,
 						dependencies: options.dependencies
 					};

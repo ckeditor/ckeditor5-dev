@@ -6,24 +6,24 @@
 'use strict';
 
 const path = require( 'path' );
-const { workspace } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { workspace: workspaceUtils } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * The function allows running a function on their locally installed dependencies.
  *
  * @param {Object} options
  * @param {String} options.cwd Current work directory.
- * @param {String} options.workspace A relative path to the workspace.
+ * @param {String} options.packages A relative path to the packages.
  * @param {Function} functionToExecute A function that will be called on each package.
  * The function receives two arguments:
- *   - `{String} dependencyName Name of current package.`
- *   - `{String dependencyPath An absolute path to the package.`
+ *   * `{String} dependencyName Name of current package.`
+ *   * `{String dependencyPath An absolute path to the package.`
  * The function may return a promise.
  * @returns {Promise}
  */
 module.exports = function executeOnDependencies( options, functionToExecute ) {
-	const workspaceAbsolutePath = path.join( options.cwd, options.workspace );
-	const directories = workspace.getDirectories( workspaceAbsolutePath );
+	const packagesAbsolutePath = path.join( options.cwd, options.packages );
+	const directories = workspaceUtils.getDirectories( packagesAbsolutePath );
 
 	let promise = Promise.resolve();
 
@@ -32,9 +32,8 @@ module.exports = function executeOnDependencies( options, functionToExecute ) {
 	}
 
 	for ( const directory of directories ) {
-		const dependencyPath = path.join( workspaceAbsolutePath, directory );
-		const directoryPackageJson = require( path.join( dependencyPath, 'package.json' ) );
-		const dependencyName = directoryPackageJson.name;
+		const dependencyPath = path.join( packagesAbsolutePath, directory );
+		const dependencyName = require( path.join( dependencyPath, 'package.json' ) ).name;
 
 		promise = promise.then( () => {
 			return functionToExecute( dependencyName, dependencyPath );

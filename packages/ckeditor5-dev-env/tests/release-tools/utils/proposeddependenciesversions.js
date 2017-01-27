@@ -33,11 +33,11 @@ describe( 'dev-env/release-tools/utils', () => {
 			mockery.registerMock( './executeondependencies', ( options, functionToExecute ) => {
 				execOptions = options;
 
-				const workspacePath = path.join( options.cwd, options.workspace );
+				const packagesPath = path.join( options.cwd, options.packages );
 
 				return Promise.resolve()
-					.then( () => functionToExecute( 'ckeditor5-core', path.join( workspacePath, 'ckeditor5-core' ) ) )
-					.then( () => functionToExecute( '@ckeditor/ckeditor5-engine', path.join( workspacePath, 'ckeditor5-engine' ) ) );
+					.then( () => functionToExecute( 'ckeditor5-core', path.join( packagesPath, 'ckeditor5-core' ) ) )
+					.then( () => functionToExecute( '@ckeditor/ckeditor5-engine', path.join( packagesPath, 'ckeditor5-engine' ) ) );
 			} );
 
 			mockery.registerMock( './getnextversion', () => {
@@ -84,7 +84,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			const options = {
 				cwd,
-				workspace: 'packages/'
+				packages: 'packages/'
 			};
 
 			return proposedDepsVersion( options )

@@ -10,18 +10,17 @@ const path = require( 'path' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 // Map of available types of the commits.
-// Types marked as `false` will be ignored during generate the changelog.
+// Types marked as `false` will be ignored during generating the changelog.
 const availableTypes = new Map( [
 	[ 'Feature', true ],
 	[ 'Fix', true ],
 	[ 'Enhancement', true ],
-	[ 'Internal Feature', false ],
-	[ 'Internal Fix', false ],
-	[ 'Internal Enhancement', false ],
+	[ 'Internal', false ],
+	[ 'Code style', false ],
 	[ 'Docs', false ],
 	[ 'Tests', false ],
 	[ 'Revert', false ],
-	[ 'Release', false ],
+	[ 'Release', false ]
 ] );
 
 const packageJson = require( path.join( process.cwd(), 'package.json' ) );

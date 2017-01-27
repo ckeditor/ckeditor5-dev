@@ -14,48 +14,36 @@ npm i --save-dev @ckeditor/ckeditor5-dev-env
 Then add the tasks to `gulpfile.js`
 
 ```js
-// Generate changelog for current package.
-gulp.task( 'changelog', () => {
-	const ckeditor5DevEnv = require( '@ckeditor/ckeditor5-dev-env' );
+// Generate changelog for the current package.
+gulp.task( 'changelog:self', () => {
+	const tasks = require( '@ckeditor/ckeditor5-dev-env' );
 
-	return ckeditor5DevEnv.generateChangelog();
+	return tasks.generateChangelog();
 } );
 
 // Generate changelog for all dependencies.
-gulp.task( 'changelog-packages', () => {
-	const ckeditor5DevEnv = require( '@ckeditor/ckeditor5-dev-env' );
-	const options = devTaskOptions();
-	
-	options.cwd = process.cwd();
-	
-	// Directory to the dependencies.
-	options.workspace = 'packages/';
+gulp.task( 'changelog:packages', () => {
+	const tasks = require( '@ckeditor/ckeditor5-dev-env' );
+	const options = getReleaseToolsOptions();
 
-	return ckeditor5DevEnv.generateChangelogForDependencies( options );
+	return tasks.generateChangelogForDependencies( options );
 } );
 
-// Create release for current package.
-gulp.task( 'release', () => {
-	const ckeditor5DevEnv = require( '@ckeditor/ckeditor5-dev-env' );
+// Create release for the current package.
+gulp.task( 'release:self', () => {
+	const tasks = require( '@ckeditor/ckeditor5-dev-env' );
 
-	return ckeditor5DevEnv.createRelease( devTaskOptions() );
+	return tasks.createRelease( getReleaseToolsOptions() );
 } );
 
 // Create release for all dependencies.
-gulp.task( 'release-packages', () => {
-	const ckeditor5DevEnv = require( '@ckeditor/ckeditor5-dev-env' );
-	const options = devTaskOptions();
-	
-	options.cwd = process.cwd();
-	
-	// Directory to the dependencies.
-	options.workspace = 'packages/';
-	
-	return ckeditor5DevEnv.releaseDependencies( options );
+gulp.task( 'release:packages', () => {
+	const tasks = require( '@ckeditor/ckeditor5-dev-env' );
+	return tasks.releaseDependencies( getReleaseToolsOptions() );
 } );
 
-function devTaskOptions() {
-	return require( '@ckeditor/ckeditor5-dev-env/lib/utils/parsearguments' )();
+function getReleaseToolsOptions() {
+	return require( 'ckeditor5-dev/packages/ckeditor5-dev-env/lib/release-tools/utils/getoptions' )();
 }
 ```
 
@@ -72,7 +60,7 @@ Not required an additional description of the commit.
 
 NOTE: This note will be copied to the changelog.
 
-BREAKING CHANGE: This sentence means - public API has been changed, the package isn't backward compatible. The sentence also will be copied to the changelog. 
+BREAKING CHANGE: This sentence means - public API has been changed, the package isn't backward compatible. The sentence also will be copied to the changelog.
 ```
 
 Accepted types of the commit:
@@ -254,7 +242,7 @@ This tool doesn't commit the changes. You can still provide manual fixes if some
 ### Creating a release
 
 This tool creates a new release based on commits in the repository. Commits have to follow the same terms which tool for generating the changelog.
-  
+
 Required parameters:
 
 - `token` - a GitHub token used for creating a new release on GitHub,

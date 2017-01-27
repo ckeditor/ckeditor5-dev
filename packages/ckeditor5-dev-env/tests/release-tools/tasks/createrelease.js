@@ -77,7 +77,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 		it( 'makes a tag and creates a new release on GitHub', () => {
 			const options = {
 				token: '123',
-				init: false,
 				dependencies: {
 					'@ckeditor/ckeditor5-foo': '1.1.1',
 					'@ckeditor/ckeditor5-bar': '2.0.0',

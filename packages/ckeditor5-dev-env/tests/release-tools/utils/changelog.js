@@ -32,7 +32,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		describe( 'getChangesForVersion()', () => {
-			it( 'returns changes for initial tag', () => {
+			it( 'returns changes for the first tag', () => {
 				const expectedChangelog = [
 					'### Features',
 					'',

@@ -15,7 +15,7 @@ const executeOnDependencies = require( './executeondependencies' );
  *
  * @param {Object} options
  * @params {String} options.cwd Current work directory.
- * @params {String} options.workspace A relative path to the workspace.
+ * @params {String} options.packages A relative path to the packages.
  * @returns {Promise}
  */
 module.exports = function proposedDependenciesVersions( options ) {
@@ -23,7 +23,7 @@ module.exports = function proposedDependenciesVersions( options ) {
 
 	const execOptions = {
 		cwd: options.cwd,
-		workspace: options.workspace
+		packages: options.packages
 	};
 
 	const functionToExecute = ( repositoryName, repositoryPath ) => {

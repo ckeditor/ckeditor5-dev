@@ -13,7 +13,6 @@ const validator = {
 	 *
 	 * @params {Object} options
 	 * @params {String} options.token GitHub token used to authenticate.
-	 * @params {Boolean} options.init Whether to create first release using this package.
 	 * @params {Object} options.dependencies Dependencies with versions of other CKEditor5 package.
 	 */
 	checkOptions( options ) {

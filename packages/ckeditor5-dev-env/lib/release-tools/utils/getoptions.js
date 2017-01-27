@@ -10,23 +10,19 @@
  *
  * @returns {Object} options
  * @returns {String} options.token GitHub token used to authenticate.
- * @returns {Boolean} options.init Whether to create first release using this package.
  * @returns {Boolean} options.debug Whether to show additional logs.
+ * @returns {Boolean} options.cwd Current working directory (packages) from which all paths will be resolved.
+ * @returns {Boolean} options.packages Where to look for other packages (dependencies).
  */
-module.exports = function parseArguments( args = process.argv.slice( 2 ) ) {
-	const options = require( 'minimist' )( args, {
+module.exports = function getOptions( args = process.argv.slice( 2 ) ) {
+	args = require( 'minimist' )( args, {
 		string: [
 			'token'
-		],
-
-		boolean: [
-			'init'
-		],
-
-		default: {
-			init: false
-		}
+		]
 	} );
 
-	return options;
+	return Object.assign( {
+		cwd: process.cwd(),
+		packages: 'packages'
+	}, args );
 };
