@@ -14,10 +14,10 @@ const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const availableTypes = new Map( [
 	[ 'Feature', true ],
 	[ 'Fix', true ],
-	[ 'Enhancement', true ],
-	[ 'Internal', false ],
+	[ 'Other', true ],
 	[ 'Code style', false ],
 	[ 'Docs', false ],
+	[ 'Internal', false ],
 	[ 'Tests', false ],
 	[ 'Revert', false ],
 	[ 'Release', false ]
@@ -105,10 +105,13 @@ function getCommitType( commit ) {
 			return 'Features';
 
 		case 'Fix':
-			return 'Bug Fixes';
+			return 'Bug fixes';
 
 		case 'Enhancement':
 			return 'Enhancements';
+
+		case 'Other':
+			return 'Other changes';
 
 		default:
 			throw new Error( `Given invalid type of commit ("${ commit }").` );
