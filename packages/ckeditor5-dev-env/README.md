@@ -21,8 +21,8 @@ gulp.task( 'changelog', () => {
 	return ckeditor5DevEnv.generateChangelog();
 } );
 
-// Generate changelog for all dependencies and current package.
-gulp.task( 'packages-changelog', () => {
+// Generate changelog for all dependencies.
+gulp.task( 'changelog-packages', () => {
 	const ckeditor5DevEnv = require( '@ckeditor/ckeditor5-dev-env' );
 	const options = devTaskOptions();
 	
@@ -41,8 +41,8 @@ gulp.task( 'release', () => {
 	return ckeditor5DevEnv.createRelease( devTaskOptions() );
 } );
 
-// Create release for all dependencies and current package.
-gulp.task( 'release', () => {
+// Create release for all dependencies.
+gulp.task( 'release-packages', () => {
 	const ckeditor5DevEnv = require( '@ckeditor/ckeditor5-dev-env' );
 	const options = devTaskOptions();
 	
