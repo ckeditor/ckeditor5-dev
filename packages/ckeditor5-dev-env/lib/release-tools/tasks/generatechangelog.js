@@ -37,7 +37,7 @@ module.exports = function generateChangelog() {
 
 			function saveChangelogPipe() {
 				return stream.noop( ( changes ) => {
-					let currentChangelog = utils.getCurrentChangelog();
+					let currentChangelog = utils.getChangelog();
 
 					// Remove header from current changelog.
 					currentChangelog = currentChangelog.replace( utils.changelogHeader, '' );

@@ -42,7 +42,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				},
 				validator: {},
 				utils: {
-					getLatestChangesFromChangelog: sandbox.stub()
+					getChangesForVersion: sandbox.stub()
 				}
 			};
 
@@ -63,7 +63,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 			mockery.registerMock( '../utils/releasevalidator', stubs.validator );
 			mockery.registerMock( './creategithubrelease', stubs.createGithubRelease );
 			mockery.registerMock( '../utils/getnewreleasetype', stubs.getNewReleaseType );
-			mockery.registerMock( '../utils/getlastcreatedtag', stubs.getLastCreatedTag );
 			mockery.registerMock( '../utils/updatedependenciesversions', stubs.updateDependenciesVersions );
 			mockery.registerMock( 'parse-github-url', stubs.parseGithubUrl );
 
@@ -89,7 +88,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			stubs.tools.shExec.withArgs( 'npm version minor --no-git-tag-version --force' ).returns( 'v0.6.0' );
 			stubs.getNewReleaseType.returns( Promise.resolve( { releaseType: 'minor' } ) );
 			stubs.getLastCreatedTag.returns( 'v0.5.0' );
-			stubs.utils.getLatestChangesFromChangelog.returns( 'Changes.' );
+			stubs.utils.getChangesForVersion.returns( 'Changes.' );
 			stubs.parseGithubUrl.returns( {
 				owner: 'organization',
 				name: 'repository'
@@ -106,18 +105,16 @@ describe( 'dev-env/release-tools/tasks', () => {
 					}
 
 					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
-					expect( stubs.getLastCreatedTag.calledOnce ).to.equal( true );
 
 					expect( stubs.updateDependenciesVersions.calledOnce ).to.equal( true );
 					expect( stubs.updateDependenciesVersions.firstCall.args[ 0 ] ).to.deep.equal( options.dependencies );
 					expect( stubs.updateDependenciesVersions.firstCall.args[ 1 ] ).to.deep.equal( '/cwd/package.json' );
 
-					expect( stubs.utils.getLatestChangesFromChangelog.calledOnce ).to.equal( true );
-					expect( stubs.utils.getLatestChangesFromChangelog.firstCall.args[ 0 ] ).to.equal( 'v0.6.0' );
-					expect( stubs.utils.getLatestChangesFromChangelog.firstCall.args[ 1 ] ).to.equal( 'v0.5.0' );
+					expect( stubs.utils.getChangesForVersion.calledOnce ).to.equal( true );
+					expect( stubs.utils.getChangesForVersion.firstCall.args[ 0 ] ).to.equal( 'v0.6.0' );
 
 					expect( stubs.parseGithubUrl.calledOnce ).to.equal( true );
-					expect( stubs.tools.shExec.callCount ).to.equal( 7, 'tools.shExec() calls' );
+					expect( stubs.tools.shExec.callCount ).to.equal( 8, 'tools.shExec() calls' );
 
 					expect( stubs.logger.info.callCount ).to.equal( 6, 'logger.info() calls' );
 					expect( stubs.logger.info.getCall( 5 ).args[ 0 ] ).to.equal( 'Release "v0.6.0" has been created and published.' );

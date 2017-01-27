@@ -10,7 +10,6 @@ const parseGithubUrl = require( 'parse-github-url' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const createGithubRelease = require( './creategithubrelease' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
-const getLastCreatedTag = require( '../utils/getlastcreatedtag' );
 const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
 const utils = require( '../utils/changelog' );
 const validator = require( '../utils/releasevalidator' );
@@ -39,17 +38,12 @@ module.exports = function createRelease( options ) {
 	log.info( `Releasing: ${ cwd }` );
 
 	tools.shExec( 'git fetch', shExecParams );
+	tools.shExec( 'git status' );
 
 	log.info( 'Checking whether on master and ready to release...' );
 	validator.checkBranch();
 
-	let lastTag;
 	let version;
-
-	// If the release is not marked as initial, find the last created tag.
-	if ( !options.init ) {
-		lastTag = getLastCreatedTag();
-	}
 
 	const packageJsonPath = path.join( cwd, 'package.json' );
 	updateDependenciesVersions( options.dependencies, packageJsonPath );
@@ -59,7 +53,7 @@ module.exports = function createRelease( options ) {
 			const bumpVersionCommand = `npm version ${ response.releaseType } --no-git-tag-version --force`;
 			version = tools.shExec( bumpVersionCommand, shExecParams ).trim();
 
-			const latestChanges = utils.getLatestChangesFromChangelog( version, lastTag );
+			const latestChanges = utils.getChangesForVersion( version );
 
 			log.info( `Committing "${ utils.changelogFile }" and "package.json"...` );
 			tools.shExec( `git add package.json ${ utils.changelogFile }`, shExecParams );
@@ -67,7 +61,7 @@ module.exports = function createRelease( options ) {
 
 			log.info( 'Creating tag...' );
 			tools.shExec( `git tag ${ version }`, shExecParams );
-			tools.shExec( 'git push origin master ${ version }', shExecParams );
+			tools.shExec( `git push origin master ${ version }`, shExecParams );
 
 			log.info( 'Creating GitHub release...' );
 

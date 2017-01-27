@@ -20,34 +20,30 @@ const utils = {
 	changelogHeader: `Changelog\n=========\n\n`,
 
 	/**
-	 * Returns all changes between `currentTag` and `previousTag`.
+	 * Retrieves changes from the changelog for the given tag.
 	 *
-	 * If `previousTag` is null, returns the whole file (first release).
-	 *
-	 * @param {String} currentTag
-	 * @param {String|null} previousTag
+	 * @param {String} version
 	 * @returns {String}
 	 */
-	getLatestChangesFromChangelog( currentTag, previousTag ) {
-		currentTag = currentTag.replace( /^v/, '' );
+	getChangesForVersion( version ) {
+		version = version.replace( /^v/, '' );
 
-		let changelog = utils.getCurrentChangelog().replace( utils.changelogHeader, '' );
+		let changelog = utils.getChangelog().replace( utils.changelogHeader, '\n' );
 
-		if ( previousTag ) {
-			previousTag = previousTag.replace( /^v/, '' );
+		const match = changelog.match( new RegExp( `\\n(## \\[${ version }\\][\\s\\S]+?)(?:\\n## \\[|$)` ) );
 
-			changelog = changelog.match( new RegExp( `(## \\[${ currentTag }\\][\\w\\W]+)## \\[?${ previousTag }\\]?` ) )[ 1 ];
+		if ( !match || !match[ 1 ] ) {
+			console.log( changelog, match, version );
+			throw new Error( `Cannot find changelog entries for ${ version }.` );
 		}
 
-		changelog = changelog.replace( new RegExp( `^## \\[?${ currentTag }\\]?.*` ), '' ).trim();
-
-		return changelog;
+		return match[ 1 ].replace( /##[^\n]+\n/, '' ).trim();
 	},
 
 	/**
 	 * @returns {String}
 	 */
-	getCurrentChangelog() {
+	getChangelog() {
 		const changelogFile = path.resolve( utils.changelogFile );
 
 		return fs.readFileSync( changelogFile, 'utf-8' );

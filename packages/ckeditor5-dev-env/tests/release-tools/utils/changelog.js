@@ -31,7 +31,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			expect( utils.changelogHeader ).to.be.a( 'string' );
 		} );
 
-		describe( 'getLatestChangesFromChangelog()', () => {
+		describe( 'getChangesForVersion()', () => {
 			it( 'returns changes for initial tag', () => {
 				const expectedChangelog = [
 					'### Features',
@@ -39,56 +39,97 @@ describe( 'dev-env/release-tools/utils', () => {
 					'* Cloned the main module. ([abcd123](https://github.com))'
 				].join( '\n' );
 
-				const changelog = [
-					'## 0.1.0 (2017-01-13)\n',
-					expectedChangelog
-				].join( '\n' );
+				const changelog =
+`## [0.1.0](https://github.com) (2017-01-13)
 
-				const currentChangelogStub = sandbox.stub( utils, 'getCurrentChangelog' )
+${ expectedChangelog }`;
+
+				const currentChangelogStub = sandbox.stub( utils, 'getChangelog' )
 					.returns( utils.changelogHeader + changelog );
 
-				const parsedChangelog = utils.getLatestChangesFromChangelog( 'v0.1.0' );
+				const parsedChangelog = utils.getChangesForVersion( 'v0.1.0' );
 
 				expect( currentChangelogStub.calledOnce ).to.equal( true );
 				expect( parsedChangelog ).to.equal( expectedChangelog );
 			} );
 
 			it( 'returns changes between tags', () => {
-				const expectedChangelog = [
-					'### Features',
-					'',
-					'* Cloned the main module. ([abcd123](https://github.com))\n',
-					'### BREAKING CHANGE',
-					'* Bump the major!',
-				].join( '\n' );
+				const expectedChangelog =
+`### Features
 
-				const changelog = [
-					'## [1.0.0](https://github.com/) (2017-01-13)',
-					'',
-					expectedChangelog,
-					'\n',
-					'## 0.1.0 (2017-01-13)',
-					'',
-					'### Features',
-					'',
-					'* Cloned the main module. ([abcd123](https://github.com))'
-				].join( '\n' );
+* Cloned the main module. ([abcd123](https://github.com))
 
-				const currentChangelogStub = sandbox.stub( utils, 'getCurrentChangelog' )
+### BREAKING CHANGE
+
+* Bump the major!`;
+
+				const changelog =
+`## [1.0.0](https://github.com/) (2017-01-13)
+
+${ expectedChangelog }
+
+## [0.1.0](https://github.com) (2017-01-13)
+
+### Features
+
+* Cloned the main module. ([abcd123](https://github.com))`;
+
+				const currentChangelogStub = sandbox.stub( utils, 'getChangelog' )
 					.returns( utils.changelogHeader + changelog );
 
-				const parsedChangelog = utils.getLatestChangesFromChangelog( 'v1.0.0', 'v0.1.0' );
+				const parsedChangelog = utils.getChangesForVersion( 'v1.0.0' );
 
 				expect( currentChangelogStub.calledOnce ).to.equal( true );
 				expect( parsedChangelog ).to.equal( expectedChangelog );
 			} );
+
+			it( 'throws if cannot find changes for the specified version', () => {
+				const changelog =
+`## [0.1.0](https://github.com) (2017-01-13)
+
+### Features
+
+* Cloned the main module. ([abcd123](https://github.com))`;
+
+				sandbox.stub( utils, 'getChangelog' )
+					.returns( utils.changelogHeader + changelog );
+
+				expect( () => utils.getChangesForVersion( 'v1.0.0' ) )
+					.to.throw( Error, /^Cannot find changelog entries for/ );
+			} );
+
+			it( 'does not leak or stop too early', () => {
+				const changelog =
+`## [0.3.0](https://github.com) (2017-01-13)
+
+3
+
+Some text ## [like a release header]
+
+## [0.2.0](https://github.com) (2017-01-13)
+
+2
+
+## [0.1.0](https://github.com) (2017-01-13)
+
+1`;
+
+				sandbox.stub( utils, 'getChangelog' )
+					.returns( utils.changelogHeader + changelog );
+
+				expect( utils.getChangesForVersion( 'v0.3.0' ) )
+					.to.equal( '3\n\nSome text ## [like a release header]' );
+
+				expect( utils.getChangesForVersion( 'v0.2.0' ) )
+					.to.equal( '2' );
+			} );
 		} );
 
-		describe( 'getCurrentChangelog()', () => {
+		describe( 'getChangelog()', () => {
 			it( 'resolves the changelog', () => {
 				const resolveStub = sandbox.stub( path, 'resolve' ).returns( 'path-to-changelog' );
 				const readFileStub = sandbox.stub( fs, 'readFileSync' ).returns( 'Content.' );
-				const changelog = utils.getCurrentChangelog();
+				const changelog = utils.getChangelog();
 
 				expect( resolveStub.calledOnce ).to.equal( true );
 				expect( readFileStub.calledOnce ).to.equal( true );
