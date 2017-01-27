@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "gettext-parser": "^1.2.2",
     "mockery": "^2.0.0",
     "sinon": "^1.17.4",
     "vinyl": "^1.1.1"

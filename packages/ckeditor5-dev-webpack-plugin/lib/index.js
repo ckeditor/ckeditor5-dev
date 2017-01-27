@@ -5,10 +5,7 @@
 
 'use strict';
 
-const resolveImportPathInContext = require( '@ckeditor/ckeditor5-dev-utils/lib/compiler/resolveimportpathincontext' );
-const getWorkspaceRelativePathInfo = require( '@ckeditor/ckeditor5-dev-utils/lib/compiler/getworkspacerelativepathinfo' );
-const path = require( 'path' );
-const injectTranslations = require( './injecttranslations' );
+const replaceTranslationCallsForOneLangauge = require( './replacetranslationcallsforonelanguage' );
 
 module.exports = class CKEditorWebpackPlugin {
 	/**
@@ -21,46 +18,10 @@ module.exports = class CKEditorWebpackPlugin {
 	}
 
 	apply( compiler ) {
-		const { languages, packages } = this.options;
+		const { languages } = this.options;
 
-		if ( packages && packages.length > 0 ) {
-			enhanceResolver( compiler, packages );
-		}
-
-		if ( languages && languages.length > 0 ) {
-			injectTranslations( compiler, languages );
+		if ( languages && languages.length == 1 ) {
+			replaceTranslationCallsForOneLangauge( compiler, languages[0] );
 		}
 	}
 };
-
-function enhanceResolver( compiler, packagePaths ) {
-	compiler.plugin( 'after-resolvers', ( compiler ) => {
-		compiler.resolvers.normal.plugin( 'before-resolve', ( obj, done ) => {
-			const requestPackageName = getWorkspaceRelativePathInfo( obj.request ).packageName;
-
-			let resolvedPath;
-
-			for ( let contextPackagePath of packagePaths ) {
-				if ( resolvedPath ) {
-					break;
-				}
-
-				const chunks = contextPackagePath.split( path.sep );
-
-				// Current request package is the main package.
-				if ( chunks[ chunks.length - 1 ] === requestPackageName ) {
-					contextPackagePath = chunks.slice( 0, -1 ).join( path.sep );
-				}
-
-				resolvedPath = resolveImportPathInContext( obj.context.issuer, obj.request, contextPackagePath );
-			}
-
-			if ( resolvedPath ) {
-				obj.path = resolvedPath.modulesPath;
-				obj.request = '.' + path.sep + path.join( resolvedPath.packageName, resolvedPath.filePath );
-			}
-
-			done();
-		} );
-	} );
-}
