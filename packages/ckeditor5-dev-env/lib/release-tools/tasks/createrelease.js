@@ -36,7 +36,7 @@ module.exports = function createRelease( options ) {
 	const shExecParams = { verbosity: 'error' };
 	const log = logger();
 
-	log.info( `Parsing: ${ cwd }` );
+	log.info( `Releasing: ${ cwd }` );
 
 	tools.shExec( 'git fetch', shExecParams );
 

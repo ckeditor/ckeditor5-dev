@@ -6,7 +6,7 @@
 'use strict';
 
 const conventionalChangelog = require( 'conventional-changelog' );
-const { tools, stream } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { tools, stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const parserOpts = require( '../changelog/parser-options' );
 const writerOpts = require( '../changelog/writer-options' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
@@ -20,7 +20,9 @@ const utils = require( '../utils/changelog' );
  * @returns {Promise}
  */
 module.exports = function generateChangelog() {
-	console.log( `\nParsing: ${ process.cwd() }\n` );
+	const log = logger();
+
+	log.info( `Generating changelog for: ${ process.cwd() }` );
 
 	const shExecParams = { verbosity: 'warning' };
 
@@ -34,7 +36,7 @@ module.exports = function generateChangelog() {
 				.pipe( saveChangelogPipe() );
 
 			function saveChangelogPipe() {
-				return stream.noop( ( ( changes ) => {
+				return stream.noop( ( changes ) => {
 					let currentChangelog = utils.getCurrentChangelog();
 
 					// Remove header from current changelog.
@@ -52,7 +54,7 @@ module.exports = function generateChangelog() {
 					tools.shExec( `git checkout -- ./package.json`, shExecParams );
 
 					resolve();
-				} ) );
+				} );
 			}
 		} );
 	} );
