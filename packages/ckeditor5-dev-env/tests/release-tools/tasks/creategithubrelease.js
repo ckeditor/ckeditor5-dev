@@ -79,7 +79,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 						tag_name: 'v1.0.0',
 						body: 'Changes.'
 					} );
-					// jscs:eanble requireCamelCaseOrUpperCaseIdentifiers
+					// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 				} );
 		} );
 	} );

@@ -24,19 +24,14 @@ describe( 'dev-env/index', () => {
 			warnOnUnregistered: false
 		} );
 
-		mockery.registerMock( './release-tools/utils/executeondependencies', ( options, functionToExecute, done = null ) => {
+		mockery.registerMock( './release-tools/utils/executeondependencies', ( options, functionToExecute ) => {
 			execOptions = options;
 
 			const workspacePath = path.join( options.cwd, options.workspace );
 
 			return Promise.resolve()
 				.then( () => functionToExecute( 'ckeditor5-core', path.join( workspacePath, 'ckeditor5-core' ) ) )
-				.then( () => functionToExecute( 'ckeditor5-engine', path.join( workspacePath, 'ckeditor5-engine' ) ) )
-				.then( () => {
-					if ( done ) {
-						return done();
-					}
-				} );
+				.then( () => functionToExecute( 'ckeditor5-engine', path.join( workspacePath, 'ckeditor5-engine' ) ) );
 		} );
 
 		tasks = require( '../lib/index' );
