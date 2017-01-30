@@ -51,7 +51,11 @@ module.exports = function generateChangelog() {
 					utils.saveChangelog( newChangelog );
 
 					// Revert bumping the version.
-					tools.shExec( `git checkout -- ./package.json`, shExecParams );
+					tools.shExec( `git checkout -- package.json`, shExecParams );
+
+					// Commit the changelog.
+					tools.shExec( `git add ${ utils.changelogFile }` );
+					tools.shExec( `git commit -m "Docs: Changelog."` );
 
 					resolve();
 				} );
