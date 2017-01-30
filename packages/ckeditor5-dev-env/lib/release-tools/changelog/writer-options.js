@@ -7,6 +7,7 @@
 
 const fs = require( 'fs' );
 const path = require( 'path' );
+const chalk = require( 'chalk' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 // Map of available types of the commits.
@@ -24,9 +25,9 @@ const availableTypes = new Map( [
 ] );
 
 const packageJson = require( path.join( process.cwd(), 'package.json' ) );
+const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
 const templatePath = path.join( __dirname, 'templates' );
 const log = logger();
-const logOptions = { raw: true };
 
 module.exports = {
 	transform: transformCommit,
@@ -46,27 +47,32 @@ module.exports = {
 // - filters out the commit if it should not be visible in the changelog,
 // - makes links to issues and user's profiles on GitHub.
 function transformCommit( commit ) {
+	if ( typeof commit.hash === 'string' ) {
+		commit.hash = commit.hash.substring( 0, 7 );
+	}
+
+	const isCommitIncluded = availableTypes.get( commit.type );
+
+	let logMessage = `* ${ commit.hash } "${ commit.header }" `;
+
+	if ( isCommitIncluded ) {
+		logMessage += chalk.green( 'INCLUDED' );
+	} else {
+		logMessage += chalk.red( 'SKIPPED' );
+	}
+
+	log.info( logMessage );
+
+	if ( !isCommitIncluded ) {
+		return;
+	}
+
 	const issues = [];
-
-	if ( !availableTypes.has( commit.type ) ) {
-		log.warning( `Skipped commit "${ commit.hash }" because contains invalid format of the message.`, logOptions );
-		log.info( commit.header, logOptions );
-
-		return;
-	}
-
-	if ( !availableTypes.get( commit.type ) ) {
-		return;
-	}
 
 	commit.type = getCommitType( commit.type );
 
 	if ( commit.scope === '*' ) {
 		commit.scope = '';
-	}
-
-	if ( typeof commit.hash === 'string' ) {
-		commit.hash = commit.hash.substring( 0, 7 );
 	}
 
 	if ( typeof commit.subject === 'string' ) {
@@ -95,7 +101,7 @@ function linkGithubIssues( value, issues = null ) {
 			issues.push( issueId );
 		}
 
-		return `[#${ issueId }](${ packageJson.bugs }/${ issueId })`;
+		return `[#${ issueId }](${ issuesUrl }/${ issueId })`;
 	} );
 }
 
