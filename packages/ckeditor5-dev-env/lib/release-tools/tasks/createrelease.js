@@ -52,7 +52,7 @@ module.exports = function createRelease( options ) {
 			const latestChanges = utils.getChangesForVersion( version );
 
 			log.info( `Committing "${ utils.changelogFile }" and "package.json"...` );
-			tools.shExec( `git add package.json ${ utils.changelogFile }`, shExecParams );
+			tools.shExec( 'git add package.json', shExecParams );
 			tools.shExec( `git commit --message="Release: ${ version }."`, shExecParams );
 
 			log.info( 'Creating tag...' );
