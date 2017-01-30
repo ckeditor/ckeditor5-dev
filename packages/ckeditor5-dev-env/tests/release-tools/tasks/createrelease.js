@@ -15,7 +15,7 @@ const validator = require( '../../../lib/release-tools/utils/releasevalidator' )
 
 describe( 'dev-env/release-tools/tasks', () => {
 	describe( 'createRelease()', () => {
-		let createRelease, sandbox, stubs;
+		let createRelease, sandbox, stubs, options;
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
@@ -67,15 +67,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 			mockery.registerMock( 'parse-github-url', stubs.parseGithubUrl );
 
 			createRelease = require( '../../../lib/release-tools/tasks/createrelease' );
-		} );
 
-		afterEach( () => {
-			sandbox.restore();
-			mockery.disable();
-		} );
-
-		it( 'makes a tag and creates a new release on GitHub', () => {
-			const options = {
+			options = {
 				token: '123',
 				dependencies: {
 					'@ckeditor/ckeditor5-foo': '1.1.1',
@@ -95,6 +88,16 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			sandbox.stub( process, 'cwd' ).returns( '/cwd' );
 			sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
+		} );
+
+		afterEach( () => {
+			sandbox.restore();
+			mockery.disable();
+		} );
+
+		it( 'makes a tag, publish on npm and creates a new release on GitHub', () => {
+			options.skipNpm = false;
+			options.skipGithub = false;
 
 			return createRelease( options )
 				.then( () => {
@@ -113,7 +116,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.utils.getChangesForVersion.firstCall.args[ 0 ] ).to.equal( 'v0.6.0' );
 
 					expect( stubs.parseGithubUrl.calledOnce ).to.equal( true );
-					expect( stubs.tools.shExec.callCount ).to.equal( 9, 'tools.shExec() calls' );
+					expect( stubs.tools.shExec.callCount ).to.equal( 8, 'tools.shExec() calls' );
 
 					expect( stubs.logger.info.callCount ).to.equal( 7, 'logger.info() calls' );
 					expect( stubs.logger.info.getCall( 6 ).args[ 0 ] ).to.equal( 'Release "v0.6.0" has been created and published.' );
@@ -126,6 +129,39 @@ describe( 'dev-env/release-tools/tasks', () => {
 						version: 'v0.6.0',
 						description: 'Changes.'
 					} );
+				} );
+		} );
+
+		it( 'makes a tag and publish on npm only', () => {
+			options.skipNpm = false;
+			options.skipGithub = true;
+
+			return createRelease( options )
+				.then( () => {
+					expect( stubs.tools.shExec.callCount ).to.equal( 7, 'tools.shExec() calls' );
+
+					expect( stubs.logger.info.callCount ).to.equal( 6, 'logger.info() calls' );
+					expect( stubs.logger.info.getCall( 5 ).args[ 0 ] ).to.equal( 'Release "v0.6.0" has been created and published.' );
+
+					expect( stubs.parseGithubUrl.called ).to.equal( false );
+					expect( stubs.createGithubRelease.calledOnce ).to.equal( false );
+				} );
+		} );
+
+		it( 'makes a tag and creates a new release on GitHub', () => {
+			options.skipNpm = true;
+			options.skipGithub = false;
+
+			return createRelease( options )
+				.then( () => {
+					expect( stubs.tools.shExec.neverCalledWith( 'npm publish' ) ).to.equal( true );
+					expect( stubs.tools.shExec.callCount ).to.equal( 7, 'tools.shExec() calls' );
+
+					expect( stubs.logger.info.callCount ).to.equal( 6, 'logger.info() calls' );
+					expect( stubs.logger.info.getCall( 5 ).args[ 0 ] ).to.equal( 'Release "v0.6.0" has been created and published.' );
+
+					expect( stubs.parseGithubUrl.calledOnce ).to.equal( true );
+					expect( stubs.createGithubRelease.calledOnce ).to.equal( true );
 				} );
 		} );
 	} );

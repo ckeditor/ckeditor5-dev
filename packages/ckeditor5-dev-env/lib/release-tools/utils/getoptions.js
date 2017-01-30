@@ -8,21 +8,37 @@
 /**
  * Parses command line arguments and returns them as a user-friendly hash.
  *
- * @returns {Object} options
- * @returns {String} options.token GitHub token used to authenticate.
- * @returns {Boolean} options.debug Whether to show additional logs.
- * @returns {Boolean} options.cwd Current working directory (packages) from which all paths will be resolved.
- * @returns {Boolean} options.packages Where to look for other packages (dependencies).
+ * @returns {Options} options
  */
 module.exports = function getOptions( args = process.argv.slice( 2 ) ) {
 	args = require( 'minimist' )( args, {
 		string: [
 			'token'
+		],
+		boolean: [
+			'skip-github',
+			'skip-npm'
 		]
 	} );
 
 	return Object.assign( {
 		cwd: process.cwd(),
-		packages: 'packages'
+		packages: 'packages',
+		skipGithub: args[ 'skip-github' ] || false,
+		skipNpm: args[ 'skip-npm' ] || false,
 	}, args );
 };
+
+/**
+ * @typedef Options
+ *
+ * @property {String} [token] GitHub token used to authenticate.
+ *
+ * @property {Boolean} [skipGithub=false] Whether to publish the package on Github.
+ *
+ * @property {Boolean} [skipNpm=false] Whether to publish the package on Npm.
+ *
+ * @property {String} [cwd=process.cwd()] Current working directory (packages) from which all paths will be resolved.
+ *
+ * @property {String} [packages='packages'] Where to look for other packages (dependencies).
+ */

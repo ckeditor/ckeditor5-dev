@@ -22,9 +22,7 @@ const validator = require( '../utils/releasevalidator' );
  *
  * This method should be executed after the `tasks.generateChangelog` method.
  *
- * @params {Object} options
- * @params {String} options.token GitHub token used to authenticate.
- * @params {Object} options.dependencies Packages with versions of CKEditor 5 dependencies.
+ * @params {Options} options
  * @returns {Promise}
  */
 module.exports = function createRelease( options ) {
@@ -37,7 +35,6 @@ module.exports = function createRelease( options ) {
 	log.info( `Releasing: ${ cwd }` );
 
 	tools.shExec( 'git fetch', shExecParams );
-	tools.shExec( 'git status' );
 
 	log.info( 'Checking whether on master and ready to release...' );
 	validator.checkBranch();
@@ -62,21 +59,25 @@ module.exports = function createRelease( options ) {
 			tools.shExec( `git tag ${ version }`, shExecParams );
 			tools.shExec( `git push origin master ${ version }`, shExecParams );
 
-			log.info( 'Publishing on NPM...' );
-			tools.shExec( 'npm publish', shExecParams );
+			if ( !options.skipNpm ) {
+				log.info( 'Publishing on NPM...' );
+				tools.shExec( 'npm publish', shExecParams );
+			}
 
-			log.info( 'Creating GitHub release...' );
+			if ( !options.skipGithub ) {
+				log.info( 'Creating GitHub release...' );
 
-			const repositoryInfo = parseGithubUrl(
-				tools.shExec( 'git remote get-url origin --push', shExecParams ).trim()
-			);
+				const repositoryInfo = parseGithubUrl(
+					tools.shExec( 'git remote get-url origin --push', shExecParams ).trim()
+				);
 
-			return createGithubRelease( options.token, {
-				repositoryOwner: repositoryInfo.owner,
-				repositoryName: repositoryInfo.name,
-				version: version,
-				description: latestChanges
-			} );
+				return createGithubRelease( options.token, {
+					repositoryOwner: repositoryInfo.owner,
+					repositoryName: repositoryInfo.name,
+					version: version,
+					description: latestChanges
+				} );
+			}
 		} )
 		.then( () => {
 			log.info( `Release "${ version }" has been created and published.` );
