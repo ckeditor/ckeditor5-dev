@@ -8,10 +8,10 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
-const transifexAPI = require( './transifex-api' );
+const transifexService = require( './transifex-service' );
 
 /**
- * Adds translations to the Transifex.
+ * Uploads translations to the Transifex from collected files that are saved at 'ckeditor5/build/.transifex'.
  *
  * @param {Object} loginConfig
  * @param {String} loginConfig.username Username for the Transifex account.
@@ -25,7 +25,7 @@ module.exports = function upload( loginConfig ) {
 	} ) );
 
 	const resourceExistPromises = potFiles.map( ( potFile ) => {
-		return transifexAPI.hasResource( Object.assign( {}, loginConfig, {
+		return transifexService.hasResource( Object.assign( {}, loginConfig, {
 			slug: potFile.packageName,
 		} ) );
 	} );
@@ -48,11 +48,11 @@ function createOrUpdateResource( config, potFile, resourceExists ) {
 	} );
 
 	if ( resourceExists ) {
-		return transifexAPI.putResourceContent( resConfig )
+		return transifexService.putResourceContent( resConfig )
 			.then( ( parsedResponse ) => logPutResponse( packageName, parsedResponse ) );
 	}
 
-	return transifexAPI.postResource( resConfig )
+	return transifexService.postResource( resConfig )
 		.then( ( parsedResponse ) => logPostResponse( packageName, parsedResponse ) );
 }
 

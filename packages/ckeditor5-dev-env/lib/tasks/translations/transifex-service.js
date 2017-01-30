@@ -11,11 +11,20 @@ const projectSlug = 'test-779';
 const API_BASE = `http://www.transifex.com/api/2/project/${ projectSlug }`;
 
 /**
- * Wrappers of the Transifex API.
+ * Promise wrappers of the Transifex API.
  *
  * @see https://docs.transifex.com/api/ for API documentation.
  */
 module.exports = {
+	/**
+	 * Returns promise whether or not the resource exists.
+	 *
+	 * @param {Object} config
+	 * @param {String} config.username Username for the Transifex account.
+	 * @param {String} config.password Username for the Transifex account.
+	 * @param {String} config.slug Resource slug.
+	 * @returns {Promise<Boolean>}
+	 */
 	hasResource( { username, password, slug } ) {
 		return new Promise( ( resolve ) => {
 			request.get( `${ API_BASE }/resource/${ slug }/`, {
@@ -32,6 +41,17 @@ module.exports = {
 		} );
 	},
 
+	/**
+	 * Uploads resource for the first time.
+	 *
+	 * @param {Object} config
+	 * @param {String} config.username Username for the Transifex account.
+	 * @param {String} config.password Username for the Transifex account.
+	 * @param {String} config.slug Resource slug.
+	 * @param {String} config.content Resource content.
+	 * @param {String} config.name Resource name.
+	 * @returns {Promise<Object>}
+	 */
 	postResource( { username, password, name, slug, content } ) {
 		return new Promise( ( resolve, reject ) => {
 			request.post( `${ API_BASE }/resources/`, {
@@ -47,6 +67,16 @@ module.exports = {
 		} );
 	},
 
+	/**
+	 * Updates resoure content.
+	 *
+	 * @param {Object} config
+	 * @param {String} config.username Username for the Transifex account.
+	 * @param {String} config.password Username for the Transifex account.
+	 * @param {String} config.slug Resource slug.
+	 * @param {String} config.content Resource content.
+	 * @returns {Promise<Object>}
+	 */
 	putResourceContent( { username, password, slug, content } ) {
 		return new Promise( ( resolve, reject ) => {
 			request.put( `${ API_BASE }/resource/${ slug }/content/`, {
@@ -62,25 +92,45 @@ module.exports = {
 		} );
 	},
 
+	/**
+	 * Returns resource details promise.
+	 *
+	 * @param {Object} config
+	 * @param {String} config.username Username for the Transifex account.
+	 * @param {String} config.password Username for the Transifex account.
+	 * @param {String} config.slug Resource slug.
+	 * @returns {Promise<Object>}
+	 */
 	getResourceDetails( { username, password, slug } ) {
 		return new Promise( ( resolve, reject ) => {
 			request.get( `${ API_BASE }/resource/${ slug }/?details`, {
 				auth: { username, password }
-			}, createJSONResponseHandler( resolve, reject ) );
+			}, createJsonResponseHandler( resolve, reject ) );
 		} );
 	},
 
+	/**
+	 * Returns translations promise for the target resource and language.
+	 *
+	 * @param {Object} config
+	 * @param {String} config.username Username for the Transifex account.
+	 * @param {String} config.password Username for the Transifex account.
+	 * @param {String} config.slug Resource slug.
+	 * @param {String} config.lang Target language.
+	 * @returns {Promise<Object>}
+	 */
 	getTranslation( { username, password, slug, lang } ) {
 		return new Promise( ( resolve, reject ) => {
 			request.get( `${ API_BASE }/resource/${ slug }/translation/${ lang }/`, {
 				auth: { username, password }
-			}, createJSONResponseHandler( resolve, reject ) );
+			}, createJsonResponseHandler( resolve, reject ) );
 		} );
 	}
 };
 
-function createJSONResponseHandler( resolve, reject ) {
-	return function handleJSONResponse( error, response, body ) {
+// Creates handler for the get requests in the promise wrappers.
+function createJsonResponseHandler( resolve, reject ) {
+	return function handleJsonResponse( error, response, body ) {
 		if ( error ) {
 			return reject( error );
 		}  else if ( response.statusCode !== 200 ) {

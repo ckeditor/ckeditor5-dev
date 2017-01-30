@@ -161,7 +161,7 @@ describe( 'collect-utils', () => {
 			const errors = utils.getUnusedContextErrorMessages( contexts, translations );
 
 			expect( errors ).to.deep.equal( [
-				'Unused context: ckeditor5-utils/util'
+				'Unused context: ckeditor5-utils/util.'
 			] );
 		} );
 
@@ -189,7 +189,7 @@ describe( 'collect-utils', () => {
 
 			const errors = utils.getRepeatedContextErrorMessages( contexts );
 			expect( errors ).to.deep.equal( [
-				'Context is duplicated for the key: util'
+				'Context is duplicated for the key: util.'
 			] );
 		} );
 	} );

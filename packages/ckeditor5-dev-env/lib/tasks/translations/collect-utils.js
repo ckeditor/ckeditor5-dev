@@ -15,9 +15,17 @@ const langContextSuffix = path.join( 'lang', 'contexts.json' );
 const corePackageName = 'ckeditor5-core';
 
 const utils = {
+	/**
+	 * Collect translations and returns array of translations.
+	 *
+	 * @returns {Array<Object>}
+	 */
 	collectTranslations() {
 		const srcPaths = [ process.cwd(), 'packages', '*', 'src', '**', '*.js' ].join( '/' );
-		const files = glob.sync( srcPaths  );
+
+		const files = glob.sync( srcPaths )
+			.filter( ( srcPath ) => !srcPath.match( /packages\/[^\/]+\/src\/lib\// ) );
+
 		const translations = [];
 
 		for ( const filePath of files ) {
@@ -41,7 +49,7 @@ const utils = {
 				return;
 			}
 
-			const key = stringMatch[1];
+			const key = stringMatch[ 1 ];
 
 			const contextMatch = key.match( /\[context: ([^\]]+)\]/ );
 			const sentenceMatch = key.match( /^[^\[]+/ );
@@ -50,14 +58,19 @@ const utils = {
 			return {
 				filePath,
 				key,
-				package: packageMatch[1],
-				context: contextMatch ? contextMatch[1] : null,
-				sentence: sentenceMatch[0].trim(),
+				package: packageMatch[ 1 ],
+				context: contextMatch ? contextMatch[ 1 ] : null,
+				sentence: sentenceMatch[ 0 ].trim(),
 			};
 		} )
 		.filter( translationCall => !!translationCall );
 	},
 
+	/**
+	 * Traverse all packages and returns Map of the all founded language contexts informations (file content and file name).
+	 *
+	 * @returns {Map<String, Object>}
+	 */
 	getContexts() {
 		const mapEntries = utils.getPackagesContainingContexts().map( packageName => {
 			const pathToContext = path.join( ckeditor5PackagesDir, packageName, langContextSuffix );
@@ -78,9 +91,12 @@ const utils = {
 			) );
 	},
 
-	// @param {Map.<Object>} contexts
-	// @param {Array.<Object>} translations
-	getMissingContextErrorMessages: function getMissingContextErrorMessages( contexts, translations ) {
+	/**
+	 * @param {Map.<Object>} contexts Map of the language contexts.
+	 * @param {Array.<Object>} translations Array of the translations.
+	 * @returns {Array<String>}
+	 */
+	getMissingContextErrorMessages( contexts, translations ) {
 		const errors = [];
 
 		for ( const translation of translations ) {
@@ -130,7 +146,7 @@ const utils = {
 
 		return [ ...usedContextMap ]
 			.filter( ( [ key, usage ] ) => !usage )
-			.map( ( [ key ] ) => `Unused context: ${ key }` );
+			.map( ( [ key ] ) => `Unused context: ${ key }.` );
 	},
 
 	getRepeatedContextErrorMessages( contexts ) {
@@ -140,7 +156,7 @@ const utils = {
 		for ( const context of contexts.values() ) {
 			for ( const key in context.content ) {
 				if ( keys.has( key ) ) {
-					errors.push( `Context is duplicated for the key: ${ key }` );
+					errors.push( `Context is duplicated for the key: ${ key }.` );
 				}
 				keys.add( key );
 			}
@@ -150,22 +166,22 @@ const utils = {
 	},
 
 	createPotFileContent( context ) {
-		const messages = Object.keys( context.content ).map( str => ( {
+		const translationObjects = Object.keys( context.content ).map( str => ( {
 			id: str,
 			str: str,
 			ctxt: context.content[ str ]
 		} ) );
 
-		return utils.jsonToPotFile( messages );
+		return utils.stringifyTranslationObjects( translationObjects );
 	},
 
-	jsonToPotFile( messages ) {
-		return messages.map( ( msg ) => {
+	stringifyTranslationObjects( translationObjects ) {
+		return translationObjects.map( ( translationObject ) => {
 			// Note that order is important.
 			return [
-				`msgctxt "${msg.ctxt}"`,
-				`msgid "${msg.id}"`,
-				`msgstr "${msg.str}"`
+				`msgctxt "${ translationObject.ctxt }"`,
+				`msgid "${ translationObject.id }"`,
+				`msgstr "${ translationObject.str }"`
 			].map( x => x + '\n' ).join( '' );
 		} ).join( '\n' );
 	},
@@ -179,14 +195,7 @@ const utils = {
 	},
 
 	createPotFileHeader() {
-		return [
-			'# Copyright (c) Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.',
-			// '# This file is distributed under the same license as the PACKAGE package.',
-			// '"Last-Translator: FULL NAME <EMAIL@ADDRESS>"\\n',
-			// '"MIME-Version: 1.0"\\n',
-			// '"Content-Type: text/plain; charset=UTF-8"\\n',
-			// '"Content-Transfer-Encoding: 8bit"\\n',
-		].join( '\n' ) + '\n\n';
+		return '# Copyright (c) Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.\n\n';
 	},
 };
 

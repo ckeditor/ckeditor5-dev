@@ -7,7 +7,7 @@
 
 const fs = require( 'fs-extra' );
 const path = require( 'path' );
-const transifexAPI = require( './transifex-api' );
+const transifexService = require( './transifex-service' );
 const collectUtils = require( './collect-utils' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 
@@ -40,7 +40,7 @@ module.exports = function download( loginConfig ) {
 
 // @returns {Promise<Map>}
 function downloadPoFilesForPackage( loginConfig, packageName ) {
-	const resourceDetailsPromise = transifexAPI.getResourceDetails( Object.assign( {}, loginConfig, { slug: packageName } ) );
+	const resourceDetailsPromise = transifexService.getResourceDetails( Object.assign( {}, loginConfig, { slug: packageName } ) );
 	let languageCodes;
 
 	const translationsForPackagePromise = resourceDetailsPromise.then( ( resourceDetails ) => {
@@ -68,7 +68,7 @@ function downloadPoFilesForPackage( loginConfig, packageName ) {
 }
 
 function downloadPoFile( config ) {
-	return transifexAPI.getTranslation( config ).then( ( data ) => data.content );
+	return transifexService.getTranslation( config ).then( ( data ) => data.content );
 }
 
 function saveTranslations( packageName, translations ) {
