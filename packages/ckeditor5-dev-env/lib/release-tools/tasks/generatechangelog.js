@@ -32,7 +32,7 @@ module.exports = function generateChangelog() {
 
 		return new Promise( ( resolve ) => {
 			// conventionalChangelog based on version in `package.json`.
-			conventionalChangelog( {}, null, null, parserOpts, writerOpts )
+			conventionalChangelog( {}, null, { merges: true }, parserOpts, writerOpts )
 				.pipe( saveChangelogPipe() );
 
 			function saveChangelogPipe() {
