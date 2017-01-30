@@ -6,9 +6,7 @@
 'use strict';
 
 const request = require( 'request' );
-
-const projectSlug = 'test-779';
-const API_BASE = `http://www.transifex.com/api/2/project/${ projectSlug }`;
+const API_BASE = 'http://www.transifex.com/api/2/project/ckeditor5';
 
 /**
  * Promise wrappers of the Transifex API.
@@ -57,13 +55,7 @@ module.exports = {
 			request.post( `${ API_BASE }/resources/`, {
 				auth: { username, password },
 				formData: { slug, name, content, 'i18n_type': 'PO' }
-			}, ( error, response, body ) => {
-				if ( error ) {
-					reject( error );
-				} else {
-					resolve( JSON.parse( body ) );
-				}
-			} );
+			}, createJsonResponseHandler( resolve, reject ) );
 		} );
 	},
 
@@ -82,13 +74,7 @@ module.exports = {
 			request.put( `${ API_BASE }/resource/${ slug }/content/`, {
 				auth: { username, password },
 				formData: { content, 'i18n_type': 'PO' }
-			}, ( error, response, body ) => {
-				if ( error ) {
-					reject( error );
-				} else {
-					resolve( JSON.parse( body ) );
-				}
-			} );
+			}, createJsonResponseHandler( resolve, reject ) );
 		} );
 	},
 
@@ -128,14 +114,19 @@ module.exports = {
 	}
 };
 
-// Creates handler for the get requests in the promise wrappers.
+// Creates handler for the requests in the promise wrappers.
 function createJsonResponseHandler( resolve, reject ) {
 	return function handleJsonResponse( error, response, body ) {
 		if ( error ) {
 			return reject( error );
-		}  else if ( response.statusCode !== 200 ) {
+		}  else if ( response.statusCode >= 300 ) {
 			return reject( new Error( `Status code: ${response.statusCode}` ) );
 		}
-		resolve( JSON.parse( body ) );
+
+		try {
+			resolve( JSON.parse( body ) );
+		} catch ( err ) {
+			reject( `Error handled while parsing body: ${ body.toString() }` );
+		}
 	};
 }
