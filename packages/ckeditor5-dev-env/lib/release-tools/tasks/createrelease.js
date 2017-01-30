@@ -62,6 +62,9 @@ module.exports = function createRelease( options ) {
 			tools.shExec( `git tag ${ version }`, shExecParams );
 			tools.shExec( `git push origin master ${ version }`, shExecParams );
 
+			log.info( 'Publishing on NPM...' );
+			tools.shExec( 'npm publish', shExecParams );
+
 			log.info( 'Creating GitHub release...' );
 
 			const repositoryInfo = parseGithubUrl(

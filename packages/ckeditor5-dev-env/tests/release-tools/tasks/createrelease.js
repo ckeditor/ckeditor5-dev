@@ -113,10 +113,10 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.utils.getChangesForVersion.firstCall.args[ 0 ] ).to.equal( 'v0.6.0' );
 
 					expect( stubs.parseGithubUrl.calledOnce ).to.equal( true );
-					expect( stubs.tools.shExec.callCount ).to.equal( 8, 'tools.shExec() calls' );
+					expect( stubs.tools.shExec.callCount ).to.equal( 9, 'tools.shExec() calls' );
 
-					expect( stubs.logger.info.callCount ).to.equal( 6, 'logger.info() calls' );
-					expect( stubs.logger.info.getCall( 5 ).args[ 0 ] ).to.equal( 'Release "v0.6.0" has been created and published.' );
+					expect( stubs.logger.info.callCount ).to.equal( 7, 'logger.info() calls' );
+					expect( stubs.logger.info.getCall( 6 ).args[ 0 ] ).to.equal( 'Release "v0.6.0" has been created and published.' );
 
 					expect( stubs.createGithubRelease.calledOnce ).to.equal( true );
 					expect( stubs.createGithubRelease.firstCall.args[ 0 ] ).to.equal( '123' );
