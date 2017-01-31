@@ -23,7 +23,7 @@ module.exports = {
 	 * @param {String} config.slug Resource slug.
 	 * @param {String} config.content Resource content.
 	 * @param {String} config.name Resource name.
-	 * @returns {Promise<Object>}
+	 * @returns {Promise.<Object>}
 	 */
 	getResources( { username, password } ) {
 		return new Promise( ( resolve, reject ) => {
@@ -42,7 +42,7 @@ module.exports = {
 	 * @param {String} config.slug Resource slug.
 	 * @param {String} config.content Resource content.
 	 * @param {String} config.name Resource name.
-	 * @returns {Promise<Object>}
+	 * @returns {Promise.<Object>}
 	 */
 	postResource( { username, password, name, slug, content } ) {
 		return new Promise( ( resolve, reject ) => {
@@ -61,7 +61,7 @@ module.exports = {
 	 * @param {String} config.password Username for the Transifex account.
 	 * @param {String} config.slug Resource slug.
 	 * @param {String} config.content Resource content.
-	 * @returns {Promise<Object>}
+	 * @returns {Promise.<Object>}
 	 */
 	putResourceContent( { username, password, slug, content } ) {
 		return new Promise( ( resolve, reject ) => {
@@ -79,7 +79,7 @@ module.exports = {
 	 * @param {String} config.username Username for the Transifex account.
 	 * @param {String} config.password Username for the Transifex account.
 	 * @param {String} config.slug Resource slug.
-	 * @returns {Promise<Object>}
+	 * @returns {Promise.<Object>}
 	 */
 	getResourceDetails( { username, password, slug } ) {
 		return new Promise( ( resolve, reject ) => {
@@ -97,7 +97,7 @@ module.exports = {
 	 * @param {String} config.password Username for the Transifex account.
 	 * @param {String} config.slug Resource slug.
 	 * @param {String} config.lang Target language.
-	 * @returns {Promise<Object>}
+	 * @returns {Promise.<Object>}
 	 */
 	getTranslation( { username, password, slug, lang } ) {
 		return new Promise( ( resolve, reject ) => {

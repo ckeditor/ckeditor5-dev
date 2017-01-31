@@ -18,7 +18,7 @@ const utils = {
 	/**
 	 * Collect translations and returns array of translations.
 	 *
-	 * @returns {Array<Object>}
+	 * @returns {Array.<Object>}
 	 */
 	collectTranslations() {
 		const srcPaths = [ process.cwd(), 'packages', '*', 'src', '**', '*.js' ].join( '/' );
@@ -69,7 +69,7 @@ const utils = {
 	/**
 	 * Traverse all packages and returns Map of the all founded language contexts informations (file content and file name).
 	 *
-	 * @returns {Map<String, Object>}
+	 * @returns {Map.<String, Object>}
 	 */
 	getContexts() {
 		const mapEntries = utils.getPackagesContainingContexts().map( packageName => {
@@ -94,7 +94,7 @@ const utils = {
 	/**
 	 * @param {Map.<Object>} contexts Map of the language contexts.
 	 * @param {Array.<Object>} translations Array of the translations.
-	 * @returns {Array<String>}
+	 * @returns {Array.<String>}
 	 */
 	getMissingContextErrorMessages( contexts, translations ) {
 		const errors = [];

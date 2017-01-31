@@ -35,7 +35,7 @@ describe( 'upload', () => {
 		sandbox.restore();
 	} );
 
-	it( 'should be able to create and update resource on Transifex', () => {
+	it( 'should be able to create and update resources on the Transifex', () => {
 		const packageNames = [
 			'ckeditor5-core',
 			'ckeditor5-ui',
