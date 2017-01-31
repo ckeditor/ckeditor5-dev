@@ -49,7 +49,8 @@ module.exports = {
 // - makes links to issues and user's profiles on GitHub.
 function transformCommit( commit ) {
 	if ( commit.header.startsWith( 'Merge' ) ) {
-		const parsedHeader = parserOptions.headerPattern.exec( commit.footer );
+		// Header for merge commit can be in "body" or "footer" of the commit message.
+		const parsedHeader = parserOptions.headerPattern.exec( commit.body || commit.footer );
 
 		if ( parsedHeader ) {
 			parserOptions.headerCorrespondence.forEach( ( key, index ) => {
