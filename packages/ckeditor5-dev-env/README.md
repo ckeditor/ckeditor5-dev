@@ -13,7 +13,7 @@ More information about development tools packages can be found at the following 
 npm i --save-dev @ckeditor/ckeditor5-dev-env
 ```
 
-Then add the tasks to `gulpfile.js`
+Then add the tasks to `gulpfile.js`:
 
 ```js
 // Generate changelog for the current package.
@@ -195,21 +195,17 @@ Changelog
 
 ## [1.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v1.0.0...v0.0.1) (2017-01-04)
 
-
 ### Bug fixes
 
 * The editor will be great again. Fixes: [#3](https://github.com/ckeditor/ckeditor5-dev/issue/3). ([a0b4ce8](https://github.com/ckeditor/ckeditor5-dev/commit/a0b4ce8))
-
 
 ### Other changes
 
 * Extracted the `utils.moo()` to a separate package. Thanks to [@CKEditor](https://github.com/CKEditor). ([e8cc04f](https://github.com/ckeditor/ckeditor5-dev/commit/e8cc04f))
 
-
 ### Features
 
 * Added support for RTL languages. Closes: [#1](https://github.com/ckeditor/ckeditor5-dev/issue/1). ([adc59ed](https://github.com/ckeditor/ckeditor5-dev/commit/adc59ed))
-
 
 ### BREAKING CHANGE
 
