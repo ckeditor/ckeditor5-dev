@@ -4,9 +4,11 @@
 {{#if title}}
 ### {{title}}
 {{/if}}
+
 {{#each commits}}
 {{> commit root=@root}}
 {{/each}}
+
 {{else}}
 Internal changes only (updated dependencies, documentation, etc.).
 {{/each}}

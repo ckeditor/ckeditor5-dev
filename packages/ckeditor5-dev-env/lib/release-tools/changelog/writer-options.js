@@ -9,6 +9,7 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 const chalk = require( 'chalk' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const parserOptions = require( './parser-options' );
 
 // Map of available types of the commits.
 // Types marked as `false` will be ignored during generating the changelog.
@@ -47,6 +48,16 @@ module.exports = {
 // - filters out the commit if it should not be visible in the changelog,
 // - makes links to issues and user's profiles on GitHub.
 function transformCommit( commit ) {
+	if ( commit.header.startsWith( 'Merge pull request' ) ) {
+		const parsedHeader = parserOptions.headerPattern.exec( commit.footer );
+
+		if ( parsedHeader ) {
+			parserOptions.headerCorrespondence.forEach( ( key, index ) => {
+				commit[ key ] = parsedHeader[ index + 1 ];
+			} );
+		}
+	}
+
 	if ( typeof commit.hash === 'string' ) {
 		commit.hash = commit.hash.substring( 0, 7 );
 	}
