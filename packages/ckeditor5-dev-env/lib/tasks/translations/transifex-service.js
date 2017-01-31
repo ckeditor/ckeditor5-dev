@@ -50,6 +50,25 @@ module.exports = {
 	 * @param {String} config.name Resource name.
 	 * @returns {Promise<Object>}
 	 */
+	getResources( { username, password } ) {
+		return new Promise( ( resolve, reject ) => {
+			request.get( `${ API_BASE }/resources/`, {
+				auth: { username, password }
+			}, createJsonResponseHandler( resolve, reject ) );
+		} );
+	},
+
+	/**
+	 * Uploads resource for the first time.
+	 *
+	 * @param {Object} config
+	 * @param {String} config.username Username for the Transifex account.
+	 * @param {String} config.password Username for the Transifex account.
+	 * @param {String} config.slug Resource slug.
+	 * @param {String} config.content Resource content.
+	 * @param {String} config.name Resource name.
+	 * @returns {Promise<Object>}
+	 */
 	postResource( { username, password, name, slug, content } ) {
 		return new Promise( ( resolve, reject ) => {
 			request.post( `${ API_BASE }/resources/`, {

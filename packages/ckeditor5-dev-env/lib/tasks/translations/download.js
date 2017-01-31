@@ -8,7 +8,6 @@
 const fs = require( 'fs-extra' );
 const path = require( 'path' );
 const transifexService = require( './transifex-service' );
-const collectUtils = require( './collect-utils' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 
 /**
@@ -19,17 +18,9 @@ const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
  * @param {String} loginConfig.password Password for the Transifex account.
  */
 module.exports = function download( loginConfig ) {
-	const packageNames = collectUtils.getPackagesContainingContexts();
-
-	const downlaodAndSaveTranslations = packageNames.map( ( packageName ) => {
-		const translationPromises = downloadPoFilesForPackage( loginConfig, packageName );
-
-		return translationPromises.then( translations => {
-			saveTranslations( packageName, translations );
-		} );
-	} );
-
-	return Promise.all( downlaodAndSaveTranslations )
+	return Promise.resolve()
+		.then( () => getPackageNames( loginConfig ) )
+		.then( ( packageNames ) => downlaodAndSaveTranslations( loginConfig, packageNames ) )
 		.then( () => {
 			logger.info( 'Saved all translations.' );
 		} )
@@ -37,6 +28,23 @@ module.exports = function download( loginConfig ) {
 			logger.error( err );
 		} );
 };
+
+function getPackageNames( loginConfig ) {
+	return transifexService.getResources( loginConfig )
+		.then( resources => resources.map( ( resource ) => resource.slug ) );
+}
+
+function downlaodAndSaveTranslations( loginConfig, packageNames ) {
+	return Promise.all(
+		packageNames.map( ( packageName ) => {
+			const translationPromises = downloadPoFilesForPackage( loginConfig, packageName );
+
+			return translationPromises.then( translations => {
+				saveTranslations( packageName, translations );
+			} );
+		} )
+	);
+}
 
 // @returns {Promise<Map>}
 function downloadPoFilesForPackage( loginConfig, packageName ) {
