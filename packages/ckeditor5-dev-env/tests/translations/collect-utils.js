@@ -22,7 +22,7 @@ describe( 'collect-utils', () => {
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
 		sandbox.stub( process, 'cwd', () => path.join( 'workspace', 'ckeditor5' ) );
-		utils = require( '../../lib/tasks/translations/collect-utils' );
+		utils = require( '../../lib/translations/collect-utils' );
 	} );
 
 	afterEach( () => {

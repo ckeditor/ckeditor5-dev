@@ -5,126 +5,89 @@
 
 'use strict';
 
-/**
- * Exports function returning development tasks.
- *
- * @param {Object} config Configuration object.
- * @param {String} config.workspaceDir Relative path to workspace where packages in development mode will be stored.
- * @returns {Object}
- */
-module.exports = ( config ) => {
-	const workspaceRelativePath = config.workspaceDir;
-	const cwd = process.cwd();
-	const path = require( 'path' );
-	const packageJSON = require( path.join( cwd, 'package.json' ) );
+const executeOnDependencies = require( './release-tools/utils/executeondependencies' );
 
-	const tasks = {
-		updateRepositories() {
-			const updateTask = require( './tasks/update' );
-			const installTask = require( './tasks/install' );
+const tasks = {
+	generateChangelog: require( './release-tools/tasks/generatechangelog' ),
 
-			const minimist = require( 'minimist' );
-			const options = minimist( process.argv.slice( 2 ), {
-				boolean: [ 'npm-update' ],
-				default: {
-					'npm-update': false
-				}
+	createRelease: require( './release-tools/tasks/createrelease' ),
+
+	/**
+	 * Generates the changelog for dependencies.
+	 *
+	 * @param {Object} options
+	 * @params {String} options.cwd Current work directory.
+	 * @params {String} options.packages A relative path to the packages.
+	 * @returns {Promise}
+	 */
+	generateChangelogForDependencies( options ) {
+		const execOptions = {
+			cwd: options.cwd,
+			packages: options.packages
+		};
+
+		const functionToExecute = ( repositoryName, repositoryPath ) => {
+			process.chdir( repositoryPath );
+
+			return tasks.generateChangelog();
+		};
+
+		return executeOnDependencies( execOptions, functionToExecute )
+			.then( () => {
+				process.chdir( options.cwd );
 			} );
+	},
 
-			return updateTask( installTask, cwd, packageJSON, workspaceRelativePath, options[ 'npm-update' ] );
-		},
+	/**
+	 * Generates the changelog for dependencies.
+	 *
+	 * @param {Object} options
+	 * @params {String} options.cwd Current work directory.
+	 * @params {String} options.packages A relative path to the packages.
+	 * @params {String} options.token GitHub token used to authenticate.
+	 * @params {Object} options.dependencies Dependencies with versions of other CKEditor5 package.
+	 * @returns {Promise}
+	 */
+	releaseDependencies( options ) {
+		const execOptions = {
+			cwd: options.cwd,
+			packages: options.packages
+		};
 
-		checkStatus() {
-			const statusTask = require( './tasks/status' );
+		const functionToExecute = ( repositoryName, repositoryPath ) => {
+			process.chdir( repositoryPath );
 
-			return statusTask( cwd, packageJSON, workspaceRelativePath );
-		},
-
-		initRepository() {
-			const initTask = require( './tasks/init' );
-			const installTask = require( './tasks/install' );
-
-			return initTask( installTask, cwd, packageJSON, workspaceRelativePath );
-		},
-
-		createPackage( done ) {
-			const packageCreateTask = require( './tasks/create-package' );
-
-			packageCreateTask( cwd, workspaceRelativePath )
-				.then( done )
-				.catch( ( error ) => done( error ) );
-		},
-
-		relink() {
-			const relinkTask = require( './tasks/relink' );
-
-			return relinkTask( cwd, packageJSON, workspaceRelativePath );
-		},
-
-		installPackage() {
-			const installTask = require( './tasks/install' );
-			const minimist = require( 'minimist' );
-
-			const options = minimist( process.argv.slice( 2 ), {
-				string: [ 'package' ],
-				default: {
-					plugin: ''
-				}
+			return tasks.createRelease( {
+				token: options.token,
+				dependencies: options.dependencies
 			} );
+		};
 
-			if ( options.package ) {
-				return installTask( cwd, workspaceRelativePath, options.package );
-			} else {
-				throw new Error( 'Please provide a package to install: --package <path|GitHub URL|name>' );
-			}
-		},
-
-		execOnRepositories() {
-			const execTask = require( './tasks/exec' );
-			const minimist = require( 'minimist' );
-			const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-			const log = logger();
-
-			const params = minimist( process.argv.slice( 3 ), {
-				stopEarly: false,
+		return executeOnDependencies( execOptions, functionToExecute )
+			.then( () => {
+				process.chdir( options.cwd );
 			} );
-			let task;
+	},
 
-			try {
-				if ( params.task ) {
-					task = require( `./tasks/exec/functions/${ params.task }` );
-				} else {
-					throw new Error( 'Missing task parameter: --task task-name' );
-				}
-			} catch ( err ) {
-				log.error( err );
+	collectTranslations() {
+		const collectTranslations = require( './translations/collect' );
 
-				return;
-			}
+		return collectTranslations();
+	},
 
-			return execTask( task, cwd, packageJSON, workspaceRelativePath, params );
-		},
+	uploadTranslations() {
+		const uploadTranslations = require( './translations/upload' );
+		const loginOptions = require( './translations/getloginoptions' )( process.argv.slice( 2 ) );
 
-		collectTranslations() {
-			const collectTranslations = require( './tasks/translations/collect' );
+		return uploadTranslations( loginOptions );
+	},
 
-			return collectTranslations();
-		},
+	downloadTranslations() {
+		const downloadTranslations = require( './translations/download' );
+		const loginOptions = require( './translations/getloginoptions' )( process.argv.slice( 2 ) );
 
-		uploadTranslations() {
-			const uploadTranslations = require( './tasks/translations/upload' );
-			const loginOptions = require( './tasks/translations/getloginoptions' )( process.argv.slice( 2 ) );
-
-			return uploadTranslations( loginOptions );
-		},
-
-		downloadTranslations() {
-			const downloadTranslations = require( './tasks/translations/download' );
-			const loginOptions = require( './tasks/translations/getloginoptions' )( process.argv.slice( 2 ) );
-
-			return downloadTranslations( loginOptions );
-		}
-	};
-
-	return tasks;
+		return downloadTranslations( loginOptions );
+	}
 };
+
+module.exports = tasks;

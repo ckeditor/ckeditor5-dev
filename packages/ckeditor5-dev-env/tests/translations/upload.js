@@ -10,7 +10,7 @@
 const path = require( 'path' );
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
-const transifexService = require( '../../lib/tasks/translations/transifex-service' );
+const transifexService = require( '../../lib/translations/transifex-service' );
 const fs = require( 'fs' );
 
 describe( 'upload', () => {
@@ -27,7 +27,7 @@ describe( 'upload', () => {
 		} );
 		sandbox.stub( process, 'cwd', () => path.join( 'workspace', 'ckeditor5' ) );
 
-		upload = require( '../../lib/tasks/translations/upload' );
+		upload = require( '../../lib/translations/upload' );
 	} );
 
 	afterEach( () => {
