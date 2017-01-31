@@ -51,7 +51,7 @@ module.exports = function createRelease( options ) {
 
 			const latestChanges = utils.getChangesForVersion( version );
 
-			log.info( `Committing "${ utils.changelogFile }" and "package.json"...` );
+			log.info( `Committing "package.json"...` );
 			tools.shExec( 'git add package.json', shExecParams );
 			tools.shExec( `git commit --message="Release: ${ version }."`, shExecParams );
 
