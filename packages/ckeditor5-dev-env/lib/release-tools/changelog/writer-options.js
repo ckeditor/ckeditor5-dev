@@ -48,7 +48,7 @@ module.exports = {
 // - filters out the commit if it should not be visible in the changelog,
 // - makes links to issues and user's profiles on GitHub.
 function transformCommit( commit ) {
-	if ( commit.header.startsWith( 'Merge pull request' ) ) {
+	if ( commit.header.startsWith( 'Merge' ) ) {
 		const parsedHeader = parserOptions.headerPattern.exec( commit.footer );
 
 		if ( parsedHeader ) {
