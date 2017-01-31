@@ -63,11 +63,11 @@ function logPutResponse( packageName, parsedResponse ) {
 	logger.info( `Updated: ${ parsedResponse.strings_updated }` );
 	logger.info( `Deleted: ${ parsedResponse.strings_delete }` );
 	// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
-	process.stdout.write( '\n' );
+	logger.info( '-------------------------------' );
 }
 
 function logPostResponse( packageName, parsedResponse ) {
 	logger.info( `Package: ${ packageName }` );
 	logger.info( `New: ${ parsedResponse[ 0 ] }` );
-	process.stdout.write( '\n' );
+	logger.info( '-------------------------------' );
 }
