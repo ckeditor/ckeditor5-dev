@@ -54,20 +54,12 @@ describe( 'dev-env/release-tools/utils', () => {
 				} ).to.not.throw();
 			} );
 
-			it( 'does not throw an error when master is ahead of origin', () => {
-				shExecStub.returns( '## master...origin/master [ahead 1]' );
-
-				expect( () => {
-					validator.checkBranch();
-				} ).to.not.throw();
-			} );
-
 			it( 'throws an error when current branch is not master', () => {
 				shExecStub.returns( '## t/2...origin/t/2' );
 
 				expect( () => {
 					validator.checkBranch();
-				} ).to.throw( Error, 'Current branch is not a "master".' );
+				} ).to.throw( Error, 'Not on master or master is not clean.' );
 			} );
 
 			it( 'throws an error when master is behind origin', () => {
@@ -75,7 +67,15 @@ describe( 'dev-env/release-tools/utils', () => {
 
 				expect( () => {
 					validator.checkBranch();
-				} ).to.throw( Error, 'Branch is behind the remote. Pull the changes.' );
+				} ).to.throw( Error, 'Not on master or master is not clean.' );
+			} );
+
+			it( 'throws an error when master is ahead of origin', () => {
+				shExecStub.returns( '## master...origin/master [ahead 1]' );
+
+				expect( () => {
+					validator.checkBranch();
+				} ).to.throw( Error, 'Not on master or master is not clean.' );
 			} );
 
 			it( 'throws an error when master contains uncommitted changes', () => {
@@ -83,7 +83,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 				expect( () => {
 					validator.checkBranch();
-				} ).to.throw( Error, 'Branch contains uncommitted changes.' );
+				} ).to.throw( Error, 'Not on master or master is not clean.' );
 			} );
 		} );
 	} );

@@ -20,31 +20,19 @@ const validator = {
 	},
 
 	/**
-	 * Checks whether we're on master and there we're not behind.
+	 * Checks whether we're on master and there we're not behind or ahead.
 	 *
-	 * The idea is that the status should be totally clean. If branch has any uncommitted
-	 * or unpulled changes, abort.
+	 * The idea is that the status should be totally clean. If branch has any ucommited,
+	 * unpulled or unpushed changes, abort.
 	 */
 	checkBranch() {
-		let status = tools.shExec( 'git status -sb', { verbosity: 'error' } ).trim().split( '\n' );
+		const status = tools.shExec( 'git status -sb', { verbosity: 'error' } ).trim();
 
-		// Uncommitted changes.
-		if ( status.length !== 1 ) {
-			throw new Error( 'Branch contains uncommitted changes.' );
+		// This way we'll catch if a branch is behind/ahead or contains uncommited files.
+		if ( status != '## master...origin/master' ) {
+			throw new Error( 'Not on master or master is not clean.' );
 		}
-
-		status = status[ 0 ];
-
-		// Not a master.
-		if ( !status.startsWith( '## master' ) ) {
-			throw new Error( 'Current branch is not a "master".' );
-		}
-
-		// Not up to date.
-		if ( /behind \d+\]$/.test( status ) ) {
-			throw new Error( 'Branch is behind the remote. Pull the changes.' );
-		}
-	},
+	}
 };
 
 module.exports = validator;
