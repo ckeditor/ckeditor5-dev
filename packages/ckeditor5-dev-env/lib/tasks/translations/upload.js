@@ -24,22 +24,28 @@ module.exports = function upload( loginConfig ) {
 		path: path.join( pathToPoTranslations, packageName, 'en.pot' )
 	} ) );
 
-	const resourceExistPromises = potFiles.map( ( potFile ) => {
-		return transifexService.hasResource( Object.assign( {}, loginConfig, {
-			slug: potFile.packageName,
-		} ) );
-	} );
-
-	return Promise.all( resourceExistPromises ).then( ( resourcesExist ) => {
-		return Promise.all( resourcesExist.map( ( resourceExists, index ) => {
-			return createOrUpdateResource( loginConfig, potFiles[ index ], resourceExists );
-		} ) );
-	} )
-	.then( () => logger.info( 'All resources uploaded.\n' ) )
-	.catch( ( err ) => logger.error( err ) );
+	return Promise.resolve()
+		.then( () => transifexService.getResources( loginConfig ) )
+		.then( ( resources ) => resources.map( ( resource ) => resource.slug ) )
+		.then( ( uploadedPackageNames ) => getUploadedPackages( potFiles, uploadedPackageNames ) )
+		.then( ( areUploadedResources ) => createOrUpdateResources( loginConfig, areUploadedResources, potFiles ) )
+		.then( () => logger.info( 'All resources uploaded.\n' ) )
+		.catch( ( err ) => logger.error( err ) );
 };
 
-function createOrUpdateResource( config, potFile, resourceExists ) {
+function getUploadedPackages( potFiles, uploadedPackageNames ) {
+	return potFiles.map( ( potFile ) => uploadedPackageNames.includes( potFile.packageName ) );
+}
+
+function createOrUpdateResources( loginConfig, areUploadedResources, potFiles ) {
+	return Promise.all(
+		areUploadedResources.map( ( isUploadedResource, index ) => {
+			return createOrUpdateResource( loginConfig, potFiles[ index ], isUploadedResource );
+		} )
+	);
+}
+
+function createOrUpdateResource( config, potFile, isUploadedResource ) {
 	const { packageName, path } = potFile;
 	const resConfig = Object.assign( {}, config, {
 		name: packageName,
@@ -47,7 +53,7 @@ function createOrUpdateResource( config, potFile, resourceExists ) {
 		content: fs.createReadStream( path )
 	} );
 
-	if ( resourceExists ) {
+	if ( isUploadedResource ) {
 		return transifexService.putResourceContent( resConfig )
 			.then( ( parsedResponse ) => logPutResponse( packageName, parsedResponse ) );
 	}

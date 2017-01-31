@@ -41,13 +41,13 @@ describe( 'upload', () => {
 			'ckeditor5-ui',
 		];
 
-		const resourcesUploadedBefore = [ 'ckeditor5-core' ];
-
-		const hasResourceSpy = sandbox.spy( ( { slug } ) => Promise.resolve( resourcesUploadedBefore.includes( slug ) ) );
+		const getResourcesSpy = sandbox.spy( () => ( [ {
+			slug: 'ckeditor5-core'
+		} ] ) );
 		const postResourceSpy = sandbox.spy( () => Promise.resolve( '[]' ) );
 		const putResourceContentSpy = sandbox.spy( () => Promise.resolve( '{}' ) );
 
-		sandbox.stub( transifexService, 'hasResource', hasResourceSpy );
+		sandbox.stub( transifexService, 'getResources', getResourcesSpy );
 		sandbox.stub( transifexService, 'postResource', postResourceSpy );
 		sandbox.stub( transifexService, 'putResourceContent', putResourceContentSpy );
 
@@ -55,7 +55,7 @@ describe( 'upload', () => {
 		const createReadStreamStub = sandbox.stub( fs, 'createReadStream', ( path ) => `${path} content` );
 
 		return upload( { username: 'username', password: 'password' } ).then( () => {
-			sinon.assert.calledTwice( hasResourceSpy );
+			sinon.assert.calledOnce( getResourcesSpy );
 			sinon.assert.calledTwice( createReadStreamStub );
 			sinon.assert.calledWithExactly( readDirSyncStub, path.join( 'workspace', 'ckeditor5', 'build', '.transifex' ) );
 

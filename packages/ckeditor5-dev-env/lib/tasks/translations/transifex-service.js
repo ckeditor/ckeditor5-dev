@@ -15,31 +15,6 @@ const API_BASE = 'http://www.transifex.com/api/2/project/ckeditor5';
  */
 module.exports = {
 	/**
-	 * Returns promise whether or not the resource exists.
-	 *
-	 * @param {Object} config
-	 * @param {String} config.username Username for the Transifex account.
-	 * @param {String} config.password Username for the Transifex account.
-	 * @param {String} config.slug Resource slug.
-	 * @returns {Promise<Boolean>}
-	 */
-	hasResource( { username, password, slug } ) {
-		return new Promise( ( resolve ) => {
-			request.get( `${ API_BASE }/resource/${ slug }/`, {
-				auth: { username, password },
-			}, ( error, response ) => {
-				if ( error ) {
-					resolve( false );
-				} else if ( response.statusCode !== 200 ) {
-					resolve( false );
-				} else {
-					resolve( true );
-				}
-			} );
-		} );
-	},
-
-	/**
 	 * Uploads resource for the first time.
 	 *
 	 * @param {Object} config

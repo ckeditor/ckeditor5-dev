@@ -57,14 +57,7 @@ function downloadPoFilesForPackage( loginConfig, packageName ) {
 		// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 
 		return Promise.all(
-			languageCodes.map( ( lang ) => {
-				const transifexDownloadConfig = Object.assign( {}, loginConfig, {
-					lang,
-					slug: packageName
-				} );
-
-				return downloadPoFile( transifexDownloadConfig );
-			} )
+			languageCodes.map( ( lang ) => downloadPoFile( loginConfig, lang, packageName ) )
 		);
 	} );
 
@@ -75,8 +68,14 @@ function downloadPoFilesForPackage( loginConfig, packageName ) {
 	} );
 }
 
-function downloadPoFile( config ) {
-	return transifexService.getTranslation( config ).then( ( data ) => data.content );
+function downloadPoFile( loginConfig, lang, packageName ) {
+	const config = Object.assign( {}, loginConfig, {
+		lang,
+		slug: packageName
+	} );
+
+	return transifexService.getTranslation( config )
+		.then( ( data ) => data.content );
 }
 
 function saveTranslations( packageName, translations ) {
