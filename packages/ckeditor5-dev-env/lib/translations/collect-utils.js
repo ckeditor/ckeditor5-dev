@@ -116,7 +116,7 @@ const utils = {
 		let error;
 
 		if ( !corePackageContext ) {
-			error = `${corePackageName}/lang/contexts.json file is missing.`;
+			error = `${ corePackageName }/lang/contexts.json file is missing.`;
 		}
 
 		else if ( !corePackageContext.content[ translation.key ] && !packageContext ) {
@@ -158,6 +158,7 @@ const utils = {
 				if ( keys.has( key ) ) {
 					errors.push( `Context is duplicated for the key: ${ key }.` );
 				}
+
 				keys.add( key );
 			}
 		}
@@ -195,7 +196,9 @@ const utils = {
 	},
 
 	createPotFileHeader() {
-		return '# Copyright (c) Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.\n\n';
+		const year = new Date().getFullYear();
+
+		return `# Copyright (c) Copyright (c) 2003-${ year }, CKSource - Frederico Knabben. All rights reserved.\n\n`;
 	},
 };
 

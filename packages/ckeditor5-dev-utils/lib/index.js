@@ -11,7 +11,5 @@ module.exports = {
 	tools: require( './tools' ),
 	stream: require( './stream' ),
 	workspace: require( './workspace' ),
-	getAllTranslations: require( './translations/getalltranslations' ),
-	createTranslator: require( './translations/createtranslator' ),
-	replaceFirstFunctionParameter: require( './replacefirstfunctionparameter' )
+	translations: require( './translations/index' )
 };

@@ -5,11 +5,7 @@
 
 'use strict';
 
-const {
-	getAllTranslations,
-	replaceFirstFunctionParameter,
-	createTranslator
-} = require( '@ckeditor/ckeditor5-dev-utils' );
+const {	TranslationService } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 
 /**
  * Replaces all function call parameters with translated strings for the t function.
@@ -18,33 +14,19 @@ const {
  * @param {String} language Language code, e.g en_US.
  */
 module.exports = function replaceTranslationCallsForOneLangauge( compiler, language ) {
-	const packageNames = new Set();
+	const translationService = new TranslationService( language );
+
+	compiler.options.translateString = ( originalString ) => translationService.translateString( originalString );
 
 	compiler.plugin( 'after-resolvers', ( compiler ) => {
 		compiler.resolvers.normal.plugin( 'before-resolve', ( obj, done ) => {
 			const match = obj.request.match( /@ckeditor[\\\/]([^\\\/]+)/ );
 
 			if ( match ) {
-				packageNames.add( match[ 1 ] );
+				translationService.loadPackage( match[ 1 ] );
 			}
 
 			done();
 		} );
 	} );
-
-	compiler.plugin( 'emit', ( options, done ) => {
-		const allTranslations = getAllTranslations( packageNames, language );
-
-		for ( const assetName in options.assets ) {
-			replaceTCalls( options.assets[ assetName ], allTranslations );
-		}
-
-		done();
-	} );
 };
-
-function replaceTCalls( assetContent, allTranslations ) {
-	const source = replaceFirstFunctionParameter( assetContent.source(), 't', createTranslator( allTranslations ) );
-	assetContent.source = () => source;
-	assetContent.size = () => source.length;
-}
