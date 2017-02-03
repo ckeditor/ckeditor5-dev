@@ -8,6 +8,9 @@
 const path = require( 'path' );
 const fs = require( 'fs' );
 const parsePoFileContent = require( './parsepofilecontent' );
+const acorn = require( 'acorn' );
+const walk = require( 'acorn/dist/walk' );
+const escodegen = require( 'escodegen' );
 
 /**
  *
@@ -23,6 +26,8 @@ module.exports = class TranslationService {
 	}
 
 	/**
+	 * Loads package.
+	 *
 	 * @param {String} pathToPackage Path to the package containing translations.
 	 */
 	loadPackage( pathToPackage ) {
@@ -47,13 +52,53 @@ module.exports = class TranslationService {
 	}
 
 	/**
+	 * Parses source, translates t call arguments and returns modified output.
+	 *
+	 * @param {String} source JS source text which will be translated.
+	 */
+	translateSource( source ) {
+		const comments = [];
+		const tokens = [];
+
+		const ast = acorn.parse( source, {
+			sourceType: 'module',
+			ranges: true,
+			onComment: comments,
+			onToken: tokens
+		} );
+
+		const that = this;
+
+		walk.simple( ast, {
+			CallExpression( node ) {
+				if ( node.callee.name !== 't' ) {
+					return;
+				}
+
+				if ( node.arguments[ 0 ].type !== 'Literal' ) {
+					console.error( 'First T call argument should be literal type' );
+
+					return;
+				}
+
+				node.arguments[ 0 ].value = that._translateString( node.arguments[ 0 ].value );
+			}
+		} );
+
+		escodegen.attachComments( ast, comments, tokens );
+		const output = escodegen.generate( ast, { comment: true } );
+
+		return output;
+	}
+
+	/**
 	 * Translates all t() call found in source text to the target language.
 	 *
-	 * @param {String} source Source text which will be translated.
+	 * @param {String} originalString Source text which will be translated.
 	 * @returns {String}
 	 *
 	 */
-	translateString( originalString ) {
+	_translateString( originalString ) {
 		let translation = this.dictionary.get( originalString );
 
 		if ( !translation ) {

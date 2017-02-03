@@ -5,6 +5,7 @@
 
 'use strict';
 
+const path = require( 'path' );
 const {	TranslationService } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 
 /**
@@ -16,7 +17,7 @@ const {	TranslationService } = require( '@ckeditor/ckeditor5-dev-utils' ).transl
 module.exports = function replaceTranslationCallsForOneLangauge( compiler, language ) {
 	const translationService = new TranslationService( language );
 
-	compiler.options.translateString = ( originalString ) => translationService.translateString( originalString );
+	compiler.options.translateSource = ( source ) => translationService.translateSource( source );
 
 	compiler.plugin( 'after-resolvers', ( compiler ) => {
 		compiler.resolvers.normal.plugin( 'before-resolve', ( obj, done ) => {
@@ -27,6 +28,15 @@ module.exports = function replaceTranslationCallsForOneLangauge( compiler, langu
 			}
 
 			done();
+		} );
+	} );
+
+	compiler.plugin( 'normal-module-factory', ( nmf ) => {
+		nmf.plugin( 'after-resolve', ( data, done ) => {
+			// Here the loader is injected.
+			// TODO: add test /ckeditor5-[^/]+\/src\/.+\.js$/ to the path.
+			data.loaders.unshift( path.join( __dirname, 'translate-source-loader.js' ) );
+			done( null, data );
 		} );
 	} );
 };
