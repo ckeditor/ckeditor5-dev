@@ -6,5 +6,6 @@
 'use strict';
 
 module.exports = {
-	TranslationService: require( './translationservice' )
+	TranslationService: require( './translationservice' ),
+	findOriginalStrings: require( './findoriginalstrings' )
 };

@@ -9,6 +9,7 @@ const glob = require( 'glob' );
 const fs = require( 'fs-extra' );
 const path = require( 'path' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
+const { findOriginalStrings } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 
 const ckeditor5PackagesDir = path.join( process.cwd(), 'packages' );
 const langContextSuffix = path.join( 'lang', 'contexts.json' );
@@ -38,26 +39,16 @@ const utils = {
 	},
 
 	_getTranslationCallsFromFile( filePath, fileContent ) {
-		const fullMatches = fileContent.match( / t\([^)]+?\)/gm ) || [];
+		const originalStrings = findOriginalStrings( fileContent );
 
-		return fullMatches.map( ( fullMatch ) => {
-			const stringMatch = fullMatch.match( /'([^']+?)'/ );
-
-			if ( !stringMatch ) {
-				logger.error( `Invalid translation call: ${ fullMatch } in ${ filePath }` );
-
-				return;
-			}
-
-			const key = stringMatch[ 1 ];
-
-			const contextMatch = key.match( /\[context: ([^\]]+)\]/ );
-			const sentenceMatch = key.match( /^[^\[]+/ );
+		return originalStrings.map( ( originalString ) => {
+			const contextMatch = originalString.match( /\[context: ([^\]]+)\]/ );
+			const sentenceMatch = originalString.match( /^[^\[]+/ );
 			const packageMatch = filePath.match( /\/(ckeditor5-[^\/]+)\// );
 
 			return {
 				filePath,
-				key,
+				key: originalString,
 				package: packageMatch[ 1 ],
 				context: contextMatch ? contextMatch[ 1 ] : null,
 				sentence: sentenceMatch[ 0 ].trim(),

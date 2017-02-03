@@ -26,7 +26,7 @@ module.exports = class TranslationService {
 	}
 
 	/**
-	 * Loads package.
+	 * Loads package and tries to get the po file from the package.
 	 *
 	 * @param {String} pathToPackage Path to the package containing translations.
 	 */
@@ -67,10 +67,8 @@ module.exports = class TranslationService {
 			onToken: tokens
 		} );
 
-		const that = this;
-
 		walk.simple( ast, {
-			CallExpression( node ) {
+			CallExpression: ( node ) => {
 				if ( node.callee.name !== 't' ) {
 					return;
 				}
@@ -81,7 +79,7 @@ module.exports = class TranslationService {
 					return;
 				}
 
-				node.arguments[ 0 ].value = that._translateString( node.arguments[ 0 ].value );
+				node.arguments[ 0 ].value = this._translateString( node.arguments[ 0 ].value );
 			}
 		} );
 
@@ -96,7 +94,6 @@ module.exports = class TranslationService {
 	 *
 	 * @param {String} originalString Source text which will be translated.
 	 * @returns {String}
-	 *
 	 */
 	_translateString( originalString ) {
 		let translation = this.dictionary.get( originalString );

@@ -33,8 +33,8 @@ describe( 'collect-utils', () => {
 	describe( 'collectTranslations()', () => {
 		it( 'should collect info about t() calls', () => {
 			const fileContents = {
-				'/ckeditor5-core/file1.js': '= t( \'Bold\' );',
-				'/ckeditor5-utils/file2.js': '= t( \'Italic [context: italic style]\' );',
+				'/ckeditor5-core/file1.js': 't( \'Bold\' );',
+				'/ckeditor5-utils/file2.js': 't( \'Italic [context: italic style]\' );',
 			};
 
 			const globSyncStub = sandbox.stub( glob, 'sync', () => [
