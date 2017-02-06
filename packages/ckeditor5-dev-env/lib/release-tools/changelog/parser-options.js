@@ -11,7 +11,8 @@ module.exports = {
 		'type',
 		'subject'
 	],
-	noteKeywords: [ 'BREAKING CHANGE', 'NOTE' ],
+	// 'BREAKING CHANGE' and 'BREAKING CHANGES' will be grouped as 'BREAKING CHANGES'.
+	noteKeywords: [ 'BREAKING CHANGE', 'BREAKING CHANGES', 'NOTE' ],
 	revertPattern: /^Revert:\s([\s\S]*?)\s*This reverts commit (\w*)\./,
 	revertCorrespondence: [ 'header', 'hash' ],
 	referenceActions: [
