@@ -19,23 +19,22 @@ module.exports = function replaceTranslationCallsForOneLangauge( compiler, langu
 
 	compiler.options.translateSource = ( source ) => translationService.translateSource( source );
 
-	compiler.plugin( 'after-resolvers', ( compiler ) => {
-		compiler.resolvers.normal.plugin( 'before-resolve', ( obj, done ) => {
-			const match = obj.request.match( /@ckeditor[\\\/]([^\\\/]+)/ );
-
-			if ( match ) {
-				translationService.loadPackage( match[ 1 ] );
-			}
-
-			done();
-		} );
-	} );
-
 	compiler.plugin( 'normal-module-factory', ( nmf ) => {
 		nmf.plugin( 'after-resolve', ( data, done ) => {
-			// Here the loader is injected.
-			// TODO: add test /ckeditor5-[^/]+\/src\/.+\.js$/ to the path.
-			data.loaders.unshift( path.join( __dirname, 'translate-source-loader.js' ) );
+			const packageNameRegExp = /\/ckeditor5-[^/]+\//;
+			const match = data.resource.match( packageNameRegExp );
+
+			if ( match ) {
+				const index = data.resource.search( packageNameRegExp ) + match[ 0 ].length;
+				const pathToPackage = data.resource.slice( 0, index );
+				translationService.loadPackage( pathToPackage );
+			}
+
+			// Translation loader is injected when the file comes from ckeditor5-* packages.
+			if ( data.resource.match( /\/ckeditor5-[^/]+\/src\/.+\.js$/ ) ) {
+				data.loaders.unshift( path.join( __dirname, 'translate-source-loader.js' ) );
+			}
+
 			done( null, data );
 		} );
 	} );

@@ -37,7 +37,9 @@ module.exports = class TranslationService {
 
 		this.packagePaths.add( pathToPackage );
 
-		const pathToPoFile = path.join( process.cwd(), 'packages', pathToPackage, 'lang', 'translations', this.language + '.po' );
+		const pathToPoFile = path.join( pathToPackage, 'lang', 'translations', this.language + '.po' );
+
+		console.log( pathToPoFile );
 
 		if ( !fs.existsSync( pathToPoFile ) ) {
 			return;
