@@ -11,6 +11,7 @@
     "conventional-changelog": "^1.1.0",
     "conventional-recommended-bump": "^0.3.0",
     "github": "^7.1.0",
+    "inquirer": "^3.0.1",
     "minimist": "^1.2.0",
     "parse-github-url": "^0.3.2"
   },
