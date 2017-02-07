@@ -6,6 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
+const semver = require( 'semver' );
 const executeOnDependencies = require( './executeondependencies' );
 const versionUtils = require( './versions' );
 
@@ -62,7 +63,7 @@ module.exports = function packagesToRelease( options ) {
 					// If so, bump the patch version for current package and release it too.
 					if ( willUpdateDependencies ) {
 						packagesToRelease.set( packageName, {
-							version: versionUtils.getNext( packageJson.version, 'patch' ),
+							version: semver.inc( packageJson.version, 'patch' ),
 							hasChangelog: false
 						} );
 
