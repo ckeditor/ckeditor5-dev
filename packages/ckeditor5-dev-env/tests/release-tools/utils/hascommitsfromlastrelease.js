@@ -12,7 +12,7 @@ const sinon = require( 'sinon' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-env/release-tools/utils', () => {
-	let hasCommitsUntilLastRelease, sandbox;
+	let hasCommitsFromLastRelease, sandbox;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
@@ -22,9 +22,9 @@ describe( 'dev-env/release-tools/utils', () => {
 		sandbox.restore();
 	} );
 
-	describe( 'hasCommitsUntilLastRelease()', () => {
+	describe( 'hasCommitsFromLastRelease()', () => {
 		beforeEach( () => {
-			hasCommitsUntilLastRelease = require( '../../../lib/release-tools/utils/hascommitsuntillastrelease' );
+			hasCommitsFromLastRelease = require( '../../../lib/release-tools/utils/hascommitsfromlastrelease' );
 		} );
 
 		it( 'returns true if a commit was made until the last tag', () => {
@@ -38,7 +38,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			shExec.onSecondCall().returns( '    2 ' );
 
-			expect( hasCommitsUntilLastRelease() ).to.equal( true );
+			expect( hasCommitsFromLastRelease() ).to.equal( true );
 		} );
 
 		it( 'returns false if a commit was not made until the last tag', () => {
@@ -52,7 +52,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			shExec.onSecondCall().returns( '    0 ' );
 
-			expect( hasCommitsUntilLastRelease() ).to.equal( false );
+			expect( hasCommitsFromLastRelease() ).to.equal( false );
 		} );
 
 		it( 'returns true if any commit was made when no tag exists', () => {
@@ -61,7 +61,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			shExec.onFirstCall().returns( ' ' );
 			shExec.onSecondCall().returns( '    1 ' );
 
-			expect( hasCommitsUntilLastRelease() ).to.equal( true );
+			expect( hasCommitsFromLastRelease() ).to.equal( true );
 		} );
 
 		it( 'returns false if any commit was not made when no tag exists', () => {
@@ -70,7 +70,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			shExec.onFirstCall().returns( ' ' );
 			shExec.onSecondCall().returns( '    0 ' );
 
-			expect( hasCommitsUntilLastRelease() ).to.equal( false );
+			expect( hasCommitsFromLastRelease() ).to.equal( false );
 		} );
 	} );
 } );

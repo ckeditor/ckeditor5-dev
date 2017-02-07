@@ -15,9 +15,7 @@ const tasks = {
 	/**
 	 * Generates the changelog for dependencies.
 	 *
-	 * @param {Object} options
-	 * @params {String} options.cwd Current work directory.
-	 * @params {String} options.packages A relative path to the packages.
+	 * @param {Options} options
 	 * @returns {Promise}
 	 */
 	generateChangelogForDependencies( options ) {
@@ -41,11 +39,7 @@ const tasks = {
 	/**
 	 * Generates the changelog for dependencies.
 	 *
-	 * @param {Object} options
-	 * @params {String} options.cwd Current work directory.
-	 * @params {String} options.packages A relative path to the packages.
-	 * @params {String} options.token GitHub token used to authenticate.
-	 * @params {Object} options.dependencies Dependencies with versions of other CKEditor5 package.
+	 * @param {Options} options
 	 * @returns {Promise}
 	 */
 	releaseDependencies( options ) {
@@ -54,16 +48,40 @@ const tasks = {
 			packages: options.packages
 		};
 
-		const functionToExecute = ( repositoryName, repositoryPath ) => {
+		const releaseSinglePackage = ( repositoryName, repositoryPath ) => {
+			if ( !options.dependencies.has( repositoryName ) ) {
+				return Promise.resolve();
+			}
+
 			process.chdir( repositoryPath );
 
 			return tasks.createRelease( {
 				token: options.token,
-				dependencies: options.dependencies
+				dependencies: options.dependencies,
+				skipGithub: options.skipGithub,
+				skipNpm: options.skipNpm
 			} );
 		};
 
-		return executeOnDependencies( execOptions, functionToExecute )
+		const validatePackages = ( repositoryName, repositoryPath ) => {
+			if ( !options.dependencies.has( repositoryName ) ) {
+				return Promise.resolve();
+			}
+
+			process.chdir( repositoryPath );
+
+			// todo: validate process.
+
+			return Promise.resolve();
+		};
+
+		return executeOnDependencies( execOptions, validatePackages )
+			.then( () => {
+				// Whether to release on NPM, GH (and provide token)
+
+				return Promise.resolve();
+			} )
+			.then( () => executeOnDependencies( execOptions, releaseSinglePackage ) )
 			.then( () => {
 				process.chdir( options.cwd );
 			} );

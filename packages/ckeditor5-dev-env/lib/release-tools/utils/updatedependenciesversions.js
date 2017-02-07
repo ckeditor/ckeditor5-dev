@@ -10,18 +10,19 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 /**
  * Updates dependencies and devDependencies in `package.json`.
  *
- * @param {Object} dependencies Packages with versions of CKEditor 5 dependencies.
+ * @param {Map} dependencies Packages with versions of CKEditor 5 dependencies.
  * @param {String} packageJsonPath An absolute path to the `package.json` file.
+ * @returns {Boolean}
  */
 module.exports = function updateDependenciesVersions( dependencies, packageJsonPath ) {
-	const packageNames = Object.keys( dependencies );
-
 	tools.updateJSONFile( packageJsonPath, ( json ) => {
-		for ( const item of packageNames ) {
+		for ( const item of dependencies.keys() ) {
+			const version = dependencies.get( item ).version;
+
 			if ( json.dependencies && json.dependencies[ item ] ) {
-				json.dependencies[ item ] = `^${ dependencies[ item ] }`;
+				json.dependencies[ item ] = `^${ version }`;
 			} else if ( json.devDependencies && json.devDependencies[ item ] ) {
-				json.devDependencies[ item ] = `^${ dependencies[ item ] }`;
+				json.devDependencies[ item ] = `^${ version }`;
 			}
 		}
 

@@ -6,29 +6,9 @@
 'use strict';
 
 const inquirer = require( 'inquirer' );
-const getNextVersion = require( './getnextversion' );
+const semver = require( 'semver' );
 
 const cli = {
-	/**
-	 * Asks a user for the confirmation for generating the changelog.
-	 *
-	 * @returns {Promise}
-	 */
-	confirmRelease() {
-		return new Promise( ( resolve, reject ) => {
-			const confirmQuestion = {
-				type: 'confirm',
-				name: 'confirm',
-				default: false,
-				message: 'Generated changelog will be empty. Continue?'
-			};
-
-			inquirer.prompt( [ confirmQuestion ] )
-				.then( ( answers ) => resolve( answers.confirm ) )
-				.catch( reject );
-		} );
-	},
-
 	/**
 	 * Asks a user for providing the new version.
 	 *
@@ -41,13 +21,15 @@ const cli = {
 		return new Promise( ( resolve, reject ) => {
 			const versionQuestion = {
 				name: 'version',
-				default: getNextVersion( packageVersion, releaseType ),
-				message: `Provide next version for package "${ packageName }":`,
+				default: ( releaseType ) ? semver.inc( packageVersion, releaseType ) : 'skip',
+				message: `New version for "${ packageName }" (currently ${ packageVersion }, type new version or "skip")?`,
 				validate( input ) {
-					// TODO: Support for alpha/beta/rc.
-					const regexp = /^\d+\.\d+\.\d+$/;
+					if ( input === 'skip' ) {
+						return true;
+					}
 
-					return regexp.test( input ) ? true : 'Please provide a valid version (X.Y.Z).';
+					// TODO: Check whether provided version is available.
+					return semver.valid( input ) ? true : 'Please provide a valid version.';
 				}
 			};
 

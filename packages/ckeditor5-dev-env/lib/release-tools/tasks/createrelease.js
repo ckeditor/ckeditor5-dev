@@ -8,11 +8,11 @@
 const path = require( 'path' );
 const parseGithubUrl = require( 'parse-github-url' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const generateChangelog = require( './generatechangelog' );
 const createGithubRelease = require( './creategithubrelease' );
-const getNewReleaseType = require( '../utils/getnewreleasetype' );
 const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
 const utils = require( '../utils/changelog' );
-const validator = require( '../utils/releasevalidator' );
+const versionUtils = require( '../utils/versions' );
 
 /**
  * Creates a new release.
@@ -20,68 +20,96 @@ const validator = require( '../utils/releasevalidator' );
  * Commits a new changelog (and package.json), creates a tag,
  * pushes the tag to a remote server and creates a note on GitHub releases page.
  *
- * This method should be executed after the `tasks.generateChangelog` method.
- *
  * @params {Options} options
  * @returns {Promise}
  */
 module.exports = function createRelease( options ) {
-	validator.checkOptions( options );
-
 	const cwd = process.cwd();
-	const shExecParams = { verbosity: 'error' };
 	const log = logger();
+	const shExecParams = { verbosity: 'error' };
 
-	log.info( `Releasing: ${ cwd }` );
+	const packageJsonPath = path.join( cwd, 'package.json' );
+	const packageJson = require( packageJsonPath );
 
-	tools.shExec( 'git fetch', shExecParams );
+	log.info( `Generating changelog for "${ packageJson.name }".` );
 
-	log.info( 'Checking whether on master and ready to release...' );
-	validator.checkBranch();
-
-	let version;
-
-	if ( options.dependencies ) {
-		const packageJsonPath = path.join( cwd, 'package.json' );
+	// Update dependencies/devDependencies versions in package.json.
+	if ( options.dependencies.has( packageJson.name ) ) {
 		updateDependenciesVersions( options.dependencies, packageJsonPath );
+
+		// Commit the changes.
+		tools.shExec( 'git add package.json', shExecParams );
+		tools.shExec( 'git commit -m "Internal: Update dependencies."', shExecParams );
+
+		const packageDetails = options.dependencies.get( packageJson.name );
+
+		// If package does not have generated changelog - let's generate it.
+		if ( !packageDetails.hasChangelog ) {
+			return generateChangelog( packageDetails.version )
+				.then( () => {
+					packageDetails.hasChangelog = true;
+
+					options.dependencies.set( packageJson.name, packageDetails );
+
+					return createRelease( {
+						token: options.token,
+						skipGithub: options.skipGithub,
+						skipNpm: options.skipNpm,
+						dependencies: new Map()
+					} );
+				} );
+		}
 	}
 
-	return getNewReleaseType()
-		.then( ( response ) => {
-			const bumpVersionCommand = `npm version ${ response.releaseType } --no-git-tag-version --force`;
-			version = tools.shExec( bumpVersionCommand, shExecParams ).trim();
+	// Get last version from the changelog.
+	const version = versionUtils.getLastFromChangelog();
 
-			const latestChanges = utils.getChangesForVersion( version );
+	const promise = new Promise( ( resolve, reject ) => {
+		const latestChanges = utils.getChangesForVersion( version );
 
-			log.info( `Committing "package.json"...` );
-			tools.shExec( 'git add package.json', shExecParams );
-			tools.shExec( `git commit --message="Release: ${ version }."`, shExecParams );
+		// Bump version in `package.json`.
+		tools.updateJSONFile( packageJsonPath, ( json ) => {
+			json.version = version;
 
-			log.info( 'Creating tag...' );
-			tools.shExec( `git tag ${ version }`, shExecParams );
-			tools.shExec( `git push origin master ${ version }`, shExecParams );
-
-			if ( !options.skipNpm ) {
-				log.info( 'Publishing on NPM...' );
-				tools.shExec( 'npm publish', shExecParams );
-			}
-
-			if ( !options.skipGithub ) {
-				log.info( 'Creating GitHub release...' );
-
-				const repositoryInfo = parseGithubUrl(
-					tools.shExec( 'git remote get-url origin --push', shExecParams ).trim()
-				);
-
-				return createGithubRelease( options.token, {
-					repositoryOwner: repositoryInfo.owner,
-					repositoryName: repositoryInfo.name,
-					version: version,
-					description: latestChanges
-				} );
-			}
-		} )
-		.then( () => {
-			log.info( `Release "${ version }" has been created and published.` );
+			return json;
 		} );
+
+		log.info( `Committing "package.json"...` );
+		tools.shExec( 'git add package.json', shExecParams );
+		tools.shExec( `git commit --message="Release: v${ version }."`, shExecParams );
+
+		log.info( 'Creating tag...' );
+		tools.shExec( `git tag v${ version }`, shExecParams );
+		tools.shExec( `git push origin master v${ version }`, shExecParams );
+
+		if ( !options.skipNpm ) {
+			log.info( 'Publishing on NPM...' );
+			tools.shExec( 'npm publish', shExecParams );
+		}
+
+		if ( !options.skipGithub ) {
+			log.info( 'Creating GitHub release...' );
+
+			const repositoryInfo = parseGithubUrl(
+				tools.shExec( 'git remote get-url origin --push', shExecParams ).trim()
+			);
+
+			const releaseOptions = {
+				repositoryOwner: repositoryInfo.owner,
+				repositoryName: repositoryInfo.name,
+				version: `v${ version }`,
+				description: latestChanges
+			};
+
+			return createGithubRelease( options.token, releaseOptions )
+				.then( resolve )
+				.catch( reject );
+		}
+
+		resolve();
+	} );
+
+	return promise.then( () => {
+		log.info( `Release "${ version }" has been created and published.` );
+	} );
 };

@@ -13,7 +13,7 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  *
  * @returns {Boolean}
  */
-module.exports = function hasCommitsUntilLastRelease() {
+module.exports = function hasCommitsFromLastRelease() {
 	const shExecParams = { verbosity: 'error' };
 	let commitsNumber;
 
@@ -23,7 +23,7 @@ module.exports = function hasCommitsUntilLastRelease() {
 		commitsNumber = tools.shExec( 'git log `git describe --tags --abbrev=0`..HEAD --oneline | wc -l', shExecParams );
 	} else {
 		// Won't throw an error if repository does not have any commit.
-		commitsNumber = tools.shExec( 'git log --oneline 2&> /dev/null | wc -l', shExecParams );
+		commitsNumber = tools.shExec( 'git log --oneline 2> /dev/null | wc -l', shExecParams );
 	}
 
 	return parseInt( commitsNumber.trim() ) > 0;

@@ -26,6 +26,7 @@ module.exports = function getOptions( args = process.argv.slice( 2 ) ) {
 		packages: 'packages',
 		skipGithub: args[ 'skip-github' ] || false,
 		skipNpm: args[ 'skip-npm' ] || false,
+		dependencies: new Map()
 	}, args );
 };
 
@@ -41,4 +42,6 @@ module.exports = function getOptions( args = process.argv.slice( 2 ) ) {
  * @property {String} [cwd=process.cwd()] Current working directory (packages) from which all paths will be resolved.
  *
  * @property {String} [packages='packages'] Where to look for other packages (dependencies).
+ *
+ * @property {Map} [dependencies] Dependencies list to update.
  */

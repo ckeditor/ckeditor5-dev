@@ -8,15 +8,9 @@
 const path = require( 'path' );
 const conventionalChangelog = require( 'conventional-changelog' );
 const { tools, stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const parserOpts = require( '../changelog/parser-options' );
-const writerOpts = require( '../changelog/writer-options' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
-const hasCommitsUntilLastRelease = require( '../utils/hascommitsuntillastrelease' );
-const utils = require( '../utils/changelog' );
+const hasCommitsFromLastRelease = require( '../utils/hascommitsfromlastrelease' );
 const cli = require( '../utils/cli' );
-
-const BREAK_CHANGELOG_MESSAGE = 'Generate the changelog has been aborted.';
-
 /**
  * Generates the release changelog based on commit messages in the repository.
  *
@@ -27,50 +21,52 @@ const BREAK_CHANGELOG_MESSAGE = 'Generate the changelog has been aborted.';
  *
  * @returns {Promise}
  */
-module.exports = function generateChangelog() {
+module.exports = function generateChangelog( newVersion = null ) {
 	const log = logger();
 	const cwd = process.cwd();
-	const packageJson = require( path.join( cwd, 'package.json' ) );
 
-	log.info( `Generating changelog for "${ packageJson.name }".` );
+	return new Promise( ( resolve ) => {
+		const packageJson = require( path.join( cwd, 'package.json' ) );
 
-	return new Promise( ( resolve, reject ) => {
+		log.info( `Generating changelog for "${ packageJson.name }".` );
+
 		let promise = Promise.resolve();
 
-		if ( !hasCommitsUntilLastRelease() ) {
-			promise = cli.confirmRelease()
-				.then( ( isConfirmed ) => {
-					if ( !isConfirmed ) {
-						throw new Error( BREAK_CHANGELOG_MESSAGE );
-					}
+		if ( !newVersion ) {
+			promise = promise.then( () => getNewReleaseType() )
+				.then( ( response ) => {
+					const newReleaseType = ( hasCommitsFromLastRelease() ) ? response.releaseType : null;
+
+					return cli.provideVersion( packageJson.name, packageJson.version, newReleaseType );
 				} );
+		} else {
+			promise = promise.then( () => Promise.resolve( newVersion ) );
 		}
 
-		promise.then( () => getNewReleaseType() )
-			.then( ( response ) => cli.provideVersion( packageJson.name, packageJson.version, response.releaseType ) )
+		return promise
 			.then( ( version ) => {
+				if ( version === 'skip' ) {
+					return resolve();
+				}
+
+				const context = {
+					version
+				};
 				const gitRawCommitsOpts = {
 					merges: undefined,
 					firstParent: true
 				};
-				const context = {
-					version
-				};
+				const parserOpts = require( '../changelog/parser-options' );
+				const writerOpts = require( '../changelog/writer-options' );
 
 				conventionalChangelog( {}, context, gitRawCommitsOpts, parserOpts, writerOpts )
 					.pipe( saveChangelogPipe() );
-			} )
-			.catch( ( err ) => {
-				// User does not want to generate changelog. Abort the process.
-				if ( err.message === BREAK_CHANGELOG_MESSAGE ) {
-					return resolve();
-				}
-
-				reject( err );
 			} );
 
 		function saveChangelogPipe() {
 			return stream.noop( ( changes ) => {
+				const utils = require( '../utils/changelog' );
+
 				let currentChangelog = utils.getChangelog();
 
 				// Remove header from current changelog.
@@ -84,8 +80,8 @@ module.exports = function generateChangelog() {
 				utils.saveChangelog( newChangelog );
 
 				// Commit the changelog.
-				tools.shExec( `git add ${ utils.changelogFile }` );
-				tools.shExec( `git commit -m "Docs: Changelog."` );
+				tools.shExec( `git add ${ utils.changelogFile }`, { verbosity: 'error' } );
+				tools.shExec( `git commit -m "Docs: Changelog."`, { verbosity: 'error' } );
 
 				log.info( `Changelog for "${ packageJson.name }" has been generated.` );
 
