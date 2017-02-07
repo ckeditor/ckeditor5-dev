@@ -26,7 +26,7 @@ module.exports = function replaceTranslationCallsForOneLangauge( compiler, langu
 			process.cwd(),
 			'@ckeditor/ckeditor5-core/src/editor/editor.js',
 			( err, result ) => {
-				const pathToCoreTranslationPackage = result.match( /.+\/ckeditor5-core/ )[0];
+				const pathToCoreTranslationPackage = result.match( /.+\/ckeditor5-core/ )[ 0 ];
 				translationService.loadPackage( pathToCoreTranslationPackage.replace( '/', path.sep ) );
 			}
 		);
@@ -41,6 +41,7 @@ module.exports = function replaceTranslationCallsForOneLangauge( compiler, langu
 		} );
 	} );
 
+	// Adds package to the translations if the resource comes from ckeditor5-* package.
 	function maybeLoadPackage( resolveOptions ) {
 		const packageNameRegExp = /\/ckeditor5-[^/]+\//;
 		const match = resolveOptions.resource.match( packageNameRegExp );

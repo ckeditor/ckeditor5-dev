@@ -42,23 +42,11 @@ module.exports = class TranslationService {
 		this._laodPoFile( pathToPoFile );
 	}
 
-	_laodPoFile( pathToPoFile ) {
-		if ( !fs.existsSync( pathToPoFile ) ) {
-			return;
-		}
-
-		const poFileContent = fs.readFileSync( pathToPoFile, 'utf-8' );
-		const parsedTranslationFile = parsePoFileContent( poFileContent );
-
-		for ( const translationKey in parsedTranslationFile ) {
-			this.dictionary.set( translationKey, parsedTranslationFile[ translationKey ] );
-		}
-	}
-
 	/**
 	 * Parses source, translates t call arguments and returns modified output.
 	 *
 	 * @param {String} source JS source text which will be translated.
+	 * @returns {String}
 	 */
 	translateSource( source ) {
 		const comments = [];
@@ -93,12 +81,21 @@ module.exports = class TranslationService {
 		return output;
 	}
 
-	/**
-	 * Translates all t() call found in source text to the target language.
-	 *
-	 * @param {String} originalString Source text which will be translated.
-	 * @returns {String}
-	 */
+	// Loads translations from the po file.
+	_laodPoFile( pathToPoFile ) {
+		if ( !fs.existsSync( pathToPoFile ) ) {
+			return;
+		}
+
+		const poFileContent = fs.readFileSync( pathToPoFile, 'utf-8' );
+		const parsedTranslationFile = parsePoFileContent( poFileContent );
+
+		for ( const translationKey in parsedTranslationFile ) {
+			this.dictionary.set( translationKey, parsedTranslationFile[ translationKey ] );
+		}
+	}
+
+	// Translates all t() call found in source text to the target language.
 	_translateString( originalString ) {
 		let translation = this.dictionary.get( originalString );
 
