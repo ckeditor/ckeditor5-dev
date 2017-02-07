@@ -19,23 +19,43 @@ module.exports = function replaceTranslationCallsForOneLangauge( compiler, langu
 
 	compiler.options.translateSource = ( source ) => translationService.translateSource( source );
 
+	// Adds ckeditor5-core translations before translate-source-loader starts translating.
+	compiler.plugin( 'after-resolvers', () => {
+		compiler.resolvers.normal.resolve(
+			process.cwd(),
+			process.cwd(),
+			'@ckeditor/ckeditor5-core/src/editor/editor.js',
+			( err, result ) => {
+				const pathToCoreTranslationPackage = result.match( /.+\/ckeditor5-core/ )[0];
+				translationService.loadPackage( pathToCoreTranslationPackage.replace( '/', path.sep ) );
+			}
+		);
+	} );
+
 	compiler.plugin( 'normal-module-factory', ( nmf ) => {
-		nmf.plugin( 'after-resolve', ( data, done ) => {
-			const packageNameRegExp = /\/ckeditor5-[^/]+\//;
-			const match = data.resource.match( packageNameRegExp );
+		nmf.plugin( 'after-resolve', ( resolveOptions, done ) => {
+			maybeLoadPackage( resolveOptions );
+			maybeAddLoader( resolveOptions );
 
-			if ( match ) {
-				const index = data.resource.search( packageNameRegExp ) + match[ 0 ].length;
-				const pathToPackage = data.resource.slice( 0, index );
-				translationService.loadPackage( pathToPackage );
-			}
-
-			// Translation loader is injected when the file comes from ckeditor5-* packages.
-			if ( data.resource.match( /\/ckeditor5-[^/]+\/src\/.+\.js$/ ) ) {
-				data.loaders.unshift( path.join( __dirname, 'translate-source-loader.js' ) );
-			}
-
-			done( null, data );
+			done( null, resolveOptions );
 		} );
 	} );
+
+	function maybeLoadPackage( resolveOptions ) {
+		const packageNameRegExp = /\/ckeditor5-[^/]+\//;
+		const match = resolveOptions.resource.match( packageNameRegExp );
+
+		if ( match ) {
+			const index = resolveOptions.resource.search( packageNameRegExp ) + match[ 0 ].length;
+			const pathToPackage = resolveOptions.resource.slice( 0, index );
+			translationService.loadPackage( pathToPackage.replace( '/', path.sep ) );
+		}
+	}
+
+	// Injects loader when the file comes from ckeditor5-* packages.
+	function maybeAddLoader( resolveOptions ) {
+		if ( resolveOptions.resource.match( /\/ckeditor5-[^/]+\/src\/.+\.js$/ ) ) {
+			resolveOptions.loaders.unshift( path.join( __dirname, 'translate-source-loader.js' ) );
+		}
+	}
 };
