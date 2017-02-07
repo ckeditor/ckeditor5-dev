@@ -41,8 +41,10 @@ module.exports = function createRelease( options ) {
 
 	let version;
 
-	const packageJsonPath = path.join( cwd, 'package.json' );
-	updateDependenciesVersions( options.dependencies, packageJsonPath );
+	if ( options.dependencies ) {
+		const packageJsonPath = path.join( cwd, 'package.json' );
+		updateDependenciesVersions( options.dependencies, packageJsonPath );
+	}
 
 	return getNewReleaseType()
 		.then( ( response ) => {

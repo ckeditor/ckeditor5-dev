@@ -164,5 +164,16 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.createGithubRelease.calledOnce ).to.equal( true );
 				} );
 		} );
+
+		it( 'should not throw an error when dependencies are not defined', () => {
+			options.skipNpm = true;
+			options.skipGithub = true;
+			options.dependencies = undefined;
+
+			return createRelease( options )
+				.then( () => {
+					expect( stubs.updateDependenciesVersions.called ).to.equal( false );
+				} );
+		} );
 	} );
 } );

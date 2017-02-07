@@ -49,7 +49,8 @@ module.exports = {
 // - makes links to issues and user's profiles on GitHub.
 function transformCommit( commit ) {
 	if ( commit.header.startsWith( 'Merge' ) ) {
-		const parsedHeader = parserOptions.headerPattern.exec( commit.footer );
+		// Header for merge commit can be in "body" or "footer" of the commit message.
+		const parsedHeader = parserOptions.headerPattern.exec( commit.body || commit.footer );
 
 		if ( parsedHeader ) {
 			parserOptions.headerCorrespondence.forEach( ( key, index ) => {
@@ -62,14 +63,17 @@ function transformCommit( commit ) {
 		commit.hash = commit.hash.substring( 0, 7 );
 	}
 
+	const hasCorrectType = availableTypes.has( commit.type );
 	const isCommitIncluded = availableTypes.get( commit.type );
 
 	let logMessage = `* ${ commit.hash } "${ commit.header }" `;
 
-	if ( isCommitIncluded ) {
+	if ( hasCorrectType && isCommitIncluded ) {
 		logMessage += chalk.green( 'INCLUDED' );
+	} else if ( hasCorrectType && !isCommitIncluded ) {
+		logMessage += chalk.grey( 'SKIPPED' );
 	} else {
-		logMessage += chalk.red( 'SKIPPED' );
+		logMessage += chalk.red( 'INVALID' );
 	}
 
 	log.info( logMessage );
@@ -91,6 +95,9 @@ function transformCommit( commit ) {
 	}
 
 	for ( const note of commit.notes ) {
+		if ( note.title === 'BREAKING CHANGE' ) {
+			note.title = 'BREAKING CHANGES';
+		}
 		note.text = linkGithubIssues( linkGithubUsers( note.text ) );
 	}
 
