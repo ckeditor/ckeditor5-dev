@@ -13,7 +13,7 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 const validator = require( '../../../lib/release-tools/utils/releasevalidator' );
 
-describe( 'dev-env/release-tools/tasks', () => {
+xdescribe( 'dev-env/release-tools/tasks', () => {
 	describe( 'createRelease()', () => {
 		let createRelease, sandbox, stubs, options;
 

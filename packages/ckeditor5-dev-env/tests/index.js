@@ -82,7 +82,7 @@ describe( 'dev-env/index', () => {
 		} );
 	} );
 
-	describe( 'releaseDependencies()', () => {
+	xdescribe( 'releaseDependencies()', () => {
 		it( 'executes "createRelease" task on each package', () => {
 			const createReleaseStub = sandbox.stub( tasks, 'createRelease' ).returns( Promise.resolve() );
 

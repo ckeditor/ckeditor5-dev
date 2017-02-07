@@ -12,9 +12,9 @@ const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 
-describe( 'dev-env/release-tools/utils', () => {
-	describe( 'proposedDependenciesVersions()', () => {
-		let proposedDepsVersion, sandbox, execOptions;
+xdescribe( 'dev-env/release-tools/utils', () => {
+	describe( 'packagesToRelease()', () => {
+		let packagesToRelease, sandbox, execOptions;
 		let mockCalled = {
 			getNextVersion: false,
 			getNewReleaseType: false,
@@ -70,7 +70,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				return 'v0.5.0';
 			} );
 
-			proposedDepsVersion = require( '../../../lib/release-tools/utils/proposeddependenciesversions' );
+			packagesToRelease = require( '../../../lib/release-tools/utils/packagestorelease' );
 		} );
 
 		afterEach( () => {
@@ -87,7 +87,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				packages: 'packages/'
 			};
 
-			return proposedDepsVersion( options )
+			return packagesToRelease( options )
 				.then( ( versions ) => {
 					expect( chdirStub.calledThrice ).to.equal( true );
 					expect( chdirStub.firstCall.args[ 0 ] ).to.match( /ckeditor5-core$/ );
