@@ -20,6 +20,7 @@ const cli = {
 	provideVersion( packageName, packageVersion, releaseType ) {
 		return new Promise( ( resolve, reject ) => {
 			const versionQuestion = {
+				type: 'input',
 				name: 'version',
 				default: ( releaseType ) ? semver.inc( packageVersion, releaseType ) : 'skip',
 				message: `New version for "${ packageName }" (currently ${ packageVersion }, type new version or "skip")?`,
@@ -35,6 +36,73 @@ const cli = {
 
 			return inquirer.prompt( [ versionQuestion ] )
 				.then( ( answers ) => resolve( answers.version ) )
+				.catch( reject );
+		} );
+	},
+
+	/**
+	 * Asks a user for providing the GitHub token.
+	 *
+	 * @returns {Promise}
+	 */
+	provideToken() {
+		return new Promise( ( resolve, reject ) => {
+			const tokenQuestion = {
+				type: 'password',
+				name: 'token',
+				message: `Provide the GitHub token:`,
+				validate( input ) {
+					return input.length === 40 ? true : 'Please provide a valid token.';
+				}
+			};
+
+			return inquirer.prompt( [ tokenQuestion ] )
+				.then( ( answers ) => resolve( answers.token ) )
+				.catch( reject );
+		} );
+	},
+
+	/**
+	 * Asks a user for selecting services where packages will be released.
+	 *
+	 * If the user choices a GitHub, required token also has to be provided.
+	 *
+	 * @returns {Promise}
+	 */
+	configureReleaseOptions() {
+		const options = {};
+
+		return new Promise( ( resolve, reject ) => {
+			const servicesQuestion = {
+				type: 'checkbox',
+				name: 'services',
+				message: `Select services where packages will be released:`,
+				choices: [
+					'npm',
+					'GitHub'
+				],
+				default: [
+					'npm',
+					'GitHub'
+				]
+			};
+
+			inquirer.prompt( [ servicesQuestion ] )
+				.then( ( answers ) => {
+					options.skipNpm = answers.services.indexOf( 'npm' ) === -1;
+					options.skipGithub = answers.services.indexOf( 'GitHub' ) === -1;
+
+					if ( options.skipGithub ) {
+						return resolve( options );
+					}
+
+					cli.provideToken()
+						.then( ( token ) => {
+							options.token = token;
+
+							return resolve( options );
+						} );
+				} )
 				.catch( reject );
 		} );
 	}

@@ -29,7 +29,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			it( 'throws an error when token was not found', () => {
 				expect( () => {
 					validator.checkOptions( {} );
-				} ).to.throw( Error, 'GitHub CLI token not found. Use --token=<token>.' );
+				} ).to.throw( Error, 'GitHub CLI token not found.' );
 			} );
 
 			it( 'does not throw when token was not found but package will not be release on GitHub release page', () => {

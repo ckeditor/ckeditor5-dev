@@ -20,7 +20,13 @@ const versionUtils = require( '../utils/versions' );
  * Commits a new changelog (and package.json), creates a tag,
  * pushes the tag to a remote server and creates a note on GitHub releases page.
  *
- * @params {Options} options
+ * @param {Object} options
+ * @param {String} options.token GitHub token used to authenticate.
+ * @param {Boolean} options.skipGithub Whether to publish the package on Github.
+ * @param {Boolean} options.skipNpm Whether to publish the package on Npm.
+ * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
+ * @param {String} options.packages Where to look for other packages (dependencies).
+ * @param {Map} options.dependencies Dependencies list to update.
  * @returns {Promise}
  */
 module.exports = function createRelease( options ) {
@@ -31,7 +37,7 @@ module.exports = function createRelease( options ) {
 	const packageJsonPath = path.join( cwd, 'package.json' );
 	const packageJson = require( packageJsonPath );
 
-	log.info( `Generating changelog for "${ packageJson.name }".` );
+	log.info( `Creating release for "${ packageJson.name }".` );
 
 	// Update dependencies/devDependencies versions in package.json.
 	if ( options.dependencies.has( packageJson.name ) ) {

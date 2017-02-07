@@ -9,17 +9,6 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 const validator = {
 	/**
-	 * Checks the release options.
-	 *
-	 * @params {Options} options
-	 */
-	checkOptions( options ) {
-		if ( !options.skipGithub && !options.token ) {
-			throw new Error( 'GitHub CLI token not found. Use --token=<token>.' );
-		}
-	},
-
-	/**
 	 * Checks whether we're on master and there we're not behind or ahead.
 	 *
 	 * The idea is that the status should be totally clean. If branch has any ucommited,
