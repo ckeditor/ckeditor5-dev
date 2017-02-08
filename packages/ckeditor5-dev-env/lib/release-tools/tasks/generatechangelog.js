@@ -5,12 +5,13 @@
 
 'use strict';
 
-const path = require( 'path' );
 const conventionalChangelog = require( 'conventional-changelog' );
 const { tools, stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
 const hasCommitsFromLastRelease = require( '../utils/hascommitsfromlastrelease' );
 const cli = require( '../utils/cli' );
+const getPackageJson = require( '../utils/getpackagejson' );
+
 /**
  * Generates the release changelog based on commit messages in the repository.
  *
@@ -23,10 +24,9 @@ const cli = require( '../utils/cli' );
  */
 module.exports = function generateChangelog( newVersion = null ) {
 	const log = logger();
-	const cwd = process.cwd();
 
 	return new Promise( ( resolve ) => {
-		const packageJson = require( path.join( cwd, 'package.json' ) );
+		const packageJson = getPackageJson();
 
 		log.info( `Generating changelog for "${ packageJson.name }".` );
 

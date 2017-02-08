@@ -10,6 +10,35 @@ const semver = require( 'semver' );
 
 const cli = {
 	/**
+	 * Asks a user for a confirmation for creating the releases.
+	 *
+	 * @param {Map} packages Packages to release.
+	 * @returns {Promise}
+	 */
+	confirmRelease( packages ) {
+		let message = 'Packages to release:\n';
+
+		for ( const [ packageName, packageDetails ] of packages ) {
+			message += `  - "${ packageName }": v${ packageDetails.version }\n`;
+		}
+
+		message += 'Continue?';
+
+		return new Promise( ( resolve, reject ) => {
+			const confirmQuestion = {
+				message,
+				type: 'confirm',
+				name: 'confirm',
+				default: true,
+			};
+
+			inquirer.prompt( [ confirmQuestion ] )
+				.then( ( answers ) => resolve( answers.confirm ) )
+				.catch( reject );
+		} );
+	},
+
+	/**
 	 * Asks a user for providing the new version.
 	 *
 	 * @param {String} packageName

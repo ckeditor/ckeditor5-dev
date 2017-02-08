@@ -13,6 +13,7 @@ const createGithubRelease = require( './creategithubrelease' );
 const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
 const utils = require( '../utils/changelog' );
 const versionUtils = require( '../utils/versions' );
+const getPackageJson = require( '../utils/getpackagejson' );
 
 /**
  * Creates a new release.
@@ -32,25 +33,26 @@ const versionUtils = require( '../utils/versions' );
 module.exports = function createRelease( options ) {
 	const cwd = process.cwd();
 	const log = logger();
-	const shExecParams = { verbosity: 'error' };
 
 	const packageJsonPath = path.join( cwd, 'package.json' );
-	const packageJson = require( packageJsonPath );
+	const packageJson = getPackageJson( cwd );
 
 	log.info( `Creating release for "${ packageJson.name }".` );
 
-	// Update dependencies/devDependencies versions in package.json.
-	if ( options.dependencies.has( packageJson.name ) ) {
+	if ( options.dependencies ) {
+		// Update dependencies/devDependencies versions in package.json.
 		updateDependenciesVersions( options.dependencies, packageJsonPath );
 
-		// Commit the changes.
-		tools.shExec( 'git add package.json', shExecParams );
-		tools.shExec( 'git commit -m "Internal: Update dependencies."', shExecParams );
+		if ( exec( 'git diff --name-only package.json' ).trim().length ) {
+			log.info( `Updating dependencies...` );
+			exec( 'git add package.json' );
+			exec( 'git commit -m "Internal: Update dependencies."' );
+		}
 
 		const packageDetails = options.dependencies.get( packageJson.name );
 
 		// If package does not have generated changelog - let's generate it.
-		if ( !packageDetails.hasChangelog ) {
+		if ( packageDetails && !packageDetails.hasChangelog ) {
 			return generateChangelog( packageDetails.version )
 				.then( () => {
 					packageDetails.hasChangelog = true;
@@ -61,7 +63,7 @@ module.exports = function createRelease( options ) {
 						token: options.token,
 						skipGithub: options.skipGithub,
 						skipNpm: options.skipNpm,
-						dependencies: new Map()
+						dependencies: null
 					} );
 				} );
 		}
@@ -81,23 +83,23 @@ module.exports = function createRelease( options ) {
 		} );
 
 		log.info( `Committing "package.json"...` );
-		tools.shExec( 'git add package.json', shExecParams );
-		tools.shExec( `git commit --message="Release: v${ version }."`, shExecParams );
+		exec( 'git add package.json' );
+		exec( `git commit --message="Release: v${ version }."` );
 
 		log.info( 'Creating tag...' );
-		tools.shExec( `git tag v${ version }`, shExecParams );
-		tools.shExec( `git push origin master v${ version }`, shExecParams );
+		exec( `git tag v${ version }` );
+		exec( `git push origin master v${ version }` );
 
 		if ( !options.skipNpm ) {
 			log.info( 'Publishing on NPM...' );
-			tools.shExec( 'npm publish', shExecParams );
+			exec( 'npm publish' );
 		}
 
 		if ( !options.skipGithub ) {
 			log.info( 'Creating GitHub release...' );
 
 			const repositoryInfo = parseGithubUrl(
-				tools.shExec( 'git remote get-url origin --push', shExecParams ).trim()
+				exec( 'git remote get-url origin --push' ).trim()
 			);
 
 			const releaseOptions = {
@@ -116,6 +118,10 @@ module.exports = function createRelease( options ) {
 	} );
 
 	return promise.then( () => {
-		log.info( `Release "${ version }" has been created and published.` );
+		log.info( `Release "${ version }" has been created and published.\n` );
 	} );
 };
+
+function exec( command ) {
+	return tools.shExec( command, { verbosity: 'error' } );
+}

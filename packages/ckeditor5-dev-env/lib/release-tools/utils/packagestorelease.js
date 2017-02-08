@@ -5,10 +5,10 @@
 
 'use strict';
 
-const path = require( 'path' );
 const semver = require( 'semver' );
 const executeOnDependencies = require( './executeondependencies' );
 const versionUtils = require( './versions' );
+const getPackageJson = require( './getpackagejson' );
 
 /**
  * Returns a list of packages to release.
@@ -41,8 +41,7 @@ module.exports = function packagesToRelease( options ) {
 			} );
 		} else {
 			// Package does not have new changes but its dependencies may be changed.
-			const packageJson = require( path.join( process.cwd(), 'package.json' ) );
-			packagesToCheck.set( repositoryName, packageJson );
+			packagesToCheck.set( repositoryName, getPackageJson() );
 		}
 
 		return Promise.resolve();

@@ -10,6 +10,7 @@ const path = require( 'path' );
 const chalk = require( 'chalk' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const parserOptions = require( './parser-options' );
+const getPackageJson = require( '../utils/getpackagejson' );
 
 // Map of available types of the commits.
 // Types marked as `false` will be ignored during generating the changelog.
@@ -25,7 +26,7 @@ const availableTypes = new Map( [
 	[ 'Release', false ]
 ] );
 
-const packageJson = require( path.join( process.cwd(), 'package.json' ) );
+const packageJson = getPackageJson();
 const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
 const templatePath = path.join( __dirname, 'templates' );
 const log = logger();
@@ -40,7 +41,8 @@ module.exports = {
 	mainTemplate: fs.readFileSync( path.join( templatePath, 'template.hbs' ), 'utf-8' ),
 	headerPartial: fs.readFileSync( path.join( templatePath, 'header.hbs' ), 'utf-8' ),
 	commitPartial: fs.readFileSync( path.join( templatePath, 'commit.hbs' ), 'utf-8' ),
-	footerPartial: fs.readFileSync( path.join( templatePath, 'footer.hbs' ), 'utf-8' )
+	footerPartial: fs.readFileSync( path.join( templatePath, 'footer.hbs' ), 'utf-8' ),
+	commitTypes: availableTypes
 };
 
 // Parses a single commit:

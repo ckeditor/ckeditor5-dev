@@ -11,6 +11,8 @@ const packagesToRelease = require( './release-tools/utils/packagestorelease' );
 const validator = require( './release-tools/utils/releasevalidator' );
 const cli = require( './release-tools/utils/cli' );
 
+const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted.';
+
 const tasks = {
 	generateChangelog: require( './release-tools/tasks/generatechangelog' ),
 
@@ -52,6 +54,8 @@ const tasks = {
 	 * @returns {Promise}
 	 */
 	releaseDependencies( options ) {
+		const log = logger();
+
 		const execOptions = {
 			cwd: options.cwd,
 			packages: options.packages
@@ -63,6 +67,29 @@ const tasks = {
 			.then( ( dependencies ) => {
 				options.dependencies = dependencies;
 
+				if ( dependencies.size === 0 ) {
+					log.warning( 'Not found packages to release.' );
+
+					throw new Error( BREAK_RELEASE_MESSAGE );
+				}
+
+				return cli.confirmRelease( dependencies );
+			} )
+			.then( ( isConfirmed ) => {
+				if ( !isConfirmed ) {
+					throw new Error( BREAK_RELEASE_MESSAGE );
+				}
+
+				return executeOnDependencies( execOptions, validatePackages );
+			} )
+			.then( () => {
+				if ( errors.length ) {
+					log.error( 'The errors occur during release process.' );
+					errors.forEach( log.error.bind( log ) );
+
+					throw new Error( BREAK_RELEASE_MESSAGE );
+				}
+
 				return cli.configureReleaseOptions();
 			} )
 			.then( ( parsedOptions ) => {
@@ -70,21 +97,17 @@ const tasks = {
 				options.skipGithub = parsedOptions.skipGithub;
 				options.skipNpm = parsedOptions.skipNpm;
 
-				return executeOnDependencies( execOptions, validatePackages );
-			} )
-			.then( () => {
-				if ( errors.length ) {
-					const log = logger();
-
-					log.error( 'The errors occur during release process.' );
-					errors.forEach( log.error.bind( log ) );
-
-					return Promise.reject();
-				}
-
 				return executeOnDependencies( execOptions, releaseSinglePackage );
 			} )
-			.then( () => process.chdir( options.cwd ) );
+			.then( () => process.chdir( options.cwd ) )
+			.catch( ( err ) => {
+				// A user did not confirm the release process.
+				if ( err instanceof Error && err.message === BREAK_RELEASE_MESSAGE ) {
+					return Promise.resolve();
+				}
+
+				throw err;
+			} );
 
 		function releaseSinglePackage( repositoryName, repositoryPath ) {
 			if ( !options.dependencies.has( repositoryName ) ) {

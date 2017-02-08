@@ -5,9 +5,9 @@
 
 'use strict';
 
-const path = require( 'path' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 const changelogUtils = require( './changelog' );
+const getPackageJson = require( './getpackagejson' );
 
 const versions = {
 	/**
@@ -43,9 +43,7 @@ const versions = {
 	 * @returns {String}
 	 */
 	getCurrent( cwd = process.cwd() ) {
-		const packageJson = require( path.join( cwd, 'package.json' ) );
-
-		return packageJson.version;
+		return getPackageJson( cwd ).version;
 	}
 };
 
