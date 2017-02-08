@@ -52,7 +52,7 @@ describe( 'dev-env/release-tools/utils', () => {
 						throw new Error( 'Supposed to be rejected.' );
 					},
 					( err ) => {
-						expect( err.message ).to.match( /your current branch 'master' does not have any commits yet/ );
+						expect( err.message ).to.match( /Command failed: git log/ );
 					}
 				);
 		} );
