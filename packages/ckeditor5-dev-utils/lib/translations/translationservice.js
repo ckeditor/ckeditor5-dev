@@ -59,6 +59,8 @@ module.exports = class TranslationService {
 			onToken: tokens
 		} );
 
+		let changesInCode = false;
+
 		walk.simple( ast, {
 			CallExpression: ( node ) => {
 				if ( node.callee.name !== 't' ) {
@@ -71,9 +73,15 @@ module.exports = class TranslationService {
 					return;
 				}
 
+				changesInCode = true;
 				node.arguments[ 0 ].value = this._translateString( node.arguments[ 0 ].value );
 			}
 		} );
+
+		// Optimization for files without t() calls.
+		if ( !changesInCode ) {
+			return source;
+		}
 
 		escodegen.attachComments( ast, comments, tokens );
 		const output = escodegen.generate( ast, { comment: true } );
