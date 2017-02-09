@@ -22,8 +22,10 @@ const writer = new commonmark.HtmlRenderer();
 const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 
 module.exports = function compileManualTestHtmlFiles( buildDir, manualTestPattern ) {
-	const sourceMDFiles = globSync( path.join( manualTestPattern, '*.md' ) );
-	const sourceDirs = uniq( sourceMDFiles.map( file => path.dirname( file ) ) );
+	const sourceMdFiles = globSync( path.join( manualTestPattern, '*.md' ) );
+	const sourceHtmlFiles = sourceMdFiles.map( ( mdFile ) => setExtension( mdFile, 'html' ) );
+	const sourceDirs = uniq( sourceMdFiles.map( file => path.dirname( file ) ) );
+	const sourceFilePathBases = sourceMdFiles.map( ( mdFile ) => getFilePathWithoutExtension( mdFile ) );
 
 	fs.ensureDirSync( buildDir );
 
@@ -32,36 +34,44 @@ module.exports = function compileManualTestHtmlFiles( buildDir, manualTestPatter
 	sourceDirs.forEach( sourceDir => copyStaticFiles( buildDir, sourceDir ) );
 
 	// Generate real HTML files out of the MD + HTML files of each test.
-	sourceMDFiles.forEach( sourceFile => compileTestHtmlFile( buildDir, sourceFile ) );
+	sourceFilePathBases.forEach( sourceFilePathBase => compileTestHtmlFile( buildDir, sourceFilePathBase ) );
 
-	watchFiles( sourceMDFiles, ( mdFile ) => compileTestHtmlFile( buildDir, mdFile ) );
+	// Watch file and compile on change.
+	watchFiles( sourceMdFiles, ( mdFile ) => compileTestHtmlFile( buildDir, getFilePathWithoutExtension( mdFile ) ) );
+	watchFiles( sourceHtmlFiles, ( mdFile ) => compileTestHtmlFile( buildDir, getFilePathWithoutExtension( mdFile ) ) );
 };
 
-function compileTestHtmlFile( buildDir, sourceFile ) {
+function compileTestHtmlFile( buildDir, sourceFilePathBase ) {
 	const log = logger();
+	const sourceMdFilePath = setExtension( sourceFilePathBase, 'md' );
+	const sourceHtmlFilePath = setExtension( sourceFilePathBase, 'html' );
+	const sourceJsFilePath = setExtension( sourceFilePathBase, 'js' );
 
-	const relativeFilePath = getRelativeFilePath( sourceFile );
+	const relativeHtmlFilePath = getRelativeFilePath( sourceHtmlFilePath );
+	const relativeJsFilePath = getRelativeFilePath( sourceJsFilePath );
 
-	log.info( `Processing '${ gutil.colors.cyan( sourceFile ) }'...` );
+	console.log( relativeJsFilePath );
+
+	log.info( `Processing '${ gutil.colors.cyan( sourceFilePathBase ) }'...` );
 
 	// Compile test instruction (Markdown file).
-	const parsedMarkdownTree = reader.parse( fs.readFileSync( sourceFile, 'utf-8' ) );
+	const parsedMarkdownTree = reader.parse( fs.readFileSync( sourceMdFilePath, 'utf-8' ) );
 	const manualTestInstructions = '<div class="manual-test-sidebar">' + writer.render( parsedMarkdownTree ) + '</div>';
 
 	// Load test view (HTML file).
-	const htmlView = fs.readFileSync( `${ changeExtension( sourceFile, 'html' ) }`, 'utf-8' );
+	const htmlView = fs.readFileSync( `${ sourceHtmlFilePath }`, 'utf-8' );
 
 	// Attach script file to the view.
 	const scriptTag =
 		'<body class="manual-test-container">' +
-			`<script src="./${ changeExtension( path.basename( sourceFile ), 'js' ) }"></script>` +
+			`<script src="/${ relativeJsFilePath }"></script>` +
 		'</body>';
 
 	// Concat the all HTML parts to single one.
 	const preparedHtml = combine( viewTemplate, manualTestInstructions, htmlView, scriptTag );
 
 	// Prepare output path.
-	const outputFilePath = path.join( buildDir, changeExtension( relativeFilePath, 'html' ) );
+	const outputFilePath = path.join( buildDir, relativeHtmlFilePath );
 
 	fs.outputFileSync( outputFilePath, preparedHtml );
 
@@ -82,10 +92,16 @@ function uniq( arr ) {
 	return Array.from( new Set( arr ) );
 }
 
-function changeExtension( file, newExt ) {
+function setExtension( file, newExt ) {
 	const { dir, name } = path.parse( file );
 
 	return path.join( dir, name + '.' + newExt );
+}
+
+function getFilePathWithoutExtension( file ) {
+	const { dir, name } = path.parse( file );
+
+	return path.join( dir, name );
 }
 
 function watchFiles( filePaths, onChange ) {
