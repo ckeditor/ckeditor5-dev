@@ -33,6 +33,8 @@ module.exports = function compileManualTestHtmlFiles( buildDir, manualTestPatter
 
 	// Generate real HTML files out of the MD + HTML files of each test.
 	sourceMDFiles.forEach( sourceFile => compileTestHtmlFile( buildDir, sourceFile ) );
+
+	watchFiles( sourceMDFiles, ( mdFile ) => compileTestHtmlFile( buildDir, mdFile ) );
 };
 
 function compileTestHtmlFile( buildDir, sourceFile ) {
@@ -84,4 +86,31 @@ function changeExtension( file, newExt ) {
 	const { dir, name } = path.parse( file );
 
 	return path.join( dir, name + '.' + newExt );
+}
+
+function watchFiles( filePaths, onChange ) {
+	for ( const filePath of filePaths ) {
+		watchFile( filePath, onChange );
+	}
+}
+
+function watchFile( filePath, onChange ) {
+	const debouncedOnChange = debounce( () => onChange( filePath ), 500 );
+	fs.watch( filePath, debouncedOnChange );
+}
+
+function debounce( callback, delay ) {
+	let timerId;
+
+	return function( ...args ) {
+		if ( timerId ) {
+			clearTimeout( timerId );
+		}
+
+		timerId = setTimeout( () => {
+			timerId = null;
+
+			callback.apply( null, args );
+		}, delay );
+	};
 }
