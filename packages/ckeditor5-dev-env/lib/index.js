@@ -21,7 +21,7 @@ const tasks = {
 	/**
 	 * Generates the changelog for dependencies.
 	 *
-	 * @param {Options} options
+	 * @param {Object} options
 	 * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
 	 * @param {String} options.packages Where to look for other packages (dependencies).
 	 * @returns {Promise}
