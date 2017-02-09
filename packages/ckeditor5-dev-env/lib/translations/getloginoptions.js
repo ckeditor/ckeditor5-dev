@@ -7,6 +7,12 @@
 
 const minimist = require( 'minimist' );
 
+/**
+ * Retuns username and password from the array of command line arguments.
+ *
+ * @param {Array.<String>} args
+ * @returns {Object}
+ */
 module.exports = function getLoginOptions( args ) {
 	return minimist( args, {
 		string: [ 'username', 'password' ],

@@ -210,7 +210,7 @@ msgstr "util"
 
 	describe( 'savePotFile()', () => {
 		it( 'should write pot file', () => {
-			const outputFileStub = sandbox.stub( fs, 'outputFileSync', () => {} );
+			const outputFileStub = sandbox.stub( fs, 'outputFileSync' );
 			utils.savePotFile( 'packageName', 'fileContent' );
 
 			sinon.assert.alwaysCalledWith(
