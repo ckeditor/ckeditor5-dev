@@ -13,60 +13,62 @@ const expect = chai.expect;
 const path = require( 'path' );
 const TranslationService = require( '../../lib/translations/translationservice' );
 
-describe( 'TranslationService', () => {
-	let translationService;
-	let sandbox;
+describe( 'translations', () => {
+	describe( 'TranslationService', () => {
+		let translationService;
+		let sandbox;
 
-	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
-		translationService = new TranslationService();
-	} );
-
-	afterEach( () => {
-		sandbox.restore();
-	} );
-
-	describe( 'loadPackage()', () => {
-		it( 'should load po file from the package', () => {
-			const loadPoFileSpy = sinon.spy();
-			sandbox.stub( translationService, '_laodPoFile', loadPoFileSpy );
-
-			translationService.loadPackage( 'pathToPackage' );
-
-			sinon.assert.calledWith(
-				loadPoFileSpy,
-				path.join( 'pathToPackage', 'lang', 'translations', this.language + '.po' )
-			);
+		beforeEach( () => {
+			sandbox = sinon.sandbox.create();
+			translationService = new TranslationService();
 		} );
 
-		it( 'should load po file from the package only once', () => {
-			const loadPoFileSpy = sinon.spy();
-			sandbox.stub( translationService, '_laodPoFile', loadPoFileSpy );
-
-			translationService.loadPackage( 'pathToPackage' );
-			translationService.loadPackage( 'pathToPackage' );
-
-			sinon.assert.calledOnce( loadPoFileSpy );
-		} );
-	} );
-
-	describe( 'translateSource()', () => {
-		it( 'should translate t() calls in the code', () => {
-			const source = `t( 'Cancel' )`;
-
-			translationService.dictionary.set( 'Cancel', 'Anuluj' );
-
-			const result = translationService.translateSource( source );
-
-			expect( result ).to.equal( `t('Anuluj');` );
+		afterEach( () => {
+			sandbox.restore();
 		} );
 
-		it( 'should return original source if there is no t() calls in the code', () => {
-			const source = `translate( 'Cancel' )`;
+		describe( 'loadPackage()', () => {
+			it( 'should load po file from the package', () => {
+				const loadPoFileSpy = sinon.spy();
+				sandbox.stub( translationService, '_laodPoFile', loadPoFileSpy );
 
-			const result = translationService.translateSource( source );
+				translationService.loadPackage( 'pathToPackage' );
 
-			expect( result ).to.equal( `translate( 'Cancel' )` );
+				sinon.assert.calledWith(
+					loadPoFileSpy,
+					path.join( 'pathToPackage', 'lang', 'translations', this.language + '.po' )
+				);
+			} );
+
+			it( 'should load po file from the package only once', () => {
+				const loadPoFileSpy = sinon.spy();
+				sandbox.stub( translationService, '_laodPoFile', loadPoFileSpy );
+
+				translationService.loadPackage( 'pathToPackage' );
+				translationService.loadPackage( 'pathToPackage' );
+
+				sinon.assert.calledOnce( loadPoFileSpy );
+			} );
+		} );
+
+		describe( 'translateSource()', () => {
+			it( 'should translate t() calls in the code', () => {
+				const source = `t( 'Cancel' )`;
+
+				translationService.dictionary.set( 'Cancel', 'Anuluj' );
+
+				const result = translationService.translateSource( source );
+
+				expect( result ).to.equal( `t('Anuluj');` );
+			} );
+
+			it( 'should return original source if there is no t() calls in the code', () => {
+				const source = `translate( 'Cancel' )`;
+
+				const result = translationService.translateSource( source );
+
+				expect( result ).to.equal( `translate( 'Cancel' )` );
+			} );
 		} );
 	} );
 } );

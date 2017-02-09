@@ -7,6 +7,12 @@
 
 const gettextParser = require( 'gettext-parser' );
 
+/**
+ * Returns object with key-value pairs from parsed po file.
+ *
+ * @param {String} poFileContent Content of the translation file.
+ * @returns {Object.<String,String>}
+ */
 module.exports = function parsePoFileContent( poFileContent ) {
 	const parsedContent = gettextParser.po.parse( poFileContent );
 
@@ -14,6 +20,19 @@ module.exports = function parsePoFileContent( poFileContent ) {
 };
 
 // Fixes weird gettextParser output.
+//
+// Sample input:
+// {
+//     "Label for the Save button.": {
+//         "Save": {
+//             "msgid": "Save",
+//             "msgctxt": "Label for the Save button.",
+//             "msgstr": [
+//                 "Zapisz"
+//             ]
+//         }
+//     }
+// }
 function getCorrectTranslationFormat( translations ) {
 	const result = {};
 
