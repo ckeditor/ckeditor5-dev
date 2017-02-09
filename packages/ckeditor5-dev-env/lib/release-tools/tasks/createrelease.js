@@ -11,7 +11,7 @@ const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const generateChangelog = require( './generatechangelog' );
 const createGithubRelease = require( './creategithubrelease' );
 const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
-const utils = require( '../utils/changelog' );
+const changelogUtils = require( '../utils/changelog' );
 const versionUtils = require( '../utils/versions' );
 const getPackageJson = require( '../utils/getpackagejson' );
 
@@ -44,7 +44,7 @@ module.exports = function createRelease( options ) {
 		updateDependenciesVersions( options.dependencies, packageJsonPath );
 
 		if ( exec( 'git diff --name-only package.json' ).trim().length ) {
-			log.info( `Updating dependencies...` );
+			log.info( 'Updating dependencies...' );
 			exec( 'git add package.json' );
 			exec( 'git commit -m "Internal: Update dependencies."' );
 		}
@@ -73,7 +73,7 @@ module.exports = function createRelease( options ) {
 	const version = versionUtils.getLastFromChangelog();
 
 	const promise = new Promise( ( resolve, reject ) => {
-		const latestChanges = utils.getChangesForVersion( version );
+		const latestChanges = changelogUtils.getChangesForVersion( version );
 
 		// Bump version in `package.json`.
 		tools.updateJSONFile( packageJsonPath, ( json ) => {
@@ -118,7 +118,7 @@ module.exports = function createRelease( options ) {
 	} );
 
 	return promise.then( () => {
-		log.info( `Release "${ version }" has been created and published.\n` );
+		log.info( `Release "v${ version }" has been created and published.\n` );
 	} );
 };
 

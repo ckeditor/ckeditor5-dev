@@ -20,11 +20,11 @@ describe( 'dev-env/release-tools/utils', () => {
 		before( () => {
 			cwd = process.cwd();
 			tmpCwd = fs.mkdtempSync( __dirname + path.sep );
-			exec( `cd ${ tmpCwd} && git init` );
+			exec( `cd ${ tmpCwd } && git init` );
 
 			if ( process.env.CI ) {
-				exec( 'git config --global user.email "ckeditor5@ckeditor.com"' );
-				exec( 'git config --global user.name "CKEditor5 CI"' );
+				exec( `cd ${ tmpCwd } && git config user.email "ckeditor5@ckeditor.com"` );
+				exec( `cd ${ tmpCwd } && git config user.name "CKEditor5 CI"` );
 			}
 		} );
 
