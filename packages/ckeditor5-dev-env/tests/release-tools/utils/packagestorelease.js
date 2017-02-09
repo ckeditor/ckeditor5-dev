@@ -102,7 +102,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				} );
 		} );
 
-		it( 'returns packages with changes and dependent also packages', () => {
+		it( 'returns packages with changes and also dependent packages', () => {
 			packagesToCheck = [
 				'@ckeditor/ckeditor5-core',
 				'@ckeditor/ckeditor5-engine',
