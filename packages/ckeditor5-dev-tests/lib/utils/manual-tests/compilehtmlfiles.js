@@ -54,7 +54,7 @@ function compileTestHtmlFile( buildDir, sourceFilePathBase ) {
 	const sourceJSFilePath = setExtension( sourceFilePathBase, 'js' );
 
 	const absoluteHtmlFilePath = getRelativeFilePath( sourceHtmlFilePath );
-	const absoluteJsFilePath = getRelativeFilePath( sourceJSFilePath );
+	const absoluteJSFilePath = getRelativeFilePath( sourceJSFilePath );
 
 	log.info( `Processing '${ gutil.colors.cyan( sourceFilePathBase ) }'...` );
 
@@ -68,7 +68,7 @@ function compileTestHtmlFile( buildDir, sourceFilePathBase ) {
 	// Attach script file to the view.
 	const scriptTag =
 		'<body class="manual-test-container">' +
-			`<script src="/${ absoluteJsFilePath }"></script>` +
+			`<script src="/${ absoluteJSFilePath }"></script>` +
 		'</body>';
 
 	// Concat the all HTML parts to single one.
