@@ -56,17 +56,17 @@ describe( 'dev-env/release-tools/utils', () => {
 			} );
 		} );
 
-		describe( 'getLastFromTag()', () => {
+		describe( 'getLastTagFromGit()', () => {
 			it( 'returns last tag if exists', () => {
 				sandbox.stub( tools, 'shExec' ).returns( `v1.0.0` );
 
-				expect( version.getLastFromTag() ).to.equal( '1.0.0' );
+				expect( version.getLastTagFromGit() ).to.equal( '1.0.0' );
 			} );
 
 			it( 'returns null if tags do not exist', () => {
 				sandbox.stub( tools, 'shExec' ).returns( '' );
 
-				expect( version.getLastFromTag() ).to.equal( null );
+				expect( version.getLastTagFromGit() ).to.equal( null );
 			} );
 		} );
 

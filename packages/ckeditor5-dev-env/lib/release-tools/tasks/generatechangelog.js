@@ -6,6 +6,7 @@
 'use strict';
 
 const conventionalChangelog = require( 'conventional-changelog' );
+const chalk = require( 'chalk' );
 const { tools, stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
 const hasCommitsFromLastRelease = require( '../utils/hascommitsfromlastrelease' );
@@ -28,7 +29,7 @@ module.exports = function generateChangelog( newVersion = null ) {
 	return new Promise( ( resolve ) => {
 		const packageJson = getPackageJson();
 
-		log.info( `Generating changelog for "${ packageJson.name }".` );
+		log.info( `Generating changelog entries "${ packageJson.name }".` );
 
 		let promise = Promise.resolve();
 
@@ -40,7 +41,7 @@ module.exports = function generateChangelog( newVersion = null ) {
 					return cli.provideVersion( packageJson.name, packageJson.version, newReleaseType );
 				} );
 		} else {
-			promise = promise.then( () => Promise.resolve( newVersion ) );
+			promise = promise.then( () => newVersion );
 		}
 
 		return promise
@@ -83,7 +84,7 @@ module.exports = function generateChangelog( newVersion = null ) {
 				tools.shExec( `git add ${ utils.changelogFile }`, { verbosity: 'error' } );
 				tools.shExec( `git commit -m "Docs: Changelog."`, { verbosity: 'error' } );
 
-				log.info( `Changelog for "${ packageJson.name }" has been generated.` );
+				log.info( chalk.green( `Changelog for "${ packageJson.name }" has been generated.` ) );
 
 				resolve();
 			} );

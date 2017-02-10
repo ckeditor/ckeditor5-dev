@@ -19,23 +19,20 @@ const cli = {
 		let message = 'Packages to release:\n';
 
 		for ( const [ packageName, packageDetails ] of packages ) {
-			message += `  - "${ packageName }": v${ packageDetails.version }\n`;
+			message += `  * "${ packageName }": v${ packageDetails.version }\n`;
 		}
 
 		message += 'Continue?';
 
-		return new Promise( ( resolve, reject ) => {
-			const confirmQuestion = {
-				message,
-				type: 'confirm',
-				name: 'confirm',
-				default: true,
-			};
+		const confirmQuestion = {
+			message,
+			type: 'confirm',
+			name: 'confirm',
+			default: true,
+		};
 
-			inquirer.prompt( [ confirmQuestion ] )
-				.then( ( answers ) => resolve( answers.confirm ) )
-				.catch( reject );
-		} );
+		return inquirer.prompt( [ confirmQuestion ] )
+			.then( ( answers ) => answers.confirm );
 	},
 
 	/**
@@ -47,26 +44,26 @@ const cli = {
 	 * @returns {Promise}
 	 */
 	provideVersion( packageName, packageVersion, releaseType ) {
-		return new Promise( ( resolve, reject ) => {
-			const versionQuestion = {
-				type: 'input',
-				name: 'version',
-				default: ( releaseType ) ? semver.inc( packageVersion, releaseType ) : 'skip',
-				message: `New version for "${ packageName }" (currently ${ packageVersion }, type new version or "skip")?`,
-				validate( input ) {
-					if ( input === 'skip' ) {
-						return true;
-					}
-
-					// TODO: Check whether provided version is available.
-					return semver.valid( input ) ? true : 'Please provide a valid version.';
+		const versionQuestion = {
+			type: 'input',
+			name: 'version',
+			default: releaseType ? semver.inc( packageVersion, releaseType ) : 'skip',
+			message: `New version for "${ packageName }" (currently "${ packageVersion }", type the new version or "skip")?`,
+			filter( input ) {
+				return input.trim();
+			},
+			validate( input ) {
+				if ( input === 'skip' ) {
+					return true;
 				}
-			};
 
-			return inquirer.prompt( [ versionQuestion ] )
-				.then( ( answers ) => resolve( answers.version ) )
-				.catch( reject );
-		} );
+				// TODO: Check whether provided version is available.
+				return semver.valid( input ) ? true : 'Please provide a valid version.';
+			}
+		};
+
+		return inquirer.prompt( [ versionQuestion ] )
+			.then( ( answers ) => answers.version );
 	},
 
 	/**
@@ -75,20 +72,17 @@ const cli = {
 	 * @returns {Promise}
 	 */
 	provideToken() {
-		return new Promise( ( resolve, reject ) => {
-			const tokenQuestion = {
-				type: 'password',
-				name: 'token',
-				message: `Provide the GitHub token:`,
-				validate( input ) {
-					return input.length === 40 ? true : 'Please provide a valid token.';
-				}
-			};
+		const tokenQuestion = {
+			type: 'password',
+			name: 'token',
+			message: `Provide the GitHub token:`,
+			validate( input ) {
+				return input.length === 40 ? true : 'Please provide a valid token.';
+			}
+		};
 
-			return inquirer.prompt( [ tokenQuestion ] )
-				.then( ( answers ) => resolve( answers.token ) )
-				.catch( reject );
-		} );
+		return inquirer.prompt( [ tokenQuestion ] )
+			.then( ( answers ) => answers.token );
 	},
 
 	/**
@@ -101,39 +95,36 @@ const cli = {
 	configureReleaseOptions() {
 		const options = {};
 
-		return new Promise( ( resolve, reject ) => {
-			const servicesQuestion = {
-				type: 'checkbox',
-				name: 'services',
-				message: `Select services where packages will be released:`,
-				choices: [
-					'npm',
-					'GitHub'
-				],
-				default: [
-					'npm',
-					'GitHub'
-				]
-			};
+		const servicesQuestion = {
+			type: 'checkbox',
+			name: 'services',
+			message: `Select services where packages will be released:`,
+			choices: [
+				'npm',
+				'GitHub'
+			],
+			default: [
+				'npm',
+				'GitHub'
+			]
+		};
 
-			inquirer.prompt( [ servicesQuestion ] )
-				.then( ( answers ) => {
-					options.skipNpm = answers.services.indexOf( 'npm' ) === -1;
-					options.skipGithub = answers.services.indexOf( 'GitHub' ) === -1;
+		return inquirer.prompt( [ servicesQuestion ] )
+			.then( ( answers ) => {
+				options.skipNpm = answers.services.indexOf( 'npm' ) === -1;
+				options.skipGithub = answers.services.indexOf( 'GitHub' ) === -1;
 
-					if ( options.skipGithub ) {
-						return resolve( options );
-					}
+				if ( options.skipGithub ) {
+					return options;
+				}
 
-					cli.provideToken()
-						.then( ( token ) => {
-							options.token = token;
+				return cli.provideToken()
+					.then( ( token ) => {
+						options.token = token;
 
-							return resolve( options );
-						} );
-				} )
-				.catch( reject );
-		} );
+						return options;
+					} );
+			} );
 	}
 };
 

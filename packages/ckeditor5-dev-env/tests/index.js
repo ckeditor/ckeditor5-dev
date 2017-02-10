@@ -66,7 +66,7 @@ describe( 'dev-env/index', () => {
 			return promise;
 		} );
 
-		mockery.registerMock( './release-tools/utils/packagestorelease', () => {
+		mockery.registerMock( './release-tools/utils/getpackagestorelease', () => {
 			return Promise.resolve( packagesToRelease );
 		} );
 
@@ -185,8 +185,11 @@ describe( 'dev-env/index', () => {
 
 			return tasks.releaseDependencies( options )
 				.then( () => {
+					const expectedError = 'None of the packages contains any changes since its last release. Aborting.';
+
 					expect( createReleaseStub.called ).to.equal( false );
-					expect( stubs.logger.warning.calledOnce ).to.equal( true );
+					expect( stubs.logger.error.calledOnce ).to.equal( true );
+					expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal( expectedError );
 				} );
 		} );
 
@@ -209,7 +212,7 @@ describe( 'dev-env/index', () => {
 			return tasks.releaseDependencies( options )
 				.then( () => {
 					expect( createReleaseStub.called ).to.equal( false );
-					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal( 'The errors occur during release process.' );
+					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal( 'Releasing has been aborted due to errors.' );
 					expect( stubs.logger.error.getCall( 1 ).args[ 0 ] ).to.equal( '## @ckeditor/ckeditor5-core' );
 					expect( stubs.logger.error.getCall( 2 ).args[ 0 ] ).to.equal( 'Not on master or master is not clean.' );
 					expect( stubs.logger.error.getCall( 3 ).args[ 0 ] ).to.equal( '## @ckeditor/ckeditor5-engine' );
@@ -248,27 +251,32 @@ describe( 'dev-env/index', () => {
 				skipGithub: true,
 				skipNpm: true
 			} ) );
+
 			stubs.validator.checkBranch.returns( undefined );
+
+			packagesToRelease.set( '@ckeditor/ckeditor5-core', {
+				version: '0.6.0',
+				hasChangelog: true
+			} );
+			packagesToRelease.set( '@ckeditor/ckeditor5-engine', {
+				version: '1.0.0',
+				hasChangelog: true
+			} );
+
+			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
 
 			const options = {
 				cwd: __dirname,
 				packages: 'packages/'
 			};
 
-			packagesToRelease.set( '@ckeditor/ckeditor5-core', { version: '0.6.0', hasChangelog: true } );
-			packagesToRelease.set( '@ckeditor/ckeditor5-engine', { version: '1.0.0', hasChangelog: true } );
-
-			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
-
 			return tasks.releaseDependencies( options )
-				.then(
-					() => {
-						throw new Error( 'Supposed to be rejected.' );
-					},
-					( err ) => {
-						expect( err ).to.equal( error );
-					}
-				);
+				.then( () => {
+					expect( process.exitCode ).to.equal( -1 );
+					expect( createReleaseStub.calledTwice ).to.equal( true );
+					expect( stubs.logger.error.calledOnce ).to.equal( true );
+					expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal( error.message );
+				} );
 		} );
 	} );
 } );

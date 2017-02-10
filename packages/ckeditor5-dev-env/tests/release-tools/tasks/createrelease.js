@@ -138,7 +138,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.equal( 'Updating dependencies...' );
 
 					expect( stubs.tools.shExec.calledWith( 'git add package.json' ) ).to.equal( true );
-					expect( stubs.tools.shExec.calledWith( 'git commit -m "Internal: Update dependencies."' ) ).to.equal( true );
+					expect( stubs.tools.shExec.calledWith( 'git commit -m "Internal: Updated dependencies."' ) ).to.equal( true );
 				} );
 		} );
 

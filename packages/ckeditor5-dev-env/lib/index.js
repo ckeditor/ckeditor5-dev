@@ -7,11 +7,11 @@
 
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const executeOnDependencies = require( './release-tools/utils/executeondependencies' );
-const packagesToRelease = require( './release-tools/utils/packagestorelease' );
+const getPackagesToRelease = require( './release-tools/utils/getpackagestorelease' );
 const validator = require( './release-tools/utils/releasevalidator' );
 const cli = require( './release-tools/utils/cli' );
 
-const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted.';
+const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted by the user.';
 
 const tasks = {
 	generateChangelog: require( './release-tools/tasks/generatechangelog' ),
@@ -61,16 +61,15 @@ const tasks = {
 			packages: options.packages
 		};
 
+		// Errors are added to this array by the `validatePackages` function.
 		const errors = [];
 
-		return packagesToRelease( execOptions )
+		return getPackagesToRelease( execOptions )
 			.then( ( dependencies ) => {
 				options.dependencies = dependencies;
 
 				if ( dependencies.size === 0 ) {
-					log.warning( 'Not found packages to release.' );
-
-					throw new Error( BREAK_RELEASE_MESSAGE );
+					throw new Error( 'None of the packages contains any changes since its last release. Aborting.' );
 				}
 
 				return cli.confirmRelease( dependencies );
@@ -84,10 +83,7 @@ const tasks = {
 			} )
 			.then( () => {
 				if ( errors.length ) {
-					log.error( 'The errors occur during release process.' );
-					errors.forEach( log.error.bind( log ) );
-
-					throw new Error( BREAK_RELEASE_MESSAGE );
+					throw new Error( 'Releasing has been aborted due to errors.' );
 				}
 
 				return cli.configureReleaseOptions();
@@ -106,7 +102,10 @@ const tasks = {
 					return Promise.resolve();
 				}
 
-				throw err;
+				log.error( err.message );
+				errors.forEach( log.error.bind( log ) );
+
+				process.exitCode = -1;
 			} );
 
 		function releaseSinglePackage( repositoryName, repositoryPath ) {

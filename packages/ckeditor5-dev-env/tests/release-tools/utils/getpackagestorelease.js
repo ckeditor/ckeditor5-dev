@@ -13,8 +13,8 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 
 describe( 'dev-env/release-tools/utils', () => {
-	describe( 'packagesToRelease()', () => {
-		let packagesToRelease, sandbox, execOptions, stubs;
+	describe( 'getPackagesToRelease()', () => {
+		let getPackagesToRelease, sandbox, execOptions, stubs;
 		let packagesToCheck = [];
 
 		const options = {
@@ -36,7 +36,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				getPackageJson: sandbox.stub(),
 				versions: {
 					getLastFromChangelog: sandbox.stub(),
-					getLastFromTag: sandbox.stub(),
+					getLastTagFromGit: sandbox.stub(),
 					getCurrent: sandbox.stub()
 				}
 			};
@@ -59,7 +59,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			mockery.registerMock( './versions', stubs.versions );
 			mockery.registerMock( './getpackagejson', stubs.getPackageJson );
 
-			packagesToRelease = require( '../../../lib/release-tools/utils/packagestorelease' );
+			getPackagesToRelease = require( '../../../lib/release-tools/utils/getpackagestorelease' );
 		} );
 
 		afterEach( () => {
@@ -75,13 +75,13 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			// @ckeditor/ckeditor5-core
 			stubs.versions.getLastFromChangelog.onFirstCall().returns( '0.6.0' );
-			stubs.versions.getLastFromTag.onFirstCall().returns( '0.5.0' );
+			stubs.versions.getLastTagFromGit.onFirstCall().returns( '0.5.0' );
 
 			// @ckeditor/ckeditor5-engine
 			stubs.versions.getLastFromChangelog.onSecondCall().returns( '1.0.1' );
-			stubs.versions.getLastFromTag.onSecondCall().returns( '1.0.0' );
+			stubs.versions.getLastTagFromGit.onSecondCall().returns( '1.0.0' );
 
-			return packagesToRelease( options )
+			return getPackagesToRelease( options )
 				.then( ( packages ) => {
 					expect( packages.size ).to.equal( 2 );
 
@@ -111,11 +111,11 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			// @ckeditor/ckeditor5-core
 			stubs.versions.getLastFromChangelog.onFirstCall().returns( '0.6.0' );
-			stubs.versions.getLastFromTag.onFirstCall().returns( '0.5.0' );
+			stubs.versions.getLastTagFromGit.onFirstCall().returns( '0.5.0' );
 
 			// @ckeditor/ckeditor5-engine
 			stubs.versions.getLastFromChangelog.onSecondCall().returns( '1.0.0' );
-			stubs.versions.getLastFromTag.onSecondCall().returns( '1.0.0' );
+			stubs.versions.getLastTagFromGit.onSecondCall().returns( '1.0.0' );
 			stubs.getPackageJson.onFirstCall().returns( {
 				version: '1.0.0',
 				dependencies: {
@@ -125,7 +125,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			// @ckeditor/ckeditor5-basic-styles
 			stubs.versions.getLastFromChangelog.onThirdCall().returns( '0.1.0' );
-			stubs.versions.getLastFromTag.onThirdCall().returns( '0.1.0' );
+			stubs.versions.getLastTagFromGit.onThirdCall().returns( '0.1.0' );
 			stubs.getPackageJson.onSecondCall().returns( {
 				version: '0.1.0',
 				dependencies: {
@@ -133,7 +133,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				}
 			} );
 
-			return packagesToRelease( options )
+			return getPackagesToRelease( options )
 				.then( ( packages ) => {
 					expect( packages.size ).to.equal( 3 );
 
@@ -159,14 +159,14 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			// @ckeditor/ckeditor5-core
 			stubs.versions.getLastFromChangelog.onFirstCall().returns( '0.6.0' );
-			stubs.versions.getLastFromTag.onFirstCall().returns( '0.5.0' );
+			stubs.versions.getLastTagFromGit.onFirstCall().returns( '0.5.0' );
 
 			// @ckeditor/ckeditor5-utils
 			stubs.versions.getLastFromChangelog.onSecondCall().returns( '1.0.0' );
-			stubs.versions.getLastFromTag.onSecondCall().returns( '1.0.0' );
+			stubs.versions.getLastTagFromGit.onSecondCall().returns( '1.0.0' );
 			stubs.getPackageJson.onFirstCall().returns( {} );
 
-			return packagesToRelease( options )
+			return getPackagesToRelease( options )
 				.then( ( packages ) => {
 					expect( packages.size ).to.equal( 1 );
 

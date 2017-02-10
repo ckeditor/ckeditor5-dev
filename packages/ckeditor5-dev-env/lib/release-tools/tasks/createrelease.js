@@ -6,6 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
+const chalk = require( 'chalk' );
 const parseGithubUrl = require( 'parse-github-url' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const generateChangelog = require( './generatechangelog' );
@@ -46,7 +47,7 @@ module.exports = function createRelease( options ) {
 		if ( exec( 'git diff --name-only package.json' ).trim().length ) {
 			log.info( 'Updating dependencies...' );
 			exec( 'git add package.json' );
-			exec( 'git commit -m "Internal: Update dependencies."' );
+			exec( 'git commit -m "Internal: Updated dependencies."' );
 		}
 
 		const packageDetails = options.dependencies.get( packageJson.name );
@@ -86,7 +87,7 @@ module.exports = function createRelease( options ) {
 		exec( 'git add package.json' );
 		exec( `git commit --message="Release: v${ version }."` );
 
-		log.info( 'Creating tag...' );
+		log.info( 'Creating a tag...' );
 		exec( `git tag v${ version }` );
 		exec( `git push origin master v${ version }` );
 
@@ -96,7 +97,7 @@ module.exports = function createRelease( options ) {
 		}
 
 		if ( !options.skipGithub ) {
-			log.info( 'Creating GitHub release...' );
+			log.info( 'Creating a GitHub release...' );
 
 			const repositoryInfo = parseGithubUrl(
 				exec( 'git remote get-url origin --push' ).trim()
@@ -118,7 +119,7 @@ module.exports = function createRelease( options ) {
 	} );
 
 	return promise.then( () => {
-		log.info( `Release "v${ version }" has been created and published.\n` );
+		log.info( chalk.green( `Release "v${ version }" has been created and published.\n` ) );
 	} );
 };
 
