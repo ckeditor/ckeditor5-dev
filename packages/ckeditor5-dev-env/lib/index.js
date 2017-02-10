@@ -69,12 +69,19 @@ const tasks = {
 			} );
 	},
 
+	/**
+	 * Collects translation strings ( from `t()` calls ) and stores them in ckeditor5/build/.transifex directory.
+	 */
 	collectTranslations() {
 		const collectTranslations = require( './translations/collect' );
-
-		return collectTranslations();
+		collectTranslations();
 	},
 
+	/**
+	 * Uploads translation strings on the Transifex server.
+	 *
+	 * @returns {Promise}
+	 */
 	uploadTranslations() {
 		const uploadTranslations = require( './translations/upload' );
 		const loginOptions = require( './translations/getloginoptions' )( process.argv.slice( 2 ) );
@@ -82,6 +89,11 @@ const tasks = {
 		return uploadTranslations( loginOptions );
 	},
 
+	/**
+	 * Download translations from the Transifex server.
+	 *
+	 * @returns {Promise}
+	 */
 	downloadTranslations() {
 		const downloadTranslations = require( './translations/download' );
 		const loginOptions = require( './translations/getloginoptions' )( process.argv.slice( 2 ) );
