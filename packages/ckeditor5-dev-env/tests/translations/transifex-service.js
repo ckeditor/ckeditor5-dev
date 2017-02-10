@@ -13,7 +13,7 @@ const sinon = require( 'sinon' );
 const expect = chai.expect;
 const request = require( 'request' );
 
-describe( 'collect-utils', () => {
+describe( 'transifex-service', () => {
 	let sandbox;
 
 	beforeEach( () => {

@@ -46,7 +46,6 @@ function downlaodAndSaveTranslations( loginConfig, packageNames ) {
 	);
 }
 
-// @returns {Promise<Map>}
 function downloadPoFilesForPackage( loginConfig, packageName ) {
 	const resourceDetailsPromise = transifexService.getResourceDetails( Object.assign( {}, loginConfig, { slug: packageName } ) );
 	let languageCodes;
