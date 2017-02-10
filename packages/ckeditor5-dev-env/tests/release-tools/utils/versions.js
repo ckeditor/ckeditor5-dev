@@ -43,10 +43,52 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		describe( 'getLastFromChangelog()', () => {
-			it( 'returns version from changelog', () => {
-				changelogStub.returns( `## [1.0.0]` );
+			it( 'returns version from changelog #1', () => {
+				changelogStub.returns( `\n## [1.0.0]\n\n## 0.0.1` );
 
 				expect( version.getLastFromChangelog() ).to.equal( '1.0.0' );
+			} );
+
+			it( 'returns version from changelog #2', () => {
+				changelogStub.returns( `\n## 1.0.0` );
+
+				expect( version.getLastFromChangelog() ).to.equal( '1.0.0' );
+			} );
+
+			it( 'returns version from changelog #3', () => {
+				changelogStub.returns( `\n## [1.0.0-alpha]\n\n## 0.0.1` );
+
+				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-alpha' );
+			} );
+
+			it( 'returns version from changelog #4', () => {
+				changelogStub.returns( `\n## 1.0.0-alpha` );
+
+				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-alpha' );
+			} );
+
+			it( 'returns version from changelog #5', () => {
+				changelogStub.returns( `\n## [1.0.0-alpha+001]\n\n## 0.0.1` );
+
+				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-alpha+001' );
+			} );
+
+			it( 'returns version from changelog #6', () => {
+				changelogStub.returns( `\n## 1.0.0-alpha+001` );
+
+				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-alpha+001' );
+			} );
+
+			it( 'returns version from changelog #7', () => {
+				changelogStub.returns( `\n## [1.0.0-beta.2]\n\n## 0.0.1` );
+
+				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-beta.2' );
+			} );
+
+			it( 'returns version from changelog #8', () => {
+				changelogStub.returns( `\n## 1.0.0-beta.2` );
+
+				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-beta.2' );
 			} );
 
 			it( 'returns null for empty changelog', () => {

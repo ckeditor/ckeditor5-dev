@@ -17,8 +17,7 @@ const versions = {
 	 */
 	getLastFromChangelog() {
 		const changelog = changelogUtils.getChangelog();
-		// TODO: Support for versions: alpha/beta/rc.
-		const regexp = /## \[?(\d+\.\d+\.\d+)\]?/;
+		const regexp = /\n## \[?([^\]]+)/;
 
 		const matches = changelog.match( regexp );
 
