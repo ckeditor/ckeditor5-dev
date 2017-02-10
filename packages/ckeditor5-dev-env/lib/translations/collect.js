@@ -9,6 +9,14 @@ const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 
 const utils = require( './collect-utils' );
 
+/**
+ * Function collects translations using following steps:
+ *
+ * 1. Collect translation contexts from each package.
+ * 2. Collect t() calls arguments with usage of acorn from each package.
+ * 3. Assert whether contexts and translations are correct. If not, log the errors and break the script.
+ * 4. Create po files from the translation contexts."
+ */
 module.exports = function collect() {
 	const contexts = utils.getContexts();
 	const translations = utils.collectTranslations();
