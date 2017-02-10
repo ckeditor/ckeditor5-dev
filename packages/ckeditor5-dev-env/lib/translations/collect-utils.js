@@ -11,7 +11,6 @@ const path = require( 'path' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 const { findOriginalStrings } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 
-const ckeditor5PackagesDir = path.join( process.cwd(), 'packages' );
 const langContextSuffix = path.join( 'lang', 'contexts.json' );
 const corePackageName = 'ckeditor5-core';
 
@@ -44,7 +43,8 @@ const utils = {
 	 * @returns {Map.<String, Object>}
 	 */
 	getContexts() {
-		const mapEntries = utils._getPackagesContainingContexts().map( packageName => {
+		const ckeditor5PackagesDir = path.join( process.cwd(), 'packages' );
+		const mapEntries = utils._getPackagesContainingContexts( ckeditor5PackagesDir ).map( packageName => {
 			const pathToContext = path.join( ckeditor5PackagesDir, packageName, langContextSuffix );
 
 			return [ packageName, {
@@ -184,7 +184,7 @@ const utils = {
 		} ).join( '\n' );
 	},
 
-	_getPackagesContainingContexts() {
+	_getPackagesContainingContexts( ckeditor5PackagesDir ) {
 		return fs.readdirSync( ckeditor5PackagesDir )
 			.filter( ( packageName ) => fs.existsSync(
 				path.join( ckeditor5PackagesDir, packageName, langContextSuffix )

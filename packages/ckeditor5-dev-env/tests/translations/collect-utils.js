@@ -181,7 +181,7 @@ describe( 'collect-utils', () => {
 	} );
 
 	describe( 'getRepeatedContextErrorMessages()', () => {
-		it( 'should return an error when the key for translation context is dupliacted', () => {
+		it( 'should return an error when the key for translation context is duplicated', () => {
 			const contexts = new Map( [
 				[ 'ckeditor5-core', { content: { util: 'Util' } } ],
 				[ 'ckeditor5-utils', { content: { util: 'Util' } } ]
