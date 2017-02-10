@@ -120,7 +120,7 @@ function createJsonResponseHandler( resolve, reject ) {
 		try {
 			resolve( JSON.parse( body ) );
 		} catch ( err ) {
-			reject( `Error handled while parsing body: ${ body.toString() }` );
+			reject( new Error( `Error handled while parsing body: ${ body.toString() }` ) );
 		}
 	};
 }
