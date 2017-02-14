@@ -101,12 +101,20 @@ function transformCommit( commit ) {
 
 	commit.type = getCommitType( commit.type );
 
-	if ( commit.scope === '*' ) {
-		commit.scope = '';
-	}
-
 	if ( typeof commit.subject === 'string' ) {
 		commit.subject = linkGithubIssues( linkGithubUsers( commit.subject ), issues );
+	}
+
+	if ( typeof commit.body === 'string' ) {
+		commit.body = commit.body.split( '\n' )
+			.map( ( line ) => {
+				if ( !line.length ) {
+					return line;
+				}
+
+				return ' '.repeat( 2 ) + ' ' + line;
+			} )
+			.join( '\n' );
 	}
 
 	for ( const note of commit.notes ) {
