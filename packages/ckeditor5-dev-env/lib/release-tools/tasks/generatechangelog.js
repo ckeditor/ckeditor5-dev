@@ -5,6 +5,7 @@
 
 'use strict';
 
+const fs = require( 'fs' );
 const conventionalChangelog = require( 'conventional-changelog' );
 const chalk = require( 'chalk' );
 const { tools, stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
@@ -12,6 +13,7 @@ const getNewReleaseType = require( '../utils/getnewreleasetype' );
 const hasCommitsFromLastRelease = require( '../utils/hascommitsfromlastrelease' );
 const cli = require( '../utils/cli' );
 const getPackageJson = require( '../utils/getpackagejson' );
+const changelogUtils = require( '../utils/changelog' );
 
 /**
  * Generates the release changelog based on commit messages in the repository.
@@ -30,6 +32,12 @@ module.exports = function generateChangelog( newVersion = null ) {
 		const packageJson = getPackageJson();
 
 		log.info( `Generating changelog entries "${ packageJson.name }".` );
+
+		if ( !fs.existsSync( changelogUtils.changelogFile ) ) {
+			log.warning( 'Changelog file does not exist. Creating...' );
+
+			fs.writeFileSync( changelogUtils.changelogFile, changelogUtils.changelogHeader );
+		}
 
 		let promise = Promise.resolve();
 
