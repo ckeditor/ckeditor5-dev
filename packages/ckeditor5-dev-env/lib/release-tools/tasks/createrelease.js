@@ -93,7 +93,7 @@ module.exports = function createRelease( options ) {
 
 		if ( !options.skipNpm ) {
 			log.info( 'Publishing on NPM...' );
-			exec( 'npm publish' );
+			exec( 'npm publish --access=public' );
 		}
 
 		if ( !options.skipGithub ) {

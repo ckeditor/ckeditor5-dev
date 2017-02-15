@@ -181,7 +181,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 					expect( stubs.parseGithubUrl.calledOnce ).to.equal( false );
 					expect( stubs.createGithubRelease.calledOnce ).to.equal( false );
-					expect( stubs.tools.shExec.calledWith( 'npm publish' ) ).to.equal( false );
+					expect( stubs.tools.shExec.calledWith( 'npm publish --access=public' ) ).to.equal( false );
 
 					expect( stubs.tools.shExec.calledWith( 'git add package.json' ) ).to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'git commit --message="Release: v1.0.0."' ) ).to.equal( true );
@@ -210,7 +210,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				.then( () => {
 					expect( stubs.parseGithubUrl.calledOnce ).to.equal( false );
 					expect( stubs.createGithubRelease.calledOnce ).to.equal( false );
-					expect( stubs.tools.shExec.calledWith( 'npm publish' ) ).to.equal( true );
+					expect( stubs.tools.shExec.calledWith( 'npm publish --access=public' ) ).to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'git commit --message="Release: v1.0.0."' ) ).to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'git tag v1.0.0' ) ).to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'git push origin master v1.0.0' ) ).to.equal( true );
@@ -239,7 +239,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				.then( () => {
 					expect( stubs.parseGithubUrl.calledOnce ).to.equal( true );
 					expect( stubs.createGithubRelease.calledOnce ).to.equal( true );
-					expect( stubs.tools.shExec.calledWith( 'npm publish' ) ).to.equal( false );
+					expect( stubs.tools.shExec.calledWith( 'npm publish --access=public' ) ).to.equal( false );
 
 					expect( stubs.logger.info.calledWith( 'Release "v1.0.0" has been created and published.\n' ) ).to.equal( true );
 
