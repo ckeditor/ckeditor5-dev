@@ -19,6 +19,7 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "mockery": "^1.7.0",
+    "proxyquire": "^1.7.11",
     "sinon": "^1.17.4"
   },
   "engines": {

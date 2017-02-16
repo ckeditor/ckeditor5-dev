@@ -10,6 +10,7 @@
 const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
+const proxyquire = require( 'proxyquire' );
 const mockery = require( 'mockery' );
 
 describe( 'dev-env/release-tools/tasks', () => {
@@ -50,13 +51,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 				}
 			};
 
-			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-				tools: stubs.tools,
-
-				logger() {
-					return stubs.logger;
-				}
-			} );
 			mockery.registerMock( '../utils/getpackagejson', stubs.getPackageJson );
 			mockery.registerMock( '../utils/changelog', stubs.changelogUtils );
 			mockery.registerMock( '../utils/versions', stubs.versionUtils );
@@ -68,7 +62,15 @@ describe( 'dev-env/release-tools/tasks', () => {
 			sandbox.stub( process, 'cwd' ).returns( '/cwd' );
 			sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 
-			createRelease = require( '../../../lib/release-tools/tasks/createrelease' );
+			createRelease = proxyquire( '../../../lib/release-tools/tasks/createrelease', {
+				'@ckeditor/ckeditor5-dev-utils': {
+					tools: stubs.tools,
+
+					logger() {
+						return stubs.logger;
+					}
+				}
+			} );
 
 			options = {
 				token: 'github-secret-token',
@@ -187,7 +189,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.tools.shExec.calledWith( 'git commit --message="Release: v1.0.0."' ) ).to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'git tag v1.0.0' ) ).to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'git push origin master v1.0.0' ) ).to.equal( true );
-					expect( stubs.logger.info.calledWith( 'Release "v1.0.0" has been created and published.\n' ) ).to.equal( true );
+					expect( stubs.logger.info.calledWithMatch( /Release "v1.0.0" has been created and published./ ) ).to.equal( true );
 				} );
 		} );
 
@@ -214,7 +216,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.tools.shExec.calledWith( 'git commit --message="Release: v1.0.0."' ) ).to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'git tag v1.0.0' ) ).to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'git push origin master v1.0.0' ) ).to.equal( true );
-					expect( stubs.logger.info.calledWith( 'Release "v1.0.0" has been created and published.\n' ) ).to.equal( true );
+					expect( stubs.logger.info.calledWithMatch( /Release "v1.0.0" has been created and published./ ) ).to.equal( true );
 				} );
 		} );
 
@@ -241,7 +243,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.createGithubRelease.calledOnce ).to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'npm publish --access=public' ) ).to.equal( false );
 
-					expect( stubs.logger.info.calledWith( 'Release "v1.0.0" has been created and published.\n' ) ).to.equal( true );
+					expect( stubs.logger.info.calledWithMatch( /Release "v1.0.0" has been created and published./ ) ).to.equal( true );
 
 					expect( stubs.createGithubRelease.firstCall.args[ 0 ] ).to.equal( options.token );
 					expect( stubs.createGithubRelease.firstCall.args[ 1 ] ).to.deep.equal( {

@@ -10,6 +10,7 @@
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-env/release-tools/changelog/writer-options', () => {
 	describe( 'transform()', () => {
@@ -37,15 +38,15 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 				}
 			};
 
-			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-				logger() {
-					return stubs.logger;
-				}
-			} );
-
 			mockery.registerMock( 'chalk', stubs.chalk );
 
-			transformCommit = require( '../../../lib/release-tools/changelog/writer-options' ).transform;
+			transformCommit = proxyquire( '../../../lib/release-tools/changelog/writer-options', {
+				'@ckeditor/ckeditor5-dev-utils': {
+					logger() {
+						return stubs.logger;
+					}
+				}
+			} ).transform;
 		} );
 
 		afterEach( () => {

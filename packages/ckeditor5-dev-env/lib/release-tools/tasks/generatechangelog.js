@@ -33,12 +33,6 @@ module.exports = function generateChangelog( newVersion = null ) {
 
 		log.info( `Generating changelog entries "${ packageJson.name }".` );
 
-		if ( !fs.existsSync( changelogUtils.changelogFile ) ) {
-			log.warning( 'Changelog file does not exist. Creating...' );
-
-			fs.writeFileSync( changelogUtils.changelogFile, changelogUtils.changelogHeader );
-		}
-
 		let promise = Promise.resolve();
 
 		if ( !newVersion ) {
@@ -58,6 +52,12 @@ module.exports = function generateChangelog( newVersion = null ) {
 					return resolve();
 				}
 
+				if ( !fs.existsSync( changelogUtils.changelogFile ) ) {
+					log.warning( 'Changelog file does not exist. Creating...' );
+
+					changelogUtils.saveChangelog( changelogUtils.changelogHeader );
+				}
+
 				const context = {
 					version
 				};
@@ -69,10 +69,10 @@ module.exports = function generateChangelog( newVersion = null ) {
 				const writerOpts = require( '../changelog/writer-options' );
 
 				conventionalChangelog( {}, context, gitRawCommitsOpts, parserOpts, writerOpts )
-					.pipe( saveChangelogPipe() );
+					.pipe( saveChangelogPipe( version ) );
 			} );
 
-		function saveChangelogPipe() {
+		function saveChangelogPipe( version ) {
 			return stream.noop( ( changes ) => {
 				const utils = require( '../utils/changelog' );
 
@@ -92,7 +92,7 @@ module.exports = function generateChangelog( newVersion = null ) {
 				tools.shExec( `git add ${ utils.changelogFile }`, { verbosity: 'error' } );
 				tools.shExec( `git commit -m "Docs: Changelog."`, { verbosity: 'error' } );
 
-				log.info( chalk.green( `Changelog for "${ packageJson.name }" has been generated.` ) );
+				log.info( chalk.green( `Changelog for "${ packageJson.name }" (v${ version }) has been generated.` ) );
 
 				resolve();
 			} );

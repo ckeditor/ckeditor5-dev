@@ -10,6 +10,7 @@
 const path = require( 'path' );
 const sinon = require( 'sinon' );
 const expect = require( 'chai' ).expect;
+const proxyquire = require( 'proxyquire' );
 const mockery = require( 'mockery' );
 
 describe( 'dev-env/index', () => {
@@ -74,13 +75,13 @@ describe( 'dev-env/index', () => {
 
 		mockery.registerMock( './release-tools/utils/releasevalidator', stubs.validator );
 
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-			logger() {
-				return stubs.logger;
+		tasks = proxyquire( '../lib/index', {
+			'@ckeditor/ckeditor5-dev-utils': {
+				logger() {
+					return stubs.logger;
+				}
 			}
 		} );
-
-		tasks = require( '../lib/index' );
 	} );
 
 	afterEach( () => {

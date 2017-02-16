@@ -10,6 +10,7 @@
 const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
+const proxyquire = require( 'proxyquire' );
 const mockery = require( 'mockery' );
 const { workspace: workspaceUtils } = require( '@ckeditor/ckeditor5-dev-utils' );
 
@@ -29,9 +30,12 @@ describe( 'dev-env/release-tools/utils', () => {
 			getPackageJsonStub = sandbox.stub();
 
 			mockery.registerMock( './getpackagejson', getPackageJsonStub );
-			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', { workspace: workspaceUtils } );
 
-			executeOnDependencies = require( '../../../lib/release-tools/utils/executeondependencies' );
+			executeOnDependencies = proxyquire( '../../../lib/release-tools/utils/executeondependencies', {
+				'@ckeditor/ckeditor5-dev-utils': {
+					workspace: workspaceUtils
+				}
+			} );
 		} );
 
 		afterEach( () => {

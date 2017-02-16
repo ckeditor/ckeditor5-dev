@@ -10,6 +10,7 @@
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
+const proxyquire = require( 'proxyquire' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-env/release-tools/utils', () => {
@@ -28,13 +29,16 @@ describe( 'dev-env/release-tools/utils', () => {
 				warnOnUnregistered: false
 			} );
 
-			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', { tools } );
 			mockery.registerMock( './getpackagejson', getPackageJsonStub );
 			mockery.registerMock( './changelog', {
 				getChangelog: changelogStub
 			} );
 
-			version = require( '../../../lib/release-tools/utils/versions' );
+			version = proxyquire( '../../../lib/release-tools/utils/versions', {
+				'@ckeditor/ckeditor5-dev-utils': {
+					tools
+				}
+			} );
 		} );
 
 		afterEach( () => {
