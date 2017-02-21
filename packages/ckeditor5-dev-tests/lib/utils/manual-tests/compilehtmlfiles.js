@@ -9,7 +9,6 @@
 
 const path = require( 'path' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const globSync = require( '../glob' );
 const fs = require( 'fs-extra' );
 const gutil = require( 'gulp-util' );
 const commonmark = require( 'commonmark' );
@@ -21,12 +20,12 @@ const chokidar = require( 'chokidar' );
 const reader = new commonmark.Parser();
 const writer = new commonmark.HtmlRenderer();
 
-const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
-
-module.exports = function compileManualTestHtmlFiles( buildDir, manualTestPattern ) {
+module.exports = function compileHtmlFiles( buildDir, manualTestPattern ) {
+	const globSync = require( '../glob' );
+	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 	const sourceMDFiles = globSync( path.join( manualTestPattern, '*.md' ) );
 	const sourceHtmlFiles = sourceMDFiles.map( ( mdFile ) => setExtension( mdFile, 'html' ) );
-	const sourceDirs = uniq( sourceMDFiles.map( file => path.dirname( file ) ) );
+	const sourceDirs = _.uniq( sourceMDFiles.map( file => path.dirname( file ) ) );
 	const sourceFilePathBases = sourceMDFiles.map( ( mdFile ) => getFilePathWithoutExtension( mdFile ) );
 	const staticFiles = _.flatten( sourceDirs.map( sourceDir => {
 		return globSync( path.join( sourceDir, '**', '*.!(js|html|md)' ) );
@@ -39,15 +38,15 @@ module.exports = function compileManualTestHtmlFiles( buildDir, manualTestPatter
 	staticFiles.forEach( staticFile => copyStaticFile( buildDir, staticFile ) );
 
 	// Generate real HTML files out of the MD + HTML files of each test.
-	sourceFilePathBases.forEach( sourceFilePathBase => compileTestHtmlFile( buildDir, sourceFilePathBase ) );
+	sourceFilePathBases.forEach( sourceFilePathBase => compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate ) );
 
 	// Watch files and compile on change.
 	watchFiles( [ ...sourceMDFiles, ...sourceHtmlFiles ], ( file ) => {
-		compileTestHtmlFile( buildDir, getFilePathWithoutExtension( file ) );
+		compileHtmlFile( buildDir, getFilePathWithoutExtension( file ), viewTemplate );
 	} );
 };
 
-function compileTestHtmlFile( buildDir, sourceFilePathBase ) {
+function compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate ) {
 	const log = logger();
 	const sourceMDFilePath = setExtension( sourceFilePathBase, 'md' );
 	const sourceHtmlFilePath = setExtension( sourceFilePathBase, 'html' );
@@ -86,10 +85,6 @@ function compileTestHtmlFile( buildDir, sourceFilePathBase ) {
 function copyStaticFile( buildDir, staticFile ) {
 	const outputFilePath = path.join( buildDir, getRelativeFilePath( staticFile ) );
 	fs.copySync( staticFile, outputFilePath );
-}
-
-function uniq( arr ) {
-	return Array.from( new Set( arr ) );
 }
 
 function setExtension( file, newExt ) {
