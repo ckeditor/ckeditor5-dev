@@ -36,22 +36,18 @@ describe( 'compileHtmlFiles', () => {
 		const fakeDirname = path.dirname( require.resolve( '../../../lib/utils/manual-tests/compilehtmlfiles' ) );
 		const files = {
 			[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
-			[ path.join( 'path', 'to', 'file.md' ) ]: '##Markdown header',
+			[ path.join( 'path', 'to', 'file.md' ) ]: '## Markdown header',
 			[ path.join( 'path', 'to', 'file.html' ) ]: '<div>html file content</div>'
 		};
 
 		const patternFiles = {
-			[ path.join( 'manualTestPattern', '*.md' ) ]: [
-				path.join( 'path', 'to', 'file.md' )
-			],
+			[ path.join( 'manualTestPattern', '*.md' ) ]: [ path.join( 'path', 'to', 'file.md' ) ],
 			[ path.join( 'path', 'to', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ],
 		};
 
 		const mdParserSpy = sandbox.spy();
 		const htmlRendererSpy = sandbox.spy( () => '<h2>Markdown header</h2>' );
 		const getRelativeFilePathSpy = sandbox.spy( pathToFile => pathToFile );
-		const readFileSyncSpy = sandbox.spy( ( pathToFile ) => files[ pathToFile ] );
-		const globSyncSpy = sandbox.spy( ( pattern ) => patternFiles[ pattern ] );
 
 		sandbox.stub( commonmark, 'Parser', sinon.spy( function() {
 			return {
@@ -70,7 +66,7 @@ describe( 'compileHtmlFiles', () => {
 		} ) );
 
 		sandbox.stub( gutil, 'colors', { cyan: text => text } );
-		sandbox.stub( fs, 'readFileSync', readFileSyncSpy );
+		sandbox.stub( fs, 'readFileSync', ( pathToFile ) => files[ pathToFile ] );
 
 		const ensureDirSyncStub = sandbox.stub( fs, 'ensureDirSync' );
 		const outputFileSyncStub = sandbox.stub( fs, 'outputFileSync' );
@@ -78,22 +74,18 @@ describe( 'compileHtmlFiles', () => {
 		const chokidarWatchStub = sandbox.stub( chokidar, 'watch', () => ( { on: () => {} } ) );
 
 		mockery.registerMock( '../getrelativefilepath', getRelativeFilePathSpy );
-		mockery.registerMock( '../glob', globSyncSpy );
+		mockery.registerMock( '../glob', ( pattern ) => patternFiles[ pattern ] );
 		mockery.registerMock( 'dom-combiner', ( ...args ) => args.join( '\n' ) );
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
 			logger: () => ( {
-				info() { }
+				info() {}
 			} )
 		} );
 
 		const compileHtmlFiles = require( '../../../lib/utils/manual-tests/compilehtmlfiles' );
 		compileHtmlFiles( 'buildDir', 'manualTestPattern' );
 
-		sinon.assert.calledWithExactly( readFileSyncSpy, path.join( fakeDirname, 'template.html' ), 'utf-8' );
-		sinon.assert.calledWithExactly( readFileSyncSpy, path.join( 'path', 'to', 'file.md' ), 'utf-8' );
-		sinon.assert.calledWithExactly( readFileSyncSpy, path.join( 'path', 'to', 'file.html' ), 'utf-8' );
-		sinon.assert.calledWithExactly( globSyncSpy, path.join( 'manualTestPattern', '*.md' ) );
-		sinon.assert.calledWithExactly( mdParserSpy, '##Markdown header' );
+		sinon.assert.calledWithExactly( mdParserSpy, '## Markdown header' );
 		sinon.assert.calledWithExactly( ensureDirSyncStub, 'buildDir' );
 		sinon.assert.calledWithExactly(
 			outputFileSyncStub,
