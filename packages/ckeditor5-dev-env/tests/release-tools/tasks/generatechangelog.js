@@ -130,7 +130,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 0 ] ).to.equal( newChangelog );
 
 					expect( stubs.logger.info.calledTwice ).to.equal( true );
-					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( 'Generating changelog entries "test-package".' );
+					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /Generating changelog entries "test-package".../ );
 					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.match( /Changelog for "test-package" \(v1\.0\.0\) has been generated\./ );
 				} );
 		} );

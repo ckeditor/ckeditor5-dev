@@ -44,14 +44,19 @@ const cli = {
 	 * @returns {Promise}
 	 */
 	provideVersion( packageName, packageVersion, releaseType ) {
+		const suggestedVersion = releaseType ? semver.inc( packageVersion, releaseType ) : 'skip';
+
 		const versionQuestion = {
 			type: 'input',
 			name: 'version',
-			default: releaseType ? semver.inc( packageVersion, releaseType ) : 'skip',
-			message: `New version for "${ packageName }" (currently "${ packageVersion }", type the new version or "skip")?`,
+			default: suggestedVersion,
+			message:
+				`Type the new version or "skip" (suggested: "${ suggestedVersion }", current: "${ packageVersion }"):`,
+
 			filter( input ) {
 				return input.trim();
 			},
+
 			validate( input ) {
 				if ( input === 'skip' ) {
 					return true;
