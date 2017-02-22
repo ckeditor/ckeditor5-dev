@@ -129,9 +129,10 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.changelogUtils.saveChangelog.calledOnce ).to.equal( true );
 					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 0 ] ).to.equal( newChangelog );
 
-					expect( stubs.logger.info.calledTwice ).to.equal( true );
-					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /Generating changelog entries "test-package".../ );
-					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.match( /Changelog for "test-package" \(v1\.0\.0\) has been generated\./ );
+					expect( stubs.logger.info.calledThrice ).to.equal( true );
+					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( '' );
+					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.match( /Generating changelog for "test-package".../ );
+					expect( stubs.logger.info.thirdCall.args[ 0 ] ).to.match( /Changelog for "test-package" \(v1\.0\.0\) has been generated\./ );
 				} );
 		} );
 
@@ -165,8 +166,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.changelogUtils.saveChangelog.calledOnce ).to.equal( true );
 					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 0 ] ).to.equal( newChangelog );
 
-					expect( stubs.logger.info.calledTwice ).to.equal( true );
-					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.match( /Changelog for "test-package" \(v0\.1\.0\) has been generated\./ );
+					expect( stubs.logger.info.calledThrice ).to.equal( true );
+					expect( stubs.logger.info.thirdCall.args[ 0 ] ).to.match( /Changelog for "test-package" \(v0\.1\.0\) has been generated\./ );
 
 					expect( stubs.hasCommitsFromLastRelease.calledOnce ).to.equal( true );
 					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );

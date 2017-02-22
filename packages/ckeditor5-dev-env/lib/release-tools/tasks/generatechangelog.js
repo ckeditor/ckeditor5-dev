@@ -31,7 +31,8 @@ module.exports = function generateChangelog( newVersion = null ) {
 	return new Promise( ( resolve ) => {
 		const packageJson = getPackageJson();
 
-		log.info( chalk.bold.blue( `Generating changelog entries "${ packageJson.name }"...` ) );
+		log.info( '' );
+		log.info( chalk.bold.blue( `Generating changelog for "${ packageJson.name }"...` ) );
 
 		let promise = Promise.resolve();
 
