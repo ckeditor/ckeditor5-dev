@@ -61,7 +61,7 @@ describe( 'removeDir', () => {
 	it( 'should remove directory and log it', () => {
 		return removeDir( 'workspace/directory' ).then( () => {
 			expect( logMessages ).to.deep.equal( [
-				'Removed directory: \'\u001b[36mworkspace/directory\u001b[39m\''
+				'Removed directory \'\u001b[36mworkspace/directory\u001b[39m\''
 			] );
 
 			expect( deletedPaths ).to.deep.equal( [
