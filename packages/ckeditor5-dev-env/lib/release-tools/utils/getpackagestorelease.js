@@ -19,7 +19,7 @@ const getPackageJson = require( './getpackagejson' );
  * @returns {Promise}
  */
 module.exports = function getPackagesToRelease( options ) {
-	const getPackagesToRelease = new Map();
+	const packagesToRelease = new Map();
 	const packagesToCheck = new Map();
 
 	const execOptions = {
@@ -27,27 +27,29 @@ module.exports = function getPackagesToRelease( options ) {
 		packages: options.packages
 	};
 
-	const filterPreparedgetPackagesToRelease = ( repositoryName, repositoryPath ) => {
+	function filterPackagesToRelease( repositoryName, repositoryPath ) {
 		process.chdir( repositoryPath );
 
 		const gitVersion = versionUtils.getLastTagFromGit();
 		const changelogVersion = versionUtils.getLastFromChangelog();
+		const packageJson = getPackageJson();
 
 		if ( gitVersion !== changelogVersion ) {
 			// Package is ready to release.
-			getPackagesToRelease.set( repositoryName, {
+			packagesToRelease.set( repositoryName, {
+				previousVersion: packageJson.version,
 				version: changelogVersion,
 				hasChangelog: true
 			} );
 		} else {
 			// Package does not have new changes but its dependencies may be changed.
-			packagesToCheck.set( repositoryName, getPackageJson() );
+			packagesToCheck.set( repositoryName, packageJson );
 		}
 
 		return Promise.resolve();
-	};
+	}
 
-	return executeOnDependencies( execOptions, filterPreparedgetPackagesToRelease )
+	return executeOnDependencies( execOptions, filterPackagesToRelease )
 		.then( () => {
 			let clearRun = false;
 
@@ -57,11 +59,12 @@ module.exports = function getPackagesToRelease( options ) {
 				for ( const [ packageName, packageJson ] of packagesToCheck ) {
 					// Check whether the dependencies will be released.
 					let willUpdateDependencies = Object.keys( packageJson.dependencies || {} )
-						.some( ( dependencyName ) => getPackagesToRelease.has( dependencyName ) );
+						.some( ( dependencyName ) => packagesToRelease.has( dependencyName ) );
 
 					// If so, bump the patch version for current package and release it too.
 					if ( willUpdateDependencies ) {
-						getPackagesToRelease.set( packageName, {
+						packagesToRelease.set( packageName, {
+							previousVersion: packageJson.version,
 							version: semver.inc( packageJson.version, 'patch' ),
 							hasChangelog: false
 						} );
@@ -74,6 +77,6 @@ module.exports = function getPackagesToRelease( options ) {
 
 			process.chdir( options.cwd );
 
-			return Promise.resolve( getPackagesToRelease );
+			return Promise.resolve( packagesToRelease );
 		} );
 };

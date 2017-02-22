@@ -76,10 +76,16 @@ describe( 'dev-env/release-tools/utils', () => {
 			// @ckeditor/ckeditor5-core
 			stubs.versions.getLastFromChangelog.onFirstCall().returns( '0.6.0' );
 			stubs.versions.getLastTagFromGit.onFirstCall().returns( '0.5.0' );
+			stubs.getPackageJson.onFirstCall().returns( {
+				version: '0.5.0'
+			} );
 
 			// @ckeditor/ckeditor5-engine
 			stubs.versions.getLastFromChangelog.onSecondCall().returns( '1.0.1' );
 			stubs.versions.getLastTagFromGit.onSecondCall().returns( '1.0.0' );
+			stubs.getPackageJson.onSecondCall().returns( {
+				version: '1.0.0'
+			} );
 
 			return getPackagesToRelease( options )
 				.then( ( packages ) => {
@@ -112,11 +118,14 @@ describe( 'dev-env/release-tools/utils', () => {
 			// @ckeditor/ckeditor5-core
 			stubs.versions.getLastFromChangelog.onFirstCall().returns( '0.6.0' );
 			stubs.versions.getLastTagFromGit.onFirstCall().returns( '0.5.0' );
+			stubs.getPackageJson.onFirstCall().returns( {
+				version: '0.5.0'
+			} );
 
 			// @ckeditor/ckeditor5-engine
 			stubs.versions.getLastFromChangelog.onSecondCall().returns( '1.0.0' );
 			stubs.versions.getLastTagFromGit.onSecondCall().returns( '1.0.0' );
-			stubs.getPackageJson.onFirstCall().returns( {
+			stubs.getPackageJson.onSecondCall().returns( {
 				version: '1.0.0',
 				dependencies: {
 					'@ckeditor/ckeditor5-core': '^0.5.0'
@@ -126,7 +135,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			// @ckeditor/ckeditor5-basic-styles
 			stubs.versions.getLastFromChangelog.onThirdCall().returns( '0.1.0' );
 			stubs.versions.getLastTagFromGit.onThirdCall().returns( '0.1.0' );
-			stubs.getPackageJson.onSecondCall().returns( {
+			stubs.getPackageJson.onThirdCall().returns( {
 				version: '0.1.0',
 				dependencies: {
 					'@ckeditor/ckeditor5-engine': '^1.0.0'
@@ -160,11 +169,14 @@ describe( 'dev-env/release-tools/utils', () => {
 			// @ckeditor/ckeditor5-core
 			stubs.versions.getLastFromChangelog.onFirstCall().returns( '0.6.0' );
 			stubs.versions.getLastTagFromGit.onFirstCall().returns( '0.5.0' );
+			stubs.getPackageJson.onFirstCall().returns( {
+				version: '0.5.0'
+			} );
 
 			// @ckeditor/ckeditor5-utils
 			stubs.versions.getLastFromChangelog.onSecondCall().returns( '1.0.0' );
 			stubs.versions.getLastTagFromGit.onSecondCall().returns( '1.0.0' );
-			stubs.getPackageJson.onFirstCall().returns( {} );
+			stubs.getPackageJson.onSecondCall().returns( {} );
 
 			return getPackagesToRelease( options )
 				.then( ( packages ) => {

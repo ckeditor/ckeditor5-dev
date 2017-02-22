@@ -19,7 +19,7 @@ const cli = {
 		let message = 'Packages to release:\n';
 
 		for ( const [ packageName, packageDetails ] of packages ) {
-			message += `  * "${ packageName }": v${ packageDetails.version }\n`;
+			message += `  * "${ packageName }": ${ packageDetails.previousVersion } => v${ packageDetails.version }\n`;
 		}
 
 		message += 'Continue?';
