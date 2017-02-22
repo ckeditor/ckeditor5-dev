@@ -5,6 +5,8 @@
 
 'use strict';
 
+const { commitTypes } = require( '../changelog/writer-options' );
+
 /**
  * Returns a type (major, minor, patch) of the next release based on commits.
  *
@@ -42,8 +44,13 @@ function getNewVersionType( commits ) {
 	let hasNewFeatures = false;
 
 	for ( const item of commits ) {
+		// Checking only commits visible in changelog.
+		if ( !commitTypes.get( item.type ) ) {
+			continue;
+		}
+
 		for ( const note of item.notes ) {
-			if ( note.title === 'BREAKING CHANGE' ) {
+			if ( note.title === 'BREAKING CHANGES' || note.title === 'BREAKING CHANGE' ) {
 				return 0;
 			}
 		}

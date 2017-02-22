@@ -5,61 +5,98 @@
 
 'use strict';
 
+const fs = require( 'fs' );
 const conventionalChangelog = require( 'conventional-changelog' );
+const chalk = require( 'chalk' );
 const { tools, stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const parserOpts = require( '../changelog/parser-options' );
-const writerOpts = require( '../changelog/writer-options' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
-const utils = require( '../utils/changelog' );
+const hasCommitsFromLastRelease = require( '../utils/hascommitsfromlastrelease' );
+const cli = require( '../utils/cli' );
+const getPackageJson = require( '../utils/getpackagejson' );
+const changelogUtils = require( '../utils/changelog' );
 
 /**
  * Generates the release changelog based on commit messages in the repository.
  *
- * This method should be executed before the `tasks.createRelease` method.
+ * User can provide a version for the entry in changelog.
+ *
+ * If package does not have any commits, user has to confirm whether the changelog
+ * should be generated.
  *
  * @returns {Promise}
  */
-module.exports = function generateChangelog() {
+module.exports = function generateChangelog( newVersion = null ) {
 	const log = logger();
 
-	log.info( `Generating changelog for: ${ process.cwd() }` );
+	return new Promise( ( resolve ) => {
+		const packageJson = getPackageJson();
 
-	const shExecParams = { verbosity: 'warning' };
+		log.info( '' );
+		log.info( chalk.bold.blue( `Generating changelog for "${ packageJson.name }"...` ) );
 
-	return getNewReleaseType().then( ( response ) => {
-		// Bump the version for conventionalChangelog.
-		tools.shExec( `npm version ${ response.releaseType } --no-git-tag-version`, shExecParams );
+		let promise = Promise.resolve();
 
-		return new Promise( ( resolve ) => {
-			// conventionalChangelog based on version in `package.json`.
-			conventionalChangelog( {}, null, { merges: undefined, firstParent: true }, parserOpts, writerOpts )
-				.pipe( saveChangelogPipe() );
+		if ( !newVersion ) {
+			promise = promise.then( () => getNewReleaseType() )
+				.then( ( response ) => {
+					const newReleaseType = ( hasCommitsFromLastRelease() ) ? response.releaseType : null;
 
-			function saveChangelogPipe() {
-				return stream.noop( ( changes ) => {
-					let currentChangelog = utils.getChangelog();
-
-					// Remove header from current changelog.
-					currentChangelog = currentChangelog.replace( utils.changelogHeader, '' );
-
-					// Concat header, new and current changelog.
-					let newChangelog = utils.changelogHeader + changes.toString() + currentChangelog.trim();
-
-					// Remove all white characters and add empty line at the end.
-					newChangelog = newChangelog.trim() + '\n';
-
-					utils.saveChangelog( newChangelog );
-
-					// Revert bumping the version.
-					tools.shExec( `git checkout -- package.json`, shExecParams );
-
-					// Commit the changelog.
-					tools.shExec( `git add ${ utils.changelogFile }` );
-					tools.shExec( `git commit -m "Docs: Changelog."` );
-
-					resolve();
+					return cli.provideVersion( packageJson.name, packageJson.version, newReleaseType );
 				} );
-			}
-		} );
+		} else {
+			promise = promise.then( () => newVersion );
+		}
+
+		return promise
+			.then( ( version ) => {
+				if ( version === 'skip' ) {
+					return resolve();
+				}
+
+				if ( !fs.existsSync( changelogUtils.changelogFile ) ) {
+					log.warning( 'Changelog file does not exist. Creating...' );
+
+					changelogUtils.saveChangelog( changelogUtils.changelogHeader );
+				}
+
+				const context = {
+					version
+				};
+				const gitRawCommitsOpts = {
+					merges: undefined,
+					firstParent: true
+				};
+				const parserOpts = require( '../changelog/parser-options' );
+				const writerOpts = require( '../changelog/writer-options' );
+
+				conventionalChangelog( {}, context, gitRawCommitsOpts, parserOpts, writerOpts )
+					.pipe( saveChangelogPipe( version ) );
+			} );
+
+		function saveChangelogPipe( version ) {
+			return stream.noop( ( changes ) => {
+				const utils = require( '../utils/changelog' );
+
+				let currentChangelog = utils.getChangelog();
+
+				// Remove header from current changelog.
+				currentChangelog = currentChangelog.replace( utils.changelogHeader, '' );
+
+				// Concat header, new and current changelog.
+				let newChangelog = utils.changelogHeader + changes.toString() + currentChangelog.trim();
+				newChangelog = newChangelog.trim() + '\n';
+
+				// Save the changelog.
+				utils.saveChangelog( newChangelog );
+
+				// Commit the changelog.
+				tools.shExec( `git add ${ utils.changelogFile }`, { verbosity: 'error' } );
+				tools.shExec( `git commit -m "Docs: Changelog."`, { verbosity: 'error' } );
+
+				log.info( chalk.green( `Changelog for "${ packageJson.name }" (v${ version }) has been generated.` ) );
+
+				resolve();
+			} );
+		}
 	} );
 };
