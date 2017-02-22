@@ -32,10 +32,12 @@ describe( 'runManualTests', () => {
 		const serverSpy = sandbox.spy( () => Promise.resolve() );
 		const htmlFileCompilerSpy = sandbox.spy( () => Promise.resolve() );
 		const scriptCompilerSpy = sandbox.spy( () => Promise.resolve() );
+		const removeDirSpy = sandbox.spy( () => Promise.resolve() );
 
 		mockery.registerMock( '../utils/manual-tests/createserver', serverSpy );
 		mockery.registerMock( '../utils/manual-tests/compilehtmlfiles', htmlFileCompilerSpy );
 		mockery.registerMock( '../utils/manual-tests/compilescripts', scriptCompilerSpy );
+		mockery.registerMock( '../utils/manual-tests/removedir', removeDirSpy );
 
 		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 		sandbox.stub( process, 'cwd', () => 'workspace' );
@@ -43,7 +45,11 @@ describe( 'runManualTests', () => {
 		const runManualTests = require( '../../lib/tasks/runmanualtests' );
 
 		return runManualTests().then( () => {
-			sinon.assert.calledWithExactly( serverSpy, 'workspace/build/.manual-tests' );
+			sinon.assert.calledWithExactly(
+				removeDirSpy,
+				'workspace/build/.manual-tests'
+			);
+
 			sinon.assert.calledWithExactly(
 				htmlFileCompilerSpy,
 				'workspace/build/.manual-tests',
@@ -53,6 +59,11 @@ describe( 'runManualTests', () => {
 				scriptCompilerSpy,
 				'workspace/build/.manual-tests',
 				'workspace/packages/ckeditor5-*/tests/**/manual/**'
+			);
+
+			sinon.assert.calledWithExactly(
+				serverSpy,
+				'workspace/build/.manual-tests'
 			);
 		} );
 	} );

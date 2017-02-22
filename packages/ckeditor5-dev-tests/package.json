@@ -14,6 +14,7 @@
     "chokidar": "^1.6.1",
     "commonmark": "^0.27.0",
     "css-loader": "^0.26.1",
+    "del": "^2.2.2",
     "dom-combiner": "^0.1.2",
     "fs-extra": "^2.0.0",
     "glob": "^7.1.1",
