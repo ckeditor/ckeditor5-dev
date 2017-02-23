@@ -63,14 +63,18 @@ module.exports = {
 // - filters out the commit if it should not be visible in the changelog,
 // - makes links to issues and user's profiles on GitHub.
 function transformCommit( commit ) {
-	if ( commit.header.startsWith( 'Merge' ) ) {
+	if ( commit.header.startsWith( 'Merge' ) && commit.body ) {
 		// Header for merge commit can be in "body" or "footer" of the commit message.
-		const parsedHeader = parserOptions.headerPattern.exec( commit.body || commit.footer );
+		const parsedHeader = parserOptions.headerPattern.exec( commit.body );
 
 		if ( parsedHeader ) {
 			parserOptions.headerCorrespondence.forEach( ( key, index ) => {
 				commit[ key ] = parsedHeader[ index + 1 ];
 			} );
+
+			// Remove the new header from commit body in order to avoid
+			// duplicating the same sentence in a changelog description.
+			commit.body = commit.body.replace( parserOptions.headerPattern, '' ).trim();
 		}
 	}
 
@@ -112,7 +116,7 @@ function transformCommit( commit ) {
 					return line;
 				}
 
-				return ' '.repeat( 2 ) + ' ' + line;
+				return ' '.repeat( 3 ) + line;
 			} )
 			.join( '\n' );
 	}
