@@ -25,26 +25,6 @@ describe( 'dev-env/release-tools/utils', () => {
 			shExecStub.restore();
 		} );
 
-		describe( 'checkOptions()', () => {
-			it( 'throws an error when token was not found', () => {
-				expect( () => {
-					validator.checkOptions( {} );
-				} ).to.throw( Error, 'GitHub CLI token not found. Use --token=<token>.' );
-			} );
-
-			it( 'does not throw when token was not found but package will not be release on GitHub release page', () => {
-				expect( () => {
-					validator.checkOptions( { skipGithub: true } );
-				} ).to.not.throw();
-			} );
-
-			it( 'does not throw when options are valid', () => {
-				expect( () => {
-					validator.checkOptions( { token: 'abc' } );
-				} ).to.not.throw();
-			} );
-		} );
-
 		describe( 'checkBranch()', () => {
 			it( 'does not throw if on master and master is clean', () => {
 				shExecStub.returns( '## master...origin/master' );

@@ -10,20 +10,55 @@
 const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
+const proxyquire = require( 'proxyquire' );
+const mockery = require( 'mockery' );
 const { workspace: workspaceUtils } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-env/release-tools/utils', () => {
 	describe( 'executeOnDependencies()', () => {
-		let executeOnDependencies, sandbox;
+		let executeOnDependencies, sandbox, getPackageJsonStub;
 
 		beforeEach( () => {
-			executeOnDependencies = require( '../../../lib/release-tools/utils/executeondependencies' );
-
 			sandbox = sinon.sandbox.create();
+
+			mockery.enable( {
+				useCleanCache: true,
+				warnOnReplace: false,
+				warnOnUnregistered: false
+			} );
+
+			getPackageJsonStub = sandbox.stub();
+
+			mockery.registerMock( './getpackagejson', getPackageJsonStub );
+
+			executeOnDependencies = proxyquire( '../../../lib/release-tools/utils/executeondependencies', {
+				'@ckeditor/ckeditor5-dev-utils': {
+					workspace: workspaceUtils
+				}
+			} );
 		} );
 
 		afterEach( () => {
 			sandbox.restore();
+			mockery.disable();
+		} );
+
+		it( 'resolves promsie when package list is empty', () => {
+			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
+
+			const getDirectoriesStub = sandbox.stub( workspaceUtils, 'getDirectories' )
+				.returns( [] );
+
+			const options = {
+				cwd: path.join( __dirname, '..', 'fixtures', 'basic' ),
+				packages: 'packages/'
+			};
+
+			return executeOnDependencies( options, functionToExecute )
+				.then( () => {
+					expect( getDirectoriesStub.calledOnce ).to.equal( true );
+					expect( functionToExecute.called ).to.equal( false );
+				} );
 		} );
 
 		it( 'executes a function for each package', () => {
@@ -31,6 +66,9 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			const getDirectoriesStub = sandbox.stub( workspaceUtils, 'getDirectories' )
 				.returns( [ 'ckeditor5-core', 'ckeditor5-engine' ] );
+
+			getPackageJsonStub.onFirstCall().returns( { name: 'ckeditor5-core' } );
+			getPackageJsonStub.onSecondCall().returns( { name: '@ckeditor/ckeditor5-engine' } );
 
 			const options = {
 				cwd: path.join( __dirname, '..', 'fixtures', 'basic' ),
@@ -42,6 +80,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			return executeOnDependencies( options, functionToExecute )
 				.then( () => {
 					expect( getDirectoriesStub.calledOnce ).to.equal( true );
+					expect( getPackageJsonStub.calledTwice ).to.equal( true );
 
 					expect( functionToExecute.calledTwice ).to.equal( true );
 					expect( functionToExecute.firstCall.args[ 0 ] ).to.equal( 'ckeditor5-core' );
@@ -67,6 +106,9 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			sandbox.stub( workspaceUtils, 'getDirectories' )
 				.returns( [ 'ckeditor5-core', 'ckeditor5-engine' ] );
+
+			getPackageJsonStub.onFirstCall().returns( { name: 'ckeditor5-core' } );
+			getPackageJsonStub.onSecondCall().returns( { name: '@ckeditor/ckeditor5-engine' } );
 
 			const options = {
 				cwd: path.join( __dirname, '..', 'fixtures', 'basic' ),

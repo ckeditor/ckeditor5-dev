@@ -10,6 +10,7 @@
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-env/release-tools/changelog/writer-options', () => {
 	describe( 'transform()', () => {
@@ -29,23 +30,16 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 					info: sandbox.spy(),
 					warning: sandbox.spy(),
 					error: sandbox.spy()
-				},
-				chalk: {
-					red: sandbox.stub().returnsArg( 0 ),
-					grey: sandbox.stub().returnsArg( 0 ),
-					green: sandbox.stub().returnsArg( 0 )
 				}
 			};
 
-			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-				logger() {
-					return stubs.logger;
+			transformCommit = proxyquire( '../../../lib/release-tools/changelog/writer-options', {
+				'@ckeditor/ckeditor5-dev-utils': {
+					logger() {
+						return stubs.logger;
+					}
 				}
-			} );
-
-			mockery.registerMock( 'chalk', stubs.chalk );
-
-			transformCommit = require( '../../../lib/release-tools/changelog/writer-options' ).transform;
+			} ).transform;
 		} );
 
 		afterEach( () => {
@@ -89,9 +83,7 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 			transformCommit( commit );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Fix: Simple fix\." INCLUDED/ );
-			expect( stubs.chalk.green.calledOnce ).to.equal( true );
-			expect( stubs.chalk.green.firstCall.args[ 0 ] ).to.equal( 'INCLUDED' );
+			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Fix: Simple fix\." \u001b\[32mINCLUDED/ );
 		} );
 
 		it( 'does not attach valid "internal" commit to the changelog', () => {
@@ -109,9 +101,7 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 			transformCommit( commit );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Docs: README\." SKIPPED/ );
-			expect( stubs.chalk.grey.calledOnce ).to.equal( true );
-			expect( stubs.chalk.grey.firstCall.args[ 0 ] ).to.equal( 'SKIPPED' );
+			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Docs: README\." \u001b\[90mSKIPPED/ );
 		} );
 
 		it( 'does not attach invalid commit to the changelog', () => {
@@ -129,9 +119,7 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 			transformCommit( commit );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Invalid commit\." INVALID/ );
-			expect( stubs.chalk.red.calledOnce ).to.equal( true );
-			expect( stubs.chalk.red.firstCall.args[ 0 ] ).to.equal( 'INVALID' );
+			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Invalid commit\." \u001b\[31mINVALID/ );
 		} );
 	} );
 } );

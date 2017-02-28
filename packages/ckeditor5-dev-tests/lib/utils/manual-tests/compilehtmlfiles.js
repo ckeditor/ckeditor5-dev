@@ -9,57 +9,72 @@
 
 const path = require( 'path' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const globSync = require( '../glob' );
 const fs = require( 'fs-extra' );
 const gutil = require( 'gulp-util' );
 const commonmark = require( 'commonmark' );
 const combine = require( 'dom-combiner' );
 const getRelativeFilePath = require( '../getrelativefilepath' );
+const _ = require( 'lodash' );
+const chokidar = require( 'chokidar' );
 
 const reader = new commonmark.Parser();
 const writer = new commonmark.HtmlRenderer();
 
-const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
-
-module.exports = function compileManualTestHtmlFiles( buildDir, manualTestPattern ) {
+module.exports = function compileHtmlFiles( buildDir, manualTestPattern ) {
+	const globSync = require( '../glob' );
+	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 	const sourceMDFiles = globSync( path.join( manualTestPattern, '*.md' ) );
-	const sourceDirs = uniq( sourceMDFiles.map( file => path.dirname( file ) ) );
+	const sourceHtmlFiles = sourceMDFiles.map( ( mdFile ) => setExtension( mdFile, 'html' ) );
+	const sourceDirs = _.uniq( sourceMDFiles.map( file => path.dirname( file ) ) );
+	const sourceFilePathBases = sourceMDFiles.map( ( mdFile ) => getFilePathWithoutExtension( mdFile ) );
+	const staticFiles = _.flatten( sourceDirs.map( sourceDir => {
+		return globSync( path.join( sourceDir, '**', '*.!(js|html|md)' ) );
+	} ) );
 
 	fs.ensureDirSync( buildDir );
 
 	// Copy all files which can be found in the directories with manual tests
 	// to the build dir.
-	sourceDirs.forEach( sourceDir => copyStaticFiles( buildDir, sourceDir ) );
+	staticFiles.forEach( staticFile => copyStaticFile( buildDir, staticFile ) );
 
 	// Generate real HTML files out of the MD + HTML files of each test.
-	sourceMDFiles.forEach( sourceFile => compileTestHtmlFile( buildDir, sourceFile ) );
+	sourceFilePathBases.forEach( sourceFilePathBase => compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate ) );
+
+	// Watch files and compile on change.
+	watchFiles( [ ...sourceMDFiles, ...sourceHtmlFiles ], ( file ) => {
+		compileHtmlFile( buildDir, getFilePathWithoutExtension( file ), viewTemplate );
+	} );
 };
 
-function compileTestHtmlFile( buildDir, sourceFile ) {
+function compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate ) {
 	const log = logger();
+	const sourceMDFilePath = setExtension( sourceFilePathBase, 'md' );
+	const sourceHtmlFilePath = setExtension( sourceFilePathBase, 'html' );
+	const sourceJSFilePath = setExtension( sourceFilePathBase, 'js' );
 
-	const relativeFilePath = getRelativeFilePath( sourceFile );
+	const absoluteHtmlFilePath = getRelativeFilePath( sourceHtmlFilePath );
+	const absoluteJSFilePath = getRelativeFilePath( sourceJSFilePath );
 
-	log.info( `Processing '${ gutil.colors.cyan( sourceFile ) }'...` );
+	log.info( `Processing '${ gutil.colors.cyan( sourceFilePathBase ) }'...` );
 
 	// Compile test instruction (Markdown file).
-	const parsedMarkdownTree = reader.parse( fs.readFileSync( sourceFile, 'utf-8' ) );
+	const parsedMarkdownTree = reader.parse( fs.readFileSync( sourceMDFilePath, 'utf-8' ) );
 	const manualTestInstructions = '<div class="manual-test-sidebar">' + writer.render( parsedMarkdownTree ) + '</div>';
 
 	// Load test view (HTML file).
-	const htmlView = fs.readFileSync( `${ changeExtension( sourceFile, 'html' ) }`, 'utf-8' );
+	const htmlView = fs.readFileSync( sourceHtmlFilePath, 'utf-8' );
 
 	// Attach script file to the view.
 	const scriptTag =
 		'<body class="manual-test-container">' +
-			`<script src="./${ changeExtension( path.basename( sourceFile ), 'js' ) }"></script>` +
+			`<script src="/${ absoluteJSFilePath }"></script>` +
 		'</body>';
 
 	// Concat the all HTML parts to single one.
 	const preparedHtml = combine( viewTemplate, manualTestInstructions, htmlView, scriptTag );
 
 	// Prepare output path.
-	const outputFilePath = path.join( buildDir, changeExtension( relativeFilePath, 'html' ) );
+	const outputFilePath = path.join( buildDir, absoluteHtmlFilePath );
 
 	fs.outputFileSync( outputFilePath, preparedHtml );
 
@@ -67,21 +82,26 @@ function compileTestHtmlFile( buildDir, sourceFile ) {
 }
 
 // Copies all non JS/HTML/MD files to build dir. Their relative paths to JS/HTML files are maintained.
-function copyStaticFiles( buildDir, sourceDir ) {
-	const files = globSync( path.join( sourceDir, '**', '*.!(js|html|md)' ) );
-
-	for ( const file of files ) {
-		const outputFilePath = path.join( buildDir, getRelativeFilePath( file ) );
-		fs.copySync( file, outputFilePath );
-	}
+function copyStaticFile( buildDir, staticFile ) {
+	const outputFilePath = path.join( buildDir, getRelativeFilePath( staticFile ) );
+	fs.copySync( staticFile, outputFilePath );
 }
 
-function uniq( arr ) {
-	return Array.from( new Set( arr ) );
-}
-
-function changeExtension( file, newExt ) {
+function setExtension( file, newExt ) {
 	const { dir, name } = path.parse( file );
 
 	return path.join( dir, name + '.' + newExt );
+}
+
+function getFilePathWithoutExtension( file ) {
+	const { dir, name } = path.parse( file );
+
+	return path.join( dir, name );
+}
+
+function watchFiles( filePaths, onChange ) {
+	for ( const filePath of filePaths ) {
+		const debouncedOnChange = _.debounce( () => onChange( filePath ), 500 );
+		chokidar.watch( filePath ).on( 'all', debouncedOnChange );
+	}
 }

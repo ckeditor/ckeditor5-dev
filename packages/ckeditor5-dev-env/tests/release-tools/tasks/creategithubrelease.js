@@ -13,7 +13,7 @@ const mockery = require( 'mockery' );
 
 describe( 'dev-env/release-tools/tasks', () => {
 	describe( 'createGithubRelease()', () => {
-		let createGithubRelease, sandbox, githubOptions, releaseOptions, stubs;
+		let createGithubRelease, sandbox, githubOptions, releaseOptions, stubs, error;
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
@@ -22,6 +22,10 @@ describe( 'dev-env/release-tools/tasks', () => {
 				authenticate: sandbox.stub(),
 				createRelease: sandbox.spy( ( options, callback ) => {
 					releaseOptions = options;
+
+					if ( error ) {
+						return callback( error );
+					}
 
 					callback( null, 'Response.' );
 				} )
@@ -81,6 +85,20 @@ describe( 'dev-env/release-tools/tasks', () => {
 					} );
 					// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 				} );
+		} );
+
+		it( 'rejects promise when something went wrong', () => {
+			error = new Error( 'Unexpected error.' );
+
+			return createGithubRelease( 'token-123', {} )
+				.then(
+					() => {
+						throw new Error( 'Supposed to be rejected.' );
+					},
+					( err ) => {
+						expect( err ).to.equal( error );
+					}
+				);
 		} );
 	} );
 } );

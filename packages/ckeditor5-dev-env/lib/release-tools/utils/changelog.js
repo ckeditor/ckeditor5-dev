@@ -33,7 +33,6 @@ const utils = {
 		const match = changelog.match( new RegExp( `\\n(## \\[${ version }\\][\\s\\S]+?)(?:\\n## \\[|$)` ) );
 
 		if ( !match || !match[ 1 ] ) {
-			console.log( changelog, match, version );
 			throw new Error( `Cannot find changelog entries for ${ version }.` );
 		}
 
