@@ -134,6 +134,7 @@ class DocletValidator {
 		const paramFullNames = Array.isArray( param.type.parsedType.elements ) ?
 			param.type.parsedType.elements
 				.filter( typeExpression => typeExpression.type !== 'FunctionType' )
+				.filter( typeExpression => typeExpression.type !== 'NullLiteral' )
 				.map( typeExpression => typeExpression.name || typeExpression.expression.name ) :
 			[ param.type.parsedType.name ];
 

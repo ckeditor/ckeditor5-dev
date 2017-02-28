@@ -70,99 +70,120 @@ describe( 'Linter plugin', () => {
 		expect( linter._errors.length ).to.be.equal( 0 );
 	} );
 
-	it( '_lintParams() - not existing type', () => {
-		const linter = new DocletValidator( [ {
-			kind: 'function',
-			params: [ {
-				type: { parsedType: {
-					name: 'module:engine/ckeditor5/editor'
-				} }
-			} ],
-			longname: 'abc',
-			scope: 'inner',
-			meta: { fileName: '',  path: '' },
-		} ], testedModules );
+	describe( '_lintParams()', () => {
+		it( 'should hande not existing types', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'function',
+				params: [ {
+					type: { parsedType: {
+						name: 'module:engine/ckeditor5/editor'
+					} }
+				} ],
+				longname: 'abc',
+				scope: 'inner',
+				meta: { fileName: '',  path: '' },
+			} ], testedModules );
 
-		linter._lintParams();
+			linter._lintParams();
 
-		expect( linter._errors.length ).to.be.equal( 1 );
-	} );
+			expect( linter._errors.length ).to.be.equal( 1 );
+		} );
 
-	it( '_lintParams() - existing type', () => {
-		const linter = new DocletValidator( [ {
-			kind: 'class',
-			params: [ {
-				type: { parsedType: {
-					name: 'module:engine/ckeditor5/editor'
-				} }
-			} ],
-			meta: { fileName: '',  path: '' },
-		}, {
-			kind: 'module',
-			longname: 'module:engine/ckeditor5/editor',
-			meta: { fileName: '',  path: '' },
-		} ], testedModules );
-
-		linter._lintParams();
-
-		expect( linter._errors.length ).to.be.equal( 0 );
-	} );
-
-	it( '_lintParams() - built-in types', () => {
-		const linter = new DocletValidator( [ {
-			kind: 'class',
-			params: [ {
-				type: { parsedType: { name: 'String' } },
+		it( 'should handle existing types', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				params: [ {
+					type: { parsedType: {
+						name: 'module:engine/ckeditor5/editor'
+					} }
+				} ],
+				meta: { fileName: '',  path: '' },
 			}, {
-				type: { parsedType: { name: 'Array' } },
-			}, {
-				type: { parsedType: { name: 'Number' } },
-			} ],
-			meta: { fileName: '',  path: '' },
-		} ], testedModules );
+				kind: 'module',
+				longname: 'module:engine/ckeditor5/editor',
+				meta: { fileName: '',  path: '' },
+			} ], testedModules );
 
-		linter._lintParams();
+			linter._lintParams();
 
-		expect( linter._errors.length ).to.be.equal( 0 );
-	} );
+			expect( linter._errors.length ).to.be.equal( 0 );
+		} );
 
-	it( '_lintParams() - built-in type as aliases', () => {
-		const linter = new DocletValidator( [ {
-			kind: 'class',
-			params: [ {
-				type: { parsedType: {
-					elements: [
-						{ name: 'String' },
-						{ name: 'Array' },
-						{ name: 'Number' },
-					]
-				} },
-			} ],
-			meta: { fileName: '',  path: '' },
-		} ], testedModules );
+		it( 'should handle built-in types', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				params: [ {
+					type: { parsedType: { name: 'String' } },
+				}, {
+					type: { parsedType: { name: 'Array' } },
+				}, {
+					type: { parsedType: { name: 'Number' } },
+				} ],
+				meta: { fileName: '',  path: '' },
+			} ], testedModules );
 
-		linter._lintParams();
+			linter._lintParams();
 
-		expect( linter._errors.length ).to.be.equal( 0 );
-	} );
+			expect( linter._errors.length ).to.be.equal( 0 );
+		} );
 
-	it( '_lintParams() - wrong type in alias', () => {
-		const linter = new DocletValidator( [ {
-			kind: 'class',
-			params: [ {
-				type: { parsedType: {
-					elements: [
-						{ name: 'String' },
-						{ name: 'Wrong' },
-					]
-				} },
-			} ],
-			meta: { fileName: '',  path: '' },
-		} ], testedModules );
+		it( 'should handle built-in type as aliases', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				params: [ {
+					type: { parsedType: {
+						elements: [
+							{ name: 'String' },
+							{ name: 'Array' },
+							{ name: 'Number' },
+						]
+					} },
+				} ],
+				meta: { fileName: '',  path: '' },
+			} ], testedModules );
 
-		linter._lintParams();
+			linter._lintParams();
 
-		expect( linter._errors.length ).to.be.equal( 1 );
+			expect( linter._errors.length ).to.be.equal( 0 );
+		} );
+
+		it( 'should handle wrong type in alias', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				params: [ {
+					type: { parsedType: {
+						elements: [
+							{ name: 'String' },
+							{ name: 'Wrong' },
+						]
+					} },
+				} ],
+				meta: { fileName: '',  path: '' },
+			} ], testedModules );
+
+			linter._lintParams();
+
+			expect( linter._errors.length ).to.be.equal( 1 );
+		} );
+
+		it( 'should handle NullLiteral type', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				params: [ {
+					type: { parsedType: {
+						elements: [
+							{ name: 'String' },
+							{ type: 'NullLiteral' },
+						]
+					} },
+				} ],
+				meta: { fileName: '',  path: '' },
+			} ], testedModules );
+
+			linter._lintParams();
+
+			expect( linter._errors.length ).to.be.equal( 0 );
+		} );
 	} );
 
 	it( '_lintLinks()', () => {
