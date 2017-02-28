@@ -166,7 +166,7 @@ describe( 'Linter plugin', () => {
 			expect( linter._errors.length ).to.be.equal( 1 );
 		} );
 
-		it( 'should handle NullLiteral type', () => {
+		it( 'should handle NullLiteral and UndefinedLiteral type', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'class',
 				params: [ {
@@ -174,6 +174,7 @@ describe( 'Linter plugin', () => {
 						elements: [
 							{ name: 'String' },
 							{ type: 'NullLiteral' },
+							{ type: 'UndefinedLiteral' },
 						]
 					} },
 				} ],
