@@ -68,7 +68,7 @@ module.exports = class TranslationService {
 				}
 
 				if ( node.arguments[ 0 ].type !== 'Literal' ) {
-					console.error( 'First T call argument should be literal type' );
+					console.error( 'First t() call argument should be a string literal.' );
 
 					return;
 				}
@@ -108,7 +108,8 @@ module.exports = class TranslationService {
 		let translation = this.dictionary.get( originalString );
 
 		if ( !translation ) {
-			console.error( `Missing translation for: ${ originalString }` );
+			console.error( `Missing translation for: ${ originalString }.` );
+
 			translation = originalString;
 		}
 

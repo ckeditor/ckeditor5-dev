@@ -27,6 +27,7 @@ module.exports = function replaceTranslationCallsForOneLangauge( compiler, langu
 			'@ckeditor/ckeditor5-core/src/editor/editor.js',
 			( err, result ) => {
 				const pathToCoreTranslationPackage = result.match( /.+\/ckeditor5-core/ )[ 0 ];
+
 				translationService.loadPackage( pathToCoreTranslationPackage.replace( '/', path.sep ) );
 			}
 		);
@@ -49,6 +50,7 @@ module.exports = function replaceTranslationCallsForOneLangauge( compiler, langu
 		if ( match ) {
 			const index = resolveOptions.resource.search( packageNameRegExp ) + match[ 0 ].length;
 			const pathToPackage = resolveOptions.resource.slice( 0, index );
+
 			translationService.loadPackage( pathToPackage.replace( '/', path.sep ) );
 		}
 	}

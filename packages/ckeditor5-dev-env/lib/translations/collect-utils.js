@@ -142,7 +142,7 @@ const utils = {
 
 		fs.outputFileSync( outputFilePath, fileContent );
 
-		logger.info( `Created file: ${ outputFilePath }` );
+		logger.info( `Created file: ${ outputFilePath }.` );
 	},
 
 	/**

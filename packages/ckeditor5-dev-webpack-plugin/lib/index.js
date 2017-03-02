@@ -21,9 +21,9 @@ module.exports = class CKEditorWebpackPlugin {
 		const { languages } = this.options;
 
 		if ( languages && languages.length == 1 ) {
-			replaceTranslationCallsForOneLangauge( compiler, languages[0] );
+			replaceTranslationCallsForOneLangauge( compiler, languages[ 0 ] );
 		} else {
-			console.error( 'Multi-language support is not implemented yet' );
+			console.error( 'Multi-language support is not implemented yet.' );
 		}
 	}
 };

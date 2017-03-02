@@ -22,7 +22,7 @@ module.exports = function findOriginalStrings( source ) {
 			}
 
 			if ( node.arguments[ 0 ].type !== 'Literal' ) {
-				console.error( 'First T call argument should be literal type' );
+				console.error( 'First t() call argument should be a string literal.' );
 
 				return;
 			}
