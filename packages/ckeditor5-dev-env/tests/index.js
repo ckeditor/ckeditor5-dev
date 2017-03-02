@@ -39,6 +39,12 @@ describe( 'dev-env/index', () => {
 				info: sandbox.spy(),
 				warning: sandbox.spy(),
 				error: sandbox.spy()
+			},
+			translations: {
+				upload: sandbox.spy(),
+				download: sandbox.spy(),
+				collect: sandbox.spy(),
+				getCredentials: sandbox.stub()
 			}
 		};
 
@@ -74,6 +80,11 @@ describe( 'dev-env/index', () => {
 		mockery.registerMock( './release-tools/utils/cli', stubs.cli );
 
 		mockery.registerMock( './release-tools/utils/releasevalidator', stubs.validator );
+
+		mockery.registerMock( './translations/upload', stubs.translations.upload );
+		mockery.registerMock( './translations/getcredentials', stubs.translations.getCredentials );
+		mockery.registerMock( './translations/download', stubs.translations.download );
+		mockery.registerMock( './translations/collect', stubs.translations.collect );
 
 		tasks = proxyquire( '../lib/index', {
 			'@ckeditor/ckeditor5-dev-utils': {
@@ -278,6 +289,42 @@ describe( 'dev-env/index', () => {
 					expect( stubs.logger.error.calledOnce ).to.equal( true );
 					expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal( error.message );
 				} );
+		} );
+	} );
+
+	describe( 'collectTranslations()', () => {
+		it( 'should collect translations', () => {
+			tasks.collectTranslations();
+
+			sinon.assert.calledOnce( stubs.translations.collect );
+		} );
+	} );
+
+	describe( 'uploadTranslations()', () => {
+		it( 'should upload translations', () => {
+			stubs.translations.getCredentials.returns( Promise.resolve( { username: 'username', password: 'password' } ) );
+
+			return tasks.uploadTranslations().then( () => {
+				sinon.assert.calledOnce( stubs.translations.upload );
+				sinon.assert.alwaysCalledWithExactly( stubs.translations.upload, {
+					username: 'username',
+					password: 'password'
+				} );
+			} );
+		} );
+	} );
+
+	describe( 'downloadTranslations()', () => {
+		it( 'should download translations', () => {
+			stubs.translations.getCredentials.returns( Promise.resolve( { username: 'username', password: 'password' } ) );
+
+			return tasks.downloadTranslations().then( () => {
+				sinon.assert.calledOnce( stubs.translations.download );
+				sinon.assert.alwaysCalledWithExactly( stubs.translations.download, {
+					username: 'username',
+					password: 'password'
+				} );
+			} );
 		} );
 	} );
 } );

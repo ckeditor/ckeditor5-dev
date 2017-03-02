@@ -146,6 +146,7 @@ const tasks = {
 	 */
 	collectTranslations() {
 		const collectTranslations = require( './translations/collect' );
+
 		collectTranslations();
 	},
 
@@ -156,9 +157,10 @@ const tasks = {
 	 */
 	uploadTranslations() {
 		const uploadTranslations = require( './translations/upload' );
-		const loginOptions = require( './translations/getloginoptions' )( process.argv.slice( 2 ) );
+		const getCredentials = require( './translations/getcredentials' );
 
-		return uploadTranslations( loginOptions );
+		return getCredentials()
+			.then( credentials => uploadTranslations( credentials ) );
 	},
 
 	/**
@@ -168,9 +170,10 @@ const tasks = {
 	 */
 	downloadTranslations() {
 		const downloadTranslations = require( './translations/download' );
-		const loginOptions = require( './translations/getloginoptions' )( process.argv.slice( 2 ) );
+		const getCredentials = require( './translations/getcredentials' );
 
-		return downloadTranslations( loginOptions );
+		return getCredentials()
+			.then( credentials => downloadTranslations( credentials ) );
 	}
 };
 

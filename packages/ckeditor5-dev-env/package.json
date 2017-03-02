@@ -13,7 +13,7 @@
     "fs-extra": "^1.0.0",
     "github": "^9.0.0",
     "glob": "^7.1.1",
-    "inquirer": "^3.0.1",
+    "inquirer": "^3.0.5",
     "minimist": "^1.2.0",
     "parse-github-url": "^1.0.0",
     "request": "^2.79.0",
