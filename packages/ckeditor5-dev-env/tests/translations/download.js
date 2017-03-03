@@ -104,7 +104,7 @@ describe( 'download', () => {
 			sinon.assert.calledTwice( deleteSpy );
 			sinon.assert.calledWithExactly(
 				deleteSpy,
-				path.join( 'workspace', 'packages', 'ckeditor5-core', 'lang', 'translations', '**', '**' )
+				path.join( 'workspace', 'packages', 'ckeditor5-core', 'lang', 'translations', '**' )
 			);
 
 			sinon.assert.calledWithExactly(

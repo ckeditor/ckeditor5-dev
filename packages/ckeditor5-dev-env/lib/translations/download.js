@@ -49,7 +49,7 @@ function downlaodAndReplaceTranslations( loginConfig, packageNames ) {
 
 function removeOldTranslationForPackage( packageName ) {
 	const del = require( 'del' );
-	const glob = path.join( process.cwd(), 'packages', packageName, 'lang', 'translations', '**', '**' );
+	const glob = path.join( process.cwd(), 'packages', packageName, 'lang', 'translations', '**' );
 
 	return del( glob );
 }
