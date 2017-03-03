@@ -20,7 +20,7 @@ const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 module.exports = function download( loginConfig ) {
 	return Promise.resolve()
 		.then( () => getPackageNames( loginConfig ) )
-		.then( ( packageNames ) => downlaodAndSaveTranslations( loginConfig, packageNames ) )
+		.then( packageNames => downlaodAndReplaceTranslations( loginConfig, packageNames ) )
 		.then( () => {
 			logger.info( 'Saved all translations.' );
 		} )
@@ -34,10 +34,11 @@ function getPackageNames( loginConfig ) {
 		.then( resources => resources.map( ( resource ) => resource.slug ) );
 }
 
-function downlaodAndSaveTranslations( loginConfig, packageNames ) {
+function downlaodAndReplaceTranslations( loginConfig, packageNames ) {
 	return Promise.all(
 		packageNames.map( ( packageName ) => {
-			const translationPromises = downloadPoFilesForPackage( loginConfig, packageName );
+			const translationPromises = removeOldTranslationForPackage( packageName )
+				.then( () => downloadPoFilesForPackage( loginConfig, packageName ) );
 
 			return translationPromises.then( translations => {
 				saveTranslations( packageName, translations );
@@ -46,8 +47,17 @@ function downlaodAndSaveTranslations( loginConfig, packageNames ) {
 	);
 }
 
+function removeOldTranslationForPackage( packageName ) {
+	const del = require( 'del' );
+	const glob = path.join( process.cwd(), 'packages', packageName, 'lang', 'translations', '**', '**' );
+
+	return del( glob );
+}
+
 function downloadPoFilesForPackage( loginConfig, packageName ) {
-	const resourceDetailsPromise = transifexService.getResourceDetails( Object.assign( {}, loginConfig, { slug: packageName } ) );
+	const resourceDetailsPromise = transifexService.getResourceDetails( Object.assign( {}, loginConfig, {
+		slug: packageName
+	} ) );
 	let languageCodes;
 
 	const translationsForPackagePromise = resourceDetailsPromise.then( ( resourceDetails ) => {
@@ -78,7 +88,13 @@ function downloadPoFile( loginConfig, lang, packageName ) {
 }
 
 function saveTranslations( packageName, translations ) {
-	for ( const [ lang, poFileContent ] of translations ) {
+	const languageCodeMap = require( './languagecodemap.json' );
+
+	for ( let [ lang, poFileContent ] of translations ) {
+		if ( lang in languageCodeMap ) {
+			lang = languageCodeMap[ lang ];
+		}
+
 		const pathToSave = path.join( process.cwd(), 'packages', packageName, 'lang', 'translations', lang + '.po' );
 
 		fs.outputFileSync( pathToSave, poFileContent );

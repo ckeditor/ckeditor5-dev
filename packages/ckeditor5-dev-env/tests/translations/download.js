@@ -12,22 +12,40 @@ const sinon = require( 'sinon' );
 const path = require( 'path' );
 const transifexService = require( '../../lib/translations/transifex-service' );
 const fs = require( 'fs-extra' );
+const mockery = require( 'mockery' );
 
 describe( 'download', () => {
-	let sandbox;
+	const sandbox = sinon.sandbox.create();
+	let deleteSpy;
 
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		deleteSpy = sandbox.spy( () => Promise.resolve() );
+
+		mockery.registerMock( './languagecodemap.json', {
+			'en_AU': 'en-au'
+		} );
+
+		mockery.registerMock( 'del', deleteSpy );
+
+		mockery.enable( {
+			warnOnReplace: true,
+			warnOnUnregistered: true,
+		} );
 	} );
 
 	afterEach( () => {
 		sandbox.restore();
+		mockery.deregisterAll();
+		mockery.disable();
 	} );
 
 	it( 'should download translations', () => {
-		const resources = [
-			{ slug: 'ckeditor5-core' },
-			{ slug: 'ckeditor5-ui' }
+		const resources = [ {
+				slug: 'ckeditor5-core'
+			},
+			{
+				slug: 'ckeditor5-ui'
+			}
 		];
 
 		// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
@@ -39,25 +57,34 @@ describe( 'download', () => {
 			},
 			'ckeditor5-ui': {
 				available_languages: [ {
-					code: 'en'
+					code: 'en_AU'
 				} ]
 			}
 		};
 
 		const translations = {
 			'ckeditor5-core': {
-				pl: { content: 'ckeditor5-core-pl-content' }
+				pl: {
+					content: 'ckeditor5-core-pl-content'
+				}
 			},
 			'ckeditor5-ui': {
-				en: { content: 'ckeditor5-ui-en-content' }
+				en_AU: {
+					content: 'ckeditor5-ui-en-content'
+				}
 			}
 		};
 
 		// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 
 		const getResourcesSpy = sandbox.spy( () => Promise.resolve( resources ) );
-		const getResourceDetailsSpy = sandbox.spy( ( { slug } ) => Promise.resolve( resourcesDetails[ slug ] ) );
-		const getTranslationSpy = sandbox.spy( ( { lang, slug } ) => Promise.resolve( translations[ slug ][ lang ] ) );
+		const getResourceDetailsSpy = sandbox.spy( ( {
+			slug
+		} ) => Promise.resolve( resourcesDetails[ slug ] ) );
+		const getTranslationSpy = sandbox.spy( ( {
+			lang,
+			slug
+		} ) => Promise.resolve( translations[ slug ][ lang ] ) );
 		const outputFileSyncSpy = sandbox.spy();
 
 		sandbox.stub( transifexService, 'getResources', getResourcesSpy );
@@ -74,6 +101,12 @@ describe( 'download', () => {
 			sinon.assert.calledTwice( getResourceDetailsSpy );
 			sinon.assert.calledTwice( getTranslationSpy );
 			sinon.assert.calledTwice( outputFileSyncSpy );
+			sinon.assert.calledTwice( deleteSpy );
+			sinon.assert.calledWithExactly(
+				deleteSpy,
+				path.join( 'workspace', 'packages', 'ckeditor5-core', 'lang', 'translations', '**', '**' )
+			);
+
 			sinon.assert.calledWithExactly(
 				outputFileSyncSpy,
 				path.join( 'workspace', 'packages', 'ckeditor5-core', 'lang', 'translations', 'pl.po' ),
@@ -81,7 +114,7 @@ describe( 'download', () => {
 			);
 			sinon.assert.calledWithExactly(
 				outputFileSyncSpy,
-				path.join( 'workspace', 'packages', 'ckeditor5-ui', 'lang', 'translations', 'en.po' ),
+				path.join( 'workspace', 'packages', 'ckeditor5-ui', 'lang', 'translations', 'en-au.po' ),
 				'ckeditor5-ui-en-content'
 			);
 		} );
