@@ -13,6 +13,7 @@ const path = require( 'path' );
 const transifexService = require( '../../lib/translations/transifex-service' );
 const fs = require( 'fs-extra' );
 const mockery = require( 'mockery' );
+const translationUtils = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 
 describe( 'download', () => {
 	const sandbox = sinon.sandbox.create();
@@ -75,6 +76,11 @@ describe( 'download', () => {
 			}
 		};
 
+		const fileContents = {
+			'ckeditor5-core-pl-content': {}, // empty
+			'ckeditor5-ui-en-content': { ui: 'ui' }
+		};
+
 		// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 
 		const getResourcesSpy = sandbox.spy( () => Promise.resolve( resources ) );
@@ -87,11 +93,14 @@ describe( 'download', () => {
 		} ) => Promise.resolve( translations[ slug ][ lang ] ) );
 		const outputFileSyncSpy = sandbox.spy();
 
+		const parsePoFileContentSpy = sandbox.spy( poFileContent => fileContents[ poFileContent ] );
+
 		sandbox.stub( transifexService, 'getResources', getResourcesSpy );
 		sandbox.stub( transifexService, 'getResourceDetails', getResourceDetailsSpy );
 		sandbox.stub( transifexService, 'getTranslation', getTranslationSpy );
 		sandbox.stub( fs, 'outputFileSync', outputFileSyncSpy );
 		sandbox.stub( process, 'cwd', () => 'workspace' );
+		sandbox.stub( translationUtils, 'parsePoFileContent', parsePoFileContentSpy );
 
 		return download( {
 			username: 'username',
@@ -100,18 +109,14 @@ describe( 'download', () => {
 			sinon.assert.calledOnce( getResourcesSpy );
 			sinon.assert.calledTwice( getResourceDetailsSpy );
 			sinon.assert.calledTwice( getTranslationSpy );
-			sinon.assert.calledTwice( outputFileSyncSpy );
 			sinon.assert.calledTwice( deleteSpy );
+			sinon.assert.calledOnce( outputFileSyncSpy );
+
 			sinon.assert.calledWithExactly(
 				deleteSpy,
 				path.join( 'workspace', 'packages', 'ckeditor5-core', 'lang', 'translations', '**' )
 			);
 
-			sinon.assert.calledWithExactly(
-				outputFileSyncSpy,
-				path.join( 'workspace', 'packages', 'ckeditor5-core', 'lang', 'translations', 'pl.po' ),
-				'ckeditor5-core-pl-content'
-			);
 			sinon.assert.calledWithExactly(
 				outputFileSyncSpy,
 				path.join( 'workspace', 'packages', 'ckeditor5-ui', 'lang', 'translations', 'en-au.po' ),

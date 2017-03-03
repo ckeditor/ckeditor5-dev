@@ -9,6 +9,7 @@ const fs = require( 'fs-extra' );
 const path = require( 'path' );
 const transifexService = require( './transifex-service' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
+const translationUtils = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 
 /**
  * Downloads translations from the Transifex for each package and language.
@@ -91,6 +92,10 @@ function saveTranslations( packageName, translations ) {
 	const languageCodeMap = require( './languagecodemap.json' );
 
 	for ( let [ lang, poFileContent ] of translations ) {
+		if ( !isPoFileContainingTranslations(  poFileContent ) ) {
+			continue;
+		}
+
 		if ( lang in languageCodeMap ) {
 			lang = languageCodeMap[ lang ];
 		}
@@ -100,4 +105,11 @@ function saveTranslations( packageName, translations ) {
 		fs.outputFileSync( pathToSave, poFileContent );
 		logger.info( `Saved ${ lang }.po for ${ packageName } package` );
 	}
+}
+
+function isPoFileContainingTranslations( poFileContent ) {
+	const parsePoFileContent = translationUtils.parsePoFileContent;
+	const translations = parsePoFileContent( poFileContent );
+
+	return Object.keys( translations ).some( key => translations[ key ] !== '' );
 }
