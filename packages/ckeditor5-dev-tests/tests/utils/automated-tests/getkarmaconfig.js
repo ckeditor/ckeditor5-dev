@@ -48,7 +48,7 @@ describe( 'getKarmaConfig', () => {
 			reporter: 'mocha',
 			sourceMap: false,
 			coverage: false,
-			browsers: 'Chrome',
+			browsers: [ 'Chrome' ],
 			watch: false,
 			verbose: false
 		} );
@@ -81,12 +81,16 @@ describe( 'getKarmaConfig', () => {
 			port: 9876,
 			colors: true,
 			logLevel: 'INFO',
-			browsers: 'Chrome',
+			browsers: [ 'CHROME_LOCAL' ],
 			customLaunchers: {
 				CHROME_TRAVIS_CI: {
 					base: 'Chrome',
 					flags: [ '--no-sandbox', '--disable-background-timer-throttling' ]
-				}
+				},
+				CHROME_LOCAL: {
+					base: 'Chrome',
+					flags: [ '--disable-background-timer-throttling' ]
+				},
 			},
 			singleRun: true,
 			concurrency: Infinity,
