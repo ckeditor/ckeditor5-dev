@@ -100,6 +100,7 @@ function transformCommit( commit, displayLog = true ) {
 
 	const issues = [];
 
+	commit.rawType = commit.type;
 	commit.type = getCommitType( commit.type );
 
 	if ( commit.scope === '*' ) {
