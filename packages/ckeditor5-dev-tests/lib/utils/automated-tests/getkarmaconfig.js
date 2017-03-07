@@ -99,7 +99,7 @@ module.exports = function getKarmaConfig( options ) {
 		customLaunchers: {
 			CHROME_TRAVIS_CI: {
 				base: 'Chrome',
-				flags: [ '--no-sandbox' ]
+				flags: [ '--no-sandbox', '--disable-background-timer-throttling' ]
 			}
 		},
 

@@ -85,7 +85,7 @@ describe( 'getKarmaConfig', () => {
 			customLaunchers: {
 				CHROME_TRAVIS_CI: {
 					base: 'Chrome',
-					flags: [ '--no-sandbox' ]
+					flags: [ '--no-sandbox', '--disable-background-timer-throttling' ]
 				}
 			},
 			singleRun: true,
