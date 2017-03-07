@@ -42,6 +42,18 @@ module.exports = function getKarmaConfig( options ) {
 		}
 	}
 
+	let browsers = [];
+
+	if ( options.browsers ) {
+		browsers = options.browsers.map( ( browser ) => {
+			if ( browser === 'Chrome' ) {
+				return 'CHROME_LOCAL';
+			}
+
+			return browser;
+		} );
+	}
+
 	const karmaConfig = {
 		// Base path that will be used to resolve all patterns (eg. files, exclude).
 		basePath: process.cwd(),
@@ -94,13 +106,17 @@ module.exports = function getKarmaConfig( options ) {
 
 		// Start these browsers.
 		// Available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-		browsers: options.browsers,
+		browsers: browsers,
 
 		customLaunchers: {
 			CHROME_TRAVIS_CI: {
 				base: 'Chrome',
 				flags: [ '--no-sandbox', '--disable-background-timer-throttling' ]
-			}
+			},
+			CHROME_LOCAL: {
+				base: 'Chrome',
+				flags: [ '--disable-background-timer-throttling' ]
+			},
 		},
 
 		// Continuous Integration mode. If true, Karma captures browsers, runs the tests and exits.
