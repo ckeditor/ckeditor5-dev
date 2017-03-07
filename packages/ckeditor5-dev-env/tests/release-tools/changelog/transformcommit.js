@@ -14,7 +14,7 @@ const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-env/release-tools/changelog/writer-options', () => {
 	describe( 'transform()', () => {
-		let transformCommit, sandbox, stubs;
+		let transformCommit, sandbox, stubs, loggerVerbosity;
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
@@ -35,7 +35,9 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 
 			transformCommit = proxyquire( '../../../lib/release-tools/changelog/writer-options', {
 				'@ckeditor/ckeditor5-dev-utils': {
-					logger() {
+					logger( verbosity ) {
+						loggerVerbosity = verbosity;
+
 						return stubs.logger;
 					}
 				}
@@ -120,6 +122,23 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Invalid commit\." \u001b\[31mINVALID/ );
+		} );
+
+		it( 'allows hiding the logs', () => {
+			const commit = {
+				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+				header: 'Fix: Simple fix.',
+				type: 'Fix',
+				subject: 'Simple fix.',
+				body: null,
+				footer: null,
+				notes: [],
+				references: []
+			};
+
+			transformCommit( commit, false );
+
+			expect( loggerVerbosity ).to.equal( 'error' );
 		} );
 	} );
 } );
