@@ -19,7 +19,9 @@ let json = {
 		'packages/*',
 		'.'
 	],
-	'version': '0.0.0'
+	'version': '0.0.0',
+	'hoist': true,
+	'nohoist': 'guppy-pre-commit',
 };
 
 fs.writeFileSync( lerna, JSON.stringify( json, null, 2 ) + '\n', 'utf-8' );
