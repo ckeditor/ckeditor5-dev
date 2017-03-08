@@ -14,7 +14,7 @@ const cwd = process.cwd();
 const lerna = path.resolve( cwd, 'lerna.json' );
 
 let json = {
-	'lerna': '2.0.0-beta.34',
+	'lerna': '2.0.0-beta.37',
 	'packages': [
 		'packages/*',
 		'.'
