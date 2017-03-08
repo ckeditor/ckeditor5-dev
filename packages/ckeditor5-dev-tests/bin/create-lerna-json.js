@@ -20,8 +20,7 @@ let json = {
 		'.'
 	],
 	'version': '0.0.0',
-	'hoist': true,
-	'nohoist': 'guppy-pre-commit',
+	'hoist': true
 };
 
 fs.writeFileSync( lerna, JSON.stringify( json, null, 2 ) + '\n', 'utf-8' );
