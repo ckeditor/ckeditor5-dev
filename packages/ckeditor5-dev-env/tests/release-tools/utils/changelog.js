@@ -40,7 +40,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				].join( '\n' );
 
 				const changelog =
-`## [0.1.0](https://github.com) (2017-01-13)
+`## 0.1.0 (2017-01-13)
 
 ${ expectedChangelog }`;
 
@@ -68,7 +68,7 @@ ${ expectedChangelog }`;
 
 ${ expectedChangelog }
 
-## [0.1.0](https://github.com) (2017-01-13)
+## 0.1.0 (2017-01-13)
 
 ### Features
 

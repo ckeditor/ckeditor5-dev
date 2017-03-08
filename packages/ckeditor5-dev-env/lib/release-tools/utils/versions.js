@@ -17,7 +17,7 @@ const versions = {
 	 */
 	getLastFromChangelog() {
 		const changelog = changelogUtils.getChangelog();
-		const regexp = /\n## \[?([^\]]+)/;
+		const regexp = /\n## \[?([^\]| ]+)/;
 
 		const matches = changelog.match( regexp );
 

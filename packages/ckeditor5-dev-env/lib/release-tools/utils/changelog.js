@@ -28,9 +28,8 @@ const utils = {
 	getChangesForVersion( version ) {
 		version = version.replace( /^v/, '' );
 
-		let changelog = utils.getChangelog().replace( utils.changelogHeader, '\n' );
-
-		const match = changelog.match( new RegExp( `\\n(## \\[${ version }\\][\\s\\S]+?)(?:\\n## \\[|$)` ) );
+		const changelog = utils.getChangelog().replace( utils.changelogHeader, '\n' );
+		const match = changelog.match( new RegExp( `\\n(## \\[?${ version }\\]?[\\s\\S]+?)(?:\\n## \\[?|$)` ) );
 
 		if ( !match || !match[ 1 ] ) {
 			throw new Error( `Cannot find changelog entries for ${ version }.` );
@@ -55,7 +54,7 @@ const utils = {
 		const changelogFile = path.resolve( utils.changelogFile );
 
 		fs.writeFileSync( changelogFile, content, 'utf-8' );
-	},
+	}
 };
 
 module.exports = utils;
