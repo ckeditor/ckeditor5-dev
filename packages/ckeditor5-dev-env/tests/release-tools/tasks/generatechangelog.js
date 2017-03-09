@@ -192,5 +192,26 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.changelogUtils.saveChangelog.called ).to.equal( false );
 				} );
 		} );
+
+		it( 'commited changelog should not trigger CI', () => {
+			const newChangelogChunk = [
+				'## 1.0.0',
+				'',
+				'### Features',
+				'',
+				'* This test should pass!'
+			].join( '\n' );
+
+			changelogBuffer = Buffer.from( newChangelogChunk );
+
+			stubs.fs.existsSync.returns( true );
+
+			stubs.changelogUtils.getChangelog.returns( changelogUtils.changelogHeader );
+
+			return generateChangelog( '1.0.0' )
+				.then( () => {
+					expect( stubs.tools.shExec.secondCall.args[ 0 ] ).to.equal( 'git commit -m "Docs: Changelog. [skip ci]"' );
+				} );
+		} );
 	} );
 } );

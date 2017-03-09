@@ -91,7 +91,7 @@ module.exports = function generateChangelog( newVersion = null ) {
 
 				// Commit the changelog.
 				tools.shExec( `git add ${ utils.changelogFile }`, { verbosity: 'error' } );
-				tools.shExec( `git commit -m "Docs: Changelog."`, { verbosity: 'error' } );
+				tools.shExec( `git commit -m "Docs: Changelog. [skip ci]"`, { verbosity: 'error' } );
 
 				log.info( chalk.green( `Changelog for "${ packageJson.name }" (v${ version }) has been generated.` ) );
 
