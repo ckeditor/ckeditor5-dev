@@ -10,7 +10,8 @@ const path = require( 'path' );
 const chalk = require( 'chalk' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const parserOptions = require( './parser-options' );
-const getPackageJson = require( '../utils/getpackagejson' );
+
+const packageJsonMap = new Map();
 
 // Map of available types of the commits.
 // Types marked as `false` will be ignored during generating the changelog.
@@ -35,8 +36,6 @@ const typesOrder = {
 	'NOTE': 2
 };
 
-const packageJson = getPackageJson();
-const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
 const templatePath = path.join( __dirname, 'templates' );
 const log = logger();
 
@@ -129,6 +128,9 @@ function linkGithubUsers( value ) {
 }
 
 function linkGithubIssues( value, issues = null ) {
+	const packageJson = getPackageJson();
+	const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
+
 	return value.replace( /#([0-9]+)/g, ( _, issueId ) => {
 		if ( issues ) {
 			issues.push( issueId );
@@ -152,4 +154,16 @@ function getCommitType( commit ) {
 		default:
 			throw new Error( `Given invalid type of commit ("${ commit }").` );
 	}
+}
+
+function getPackageJson() {
+	const cwd = process.cwd();
+
+	if ( !packageJsonMap.has( cwd ) ) {
+		const loadPackageJson = require( '../utils/getpackagejson' );
+
+		packageJsonMap.set( cwd, loadPackageJson() );
+	}
+
+	return packageJsonMap.get( cwd );
 }
