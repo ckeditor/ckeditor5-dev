@@ -38,7 +38,6 @@ const typesOrder = {
 const packageJson = getPackageJson();
 const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
 const templatePath = path.join( __dirname, 'templates' );
-const log = logger();
 
 module.exports = {
 	transform: transformCommit,
@@ -62,7 +61,9 @@ module.exports = {
 // - displays a log when the commit has invalid format of the message,
 // - filters out the commit if it should not be visible in the changelog,
 // - makes links to issues and user's profiles on GitHub.
-function transformCommit( commit ) {
+function transformCommit( commit, displayLog = true ) {
+	const log = logger( displayLog ? 'info' : 'error' );
+
 	if ( commit.header.startsWith( 'Merge' ) ) {
 		// Header for merge commit can be in "body" or "footer" of the commit message.
 		const parsedHeader = parserOptions.headerPattern.exec( commit.body || commit.footer );
@@ -99,6 +100,7 @@ function transformCommit( commit ) {
 
 	const issues = [];
 
+	commit.rawType = commit.type;
 	commit.type = getCommitType( commit.type );
 
 	if ( commit.scope === '*' ) {

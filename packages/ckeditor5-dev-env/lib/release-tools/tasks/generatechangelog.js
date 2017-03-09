@@ -41,7 +41,7 @@ module.exports = function generateChangelog( newVersion = null ) {
 				.then( ( response ) => {
 					const newReleaseType = ( hasCommitsFromLastRelease() ) ? response.releaseType : null;
 
-					return cli.provideVersion( packageJson.name, packageJson.version, newReleaseType );
+					return cli.provideVersion( packageJson.version, newReleaseType );
 				} );
 		} else {
 			promise = promise.then( () => newVersion );

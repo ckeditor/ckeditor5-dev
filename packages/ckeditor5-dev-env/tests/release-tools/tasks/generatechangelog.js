@@ -172,9 +172,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.hasCommitsFromLastRelease.calledOnce ).to.equal( true );
 					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
 					expect( stubs.cli.provideVersion.calledOnce ).to.equal( true );
-					expect( stubs.cli.provideVersion.firstCall.args[ 0 ] ).to.equal( 'test-package' );
-					expect( stubs.cli.provideVersion.firstCall.args[ 1 ] ).to.equal( '0.0.1' );
-					expect( stubs.cli.provideVersion.firstCall.args[ 2 ] ).to.equal( 'minor' );
+					expect( stubs.cli.provideVersion.firstCall.args[ 0 ] ).to.equal( '0.0.1' );
+					expect( stubs.cli.provideVersion.firstCall.args[ 1 ] ).to.equal( 'minor' );
 				} );
 		} );
 
