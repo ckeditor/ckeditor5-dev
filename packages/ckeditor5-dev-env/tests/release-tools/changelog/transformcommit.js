@@ -190,5 +190,25 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 
 			expect( loggerVerbosity ).to.equal( 'error' );
 		} );
+
+		it( 'throws an error when "package.json" does not have valid "bugs" property', () => {
+			stubs.getPackageJson.returns( {
+				name: 'foo'
+			} );
+
+			const commit = {
+				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+				header: 'Fix: Simple fix. Closes #1.',
+				type: 'Fix',
+				subject: 'Simple fix. Closes #1.',
+				body: null,
+				footer: null,
+				notes: [],
+				references: []
+			};
+
+			const error = 'File "package.json" for package "foo" does not contain a proper set "bugs" property.';
+			expect( () => transformCommit( commit ) ).to.throw( Error, error );
+		} );
 	} );
 } );
