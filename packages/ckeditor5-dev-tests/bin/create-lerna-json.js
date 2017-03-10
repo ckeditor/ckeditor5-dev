@@ -14,12 +14,13 @@ const cwd = process.cwd();
 const lerna = path.resolve( cwd, 'lerna.json' );
 
 let json = {
-	'lerna': '2.0.0-beta.34',
+	'lerna': '2.0.0-beta.37',
 	'packages': [
 		'packages/*',
 		'.'
 	],
-	'version': '0.0.0'
+	'version': '0.0.0',
+	'hoist': true
 };
 
 fs.writeFileSync( lerna, JSON.stringify( json, null, 2 ) + '\n', 'utf-8' );

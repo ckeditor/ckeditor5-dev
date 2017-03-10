@@ -10,5 +10,6 @@ module.exports = {
 	logger: require( './logger' ),
 	tools: require( './tools' ),
 	stream: require( './stream' ),
-	workspace: require( './workspace' )
+	workspace: require( './workspace' ),
+	translations: require( './translations/index' )
 };

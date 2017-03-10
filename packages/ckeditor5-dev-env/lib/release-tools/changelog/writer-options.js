@@ -10,6 +10,7 @@ const path = require( 'path' );
 const chalk = require( 'chalk' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const parserOptions = require( './parser-options' );
+const getPackageJson = require( '../utils/getpackagejson' );
 
 // Map of available types of the commits.
 // Types marked as `false` will be ignored during generating the changelog.
@@ -25,29 +26,44 @@ const availableTypes = new Map( [
 	[ 'Release', false ]
 ] );
 
-const packageJson = require( path.join( process.cwd(), 'package.json' ) );
+const typesOrder = {
+	'Bug fixes': 1,
+	'Features': 2,
+	'Other changes': 3,
+
+	'BREAKING CHANGES': 1,
+	'NOTE': 2
+};
+
+const packageJson = getPackageJson();
 const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
 const templatePath = path.join( __dirname, 'templates' );
-const log = logger();
 
 module.exports = {
 	transform: transformCommit,
 	groupBy: 'type',
-	commitGroupsSort: 'title',
+	commitGroupsSort( a, b ) {
+		return typesOrder[ a.title ] - typesOrder[ b.title ];
+	},
 	commitsSort: [ 'subject' ],
-	noteGroupsSort: 'title',
+	noteGroupsSort( a, b ) {
+		return typesOrder[ a.title ] - typesOrder[ b.title ];
+	},
 	notesSort: require( 'compare-func' ),
 	mainTemplate: fs.readFileSync( path.join( templatePath, 'template.hbs' ), 'utf-8' ),
 	headerPartial: fs.readFileSync( path.join( templatePath, 'header.hbs' ), 'utf-8' ),
 	commitPartial: fs.readFileSync( path.join( templatePath, 'commit.hbs' ), 'utf-8' ),
-	footerPartial: fs.readFileSync( path.join( templatePath, 'footer.hbs' ), 'utf-8' )
+	footerPartial: fs.readFileSync( path.join( templatePath, 'footer.hbs' ), 'utf-8' ),
+	commitTypes: availableTypes
 };
 
 // Parses a single commit:
 // - displays a log when the commit has invalid format of the message,
 // - filters out the commit if it should not be visible in the changelog,
 // - makes links to issues and user's profiles on GitHub.
-function transformCommit( commit ) {
+function transformCommit( commit, displayLog = true ) {
+	const log = logger( displayLog ? 'info' : 'error' );
+
 	if ( commit.header.startsWith( 'Merge' ) ) {
 		// Header for merge commit can be in "body" or "footer" of the commit message.
 		const parsedHeader = parserOptions.headerPattern.exec( commit.body || commit.footer );
@@ -63,14 +79,17 @@ function transformCommit( commit ) {
 		commit.hash = commit.hash.substring( 0, 7 );
 	}
 
+	const hasCorrectType = availableTypes.has( commit.type );
 	const isCommitIncluded = availableTypes.get( commit.type );
 
 	let logMessage = `* ${ commit.hash } "${ commit.header }" `;
 
-	if ( isCommitIncluded ) {
+	if ( hasCorrectType && isCommitIncluded ) {
 		logMessage += chalk.green( 'INCLUDED' );
+	} else if ( hasCorrectType && !isCommitIncluded ) {
+		logMessage += chalk.grey( 'SKIPPED' );
 	} else {
-		logMessage += chalk.red( 'SKIPPED' );
+		logMessage += chalk.red( 'INVALID' );
 	}
 
 	log.info( logMessage );
@@ -81,6 +100,7 @@ function transformCommit( commit ) {
 
 	const issues = [];
 
+	commit.rawType = commit.type;
 	commit.type = getCommitType( commit.type );
 
 	if ( commit.scope === '*' ) {
@@ -92,6 +112,9 @@ function transformCommit( commit ) {
 	}
 
 	for ( const note of commit.notes ) {
+		if ( note.title === 'BREAKING CHANGE' ) {
+			note.title = 'BREAKING CHANGES';
+		}
 		note.text = linkGithubIssues( linkGithubUsers( note.text ) );
 	}
 
@@ -124,9 +147,6 @@ function getCommitType( commit ) {
 
 		case 'Fix':
 			return 'Bug fixes';
-
-		case 'Enhancement':
-			return 'Enhancements';
 
 		case 'Other':
 			return 'Other changes';

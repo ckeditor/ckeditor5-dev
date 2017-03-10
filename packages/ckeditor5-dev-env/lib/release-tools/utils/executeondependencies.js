@@ -7,6 +7,7 @@
 
 const path = require( 'path' );
 const { workspace: workspaceUtils } = require( '@ckeditor/ckeditor5-dev-utils' );
+const getPackageJson = require( './getpackagejson' );
 
 /**
  * The function allows running a function on their locally installed dependencies.
@@ -33,7 +34,7 @@ module.exports = function executeOnDependencies( options, functionToExecute ) {
 
 	for ( const directory of directories ) {
 		const dependencyPath = path.join( packagesAbsolutePath, directory );
-		const dependencyName = require( path.join( dependencyPath, 'package.json' ) ).name;
+		const dependencyName = getPackageJson( dependencyPath ).name;
 
 		promise = promise.then( () => {
 			return functionToExecute( dependencyName, dependencyPath );

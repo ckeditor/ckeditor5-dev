@@ -12,7 +12,7 @@ const fsExtra = require( 'fs-extra' );
  * You can add / remove this plugin in src/tasks/build-api-docs.js
  */
 exports.handlers = {
-	parseComplete( e ) {
+	processingComplete( e ) {
 		fsExtra.outputFileSync( process.cwd() + '/build/docs/output.json', JSON.stringify( e, null, 4 ) );
 	}
 };
