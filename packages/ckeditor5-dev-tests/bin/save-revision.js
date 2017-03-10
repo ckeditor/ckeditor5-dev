@@ -30,9 +30,7 @@ process.chdir( path.join( process.cwd(), 'ckeditor5' ) );
 exec( 'npm install -g mgit2' );
 
 // Install dependencies.
-// jscs:disable maximumLineLength
 exec( 'mgit bootstrap --recursive --resolver-url-template="https://github.com/\\\${ path }.git"' );
-// jscs:enable maximumLineLength
 
 // Checkout out each package to master.
 exec( `mgit exec "git checkout ${ branch }"` );
