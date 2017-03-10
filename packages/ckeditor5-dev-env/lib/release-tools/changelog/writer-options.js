@@ -10,8 +10,7 @@ const path = require( 'path' );
 const chalk = require( 'chalk' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const parserOptions = require( './parser-options' );
-
-const packageJsonMap = new Map();
+const getPackageJson = require( '../utils/getpackagejson' );
 
 // Map of available types of the commits.
 // Types marked as `false` will be ignored during generating the changelog.
@@ -156,16 +155,4 @@ function getCommitType( commit ) {
 		default:
 			throw new Error( `Given invalid type of commit ("${ commit }").` );
 	}
-}
-
-function getPackageJson() {
-	const cwd = process.cwd();
-
-	if ( !packageJsonMap.has( cwd ) ) {
-		const loadPackageJson = require( '../utils/getpackagejson' );
-
-		packageJsonMap.set( cwd, loadPackageJson() );
-	}
-
-	return packageJsonMap.get( cwd );
 }

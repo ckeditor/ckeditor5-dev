@@ -11,7 +11,6 @@ const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 const proxyquire = require( 'proxyquire' );
-const getPackageJson = require( '../../../lib/release-tools/utils/getpackagejson' );
 
 describe( 'dev-env/release-tools/changelog/writer-options', () => {
 	describe( 'transform()', () => {
@@ -32,10 +31,13 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 					warning: sandbox.spy(),
 					error: sandbox.spy()
 				},
-				getPackageJson: sandbox.spy( () => {
-					return getPackageJson();
-				} )
+				getPackageJson: sandbox.stub()
 			};
+
+			stubs.getPackageJson.returns( {
+				name: 'ckeditor5-dev',
+				bugs: 'https://github.com/ckeditor/ckeditor5-dev/issues'
+			} );
 
 			mockery.registerMock( '../utils/getpackagejson', stubs.getPackageJson );
 
@@ -170,36 +172,6 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 
 			const expectedSubject = 'Internal: Thanks to [@CKEditor](https://github.com/CKEditor)';
 			expect( commit.subject ).to.equal( expectedSubject );
-		} );
-
-		it( 'should load package.json once', () => {
-			const commits = [
-				{
-					hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
-					header: 'Fix: Simple fix (first). Closes #2.',
-					type: 'Fix',
-					subject: 'Simple fix (first). Closes #2',
-					body: null,
-					footer: null,
-					notes: [],
-					references: []
-				},
-				{
-					hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
-					header: 'Fix: Simple fix (second). Closes #1.',
-					type: 'Fix',
-					subject: 'Simple fix (second). Closes #1',
-					body: null,
-					footer: null,
-					notes: [],
-					references: []
-				}
-			];
-
-			transformCommit( commits[ 0 ] );
-			transformCommit( commits[ 1 ] );
-
-			expect( stubs.getPackageJson.calledOnce ).to.equal( true );
 		} );
 
 		it( 'allows hiding the logs', () => {

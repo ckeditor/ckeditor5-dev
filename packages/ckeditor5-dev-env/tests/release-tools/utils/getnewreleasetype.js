@@ -14,7 +14,7 @@ const sinon = require( 'sinon' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-env/release-tools/utils', () => {
-	let tmpCwd, cwd, getNewReleaseType, sandbox;
+	let tmpCwd, cwd, getNewReleaseType, sandbox, packageJson;
 
 	describe( 'getNewReleaseType()', () => {
 		before( () => {
@@ -38,6 +38,13 @@ describe( 'dev-env/release-tools/utils', () => {
 			sandbox = sinon.sandbox.create();
 
 			process.chdir( tmpCwd );
+
+			packageJson = {
+				name: 'test-package',
+				bugs: 'some-url'
+			};
+
+			fs.writeFileSync( path.join( tmpCwd, 'package.json' ), JSON.stringify( packageJson, null, '\t' ) );
 		} );
 
 		afterEach( () => {
