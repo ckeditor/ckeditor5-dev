@@ -7,8 +7,9 @@
 
 'use strict';
 
-const branch = 'master'; // process.env.TRAVIS_BRANCH;
+const branch = process.env.TRAVIS_BRANCH;
 
+// Save revision only when master branches are updated.
 if ( branch !== 'master' ) {
 	process.exit();
 }
@@ -19,9 +20,10 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 const mainBranch = `${ branch }-revisions`;
 
 // Clone the repository.
-// jscs:disable maximumLineLength
-exec( `git clone -b ${ mainBranch } https://${ process.env.GITHUB_USER }:${ process.env.GITHUB_PASSWORD }@github.com/ckeditor/ckeditor5.git` );
-// jscs:enable maximumLineLength
+exec(
+	`git clone -b ${ mainBranch } ` +
+	`https://${ process.env.GITHUB_USER }:${ process.env.GITHUB_PASSWORD }@github.com/ckeditor/ckeditor5.git`
+);
 
 // Change current dir to cloned repository.
 process.chdir( path.join( process.cwd(), 'ckeditor5' ) );
@@ -40,9 +42,9 @@ exec( 'mgit save-hashes' );
 
 const commitMessage = `[${ process.env.TRAVIS_REPO_SLUG }] Updated hashes.`;
 
-// Check whether the mgit.json has changed.
+// Check whether the mgit.json has changed. It might not have changed if, e.g., a build was restarted.
 if ( exec( 'git diff --name-only mgit.json' ).trim().length ) {
-	exec( `git add mgit.json && git commit -m "${ commitMessage } "` );
+	exec( `git add mgit.json && git commit -m "${ commitMessage }"` );
 	exec( `git push origin ${ mainBranch }` );
 }
 
