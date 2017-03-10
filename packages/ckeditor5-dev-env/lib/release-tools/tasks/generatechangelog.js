@@ -41,7 +41,7 @@ module.exports = function generateChangelog( newVersion = null ) {
 				.then( ( response ) => {
 					const newReleaseType = ( hasCommitsFromLastRelease() ) ? response.releaseType : null;
 
-					return cli.provideVersion( packageJson.name, packageJson.version, newReleaseType );
+					return cli.provideVersion( packageJson.version, newReleaseType );
 				} );
 		} else {
 			promise = promise.then( () => newVersion );
@@ -91,7 +91,7 @@ module.exports = function generateChangelog( newVersion = null ) {
 
 				// Commit the changelog.
 				tools.shExec( `git add ${ utils.changelogFile }`, { verbosity: 'error' } );
-				tools.shExec( `git commit -m "Docs: Changelog."`, { verbosity: 'error' } );
+				tools.shExec( `git commit -m "Docs: Changelog. [skip ci]"`, { verbosity: 'error' } );
 
 				log.info( chalk.green( `Changelog for "${ packageJson.name }" (v${ version }) has been generated.` ) );
 
