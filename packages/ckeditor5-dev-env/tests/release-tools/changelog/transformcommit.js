@@ -207,7 +207,7 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 				references: []
 			};
 
-			const error = 'File "package.json" for package "foo" does not contain a proper set "bugs" property.';
+			const error = 'The package.json for "foo" must contain the "bugs" property.';
 			expect( () => transformCommit( commit ) ).to.throw( Error, error );
 		} );
 	} );

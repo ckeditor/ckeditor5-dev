@@ -133,8 +133,7 @@ function linkGithubIssues( value, issues = null ) {
 	const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
 
 	if ( !issuesUrl ) {
-		throw new Error( `File "package.json" for package "${ packageJson.name }" ` +
-			'does not contain a proper set "bugs" property.' );
+		throw new Error( `The package.json for "${ packageJson.name }" must contain the "bugs" property.` );
 	}
 
 	return value.replace( /#([0-9]+)/g, ( _, issueId ) => {
