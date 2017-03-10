@@ -38,13 +38,22 @@ const cli = {
 	/**
 	 * Asks a user for providing the new version.
 	 *
-	 * @param {String} packageName
 	 * @param {String} packageVersion
 	 * @param {String} releaseType
 	 * @returns {Promise}
 	 */
-	provideVersion( packageName, packageVersion, releaseType ) {
-		const suggestedVersion = releaseType ? semver.inc( packageVersion, releaseType ) : 'skip';
+	provideVersion( packageVersion, releaseType ) {
+		let suggestedVersion;
+
+		if ( !releaseType ) {
+			// If package does not have changes, 'releaseType' is null and we don't want to generate the changelog.
+			suggestedVersion = 'skip';
+		} else if ( releaseType === 'major' && semver.gt( '1.0.0', packageVersion ) ) {
+			// If package is below the '1.0.0' version, bump the 'minor' instead of 'major'
+			suggestedVersion = semver.inc( packageVersion, 'minor' );
+		} else {
+			suggestedVersion = semver.inc( packageVersion, releaseType );
+		}
 
 		const versionQuestion = {
 			type: 'input',
