@@ -37,7 +37,6 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 		};
 	} );
 
-	// jscs:disable maximumLineLength
 	describe( 'commit', () => {
 		it( 'displays commit subject and hash as a plain text', () => {
 			rootOptions.linkReferences = false;
@@ -69,7 +68,9 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 				]
 			};
 
-			const expectedEntry = '* Test ([1234qwe](https://github.com/organization/repository/commit/1234qwe)), closes [#2](https://github.com/organization/repository/issues/2) [#3](https://github.com/organization/repository/issues/3)';
+			const expectedEntry = '* Test ([1234qwe](https://github.com/organization/repository/commit/1234qwe)), ' +
+				'closes [#2](https://github.com/organization/repository/issues/2) ' +
+				'[#3](https://github.com/organization/repository/issues/3)';
 			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
 		} );
 
@@ -85,8 +86,9 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 					}
 				]
 			};
-
-			const expectedEntry = '* Test ([1234qwe](https://github.com/organization/repository/commit/1234qwe)), closes [another-owner/another-repository#2](https://github.com/another-owner/another-repository/issues/2)';
+			const expectedEntry = '* Test ([1234qwe](https://github.com/organization/repository/commit/1234qwe)), ' +
+				'closes [another-owner/another-repository#2]' +
+				'(https://github.com/another-owner/another-repository/issues/2)';
 			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
 		} );
 
@@ -102,9 +104,9 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 				].join( '\n' )
 			};
 
-			const expectedEntry = '* Test ([1234qwe](https://github.com/organization/repository/commit/1234qwe))\n\n  Some paragraph.\n\n  * List Item 1.\n  * List Item 2.';
+			const expectedEntry = '* Test ([1234qwe](https://github.com/organization/repository/commit/1234qwe))' +
+				'\n\n  Some paragraph.\n\n  * List Item 1.\n  * List Item 2.';
 			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
 		} );
 	} );
-	// jscs:enable maximumLineLength
 } );

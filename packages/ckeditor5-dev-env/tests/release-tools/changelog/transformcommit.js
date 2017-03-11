@@ -176,13 +176,18 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 
 		it( 'does not duplicate the commit header in additional description for merge commits', () => {
 			const commitDescription = [
-				'* Added interactive mode for generating the changelog. A user can provide a new version or skip the process for given package.',
 				'* Release task - rebuilt module for collecting dependencies to release.',
 				'* Release task - a new version to release will be read from CHANGELOG file.',
 				'* Changelog task - will not break if changelog does not exist.',
 				'* Used `semver` package for bumping the version (instead of a custom module).',
 			];
-			const commitDescriptionWithIndents = commitDescription.map( ( l ) => `   ${ l }` ).join( '\n' );
+
+			const commitDescriptionWithIndents = [
+				'  * Release task - rebuilt module for collecting dependencies to release.',
+				'  * Release task - a new version to release will be read from CHANGELOG file.',
+				'  * Changelog task - will not break if changelog does not exist.',
+				'  * Used `semver` package for bumping the version (instead of a custom module).',
+			].join( '\n' );
 
 			const commit = {
 				header: 'Merge pull request #75 from ckeditor/t/64',
@@ -232,14 +237,15 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 
 			transformCommit( commit );
 
-			// jscs:disable maximumLineLength
 			expect( commit.type ).to.equal( 'Features' );
-			expect( commit.subject ).to.equal( 'Introduced a brand new release tools with a new set of requirements. See [#64](https://github.com/ckeditor/ckeditor5-dev/issues/64).' );
+			expect( commit.subject ).to.equal( 'Introduced a brand new release tools with a new set of requirements. ' +
+				'See [#64](https://github.com/ckeditor/ckeditor5-dev/issues/64).' );
 			expect( commit.body ).to.equal( commitDescriptionWithIndents );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* dea3501 "Merge pull request #75 from ckeditor\/t\/64" \u001b\[32mINCLUDED/ );
-			// jscs:enable maximumLineLength
+
+			const commitRegexp = /\* dea3501 "Merge pull request #75 from ckeditor\/t\/64" \u001b\[32mINCLUDED/;
+			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( commitRegexp );
 		} );
 
 		it( 'allows hiding the logs', () => {

@@ -112,10 +112,10 @@ function transformCommit( commit, displayLog = true ) {
 		commit.body = commit.body.split( '\n' )
 			.map( ( line ) => {
 				if ( !line.length ) {
-					return line;
+					return '';
 				}
 
-				return ' '.repeat( 3 ) + line;
+				return '  ' + line;
 			} )
 			.join( '\n' );
 	}
