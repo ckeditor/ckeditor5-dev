@@ -30,8 +30,16 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 					info: sandbox.spy(),
 					warning: sandbox.spy(),
 					error: sandbox.spy()
-				}
+				},
+				getPackageJson: sandbox.stub()
 			};
+
+			stubs.getPackageJson.returns( {
+				name: 'ckeditor5-dev',
+				bugs: 'https://github.com/ckeditor/ckeditor5-dev/issues'
+			} );
+
+			mockery.registerMock( '../utils/getpackagejson', stubs.getPackageJson );
 
 			transformCommit = proxyquire( '../../../lib/release-tools/changelog/writer-options', {
 				'@ckeditor/ckeditor5-dev-utils': {
@@ -124,6 +132,48 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Invalid commit\." \u001b\[31mINVALID/ );
 		} );
 
+		it( 'makes URLs to issues on GitHub', () => {
+			const commit = {
+				hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+				header: 'Fix: Simple fix. Closes #2.',
+				type: 'Fix',
+				subject: 'Simple fix. Closes #2',
+				body: null,
+				footer: null,
+				notes: [
+					{
+						title: 'BREAKING CHANGES',
+						text: 'Some issue #1.'
+					}
+				],
+				references: []
+			};
+
+			transformCommit( commit );
+
+			const expectedSubject = 'Simple fix. Closes [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2)';
+			expect( commit.subject ).to.equal( expectedSubject );
+			expect( commit.notes[ 0 ].text ).to.equal( 'Some issue [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1).' );
+		} );
+
+		it( 'makes URLs to organization on GitHub', () => {
+			const commit = {
+				hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+				header: 'Internal: Thanks to @CKEditor',
+				type: 'Fix',
+				subject: 'Internal: Thanks to @CKEditor',
+				body: null,
+				footer: null,
+				notes: [],
+				references: []
+			};
+
+			transformCommit( commit );
+
+			const expectedSubject = 'Internal: Thanks to [@CKEditor](https://github.com/CKEditor)';
+			expect( commit.subject ).to.equal( expectedSubject );
+		} );
+
 		it( 'does not duplicate the commit header in additional description for merge commits', () => {
 			const commitDescription = [
 				'* Added interactive mode for generating the changelog. A user can provide a new version or skip the process for given package.',
@@ -207,6 +257,26 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 			transformCommit( commit, false );
 
 			expect( loggerVerbosity ).to.equal( 'error' );
+		} );
+
+		it( 'throws an error when "package.json" does not have valid "bugs" property', () => {
+			stubs.getPackageJson.returns( {
+				name: 'foo'
+			} );
+
+			const commit = {
+				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+				header: 'Fix: Simple fix. Closes #1.',
+				type: 'Fix',
+				subject: 'Simple fix. Closes #1.',
+				body: null,
+				footer: null,
+				notes: [],
+				references: []
+			};
+
+			const error = 'The package.json for "foo" must contain the "bugs" property.';
+			expect( () => transformCommit( commit ) ).to.throw( Error, error );
 		} );
 	} );
 } );

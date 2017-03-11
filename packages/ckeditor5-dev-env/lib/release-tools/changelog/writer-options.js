@@ -35,8 +35,6 @@ const typesOrder = {
 	'NOTE': 2
 };
 
-const packageJson = getPackageJson();
-const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
 const templatePath = path.join( __dirname, 'templates' );
 
 module.exports = {
@@ -142,6 +140,13 @@ function linkGithubUsers( value ) {
 }
 
 function linkGithubIssues( value, issues = null ) {
+	const packageJson = getPackageJson();
+	const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
+
+	if ( !issuesUrl ) {
+		throw new Error( `The package.json for "${ packageJson.name }" must contain the "bugs" property.` );
+	}
+
 	return value.replace( /#([0-9]+)/g, ( _, issueId ) => {
 		if ( issues ) {
 			issues.push( issueId );
