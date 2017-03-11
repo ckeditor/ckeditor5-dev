@@ -70,7 +70,7 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 
 			const expectedEntry = '* Test ([1234qwe](https://github.com/organization/repository/commit/1234qwe)), ' +
 				'closes [#2](https://github.com/organization/repository/issues/2) ' +
-				'[#3](https://github.com/organization/repository/issues/3)';
+				'[#3](https://github.com/organization/repository/issues/3).';
 			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
 		} );
 
@@ -88,7 +88,7 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 			};
 			const expectedEntry = '* Test ([1234qwe](https://github.com/organization/repository/commit/1234qwe)), ' +
 				'closes [another-owner/another-repository#2]' +
-				'(https://github.com/another-owner/another-repository/issues/2)';
+				'(https://github.com/another-owner/another-repository/issues/2).';
 			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
 		} );
 
