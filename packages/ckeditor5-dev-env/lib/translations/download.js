@@ -92,13 +92,15 @@ function saveTranslations( packageName, translations ) {
 	const languageCodeMap = require( './languagecodemap.json' );
 
 	for ( let [ lang, poFileContent ] of translations ) {
-		if ( !isPoFileContainingTranslations(  poFileContent ) ) {
+		if ( !isPoFileContainingTranslations( poFileContent ) ) {
 			continue;
 		}
 
 		if ( lang in languageCodeMap ) {
 			lang = languageCodeMap[ lang ];
 		}
+
+		poFileContent = translationUtils.cleanPoFileContent( poFileContent );
 
 		const pathToSave = path.join( process.cwd(), 'packages', packageName, 'lang', 'translations', lang + '.po' );
 
@@ -108,8 +110,7 @@ function saveTranslations( packageName, translations ) {
 }
 
 function isPoFileContainingTranslations( poFileContent ) {
-	const parsePoFileContent = translationUtils.parsePoFileContent;
-	const translations = parsePoFileContent( poFileContent );
+	const translations = translationUtils.createDicitionaryFromPoFileContent( poFileContent );
 
 	return Object.keys( translations ).some( key => translations[ key ] !== '' );
 }
