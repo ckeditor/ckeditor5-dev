@@ -317,6 +317,12 @@ describe( 'dev-env/index', () => {
 						skipPackages: options.skipPackages
 					} );
 
+					expect( stubs.getPackagesToRelease.firstCall.args[ 0 ] ).to.deep.equal( {
+						cwd: options.cwd,
+						packages: options.packages,
+						skipPackages: options.skipPackages
+					} );
+
 					expect( chdirStub.called ).to.equal( true );
 					expect( chdirStub.firstCall.args[ 0 ] ).to.match( /ckeditor5-core$/ );
 					expect( chdirStub.calledWithMatch( /ckeditor5-engine$/ ) ).to.equal( false );
