@@ -93,14 +93,15 @@ describe( 'download', () => {
 		} ) => Promise.resolve( translations[ slug ][ lang ] ) );
 		const outputFileSyncSpy = sandbox.spy();
 
-		const parsePoFileContentSpy = sandbox.spy( poFileContent => fileContents[ poFileContent ] );
+		const createDicitionaryFromPoFileContentSpy = sandbox.spy( poFileContent => fileContents[ poFileContent ] );
 
 		sandbox.stub( transifexService, 'getResources', getResourcesSpy );
 		sandbox.stub( transifexService, 'getResourceDetails', getResourceDetailsSpy );
 		sandbox.stub( transifexService, 'getTranslation', getTranslationSpy );
 		sandbox.stub( fs, 'outputFileSync', outputFileSyncSpy );
 		sandbox.stub( process, 'cwd', () => 'workspace' );
-		sandbox.stub( translationUtils, 'parsePoFileContent', parsePoFileContentSpy );
+		sandbox.stub( translationUtils, 'createDicitionaryFromPoFileContent', createDicitionaryFromPoFileContentSpy );
+		sandbox.stub( translationUtils, 'cleanPoFileContent', x => x );
 
 		return download( {
 			username: 'username',
