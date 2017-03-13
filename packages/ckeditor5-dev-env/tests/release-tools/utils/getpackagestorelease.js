@@ -11,11 +11,13 @@ const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-env/release-tools/utils', () => {
 	describe( 'getPackagesToRelease()', () => {
 		let getPackagesToRelease, sandbox, execOptions, stubs;
 		let packagesToCheck = [];
+		let skipedPackages = [];
 
 		const options = {
 			cwd: __dirname,
@@ -38,6 +40,11 @@ describe( 'dev-env/release-tools/utils', () => {
 					getLastFromChangelog: sandbox.stub(),
 					getLastTagFromGit: sandbox.stub(),
 					getCurrent: sandbox.stub()
+				},
+				logger: {
+					info: sandbox.stub(),
+					warning: sandbox.stub(),
+					error: sandbox.stub()
 				}
 			};
 
@@ -54,12 +61,18 @@ describe( 'dev-env/release-tools/utils', () => {
 					} );
 				}
 
-				return promise;
+				return promise.then( () => Promise.resolve( skipedPackages ) );
 			} );
 			mockery.registerMock( './versions', stubs.versions );
 			mockery.registerMock( './getpackagejson', stubs.getPackageJson );
 
-			getPackagesToRelease = require( '../../../lib/release-tools/utils/getpackagestorelease' );
+			getPackagesToRelease = proxyquire( '../../../lib/release-tools/utils/getpackagestorelease', {
+				'@ckeditor/ckeditor5-dev-utils': {
+					logger() {
+						return stubs.logger;
+					}
+				}
+			} );
 		} );
 
 		afterEach( () => {
@@ -104,7 +117,11 @@ describe( 'dev-env/release-tools/utils', () => {
 					expect( enginePackageDetails.version ).to.equal( '1.0.1' );
 					expect( enginePackageDetails.hasChangelog ).to.equal( true );
 
-					expect( execOptions ).to.deep.equal( options );
+					expect( execOptions ).to.deep.equal( {
+						cwd: __dirname,
+						packages: 'packages/',
+						skipPackages: []
+					} );
 				} );
 		} );
 
@@ -183,6 +200,28 @@ describe( 'dev-env/release-tools/utils', () => {
 					expect( packages.size ).to.equal( 1 );
 
 					expect( packages.get( '@ckeditor/ckeditor5-utils' ) ).to.equal( undefined );
+				} );
+		} );
+
+		it( 'informs about skipped packages', () => {
+			packagesToCheck = [];
+			options.skipPackages = [
+				'@ckeditor/ckeditor5-foo',
+				'@ckeditor/ckeditor5-bar'
+			];
+
+			skipedPackages = options.skipPackages.slice();
+
+			return getPackagesToRelease( options )
+				.then( () => {
+					const logMessage = [
+						'Packages listed below have been skipped:',
+						'  * @ckeditor/ckeditor5-foo',
+						'  * @ckeditor/ckeditor5-bar'
+					].join( '\n' );
+
+					expect( stubs.logger.info.calledOnce ).to.equal( true );
+					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( logMessage );
 				} );
 		} );
 	} );

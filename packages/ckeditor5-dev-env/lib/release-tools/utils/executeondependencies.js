@@ -26,7 +26,8 @@ const getPackageJson = require( './getpackagejson' );
 module.exports = function executeOnDependencies( options, functionToExecute ) {
 	const packagesAbsolutePath = path.join( options.cwd, options.packages );
 	const directories = workspaceUtils.getDirectories( packagesAbsolutePath );
-	const skipedPackageNames = [];
+	const skipPackagesList = options.skipPackages || [];
+	const skippedPackageNames = [];
 
 	let promise = Promise.resolve();
 
@@ -34,7 +35,7 @@ module.exports = function executeOnDependencies( options, functionToExecute ) {
 		return promise;
 	}
 
-	const packageJson = require( path.join( options.cwd, 'package.json' ) );
+	const packageJson = getPackageJson( options.cwd );
 	const dependencies = Object.keys( packageJson.dependencies || {} );
 
 	for ( const directory of directories ) {
@@ -42,7 +43,7 @@ module.exports = function executeOnDependencies( options, functionToExecute ) {
 		const dependencyName = getPackageJson( dependencyPath ).name;
 
 		if ( !isValidPackage( dependencyName ) ) {
-			skipedPackageNames.push( dependencyName );
+			skippedPackageNames.push( dependencyName );
 
 			continue;
 		}
@@ -52,7 +53,7 @@ module.exports = function executeOnDependencies( options, functionToExecute ) {
 		} );
 	}
 
-	return promise.then( () => Promise.resolve( skipedPackageNames ) );
+	return promise.then( () => Promise.resolve( skippedPackageNames ) );
 
 	function isValidPackage( dependencyName ) {
 		// If the package is not specified in `package.json` - ignore them.
@@ -61,7 +62,7 @@ module.exports = function executeOnDependencies( options, functionToExecute ) {
 		}
 
 		// If the package should not be released - ignore them.
-		if ( options.skipPackages.includes( dependencyName ) ) {
+		if ( skipPackagesList.includes( dependencyName ) ) {
 			return false;
 		}
 

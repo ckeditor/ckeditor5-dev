@@ -26,7 +26,7 @@ module.exports = function getPackagesToRelease( options ) {
 	const execOptions = {
 		cwd: options.cwd,
 		packages: options.packages,
-		skipPackages: options.skipPackages
+		skipPackages: options.skipPackages || []
 	};
 
 	function filterPackagesToRelease( repositoryName, repositoryPath ) {
@@ -52,8 +52,8 @@ module.exports = function getPackagesToRelease( options ) {
 	}
 
 	return executeOnDependencies( execOptions, filterPackagesToRelease )
-		.then( ( skipedPackages ) => {
-			displaySkipedPackages( skipedPackages );
+		.then( ( skippedPackages ) => {
+			displaySkippedPackages( skippedPackages );
 
 			let clearRun = false;
 
@@ -84,15 +84,15 @@ module.exports = function getPackagesToRelease( options ) {
 			return Promise.resolve( packagesToRelease );
 		} );
 
-	function displaySkipedPackages( skipedPackages ) {
-		if ( skipedPackages && !skipedPackages.length ) {
+	function displaySkippedPackages( skippedPackages ) {
+		if ( skippedPackages && !skippedPackages.length ) {
 			return;
 		}
 
 		const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
-		let message = 'Packages listed below have been skiped:\n';
-		skipedPackages.forEach( ( packageName ) => message += `  * ${ packageName }\n` );
+		let message = 'Packages listed below have been skipped:\n';
+		skippedPackages.forEach( ( packageName ) => message += `  * ${ packageName }\n` );
 
 		logger().info( message.trim() );
 	}
