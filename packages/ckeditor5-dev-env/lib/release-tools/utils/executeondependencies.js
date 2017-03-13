@@ -15,6 +15,7 @@ const getPackageJson = require( './getpackagejson' );
  * @param {Object} options
  * @param {String} options.cwd Current work directory.
  * @param {String} options.packages A relative path to the packages.
+ * @param {Array.<String>} options.skipPackages Name of packages which won't be released.
  * @param {Function} functionToExecute A function that will be called on each package.
  * The function receives two arguments:
  *   * `{String} dependencyName Name of current package.`
@@ -39,7 +40,7 @@ module.exports = function executeOnDependencies( options, functionToExecute ) {
 		const dependencyPath = path.join( packagesAbsolutePath, directory );
 		const dependencyName = getPackageJson( dependencyPath ).name;
 
-		if ( !dependencies.includes( dependencyName ) ) {
+		if ( !isValidPackage( dependencyName ) ) {
 			continue;
 		}
 
@@ -49,4 +50,18 @@ module.exports = function executeOnDependencies( options, functionToExecute ) {
 	}
 
 	return promise;
+
+	function isValidPackage( dependencyName ) {
+		// If the package is not specified in `package.json` - ignore them.
+		if ( !dependencies.includes( dependencyName ) ) {
+			return false;
+		}
+
+		// If the package should not be released - ignore them.
+		if ( options.skipPackages.includes( dependencyName ) ) {
+			return false;
+		}
+
+		return true;
+	}
 };

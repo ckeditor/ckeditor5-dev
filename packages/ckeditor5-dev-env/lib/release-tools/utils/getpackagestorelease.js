@@ -14,8 +14,9 @@ const getPackageJson = require( './getpackagejson' );
  * Returns a list of packages to release.
  *
  * @param {Object} options
- * @params {String} options.cwd Current work directory.
- * @params {String} options.packages A relative path to the packages.
+ * @param {String} options.cwd Current work directory.
+ * @param {String} options.packages A relative path to the packages.
+ * @param {Array.<String>} options.skipPackages Name of packages which won't be released.
  * @returns {Promise}
  */
 module.exports = function getPackagesToRelease( options ) {
@@ -24,7 +25,8 @@ module.exports = function getPackagesToRelease( options ) {
 
 	const execOptions = {
 		cwd: options.cwd,
-		packages: options.packages
+		packages: options.packages,
+		skipPackages: options.skipPackages
 	};
 
 	function filterPackagesToRelease( repositoryName, repositoryPath ) {

@@ -51,6 +51,7 @@ const tasks = {
 	 * @param {Object} options
 	 * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
 	 * @param {String} options.packages Where to look for other packages (dependencies).
+	 * @param {Array.<String>} options.skipPackages Name of packages which won't be released.
 	 * @returns {Promise}
 	 */
 	releaseDependencies( options ) {
@@ -58,7 +59,8 @@ const tasks = {
 
 		const execOptions = {
 			cwd: options.cwd,
-			packages: options.packages
+			packages: options.packages,
+			skipPackages: options.skipPackages || []
 		};
 
 		// Errors are added to this array by the `validatePackages` function.
