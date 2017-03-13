@@ -32,9 +32,16 @@ module.exports = function executeOnDependencies( options, functionToExecute ) {
 		return promise;
 	}
 
+	const packageJson = require( path.join( options.cwd, 'package.json' ) );
+	const dependencies = Object.keys( packageJson.dependencies || {} );
+
 	for ( const directory of directories ) {
 		const dependencyPath = path.join( packagesAbsolutePath, directory );
 		const dependencyName = getPackageJson( dependencyPath ).name;
+
+		if ( !dependencies.includes( dependencyName ) ) {
+			continue;
+		}
 
 		promise = promise.then( () => {
 			return functionToExecute( dependencyName, dependencyPath );
