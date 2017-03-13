@@ -26,6 +26,7 @@ const getPackageJson = require( './getpackagejson' );
 module.exports = function executeOnDependencies( options, functionToExecute ) {
 	const packagesAbsolutePath = path.join( options.cwd, options.packages );
 	const directories = workspaceUtils.getDirectories( packagesAbsolutePath );
+	const skipedPackageNames = [];
 
 	let promise = Promise.resolve();
 
@@ -41,6 +42,8 @@ module.exports = function executeOnDependencies( options, functionToExecute ) {
 		const dependencyName = getPackageJson( dependencyPath ).name;
 
 		if ( !isValidPackage( dependencyName ) ) {
+			skipedPackageNames.push( dependencyName );
+
 			continue;
 		}
 
@@ -49,7 +52,7 @@ module.exports = function executeOnDependencies( options, functionToExecute ) {
 		} );
 	}
 
-	return promise;
+	return promise.then( () => Promise.resolve( skipedPackageNames ) );
 
 	function isValidPackage( dependencyName ) {
 		// If the package is not specified in `package.json` - ignore them.
