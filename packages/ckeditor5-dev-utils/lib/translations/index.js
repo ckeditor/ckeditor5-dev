@@ -8,5 +8,6 @@
 module.exports = {
 	TranslationService: require( './translationservice' ),
 	findOriginalStrings: require( './findoriginalstrings' ),
-	parsePoFileContent: require( './parsepofilecontent' )
+	createDicitionaryFromPoFileContent: require( './createdictionaryfrompofilecontent' ),
+	cleanPoFileContent: require( './cleanpofilecontent' )
 };

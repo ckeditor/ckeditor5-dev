@@ -9,13 +9,13 @@
 
 const chai = require( 'chai' );
 const expect = chai.expect;
-const parsePoFileContent = require( '../../lib/translations/parsepofilecontent' );
+const createDicitionaryFromPoFileContent = require( '../../lib/translations/createdictionaryfrompofilecontent' );
 
 describe( 'translations', () => {
 	describe( 'parsePoFileContent()', () => {
 		// More functional rather than unit test to check whole conversion process.
 		it( 'should parse content and return js object with key - value pairs', () => {
-			const result = parsePoFileContent( [
+			const result = createDicitionaryFromPoFileContent( [
 				`msgctxt "Label for the Save button."`,
 				`msgid "Save"`,
 				`msgstr "Zapisz"`,
