@@ -317,20 +317,12 @@ describe( 'dev-env/index', () => {
 		} );
 
 		it( 'does not release specified packages', () => {
-			const createReleaseStub = sandbox.stub( tasks, 'createRelease' ).returns( Promise.resolve() );
-
-			const chdirStub = sandbox.stub( process, 'chdir' );
-
-			packagesToRelease.set( '@ckeditor/ckeditor5-core', { version: '0.6.0', hasChangelog: true } );
+			sandbox.stub( tasks, 'createRelease' ).returns( Promise.resolve() );
+			sandbox.stub( process, 'chdir' );
 
 			stubs.getPackagesToRelease.returns( Promise.resolve( packagesToRelease ) );
-
 			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
-			stubs.cli.configureReleaseOptions.returns( Promise.resolve( {
-				skipGithub: false,
-				skipNpm: true,
-				token: 'secret-token-to-github-account'
-			} ) );
+			stubs.cli.configureReleaseOptions.returns( Promise.resolve() );
 			stubs.validator.checkBranch.returns( undefined );
 
 			const options = {
@@ -343,32 +335,13 @@ describe( 'dev-env/index', () => {
 
 			return tasks.releaseDependencies( options )
 				.then( () => {
-					expect( execOptions ).to.deep.equal( {
-						cwd: options.cwd,
-						packages: options.packages,
-						skipPackages: options.skipPackages
-					} );
-
 					expect( stubs.getPackagesToRelease.firstCall.args[ 0 ] ).to.deep.equal( {
 						cwd: options.cwd,
 						packages: options.packages,
-						skipPackages: options.skipPackages
+						skipPackages: [
+							'@ckeditor/ckeditor5-engine'
+						]
 					} );
-
-					expect( chdirStub.called ).to.equal( true );
-					expect( chdirStub.firstCall.args[ 0 ] ).to.match( /ckeditor5-core$/ );
-					expect( chdirStub.calledWithMatch( /ckeditor5-engine$/ ) ).to.equal( false );
-
-					expect( createReleaseStub.calledOnce ).to.equal( true );
-
-					const releaseArguments = {
-						skipGithub: false,
-						skipNpm: true,
-						token: 'secret-token-to-github-account',
-						dependencies: packagesToRelease
-					};
-
-					expect( createReleaseStub.firstCall.args[ 0 ] ).to.deep.equal( releaseArguments );
 				} );
 		} );
 	} );
