@@ -248,6 +248,75 @@ describe( 'dev-env/release-tools/changelog/writer-options', () => {
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( commitRegexp );
 		} );
 
+		it( 'reads commit details from "footer" for merge commit from Github', () => {
+			const commit = {
+				header: 'Merge pull request #75 from ckeditor/t/64',
+				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
+				body: null,
+				footer: 'Feature: Introduced a brand new release tools with a new set of requirements. See #64.',
+				references: [],
+				mentions: [],
+				type: null,
+				subject: null,
+				notes: []
+			};
+
+			transformCommit( commit );
+
+			expect( commit.header ).to.equal( 'Merge pull request #75 from ckeditor/t/64' );
+			expect( commit.type ).to.equal( 'Features' );
+			expect( commit.subject ).to.equal( 'Introduced a brand new release tools with a new set of requirements. ' +
+				'See [#64](https://github.com/ckeditor/ckeditor5-dev/issues/64).' );
+		} );
+
+		it( 'reads commit details from "body" for manually merge commit', () => {
+			const commit = {
+				header: 'Merge pull request #75 from ckeditor/t/64',
+				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
+				body: 'Feature: Introduced a brand new release tools with a new set of requirements. See #64.',
+				footer: null,
+				references: [],
+				mentions: [],
+				type: null,
+				subject: null,
+				notes: []
+			};
+
+			transformCommit( commit );
+
+			expect( commit.header ).to.equal( 'Merge pull request #75 from ckeditor/t/64' );
+			expect( commit.type ).to.equal( 'Features' );
+			expect( commit.subject ).to.equal( 'Introduced a brand new release tools with a new set of requirements. ' +
+				'See [#64](https://github.com/ckeditor/ckeditor5-dev/issues/64).' );
+		} );
+
+		it( 'attaches additional subject for merge commits to the commit list', () => {
+			const commit = {
+				header: 'Merge pull request #75 from ckeditor/t/64',
+				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
+				body: 'Feature: Introduced a brand new release tools with a new set of requirements.',
+				footer: null,
+				references: [],
+				mentions: [],
+				type: null,
+				subject: null,
+				notes: []
+			};
+
+			transformCommit( commit );
+
+			expect( stubs.logger.info.calledOnce ).to.equal( true );
+			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.be.a( 'string' );
+
+			const logMessageAsArray = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
+			const mergeCommitPattern = /\* dea3501 "Merge pull request #75 from ckeditor\/t\/64" \u001b\[32mINCLUDED/;
+			const detailsPattern = /Feature: Introduced a brand new release tools with a new set of requirements\./;
+
+			expect( logMessageAsArray.length ).to.equal( 2 );
+			expect( logMessageAsArray[ 0 ] ).to.match( mergeCommitPattern );
+			expect( logMessageAsArray[ 1 ] ).to.match( detailsPattern );
+		} );
+
 		it( 'allows hiding the logs', () => {
 			const commit = {
 				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',

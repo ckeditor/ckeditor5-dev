@@ -63,7 +63,10 @@ function transformCommit( commit, displayLog = true ) {
 	const log = logger( displayLog ? 'info' : 'error' );
 
 	if ( commit.header.startsWith( 'Merge' ) ) {
-		const parsedHeader = parserOptions.headerPattern.exec( commit.body );
+		// For merge commit from Github, additional description is provided as "footer".
+		// For manually merge commit, additional description is provides as "body".
+		const descriptionKey = commit.body ? 'body' : 'footer';
+		const parsedHeader = parserOptions.headerPattern.exec( commit[ descriptionKey ] );
 
 		if ( parsedHeader ) {
 			parserOptions.headerCorrespondence.forEach( ( key, index ) => {
@@ -72,7 +75,7 @@ function transformCommit( commit, displayLog = true ) {
 
 			// Remove the new header from commit body in order to avoid
 			// duplicating the same sentence in a changelog description.
-			commit.body = commit.body.replace( parserOptions.headerPattern, '' ).trim();
+			commit[ descriptionKey ] = commit[ descriptionKey ] .replace( parserOptions.headerPattern, '' ).trim();
 		}
 	}
 
@@ -91,6 +94,11 @@ function transformCommit( commit, displayLog = true ) {
 		logMessage += chalk.grey( 'SKIPPED' );
 	} else {
 		logMessage += chalk.red( 'INVALID' );
+	}
+
+	if ( commit.header.startsWith( 'Merge' ) ) {
+		const indentSize = '[XX:YY:ZZ] * 1234567 '.length;
+		logMessage += `\n${ ' '.repeat( indentSize ) }"${ commit.type }: ${ commit.subject }"`;
 	}
 
 	log.info( logMessage );
