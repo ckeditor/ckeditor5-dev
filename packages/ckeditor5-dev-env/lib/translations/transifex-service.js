@@ -6,7 +6,7 @@
 'use strict';
 
 const request = require( 'request' );
-const API_BASE = 'http://www.transifex.com/api/2/project/ckeditor5';
+const PROJECT_URL = 'http://www.transifex.com/api/2/project/ckeditor5';
 
 /**
  * Promise wrappers of the Transifex API.
@@ -15,20 +15,16 @@ const API_BASE = 'http://www.transifex.com/api/2/project/ckeditor5';
  */
 module.exports = {
 	/**
-	 * Uploads resource for the first time.
+	 * Downloads available resources.
 	 *
 	 * @param {Object} config
-	 * @param {String} config.username Username for the Transifex account.
-	 * @param {String} config.password Username for the Transifex account.
-	 * @param {String} config.slug Resource slug.
-	 * @param {String} config.content Resource content.
-	 * @param {String} config.name Resource name.
+	 * @param {String} config.token Token to the Transifex API.
 	 * @returns {Promise.<Object>}
 	 */
-	getResources( { username, password } ) {
+	getResources( { token } ) {
 		return new Promise( ( resolve, reject ) => {
-			request.get( `${ API_BASE }/resources/`, {
-				auth: { username, password }
+			request.get( `${ PROJECT_URL }/resources/`, {
+				auth: { username: 'api', password: token }
 			}, createJsonResponseHandler( resolve, reject ) );
 		} );
 	},
@@ -37,17 +33,16 @@ module.exports = {
 	 * Uploads resource for the first time.
 	 *
 	 * @param {Object} config
-	 * @param {String} config.username Username for the Transifex account.
-	 * @param {String} config.password Username for the Transifex account.
+	 * @param {String} config.token Token to the Transifex API.
 	 * @param {String} config.slug Resource slug.
 	 * @param {String} config.content Resource content.
 	 * @param {String} config.name Resource name.
 	 * @returns {Promise.<Object>}
 	 */
-	postResource( { username, password, name, slug, content } ) {
+	postResource( { token, name, slug, content } ) {
 		return new Promise( ( resolve, reject ) => {
-			request.post( `${ API_BASE }/resources/`, {
-				auth: { username, password },
+			request.post( `${ PROJECT_URL }/resources/`, {
+				auth: { username: 'api', password: token },
 				formData: { slug, name, content, 'i18n_type': 'PO' }
 			}, createJsonResponseHandler( resolve, reject ) );
 		} );
@@ -57,16 +52,15 @@ module.exports = {
 	 * Updates resoure content.
 	 *
 	 * @param {Object} config
-	 * @param {String} config.username Username for the Transifex account.
-	 * @param {String} config.password Username for the Transifex account.
+	 * @param {String} config.token Token to the Transifex API.
 	 * @param {String} config.slug Resource slug.
 	 * @param {String} config.content Resource content.
 	 * @returns {Promise.<Object>}
 	 */
-	putResourceContent( { username, password, slug, content } ) {
+	putResourceContent( { token, slug, content } ) {
 		return new Promise( ( resolve, reject ) => {
-			request.put( `${ API_BASE }/resource/${ slug }/content/`, {
-				auth: { username, password },
+			request.put( `${ PROJECT_URL }/resource/${ slug }/content/`, {
+				auth: { username: 'api', password: token },
 				formData: { content, 'i18n_type': 'PO' }
 			}, createJsonResponseHandler( resolve, reject ) );
 		} );
@@ -76,15 +70,14 @@ module.exports = {
 	 * Returns resource details promise.
 	 *
 	 * @param {Object} config
-	 * @param {String} config.username Username for the Transifex account.
-	 * @param {String} config.password Username for the Transifex account.
+	 * @param {String} config.token Token to the Transifex API.
 	 * @param {String} config.slug Resource slug.
 	 * @returns {Promise.<Object>}
 	 */
-	getResourceDetails( { username, password, slug } ) {
+	getResourceDetails( { token, slug } ) {
 		return new Promise( ( resolve, reject ) => {
-			request.get( `${ API_BASE }/resource/${ slug }/?details`, {
-				auth: { username, password }
+			request.get( `${ PROJECT_URL }/resource/${ slug }/?details`, {
+				auth: { username: 'api', password: token }
 			}, createJsonResponseHandler( resolve, reject ) );
 		} );
 	},
@@ -93,16 +86,15 @@ module.exports = {
 	 * Returns translations promise for the target resource and language.
 	 *
 	 * @param {Object} config
-	 * @param {String} config.username Username for the Transifex account.
-	 * @param {String} config.password Username for the Transifex account.
+	 * @param {String} config.token Token to the Transifex API.
 	 * @param {String} config.slug Resource slug.
 	 * @param {String} config.lang Target language.
 	 * @returns {Promise.<Object>}
 	 */
-	getTranslation( { username, password, slug, lang } ) {
+	getTranslation( { token, slug, lang } ) {
 		return new Promise( ( resolve, reject ) => {
-			request.get( `${ API_BASE }/resource/${ slug }/translation/${ lang }/`, {
-				auth: { username, password }
+			request.get( `${ PROJECT_URL }/resource/${ slug }/translation/${ lang }/`, {
+				auth: { username: 'api', password: token }
 			}, createJsonResponseHandler( resolve, reject ) );
 		} );
 	}
