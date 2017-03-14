@@ -10,6 +10,7 @@ const executeOnDependencies = require( './release-tools/utils/executeondependenc
 const getPackagesToRelease = require( './release-tools/utils/getpackagestorelease' );
 const validator = require( './release-tools/utils/releasevalidator' );
 const cli = require( './release-tools/utils/cli' );
+const displaySkippedPackages = require( './release-tools/utils/displayskippedpackages' );
 
 const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted by the user.';
 
@@ -24,12 +25,14 @@ const tasks = {
 	 * @param {Object} options
 	 * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
 	 * @param {String} options.packages Where to look for other packages (dependencies).
+	 * @param {Array.<String>} options.skipPackages Name of packages which will be skipped.
 	 * @returns {Promise}
 	 */
 	generateChangelogForDependencies( options ) {
 		const execOptions = {
 			cwd: options.cwd,
-			packages: options.packages
+			packages: options.packages,
+			skipPackages: options.skipPackages || []
 		};
 
 		const generateChangelogForSinglePackage = ( repositoryName, repositoryPath ) => {
@@ -39,7 +42,9 @@ const tasks = {
 		};
 
 		return executeOnDependencies( execOptions, generateChangelogForSinglePackage )
-			.then( () => {
+			.then( ( skippedPackages ) => {
+				displaySkippedPackages( skippedPackages );
+
 				process.chdir( options.cwd );
 			} );
 	},
@@ -51,6 +56,7 @@ const tasks = {
 	 * @param {Object} options
 	 * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
 	 * @param {String} options.packages Where to look for other packages (dependencies).
+	 * @param {Array.<String>} options.skipPackages Name of packages which won't be released.
 	 * @returns {Promise}
 	 */
 	releaseDependencies( options ) {
@@ -58,7 +64,8 @@ const tasks = {
 
 		const execOptions = {
 			cwd: options.cwd,
-			packages: options.packages
+			packages: options.packages,
+			skipPackages: options.skipPackages || []
 		};
 
 		// Errors are added to this array by the `validatePackages` function.
@@ -146,6 +153,7 @@ const tasks = {
 	 */
 	collectTranslations() {
 		const collectTranslations = require( './translations/collect' );
+
 		collectTranslations();
 	},
 
@@ -156,9 +164,10 @@ const tasks = {
 	 */
 	uploadTranslations() {
 		const uploadTranslations = require( './translations/upload' );
-		const loginOptions = require( './translations/getloginoptions' )( process.argv.slice( 2 ) );
+		const getToken = require( './translations/gettoken' );
 
-		return uploadTranslations( loginOptions );
+		return getToken()
+			.then( credentials => uploadTranslations( credentials ) );
 	},
 
 	/**
@@ -168,9 +177,10 @@ const tasks = {
 	 */
 	downloadTranslations() {
 		const downloadTranslations = require( './translations/download' );
-		const loginOptions = require( './translations/getloginoptions' )( process.argv.slice( 2 ) );
+		const getToken = require( './translations/gettoken' );
 
-		return downloadTranslations( loginOptions );
+		return getToken()
+			.then( credentials => downloadTranslations( credentials ) );
 	}
 };
 

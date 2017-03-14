@@ -30,16 +30,15 @@ describe( 'transifex-service', () => {
 			sandbox.stub( request, 'get', spy );
 
 			return transifexService.getResources( {
-				username: 'username',
-				password: 'password'
+				token: 'token'
 			} ).then( () => {
 				sinon.assert.calledWith(
 					spy,
 					'http://www.transifex.com/api/2/project/ckeditor5/resources/',
 					{
 						auth: {
-							username: 'username',
-							password: 'password'
+							username: 'api',
+							password: 'token'
 						}
 					}
 				);
@@ -51,8 +50,7 @@ describe( 'transifex-service', () => {
 			sandbox.stub( request, 'get', spy );
 
 			return transifexService.getResources( {
-				username: 'username',
-				password: 'password'
+				token: 'token'
 			} )
 			.then( () => new Error( 'Promise should not be resolved' ) )
 			.catch( ( err ) => expect( err.message ).to.equal( 'Status code: 500' ) );
@@ -65,8 +63,7 @@ describe( 'transifex-service', () => {
 			sandbox.stub( request, 'post', spy );
 
 			return transifexService.postResource( {
-				username: 'username',
-				password: 'password',
+				token: 'token',
 				name: 'name',
 				slug: 'slug',
 				content: 'content',
@@ -76,8 +73,8 @@ describe( 'transifex-service', () => {
 					'http://www.transifex.com/api/2/project/ckeditor5/resources/',
 					{
 						auth: {
-							username: 'username',
-							password: 'password'
+							username: 'api',
+							password: 'token'
 						},
 						formData: {
 							slug: 'slug',
@@ -97,8 +94,7 @@ describe( 'transifex-service', () => {
 			sandbox.stub( request, 'put', spy );
 
 			return transifexService.putResourceContent( {
-				username: 'username',
-				password: 'password',
+				token: 'token',
 				slug: 'slug',
 				content: 'content',
 			} ).then( () => {
@@ -107,8 +103,8 @@ describe( 'transifex-service', () => {
 					'http://www.transifex.com/api/2/project/ckeditor5/resource/slug/content/',
 					{
 						auth: {
-							username: 'username',
-							password: 'password'
+							username: 'api',
+							password: 'token'
 						},
 						formData: {
 							content: 'content',
@@ -126,8 +122,7 @@ describe( 'transifex-service', () => {
 			sandbox.stub( request, 'get', spy );
 
 			return transifexService.getResourceDetails( {
-				username: 'username',
-				password: 'password',
+				token: 'token',
 				slug: 'slug',
 			} ).then( () => {
 				sinon.assert.calledWith(
@@ -135,8 +130,8 @@ describe( 'transifex-service', () => {
 					'http://www.transifex.com/api/2/project/ckeditor5/resource/slug/?details',
 					{
 						auth: {
-							username: 'username',
-							password: 'password'
+							username: 'api',
+							password: 'token'
 						}
 					}
 				);
@@ -150,8 +145,7 @@ describe( 'transifex-service', () => {
 			sandbox.stub( request, 'get', spy );
 
 			return transifexService.getTranslation( {
-				username: 'username',
-				password: 'password',
+				token: 'token',
 				slug: 'slug',
 				lang: 'lang'
 			} ).then( () => {
@@ -160,8 +154,8 @@ describe( 'transifex-service', () => {
 					'http://www.transifex.com/api/2/project/ckeditor5/resource/slug/translation/lang/',
 					{
 						auth: {
-							username: 'username',
-							password: 'password'
+							username: 'api',
+							password: 'token'
 						}
 					}
 				);

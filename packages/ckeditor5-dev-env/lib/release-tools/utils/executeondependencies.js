@@ -15,16 +15,20 @@ const getPackageJson = require( './getpackagejson' );
  * @param {Object} options
  * @param {String} options.cwd Current work directory.
  * @param {String} options.packages A relative path to the packages.
+ * @param {Array.<String>} options.skipPackages Name of packages which won't be released.
  * @param {Function} functionToExecute A function that will be called on each package.
  * The function receives two arguments:
  *   * `{String} dependencyName Name of current package.`
  *   * `{String dependencyPath An absolute path to the package.`
  * The function may return a promise.
- * @returns {Promise}
+ * @returns {Promise.<Array.<String>>} Resolved promise returns an array with packages
+ * which have been skipped.
  */
 module.exports = function executeOnDependencies( options, functionToExecute ) {
 	const packagesAbsolutePath = path.join( options.cwd, options.packages );
 	const directories = workspaceUtils.getDirectories( packagesAbsolutePath );
+	const skipPackagesList = options.skipPackages || [];
+	const skippedPackageNames = [];
 
 	let promise = Promise.resolve();
 
@@ -32,14 +36,37 @@ module.exports = function executeOnDependencies( options, functionToExecute ) {
 		return promise;
 	}
 
+	const packageJson = getPackageJson( options.cwd );
+	const dependencies = Object.keys( packageJson.dependencies || {} );
+
 	for ( const directory of directories ) {
 		const dependencyPath = path.join( packagesAbsolutePath, directory );
 		const dependencyName = getPackageJson( dependencyPath ).name;
+
+		if ( !isValidPackage( dependencyName ) ) {
+			skippedPackageNames.push( dependencyName );
+
+			continue;
+		}
 
 		promise = promise.then( () => {
 			return functionToExecute( dependencyName, dependencyPath );
 		} );
 	}
 
-	return promise;
+	return promise.then( () => Promise.resolve( skippedPackageNames ) );
+
+	function isValidPackage( dependencyName ) {
+		// If the package is not specified in `package.json` - ignore them.
+		if ( !dependencies.includes( dependencyName ) ) {
+			return false;
+		}
+
+		// If the package should not be released - ignore them.
+		if ( skipPackagesList.includes( dependencyName ) ) {
+			return false;
+		}
+
+		return true;
+	}
 };
