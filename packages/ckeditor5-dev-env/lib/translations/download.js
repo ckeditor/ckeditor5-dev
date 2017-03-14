@@ -16,7 +16,7 @@ const translationUtils = require( '@ckeditor/ckeditor5-dev-utils' ).translations
  *
  * @param {Object} loginConfig
  * @param {String} loginConfig.token Token to the Transifex API.
-	  */
+ */
 module.exports = function download( loginConfig ) {
 	return Promise.resolve()
 		.then( () => getPackageNames( loginConfig ) )
