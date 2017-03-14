@@ -92,8 +92,8 @@ module.exports = function getPackagesToRelease( options ) {
 		const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 		let message = 'Packages listed below have been skipped:\n';
-		skippedPackages.forEach( ( packageName ) => message += `  * ${ packageName }\n` );
+		message += skippedPackages.map( ( line ) => `  * ${ line }` ).join( '\n' );
 
-		logger().info( message.trim() );
+		logger().info( message );
 	}
 };
