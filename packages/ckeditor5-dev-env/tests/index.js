@@ -44,7 +44,7 @@ describe( 'dev-env/index', () => {
 				upload: sandbox.spy(),
 				download: sandbox.spy(),
 				collect: sandbox.spy(),
-				getCredentials: sandbox.stub()
+				getToken: sandbox.stub()
 			}
 		};
 
@@ -82,7 +82,7 @@ describe( 'dev-env/index', () => {
 		mockery.registerMock( './release-tools/utils/releasevalidator', stubs.validator );
 
 		mockery.registerMock( './translations/upload', stubs.translations.upload );
-		mockery.registerMock( './translations/getcredentials', stubs.translations.getCredentials );
+		mockery.registerMock( './translations/gettoken', stubs.translations.getToken );
 		mockery.registerMock( './translations/download', stubs.translations.download );
 		mockery.registerMock( './translations/collect', stubs.translations.collect );
 
@@ -302,13 +302,12 @@ describe( 'dev-env/index', () => {
 
 	describe( 'uploadTranslations()', () => {
 		it( 'should upload translations', () => {
-			stubs.translations.getCredentials.returns( Promise.resolve( { username: 'username', password: 'password' } ) );
+			stubs.translations.getToken.returns( Promise.resolve( { token: 'token' } ) );
 
 			return tasks.uploadTranslations().then( () => {
 				sinon.assert.calledOnce( stubs.translations.upload );
 				sinon.assert.alwaysCalledWithExactly( stubs.translations.upload, {
-					username: 'username',
-					password: 'password'
+					token: 'token',
 				} );
 			} );
 		} );
@@ -316,13 +315,12 @@ describe( 'dev-env/index', () => {
 
 	describe( 'downloadTranslations()', () => {
 		it( 'should download translations', () => {
-			stubs.translations.getCredentials.returns( Promise.resolve( { username: 'username', password: 'password' } ) );
+			stubs.translations.getToken.returns( Promise.resolve( { token: 'token' } ) );
 
 			return tasks.downloadTranslations().then( () => {
 				sinon.assert.calledOnce( stubs.translations.download );
 				sinon.assert.alwaysCalledWithExactly( stubs.translations.download, {
-					username: 'username',
-					password: 'password'
+					token: 'token',
 				} );
 			} );
 		} );

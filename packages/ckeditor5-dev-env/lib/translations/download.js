@@ -14,9 +14,8 @@ const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
  * Downloads translations from the Transifex for each package and language.
  *
  * @param {Object} loginConfig
- * @param {String} loginConfig.username Username for the Transifex account.
- * @param {String} loginConfig.password Password for the Transifex account.
- */
+ * @param {String} loginConfig.token Token to the Transifex API.
+	  */
 module.exports = function download( loginConfig ) {
 	return Promise.resolve()
 		.then( () => getPackageNames( loginConfig ) )

@@ -157,9 +157,9 @@ const tasks = {
 	 */
 	uploadTranslations() {
 		const uploadTranslations = require( './translations/upload' );
-		const getCredentials = require( './translations/getcredentials' );
+		const getToken = require( './translations/gettoken' );
 
-		return getCredentials()
+		return getToken()
 			.then( credentials => uploadTranslations( credentials ) );
 	},
 
@@ -170,9 +170,9 @@ const tasks = {
 	 */
 	downloadTranslations() {
 		const downloadTranslations = require( './translations/download' );
-		const getCredentials = require( './translations/getcredentials' );
+		const getToken = require( './translations/gettoken' );
 
-		return getCredentials()
+		return getToken()
 			.then( credentials => downloadTranslations( credentials ) );
 	}
 };

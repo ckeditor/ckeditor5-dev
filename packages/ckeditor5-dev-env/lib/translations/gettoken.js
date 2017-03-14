@@ -12,14 +12,10 @@ const inquirer = require( 'inquirer' );
  *
  * @returns {Promise.<Object>}
  */
-module.exports = function getCredentials() {
+module.exports = function getToken() {
 	return inquirer.prompt( [ {
-		type: 'input',
-		message: 'Provide Transifex username',
-		name: 'username'
-	}, {
 		type: 'password',
-		message: 'Provide Transifex password',
-		name: 'password'
+		message: 'Provide Transifex token (it should be generated here: https://www.transifex.com/user/settings/api/)',
+		name: 'token'
 	} ] );
 };
