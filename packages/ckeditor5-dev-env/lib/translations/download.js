@@ -104,7 +104,7 @@ function saveTranslations( packageName, translations ) {
 		const pathToSave = path.join( process.cwd(), 'packages', packageName, 'lang', 'translations', lang + '.po' );
 
 		fs.outputFileSync( pathToSave, poFileContent );
-		logger.info( `Saved ${ lang }.po for ${ packageName } package` );
+		logger.info( `Saved ${ lang }.po for ${ packageName } package.` );
 	}
 }
 

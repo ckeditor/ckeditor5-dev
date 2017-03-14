@@ -15,7 +15,7 @@ const inquirer = require( 'inquirer' );
 module.exports = function getToken() {
 	return inquirer.prompt( [ {
 		type: 'password',
-		message: 'Provide Transifex token (it should be generated here: https://www.transifex.com/user/settings/api/)',
+		message: 'Provide the Transifex token (generate it here: https://www.transifex.com/user/settings/api/):',
 		name: 'token'
 	} ] );
 };
