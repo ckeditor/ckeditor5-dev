@@ -39,7 +39,9 @@ describe( 'dev-env/index', () => {
 				info: sandbox.spy(),
 				warning: sandbox.spy(),
 				error: sandbox.spy()
-			}
+			},
+			getPackagesToRelease: sandbox.stub(),
+			displaySkippedPackages: sandbox.stub()
 		};
 
 		mockery.registerMock( './release-tools/utils/executeondependencies', ( options, functionToExecute ) => {
@@ -64,12 +66,15 @@ describe( 'dev-env/index', () => {
 				return functionToExecute( item, path.join( packagesPath, item.replace( '@', '' ) ) );
 			} );
 
-			return promise;
+			// Returns a list contains skipped packages.
+			return promise.then( () => Promise.resolve( [
+				'@ckeditor/ckeditor5-foo'
+			] ) );
 		} );
 
-		mockery.registerMock( './release-tools/utils/getpackagestorelease', () => {
-			return Promise.resolve( packagesToRelease );
-		} );
+		mockery.registerMock( './release-tools/utils/displayskippedpackages', stubs.displaySkippedPackages );
+
+		mockery.registerMock( './release-tools/utils/getpackagestorelease', stubs.getPackagesToRelease );
 
 		mockery.registerMock( './release-tools/utils/cli', stubs.cli );
 
@@ -110,14 +115,40 @@ describe( 'dev-env/index', () => {
 				.then( () => {
 					expect( execOptions ).to.deep.equal( {
 						cwd: options.cwd,
-						packages: options.packages
+						packages: options.packages,
+						skipPackages: []
 					} );
 
 					expect( chdirStub.called ).to.equal( true );
 
-					// ckeditor5-utils is a dependency found by `executeOnDependencies` function.
+					// @ckeditor/ckeditor5-utils is a dependency found by `executeOnDependencies` function.
 					expect( chdirStub.firstCall.args[ 0 ] ).to.match( /ckeditor5-utils$/ );
 					expect( generateChangelogStub.calledOnce ).to.equal( true );
+
+					expect( stubs.displaySkippedPackages.calledOnce ).to.equal( true );
+					expect( stubs.displaySkippedPackages.firstCall.args[ 0 ] ).to.deep.equal( [ '@ckeditor/ckeditor5-foo' ] );
+				} );
+		} );
+
+		it( 'passes "options.skipPackages" to the handler', () => {
+			sandbox.stub( process, 'chdir' );
+			sandbox.stub( tasks, 'generateChangelog' ).returns( Promise.resolve() );
+
+			const skipPackages = [
+				'@ckeditor/ckeditor5-a',
+				'@ckeditor/ckeditor5-b',
+				'@ckeditor/ckeditor5-c',
+			];
+
+			const options = {
+				cwd: __dirname,
+				packages: 'packages/',
+				skipPackages
+			};
+
+			return tasks.generateChangelogForDependencies( options )
+				.then( () => {
+					expect( execOptions.skipPackages ).to.deep.equal( skipPackages );
 				} );
 		} );
 	} );
@@ -137,6 +168,8 @@ describe( 'dev-env/index', () => {
 			packagesToRelease.set( '@ckeditor/ckeditor5-core', { version: '0.6.0', hasChangelog: true } );
 			packagesToRelease.set( '@ckeditor/ckeditor5-engine', { version: '1.0.1', hasChangelog: true } );
 
+			stubs.getPackagesToRelease.returns( Promise.resolve( packagesToRelease ) );
+
 			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
 			stubs.cli.configureReleaseOptions.returns( Promise.resolve( {
 				skipGithub: false,
@@ -154,7 +187,8 @@ describe( 'dev-env/index', () => {
 				.then( () => {
 					expect( execOptions ).to.deep.equal( {
 						cwd: options.cwd,
-						packages: options.packages
+						packages: options.packages,
+						skipPackages: []
 					} );
 
 					expect( chdirStub.called ).to.equal( true );
@@ -184,6 +218,8 @@ describe( 'dev-env/index', () => {
 				packages: 'packages/'
 			};
 
+			stubs.getPackagesToRelease.returns( Promise.resolve( packagesToRelease ) );
+
 			return tasks.releaseDependencies( options )
 				.then( () => {
 					const expectedError = 'None of the packages contains any changes since its last release. Aborting.';
@@ -201,6 +237,8 @@ describe( 'dev-env/index', () => {
 
 			packagesToRelease.set( '@ckeditor/ckeditor5-core', { version: '0.6.0', hasChangelog: true } );
 			packagesToRelease.set( '@ckeditor/ckeditor5-engine', { version: '1.0.1', hasChangelog: true } );
+
+			stubs.getPackagesToRelease.returns( Promise.resolve( packagesToRelease ) );
 
 			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
 			stubs.validator.checkBranch.throws( new Error( 'Not on master or master is not clean.' ) );
@@ -231,6 +269,8 @@ describe( 'dev-env/index', () => {
 
 			packagesToRelease.set( '@ckeditor/ckeditor5-core', { version: '0.6.0', hasChangelog: true } );
 
+			stubs.getPackagesToRelease.returns( Promise.resolve( packagesToRelease ) );
+
 			stubs.cli.confirmRelease.returns( Promise.resolve( false ) );
 
 			return tasks.releaseDependencies( options )
@@ -255,14 +295,10 @@ describe( 'dev-env/index', () => {
 
 			stubs.validator.checkBranch.returns( undefined );
 
-			packagesToRelease.set( '@ckeditor/ckeditor5-core', {
-				version: '0.6.0',
-				hasChangelog: true
-			} );
-			packagesToRelease.set( '@ckeditor/ckeditor5-engine', {
-				version: '1.0.0',
-				hasChangelog: true
-			} );
+			packagesToRelease.set( '@ckeditor/ckeditor5-core', { version: '0.6.0', hasChangelog: true } );
+			packagesToRelease.set( '@ckeditor/ckeditor5-engine', { version: '1.0.0', hasChangelog: true } );
+
+			stubs.getPackagesToRelease.returns( Promise.resolve( packagesToRelease ) );
 
 			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
 
@@ -277,6 +313,35 @@ describe( 'dev-env/index', () => {
 					expect( createReleaseStub.calledTwice ).to.equal( true );
 					expect( stubs.logger.error.calledOnce ).to.equal( true );
 					expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal( error.message );
+				} );
+		} );
+
+		it( 'does not release specified packages', () => {
+			sandbox.stub( tasks, 'createRelease' ).returns( Promise.resolve() );
+			sandbox.stub( process, 'chdir' );
+
+			stubs.getPackagesToRelease.returns( Promise.resolve( packagesToRelease ) );
+			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
+			stubs.cli.configureReleaseOptions.returns( Promise.resolve() );
+			stubs.validator.checkBranch.returns( undefined );
+
+			const options = {
+				cwd: __dirname,
+				packages: 'packages/',
+				skipPackages: [
+					'@ckeditor/ckeditor5-engine'
+				]
+			};
+
+			return tasks.releaseDependencies( options )
+				.then( () => {
+					expect( stubs.getPackagesToRelease.firstCall.args[ 0 ] ).to.deep.equal( {
+						cwd: options.cwd,
+						packages: options.packages,
+						skipPackages: [
+							'@ckeditor/ckeditor5-engine'
+						]
+					} );
 				} );
 		} );
 	} );
