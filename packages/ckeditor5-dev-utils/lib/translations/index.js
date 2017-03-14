@@ -7,5 +7,7 @@
 
 module.exports = {
 	TranslationService: require( './translationservice' ),
-	findOriginalStrings: require( './findoriginalstrings' )
+	findOriginalStrings: require( './findoriginalstrings' ),
+	createDicitionaryFromPoFileContent: require( './createdictionaryfrompofilecontent' ),
+	cleanPoFileContent: require( './cleanpofilecontent' )
 };

@@ -7,7 +7,7 @@
 
 const path = require( 'path' );
 const fs = require( 'fs' );
-const parsePoFileContent = require( './parsepofilecontent' );
+const createDicitionaryFromPoFileContent = require( './createdictionaryfrompofilecontent' );
 const acorn = require( 'acorn' );
 const walk = require( 'acorn/dist/walk' );
 const escodegen = require( 'escodegen' );
@@ -96,7 +96,7 @@ module.exports = class TranslationService {
 		}
 
 		const poFileContent = fs.readFileSync( pathToPoFile, 'utf-8' );
-		const parsedTranslationFile = parsePoFileContent( poFileContent );
+		const parsedTranslationFile = createDicitionaryFromPoFileContent( poFileContent );
 
 		for ( const translationKey in parsedTranslationFile ) {
 			this.dictionary.set( translationKey, parsedTranslationFile[ translationKey ] );

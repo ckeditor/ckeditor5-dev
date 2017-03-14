@@ -3,5 +3,7 @@
   "packages": [
     "packages/*"
   ],
+  "hoist": true,
+  "nohoist": "guppy-pre-commit",
   "version": "independent"
 }
