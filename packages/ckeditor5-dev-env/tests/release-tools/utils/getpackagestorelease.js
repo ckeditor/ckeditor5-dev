@@ -45,7 +45,8 @@ describe( 'dev-env/release-tools/utils', () => {
 					info: sandbox.stub(),
 					warning: sandbox.stub(),
 					error: sandbox.stub()
-				}
+				},
+				displaySkippedPackages: sandbox.stub()
 			};
 
 			mockery.registerMock( './executeondependencies', ( options, functionToExecute ) => {
@@ -65,6 +66,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			} );
 			mockery.registerMock( './versions', stubs.versions );
 			mockery.registerMock( './getpackagejson', stubs.getPackageJson );
+			mockery.registerMock( './displayskippedpackages', stubs.displaySkippedPackages );
 
 			getPackagesToRelease = proxyquire( '../../../lib/release-tools/utils/getpackagestorelease', {
 				'@ckeditor/ckeditor5-dev-utils': {
@@ -214,14 +216,11 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			return getPackagesToRelease( options )
 				.then( () => {
-					const logMessage = [
-						'Packages listed below have been skipped:',
-						'  * @ckeditor/ckeditor5-foo',
-						'  * @ckeditor/ckeditor5-bar'
-					].join( '\n' );
-
-					expect( stubs.logger.info.calledOnce ).to.equal( true );
-					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( logMessage );
+					expect( stubs.displaySkippedPackages.calledOnce ).to.equal( true );
+					expect( stubs.displaySkippedPackages.firstCall.args[ 0 ] ).to.deep.equal( [
+						'@ckeditor/ckeditor5-foo',
+						'@ckeditor/ckeditor5-bar'
+					] );
 				} );
 		} );
 	} );

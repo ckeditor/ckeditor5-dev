@@ -21,7 +21,8 @@ const getPackageJson = require( './getpackagejson' );
  *   * `{String} dependencyName Name of current package.`
  *   * `{String dependencyPath An absolute path to the package.`
  * The function may return a promise.
- * @returns {Promise}
+ * @returns {Promise.<Array.<String>>} Resolved promise returns an array with packages
+ * which have been skipped.
  */
 module.exports = function executeOnDependencies( options, functionToExecute ) {
 	const packagesAbsolutePath = path.join( options.cwd, options.packages );

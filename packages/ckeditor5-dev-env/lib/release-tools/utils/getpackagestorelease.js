@@ -9,6 +9,7 @@ const semver = require( 'semver' );
 const executeOnDependencies = require( './executeondependencies' );
 const versionUtils = require( './versions' );
 const getPackageJson = require( './getpackagejson' );
+const displaySkippedPackages = require( './displayskippedpackages' );
 
 /**
  * Returns a list of packages to release.
@@ -83,17 +84,4 @@ module.exports = function getPackagesToRelease( options ) {
 
 			return Promise.resolve( packagesToRelease );
 		} );
-
-	function displaySkippedPackages( skippedPackages ) {
-		if ( skippedPackages && !skippedPackages.length ) {
-			return;
-		}
-
-		const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-
-		let message = 'Packages listed below have been skipped:\n';
-		message += skippedPackages.map( ( line ) => `  * ${ line }` ).join( '\n' );
-
-		logger().info( message );
-	}
 };

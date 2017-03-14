@@ -40,7 +40,8 @@ describe( 'dev-env/index', () => {
 				warning: sandbox.spy(),
 				error: sandbox.spy()
 			},
-			getPackagesToRelease: sandbox.stub()
+			getPackagesToRelease: sandbox.stub(),
+			displaySkippedPackages: sandbox.stub()
 		};
 
 		mockery.registerMock( './release-tools/utils/executeondependencies', ( options, functionToExecute ) => {
@@ -65,8 +66,13 @@ describe( 'dev-env/index', () => {
 				return functionToExecute( item, path.join( packagesPath, item.replace( '@', '' ) ) );
 			} );
 
-			return promise;
+			// Returns a list contains skipped packages.
+			return promise.then( () => Promise.resolve( [
+				'@ckeditor/ckeditor5-foo'
+			] ) );
 		} );
+
+		mockery.registerMock( './release-tools/utils/displayskippedpackages', stubs.displaySkippedPackages );
 
 		mockery.registerMock( './release-tools/utils/getpackagestorelease', stubs.getPackagesToRelease );
 
@@ -109,14 +115,40 @@ describe( 'dev-env/index', () => {
 				.then( () => {
 					expect( execOptions ).to.deep.equal( {
 						cwd: options.cwd,
-						packages: options.packages
+						packages: options.packages,
+						skipPackages: []
 					} );
 
 					expect( chdirStub.called ).to.equal( true );
 
-					// ckeditor5-utils is a dependency found by `executeOnDependencies` function.
+					// @ckeditor/ckeditor5-utils is a dependency found by `executeOnDependencies` function.
 					expect( chdirStub.firstCall.args[ 0 ] ).to.match( /ckeditor5-utils$/ );
 					expect( generateChangelogStub.calledOnce ).to.equal( true );
+
+					expect( stubs.displaySkippedPackages.calledOnce ).to.equal( true );
+					expect( stubs.displaySkippedPackages.firstCall.args[ 0 ] ).to.deep.equal( [ '@ckeditor/ckeditor5-foo' ] );
+				} );
+		} );
+
+		it( 'passes "options.skipPackages" to the handler', () => {
+			sandbox.stub( process, 'chdir' );
+			sandbox.stub( tasks, 'generateChangelog' ).returns( Promise.resolve() );
+
+			const skipPackages = [
+				'@ckeditor/ckeditor5-a',
+				'@ckeditor/ckeditor5-b',
+				'@ckeditor/ckeditor5-c',
+			];
+
+			const options = {
+				cwd: __dirname,
+				packages: 'packages/',
+				skipPackages
+			};
+
+			return tasks.generateChangelogForDependencies( options )
+				.then( () => {
+					expect( execOptions.skipPackages ).to.deep.equal( skipPackages );
 				} );
 		} );
 	} );
