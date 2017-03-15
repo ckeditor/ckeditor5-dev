@@ -44,7 +44,7 @@ const commitMessage = `[${ process.env.TRAVIS_REPO_SLUG }] Updated hashes.`;
 // Check whether the mgit.json has changed. It might not have changed if, e.g., a build was restarted.
 if ( exec( 'git diff --name-only mgit.json' ).trim().length ) {
 	exec( `git add mgit.json && git commit -m "${ commitMessage }"` );
-	exec( `git push origin ${ revisionBranch }` );
+	exec( `git push origin ${ revisionBranch } --quiet` );
 }
 
 function exec( command ) {
