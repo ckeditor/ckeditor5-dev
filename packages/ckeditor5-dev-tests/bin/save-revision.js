@@ -37,7 +37,9 @@ exec( 'mgit bootstrap --recursive --resolver-url-template="https://github.com/\\
 // Save hashes from all dependencies.
 exec( 'mgit save-hashes' );
 
-const commitMessage = `[${ process.env.TRAVIS_REPO_SLUG }] Updated hashes.`;
+const repository = process.env.TRAVIS_REPO_SLUG;
+const commit = process.env.TRAVIS_COMMIT;
+const commitMessage = `Revision: https://github.com/${ repository }/commit/${ commit }`;
 
 // Check whether the mgit.json has changed. It might not have changed if, e.g., a build was restarted.
 if ( exec( 'git diff --name-only mgit.json' ).trim().length ) {
