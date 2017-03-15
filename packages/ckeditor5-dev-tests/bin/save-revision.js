@@ -29,7 +29,7 @@ process.chdir( path.join( process.cwd(), 'ckeditor5' ) );
 exec( 'npm install -g mgit2' );
 
 // Get the latest `mgit.json`.
-exec( `git checkout origin/${ branch } mgit.json` );
+exec( `git checkout origin/${ branch } .` );
 
 // Install dependencies.
 exec( 'mgit bootstrap --recursive --resolver-url-template="https://github.com/\\\${ path }.git"' );
