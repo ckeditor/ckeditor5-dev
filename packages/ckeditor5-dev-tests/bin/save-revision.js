@@ -17,10 +17,11 @@ if ( branch !== 'master' ) {
 const path = require( 'path' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
+const mainRepoUrl = 'https://github.com/ckeditor/ckeditor5';
 const revisionBranch = `${ branch }-revisions`;
 
 // Clone the repository.
-exec( `git clone -b ${ revisionBranch } https://github.com/ckeditor/ckeditor5.git` );
+exec( `git clone -b ${ revisionBranch } ${ mainRepoUrl }.git` );
 
 // Change current dir to cloned repository.
 process.chdir( path.join( process.cwd(), 'ckeditor5' ) );
@@ -49,6 +50,9 @@ if ( exec( 'git diff --name-only mgit.json' ).trim().length ) {
 	exec( 'git config credential.helper "store --file=.git/credentials"' );
 
 	exec( `git push origin ${ revisionBranch } --quiet` );
+
+	const lastCommit = exec( 'git log -1 --format="%h"' );
+	console.log( `Successfully saved the revision under ${ mainRepoUrl }/commit/${ lastCommit }` );
 }
 
 function exec( command ) {
