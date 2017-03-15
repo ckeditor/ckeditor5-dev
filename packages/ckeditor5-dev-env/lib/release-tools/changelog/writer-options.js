@@ -62,14 +62,23 @@ module.exports = {
 function transformCommit( commit, displayLog = true ) {
 	const log = logger( displayLog ? 'info' : 'error' );
 
+	// For merge commit from Github, additional description is provided as "footer".
+	if ( !commit.body && commit.footer ) {
+		commit.body = commit.footer;
+		commit.footer = null;
+	}
+
 	if ( commit.header.startsWith( 'Merge' ) ) {
-		// Header for merge commit can be in "body" or "footer" of the commit message.
-		const parsedHeader = parserOptions.headerPattern.exec( commit.body || commit.footer );
+		const parsedHeader = parserOptions.headerPattern.exec( commit.body );
 
 		if ( parsedHeader ) {
 			parserOptions.headerCorrespondence.forEach( ( key, index ) => {
 				commit[ key ] = parsedHeader[ index + 1 ];
 			} );
+
+			// Remove the new header from commit body in order to avoid
+			// duplicating the same sentence in a changelog description.
+			commit.body = commit.body.replace( parserOptions.headerPattern, '' ).trim();
 		}
 	}
 
@@ -90,6 +99,11 @@ function transformCommit( commit, displayLog = true ) {
 		logMessage += chalk.red( 'INVALID' );
 	}
 
+	if ( commit.header.startsWith( 'Merge' ) && hasCorrectType ) {
+		const indentSize = '[XX:YY:ZZ] * 1234567 '.length;
+		logMessage += `\n${ ' '.repeat( indentSize ) }"${ commit.type }: ${ commit.subject }"`;
+	}
+
 	log.info( logMessage );
 
 	if ( !isCommitIncluded ) {
@@ -101,12 +115,20 @@ function transformCommit( commit, displayLog = true ) {
 	commit.rawType = commit.type;
 	commit.type = getCommitType( commit.type );
 
-	if ( commit.scope === '*' ) {
-		commit.scope = '';
-	}
-
 	if ( typeof commit.subject === 'string' ) {
 		commit.subject = linkGithubIssues( linkGithubUsers( commit.subject ), issues );
+	}
+
+	if ( typeof commit.body === 'string' ) {
+		commit.body = commit.body.split( '\n' )
+			.map( ( line ) => {
+				if ( !line.length ) {
+					return '';
+				}
+
+				return '  ' + line;
+			} )
+			.join( '\n' );
 	}
 
 	for ( const note of commit.notes ) {
