@@ -17,10 +17,11 @@ if ( branch !== 'master' ) {
 const path = require( 'path' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
+const mainRepoUrl = 'https://github.com/ckeditor/ckeditor5';
 const revisionBranch = `${ branch }-revisions`;
 
 // Clone the repository.
-exec( `git clone -b ${ revisionBranch } https://github.com/ckeditor/ckeditor5.git` );
+exec( `git clone -b ${ revisionBranch } ${ mainRepoUrl }.git` );
 
 // Change current dir to cloned repository.
 process.chdir( path.join( process.cwd(), 'ckeditor5' ) );
@@ -37,7 +38,9 @@ exec( 'mgit bootstrap --recursive --resolver-url-template="https://github.com/\\
 // Save hashes from all dependencies.
 exec( 'mgit save-hashes' );
 
-const commitMessage = `[${ process.env.TRAVIS_REPO_SLUG }] Updated hashes.`;
+const repository = process.env.TRAVIS_REPO_SLUG;
+const commit = process.env.TRAVIS_COMMIT;
+const commitMessage = `Revision: https://github.com/${ repository }/commit/${ commit }`;
 
 // Check whether the mgit.json has changed. It might not have changed if, e.g., a build was restarted.
 if ( exec( 'git diff --name-only mgit.json' ).trim().length ) {
@@ -47,6 +50,9 @@ if ( exec( 'git diff --name-only mgit.json' ).trim().length ) {
 	exec( 'git config credential.helper "store --file=.git/credentials"' );
 
 	exec( `git push origin ${ revisionBranch } --quiet` );
+
+	const lastCommit = exec( 'git log -1 --format="%h"' );
+	console.log( `Successfully saved the revision under ${ mainRepoUrl }/commit/${ lastCommit }` );
 }
 
 function exec( command ) {
