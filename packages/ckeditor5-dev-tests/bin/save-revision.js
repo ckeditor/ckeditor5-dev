@@ -19,10 +19,8 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 const revisionBranch = `${ branch }-revisions`;
 
-exec( `echo "https://${ process.env.GITHUB_TOKEN }:@github.com" > .git/credentials 2> /dev/null` );
-
 // Clone the repository.
-exec( `git clone -b ${ revisionBranch } https://github.com/ckeditor/ckeditor5.git --quiet` );
+exec( `git clone -b ${ revisionBranch } https://github.com/ckeditor/ckeditor5.git` );
 
 // Change current dir to cloned repository.
 process.chdir( path.join( process.cwd(), 'ckeditor5' ) );
@@ -44,6 +42,10 @@ const commitMessage = `[${ process.env.TRAVIS_REPO_SLUG }] Updated hashes.`;
 // Check whether the mgit.json has changed. It might not have changed if, e.g., a build was restarted.
 if ( exec( 'git diff --name-only mgit.json' ).trim().length ) {
 	exec( `git add mgit.json && git commit -m "${ commitMessage }"` );
+
+	exec( `echo "https://${ process.env.GITHUB_TOKEN }:@github.com" > .git/credentials 2> /dev/null` );
+	exec( 'git config credential.helper "store --file=.git/credentials"' );
+
 	exec( `git push origin ${ revisionBranch } --quiet` );
 }
 
