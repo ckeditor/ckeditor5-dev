@@ -38,12 +38,15 @@ exec( 'mgit bootstrap --recursive --resolver-url-template="https://github.com/\\
 // Save hashes from all dependencies.
 exec( 'mgit save-hashes' );
 
+exec( 'git add mgit.json' );
+
 const repository = process.env.TRAVIS_REPO_SLUG;
 const commit = process.env.TRAVIS_COMMIT;
 const commitMessage = `Revision: https://github.com/${ repository }/commit/${ commit }`;
 
-// Check whether the mgit.json has changed. It might not have changed if, e.g., a build was restarted.
-if ( exec( 'git diff --name-only mgit.json' ).trim().length ) {
+// Check whether any of the files have changed. It might happen that none has changed if a build was restarted
+// or two builds were running at the same time.
+if ( exec( 'git status -s' ).trim().length ) {
 	exec( `git add mgit.json && git commit -m "${ commitMessage }"` );
 
 	exec( `echo "https://${ process.env.GITHUB_TOKEN }:@github.com" > .git/credentials 2> /dev/null` );
