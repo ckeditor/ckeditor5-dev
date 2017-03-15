@@ -22,7 +22,7 @@ const revisionBranch = `${ branch }-revisions`;
 exec( `echo "https://${ process.env.GITHUB_TOKEN }:@github.com" > .git/credentials 2> /dev/null` );
 
 // Clone the repository.
-exec( `git clone -b ${ revisionBranch } https://github.com/ckeditor/ckeditor5.git` );
+exec( `git clone -b ${ revisionBranch } https://github.com/ckeditor/ckeditor5.git --quiet` );
 
 // Change current dir to cloned repository.
 process.chdir( path.join( process.cwd(), 'ckeditor5' ) );
