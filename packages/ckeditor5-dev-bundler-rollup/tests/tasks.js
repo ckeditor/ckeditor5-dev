@@ -12,7 +12,7 @@ const chai = require( 'chai' );
 const expect = chai.expect;
 const sinon = require( 'sinon' );
 const path = require( 'path' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { tools, bundler } = require( '@ckeditor/ckeditor5-dev-utils' );
 const compiler = require( '@ckeditor/ckeditor5-dev-compiler' );
 const utils = require( '../lib/utils' );
 const mockery = require( 'mockery' );
@@ -157,10 +157,9 @@ describe( 'bundle-tasks', () => {
 		it( 'should create temporary file with given name', () => {
 			sandbox.stub( mkdirp, 'sync' );
 			sandbox.stub( fs, 'mkdtempSync', path => path + 'temp' );
-			const writeFileStub = sandbox.stub( fs, 'writeFileSync' );
-			sandbox.stub( utils, 'renderEntryFileContent' );
 			sandbox.stub( path, 'join', ( x, y ) => x + '/' + y );
 			sandbox.stub( path, 'sep', '/' );
+			const createEntryFileStub = sandbox.stub( bundler, 'createEntryFile' );
 
 			const result = tasks._saveLocallyTemporaryEntryFile( {
 				destinationPath: 'destinationPath',
@@ -170,14 +169,15 @@ describe( 'bundle-tasks', () => {
 				plugins: [ 'plugin1' ],
 			} );
 
-			expect( writeFileStub.called ).to.be.eq( true );
-			sinon.assert.calledWithExactly(
-				writeFileStub,
-				'destinationPath/temp/entryfile.js', undefined
-			);
-
 			expect( result.temporaryEntryFilePath ).to.deep.eq( 'destinationPath/temp/entryfile.js' );
 			expect( result.bundleTmpDir ).to.deep.eq( 'destinationPath/temp' );
+			expect( createEntryFileStub.calledOnce ).to.equal( true );
+			expect( createEntryFileStub.firstCall.args[ 0 ] ).to.equal( 'destinationPath/temp/entryfile.js' );
+			expect( createEntryFileStub.firstCall.args[ 1 ] ).to.deep.equal( {
+				moduleName: 'moduleName',
+				editor: 'editor',
+				plugins: [ 'plugin1' ]
+			} );
 		} );
 	} );
 
