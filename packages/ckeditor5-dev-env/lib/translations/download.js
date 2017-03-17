@@ -15,8 +15,7 @@ const translationUtils = require( '@ckeditor/ckeditor5-dev-utils' ).translations
  * Downloads translations from the Transifex for each package and language.
  *
  * @param {Object} loginConfig
- * @param {String} loginConfig.username Username for the Transifex account.
- * @param {String} loginConfig.password Password for the Transifex account.
+ * @param {String} loginConfig.token Token to the Transifex API.
  */
 module.exports = function download( loginConfig ) {
 	return Promise.resolve()
@@ -92,7 +91,7 @@ function saveTranslations( packageName, translations ) {
 	const languageCodeMap = require( './languagecodemap.json' );
 
 	for ( let [ lang, poFileContent ] of translations ) {
-		if ( !isPoFileContainingTranslations(  poFileContent ) ) {
+		if ( !isPoFileContainingTranslations( poFileContent ) ) {
 			continue;
 		}
 
@@ -100,16 +99,17 @@ function saveTranslations( packageName, translations ) {
 			lang = languageCodeMap[ lang ];
 		}
 
+		poFileContent = translationUtils.cleanPoFileContent( poFileContent );
+
 		const pathToSave = path.join( process.cwd(), 'packages', packageName, 'lang', 'translations', lang + '.po' );
 
 		fs.outputFileSync( pathToSave, poFileContent );
-		logger.info( `Saved ${ lang }.po for ${ packageName } package` );
+		logger.info( `Saved ${ lang }.po for ${ packageName } package.` );
 	}
 }
 
 function isPoFileContainingTranslations( poFileContent ) {
-	const parsePoFileContent = translationUtils.parsePoFileContent;
-	const translations = parsePoFileContent( poFileContent );
+	const translations = translationUtils.createDicitionaryFromPoFileContent( poFileContent );
 
 	return Object.keys( translations ).some( key => translations[ key ] !== '' );
 }

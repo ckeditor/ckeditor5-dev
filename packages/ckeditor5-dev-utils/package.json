@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-utils",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
   "main": "lib/index.js",
@@ -9,8 +9,8 @@
     "del": "^2.2.1",
     "escodegen": "git://github.com/ma2ciek/escodegen.git",
     "fs-extra": "^0.30.0",
-    "gettext-parser": "^1.2.2",
     "gulp-util": "^3.0.7",
+    "pofile": "^1.0.5",
     "shelljs": "^0.7.4",
     "through2": "^2.0.1"
   },

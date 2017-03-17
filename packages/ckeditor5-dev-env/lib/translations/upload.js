@@ -14,8 +14,7 @@ const transifexService = require( './transifex-service' );
  * Uploads translations to the Transifex from collected files that are saved at 'ckeditor5/build/.transifex'.
  *
  * @param {Object} loginConfig
- * @param {String} loginConfig.username Username for the Transifex account.
- * @param {String} loginConfig.password Password for the Transifex account.
+ * @param {String} config.token Token to the Transifex API.
  */
 module.exports = function upload( loginConfig ) {
 	const pathToPoTranslations = path.join( process.cwd(), 'build', '.transifex' );
