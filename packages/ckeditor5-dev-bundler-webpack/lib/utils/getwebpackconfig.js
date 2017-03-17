@@ -22,7 +22,9 @@ module.exports = function getWebpackConfig( options ) {
 	config.output.filename = 'ckeditor.js';
 
 	config.plugins = [
-		new webpack.optimize.UglifyJsPlugin()
+		new webpack.optimize.UglifyJsPlugin( {
+			sourceMap: true
+		} )
 	];
 
 	config.module.rules.push( {

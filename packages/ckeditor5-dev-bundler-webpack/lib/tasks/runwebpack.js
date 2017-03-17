@@ -8,12 +8,12 @@
 const webpack = require( 'webpack' );
 
 /**
- * @param {Object} webpackConfig
+ * @param {Object} config
  * @returns {Promise}
  */
-module.exports = function runWebpack( webpackConfig ) {
+module.exports = function runWebpack( config ) {
 	return new Promise( ( resolve, reject ) => {
-		webpack( webpackConfig, ( err ) => {
+		webpack( config, ( err ) => {
 			if ( err ) {
 				return reject( err );
 			}

@@ -12,7 +12,9 @@
     "webpack": "^2.2.1"
   },
   "devDependencies": {
-    "chai": "^3.5.0"
+    "chai": "^3.5.0",
+    "mockery": "^1.7.0",
+    "sinon": "^1.17.4"
   },
   "main": "./lib/index.js",
   "engines": {
