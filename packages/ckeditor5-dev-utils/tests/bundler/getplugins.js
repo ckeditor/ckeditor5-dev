@@ -17,9 +17,27 @@ describe( 'bundler', () => {
 		getPlugins = require( '../../lib/bundler/getplugins' );
 	} );
 
-	describe( 'createEntryFile()', () => {
-		it( 'should be a function', () => {
-			expect( getPlugins ).to.be.a( 'function' );
+	describe( 'getPlugins()', () => {
+		it( 'returns plugin names and paths', () => {
+			const plugins = getPlugins( [
+				'@ckeditor/ckeditor5-presets/src/article',
+				'@ckeditor/ckeditor5-basic-styles/src/bold',
+				'@ckeditor/ckeditor5-basic-styles/src/italic'
+			] );
+
+			expect( plugins ).to.have.property( 'ArticlePlugin', '@ckeditor/ckeditor5-presets/src/article' );
+			expect( plugins ).to.have.property( 'BoldPlugin', '@ckeditor/ckeditor5-basic-styles/src/bold' );
+			expect( plugins ).to.have.property( 'ItalicPlugin', '@ckeditor/ckeditor5-basic-styles/src/italic' );
+		} );
+
+		it( 'does not duplicate plugins with the same name', () => {
+			const plugins = getPlugins( [
+				'@ckeditor/ckeditor5-presets/src/article',
+				'ckeditor5-foo/src/article',
+			] );
+
+			expect( plugins ).to.have.property( 'ArticlePlugin', '@ckeditor/ckeditor5-presets/src/article' );
+			expect( plugins ).to.have.property( 'Article1Plugin', 'ckeditor5-foo/src/article' );
 		} );
 	} );
 } );

@@ -11,15 +11,41 @@ const chai = require( 'chai' );
 const expect = chai.expect;
 
 describe( 'bundler', () => {
-	let createEntryFile;
+	let getEditorConfig;
 
 	beforeEach( () => {
-		createEntryFile = require( '../../lib/bundler/createentryfile' );
+		getEditorConfig = require( '../../lib/bundler/geteditorconfig' );
 	} );
 
-	describe( 'createEntryFile()', () => {
-		it( 'should be a function', () => {
-			expect( createEntryFile ).to.be.a( 'function' );
+	describe( 'getEditorConfig()', () => {
+		it( 'returns empty object as string if config was not specified', () => {
+			expect( getEditorConfig() ).to.equal( '{}' );
+		} );
+
+		it( 'returns given object as string with proper indents', () => {
+			const config = {
+				foo: 1,
+				bar: [ 1, 2, 3 ],
+				plugin: {
+					enabled: true,
+					key: 'PRIVATE_KEY'
+				}
+			};
+
+			const expectedConfig = `{
+		foo: 1,
+		bar: [
+			1,
+			2,
+			3
+		],
+		plugin: {
+			enabled: true,
+			key: 'PRIVATE_KEY'
+		}
+	}`;
+
+			expect( getEditorConfig( config ) ).to.equal( expectedConfig );
 		} );
 	} );
 } );
