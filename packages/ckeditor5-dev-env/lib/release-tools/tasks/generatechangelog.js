@@ -66,8 +66,8 @@ module.exports = function generateChangelog( newVersion = null ) {
 					merges: undefined,
 					firstParent: true
 				};
-				const parserOpts = require( '../changelog/parser-options' );
-				const writerOpts = require( '../changelog/writer-options' );
+				const parserOpts = require( '../utils/parser-options' );
+				const writerOpts = require( '../utils/writer-options' );
 
 				conventionalChangelog( {}, context, gitRawCommitsOpts, parserOpts, writerOpts )
 					.pipe( saveChangelogPipe( version ) );

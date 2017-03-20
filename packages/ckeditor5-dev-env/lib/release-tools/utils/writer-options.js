@@ -10,7 +10,7 @@ const path = require( 'path' );
 const chalk = require( 'chalk' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const parserOptions = require( './parser-options' );
-const getPackageJson = require( '../utils/getpackagejson' );
+const getPackageJson = require( './getpackagejson' );
 
 // Map of available types of the commits.
 // Types marked as `false` will be ignored during generating the changelog.
@@ -35,7 +35,7 @@ const typesOrder = {
 	'NOTE': 2
 };
 
-const templatePath = path.join( __dirname, 'templates' );
+const templatePath = path.join( __dirname, '..', 'templates' );
 
 module.exports = {
 	transform: transformCommit,
