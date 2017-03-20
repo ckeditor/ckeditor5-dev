@@ -6,7 +6,6 @@
   "main": "lib/index.js",
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "^2.4.3",
-    "@ckeditor/ckeditor5-dev-webpack-plugin": "^2.0.3",
     "babel-core": "^6.21.0",
     "babel-loader": "^6.2.5",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.18.0",

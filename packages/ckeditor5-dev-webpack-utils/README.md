@@ -1,4 +1,4 @@
-CKEditor 5 Webpack plugin
+CKEditor 5 Webpack utils
 =========================
 
 Intergrate [CKEditor 5](https://ckeditor5.github.io)'s build process with your [Webpack](https://webpack.js.org) setup.

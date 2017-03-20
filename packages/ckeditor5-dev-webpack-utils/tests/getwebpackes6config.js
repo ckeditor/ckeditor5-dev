@@ -10,22 +10,22 @@
 const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
-const webpack = require( 'webpack' );
+const BabiliPlugin = require( 'babili-webpack-plugin' );
 
 describe( 'dev-bundler-webpack/utils', () => {
-	let getWebpackConfig, sandbox;
+	let getWebpackES6Config, sandbox;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
 
-		getWebpackConfig = require( '../../lib/utils/getwebpackconfig' );
+		getWebpackES6Config = require( '../lib/getwebpackes6config' );
 	} );
 
 	afterEach( () => {
 		sandbox.restore();
 	} );
 
-	describe( 'getWebpackConfig()', () => {
+	describe( 'getWebpackES6Config()', () => {
 		it( 'returns configuration for webpack which compiles code to ES5', () => {
 			sandbox.spy( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 
@@ -34,7 +34,7 @@ describe( 'dev-bundler-webpack/utils', () => {
 			const destinationPath = cwd + '/build';
 			const moduleName = 'ClassicEditor';
 
-			const config = getWebpackConfig( {
+			const config = getWebpackES6Config( {
 				cwd,
 				entryPoint,
 				destinationPath,
@@ -46,18 +46,18 @@ describe( 'dev-bundler-webpack/utils', () => {
 
 			expect( config ).to.have.property( 'output' );
 			expect( config.output ).to.have.property( 'path', destinationPath );
-			expect( config.output ).to.have.property( 'filename', 'ckeditor.js' );
+			expect( config.output ).to.have.property( 'filename', 'ckeditor.es6.js' );
 			expect( config.output ).to.have.property( 'libraryTarget', 'umd' );
 			expect( config.output ).to.have.property( 'library', moduleName );
 
 			expect( config ).to.have.deep.property( 'plugins' );
 			expect( config.plugins ).to.be.an( 'array' );
-			expect( config.plugins[ 0 ] ).to.be.instanceof( webpack.optimize.UglifyJsPlugin );
+			expect( config.plugins[ 0 ] ).to.be.instanceof( BabiliPlugin );
 
 			expect( config ).to.have.deep.property( 'module' );
 			expect( config.module ).to.have.property( 'rules' );
 			expect( config.module.rules ).to.be.an( 'array' );
-			expect( config.module.rules.length ).to.equal( 3 );
+			expect( config.module.rules.length ).to.equal( 2 );
 
 			expect( config ).to.have.deep.property( 'resolveLoader' );
 			expect( config.resolveLoader ).to.have.property( 'modules' );
