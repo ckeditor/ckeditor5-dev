@@ -12,3 +12,12 @@ const ckeditor5Lint = require( '@ckeditor/ckeditor5-dev-lint' )();
 gulp.task( 'lint', ckeditor5Lint.lint );
 gulp.task( 'lint-staged', ckeditor5Lint.lintStaged );
 gulp.task( 'pre-commit', [ 'lint-staged' ] );
+
+gulp.task( 'changelog', () => {
+	return require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForDependencies( {
+		cwd: __dirname,
+		packages: 'packages/',
+		isDevPackage: true,
+		checkPackageJson: false
+	} );
+} );

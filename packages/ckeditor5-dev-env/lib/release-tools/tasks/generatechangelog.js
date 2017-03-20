@@ -14,6 +14,8 @@ const hasCommitsFromLastRelease = require( '../utils/hascommitsfromlastrelease' 
 const cli = require( '../utils/cli' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const changelogUtils = require( '../utils/changelog' );
+const getWriterOptions = require( '../utils/getwriteroptions' );
+const transformCommitForCKEditor5Package = require( '../utils/transformcommitforckeditor5package' );
 
 /**
  * Generates the release changelog based on commit messages in the repository.
@@ -23,6 +25,7 @@ const changelogUtils = require( '../utils/changelog' );
  * If package does not have any commits, user has to confirm whether the changelog
  * should be generated.
  *
+ * @param {String|null} [newVersion=null]
  * @returns {Promise}
  */
 module.exports = function generateChangelog( newVersion = null ) {
@@ -37,7 +40,9 @@ module.exports = function generateChangelog( newVersion = null ) {
 		let promise = Promise.resolve();
 
 		if ( !newVersion ) {
-			promise = promise.then( () => getNewReleaseType() )
+			promise = promise.then( () => {
+					return getNewReleaseType( transformCommitForCKEditor5Package );
+				} )
 				.then( ( response ) => {
 					const newReleaseType = ( hasCommitsFromLastRelease() ) ? response.releaseType : null;
 
@@ -66,10 +71,10 @@ module.exports = function generateChangelog( newVersion = null ) {
 					merges: undefined,
 					firstParent: true
 				};
-				const parserOpts = require( '../changelog/parser-options' );
-				const writerOpts = require( '../changelog/writer-options' );
+				const parserOptions = require( '../utils/parser-options' );
+				const writerOptions = getWriterOptions( transformCommitForCKEditor5Package );
 
-				conventionalChangelog( {}, context, gitRawCommitsOpts, parserOpts, writerOpts )
+				conventionalChangelog( {}, context, gitRawCommitsOpts, parserOptions, writerOptions )
 					.pipe( saveChangelogPipe( version ) );
 			} );
 

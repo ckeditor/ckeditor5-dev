@@ -14,7 +14,7 @@ const sinon = require( 'sinon' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-env/release-tools/utils', () => {
-	let tmpCwd, cwd, getNewReleaseType, sandbox, packageJson;
+	let tmpCwd, cwd, getNewReleaseType, sandbox, packageJson, transformCommit;
 
 	describe( 'getNewReleaseType()', () => {
 		before( () => {
@@ -37,6 +37,16 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			sandbox = sinon.sandbox.create();
 
+			transformCommit = sandbox.spy( ( commit ) => {
+				if ( commit.type === 'Docs' ) {
+					return;
+				}
+
+				commit.rawType = commit.type;
+
+				return commit;
+			} );
+
 			process.chdir( tmpCwd );
 
 			packageJson = {
@@ -53,7 +63,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'throws an error when repository is empty', () => {
-			return getNewReleaseType()
+			return getNewReleaseType( transformCommit )
 				.then(
 					() => {
 						throw new Error( 'Supposed to be rejected.' );
@@ -68,7 +78,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			exec( `git commit --allow-empty --message "Fix: Some fix."` );
 			exec( `git commit --allow-empty --message "Other: Some change."` );
 
-			return getNewReleaseType()
+			return getNewReleaseType( transformCommit )
 				.then( ( response ) => {
 					expect( response.releaseType ).to.equal( 'patch' );
 				} );
@@ -77,7 +87,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		it( 'ignores notes from commits which will not be included in changelog', () => {
 			exec( `git commit --allow-empty --message "Docs: Nothing.\n\nBREAKING CHANGES: It should not bump the major."` );
 
-			return getNewReleaseType()
+			return getNewReleaseType( transformCommit )
 				.then( ( response ) => {
 					expect( response.releaseType ).to.equal( 'patch' );
 				} );
@@ -86,7 +96,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		it( 'returns "minor" release for feature commit', () => {
 			exec( `git commit --allow-empty --message "Feature: Nothing new."` );
 
-			return getNewReleaseType()
+			return getNewReleaseType( transformCommit )
 				.then( ( response ) => {
 					expect( response.releaseType ).to.equal( 'minor' );
 				} );
@@ -95,7 +105,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		it( 'returns "major" if any visible in changelog commit has breaking changes', () => {
 			exec( `git commit --allow-empty --message "Other: Nothing.\n\nBREAKING CHANGE: Bump the major!"` );
 
-			return getNewReleaseType()
+			return getNewReleaseType( transformCommit )
 				.then( ( response ) => {
 					expect( response.releaseType ).to.equal( 'major' );
 				} );
