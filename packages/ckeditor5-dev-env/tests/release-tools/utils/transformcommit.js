@@ -12,7 +12,7 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 const proxyquire = require( 'proxyquire' );
 
-describe( 'dev-env/release-tools/utils/writer-options', () => {
+describe( 'dev-env/release-tools/utils/writerOptions', () => {
 	describe( 'transform()', () => {
 		let transformCommit, sandbox, stubs, loggerVerbosity;
 
@@ -41,7 +41,7 @@ describe( 'dev-env/release-tools/utils/writer-options', () => {
 
 			mockery.registerMock( './getpackagejson', stubs.getPackageJson );
 
-			transformCommit = proxyquire( '../../../lib/release-tools/utils/writer-options', {
+			transformCommit = proxyquire( '../../../lib/release-tools/utils/writeroptions', {
 				'@ckeditor/ckeditor5-dev-utils': {
 					logger( verbosity ) {
 						loggerVerbosity = verbosity;

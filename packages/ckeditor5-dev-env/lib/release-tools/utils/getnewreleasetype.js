@@ -5,7 +5,7 @@
 
 'use strict';
 
-const { commitTypes, transform } = require( './writer-options' );
+const { commitTypes, transform } = require( './writeroptions' );
 
 /**
  * Returns a type (major, minor, patch) of the next release based on commits.
@@ -14,7 +14,7 @@ const { commitTypes, transform } = require( './writer-options' );
  */
 module.exports = function getNewReleaseType() {
 	const conventionalRecommendedBump = require( 'conventional-recommended-bump' );
-	const parserOpts = require( './parser-options' );
+	const parserOpts = require( './parseroptions' );
 
 	return new Promise( ( resolve, reject ) => {
 		const options = {

@@ -9,7 +9,7 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 const chalk = require( 'chalk' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const parserOptions = require( './parser-options' );
+const parserOptions = require( './parseroptions' );
 const getPackageJson = require( './getpackagejson' );
 
 // Map of available types of the commits.
