@@ -42,7 +42,9 @@ import ${ options.moduleName }Base from '${ options.editor }';
 export default class ${ options.moduleName } extends ${ options.moduleName }Base {}
 
 ${ options.moduleName }.build = {
-	plugins: [ ${ Object.keys( plugins ).join( ', ' ) } ],
+	plugins: [
+		${ Object.keys( plugins ).join( ',\n\t\t' ) } 
+	],
 	config: ${ getEditorConfig( options.config ) }
 };
 `;

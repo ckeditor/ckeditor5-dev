@@ -58,7 +58,10 @@ import ClipboardPlugin from '@ckeditor/ckeditor5-clipboard/src/clipboard';
 export default class ClassicEditor extends ClassicEditorBase {}
 
 ClassicEditor.build = {
-	plugins: [ ArticlePlugin, ClipboardPlugin ],
+	plugins: [
+		ArticlePlugin, 
+		ClipboardPlugin 
+	],
 	config: {
 		undo: {
 			step: 3
