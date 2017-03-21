@@ -59,7 +59,7 @@ export default class ClassicEditor extends ClassicEditorBase {}
 
 ClassicEditor.build = {
 	plugins: [
-		ArticlePlugin, 
+		ArticlePlugin,
 		ClipboardPlugin 
 	],
 	config: {
