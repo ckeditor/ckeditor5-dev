@@ -6,7 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
-const webpack = require( 'webpack' );
+const BabiliPlugin = require( 'babili-webpack-plugin' );
 
 /**
  * @param options
@@ -20,7 +20,10 @@ module.exports = function getWebpackConfig( options ) {
 	return {
 		devtool: 'cheap-source-map',
 
-		entry: options.entryPoint,
+		entry: [
+			require.resolve( 'regenerator-runtime/runtime.js' ),
+			options.entryPoint
+		],
 
 		output: {
 			path: options.destinationPath,
@@ -30,8 +33,8 @@ module.exports = function getWebpackConfig( options ) {
 		},
 
 		plugins: [
-			new webpack.optimize.UglifyJsPlugin( {
-				sourceMap: true
+			new BabiliPlugin( {
+				comments: false
 			} )
 		],
 
@@ -39,12 +42,26 @@ module.exports = function getWebpackConfig( options ) {
 			rules: [
 				{
 					test: /\.js$/,
-					loader: 'babel-loader',
-					options: {
-						presets: [
-							'es2015'
-						]
-					}
+					use: [
+						{
+							loader: 'babel-loader',
+							query: {
+								presets: [
+									[
+										require( 'babel-preset-env' ),
+										{
+											targets: {
+												browsers: [
+													'last 2 versions',
+													'ie >= 11'
+												]
+											}
+										}
+									]
+								]
+							}
+						}
+					]
 				},
 				{
 					// test: **/ckeditor5-*/theme/icons/*.svg

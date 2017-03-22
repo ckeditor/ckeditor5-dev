@@ -20,7 +20,7 @@ const removeDir = require( '../utils/manual-tests/removedir' );
  */
 module.exports = function runManualTests() {
 	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
-	const manualTestPattern = path.join( process.cwd(), 'packages', 'ckeditor5-*', 'tests', '**', 'manual', '**' );
+	const manualTestPattern = path.join( process.cwd(), 'packages', 'ckeditor5-build-classic', 'tests', '**', 'manual', '**' );
 
 	return Promise.resolve()
 		.then( () => removeDir( buildDir ) )
