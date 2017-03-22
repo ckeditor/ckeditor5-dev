@@ -9,21 +9,26 @@ const path = require( 'path' );
 const BabiliPlugin = require( 'babili-webpack-plugin' );
 
 /**
+ * Returns an configuration for Webpack which uses preset "babel-presets-env".
+ *
  * @param options
  * @param {String} options.entryPoint An entry point which will be compiled.
  * @param {String} options.destinationPath A path where compiled file will be saved.
  * @param {String} options.cwd Current work directory. Required for searching the modules.
  * @returns {Object}
  */
-module.exports = function getWebpackES6Config( options ) {
+module.exports = function getWebpackCompactConfig( options ) {
 	return {
 		devtool: 'cheap-source-map',
 
-		entry: options.entryPoint,
+		entry: [
+			require.resolve( 'regenerator-runtime/runtime.js' ),
+			options.entryPoint
+		],
 
 		output: {
 			path: options.destinationPath,
-			filename: 'ckeditor.es6.js',
+			filename: 'ckeditor.compact.js',
 			libraryTarget: 'umd'
 		},
 
@@ -35,6 +40,29 @@ module.exports = function getWebpackES6Config( options ) {
 
 		module: {
 			rules: [
+				{
+					test: /\.js$/,
+					use: [
+						{
+							loader: 'babel-loader',
+							query: {
+								presets: [
+									[
+										require( 'babel-preset-env' ),
+										{
+											targets: {
+												browsers: [
+													'last 2 versions',
+													'ie >= 11'
+												]
+											}
+										}
+									]
+								]
+							}
+						}
+					]
+				},
 				{
 					// test: **/ckeditor5-*/theme/icons/*.svg
 					test: /ckeditor5-[^/]+\/theme\/icons\/[^/]+\.svg$/,

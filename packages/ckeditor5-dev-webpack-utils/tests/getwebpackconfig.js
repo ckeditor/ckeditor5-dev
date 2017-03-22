@@ -40,11 +40,7 @@ describe( 'dev-bundler-webpack/utils', () => {
 			} );
 
 			expect( config ).to.have.property( 'devtool', 'cheap-source-map' );
-			expect( config ).to.have.property( 'entry' );
-
-			expect( config.entry ).to.be.a( 'array' );
-			expect( config.entry[ 0 ] ).to.match( /regenerator-runtime\/runtime\.js$/ );
-			expect( config.entry[ 1 ] ).to.equal( entryPoint );
+			expect( config ).to.have.property( 'entry', entryPoint );
 
 			expect( config ).to.have.property( 'output' );
 			expect( config.output ).to.have.property( 'path', destinationPath );
@@ -58,7 +54,7 @@ describe( 'dev-bundler-webpack/utils', () => {
 			expect( config ).to.have.deep.property( 'module' );
 			expect( config.module ).to.have.property( 'rules' );
 			expect( config.module.rules ).to.be.an( 'array' );
-			expect( config.module.rules.length ).to.equal( 3 );
+			expect( config.module.rules.length ).to.equal( 2 );
 
 			expect( config ).to.have.deep.property( 'resolveLoader' );
 			expect( config.resolveLoader ).to.have.property( 'modules' );
