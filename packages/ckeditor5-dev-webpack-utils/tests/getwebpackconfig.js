@@ -32,13 +32,11 @@ describe( 'dev-bundler-webpack/utils', () => {
 			const cwd = '/cwd';
 			const entryPoint = cwd + '/ckeditor.js';
 			const destinationPath = cwd + '/build';
-			const moduleName = 'ClassicEditor';
 
 			const config = getWebpackConfig( {
 				cwd,
 				entryPoint,
-				destinationPath,
-				moduleName
+				destinationPath
 			} );
 
 			expect( config ).to.have.property( 'devtool', 'cheap-source-map' );
@@ -52,7 +50,6 @@ describe( 'dev-bundler-webpack/utils', () => {
 			expect( config.output ).to.have.property( 'path', destinationPath );
 			expect( config.output ).to.have.property( 'filename', 'ckeditor.js' );
 			expect( config.output ).to.have.property( 'libraryTarget', 'umd' );
-			expect( config.output ).to.have.property( 'library', moduleName );
 
 			expect( config ).to.have.deep.property( 'plugins' );
 			expect( config.plugins ).to.be.an( 'array' );

@@ -12,7 +12,6 @@ const BabiliPlugin = require( 'babili-webpack-plugin' );
  * @param options
  * @param {String} options.entryPoint An entry point which will be compiled.
  * @param {String} options.destinationPath A path where compiled file will be saved.
- * @param {String} options.moduleName A name of exported module after compilation.
  * @param {String} options.cwd Current work directory. Required for searching the modules.
  * @returns {Object}
  */
@@ -25,8 +24,7 @@ module.exports = function getWebpackES6Config( options ) {
 		output: {
 			path: options.destinationPath,
 			filename: 'ckeditor.es6.js',
-			libraryTarget: 'umd',
-			library: options.moduleName
+			libraryTarget: 'umd'
 		},
 
 		plugins: [

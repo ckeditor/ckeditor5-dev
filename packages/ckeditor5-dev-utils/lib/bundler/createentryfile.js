@@ -42,7 +42,7 @@ import ${ options.moduleName }Base from '${ options.editor }';
 	}
 
 	content += `
-export default class ${ options.moduleName } extends ${ options.moduleName }Base {}
+export class ${ options.moduleName } extends ${ options.moduleName }Base {}
 
 ${ options.moduleName }.build = {
 	plugins: [
