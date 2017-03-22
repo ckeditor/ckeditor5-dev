@@ -7,6 +7,6 @@
 
 module.exports = {
 	CKEditorWebpackPlugin: require( './ckeditorwebpackplugin' ),
-	getWebpackES6Config: require( './getwebpackconfig' ),
-	getWebpackConfig: require( './getwebpackcompactconfig' ),
+	getWebpackConfig: require( './getwebpackconfig' ),
+	getWebpackCompactConfig: require( './getwebpackcompactconfig' ),
 };

@@ -22,15 +22,15 @@ describe( 'dev-webpack-utils/index', () => {
 		} );
 	} );
 
-	describe( 'getWebpackES6Config()', () => {
-		it( 'is defined', () => {
-			expect( utils.getWebpackES6Config ).to.be.a( 'function' );
-		} );
-	} );
-
 	describe( 'getWebpackConfig()', () => {
 		it( 'is defined', () => {
 			expect( utils.getWebpackConfig ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'getWebpackCompactConfig()', () => {
+		it( 'is defined', () => {
+			expect( utils.getWebpackCompactConfig ).to.be.a( 'function' );
 		} );
 	} );
 } );
