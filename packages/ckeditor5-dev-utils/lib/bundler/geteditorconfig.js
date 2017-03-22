@@ -6,6 +6,14 @@
 'use strict';
 
 /**
+ * Transforms specified configuration to a string which can be inserted
+ * to generated an entry file.
+ *
+ * Keys and values will be wrapped in apostrophes instead of quotation marks.
+ *
+ * Keys which contains letters or/and numbers or/and underscore or/and a Dollar sign
+ * will not be wrapped in apostrophes.
+ *
  * @param {Object} config
  * @returns {String}
  */
@@ -25,5 +33,5 @@ module.exports = function getEditorConfig( config ) {
 		} )
 		.join( '\n' )
 		.replace( /"/g, '\'' )
-		.replace( /'([A-Z0-9_]+)':/gi, '$1:' );
+		.replace( /'([$A-Z0-9_]+)':/gi, '$1:' );
 };

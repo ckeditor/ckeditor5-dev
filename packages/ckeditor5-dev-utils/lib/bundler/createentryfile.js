@@ -10,12 +10,14 @@ const getPlugins = require( './getplugins' );
 const getEditorConfig = require( './geteditorconfig' );
 
 /**
+ * Generates an entry file which can be compiled by bundler, e.g. Webpack or Rollup.
+ *
  * @param {String} destinationPath A path where entry file will be saved.
  * @param {Object} options
- * @param {Array.<String>} options.plugins
- * @param {String} options.moduleName
- * @param {String} options.editor
- * @param {Object} options.config
+ * @param {Array.<String>} options.plugins An array with paths to the plugins for the editor.
+ * @param {String} options.moduleName Name of exported UMD module.
+ * @param {String} options.editor Path to class which defined the editor.
+ * @param {Object} options.config Additional editor's configuration which will be built-in.
  */
 module.exports = function createEntryFile( destinationPath, options ) {
 	const entryFileContent = renderEntryFile( options );
@@ -25,9 +27,10 @@ module.exports = function createEntryFile( destinationPath, options ) {
 
 function renderEntryFile( options ) {
 	const plugins = getPlugins( options.plugins );
+	const date = new Date();
 
 	let content = `/**
- * @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-${ date.getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
