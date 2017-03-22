@@ -48,9 +48,9 @@ module.exports = function compileHtmlFiles( buildDir, manualTestPattern ) {
 
 function compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate ) {
 	const log = logger();
-	const sourceMDFilePath = setExtension( sourceFilePathBase, 'md' );
-	const sourceHtmlFilePath = setExtension( sourceFilePathBase, 'html' );
-	const sourceJSFilePath = setExtension( sourceFilePathBase, 'js' );
+	const sourceMDFilePath = sourceFilePathBase + '.md';
+	const sourceHtmlFilePath = sourceFilePathBase + '.html';
+	const sourceJSFilePath = sourceFilePathBase + '.js';
 
 	const absoluteHtmlFilePath = getRelativeFilePath( sourceHtmlFilePath );
 	const absoluteJSFilePath = getRelativeFilePath( sourceJSFilePath );
