@@ -94,7 +94,10 @@ describe( 'getKarmaConfig', () => {
 			},
 			singleRun: true,
 			concurrency: Infinity,
-			browserNoActivityTimeout: 0
+			browserNoActivityTimeout: 0,
+			mochaReporter: {
+				showDiff: true
+			}
 		} );
 	} );
 
