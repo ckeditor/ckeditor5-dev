@@ -8,23 +8,34 @@
 'use strict';
 
 const path = require( 'path' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const fs = require( 'fs-extra' );
+const _ = require( 'lodash' );
 const gutil = require( 'gulp-util' );
 const commonmark = require( 'commonmark' );
 const combine = require( 'dom-combiner' );
-const getRelativeFilePath = require( '../getrelativefilepath' );
-const _ = require( 'lodash' );
 const chokidar = require( 'chokidar' );
+const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const getRelativeFilePath = require( '../getrelativefilepath' );
+const globSync = require( '../glob' );
 
 const reader = new commonmark.Parser();
 const writer = new commonmark.HtmlRenderer();
 
-module.exports = function compileHtmlFiles( buildDir, manualTestPattern ) {
-	const globSync = require( '../glob' );
+/**
+ * @param {String} buildDir A path where compiled files will be saved.
+ * @param {Array.<String>} manualTestScriptsPattern An array of patterns that resolve manual test scripts.
+ * @returns {Promise}
+ */
+module.exports = function compileHtmlFiles( buildDir, manualTestScriptsPattern ) {
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
-	const sourceMDFiles = globSync( path.join( manualTestPattern, '*.md' ) );
+
+	const sourceMDFiles = manualTestScriptsPattern.reduce( ( arr, manualTestPattern ) => {
+		arr.push( ...globSync( manualTestPattern ).map( ( jsFile ) => setExtension( jsFile, 'md' ) ) );
+
+		return arr;
+	}, [] );
 	const sourceHtmlFiles = sourceMDFiles.map( ( mdFile ) => setExtension( mdFile, 'html' ) );
+
 	const sourceDirs = _.uniq( sourceMDFiles.map( file => path.dirname( file ) ) );
 	const sourceFilePathBases = sourceMDFiles.map( ( mdFile ) => getFilePathWithoutExtension( mdFile ) );
 	const staticFiles = _.flatten( sourceDirs.map( sourceDir => {
