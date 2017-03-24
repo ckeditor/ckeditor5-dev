@@ -20,7 +20,7 @@ const nodeModulesPath = path.join( process.cwd(), 'packages' );
  * 5. simplified glob – 'engine/view/**\/*.js' -> 'ckeditor5-engine/tests/view/**\/*.js'
  *
  * @param {String} file
- * @param {Boolean} isManualTest=false
+ * @param {Boolean} [isManualTest=false]
  * @returns {String}
  */
 module.exports = function fileOptionToGlob( file, isManualTest = false ) {
@@ -60,7 +60,17 @@ module.exports = function fileOptionToGlob( file, isManualTest = false ) {
 	// 4.
 	if ( !glob.endsWith( '.js' ) ) {
 		glob = path.join( glob, '**', '*.js' );
+
+		// 5. for automated tests.
+		if ( !isManualTest ) {
+			return path.join( nodeModulesPath, 'ckeditor5-' + packageName, 'tests', glob );
+		}
 	}
+
+	// 5. for manual tests. We need to insert a directory "manual" after specified directory in path.
+	// 'engine/view/*.js' => 'ckeditor5-engine/tests/view/manual/*.js'
+	const directoryWithManualTests = glob.split( '/' ).shift();
+	glob = glob.replace( new RegExp( `^(${ directoryWithManualTests })` ), `$1${ path.sep }manual` );
 
 	// 5.
 	return path.join( nodeModulesPath, 'ckeditor5-' + packageName, 'tests', glob );
