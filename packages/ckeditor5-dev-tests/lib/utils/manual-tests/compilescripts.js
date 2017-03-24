@@ -14,11 +14,11 @@ const getRelativeFilePath = require( '../getrelativefilepath' );
 
 /**
  * @param {String} buildDir A path where compiled files will be saved.
- * @param {Array.<String>} manualTestScriptsPattern An array of patterns that resolve manual test scripts.
+ * @param {Array.<String>} manualTestScriptsPatterns An array of patterns that resolve manual test scripts.
  * @returns {Promise}
  */
-module.exports = function compileManualTestScripts( buildDir, manualTestScriptsPattern ) {
-	const entryFiles = manualTestScriptsPattern.reduce( ( arr, manualTestPattern ) => {
+module.exports = function compileManualTestScripts( buildDir, manualTestScriptsPatterns ) {
+	const entryFiles = manualTestScriptsPatterns.reduce( ( arr, manualTestPattern ) => {
 		arr.push( ...globSync( manualTestPattern ) );
 
 		return arr;

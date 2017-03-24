@@ -15,7 +15,7 @@ const removeDir = require( '../utils/manual-tests/removedir' );
 const fileOptionToGlob = require( '../utils/fileoptiontoglob' );
 
 /**
- * Main function that runs automated tests.
+ * Main function that runs manual tests.
  *
  * @param {Object} options
  * @param {Array.<String>} options.files
@@ -23,7 +23,8 @@ const fileOptionToGlob = require( '../utils/fileoptiontoglob' );
  */
 module.exports = function runManualTests( options ) {
 	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
-	const manualTestFilesPattern = options.files.map( ( file ) => fileOptionToGlob( file, true ) );
+	const files = ( options.files && options.files.length ) ? options.files : [ '*' ];
+	const manualTestFilesPattern = files.map( ( file ) => fileOptionToGlob( file, true ) );
 
 	return Promise.resolve()
 		.then( () => removeDir( buildDir ) )
