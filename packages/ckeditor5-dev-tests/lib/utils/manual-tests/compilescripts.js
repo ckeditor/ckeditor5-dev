@@ -21,7 +21,7 @@ module.exports = function compileManualTestScripts( buildDir, manualTestScriptsP
 	const entryFiles = manualTestScriptsPatterns.reduce( ( arr, manualTestPattern ) => {
 		return [
 			...arr,
-			...globSync( manualTestPattern )
+			...globSync( manualTestPattern ).filter( ( manualTestFile ) => manualTestFile.includes( '/manual/' ) )
 		];
 	}, [] );
 

@@ -79,7 +79,7 @@ describe( 'dev-tests/utils', () => {
 		} );
 
 		it( 'for manual tests', () => {
-			expect( transformFileOptionToTestGlob( 'engine/view', true ) )
+			expect( transformFileOptionToTestGlob( 'engine/view/manual', true ) )
 				.to.equal( '/workspace/packages/ckeditor5-engine/tests/view/manual/**/*.js' );
 		} );
 	} );
@@ -91,7 +91,7 @@ describe( 'dev-tests/utils', () => {
 		} );
 
 		it( 'for manual tests', () => {
-			expect( transformFileOptionToTestGlob( 'engine/view/*.js', true ) )
+			expect( transformFileOptionToTestGlob( 'engine/view/manual/*.js', true ) )
 				.to.equal( '/workspace/packages/ckeditor5-engine/tests/view/manual/*.js' );
 		} );
 	} );

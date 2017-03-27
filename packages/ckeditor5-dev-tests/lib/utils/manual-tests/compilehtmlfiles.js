@@ -32,7 +32,9 @@ module.exports = function compileHtmlFiles( buildDir, manualTestScriptsPatterns 
 	const sourceMDFiles = manualTestScriptsPatterns.reduce( ( arr, manualTestPattern ) => {
 		return [
 			...arr,
-			...globSync( manualTestPattern ).map( ( jsFile ) => setExtension( jsFile, 'md' ) )
+			...globSync( manualTestPattern )
+				.filter( ( manualTestFile ) => manualTestFile.includes( '/manual/' ) )
+				.map( ( jsFile ) => setExtension( jsFile, 'md' ) )
 		];
 	}, [] );
 	const sourceHtmlFiles = sourceMDFiles.map( ( mdFile ) => setExtension( mdFile, 'html' ) );

@@ -16,6 +16,8 @@ describe( 'compileManualTestScripts', () => {
 	let sandbox, stubs, webpackError, compileManualTestScripts;
 
 	beforeEach( () => {
+		webpackError = null;
+
 		mockery.enable( {
 			useCleanCache: true,
 			warnOnReplace: false,
@@ -51,14 +53,14 @@ describe( 'compileManualTestScripts', () => {
 	} );
 
 	it( 'should compile manual test scripts', () => {
-		stubs.glob.returns( [ 'file1', 'file2' ] );
+		stubs.glob.returns( [ 'ckeditor5-foo/manual/file1', 'ckeditor5-foo/manual/file2' ] );
 
 		return compileManualTestScripts( 'buildDir', [ 'manualTestPattern' ] )
 			.then( () => {
 				expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
 				expect( stubs.getWebpackConfig.firstCall.args[ 0 ] ).to.deep.equal( {
-					file1: 'file1',
-					file2: 'file2'
+					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
+					'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
 				} );
 				expect( stubs.getWebpackConfig.firstCall.args[ 1 ] ).to.deep.equal( 'buildDir' );
 
@@ -66,8 +68,8 @@ describe( 'compileManualTestScripts', () => {
 				expect( stubs.webpack.firstCall.args[ 0 ] ).to.deep.equal( {
 					buildDir: 'buildDir',
 					entries: {
-						file1: 'file1',
-						file2: 'file2'
+						'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
+						'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
 					}
 				} );
 
@@ -113,7 +115,7 @@ describe( 'compileManualTestScripts', () => {
 	it( 'rejects if Webpack threw an error', () => {
 		webpackError = new Error( 'Unexpected error.' );
 
-		stubs.glob.returns( [ 'file1', 'file2' ] );
+		stubs.glob.returns( [ 'ckeditor5-foo/manual/file1', 'ckeditor5-foo/manual/file2' ] );
 
 		return compileManualTestScripts( 'buildDir', [ 'manualTestPattern' ] )
 			.then(
@@ -124,5 +126,27 @@ describe( 'compileManualTestScripts', () => {
 					expect( err ).to.equal( webpackError );
 				}
 			);
+	} );
+
+	it( 'compiles only manual test files', () => {
+		const manualTestScriptsPatterns = [
+			'ckeditor5-build-classic/tests/**/*.js',
+		];
+
+		stubs.glob.onFirstCall().returns( [
+			'ckeditor5-build-classic/tests/manual/ckeditor.js',
+			'ckeditor5-build-classic/tests/ckeditor.js'
+		] );
+
+		return compileManualTestScripts( 'buildDir', manualTestScriptsPatterns )
+			.then( () => {
+				expect( stubs.getRelativeFilePath.calledOnce ).to.equal( true );
+				expect( stubs.getRelativeFilePath.firstCall.args[ 0 ] )
+					.to.equal( 'ckeditor5-build-classic/tests/manual/ckeditor.js' );
+
+				expect(
+					stubs.getRelativeFilePath.neverCalledWith( 'ckeditor5-build-classic/tests/ckeditor.js' )
+				).to.equal( true );
+			} );
 	} );
 } );

@@ -103,13 +103,13 @@ describe( 'compileHtmlFiles', () => {
 	it( 'should compile md and html files to the output html file', () => {
 		files = {
 			[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
-			[ path.join( 'path', 'to', 'file.md' ) ]: '## Markdown header',
-			[ path.join( 'path', 'to', 'file.html' ) ]: '<div>html file content</div>'
+			[ path.join( 'path', 'to', 'manual', 'file.md' ) ]: '## Markdown header',
+			[ path.join( 'path', 'to', 'manual', 'file.html' ) ]: '<div>html file content</div>'
 		};
 
 		patternFiles = {
-			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'file.js' ) ],
-			[ path.join( 'path', 'to', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ],
+			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
+			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ],
 		};
 
 		compileHtmlFiles( 'buildDir', [ path.join( 'manualTestPattern', '*.js' ) ] );
@@ -118,39 +118,39 @@ describe( 'compileHtmlFiles', () => {
 		sinon.assert.calledWithExactly( stubs.fs.ensureDirSync, 'buildDir' );
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			path.join( 'buildDir', 'path', 'to', 'file.html' ), [
+			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
 				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 				'<div>html file content</div>',
-				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'file.js' ) }"></script></body>`
+				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script></body>`
 			].join( '\n' )
 		);
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'file.md' ) );
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'file.html' ) );
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ) );
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ) );
 		sinon.assert.calledWithExactly( stubs.fs.copySync, 'static-file.png', path.join( 'buildDir', 'static-file.png' ) );
 	} );
 
 	it( 'should work with files containing dots in their names', () => {
 		files = {
 			[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
-			[ path.join( 'path', 'to', 'file.abc.md' ) ]: '## Markdown header',
-			[ path.join( 'path', 'to', 'file.abc.html' ) ]: '<div>html file content</div>'
+			[ path.join( 'path', 'to', 'manual', 'file.abc.md' ) ]: '## Markdown header',
+			[ path.join( 'path', 'to', 'manual', 'file.abc.html' ) ]: '<div>html file content</div>'
 		};
 
 		patternFiles = {
-			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'file.abc.js' ) ],
-			[ path.join( 'path', 'to', '**', '*.!(js|html|md)' ) ]: [],
+			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.abc.js' ) ],
+			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [],
 		};
 
 		compileHtmlFiles( 'buildDir', [ path.join( 'manualTestPattern', '*.js' ) ] );
 
 		sinon.assert.calledWith(
 			stubs.fs.outputFileSync,
-			path.join( 'buildDir', 'path', 'to', 'file.abc.html' ), [
+			path.join( 'buildDir', 'path', 'to', 'manual', 'file.abc.html' ), [
 				'<div>template html content</div>',
 				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 				'<div>html file content</div>',
-				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'file.abc.js' ) }"></script></body>`
+				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.abc.js' ) }"></script></body>`
 			].join( '\n' )
 		);
 	} );
@@ -158,16 +158,16 @@ describe( 'compileHtmlFiles', () => {
 	it( 'should work with a few entry points patterns', () => {
 		files = {
 			[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
-			[ path.join( 'path', 'to', 'file.md' ) ]: '## Markdown header',
-			[ path.join( 'path', 'to', 'file.html' ) ]: '<div>html file content</div>',
-			[ path.join( 'path', 'to', 'another', 'file.md' ) ]: '## Markdown header',
-			[ path.join( 'path', 'to', 'another', 'file.html' ) ]: '<div>html file content</div>'
+			[ path.join( 'path', 'to', 'manual', 'file.md' ) ]: '## Markdown header',
+			[ path.join( 'path', 'to', 'manual', 'file.html' ) ]: '<div>html file content</div>',
+			[ path.join( 'path', 'to', 'another', 'manual', 'file.md' ) ]: '## Markdown header',
+			[ path.join( 'path', 'to', 'another', 'manual', 'file.html' ) ]: '<div>html file content</div>'
 		};
 
 		patternFiles = {
-			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'file.js' ) ],
-			[ path.join( 'anotherPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'another', 'file.js' ) ],
-			[ path.join( 'path', 'to', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ],
+			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
+			[ path.join( 'anotherPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'another', 'manual', 'file.js' ) ],
+			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ],
 		};
 
 		compileHtmlFiles( 'buildDir', [
@@ -175,9 +175,35 @@ describe( 'compileHtmlFiles', () => {
 			path.join( 'anotherPattern', '*.js' )
 		] );
 
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'file.md' ) );
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'file.html' ) );
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'file.html' ) );
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'file.html' ) );
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ) );
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ) );
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'manual', 'file.html' ) );
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'manual', 'file.html' ) );
+	} );
+
+	it( 'compiles only manual test files', () => {
+		files = {
+			[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
+			[ path.join( 'path', 'to', 'manual', 'file.md' ) ]: '## Markdown header',
+			[ path.join( 'path', 'to', 'manual', 'file.html' ) ]: '<div>html file content</div>',
+			[ path.join( 'path', 'to', 'another', 'file.md' ) ]: '## Markdown header',
+			[ path.join( 'path', 'to', 'another', 'file.html' ) ]: '<div>html file content</div>'
+		};
+
+		patternFiles = {
+			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
+			[ path.join( 'anotherPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'another', 'file.js' ) ],
+			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ],
+		};
+
+		compileHtmlFiles( 'buildDir', [
+			path.join( 'manualTestPattern', '*.js' ),
+			path.join( 'anotherPattern', '*.js' )
+		] );
+
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ) );
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ) );
+		sinon.assert.neverCalledWith( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'file.html' ) );
+		sinon.assert.neverCalledWith( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'file.html' ) );
 	} );
 } );
