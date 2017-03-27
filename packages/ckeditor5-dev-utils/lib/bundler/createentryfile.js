@@ -14,17 +14,17 @@ const getPlugins = require( './getplugins' );
  * @param {String} destinationPath A path where entry file will be saved.
  * @param {Object} options
  * @param {Array.<String>} options.plugins An array with paths to the plugins for the editor.
+ * @param {String} configPath A path to additional editor's configuration which will be built-in.
  * @param {String} options.moduleName Name of exported UMD module.
  * @param {String} options.editor A path to class which defined the editor.
- * @param {Object} options.config A path to additional editor's configuration which will be built-in.
  */
-module.exports = function createEntryFile( destinationPath, options ) {
-	const entryFileContent = renderEntryFile( options );
+module.exports = function createEntryFile( destinationPath, configPath, options ) {
+	const entryFileContent = renderEntryFile( configPath, options );
 
 	fs.writeFileSync( destinationPath, entryFileContent );
 };
 
-function renderEntryFile( options ) {
+function renderEntryFile( configPath, options ) {
 	const plugins = getPlugins( options.plugins );
 	const date = new Date();
 
@@ -47,7 +47,7 @@ ${ options.moduleName }.build = {
 	plugins: [
 		${ Object.keys( plugins ).join( ',\n\t\t' ) } 
 	],
-	config: require( '${ options.config }' )
+	config: require( '${ configPath }' )
 };
 `;
 

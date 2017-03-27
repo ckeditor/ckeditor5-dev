@@ -29,14 +29,13 @@ describe( 'bundler', () => {
 		it( 'should create an entry file', () => {
 			const writeFileSyncStub = sandbox.stub( fs, 'writeFileSync' );
 
-			createEntryFile( 'destination/path/file.js', {
+			createEntryFile( 'destination/path/file.js', './config-editor', {
 				plugins: [
 					'@ckeditor/ckeditor5-presets/src/article',
 					'@ckeditor/ckeditor5-clipboard/src/clipboard'
 				],
 				moduleName: 'ClassicEditor',
-				editor: '@ckeditor/ckeditor5-editor-classic/src/editor',
-				config: './config-editor'
+				editor: '@ckeditor/ckeditor5-editor-classic/src/editor'
 			} );
 
 			const expectedEntryFile = `/**
