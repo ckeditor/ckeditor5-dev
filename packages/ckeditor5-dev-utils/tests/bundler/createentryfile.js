@@ -47,7 +47,7 @@ describe( 'bundler', () => {
 			} );
 
 			const expectedEntryFile = `/**
- * @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-${ new Date().getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
