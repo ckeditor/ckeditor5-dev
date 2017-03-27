@@ -16,21 +16,15 @@ describe( 'dev-webpack-utils/index', () => {
 		utils = require( '../lib/index' );
 	} );
 
-	describe( 'CKEditorWebpackPlugin()', () => {
-		it( 'is defined', () => {
-			expect( utils.CKEditorWebpackPlugin ).to.be.a( 'function' );
-		} );
-	} );
-
 	describe( 'getWebpackConfig()', () => {
 		it( 'is defined', () => {
 			expect( utils.getWebpackConfig ).to.be.a( 'function' );
 		} );
 	} );
 
-	describe( 'getWebpackCompactConfig()', () => {
+	describe( 'getWebpackCompatConfig()', () => {
 		it( 'is defined', () => {
-			expect( utils.getWebpackCompactConfig ).to.be.a( 'function' );
+			expect( utils.getWebpackCompatConfig ).to.be.a( 'function' );
 		} );
 	} );
 } );

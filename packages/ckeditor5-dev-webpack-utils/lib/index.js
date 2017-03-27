@@ -6,7 +6,6 @@
 'use strict';
 
 module.exports = {
-	CKEditorWebpackPlugin: require( './ckeditorwebpackplugin' ),
 	getWebpackConfig: require( './getwebpackconfig' ),
-	getWebpackCompactConfig: require( './getwebpackcompactconfig' ),
+	getWebpackCompatConfig: require( './getwebpackcompatconfig' ),
 };

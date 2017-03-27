@@ -17,7 +17,7 @@ const BabiliPlugin = require( 'babili-webpack-plugin' );
  * @param {String} options.cwd Current work directory. Required for searching the modules.
  * @returns {Object}
  */
-module.exports = function getWebpackCompactConfig( options ) {
+module.exports = function getWebpackCompatConfig( options ) {
 	return {
 		devtool: 'cheap-source-map',
 
@@ -28,7 +28,7 @@ module.exports = function getWebpackCompactConfig( options ) {
 
 		output: {
 			path: options.destinationPath,
-			filename: 'ckeditor.compact.js',
+			filename: 'ckeditor.Compat.js',
 			libraryTarget: 'umd'
 		},
 

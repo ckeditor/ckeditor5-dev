@@ -13,19 +13,19 @@ const sinon = require( 'sinon' );
 const BabiliPlugin = require( 'babili-webpack-plugin' );
 
 describe( 'dev-bundler-webpack/utils', () => {
-	let getWebpackCompactConfig, sandbox;
+	let getWebpackCompatConfig, sandbox;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
 
-		getWebpackCompactConfig = require( '../lib/getwebpackcompactconfig' );
+		getWebpackCompatConfig = require( '../lib/getwebpackcompatconfig' );
 	} );
 
 	afterEach( () => {
 		sandbox.restore();
 	} );
 
-	describe( 'getWebpackCompactConfig()', () => {
+	describe( 'getWebpackCompatConfig()', () => {
 		it( 'returns configuration for webpack which compiles code to ES5', () => {
 			sandbox.spy( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 
@@ -33,7 +33,7 @@ describe( 'dev-bundler-webpack/utils', () => {
 			const entryPoint = cwd + '/ckeditor.js';
 			const destinationPath = cwd + '/build';
 
-			const config = getWebpackCompactConfig( {
+			const config = getWebpackCompatConfig( {
 				cwd,
 				entryPoint,
 				destinationPath
@@ -48,7 +48,7 @@ describe( 'dev-bundler-webpack/utils', () => {
 
 			expect( config ).to.have.property( 'output' );
 			expect( config.output ).to.have.property( 'path', destinationPath );
-			expect( config.output ).to.have.property( 'filename', 'ckeditor.compact.js' );
+			expect( config.output ).to.have.property( 'filename', 'ckeditor.Compat.js' );
 			expect( config.output ).to.have.property( 'libraryTarget', 'umd' );
 
 			expect( config ).to.have.deep.property( 'plugins' );
