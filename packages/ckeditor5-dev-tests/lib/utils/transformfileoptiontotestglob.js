@@ -5,9 +5,6 @@
 
 'use strict';
 
-const path = require( 'path' );
-const nodeModulesPath = path.join( process.cwd(), 'packages' );
-
 /**
  * Converts values of --files argument to proper globs.
  * There are 5 supported types of values now:
@@ -19,12 +16,15 @@ const nodeModulesPath = path.join( process.cwd(), 'packages' );
  * 4. path – 'engine/view' -> 'ckeditor5-engine/tests/view/**\/*.js'
  * 5. simplified glob – 'engine/view/**\/*.js' -> 'ckeditor5-engine/tests/view/**\/*.js'
  *
- * @param {String} file
- * @param {Boolean} [isManualTest=false]
+ * @param {String} fileOption A path or pattern to determine the tests to execute.
+ * @param {Boolean} [isManualTest=false] Whether the tests are manual or automated.
  * @returns {String}
  */
-module.exports = function fileOptionToGlob( file, isManualTest = false ) {
-	const chunks = file.split( '/' );
+module.exports = function transformFileOptionToTestGlob( fileOption, isManualTest = false ) {
+	const path = require( 'path' );
+	const nodeModulesPath = path.join( process.cwd(), 'packages' );
+
+	const chunks = fileOption.split( '/' );
 	const packageName = chunks.shift();
 	let globSuffix = path.join( 'tests', '**' );
 
@@ -35,7 +35,7 @@ module.exports = function fileOptionToGlob( file, isManualTest = false ) {
 	globSuffix += path.sep + '*.js';
 
 	// 0.
-	if ( file === '/' ) {
+	if ( fileOption === '/' ) {
 		return path.join( process.cwd(), globSuffix );
 	}
 
@@ -60,18 +60,17 @@ module.exports = function fileOptionToGlob( file, isManualTest = false ) {
 	// 4.
 	if ( !glob.endsWith( '.js' ) ) {
 		glob = path.join( glob, '**', '*.js' );
+	}
 
-		// 5. for automated tests.
-		if ( !isManualTest ) {
-			return path.join( nodeModulesPath, 'ckeditor5-' + packageName, 'tests', glob );
-		}
+	// 5. for automated tests.
+	if ( !isManualTest ) {
+		return path.join( nodeModulesPath, 'ckeditor5-' + packageName, 'tests', glob );
 	}
 
 	// 5. for manual tests. We need to insert a directory "manual" after specified directory in path.
 	// 'engine/view/*.js' => 'ckeditor5-engine/tests/view/manual/*.js'
-	const directoryWithManualTests = glob.split( '/' ).shift();
+	const directoryWithManualTests = glob.split( path.sep ).shift();
 	glob = glob.replace( new RegExp( `^(${ directoryWithManualTests })` ), `$1${ path.sep }manual` );
 
-	// 5.
 	return path.join( nodeModulesPath, 'ckeditor5-' + packageName, 'tests', glob );
 };

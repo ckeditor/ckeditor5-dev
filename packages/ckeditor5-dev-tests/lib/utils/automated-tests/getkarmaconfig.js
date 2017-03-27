@@ -8,7 +8,7 @@
 
 const path = require( 'path' );
 const getWebpackConfigForAutomatedTests = require( './getwebpackconfig' );
-const fileOptionToGlob = require( '../fileoptiontoglob' );
+const transformFileOptionToTestGlob = require( '../transformfileoptiontotestglob' );
 
 const reporters = [
 	'mocha',
@@ -30,7 +30,7 @@ module.exports = function getKarmaConfig( options ) {
 		throw new Error( `Given Mocha reporter is not supported. Available reporters: ${ reporters.join( ', ' ) }.` );
 	}
 
-	const files = options.files.map( file => fileOptionToGlob( file ) );
+	const files = options.files.map( file => transformFileOptionToTestGlob( file ) );
 
 	const preprocessorMap = {};
 

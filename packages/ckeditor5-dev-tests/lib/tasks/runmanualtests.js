@@ -12,7 +12,7 @@ const createManualTestServer = require( '../utils/manual-tests/createserver' );
 const compileManualTestScripts = require( '../utils/manual-tests/compilescripts' );
 const compileManualTestHtmlFiles = require( '../utils/manual-tests/compilehtmlfiles' );
 const removeDir = require( '../utils/manual-tests/removedir' );
-const fileOptionToGlob = require( '../utils/fileoptiontoglob' );
+const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontotestglob' );
 
 /**
  * Main function that runs manual tests.
@@ -24,7 +24,7 @@ const fileOptionToGlob = require( '../utils/fileoptiontoglob' );
 module.exports = function runManualTests( options ) {
 	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
 	const files = ( options.files && options.files.length ) ? options.files : [ '*' ];
-	const manualTestFilesPattern = files.map( ( file ) => fileOptionToGlob( file, true ) );
+	const manualTestFilesPattern = files.map( ( file ) => transformFileOptionToTestGlob( file, true ) );
 
 	return Promise.resolve()
 		.then( () => removeDir( buildDir ) )

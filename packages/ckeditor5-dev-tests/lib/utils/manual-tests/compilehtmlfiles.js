@@ -23,16 +23,17 @@ const writer = new commonmark.HtmlRenderer();
 
 /**
  * @param {String} buildDir A path where compiled files will be saved.
- * @param {Array.<String>} manualTestScriptsPatterns An array of patterns that resolve manual test scripts.
+ * @param {Array.<String>} manualTestScriptsPatterns An array of patterns that resolves manual test scripts.
  * @returns {Promise}
  */
 module.exports = function compileHtmlFiles( buildDir, manualTestScriptsPatterns ) {
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 
 	const sourceMDFiles = manualTestScriptsPatterns.reduce( ( arr, manualTestPattern ) => {
-		arr.push( ...globSync( manualTestPattern ).map( ( jsFile ) => setExtension( jsFile, 'md' ) ) );
-
-		return arr;
+		return [
+			...arr,
+			...globSync( manualTestPattern ).map( ( jsFile ) => setExtension( jsFile, 'md' ) )
+		];
 	}, [] );
 	const sourceHtmlFiles = sourceMDFiles.map( ( mdFile ) => setExtension( mdFile, 'html' ) );
 

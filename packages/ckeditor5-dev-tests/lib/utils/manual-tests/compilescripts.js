@@ -19,9 +19,10 @@ const getRelativeFilePath = require( '../getrelativefilepath' );
  */
 module.exports = function compileManualTestScripts( buildDir, manualTestScriptsPatterns ) {
 	const entryFiles = manualTestScriptsPatterns.reduce( ( arr, manualTestPattern ) => {
-		arr.push( ...globSync( manualTestPattern ) );
-
-		return arr;
+		return [
+			...arr,
+			...globSync( manualTestPattern )
+		];
 	}, [] );
 
 	const entries = getWebpackEntryPoints( entryFiles );
