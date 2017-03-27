@@ -14,7 +14,7 @@ const {	TranslationService } = require( '@ckeditor/ckeditor5-dev-utils' ).transl
  * @param {Object} compiler Webpack compiler.
  * @param {String} language Language code, e.g en_US.
  */
-module.exports = function replaceTranslationCallsForOneLangauge( compiler, language ) {
+module.exports = function replaceTranslationCallsForOneLanguage( compiler, language ) {
 	const translationService = new TranslationService( language );
 
 	compiler.options.translateSource = ( source ) => translationService.translateSource( source );
