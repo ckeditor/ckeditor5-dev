@@ -36,14 +36,7 @@ describe( 'bundler', () => {
 				],
 				moduleName: 'ClassicEditor',
 				editor: '@ckeditor/ckeditor5-editor-classic/src/editor',
-				config: {
-					undo: {
-						step: 3,
-					},
-					toolbar: [
-						'image'
-					]
-				}
+				config: './config-editor'
 			} );
 
 			const expectedEntryFile = `/**
@@ -62,14 +55,7 @@ ClassicEditor.build = {
 		ArticlePlugin,
 		ClipboardPlugin 
 	],
-	config: {
-		undo: {
-			step: 3
-		},
-		toolbar: [
-			'image'
-		]
-	}
+	config: require( './config-editor' )
 };
 `;
 
