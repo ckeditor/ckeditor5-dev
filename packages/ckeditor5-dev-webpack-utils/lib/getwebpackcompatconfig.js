@@ -28,7 +28,7 @@ module.exports = function getWebpackCompatConfig( options ) {
 
 		output: {
 			path: options.destinationPath,
-			filename: 'ckeditor.Compat.js',
+			filename: 'ckeditor.compat.js',
 			libraryTarget: 'umd'
 		},
 

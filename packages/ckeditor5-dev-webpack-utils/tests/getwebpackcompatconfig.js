@@ -48,7 +48,7 @@ describe( 'dev-bundler-webpack/utils', () => {
 
 			expect( config ).to.have.property( 'output' );
 			expect( config.output ).to.have.property( 'path', destinationPath );
-			expect( config.output ).to.have.property( 'filename', 'ckeditor.Compat.js' );
+			expect( config.output ).to.have.property( 'filename', 'ckeditor.compat.js' );
 			expect( config.output ).to.have.property( 'libraryTarget', 'umd' );
 
 			expect( config ).to.have.deep.property( 'plugins' );
