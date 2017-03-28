@@ -47,7 +47,7 @@ const commitMessage = `Revision: https://github.com/${ repository }/commit/${ co
 // Check whether any of the files have changed. It might happen that none has changed if a build was restarted
 // or two builds were running at the same time.
 if ( exec( 'git status -s' ).trim().length ) {
-	exec( `git add mgit.json && git commit -m "${ commitMessage }"` );
+	exec( `git commit -m "${ commitMessage }"` );
 
 	exec( `echo "https://${ process.env.GITHUB_TOKEN }:@github.com" > .git/credentials 2> /dev/null` );
 	exec( 'git config credential.helper "store --file=.git/credentials"' );

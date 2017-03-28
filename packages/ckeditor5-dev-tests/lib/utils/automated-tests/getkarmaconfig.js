@@ -126,7 +126,12 @@ module.exports = function getKarmaConfig( options ) {
 		concurrency: Infinity,
 
 		// How long will Karma wait for a message from a browser before disconnecting from it (in ms).
-		browserNoActivityTimeout: 0
+		browserNoActivityTimeout: 0,
+
+		// Shows differences in object comparison.
+		mochaReporter: {
+			showDiff: true
+		}
 	};
 
 	if ( process.env.TRAVIS ) {
