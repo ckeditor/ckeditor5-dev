@@ -20,7 +20,7 @@ describe( 'upload', () => {
 	beforeEach( () => {
 		mockery.enable( {
 			useCleanCache: true,
-			warnOnReplace: true,
+			warnOnReplace: false,
 			warnOnUnregistered: false,
 		} );
 
