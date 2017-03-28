@@ -5,7 +5,8 @@
 
 'use strict';
 
-const { commitTypes, transform } = require( './writeroptions' );
+const { availableTypes } = require( './transformcommit' );
+const transformCommitForCkeditor5Package = require( './transformcommitforckeditor5package' );
 
 /**
  * Returns a type (major, minor, patch) of the next release based on commits.
@@ -44,14 +45,14 @@ function getNewVersionType( commits ) {
 	let hasNewFeatures = false;
 
 	for ( const item of commits ) {
-		const singleCommit = transform( item, false );
+		const singleCommit = transformCommitForCkeditor5Package( item, false );
 
 		if ( !singleCommit ) {
 			continue;
 		}
 
 		// Check whether the commit is visible in changelog.
-		if ( !commitTypes.get( singleCommit.rawType ) ) {
+		if ( !availableTypes.get( singleCommit.rawType ) ) {
 			continue;
 		}
 

@@ -68,6 +68,7 @@ module.exports = function generateChangelog( newVersion = null ) {
 				};
 				const parserOpts = require( '../utils/parseroptions' );
 				const writerOpts = require( '../utils/writeroptions' );
+				writerOpts.transform = require( '../utils/transformcommitforckeditor5package' );
 
 				conventionalChangelog( {}, context, gitRawCommitsOpts, parserOpts, writerOpts )
 					.pipe( saveChangelogPipe( version ) );
