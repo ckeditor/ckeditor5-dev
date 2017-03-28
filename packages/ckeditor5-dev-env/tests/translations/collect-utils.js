@@ -16,16 +16,42 @@ const glob = require( 'glob' );
 const fs = require( 'fs-extra' );
 
 describe( 'collect-utils', () => {
-	let sandbox;
+	const sandbox = sinon.sandbox.create();
 	let utils;
+	let stubs;
+	let originalStringMap;
 
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		mockery.enable( {
+			warnOnReplace: false,
+			warnOnUnregistered: false,
+		} );
+
+		stubs = {
+			logger: {
+				info: sandbox.spy(),
+				warning: sandbox.spy(),
+				error: err => {
+					throw err;
+				},
+			},
+			translations: {
+				findOriginalStrings: sandbox.spy( string => originalStringMap[ string ] ),
+			}
+		};
+
+		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
+			logger: () => stubs.logger,
+			translations: stubs.translations,
+		} );
+
 		sandbox.stub( process, 'cwd', () => path.join( 'workspace', 'ckeditor5' ) );
+
 		utils = require( '../../lib/translations/collect-utils' );
 	} );
 
 	afterEach( () => {
+		mockery.disable();
 		mockery.deregisterAll();
 		sandbox.restore();
 	} );
@@ -35,6 +61,11 @@ describe( 'collect-utils', () => {
 			const fileContents = {
 				'/ckeditor5-core/file1.js': 't( \'Bold\' );',
 				'/ckeditor5-utils/file2.js': 't( \'Italic [context: italic style]\' );',
+			};
+
+			originalStringMap = {
+				't( \'Bold\' );': [ 'Bold' ],
+				't( \'Italic [context: italic style]\' );': [ 'Italic [context: italic style]' ]
 			};
 
 			const globSyncStub = sandbox.stub( glob, 'sync', () => [
