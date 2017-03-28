@@ -217,7 +217,7 @@ describe( 'compileHtmlFiles', () => {
 
 		patternFiles = {
 			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
-			// glob pattern have problem with file names containing dots.
+			// Glob pattern has problem with file names containing dots.
 			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'some.file.md' ],
 		};
 
