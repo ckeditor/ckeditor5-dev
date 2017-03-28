@@ -12,9 +12,9 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 const proxyquire = require( 'proxyquire' );
 
-describe( 'dev-env/release-tools/utils/writerOptions', () => {
-	describe( 'transform()', () => {
-		let transformCommit, sandbox, stubs, loggerVerbosity;
+describe( 'dev-env/release-tools/utils', () => {
+	describe( 'transformCommitForCkeditor5Package()', () => {
+		let transformCommitForCkeditor5Package, sandbox, stubs, loggerVerbosity;
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
@@ -41,7 +41,7 @@ describe( 'dev-env/release-tools/utils/writerOptions', () => {
 
 			mockery.registerMock( './getpackagejson', stubs.getPackageJson );
 
-			transformCommit = proxyquire( '../../../lib/release-tools/utils/writeroptions', {
+			transformCommitForCkeditor5Package = proxyquire( '../../../lib/release-tools/utils/transformcommitforckeditor5package', {
 				'@ckeditor/ckeditor5-dev-utils': {
 					logger( verbosity ) {
 						loggerVerbosity = verbosity;
@@ -49,7 +49,7 @@ describe( 'dev-env/release-tools/utils/writerOptions', () => {
 						return stubs.logger;
 					}
 				}
-			} ).transform;
+			} );
 		} );
 
 		afterEach( () => {
@@ -72,7 +72,7 @@ describe( 'dev-env/release-tools/utils/writerOptions', () => {
 				references: []
 			};
 
-			transformCommit( commit );
+			transformCommitForCkeditor5Package( commit );
 
 			expect( commit.notes[ 0 ].title ).to.equal( 'BREAKING CHANGES' );
 			expect( commit.notes[ 1 ].title ).to.equal( 'BREAKING CHANGES' );
@@ -90,7 +90,7 @@ describe( 'dev-env/release-tools/utils/writerOptions', () => {
 				references: []
 			};
 
-			transformCommit( commit );
+			transformCommitForCkeditor5Package( commit );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Fix: Simple fix\." \u001b\[32mINCLUDED/ );
@@ -108,7 +108,7 @@ describe( 'dev-env/release-tools/utils/writerOptions', () => {
 				references: []
 			};
 
-			transformCommit( commit );
+			transformCommitForCkeditor5Package( commit );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Docs: README\." \u001b\[90mSKIPPED/ );
@@ -126,7 +126,7 @@ describe( 'dev-env/release-tools/utils/writerOptions', () => {
 				references: []
 			};
 
-			transformCommit( commit );
+			transformCommitForCkeditor5Package( commit );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Invalid commit\." \u001b\[31mINVALID/ );
@@ -149,7 +149,7 @@ describe( 'dev-env/release-tools/utils/writerOptions', () => {
 				references: []
 			};
 
-			transformCommit( commit );
+			transformCommitForCkeditor5Package( commit );
 
 			const expectedSubject = 'Simple fix. Closes [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2)';
 			expect( commit.subject ).to.equal( expectedSubject );
@@ -168,7 +168,7 @@ describe( 'dev-env/release-tools/utils/writerOptions', () => {
 				references: []
 			};
 
-			transformCommit( commit );
+			transformCommitForCkeditor5Package( commit );
 
 			const expectedSubject = 'Internal: Thanks to [@CKEditor](https://github.com/CKEditor)';
 			expect( commit.subject ).to.equal( expectedSubject );
@@ -197,7 +197,7 @@ describe( 'dev-env/release-tools/utils/writerOptions', () => {
 				notes: []
 			};
 
-			transformCommit( commit );
+			transformCommitForCkeditor5Package( commit );
 
 			expect( commit.type ).to.equal( 'Features' );
 			expect( commit.subject ).to.equal( 'Introduced a brand new release tools with a new set of requirements. ' +
@@ -243,7 +243,7 @@ describe( 'dev-env/release-tools/utils/writerOptions', () => {
 				notes: []
 			};
 
-			transformCommit( commit );
+			transformCommitForCkeditor5Package( commit );
 
 			expect( commit.type ).to.equal( 'Features' );
 			expect( commit.subject ).to.equal( 'Introduced a brand new release tools with a new set of requirements. ' +
@@ -269,7 +269,7 @@ describe( 'dev-env/release-tools/utils/writerOptions', () => {
 				notes: []
 			};
 
-			transformCommit( commit );
+			transformCommitForCkeditor5Package( commit );
 
 			expect( commit.header ).to.equal( 'Merge pull request #75 from ckeditor/t/64' );
 			expect( commit.type ).to.equal( 'Features' );
@@ -290,7 +290,7 @@ describe( 'dev-env/release-tools/utils/writerOptions', () => {
 				notes: []
 			};
 
-			transformCommit( commit );
+			transformCommitForCkeditor5Package( commit );
 
 			expect( commit.header ).to.equal( 'Merge pull request #75 from ckeditor/t/64' );
 			expect( commit.type ).to.equal( 'Features' );
@@ -311,7 +311,7 @@ describe( 'dev-env/release-tools/utils/writerOptions', () => {
 				notes: []
 			};
 
-			transformCommit( commit );
+			transformCommitForCkeditor5Package( commit );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.be.a( 'string' );
@@ -337,7 +337,7 @@ describe( 'dev-env/release-tools/utils/writerOptions', () => {
 				references: []
 			};
 
-			transformCommit( commit, false );
+			transformCommitForCkeditor5Package( commit, false );
 
 			expect( loggerVerbosity ).to.equal( 'error' );
 		} );
@@ -359,7 +359,7 @@ describe( 'dev-env/release-tools/utils/writerOptions', () => {
 			};
 
 			const error = 'The package.json for "foo" must contain the "bugs" property.';
-			expect( () => transformCommit( commit ) ).to.throw( Error, error );
+			expect( () => transformCommitForCkeditor5Package( commit ) ).to.throw( Error, error );
 		} );
 	} );
 } );
