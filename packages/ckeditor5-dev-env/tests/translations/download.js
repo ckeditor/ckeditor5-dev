@@ -7,50 +7,79 @@
 
 'use strict';
 
-const download = require( '../../lib/translations/download' );
 const sinon = require( 'sinon' );
 const path = require( 'path' );
-const transifexService = require( '../../lib/translations/transifex-service' );
-const fs = require( 'fs-extra' );
 const mockery = require( 'mockery' );
-const translationUtils = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 
 describe( 'download', () => {
 	const sandbox = sinon.sandbox.create();
-	let deleteSpy;
+	let stubs;
+	let download, resources, resourcesDetails, translations, fileContents;
 
 	beforeEach( () => {
-		deleteSpy = sandbox.spy( () => Promise.resolve() );
-
-		mockery.registerMock( './languagecodemap.json', {
-			'en_AU': 'en-au'
-		} );
-
-		mockery.registerMock( 'del', deleteSpy );
-
 		mockery.enable( {
-			warnOnReplace: true,
-			warnOnUnregistered: true,
+			useCleanCache: true,
+			warnOnReplace: false,
+			warnOnUnregistered: false,
 		} );
+
+		stubs = {
+			del: sandbox.spy( () => Promise.resolve() ),
+
+			logger: {
+				info: sandbox.stub(),
+				warning: sandbox.stub(),
+				error: sandbox.stub(),
+			},
+
+			fs: {
+				outputFileSync: sandbox.spy(),
+			},
+
+			devUtils: {
+				translations: {
+					createDictionaryFromPoFileContent: sandbox.spy( poFileContent => fileContents[ poFileContent ] ),
+					cleanPoFileContent: x => x,
+				},
+				logger() {
+					return stubs.logger;
+				}
+			},
+
+			path: path,
+
+			transifexService: {
+				getResources: sandbox.spy( () => Promise.resolve( resources ) ),
+				getResourceDetails: sandbox.spy( ( { slug } ) => Promise.resolve( resourcesDetails[ slug ] ) ),
+				getTranslation: sandbox.spy( ( { lang, slug	} ) => Promise.resolve( translations[ slug ][ lang ] ) ),
+			}
+		};
+
+		sandbox.stub( process, 'cwd', () => 'workspace' );
+
+		mockery.registerMock( './languagecodemap.json', { 'en_AU': 'en-au' } );
+		mockery.registerMock( 'del', stubs.del );
+		mockery.registerMock( 'fs-extra', stubs.fs );
+		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', stubs.devUtils );
+		mockery.registerMock( 'path', stubs.path );
+		mockery.registerMock( './transifex-service', stubs.transifexService );
+
+		download = require( '../../lib/translations/download' );
 	} );
 
 	afterEach( () => {
 		sandbox.restore();
-		mockery.deregisterAll();
 		mockery.disable();
 	} );
 
 	it( 'should download translations', () => {
-		const resources = [ {
-				slug: 'ckeditor5-core'
-			},
-			{
-				slug: 'ckeditor5-ui'
-			}
+		resources = [
+			{ slug: 'ckeditor5-core' },
+			{ slug: 'ckeditor5-ui' },
 		];
 
 		// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
-		const resourcesDetails = {
+		resourcesDetails = {
 			'ckeditor5-core': {
 				available_languages: [ {
 					code: 'pl'
@@ -63,66 +92,44 @@ describe( 'download', () => {
 			}
 		};
 
-		const translations = {
+		translations = {
 			'ckeditor5-core': {
-				pl: {
-					content: 'ckeditor5-core-pl-content'
-				}
+				pl: { content: 'ckeditor5-core-pl-content' }
 			},
 			'ckeditor5-ui': {
-				en_AU: {
-					content: 'ckeditor5-ui-en-content'
-				}
+				en_AU: { content: 'ckeditor5-ui-en-content' }
 			}
 		};
 
-		const fileContents = {
+		fileContents = {
 			'ckeditor5-core-pl-content': {}, // empty
 			'ckeditor5-ui-en-content': { ui: 'ui' }
 		};
 
 		// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 
-		const getResourcesSpy = sandbox.spy( () => Promise.resolve( resources ) );
-		const getResourceDetailsSpy = sandbox.spy( ( {
-			slug
-		} ) => Promise.resolve( resourcesDetails[ slug ] ) );
-		const getTranslationSpy = sandbox.spy( ( {
-			lang,
-			slug
-		} ) => Promise.resolve( translations[ slug ][ lang ] ) );
-		const outputFileSyncSpy = sandbox.spy();
-
-		const createDicitionaryFromPoFileContentSpy = sandbox.spy( poFileContent => fileContents[ poFileContent ] );
-
-		sandbox.stub( transifexService, 'getResources', getResourcesSpy );
-		sandbox.stub( transifexService, 'getResourceDetails', getResourceDetailsSpy );
-		sandbox.stub( transifexService, 'getTranslation', getTranslationSpy );
-		sandbox.stub( fs, 'outputFileSync', outputFileSyncSpy );
-		sandbox.stub( process, 'cwd', () => 'workspace' );
-		sandbox.stub( translationUtils, 'createDicitionaryFromPoFileContent', createDicitionaryFromPoFileContentSpy );
-		sandbox.stub( translationUtils, 'cleanPoFileContent', x => x );
-
 		return download( {
 			username: 'username',
 			password: 'password'
 		} ).then( () => {
-			sinon.assert.calledOnce( getResourcesSpy );
-			sinon.assert.calledTwice( getResourceDetailsSpy );
-			sinon.assert.calledTwice( getTranslationSpy );
-			sinon.assert.calledTwice( deleteSpy );
-			sinon.assert.calledOnce( outputFileSyncSpy );
+			sinon.assert.calledOnce( stubs.transifexService.getResources );
+			sinon.assert.calledTwice( stubs.transifexService.getResourceDetails );
+			sinon.assert.calledTwice( stubs.transifexService.getTranslation );
+			sinon.assert.calledTwice( stubs.del );
+			sinon.assert.calledOnce( stubs.fs.outputFileSync );
 
 			sinon.assert.calledWithExactly(
-				deleteSpy,
+				stubs.del,
 				path.join( 'workspace', 'packages', 'ckeditor5-core', 'lang', 'translations', '**' )
 			);
 
 			sinon.assert.calledWithExactly(
-				outputFileSyncSpy,
+				stubs.fs.outputFileSync,
 				path.join( 'workspace', 'packages', 'ckeditor5-ui', 'lang', 'translations', 'en-au.po' ),
 				'ckeditor5-ui-en-content'
 			);
+		}, ( err ) => {
+			throw err;
 		} );
 	} );
 } );

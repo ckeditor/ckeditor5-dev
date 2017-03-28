@@ -20,7 +20,7 @@ const translationUtils = require( '@ckeditor/ckeditor5-dev-utils' ).translations
 module.exports = function download( loginConfig ) {
 	return Promise.resolve()
 		.then( () => getPackageNames( loginConfig ) )
-		.then( packageNames => downlaodAndReplaceTranslations( loginConfig, packageNames ) )
+		.then( packageNames => downloadAndReplaceTranslations( loginConfig, packageNames ) )
 		.then( () => {
 			logger.info( 'Saved all translations.' );
 		} )
@@ -34,7 +34,7 @@ function getPackageNames( loginConfig ) {
 		.then( resources => resources.map( ( resource ) => resource.slug ) );
 }
 
-function downlaodAndReplaceTranslations( loginConfig, packageNames ) {
+function downloadAndReplaceTranslations( loginConfig, packageNames ) {
 	return Promise.all(
 		packageNames.map( ( packageName ) => {
 			const translationPromises = removeOldTranslationForPackage( packageName )
@@ -109,7 +109,7 @@ function saveTranslations( packageName, translations ) {
 }
 
 function isPoFileContainingTranslations( poFileContent ) {
-	const translations = translationUtils.createDicitionaryFromPoFileContent( poFileContent );
+	const translations = translationUtils.createDictionaryFromPoFileContent( poFileContent );
 
 	return Object.keys( translations ).some( key => translations[ key ] !== '' );
 }

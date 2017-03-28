@@ -7,7 +7,7 @@
 
 const path = require( 'path' );
 const fs = require( 'fs' );
-const createDicitionaryFromPoFileContent = require( './createdictionaryfrompofilecontent' );
+const createDictionaryFromPoFileContent = require( './createdictionaryfrompofilecontent' );
 const acorn = require( 'acorn' );
 const walk = require( 'acorn/dist/walk' );
 const escodegen = require( 'escodegen' );
@@ -17,7 +17,7 @@ const escodegen = require( 'escodegen' );
  */
 module.exports = class TranslationService {
 	/**
-	 * @param {String} langauge Target language.
+	 * @param {String} language Target language.
 	 */
 	constructor( language ) {
 		this.language = language;
@@ -39,7 +39,7 @@ module.exports = class TranslationService {
 
 		const pathToPoFile = path.join( pathToPackage, 'lang', 'translations', this.language + '.po' );
 
-		this._laodPoFile( pathToPoFile );
+		this._loadPoFile( pathToPoFile );
 	}
 
 	/**
@@ -90,13 +90,13 @@ module.exports = class TranslationService {
 	}
 
 	// Loads translations from the po file.
-	_laodPoFile( pathToPoFile ) {
+	_loadPoFile( pathToPoFile ) {
 		if ( !fs.existsSync( pathToPoFile ) ) {
 			return;
 		}
 
 		const poFileContent = fs.readFileSync( pathToPoFile, 'utf-8' );
-		const parsedTranslationFile = createDicitionaryFromPoFileContent( poFileContent );
+		const parsedTranslationFile = createDictionaryFromPoFileContent( poFileContent );
 
 		for ( const translationKey in parsedTranslationFile ) {
 			this.dictionary.set( translationKey, parsedTranslationFile[ translationKey ] );

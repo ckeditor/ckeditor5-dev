@@ -13,7 +13,7 @@ const PO = require( 'pofile' );
  * @param {String} poFileContent Content of the translation file.
  * @returns {Object.<String,String>}
  */
-module.exports = function createDicitionaryFromPoFileContent( poFileContent ) {
+module.exports = function createDictionaryFromPoFileContent( poFileContent ) {
 	const po = PO.parse( poFileContent );
 
 	const keys = {};
