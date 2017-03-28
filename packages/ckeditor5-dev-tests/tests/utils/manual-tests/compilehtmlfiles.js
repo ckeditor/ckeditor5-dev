@@ -168,6 +168,7 @@ describe( 'compileHtmlFiles', () => {
 			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
 			[ path.join( 'anotherPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'another', 'manual', 'file.js' ) ],
 			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ],
+			[ path.join( 'path', 'to', 'another', 'manual', '**', '*.!(js|html|md)' ) ]: [],
 		};
 
 		compileHtmlFiles( 'buildDir', [
@@ -181,7 +182,7 @@ describe( 'compileHtmlFiles', () => {
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'manual', 'file.html' ) );
 	} );
 
-	it( 'compiles only manual test files', () => {
+	it( 'should compile only manual test files', () => {
 		files = {
 			[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
 			[ path.join( 'path', 'to', 'manual', 'file.md' ) ]: '## Markdown header',
@@ -205,5 +206,36 @@ describe( 'compileHtmlFiles', () => {
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ) );
 		sinon.assert.neverCalledWith( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'file.html' ) );
 		sinon.assert.neverCalledWith( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'file.html' ) );
+	} );
+
+	it( 'should not copy md files containing dots in their file names', () => {
+		files = {
+			[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
+			[ path.join( 'path', 'to', 'manual', 'file.md' ) ]: '## Markdown header',
+			[ path.join( 'path', 'to', 'manual', 'file.html' ) ]: '<div>html file content</div>'
+		};
+
+		patternFiles = {
+			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
+			// Glob pattern has problem with file names containing dots.
+			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'some.file.md' ],
+		};
+
+		compileHtmlFiles( 'buildDir', [ path.join( 'manualTestPattern', '*.js' ) ] );
+
+		sinon.assert.calledWithExactly( stubs.commonmark.parse, '## Markdown header' );
+		sinon.assert.calledWithExactly( stubs.fs.ensureDirSync, 'buildDir' );
+		sinon.assert.calledWithExactly(
+			stubs.fs.outputFileSync,
+			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
+				'<div>template html content</div>',
+				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
+				'<div>html file content</div>',
+				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script></body>`
+			].join( '\n' )
+		);
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ) );
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ) );
+		sinon.assert.neverCalledWith( stubs.fs.copySync, 'some.file.md', path.join( 'buildDir', 'some.file.md' ) );
 	} );
 } );
