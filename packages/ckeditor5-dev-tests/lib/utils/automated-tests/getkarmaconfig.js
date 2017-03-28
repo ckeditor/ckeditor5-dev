@@ -8,6 +8,7 @@
 
 const path = require( 'path' );
 const getWebpackConfigForAutomatedTests = require( './getwebpackconfig' );
+const transformFileOptionToTestGlob = require( '../transformfileoptiontotestglob' );
 
 const reporters = [
 	'mocha',
@@ -15,7 +16,6 @@ const reporters = [
 ];
 
 const coverageDir = path.join( process.cwd(), 'coverage' );
-const nodeModulesPath = path.join( process.cwd(), 'packages' );
 
 /**
  * @param {Object} options
@@ -30,7 +30,7 @@ module.exports = function getKarmaConfig( options ) {
 		throw new Error( `Given Mocha reporter is not supported. Available reporters: ${ reporters.join( ', ' ) }.` );
 	}
 
-	const files = options.files.map( file => fileOptionToGlob( file ) );
+	const files = options.files.map( file => transformFileOptionToTestGlob( file ) );
 
 	const preprocessorMap = {};
 
@@ -126,7 +126,12 @@ module.exports = function getKarmaConfig( options ) {
 		concurrency: Infinity,
 
 		// How long will Karma wait for a message from a browser before disconnecting from it (in ms).
-		browserNoActivityTimeout: 0
+		browserNoActivityTimeout: 0,
+
+		// Shows differences in object comparison.
+		mochaReporter: {
+			showDiff: true
+		}
 	};
 
 	if ( process.env.TRAVIS ) {
@@ -169,48 +174,3 @@ module.exports = function getKarmaConfig( options ) {
 	return karmaConfig;
 };
 
-// Converts values of --files argument to proper globs.
-// There are 5 supported types of values now:
-//
-// 0. current package's tests (when run in context of a package – e.g. on CI) - '/'
-// 1. all packages' files – '*'
-// 2. given package files – 'engine'
-// 3. everything except the given package – '!engine'
-// 4. path – 'engine/view' -> 'ckeditor5-engine/tests/view/**/*.js'
-// 5. simplified glob – 'engine/view/**/*.js' -> 'ckeditor5-engine/tests/view/**/*.js'
-function fileOptionToGlob( file ) {
-	const chunks = file.split( '/' );
-	const packageName = chunks.shift();
-	const globSuffix = path.join( 'tests', '**', '*.js' );
-
-	// 0.
-	if ( file === '/' ) {
-		return path.join( process.cwd(), globSuffix );
-	}
-
-	// 1. 2. 3.
-	if ( chunks.length === 0 ) {
-		// 1.
-		if ( packageName == '*' ) {
-			return path.join( nodeModulesPath, 'ckeditor5-*', globSuffix );
-		}
-
-		// 3.
-		if ( packageName.startsWith( '!' ) ) {
-			return path.join( nodeModulesPath, 'ckeditor5-!(' + packageName.slice( 1 ) + ')*', globSuffix );
-		}
-
-		// 2.
-		return path.join( nodeModulesPath, 'ckeditor5-' + packageName, globSuffix );
-	}
-
-	let glob = chunks.join( path.sep );
-
-	// 4.
-	if ( !glob.endsWith( '.js' ) ) {
-		glob = path.join( glob, '**', '*.js' );
-	}
-
-	// 5.
-	return path.join( nodeModulesPath, 'ckeditor5-' + packageName, 'tests', glob );
-}

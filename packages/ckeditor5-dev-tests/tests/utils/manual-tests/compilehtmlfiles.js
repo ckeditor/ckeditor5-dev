@@ -10,173 +10,200 @@
 const mockery = require( 'mockery' );
 const sinon = require( 'sinon' );
 const path = require( 'path' );
-const commonmark = require( 'commonmark' );
-const fs = require( 'fs-extra' );
 const chokidar = require( 'chokidar' );
 const gutil = require( 'gulp-util' );
 
+const fakeDirname = path.dirname( require.resolve( '../../../lib/utils/manual-tests/compilehtmlfiles' ) );
+
 describe( 'compileHtmlFiles', () => {
-	let sandbox = sinon.sandbox.create();
-
-	let files = {};
+	let sandbox, stubs, files, compileHtmlFiles;
 	let patternFiles = {};
-	const fakeDirname = path.dirname( require.resolve( '../../../lib/utils/manual-tests/compilehtmlfiles' ) );
 
-	const mdParserSpy = sandbox.spy();
-	const htmlRendererSpy = sandbox.spy( () => '<h2>Markdown header</h2>' );
-	const getRelativeFilePathSpy = sandbox.spy( pathToFile => pathToFile );
-
-	before( () => {
+	beforeEach( () => {
 		mockery.enable( {
+			useCleanCache: true,
 			warnOnReplace: false,
 			warnOnUnregistered: false
 		} );
-		mockery.registerMock( '../getrelativefilepath', getRelativeFilePathSpy );
-		mockery.registerMock( '../glob', ( pattern ) => patternFiles[ pattern ] );
-		mockery.registerMock( 'dom-combiner', ( ...args ) => args.join( '\n' ) );
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-			logger: () => ( {
-				info() {}
-			} )
+
+		sandbox = sinon.sandbox.create();
+
+		stubs = {
+			fs: {
+				readFileSync: sandbox.spy( ( pathToFile ) => files[ pathToFile ] ),
+				ensureDirSync: sandbox.stub(),
+				outputFileSync: sandbox.stub(),
+				copySync: sandbox.stub()
+			},
+
+			path: {
+				join: sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) )
+			},
+
+			logger: {
+				info: sandbox.stub(),
+				warning: sandbox.stub(),
+				error: sandbox.stub()
+			},
+
+			commonmark: {
+				parse: sandbox.spy(),
+				render: sandbox.spy( () => '<h2>Markdown header</h2>' ),
+			},
+
+			gutil: {
+				colors: sandbox.stub( gutil, 'colors', {
+					cyan: ( text ) => text
+				} )
+			},
+
+			chokidar: {
+				watch: sandbox.stub( chokidar, 'watch', () => ( {
+					on: () => {
+					}
+				} ) )
+			},
+
+			getRelativeFilePath: sandbox.spy( ( pathToFile ) => pathToFile ),
+			glob: sandbox.spy( ( pattern ) => patternFiles[ pattern ] ),
+			domCombiner: sandbox.spy( ( ...args ) => args.join( '\n' ) )
+		};
+
+		mockery.registerMock( 'commonmark', {
+			Parser: function() {
+				return {
+					parse: stubs.commonmark.parse
+				};
+			},
+			HtmlRenderer: function() {
+				return {
+					render: stubs.commonmark.render
+				};
+			}
 		} );
+		mockery.registerMock( 'fs-extra', stubs.fs );
+		mockery.registerMock( 'chokidar', stubs.chokidar );
+		mockery.registerMock( 'dom-combiner', stubs.domCombiner );
+		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
+			logger() {
+				return stubs.logger;
+			}
+		} );
+		mockery.registerMock( '../getrelativefilepath', stubs.getRelativeFilePath );
+		mockery.registerMock( '../glob', stubs.glob );
+
+		compileHtmlFiles = require( '../../../lib/utils/manual-tests/compilehtmlfiles' );
 	} );
 
 	afterEach( () => {
 		sandbox.restore();
-		files = {};
-		patternFiles = {};
-	} );
-
-	after( () => {
 		mockery.disable();
-		mockery.deregisterAll();
 	} );
 
 	it( 'should compile md and html files to the output html file', () => {
 		files = {
 			[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
-			[ path.join( 'path', 'to', 'file.md' ) ]: '## Markdown header',
-			[ path.join( 'path', 'to', 'file.html' ) ]: '<div>html file content</div>'
+			[ path.join( 'path', 'to', 'manual', 'file.md' ) ]: '## Markdown header',
+			[ path.join( 'path', 'to', 'manual', 'file.html' ) ]: '<div>html file content</div>'
 		};
 
 		patternFiles = {
-			[ path.join( 'manualTestPattern', '*.md' ) ]: [ path.join( 'path', 'to', 'file.md' ) ],
-			[ path.join( 'path', 'to', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ],
+			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
+			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ],
 		};
 
-		sandbox.stub( commonmark, 'Parser', sinon.spy( function() {
-			return {
-				parse( content ) {
-					return mdParserSpy( content );
-				}
-			};
-		} ) );
+		compileHtmlFiles( 'buildDir', [ path.join( 'manualTestPattern', '*.js' ) ] );
 
-		sandbox.stub( commonmark, 'HtmlRenderer', sinon.spy( function() {
-			return {
-				render( content ) {
-					return htmlRendererSpy( content );
-				}
-			};
-		} ) );
-
-		sandbox.stub( gutil, 'colors', {
-			cyan: text => text
-		} );
-		sandbox.stub( fs, 'readFileSync', ( pathToFile ) => files[ pathToFile ] );
-
-		const ensureDirSyncStub = sandbox.stub( fs, 'ensureDirSync' );
-		const outputFileSyncStub = sandbox.stub( fs, 'outputFileSync' );
-		const copySyncStub = sandbox.stub( fs, 'copySync' );
-		const chokidarWatchStub = sandbox.stub( chokidar, 'watch', () => ( {
-			on: () => {}
-		} ) );
-
-		const compileHtmlFiles = require( '../../../lib/utils/manual-tests/compilehtmlfiles' );
-		compileHtmlFiles( 'buildDir', 'manualTestPattern' );
-
-		sinon.assert.calledWithExactly( mdParserSpy, '## Markdown header' );
-		sinon.assert.calledWithExactly( ensureDirSyncStub, 'buildDir' );
+		sinon.assert.calledWithExactly( stubs.commonmark.parse, '## Markdown header' );
+		sinon.assert.calledWithExactly( stubs.fs.ensureDirSync, 'buildDir' );
 		sinon.assert.calledWithExactly(
-			outputFileSyncStub,
-			path.join( 'buildDir', 'path', 'to', 'file.html' ), [
+			stubs.fs.outputFileSync,
+			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
 				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 				'<div>html file content</div>',
-				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'file.js' ) }"></script></body>`
+				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script></body>`
 			].join( '\n' )
 		);
-		sinon.assert.calledWithExactly( chokidarWatchStub, path.join( 'path', 'to', 'file.md' ) );
-		sinon.assert.calledWithExactly( chokidarWatchStub, path.join( 'path', 'to', 'file.html' ) );
-		sinon.assert.calledWithExactly( copySyncStub, 'static-file.png', path.join( 'buildDir', 'static-file.png' ) );
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ) );
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ) );
+		sinon.assert.calledWithExactly( stubs.fs.copySync, 'static-file.png', path.join( 'buildDir', 'static-file.png' ) );
 	} );
 
 	it( 'should work with files containing dots in their names', () => {
-		const files = {
+		files = {
 			[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
-			[ path.join( 'path', 'to', 'file.abc.md' ) ]: '## Markdown header',
-			[ path.join( 'path', 'to', 'file.abc.html' ) ]: '<div>html file content</div>'
+			[ path.join( 'path', 'to', 'manual', 'file.abc.md' ) ]: '## Markdown header',
+			[ path.join( 'path', 'to', 'manual', 'file.abc.html' ) ]: '<div>html file content</div>'
 		};
 
-		const patternFiles = {
-			[ path.join( 'manualTestPattern', '*.md' ) ]: [ path.join( 'path', 'to', 'file.abc.md' ) ],
-			[ path.join( 'path', 'to', '**', '*.!(js|html|md)' ) ]: [],
+		patternFiles = {
+			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.abc.js' ) ],
+			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [],
 		};
 
-		const mdParserSpy = sandbox.spy();
-		const htmlRendererSpy = sandbox.spy( () => '<h2>Markdown header</h2>' );
-		const getRelativeFilePathSpy = sandbox.spy( pathToFile => pathToFile );
-
-		sandbox.stub( commonmark, 'Parser', sinon.spy( function() {
-			return {
-				parse( content ) {
-					return mdParserSpy( content );
-				}
-			};
-		} ) );
-
-		sandbox.stub( commonmark, 'HtmlRenderer', sinon.spy( function() {
-			return {
-				render( content ) {
-					return htmlRendererSpy( content );
-				}
-			};
-		} ) );
-
-		sandbox.stub( gutil, 'colors', {
-			cyan: text => text
-		} );
-		sandbox.stub( fs, 'readFileSync', ( pathToFile ) => files[ pathToFile ] );
-
-		sandbox.stub( fs, 'ensureDirSync' );
-		sandbox.stub( fs, 'copySync' );
-
-		const outputFileSyncStub = sandbox.stub( fs, 'outputFileSync' );
-
-		sandbox.stub( chokidar, 'watch', () => ( {
-			on: () => {}
-		} ) );
-
-		mockery.registerMock( '../getrelativefilepath', getRelativeFilePathSpy );
-		mockery.registerMock( '../glob', ( pattern ) => patternFiles[ pattern ] );
-		mockery.registerMock( 'dom-combiner', ( ...args ) => args.join( '\n' ) );
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-			logger: () => ( {
-				info() {}
-			} )
-		} );
-
-		const compileHtmlFiles = require( '../../../lib/utils/manual-tests/compilehtmlfiles' );
-		compileHtmlFiles( 'buildDir', 'manualTestPattern' );
+		compileHtmlFiles( 'buildDir', [ path.join( 'manualTestPattern', '*.js' ) ] );
 
 		sinon.assert.calledWith(
-			outputFileSyncStub,
-			path.join( 'buildDir', 'path', 'to', 'file.abc.html' ), [
+			stubs.fs.outputFileSync,
+			path.join( 'buildDir', 'path', 'to', 'manual', 'file.abc.html' ), [
 				'<div>template html content</div>',
 				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 				'<div>html file content</div>',
-				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'file.abc.js' ) }"></script></body>`
+				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.abc.js' ) }"></script></body>`
 			].join( '\n' )
 		);
+	} );
+
+	it( 'should work with a few entry points patterns', () => {
+		files = {
+			[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
+			[ path.join( 'path', 'to', 'manual', 'file.md' ) ]: '## Markdown header',
+			[ path.join( 'path', 'to', 'manual', 'file.html' ) ]: '<div>html file content</div>',
+			[ path.join( 'path', 'to', 'another', 'manual', 'file.md' ) ]: '## Markdown header',
+			[ path.join( 'path', 'to', 'another', 'manual', 'file.html' ) ]: '<div>html file content</div>'
+		};
+
+		patternFiles = {
+			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
+			[ path.join( 'anotherPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'another', 'manual', 'file.js' ) ],
+			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ],
+		};
+
+		compileHtmlFiles( 'buildDir', [
+			path.join( 'manualTestPattern', '*.js' ),
+			path.join( 'anotherPattern', '*.js' )
+		] );
+
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ) );
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ) );
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'manual', 'file.html' ) );
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'manual', 'file.html' ) );
+	} );
+
+	it( 'compiles only manual test files', () => {
+		files = {
+			[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
+			[ path.join( 'path', 'to', 'manual', 'file.md' ) ]: '## Markdown header',
+			[ path.join( 'path', 'to', 'manual', 'file.html' ) ]: '<div>html file content</div>',
+			[ path.join( 'path', 'to', 'another', 'file.md' ) ]: '## Markdown header',
+			[ path.join( 'path', 'to', 'another', 'file.html' ) ]: '<div>html file content</div>'
+		};
+
+		patternFiles = {
+			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
+			[ path.join( 'anotherPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'another', 'file.js' ) ],
+			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ],
+		};
+
+		compileHtmlFiles( 'buildDir', [
+			path.join( 'manualTestPattern', '*.js' ),
+			path.join( 'anotherPattern', '*.js' )
+		] );
+
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ) );
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ) );
+		sinon.assert.neverCalledWith( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'file.html' ) );
+		sinon.assert.neverCalledWith( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'file.html' ) );
 	} );
 } );

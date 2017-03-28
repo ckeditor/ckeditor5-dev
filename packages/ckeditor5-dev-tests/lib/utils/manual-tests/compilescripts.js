@@ -7,14 +7,24 @@
 
 'use strict';
 
-const path = require( 'path' );
 const webpack = require( 'webpack' );
 const globSync = require( '../glob' );
 const getWebpackConfigForManualTests = require( './getwebpackconfig' );
 const getRelativeFilePath = require( '../getrelativefilepath' );
 
-module.exports = function compileManualTestScripts( buildDir, manualTestPattern ) {
-	const entryFiles = globSync( path.join( manualTestPattern, '*.js' ) );
+/**
+ * @param {String} buildDir A path where compiled files will be saved.
+ * @param {Array.<String>} manualTestScriptsPatterns An array of patterns that resolve manual test scripts.
+ * @returns {Promise}
+ */
+module.exports = function compileManualTestScripts( buildDir, manualTestScriptsPatterns ) {
+	const entryFiles = manualTestScriptsPatterns.reduce( ( arr, manualTestPattern ) => {
+		return [
+			...arr,
+			...globSync( manualTestPattern ).filter( ( manualTestFile ) => manualTestFile.includes( '/manual/' ) )
+		];
+	}, [] );
+
 	const entries = getWebpackEntryPoints( entryFiles );
 	const webpackConfig = getWebpackConfigForManualTests( entries, buildDir );
 
