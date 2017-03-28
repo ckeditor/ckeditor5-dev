@@ -10,61 +10,108 @@
 const mockery = require( 'mockery' );
 const sinon = require( 'sinon' );
 const path = require( 'path' );
+const expect = require( 'chai' ).expect;
 
 describe( 'runManualTests', () => {
-	let sandbox;
+	let sandbox, spies, testsToExecute, runManualTests;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
+
 		mockery.enable( {
+			useCleanCache: true,
 			warnOnReplace: false,
 			warnOnUnregistered: false
 		} );
+
+		spies = {
+			server: sandbox.spy( () => Promise.resolve() ),
+			htmlFileCompiler: sandbox.spy( () => Promise.resolve() ),
+			scriptCompiler: sandbox.spy( () => Promise.resolve() ),
+			removeDir: sandbox.spy( () => Promise.resolve() ),
+			transformFileOptionToTestGlob: sandbox.stub()
+		};
+
+		mockery.registerMock( '../utils/manual-tests/createserver', spies.server );
+		mockery.registerMock( '../utils/manual-tests/compilehtmlfiles', spies.htmlFileCompiler );
+		mockery.registerMock( '../utils/manual-tests/compilescripts', spies.scriptCompiler );
+		mockery.registerMock( '../utils/manual-tests/removedir', spies.removeDir );
+		mockery.registerMock( '../utils/transformfileoptiontotestglob', spies.transformFileOptionToTestGlob );
+
+		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
+		sandbox.stub( process, 'cwd', () => 'workspace' );
+
+		runManualTests = require( '../../lib/tasks/runmanualtests' );
 	} );
 
 	afterEach( () => {
 		sandbox.restore();
 		mockery.disable();
-		mockery.deregisterAll();
 	} );
 
-	it( 'should run manual tests and return promise', () => {
-		const serverSpy = sandbox.spy( () => Promise.resolve() );
-		const htmlFileCompilerSpy = sandbox.spy( () => Promise.resolve() );
-		const scriptCompilerSpy = sandbox.spy( () => Promise.resolve() );
-		const removeDirSpy = sandbox.spy( () => Promise.resolve() );
+	it( 'should run all manual tests and return promise', () => {
+		const testsToExecute = 'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js';
+		spies.transformFileOptionToTestGlob.returns( testsToExecute );
 
-		mockery.registerMock( '../utils/manual-tests/createserver', serverSpy );
-		mockery.registerMock( '../utils/manual-tests/compilehtmlfiles', htmlFileCompilerSpy );
-		mockery.registerMock( '../utils/manual-tests/compilescripts', scriptCompilerSpy );
-		mockery.registerMock( '../utils/manual-tests/removedir', removeDirSpy );
+		return runManualTests( {} )
+			.then( () => {
+				expect( spies.removeDir.calledOnce ).to.equal( true );
+				expect( spies.removeDir.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
 
-		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
-		sandbox.stub( process, 'cwd', () => 'workspace' );
+				expect( spies.transformFileOptionToTestGlob.calledOnce ).to.equal( true );
+				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( '*' );
+				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 1 ] ).to.equal( true );
 
-		const runManualTests = require( '../../lib/tasks/runmanualtests' );
+				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
+				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+				expect( spies.htmlFileCompiler.firstCall.args[ 1 ] ).to.deep.equal( [ testsToExecute ] );
 
-		return runManualTests().then( () => {
-			sinon.assert.calledWithExactly(
-				removeDirSpy,
-				'workspace/build/.manual-tests'
-			);
+				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
+				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+				expect( spies.scriptCompiler.firstCall.args[ 1 ] ).to.deep.equal( [ testsToExecute ] );
 
-			sinon.assert.calledWithExactly(
-				htmlFileCompilerSpy,
-				'workspace/build/.manual-tests',
-				'workspace/packages/ckeditor5-*/tests/**/manual/**'
-			);
-			sinon.assert.calledWithExactly(
-				scriptCompilerSpy,
-				'workspace/build/.manual-tests',
-				'workspace/packages/ckeditor5-*/tests/**/manual/**'
-			);
+				expect( spies.server.calledOnce ).to.equal( true );
+				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+			} );
+	} );
 
-			sinon.assert.calledWithExactly(
-				serverSpy,
-				'workspace/build/.manual-tests'
-			);
-		} );
+	it( 'run specified manual tests', () => {
+		testsToExecute = [
+			'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
+			'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js'
+		];
+
+		spies.transformFileOptionToTestGlob.onFirstCall().returns( testsToExecute[ 0 ] );
+		spies.transformFileOptionToTestGlob.onSecondCall().returns( testsToExecute[ 1 ] );
+
+		const options = {
+			files: [
+				'build-classic',
+				'editor-classic/manual/classic.js'
+			]
+		};
+
+		return runManualTests( options )
+			.then( () => {
+				expect( spies.removeDir.calledOnce ).to.equal( true );
+				expect( spies.removeDir.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+
+				expect( spies.transformFileOptionToTestGlob.calledTwice ).to.equal( true );
+				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( 'build-classic' );
+				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 1 ] ).to.equal( true );
+				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 0 ] ).to.equal( 'editor-classic/manual/classic.js' );
+				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 1 ] ).to.equal( true );
+
+				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
+				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+				expect( spies.htmlFileCompiler.firstCall.args[ 1 ] ).to.deep.equal( testsToExecute );
+
+				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
+				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+				expect( spies.scriptCompiler.firstCall.args[ 1 ] ).to.deep.equal( testsToExecute );
+
+				expect( spies.server.calledOnce ).to.equal( true );
+				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+			} );
 	} );
 } );
