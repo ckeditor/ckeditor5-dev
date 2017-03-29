@@ -12,7 +12,8 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 
 describe( 'upload', () => {
-	let sandbox, upload, packageNames, stubs;
+	let sandbox, stubs, upload;
+	let packageNames, serverResources;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
@@ -31,17 +32,15 @@ describe( 'upload', () => {
 			},
 
 			transifexService: {
-				getResources: sandbox.spy( () => Promise.resolve( [ {
-					slug: 'ckeditor5-core'
-				} ] ) ),
+				getResources: sandbox.spy( () => Promise.resolve( serverResources ) ),
 				postResource: sandbox.spy( () => Promise.resolve( '[]' ) ),
 				putResourceContent: sandbox.spy( () => Promise.resolve( '{}' ) )
 			},
 
 			fs: {
 				readdirSync: sandbox.spy( () => packageNames ),
-				createReadStream: sandbox.spy( path => `${ path } content` )
-			},
+				createReadStream: sandbox.spy( file => `${ file } content` )
+			}
 		};
 
 		mockery.registerMock( './transifex-service', stubs.transifexService );
@@ -66,34 +65,31 @@ describe( 'upload', () => {
 			'ckeditor5-ui',
 		];
 
-		return upload( {
-			username: 'username',
-			password: 'password'
-		} ).then( test );
+		serverResources = [ {
+			slug: 'ckeditor5-core'
+		} ];
 
-		function test() {
-			sinon.assert.calledOnce( stubs.transifexService.getResources );
-			sinon.assert.calledTwice( stubs.fs.createReadStream );
-			sinon.assert.calledWithExactly( stubs.fs.readdirSync, path.join( 'workspace', 'ckeditor5', 'build', '.transifex' ) );
+		return upload( { token: 'secretToken' } )
+			.then( () => {
+				sinon.assert.calledOnce( stubs.transifexService.getResources );
+				sinon.assert.calledWithExactly( stubs.fs.readdirSync, path.join( 'workspace', 'ckeditor5', 'build', '.transifex' ) );
 
-			sinon.assert.calledOnce( stubs.transifexService.postResource );
-			sinon.assert.calledWithExactly( stubs.transifexService.postResource, {
-				username: 'username',
-				password: 'password',
-				name: 'ckeditor5-ui',
-				slug: 'ckeditor5-ui',
-				content: 'workspace/ckeditor5/build/.transifex/ckeditor5-ui/en.pot content'
+				sinon.assert.calledOnce( stubs.transifexService.postResource );
+				sinon.assert.calledWithExactly( stubs.transifexService.postResource, {
+					token: 'secretToken',
+					name: 'ckeditor5-ui',
+					slug: 'ckeditor5-ui',
+					content: 'workspace/ckeditor5/build/.transifex/ckeditor5-ui/en.pot content'
+				} );
+
+				sinon.assert.calledOnce( stubs.transifexService.putResourceContent );
+
+				sinon.assert.calledWithExactly( stubs.transifexService.putResourceContent, {
+					token: 'secretToken',
+					slug: 'ckeditor5-core',
+					name: 'ckeditor5-core',
+					content: 'workspace/ckeditor5/build/.transifex/ckeditor5-core/en.pot content'
+				} );
 			} );
-
-			sinon.assert.calledOnce( stubs.transifexService.putResourceContent );
-
-			sinon.assert.calledWithExactly( stubs.transifexService.putResourceContent, {
-				username: 'username',
-				password: 'password',
-				slug: 'ckeditor5-core',
-				name: 'ckeditor5-core',
-				content: 'workspace/ckeditor5/build/.transifex/ckeditor5-core/en.pot content'
-			} );
-		}
 	} );
 } );

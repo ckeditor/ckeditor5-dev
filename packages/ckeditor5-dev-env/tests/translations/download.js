@@ -57,7 +57,6 @@ describe( 'download', () => {
 			translations: stubs.translationUtils,
 			logger: () => stubs.logger
 		} );
-		mockery.registerMock( 'path', stubs.path );
 		mockery.registerMock( './transifex-service', stubs.transifexService );
 
 		download = require( '../../lib/translations/download' );
@@ -104,28 +103,24 @@ describe( 'download', () => {
 
 		// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 
-		return download( {
-			username: 'username',
-			password: 'password'
-		} ).then( test );
+		return download( { token: 'secretToken' } )
+			.then( () => {
+				sinon.assert.calledOnce( stubs.transifexService.getResources );
+				sinon.assert.calledTwice( stubs.transifexService.getResourceDetails );
+				sinon.assert.calledTwice( stubs.transifexService.getTranslation );
+				sinon.assert.calledTwice( stubs.del );
+				sinon.assert.calledOnce( stubs.fs.outputFileSync );
 
-		function test() {
-			sinon.assert.calledOnce( stubs.transifexService.getResources );
-			sinon.assert.calledTwice( stubs.transifexService.getResourceDetails );
-			sinon.assert.calledTwice( stubs.transifexService.getTranslation );
-			sinon.assert.calledTwice( stubs.del );
-			sinon.assert.calledOnce( stubs.fs.outputFileSync );
+				sinon.assert.calledWithExactly(
+					stubs.del,
+					path.join( 'workspace', 'packages', 'ckeditor5-core', 'lang', 'translations', '**' )
+				);
 
-			sinon.assert.calledWithExactly(
-				stubs.del,
-				path.join( 'workspace', 'packages', 'ckeditor5-core', 'lang', 'translations', '**' )
-			);
-
-			sinon.assert.calledWithExactly(
-				stubs.fs.outputFileSync,
-				path.join( 'workspace', 'packages', 'ckeditor5-ui', 'lang', 'translations', 'en-au.po' ),
-				'ckeditor5-ui-en-content'
-			);
-		}
+				sinon.assert.calledWithExactly(
+					stubs.fs.outputFileSync,
+					path.join( 'workspace', 'packages', 'ckeditor5-ui', 'lang', 'translations', 'en-au.po' ),
+					'ckeditor5-ui-en-content'
+				);
+			} );
 	} );
 } );
