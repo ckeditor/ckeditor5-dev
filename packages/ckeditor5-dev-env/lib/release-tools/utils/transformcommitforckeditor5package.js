@@ -10,6 +10,10 @@ const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const parserOptions = require( './parser-options' );
 const utils = require( './transform-commit-utils' );
 
+// A size of indent for a log. The number is equal to length of the Gulp log string:
+// '[XX:YY:ZZ] * 1234567 ', where '1234567' is short commit id.
+const INDENT_SIZE = 21;
+
 /**
  * Parses a single commit:
  *   - displays a log when the commit has invalid format of the message,
@@ -61,8 +65,7 @@ module.exports = function transformCommitForCKEditor5Package( commit, displayLog
 	}
 
 	if ( commit.header.startsWith( 'Merge' ) && hasCorrectType ) {
-		const indentSize = '[XX:YY:ZZ] * 1234567 '.length;
-		logMessage += `\n${ ' '.repeat( indentSize ) }"${ commit.type }: ${ commit.subject }"`;
+		logMessage += `\n${ ' '.repeat( INDENT_SIZE ) }"${ commit.type }: ${ commit.subject }"`;
 	}
 
 	log.info( logMessage );
