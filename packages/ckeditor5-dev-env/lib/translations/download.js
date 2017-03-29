@@ -26,6 +26,7 @@ module.exports = function download( loginConfig ) {
 		} )
 		.catch( ( err ) => {
 			logger.error( err );
+			throw err;
 		} );
 };
 

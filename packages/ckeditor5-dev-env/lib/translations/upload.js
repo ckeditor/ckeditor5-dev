@@ -29,7 +29,10 @@ module.exports = function upload( loginConfig ) {
 		.then( ( uploadedPackageNames ) => getUploadedPackages( potFiles, uploadedPackageNames ) )
 		.then( ( areUploadedResources ) => createOrUpdateResources( loginConfig, areUploadedResources, potFiles ) )
 		.then( () => logger.info( 'All resources uploaded.\n' ) )
-		.catch( ( err ) => logger.error( err ) );
+		.catch( ( err ) => {
+			logger.error( err );
+			throw err;
+		} );
 };
 
 function getUploadedPackages( potFiles, uploadedPackageNames ) {

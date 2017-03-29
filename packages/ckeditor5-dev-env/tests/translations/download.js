@@ -12,15 +12,15 @@ const path = require( 'path' );
 const mockery = require( 'mockery' );
 
 describe( 'download', () => {
-	const sandbox = sinon.sandbox.create();
-	let stubs;
-	let download, resources, resourcesDetails, translations, fileContents;
+	let sandbox, stubs, download, resources, resourcesDetails, translations, fileContents;
 
 	beforeEach( () => {
+		sandbox = sinon.sandbox.create();
+
 		mockery.enable( {
 			useCleanCache: true,
 			warnOnReplace: false,
-			warnOnUnregistered: false,
+			warnOnUnregistered: false
 		} );
 
 		stubs = {
@@ -29,29 +29,22 @@ describe( 'download', () => {
 			logger: {
 				info: sandbox.stub(),
 				warning: sandbox.stub(),
-				error: sandbox.stub(),
+				error: sandbox.stub()
 			},
 
 			fs: {
-				outputFileSync: sandbox.spy(),
+				outputFileSync: sandbox.spy()
 			},
 
-			devUtils: {
-				translations: {
-					createDictionaryFromPoFileContent: sandbox.spy( poFileContent => fileContents[ poFileContent ] ),
-					cleanPoFileContent: x => x,
-				},
-				logger() {
-					return stubs.logger;
-				}
+			translationUtils: {
+				createDictionaryFromPoFileContent: sandbox.spy( poFileContent => fileContents[ poFileContent ] ),
+				cleanPoFileContent: x => x
 			},
-
-			path: path,
 
 			transifexService: {
 				getResources: sandbox.spy( () => Promise.resolve( resources ) ),
 				getResourceDetails: sandbox.spy( ( { slug } ) => Promise.resolve( resourcesDetails[ slug ] ) ),
-				getTranslation: sandbox.spy( ( { lang, slug	} ) => Promise.resolve( translations[ slug ][ lang ] ) ),
+				getTranslation: sandbox.spy( ( { lang, slug	} ) => Promise.resolve( translations[ slug ][ lang ] ) )
 			}
 		};
 
@@ -60,7 +53,10 @@ describe( 'download', () => {
 		mockery.registerMock( './languagecodemap.json', { 'en_AU': 'en-au' } );
 		mockery.registerMock( 'del', stubs.del );
 		mockery.registerMock( 'fs-extra', stubs.fs );
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', stubs.devUtils );
+		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
+			translations: stubs.translationUtils,
+			logger: () => stubs.logger
+		} );
 		mockery.registerMock( 'path', stubs.path );
 		mockery.registerMock( './transifex-service', stubs.transifexService );
 
@@ -102,7 +98,7 @@ describe( 'download', () => {
 		};
 
 		fileContents = {
-			'ckeditor5-core-pl-content': {}, // empty
+			'ckeditor5-core-pl-content': {},
 			'ckeditor5-ui-en-content': { ui: 'ui' }
 		};
 
@@ -111,7 +107,9 @@ describe( 'download', () => {
 		return download( {
 			username: 'username',
 			password: 'password'
-		} ).then( () => {
+		} ).then( test );
+
+		function test() {
 			sinon.assert.calledOnce( stubs.transifexService.getResources );
 			sinon.assert.calledTwice( stubs.transifexService.getResourceDetails );
 			sinon.assert.calledTwice( stubs.transifexService.getTranslation );
@@ -128,8 +126,6 @@ describe( 'download', () => {
 				path.join( 'workspace', 'packages', 'ckeditor5-ui', 'lang', 'translations', 'en-au.po' ),
 				'ckeditor5-ui-en-content'
 			);
-		}, ( err ) => {
-			throw err;
-		} );
+		}
 	} );
 } );

@@ -16,33 +16,30 @@ const glob = require( 'glob' );
 const fs = require( 'fs-extra' );
 
 describe( 'collect-utils', () => {
-	const sandbox = sinon.sandbox.create();
-	let utils;
-	let stubs;
-	let originalStringMap;
+	let sandbox, utils, stubs, originalStringMap;
 
 	beforeEach( () => {
+		sandbox = sinon.sandbox.create();
+
 		mockery.enable( {
 			warnOnReplace: false,
-			warnOnUnregistered: false,
+			warnOnUnregistered: false
 		} );
 
 		stubs = {
 			logger: {
 				info: sandbox.spy(),
 				warning: sandbox.spy(),
-				error: err => {
-					throw err;
-				},
+				error: sandbox.spy()
 			},
 			translations: {
-				findOriginalStrings: sandbox.spy( string => originalStringMap[ string ] ),
+				findOriginalStrings: sandbox.spy( string => originalStringMap[ string ] )
 			}
 		};
 
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
 			logger: () => stubs.logger,
-			translations: stubs.translations,
+			translations: stubs.translations
 		} );
 
 		sandbox.stub( process, 'cwd', () => path.join( 'workspace', 'ckeditor5' ) );
@@ -154,7 +151,7 @@ describe( 'collect-utils', () => {
 			] );
 		} );
 
-		it( 'shouldn\'t return error when translation exists in ckeditor5-core/lang/contexts.json', () => {
+		it( 'should not return error when translation exists in ckeditor5-core/lang/contexts.json', () => {
 			const contexts = new Map( [
 				[ 'ckeditor5-core', { content: { util: 'Util' } } ]
 			] );
@@ -167,7 +164,7 @@ describe( 'collect-utils', () => {
 			expect( errors ).to.deep.equal( [] );
 		} );
 
-		it( 'shouldn\'t return error when translation exists in package that is relevant for the translation', () => {
+		it( 'should not return error when translation exists in package that is relevant for the translation', () => {
 			const contexts = new Map( [
 				[ 'ckeditor5-core', { content: {} } ],
 				[ 'ckeditor5-utils', { content: { util: 'Util' } } ]
@@ -226,7 +223,7 @@ describe( 'collect-utils', () => {
 	} );
 
 	describe( 'createPotFileContent()', () => {
-		it( 'shoud translate json object to po-style text', () => {
+		it( 'should translate json object to po-style text', () => {
 			const context = { content: { util: 'Util' } };
 			const poContent = utils.createPotFileContent( context );
 

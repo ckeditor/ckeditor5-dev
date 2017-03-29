@@ -12,25 +12,22 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 
 describe( 'upload', () => {
-	const sandbox = sinon.sandbox.create();
-	let upload;
-	let packageNames;
-	let stubs;
+	let sandbox, upload, packageNames, stubs;
 
 	beforeEach( () => {
+		sandbox = sinon.sandbox.create();
+
 		mockery.enable( {
 			useCleanCache: true,
 			warnOnReplace: false,
-			warnOnUnregistered: false,
+			warnOnUnregistered: false
 		} );
 
 		stubs = {
 			logger: {
 				info: sandbox.stub(),
 				warning: sandbox.stub(),
-				error: err => {
-					throw err;
-				},
+				error: sandbox.stub()
 			},
 
 			transifexService: {
@@ -38,12 +35,12 @@ describe( 'upload', () => {
 					slug: 'ckeditor5-core'
 				} ] ) ),
 				postResource: sandbox.spy( () => Promise.resolve( '[]' ) ),
-				putResourceContent: sandbox.spy( () => Promise.resolve( '{}' ) ),
+				putResourceContent: sandbox.spy( () => Promise.resolve( '{}' ) )
 			},
 
 			fs: {
 				readdirSync: sandbox.spy( () => packageNames ),
-				createReadStream: sandbox.spy( path => `${ path } content` ),
+				createReadStream: sandbox.spy( path => `${ path } content` )
 			},
 		};
 
@@ -69,7 +66,12 @@ describe( 'upload', () => {
 			'ckeditor5-ui',
 		];
 
-		return upload( { username: 'username', password: 'password' } ).then( () => {
+		return upload( {
+			username: 'username',
+			password: 'password'
+		} ).then( test );
+
+		function test() {
 			sinon.assert.calledOnce( stubs.transifexService.getResources );
 			sinon.assert.calledTwice( stubs.fs.createReadStream );
 			sinon.assert.calledWithExactly( stubs.fs.readdirSync, path.join( 'workspace', 'ckeditor5', 'build', '.transifex' ) );
@@ -92,6 +94,6 @@ describe( 'upload', () => {
 				name: 'ckeditor5-core',
 				content: 'workspace/ckeditor5/build/.transifex/ckeditor5-core/en.pot content'
 			} );
-		} );
+		}
 	} );
 } );
