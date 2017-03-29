@@ -6,7 +6,7 @@
 'use strict';
 
 const { availableCommitTypes } = require( './transform-commit-utils' );
-const transformCommitForCkeditor5Package = require( './transformcommitforckeditor5package' );
+const transformCommitForCKEditor5Package = require( './transformcommitforckeditor5package' );
 
 /**
  * Returns a type (major, minor, patch) of the next release based on commits.
@@ -45,7 +45,7 @@ function getNewVersionType( commits ) {
 	let hasNewFeatures = false;
 
 	for ( const item of commits ) {
-		const singleCommit = transformCommitForCkeditor5Package( item, false );
+		const singleCommit = transformCommitForCKEditor5Package( item, false );
 
 		if ( !singleCommit ) {
 			continue;

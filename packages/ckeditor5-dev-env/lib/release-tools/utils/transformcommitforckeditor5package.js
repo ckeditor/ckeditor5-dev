@@ -20,7 +20,7 @@ const utils = require( './transform-commit-utils' );
  * @param {Boolean} [displayLog=true] Whether to display the logs.
  * @returns {Commit}
  */
-module.exports = function transformCommitForCkeditor5Package( commit, displayLog = true ) {
+module.exports = function transformCommitForCKEditor5Package( commit, displayLog = true ) {
 	const log = logger( displayLog ? 'info' : 'error' );
 
 	// For merge commit from Github, additional description is provided as "footer".
