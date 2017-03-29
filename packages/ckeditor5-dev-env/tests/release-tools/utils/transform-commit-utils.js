@@ -30,7 +30,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			mockery.registerMock( './getpackagejson', stubs.getPackageJson );
 
-			transformCommit = require( '../../../lib/release-tools/utils/transformcommit' );
+			transformCommit = require( '../../../lib/release-tools/utils/transform-commit-utils' );
 		} );
 
 		afterEach( () => {
@@ -40,7 +40,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 		describe( 'availableTypes', () => {
 			it( 'should be defined', () => {
-				expect( transformCommit.availableTypes ).to.be.a( 'Map' );
+				expect( transformCommit.availableCommitTypes ).to.be.a( 'Map' );
 			} );
 		} );
 

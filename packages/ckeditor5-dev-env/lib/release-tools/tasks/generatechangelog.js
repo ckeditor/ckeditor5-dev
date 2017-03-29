@@ -66,11 +66,11 @@ module.exports = function generateChangelog( newVersion = null ) {
 					merges: undefined,
 					firstParent: true
 				};
-				const parserOpts = require( '../utils/parseroptions' );
-				const writerOpts = require( '../utils/writeroptions' );
-				writerOpts.transform = require( '../utils/transformcommitforckeditor5package' );
+				const parserOptions = require( '../utils/parser-options' );
+				const writerOptions = require( '../utils/writer-options' );
+				writerOptions.transform = require( '../utils/transformcommitforckeditor5package' );
 
-				conventionalChangelog( {}, context, gitRawCommitsOpts, parserOpts, writerOpts )
+				conventionalChangelog( {}, context, gitRawCommitsOpts, parserOptions, writerOptions )
 					.pipe( saveChangelogPipe( version ) );
 			} );
 

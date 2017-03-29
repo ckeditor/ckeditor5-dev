@@ -7,8 +7,8 @@
 
 const chalk = require( 'chalk' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const parserOptions = require( './parseroptions' );
-const transformCommit = require( './transformcommit' );
+const parserOptions = require( './parser-options' );
+const utils = require( './transform-commit-utils' );
 
 /**
  * Parses a single commit:
@@ -47,8 +47,8 @@ module.exports = function transformCommitForCkeditor5Package( commit, displayLog
 		commit.hash = commit.hash.substring( 0, 7 );
 	}
 
-	const hasCorrectType = transformCommit.availableTypes.has( commit.type );
-	const isCommitIncluded = transformCommit.availableTypes.get( commit.type );
+	const hasCorrectType = utils.availableCommitTypes.has( commit.type );
+	const isCommitIncluded = utils.availableCommitTypes.get( commit.type );
 
 	let logMessage = `* ${ commit.hash } "${ commit.header }" `;
 
@@ -74,11 +74,11 @@ module.exports = function transformCommitForCkeditor5Package( commit, displayLog
 	const issues = [];
 
 	commit.rawType = commit.type;
-	commit.type = transformCommit.getCommitType( commit.type );
+	commit.type = utils.getCommitType( commit.type );
 
 	if ( typeof commit.subject === 'string' ) {
-		commit.subject = transformCommit.linkGithubIssues(
-			transformCommit.linkGithubUsers( commit.subject ), issues
+		commit.subject = utils.linkGithubIssues(
+			utils.linkGithubUsers( commit.subject ), issues
 		);
 	}
 
@@ -98,13 +98,11 @@ module.exports = function transformCommitForCkeditor5Package( commit, displayLog
 		if ( note.title === 'BREAKING CHANGE' ) {
 			note.title = 'BREAKING CHANGES';
 		}
-		note.text = transformCommit.linkGithubIssues( transformCommit.linkGithubUsers( note.text ) );
+		note.text = utils.linkGithubIssues( utils.linkGithubUsers( note.text ) );
 	}
 
 	// Removes references that already appear in the subject.
-	commit.references = commit.references.filter( ( reference ) => {
-		return issues.indexOf( reference.issue ) === -1;
-	} );
+	commit.references = commit.references.filter( ( reference ) => !issues.includes( reference.issue ) );
 
 	return commit;
 };

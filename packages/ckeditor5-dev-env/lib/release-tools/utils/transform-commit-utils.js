@@ -12,7 +12,7 @@ const transformCommit = {
 	 * Map of available types of the commits.
 	 * Types marked as `false` will be ignored during generating the changelog.
 	 */
-	availableTypes: new Map( [
+	availableCommitTypes: new Map( [
 		[ 'Feature', true ],
 		[ 'Fix', true ],
 		[ 'Other', true ],

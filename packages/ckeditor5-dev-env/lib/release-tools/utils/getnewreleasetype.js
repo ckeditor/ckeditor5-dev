@@ -5,7 +5,7 @@
 
 'use strict';
 
-const { availableTypes } = require( './transformcommit' );
+const { availableCommitTypes } = require( './transform-commit-utils' );
 const transformCommitForCkeditor5Package = require( './transformcommitforckeditor5package' );
 
 /**
@@ -15,14 +15,14 @@ const transformCommitForCkeditor5Package = require( './transformcommitforckedito
  */
 module.exports = function getNewReleaseType() {
 	const conventionalRecommendedBump = require( 'conventional-recommended-bump' );
-	const parserOpts = require( './parseroptions' );
+	const parserOptions = require( './parser-options' );
 
 	return new Promise( ( resolve, reject ) => {
 		const options = {
 			whatBump: getNewVersionType
 		};
 
-		conventionalRecommendedBump( options, parserOpts, ( err, response ) => {
+		conventionalRecommendedBump( options, parserOptions, ( err, response ) => {
 			if ( err ) {
 				return reject( err );
 			}
@@ -52,7 +52,7 @@ function getNewVersionType( commits ) {
 		}
 
 		// Check whether the commit is visible in changelog.
-		if ( !availableTypes.get( singleCommit.rawType ) ) {
+		if ( !availableCommitTypes.get( singleCommit.rawType ) ) {
 			continue;
 		}
 
