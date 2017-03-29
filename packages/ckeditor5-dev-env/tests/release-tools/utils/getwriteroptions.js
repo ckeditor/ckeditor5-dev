@@ -7,17 +7,15 @@
 
 'use strict';
 
-const fs = require( 'fs' );
-const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 
-describe( 'dev-env/release-tools/utils', () => {
+describe.only( 'dev-env/release-tools/utils', () => {
 	let getWriterOptions, sandbox, transformSpy;
 
 	beforeEach( () => {
+		transformSpy = sinon.spy();
 		sandbox = sinon.sandbox.create();
-		transformSpy = sandbox.spy();
 
 		getWriterOptions = require( '../../../lib/release-tools/utils/getwriteroptions' );
 	} );
@@ -44,23 +42,6 @@ describe( 'dev-env/release-tools/utils', () => {
 			expect( writerOptions.commitGroupsSort ).to.be.a( 'function' );
 			expect( writerOptions.noteGroupsSort ).to.be.a( 'function' );
 			expect( writerOptions.notesSort ).to.be.a( 'function' );
-		} );
-
-		it( 'loads the templates', () => {
-			const joinStub = sandbox.stub( path, 'join' );
-			const readFileSyncStub = sandbox.stub( fs, 'readFileSync' );
-
-			joinStub.returnsArg( 1 );
-			readFileSyncStub.returnsArg( 0 );
-
-			const writerOptions = getWriterOptions( transformSpy );
-
-			expect( joinStub.callCount ).to.equal( 4, 'Calls "path.join"' );
-			expect( readFileSyncStub.callCount ).to.equal( 4, 'Calls "fs.readFileSync"' );
-			expect( writerOptions.mainTemplate ).to.equal( 'template.hbs' );
-			expect( writerOptions.headerPartial ).to.equal( 'header.hbs' );
-			expect( writerOptions.commitPartial ).to.equal( 'commit.hbs' );
-			expect( writerOptions.footerPartial ).to.equal( 'footer.hbs' );
 		} );
 	} );
 } );
