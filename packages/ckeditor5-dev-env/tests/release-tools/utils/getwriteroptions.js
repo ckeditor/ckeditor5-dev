@@ -10,7 +10,7 @@
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 
-describe.only( 'dev-env/release-tools/utils', () => {
+describe( 'dev-env/release-tools/utils', () => {
 	let getWriterOptions, sandbox, transformSpy;
 
 	beforeEach( () => {
