@@ -14,7 +14,7 @@ const mockery = require( 'mockery' );
 describe( 'dev-env/release-tools/utils', () => {
 	let transformCommit, sandbox, stubs;
 
-	describe( 'transformCommit', () => {
+	describe( 'transformCommitUtils', () => {
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
 
