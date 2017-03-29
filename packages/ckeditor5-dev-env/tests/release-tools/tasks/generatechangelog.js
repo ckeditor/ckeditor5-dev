@@ -16,13 +16,15 @@ const changelogUtils = require( '../../../lib/release-tools/utils/changelog' );
 
 describe( 'dev-env/release-tools/tasks', () => {
 	describe( 'generateChangelog()', () => {
-		let generateChangelog, sandbox, stubs, changelogBuffer;
+		let generateChangelog, sandbox, stubs, changelogBuffer, conventionalChangelogArguments;
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
 
 			stubs = {
-				conventionalChangelog() {
+				conventionalChangelog( ...args ) {
+					conventionalChangelogArguments = args;
+
 					return new class extends require( 'stream' ).Readable {
 						_read() {
 							if ( changelogBuffer instanceof Buffer ) {
@@ -54,7 +56,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 				},
 				cli: {
 					provideVersion: sandbox.stub()
-				}
+				},
+				getWriterOptions: sandbox.stub()
 			};
 
 			mockery.enable( {
@@ -68,6 +71,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			mockery.registerMock( '../utils/changelog', stubs.changelogUtils );
 			mockery.registerMock( '../utils/getnewreleasetype', stubs.getNewReleaseType );
 			mockery.registerMock( '../utils/hascommitsfromlastrelease', stubs.hasCommitsFromLastRelease );
+			mockery.registerMock( '../utils/getwriteroptions', stubs.getWriterOptions );
 			mockery.registerMock( '../utils/getpackagejson', () => {
 				return {
 					name: 'test-package',
@@ -88,6 +92,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 		afterEach( () => {
 			sandbox.restore();
 			mockery.disable();
+			conventionalChangelogArguments = null;
 		} );
 
 		it( 'creates a changelog file if is not present', () => {
@@ -122,8 +127,13 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			stubs.changelogUtils.getChangelog.returns( changelogUtils.changelogHeader );
 
+			stubs.getWriterOptions.returns( { foo: 'bar' } );
+
 			return generateChangelog( '1.0.0' )
 				.then( () => {
+					expect( conventionalChangelogArguments ).to.be.an( 'array' );
+					expect( conventionalChangelogArguments[ 4 ] ).to.deep.equal( { foo: 'bar' } );
+
 					const newChangelog = changelogUtils.changelogHeader + newChangelogChunk + '\n';
 
 					expect( stubs.changelogUtils.saveChangelog.calledOnce ).to.equal( true );
@@ -193,7 +203,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				} );
 		} );
 
-		it( 'commited changelog should not trigger CI', () => {
+		it( 'committed changelog should not trigger CI', () => {
 			const newChangelogChunk = [
 				'## 1.0.0',
 				'',

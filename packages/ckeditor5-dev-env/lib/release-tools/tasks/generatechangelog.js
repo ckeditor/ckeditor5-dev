@@ -14,6 +14,7 @@ const hasCommitsFromLastRelease = require( '../utils/hascommitsfromlastrelease' 
 const cli = require( '../utils/cli' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const changelogUtils = require( '../utils/changelog' );
+const getWriterOptions = require( '../utils/getwriteroptions' );
 
 /**
  * Generates the release changelog based on commit messages in the repository.
@@ -23,6 +24,7 @@ const changelogUtils = require( '../utils/changelog' );
  * If package does not have any commits, user has to confirm whether the changelog
  * should be generated.
  *
+ * @param {String|null} [newVersion=null]
  * @returns {Promise}
  */
 module.exports = function generateChangelog( newVersion = null ) {
@@ -67,8 +69,9 @@ module.exports = function generateChangelog( newVersion = null ) {
 					firstParent: true
 				};
 				const parserOptions = require( '../utils/parser-options' );
-				const writerOptions = require( '../utils/writer-options' );
-				writerOptions.transform = require( '../utils/transformcommitforckeditor5package' );
+				const writerOptions = getWriterOptions(
+					require( '../utils/transformcommitforckeditor5package' )
+				);
 
 				conventionalChangelog( {}, context, gitRawCommitsOpts, parserOptions, writerOptions )
 					.pipe( saveChangelogPipe( version ) );

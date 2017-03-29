@@ -7,7 +7,7 @@
 
 const getPackageJson = require( './getpackagejson' );
 
-const transformCommit = {
+const transformCommitUtils = {
 	/**
 	 * Map of available types of the commits.
 	 * Types marked as `false` will be ignored during generating the changelog.
@@ -93,4 +93,4 @@ const transformCommit = {
 	}
 };
 
-module.exports = transformCommit;
+module.exports = transformCommitUtils;
