@@ -15,6 +15,7 @@ const cli = require( '../utils/cli' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const changelogUtils = require( '../utils/changelog' );
 const getWriterOptions = require( '../utils/getwriteroptions' );
+const transformCommitForCKEditor5Package = require( '../utils/transformcommitforckeditor5package' );
 
 /**
  * Generates the release changelog based on commit messages in the repository.
@@ -39,7 +40,9 @@ module.exports = function generateChangelog( newVersion = null ) {
 		let promise = Promise.resolve();
 
 		if ( !newVersion ) {
-			promise = promise.then( () => getNewReleaseType() )
+			promise = promise.then( () => {
+					return getNewReleaseType( transformCommitForCKEditor5Package );
+				} )
 				.then( ( response ) => {
 					const newReleaseType = ( hasCommitsFromLastRelease() ) ? response.releaseType : null;
 
@@ -69,9 +72,7 @@ module.exports = function generateChangelog( newVersion = null ) {
 					firstParent: true
 				};
 				const parserOptions = require( '../utils/parser-options' );
-				const writerOptions = getWriterOptions(
-					require( '../utils/transformcommitforckeditor5package' )
-				);
+				const writerOptions = getWriterOptions( transformCommitForCKEditor5Package );
 
 				conventionalChangelog( {}, context, gitRawCommitsOpts, parserOptions, writerOptions )
 					.pipe( saveChangelogPipe( version ) );

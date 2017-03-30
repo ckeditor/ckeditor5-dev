@@ -57,7 +57,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 				cli: {
 					provideVersion: sandbox.stub()
 				},
-				getWriterOptions: sandbox.stub()
+				getWriterOptions: sandbox.stub(),
+				transformCommit: sandbox.spy()
 			};
 
 			mockery.enable( {
@@ -72,6 +73,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			mockery.registerMock( '../utils/getnewreleasetype', stubs.getNewReleaseType );
 			mockery.registerMock( '../utils/hascommitsfromlastrelease', stubs.hasCommitsFromLastRelease );
 			mockery.registerMock( '../utils/getwriteroptions', stubs.getWriterOptions );
+			mockery.registerMock( '../utils/transformcommitforckeditor5package', stubs.transformCommit );
 			mockery.registerMock( '../utils/getpackagejson', () => {
 				return {
 					name: 'test-package',
@@ -180,7 +182,10 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.logger.info.thirdCall.args[ 0 ] ).to.match( /Changelog for "test-package" \(v0\.1\.0\) has been generated\./ );
 
 					expect( stubs.hasCommitsFromLastRelease.calledOnce ).to.equal( true );
+
 					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
+					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit );
+
 					expect( stubs.cli.provideVersion.calledOnce ).to.equal( true );
 					expect( stubs.cli.provideVersion.firstCall.args[ 0 ] ).to.equal( '0.0.1' );
 					expect( stubs.cli.provideVersion.firstCall.args[ 1 ] ).to.equal( 'minor' );
@@ -199,6 +204,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			return generateChangelog()
 				.then( () => {
+					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit );
 					expect( stubs.changelogUtils.saveChangelog.called ).to.equal( false );
 				} );
 		} );
