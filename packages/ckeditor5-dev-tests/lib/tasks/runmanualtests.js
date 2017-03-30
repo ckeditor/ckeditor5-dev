@@ -12,21 +12,25 @@ const createManualTestServer = require( '../utils/manual-tests/createserver' );
 const compileManualTestScripts = require( '../utils/manual-tests/compilescripts' );
 const compileManualTestHtmlFiles = require( '../utils/manual-tests/compilehtmlfiles' );
 const removeDir = require( '../utils/manual-tests/removedir' );
+const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontotestglob' );
 
 /**
- * Main function that runs automated tests.
+ * Main function that runs manual tests.
  *
+ * @param {Object} options
+ * @param {Array.<String>} options.files
  * @returns {Promise}
  */
-module.exports = function runManualTests() {
+module.exports = function runManualTests( options ) {
 	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
-	const manualTestPattern = path.join( process.cwd(), 'packages', 'ckeditor5-*', 'tests', '**', 'manual', '**' );
+	const files = ( options.files && options.files.length ) ? options.files : [ '*' ];
+	const manualTestFilesPattern = files.map( ( file ) => transformFileOptionToTestGlob( file, true ) );
 
 	return Promise.resolve()
 		.then( () => removeDir( buildDir ) )
 		.then( () => Promise.all( [
-			compileManualTestScripts( buildDir, manualTestPattern ),
-			compileManualTestHtmlFiles( buildDir, manualTestPattern )
+			compileManualTestScripts( buildDir, manualTestFilesPattern ),
+			compileManualTestHtmlFiles( buildDir, manualTestFilesPattern )
 		] ) )
 		.then( () => createManualTestServer( buildDir ) );
 };
