@@ -1,9 +1,11 @@
 CKEditor 5 Webpack utils
 =========================
 
-Intergrate [CKEditor 5](https://ckeditor5.github.io)'s build process with your [Webpack](https://webpack.js.org) setup.
+Utilities for building [CKEditor 5](https://ckeditor5.github.io) with [Webpack](https://webpack.js.org).
 
-Requires Webpack >=2.0.0.
+Webpack >=2.0.0 is required.
+
+See also [@ckeditor/ckeditor5-dev-webpack-plugin](https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-webpack-plugin).
 
 More information about development tools packages can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev>.
 

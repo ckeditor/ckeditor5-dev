@@ -52,7 +52,7 @@ export class ClassicEditor extends ClassicEditorBase {}
 ClassicEditor.build = {
 	plugins: [
 		ArticlePlugin,
-		ClipboardPlugin 
+		ClipboardPlugin
 	],
 	config: require( './config-editor' )
 };

@@ -45,7 +45,7 @@ export class ${ options.moduleName } extends ${ options.moduleName }Base {}
 
 ${ options.moduleName }.build = {
 	plugins: [
-		${ Object.keys( plugins ).join( ',\n\t\t' ) } 
+		${ Object.keys( plugins ).join( ',\n\t\t' ) }
 	],
 	config: require( '${ configPath }' )
 };

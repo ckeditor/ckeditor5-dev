@@ -1,7 +1,7 @@
 {
   "name": "@ckeditor/ckeditor5-dev-webpack-utils",
   "version": "0.0.1",
-  "description": "CKEditor 5 utils for Webpack.",
+  "description": "Utils for building CKEditor 5 with Webpack 2.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
