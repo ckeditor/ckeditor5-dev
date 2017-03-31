@@ -7,6 +7,8 @@
 
 const path = require( 'path' );
 const BabiliPlugin = require( 'babili-webpack-plugin' );
+const webpack = require( 'webpack' );
+const getLicenseBanner = require( './getlicensebanner' );
 
 /**
  * Returns an configuration for Webpack which will use features introduced in ES6.
@@ -30,8 +32,12 @@ module.exports = function getWebpackConfig( options ) {
 		},
 
 		plugins: [
-			new BabiliPlugin( {
+			new BabiliPlugin( null, {
 				comments: false
+			} ),
+			new webpack.BannerPlugin( {
+				banner: getLicenseBanner(),
+				raw: true
 			} )
 		],
 
