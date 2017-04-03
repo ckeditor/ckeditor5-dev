@@ -22,4 +22,10 @@ describe( 'bundler', () => {
 			expect( tasks.createEntryFile ).to.be.a( 'function' );
 		} );
 	} );
+
+	describe( 'getLicenseBanner()', () => {
+		it( 'should be a function', () => {
+			expect( tasks.getLicenseBanner ).to.be.a( 'function' );
+		} );
+	} );
 } );

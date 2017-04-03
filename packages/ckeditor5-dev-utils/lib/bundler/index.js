@@ -6,5 +6,6 @@
 'use strict';
 
 module.exports = {
-	createEntryFile: require( './createentryfile' )
+	createEntryFile: require( './createentryfile' ),
+	getLicenseBanner: require( './getlicensebanner' )
 };
