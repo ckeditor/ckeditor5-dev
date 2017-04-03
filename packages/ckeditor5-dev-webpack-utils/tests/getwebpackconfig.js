@@ -29,12 +29,10 @@ describe( 'dev-bundler-webpack/utils', () => {
 		it( 'returns configuration for webpack which compiles code to ES5', () => {
 			sandbox.spy( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 
-			const cwd = '/cwd';
-			const entryPoint = cwd + '/ckeditor.js';
-			const destinationPath = cwd + '/build';
+			const entryPoint = '/foo/ckeditor.js';
+			const destinationPath = '/foo/build';
 
 			const config = getWebpackConfig( {
-				cwd,
 				entryPoint,
 				destinationPath
 			} );
@@ -55,10 +53,6 @@ describe( 'dev-bundler-webpack/utils', () => {
 			expect( config.module ).to.have.property( 'rules' );
 			expect( config.module.rules ).to.be.an( 'array' );
 			expect( config.module.rules.length ).to.equal( 2 );
-
-			expect( config ).to.have.deep.property( 'resolveLoader' );
-			expect( config.resolveLoader ).to.have.property( 'modules' );
-			expect( config.resolveLoader.modules[ 0 ] ).to.equal( cwd + '/node_modules' );
 		} );
 	} );
 } );

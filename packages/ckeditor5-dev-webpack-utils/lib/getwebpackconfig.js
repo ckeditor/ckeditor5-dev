@@ -5,7 +5,6 @@
 
 'use strict';
 
-const path = require( 'path' );
 const BabiliPlugin = require( 'babili-webpack-plugin' );
 const webpack = require( 'webpack' );
 const getLicenseBanner = require( './getlicensebanner' );
@@ -16,7 +15,6 @@ const getLicenseBanner = require( './getlicensebanner' );
  * @param options
  * @param {String} options.entryPoint An entry point which will be compiled.
  * @param {String} options.destinationPath A path where compiled file will be saved.
- * @param {String} options.cwd Current work directory. Required for searching the modules.
  * @returns {Object}
  */
 module.exports = function getWebpackConfig( options ) {
@@ -53,12 +51,6 @@ module.exports = function getWebpackConfig( options ) {
 					test: /\.scss$/,
 					use: [ 'style-loader', 'css-loader', 'sass-loader' ]
 				}
-			]
-		},
-
-		resolveLoader: {
-			modules: [
-				path.join( options.cwd, 'node_modules' )
 			]
 		}
 	};
