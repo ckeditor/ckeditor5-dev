@@ -39,7 +39,7 @@ describe( 'upload', () => {
 
 			fs: {
 				readdirSync: sandbox.spy( () => packageNames ),
-				createReadStream: sandbox.spy( file => `${ file } content` )
+				readFileSync: sandbox.spy( file => `${ file } content` )
 			}
 		};
 

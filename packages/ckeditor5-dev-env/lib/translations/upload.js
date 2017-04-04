@@ -52,7 +52,7 @@ function createOrUpdateResource( config, potFile, isUploadedResource ) {
 	const resConfig = Object.assign( {}, config, {
 		name: packageName,
 		slug: packageName,
-		content: fs.createReadStream( path )
+		content: fs.readFileSync( path )
 	} );
 
 	if ( isUploadedResource ) {
