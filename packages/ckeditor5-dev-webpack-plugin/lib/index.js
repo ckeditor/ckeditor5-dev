@@ -5,7 +5,7 @@
 
 'use strict';
 
-const replaceTranslationCallsForOneLanguage = require( './replacetranslationcallsforonelanguage' );
+const replaceTCalls = require( './replacetcalls' );
 
 module.exports = class CKEditorWebpackPlugin {
 	/**
@@ -21,7 +21,7 @@ module.exports = class CKEditorWebpackPlugin {
 		const { languages } = this.options;
 
 		if ( languages && languages.length == 1 ) {
-			replaceTranslationCallsForOneLanguage( compiler, languages[ 0 ] );
+			replaceTCalls( compiler, languages[ 0 ] );
 		} else {
 			console.error( 'Multi-language support is not implemented yet.' );
 		}

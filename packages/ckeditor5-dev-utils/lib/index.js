@@ -11,5 +11,6 @@ module.exports = {
 	tools: require( './tools' ),
 	stream: require( './stream' ),
 	workspace: require( './workspace' ),
-	translations: require( './translations/index' )
+	translations: require( './translations/index' ),
+	bundler: require( './bundler/index' )
 };
