@@ -6,7 +6,7 @@
 'use strict';
 
 const rollup = require( 'rollup' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { tools, bundler } = require( '@ckeditor/ckeditor5-dev-utils' );
 const fs = require( 'fs' );
 const gulp = require( 'gulp' );
 const gulpCssnano = require( 'gulp-cssnano' );
@@ -180,21 +180,21 @@ const tasks = {
 	 * @param {Object}
 	 * @param {String} destiationPath
 	 * @param {String} moduleName Module name of CKEditor instance exposed as global variable by a bundle.
-	 * @param {String} sourceBuildDir Temporary directory.
 	 * @param {String} editor
 	 * @param {Array.<String>} plugins
 	 */
-	_saveLocallyTemporaryEntryFile( { destinationPath, moduleName, sourceBuildDir, editor, plugins } ) {
+	_saveLocallyTemporaryEntryFile( { destinationPath, moduleName, editor, plugins } ) {
 		mkdirp.sync( destinationPath );
 
 		const bundleTmpDir = fs.mkdtempSync( destinationPath + path.sep );
 		// Entry file can not be a stream because rollup requires physically existing file.
 		const temporaryEntryFilePath = path.join( bundleTmpDir, 'entryfile.js' );
-		fs.writeFileSync( temporaryEntryFilePath, utils.renderEntryFileContent(
-			bundleTmpDir,
-			{ moduleName, editor, plugins },
-			sourceBuildDir
-		) );
+
+		bundler.createEntryFile( temporaryEntryFilePath, {
+			moduleName,
+			editor,
+			plugins
+		} );
 
 		return { temporaryEntryFilePath, bundleTmpDir };
 	},

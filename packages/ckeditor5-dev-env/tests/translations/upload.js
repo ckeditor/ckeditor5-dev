@@ -13,7 +13,7 @@ const mockery = require( 'mockery' );
 
 describe( 'upload', () => {
 	let sandbox, stubs, upload;
-	let packageNames, serverResources;
+	let packageNames, serverResources, fileContents;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
@@ -33,13 +33,13 @@ describe( 'upload', () => {
 
 			transifexService: {
 				getResources: sandbox.spy( () => Promise.resolve( serverResources ) ),
-				postResource: sandbox.spy( () => Promise.resolve( '[]' ) ),
-				putResourceContent: sandbox.spy( () => Promise.resolve( '{}' ) )
+				postResource: sandbox.spy( () => Promise.resolve( [] ) ),
+				putResourceContent: sandbox.spy( () => Promise.resolve( {} ) )
 			},
 
 			fs: {
 				readdirSync: sandbox.spy( () => packageNames ),
-				readFileSync: sandbox.spy( file => `${ file } content` )
+				readFileSync: sandbox.spy( fileName => fileContents[ fileName ] )
 			}
 		};
 
@@ -69,6 +69,11 @@ describe( 'upload', () => {
 			slug: 'ckeditor5-core'
 		} ];
 
+		fileContents = {
+			'workspace/ckeditor5/build/.transifex/ckeditor5-ui/en.pot': '# ckeditor-ui en.pot content',
+			'workspace/ckeditor5/build/.transifex/ckeditor5-core/en.pot': '# ckeditor-core en.pot content',
+		};
+
 		return upload( { token: 'secretToken' } )
 			.then( () => {
 				sinon.assert.calledOnce( stubs.transifexService.getResources );
@@ -79,7 +84,7 @@ describe( 'upload', () => {
 					token: 'secretToken',
 					name: 'ckeditor5-ui',
 					slug: 'ckeditor5-ui',
-					content: 'workspace/ckeditor5/build/.transifex/ckeditor5-ui/en.pot content'
+					content: '# ckeditor-ui en.pot content'
 				} );
 
 				sinon.assert.calledOnce( stubs.transifexService.putResourceContent );
@@ -88,7 +93,7 @@ describe( 'upload', () => {
 					token: 'secretToken',
 					slug: 'ckeditor5-core',
 					name: 'ckeditor5-core',
-					content: 'workspace/ckeditor5/build/.transifex/ckeditor5-core/en.pot content'
+					content: '# ckeditor-core en.pot content'
 				} );
 			} );
 	} );

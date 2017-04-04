@@ -14,7 +14,7 @@ const {	TranslationService } = require( '@ckeditor/ckeditor5-dev-utils' ).transl
  * @param {Object} compiler Webpack compiler.
  * @param {String} language Language code, e.g en_US.
  */
-module.exports = function replaceTranslationCallsForOneLanguage( compiler, language ) {
+module.exports = function replaceTCalls( compiler, language ) {
 	const translationService = new TranslationService( language );
 
 	compiler.options.translateSource = ( source ) => translationService.translateSource( source );
@@ -58,7 +58,7 @@ module.exports = function replaceTranslationCallsForOneLanguage( compiler, langu
 	// Injects loader when the file comes from ckeditor5-* packages.
 	function maybeAddLoader( resolveOptions ) {
 		if ( resolveOptions.resource.match( /\/ckeditor5-[^/]+\/src\/.+\.js$/ ) ) {
-			resolveOptions.loaders.unshift( path.join( __dirname, 'translate-source-loader.js' ) );
+			resolveOptions.loaders.unshift( path.join( __dirname, 'translatesourceloader.js' ) );
 		}
 	}
 };
