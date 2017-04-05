@@ -14,14 +14,10 @@ gulp.task( 'lint-staged', ckeditor5Lint.lintStaged );
 gulp.task( 'pre-commit', [ 'lint-staged' ] );
 
 gulp.task( 'changelog', () => {
-	return require( '@ckeditor/ckeditor5-dev-env' ).generateChangelog();
-} );
-
-gulp.task( 'release', () => {
-	const cli = require( '@ckeditor/ckeditor5-dev-env/lib/release-tools/utils/cli' );
-
-	return cli.configureReleaseOptions()
-		.then( ( options ) => {
-			return require( '@ckeditor/ckeditor5-dev-env' ).createRelease( options );
-		} );
+	return require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForDependencies( {
+		cwd: __dirname,
+		packages: 'packages/',
+		isDevPackage: true,
+		checkPackageJson: false
+	} );
 } );
