@@ -5,46 +5,67 @@
 
 'use strict';
 
+const conventionalCommitsParser = require( 'conventional-commits-parser' );
+const conventionalCommitsFilter = require( 'conventional-commits-filter' );
+const gitRawCommits = require( 'git-raw-commits' );
+const concat = require( 'concat-stream' );
+const parserOptions = require( './parser-options' );
 const { availableCommitTypes } = require( './transform-commit-utils' );
+const getPackageJson = require( './getpackagejson' );
+const versions = require( './versions' );
 
 /**
  * Returns a type (major, minor, patch) of the next release based on commits.
  *
+ * If given package has not changed, suggested version will be 'skip'.
+ *
  * @param {Function} transformCommit
+ * @param {Boolean} isDevPackage Is the function called in a repository
+ * with multiple packages (which is management by Lerna).
  * @returns {Promise}
  */
-module.exports = function getNewReleaseType( transformCommit ) {
-	const conventionalRecommendedBump = require( 'conventional-recommended-bump' );
-	const parserOptions = require( './parser-options' );
+module.exports = function getNewReleaseType( transformCommit, isDevPackage ) {
+	const packageJson = getPackageJson();
+	let fromVersion = versions.getLastFromChangelog();
+
+	if ( isDevPackage && fromVersion ) {
+		fromVersion = packageJson.name + '@' + fromVersion;
+	}
+
+	const gitRawCommitsOpts = {
+		format: '%B%n-hash-%n%H',
+		from: fromVersion,
+		merges: undefined,
+		firstParent: true
+	};
+
+	const context = {
+		displayLogs: true,
+		packageData: packageJson
+	};
 
 	return new Promise( ( resolve, reject ) => {
-		const options = {
-			whatBump: getNewVersionType
-		};
+		gitRawCommits( gitRawCommitsOpts )
+			.pipe( conventionalCommitsParser( parserOptions ) )
+			.pipe( concat( ( data ) => {
+				const commits = conventionalCommitsFilter( data );
+				const releaseType = getNewVersionType( commits );
 
-		conventionalRecommendedBump( options, parserOptions, ( err, response ) => {
-			if ( err ) {
-				return reject( err );
-			}
-
-			return resolve( response );
-		} );
+				return resolve( { releaseType } );
+			} ) )
+			.on( 'error', reject );
 	} );
 
-	// Returns a level which represents a type of release based on the commits.
-	//   - 0: major,
-	//   - 1: minor,
-	//   - 2: patch.
-	//
-	// An input array is a result of module https://github.com/conventional-changelog/conventional-commits-parser.
+	// Returns a type of version for a release based on the commits.
 	//
 	// @param {Array} commits
-	// @returns {Number}
+	// @returns {String}
 	function getNewVersionType( commits ) {
 		let hasNewFeatures = false;
+		let hasChanges = false;
 
 		for ( const item of commits ) {
-			const singleCommit = transformCommit( item, false );
+			const singleCommit = transformCommit( item, context );
 
 			if ( !singleCommit ) {
 				continue;
@@ -55,9 +76,11 @@ module.exports = function getNewReleaseType( transformCommit ) {
 				continue;
 			}
 
+			hasChanges = true;
+
 			for ( const note of singleCommit.notes ) {
-				if ( note.title === 'BREAKING CHANGES' || note.title === 'BREAKING CHANGE' ) {
-					return 0;
+				if ( note.title === 'BREAKING CHANGES' ) {
+					return 'major';
 				}
 			}
 
@@ -66,6 +89,10 @@ module.exports = function getNewReleaseType( transformCommit ) {
 			}
 		}
 
-		return hasNewFeatures ? 1 : 2;
+		if ( !hasChanges ) {
+			return 'skip';
+		}
+
+		return hasNewFeatures ? 'minor' : 'patch';
 	}
 };
