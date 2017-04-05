@@ -21,11 +21,13 @@ const INDENT_SIZE = 21;
  *   - makes links to issues and user's profiles on GitHub.
  *
  * @param {Commit} commit
- * @param {Boolean} [displayLog=true] Whether to display the logs.
+ * @param {Object} {context}
+ * @param {Boolean} context.displayLogs Whether to display the logs.
+ * @param {Object} context.packageData Content from the 'package.json' for given package.
  * @returns {Commit}
  */
-module.exports = function transformCommitForCKEditor5Package( commit, displayLog = true ) {
-	const log = logger( displayLog ? 'info' : 'error' );
+module.exports = function transformCommitForCKEditor5Package( commit, context ) {
+	const log = logger( context.displayLogs ? 'info' : 'error' );
 
 	// For merge commit from Github, additional description is provided as "footer".
 	if ( !commit.body && commit.footer ) {

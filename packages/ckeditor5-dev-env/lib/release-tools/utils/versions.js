@@ -17,11 +17,19 @@ const versions = {
 	 */
 	getLastFromChangelog() {
 		const changelog = changelogUtils.getChangelog();
-		const regexp = /\n## \[?([^\]]+)/;
 
+		if ( !changelog ) {
+			return null;
+		}
+
+		const regexp = /\n## (\[([^\]]+)|[^ ]+)/;
 		const matches = changelog.match( regexp );
 
-		return matches ? matches[ 1 ] : null;
+		if ( !matches ) {
+			return null;
+		}
+
+		return matches[ 2 ] ? matches[ 2 ] : matches[ 1 ];
 	},
 
 	/**

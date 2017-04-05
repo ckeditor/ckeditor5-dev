@@ -45,6 +45,10 @@ const utils = {
 	getChangelog() {
 		const changelogFile = path.resolve( utils.changelogFile );
 
+		if ( !fs.existsSync( changelogFile ) ) {
+			return null;
+		}
+
 		return fs.readFileSync( changelogFile, 'utf-8' );
 	},
 
