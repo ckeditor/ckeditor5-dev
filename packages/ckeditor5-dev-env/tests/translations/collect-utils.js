@@ -8,12 +8,12 @@
 'use strict';
 
 const path = require( 'path' );
-const chai = require( 'chai' );
+const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
-const expect = chai.expect;
 const mockery = require( 'mockery' );
 const glob = require( 'glob' );
 const fs = require( 'fs-extra' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'collect-utils', () => {
 	let sandbox, utils, stubs, originalStringMap;
@@ -37,14 +37,14 @@ describe( 'collect-utils', () => {
 			}
 		};
 
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-			logger: () => stubs.logger,
-			translations: stubs.translations
-		} );
-
 		sandbox.stub( process, 'cwd', () => path.join( 'workspace', 'ckeditor5' ) );
 
-		utils = require( '../../lib/translations/collect-utils' );
+		utils = proxyquire( '../../lib/translations/collect-utils' , {
+			'@ckeditor/ckeditor5-dev-utils': {
+				logger: () => stubs.logger,
+				translations: stubs.translations
+			}
+		} );
 	} );
 
 	afterEach( () => {
