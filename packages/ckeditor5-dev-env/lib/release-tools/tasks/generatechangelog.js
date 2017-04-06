@@ -71,6 +71,8 @@ module.exports = function generateChangelog( newVersion = null, options = {} ) {
 
 				if ( options.isDevPackage && fromVersion ) {
 					fromVersion = packageJson.name + '@' + fromVersion;
+				} else {
+					fromVersion = 'v' + fromVersion;
 				}
 
 				const context = {

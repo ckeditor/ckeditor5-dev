@@ -30,6 +30,8 @@ module.exports = function getNewReleaseType( transformCommit, isDevPackage ) {
 
 	if ( isDevPackage && fromVersion ) {
 		fromVersion = packageJson.name + '@' + fromVersion;
+	} else {
+		fromVersion = 'v' + fromVersion;
 	}
 
 	const gitRawCommitsOpts = {
