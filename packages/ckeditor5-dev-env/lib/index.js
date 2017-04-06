@@ -72,7 +72,9 @@ const tasks = {
 				const log = logger();
 
 				let message = 'Changelog for packages listed below has been generated:\n';
-				message += packageNames.map( ( packageName ) => `  * ${ generatedChangelog[ packageName ] }` ).join( '\n' );
+				message += packageNames.map( ( packageName ) => {
+					return `  * "${ packageName }": ${ generatedChangelog[ packageName ] }`;
+				} ).join( '\n' );
 
 				log.info( message );
 			} );
