@@ -39,7 +39,7 @@ const cli = {
 	 * Asks a user for providing the new version.
 	 *
 	 * @param {String} packageVersion
-	 * @param {String} releaseType
+	 * @param {String|null} releaseType
 	 * @returns {Promise}
 	 */
 	provideVersion( packageVersion, releaseType ) {
