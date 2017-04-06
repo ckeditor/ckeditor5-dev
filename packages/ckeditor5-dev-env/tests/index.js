@@ -127,7 +127,8 @@ describe( 'dev-env/index', () => {
 					expect( execOptions ).to.deep.equal( {
 						cwd: options.cwd,
 						packages: options.packages,
-						skipPackages: []
+						skipPackages: [],
+						checkPackageJson: true
 					} );
 
 					expect( chdirStub.called ).to.equal( true );

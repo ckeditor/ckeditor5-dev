@@ -9,7 +9,6 @@
 
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
 const proxyquire = require( 'proxyquire' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
@@ -23,27 +22,19 @@ describe( 'dev-env/release-tools/utils', () => {
 			changelogStub = sandbox.stub();
 			getPackageJsonStub = sandbox.stub();
 
-			mockery.enable( {
-				useCleanCache: true,
-				warnOnReplace: false,
-				warnOnUnregistered: false
-			} );
-
-			mockery.registerMock( './getpackagejson', getPackageJsonStub );
-			mockery.registerMock( './changelog', {
-				getChangelog: changelogStub
-			} );
-
 			version = proxyquire( '../../../lib/release-tools/utils/versions', {
 				'@ckeditor/ckeditor5-dev-utils': {
 					tools
+				},
+				'./getpackagejson': getPackageJsonStub,
+				'./changelog': {
+					getChangelog: changelogStub
 				}
 			} );
 		} );
 
 		afterEach( () => {
 			sandbox.restore();
-			mockery.disable();
 		} );
 
 		describe( 'getLastFromChangelog()', () => {

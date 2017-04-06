@@ -40,7 +40,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				].join( '\n' );
 
 				const changelog =
-`## [0.1.0](https://github.com) (2017-01-13)
+					`## [0.1.0](https://github.com) (2017-01-13)
 
 ${ expectedChangelog }`;
 
@@ -55,7 +55,7 @@ ${ expectedChangelog }`;
 
 			it( 'returns changes between tags', () => {
 				const expectedChangelog =
-`### Features
+					`### Features
 
 * Cloned the main module. ([abcd123](https://github.com))
 
@@ -64,7 +64,7 @@ ${ expectedChangelog }`;
 * Bump the major!`;
 
 				const changelog =
-`## [1.0.0](https://github.com/) (2017-01-13)
+					`## [1.0.0](https://github.com/) (2017-01-13)
 
 ${ expectedChangelog }
 
@@ -85,7 +85,7 @@ ${ expectedChangelog }
 
 			it( 'throws if cannot find changes for the specified version', () => {
 				const changelog =
-`## [0.1.0](https://github.com) (2017-01-13)
+					`## [0.1.0](https://github.com) (2017-01-13)
 
 ### Features
 
@@ -100,7 +100,7 @@ ${ expectedChangelog }
 
 			it( 'does not leak or stop too early', () => {
 				const changelog =
-`## [0.3.0](https://github.com) (2017-01-13)
+					`## [0.3.0](https://github.com) (2017-01-13)
 
 3
 
@@ -128,14 +128,28 @@ Some text ## [like a release header]
 		describe( 'getChangelog()', () => {
 			it( 'resolves the changelog', () => {
 				const resolveStub = sandbox.stub( path, 'resolve' ).returns( 'path-to-changelog' );
+				const existsSyncStub = sandbox.stub( fs, 'existsSync' ).returns( true );
 				const readFileStub = sandbox.stub( fs, 'readFileSync' ).returns( 'Content.' );
 				const changelog = utils.getChangelog();
 
 				expect( resolveStub.calledOnce ).to.equal( true );
+				expect( existsSyncStub.calledOnce ).to.equal( true );
 				expect( readFileStub.calledOnce ).to.equal( true );
 				expect( readFileStub.firstCall.args[ 0 ] ).to.equal( 'path-to-changelog' );
 				expect( readFileStub.firstCall.args[ 1 ] ).to.equal( 'utf-8' );
 				expect( changelog ).to.equal( 'Content.' );
+			} );
+
+			it( 'returns null if the changelog does not exist', () => {
+				const resolveStub = sandbox.stub( path, 'resolve' ).returns( 'path-to-changelog' );
+				const existsSyncStub = sandbox.stub( fs, 'existsSync' ).returns( false );
+				const readFileStub = sandbox.stub( fs, 'readFileSync' );
+				const changelog = utils.getChangelog();
+
+				expect( resolveStub.calledOnce ).to.equal( true );
+				expect( existsSyncStub.calledOnce ).to.equal( true );
+				expect( readFileStub.called ).to.equal( false );
+				expect( changelog ).to.equal( null );
 			} );
 		} );
 

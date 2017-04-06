@@ -65,7 +65,6 @@ describe( 'dev-env/release-tools/utils', () => {
 				return promise.then( () => Promise.resolve( skipedPackages ) );
 			} );
 			mockery.registerMock( './versions', stubs.versions );
-			mockery.registerMock( './getpackagejson', stubs.getPackageJson );
 			mockery.registerMock( './displayskippedpackages', stubs.displaySkippedPackages );
 
 			getPackagesToRelease = proxyquire( '../../../lib/release-tools/utils/getpackagestorelease', {
@@ -73,7 +72,8 @@ describe( 'dev-env/release-tools/utils', () => {
 					logger() {
 						return stubs.logger;
 					}
-				}
+				},
+				'./getpackagejson': stubs.getPackageJson
 			} );
 		} );
 

@@ -9,7 +9,7 @@
 
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-env/release-tools/utils', () => {
 	let transformCommit, sandbox, stubs;
@@ -18,24 +18,17 @@ describe( 'dev-env/release-tools/utils', () => {
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
 
-			mockery.enable( {
-				useCleanCache: true,
-				warnOnReplace: false,
-				warnOnUnregistered: false
-			} );
-
 			stubs = {
 				getPackageJson: sandbox.stub()
 			};
 
-			mockery.registerMock( './getpackagejson', stubs.getPackageJson );
-
-			transformCommit = require( '../../../lib/release-tools/utils/transform-commit-utils' );
+			transformCommit = proxyquire( '../../../lib/release-tools/utils/transform-commit-utils', {
+				'./getpackagejson': stubs.getPackageJson
+			} );
 		} );
 
 		afterEach( () => {
 			sandbox.restore();
-			mockery.disable();
 		} );
 
 		describe( 'availableTypes', () => {

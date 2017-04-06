@@ -17,7 +17,7 @@ const versions = require( './versions' );
 /**
  * Returns a type (major, minor, patch) of the next release based on commits.
  *
- * If given package has not changed, suggested version will be 'skip'.
+ * If given package has not changed, suggested version will be equal to 'skip'.
  *
  * @param {Function} transformCommit
  * @param {Boolean} isDevPackage Is the function called in a repository
@@ -28,10 +28,12 @@ module.exports = function getNewReleaseType( transformCommit, isDevPackage ) {
 	const packageJson = getPackageJson();
 	let fromVersion = versions.getLastFromChangelog();
 
-	if ( isDevPackage && fromVersion ) {
-		fromVersion = packageJson.name + '@' + fromVersion;
-	} else {
-		fromVersion = 'v' + fromVersion;
+	if ( fromVersion ) {
+		if ( isDevPackage ) {
+			fromVersion = packageJson.name + '@' + fromVersion;
+		} else {
+			fromVersion = 'v' + fromVersion;
+		}
 	}
 
 	const gitRawCommitsOpts = {
@@ -48,14 +50,14 @@ module.exports = function getNewReleaseType( transformCommit, isDevPackage ) {
 
 	return new Promise( ( resolve, reject ) => {
 		gitRawCommits( gitRawCommitsOpts )
+			.on( 'error', reject )
 			.pipe( conventionalCommitsParser( parserOptions ) )
 			.pipe( concat( ( data ) => {
 				const commits = conventionalCommitsFilter( data );
 				const releaseType = getNewVersionType( commits );
 
 				return resolve( { releaseType } );
-			} ) )
-			.on( 'error', reject );
+			} ) );
 	} );
 
 	// Returns a type of version for a release based on the commits.

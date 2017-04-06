@@ -11,7 +11,6 @@ const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
-const mockery = require( 'mockery' );
 const { workspace: workspaceUtils } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-env/release-tools/utils', () => {
@@ -21,26 +20,18 @@ describe( 'dev-env/release-tools/utils', () => {
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
 
-			mockery.enable( {
-				useCleanCache: true,
-				warnOnReplace: false,
-				warnOnUnregistered: false
-			} );
-
 			getPackageJsonStub = sandbox.stub();
-
-			mockery.registerMock( './getpackagejson', getPackageJsonStub );
 
 			executeOnDependencies = proxyquire( '../../../lib/release-tools/utils/executeondependencies', {
 				'@ckeditor/ckeditor5-dev-utils': {
 					workspace: workspaceUtils
-				}
+				},
+				'./getpackagejson': getPackageJsonStub
 			} );
 		} );
 
 		afterEach( () => {
 			sandbox.restore();
-			mockery.disable();
 		} );
 
 		it( 'resolves promsie when package list is empty', () => {
@@ -52,7 +43,8 @@ describe( 'dev-env/release-tools/utils', () => {
 			const options = {
 				cwd: path.join( __dirname, '..', 'fixtures', 'basic' ),
 				packages: 'packages/',
-				skipPackages: []
+				skipPackages: [],
+				checkPackageJson: true
 			};
 
 			return executeOnDependencies( options, functionToExecute )
@@ -81,7 +73,8 @@ describe( 'dev-env/release-tools/utils', () => {
 			const options = {
 				cwd: path.join( __dirname, '..', 'fixtures', 'basic' ),
 				packages: 'packages/',
-				skipPackages: []
+				skipPackages: [],
+				checkPackageJson: true
 			};
 
 			const packagesPath = path.join( options.cwd, options.packages );
@@ -129,7 +122,8 @@ describe( 'dev-env/release-tools/utils', () => {
 			const options = {
 				cwd: path.join( __dirname, '..', 'fixtures', 'basic' ),
 				packages: 'packages/',
-				skipPackages: []
+				skipPackages: [],
+				checkPackageJson: true
 			};
 
 			return executeOnDependencies( options, functionToExecute )
@@ -163,7 +157,8 @@ describe( 'dev-env/release-tools/utils', () => {
 				packages: 'packages/',
 				skipPackages: [
 					'ckeditor5-core'
-				]
+				],
+				checkPackageJson: true
 			};
 
 			return executeOnDependencies( options, functionToExecute )
@@ -173,6 +168,41 @@ describe( 'dev-env/release-tools/utils', () => {
 					expect( skipedDependencies ).to.deep.equal( options.skipPackages );
 					expect( functionToExecute.calledOnce ).to.equal( true );
 					expect( functionToExecute.neverCalledWith( 'ckeditor5-core', enginePath ) ).to.equal( true );
+				} );
+		} );
+
+		it( 'allows disabling checking whether the package is specified in "package.json"', () => {
+			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
+
+			sandbox.stub( workspaceUtils, 'getDirectories' )
+				.returns( [ 'ckeditor5-core', 'ckeditor5-engine' ] );
+
+			getPackageJsonStub.onFirstCall().returns( {
+				dependencies: {
+					'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine'
+				}
+			} );
+			getPackageJsonStub.onSecondCall().returns( { name: 'ckeditor5-core' } );
+			getPackageJsonStub.onThirdCall().returns( { name: '@ckeditor/ckeditor5-engine' } );
+
+			const options = {
+				cwd: path.join( __dirname, '..', 'fixtures', 'basic' ),
+				packages: 'packages/',
+				skipPackages: [],
+				checkPackageJson: false
+			};
+
+			const packagesPath = path.join( options.cwd, options.packages );
+
+			return executeOnDependencies( options, functionToExecute )
+				.then( ( skipedDependencies ) => {
+					expect( skipedDependencies ).to.deep.equal( [] );
+
+					expect( functionToExecute.calledTwice ).to.equal( true );
+					expect( functionToExecute.firstCall.args[ 0 ] ).to.equal( 'ckeditor5-core' );
+					expect( functionToExecute.firstCall.args[ 1 ] ).to.equal( path.join( packagesPath, 'ckeditor5-core' ) );
+					expect( functionToExecute.secondCall.args[ 0 ] ).to.equal( '@ckeditor/ckeditor5-engine' );
+					expect( functionToExecute.secondCall.args[ 1 ] ).to.equal( path.join( packagesPath, 'ckeditor5-engine' ) );
 				} );
 		} );
 	} );
