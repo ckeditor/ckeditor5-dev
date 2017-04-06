@@ -30,7 +30,7 @@ describe( 'translations', () => {
 		describe( 'loadPackage()', () => {
 			it( 'should load po file from the package', () => {
 				const loadPoFileSpy = sinon.spy();
-				sandbox.stub( translationService, '_laodPoFile', loadPoFileSpy );
+				sandbox.stub( translationService, '_loadPoFile', loadPoFileSpy );
 
 				translationService.loadPackage( 'pathToPackage' );
 
@@ -42,7 +42,7 @@ describe( 'translations', () => {
 
 			it( 'should load po file from the package only once', () => {
 				const loadPoFileSpy = sinon.spy();
-				sandbox.stub( translationService, '_laodPoFile', loadPoFileSpy );
+				sandbox.stub( translationService, '_loadPoFile', loadPoFileSpy );
 
 				translationService.loadPackage( 'pathToPackage' );
 				translationService.loadPackage( 'pathToPackage' );

@@ -8,24 +8,47 @@
 'use strict';
 
 const path = require( 'path' );
-const chai = require( 'chai' );
+const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
-const expect = chai.expect;
 const mockery = require( 'mockery' );
 const glob = require( 'glob' );
 const fs = require( 'fs-extra' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'collect-utils', () => {
-	let sandbox;
-	let utils;
+	let sandbox, utils, stubs, originalStringMap;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
+
+		mockery.enable( {
+			warnOnReplace: false,
+			warnOnUnregistered: false
+		} );
+
+		stubs = {
+			logger: {
+				info: sandbox.spy(),
+				warning: sandbox.spy(),
+				error: sandbox.spy()
+			},
+			translations: {
+				findOriginalStrings: sandbox.spy( string => originalStringMap[ string ] )
+			}
+		};
+
 		sandbox.stub( process, 'cwd', () => path.join( 'workspace', 'ckeditor5' ) );
-		utils = require( '../../lib/translations/collect-utils' );
+
+		utils = proxyquire( '../../lib/translations/collect-utils' , {
+			'@ckeditor/ckeditor5-dev-utils': {
+				logger: () => stubs.logger,
+				translations: stubs.translations
+			}
+		} );
 	} );
 
 	afterEach( () => {
+		mockery.disable();
 		mockery.deregisterAll();
 		sandbox.restore();
 	} );
@@ -35,6 +58,11 @@ describe( 'collect-utils', () => {
 			const fileContents = {
 				'/ckeditor5-core/file1.js': 't( \'Bold\' );',
 				'/ckeditor5-utils/file2.js': 't( \'Italic [context: italic style]\' );',
+			};
+
+			originalStringMap = {
+				't( \'Bold\' );': [ 'Bold' ],
+				't( \'Italic [context: italic style]\' );': [ 'Italic [context: italic style]' ]
 			};
 
 			const globSyncStub = sandbox.stub( glob, 'sync', () => [
@@ -123,7 +151,7 @@ describe( 'collect-utils', () => {
 			] );
 		} );
 
-		it( 'shouldn\'t return error when translation exists in ckeditor5-core/lang/contexts.json', () => {
+		it( 'should not return error when translation exists in ckeditor5-core/lang/contexts.json', () => {
 			const contexts = new Map( [
 				[ 'ckeditor5-core', { content: { util: 'Util' } } ]
 			] );
@@ -136,7 +164,7 @@ describe( 'collect-utils', () => {
 			expect( errors ).to.deep.equal( [] );
 		} );
 
-		it( 'shouldn\'t return error when translation exists in package that is relevant for the translation', () => {
+		it( 'should not return error when translation exists in package that is relevant for the translation', () => {
 			const contexts = new Map( [
 				[ 'ckeditor5-core', { content: {} } ],
 				[ 'ckeditor5-utils', { content: { util: 'Util' } } ]
@@ -195,7 +223,7 @@ describe( 'collect-utils', () => {
 	} );
 
 	describe( 'createPotFileContent()', () => {
-		it( 'shoud translate json object to po-style text', () => {
+		it( 'should translate json object to po-style text', () => {
 			const context = { content: { util: 'Util' } };
 			const poContent = utils.createPotFileContent( context );
 
