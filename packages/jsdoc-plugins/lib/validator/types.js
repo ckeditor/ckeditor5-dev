@@ -6,7 +6,8 @@
 'use strict';
 
 const BASIC_TYPES = [
-	'*', // wildcard
+	// Wildcard
+	'*',
 
 	// ES types
 	'null',
@@ -31,20 +32,29 @@ const BASIC_TYPES = [
 	'Range',
 	'Selection',
 	'Event',
-	'ClientRect'
+	'ClientRect',
+
+	// Web APIs
+	'File'
 ];
 
 const GENERIC_TYPES = [
 	'Array',
-	'Iterator',
 	'Set',
 	'Map',
 	'WeakMap',
+	'WeakSet',
 	'Promise',
-	'Object', // as a dictionary
 
-	// type of object that contains [Symbol.iterator]
+	// Object treated as a dictionary, e.g. Object.<String, Number>.
+	'Object',
+
+	// Object that contains a [Symbol.iterator]() method.
 	'Iterable',
+
+	// Object that contains next() method and satisfies the Iterator protocol.
+	// https://developer.mozilla.org/pl/docs/Web/JavaScript/Reference/Iteration_protocols
+	'Iterator',
 ];
 
 module.exports = {
