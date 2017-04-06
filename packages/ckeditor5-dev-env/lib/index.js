@@ -36,7 +36,7 @@ const tasks = {
 			cwd: options.cwd,
 			packages: options.packages,
 			skipPackages: options.skipPackages || [],
-			checkPackageJson: typeof options.checkPackageJson == 'undefined' ? true : options.checkPackageJson
+			checkPackageJson: options.checkPackageJson === undefined ? true : options.checkPackageJson
 		};
 
 		const generatedChangelog = {};
