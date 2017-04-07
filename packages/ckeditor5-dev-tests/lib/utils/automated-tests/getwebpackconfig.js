@@ -24,7 +24,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 				{
 					// test: **/ckeditor5-*/theme/**/*.scss
 					test: /\.scss$/,
-					use: [ 'style-loader', 'css-loader', 'sass-loader' ]
+					use: [ 'style-loader', 'css-loader', require.resolve( 'sass-loader' ) ]
 				}
 			]
 		},

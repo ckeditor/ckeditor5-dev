@@ -55,6 +55,29 @@ describe( 'transifex-service', () => {
 			.then( () => new Error( 'Promise should not be resolved' ) )
 			.catch( ( err ) => expect( err.message ).to.equal( 'Status code: 500' ) );
 		} );
+
+		it( 'should throw an error if some other error occurs', () => {
+			const error = new Error();
+			const spy = sandbox.spy( ( url, data, cb ) => cb( error, { statusCode: 200 }, '{"body": ""}' ) );
+			sandbox.stub( request, 'get', spy );
+
+			return transifexService.getResources( {
+				token: 'token'
+			} )
+			.then( () => new Error( 'Promise should not be resolved' ) )
+			.catch( ( err ) => expect( err ).to.equal( error ) );
+		} );
+
+		it( 'should throw an error if some error occurs during parsing the body', () => {
+			const spy = sandbox.spy( ( url, data, cb ) => cb( null, { statusCode: 200 }, 'Invalid JSON' ) );
+			sandbox.stub( request, 'get', spy );
+
+			return transifexService.getResources( {
+				token: 'token'
+			} )
+			.then( () => new Error( 'Promise should not be resolved' ) )
+			.catch( ( err ) => expect( err.message ).to.equal( `Error handled while parsing body: Invalid JSON` ) );
+		} );
 	} );
 
 	describe( 'postResource()', () => {

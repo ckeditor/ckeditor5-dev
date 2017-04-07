@@ -7,6 +7,7 @@
 
 const acorn = require( 'acorn' );
 const walk = require( 'acorn/dist/walk' );
+const logger = require( '../logger' )();
 
 module.exports = function findOriginalStrings( source ) {
 	const ast = acorn.parse( source, {
@@ -22,7 +23,7 @@ module.exports = function findOriginalStrings( source ) {
 			}
 
 			if ( node.arguments[ 0 ].type !== 'Literal' ) {
-				console.error( 'First t() call argument should be a string literal.' );
+				logger.error( 'First t() call argument should be a string literal.' );
 
 				return;
 			}
