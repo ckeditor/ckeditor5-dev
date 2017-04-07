@@ -35,12 +35,7 @@ module.exports = function transformCommitForCKEditor5DevPackage( commit, context
 
 function isValidCommit( files, packageName ) {
 	for ( const filePath of files ) {
-		// Accept non-packages file (Gulpfile.js, .travis.yml, etc).
-		if ( !filePath.match( /^packages\// ) ) {
-			continue;
-		}
-
-		// Reject file which is not a part of current package.
+		// Reject if given file is not a part of current processed package.
 		if ( !filePath.startsWith( `packages/${ packageName}` ) ) {
 			return false;
 		}

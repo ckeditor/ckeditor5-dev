@@ -216,7 +216,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			changelogBuffer = Buffer.from( newChangelogChunk );
 
 			stubs.fs.existsSync.returns( true );
-			stubs.versionUtils.getLastFromChangelog.returns( null );
+			stubs.versionUtils.getLastFromChangelog.returns( '0.5.0' );
 			stubs.changelogUtils.getChangelog.returns( changelogUtils.changelogHeader );
 
 			stubs.getNewReleaseType.returns( Promise.resolve( { releaseType: 'minor' } ) );
@@ -228,6 +228,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 					expect( stubs.changelogUtils.saveChangelog.calledOnce ).to.equal( true );
 					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 0 ] ).to.equal( newChangelog );
+
+					expect( conventionalChangelogArguments[ 2 ] ).to.have.property( 'from', 'test-package@0.5.0' );
 
 					expect( stubs.logger.info.calledThrice ).to.equal( true );
 					expect( stubs.logger.info.thirdCall.args[ 0 ] ).to.match( /Changelog for "test-package" \(v0\.1\.0\) has been generated\./ );
@@ -244,11 +246,27 @@ describe( 'dev-env/release-tools/tasks', () => {
 				} );
 		} );
 
-		it( 'does not generate if a user provides "skip" as a new version', () => {
+		it( 'does not generate if a user provides "skip" as a new version (suggested a "minor" release)', () => {
 			stubs.fs.existsSync.returns( true );
 
 			stubs.getNewReleaseType.returns( Promise.resolve( {
 				releaseType: 'minor'
+			} ) );
+
+			stubs.cli.provideVersion.returns( Promise.resolve( 'skip' ) );
+
+			return generateChangelog()
+				.then( () => {
+					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommitForCKEditor5Package );
+					expect( stubs.changelogUtils.saveChangelog.called ).to.equal( false );
+				} );
+		} );
+
+		it( 'does not generate if a user provides "skip" as a new version (suggested a "skip" release)', () => {
+			stubs.fs.existsSync.returns( true );
+
+			stubs.getNewReleaseType.returns( Promise.resolve( {
+				releaseType: 'skip'
 			} ) );
 
 			stubs.cli.provideVersion.returns( Promise.resolve( 'skip' ) );
