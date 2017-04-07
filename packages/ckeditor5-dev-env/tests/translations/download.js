@@ -10,6 +10,7 @@
 const sinon = require( 'sinon' );
 const path = require( 'path' );
 const mockery = require( 'mockery' );
+const { expect } = require( 'chai' );
 
 describe( 'download', () => {
 	let sandbox, stubs, download, resources, resourcesDetails, translations, fileContents;
@@ -121,6 +122,21 @@ describe( 'download', () => {
 					path.join( 'workspace', 'packages', 'ckeditor5-ui', 'lang', 'translations', 'en-au.po' ),
 					'ckeditor5-ui-en-content'
 				);
+			} );
+	} );
+
+	it( 'should report an error when something goes wrong', () => {
+		let error = new Error();
+
+		stubs.transifexService.getResources = sandbox.spy( () => Promise.reject( error ) );
+
+		return download( { token: 'secretToken' } )
+			.then( () => {
+				throw new Error( 'It should throws an error' );
+			}, ( err ) => {
+				expect( err ).to.equal( error );
+				sinon.assert.calledOnce( stubs.logger.error );
+				sinon.assert.calledWithExactly( stubs.logger.error, error );
 			} );
 	} );
 } );

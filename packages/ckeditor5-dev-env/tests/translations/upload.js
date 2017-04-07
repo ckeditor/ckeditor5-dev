@@ -10,6 +10,7 @@
 const path = require( 'path' );
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
+const { expect } = require( 'chai' );
 
 describe( 'upload', () => {
 	let sandbox, stubs, upload;
@@ -59,7 +60,7 @@ describe( 'upload', () => {
 		sandbox.restore();
 	} );
 
-	it( 'should be able to create and update resources on the Transifex', () => {
+	it( 'should create and update resources on the Transifex', () => {
 		packageNames = [
 			'ckeditor5-core',
 			'ckeditor5-ui',
@@ -95,6 +96,20 @@ describe( 'upload', () => {
 					name: 'ckeditor5-core',
 					content: '# ckeditor-core en.pot content'
 				} );
+			} );
+	} );
+
+	it( 'should report an error and throw it when something goes wrong', () => {
+		let error = new Error();
+		stubs.transifexService.getResources = sandbox.spy( () => Promise.reject( error ) );
+
+		return upload( { token: 'secretToken' } )
+			.then( () => {
+				throw new Error( 'It should throws an error' );
+			}, ( err ) => {
+				expect( err ).to.equal( error );
+				sinon.assert.calledOnce( stubs.logger.error );
+				sinon.assert.calledWithExactly( stubs.logger.error, error );
 			} );
 	} );
 } );

@@ -8,14 +8,38 @@
 'use strict';
 
 const sinon = require( 'sinon' );
-const utils = require( '../../lib/translations/collect-utils' );
-const collect = require( '../../lib/translations/collect' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'collect', () => {
-	let sandbox;
+	const sandbox = sinon.sandbox.create();
+	let collect, stubs;
 
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		stubs = {
+			logger: {
+				info: sandbox.spy(),
+				warning: sandbox.spy(),
+				error: sandbox.spy()
+			},
+
+			collectUtils: {
+				getContexts: sandbox.stub(),
+				collectTranslations: sandbox.stub().returns( [] ),
+				getUnusedContextErrorMessages: sandbox.stub().returns( [] ),
+				getMissingContextErrorMessages: sandbox.stub().returns( [] ),
+				getRepeatedContextErrorMessages: sandbox.stub().returns( [] ),
+				createPotFileHeader: sandbox.stub(),
+				createPotFileContent: sandbox.stub(),
+				savePotFile: sandbox.spy(),
+			}
+		};
+
+		collect = proxyquire( '../../lib/translations/collect', {
+			'@ckeditor/ckeditor5-dev-utils': {
+				logger: () => stubs.logger
+			},
+			'./collect-utils': stubs.collectUtils
+		} );
 	} );
 
 	afterEach( () => {
@@ -23,25 +47,34 @@ describe( 'collect', () => {
 	} );
 
 	it( 'should collect translations', () => {
-		sandbox.stub( utils, 'getContexts', () => new Map( [ [
-			'ckeditor5-ui',
-			{
-				filePath: 'path/to/file',
-				content: {}
-			}
-		] ] ) );
-		sandbox.stub( utils, 'collectTranslations', () => [] );
-		sandbox.stub( utils, 'getUnusedContextErrorMessages', () => [] );
-		sandbox.stub( utils, 'getMissingContextErrorMessages', () => [] );
-		sandbox.stub( utils, 'getRepeatedContextErrorMessages', () => [] );
-		sandbox.stub( utils, 'createPotFileHeader', () => 'header' );
-		sandbox.stub( utils, 'createPotFileContent', () => 'content' );
+		stubs.collectUtils.getContexts.returns( new Map( [
+			[
+				'ckeditor5-ui',
+				{
+					filePath: 'path/to/file',
+					content: {}
+				}
+			]
+		] ) );
 
-		const savePotFileStub = sandbox.stub( utils, 'savePotFile', () => [] );
+		stubs.collectUtils.createPotFileHeader.returns( 'header' );
+		stubs.collectUtils.createPotFileContent.returns( 'content' );
 
 		collect();
 
-		sinon.assert.calledOnce( savePotFileStub );
-		sinon.assert.calledWithExactly( savePotFileStub, 'ckeditor5-ui', 'headercontent' );
+		sinon.assert.calledOnce( stubs.collectUtils.savePotFile );
+		sinon.assert.calledWithExactly( stubs.collectUtils.savePotFile, 'ckeditor5-ui', 'headercontent' );
+	} );
+
+	it( 'should log the error and return it when hits one', () => {
+		stubs.collectUtils.getContexts.returns( new Map() );
+		stubs.collectUtils.getMissingContextErrorMessages.returns( [ 'ckeditor5-core/lang/context.json file is missing' ] );
+		stubs.collectUtils.createPotFileHeader.returns( 'header' );
+		stubs.collectUtils.createPotFileContent.returns( 'content' );
+
+		collect();
+
+		sinon.assert.notCalled( stubs.collectUtils.savePotFile );
+		sinon.assert.calledWithExactly( stubs.logger.error, 'ckeditor5-core/lang/context.json file is missing' );
 	} );
 } );
