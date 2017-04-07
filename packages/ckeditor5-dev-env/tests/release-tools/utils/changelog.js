@@ -55,7 +55,7 @@ ${ expectedChangelog }`;
 
 			it( 'returns changes between tags', () => {
 				const expectedChangelog =
-					`### Features
+`### Features
 
 * Cloned the main module. ([abcd123](https://github.com))
 
@@ -64,7 +64,7 @@ ${ expectedChangelog }`;
 * Bump the major!`;
 
 				const changelog =
-					`## [1.0.0](https://github.com/) (2017-01-13)
+`## [1.0.0](https://github.com/) (2017-01-13)
 
 ${ expectedChangelog }
 
@@ -85,7 +85,7 @@ ${ expectedChangelog }
 
 			it( 'throws if cannot find changes for the specified version', () => {
 				const changelog =
-					`## [0.1.0](https://github.com) (2017-01-13)
+`## [0.1.0](https://github.com) (2017-01-13)
 
 ### Features
 
@@ -100,7 +100,7 @@ ${ expectedChangelog }
 
 			it( 'does not leak or stop too early', () => {
 				const changelog =
-					`## [0.3.0](https://github.com) (2017-01-13)
+`## [0.3.0](https://github.com) (2017-01-13)
 
 3
 
