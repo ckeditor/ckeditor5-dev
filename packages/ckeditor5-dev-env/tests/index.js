@@ -163,6 +163,23 @@ describe( 'dev-env/index', () => {
 					expect( execOptions.skipPackages ).to.deep.equal( skipPackages );
 				} );
 		} );
+
+		it( 'passes "options.checkPackageJson" to the handler', () => {
+			sandbox.stub( process, 'chdir' );
+			sandbox.stub( tasks, 'generateChangelog' ).returns( Promise.resolve() );
+
+			const options = {
+				cwd: __dirname,
+				packages: 'packages/',
+				skipPackages: [],
+				checkPackageJson: false
+			};
+
+			return tasks.generateChangelogForDependencies( options )
+				.then( () => {
+					expect( execOptions.checkPackageJson ).to.equal( false );
+				} );
+		} );
 	} );
 
 	describe( 'createRelease()', () => {
