@@ -11,7 +11,7 @@ const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
-const { workspace: workspaceUtils } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { tools: toolsUtils } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-env/release-tools/utils', () => {
 	describe( 'executeOnDependencies()', () => {
@@ -24,7 +24,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			executeOnDependencies = proxyquire( '../../../lib/release-tools/utils/executeondependencies', {
 				'@ckeditor/ckeditor5-dev-utils': {
-					workspace: workspaceUtils
+					tools: toolsUtils
 				},
 				'./getpackagejson': getPackageJsonStub
 			} );
@@ -37,7 +37,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		it( 'resolves promsie when package list is empty', () => {
 			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
 
-			const getDirectoriesStub = sandbox.stub( workspaceUtils, 'getDirectories' )
+			const getDirectoriesStub = sandbox.stub( toolsUtils, 'getDirectories' )
 				.returns( [] );
 
 			const options = {
@@ -57,7 +57,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		it( 'executes a function for each package found as a dependency in package.json in CWD', () => {
 			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
 
-			const getDirectoriesStub = sandbox.stub( workspaceUtils, 'getDirectories' )
+			const getDirectoriesStub = sandbox.stub( toolsUtils, 'getDirectories' )
 				.returns( [ 'ckeditor5-core', 'ckeditor5-engine', 'ckeditor5-utils' ] );
 
 			getPackageJsonStub.onFirstCall().returns( {
@@ -107,7 +107,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				} );
 			}
 
-			sandbox.stub( workspaceUtils, 'getDirectories' )
+			sandbox.stub( toolsUtils, 'getDirectories' )
 				.returns( [ 'ckeditor5-core', 'ckeditor5-engine' ] );
 
 			getPackageJsonStub.onFirstCall().returns( {
@@ -140,7 +140,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		it( 'does not execute a function for specified packages', () => {
 			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
 
-			sandbox.stub( workspaceUtils, 'getDirectories' )
+			sandbox.stub( toolsUtils, 'getDirectories' )
 				.returns( [ 'ckeditor5-core', 'ckeditor5-engine' ] );
 
 			getPackageJsonStub.onFirstCall().returns( {
@@ -174,7 +174,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		it( 'allows disabling checking whether the package is specified in "package.json"', () => {
 			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
 
-			sandbox.stub( workspaceUtils, 'getDirectories' )
+			sandbox.stub( toolsUtils, 'getDirectories' )
 				.returns( [ 'ckeditor5-core', 'ckeditor5-engine' ] );
 
 			getPackageJsonStub.onFirstCall().returns( {

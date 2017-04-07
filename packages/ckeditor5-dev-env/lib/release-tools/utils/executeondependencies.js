@@ -6,7 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
-const { workspace: workspaceUtils } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 const getPackageJson = require( './getpackagejson' );
 
 /**
@@ -28,7 +28,7 @@ const getPackageJson = require( './getpackagejson' );
  */
 module.exports = function executeOnDependencies( options, functionToExecute ) {
 	const packagesAbsolutePath = path.join( options.cwd, options.packages );
-	const directories = workspaceUtils.getDirectories( packagesAbsolutePath );
+	const directories = tools.getDirectories( packagesAbsolutePath );
 	const skipPackagesList = options.skipPackages || [];
 	const skippedPackageNames = [];
 
