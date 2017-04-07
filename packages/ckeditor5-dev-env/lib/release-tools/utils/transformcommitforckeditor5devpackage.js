@@ -6,7 +6,7 @@
 'use strict';
 
 const transformCommitForCKEditor5Package = require( './transformcommitforckeditor5package' );
-const getChangedFilesFromCommit = require( './getchangedfilesfromcommit' );
+const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
 
 /**
  * Parses a single commit for `ckeditor5-dev` package.
@@ -18,7 +18,7 @@ const getChangedFilesFromCommit = require( './getchangedfilesfromcommit' );
  * @returns {Commit}
  */
 module.exports = function transformCommitForCKEditor5DevPackage( commit, context ) {
-	const files = getChangedFilesFromCommit( commit.hash );
+	const files = getChangedFilesForCommit( commit.hash );
 
 	if ( !files.length ) {
 		return;
