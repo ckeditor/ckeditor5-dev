@@ -11,6 +11,8 @@ const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
 /**
  * Parses a single commit for `ckeditor5-dev` package.
  *
+ * We accept the commit only if its files are located in current processing package.
+ *
  * @param {Commit} commit
  * @param {Object} context
  * @param {Boolean} context.displayLogs Whether to display the logs.
