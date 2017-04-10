@@ -32,7 +32,7 @@ const getWriterOptions = require( '../utils/getwriteroptions' );
 module.exports = function generateChangelog( newVersion = null, options = {} ) {
 	const log = logger();
 
-	const transformCommitFunction = getTransformFunction();
+	const transformCommitFunction = getTransformFunction( options.isDevPackage );
 
 	return new Promise( ( resolve ) => {
 		const packageJson = getPackageJson();
@@ -128,12 +128,12 @@ module.exports = function generateChangelog( newVersion = null, options = {} ) {
 			} );
 		}
 	} );
-
-	function getTransformFunction() {
-		if ( options.isDevPackage ) {
-			return require( '../utils/transformcommitforckeditor5devpackage' );
-		}
-
-		return require( '../utils/transformcommitforckeditor5package' );
-	}
 };
+
+function getTransformFunction( isDevPackage ) {
+	if ( isDevPackage ) {
+		return require( '../utils/transformcommitforckeditor5devpackage' );
+	}
+
+	return require( '../utils/transformcommitforckeditor5package' );
+}

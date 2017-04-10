@@ -39,21 +39,21 @@ const transformCommitUtils = {
 	/**
 	 * Changes user's name to link that leads to the user's profile.
 	 *
-	 * @param {String} value
+	 * @param {String} sentence
 	 * @returns {String}
 	 */
-	linkGithubUsers( value ) {
-		return value.replace( /@([\w\d_-]+)/g, '[@$1](https://github.com/$1)' );
+	linkGithubUsers( sentence ) {
+		return sentence.replace( /@([\w\d_-]+)/g, '[@$1](https://github.com/$1)' );
 	},
 
 	/**
 	 * Changes references to issue to links that lead to the GitHub issue page.
 	 *
-	 * @param {String} value
+	 * @param {String} sentence
 	 * @param {Array} [issues=null]
 	 * @returns {String}
 	 */
-	linkGithubIssues( value, issues = null ) {
+	linkGithubIssues( sentence, issues = null ) {
 		const packageJson = getPackageJson();
 		const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
 
@@ -61,7 +61,7 @@ const transformCommitUtils = {
 			throw new Error( `The package.json for "${ packageJson.name }" must contain the "bugs" property.` );
 		}
 
-		return value.replace( /#([0-9]+)/g, ( _, issueId ) => {
+		return sentence.replace( /#([0-9]+)/g, ( _, issueId ) => {
 			if ( Array.isArray( issues ) ) {
 				issues.push( issueId );
 			}

@@ -21,7 +21,7 @@ const INDENT_SIZE = 21;
  *   - makes links to issues and user's profiles on GitHub.
  *
  * @param {Commit} commit
- * @param {Object} {context}
+ * @param {Object} context
  * @param {Boolean} context.displayLogs Whether to display the logs.
  * @param {Object} context.packageData Content from the 'package.json' for given package.
  * @returns {Commit}
