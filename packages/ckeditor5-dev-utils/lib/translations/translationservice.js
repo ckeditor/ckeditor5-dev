@@ -11,6 +11,7 @@ const createDictionaryFromPoFileContent = require( './createdictionaryfrompofile
 const acorn = require( 'acorn' );
 const walk = require( 'acorn/dist/walk' );
 const escodegen = require( 'escodegen' );
+const logger = require( '../logger' )();
 
 /**
  *
@@ -68,7 +69,7 @@ module.exports = class TranslationService {
 				}
 
 				if ( node.arguments[ 0 ].type !== 'Literal' ) {
-					console.error( 'First t() call argument should be a string literal.' );
+					logger.error( 'First t() call argument should be a string literal.' );
 
 					return;
 				}
@@ -84,7 +85,9 @@ module.exports = class TranslationService {
 		}
 
 		escodegen.attachComments( ast, comments, tokens );
-		const output = escodegen.generate( ast, { comment: true } );
+		const output = escodegen.generate( ast, {
+			comment: true
+		} );
 
 		return output;
 	}
@@ -108,7 +111,7 @@ module.exports = class TranslationService {
 		let translation = this.dictionary.get( originalString );
 
 		if ( !translation ) {
-			console.error( `Missing translation for: ${ originalString }.` );
+			logger.error( `Missing translation for: ${ originalString }.` );
 
 			translation = originalString;
 		}

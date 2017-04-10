@@ -11,33 +11,77 @@ const chai = require( 'chai' );
 const sinon = require( 'sinon' );
 const expect = chai.expect;
 const path = require( 'path' );
-const TranslationService = require( '../../lib/translations/translationservice' );
+const proxyquire = require( 'proxyquire' );
+const mockery = require( 'mockery' );
 
 describe( 'translations', () => {
 	describe( 'TranslationService', () => {
-		let translationService;
-		let sandbox;
+		const sandbox = sinon.sandbox.create();
+		let translationService, stubs;
+		let files, fileContents;
 
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
-			translationService = new TranslationService();
+			mockery.enable( {
+				useCleanCache: true,
+				warnOnReplace: false,
+				warnOnUnregistered: false
+			} );
+
+			stubs = {
+				logger: {
+					info: sandbox.stub(),
+					warning: sandbox.stub(),
+					error: sandbox.stub()
+				},
+				fs: {
+					existsSync: path => files.includes( path ),
+					readFileSync: path => fileContents[ path ]
+				}
+			};
+
+			mockery.registerMock( 'fs', stubs.fs );
+
+			const TranslationService = proxyquire( '../../lib/translations/translationservice', {
+				'../logger': () => stubs.logger,
+			} );
+
+			translationService = new TranslationService( 'pl' );
 		} );
 
 		afterEach( () => {
 			sandbox.restore();
+			mockery.disable();
 		} );
 
 		describe( 'loadPackage()', () => {
-			it( 'should load po file from the package', () => {
-				const loadPoFileSpy = sinon.spy();
-				sandbox.stub( translationService, '_loadPoFile', loadPoFileSpy );
+			it( 'should load po file from the package and load translations', () => {
+				const pathToTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'pl.po' );
+
+				files = [ pathToTranslations ];
+
+				fileContents = {
+					[ pathToTranslations ]: [
+						`msgctxt "Label for the Save button."`,
+						`msgid "Save"`,
+						`msgstr "Zapisz"`,
+						''
+					].join( '\n' )
+				};
 
 				translationService.loadPackage( 'pathToPackage' );
 
-				sinon.assert.calledWith(
-					loadPoFileSpy,
-					path.join( 'pathToPackage', 'lang', 'translations', this.language + '.po' )
-				);
+				expect( Array.from( translationService.dictionary ) ).to.deep.equal( [
+					[ 'Save', 'Zapisz' ]
+				] );
+			} );
+
+			it( 'should do nothing if the po file does not exist', () => {
+				files = [];
+				fileContents = {};
+
+				translationService.loadPackage( 'pathToPackage' );
+
+				expect( Array.from( translationService.dictionary ) ).to.deep.equal( [] );
 			} );
 
 			it( 'should load po file from the package only once', () => {
@@ -68,6 +112,25 @@ describe( 'translations', () => {
 				const result = translationService.translateSource( source );
 
 				expect( result ).to.equal( `translate( 'Cancel' )` );
+			} );
+
+			it( 'should lg the error and keep original string if the translation misses', () => {
+				const source = `t( 'Cancel' )`;
+				const result = translationService.translateSource( source );
+
+				expect( result ).to.equal( `t('Cancel');` );
+				sinon.assert.calledOnce( stubs.logger.error );
+				sinon.assert.calledWithExactly( stubs.logger.error, 'Missing translation for: Cancel.' );
+			} );
+
+			it( 'should throw an error when the t is called with the variable', () => {
+				const source = `const cancel = 'Cancel';t( cancel );`;
+
+				const result = translationService.translateSource( source );
+
+				expect( result ).to.equal( `const cancel = 'Cancel';t( cancel );` );
+				sinon.assert.calledOnce( stubs.logger.error );
+				sinon.assert.calledWithExactly( stubs.logger.error, 'First t() call argument should be a string literal.' );
 			} );
 		} );
 	} );

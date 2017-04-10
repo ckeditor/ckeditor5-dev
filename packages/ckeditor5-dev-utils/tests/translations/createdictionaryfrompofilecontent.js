@@ -31,5 +31,16 @@ describe( 'translations', () => {
 				Cancel: 'Anuluj'
 			} );
 		} );
+
+		it( 'should skip the objects that do not contain msgstr property', () => {
+			const result = createDicitionaryFromPoFileContent( [
+				`msgctxt "Label for the Save button."`,
+				`msgid "Save"`,
+				`msgstr ""`,
+				``,
+			].join( '\n' ) );
+
+			expect( result ).to.deep.equal( {} );
+		} );
 	} );
 } );
