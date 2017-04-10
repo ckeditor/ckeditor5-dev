@@ -35,7 +35,8 @@ const BASIC_TYPES = [
 	'ClientRect',
 
 	// Web APIs
-	'File'
+	'File',
+	'DataTransfer'
 ];
 
 const GENERIC_TYPES = [

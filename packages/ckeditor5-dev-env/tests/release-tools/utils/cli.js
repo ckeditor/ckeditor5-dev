@@ -12,11 +12,12 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 
 describe( 'dev-env/release-tools/utils', () => {
-	let cli, sandbox;
+	let cli, sandbox, questionItems;
 
 	describe( 'cli', () => {
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
+			questionItems = [];
 
 			mockery.enable( {
 				useCleanCache: true,
@@ -26,12 +27,11 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			mockery.registerMock( 'inquirer', {
 				prompt( questions ) {
+					questionItems.push( ...questions );
 					const questionItem = questions[ 0 ];
 
-					if ( questionItem.name === 'version' ) {
-						// Returns suggested version.
-						return Promise.resolve( { version: questionItem.default } );
-					}
+					// Returns suggested value as a user input.
+					return Promise.resolve( { version: questionItem.default } );
 				}
 			} );
 
@@ -83,6 +83,31 @@ describe( 'dev-env/release-tools/utils', () => {
 				return cli.provideVersion( '0.7.0', 'patch' )
 					.then( ( newVersion ) => {
 						expect( newVersion ).to.equal( '0.7.1' );
+					} );
+			} );
+		} );
+
+		describe( 'confirmRelease()', () => {
+			it( 'displays packages and their versions (current and proposed) to release', () => {
+				const packagesMap = new Map();
+
+				packagesMap.set( '@ckeditor/ckeditor5-engine', {
+					previousVersion: '1.0.0',
+					version: '1.1.0'
+				} );
+				packagesMap.set( '@ckeditor/ckeditor5-core', {
+					previousVersion: '0.7.0',
+					version: '0.7.1'
+				} );
+
+				return cli.confirmRelease( packagesMap )
+					.then( () => {
+						const questionItem = questionItems[ 0 ];
+
+						expect( questionItem.message ).to.match( /^Packages to release:/ );
+						expect( questionItem.message ).to.match( /"@ckeditor\/ckeditor5-engine": v1\.0\.0 => v1\.1\.0/ );
+						expect( questionItem.message ).to.match( /"@ckeditor\/ckeditor5-core": v0\.7\.0 => v0\.7\.1/ );
+						expect( questionItem.message ).to.match( /Continue\?$/ );
 					} );
 			} );
 		} );

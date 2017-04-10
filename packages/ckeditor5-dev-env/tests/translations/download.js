@@ -10,9 +10,11 @@
 const sinon = require( 'sinon' );
 const path = require( 'path' );
 const mockery = require( 'mockery' );
+const { expect } = require( 'chai' );
 
 describe( 'download', () => {
-	let sandbox, stubs, download, resources, resourcesDetails, translations, fileContents;
+	let sandbox, stubs, download;
+	let resources, resourcesDetails, translations, fileContents;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
@@ -50,7 +52,6 @@ describe( 'download', () => {
 
 		sandbox.stub( process, 'cwd', () => 'workspace' );
 
-		mockery.registerMock( './languagecodemap.json', { 'en_AU': 'en-au' } );
 		mockery.registerMock( 'del', stubs.del );
 		mockery.registerMock( 'fs-extra', stubs.fs );
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
@@ -68,6 +69,8 @@ describe( 'download', () => {
 	} );
 
 	it( 'should download translations', () => {
+		mockery.registerMock( './languagecodemap.json', { 'en_AU': 'en-au' } );
+
 		resources = [
 			{ slug: 'ckeditor5-core' },
 			{ slug: 'ckeditor5-ui' },
@@ -121,6 +124,69 @@ describe( 'download', () => {
 					path.join( 'workspace', 'packages', 'ckeditor5-ui', 'lang', 'translations', 'en-au.po' ),
 					'ckeditor5-ui-en-content'
 				);
+			} );
+	} );
+
+	it( 'should use the default language codes when the codes are missing in the languagecodemap.json file', () => {
+		mockery.registerMock( './languagecodemap.json', {} );
+
+		resources = [
+			{ slug: 'ckeditor5-core' },
+			{ slug: 'ckeditor5-ui' },
+		];
+
+		// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+		resourcesDetails = {
+			'ckeditor5-core': {
+				available_languages: [ {
+					code: 'pl'
+				} ]
+			},
+			'ckeditor5-ui': {
+				available_languages: [ {
+					code: 'en_AU'
+				} ]
+			}
+		};
+
+		translations = {
+			'ckeditor5-core': {
+				pl: { content: 'ckeditor5-core-pl-content' }
+			},
+			'ckeditor5-ui': {
+				en_AU: { content: 'ckeditor5-ui-en-content' }
+			}
+		};
+
+		fileContents = {
+			'ckeditor5-core-pl-content': {},
+			'ckeditor5-ui-en-content': { ui: 'ui' }
+		};
+
+		// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
+
+		return download( { token: 'secretToken' } )
+			.then( () => {
+				sinon.assert.calledWithExactly(
+					stubs.fs.outputFileSync,
+					path.join( 'workspace', 'packages', 'ckeditor5-ui', 'lang', 'translations', 'en_AU.po' ),
+					'ckeditor5-ui-en-content'
+				);
+			} );
+	} );
+
+	it( 'should report an error when something goes wrong', () => {
+		let error = new Error();
+
+		stubs.transifexService.getResources = sandbox.spy( () => Promise.reject( error ) );
+
+		return download( { token: 'secretToken' } )
+			.then( () => {
+				throw new Error( 'It should throws an error' );
+			}, ( err ) => {
+				expect( err ).to.equal( error );
+				sinon.assert.calledOnce( stubs.logger.error );
+				sinon.assert.calledWithExactly( stubs.logger.error, error );
 			} );
 	} );
 } );

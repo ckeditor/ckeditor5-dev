@@ -124,7 +124,7 @@ describe( 'collect-utils', () => {
 	} );
 
 	describe( 'getMissingContextErrorMessages()', () => {
-		it( 'should return error when ckeditor5-core is missing', () => {
+		it( 'should return an error when ckeditor5-core is missing', () => {
 			const contexts = new Map();
 			const translations = [ {
 				package: 'ckeditor5-utils',
@@ -136,7 +136,7 @@ describe( 'collect-utils', () => {
 			] );
 		} );
 
-		it( 'should return error when lang/contexts.json could be missing', () => {
+		it( 'should return an error when lang/contexts.json could be missing', () => {
 			const contexts = new Map( [
 				[ 'ckeditor5-core', { content: {} } ]
 			] );
@@ -151,7 +151,25 @@ describe( 'collect-utils', () => {
 			] );
 		} );
 
-		it( 'should not return error when translation exists in ckeditor5-core/lang/contexts.json', () => {
+		it( 'should return an error when the translation does not exist', () => {
+			const contexts = new Map( [
+				[ 'ckeditor5-core', { content: {} } ],
+				[ 'ckeditor5-utils', { content: {} } ]
+			] );
+
+			const translations = [ {
+				package: 'ckeditor5-utils',
+				key: 'util'
+			} ];
+
+			const errors = utils.getMissingContextErrorMessages( contexts, translations );
+
+			expect( errors ).to.deep.equal( [
+				`Context for the translation key is missing (ckeditor5-utils, util).`
+			] );
+		} );
+
+		it( 'should not return errors when translation exists in ckeditor5-core/lang/contexts.json', () => {
 			const contexts = new Map( [
 				[ 'ckeditor5-core', { content: { util: 'Util' } } ]
 			] );
@@ -164,7 +182,7 @@ describe( 'collect-utils', () => {
 			expect( errors ).to.deep.equal( [] );
 		} );
 
-		it( 'should not return error when translation exists in package that is relevant for the translation', () => {
+		it( 'should not return errors when translation exists in package that is relevant for the translation', () => {
 			const contexts = new Map( [
 				[ 'ckeditor5-core', { content: {} } ],
 				[ 'ckeditor5-utils', { content: { util: 'Util' } } ]
@@ -233,6 +251,17 @@ msgid "util"
 msgstr "util"
 `
 			);
+		} );
+	} );
+
+	describe( 'createPotFileHeader', () => {
+		it( 'should return a pot file default header', () => {
+			const getFullYearStub = sandbox.stub( Date.prototype, 'getFullYear' ).returns( 2100 );
+
+			const header = utils.createPotFileHeader();
+
+			expect( header ).to.equal( `# Copyright (c) Copyright (c) 2003-2100, CKSource - Frederico Knabben. All rights reserved.\n\n` );
+			sinon.assert.calledOnce( getFullYearStub );
 		} );
 	} );
 
