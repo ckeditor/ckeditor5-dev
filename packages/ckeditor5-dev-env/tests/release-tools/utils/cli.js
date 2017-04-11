@@ -110,6 +110,59 @@ describe( 'dev-env/release-tools/utils', () => {
 						expect( questionItem.message ).to.match( /Continue\?$/ );
 					} );
 			} );
+
+			it( 'sorts the packages alphabetically', () => {
+				const packagesMap = new Map();
+
+				packagesMap.set( '@ckeditor/ckeditor5-list', {
+					previousVersion: '0.6.0',
+					version: '0.6.1'
+				} );
+
+				packagesMap.set( '@ckeditor/ckeditor5-autoformat', {
+					previousVersion: '0.1.0',
+					version: '0.1.1'
+				} );
+
+				packagesMap.set( '@ckeditor/ckeditor5-basic-styles', {
+					previousVersion: '0.2.0',
+					version: '0.2.1'
+				} );
+
+				packagesMap.set( '@ckeditor/ckeditor5-core', {
+					previousVersion: '0.4.0',
+					version: '0.4.1'
+				} );
+
+				packagesMap.set( '@ckeditor/ckeditor5-link', {
+					previousVersion: '0.5.0',
+					version: '0.5.1'
+				} );
+
+				packagesMap.set( '@ckeditor/ckeditor5-build-classic', {
+					previousVersion: '0.3.0',
+					version: '0.3.1'
+				} );
+
+				return cli.confirmRelease( packagesMap )
+					.then( () => {
+						const questionItem = questionItems[ 0 ];
+						const packagesAsArray = questionItem.message
+							.split( '\n' )
+							// Remove header and footer from the message.
+							.slice( 1, -1 )
+							// Extract package name from the whole line.
+							.map( ( line ) => line.replace( /.*"([^"]+)".*/, '$1' ) );
+
+						expect( packagesAsArray.length ).to.equal( 6 );
+						expect( packagesAsArray[ 0 ] ).to.equal( '@ckeditor/ckeditor5-autoformat' );
+						expect( packagesAsArray[ 1 ] ).to.equal( '@ckeditor/ckeditor5-basic-styles' );
+						expect( packagesAsArray[ 2 ] ).to.equal( '@ckeditor/ckeditor5-build-classic' );
+						expect( packagesAsArray[ 3 ] ).to.equal( '@ckeditor/ckeditor5-core' );
+						expect( packagesAsArray[ 4 ] ).to.equal( '@ckeditor/ckeditor5-link' );
+						expect( packagesAsArray[ 5 ] ).to.equal( '@ckeditor/ckeditor5-list' );
+					} );
+			} );
 		} );
 	} );
 } );
