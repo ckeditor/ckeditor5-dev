@@ -114,40 +114,16 @@ describe( 'dev-env/release-tools/utils', () => {
 			it( 'sorts the packages alphabetically', () => {
 				const packagesMap = new Map();
 
-				packagesMap.set( '@ckeditor/ckeditor5-list', {
-					previousVersion: '0.6.0',
-					version: '0.6.1'
-				} );
-
-				packagesMap.set( '@ckeditor/ckeditor5-autoformat', {
-					previousVersion: '0.1.0',
-					version: '0.1.1'
-				} );
-
-				packagesMap.set( '@ckeditor/ckeditor5-basic-styles', {
-					previousVersion: '0.2.0',
-					version: '0.2.1'
-				} );
-
-				packagesMap.set( '@ckeditor/ckeditor5-core', {
-					previousVersion: '0.4.0',
-					version: '0.4.1'
-				} );
-
-				packagesMap.set( '@ckeditor/ckeditor5-link', {
-					previousVersion: '0.5.0',
-					version: '0.5.1'
-				} );
-
-				packagesMap.set( '@ckeditor/ckeditor5-build-classic', {
-					previousVersion: '0.3.0',
-					version: '0.3.1'
-				} );
+				packagesMap.set( '@ckeditor/ckeditor5-list', {} );
+				packagesMap.set( '@ckeditor/ckeditor5-autoformat', {} );
+				packagesMap.set( '@ckeditor/ckeditor5-basic-styles', {} );
+				packagesMap.set( '@ckeditor/ckeditor5-core', {} );
+				packagesMap.set( '@ckeditor/ckeditor5-link', {} );
+				packagesMap.set( '@ckeditor/ckeditor5-build-classic', {} );
 
 				return cli.confirmRelease( packagesMap )
 					.then( () => {
-						const questionItem = questionItems[ 0 ];
-						const packagesAsArray = questionItem.message
+						const packagesAsArray = questionItems[ 0 ].message
 							.split( '\n' )
 							// Remove header and footer from the message.
 							.slice( 1, -1 )
