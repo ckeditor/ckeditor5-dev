@@ -32,7 +32,7 @@ describe( 'getWebpackConfigForAutomatedTests', () => {
 	it( 'should return basic webpack configutation object', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {} );
 
-		expect( webpackConfig.module.rules.length ).to.equal( 2 );
+		expect( webpackConfig.module.rules.length ).to.equal( 3 );
 		expect( webpackConfig.resolveLoader.modules[ 0 ] ).to.equal( 'node_modules' );
 
 		expect( webpackConfig.devtool ).to.equal( undefined );
