@@ -43,6 +43,10 @@ module.exports = function getWebpackConfigForManualTests( entryObject, buildDir 
 					// test: **/ckeditor5-*/theme/**/*.scss
 					test: /\.scss$/,
 					use: [ 'style-loader', 'css-loader', 'sass-loader' ]
+				},
+				{
+					test: /\.(txt|html)$/,
+					use: [ 'raw-loader' ]
 				}
 			]
 		},
