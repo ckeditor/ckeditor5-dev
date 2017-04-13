@@ -18,7 +18,9 @@ const cli = {
 	confirmRelease( packages ) {
 		let message = 'Packages to release:\n';
 
-		for ( const [ packageName, packageDetails ] of packages ) {
+		for ( const packageName of Array.from( packages.keys() ).sort() ) {
+			const packageDetails = packages.get( packageName );
+
 			message += `  * "${ packageName }": v${ packageDetails.previousVersion } => v${ packageDetails.version }\n`;
 		}
 
