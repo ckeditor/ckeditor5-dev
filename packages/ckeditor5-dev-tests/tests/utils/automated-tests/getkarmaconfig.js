@@ -183,6 +183,31 @@ describe( 'getKarmaConfig', () => {
 		} );
 	} );
 
+	it( 'should return karma config for options.server=true', () => {
+		const karmaConfig = getKarmaConfig( {
+			files: [ '/' ],
+			reporter: 'mocha',
+			server: true
+		} );
+
+		expect( karmaConfig.browsers ).to.equal( null );
+		expect( karmaConfig.autoWatch ).to.equal( true );
+		expect( karmaConfig.singleRun ).to.equal( false );
+	} );
+
+	it( 'should return karma config for options.watch=true', () => {
+		const karmaConfig = getKarmaConfig( {
+			files: [ '/' ],
+			reporter: 'mocha',
+			watch: true,
+			browsers: [ 'Chrome' ]
+		} );
+
+		expect( karmaConfig.browsers ).to.deep.equal( [ 'CHROME_LOCAL' ] );
+		expect( karmaConfig.autoWatch ).to.equal( true );
+		expect( karmaConfig.singleRun ).to.equal( false );
+	} );
+
 	it( 'should throw an error if no files are provided', () => {
 		const spy = sandbox.spy( getKarmaConfig );
 

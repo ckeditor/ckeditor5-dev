@@ -23,7 +23,8 @@ module.exports = function parseArguments( args ) {
 			'watch',
 			'coverage',
 			'source-map',
-			'verbose'
+			'verbose',
+			'server'
 		],
 
 		alias: {
@@ -40,7 +41,8 @@ module.exports = function parseArguments( args ) {
 			watch: false,
 			coverage: false,
 			verbose: false,
-			'source-map': false
+			'source-map': false,
+			server: false
 		}
 	} );
 
