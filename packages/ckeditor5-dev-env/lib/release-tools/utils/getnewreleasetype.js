@@ -12,7 +12,7 @@ const concat = require( 'concat-stream' );
 const parserOptions = require( './parser-options' );
 const { availableCommitTypes } = require( './transform-commit-utils' );
 const getPackageJson = require( './getpackagejson' );
-const versions = require( './versions' );
+const getLastTagForPackage = require( './getlasttagforpackage' );
 
 /**
  * Returns a type (major, minor, patch) of the next release based on commits.
@@ -20,37 +20,39 @@ const versions = require( './versions' );
  * If given package has not changed, suggested version will be equal to 'skip'.
  *
  * @param {Function} transformCommit
- * @param {Boolean} isDevPackage Is the function called in a repository
- * with multiple packages (which is management by Lerna).
+ * @param {Object} options
+ * @param {Boolean} options.isSubPackage Is the function called inside a repository
+ * with multiple packages (which is management by Lerna)?
  * @returns {Promise}
  */
-module.exports = function getNewReleaseType( transformCommit, isDevPackage ) {
-	const packageJson = getPackageJson();
-	let fromVersion = versions.getLastFromChangelog();
-
-	if ( fromVersion ) {
-		if ( isDevPackage ) {
-			fromVersion = packageJson.name + '@' + fromVersion;
-		} else {
-			fromVersion = 'v' + fromVersion;
-		}
-	}
+module.exports = function getNewReleaseType( transformCommit, options ) {
+	const lastTagForPackage = getLastTagForPackage( {
+		isSubPackage: options.isSubPackage
+	} );
 
 	const gitRawCommitsOpts = {
 		format: '%B%n-hash-%n%H',
-		from: fromVersion,
+		from: lastTagForPackage,
 		merges: undefined,
 		firstParent: true
 	};
 
 	const context = {
 		displayLogs: true,
-		packageData: packageJson
+		packageData: getPackageJson()
 	};
 
 	return new Promise( ( resolve, reject ) => {
 		gitRawCommits( gitRawCommitsOpts )
-			.on( 'error', reject )
+			.on( 'error', ( err ) => {
+				if ( err.message.match( /fatal\: ambiguous argument/ ) ) {
+					const error = new Error( `Cannot find tag "${ lastTagForPackage }" (the latest version from the changelog) in given repository.` );
+
+					return reject( error );
+				}
+
+				reject( err );
+			} )
 			.pipe( conventionalCommitsParser( parserOptions ) )
 			.pipe( concat( ( data ) => {
 				const commits = conventionalCommitsFilter( data );

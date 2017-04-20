@@ -9,7 +9,7 @@ const path = require( 'path' );
 const chalk = require( 'chalk' );
 const parseGithubUrl = require( 'parse-github-url' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const generateChangelog = require( './generatechangelog' );
+const generateChangelogForSinglePackage = require( './generatechangelogforsinglepackage' );
 const createGithubRelease = require( './creategithubrelease' );
 const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
 const changelogUtils = require( '../utils/changelog' );
@@ -54,7 +54,7 @@ module.exports = function createRelease( options ) {
 
 		// If package does not have generated changelog - let's generate it.
 		if ( packageDetails && !packageDetails.hasChangelog ) {
-			return generateChangelog( packageDetails.version )
+			return generateChangelogForSinglePackage( packageDetails.version )
 				.then( () => {
 					packageDetails.hasChangelog = true;
 

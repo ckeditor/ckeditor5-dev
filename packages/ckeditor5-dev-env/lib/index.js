@@ -10,75 +10,11 @@ const executeOnDependencies = require( './release-tools/utils/executeondependenc
 const getPackagesToRelease = require( './release-tools/utils/getpackagestorelease' );
 const validator = require( './release-tools/utils/releasevalidator' );
 const cli = require( './release-tools/utils/cli' );
-const displaySkippedPackages = require( './release-tools/utils/displayskippedpackages' );
 
 const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted by the user.';
 
 const tasks = {
-	generateChangelog: require( './release-tools/tasks/generatechangelog' ),
-
 	createRelease: require( './release-tools/tasks/createrelease' ),
-
-	/**
-	 * Generates the changelog for dependencies.
-	 *
-	 * @param {Object} options
-	 * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
-	 * @param {String} options.packages Where to look for other packages (dependencies).
-	 * @param {Array.<String>} options.skipPackages Name of packages which will be skipped.
-	 * @param {Boolean} options.isDevPackage Whether the changelog will be generated for development packages.
-	 * @param {Boolean} [options.checkPackageJson=true] If set to false, the mechanism will not check whether
-	 * the current package being specified in 'package.json' file.
-	 * @returns {Promise}
-	 */
-	generateChangelogForDependencies( options ) {
-		const execOptions = {
-			cwd: options.cwd,
-			packages: options.packages,
-			skipPackages: options.skipPackages || [],
-			checkPackageJson: options.checkPackageJson === undefined ? true : options.checkPackageJson
-		};
-
-		const generatedChangelog = {};
-
-		const generateChangelogForSinglePackage = ( repositoryName, repositoryPath ) => {
-			process.chdir( repositoryPath );
-
-			const changelogOptions = {
-				isDevPackage: options.isDevPackage
-			};
-
-			return tasks.generateChangelog( null, changelogOptions )
-				.then( ( newVersion ) => {
-					if ( newVersion ) {
-						generatedChangelog[ repositoryName ] = `v${ newVersion }`;
-					}
-				} );
-		};
-
-		return executeOnDependencies( execOptions, generateChangelogForSinglePackage )
-			.then( ( skippedPackages ) => {
-				displaySkippedPackages( skippedPackages );
-
-				process.chdir( options.cwd );
-			} )
-			.then( () => {
-				const packageNames = Object.keys( generatedChangelog );
-
-				if ( !packageNames.length ) {
-					return;
-				}
-
-				const log = logger();
-
-				let message = 'Changelog for packages listed below has been generated:\n';
-				message += packageNames.map( ( packageName ) => {
-					return `  * "${ packageName }": ${ generatedChangelog[ packageName ] }`;
-				} ).join( '\n' );
-
-				log.info( message );
-			} );
-	},
 
 	/**
 	 * Task releases the dependencies. It collects packages that will be release,
@@ -178,6 +114,12 @@ const tasks = {
 			return Promise.resolve();
 		}
 	},
+
+	generateChangelogForSinglePackage: require( './release-tools/tasks/generatechangelogforsinglepackage' ),
+
+	generateChangelogForSubPackages: require( './release-tools/tasks/generatechangelogforsubpackages' ),
+
+	generateChangelogForSubRepositories: require( './release-tools/tasks/generatechangelogforsubrepositories' ),
 
 	/**
 	 * Collects translation strings ( from `t()` calls ) and stores them in ckeditor5/build/.transifex directory.
