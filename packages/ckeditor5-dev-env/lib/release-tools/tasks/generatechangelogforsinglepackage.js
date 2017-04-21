@@ -8,6 +8,7 @@
 const chalk = require( 'chalk' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const cli = require( '../utils/cli' );
+const versions = require( '../utils/versions' );
 const changelogUtils = require( '../utils/changelog' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
@@ -29,6 +30,12 @@ module.exports = function generateChangelogForSinglePackage( newVersion = null )
 	const log = logger();
 	const packageJson = getPackageJson();
 
+	let tagName = versions.getLastFromChangelog();
+
+	if ( tagName ) {
+		tagName = 'v' + tagName;
+	}
+
 	log.info( '' );
 	log.info( chalk.bold.blue( `Generating changelog for "${ packageJson.name }"...` ) );
 
@@ -37,7 +44,7 @@ module.exports = function generateChangelogForSinglePackage( newVersion = null )
 	if ( !newVersion ) {
 		promise = promise
 			.then( () => {
-				return getNewReleaseType( transformCommitFunction, { isSubPackage: false } );
+				return getNewReleaseType( transformCommitFunction, { tagName } );
 			} )
 			.then( ( response ) => {
 				const newReleaseType = response.releaseType !== 'skip' ? response.releaseType : null;
@@ -56,7 +63,7 @@ module.exports = function generateChangelogForSinglePackage( newVersion = null )
 
 			const changelogOptions = {
 				version,
-				isSubPackage: false,
+				tagName,
 				transformCommit: transformCommitFunction
 			};
 

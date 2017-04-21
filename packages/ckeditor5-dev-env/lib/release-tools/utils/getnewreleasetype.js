@@ -12,7 +12,6 @@ const concat = require( 'concat-stream' );
 const parserOptions = require( './parser-options' );
 const { availableCommitTypes } = require( './transform-commit-utils' );
 const getPackageJson = require( './getpackagejson' );
-const getLastTagForPackage = require( './getlasttagforpackage' );
 
 /**
  * Returns a type (major, minor, patch) of the next release based on commits.
@@ -21,18 +20,13 @@ const getLastTagForPackage = require( './getlasttagforpackage' );
  *
  * @param {Function} transformCommit
  * @param {Object} options
- * @param {Boolean} options.isSubPackage Is the function called inside a repository
- * with multiple packages (which is management by Lerna)?
+ * @param {String|null} options.tagName Name of the last created tag for the repository.
  * @returns {Promise}
  */
 module.exports = function getNewReleaseType( transformCommit, options ) {
-	const lastTagForPackage = getLastTagForPackage( {
-		isSubPackage: options.isSubPackage
-	} );
-
 	const gitRawCommitsOpts = {
 		format: '%B%n-hash-%n%H',
-		from: lastTagForPackage,
+		from: options.tagName,
 		merges: undefined,
 		firstParent: true
 	};
@@ -46,7 +40,7 @@ module.exports = function getNewReleaseType( transformCommit, options ) {
 		gitRawCommits( gitRawCommitsOpts )
 			.on( 'error', ( err ) => {
 				if ( err.message.match( /fatal\: ambiguous argument/ ) ) {
-					const error = new Error( `Cannot find tag "${ lastTagForPackage }" (the latest version from the changelog) in given repository.` );
+					const error = new Error( `Cannot find tag "${ options.tagName }" (the latest version from the changelog) in given repository.` );
 
 					return reject( error );
 				}

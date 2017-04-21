@@ -9,7 +9,6 @@ const fs = require( 'fs' );
 const conventionalChangelog = require( 'conventional-changelog' );
 const { stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const getWriterOptions = require( './getwriteroptions' );
-const getLastTagForPackage = require( './getlasttagforpackage' );
 const changelogUtils = require( './changelog' );
 const parserOptions = require( './parser-options' );
 
@@ -18,10 +17,9 @@ const parserOptions = require( './parser-options' );
  * it in the changelog file.
  *
  * @param {Object} options
- * @param {Boolean} options.isSubPackage Is the function called inside a repository
- * with multiple packages (which is management by Lerna)?
  * @param {String} options.version A version for generated changelog.
  * @param {Function} options.transformCommit A function which transforms the commit.
+ * @param {String|null} options.tagName Name of the last created tag for the repository.
  * @returns {Promise}
  */
 module.exports = function generateChangelogFromCommits( options ) {
@@ -40,7 +38,7 @@ module.exports = function generateChangelogFromCommits( options ) {
 		};
 
 		const gitRawCommitsOpts = {
-			from: getLastTagForPackage( { isSubPackage: options.isSubPackage } ),
+			from: options.tagName,
 			merges: undefined,
 			firstParent: true
 		};
