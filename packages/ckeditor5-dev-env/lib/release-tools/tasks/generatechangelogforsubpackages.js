@@ -9,7 +9,7 @@ const chalk = require( 'chalk' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
 const cli = require( '../utils/cli' );
-const versions = require( '../utils/versions' );
+const versionUtils = require( '../utils/versions' );
 const changelogUtils = require( '../utils/changelog' );
 const displaySkippedPackages = require( '../utils/displayskippedpackages' );
 const displayGeneratedChangelogs = require( '../utils/displaygeneratedchangelogs' );
@@ -17,7 +17,7 @@ const executeOnPackages = require( '../utils/executeonpackages' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getSubPackagesPaths = require( '../utils/getsubpackagespaths' );
 const generateChangelogFromCommits = require( '../utils/generatechangelogfromcommits' );
-const transformCommitFunction = require( '../utils/transformcommitforckeditor5devpackage' );
+const transformCommitFunction = require( '../utils/transform-commit/transformcommitforckeditor5devpackage' );
 
 /**
  * Generates the changelog for packages located in single repository.
@@ -68,7 +68,7 @@ module.exports = function generateChangelogForSubPackages( options ) {
 		process.chdir( dependencyPath );
 
 		const packageJson = getPackageJson( dependencyPath );
-		let tagName = versions.getLastFromChangelog();
+		let tagName = versionUtils.getLastFromChangelog();
 
 		if ( tagName ) {
 			tagName = packageJson.name + '@' + tagName;

@@ -7,7 +7,7 @@
 
 const fs = require( 'fs' );
 const path = require( 'path' );
-const templatePath = path.join( __dirname, '..', 'templates' );
+const templatePath = path.join( __dirname, '..', '..', 'templates' );
 const { typesOrder } = require( './transform-commit-utils' );
 
 /**

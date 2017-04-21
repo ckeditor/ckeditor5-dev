@@ -8,12 +8,12 @@
 const chalk = require( 'chalk' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const cli = require( '../utils/cli' );
-const versions = require( '../utils/versions' );
+const versionUtils = require( '../utils/versions' );
 const changelogUtils = require( '../utils/changelog' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
 const generateChangelogFromCommits = require( '../utils/generatechangelogfromcommits' );
-const transformCommitFunction = require( '../utils/transformcommitforckeditor5package' );
+const transformCommitFunction = require( '../utils/transform-commit/transformcommitforckeditor5package' );
 
 /**
  * Generates the release changelog based on commit messages in the repository.
@@ -30,7 +30,7 @@ module.exports = function generateChangelogForSinglePackage( newVersion = null )
 	const log = logger();
 	const packageJson = getPackageJson();
 
-	let tagName = versions.getLastFromChangelog();
+	let tagName = versionUtils.getLastFromChangelog();
 
 	if ( tagName ) {
 		tagName = 'v' + tagName;
@@ -64,6 +64,7 @@ module.exports = function generateChangelogForSinglePackage( newVersion = null )
 			const changelogOptions = {
 				version,
 				tagName,
+				isSubPackage: false,
 				transformCommit: transformCommitFunction
 			};
 

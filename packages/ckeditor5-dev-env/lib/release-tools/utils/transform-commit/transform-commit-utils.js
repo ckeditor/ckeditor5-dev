@@ -5,7 +5,7 @@
 
 'use strict';
 
-const getPackageJson = require( './getpackagejson' );
+const getPackageJson = require( '../getpackagejson' );
 
 const transformCommitUtils = {
 	/**

@@ -7,10 +7,10 @@
 
 const fs = require( 'fs' );
 const conventionalChangelog = require( 'conventional-changelog' );
-const { stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const getWriterOptions = require( './getwriteroptions' );
 const changelogUtils = require( './changelog' );
-const parserOptions = require( './parser-options' );
+const getWriterOptions = require( './transform-commit/getwriteroptions' );
+const parserOptions = require( './transform-commit/parser-options' );
+const { stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * Generates a changelog based on user's commits in the repository and saves
