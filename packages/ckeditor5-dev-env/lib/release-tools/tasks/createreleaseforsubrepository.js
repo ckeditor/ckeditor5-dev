@@ -17,7 +17,7 @@ const versionUtils = require( '../utils/versions' );
 const getPackageJson = require( '../utils/getpackagejson' );
 
 /**
- * Creates a new release.
+ * Creates a new release for a single repository.
  *
  * Commits a new changelog (and package.json), creates a tag,
  * pushes the tag to a remote server and creates a note on GitHub releases page.
@@ -31,7 +31,7 @@ const getPackageJson = require( '../utils/getpackagejson' );
  * @param {Map} options.dependencies Dependencies list to update.
  * @returns {Promise}
  */
-module.exports = function createRelease( options ) {
+module.exports = function createReleaseForSubRepository( options ) {
 	const cwd = process.cwd();
 	const log = logger();
 

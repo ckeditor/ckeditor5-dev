@@ -10,7 +10,7 @@ const executeOnDependencies = require( '../utils/executeondependencies' );
 const getPackagesToRelease = require( '../utils/getpackagestorelease' );
 const validator = require( '../utils/releasevalidator' );
 const cli = require( '../utils/cli' );
-const createRelease = require( './createrelease' );
+const createReleaseForSubRepository = require( './createreleaseforsubrepository' );
 
 const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted by the user.';
 
@@ -24,7 +24,7 @@ const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted by the user.';
  * @param {Array.<String>} options.skipPackages Name of packages which won't be released.
  * @returns {Promise}
  */
-module.exports = function releaseDependencies( options ) {
+module.exports = function releaseSubRepositories( options ) {
 	const log = logger();
 
 	const execOptions = {
@@ -87,7 +87,7 @@ module.exports = function releaseDependencies( options ) {
 
 		process.chdir( repositoryPath );
 
-		return createRelease( {
+		return createReleaseForSubRepository( {
 			token: options.token,
 			dependencies: options.dependencies,
 			skipGithub: options.skipGithub,

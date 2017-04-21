@@ -6,12 +6,12 @@
 'use strict';
 
 const tasks = {
-	createRelease( ...args ) {
-		return require( './release-tools/tasks/createrelease' ).apply( null, args );
+	createReleaseForSubRepository( ...args ) {
+		return require( './release-tools/tasks/createreleaseforsubrepository' ).apply( null, args );
 	},
 
-	releaseDependencies( ...args ) {
-		return require( './release-tools/tasks/releasedependencies' ).apply( null, args );
+	releaseSubRepositories( ...args ) {
+		return require( './release-tools/tasks/releasesubrepositories' ).apply( null, args );
 	},
 
 	generateChangelogForSinglePackage( ...args ) {
