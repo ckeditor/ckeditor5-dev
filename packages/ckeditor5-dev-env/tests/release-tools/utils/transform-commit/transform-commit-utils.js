@@ -11,7 +11,7 @@ const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 
-describe( 'dev-env/release-tools/utils', () => {
+describe( 'dev-env/release-tools/utils/transform-commit', () => {
 	let transformCommit, sandbox, stubs;
 
 	describe( 'transformCommitUtils', () => {
@@ -22,8 +22,8 @@ describe( 'dev-env/release-tools/utils', () => {
 				getPackageJson: sandbox.stub()
 			};
 
-			transformCommit = proxyquire( '../../../lib/release-tools/utils/transform-commit-utils', {
-				'./getpackagejson': stubs.getPackageJson
+			transformCommit = proxyquire( '../../../../lib/release-tools/utils/transform-commit/transform-commit-utils', {
+				'../getpackagejson': stubs.getPackageJson
 			} );
 		} );
 

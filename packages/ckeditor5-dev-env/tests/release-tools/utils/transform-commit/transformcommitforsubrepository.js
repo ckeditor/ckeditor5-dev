@@ -12,9 +12,9 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 const proxyquire = require( 'proxyquire' );
 
-describe( 'dev-env/release-tools/utils', () => {
-	describe( 'transformCommitForCKEditor5Package()', () => {
-		let transformCommitForCKEditor5Package, sandbox, stubs, loggerVerbosity, packageJson;
+describe( 'dev-env/release-tools/utils/transform-commit', () => {
+	describe( 'transformCommitForSubRepository()', () => {
+		let transformCommitForSubRepository, sandbox, stubs, loggerVerbosity, packageJson;
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
@@ -38,7 +38,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				bugs: 'https://github.com/ckeditor/ckeditor5-dev/issues'
 			};
 
-			transformCommitForCKEditor5Package = proxyquire( '../../../lib/release-tools/utils/transformcommitforckeditor5package', {
+			transformCommitForSubRepository = proxyquire( '../../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository', {
 				'@ckeditor/ckeditor5-dev-utils': {
 					logger( verbosity ) {
 						loggerVerbosity = verbosity;
@@ -69,7 +69,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				references: []
 			};
 
-			transformCommitForCKEditor5Package( commit, { displayLogs: true, packageData: packageJson } );
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( commit.notes[ 0 ].title ).to.equal( 'BREAKING CHANGES' );
 			expect( commit.notes[ 1 ].title ).to.equal( 'BREAKING CHANGES' );
@@ -87,7 +87,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				references: []
 			};
 
-			transformCommitForCKEditor5Package( commit, { displayLogs: true, packageData: packageJson } );
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Fix: Simple fix\." \u001b\[32mINCLUDED/ );
@@ -105,7 +105,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				references: []
 			};
 
-			transformCommitForCKEditor5Package( commit, { displayLogs: true, packageData: packageJson } );
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Docs: README\." \u001b\[90mSKIPPED/ );
@@ -123,7 +123,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				references: []
 			};
 
-			transformCommitForCKEditor5Package( commit, { displayLogs: true, packageData: packageJson } );
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Invalid commit\." \u001b\[31mINVALID/ );
@@ -146,7 +146,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				references: []
 			};
 
-			transformCommitForCKEditor5Package( commit, { displayLogs: true, packageData: packageJson } );
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			const expectedSubject = 'Simple fix. Closes [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2)';
 			expect( commit.subject ).to.equal( expectedSubject );
@@ -165,7 +165,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				references: []
 			};
 
-			transformCommitForCKEditor5Package( commit, { displayLogs: true, packageData: packageJson } );
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			const expectedSubject = 'Internal: Thanks to [@CKEditor](https://github.com/CKEditor)';
 			expect( commit.subject ).to.equal( expectedSubject );
@@ -194,7 +194,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				notes: []
 			};
 
-			transformCommitForCKEditor5Package( commit, { displayLogs: true, packageData: packageJson } );
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( commit.type ).to.equal( 'Features' );
 			expect( commit.subject ).to.equal( 'Introduced a brand new release tools with a new set of requirements. ' +
@@ -240,7 +240,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				notes: []
 			};
 
-			transformCommitForCKEditor5Package( commit, { displayLogs: true, packageData: packageJson } );
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( commit.type ).to.equal( 'Features' );
 			expect( commit.subject ).to.equal( 'Introduced a brand new release tools with a new set of requirements. ' +
@@ -266,7 +266,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				notes: []
 			};
 
-			transformCommitForCKEditor5Package( commit, { displayLogs: true, packageData: packageJson } );
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( commit.header ).to.equal( 'Merge pull request #75 from ckeditor/t/64' );
 			expect( commit.type ).to.equal( 'Features' );
@@ -287,7 +287,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				notes: []
 			};
 
-			transformCommitForCKEditor5Package( commit, { displayLogs: true, packageData: packageJson } );
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( commit.header ).to.equal( 'Merge pull request #75 from ckeditor/t/64' );
 			expect( commit.type ).to.equal( 'Features' );
@@ -308,7 +308,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				notes: []
 			};
 
-			transformCommitForCKEditor5Package( commit, { displayLogs: true, packageData: packageJson } );
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.be.a( 'string' );
@@ -334,7 +334,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				references: []
 			};
 
-			transformCommitForCKEditor5Package( commit, { displayLogs: false } );
+			transformCommitForSubRepository( commit, { displayLogs: false } );
 
 			expect( loggerVerbosity ).to.equal( 'error' );
 		} );

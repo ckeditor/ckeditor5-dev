@@ -78,22 +78,18 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'throws an error when repository is empty', () => {
-			stubs.versionUtils.getLastFromChangelog.returns( null );
-
 			return getNewReleaseType( stubs.transformCommit )
 				.then(
 					() => {
 						throw new Error( 'Supposed to be rejected.' );
 					},
 					( err ) => {
-						expect( err.message ).to.match( /unknown revision or path not in the working tree/ );
+						expect( err.message ).to.equal( 'Given repository is empty.' );
 					}
 				);
 		} );
 
 		it( 'returns "patch" release for non-feature commits', () => {
-			stubs.versionUtils.getLastFromChangelog.returns( null );
-
 			exec( `git commit --allow-empty --message "Fix: Some fix."` );
 			exec( `git commit --allow-empty --message "Other: Some change."` );
 
@@ -104,8 +100,6 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'ignores notes from commits which will not be included in changelog', () => {
-			stubs.versionUtils.getLastFromChangelog.returns( null );
-
 			exec( `git commit --allow-empty --message "Docs: Nothing." --message "BREAKING CHANGES: It should not bump the major."` );
 
 			return getNewReleaseType( stubs.transformCommit )
@@ -115,8 +109,6 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'returns "minor" release for feature commit', () => {
-			stubs.versionUtils.getLastFromChangelog.returns( null );
-
 			exec( `git commit --allow-empty --message "Feature: Nothing new."` );
 
 			return getNewReleaseType( stubs.transformCommit )
@@ -126,8 +118,6 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'returns "major" if any visible in changelog commit has breaking changes', () => {
-			stubs.versionUtils.getLastFromChangelog.returns( null );
-
 			exec( `git commit --allow-empty --message "Other: Nothing." --message "BREAKING CHANGES: Bump the major!"` );
 
 			return getNewReleaseType( stubs.transformCommit )
@@ -137,16 +127,26 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'returns "skip" if there are not any "public" commits since the last release', () => {
-			stubs.versionUtils.getLastFromChangelog.returns( '1.0.0' );
-
 			exec( `git tag v1.0.0` );
 
-			return getNewReleaseType( stubs.transformCommit )
+			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.0.0' } )
 				.then( ( response ) => {
-					exec( `git tag --delete v1.0.0` );
-
 					expect( response.releaseType ).to.equal( 'skip' );
 				} );
+		} );
+
+		it( 'throws an error when given tag does not exist', () => {
+			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.1.2' } )
+				.then(
+					() => {
+						throw new Error( 'Supposed to be rejected.' );
+					},
+					( err ) => {
+						const message = 'Cannot find tag "v1.1.2" (the latest version' +
+							' from the changelog) in given repository.';
+						expect( err.message ).to.equal( message );
+					}
+				);
 		} );
 	} );
 

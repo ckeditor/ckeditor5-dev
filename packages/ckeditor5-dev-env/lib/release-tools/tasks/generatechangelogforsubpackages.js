@@ -17,7 +17,7 @@ const executeOnPackages = require( '../utils/executeonpackages' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getSubPackagesPaths = require( '../utils/getsubpackagespaths' );
 const generateChangelogFromCommits = require( '../utils/generatechangelogfromcommits' );
-const transformCommitFunction = require( '../utils/transform-commit/transformcommitforckeditor5devpackage' );
+const transformCommitFunction = require( '../utils/transform-commit/transformcommitforsubpackage' );
 
 /**
  * Generates the changelog for packages located in single repository.

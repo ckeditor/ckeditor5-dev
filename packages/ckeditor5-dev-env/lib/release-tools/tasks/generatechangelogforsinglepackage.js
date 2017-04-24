@@ -13,7 +13,7 @@ const changelogUtils = require( '../utils/changelog' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
 const generateChangelogFromCommits = require( '../utils/generatechangelogfromcommits' );
-const transformCommitFunction = require( '../utils/transform-commit/transformcommitforckeditor5package' );
+const transformCommitFunction = require( '../utils/transform-commit/transformcommitforsubrepository' );
 
 /**
  * Generates the release changelog based on commit messages in the repository.

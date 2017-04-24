@@ -26,7 +26,7 @@ const INDENT_SIZE = 21;
  * @param {Object} context.packageData Content from the 'package.json' for given package.
  * @returns {Commit}
  */
-module.exports = function transformCommitForCKEditor5Package( commit, context ) {
+module.exports = function transformCommitForSubRepository( commit, context ) {
 	const log = logger( context.displayLogs ? 'info' : 'error' );
 
 	// For merge commit from Github, additional description is provided as "footer".

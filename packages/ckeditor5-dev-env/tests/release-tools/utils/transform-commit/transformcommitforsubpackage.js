@@ -12,9 +12,9 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 const proxyquire = require( 'proxyquire' );
 
-describe( 'dev-env/release-tools/utils', () => {
-	describe( 'transformCommitForCKEditor5DevPackage()', () => {
-		let transformCommitForCKEditor5DevPackage, sandbox, stubs, context;
+describe( 'dev-env/release-tools/utils/transform-commit', () => {
+	describe( 'transformCommitForSubPackage()', () => {
+		let transformCommitForSubPackage, sandbox, stubs, context;
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
@@ -31,7 +31,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					warning: sandbox.spy(),
 					error: sandbox.spy()
 				},
-				transformCommitForCKEditor5Package: sandbox.stub(),
+				transformCommitForSubRepository: sandbox.stub(),
 				getChangedFilesForCommit: sandbox.stub()
 			};
 
@@ -41,11 +41,11 @@ describe( 'dev-env/release-tools/utils', () => {
 				}
 			};
 
-			mockery.registerMock( './transformcommitforckeditor5package', stubs.transformCommitForCKEditor5Package );
+			mockery.registerMock( './transformcommitforsubrepository', stubs.transformCommitForSubRepository );
 			mockery.registerMock( './getchangedfilesforcommit', stubs.getChangedFilesForCommit );
 
-			const functionPath = '../../../lib/release-tools/utils/transformcommitforckeditor5devpackage';
-			transformCommitForCKEditor5DevPackage = proxyquire( functionPath, {
+			const functionPath = '../../../../lib/release-tools/utils/transform-commit/transformcommitforsubpackage';
+			transformCommitForSubPackage = proxyquire( functionPath, {
 				'@ckeditor/ckeditor5-dev-utils': {
 					logger() {
 						return stubs.logger;
@@ -66,8 +66,8 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			stubs.getChangedFilesForCommit.returns( [] );
 
-			expect( transformCommitForCKEditor5DevPackage( commit, context ) ).to.equal( undefined );
-			expect( stubs.transformCommitForCKEditor5Package.called ).to.equal( false );
+			expect( transformCommitForSubPackage( commit, context ) ).to.equal( undefined );
+			expect( stubs.transformCommitForSubRepository.called ).to.equal( false );
 		} );
 
 		it( 'rejects the commit when it has changed files in other packages', () => {
@@ -80,8 +80,8 @@ describe( 'dev-env/release-tools/utils', () => {
 				'packages/ckeditor5-dev-tests/README.md'
 			] );
 
-			expect( transformCommitForCKEditor5DevPackage( commit, context ) ).to.equal( undefined );
-			expect( stubs.transformCommitForCKEditor5Package.called ).to.equal( false );
+			expect( transformCommitForSubPackage( commit, context ) ).to.equal( undefined );
+			expect( stubs.transformCommitForSubRepository.called ).to.equal( false );
 		} );
 
 		it( 'rejects the commit when it has changed files in root of the repository', () => {
@@ -94,8 +94,8 @@ describe( 'dev-env/release-tools/utils', () => {
 				'README.md'
 			] );
 
-			expect( transformCommitForCKEditor5DevPackage( commit, context ) ).to.equal( undefined );
-			expect( stubs.transformCommitForCKEditor5Package.called ).to.equal( false );
+			expect( transformCommitForSubPackage( commit, context ) ).to.equal( undefined );
+			expect( stubs.transformCommitForSubRepository.called ).to.equal( false );
 		} );
 
 		it( 'accepts the commit when it has changed files for proper package', () => {
@@ -108,10 +108,10 @@ describe( 'dev-env/release-tools/utils', () => {
 				'packages/ckeditor5-dev-env/package.json',
 			] );
 
-			stubs.transformCommitForCKEditor5Package.returnsArg( 0 );
+			stubs.transformCommitForSubRepository.returnsArg( 0 );
 
-			expect( transformCommitForCKEditor5DevPackage( commit, context ) ).to.equal( commit );
-			expect( stubs.transformCommitForCKEditor5Package.calledOnce ).to.equal( true );
+			expect( transformCommitForSubPackage( commit, context ) ).to.equal( commit );
+			expect( stubs.transformCommitForSubRepository.calledOnce ).to.equal( true );
 		} );
 	} );
 } );

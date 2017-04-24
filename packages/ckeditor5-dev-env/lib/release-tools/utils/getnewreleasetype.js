@@ -23,7 +23,7 @@ const getPackageJson = require( './getpackagejson' );
  * @param {String|null} options.tagName Name of the last created tag for the repository.
  * @returns {Promise}
  */
-module.exports = function getNewReleaseType( transformCommit, options ) {
+module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 	const gitRawCommitsOpts = {
 		format: '%B%n-hash-%n%H',
 		from: options.tagName,
@@ -39,13 +39,15 @@ module.exports = function getNewReleaseType( transformCommit, options ) {
 	return new Promise( ( resolve, reject ) => {
 		gitRawCommits( gitRawCommitsOpts )
 			.on( 'error', ( err ) => {
-				if ( err.message.match( /fatal\: ambiguous argument/ ) ) {
-					const error = new Error( `Cannot find tag "${ options.tagName }" (the latest version from the changelog) in given repository.` );
+				let error;
 
-					return reject( error );
+				if ( err.message.match( /'HEAD': unknown/ ) ) {
+					error = new Error( `Given repository is empty.` );
+				} else if ( err.message.match( new RegExp( `${ options.tagName }\.\.HEAD': unknown` ) ) ) {
+					error = new Error( `Cannot find tag "${ options.tagName }" (the latest version from the changelog) in given repository.` );
 				}
 
-				reject( err );
+				reject( error || err );
 			} )
 			.pipe( conventionalCommitsParser( parserOptions ) )
 			.pipe( concat( ( data ) => {

@@ -11,6 +11,7 @@ const getPackageJson = require( './getpackagejson' );
 
 /**
  * Returns a collection of paths to packages which are located in single repository.
+ * Those packages have to specified in the "main" package.json as the dependencies.
  *
  * @param {Object} options
  * @param {String} options.cwd Current work directory.

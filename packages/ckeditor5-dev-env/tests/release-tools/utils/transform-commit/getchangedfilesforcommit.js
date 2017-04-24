@@ -11,10 +11,10 @@ const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 
-describe( 'dev-env/release-tools/utils', () => {
+describe( 'dev-env/release-tools/utils/transform-commit', () => {
 	let getChangedFilesForCommit, sandbox, shExecStub;
 
-	describe( 'getChangedFilesForCommit', () => {
+	describe( 'getChangedFilesForCommit()', () => {
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
 
@@ -32,7 +32,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				}
 			} );
 
-			getChangedFilesForCommit = require( '../../../lib/release-tools/utils/getchangedfilesforcommit' );
+			getChangedFilesForCommit = require( '../../../../lib/release-tools/utils/transform-commit/getchangedfilesforcommit' );
 		} );
 
 		afterEach( () => {

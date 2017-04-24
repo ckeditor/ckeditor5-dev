@@ -10,14 +10,14 @@
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 
-describe( 'dev-env/release-tools/utils', () => {
+describe( 'dev-env/release-tools/utils/transform-commit', () => {
 	let getWriterOptions, sandbox, transformSpy;
 
 	beforeEach( () => {
 		transformSpy = sinon.spy();
 		sandbox = sinon.sandbox.create();
 
-		getWriterOptions = require( '../../../lib/release-tools/utils/getwriteroptions' );
+		getWriterOptions = require( '../../../../lib/release-tools/utils/transform-commit/getwriteroptions' );
 	} );
 
 	afterEach( () => {

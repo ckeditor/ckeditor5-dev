@@ -5,13 +5,13 @@
 
 'use strict';
 
-const transformCommitForCKEditor5Package = require( './transformcommitforckeditor5package' );
+const transformCommitForSubRepository = require( './transformcommitforsubrepository' );
 const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
 
 /**
- * Parses a single commit for `ckeditor5-dev` package.
+ * Parses a single commit for package which is located in multi-package repository.
  *
- * We accept the commit only if its files are located in current processing package.
+ * The commit will be parsed only if its files are located in current processing package.
  *
  * @param {Commit} commit
  * @param {Object} context
@@ -19,7 +19,7 @@ const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
  * @param {Object} context.packageData Content from the 'package.json' for given package.
  * @returns {Commit}
  */
-module.exports = function transformCommitForCKEditor5DevPackage( commit, context ) {
+module.exports = function transformCommitForSubPackage( commit, context ) {
 	const files = getChangedFilesForCommit( commit.hash );
 
 	if ( !files.length ) {
@@ -32,7 +32,7 @@ module.exports = function transformCommitForCKEditor5DevPackage( commit, context
 		return;
 	}
 
-	return transformCommitForCKEditor5Package( commit, context );
+	return transformCommitForSubRepository( commit, context );
 };
 
 function isValidCommit( files, packageName ) {
