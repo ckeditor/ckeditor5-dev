@@ -38,7 +38,8 @@ module.exports = function createReleaseForSubRepository( options ) {
 	const packageJsonPath = path.join( cwd, 'package.json' );
 	const packageJson = getPackageJson( cwd );
 
-	log.info( `Creating release for "${ packageJson.name }".` );
+	log.info( '' );
+	log.info( chalk.bold.blue( `Creating release for "${ packageJson.name }".` ) );
 
 	if ( options.dependencies ) {
 		// Update dependencies/devDependencies versions in package.json.
@@ -60,7 +61,7 @@ module.exports = function createReleaseForSubRepository( options ) {
 
 					options.dependencies.set( packageJson.name, packageDetails );
 
-					return createRelease( {
+					return createReleaseForSubRepository( {
 						token: options.token,
 						skipGithub: options.skipGithub,
 						skipNpm: options.skipNpm,

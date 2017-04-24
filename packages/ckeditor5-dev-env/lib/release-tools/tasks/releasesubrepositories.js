@@ -6,11 +6,14 @@
 'use strict';
 
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const executeOnDependencies = require( '../utils/executeondependencies' );
+const executeOnPackages = require( '../utils/executeonpackages' );
 const getPackagesToRelease = require( '../utils/getpackagestorelease' );
 const validator = require( '../utils/releasevalidator' );
 const cli = require( '../utils/cli' );
+const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
 const createReleaseForSubRepository = require( './createreleaseforsubrepository' );
+const displaySkippedPackages = require( '../utils/displayskippedpackages' );
+const getPackageJson = require( '../utils/getpackagejson' );
 
 const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted by the user.';
 
@@ -27,21 +30,32 @@ const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted by the user.';
 module.exports = function releaseSubRepositories( options ) {
 	const log = logger();
 
-	const execOptions = {
+	const pathsCollection = getSubRepositoriesPaths( {
 		cwd: options.cwd,
 		packages: options.packages,
 		skipPackages: options.skipPackages || []
-	};
+	} );
 
 	// Errors are added to this array by the `validatePackages` function.
 	const errors = [];
 
-	return getPackagesToRelease( execOptions )
+	return getPackagesToRelease( pathsCollection.packages )
 		.then( ( dependencies ) => {
-			options.dependencies = dependencies;
+			displaySkippedPackages( pathsCollection.skipped );
 
 			if ( dependencies.size === 0 ) {
 				throw new Error( 'None of the packages contains any changes since its last release. Aborting.' );
+			}
+
+			options.dependencies = dependencies;
+
+			// Filter out packages which won't be released.
+			for ( const pathToPackage of pathsCollection.packages ) {
+				const packageName = getPackageJson( pathToPackage ).name;
+
+				if ( !dependencies.has( packageName ) ) {
+					pathsCollection.packages.delete( pathToPackage );
+				}
 			}
 
 			return cli.confirmRelease( dependencies );
@@ -51,7 +65,7 @@ module.exports = function releaseSubRepositories( options ) {
 				throw new Error( BREAK_RELEASE_MESSAGE );
 			}
 
-			return executeOnDependencies( execOptions, validatePackages );
+			return executeOnPackages( pathsCollection.packages, validatePackages );
 		} )
 		.then( () => {
 			if ( errors.length ) {
@@ -65,7 +79,7 @@ module.exports = function releaseSubRepositories( options ) {
 			options.skipGithub = parsedOptions.skipGithub;
 			options.skipNpm = parsedOptions.skipNpm;
 
-			return executeOnDependencies( execOptions, releaseSinglePackage );
+			return executeOnPackages( pathsCollection.packages, releaseSinglePackage );
 		} )
 		.then( () => process.chdir( options.cwd ) )
 		.catch( ( err ) => {
@@ -81,10 +95,6 @@ module.exports = function releaseSubRepositories( options ) {
 		} );
 
 	function releaseSinglePackage( repositoryName, repositoryPath ) {
-		if ( !options.dependencies.has( repositoryName ) ) {
-			return Promise.resolve();
-		}
-
 		process.chdir( repositoryPath );
 
 		return createReleaseForSubRepository( {
@@ -96,10 +106,6 @@ module.exports = function releaseSubRepositories( options ) {
 	}
 
 	function validatePackages( repositoryName, repositoryPath ) {
-		if ( !options.dependencies.has( repositoryName ) ) {
-			return Promise.resolve();
-		}
-
 		process.chdir( repositoryPath );
 
 		try {
