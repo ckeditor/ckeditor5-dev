@@ -94,7 +94,7 @@ module.exports = function releaseSubRepositories( options ) {
 			process.exitCode = -1;
 		} );
 
-	function releaseSinglePackage( repositoryName, repositoryPath ) {
+	function releaseSinglePackage( repositoryPath ) {
 		process.chdir( repositoryPath );
 
 		return createReleaseForSubRepository( {
@@ -105,13 +105,13 @@ module.exports = function releaseSubRepositories( options ) {
 		} );
 	}
 
-	function validatePackages( repositoryName, repositoryPath ) {
+	function validatePackages( repositoryPath ) {
 		process.chdir( repositoryPath );
 
 		try {
 			validator.checkBranch();
 		} catch ( err ) {
-			errors.push( `## ${ repositoryName }` );
+			errors.push( `## ${ getPackageJson().name }` );
 			errors.push( err.message );
 		}
 

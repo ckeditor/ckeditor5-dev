@@ -64,10 +64,11 @@ module.exports = function generateChangelogForSubPackages( options ) {
 			log.info( 'Done.' );
 		} );
 
-	function generateChangelogTask( dependencyName, dependencyPath ) {
+	function generateChangelogTask( dependencyPath ) {
 		process.chdir( dependencyPath );
 
-		const packageJson = getPackageJson( dependencyPath );
+		const packageJson = getPackageJson();
+		const dependencyName = getPackageJson().name;
 		let tagName = versionUtils.getLastFromChangelog();
 
 		if ( tagName ) {

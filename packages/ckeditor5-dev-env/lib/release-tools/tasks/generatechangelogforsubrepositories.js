@@ -10,6 +10,7 @@ const executeOnPackages = require( '../utils/executeonpackages' );
 const displayGeneratedChangelogs = require( '../utils/displaygeneratedchangelogs' );
 const displaySkippedPackages = require( '../utils/displayskippedpackages' );
 const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
+const getPackageJson = require( '../utils/getpackagejson' );
 const generateChangelogForSinglePackage = require( './generatechangelogforsinglepackage' );
 
 /**
@@ -43,13 +44,13 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 			log.info( 'Done.' );
 		} );
 
-	function generateChangelogTask( dependencyName, dependencyPath ) {
+	function generateChangelogTask( dependencyPath ) {
 		process.chdir( dependencyPath );
 
 		return generateChangelogForSinglePackage()
 			.then( ( newVersion ) => {
 				if ( newVersion ) {
-					generatedChangelogsMap.set( dependencyName, newVersion );
+					generatedChangelogsMap.set( getPackageJson().name, newVersion );
 				} else {
 					pathsCollection.skipped.add( dependencyPath );
 				}

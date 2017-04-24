@@ -21,12 +21,13 @@ module.exports = function getPackagesToRelease( pathsToPackages ) {
 	const packagesToRelease = new Map();
 	const packagesToCheck = new Map();
 
-	function filterPackagesToRelease( repositoryName, repositoryPath ) {
+	function filterPackagesToRelease( repositoryPath ) {
 		process.chdir( repositoryPath );
 
 		const gitVersion = versionUtils.getLastTagFromGit();
 		const changelogVersion = versionUtils.getLastFromChangelog();
 		const packageJson = getPackageJson();
+		const repositoryName = packageJson.name;
 
 		if ( gitVersion !== changelogVersion ) {
 			// Package is ready to release.
