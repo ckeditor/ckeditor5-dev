@@ -13,6 +13,6 @@ const fsExtra = require( 'fs-extra' );
  */
 exports.handlers = {
 	processingComplete( e ) {
-		fsExtra.outputFileSync( process.cwd() + '/docs/api-docs/output.json', JSON.stringify( e, null, 4 ) );
+		fsExtra.outputFileSync( process.cwd() + '/docs/api/output.json', JSON.stringify( e, null, 4 ) );
 	}
 };
