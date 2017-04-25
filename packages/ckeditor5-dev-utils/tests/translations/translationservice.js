@@ -17,7 +17,7 @@ const mockery = require( 'mockery' );
 describe( 'translations', () => {
 	describe( 'TranslationService', () => {
 		const sandbox = sinon.sandbox.create();
-		let translationService, stubs;
+		let translationService, TranslationService, stubs;
 		let files, fileContents;
 
 		beforeEach( () => {
@@ -41,7 +41,7 @@ describe( 'translations', () => {
 
 			mockery.registerMock( 'fs', stubs.fs );
 
-			const TranslationService = proxyquire( '../../lib/translations/translationservice', {
+			TranslationService = proxyquire( '../../lib/translations/translationservice', {
 				'../logger': () => stubs.logger,
 			} );
 
@@ -51,6 +51,33 @@ describe( 'translations', () => {
 		afterEach( () => {
 			sandbox.restore();
 			mockery.disable();
+		} );
+
+		describe( 'constructor()', () => {
+			it( 'should be able to use custom function that returns path to the po file', () => {
+				const pathToTranslations = path.join( 'customPathToPackage', 'lang', 'translations', 'pl.po' );
+
+				files = [ pathToTranslations ];
+
+				fileContents = {
+					[ pathToTranslations ]: [
+						`msgctxt "Label for the Save button."`,
+						`msgid "Save"`,
+						`msgstr "Zapisz"`,
+						''
+					].join( '\n' )
+				};
+
+				translationService = new TranslationService( 'pl', {
+					getPathToPoFile: ( pathToPackage, languageCode ) => path.join( pathToPackage, 'lang', 'translations', `${ languageCode }.po` )
+				} );
+
+				translationService.loadPackage( 'customPathToPackage' );
+
+				expect( Array.from( translationService.dictionary ) ).to.deep.equal( [
+					[ 'Save', 'Zapisz' ]
+				] );
+			} );
 		} );
 
 		describe( 'loadPackage()', () => {
