@@ -5,66 +5,94 @@
 
 'use strict';
 
-const { commitTypes, transform } = require( '../changelog/writer-options' );
+const conventionalCommitsParser = require( 'conventional-commits-parser' );
+const conventionalCommitsFilter = require( 'conventional-commits-filter' );
+const gitRawCommits = require( 'git-raw-commits' );
+const concat = require( 'concat-stream' );
+const parserOptions = require( './parser-options' );
+const { availableCommitTypes } = require( './transform-commit-utils' );
+const getPackageJson = require( './getpackagejson' );
+const versions = require( './versions' );
 
 /**
  * Returns a type (major, minor, patch) of the next release based on commits.
  *
+ * If given package has not changed, suggested version will be 'skip'.
+ *
+ * @param {Function} transformCommit
+ * @param {Boolean} isDevPackage Is the function called in a repository
+ * with multiple packages (which is management by Lerna).
  * @returns {Promise}
  */
-module.exports = function getNewReleaseType() {
-	const conventionalRecommendedBump = require( 'conventional-recommended-bump' );
-	const parserOpts = require( '../changelog/parser-options' );
+module.exports = function getNewReleaseType( transformCommit, isDevPackage ) {
+	const packageJson = getPackageJson();
+	let fromVersion = versions.getLastFromChangelog();
 
-	return new Promise( ( resolve, reject ) => {
-		const options = {
-			whatBump: getNewVersionType
-		};
-
-		conventionalRecommendedBump( options, parserOpts, ( err, response ) => {
-			if ( err ) {
-				return reject( err );
-			}
-
-			return resolve( response );
-		} );
-	} );
-};
-
-// Returns a level which represents a type of release based on the commits.
-//   - 0: major,
-//   - 1: minor,
-//   - 2: patch.
-//
-// An input array is a result of module https://github.com/conventional-changelog/conventional-commits-parser.
-//
-// @param {Array} commits
-// @returns {Number}
-function getNewVersionType( commits ) {
-	let hasNewFeatures = false;
-
-	for ( const item of commits ) {
-		const singleCommit = transform( item, false );
-
-		if ( !singleCommit ) {
-			continue;
-		}
-
-		// Check whether the commit is visible in changelog.
-		if ( !commitTypes.get( singleCommit.rawType ) ) {
-			continue;
-		}
-
-		for ( const note of singleCommit.notes ) {
-			if ( note.title === 'BREAKING CHANGES' || note.title === 'BREAKING CHANGE' ) {
-				return 0;
-			}
-		}
-
-		if ( !hasNewFeatures && singleCommit.rawType === 'Feature' ) {
-			hasNewFeatures = true;
-		}
+	if ( isDevPackage && fromVersion ) {
+		fromVersion = packageJson.name + '@' + fromVersion;
 	}
 
-	return hasNewFeatures ? 1 : 2;
-}
+	const gitRawCommitsOpts = {
+		format: '%B%n-hash-%n%H',
+		from: fromVersion,
+		merges: undefined,
+		firstParent: true
+	};
+
+	const context = {
+		displayLogs: true,
+		packageData: packageJson
+	};
+
+	return new Promise( ( resolve, reject ) => {
+		gitRawCommits( gitRawCommitsOpts )
+			.pipe( conventionalCommitsParser( parserOptions ) )
+			.pipe( concat( ( data ) => {
+				const commits = conventionalCommitsFilter( data );
+				const releaseType = getNewVersionType( commits );
+
+				return resolve( { releaseType } );
+			} ) )
+			.on( 'error', reject );
+	} );
+
+	// Returns a type of version for a release based on the commits.
+	//
+	// @param {Array} commits
+	// @returns {String}
+	function getNewVersionType( commits ) {
+		let hasNewFeatures = false;
+		let hasChanges = false;
+
+		for ( const item of commits ) {
+			const singleCommit = transformCommit( item, context );
+
+			if ( !singleCommit ) {
+				continue;
+			}
+
+			// Check whether the commit is visible in changelog.
+			if ( !availableCommitTypes.get( singleCommit.rawType ) ) {
+				continue;
+			}
+
+			hasChanges = true;
+
+			for ( const note of singleCommit.notes ) {
+				if ( note.title === 'BREAKING CHANGES' ) {
+					return 'major';
+				}
+			}
+
+			if ( !hasNewFeatures && singleCommit.rawType === 'Feature' ) {
+				hasNewFeatures = true;
+			}
+		}
+
+		if ( !hasChanges ) {
+			return 'skip';
+		}
+
+		return hasNewFeatures ? 'minor' : 'patch';
+	}
+};

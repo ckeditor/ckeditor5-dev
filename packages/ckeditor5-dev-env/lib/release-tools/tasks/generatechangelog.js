@@ -10,10 +10,11 @@ const conventionalChangelog = require( 'conventional-changelog' );
 const chalk = require( 'chalk' );
 const { tools, stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
-const hasCommitsFromLastRelease = require( '../utils/hascommitsfromlastrelease' );
 const cli = require( '../utils/cli' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const changelogUtils = require( '../utils/changelog' );
+const versionUtils = require( '../utils/versions' );
+const getWriterOptions = require( '../utils/getwriteroptions' );
 
 /**
  * Generates the release changelog based on commit messages in the repository.
@@ -23,10 +24,15 @@ const changelogUtils = require( '../utils/changelog' );
  * If package does not have any commits, user has to confirm whether the changelog
  * should be generated.
  *
+ * @param {String|null} [newVersion=null] A version for which changelog will be generated.
+ * @param {Object} [options={}]
+ * @param {Boolean} options.isDevPackage Whether the changelog will be generated for development packages.
  * @returns {Promise}
  */
-module.exports = function generateChangelog( newVersion = null ) {
+module.exports = function generateChangelog( newVersion = null, options = {} ) {
 	const log = logger();
+
+	const transformCommitFunction = getTransformFunction();
 
 	return new Promise( ( resolve ) => {
 		const packageJson = getPackageJson();
@@ -37,9 +43,11 @@ module.exports = function generateChangelog( newVersion = null ) {
 		let promise = Promise.resolve();
 
 		if ( !newVersion ) {
-			promise = promise.then( () => getNewReleaseType() )
+			promise = promise.then( () => {
+					return getNewReleaseType( transformCommitFunction, options.isDevPackage );
+				} )
 				.then( ( response ) => {
-					const newReleaseType = ( hasCommitsFromLastRelease() ) ? response.releaseType : null;
+					const newReleaseType = response.releaseType !== 'skip' ? response.releaseType : null;
 
 					return cli.provideVersion( packageJson.version, newReleaseType );
 				} );
@@ -59,17 +67,25 @@ module.exports = function generateChangelog( newVersion = null ) {
 					changelogUtils.saveChangelog( changelogUtils.changelogHeader );
 				}
 
+				let fromVersion = versionUtils.getLastFromChangelog();
+
+				if ( options.isDevPackage && fromVersion ) {
+					fromVersion = packageJson.name + '@' + fromVersion;
+				}
+
 				const context = {
-					version
+					version,
+					displayLogs: false
 				};
 				const gitRawCommitsOpts = {
+					from: fromVersion,
 					merges: undefined,
 					firstParent: true
 				};
-				const parserOpts = require( '../changelog/parser-options' );
-				const writerOpts = require( '../changelog/writer-options' );
+				const parserOptions = require( '../utils/parser-options' );
+				const writerOptions = getWriterOptions( transformCommitFunction );
 
-				conventionalChangelog( {}, context, gitRawCommitsOpts, parserOpts, writerOpts )
+				conventionalChangelog( {}, context, gitRawCommitsOpts, parserOptions, writerOptions )
 					.pipe( saveChangelogPipe( version ) );
 			} );
 
@@ -91,12 +107,29 @@ module.exports = function generateChangelog( newVersion = null ) {
 
 				// Commit the changelog.
 				tools.shExec( `git add ${ utils.changelogFile }`, { verbosity: 'error' } );
-				tools.shExec( `git commit -m "Docs: Changelog. [skip ci]"`, { verbosity: 'error' } );
+
+				let commitMessage;
+
+				if ( options.isDevPackage ) {
+					commitMessage = `Changelog for "${ packageJson.name }".`;
+				} else {
+					commitMessage = 'Changelog.';
+				}
+
+				tools.shExec( `git commit -m "Docs: ${ commitMessage } [skip ci]"`, { verbosity: 'error' } );
 
 				log.info( chalk.green( `Changelog for "${ packageJson.name }" (v${ version }) has been generated.` ) );
 
-				resolve();
+				resolve( version );
 			} );
 		}
 	} );
+
+	function getTransformFunction() {
+		if ( options.isDevPackage ) {
+			return require( '../utils/transformcommitforckeditor5devpackage' );
+		}
+
+		return require( '../utils/transformcommitforckeditor5package' );
+	}
 };

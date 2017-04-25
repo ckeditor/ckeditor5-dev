@@ -26,19 +26,34 @@ const tasks = {
 	 * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
 	 * @param {String} options.packages Where to look for other packages (dependencies).
 	 * @param {Array.<String>} options.skipPackages Name of packages which will be skipped.
+	 * @param {Boolean} options.isDevPackage Whether the changelog will be generated for development packages.
+	 * @param {Boolean} [options.checkPackageJson=true] If set to false, the mechanism will not check whether
+	 * the current package being specified in 'package.json' file.
 	 * @returns {Promise}
 	 */
 	generateChangelogForDependencies( options ) {
 		const execOptions = {
 			cwd: options.cwd,
 			packages: options.packages,
-			skipPackages: options.skipPackages || []
+			skipPackages: options.skipPackages || [],
+			checkPackageJson: typeof options.checkPackageJson == 'undefined' ? true : options.checkPackageJson
 		};
+
+		const generatedChangelog = {};
 
 		const generateChangelogForSinglePackage = ( repositoryName, repositoryPath ) => {
 			process.chdir( repositoryPath );
 
-			return tasks.generateChangelog();
+			const changelogOptions = {
+				isDevPackage: options.isDevPackage
+			};
+
+			return tasks.generateChangelog( null, changelogOptions )
+				.then( ( newVersion ) => {
+					if ( newVersion ) {
+						generatedChangelog[ repositoryName ] = `v${ newVersion }`;
+					}
+				} );
 		};
 
 		return executeOnDependencies( execOptions, generateChangelogForSinglePackage )
@@ -46,6 +61,20 @@ const tasks = {
 				displaySkippedPackages( skippedPackages );
 
 				process.chdir( options.cwd );
+			} )
+			.then( () => {
+				const packageNames = Object.keys( generatedChangelog );
+
+				if ( !packageNames.length ) {
+					return;
+				}
+
+				const log = logger();
+
+				let message = 'Changelog for packages listed below has been generated:\n';
+				message += packageNames.map( ( packageName ) => `  * ${ generatedChangelog[ packageName ] }` ).join( '\n' );
+
+				log.info( message );
 			} );
 	},
 
