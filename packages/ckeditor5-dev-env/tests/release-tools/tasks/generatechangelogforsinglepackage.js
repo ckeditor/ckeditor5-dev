@@ -36,7 +36,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 				cli: {
 					provideVersion: sandbox.stub()
 				},
-				getWriterOptions: sandbox.stub(),
 				transformCommit: sandbox.spy(),
 				generateChangelogFromCommits: sandbox.stub(),
 				versionUtils: {

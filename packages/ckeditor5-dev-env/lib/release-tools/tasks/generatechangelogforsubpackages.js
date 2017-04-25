@@ -68,7 +68,7 @@ module.exports = function generateChangelogForSubPackages( options ) {
 		process.chdir( dependencyPath );
 
 		const packageJson = getPackageJson();
-		const dependencyName = getPackageJson().name;
+		const dependencyName = packageJson.name;
 		let tagName = versionUtils.getLastFromChangelog();
 
 		if ( tagName ) {
