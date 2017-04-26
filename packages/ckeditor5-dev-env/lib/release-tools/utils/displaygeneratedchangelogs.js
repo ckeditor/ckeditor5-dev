@@ -17,7 +17,7 @@ module.exports = function displayGeneratedChangelogs( generatedChangelogsMap ) {
 		return;
 	}
 
-	let message = 'Changelog for packages listed below has been generated:\n';
+	let message = 'Generated changelog for the following packages:\n';
 
 	for ( const [ packageName, version ] of generatedChangelogsMap ) {
 		message += `  * "${ packageName }": v${ version }\n`;

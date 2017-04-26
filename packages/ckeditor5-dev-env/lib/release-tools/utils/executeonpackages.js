@@ -18,10 +18,6 @@
 module.exports = function executeOnPackages( pathsToPackages, functionToExecute ) {
 	let promise = Promise.resolve();
 
-	if ( !pathsToPackages.size ) {
-		return promise;
-	}
-
 	for ( const pathToSinglePackage of pathsToPackages ) {
 		promise = promise.then( () => functionToExecute( pathToSinglePackage ) );
 	}

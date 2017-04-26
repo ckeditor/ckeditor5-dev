@@ -41,7 +41,7 @@ describe( 'dev-env/release-tools/utils', () => {
 	describe( 'displayGeneratedChangelogs()', () => {
 		it( 'displays name of packages that have been skipped', () => {
 			const logMessage = [
-				'Changelog for packages listed below has been generated:',
+				'Generated changelog for the following packages:',
 				'  * "@ckeditor/ckeditor5-foo": v1.0.0',
 				'  * "@ckeditor/ckeditor5-bar": v2.0.0'
 			].join( '\n' );

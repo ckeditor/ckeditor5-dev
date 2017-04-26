@@ -39,15 +39,15 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 	return new Promise( ( resolve, reject ) => {
 		gitRawCommits( gitRawCommitsOpts )
 			.on( 'error', ( err ) => {
-				let error;
-
 				if ( err.message.match( /'HEAD': unknown/ ) ) {
-					error = new Error( `Given repository is empty.` );
-				} else if ( err.message.match( new RegExp( `${ options.tagName }\.\.HEAD': unknown` ) ) ) {
-					error = new Error( `Cannot find tag "${ options.tagName }" (the latest version from the changelog) in given repository.` );
+					reject( new Error( `Given repository is empty.` ) );
+				} else if ( err.message.match( new RegExp( `'${ options.tagName }\.\.HEAD': unknown` ) ) ) {
+					reject( new Error(
+						`Cannot find tag "${ options.tagName }" (the latest version from the changelog) in given repository.`
+					) );
+				} else {
+					reject( err );
 				}
-
-				reject( error || err );
 			} )
 			.pipe( conventionalCommitsParser( parserOptions ) )
 			.pipe( concat( ( data ) => {
