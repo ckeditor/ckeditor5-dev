@@ -65,6 +65,7 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 	function getNewVersionType( commits ) {
 		let hasNewFeatures = false;
 		let hasChanges = false;
+		let hasBreakingChanges = false;
 
 		for ( const item of commits ) {
 			const singleCommit = transformCommit( item, context );
@@ -73,16 +74,16 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 				continue;
 			}
 
+			hasChanges = true;
+
 			// Check whether the commit is visible in changelog.
 			if ( !availableCommitTypes.get( singleCommit.rawType ) ) {
 				continue;
 			}
 
-			hasChanges = true;
-
 			for ( const note of singleCommit.notes ) {
 				if ( note.title === 'BREAKING CHANGES' ) {
-					return 'major';
+					hasBreakingChanges = true;
 				}
 			}
 
@@ -91,10 +92,21 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 			}
 		}
 
+		// Repository does not have new changes - skip the release.
 		if ( !hasChanges ) {
 			return 'skip';
 		}
 
-		return hasNewFeatures ? 'minor' : 'patch';
+		// Repository has breaking changes - bump the major.
+		if ( hasBreakingChanges ) {
+			return 'major';
+		}
+
+		// Repository has new features without breaking changes - bump the minor.
+		if ( hasNewFeatures ) {
+			return 'minor';
+		}
+
+		return 'patch';
 	}
 };

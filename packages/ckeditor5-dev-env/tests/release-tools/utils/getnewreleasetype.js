@@ -44,10 +44,6 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			stubs = {
 				transformCommit: sandbox.spy( ( commit ) => {
-					if ( commit.type === 'Docs' ) {
-						return;
-					}
-
 					commit.rawType = commit.type;
 
 					return commit;
@@ -132,6 +128,29 @@ describe( 'dev-env/release-tools/utils', () => {
 			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.0.0' } )
 				.then( ( response ) => {
 					expect( response.releaseType ).to.equal( 'skip' );
+				} );
+		} );
+
+		it( 'returns "patch" release for internal commits since the last release', () => {
+			exec( `git commit --allow-empty --message "Docs: Added some notes to README #1."` );
+
+			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.0.0' } )
+				.then( ( response ) => {
+					expect( response.releaseType ).to.equal( 'patch' );
+				} );
+		} );
+
+		it( 'transforms each commit since the last release', () => {
+			exec( `git commit --allow-empty --message "Other: Nothing." --message "BREAKING CHANGES: Bump the major!"` );
+			exec( `git commit --allow-empty --message "Docs: Added some notes to README #2."` );
+
+			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.0.0' } )
+				.then( () => {
+					// transformCommit should be called for commits:
+					// (1) Docs: Added some notes to README #1.
+					// (2) Other: Nothing.
+					// (3) Docs: Added some notes to README #2.
+					expect( stubs.transformCommit.calledThrice ).to.equal( true );
 				} );
 		} );
 
