@@ -1,9 +1,6 @@
 {
   "name": "ckeditor5-dev",
-  "version": "2.0.0",
-  "description": "CKEditor 5 development tools packages.",
-  "main": "index.js",
-  "dependencies": {},
+  "private": true,
   "devDependencies": {
     "@ckeditor/ckeditor5-dev-env": "^4.2.0",
     "@ckeditor/ckeditor5-dev-lint": "^2.0.0",
@@ -12,10 +9,6 @@
     "istanbul": "^0.4.4",
     "lerna": "2.0.0-rc.1",
     "mocha": "^3.0.2"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ckeditor/ckeditor5-dev.git"
   },
   "engines": {
     "node": ">=6.0.0",
