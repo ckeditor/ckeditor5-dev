@@ -144,6 +144,19 @@ Some text ## [like a release header]
 				expect( utils.getChangesForVersion( 'v0.2.0' ) )
 					.to.equal( '2' );
 			} );
+
+			it( 'works when date is not specified', () => {
+				const changelog =
+`## 0.3.0
+
+Foo`;
+
+				sandbox.stub( utils, 'getChangelog' )
+					.returns( utils.changelogHeader + changelog );
+
+				expect( utils.getChangesForVersion( 'v0.3.0' ) )
+					.to.equal( 'Foo' );
+			} );
 		} );
 
 		describe( 'getChangelog()', () => {

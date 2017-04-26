@@ -86,6 +86,12 @@ describe( 'dev-env/release-tools/utils', () => {
 				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-beta.2' );
 			} );
 
+			it( 'returns version from changelog #9', () => {
+				changelogStub.returns( `\n## 1.0.0\nSome changelog entry.` );
+
+				expect( version.getLastFromChangelog() ).to.equal( '1.0.0' );
+			} );
+
 			it( 'returns null for empty changelog', () => {
 				changelogStub.returns( '' );
 
