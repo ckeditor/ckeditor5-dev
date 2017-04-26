@@ -6,25 +6,15 @@
 'use strict';
 
 const tasks = {
-	createReleaseForSubRepository( ...args ) {
-		return require( './release-tools/tasks/createreleaseforsubrepository' ).apply( null, args );
-	},
+	createReleaseForSubRepository: require( './release-tools/tasks/createreleaseforsubrepository' ),
 
-	releaseSubRepositories( ...args ) {
-		return require( './release-tools/tasks/releasesubrepositories' ).apply( null, args );
-	},
+	releaseSubRepositories: require( './release-tools/tasks/releasesubrepositories' ),
 
-	generateChangelogForSinglePackage( ...args ) {
-		return require( './release-tools/tasks/generatechangelogforsinglepackage' ).apply( null, args );
-	},
+	generateChangelogForSinglePackage: require( './release-tools/tasks/generatechangelogforsinglepackage' ),
 
-	generateChangelogForSubPackages( ...args ) {
-		return require( './release-tools/tasks/generatechangelogforsubpackages' ).apply( null, args );
-	},
+	generateChangelogForSubPackages: require( './release-tools/tasks/generatechangelogforsubpackages' ),
 
-	generateChangelogForSubRepositories( ...args ) {
-		return require( './release-tools/tasks/generatechangelogforsubrepositories' ).apply( null, args );
-	},
+	generateChangelogForSubRepositories: require( './release-tools/tasks/generatechangelogforsubrepositories' ),
 
 	/**
 	 * Collects translation strings ( from `t()` calls ) and stores them in ckeditor5/build/.transifex directory.
