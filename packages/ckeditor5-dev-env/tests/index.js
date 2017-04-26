@@ -37,7 +37,7 @@ describe( 'dev-env/index', () => {
 				getToken: sandbox.stub()
 			},
 			releaseTools: {
-				createReleaseForSubRepository: sandbox.stub(),
+				releaseRepository: sandbox.stub(),
 				releaseSubRepositories: sandbox.stub(),
 				generateChangelogForSinglePackage: sandbox.stub(),
 				generateChangelogForSubPackages: sandbox.stub(),
@@ -51,8 +51,8 @@ describe( 'dev-env/index', () => {
 		mockery.registerMock( './translations/collect', stubs.translations.collect );
 
 		mockery.registerMock(
-			'./release-tools/tasks/createreleaseforsubrepository',
-			stubs.releaseTools.createReleaseForSubRepository
+			'./release-tools/tasks/releaserepository',
+			stubs.releaseTools.releaseRepository
 		);
 		mockery.registerMock(
 			'./release-tools/tasks/releasesubrepositories',
@@ -85,15 +85,15 @@ describe( 'dev-env/index', () => {
 		mockery.disable();
 	} );
 
-	describe( 'createReleaseForSubRepository()', () => {
+	describe( 'releaseRepository()', () => {
 		it( 'creates release for sub repository', () => {
-			stubs.releaseTools.createReleaseForSubRepository.returns( Promise.resolve( { result: true } ) );
+			stubs.releaseTools.releaseRepository.returns( Promise.resolve( { result: true } ) );
 
-			return tasks.createReleaseForSubRepository( 'argument' )
+			return tasks.releaseRepository( 'argument' )
 				.then( ( response ) => {
 					expect( response.result ).to.equal( true );
-					expect( stubs.releaseTools.createReleaseForSubRepository.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.createReleaseForSubRepository.firstCall.args[0] ).to.equal( 'argument' );
+					expect( stubs.releaseTools.releaseRepository.calledOnce ).to.equal( true );
+					expect( stubs.releaseTools.releaseRepository.firstCall.args[0] ).to.equal( 'argument' );
 				} );
 		} );
 	} );

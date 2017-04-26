@@ -6,7 +6,7 @@
 'use strict';
 
 const tasks = {
-	createReleaseForSubRepository: require( './release-tools/tasks/createreleaseforsubrepository' ),
+	releaseRepository: require( './release-tools/tasks/releaserepository' ),
 
 	releaseSubRepositories: require( './release-tools/tasks/releasesubrepositories' ),
 

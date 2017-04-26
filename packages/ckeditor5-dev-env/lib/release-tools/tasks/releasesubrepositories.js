@@ -11,7 +11,7 @@ const getPackagesToRelease = require( '../utils/getpackagestorelease' );
 const validator = require( '../utils/releasevalidator' );
 const cli = require( '../utils/cli' );
 const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
-const createReleaseForSubRepository = require( './createreleaseforsubrepository' );
+const releaseRepository = require( './releaserepository' );
 const displaySkippedPackages = require( '../utils/displayskippedpackages' );
 const getPackageJson = require( '../utils/getpackagejson' );
 
@@ -97,7 +97,7 @@ module.exports = function releaseSubRepositories( options ) {
 	function releaseSinglePackage( repositoryPath ) {
 		process.chdir( repositoryPath );
 
-		return createReleaseForSubRepository( {
+		return releaseRepository( {
 			token: options.token,
 			dependencies: options.dependencies,
 			skipGithub: options.skipGithub,

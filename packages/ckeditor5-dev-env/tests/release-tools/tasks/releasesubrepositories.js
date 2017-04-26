@@ -42,7 +42,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			},
 			getPackagesToRelease: sandbox.stub(),
 			displaySkippedPackages: sandbox.stub(),
-			createReleaseForSubRepository: sandbox.stub(),
+			releaseRepository: sandbox.stub(),
 			getPackageJson: sandbox.stub(),
 			getSubRepositoriesPaths: sandbox.stub()
 		};
@@ -57,7 +57,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return promise;
 		} );
 
-		mockery.registerMock( './createreleaseforsubrepository', stubs.createReleaseForSubRepository );
+		mockery.registerMock( './releaserepository', stubs.releaseRepository );
 		mockery.registerMock( '../utils/getpackagejson', stubs.getPackageJson );
 		mockery.registerMock( '../utils/displayskippedpackages', stubs.displaySkippedPackages );
 		mockery.registerMock( '../utils/getpackagestorelease', stubs.getPackagesToRelease );
@@ -82,7 +82,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 	} );
 
 	describe( 'releaseSubRepositories()', () => {
-		it( 'executes "createReleaseForSubRepository" function on each package', () => {
+		it( 'executes "releaseRepository" function on each package', () => {
 			const chdirStub = sandbox.stub( process, 'chdir' );
 
 			packagesToRelease.set( '@ckeditor/ckeditor5-core', {
@@ -126,7 +126,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( chdirStub.firstCall.args[ 0 ] ).to.equal( '/tmp/packages/ckeditor5-core' );
 					expect( chdirStub.secondCall.args[ 0 ] ).to.equal( '/tmp/packages/ckeditor5-engine' );
 
-					expect( stubs.createReleaseForSubRepository.calledTwice ).to.equal( true );
+					expect( stubs.releaseRepository.calledTwice ).to.equal( true );
 					expect( stubs.getSubRepositoriesPaths.calledOnce ).to.equal( true );
 					expect( stubs.getSubRepositoriesPaths.firstCall.args[ 0 ] ).to.deep.equal( {
 						cwd: options.cwd,
@@ -141,8 +141,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 						dependencies: packagesToRelease
 					};
 
-					expect( stubs.createReleaseForSubRepository.firstCall.args[ 0 ] ).to.deep.equal( releaseArguments );
-					expect( stubs.createReleaseForSubRepository.secondCall.args[ 0 ] ).to.deep.equal( releaseArguments );
+					expect( stubs.releaseRepository.firstCall.args[ 0 ] ).to.deep.equal( releaseArguments );
+					expect( stubs.releaseRepository.secondCall.args[ 0 ] ).to.deep.equal( releaseArguments );
 				} );
 		} );
 
@@ -166,7 +166,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				.then( () => {
 					const expectedError = 'None of the packages contains any changes since its last release. Aborting.';
 
-					expect( stubs.createReleaseForSubRepository.called ).to.equal( false );
+					expect( stubs.releaseRepository.called ).to.equal( false );
 					expect( stubs.logger.error.calledOnce ).to.equal( true );
 					expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal( expectedError );
 				} );
@@ -209,7 +209,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			return releaseSubRepositories( options )
 				.then( () => {
-					expect( stubs.createReleaseForSubRepository.called ).to.equal( false );
+					expect( stubs.releaseRepository.called ).to.equal( false );
 					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal( 'Releasing has been aborted due to errors.' );
 					expect( stubs.logger.error.getCall( 1 ).args[ 0 ] ).to.equal( '## @ckeditor/ckeditor5-core' );
 					expect( stubs.logger.error.getCall( 2 ).args[ 0 ] ).to.equal( 'Not on master or master is not clean.' );
@@ -242,7 +242,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			return releaseSubRepositories( options )
 				.then( () => {
-					expect( stubs.createReleaseForSubRepository.called ).to.equal( false );
+					expect( stubs.releaseRepository.called ).to.equal( false );
 				} );
 		} );
 
@@ -251,8 +251,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			sandbox.stub( process, 'chdir' );
 
-			stubs.createReleaseForSubRepository.onFirstCall().returns( Promise.resolve() );
-			stubs.createReleaseForSubRepository.onSecondCall().throws( error );
+			stubs.releaseRepository.onFirstCall().returns( Promise.resolve() );
+			stubs.releaseRepository.onSecondCall().throws( error );
 
 			stubs.cli.configureReleaseOptions.returns( Promise.resolve( {
 				skipGithub: true,
@@ -295,7 +295,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return releaseSubRepositories( options )
 				.then( () => {
 					expect( process.exitCode ).to.equal( -1 );
-					expect( stubs.createReleaseForSubRepository.calledTwice ).to.equal( true );
+					expect( stubs.releaseRepository.calledTwice ).to.equal( true );
 					expect( stubs.logger.error.calledOnce ).to.equal( true );
 					expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal( error.message );
 				} );
