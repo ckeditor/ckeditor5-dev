@@ -30,7 +30,7 @@ const utils = {
 
 		let changelog = utils.getChangelog().replace( utils.changelogHeader, '\n' );
 
-		const match = changelog.match( new RegExp( `\\n(## \\[${ version }\\][\\s\\S]+?)(?:\\n## \\[|$)` ) );
+		const match = changelog.match( new RegExp( `\\n(## \\[?${ version }\\]?[\\s\\S]+?)(?:\\n## \\[|$)` ) );
 
 		if ( !match || !match[ 1 ] ) {
 			throw new Error( `Cannot find changelog entries for ${ version }.` );
@@ -44,6 +44,10 @@ const utils = {
 	 */
 	getChangelog() {
 		const changelogFile = path.resolve( utils.changelogFile );
+
+		if ( !fs.existsSync( changelogFile ) ) {
+			return null;
+		}
 
 		return fs.readFileSync( changelogFile, 'utf-8' );
 	},

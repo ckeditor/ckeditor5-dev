@@ -7,7 +7,6 @@
 
 'use strict';
 
-const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
@@ -15,14 +14,7 @@ const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-env/release-tools/utils', () => {
 	describe( 'getPackagesToRelease()', () => {
-		let getPackagesToRelease, sandbox, execOptions, stubs;
-		let packagesToCheck = [];
-		let skipedPackages = [];
-
-		const options = {
-			cwd: __dirname,
-			packages: 'packages/'
-		};
+		let getPackagesToRelease, sandbox, stubs;
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
@@ -46,34 +38,27 @@ describe( 'dev-env/release-tools/utils', () => {
 					warning: sandbox.stub(),
 					error: sandbox.stub()
 				},
-				displaySkippedPackages: sandbox.stub()
 			};
 
-			mockery.registerMock( './executeondependencies', ( options, functionToExecute ) => {
-				execOptions = options;
-
-				const packagesPath = path.join( options.cwd, options.packages );
-
+			mockery.registerMock( './executeonpackages', ( pathsToPackages, functionToExecute ) => {
 				let promise = Promise.resolve();
 
-				for ( const item of packagesToCheck ) {
-					promise = promise.then( () => {
-						return functionToExecute( item, path.join( packagesPath, item.replace( '@', '' ) ) );
-					} );
+				for ( const repositoryPath of pathsToPackages ) {
+					promise = promise.then( () => functionToExecute( repositoryPath ) );
 				}
 
-				return promise.then( () => Promise.resolve( skipedPackages ) );
+				return promise;
 			} );
+
 			mockery.registerMock( './versions', stubs.versions );
-			mockery.registerMock( './getpackagejson', stubs.getPackageJson );
-			mockery.registerMock( './displayskippedpackages', stubs.displaySkippedPackages );
 
 			getPackagesToRelease = proxyquire( '../../../lib/release-tools/utils/getpackagestorelease', {
 				'@ckeditor/ckeditor5-dev-utils': {
 					logger() {
 						return stubs.logger;
 					}
-				}
+				},
+				'./getpackagejson': stubs.getPackageJson
 			} );
 		} );
 
@@ -83,15 +68,16 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'returns all packages with changes', () => {
-			packagesToCheck = [
-				'@ckeditor/ckeditor5-core',
-				'@ckeditor/ckeditor5-engine'
-			];
+			const packagesToCheck = new Set( [
+				'/packages/ckeditor5-core',
+				'/packages/ckeditor5-engine'
+			] );
 
 			// @ckeditor/ckeditor5-core
 			stubs.versions.getLastFromChangelog.onFirstCall().returns( '0.6.0' );
 			stubs.versions.getLastTagFromGit.onFirstCall().returns( '0.5.0' );
 			stubs.getPackageJson.onFirstCall().returns( {
+				name: '@ckeditor/ckeditor5-core',
 				version: '0.5.0'
 			} );
 
@@ -99,17 +85,20 @@ describe( 'dev-env/release-tools/utils', () => {
 			stubs.versions.getLastFromChangelog.onSecondCall().returns( '1.0.1' );
 			stubs.versions.getLastTagFromGit.onSecondCall().returns( '1.0.0' );
 			stubs.getPackageJson.onSecondCall().returns( {
+				name: '@ckeditor/ckeditor5-engine',
 				version: '1.0.0'
 			} );
 
-			return getPackagesToRelease( options )
+			sandbox.stub( process, 'cwd' ).returns( '/cwd' );
+
+			return getPackagesToRelease( packagesToCheck )
 				.then( ( packages ) => {
 					expect( packages.size ).to.equal( 2 );
 
 					expect( stubs.chdir.calledThrice ).to.equal( true );
-					expect( stubs.chdir.firstCall.args[ 0 ] ).to.match( /ckeditor5-core$/ );
-					expect( stubs.chdir.secondCall.args[ 0 ] ).to.match( /ckeditor5-engine$/ );
-					expect( stubs.chdir.thirdCall.args[ 0 ] ).to.equal( __dirname );
+					expect( stubs.chdir.firstCall.args[ 0 ] ).to.match( /^\/packages\/ckeditor5-core$/ );
+					expect( stubs.chdir.secondCall.args[ 0 ] ).to.match( /^\/packages\/ckeditor5-engine$/ );
+					expect( stubs.chdir.thirdCall.args[ 0 ] ).to.equal( '/cwd' );
 
 					const corePackageDetails = packages.get( '@ckeditor/ckeditor5-core' );
 					expect( corePackageDetails.version ).to.equal( '0.6.0' );
@@ -118,26 +107,21 @@ describe( 'dev-env/release-tools/utils', () => {
 					const enginePackageDetails = packages.get( '@ckeditor/ckeditor5-engine' );
 					expect( enginePackageDetails.version ).to.equal( '1.0.1' );
 					expect( enginePackageDetails.hasChangelog ).to.equal( true );
-
-					expect( execOptions ).to.deep.equal( {
-						cwd: __dirname,
-						packages: 'packages/',
-						skipPackages: []
-					} );
 				} );
 		} );
 
 		it( 'returns packages with changes and also dependent packages', () => {
-			packagesToCheck = [
-				'@ckeditor/ckeditor5-core',
-				'@ckeditor/ckeditor5-engine',
-				'@ckeditor/ckeditor5-basic-styles',
-			];
+			const packagesToCheck = new Set( [
+				'/packages/ckeditor5-core',
+				'/packages/ckeditor5-engine',
+				'/packages/ckeditor5-basic-styles'
+			] );
 
 			// @ckeditor/ckeditor5-core
 			stubs.versions.getLastFromChangelog.onFirstCall().returns( '0.6.0' );
 			stubs.versions.getLastTagFromGit.onFirstCall().returns( '0.5.0' );
 			stubs.getPackageJson.onFirstCall().returns( {
+				name: '@ckeditor/ckeditor5-core',
 				version: '0.5.0'
 			} );
 
@@ -145,6 +129,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			stubs.versions.getLastFromChangelog.onSecondCall().returns( '1.0.0' );
 			stubs.versions.getLastTagFromGit.onSecondCall().returns( '1.0.0' );
 			stubs.getPackageJson.onSecondCall().returns( {
+				name: '@ckeditor/ckeditor5-engine',
 				version: '1.0.0',
 				dependencies: {
 					'@ckeditor/ckeditor5-core': '^0.5.0'
@@ -152,16 +137,19 @@ describe( 'dev-env/release-tools/utils', () => {
 			} );
 
 			// @ckeditor/ckeditor5-basic-styles
+			// This package does not have any changes but will be released because
+			// its dependency (@ckeditor/ckeditor5-engine) will be release.
 			stubs.versions.getLastFromChangelog.onThirdCall().returns( '0.1.0' );
 			stubs.versions.getLastTagFromGit.onThirdCall().returns( '0.1.0' );
 			stubs.getPackageJson.onThirdCall().returns( {
+				name: '@ckeditor/ckeditor5-basic-styles',
 				version: '0.1.0',
 				dependencies: {
 					'@ckeditor/ckeditor5-engine': '^1.0.0'
 				}
 			} );
 
-			return getPackagesToRelease( options )
+			return getPackagesToRelease( packagesToCheck )
 				.then( ( packages ) => {
 					expect( packages.size ).to.equal( 3 );
 
@@ -180,10 +168,10 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'ignores package if its dependencies have not changed', () => {
-			packagesToCheck = [
-				'@ckeditor/ckeditor5-core',
-				'@ckeditor/ckeditor5-utils'
-			];
+			const packagesToCheck = new Set( [
+				'/packages/ckeditor5-core',
+				'/packages/ckeditor5-utils'
+			] );
 
 			// @ckeditor/ckeditor5-core
 			stubs.versions.getLastFromChangelog.onFirstCall().returns( '0.6.0' );
@@ -197,30 +185,11 @@ describe( 'dev-env/release-tools/utils', () => {
 			stubs.versions.getLastTagFromGit.onSecondCall().returns( '1.0.0' );
 			stubs.getPackageJson.onSecondCall().returns( {} );
 
-			return getPackagesToRelease( options )
+			return getPackagesToRelease( packagesToCheck )
 				.then( ( packages ) => {
 					expect( packages.size ).to.equal( 1 );
 
 					expect( packages.get( '@ckeditor/ckeditor5-utils' ) ).to.equal( undefined );
-				} );
-		} );
-
-		it( 'informs about skipped packages', () => {
-			packagesToCheck = [];
-			options.skipPackages = [
-				'@ckeditor/ckeditor5-foo',
-				'@ckeditor/ckeditor5-bar'
-			];
-
-			skipedPackages = options.skipPackages.slice();
-
-			return getPackagesToRelease( options )
-				.then( () => {
-					expect( stubs.displaySkippedPackages.calledOnce ).to.equal( true );
-					expect( stubs.displaySkippedPackages.firstCall.args[ 0 ] ).to.deep.equal( [
-						'@ckeditor/ckeditor5-foo',
-						'@ckeditor/ckeditor5-bar'
-					] );
 				} );
 		} );
 	} );

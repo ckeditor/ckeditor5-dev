@@ -12,7 +12,7 @@ const path = require( 'path' );
 const handlebars = require( 'handlebars' );
 const expect = require( 'chai' ).expect;
 
-const templatePath = path.resolve( __dirname, '..', '..', '..', '..', 'lib', 'release-tools', 'changelog', 'templates', 'commit.hbs' );
+const templatePath = path.resolve( __dirname, '..', '..', '..', 'lib', 'release-tools', 'templates', 'commit.hbs' );
 const templateContent = fs.readFileSync( templatePath, 'utf-8' );
 
 describe( 'dev-env/release-tools/changelog/templates', () => {
