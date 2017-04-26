@@ -32,7 +32,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		describe( 'getChangesForVersion()', () => {
-			it( 'returns changes for the first tag', () => {
+			it( 'returns changes for the first tag which is a link to the release', () => {
 				const expectedChangelog = [
 					'### Features',
 					'',
@@ -41,6 +41,27 @@ describe( 'dev-env/release-tools/utils', () => {
 
 				const changelog =
 					`## [0.1.0](https://github.com) (2017-01-13)
+
+${ expectedChangelog }`;
+
+				const currentChangelogStub = sandbox.stub( utils, 'getChangelog' )
+					.returns( utils.changelogHeader + changelog );
+
+				const parsedChangelog = utils.getChangesForVersion( 'v0.1.0' );
+
+				expect( currentChangelogStub.calledOnce ).to.equal( true );
+				expect( parsedChangelog ).to.equal( expectedChangelog );
+			} );
+
+			it( 'returns changes for the first tag which is not a link', () => {
+				const expectedChangelog = [
+					'### Features',
+					'',
+					'* Cloned the main module. ([abcd123](https://github.com))'
+				].join( '\n' );
+
+				const changelog =
+					`## 0.1.0 (2017-01-13)
 
 ${ expectedChangelog }`;
 
