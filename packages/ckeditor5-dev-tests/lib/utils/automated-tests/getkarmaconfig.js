@@ -42,18 +42,6 @@ module.exports = function getKarmaConfig( options ) {
 		}
 	}
 
-	let browsers = [];
-
-	if ( options.browsers ) {
-		browsers = options.browsers.map( ( browser ) => {
-			if ( browser === 'Chrome' ) {
-				return 'CHROME_LOCAL';
-			}
-
-			return browser;
-		} );
-	}
-
 	const karmaConfig = {
 		// Base path that will be used to resolve all patterns (eg. files, exclude).
 		basePath: process.cwd(),
@@ -106,7 +94,7 @@ module.exports = function getKarmaConfig( options ) {
 
 		// Start these browsers.
 		// Available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-		browsers: browsers,
+		browsers: getBrowsers( options ),
 
 		customLaunchers: {
 			CHROME_TRAVIS_CI: {
@@ -134,11 +122,7 @@ module.exports = function getKarmaConfig( options ) {
 		}
 	};
 
-	if ( process.env.TRAVIS ) {
-		karmaConfig.browsers = [ 'CHROME_TRAVIS_CI' ];
-	}
-
-	if ( options.watch ) {
+	if ( options.watch || options.server ) {
 		// Enable/Disable watching file and executing tests whenever any file changes.
 		karmaConfig.autoWatch = true;
 		karmaConfig.singleRun = false;
@@ -174,3 +158,22 @@ module.exports = function getKarmaConfig( options ) {
 	return karmaConfig;
 };
 
+// Returns the value of Karma's browser option.
+// @returns {Array|null}
+function getBrowsers( options ) {
+	if ( process.env.TRAVIS ) {
+		return [ 'CHROME_TRAVIS_CI' ];
+	}
+
+	if ( options.server || !options.browsers ) {
+		return null;
+	}
+
+	return options.browsers.map( ( browser ) => {
+		if ( browser === 'Chrome' ) {
+			return 'CHROME_LOCAL';
+		}
+
+		return browser;
+	} );
+}

@@ -5,8 +5,6 @@
 
 'use strict';
 
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const path = require( 'path' );
 const gulp = require( 'gulp' );
 const jsdoc = require( 'gulp-jsdoc3' );
 
@@ -20,36 +18,32 @@ module.exports = {
  * @param {Object} config
  * @param {Array.<String>} config.sourceFiles Glob pattern with source files.
  * @param {String} config.readmePath Path to `README.md`.
- * @param {String} config.destinationPath Path under which documentation should be generated.
  * @returns {Promise}
  */
 function build( config ) {
-	return tools.clean( config.destinationPath, '.' )
-		.then( () => {
-			const sourceFiles = [
-				config.readmePath,
-				...config.sourceFiles
-			];
+	const sourceFiles = [
+		config.readmePath,
+		...config.sourceFiles
+	];
 
-			const jsDocConfig = {
-				opts: {
-					encoding: 'utf8',
-					destination: path.join( config.destinationPath, 'api' ),
-					recurse: true,
-					access: 'all'
-				},
-				plugins: [
-					'node_modules/jsdoc/plugins/markdown',
-					require.resolve( '@ckeditor/jsdoc-plugins/lib/export-fixer/export-fixer' ),
-					require.resolve( '@ckeditor/jsdoc-plugins/lib/longname-fixer/longname-fixer' ),
-					require.resolve( '@ckeditor/jsdoc-plugins/lib/validator/validator' ),
-					require.resolve( '@ckeditor/jsdoc-plugins/lib/utils/doclet-logger' )
-				]
-			};
+	const jsDocConfig = {
+		opts: {
+			encoding: 'utf8',
+			recurse: true,
+			access: 'all',
+			template: 'templates/silent'
+		},
+		plugins: [
+			'node_modules/jsdoc/plugins/markdown',
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/export-fixer/export-fixer' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/longname-fixer/longname-fixer' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/validator/validator' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/utils/doclet-logger' )
+		]
+	};
 
-			return new Promise( ( resolve ) => {
-				gulp.src( sourceFiles, { read: false } )
-					.pipe( jsdoc( jsDocConfig, resolve ) );
-			} );
-		} );
+	return new Promise( ( resolve ) => {
+		gulp.src( sourceFiles, { read: false } )
+			.pipe( jsdoc( jsDocConfig, resolve ) );
+	} );
 }
