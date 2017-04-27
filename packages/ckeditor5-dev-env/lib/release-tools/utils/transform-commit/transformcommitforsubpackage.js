@@ -11,7 +11,7 @@ const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
 /**
  * Parses a single commit for package which is located in multi-package repository.
  *
- * The commit will be parsed only if its files are located in current processing package.
+ * The commit will be parsed only if its at least one file is located in current processing package.
  *
  * @param {Commit} commit
  * @param {Object} context
@@ -36,12 +36,8 @@ module.exports = function transformCommitForSubPackage( commit, context ) {
 };
 
 function isValidCommit( files, packageName ) {
-	for ( const filePath of files ) {
-		// Reject if given file is not a part of current processed package.
-		if ( !filePath.startsWith( `packages/${ packageName}` ) ) {
-			return false;
-		}
-	}
-
-	return true;
+	// Commit is valid for the package if at least one file in the package was changed.
+	return files.some( ( filePath ) => {
+		return filePath.startsWith( `packages/${ packageName }` );
+	} );
 }

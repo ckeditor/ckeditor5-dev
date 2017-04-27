@@ -70,7 +70,21 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( stubs.transformCommitForSubRepository.called ).to.equal( false );
 		} );
 
-		it( 'rejects the commit when it has changed files in other packages', () => {
+		it( 'rejects the commit when it changed files in other package', () => {
+			const commit = {
+				hash: 'abcd123'
+			};
+
+			stubs.getChangedFilesForCommit.returns( [
+				'packages/ckeditor5-dev-tests/CHANGELOG.md',
+				'packages/ckeditor5-dev-tests/README.md'
+			] );
+
+			expect( transformCommitForSubPackage( commit, context ) ).to.equal( undefined );
+			expect( stubs.transformCommitForSubRepository.called ).to.equal( false );
+		} );
+
+		it( 'accepts the commit when it has changed files in proper and other packages', () => {
 			const commit = {
 				hash: 'abcd123'
 			};
@@ -80,11 +94,13 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				'packages/ckeditor5-dev-tests/README.md'
 			] );
 
-			expect( transformCommitForSubPackage( commit, context ) ).to.equal( undefined );
-			expect( stubs.transformCommitForSubRepository.called ).to.equal( false );
+			stubs.transformCommitForSubRepository.returnsArg( 0 );
+
+			expect( transformCommitForSubPackage( commit, context ) ).to.equal( commit );
+			expect( stubs.transformCommitForSubRepository.called ).to.equal( true );
 		} );
 
-		it( 'rejects the commit when it has changed files in root of the repository', () => {
+		it( 'accepts the commit when it has changed files in proper packages and root of the repository', () => {
 			const commit = {
 				hash: 'abcd123'
 			};
@@ -94,8 +110,10 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				'README.md'
 			] );
 
-			expect( transformCommitForSubPackage( commit, context ) ).to.equal( undefined );
-			expect( stubs.transformCommitForSubRepository.called ).to.equal( false );
+			stubs.transformCommitForSubRepository.returnsArg( 0 );
+
+			expect( transformCommitForSubPackage( commit, context ) ).to.equal( commit );
+			expect( stubs.transformCommitForSubRepository.called ).to.equal( true );
 		} );
 
 		it( 'accepts the commit when it has changed files for proper package', () => {
