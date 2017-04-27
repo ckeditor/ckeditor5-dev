@@ -17,7 +17,7 @@ const mockery = require( 'mockery' );
 describe( 'translations', () => {
 	describe( 'TranslationService', () => {
 		const sandbox = sinon.sandbox.create();
-		let translationService, stubs;
+		let TranslationService, stubs;
 		let files, fileContents;
 
 		beforeEach( () => {
@@ -41,11 +41,9 @@ describe( 'translations', () => {
 
 			mockery.registerMock( 'fs', stubs.fs );
 
-			const TranslationService = proxyquire( '../../lib/translations/translationservice', {
+			TranslationService = proxyquire( '../../lib/translations/translationservice', {
 				'../logger': () => stubs.logger,
 			} );
-
-			translationService = new TranslationService( 'pl' );
 		} );
 
 		afterEach( () => {
@@ -53,8 +51,36 @@ describe( 'translations', () => {
 			mockery.disable();
 		} );
 
+		describe( 'constructor()', () => {
+			it( 'should be able to use custom function that returns path to the po file', () => {
+				const pathToTranslations = path.join( 'customPathToPackage', 'lang', 'translations', 'pl.po' );
+
+				files = [ pathToTranslations ];
+
+				fileContents = {
+					[ pathToTranslations ]: [
+						`msgctxt "Label for the Save button."`,
+						`msgid "Save"`,
+						`msgstr "Zapisz"`,
+						''
+					].join( '\n' )
+				};
+
+				const translationService = new TranslationService( 'pl', {
+					getPathToPoFile: ( pathToPackage, languageCode ) => path.join( pathToPackage, 'lang', 'translations', `${ languageCode }.po` )
+				} );
+
+				translationService.loadPackage( 'customPathToPackage' );
+
+				expect( Array.from( translationService.dictionary ) ).to.deep.equal( [
+					[ 'Save', 'Zapisz' ]
+				] );
+			} );
+		} );
+
 		describe( 'loadPackage()', () => {
 			it( 'should load po file from the package and load translations', () => {
+				const translationService = new TranslationService( 'pl' );
 				const pathToTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'pl.po' );
 
 				files = [ pathToTranslations ];
@@ -76,6 +102,8 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should do nothing if the po file does not exist', () => {
+				const translationService = new TranslationService( 'pl' );
+
 				files = [];
 				fileContents = {};
 
@@ -85,7 +113,9 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should load po file from the package only once', () => {
+				const translationService = new TranslationService( 'pl' );
 				const loadPoFileSpy = sinon.spy();
+
 				sandbox.stub( translationService, '_loadPoFile', loadPoFileSpy );
 
 				translationService.loadPackage( 'pathToPackage' );
@@ -97,6 +127,7 @@ describe( 'translations', () => {
 
 		describe( 'translateSource()', () => {
 			it( 'should translate t() calls in the code', () => {
+				const translationService = new TranslationService( 'pl' );
 				const source = `t( 'Cancel' )`;
 
 				translationService.dictionary.set( 'Cancel', 'Anuluj' );
@@ -107,6 +138,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should return original source if there is no t() calls in the code', () => {
+				const translationService = new TranslationService( 'pl' );
 				const source = `translate( 'Cancel' )`;
 
 				const result = translationService.translateSource( source );
@@ -115,7 +147,9 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should lg the error and keep original string if the translation misses', () => {
+				const translationService = new TranslationService( 'pl' );
 				const source = `t( 'Cancel' )`;
+
 				const result = translationService.translateSource( source );
 
 				expect( result ).to.equal( `t('Cancel');` );
@@ -124,6 +158,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should throw an error when the t is called with the variable', () => {
+				const translationService = new TranslationService( 'pl' );
 				const source = `const cancel = 'Cancel';t( cancel );`;
 
 				const result = translationService.translateSource( source );
