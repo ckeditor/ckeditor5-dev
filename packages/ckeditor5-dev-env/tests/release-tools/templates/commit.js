@@ -54,7 +54,7 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
 		} );
 
-		it( 'displays references to itself repository', () => {
+		it( 'do not display references to itself repository', () => {
 			const data = {
 				subject: 'Test',
 				hash: '1234qwe',
@@ -68,27 +68,7 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 				]
 			};
 
-			const expectedEntry = '* Test ([1234qwe](https://github.com/organization/repository/commit/1234qwe)), ' +
-				'closes [#2](https://github.com/organization/repository/issues/2) ' +
-				'[#3](https://github.com/organization/repository/issues/3).';
-			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
-		} );
-
-		it( 'displays references to external repository', () => {
-			const data = {
-				subject: 'Test',
-				hash: '1234qwe',
-				references: [
-					{
-						issue: 2,
-						owner: 'another-owner',
-						repository: 'another-repository'
-					}
-				]
-			};
-			const expectedEntry = '* Test ([1234qwe](https://github.com/organization/repository/commit/1234qwe)), ' +
-				'closes [another-owner/another-repository#2]' +
-				'(https://github.com/another-owner/another-repository/issues/2).';
+			const expectedEntry = '* Test ([1234qwe](https://github.com/organization/repository/commit/1234qwe))';
 			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
 		} );
 

@@ -50,10 +50,9 @@ const transformCommitUtils = {
 	 * Changes references to issue to links that lead to the GitHub issue page.
 	 *
 	 * @param {String} sentence
-	 * @param {Array} [issues=null]
 	 * @returns {String}
 	 */
-	linkGithubIssues( sentence, issues = null ) {
+	linkGithubIssues( sentence ) {
 		const packageJson = getPackageJson();
 		const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
 
@@ -62,10 +61,6 @@ const transformCommitUtils = {
 		}
 
 		return sentence.replace( /#([0-9]+)/g, ( _, issueId ) => {
-			if ( Array.isArray( issues ) ) {
-				issues.push( issueId );
-			}
-
 			return `[#${ issueId }](${ issuesUrl }/${ issueId })`;
 		} );
 	},

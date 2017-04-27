@@ -81,19 +81,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				expect( transformCommit.linkGithubIssues( 'Some issue #1.' ) )
 					.to.equal( 'Some issue [#1](/issues/1).' );
 			} );
-
-			it( 'adds created links to collection', () => {
-				stubs.getPackageJson.returns( {
-					name: 'test-package',
-					bugs: '/issues'
-				} );
-
-				const issues = [];
-
-				transformCommit.linkGithubIssues( '#1 #2 #3.', issues );
-
-				expect( issues ).to.deep.equal( [ '1', '2', '3' ] );
-			} );
 		} );
 
 		describe( 'getCommitType()', () => {

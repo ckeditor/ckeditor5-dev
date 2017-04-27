@@ -338,5 +338,25 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 			expect( loggerVerbosity ).to.equal( 'error' );
 		} );
+
+		it( 'clears references to issues', () => {
+			const commit = {
+				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+				header: 'Fix: Simple fix.',
+				type: 'Fix',
+				subject: 'Simple fix.',
+				body: null,
+				footer: null,
+				notes: [],
+				references: [
+					{ issue: '11' },
+					{ issue: '12' }
+				]
+			};
+
+			transformCommitForSubRepository( commit, { displayLogs: false } );
+
+			expect( commit.references ).to.deep.equal( [] );
+		} );
 	} );
 } );

@@ -76,14 +76,12 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 		return;
 	}
 
-	const issues = [];
-
 	commit.rawType = commit.type;
 	commit.type = utils.getCommitType( commit.type );
 
 	if ( typeof commit.subject === 'string' ) {
 		commit.subject = utils.linkGithubIssues(
-			utils.linkGithubUsers( commit.subject ), issues
+			utils.linkGithubUsers( commit.subject )
 		);
 	}
 
@@ -106,8 +104,8 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 		note.text = utils.linkGithubIssues( utils.linkGithubUsers( note.text ) );
 	}
 
-	// Removes references that already appear in the subject.
-	commit.references = commit.references.filter( ( reference ) => !issues.includes( reference.issue ) );
+	// Clear the references array - we don't want to hoist the issues.
+	commit.references = [];
 
 	return commit;
 };
