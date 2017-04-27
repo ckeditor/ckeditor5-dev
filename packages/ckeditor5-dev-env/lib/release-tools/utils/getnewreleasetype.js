@@ -5,66 +5,108 @@
 
 'use strict';
 
-const { commitTypes, transform } = require( '../changelog/writer-options' );
+const conventionalCommitsParser = require( 'conventional-commits-parser' );
+const conventionalCommitsFilter = require( 'conventional-commits-filter' );
+const gitRawCommits = require( 'git-raw-commits' );
+const concat = require( 'concat-stream' );
+const parserOptions = require( './transform-commit/parser-options' );
+const { availableCommitTypes } = require( './transform-commit/transform-commit-utils' );
+const getPackageJson = require( './getpackagejson' );
 
 /**
  * Returns a type (major, minor, patch) of the next release based on commits.
  *
+ * If given package has not changed, suggested version will be equal to 'skip'.
+ *
+ * @param {Function} transformCommit
+ * @param {Object} options
+ * @param {String|null} options.tagName Name of the last created tag for the repository.
  * @returns {Promise}
  */
-module.exports = function getNewReleaseType() {
-	const conventionalRecommendedBump = require( 'conventional-recommended-bump' );
-	const parserOpts = require( '../changelog/parser-options' );
+module.exports = function getNewReleaseType( transformCommit, options = {} ) {
+	const gitRawCommitsOpts = {
+		format: '%B%n-hash-%n%H',
+		from: options.tagName,
+		merges: undefined,
+		firstParent: true
+	};
+
+	const context = {
+		displayLogs: true,
+		packageData: getPackageJson()
+	};
 
 	return new Promise( ( resolve, reject ) => {
-		const options = {
-			whatBump: getNewVersionType
-		};
+		gitRawCommits( gitRawCommitsOpts )
+			.on( 'error', ( err ) => {
+				if ( err.message.match( /'HEAD': unknown/ ) ) {
+					reject( new Error( `Given repository is empty.` ) );
+				} else if ( err.message.match( new RegExp( `'${ options.tagName }\.\.HEAD': unknown` ) ) ) {
+					reject( new Error(
+						`Cannot find tag "${ options.tagName }" (the latest version from the changelog) in given repository.`
+					) );
+				} else {
+					reject( err );
+				}
+			} )
+			.pipe( conventionalCommitsParser( parserOptions ) )
+			.pipe( concat( ( data ) => {
+				const commits = conventionalCommitsFilter( data );
+				const releaseType = getNewVersionType( commits );
 
-		conventionalRecommendedBump( options, parserOpts, ( err, response ) => {
-			if ( err ) {
-				return reject( err );
-			}
-
-			return resolve( response );
-		} );
+				return resolve( { releaseType } );
+			} ) );
 	} );
-};
 
-// Returns a level which represents a type of release based on the commits.
-//   - 0: major,
-//   - 1: minor,
-//   - 2: patch.
-//
-// An input array is a result of module https://github.com/conventional-changelog/conventional-commits-parser.
-//
-// @param {Array} commits
-// @returns {Number}
-function getNewVersionType( commits ) {
-	let hasNewFeatures = false;
+	// Returns a type of version for a release based on the commits.
+	//
+	// @param {Array} commits
+	// @returns {String}
+	function getNewVersionType( commits ) {
+		let hasNewFeatures = false;
+		let hasChanges = false;
+		let hasBreakingChanges = false;
 
-	for ( const item of commits ) {
-		const singleCommit = transform( item, false );
+		for ( const item of commits ) {
+			const singleCommit = transformCommit( item, context );
 
-		if ( !singleCommit ) {
-			continue;
-		}
+			if ( !singleCommit ) {
+				continue;
+			}
 
-		// Check whether the commit is visible in changelog.
-		if ( !commitTypes.get( singleCommit.rawType ) ) {
-			continue;
-		}
+			hasChanges = true;
 
-		for ( const note of singleCommit.notes ) {
-			if ( note.title === 'BREAKING CHANGES' || note.title === 'BREAKING CHANGE' ) {
-				return 0;
+			// Check whether the commit is visible in changelog.
+			if ( !availableCommitTypes.get( singleCommit.rawType ) ) {
+				continue;
+			}
+
+			for ( const note of singleCommit.notes ) {
+				if ( note.title === 'BREAKING CHANGES' ) {
+					hasBreakingChanges = true;
+				}
+			}
+
+			if ( !hasNewFeatures && singleCommit.rawType === 'Feature' ) {
+				hasNewFeatures = true;
 			}
 		}
 
-		if ( !hasNewFeatures && singleCommit.rawType === 'Feature' ) {
-			hasNewFeatures = true;
+		// Repository does not have new changes - skip the release.
+		if ( !hasChanges ) {
+			return 'skip';
 		}
-	}
 
-	return hasNewFeatures ? 1 : 2;
-}
+		// Repository has breaking changes - bump the major.
+		if ( hasBreakingChanges ) {
+			return 'major';
+		}
+
+		// Repository has new features without breaking changes - bump the minor.
+		if ( hasNewFeatures ) {
+			return 'minor';
+		}
+
+		return 'patch';
+	}
+};

@@ -6,36 +6,28 @@
 'use strict';
 
 const semver = require( 'semver' );
-const executeOnDependencies = require( './executeondependencies' );
-const versionUtils = require( './versions' );
+const executeOnPackages = require( './executeonpackages' );
 const getPackageJson = require( './getpackagejson' );
-const displaySkippedPackages = require( './displayskippedpackages' );
+const versionUtils = require( './versions' );
 
 /**
  * Returns a list of packages to release.
  *
- * @param {Object} options
- * @param {String} options.cwd Current work directory.
- * @param {String} options.packages A relative path to the packages.
- * @param {Array.<String>} options.skipPackages Name of packages which won't be released.
+ * @param {Set} pathsToPackages A collection of paths to packages.
  * @returns {Promise}
  */
-module.exports = function getPackagesToRelease( options ) {
+module.exports = function getPackagesToRelease( pathsToPackages ) {
+	const cwd = process.cwd();
 	const packagesToRelease = new Map();
 	const packagesToCheck = new Map();
 
-	const execOptions = {
-		cwd: options.cwd,
-		packages: options.packages,
-		skipPackages: options.skipPackages || []
-	};
-
-	function filterPackagesToRelease( repositoryName, repositoryPath ) {
+	function filterPackagesToRelease( repositoryPath ) {
 		process.chdir( repositoryPath );
 
 		const gitVersion = versionUtils.getLastTagFromGit();
 		const changelogVersion = versionUtils.getLastFromChangelog();
 		const packageJson = getPackageJson();
+		const repositoryName = packageJson.name;
 
 		if ( gitVersion !== changelogVersion ) {
 			// Package is ready to release.
@@ -52,10 +44,8 @@ module.exports = function getPackagesToRelease( options ) {
 		return Promise.resolve();
 	}
 
-	return executeOnDependencies( execOptions, filterPackagesToRelease )
-		.then( ( skippedPackages ) => {
-			displaySkippedPackages( skippedPackages );
-
+	return executeOnPackages( pathsToPackages, filterPackagesToRelease )
+		.then( () => {
 			let clearRun = false;
 
 			while ( !clearRun ) {
@@ -80,7 +70,7 @@ module.exports = function getPackagesToRelease( options ) {
 				}
 			}
 
-			process.chdir( options.cwd );
+			process.chdir( cwd );
 
 			return Promise.resolve( packagesToRelease );
 		} );

@@ -11,10 +11,11 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
+const mockery = require( 'mockery' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-env/release-tools/utils', () => {
-	let tmpCwd, cwd, getNewReleaseType, sandbox, packageJson;
+	let tmpCwd, cwd, getNewReleaseType, sandbox, packageJson, stubs;
 
 	describe( 'getNewReleaseType()', () => {
 		before( () => {
@@ -33,9 +34,24 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		beforeEach( () => {
-			getNewReleaseType = require( '../../../lib/release-tools/utils/getnewreleasetype' );
+			mockery.enable( {
+				useCleanCache: true,
+				warnOnReplace: false,
+				warnOnUnregistered: false
+			} );
 
 			sandbox = sinon.sandbox.create();
+
+			stubs = {
+				transformCommit: sandbox.spy( ( commit ) => {
+					commit.rawType = commit.type;
+
+					return commit;
+				} ),
+				versionUtils: {
+					getLastFromChangelog: sandbox.stub()
+				}
+			};
 
 			process.chdir( tmpCwd );
 
@@ -45,21 +61,26 @@ describe( 'dev-env/release-tools/utils', () => {
 			};
 
 			fs.writeFileSync( path.join( tmpCwd, 'package.json' ), JSON.stringify( packageJson, null, '\t' ) );
+
+			mockery.registerMock( './versions', stubs.versionUtils );
+
+			getNewReleaseType = require( '../../../lib/release-tools/utils/getnewreleasetype' );
 		} );
 
 		afterEach( () => {
 			process.chdir( cwd );
 			sandbox.restore();
+			mockery.disable();
 		} );
 
 		it( 'throws an error when repository is empty', () => {
-			return getNewReleaseType()
+			return getNewReleaseType( stubs.transformCommit )
 				.then(
 					() => {
 						throw new Error( 'Supposed to be rejected.' );
 					},
 					( err ) => {
-						expect( err.message ).to.match( /Command failed: git log/ );
+						expect( err.message ).to.equal( 'Given repository is empty.' );
 					}
 				);
 		} );
@@ -68,16 +89,16 @@ describe( 'dev-env/release-tools/utils', () => {
 			exec( `git commit --allow-empty --message "Fix: Some fix."` );
 			exec( `git commit --allow-empty --message "Other: Some change."` );
 
-			return getNewReleaseType()
+			return getNewReleaseType( stubs.transformCommit )
 				.then( ( response ) => {
 					expect( response.releaseType ).to.equal( 'patch' );
 				} );
 		} );
 
 		it( 'ignores notes from commits which will not be included in changelog', () => {
-			exec( `git commit --allow-empty --message "Docs: Nothing.\n\nBREAKING CHANGES: It should not bump the major."` );
+			exec( `git commit --allow-empty --message "Docs: Nothing." --message "BREAKING CHANGES: It should not bump the major."` );
 
-			return getNewReleaseType()
+			return getNewReleaseType( stubs.transformCommit )
 				.then( ( response ) => {
 					expect( response.releaseType ).to.equal( 'patch' );
 				} );
@@ -86,19 +107,65 @@ describe( 'dev-env/release-tools/utils', () => {
 		it( 'returns "minor" release for feature commit', () => {
 			exec( `git commit --allow-empty --message "Feature: Nothing new."` );
 
-			return getNewReleaseType()
+			return getNewReleaseType( stubs.transformCommit )
 				.then( ( response ) => {
 					expect( response.releaseType ).to.equal( 'minor' );
 				} );
 		} );
 
 		it( 'returns "major" if any visible in changelog commit has breaking changes', () => {
-			exec( `git commit --allow-empty --message "Other: Nothing.\n\nBREAKING CHANGE: Bump the major!"` );
+			exec( `git commit --allow-empty --message "Other: Nothing." --message "BREAKING CHANGES: Bump the major!"` );
 
-			return getNewReleaseType()
+			return getNewReleaseType( stubs.transformCommit )
 				.then( ( response ) => {
 					expect( response.releaseType ).to.equal( 'major' );
 				} );
+		} );
+
+		it( 'returns "skip" if there are not any "public" commits since the last release', () => {
+			exec( `git tag v1.0.0` );
+
+			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.0.0' } )
+				.then( ( response ) => {
+					expect( response.releaseType ).to.equal( 'skip' );
+				} );
+		} );
+
+		it( 'returns "patch" release for internal commits since the last release', () => {
+			exec( `git commit --allow-empty --message "Docs: Added some notes to README #1."` );
+
+			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.0.0' } )
+				.then( ( response ) => {
+					expect( response.releaseType ).to.equal( 'patch' );
+				} );
+		} );
+
+		it( 'transforms each commit since the last release', () => {
+			exec( `git commit --allow-empty --message "Other: Nothing." --message "BREAKING CHANGES: Bump the major!"` );
+			exec( `git commit --allow-empty --message "Docs: Added some notes to README #2."` );
+
+			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.0.0' } )
+				.then( () => {
+					// transformCommit should be called for commits:
+					// (1) Docs: Added some notes to README #1.
+					// (2) Other: Nothing.
+					// (3) Docs: Added some notes to README #2.
+					expect( stubs.transformCommit.calledThrice ).to.equal( true );
+				} );
+		} );
+
+		it( 'throws an error when given tag does not exist', () => {
+			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.1.2' } )
+				.then(
+					() => {
+						throw new Error( 'Supposed to be rejected.' );
+					},
+					( err ) => {
+						const message = 'Cannot find tag "v1.1.2" (the latest version' +
+							' from the changelog) in given repository.';
+						expect( err.message ).to.equal( message );
+					}
+				);
 		} );
 	} );
 

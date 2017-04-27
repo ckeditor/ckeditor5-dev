@@ -12,7 +12,7 @@ const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-env/release-tools/utils', () => {
-	let displaySkippedPackages, sandbox, stubs;
+	let displayGeneratedChangelogs, sandbox, stubs;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
@@ -22,17 +22,15 @@ describe( 'dev-env/release-tools/utils', () => {
 				info: sandbox.stub(),
 				warning: sandbox.stub(),
 				error: sandbox.stub()
-			},
-			getPackageJson: sandbox.stub()
+			}
 		};
 
-		displaySkippedPackages = proxyquire( '../../../lib/release-tools/utils/displayskippedpackages', {
+		displayGeneratedChangelogs = proxyquire( '../../../lib/release-tools/utils/displaygeneratedchangelogs', {
 			'@ckeditor/ckeditor5-dev-utils': {
 				logger() {
 					return stubs.logger;
 				}
-			},
-			'./getpackagejson': stubs.getPackageJson
+			}
 		} );
 	} );
 
@@ -40,20 +38,17 @@ describe( 'dev-env/release-tools/utils', () => {
 		sandbox.restore();
 	} );
 
-	describe( 'displaySkippedPackages()', () => {
+	describe( 'displayGeneratedChangelogs()', () => {
 		it( 'displays name of packages that have been skipped', () => {
 			const logMessage = [
-				'Packages listed below have been skipped:',
-				'  * @ckeditor/ckeditor5-foo',
-				'  * @ckeditor/ckeditor5-bar'
+				'Generated changelog for the following packages:',
+				'  * "@ckeditor/ckeditor5-foo": v1.0.0',
+				'  * "@ckeditor/ckeditor5-bar": v2.0.0'
 			].join( '\n' );
 
-			stubs.getPackageJson.onFirstCall().returns( { name: '@ckeditor/ckeditor5-foo' } );
-			stubs.getPackageJson.onSecondCall().returns( { name: '@ckeditor/ckeditor5-bar' } );
-
-			displaySkippedPackages( new Set( [
-				'/packages/ckeditor5-foo',
-				'/packages/ckeditor5-bar'
+			displayGeneratedChangelogs( new Map( [
+				[ '@ckeditor/ckeditor5-foo', '1.0.0' ],
+				[ '@ckeditor/ckeditor5-bar', '2.0.0' ]
 			] ) );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
@@ -61,7 +56,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'does not display if given list is empty', () => {
-			displaySkippedPackages( new Set() );
+			displayGeneratedChangelogs( new Map() );
 			expect( stubs.logger.info.calledOnce ).to.equal( false );
 		} );
 	} );

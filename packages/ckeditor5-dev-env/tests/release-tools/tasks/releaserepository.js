@@ -14,8 +14,8 @@ const proxyquire = require( 'proxyquire' );
 const mockery = require( 'mockery' );
 
 describe( 'dev-env/release-tools/tasks', () => {
-	describe( 'createRelease()', () => {
-		let createRelease, sandbox, stubs, options, updateJsonFileArgs;
+	describe( 'releaseRepository()', () => {
+		let releaseRepository, sandbox, stubs, options, updateJsonFileArgs;
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
@@ -28,7 +28,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			stubs = {
 				createGithubRelease: sandbox.stub(),
-				generateChangelog: sandbox.stub(),
+				generateChangelogForSinglePackage: sandbox.stub(),
 				updateDependenciesVersions: sandbox.stub(),
 				parseGithubUrl: sandbox.stub(),
 				getPackageJson: sandbox.stub(),
@@ -56,13 +56,13 @@ describe( 'dev-env/release-tools/tasks', () => {
 			mockery.registerMock( '../utils/versions', stubs.versionUtils );
 			mockery.registerMock( '../utils/updatedependenciesversions', stubs.updateDependenciesVersions );
 			mockery.registerMock( './creategithubrelease', stubs.createGithubRelease );
-			mockery.registerMock( './generatechangelog', stubs.generateChangelog );
+			mockery.registerMock( './generatechangelogforsinglepackage', stubs.generateChangelogForSinglePackage );
 			mockery.registerMock( 'parse-github-url', stubs.parseGithubUrl );
 
 			sandbox.stub( process, 'cwd' ).returns( '/cwd' );
 			sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 
-			createRelease = proxyquire( '../../../lib/release-tools/tasks/createrelease', {
+			releaseRepository = proxyquire( '../../../lib/release-tools/tasks/releaserepository', {
 				'@ckeditor/ckeditor5-dev-utils': {
 					tools: stubs.tools,
 
@@ -92,13 +92,13 @@ describe( 'dev-env/release-tools/tasks', () => {
 				name: '@ckeditor/ckeditor5-core'
 			} );
 
-			stubs.generateChangelog.returns( Promise.resolve() );
+			stubs.generateChangelogForSinglePackage.returns( Promise.resolve() );
 			stubs.tools.shExec.withArgs( 'git diff --name-only package.json' ).returns( '' );
 
-			return createRelease( options )
+			return releaseRepository( options )
 				.then( () => {
-					expect( stubs.generateChangelog.calledOnce ).to.equal( true );
-					expect( stubs.generateChangelog.firstCall.args[ 0 ] ).to.equal( '1.0.0' );
+					expect( stubs.generateChangelogForSinglePackage.calledOnce ).to.equal( true );
+					expect( stubs.generateChangelogForSinglePackage.firstCall.args[ 0 ] ).to.equal( '1.0.0' );
 
 					expect( options.dependencies.get( '@ckeditor/ckeditor5-core' ).hasChangelog ).to.equal( true );
 				} );
@@ -113,9 +113,9 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			stubs.tools.shExec.withArgs( 'git diff --name-only package.json' ).returns( '' );
 
-			return createRelease( options )
+			return releaseRepository( options )
 				.then( () => {
-					expect( stubs.generateChangelog.calledOnce ).to.equal( false );
+					expect( stubs.generateChangelogForSinglePackage.calledOnce ).to.equal( false );
 				} );
 		} );
 
@@ -129,15 +129,16 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			stubs.tools.shExec.withArgs( 'git diff --name-only package.json' ).returns( 'package.json' );
 
-			return createRelease( options )
+			return releaseRepository( options )
 				.then( () => {
 					expect( stubs.updateDependenciesVersions.calledOnce ).to.equal( true );
 					expect( stubs.updateDependenciesVersions.firstCall.args[ 0 ] ).to.deep.equal( options.dependencies );
 					expect( stubs.updateDependenciesVersions.firstCall.args[ 1 ] ).to.deep.equal( '/cwd/package.json' );
 
 					expect( stubs.logger.info.called ).to.equal( true );
-					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( 'Creating release for "@ckeditor/ckeditor5-core".' );
-					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.equal( 'Updating dependencies...' );
+					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( '' );
+					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.match( /Creating release for "@ckeditor\/ckeditor5-core"\./ );
+					expect( stubs.logger.info.thirdCall.args[ 0 ] ).to.equal( 'Updating dependencies...' );
 
 					expect( stubs.tools.shExec.calledWith( 'git add package.json' ) ).to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'git commit -m "Internal: Updated dependencies."' ) ).to.equal( true );
@@ -151,7 +152,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				name: '@ckeditor/ckeditor5-core'
 			} );
 
-			return createRelease( options )
+			return releaseRepository( options )
 				.then( () => {
 					expect( stubs.updateDependenciesVersions.called ).to.equal( false );
 				} );
@@ -170,7 +171,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				version: '0.0.1'
 			};
 
-			return createRelease( options )
+			return releaseRepository( options )
 				.then( () => {
 					expect( updateJsonFileArgs[ 0 ] ).to.equal( '/cwd/package.json' );
 					expect( updateJsonFileArgs[ 1 ] ).to.be.a( 'function' );
@@ -208,7 +209,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				name: 'repository'
 			} );
 
-			return createRelease( options )
+			return releaseRepository( options )
 				.then( () => {
 					expect( stubs.parseGithubUrl.calledOnce ).to.equal( false );
 					expect( stubs.createGithubRelease.calledOnce ).to.equal( false );
@@ -237,7 +238,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				name: 'repository'
 			} );
 
-			return createRelease( options )
+			return releaseRepository( options )
 				.then( () => {
 					expect( stubs.parseGithubUrl.calledOnce ).to.equal( true );
 					expect( stubs.createGithubRelease.calledOnce ).to.equal( true );

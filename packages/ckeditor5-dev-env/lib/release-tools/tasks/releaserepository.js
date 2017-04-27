@@ -9,36 +9,35 @@ const path = require( 'path' );
 const chalk = require( 'chalk' );
 const parseGithubUrl = require( 'parse-github-url' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const generateChangelog = require( './generatechangelog' );
 const createGithubRelease = require( './creategithubrelease' );
+const generateChangelogForSinglePackage = require( './generatechangelogforsinglepackage' );
 const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
 const changelogUtils = require( '../utils/changelog' );
 const versionUtils = require( '../utils/versions' );
 const getPackageJson = require( '../utils/getpackagejson' );
 
 /**
- * Creates a new release.
+ * Releases the package defined in the current repository.
  *
- * Commits a new changelog (and package.json), creates a tag,
+ * Commits a new changelog (and `package.json`), creates a tag,
  * pushes the tag to a remote server and creates a note on GitHub releases page.
  *
  * @param {Object} options
  * @param {String} options.token GitHub token used to authenticate.
  * @param {Boolean} options.skipGithub Whether to publish the package on Github.
  * @param {Boolean} options.skipNpm Whether to publish the package on Npm.
- * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
- * @param {String} options.packages Where to look for other packages (dependencies).
  * @param {Map} options.dependencies Dependencies list to update.
  * @returns {Promise}
  */
-module.exports = function createRelease( options ) {
+module.exports = function releaseRepository( options ) {
 	const cwd = process.cwd();
 	const log = logger();
 
 	const packageJsonPath = path.join( cwd, 'package.json' );
 	const packageJson = getPackageJson( cwd );
 
-	log.info( `Creating release for "${ packageJson.name }".` );
+	log.info( '' );
+	log.info( chalk.bold.blue( `Creating release for "${ packageJson.name }".` ) );
 
 	if ( options.dependencies ) {
 		// Update dependencies/devDependencies versions in package.json.
@@ -54,13 +53,13 @@ module.exports = function createRelease( options ) {
 
 		// If package does not have generated changelog - let's generate it.
 		if ( packageDetails && !packageDetails.hasChangelog ) {
-			return generateChangelog( packageDetails.version )
+			return generateChangelogForSinglePackage( packageDetails.version )
 				.then( () => {
 					packageDetails.hasChangelog = true;
 
 					options.dependencies.set( packageJson.name, packageDetails );
 
-					return createRelease( {
+					return releaseRepository( {
 						token: options.token,
 						skipGithub: options.skipGithub,
 						skipNpm: options.skipNpm,
