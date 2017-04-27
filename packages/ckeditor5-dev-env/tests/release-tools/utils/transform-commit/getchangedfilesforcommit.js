@@ -50,10 +50,19 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			shExecStub.returns( `README.md
 packages/ckeditor5-dev-env/tests/index.js` );
 
-			expect( getChangedFilesForCommit( 'commit sha1' ) ).to.deep.equal( [
+			expect( getChangedFilesForCommit( 'a1b2c3d' ) ).to.deep.equal( [
 				'README.md',
 				'packages/ckeditor5-dev-env/tests/index.js'
 			] );
+
+			expect( shExecStub.firstCall.args[ 0 ] ).to.equal( 'git log -m -1 --name-only --pretty="format:" a1b2c3d' );
+		} );
+
+		it( 'should not use "git show" command for collecting changed files', () => {
+			shExecStub.returns( '' );
+			getChangedFilesForCommit( 'a1b2c3d' );
+
+			expect( shExecStub.firstCall.args[ 0 ] ).to.not.match( /^git show/ );
 		} );
 	} );
 } );
