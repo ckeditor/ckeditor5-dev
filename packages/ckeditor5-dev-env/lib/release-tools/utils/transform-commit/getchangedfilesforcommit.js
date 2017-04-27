@@ -14,7 +14,7 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @returns {Array.<String>}
  */
 module.exports = function getChangedFilesForCommit( commitId ) {
-	const gitCommand = `git show --pretty="" --name-only ${ commitId }`;
+	const gitCommand = `git diff --name-only ${ commitId }~..${ commitId }`;
 	const changedFiles = tools.shExec( gitCommand, { verbosity: 'error' } ).trim();
 
 	if ( !changedFiles ) {

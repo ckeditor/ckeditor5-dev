@@ -50,10 +50,26 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			shExecStub.returns( `README.md
 packages/ckeditor5-dev-env/tests/index.js` );
 
-			expect( getChangedFilesForCommit( 'commit sha1' ) ).to.deep.equal( [
+			expect( getChangedFilesForCommit( 'a1b2c3d' ) ).to.deep.equal( [
 				'README.md',
 				'packages/ckeditor5-dev-env/tests/index.js'
 			] );
+
+			expect( shExecStub.firstCall.args[ 0 ] ).to.equal( 'git diff --name-only a1b2c3d~..a1b2c3d' );
+		} );
+
+		it( 'should not use "git show" command because it does not work for merge commits', () => {
+			shExecStub.returns( '' );
+			getChangedFilesForCommit( 'a1b2c3d' );
+
+			expect( shExecStub.firstCall.args[ 0 ] ).to.not.match( /^git show/ );
+		} );
+
+		it( 'should not use "git log" command because it can show two parents commits', () => {
+			shExecStub.returns( '' );
+			getChangedFilesForCommit( 'a1b2c3d' );
+
+			expect( shExecStub.firstCall.args[ 0 ] ).to.not.match( /^git log/ );
 		} );
 	} );
 } );
