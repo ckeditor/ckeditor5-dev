@@ -19,9 +19,13 @@ const logger = require( '../logger' )();
 module.exports = class TranslationService {
 	/**
 	 * @param {String} language Target language.
+	 * @param {Object} [options] Optional config.
+	 * @param {Function} [options.getPathToPoFile] Function that return a full path to the po file.
 	 */
-	constructor( language ) {
+	constructor( language, options = {} ) {
 		this.language = language;
+		this.getPathToPoFile = options.getPathToPoFile || getDefaultPathToPoFile;
+
 		this.packagePaths = new Set();
 		this.dictionary = new Map();
 	}
@@ -38,13 +42,13 @@ module.exports = class TranslationService {
 
 		this.packagePaths.add( pathToPackage );
 
-		const pathToPoFile = path.join( pathToPackage, 'lang', 'translations', this.language + '.po' );
+		const pathToPoFile = this.getPathToPoFile( pathToPackage, this.language );
 
 		this._loadPoFile( pathToPoFile );
 	}
 
 	/**
-	 * Parses source, translates t call arguments and returns modified output.
+	 * Parses source, translates `t()` call arguments and returns modified output.
 	 *
 	 * @param {String} source JS source text which will be translated.
 	 * @returns {String}
@@ -95,6 +99,8 @@ module.exports = class TranslationService {
 	// Loads translations from the po file.
 	_loadPoFile( pathToPoFile ) {
 		if ( !fs.existsSync( pathToPoFile ) ) {
+			console.warn( `PO file doesn't exist under the path: ${ pathToPoFile }.` );
+
 			return;
 		}
 
@@ -119,3 +125,7 @@ module.exports = class TranslationService {
 		return translation;
 	}
 };
+
+function getDefaultPathToPoFile( pathToPackage, languageCode ) {
+	return path.join( pathToPackage, 'lang', 'translations', languageCode + '.po' );
+}

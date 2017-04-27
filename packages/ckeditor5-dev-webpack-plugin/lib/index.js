@@ -23,7 +23,7 @@ module.exports = class CKEditorWebpackPlugin {
 		if ( languages && languages.length == 1 ) {
 			replaceTCalls( compiler, languages[ 0 ] );
 		} else {
-			console.error( 'Multi-language support is not implemented yet.' );
+			throw new Error( 'Multi-language support is not implemented yet.' );
 		}
 	}
 };
