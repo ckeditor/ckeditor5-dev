@@ -15,15 +15,5 @@ module.exports = {
 	noteKeywords: [ 'BREAKING CHANGE', 'BREAKING CHANGES', 'NOTE' ],
 	revertPattern: /^Revert:\s([\s\S]*?)\s*This reverts commit (\w*)\./,
 	revertCorrespondence: [ 'header', 'hash' ],
-	referenceActions: [
-		'Close:',
-		'Closes:',
-		'Closed:',
-		'Fix:',
-		'Fixes:',
-		'Fixed:',
-		'Resolve:',
-		'Resolves:',
-		'Resolved:',
-	]
+	referenceActions: []
 };
