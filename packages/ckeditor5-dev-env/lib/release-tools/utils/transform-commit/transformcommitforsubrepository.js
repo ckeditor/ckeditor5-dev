@@ -105,7 +105,7 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 	}
 
 	// Clear the references array - we don't want to hoist the issues.
-	commit.references = [];
+	delete commit.references;
 
 	return commit;
 };
@@ -124,8 +124,6 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
  * @property {String|null} [footer] Footer of the commit message.
  *
  * @property {Array.<CommitNote>} [notes] Notes for the commit.
- *
- * @property {Array.<Number|String>} [references] An array with issue ids.
  *
  * @property {Array.<String>} [mentions] An array with users profiles extracted
  * from the commit message.

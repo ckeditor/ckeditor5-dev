@@ -65,8 +65,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				notes: [
 					{ title: 'BREAKING CHANGE', text: 'Note 1.' },
 					{ title: 'BREAKING CHANGES', text: 'Note 2.' }
-				],
-				references: []
+				]
 			};
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
@@ -83,8 +82,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				subject: 'Simple fix.',
 				body: null,
 				footer: null,
-				notes: [],
-				references: []
+				notes: []
 			};
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
@@ -101,8 +99,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				subject: 'README.',
 				body: null,
 				footer: null,
-				notes: [],
-				references: []
+				notes: []
 			};
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
@@ -119,8 +116,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				subject: null,
 				body: null,
 				footer: null,
-				notes: [],
-				references: []
+				notes: []
 			};
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
@@ -142,8 +138,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 						title: 'BREAKING CHANGES',
 						text: 'Some issue #1.'
 					}
-				],
-				references: []
+				]
 			};
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
@@ -161,8 +156,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				subject: 'Internal: Thanks to @CKEditor',
 				body: null,
 				footer: null,
-				notes: [],
-				references: []
+				notes: []
 			};
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
@@ -187,7 +181,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
 				body: commitDescription.join( '\n' ),
 				footer: null,
-				references: [],
 				mentions: [],
 				type: 'Feature',
 				subject: 'Introduced a brand new release tools with a new set of requirements. See #64.',
@@ -233,7 +226,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					...commitDescription,
 					''
 				].join( '\n' ),
-				references: [],
 				mentions: [],
 				type: null,
 				subject: null,
@@ -259,7 +251,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
 				body: null,
 				footer: 'Feature: Introduced a brand new release tools with a new set of requirements. See #64.',
-				references: [],
 				mentions: [],
 				type: null,
 				subject: null,
@@ -280,7 +271,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
 				body: 'Feature: Introduced a brand new release tools with a new set of requirements. See #64.',
 				footer: null,
-				references: [],
 				mentions: [],
 				type: null,
 				subject: null,
@@ -301,7 +291,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
 				body: 'Feature: Introduced a brand new release tools with a new set of requirements.',
 				footer: null,
-				references: [],
 				mentions: [],
 				type: null,
 				subject: null,
@@ -330,8 +319,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				subject: 'Simple fix.',
 				body: null,
 				footer: null,
-				notes: [],
-				references: []
+				notes: []
 			};
 
 			transformCommitForSubRepository( commit, { displayLogs: false } );
@@ -339,7 +327,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( loggerVerbosity ).to.equal( 'error' );
 		} );
 
-		it( 'clears references to issues', () => {
+		it( 'removes references to issues', () => {
 			const commit = {
 				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
 				header: 'Fix: Simple fix.',
@@ -356,7 +344,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 			transformCommitForSubRepository( commit, { displayLogs: false } );
 
-			expect( commit.references ).to.deep.equal( [] );
+			expect( commit.references ).to.equal( undefined );
 		} );
 	} );
 } );
