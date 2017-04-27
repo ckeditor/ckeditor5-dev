@@ -87,6 +87,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
 						version: '1.0.0',
 						tagName: 'v0.5.0',
+						newTagName: 'v1.0.0',
 						transformCommit: stubs.transformCommit
 					} );
 
@@ -111,6 +112,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
 						version: '0.1.0',
 						tagName: null,
+						newTagName: 'v0.1.0',
 						transformCommit: stubs.transformCommit
 					} );
 

@@ -95,6 +95,7 @@ module.exports = function generateChangelogForSubPackages( options ) {
 				const changelogOptions = {
 					version,
 					tagName,
+					newTagName: packageJson.name + '@' + version,
 					transformCommit: transformCommitFunction
 				};
 
