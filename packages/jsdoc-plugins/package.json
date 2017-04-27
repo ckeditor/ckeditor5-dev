@@ -17,5 +17,5 @@
   "license": "MIT",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/jsdoc-plugins",
   "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
-  "repository": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/jsdoc-plugins"
+  "repository": "https://github.com/ckeditor/ckeditor5-dev"
 }
