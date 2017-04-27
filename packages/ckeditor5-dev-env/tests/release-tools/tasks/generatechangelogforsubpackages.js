@@ -164,6 +164,20 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.tools.shExec.calledTwice ).to.equal( true );
 					expect( stubs.tools.shExec.firstCall.args[ 0 ] ).to.equal( 'git add packages/**/CHANGELOG.md' );
 					expect( stubs.tools.shExec.secondCall.args[ 0 ] ).to.equal( 'git commit -m "Docs: Updated changelog for packages. [skip ci]"' );
+
+					expect( stubs.generateChangelogFromCommits.calledTwice ).to.equal( true );
+					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						version: '1.0.1',
+						transformCommit: stubs.transformCommit,
+						tagName: '@ckeditor/ckeditor5-dev-foo@1.0.0',
+						newTagName: '@ckeditor/ckeditor5-dev-foo@1.0.1'
+					} );
+					expect( stubs.generateChangelogFromCommits.secondCall.args[ 0 ] ).to.deep.equal( {
+						version: '2.1.0',
+						transformCommit: stubs.transformCommit,
+						tagName: '@ckeditor/ckeditor5-dev-bar@2.0.0',
+						newTagName: '@ckeditor/ckeditor5-dev-bar@2.1.0'
+					} );
 				} );
 		} );
 
@@ -207,6 +221,13 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.displaySkippedPackages.firstCall.args[ 0 ] ).to.deep.equal( new Set( [
 						'/ckeditor5-dev/packages/ckeditor5-dev-bar'
 					] ) );
+
+					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						version: '1.0.1',
+						transformCommit: stubs.transformCommit,
+						tagName: '@ckeditor/ckeditor5-dev-foo@1.0.0',
+						newTagName: '@ckeditor/ckeditor5-dev-foo@1.0.1'
+					} );
 				} );
 		} );
 
@@ -251,6 +272,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					] ) );
 
 					expect( stubs.tools.shExec.called ).to.equal( false );
+					expect( stubs.generateChangelogFromCommits.called ).to.equal( false );
 				} );
 		} );
 	} );

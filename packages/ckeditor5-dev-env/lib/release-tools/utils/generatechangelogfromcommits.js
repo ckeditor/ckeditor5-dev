@@ -20,6 +20,7 @@ const { stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {String} options.version A version for generated changelog.
  * @param {Function} options.transformCommit A function which transforms the commit.
  * @param {String|null} options.tagName Name of the last created tag for the repository.
+ * @param {String} options.newTagName Name of the tag for current version.
  * @returns {Promise}
  */
 module.exports = function generateChangelogFromCommits( options ) {
@@ -34,6 +35,8 @@ module.exports = function generateChangelogFromCommits( options ) {
 
 		const context = {
 			version: options.version,
+			currentTag: options.newTagName,
+			previousTag: options.tagName,
 			displayLogs: false
 		};
 

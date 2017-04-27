@@ -126,7 +126,8 @@ describe( 'dev-env/release-tools/utils', () => {
 			const options = {
 				version: '1.0.0',
 				transformCommit: stubs.transformCommit,
-				tagName: 'v0.5.0'
+				tagName: 'v0.5.0',
+				newTagName: 'v1.0.0'
 			};
 
 			return generateChangelogFromCommits( options )
@@ -137,7 +138,9 @@ describe( 'dev-env/release-tools/utils', () => {
 					expect( conventionalChangelogArguments ).to.be.an( 'array' );
 					expect( conventionalChangelogArguments[ 1 ] ).to.deep.equal( {
 						displayLogs: false,
-						version: '1.0.0'
+						version: '1.0.0',
+						previousTag: 'v0.5.0',
+						currentTag: 'v1.0.0'
 					} );
 					expect( conventionalChangelogArguments[ 2 ] ).to.have.property( 'from', 'v0.5.0' );
 					expect( conventionalChangelogArguments[ 4 ] ).to.deep.equal( { foo: 'bar' } );

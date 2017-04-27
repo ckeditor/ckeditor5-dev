@@ -64,6 +64,7 @@ module.exports = function generateChangelogForSinglePackage( newVersion = null )
 			const changelogOptions = {
 				version,
 				tagName,
+				newTagName: 'v' + version,
 				transformCommit: transformCommitFunction
 			};
 
