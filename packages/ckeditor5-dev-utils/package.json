@@ -28,5 +28,5 @@
   "license": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-utils",
   "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
-  "repository": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-utils"
+  "repository": "https://github.com/ckeditor/ckeditor5-dev"
 }

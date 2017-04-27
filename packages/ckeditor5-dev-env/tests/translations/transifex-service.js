@@ -53,7 +53,7 @@ describe( 'transifex-service', () => {
 				token: 'token'
 			} )
 			.then( () => new Error( 'Promise should not be resolved' ) )
-			.catch( ( err ) => expect( err.message ).to.equal( 'Status code: 500' ) );
+			.catch( ( err ) => expect( err.message ).to.equal( `Status code: 500 for 'getResources' method.` ) );
 		} );
 
 		it( 'should throw an error if some other error occurs', () => {
@@ -76,7 +76,7 @@ describe( 'transifex-service', () => {
 				token: 'token'
 			} )
 			.then( () => new Error( 'Promise should not be resolved' ) )
-			.catch( ( err ) => expect( err.message ).to.equal( `Error handled while parsing body: Invalid JSON` ) );
+			.catch( ( err ) => expect( err.message ).to.equal( `Error handled while parsing body of the 'getResources' response: Invalid JSON` ) );
 		} );
 	} );
 
