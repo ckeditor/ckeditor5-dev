@@ -25,7 +25,7 @@ module.exports = {
 		return new Promise( ( resolve, reject ) => {
 			request.get( `${ PROJECT_URL }/resources/`, {
 				auth: { username: 'api', password: token }
-			}, createJsonResponseHandler( resolve, reject ) );
+			}, createJsonResponseHandler( resolve, reject, 'getResources' ) );
 		} );
 	},
 
@@ -44,12 +44,12 @@ module.exports = {
 			request.post( `${ PROJECT_URL }/resources/`, {
 				auth: { username: 'api', password: token },
 				formData: { slug, name, content, 'i18n_type': 'PO' }
-			}, createJsonResponseHandler( resolve, reject ) );
+			}, createJsonResponseHandler( resolve, reject, 'postResource' ) );
 		} );
 	},
 
 	/**
-	 * Updates resoure content.
+	 * Updates resource content.
 	 *
 	 * @param {Object} config
 	 * @param {String} config.token Token to the Transifex API.
@@ -62,7 +62,7 @@ module.exports = {
 			request.put( `${ PROJECT_URL }/resource/${ slug }/content/`, {
 				auth: { username: 'api', password: token },
 				formData: { content, 'i18n_type': 'PO' }
-			}, createJsonResponseHandler( resolve, reject ) );
+			}, createJsonResponseHandler( resolve, reject, 'putResourceContent' ) );
 		} );
 	},
 
@@ -78,7 +78,7 @@ module.exports = {
 		return new Promise( ( resolve, reject ) => {
 			request.get( `${ PROJECT_URL }/resource/${ slug }/?details`, {
 				auth: { username: 'api', password: token }
-			}, createJsonResponseHandler( resolve, reject ) );
+			}, createJsonResponseHandler( resolve, reject, 'getResourceDetails' ) );
 		} );
 	},
 
@@ -95,24 +95,24 @@ module.exports = {
 		return new Promise( ( resolve, reject ) => {
 			request.get( `${ PROJECT_URL }/resource/${ slug }/translation/${ lang }/`, {
 				auth: { username: 'api', password: token }
-			}, createJsonResponseHandler( resolve, reject ) );
+			}, createJsonResponseHandler( resolve, reject, 'getTranslation' ) );
 		} );
 	}
 };
 
 // Creates handler for the requests in the promise wrappers.
-function createJsonResponseHandler( resolve, reject ) {
+function createJsonResponseHandler( resolve, reject, methodName ) {
 	return function handleJsonResponse( error, response, body ) {
 		if ( error ) {
 			return reject( error );
 		}  else if ( response.statusCode >= 300 ) {
-			return reject( new Error( `Status code: ${response.statusCode}` ) );
+			return reject( new Error( `Status code: ${response.statusCode} for '${ methodName }' method.` ) );
 		}
 
 		try {
 			resolve( JSON.parse( body ) );
 		} catch ( err ) {
-			reject( new Error( `Error handled while parsing body: ${ body.toString() }` ) );
+			reject( new Error( `Error handled while parsing body of the '${ methodName }' response: ${ body.toString() }` ) );
 		}
 	};
 }
