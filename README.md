@@ -32,6 +32,20 @@ Code coverage:
 npm run coverage
 ```
 
+## Releasing
+
+1. Fetch all changes and switch to `master`!
+1. Execute `gulp changelog`.
+   * At the current stage, a single change will be added to all packages which it touched. Sometimes, this means that in one of these packages the entry will not have much sense. Browse the changes, check if they are relevant.
+      * If not and the package should not be released, just type "skip". However, this is not the best option because Lerna will also recognised this package as changed and will try to release it.
+      * If the changes are a bit irrelevant, but the package still should be released, pick the "patch" bump, remove all the irrelevant entries from the changelog and if it became empty after that, add the "Internal changes only (updated dependencies, documentation, etc.)" text.
+      * Remove the irrelevant changes from the changelog.
+   * When unsure what has really changed in this version, use `git diff <hash of previous release> packages/ckeditor5-dev-<name>/`.
+1. After reviewing the changelog, push the commit to GitHub.
+1. Now, release the changed packages using `lerna publish`.
+
+   Lerna may propose to release more packages than you'd want – e.g. one of the packages might have some totally irrelevant change which you don't want to release now. You can do that by calling e.g.: `lerna publish --scope="@ckeditor/ckeditor5-dev-?(env|utils|webpack-plugin)"`. However, this means that if one of ignored packages depends on one of the release ones it won't have a version bump... so usually it's better to just release everything (so also – to generate changelog for every, even slightest change).
+
 ## License
 
 Licensed under the GPL, LGPL and MPL licenses, at your choice. For full details about the license, please check the `LICENSE.md` file.
