@@ -1,11 +1,11 @@
 {
   "name": "@ckeditor/ckeditor5-dev-webpack-plugin",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "CKEditor 5 plugin for Webpack 2.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^2.5.1"
+    "@ckeditor/ckeditor5-dev-utils": "^2.6.0"
   },
   "devDependencies": {},
   "engines": {
