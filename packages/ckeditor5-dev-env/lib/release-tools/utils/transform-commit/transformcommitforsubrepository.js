@@ -95,6 +95,10 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 				return '  ' + line;
 			} )
 			.join( '\n' );
+
+		commit.body = utils.linkGithubIssues(
+			utils.linkGithubUsers( commit.body )
+		);
 	}
 
 	for ( const note of commit.notes ) {

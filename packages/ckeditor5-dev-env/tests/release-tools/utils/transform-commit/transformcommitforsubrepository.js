@@ -165,6 +165,57 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( commit.subject ).to.equal( expectedSubject );
 		} );
 
+		it( 'makes URLs to issues in additional commit description', () => {
+			const commitDescription = [
+				'* See more in #1 and #2.'
+			];
+
+			const commitDescriptionWithIndents = [
+				'  * See more in [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1) and ' +
+				'[#2](https://github.com/ckeditor/ckeditor5-dev/issues/2).'
+			].join( '\n' );
+
+			const commit = {
+				header: 'Other: Some improvements.',
+				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
+				body: commitDescription.join( '\n' ),
+				footer: null,
+				mentions: [],
+				type: 'Other',
+				subject: 'Some improvements.',
+				notes: []
+			};
+
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
+
+			expect( commit.body ).to.equal( commitDescriptionWithIndents );
+		} );
+
+		it( 'makes URLs to organization in additional commit description', () => {
+			const commitDescription = [
+				'* Thanks to @CKSource and @CKEditor.'
+			];
+
+			const commitDescriptionWithIndents = [
+				'  * Thanks to [@CKSource](https://github.com/CKSource) and [@CKEditor](https://github.com/CKEditor).'
+			].join( '\n' );
+
+			const commit = {
+				header: 'Other: Some improvements.',
+				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
+				body: commitDescription.join( '\n' ),
+				footer: null,
+				mentions: [],
+				type: 'Other',
+				subject: 'Some improvements.',
+				notes: []
+			};
+
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
+
+			expect( commit.body ).to.equal( commitDescriptionWithIndents );
+		} );
+
 		it( 'attaches additional commit description with correct indent', () => {
 			const commitDescription = [
 				'* Release task - rebuilt module for collecting dependencies to release.',
