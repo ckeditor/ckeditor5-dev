@@ -91,6 +91,26 @@ describe( 'dev-env/release-tools/utils', () => {
 					release( '0.2.0' );
 				} );
 		} );
+
+		it( 'does not hoist issues from the commit body for merge commit', () => {
+			exec( 'git commit --allow-empty ' +
+				'--message "Merge pull request #5 from ckeditor/t/4" ' +
+				'--message "Fix: Amazing fix. Closes #5." ' +
+				'--message "The PR also finally closes #3 and #4. So good!"' );
+
+			return generateChangelog( '0.2.1', '0.2.0' )
+				.then( () => {
+					const changelog = getChangelog();
+					const url = 'https://github.com/ckeditor/ckeditor5-test-package';
+
+					//jscs:disable maximumLineLength
+					expect( changelog ).to.match( new RegExp( `\\* Amazing fix. Closes \\[#5\\]\\(${ url }\\/issues\\/5\\). \\(\\[[a-z0-9]{7}\\]\\(${ url }\\/commit\\/[a-z0-9]{7}\\)\\)` ) );
+					expect( changelog ).to.match( new RegExp( `  The PR also finally closes \\[#3\\]\\(${ url }\\/issues\\/3\\) and \\[#4\\]\\(${ url }\\/issues\\/4\\). So good!` ) );
+					//jscs:enable maximumLineLength
+
+					release( '0.2.1' );
+				} );
+		} );
 	} );
 
 	function exec( command ) {
