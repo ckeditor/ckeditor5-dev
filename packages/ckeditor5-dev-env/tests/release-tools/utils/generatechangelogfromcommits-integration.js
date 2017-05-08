@@ -44,6 +44,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 		after( () => {
 			exec( `rm -rf ${ tmpCwd }` );
+			process.chdir( cwd );
 		} );
 
 		it( 'generates a changelog for the first time', () => {
