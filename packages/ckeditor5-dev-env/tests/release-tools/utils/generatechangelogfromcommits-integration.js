@@ -82,7 +82,6 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			return generateChangelog( '0.2.0', '0.1.0' )
 				.then( () => {
-					const url = 'https://github.com/ckeditor/ckeditor5-test-package';
 					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.0' ) );
 
 					expect( latestChangelog.split( '\n' ).length ).to.equal( 5 );
@@ -107,7 +106,6 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			return generateChangelog( '0.2.1', '0.2.0' )
 				.then( () => {
-					const url = 'https://github.com/ckeditor/ckeditor5-test-package';
 					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.1' ) );
 
 					expect( latestChangelog.split( '\n' ).length ).to.equal( 5 );
