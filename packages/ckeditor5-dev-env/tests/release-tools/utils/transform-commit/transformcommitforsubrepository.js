@@ -88,7 +88,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Fix: Simple fix\." \u001b\[32mINCLUDED/ );
+			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* \u001b\[33m684997d\u001b\[39m "Fix: Simple fix\." \u001b\[32mINCLUDED/ );
 		} );
 
 		it( 'does not attach valid "internal" commit to the changelog', () => {
@@ -105,7 +105,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Docs: README\." \u001b\[90mSKIPPED/ );
+			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* \u001b\[33m684997d\u001b\[39m "Docs: README\." \u001b\[90mSKIPPED/ );
 		} );
 
 		it( 'does not attach invalid commit to the changelog', () => {
@@ -122,7 +122,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* 684997d "Invalid commit\." \u001b\[31mINVALID/ );
+			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* \u001b\[33m684997d\u001b\[39m "Invalid commit\." \u001b\[31mINVALID/ );
 		} );
 
 		it( 'makes URLs to issues on GitHub', () => {
@@ -252,99 +252,16 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\u001b\[32mINCLUDED/ );
 		} );
 
-		it( 'does not duplicate the commit header in additional description for merge commits', () => {
-			const commitDescription = [
-				'* Release task - rebuilt module for collecting dependencies to release.',
-				'* Release task - a new version to release will be read from CHANGELOG file.',
-				'* Changelog task - will not break if changelog does not exist.',
-				'* Used `semver` package for bumping the version (instead of a custom module).',
-			];
-
-			const commitDescriptionWithIndents = [
-				'  * Release task - rebuilt module for collecting dependencies to release.',
-				'  * Release task - a new version to release will be read from CHANGELOG file.',
-				'  * Changelog task - will not break if changelog does not exist.',
-				'  * Used `semver` package for bumping the version (instead of a custom module).',
-			].join( '\n' );
-
-			const commit = {
-				header: 'Merge pull request #75 from ckeditor/t/64',
-				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
-				body: null,
-				footer: [
-					'Feature: Introduced a brand new release tools with a new set of requirements. See #64.',
-					'',
-					...commitDescription,
-					''
-				].join( '\n' ),
-				mentions: [],
-				type: null,
-				subject: null,
-				notes: []
-			};
-
-			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
-
-			expect( commit.type ).to.equal( 'Features' );
-			expect( commit.subject ).to.equal( 'Introduced a brand new release tools with a new set of requirements. ' +
-				'See [#64](https://github.com/ckeditor/ckeditor5-dev/issues/64).' );
-			expect( commit.body ).to.equal( commitDescriptionWithIndents );
-
-			expect( stubs.logger.info.calledOnce ).to.equal( true );
-
-			const commitRegexp = /\* dea3501 "Merge pull request #75 from ckeditor\/t\/64" \u001b\[32mINCLUDED/;
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( commitRegexp );
-		} );
-
-		it( 'reads commit details from "footer" for merge commit from Github', () => {
-			const commit = {
-				header: 'Merge pull request #75 from ckeditor/t/64',
-				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
-				body: null,
-				footer: 'Feature: Introduced a brand new release tools with a new set of requirements. See #64.',
-				mentions: [],
-				type: null,
-				subject: null,
-				notes: []
-			};
-
-			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
-
-			expect( commit.header ).to.equal( 'Merge pull request #75 from ckeditor/t/64' );
-			expect( commit.type ).to.equal( 'Features' );
-			expect( commit.subject ).to.equal( 'Introduced a brand new release tools with a new set of requirements. ' +
-				'See [#64](https://github.com/ckeditor/ckeditor5-dev/issues/64).' );
-		} );
-
-		it( 'reads commit details from "body" for manually merge commit', () => {
-			const commit = {
-				header: 'Merge pull request #75 from ckeditor/t/64',
-				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
-				body: 'Feature: Introduced a brand new release tools with a new set of requirements. See #64.',
-				footer: null,
-				mentions: [],
-				type: null,
-				subject: null,
-				notes: []
-			};
-
-			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
-
-			expect( commit.header ).to.equal( 'Merge pull request #75 from ckeditor/t/64' );
-			expect( commit.type ).to.equal( 'Features' );
-			expect( commit.subject ).to.equal( 'Introduced a brand new release tools with a new set of requirements. ' +
-				'See [#64](https://github.com/ckeditor/ckeditor5-dev/issues/64).' );
-		} );
-
 		it( 'attaches additional subject for merge commits to the commit list', () => {
 			const commit = {
-				header: 'Merge pull request #75 from ckeditor/t/64',
+				merge: 'Merge pull request #75 from ckeditor/t/64',
 				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
-				body: 'Feature: Introduced a brand new release tools with a new set of requirements.',
+				header: 'Feature: Introduced a brand new release tools with a new set of requirements.',
+				type: 'Feature',
+				subject: 'Introduced a brand new release tools with a new set of requirements.',
+				body: null,
 				footer: null,
 				mentions: [],
-				type: null,
-				subject: null,
 				notes: []
 			};
 
@@ -354,12 +271,14 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.be.a( 'string' );
 
 			const logMessageAsArray = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
-			const mergeCommitPattern = /\* dea3501 "Merge pull request #75 from ckeditor\/t\/64" \u001b\[32mINCLUDED/;
-			const detailsPattern = /Feature: Introduced a brand new release tools with a new set of requirements\./;
+			//jscs:disable maximumLineLength
+			const commitDetailsPattern = /\* \u001b\[33mdea3501\u001b\[39m "Feature: Introduced a brand new release tools with a new set of requirements\." \u001b\[32mINCLUDED/;
+			//jscs:enable maximumLineLength
+			const mergeCommitPattern = /Merge pull request #75 from ckeditor\/t\/64/;
 
 			expect( logMessageAsArray.length ).to.equal( 2 );
-			expect( logMessageAsArray[ 0 ] ).to.match( mergeCommitPattern );
-			expect( logMessageAsArray[ 1 ] ).to.match( detailsPattern );
+			expect( logMessageAsArray[ 0 ] ).to.match( commitDetailsPattern );
+			expect( logMessageAsArray[ 1 ] ).to.match( mergeCommitPattern );
 		} );
 
 		it( 'allows hiding the logs', () => {
@@ -396,6 +315,23 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			transformCommitForSubRepository( commit, { displayLogs: false } );
 
 			expect( commit.references ).to.equal( undefined );
+		} );
+
+		it( 'uses commit\'s footer as a commit\'s body when commit does not have additional notes', () => {
+			const commit = {
+				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
+				header: 'Feature: Introduced a brand new release tools with a new set of requirements.',
+				type: 'Feature',
+				subject: 'Introduced a brand new release tools with a new set of requirements.',
+				body: null,
+				footer: 'Additional description has been parsed as a footer but it should be a body.',
+				notes: []
+			};
+
+			transformCommitForSubRepository( commit, { displayLogs: false, packageData: packageJson } );
+
+			expect( commit.body ).to.equal( '  Additional description has been parsed as a footer but it should be a body.' );
+			expect( commit.footer ).to.equal( null );
 		} );
 	} );
 } );

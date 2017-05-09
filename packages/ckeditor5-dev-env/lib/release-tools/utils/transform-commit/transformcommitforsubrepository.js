@@ -8,17 +8,16 @@
 const chalk = require( 'chalk' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const utils = require( './transform-commit-utils' );
-const parserOptions = require( './parser-options' );
 
 // A size of indent for a log. The number is equal to length of the Gulp log string:
-// '[XX:YY:ZZ] * 1234567 ', where '1234567' is short commit id.
+// '[XX:YY:ZZ] * 1234567 ', where '1234567' is a short commit id.
 const INDENT_SIZE = 21;
 
 /**
  * Parses a single commit:
  *   - displays a log when the commit has invalid format of the message,
  *   - filters out the commit if it should not be visible in the changelog,
- *   - makes links to issues and user's profiles on GitHub.
+ *   - makes links to issues and organizations on GitHub.
  *
  * @param {Commit} commit
  * @param {Object} context
@@ -29,26 +28,6 @@ const INDENT_SIZE = 21;
 module.exports = function transformCommitForSubRepository( commit, context ) {
 	const log = logger( context.displayLogs ? 'info' : 'error' );
 
-	// For merge commit from Github, additional description is provided as "footer".
-	if ( !commit.body && commit.footer ) {
-		commit.body = commit.footer;
-		commit.footer = null;
-	}
-
-	if ( commit.header.startsWith( 'Merge' ) ) {
-		const parsedHeader = parserOptions.headerPattern.exec( commit.body );
-
-		if ( parsedHeader ) {
-			parserOptions.headerCorrespondence.forEach( ( key, index ) => {
-				commit[ key ] = parsedHeader[ index + 1 ];
-			} );
-
-			// Remove the new header from commit body in order to avoid
-			// duplicating the same sentence in a changelog description.
-			commit.body = commit.body.replace( parserOptions.headerPattern, '' ).trim();
-		}
-	}
-
 	if ( typeof commit.hash === 'string' ) {
 		commit.hash = commit.hash.substring( 0, 7 );
 	}
@@ -56,7 +35,7 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 	const hasCorrectType = utils.availableCommitTypes.has( commit.type );
 	const isCommitIncluded = utils.availableCommitTypes.get( commit.type );
 
-	let logMessage = `* ${ commit.hash } "${ commit.header }" `;
+	let logMessage = `* ${ chalk.yellow( commit.hash ) } "${ commit.header }" `;
 
 	if ( hasCorrectType && isCommitIncluded ) {
 		logMessage += chalk.green( 'INCLUDED' );
@@ -66,8 +45,8 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 		logMessage += chalk.red( 'INVALID' );
 	}
 
-	if ( commit.header.startsWith( 'Merge' ) && hasCorrectType ) {
-		logMessage += `\n${ ' '.repeat( INDENT_SIZE ) }"${ commit.type }: ${ commit.subject }"`;
+	if ( commit.merge ) {
+		logMessage += `\n${ ' '.repeat( INDENT_SIZE ) }${ commit.merge }`;
 	}
 
 	log.info( logMessage );
@@ -83,6 +62,11 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 		commit.subject = utils.linkGithubIssues(
 			utils.linkGithubUsers( commit.subject )
 		);
+	}
+
+	if ( commit.footer && !commit.body && !commit.notes.length ) {
+		commit.body = commit.footer;
+		commit.footer = null;
 	}
 
 	if ( typeof commit.body === 'string' ) {
@@ -128,9 +112,6 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
  * @property {String|null} [footer] Footer of the commit message.
  *
  * @property {Array.<CommitNote>} [notes] Notes for the commit.
- *
- * @property {Array.<String>} [mentions] An array with users profiles extracted
- * from the commit message.
  *
  * @property {String} [hash] The commit SHA-1 id.
  *

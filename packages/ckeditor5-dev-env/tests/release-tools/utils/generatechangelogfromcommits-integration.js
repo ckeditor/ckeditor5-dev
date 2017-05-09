@@ -15,6 +15,8 @@ const generateChangelogFromCommits = require( '../../../lib/release-tools/utils/
 const { changelogHeader, getChangelog, getChangesForVersion } = require( '../../../lib/release-tools/utils/changelog' );
 
 describe( 'dev-env/release-tools/utils', () => {
+	const url = 'https://github.com/ckeditor/ckeditor5-test-package';
+
 	let tmpCwd, cwd;
 
 	// These tests create a chain of releases.
@@ -33,8 +35,8 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			const packageJson = {
 				name: '@ckeditor/ckeditor5-test-package',
-				bugs: 'https://github.com/ckeditor/ckeditor5-test-package/issues',
-				repository: 'https://github.com/ckeditor/ckeditor5-test-package'
+				bugs: `${ url }/issues`,
+				repository: url
 			};
 
 			fs.writeFileSync(
@@ -119,6 +121,65 @@ describe( 'dev-env/release-tools/utils', () => {
 					//jscs:enable maximumLineLength
 
 					release( '0.2.1' );
+				} );
+		} );
+
+		it( 'does not hoist issues from the commit body with additional notes for merge commit', () => {
+			exec( 'git commit --allow-empty ' +
+				'--message "Merge pull request #7 from ckeditor/t/6" ' +
+				'--message "Other: Some docs improvements. Closes #6." ' +
+				'--message "Did you see the #3 and #4?" ' +
+				'--message "NOTE: Please read #1." ' +
+				'--message "BREAKING CHANGES: Some breaking change." ' );
+
+			return generateChangelog( '0.3.0', '0.2.1' )
+				.then( () => {
+					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.3.0' ) );
+
+					expect( latestChangelog.split( '\n' ).length ).to.equal( 13 );
+
+					const changesAsArray = latestChangelog.split( '\n' ).filter( ( line ) => line.trim().length );
+
+					//jscs:disable maximumLineLength
+					expect( changesAsArray[ 0 ] ).to.equal( '### Other changes' );
+					expect( changesAsArray[ 1 ] ).to.equal( `* Some docs improvements. Closes [#6](${ url }/issues/6). ([XXXXXXX](${ url }/commit/XXXXXXX))` );
+					expect( changesAsArray[ 2 ] ).to.equal( `  Did you see the [#3](${ url }/issues/3) and [#4](${ url }/issues/4)?` );
+					expect( changesAsArray[ 3 ] ).to.equal( '### BREAKING CHANGES' );
+					expect( changesAsArray[ 4 ] ).to.equal( '* Some breaking change.' );
+					expect( changesAsArray[ 5 ] ).to.equal( '### NOTE' );
+					expect( changesAsArray[ 6 ] ).to.equal( `* Please read [#1](${ url }/issues/1).` );
+					//jscs:enable maximumLineLength
+
+					release( '0.3.0' );
+				} );
+		} );
+
+		it( 'does not hoist issues from the commit body with additional notes', () => {
+			exec( 'git commit --allow-empty ' +
+				'--message "Feature: Issues will not be hoisted. Closes #8." ' +
+				'--message "All details have been described in #1." ' +
+				'--message "NOTE: Please read #1." ' +
+				'--message "BREAKING CHANGES: Some breaking change." ' );
+
+			return generateChangelog( '0.4.0', '0.3.0' )
+				.then( () => {
+					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.4.0' ) );
+
+					expect( latestChangelog.split( '\n' ).length ).to.equal( 13 );
+
+					const changesAsArray = latestChangelog.split( '\n' ).filter( ( line ) => line.trim().length );
+
+					//jscs:disable maximumLineLength
+					expect( changesAsArray[ 0 ] ).to.equal( '### Features' );
+					expect( changesAsArray[ 1 ] ).to.equal( `* Issues will not be hoisted. Closes [#8](${ url }/issues/8). ([XXXXXXX](${ url }/commit/XXXXXXX))` );
+					expect( changesAsArray[ 2 ] ).to.equal( `  All details have been described in [#1](${ url }/issues/1).` );
+					expect( changesAsArray[ 3 ] ).to.equal( '### BREAKING CHANGES' );
+					expect( changesAsArray[ 4 ] ).to.equal( '* Some breaking change.' );
+					expect( changesAsArray[ 5 ] ).to.equal( '### NOTE' );
+					expect( changesAsArray[ 6 ] ).to.equal( `* Please read [#1](${ url }/issues/1).` );
+					//jscs:enable maximumLineLength
+
+					release( '0.4.0' );
 				} );
 		} );
 	} );
