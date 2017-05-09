@@ -76,14 +76,12 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 		return;
 	}
 
-	const issues = [];
-
 	commit.rawType = commit.type;
 	commit.type = utils.getCommitType( commit.type );
 
 	if ( typeof commit.subject === 'string' ) {
 		commit.subject = utils.linkGithubIssues(
-			utils.linkGithubUsers( commit.subject ), issues
+			utils.linkGithubUsers( commit.subject )
 		);
 	}
 
@@ -97,6 +95,10 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 				return '  ' + line;
 			} )
 			.join( '\n' );
+
+		commit.body = utils.linkGithubIssues(
+			utils.linkGithubUsers( commit.body )
+		);
 	}
 
 	for ( const note of commit.notes ) {
@@ -106,8 +108,8 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 		note.text = utils.linkGithubIssues( utils.linkGithubUsers( note.text ) );
 	}
 
-	// Removes references that already appear in the subject.
-	commit.references = commit.references.filter( ( reference ) => !issues.includes( reference.issue ) );
+	// Clear the references array - we don't want to hoist the issues.
+	delete commit.references;
 
 	return commit;
 };
@@ -126,8 +128,6 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
  * @property {String|null} [footer] Footer of the commit message.
  *
  * @property {Array.<CommitNote>} [notes] Notes for the commit.
- *
- * @property {Array.<Number|String>} [references] An array with issue ids.
  *
  * @property {Array.<String>} [mentions] An array with users profiles extracted
  * from the commit message.

@@ -65,8 +65,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				notes: [
 					{ title: 'BREAKING CHANGE', text: 'Note 1.' },
 					{ title: 'BREAKING CHANGES', text: 'Note 2.' }
-				],
-				references: []
+				]
 			};
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
@@ -83,8 +82,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				subject: 'Simple fix.',
 				body: null,
 				footer: null,
-				notes: [],
-				references: []
+				notes: []
 			};
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
@@ -101,8 +99,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				subject: 'README.',
 				body: null,
 				footer: null,
-				notes: [],
-				references: []
+				notes: []
 			};
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
@@ -119,8 +116,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				subject: null,
 				body: null,
 				footer: null,
-				notes: [],
-				references: []
+				notes: []
 			};
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
@@ -142,8 +138,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 						title: 'BREAKING CHANGES',
 						text: 'Some issue #1.'
 					}
-				],
-				references: []
+				]
 			};
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
@@ -161,14 +156,64 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				subject: 'Internal: Thanks to @CKEditor',
 				body: null,
 				footer: null,
-				notes: [],
-				references: []
+				notes: []
 			};
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			const expectedSubject = 'Internal: Thanks to [@CKEditor](https://github.com/CKEditor)';
 			expect( commit.subject ).to.equal( expectedSubject );
+		} );
+
+		it( 'makes URLs to issues in additional commit description', () => {
+			const commitDescription = [
+				'* See more in #1 and #2.'
+			];
+
+			const commitDescriptionWithIndents = [
+				'  * See more in [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1) and ' +
+				'[#2](https://github.com/ckeditor/ckeditor5-dev/issues/2).'
+			].join( '\n' );
+
+			const commit = {
+				header: 'Other: Some improvements.',
+				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
+				body: commitDescription.join( '\n' ),
+				footer: null,
+				mentions: [],
+				type: 'Other',
+				subject: 'Some improvements.',
+				notes: []
+			};
+
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
+
+			expect( commit.body ).to.equal( commitDescriptionWithIndents );
+		} );
+
+		it( 'makes URLs to organization in additional commit description', () => {
+			const commitDescription = [
+				'* Thanks to @CKSource and @CKEditor.'
+			];
+
+			const commitDescriptionWithIndents = [
+				'  * Thanks to [@CKSource](https://github.com/CKSource) and [@CKEditor](https://github.com/CKEditor).'
+			].join( '\n' );
+
+			const commit = {
+				header: 'Other: Some improvements.',
+				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
+				body: commitDescription.join( '\n' ),
+				footer: null,
+				mentions: [],
+				type: 'Other',
+				subject: 'Some improvements.',
+				notes: []
+			};
+
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
+
+			expect( commit.body ).to.equal( commitDescriptionWithIndents );
 		} );
 
 		it( 'attaches additional commit description with correct indent', () => {
@@ -187,7 +232,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
 				body: commitDescription.join( '\n' ),
 				footer: null,
-				references: [],
 				mentions: [],
 				type: 'Feature',
 				subject: 'Introduced a brand new release tools with a new set of requirements. See #64.',
@@ -233,7 +277,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					...commitDescription,
 					''
 				].join( '\n' ),
-				references: [],
 				mentions: [],
 				type: null,
 				subject: null,
@@ -259,7 +302,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
 				body: null,
 				footer: 'Feature: Introduced a brand new release tools with a new set of requirements. See #64.',
-				references: [],
 				mentions: [],
 				type: null,
 				subject: null,
@@ -280,7 +322,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
 				body: 'Feature: Introduced a brand new release tools with a new set of requirements. See #64.',
 				footer: null,
-				references: [],
 				mentions: [],
 				type: null,
 				subject: null,
@@ -301,7 +342,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
 				body: 'Feature: Introduced a brand new release tools with a new set of requirements.',
 				footer: null,
-				references: [],
 				mentions: [],
 				type: null,
 				subject: null,
@@ -330,13 +370,32 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				subject: 'Simple fix.',
 				body: null,
 				footer: null,
-				notes: [],
-				references: []
+				notes: []
 			};
 
 			transformCommitForSubRepository( commit, { displayLogs: false } );
 
 			expect( loggerVerbosity ).to.equal( 'error' );
+		} );
+
+		it( 'removes references to issues', () => {
+			const commit = {
+				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+				header: 'Fix: Simple fix.',
+				type: 'Fix',
+				subject: 'Simple fix.',
+				body: null,
+				footer: null,
+				notes: [],
+				references: [
+					{ issue: '11' },
+					{ issue: '12' }
+				]
+			};
+
+			transformCommitForSubRepository( commit, { displayLogs: false } );
+
+			expect( commit.references ).to.equal( undefined );
 		} );
 	} );
 } );
