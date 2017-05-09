@@ -35,7 +35,7 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 	const hasCorrectType = utils.availableCommitTypes.has( commit.type );
 	const isCommitIncluded = utils.availableCommitTypes.get( commit.type );
 
-	let logMessage = `* ${ chalk.yellow( commit.hash ) } "${ commit.header }" `;
+	let logMessage = `* ${ chalk.yellow( commit.hash ) } "${ utils.truncate( commit.header, 100 ) }" `;
 
 	if ( hasCorrectType && isCommitIncluded ) {
 		logMessage += chalk.green( 'INCLUDED' );

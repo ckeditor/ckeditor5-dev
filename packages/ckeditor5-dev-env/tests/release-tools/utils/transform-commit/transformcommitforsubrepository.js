@@ -91,6 +91,25 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* \u001b\[33m684997d\u001b\[39m "Fix: Simple fix\." \u001b\[32mINCLUDED/ );
 		} );
 
+		it( 'truncates too long commit\'s subject', () => {
+			const commit = {
+				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+				header: 'Fix: Reference site about Lorem Ipsum, giving information on its origins, as well as a random Lipsum generator.',
+				type: 'Fix',
+				subject: 'Reference site about Lorem Ipsum, giving information on its origins, as well as a random Lipsum generator.',
+				body: null,
+				footer: null,
+				notes: []
+			};
+
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
+
+			expect( stubs.logger.info.calledOnce ).to.equal( true );
+			//jscs:disable maximumLineLength
+			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* \u001b\[33m684997d\u001b\[39m "Fix: Reference site about Lorem Ipsum, giving information on its origins, as well as a random Lip\.\.\." \u001b\[32mINCLUDED/ );
+			//jscs:enable maximumLineLength
+		} );
+
 		it( 'does not attach valid "internal" commit to the changelog', () => {
 			const commit = {
 				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
