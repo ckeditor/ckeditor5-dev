@@ -15,6 +15,8 @@ const generateChangelogFromCommits = require( '../../../lib/release-tools/utils/
 const { changelogHeader, getChangelog, getChangesForVersion } = require( '../../../lib/release-tools/utils/changelog' );
 
 describe( 'dev-env/release-tools/utils', () => {
+	const url = 'https://github.com/ckeditor/ckeditor5-test-package';
+
 	let tmpCwd, cwd;
 
 	// These tests create a chain of releases.
@@ -33,8 +35,8 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			const packageJson = {
 				name: '@ckeditor/ckeditor5-test-package',
-				bugs: 'https://github.com/ckeditor/ckeditor5-test-package/issues',
-				repository: 'https://github.com/ckeditor/ckeditor5-test-package'
+				bugs: `${ url }/issues`,
+				repository: url
 			};
 
 			fs.writeFileSync(
@@ -65,9 +67,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			return generateChangelog( '0.1.0', '0.0.1' )
 				.then( () => {
-					const expectedTitle = '## [0.1.0](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.0.1...v0.1.0)';
-
-					expect( getChangelog() ).to.contain( expectedTitle );
+					expect( getChangelog() ).to.contain( '## [0.1.0](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.0.1...v0.1.0)' );
 
 					release( '0.1.0' );
 				} );
@@ -80,18 +80,17 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			return generateChangelog( '0.2.0', '0.1.0' )
 				.then( () => {
-					const url = 'https://github.com/ckeditor/ckeditor5-test-package';
 					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.0' ) );
 
-					expect( latestChangelog.split( '\n' ).length ).to.equal( 5 );
+					const expectedChangelog = `
+### Features
 
-					const changesAsArray = latestChangelog.split( '\n' ).filter( ( line ) => line.trim().length );
+* Another feature. Closes [#2](https://github.com/ckeditor/ckeditor5-test-package/issues/2). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
 
-					//jscs:disable maximumLineLength
-					expect( changesAsArray[ 0 ] ).to.equal( '### Features' );
-					expect( changesAsArray[ 1 ] ).to.equal( `* Another feature. Closes [#2](${ url }/issues/2). ([XXXXXXX](${ url }/commit/XXXXXXX))` );
-					expect( changesAsArray[ 2 ] ).to.equal( `  This PR also closes [#3](${ url }/issues/3) and [#4](${ url }/issues/4).` );
-					//jscs:enable maximumLineLength
+  This PR also closes [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4).
+`;
+
+					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
 
 					release( '0.2.0' );
 				} );
@@ -105,20 +104,86 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			return generateChangelog( '0.2.1', '0.2.0' )
 				.then( () => {
-					const url = 'https://github.com/ckeditor/ckeditor5-test-package';
 					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.1' ) );
 
-					expect( latestChangelog.split( '\n' ).length ).to.equal( 5 );
+					const expectedChangelog = `
+### Bug fixes
 
-					const changesAsArray = latestChangelog.split( '\n' ).filter( ( line ) => line.trim().length );
+* Amazing fix. Closes [#5](https://github.com/ckeditor/ckeditor5-test-package/issues/5). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
 
-					//jscs:disable maximumLineLength
-					expect( changesAsArray[ 0 ] ).to.equal( '### Bug fixes' );
-					expect( changesAsArray[ 1 ] ).to.equal( `* Amazing fix. Closes [#5](${ url }/issues/5). ([XXXXXXX](${ url }/commit/XXXXXXX))` );
-					expect( changesAsArray[ 2 ] ).to.equal( `  The PR also finally closes [#3](${ url }/issues/3) and [#4](${ url }/issues/4). So good!` );
-					//jscs:enable maximumLineLength
+  The PR also finally closes [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4). So good!
+`;
+
+					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
 
 					release( '0.2.1' );
+				} );
+		} );
+
+		it( 'does not hoist issues from the commit body with additional notes for merge commit', () => {
+			exec( 'git commit --allow-empty ' +
+				'--message "Merge pull request #7 from ckeditor/t/6" ' +
+				'--message "Other: Some docs improvements. Closes #6." ' +
+				'--message "Did you see the #3 and #4?" ' +
+				'--message "NOTE: Please read #1." ' +
+				'--message "BREAKING CHANGES: Some breaking change." ' );
+
+			return generateChangelog( '0.3.0', '0.2.1' )
+				.then( () => {
+					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.3.0' ) );
+
+					const expectedChangelog = `
+### Other changes
+
+* Some docs improvements. Closes [#6](https://github.com/ckeditor/ckeditor5-test-package/issues/6). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+
+  Did you see the [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4)?
+
+### BREAKING CHANGES
+
+* Some breaking change.
+
+### NOTE
+
+* Please read [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
+`;
+
+					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
+
+					release( '0.3.0' );
+				} );
+		} );
+
+		it( 'does not hoist issues from the commit body with additional notes', () => {
+			exec( 'git commit --allow-empty ' +
+				'--message "Feature: Issues will not be hoisted. Closes #8." ' +
+				'--message "All details have been described in #1." ' +
+				'--message "NOTE: Please read #1." ' +
+				'--message "BREAKING CHANGES: Some breaking change." ' );
+
+			return generateChangelog( '0.4.0', '0.3.0' )
+				.then( () => {
+					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.4.0' ) );
+
+					const expectedChangelog = `
+### Features
+
+* Issues will not be hoisted. Closes [#8](https://github.com/ckeditor/ckeditor5-test-package/issues/8). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+
+  All details have been described in [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
+
+### BREAKING CHANGES
+
+* Some breaking change.
+
+### NOTE
+
+* Please read [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
+`;
+
+					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
+
+					release( '0.4.0' );
 				} );
 		} );
 	} );
@@ -128,11 +193,13 @@ describe( 'dev-env/release-tools/utils', () => {
 	}
 
 	function generateChangelog( version, previousVersion = null ) {
+		const transform = require( '../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository' );
+
 		return generateChangelogFromCommits( {
 			version,
 			newTagName: 'v' + version,
 			tagName: previousVersion ? 'v' + previousVersion : null,
-			transformCommit: require( '../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository' )
+			transformCommit: transform
 		} );
 	}
 

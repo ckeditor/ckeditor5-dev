@@ -85,6 +85,19 @@ const transformCommitUtils = {
 			default:
 				throw new Error( `Given invalid type of commit ("${ commitType }").` );
 		}
+	},
+
+	/**
+	 * @param {String} sentence
+	 * @param {Number} length
+	 * @returns {String}
+	 */
+	truncate( sentence, length ) {
+		if ( sentence.length <= length ) {
+			return sentence;
+		}
+
+		return sentence.slice( 0, length - 3 ).trim() + '...';
 	}
 };
 

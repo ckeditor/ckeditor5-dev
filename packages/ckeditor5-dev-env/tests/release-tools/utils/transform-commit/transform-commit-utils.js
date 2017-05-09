@@ -95,5 +95,19 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				expect( transformCommit.getCommitType( 'Other' ) ).to.equal( 'Other changes' );
 			} );
 		} );
+
+		describe( 'truncate()', () => {
+			it( 'does not modify too short sentence', () => {
+				const sentence = 'This is a short sentence.';
+
+				expect( transformCommit.truncate( sentence, 25 ) ).to.equal( sentence );
+			} );
+
+			it( 'truncates too long sentence', () => {
+				const sentence = 'This is a short sentence.';
+
+				expect( transformCommit.truncate( sentence, 13 ) ).to.equal( 'This is a...' );
+			} );
+		} );
 	} );
 } );

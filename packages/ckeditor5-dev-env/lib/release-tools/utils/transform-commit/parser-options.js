@@ -6,6 +6,8 @@
 'use strict';
 
 module.exports = {
+	mergePattern: /^Merge pull request #(\d+) from .*$/,
+	mergeCorrespondence: [ 'pullRequestId' ],
 	headerPattern: /^([^\:]+): (.*\.)/,
 	headerCorrespondence: [
 		'type',
