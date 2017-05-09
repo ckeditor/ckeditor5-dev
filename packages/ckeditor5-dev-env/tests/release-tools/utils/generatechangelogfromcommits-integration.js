@@ -17,7 +17,7 @@ const { changelogHeader, getChangelog, getChangesForVersion } = require( '../../
 describe( 'dev-env/release-tools/utils', () => {
 	let tmpCwd, cwd;
 
-	// Those tests create a chain of releases.
+	// These tests create a chain of releases.
 	describe( 'generateChangelogFromCommits() - integration test', () => {
 		before( () => {
 			cwd = process.cwd();
