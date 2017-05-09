@@ -12,11 +12,12 @@ const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 const generateChangelogFromCommits = require( '../../../lib/release-tools/utils/generatechangelogfromcommits' );
-const { changelogHeader, getChangelog } = require( '../../../lib/release-tools/utils/changelog' );
+const { changelogHeader, getChangelog, getChangesForVersion } = require( '../../../lib/release-tools/utils/changelog' );
 
 describe( 'dev-env/release-tools/utils', () => {
 	let tmpCwd, cwd;
 
+	// Those tests create a chain of releases.
 	describe( 'generateChangelogFromCommits() - integration test', () => {
 		before( () => {
 			cwd = process.cwd();
@@ -52,10 +53,8 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			return generateChangelog( '0.0.1' )
 				.then( () => {
-					const changelog = getChangelog();
-
-					expect( changelog ).to.contain( changelogHeader );
-					expect( changelog ).to.contain( 'Internal changes only (updated dependencies, documentation, etc.).' );
+					expect( getChangelog() ).to.contain( changelogHeader );
+					expect( getChangesForVersion( '0.0.1' ) ).to.contain( 'Internal changes only (updated dependencies, documentation, etc.).' );
 
 					release( '0.0.1' );
 				} );
@@ -81,12 +80,17 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			return generateChangelog( '0.2.0', '0.1.0' )
 				.then( () => {
-					const changelog = getChangelog();
 					const url = 'https://github.com/ckeditor/ckeditor5-test-package';
+					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.0' ) );
+
+					expect( latestChangelog.split( '\n' ).length ).to.equal( 5 );
+
+					const changesAsArray = latestChangelog.split( '\n' ).filter( ( line ) => line.trim().length );
 
 					//jscs:disable maximumLineLength
-					expect( changelog ).to.match( new RegExp( `\\* Another feature. Closes \\[#2\\]\\(${ url }\\/issues\\/2\\). \\(\\[[a-z0-9]{7}\\]\\(${ url }\\/commit\\/[a-z0-9]{7}\\)\\)` ) );
-					expect( changelog ).to.match( new RegExp( `  This PR also closes \\[#3\\]\\(${ url }\\/issues\\/3\\) and \\[#4\\]\\(${ url }\\/issues\\/4\\).` ) );
+					expect( changesAsArray[ 0 ] ).to.equal( '### Features' );
+					expect( changesAsArray[ 1 ] ).to.equal( `* Another feature. Closes [#2](${ url }/issues/2). ([XXXXXXX](${ url }/commit/XXXXXXX))` );
+					expect( changesAsArray[ 2 ] ).to.equal( `  This PR also closes [#3](${ url }/issues/3) and [#4](${ url }/issues/4).` );
 					//jscs:enable maximumLineLength
 
 					release( '0.2.0' );
@@ -101,12 +105,17 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			return generateChangelog( '0.2.1', '0.2.0' )
 				.then( () => {
-					const changelog = getChangelog();
 					const url = 'https://github.com/ckeditor/ckeditor5-test-package';
+					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.1' ) );
+
+					expect( latestChangelog.split( '\n' ).length ).to.equal( 5 );
+
+					const changesAsArray = latestChangelog.split( '\n' ).filter( ( line ) => line.trim().length );
 
 					//jscs:disable maximumLineLength
-					expect( changelog ).to.match( new RegExp( `\\* Amazing fix. Closes \\[#5\\]\\(${ url }\\/issues\\/5\\). \\(\\[[a-z0-9]{7}\\]\\(${ url }\\/commit\\/[a-z0-9]{7}\\)\\)` ) );
-					expect( changelog ).to.match( new RegExp( `  The PR also finally closes \\[#3\\]\\(${ url }\\/issues\\/3\\) and \\[#4\\]\\(${ url }\\/issues\\/4\\). So good!` ) );
+					expect( changesAsArray[ 0 ] ).to.equal( '### Bug fixes' );
+					expect( changesAsArray[ 1 ] ).to.equal( `* Amazing fix. Closes [#5](${ url }/issues/5). ([XXXXXXX](${ url }/commit/XXXXXXX))` );
+					expect( changesAsArray[ 2 ] ).to.equal( `  The PR also finally closes [#3](${ url }/issues/3) and [#4](${ url }/issues/4). So good!` );
 					//jscs:enable maximumLineLength
 
 					release( '0.2.1' );
@@ -132,5 +141,12 @@ describe( 'dev-env/release-tools/utils', () => {
 		exec( 'git add package.json' );
 		exec( `git commit --message "Release: v${ version }."` );
 		exec( `git tag v${ version }` );
+	}
+
+	// Replaces random commits ID to known string. It allows comparing changelog to strings
+	// which makes the test easier to read.
+	function replaceCommitIds( changelog ) {
+		return changelog.replace( /\[[a-z0-9]{7}\]/g, '[XXXXXXX]' )
+			.replace( /commit\/[a-z0-9]{7}/g, 'commit/XXXXXXX' );
 	}
 } );
