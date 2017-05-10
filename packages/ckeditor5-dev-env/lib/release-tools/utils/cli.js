@@ -34,7 +34,7 @@ const cli = {
 		};
 
 		return inquirer.prompt( [ confirmQuestion ] )
-			.then( ( answers ) => answers.confirm );
+			.then( answers => answers.confirm );
 	},
 
 	/**
@@ -79,7 +79,7 @@ const cli = {
 		};
 
 		return inquirer.prompt( [ versionQuestion ] )
-			.then( ( answers ) => answers.version );
+			.then( answers => answers.version );
 	},
 
 	/**
@@ -91,14 +91,14 @@ const cli = {
 		const tokenQuestion = {
 			type: 'password',
 			name: 'token',
-			message: `Provide the GitHub token:`,
+			message: 'Provide the GitHub token:',
 			validate( input ) {
 				return input.length === 40 ? true : 'Please provide a valid token.';
 			}
 		};
 
 		return inquirer.prompt( [ tokenQuestion ] )
-			.then( ( answers ) => answers.token );
+			.then( answers => answers.token );
 	},
 
 	/**
@@ -114,7 +114,7 @@ const cli = {
 		const servicesQuestion = {
 			type: 'checkbox',
 			name: 'services',
-			message: `Select services where packages will be released:`,
+			message: 'Select services where packages will be released:',
 			choices: [
 				'npm',
 				'GitHub'
@@ -126,7 +126,7 @@ const cli = {
 		};
 
 		return inquirer.prompt( [ servicesQuestion ] )
-			.then( ( answers ) => {
+			.then( answers => {
 				options.skipNpm = answers.services.indexOf( 'npm' ) === -1;
 				options.skipGithub = answers.services.indexOf( 'GitHub' ) === -1;
 
@@ -135,7 +135,7 @@ const cli = {
 				}
 
 				return cli.provideToken()
-					.then( ( token ) => {
+					.then( token => {
 						options.token = token;
 
 						return options;

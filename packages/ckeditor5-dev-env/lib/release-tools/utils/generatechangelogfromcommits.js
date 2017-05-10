@@ -26,7 +26,7 @@ const { stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 module.exports = function generateChangelogFromCommits( options ) {
 	const log = logger();
 
-	return new Promise( ( resolve ) => {
+	return new Promise( resolve => {
 		if ( !fs.existsSync( changelogUtils.changelogFile ) ) {
 			log.warning( 'Changelog file does not exist. Creating...' );
 
@@ -54,7 +54,7 @@ module.exports = function generateChangelogFromCommits( options ) {
 };
 
 function saveChangelogPipe( version, done ) {
-	return stream.noop( ( changes ) => {
+	return stream.noop( changes => {
 		let currentChangelog = changelogUtils.getChangelog();
 
 		// Remove header from current changelog.

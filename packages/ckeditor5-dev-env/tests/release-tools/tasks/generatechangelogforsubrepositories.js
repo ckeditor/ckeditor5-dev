@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const path = require( 'path' );
@@ -58,6 +56,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 
+		// eslint-disable-next-line max-len
 		generateChangelogForSubRepositories = proxyquire( '../../../lib/release-tools/tasks/generatechangelogforsubrepositories', {
 			'@ckeditor/ckeditor5-dev-utils': {
 				logger() {
@@ -116,7 +115,9 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( chdirStub.thirdCall.args[ 0 ] ).to.equal( '/tmp' );
 
 					expect( stubs.displayGeneratedChangelogs.calledOnce ).to.equal( true );
-					expect( stubs.displayGeneratedChangelogs.firstCall.args[ 0 ] ).to.deep.equal( generatedChangelogsMap );
+					expect( stubs.displayGeneratedChangelogs.firstCall.args[ 0 ] ).to.deep.equal(
+						generatedChangelogsMap
+					);
 				} );
 		} );
 

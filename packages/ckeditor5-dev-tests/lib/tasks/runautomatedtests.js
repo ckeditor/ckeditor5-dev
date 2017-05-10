@@ -16,7 +16,7 @@ module.exports = function runAutomatedTests( options ) {
 	return new Promise( ( resolve, reject ) => {
 		const config = getKarmaConfig( options );
 
-		const server = new KarmaServer( config, ( exitCode ) => {
+		const server = new KarmaServer( config, exitCode => {
 			if ( exitCode === 0 ) {
 				resolve();
 			} else {

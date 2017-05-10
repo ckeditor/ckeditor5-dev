@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const mockery = require( 'mockery' );
@@ -30,7 +28,7 @@ describe( 'getKarmaConfig', () => {
 			warnOnReplace: false,
 			warnOnUnregistered: false
 		} );
-		mockery.registerMock( './getwebpackconfig', ( options ) => options );
+		mockery.registerMock( './getwebpackconfig', options => options );
 
 		getKarmaConfig = require( '../../../lib/utils/automated-tests/getkarmaconfig' );
 	} );
@@ -215,7 +213,9 @@ describe( 'getKarmaConfig', () => {
 			spy( {
 				reporter: 'mocha'
 			} );
-		} catch ( err ) {}
+		} catch ( err ) {
+			expect( err ).to.be.an.instanceof( Error );
+		}
 
 		expect( spy.threw() ).to.equal( true );
 	} );

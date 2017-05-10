@@ -17,7 +17,7 @@ const utils = {
 	/**
 	 * Changelog header.
 	 */
-	changelogHeader: `Changelog\n=========\n\n`,
+	changelogHeader: 'Changelog\n=========\n\n',
 
 	/**
 	 * Retrieves changes from the changelog for the given tag.
@@ -28,7 +28,7 @@ const utils = {
 	getChangesForVersion( version ) {
 		version = version.replace( /^v/, '' );
 
-		let changelog = utils.getChangelog().replace( utils.changelogHeader, '\n' );
+		const changelog = utils.getChangelog().replace( utils.changelogHeader, '\n' );
 
 		const match = changelog.match( new RegExp( `\\n(## \\[?${ version }\\]?[\\s\\S]+?)(?:\\n## \\[|$)` ) );
 

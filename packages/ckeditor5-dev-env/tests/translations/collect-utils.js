@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it, beforeEach, afterEach */
-
 'use strict';
 
 const path = require( 'path' );
@@ -78,8 +76,12 @@ describe( 'collect-utils', () => {
 				path.join( 'workspace', 'ckeditor5', 'packages', '*', 'src', '**', '*.js' )
 			);
 			sinon.assert.calledTwice( readFileStub );
-			sinon.assert.calledWithExactly( readFileStub, path.sep + path.join( 'ckeditor5-core', 'file1.js' ), 'utf-8' );
-			sinon.assert.calledWithExactly( readFileStub, path.sep + path.join( 'ckeditor5-utils', 'file2.js' ), 'utf-8' );
+			sinon.assert.calledWithExactly(
+				readFileStub, path.sep + path.join( 'ckeditor5-core', 'file1.js' ), 'utf-8'
+			);
+			sinon.assert.calledWithExactly(
+				readFileStub, path.sep + path.join( 'ckeditor5-utils', 'file2.js' ), 'utf-8'
+			);
 
 			expect( translations ).to.deep.equal( [ {
 				filePath: '/ckeditor5-core/file1.js',
@@ -109,7 +111,7 @@ describe( 'collect-utils', () => {
 
 			const readDirStub = sandbox.stub( fs, 'readdirSync', () => ( [ 'ckeditor5-core', 'ckeditor5-utils' ] ) );
 			sandbox.stub( fs, 'existsSync', () => true );
-			sandbox.stub( fs, 'readFileSync', ( filePath ) => fileContents[ filePath ] );
+			sandbox.stub( fs, 'readFileSync', filePath => fileContents[ filePath ] );
 
 			const contexts = utils.getContexts();
 
@@ -147,7 +149,7 @@ describe( 'collect-utils', () => {
 			const errors = utils.getMissingContextErrorMessages( contexts, translations );
 
 			expect( errors ).to.deep.equal( [
-				`contexts.json file or context for the translation key is missing (ckeditor5-utils, util).`
+				'contexts.json file or context for the translation key is missing (ckeditor5-utils, util).'
 			] );
 		} );
 
@@ -165,7 +167,7 @@ describe( 'collect-utils', () => {
 			const errors = utils.getMissingContextErrorMessages( contexts, translations );
 
 			expect( errors ).to.deep.equal( [
-				`Context for the translation key is missing (ckeditor5-utils, util).`
+				'Context for the translation key is missing (ckeditor5-utils, util).'
 			] );
 		} );
 
@@ -260,7 +262,8 @@ msgstr "util"
 
 			const header = utils.createPotFileHeader();
 
-			expect( header ).to.equal( `# Copyright (c) Copyright (c) 2003-2100, CKSource - Frederico Knabben. All rights reserved.\n\n` );
+			// eslint-disable-next-line max-len
+			expect( header ).to.equal( '# Copyright (c) Copyright (c) 2003-2100, CKSource - Frederico Knabben. All rights reserved.\n\n' );
 			sinon.assert.calledOnce( getFullYearStub );
 		} );
 	} );

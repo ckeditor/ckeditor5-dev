@@ -5,6 +5,7 @@
 
 'use strict';
 
+/* eslint-disable max-len */
 /**
  * Fixes:
  * module:utils/ckeditorerror~CKEditorError.CKEditorError to module:utils/ckeditorerror~CKEditorError#constructor
@@ -13,6 +14,7 @@
  * @param {Options} options
  * @returns {Options}
  */
+/* eslint-enable max-len */
 function fixIncorrectClassConstructor( object ) {
 	let { doclet } = object;
 

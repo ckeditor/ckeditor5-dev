@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const expect = require( 'chai' ).expect;
@@ -13,6 +11,7 @@ const mockery = require( 'mockery' );
 
 describe( 'dev-env/release-tools/tasks', () => {
 	describe( 'createGithubRelease()', () => {
+		// eslint-disable-next-line no-unused-vars
 		let createGithubRelease, sandbox, githubOptions, releaseOptions, stubs, error;
 
 		beforeEach( () => {
@@ -65,7 +64,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			};
 
 			return createGithubRelease( 'token-123', options )
-				.then( ( response ) => {
+				.then( response => {
 					expect( response ).to.equal( 'Response.' );
 
 					expect( stubs.authenticate.calledOnce ).to.equal( true );
@@ -95,7 +94,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					() => {
 						throw new Error( 'Supposed to be rejected.' );
 					},
-					( err ) => {
+					err => {
 						expect( err ).to.equal( error );
 					}
 				);

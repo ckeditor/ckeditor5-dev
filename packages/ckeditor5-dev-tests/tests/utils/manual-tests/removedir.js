@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const mockery = require( 'mockery' );
@@ -31,7 +29,7 @@ describe( 'removeDir', () => {
 			} )
 		} );
 
-		mockery.registerMock( 'del', ( path ) => {
+		mockery.registerMock( 'del', path => {
 			return Promise.resolve().then( () => {
 				deletedPaths.push( path );
 			} );
@@ -39,7 +37,7 @@ describe( 'removeDir', () => {
 
 		mockery.registerMock( 'gulp-util', {
 			colors: {
-				cyan: ( message ) => `\u001b[36m${ message }\u001b[39m`
+				cyan: message => `\u001b[36m${ message }\u001b[39m`
 			}
 		} );
 

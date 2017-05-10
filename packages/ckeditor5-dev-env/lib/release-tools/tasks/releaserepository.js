@@ -76,13 +76,13 @@ module.exports = function releaseRepository( options ) {
 		const latestChanges = changelogUtils.getChangesForVersion( version );
 
 		// Bump version in `package.json`.
-		tools.updateJSONFile( packageJsonPath, ( json ) => {
+		tools.updateJSONFile( packageJsonPath, json => {
 			json.version = version;
 
 			return json;
 		} );
 
-		log.info( `Committing "package.json"...` );
+		log.info( 'Committing "package.json"...' );
 		exec( 'git add package.json' );
 		exec( `git commit --message="Release: v${ version }."` );
 

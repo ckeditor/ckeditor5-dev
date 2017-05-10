@@ -108,7 +108,7 @@ const utils = {
 	 * * gzippedSize – Gzipped file size in human readable format.
 	 */
 	getFilesSizeStats( files, rootDir = '' ) {
-		return files.map( ( file ) => {
+		return files.map( file => {
 			const filePath = path.join( rootDir, file );
 
 			return {
@@ -131,7 +131,7 @@ const utils = {
 	 */
 	showFilesSummary( title, filesStats ) {
 		const label = gutil.colors.underline( title );
-		const filesSummary = filesStats.map( ( file ) => {
+		const filesSummary = filesStats.map( file => {
 			return `${ file.name }: ${ prettyBytes( file.size ) } (gzipped: ${ prettyBytes( file.gzippedSize ) })`;
 		} ).join( '\n' );
 

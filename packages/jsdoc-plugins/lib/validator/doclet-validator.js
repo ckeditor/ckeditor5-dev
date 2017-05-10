@@ -86,13 +86,16 @@ class DocletValidator {
 		this._collection.getAll()
 			.filter( el => el.memberof && !el.memberof.includes( 'module:' ) )
 			.filter( el => el.memberof.indexOf( '<anonymous>' ) === -1 ) // local variables, functions
-			.forEach( el =>	this._addError( el, `Memberof property should start with 'module:'. Got ${ el.memberof } instead` ) );
+			.forEach( el =>	{
+				this._addError( el, `Memberof property should start with 'module:'. Got ${ el.memberof } instead` );
+			} );
 	}
 
 	_lintLongnamePropertyInClasses() {
 		this._collection.getAll()
 			.filter( el => el.longname )
 			.filter( el => {
+				// eslint-disable-next-line max-len
 				const match = el.longname.match( /~([\w]+)\.([\w]+)$/ ); // e.g module:utils/ckeditorerror~CKEditorError.CKEditorError
 
 				return match && match[1] === match[2];
@@ -103,7 +106,9 @@ class DocletValidator {
 	_lintLongnameProperty() {
 		this._collection.getAll()
 			.filter( el => el.longname && !el.longname.includes( 'module:' ) )
-			.forEach( el => this._addError( el, `Longname property should start with 'module:'. Got ${ el.longname } instead` ) );
+			.forEach( el => {
+				this._addError( el, `Longname property should start with 'module:'. Got ${ el.longname } instead` );
+			} );
 	}
 
 	/**

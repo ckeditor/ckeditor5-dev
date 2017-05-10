@@ -71,7 +71,7 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 
 	if ( typeof commit.body === 'string' ) {
 		commit.body = commit.body.split( '\n' )
-			.map( ( line ) => {
+			.map( line => {
 				if ( !line.length ) {
 					return '';
 				}

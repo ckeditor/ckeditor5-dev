@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const expect = require( 'chai' ).expect;
@@ -32,6 +30,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				}
 			} );
 
+			// eslint-disable-next-line max-len
 			getChangedFilesForCommit = require( '../../../../lib/release-tools/utils/transform-commit/getchangedfilesforcommit' );
 		} );
 

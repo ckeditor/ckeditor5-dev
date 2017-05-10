@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const expect = require( 'chai' ).expect;
@@ -62,6 +60,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				};
 			} );
 
+			// eslint-disable-next-line max-len
 			generateChangelogForSinglePackage = proxyquire( '../../../lib/release-tools/tasks/generatechangelogforsinglepackage', {
 				'@ckeditor/ckeditor5-dev-utils': {
 					tools: stubs.tools,
@@ -93,8 +92,12 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 					expect( stubs.logger.info.calledThrice ).to.equal( true );
 					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( '' );
-					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.match( /Generating changelog for "test-package".../ );
-					expect( stubs.logger.info.thirdCall.args[ 0 ] ).to.match( /Changelog for "test-package" \(v1\.0\.0\) has been generated\./ );
+					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.match(
+						/Generating changelog for "test-package".../
+					);
+					expect( stubs.logger.info.thirdCall.args[ 0 ] ).to.match(
+						/Changelog for "test-package" \(v1\.0\.0\) has been generated\./
+					);
 				} );
 		} );
 
@@ -157,7 +160,9 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			return generateChangelogForSinglePackage( '1.0.0' )
 				.then( () => {
-					expect( stubs.tools.shExec.secondCall.args[ 0 ] ).to.equal( 'git commit -m "Docs: Changelog. [skip ci]"' );
+					expect( stubs.tools.shExec.secondCall.args[ 0 ] ).to.equal(
+						'git commit -m "Docs: Changelog. [skip ci]"'
+					);
 				} );
 		} );
 	} );

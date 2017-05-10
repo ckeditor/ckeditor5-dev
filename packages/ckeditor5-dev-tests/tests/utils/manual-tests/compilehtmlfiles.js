@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const mockery = require( 'mockery' );
@@ -30,7 +28,7 @@ describe( 'compileHtmlFiles', () => {
 
 		stubs = {
 			fs: {
-				readFileSync: sandbox.spy( ( pathToFile ) => files[ pathToFile ] ),
+				readFileSync: sandbox.spy( pathToFile => files[ pathToFile ] ),
 				ensureDirSync: sandbox.stub(),
 				outputFileSync: sandbox.stub(),
 				copySync: sandbox.stub()
@@ -53,7 +51,7 @@ describe( 'compileHtmlFiles', () => {
 
 			gutil: {
 				colors: sandbox.stub( gutil, 'colors', {
-					cyan: ( text ) => text
+					cyan: text => text
 				} )
 			},
 
@@ -64,8 +62,8 @@ describe( 'compileHtmlFiles', () => {
 				} ) )
 			},
 
-			getRelativeFilePath: sandbox.spy( ( pathToFile ) => pathToFile ),
-			glob: sandbox.spy( ( pattern ) => patternFiles[ pattern ] ),
+			getRelativeFilePath: sandbox.spy( pathToFile => pathToFile ),
+			glob: sandbox.spy( pattern => patternFiles[ pattern ] ),
 			domCombiner: sandbox.spy( ( ...args ) => args.join( '\n' ) )
 		};
 
@@ -116,6 +114,7 @@ describe( 'compileHtmlFiles', () => {
 
 		sinon.assert.calledWithExactly( stubs.commonmark.parse, '## Markdown header' );
 		sinon.assert.calledWithExactly( stubs.fs.ensureDirSync, 'buildDir' );
+		/* eslint-disable max-len */
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
@@ -125,9 +124,12 @@ describe( 'compileHtmlFiles', () => {
 				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script></body>`
 			].join( '\n' )
 		);
+		/* eslint-enable max-len */
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ) );
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ) );
-		sinon.assert.calledWithExactly( stubs.fs.copySync, 'static-file.png', path.join( 'buildDir', 'static-file.png' ) );
+		sinon.assert.calledWithExactly(
+			stubs.fs.copySync, 'static-file.png', path.join( 'buildDir', 'static-file.png' )
+		);
 	} );
 
 	it( 'should work with files containing dots in their names', () => {
@@ -144,6 +146,7 @@ describe( 'compileHtmlFiles', () => {
 
 		compileHtmlFiles( 'buildDir', [ path.join( 'manualTestPattern', '*.js' ) ] );
 
+		/* eslint-disable max-len */
 		sinon.assert.calledWith(
 			stubs.fs.outputFileSync,
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.abc.html' ), [
@@ -153,6 +156,7 @@ describe( 'compileHtmlFiles', () => {
 				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.abc.js' ) }"></script></body>`
 			].join( '\n' )
 		);
+		/* eslint-enable max-len */
 	} );
 
 	it( 'should work with a few entry points patterns', () => {
@@ -178,8 +182,12 @@ describe( 'compileHtmlFiles', () => {
 
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ) );
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ) );
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'manual', 'file.html' ) );
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'manual', 'file.html' ) );
+		sinon.assert.calledWithExactly(
+			stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'manual', 'file.html' )
+		);
+		sinon.assert.calledWithExactly(
+			stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'manual', 'file.html' )
+		);
 	} );
 
 	it( 'should compile only manual test files', () => {
@@ -225,6 +233,7 @@ describe( 'compileHtmlFiles', () => {
 
 		sinon.assert.calledWithExactly( stubs.commonmark.parse, '## Markdown header' );
 		sinon.assert.calledWithExactly( stubs.fs.ensureDirSync, 'buildDir' );
+		/* eslint-disable max-len */
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
@@ -234,6 +243,7 @@ describe( 'compileHtmlFiles', () => {
 				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script></body>`
 			].join( '\n' )
 		);
+		/* eslint-enable max-len */
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ) );
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ) );
 		sinon.assert.neverCalledWith( stubs.fs.copySync, 'some.file.md', path.join( 'buildDir', 'some.file.md' ) );

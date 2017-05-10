@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it, beforeEach, afterEach */
-
 'use strict';
 
 const sinon = require( 'sinon' );
@@ -68,7 +66,9 @@ describe( 'collect', () => {
 
 	it( 'should log the error and return it when hits one', () => {
 		stubs.collectUtils.getContexts.returns( new Map() );
-		stubs.collectUtils.getMissingContextErrorMessages.returns( [ 'ckeditor5-core/lang/context.json file is missing' ] );
+		stubs.collectUtils.getMissingContextErrorMessages.returns( [
+			'ckeditor5-core/lang/context.json file is missing'
+		] );
 		stubs.collectUtils.createPotFileHeader.returns( 'header' );
 		stubs.collectUtils.createPotFileContent.returns( 'content' );
 

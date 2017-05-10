@@ -14,8 +14,8 @@ const fixShortRefs = require( './fixers/fix-short-refs' );
 const fixIncorrectClassLongname = require( './fixers/fix-incorrect-class-longname' );
 const composeFunctions = require( '../utils/compose-functions' );
 
-const setNewDoclet = ( doclet ) => {
-	return ( config ) => {
+const setNewDoclet = doclet => {
+	return config => {
 		return Object.assign( {}, config, { doclet } );
 	};
 };

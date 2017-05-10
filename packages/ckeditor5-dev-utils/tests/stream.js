@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it, beforeEach, afterEach */
-
 'use strict';
 
 const chai = require( 'chai' );
@@ -44,7 +42,7 @@ describe( 'stream', () => {
 		} );
 
 		it( 'should wait until a promise returned by the callback is resolved', ( ) => {
-			let resolve, resolved;
+			let resolve, resolved; // eslint-disable-line
 
 			const stream = utils.noop( () => {
 				return new Promise( r => {
@@ -65,9 +63,9 @@ describe( 'stream', () => {
 			resolve();
 		} );
 
-		it( 'should fail when a returned promise is rejected', ( done ) => {
+		it( 'should fail when a returned promise is rejected', done => {
 			const chunks = [];
-			const stream = utils.noop( ( chunk ) => {
+			const stream = utils.noop( chunk => {
 				return new Promise( ( resolve, reject ) => {
 					if ( chunk == 'foo' ) {
 						reject();
@@ -77,7 +75,7 @@ describe( 'stream', () => {
 				} );
 			} );
 
-			stream.pipe( utils.noop( ( chunk ) => {
+			stream.pipe( utils.noop( chunk => {
 				chunks.push( chunk );
 			} ) );
 

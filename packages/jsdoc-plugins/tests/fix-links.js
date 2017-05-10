@@ -3,8 +3,6 @@
  * Licensed under the terms of the MIT License (see LICENSE.md).
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const chai = require( 'chai' );
@@ -108,7 +106,8 @@ describe( 'Long name fix plugin - formatLinks()', () => {
 		} );
 
 		expect( doclet.comment ).to.be.equal(
-			'Creates {@link module:ckeditor5/editor/editorinterface~EditorInterface some editor} instance with a given name.'
+			'Creates {@link module:ckeditor5/editor/editorinterface~EditorInterface some editor} ' +
+			'instance with a given name.'
 		);
 	} );
 } );

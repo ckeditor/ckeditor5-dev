@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it, beforeEach, afterEach */
-
 'use strict';
 
 const chai = require( 'chai' );
@@ -59,15 +57,17 @@ describe( 'translations', () => {
 
 				fileContents = {
 					[ pathToTranslations ]: [
-						`msgctxt "Label for the Save button."`,
-						`msgid "Save"`,
-						`msgstr "Zapisz"`,
+						'msgctxt "Label for the Save button."',
+						'msgid "Save"',
+						'msgstr "Zapisz"',
 						''
 					].join( '\n' )
 				};
 
 				const translationService = new TranslationService( 'pl', {
-					getPathToPoFile: ( pathToPackage, languageCode ) => path.join( pathToPackage, 'lang', 'translations', `${ languageCode }.po` )
+					getPathToPoFile: ( pathToPackage, languageCode ) => {
+						return path.join( pathToPackage, 'lang', 'translations', `${ languageCode }.po` );
+					}
 				} );
 
 				translationService.loadPackage( 'customPathToPackage' );
@@ -87,9 +87,9 @@ describe( 'translations', () => {
 
 				fileContents = {
 					[ pathToTranslations ]: [
-						`msgctxt "Label for the Save button."`,
-						`msgid "Save"`,
-						`msgstr "Zapisz"`,
+						'msgctxt "Label for the Save button."',
+						'msgid "Save"',
+						'msgstr "Zapisz"',
 						''
 					].join( '\n' )
 				};
@@ -128,44 +128,46 @@ describe( 'translations', () => {
 		describe( 'translateSource()', () => {
 			it( 'should translate t() calls in the code', () => {
 				const translationService = new TranslationService( 'pl' );
-				const source = `t( 'Cancel' )`;
+				const source = 't( \'Cancel\' )';
 
 				translationService.dictionary.set( 'Cancel', 'Anuluj' );
 
 				const result = translationService.translateSource( source );
 
-				expect( result ).to.equal( `t('Anuluj');` );
+				expect( result ).to.equal( 't(\'Anuluj\');' );
 			} );
 
 			it( 'should return original source if there is no t() calls in the code', () => {
 				const translationService = new TranslationService( 'pl' );
-				const source = `translate( 'Cancel' )`;
+				const source = 'translate( \'Cancel\' )';
 
 				const result = translationService.translateSource( source );
 
-				expect( result ).to.equal( `translate( 'Cancel' )` );
+				expect( result ).to.equal( 'translate( \'Cancel\' )' );
 			} );
 
 			it( 'should lg the error and keep original string if the translation misses', () => {
 				const translationService = new TranslationService( 'pl' );
-				const source = `t( 'Cancel' )`;
+				const source = 't( \'Cancel\' )';
 
 				const result = translationService.translateSource( source );
 
-				expect( result ).to.equal( `t('Cancel');` );
+				expect( result ).to.equal( 't(\'Cancel\');' );
 				sinon.assert.calledOnce( stubs.logger.error );
 				sinon.assert.calledWithExactly( stubs.logger.error, 'Missing translation for: Cancel.' );
 			} );
 
 			it( 'should throw an error when the t is called with the variable', () => {
 				const translationService = new TranslationService( 'pl' );
-				const source = `const cancel = 'Cancel';t( cancel );`;
+				const source = 'const cancel = \'Cancel\';t( cancel );';
 
 				const result = translationService.translateSource( source );
 
-				expect( result ).to.equal( `const cancel = 'Cancel';t( cancel );` );
+				expect( result ).to.equal( 'const cancel = \'Cancel\';t( cancel );' );
 				sinon.assert.calledOnce( stubs.logger.error );
-				sinon.assert.calledWithExactly( stubs.logger.error, 'First t() call argument should be a string literal.' );
+				sinon.assert.calledWithExactly(
+					stubs.logger.error, 'First t() call argument should be a string literal.'
+				);
 			} );
 		} );
 	} );

@@ -14,6 +14,7 @@ const cleanPoFileContent = require( '../../lib/translations/cleanpofilecontent' 
 describe( 'translations', () => {
 	describe( 'cleanPoFileContent()', () => {
 		it( 'clean po files from personal data', () => {
+			// eslint-disable-next-line max-len
 			const poFileContent = `# Copyright (c) Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
 # Translators:
 # Xuxxx Satxxx <xxxx@gmail.com>, 2017
@@ -29,6 +30,7 @@ msgid "Link URL"
 msgstr "URL del enllaz"
 `;
 
+			// eslint-disable-next-line max-len
 			const expectedResult = `# Copyright (c) Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
 msgid ""
 msgstr ""

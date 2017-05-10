@@ -46,7 +46,7 @@ class Collection {
 	 * @returns {Object[]}
 	*/
 	getAll() {
-		let result = [];
+		const result = [];
 
 		Object.keys( this._data ).forEach( key => {
 			result.push( ...this._data[ key ] );

@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const path = require( 'path' );
@@ -164,11 +162,11 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			return releaseSubRepositories( options )
 				.then( () => {
-					const expectedError = 'None of the packages contains any changes since its last release. Aborting.';
+					const expectedErr = 'None of the packages contains any changes since its last release. Aborting.';
 
 					expect( stubs.releaseRepository.called ).to.equal( false );
 					expect( stubs.logger.error.calledOnce ).to.equal( true );
-					expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal( expectedError );
+					expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal( expectedErr );
 				} );
 		} );
 
@@ -210,11 +208,16 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return releaseSubRepositories( options )
 				.then( () => {
 					expect( stubs.releaseRepository.called ).to.equal( false );
-					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal( 'Releasing has been aborted due to errors.' );
-					expect( stubs.logger.error.getCall( 1 ).args[ 0 ] ).to.equal( '## @ckeditor/ckeditor5-core' );
-					expect( stubs.logger.error.getCall( 2 ).args[ 0 ] ).to.equal( 'Not on master or master is not clean.' );
-					expect( stubs.logger.error.getCall( 3 ).args[ 0 ] ).to.equal( '## @ckeditor/ckeditor5-engine' );
-					expect( stubs.logger.error.getCall( 4 ).args[ 0 ] ).to.equal( 'Not on master or master is not clean.' );
+					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] )
+						.to.equal( 'Releasing has been aborted due to errors.' );
+					expect( stubs.logger.error.getCall( 1 ).args[ 0 ] )
+						.to.equal( '## @ckeditor/ckeditor5-core' );
+					expect( stubs.logger.error.getCall( 2 ).args[ 0 ] )
+						.to.equal( 'Not on master or master is not clean.' );
+					expect( stubs.logger.error.getCall( 3 ).args[ 0 ] )
+						.to.equal( '## @ckeditor/ckeditor5-engine' );
+					expect( stubs.logger.error.getCall( 4 ).args[ 0 ] )
+						.to.equal( 'Not on master or master is not clean.' );
 				} );
 		} );
 

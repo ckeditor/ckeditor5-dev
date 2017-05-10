@@ -24,7 +24,7 @@ const utils = {
 		const srcPaths = [ process.cwd(), 'packages', '*', 'src', '**', '*.js' ].join( '/' );
 
 		const files = glob.sync( srcPaths )
-			.filter( ( srcPath ) => !srcPath.match( /packages\/[^\/]+\/src\/lib\// ) );
+			.filter( srcPath => !srcPath.match( /packages\/[^\/]+\/src\/lib\// ) );
 
 		const translations = [];
 
@@ -38,7 +38,8 @@ const utils = {
 	},
 
 	/**
-	 * Traverse all packages and returns Map of the all founded language contexts informations (file content and file name).
+	 * Traverse all packages and returns Map of the all founded language contexts informations
+	 * (file content and file name).
 	 *
 	 * @returns {Map.<String, Object>}
 	 */
@@ -95,7 +96,7 @@ const utils = {
 		}
 
 		return [ ...usedContextMap ]
-			.filter( ( [ key, usage ] ) => !usage )
+			.filter( ( [ key, usage ] ) => !usage ) // eslint-disable-line no-unused-vars
 			.map( ( [ key ] ) => `Unused context: ${ key }.` );
 	},
 	/**
@@ -157,7 +158,7 @@ const utils = {
 	_getTranslationCallsFromFile( filePath, fileContent ) {
 		const originalStrings = findOriginalStrings( fileContent );
 
-		return originalStrings.map( ( originalString ) => {
+		return originalStrings.map( originalString => {
 			const contextMatch = originalString.match( /\[context: ([^\]]+)\]/ );
 			const sentenceMatch = originalString.match( /^[^\[]+/ );
 			const packageMatch = filePath.match( /\/(ckeditor5-[^\/]+)\// );
@@ -174,7 +175,7 @@ const utils = {
 	},
 
 	_stringifyTranslationObjects( translationObjects ) {
-		return translationObjects.map( ( translationObject ) => {
+		return translationObjects.map( translationObject => {
 			// Note that order is important.
 			return [
 				`msgctxt "${ translationObject.ctxt }"`,
@@ -186,7 +187,7 @@ const utils = {
 
 	_getPackagesContainingContexts( ckeditor5PackagesDir ) {
 		return fs.readdirSync( ckeditor5PackagesDir )
-			.filter( ( packageName ) => fs.existsSync(
+			.filter( packageName => fs.existsSync(
 				path.join( ckeditor5PackagesDir, packageName, langContextSuffix )
 			) );
 	},
@@ -201,7 +202,8 @@ const utils = {
 		}
 
 		else if ( !corePackageContext.content[ translation.key ] && !packageContext ) {
-			error = `contexts.json file or context for the translation key is missing (${ translation.package }, ${ translation.key }).`;
+			error = 'contexts.json file or context for the translation key is missing ' +
+				`(${ translation.package }, ${ translation.key }).`;
 		}
 
 		else if ( !corePackageContext.content[ translation.key ] && !packageContext.content[ translation.key ] ) {

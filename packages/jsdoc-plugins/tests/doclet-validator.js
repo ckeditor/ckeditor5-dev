@@ -3,8 +3,6 @@
  * Licensed under the terms of the MIT License (see LICENSE.md).
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const chai = require( 'chai' );
@@ -219,7 +217,7 @@ describe( 'Linter plugin', () => {
 
 	it( '_lintLinks() with link name', () => {
 		const linter = new DocletValidator( [ {
-			comment: ` {@link module:ckeditor5/a~A classA} `,
+			comment: ' {@link module:ckeditor5/a~A classA} ',
 			meta: { fileName: '',  path: '' },
 		}, {
 			comment: '',
@@ -234,7 +232,7 @@ describe( 'Linter plugin', () => {
 
 	it( '_lintLinks() with whitespaces', () => {
 		const linter = new DocletValidator( [ {
-			comment: ` {@link \n module:ckeditor5/a~A \n\t classA} `,
+			comment: ' {@link \n module:ckeditor5/a~A \n\t classA} ',
 			meta: { fileName: '',  path: '' },
 		}, {
 			comment: '',
@@ -249,7 +247,7 @@ describe( 'Linter plugin', () => {
 
 	it( '_lintLinks() with multi-word link', () => {
 		const linter = new DocletValidator( [ {
-			comment: ` {@link module:ckeditor5/a~A with multi word link} `,
+			comment: ' {@link module:ckeditor5/a~A with multi word link} ',
 			meta: { fileName: '',  path: '' },
 		}, {
 			comment: '',

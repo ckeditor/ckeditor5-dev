@@ -112,7 +112,9 @@ function createJsonResponseHandler( resolve, reject, methodName ) {
 		try {
 			resolve( JSON.parse( body ) );
 		} catch ( err ) {
-			reject( new Error( `Error handled while parsing body of the '${ methodName }' response: ${ body.toString() }` ) );
+			reject(
+				new Error( `Error handled while parsing body of the '${ methodName }' response: ${ body.toString() }` )
+			);
 		}
 	};
 }

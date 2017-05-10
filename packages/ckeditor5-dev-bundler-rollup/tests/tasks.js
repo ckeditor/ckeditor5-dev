@@ -317,7 +317,7 @@ describe( 'bundle-tasks', () => {
 	} );
 
 	describe( '_showSummary()', () => {
-		it( 'should show file stats', ( done ) => {
+		it( 'should show file stats', done => {
 			const fileStats = {
 				'editor.js': { size: 123 },
 				'editor.css': { size: 50 },
@@ -325,7 +325,7 @@ describe( 'bundle-tasks', () => {
 				'editor.min.css': { size: 10 },
 			};
 
-			sandbox.stub( utils, 'getFilesSizeStats', ( files ) => {
+			sandbox.stub( utils, 'getFilesSizeStats', files => {
 				return files.map( fileName => ( {
 					name: fileName,
 					size: fileStats[ fileName ].size,
