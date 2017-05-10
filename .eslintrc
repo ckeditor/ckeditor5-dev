@@ -126,7 +126,7 @@
     "no-trailing-spaces": "error",
     "max-len": [
       "error",
-      120
+      140
     ],
     "dot-notation": "error",
     "yoda": [
