@@ -11,8 +11,10 @@ const filter = require( 'gulp-filter' );
 const getSourceFiles = require( '../utils/getsourcefiles' );
 
 /**
- * @param {Object} config
- * @param {Array.<String>} config.ignoredFiles Files that will be ignored.
+ * This function is executed on pre-commit hook, linting only files staged for the current commit.
+ *
+ * @param {Object} [config={}]
+ * @param {Array.<String>} [config.ignoredFiles=[]] Files that will be ignored.
  * @returns {Stream}
  */
 module.exports = function lintStaged( config = {} ) {

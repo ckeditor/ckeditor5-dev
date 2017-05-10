@@ -10,8 +10,10 @@ const eslint = require( 'gulp-eslint' );
 const getSourceFiles = require( '../utils/getsourcefiles' );
 
 /**
- * @param {Object} config
- * @param {Array.<String>} config.ignoredFiles Files that will be ignored.
+ * Returns a stream containing eslint reporter.
+ *
+ * @param {Object} [config={}]
+ * @param {Array.<String>} [config.ignoredFiles=[]] Files that will be ignored.
  * @returns {Stream}
  */
 module.exports = function lint( config = {} ) {
