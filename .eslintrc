@@ -1,0 +1,158 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "script"
+  },
+  "env": {
+    "node": true,
+    "mocha": true,
+    "es6": true,
+    "browser": true
+  },
+  "globals": {
+    "expect": true,
+    "sinon": true
+  },
+  "rules": {
+    "wrap-iife": "error",
+    "no-loop-func": "error",
+    "no-caller": "error",
+    "no-irregular-whitespace": "error",
+    "no-undef": "error",
+    "no-unused-vars": "error",
+    "strict": [
+      "error",
+      "global"
+    ],
+    "semi": [
+      "error",
+      "always"
+    ],
+    "no-extra-semi": "error",
+    "no-var": "error",
+    "curly": [
+      "error",
+      "all"
+    ],
+    "arrow-parens": [
+      "error",
+      "as-needed"
+    ],
+    "arrow-spacing": [
+      "error",
+      {
+        "before": true,
+        "after": true
+      }
+    ],
+    "keyword-spacing": [
+      "error",
+      {}
+    ],
+    "space-before-blocks": [
+      "error",
+      "always"
+    ],
+    "space-before-function-paren": [
+      "error",
+      "never"
+    ],
+    "no-spaced-func": "error",
+    "prefer-const": "error",
+    "yield-star-spacing": [
+      "error",
+      "after"
+    ],
+    "no-duplicate-case": "error",
+    "no-empty": "error",
+    "no-else-return": "error",
+    "valid-typeof": "error",
+    "generator-star-spacing": [
+      "error",
+      "before"
+    ],
+    "padded-blocks": [
+      "error",
+      "never"
+    ],
+    "array-bracket-spacing": [
+      "error",
+      "always"
+    ],
+    "space-in-parens": [
+      "error",
+      "always"
+    ],
+    "key-spacing": [
+      "error",
+      {
+        "beforeColon": false,
+        "afterColon": true
+      }
+    ],
+    "comma-style": [
+      "error",
+      "last"
+    ],
+    "operator-linebreak": [
+      "error",
+      "after"
+    ],
+    "space-unary-ops": [
+      "error",
+      {
+        "words": false,
+        "nonwords": false
+      }
+    ],
+    "space-infix-ops": "error",
+    "no-implicit-coercion": [
+      "error",
+      {
+        "boolean": false,
+        "string": true,
+        "number": true
+      }
+    ],
+    "camelcase": [
+      "error",
+      {
+        "properties": "never"
+      }
+    ],
+    "no-with": "error",
+    "no-multi-str": "error",
+    "no-multiple-empty-lines": "error",
+    "no-mixed-spaces-and-tabs": "error",
+    "no-trailing-spaces": "error",
+    "max-len": [
+      "error",
+      150
+    ],
+    "dot-notation": "error",
+    "yoda": [
+      "error",
+      "never"
+    ],
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "indent": [
+      "error",
+      "tab",
+      {
+        "SwitchCase": 1
+      }
+    ],
+    "consistent-this": [
+      "error",
+      "that"
+    ],
+    "eol-last": "error"
+  }
+}
