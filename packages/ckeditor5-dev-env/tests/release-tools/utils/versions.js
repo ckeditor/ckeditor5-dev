@@ -97,6 +97,12 @@ describe( 'dev-env/release-tools/utils', () => {
 
 				expect( version.getLastFromChangelog() ).to.equal( null );
 			} );
+
+			it( 'returns null if changelog does not exist', () => {
+				changelogStub.returns( null );
+
+				expect( version.getLastFromChangelog() ).to.equal( null );
+			} );
 		} );
 
 		describe( 'getLastTagFromGit()', () => {
