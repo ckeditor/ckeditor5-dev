@@ -31,6 +31,7 @@ describe( 'collect', () => {
 				createPotFileHeader: sandbox.stub(),
 				createPotFileContent: sandbox.stub(),
 				savePotFile: sandbox.spy(),
+				removeExistingPotFiles: sandbox.spy(),
 			}
 		};
 
@@ -76,5 +77,13 @@ describe( 'collect', () => {
 
 		sinon.assert.notCalled( stubs.collectUtils.savePotFile );
 		sinon.assert.calledWithExactly( stubs.logger.error, 'ckeditor5-core/lang/context.json file is missing' );
+	} );
+
+	it( 'should remove existing po files', () => {
+		stubs.collectUtils.getContexts.returns( new Map() );
+
+		collect();
+
+		sinon.assert.calledOnce( stubs.collectUtils.removeExistingPotFiles );
 	} );
 } );

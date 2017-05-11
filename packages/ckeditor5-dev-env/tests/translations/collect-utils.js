@@ -14,6 +14,7 @@ const mockery = require( 'mockery' );
 const glob = require( 'glob' );
 const fs = require( 'fs-extra' );
 const proxyquire = require( 'proxyquire' );
+const del = require( 'del' );
 
 describe( 'collect-utils', () => {
 	let sandbox, utils, stubs, originalStringMap;
@@ -34,10 +35,12 @@ describe( 'collect-utils', () => {
 			},
 			translations: {
 				findOriginalStrings: sandbox.spy( string => originalStringMap[ string ] )
-			}
+			},
+			delSync: sandbox.spy()
 		};
 
 		sandbox.stub( process, 'cwd', () => path.join( 'workspace', 'ckeditor5' ) );
+		sandbox.stub( del, 'sync', stubs.delSync );
 
 		utils = proxyquire( '../../lib/translations/collect-utils' , {
 			'@ckeditor/ckeditor5-dev-utils': {
@@ -237,6 +240,17 @@ describe( 'collect-utils', () => {
 			expect( errors ).to.deep.equal( [
 				'Context is duplicated for the key: util.'
 			] );
+		} );
+	} );
+
+	describe( 'removeExistingPotFiles()', () => {
+		it( 'should remove existing po files from the transifex directory', () => {
+			utils.removeExistingPotFiles();
+
+			sinon.assert.calledWithExactly(
+				stubs.delSync,
+				path.join( 'workspace', 'ckeditor5', 'build', '.transifex' )
+			);
 		} );
 	} );
 
