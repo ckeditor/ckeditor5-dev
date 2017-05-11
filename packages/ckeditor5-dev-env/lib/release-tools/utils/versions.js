@@ -17,6 +17,11 @@ const versions = {
 	 */
 	getLastFromChangelog() {
 		const changelog = changelogUtils.getChangelog();
+
+		if ( !changelog ) {
+			return null;
+		}
+
 		const regexp = /\n## \[?([\da-z\.\-\+]+)/i;
 
 		const matches = changelog.match( regexp );

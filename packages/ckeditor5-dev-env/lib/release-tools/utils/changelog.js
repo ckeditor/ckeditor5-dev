@@ -40,7 +40,7 @@ const utils = {
 	},
 
 	/**
-	 * @returns {String}
+	 * @returns {String|null}
 	 */
 	getChangelog() {
 		const changelogFile = path.resolve( utils.changelogFile );

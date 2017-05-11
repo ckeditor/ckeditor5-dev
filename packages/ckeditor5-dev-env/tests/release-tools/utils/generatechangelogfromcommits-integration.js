@@ -8,14 +8,15 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const expect = require( 'chai' ).expect;
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const generateChangelogFromCommits = require( '../../../lib/release-tools/utils/generatechangelogfromcommits' );
+const sinon = require( 'sinon' );
+const proxyquire = require( 'proxyquire' );
+const { tools, stream } = require( '@ckeditor/ckeditor5-dev-utils' );
 const { changelogHeader, getChangelog, getChangesForVersion } = require( '../../../lib/release-tools/utils/changelog' );
 
 describe( 'dev-env/release-tools/utils', () => {
 	const url = 'https://github.com/ckeditor/ckeditor5-test-package';
 
-	let tmpCwd, cwd;
+	let tmpCwd, cwd, generateChangelogFromCommits, stubs, sandbox;
 
 	// These tests create a chain of releases.
 	describe( 'generateChangelogFromCommits() - integration test', () => {
@@ -48,11 +49,37 @@ describe( 'dev-env/release-tools/utils', () => {
 			process.chdir( cwd );
 		} );
 
+		beforeEach( () => {
+			sandbox = sinon.sandbox.create();
+
+			stubs = {
+				logger: {
+					info: sandbox.stub(),
+					warning: sandbox.stub(),
+					error: sandbox.stub()
+				},
+			};
+
+			generateChangelogFromCommits = proxyquire( '../../../lib/release-tools/utils/generatechangelogfromcommits', {
+				'@ckeditor/ckeditor5-dev-utils': {
+					stream,
+					logger() {
+						return stubs.logger;
+					}
+				}
+			} );
+		} );
+
+		afterEach( () => {
+			sandbox.restore();
+		} );
+
 		it( 'generates a changelog for the first time', () => {
 			exec( 'git commit --allow-empty --message "Internal: An initial commit."' );
 
 			return generateChangelog( '0.0.1' )
 				.then( () => {
+					expect( stubs.logger.warning.calledOnce ).to.equal( true );
 					expect( getChangelog() ).to.contain( changelogHeader );
 					expect( getChangesForVersion( '0.0.1' ) ).to.contain(
 						'Internal changes only (updated dependencies, documentation, etc.).'
@@ -196,6 +223,29 @@ describe( 'dev-env/release-tools/utils', () => {
 					release( '0.4.0' );
 				} );
 		} );
+
+		it( 'changelog should contain 2 blank lines for changelog with internal changes', () => {
+			exec( 'git commit --allow-empty --message "Docs: Updated README."' );
+
+			return generateChangelog( '0.4.1', '0.4.0' )
+				.then( () => {
+					const expectedChangelogeEntries = [
+						'## [0.4.1](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.4.0...v0.4.1) (0000-00-00)',
+						'',
+						'Internal changes only (updated dependencies, documentation, etc.).',
+						'',
+						'',
+						'## [0.4.0](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.3.0...v0.4.0) (0000-00-00)'
+					];
+					const changelogAsArray = replaceDates( getChangelog() ).replace( changelogHeader, '' ).split( '\n' );
+
+					expectedChangelogeEntries.forEach( ( row, index ) => {
+						expect( row ).to.equal( changelogAsArray[ index ], `Index: ${ index }` );
+					} );
+
+					release( '0.4.1' );
+				} );
+		} );
 	} );
 
 	function exec( command ) {
@@ -226,5 +276,9 @@ describe( 'dev-env/release-tools/utils', () => {
 	function replaceCommitIds( changelog ) {
 		return changelog.replace( /\[[a-z0-9]{7}\]/g, '[XXXXXXX]' )
 			.replace( /commit\/[a-z0-9]{7}/g, 'commit/XXXXXXX' );
+	}
+
+	function replaceDates( changelog ) {
+		return changelog.replace( /\) \(\d{4}-\d{2}-\d{2}\)/g, ') (0000-00-00)' );
 	}
 } );

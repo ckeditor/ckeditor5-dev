@@ -33,6 +33,8 @@ module.exports = function collect() {
 		return;
 	}
 
+	utils.removeExistingPotFiles();
+
 	for ( const [ packageName, context ] of contexts ) {
 		const potFileHeader = utils.createPotFileHeader();
 		const potFileContent = utils.createPotFileContent( context );
