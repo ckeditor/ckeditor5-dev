@@ -4,7 +4,7 @@ module.exports = {
 	extends: 'eslint:recommended',
 	parserOptions: {
 		ecmaVersion: 6,
-		sourceType: 'script'
+		sourceType: 'module'
 	},
 	env: {
 		es6: true,
@@ -55,7 +55,8 @@ module.exports = {
 		'no-return-assign': 'error',
 		'no-self-compare': 'error',
 		'no-sequences': 'error',
-		'no-unused-expressions': 'error',
+		// We can't use it because of https://github.com/eslint/eslint/issues/2102
+		// 'no-unused-expressions': 'error',
 		'no-useless-call': 'error',
 		'no-useless-concat': 'error',
 		'no-useless-escape': 'error',
