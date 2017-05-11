@@ -23,7 +23,7 @@ class Collection {
 	 * @param {Object} record
 	*/
 	add( name, record ) {
-		if ( !this._data[name] ) {
+		if ( !this._data[ name ] ) {
 			this._data[ name ] = [];
 		}
 

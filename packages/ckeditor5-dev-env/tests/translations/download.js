@@ -11,8 +11,7 @@ const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 
 describe( 'download', () => {
-	let sandbox, stubs, download;
-	let resources, resourcesDetails, translations, fileContents;
+	let sandbox, stubs, download, resources, resourcesDetails, translations, fileContents;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();

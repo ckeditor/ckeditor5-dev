@@ -21,7 +21,11 @@ module.exports = {
 		'sinon': true
 	},
 	'rules': {
-		// Best practices.
+		// ## Possible errors
+		// Offing because there's nothing wrong with good `while ( true )` with a return statement.
+		'no-constant-condition': 'off',
+
+		// ## Best practices
 		'curly': [
 			'error',
 			'all'
@@ -70,7 +74,7 @@ module.exports = {
 			'never'
 		],
 
-		// Variables.
+		// ## Variables
 		'no-use-before-define': [
 			'error',
 			{
@@ -80,7 +84,7 @@ module.exports = {
 			}
 		],
 
-		// Stylistic issues.
+		// ## Stylistic issues
 		'array-bracket-spacing': [
 			'error',
 			'always'
@@ -89,10 +93,12 @@ module.exports = {
 			'error',
 			'always'
 		],
-		'brace-style': [
-			'error',
-			'1tbs'
-		],
+		// We can't use this rule because we allow comments before `else`.
+		// Make sure to report such case to ESLint.
+		// 'brace-style': [
+		// 	'error',
+		// 	'1tbs'
+		// ],
 		'camelcase': [
 			'error',
 			{
@@ -143,7 +149,9 @@ module.exports = {
 			'error',
 			{
 				beforeBlockComment: true,
-				allowObjectStart: true
+				allowObjectStart: true,
+				allowBlockStart: true,
+				allowArrayStart: true
 			}
 		],
 		'max-len': [
@@ -240,7 +248,7 @@ module.exports = {
 			'never'
 		],
 
-		// ECMAScript 6.
+		// ## ECMAScript 6
 		'arrow-parens': [
 			'error',
 			'as-needed'

@@ -98,7 +98,7 @@ class DocletValidator {
 				// eslint-disable-next-line max-len
 				const match = el.longname.match( /~([\w]+)\.([\w]+)$/ ); // e.g module:utils/ckeditorerror~CKEditorError.CKEditorError
 
-				return match && match[1] === match[2];
+				return match && match[ 1 ] === match[ 2 ];
 			} )
 			.forEach( el =>	this._addError( el, `Incorrect class reference name. Got ${ el.longname }` ) );
 	}
@@ -163,12 +163,12 @@ class DocletValidator {
 	 * @protected
 	 */
 	_lintLinks() {
-		const allLinkRegExp = /\{\@link\s+[^}\s]+[\s\w]*(\})/g;
-		const pathRegExp = /\{\@link\s+([^}\s]+)[\s\w]*(\})/;
+		const allLinkRegExp = /\{@link\s+[^}\s]+[\s\w]*(\})/g;
+		const pathRegExp = /\{@link\s+([^}\s]+)[\s\w]*(\})/;
 
 		for ( const element of this._collection.getAll() ) {
 			const refs = ( element.comment.match( allLinkRegExp ) || [] )
-				.map( link => link.match( pathRegExp )[1] );
+				.map( link => link.match( pathRegExp )[ 1 ] );
 
 			for ( const ref of refs ) {
 				if ( !this._isCorrectReference( ref ) ) {
@@ -226,7 +226,7 @@ class DocletValidator {
 
 		for ( const member of members ) {
 			if ( moduleNames.includes( member.memberof ) ) {
-				this._addError( member, `Module ${member.memberof} exports member: ${ member.name }` );
+				this._addError( member, `Module ${ member.memberof } exports member: ${ member.name }` );
 			}
 		}
 	}
@@ -239,12 +239,12 @@ class DocletValidator {
 			.filter( el => !!el.returns );
 
 		for ( const returnEl of returnElements ) {
-			if ( !returnEl.returns[0].type  ) {
+			if ( !returnEl.returns[ 0 ].type ) {
 				this._addError( returnEl, 'Invalid return type.' );
 				continue;
 			}
 
-			for ( const typeName of returnEl.returns[0].type.names ) {
+			for ( const typeName of returnEl.returns[ 0 ].type.names ) {
 				if ( !this._isCorrectType( typeName ) ) {
 					this._addError( returnEl, `Invalid return type: ${ typeName }.` );
 				}

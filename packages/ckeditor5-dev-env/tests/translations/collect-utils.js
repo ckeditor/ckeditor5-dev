@@ -40,7 +40,7 @@ describe( 'collect-utils', () => {
 		sandbox.stub( process, 'cwd', () => path.join( 'workspace', 'ckeditor5' ) );
 		sandbox.stub( del, 'sync', stubs.delSync );
 
-		utils = proxyquire( '../../lib/translations/collect-utils' , {
+		utils = proxyquire( '../../lib/translations/collect-utils', {
 			'@ckeditor/ckeditor5-dev-utils': {
 				logger: () => stubs.logger,
 				translations: stubs.translations

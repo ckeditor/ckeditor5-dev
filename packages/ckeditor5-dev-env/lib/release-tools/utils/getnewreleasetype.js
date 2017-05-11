@@ -41,7 +41,7 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 			.on( 'error', err => {
 				if ( err.message.match( /'HEAD': unknown/ ) ) {
 					reject( new Error( 'Given repository is empty.' ) );
-				} else if ( err.message.match( new RegExp( `'${ options.tagName }\.\.HEAD': unknown` ) ) ) {
+				} else if ( err.message.match( new RegExp( `'${ options.tagName }\\.\\.HEAD': unknown` ) ) ) {
 					reject( new Error(
 						`Cannot find tag "${ options.tagName }" (the latest version from the changelog) ` +
 						'in given repository.'

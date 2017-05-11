@@ -92,10 +92,10 @@ describe( 'stream', () => {
 
 	describe( 'isTestFile', () => {
 		function test( path, expected ) {
-			it( `returns ${ expected} for ${ path }`, () => {
+			it( `returns ${ expected } for ${ path }`, () => {
 				const file = new Vinyl( {
 					cwd: './',
-					path: path,
+					path,
 					contents: new Buffer( '' )
 				} );
 

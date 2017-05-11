@@ -25,12 +25,12 @@ const utils = {
 		const srcPaths = [ process.cwd(), 'packages', '*', 'src', '**', '*.js' ].join( '/' );
 
 		const files = glob.sync( srcPaths )
-			.filter( srcPath => !srcPath.match( /packages\/[^\/]+\/src\/lib\// ) );
+			.filter( srcPath => !srcPath.match( /packages\/[^/]+\/src\/lib\// ) );
 
 		const translations = [];
 
 		for ( const filePath of files ) {
-			const content =  fs.readFileSync( filePath, 'utf-8' );
+			const content = fs.readFileSync( filePath, 'utf-8' );
 
 			translations.push( ...utils._getTranslationCallsFromFile( filePath, content ) );
 		}
@@ -100,6 +100,7 @@ const utils = {
 			.filter( ( [ key, usage ] ) => !usage ) // eslint-disable-line no-unused-vars
 			.map( ( [ key ] ) => `Unused context: ${ key }.` );
 	},
+
 	/**
 	 * @param {Map.<String, Object>} contexts Map of the language contexts.
 	 * @returns {Array.<String>}
@@ -133,7 +134,7 @@ const utils = {
 	createPotFileContent( context ) {
 		const translationObjects = Object.keys( context.content ).map( str => ( {
 			id: str,
-			str: str,
+			str,
 			ctxt: context.content[ str ]
 		} ) );
 
@@ -165,9 +166,9 @@ const utils = {
 		const originalStrings = findOriginalStrings( fileContent );
 
 		return originalStrings.map( originalString => {
-			const contextMatch = originalString.match( /\[context: ([^\]]+)\]/ );
-			const sentenceMatch = originalString.match( /^[^\[]+/ );
-			const packageMatch = filePath.match( /\/(ckeditor5-[^\/]+)\// );
+			const contextMatch = originalString.match( /\[context: ([^]]+)\]/ );
+			const sentenceMatch = originalString.match( /^[^[]+/ );
+			const packageMatch = filePath.match( /\/(ckeditor5-[^/]+)\// );
 
 			return {
 				filePath,
@@ -205,13 +206,11 @@ const utils = {
 
 		if ( !corePackageContext ) {
 			error = `${ corePackageName }/lang/contexts.json file is missing.`;
-		}
-
-		else if ( !corePackageContext.content[ translation.key ] && !packageContext ) {
+		} else if ( !corePackageContext.content[ translation.key ] && !packageContext ) {
 			error = 'contexts.json file or context for the translation key is missing ' +
 				`(${ translation.package }, ${ translation.key }).`;
 		}
-
+		// xxx
 		else if ( !corePackageContext.content[ translation.key ] && !packageContext.content[ translation.key ] ) {
 			error = `Context for the translation key is missing (${ translation.package }, ${ translation.key }).`;
 		}

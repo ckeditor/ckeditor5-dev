@@ -15,8 +15,7 @@ const mockery = require( 'mockery' );
 describe( 'translations', () => {
 	describe( 'TranslationService', () => {
 		const sandbox = sinon.sandbox.create();
-		let TranslationService, stubs;
-		let files, fileContents;
+		let TranslationService, stubs, files, fileContents;
 
 		beforeEach( () => {
 			mockery.enable( {

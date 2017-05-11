@@ -11,8 +11,7 @@ const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 
 describe( 'upload', () => {
-	let sandbox, stubs, upload;
-	let packageNames, serverResources, fileContents;
+	let sandbox, stubs, upload, packageNames, serverResources, fileContents;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();

@@ -91,7 +91,7 @@ describe( 'dev-env/index', () => {
 				.then( response => {
 					expect( response.result ).to.equal( true );
 					expect( stubs.releaseTools.releaseRepository.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.releaseRepository.firstCall.args[0] ).to.equal( 'arg' );
+					expect( stubs.releaseTools.releaseRepository.firstCall.args[ 0 ] ).to.equal( 'arg' );
 				} );
 		} );
 	} );
@@ -104,7 +104,7 @@ describe( 'dev-env/index', () => {
 				.then( response => {
 					expect( response.result ).to.equal( true );
 					expect( stubs.releaseTools.releaseSubRepositories.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.releaseSubRepositories.firstCall.args[0] ).to.equal( 'arg' );
+					expect( stubs.releaseTools.releaseSubRepositories.firstCall.args[ 0 ] ).to.equal( 'arg' );
 				} );
 		} );
 	} );
@@ -117,7 +117,7 @@ describe( 'dev-env/index', () => {
 				.then( response => {
 					expect( response.result ).to.equal( true );
 					expect( stubs.releaseTools.generateChangelogForSinglePackage.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.generateChangelogForSinglePackage.firstCall.args[0] ).to.equal( 'arg' );
+					expect( stubs.releaseTools.generateChangelogForSinglePackage.firstCall.args[ 0 ] ).to.equal( 'arg' );
 				} );
 		} );
 	} );
@@ -130,7 +130,7 @@ describe( 'dev-env/index', () => {
 				.then( response => {
 					expect( response.result ).to.equal( true );
 					expect( stubs.releaseTools.generateChangelogForSubPackages.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.generateChangelogForSubPackages.firstCall.args[0] ).to.equal( 'arg' );
+					expect( stubs.releaseTools.generateChangelogForSubPackages.firstCall.args[ 0 ] ).to.equal( 'arg' );
 				} );
 		} );
 	} );
@@ -143,7 +143,7 @@ describe( 'dev-env/index', () => {
 				.then( response => {
 					expect( response.result ).to.equal( true );
 					expect( stubs.releaseTools.generateChangelogForSubRepositories.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.generateChangelogForSubRepositories.firstCall.args[0] ).to.equal( 123 );
+					expect( stubs.releaseTools.generateChangelogForSubRepositories.firstCall.args[ 0 ] ).to.equal( 123 );
 				} );
 		} );
 	} );

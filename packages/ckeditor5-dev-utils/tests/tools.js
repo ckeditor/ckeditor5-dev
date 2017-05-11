@@ -332,7 +332,7 @@ describe( 'utils', () => {
 				sandbox.stub( tools, 'isFile' ).returns( true );
 				const fs = require( 'fs' );
 				const name = 'module-name';
-				sandbox.stub( fs, 'readFileSync' ).returns( JSON.stringify( { name: name } ) );
+				sandbox.stub( fs, 'readFileSync' ).returns( JSON.stringify( { name } ) );
 
 				const result = tools.readPackageName( modulePath );
 
@@ -413,7 +413,7 @@ describe( 'utils', () => {
 
 				readFileStub.onFirstCall().returns( 'file data {{var1}}, {{var2}}' );
 
-				tools.copyTemplateFile( inputPath,  outputPath, {
+				tools.copyTemplateFile( inputPath, outputPath, {
 					'{{var1}}': 'foo',
 					'{{var2}}': 'bar'
 				} );
@@ -433,7 +433,7 @@ describe( 'utils', () => {
 				const copyFileStub = sandbox.stub( fs, 'copySync' );
 				const ensureDirStub = sandbox.stub( fs, 'ensureDirSync' );
 
-				tools.copyTemplateFile( inputPath,  outputPath );
+				tools.copyTemplateFile( inputPath, outputPath );
 
 				sinon.assert.calledWithExactly( ensureDirStub, path.dirname( outputPath ) );
 				sinon.assert.calledOnce( copyFileStub );
@@ -579,8 +579,8 @@ describe( 'utils', () => {
 						expect( delArg ).to.equal( path.join( 'test', '**' ) );
 						expect( loggerVerbosity ).to.equal( 'info' );
 						expect( infoSpy.calledTwice ).to.equal( true );
-						expect( infoSpy.firstCall.args[ 0 ] ).to.match( new RegExp( files [ 0 ] ) );
-						expect( infoSpy.secondCall.args[ 0 ] ).to.match( new RegExp( files [ 1 ] ) );
+						expect( infoSpy.firstCall.args[ 0 ] ).to.match( new RegExp( files[ 0 ] ) );
+						expect( infoSpy.secondCall.args[ 0 ] ).to.match( new RegExp( files[ 1 ] ) );
 					} );
 			} );
 		} );

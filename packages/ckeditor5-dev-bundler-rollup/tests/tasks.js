@@ -21,8 +21,7 @@ const fs = require( 'fs' );
 const rollup = require( 'rollup' );
 
 describe( 'bundle-tasks', () => {
-	let tasks;
-	let sandbox;
+	let tasks, sandbox;
 
 	before( () => {
 		mockery.enable( {
@@ -52,10 +51,10 @@ describe( 'bundle-tasks', () => {
 	describe( 'build()', () => {
 		it( 'should run generateWithEntryPoint when entryPoint is specified', () => {
 			sandbox.stub( utils, 'cleanFiles' );
-			sandbox.stub( tasks, '_compile' ) ;
-			const generateWithEntryPoint = sandbox.stub( tasks, '_generateBundleWithEntryPoint' ) ;
-			const generateWithoutEntryPoint = sandbox.stub( tasks, '_generateBundleWithoutEntryPoint' ) ;
-			sandbox.stub( tasks, '_minify' ) ;
+			sandbox.stub( tasks, '_compile' );
+			const generateWithEntryPoint = sandbox.stub( tasks, '_generateBundleWithEntryPoint' );
+			const generateWithoutEntryPoint = sandbox.stub( tasks, '_generateBundleWithoutEntryPoint' );
+			sandbox.stub( tasks, '_minify' );
 			sandbox.stub( tasks, '_showSummary' );
 			sandbox.stub( utils, 'maybeCleanDir' );
 
@@ -221,8 +220,8 @@ describe( 'bundle-tasks', () => {
 
 			return promise.then( result => {
 				expect( result.entry ).to.be.eq( 'entryPoint' );
-				expect( result.plugins[0].presets ).to.be.an( 'array' );
-				expect( result.plugins[0].plugins ).to.be.an( 'array' );
+				expect( result.plugins[ 0 ].presets ).to.be.an( 'array' );
+				expect( result.plugins[ 0 ].plugins ).to.be.an( 'array' );
 			} );
 		} );
 	} );

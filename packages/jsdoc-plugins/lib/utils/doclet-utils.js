@@ -29,10 +29,10 @@ function doesFieldExistInClass( doclets, methodLongname ) {
 		}
 
 		// eslint-disable-next-line no-loop-func
-		currentClass = doclets.find( doclet => doclet.longname === currentClass.augments[0] );
+		currentClass = doclets.find( doclet => doclet.longname === currentClass.augments[ 0 ] );
 	}
 }
 
 module.exports = {
-	doesFieldExistInClass,
+	doesFieldExistInClass
 };

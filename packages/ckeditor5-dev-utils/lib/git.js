@@ -22,7 +22,7 @@ module.exports = {
 	 */
 	parseRepositoryUrl( url ) {
 		// eslint-disable-next-line max-len
-		const regexp = /^((?:git@|(?:http[s]?|git):\/\/)github\.com(?:\/|:))?(([\w-]+)\/([\w-]+(?:\.git)?))(?:#([\w-\/\.]+))?$/;
+		const regexp = /^((?:git@|(?:https?|git):\/\/)github\.com(?:\/|:))?(([\w-]+)\/([\w-]+(?:\.git)?))(?:#([\w-/.]+))?$/;
 		const match = url.match( regexp );
 
 		if ( !match ) {
@@ -38,11 +38,11 @@ module.exports = {
 		name = /\.git$/.test( name ) ? name.slice( 0, -4 ) : name;
 
 		return {
-			server: server,
-			repository: repository,
-			branch: branch,
-			user: user,
-			name: name
+			server,
+			repository,
+			branch,
+			user,
+			name
 		};
 	},
 

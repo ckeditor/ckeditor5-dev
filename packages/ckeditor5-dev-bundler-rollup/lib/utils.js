@@ -56,7 +56,7 @@ const utils = {
 	 * @returns {Promise}
 	 */
 	cleanFiles( destinationPath, fileName ) {
-		return tools.clean( destinationPath, `${fileName}.*` );
+		return tools.clean( destinationPath, `${ fileName }.*` );
 	},
 
 	/**
