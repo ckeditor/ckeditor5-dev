@@ -186,6 +186,29 @@ describe( 'dev-env/release-tools/utils', () => {
 					release( '0.4.0' );
 				} );
 		} );
+
+		it( 'changelog should contain 2 blank lines for changelog with internal changes', () => {
+			exec( 'git commit --allow-empty --message "Docs: Updated README."' );
+
+			return generateChangelog( '0.4.1', '0.4.0' )
+				.then( () => {
+					const expectedChangelogeEntries = [
+						'## [0.4.1](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.4.0...v0.4.1) (0000-00-00)',
+						'',
+						'Internal changes only (updated dependencies, documentation, etc.).',
+						'',
+						'',
+						'## [0.4.0](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.3.0...v0.4.0) (0000-00-00)'
+					];
+					const changelogAsArray = replaceDates( getChangelog() ).replace( changelogHeader, '' ).split( '\n' );
+
+					expectedChangelogeEntries.forEach( ( row, index ) => {
+						expect( row ).to.equal( changelogAsArray[ index ], `Index: ${ index }` );
+					} );
+
+					release( '0.4.1' );
+				} );
+		} );
 	} );
 
 	function exec( command ) {
@@ -215,5 +238,9 @@ describe( 'dev-env/release-tools/utils', () => {
 	function replaceCommitIds( changelog ) {
 		return changelog.replace( /\[[a-z0-9]{7}\]/g, '[XXXXXXX]' )
 			.replace( /commit\/[a-z0-9]{7}/g, 'commit/XXXXXXX' );
+	}
+
+	function replaceDates( changelog ) {
+		return changelog.replace( /\) \(\d{4}-\d{2}-\d{2}\)/g, ') (0000-00-00)' );
 	}
 } );
