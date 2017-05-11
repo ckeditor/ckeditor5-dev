@@ -44,16 +44,14 @@ function fixShortRefs( options ) {
  */
 function fixShortRefsInLongnameAndMemeberof( options ) {
 	let { doclet, lastInterfaceOrClass } = options; // eslint-disable-line prefer-const
-	const firstNameChar = doclet.longname[0];
+	const firstNameChar = doclet.longname[ 0 ];
 
 	if ( firstNameChar === '~' ) {
 		doclet = assign( {}, doclet, {
 			memberof: lastInterfaceOrClass.memberof + '~' + lastInterfaceOrClass.name,
 			longname: lastInterfaceOrClass.memberof + doclet.longname,
 		} );
-	}
-
-	else if ( firstNameChar === '#' ) {
+	} else if ( firstNameChar === '#' ) {
 		doclet = assign( {}, doclet, {
 			memberof: lastInterfaceOrClass.longname,
 			longname: lastInterfaceOrClass.longname + doclet.longname,
@@ -66,9 +64,7 @@ function fixShortRefsInLongnameAndMemeberof( options ) {
 			memberof: lastInterfaceOrClass.longname,
 			longname: lastInterfaceOrClass.longname + '#event:' + doclet.name,
 		} );
-	}
-
-	else if ( doclet.kind === 'event' && !doclet.longname.includes( 'module:' ) ) {
+	} else if ( doclet.kind === 'event' && !doclet.longname.includes( 'module:' ) ) {
 		doclet = assign( {}, doclet, {
 			memberof: lastInterfaceOrClass.longname,
 			longname: lastInterfaceOrClass.longname + '#' + doclet.longname,
@@ -122,11 +118,11 @@ function fixShortRefsInSeeTag( options ) {
 	}
 
 	const see = doclet.see.map( see => {
-		if ( see[0] === '#' ) {
+		if ( see[ 0 ] === '#' ) {
 			return lastInterfaceOrClass.longname + see;
 		}
 
-		if ( see[0] === '~' ) {
+		if ( see[ 0 ] === '~' ) {
 			return lastInterfaceOrClass.memberof + see;
 		}
 

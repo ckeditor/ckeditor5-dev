@@ -11,8 +11,7 @@ const sinon = require( 'sinon' );
 const path = require( 'path' );
 
 describe( 'getKarmaConfig', () => {
-	let getKarmaConfig;
-	let sandbox;
+	let getKarmaConfig, sandbox;
 	const originalEnv = process.env;
 
 	beforeEach( () => {

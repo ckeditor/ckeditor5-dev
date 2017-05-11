@@ -10,10 +10,9 @@ const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
 
 describe( 'removeDir', () => {
-	let sandbox;
+	let sandbox, removeDir;
 	const logMessages = [];
 	const deletedPaths = [];
-	let removeDir;
 
 	before( () => {
 		mockery.enable( {

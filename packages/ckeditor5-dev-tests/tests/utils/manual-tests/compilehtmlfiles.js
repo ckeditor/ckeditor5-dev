@@ -68,12 +68,12 @@ describe( 'compileHtmlFiles', () => {
 		};
 
 		mockery.registerMock( 'commonmark', {
-			Parser: function() {
+			Parser() {
 				return {
 					parse: stubs.commonmark.parse
 				};
 			},
-			HtmlRenderer: function() {
+			HtmlRenderer() {
 				return {
 					render: stubs.commonmark.render
 				};

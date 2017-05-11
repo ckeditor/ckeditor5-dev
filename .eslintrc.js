@@ -21,9 +21,6 @@ module.exports = {
 		'sinon': true
 	},
 	'rules': {
-		// Possible errors.
-		'no-extra-parens': 'error',
-
 		// Best practices.
 		'curly': [
 			'error',
@@ -57,7 +54,6 @@ module.exports = {
 		'no-new': 'error',
 		'no-new-func': 'error',
 		'no-new-wrappers': 'error',
-		'no-param-reassign': 'error',
 		'no-return-assign': 'error',
 		'no-self-compare': 'error',
 		'no-sequences': 'error',
@@ -75,7 +71,6 @@ module.exports = {
 		],
 
 		// Variables.
-		'no-undefined': 'error',
 		'no-use-before-define': [
 			'error',
 			{
@@ -103,10 +98,6 @@ module.exports = {
 			{
 				'properties': 'never'
 			}
-		],
-		'comma-dangle': [
-			'error',
-			'never'
 		],
 		'comma-spacing': [
 			'error',
@@ -144,12 +135,6 @@ module.exports = {
 		],
 		'keyword-spacing': 'error',
 		'key-spacing': 'error',
-		'line-comment-position': [
-			'error',
-			{
-				position: 'above'
-			}
-		],
 		'linebreak-style': [
 			'error',
 			'unix'
@@ -157,7 +142,8 @@ module.exports = {
 		'lines-around-comment': [
 			'error',
 			{
-				beforeBlockComment: true
+				beforeBlockComment: true,
+				allowObjectStart: true
 			}
 		],
 		'max-len': [
@@ -204,7 +190,10 @@ module.exports = {
 		],
 		'quote-props': [
 			'error',
-			'consistent-as-needed'
+			'as-needed',
+			{
+				'unnecessary': false
+			}
 		],
 		'quotes': [
 			'error',
@@ -252,10 +241,6 @@ module.exports = {
 		],
 
 		// ECMAScript 6.
-		'arrow-body-style': [
-			'error',
-			'as-needed'
-		],
 		'arrow-parens': [
 			'error',
 			'as-needed'

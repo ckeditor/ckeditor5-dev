@@ -84,7 +84,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 function getPathsToIncludeForCoverage( globs ) {
 	return globs
 		.map( glob => {
-			const match = glob.match( /\/(ckeditor5-[^\/]+)\// );
+			const match = glob.match( /\/(ckeditor5-[^/]+)\// );
 
 			if ( match ) {
 				const packageName = match[ 1 ]

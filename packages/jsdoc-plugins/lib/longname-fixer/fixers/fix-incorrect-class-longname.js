@@ -20,22 +20,22 @@ function fixIncorrectClassConstructor( object ) {
 
 	const match = doclet.longname.match( /~([\w]+)\.([\w]+)/ );
 
-	if ( !match || match[1] !== match[2] ) {
+	if ( !match || match[ 1 ] !== match[ 2 ] ) {
 		return object;
 	}
 
 	if ( doclet.kind === 'class' ) {
 		doclet = Object.assign( {}, doclet, {
-			longname: doclet.longname.replace( '.' + match[1], '#constructor' ),
-			memberof: doclet.memberof.replace( '.' + match[1], '' ),
+			longname: doclet.longname.replace( '.' + match[ 1 ], '#constructor' ),
+			memberof: doclet.memberof.replace( '.' + match[ 1 ], '' ),
 			kind: 'function',
 			scope: 'instance',
 			name: 'constructor',
 		} );
 	} else {
 		doclet = Object.assign( {}, doclet, {
-			longname: doclet.longname.replace( '.' + match[1], '' ),
-			memberof: doclet.memberof.replace( '.' + match[1], '' ),
+			longname: doclet.longname.replace( '.' + match[ 1 ], '' ),
+			memberof: doclet.memberof.replace( '.' + match[ 1 ], '' ),
 		} );
 	}
 
