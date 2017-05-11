@@ -243,7 +243,7 @@ describe( 'collect-utils', () => {
 		} );
 	} );
 
-	describe( 'removeExistingPotFiles', () => {
+	describe( 'removeExistingPotFiles()', () => {
 		it( 'should remove existing po files from the transifex directory', () => {
 			utils.removeExistingPotFiles();
 
