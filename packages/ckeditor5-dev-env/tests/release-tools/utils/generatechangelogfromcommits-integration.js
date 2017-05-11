@@ -10,14 +10,15 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const expect = require( 'chai' ).expect;
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const generateChangelogFromCommits = require( '../../../lib/release-tools/utils/generatechangelogfromcommits' );
+const sinon = require( 'sinon' );
+const proxyquire = require( 'proxyquire' );
+const { tools, stream } = require( '@ckeditor/ckeditor5-dev-utils' );
 const { changelogHeader, getChangelog, getChangesForVersion } = require( '../../../lib/release-tools/utils/changelog' );
 
 describe( 'dev-env/release-tools/utils', () => {
 	const url = 'https://github.com/ckeditor/ckeditor5-test-package';
 
-	let tmpCwd, cwd;
+	let tmpCwd, cwd, generateChangelogFromCommits, stubs, sandbox;
 
 	// These tests create a chain of releases.
 	describe( 'generateChangelogFromCommits() - integration test', () => {
@@ -50,11 +51,37 @@ describe( 'dev-env/release-tools/utils', () => {
 			process.chdir( cwd );
 		} );
 
+		beforeEach( () => {
+			sandbox = sinon.sandbox.create();
+
+			stubs = {
+				logger: {
+					info: sandbox.stub(),
+					warning: sandbox.stub(),
+					error: sandbox.stub()
+				},
+			};
+
+			generateChangelogFromCommits = proxyquire( '../../../lib/release-tools/utils/generatechangelogfromcommits', {
+				'@ckeditor/ckeditor5-dev-utils': {
+					stream,
+					logger() {
+						return stubs.logger;
+					}
+				}
+			} );
+		} );
+
+		afterEach( () => {
+			sandbox.restore();
+		} );
+
 		it( 'generates a changelog for the first time', () => {
 			exec( 'git commit --allow-empty --message "Internal: An initial commit."' );
 
 			return generateChangelog( '0.0.1' )
 				.then( () => {
+					expect( stubs.logger.warning.calledOnce ).to.equal( true );
 					expect( getChangelog() ).to.contain( changelogHeader );
 					expect( getChangesForVersion( '0.0.1' ) ).to.contain( 'Internal changes only (updated dependencies, documentation, etc.).' );
 
