@@ -5,6 +5,7 @@
 
 'use strict';
 
+const del = require( 'del' );
 const glob = require( 'glob' );
 const fs = require( 'fs-extra' );
 const path = require( 'path' );
@@ -117,6 +118,11 @@ const utils = {
 		}
 
 		return errors;
+	},
+
+	removeExistingPotFiles() {
+		const pathToTransifexDirectory = path.join( process.cwd(), 'build', '.transifex' );
+		del.sync( pathToTransifexDirectory );
 	},
 
 	/**
