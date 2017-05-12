@@ -25,7 +25,7 @@ const utils = {
 		const srcPaths = [ process.cwd(), 'packages', '*', 'src', '**', '*.js' ].join( '/' );
 
 		const files = glob.sync( srcPaths )
-			.filter( srcPath => !srcPath.match( /packages\/[^/]+\/src\/lib\// ) );
+			.filter( srcPath => !srcPath.match( /packages\/[^\/]+\/src\/lib\// ) );
 
 		const translations = [];
 
@@ -166,9 +166,9 @@ const utils = {
 		const originalStrings = findOriginalStrings( fileContent );
 
 		return originalStrings.map( originalString => {
-			const contextMatch = originalString.match( /\[context: ([^]]+)\]/ );
-			const sentenceMatch = originalString.match( /^[^[]+/ );
-			const packageMatch = filePath.match( /\/(ckeditor5-[^/]+)\// );
+			const contextMatch = originalString.match( /\[context: ([^\]]+)\]/ );
+			const sentenceMatch = originalString.match( /^[^\[]+/ );
+			const packageMatch = filePath.match( /\/(ckeditor5-[^\/]+)\// );
 
 			return {
 				filePath,
