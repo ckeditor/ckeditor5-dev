@@ -68,15 +68,16 @@ describe( 'compileHtmlFiles', () => {
 		};
 
 		mockery.registerMock( 'commonmark', {
-			Parser: function() {
-				return {
-					parse: stubs.commonmark.parse
-				};
+			Parser: class Parser {
+				parse( ...args ) {
+					return stubs.commonmark.parse( ...args );
+				}
 			},
-			HtmlRenderer: function() {
-				return {
-					render: stubs.commonmark.render
-				};
+
+			HtmlRenderer: class HtmlRenderer {
+				render( ...args ) {
+					return stubs.commonmark.render( ...args );
+				}
 			}
 		} );
 		mockery.registerMock( 'fs-extra', stubs.fs );
