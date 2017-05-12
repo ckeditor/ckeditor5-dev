@@ -62,9 +62,7 @@ function downloadPoFilesForPackage( loginConfig, packageName ) {
 	let languageCodes;
 
 	const translationsForPackagePromise = resourceDetailsPromise.then( resourceDetails => {
-		// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 		languageCodes = resourceDetails.available_languages.map( languageInfo => languageInfo.code );
-		// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 
 		return Promise.all(
 			languageCodes.map( lang => downloadPoFile( loginConfig, lang, packageName ) )

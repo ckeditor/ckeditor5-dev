@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it, beforeEach, afterEach, after, before */
-
 'use strict';
 
 const gulp = require( 'gulp' );

@@ -66,11 +66,9 @@ function createOrUpdateResource( config, potFile, isUploadedResource ) {
 
 function logPutResponse( packageName, parsedResponse ) {
 	logger.info( `Package: ${ packageName }` );
-	// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 	logger.info( `New: ${ parsedResponse.strings_added }` );
 	logger.info( `Updated: ${ parsedResponse.strings_updated }` );
 	logger.info( `Deleted: ${ parsedResponse.strings_delete }` );
-	// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 	logger.info( '-------------------------------' );
 }
 
