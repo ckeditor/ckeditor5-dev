@@ -42,7 +42,8 @@ describe( 'stream', () => {
 		} );
 
 		it( 'should wait until a promise returned by the callback is resolved', ( ) => {
-			let resolve, resolved; // eslint-disable-line
+			let resolved = false;
+			let resolve;
 
 			const stream = utils.noop( () => {
 				return new Promise( r => {

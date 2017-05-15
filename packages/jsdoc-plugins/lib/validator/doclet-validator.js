@@ -95,7 +95,6 @@ class DocletValidator {
 		this._collection.getAll()
 			.filter( el => el.longname )
 			.filter( el => {
-				// eslint-disable-next-line max-len
 				const match = el.longname.match( /~([\w]+)\.([\w]+)$/ ); // e.g module:utils/ckeditorerror~CKEditorError.CKEditorError
 
 				return match && match[ 1 ] === match[ 2 ];

@@ -11,8 +11,7 @@ const mockery = require( 'mockery' );
 
 describe( 'dev-env/release-tools/tasks', () => {
 	describe( 'createGithubRelease()', () => {
-		// eslint-disable-next-line no-unused-vars
-		let createGithubRelease, sandbox, githubOptions, releaseOptions, stubs, error;
+		let createGithubRelease, sandbox, stubs, error;
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
@@ -20,8 +19,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 			stubs = {
 				authenticate: sandbox.stub(),
 				createRelease: sandbox.spy( ( options, callback ) => {
-					releaseOptions = options;
-
 					if ( error ) {
 						return callback( error );
 					}
@@ -36,9 +33,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				warnOnUnregistered: false
 			} );
 
-			mockery.registerMock( 'github', function GitHubApi( options ) {
-				githubOptions = options;
-
+			mockery.registerMock( 'github', function GitHubApi() {
 				return {
 					authenticate: stubs.authenticate,
 					repos: {

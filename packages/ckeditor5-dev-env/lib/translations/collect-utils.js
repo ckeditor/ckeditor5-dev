@@ -97,7 +97,7 @@ const utils = {
 		}
 
 		return [ ...usedContextMap ]
-			.filter( ( [ key, usage ] ) => !usage ) // eslint-disable-line no-unused-vars
+			.filter( ( [ mapKey ] ) => !usedContextMap.get( mapKey ) )
 			.map( ( [ key ] ) => `Unused context: ${ key }.` );
 	},
 

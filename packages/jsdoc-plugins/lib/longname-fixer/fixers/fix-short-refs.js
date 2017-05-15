@@ -15,7 +15,7 @@ const assign = Object.assign;
  * @returns {Options}
  */
 function fixShortRefs( options ) {
-	let { doclet, lastInterfaceOrClass } = options; // eslint-disable-line prefer-const
+	const { doclet, lastInterfaceOrClass } = options;
 
 	if ( doclet.kind === 'interface' || doclet.kind === 'class' || doclet.kind === 'mixin' ) {
 		options = assign( {}, options, { lastInterfaceOrClass: doclet } );
@@ -43,7 +43,8 @@ function fixShortRefs( options ) {
  * @returns {Options}
  */
 function fixShortRefsInLongnameAndMemeberof( options ) {
-	let { doclet, lastInterfaceOrClass } = options; // eslint-disable-line prefer-const
+	let doclet = options.doclet;
+	const lastInterfaceOrClass = options.lastInterfaceOrClass;
 	const firstNameChar = doclet.longname[ 0 ];
 
 	if ( firstNameChar === '~' ) {
@@ -79,7 +80,7 @@ function fixShortRefsInLongnameAndMemeberof( options ) {
  * @returns {Options}
  */
 function fixShortRefsInFireTag( options ) {
-	let { doclet } = options; // eslint-disable-line prefer-const
+	let { doclet } = options;
 
 	if ( !doclet.fires ) {
 		return options;
@@ -111,7 +112,8 @@ function fixShortRefsInFireTag( options ) {
  * @returns {Options}
  */
 function fixShortRefsInSeeTag( options ) {
-	let { doclet, lastInterfaceOrClass } = options; // eslint-disable-line prefer-const
+	let doclet = options.doclet;
+	const lastInterfaceOrClass = options.lastInterfaceOrClass;
 
 	if ( !doclet.see ) {
 		return options;
