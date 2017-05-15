@@ -97,7 +97,7 @@ const utils = {
 		}
 
 		return [ ...usedContextMap ]
-			.filter( ( [ mapKey ] ) => !usedContextMap.get( mapKey ) )
+			.filter( ( [ , usage ] ) => !usage )
 			.map( ( [ key ] ) => `Unused context: ${ key }.` );
 	},
 
