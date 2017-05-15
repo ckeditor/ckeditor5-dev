@@ -276,8 +276,8 @@ msgstr "util"
 
 			const header = utils.createPotFileHeader();
 
-			// eslint-disable-next-line max-len
-			expect( header ).to.equal( '# Copyright (c) Copyright (c) 2003-2100, CKSource - Frederico Knabben. All rights reserved.\n\n' );
+			expect( header )
+				.to.equal( '# Copyright (c) Copyright (c) 2003-2100, CKSource - Frederico Knabben. All rights reserved.\n\n' );
 			sinon.assert.calledOnce( getFullYearStub );
 		} );
 	} );

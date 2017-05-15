@@ -261,7 +261,6 @@ describe( 'dev-env/release-tools/utils', () => {
 	}
 
 	function generateChangelog( version, previousVersion = null ) {
-		// eslint-disable-next-line max-len
 		const transform = require( '../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository' );
 
 		return generateChangelogFromCommits( {

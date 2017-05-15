@@ -94,7 +94,6 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'ignores notes from commits which will not be included in changelog', () => {
-			// eslint-disable-next-line max-len
 			exec( 'git commit --allow-empty --message "Docs: Nothing." --message "BREAKING CHANGES: It should not bump the major."' );
 
 			return getNewReleaseType( stubs.transformCommit )
@@ -113,7 +112,6 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'returns "major" if any visible in changelog commit has breaking changes', () => {
-			// eslint-disable-next-line max-len
 			exec( 'git commit --allow-empty --message "Other: Nothing." --message "BREAKING CHANGES: Bump the major!"' );
 
 			return getNewReleaseType( stubs.transformCommit )
@@ -141,7 +139,6 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'transforms each commit since the last release', () => {
-			// eslint-disable-next-line max-len
 			exec( 'git commit --allow-empty --message "Other: Nothing." --message "BREAKING CHANGES: Bump the major!"' );
 			exec( 'git commit --allow-empty --message "Docs: Added some notes to README #2."' );
 

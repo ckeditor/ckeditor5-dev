@@ -20,7 +20,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				getPackageJson: sandbox.stub()
 			};
 
-			// eslint-disable-next-line max-len
 			transformCommit = proxyquire( '../../../../lib/release-tools/utils/transform-commit/transform-commit-utils', {
 				'../getpackagejson': stubs.getPackageJson
 			} );

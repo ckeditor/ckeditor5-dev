@@ -36,16 +36,18 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				bugs: 'https://github.com/ckeditor/ckeditor5-dev/issues'
 			};
 
-			// eslint-disable-next-line max-len
-			transformCommitForSubRepository = proxyquire( '../../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository', {
-				'@ckeditor/ckeditor5-dev-utils': {
-					logger( verbosity ) {
-						loggerVerbosity = verbosity;
+			transformCommitForSubRepository = proxyquire(
+				'../../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository',
+				{
+					'@ckeditor/ckeditor5-dev-utils': {
+						logger( verbosity ) {
+							loggerVerbosity = verbosity;
 
-						return stubs.logger;
+							return stubs.logger;
+						}
 					}
 				}
-			} );
+			);
 		} );
 
 		afterEach( () => {
@@ -87,8 +89,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			// eslint-disable-next-line max-len
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* \u001b\[33m684997d\u001b\[39m "Fix: Simple fix\." \u001b\[32mINCLUDED/ );
+			expect( stubs.logger.info.firstCall.args[ 0 ] )
+				.to.match( /\* \u001b\[33m684997d\u001b\[39m "Fix: Simple fix\." \u001b\[32mINCLUDED/ );
 		} );
 
 		it( 'truncates too long commit\'s subject', () => {
@@ -106,9 +108,11 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
-			expect( stubs.logger.info.calledOnce ).to.equal( true );
 			// eslint-disable-next-line max-len
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* \u001b\[33m684997d\u001b\[39m "Fix: Reference site about Lorem Ipsum, giving information on its origins, as well as a random Lip\.\.\." \u001b\[32mINCLUDED/ );
+			const commitDetailsPattern = /\* \u001b\[33m684997d\u001b\[39m "Fix: Reference site about Lorem Ipsum, giving information on its origins, as well as a random Lip\.\.\." \u001b\[32mINCLUDED/;
+
+			expect( stubs.logger.info.calledOnce ).to.equal( true );
+			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( commitDetailsPattern );
 		} );
 
 		it( 'does not attach valid "internal" commit to the changelog', () => {
@@ -125,8 +129,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			// eslint-disable-next-line max-len
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* \u001b\[33m684997d\u001b\[39m "Docs: README\." \u001b\[90mSKIPPED/ );
+			expect( stubs.logger.info.firstCall.args[ 0 ] )
+				.to.match( /\* \u001b\[33m684997d\u001b\[39m "Docs: README\." \u001b\[90mSKIPPED/ );
 		} );
 
 		it( 'does not attach invalid commit to the changelog', () => {
@@ -143,8 +147,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			// eslint-disable-next-line max-len
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* \u001b\[33m684997d\u001b\[39m "Invalid commit\." \u001b\[31mINVALID/ );
+			expect( stubs.logger.info.firstCall.args[ 0 ] )
+				.to.match( /\* \u001b\[33m684997d\u001b\[39m "Invalid commit\." \u001b\[31mINVALID/ );
 		} );
 
 		it( 'makes URLs to issues on GitHub', () => {

@@ -100,7 +100,6 @@ describe( 'utils', () => {
 
 			it( 'should be defined', () => expect( ckeditor5Dirs.getDevDirectories ).to.be.a( 'function' ) );
 
-			// eslint-disable-next-line max-len
 			it( 'should return empty array if no dev directories were found - because of missing ckeditor5-* repos', () => {
 				const wrongRepositoryInfo = { name: 'plugins/plugin' };
 
@@ -108,14 +107,12 @@ describe( 'utils', () => {
 				sandbox.stub( ckeditor5Dirs, 'getDependencies', () => dependencies );
 				sandbox.stub( git, 'parseRepositoryUrl' ).returns( wrongRepositoryInfo );
 
-				// eslint-disable-next-line max-len
 				const directories = ckeditor5Dirs.getDevDirectories( workspacePath, packageJSONDependencies, ckeditor5Path );
 
 				expect( directories ).to.be.a( 'array' );
 				expect( directories.length ).to.equal( 0 );
 			} );
 
-			// eslint-disable-next-line max-len
 			it( 'should return empty array if no dev directories were found - because of missing ckeditor5-* dirs', () => {
 				const wrongDirectories = [ 'tools', 'ckeditor5', '.bin' ];
 
@@ -123,7 +120,6 @@ describe( 'utils', () => {
 				sandbox.stub( ckeditor5Dirs, 'getDependencies', () => dependencies );
 				sandbox.stub( git, 'parseRepositoryUrl' ).returns( repositoryInfo );
 
-				// eslint-disable-next-line max-len
 				const directories = ckeditor5Dirs.getDevDirectories( workspacePath, packageJSONDependencies, ckeditor5Path );
 
 				expect( directories ).to.be.a( 'array' );
@@ -135,7 +131,6 @@ describe( 'utils', () => {
 				sandbox.stub( ckeditor5Dirs, 'getDependencies', () => dependencies );
 				sandbox.stub( git, 'parseRepositoryUrl' ).returns( repositoryInfo );
 
-				// eslint-disable-next-line max-len
 				const directories = ckeditor5Dirs.getDevDirectories( workspacePath, packageJSONDependencies, ckeditor5Path );
 
 				expect( directories.length ).to.equal( 2 );
@@ -155,7 +150,6 @@ describe( 'utils', () => {
 				sandbox.stub( git, 'parseRepositoryUrl' ).returns( repositoryInfo );
 				const includeRoot = true;
 
-				// eslint-disable-next-line max-len
 				const directories = ckeditor5Dirs.getDevDirectories( workspacePath, packageJSONDependencies, ckeditor5Path, includeRoot );
 
 				expect( directories.length ).to.equal( 3 );

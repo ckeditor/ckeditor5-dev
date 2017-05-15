@@ -21,7 +21,6 @@ module.exports = {
 	 * @returns {String} urlInfo.branch
 	 */
 	parseRepositoryUrl( url ) {
-		// eslint-disable-next-line max-len
 		const regexp = /^((?:git@|(?:https?|git):\/\/)github\.com(?:\/|:))?(([\w-]+)\/([\w-]+(?:\.git)?))(?:#([\w-/.]+))?$/;
 		const match = url.match( regexp );
 

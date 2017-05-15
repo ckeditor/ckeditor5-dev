@@ -56,7 +56,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 
-		// eslint-disable-next-line max-len
 		generateChangelogForSubRepositories = proxyquire( '../../../lib/release-tools/tasks/generatechangelogforsubrepositories', {
 			'@ckeditor/ckeditor5-dev-utils': {
 				logger() {

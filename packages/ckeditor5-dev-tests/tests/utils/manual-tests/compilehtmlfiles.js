@@ -115,6 +115,7 @@ describe( 'compileHtmlFiles', () => {
 
 		sinon.assert.calledWithExactly( stubs.commonmark.parse, '## Markdown header' );
 		sinon.assert.calledWithExactly( stubs.fs.ensureDirSync, 'buildDir' );
+
 		/* eslint-disable max-len */
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
@@ -126,6 +127,7 @@ describe( 'compileHtmlFiles', () => {
 			].join( '\n' )
 		);
 		/* eslint-enable max-len */
+
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ) );
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ) );
 		sinon.assert.calledWithExactly(
@@ -234,6 +236,7 @@ describe( 'compileHtmlFiles', () => {
 
 		sinon.assert.calledWithExactly( stubs.commonmark.parse, '## Markdown header' );
 		sinon.assert.calledWithExactly( stubs.fs.ensureDirSync, 'buildDir' );
+
 		/* eslint-disable max-len */
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
@@ -245,6 +248,7 @@ describe( 'compileHtmlFiles', () => {
 			].join( '\n' )
 		);
 		/* eslint-enable max-len */
+
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ) );
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ) );
 		sinon.assert.neverCalledWith( stubs.fs.copySync, 'some.file.md', path.join( 'buildDir', 'some.file.md' ) );

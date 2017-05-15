@@ -60,7 +60,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 				};
 			} );
 
-			// eslint-disable-next-line max-len
 			generateChangelogForSinglePackage = proxyquire( '../../../lib/release-tools/tasks/generatechangelogforsinglepackage', {
 				'@ckeditor/ckeditor5-dev-utils': {
 					tools: stubs.tools,

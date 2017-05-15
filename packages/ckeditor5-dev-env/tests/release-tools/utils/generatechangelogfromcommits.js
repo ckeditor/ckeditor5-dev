@@ -67,7 +67,6 @@ describe( 'dev-env/release-tools/utils', () => {
 				};
 			} );
 
-			// eslint-disable-next-line max-len
 			generateChangelogFromCommits = proxyquire( '../../../lib/release-tools/utils/generatechangelogfromcommits', {
 				'@ckeditor/ckeditor5-dev-utils': {
 					logger() {
