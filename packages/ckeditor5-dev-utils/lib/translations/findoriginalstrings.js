@@ -17,7 +17,7 @@ module.exports = function findOriginalStrings( source ) {
 	const originalStrings = [];
 
 	walk.simple( ast, {
-		CallExpression: ( node ) => {
+		CallExpression: node => {
 			if ( node.callee.name !== 't' ) {
 				return;
 			}

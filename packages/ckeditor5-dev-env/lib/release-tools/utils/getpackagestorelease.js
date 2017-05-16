@@ -53,8 +53,8 @@ module.exports = function getPackagesToRelease( pathsToPackages ) {
 
 				for ( const [ packageName, packageJson ] of packagesToCheck ) {
 					// Check whether the dependencies will be released.
-					let willUpdateDependencies = Object.keys( packageJson.dependencies || {} )
-						.some( ( dependencyName ) => packagesToRelease.has( dependencyName ) );
+					const willUpdateDependencies = Object.keys( packageJson.dependencies || {} )
+						.some( dependencyName => packagesToRelease.has( dependencyName ) );
 
 					// If so, bump the patch version for current package and release it too.
 					if ( willUpdateDependencies ) {

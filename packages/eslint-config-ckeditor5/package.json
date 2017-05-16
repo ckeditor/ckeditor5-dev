@@ -1,0 +1,22 @@
+{
+  "name": "eslint-config-ckeditor5",
+  "version": "0.0.2",
+  "description": "CKEditor 5 ESLint preset.",
+  "keywords": [
+    "style guide",
+    "eslint",
+    "config",
+    "lint",
+    "ckeditor",
+    "eslintconfig"
+  ],
+  "main": ".eslintrc.js",
+  "files": [
+    ".eslintrc.js"
+  ],
+  "author": "CKSource (http://cksource.com/)",
+  "license": "MIT",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/eslint-config-ckeditor5",
+  "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
+  "repository": "https://github.com/ckeditor/ckeditor5-dev"
+}

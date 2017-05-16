@@ -33,7 +33,7 @@ exec( 'npm install -g mgit2' );
 exec( `git checkout origin/${ branch } .` );
 
 // Install dependencies.
-exec( 'mgit bootstrap --recursive --resolver-url-template="https://github.com/\\\${ path }.git"' );
+exec( 'mgit bootstrap --recursive --resolver-url-template="https://github.com/\\${ path }.git"' );
 
 // Save hashes from all dependencies.
 exec( 'mgit save-hashes' );

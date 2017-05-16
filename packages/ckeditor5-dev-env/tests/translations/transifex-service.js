@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it, beforeEach, afterEach */
-
 'use strict';
 
 const transifexService = require( '../../lib/translations/transifex-service' );
@@ -53,7 +51,7 @@ describe( 'transifex-service', () => {
 				token: 'token'
 			} )
 			.then( () => new Error( 'Promise should not be resolved' ) )
-			.catch( ( err ) => expect( err.message ).to.equal( `Status code: 500 for 'getResources' method.` ) );
+			.catch( err => expect( err.message ).to.equal( 'Status code: 500 for \'getResources\' method.' ) );
 		} );
 
 		it( 'should throw an error if some other error occurs', () => {
@@ -65,7 +63,7 @@ describe( 'transifex-service', () => {
 				token: 'token'
 			} )
 			.then( () => new Error( 'Promise should not be resolved' ) )
-			.catch( ( err ) => expect( err ).to.equal( error ) );
+			.catch( err => expect( err ).to.equal( error ) );
 		} );
 
 		it( 'should throw an error if some error occurs during parsing the body', () => {
@@ -76,7 +74,11 @@ describe( 'transifex-service', () => {
 				token: 'token'
 			} )
 			.then( () => new Error( 'Promise should not be resolved' ) )
-			.catch( ( err ) => expect( err.message ).to.equal( `Error handled while parsing body of the 'getResources' response: Invalid JSON` ) );
+			.catch( err => {
+				expect( err.message ).to.equal(
+					'Error handled while parsing body of the \'getResources\' response: Invalid JSON'
+				);
+			} );
 		} );
 	} );
 

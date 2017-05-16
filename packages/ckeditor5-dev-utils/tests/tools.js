@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it, beforeEach, afterEach */
-
 'use strict';
 
 const chai = require( 'chai' );
@@ -26,7 +24,7 @@ describe( 'utils', () => {
 			warnOnUnregistered: false
 		} );
 
-		mockery.registerMock( './logger', ( verbosity ) => {
+		mockery.registerMock( './logger', verbosity => {
 			loggerVerbosity = verbosity;
 			infoSpy = sinon.spy();
 			errorSpy = sinon.spy();
@@ -334,7 +332,7 @@ describe( 'utils', () => {
 				sandbox.stub( tools, 'isFile' ).returns( true );
 				const fs = require( 'fs' );
 				const name = 'module-name';
-				sandbox.stub( fs, 'readFileSync' ).returns( JSON.stringify( { name: name } ) );
+				sandbox.stub( fs, 'readFileSync' ).returns( JSON.stringify( { name } ) );
 
 				const result = tools.readPackageName( modulePath );
 
@@ -415,7 +413,7 @@ describe( 'utils', () => {
 
 				readFileStub.onFirstCall().returns( 'file data {{var1}}, {{var2}}' );
 
-				tools.copyTemplateFile( inputPath,  outputPath, {
+				tools.copyTemplateFile( inputPath, outputPath, {
 					'{{var1}}': 'foo',
 					'{{var2}}': 'bar'
 				} );
@@ -435,7 +433,7 @@ describe( 'utils', () => {
 				const copyFileStub = sandbox.stub( fs, 'copySync' );
 				const ensureDirStub = sandbox.stub( fs, 'ensureDirSync' );
 
-				tools.copyTemplateFile( inputPath,  outputPath );
+				tools.copyTemplateFile( inputPath, outputPath );
 
 				sinon.assert.calledWithExactly( ensureDirStub, path.dirname( outputPath ) );
 				sinon.assert.calledOnce( copyFileStub );
@@ -481,7 +479,9 @@ describe( 'utils', () => {
 
 				try {
 					tools.getGitUrlFromNpm( moduleName );
-				} catch ( e ) {}
+				} catch ( e ) {
+					expect( e ).to.equal( error );
+				}
 
 				expect( getUrlSpy.threw( error ) ).to.equal( true );
 			} );
@@ -509,7 +509,7 @@ describe( 'utils', () => {
 				} );
 
 				return tools.copyFile( '/tmp/not/existing/file.txt', '/tmp/file.txt' )
-					.catch( ( err ) => {
+					.catch( err => {
 						expect( readFileStub.calledOnce ).to.equal( true );
 						expect( readFileStub.firstCall.args[ 0 ] ).to.equal( '/tmp/not/existing/file.txt' );
 						expect( err ).to.equal( 'Some error during readFile.' );
@@ -526,7 +526,7 @@ describe( 'utils', () => {
 				} );
 
 				return tools.copyFile( '/tmp/directory/file.txt', '/tmp/file.txt' )
-					.catch( ( err ) => {
+					.catch( err => {
 						expect( readFileStub.calledOnce ).to.equal( true );
 						expect( readFileStub.firstCall.args[ 0 ] ).to.equal( '/tmp/directory/file.txt' );
 						expect( outputFileStub.calledOnce ).to.equal( true );
@@ -558,7 +558,7 @@ describe( 'utils', () => {
 		} );
 
 		describe( 'clean', () => {
-			let files = [
+			const files = [
 				path.join( 'test', 'foo', 'bar' ),
 				path.join( 'test', 'bar', 'foo' )
 			];
@@ -566,7 +566,7 @@ describe( 'utils', () => {
 			let delArg;
 
 			beforeEach( () => {
-				mockery.registerMock( 'del', ( globToDelete ) => {
+				mockery.registerMock( 'del', globToDelete => {
 					delArg = globToDelete;
 
 					return Promise.resolve( files );
@@ -579,8 +579,8 @@ describe( 'utils', () => {
 						expect( delArg ).to.equal( path.join( 'test', '**' ) );
 						expect( loggerVerbosity ).to.equal( 'info' );
 						expect( infoSpy.calledTwice ).to.equal( true );
-						expect( infoSpy.firstCall.args[ 0 ] ).to.match( new RegExp( files [ 0 ] ) );
-						expect( infoSpy.secondCall.args[ 0 ] ).to.match( new RegExp( files [ 1 ] ) );
+						expect( infoSpy.firstCall.args[ 0 ] ).to.match( new RegExp( files[ 0 ] ) );
+						expect( infoSpy.secondCall.args[ 0 ] ).to.match( new RegExp( files[ 1 ] ) );
 					} );
 			} );
 		} );

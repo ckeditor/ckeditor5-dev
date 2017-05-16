@@ -15,7 +15,7 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @returns {Boolean}
  */
 module.exports = function updateDependenciesVersions( dependencies, packageJsonPath ) {
-	tools.updateJSONFile( packageJsonPath, ( json ) => {
+	tools.updateJSONFile( packageJsonPath, json => {
 		for ( const item of dependencies.keys() ) {
 			const version = dependencies.get( item ).version;
 

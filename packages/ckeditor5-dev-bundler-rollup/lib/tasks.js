@@ -256,7 +256,7 @@ const tasks = {
 	_writeBundle( { bundle, rollupOptions, filePath } ) {
 		return bundle.write( Object.assign( {
 			format: 'iife',
-			dest: `${filePath}.js`,
+			dest: `${ filePath }.js`,
 		}, rollupOptions ) );
 	},
 
@@ -289,7 +289,7 @@ const tasks = {
 		const cssSource = path.join( sourceBuildDir, 'theme', 'ckeditor.css' );
 		const outputDirectory = path.dirname( filePath );
 
-		return tools.copyFile( cssSource, path.join( outputDirectory, `${fileName}.css` ) );
+		return tools.copyFile( cssSource, path.join( outputDirectory, `${ fileName }.css` ) );
 	},
 
 	/**
@@ -316,7 +316,7 @@ const tasks = {
 	 * @returns {Stream}
 	 */
 	_minifyJs( filePath ) {
-		const stream = gulp.src( `${filePath}.js` )
+		const stream = gulp.src( `${ filePath }.js` )
 			.pipe( gulpUglify() );
 
 		return utils.saveFileFromStreamAsMinified( stream, path.dirname( filePath ) );
@@ -330,7 +330,7 @@ const tasks = {
 	 * @returns {Stream}
 	 */
 	_minifyCss( filePath ) {
-		const stream = gulp.src( `${filePath}.css` )
+		const stream = gulp.src( `${ filePath }.css` )
 			.pipe( gulpCssnano() );
 
 		return utils.saveFileFromStreamAsMinified( stream, path.dirname( filePath ) );
@@ -345,10 +345,10 @@ const tasks = {
 	 */
 	_showSummary( destinationPath, fileName ) {
 		const files = [
-			`${fileName}.js`,
-			`${fileName}.css`,
-			`${fileName}.min.js`,
-			`${fileName}.min.css`
+			`${ fileName }.js`,
+			`${ fileName }.css`,
+			`${ fileName }.min.js`,
+			`${ fileName }.min.css`
 		];
 		const filesStats = utils.getFilesSizeStats( files, destinationPath );
 

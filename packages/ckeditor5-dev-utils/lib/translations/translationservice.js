@@ -67,7 +67,7 @@ module.exports = class TranslationService {
 		let changesInCode = false;
 
 		walk.simple( ast, {
-			CallExpression: ( node ) => {
+			CallExpression: node => {
 				if ( node.callee.name !== 't' ) {
 					return;
 				}

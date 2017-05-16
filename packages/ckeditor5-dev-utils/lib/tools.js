@@ -96,9 +96,9 @@ module.exports = {
 
 		try {
 			return fs.statSync( path ).isDirectory();
-		} catch ( e ) {}
-
-		return false;
+		} catch ( e ) {
+			return false;
+		}
 	},
 
 	/**
@@ -112,9 +112,9 @@ module.exports = {
 
 		try {
 			return fs.statSync( path ).isFile();
-		} catch ( e ) {}
-
-		return false;
+		} catch ( e ) {
+			return false;
+		}
 	},
 
 	/**
@@ -127,9 +127,9 @@ module.exports = {
 
 		try {
 			return fs.lstatSync( path ).isSymbolicLink();
-		} catch ( e ) {}
-
-		return false;
+		} catch ( e ) {
+			return false;
+		}
 	},
 
 	/**
@@ -243,7 +243,7 @@ module.exports = {
 		// When replace object is passed - modify file on the fly.
 		const regexpList = [];
 
-		for ( let variableName in replace ) {
+		for ( const variableName in replace ) {
 			regexpList.push( variableName );
 		}
 
@@ -252,7 +252,7 @@ module.exports = {
 
 		// Read and modify.
 		const inputData = fs.readFileSync( inputPath, 'utf8' );
-		const modifiedData = inputData.replace( regexp, ( matched ) => replace[ matched ] );
+		const modifiedData = inputData.replace( regexp, matched => replace[ matched ] );
 
 		// Save.
 		fs.writeFileSync( outputPath, modifiedData, 'utf8' );
@@ -272,7 +272,7 @@ module.exports = {
 					return reject( err );
 				}
 
-				fs.outputFile( to, data, ( err ) => {
+				fs.outputFile( to, data, err => {
 					if ( err ) {
 						return reject( err );
 					}
@@ -331,7 +331,7 @@ module.exports = {
 		const del = require( 'del' );
 
 		return del( path.join( rootDir, glob ) )
-			.then( ( paths ) => {
+			.then( paths => {
 				const log = require( './logger' )( options.verbosity );
 
 				paths.forEach( p => {

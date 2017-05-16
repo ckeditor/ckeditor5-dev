@@ -23,7 +23,7 @@ module.exports = {
 		let result = null;
 
 		if ( dependencies ) {
-			Object.keys( dependencies ).forEach( ( key ) => {
+			Object.keys( dependencies ).forEach( key => {
 				if ( dependencyRegExp.test( key ) ) {
 					if ( result === null ) {
 						result = {};
@@ -79,9 +79,9 @@ module.exports = {
 		const directories = this.getDirectories( workspacePath );
 		const dependencies = this.getDependencies( packageJSON.dependencies );
 
-		let devDirectories = [];
+		const devDirectories = [];
 
-		for ( let dependency in dependencies ) {
+		for ( const dependency in dependencies ) {
 			const repositoryURL = dependencies[ dependency ];
 			const urlInfo = git.parseRepositoryUrl( repositoryURL );
 			const repositoryPath = path.join( workspacePath, dependency );

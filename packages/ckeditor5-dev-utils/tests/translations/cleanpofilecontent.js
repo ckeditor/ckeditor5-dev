@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it */
-
 'use strict';
 
 const chai = require( 'chai' );
@@ -14,7 +12,9 @@ const cleanPoFileContent = require( '../../lib/translations/cleanpofilecontent' 
 describe( 'translations', () => {
 	describe( 'cleanPoFileContent()', () => {
 		it( 'clean po files from personal data', () => {
-			const poFileContent = `# Copyright (c) Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
+			const poFileContent =
+// eslint-disable-next-line max-len
+`# Copyright (c) Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
 # Translators:
 # Xuxxx Satxxx <xxxx@gmail.com>, 2017
 msgid ""
@@ -29,7 +29,9 @@ msgid "Link URL"
 msgstr "URL del enllaz"
 `;
 
-			const expectedResult = `# Copyright (c) Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
+			const expectedResult =
+// eslint-disable-next-line max-len
+`# Copyright (c) Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
 msgid ""
 msgstr ""
 "Language: ast\\n"

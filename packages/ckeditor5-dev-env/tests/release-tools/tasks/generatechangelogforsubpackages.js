@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const path = require( 'path' );
@@ -154,8 +152,12 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.cli.provideVersion.secondCall.args[ 0 ] ).to.equal( '2.0.0' );
 					expect( stubs.cli.provideVersion.secondCall.args[ 1 ] ).to.equal( 'minor' );
 
-					expect( stubs.logger.info.getCall( 1 ).args[ 0 ] ).to.match( /Generating changelog for "@ckeditor\/ckeditor5-dev-foo"\.\.\./ );
-					expect( stubs.logger.info.getCall( 3 ).args[ 0 ] ).to.match( /Generating changelog for "@ckeditor\/ckeditor5-dev-bar"\.\.\./ );
+					expect( stubs.logger.info.getCall( 1 ).args[ 0 ] ).to.match(
+						/Generating changelog for "@ckeditor\/ckeditor5-dev-foo"\.\.\./
+					);
+					expect( stubs.logger.info.getCall( 3 ).args[ 0 ] ).to.match(
+						/Generating changelog for "@ckeditor\/ckeditor5-dev-bar"\.\.\./
+					);
 					expect( stubs.logger.info.getCall( 4 ).args[ 0 ] ).to.match( /Committing generated changelogs\./ );
 
 					expect( stubs.displayGeneratedChangelogs.calledOnce ).to.equal( true );
@@ -163,7 +165,9 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 					expect( stubs.tools.shExec.calledTwice ).to.equal( true );
 					expect( stubs.tools.shExec.firstCall.args[ 0 ] ).to.equal( 'git add packages/**/CHANGELOG.md' );
-					expect( stubs.tools.shExec.secondCall.args[ 0 ] ).to.equal( 'git commit -m "Docs: Updated changelog for packages. [skip ci]"' );
+					expect( stubs.tools.shExec.secondCall.args[ 0 ] ).to.equal(
+						'git commit -m "Docs: Updated changelog for packages. [skip ci]"'
+					);
 
 					expect( stubs.generateChangelogFromCommits.calledTwice ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {

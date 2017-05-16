@@ -13,7 +13,7 @@ const path = require( 'path' );
 const cwd = process.cwd();
 const lerna = path.resolve( cwd, 'lerna.json' );
 
-let json = {
+const json = {
 	'lerna': '2.0.0-rc.1',
 	'packages': [
 		'packages/*',

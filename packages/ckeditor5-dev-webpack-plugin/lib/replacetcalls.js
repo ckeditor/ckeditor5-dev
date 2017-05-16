@@ -17,7 +17,7 @@ const {	TranslationService } = require( '@ckeditor/ckeditor5-dev-utils' ).transl
 module.exports = function replaceTCalls( compiler, language ) {
 	const translationService = new TranslationService( language );
 
-	compiler.options.translateSource = ( source ) => translationService.translateSource( source );
+	compiler.options.translateSource = source => translationService.translateSource( source );
 
 	// Adds ckeditor5-core translations before translate-source-loader starts translating.
 	compiler.plugin( 'after-resolvers', () => {
@@ -33,7 +33,7 @@ module.exports = function replaceTCalls( compiler, language ) {
 		);
 	} );
 
-	compiler.plugin( 'normal-module-factory', ( nmf ) => {
+	compiler.plugin( 'normal-module-factory', nmf => {
 		nmf.plugin( 'after-resolve', ( resolveOptions, done ) => {
 			maybeLoadPackage( resolveOptions );
 			maybeAddLoader( resolveOptions );

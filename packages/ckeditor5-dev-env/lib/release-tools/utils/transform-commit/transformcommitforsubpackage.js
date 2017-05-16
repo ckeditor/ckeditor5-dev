@@ -37,7 +37,7 @@ module.exports = function transformCommitForSubPackage( commit, context ) {
 
 function isValidCommit( files, packageName ) {
 	// Commit is valid for the package if at least one file in the package was changed.
-	return files.some( ( filePath ) => {
+	return files.some( filePath => {
 		return filePath.startsWith( `packages/${ packageName }` );
 	} );
 }

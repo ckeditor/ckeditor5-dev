@@ -3,17 +3,13 @@
   "version": "2.0.3",
   "description": "Gulp linting tasks for CKEditor 5.",
   "keywords": [],
-  "main": "lib/lint.js",
+  "main": "lib/index.js",
   "dependencies": {
-    "concat-stream": "^1.5.1",
     "git-guppy": "^1.2.1",
     "gulp": "^3.9.1",
     "gulp-filter": "^4.0.0",
-    "gulp-jscs": "^4.0.0",
-    "gulp-jshint": "^2.0.1",
-    "gulp-util": "^3.0.7",
-    "jshint": "^2.9.2",
-    "jshint-reporter-jscs": "^0.1.0"
+    "gulp-eslint": "^3.0.1",
+    "gulp-util": "^3.0.7"
   },
   "devDependencies": {
     "chai": "^3.5.0",

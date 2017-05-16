@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const sinon = require( 'sinon' );
@@ -89,11 +87,11 @@ describe( 'dev-env/index', () => {
 		it( 'creates release for sub repository', () => {
 			stubs.releaseTools.releaseRepository.returns( Promise.resolve( { result: true } ) );
 
-			return tasks.releaseRepository( 'argument' )
-				.then( ( response ) => {
+			return tasks.releaseRepository( 'arg' )
+				.then( response => {
 					expect( response.result ).to.equal( true );
 					expect( stubs.releaseTools.releaseRepository.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.releaseRepository.firstCall.args[0] ).to.equal( 'argument' );
+					expect( stubs.releaseTools.releaseRepository.firstCall.args[ 0 ] ).to.equal( 'arg' );
 				} );
 		} );
 	} );
@@ -102,11 +100,11 @@ describe( 'dev-env/index', () => {
 		it( 'creates release for sub repositories', () => {
 			stubs.releaseTools.releaseSubRepositories.returns( Promise.resolve( { result: true } ) );
 
-			return tasks.releaseSubRepositories( 'argument' )
-				.then( ( response ) => {
+			return tasks.releaseSubRepositories( 'arg' )
+				.then( response => {
 					expect( response.result ).to.equal( true );
 					expect( stubs.releaseTools.releaseSubRepositories.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.releaseSubRepositories.firstCall.args[0] ).to.equal( 'argument' );
+					expect( stubs.releaseTools.releaseSubRepositories.firstCall.args[ 0 ] ).to.equal( 'arg' );
 				} );
 		} );
 	} );
@@ -115,11 +113,11 @@ describe( 'dev-env/index', () => {
 		it( 'generates a changelog for package', () => {
 			stubs.releaseTools.generateChangelogForSinglePackage.returns( Promise.resolve( { result: true } ) );
 
-			return tasks.generateChangelogForSinglePackage( 'argument' )
-				.then( ( response ) => {
+			return tasks.generateChangelogForSinglePackage( 'arg' )
+				.then( response => {
 					expect( response.result ).to.equal( true );
 					expect( stubs.releaseTools.generateChangelogForSinglePackage.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.generateChangelogForSinglePackage.firstCall.args[0] ).to.equal( 'argument' );
+					expect( stubs.releaseTools.generateChangelogForSinglePackage.firstCall.args[ 0 ] ).to.equal( 'arg' );
 				} );
 		} );
 	} );
@@ -128,11 +126,11 @@ describe( 'dev-env/index', () => {
 		it( 'generates a changelog for sub packages', () => {
 			stubs.releaseTools.generateChangelogForSubPackages.returns( Promise.resolve( { result: true } ) );
 
-			return tasks.generateChangelogForSubPackages( 'argument' )
-				.then( ( response ) => {
+			return tasks.generateChangelogForSubPackages( 'arg' )
+				.then( response => {
 					expect( response.result ).to.equal( true );
 					expect( stubs.releaseTools.generateChangelogForSubPackages.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.generateChangelogForSubPackages.firstCall.args[0] ).to.equal( 'argument' );
+					expect( stubs.releaseTools.generateChangelogForSubPackages.firstCall.args[ 0 ] ).to.equal( 'arg' );
 				} );
 		} );
 	} );
@@ -141,11 +139,11 @@ describe( 'dev-env/index', () => {
 		it( 'generates a changelog for sub repositories', () => {
 			stubs.releaseTools.generateChangelogForSubRepositories.returns( Promise.resolve( { result: true } ) );
 
-			return tasks.generateChangelogForSubRepositories( 'argument' )
-				.then( ( response ) => {
+			return tasks.generateChangelogForSubRepositories( 123 )
+				.then( response => {
 					expect( response.result ).to.equal( true );
 					expect( stubs.releaseTools.generateChangelogForSubRepositories.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.generateChangelogForSubRepositories.firstCall.args[0] ).to.equal( 'argument' );
+					expect( stubs.releaseTools.generateChangelogForSubRepositories.firstCall.args[ 0 ] ).to.equal( 123 );
 				} );
 		} );
 	} );

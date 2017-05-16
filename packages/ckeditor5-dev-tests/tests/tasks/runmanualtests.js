@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const mockery = require( 'mockery' );
@@ -99,7 +97,8 @@ describe( 'runManualTests', () => {
 				expect( spies.transformFileOptionToTestGlob.calledTwice ).to.equal( true );
 				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( 'build-classic' );
 				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 1 ] ).to.equal( true );
-				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 0 ] ).to.equal( 'editor-classic/manual/classic.js' );
+				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 0 ] )
+					.to.equal( 'editor-classic/manual/classic.js' );
 				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 1 ] ).to.equal( true );
 
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );

@@ -3,6 +3,4 @@
  * Licensed under the terms of the MIT License (see LICENSE.md).
  */
 
-/* jshint mocha:true */
-
 'use strict';

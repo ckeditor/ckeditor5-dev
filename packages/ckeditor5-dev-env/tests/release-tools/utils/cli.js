@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const expect = require( 'chai' ).expect;
@@ -46,42 +44,42 @@ describe( 'dev-env/release-tools/utils', () => {
 		describe( 'provideVersion()', () => {
 			it( 'should suggest proper "major" version for public package', () => {
 				return cli.provideVersion( '1.0.0', 'major' )
-					.then( ( newVersion ) => {
+					.then( newVersion => {
 						expect( newVersion ).to.equal( '2.0.0' );
 					} );
 			} );
 
 			it( 'should suggest proper "minor" version for public package', () => {
 				return cli.provideVersion( '1.0.0', 'minor' )
-					.then( ( newVersion ) => {
+					.then( newVersion => {
 						expect( newVersion ).to.equal( '1.1.0' );
 					} );
 			} );
 
 			it( 'should suggest proper "patch" version for public package', () => {
 				return cli.provideVersion( '1.0.0', 'patch' )
-					.then( ( newVersion ) => {
+					.then( newVersion => {
 						expect( newVersion ).to.equal( '1.0.1' );
 					} );
 			} );
 
 			it( 'should suggest "skip" version for package which does not contain changes', () => {
 				return cli.provideVersion( '1.0.0', null )
-					.then( ( newVersion ) => {
+					.then( newVersion => {
 						expect( newVersion ).to.equal( 'skip' );
 					} );
 			} );
 
 			it( 'should suggest "minor" instead of "major" version for non-public package', () => {
 				return cli.provideVersion( '0.7.0', 'major' )
-					.then( ( newVersion ) => {
+					.then( newVersion => {
 						expect( newVersion ).to.equal( '0.8.0' );
 					} );
 			} );
 
 			it( 'should suggest proper "patch" version for non-public package', () => {
 				return cli.provideVersion( '0.7.0', 'patch' )
-					.then( ( newVersion ) => {
+					.then( newVersion => {
 						expect( newVersion ).to.equal( '0.7.1' );
 					} );
 			} );
@@ -102,12 +100,12 @@ describe( 'dev-env/release-tools/utils', () => {
 
 				return cli.confirmRelease( packagesMap )
 					.then( () => {
-						const questionItem = questionItems[ 0 ];
+						const question = questionItems[ 0 ];
 
-						expect( questionItem.message ).to.match( /^Packages to release:/ );
-						expect( questionItem.message ).to.match( /"@ckeditor\/ckeditor5-engine": v1\.0\.0 => v1\.1\.0/ );
-						expect( questionItem.message ).to.match( /"@ckeditor\/ckeditor5-core": v0\.7\.0 => v0\.7\.1/ );
-						expect( questionItem.message ).to.match( /Continue\?$/ );
+						expect( question.message ).to.match( /^Packages to release:/ );
+						expect( question.message ).to.match( /"@ckeditor\/ckeditor5-engine": v1\.0\.0 => v1\.1\.0/ );
+						expect( question.message ).to.match( /"@ckeditor\/ckeditor5-core": v0\.7\.0 => v0\.7\.1/ );
+						expect( question.message ).to.match( /Continue\?$/ );
 					} );
 			} );
 
@@ -128,7 +126,7 @@ describe( 'dev-env/release-tools/utils', () => {
 							// Remove header and footer from the message.
 							.slice( 1, -1 )
 							// Extract package name from the whole line.
-							.map( ( line ) => line.replace( /.*"([^"]+)".*/, '$1' ) );
+							.map( line => line.replace( /.*"([^"]+)".*/, '$1' ) );
 
 						expect( packagesAsArray.length ).to.equal( 6 );
 						expect( packagesAsArray[ 0 ] ).to.equal( '@ckeditor/ckeditor5-autoformat' );

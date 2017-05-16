@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const path = require( 'path' );
@@ -132,16 +130,21 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return releaseRepository( options )
 				.then( () => {
 					expect( stubs.updateDependenciesVersions.calledOnce ).to.equal( true );
-					expect( stubs.updateDependenciesVersions.firstCall.args[ 0 ] ).to.deep.equal( options.dependencies );
-					expect( stubs.updateDependenciesVersions.firstCall.args[ 1 ] ).to.deep.equal( '/cwd/package.json' );
+					expect( stubs.updateDependenciesVersions.firstCall.args[ 0 ] )
+						.to.deep.equal( options.dependencies );
+					expect( stubs.updateDependenciesVersions.firstCall.args[ 1 ] )
+						.to.deep.equal( '/cwd/package.json' );
 
 					expect( stubs.logger.info.called ).to.equal( true );
 					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( '' );
-					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.match( /Creating release for "@ckeditor\/ckeditor5-core"\./ );
+					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.match(
+						/Creating release for "@ckeditor\/ckeditor5-core"\./
+					);
 					expect( stubs.logger.info.thirdCall.args[ 0 ] ).to.equal( 'Updating dependencies...' );
 
 					expect( stubs.tools.shExec.calledWith( 'git add package.json' ) ).to.equal( true );
-					expect( stubs.tools.shExec.calledWith( 'git commit -m "Internal: Updated dependencies."' ) ).to.equal( true );
+					expect( stubs.tools.shExec.calledWith( 'git commit -m "Internal: Updated dependencies."' ) )
+						.to.equal( true );
 				} );
 		} );
 
@@ -187,10 +190,12 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.tools.shExec.calledWith( 'npm publish --access=public' ) ).to.equal( false );
 
 					expect( stubs.tools.shExec.calledWith( 'git add package.json' ) ).to.equal( true );
-					expect( stubs.tools.shExec.calledWith( 'git commit --message="Release: v1.0.0."' ) ).to.equal( true );
+					expect( stubs.tools.shExec.calledWith( 'git commit --message="Release: v1.0.0."' ) )
+						.to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'git tag v1.0.0' ) ).to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'git push origin master v1.0.0' ) ).to.equal( true );
-					expect( stubs.logger.info.calledWithMatch( /Release "v1.0.0" has been created and published./ ) ).to.equal( true );
+					expect( stubs.logger.info.calledWithMatch( /Release "v1.0.0" has been created and published./ ) )
+						.to.equal( true );
 				} );
 		} );
 
@@ -214,10 +219,12 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.parseGithubUrl.calledOnce ).to.equal( false );
 					expect( stubs.createGithubRelease.calledOnce ).to.equal( false );
 					expect( stubs.tools.shExec.calledWith( 'npm publish --access=public' ) ).to.equal( true );
-					expect( stubs.tools.shExec.calledWith( 'git commit --message="Release: v1.0.0."' ) ).to.equal( true );
+					expect( stubs.tools.shExec.calledWith( 'git commit --message="Release: v1.0.0."' ) )
+						.to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'git tag v1.0.0' ) ).to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'git push origin master v1.0.0' ) ).to.equal( true );
-					expect( stubs.logger.info.calledWithMatch( /Release "v1.0.0" has been created and published./ ) ).to.equal( true );
+					expect( stubs.logger.info.calledWithMatch( /Release "v1.0.0" has been created and published./ ) )
+						.to.equal( true );
 				} );
 		} );
 
@@ -244,7 +251,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.createGithubRelease.calledOnce ).to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'npm publish --access=public' ) ).to.equal( false );
 
-					expect( stubs.logger.info.calledWithMatch( /Release "v1.0.0" has been created and published./ ) ).to.equal( true );
+					expect( stubs.logger.info.calledWithMatch( /Release "v1.0.0" has been created and published./ ) )
+						.to.equal( true );
 
 					expect( stubs.createGithubRelease.firstCall.args[ 0 ] ).to.equal( options.token );
 					expect( stubs.createGithubRelease.firstCall.args[ 1 ] ).to.deep.equal( {

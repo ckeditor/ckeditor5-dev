@@ -21,7 +21,7 @@ module.exports = function compileManualTestScripts( buildDir, manualTestScriptsP
 	const entryFiles = manualTestScriptsPatterns.reduce( ( arr, manualTestPattern ) => {
 		return [
 			...arr,
-			...globSync( manualTestPattern ).filter( ( manualTestFile ) => manualTestFile.includes( '/manual/' ) )
+			...globSync( manualTestPattern ).filter( manualTestFile => manualTestFile.includes( '/manual/' ) )
 		];
 	}, [] );
 
@@ -36,7 +36,7 @@ module.exports = function compileManualTestScripts( buildDir, manualTestScriptsP
  */
 function runWebpack( webpackConfig ) {
 	return new Promise( ( resolve, reject ) => {
-		webpack( webpackConfig, ( err ) => {
+		webpack( webpackConfig, err => {
 			if ( err ) {
 				reject( err );
 			} else {
@@ -49,7 +49,7 @@ function runWebpack( webpackConfig ) {
 function getWebpackEntryPoints( entryFiles ) {
 	const entryObject = {};
 
-	entryFiles.forEach( ( file ) => {
+	entryFiles.forEach( file => {
 		entryObject[ getRelativeFilePath( file ).replace( /\.js$/, '' ) ] = file;
 	} );
 

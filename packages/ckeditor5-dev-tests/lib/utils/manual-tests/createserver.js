@@ -21,7 +21,7 @@ const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
  * @param {String} sourcePath Base path where the compiler saved the files.
  */
 module.exports = function createManualTestServer( sourcePath ) {
-	return new Promise( ( resolve ) => {
+	return new Promise( resolve => {
 		const server = http.createServer( ( request, response ) => {
 			onRequest( sourcePath, request, response );
 		} ).listen( 8125 );
@@ -116,7 +116,7 @@ function getContentType( fileExtension ) {
 function generateIndex( sourcePath ) {
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 	const listElements = globSync( path.join( sourcePath, '**', '*.html' ) )
-		.map( ( file ) => {
+		.map( file => {
 			// TODO this bit repeates in runmanualtests.js
 			const relativeFilePath = file.replace( new RegExp( '^.+?' + escapedPathSep + 'ckeditor5-' ), 'ckeditor5-' );
 
@@ -126,7 +126,7 @@ function generateIndex( sourcePath ) {
 	listElements.unshift( '<ul>' );
 	listElements.push( '</ul>' );
 
-	const headerHtml = `<body><h1>CKEditor 5 manual tests</h1></body>`;
+	const headerHtml = '<body><h1>CKEditor 5 manual tests</h1></body>';
 
 	return combine( viewTemplate, headerHtml, listElements.join( '\n' ) );
 }

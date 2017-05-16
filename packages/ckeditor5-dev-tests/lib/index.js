@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 module.exports = {
 	runAutomatedTests: require( './tasks/runautomatedtests' ),
 	runManualTests: require( './tasks/runmanualtests' ),
