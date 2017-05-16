@@ -186,7 +186,6 @@ module.exports = {
 		'one-var': [
 			'error',
 			{
-				uninitialized: 'always',
 				initialized: 'never'
 			}
 		],
