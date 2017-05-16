@@ -255,14 +255,20 @@ module.exports = {
 			'as-needed'
 		],
 		'arrow-spacing': 'error',
-		'no-confusing-arrow': 'error',
+		// This is too pedantic. It makes writing callbacks such as `value => value ? 1 : 2` impossible
+		// 'no-confusing-arrow': 'error',
 		'generator-star-spacing': 'error',
 		'no-duplicate-imports': 'error',
 		'no-useless-computed-key': 'error',
 		'no-useless-constructor': 'error',
 		'no-var': 'error',
 		'object-shorthand': 'error',
-		'prefer-const': 'error',
+		'prefer-const': [
+			'error',
+			{
+				destructuring: 'all'
+			}
+		],
 		'prefer-rest-params': 'error',
 		'prefer-spread': 'error',
 		'symbol-description': 'error',
