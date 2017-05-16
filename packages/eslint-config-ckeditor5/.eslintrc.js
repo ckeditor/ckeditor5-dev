@@ -266,7 +266,8 @@ module.exports = {
 		'prefer-const': [
 			'error',
 			{
-				destructuring: 'all'
+				destructuring: 'all',
+				ignoreReadBeforeAssign: true
 			}
 		],
 		'prefer-rest-params': 'error',
