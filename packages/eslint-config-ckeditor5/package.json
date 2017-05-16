@@ -11,6 +11,9 @@
     "eslintconfig"
   ],
   "main": ".eslintrc.js",
+  "peerDependencies": {
+    "eslint": ">=3.0.0"
+  },
   "files": [
     ".eslintrc.js"
   ],
