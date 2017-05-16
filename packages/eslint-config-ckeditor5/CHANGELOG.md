@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@1.0.2...eslint-config-ckeditor5@1.0.3) (2017-05-16)
+
+### Bug fixes
+
+* Improved `prefer-const` configuration to not throw when reading before assignining. ([91fe66e](https://github.com/ckeditor/ckeditor5-dev/commit/91fe66e))
+
+
 ## [1.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@1.0.1...eslint-config-ckeditor5@1.0.2) (2017-05-16)
 
 ### Bug fixes
