@@ -1,6 +1,6 @@
 {
   "name": "eslint-config-ckeditor5",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CKEditor 5 ESLint preset.",
   "keywords": [
     "style guide",

@@ -4,7 +4,7 @@
   "devDependencies": {
     "@ckeditor/ckeditor5-dev-env": "^4.2.0",
     "@ckeditor/ckeditor5-dev-lint": "^3.0.0",
-    "eslint-config-ckeditor5": "^1.0.0",
+    "eslint-config-ckeditor5": "^1.0.1",
     "gulp": "^3.9.1",
     "guppy-pre-commit": "^0.4.0",
     "istanbul": "^0.4.4",
@@ -23,5 +23,5 @@
     "test": "mocha `./scripts/get-test-directories.sh` --recursive",
     "coverage": "istanbul cover _mocha `./scripts/get-test-directories.sh` -- --recursive"
   },
-  "version": "0.0.1"
+  "version": "0.0.2"
 }
