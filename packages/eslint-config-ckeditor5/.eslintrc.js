@@ -43,10 +43,14 @@ module.exports = {
 			}
 		],
 		'no-implied-eval': 'error',
-		'no-invalid-this': 'error',
+		// Brings more trouble than profit. When defining callbacks which are called in a specific context,
+		// or when defining functions which are later assigned to some objects.
+		// 'no-invalid-this': 'error',
 		'no-labels': 'error',
 		'no-lone-blocks': 'error',
-		'no-loop-func': 'error',
+		// Brings more confusion than profit. Especially useless when using `map()` or `filter()`
+		// inside some other loops.
+		// 'no-loop-func': 'error',
 		'no-multi-spaces': 'error',
 		'no-multi-str': 'error',
 		'no-new': 'error',

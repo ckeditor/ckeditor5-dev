@@ -19,7 +19,6 @@ function doesFieldExistInClass( doclets, methodLongname ) {
 			return false;
 		}
 
-		// eslint-disable-next-line no-loop-func
 		if ( doclets.find( doclet => doclet.longname === currentClass.longname + '#' + methodName ) ) {
 			return true;
 		}
@@ -28,7 +27,6 @@ function doesFieldExistInClass( doclets, methodLongname ) {
 			return false;
 		}
 
-		// eslint-disable-next-line no-loop-func
 		currentClass = doclets.find( doclet => doclet.longname === currentClass.augments[ 0 ] );
 	}
 }
