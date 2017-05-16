@@ -37,10 +37,10 @@ function printErrors( errors, maxSize ) {
 	}
 
 	errorMessages.push( '\nValidation Summary:' );
-	errorMessages.push( ` * Validator found ${errors.length} errors.` );
+	errorMessages.push( ` * Validator found ${ errors.length } errors.` );
 
 	if ( errors.length > maxSize ) {
-		errorMessages.push( ` * ${errors.length - maxSize} errors not shown in the console.` );
+		errorMessages.push( ` * ${ errors.length - maxSize } errors not shown in the console.` );
 	}
 
 	process.stderr.write( errorMessages.join( '\n' ) );

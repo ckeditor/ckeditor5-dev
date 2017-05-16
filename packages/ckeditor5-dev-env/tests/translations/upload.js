@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it, beforeEach, afterEach */
-
 'use strict';
 
 const path = require( 'path' );
@@ -13,8 +11,7 @@ const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 
 describe( 'upload', () => {
-	let sandbox, stubs, upload;
-	let packageNames, serverResources, fileContents;
+	let sandbox, stubs, upload, packageNames, serverResources, fileContents;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
@@ -78,7 +75,9 @@ describe( 'upload', () => {
 		return upload( { token: 'secretToken' } )
 			.then( () => {
 				sinon.assert.calledOnce( stubs.transifexService.getResources );
-				sinon.assert.calledWithExactly( stubs.fs.readdirSync, path.join( 'workspace', 'ckeditor5', 'build', '.transifex' ) );
+				sinon.assert.calledWithExactly(
+					stubs.fs.readdirSync, path.join( 'workspace', 'ckeditor5', 'build', '.transifex' )
+				);
 
 				sinon.assert.calledOnce( stubs.transifexService.postResource );
 				sinon.assert.calledWithExactly( stubs.transifexService.postResource, {
@@ -100,13 +99,13 @@ describe( 'upload', () => {
 	} );
 
 	it( 'should report an error and throw it when something goes wrong', () => {
-		let error = new Error();
+		const error = new Error();
 		stubs.transifexService.getResources = sandbox.spy( () => Promise.reject( error ) );
 
 		return upload( { token: 'secretToken' } )
 			.then( () => {
 				throw new Error( 'It should throws an error' );
-			}, ( err ) => {
+			}, err => {
 				expect( err ).to.equal( error );
 				sinon.assert.calledOnce( stubs.logger.error );
 				sinon.assert.calledWithExactly( stubs.logger.error, error );

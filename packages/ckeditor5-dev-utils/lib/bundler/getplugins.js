@@ -23,7 +23,7 @@ const path = require( 'path' );
 module.exports = function getPlugins( pluginPaths ) {
 	const plugins = {};
 
-	pluginPaths.forEach( ( pathToFile ) => {
+	pluginPaths.forEach( pathToFile => {
 		const basePluginName = capitalize( path.basename( pathToFile, '.js' ) );
 		let pluginName = basePluginName + 'Plugin';
 		let i = 0;

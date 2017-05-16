@@ -42,7 +42,7 @@ function build( config ) {
 		]
 	};
 
-	return new Promise( ( resolve ) => {
+	return new Promise( resolve => {
 		gulp.src( sourceFiles, { read: false } )
 			.pipe( jsdoc( jsDocConfig, resolve ) );
 	} );

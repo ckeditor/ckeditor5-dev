@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it, beforeEach, afterEach */
-
 'use strict';
 
 let sandbox;
@@ -244,7 +242,7 @@ describe( 'utils', () => {
 				const repositoryPath = '/path/to/repo';
 				const commitCommands = [
 					`cd ${ repositoryPath }`,
-					`git add .`,
+					'git add .',
 					`git commit -m "Initial commit for ${ pluginName }."`
 				];
 

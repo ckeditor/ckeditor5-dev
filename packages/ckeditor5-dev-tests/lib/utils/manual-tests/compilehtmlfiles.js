@@ -33,14 +33,14 @@ module.exports = function compileHtmlFiles( buildDir, manualTestScriptsPatterns 
 		return [
 			...arr,
 			...globSync( manualTestPattern )
-				.filter( ( manualTestFile ) => manualTestFile.includes( '/manual/' ) )
-				.map( ( jsFile ) => setExtension( jsFile, 'md' ) )
+				.filter( manualTestFile => manualTestFile.includes( '/manual/' ) )
+				.map( jsFile => setExtension( jsFile, 'md' ) )
 		];
 	}, [] );
-	const sourceHtmlFiles = sourceMDFiles.map( ( mdFile ) => setExtension( mdFile, 'html' ) );
+	const sourceHtmlFiles = sourceMDFiles.map( mdFile => setExtension( mdFile, 'html' ) );
 
 	const sourceDirs = _.uniq( sourceMDFiles.map( file => path.dirname( file ) ) );
-	const sourceFilePathBases = sourceMDFiles.map( ( mdFile ) => getFilePathWithoutExtension( mdFile ) );
+	const sourceFilePathBases = sourceMDFiles.map( mdFile => getFilePathWithoutExtension( mdFile ) );
 	const staticFiles = _.flatten( sourceDirs.map( sourceDir => {
 		return globSync( path.join( sourceDir, '**', '*.!(js|html|md)' ) );
 	} ) ).filter( file => !file.match( /\.(js|html|md)$/ ) );
@@ -55,7 +55,7 @@ module.exports = function compileHtmlFiles( buildDir, manualTestScriptsPatterns 
 	sourceFilePathBases.forEach( sourceFilePathBase => compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate ) );
 
 	// Watch files and compile on change.
-	watchFiles( [ ...sourceMDFiles, ...sourceHtmlFiles ], ( file ) => {
+	watchFiles( [ ...sourceMDFiles, ...sourceHtmlFiles ], file => {
 		compileHtmlFile( buildDir, getFilePathWithoutExtension( file ), viewTemplate );
 	} );
 };
@@ -73,7 +73,7 @@ function compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate ) {
 
 	// Compile test instruction (Markdown file).
 	const parsedMarkdownTree = reader.parse( fs.readFileSync( sourceMDFilePath, 'utf-8' ) );
-	const manualTestInstructions = '<div class="manual-test-sidebar">' + writer.render( parsedMarkdownTree ) + '</div>';
+	const manualTestInstruction = '<div class="manual-test-sidebar">' + writer.render( parsedMarkdownTree ) + '</div>';
 
 	// Load test view (HTML file).
 	const htmlView = fs.readFileSync( sourceHtmlFilePath, 'utf-8' );
@@ -85,7 +85,7 @@ function compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate ) {
 		'</body>';
 
 	// Concat the all HTML parts to single one.
-	const preparedHtml = combine( viewTemplate, manualTestInstructions, htmlView, scriptTag );
+	const preparedHtml = combine( viewTemplate, manualTestInstruction, htmlView, scriptTag );
 
 	// Prepare output path.
 	const outputFilePath = path.join( buildDir, absoluteHtmlFilePath );

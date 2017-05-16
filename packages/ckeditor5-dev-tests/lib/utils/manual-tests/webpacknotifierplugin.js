@@ -26,7 +26,7 @@ module.exports = class WebpackNotifierPlugin {
 			this.log.info( '[Webpack] Starting scripts compilation...' );
 		} );
 
-		compiler.plugin( 'done', ( stats ) => {
+		compiler.plugin( 'done', stats => {
 			if ( stats.compilation.errors.length ) {
 				for ( const item of stats.compilation.errors ) {
 					this.log.error( item.message, { raw: true } );

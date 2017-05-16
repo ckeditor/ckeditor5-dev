@@ -3,8 +3,6 @@
  * Licensed under the terms of the MIT License (see LICENSE.md).
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const chai = require( 'chai' );
@@ -221,7 +219,7 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 			},
 		} );
 
-		expect( result.doclet.fires[0] ).to.be.equal(
+		expect( result.doclet.fires[ 0 ] ).to.be.equal(
 			'module:editor~Editor#event:execute'
 		);
 	} );
@@ -251,7 +249,7 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 			},
 		} );
 
-		expect( result.doclet.fires[0] ).to.be.equal(
+		expect( result.doclet.fires[ 0 ] ).to.be.equal(
 			'module:editor~Editor#event:change:attribute'
 		);
 	} );
@@ -281,7 +279,7 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 			},
 		} );
 
-		expect( result.doclet.see[0] ).to.be.equal(
+		expect( result.doclet.see[ 0 ] ).to.be.equal(
 			'module:editor~Editor#create'
 		);
 	} );

@@ -22,7 +22,7 @@ const versions = {
 			return null;
 		}
 
-		const regexp = /\n## \[?([\da-z\.\-\+]+)/i;
+		const regexp = /\n## \[?([\da-z.\-+]+)/i;
 
 		const matches = changelog.match( regexp );
 

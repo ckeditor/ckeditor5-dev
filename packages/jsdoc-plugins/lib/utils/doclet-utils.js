@@ -27,10 +27,10 @@ function doesFieldExistInClass( doclets, methodLongname ) {
 			return false;
 		}
 
-		currentClass = doclets.find( doclet => doclet.longname === currentClass.augments[0] );
+		currentClass = doclets.find( doclet => doclet.longname === currentClass.augments[ 0 ] );
 	}
 }
 
 module.exports = {
-	doesFieldExistInClass,
+	doesFieldExistInClass
 };

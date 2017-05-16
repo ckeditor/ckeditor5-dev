@@ -48,14 +48,14 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 		process.chdir( dependencyPath );
 
 		return generateChangelogForSinglePackage()
-			.then( ( newVersion ) => {
+			.then( newVersion => {
 				if ( newVersion ) {
 					generatedChangelogsMap.set( getPackageJson().name, newVersion );
 				} else {
 					pathsCollection.skipped.add( dependencyPath );
 				}
 			} )
-			.catch( ( err ) => {
+			.catch( err => {
 				log.error( err );
 			} );
 	}

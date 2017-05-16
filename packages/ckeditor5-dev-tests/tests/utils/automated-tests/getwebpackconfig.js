@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const getWebpackConfigForAutomatedTests = require( '../../../lib/utils/automated-tests/getwebpackconfig' );
@@ -45,14 +43,14 @@ describe( 'getWebpackConfigForAutomatedTests', () => {
 		} );
 
 		const babelLoader = webpackConfig.module.rules
-			.find( ( rule ) => rule.loader === 'babel-loader' );
+			.find( rule => rule.loader === 'babel-loader' );
 
 		expect( babelLoader.query.plugins ).to.contain(
 			require( 'babel-plugin-transform-es2015-modules-commonjs' )
 		);
 
 		const istanbulLoader = webpackConfig.module.rules
-			.find( ( rule ) => rule.loader === 'istanbul-instrumenter-loader' );
+			.find( rule => rule.loader === 'istanbul-instrumenter-loader' );
 
 		expect( istanbulLoader ).to.deep.equal( {
 			test: /\.js$/,
@@ -74,7 +72,7 @@ describe( 'getWebpackConfigForAutomatedTests', () => {
 		} );
 
 		const istanbulLoader = webpackConfig.module.rules
-			.find( ( rule ) => rule.loader === 'istanbul-instrumenter-loader' );
+			.find( rule => rule.loader === 'istanbul-instrumenter-loader' );
 
 		const expectedRegExp = new RegExp( [ 'ckeditor5-utils', 'src', '' ].join( escapedPathSep ) );
 
@@ -88,7 +86,7 @@ describe( 'getWebpackConfigForAutomatedTests', () => {
 		} );
 
 		const istanbulLoader = webpackConfig.module.rules
-			.find( ( rule ) => rule.loader === 'istanbul-instrumenter-loader' );
+			.find( rule => rule.loader === 'istanbul-instrumenter-loader' );
 
 		const expectedRegExp = new RegExp( [ 'ckeditor5-!(utils)', 'src', '' ].join( escapedPathSep ) );
 

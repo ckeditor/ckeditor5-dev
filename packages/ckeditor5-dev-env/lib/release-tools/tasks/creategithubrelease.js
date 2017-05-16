@@ -28,14 +28,12 @@ module.exports = function createGithubRelease( token, options ) {
 		type: 'oauth',
 	} );
 
-	// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 	const releaseParams = {
 		owner: options.repositoryOwner,
 		repo: options.repositoryName,
 		tag_name: options.version,
 		body: options.description
 	};
-	// jscs:eanble requireCamelCaseOrUpperCaseIdentifiers
 
 	return new Promise( ( resolve, reject ) => {
 		github.repos.createRelease( releaseParams, ( err, responses ) => {

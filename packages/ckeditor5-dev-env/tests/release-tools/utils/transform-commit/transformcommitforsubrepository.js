@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const expect = require( 'chai' ).expect;
@@ -38,15 +36,18 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				bugs: 'https://github.com/ckeditor/ckeditor5-dev/issues'
 			};
 
-			transformCommitForSubRepository = proxyquire( '../../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository', {
-				'@ckeditor/ckeditor5-dev-utils': {
-					logger( verbosity ) {
-						loggerVerbosity = verbosity;
+			transformCommitForSubRepository = proxyquire(
+				'../../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository',
+				{
+					'@ckeditor/ckeditor5-dev-utils': {
+						logger( verbosity ) {
+							loggerVerbosity = verbosity;
 
-						return stubs.logger;
+							return stubs.logger;
+						}
 					}
 				}
-			} );
+			);
 		} );
 
 		afterEach( () => {
@@ -88,15 +89,18 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* \u001b\[33m684997d\u001b\[39m "Fix: Simple fix\." \u001b\[32mINCLUDED/ );
+			expect( stubs.logger.info.firstCall.args[ 0 ] )
+				.to.match( /\* \u001b\[33m684997d\u001b\[39m "Fix: Simple fix\." \u001b\[32mINCLUDED/ );
 		} );
 
 		it( 'truncates too long commit\'s subject', () => {
 			const commit = {
 				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
-				header: 'Fix: Reference site about Lorem Ipsum, giving information on its origins, as well as a random Lipsum generator.',
+				header: 'Fix: Reference site about Lorem Ipsum, giving information on its origins, as well as ' +
+				'a random Lipsum generator.',
 				type: 'Fix',
-				subject: 'Reference site about Lorem Ipsum, giving information on its origins, as well as a random Lipsum generator.',
+				subject: 'Reference site about Lorem Ipsum, giving information on its origins, as well as ' +
+				'a random Lipsum generator.',
 				body: null,
 				footer: null,
 				notes: []
@@ -104,10 +108,11 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
+			// eslint-disable-next-line max-len
+			const commitDetailsPattern = /\* \u001b\[33m684997d\u001b\[39m "Fix: Reference site about Lorem Ipsum, giving information on its origins, as well as a random Lip\.\.\." \u001b\[32mINCLUDED/;
+
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			//jscs:disable maximumLineLength
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* \u001b\[33m684997d\u001b\[39m "Fix: Reference site about Lorem Ipsum, giving information on its origins, as well as a random Lip\.\.\." \u001b\[32mINCLUDED/ );
-			//jscs:enable maximumLineLength
+			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( commitDetailsPattern );
 		} );
 
 		it( 'does not attach valid "internal" commit to the changelog', () => {
@@ -124,7 +129,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* \u001b\[33m684997d\u001b\[39m "Docs: README\." \u001b\[90mSKIPPED/ );
+			expect( stubs.logger.info.firstCall.args[ 0 ] )
+				.to.match( /\* \u001b\[33m684997d\u001b\[39m "Docs: README\." \u001b\[90mSKIPPED/ );
 		} );
 
 		it( 'does not attach invalid commit to the changelog', () => {
@@ -141,7 +147,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\* \u001b\[33m684997d\u001b\[39m "Invalid commit\." \u001b\[31mINVALID/ );
+			expect( stubs.logger.info.firstCall.args[ 0 ] )
+				.to.match( /\* \u001b\[33m684997d\u001b\[39m "Invalid commit\." \u001b\[31mINVALID/ );
 		} );
 
 		it( 'makes URLs to issues on GitHub', () => {
@@ -164,7 +171,9 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 			const expectedSubject = 'Simple fix. Closes [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2)';
 			expect( commit.subject ).to.equal( expectedSubject );
-			expect( commit.notes[ 0 ].text ).to.equal( 'Some issue [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1).' );
+			expect( commit.notes[ 0 ].text ).to.equal(
+				'Some issue [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1).'
+			);
 		} );
 
 		it( 'makes URLs to organization on GitHub', () => {
@@ -290,9 +299,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.be.a( 'string' );
 
 			const logMessageAsArray = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
-			//jscs:disable maximumLineLength
+			// eslint-disable-next-line max-len
 			const commitDetailsPattern = /\* \u001b\[33mdea3501\u001b\[39m "Feature: Introduced a brand new release tools with a new set of requirements\." \u001b\[32mINCLUDED/;
-			//jscs:enable maximumLineLength
 			const mergeCommitPattern = /Merge pull request #75 from ckeditor\/t\/64/;
 
 			expect( logMessageAsArray.length ).to.equal( 2 );
@@ -349,7 +357,9 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 			transformCommitForSubRepository( commit, { displayLogs: false, packageData: packageJson } );
 
-			expect( commit.body ).to.equal( '  Additional description has been parsed as a footer but it should be a body.' );
+			expect( commit.body ).to.equal(
+				'  Additional description has been parsed as a footer but it should be a body.'
+			);
 			expect( commit.footer ).to.equal( null );
 		} );
 	} );

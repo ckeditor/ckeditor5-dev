@@ -29,7 +29,7 @@ if ( packageJson.devDependencies ) {
 }
 
 if ( deps.length ) {
-	deps.forEach( ( item ) => {
+	deps.forEach( item => {
 		if ( !item.startsWith( '@ckeditor/ckeditor5' ) ) {
 			return;
 		}

@@ -15,7 +15,7 @@ const assign = Object.assign;
  * @returns {Options}
  */
 function fixShortRefs( options ) {
-	let { doclet, lastInterfaceOrClass } = options;
+	const { doclet, lastInterfaceOrClass } = options;
 
 	if ( doclet.kind === 'interface' || doclet.kind === 'class' || doclet.kind === 'mixin' ) {
 		options = assign( {}, options, { lastInterfaceOrClass: doclet } );
@@ -43,17 +43,16 @@ function fixShortRefs( options ) {
  * @returns {Options}
  */
 function fixShortRefsInLongnameAndMemeberof( options ) {
-	let { doclet, lastInterfaceOrClass } = options;
-	const firstNameChar = doclet.longname[0];
+	let doclet = options.doclet;
+	const lastInterfaceOrClass = options.lastInterfaceOrClass;
+	const firstNameChar = doclet.longname[ 0 ];
 
 	if ( firstNameChar === '~' ) {
 		doclet = assign( {}, doclet, {
 			memberof: lastInterfaceOrClass.memberof + '~' + lastInterfaceOrClass.name,
 			longname: lastInterfaceOrClass.memberof + doclet.longname,
 		} );
-	}
-
-	else if ( firstNameChar === '#' ) {
+	} else if ( firstNameChar === '#' ) {
 		doclet = assign( {}, doclet, {
 			memberof: lastInterfaceOrClass.longname,
 			longname: lastInterfaceOrClass.longname + doclet.longname,
@@ -66,9 +65,7 @@ function fixShortRefsInLongnameAndMemeberof( options ) {
 			memberof: lastInterfaceOrClass.longname,
 			longname: lastInterfaceOrClass.longname + '#event:' + doclet.name,
 		} );
-	}
-
-	else if ( doclet.kind === 'event' && !doclet.longname.includes( 'module:' ) ) {
+	} else if ( doclet.kind === 'event' && !doclet.longname.includes( 'module:' ) ) {
 		doclet = assign( {}, doclet, {
 			memberof: lastInterfaceOrClass.longname,
 			longname: lastInterfaceOrClass.longname + '#' + doclet.longname,
@@ -115,18 +112,19 @@ function fixShortRefsInFireTag( options ) {
  * @returns {Options}
  */
 function fixShortRefsInSeeTag( options ) {
-	let { doclet, lastInterfaceOrClass } = options;
+	let doclet = options.doclet;
+	const lastInterfaceOrClass = options.lastInterfaceOrClass;
 
 	if ( !doclet.see ) {
 		return options;
 	}
 
 	const see = doclet.see.map( see => {
-		if ( see[0] === '#' ) {
+		if ( see[ 0 ] === '#' ) {
 			return lastInterfaceOrClass.longname + see;
 		}
 
-		if ( see[0] === '~' ) {
+		if ( see[ 0 ] === '~' ) {
 			return lastInterfaceOrClass.memberof + see;
 		}
 

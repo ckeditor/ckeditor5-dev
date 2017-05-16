@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const expect = require( 'chai' ).expect;
@@ -92,7 +90,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			sandbox.stub( process, 'cwd' ).returns( '/cwd' );
 
 			return getPackagesToRelease( packagesToCheck )
-				.then( ( packages ) => {
+				.then( packages => {
 					expect( packages.size ).to.equal( 2 );
 
 					expect( stubs.chdir.calledThrice ).to.equal( true );
@@ -150,7 +148,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			} );
 
 			return getPackagesToRelease( packagesToCheck )
-				.then( ( packages ) => {
+				.then( packages => {
 					expect( packages.size ).to.equal( 3 );
 
 					const corePackageDetails = packages.get( '@ckeditor/ckeditor5-core' );
@@ -186,7 +184,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			stubs.getPackageJson.onSecondCall().returns( {} );
 
 			return getPackagesToRelease( packagesToCheck )
-				.then( ( packages ) => {
+				.then( packages => {
 					expect( packages.size ).to.equal( 1 );
 
 					expect( packages.get( '@ckeditor/ckeditor5-utils' ) ).to.equal( undefined );
