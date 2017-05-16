@@ -16,6 +16,9 @@ module.exports = {
 	},
 	rules: {
 		// ## Possible errors
+		// Offing because we keep the browser env disabled so when using a console you need to define
+		// it as a global variable anyway.
+		'no-console': 'off',
 		// Offing because there's nothing wrong with good `while ( true )` with a return statement.
 		'no-constant-condition': 'off',
 
