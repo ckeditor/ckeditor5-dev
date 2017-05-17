@@ -10,6 +10,9 @@
  * Jsdoc doesn't support inheritance of static members which is why this plugin is needed.
  */
 class StaticsAugmentor {
+	/**
+	 * @param {Array.<Doclet>} doclets
+	 */
 	constructor( doclets ) {
 		this._data = doclets;
 
@@ -24,13 +27,13 @@ class StaticsAugmentor {
 	augmentStatics() {
 		const childClasses = this._getDescendants();
 
-		for ( let child of childClasses ) {
+		for ( const child of childClasses ) {
 			const parents = child.augments;
 
-			for ( let parent of parents ) {
+			for ( const parent of parents ) {
 				const staticMembers = this._getStaticMembers( parent );
 
-				for ( let member of staticMembers ) {
+				for ( const member of staticMembers ) {
 					this._handleStaticMember( member, child );
 				}
 			}
@@ -44,7 +47,8 @@ class StaticsAugmentor {
 	 * @private
 	 */
 	_getDescendants() {
-		return this._data.filter( doclet => Array.isArray( doclet.augments ) &&
+		return this._data.filter( doclet =>
+			Array.isArray( doclet.augments ) &&
 			doclet.augments.length > 0 &&
 			( doclet.kind === 'class' || doclet.kind === 'interface' )
 		);
@@ -52,7 +56,7 @@ class StaticsAugmentor {
 
 	/**
 	 * Gets all static members of a doclet.
-	 * @param longname
+	 * @param {String} longname
 	 * @returns {Array.<Doclet>}
 	 * @private
 	 */
@@ -61,7 +65,7 @@ class StaticsAugmentor {
 	}
 
 	/**
-	 * @param {Doclet }member
+	 * @param {Doclet}member
 	 * @param {Doclet} childClass
 	 * @private
 	 */
@@ -69,7 +73,7 @@ class StaticsAugmentor {
 		if ( member.undocumented || member.ignore ) {
 			return;
 		}
-		// deep clone member
+		// Deep clone member.
 		const clone = JSON.parse( JSON.stringify( member ) );
 
 		this._addNewDoclet( clone, member, childClass );
@@ -92,7 +96,7 @@ class StaticsAugmentor {
 
 		doclet.memberof = childClass.longname;
 
-		// static members are separated by a dot
+		// Static members are separated by a dot.
 		parts = doclet.longname.split( '.' );
 		parts[ 0 ] = childClass.longname;
 		doclet.longname = parts.join( '.' );
@@ -104,16 +108,14 @@ class StaticsAugmentor {
 		}
 
 		if ( !this._documented.hasOwnProperty( doclet.longname ) ) {
-			// if there was no doclet for that member, simply add it to existing doclets
+			// If there was no doclet for that member, simply add it to existing doclets.
 			this._data.push( doclet );
 		} else if ( this._explicitlyInherits( this._documented[ doclet.longname ] ) ) {
-			// if doclet for that member already existed and used `inheritdoc` or`overrides`
-			// add `ignore` property to existing doclets
-			this._documented[ doclet.longname ].forEach( ( d ) => {
-				d.ignore = true;
-			} );
+			// If doclet for that member already existed and used `inheritdoc` or`overrides`.
+			// Add `ignore` property to existing doclets.
+			this._documented[ doclet.longname ].forEach( d => d.ignore = true );
 
-			// remove properties which are no longer accurate or needed
+			// Remove properties which are no longer accurate or needed.
 			if ( doclet.virtual ) {
 				delete doclet.virtual;
 			}
@@ -126,37 +128,37 @@ class StaticsAugmentor {
 				delete doclet.override;
 			}
 
-			// add new doclet
+			// Add new doclet.
 			this._data.push( doclet );
 		} else {
-			// if doclet for that member already existed and didnt use `inheritdoc` or `overrides`
-			// then don't do anything except adding `overrides` property
-			this._documented[ doclet.longname ].forEach( ( d ) => {
-				d.overrides = original.longname;
-			} );
+			// If doclet for that member already existed and didnt use `inheritdoc` or `overrides`.
+			// Then don't do anything except adding `overrides` property.
+			this._documented[ doclet.longname ].forEach( d => d.overrides = original.longname );
 		}
 	}
 
 	/**
-	 * Checks if `@inheritdoc` or `@overrides` tags were used.
-	 * @param doclets
-	 * @returns {boolean}
+	 * Checks if
+	 *
+	 * `@inheritdoc`
+	 *
+	 * or
+	 *
+	 * `@overrides`
+	 *
+	 * tags were used.
 	 * @private
+	 * @param {Array.<Doclet>} doclets
+	 * @returns {Boolean}
 	 */
 	_explicitlyInherits( doclets ) {
-		let doclet;
-		let inherits = false;
-
-		for ( let i = 0, l = doclets.length; i < l; i++ ) {
-			doclet = doclets[ i ];
-
+		for ( const doclet of doclets ) {
 			if ( typeof doclet.inheritdoc !== 'undefined' || typeof doclet.override !== 'undefined' ) {
-				inherits = true;
-				break;
+				return true;
 			}
 		}
 
-		return inherits;
+		return false;
 	}
 }
 
