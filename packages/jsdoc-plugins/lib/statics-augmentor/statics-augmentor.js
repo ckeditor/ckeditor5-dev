@@ -6,32 +6,29 @@
 'use strict';
 
 /**
- * Class which manually adds doclets for inherited static members.
+ * Manually adds doclets for inherited static members.
  * Jsdoc doesn't support inheritance of static members which is why this plugin is needed.
  */
 class StaticsAugmentor {
 	constructor( doclets ) {
 		this._data = doclets;
 
-		/**
-		 * Doclets
-		 */
 		this._longnames = doclets.index.longname;
 
 		this._documented = doclets.index.documented;
 	}
 
-	augmentStatics() { //todo: remove these comments below becauase method docs will explain it
-		// find all classes and interfaces with 'augments' property, they may be missing inherited static members
+	/**
+	 * Main method responsible for inheriting static members.
+	 */
+	augmentStatics() {
 		const childClasses = this._getDescendants();
 
 		for ( let child of childClasses ) {
-			// get all parent doclets
-			const parents = this._getAncestors( child.augments );
+			const parents = child.augments;
 
 			for ( let parent of parents ) {
-				// get all static members which will be added as new doclets as members of children classes
-				const staticMembers = this._getStaticMembers( parent.longname );
+				const staticMembers = this._getStaticMembers( parent );
 
 				for ( let member of staticMembers ) {
 					this._handleStaticMember( member, child );
@@ -43,7 +40,7 @@ class StaticsAugmentor {
 	/**
 	 * Finds doclets of child classes which need to have inherited static members added.
 	 * These have to be of kind `class` or `interface` and have a non empty `augments` array.
-	 * @returns {Array}
+	 * @returns {Array.<Doclet>}
 	 * @private
 	 */
 	_getDescendants() {
@@ -53,22 +50,23 @@ class StaticsAugmentor {
 		);
 	}
 
-	_getAncestors( longnames ) {
-		return longnames.map( name => this._getDocletByLongname( name ) )
-			.filter( name => !!( name ) );
-	}
-
-	// todo: check if there is only one doclet with a given longname
-	_getDocletByLongname( longname ) {
-		return this._data.find( doclet => doclet.longname === longname );
-	}
-
+	/**
+	 * Gets all static members of a doclet.
+	 * @param longname
+	 * @returns {Array.<Doclet>}
+	 * @private
+	 */
 	_getStaticMembers( longname ) {
 		return this._data.filter( doclet => doclet.memberof === longname && doclet.scope === 'static' );
 	}
 
+	/**
+	 * @param {Doclet }member
+	 * @param {Doclet} childClass
+	 * @private
+	 */
 	_handleStaticMember( member, childClass ) {
-		if ( member.undocumented ) {
+		if ( member.undocumented || member.ignore ) {
 			return;
 		}
 		// deep clone member
@@ -77,6 +75,13 @@ class StaticsAugmentor {
 		this._addNewDoclet( clone, member, childClass );
 	}
 
+	/**
+	 * Modifies and adds new doclet to array of doclets. Makes existing doclets ignored if needed.
+	 * @param {Doclet} doclet New doclet which will be added to doclets array.
+	 * @param {Doclet} original Doclet from which new doclet is created.
+	 * @param {Doclet} childClass Doclet of a child class.
+	 * @private
+	 */
 	_addNewDoclet( doclet, original, childClass ) {
 		let parts;
 
@@ -87,6 +92,7 @@ class StaticsAugmentor {
 
 		doclet.memberof = childClass.longname;
 
+		// static members are separated by a dot
 		parts = doclet.longname.split( '.' );
 		parts[ 0 ] = childClass.longname;
 		doclet.longname = parts.join( '.' );
@@ -100,7 +106,7 @@ class StaticsAugmentor {
 		if ( !this._documented.hasOwnProperty( doclet.longname ) ) {
 			// if there was no doclet for that member, simply add it to existing doclets
 			this._data.push( doclet );
-		} else if ( explicitlyInherits( this._documented[ doclet.longname ] ) ) {
+		} else if ( this._explicitlyInherits( this._documented[ doclet.longname ] ) ) {
 			// if doclet for that member already existed and used `inheritdoc` or`overrides`
 			// add `ignore` property to existing doclets
 			this._documented[ doclet.longname ].forEach( ( d ) => {
@@ -124,28 +130,34 @@ class StaticsAugmentor {
 			this._data.push( doclet );
 		} else {
 			// if doclet for that member already existed and didnt use `inheritdoc` or `overrides`
-			// then don't do anything except add `overrides` property
+			// then don't do anything except adding `overrides` property
 			this._documented[ doclet.longname ].forEach( ( d ) => {
 				d.overrides = original.longname;
 			} );
 		}
 	}
-}
 
-function explicitlyInherits( doclets ) {
-	let doclet;
-	let inherits = false;
+	/**
+	 * Checks if `@inheritdoc` or `@overrides` tags were used.
+	 * @param doclets
+	 * @returns {boolean}
+	 * @private
+	 */
+	_explicitlyInherits( doclets ) {
+		let doclet;
+		let inherits = false;
 
-	for ( let i = 0, l = doclets.length; i < l; i++ ) {
-		doclet = doclets[ i ];
+		for ( let i = 0, l = doclets.length; i < l; i++ ) {
+			doclet = doclets[ i ];
 
-		if ( typeof doclet.inheritdoc !== 'undefined' || typeof doclet.override !== 'undefined' ) {
-			inherits = true;
-			break;
+			if ( typeof doclet.inheritdoc !== 'undefined' || typeof doclet.override !== 'undefined' ) {
+				inherits = true;
+				break;
+			}
 		}
-	}
 
-	return inherits;
+		return inherits;
+	}
 }
 
 module.exports = StaticsAugmentor;
