@@ -86,8 +86,6 @@ class StaticsAugmentor {
 	 * @private
 	 */
 	_addNewDoclet( doclet, original, childClass ) {
-		let parts;
-
 		if ( !doclet.inherited ) {
 			doclet.inherits = doclet.longname;
 		}
@@ -96,7 +94,7 @@ class StaticsAugmentor {
 		doclet.memberof = childClass.longname;
 
 		// Static members are separated by a dot.
-		parts = doclet.longname.split( '.' );
+		const parts = doclet.longname.split( '.' );
 		parts[ 0 ] = childClass.longname;
 		doclet.longname = parts.join( '.' );
 
@@ -114,7 +112,9 @@ class StaticsAugmentor {
 		} else if ( this._explicitlyInherits( docletsWithSameLongname ) ) {
 			// If doclet for that member already existed and used `inheritdoc` or`overrides`.
 			// Add `ignore` property to existing doclets.
-			docletsWithSameLongname.forEach( d => d.ignore = true );
+			docletsWithSameLongname.forEach( d => {
+				d.ignore = true;
+			} );
 
 			// Remove properties which are no longer accurate or needed.
 			if ( doclet.virtual ) {
@@ -134,7 +134,9 @@ class StaticsAugmentor {
 		} else {
 			// If doclet for that member already existed and didnt use `inheritdoc` or `overrides`.
 			// Then don't do anything except adding `overrides` property.
-			docletsWithSameLongname.forEach( d => d.overrides = original.longname );
+			docletsWithSameLongname.forEach( d => {
+				d.overrides = original.longname;
+			} );
 		}
 	}
 
