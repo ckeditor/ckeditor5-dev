@@ -257,7 +257,10 @@ module.exports = {
 		'arrow-spacing': 'error',
 		// This is too pedantic. It makes writing callbacks such as `value => value ? 1 : 2` impossible
 		// 'no-confusing-arrow': 'error',
-		'generator-star-spacing': 'error',
+		"generator-star-spacing": [
+			"error",
+			"after"
+		],
 		'no-duplicate-imports': 'error',
 		'no-useless-computed-key': 'error',
 		'no-useless-constructor': 'error',
@@ -277,6 +280,9 @@ module.exports = {
 			'error',
 			'always'
 		],
-		'yield-star-spacing': 'error'
+		"yield-star-spacing": [
+			"error",
+			"after"
+		]
 	}
 };
