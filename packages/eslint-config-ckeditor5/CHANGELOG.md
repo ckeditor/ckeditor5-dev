@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## [1.0.4](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@1.0.3...eslint-config-ckeditor5@1.0.4) (2017-05-17)
+
+* Aligned star spacing to our rules. ([8f143c6](https://github.com/ckeditor/ckeditor5-dev/commit/8f143c6))
+
+
 ## [1.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@1.0.2...eslint-config-ckeditor5@1.0.3) (2017-05-16)
 
 ### Bug fixes
