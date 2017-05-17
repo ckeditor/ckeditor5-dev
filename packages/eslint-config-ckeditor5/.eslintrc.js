@@ -259,7 +259,7 @@ module.exports = {
 		// 'no-confusing-arrow': 'error',
 		"generator-star-spacing": [
 			"error",
-			"before"
+			"after"
 		],
 		'no-duplicate-imports': 'error',
 		'no-useless-computed-key': 'error',
