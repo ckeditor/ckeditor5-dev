@@ -15,10 +15,6 @@ class StaticsAugmentor {
 	 */
 	constructor( doclets ) {
 		this._data = doclets;
-
-		this._longnames = doclets.index.longname;
-
-		this._documented = doclets.index.documented;
 	}
 
 	/**
@@ -43,6 +39,7 @@ class StaticsAugmentor {
 	/**
 	 * Finds doclets of child classes which need to have inherited static members added.
 	 * These have to be of kind `class` or `interface` and have a non empty `augments` array.
+	 *
 	 * @returns {Array.<Doclet>}
 	 * @private
 	 */
@@ -56,6 +53,7 @@ class StaticsAugmentor {
 
 	/**
 	 * Gets all static members of a doclet.
+	 *
 	 * @param {String} longname
 	 * @returns {Array.<Doclet>}
 	 * @private
@@ -81,6 +79,7 @@ class StaticsAugmentor {
 
 	/**
 	 * Modifies and adds new doclet to array of doclets. Makes existing doclets ignored if needed.
+	 *
 	 * @param {Doclet} doclet New doclet which will be added to doclets array.
 	 * @param {Doclet} original Doclet from which new doclet is created.
 	 * @param {Doclet} childClass Doclet of a child class.
@@ -101,19 +100,21 @@ class StaticsAugmentor {
 		parts[ 0 ] = childClass.longname;
 		doclet.longname = parts.join( '.' );
 
-		if ( this._longnames.hasOwnProperty( doclet.longname ) ) {
+		if ( this._getDocletsByLongname( doclet.longname ).length > 0 ) {
 			doclet.overrides = original.longname;
 		} else {
 			delete doclet.overrides;
 		}
 
-		if ( !this._documented.hasOwnProperty( doclet.longname ) ) {
+		const docletsWithSameLongname = this._getDocletsByLongname( doclet.longname );
+
+		if ( docletsWithSameLongname.length === 0 ) {
 			// If there was no doclet for that member, simply add it to existing doclets.
 			this._data.push( doclet );
-		} else if ( this._explicitlyInherits( this._documented[ doclet.longname ] ) ) {
+		} else if ( this._explicitlyInherits( docletsWithSameLongname ) ) {
 			// If doclet for that member already existed and used `inheritdoc` or`overrides`.
 			// Add `ignore` property to existing doclets.
-			this._documented[ doclet.longname ].forEach( d => d.ignore = true );
+			docletsWithSameLongname.forEach( d => d.ignore = true );
 
 			// Remove properties which are no longer accurate or needed.
 			if ( doclet.virtual ) {
@@ -133,20 +134,23 @@ class StaticsAugmentor {
 		} else {
 			// If doclet for that member already existed and didnt use `inheritdoc` or `overrides`.
 			// Then don't do anything except adding `overrides` property.
-			this._documented[ doclet.longname ].forEach( d => d.overrides = original.longname );
+			docletsWithSameLongname.forEach( d => d.overrides = original.longname );
 		}
 	}
 
 	/**
-	 * Checks if
+	 * Returns doclets by longname which are documented and not ignored.
+	 * @param {String} longname
+	 * @returns {Array.<Doclet>}
+	 * @private
+	 */
+	_getDocletsByLongname( longname ) {
+		return this._data.filter( doclet => doclet.longname === longname && !doclet.ignore && !doclet.undocumented );
+	}
+
+	/**
+	 * Checks if `@inheritdoc` or `@overrides` tags were used.
 	 *
-	 * `@inheritdoc`
-	 *
-	 * or
-	 *
-	 * `@overrides`
-	 *
-	 * tags were used.
 	 * @private
 	 * @param {Array.<Doclet>} doclets
 	 * @returns {Boolean}
