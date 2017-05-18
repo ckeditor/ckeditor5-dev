@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it, beforeEach, afterEach */
-
 'use strict';
 
 const chai = require( 'chai' );

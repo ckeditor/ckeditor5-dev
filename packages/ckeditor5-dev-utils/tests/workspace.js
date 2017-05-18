@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it, beforeEach, afterEach */
-
 'use strict';
 
 const chai = require( 'chai' );
@@ -75,7 +73,11 @@ describe( 'utils', () => {
 			it( 'should return CKE5 symlinks from provided path', () => {
 				const fs = require( 'fs' );
 				const path = 'path/to/dir';
-				sandbox.stub( fs, 'readdirSync' ).returns( [ 'ckeditor5-core', 'ckeditor5-image', 'other-dependency' ] );
+				sandbox.stub( fs, 'readdirSync' ).returns( [
+					'ckeditor5-core',
+					'ckeditor5-image',
+					'other-dependency'
+				] );
 				sandbox.stub( tools, 'isSymlink' ).returns( true );
 
 				const symlinks = ckeditor5Dirs.getSymlinks( path );
@@ -133,13 +135,13 @@ describe( 'utils', () => {
 
 				expect( directories.length ).to.equal( 2 );
 				expect( directories[ 0 ] ).to.deep.equal( {
-						repositoryURL: 'ckeditor/ckeditor5-plugin-image',
-						repositoryPath: '/workspace/path/ckeditor5-plugin-image'
-					} );
+					repositoryURL: 'ckeditor/ckeditor5-plugin-image',
+					repositoryPath: '/workspace/path/ckeditor5-plugin-image'
+				} );
 				expect( directories[ 1 ] ).to.deep.equal( {
-						repositoryURL: 'ckeditor/ckeditor5-core',
-						repositoryPath: '/workspace/path/ckeditor5-core'
-					} );
+					repositoryURL: 'ckeditor/ckeditor5-core',
+					repositoryPath: '/workspace/path/ckeditor5-core'
+				} );
 			} );
 
 			it( 'should return only ckeditor5 directories in development mode, including root directory', () => {
@@ -152,17 +154,17 @@ describe( 'utils', () => {
 
 				expect( directories.length ).to.equal( 3 );
 				expect( directories[ 0 ] ).to.deep.equal( {
-						repositoryURL: 'ckeditor/ckeditor5',
-						repositoryPath: '/workspace/path/ckeditor5'
-					} );
+					repositoryURL: 'ckeditor/ckeditor5',
+					repositoryPath: '/workspace/path/ckeditor5'
+				} );
 				expect( directories[ 1 ] ).to.deep.equal( {
-						repositoryURL: 'ckeditor/ckeditor5-plugin-image',
-						repositoryPath: '/workspace/path/ckeditor5-plugin-image'
-					} );
+					repositoryURL: 'ckeditor/ckeditor5-plugin-image',
+					repositoryPath: '/workspace/path/ckeditor5-plugin-image'
+				} );
 				expect( directories[ 2 ] ).to.deep.equal( {
-						repositoryURL: 'ckeditor/ckeditor5-core',
-						repositoryPath: '/workspace/path/ckeditor5-core'
-					} );
+					repositoryURL: 'ckeditor/ckeditor5-core',
+					repositoryPath: '/workspace/path/ckeditor5-core'
+				} );
 			} );
 		} );
 	} );

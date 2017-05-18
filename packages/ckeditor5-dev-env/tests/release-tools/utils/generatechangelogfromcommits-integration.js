@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const fs = require( 'fs' );
@@ -21,17 +19,19 @@ describe( 'dev-env/release-tools/utils', () => {
 	let tmpCwd, cwd, generateChangelogFromCommits, stubs, sandbox;
 
 	// These tests create a chain of releases.
-	describe( 'generateChangelogFromCommits() - integration test', () => {
+	describe( 'generateChangelogFromCommits() - integration test', function() {
+		this.timeout( 5000 );
+
 		before( () => {
 			cwd = process.cwd();
 			tmpCwd = fs.mkdtempSync( __dirname + path.sep );
 			process.chdir( tmpCwd );
 
-			exec( `git init` );
+			exec( 'git init' );
 
 			if ( process.env.CI ) {
-				exec( `git config user.email "ckeditor5@ckeditor.com"` );
-				exec( `git config user.name "CKEditor5 CI"` );
+				exec( 'git config user.email "ckeditor5@ckeditor.com"' );
+				exec( 'git config user.name "CKEditor5 CI"' );
 			}
 
 			const packageJson = {
@@ -76,6 +76,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			sandbox.restore();
 		} );
 
+		// Done callback is called manually because these tests are slow and sometimes Mocha throws a timeout error.
 		it( 'generates a changelog for the first time', () => {
 			exec( 'git commit --allow-empty --message "Internal: An initial commit."' );
 
@@ -83,7 +84,9 @@ describe( 'dev-env/release-tools/utils', () => {
 				.then( () => {
 					expect( stubs.logger.warning.calledOnce ).to.equal( true );
 					expect( getChangelog() ).to.contain( changelogHeader );
-					expect( getChangesForVersion( '0.0.1' ) ).to.contain( 'Internal changes only (updated dependencies, documentation, etc.).' );
+					expect( getChangesForVersion( '0.0.1' ) ).to.contain(
+						'Internal changes only (updated dependencies, documentation, etc.).'
+					);
 
 					release( '0.0.1' );
 				} );
@@ -94,7 +97,9 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			return generateChangelog( '0.1.0', '0.0.1' )
 				.then( () => {
-					expect( getChangelog() ).to.contain( '## [0.1.0](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.0.1...v0.1.0)' );
+					expect( getChangelog() ).to.contain(
+						'## [0.1.0](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.0.1...v0.1.0)'
+					);
 
 					release( '0.1.0' );
 				} );
@@ -109,6 +114,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				.then( () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.0' ) );
 
+					/* eslint-disable max-len */
 					const expectedChangelog = `
 ### Features
 
@@ -116,6 +122,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
   This PR also closes [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4).
 `;
+					/* eslint-enable max-len */
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
 
@@ -133,6 +140,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				.then( () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.1' ) );
 
+					/* eslint-disable max-len */
 					const expectedChangelog = `
 ### Bug fixes
 
@@ -140,6 +148,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
   The PR also finally closes [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4). So good!
 `;
+					/* eslint-enable max-len */
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
 
@@ -159,6 +168,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				.then( () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.3.0' ) );
 
+					/* eslint-disable max-len */
 					const expectedChangelog = `
 ### Other changes
 
@@ -174,6 +184,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 * Please read [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
 `;
+					/* eslint-enable max-len */
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
 
@@ -192,6 +203,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				.then( () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.4.0' ) );
 
+					/* eslint-disable max-len */
 					const expectedChangelog = `
 ### Features
 
@@ -207,6 +219,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 * Please read [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
 `;
+					/* eslint-enable max-len */
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
 

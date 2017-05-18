@@ -21,32 +21,27 @@ module.exports = {
 	 * @returns {String} urlInfo.branch
 	 */
 	parseRepositoryUrl( url ) {
-		const regexp = /^((?:git@|(?:http[s]?|git):\/\/)github\.com(?:\/|:))?(([\w-]+)\/([\w-]+(?:\.git)?))(?:#([\w-\/\.]+))?$/;
+		const regexp = /^((?:git@|(?:https?|git):\/\/)github\.com(?:\/|:))?(([\w-]+)\/([\w-]+(?:\.git)?))(?:#([\w-/.]+))?$/;
 		const match = url.match( regexp );
-		let server;
-		let repository;
-		let branch;
-		let name;
-		let user;
 
 		if ( !match ) {
 			return null;
 		}
 
-		server = match[ 1 ] || 'git@github.com:';
-		repository = match[ 2 ];
-		user = match[ 3 ];
-		name = match[ 4 ];
-		branch = match[ 5 ] || 'master';
+		const server = match[ 1 ] || 'git@github.com:';
+		const repository = match[ 2 ];
+		const user = match[ 3 ];
+		const branch = match[ 5 ] || 'master';
+		let name = match[ 4 ];
 
 		name = /\.git$/.test( name ) ? name.slice( 0, -4 ) : name;
 
 		return {
-			server: server,
-			repository: repository,
-			branch: branch,
-			user: user,
-			name: name
+			server,
+			repository,
+			branch,
+			user,
+			name
 		};
 	},
 
@@ -103,7 +98,7 @@ module.exports = {
 	fetchAll( repositoryLocation ) {
 		const fetchCommands = [
 			`cd ${ repositoryLocation }`,
-			`git fetch --all`
+			'git fetch --all'
 		];
 
 		tools.shExec( fetchCommands.join( ' && ' ) );
@@ -137,7 +132,7 @@ module.exports = {
 	initialCommit( pluginName, repositoryPath ) {
 		const commitCommands = [
 			`cd ${ repositoryPath }`,
-			`git add .`,
+			'git add .',
 			`git commit -m "Initial commit for ${ pluginName }."`
 		];
 
@@ -182,7 +177,7 @@ module.exports = {
 	push( repositoryPath ) {
 		const pushCommands = [
 			`cd ${ repositoryPath }`,
-			`git push`
+			'git push'
 		];
 
 		tools.shExec( pushCommands.join( ' && ' ) );

@@ -19,7 +19,7 @@ module.exports = function globSync( pattern ) {
 
 	// Glob always returns paths separated by '/'. This is incorrect on Windows.
 	if ( process.platform === 'win32' ) {
-		return files.map( ( absolutePath ) => absolutePath.replace( /\//g, '\\' ) );
+		return files.map( absolutePath => absolutePath.replace( /\//g, '\\' ) );
 	}
 
 	return files;

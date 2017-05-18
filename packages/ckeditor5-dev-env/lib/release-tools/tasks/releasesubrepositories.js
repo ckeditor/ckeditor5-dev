@@ -40,7 +40,7 @@ module.exports = function releaseSubRepositories( options ) {
 	const errors = [];
 
 	return getPackagesToRelease( pathsCollection.packages )
-		.then( ( dependencies ) => {
+		.then( dependencies => {
 			displaySkippedPackages( pathsCollection.skipped );
 
 			if ( dependencies.size === 0 ) {
@@ -60,7 +60,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 			return cli.confirmRelease( dependencies );
 		} )
-		.then( ( isConfirmed ) => {
+		.then( isConfirmed => {
 			if ( !isConfirmed ) {
 				throw new Error( BREAK_RELEASE_MESSAGE );
 			}
@@ -74,7 +74,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 			return cli.configureReleaseOptions();
 		} )
-		.then( ( parsedOptions ) => {
+		.then( parsedOptions => {
 			options.token = parsedOptions.token;
 			options.skipGithub = parsedOptions.skipGithub;
 			options.skipNpm = parsedOptions.skipNpm;
@@ -82,7 +82,7 @@ module.exports = function releaseSubRepositories( options ) {
 			return executeOnPackages( pathsCollection.packages, releaseSinglePackage );
 		} )
 		.then( () => process.chdir( options.cwd ) )
-		.catch( ( err ) => {
+		.catch( err => {
 			// A user did not confirm the release process.
 			if ( err instanceof Error && err.message === BREAK_RELEASE_MESSAGE ) {
 				return Promise.resolve();

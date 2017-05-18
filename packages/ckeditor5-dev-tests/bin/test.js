@@ -22,7 +22,7 @@ if ( options.files.length === 0 ) {
 }
 
 tests.runAutomatedTests( options )
-	.catch( ( error ) => {
+	.catch( error => {
 		// Mark result of this task as invalid.
 		process.exitCode = 1;
 

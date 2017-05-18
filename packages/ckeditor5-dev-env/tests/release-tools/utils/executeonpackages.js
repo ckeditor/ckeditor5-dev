@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const expect = require( 'chai' ).expect;
@@ -53,7 +51,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			const order = [];
 
 			function functionToExecute( pathToSinglePackage ) {
-				return new Promise( ( resolve ) => {
+				return new Promise( resolve => {
 					order.push( pathToSinglePackage + ':started' );
 
 					setTimeout( () => {

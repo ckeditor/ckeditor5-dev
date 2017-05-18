@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const mockery = require( 'mockery' );
@@ -35,7 +33,7 @@ describe( 'compileManualTestScripts', () => {
 				entries,
 				buildDir
 			} ) ),
-			getRelativeFilePath: sandbox.spy( ( x ) => x ),
+			getRelativeFilePath: sandbox.spy( x => x ),
 			pathJoin: sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) )
 		};
 
@@ -122,7 +120,7 @@ describe( 'compileManualTestScripts', () => {
 				() => {
 					throw new Error( 'Expected to be rejected.' );
 				},
-				( err ) => {
+				err => {
 					expect( err ).to.equal( webpackError );
 				}
 			);

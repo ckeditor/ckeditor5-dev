@@ -105,14 +105,16 @@ function createJsonResponseHandler( resolve, reject, methodName ) {
 	return function handleJsonResponse( error, response, body ) {
 		if ( error ) {
 			return reject( error );
-		}  else if ( response.statusCode >= 300 ) {
-			return reject( new Error( `Status code: ${response.statusCode} for '${ methodName }' method.` ) );
+		} else if ( response.statusCode >= 300 ) {
+			return reject( new Error( `Status code: ${ response.statusCode } for '${ methodName }' method.` ) );
 		}
 
 		try {
 			resolve( JSON.parse( body ) );
 		} catch ( err ) {
-			reject( new Error( `Error handled while parsing body of the '${ methodName }' response: ${ body.toString() }` ) );
+			reject(
+				new Error( `Error handled while parsing body of the '${ methodName }' response: ${ body.toString() }` )
+			);
 		}
 	};
 }

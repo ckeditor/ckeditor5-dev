@@ -19,10 +19,10 @@ module.exports = function displaySkippedPackages( skippedPackagesPaths ) {
 	}
 
 	const packageNames = Array.from( skippedPackagesPaths )
-		.map( ( packagePath ) => getPackageJson( packagePath ).name );
+		.map( packagePath => getPackageJson( packagePath ).name );
 
 	let message = 'Packages listed below have been skipped:\n';
-	message += packageNames.map( ( line ) => `  * ${ line }` ).join( '\n' );
+	message += packageNames.map( line => `  * ${ line }` ).join( '\n' );
 
 	logger().info( message );
 };

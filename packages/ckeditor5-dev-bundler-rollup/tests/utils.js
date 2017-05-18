@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it, beforeEach, afterEach */
-
 'use strict';
 
 const chai = require( 'chai' );
@@ -117,8 +115,7 @@ describe( 'bundle-utils', () => {
 		} );
 
 		it( 'should get files from root directory', () => {
-			let basenameSpy = sandbox.spy( path, 'basename' );
-
+			const basenameSpy = sandbox.spy( path, 'basename' );
 			const result = utils.getFilesSizeStats( [ 'sub/dir/file.js', 'other/sub/dir/file.css' ], 'root/path' );
 
 			expect( result[ 0 ] ).to.have.property( 'name', 'file.js' );
@@ -128,8 +125,7 @@ describe( 'bundle-utils', () => {
 		} );
 
 		it( 'should get files if root directory is not specified', () => {
-			let basenameSpy = sandbox.spy( path, 'basename' );
-
+			const basenameSpy = sandbox.spy( path, 'basename' );
 			const result = utils.getFilesSizeStats( [ 'sub/dir/file.js', 'file.css' ] );
 
 			expect( result[ 0 ] ).to.have.property( 'name', 'file.js' );

@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const expect = require( 'chai' ).expect;
@@ -39,55 +37,55 @@ describe( 'dev-env/release-tools/utils', () => {
 
 		describe( 'getLastFromChangelog()', () => {
 			it( 'returns version from changelog #1', () => {
-				changelogStub.returns( `\n## [1.0.0](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1` );
+				changelogStub.returns( '\n## [1.0.0](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1' );
 
 				expect( version.getLastFromChangelog() ).to.equal( '1.0.0' );
 			} );
 
 			it( 'returns version from changelog #2', () => {
-				changelogStub.returns( `\n## 1.0.0 (2017-04-05)\nSome changelog entry.` );
+				changelogStub.returns( '\n## 1.0.0 (2017-04-05)\nSome changelog entry.' );
 
 				expect( version.getLastFromChangelog() ).to.equal( '1.0.0' );
 			} );
 
 			it( 'returns version from changelog #3', () => {
-				changelogStub.returns( `\n## [1.0.0-alpha](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1` );
+				changelogStub.returns( '\n## [1.0.0-alpha](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1' );
 
 				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-alpha' );
 			} );
 
 			it( 'returns version from changelog #4', () => {
-				changelogStub.returns( `\n## 1.0.0-alpha (2017-04-05)\nSome changelog entry.` );
+				changelogStub.returns( '\n## 1.0.0-alpha (2017-04-05)\nSome changelog entry.' );
 
 				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-alpha' );
 			} );
 
 			it( 'returns version from changelog #5', () => {
-				changelogStub.returns( `\n## [1.0.0-alpha+001](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1` );
+				changelogStub.returns( '\n## [1.0.0-alpha+001](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1' );
 
 				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-alpha+001' );
 			} );
 
 			it( 'returns version from changelog #6', () => {
-				changelogStub.returns( `\n## 1.0.0-alpha+001 (2017-04-05)\nSome changelog entry.` );
+				changelogStub.returns( '\n## 1.0.0-alpha+001 (2017-04-05)\nSome changelog entry.' );
 
 				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-alpha+001' );
 			} );
 
 			it( 'returns version from changelog #7', () => {
-				changelogStub.returns( `\n## [1.0.0-beta.2](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1` );
+				changelogStub.returns( '\n## [1.0.0-beta.2](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1' );
 
 				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-beta.2' );
 			} );
 
 			it( 'returns version from changelog #8', () => {
-				changelogStub.returns( `\n## 1.0.0-beta.2 (2017-04-05)\nSome changelog entry.` );
+				changelogStub.returns( '\n## 1.0.0-beta.2 (2017-04-05)\nSome changelog entry.' );
 
 				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-beta.2' );
 			} );
 
 			it( 'returns version from changelog #9', () => {
-				changelogStub.returns( `\n## 1.0.0\nSome changelog entry.` );
+				changelogStub.returns( '\n## 1.0.0\nSome changelog entry.' );
 
 				expect( version.getLastFromChangelog() ).to.equal( '1.0.0' );
 			} );
@@ -107,7 +105,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 		describe( 'getLastTagFromGit()', () => {
 			it( 'returns last tag if exists', () => {
-				sandbox.stub( tools, 'shExec' ).returns( `v1.0.0` );
+				sandbox.stub( tools, 'shExec' ).returns( 'v1.0.0' );
 
 				expect( version.getLastTagFromGit() ).to.equal( '1.0.0' );
 			} );

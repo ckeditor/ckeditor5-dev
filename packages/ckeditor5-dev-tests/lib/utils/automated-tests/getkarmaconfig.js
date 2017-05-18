@@ -169,7 +169,7 @@ function getBrowsers( options ) {
 		return null;
 	}
 
-	return options.browsers.map( ( browser ) => {
+	return options.browsers.map( browser => {
 		if ( browser === 'Chrome' ) {
 			return 'CHROME_LOCAL';
 		}

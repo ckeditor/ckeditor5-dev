@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const expect = require( 'chai' ).expect;
@@ -57,7 +55,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				} );
 
 				expect( () => transformCommit.linkGithubIssues( '' ) )
-					.to.throw( Error, `The package.json for "test-package" must contain the "bugs" property.` );
+					.to.throw( Error, 'The package.json for "test-package" must contain the "bugs" property.' );
 			} );
 
 			it( 'marks references to issues as links to GitHub issues #1', () => {
@@ -86,7 +84,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		describe( 'getCommitType()', () => {
 			it( 'throws an error when passed unsupported commit type', () => {
 				expect( () => transformCommit.getCommitType( 'invalid' ) )
-					.to.throw( Error, `Given invalid type of commit ("invalid").` );
+					.to.throw( Error, 'Given invalid type of commit ("invalid").' );
 			} );
 
 			it( 'changes a singular type of commit to plural', () => {

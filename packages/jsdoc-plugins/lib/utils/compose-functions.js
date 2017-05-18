@@ -9,7 +9,7 @@
  * @param {...Function} functions
  */
 const composeFunctions = ( ...fns ) => {
-	return ( result ) => {
+	return result => {
 		for ( const fn of fns ) {
 			result = fn( result );
 		}

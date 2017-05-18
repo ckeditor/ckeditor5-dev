@@ -24,7 +24,7 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
 module.exports = function runManualTests( options ) {
 	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
 	const files = ( options.files && options.files.length ) ? options.files : [ '*' ];
-	const manualTestFilesPattern = files.map( ( file ) => transformFileOptionToTestGlob( file, true ) );
+	const manualTestFilesPattern = files.map( file => transformFileOptionToTestGlob( file, true ) );
 
 	return Promise.resolve()
 		.then( () => removeDir( buildDir ) )

@@ -3,8 +3,6 @@
  * Licensed under the terms of the MIT License (see LICENSE.md).
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const chai = require( 'chai' );
@@ -81,7 +79,7 @@ describe( 'Linter plugin', () => {
 				} ],
 				longname: 'abc',
 				scope: 'inner',
-				meta: { fileName: '',  path: '' },
+				meta: { fileName: '', path: '' },
 			} ], testedModules );
 
 			linter._lintParams();
@@ -97,11 +95,11 @@ describe( 'Linter plugin', () => {
 						name: 'module:engine/ckeditor5/editor'
 					} }
 				} ],
-				meta: { fileName: '',  path: '' },
+				meta: { fileName: '', path: '' },
 			}, {
 				kind: 'module',
 				longname: 'module:engine/ckeditor5/editor',
-				meta: { fileName: '',  path: '' },
+				meta: { fileName: '', path: '' },
 			} ], testedModules );
 
 			linter._lintParams();
@@ -119,7 +117,7 @@ describe( 'Linter plugin', () => {
 				}, {
 					type: { parsedType: { name: 'Number' } },
 				} ],
-				meta: { fileName: '',  path: '' },
+				meta: { fileName: '', path: '' },
 			} ], testedModules );
 
 			linter._lintParams();
@@ -139,7 +137,7 @@ describe( 'Linter plugin', () => {
 						]
 					} },
 				} ],
-				meta: { fileName: '',  path: '' },
+				meta: { fileName: '', path: '' },
 			} ], testedModules );
 
 			linter._lintParams();
@@ -158,7 +156,7 @@ describe( 'Linter plugin', () => {
 						]
 					} },
 				} ],
-				meta: { fileName: '',  path: '' },
+				meta: { fileName: '', path: '' },
 			} ], testedModules );
 
 			linter._lintParams();
@@ -178,7 +176,7 @@ describe( 'Linter plugin', () => {
 						]
 					} },
 				} ],
-				meta: { fileName: '',  path: '' },
+				meta: { fileName: '', path: '' },
 			} ], testedModules );
 
 			linter._lintParams();
@@ -192,7 +190,7 @@ describe( 'Linter plugin', () => {
 			comment:
 				`* {@link module:utils/a~A#method1}
 				 * {@link module:utils/b~Some1} `,
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 		} ], testedModules );
 
 		linter._lintLinks();
@@ -205,11 +203,11 @@ describe( 'Linter plugin', () => {
 			comment:
 				`/** Linking test:\n *\n * * a:\n *
 				 * {@link module:ckeditor5/a~A} `,
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 		}, {
 			comment: '',
 			longname: 'module:ckeditor5/a~A',
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 		} ], testedModules );
 
 		linter._lintLinks();
@@ -219,12 +217,12 @@ describe( 'Linter plugin', () => {
 
 	it( '_lintLinks() with link name', () => {
 		const linter = new DocletValidator( [ {
-			comment: ` {@link module:ckeditor5/a~A classA} `,
-			meta: { fileName: '',  path: '' },
+			comment: ' {@link module:ckeditor5/a~A classA} ',
+			meta: { fileName: '', path: '' },
 		}, {
 			comment: '',
 			longname: 'module:ckeditor5/a~A',
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 		} ], testedModules );
 
 		linter._lintLinks();
@@ -234,12 +232,12 @@ describe( 'Linter plugin', () => {
 
 	it( '_lintLinks() with whitespaces', () => {
 		const linter = new DocletValidator( [ {
-			comment: ` {@link \n module:ckeditor5/a~A \n\t classA} `,
-			meta: { fileName: '',  path: '' },
+			comment: ' {@link \n module:ckeditor5/a~A \n\t classA} ',
+			meta: { fileName: '', path: '' },
 		}, {
 			comment: '',
 			longname: 'module:ckeditor5/a~A',
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 		} ], testedModules );
 
 		linter._lintLinks();
@@ -249,12 +247,12 @@ describe( 'Linter plugin', () => {
 
 	it( '_lintLinks() with multi-word link', () => {
 		const linter = new DocletValidator( [ {
-			comment: ` {@link module:ckeditor5/a~A with multi word link} `,
-			meta: { fileName: '',  path: '' },
+			comment: ' {@link module:ckeditor5/a~A with multi word link} ',
+			meta: { fileName: '', path: '' },
 		}, {
 			comment: '',
 			longname: 'module:ckeditor5/a~A',
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 		} ], testedModules );
 
 		linter._lintLinks();
@@ -266,7 +264,7 @@ describe( 'Linter plugin', () => {
 		const linter = new DocletValidator( [ {
 			kind: 'class',
 			longname: 'module:abc/SomeClass',
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 			fires: [ 'someEvent' ],
 		} ], testedModules );
 
@@ -279,7 +277,7 @@ describe( 'Linter plugin', () => {
 		const linter = new DocletValidator( [ {
 			kind: 'class',
 			longname: 'module:abc/SomeClass',
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 			fires: [ 'module:abc/SomeClass#event:someEvent' ],
 		}, {
 			kind: 'event',
@@ -295,7 +293,7 @@ describe( 'Linter plugin', () => {
 		const linter = new DocletValidator( [ {
 			kind: 'class',
 			longname: 'module:abc/SomeClass',
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 			fires: [ 'module:abc/SomeClass#event:someEvent' ],
 		}, {
 			kind: 'not-event',
@@ -312,11 +310,11 @@ describe( 'Linter plugin', () => {
 			kind: 'member',
 			scope: 'inner',
 			memberof: 'module:utils/emittermixin',
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 		}, {
 			kind: 'module',
 			longname: 'module:utils/emittermixin',
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 		} ], testedModules );
 
 		linter._lintModuleDocumentedExports();
@@ -329,7 +327,7 @@ describe( 'Linter plugin', () => {
 			kind: 'member',
 			scope: 'inner',
 			memberof: 'module:utils/emittermixin~EmitterMixin',
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 		} ], testedModules );
 
 		linter._lintModuleDocumentedExports();
@@ -344,11 +342,11 @@ describe( 'Linter plugin', () => {
 			see: [
 				'module:utils/emittermixin~EmitterMixin#constructor',
 			],
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 		}, {
 			kind: 'member',
 			longname: 'module:utils/emittermixin~EmitterMixin#constructor',
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 		} ], testedModules );
 
 		linter._lintSeeReferences();
@@ -362,7 +360,7 @@ describe( 'Linter plugin', () => {
 			see: [
 				'module:utils/emittermixin~EmitterMixin',
 			],
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 		} ], testedModules );
 
 		linter._lintSeeReferences();
@@ -381,7 +379,7 @@ describe( 'Linter plugin', () => {
 					]
 				},
 			} ],
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 		} ], testedModules );
 
 		linter._lintTypedefs();
@@ -399,7 +397,7 @@ describe( 'Linter plugin', () => {
 					]
 				},
 			} ],
-			meta: { fileName: '',  path: '' },
+			meta: { fileName: '', path: '' },
 		} ], testedModules );
 
 		linter._lintTypedefs();
@@ -447,7 +445,7 @@ describe( 'Linter plugin', () => {
 			const linter = new DocletValidator( [ {
 				longname: 'module:core/editor~Editor',
 				kind: 'function',
-				meta: { fileName: '',  path: '' },
+				meta: { fileName: '', path: '' },
 			} ], testedModules );
 
 			const result = linter._isCorrectType( 'Array.<module:core/editor~Editor>' );

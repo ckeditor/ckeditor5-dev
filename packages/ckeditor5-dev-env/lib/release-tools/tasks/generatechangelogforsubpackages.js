@@ -55,7 +55,7 @@ module.exports = function generateChangelogForSubPackages( options ) {
 			log.info( 'Committing generated changelogs.' );
 
 			tools.shExec( `git add ${ options.packages }/**/${ changelogUtils.changelogFile }`, shExecOptions );
-			tools.shExec( `git commit -m "Docs: Updated changelog for packages. [skip ci]"`, shExecOptions );
+			tools.shExec( 'git commit -m "Docs: Updated changelog for packages. [skip ci]"', shExecOptions );
 		} )
 		.then( () => {
 			displaySkippedPackages( pathsCollection.skipped );
@@ -79,12 +79,12 @@ module.exports = function generateChangelogForSubPackages( options ) {
 		log.info( chalk.bold.blue( `Generating changelog for "${ dependencyName }"...` ) );
 
 		return getNewReleaseType( transformCommitFunction, { tagName } )
-			.then( ( response ) => {
+			.then( response => {
 				const newReleaseType = response.releaseType !== 'skip' ? response.releaseType : null;
 
 				return cli.provideVersion( packageJson.version, newReleaseType );
 			} )
-			.then( ( version ) => {
+			.then( version => {
 				if ( version === 'skip' ) {
 					pathsCollection.skipped.add( dependencyPath );
 					skippedPackages.add( dependencyPath );
@@ -100,11 +100,11 @@ module.exports = function generateChangelogForSubPackages( options ) {
 				};
 
 				return generateChangelogFromCommits( changelogOptions )
-					.then( ( newVersion ) => {
+					.then( newVersion => {
 						generatedChangelogsMap.set( dependencyName, newVersion );
 					} );
 			} )
-			.catch( ( err ) => {
+			.catch( err => {
 				log.error( err );
 			} );
 	}

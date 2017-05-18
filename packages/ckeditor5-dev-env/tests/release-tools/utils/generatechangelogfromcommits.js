@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const fs = require( 'fs' );
@@ -99,10 +97,12 @@ describe( 'dev-env/release-tools/utils', () => {
 			return generateChangelogFromCommits( options )
 				.then( () => {
 					expect( stubs.changelogUtils.saveChangelog.calledTwice ).to.equal( true );
-					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 0 ] ).to.equal( changelogUtils.changelogHeader );
+					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 0 ] )
+						.to.equal( changelogUtils.changelogHeader );
 
 					expect( stubs.logger.warning.calledOnce ).to.equal( true );
-					expect( stubs.logger.warning.firstCall.args[ 0 ] ).to.equal( 'Changelog file does not exist. Creating...' );
+					expect( stubs.logger.warning.firstCall.args[ 0 ] )
+						.to.equal( 'Changelog file does not exist. Creating...' );
 				} );
 		} );
 

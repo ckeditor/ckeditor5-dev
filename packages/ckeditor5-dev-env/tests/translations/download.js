@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* global describe, it, beforeEach, afterEach */
-
 'use strict';
 
 const sinon = require( 'sinon' );
@@ -13,8 +11,7 @@ const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 
 describe( 'download', () => {
-	let sandbox, stubs, download;
-	let resources, resourcesDetails, translations, fileContents;
+	let sandbox, stubs, download, resources, resourcesDetails, translations, fileContents;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
@@ -176,14 +173,14 @@ describe( 'download', () => {
 	} );
 
 	it( 'should report an error when something goes wrong', () => {
-		let error = new Error();
+		const error = new Error();
 
 		stubs.transifexService.getResources = sandbox.spy( () => Promise.reject( error ) );
 
 		return download( { token: 'secretToken' } )
 			.then( () => {
 				throw new Error( 'It should throws an error' );
-			}, ( err ) => {
+			}, err => {
 				expect( err ).to.equal( error );
 				sinon.assert.calledOnce( stubs.logger.error );
 				sinon.assert.calledWithExactly( stubs.logger.error, error );

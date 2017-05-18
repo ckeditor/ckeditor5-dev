@@ -24,7 +24,7 @@ module.exports = function download( loginConfig ) {
 		.then( () => {
 			logger.info( 'Saved all translations.' );
 		} )
-		.catch( ( err ) => {
+		.catch( err => {
 			logger.error( err );
 			throw err;
 		} );
@@ -32,12 +32,12 @@ module.exports = function download( loginConfig ) {
 
 function getPackageNames( loginConfig ) {
 	return transifexService.getResources( loginConfig )
-		.then( resources => resources.map( ( resource ) => resource.slug ) );
+		.then( resources => resources.map( resource => resource.slug ) );
 }
 
 function downloadAndReplaceTranslations( loginConfig, packageNames ) {
 	return Promise.all(
-		packageNames.map( ( packageName ) => {
+		packageNames.map( packageName => {
 			const translationPromises = removeOldTranslationForPackage( packageName )
 				.then( () => downloadPoFilesForPackage( loginConfig, packageName ) );
 
@@ -61,18 +61,17 @@ function downloadPoFilesForPackage( loginConfig, packageName ) {
 	} ) );
 	let languageCodes;
 
-	const translationsForPackagePromise = resourceDetailsPromise.then( ( resourceDetails ) => {
-		// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+	const translationsForPackagePromise = resourceDetailsPromise.then( resourceDetails => {
 		languageCodes = resourceDetails.available_languages.map( languageInfo => languageInfo.code );
-		// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 
 		return Promise.all(
-			languageCodes.map( ( lang ) => downloadPoFile( loginConfig, lang, packageName ) )
+			languageCodes.map( lang => downloadPoFile( loginConfig, lang, packageName ) )
 		);
 	} );
 
 	return translationsForPackagePromise.then( translationsForPackage => {
-		const translationMapEntries = translationsForPackage.map( ( translations, index ) => [ languageCodes[ index ], translations ] );
+		const translationMapEntries = translationsForPackage
+			.map( ( translations, index ) => [ languageCodes[ index ], translations ] );
 
 		return new Map( translationMapEntries );
 	} );
@@ -85,7 +84,7 @@ function downloadPoFile( loginConfig, lang, packageName ) {
 	} );
 
 	return transifexService.getTranslation( config )
-		.then( ( data ) => data.content );
+		.then( data => data.content );
 }
 
 function saveTranslations( packageName, translations ) {

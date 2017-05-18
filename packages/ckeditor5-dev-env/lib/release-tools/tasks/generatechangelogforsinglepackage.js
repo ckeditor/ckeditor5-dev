@@ -46,7 +46,7 @@ module.exports = function generateChangelogForSinglePackage( newVersion = null )
 			.then( () => {
 				return getNewReleaseType( transformCommitFunction, { tagName } );
 			} )
-			.then( ( response ) => {
+			.then( response => {
 				const newReleaseType = response.releaseType !== 'skip' ? response.releaseType : null;
 
 				return cli.provideVersion( packageJson.version, newReleaseType );
@@ -56,7 +56,7 @@ module.exports = function generateChangelogForSinglePackage( newVersion = null )
 	}
 
 	return promise
-		.then( ( version ) => {
+		.then( version => {
 			if ( version === 'skip' ) {
 				return Promise.resolve();
 			}
@@ -71,9 +71,11 @@ module.exports = function generateChangelogForSinglePackage( newVersion = null )
 			return generateChangelogFromCommits( changelogOptions )
 				.then( () => {
 					tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
-					tools.shExec( `git commit -m "Docs: Changelog. [skip ci]"`, { verbosity: 'error' } );
+					tools.shExec( 'git commit -m "Docs: Changelog. [skip ci]"', { verbosity: 'error' } );
 
-					log.info( chalk.green( `Changelog for "${ packageJson.name }" (v${ version }) has been generated.` ) );
+					log.info(
+						chalk.green( `Changelog for "${ packageJson.name }" (v${ version }) has been generated.` )
+					);
 
 					return Promise.resolve( version );
 				} );
