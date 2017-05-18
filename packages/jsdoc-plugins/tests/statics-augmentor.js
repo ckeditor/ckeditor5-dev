@@ -9,14 +9,14 @@
 
 const chai = require( 'chai' );
 const expect = chai.expect;
-const StaticsAugmentor = require( '../lib/statics-augmentor/statics-augmentor' );
+const augmentStatics = require( '../lib/statics-augmentor/augment-statics' );
 
 describe( 'Static members inheritance plugin', () => {
 	it( 'should add doclet of implicitly inherited static member', () => {
 		const inputDoclets = require( './statics-augmentor-mockups/implicit' ).inputDoclets;
 		const expectedResult = require( './statics-augmentor-mockups/implicit' ).expectedResult;
 		const doclets = clone( inputDoclets );
-		new StaticsAugmentor( doclets ).augmentStatics();
+		augmentStatics( doclets );
 
 		expect( doclets ).to.eql( expectedResult );
 	} );
@@ -25,7 +25,7 @@ describe( 'Static members inheritance plugin', () => {
 		const inputDoclets = require( './statics-augmentor-mockups/inheritdoc' ).inputDoclets;
 		const expectedResult = require( './statics-augmentor-mockups/inheritdoc' ).expectedResult;
 		const doclets = clone( inputDoclets );
-		new StaticsAugmentor( doclets ).augmentStatics();
+		augmentStatics( doclets );
 
 		expect( doclets ).to.eql( expectedResult );
 	} );
@@ -34,7 +34,7 @@ describe( 'Static members inheritance plugin', () => {
 		const inputDoclets = require( './statics-augmentor-mockups/explicit' ).inputDoclets;
 		const expectedResult = require( './statics-augmentor-mockups/explicit' ).expectedResult;
 		const doclets = clone( inputDoclets );
-		new StaticsAugmentor( doclets ).augmentStatics();
+		augmentStatics( doclets );
 
 		expect( doclets ).to.eql( expectedResult );
 	} );
