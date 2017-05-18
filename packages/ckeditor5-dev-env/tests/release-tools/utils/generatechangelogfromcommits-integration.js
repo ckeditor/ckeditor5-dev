@@ -264,11 +264,13 @@ describe( 'dev-env/release-tools/utils', () => {
 				'--message "NOTE: Please read #1." ' +
 				'--message "BREAKING CHANGES: Some breaking change." ' );
 
-			return generateChangelog( '0.4.1', '0.4.0', true )
+			return generateChangelog( '0.4.2', '0.4.1', true )
 				.then( () => {
-					const latestChangelog = getChangesForVersion( '0.4.1' );
+					const latestChangelog = getChangesForVersion( '0.4.2' );
 
 					expect( latestChangelog ).to.equal( 'Internal changes only (updated dependencies, documentation, etc.).' );
+
+					release( '0.4.2' );
 				} );
 		} );
 	} );
