@@ -190,43 +190,5 @@ describe( 'dev-env/release-tools/utils', () => {
 					expect( packages.get( '@ckeditor/ckeditor5-utils' ) ).to.equal( undefined );
 				} );
 		} );
-
-		it( 'does not throw when packages are released for the first time', () => {
-			const packagesToCheck = new Set( [
-				'/packages/ckeditor5-core',
-				'/packages/ckeditor5-engine'
-			] );
-
-			// @ckeditor/ckeditor5-core
-			stubs.versions.getLastFromChangelog.onFirstCall().returns( '0.1.0' );
-			stubs.versions.getLastTagFromGit.onFirstCall().returns( null );
-			stubs.getPackageJson.onFirstCall().returns( {
-				name: '@ckeditor/ckeditor5-core',
-				version: '0.0.1'
-			} );
-
-			// @ckeditor/ckeditor5-engine
-			stubs.versions.getLastFromChangelog.onSecondCall().returns( '0.1.0' );
-			stubs.versions.getLastTagFromGit.onSecondCall().returns( null );
-			stubs.getPackageJson.onSecondCall().returns( {
-				name: '@ckeditor/ckeditor5-engine',
-				version: '0.0.1'
-			} );
-
-			sandbox.stub( process, 'cwd' ).returns( '/cwd' );
-
-			return getPackagesToRelease( packagesToCheck )
-				.then( ( packages ) => {
-					expect( packages.size ).to.equal( 2 );
-
-					const corePackageDetails = packages.get( '@ckeditor/ckeditor5-core' );
-					expect( corePackageDetails.version ).to.equal( '0.1.0' );
-					expect( corePackageDetails.hasChangelog ).to.equal( true );
-
-					const enginePackageDetails = packages.get( '@ckeditor/ckeditor5-engine' );
-					expect( enginePackageDetails.version ).to.equal( '0.1.0' );
-					expect( enginePackageDetails.hasChangelog ).to.equal( true );
-				} );
-		} );
 	} );
 } );
