@@ -34,7 +34,7 @@ function build( config ) {
 			template: 'templates/silent'
 		},
 		plugins: [
-			'node_modules/jsdoc/plugins/markdown',
+			require.resolve( 'jsdoc/plugins/markdown' ),
 			require.resolve( '@ckeditor/jsdoc-plugins/lib/export-fixer/export-fixer' ),
 			require.resolve( '@ckeditor/jsdoc-plugins/lib/longname-fixer/longname-fixer' ),
 			require.resolve( '@ckeditor/jsdoc-plugins/lib/validator/validator' ),

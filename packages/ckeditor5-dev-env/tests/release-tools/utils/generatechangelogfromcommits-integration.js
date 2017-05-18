@@ -19,7 +19,9 @@ describe( 'dev-env/release-tools/utils', () => {
 	let tmpCwd, cwd, generateChangelogFromCommits, stubs, sandbox;
 
 	// These tests create a chain of releases.
-	describe( 'generateChangelogFromCommits() - integration test', () => {
+	describe( 'generateChangelogFromCommits() - integration test', function() {
+		this.timeout( 5000 );
+
 		before( () => {
 			cwd = process.cwd();
 			tmpCwd = fs.mkdtempSync( __dirname + path.sep );
@@ -75,10 +77,10 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		// Done callback is called manually because these tests are slow and sometimes Mocha throws a timeout error.
-		it( 'generates a changelog for the first time', done => {
+		it( 'generates a changelog for the first time', () => {
 			exec( 'git commit --allow-empty --message "Internal: An initial commit."' );
 
-			generateChangelog( '0.0.1' )
+			return generateChangelog( '0.0.1' )
 				.then( () => {
 					expect( stubs.logger.warning.calledOnce ).to.equal( true );
 					expect( getChangelog() ).to.contain( changelogHeader );
@@ -87,30 +89,28 @@ describe( 'dev-env/release-tools/utils', () => {
 					);
 
 					release( '0.0.1' );
-					done();
 				} );
 		} );
 
-		it( 'title of the next release should be a link which compares current version with the previous one', done => {
+		it( 'title of the next release should be a link which compares current version with the previous one', () => {
 			exec( 'git commit --allow-empty --message "Feature: Some amazing feature. Closes #1."' );
 
-			generateChangelog( '0.1.0', '0.0.1' )
+			return generateChangelog( '0.1.0', '0.0.1' )
 				.then( () => {
 					expect( getChangelog() ).to.contain(
 						'## [0.1.0](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.0.1...v0.1.0)'
 					);
 
 					release( '0.1.0' );
-					done();
 				} );
 		} );
 
-		it( 'does not hoist issues from the commit body', done => {
+		it( 'does not hoist issues from the commit body', () => {
 			exec( 'git commit --allow-empty ' +
 				'--message "Feature: Another feature. Closes #2." ' +
 				'--message "This PR also closes #3 and #4."' );
 
-			generateChangelog( '0.2.0', '0.1.0' )
+			return generateChangelog( '0.2.0', '0.1.0' )
 				.then( () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.0' ) );
 
@@ -127,17 +127,16 @@ describe( 'dev-env/release-tools/utils', () => {
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
 
 					release( '0.2.0' );
-					done();
 				} );
 		} );
 
-		it( 'does not hoist issues from the commit body for merge commit', done => {
+		it( 'does not hoist issues from the commit body for merge commit', () => {
 			exec( 'git commit --allow-empty ' +
 				'--message "Merge pull request #5 from ckeditor/t/4" ' +
 				'--message "Fix: Amazing fix. Closes #5." ' +
 				'--message "The PR also finally closes #3 and #4. So good!"' );
 
-			generateChangelog( '0.2.1', '0.2.0' )
+			return generateChangelog( '0.2.1', '0.2.0' )
 				.then( () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.1' ) );
 
@@ -154,11 +153,10 @@ describe( 'dev-env/release-tools/utils', () => {
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
 
 					release( '0.2.1' );
-					done();
 				} );
 		} );
 
-		it( 'does not hoist issues from the commit body with additional notes for merge commit', done => {
+		it( 'does not hoist issues from the commit body with additional notes for merge commit', () => {
 			exec( 'git commit --allow-empty ' +
 				'--message "Merge pull request #7 from ckeditor/t/6" ' +
 				'--message "Other: Some docs improvements. Closes #6." ' +
@@ -166,7 +164,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				'--message "NOTE: Please read #1." ' +
 				'--message "BREAKING CHANGES: Some breaking change." ' );
 
-			generateChangelog( '0.3.0', '0.2.1' )
+			return generateChangelog( '0.3.0', '0.2.1' )
 				.then( () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.3.0' ) );
 
@@ -191,18 +189,17 @@ describe( 'dev-env/release-tools/utils', () => {
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
 
 					release( '0.3.0' );
-					done();
 				} );
 		} );
 
-		it( 'does not hoist issues from the commit body with additional notes', done => {
+		it( 'does not hoist issues from the commit body with additional notes', () => {
 			exec( 'git commit --allow-empty ' +
 				'--message "Feature: Issues will not be hoisted. Closes #8." ' +
 				'--message "All details have been described in #1." ' +
 				'--message "NOTE: Please read #1." ' +
 				'--message "BREAKING CHANGES: Some breaking change." ' );
 
-			generateChangelog( '0.4.0', '0.3.0' )
+			return generateChangelog( '0.4.0', '0.3.0' )
 				.then( () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.4.0' ) );
 
@@ -227,14 +224,13 @@ describe( 'dev-env/release-tools/utils', () => {
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
 
 					release( '0.4.0' );
-					done();
 				} );
 		} );
 
-		it( 'changelog should contain 2 blank lines for changelog with internal changes', done => {
+		it( 'changelog should contain 2 blank lines for changelog with internal changes', () => {
 			exec( 'git commit --allow-empty --message "Docs: Updated README."' );
 
-			generateChangelog( '0.4.1', '0.4.0' )
+			return generateChangelog( '0.4.1', '0.4.0' )
 				.then( () => {
 					const expectedChangelogeEntries = [
 						'## [0.4.1](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.4.0...v0.4.1) (0000-00-00)',
@@ -251,7 +247,6 @@ describe( 'dev-env/release-tools/utils', () => {
 					} );
 
 					release( '0.4.1' );
-					done();
 				} );
 		} );
 	} );
