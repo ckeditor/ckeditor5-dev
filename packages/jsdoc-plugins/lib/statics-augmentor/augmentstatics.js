@@ -12,7 +12,7 @@
  *
  * @param {Array.<Doclet>} doclets
  */
-function augmentStatics( doclets ) {
+module.exports = function augmentStatics( doclets ) {
 	const childClasses = getDescendants( doclets );
 
 	for ( const child of childClasses ) {
@@ -26,7 +26,7 @@ function augmentStatics( doclets ) {
 			}
 		}
 	}
-}
+};
 
 /**
  * Finds doclets of child classes which need to have inherited static members added.
@@ -169,5 +169,3 @@ function checkExplicitlyInherits( doclets ) {
 
 	return false;
 }
-
-module.exports = augmentStatics;
