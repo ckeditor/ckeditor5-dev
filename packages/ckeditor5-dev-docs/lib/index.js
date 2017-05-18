@@ -36,6 +36,7 @@ function build( config ) {
 		plugins: [
 			require.resolve( 'jsdoc/plugins/markdown' ),
 			require.resolve( '@ckeditor/jsdoc-plugins/lib/export-fixer/export-fixer' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/statics-augmentor/augmentor' ),
 			require.resolve( '@ckeditor/jsdoc-plugins/lib/longname-fixer/longname-fixer' ),
 			require.resolve( '@ckeditor/jsdoc-plugins/lib/validator/validator' ),
 			require.resolve( '@ckeditor/jsdoc-plugins/lib/utils/doclet-logger' )
