@@ -21,6 +21,7 @@ const { stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {Function} options.transformCommit A function which transforms the commit.
  * @param {String|null} options.tagName Name of the last created tag for the repository.
  * @param {String} options.newTagName Name of the tag for current version.
+ * @param {Boolean} [options.isInternalRelease=false] Whether the changelog is generated for internal release.
  * @returns {Promise}
  */
 module.exports = function generateChangelogFromCommits( options ) {
@@ -37,7 +38,8 @@ module.exports = function generateChangelogFromCommits( options ) {
 			version: options.version,
 			currentTag: options.newTagName,
 			previousTag: options.tagName,
-			displayLogs: false
+			displayLogs: false,
+			isInternalRelease: options.isInternalRelease || false,
 		};
 
 		const gitRawCommitsOpts = {

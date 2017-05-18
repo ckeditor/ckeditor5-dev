@@ -6,6 +6,7 @@
 'use strict';
 
 const chalk = require( 'chalk' );
+const semver = require( 'semver' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
 const cli = require( '../utils/cli' );
@@ -92,9 +93,17 @@ module.exports = function generateChangelogForSubPackages( options ) {
 					return Promise.resolve();
 				}
 
+				let isInternalRelease = false;
+
+				if ( version === 'internal' ) {
+					isInternalRelease = true;
+					version = semver.inc( packageJson.version, 'patch' );
+				}
+
 				const changelogOptions = {
 					version,
 					tagName,
+					isInternalRelease,
 					newTagName: packageJson.name + '@' + version,
 					transformCommit: transformCommitFunction
 				};

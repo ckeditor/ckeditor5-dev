@@ -174,13 +174,15 @@ describe( 'dev-env/release-tools/tasks', () => {
 						version: '1.0.1',
 						transformCommit: stubs.transformCommit,
 						tagName: '@ckeditor/ckeditor5-dev-foo@1.0.0',
-						newTagName: '@ckeditor/ckeditor5-dev-foo@1.0.1'
+						newTagName: '@ckeditor/ckeditor5-dev-foo@1.0.1',
+						isInternalRelease: false
 					} );
 					expect( stubs.generateChangelogFromCommits.secondCall.args[ 0 ] ).to.deep.equal( {
 						version: '2.1.0',
 						transformCommit: stubs.transformCommit,
 						tagName: '@ckeditor/ckeditor5-dev-bar@2.0.0',
-						newTagName: '@ckeditor/ckeditor5-dev-bar@2.1.0'
+						newTagName: '@ckeditor/ckeditor5-dev-bar@2.1.0',
+						isInternalRelease: false
 					} );
 				} );
 		} );
@@ -230,7 +232,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 						version: '1.0.1',
 						transformCommit: stubs.transformCommit,
 						tagName: '@ckeditor/ckeditor5-dev-foo@1.0.0',
-						newTagName: '@ckeditor/ckeditor5-dev-foo@1.0.1'
+						newTagName: '@ckeditor/ckeditor5-dev-foo@1.0.1',
+						isInternalRelease: false
 					} );
 				} );
 		} );
@@ -277,6 +280,61 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 					expect( stubs.tools.shExec.called ).to.equal( false );
 					expect( stubs.generateChangelogFromCommits.called ).to.equal( false );
+				} );
+		} );
+
+		it( 'allows generating changelog as "internal"', () => {
+			sandbox.stub( process, 'chdir' );
+			sandbox.stub( process, 'cwd' ).returns( '/ckeditor5-dev' );
+
+			stubs.getSubPackagesPaths.returns( {
+				skipped: new Set(),
+				packages: new Set( [
+					'/ckeditor5-dev/packages/ckeditor5-dev-foo',
+					'/ckeditor5-dev/packages/ckeditor5-dev-bar'
+				] )
+			} );
+
+			stubs.getPackageJson.onFirstCall().returns( {
+				name: '@ckeditor/ckeditor5-dev-foo',
+				version: '1.0.0'
+			} );
+			stubs.versionUtils.getLastFromChangelog.onFirstCall().returns( '1.0.0' );
+			stubs.getNewReleaseType.onFirstCall().returns( Promise.resolve( { releaseType: 'patch' } ) );
+			stubs.cli.provideVersion.onFirstCall().returns( Promise.resolve( 'internal' ) );
+			stubs.generateChangelogFromCommits.onFirstCall().returns( Promise.resolve( '1.0.1' ) );
+
+			stubs.getPackageJson.onSecondCall().returns( {
+				name: '@ckeditor/ckeditor5-dev-bar',
+				version: '2.0.0'
+			} );
+			stubs.versionUtils.getLastFromChangelog.onSecondCall().returns( '2.0.0' );
+			stubs.getNewReleaseType.onSecondCall().returns( Promise.resolve( { releaseType: 'minor' } ) );
+			stubs.cli.provideVersion.onSecondCall().returns( Promise.resolve( 'internal' ) );
+			stubs.generateChangelogFromCommits.onSecondCall().returns( Promise.resolve( '2.0.1' ) );
+
+			const options = {
+				cwd: '/ckeditor5-dev',
+				packages: 'packages'
+			};
+
+			return generateChangelogForSubPackages( options )
+				.then( () => {
+					expect( stubs.generateChangelogFromCommits.calledTwice ).to.equal( true );
+					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						version: '1.0.1',
+						transformCommit: stubs.transformCommit,
+						tagName: '@ckeditor/ckeditor5-dev-foo@1.0.0',
+						newTagName: '@ckeditor/ckeditor5-dev-foo@1.0.1',
+						isInternalRelease: true
+					} );
+					expect( stubs.generateChangelogFromCommits.secondCall.args[ 0 ] ).to.deep.equal( {
+						version: '2.0.1',
+						transformCommit: stubs.transformCommit,
+						tagName: '@ckeditor/ckeditor5-dev-bar@2.0.0',
+						newTagName: '@ckeditor/ckeditor5-dev-bar@2.0.1',
+						isInternalRelease: true
+					} );
 				} );
 		} );
 	} );

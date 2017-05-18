@@ -1,5 +1,9 @@
 {{> header}}
 
+{{#if isInternalRelease}}
+Internal changes only (updated dependencies, documentation, etc.).
+
+{{else}}
 {{#each commitGroups}}
 {{#if title}}
 ### {{title}}
@@ -13,4 +17,5 @@
 Internal changes only (updated dependencies, documentation, etc.).
 
 {{/each}}
+{{/if}}
 {{> footer}}

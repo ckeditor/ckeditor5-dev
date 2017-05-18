@@ -69,7 +69,7 @@ const cli = {
 			},
 
 			validate( input ) {
-				if ( input === 'skip' ) {
+				if ( input === 'skip' || input === 'internal' ) {
 					return true;
 				}
 
