@@ -9,7 +9,7 @@
  * @see http://usejsdoc.org/about-plugins.html
  */
 
-const augmentStatics = require( './augment-statics' );
+const augmentStatics = require( './augmentstatics' );
 
 exports.handlers = {
 	processingComplete( e ) {

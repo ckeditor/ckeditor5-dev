@@ -9,7 +9,7 @@
 
 const chai = require( 'chai' );
 const expect = chai.expect;
-const augmentStatics = require( '../lib/statics-augmentor/augment-statics' );
+const augmentStatics = require( '../lib/statics-augmentor/augmentstatics' );
 
 describe( 'Static members inheritance plugin', () => {
 	it( 'should add doclet of implicitly inherited static member', () => {
