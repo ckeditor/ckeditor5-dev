@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [6.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@6.2.3...@ckeditor/ckeditor5-dev-docs@6.3.0) (2017-05-18)
+
+### Features
+
+* Introduced JSDoc plugin enabling inheritance of static members. Closes [#201](https://github.com/ckeditor/ckeditor5-dev/issues/201). ([08c0a21](https://github.com/ckeditor/ckeditor5-dev/commit/08c0a21))
+
+
 ## [6.2.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@6.2.2...@ckeditor/ckeditor5-dev-docs@6.2.3) (2017-05-18)
 
 ### Bug fixes
