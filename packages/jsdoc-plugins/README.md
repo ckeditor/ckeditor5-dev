@@ -152,3 +152,13 @@ For now there're still few unsupported tags, which require full references.
 There're also tags which are not validated for now:
 * `@mixes`
 * `@augments` / `@extends`
+
+## Inheritance of static members
+
+### Overview
+
+As of version 3.4.3 JSDoc [does not support inheritance of static members](https://github.com/jsdoc3/jsdoc/issues/1229).
+
+If class B extends class A and class A has a static property, JSDoc will not output documentation of that static property to documentation of class B.
+
+`statics-augmentor` plugin checks for such cases and updates documentation of child classes with documentation of inherited static members.
