@@ -157,7 +157,7 @@ There're also tags which are not validated for now:
 
 ### Overview
 
-As of version 3.4.3 JSDoc does not support inheritance of static members.
+As of version 3.4.3 JSDoc [does not support inheritance of static members](https://github.com/jsdoc3/jsdoc/issues/1229).
 
 If class B extends class A and class A has a static property, JSDoc will not output documentation of that static property to documentation of class B.
 
