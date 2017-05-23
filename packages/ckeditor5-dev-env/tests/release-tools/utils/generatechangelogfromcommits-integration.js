@@ -249,20 +249,45 @@ describe( 'dev-env/release-tools/utils', () => {
 					release( '0.4.1' );
 				} );
 		} );
+
+		// See: https://github.com/ckeditor/ckeditor5-dev/issues/184
+		it( 'generates changelog as "internal" even if commits were made', () => {
+			exec( 'git commit --allow-empty ' +
+				'--message "Feature: Issues will not be hoisted. Closes #8." ' +
+				'--message "All details have been described in #1." ' +
+				'--message "NOTE: Please read #1." ' +
+				'--message "BREAKING CHANGES: Some breaking change." ' );
+
+			exec( 'git commit --allow-empty ' +
+				'--message "Feature: Issues will not be hoisted. Closes #8." ' +
+				'--message "All details have been described in #1." ' +
+				'--message "NOTE: Please read #1." ' +
+				'--message "BREAKING CHANGES: Some breaking change." ' );
+
+			return generateChangelog( '0.4.2', '0.4.1', true )
+				.then( () => {
+					const latestChangelog = getChangesForVersion( '0.4.2' );
+
+					expect( latestChangelog ).to.equal( 'Internal changes only (updated dependencies, documentation, etc.).' );
+
+					release( '0.4.2' );
+				} );
+		} );
 	} );
 
 	function exec( command ) {
 		return tools.shExec( command, { verbosity: 'error' } );
 	}
 
-	function generateChangelog( version, previousVersion = null ) {
+	function generateChangelog( version, previousVersion = null, isInternalRelease = false ) {
 		const transform = require( '../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository' );
 
 		return generateChangelogFromCommits( {
 			version,
+			isInternalRelease,
 			newTagName: 'v' + version,
 			tagName: previousVersion ? 'v' + previousVersion : null,
-			transformCommit: transform
+			transformCommit: transform,
 		} );
 	}
 

@@ -140,7 +140,8 @@ describe( 'dev-env/release-tools/utils', () => {
 						displayLogs: false,
 						version: '1.0.0',
 						previousTag: 'v0.5.0',
-						currentTag: 'v1.0.0'
+						currentTag: 'v1.0.0',
+						isInternalRelease: false
 					} );
 					expect( conventionalChangelogArguments[ 2 ] ).to.have.property( 'from', 'v0.5.0' );
 					expect( conventionalChangelogArguments[ 4 ] ).to.deep.equal( { foo: 'bar' } );
@@ -149,6 +150,33 @@ describe( 'dev-env/release-tools/utils', () => {
 
 					expect( stubs.changelogUtils.saveChangelog.calledOnce ).to.equal( true );
 					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 0 ] ).to.equal( newChangelog );
+				} );
+		} );
+
+		it( 'allows generating "internal" release', () => {
+			changelogBuffer = Buffer.from( 'Internal changes only (updated dependencies, documentation, etc.).' );
+
+			stubs.fs.existsSync.returns( true );
+			stubs.changelogUtils.getChangelog.returns( changelogUtils.changelogHeader );
+
+			const options = {
+				version: '0.5.1',
+				transformCommit: stubs.transformCommit,
+				tagName: 'v0.5.0',
+				newTagName: 'v0.5.1',
+				isInternalRelease: true
+			};
+
+			return generateChangelogFromCommits( options )
+				.then( () => {
+					expect( conventionalChangelogArguments ).to.be.an( 'array' );
+					expect( conventionalChangelogArguments[ 1 ] ).to.deep.equal( {
+						displayLogs: false,
+						version: '0.5.1',
+						previousTag: 'v0.5.0',
+						currentTag: 'v0.5.1',
+						isInternalRelease: true
+					} );
 				} );
 		} );
 	} );

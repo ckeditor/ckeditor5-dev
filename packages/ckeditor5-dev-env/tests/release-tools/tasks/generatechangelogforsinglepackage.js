@@ -86,7 +86,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 						version: '1.0.0',
 						tagName: 'v0.5.0',
 						newTagName: 'v1.0.0',
-						transformCommit: stubs.transformCommit
+						transformCommit: stubs.transformCommit,
+						isInternalRelease: false
 					} );
 
 					expect( stubs.logger.info.calledThrice ).to.equal( true );
@@ -115,7 +116,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 						version: '0.1.0',
 						tagName: null,
 						newTagName: 'v0.1.0',
-						transformCommit: stubs.transformCommit
+						transformCommit: stubs.transformCommit,
+						isInternalRelease: false
 					} );
 
 					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
@@ -162,6 +164,23 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.tools.shExec.secondCall.args[ 0 ] ).to.equal(
 						'git commit -m "Docs: Changelog. [skip ci]"'
 					);
+				} );
+		} );
+
+		it( 'allows generating changelog as "internal"', () => {
+			stubs.versionUtils.getLastFromChangelog.returns( '0.0.1' );
+			stubs.generateChangelogFromCommits.returns( Promise.resolve() );
+
+			return generateChangelogForSinglePackage( 'internal' )
+				.then( () => {
+					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
+					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						version: '0.0.2',
+						tagName: 'v0.0.1',
+						newTagName: 'v0.0.2',
+						transformCommit: stubs.transformCommit,
+						isInternalRelease: true
+					} );
 				} );
 		} );
 	} );
