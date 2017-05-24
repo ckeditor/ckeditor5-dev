@@ -13,7 +13,7 @@ const mockery = require( 'mockery' );
 
 describe( 'dev-env/release-tools/tasks', () => {
 	describe( 'releaseRepository()', () => {
-		let releaseRepository, sandbox, stubs, options, updateJsonFileArgs;
+		let releaseRepository, sandbox, stubs, options;
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
@@ -37,9 +37,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				},
 				tools: {
 					shExec: sandbox.stub(),
-					updateJSONFile: sandbox.spy( ( packageJsonPath, jsonFunction ) => {
-						updateJsonFileArgs = [ packageJsonPath, jsonFunction ];
-					} )
+					updateJSONFile: sandbox.spy()
 				},
 				changelogUtils: {
 					getChangesForVersion: sandbox.stub()
@@ -170,17 +168,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 			stubs.versionUtils.getLastFromChangelog.returns( '1.0.0' );
 			stubs.changelogUtils.getChangesForVersion.returns( 'Changes.' );
 
-			let packageJson = {
-				version: '0.0.1'
-			};
-
 			return releaseRepository( options )
 				.then( () => {
-					expect( updateJsonFileArgs[ 0 ] ).to.equal( '/cwd/package.json' );
-					expect( updateJsonFileArgs[ 1 ] ).to.be.a( 'function' );
-					packageJson = updateJsonFileArgs[ 1 ]( packageJson );
-					expect( packageJson.version ).to.equal( '1.0.0' );
-
 					expect( stubs.versionUtils.getLastFromChangelog.calledOnce ).to.equal( true );
 					expect( stubs.changelogUtils.getChangesForVersion.calledOnce ).to.equal( true );
 					expect( stubs.changelogUtils.getChangesForVersion.firstCall.args[ 0 ] ).to.equal( '1.0.0' );
@@ -189,10 +178,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.createGithubRelease.calledOnce ).to.equal( false );
 					expect( stubs.tools.shExec.calledWith( 'npm publish --access=public' ) ).to.equal( false );
 
-					expect( stubs.tools.shExec.calledWith( 'git add package.json' ) ).to.equal( true );
-					expect( stubs.tools.shExec.calledWith( 'git commit --message="Release: v1.0.0."' ) )
-						.to.equal( true );
-					expect( stubs.tools.shExec.calledWith( 'git tag v1.0.0' ) ).to.equal( true );
+					expect( stubs.tools.shExec.calledWith( 'npm version 1.0.0 --message "Release: v1.0.0."' ) ).to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'git push origin master v1.0.0' ) ).to.equal( true );
 					expect( stubs.logger.info.calledWithMatch( /Release "v1.0.0" has been created and published./ ) )
 						.to.equal( true );
@@ -218,11 +204,9 @@ describe( 'dev-env/release-tools/tasks', () => {
 				.then( () => {
 					expect( stubs.parseGithubUrl.calledOnce ).to.equal( false );
 					expect( stubs.createGithubRelease.calledOnce ).to.equal( false );
-					expect( stubs.tools.shExec.calledWith( 'npm publish --access=public' ) ).to.equal( true );
-					expect( stubs.tools.shExec.calledWith( 'git commit --message="Release: v1.0.0."' ) )
-						.to.equal( true );
-					expect( stubs.tools.shExec.calledWith( 'git tag v1.0.0' ) ).to.equal( true );
+					expect( stubs.tools.shExec.calledWith( 'npm version 1.0.0 --message "Release: v1.0.0."' ) ).to.equal( true );
 					expect( stubs.tools.shExec.calledWith( 'git push origin master v1.0.0' ) ).to.equal( true );
+					expect( stubs.tools.shExec.calledWith( 'npm publish --access=public' ) ).to.equal( true );
 					expect( stubs.logger.info.calledWithMatch( /Release "v1.0.0" has been created and published./ ) )
 						.to.equal( true );
 				} );
