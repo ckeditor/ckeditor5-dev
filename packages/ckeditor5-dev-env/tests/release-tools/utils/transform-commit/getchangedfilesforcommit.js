@@ -46,7 +46,11 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		} );
 
 		it( 'returns files for initial commit', () => {
-			exec( 'touch {1..5}.txt' );
+			exec( 'touch 1.txt' );
+			exec( 'touch 2.txt' );
+			exec( 'touch 3.txt' );
+			exec( 'touch 4.txt' );
+			exec( 'touch 5.txt' );
 			exec( 'git add *.txt' );
 			exec( 'git commit -m "Initial commit."' );
 
@@ -62,11 +66,17 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		} );
 
 		it( 'returns files for next commit after initial', () => {
-			exec( 'touch {1..5}.txt' );
+			exec( 'touch 1.txt' );
+			exec( 'touch 2.txt' );
+			exec( 'touch 3.txt' );
+			exec( 'touch 4.txt' );
+			exec( 'touch 5.txt' );
 			exec( 'git add *.txt' );
 			exec( 'git commit -m "Initial commit."' );
 
-			exec( 'touch {2..4}.js' );
+			exec( 'touch 2.js' );
+			exec( 'touch 3.js' );
+			exec( 'touch 4.js' );
 			exec( 'git add *.js' );
 			exec( 'git commit -m "Next commit after initial."' );
 
@@ -80,16 +90,23 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		} );
 
 		it( 'returns files for commit on new branch', () => {
-			exec( 'touch {1..5}.txt' );
+			exec( 'touch 1.txt' );
+			exec( 'touch 2.txt' );
+			exec( 'touch 3.txt' );
+			exec( 'touch 4.txt' );
+			exec( 'touch 5.txt' );
 			exec( 'git add *.txt' );
 			exec( 'git commit -m "Initial commit."' );
 
-			exec( 'touch {2..4}.js' );
+			exec( 'touch 2.js' );
+			exec( 'touch 3.js' );
+			exec( 'touch 4.js' );
 			exec( 'git add *.js' );
 			exec( 'git commit -m "Next commit after initial."' );
 
 			exec( 'git checkout -b develop' );
-			exec( 'touch {5..6}.json' );
+			exec( 'touch 5.json' );
+			exec( 'touch 6.json' );
 			exec( 'git add *.json' );
 			exec( 'git commit -m "New commit on branch develop."' );
 
@@ -102,21 +119,30 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		} );
 
 		it( 'returns files for merge commit', () => {
-			exec( 'touch {1..5}.txt' );
+			exec( 'touch 1.txt' );
+			exec( 'touch 2.txt' );
+			exec( 'touch 3.txt' );
+			exec( 'touch 4.txt' );
+			exec( 'touch 5.txt' );
 			exec( 'git add *.txt' );
 			exec( 'git commit -m "Initial commit."' );
 
-			exec( 'touch {2..4}.js' );
+			exec( 'touch 2.js' );
+			exec( 'touch 3.js' );
+			exec( 'touch 4.js' );
 			exec( 'git add *.js' );
 			exec( 'git commit -m "Next commit after initial."' );
 
 			exec( 'git checkout -b develop' );
-			exec( 'touch {5..6}.json' );
+			exec( 'touch 5.json' );
+			exec( 'touch 6.json' );
 			exec( 'git add *.json' );
 			exec( 'git commit -m "New commit on branch develop."' );
 
 			exec( 'git checkout master' );
-			exec( 'touch {10..12}.sh' );
+			exec( 'touch 10.sh' );
+			exec( 'touch 11.sh' );
+			exec( 'touch 12.sh' );
 			exec( 'git add *.sh' );
 			exec( 'git commit -m "New commit on branch master."' );
 
