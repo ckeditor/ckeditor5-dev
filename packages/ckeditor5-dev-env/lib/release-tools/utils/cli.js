@@ -62,7 +62,7 @@ const cli = {
 			name: 'version',
 			default: suggestedVersion,
 			message:
-				`Type the new version or "skip" (suggested: "${ suggestedVersion }", current: "${ packageVersion }"):`,
+				`Type the new version, "skip" or "internal" (suggested: "${ suggestedVersion }", current: "${ packageVersion }"):`,
 
 			filter( input ) {
 				return input.trim();
