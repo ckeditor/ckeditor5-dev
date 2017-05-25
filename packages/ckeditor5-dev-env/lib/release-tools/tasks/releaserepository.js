@@ -69,10 +69,8 @@ module.exports = function releaseRepository( options ) {
 		}
 	}
 
-	// Get last version from the changelog.
-	const version = versionUtils.getLastFromChangelog();
-
 	const promise = new Promise( ( resolve, reject ) => {
+		const version = versionUtils.getLastFromChangelog();
 		const latestChanges = changelogUtils.getChangesForVersion( version );
 
 		// Bump the version.
@@ -99,16 +97,17 @@ module.exports = function releaseRepository( options ) {
 			};
 
 			return createGithubRelease( options.token, releaseOptions )
-				.then( resolve )
+				.then( () => resolve( version ) )
 				.catch( reject );
 		}
 
-		resolve();
+		resolve( version );
 	} );
 
-	return promise.then( () => {
-		log.info( chalk.green( `Release "v${ version }" has been created and published.\n` ) );
-	} );
+	return promise
+		.then( version => {
+			log.info( chalk.green( `Release "v${ version }" has been created and published.\n` ) );
+		} );
 };
 
 function exec( command ) {

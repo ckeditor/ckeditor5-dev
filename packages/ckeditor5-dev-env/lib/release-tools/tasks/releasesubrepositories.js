@@ -14,6 +14,7 @@ const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
 const releaseRepository = require( './releaserepository' );
 const displaySkippedPackages = require( '../utils/displayskippedpackages' );
 const getPackageJson = require( '../utils/getpackagejson' );
+const { getChangesForVersion } = require( '../utils/changelog' );
 
 const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted by the user.';
 
@@ -94,27 +95,50 @@ module.exports = function releaseSubRepositories( options ) {
 			process.exitCode = -1;
 		} );
 
-	function releaseSinglePackage( repositoryPath ) {
-		process.chdir( repositoryPath );
-
-		return releaseRepository( {
-			token: options.token,
-			dependencies: options.dependencies,
-			skipGithub: options.skipGithub,
-			skipNpm: options.skipNpm
-		} );
-	}
-
 	function validatePackages( repositoryPath ) {
+		const errorsForPackage = [];
 		process.chdir( repositoryPath );
 
 		try {
 			validator.checkBranch();
 		} catch ( err ) {
-			errors.push( `## ${ getPackageJson().name }` );
-			errors.push( err.message );
+			errorsForPackage.push( err.message );
+		}
+
+		const packageName = getPackageJson().name;
+		const packageDetails = options.dependencies.get( packageName );
+		const changesForVersion = getChangesForVersion( packageDetails.version );
+
+		if ( !changesForVersion ) {
+			errorsForPackage.push( `Cannot find changelog entry for version "${ packageDetails.version }".` );
+		}
+
+		if ( errorsForPackage.length ) {
+			errors.push( `## ${ packageName }` );
+			errors.push( ...errorsForPackage.map( err => '- ' + err ) );
 		}
 
 		return Promise.resolve();
+	}
+
+	function releaseSinglePackage( repositoryPath ) {
+		process.chdir( repositoryPath );
+
+		const releaseTaskOptions = {
+			token: options.token,
+			dependencies: options.dependencies,
+			skipGithub: options.skipGithub,
+			skipNpm: options.skipNpm
+		};
+
+		return releaseRepository( releaseTaskOptions )
+			.catch( err => {
+				const packageName = getPackageJson().name;
+
+				log.error( `## ${ packageName }` );
+				log.error( err.message );
+
+				process.exitCode = -1;
+			} );
 	}
 };

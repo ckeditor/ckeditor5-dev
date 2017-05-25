@@ -30,6 +30,9 @@ describe( 'dev-env/release-tools/tasks', () => {
 				confirmRelease: sandbox.stub(),
 				configureReleaseOptions: sandbox.stub(),
 			},
+			changelog: {
+				getChangesForVersion: sandbox.stub()
+			},
 			validator: {
 				checkBranch: sandbox.stub(),
 			},
@@ -61,6 +64,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 		mockery.registerMock( '../utils/getpackagestorelease', stubs.getPackagesToRelease );
 		mockery.registerMock( '../utils/getsubrepositoriespaths', stubs.getSubRepositoriesPaths );
 		mockery.registerMock( '../utils/cli', stubs.cli );
+		mockery.registerMock( '../utils/changelog', stubs.changelog );
 		mockery.registerMock( '../utils/releasevalidator', stubs.validator );
 
 		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
@@ -92,8 +96,10 @@ describe( 'dev-env/release-tools/tasks', () => {
 				hasChangelog: true
 			} );
 
-			stubs.getPackageJson.onFirstCall().returns( { name: '@ckeditor/ckeditor5-core' } );
-			stubs.getPackageJson.onSecondCall().returns( { name: '@ckeditor/ckeditor5-engine' } );
+			stubs.getPackageJson.onCall( 0 ).returns( { name: '@ckeditor/ckeditor5-core' } );
+			stubs.getPackageJson.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-engine' } );
+			stubs.getPackageJson.onCall( 2 ).returns( { name: '@ckeditor/ckeditor5-core' } );
+			stubs.getPackageJson.onCall( 3 ).returns( { name: '@ckeditor/ckeditor5-engine' } );
 
 			stubs.getSubRepositoriesPaths.returns( {
 				skipped: new Set(),
@@ -104,13 +110,14 @@ describe( 'dev-env/release-tools/tasks', () => {
 			} );
 
 			stubs.getPackagesToRelease.returns( Promise.resolve( packagesToRelease ) );
-
+			stubs.releaseRepository.returns( Promise.resolve() );
 			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
 			stubs.cli.configureReleaseOptions.returns( Promise.resolve( {
 				skipGithub: false,
 				skipNpm: true,
 				token: 'secret-token-to-github-account'
 			} ) );
+			stubs.changelog.getChangesForVersion.returns( 'Changes for version.' );
 			stubs.validator.checkBranch.returns( undefined );
 
 			const options = {
@@ -199,6 +206,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
 			stubs.validator.checkBranch.throws( new Error( 'Not on master or master is not clean.' ) );
+			stubs.changelog.getChangesForVersion.returns( 'Changes for version.' );
 
 			const options = {
 				cwd: __dirname,
@@ -213,11 +221,63 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.logger.error.getCall( 1 ).args[ 0 ] )
 						.to.equal( '## @ckeditor/ckeditor5-core' );
 					expect( stubs.logger.error.getCall( 2 ).args[ 0 ] )
-						.to.equal( 'Not on master or master is not clean.' );
+						.to.equal( '- Not on master or master is not clean.' );
 					expect( stubs.logger.error.getCall( 3 ).args[ 0 ] )
 						.to.equal( '## @ckeditor/ckeditor5-engine' );
 					expect( stubs.logger.error.getCall( 4 ).args[ 0 ] )
-						.to.equal( 'Not on master or master is not clean.' );
+						.to.equal( '- Not on master or master is not clean.' );
+				} );
+		} );
+
+		it( 'does not release anything when packages do not have changelog entries', () => {
+			sandbox.stub( process, 'chdir' );
+
+			packagesToRelease.set( '@ckeditor/ckeditor5-core', {
+				version: '0.6.0',
+				hasChangelog: true
+			} );
+			packagesToRelease.set( '@ckeditor/ckeditor5-engine', {
+				version: '1.0.1',
+				hasChangelog: true
+			} );
+
+			stubs.getSubRepositoriesPaths.returns( {
+				skipped: new Set(),
+				packages: new Set( [
+					'/tmp/packages/ckeditor5-core',
+					'/tmp/packages/ckeditor5-engine'
+				] )
+			} );
+
+			stubs.getPackageJson.onCall( 0 ).returns( { name: '@ckeditor/ckeditor5-core' } );
+			stubs.getPackageJson.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-engine' } );
+			stubs.getPackageJson.onCall( 2 ).returns( { name: '@ckeditor/ckeditor5-core' } );
+			stubs.getPackageJson.onCall( 3 ).returns( { name: '@ckeditor/ckeditor5-engine' } );
+
+			stubs.getPackagesToRelease.returns( Promise.resolve( packagesToRelease ) );
+
+			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
+			stubs.validator.checkBranch.returns( null );
+			stubs.changelog.getChangesForVersion.returns( null );
+
+			const options = {
+				cwd: __dirname,
+				packages: 'packages/'
+			};
+
+			return releaseSubRepositories( options )
+				.then( () => {
+					expect( stubs.releaseRepository.called ).to.equal( false );
+					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] )
+						.to.equal( 'Releasing has been aborted due to errors.' );
+					expect( stubs.logger.error.getCall( 1 ).args[ 0 ] )
+						.to.equal( '## @ckeditor/ckeditor5-core' );
+					expect( stubs.logger.error.getCall( 2 ).args[ 0 ] )
+						.to.equal( '- Cannot find changelog entry for version "0.6.0".' );
+					expect( stubs.logger.error.getCall( 3 ).args[ 0 ] )
+						.to.equal( '## @ckeditor/ckeditor5-engine' );
+					expect( stubs.logger.error.getCall( 4 ).args[ 0 ] )
+						.to.equal( '- Cannot find changelog entry for version "1.0.1".' );
 				} );
 		} );
 
@@ -249,13 +309,15 @@ describe( 'dev-env/release-tools/tasks', () => {
 				} );
 		} );
 
-		it( 'breaks the whole process when unexpected error occurs', () => {
+		it( 'does not break the whole process when unexpected error occurs during the release a package', () => {
 			const error = new Error( 'Unexpected error.' );
 
 			sandbox.stub( process, 'chdir' );
 
-			stubs.releaseRepository.onFirstCall().returns( Promise.resolve() );
-			stubs.releaseRepository.onSecondCall().throws( error );
+			stubs.changelog.getChangesForVersion.returns( 'Changes for version.' );
+
+			stubs.releaseRepository.onFirstCall().returns( Promise.reject( error ) );
+			stubs.releaseRepository.onSecondCall().returns( Promise.resolve() );
 
 			stubs.cli.configureReleaseOptions.returns( Promise.resolve( {
 				skipGithub: true,
@@ -285,6 +347,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			stubs.getPackageJson.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-engine' } );
 			stubs.getPackageJson.onCall( 2 ).returns( { name: '@ckeditor/ckeditor5-core' } );
 			stubs.getPackageJson.onCall( 3 ).returns( { name: '@ckeditor/ckeditor5-engine' } );
+			stubs.getPackageJson.onCall( 4 ).returns( { name: '@ckeditor/ckeditor5-core' } );
 
 			stubs.getPackagesToRelease.returns( Promise.resolve( packagesToRelease ) );
 
@@ -298,9 +361,11 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return releaseSubRepositories( options )
 				.then( () => {
 					expect( process.exitCode ).to.equal( -1 );
-					expect( stubs.releaseRepository.calledTwice ).to.equal( true );
-					expect( stubs.logger.error.calledOnce ).to.equal( true );
-					expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal( error.message );
+					expect( stubs.releaseRepository.callCount ).to.equal( 2 );
+
+					expect( stubs.logger.error.callCount ).to.equal( 2 );
+					expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal( '## @ckeditor/ckeditor5-core' );
+					expect( stubs.logger.error.secondCall.args[ 0 ] ).to.equal( error.message );
 				} );
 		} );
 
