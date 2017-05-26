@@ -13,8 +13,8 @@ const getPlugins = require( './getplugins' );
  *
  * @param {String} destinationPath A path where entry file will be saved.
  * @param {Object} options
+ * @param {String} configPath A path to the configuration of the build. The file must expose a "config" key as a config for the editor.
  * @param {Array.<String>} options.plugins An array with paths to the plugins for the editor.
- * @param {String} configPath A path to additional editor's configuration which will be built-in.
  * @param {String} options.moduleName Name of exported UMD module.
  * @param {String} options.editor A path to class which defined the editor.
  */
@@ -47,7 +47,7 @@ ${ options.moduleName }.build = {
 	plugins: [
 		${ Object.keys( plugins ).join( ',\n\t\t' ) }
 	],
-	config: require( '${ configPath }' )
+	config: require( '${ configPath }' ).config
 };
 `;
 

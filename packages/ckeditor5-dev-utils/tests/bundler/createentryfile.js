@@ -52,7 +52,7 @@ ClassicEditor.build = {
 		ArticlePlugin,
 		ClipboardPlugin
 	],
-	config: require( './config-editor' )
+	config: require( './config-editor' ).config
 };
 `;
 
