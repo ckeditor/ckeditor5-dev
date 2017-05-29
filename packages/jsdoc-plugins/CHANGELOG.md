@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.3.1...@ckeditor/jsdoc-plugins@1.4.0) (2017-05-29)
+
+### Features
+
+* Allow breaking the process if API docs validation fails. Closes [#221](https://github.com/ckeditor/ckeditor5-dev/issues/221). ([e2f0dec](https://github.com/ckeditor/ckeditor5-dev/commit/e2f0dec))
+
+
 ## [1.3.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.3.0...@ckeditor/jsdoc-plugins@1.3.1) (2017-05-24)
 
 Internal changes only (updated dependencies, documentation, etc.).
