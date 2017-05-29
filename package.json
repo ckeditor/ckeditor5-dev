@@ -23,5 +23,5 @@
     "test": "mocha `./scripts/get-test-directories.sh` --recursive",
     "coverage": "istanbul cover _mocha `./scripts/get-test-directories.sh` -- --recursive"
   },
-  "version": "0.0.13"
+  "version": "0.0.14"
 }
