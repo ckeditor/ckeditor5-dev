@@ -8,13 +8,7 @@
 const javascriptStringify = require( 'javascript-stringify' );
 
 /**
- * Transforms specified configuration to a string which can be inserted
- * to generated an entry file.
- *
- * Keys and values will be wrapped in apostrophes instead of quotation marks.
- *
- * Keys which contains letters or/and numbers or/and underscore or/and a Dollar sign
- * will not be wrapped in apostrophes.
+ * Transforms specified configuration to a string that match to our code style.
  *
  * @param {Object} config
  * @returns {String}
