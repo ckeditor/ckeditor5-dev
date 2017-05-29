@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## [7.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@6.4.0...@ckeditor/ckeditor5-dev-docs@7.0.0) (2017-05-29)
+
+### Other changes
+
+* Changed the option name from `validationOnly` to `validateOnly` to match CLI style. Closes [#223](https://github.com/ckeditor/ckeditor5-dev/issues/223). ([cbd8c3d](https://github.com/ckeditor/ckeditor5-dev/commit/cbd8c3d))
+
+### BREAKING CHANGES
+
+* The `validationOnly` option is now called `validateOnly`.
+
+
 ## [6.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@6.3.0...@ckeditor/ckeditor5-dev-docs@6.4.0) (2017-05-29)
 
 ### Features
