@@ -18,6 +18,8 @@ module.exports = {
  * @param {Object} config
  * @param {Array.<String>} config.sourceFiles Glob pattern with source files.
  * @param {String} config.readmePath Path to `README.md`.
+ * @param {Boolean} [config.validationOnly=false] Whether JSDoc should only validate the documentation and finish
+ * with error code `1`. If not passed, the errors will be printed to the console but the task will finish with `0`.
  * @returns {Promise}
  */
 function build( config ) {
@@ -25,6 +27,12 @@ function build( config ) {
 		config.readmePath,
 		...config.sourceFiles
 	];
+
+	const validationOnly = config.validationOnly || false;
+
+	if ( validationOnly ) {
+		process.env.JSDOC_VALIDATE_ONLY = true;
+	}
 
 	const jsDocConfig = {
 		opts: {
@@ -43,8 +51,14 @@ function build( config ) {
 		]
 	};
 
-	return new Promise( resolve => {
+	return new Promise( ( resolve, reject ) => {
 		gulp.src( sourceFiles, { read: false } )
-			.pipe( jsdoc( jsDocConfig, resolve ) );
+			.pipe( jsdoc( jsDocConfig, result => {
+				if ( result instanceof Error ) {
+					return reject( result.message );
+				}
+
+				return resolve( result );
+			} ) );
 	} );
 }

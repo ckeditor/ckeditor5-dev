@@ -10,6 +10,7 @@
  */
 
 const DocletValidator = require( './doclet-validator' );
+const logger = require( 'jsdoc/util/logger' );
 
 exports.handlers = {
 	parseComplete( e ) {
@@ -19,6 +20,10 @@ exports.handlers = {
 
 		// Prints only first 50 errors to stdout.
 		printErrors( errors, 50 );
+
+		if ( process.env.JSDOC_VALIDATE_ONLY ) {
+			process.exit();
+		}
 	}
 };
 
@@ -44,4 +49,8 @@ function printErrors( errors, maxSize ) {
 	}
 
 	process.stderr.write( errorMessages.join( '\n' ) );
+
+	if ( process.env.JSDOC_VALIDATE_ONLY ) {
+		logger.fatal( 'Aborted due to errors.' );
+	}
 }
