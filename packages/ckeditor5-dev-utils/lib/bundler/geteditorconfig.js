@@ -19,13 +19,6 @@ module.exports = function getEditorConfig( config ) {
 	}
 
 	return javascriptStringify( config, null, '\t' )
-		.split( '\n' )
-		.map( ( line, index ) => {
-			if ( index === 0 ) {
-				return line;
-			}
-
-			return `\t${ line }`;
-		} )
-		.join( '\n' );
+		// Indent all but the first line (so it can be easily concatenated with `config = ${ editorConfig }`).
+		.replace( /\n/g, '\n\t' );
 };
