@@ -27,13 +27,21 @@ describe( 'bundler', () => {
 		it( 'should create an entry file', () => {
 			const writeFileSyncStub = sandbox.stub( fs, 'writeFileSync' );
 
-			createEntryFile( 'destination/path/file.js', './config-editor', {
+			createEntryFile( 'destination/path/file.js', {
 				plugins: [
 					'@ckeditor/ckeditor5-presets/src/article',
 					'@ckeditor/ckeditor5-clipboard/src/clipboard'
 				],
 				moduleName: 'ClassicEditor',
-				editor: '@ckeditor/ckeditor5-editor-classic/src/editor'
+				editor: '@ckeditor/ckeditor5-editor-classic/src/editor',
+				config: {
+					undo: {
+						step: 3,
+					},
+					toolbar: [
+						'image'
+					]
+				}
 			} );
 
 			const expectedEntryFile = `/**
@@ -52,7 +60,14 @@ ClassicEditor.build = {
 		ArticlePlugin,
 		ClipboardPlugin
 	],
-	config: require( './config-editor' ).config
+	config: {
+		undo: {
+			step: 3
+		},
+		toolbar: [
+			'image'
+		]
+	}
 };
 `;
 

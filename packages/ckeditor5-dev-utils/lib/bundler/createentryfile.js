@@ -7,24 +7,25 @@
 
 const fs = require( 'fs' );
 const getPlugins = require( './getplugins' );
+const getEditorConfig = require( './geteditorconfig' );
 
 /**
  * Generates an entry file which can be compiled by bundler, e.g. Webpack or Rollup.
  *
  * @param {String} destinationPath A path where entry file will be saved.
  * @param {Object} options
- * @param {String} configPath A path to the configuration of the build. The file must expose a "config" key as a config for the editor.
  * @param {Array.<String>} options.plugins An array with paths to the plugins for the editor.
  * @param {String} options.moduleName Name of exported UMD module.
  * @param {String} options.editor A path to class which defined the editor.
+ * @param {Object} options.config Additional editor's configuration which will be built-in.
  */
-module.exports = function createEntryFile( destinationPath, configPath, options ) {
-	const entryFileContent = renderEntryFile( configPath, options );
+module.exports = function createEntryFile( destinationPath, options ) {
+	const entryFileContent = renderEntryFile( options );
 
 	fs.writeFileSync( destinationPath, entryFileContent );
 };
 
-function renderEntryFile( configPath, options ) {
+function renderEntryFile( options ) {
 	const plugins = getPlugins( options.plugins );
 	const date = new Date();
 
@@ -47,7 +48,7 @@ ${ options.moduleName }.build = {
 	plugins: [
 		${ Object.keys( plugins ).join( ',\n\t\t' ) }
 	],
-	config: require( '${ configPath }' ).config
+	config: ${ getEditorConfig( options.config ) }
 };
 `;
 
