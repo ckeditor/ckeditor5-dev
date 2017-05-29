@@ -5,6 +5,8 @@
 
 'use strict';
 
+const javascriptStringify = require( 'javascript-stringify' );
+
 /**
  * Transforms specified configuration to a string which can be inserted
  * to generated an entry file.
@@ -22,7 +24,7 @@ module.exports = function getEditorConfig( config ) {
 		return '{}';
 	}
 
-	return JSON.stringify( config, null, '\t' )
+	return javascriptStringify( config, null, '\t' )
 		.split( '\n' )
 		.map( ( line, index ) => {
 			if ( index === 0 ) {
@@ -31,9 +33,5 @@ module.exports = function getEditorConfig( config ) {
 
 			return `\t${ line }`;
 		} )
-		.join( '\n' )
-		// Replace quotation marks to apostrophes.
-		.replace( /"/g, '\'' )
-		// Removes apostrophes from single word keys.
-		.replace( /'([$A-Z0-9_]+)':/gi, '$1:' );
+		.join( '\n' );
 };

@@ -30,7 +30,8 @@ describe( 'bundler', () => {
 					enabled: true,
 					key: 'PRIVATE_KEY'
 				},
-				'key with spaces': null
+				'key with spaces': null,
+				anotherKey: 'Key with "quotation marks".'
 			};
 
 			const expectedConfig = `{
@@ -44,7 +45,8 @@ describe( 'bundler', () => {
 			enabled: true,
 			key: 'PRIVATE_KEY'
 		},
-		'key with spaces': null
+		'key with spaces': null,
+		anotherKey: 'Key with "quotation marks".'
 	}`;
 
 			expect( getEditorConfig( config ) ).to.equal( expectedConfig );
