@@ -18,7 +18,8 @@ module.exports = {
  * @param {Object} config
  * @param {Array.<String>} config.sourceFiles Glob pattern with source files.
  * @param {String} config.readmePath Path to `README.md`.
- * @param {Boolean} [config.validationOnly=false] Whether JSDoc should validate only the documentation.
+ * @param {Boolean} [config.validationOnly=false] Whether JSDoc should only validate the documentation and finish
+ * with error code `1`. If not passed, the errors will be printed to the console but the task will finish with `0`.
  * @returns {Promise}
  */
 function build( config ) {
