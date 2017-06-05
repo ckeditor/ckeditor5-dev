@@ -35,9 +35,17 @@ const versions = {
 	 * @returns {String|null}
 	 */
 	getLastTagFromGit() {
-		const lastTag = tools.shExec( 'git describe --abbrev=0 --tags 2> /dev/null', { verbosity: 'error' } );
+		try {
+			const lastTag = tools.shExec( 'git describe --abbrev=0 --tags 2> /dev/null', { verbosity: 'error' } ).trim();
 
-		return lastTag.trim().replace( /^v/, '' ) || null;
+			if ( !lastTag ) {
+				return null;
+			}
+
+			return lastTag.replace( /^v/, '' );
+		} catch ( err ) {
+			return null;
+		}
 	},
 
 	/**

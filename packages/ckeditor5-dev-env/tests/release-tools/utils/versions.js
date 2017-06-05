@@ -115,6 +115,14 @@ describe( 'dev-env/release-tools/utils', () => {
 
 				expect( version.getLastTagFromGit() ).to.equal( null );
 			} );
+
+			it( 'returns null if something went wrong', () => {
+				sandbox.stub( tools, 'shExec' ).throws(
+					new Error( 'Error while executing...' )
+				);
+
+				expect( version.getLastTagFromGit() ).to.equal( null );
+			} );
 		} );
 
 		describe( 'getCurrent()', () => {
