@@ -161,4 +161,11 @@ As of version 3.4.3 JSDoc [does not support inheritance of static members](https
 
 If class B extends class A and class A has a static property, JSDoc will not output documentation of that static property to documentation of class B.
 
-`statics-augmentor` plugin checks for such cases and updates documentation of child classes with documentation of inherited static members.
+`relation-fixer` plugin checks for such cases and updates documentation of child classes with documentation of inherited, implemented or mixed static members.
+
+It also adds additional properties to doclets of classes, interfaces and mixins to show related doclets. These properties are:
+
+* `augmentsNested` - Array of longnames of all parent classes
+* `implementsNested` - Array of longnames of implemented interfaces
+* `mixesNested` - Array of longnames of mixed mixins
+* `descendants` - Array of longnames of entities which implement, mix or extend the doclet
