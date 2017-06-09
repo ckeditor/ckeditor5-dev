@@ -34,7 +34,7 @@ module.exports = function getPackagesToRelease( pathsToPackages ) {
 			packagesToRelease.set( repositoryName, {
 				previousVersion: packageJson.version,
 				version: changelogVersion,
-				hasChangelog: true
+				hasChangelog: changelogVersion !== null
 			} );
 		} else {
 			// Package does not have new changes but its dependencies may be changed.

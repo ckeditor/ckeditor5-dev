@@ -13,6 +13,7 @@ const path = require( 'path' );
  * This function is helpful for testing the whole process. Allows mocking the file
  * instead of create the fixtures.
  *
+ * @param {String} [cwd=process.cwd()] Where to look for package.json.
  * @returns {Object}
  */
 module.exports = function getPackageJson( cwd = process.cwd() ) {

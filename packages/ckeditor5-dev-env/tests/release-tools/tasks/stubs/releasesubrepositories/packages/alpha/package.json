@@ -1,0 +1,11 @@
+{
+  "name": "@ckeditor/alpha",
+  "version": "0.0.1",
+  "dependencies": {
+    "@ckeditor/beta": "*",
+    "@ckeditor/gamma": "*"
+  },
+  "devDependencies": {
+    "@ckeditor/epsilon": "*"
+  }
+}

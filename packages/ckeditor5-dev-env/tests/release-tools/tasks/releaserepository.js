@@ -5,7 +5,6 @@
 
 'use strict';
 
-const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
@@ -27,7 +26,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 			stubs = {
 				createGithubRelease: sandbox.stub(),
 				generateChangelogForSinglePackage: sandbox.stub(),
-				updateDependenciesVersions: sandbox.stub(),
 				parseGithubUrl: sandbox.stub(),
 				getPackageJson: sandbox.stub(),
 				logger: {
@@ -36,27 +34,16 @@ describe( 'dev-env/release-tools/tasks', () => {
 					error: sandbox.spy()
 				},
 				tools: {
-					shExec: sandbox.stub(),
-					updateJSONFile: sandbox.spy()
-				},
-				changelogUtils: {
-					getChangesForVersion: sandbox.stub()
-				},
-				versionUtils: {
-					getLastFromChangelog: sandbox.stub()
+					shExec: sandbox.stub()
 				}
 			};
 
 			mockery.registerMock( '../utils/getpackagejson', stubs.getPackageJson );
-			mockery.registerMock( '../utils/changelog', stubs.changelogUtils );
-			mockery.registerMock( '../utils/versions', stubs.versionUtils );
-			mockery.registerMock( '../utils/updatedependenciesversions', stubs.updateDependenciesVersions );
-			mockery.registerMock( './creategithubrelease', stubs.createGithubRelease );
+			mockery.registerMock( '../utils/creategithubrelease', stubs.createGithubRelease );
 			mockery.registerMock( './generatechangelogforsinglepackage', stubs.generateChangelogForSinglePackage );
 			mockery.registerMock( 'parse-github-url', stubs.parseGithubUrl );
 
 			sandbox.stub( process, 'cwd' ).returns( '/cwd' );
-			sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 
 			releaseRepository = proxyquire( '../../../lib/release-tools/tasks/releaserepository', {
 				'@ckeditor/ckeditor5-dev-utils': {
@@ -72,7 +59,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 				token: 'github-secret-token',
 				skipNpm: true,
 				skipGithub: true,
-				dependencies: new Map()
+				version: '1.0.0',
+				changes: 'Changes.'
 			};
 		} );
 
@@ -81,99 +69,15 @@ describe( 'dev-env/release-tools/tasks', () => {
 			mockery.disable();
 		} );
 
-		it( 'generates changelog if was not generated before', () => {
-			options.dependencies.set( '@ckeditor/ckeditor5-core', { version: '1.0.0', hasChangelog: false } );
-
-			stubs.getPackageJson.returns( {
-				name: '@ckeditor/ckeditor5-core'
-			} );
-
-			stubs.generateChangelogForSinglePackage.returns( Promise.resolve() );
-			stubs.tools.shExec.withArgs( 'git diff --name-only package.json' ).returns( '' );
-
-			return releaseRepository( options )
-				.then( () => {
-					expect( stubs.generateChangelogForSinglePackage.calledOnce ).to.equal( true );
-					expect( stubs.generateChangelogForSinglePackage.firstCall.args[ 0 ] ).to.equal( '1.0.0' );
-
-					expect( options.dependencies.get( '@ckeditor/ckeditor5-core' ).hasChangelog ).to.equal( true );
-				} );
-		} );
-
-		it( 'does not generate changelog if was generated before', () => {
-			options.dependencies.set( '@ckeditor/ckeditor5-core', { version: '1.0.0', hasChangelog: true } );
-
-			stubs.getPackageJson.returns( {
-				name: '@ckeditor/ckeditor5-core'
-			} );
-
-			stubs.tools.shExec.withArgs( 'git diff --name-only package.json' ).returns( '' );
-
-			return releaseRepository( options )
-				.then( () => {
-					expect( stubs.generateChangelogForSinglePackage.calledOnce ).to.equal( false );
-				} );
-		} );
-
-		it( 'updates dependencies before release', () => {
-			options.dependencies.set( '@ckeditor/ckeditor5-core', { version: '1.0.0', hasChangelog: true } );
-			options.dependencies.set( '@ckeditor/ckeditor5-engine', { version: '0.2.0', hasChangelog: true } );
-
-			stubs.getPackageJson.returns( {
-				name: '@ckeditor/ckeditor5-core'
-			} );
-
-			stubs.tools.shExec.withArgs( 'git diff --name-only package.json' ).returns( 'package.json' );
-
-			return releaseRepository( options )
-				.then( () => {
-					expect( stubs.updateDependenciesVersions.calledOnce ).to.equal( true );
-					expect( stubs.updateDependenciesVersions.firstCall.args[ 0 ] )
-						.to.deep.equal( options.dependencies );
-					expect( stubs.updateDependenciesVersions.firstCall.args[ 1 ] )
-						.to.deep.equal( '/cwd/package.json' );
-
-					expect( stubs.logger.info.called ).to.equal( true );
-					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( '' );
-					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.match(
-						/Creating release for "@ckeditor\/ckeditor5-core"\./
-					);
-					expect( stubs.logger.info.thirdCall.args[ 0 ] ).to.equal( 'Updating dependencies...' );
-
-					expect( stubs.tools.shExec.calledWith( 'git add package.json' ) ).to.equal( true );
-					expect( stubs.tools.shExec.calledWith( 'git commit -m "Internal: Updated dependencies."' ) )
-						.to.equal( true );
-				} );
-		} );
-
-		it( 'does not throw an error if dependencies are not defined', () => {
-			delete options.dependencies;
-
-			stubs.getPackageJson.returns( {
-				name: '@ckeditor/ckeditor5-core'
-			} );
-
-			return releaseRepository( options )
-				.then( () => {
-					expect( stubs.updateDependenciesVersions.called ).to.equal( false );
-				} );
-		} );
-
 		it( 'release the package', () => {
 			stubs.getPackageJson.returns( {
 				name: '@ckeditor/ckeditor5-core'
 			} );
 
 			stubs.tools.shExec.returns( '' );
-			stubs.versionUtils.getLastFromChangelog.returns( '1.0.0' );
-			stubs.changelogUtils.getChangesForVersion.returns( 'Changes.' );
 
 			return releaseRepository( options )
 				.then( () => {
-					expect( stubs.versionUtils.getLastFromChangelog.calledOnce ).to.equal( true );
-					expect( stubs.changelogUtils.getChangesForVersion.calledOnce ).to.equal( true );
-					expect( stubs.changelogUtils.getChangesForVersion.firstCall.args[ 0 ] ).to.equal( '1.0.0' );
-
 					expect( stubs.parseGithubUrl.calledOnce ).to.equal( false );
 					expect( stubs.createGithubRelease.calledOnce ).to.equal( false );
 					expect( stubs.tools.shExec.calledWith( 'npm publish --access=public' ) ).to.equal( false );
@@ -193,8 +97,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 			} );
 
 			stubs.tools.shExec.returns( '' );
-			stubs.versionUtils.getLastFromChangelog.returns( '1.0.0' );
-			stubs.changelogUtils.getChangesForVersion.returns( 'Changes.' );
 			stubs.parseGithubUrl.returns( {
 				owner: 'organization',
 				name: 'repository'
@@ -222,8 +124,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 			stubs.createGithubRelease.returns( Promise.resolve() );
 
 			stubs.tools.shExec.returns( '' );
-			stubs.versionUtils.getLastFromChangelog.returns( '1.0.0' );
-			stubs.changelogUtils.getChangesForVersion.returns( 'Changes.' );
 			stubs.parseGithubUrl.returns( {
 				owner: 'organization',
 				name: 'repository'

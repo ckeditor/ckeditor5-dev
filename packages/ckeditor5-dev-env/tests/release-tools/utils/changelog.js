@@ -102,7 +102,7 @@ ${ expectedChangelog }
 				expect( parsedChangelog ).to.equal( expectedChangelog );
 			} );
 
-			it( 'throws if cannot find changes for the specified version', () => {
+			it( 'returns null if cannot find changes for the specified version', () => {
 				const changelog =
 `## [0.1.0](https://github.com) (2017-01-13)
 
@@ -113,8 +113,7 @@ ${ expectedChangelog }
 				sandbox.stub( utils, 'getChangelog' )
 					.returns( utils.changelogHeader + changelog );
 
-				expect( () => utils.getChangesForVersion( 'v1.0.0' ) )
-					.to.throw( Error, /^Cannot find changelog entries for/ );
+				expect( utils.getChangesForVersion( 'v1.0.0' ) ).to.equal( null );
 			} );
 
 			it( 'does not leak or stop too early', () => {
@@ -159,12 +158,12 @@ Foo`;
 
 		describe( 'getChangelog()', () => {
 			it( 'resolves the changelog', () => {
-				const resolveStub = sandbox.stub( path, 'resolve' ).returns( 'path-to-changelog' );
+				const joinStub = sandbox.stub( path, 'join' ).returns( 'path-to-changelog' );
 				const existsSyncStub = sandbox.stub( fs, 'existsSync' ).returns( true );
 				const readFileStub = sandbox.stub( fs, 'readFileSync' ).returns( 'Content.' );
 				const changelog = utils.getChangelog();
 
-				expect( resolveStub.calledOnce ).to.equal( true );
+				expect( joinStub.calledOnce ).to.equal( true );
 				expect( existsSyncStub.calledOnce ).to.equal( true );
 				expect( readFileStub.calledOnce ).to.equal( true );
 				expect( readFileStub.firstCall.args[ 0 ] ).to.equal( 'path-to-changelog' );
@@ -173,12 +172,12 @@ Foo`;
 			} );
 
 			it( 'returns null if the changelog does not exist', () => {
-				const resolveStub = sandbox.stub( path, 'resolve' ).returns( 'path-to-changelog' );
+				const joinStub = sandbox.stub( path, 'join' ).returns( 'path-to-changelog' );
 				const existsSyncStub = sandbox.stub( fs, 'existsSync' ).returns( false );
 				const readFileStub = sandbox.stub( fs, 'readFileSync' );
 				const changelog = utils.getChangelog();
 
-				expect( resolveStub.calledOnce ).to.equal( true );
+				expect( joinStub.calledOnce ).to.equal( true );
 				expect( existsSyncStub.calledOnce ).to.equal( true );
 				expect( readFileStub.called ).to.equal( false );
 				expect( changelog ).to.equal( null );

@@ -1,0 +1,7 @@
+{
+  "name": "@ckeditor/gamma",
+  "version": "0.3.0",
+  "devDependencies": {
+    "@ckeditor/epsilon": "*"
+  }
+}

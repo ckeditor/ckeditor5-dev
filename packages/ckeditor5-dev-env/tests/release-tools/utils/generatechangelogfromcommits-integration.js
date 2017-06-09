@@ -20,7 +20,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 	// These tests create a chain of releases.
 	describe( 'generateChangelogFromCommits() - integration test', function() {
-		this.timeout( 5000 );
+		this.timeout( 10 * 1000 ); // 10 sec * 1000 ms
 
 		before( () => {
 			cwd = process.cwd();

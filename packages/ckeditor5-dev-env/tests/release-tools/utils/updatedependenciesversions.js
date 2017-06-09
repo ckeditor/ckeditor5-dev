@@ -39,7 +39,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			let json = {};
 
 			const dependencies = new Map( [
-				[ 'package-a', { version: '1.1.0' } ]
+				[ 'package-a', '1.1.0' ]
 			] );
 
 			sandbox.stub( tools, 'updateJSONFile', ( pathToJson, editJsonFunction ) => {
@@ -66,10 +66,10 @@ describe( 'dev-env/release-tools/utils', () => {
 			};
 
 			const dependencies = new Map( [
-				[ 'package-a', { version: '1.1.0' } ],
-				[ 'package-b', { version: '2.1.0' } ],
-				[ 'package-dev-a', { version: '1.0.0' } ],
-				[ 'package-dev-b', { version: '0.1.0' } ]
+				[ 'package-a', '1.1.0' ],
+				[ 'package-b', '2.1.0' ],
+				[ 'package-dev-a', '1.0.0' ],
+				[ 'package-dev-b', '0.1.0' ]
 			] );
 
 			const updateJsonFileStub = sandbox.stub( tools, 'updateJSONFile', ( pathToJson, editJsonFunction ) => {
@@ -98,9 +98,9 @@ describe( 'dev-env/release-tools/utils', () => {
 			};
 
 			const dependencies = new Map( [
-				[ 'package-a', { version: '1.1.0' } ],
-				[ 'package-b', { version: '2.1.0' } ],
-				[ 'package-d', { version: '1.2.3' } ]
+				[ 'package-a', '1.1.0' ],
+				[ 'package-b', '2.1.0' ],
+				[ 'package-d', '1.2.3' ]
 			] );
 
 			sandbox.stub( tools, 'updateJSONFile', ( pathToJson, editJsonFunction ) => {
@@ -124,9 +124,9 @@ describe( 'dev-env/release-tools/utils', () => {
 			};
 
 			const dependencies = new Map( [
-				[ 'package-a', { version: '1.1.0' } ],
-				[ 'package-b', { version: '2.1.0' } ],
-				[ 'package-d', { version: '1.2.3' } ]
+				[ 'package-a', '1.1.0' ],
+				[ 'package-b', '2.1.0' ],
+				[ 'package-d', '1.2.3' ]
 			] );
 
 			sandbox.stub( tools, 'updateJSONFile', ( pathToJson, editJsonFunction ) => {

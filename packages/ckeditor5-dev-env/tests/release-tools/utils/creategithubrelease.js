@@ -42,7 +42,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				};
 			} );
 
-			createGithubRelease = require( '../../../lib/release-tools/tasks/creategithubrelease' );
+			createGithubRelease = require( '../../../lib/release-tools/utils/creategithubrelease' );
 		} );
 
 		afterEach( () => {

@@ -50,16 +50,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 			}
 		};
 
-		mockery.registerMock( '../utils/executeonpackages', ( pathsToPackages, functionToExecute ) => {
-			let promise = Promise.resolve();
-
-			for ( const repositoryPath of pathsToPackages ) {
-				promise = promise.then( () => functionToExecute( repositoryPath ) );
-			}
-
-			return promise;
-		} );
-
 		mockery.registerMock( '../utils/transform-commit/transformcommitforsubpackage', stubs.transformCommit );
 		mockery.registerMock( '../utils/generatechangelogfromcommits', stubs.generateChangelogFromCommits );
 		mockery.registerMock( '../utils/getsubpackagespaths', stubs.getSubPackagesPaths );

@@ -5,30 +5,40 @@
 
 'use strict';
 
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const executeOnPackages = require( '../utils/executeonpackages' );
-const getPackagesToRelease = require( '../utils/getpackagestorelease' );
-const validator = require( '../utils/releasevalidator' );
+const path = require( 'path' );
+const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const cli = require( '../utils/cli' );
+const displaySkippedPackages = require( '../utils/displayskippedpackages' );
+const executeOnPackages = require( '../utils/executeonpackages' );
+const generateChangelogForSinglePackage = require( './generatechangelogforsinglepackage' );
+const getPackageJson = require( '../utils/getpackagejson' );
+const getPackagesToRelease = require( '../utils/getpackagestorelease' );
 const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
 const releaseRepository = require( './releaserepository' );
-const displaySkippedPackages = require( '../utils/displayskippedpackages' );
-const getPackageJson = require( '../utils/getpackagejson' );
+const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
 const { getChangesForVersion } = require( '../utils/changelog' );
 
 const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted by the user.';
 
 /**
- * Task releases the dependencies. It collects packages that will be release,
- * validates whether the packages can be released and gather required data from the user.
+ * Releases all sub repositories found in specified path.
+ *
+ * This task does:
+ *   - finds paths to sub repositories,
+ *   - filters packages which should be released,
+ *   - updated version of dependencies between all released sub repositories,
+ *   - generates changelog for packages that dependencies has changed,
+ *   - collects required parameters for releases from user,
+ *   - finally, releases the packages.
  *
  * @param {Object} options
  * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
  * @param {String} options.packages Where to look for other packages (dependencies).
- * @param {Array.<String>} options.skipPackages Name of packages which won't be released.
+ * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be released.
  * @returns {Promise}
  */
 module.exports = function releaseSubRepositories( options ) {
+	const cwd = process.cwd();
 	const log = logger();
 
 	const pathsCollection = getSubRepositoriesPaths( {
@@ -37,53 +47,25 @@ module.exports = function releaseSubRepositories( options ) {
 		skipPackages: options.skipPackages || []
 	} );
 
-	// Errors are added to this array by the `validatePackages` function.
+	let packagesToRelease, dependencies;
+
+	// Errors are added to this array by the `validateRepositories` function.
 	const errors = [];
 
-	return getPackagesToRelease( pathsCollection.packages )
-		.then( dependencies => {
-			displaySkippedPackages( pathsCollection.skipped );
-
-			if ( dependencies.size === 0 ) {
-				throw new Error( 'None of the packages contains any changes since its last release. Aborting.' );
-			}
-
-			options.dependencies = dependencies;
-
-			// Filter out packages which won't be released.
-			for ( const pathToPackage of pathsCollection.packages ) {
-				const packageName = getPackageJson( pathToPackage ).name;
-
-				if ( !dependencies.has( packageName ) ) {
-					pathsCollection.packages.delete( pathToPackage );
-				}
-			}
-
-			return cli.confirmRelease( dependencies );
-		} )
-		.then( isConfirmed => {
-			if ( !isConfirmed ) {
-				throw new Error( BREAK_RELEASE_MESSAGE );
-			}
-
-			return executeOnPackages( pathsCollection.packages, validatePackages );
-		} )
-		.then( () => {
-			if ( errors.length ) {
-				throw new Error( 'Releasing has been aborted due to errors.' );
-			}
-
-			return cli.configureReleaseOptions();
-		} )
-		.then( parsedOptions => {
-			options.token = parsedOptions.token;
-			options.skipGithub = parsedOptions.skipGithub;
-			options.skipNpm = parsedOptions.skipNpm;
-
-			return executeOnPackages( pathsCollection.packages, releaseSinglePackage );
-		} )
-		.then( () => process.chdir( options.cwd ) )
+	return Promise.resolve()
+		.then( () => getPackagesToRelease( pathsCollection.packages ) )
+		.then( displayAndConfirmReleasedPackages )
+		.then( prepareDependenciesVersions )
+		.then( filterPackagesToRelease )
+		.then( updateDependenciesForReleasedPackages )
+		.then( generateChangelogForPackagesThatDependenciesHaveUpdated )
+		.then( validateRepositories )
+		.then( getReleaseOptions )
+		.then( releasePackages )
+		.then( () => process.chdir( cwd ) )
 		.catch( err => {
+			process.chdir( cwd );
+
 			// A user did not confirm the release process.
 			if ( err instanceof Error && err.message === BREAK_RELEASE_MESSAGE ) {
 				return Promise.resolve();
@@ -95,50 +77,175 @@ module.exports = function releaseSubRepositories( options ) {
 			process.exitCode = -1;
 		} );
 
-	function validatePackages( repositoryPath ) {
-		const errorsForPackage = [];
-		process.chdir( repositoryPath );
+	function displayAndConfirmReleasedPackages( packages ) {
+		packagesToRelease = packages;
 
-		try {
-			validator.checkBranch();
-		} catch ( err ) {
-			errorsForPackage.push( err.message );
+		displaySkippedPackages( pathsCollection.skipped );
+
+		if ( packagesToRelease.size === 0 ) {
+			throw new Error( 'None of the packages contains any changes since its last release. Aborting.' );
 		}
 
-		const packageName = getPackageJson().name;
-		const packageDetails = options.dependencies.get( packageName );
-		const changesForVersion = getChangesForVersion( packageDetails.version );
-
-		if ( !changesForVersion ) {
-			errorsForPackage.push( `Cannot find changelog entry for version "${ packageDetails.version }".` );
-		}
-
-		if ( errorsForPackage.length ) {
-			errors.push( `## ${ packageName }` );
-			errors.push( ...errorsForPackage.map( err => '- ' + err ) );
-		}
-
-		return Promise.resolve();
+		return cli.confirmRelease( packagesToRelease );
 	}
 
-	function releaseSinglePackage( repositoryPath ) {
-		process.chdir( repositoryPath );
+	function prepareDependenciesVersions( isConfirmed ) {
+		if ( !isConfirmed ) {
+			throw new Error( BREAK_RELEASE_MESSAGE );
+		}
 
-		const releaseTaskOptions = {
-			token: options.token,
-			dependencies: options.dependencies,
-			skipGithub: options.skipGithub,
-			skipNpm: options.skipNpm
-		};
+		const dependencies = new Map();
 
-		return releaseRepository( releaseTaskOptions )
-			.catch( err => {
-				const packageName = getPackageJson().name;
+		for ( const [ packageName, { version } ] of packagesToRelease ) {
+			dependencies.set( packageName, version );
+		}
 
-				log.error( `## ${ packageName }` );
-				log.error( err.message );
+		for ( const packagePath of pathsCollection.skipped ) {
+			const packageJson = getPackageJson( packagePath );
 
-				process.exitCode = -1;
-			} );
+			dependencies.set( packageJson.name, packageJson.version );
+		}
+
+		for ( const packagePath of pathsCollection.packages ) {
+			const packageJson = getPackageJson( packagePath );
+
+			if ( !dependencies.has( packageJson.name ) ) {
+				dependencies.set( packageJson.name, packageJson.version );
+			}
+		}
+
+		return dependencies;
+	}
+
+	function filterPackagesToRelease( dependenciesWithVersions ) {
+		dependencies = dependenciesWithVersions;
+
+		// Filter out packages which won't be released.
+		for ( const pathToPackage of pathsCollection.packages ) {
+			const packageName = getPackageJson( pathToPackage ).name;
+
+			if ( !packagesToRelease.has( packageName ) ) {
+				pathsCollection.packages.delete( pathToPackage );
+			}
+		}
+	}
+
+	function updateDependenciesForReleasedPackages() {
+		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+			process.chdir( repositoryPath );
+
+			const packageJson = getPackageJson( repositoryPath );
+
+			if ( !packagesToRelease.has( packageJson.name ) ) {
+				return Promise.resolve();
+			}
+
+			updateDependenciesVersions( dependencies, path.join( repositoryPath, 'package.json' ) );
+
+			if ( exec( 'git diff --name-only package.json' ).trim().length ) {
+				log.info( `Updating dependencies for "${ packageJson.name }"...` );
+				exec( 'git add package.json' );
+				exec( 'git commit -m "Internal: Updated dependencies."' );
+				exec( 'git pull && git push' );
+			}
+
+			return Promise.resolve();
+		} );
+	}
+
+	function generateChangelogForPackagesThatDependenciesHaveUpdated() {
+		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+			process.chdir( repositoryPath );
+
+			const packageJson = getPackageJson( repositoryPath );
+			const releaseDetails = packagesToRelease.get( packageJson.name );
+
+			const hasChangelog = releaseDetails.hasChangelog;
+			const version = releaseDetails.version;
+
+			// This flag was required only for generating the changelog.
+			delete releaseDetails.hasChangelog;
+
+			if ( hasChangelog ) {
+				releaseDetails.changes = getChangesForVersion( version, repositoryPath );
+
+				return Promise.resolve();
+			}
+
+			return generateChangelogForSinglePackage( version )
+				.then( () => {
+					exec( 'git pull && git push' );
+
+					releaseDetails.changes = getChangesForVersion( version, repositoryPath );
+				} );
+		} );
+	}
+
+	function validateRepositories() {
+		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+			process.chdir( repositoryPath );
+
+			const errorsForPackage = [];
+			const packageJson = getPackageJson( repositoryPath );
+			const releaseDetails = packagesToRelease.get( packageJson.name );
+
+			// Check whether the repository is ready for the release.
+			const status = exec( 'git status -sb', { verbosity: 'error' } ).trim();
+
+			// This way we'll catch if a branch is behind/ahead or contains uncommited files.
+			if ( status !== '## master...origin/master' ) {
+				errorsForPackage.push( 'Not on master or master is not clean.' );
+			}
+
+			// Check whether the changelog entries are correct.
+			if ( !releaseDetails.changes ) {
+				errorsForPackage.push( `Cannot find changelog entry for version "${ releaseDetails.version }".` );
+			}
+
+			if ( errorsForPackage.length ) {
+				errors.push( `## ${ packageJson.name }` );
+				errors.push( ...errorsForPackage.map( err => '- ' + err ) );
+			}
+
+			return Promise.resolve();
+		} );
+	}
+
+	function getReleaseOptions() {
+		if ( errors.length ) {
+			throw new Error( 'Releasing has been aborted due to errors.' );
+		}
+
+		return cli.configureReleaseOptions();
+	}
+
+	function releasePackages( parsedOptions ) {
+		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+			process.chdir( repositoryPath );
+
+			const packageJson = getPackageJson( repositoryPath );
+			const releaseDetails = packagesToRelease.get( packageJson.name );
+			const releaseTaskOptions = {
+				token: parsedOptions.token,
+				skipGithub: parsedOptions.skipGithub,
+				skipNpm: parsedOptions.skipNpm,
+				version: releaseDetails.version,
+				changes: releaseDetails.changes
+			};
+
+			return releaseRepository( releaseTaskOptions )
+				.catch( err => {
+					const packageName = getPackageJson().name;
+
+					log.error( `## ${ packageName }` );
+					log.error( err.message );
+
+					process.exitCode = -1;
+				} );
+		} );
+	}
+
+	function exec( command ) {
+		return tools.shExec( command, { verbosity: 'error' } );
 	}
 };

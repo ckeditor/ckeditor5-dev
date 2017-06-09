@@ -23,27 +23,28 @@ const utils = {
 	 * Retrieves changes from the changelog for the given tag.
 	 *
 	 * @param {String} version
+	 * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
 	 * @returns {String}
 	 */
-	getChangesForVersion( version ) {
+	getChangesForVersion( version, cwd = process.cwd() ) {
 		version = version.replace( /^v/, '' );
 
-		const changelog = utils.getChangelog().replace( utils.changelogHeader, '\n' );
-
+		const changelog = utils.getChangelog( cwd ).replace( utils.changelogHeader, '\n' );
 		const match = changelog.match( new RegExp( `\\n(## \\[?${ version }\\]?[\\s\\S]+?)(?:\\n## \\[|$)` ) );
 
 		if ( !match || !match[ 1 ] ) {
-			throw new Error( `Cannot find changelog entries for ${ version }.` );
+			return null;
 		}
 
 		return match[ 1 ].replace( /##[^\n]+\n/, '' ).trim();
 	},
 
 	/**
+	 * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
 	 * @returns {String|null}
 	 */
-	getChangelog() {
-		const changelogFile = path.resolve( utils.changelogFile );
+	getChangelog( cwd = process.cwd() ) {
+		const changelogFile = path.join( cwd, utils.changelogFile );
 
 		if ( !fs.existsSync( changelogFile ) ) {
 			return null;

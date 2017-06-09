@@ -5,77 +5,38 @@
 
 'use strict';
 
-const path = require( 'path' );
 const chalk = require( 'chalk' );
 const parseGithubUrl = require( 'parse-github-url' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const createGithubRelease = require( './creategithubrelease' );
-const generateChangelogForSinglePackage = require( './generatechangelogforsinglepackage' );
-const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
-const changelogUtils = require( '../utils/changelog' );
-const versionUtils = require( '../utils/versions' );
+const createGithubRelease = require( '../utils/creategithubrelease' );
 const getPackageJson = require( '../utils/getpackagejson' );
 
 /**
  * Releases the package defined in the current repository.
  *
- * Commits a new changelog (and `package.json`), creates a tag,
- * pushes the tag to a remote server and creates a note on GitHub releases page.
+ * This task bumps a version in package.json file and publish the changes on npm and/or GitHub.
  *
  * @param {Object} options
  * @param {String} options.token GitHub token used to authenticate.
  * @param {Boolean} options.skipGithub Whether to publish the package on Github.
  * @param {Boolean} options.skipNpm Whether to publish the package on Npm.
- * @param {Map} options.dependencies Dependencies list to update.
+ * @param {String} options.version Version of the current release.
+ * @param {String} options.changes Changelog entries for the current release.
  * @returns {Promise}
  */
 module.exports = function releaseRepository( options ) {
 	const cwd = process.cwd();
 	const log = logger();
 
-	const packageJsonPath = path.join( cwd, 'package.json' );
 	const packageJson = getPackageJson( cwd );
 
 	log.info( '' );
 	log.info( chalk.bold.blue( `Creating release for "${ packageJson.name }".` ) );
 
-	if ( options.dependencies ) {
-		// Update dependencies/devDependencies versions in package.json.
-		updateDependenciesVersions( options.dependencies, packageJsonPath );
-
-		if ( exec( 'git diff --name-only package.json' ).trim().length ) {
-			log.info( 'Updating dependencies...' );
-			exec( 'git add package.json' );
-			exec( 'git commit -m "Internal: Updated dependencies."' );
-		}
-
-		const packageDetails = options.dependencies.get( packageJson.name );
-
-		// If package does not have generated changelog - let's generate it.
-		if ( packageDetails && !packageDetails.hasChangelog ) {
-			return generateChangelogForSinglePackage( packageDetails.version )
-				.then( () => {
-					packageDetails.hasChangelog = true;
-
-					options.dependencies.set( packageJson.name, packageDetails );
-
-					return releaseRepository( {
-						token: options.token,
-						skipGithub: options.skipGithub,
-						skipNpm: options.skipNpm,
-						dependencies: null
-					} );
-				} );
-		}
-	}
-
 	const promise = new Promise( ( resolve, reject ) => {
-		const version = versionUtils.getLastFromChangelog();
-		const latestChanges = changelogUtils.getChangesForVersion( version );
-
 		// Bump the version.
-		exec( `npm version ${ version } --message "Release: v${ version }."` );
-		exec( `git push origin master v${ version }` );
+		exec( `npm version ${ options.version } --message "Release: v${ options.version }."` );
+		exec( `git push origin master v${ options.version }` );
 
 		if ( !options.skipNpm ) {
 			log.info( 'Publishing on NPM...' );
@@ -92,16 +53,21 @@ module.exports = function releaseRepository( options ) {
 			const releaseOptions = {
 				repositoryOwner: repositoryInfo.owner,
 				repositoryName: repositoryInfo.name,
-				version: `v${ version }`,
-				description: latestChanges
+				version: `v${ options.version }`,
+				description: options.changes
 			};
 
 			return createGithubRelease( options.token, releaseOptions )
-				.then( () => resolve( version ) )
+				.then( () => {
+					const url = `https://github.com/${ repositoryInfo.owner }/${ repositoryInfo.name }/releases/tag/v${ options.version }`;
+					log.info( `Created the release: ${ url }` );
+
+					resolve( options.version );
+				} )
 				.catch( reject );
 		}
 
-		resolve( version );
+		resolve( options.version );
 	} );
 
 	return promise
