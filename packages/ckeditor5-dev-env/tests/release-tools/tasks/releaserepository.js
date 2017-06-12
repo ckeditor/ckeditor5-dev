@@ -38,7 +38,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 				}
 			};
 
-			mockery.registerMock( '../utils/getpackagejson', stubs.getPackageJson );
 			mockery.registerMock( '../utils/creategithubrelease', stubs.createGithubRelease );
 			mockery.registerMock( './generatechangelogforsinglepackage', stubs.generateChangelogForSinglePackage );
 			mockery.registerMock( 'parse-github-url', stubs.parseGithubUrl );
@@ -46,6 +45,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			sandbox.stub( process, 'cwd' ).returns( '/cwd' );
 
 			releaseRepository = proxyquire( '../../../lib/release-tools/tasks/releaserepository', {
+				'../utils/getpackagejson': stubs.getPackageJson,
 				'@ckeditor/ckeditor5-dev-utils': {
 					tools: stubs.tools,
 

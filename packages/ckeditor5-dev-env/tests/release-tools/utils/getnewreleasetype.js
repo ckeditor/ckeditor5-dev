@@ -9,7 +9,7 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
+const proxyquire = require( 'proxyquire' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-env/release-tools/utils', () => {
@@ -32,12 +32,6 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		beforeEach( () => {
-			mockery.enable( {
-				useCleanCache: true,
-				warnOnReplace: false,
-				warnOnUnregistered: false
-			} );
-
 			sandbox = sinon.sandbox.create();
 
 			stubs = {
@@ -60,15 +54,14 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			fs.writeFileSync( path.join( tmpCwd, 'package.json' ), JSON.stringify( packageJson, null, '\t' ) );
 
-			mockery.registerMock( './versions', stubs.versionUtils );
-
-			getNewReleaseType = require( '../../../lib/release-tools/utils/getnewreleasetype' );
+			getNewReleaseType = proxyquire( '../../../lib/release-tools/utils/getnewreleasetype', {
+				'./versions': stubs.versionUtils
+			} );
 		} );
 
 		afterEach( () => {
 			process.chdir( cwd );
 			sandbox.restore();
-			mockery.disable();
 		} );
 
 		it( 'throws an error when repository is empty', () => {

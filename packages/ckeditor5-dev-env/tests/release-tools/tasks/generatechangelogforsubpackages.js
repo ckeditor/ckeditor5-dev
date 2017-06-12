@@ -53,11 +53,9 @@ describe( 'dev-env/release-tools/tasks', () => {
 		mockery.registerMock( '../utils/transform-commit/transformcommitforsubpackage', stubs.transformCommit );
 		mockery.registerMock( '../utils/generatechangelogfromcommits', stubs.generateChangelogFromCommits );
 		mockery.registerMock( '../utils/getsubpackagespaths', stubs.getSubPackagesPaths );
-		mockery.registerMock( '../utils/getpackagejson', stubs.getPackageJson );
 		mockery.registerMock( '../utils/displayskippedpackages', stubs.displaySkippedPackages );
 		mockery.registerMock( '../utils/displaygeneratedchangelogs', stubs.displayGeneratedChangelogs );
 		mockery.registerMock( '../utils/cli', stubs.cli );
-		mockery.registerMock( '../utils/changelog', stubs.changelogUtils );
 		mockery.registerMock( '../utils/versions', stubs.versionUtils );
 		mockery.registerMock( '../utils/getnewreleasetype', stubs.getNewReleaseType );
 
@@ -69,7 +67,9 @@ describe( 'dev-env/release-tools/tasks', () => {
 				logger() {
 					return stubs.logger;
 				}
-			}
+			},
+			'../utils/getpackagejson': stubs.getPackageJson,
+			'../utils/changelog': stubs.changelogUtils
 		} );
 	} );
 

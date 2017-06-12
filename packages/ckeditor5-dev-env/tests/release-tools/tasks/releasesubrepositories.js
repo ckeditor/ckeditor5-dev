@@ -72,9 +72,6 @@ describe( 'dev-env/release-tools/tasks', function() {
 				confirmRelease: sandbox.stub(),
 				configureReleaseOptions: sandbox.stub(),
 			},
-			changelog: {
-				getChangesForVersion: sandbox.stub()
-			},
 			logger: {
 				info: sandbox.spy(),
 				warning: sandbox.spy(),
