@@ -3,19 +3,28 @@
  * Licensed under the terms of the MIT License (see LICENSE.md).
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const chai = require( 'chai' );
 const expect = chai.expect;
 const addMissingDoclets = require( '../../lib/relation-fixer/addmissingdoclets' );
+const interfaceTestData = require( './test-data/interface' );
+const inheritanceImplicitTestData = require( './test-data/inheritance-implicit' );
+const inheritanceInheritdocTestData = require( './test-data/inheritance-inheritdoc' );
 const cloneDeep = require( 'lodash' ).cloneDeep;
 
 describe( 'Plugin adds missing doclets from relation chain', () => {
+	let interfaceTestDoclets;
+	let inheritanceImplicitTestDoclets;
+	let inheritanceInheritdocTestDoclets;
+
+	beforeEach( () => {
+		interfaceTestDoclets = cloneDeep( interfaceTestData );
+		inheritanceImplicitTestDoclets = cloneDeep( inheritanceImplicitTestData );
+		inheritanceInheritdocTestDoclets = cloneDeep( inheritanceInheritdocTestData );
+	} );
+
 	it( 'should add missing doclets coming from interfaces', () => {
-		const testDoclets = require( './test-data/interface' );
-		const doclets = cloneDeep( testDoclets );
 		const expectedDoclet = {
 			name: 'intAProperty',
 			longname: 'classB.intAProperty',
@@ -26,13 +35,11 @@ describe( 'Plugin adds missing doclets from relation chain', () => {
 			inherited: true
 		};
 
-		addMissingDoclets( doclets );
-		expect( doclets ).to.deep.include( expectedDoclet );
+		const newDoclets = addMissingDoclets( interfaceTestDoclets );
+		expect( newDoclets ).to.deep.include( expectedDoclet );
 	} );
 
 	it( 'should add missing doclets coming from extended classes implicitly', () => {
-		const testDoclets = require( './test-data/inheritance-implicit' );
-		const doclets = cloneDeep( testDoclets );
 		const expectedDoclet = {
 			name: 'classAProp',
 			longname: 'classB.prop',
@@ -42,13 +49,11 @@ describe( 'Plugin adds missing doclets from relation chain', () => {
 			inherited: true
 		};
 
-		addMissingDoclets( doclets );
-		expect( doclets ).to.deep.include( expectedDoclet );
+		const newDoclets = addMissingDoclets( inheritanceImplicitTestDoclets );
+		expect( newDoclets ).to.deep.include( expectedDoclet );
 	} );
 
 	it( 'should add missing doclets coming from extended classes with use of `inheritdoc`', () => {
-		const testDoclets = require( './test-data/inheritance-inheritdoc' );
-		const doclets = cloneDeep( testDoclets );
 		const expectedDoclet = {
 			name: 'classAProp',
 			longname: 'classB.prop',
@@ -59,13 +64,11 @@ describe( 'Plugin adds missing doclets from relation chain', () => {
 			inherited: true
 		};
 
-		addMissingDoclets( doclets );
-		expect( doclets ).to.deep.include( expectedDoclet );
+		const newDoclets = addMissingDoclets( inheritanceInheritdocTestDoclets );
+		expect( newDoclets ).to.deep.include( expectedDoclet );
 	} );
 
 	it( 'should ignore exising doclets when `inheritdoc` was used', () => {
-		const testDoclets = require( './test-data/inheritance-inheritdoc' );
-		const doclets = cloneDeep( testDoclets );
 		const expectedDoclet = {
 			name: 'classAProp',
 			longname: 'classB.prop',
@@ -76,7 +79,7 @@ describe( 'Plugin adds missing doclets from relation chain', () => {
 			ignore: true
 		};
 
-		addMissingDoclets( doclets );
-		expect( doclets ).to.deep.include( expectedDoclet );
+		const newDoclets = addMissingDoclets( inheritanceInheritdocTestDoclets );
+		expect( newDoclets ).to.deep.include( expectedDoclet );
 	} );
 } );

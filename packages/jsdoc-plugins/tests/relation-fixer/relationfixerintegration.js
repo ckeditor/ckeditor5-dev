@@ -3,59 +3,67 @@
  * Licensed under the terms of the MIT License (see LICENSE.md).
  */
 
-/* jshint mocha:true */
-
 'use strict';
 
 const chai = require( 'chai' );
 const expect = chai.expect;
-const relationBuilder = require( '../../lib/relation-fixer/relationbuilder' );
+const buildRelations = require( '../../lib/relation-fixer/buildrelations' );
 const addMissingDoclets = require( '../../lib/relation-fixer/addmissingdoclets' );
-const cloneDeep = require( 'lodash' ).cloneDeep;
-const testDoclets = [
-	{
-		name: 'interfaceB',
-		longname: 'interfaceB',
-		kind: 'interface'
-	},
-	{
-		name: 'interfaceBProp',
-		longname: 'interfaceB.prop',
-		kind: 'member',
-		scope: 'static',
-		memberof: 'interfaceB',
-		description: 'Interface B prop description'
-	},
-	{
-		name: 'mixinA',
-		longname: 'mixinA',
-		kind: 'mixin',
-		implements: [
-			'interfaceB'
-		]
-	},
-	{
-		name: 'classA',
-		longname: 'classA',
-		kind: 'class',
-		mixes: [ 'mixinA' ]
-	},
-	{
-		name: 'classB',
-		longname: 'classB',
-		kind: 'class',
-		augments: [
-			'classA'
-		],
-		augmentsNested: [
-			'classA'
-		]
-	}
-];
 
 describe( 'Adding missing doclets through relation chain', () => {
+	let testDoclets;
+
+	beforeEach( () => {
+		testDoclets = [
+			{
+				name: 'interfaceB',
+				longname: 'interfaceB',
+				kind: 'interface'
+			},
+			{
+				name: 'interfaceBProp',
+				longname: 'interfaceB.prop',
+				kind: 'member',
+				scope: 'static',
+				memberof: 'interfaceB',
+				description: 'Interface B prop description'
+			},
+			{
+				name: 'mixinA',
+				longname: 'mixinA',
+				kind: 'mixin',
+				implements: [
+					'interfaceB'
+				]
+			},
+			{
+				name: 'classA',
+				longname: 'classA',
+				kind: 'class',
+				mixes: [ 'mixinA' ]
+			},
+			{
+				name: 'eventD',
+				longname: 'classA.eventD',
+				kind: 'event',
+				memberof: 'classA'
+			},
+			{
+				name: 'classB',
+				longname: 'classB',
+				kind: 'class',
+				augments: [
+					'classA'
+				],
+				augmentsNested: [
+					'classA'
+				]
+			}
+		];
+	} );
+
 	it( 'should add missing doclet through relation chain', () => {
-		const doclets = cloneDeep( testDoclets );
+		const newDoclets = addMissingDoclets( buildRelations( testDoclets ) );
 		const expectedDoclet = {
 			name: 'interfaceBProp',
 			longname: 'classB.prop',
@@ -66,12 +74,11 @@ describe( 'Adding missing doclets through relation chain', () => {
 			inherited: true
 		};
 
-		addMissingDoclets( relationBuilder( doclets ) );
-		expect( doclets ).to.deep.include( expectedDoclet );
+		expect( newDoclets ).to.deep.include( expectedDoclet );
 	} );
 
 	it( 'should add missing doclet to other links of relation chain', () => {
-		const doclets = cloneDeep( testDoclets );
+		const newDoclets = addMissingDoclets( buildRelations( testDoclets ) );
 		const expectedDoclet = {
 			name: 'interfaceBProp',
 			longname: 'mixinA.prop',
@@ -81,7 +88,19 @@ describe( 'Adding missing doclets through relation chain', () => {
 			description: 'Interface B prop description'
 		};
 
-		addMissingDoclets( relationBuilder( doclets ) );
-		expect( doclets ).to.deep.include( expectedDoclet );
+		expect( newDoclets ).to.deep.include( expectedDoclet );
+	} );
+
+	it( 'should add missing events', () => {
+		const newDoclets = addMissingDoclets( buildRelations( testDoclets ) );
+		const expectedDoclet = {
+			name: 'eventD',
+			longname: 'classB.eventD',
+			kind: 'event',
+			memberof: 'classB',
+			inherited: true
+		};
+
+		expect( newDoclets ).to.deep.include( expectedDoclet );
 	} );
 } );

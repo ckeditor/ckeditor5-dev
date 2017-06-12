@@ -5,11 +5,11 @@
 
 'use strict';
 
-const relationBuilder = require( './relationbuilder' );
+const buildRelations = require( './buildrelations' );
 const addMissingDoclets = require( './addmissingdoclets' );
 
 exports.handlers = {
 	processingComplete( e ) {
-		e.doclets = addMissingDoclets( relationBuilder( e.doclets ) );
+		e.doclets = addMissingDoclets( buildRelations( e.doclets ) );
 	}
 };
