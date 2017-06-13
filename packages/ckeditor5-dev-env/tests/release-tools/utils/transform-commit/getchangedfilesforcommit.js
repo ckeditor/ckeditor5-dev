@@ -14,7 +14,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 	let tmpCwd, cwd, getChangedFilesForCommit;
 
 	describe( 'getChangedFilesForCommit()', function() {
-		this.timeout( 10 * 1000 ); // 10 sec * 1000 ms
+		this.timeout( 10 * 1000 );
 
 		before( () => {
 			cwd = process.cwd();
