@@ -5,6 +5,7 @@
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
+    "@ckeditor/ckeditor5-dev-utils": "^3.0.0",
     "@ckeditor/jsdoc-plugins": "^1.4.0",
     "gulp": "^3.9.1",
     "gulp-jsdoc3": "^1.0.1"
@@ -13,6 +14,9 @@
   "engines": {
     "node": ">=6.0.0",
     "npm": ">=3.0.0"
+  },
+  "bin": {
+    "ckeditor5-dev-docs": "./bin/build-documentation.js"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",
