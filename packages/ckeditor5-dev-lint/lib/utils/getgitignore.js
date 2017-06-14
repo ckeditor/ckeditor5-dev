@@ -26,10 +26,10 @@ module.exports = function getGitIgnore() {
 		.map( i => '!' + i )
 		// Add "**" to folders to have everything inside them ignored.
 		.map( path => {
-			if ( !path.endsWith( '/' ) ) {
-				return path;
+			if ( path.endsWith( '/' ) ) {
+				return path + '**';
 			}
 
-			return path + '**';
+			return path;
 		} );
 };
