@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [7.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.0.0...@ckeditor/ckeditor5-dev-docs@7.1.0) (2017-06-14)
+
+### Features
+
+* Added a bin script for publishing nightly builds of CKEditor 5 documentation. Closes [#230](https://github.com/ckeditor/ckeditor5-dev/issues/230). ([0d15864](https://github.com/ckeditor/ckeditor5-dev/commit/0d15864))
+
+
 ## [7.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@6.4.0...@ckeditor/ckeditor5-dev-docs@7.0.0) (2017-05-29)
 
 ### Other changes
