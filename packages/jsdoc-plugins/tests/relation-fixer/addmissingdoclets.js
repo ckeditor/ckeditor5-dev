@@ -11,17 +11,20 @@ const addMissingDoclets = require( '../../lib/relation-fixer/addmissingdoclets' 
 const interfaceTestData = require( './test-data/interface' );
 const inheritanceImplicitTestData = require( './test-data/inheritance-implicit' );
 const inheritanceInheritdocTestData = require( './test-data/inheritance-inheritdoc' );
+const unwantedDocletsTestData = require( './test-data/unwanted-doclets' );
 const cloneDeep = require( 'lodash' ).cloneDeep;
 
 describe( 'Plugin adds missing doclets from relation chain', () => {
 	let interfaceTestDoclets;
 	let inheritanceImplicitTestDoclets;
 	let inheritanceInheritdocTestDoclets;
+	let unwantedTestDoclets;
 
 	beforeEach( () => {
 		interfaceTestDoclets = cloneDeep( interfaceTestData );
 		inheritanceImplicitTestDoclets = cloneDeep( inheritanceImplicitTestData );
 		inheritanceInheritdocTestDoclets = cloneDeep( inheritanceInheritdocTestData );
+		unwantedTestDoclets = cloneDeep( unwantedDocletsTestData );
 	} );
 
 	it( 'should add missing doclets coming from interfaces', () => {
@@ -30,7 +33,6 @@ describe( 'Plugin adds missing doclets from relation chain', () => {
 			longname: 'classB.intAProperty',
 			kind: 'member',
 			memberof: 'classB',
-			scope: 'static',
 			description: 'intAProp description',
 			inherited: true
 		};
@@ -75,11 +77,32 @@ describe( 'Plugin adds missing doclets from relation chain', () => {
 			kind: 'member',
 			scope: 'static',
 			memberof: 'classB',
-			inheritdoc: true,
+			inheritdoc: '',
 			ignore: true
 		};
 
 		const newDoclets = addMissingDoclets( inheritanceInheritdocTestDoclets );
 		expect( newDoclets ).to.deep.include( expectedDoclet );
+	} );
+
+	it( 'should not add doclets which were already inherited (they have inheritdoc property)', () => {
+		const newDoclets = addMissingDoclets( unwantedTestDoclets );
+		const expectedDoclet = newDoclets.find( d => d.longname === 'classB.propA' );
+
+		expect( expectedDoclet ).to.not.exist;
+	} );
+
+	it( 'should not add doclets which have `ignore: true` property', () => {
+		const newDoclets = addMissingDoclets( unwantedTestDoclets );
+		const expectedDoclet = newDoclets.find( d => d.longname === 'classB.propB' );
+
+		expect( expectedDoclet ).to.not.exist;
+	} );
+
+	it( 'should not add doclets which have `undocumented: true` property', () => {
+		const newDoclets = addMissingDoclets( unwantedTestDoclets );
+		const expectedDoclet = newDoclets.find( d => d.longname === 'classB.propC' );
+
+		expect( expectedDoclet ).to.not.exist;
 	} );
 } );

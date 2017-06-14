@@ -20,7 +20,6 @@ module.exports = [
 		longname: 'interfaceA.intAProperty',
 		kind: 'member',
 		memberof: 'interfaceA',
-		scope: 'static',
 		description: 'intAProp description'
 	},
 	{
@@ -42,5 +41,12 @@ module.exports = [
 		],
 		implementsNested: [ 'interfaceA' ],
 		augmentsNested: [ 'classA' ]
+	},
+	{
+		name: 'intAProperty',
+		longname: 'classB.intAProperty',
+		kind: 'member',
+		memberof: 'classB',
+		inheritdoc: ''
 	}
 ];

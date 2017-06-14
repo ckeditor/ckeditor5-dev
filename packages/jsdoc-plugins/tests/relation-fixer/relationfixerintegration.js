@@ -43,6 +43,14 @@ describe( 'Adding missing doclets through relation chain', () => {
 				mixes: [ 'mixinA' ]
 			},
 			{
+				name: 'interfaceBProp',
+				longname: 'classA.prop',
+				kind: 'member',
+				scope: 'static',
+				memberof: 'classA',
+				inheritdoc: ''
+			},
+			{
 				name: 'eventD',
 				longname: 'classA.eventD',
 				kind: 'event',
@@ -58,6 +66,14 @@ describe( 'Adding missing doclets through relation chain', () => {
 				augmentsNested: [
 					'classA'
 				]
+			},
+			{
+				name: 'interfaceBProp',
+				longname: 'classB.prop',
+				kind: 'member',
+				scope: 'static',
+				memberof: 'classB',
+				inheritdoc: ''
 			}
 		];
 	} );
@@ -81,10 +97,10 @@ describe( 'Adding missing doclets through relation chain', () => {
 		const newDoclets = addMissingDoclets( buildRelations( testDoclets ) );
 		const expectedDoclet = {
 			name: 'interfaceBProp',
-			longname: 'mixinA.prop',
+			longname: 'classA.prop',
 			kind: 'member',
 			scope: 'static',
-			memberof: 'mixinA',
+			memberof: 'classA',
 			description: 'Interface B prop description'
 		};
 

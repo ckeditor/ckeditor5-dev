@@ -69,13 +69,13 @@ describe( 'Linter plugin', () => {
 	} );
 
 	describe( '_lintParams()', () => {
-		it( 'should hande not existing types', () => {
+		it( 'should handle not existing types', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'function',
 				params: [ {
-					type: { parsedType: {
-						name: 'module:engine/ckeditor5/editor'
-					} }
+					type: {
+						names: [ 'module:engine/ckeditor5/editor' ]
+					}
 				} ],
 				longname: 'abc',
 				scope: 'inner',
@@ -91,9 +91,9 @@ describe( 'Linter plugin', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'class',
 				params: [ {
-					type: { parsedType: {
-						name: 'module:engine/ckeditor5/editor'
-					} }
+					type: {
+						names: [ 'module:engine/ckeditor5/editor' ]
+					}
 				} ],
 				meta: { fileName: '', path: '' },
 			}, {
@@ -111,11 +111,13 @@ describe( 'Linter plugin', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'class',
 				params: [ {
-					type: { parsedType: { name: 'String' } },
-				}, {
-					type: { parsedType: { name: 'Array' } },
-				}, {
-					type: { parsedType: { name: 'Number' } },
+					type: {
+						names: [
+							'String',
+							'Array',
+							'Number'
+						]
+					}
 				} ],
 				meta: { fileName: '', path: '' },
 			} ], testedModules );
@@ -125,36 +127,17 @@ describe( 'Linter plugin', () => {
 			expect( linter._errors.length ).to.be.equal( 0 );
 		} );
 
-		it( 'should handle built-in type as aliases', () => {
+		it( 'should handle wrong types', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'class',
 				params: [ {
-					type: { parsedType: {
-						elements: [
-							{ name: 'String' },
-							{ name: 'Array' },
-							{ name: 'Number' },
+					type: {
+						names: [
+							'String',
+							'Array',
+							'Wrong'
 						]
-					} },
-				} ],
-				meta: { fileName: '', path: '' },
-			} ], testedModules );
-
-			linter._lintParams();
-
-			expect( linter._errors.length ).to.be.equal( 0 );
-		} );
-
-		it( 'should handle wrong type in alias', () => {
-			const linter = new DocletValidator( [ {
-				kind: 'class',
-				params: [ {
-					type: { parsedType: {
-						elements: [
-							{ name: 'String' },
-							{ name: 'Wrong' },
-						]
-					} },
+					}
 				} ],
 				meta: { fileName: '', path: '' },
 			} ], testedModules );
@@ -162,26 +145,6 @@ describe( 'Linter plugin', () => {
 			linter._lintParams();
 
 			expect( linter._errors.length ).to.be.equal( 1 );
-		} );
-
-		it( 'should handle NullLiteral and UndefinedLiteral type', () => {
-			const linter = new DocletValidator( [ {
-				kind: 'class',
-				params: [ {
-					type: { parsedType: {
-						elements: [
-							{ name: 'String' },
-							{ type: 'NullLiteral' },
-							{ type: 'UndefinedLiteral' },
-						]
-					} },
-				} ],
-				meta: { fileName: '', path: '' },
-			} ], testedModules );
-
-			linter._lintParams();
-
-			expect( linter._errors.length ).to.be.equal( 0 );
 		} );
 	} );
 

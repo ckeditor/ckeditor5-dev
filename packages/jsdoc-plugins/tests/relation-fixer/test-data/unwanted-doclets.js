@@ -12,12 +12,28 @@ module.exports = [
 		kind: 'class'
 	},
 	{
-		name: 'classAProp',
-		longname: 'classA.prop',
+		name: 'classAPropA',
+		longname: 'classA.propA',
 		kind: 'member',
 		scope: 'static',
 		memberof: 'classA',
-		description: 'Class A prop description'
+		inheritdoc: ''
+	},
+	{
+		name: 'classAPropB',
+		longname: 'classA.propB',
+		kind: 'member',
+		scope: 'static',
+		memberof: 'classA',
+		ignore: true
+	},
+	{
+		name: 'classAPropC',
+		longname: 'classA.propC',
+		kind: 'member',
+		scope: 'static',
+		memberof: 'classA',
+		undocumented: true
 	},
 	{
 		name: 'classB',
@@ -30,12 +46,4 @@ module.exports = [
 			'classA'
 		]
 	},
-	{
-		name: 'classAProp',
-		longname: 'classB.prop',
-		kind: 'member',
-		scope: 'static',
-		memberof: 'classB',
-		inheritdoc: ''
-	}
 ];
