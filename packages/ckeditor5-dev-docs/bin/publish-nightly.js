@@ -13,9 +13,9 @@ if ( process.env.TRAVIS_BRANCH !== 'master' ) {
 }
 
 // Build the documentation only when CRON triggered the CI.
-if ( process.env.TRAVIS_EVENT_TYPE !== 'cron' ) {
-	process.exit();
-}
+// if ( process.env.TRAVIS_EVENT_TYPE !== 'cron' ) {
+// 	process.exit();
+// }
 
 const path = require( 'path' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
