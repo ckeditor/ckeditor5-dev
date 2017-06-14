@@ -12,10 +12,10 @@ if ( process.env.TRAVIS_BRANCH !== 'master' ) {
 	process.exit();
 }
 
-// Build the documentation only when CRON triggered the CI.
-// if ( process.env.TRAVIS_EVENT_TYPE !== 'cron' ) {
-// 	process.exit();
-// }
+// Build the documentation only when a cron task triggered the CI.
+if ( process.env.TRAVIS_EVENT_TYPE !== 'cron' ) {
+	process.exit();
+}
 
 const path = require( 'path' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
