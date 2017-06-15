@@ -23,5 +23,13 @@ module.exports = function getGitIgnore() {
 		// Remove empty entries.
 		.filter( path => !!path )
 		// Add `!` for ignore glob.
-		.map( i => '!' + i );
+		.map( i => '!' + i )
+		// Add "**" to folders to have everything inside them ignored.
+		.map( path => {
+			if ( path.endsWith( '/' ) ) {
+				return path + '**';
+			}
+
+			return path;
+		} );
 };
