@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [7.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.1.0...@ckeditor/ckeditor5-dev-docs@7.1.1) (2017-06-15)
+
+### Other changes
+
+* The publish-nightly script should check if it's triggered by a cron job (the check was temporarily disabled). ([3dece10](https://github.com/ckeditor/ckeditor5-dev/commit/3dece10))
+
+
 ## [7.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.0.0...@ckeditor/ckeditor5-dev-docs@7.1.0) (2017-06-14)
 
 ### Features
