@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-bundler-rollup",
-  "version": "5.0.14",
+  "version": "5.0.15",
   "description": "Tasks used to create CKEditor 5 bundle.",
   "keywords": [],
   "main": "lib/index.js",
@@ -26,10 +26,7 @@
     "stream-to-promise": "^2.2.0"
   },
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-lint": "^3.0.0",
     "chai": "^3.5.0",
-    "guppy-pre-commit": "^0.4.0",
-    "istanbul": "^0.4.4",
     "mocha": "^3.0.2",
     "mockery": "^2.0.0",
     "sinon": "^1.17.4"
