@@ -10,7 +10,7 @@ const expect = chai.expect;
 const buildRelations = require( '../../lib/relation-fixer/buildrelations' );
 const addMissingDoclets = require( '../../lib/relation-fixer/addmissingdoclets' );
 
-describe( 'Adding missing doclets through relation chain', () => {
+describe( 'JSDoc relation-fixer plugin', () => {
 	let testDoclets;
 
 	beforeEach( () => {

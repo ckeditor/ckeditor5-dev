@@ -40,17 +40,14 @@ function addMissingDoclets( originalDoclets ) {
 				kind: 'event'
 			}
 		},
-		// missing mixed events
+		// everything mixed, except existing mixed items
 		{
 			relation: 'mixesNested',
-			filter: {
-				kind: 'event'
-			}
+			onlyImplicitlyInherited: true
 		},
-		// everything from implemented interfaces which was inherited using 'inheritdoc' or 'override' tag
+		// everything from implemented interfaces
 		{
-			relation: 'implementsNested',
-			onlyExplicitlyInherited: true
+			relation: 'implementsNested'
 		}
 	];
 

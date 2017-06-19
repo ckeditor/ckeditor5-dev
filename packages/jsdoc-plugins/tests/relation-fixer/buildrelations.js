@@ -11,7 +11,7 @@ const chai = require( 'chai' );
 const expect = chai.expect;
 const buildRelations = require( '../../lib/relation-fixer/buildrelations' );
 
-describe( 'Doclets have relation chain arrays added', () => {
+describe( 'JSDoc relation-fixer buildrelations module', () => {
 	let testDoclets;
 
 	beforeEach( () => {

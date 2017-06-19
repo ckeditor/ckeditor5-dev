@@ -12,19 +12,22 @@ const interfaceTestData = require( './test-data/interface' );
 const inheritanceImplicitTestData = require( './test-data/inheritance-implicit' );
 const inheritanceInheritdocTestData = require( './test-data/inheritance-inheritdoc' );
 const unwantedDocletsTestData = require( './test-data/unwanted-doclets' );
+const mixinTestData = require( './test-data/mixins' );
 const cloneDeep = require( 'lodash' ).cloneDeep;
 
-describe( 'Plugin adds missing doclets from relation chain', () => {
+describe( 'JSDoc relation-fixer addmissingdoclets module', () => {
 	let interfaceTestDoclets;
 	let inheritanceImplicitTestDoclets;
 	let inheritanceInheritdocTestDoclets;
 	let unwantedTestDoclets;
+	let mixinTestDoclets;
 
 	beforeEach( () => {
 		interfaceTestDoclets = cloneDeep( interfaceTestData );
 		inheritanceImplicitTestDoclets = cloneDeep( inheritanceImplicitTestData );
 		inheritanceInheritdocTestDoclets = cloneDeep( inheritanceInheritdocTestData );
 		unwantedTestDoclets = cloneDeep( unwantedDocletsTestData );
+		mixinTestDoclets = cloneDeep( mixinTestData );
 	} );
 
 	it( 'should add missing doclets coming from interfaces', () => {
@@ -83,6 +86,34 @@ describe( 'Plugin adds missing doclets from relation chain', () => {
 
 		const newDoclets = addMissingDoclets( inheritanceInheritdocTestDoclets );
 		expect( newDoclets ).to.deep.include( expectedDoclet );
+	} );
+
+	it( 'should add missing doclets of mixed stuff', () => {
+		const expectedDoclet = {
+			name: 'mixedProp',
+			longname: 'classB.mixedProp',
+			kind: 'event',
+			memberof: 'classB',
+			description: 'mixedProp description',
+			mixed: true
+		};
+
+		const newDoclets = addMissingDoclets( mixinTestDoclets );
+		expect( newDoclets ).to.deep.include( expectedDoclet );
+	} );
+
+	it( 'should not add doclets of mixed stuff which already have own doclets', () => {
+		const expectedDoclet = {
+			name: 'mixedProp',
+			longname: 'classA.mixedProp',
+			kind: 'event',
+			memberof: 'classA',
+			description: 'mixedProp description',
+			mixed: true
+		};
+
+		const newDoclets = addMissingDoclets( mixinTestDoclets );
+		expect( newDoclets ).to.not.deep.include( expectedDoclet );
 	} );
 
 	it( 'should not add doclets which were already inherited (they have inheritdoc property)', () => {

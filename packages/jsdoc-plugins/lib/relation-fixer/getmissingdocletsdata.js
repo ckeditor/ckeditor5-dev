@@ -33,9 +33,11 @@ function getMissingDocletsData( originalDoclets, childDoclet, options ) {
 		clonedDoclet.longname = getLongnameForNewDoclet( d, childDoclet );
 		clonedDoclet.memberof = childDoclet.longname;
 
-		// Add property `inherited`
-		if ( checkIfAddInheritedProperty( originalDoclets, childDoclet, d, options.relation ) ) {
-			clonedDoclet.inherited = true;
+		// Add property `inherited` or `mixed`
+		const relationProperty = getRelationProperty( originalDoclets, childDoclet, d, options.relation );
+
+		if ( relationProperty ) {
+			clonedDoclet[ relationProperty ] = true;
 		}
 
 		const docletsOfSameMember = originalDoclets.filter( d => {
@@ -104,29 +106,32 @@ function getLongnameForNewDoclet( parentDoclet, childDoclet ) {
 	return childDoclet.longname + name;
 }
 
-// Checks if memberDoclet was inherited from a parent class.
-function checkIfAddInheritedProperty( allDoclets, childDoclet, memberDoclet, relation ) {
+// Gets property which should be added to new doclet (e.g. inherited, mixed).
+function getRelationProperty( allDoclets, childDoclet, memberDoclet, relation ) {
 	if ( relation === 'augmentsNested' ) {
-		return true;
+		return 'inherited';
+	}
+
+	if ( relation === 'mixesNested' ) {
+		return 'mixed';
 	}
 
 	const memberDocletParent = allDoclets.find( d => d.longname === memberDoclet.memberof );
-	let result = false;
 
 	if ( isNonEmptyArray( memberDocletParent.descendants ) ) {
-		memberDocletParent.descendants.forEach( longname => {
+		for ( const longname of memberDocletParent.descendants ) {
 			const doclet = allDoclets.find( d => d.longname === longname );
 
-			if ( doclet.kind === 'class' ) {
+			if ( doclet && doclet.kind === 'class' ) {
 				if ( isNonEmptyArray( doclet.descendants ) &&
 					doclet.descendants.indexOf( childDoclet.longname ) !== -1 ) {
-					result = true;
+					return 'inherited';
 				}
 			}
-		} );
+		}
 	}
 
-	return result;
+	return null;
 }
 
 function checkIfExplicitlyInherits( doclets ) {
