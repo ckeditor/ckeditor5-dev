@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [7.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.1.1...@ckeditor/ckeditor5-dev-docs@7.2.0) (2017-06-20)
+
+### Features
+
+* Static and mixed method, properties and events will be inherited too. Closes [#226](https://github.com/ckeditor/ckeditor5-dev/issues/226). ([a160840](https://github.com/ckeditor/ckeditor5-dev/commit/a160840))
+
+
 ## [7.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.1.0...@ckeditor/ckeditor5-dev-docs@7.1.1) (2017-06-15)
 
 ### Other changes
