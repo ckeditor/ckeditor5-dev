@@ -2,7 +2,7 @@
   "name": "ckeditor5-dev",
   "private": true,
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-env": "^4.2.0",
+    "@ckeditor/ckeditor5-dev-env": "^5.1.2",
     "@ckeditor/ckeditor5-dev-lint": "^3.1.0",
     "eslint-config-ckeditor5": "^1.0.5",
     "gulp": "^3.9.1",
