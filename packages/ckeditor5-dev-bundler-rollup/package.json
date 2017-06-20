@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-bundler-rollup",
-  "version": "5.0.15",
+  "version": "5.0.16",
   "description": "Tasks used to create CKEditor 5 bundle.",
   "keywords": [],
   "main": "lib/index.js",
