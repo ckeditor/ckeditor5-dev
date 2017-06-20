@@ -26,26 +26,29 @@ function addMissingDoclets( originalDoclets ) {
 	const newDocletsToAdd = [];
 	const docletsToIgnore = [];
 	const settings = [
-		// missing statics inherited from parent classes
+		// Missing statics inherited from parent classes.
 		{
 			relation: 'augmentsNested',
 			filter: {
 				scope: 'static'
 			}
 		},
-		// missing events inherited from parent classes
+
+		// Missing events inherited from parent classes.
 		{
 			relation: 'augmentsNested',
 			filter: {
 				kind: 'event'
 			}
 		},
-		// everything mixed, except existing mixed items
+
+		// Everything mixed, except existing mixed items.
 		{
 			relation: 'mixesNested',
 			onlyImplicitlyInherited: true
 		},
-		// everything from implemented interfaces
+
+		// Everything from implemented interfaces.
 		{
 			relation: 'implementsNested'
 		}

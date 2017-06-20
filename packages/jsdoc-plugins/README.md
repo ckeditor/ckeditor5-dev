@@ -71,8 +71,6 @@ Events can be declared in class bodies and after them (internal references are a
 Full reference to the events must have following syntax: `module:somemodule~SomeClass#event:eventName`. Note that `event:` part is required here.
 Short reference can be either `event:eventName` or `eventName`.
 
-
-
 ```
 class FocusTracker {
 	/**
@@ -128,6 +126,7 @@ There're few kind of types available with following syntax:
 * References: declared interfaces, objects, events, etc. E.g. `module:somemodule~SomeInteface`.
 
 These types can be used together, e.g.:
+
 ```
 /**
  * @param {Map<*>} map
@@ -143,17 +142,19 @@ Basic types and generic types are listed in `jsdoc/validator/types.js`.
 
 ### Unsupported short references
 
-For now there're still few unsupported tags, which require full references.
+For now there're still few unsupported tags, which require full references:
+
 * `@param`
 * `@typedef`
 
 ### Missing validation
 
 There're also tags which are not validated for now:
+
 * `@mixes`
 * `@augments` / `@extends`
 
-## Inheritance of static members
+## Inheritance of class members
 
 ### Overview
 
@@ -165,7 +166,7 @@ If class B extends class A and class A has a static property, JSDoc will not out
 
 It also adds additional properties to doclets of classes, interfaces and mixins to show related doclets. These properties are:
 
-* `augmentsNested` - Array of longnames of all parent classes
-* `implementsNested` - Array of longnames of implemented interfaces
-* `mixesNested` - Array of longnames of mixed mixins
-* `descendants` - Array of longnames of entities which implement, mix or extend the doclet
+* `augmentsNested` - array of longnames of all parent classes,
+* `implementsNested` - array of longnames of implemented interfaces,
+* `mixesNested` - array of longnames of mixed mixins,
+* `descendants` - array of longnames of entities which implement, mix or extend the doclet.

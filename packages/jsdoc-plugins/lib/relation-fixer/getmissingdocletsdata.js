@@ -33,7 +33,7 @@ function getMissingDocletsData( originalDoclets, childDoclet, options ) {
 		clonedDoclet.longname = getLongnameForNewDoclet( d, childDoclet );
 		clonedDoclet.memberof = childDoclet.longname;
 
-		// Add property `inherited` or `mixed`
+		// Add property `inherited` or `mixed`.
 		const relationProperty = getRelationProperty( originalDoclets, childDoclet, d, options.relation );
 
 		if ( relationProperty ) {
@@ -45,11 +45,11 @@ function getMissingDocletsData( originalDoclets, childDoclet, options ) {
 		} );
 
 		if ( docletsOfSameMember.length === 0 && !options.onlyExplicitlyInherited ) {
-			// If there was no doclet for that member, simply add it to new doclets. Unless 'onlyExplicitlyInherited' option is set
+			// If there was no doclet for that member, simply add it to new doclets. Unless 'onlyExplicitlyInherited' option is set.
 			newDoclets.push( clonedDoclet );
 		} else if ( checkIfExplicitlyInherits( docletsOfSameMember ) && !options.onlyImplicitlyInherited ) {
 			// If doclet for that member already existed and used `inheritdoc` or`overrides`.
-			// Add `ignore` property to existing doclets. Unless 'onlyImplicitlyInherited' option is set
+			// Add `ignore` property to existing doclets. Unless 'onlyImplicitlyInherited' option is set.
 			docletsWhichShouldBeIgnored.push( ...docletsOfSameMember );
 			newDoclets.push( clonedDoclet );
 		}
@@ -61,7 +61,7 @@ function getMissingDocletsData( originalDoclets, childDoclet, options ) {
 	};
 }
 
-// Gets doclets from entities related to current doclet ( e.g. implemented by it )
+// Gets doclets from entities related to current doclet (e.g. implemented by it)
 // and matching criteria given in options.filter.
 function getDocletsToAdd( allDoclets, childDoclet, options = {} ) {
 	if ( !isNonEmptyArray( childDoclet[ options.relation ] ) ) {

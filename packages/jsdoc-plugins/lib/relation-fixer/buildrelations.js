@@ -7,9 +7,9 @@
 
 const cloneDeep = require( 'lodash' ).cloneDeep;
 const RELATIONS = {
-	'implements': 'implementsNested',
-	'mixes': 'mixesNested',
-	'augments': 'augmentsNested'
+	implements: 'implementsNested',
+	mixes: 'mixesNested',
+	augments: 'augmentsNested'
 };
 
 module.exports = addRelationArrays;
@@ -51,7 +51,7 @@ function addRelationArrays( originalDoclets ) {
 	return clonedDoclets;
 }
 
-// Gets longnames of currentDoclet's ancestors ( classes it extends, interfaces it implements and so on ).
+// Gets longnames of currentDoclet's ancestors (classes it extends, interfaces it implements and so on).
 //
 // @param {Array.<Doclet>} allDoclets
 // @param {Doclet} currentDoclet
@@ -95,7 +95,7 @@ function isNonEmptyArray( obj ) {
 	return Array.isArray( obj ) && obj.length > 0;
 }
 
-// Gets longnames of descendants i.e. entities which extend, implement or mix a doclet.
+// Gets longnames of descendants – i.e. entities which extend, implement or mix a doclet.
 //
 // @param {Array.<Doclet>} searchedDoclets
 // @param {Doclet} currentDoclet
