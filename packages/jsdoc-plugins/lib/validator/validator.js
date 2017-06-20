@@ -13,7 +13,7 @@ const DocletValidator = require( './doclet-validator' );
 const logger = require( 'jsdoc/util/logger' );
 
 exports.handlers = {
-	parseComplete( e ) {
+	processingComplete( e ) {
 		const validator = new DocletValidator( e.doclets );
 
 		const errors = validator.findErrors();

@@ -5,14 +5,11 @@
 
 'use strict';
 
-/**
- * @see http://usejsdoc.org/about-plugins.html
- */
-
-const augmentStatics = require( './augmentstatics' );
+const buildRelations = require( './buildrelations' );
+const addMissingDoclets = require( './addmissingdoclets' );
 
 exports.handlers = {
 	processingComplete( e ) {
-		augmentStatics( e.doclets );
+		e.doclets = addMissingDoclets( buildRelations( e.doclets ) );
 	}
 };

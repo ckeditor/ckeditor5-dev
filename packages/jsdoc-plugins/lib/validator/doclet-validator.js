@@ -135,15 +135,7 @@ class DocletValidator {
 			return;
 		}
 
-		const paramFullNames = Array.isArray( param.type.parsedType.elements ) ?
-			param.type.parsedType.elements
-				.filter( typeExpression => {
-					return typeExpression.type !== 'FunctionType' &&
-						typeExpression.type !== 'NullLiteral' &&
-						typeExpression.type !== 'UndefinedLiteral';
-				} )
-				.map( typeExpression => typeExpression.name || typeExpression.expression.name ) :
-			[ param.type.parsedType.name ];
+		const paramFullNames = Array.isArray( param.type.names ) ? param.type.names : [];
 
 		for ( const paramFullName of paramFullNames ) {
 			if ( !paramFullName ) {
@@ -166,6 +158,10 @@ class DocletValidator {
 		const pathRegExp = /\{@link\s+([^}\s]+)[\s\w]*(\})/;
 
 		for ( const element of this._collection.getAll() ) {
+			if ( !element.comment ) {
+				continue;
+			}
+
 			const refs = ( element.comment.match( allLinkRegExp ) || [] )
 				.map( link => link.match( pathRegExp )[ 1 ] );
 
@@ -316,6 +312,9 @@ class DocletValidator {
 	 * @returns {Boolean}
 	 */
 	_isCorrectType( type ) {
+		// JSDoc converts `Type.<Function>` to `Type.<function()>` for some reason...
+		type = type.replace( 'function()', 'function' );
+
 		const complexTypeRegExp = /^([\w]+)\.<\(?([^)^>]+)\)?>$/;
 
 		if ( complexTypeRegExp.test( type ) ) {
