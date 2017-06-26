@@ -5,21 +5,21 @@
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "acorn": "^4.0.8",
-    "del": "^2.2.1",
+    "acorn": "^5.0.3",
+    "del": "^3.0.0",
     "escodegen": "git://github.com/ma2ciek/escodegen.git",
-    "fs-extra": "^0.30.0",
-    "gulp-util": "^3.0.7",
+    "fs-extra": "^3.0.1",
+    "gulp-util": "^3.0.8",
     "javascript-stringify": "^1.6.0",
-    "pofile": "^1.0.5",
-    "shelljs": "^0.7.4",
-    "through2": "^2.0.1"
+    "pofile": "^1.0.8",
+    "shelljs": "^0.7.8",
+    "through2": "^2.0.3"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
+    "chai": "^4.0.2",
     "mockery": "^2.0.0",
-    "sinon": "^1.17.4",
-    "vinyl": "^1.1.1"
+    "sinon": "^2.3.5",
+    "vinyl": "^2.0.2"
   },
   "engines": {
     "node": ">=6.0.0",

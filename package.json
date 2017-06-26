@@ -8,8 +8,8 @@
     "gulp": "^3.9.1",
     "guppy-pre-commit": "^0.4.0",
     "istanbul": "^0.4.4",
-    "lerna": "2.0.0-rc.1",
-    "mocha": "^3.0.2"
+    "lerna": "2.0.0-rc.5",
+    "mocha": "^3.4.2"
   },
   "engines": {
     "node": ">=6.0.0",
