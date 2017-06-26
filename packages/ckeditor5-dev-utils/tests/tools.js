@@ -174,7 +174,7 @@ describe( 'utils', () => {
 			it( 'should get directories in specified path', () => {
 				const fs = require( 'fs' );
 				const directories = [ 'dir1', 'dir2', 'dir3' ];
-				const readdirSyncStub = sandbox.stub( fs, 'readdirSync', () => directories );
+				const readdirSyncStub = sandbox.stub( fs, 'readdirSync' ).callsFake( () => directories );
 				const isDirectoryStub = sandbox.stub( tools, 'isDirectory' ).returns( true );
 				const dirPath = 'path';
 
@@ -193,7 +193,7 @@ describe( 'utils', () => {
 
 			it( 'should return true if path points to directory', () => {
 				const fs = require( 'fs' );
-				const statSyncStub = sandbox.stub( fs, 'statSync', () => ( { isDirectory: () => true } ) );
+				const statSyncStub = sandbox.stub( fs, 'statSync' ).callsFake( () => ( { isDirectory: () => true } ) );
 				const path = 'path';
 
 				const result = tools.isDirectory( path );
@@ -205,7 +205,7 @@ describe( 'utils', () => {
 
 			it( 'should return false if path does not point to directory', () => {
 				const fs = require( 'fs' );
-				const statSyncStub = sandbox.stub( fs, 'statSync', () => ( { isDirectory: () => false } ) );
+				const statSyncStub = sandbox.stub( fs, 'statSync' ).callsFake( () => ( { isDirectory: () => false } ) );
 				const path = 'path';
 
 				const result = tools.isDirectory( path );
@@ -233,7 +233,7 @@ describe( 'utils', () => {
 
 			it( 'should return true if path points to file', () => {
 				const fs = require( 'fs' );
-				const statSyncStub = sandbox.stub( fs, 'statSync', () => ( { isFile: () => true } ) );
+				const statSyncStub = sandbox.stub( fs, 'statSync' ).callsFake( () => ( { isFile: () => true } ) );
 				const path = 'path';
 
 				const result = tools.isFile( path );
@@ -245,7 +245,7 @@ describe( 'utils', () => {
 
 			it( 'should return false if path does not point to directory', () => {
 				const fs = require( 'fs' );
-				const statSyncStub = sandbox.stub( fs, 'statSync', () => ( { isFile: () => false } ) );
+				const statSyncStub = sandbox.stub( fs, 'statSync' ).callsFake( () => ( { isFile: () => false } ) );
 				const path = 'path';
 
 				const result = tools.isFile( path );
@@ -293,7 +293,7 @@ describe( 'utils', () => {
 			it( 'should read, update and save JSON file', () => {
 				const path = 'path/to/file.json';
 				const fs = require( 'fs' );
-				const readFileStub = sandbox.stub( fs, 'readFileSync', () => '{}' );
+				const readFileStub = sandbox.stub( fs, 'readFileSync' ).callsFake( () => '{}' );
 				const modifiedJSON = { modified: true };
 				const writeFileStub = sandbox.stub( fs, 'writeFileSync' );
 
@@ -450,7 +450,7 @@ describe( 'utils', () => {
 
 			it( 'should be defined', () => expect( tools.getGitUrlFromNpm ).to.be.a( 'function' ) );
 			it( 'should call npm view command', () => {
-				const shExecStub = sandbox.stub( tools, 'shExec', () => {
+				const shExecStub = sandbox.stub( tools, 'shExec' ).callsFake( () => {
 					return JSON.stringify( repository );
 				} );
 				const url = tools.getGitUrlFromNpm( moduleName );
@@ -504,7 +504,7 @@ describe( 'utils', () => {
 			const fs = require( 'fs-extra' );
 
 			it( 'rejects Promise when file does not exist', () => {
-				const readFileStub = sandbox.stub( fs, 'readFile', ( from, to, callback ) => {
+				const readFileStub = sandbox.stub( fs, 'readFile' ).callsFake( ( from, to, callback ) => {
 					callback( 'Some error during readFile.' );
 				} );
 
@@ -517,11 +517,11 @@ describe( 'utils', () => {
 			} );
 
 			it( 'rejects Promise when file cannot be saved', () => {
-				const readFileStub = sandbox.stub( fs, 'readFile', ( from, to, callback ) => {
+				const readFileStub = sandbox.stub( fs, 'readFile' ).callsFake( ( from, to, callback ) => {
 					callback( null, 'Some data.' );
 				} );
 
-				const outputFileStub = sandbox.stub( fs, 'outputFile', ( to, data, callback ) => {
+				const outputFileStub = sandbox.stub( fs, 'outputFile' ).callsFake( ( to, data, callback ) => {
 					callback( 'Some error during outputFile.' );
 				} );
 
@@ -538,11 +538,11 @@ describe( 'utils', () => {
 			} );
 
 			it( 'resolves Promise when file was copied', () => {
-				const readFileStub = sandbox.stub( fs, 'readFile', ( from, to, callback ) => {
+				const readFileStub = sandbox.stub( fs, 'readFile' ).callsFake( ( from, to, callback ) => {
 					callback( null, 'Some data.' );
 				} );
 
-				const outputFileStub = sandbox.stub( fs, 'outputFile', ( to, data, callback ) => {
+				const outputFileStub = sandbox.stub( fs, 'outputFile' ).callsFake( ( to, data, callback ) => {
 					callback( null );
 				} );
 

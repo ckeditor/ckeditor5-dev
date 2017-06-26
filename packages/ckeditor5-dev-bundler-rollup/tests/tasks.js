@@ -71,7 +71,7 @@ describe( 'bundle-tasks', () => {
 
 	describe( 'compile()', () => {
 		it( 'should compile packages', () => {
-			sandbox.stub( compiler.tasks, 'compile', config => config );
+			sandbox.stub( compiler.tasks, 'compile' ).callsFake( config => config );
 
 			const result = tasks._compile( 'sourceBuildDir', [ 'package1' ] );
 
@@ -82,9 +82,9 @@ describe( 'bundle-tasks', () => {
 
 	describe( '_generateBundleWithEntryPoint', () => {
 		it( 'should generate bundle nad use existing entry point', () => {
-			sandbox.stub( tasks, '_generateJsBundle', config => Promise.resolve( config ) );
-			sandbox.stub( tasks, '_generateCssBundle', config => Promise.resolve( config ) );
-			sandbox.stub( path, 'join', ( ...args ) => args.join( '/' ) );
+			sandbox.stub( tasks, '_generateJsBundle' ).callsFake( config => Promise.resolve( config ) );
+			sandbox.stub( tasks, '_generateCssBundle' ).callsFake( config => Promise.resolve( config ) );
+			sandbox.stub( path, 'join' ).callsFake( ( ...args ) => args.join( '/' ) );
 
 			const promise = tasks._generateBundleWithEntryPoint( {
 				rollupOptions: {
@@ -114,13 +114,13 @@ describe( 'bundle-tasks', () => {
 
 	describe( '_generateBundleWithoutEntryPoint()', () => {
 		it( 'should create entry point and generate bundle', () => {
-			sandbox.stub( tasks, '_generateJsBundle', config => Promise.resolve( config ) );
-			sandbox.stub( tasks, '_generateCssBundle', config => Promise.resolve( config ) );
-			sandbox.stub( tasks, '_saveLocallyTemporaryEntryFile', () => ( {
+			sandbox.stub( tasks, '_generateJsBundle' ).callsFake( config => Promise.resolve( config ) );
+			sandbox.stub( tasks, '_generateCssBundle' ).callsFake( config => Promise.resolve( config ) );
+			sandbox.stub( tasks, '_saveLocallyTemporaryEntryFile' ).callsFake( () => ( {
 				temporaryEntryFilePath: 'tempEntryPoint',
 				bundleTmpDir: 'bundleTemp',
 			} ) );
-			sandbox.stub( path, 'join', ( ...args ) => args.join( '/' ) );
+			sandbox.stub( path, 'join' ).callsFake( ( ...args ) => args.join( '/' ) );
 
 			const promise = tasks._generateBundleWithoutEntryPoint( {
 				rollupOptions: {
@@ -153,9 +153,9 @@ describe( 'bundle-tasks', () => {
 	describe( '_saveLocallyTemporaryEntryFile()', () => {
 		it( 'should create temporary file with given name', () => {
 			sandbox.stub( mkdirp, 'sync' );
-			sandbox.stub( fs, 'mkdtempSync', path => path + 'temp' );
-			sandbox.stub( path, 'join', ( x, y ) => x + '/' + y );
-			sandbox.stub( path, 'sep', '/' );
+			sandbox.stub( fs, 'mkdtempSync' ).callsFake( path => path + 'temp' );
+			sandbox.stub( path, 'join' ).callsFake( ( x, y ) => x + '/' + y );
+			sandbox.stub( path, 'sep' ).value( '/' );
 			const createEntryFileStub = sandbox.stub( bundler, 'createEntryFile' );
 
 			const result = tasks._saveLocallyTemporaryEntryFile( {
@@ -194,9 +194,9 @@ describe( 'bundle-tasks', () => {
 
 	describe( '_generateCssBundle', () => {
 		it( 'should copy css files', () => {
-			sandbox.stub( path, 'join', ( ...args ) => args.join( '/' ) );
-			sandbox.stub( path, 'dirname', x => x.split( '/' ).slice( 0, -1 ).join( '/' ) );
-			sandbox.stub( tools, 'copyFile', ( source, dest ) => Promise.resolve( { source, dest } ) );
+			sandbox.stub( path, 'join' ).callsFake( ( ...args ) => args.join( '/' ) );
+			sandbox.stub( path, 'dirname' ).callsFake( x => x.split( '/' ).slice( 0, -1 ).join( '/' ) );
+			sandbox.stub( tools, 'copyFile' ).callsFake( ( source, dest ) => Promise.resolve( { source, dest } ) );
 
 			const promise = tasks._generateCssBundle( {
 				sourceBuildDir: 'sourceBuildDir',
@@ -213,7 +213,7 @@ describe( 'bundle-tasks', () => {
 
 	describe( '_rollupBundle()', () => {
 		it( 'should create js bundle', () => {
-			sandbox.stub( rollup, 'rollup', config => Promise.resolve( config ) );
+			sandbox.stub( rollup, 'rollup' ).callsFake( config => Promise.resolve( config ) );
 			const promise = tasks._rollupBundle( 'entryPoint' );
 
 			return promise.then( result => {
@@ -268,18 +268,19 @@ describe( 'bundle-tasks', () => {
 			const stream1 = gulp.src( [] );
 			const stream2 = gulp.src( [] );
 
-			sandbox.stub( tasks, '_minifyJs', text => {
+			sandbox.stub( tasks, '_minifyJs' ).callsFake( text => {
 				expect( text ).to.equal( 'destinationPath/fileName' );
 
 				return stream1;
 			} );
 
-			sandbox.stub( tasks, '_minifyCss', text => {
+			sandbox.stub( tasks, '_minifyCss' ).callsFake( text => {
 				expect( text ).to.equal( 'destinationPath/fileName' );
 
 				return stream2;
 			} );
-			sandbox.stub( path, 'join', ( ...args ) => args.join( '/' ) );
+
+			sandbox.stub( path, 'join' ).callsFake( ( ...args ) => args.join( '/' ) );
 
 			return tasks._minify( 'destinationPath', 'fileName' );
 		} );
@@ -287,11 +288,12 @@ describe( 'bundle-tasks', () => {
 
 	describe( '_minifyJs', () => {
 		it( 'should minify js file', () => {
-			sandbox.stub( gulp, 'src', () => ( {
+			sandbox.stub( gulp, 'src' ).callsFake( () => ( {
 				pipe: () => {}
 			} ) );
-			sandbox.stub( path, 'dirname', path => path.split( '/' ).slice( 0, -1 ).join( '/' ) );
-			const saveMinified = sandbox.stub( utils, 'saveFileFromStreamAsMinified', path => path );
+
+			sandbox.stub( path, 'dirname' ).callsFake( path => path.split( '/' ).slice( 0, -1 ).join( '/' ) );
+			const saveMinified = sandbox.stub( utils, 'saveFileFromStreamAsMinified' ).callsFake( path => path );
 
 			tasks._minifyJs( 'path/to/editor' );
 
@@ -301,10 +303,10 @@ describe( 'bundle-tasks', () => {
 
 	describe( '_minifyCss', () => {
 		it( 'should minify css file', () => {
-			sandbox.stub( gulp, 'src', () => ( {
+			sandbox.stub( gulp, 'src' ).callsFake( () => ( {
 				pipe: () => {}
 			} ) );
-			sandbox.stub( path, 'dirname', path => path.split( '/' ).slice( 0, -1 ).join( '/' ) );
+			sandbox.stub( path, 'dirname' ).callsFake( path => path.split( '/' ).slice( 0, -1 ).join( '/' ) );
 			const saveMinified = sandbox.stub( utils, 'saveFileFromStreamAsMinified' );
 
 			tasks._minifyCss( 'path/to/editor' );
@@ -322,14 +324,14 @@ describe( 'bundle-tasks', () => {
 				'editor.min.css': { size: 10 },
 			};
 
-			sandbox.stub( utils, 'getFilesSizeStats', files => {
+			sandbox.stub( utils, 'getFilesSizeStats' ).callsFake( files => {
 				return files.map( fileName => ( {
 					name: fileName,
 					size: fileStats[ fileName ].size,
 				} ) );
 			} );
 
-			sandbox.stub( utils, 'showFilesSummary', ( text, stats ) => {
+			sandbox.stub( utils, 'showFilesSummary' ).callsFake( ( text, stats ) => {
 				expect( stats ).to.deep.equal( [
 					{ name: 'editor.js', size: 123 },
 					{ name: 'editor.css', size: 50 },

@@ -113,9 +113,7 @@ describe( 'translations', () => {
 
 			it( 'should load po file from the package only once', () => {
 				const translationService = new TranslationService( 'pl' );
-				const loadPoFileSpy = sinon.spy();
-
-				sandbox.stub( translationService, '_loadPoFile', loadPoFileSpy );
+				const loadPoFileSpy = sandbox.stub( translationService, '_loadPoFile' );
 
 				translationService.loadPackage( 'pathToPackage' );
 				translationService.loadPackage( 'pathToPackage' );
