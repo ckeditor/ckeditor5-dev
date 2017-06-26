@@ -25,7 +25,7 @@ const mainRepoUrl = 'https://github.com/CKEditor5/ckeditor5.github.io';
 // Install required dependencies for building the documentation.
 exec( 'npm run install-optional-dependencies' );
 
-// Clone te CKEditor 5 page.
+// Clone the CKEditor 5 page.
 exec( `git clone ${ mainRepoUrl }.git` );
 
 // Build the documentation.
@@ -47,12 +47,16 @@ exec( `echo "https://${ process.env.GITHUB_TOKEN }:@github.com" > .git/credentia
 exec( 'git config credential.helper "store --file=.git/credentials"' );
 
 // Commit the documentation.
-exec( 'git add docs/' );
-exec( 'git commit -m "Documentation build."' );
-exec( 'git push origin master --quiet' );
+if ( exec( 'git diff --name-only docs/' ).trim().length ) {
+	exec( 'git add docs/' );
+	exec( 'git commit -m "Documentation build."' );
+	exec( 'git push origin master --quiet' );
 
-const lastCommit = exec( 'git log -1 --format="%h"' );
-console.log( `Successfully published the documentation under ${ mainRepoUrl }/commit/${ lastCommit }` );
+	const lastCommit = exec( 'git log -1 --format="%h"' );
+	console.log( `Successfully published the documentation under ${ mainRepoUrl }/commit/${ lastCommit }` );
+} else {
+	console.log( 'Documentation is up to date.' );
+}
 
 function exec( command ) {
 	return tools.shExec( command, { verbosity: 'error' } );
