@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [7.2.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.2.1...@ckeditor/ckeditor5-dev-docs@7.2.2) (2017-07-12)
+
+### Bug fixes
+
+* Nightly docs should be available in latest/ and <version>/ directories on ckeditor5.github.io. Closes [#242](https://github.com/ckeditor/ckeditor5-dev/issues/242). ([ff487ee](https://github.com/ckeditor/ckeditor5-dev/commit/ff487ee))
+
+
 ## [7.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.2.0...@ckeditor/ckeditor5-dev-docs@7.2.1) (2017-07-11)
 
 ### Bug fixes
