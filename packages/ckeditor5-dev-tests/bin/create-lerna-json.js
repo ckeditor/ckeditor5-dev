@@ -19,8 +19,12 @@ const json = {
 		'packages/*',
 		'.'
 	],
-	'version': '0.0.0',
-	'hoist': true
+	'hoist': true,
+	'commands': {
+		'bootstrap': {
+			'concurrency': 1
+		}
+	}
 };
 
 fs.writeFileSync( lerna, JSON.stringify( json, null, 2 ) + '\n', 'utf-8' );
