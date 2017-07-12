@@ -22,23 +22,32 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 const mainRepoUrl = 'https://github.com/CKEditor5/ckeditor5.github.io';
 
+// The assumption here is that the script is called from ckeditor5/.
+const projectVersion = require( path.join( process.cwd(), 'package.json' ) ).version;
+
 // Install required dependencies for building the documentation.
 exec( 'npm run install-optional-dependencies' );
 
 // Clone the CKEditor 5 page.
+console.log( 'Cloning ckeditor5.github.io repository...' );
 exec( `git clone ${ mainRepoUrl }.git` );
 
 // Build the documentation.
+console.log( 'Building documentation...' );
 exec( 'gulp docs' );
 
-// Remove existing documentation.
-exec( 'rm -rf ckeditor5.github.io/docs/nightly/*' );
+console.log( 'Copying files...' );
 
-// Make sure that the destination directory is available.
-exec( 'mkdir -p ckeditor5.github.io/docs/nightly' );
+// Remove existing documentation.
+exec( `rm -rf ckeditor5.github.io/docs/nightly/ckeditor5/${ projectVersion }` );
+exec( 'rm -rf ckeditor5.github.io/docs/nightly/ckeditor5/latest' );
 
 // Copy built documentation to the new destination.
-exec( 'cp -R build/docs/* ckeditor5.github.io/docs/nightly' );
+exec( 'cp -R build/docs/* ckeditor5.github.io/docs/nightly/' );
+
+// Copy the versioned documentation to latest/.
+exec( 'mkdir ckeditor5.github.io/docs/nightly/ckeditor5/latest' );
+exec( `cp -R ckeditor5.github.io/docs/nightly/ckeditor5/${ projectVersion }/* ckeditor5.github.io/docs/nightly/ckeditor5/latest` );
 
 // Change work directory in order to make a commit in CKEditor 5 page's repository.
 process.chdir( path.join( process.cwd(), 'ckeditor5.github.io' ) );
@@ -55,7 +64,7 @@ if ( exec( 'git diff --name-only docs/' ).trim().length ) {
 	const lastCommit = exec( 'git log -1 --format="%h"' );
 	console.log( `Successfully published the documentation under ${ mainRepoUrl }/commit/${ lastCommit }` );
 } else {
-	console.log( 'Documentation is up to date.' );
+	console.log( 'Nothing to commit. Documentation is up to date.' );
 }
 
 function exec( command ) {
