@@ -3,16 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
-module.exports = function createMgitJson( packageJson ) {
+module.exports = function createMgitJsonContent( packageJson ) {
 	const mgitJson = {
 		dependencies: {}
 	};
 
 	const dependencies = Object.assign( {}, packageJson.dependencies, packageJson.devDependencies );
-
-	if ( !Object.keys( dependencies ).length ) {
-		return null;
-	}
 
 	for ( const dependencyName in dependencies ) {
 		const dependencyVersion = dependencies[ dependencyName ];
@@ -31,6 +27,7 @@ module.exports = function createMgitJson( packageJson ) {
 		if ( isPathToGitRepoHashVersion( dependencyVersion ) ) {
 			mgitJson.dependencies[ dependencyName ] = dependencyVersion;
 		} else {
+			// Removes '@' from the scoped npm package name.
 			mgitJson.dependencies[ dependencyName ] = dependencyName.slice( 1 );
 		}
 	}

@@ -11,7 +11,7 @@ describe( 'dev-tests/bin/create-mgit-json', () => {
 	let createMgitJson;
 
 	beforeEach( () => {
-		createMgitJson = require( '../../lib/bin/create-mgit-json' );
+		createMgitJson = require( '../../lib/bin/createmgitjsoncontent' );
 	} );
 
 	it( 'should return null if no dependency in package.json present', () => {

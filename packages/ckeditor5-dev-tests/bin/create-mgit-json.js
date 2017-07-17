@@ -9,7 +9,7 @@
 
 const fs = require( 'fs' );
 const path = require( 'path' );
-const createMgitJson = require( '../lib/bin/create-mgit-json' );
+const createMgitJson = require( '../lib/bin/createmgitjsoncontent' );
 
 const cwd = process.cwd();
 const packageJson = require( path.join( cwd, 'package.json' ) );
@@ -17,6 +17,4 @@ const mgitJsonPath = path.join( cwd, 'mgit.json' );
 
 const mgitJson = createMgitJson( packageJson );
 
-if ( mgitJson ) {
-	fs.writeFileSync( mgitJsonPath, JSON.stringify( mgitJson, null, 2 ) + '\n', 'utf-8' );
-}
+fs.writeFileSync( mgitJsonPath, JSON.stringify( mgitJson, null, 2 ) + '\n', 'utf-8' );
