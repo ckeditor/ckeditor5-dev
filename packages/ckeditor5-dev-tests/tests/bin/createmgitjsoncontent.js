@@ -14,13 +14,10 @@ describe( 'dev-tests/bin/create-mgit-json', () => {
 		createMgitJson = require( '../../lib/bin/createmgitjsoncontent' );
 	} );
 
-	it( 'should return null if no dependency in package.json present', () => {
-		const mgitJson = createMgitJson( {
-			dependencies: {},
-			devDependencies: {}
-		} );
+	it( 'should return a valid mgit config when no dependency in package.json present', () => {
+		const mgitJson = createMgitJson( {} );
 
-		expect( mgitJson ).to.equal( null );
+		expect( mgitJson ).to.deep.equal( { dependencies: {} } );
 	} );
 
 	it( 'should return an object with dependency names for npm versions of dependencies', () => {

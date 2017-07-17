@@ -3,6 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
+/**
+ * Creates content for the `mgit.json` file based on the `package.json` dependencies.
+ *
+ * @param {Object} packageJson Parsed package.json.
+ */
 module.exports = function createMgitJsonContent( packageJson ) {
 	const mgitJson = {
 		dependencies: {}
