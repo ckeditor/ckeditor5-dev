@@ -9,37 +9,14 @@
 
 const fs = require( 'fs' );
 const path = require( 'path' );
+const createMgitJson = require( '../lib/bin/create-mgit-json' );
 
 const cwd = process.cwd();
 const packageJson = require( path.join( cwd, 'package.json' ) );
-const mgitJson = path.resolve( cwd, 'mgit.json' );
+const mgitJsonPath = path.join( cwd, 'mgit.json' );
 
-const json = {
-	'dependencies': {}
-};
+const mgitJson = createMgitJson( packageJson );
 
-let deps = [];
-
-if ( packageJson.dependencies ) {
-	deps = Object.keys( packageJson.dependencies );
-}
-
-if ( packageJson.devDependencies ) {
-	deps = deps.concat( Object.keys( packageJson.devDependencies ) );
-}
-
-if ( deps.length ) {
-	deps.forEach( item => {
-		if ( !item.startsWith( '@ckeditor/ckeditor5' ) ) {
-			return;
-		}
-
-		if ( item.includes( '/ckeditor5-dev' ) ) {
-			return;
-		}
-
-		json.dependencies[ item ] = item.slice( 1 );
-	} );
-
-	fs.writeFileSync( mgitJson, JSON.stringify( json, null, 2 ) + '\n', 'utf-8' );
+if ( mgitJson ) {
+	fs.writeFileSync( mgitJsonPath, JSON.stringify( mgitJson, null, 2 ) + '\n', 'utf-8' );
 }
