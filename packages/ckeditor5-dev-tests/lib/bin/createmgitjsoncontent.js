@@ -29,7 +29,7 @@ module.exports = function createMgitJsonContent( packageJson ) {
 			continue;
 		}
 
-		if ( isPathToGitRepoHashVersion( dependencyVersion ) ) {
+		if ( isHashedDependency( dependencyVersion ) ) {
 			mgitJson.dependencies[ dependencyName ] = dependencyVersion;
 		} else {
 			// Removes '@' from the scoped npm package name.
@@ -40,9 +40,6 @@ module.exports = function createMgitJsonContent( packageJson ) {
 	return mgitJson;
 };
 
-function isPathToGitRepoHashVersion( dependency ) {
-	return (
-		dependency.match( /^(git@github.com:)[\w-]+(\/[\w-]+)?\.git#[0-9a-f]+$/ ) ||
-		dependency.match( /^[\w-]+(\/[\w-]+)?#[0-9a-f]+$/ )
-	);
+function isHashedDependency( dependency ) {
+	return dependency.match( /#[0-9a-f]+$/ );
 }
