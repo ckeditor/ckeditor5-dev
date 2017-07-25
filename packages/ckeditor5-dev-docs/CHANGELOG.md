@@ -1,6 +1,41 @@
 Changelog
 =========
 
+## [7.2.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.2.1...@ckeditor/ckeditor5-dev-docs@7.2.2) (2017-07-12)
+
+### Bug fixes
+
+* Nightly docs should be available in latest/ and <version>/ directories on ckeditor5.github.io. Closes [#242](https://github.com/ckeditor/ckeditor5-dev/issues/242). ([ff487ee](https://github.com/ckeditor/ckeditor5-dev/commit/ff487ee))
+
+
+## [7.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.2.0...@ckeditor/ckeditor5-dev-docs@7.2.1) (2017-07-11)
+
+### Bug fixes
+
+* Use a fork of gulp-jsdoc3 so we can harcode JSDoc version (to one with which our plugins work). See [#240](https://github.com/ckeditor/ckeditor5-dev/issues/240). ([2a494eb](https://github.com/ckeditor/ckeditor5-dev/commit/2a494eb))
+
+
+## [7.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.1.1...@ckeditor/ckeditor5-dev-docs@7.2.0) (2017-06-20)
+
+### Features
+
+* Static and mixed method, properties and events will be inherited too. Closes [#226](https://github.com/ckeditor/ckeditor5-dev/issues/226). ([a160840](https://github.com/ckeditor/ckeditor5-dev/commit/a160840))
+
+
+## [7.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.1.0...@ckeditor/ckeditor5-dev-docs@7.1.1) (2017-06-15)
+
+### Other changes
+
+* The publish-nightly script should check if it's triggered by a cron job (the check was temporarily disabled). ([3dece10](https://github.com/ckeditor/ckeditor5-dev/commit/3dece10))
+
+
+## [7.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.0.0...@ckeditor/ckeditor5-dev-docs@7.1.0) (2017-06-14)
+
+### Features
+
+* Added a bin script for publishing nightly builds of CKEditor 5 documentation. Closes [#230](https://github.com/ckeditor/ckeditor5-dev/issues/230). ([0d15864](https://github.com/ckeditor/ckeditor5-dev/commit/0d15864))
+
+
 ## [7.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@6.4.0...@ckeditor/ckeditor5-dev-docs@7.0.0) (2017-05-29)
 
 ### Other changes

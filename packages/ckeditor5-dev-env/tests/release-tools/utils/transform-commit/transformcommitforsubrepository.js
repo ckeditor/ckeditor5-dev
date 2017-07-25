@@ -89,8 +89,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] )
-				.to.match( /\* \u001b\[33m684997d\u001b\[39m "Fix: Simple fix\." \u001b\[32mINCLUDED/ );
+			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'Fix: Simple fix.' ) ).to.equal( true );
+			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'INCLUDED' ) ).to.equal( true );
 		} );
 
 		it( 'truncates too long commit\'s subject', () => {
@@ -108,11 +108,11 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
-			// eslint-disable-next-line max-len
-			const commitDetailsPattern = /\* \u001b\[33m684997d\u001b\[39m "Fix: Reference site about Lorem Ipsum, giving information on its origins, as well as a random Lip\.\.\." \u001b\[32mINCLUDED/;
-
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( commitDetailsPattern );
+			expect( stubs.logger.info.firstCall.args[ 0 ].includes(
+				'Fix: Reference site about Lorem Ipsum, giving information on its origins, as well as a random Lip...'
+			) ).to.equal( true );
+			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'INCLUDED' ) ).to.equal( true );
 		} );
 
 		it( 'does not attach valid "internal" commit to the changelog', () => {
@@ -129,8 +129,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] )
-				.to.match( /\* \u001b\[33m684997d\u001b\[39m "Docs: README\." \u001b\[90mSKIPPED/ );
+			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'Docs: README.' ) ).to.equal( true );
+			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'SKIPPED' ) ).to.equal( true );
 		} );
 
 		it( 'does not attach invalid commit to the changelog', () => {
@@ -147,8 +147,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] )
-				.to.match( /\* \u001b\[33m684997d\u001b\[39m "Invalid commit\." \u001b\[31mINVALID/ );
+			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'Invalid commit.' ) ).to.equal( true );
+			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'INVALID' ) ).to.equal( true );
 		} );
 
 		it( 'makes URLs to issues on GitHub', () => {
@@ -275,9 +275,10 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
 
-			const regexpMsg = /Feature: Introduced a brand new release tools with a new set of requirements. See #64./;
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( regexpMsg );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /\u001b\[32mINCLUDED/ );
+			expect( stubs.logger.info.firstCall.args[ 0 ].includes(
+				'Feature: Introduced a brand new release tools with a new set of requirements. See #64.'
+			) ).to.equal( true );
+			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'INCLUDED' ) ).to.equal( true );
 		} );
 
 		it( 'attaches additional subject for merge commits to the commit list', () => {
@@ -299,13 +300,12 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.be.a( 'string' );
 
 			const logMessageAsArray = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
-			// eslint-disable-next-line max-len
-			const commitDetailsPattern = /\* \u001b\[33mdea3501\u001b\[39m "Feature: Introduced a brand new release tools with a new set of requirements\." \u001b\[32mINCLUDED/;
-			const mergeCommitPattern = /Merge pull request #75 from ckeditor\/t\/64/;
 
-			expect( logMessageAsArray.length ).to.equal( 2 );
-			expect( logMessageAsArray[ 0 ] ).to.match( commitDetailsPattern );
-			expect( logMessageAsArray[ 1 ] ).to.match( mergeCommitPattern );
+			expect( logMessageAsArray[ 0 ].includes(
+				'Feature: Introduced a brand new release tools with a new set of requirements.'
+			) ).to.equal( true );
+			expect( logMessageAsArray[ 0 ].includes( 'INCLUDED' ) ).to.equal( true );
+			expect( logMessageAsArray[ 1 ].includes( 'Merge pull request #75 from ckeditor/t/64' ) ).to.equal( true );
 		} );
 
 		it( 'allows hiding the logs', () => {

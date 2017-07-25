@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.5.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.4.0...@ckeditor/jsdoc-plugins@1.5.0) (2017-06-20)
+
+### Features
+
+* Static and mixed method, properties and events will be inherited too. Closes [#226](https://github.com/ckeditor/ckeditor5-dev/issues/226). ([a160840](https://github.com/ckeditor/ckeditor5-dev/commit/a160840))
+
+
 ## [1.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.3.1...@ckeditor/jsdoc-plugins@1.4.0) (2017-05-29)
 
 ### Features

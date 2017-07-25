@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## [7.5.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@7.4.7...@ckeditor/ckeditor5-dev-tests@7.5.0) (2017-07-18)
+
+### Features
+
+* The `create-mgit-json` script will now use the hashes of dependencies defined in `package.json`. Closes [#243](https://github.com/ckeditor/ckeditor5-dev/issues/243). ([908c0d6](https://github.com/ckeditor/ckeditor5-dev/commit/908c0d6))
+
+
+## [7.4.7](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@7.4.4...@ckeditor/ckeditor5-dev-tests@7.4.7) (2017-06-14)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
 ## [7.4.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@7.4.3...@ckeditor/ckeditor5-dev-tests@7.4.4) (2017-05-17)
 
 ### Bug fixes

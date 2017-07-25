@@ -41,15 +41,15 @@ describe( 'dev-lint/utils', () => {
 		it( 'returns a list of ignored files as glob patterns', () => {
 			stubs.fs.readFileSync.returns( `
 # These files will be ignored.
-**/node_modules/**
-coverage/**
+node_modules/
+coverage/
 
 lerna-debug.log
 npm-debug.log
 ` );
 
 			expect( getGitIgnore() ).to.deep.equal( [
-				'!**/node_modules/**',
+				'!node_modules/**',
 				'!coverage/**',
 				'!lerna-debug.log',
 				'!npm-debug.log'
