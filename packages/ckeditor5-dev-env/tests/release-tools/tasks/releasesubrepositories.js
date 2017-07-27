@@ -79,13 +79,15 @@ describe( 'dev-env/release-tools/tasks', function() {
 			},
 			displaySkippedPackages: sandbox.stub(),
 			releaseRepository: sandbox.stub(),
-			generateChangelogForSinglePackage: sandbox.stub()
+			generateChangelogForSinglePackage: sandbox.stub(),
+			validatePackageToRelease: sandbox.stub()
 		};
 
 		mockery.registerMock( './releaserepository', stubs.releaseRepository );
 		mockery.registerMock( './generatechangelogforsinglepackage', stubs.generateChangelogForSinglePackage );
 		mockery.registerMock( '../utils/displayskippedpackages', stubs.displaySkippedPackages );
 		mockery.registerMock( '../utils/cli', stubs.cli );
+		mockery.registerMock( '../utils/validatepackagetorelease', stubs.validatePackageToRelease );
 
 		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 
@@ -164,7 +166,13 @@ describe( 'dev-env/release-tools/tasks', function() {
 				''
 			].join( '\n' ) );
 
-			return releaseSubRepositories( options );
+			return releaseSubRepositories( options )
+				.then( () => {
+					expect( stubs.logger.info.calledOnce ).to.equal( true );
+					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal(
+						'Aborted due to user\'s no confirmation.'
+					);
+				} );
 		} );
 
 		it( 'displays skipped packages', () => {
@@ -175,6 +183,8 @@ describe( 'dev-env/release-tools/tasks', function() {
 			};
 
 			makeCommit( 'alpha', 'Feature: This is an initial commit.' );
+
+			stubs.validatePackageToRelease.returns( [] );
 
 			return releaseSubRepositories( options )
 				.then( () => {
@@ -215,6 +225,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 			].join( '\n' ) );
 			makeCommit( 'delta', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
 
+			stubs.validatePackageToRelease.returns( [] );
 			stubs.cli.configureReleaseOptions.returns( Promise.resolve( {
 				skipNpm: true,
 				skipGithub: true
@@ -224,6 +235,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 
 			return releaseSubRepositories( options )
 				.then( () => {
+					expect( stubs.validatePackageToRelease.callCount ).to.equal( 1 );
 					const packageJson = getRealPackageJson( 'delta' );
 
 					expect( packageJson.dependencies[ '@ckeditor/alpha' ] ).to.equal( '^0.0.1' );
@@ -293,6 +305,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					} );
 				} ) );
 
+			stubs.validatePackageToRelease.returns( [] );
 			stubs.cli.configureReleaseOptions.returns( Promise.resolve( {
 				skipNpm: true,
 				skipGithub: true
@@ -389,6 +402,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 				skipGithub: true
 			} ) );
 
+			stubs.validatePackageToRelease.returns( [] );
 			stubs.releaseRepository.returns( Promise.resolve() );
 
 			return releaseSubRepositories( options )
@@ -438,6 +452,104 @@ describe( 'dev-env/release-tools/tasks', function() {
 						version: '0.5.1',
 						changes: 'Internal changes only (updated dependencies, documentation, etc.).'
 					} );
+				} );
+		} );
+
+		it( 'must not release any package if any error occurs', () => {
+			const options = {
+				cwd: mainPackagePath,
+				packages: 'packages'
+			};
+
+			makeCommit( 'alpha', 'Feature: This is an initial commit.' );
+			makeChangelog( 'alpha', [
+				'Changelog',
+				'=========',
+				'',
+				'## 0.1.0 (2017-06-08)',
+				'',
+				'### Features',
+				'',
+				'* This is an initial commit.',
+				''
+			].join( '\n' ) );
+			makeCommit( 'alpha', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
+
+			makeCommit( 'beta', 'Fix: Some fix.' );
+			makeChangelog( 'beta', [
+				'Changelog',
+				'=========',
+				'',
+				'## [0.2.1](https://github.com/ckeditor) (2017-06-08)',
+				'',
+				'### Fix',
+				'',
+				'* Some fix.',
+				''
+			].join( '\n' ) );
+			makeCommit( 'beta', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
+
+			stubs.cli.confirmRelease.returns( Promise.resolve() );
+
+			stubs.generateChangelogForSinglePackage.onFirstCall()
+				.returns( new Promise( resolve => {
+					// Without this timeout, the promise is resolving before starting the test and `getPackagesToRelease()`
+					// returns an invalid values.
+					setTimeout( () => {
+						makeChangelog( 'delta', [
+							'Changelog',
+							'=========',
+							'',
+							'## [0.4.1](https://githubn.com/ckeditor) (2017-06-08)',
+							'',
+							'Internal changes only (updated dependencies, documentation, etc.).',
+							''
+						].join( '\n' ) );
+						makeCommit( 'delta', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
+
+						resolve();
+					} );
+				} ) );
+
+			stubs.generateChangelogForSinglePackage.onSecondCall()
+				.returns( new Promise( resolve => {
+					// Without this timeout, the promise is resolving before starting the test and `getPackagesToRelease()`
+					// returns an invalid values.
+					setTimeout( () => {
+						makeChangelog( 'epsilon', [
+							'Changelog',
+							'=========',
+							'',
+							'## [0.5.1](https://githubn.com/ckeditor) (2017-06-08)',
+							'',
+							'Internal changes only (updated dependencies, documentation, etc.).',
+							''
+						].join( '\n' ) );
+						makeCommit( 'epsilon', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
+
+						resolve();
+					} );
+				} ) );
+
+			stubs.validatePackageToRelease.returns( [] );
+			stubs.validatePackageToRelease.onFirstCall().returns( [
+				'Not on master or master is not clean.'
+			] );
+			stubs.validatePackageToRelease.onSecondCall().returns( [
+				'Cannot find changelog entry for version 0.2.1.'
+			] );
+
+			return releaseSubRepositories( options )
+				.then( () => {
+					expect( stubs.validatePackageToRelease.callCount ).to.equal( 4 );
+					expect( stubs.releaseRepository.called ).to.equal( false );
+
+					expect( stubs.logger.error.callCount ).to.equal( 5 );
+					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal( 'Releasing has been aborted due to errors.' );
+					expect( stubs.logger.error.getCall( 1 ).args[ 0 ] ).to.equal( '## @ckeditor/alpha' );
+					expect( stubs.logger.error.getCall( 2 ).args[ 0 ] ).to.equal( '- Not on master or master is not clean.' );
+					expect( stubs.logger.error.getCall( 3 ).args[ 0 ] ).to.equal( '## @ckeditor/beta' );
+					expect( stubs.logger.error.getCall( 4 ).args[ 0 ] ).to.equal( '- Cannot find changelog entry for version 0.2.1.' );
 				} );
 		} );
 	} );

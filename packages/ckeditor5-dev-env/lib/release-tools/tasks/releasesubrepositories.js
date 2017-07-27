@@ -16,6 +16,7 @@ const getPackagesToRelease = require( '../utils/getpackagestorelease' );
 const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
 const releaseRepository = require( './releaserepository' );
 const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
+const validatePackageToRelease = require( '../utils/validatepackagetorelease' );
 const { getChangesForVersion } = require( '../utils/changelog' );
 
 const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted by the user.';
@@ -99,6 +100,8 @@ module.exports = function releaseSubRepositories( options ) {
 
 			// A user did not confirm the release process.
 			if ( err instanceof Error && err.message === BREAK_RELEASE_MESSAGE ) {
+				log.info( 'Aborted due to user\'s no confirmation.' );
+
 				return Promise.resolve();
 			}
 
@@ -187,22 +190,12 @@ module.exports = function releaseSubRepositories( options ) {
 		return executeOnPackages( pathsCollection.packages, repositoryPath => {
 			process.chdir( repositoryPath );
 
-			const errorsForPackage = [];
 			const packageJson = getPackageJson( repositoryPath );
 			const releaseDetails = packagesToRelease.get( packageJson.name );
-
-			// Check whether the repository is ready for the release.
-			const status = exec( 'git status -sb', { verbosity: 'error' } ).trim();
-
-			// This way we'll catch if a branch is behind/ahead or contains uncommited files.
-			if ( status !== '## master...origin/master' ) {
-				errorsForPackage.push( 'Not on master or master is not clean.' );
-			}
-
-			// Check whether the changelog entries are correct.
-			if ( !releaseDetails.changes ) {
-				errorsForPackage.push( `Cannot find changelog entry for version "${ releaseDetails.version }".` );
-			}
+			const errorsForPackage = validatePackageToRelease( {
+				changes: releaseDetails.changes,
+				version: releaseDetails.version
+			} );
 
 			if ( errorsForPackage.length ) {
 				errors.push( `## ${ packageJson.name }` );
