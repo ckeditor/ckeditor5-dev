@@ -48,19 +48,17 @@ describe( 'dev-env/release-tools/tasks', () => {
 			} );
 
 			mockery.registerMock( '../utils/cli', stubs.cli );
-			mockery.registerMock( '../utils/changelog', stubs.changelogUtils );
-			mockery.registerMock( '../utils/versions', stubs.versionUtils );
 			mockery.registerMock( '../utils/getnewreleasetype', stubs.getNewReleaseType );
 			mockery.registerMock( '../utils/generatechangelogfromcommits', stubs.generateChangelogFromCommits );
 			mockery.registerMock( '../utils/transform-commit/transformcommitforsubrepository', stubs.transformCommit );
-			mockery.registerMock( '../utils/getpackagejson', () => {
-				return {
-					name: 'test-package',
-					version: '0.0.1'
-				};
-			} );
 
 			generateChangelogForSinglePackage = proxyquire( '../../../lib/release-tools/tasks/generatechangelogforsinglepackage', {
+				'../utils/changelog': stubs.changelogUtils,
+				'../utils/versions': stubs.versionUtils,
+				'../utils/getpackagejson': () => ( {
+					name: 'test-package',
+					version: '0.0.1'
+				} ),
 				'@ckeditor/ckeditor5-dev-utils': {
 					tools: stubs.tools,
 					logger() {

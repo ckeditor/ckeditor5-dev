@@ -1,0 +1,11 @@
+{
+  "name": "@ckeditor/foo-bar",
+  "version": "0.1.0",
+  "dependencies": {
+    "@ckeditor/alpha": "*",
+    "@ckeditor/beta": "*",
+    "@ckeditor/gamma": "*",
+    "@ckeditor/delta": "*",
+    "@ckeditor/epsilon": "*"
+  }
+}

@@ -58,16 +58,14 @@ describe( 'dev-env/release-tools/utils', () => {
 			} );
 
 			mockery.registerMock( 'conventional-changelog', stubs.conventionalChangelog );
-			mockery.registerMock( './changelog', stubs.changelogUtils );
 			mockery.registerMock( './transform-commit/getwriteroptions', stubs.getWriterOptions );
-			mockery.registerMock( './getpackagejson', () => {
-				return {
-					name: 'test-package',
-					version: '0.0.1'
-				};
-			} );
 
 			generateChangelogFromCommits = proxyquire( '../../../lib/release-tools/utils/generatechangelogfromcommits', {
+				'./getpackagejson': () => ( {
+					name: 'test-package',
+					version: '0.0.1'
+				} ),
+				'./changelog': stubs.changelogUtils,
 				'@ckeditor/ckeditor5-dev-utils': {
 					logger() {
 						return stubs.logger;

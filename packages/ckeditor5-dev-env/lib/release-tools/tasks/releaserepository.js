@@ -5,112 +5,52 @@
 
 'use strict';
 
-const path = require( 'path' );
-const chalk = require( 'chalk' );
-const parseGithubUrl = require( 'parse-github-url' );
-const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const createGithubRelease = require( './creategithubrelease' );
-const generateChangelogForSinglePackage = require( './generatechangelogforsinglepackage' );
-const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
-const changelogUtils = require( '../utils/changelog' );
 const versionUtils = require( '../utils/versions' );
-const getPackageJson = require( '../utils/getpackagejson' );
+const cli = require( '../utils/cli' );
+const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { getChangesForVersion } = require( '../utils/changelog' );
+const releaseRepositoryUtil = require( '../utils/releaserepository' );
+const validatePackageToRelease = require( '../utils/validatepackagetorelease' );
 
 /**
- * Releases the package defined in the current repository.
+ * Releases the package defined in the current work directory.
  *
- * Commits a new changelog (and `package.json`), creates a tag,
- * pushes the tag to a remote server and creates a note on GitHub releases page.
+ * This task does not required any params because it will be passed by the user during the process.
  *
- * @param {Object} options
- * @param {String} options.token GitHub token used to authenticate.
- * @param {Boolean} options.skipGithub Whether to publish the package on Github.
- * @param {Boolean} options.skipNpm Whether to publish the package on Npm.
- * @param {Map} options.dependencies Dependencies list to update.
  * @returns {Promise}
  */
-module.exports = function releaseRepository( options ) {
-	const cwd = process.cwd();
-	const log = logger();
+module.exports = function releaseRepository() {
+	const gitVersion = versionUtils.getLastTagFromGit();
+	const changelogVersion = versionUtils.getLastFromChangelog();
 
-	const packageJsonPath = path.join( cwd, 'package.json' );
-	const packageJson = getPackageJson( cwd );
-
-	log.info( '' );
-	log.info( chalk.bold.blue( `Creating release for "${ packageJson.name }".` ) );
-
-	if ( options.dependencies ) {
-		// Update dependencies/devDependencies versions in package.json.
-		updateDependenciesVersions( options.dependencies, packageJsonPath );
-
-		if ( exec( 'git diff --name-only package.json' ).trim().length ) {
-			log.info( 'Updating dependencies...' );
-			exec( 'git add package.json' );
-			exec( 'git commit -m "Internal: Updated dependencies."' );
-		}
-
-		const packageDetails = options.dependencies.get( packageJson.name );
-
-		// If package does not have generated changelog - let's generate it.
-		if ( packageDetails && !packageDetails.hasChangelog ) {
-			return generateChangelogForSinglePackage( packageDetails.version )
-				.then( () => {
-					packageDetails.hasChangelog = true;
-
-					options.dependencies.set( packageJson.name, packageDetails );
-
-					return releaseRepository( {
-						token: options.token,
-						skipGithub: options.skipGithub,
-						skipNpm: options.skipNpm,
-						dependencies: null
-					} );
-				} );
-		}
+	if ( gitVersion === changelogVersion ) {
+		return reject( 'Before starting the release process, you should generate the changelog.' );
 	}
 
-	// Get last version from the changelog.
-	const version = versionUtils.getLastFromChangelog();
+	const releaseTaskOptions = {
+		version: changelogVersion,
+		changes: getChangesForVersion( changelogVersion )
+	};
 
-	const promise = new Promise( ( resolve, reject ) => {
-		const latestChanges = changelogUtils.getChangesForVersion( version );
+	const errors = validatePackageToRelease( releaseTaskOptions );
 
-		// Bump the version.
-		exec( `npm version ${ version } --message "Release: v${ version }."` );
-		exec( `git push origin master v${ version }` );
+	if ( errors.length ) {
+		const log = logger();
 
-		if ( !options.skipNpm ) {
-			log.info( 'Publishing on NPM...' );
-			exec( 'npm publish --access=public' );
-		}
+		log.error( 'Unexpected errors occured:' );
+		errors.map( err => '* ' + err ).forEach( log.error.bind( log ) );
 
-		if ( !options.skipGithub ) {
-			log.info( 'Creating a GitHub release...' );
+		return reject( 'Releasing has been aborted due to errors.' );
+	}
 
-			const repositoryInfo = parseGithubUrl(
-				exec( 'git remote get-url origin --push' ).trim()
-			);
+	return cli.configureReleaseOptions()
+		.then( userOptions => {
+			const options = Object.assign( {}, releaseTaskOptions, userOptions );
 
-			const releaseOptions = {
-				repositoryOwner: repositoryInfo.owner,
-				repositoryName: repositoryInfo.name,
-				version: `v${ version }`,
-				description: latestChanges
-			};
-
-			return createGithubRelease( options.token, releaseOptions )
-				.then( resolve )
-				.catch( reject );
-		}
-
-		resolve();
-	} );
-
-	return promise.then( () => {
-		log.info( chalk.green( `Release "v${ version }" has been created and published.\n` ) );
-	} );
+			return releaseRepositoryUtil( options );
+		} );
 };
 
-function exec( command ) {
-	return tools.shExec( command, { verbosity: 'error' } );
+function reject( message ) {
+	return Promise.reject( new Error( message ) );
 }

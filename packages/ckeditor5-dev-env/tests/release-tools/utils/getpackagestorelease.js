@@ -7,7 +7,6 @@
 
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
 const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-env/release-tools/utils', () => {
@@ -16,12 +15,6 @@ describe( 'dev-env/release-tools/utils', () => {
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
-
-			mockery.enable( {
-				useCleanCache: true,
-				warnOnReplace: false,
-				warnOnUnregistered: false
-			} );
 
 			stubs = {
 				chdir: sandbox.stub( process, 'chdir' ),
@@ -38,31 +31,19 @@ describe( 'dev-env/release-tools/utils', () => {
 				},
 			};
 
-			mockery.registerMock( './executeonpackages', ( pathsToPackages, functionToExecute ) => {
-				let promise = Promise.resolve();
-
-				for ( const repositoryPath of pathsToPackages ) {
-					promise = promise.then( () => functionToExecute( repositoryPath ) );
-				}
-
-				return promise;
-			} );
-
-			mockery.registerMock( './versions', stubs.versions );
-
 			getPackagesToRelease = proxyquire( '../../../lib/release-tools/utils/getpackagestorelease', {
 				'@ckeditor/ckeditor5-dev-utils': {
 					logger() {
 						return stubs.logger;
 					}
 				},
-				'./getpackagejson': stubs.getPackageJson
+				'./getpackagejson': stubs.getPackageJson,
+				'./versions': stubs.versions
 			} );
 		} );
 
 		afterEach( () => {
 			sandbox.restore();
-			mockery.disable();
 		} );
 
 		it( 'returns all packages with changes', () => {
