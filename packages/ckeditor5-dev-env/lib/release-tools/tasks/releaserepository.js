@@ -5,77 +5,52 @@
 
 'use strict';
 
-const chalk = require( 'chalk' );
-const parseGithubUrl = require( 'parse-github-url' );
-const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const createGithubRelease = require( '../utils/creategithubrelease' );
-const getPackageJson = require( '../utils/getpackagejson' );
+const versionUtils = require( '../utils/versions' );
+const cli = require( '../utils/cli' );
+const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { getChangesForVersion } = require( '../utils/changelog' );
+const releaseRepositoryUtil = require( '../utils/releaserepository' );
+const validatePackageToRelease = require( '../utils/validatepackagetorelease' );
 
 /**
- * Releases the package defined in the current repository.
+ * Releases the package defined in the current work directory.
  *
- * This task bumps a version in package.json file and publish the changes on npm and/or GitHub.
+ * This task does not required any params because it will be passed by the user during the process.
  *
- * @param {Object} options
- * @param {String} options.token GitHub token used to authenticate.
- * @param {Boolean} options.skipGithub Whether to publish the package on Github.
- * @param {Boolean} options.skipNpm Whether to publish the package on Npm.
- * @param {String} options.version Version of the current release.
- * @param {String} options.changes Changelog entries for the current release.
  * @returns {Promise}
  */
-module.exports = function releaseRepository( options ) {
-	const cwd = process.cwd();
-	const log = logger();
+module.exports = function releaseRepository() {
+	const gitVersion = versionUtils.getLastTagFromGit();
+	const changelogVersion = versionUtils.getLastFromChangelog();
 
-	const packageJson = getPackageJson( cwd );
+	if ( gitVersion === changelogVersion ) {
+		return reject( 'Before starting the release process, you should generate the changelog.' );
+	}
 
-	log.info( '' );
-	log.info( chalk.bold.blue( `Creating release for "${ packageJson.name }".` ) );
+	const releaseTaskOptions = {
+		version: changelogVersion,
+		changes: getChangesForVersion( changelogVersion )
+	};
 
-	const promise = new Promise( ( resolve, reject ) => {
-		// Bump the version.
-		exec( `npm version ${ options.version } --message "Release: v${ options.version }."` );
-		exec( `git push origin master v${ options.version }` );
+	const errors = validatePackageToRelease( releaseTaskOptions );
 
-		if ( !options.skipNpm ) {
-			log.info( 'Publishing on NPM...' );
-			exec( 'npm publish --access=public' );
-		}
+	if ( errors.length ) {
+		const log = logger();
 
-		if ( !options.skipGithub ) {
-			log.info( 'Creating a GitHub release...' );
+		log.error( 'Unexpected errors occur:' );
+		errors.map( err => '- ' + err ).forEach( log.error.bind( log ) );
 
-			const repositoryInfo = parseGithubUrl(
-				exec( 'git remote get-url origin --push' ).trim()
-			);
+		return reject( 'Releasing has been aborted due to errors.' );
+	}
 
-			const releaseOptions = {
-				repositoryOwner: repositoryInfo.owner,
-				repositoryName: repositoryInfo.name,
-				version: `v${ options.version }`,
-				description: options.changes
-			};
+	return cli.configureReleaseOptions()
+		.then( userOptions => {
+			const options = Object.assign( {}, releaseTaskOptions, userOptions );
 
-			return createGithubRelease( options.token, releaseOptions )
-				.then( () => {
-					const url = `https://github.com/${ repositoryInfo.owner }/${ repositoryInfo.name }/releases/tag/v${ options.version }`;
-					log.info( `Created the release: ${ url }` );
-
-					resolve( options.version );
-				} )
-				.catch( reject );
-		}
-
-		resolve( options.version );
-	} );
-
-	return promise
-		.then( version => {
-			log.info( chalk.green( `Release "v${ version }" has been created and published.\n` ) );
+			return releaseRepositoryUtil( options );
 		} );
 };
 
-function exec( command ) {
-	return tools.shExec( command, { verbosity: 'error' } );
+function reject( message ) {
+	return Promise.reject( new Error( message ) );
 }

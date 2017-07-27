@@ -14,7 +14,7 @@ const generateChangelogForSinglePackage = require( './generatechangelogforsingle
 const getPackageJson = require( '../utils/getpackagejson' );
 const getPackagesToRelease = require( '../utils/getpackagestorelease' );
 const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
-const releaseRepository = require( './releaserepository' );
+const releaseRepository = require( '../utils/releaserepository' );
 const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
 const validatePackageToRelease = require( '../utils/validatepackagetorelease' );
 const { getChangesForVersion } = require( '../utils/changelog' );
@@ -27,9 +27,9 @@ const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted by the user.';
  * This task does:
  *   - finds paths to sub repositories,
  *   - filters packages which should be released,
- *   - updated version of dependencies between all released sub repositories,
- *   - generates changelog for packages that dependencies has changed,
- *   - collects required parameters for releases from user,
+ *   - updated version of dependencies between all released sub repositories (even if some packages will not be released),
+ *   - generates changelog for packages that dependencies have changed,
+ *   - collects required parameters for release from the user,
  *   - finally, releases the packages.
  *
  * @param {Object} options

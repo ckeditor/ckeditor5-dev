@@ -83,7 +83,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 			validatePackageToRelease: sandbox.stub()
 		};
 
-		mockery.registerMock( './releaserepository', stubs.releaseRepository );
+		mockery.registerMock( '../utils/releaserepository', stubs.releaseRepository );
 		mockery.registerMock( './generatechangelogforsinglepackage', stubs.generateChangelogForSinglePackage );
 		mockery.registerMock( '../utils/displayskippedpackages', stubs.displaySkippedPackages );
 		mockery.registerMock( '../utils/cli', stubs.cli );
