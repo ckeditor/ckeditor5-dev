@@ -34,7 +34,7 @@ const cli = {
 		};
 
 		return inquirer.prompt( [ confirmQuestion ] )
-			.then( answers => answers.confirm );
+			.then( answers => answers.confirm ? Promise.resolve() : Promise.reject() );
 	},
 
 	/**

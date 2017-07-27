@@ -47,21 +47,52 @@ module.exports = function releaseSubRepositories( options ) {
 		skipPackages: options.skipPackages || []
 	} );
 
+	// These variables will be set during the function's execution.
 	let packagesToRelease, dependencies;
 
 	// Errors are added to this array by the `validateRepositories` function.
 	const errors = [];
 
-	return Promise.resolve()
-		.then( () => getPackagesToRelease( pathsCollection.packages ) )
-		.then( displayAndConfirmReleasedPackages )
-		.then( prepareDependenciesVersions )
-		.then( filterPackagesToRelease )
-		.then( updateDependenciesForReleasedPackages )
-		.then( generateChangelogForPackagesThatDependenciesHaveUpdated )
-		.then( validateRepositories )
-		.then( getReleaseOptions )
-		.then( releasePackages )
+	return getPackagesToRelease( pathsCollection.packages )
+		.then( packages => {
+			packagesToRelease = packages;
+
+			displaySkippedPackages( pathsCollection.skipped );
+
+			if ( packagesToRelease.size === 0 ) {
+				throw new Error( 'None of the packages contains any changes since its last release. Aborting.' );
+			}
+
+			return cli.confirmRelease( packagesToRelease )
+				.catch( () => {
+					throw new Error( BREAK_RELEASE_MESSAGE );
+				} );
+		} )
+		.then( () => prepareDependenciesVersions() )
+		.then( dependenciesWithVersions => {
+			dependencies = dependenciesWithVersions;
+
+			// Filter out packages which won't be released.
+			for ( const pathToPackage of pathsCollection.packages ) {
+				const packageName = getPackageJson( pathToPackage ).name;
+
+				if ( !packagesToRelease.has( packageName ) ) {
+					pathsCollection.packages.delete( pathToPackage );
+				}
+			}
+
+			return updateDependenciesOfPackagesToRelease();
+		} )
+		.then( () => generateChangelogForPackagesThatDependenciesHaveUpdated() )
+		.then( () => validateRepositories() )
+		.then( () => {
+			if ( errors.length ) {
+				throw new Error( 'Releasing has been aborted due to errors.' );
+			}
+
+			return cli.configureReleaseOptions();
+		} )
+		.then( releaseOptions => releasePackages( releaseOptions ) )
 		.then( () => process.chdir( cwd ) )
 		.catch( err => {
 			process.chdir( cwd );
@@ -77,23 +108,7 @@ module.exports = function releaseSubRepositories( options ) {
 			process.exitCode = -1;
 		} );
 
-	function displayAndConfirmReleasedPackages( packages ) {
-		packagesToRelease = packages;
-
-		displaySkippedPackages( pathsCollection.skipped );
-
-		if ( packagesToRelease.size === 0 ) {
-			throw new Error( 'None of the packages contains any changes since its last release. Aborting.' );
-		}
-
-		return cli.confirmRelease( packagesToRelease );
-	}
-
-	function prepareDependenciesVersions( isConfirmed ) {
-		if ( !isConfirmed ) {
-			throw new Error( BREAK_RELEASE_MESSAGE );
-		}
-
+	function prepareDependenciesVersions() {
 		const dependencies = new Map();
 
 		for ( const [ packageName, { version } ] of packagesToRelease ) {
@@ -117,20 +132,7 @@ module.exports = function releaseSubRepositories( options ) {
 		return dependencies;
 	}
 
-	function filterPackagesToRelease( dependenciesWithVersions ) {
-		dependencies = dependenciesWithVersions;
-
-		// Filter out packages which won't be released.
-		for ( const pathToPackage of pathsCollection.packages ) {
-			const packageName = getPackageJson( pathToPackage ).name;
-
-			if ( !packagesToRelease.has( packageName ) ) {
-				pathsCollection.packages.delete( pathToPackage );
-			}
-		}
-	}
-
-	function updateDependenciesForReleasedPackages() {
+	function updateDependenciesOfPackagesToRelease() {
 		return executeOnPackages( pathsCollection.packages, repositoryPath => {
 			process.chdir( repositoryPath );
 
@@ -211,24 +213,16 @@ module.exports = function releaseSubRepositories( options ) {
 		} );
 	}
 
-	function getReleaseOptions() {
-		if ( errors.length ) {
-			throw new Error( 'Releasing has been aborted due to errors.' );
-		}
-
-		return cli.configureReleaseOptions();
-	}
-
-	function releasePackages( parsedOptions ) {
+	function releasePackages( releaseOptions ) {
 		return executeOnPackages( pathsCollection.packages, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
 			const releaseDetails = packagesToRelease.get( packageJson.name );
 			const releaseTaskOptions = {
-				token: parsedOptions.token,
-				skipGithub: parsedOptions.skipGithub,
-				skipNpm: parsedOptions.skipNpm,
+				token: releaseOptions.token,
+				skipGithub: releaseOptions.skipGithub,
+				skipNpm: releaseOptions.skipNpm,
 				version: releaseDetails.version,
 				changes: releaseDetails.changes
 			};
