@@ -55,7 +55,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			const errors = validatePackageToRelease( { changes: null, version: '1.0.0' } );
 
 			expect( errors.length ).to.equal( 1 );
-			expect( errors[ 0 ] ).to.equal( 'Cannot find changelog entry for version "1.0.0".' );
+			expect( errors[ 0 ] ).to.equal( 'Cannot find changelog entries for version "1.0.0".' );
 		} );
 
 		it( 'returns an array with errors if passed version is invalid', () => {
@@ -64,7 +64,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			const errors = validatePackageToRelease( { changes: 'Some changes.', version: null } );
 
 			expect( errors.length ).to.equal( 1 );
-			expect( errors[ 0 ] ).to.equal( 'Passed an invalid version.' );
+			expect( errors[ 0 ] ).to.equal( 'Passed an invalid version ("null").' );
 		} );
 
 		it( 'returns an array with errors if current branch is not "master"', () => {

@@ -37,8 +37,8 @@ module.exports = function releaseRepository() {
 	if ( errors.length ) {
 		const log = logger();
 
-		log.error( 'Unexpected errors occur:' );
-		errors.map( err => '- ' + err ).forEach( log.error.bind( log ) );
+		log.error( 'Unexpected errors occured:' );
+		errors.map( err => '* ' + err ).forEach( log.error.bind( log ) );
 
 		return reject( 'Releasing has been aborted due to errors.' );
 	}

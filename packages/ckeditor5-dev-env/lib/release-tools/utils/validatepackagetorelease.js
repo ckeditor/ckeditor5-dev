@@ -25,14 +25,14 @@ module.exports = function validatePackageToRelease( options ) {
 	}
 
 	if ( !options.version ) {
-		errors.push( 'Passed an invalid version.' );
+		errors.push( `Passed an invalid version ("${ options.version }").` );
 
 		return errors;
 	}
 
 	// Check whether the changelog entries are correct.
 	if ( !options.changes ) {
-		errors.push( `Cannot find changelog entry for version "${ options.version }".` );
+		errors.push( `Cannot find changelog entries for version "${ options.version }".` );
 	}
 
 	return errors;

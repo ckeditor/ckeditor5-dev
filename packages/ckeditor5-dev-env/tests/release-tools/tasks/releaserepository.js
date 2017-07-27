@@ -101,8 +101,8 @@ describe( 'dev-env/release-tools/utils', () => {
 							version: '1.0.0'
 						} );
 						expect( stubs.logger.error.calledTwice ).to.equal( true );
-						expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal( 'Unexpected errors occur:' );
-						expect( stubs.logger.error.secondCall.args[ 0 ] ).to.equal( '- Some error.' );
+						expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal( 'Unexpected errors occured:' );
+						expect( stubs.logger.error.secondCall.args[ 0 ] ).to.equal( '* Some error.' );
 					}
 				);
 		} );

@@ -199,7 +199,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 			if ( errorsForPackage.length ) {
 				errors.push( `## ${ packageJson.name }` );
-				errors.push( ...errorsForPackage.map( err => '- ' + err ) );
+				errors.push( ...errorsForPackage.map( err => '* ' + err ) );
 			}
 
 			return Promise.resolve();
