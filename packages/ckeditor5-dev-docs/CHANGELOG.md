@@ -1,6 +1,20 @@
 Changelog
 =========
 
+## [7.2.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.2.1...@ckeditor/ckeditor5-dev-docs@7.2.2) (2017-07-12)
+
+### Bug fixes
+
+* Nightly docs should be available in latest/ and <version>/ directories on ckeditor5.github.io. Closes [#242](https://github.com/ckeditor/ckeditor5-dev/issues/242). ([ff487ee](https://github.com/ckeditor/ckeditor5-dev/commit/ff487ee))
+
+
+## [7.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.2.0...@ckeditor/ckeditor5-dev-docs@7.2.1) (2017-07-11)
+
+### Bug fixes
+
+* Use a fork of gulp-jsdoc3 so we can harcode JSDoc version (to one with which our plugins work). See [#240](https://github.com/ckeditor/ckeditor5-dev/issues/240). ([2a494eb](https://github.com/ckeditor/ckeditor5-dev/commit/2a494eb))
+
+
 ## [7.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.1.1...@ckeditor/ckeditor5-dev-docs@7.2.0) (2017-06-20)
 
 ### Features

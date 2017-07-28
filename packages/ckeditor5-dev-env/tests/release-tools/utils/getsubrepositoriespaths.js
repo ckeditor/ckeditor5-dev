@@ -8,40 +8,32 @@
 const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-env/release-tools/utils', () => {
 	describe( 'getSubRepositoriesPaths()', () => {
-		let getSubRepositoriesPaths, sandbox, getPackageJsonStub,
-			getDirectoriesStub;
+		let getSubRepositoriesPaths, sandbox, getPackageJsonStub, getDirectoriesStub;
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
 
-			mockery.enable( {
-				useCleanCache: true,
-				warnOnReplace: false,
-				warnOnUnregistered: false
-			} );
-
 			getPackageJsonStub = sandbox.stub();
 			getDirectoriesStub = sandbox.stub();
 
-			mockery.registerMock( './getpackagejson', getPackageJsonStub );
-			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-				tools: {
-					getDirectories: getDirectoriesStub
-				}
-			} );
-
 			sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 
-			getSubRepositoriesPaths = require( '../../../lib/release-tools/utils/getsubrepositoriespaths' );
+			getSubRepositoriesPaths = proxyquire( '../../../lib/release-tools/utils/getsubrepositoriespaths', {
+				'./getpackagejson': getPackageJsonStub,
+				'@ckeditor/ckeditor5-dev-utils': {
+					tools: {
+						getDirectories: getDirectoriesStub
+					}
+				}
+			} );
 		} );
 
 		afterEach( () => {
 			sandbox.restore();
-			mockery.disable();
 		} );
 
 		it( 'returns all found packages', () => {

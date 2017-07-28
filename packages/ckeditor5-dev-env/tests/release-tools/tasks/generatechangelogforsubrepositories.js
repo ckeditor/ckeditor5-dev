@@ -37,22 +37,9 @@ describe( 'dev-env/release-tools/tasks', () => {
 			getSubRepositoriesPaths: sandbox.stub()
 		};
 
-		mockery.registerMock( '../utils/executeonpackages', ( pathsToPackages, functionToExecute ) => {
-			let promise = Promise.resolve();
-
-			for ( const repositoryPath of pathsToPackages ) {
-				promise = promise.then( () => functionToExecute( repositoryPath ) );
-			}
-
-			return promise;
-		} );
-
 		mockery.registerMock( './generatechangelogforsinglepackage', stubs.generateChangelogForSinglePackage );
-		mockery.registerMock( '../utils/getpackagejson', stubs.getPackageJson );
 		mockery.registerMock( '../utils/displayskippedpackages', stubs.displaySkippedPackages );
 		mockery.registerMock( '../utils/displaygeneratedchangelogs', stubs.displayGeneratedChangelogs );
-		mockery.registerMock( '../utils/getpackagestorelease', stubs.getPackagesToRelease );
-		mockery.registerMock( '../utils/getsubrepositoriespaths', stubs.getSubRepositoriesPaths );
 
 		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
 
@@ -61,7 +48,10 @@ describe( 'dev-env/release-tools/tasks', () => {
 				logger() {
 					return stubs.logger;
 				}
-			}
+			},
+			'../utils/getpackagejson': stubs.getPackageJson,
+			'../utils/getpackagestorelease': stubs.getPackagesToRelease,
+			'../utils/getsubrepositoriespaths': stubs.getSubRepositoriesPaths
 		} );
 	} );
 

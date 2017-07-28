@@ -10,10 +10,11 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 
 describe( 'dev-env/release-tools/utils', () => {
-	let cli, sandbox, questionItems;
+	let cli, sandbox, questionItems, hasConfirmedRelease;
 
 	describe( 'cli', () => {
 		beforeEach( () => {
+			hasConfirmedRelease = undefined;
 			sandbox = sinon.sandbox.create();
 			questionItems = [];
 
@@ -28,8 +29,14 @@ describe( 'dev-env/release-tools/utils', () => {
 					questionItems.push( ...questions );
 					const questionItem = questions[ 0 ];
 
+					if ( typeof hasConfirmedRelease != 'undefined' ) {
+						return Promise.resolve( { confirm: hasConfirmedRelease } );
+					}
+
 					// Returns suggested value as a user input.
-					return Promise.resolve( { version: questionItem.default } );
+					if ( questionItem.default ) {
+						return Promise.resolve( { version: questionItem.default } );
+					}
 				}
 			} );
 
@@ -87,6 +94,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 		describe( 'confirmRelease()', () => {
 			it( 'displays packages and their versions (current and proposed) to release', () => {
+				hasConfirmedRelease = true;
 				const packagesMap = new Map();
 
 				packagesMap.set( '@ckeditor/ckeditor5-engine', {
@@ -110,6 +118,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			} );
 
 			it( 'sorts the packages alphabetically', () => {
+				hasConfirmedRelease = true;
 				const packagesMap = new Map();
 
 				packagesMap.set( '@ckeditor/ckeditor5-list', {} );
@@ -136,6 +145,21 @@ describe( 'dev-env/release-tools/utils', () => {
 						expect( packagesAsArray[ 4 ] ).to.equal( '@ckeditor/ckeditor5-link' );
 						expect( packagesAsArray[ 5 ] ).to.equal( '@ckeditor/ckeditor5-list' );
 					} );
+			} );
+
+			it( 'rejects when user did not confirm the release', () => {
+				hasConfirmedRelease = false;
+				const packagesMap = new Map();
+
+				return cli.confirmRelease( packagesMap )
+					.then(
+						() => {
+							throw new Error( 'Supposed to be rejected.' );
+						},
+						() => {
+							expect( 'All is fine.' ).to.be.a( 'string' );
+						}
+					);
 			} );
 		} );
 	} );
