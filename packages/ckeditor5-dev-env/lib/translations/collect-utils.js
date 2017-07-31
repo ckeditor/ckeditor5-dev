@@ -165,20 +165,21 @@ const utils = {
 	_getTranslationCallsFromFile( filePath, fileContent ) {
 		const originalStrings = findOriginalStrings( fileContent );
 
-		return originalStrings.map( originalString => {
-			const contextMatch = originalString.match( /\[context: ([^\]]+)\]/ );
-			const sentenceMatch = originalString.match( /^[^[]+/ );
-			const packageMatch = filePath.match( /\/(ckeditor5-[^/]+)\// );
+		return originalStrings
+			.map( originalString => {
+				const contextMatch = originalString.match( /\[context: ([^\]]+)\]/ );
+				const sentenceMatch = originalString.match( /^[^[]+/ );
+				const packageMatch = filePath.match( /\/(ckeditor5-[^/]+)\// );
 
-			return {
-				filePath,
-				key: originalString,
-				package: packageMatch[ 1 ],
-				context: contextMatch ? contextMatch[ 1 ] : null,
-				sentence: sentenceMatch[ 0 ].trim(),
-			};
-		} )
-		.filter( translationCall => !!translationCall );
+				return {
+					filePath,
+					key: originalString,
+					package: packageMatch[ 1 ],
+					context: contextMatch ? contextMatch[ 1 ] : null,
+					sentence: sentenceMatch[ 0 ].trim(),
+				};
+			} )
+			.filter( translationCall => !!translationCall );
 	},
 
 	_stringifyTranslationObjects( translationObjects ) {
