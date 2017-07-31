@@ -9,6 +9,7 @@ const path = require( 'path' );
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'upload', () => {
 	let sandbox, stubs, upload, packageNames, serverResources, fileContents;
@@ -42,14 +43,15 @@ describe( 'upload', () => {
 		};
 
 		mockery.registerMock( './transifex-service', stubs.transifexService );
-		mockery.registerMock( 'fs', stubs.fs );
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-			logger: () => stubs.logger
-		} );
 
 		sandbox.stub( process, 'cwd' ).returns( path.join( 'workspace', 'ckeditor5' ) );
 
-		upload = require( '../../lib/translations/upload' );
+		upload = proxyquire( '../../lib/translations/upload', {
+			'@ckeditor/ckeditor5-dev-utils': {
+				logger: () => stubs.logger
+			},
+			'fs': stubs.fs
+		} );
 	} );
 
 	afterEach( () => {

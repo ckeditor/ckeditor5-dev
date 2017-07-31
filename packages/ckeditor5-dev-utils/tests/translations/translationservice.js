@@ -10,19 +10,13 @@ const sinon = require( 'sinon' );
 const expect = chai.expect;
 const path = require( 'path' );
 const proxyquire = require( 'proxyquire' );
-const mockery = require( 'mockery' );
 
 describe( 'translations', () => {
 	describe( 'TranslationService', () => {
-		const sandbox = sinon.sandbox.create();
-		let TranslationService, stubs, files, fileContents;
+		let TranslationService, stubs, files, fileContents, sandbox;
 
 		beforeEach( () => {
-			mockery.enable( {
-				useCleanCache: true,
-				warnOnReplace: false,
-				warnOnUnregistered: false
-			} );
+			sandbox = sinon.sandbox.create();
 
 			stubs = {
 				logger: {
@@ -36,16 +30,14 @@ describe( 'translations', () => {
 				}
 			};
 
-			mockery.registerMock( 'fs', stubs.fs );
-
 			TranslationService = proxyquire( '../../lib/translations/translationservice', {
 				'../logger': () => stubs.logger,
+				'fs': stubs.fs
 			} );
 		} );
 
 		afterEach( () => {
 			sandbox.restore();
-			mockery.disable();
 		} );
 
 		describe( 'constructor()', () => {

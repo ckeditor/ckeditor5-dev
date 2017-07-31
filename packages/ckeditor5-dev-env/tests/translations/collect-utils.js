@@ -8,22 +8,15 @@
 const path = require( 'path' );
 const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
 const glob = require( 'glob' );
 const fs = require( 'fs-extra' );
 const proxyquire = require( 'proxyquire' );
-const del = require( 'del' );
 
 describe( 'collect-utils', () => {
 	let sandbox, utils, stubs, originalStringMap;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
-
-		mockery.enable( {
-			warnOnReplace: false,
-			warnOnUnregistered: false
-		} );
 
 		stubs = {
 			logger: {
@@ -38,19 +31,19 @@ describe( 'collect-utils', () => {
 		};
 
 		sandbox.stub( process, 'cwd' ).returns( path.join( 'workspace', 'ckeditor5' ) );
-		sandbox.stub( del, 'sync' ).callsFake( stubs.delSync );
 
 		utils = proxyquire( '../../lib/translations/collect-utils', {
 			'@ckeditor/ckeditor5-dev-utils': {
 				logger: () => stubs.logger,
 				translations: stubs.translations
+			},
+			del: {
+				sync: stubs.delSync
 			}
 		} );
 	} );
 
 	afterEach( () => {
-		mockery.disable();
-		mockery.deregisterAll();
 		sandbox.restore();
 	} );
 

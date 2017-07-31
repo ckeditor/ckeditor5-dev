@@ -17,6 +17,7 @@ const mockery = require( 'mockery' );
 const mkdirp = require( 'mkdirp' );
 const fs = require( 'fs' );
 const rollup = require( 'rollup' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'bundle-tasks', () => {
 	let tasks, sandbox;
@@ -30,7 +31,11 @@ describe( 'bundle-tasks', () => {
 		mockery.registerMock( 'gulp-cssnano', () => {} );
 		mockery.registerMock( 'rollup-plugin-babel', config => config );
 
-		tasks = require( '../lib/tasks' );
+		tasks = proxyquire( '../lib/tasks', {
+			'@ckeditor/ckeditor5-dev-utils': {
+				tools, bundler
+			}
+		} );
 	} );
 
 	after( () => {
