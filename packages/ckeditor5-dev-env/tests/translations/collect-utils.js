@@ -37,8 +37,8 @@ describe( 'collect-utils', () => {
 			delSync: sandbox.spy()
 		};
 
-		sandbox.stub( process, 'cwd', () => path.join( 'workspace', 'ckeditor5' ) );
-		sandbox.stub( del, 'sync', stubs.delSync );
+		sandbox.stub( process, 'cwd' ).returns( path.join( 'workspace', 'ckeditor5' ) );
+		sandbox.stub( del, 'sync' ).callsFake( stubs.delSync );
 
 		utils = proxyquire( '../../lib/translations/collect-utils', {
 			'@ckeditor/ckeditor5-dev-utils': {
@@ -66,12 +66,12 @@ describe( 'collect-utils', () => {
 				't( \'Italic [context: italic style]\' );': [ 'Italic [context: italic style]' ]
 			};
 
-			const globSyncStub = sandbox.stub( glob, 'sync', () => [
+			const globSyncStub = sandbox.stub( glob, 'sync' ).returns( [
 				path.sep + path.join( 'ckeditor5-core', 'file1.js' ),
 				path.sep + path.join( 'ckeditor5-utils', 'file2.js' )
 			] );
 
-			const readFileStub = sandbox.stub( fs, 'readFileSync', fileName => fileContents[ fileName ] );
+			const readFileStub = sandbox.stub( fs, 'readFileSync' ).callsFake( fileName => fileContents[ fileName ] );
 
 			const translations = utils.collectTranslations();
 
@@ -112,9 +112,9 @@ describe( 'collect-utils', () => {
 				[ path2 ]: '{}'
 			};
 
-			const readDirStub = sandbox.stub( fs, 'readdirSync', () => ( [ 'ckeditor5-core', 'ckeditor5-utils' ] ) );
-			sandbox.stub( fs, 'existsSync', () => true );
-			sandbox.stub( fs, 'readFileSync', filePath => fileContents[ filePath ] );
+			const readDirStub = sandbox.stub( fs, 'readdirSync' ).returns( [ 'ckeditor5-core', 'ckeditor5-utils' ] );
+			sandbox.stub( fs, 'existsSync' ).returns( true );
+			sandbox.stub( fs, 'readFileSync' ).callsFake( filePath => fileContents[ filePath ] );
 
 			const contexts = utils.getContexts();
 
@@ -261,12 +261,14 @@ describe( 'collect-utils', () => {
 			const context = { content: { util: 'Util' } };
 			const poContent = utils.createPotFileContent( context );
 
+			/* eslint-disable indent */
 			expect( poContent ).to.be.equal(
 `msgctxt "Util"
 msgid "util"
 msgstr "util"
 `
 			);
+			/* eslint-enable indent */
 		} );
 	} );
 

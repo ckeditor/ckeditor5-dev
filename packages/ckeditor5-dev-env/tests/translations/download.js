@@ -47,7 +47,7 @@ describe( 'download', () => {
 			}
 		};
 
-		sandbox.stub( process, 'cwd', () => 'workspace' );
+		sandbox.stub( process, 'cwd' ).returns( 'workspace' );
 
 		mockery.registerMock( 'del', stubs.del );
 		mockery.registerMock( 'fs-extra', stubs.fs );
@@ -73,7 +73,6 @@ describe( 'download', () => {
 			{ slug: 'ckeditor5-ui' },
 		];
 
-		// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 		resourcesDetails = {
 			'ckeditor5-core': {
 				available_languages: [ {
@@ -100,8 +99,6 @@ describe( 'download', () => {
 			'ckeditor5-core-pl-content': {},
 			'ckeditor5-ui-en-content': { ui: 'ui' }
 		};
-
-		// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 
 		return download( { token: 'secretToken' } )
 			.then( () => {

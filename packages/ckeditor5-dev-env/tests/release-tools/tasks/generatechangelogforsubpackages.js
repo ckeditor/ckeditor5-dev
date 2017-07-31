@@ -59,7 +59,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 		mockery.registerMock( '../utils/versions', stubs.versionUtils );
 		mockery.registerMock( '../utils/getnewreleasetype', stubs.getNewReleaseType );
 
-		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
+		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
 
 		generateChangelogForSubPackages = proxyquire( '../../../lib/release-tools/tasks/generatechangelogforsubpackages', {
 			'@ckeditor/ckeditor5-dev-utils': {

@@ -20,7 +20,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			getPackageJsonStub = sandbox.stub();
 			getDirectoriesStub = sandbox.stub();
 
-			sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
+			sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
 
 			getSubRepositoriesPaths = proxyquire( '../../../lib/release-tools/utils/getsubrepositoriespaths', {
 				'./getpackagejson': getPackageJsonStub,

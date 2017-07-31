@@ -47,7 +47,7 @@ describe( 'upload', () => {
 			logger: () => stubs.logger
 		} );
 
-		sandbox.stub( process, 'cwd', () => path.join( 'workspace', 'ckeditor5' ) );
+		sandbox.stub( process, 'cwd' ).returns( path.join( 'workspace', 'ckeditor5' ) );
 
 		upload = require( '../../lib/translations/upload' );
 	} );

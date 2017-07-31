@@ -41,7 +41,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 		mockery.registerMock( '../utils/displayskippedpackages', stubs.displaySkippedPackages );
 		mockery.registerMock( '../utils/displaygeneratedchangelogs', stubs.displayGeneratedChangelogs );
 
-		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
+		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
 
 		generateChangelogForSubRepositories = proxyquire( '../../../lib/release-tools/tasks/generatechangelogforsubrepositories', {
 			'@ckeditor/ckeditor5-dev-utils': {
@@ -146,8 +146,9 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( chdirStub.secondCall.args[ 0 ] ).to.equal( '/tmp' );
 
 					expect( stubs.displaySkippedPackages.calledOnce ).to.equal( true );
+
 					expect( stubs.displaySkippedPackages.firstCall.args[ 0 ] ).to.deep.equal( new Set( [
-						'@ckeditor/ckeditor5-engine'
+						'/tmp/packages/ckeditor5-engine'
 					] ) );
 				} );
 		} );
@@ -179,7 +180,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 					expect( stubs.displaySkippedPackages.calledOnce ).to.equal( true );
 					expect( stubs.displaySkippedPackages.firstCall.args[ 0 ] ).to.deep.equal( new Set( [
-						'@ckeditor/ckeditor5-core'
+						'/tmp/packages/ckeditor5-core'
 					] ) );
 				} );
 		} );

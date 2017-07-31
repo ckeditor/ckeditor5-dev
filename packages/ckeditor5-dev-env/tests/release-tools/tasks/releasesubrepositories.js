@@ -89,7 +89,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 		mockery.registerMock( '../utils/cli', stubs.cli );
 		mockery.registerMock( '../utils/validatepackagetorelease', stubs.validatePackageToRelease );
 
-		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
+		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
 
 		releaseSubRepositories = proxyquire( '../../../lib/release-tools/tasks/releasesubrepositories', {
 			'@ckeditor/ckeditor5-dev-utils': {

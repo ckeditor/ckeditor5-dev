@@ -26,7 +26,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		it( 'does not update when package list is empty', () => {
 			let json = {};
 
-			sandbox.stub( tools, 'updateJSONFile', ( pathToJson, editJsonFunction ) => {
+			sandbox.stub( tools, 'updateJSONFile' ).callsFake( ( pathToJson, editJsonFunction ) => {
 				json = editJsonFunction( json );
 			} );
 
@@ -42,7 +42,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				[ 'package-a', '1.1.0' ]
 			] );
 
-			sandbox.stub( tools, 'updateJSONFile', ( pathToJson, editJsonFunction ) => {
+			sandbox.stub( tools, 'updateJSONFile' ).callsFake( ( pathToJson, editJsonFunction ) => {
 				expect( pathToJson ).to.equal( 'path/to/json/file' );
 
 				json = editJsonFunction( json );
@@ -72,7 +72,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				[ 'package-dev-b', '0.1.0' ]
 			] );
 
-			const updateJsonFileStub = sandbox.stub( tools, 'updateJSONFile', ( pathToJson, editJsonFunction ) => {
+			const updateJsonFileStub = sandbox.stub( tools, 'updateJSONFile' ).callsFake( ( pathToJson, editJsonFunction ) => {
 				expect( pathToJson ).to.equal( 'path/to/json/file' );
 
 				json = editJsonFunction( json );
@@ -103,7 +103,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				[ 'package-d', '1.2.3' ]
 			] );
 
-			sandbox.stub( tools, 'updateJSONFile', ( pathToJson, editJsonFunction ) => {
+			sandbox.stub( tools, 'updateJSONFile' ).callsFake( ( pathToJson, editJsonFunction ) => {
 				json = editJsonFunction( json );
 			} );
 
@@ -129,7 +129,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				[ 'package-d', '1.2.3' ]
 			] );
 
-			sandbox.stub( tools, 'updateJSONFile', ( pathToJson, editJsonFunction ) => {
+			sandbox.stub( tools, 'updateJSONFile' ).callsFake( ( pathToJson, editJsonFunction ) => {
 				json = editJsonFunction( json );
 			} );
 
