@@ -34,7 +34,7 @@ const filesToRecoverAfterTest = [
 ];
 
 describe( 'dev-env/release-tools/tasks', function() {
-	this.timeout( 10 * 1000 ); 	// 10 sec * 1000 ms
+	this.timeout( 10 * 1000 ); // 10 sec * 1000 ms
 
 	let releaseSubRepositories, sandbox, stubs;
 
