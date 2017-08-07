@@ -36,8 +36,8 @@ describe( 'runManualTests', () => {
 		mockery.registerMock( '../utils/manual-tests/removedir', spies.removeDir );
 		mockery.registerMock( '../utils/transformfileoptiontotestglob', spies.transformFileOptionToTestGlob );
 
-		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
-		sandbox.stub( process, 'cwd', () => 'workspace' );
+		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
+		sandbox.stub( process, 'cwd' ).returns( 'workspace' );
 
 		runManualTests = require( '../../lib/tasks/runmanualtests' );
 	} );

@@ -35,7 +35,7 @@ describe( 'compileHtmlFiles', () => {
 			},
 
 			path: {
-				join: sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) )
+				join: sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) )
 			},
 
 			logger: {
@@ -50,13 +50,13 @@ describe( 'compileHtmlFiles', () => {
 			},
 
 			gutil: {
-				colors: sandbox.stub( gutil, 'colors', {
+				colors: sandbox.stub( gutil, 'colors' ).value( {
 					cyan: text => text
 				} )
 			},
 
 			chokidar: {
-				watch: sandbox.stub( chokidar, 'watch', () => ( {
+				watch: sandbox.stub( chokidar, 'watch' ).callsFake( () => ( {
 					on: () => {
 					}
 				} ) )

@@ -34,7 +34,7 @@ describe( 'compileManualTestScripts', () => {
 				buildDir
 			} ) ),
 			getRelativeFilePath: sandbox.spy( x => x ),
-			pathJoin: sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) )
+			pathJoin: sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) )
 		};
 
 		mockery.registerMock( '../glob', stubs.glob );
