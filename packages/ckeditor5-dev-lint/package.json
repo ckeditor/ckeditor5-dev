@@ -15,7 +15,7 @@
     "chai": "^4.0.2",
     "guppy-pre-commit": "^0.4.0",
     "mockery": "^2.0.0",
-    "sinon": "^2.3.5",
+    "sinon": "^3.1.0",
     "through2": "^2.0.3",
     "vinyl": "^2.0.2"
   },
