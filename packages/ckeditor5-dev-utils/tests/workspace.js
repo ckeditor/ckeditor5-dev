@@ -60,7 +60,7 @@ describe( 'utils', () => {
 			it( 'should return only ckeditor5 directories', () => {
 				const workspacePath = '/workspace/path';
 				const sourceDirectories = [ 'tools', 'ckeditor5', 'ckeditor5-core', '.bin', 'ckeditor5-plugin-image' ];
-				sandbox.stub( tools, 'getDirectories' ).callsFake( () => sourceDirectories );
+				sandbox.stub( tools, 'getDirectories' ).returns( sourceDirectories );
 				const directories = ckeditor5Dirs.getDirectories( workspacePath );
 
 				expect( directories.length ).to.equal( 2 );
@@ -103,8 +103,8 @@ describe( 'utils', () => {
 			it( 'should return empty array if no dev directories were found - because of missing ckeditor5-* repos', () => {
 				const wrongRepositoryInfo = { name: 'plugins/plugin' };
 
-				sandbox.stub( ckeditor5Dirs, 'getDirectories' ).callsFake( () => sourceDirectories );
-				sandbox.stub( ckeditor5Dirs, 'getDependencies' ).callsFake( () => dependencies );
+				sandbox.stub( ckeditor5Dirs, 'getDirectories' ).returns( sourceDirectories );
+				sandbox.stub( ckeditor5Dirs, 'getDependencies' ).returns( dependencies );
 				sandbox.stub( git, 'parseRepositoryUrl' ).returns( wrongRepositoryInfo );
 
 				const directories = ckeditor5Dirs.getDevDirectories( workspacePath, packageJSONDependencies, ckeditor5Path );
@@ -116,8 +116,8 @@ describe( 'utils', () => {
 			it( 'should return empty array if no dev directories were found - because of missing ckeditor5-* dirs', () => {
 				const wrongDirectories = [ 'tools', 'ckeditor5', '.bin' ];
 
-				sandbox.stub( ckeditor5Dirs, 'getDirectories' ).callsFake( () => wrongDirectories );
-				sandbox.stub( ckeditor5Dirs, 'getDependencies' ).callsFake( () => dependencies );
+				sandbox.stub( ckeditor5Dirs, 'getDirectories' ).returns( wrongDirectories );
+				sandbox.stub( ckeditor5Dirs, 'getDependencies' ).returns( dependencies );
 				sandbox.stub( git, 'parseRepositoryUrl' ).returns( repositoryInfo );
 
 				const directories = ckeditor5Dirs.getDevDirectories( workspacePath, packageJSONDependencies, ckeditor5Path );
@@ -127,8 +127,8 @@ describe( 'utils', () => {
 			} );
 
 			it( 'should return only ckeditor5 directories in development mode', () => {
-				sandbox.stub( ckeditor5Dirs, 'getDirectories' ).callsFake( () => sourceDirectories );
-				sandbox.stub( ckeditor5Dirs, 'getDependencies' ).callsFake( () => dependencies );
+				sandbox.stub( ckeditor5Dirs, 'getDirectories' ).returns( sourceDirectories );
+				sandbox.stub( ckeditor5Dirs, 'getDependencies' ).returns( dependencies );
 				sandbox.stub( git, 'parseRepositoryUrl' ).returns( repositoryInfo );
 
 				const directories = ckeditor5Dirs.getDevDirectories( workspacePath, packageJSONDependencies, ckeditor5Path );
@@ -145,8 +145,8 @@ describe( 'utils', () => {
 			} );
 
 			it( 'should return only ckeditor5 directories in development mode, including root directory', () => {
-				sandbox.stub( ckeditor5Dirs, 'getDirectories' ).callsFake( () => sourceDirectories );
-				sandbox.stub( ckeditor5Dirs, 'getDependencies' ).callsFake( () => dependencies );
+				sandbox.stub( ckeditor5Dirs, 'getDirectories' ).returns( sourceDirectories );
+				sandbox.stub( ckeditor5Dirs, 'getDependencies' ).returns( dependencies );
 				sandbox.stub( git, 'parseRepositoryUrl' ).returns( repositoryInfo );
 				const includeRoot = true;
 

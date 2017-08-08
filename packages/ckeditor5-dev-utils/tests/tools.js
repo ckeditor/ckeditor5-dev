@@ -174,7 +174,7 @@ describe( 'utils', () => {
 			it( 'should get directories in specified path', () => {
 				const fs = require( 'fs' );
 				const directories = [ 'dir1', 'dir2', 'dir3' ];
-				const readdirSyncStub = sandbox.stub( fs, 'readdirSync' ).callsFake( () => directories );
+				const readdirSyncStub = sandbox.stub( fs, 'readdirSync' ).returns( directories );
 				const isDirectoryStub = sandbox.stub( tools, 'isDirectory' ).returns( true );
 				const dirPath = 'path';
 
@@ -193,7 +193,7 @@ describe( 'utils', () => {
 
 			it( 'should return true if path points to directory', () => {
 				const fs = require( 'fs' );
-				const statSyncStub = sandbox.stub( fs, 'statSync' ).callsFake( () => ( { isDirectory: () => true } ) );
+				const statSyncStub = sandbox.stub( fs, 'statSync' ).returns( { isDirectory: () => true } );
 				const path = 'path';
 
 				const result = tools.isDirectory( path );
@@ -205,7 +205,7 @@ describe( 'utils', () => {
 
 			it( 'should return false if path does not point to directory', () => {
 				const fs = require( 'fs' );
-				const statSyncStub = sandbox.stub( fs, 'statSync' ).callsFake( () => ( { isDirectory: () => false } ) );
+				const statSyncStub = sandbox.stub( fs, 'statSync' ).returns( { isDirectory: () => false } );
 				const path = 'path';
 
 				const result = tools.isDirectory( path );
@@ -233,7 +233,7 @@ describe( 'utils', () => {
 
 			it( 'should return true if path points to file', () => {
 				const fs = require( 'fs' );
-				const statSyncStub = sandbox.stub( fs, 'statSync' ).callsFake( () => ( { isFile: () => true } ) );
+				const statSyncStub = sandbox.stub( fs, 'statSync' ).returns( { isFile: () => true } );
 				const path = 'path';
 
 				const result = tools.isFile( path );
@@ -245,7 +245,7 @@ describe( 'utils', () => {
 
 			it( 'should return false if path does not point to directory', () => {
 				const fs = require( 'fs' );
-				const statSyncStub = sandbox.stub( fs, 'statSync' ).callsFake( () => ( { isFile: () => false } ) );
+				const statSyncStub = sandbox.stub( fs, 'statSync' ).returns( { isFile: () => false } );
 				const path = 'path';
 
 				const result = tools.isFile( path );
@@ -293,7 +293,7 @@ describe( 'utils', () => {
 			it( 'should read, update and save JSON file', () => {
 				const path = 'path/to/file.json';
 				const fs = require( 'fs' );
-				const readFileStub = sandbox.stub( fs, 'readFileSync' ).callsFake( () => '{}' );
+				const readFileStub = sandbox.stub( fs, 'readFileSync' ).returns( '{}' );
 				const modifiedJSON = { modified: true };
 				const writeFileStub = sandbox.stub( fs, 'writeFileSync' );
 
@@ -350,7 +350,7 @@ describe( 'utils', () => {
 			it( 'should return null if no name in package.json is provided', () => {
 				sandbox.stub( tools, 'isFile' ).returns( true );
 				const fs = require( 'fs' );
-				sandbox.stub( fs, 'readFileSync' ).returns( JSON.stringify( { } ) );
+				sandbox.stub( fs, 'readFileSync' ).returns( JSON.stringify( {} ) );
 
 				const result = tools.readPackageName( modulePath );
 
@@ -450,9 +450,7 @@ describe( 'utils', () => {
 
 			it( 'should be defined', () => expect( tools.getGitUrlFromNpm ).to.be.a( 'function' ) );
 			it( 'should call npm view command', () => {
-				const shExecStub = sandbox.stub( tools, 'shExec' ).callsFake( () => {
-					return JSON.stringify( repository );
-				} );
+				const shExecStub = sandbox.stub( tools, 'shExec' ).returns( JSON.stringify( repository ) );
 				const url = tools.getGitUrlFromNpm( moduleName );
 
 				expect( shExecStub.calledOnce ).to.equal( true );
