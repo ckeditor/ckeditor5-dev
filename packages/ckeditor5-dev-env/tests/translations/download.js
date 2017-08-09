@@ -9,6 +9,7 @@ const sinon = require( 'sinon' );
 const path = require( 'path' );
 const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'download', () => {
 	let sandbox, stubs, download, resources, resourcesDetails, translations, fileContents;
@@ -47,17 +48,17 @@ describe( 'download', () => {
 			}
 		};
 
-		sandbox.stub( process, 'cwd', () => 'workspace' );
+		sandbox.stub( process, 'cwd' ).returns( 'workspace' );
 
-		mockery.registerMock( 'del', stubs.del );
-		mockery.registerMock( 'fs-extra', stubs.fs );
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-			translations: stubs.translationUtils,
-			logger: () => stubs.logger
+		download = proxyquire( '../../lib/translations/download', {
+			'@ckeditor/ckeditor5-dev-utils': {
+				translations: stubs.translationUtils,
+				logger: () => stubs.logger
+			},
+			'fs-extra': stubs.fs,
+			'del': stubs.del,
+			'./transifex-service': stubs.transifexService
 		} );
-		mockery.registerMock( './transifex-service', stubs.transifexService );
-
-		download = require( '../../lib/translations/download' );
 	} );
 
 	afterEach( () => {
@@ -73,7 +74,6 @@ describe( 'download', () => {
 			{ slug: 'ckeditor5-ui' },
 		];
 
-		// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 		resourcesDetails = {
 			'ckeditor5-core': {
 				available_languages: [ {
@@ -100,8 +100,6 @@ describe( 'download', () => {
 			'ckeditor5-core-pl-content': {},
 			'ckeditor5-ui-en-content': { ui: 'ui' }
 		};
-
-		// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 
 		return download( { token: 'secretToken' } )
 			.then( () => {

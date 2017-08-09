@@ -27,8 +27,8 @@ describe( 'bundle-utils', () => {
 
 	describe( 'maybeCleanDir()', () => {
 		it( 'should clean directory if dir is provided', () => {
-			const cleanStub = sandbox.stub( tools, 'clean', () => Promise.resolve() );
-			sandbox.stub( path, 'join', x => x );
+			const cleanStub = sandbox.stub( tools, 'clean' ).resolves();
+			sandbox.stub( path, 'join' ).callsFake( x => x );
 
 			const promise = utils.maybeCleanDir( 'dir' );
 			sinon.assert.calledWithExactly( cleanStub, 'dir', '' );
@@ -37,8 +37,8 @@ describe( 'bundle-utils', () => {
 		} );
 
 		it( 'should return resolved promise if no dir is provided', () => {
-			const cleanStub = sandbox.stub( tools, 'clean', () => Promise.resolve() );
-			sandbox.stub( path, 'join', x => x );
+			const cleanStub = sandbox.stub( tools, 'clean' ).resolves();
+			sandbox.stub( path, 'join' ).callsFake( x => x );
 
 			const promise = utils.maybeCleanDir();
 			sinon.assert.notCalled( cleanStub );
@@ -49,7 +49,7 @@ describe( 'bundle-utils', () => {
 
 	describe( 'cleanFiles()', () => {
 		it( 'should clean every file with specific filename', () => {
-			sandbox.stub( tools, 'clean', ( path, filePattern ) => {
+			sandbox.stub( tools, 'clean' ).callsFake( ( path, filePattern ) => {
 				return { path, filePattern };
 			} );
 
@@ -64,9 +64,7 @@ describe( 'bundle-utils', () => {
 		it( 'should return file size in bytes', () => {
 			const filePath = 'path/to/file';
 			const size = 1337;
-			const statSyncMock = sandbox.stub( fs, 'statSync', () => {
-				return { size };
-			} );
+			const statSyncMock = sandbox.stub( fs, 'statSync' ).returns( { size } );
 
 			expect( utils.getFileSize( filePath ) ).to.be.equal( size );
 			sinon.assert.calledWithExactly( statSyncMock, filePath );
@@ -78,8 +76,8 @@ describe( 'bundle-utils', () => {
 			const filePath = 'path/to/file';
 			const size = 1337;
 			const fileContent = 'some string';
-			const readFileSyncMock = sandbox.stub( fs, 'readFileSync', () => fileContent );
-			const gzipSizeMock = sandbox.stub( gzipSize, 'sync', () => 1337 );
+			const readFileSyncMock = sandbox.stub( fs, 'readFileSync' ).returns( fileContent );
+			const gzipSizeMock = sandbox.stub( gzipSize, 'sync' ).returns( 1337 );
 
 			expect( utils.getGzippedFileSize( filePath ) ).to.be.equal( size );
 			sinon.assert.calledWithExactly( readFileSyncMock, filePath );
@@ -94,8 +92,8 @@ describe( 'bundle-utils', () => {
 			size = 1337;
 			gzippedSize = 543;
 
-			sandbox.stub( utils, 'getFileSize', () => size );
-			sandbox.stub( utils, 'getGzippedFileSize', () => gzippedSize );
+			sandbox.stub( utils, 'getFileSize' ).returns( size );
+			sandbox.stub( utils, 'getGzippedFileSize' ).returns( gzippedSize );
 		} );
 
 		it( 'should returns an array with two elements', () => {

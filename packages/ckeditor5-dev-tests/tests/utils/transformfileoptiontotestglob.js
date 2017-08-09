@@ -17,7 +17,7 @@ describe( 'dev-tests/utils', () => {
 
 		transformFileOptionToTestGlob = require( '../../lib/utils/transformfileoptiontotestglob' );
 
-		sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) );
+		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
 		sandbox.stub( process, 'cwd' ).returns( '/workspace' );
 	} );
 

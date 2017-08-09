@@ -99,7 +99,7 @@ module.exports = class TranslationService {
 	// Loads translations from the po file.
 	_loadPoFile( pathToPoFile ) {
 		if ( !fs.existsSync( pathToPoFile ) ) {
-			console.warn( `PO file doesn't exist under the path: ${ pathToPoFile }.` );
+			logger.warning( `PO file doesn't exist under the path: ${ pathToPoFile }.` );
 
 			return;
 		}

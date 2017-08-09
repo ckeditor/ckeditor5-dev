@@ -34,7 +34,7 @@ describe( 'compileManualTestScripts', () => {
 				buildDir
 			} ) ),
 			getRelativeFilePath: sandbox.spy( x => x ),
-			pathJoin: sandbox.stub( path, 'join', ( ...chunks ) => chunks.join( '/' ) )
+			pathJoin: sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) )
 		};
 
 		mockery.registerMock( '../glob', stubs.glob );
@@ -105,8 +105,7 @@ describe( 'compileManualTestScripts', () => {
 				expect( stubs.getRelativeFilePath.secondCall.args[ 0 ] )
 					.to.equal( 'ckeditor5-build-classic/tests/manual/ckeditor.compcat.js' );
 				expect( stubs.getRelativeFilePath.thirdCall.args[ 0 ] )
-					.to.equal( 'ckeditor5-editor-classic/tests/manual/classic.js'
-				);
+					.to.equal( 'ckeditor5-editor-classic/tests/manual/classic.js' );
 			} );
 	} );
 

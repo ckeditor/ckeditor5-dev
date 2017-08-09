@@ -7,7 +7,7 @@
 
 const sinon = require( 'sinon' );
 const expect = require( 'chai' ).expect;
-const mockery = require( 'mockery' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-lint/utils', () => {
 	let getGitIgnore, sandbox, stubs;
@@ -15,26 +15,19 @@ describe( 'dev-lint/utils', () => {
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
 
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
-		} );
-
 		stubs = {
 			fs: {
 				readFileSync: sandbox.stub()
 			}
 		};
 
-		mockery.registerMock( 'fs', stubs.fs );
-
-		getGitIgnore = require( '../../lib/utils/getgitignore' );
+		getGitIgnore = proxyquire( '../../lib/utils/getgitignore', {
+			fs: stubs.fs
+		} );
 	} );
 
 	afterEach( () => {
 		sandbox.restore();
-		mockery.disable();
 	} );
 
 	describe( 'getGitIgnore()', () => {
