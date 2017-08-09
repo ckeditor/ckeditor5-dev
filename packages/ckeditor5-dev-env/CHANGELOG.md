@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [5.1.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.2...@ckeditor/ckeditor5-dev-env@5.1.4) (2017-08-09)
+
+### Other changes
+
+* The release process will now be error-proof by performing validation before starting taking any actions. Closes [#99](https://github.com/ckeditor/ckeditor5-dev/issues/99). Closes [#147](https://github.com/ckeditor/ckeditor5-dev/issues/147).  Closes: [#149](https://github.com/ckeditor/ckeditor5-dev/issues/149). Closes: [#151](https://github.com/ckeditor/ckeditor5-dev/issues/151). ([330a8dc](https://github.com/ckeditor/ckeditor5-dev/commit/330a8dc))
+
+
 ## [5.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.0...@ckeditor/ckeditor5-dev-env@5.1.2) (2017-06-14)
 
 Internal changes only (updated dependencies, documentation, etc.).
