@@ -35,6 +35,7 @@ const BASIC_TYPES = [
 	'ClientRect',
 
 	// Web APIs
+	'Window',
 	'File',
 	'DataTransfer'
 ];
