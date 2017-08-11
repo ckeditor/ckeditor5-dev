@@ -151,7 +151,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 				packages: 'packages'
 			};
 
-			stubs.cli.confirmRelease.returns( Promise.reject() );
+			stubs.cli.confirmRelease.returns( Promise.resolve( false ) );
 
 			makeCommit( 'alpha', 'Feature: This is an initial commit.' );
 			makeChangelog( 'alpha', [
@@ -209,7 +209,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 				]
 			};
 
-			stubs.cli.confirmRelease.returns( Promise.resolve() );
+			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
 
 			makeCommit( 'delta', 'Feature: Introduced another package. Yay!' );
 			makeChangelog( 'delta', [
@@ -249,7 +249,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 				packages: 'packages'
 			};
 
-			stubs.cli.confirmRelease.returns( Promise.resolve() );
+			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
 
 			makeCommit( 'alpha', 'Feature: This is an initial commit.' );
 			makeChangelog( 'alpha', [
@@ -355,7 +355,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 			].join( '\n' ) );
 			makeCommit( 'beta', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
 
-			stubs.cli.confirmRelease.returns( Promise.resolve() );
+			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
 
 			stubs.generateChangelogForSinglePackage.onFirstCall()
 				.returns( new Promise( resolve => {
@@ -489,7 +489,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 			].join( '\n' ) );
 			makeCommit( 'beta', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
 
-			stubs.cli.confirmRelease.returns( Promise.resolve() );
+			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
 
 			stubs.generateChangelogForSinglePackage.onFirstCall()
 				.returns( new Promise( resolve => {

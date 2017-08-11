@@ -65,8 +65,10 @@ module.exports = function releaseSubRepositories( options ) {
 			}
 
 			return cli.confirmRelease( packagesToRelease )
-				.catch( () => {
-					throw new Error( BREAK_RELEASE_MESSAGE );
+				.then( isConfirmed => {
+					if ( !isConfirmed ) {
+						throw new Error( BREAK_RELEASE_MESSAGE );
+					}
 				} );
 		} )
 		.then( () => prepareDependenciesVersions() )
