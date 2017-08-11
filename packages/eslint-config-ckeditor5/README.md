@@ -14,3 +14,7 @@ Configure ESLint with a `.eslintrc` file using the following contents:
 	"extends": "ckeditor5"
 }
 ```
+
+## Changelog
+
+The changes are described in the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/eslint-config-ckeditor5/CHANGELOG.md) file.
