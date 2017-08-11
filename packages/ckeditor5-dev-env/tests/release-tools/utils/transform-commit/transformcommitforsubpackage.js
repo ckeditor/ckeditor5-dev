@@ -82,6 +82,28 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( stubs.transformCommitForSubRepository.called ).to.equal( false );
 		} );
 
+		it( 'rejects the "Publish" commit', () => {
+			const commit = {
+				type: null,
+				subject: null,
+				pullRequestId: null,
+				merge: null,
+				header: 'Publish',
+				body: ' - @ckeditor/ckeditor5-dev-env@5.1.4\n' +
+					' - ckeditor5-dev@0.0.22',
+				footer: null,
+				notes: [],
+				references: [],
+				mentions: [],
+				revert: null,
+				hash: '55a067502afcf26af25522b7a49b4245a16de16d'
+			};
+
+			expect( transformCommitForSubPackage( commit, context ) ).to.equal( undefined );
+			expect( stubs.getChangedFilesForCommit.called ).to.equal( false );
+			expect( stubs.transformCommitForSubRepository.called ).to.equal( false );
+		} );
+
 		it( 'accepts the commit when it has changed files in proper and other packages', () => {
 			const commit = {
 				hash: 'abcd123'
