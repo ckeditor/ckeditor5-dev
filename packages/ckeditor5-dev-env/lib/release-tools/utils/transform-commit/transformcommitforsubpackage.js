@@ -20,6 +20,11 @@ const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
  * @returns {Commit}
  */
 module.exports = function transformCommitForSubPackage( commit, context ) {
+	// Skip the Lerna "Publish" commit.
+	if ( !commit.type && commit.header === 'Publish' && commit.body ) {
+		return;
+	}
+
 	const files = getChangedFilesForCommit( commit.hash );
 
 	if ( !files.length ) {
