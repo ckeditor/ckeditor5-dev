@@ -7,7 +7,7 @@ More information about development tools packages can be found at the following 
 
 ## Changelog
 
-The changes are described in the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-docs/CHANGELOG.md) file.
+See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-docs/CHANGELOG.md) file.
 
 ## License
 

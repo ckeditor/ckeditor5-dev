@@ -98,7 +98,7 @@ $ gulp test --files='!(engine|ui)'
 
 ## Changelog
 
-The changes are described in the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-tests/CHANGELOG.md) file.
+See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-tests/CHANGELOG.md) file.
 
 ## License
 

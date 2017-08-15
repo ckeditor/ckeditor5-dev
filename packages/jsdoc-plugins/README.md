@@ -173,4 +173,4 @@ It also adds additional properties to doclets of classes, interfaces and mixins 
 
 ## Changelog
 
-The changes are described in the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/jsdoc-plugins/CHANGELOG.md) file.
+See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/jsdoc-plugins/CHANGELOG.md) file.

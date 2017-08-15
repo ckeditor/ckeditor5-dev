@@ -39,7 +39,7 @@ const ckeditor5Lint = require( '@ckeditor/ckeditor5-dev-lint' )( {
 
 ## Changelog
 
-The changes are described in the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-lint/CHANGELOG.md) file.
+See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-lint/CHANGELOG.md) file.
 
 ## License
 

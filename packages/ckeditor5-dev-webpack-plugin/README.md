@@ -13,7 +13,7 @@ TODO
 
 ## Changelog
 
-The changes are described in the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-webpack-plugin/CHANGELOG.md) file.
+See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-webpack-plugin/CHANGELOG.md) file.
 
 ## License
 
