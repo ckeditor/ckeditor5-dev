@@ -33,6 +33,7 @@ const BASIC_TYPES = [
 	'Selection',
 	'Event',
 	'ClientRect',
+	'Window',
 
 	// Web APIs
 	'File',
