@@ -13,55 +13,56 @@ More information about development tools packages can be found at the following 
 npm i --save-dev @ckeditor/ckeditor5-dev-env
 ```
 
-Then add the tasks to `gulpfile.js`:
+Then add tasks to your `gulpfile.js`:
 
 ```js
 // Generate changelog for the current package.
 gulp.task( 'changelog:self', () => {
-	return require( '@ckeditor/ckeditor5-dev-env' ).generateChangelog();
+	return require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForSinglePackage();
 } );
 
-// Generate changelog for all dependencies.
+// Generate changelog for all dependencies (repository using multiple repositories).
 gulp.task( 'changelog:packages', () => {
-	return require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForDependencies( getReleaseToolsOptions() );
+	return require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForSubRepositories( /* options */ );
+} );
+
+// Generate changelog for all packages (repository contains multiple packages).
+gulp.task( 'changelog:packages', () => {
+	return require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForSubPackages( /* options */ );
 } );
 
 // Create release for the current package.
 gulp.task( 'release:self', () => {
-	return require( '@ckeditor/ckeditor5-dev-env' ).createRelease( getReleaseToolsOptions() );
+	return require( '@ckeditor/ckeditor5-dev-env' ).releaseRepository();
 } );
 
 // Create release for all dependencies.
 gulp.task( 'release:packages', () => {
-	return require( '@ckeditor/ckeditor5-dev-env' ).releaseDependencies( getReleaseToolsOptions() );
+	return require( '@ckeditor/ckeditor5-dev-env' ).releaseSubRepositories( /* options */ );
 } );
-
-function getReleaseToolsOptions() {
-	return require( 'ckeditor5-dev/packages/ckeditor5-dev-env/lib/release-tools/utils/getoptions' )();
-}
 ```
 
 ### Generating changelog
 
-This tool can generate a changelog file based on commits in the repository. It can also propose what should be the next release (according to the [SemVer](http://semver.org)).
+This tool can generate a changelog file based on commits in the repository. It can also propose what should be the next release version (according to [SemVer](http://semver.org)).
 
 Read more about the [git commit message convention](https://github.com/ckeditor/ckeditor5-design/wiki/Git-commit-message-convention) implemented by this tool.
 
-### Creating a release
+### Creating a release for multiple repositories
 
-Required parameters:
+**Note:** Before running the release task you need to generate the changelog for changes in the version to be released.
 
-* `token` - a GitHub token used for creating a new release on GitHub.
+The process implemented by the tool:
 
-Process:
+1. Read a new release version from the changelog (the last header),
+1. Filter out packages which won't be released (no changes or dependencies has not changed),
+1. Update new versions of packages in `package.json` for all released packages,
+1. Commit these changes as `Release: vX.Y.Z.`,
+1. Create a tag `vX.Y.Z`,
+1. Push the commit and tag,
+1. Optional: create a [GitHub release](https://help.github.com/articles/creating-releases/) or/and [NPM](https://docs.npmjs.com/getting-started/publishing-npm-packages).
 
-* Bump up the version in `package.json` and version of all dependencies.
-* Commit these changes as `Release: vX.Y.Z.`,
-* Create a tag `vX.Y.Z`,
-* Push the commit and tag,
-* Create a [GitHub release](https://help.github.com/articles/creating-releases/).
-
-Notes for the release are taken from the changelog.
+	Notes for the release are taken from the changelog.
 
 ## Changelog
 
