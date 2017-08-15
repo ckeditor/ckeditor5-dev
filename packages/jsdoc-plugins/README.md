@@ -170,3 +170,7 @@ It also adds additional properties to doclets of classes, interfaces and mixins 
 * `implementsNested` - array of longnames of implemented interfaces,
 * `mixesNested` - array of longnames of mixed mixins,
 * `descendants` - array of longnames of entities which implement, mix or extend the doclet.
+
+## Changelog
+
+See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/jsdoc-plugins/CHANGELOG.md) file.

@@ -96,6 +96,10 @@ $ gulp test --files='!(engine|ui)'
 | `*` | `node_modules/ckeditor5-*/tests/**/*.js` | all installed package's tests |
 | `/` | `tests/**/*.js` | current package's tests only |
 
+## Changelog
+
+See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-tests/CHANGELOG.md) file.
+
 ## License
 
 Licensed under the GPL, LGPL and MPL licenses, at your choice. For full details about the license, please check the `LICENSE.md` file.

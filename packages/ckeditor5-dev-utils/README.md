@@ -43,6 +43,10 @@ errorLog.warning( 'Message.' );
 errorLog.error( 'Message.' );
 ```
 
+## Changelog
+
+See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-utils/CHANGELOG.md) file.
+
 ## License
 
 Licensed under the GPL, LGPL and MPL licenses, at your choice. For full details about the license, please check the `LICENSE.md` file.
