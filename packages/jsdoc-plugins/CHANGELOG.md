@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.5.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.5.0...@ckeditor/jsdoc-plugins@1.5.2) (2017-08-16)
+
+### Other changes
+
+* Added Window type to JSDoc validator. Closes [#250](https://github.com/ckeditor/ckeditor5-dev/issues/250). ([fdec4a0](https://github.com/ckeditor/ckeditor5-dev/commit/fdec4a0))
+
+
 ## [1.5.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.4.0...@ckeditor/jsdoc-plugins@1.5.0) (2017-06-20)
 
 ### Features

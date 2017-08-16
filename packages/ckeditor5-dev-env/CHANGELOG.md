@@ -1,6 +1,14 @@
 Changelog
 =========
 
+## [5.1.5](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.4...@ckeditor/ckeditor5-dev-env@5.1.5) (2017-08-16)
+
+### Bug fixes
+
+* "Publish" commits will not be parsed when generating the changelog. Closes [#220](https://github.com/ckeditor/ckeditor5-dev/issues/220). ([7501a6b](https://github.com/ckeditor/ckeditor5-dev/commit/7501a6b))
+* `cli.confirmRelease()` shouldn't reject the promise if the user did not confirm the process. Closes [#245](https://github.com/ckeditor/ckeditor5-dev/issues/245). ([d57f9c8](https://github.com/ckeditor/ckeditor5-dev/commit/d57f9c8))
+
+
 ## [5.1.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.2...@ckeditor/ckeditor5-dev-env@5.1.4) (2017-08-09)
 
 ### Other changes
