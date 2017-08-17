@@ -124,15 +124,15 @@ describe( 'JSDoc relation-fixer buildrelations module', () => {
 		const testedClass = newDoclets.find( d => d.longname === 'classB' );
 		const testedInterface = newDoclets.find( d => d.longname === 'interfaceB' );
 
-		// removing duplicates
+		// Removing duplicates.
 		const expectedImplementsNested = Array.from( new Set( testedClass.implementsNested ) );
 		const expectedMixesNested = Array.from( new Set( testedClass.mixesNested ) );
 		const expectedAugmentsNested = Array.from( new Set( testedClass.augmentsNested ) );
 		const expectedDescendants = Array.from( new Set( testedInterface.descendants ) );
 
-		expect( testedClass ).to.have.property( 'implementsNested' ).and.to.eql( expectedImplementsNested );
-		expect( testedClass ).to.have.property( 'mixesNested' ).and.to.eql( expectedMixesNested );
-		expect( testedClass ).to.have.property( 'augmentsNested' ).and.to.eql( expectedAugmentsNested );
-		expect( testedInterface ).to.have.property( 'descendants' ).and.to.eql( expectedDescendants );
+		expect( testedClass ).to.have.property( 'implementsNested' ).and.to.deep.equal( expectedImplementsNested );
+		expect( testedClass ).to.have.property( 'mixesNested' ).and.to.deep.equal( expectedMixesNested );
+		expect( testedClass ).to.have.property( 'augmentsNested' ).and.to.deep.equal( expectedAugmentsNested );
+		expect( testedInterface ).to.have.property( 'descendants' ).and.to.deep.equal( expectedDescendants );
 	} );
 } );

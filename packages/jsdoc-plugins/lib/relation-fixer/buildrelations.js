@@ -39,7 +39,7 @@ function addRelationArrays( originalDoclets ) {
 			relations: [ 'augments', 'implements', 'mixes' ]
 		} );
 
-		// remove duplicates
+		// Remove duplicates.
 		for ( const relation of Object.keys( related ) ) {
 			related[ relation ] = Array.from( new Set( related[ relation ] ) );
 		}
