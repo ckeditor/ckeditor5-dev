@@ -1,6 +1,10 @@
 Changelog
 =========
 
+## [3.1.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-lint@3.1.0...@ckeditor/ckeditor5-dev-lint@3.1.3) (2017-08-18)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
 ## [3.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-lint@3.0.0...@ckeditor/ckeditor5-dev-lint@3.1.0) (2017-06-15)
 
 ### Features

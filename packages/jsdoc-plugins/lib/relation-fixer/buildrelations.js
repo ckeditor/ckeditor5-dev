@@ -39,11 +39,16 @@ function addRelationArrays( originalDoclets ) {
 			relations: [ 'augments', 'implements', 'mixes' ]
 		} );
 
+		// Remove duplicates.
+		for ( const relation of Object.keys( related ) ) {
+			related[ relation ] = Array.from( new Set( related[ relation ] ) );
+		}
+
 		Object.assign( d, related );
 	} );
 
 	subjectDoclets.forEach( d => {
-		const descendants = getDescendants( subjectDoclets, d );
+		const descendants = Array.from( new Set( getDescendants( subjectDoclets, d ) ) );
 
 		Object.assign( d, { descendants } );
 	} );

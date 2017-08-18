@@ -1,6 +1,10 @@
 Changelog
 =========
 
+## [5.0.19](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-bundler-rollup@5.0.13...@ckeditor/ckeditor5-dev-bundler-rollup@5.0.19) (2017-08-18)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
 ## [5.0.13](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-bundler-rollup@5.0.11...@ckeditor/ckeditor5-dev-bundler-rollup@5.0.13) (2017-05-24)
 
 Internal changes only (updated dependencies, documentation, etc.).
