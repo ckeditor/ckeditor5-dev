@@ -31,6 +31,7 @@ describe( 'JSDoc relation-fixer buildrelations module', () => {
 				longname: 'mixinA',
 				kind: 'mixin',
 				implements: [
+					'interfaceB',
 					'interfaceB'
 				]
 			},
@@ -41,13 +42,26 @@ describe( 'JSDoc relation-fixer buildrelations module', () => {
 				implements: [
 					'interfaceA'
 				],
-				mixes: [ 'mixinA' ]
+				mixes: [
+					'mixinA',
+					'mixinA'
+				]
 			},
 			{
 				name: 'classB',
 				longname: 'classB',
 				kind: 'class',
 				augments: [
+					'classA',
+					'classA'
+				]
+			},
+			{
+				name: 'classB',
+				longname: 'classB',
+				kind: 'class',
+				augments: [
+					'classA',
 					'classA'
 				]
 			}
@@ -62,7 +76,9 @@ describe( 'JSDoc relation-fixer buildrelations module', () => {
 			'interfaceB'
 		];
 
-		expect( testedDoclet ).to.have.property( 'implementsNested' ).and.to.eql( expectedProp );
+		expectedProp.forEach( prop => {
+			expect( testedDoclet ).to.have.property( 'implementsNested' ).and.to.include( prop );
+		} );
 	} );
 
 	it( 'should add mixing chain array to doclets', () => {
@@ -72,7 +88,9 @@ describe( 'JSDoc relation-fixer buildrelations module', () => {
 			'mixinA'
 		];
 
-		expect( testedDoclet ).to.have.property( 'mixesNested' ).and.to.eql( expectedProp );
+		expectedProp.forEach( prop => {
+			expect( testedDoclet ).to.have.property( 'mixesNested' ).and.to.include( prop );
+		} );
 	} );
 
 	it( 'should add inheritance chain array to doclets', () => {
@@ -82,7 +100,9 @@ describe( 'JSDoc relation-fixer buildrelations module', () => {
 			'classA'
 		];
 
-		expect( testedDoclet ).to.have.property( 'augmentsNested' ).and.to.eql( expectedProp );
+		expectedProp.forEach( prop => {
+			expect( testedDoclet ).to.have.property( 'augmentsNested' ).and.to.include( prop );
+		} );
 	} );
 
 	it( 'should add descendants chain array to doclets', () => {
@@ -94,6 +114,25 @@ describe( 'JSDoc relation-fixer buildrelations module', () => {
 			'classB'
 		];
 
-		expect( testedDoclet ).to.have.property( 'descendants' ).and.to.eql( expectedProp );
+		expectedProp.forEach( prop => {
+			expect( testedDoclet ).to.have.property( 'descendants' ).and.to.include( prop );
+		} );
+	} );
+
+	it( 'should not allow duplicates in relation arrays', () => {
+		const newDoclets = buildRelations( testDoclets );
+		const testedClass = newDoclets.find( d => d.longname === 'classB' );
+		const testedInterface = newDoclets.find( d => d.longname === 'interfaceB' );
+
+		// Removing duplicates.
+		const expectedImplementsNested = Array.from( new Set( testedClass.implementsNested ) );
+		const expectedMixesNested = Array.from( new Set( testedClass.mixesNested ) );
+		const expectedAugmentsNested = Array.from( new Set( testedClass.augmentsNested ) );
+		const expectedDescendants = Array.from( new Set( testedInterface.descendants ) );
+
+		expect( testedClass ).to.have.property( 'implementsNested' ).and.to.deep.equal( expectedImplementsNested );
+		expect( testedClass ).to.have.property( 'mixesNested' ).and.to.deep.equal( expectedMixesNested );
+		expect( testedClass ).to.have.property( 'augmentsNested' ).and.to.deep.equal( expectedAugmentsNested );
+		expect( testedInterface ).to.have.property( 'descendants' ).and.to.deep.equal( expectedDescendants );
 	} );
 } );
