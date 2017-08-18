@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [7.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.2.2...@ckeditor/ckeditor5-dev-docs@7.3.0) (2017-08-18)
+
+### Features
+
+* All events will be automatically extended with `EventInfo` parameter. Closes [#257](https://github.com/ckeditor/ckeditor5-dev/issues/257). ([3968bd0](https://github.com/ckeditor/ckeditor5-dev/commit/3968bd0))
+
+
 ## [7.2.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.2.1...@ckeditor/ckeditor5-dev-docs@7.2.2) (2017-07-12)
 
 ### Bug fixes
