@@ -38,7 +38,8 @@ describe( 'download', () => {
 
 			translationUtils: {
 				createDictionaryFromPoFileContent: sandbox.spy( poFileContent => fileContents[ poFileContent ] ),
-				cleanPoFileContent: x => x
+				cleanPoFileContent: x => x,
+				runFewTimesAsyncFunction: fn => fn()
 			},
 
 			transifexService: {

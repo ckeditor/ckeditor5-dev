@@ -9,5 +9,6 @@ module.exports = {
 	TranslationService: require( './translationservice' ),
 	findOriginalStrings: require( './findoriginalstrings' ),
 	createDictionaryFromPoFileContent: require( './createdictionaryfrompofilecontent' ),
-	cleanPoFileContent: require( './cleanpofilecontent' )
+	cleanPoFileContent: require( './cleanpofilecontent' ),
+	runFewTimesAsyncFunction: require( './runfewtimesasyncfunction' )
 };
