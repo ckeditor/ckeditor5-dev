@@ -32,7 +32,7 @@ describe( 'transifex-service', () => {
 			} ).then( () => {
 				sinon.assert.calledWith(
 					spy,
-					'http://www.transifex.com/api/2/project/ckeditor5/resources/',
+					'https://www.transifex.com/api/2/project/ckeditor5/resources/',
 					{
 						auth: {
 							username: 'api',
@@ -104,7 +104,7 @@ describe( 'transifex-service', () => {
 			} ).then( () => {
 				sinon.assert.calledWith(
 					spy,
-					'http://www.transifex.com/api/2/project/ckeditor5/resources/',
+					'https://www.transifex.com/api/2/project/ckeditor5/resources/',
 					{
 						auth: {
 							username: 'api',
@@ -134,7 +134,7 @@ describe( 'transifex-service', () => {
 			} ).then( () => {
 				sinon.assert.calledWith(
 					spy,
-					'http://www.transifex.com/api/2/project/ckeditor5/resource/slug/content/',
+					'https://www.transifex.com/api/2/project/ckeditor5/resource/slug/content/',
 					{
 						auth: {
 							username: 'api',
@@ -161,7 +161,7 @@ describe( 'transifex-service', () => {
 			} ).then( () => {
 				sinon.assert.calledWith(
 					spy,
-					'http://www.transifex.com/api/2/project/ckeditor5/resource/slug/?details',
+					'https://www.transifex.com/api/2/project/ckeditor5/resource/slug/?details',
 					{
 						auth: {
 							username: 'api',
@@ -185,7 +185,7 @@ describe( 'transifex-service', () => {
 			} ).then( () => {
 				sinon.assert.calledWith(
 					spy,
-					'http://www.transifex.com/api/2/project/ckeditor5/resource/slug/translation/lang/',
+					'https://www.transifex.com/api/2/project/ckeditor5/resource/slug/translation/lang/',
 					{
 						auth: {
 							username: 'api',
