@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.6.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.5.2...@ckeditor/jsdoc-plugins@1.6.0) (2017-08-18)
+
+### Features
+
+* All events will be automatically extended with `EventInfo` parameter. Closes [#257](https://github.com/ckeditor/ckeditor5-dev/issues/257). ([3968bd0](https://github.com/ckeditor/ckeditor5-dev/commit/3968bd0))
+
+
 ## [1.5.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.5.0...@ckeditor/jsdoc-plugins@1.5.2) (2017-08-16)
 
 ### Other changes
