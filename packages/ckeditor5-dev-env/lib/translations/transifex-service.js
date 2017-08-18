@@ -6,7 +6,12 @@
 'use strict';
 
 const request = require( 'request' );
-const PROJECT_URL = 'http://www.transifex.com/api/2/project/ckeditor5';
+// In case of debugging requests install and enable following package
+// and remove `createJsonResponseHandler` callback from the request arguments.
+// See https://github.com/request/request-debug.
+// require( 'request-debug' )( request );
+
+const PROJECT_URL = 'https://www.transifex.com/api/2/project/ckeditor5';
 
 /**
  * Promise wrappers of the Transifex API.
