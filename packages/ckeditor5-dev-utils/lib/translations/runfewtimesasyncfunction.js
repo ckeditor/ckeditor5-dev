@@ -11,11 +11,12 @@ const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
  * Runs hazardous function few times until the function's promise succeed.
  *
  * @param {Function} fn Function which will be called few times until the function's promise succeed.
- * @param {Number} [times=5]
- * @param {Number} [delay=100]
+ * @param {Object} [options={ times:5, delay:100 }] Options.
+ * @param {Number} [options.times=5] Times of retrying.
+ * @param {Number} [options.delay=100] Delay between fn calls. Useful for testing.
  * @returns {Promise}
  */
-module.exports = function runFewTimesAsyncFunction( fn, times = 5, delay = 100 ) {
+module.exports = function runFewTimesAsyncFunction( fn, { times = 5, delay = 100 } = {} ) {
 	let promise = fn();
 
 	for ( let i = 0; i < times - 1; i++ ) {
