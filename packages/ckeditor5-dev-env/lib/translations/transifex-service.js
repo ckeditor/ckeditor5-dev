@@ -11,6 +11,8 @@ const request = require( 'request' );
 // See https://github.com/request/request-debug.
 // require( 'request-debug' )( request );
 
+const { runFewTimesAsyncFunction } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
+
 const PROJECT_URL = 'https://www.transifex.com/api/2/project/ckeditor5';
 
 /**
@@ -27,10 +29,12 @@ module.exports = {
 	 * @returns {Promise.<Object>}
 	 */
 	getResources( { token } ) {
-		return new Promise( ( resolve, reject ) => {
-			request.get( `${ PROJECT_URL }/resources/`, {
-				auth: { username: 'api', password: token }
-			}, createJsonResponseHandler( resolve, reject, 'getResources' ) );
+		return runFewTimesAsyncFunction( () => {
+			return new Promise( ( resolve, reject ) => {
+				request.get( `${ PROJECT_URL }/resources/`, {
+					auth: { username: 'api', password: token }
+				}, createJsonResponseHandler( resolve, reject, 'getResources' ) );
+			} );
 		} );
 	},
 
@@ -45,11 +49,13 @@ module.exports = {
 	 * @returns {Promise.<Object>}
 	 */
 	postResource( { token, name, slug, content } ) {
-		return new Promise( ( resolve, reject ) => {
-			request.post( `${ PROJECT_URL }/resources/`, {
-				auth: { username: 'api', password: token },
-				formData: { slug, name, content, 'i18n_type': 'PO' }
-			}, createJsonResponseHandler( resolve, reject, 'postResource' ) );
+		return runFewTimesAsyncFunction( () => {
+			return new Promise( ( resolve, reject ) => {
+				request.post( `${ PROJECT_URL }/resources/`, {
+					auth: { username: 'api', password: token },
+					formData: { slug, name, content, 'i18n_type': 'PO' }
+				}, createJsonResponseHandler( resolve, reject, 'postResource' ) );
+			} );
 		} );
 	},
 
@@ -63,11 +69,13 @@ module.exports = {
 	 * @returns {Promise.<Object>}
 	 */
 	putResourceContent( { token, slug, content } ) {
-		return new Promise( ( resolve, reject ) => {
-			request.put( `${ PROJECT_URL }/resource/${ slug }/content/`, {
-				auth: { username: 'api', password: token },
-				formData: { content, 'i18n_type': 'PO' }
-			}, createJsonResponseHandler( resolve, reject, 'putResourceContent' ) );
+		return runFewTimesAsyncFunction( () => {
+			return new Promise( ( resolve, reject ) => {
+				request.put( `${ PROJECT_URL }/resource/${ slug }/content/`, {
+					auth: { username: 'api', password: token },
+					formData: { content, 'i18n_type': 'PO' }
+				}, createJsonResponseHandler( resolve, reject, 'putResourceContent' ) );
+			} );
 		} );
 	},
 
@@ -80,10 +88,12 @@ module.exports = {
 	 * @returns {Promise.<Object>}
 	 */
 	getResourceDetails( { token, slug } ) {
-		return new Promise( ( resolve, reject ) => {
-			request.get( `${ PROJECT_URL }/resource/${ slug }/?details`, {
-				auth: { username: 'api', password: token }
-			}, createJsonResponseHandler( resolve, reject, 'getResourceDetails' ) );
+		return runFewTimesAsyncFunction( () => {
+			return new Promise( ( resolve, reject ) => {
+				request.get( `${ PROJECT_URL }/resource/${ slug }/?details`, {
+					auth: { username: 'api', password: token }
+				}, createJsonResponseHandler( resolve, reject, 'getResourceDetails' ) );
+			} );
 		} );
 	},
 
@@ -97,10 +107,12 @@ module.exports = {
 	 * @returns {Promise.<Object>}
 	 */
 	getTranslation( { token, slug, lang } ) {
-		return new Promise( ( resolve, reject ) => {
-			request.get( `${ PROJECT_URL }/resource/${ slug }/translation/${ lang }/`, {
-				auth: { username: 'api', password: token }
-			}, createJsonResponseHandler( resolve, reject, 'getTranslation' ) );
+		return runFewTimesAsyncFunction( () => {
+			return new Promise( ( resolve, reject ) => {
+				request.get( `${ PROJECT_URL }/resource/${ slug }/translation/${ lang }/`, {
+					auth: { username: 'api', password: token }
+				}, createJsonResponseHandler( resolve, reject, 'getTranslation' ) );
+			} );
 		} );
 	}
 };

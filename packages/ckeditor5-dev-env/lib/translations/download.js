@@ -9,11 +9,7 @@ const fs = require( 'fs-extra' );
 const path = require( 'path' );
 const transifexService = require( './transifex-service' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
-const {
-	cleanPoFileContent,
-	createDictionaryFromPoFileContent,
-	runFewTimesAsyncFunction
-} = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
+const { cleanPoFileContent, createDictionaryFromPoFileContent } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 
 /**
  * Downloads translations from the Transifex for each package and language.
@@ -52,7 +48,7 @@ function downloadAndReplaceTranslations( loginConfig, packageNames ) {
 function downloadAndReplaceTranslationsForPackage( loginConfig, packageName ) {
 	let translations;
 
-	return runFewTimesAsyncFunction( () => downloadPoFilesForPackage( loginConfig, packageName ) )
+	return downloadPoFilesForPackage( loginConfig, packageName )
 		.then( _translations => { translations = _translations; } )
 		.then( () => removeOldTranslationForPackage( packageName ) )
 		.then( () => { saveTranslations( packageName, translations ); } );

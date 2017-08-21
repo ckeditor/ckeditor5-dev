@@ -22,7 +22,7 @@ module.exports = function runFewTimesAsyncFunction( fn, { times = 5, delay = 100
 	for ( let i = 0; i < times - 1; i++ ) {
 		promise = promise.catch( err => {
 			logger.error( err );
-			logger.info( 'Trying again.' );
+			logger.info( `Trying again after ${ delay }ms...` );
 
 			return wait( delay ).then( fn );
 		} );
