@@ -10,5 +10,5 @@ module.exports = {
 	findOriginalStrings: require( './findoriginalstrings' ),
 	createDictionaryFromPoFileContent: require( './createdictionaryfrompofilecontent' ),
 	cleanPoFileContent: require( './cleanpofilecontent' ),
-	runFewTimesAsyncFunction: require( './runfewtimesasyncfunction' )
+	retryAsyncFunction: require( './retryasyncfunction' )
 };

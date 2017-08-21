@@ -12,8 +12,8 @@ const expect = chai.expect;
 const proxyquire = require( 'proxyquire' );
 
 describe( 'translations', () => {
-	describe( 'runFewTimesAsyncFunction()', () => {
-		let sandbox, stubs, runFewTimesAsyncFunction;
+	describe( 'retryAsyncFunction()', () => {
+		let sandbox, stubs, retryAsyncFunction;
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
 
@@ -31,7 +31,7 @@ describe( 'translations', () => {
 				}
 			};
 
-			runFewTimesAsyncFunction = proxyquire( '../../lib/translations/runfewtimesasyncfunction', {
+			retryAsyncFunction = proxyquire( '../../lib/translations/retryasyncfunction', {
 				'@ckeditor/ckeditor5-dev-utils': {
 					logger: () => stubs.logger
 				}
@@ -44,7 +44,7 @@ describe( 'translations', () => {
 		} );
 
 		it( 'should exeute an async function and return a promise', () => {
-			const result = runFewTimesAsyncFunction( () => Promise.resolve() );
+			const result = retryAsyncFunction( () => Promise.resolve() );
 
 			expect( result ).to.be.instanceof( Promise );
 			return result;
@@ -56,7 +56,7 @@ describe( 'translations', () => {
 			p.onFirstCall().returns( Promise.reject() );
 			p.onSecondCall().returns( Promise.resolve() );
 
-			return runFewTimesAsyncFunction( p, { delay: 0 } );
+			return retryAsyncFunction( p, { delay: 0 } );
 		} );
 
 		it( 'should resolve when one of the calls resolves', () => {
@@ -65,7 +65,7 @@ describe( 'translations', () => {
 			p.onFirstCall().returns( Promise.reject() );
 			p.onSecondCall().returns( Promise.resolve() );
 
-			return runFewTimesAsyncFunction( p, { delay: 0 } );
+			return retryAsyncFunction( p, { delay: 0 } );
 		} );
 
 		it( 'should exeute an async function and return a promise 1', () => {
@@ -74,7 +74,7 @@ describe( 'translations', () => {
 			p.onFirstCall().returns( Promise.reject() );
 			p.onSecondCall().returns( Promise.resolve() );
 
-			return runFewTimesAsyncFunction( p, { delay: 0, times: 2 } );
+			return retryAsyncFunction( p, { delay: 0, times: 2 } );
 		} );
 	} );
 } );

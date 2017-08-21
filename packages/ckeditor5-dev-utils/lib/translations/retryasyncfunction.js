@@ -16,7 +16,7 @@ const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
  * @param {Number} [options.delay=100] Delay between fn calls. Useful for testing.
  * @returns {Promise}
  */
-module.exports = function runFewTimesAsyncFunction( fn, { times = 5, delay = 100 } = {} ) {
+module.exports = function retryAsyncFunction( fn, { times = 5, delay = 100 } = {} ) {
 	let promise = fn();
 
 	for ( let i = 0; i < times - 1; i++ ) {
