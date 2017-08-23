@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [5.1.7](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.5...@ckeditor/ckeditor5-dev-env@5.1.7) (2017-08-23)
+
+### Bug fixes
+
+* Fixed Transifex URL scheme. Closes [#249](https://github.com/ckeditor/ckeditor5-dev/issues/249). ([3276048](https://github.com/ckeditor/ckeditor5-dev/commit/3276048))
+
+
 ## [5.1.5](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.4...@ckeditor/ckeditor5-dev-env@5.1.5) (2017-08-16)
 
 ### Bug fixes
