@@ -43,38 +43,93 @@ describe( 'translations', () => {
 			sandbox.restore();
 		} );
 
-		it( 'should exeute an async function and return a promise', () => {
+		it( 'should execute an async function and return a promise', () => {
 			const result = retryAsyncFunction( () => Promise.resolve() );
 
 			expect( result ).to.be.instanceof( Promise );
 			return result;
 		} );
 
-		it( 'should try to exeute an async function 5 times by default', () => {
+		it( 'should try to execute an async function 5 times by default', () => {
 			const p = sandbox.stub();
 
-			p.onFirstCall().returns( Promise.reject() );
-			p.onSecondCall().returns( Promise.resolve() );
+			const spy0 = sinon.spy( () => Promise.reject( new Error() ) );
+			const spy1 = sinon.spy( () => Promise.reject( new Error() ) );
+			const spy2 = sinon.spy( () => Promise.reject( new Error() ) );
+			const spy3 = sinon.spy( () => Promise.reject( new Error() ) );
+			const spy4 = sinon.spy( () => Promise.resolve( new Error() ) );
+			const spy5 = sinon.spy( () => Promise.resolve( new Error() ) );
 
-			return retryAsyncFunction( p, { delay: 0 } );
+			// Note: No usage of stub.returns() because of the UnhandledPromiseRejection warnings.
+
+			p.onCall( 0 ).callsFake( spy0 );
+			p.onCall( 1 ).callsFake( spy1 );
+			p.onCall( 2 ).callsFake( spy2 );
+			p.onCall( 3 ).callsFake( spy3 );
+			p.onCall( 4 ).callsFake( spy4 );
+			p.onCall( 5 ).callsFake( spy5 );
+
+			return retryAsyncFunction( p, { delay: 0 } ).then( () => {
+				expect( spy0.calledOnce ).to.be.true;
+				expect( spy1.calledOnce ).to.be.true;
+				expect( spy2.calledOnce ).to.be.true;
+				expect( spy3.calledOnce ).to.be.true;
+				expect( spy4.calledOnce ).to.be.true;
+				expect( spy5.notCalled ).to.be.true;
+			} );
 		} );
 
 		it( 'should resolve when one of the calls resolves', () => {
 			const p = sandbox.stub();
 
-			p.onFirstCall().returns( Promise.reject() );
-			p.onSecondCall().returns( Promise.resolve() );
+			// Note: No usage of stub.returns() because of the UnhandledPromiseRejection warnings.
+			p.onCall( 0 ).callsFake( () => Promise.reject( new Error() ) );
+			p.onCall( 1 ).callsFake( () => Promise.reject( new Error() ) );
+			p.onCall( 2 ).callsFake( () => Promise.reject( new Error() ) );
+			p.onCall( 3 ).callsFake( () => Promise.reject( new Error() ) );
+			p.onCall( 4 ).callsFake( () => Promise.resolve( 5 ) );
 
-			return retryAsyncFunction( p, { delay: 0 } );
+			return retryAsyncFunction( p, { delay: 0 } ).then( value => {
+				expect( value ).to.equal( 5 );
+			} );
 		} );
 
-		it( 'should exeute an async function and return a promise 1', () => {
+		it( 'should try n times to resolve the function #1', () => {
+			const n = 2;
 			const p = sandbox.stub();
 
-			p.onFirstCall().returns( Promise.reject() );
-			p.onSecondCall().returns( Promise.resolve() );
+			p.onFirstCall().rejects();
+			p.onSecondCall().resolves( 1 );
 
-			return retryAsyncFunction( p, { delay: 0, times: 2 } );
+			return retryAsyncFunction( p, { delay: 0, times: n } ).then( value => {
+				expect( value ).to.equal( 1 );
+			} );
+		} );
+
+		it( 'should try n times to resolve the function and return last error #2', done => {
+			const n = 2;
+			const p = sandbox.stub();
+			const error = new Error();
+
+			p.onFirstCall().rejects( new Error() );
+			p.onSecondCall().rejects( error );
+
+			retryAsyncFunction( p, { delay: 0, times: n } ).catch( err => {
+				expect( err ).to.equal( error );
+				done();
+			} );
+		} );
+
+		it( 'should resolve at first resolve', () => {
+			const n = 2;
+			const p = sandbox.stub();
+
+			p.onFirstCall().resolves( 1 );
+			p.onSecondCall().resolves( 2 );
+
+			return retryAsyncFunction( p, { delay: 0, times: n } ).then( value => {
+				expect( value ).to.equal( 1 );
+			} );
 		} );
 	} );
 } );

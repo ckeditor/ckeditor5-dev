@@ -1,7 +1,7 @@
 /**
- * @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
- * For licensing, see LICENSE.md.
- */
+* @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
+* For licensing, see LICENSE.md.
+*/
 
 'use strict';
 
@@ -17,18 +17,26 @@ const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
  * @returns {Promise}
  */
 module.exports = function retryAsyncFunction( fn, { times = 5, delay = 100 } = {} ) {
-	let promise = fn();
+	return new Promise( ( res, rej ) => {
+		retry();
 
-	for ( let i = 0; i < times - 1; i++ ) {
-		promise = promise.catch( err => {
-			logger.error( err );
-			logger.info( `Trying again after ${ delay }ms...` );
+		function retry() {
+			const result = fn();
+			times--;
 
-			return wait( delay ).then( fn );
-		} );
-	}
+			if ( times === 0 ) {
+				return result.then( res ).catch( rej );
+			}
 
-	return promise;
+			result.then( res )
+				.catch( err => {
+					logger.error( err );
+					logger.info( `Trying again after ${ delay }ms...` );
+
+					wait( delay ).then( retry );
+				} );
+		}
+	} );
 };
 
 function wait( milliseconds ) {
