@@ -95,26 +95,26 @@ describe( 'translations', () => {
 		} );
 
 		it( 'should try n times to resolve the function #1', () => {
-			const n = 2;
+			const times = 2;
 			const p = sandbox.stub();
 
 			p.onFirstCall().rejects();
 			p.onSecondCall().resolves( 1 );
 
-			return retryAsyncFunction( p, { delay: 0, times: n } ).then( value => {
+			return retryAsyncFunction( p, { delay: 0, times } ).then( value => {
 				expect( value ).to.equal( 1 );
 			} );
 		} );
 
 		it( 'should try n times to resolve the function and return last error #2', done => {
-			const n = 2;
+			const times = 2;
 			const p = sandbox.stub();
 			const error = new Error();
 
 			p.onFirstCall().rejects( new Error() );
 			p.onSecondCall().rejects( error );
 
-			retryAsyncFunction( p, { delay: 0, times: n } ).catch( err => {
+			retryAsyncFunction( p, { delay: 0, times } ).catch( err => {
 				expect( err ).to.equal( error );
 				done();
 			} );
@@ -129,6 +129,19 @@ describe( 'translations', () => {
 
 			return retryAsyncFunction( p, { delay: 0, times: n } ).then( value => {
 				expect( value ).to.equal( 1 );
+			} );
+		} );
+
+		it( 'should wait specified time after each rejection', () => {
+			const delay = 20;
+			const p = sandbox.stub();
+
+			p.onFirstCall().callsFake( () => Promise.reject( new Error() ) );
+			p.onSecondCall().callsFake( () => Promise.reject( new Error() ) );
+			p.onThirdCall().resolves( 7 );
+
+			return retryAsyncFunction( p, { delay } ).then( value => {
+				expect( value ).to.equal( 7 );
 			} );
 		} );
 	} );
