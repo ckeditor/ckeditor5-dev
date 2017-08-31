@@ -5,27 +5,58 @@
 
 'use strict';
 
-const transifexService = require( '../../lib/translations/transifex-service' );
 const chai = require( 'chai' );
 const sinon = require( 'sinon' );
 const expect = chai.expect;
-const request = require( 'request' );
+const mockery = require( 'mockery' );
 
 describe( 'transifex-service', () => {
-	let sandbox;
+	let sandbox, transifexService, stubs;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
+
+		mockery.enable( {
+			useCleanCache: true,
+			warnOnReplace: false,
+			warnOnUnregistered: false
+		} );
+
+		stubs = {
+			logger: {
+				info: sandbox.stub(),
+				warning: sandbox.stub(),
+				error: sandbox.stub()
+			},
+
+			request: {
+				get: sandbox.stub(),
+				post: sandbox.stub(),
+				put: sandbox.stub()
+			}
+		};
+
+		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
+			logger: () => stubs.logger,
+			translations: {
+				retryAsyncFunction: x => x()
+			}
+		} );
+
+		mockery.registerMock( 'request', stubs.request );
+
+		transifexService = require( '../../lib/translations/transifex-service' );
 	} );
 
 	afterEach( () => {
 		sandbox.restore();
+		mockery.disable();
 	} );
 
 	describe( 'getResources()', () => {
 		it( 'should return resources', () => {
 			const spy = sandbox.spy( ( url, data, cb ) => cb( null, { statusCode: 200 }, '{"body": ""}' ) );
-			sandbox.stub( request, 'get' ).callsFake( spy );
+			stubs.request.get.callsFake( spy );
 
 			return transifexService.getResources( {
 				token: 'token'
@@ -45,7 +76,7 @@ describe( 'transifex-service', () => {
 
 		it( 'should throw an error if the statusCode is above 300', () => {
 			const spy = sandbox.spy( ( url, data, cb ) => cb( null, { statusCode: 500 }, '{"body": ""}' ) );
-			sandbox.stub( request, 'get' ).callsFake( spy );
+			stubs.request.get.callsFake( spy );
 
 			return transifexService.getResources( { token: 'token' } )
 				.then(
@@ -61,7 +92,7 @@ describe( 'transifex-service', () => {
 		it( 'should throw an error if some other error occurs', () => {
 			const error = new Error();
 			const spy = sandbox.spy( ( url, data, cb ) => cb( error, { statusCode: 200 }, '{"body": ""}' ) );
-			sandbox.stub( request, 'get' ).callsFake( spy );
+			stubs.request.get.callsFake( spy );
 
 			return transifexService.getResources( { token: 'token' } )
 				.then(
@@ -76,7 +107,7 @@ describe( 'transifex-service', () => {
 
 		it( 'should throw an error if some error occurs during parsing the body', () => {
 			const spy = sandbox.spy( ( url, data, cb ) => cb( null, { statusCode: 200 }, 'Invalid JSON' ) );
-			sandbox.stub( request, 'get' ).callsFake( spy );
+			stubs.request.get.callsFake( spy );
 
 			return transifexService.getResources( { token: 'token' } )
 				.then(
@@ -94,7 +125,7 @@ describe( 'transifex-service', () => {
 	describe( 'postResource()', () => {
 		it( 'should upload resource on the Transifex', () => {
 			const spy = sandbox.spy( ( url, data, cb ) => cb( null, { statusCode: 201 }, '{"body": ""}' ) );
-			sandbox.stub( request, 'post' ).callsFake( spy );
+			stubs.request.post.callsFake( spy );
 
 			return transifexService.postResource( {
 				token: 'token',
@@ -125,7 +156,7 @@ describe( 'transifex-service', () => {
 	describe( 'putResourceContent()', () => {
 		it( 'should update resource on the Transifex', () => {
 			const spy = sandbox.spy( ( url, data, cb ) => cb( null, { statusCode: 200 }, '{"body": ""}' ) );
-			sandbox.stub( request, 'put' ).callsFake( spy );
+			stubs.request.put.callsFake( spy );
 
 			return transifexService.putResourceContent( {
 				token: 'token',
@@ -153,7 +184,7 @@ describe( 'transifex-service', () => {
 	describe( 'getResourceDetails()', () => {
 		it( 'should get resource details from the Transifex', () => {
 			const spy = sandbox.spy( ( url, data, cb ) => cb( null, { statusCode: 200 }, '{"body": ""}' ) );
-			sandbox.stub( request, 'get' ).callsFake( spy );
+			stubs.request.get.callsFake( spy );
 
 			return transifexService.getResourceDetails( {
 				token: 'token',
@@ -176,7 +207,7 @@ describe( 'transifex-service', () => {
 	describe( 'getTranslation()', () => {
 		it( 'should get translations for the target language of the resource from the Transifex', () => {
 			const spy = sandbox.spy( ( url, data, cb ) => cb( null, { statusCode: 200 }, '{"body": ""}' ) );
-			sandbox.stub( request, 'get' ).callsFake( spy );
+			stubs.request.get.callsFake( spy );
 
 			return transifexService.getTranslation( {
 				token: 'token',

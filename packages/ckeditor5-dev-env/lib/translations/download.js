@@ -9,7 +9,7 @@ const fs = require( 'fs-extra' );
 const path = require( 'path' );
 const transifexService = require( './transifex-service' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
-const translationUtils = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
+const { cleanPoFileContent, createDictionaryFromPoFileContent } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 
 /**
  * Downloads translations from the Transifex for each package and language.
@@ -36,16 +36,22 @@ function getPackageNames( loginConfig ) {
 }
 
 function downloadAndReplaceTranslations( loginConfig, packageNames ) {
-	return Promise.all(
-		packageNames.map( packageName => {
-			const translationPromises = removeOldTranslationForPackage( packageName )
-				.then( () => downloadPoFilesForPackage( loginConfig, packageName ) );
+	let promise = Promise.resolve();
 
-			return translationPromises.then( translations => {
-				saveTranslations( packageName, translations );
-			} );
-		} )
-	);
+	for ( const packageName of packageNames ) {
+		promise = promise.then( () => downloadAndReplaceTranslationsForPackage( loginConfig, packageName ) );
+	}
+
+	return promise;
+}
+
+function downloadAndReplaceTranslationsForPackage( loginConfig, packageName ) {
+	let translations;
+
+	return downloadPoFilesForPackage( loginConfig, packageName )
+		.then( _translations => { translations = _translations; } )
+		.then( () => removeOldTranslationForPackage( packageName ) )
+		.then( () => { saveTranslations( packageName, translations ); } );
 }
 
 function removeOldTranslationForPackage( packageName ) {
@@ -89,6 +95,7 @@ function downloadPoFile( loginConfig, lang, packageName ) {
 
 function saveTranslations( packageName, translations ) {
 	const languageCodeMap = require( './languagecodemap.json' );
+	let savedTranslations = 0;
 
 	for ( let [ lang, poFileContent ] of translations ) {
 		if ( !isPoFileContainingTranslations( poFileContent ) ) {
@@ -99,17 +106,19 @@ function saveTranslations( packageName, translations ) {
 			lang = languageCodeMap[ lang ];
 		}
 
-		poFileContent = translationUtils.cleanPoFileContent( poFileContent );
+		poFileContent = cleanPoFileContent( poFileContent );
 
 		const pathToSave = path.join( process.cwd(), 'packages', packageName, 'lang', 'translations', lang + '.po' );
 
 		fs.outputFileSync( pathToSave, poFileContent );
-		logger.info( `Saved ${ lang }.po for ${ packageName } package.` );
+		savedTranslations++;
 	}
+
+	logger.info( `Saved ${ savedTranslations } PO files for ${ packageName } package.` );
 }
 
 function isPoFileContainingTranslations( poFileContent ) {
-	const translations = translationUtils.createDictionaryFromPoFileContent( poFileContent );
+	const translations = createDictionaryFromPoFileContent( poFileContent );
 
 	return Object.keys( translations ).some( key => translations[ key ] !== '' );
 }
