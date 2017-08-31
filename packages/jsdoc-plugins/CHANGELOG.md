@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.6.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.6.0...@ckeditor/jsdoc-plugins@1.6.1) (2017-08-23)
+
+### Bug fixes
+
+* Remove duplicates in JSDoc relation-fixer plugin. Closes [#261](https://github.com/ckeditor/ckeditor5-dev/issues/261). ([e2a921a](https://github.com/ckeditor/ckeditor5-dev/commit/e2a921a))
+
+
 ## [1.6.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.5.2...@ckeditor/jsdoc-plugins@1.6.0) (2017-08-18)
 
 ### Features

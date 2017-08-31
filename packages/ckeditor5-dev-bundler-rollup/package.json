@@ -1,12 +1,12 @@
 {
   "name": "@ckeditor/ckeditor5-dev-bundler-rollup",
-  "version": "5.0.19",
+  "version": "5.0.20",
   "description": "Tasks used to create CKEditor 5 bundle.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
     "@ckeditor/ckeditor5-dev-compiler": "^6.0.2",
-    "@ckeditor/ckeditor5-dev-utils": "^3.0.3",
+    "@ckeditor/ckeditor5-dev-utils": "^3.0.4",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-es2015": "^6.24.1",
     "gulp": "^3.9.1",
