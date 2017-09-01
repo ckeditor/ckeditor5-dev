@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [8.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@8.0.2...@ckeditor/ckeditor5-dev-tests@8.1.0) (2017-09-01)
+
+### Features
+
+* Other support for importing CSS files in manual tests. Closes [#267](https://github.com/ckeditor/ckeditor5-dev/issues/267). ([be4d3af](https://github.com/ckeditor/ckeditor5-dev/commit/be4d3af))
+
+
 ## [8.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@8.0.0...@ckeditor/ckeditor5-dev-tests@8.0.2) (2017-08-18)
 
 Internal changes only (updated dependencies, documentation, etc.).

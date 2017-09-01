@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [5.1.8](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.7...@ckeditor/ckeditor5-dev-env@5.1.8) (2017-09-01)
+
+### Bug fixes
+
+* Add better network error handling for downloading and uploading translations. Closes [#265](https://github.com/ckeditor/ckeditor5-dev/issues/265). ([c12fb15](https://github.com/ckeditor/ckeditor5-dev/commit/c12fb15))
+
+
 ## [5.1.7](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.5...@ckeditor/ckeditor5-dev-env@5.1.7) (2017-08-23)
 
 ### Bug fixes
