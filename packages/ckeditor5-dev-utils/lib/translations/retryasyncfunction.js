@@ -5,7 +5,7 @@
 
 'use strict';
 
-const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
+const logger = require( '../logger' )();
 
 /**
  * Runs hazardous function few times until the function's promise succeed.
