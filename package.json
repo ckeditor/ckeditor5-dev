@@ -2,7 +2,7 @@
   "name": "ckeditor5-dev",
   "private": true,
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-env": "^5.1.7",
+    "@ckeditor/ckeditor5-dev-env": "^5.1.8",
     "@ckeditor/ckeditor5-dev-lint": "^3.1.3",
     "eslint-config-ckeditor5": "^1.0.6",
     "gulp": "^3.9.1",
@@ -23,5 +23,5 @@
     "test": "mocha `./scripts/get-test-directories.sh` --recursive",
     "coverage": "istanbul cover _mocha `./scripts/get-test-directories.sh` -- --recursive"
   },
-  "version": "0.0.25"
+  "version": "0.0.26"
 }
