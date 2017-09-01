@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [3.0.6](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@3.0.5...@ckeditor/ckeditor5-dev-utils@3.0.6) (2017-09-01)
+
+### Bug fixes
+
+* Fixed invalid require() call which used package name instead of relative path which caused weird issues. ([342c675](https://github.com/ckeditor/ckeditor5-dev/commit/342c675))
+
+
 ## [3.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@3.0.3...@ckeditor/ckeditor5-dev-utils@3.0.5) (2017-09-01)
 
 ### Bug fixes
