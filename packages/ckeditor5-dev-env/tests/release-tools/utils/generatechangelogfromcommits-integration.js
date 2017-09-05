@@ -16,6 +16,7 @@ const { changelogHeader, getChangelog, getChangesForVersion } = require( '../../
 describe( 'dev-env/release-tools/utils', () => {
 	const url = 'https://github.com/ckeditor/ckeditor5-test-package';
 
+	let lastReleasedVersion, lastChangelogVersion;
 	let tmpCwd, cwd, generateChangelogFromCommits, stubs, sandbox;
 
 	// These tests create a chain of releases.
@@ -23,6 +24,9 @@ describe( 'dev-env/release-tools/utils', () => {
 		this.timeout( 10 * 1000 );
 
 		before( () => {
+			lastReleasedVersion = null;
+			lastChangelogVersion = null;
+
 			cwd = process.cwd();
 			tmpCwd = fs.mkdtempSync( __dirname + path.sep );
 			process.chdir( tmpCwd );
@@ -76,7 +80,6 @@ describe( 'dev-env/release-tools/utils', () => {
 			sandbox.restore();
 		} );
 
-		// Done callback is called manually because these tests are slow and sometimes Mocha throws a timeout error.
 		it( 'generates a changelog for the first time', () => {
 			exec( 'git commit --allow-empty --message "Internal: An initial commit."' );
 
@@ -84,24 +87,24 @@ describe( 'dev-env/release-tools/utils', () => {
 				.then( () => {
 					expect( stubs.logger.warning.calledOnce ).to.equal( true );
 					expect( getChangelog() ).to.contain( changelogHeader );
-					expect( getChangesForVersion( '0.0.1' ) ).to.contain(
+					expect( getChangesForVersion( lastChangelogVersion ) ).to.contain(
 						'Internal changes only (updated dependencies, documentation, etc.).'
 					);
 
-					release( '0.0.1' );
+					release();
 				} );
 		} );
 
 		it( 'title of the next release should be a link which compares current version with the previous one', () => {
 			exec( 'git commit --allow-empty --message "Feature: Some amazing feature. Closes #1."' );
 
-			return generateChangelog( '0.1.0', '0.0.1' )
+			return generateChangelog( '0.1.0' )
 				.then( () => {
 					expect( getChangelog() ).to.contain(
 						'## [0.1.0](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.0.1...v0.1.0)'
 					);
 
-					release( '0.1.0' );
+					release();
 				} );
 		} );
 
@@ -110,9 +113,9 @@ describe( 'dev-env/release-tools/utils', () => {
 				'--message "Feature: Another feature. Closes #2." ' +
 				'--message "This PR also closes #3 and #4."' );
 
-			return generateChangelog( '0.2.0', '0.1.0' )
+			return generateChangelog( '0.2.0' )
 				.then( () => {
-					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.0' ) );
+					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
 
 					/* eslint-disable max-len */
 					const expectedChangelog = `
@@ -126,7 +129,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
 
-					release( '0.2.0' );
+					release();
 				} );
 		} );
 
@@ -136,9 +139,9 @@ describe( 'dev-env/release-tools/utils', () => {
 				'--message "Fix: Amazing fix. Closes #5." ' +
 				'--message "The PR also finally closes #3 and #4. So good!"' );
 
-			return generateChangelog( '0.2.1', '0.2.0' )
+			return generateChangelog( '0.2.1' )
 				.then( () => {
-					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.1' ) );
+					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
 
 					/* eslint-disable max-len */
 					const expectedChangelog = `
@@ -152,7 +155,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
 
-					release( '0.2.1' );
+					release();
 				} );
 		} );
 
@@ -164,9 +167,9 @@ describe( 'dev-env/release-tools/utils', () => {
 				'--message "NOTE: Please read #1." ' +
 				'--message "BREAKING CHANGES: Some breaking change." ' );
 
-			return generateChangelog( '0.3.0', '0.2.1' )
+			return generateChangelog( '0.3.0' )
 				.then( () => {
-					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.3.0' ) );
+					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
 
 					/* eslint-disable max-len */
 					const expectedChangelog = `
@@ -188,7 +191,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
 
-					release( '0.3.0' );
+					release();
 				} );
 		} );
 
@@ -199,9 +202,9 @@ describe( 'dev-env/release-tools/utils', () => {
 				'--message "NOTE: Please read #1." ' +
 				'--message "BREAKING CHANGES: Some breaking change." ' );
 
-			return generateChangelog( '0.4.0', '0.3.0' )
+			return generateChangelog( '0.4.0' )
 				.then( () => {
-					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.4.0' ) );
+					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
 
 					/* eslint-disable max-len */
 					const expectedChangelog = `
@@ -223,14 +226,14 @@ describe( 'dev-env/release-tools/utils', () => {
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
 
-					release( '0.4.0' );
+					release();
 				} );
 		} );
 
 		it( 'changelog should contain 2 blank lines for changelog with internal changes', () => {
 			exec( 'git commit --allow-empty --message "Docs: Updated README."' );
 
-			return generateChangelog( '0.4.1', '0.4.0' )
+			return generateChangelog( '0.4.1' )
 				.then( () => {
 					const expectedChangelogeEntries = [
 						'## [0.4.1](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.4.0...v0.4.1) (0000-00-00)',
@@ -246,7 +249,7 @@ describe( 'dev-env/release-tools/utils', () => {
 						expect( row ).to.equal( changelogAsArray[ index ], `Index: ${ index }` );
 					} );
 
-					release( '0.4.1' );
+					release();
 				} );
 		} );
 
@@ -264,13 +267,86 @@ describe( 'dev-env/release-tools/utils', () => {
 				'--message "NOTE: Please read #1." ' +
 				'--message "BREAKING CHANGES: Some breaking change." ' );
 
-			return generateChangelog( '0.4.2', '0.4.1', true )
+			return generateChangelog( '0.4.2', true )
 				.then( () => {
-					const latestChangelog = getChangesForVersion( '0.4.2' );
+					const latestChangelog = getChangesForVersion( lastChangelogVersion );
 
 					expect( latestChangelog ).to.equal( 'Internal changes only (updated dependencies, documentation, etc.).' );
 
-					release( '0.4.2' );
+					release();
+				} );
+		} );
+
+		// See: https://github.com/ckeditor/ckeditor5-dev/issues/270#issuecomment-326807018
+		it( 'handles a commit which does not end with a dot', () => {
+			exec( 'git commit --allow-empty ' +
+				'--message "Feature: Another feature. Closes #2"' );
+
+			return generateChangelog( '0.5.0' )
+				.then( () => {
+					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
+
+					/* eslint-disable max-len */
+					const expectedChangelog = `
+### Features
+
+* Another feature. Closes [#2](https://github.com/ckeditor/ckeditor5-test-package/issues/2). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+`;
+					/* eslint-enable max-len */
+
+					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
+
+					release();
+				} );
+		} );
+
+		// See: https://github.com/ckeditor/ckeditor5-dev/issues/270
+		it( 'works with merge commit which is not a pull request #1', () => {
+			exec( 'git commit --allow-empty ' +
+				'--message "Merge t/ckeditor5-link/52 into master" ' +
+				'--message "Fix: Foo."'
+			);
+
+			return generateChangelog( '0.5.1' )
+				.then( () => {
+					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
+
+					/* eslint-disable max-len */
+					const expectedChangelog = `
+### Bug fixes
+
+* Foo. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+`;
+					/* eslint-enable max-len */
+
+					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
+
+					release();
+				} );
+		} );
+
+		// See: https://github.com/ckeditor/ckeditor5-dev/issues/270
+		it( 'works with merge commit which is not a pull request #2', () => {
+			exec( 'git commit --allow-empty ' +
+				'--message "Merge branch t/ckedtor5-engine/660 to master" ' +
+				'--message "Fix: Foo."'
+			);
+
+			return generateChangelog( '0.5.2' )
+				.then( () => {
+					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
+
+					/* eslint-disable max-len */
+					const expectedChangelog = `
+### Bug fixes
+
+* Foo. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+`;
+					/* eslint-enable max-len */
+
+					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
+
+					release();
 				} );
 		} );
 	} );
@@ -279,19 +355,23 @@ describe( 'dev-env/release-tools/utils', () => {
 		return tools.shExec( command, { verbosity: 'error' } );
 	}
 
-	function generateChangelog( version, previousVersion = null, isInternalRelease = false ) {
+	function generateChangelog( version, isInternalRelease = false ) {
+		lastChangelogVersion = version;
+
 		const transform = require( '../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository' );
 
 		return generateChangelogFromCommits( {
 			version,
 			isInternalRelease,
 			newTagName: 'v' + version,
-			tagName: previousVersion ? 'v' + previousVersion : null,
+			tagName: lastReleasedVersion ? 'v' + lastReleasedVersion : null,
 			transformCommit: transform,
 		} );
 	}
 
-	function release( version ) {
+	function release( version = lastChangelogVersion ) {
+		lastReleasedVersion = version;
+
 		exec( `npm version ${ version } --no-git-tag-version` );
 		exec( 'git add package.json' );
 		exec( `git commit --message "Release: v${ version }."` );
