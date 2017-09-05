@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [7.3.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.3.0...@ckeditor/ckeditor5-dev-docs@7.3.4) (2017-09-05)
+
+### Other changes
+
+* Build nightly docs in production mode (minified). ([6315c74](https://github.com/ckeditor/ckeditor5-dev/commit/6315c74))
+
+
 ## [7.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.2.2...@ckeditor/ckeditor5-dev-docs@7.3.0) (2017-08-18)
 
 ### Features
