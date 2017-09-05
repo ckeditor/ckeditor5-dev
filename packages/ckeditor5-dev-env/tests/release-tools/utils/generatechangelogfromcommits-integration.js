@@ -349,6 +349,54 @@ describe( 'dev-env/release-tools/utils', () => {
 					release();
 				} );
 		} );
+
+		// See: https://github.com/ckeditor/ckeditor5-dev/issues/271
+		it( 'works with prefix "Fixes"', () => {
+			exec( 'git commit --allow-empty ' +
+				'--message "Fixes: Foo Bar."'
+			);
+
+			return generateChangelog( '0.5.3' )
+				.then( () => {
+					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
+
+					/* eslint-disable max-len */
+					const expectedChangelog = `
+### Bug fixes
+
+* Foo Bar. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+`;
+					/* eslint-enable max-len */
+
+					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
+
+					release();
+				} );
+		} );
+
+		// See: https://github.com/ckeditor/ckeditor5-dev/issues/271
+		it( 'works with prefix "Fixed"', () => {
+			exec( 'git commit --allow-empty ' +
+				'--message "Fixed: Bar Foo."'
+			);
+
+			return generateChangelog( '0.5.4' )
+				.then( () => {
+					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
+
+					/* eslint-disable max-len */
+					const expectedChangelog = `
+### Bug fixes
+
+* Bar Foo. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+`;
+					/* eslint-enable max-len */
+
+					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
+
+					release();
+				} );
+		} );
 	} );
 
 	function exec( command ) {
