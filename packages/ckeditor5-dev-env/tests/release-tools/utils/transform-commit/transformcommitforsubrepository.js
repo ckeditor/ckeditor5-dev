@@ -156,7 +156,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
 				header: 'Fix: Simple fix. Closes #2.',
 				type: 'Fix',
-				subject: 'Simple fix. Closes #2',
+				subject: 'Simple fix. Closes #2.',
 				body: null,
 				footer: null,
 				notes: [
@@ -169,7 +169,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
-			const expectedSubject = 'Simple fix. Closes [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2)';
+			const expectedSubject = 'Simple fix. Closes [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2).';
 			expect( commit.subject ).to.equal( expectedSubject );
 			expect( commit.notes[ 0 ].text ).to.equal(
 				'Some issue [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1).'
@@ -179,9 +179,9 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		it( 'makes URLs to organization on GitHub', () => {
 			const commit = {
 				hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
-				header: 'Internal: Thanks to @CKEditor',
+				header: 'Internal: Thanks to @CKEditor.',
 				type: 'Fix',
-				subject: 'Internal: Thanks to @CKEditor',
+				subject: 'Internal: Thanks to @CKEditor.',
 				body: null,
 				footer: null,
 				notes: []
@@ -189,7 +189,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
-			const expectedSubject = 'Internal: Thanks to [@CKEditor](https://github.com/CKEditor)';
+			const expectedSubject = 'Internal: Thanks to [@CKEditor](https://github.com/CKEditor).';
 			expect( commit.subject ).to.equal( expectedSubject );
 		} );
 
