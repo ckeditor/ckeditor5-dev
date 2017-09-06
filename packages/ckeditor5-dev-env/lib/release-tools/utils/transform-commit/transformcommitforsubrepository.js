@@ -55,6 +55,12 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 		return;
 	}
 
+	// If a dot is missing at the end of the subject...
+	if ( !commit.subject.endsWith( '.' ) ) {
+		// ...let's add it.
+		commit.subject += '.';
+	}
+
 	commit.rawType = commit.type;
 	commit.type = utils.getCommitType( commit.type );
 

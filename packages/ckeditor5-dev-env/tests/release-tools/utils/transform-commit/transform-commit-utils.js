@@ -216,6 +216,11 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				expect( transformCommit.getCommitType( 'Fix' ) ).to.equal( 'Bug fixes' );
 				expect( transformCommit.getCommitType( 'Other' ) ).to.equal( 'Other changes' );
 			} );
+
+			it( 'should support aliases for the "Fix" type', () => {
+				expect( transformCommit.getCommitType( 'Fixes' ), 'Fixes' ).to.equal( 'Bug fixes' );
+				expect( transformCommit.getCommitType( 'Fixed' ), 'Fixed' ).to.equal( 'Bug fixes' );
+			} );
 		} );
 
 		describe( 'truncate()', () => {

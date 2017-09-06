@@ -34,7 +34,7 @@ exec( `git clone ${ mainRepoUrl }.git` );
 
 // Build the documentation.
 console.log( 'Building documentation...' );
-exec( 'gulp docs' );
+exec( 'gulp docs --production' );
 
 console.log( 'Copying files...' );
 

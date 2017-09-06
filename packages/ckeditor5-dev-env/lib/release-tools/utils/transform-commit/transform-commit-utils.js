@@ -13,8 +13,10 @@ const transformCommitUtils = {
 	 * Types marked as `false` will be ignored during generating the changelog.
 	 */
 	availableCommitTypes: new Map( [
-		[ 'Feature', true ],
 		[ 'Fix', true ],
+		[ 'Fixes', true ],
+		[ 'Fixed', true ],
+		[ 'Feature', true ],
 		[ 'Other', true ],
 		[ 'Code style', false ],
 		[ 'Docs', false ],
@@ -146,6 +148,8 @@ const transformCommitUtils = {
 				return 'Features';
 
 			case 'Fix':
+			case 'Fixes':
+			case 'Fixed':
 				return 'Bug fixes';
 
 			case 'Other':
