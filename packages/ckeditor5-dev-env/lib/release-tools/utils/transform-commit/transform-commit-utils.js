@@ -37,22 +37,28 @@ const transformCommitUtils = {
 	},
 
 	/**
-	 * Changes user's name to link that leads to the user's profile.
+	 * Replaces reference to user (@name) with a link to his profile.
 	 *
-	 * @param {String} sentence
+	 * @param {String} comment
 	 * @returns {String}
 	 */
-	linkGithubUsers( sentence ) {
-		return sentence.replace( /@([\w\d_-]+)/g, '[@$1](https://github.com/$1)' );
+	linkToGithubUsers( comment ) {
+		return comment.replace( /@([0-9A-Z_-]+\/?)/ig, ( matchText, nickName ) => {
+			if ( nickName.endsWith( '/' ) ) {
+				return matchText;
+			}
+
+			return `[@${ nickName }](https://github.com/${ nickName })`;
+		} );
 	},
 
 	/**
-	 * Changes references to issue to links that lead to the GitHub issue page.
+	 * Replaces reference to issue (#ID) with a link to the issue.
 	 *
-	 * @param {String} sentence
+	 * @param {String} comment
 	 * @returns {String}
 	 */
-	linkGithubIssues( sentence ) {
+	linkToGithubIssues( comment ) {
 		const packageJson = getPackageJson();
 		const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
 
@@ -60,8 +66,71 @@ const transformCommitUtils = {
 			throw new Error( `The package.json for "${ packageJson.name }" must contain the "bugs" property.` );
 		}
 
-		return sentence.replace( /#([0-9]+)/g, ( _, issueId ) => {
-			return `[#${ issueId }](${ issuesUrl }/${ issueId })`;
+		return comment.replace( /(.?)#([0-9]+)/g, ( matchText, charBeforeIssue, issueId ) => {
+			// Don't replace anything if the '#ID' belongs to another part of the comment.
+			if ( charBeforeIssue && /[A-Z0-9_-]/i.test( charBeforeIssue ) ) {
+				return matchText;
+			}
+
+			return `${ charBeforeIssue }[#${ issueId }](${ issuesUrl }/${ issueId })`;
+		} );
+	},
+
+	/**
+	 * Replaces reference to repository (organization/repository) with a link to the repository.
+	 *
+	 * If the reference contains an issue, link will lead to the issue.
+	 *
+	 * @param {String} comment
+	 * @returns {String}
+	 */
+	linkToGithubRepositories( comment ) {
+		return comment.replace( /(@|\.)?([A-Z0-9-_/]+)(#(\d+)?)?/gi, ( matchText, charBeforeRepo, repository, issueMark, issueId ) => {
+			if ( !isValidRepository() ) {
+				return matchText;
+			}
+
+			if ( issueId ) {
+				return `[${ repository }#${ issueId }](https://github.com/${ repository }/issues/${ issueId })`;
+			}
+
+			return `[${ repository }](https://github.com/${ repository })`;
+
+			function isValidRepository() {
+				// If the repository starts with '@', it means the package link should lead to NPM.
+				if ( matchText.startsWith( '@' ) ) {
+					return false;
+				}
+
+				// If the repository starts with '.', it means the repository is part of other link.
+				if ( matchText.startsWith( '.' ) ) {
+					return false;
+				}
+
+				// If the issue hash (#) occurs in repository but the issue id misses, don't modify it.
+				if ( issueMark && !issueId ) {
+					return false;
+				}
+
+				// If the repository contains more than two slashes, it means the repository is a path.
+				return repository.split( '/' ).length === 2;
+			}
+		} );
+	},
+
+	/**
+	 * Replaces scoped package name with a link which will land to the package in NPM repository.
+	 *
+	 * @param {String} comment
+	 * @returns {String}
+	 */
+	linkToNpmScopedPackage( comment ) {
+		return comment.replace( /(@[A-Z0-9-_/]+)#?/gi, ( matchText, repository ) => {
+			if ( repository.split( '/' ).length !== 2 || matchText.endsWith( '#' ) ) {
+				return matchText;
+			}
+
+			return `[${ repository }](https://npmjs.com/package/${ repository })`;
 		} );
 	},
 
