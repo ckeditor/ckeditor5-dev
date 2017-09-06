@@ -119,7 +119,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					.to.equal( 'i/am/a/path' );
 			} );
 
-			it( 'does not make a link if a comment does not match to "@organization/repository"', () => {
+			it( 'does not make a link if a comment does not match to "organization/repository"', () => {
 				expect( transformCommit.linkToGithubRepository( 'ckeditor/ckeditor5-dev/' ) )
 					.to.equal( 'ckeditor/ckeditor5-dev/' );
 			} );
