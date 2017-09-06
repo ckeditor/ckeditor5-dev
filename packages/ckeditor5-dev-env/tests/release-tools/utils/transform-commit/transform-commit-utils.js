@@ -41,25 +41,25 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			} );
 		} );
 
-		describe( 'linkToGithubUsers()', () => {
+		describe( 'linkToGithubUser()', () => {
 			it( 'makes a link to GitHub profile if a user was mentioned in a comment', () => {
-				expect( transformCommit.linkToGithubUsers( '@CKSource' ) )
+				expect( transformCommit.linkToGithubUser( '@CKSource' ) )
 					.to.equal( '[@CKSource](https://github.com/CKSource)' );
 			} );
 
 			it( 'does nothing if a comment contains scoped package name', () => {
-				expect( transformCommit.linkToGithubUsers( '@ckeditor/ckeditor5-foo' ) )
+				expect( transformCommit.linkToGithubUser( '@ckeditor/ckeditor5-foo' ) )
 					.to.equal( '@ckeditor/ckeditor5-foo' );
 			} );
 		} );
 
-		describe( 'linkToGithubIssues()', () => {
+		describe( 'linkToGithubIssue()', () => {
 			it( 'throws an error if package.json does not contain the "bugs" property', () => {
 				stubs.getPackageJson.returns( {
 					name: 'test-package'
 				} );
 
-				expect( () => transformCommit.linkToGithubIssues( '' ) )
+				expect( () => transformCommit.linkToGithubIssue( '' ) )
 					.to.throw( Error, 'The package.json for "test-package" must contain the "bugs" property.' );
 			} );
 
@@ -69,7 +69,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					bugs: '/issues'
 				} );
 
-				expect( transformCommit.linkToGithubIssues( 'Some issue #1.' ) )
+				expect( transformCommit.linkToGithubIssue( 'Some issue #1.' ) )
 					.to.equal( 'Some issue [#1](/issues/1).' );
 			} );
 
@@ -81,7 +81,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					}
 				} );
 
-				expect( transformCommit.linkToGithubIssues( 'Some issue #1.' ) )
+				expect( transformCommit.linkToGithubIssue( 'Some issue #1.' ) )
 					.to.equal( 'Some issue [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1).' );
 			} );
 
@@ -93,45 +93,45 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					}
 				} );
 
-				expect( transformCommit.linkToGithubIssues( 'organization/repository#1' ) )
+				expect( transformCommit.linkToGithubIssue( 'organization/repository#1' ) )
 					.to.equal( 'organization/repository#1' );
 			} );
 		} );
 
-		describe( 'linkToGithubRepositories()', () => {
+		describe( 'linkToGithubRepository()', () => {
 			it( 'makes a link to GitHub if a comment matches to "organization/repository"', () => {
-				expect( transformCommit.linkToGithubRepositories( 'ckeditor/ckeditor5-dev' ) )
+				expect( transformCommit.linkToGithubRepository( 'ckeditor/ckeditor5-dev' ) )
 					.to.equal( '[ckeditor/ckeditor5-dev](https://github.com/ckeditor/ckeditor5-dev)' );
 			} );
 
 			it( 'makes a link to GitHub issue if a comment matches to "organization/repository#ID"', () => {
-				expect( transformCommit.linkToGithubRepositories( 'ckeditor/ckeditor5-dev#2' ) )
+				expect( transformCommit.linkToGithubRepository( 'ckeditor/ckeditor5-dev#2' ) )
 					.to.equal( '[ckeditor/ckeditor5-dev#2](https://github.com/ckeditor/ckeditor5-dev/issues/2)' );
 			} );
 
 			it( 'does not make a link from a comment which is a scoped package', () => {
-				expect( transformCommit.linkToGithubRepositories( '@ckeditor/ckeditor5-dev' ) )
+				expect( transformCommit.linkToGithubRepository( '@ckeditor/ckeditor5-dev' ) )
 					.to.equal( '@ckeditor/ckeditor5-dev' );
 			} );
 
 			it( 'does not make a link from a comment which is a path', () => {
-				expect( transformCommit.linkToGithubRepositories( 'i/am/a/path' ) )
+				expect( transformCommit.linkToGithubRepository( 'i/am/a/path' ) )
 					.to.equal( 'i/am/a/path' );
 			} );
 
 			it( 'does not make a link if a comment does not match to "@organization/repository"', () => {
-				expect( transformCommit.linkToGithubRepositories( 'ckeditor/ckeditor5-dev/' ) )
+				expect( transformCommit.linkToGithubRepository( 'ckeditor/ckeditor5-dev/' ) )
 					.to.equal( 'ckeditor/ckeditor5-dev/' );
 			} );
 
 			it( 'does not make a link from a comment which does not contain the issue id', () => {
-				expect( transformCommit.linkToGithubRepositories( 'ckeditor/ckeditor5-dev#' ) )
+				expect( transformCommit.linkToGithubRepository( 'ckeditor/ckeditor5-dev#' ) )
 					.to.equal( 'ckeditor/ckeditor5-dev#' );
 			} );
 
 			it( 'does not make a link from a comment which is a link to GitHub\'s profile', () => {
 				// "com/CKSource" matches to "organization/repository" pattern but it should not be changed.
-				expect( transformCommit.linkToGithubRepositories( '[@CKSource](https://github.com/CKSource)' ) )
+				expect( transformCommit.linkToGithubRepository( '[@CKSource](https://github.com/CKSource)' ) )
 					.to.equal( '[@CKSource](https://github.com/CKSource)' );
 			} );
 		} );
@@ -158,8 +158,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			} );
 		} );
 
-		describe( 'linksTo* - integration', () => {
-			it( 'all linksTo* functions should work together with one another', () => {
+		describe( 'linkTo* - integration', () => {
+			it( 'all linkTo* functions should work together with one another', () => {
 				stubs.getPackageJson.returns( {
 					name: 'ckeditor5-dev',
 					bugs: 'https://github.com/ckeditor/ckeditor5-dev/issues'
@@ -196,10 +196,10 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 			function makeLinks( comment ) {
 				// Order of these functions doesn't matter.
-				comment = transformCommit.linkToGithubRepositories( comment );
+				comment = transformCommit.linkToGithubRepository( comment );
 				comment = transformCommit.linkToNpmScopedPackage( comment );
-				comment = transformCommit.linkToGithubIssues( comment );
-				comment = transformCommit.linkToGithubUsers( comment );
+				comment = transformCommit.linkToGithubIssue( comment );
+				comment = transformCommit.linkToGithubUser( comment );
 
 				return comment;
 			}

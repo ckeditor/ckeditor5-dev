@@ -96,10 +96,10 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 };
 
 function makeLinks( comment ) {
-	comment = utils.linkToGithubRepositories( comment );
+	comment = utils.linkToGithubRepository( comment );
 	comment = utils.linkToNpmScopedPackage( comment );
-	comment = utils.linkToGithubIssues( comment );
-	comment = utils.linkToGithubUsers( comment );
+	comment = utils.linkToGithubIssue( comment );
+	comment = utils.linkToGithubUser( comment );
 
 	return comment;
 }

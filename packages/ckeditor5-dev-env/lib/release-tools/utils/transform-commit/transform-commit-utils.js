@@ -42,7 +42,7 @@ const transformCommitUtils = {
 	 * @param {String} comment
 	 * @returns {String}
 	 */
-	linkToGithubUsers( comment ) {
+	linkToGithubUser( comment ) {
 		return comment.replace( /@([0-9A-Z_-]+\/?)/ig, ( matchText, nickName ) => {
 			if ( nickName.endsWith( '/' ) ) {
 				return matchText;
@@ -58,7 +58,7 @@ const transformCommitUtils = {
 	 * @param {String} comment
 	 * @returns {String}
 	 */
-	linkToGithubIssues( comment ) {
+	linkToGithubIssue( comment ) {
 		const packageJson = getPackageJson();
 		const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
 
@@ -84,7 +84,7 @@ const transformCommitUtils = {
 	 * @param {String} comment
 	 * @returns {String}
 	 */
-	linkToGithubRepositories( comment ) {
+	linkToGithubRepository( comment ) {
 		return comment.replace( /(@|\.)?([A-Z0-9-_/]+)(#(\d+)?)?/gi, ( matchText, charBeforeRepo, repository, issueMark, issueId ) => {
 			if ( !isValidRepository() ) {
 				return matchText;
