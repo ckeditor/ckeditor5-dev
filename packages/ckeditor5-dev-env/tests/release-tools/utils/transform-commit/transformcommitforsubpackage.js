@@ -151,5 +151,31 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( transformCommitForSubPackage( commit, context ) ).to.equal( commit );
 			expect( stubs.transformCommitForSubRepository.calledOnce ).to.equal( true );
 		} );
+
+		it( 'does not crash if the merge commit does not contain the second line', () => {
+			const commit = {
+				type: null,
+				subject: null,
+				merge: 'Merge branch \'master\' of github.com:ckeditor/ckeditor5-dev',
+				header: '-hash-',
+				body: '575e00bc8ece48826adefe226c4fb1fe071c73a7',
+				footer: null,
+				notes: [],
+				references: [],
+				mentions: [],
+				revert: null
+			};
+
+			stubs.getChangedFilesForCommit.returns( [] );
+
+			expect( () => {
+				transformCommitForSubPackage( commit, context );
+			} ).to.not.throw( Error );
+
+			expect( stubs.getChangedFilesForCommit.firstCall.args[ 0 ] ).to.equal( '575e00bc8ece48826adefe226c4fb1fe071c73a7' );
+			expect( commit.hash ).to.equal( '575e00bc8ece48826adefe226c4fb1fe071c73a7' );
+			expect( commit.header ).to.equal( 'Merge branch \'master\' of github.com:ckeditor/ckeditor5-dev' );
+			expect( commit.body ).to.equal( null );
+		} );
 	} );
 } );

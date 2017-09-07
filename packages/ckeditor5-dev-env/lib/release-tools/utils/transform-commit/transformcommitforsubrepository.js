@@ -28,12 +28,24 @@ const INDENT_SIZE = 21;
 module.exports = function transformCommitForSubRepository( commit, context ) {
 	const log = logger( context.displayLogs ? 'info' : 'error' );
 
+	const hasCorrectType = utils.availableCommitTypes.has( commit.type );
+	const isCommitIncluded = utils.availableCommitTypes.get( commit.type );
+
+	// Our merge commit always contains two lines:
+	// Merge ...
+	// Prefix: Subject of the changes.
+	// Unfortunately, merge commit made by Git does not contain the second line.
+	// Because of that hash of the commit is parsed as a body and the changelog will crash.
+	// See: https://github.com/ckeditor/ckeditor5-dev/issues/276.
+	if ( commit.merge && !commit.hash ) {
+		commit.hash = commit.body;
+		commit.header = commit.merge;
+		commit.body = null;
+	}
+
 	if ( typeof commit.hash === 'string' ) {
 		commit.hash = commit.hash.substring( 0, 7 );
 	}
-
-	const hasCorrectType = utils.availableCommitTypes.has( commit.type );
-	const isCommitIncluded = utils.availableCommitTypes.get( commit.type );
 
 	let logMessage = `* ${ chalk.yellow( commit.hash ) } "${ utils.truncate( commit.header, 100 ) }" `;
 
@@ -45,7 +57,8 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 		logMessage += chalk.red( 'INVALID' );
 	}
 
-	if ( commit.merge ) {
+	// Avoid displaying commit merge twice.
+	if ( commit.merge && commit.merge !== commit.header ) {
 		logMessage += `\n${ ' '.repeat( INDENT_SIZE ) }${ commit.merge }`;
 	}
 

@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## [4.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@3.0.6...@ckeditor/ckeditor5-dev-utils@4.0.0) (2017-09-07)
+
+### Other changes
+
+* Changed the `bundler.createEntryFile()` output so the entry file defines a default export. Closes [#275](https://github.com/ckeditor/ckeditor5-dev/issues/275). ([57c581c](https://github.com/ckeditor/ckeditor5-dev/commit/57c581c))
+
+### BREAKING CHANGES
+
+* The `bundler.createEntryFile()`'s output has been changed.
+
+
 ## [3.0.6](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@3.0.5...@ckeditor/ckeditor5-dev-utils@3.0.6) (2017-09-01)
 
 ### Bug fixes

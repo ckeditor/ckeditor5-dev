@@ -25,6 +25,18 @@ module.exports = function transformCommitForSubPackage( commit, context ) {
 		return;
 	}
 
+	// Our merge commit always contains two lines:
+	// Merge ...
+	// Prefix: Subject of the changes.
+	// Unfortunately, merge commit made by Git does not contain the second line.
+	// Because of that hash of the commit is parsed as a body and the changelog will crash.
+	// See: https://github.com/ckeditor/ckeditor5-dev/issues/276.
+	if ( commit.merge && !commit.hash ) {
+		commit.hash = commit.body;
+		commit.header = commit.merge;
+		commit.body = null;
+	}
+
 	const files = getChangedFilesForCommit( commit.hash );
 
 	if ( !files.length ) {
