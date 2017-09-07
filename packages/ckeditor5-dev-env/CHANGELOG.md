@@ -1,6 +1,18 @@
 Changelog
 =========
 
+## [5.1.10](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.8...@ckeditor/ckeditor5-dev-env@5.1.10) (2017-09-07)
+
+### Bug fixes
+
+* Merge commit which does not contain the second line will not crash the changelog tool. Closes [#276](https://github.com/ckeditor/ckeditor5-dev/issues/276). ([ab1ffd8](https://github.com/ckeditor/ckeditor5-dev/commit/ab1ffd8))
+* Several issues related to proper typing the commit subject. Closes [#270](https://github.com/ckeditor/ckeditor5-dev/issues/270). Closes [#271](https://github.com/ckeditor/ckeditor5-dev/issues/271). ([0df891d](https://github.com/ckeditor/ckeditor5-dev/commit/0df891d))
+
+  * If a commit message didn't end with a dot, it was ignored. Now it will be handled.
+  * Added aliases for `Fix` type of the commit. Now `Fixes` and `Fixed` will be handled as `Fix`.
+  * Merge commit which wasn't a pull request was ignored. Now it will be handled.
+
+
 ## [5.1.8](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.7...@ckeditor/ckeditor5-dev-env@5.1.8) (2017-09-01)
 
 ### Bug fixes
