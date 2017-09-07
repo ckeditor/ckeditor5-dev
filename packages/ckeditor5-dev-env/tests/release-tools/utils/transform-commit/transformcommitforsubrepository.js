@@ -362,5 +362,49 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			);
 			expect( commit.footer ).to.equal( null );
 		} );
+
+		it( 'fixes the commit which does not contain the second line', () => {
+			const commit = {
+				type: null,
+				subject: null,
+				merge: 'Merge branch \'master\' of github.com:ckeditor/ckeditor5-dev',
+				header: '-hash-',
+				body: '575e00bc8ece48826adefe226c4fb1fe071c73a7',
+				footer: null,
+				notes: [],
+				references: [],
+				mentions: [],
+				revert: null
+			};
+
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
+
+			expect( commit.hash ).to.equal( '575e00b' );
+			expect( commit.header ).to.equal( 'Merge branch \'master\' of github.com:ckeditor/ckeditor5-dev' );
+			expect( commit.body ).to.equal( null );
+		} );
+
+		it( 'displays proper log if commit does not contain the second line', () => {
+			const commit = {
+				type: null,
+				subject: null,
+				merge: 'Merge branch \'master\' of github.com:ckeditor/ckeditor5-dev',
+				header: '-hash-',
+				body: '575e00bc8ece48826adefe226c4fb1fe071c73a7',
+				footer: null,
+				notes: [],
+				references: [],
+				mentions: [],
+				revert: null
+			};
+
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
+
+			// The merge commit displays two lines:
+			// Prefix: Changes.
+			// Merge ...
+			// If the merge commit does not contain the second line, it should display only the one.
+			expect( stubs.logger.info.firstCall.args[ 0 ].split( '\n' ) ).length( 1 );
+		} );
 	} );
 } );
