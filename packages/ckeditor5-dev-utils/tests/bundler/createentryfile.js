@@ -53,7 +53,7 @@ import ClassicEditorBase from '@ckeditor/ckeditor5-editor-classic/src/editor';
 import ArticlePlugin from '@ckeditor/ckeditor5-presets/src/article';
 import ClipboardPlugin from '@ckeditor/ckeditor5-clipboard/src/clipboard';
 
-export class ClassicEditor extends ClassicEditorBase {}
+export default class ClassicEditor extends ClassicEditorBase {}
 
 ClassicEditor.build = {
 	plugins: [
