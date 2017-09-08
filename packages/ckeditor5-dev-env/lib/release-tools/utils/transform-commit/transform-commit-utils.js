@@ -45,94 +45,47 @@ const transformCommitUtils = {
 	 * @returns {String}
 	 */
 	linkToGithubUser( comment ) {
-		return comment.replace( /@([0-9A-Z_-]+\/?)/ig, ( matchText, nickName ) => {
-			if ( nickName.endsWith( '/' ) ) {
-				return matchText;
+		return comment.replace( /(.?)@([0-9A-Z_-]+)(\/)?/ig, ( matchedText, charBeforeAt, nickName, charAfterUser ) => {
+			// Most probably the matched value is an email address.
+			if ( charBeforeAt && /[A-Z0-9_]/i.test( charBeforeAt ) ) {
+				return matchedText;
 			}
 
-			return `[@${ nickName }](https://github.com/${ nickName })`;
+			if ( charAfterUser === '/' ) {
+				return matchedText;
+			}
+
+			charAfterUser = charAfterUser || '';
+
+			return `${ charBeforeAt }[@${ nickName }](https://github.com/${ nickName })${ charAfterUser }`;
 		} );
 	},
 
 	/**
 	 * Replaces reference to issue (#ID) with a link to the issue.
+	 * If comment matches to "organization/repository#ID", link will lead to the specified repository.
 	 *
 	 * @param {String} comment
 	 * @returns {String}
 	 */
 	linkToGithubIssue( comment ) {
-		const packageJson = getPackageJson();
-		const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
-
-		if ( !issuesUrl ) {
-			throw new Error( `The package.json for "${ packageJson.name }" must contain the "bugs" property.` );
-		}
-
-		return comment.replace( /(.?)#([0-9]+)/g, ( matchText, charBeforeIssue, issueId ) => {
-			// Don't replace anything if the '#ID' belongs to another part of the comment.
-			if ( charBeforeIssue && /[A-Z0-9_-]/i.test( charBeforeIssue ) ) {
-				return matchText;
-			}
-
-			return `${ charBeforeIssue }[#${ issueId }](${ issuesUrl }/${ issueId })`;
-		} );
-	},
-
-	/**
-	 * Replaces reference to repository (organization/repository) with a link to the repository.
-	 *
-	 * If the reference contains an issue, link will lead to the issue.
-	 *
-	 * @param {String} comment
-	 * @returns {String}
-	 */
-	linkToGithubRepository( comment ) {
-		return comment.replace( /(@|\.)?([A-Z0-9-_/]+)(#(\d+)?)?/gi, ( matchText, charBeforeRepo, repository, issueMark, issueId ) => {
-			if ( !isValidRepository() ) {
-				return matchText;
-			}
-
-			if ( issueId ) {
-				return `[${ repository }#${ issueId }](https://github.com/${ repository }/issues/${ issueId })`;
-			}
-
-			return `[${ repository }](https://github.com/${ repository })`;
-
-			function isValidRepository() {
-				// If the repository starts with '@', it means the package link should lead to NPM.
-				if ( matchText.startsWith( '@' ) ) {
-					return false;
+		return comment.replace( /(\/?[A-Z0-9-_]+\/[A-Z0-9-_]+)?#([0-9]+)/ig, ( matchedText, maybeRepository, issueId ) => {
+			if ( maybeRepository ) {
+				if ( maybeRepository.startsWith( '/' ) ) {
+					return matchedText;
 				}
 
-				// If the repository starts with '.', it means the repository is part of other link.
-				if ( matchText.startsWith( '.' ) ) {
-					return false;
-				}
-
-				// If the issue hash (#) occurs in repository but the issue id misses, don't modify it.
-				if ( issueMark && !issueId ) {
-					return false;
-				}
-
-				// If the repository contains more than two slashes, it means the repository is a path.
-				return repository.split( '/' ).length === 2;
-			}
-		} );
-	},
-
-	/**
-	 * Replaces scoped package name with a link which will land to the package in NPM repository.
-	 *
-	 * @param {String} comment
-	 * @returns {String}
-	 */
-	linkToNpmScopedPackage( comment ) {
-		return comment.replace( /(@[A-Z0-9-_/]+)#?/gi, ( matchText, repository ) => {
-			if ( repository.split( '/' ).length !== 2 || matchText.endsWith( '#' ) ) {
-				return matchText;
+				return `[${ maybeRepository }#${ issueId }](https://github.com/${ maybeRepository }/issues/${ issueId })`;
 			}
 
-			return `[${ repository }](https://npmjs.com/package/${ repository })`;
+			const packageJson = getPackageJson();
+			const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
+
+			if ( !issuesUrl ) {
+				throw new Error( `The package.json for "${ packageJson.name }" must contain the "bugs" property.` );
+			}
+
+			return `[#${ issueId }](${ issuesUrl }/${ issueId })`;
 		} );
 	},
 

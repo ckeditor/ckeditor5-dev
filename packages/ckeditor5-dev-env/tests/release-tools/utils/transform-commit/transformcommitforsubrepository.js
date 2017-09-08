@@ -178,7 +178,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				header: 'Fix: Simple fix. Closes #2.',
 				type: 'Fix',
 				subject: 'Simple fix. Closes #2',
-				body: 'See ckeditor/ckeditor5#1. Thanks to @CKEditor. Fix will be published under @ckeditor/ckeditor5-dev. Read more #2.',
+				body: 'See ckeditor/ckeditor5#1. Thanks to @CKEditor. Read more #2.',
 				footer: null,
 				notes: []
 			};
@@ -188,7 +188,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			// Remember about the indent in commit body.
 			const expectedBody = '  See [ckeditor/ckeditor5#1](https://github.com/ckeditor/ckeditor5/issues/1). ' +
 				'Thanks to [@CKEditor](https://github.com/CKEditor). ' +
-				'Fix will be published under [@ckeditor/ckeditor5-dev](https://npmjs.com/package/@ckeditor/ckeditor5-dev). ' +
 				'Read more [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2).';
 
 			expect( commit.body ).to.equal( expectedBody );
@@ -209,7 +208,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					},
 					{
 						title: 'NOTE',
-						text: 'Fix will be published under @ckeditor/ckeditor5-dev. Read more #2.'
+						text: 'Read more #2.'
 					}
 				]
 			};
@@ -220,8 +219,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				'Thanks to [@CKEditor](https://github.com/CKEditor).';
 
 			// eslint-disable-next-line max-len
-			const expectedSecondNodeText = 'Fix will be published under [@ckeditor/ckeditor5-dev](https://npmjs.com/package/@ckeditor/ckeditor5-dev). ' +
-				'Read more [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2).';
+			const expectedSecondNodeText = 'Read more [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2).';
 
 			expect( commit.notes[ 0 ].text ).to.equal( expectedFirstNoteText );
 			expect( commit.notes[ 1 ].text ).to.equal( expectedSecondNodeText );

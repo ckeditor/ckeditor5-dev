@@ -115,8 +115,6 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 };
 
 function makeLinks( comment ) {
-	comment = utils.linkToGithubRepository( comment );
-	comment = utils.linkToNpmScopedPackage( comment );
 	comment = utils.linkToGithubIssue( comment );
 	comment = utils.linkToGithubUser( comment );
 
