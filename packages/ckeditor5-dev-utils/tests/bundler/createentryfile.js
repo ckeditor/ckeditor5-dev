@@ -29,7 +29,7 @@ describe( 'bundler', () => {
 
 			createEntryFile( 'destination/path/file.js', {
 				plugins: [
-					'@ckeditor/ckeditor5-presets/src/article',
+					'@ckeditor/ckeditor5-basic-styles/src/bold',
 					'@ckeditor/ckeditor5-clipboard/src/clipboard'
 				],
 				moduleName: 'ClassicEditor',
@@ -50,14 +50,14 @@ describe( 'bundler', () => {
  */
 
 import ClassicEditorBase from '@ckeditor/ckeditor5-editor-classic/src/editor';
-import ArticlePlugin from '@ckeditor/ckeditor5-presets/src/article';
+import BoldPlugin from '@ckeditor/ckeditor5-basic-styles/src/bold';
 import ClipboardPlugin from '@ckeditor/ckeditor5-clipboard/src/clipboard';
 
 export default class ClassicEditor extends ClassicEditorBase {}
 
 ClassicEditor.build = {
 	plugins: [
-		ArticlePlugin,
+		BoldPlugin,
 		ClipboardPlugin
 	],
 	config: {
