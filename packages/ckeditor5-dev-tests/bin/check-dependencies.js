@@ -67,20 +67,22 @@ for ( const filePath of glob.sync( globPattern ) ) {
 }
 
 if ( invalidFiles.size ) {
-	let errorMessage = 'The files listed below contain dependencies which are not defined in "package.json":\n\n';
-	errorMessage += [ ...invalidFiles ].map( formatLine ).join( '\n' );
+	console.error( '\n' + '='.repeat( 120 ) );
+	console.error( '\nThe files listed below require dependencies which are not defined in "package.json":\n' );
+	console.error( [ ...invalidFiles ].map( formatLine ).join( '\n' ) + '\n' );
 
 	if ( missingDependencies.size ) {
-		errorMessage += '\n\nMissing dependencies:\n\n';
-		errorMessage += [ ...missingDependencies ].map( formatLine ).join( '\n' );
+		console.error( 'Missing dependencies:\n' );
+		console.error( [ ...missingDependencies ].map( formatLine ).join( '\n' ) + '\n' );
 	}
 
 	if ( missingDevDependencies.size ) {
-		errorMessage += '\n\nMissing dev-dependencies:\n\n';
-		errorMessage += [ ...missingDevDependencies ].map( formatLine ).join( '\n' );
+		console.error( 'Missing dev-dependencies:\n' );
+		console.error( [ ...missingDevDependencies ].map( formatLine ).join( '\n' ) + '\n' );
 	}
+	console.error( '='.repeat( 120 ) + '\n' );
 
-	throw new Error( errorMessage + '\n' );
+	throw new Error( 'Some of the files require dependencies which are not defined in "package.json".' );
 }
 
 function formatLine( line ) {
