@@ -29,11 +29,16 @@ for ( const filePath of glob.sync( globPattern ) ) {
 		continue;
 	}
 
-	fs.readFileSync( filePath, 'utf-8' )
-		.split( '\n' )
-		.forEach( line => {
-			// Find required package name.
-			const matchedImport = /^import[^;]+from '(@ckeditor\/[^/]+)[^']+';/mg.exec( line );
+	const fileContent = fs.readFileSync( filePath, 'utf-8' );
+	const matchedImports = fileContent.match( /^import[^;]+from '(@ckeditor\/[^/]+)[^']+';/mg );
+
+	if ( !matchedImports ) {
+		continue;
+	}
+
+	matchedImports
+		.forEach( importLine => {
+			const matchedImport = importLine.match( /(@ckeditor\/[^/]+)/ );
 
 			if ( !matchedImport ) {
 				return;
