@@ -25,6 +25,11 @@ const invalidFiles = new Set();
 const globPattern = path.join( cwd, '@(src|tests)/**/*.js' );
 
 for ( const filePath of glob.sync( globPattern ) ) {
+	// Skip "src/lib" directory.
+	if ( filePath.match( /\/src\/lib\// ) ) {
+		continue;
+	}
+
 	fs.readFileSync( filePath, 'utf-8' )
 		.split( '\n' )
 		.forEach( line => {
