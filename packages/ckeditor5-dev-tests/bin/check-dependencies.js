@@ -14,7 +14,6 @@ const glob = require( 'glob' );
 const cwd = process.cwd();
 const packageJson = require( path.join( cwd, 'package.json' ) );
 
-const currentPackageName = packageJson.name;
 const dependencies = Object.keys( packageJson.dependencies || {} );
 const devDependencies = Object.keys( packageJson.devDependencies || {} );
 
@@ -41,11 +40,6 @@ for ( const filePath of glob.sync( globPattern ) ) {
 			}
 
 			const packageName = matchedImport[ 1 ];
-
-			// Current package cannot be added as dependency.
-			if ( currentPackageName === packageName ) {
-				return;
-			}
 
 			// Check whether the package is defined as dependency and dev-dependency.
 			const containPackageAsDependency = dependencies.includes( packageName );
