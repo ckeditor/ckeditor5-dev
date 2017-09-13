@@ -34,13 +34,13 @@ for ( const filePath of glob.sync( globPattern ) ) {
 		.split( '\n' )
 		.forEach( line => {
 			// Find required package name.
-			let packageName = /^import .* from '(@ckeditor\/[^/]+)\/.*/.exec( line );
+			const matchedImport = /^import[^;]+from '(@ckeditor\/[^/]+)[^']+';/mg.exec( line );
 
-			if ( !packageName ) {
+			if ( !matchedImport ) {
 				return;
 			}
 
-			packageName = packageName[ 1 ];
+			const packageName = matchedImport[ 1 ];
 
 			// Current package cannot be added as dependency.
 			if ( currentPackageName === packageName ) {
