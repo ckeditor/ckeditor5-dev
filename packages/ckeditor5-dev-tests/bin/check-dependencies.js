@@ -81,7 +81,7 @@ if ( invalidFiles.size ) {
 	}
 
 	if ( missingDevDependencies.size ) {
-		console.error( 'Missing dev-dependencies:\n' );
+		console.error( 'Missing devDependencies:\n' );
 		console.error( [ ...missingDevDependencies ].map( formatLine ).join( '\n' ) + '\n' );
 	}
 	console.error( '='.repeat( 120 ) + '\n' );
