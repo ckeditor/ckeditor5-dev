@@ -55,7 +55,8 @@
     "ckeditor5-dev-tests-create-mgit-json": "./bin/create-mgit-json.js",
     "ckeditor5-dev-tests-create-lerna-json": "./bin/create-lerna-json.js",
     "ckeditor5-dev-tests-install-dependencies": "./bin/install-dependencies.sh",
-    "ckeditor5-dev-tests-save-revision": "./bin/save-revision.js"
+    "ckeditor5-dev-tests-save-revision": "./bin/save-revision.js",
+    "ckeditor5-dev-tests-check-dependencies": "./bin/check-dependencies.js"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",
