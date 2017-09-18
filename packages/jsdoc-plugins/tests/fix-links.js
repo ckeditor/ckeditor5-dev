@@ -110,4 +110,28 @@ describe( 'Long name fix plugin - formatLinks()', () => {
 			'instance with a given name.'
 		);
 	} );
+
+	it( 'should fix links in error doclets', () => {
+		const options = {
+			doclet: {
+				kind: 'error',
+				comment: 'The {@link #constructor source} of a rect in an HTML element',
+				description: '<p>The {@link #constructor source} of a rect in an HTML element</p>',
+			},
+			lastInterfaceOrClass: {
+				longname: 'module:ckeditor5-utils/dom/rect~Rect',
+			}
+		};
+
+		expect( fixLinks( options ) ).to.be.deep.equal( {
+			doclet: {
+				kind: 'error',
+				comment: 'The {@link module:ckeditor5-utils/dom/rect~Rect#constructor source} of a rect in an HTML element',
+				description: '<p>The {@link module:ckeditor5-utils/dom/rect~Rect#constructor source} of a rect in an HTML element</p>',
+			},
+			lastInterfaceOrClass: {
+				longname: 'module:ckeditor5-utils/dom/rect~Rect',
+			}
+		} );
+	} );
 } );

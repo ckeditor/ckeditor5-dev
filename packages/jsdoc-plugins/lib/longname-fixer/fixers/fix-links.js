@@ -6,14 +6,13 @@
 'use strict';
 
 module.exports = function fixLinks( config ) {
-	const originalDoclet = config.doclet;
-
-	let doclet = originalDoclet;
+	const doclet = config.doclet;
+	let memberof = config.doclet.memberof;
 
 	// Errors have their own module 'module/errors'.
 	// Shortened links in error descriptions should link to the class items, not the error module.
-	if ( originalDoclet.kind === 'error' ) {
-		doclet = config.lastInterfaceOrClass;
+	if ( doclet.kind === 'error' ) {
+		memberof = config.lastInterfaceOrClass.longname;
 	}
 
 	const linkRegExp = /{@link *([~#][^}]+)}/g;
@@ -21,9 +20,9 @@ module.exports = function fixLinks( config ) {
 		const [ ref, ...linkDescription ] = linkContent.split( ' ' );
 		const [ className, methodName ] = ref.split( '#' );
 
-		let result = '{@link ' + doclet.memberof;
+		let result = '{@link ' + memberof;
 
-		if ( !doclet.memberof.includes( className ) ) {
+		if ( !memberof.includes( className ) ) {
 			return result + linkContent + '}';
 		}
 
@@ -44,7 +43,7 @@ module.exports = function fixLinks( config ) {
 		description = doclet.description.replace( linkRegExp, replacer );
 	}
 
-	const updatedDoclet = Object.assign( {}, originalDoclet, { comment, description } );
-
-	return Object.assign( {}, config, { doclet: updatedDoclet } );
+	return Object.assign( {}, config, {
+		doclet: Object.assign( {}, doclet, { comment, description } )
+	} );
 };
