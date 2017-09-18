@@ -836,7 +836,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 
 			stubs.validatePackageToRelease.returns( [] );
 			stubs.validatePackageToRelease.onFirstCall().returns( [
-				'Not on master or master is not clean.'
+				'Not on master.'
 			] );
 			stubs.validatePackageToRelease.onSecondCall().returns( [
 				'Cannot find changelog entry for version 0.2.1.'
@@ -849,7 +849,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( stubs.logger.error.callCount ).to.equal( 5 );
 					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal( 'Releasing has been aborted due to errors.' );
 					expect( stubs.logger.error.getCall( 1 ).args[ 0 ] ).to.equal( '## @ckeditor/alpha' );
-					expect( stubs.logger.error.getCall( 2 ).args[ 0 ] ).to.equal( '* Not on master or master is not clean.' );
+					expect( stubs.logger.error.getCall( 2 ).args[ 0 ] ).to.equal( '* Not on master.' );
 					expect( stubs.logger.error.getCall( 3 ).args[ 0 ] ).to.equal( '## @ckeditor/beta' );
 					expect( stubs.logger.error.getCall( 4 ).args[ 0 ] ).to.equal( '* Cannot find changelog entry for version 0.2.1.' );
 				} );
