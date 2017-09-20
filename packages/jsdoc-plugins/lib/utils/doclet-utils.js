@@ -8,7 +8,7 @@
 /**
  * @param {Array.<Object>} doclets
  * @param {String} methodLongname
- * @returns {Bolean}
+ * @returns {Boolean}
  */
 function doesFieldExistInClass( doclets, methodLongname ) {
 	const [ className, methodName ] = methodLongname.split( '#' );
