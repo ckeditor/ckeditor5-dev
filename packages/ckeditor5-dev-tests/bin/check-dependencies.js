@@ -87,7 +87,7 @@ if ( invalidFiles.size || invalidImportsItself.size ) {
 			'\nThe files listed below should use relative paths to import modules ' +
 			'from the package in which they are defined:\n'
 		);
-		console.error( [ ...invalidFiles ].map( formatLine ).join( '\n' ) + '\n' );
+		console.error( [ ...invalidImportsItself ].map( formatLine ).join( '\n' ) + '\n' );
 	}
 
 	if ( invalidFiles.size ) {
