@@ -106,7 +106,6 @@ if ( invalidFiles.size || invalidImportsItself.size ) {
 	}
 
 	console.error( '='.repeat( 120 ) );
-
 	process.exit( 1 );
 }
 
