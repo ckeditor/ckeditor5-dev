@@ -13,6 +13,7 @@ const glob = require( 'glob' );
 
 const cwd = process.cwd();
 const packageJson = require( path.join( cwd, 'package.json' ) );
+const currentPackageName = packageJson.name;
 
 const dependencies = Object.keys( packageJson.dependencies || {} );
 const devDependencies = Object.keys( packageJson.devDependencies || {} );
@@ -20,6 +21,7 @@ const devDependencies = Object.keys( packageJson.devDependencies || {} );
 const missingDependencies = new Set();
 const missingDevDependencies = new Set();
 const invalidFiles = new Set();
+const invalidImportsItself = new Set();
 
 const globPattern = path.join( cwd, '@(src|tests)/**/*.js' );
 
@@ -46,6 +48,13 @@ for ( const filePath of glob.sync( globPattern ) ) {
 
 			const packageName = matchedImport[ 1 ];
 
+			// Current package should use relative links to itself.
+			if ( currentPackageName === packageName ) {
+				invalidImportsItself.add( filePath.replace( cwd + '/', './' ) );
+
+				return;
+			}
+
 			// Check whether the package is defined as dependency and dev-dependency.
 			const containPackageAsDependency = dependencies.includes( packageName );
 			const containPackageAsDevDependency = devDependencies.includes( packageName );
@@ -70,23 +79,34 @@ for ( const filePath of glob.sync( globPattern ) ) {
 		} );
 }
 
-if ( invalidFiles.size ) {
+if ( invalidFiles.size || invalidImportsItself.size ) {
 	console.error( '\n' + '='.repeat( 120 ) );
-	console.error( '\nThe files listed below require dependencies which are not defined in "package.json":\n' );
-	console.error( [ ...invalidFiles ].map( formatLine ).join( '\n' ) + '\n' );
 
-	if ( missingDependencies.size ) {
-		console.error( 'Missing dependencies:\n' );
-		console.error( [ ...missingDependencies ].map( formatLine ).join( '\n' ) + '\n' );
+	if ( invalidImportsItself.size ) {
+		console.error(
+			'\nThe files listed below should use relative paths to import modules ' +
+			'from the package in which they are defined:\n'
+		);
+		console.error( [ ...invalidImportsItself ].map( formatLine ).join( '\n' ) + '\n' );
 	}
 
-	if ( missingDevDependencies.size ) {
-		console.error( 'Missing devDependencies:\n' );
-		console.error( [ ...missingDevDependencies ].map( formatLine ).join( '\n' ) + '\n' );
-	}
-	console.error( '='.repeat( 120 ) + '\n' );
+	if ( invalidFiles.size ) {
+		console.error( '\nThe files listed below require dependencies which are not defined in "package.json":\n' );
+		console.error( [ ...invalidFiles ].map( formatLine ).join( '\n' ) + '\n' );
 
-	throw new Error( 'Some of the files require dependencies which are not defined in "package.json".' );
+		if ( missingDependencies.size ) {
+			console.error( 'Missing dependencies:\n' );
+			console.error( [ ...missingDependencies ].map( formatLine ).join( '\n' ) + '\n' );
+		}
+
+		if ( missingDevDependencies.size ) {
+			console.error( 'Missing devDependencies:\n' );
+			console.error( [ ...missingDevDependencies ].map( formatLine ).join( '\n' ) + '\n' );
+		}
+	}
+
+	console.error( '='.repeat( 120 ) );
+	process.exit( 1 );
 }
 
 function formatLine( line ) {
