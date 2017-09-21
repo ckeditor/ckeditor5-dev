@@ -104,9 +104,10 @@ if ( invalidFiles.size || invalidImportsItself.size ) {
 			console.error( [ ...missingDevDependencies ].map( formatLine ).join( '\n' ) + '\n' );
 		}
 	}
-	console.error( '='.repeat( 120 ) + '\n' );
 
-	throw new Error( 'Some of the files require dependencies which are not defined in "package.json".' );
+	console.error( '='.repeat( 120 ) );
+
+	process.exit( 1 );
 }
 
 function formatLine( line ) {
