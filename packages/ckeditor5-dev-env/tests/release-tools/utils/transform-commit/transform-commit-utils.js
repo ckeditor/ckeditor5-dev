@@ -52,9 +52,19 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					.to.equal( '[@CKSource](https://github.com/CKSource) Bar' );
 			} );
 
+			it( 'makes a link to GitHub profile if a user was mentioned at the beginning of a line', () => {
+				expect( transformCommit.linkToGithubUser( 'Foo\n@CKSource Bar' ) )
+					.to.equal( 'Foo\n[@CKSource](https://github.com/CKSource) Bar' );
+			} );
+
 			it( 'makes a link to GitHub profile if a user was mentioned in a comment at the ending', () => {
 				expect( transformCommit.linkToGithubUser( 'Bar @CKSource' ) )
 					.to.equal( 'Bar [@CKSource](https://github.com/CKSource)' );
+			} );
+
+			it( 'makes a link to GitHub profile if a user was mentioned in a bracket', () => {
+				expect( transformCommit.linkToGithubUser( 'Bar (@CKSource)' ) )
+					.to.equal( 'Bar ([@CKSource](https://github.com/CKSource))' );
 			} );
 
 			it( 'does nothing if a comment contains scoped package name', () => {
@@ -65,6 +75,11 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			it( 'does nothing if an email is inside the comment', () => {
 				expect( transformCommit.linkToGithubUser( 'Foo foo@bar.com Bar' ) )
 					.to.equal( 'Foo foo@bar.com Bar' );
+			} );
+
+			it( 'does nothing if a user is already linked', () => {
+				expect( transformCommit.linkToGithubUser( 'Foo [@bar](https://github.com/bar) Bar' ) )
+					.to.equal( 'Foo [@bar](https://github.com/bar) Bar' );
 			} );
 		} );
 

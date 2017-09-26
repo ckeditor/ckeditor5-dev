@@ -39,25 +39,14 @@ const transformCommitUtils = {
 	},
 
 	/**
-	 * Replaces reference to user (@name) with a link to his profile.
+	 * Replaces reference to the user (`@name`) with a link to the user's profile.
 	 *
 	 * @param {String} comment
 	 * @returns {String}
 	 */
 	linkToGithubUser( comment ) {
-		return comment.replace( /(.?)@([0-9A-Z_-]+)(\/)?/ig, ( matchedText, charBeforeAt, nickName, charAfterUser ) => {
-			// Most probably the matched value is an email address.
-			if ( charBeforeAt && /[A-Z0-9_]/i.test( charBeforeAt ) ) {
-				return matchedText;
-			}
-
-			if ( charAfterUser === '/' ) {
-				return matchedText;
-			}
-
-			charAfterUser = charAfterUser || '';
-
-			return `${ charBeforeAt }[@${ nickName }](https://github.com/${ nickName })${ charAfterUser }`;
+		return comment.replace( /(^|[\s(])@([\w-]+)(?![/\w-])/ig, ( matchedText, charBefore, nickName ) => {
+			return `${ charBefore }[@${ nickName }](https://github.com/${ nickName })`;
 		} );
 	},
 
@@ -69,7 +58,7 @@ const transformCommitUtils = {
 	 * @returns {String}
 	 */
 	linkToGithubIssue( comment ) {
-		return comment.replace( /(\/?[A-Z0-9-_]+\/[A-Z0-9-_]+)?#([0-9]+)/ig, ( matchedText, maybeRepository, issueId ) => {
+		return comment.replace( /(\/?[\w-]+\/[\w-]+)?#([\d]+)/ig, ( matchedText, maybeRepository, issueId ) => {
 			if ( maybeRepository ) {
 				if ( maybeRepository.startsWith( '/' ) ) {
 					return matchedText;
