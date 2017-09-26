@@ -78,9 +78,7 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 	commit.type = utils.getCommitType( commit.type );
 
 	if ( typeof commit.subject === 'string' ) {
-		commit.subject = utils.linkGithubIssues(
-			utils.linkGithubUsers( commit.subject )
-		);
+		commit.subject = makeLinks( commit.subject );
 	}
 
 	if ( commit.footer && !commit.body && !commit.notes.length ) {
@@ -99,16 +97,15 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 			} )
 			.join( '\n' );
 
-		commit.body = utils.linkGithubIssues(
-			utils.linkGithubUsers( commit.body )
-		);
+		commit.body = makeLinks( commit.body );
 	}
 
 	for ( const note of commit.notes ) {
 		if ( note.title === 'BREAKING CHANGE' ) {
 			note.title = 'BREAKING CHANGES';
 		}
-		note.text = utils.linkGithubIssues( utils.linkGithubUsers( note.text ) );
+
+		note.text = makeLinks( note.text );
 	}
 
 	// Clear the references array - we don't want to hoist the issues.
@@ -116,6 +113,13 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 
 	return commit;
 };
+
+function makeLinks( comment ) {
+	comment = utils.linkToGithubIssue( comment );
+	comment = utils.linkToGithubUser( comment );
+
+	return comment;
+}
 
 /**
  * @typedef {Object} Commit
