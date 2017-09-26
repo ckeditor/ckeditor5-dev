@@ -9,12 +9,6 @@ const chai = require( 'chai' );
 const expect = chai.expect;
 const DocletValidator = require( '../lib/validator/doclet-validator.js' );
 
-const testedModules = [
-	'module:utils',
-	'module:engine',
-	'module:ckeditor5',
-];
-
 describe( 'Linter plugin', () => {
 	it( '_lintMembers()', () => {
 		const linter = new DocletValidator( [ {
@@ -22,7 +16,7 @@ describe( 'Linter plugin', () => {
 			name: 'module:ckeditor5/wrong_path',
 			scope: 'inner',
 			meta: { fileName: '', path: '' },
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintMembers();
 
@@ -35,7 +29,7 @@ describe( 'Linter plugin', () => {
 			name: 'module:ckeditor5/path',
 			memberof: '<anonymous>',
 			meta: { fileName: '', path: '' },
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintMemberofProperty();
 
@@ -48,7 +42,7 @@ describe( 'Linter plugin', () => {
 			name: 'module:ckeditor5/wrong_path',
 			memberof: 'wrongMemberof',
 			meta: { fileName: '', path: '' },
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintMemberofProperty();
 
@@ -61,7 +55,7 @@ describe( 'Linter plugin', () => {
 			name: 'module:ckeditor5/editor',
 			memberof: 'module:ckeditor5/editor',
 			meta: { fileName: '', path: '' },
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintMemberofProperty();
 
@@ -80,7 +74,7 @@ describe( 'Linter plugin', () => {
 				longname: 'abc',
 				scope: 'inner',
 				meta: { fileName: '', path: '' },
-			} ], testedModules );
+			} ], getTestedModules() );
 
 			linter._lintParams();
 
@@ -100,7 +94,7 @@ describe( 'Linter plugin', () => {
 				kind: 'module',
 				longname: 'module:engine/ckeditor5/editor',
 				meta: { fileName: '', path: '' },
-			} ], testedModules );
+			} ], getTestedModules() );
 
 			linter._lintParams();
 
@@ -120,7 +114,7 @@ describe( 'Linter plugin', () => {
 					}
 				} ],
 				meta: { fileName: '', path: '' },
-			} ], testedModules );
+			} ], getTestedModules() );
 
 			linter._lintParams();
 
@@ -140,7 +134,7 @@ describe( 'Linter plugin', () => {
 					}
 				} ],
 				meta: { fileName: '', path: '' },
-			} ], testedModules );
+			} ], getTestedModules() );
 
 			linter._lintParams();
 
@@ -154,7 +148,7 @@ describe( 'Linter plugin', () => {
 				`* {@link module:utils/a~A#method1}
 				 * {@link module:utils/b~Some1} `,
 			meta: { fileName: '', path: '' },
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintLinks();
 
@@ -171,7 +165,7 @@ describe( 'Linter plugin', () => {
 			comment: '',
 			longname: 'module:ckeditor5/a~A',
 			meta: { fileName: '', path: '' },
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintLinks();
 
@@ -186,7 +180,7 @@ describe( 'Linter plugin', () => {
 			comment: '',
 			longname: 'module:ckeditor5/a~A',
 			meta: { fileName: '', path: '' },
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintLinks();
 
@@ -201,7 +195,7 @@ describe( 'Linter plugin', () => {
 			comment: '',
 			longname: 'module:ckeditor5/a~A',
 			meta: { fileName: '', path: '' },
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintLinks();
 
@@ -216,7 +210,7 @@ describe( 'Linter plugin', () => {
 			comment: '',
 			longname: 'module:ckeditor5/a~A',
 			meta: { fileName: '', path: '' },
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintLinks();
 
@@ -229,7 +223,7 @@ describe( 'Linter plugin', () => {
 			longname: 'module:abc/SomeClass',
 			meta: { fileName: '', path: '' },
 			fires: [ 'someEvent' ],
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintEvents();
 
@@ -245,7 +239,7 @@ describe( 'Linter plugin', () => {
 		}, {
 			kind: 'event',
 			longname: 'module:abc/SomeClass#event:someEvent'
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintEvents();
 
@@ -261,7 +255,7 @@ describe( 'Linter plugin', () => {
 		}, {
 			kind: 'not-event',
 			longname: 'module:abc/SomeClass#event:someEvent'
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintEvents();
 
@@ -278,7 +272,7 @@ describe( 'Linter plugin', () => {
 			kind: 'module',
 			longname: 'module:utils/emittermixin',
 			meta: { fileName: '', path: '' },
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintModuleDocumentedExports();
 
@@ -291,7 +285,7 @@ describe( 'Linter plugin', () => {
 			scope: 'inner',
 			memberof: 'module:utils/emittermixin~EmitterMixin',
 			meta: { fileName: '', path: '' },
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintModuleDocumentedExports();
 
@@ -310,7 +304,7 @@ describe( 'Linter plugin', () => {
 			kind: 'member',
 			longname: 'module:utils/emittermixin~EmitterMixin#constructor',
 			meta: { fileName: '', path: '' },
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintSeeReferences();
 
@@ -324,7 +318,7 @@ describe( 'Linter plugin', () => {
 				'module:utils/emittermixin~EmitterMixin',
 			],
 			meta: { fileName: '', path: '' },
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintSeeReferences();
 
@@ -343,7 +337,7 @@ describe( 'Linter plugin', () => {
 				},
 			} ],
 			meta: { fileName: '', path: '' },
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintTypedefs();
 
@@ -361,7 +355,7 @@ describe( 'Linter plugin', () => {
 				},
 			} ],
 			meta: { fileName: '', path: '' },
-		} ], testedModules );
+		} ], getTestedModules() );
 
 		linter._lintTypedefs();
 
@@ -409,7 +403,7 @@ describe( 'Linter plugin', () => {
 				longname: 'module:core/editor~Editor',
 				kind: 'function',
 				meta: { fileName: '', path: '' },
-			} ], testedModules );
+			} ], getTestedModules() );
 
 			const result = linter._isCorrectType( 'Array.<module:core/editor~Editor>' );
 
@@ -452,3 +446,11 @@ describe( 'Linter plugin', () => {
 		} );
 	} );
 } );
+
+function getTestedModules() {
+	return [
+		'module:utils',
+		'module:engine',
+		'module:ckeditor5',
+	];
+}

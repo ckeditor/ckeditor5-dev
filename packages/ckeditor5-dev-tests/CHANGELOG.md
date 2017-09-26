@@ -1,6 +1,20 @@
 Changelog
 =========
 
+## [8.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@8.2.0...@ckeditor/ckeditor5-dev-tests@8.2.1) (2017-09-22)
+
+### Bug fixes
+
+* Dependency checker will warn about non-relative links to itself. Closes [#282](https://github.com/ckeditor/ckeditor5-dev/issues/282). ([36d64e7](https://github.com/ckeditor/ckeditor5-dev/commit/36d64e7))
+
+
+## [8.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@8.1.0...@ckeditor/ckeditor5-dev-tests@8.2.0) (2017-09-15)
+
+### Features
+
+* Introduced "dependency-checker" which allows validating whether used dependencies are specified in `package.json`. Closes [#278](https://github.com/ckeditor/ckeditor5-dev/issues/278). ([9574a97](https://github.com/ckeditor/ckeditor5-dev/commit/9574a97))
+
+
 ## [8.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@8.0.2...@ckeditor/ckeditor5-dev-tests@8.1.0) (2017-09-01)
 
 ### Features

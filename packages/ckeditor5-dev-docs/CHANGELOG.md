@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [7.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.3.4...@ckeditor/ckeditor5-dev-docs@7.4.0) (2017-09-20)
+
+### Features
+
+* Provided `[@error](https://github.com/error)` tag detection in JSDoc. Closes [#280](https://github.com/ckeditor/ckeditor5-dev/issues/280). ([b7a0cf5](https://github.com/ckeditor/ckeditor5-dev/commit/b7a0cf5))
+
+
 ## [7.3.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.3.0...@ckeditor/ckeditor5-dev-docs@7.3.4) (2017-09-05)
 
 ### Other changes

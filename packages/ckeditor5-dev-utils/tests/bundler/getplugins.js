@@ -18,24 +18,24 @@ describe( 'bundler', () => {
 	describe( 'getPlugins()', () => {
 		it( 'returns plugin names and paths', () => {
 			const plugins = getPlugins( [
-				'@ckeditor/ckeditor5-presets/src/article',
+				'@ckeditor/ckeditor5-essentials/src/essentials',
 				'@ckeditor/ckeditor5-basic-styles/src/bold',
 				'@ckeditor/ckeditor5-basic-styles/src/italic'
 			] );
 
-			expect( plugins ).to.have.property( 'ArticlePlugin', '@ckeditor/ckeditor5-presets/src/article' );
+			expect( plugins ).to.have.property( 'EssentialsPlugin', '@ckeditor/ckeditor5-essentials/src/essentials' );
 			expect( plugins ).to.have.property( 'BoldPlugin', '@ckeditor/ckeditor5-basic-styles/src/bold' );
 			expect( plugins ).to.have.property( 'ItalicPlugin', '@ckeditor/ckeditor5-basic-styles/src/italic' );
 		} );
 
 		it( 'does not duplicate plugins with the same name', () => {
 			const plugins = getPlugins( [
-				'@ckeditor/ckeditor5-presets/src/article',
-				'ckeditor5-foo/src/article',
+				'@ckeditor/ckeditor5-essentials/src/essentials',
+				'ckeditor5-foo/src/essentials',
 			] );
 
-			expect( plugins ).to.have.property( 'ArticlePlugin', '@ckeditor/ckeditor5-presets/src/article' );
-			expect( plugins ).to.have.property( 'Article1Plugin', 'ckeditor5-foo/src/article' );
+			expect( plugins ).to.have.property( 'EssentialsPlugin', '@ckeditor/ckeditor5-essentials/src/essentials' );
+			expect( plugins ).to.have.property( 'Essentials1Plugin', 'ckeditor5-foo/src/essentials' );
 		} );
 	} );
 } );
