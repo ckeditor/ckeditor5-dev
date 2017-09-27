@@ -151,97 +151,78 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'INVALID' ) ).to.equal( true );
 		} );
 
-		it( 'makes URLs to issues on GitHub', () => {
+		it( 'makes proper links in the commit subject', () => {
+			const commit = {
+				hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+				header: 'Fix: Simple fix. See ckeditor/ckeditor5#1. Thanks to @CKEditor. Closes #2.',
+				type: 'Fix',
+				subject: 'Simple fix. See ckeditor/ckeditor5#1. Thanks to @CKEditor. Closes #2.',
+				body: null,
+				footer: null,
+				notes: []
+			};
+
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
+
+			const expectedSubject = 'Simple fix. ' +
+				'See [ckeditor/ckeditor5#1](https://github.com/ckeditor/ckeditor5/issues/1). ' +
+				'Thanks to [@CKEditor](https://github.com/CKEditor). ' +
+				'Closes [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2).';
+
+			expect( commit.subject ).to.equal( expectedSubject );
+		} );
+
+		it( 'makes proper links in the commit body', () => {
 			const commit = {
 				hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
 				header: 'Fix: Simple fix. Closes #2.',
 				type: 'Fix',
-				subject: 'Simple fix. Closes #2.',
+				subject: 'Simple fix. Closes #2',
+				body: 'See ckeditor/ckeditor5#1. Thanks to @CKEditor. Read more #2.',
+				footer: null,
+				notes: []
+			};
+
+			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
+
+			// Remember about the indent in commit body.
+			const expectedBody = '  See [ckeditor/ckeditor5#1](https://github.com/ckeditor/ckeditor5/issues/1). ' +
+				'Thanks to [@CKEditor](https://github.com/CKEditor). ' +
+				'Read more [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2).';
+
+			expect( commit.body ).to.equal( expectedBody );
+		} );
+
+		it( 'makes proper links in the commit notes', () => {
+			const commit = {
+				hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+				header: 'Fix: Simple fix. Closes #2.',
+				type: 'Fix',
+				subject: 'Simple fix. Closes #2',
 				body: null,
 				footer: null,
 				notes: [
 					{
 						title: 'BREAKING CHANGES',
-						text: 'Some issue #1.'
+						text: 'See ckeditor/ckeditor5#1. Thanks to @CKEditor.'
+					},
+					{
+						title: 'NOTE',
+						text: 'Read more #2.'
 					}
 				]
 			};
 
 			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
 
-			const expectedSubject = 'Simple fix. Closes [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2).';
-			expect( commit.subject ).to.equal( expectedSubject );
-			expect( commit.notes[ 0 ].text ).to.equal(
-				'Some issue [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1).'
-			);
-		} );
+			const expectedFirstNoteText = 'See [ckeditor/ckeditor5#1](https://github.com/ckeditor/ckeditor5/issues/1). ' +
+				'Thanks to [@CKEditor](https://github.com/CKEditor).';
 
-		it( 'makes URLs to organization on GitHub', () => {
-			const commit = {
-				hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
-				header: 'Internal: Thanks to @CKEditor.',
-				type: 'Fix',
-				subject: 'Internal: Thanks to @CKEditor.',
-				body: null,
-				footer: null,
-				notes: []
-			};
+			// eslint-disable-next-line max-len
+			const expectedSecondNodeText = 'Read more [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2).';
 
-			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
-
-			const expectedSubject = 'Internal: Thanks to [@CKEditor](https://github.com/CKEditor).';
-			expect( commit.subject ).to.equal( expectedSubject );
-		} );
-
-		it( 'makes URLs to issues in additional commit description', () => {
-			const commitDescription = [
-				'* See more in #1 and #2.'
-			];
-
-			const commitDescriptionWithIndents = [
-				'  * See more in [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1) and ' +
-				'[#2](https://github.com/ckeditor/ckeditor5-dev/issues/2).'
-			].join( '\n' );
-
-			const commit = {
-				header: 'Other: Some improvements.',
-				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
-				body: commitDescription.join( '\n' ),
-				footer: null,
-				mentions: [],
-				type: 'Other',
-				subject: 'Some improvements.',
-				notes: []
-			};
-
-			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
-
-			expect( commit.body ).to.equal( commitDescriptionWithIndents );
-		} );
-
-		it( 'makes URLs to organization in additional commit description', () => {
-			const commitDescription = [
-				'* Thanks to @CKSource and @CKEditor.'
-			];
-
-			const commitDescriptionWithIndents = [
-				'  * Thanks to [@CKSource](https://github.com/CKSource) and [@CKEditor](https://github.com/CKEditor).'
-			].join( '\n' );
-
-			const commit = {
-				header: 'Other: Some improvements.',
-				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
-				body: commitDescription.join( '\n' ),
-				footer: null,
-				mentions: [],
-				type: 'Other',
-				subject: 'Some improvements.',
-				notes: []
-			};
-
-			transformCommitForSubRepository( commit, { displayLogs: true, packageData: packageJson } );
-
-			expect( commit.body ).to.equal( commitDescriptionWithIndents );
+			expect( commit.notes[ 0 ].text ).to.equal( expectedFirstNoteText );
+			expect( commit.notes[ 1 ].text ).to.equal( expectedSecondNodeText );
 		} );
 
 		it( 'attaches additional commit description with correct indent', () => {

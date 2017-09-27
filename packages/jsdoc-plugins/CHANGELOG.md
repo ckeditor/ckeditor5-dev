@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.7.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.6.1...@ckeditor/jsdoc-plugins@1.7.0) (2017-09-20)
+
+### Features
+
+* Provided `[@error](https://github.com/error)` tag detection in JSDoc. Closes [#280](https://github.com/ckeditor/ckeditor5-dev/issues/280). ([b7a0cf5](https://github.com/ckeditor/ckeditor5-dev/commit/b7a0cf5))
+
+
 ## [1.6.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.6.0...@ckeditor/jsdoc-plugins@1.6.1) (2017-08-23)
 
 ### Bug fixes

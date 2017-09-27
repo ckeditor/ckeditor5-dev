@@ -1,12 +1,12 @@
 {
   "name": "@ckeditor/ckeditor5-dev-tests",
-  "version": "8.1.2",
+  "version": "8.2.1",
   "description": "Testing environment for CKEditor 5.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^4.0.0",
-    "@ckeditor/ckeditor5-dev-webpack-plugin": "^2.0.17",
+    "@ckeditor/ckeditor5-dev-utils": "^4.0.1",
+    "@ckeditor/ckeditor5-dev-webpack-plugin": "^2.0.18",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.1",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.24.1",
@@ -55,7 +55,8 @@
     "ckeditor5-dev-tests-create-mgit-json": "./bin/create-mgit-json.js",
     "ckeditor5-dev-tests-create-lerna-json": "./bin/create-lerna-json.js",
     "ckeditor5-dev-tests-install-dependencies": "./bin/install-dependencies.sh",
-    "ckeditor5-dev-tests-save-revision": "./bin/save-revision.js"
+    "ckeditor5-dev-tests-save-revision": "./bin/save-revision.js",
+    "ckeditor5-dev-tests-check-dependencies": "./bin/check-dependencies.js"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",

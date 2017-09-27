@@ -39,30 +39,41 @@ const transformCommitUtils = {
 	},
 
 	/**
-	 * Changes user's name to link that leads to the user's profile.
+	 * Replaces reference to the user (`@name`) with a link to the user's profile.
 	 *
-	 * @param {String} sentence
+	 * @param {String} comment
 	 * @returns {String}
 	 */
-	linkGithubUsers( sentence ) {
-		return sentence.replace( /@([\w\d_-]+)/g, '[@$1](https://github.com/$1)' );
+	linkToGithubUser( comment ) {
+		return comment.replace( /(^|[\s(])@([\w-]+)(?![/\w-])/ig, ( matchedText, charBefore, nickName ) => {
+			return `${ charBefore }[@${ nickName }](https://github.com/${ nickName })`;
+		} );
 	},
 
 	/**
-	 * Changes references to issue to links that lead to the GitHub issue page.
+	 * Replaces reference to issue (#ID) with a link to the issue.
+	 * If comment matches to "organization/repository#ID", link will lead to the specified repository.
 	 *
-	 * @param {String} sentence
+	 * @param {String} comment
 	 * @returns {String}
 	 */
-	linkGithubIssues( sentence ) {
-		const packageJson = getPackageJson();
-		const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
+	linkToGithubIssue( comment ) {
+		return comment.replace( /(\/?[\w-]+\/[\w-]+)?#([\d]+)/ig, ( matchedText, maybeRepository, issueId ) => {
+			if ( maybeRepository ) {
+				if ( maybeRepository.startsWith( '/' ) ) {
+					return matchedText;
+				}
 
-		if ( !issuesUrl ) {
-			throw new Error( `The package.json for "${ packageJson.name }" must contain the "bugs" property.` );
-		}
+				return `[${ maybeRepository }#${ issueId }](https://github.com/${ maybeRepository }/issues/${ issueId })`;
+			}
 
-		return sentence.replace( /#([0-9]+)/g, ( _, issueId ) => {
+			const packageJson = getPackageJson();
+			const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
+
+			if ( !issuesUrl ) {
+				throw new Error( `The package.json for "${ packageJson.name }" must contain the "bugs" property.` );
+			}
+
 			return `[#${ issueId }](${ issuesUrl }/${ issueId })`;
 		} );
 	},
