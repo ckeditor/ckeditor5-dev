@@ -101,7 +101,8 @@ describe( 'dev-env/release-tools/tasks', function() {
 					shExec( command, options ) {
 						executedCommand.push( command );
 
-						if ( command === 'git pull && git push' || command.startsWith( 'npm publish' ) ) {
+						// Does nothing with the remote commands.
+						if ( command === 'git pull' || command === 'git push' || command.startsWith( 'npm publish' ) ) {
 							return '';
 						}
 
@@ -412,17 +413,18 @@ describe( 'dev-env/release-tools/tasks', function() {
 
 			return releaseSubRepositories( options )
 				.then( () => {
-					expect( executedCommand.length ).to.equal( 28 );
+					expect( executedCommand.length ).to.equal( 32 );
 					expect( stubs.createGithubRelease.callCount ).to.equal( 4 );
 
 					// Alpha
 					expect( executedCommand[ 0 ], 'Alpha diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 1 ], 'Alpha add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 2 ], 'Alpha commit' ).to.equal( 'git commit -m "Internal: Updated dependencies."' );
-					expect( executedCommand[ 12 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0."' );
-					expect( executedCommand[ 16 ], 'Alpha publish' ).to.equal( 'npm publish --access=public' );
-					expect( executedCommand[ 20 ], 'Alpha sync' ).to.equal( 'git pull && git push' );
-					expect( executedCommand[ 24 ], 'Alpha remote' ).to.equal( 'git remote get-url origin --push' );
+					expect( executedCommand[ 12 ], 'Alpha pull' ).to.equal( 'git pull' );
+					expect( executedCommand[ 16 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0."' );
+					expect( executedCommand[ 20 ], 'Alpha publish' ).to.equal( 'npm publish --access=public' );
+					expect( executedCommand[ 24 ], 'Alpha push' ).to.equal( 'git push' );
+					expect( executedCommand[ 28 ], 'Alpha remote' ).to.equal( 'git remote get-url origin --push' );
 					expect( stubs.createGithubRelease.getCall( 0 ).args[ 0 ] ).to.equal( token );
 					expect( stubs.createGithubRelease.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
 						repositoryOwner: 'ckeditor',
@@ -435,10 +437,11 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 3 ], 'Beta diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 4 ], 'Beta add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 5 ], 'Beta commit' ).to.equal( 'git commit -m "Internal: Updated dependencies."' );
-					expect( executedCommand[ 13 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1."' );
-					expect( executedCommand[ 17 ], 'Beta publish' ).to.equal( 'npm publish --access=public' );
-					expect( executedCommand[ 21 ], 'Beta sync' ).to.equal( 'git pull && git push' );
-					expect( executedCommand[ 25 ], 'Beta remote' ).to.equal( 'git remote get-url origin --push' );
+					expect( executedCommand[ 13 ], 'Beta pull' ).to.equal( 'git pull' );
+					expect( executedCommand[ 17 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1."' );
+					expect( executedCommand[ 21 ], 'Beta publish' ).to.equal( 'npm publish --access=public' );
+					expect( executedCommand[ 25 ], 'Beta push' ).to.equal( 'git push' );
+					expect( executedCommand[ 29 ], 'Beta remote' ).to.equal( 'git remote get-url origin --push' );
 					expect( stubs.createGithubRelease.getCall( 1 ).args[ 0 ] ).to.equal( token );
 					expect( stubs.createGithubRelease.getCall( 1 ).args[ 1 ] ).to.deep.equal( {
 						repositoryOwner: 'ckeditor',
@@ -451,10 +454,11 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 6 ], 'Delta diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 7 ], 'Delta add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 8 ], 'Delta commit' ).to.equal( 'git commit -m "Internal: Updated dependencies."' );
-					expect( executedCommand[ 14 ], 'Delta version' ).to.equal( 'npm version 0.4.1 --message "Release: v0.4.1."' );
-					expect( executedCommand[ 18 ], 'Delta publish' ).to.equal( 'npm publish --access=public' );
-					expect( executedCommand[ 22 ], 'Delta sync' ).to.equal( 'git pull && git push' );
-					expect( executedCommand[ 26 ], 'Delta remote' ).to.equal( 'git remote get-url origin --push' );
+					expect( executedCommand[ 14 ], 'Delta pull' ).to.equal( 'git pull' );
+					expect( executedCommand[ 18 ], 'Delta version' ).to.equal( 'npm version 0.4.1 --message "Release: v0.4.1."' );
+					expect( executedCommand[ 22 ], 'Delta publish' ).to.equal( 'npm publish --access=public' );
+					expect( executedCommand[ 26 ], 'Delta push' ).to.equal( 'git push' );
+					expect( executedCommand[ 30 ], 'Delta remote' ).to.equal( 'git remote get-url origin --push' );
 					expect( stubs.createGithubRelease.getCall( 2 ).args[ 0 ] ).to.equal( token );
 					expect( stubs.createGithubRelease.getCall( 2 ).args[ 1 ] ).to.deep.equal( {
 						repositoryOwner: 'ckeditor',
@@ -467,10 +471,11 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 9 ], 'Epsilon diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 10 ], 'Epsilon add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 11 ], 'Epsilon commit' ).to.equal( 'git commit -m "Internal: Updated dependencies."' );
-					expect( executedCommand[ 15 ], 'Epsilon version' ).to.equal( 'npm version 0.5.1 --message "Release: v0.5.1."' );
-					expect( executedCommand[ 19 ], 'Epsilon publish' ).to.equal( 'npm publish --access=public' );
-					expect( executedCommand[ 23 ], 'Epsilon sync' ).to.equal( 'git pull && git push' );
-					expect( executedCommand[ 27 ], 'Epsilon remot' ).to.equal( 'git remote get-url origin --push' );
+					expect( executedCommand[ 15 ], 'Epsilon pull' ).to.equal( 'git pull' );
+					expect( executedCommand[ 19 ], 'Epsilon version' ).to.equal( 'npm version 0.5.1 --message "Release: v0.5.1."' );
+					expect( executedCommand[ 23 ], 'Epsilon publish' ).to.equal( 'npm publish --access=public' );
+					expect( executedCommand[ 27 ], 'Epsilon push' ).to.equal( 'git push' );
+					expect( executedCommand[ 31 ], 'Epsilon remote' ).to.equal( 'git remote get-url origin --push' );
 					expect( stubs.createGithubRelease.getCall( 3 ).args[ 0 ] ).to.equal( token );
 					expect( stubs.createGithubRelease.getCall( 3 ).args[ 1 ] ).to.deep.equal( {
 						repositoryOwner: 'ckeditor',
@@ -570,16 +575,17 @@ describe( 'dev-env/release-tools/tasks', function() {
 
 			return releaseSubRepositories( options )
 				.then( () => {
-					expect( executedCommand.length ).to.equal( 24 );
+					expect( executedCommand.length ).to.equal( 28 );
 					expect( stubs.createGithubRelease.callCount ).to.equal( 4 );
 
 					// Alpha
 					expect( executedCommand[ 0 ], 'Alpha diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 1 ], 'Alpha add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 2 ], 'Alpha commit' ).to.equal( 'git commit -m "Internal: Updated dependencies."' );
-					expect( executedCommand[ 12 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0."' );
-					expect( executedCommand[ 16 ], 'Alpha sync' ).to.equal( 'git pull && git push' );
-					expect( executedCommand[ 20 ], 'Alpha remote' ).to.equal( 'git remote get-url origin --push' );
+					expect( executedCommand[ 12 ], 'Alpha pull' ).to.equal( 'git pull' );
+					expect( executedCommand[ 16 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0."' );
+					expect( executedCommand[ 20 ], 'Alpha push' ).to.equal( 'git push' );
+					expect( executedCommand[ 24 ], 'Alpha remote' ).to.equal( 'git remote get-url origin --push' );
 					expect( stubs.createGithubRelease.getCall( 0 ).args[ 0 ] ).to.equal( token );
 					expect( stubs.createGithubRelease.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
 						repositoryOwner: 'ckeditor',
@@ -592,9 +598,10 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 3 ], 'Beta diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 4 ], 'Beta add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 5 ], 'Beta commit' ).to.equal( 'git commit -m "Internal: Updated dependencies."' );
-					expect( executedCommand[ 13 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1."' );
-					expect( executedCommand[ 17 ], 'Beta sync' ).to.equal( 'git pull && git push' );
-					expect( executedCommand[ 21 ], 'Beta remote' ).to.equal( 'git remote get-url origin --push' );
+					expect( executedCommand[ 13 ], 'Beta pull' ).to.equal( 'git pull' );
+					expect( executedCommand[ 17 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1."' );
+					expect( executedCommand[ 21 ], 'Beta push' ).to.equal( 'git push' );
+					expect( executedCommand[ 25 ], 'Beta remote' ).to.equal( 'git remote get-url origin --push' );
 					expect( stubs.createGithubRelease.getCall( 1 ).args[ 0 ] ).to.equal( token );
 					expect( stubs.createGithubRelease.getCall( 1 ).args[ 1 ] ).to.deep.equal( {
 						repositoryOwner: 'ckeditor',
@@ -607,9 +614,10 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 6 ], 'Delta diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 7 ], 'Delta add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 8 ], 'Delta commit' ).to.equal( 'git commit -m "Internal: Updated dependencies."' );
-					expect( executedCommand[ 14 ], 'Delta version' ).to.equal( 'npm version 0.4.1 --message "Release: v0.4.1."' );
-					expect( executedCommand[ 18 ], 'Delta sync' ).to.equal( 'git pull && git push' );
-					expect( executedCommand[ 22 ], 'Delta remote' ).to.equal( 'git remote get-url origin --push' );
+					expect( executedCommand[ 14 ], 'Delta pull' ).to.equal( 'git pull' );
+					expect( executedCommand[ 18 ], 'Delta version' ).to.equal( 'npm version 0.4.1 --message "Release: v0.4.1."' );
+					expect( executedCommand[ 22 ], 'Delta push' ).to.equal( 'git push' );
+					expect( executedCommand[ 26 ], 'Delta remote' ).to.equal( 'git remote get-url origin --push' );
 					expect( stubs.createGithubRelease.getCall( 2 ).args[ 0 ] ).to.equal( token );
 					expect( stubs.createGithubRelease.getCall( 2 ).args[ 1 ] ).to.deep.equal( {
 						repositoryOwner: 'ckeditor',
@@ -622,9 +630,10 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 9 ], 'Epsilon diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 10 ], 'Epsilon add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 11 ], 'Epsilon commit' ).to.equal( 'git commit -m "Internal: Updated dependencies."' );
-					expect( executedCommand[ 15 ], 'Epsilon version' ).to.equal( 'npm version 0.5.1 --message "Release: v0.5.1."' );
-					expect( executedCommand[ 19 ], 'Epsilon sync' ).to.equal( 'git pull && git push' );
-					expect( executedCommand[ 23 ], 'Epsilon remot' ).to.equal( 'git remote get-url origin --push' );
+					expect( executedCommand[ 15 ], 'Epsilon pull' ).to.equal( 'git pull' );
+					expect( executedCommand[ 19 ], 'Epsilon version' ).to.equal( 'npm version 0.5.1 --message "Release: v0.5.1."' );
+					expect( executedCommand[ 23 ], 'Epsilon push' ).to.equal( 'git push' );
+					expect( executedCommand[ 27 ], 'Epsilon remot' ).to.equal( 'git remote get-url origin --push' );
 					expect( stubs.createGithubRelease.getCall( 3 ).args[ 0 ] ).to.equal( token );
 					expect( stubs.createGithubRelease.getCall( 3 ).args[ 1 ] ).to.deep.equal( {
 						repositoryOwner: 'ckeditor',
@@ -721,40 +730,44 @@ describe( 'dev-env/release-tools/tasks', function() {
 
 			return releaseSubRepositories( options )
 				.then( () => {
-					expect( executedCommand.length ).to.equal( 24 );
+					expect( executedCommand.length ).to.equal( 28 );
 					expect( stubs.createGithubRelease.called ).to.equal( false );
 
 					// Alpha
 					expect( executedCommand[ 0 ], 'Alpha diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 1 ], 'Alpha add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 2 ], 'Alpha commit' ).to.equal( 'git commit -m "Internal: Updated dependencies."' );
-					expect( executedCommand[ 12 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0."' );
-					expect( executedCommand[ 16 ], 'Alpha publish' ).to.equal( 'npm publish --access=public' );
-					expect( executedCommand[ 20 ], 'Alpha sync' ).to.equal( 'git pull && git push' );
+					expect( executedCommand[ 12 ], 'Alpha pull' ).to.equal( 'git pull' );
+					expect( executedCommand[ 16 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0."' );
+					expect( executedCommand[ 20 ], 'Alpha publish' ).to.equal( 'npm publish --access=public' );
+					expect( executedCommand[ 24 ], 'Alpha push' ).to.equal( 'git push' );
 
 					// Beta
 					expect( executedCommand[ 3 ], 'Beta diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 4 ], 'Beta add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 5 ], 'Beta commit' ).to.equal( 'git commit -m "Internal: Updated dependencies."' );
-					expect( executedCommand[ 13 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1."' );
-					expect( executedCommand[ 17 ], 'Beta publish' ).to.equal( 'npm publish --access=public' );
-					expect( executedCommand[ 21 ], 'Beta sync' ).to.equal( 'git pull && git push' );
+					expect( executedCommand[ 13 ], 'Beta pull' ).to.equal( 'git pull' );
+					expect( executedCommand[ 17 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1."' );
+					expect( executedCommand[ 21 ], 'Beta publish' ).to.equal( 'npm publish --access=public' );
+					expect( executedCommand[ 25 ], 'Beta push' ).to.equal( 'git push' );
 
 					// Delta
 					expect( executedCommand[ 6 ], 'Delta diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 7 ], 'Delta add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 8 ], 'Delta commit' ).to.equal( 'git commit -m "Internal: Updated dependencies."' );
-					expect( executedCommand[ 14 ], 'Delta version' ).to.equal( 'npm version 0.4.1 --message "Release: v0.4.1."' );
-					expect( executedCommand[ 18 ], 'Delta publish' ).to.equal( 'npm publish --access=public' );
-					expect( executedCommand[ 22 ], 'Delta sync' ).to.equal( 'git pull && git push' );
+					expect( executedCommand[ 14 ], 'Delta pull' ).to.equal( 'git pull' );
+					expect( executedCommand[ 18 ], 'Delta version' ).to.equal( 'npm version 0.4.1 --message "Release: v0.4.1."' );
+					expect( executedCommand[ 22 ], 'Delta publish' ).to.equal( 'npm publish --access=public' );
+					expect( executedCommand[ 26 ], 'Delta push' ).to.equal( 'git push' );
 
 					// Epsilon
 					expect( executedCommand[ 9 ], 'Epsilon diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 10 ], 'Epsilon add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 11 ], 'Epsilon commit' ).to.equal( 'git commit -m "Internal: Updated dependencies."' );
-					expect( executedCommand[ 15 ], 'Epsilon version' ).to.equal( 'npm version 0.5.1 --message "Release: v0.5.1."' );
-					expect( executedCommand[ 19 ], 'Epsilon publish' ).to.equal( 'npm publish --access=public' );
-					expect( executedCommand[ 23 ], 'Epsilon sync' ).to.equal( 'git pull && git push' );
+					expect( executedCommand[ 15 ], 'Epsilon pull' ).to.equal( 'git pull' );
+					expect( executedCommand[ 19 ], 'Epsilon version' ).to.equal( 'npm version 0.5.1 --message "Release: v0.5.1."' );
+					expect( executedCommand[ 23 ], 'Epsilon publish' ).to.equal( 'npm publish --access=public' );
+					expect( executedCommand[ 27 ], 'Epsilon push' ).to.equal( 'git push' );
 				} );
 		} );
 

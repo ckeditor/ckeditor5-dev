@@ -96,6 +96,7 @@ module.exports = function releaseSubRepositories( options ) {
 			return updateDependenciesOfPackagesToRelease();
 		} )
 		.then( () => generateChangelogForPackagesThatDependenciesHaveUpdated() )
+		.then( () => pullRepositories() )
 		.then( () => validateRepositories() )
 		.then( () => {
 			if ( errors.length ) {
@@ -109,7 +110,7 @@ module.exports = function releaseSubRepositories( options ) {
 		} )
 		.then( () => bumpVersion() )
 		.then( () => releaseOnNpm() )
-		.then( () => pullAndPushPackages() )
+		.then( () => pushRepositories() )
 		.then( () => releaseOnGithub() )
 		.then( () => process.chdir( cwd ) )
 		.catch( err => {
@@ -200,6 +201,19 @@ module.exports = function releaseSubRepositories( options ) {
 		} );
 	}
 
+	function pullRepositories() {
+		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+			process.chdir( repositoryPath );
+
+			const packageJson = getPackageJson( repositoryPath );
+			log.info( `Pulling from the remote repository for "${ packageJson.name }"...` );
+
+			exec( 'git pull' );
+
+			return Promise.resolve();
+		} );
+	}
+
 	function validateRepositories() {
 		return executeOnPackages( pathsCollection.packages, repositoryPath => {
 			process.chdir( repositoryPath );
@@ -215,20 +229,6 @@ module.exports = function releaseSubRepositories( options ) {
 				errors.push( `## ${ packageJson.name }` );
 				errors.push( ...errorsForPackage.map( err => '* ' + err ) );
 			}
-
-			return Promise.resolve();
-		} );
-	}
-
-	function pullAndPushPackages() {
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
-			process.chdir( repositoryPath );
-
-			const packageJson = getPackageJson( repositoryPath );
-			log.info( `Synchronizing a local repository with the remote for "${ packageJson.name }"...` );
-
-			// Push updated dependencies and changelog if was generated.
-			exec( 'git pull && git push' );
 
 			return Promise.resolve();
 		} );
@@ -260,6 +260,19 @@ module.exports = function releaseSubRepositories( options ) {
 
 			log.info( `Publishing on NPM "${ packageJson.name }"...` );
 			exec( 'npm publish --access=public' );
+		} );
+	}
+
+	function pushRepositories() {
+		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+			process.chdir( repositoryPath );
+
+			const packageJson = getPackageJson( repositoryPath );
+			log.info( `Pushing a local repository into the remote for "${ packageJson.name }"...` );
+
+			exec( 'git push' );
+
+			return Promise.resolve();
 		} );
 	}
 
