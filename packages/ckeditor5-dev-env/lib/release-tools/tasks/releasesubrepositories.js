@@ -96,7 +96,6 @@ module.exports = function releaseSubRepositories( options ) {
 			return updateDependenciesOfPackagesToRelease();
 		} )
 		.then( () => generateChangelogForPackagesThatDependenciesHaveUpdated() )
-		.then( () => pullRepositories() )
 		.then( () => validateRepositories() )
 		.then( () => {
 			if ( errors.length ) {
@@ -198,19 +197,6 @@ module.exports = function releaseSubRepositories( options ) {
 				.then( () => {
 					releaseDetails.changes = getChangesForVersion( version, repositoryPath );
 				} );
-		} );
-	}
-
-	function pullRepositories() {
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
-			process.chdir( repositoryPath );
-
-			const packageJson = getPackageJson( repositoryPath );
-			log.info( `Pulling from the remote repository for "${ packageJson.name }"...` );
-
-			exec( 'git pull' );
-
-			return Promise.resolve();
 		} );
 	}
 
