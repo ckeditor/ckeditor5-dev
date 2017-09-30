@@ -53,7 +53,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				dependencies: {
 					'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core',
 					'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',
-					'@ckeditor/ckeditor5-utils': 'ckeditor/ckeditor5-utils',
+					'@ckeditor/ckeditor5-utils': 'ckeditor/ckeditor5-utils'
 				}
 			} );
 			getPackageJsonStub.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-core' } );
@@ -73,7 +73,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			getDirectoriesStub.returns( [
 				'ckeditor5-core',
 				'ckeditor5-engine',
-				'ckeditor5-utils',
+				'ckeditor5-utils'
 			] );
 
 			const options = {
@@ -84,7 +84,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			getPackageJsonStub.onCall( 0 ).returns( {
 				dependencies: {
 					'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core',
-					'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',
+					'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine'
 				}
 			} );
 			getPackageJsonStub.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-core' } );
@@ -105,7 +105,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			getDirectoriesStub.returns( [
 				'ckeditor5-core',
 				'ckeditor5-engine',
-				'ckeditor5-utils',
+				'ckeditor5-utils'
 			] );
 
 			const options = {
@@ -134,6 +134,100 @@ describe( 'dev-env/release-tools/utils', () => {
 			expect( pathsCollection.skipped ).to.be.instanceof( Set );
 			expect( pathsCollection.skipped.size ).to.equal( 1 );
 			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).to.equal( true );
+		} );
+
+		it( 'allows restricting the scope for packages', () => {
+			getDirectoriesStub.returns( [
+				'ckeditor5-core',
+				'ckeditor5-engine',
+				'ckeditor5-utils',
+				'ckeditor5-build-classic',
+				'ckeditor5-build-inline',
+			] );
+
+			const options = {
+				cwd: '/tmp',
+				packages: 'packages',
+				scope: /-build-/,
+				skipPackages: []
+			};
+
+			getPackageJsonStub.onCall( 0 ).returns( {
+				dependencies: {
+					'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core',
+					'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',
+					'@ckeditor/ckeditor5-utils': 'ckeditor/ckeditor5-utils',
+					'@ckeditor/ckeditor5-build-classic': 'ckeditor/ckeditor5-build-classic',
+					'@ckeditor/ckeditor5-build-inline': 'ckeditor/ckeditor5-build-inline'
+				}
+			} );
+
+			getPackageJsonStub.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-core' } );
+			getPackageJsonStub.onCall( 2 ).returns( { name: '@ckeditor/ckeditor5-engine' } );
+			getPackageJsonStub.onCall( 3 ).returns( { name: '@ckeditor/ckeditor5-utils' } );
+			getPackageJsonStub.onCall( 4 ).returns( { name: '@ckeditor/ckeditor5-build-classic' } );
+			getPackageJsonStub.onCall( 5 ).returns( { name: '@ckeditor/ckeditor5-build-inline' } );
+
+			const pathsCollection = getSubRepositoriesPaths( options );
+
+			expect( pathsCollection.packages ).to.be.instanceof( Set );
+			expect( pathsCollection.packages.size ).to.equal( 2 );
+			expect( pathsCollection.packages.has( '/tmp/packages/ckeditor5-build-classic' ) ).to.equal( true );
+			expect( pathsCollection.packages.has( '/tmp/packages/ckeditor5-build-inline' ) ).to.equal( true );
+
+			expect( pathsCollection.skipped ).to.be.instanceof( Set );
+			expect( pathsCollection.skipped.size ).to.equal( 3 );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-core' ) ).to.equal( true );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-engine' ) ).to.equal( true );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).to.equal( true );
+		} );
+
+		it( 'allows restricting the scope for packages and works fine with "skipPackages" option', () => {
+			getDirectoriesStub.returns( [
+				'ckeditor5-core',
+				'ckeditor5-engine',
+				'ckeditor5-utils',
+				'ckeditor5-build-classic',
+				'ckeditor5-build-inline',
+			] );
+
+			const options = {
+				cwd: '/tmp',
+				packages: 'packages',
+				scope: /-build-/,
+				skipPackages: [
+					'@ckeditor/ckeditor5-build-inline'
+				]
+			};
+
+			getPackageJsonStub.onCall( 0 ).returns( {
+				dependencies: {
+					'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core',
+					'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',
+					'@ckeditor/ckeditor5-utils': 'ckeditor/ckeditor5-utils',
+					'@ckeditor/ckeditor5-build-classic': 'ckeditor/ckeditor5-build-classic',
+					'@ckeditor/ckeditor5-build-inline': 'ckeditor/ckeditor5-build-inline'
+				}
+			} );
+
+			getPackageJsonStub.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-core' } );
+			getPackageJsonStub.onCall( 2 ).returns( { name: '@ckeditor/ckeditor5-engine' } );
+			getPackageJsonStub.onCall( 3 ).returns( { name: '@ckeditor/ckeditor5-utils' } );
+			getPackageJsonStub.onCall( 4 ).returns( { name: '@ckeditor/ckeditor5-build-classic' } );
+			getPackageJsonStub.onCall( 5 ).returns( { name: '@ckeditor/ckeditor5-build-inline' } );
+
+			const pathsCollection = getSubRepositoriesPaths( options );
+
+			expect( pathsCollection.packages ).to.be.instanceof( Set );
+			expect( pathsCollection.packages.size ).to.equal( 1 );
+			expect( pathsCollection.packages.has( '/tmp/packages/ckeditor5-build-classic' ) ).to.equal( true );
+
+			expect( pathsCollection.skipped ).to.be.instanceof( Set );
+			expect( pathsCollection.skipped.size ).to.equal( 4 );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-core' ) ).to.equal( true );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-engine' ) ).to.equal( true );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).to.equal( true );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-build-inline' ) ).to.equal( true );
 		} );
 	} );
 } );
