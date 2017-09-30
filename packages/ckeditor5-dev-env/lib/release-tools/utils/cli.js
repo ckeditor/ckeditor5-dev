@@ -42,9 +42,11 @@ const cli = {
 	 *
 	 * @param {String} packageVersion
 	 * @param {String|null} releaseType
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.disableInternalVersion=false] Whether to "internal" version is enabled.
 	 * @returns {Promise}
 	 */
-	provideVersion( packageVersion, releaseType ) {
+	provideVersion( packageVersion, releaseType, options = {} ) {
 		let suggestedVersion;
 
 		if ( !releaseType ) {
@@ -57,19 +59,26 @@ const cli = {
 			suggestedVersion = semver.inc( packageVersion, releaseType );
 		}
 
+		let message = 'Type the new version, "skip" or "internal"';
+
+		if ( options.disableInternalVersion ) {
+			message = 'Type the new version or "skip"';
+		}
+
+		message += ` (suggested: "${ suggestedVersion }", current: "${ packageVersion }"):`;
+
 		const versionQuestion = {
 			type: 'input',
 			name: 'version',
 			default: suggestedVersion,
-			message:
-				`Type the new version, "skip" or "internal" (suggested: "${ suggestedVersion }", current: "${ packageVersion }"):`,
+			message,
 
 			filter( input ) {
 				return input.trim();
 			},
 
 			validate( input ) {
-				if ( input === 'skip' || input === 'internal' ) {
+				if ( input === 'skip' || ( !options.disableInternalVersion && input === 'internal' ) ) {
 					return true;
 				}
 
