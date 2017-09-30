@@ -185,15 +185,29 @@ Foo`;
 		} );
 
 		describe( 'saveChangelog()', () => {
-			it( 'resolves the promise', () => {
-				const resolveStub = sandbox.stub( path, 'resolve' ).returns( 'path-to-changelog' );
+			it( 'saves the changelog', () => {
+				const processCwdStub = sandbox.stub( process, 'cwd' ).returns( '/tmp' );
+				const joinStub = sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
 				const writeFileStub = sandbox.stub( fs, 'writeFileSync' );
 
 				utils.saveChangelog( 'New content.' );
 
-				expect( resolveStub.calledOnce ).to.equal( true );
+				expect( joinStub.calledOnce ).to.equal( true );
+				expect( processCwdStub.calledOnce ).to.equal( true );
 				expect( writeFileStub.calledOnce ).to.equal( true );
-				expect( writeFileStub.firstCall.args[ 0 ] ).to.equal( 'path-to-changelog' );
+				expect( writeFileStub.firstCall.args[ 0 ] ).to.equal( '/tmp/CHANGELOG.md' );
+				expect( writeFileStub.firstCall.args[ 1 ] ).to.equal( 'New content.' );
+			} );
+
+			it( 'allows changing cwd', () => {
+				const joinStub = sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
+				const writeFileStub = sandbox.stub( fs, 'writeFileSync' );
+
+				utils.saveChangelog( 'New content.', '/new-cwd' );
+
+				expect( joinStub.calledOnce ).to.equal( true );
+				expect( writeFileStub.calledOnce ).to.equal( true );
+				expect( writeFileStub.firstCall.args[ 0 ] ).to.equal( '/new-cwd/CHANGELOG.md' );
 				expect( writeFileStub.firstCall.args[ 1 ] ).to.equal( 'New content.' );
 			} );
 		} );
