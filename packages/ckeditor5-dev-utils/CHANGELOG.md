@@ -1,6 +1,10 @@
 Changelog
 =========
 
+## [4.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@4.0.0...@ckeditor/ckeditor5-dev-utils@4.0.2) (2017-10-01)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
 ## [4.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@3.0.6...@ckeditor/ckeditor5-dev-utils@4.0.0) (2017-09-07)
 
 ### Other changes

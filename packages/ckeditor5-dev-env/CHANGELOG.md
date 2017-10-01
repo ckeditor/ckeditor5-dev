@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [5.1.12](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.10...@ckeditor/ckeditor5-dev-env@5.1.12) (2017-10-01)
+
+### Bug fixes
+
+* If a part of a commit message matches "organization/repository#id" it will be replaced with a link to an issue in that specific repository. Also, scoped package names won't be replaced with links to user profiles. Closes [#269](https://github.com/ckeditor/ckeditor5-dev/issues/269). ([e9bf324](https://github.com/ckeditor/ckeditor5-dev/commit/e9bf324))
+
+
 ## [5.1.10](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.8...@ckeditor/ckeditor5-dev-env@5.1.10) (2017-09-07)
 
 ### Bug fixes

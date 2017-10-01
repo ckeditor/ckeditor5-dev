@@ -1,6 +1,10 @@
 Changelog
 =========
 
+## [1.7.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.7.0...@ckeditor/jsdoc-plugins@1.7.1) (2017-10-01)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
 ## [1.7.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.6.1...@ckeditor/jsdoc-plugins@1.7.0) (2017-09-20)
 
 ### Features
