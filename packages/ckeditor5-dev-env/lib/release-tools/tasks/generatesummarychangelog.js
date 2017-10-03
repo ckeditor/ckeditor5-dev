@@ -139,7 +139,7 @@ module.exports = function generateSummaryChangelog( options ) {
 
 			const currentPackagePath = getPathToRepository( packageName );
 
-			// If package is not installed locally, we aren't be able to get the changelog entries.
+			// If package is not installed locally, we aren't able to get the changelog entries.
 			if ( !pathsCollection.skipped.has( currentPackagePath ) ) {
 				continue;
 			}
@@ -182,7 +182,7 @@ module.exports = function generateSummaryChangelog( options ) {
 		return packageName.replace( '@ckeditor', path.join( options.cwd, options.packages ) );
 	}
 
-	// Builds a map which contains the future and current versions for specified packages.
+	// Builds a map which contains current and future versions of specified packages.
 	//
 	// @params {Set} dependencies
 	// @returns {Map}
@@ -223,16 +223,10 @@ module.exports = function generateSummaryChangelog( options ) {
 				continue;
 			}
 
-			const diff = semver.diff( currentVersion, nextVersion );
+			const diffType = semver.diff( currentVersion, nextVersion );
 
-			// If returned diff is supported and:
-			// - "currentBumpType" is not set yet, or
-			// - returned diff has higher priority than the current suggested bump, then
-			// overwrite the suggested bump type.
-			if ( bumpTypesPriority[ diff ] &&
-				( bumpTypesPriority[ diff ] > bumpTypesPriority[ currentBumpType ] || !currentBumpType )
-			) {
-				currentBumpType = diff;
+			if ( shouldOverwriteReleaseType( currentBumpType, diffType ) ) {
+				currentBumpType = diffType;
 			}
 
 			// When the suggested bump is equal to "major", we can stop analyzing next versions.
@@ -242,6 +236,27 @@ module.exports = function generateSummaryChangelog( options ) {
 		}
 
 		return currentBumpType;
+	}
+
+	// Checks whether specified `currentBumpType` bump for release can be overwrite.
+	//
+	// It returns true when:
+	// - "currentBumpType" is null (it's not set yet) or
+	// - returned diff has higher priority than the current suggested bump.
+	//
+	// @params {String} currentBumpType
+	// @params {String} diffType
+	// @returns {Boolean}
+	function shouldOverwriteReleaseType( currentBumpType, diffType ) {
+		if ( !bumpTypesPriority[ diffType ] ) {
+			return false;
+		}
+
+		if ( !currentBumpType ) {
+			return true;
+		}
+
+		return bumpTypesPriority[ diffType ] > bumpTypesPriority[ currentBumpType ];
 	}
 
 	// Generates new changelog entry.
