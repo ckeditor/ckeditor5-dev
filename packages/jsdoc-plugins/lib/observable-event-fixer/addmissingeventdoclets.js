@@ -8,16 +8,14 @@
 const {	cloneDeep } = require( 'lodash' );
 
 module.exports = function addMissingEventDoclets( doclets ) {
-	doclets = fixFireTag( doclets );
+	doclets = markFiredEvents( doclets );
 
-	const observableEvents = getObservableEvents( doclets );
+	const newEventDoclets = createMissingEventDoclets( doclets );
 
-	const newDoclets = createMissingDoclets( doclets, observableEvents );
-
-	return doclets.concat( newDoclets );
+	return doclets.concat( newEventDoclets );
 };
 
-function fixFireTag( doclets ) {
+function markFiredEvents( doclets ) {
 	return doclets.map( doclet => {
 		if ( !doclet.observable ) {
 			return doclet;
@@ -38,38 +36,26 @@ function fixFireTag( doclets ) {
 	} );
 }
 
-function getObservableEvents( doclets ) {
-	return doclets
-		.filter( doclet => doclet.observable )
-		.map( observableDoclet => {
-			const eventName = observableDoclet.memberof + '#event:change:' + observableDoclet.name;
-
-			return {
-				name: eventName,
-				method: observableDoclet
-			};
-		} );
-}
-
-function createMissingDoclets( doclets, observableEvents ) {
+function createMissingEventDoclets( doclets ) {
 	const eventLongNames = doclets.filter( d => d.kind === 'event' ).map( d => d.longname );
+	const observableEvents = getObservableEvents( doclets );
 
 	return observableEvents
 		// Skip for existing events.
 		.filter( observableEvent => !eventLongNames.includes( observableEvent.name ) )
 		.map( observableEvent => {
-			const originalMethod = observableEvent.method;
+			const originalProperty = observableEvent.property;
 
-			const typeNames = originalMethod.type ?
-				originalMethod.type.names :
+			const typeNames = originalProperty.type ?
+				originalProperty.type.names :
 				[ '*' ];
 
 			return {
 				comment: '',
-				meta: cloneDeep( originalMethod.meta ),
-				description: '',
+				meta: cloneDeep( originalProperty.meta ),
+				description: `<p>Fired when a(n) <code>${ originalProperty.name }</code> property changed value.<p>`,
 				kind: 'event',
-				name: 'change:' + originalMethod.name,
+				name: 'change:' + originalProperty.name,
 				params: [ {
 					type: {
 						names: [ 'module:utils/eventinfo~EventInfo' ]
@@ -81,16 +67,16 @@ function createMissingDoclets( doclets, observableEvents ) {
 					type: {
 						names: [ 'String' ]
 					},
-					description: '<p>Name of the fired method</p>',
-					name: 'eventName'
+					description: `<p>Name of the changed property name (<code>${ originalProperty.name }</code>)</p>`,
+					name: 'name'
 				},
 				{
 					type: {
 						names: [ ...typeNames ]
 					},
 					description: [
-						'<p>New value of the attribute with given key or <code>null</code>, ',
-						'if operation should remove attribute.</p>'
+						`<p>New value of the <code>${ originalProperty.name }</code> property with given key or <code>null</code>, `,
+						'if operation should remove property.</p>'
 					].join( '' ),
 					name: 'value'
 				},
@@ -98,12 +84,28 @@ function createMissingDoclets( doclets, observableEvents ) {
 					type: {
 						names: [ ...typeNames ]
 					},
-					description: '<p>Old value of the attribute with given key or <code>null</code>, if attribute was not set before.</p>',
+					description: [
+						`<p>Old value of the <code>${ originalProperty.name }</code> property with given key or <code>null</code>, `,
+						'if property was not set before.</p>'
+					].join( '' ),
 					name: 'oldValue'
 				} ],
-				memberof: originalMethod.memberof,
+				memberof: originalProperty.memberof,
 				longname: observableEvent.name,
 				scope: 'instance'
+			};
+		} );
+}
+
+function getObservableEvents( doclets ) {
+	return doclets
+		.filter( doclet => doclet.observable )
+		.map( observableDoclet => {
+			const eventName = observableDoclet.memberof + '#event:change:' + observableDoclet.name;
+
+			return {
+				name: eventName,
+				property: observableDoclet
 			};
 		} );
 }
