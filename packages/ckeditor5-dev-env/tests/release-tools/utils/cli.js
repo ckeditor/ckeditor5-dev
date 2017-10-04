@@ -52,6 +52,10 @@ describe( 'dev-env/release-tools/utils', () => {
 			it( 'should suggest proper "minor" version for public package', () => {
 				return cli.provideVersion( '1.0.0', 'minor' )
 					.then( newVersion => {
+						expect( questionItems[ 0 ].message ).to.equal(
+							'Type the new version, "skip" or "internal" (suggested: "1.1.0", current: "1.0.0"):'
+						);
+
 						expect( newVersion ).to.equal( '1.1.0' );
 					} );
 			} );
@@ -81,6 +85,15 @@ describe( 'dev-env/release-tools/utils', () => {
 				return cli.provideVersion( '0.7.0', 'patch' )
 					.then( newVersion => {
 						expect( newVersion ).to.equal( '0.7.1' );
+					} );
+			} );
+
+			it( 'allows disabling "internal" version', () => {
+				return cli.provideVersion( '0.1.0', 'major', { disableInternalVersion: true } )
+					.then( () => {
+						expect( questionItems[ 0 ].message ).to.equal(
+							'Type the new version or "skip" (suggested: "0.2.0", current: "0.1.0"):'
+						);
 					} );
 			} );
 		} );
