@@ -5,8 +5,6 @@
 
 'use strict';
 
-const addMissingEventDoclets = require( '../observable-event-fixer/addmissingeventdoclets' );
-
 module.exports = {
 	// See http://usejsdoc.org/about-plugins.html#tag-definitions.
 	defineTags( dictionary ) {
@@ -18,11 +16,5 @@ module.exports = {
 				doclet.observable = true;
 			}
 		} );
-	},
-
-	handlers: {
-		processingComplete( e ) {
-			e.doclets = addMissingEventDoclets( e.doclets );
-		}
 	}
 };

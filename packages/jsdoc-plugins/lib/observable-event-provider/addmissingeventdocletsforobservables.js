@@ -14,7 +14,7 @@ const {	cloneDeep } = require( 'lodash' );
  * @param {Array.<Doclet>} doclets
  * @returns {Array.<Doclet>} An array of enhanced doclets.
  */
-module.exports = function addMissingEventDoclets( doclets ) {
+module.exports = function addMissingEventDocletsForObservables( doclets ) {
 	doclets = markFiredEvents( doclets );
 
 	const newEventDoclets = createMissingEventDoclets( doclets );
