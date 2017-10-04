@@ -7,6 +7,13 @@
 
 const {	cloneDeep } = require( 'lodash' );
 
+/**
+ * Creates event doclets for observable properties if they're missing.
+ * See #285.
+ *
+ * @param {Array.<Doclet>} doclets
+ * @returns {Array.<Doclet>} An array of enhanced doclets.
+ */
 module.exports = function addMissingEventDoclets( doclets ) {
 	doclets = markFiredEvents( doclets );
 
@@ -15,6 +22,8 @@ module.exports = function addMissingEventDoclets( doclets ) {
 	return doclets.concat( newEventDoclets );
 };
 
+// @param {Array.<Doclet>} doclets
+// @returns {Array.<Doclet>} An array of doclets with fixed fires property.
 function markFiredEvents( doclets ) {
 	return doclets.map( doclet => {
 		if ( !doclet.observable ) {
@@ -36,6 +45,8 @@ function markFiredEvents( doclets ) {
 	} );
 }
 
+// @param {Array.<Doclet>} doclets
+// @returns {Array.<Doclet>} An array of new event doclets.
 function createMissingEventDoclets( doclets ) {
 	const eventLongNames = doclets.filter( d => d.kind === 'event' ).map( d => d.longname );
 	const observableEvents = getObservableEvents( doclets );
