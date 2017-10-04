@@ -177,5 +177,34 @@ describe( 'dev-env/release-tools/utils', () => {
 					} );
 				} );
 		} );
+
+		it( 'allows returning the changes instead of saving them', () => {
+			const newChangelogChunk = [
+				'## 1.0.0',
+				'',
+				'### Features',
+				'',
+				'* This test should pass!'
+			].join( '\n' );
+
+			changelogBuffer = Buffer.from( newChangelogChunk );
+
+			stubs.fs.existsSync.returns( true );
+
+			stubs.getWriterOptions.returns( { foo: 'bar' } );
+
+			const options = {
+				version: '1.0.0',
+				transformCommit: stubs.transformCommit,
+				tagName: 'v0.5.0',
+				newTagName: 'v1.0.0',
+				doNotSave: true
+			};
+
+			return generateChangelogFromCommits( options )
+				.then( returnedChanges => {
+					expect( returnedChanges ).to.equal( newChangelogChunk );
+				} );
+		} );
 	} );
 } );

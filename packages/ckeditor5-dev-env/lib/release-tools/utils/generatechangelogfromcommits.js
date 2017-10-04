@@ -22,6 +22,8 @@ const { stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {String|null} options.tagName Name of the last created tag for the repository.
  * @param {String} options.newTagName Name of the tag for current version.
  * @param {Boolean} [options.isInternalRelease=false] Whether the changelog is generated for internal release.
+ * @param {Boolean} [options.doNotSave=false] If set on `true`, changes will be resolved in returned promise
+ * instead of saving in CHANGELOG file.
  * @returns {Promise}
  */
 module.exports = function generateChangelogFromCommits( options ) {
@@ -51,12 +53,16 @@ module.exports = function generateChangelogFromCommits( options ) {
 		const writerOptions = getWriterOptions( options.transformCommit );
 
 		conventionalChangelog( {}, context, gitRawCommitsOpts, parserOptions, writerOptions )
-			.pipe( saveChangelogPipe( options.version, resolve ) );
+			.pipe( saveChangelogPipe( options.version, resolve, options.doNotSave ) );
 	} );
 };
 
-function saveChangelogPipe( version, done ) {
+function saveChangelogPipe( version, done, doNotSave = false ) {
 	return stream.noop( changes => {
+		if ( doNotSave ) {
+			return done( changes.toString() );
+		}
+
 		let currentChangelog = changelogUtils.getChangelog();
 
 		// Remove header from current changelog.
