@@ -45,6 +45,7 @@ function build( config ) {
 			require.resolve( 'jsdoc/plugins/markdown' ),
 			require.resolve( '@ckeditor/jsdoc-plugins/lib/export-fixer/export-fixer' ),
 			require.resolve( '@ckeditor/jsdoc-plugins/lib/custom-tags/error' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/custom-tags/observable' ),
 			require.resolve( '@ckeditor/jsdoc-plugins/lib/relation-fixer' ),
 			require.resolve( '@ckeditor/jsdoc-plugins/lib/longname-fixer/longname-fixer' ),
 			require.resolve( '@ckeditor/jsdoc-plugins/lib/event-extender/event-extender' ),
