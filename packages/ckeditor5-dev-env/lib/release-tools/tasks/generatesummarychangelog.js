@@ -336,7 +336,6 @@ module.exports = function generateSummaryChangelog( options ) {
 			options.dependencies.delete( packageName );
 		}
 
-		const preReleasePackages = getPreReleasePackages( options.dependencies );
 		const majorReleasePackages = getMajorReleasePackages( options.dependencies );
 		const minorReleasePackages = getMinorReleasePackages( options.dependencies );
 		const patchReleasePackages = getPatchReleasePackages( options.dependencies );
@@ -354,16 +353,6 @@ module.exports = function generateSummaryChangelog( options ) {
 
 			for ( const [ packageName, { nextVersion } ] of newPackages ) {
 				entries.push( formatChangelogEntry( packageName, nextVersion ) );
-			}
-
-			entries.push( '' );
-		}
-
-		if ( preReleasePackages.size ) {
-			entries.push( 'Pre-releases (possible breaking changes):\n' );
-
-			for ( const [ packageName, { currentVersion, nextVersion } ] of preReleasePackages ) {
-				entries.push( formatChangelogEntry( packageName, nextVersion, currentVersion ) );
 			}
 
 			entries.push( '' );
@@ -416,18 +405,6 @@ module.exports = function generateSummaryChangelog( options ) {
 		} );
 	}
 
-	// Returns a collection of packages which the future release is marked as "prerelease".
-	//
-	// @params {Map} dependencies
-	// @returns {Map}
-	function getPreReleasePackages( dependencies ) {
-		return filterPackages( dependencies, ( packageName, currentVersion, nextVersion ) => {
-			const versionDiff = semver.diff( currentVersion, nextVersion );
-
-			return versionDiff === 'prerelease';
-		} );
-	}
-
 	// Returns a collection of packages which the future release is marked as "major".
 	//
 	// @params {Map} dependencies
@@ -436,7 +413,7 @@ module.exports = function generateSummaryChangelog( options ) {
 		return filterPackages( dependencies, ( packageName, currentVersion, nextVersion ) => {
 			const versionDiff = semver.diff( currentVersion, nextVersion );
 
-			return versionDiff === 'major' || versionDiff === 'premajor';
+			return versionDiff === 'major' || versionDiff === 'premajor' || versionDiff === 'prerelease';
 		} );
 	}
 
