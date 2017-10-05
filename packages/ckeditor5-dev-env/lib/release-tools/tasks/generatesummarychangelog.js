@@ -8,6 +8,7 @@
 const path = require( 'path' );
 const semver = require( 'semver' );
 const chalk = require( 'chalk' );
+const moment = require( 'moment' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const changelogUtils = require( '../utils/changelog' );
 const cliUtils = require( '../utils/cli' );
@@ -16,14 +17,19 @@ const executeOnPackages = require( '../utils/executeonpackages' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
 const versionUtils = require( '../utils/versions' );
+const getNewReleaseType = require( '../utils/getnewreleasetype' );
+const generateChangelogFromCommits = require( '../utils/generatechangelogfromcommits' );
+const transformCommitFunction = require( '../utils/transform-commit/transformcommitforsubrepository' );
 
 const bumpTypesPriority = {
-	major: 3,
-	premajor: 3,
-	minor: 2,
-	preminor: 2,
-	patch: 1,
-	prepatch: 1
+	prerelease: 7,
+	major: 6,
+	premajor: 5,
+	minor: 4,
+	preminor: 3,
+	patch: 2,
+	prepatch: 1,
+	skip: 0
 };
 
 /**
@@ -64,7 +70,9 @@ module.exports = function generateSummaryChangelog( options ) {
 	// @param {String} repositoryPath
 	// @returns {Promise}
 	function generateSummaryChangelogForSingleRepository( repositoryPath ) {
-		const packageJson = getPackageJson( repositoryPath );
+		process.chdir( repositoryPath );
+
+		const packageJson = getPackageJson();
 
 		log.info( chalk.bold.blue( `Generating changelog for "${ packageJson.name }"...` ) );
 
@@ -72,44 +80,87 @@ module.exports = function generateSummaryChangelog( options ) {
 			getAllDependenciesForRepository( repositoryPath )
 		);
 
-		const suggestedBump = getSuggestedBumpVersionType( dependencies );
+		let suggestedBumpFromCommits;
+		const suggestedBumpFromDependencies = getSuggestedBumpVersionType( dependencies );
 
-		return cliUtils.provideVersion( packageJson.version, suggestedBump, { disableInternalVersion: true } )
+		let tagName = versionUtils.getLastFromChangelog();
+
+		if ( tagName ) {
+			tagName = 'v' + tagName;
+		}
+
+		return getNewReleaseType( transformCommitFunction, { tagName } )
+			.then( result => {
+				suggestedBumpFromCommits = result.releaseType;
+
+				let newReleaseType;
+
+				if ( bumpTypesPriority[ suggestedBumpFromCommits ] > bumpTypesPriority[ suggestedBumpFromDependencies ] ) {
+					newReleaseType = suggestedBumpFromCommits;
+				} else {
+					newReleaseType = suggestedBumpFromDependencies;
+				}
+
+				return cliUtils.provideVersion( packageJson.version, newReleaseType, { disableInternalVersion: true } );
+			} )
 			.then( version => {
 				if ( version === 'skip' ) {
 					return Promise.resolve();
 				}
 
-				// Generate the changelog entries.
-				const changes = getChangelogEntries( {
-					dependencies,
-					newVersion: version,
-					currentVersion: packageJson.version,
-					repositoryUrl: packageJson.repository.url.replace( /\.git^/, '' ),
+				let promise = Promise.resolve();
+
+				if ( suggestedBumpFromCommits !== 'skip' ) {
+					promise = generateChangelogFromCommits( {
+						version,
+						currentTag: 'v' + version,
+						previousTag: tagName,
+						transformCommit: transformCommitFunction,
+						isInternalRelease: false,
+						doNotSave: true
+					} );
+				}
+
+				return promise.then( changesBasedOnCommits => {
+					// Generate the changelog entries based on dependencies.
+					let changelogEntries = getChangelogFromDependencies( {
+						dependencies,
+						newVersion: version,
+						currentVersion: packageJson.version,
+						repositoryUrl: packageJson.repository.url.replace( /\.git^/, '' ),
+					} );
+
+					// Part of the changelog generated from commits should be attached to changelog entries.
+					if ( changesBasedOnCommits ) {
+						changelogEntries += '\n\n' + changesBasedOnCommits.split( '\n' )
+							// First line contains a header which is already generated.
+							.slice( 1 )
+							.join( '\n' )
+							.trim();
+					}
+
+					let currentChangelog = changelogUtils.getChangelog( repositoryPath );
+
+					// Remove header from current changelog.
+					currentChangelog = currentChangelog.replace( changelogUtils.changelogHeader, '' );
+
+					// Concat header, new and current changelog.
+					let newChangelog = changelogUtils.changelogHeader + changelogEntries + '\n\n' + currentChangelog.trim();
+					newChangelog = newChangelog.trim() + '\n';
+
+					// Save the changelog.
+					changelogUtils.saveChangelog( newChangelog, repositoryPath );
+
+					log.info(
+						chalk.green( `Changelog for "${ packageJson.name }" (v${ version }) has been generated.` )
+					);
+
+					// Commit the new changelog.
+					tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
+					tools.shExec( 'git commit -m "Docs: Changelog. [skip ci]"', { verbosity: 'error' } );
 				} );
-
-				let currentChangelog = changelogUtils.getChangelog( repositoryPath );
-
-				// Remove header from current changelog.
-				currentChangelog = currentChangelog.replace( changelogUtils.changelogHeader, '' );
-
-				// Concat header, new and current changelog.
-				let newChangelog = changelogUtils.changelogHeader + changes + '\n\n' + currentChangelog.trim();
-				newChangelog = newChangelog.trim() + '\n';
-
-				// Save the changelog.
-				changelogUtils.saveChangelog( newChangelog, repositoryPath );
-
-				log.info(
-					chalk.green( `Changelog for "${ packageJson.name }" (v${ version }) has been generated.` )
-				);
-
-				// Commit the new changelog.
-				process.chdir( repositoryPath );
-
-				tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
-				tools.shExec( 'git commit -m "Docs: Changelog. [skip ci]"', { verbosity: 'error' } );
-
+			} )
+			.then( () => {
 				process.chdir( cwd );
 			} );
 	}
@@ -140,7 +191,7 @@ module.exports = function generateSummaryChangelog( options ) {
 			const currentPackagePath = getPathToRepository( packageName );
 
 			// If package is not installed locally, we aren't able to get the changelog entries.
-			if ( !pathsCollection.skipped.has( currentPackagePath ) ) {
+			if ( !pathsCollection.skipped.has( currentPackagePath ) && !pathsCollection.packages.has( currentPackagePath ) ) {
 				continue;
 			}
 
@@ -267,9 +318,12 @@ module.exports = function generateSummaryChangelog( options ) {
 	// @params {String} options.currentVersion
 	// @params {Map} options.dependencies
 	// @returns {String}
-	function getChangelogEntries( options ) {
+	function getChangelogFromDependencies( options ) {
+		const date = moment().format( 'YYYY-MM-DD' );
+
 		const entries = [
-			`## [${ options.newVersion }](${ options.repositoryUrl }/compare/v${ options.currentVersion }...v${ options.newVersion })`,
+			// eslint-disable-next-line max-len
+			`## [${ options.newVersion }](${ options.repositoryUrl }/compare/v${ options.currentVersion }...v${ options.newVersion }) (${ date })`,
 			''
 		];
 
@@ -282,6 +336,7 @@ module.exports = function generateSummaryChangelog( options ) {
 			options.dependencies.delete( packageName );
 		}
 
+		const preReleasePackages = getPreReleasePackages( options.dependencies );
 		const majorReleasePackages = getMajorReleasePackages( options.dependencies );
 		const minorReleasePackages = getMinorReleasePackages( options.dependencies );
 		const patchReleasePackages = getPatchReleasePackages( options.dependencies );
@@ -299,6 +354,16 @@ module.exports = function generateSummaryChangelog( options ) {
 
 			for ( const [ packageName, { nextVersion } ] of newPackages ) {
 				entries.push( formatChangelogEntry( packageName, nextVersion ) );
+			}
+
+			entries.push( '' );
+		}
+
+		if ( preReleasePackages.size ) {
+			entries.push( 'Pre-releases (possible breaking changes):\n' );
+
+			for ( const [ packageName, { currentVersion, nextVersion } ] of preReleasePackages ) {
+				entries.push( formatChangelogEntry( packageName, nextVersion, currentVersion ) );
 			}
 
 			entries.push( '' );
@@ -348,6 +413,18 @@ module.exports = function generateSummaryChangelog( options ) {
 	function getNewPackages( dependencies ) {
 		return filterPackages( dependencies, ( packageName, currentVersion ) => {
 			return semver.eq( currentVersion, '0.0.1' );
+		} );
+	}
+
+	// Returns a collection of packages which the future release is marked as "prerelease".
+	//
+	// @params {Map} dependencies
+	// @returns {Map}
+	function getPreReleasePackages( dependencies ) {
+		return filterPackages( dependencies, ( packageName, currentVersion, nextVersion ) => {
+			const versionDiff = semver.diff( currentVersion, nextVersion );
+
+			return versionDiff === 'prerelease';
 		} );
 	}
 
@@ -412,34 +489,23 @@ module.exports = function generateSummaryChangelog( options ) {
 	// @params {String|null} [currentVersion=null]
 	// @returns {String}
 	function formatChangelogEntry( packageName, nextVersion, currentVersion = null ) {
+		const npmUrl = `https://www.npmjs.com/package/${ packageName }`;
+
 		if ( currentVersion ) {
 			// eslint-disable-next-line max-len
-			return `* [${ packageName }](${ getUrlToNpm( packageName ) }): v${ currentVersion } => [v${ nextVersion }]( ${ getUrlToPackageReleaseTag( packageName, nextVersion ) })`;
+			return `* [${ packageName }](${ npmUrl }): v${ currentVersion } => [v${ nextVersion }]( ${ getUrlToPackageReleaseTag( nextVersion ) })`;
 		}
 
 		// eslint-disable-next-line max-len
-		return `* [${ packageName }](${ getUrlToNpm( packageName ) }): [v${ nextVersion }]( ${ getUrlToPackageReleaseTag( packageName, nextVersion ) })`;
-	}
+		return `* [${ packageName }](${ npmUrl }): [v${ nextVersion }]( ${ getUrlToPackageReleaseTag( nextVersion ) })`;
 
-	// Returns a URL which leads to release tag for specified package and version.
-	//
-	// @params {String} packageName
-	// @params {String} version
-	// @returns {String}
-	function getUrlToPackageReleaseTag( packageName, version ) {
-		const currentPackagePath = getPathToRepository( packageName );
-		const packageJson = getPackageJson( currentPackagePath );
-		const repositoryUrl = packageJson.repository.url.replace( /\.git^/, '' );
+		function getUrlToPackageReleaseTag( version ) {
+			const currentPackagePath = getPathToRepository( packageName );
+			const packageJson = getPackageJson( currentPackagePath );
+			const repositoryUrl = packageJson.repository.url.replace( /\.git^/, '' );
 
-		return `${ repositoryUrl }/releases/tag/v${ version }`;
-	}
-
-	// Returns a URL which leads to NPM.
-	//
-	// @params {String} packageName
-	// @returns {String}
-	function getUrlToNpm( packageName ) {
-		return `https://www.npmjs.com/package/${ packageName }`;
+			return `${ repositoryUrl }/releases/tag/v${ version }`;
+		}
 	}
 
 	// Checks whether breaking changes are acceptable for specified version.
