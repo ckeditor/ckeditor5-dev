@@ -40,6 +40,7 @@ const bumpTypesPriority = {
  * @param {String} options.packages Where to look for other packages.
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be touched.
  * @param {Boolean} [options.skipMainRepository=false] Whether to skip the main repository.
+ * @param {RegExp} [options.scope] Package names have to match to specified pattern.
  */
 module.exports = function generateSummaryChangelog( options ) {
 	const log = logger();

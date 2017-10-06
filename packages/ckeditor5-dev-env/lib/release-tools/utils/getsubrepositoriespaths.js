@@ -17,7 +17,7 @@ const getPackageJson = require( './getpackagejson' );
  * @param {String} options.cwd Current work directory.
  * @param {String} options.packages A relative path to the packages.
  * @param {Array.<String>} options.skipPackages Name of packages which won't be touched.
- * @param {RegExp} [options.scope] Package name has to match to specified pattern.
+ * @param {RegExp} [options.scope] Package names have to match to specified pattern.
  * @returns {Object.<String, Set>} collections
  */
 module.exports = function getSubRepositoriesPaths( options ) {
