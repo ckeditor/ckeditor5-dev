@@ -104,6 +104,25 @@ describe( 'dev-env/release-tools/utils', () => {
 				} );
 		} );
 
+		it( 'does not crate a changelog file if is not present but the "doNotSave" option is set on `true`', () => {
+			changelogBuffer = Buffer.from( 'Changelog.' );
+
+			stubs.fs.existsSync.returns( false );
+
+			stubs.changelogUtils.getChangelog.returns( changelogUtils.changelogHeader );
+
+			const options = {
+				version: '1.0.0',
+				transformCommit: stubs.transformCommit,
+				doNotSave: true
+			};
+
+			return generateChangelogFromCommits( options )
+				.then( () => {
+					expect( stubs.changelogUtils.saveChangelog.called ).to.equal( false );
+				} );
+		} );
+
 		it( 'generates the changelog for given version', () => {
 			const newChangelogChunk = [
 				'## 1.0.0',

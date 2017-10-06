@@ -32,7 +32,7 @@ module.exports = function generateChangelogFromCommits( options ) {
 	const log = logger();
 
 	return new Promise( resolve => {
-		if ( !fs.existsSync( changelogUtils.changelogFile ) ) {
+		if ( !options.doNotSave && !fs.existsSync( changelogUtils.changelogFile ) ) {
 			log.warning( 'Changelog file does not exist. Creating...' );
 
 			changelogUtils.saveChangelog( changelogUtils.changelogHeader );
