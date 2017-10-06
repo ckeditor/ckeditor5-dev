@@ -39,6 +39,15 @@ const transformCommitUtils = {
 	},
 
 	/**
+	 * Additional descriptions used in summary changelog generator. Keys of the object must match to values returned by
+	 * `transformCommitUtils#getCommitType()` function.
+	 */
+	additionalCommitNotes: {
+		'Bug fixes': 'Besides changes in the dependencies, this build also contains these bug fixes:',
+		Features: 'Besides new features introduced in the dependencies, this build also introduces these features:'
+	},
+
+	/**
 	 * Replaces reference to the user (`@name`) with a link to the user's profile.
 	 *
 	 * @param {String} comment

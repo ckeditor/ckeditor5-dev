@@ -397,13 +397,38 @@ describe( 'dev-env/release-tools/utils', () => {
 					release();
 				} );
 		} );
+
+		it( 'attaches additional description for "Bug fixes" section', () => {
+			exec( 'git commit --allow-empty ' +
+				'--message "Fix: Foo Bar."'
+			);
+
+			return generateChangelog( '0.5.5', false, true )
+				.then( () => {
+					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
+
+					/* eslint-disable max-len */
+					const expectedChangelog = `
+### Bug fixes
+
+Besides changes in the dependencies, this build also contains these bug fixes:
+
+* Foo Bar. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+`;
+					/* eslint-enable max-len */
+
+					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
+
+					release();
+				} );
+		} );
 	} );
 
 	function exec( command ) {
 		return tools.shExec( command, { verbosity: 'error' } );
 	}
 
-	function generateChangelog( version, isInternalRelease = false ) {
+	function generateChangelog( version, isInternalRelease = false, shouldAppendAdditionalNotes = false ) {
 		lastChangelogVersion = version;
 
 		const transform = require( '../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository' );
@@ -414,6 +439,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			newTagName: 'v' + version,
 			tagName: lastReleasedVersion ? 'v' + lastReleasedVersion : null,
 			transformCommit: transform,
+			additionalNotes: shouldAppendAdditionalNotes
 		} );
 	}
 

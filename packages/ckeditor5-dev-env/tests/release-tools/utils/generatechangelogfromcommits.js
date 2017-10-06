@@ -139,7 +139,8 @@ describe( 'dev-env/release-tools/utils', () => {
 						version: '1.0.0',
 						previousTag: 'v0.5.0',
 						currentTag: 'v1.0.0',
-						isInternalRelease: false
+						isInternalRelease: false,
+						additionalNotes: {}
 					} );
 					expect( conventionalChangelogArguments[ 2 ] ).to.have.property( 'from', 'v0.5.0' );
 					expect( conventionalChangelogArguments[ 4 ] ).to.deep.equal( { foo: 'bar' } );
@@ -173,7 +174,8 @@ describe( 'dev-env/release-tools/utils', () => {
 						version: '0.5.1',
 						previousTag: 'v0.5.0',
 						currentTag: 'v0.5.1',
-						isInternalRelease: true
+						isInternalRelease: true,
+						additionalNotes: {}
 					} );
 				} );
 		} );
@@ -204,6 +206,47 @@ describe( 'dev-env/release-tools/utils', () => {
 			return generateChangelogFromCommits( options )
 				.then( returnedChanges => {
 					expect( returnedChanges ).to.equal( newChangelogChunk );
+				} );
+		} );
+
+		it( 'allows appending additional notes for groups of commits ', () => {
+			const newChangelogChunk = [
+				'## 1.0.0',
+				'',
+				'### Features',
+				'',
+				'Besides new features introduced in the dependencies, this build also introduces these features:',
+				'',
+				'* This test should pass!'
+			].join( '\n' );
+
+			changelogBuffer = Buffer.from( newChangelogChunk );
+
+			stubs.fs.existsSync.returns( true );
+			stubs.changelogUtils.getChangelog.returns( changelogUtils.changelogHeader );
+
+			const options = {
+				version: '0.5.1',
+				transformCommit: stubs.transformCommit,
+				tagName: 'v0.5.0',
+				newTagName: 'v0.5.1',
+				isInternalRelease: false,
+				additionalNotes: true
+			};
+
+			return generateChangelogFromCommits( options )
+				.then( () => {
+					const { additionalCommitNotes } = require( '../../../lib/release-tools/utils/transform-commit/transform-commit-utils' );
+
+					expect( conventionalChangelogArguments ).to.be.an( 'array' );
+					expect( conventionalChangelogArguments[ 1 ] ).to.deep.equal( {
+						displayLogs: false,
+						version: '0.5.1',
+						previousTag: 'v0.5.0',
+						currentTag: 'v0.5.1',
+						isInternalRelease: false,
+						additionalNotes: additionalCommitNotes
+					} );
 				} );
 		} );
 	} );

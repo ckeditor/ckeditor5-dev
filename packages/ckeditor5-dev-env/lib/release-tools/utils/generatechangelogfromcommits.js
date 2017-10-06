@@ -11,6 +11,7 @@ const changelogUtils = require( './changelog' );
 const getWriterOptions = require( './transform-commit/getwriteroptions' );
 const parserOptions = require( './transform-commit/parser-options' );
 const { stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { additionalCommitNotes } = require( './transform-commit/transform-commit-utils' );
 
 /**
  * Generates a changelog based on user's commits in the repository and saves
@@ -24,6 +25,7 @@ const { stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {Boolean} [options.isInternalRelease=false] Whether the changelog is generated for internal release.
  * @param {Boolean} [options.doNotSave=false] If set on `true`, changes will be resolved in returned promise
  * instead of saving in CHANGELOG file.
+ * @param {Boolean} [options.additionalNotes=false] If set on `true, each category will contain additional description.
  * @returns {Promise}
  */
 module.exports = function generateChangelogFromCommits( options ) {
@@ -42,7 +44,12 @@ module.exports = function generateChangelogFromCommits( options ) {
 			previousTag: options.tagName,
 			displayLogs: false,
 			isInternalRelease: options.isInternalRelease || false,
+			additionalNotes: {},
 		};
+
+		if ( options.additionalNotes ) {
+			context.additionalNotes = additionalCommitNotes;
+		}
 
 		const gitRawCommitsOpts = {
 			from: options.tagName,
