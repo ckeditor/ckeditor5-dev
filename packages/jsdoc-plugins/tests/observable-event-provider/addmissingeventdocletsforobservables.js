@@ -20,7 +20,7 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 					],
 					filename: 'command.js',
 					lineno: 56,
-					path: '/Users/maciejbukowski/workspace/ckeditor5/packages/ckeditor5-core/src',
+					path: '/workspace/ckeditor5/packages/ckeditor5-core/src',
 					code: {}
 				},
 				description: '<p>Flag indicating whether a command is enabled or disabled.</p>',
@@ -50,7 +50,7 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 					],
 					filename: 'command.js',
 					lineno: 56,
-					path: '/Users/maciejbukowski/workspace/ckeditor5/packages/ckeditor5-core/src',
+					path: '/workspace/ckeditor5/packages/ckeditor5-core/src',
 					code: {}
 				},
 				description: '<p>Fired when a(n) <code>isEnabled</code> property changed value.<p>',
@@ -106,7 +106,7 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 					],
 					filename: 'command.js',
 					lineno: 56,
-					path: '/Users/maciejbukowski/workspace/ckeditor5/packages/ckeditor5-core/src',
+					path: '/workspace/ckeditor5/packages/ckeditor5-core/src',
 					code: {}
 				},
 				description: '<p>Flag indicating whether a command is enabled or disabled.</p>',
@@ -132,7 +132,7 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 			expect( outputDoclets.length ).to.equal( 2 );
 		} );
 
-		it( 'should add a proper event name to the fixes property', () => {
+		it( 'should add a proper event name to the fires property', () => {
 			const inputDoclets = [ {
 				comment: '/**\n\t\t * Flag indicating whether a command is enabled or disabled.',
 				meta: {
@@ -142,7 +142,7 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 					],
 					filename: 'command.js',
 					lineno: 56,
-					path: '/Users/maciejbukowski/workspace/ckeditor5/packages/ckeditor5-core/src',
+					path: '/workspace/ckeditor5/packages/ckeditor5-core/src',
 					code: {}
 				},
 				description: '<p>Flag indicating whether a command is enabled or disabled.</p>',
@@ -177,7 +177,7 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 					],
 					filename: 'command.js',
 					lineno: 56,
-					path: '/Users/maciejbukowski/workspace/ckeditor5/packages/ckeditor5-core/src',
+					path: '/workspace/ckeditor5/packages/ckeditor5-core/src',
 					code: {}
 				},
 				description: '<p>Flag indicating whether a command is enabled or disabled.</p>',
@@ -202,7 +202,7 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 					],
 					filename: 'command.js',
 					lineno: 56,
-					path: '/Users/maciejbukowski/workspace/ckeditor5/packages/ckeditor5-core/src',
+					path: '/workspace/ckeditor5/packages/ckeditor5-core/src',
 					code: {}
 				},
 				description: '<p>Fired when a(n) <code>isEnabled</code> property changed value.<p>',
