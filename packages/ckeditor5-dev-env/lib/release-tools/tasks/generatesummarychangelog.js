@@ -167,10 +167,10 @@ module.exports = function generateSummaryChangelog( options ) {
 	}
 
 	// Returns a list which contains all dependencies. It means – not only these specified in `package.json`
-	// but also dependency dependencies.
+	// but also dependency of the dependencies.
 	//
 	// @param {String} repositoryPath Path to the parsed repository.
-	// @returns {Set} List with the all dependencies.
+	// @returns {Set} List of all dependencies.
 	function getAllDependenciesForRepository( repositoryPath ) {
 		const packageJson = getPackageJson( repositoryPath );
 		const packagesToCheck = Object.keys( packageJson.dependencies || packageJson.devDependencies )
@@ -467,23 +467,16 @@ module.exports = function generateSummaryChangelog( options ) {
 	// @params {String|null} [currentVersion=null]
 	// @returns {String}
 	function formatChangelogEntry( packageName, nextVersion, currentVersion = null ) {
+		const packageJson = getPackageJson( getPathToRepository( packageName ) );
+		const repositoryUrl = packageJson.repository.url.replace( /\.git^/, '' );
+		const githubUrl = `${ repositoryUrl }/releases/tag/v${ nextVersion }`;
 		const npmUrl = `https://www.npmjs.com/package/${ packageName }`;
 
 		if ( currentVersion ) {
-			// eslint-disable-next-line max-len
-			return `* [${ packageName }](${ npmUrl }): v${ currentVersion } => [v${ nextVersion }]( ${ getUrlToPackageReleaseTag( nextVersion ) })`;
+			return `* [${ packageName }](${ npmUrl }): v${ currentVersion } => [v${ nextVersion }]( ${ githubUrl })`;
 		}
 
-		// eslint-disable-next-line max-len
-		return `* [${ packageName }](${ npmUrl }): [v${ nextVersion }]( ${ getUrlToPackageReleaseTag( nextVersion ) })`;
-
-		function getUrlToPackageReleaseTag( version ) {
-			const currentPackagePath = getPathToRepository( packageName );
-			const packageJson = getPackageJson( currentPackagePath );
-			const repositoryUrl = packageJson.repository.url.replace( /\.git^/, '' );
-
-			return `${ repositoryUrl }/releases/tag/v${ version }`;
-		}
+		return `* [${ packageName }](${ npmUrl }): [v${ nextVersion }]( ${ githubUrl })`;
 	}
 
 	// Checks whether breaking changes are acceptable for specified version.
