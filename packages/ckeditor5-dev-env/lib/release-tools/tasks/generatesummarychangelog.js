@@ -5,6 +5,7 @@
 
 'use strict';
 
+const fs = require( 'fs' );
 const path = require( 'path' );
 const semver = require( 'semver' );
 const chalk = require( 'chalk' );
@@ -139,6 +140,12 @@ module.exports = function generateSummaryChangelog( options ) {
 							.slice( 1 )
 							.join( '\n' )
 							.trim();
+					}
+
+					if ( !fs.existsSync( changelogUtils.changelogFile ) ) {
+						log.warning( 'Changelog file does not exist. Creating...' );
+
+						changelogUtils.saveChangelog( changelogUtils.changelogHeader );
 					}
 
 					let currentChangelog = changelogUtils.getChangelog( repositoryPath );
