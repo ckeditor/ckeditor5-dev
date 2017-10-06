@@ -167,6 +167,8 @@ module.exports = function generateSummaryChangelog( options ) {
 					// Commit the new changelog.
 					tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
 					tools.shExec( 'git commit -m "Docs: Changelog. [skip ci]"', { verbosity: 'error' } );
+
+					generatedChangelogMap.add( repositoryPath, version );
 				} );
 			} )
 			.then( () => {
