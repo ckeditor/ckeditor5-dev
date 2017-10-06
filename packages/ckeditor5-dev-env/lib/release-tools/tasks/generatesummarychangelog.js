@@ -117,6 +117,7 @@ module.exports = function generateSummaryChangelog( options ) {
 						previousTag: tagName,
 						transformCommit: transformCommitFunction,
 						isInternalRelease: false,
+						additionalNotes: true,
 						doNotSave: true
 					} );
 				}
