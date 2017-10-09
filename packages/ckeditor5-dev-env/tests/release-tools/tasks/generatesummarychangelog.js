@@ -76,7 +76,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 		mockery.registerMock( '../utils/getnewreleasetype', stubs.getNewReleaseType );
 		mockery.registerMock( '../utils/versions', stubs.versionUtils );
 		mockery.registerMock( '../utils/cli', stubs.cliUtils );
-		mockery.registerMock( '../utils/changelog', stubs.changelogUtils );
 
 		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
 
@@ -90,6 +89,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					return stubs.logger;
 				}
 			},
+			'../utils/changelog': stubs.changelogUtils,
 			'../utils/getsubrepositoriespaths': stubs.getSubRepositoriesPaths
 		} );
 	} );
