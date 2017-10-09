@@ -55,7 +55,7 @@ module.exports = function generateSummaryChangelog( options ) {
 	} );
 
 	if ( !options.skipMainRepository ) {
-		pathsCollection.packages.add( cwd );
+		pathsCollection.packages.add( options.cwd );
 	}
 
 	const generatedChangelogMap = new Map();
@@ -74,7 +74,7 @@ module.exports = function generateSummaryChangelog( options ) {
 	function generateSummaryChangelogForSingleRepository( repositoryPath ) {
 		process.chdir( repositoryPath );
 
-		const packageJson = getPackageJson();
+		const packageJson = getPackageJson( repositoryPath );
 
 		log.info( chalk.bold.blue( `Generating changelog for "${ packageJson.name }"...` ) );
 
@@ -85,7 +85,7 @@ module.exports = function generateSummaryChangelog( options ) {
 		let suggestedBumpFromCommits;
 		const suggestedBumpFromDependencies = getSuggestedBumpVersionType( dependencies );
 
-		let tagName = versionUtils.getLastFromChangelog();
+		let tagName = versionUtils.getLastFromChangelog( repositoryPath );
 
 		if ( tagName ) {
 			tagName = 'v' + tagName;
@@ -168,7 +168,7 @@ module.exports = function generateSummaryChangelog( options ) {
 					tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
 					tools.shExec( 'git commit -m "Docs: Changelog. [skip ci]"', { verbosity: 'error' } );
 
-					generatedChangelogMap.add( repositoryPath, version );
+					generatedChangelogMap.set( repositoryPath, version );
 				} );
 			} )
 			.then( () => {
@@ -200,6 +200,11 @@ module.exports = function generateSummaryChangelog( options ) {
 			checkedPackages.add( packageName );
 
 			const currentPackagePath = getPathToRepository( packageName );
+
+			// Package cannot be dependency for itself.
+			if ( currentPackagePath === repositoryPath ) {
+				continue;
+			}
 
 			// If package is not installed locally, we aren't able to get the changelog entries.
 			if ( !pathsCollection.skipped.has( currentPackagePath ) && !pathsCollection.packages.has( currentPackagePath ) ) {
@@ -483,10 +488,10 @@ module.exports = function generateSummaryChangelog( options ) {
 		const npmUrl = `https://www.npmjs.com/package/${ packageName }`;
 
 		if ( currentVersion ) {
-			return `* [${ packageName }](${ npmUrl }): v${ currentVersion } => [v${ nextVersion }]( ${ githubUrl })`;
+			return `* [${ packageName }](${ npmUrl }): v${ currentVersion } => [v${ nextVersion }](${ githubUrl })`;
 		}
 
-		return `* [${ packageName }](${ npmUrl }): [v${ nextVersion }]( ${ githubUrl })`;
+		return `* [${ packageName }](${ npmUrl }): [v${ nextVersion }](${ githubUrl })`;
 	}
 
 	// Checks whether breaking changes are acceptable for specified version.
