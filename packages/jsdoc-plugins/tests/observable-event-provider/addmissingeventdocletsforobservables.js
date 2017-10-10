@@ -53,7 +53,7 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 					path: '/workspace/ckeditor5/packages/ckeditor5-core/src',
 					code: {}
 				},
-				description: '<p>Fired when a(n) <code>isEnabled</code> property changed value.<p>',
+				description: '<p>Fired when the <code>isEnabled</code> property changed value.<p>',
 				kind: 'event',
 				name: 'change:isEnabled',
 				longname: 'module:core/command~Command#event:change:isEnabled',
@@ -68,7 +68,7 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 					type: {
 						names: [ 'String' ]
 					},
-					description: '<p>Name of the changed property name (<code>isEnabled</code>)</p>',
+					description: '<p>Name of the changed property (<code>isEnabled</code>).</p>',
 					name: 'name'
 				},
 				{
@@ -205,7 +205,7 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 					path: '/workspace/ckeditor5/packages/ckeditor5-core/src',
 					code: {}
 				},
-				description: '<p>Fired when a(n) <code>isEnabled</code> property changed value.<p>',
+				description: '<p>Fired when the <code>isEnabled</code> property changed value.<p>',
 				kind: 'event',
 				name: 'change:isEnabled',
 				longname: 'module:core/command~Command#event:change:isEnabled',
@@ -220,7 +220,7 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 					type: {
 						names: [ 'String' ]
 					},
-					description: '<p>Name of the changed property name (<code>isEnabled</code>)</p>',
+					description: '<p>Name of the changed property (<code>isEnabled</code>).</p>',
 					name: 'name'
 				},
 				{
