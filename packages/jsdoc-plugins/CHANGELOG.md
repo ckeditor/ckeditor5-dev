@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.8.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.7.1...@ckeditor/jsdoc-plugins@1.8.0) (2017-10-10)
+
+### Features
+
+* Provided support for `@observable` tag. Closes [#285](https://github.com/ckeditor/ckeditor5-dev/issues/285). ([fed57af](https://github.com/ckeditor/ckeditor5-dev/commit/fed57af))
+
+
 ## [1.7.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.7.0...@ckeditor/jsdoc-plugins@1.7.1) (2017-10-01)
 
 Internal changes only (updated dependencies, documentation, etc.).
