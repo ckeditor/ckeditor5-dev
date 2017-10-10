@@ -64,7 +64,7 @@ function createMissingEventDoclets( doclets ) {
 			return {
 				comment: '',
 				meta: cloneDeep( originalProperty.meta ),
-				description: `<p>Fired when a(n) <code>${ originalProperty.name }</code> property changed value.<p>`,
+				description: `<p>Fired when the <code>${ originalProperty.name }</code> property changed value.<p>`,
 				kind: 'event',
 				name: 'change:' + originalProperty.name,
 				params: [ {
@@ -78,7 +78,7 @@ function createMissingEventDoclets( doclets ) {
 					type: {
 						names: [ 'String' ]
 					},
-					description: `<p>Name of the changed property name (<code>${ originalProperty.name }</code>)</p>`,
+					description: `<p>Name of the changed property (<code>${ originalProperty.name }</code>).</p>`,
 					name: 'name'
 				},
 				{
