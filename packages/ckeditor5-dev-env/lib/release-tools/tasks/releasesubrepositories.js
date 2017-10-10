@@ -167,7 +167,7 @@ module.exports = function releaseSubRepositories( options ) {
 			if ( exec( 'git diff --name-only package.json' ).trim().length ) {
 				log.info( `Updating dependencies for "${ packageJson.name }"...` );
 				exec( 'git add package.json' );
-				exec( 'git commit -m "Internal: Updated dependencies."' );
+				exec( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
 			}
 
 			return Promise.resolve();
