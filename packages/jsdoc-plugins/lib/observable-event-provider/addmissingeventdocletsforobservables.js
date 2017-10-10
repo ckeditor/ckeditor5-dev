@@ -5,7 +5,7 @@
 
 'use strict';
 
-const {	cloneDeep } = require( 'lodash' );
+const { cloneDeep } = require( 'lodash' );
 
 /**
  * Creates event doclets for observable properties if they're missing.

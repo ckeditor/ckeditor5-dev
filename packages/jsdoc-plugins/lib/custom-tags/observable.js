@@ -9,9 +9,6 @@ module.exports = {
 	// See http://usejsdoc.org/about-plugins.html#tag-definitions.
 	defineTags( dictionary ) {
 		dictionary.defineTag( 'observable', {
-			mustNotHaveDescription: false,
-			canHaveType: true,
-			canHaveName: true,
 			onTagged( doclet ) {
 				doclet.observable = true;
 			}
