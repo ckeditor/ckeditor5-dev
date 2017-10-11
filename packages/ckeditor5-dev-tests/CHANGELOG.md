@@ -1,6 +1,10 @@
 Changelog
 =========
 
+## [8.2.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@8.2.1...@ckeditor/ckeditor5-dev-tests@8.2.2) (2017-10-01)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
 ## [8.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@8.2.0...@ckeditor/ckeditor5-dev-tests@8.2.1) (2017-09-22)
 
 ### Bug fixes
