@@ -50,6 +50,7 @@
   },
   "bin": {
     "ckeditor5-dev-tests": "./bin/test.js",
+    "ckeditor5-dev-tests-manual": "./bin/test-manual.js",
     "ckeditor5-dev-tests-travis": "./bin/test-travis.sh",
     "ckeditor5-dev-tests-create-mgit-json": "./bin/create-mgit-json.js",
     "ckeditor5-dev-tests-create-lerna-json": "./bin/create-lerna-json.js",

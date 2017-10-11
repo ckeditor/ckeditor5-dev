@@ -13,22 +13,24 @@ First, you need to install the package:
 npm i --save-dev @ckeditor/ckeditor5-dev-tests
 ```
 
-An example [gulp.js](http://gulpjs.com/) task to test CKEditor 5 packages (used e.g. in https://github.com/ckeditor/ckeditor5) can look like this:
+An example npm task to test CKEditor 5 packages (used e.g. in https://github.com/ckeditor/ckeditor5) can look like this:
 
-```js
-gulp.task( 'test', () => {
-	return require( '@ckeditor/ckeditor5-dev-tests' )
-		.runAutomatedTests( getTestOptions() );
-} );
+```json
+{
+  "scripts": {
+      "test": "node ./node_modules/.bin/ckeditor5-dev-tests",
+      "test:manual": "node ./node_modules/.bin/ckeditor5-dev-tests-manual"
+  }
+}
+```
 
-gulp.task( 'test:manual', () => {
-	return require( '@ckeditor/ckeditor5-dev-tests' )
-		.runManualTests( getTestOptions() );
-} );
+If you encounter problems with big test folders pass `--max_old_space_size=4096` option to node runner: 
 
-function getTestOptions() {
-	return require( '@ckeditor/ckeditor5-dev-tests' )
-		.parseArguments( process.argv.slice( 2 ) );
+```json
+{
+  "scripts": {
+      "test": "node --max_old_space_size=4096 ./node_modules/.bin/ckeditor5-dev-tests"
+  }
 }
 ```
 
@@ -57,32 +59,32 @@ You can also use the bin script for testing a package:
 Test the `ckeditor5-enter` and `ckeditor5-paragraph` packages and generate code coverage report:
 
 ```bash
-$ gulp test -c --files=enter,paragraph
+$ npm t -- -c --files=enter,paragraph
 ```
 
 Run `tests/view/**/*.js` tests from `ckeditor5-engine` and rerun them once any file change (the watch mode):
 
 ```bash
-$ gulp test -w --files=engine/view
+$ npm t -- -w --files=engine/view
 ```
 
 Test specified files in `ckeditor5-basic-styles` on two browsers (Chrome and Firefox) you can use:
 
 ```bash
-$ gulp test --browsers=Chrome,Firefox --files=basic-styles/boldengine.js,basic-styles/italicengine.js
+$ npm t -- --browsers=Chrome,Firefox --files=basic-styles/boldengine.js,basic-styles/italicengine.js
 ```
 
 Test all installed packages:
 
 ```bash
-$ gulp test --files=*
+$ npm t -- --files=*
 ```
 
 Test all installed packages except one (or more):
 
 ```bash
-$ gulp test --files='!(engine)'
-$ gulp test --files='!(engine|ui)'
+$ npm t -- --files='!(engine)'
+$ npm t -- --files='!(engine|ui)'
 ```
 
 ### Rules for converting `--files` option to glob pattern:
