@@ -8,7 +8,6 @@
 const sinon = require( 'sinon' );
 const chai = require( 'chai' );
 const expect = chai.expect;
-const gutil = require( 'gulp-util' );
 const logger = require( '../lib/logger' );
 
 describe( 'logger', () => {
@@ -32,65 +31,41 @@ describe( 'logger', () => {
 			log = logger( 'info' );
 		} );
 
-		describe( 'loggger.info()', () => {
+		describe( 'logger.info()', () => {
 			it( 'should log a message', () => {
-				const gutilLog = sandbox.stub( gutil, 'log' );
+				const consoleLog = sandbox.stub( console, 'log' );
 
 				log.info( logMessage );
 
-				expect( gutilLog.calledOnce ).to.equal( true );
-				expect( gutilLog.firstCall.args[ 0 ] ).to.equal( logMessage );
-			} );
-
-			it( 'should log a non-modified message', () => {
-				const consoleLog = sandbox.stub( console, 'log' );
-
-				log.info( logMessage, { raw: true } );
-
 				expect( consoleLog.calledOnce ).to.equal( true );
 				expect( consoleLog.firstCall.args[ 0 ] ).to.equal( logMessage );
+
 				consoleLog.restore();
 			} );
 		} );
 
-		describe( 'loggger.warning()', () => {
+		describe( 'logger.warning()', () => {
 			it( 'should log a message', () => {
-				const gutilLog = sandbox.stub( gutil, 'log' );
+				const consoleLog = sandbox.stub( console, 'log' );
 
 				log.warning( logMessage );
 
-				expect( gutilLog.calledOnce ).to.equal( true );
-				expect( gutilLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
-			} );
-
-			it( 'should log a non-modified message', () => {
-				const consoleLog = sandbox.stub( console, 'log' );
-
-				log.warning( logMessage, { raw: true } );
-
 				expect( consoleLog.calledOnce ).to.equal( true );
 				expect( consoleLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
+
 				consoleLog.restore();
 			} );
 		} );
 
-		describe( 'loggger.error()', () => {
+		describe( 'logger.error()', () => {
 			it( 'should log a message', () => {
-				const gutilLog = sandbox.stub( gutil, 'log' );
+				const consoleLog = sandbox.stub( console, 'log' );
 
 				log.error( logMessage );
 
-				expect( gutilLog.calledOnce ).to.equal( true );
-				expect( gutilLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
-			} );
-
-			it( 'should log a non-modified message', () => {
-				const consoleLog = sandbox.stub( console, 'log' );
-
-				log.error( logMessage, { raw: true } );
-
 				expect( consoleLog.calledOnce ).to.equal( true );
 				expect( consoleLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
+
 				consoleLog.restore();
 			} );
 		} );
@@ -101,59 +76,40 @@ describe( 'logger', () => {
 			log = logger( 'warning' );
 		} );
 
-		describe( 'loggger.info()', () => {
+		describe( 'logger.info()', () => {
 			it( 'should not log any message', () => {
-				const gutilLog = sandbox.stub( gutil, 'log' );
 				const consoleLog = sandbox.stub( console, 'log' );
 
 				log.info( logMessage );
-				log.info( logMessage, { raw: true } );
 
-				expect( gutilLog.called ).to.equal( false );
 				expect( consoleLog.called ).to.equal( false );
 
 				consoleLog.restore();
 			} );
 		} );
 
-		describe( 'loggger.warning()', () => {
+		describe( 'logger.warning()', () => {
 			it( 'should log a message', () => {
-				const gutilLog = sandbox.stub( gutil, 'log' );
+				const consoleLog = sandbox.stub( console, 'log' );
 
 				log.warning( logMessage );
 
-				expect( gutilLog.calledOnce ).to.equal( true );
-				expect( gutilLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
-			} );
-
-			it( 'should log a non-modified message', () => {
-				const consoleLog = sandbox.stub( console, 'log' );
-
-				log.warning( logMessage, { raw: true } );
-
 				expect( consoleLog.calledOnce ).to.equal( true );
 				expect( consoleLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
+
 				consoleLog.restore();
 			} );
 		} );
 
-		describe( 'loggger.error()', () => {
+		describe( 'logger.error()', () => {
 			it( 'should log a message', () => {
-				const gutilLog = sandbox.stub( gutil, 'log' );
+				const consoleLog = sandbox.stub( console, 'log' );
 
 				log.error( logMessage );
 
-				expect( gutilLog.calledOnce ).to.equal( true );
-				expect( gutilLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
-			} );
-
-			it( 'should log a non-modified message', () => {
-				const consoleLog = sandbox.stub( console, 'log' );
-
-				log.error( logMessage, { raw: true } );
-
 				expect( consoleLog.calledOnce ).to.equal( true );
 				expect( consoleLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
+
 				consoleLog.restore();
 			} );
 		} );
@@ -164,53 +120,39 @@ describe( 'logger', () => {
 			log = logger( 'error' );
 		} );
 
-		describe( 'loggger.info()', () => {
+		describe( 'logger.info()', () => {
 			it( 'should not log any message', () => {
-				const gutilLog = sandbox.stub( gutil, 'log' );
 				const consoleLog = sandbox.stub( console, 'log' );
 
 				log.info( logMessage );
-				log.info( logMessage, { raw: true } );
 
-				expect( gutilLog.called ).to.equal( false );
 				expect( consoleLog.called ).to.equal( false );
 
 				consoleLog.restore();
 			} );
 		} );
 
-		describe( 'loggger.warning()', () => {
+		describe( 'logger.warning()', () => {
 			it( 'should not log any message', () => {
-				const gutilLog = sandbox.stub( gutil, 'log' );
 				const consoleLog = sandbox.stub( console, 'log' );
 
 				log.warning( logMessage );
-				log.warning( logMessage, { raw: true } );
 
-				expect( gutilLog.called ).to.equal( false );
 				expect( consoleLog.called ).to.equal( false );
 
 				consoleLog.restore();
 			} );
 		} );
 
-		describe( 'loggger.error()', () => {
+		describe( 'logger.error()', () => {
 			it( 'should log a message', () => {
-				const gutilLog = sandbox.stub( gutil, 'log' );
+				const consoleLog = sandbox.stub( console, 'log' );
 
 				log.error( logMessage );
 
-				expect( gutilLog.calledOnce ).to.equal( true );
-				expect( gutilLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
-			} );
-
-			it( 'should log a non-modified message', () => {
-				const consoleLog = sandbox.stub( console, 'log' );
-
-				log.error( logMessage, { raw: true } );
-
 				expect( consoleLog.calledOnce ).to.equal( true );
 				expect( consoleLog.firstCall.args[ 0 ] ).to.match( new RegExp( logMessage ) );
+
 				consoleLog.restore();
 			} );
 		} );
@@ -221,14 +163,16 @@ describe( 'logger', () => {
 			log = logger();
 		} );
 
-		describe( 'loggger.info()', () => {
+		describe( 'logger.info()', () => {
 			it( 'should log a message', () => {
-				const gutilLog = sandbox.stub( gutil, 'log' );
+				const consoleLog = sandbox.stub( console, 'log' );
 
 				log.info( logMessage );
 
-				expect( gutilLog.calledOnce ).to.equal( true );
-				expect( gutilLog.firstCall.args[ 0 ] ).to.equal( logMessage );
+				expect( consoleLog.calledOnce ).to.equal( true );
+				expect( consoleLog.firstCall.args[ 0 ] ).to.equal( logMessage );
+
+				consoleLog.restore();
 			} );
 		} );
 	} );

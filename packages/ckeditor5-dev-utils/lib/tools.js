@@ -27,27 +27,27 @@ module.exports = {
 		sh.config.silent = true;
 
 		const ret = sh.exec( command );
-		const logOptions = { raw: true };
+
 		const grey = chalk.grey;
 
 		if ( ret.code ) {
 			if ( ret.stdout ) {
-				log.error( grey( ret.stdout ), logOptions );
+				log.error( grey( ret.stdout ) );
 			}
 
 			if ( ret.stderr ) {
-				log.error( grey( ret.stderr ), logOptions );
+				log.error( grey( ret.stderr ) );
 			}
 
 			throw new Error( `Error while executing ${ command }: ${ ret.stderr }` );
 		}
 
 		if ( ret.stdout ) {
-			log.info( grey( ret.stdout ), logOptions );
+			log.info( grey( ret.stdout ) );
 		}
 
 		if ( ret.stderr ) {
-			log.info( grey( ret.stderr ), logOptions );
+			log.info( grey( ret.stderr ) );
 		}
 
 		return ret.stdout;
