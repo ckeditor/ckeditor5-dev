@@ -6,6 +6,7 @@
 'use strict';
 
 const gutil = require( 'gulp-util' );
+const chalk = require( 'chalk' );
 const levels = new Map();
 
 // Displays everything.
@@ -71,7 +72,7 @@ module.exports = ( moduleVerbosity = 'info' ) => {
 		 * @param {Boolean} [options.raw=false] Whether to display non-modified message.
 		 */
 		warning( message, options = { raw: false } ) {
-			this._log( 'warning', gutil.colors.yellow( message ), options );
+			this._log( 'warning', chalk.yellow( message ), options );
 		},
 
 		/**
@@ -82,7 +83,7 @@ module.exports = ( moduleVerbosity = 'info' ) => {
 		 * @param {Boolean} [options.raw=false] Whether to display non-modified message.
 		 */
 		error( message, options = { raw: false } ) {
-			this._log( 'error', gutil.colors.red( message ), options );
+			this._log( 'error', chalk.red( message ), options );
 		},
 
 		/**

@@ -7,7 +7,7 @@
 
 'use strict';
 
-const gutil = require( 'gulp-util' );
+const chalk = require( 'chalk' );
 const tests = require( '../lib/index' );
 
 const cwd = process.cwd();
@@ -26,5 +26,5 @@ tests.runAutomatedTests( options )
 		// Mark result of this task as invalid.
 		process.exitCode = 1;
 
-		gutil.log( gutil.colors.red( error ) );
+		console.log( chalk.red( error ) );
 	} );

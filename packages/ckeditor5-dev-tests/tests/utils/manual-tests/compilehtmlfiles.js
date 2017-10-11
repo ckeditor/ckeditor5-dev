@@ -9,7 +9,6 @@ const mockery = require( 'mockery' );
 const sinon = require( 'sinon' );
 const path = require( 'path' );
 const chokidar = require( 'chokidar' );
-const gutil = require( 'gulp-util' );
 
 const fakeDirname = path.dirname( require.resolve( '../../../lib/utils/manual-tests/compilehtmlfiles' ) );
 
@@ -46,13 +45,11 @@ describe( 'compileHtmlFiles', () => {
 
 			commonmark: {
 				parse: sandbox.spy(),
-				render: sandbox.spy( () => '<h2>Markdown header</h2>' ),
+				render: sandbox.spy( () => '<h2>Markdown header</h2>' )
 			},
 
-			gutil: {
-				colors: sandbox.stub( gutil, 'colors' ).value( {
-					cyan: text => text
-				} )
+			chalk: {
+				cyan: sandbox.spy( text => text )
 			},
 
 			chokidar: {
@@ -108,7 +105,7 @@ describe( 'compileHtmlFiles', () => {
 
 		patternFiles = {
 			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
-			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ],
+			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ]
 		};
 
 		compileHtmlFiles( 'buildDir', [ path.join( 'manualTestPattern', '*.js' ) ] );
@@ -144,7 +141,7 @@ describe( 'compileHtmlFiles', () => {
 
 		patternFiles = {
 			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.abc.js' ) ],
-			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [],
+			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: []
 		};
 
 		compileHtmlFiles( 'buildDir', [ path.join( 'manualTestPattern', '*.js' ) ] );
@@ -175,7 +172,7 @@ describe( 'compileHtmlFiles', () => {
 			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
 			[ path.join( 'anotherPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'another', 'manual', 'file.js' ) ],
 			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ],
-			[ path.join( 'path', 'to', 'another', 'manual', '**', '*.!(js|html|md)' ) ]: [],
+			[ path.join( 'path', 'to', 'another', 'manual', '**', '*.!(js|html|md)' ) ]: []
 		};
 
 		compileHtmlFiles( 'buildDir', [
@@ -205,7 +202,7 @@ describe( 'compileHtmlFiles', () => {
 		patternFiles = {
 			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
 			[ path.join( 'anotherPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'another', 'file.js' ) ],
-			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ],
+			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ]
 		};
 
 		compileHtmlFiles( 'buildDir', [
@@ -229,7 +226,7 @@ describe( 'compileHtmlFiles', () => {
 		patternFiles = {
 			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
 			// Glob pattern has problem with file names containing dots.
-			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'some.file.md' ],
+			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'some.file.md' ]
 		};
 
 		compileHtmlFiles( 'buildDir', [ path.join( 'manualTestPattern', '*.js' ) ] );
@@ -244,7 +241,8 @@ describe( 'compileHtmlFiles', () => {
 				'<div>template html content</div>',
 				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 				'<div>html file content</div>',
-				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script></body>`
+				`<body class="manual-test-container"><script src="${ path.sep +
+				path.join( 'path', 'to', 'manual', 'file.js' ) }"></script></body>`
 			].join( '\n' )
 		);
 		/* eslint-enable max-len */
