@@ -64,6 +64,41 @@ The process implemented by the tool:
 
 	Notes for the release are taken from the changelog.
 
+## Translation tools
+
+Available tasks:
+- `collect` - Collects translation strings ( from `t()` calls ) and stores them in ckeditor5/build/.transifex directory.
+- `upload` - Uploads translations to the Transifex from collected files.
+- `download` - Downloads translations from the Transifex for each package and language.
+
+### Usage
+
+```
+npm i --save-dev @ckeditor/ckeditor5-dev-env
+```
+
+Then use `ckeditor5-dev-env-translations` command:
+
+```
+# directly from command line:
+node ./node_modules/bin/ckeditor5-dev-env-translations collect
+
+# using npx:
+npx ckeditor5-dev-env-translations collect
+```
+
+Or add to `package.json` scripts:
+
+```
+{
+  "scripts": {
+    "translations:collect": "ckeditor5-dev-env-translations collect",
+    "translations:download": "ckeditor5-dev-env-translations download",
+    "translations:upload": "ckeditor5-dev-env-translations upload"
+  }
+}
+```
+
 ## Changelog
 
 See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-env/CHANGELOG.md) file.
