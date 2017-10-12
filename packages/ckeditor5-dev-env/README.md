@@ -13,33 +13,31 @@ More information about development tools packages can be found at the following 
 npm i --save-dev @ckeditor/ckeditor5-dev-env
 ```
 
-Then add tasks to your `gulpfile.js`:
+Then create a script that run tasks:
 
 ```js
-// Generate changelog for the current package.
-gulp.task( 'changelog:self', () => {
-	return require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForSinglePackage();
-} );
+// scripts/changelog-self.js: Generate changelog for the current package. 
+require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForSinglePackage();
+```
 
-// Generate changelog for all dependencies (repository using multiple repositories).
-gulp.task( 'changelog:packages', () => {
-	return require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForSubRepositories( /* options */ );
-} );
+```js
+// scripts/changelog-repos.js: Generate changelog for all dependencies (repository using multiple repositories).
+require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForSubRepositories( /* options */ );
+```
 
-// Generate changelog for all packages (repository contains multiple packages).
-gulp.task( 'changelog:packages', () => {
-	return require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForSubPackages( /* options */ );
-} );
+```js
+// scripts/changelog-packages.js: Generate changelog for all packages (repository contains multiple packages).
+require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForSubPackages( /* options */ );
+```
 
-// Create release for the current package.
-gulp.task( 'release:self', () => {
-	return require( '@ckeditor/ckeditor5-dev-env' ).releaseRepository();
-} );
+```js
+// scripts/release-self.js: Create release for the current package.
+require( '@ckeditor/ckeditor5-dev-env' ).releaseRepository();
+```
 
-// Create release for all dependencies.
-gulp.task( 'release:packages', () => {
-	return require( '@ckeditor/ckeditor5-dev-env' ).releaseSubRepositories( /* options */ );
-} );
+```js
+// scripts/release-packages.js: Create release for all dependencies.
+require( '@ckeditor/ckeditor5-dev-env' ).releaseSubRepositories( /* options */ );
 ```
 
 ### Generating changelog
