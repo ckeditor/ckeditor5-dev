@@ -147,38 +147,4 @@ describe( 'dev-env/index', () => {
 				} );
 		} );
 	} );
-
-	describe( 'collectTranslations()', () => {
-		it( 'should collect translations', () => {
-			tasks.collectTranslations();
-
-			sinon.assert.calledOnce( stubs.translations.collect );
-		} );
-	} );
-
-	describe( 'uploadTranslations()', () => {
-		it( 'should upload translations', () => {
-			stubs.translations.getToken.returns( Promise.resolve( { token: 'token' } ) );
-
-			return tasks.uploadTranslations().then( () => {
-				sinon.assert.calledOnce( stubs.translations.upload );
-				sinon.assert.alwaysCalledWithExactly( stubs.translations.upload, {
-					token: 'token',
-				} );
-			} );
-		} );
-	} );
-
-	describe( 'downloadTranslations()', () => {
-		it( 'should download translations', () => {
-			stubs.translations.getToken.returns( Promise.resolve( { token: 'token' } ) );
-
-			return tasks.downloadTranslations().then( () => {
-				sinon.assert.calledOnce( stubs.translations.download );
-				sinon.assert.alwaysCalledWithExactly( stubs.translations.download, {
-					token: 'token',
-				} );
-			} );
-		} );
-	} );
 } );
