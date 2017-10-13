@@ -84,7 +84,7 @@ function build( config ) {
 					try {
 						tools.shExec( `${ cmd } -c ${ tmpConfig.name }`, { verbosity: 'info' } );
 					} catch ( error ) {
-						return reject( 'Error during JSDoc generation.' );
+						return reject( `Error during JSDoc generation: ${ error.message }` );
 					}
 
 					console.log( `Documented ${ files.length } files!` );
