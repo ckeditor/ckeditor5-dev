@@ -101,7 +101,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).to.equal( true );
 		} );
 
-		it( 'allows ignoring specified packages', () => {
+		it( 'allows ignoring specified packages (specified as array)', () => {
 			getDirectoriesStub.returns( [
 				'ckeditor5-core',
 				'ckeditor5-engine',
@@ -136,6 +136,39 @@ describe( 'dev-env/release-tools/utils', () => {
 			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).to.equal( true );
 		} );
 
+		it( 'allows ignoring specified packages (specified as string)', () => {
+			getDirectoriesStub.returns( [
+				'ckeditor5-core',
+				'ckeditor5-engine',
+				'ckeditor5-utils'
+			] );
+
+			const options = {
+				cwd: '/tmp',
+				packages: 'packages',
+				skipPackages: '@ckeditor/ckeditor5-u*'
+			};
+			getPackageJsonStub.onCall( 0 ).returns( {
+				dependencies: {
+					'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core',
+					'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',
+					'@ckeditor/ckeditor5-utils': 'ckeditor/ckeditor5-utils',
+				}
+			} );
+			getPackageJsonStub.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-core' } );
+			getPackageJsonStub.onCall( 2 ).returns( { name: '@ckeditor/ckeditor5-engine' } );
+			getPackageJsonStub.onCall( 3 ).returns( { name: '@ckeditor/ckeditor5-utils' } );
+
+			const pathsCollection = getSubRepositoriesPaths( options );
+
+			expect( pathsCollection.packages ).to.be.instanceof( Set );
+			expect( pathsCollection.packages.size ).to.equal( 2 );
+
+			expect( pathsCollection.skipped ).to.be.instanceof( Set );
+			expect( pathsCollection.skipped.size ).to.equal( 1 );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).to.equal( true );
+		} );
+
 		it( 'allows restricting the scope for packages', () => {
 			getDirectoriesStub.returns( [
 				'ckeditor5-core',
@@ -148,7 +181,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			const options = {
 				cwd: '/tmp',
 				packages: 'packages',
-				scope: /-build-/,
+				scope: '@ckeditor/ckeditor5-build-*',
 				skipPackages: []
 			};
 
@@ -194,7 +227,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			const options = {
 				cwd: '/tmp',
 				packages: 'packages',
-				scope: /-build-/,
+				scope: '@ckeditor/ckeditor5-build-*',
 				skipPackages: [
 					'@ckeditor/ckeditor5-build-inline'
 				]
