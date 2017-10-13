@@ -411,7 +411,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					const expectedChangelog = `
 ### Bug fixes
 
-Besides changes in the dependencies, this build also contains these bug fixes:
+Besides changes in the dependencies, this version also contains these bug fixes:
 
 * Foo Bar. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
 `;

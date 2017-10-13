@@ -147,6 +147,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 					/* eslint-disable max-len */
 					const expectedNewChangelog = `## [1.0.0](https://github.com/ckeditor/alpha.git/compare/v0.0.1...v1.0.0) (2017-10-09)
 
+### Dependencies
+
 Major releases (contain breaking changes):
 
 * [@ckeditor/epsilon](https://www.npmjs.com/package/@ckeditor/epsilon): v0.5.0 => [v1.0.0](https://github.com/ckeditor/epsilon.git/releases/tag/v1.0.0)
@@ -180,7 +182,7 @@ Patch releases (bug fixes, internal changes):
 
 					const genetatedChangelogMap = stubs.displayGeneratedChangelogs.firstCall.args[ 0 ];
 
-					expect( genetatedChangelogMap.has( packagesPaths.alpha ) ).to.equal( true );
+					expect( genetatedChangelogMap.has( '@ckeditor/alpha' ) ).to.equal( true );
 				} );
 		} );
 
@@ -238,6 +240,8 @@ Patch releases (bug fixes, internal changes):
 					/* eslint-disable max-len */
 					const expectedNewChangelog = `## [0.1.0](https://github.com/ckeditor/alpha.git/compare/v0.0.1...v0.1.0) (2017-10-09)
 
+### Dependencies
+
 Patch releases (bug fixes, internal changes):
 
 * [@ckeditor/beta](https://www.npmjs.com/package/@ckeditor/beta): v0.2.0 => [v0.2.1](https://github.com/ckeditor/beta.git/releases/tag/v0.2.1)
@@ -277,7 +281,7 @@ Changelog entries generated from commits.
 
 					const genetatedChangelogMap = stubs.displayGeneratedChangelogs.firstCall.args[ 0 ];
 
-					expect( genetatedChangelogMap.has( packagesPaths.alpha ) ).to.equal( true );
+					expect( genetatedChangelogMap.has( '@ckeditor/alpha' ) ).to.equal( true );
 				} );
 		} );
 
@@ -336,6 +340,8 @@ Changelog entries generated from commits.
 				.then( () => {
 					/* eslint-disable max-len */
 					const expectedNewChangelog = `## [0.2.0](https://github.com/ckeditor/foo-bar.git/compare/v0.1.0...v0.2.0) (2017-10-09)
+
+### Dependencies
 
 New packages:
 

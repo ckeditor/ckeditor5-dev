@@ -168,11 +168,14 @@ module.exports = function generateSummaryChangelog( options ) {
 					tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
 					tools.shExec( 'git commit -m "Docs: Changelog. [skip ci]"', { verbosity: 'error' } );
 
-					generatedChangelogMap.set( repositoryPath, version );
+					generatedChangelogMap.set( packageJson.name, version );
 				} );
 			} )
 			.then( () => {
 				process.chdir( cwd );
+			} )
+			.catch( err => {
+				log.error( err );
 			} );
 	}
 
@@ -340,6 +343,8 @@ module.exports = function generateSummaryChangelog( options ) {
 		const entries = [
 			// eslint-disable-next-line max-len
 			`## [${ options.newVersion }](${ options.repositoryUrl }/compare/v${ options.currentVersion }...v${ options.newVersion }) (${ date })`,
+			'',
+			'### Dependencies',
 			''
 		];
 
