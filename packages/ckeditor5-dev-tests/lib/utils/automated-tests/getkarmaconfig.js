@@ -9,6 +9,7 @@
 const path = require( 'path' );
 const getWebpackConfigForAutomatedTests = require( './getwebpackconfig' );
 const transformFileOptionToTestGlob = require( '../transformfileoptiontotestglob' );
+const glob = require( 'glob' );
 
 const reporters = [
 	'mocha',
@@ -34,11 +35,29 @@ module.exports = function getKarmaConfig( options ) {
 
 	const preprocessorMap = {};
 
+	const allFiles = [];
+
+	for ( const fileGlob of files ) {
+		allFiles.push(
+			...glob.sync( fileGlob )
+				.filter( file => !file.match( /\/manual|tickets\// ) )
+				.map( file => 'import "' + file + '";' )
+		);
+	}
+
+	const fs = require( 'fs' );
+	const tmpFile = path.resolve( '.tests.js' );
+
+	fs.writeFileSync( tmpFile, allFiles.join( '\n' ) );
+
+	preprocessorMap[ tmpFile ] = [ 'webpack' ];
+
 	for ( const file of files ) {
-		preprocessorMap[ file ] = [ 'webpack' ];
+		// preprocessorMap[ file ] = [ 'webpack' ];
 
 		if ( options.sourceMap ) {
-			preprocessorMap[ file ].push( 'sourcemap' );
+			// preprocessorMap[ file ].push( 'sourcemap' );
+			preprocessorMap[ tmpFile ].push( 'sourcemap' );
 		}
 	}
 
@@ -50,7 +69,7 @@ module.exports = function getKarmaConfig( options ) {
 		frameworks: [ 'mocha', 'chai', 'sinon' ],
 
 		// List of files/patterns to load in the browser.
-		files,
+		files: [ tmpFile ],
 
 		// List of files to exclude.
 		exclude: [
