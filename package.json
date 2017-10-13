@@ -32,5 +32,8 @@
       "eslint --quiet"
     ]
   },
+  "eslintIgnore": [
+    "coverage/**"
+  ],
   "version": "0.0.34"
 }
