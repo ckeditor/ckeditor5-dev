@@ -64,9 +64,10 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 	// @param {Array} commits
 	// @returns {String}
 	function getNewVersionType( commits ) {
-		let hasNewFeatures = false;
-		let hasChanges = false;
-		let hasBreakingChanges = false;
+		let haveValidChanges = false;
+		let newFeatures = false;
+		let publicChanges = false;
+		let internalChanges = false;
 
 		for ( const item of commits ) {
 			const singleCommit = transformCommit( item, context );
@@ -75,36 +76,40 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 				continue;
 			}
 
-			hasChanges = true;
+			haveValidChanges = true;
 
 			// Check whether the commit is visible in changelog.
 			if ( !availableCommitTypes.get( singleCommit.rawType ) ) {
+				internalChanges = true;
+
 				continue;
 			}
 
+			publicChanges = true;
+
 			for ( const note of singleCommit.notes ) {
 				if ( note.title === 'BREAKING CHANGES' ) {
-					hasBreakingChanges = true;
+					return 'major';
 				}
 			}
 
-			if ( !hasNewFeatures && singleCommit.rawType === 'Feature' ) {
-				hasNewFeatures = true;
+			if ( !newFeatures && singleCommit.rawType === 'Feature' ) {
+				newFeatures = true;
 			}
 		}
 
-		// Repository does not have new changes - skip the release.
-		if ( !hasChanges ) {
+		// Repository does not have new changes.
+		if ( !haveValidChanges ) {
 			return 'skip';
 		}
 
-		// Repository has breaking changes - bump the major.
-		if ( hasBreakingChanges ) {
-			return 'major';
+		// Repository contains internal changes only.
+		if ( !publicChanges && internalChanges ) {
+			return 'internal';
 		}
 
-		// Repository has new features without breaking changes - bump the minor.
-		if ( hasNewFeatures ) {
+		// Repository has new features without breaking changes.
+		if ( newFeatures ) {
 			return 'minor';
 		}
 
