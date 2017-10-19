@@ -93,7 +93,7 @@ module.exports = function generateSummaryChangelog( options ) {
 
 		return getNewReleaseType( transformCommitFunction, { tagName } )
 			.then( result => {
-				suggestedBumpFromCommits = result.releaseType;
+				suggestedBumpFromCommits = result.releaseType === 'internal' ? 'skip' : result.releaseType;
 
 				let newReleaseType;
 

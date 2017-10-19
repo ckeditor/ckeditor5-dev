@@ -33,6 +33,7 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 
 	const context = {
 		displayLogs: true,
+		returnInvalidCommit: true,
 		packageData: getPackageJson()
 	};
 

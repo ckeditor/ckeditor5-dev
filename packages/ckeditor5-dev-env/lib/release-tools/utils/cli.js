@@ -47,17 +47,7 @@ const cli = {
 	 * @returns {Promise}
 	 */
 	provideVersion( packageVersion, releaseType, options = {} ) {
-		let suggestedVersion;
-
-		if ( !releaseType ) {
-			// If package does not have changes, 'releaseType' is null and we don't want to generate the changelog.
-			suggestedVersion = 'skip';
-		} else if ( releaseType === 'major' && semver.gt( '1.0.0', packageVersion ) ) {
-			// If package is below the '1.0.0' version, bump the 'minor' instead of 'major'
-			suggestedVersion = semver.inc( packageVersion, 'minor' );
-		} else {
-			suggestedVersion = semver.inc( packageVersion, releaseType );
-		}
+		const suggestedVersion = getSuggestedVersion();
 
 		let message = 'Type the new version, "skip" or "internal"';
 
@@ -89,6 +79,23 @@ const cli = {
 
 		return inquirer.prompt( [ versionQuestion ] )
 			.then( answers => answers.version );
+
+		function getSuggestedVersion() {
+			if ( !releaseType ) {
+				return 'skip';
+			}
+
+			if ( releaseType === 'internal' ) {
+				return options.disableInternalVersion ? 'skip' : 'internal';
+			}
+
+			// If package's version is below the '1.0.0', bump the 'minor' instead of 'major'
+			if ( releaseType === 'major' && semver.gt( '1.0.0', packageVersion ) ) {
+				return semver.inc( packageVersion, 'minor' );
+			}
+
+			return semver.inc( packageVersion, releaseType );
+		}
 	},
 
 	/**
