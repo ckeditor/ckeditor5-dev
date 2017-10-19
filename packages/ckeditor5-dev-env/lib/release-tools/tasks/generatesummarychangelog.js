@@ -15,12 +15,12 @@ const changelogUtils = require( '../utils/changelog' );
 const cliUtils = require( '../utils/cli' );
 const displayGeneratedChangelogs = require( '../utils/displaygeneratedchangelogs' );
 const executeOnPackages = require( '../utils/executeonpackages' );
-const getPackageJson = require( '../utils/getpackagejson' );
-const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
-const versionUtils = require( '../utils/versions' );
-const getNewReleaseType = require( '../utils/getnewreleasetype' );
 const generateChangelogFromCommits = require( '../utils/generatechangelogfromcommits' );
+const getPackageJson = require( '../utils/getpackagejson' );
+const getNewReleaseType = require( '../utils/getnewreleasetype' );
+const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
 const transformCommitFunction = require( '../utils/transform-commit/transformcommitforsubrepository' );
+const versionUtils = require( '../utils/versions' );
 
 const bumpTypesPriority = {
 	prerelease: 7,
