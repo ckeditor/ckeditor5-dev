@@ -177,7 +177,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 				.then( () => {
 					expect( stubs.logger.info.calledOnce ).to.equal( true );
 					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal(
-						'Aborted due to user\'s no confirmation.'
+						'Releasing has been aborted.'
 					);
 				} );
 		} );
