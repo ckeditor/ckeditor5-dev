@@ -89,6 +89,10 @@ const cli = {
 				return options.disableInternalVersion ? 'skip' : 'internal';
 			}
 
+			if ( semver.prerelease( packageVersion ) ) {
+				releaseType = 'prerelease';
+			}
+
 			// If package's version is below the '1.0.0', bump the 'minor' instead of 'major'
 			if ( releaseType === 'major' && semver.gt( '1.0.0', packageVersion ) ) {
 				return semver.inc( packageVersion, 'minor' );

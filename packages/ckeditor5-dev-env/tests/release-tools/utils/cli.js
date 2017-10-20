@@ -88,12 +88,47 @@ describe( 'dev-env/release-tools/utils', () => {
 					} );
 			} );
 
+			it( 'returns "internal" if suggested version was "internal"', () => {
+				return cli.provideVersion( '0.1.0', 'internal' )
+					.then( newVersion => {
+						expect( newVersion ).to.equal( 'internal' );
+					} );
+			} );
+
 			it( 'allows disabling "internal" version', () => {
 				return cli.provideVersion( '0.1.0', 'major', { disableInternalVersion: true } )
 					.then( () => {
 						expect( questionItems[ 0 ].message ).to.equal(
 							'Type the new version or "skip" (suggested: "0.2.0", current: "0.1.0"):'
 						);
+					} );
+			} );
+
+			it( 'returns "skip" if suggested version was "internal" but it is disabled', () => {
+				return cli.provideVersion( '0.1.0', 'internal', { disableInternalVersion: true } )
+					.then( newVersion => {
+						expect( newVersion ).to.equal( 'skip' );
+					} );
+			} );
+
+			it( 'should suggest proper pre-release version for pre-release package (major bump)', () => {
+				return cli.provideVersion( '1.0.0-alpha.1', 'major' )
+					.then( newVersion => {
+						expect( newVersion ).to.equal( '1.0.0-alpha.2' );
+					} );
+			} );
+
+			it( 'should suggest proper pre-release version for pre-release package (minor bump)', () => {
+				return cli.provideVersion( '1.0.0-alpha.1', 'minor' )
+					.then( newVersion => {
+						expect( newVersion ).to.equal( '1.0.0-alpha.2' );
+					} );
+			} );
+
+			it( 'should suggest proper pre-release version for pre-release package (patch bump)', () => {
+				return cli.provideVersion( '1.0.0-alpha.1', 'patch' )
+					.then( newVersion => {
+						expect( newVersion ).to.equal( '1.0.0-alpha.2' );
 					} );
 			} );
 		} );

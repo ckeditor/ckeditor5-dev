@@ -97,7 +97,10 @@ module.exports = function generateSummaryChangelog( options ) {
 
 				let newReleaseType;
 
-				if ( bumpTypesPriority[ suggestedBumpFromCommits ] > bumpTypesPriority[ suggestedBumpFromDependencies ] ) {
+				const commitsWeight = bumpTypesPriority[ suggestedBumpFromCommits ];
+				const packagesWeight = bumpTypesPriority[ suggestedBumpFromDependencies ];
+
+				if ( !packagesWeight || commitsWeight > packagesWeight ) {
 					newReleaseType = suggestedBumpFromCommits;
 				} else {
 					newReleaseType = suggestedBumpFromDependencies;
