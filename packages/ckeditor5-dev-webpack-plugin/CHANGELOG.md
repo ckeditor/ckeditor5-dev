@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [2.0.20](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@2.0.19...@ckeditor/ckeditor5-dev-webpack-plugin@2.0.20) (2017-10-20)
+
+### Bug fixes
+
+* Fixed paths in webpack-plugin for Windows environment. Closes [#297](https://github.com/ckeditor/ckeditor5-dev/issues/297). ([7e61a1f](https://github.com/ckeditor/ckeditor5-dev/commit/7e61a1f))
+
+
 ## [2.0.19](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@2.0.13...@ckeditor/ckeditor5-dev-webpack-plugin@2.0.19) (2017-10-01)
 
 Internal changes only (updated dependencies, documentation, etc.).
