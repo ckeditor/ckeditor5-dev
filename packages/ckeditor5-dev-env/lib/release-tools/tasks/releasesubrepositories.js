@@ -20,7 +20,7 @@ const updateDependenciesVersions = require( '../utils/updatedependenciesversions
 const validatePackageToRelease = require( '../utils/validatepackagetorelease' );
 const { getChangesForVersion } = require( '../utils/changelog' );
 
-const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted by the user.';
+const BREAK_RELEASE_MESSAGE = 'You aborted publishing the release. Why? Oh why?!';
 
 /**
  * Releases all sub repositories found in specified path.
@@ -117,7 +117,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 			// A user did not confirm the release process.
 			if ( err instanceof Error && err.message === BREAK_RELEASE_MESSAGE ) {
-				log.info( 'Aborted due to user\'s no confirmation.' );
+				log.info( 'Releasing has been aborted.' );
 
 				return Promise.resolve();
 			}
