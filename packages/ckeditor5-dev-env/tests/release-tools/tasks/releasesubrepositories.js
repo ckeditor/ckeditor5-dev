@@ -243,84 +243,6 @@ describe( 'dev-env/release-tools/tasks', function() {
 				} );
 		} );
 
-		it( 'generates changelog if dependencies of package have been changed', () => {
-			const options = {
-				cwd: mainPackagePath,
-				packages: 'packages'
-			};
-
-			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
-
-			makeCommit( 'alpha', 'Feature: This is an initial commit.' );
-			makeChangelog( 'alpha', [
-				'Changelog',
-				'=========',
-				'',
-				'## 0.1.0 (2017-06-08)',
-				'',
-				'### Features',
-				'',
-				'* This is an initial commit.',
-				''
-			].join( '\n' ) );
-			makeCommit( 'alpha', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
-
-			stubs.generateChangelogForSinglePackage.onFirstCall()
-				.returns( new Promise( resolve => {
-					// Without this timeout, the promise is resolving before starting the test and `getPackagesToRelease()`
-					// returns an invalid values.
-					setTimeout( () => {
-						makeChangelog( 'beta', [
-							'Changelog',
-							'=========',
-							'',
-							'## [0.2.1](https://githubn.com/ckeditor) (2017-06-08)',
-							'',
-							'Internal changes only (updated dependencies, documentation, etc.).',
-							''
-						].join( '\n' ) );
-						makeCommit( 'beta', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
-
-						resolve();
-					} );
-				} ) );
-
-			stubs.generateChangelogForSinglePackage.onFirstCall()
-				.returns( new Promise( resolve => {
-					// Without this timeout, the promise is resolving before starting the test and `getPackagesToRelease()`
-					// returns an invalid values.
-					setTimeout( () => {
-						makeChangelog( 'delta', [
-							'Changelog',
-							'=========',
-							'',
-							'## [0.4.1](https://githubn.com/ckeditor) (2017-06-08)',
-							'',
-							'Internal changes only (updated dependencies, documentation, etc.).',
-							''
-						].join( '\n' ) );
-						makeCommit( 'delta', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
-
-						resolve();
-					} );
-				} ) );
-
-			stubs.validatePackageToRelease.returns( [] );
-			stubs.cli.configureReleaseOptions.returns( Promise.resolve( {
-				skipNpm: true,
-				skipGithub: true
-			} ) );
-
-			stubs.releaseRepository.returns( Promise.resolve() );
-
-			return releaseSubRepositories( options )
-				.then( () => {
-					expect( stubs.generateChangelogForSinglePackage.calledTwice ).to.equal( true );
-					expect( stubs.generateChangelogForSinglePackage.firstCall.args[ 0 ] ).to.equal( '0.2.1' );
-					expect( stubs.generateChangelogForSinglePackage.secondCall.args[ 0 ] ).to.equal( '0.4.1' );
-				} );
-		} );
-
 		it( 'releases packages', () => {
 			const options = {
 				cwd: mainPackagePath,
@@ -455,7 +377,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 				} );
 		} );
 
-		it( 'must not release any package if any error occured', () => {
+		it( 'must not release any package if any error occurred', () => {
 			const options = {
 				cwd: mainPackagePath,
 				packages: 'packages'

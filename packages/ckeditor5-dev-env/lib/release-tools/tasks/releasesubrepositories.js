@@ -10,14 +10,12 @@ const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const cli = require( '../utils/cli' );
 const displaySkippedPackages = require( '../utils/displayskippedpackages' );
 const executeOnPackages = require( '../utils/executeonpackages' );
-const generateChangelogForSinglePackage = require( './generatechangelogforsinglepackage' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getPackagesToRelease = require( '../utils/getpackagestorelease' );
 const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
 const releaseRepository = require( '../utils/releaserepository' );
 const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
 const validatePackageToRelease = require( '../utils/validatepackagetorelease' );
-const { getChangesForVersion } = require( '../utils/changelog' );
 
 const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted by the user.';
 
@@ -86,7 +84,6 @@ module.exports = function releaseSubRepositories( options ) {
 
 			return updateDependenciesOfPackagesToRelease();
 		} )
-		.then( () => generateChangelogForPackagesThatDependenciesHaveUpdated() )
 		.then( () => validateRepositories() )
 		.then( () => {
 			if ( errors.length ) {
@@ -157,34 +154,6 @@ module.exports = function releaseSubRepositories( options ) {
 			}
 
 			return Promise.resolve();
-		} );
-	}
-
-	function generateChangelogForPackagesThatDependenciesHaveUpdated() {
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
-			process.chdir( repositoryPath );
-
-			const packageJson = getPackageJson( repositoryPath );
-			const releaseDetails = packagesToRelease.get( packageJson.name );
-
-			const hasChangelog = releaseDetails.hasChangelog;
-			const version = releaseDetails.version;
-
-			// This flag was required only for generating the changelog.
-			delete releaseDetails.hasChangelog;
-
-			if ( hasChangelog ) {
-				releaseDetails.changes = getChangesForVersion( version, repositoryPath );
-
-				return Promise.resolve();
-			}
-
-			return generateChangelogForSinglePackage( version )
-				.then( () => {
-					exec( 'git pull && git push' );
-
-					releaseDetails.changes = getChangesForVersion( version, repositoryPath );
-				} );
 		} );
 	}
 

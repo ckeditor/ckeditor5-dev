@@ -76,6 +76,7 @@ module.exports = function generateSummaryChangelog( options ) {
 
 		const packageJson = getPackageJson( repositoryPath );
 
+		log.info( '' );
 		log.info( chalk.bold.blue( `Generating changelog for "${ packageJson.name }"...` ) );
 
 		const dependencies = getMapWithDependenciesVersions(
