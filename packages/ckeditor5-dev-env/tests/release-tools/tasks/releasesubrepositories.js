@@ -82,12 +82,10 @@ describe( 'dev-env/release-tools/tasks', function() {
 				error: sandbox.spy()
 			},
 			displaySkippedPackages: sandbox.stub(),
-			generateChangelogForSinglePackage: sandbox.stub(),
 			validatePackageToRelease: sandbox.stub(),
 			createGithubRelease: sandbox.stub()
 		};
 
-		mockery.registerMock( './generatechangelogforsinglepackage', stubs.generateChangelogForSinglePackage );
 		mockery.registerMock( '../utils/displayskippedpackages', stubs.displaySkippedPackages );
 		mockery.registerMock( '../utils/cli', stubs.cli );
 		mockery.registerMock( '../utils/validatepackagetorelease', stubs.validatePackageToRelease );
@@ -521,46 +519,6 @@ describe( 'dev-env/release-tools/tasks', function() {
 
 			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
 
-			stubs.generateChangelogForSinglePackage.onFirstCall()
-				.returns( new Promise( resolve => {
-					// Without this timeout, the promise is resolving before starting the test and `getPackagesToRelease()`
-					// returns an invalid values.
-					setTimeout( () => {
-						makeChangelog( 'delta', [
-							'Changelog',
-							'=========',
-							'',
-							'## [0.4.1](https://githubn.com/ckeditor) (2017-06-08)',
-							'',
-							'Internal changes only (updated dependencies, documentation, etc.).',
-							''
-						].join( '\n' ) );
-						makeCommit( 'delta', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
-
-						resolve();
-					} );
-				} ) );
-
-			stubs.generateChangelogForSinglePackage.onSecondCall()
-				.returns( new Promise( resolve => {
-					// Without this timeout, the promise is resolving before starting the test and `getPackagesToRelease()`
-					// returns an invalid values.
-					setTimeout( () => {
-						makeChangelog( 'epsilon', [
-							'Changelog',
-							'=========',
-							'',
-							'## [0.5.1](https://githubn.com/ckeditor) (2017-06-08)',
-							'',
-							'Internal changes only (updated dependencies, documentation, etc.).',
-							''
-						].join( '\n' ) );
-						makeCommit( 'epsilon', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
-
-						resolve();
-					} );
-				} ) );
-
 			stubs.validatePackageToRelease.returns( [] );
 			stubs.validatePackageToRelease.onFirstCall().returns( [
 				'Not on master.'
@@ -571,7 +529,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 
 			return releaseSubRepositories( options )
 				.then( () => {
-					expect( stubs.validatePackageToRelease.callCount ).to.equal( 4 );
+					expect( stubs.validatePackageToRelease.callCount ).to.equal( 2 );
 
 					expect( stubs.logger.error.callCount ).to.equal( 5 );
 					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal( 'Releasing has been aborted due to errors.' );
