@@ -87,7 +87,7 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 		return generateChangelogForSinglePackage()
 			.then( newVersion => {
 				if ( newVersion ) {
-					generatedChangelogsMap.set( getPackageJson().name, newVersion );
+					generatedChangelogsMap.set( getPackageJson( dependencyPath ).name, newVersion );
 				} else {
 					skippedChangelogs.add( dependencyPath );
 				}
@@ -102,7 +102,7 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 
 		return generateChangelogForSinglePackage( 'internal' )
 			.then( newVersion => {
-				generatedChangelogsMap.set( getPackageJson().name, newVersion );
+				generatedChangelogsMap.set( getPackageJson( dependencyPath ).name, newVersion );
 			} )
 			.catch( err => {
 				log.error( err );
