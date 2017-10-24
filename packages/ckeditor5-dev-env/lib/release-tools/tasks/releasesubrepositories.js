@@ -12,6 +12,7 @@ const cli = require( '../utils/cli' );
 const createGithubRelease = require( '../utils/creategithubrelease' );
 const displaySkippedPackages = require( '../utils/displayskippedpackages' );
 const executeOnPackages = require( '../utils/executeonpackages' );
+const { getChangesForVersion } = require( '../utils/changelog' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getPackagesToRelease = require( '../utils/getpackagestorelease' );
 const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
@@ -93,6 +94,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 			return updateDependenciesOfPackagesToRelease();
 		} )
+		.then( () => generateChangelogForPackagesThatDependenciesHaveUpdated() )
 		.then( () => validateRepositories() )
 		.then( () => {
 			if ( errors.length ) {
@@ -166,6 +168,21 @@ module.exports = function releaseSubRepositories( options ) {
 				exec( 'git add package.json' );
 				exec( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
 			}
+
+			return Promise.resolve();
+		} );
+	}
+
+	function generateChangelogForPackagesThatDependenciesHaveUpdated() {
+		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+			process.chdir( repositoryPath );
+
+			const packageJson = getPackageJson( repositoryPath );
+			const releaseDetails = packagesToRelease.get( packageJson.name );
+
+			const version = releaseDetails.version;
+
+			releaseDetails.changes = getChangesForVersion( version, repositoryPath );
 
 			return Promise.resolve();
 		} );
