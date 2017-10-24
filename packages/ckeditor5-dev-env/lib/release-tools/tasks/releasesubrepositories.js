@@ -94,7 +94,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 			return updateDependenciesOfPackagesToRelease();
 		} )
-		.then( () => generateChangelogForPackagesThatDependenciesHaveUpdated() )
+		.then( () => getLatestChangesForPackagesThatWillBeReleased() )
 		.then( () => validateRepositories() )
 		.then( () => {
 			if ( errors.length ) {
@@ -173,7 +173,7 @@ module.exports = function releaseSubRepositories( options ) {
 		} );
 	}
 
-	function generateChangelogForPackagesThatDependenciesHaveUpdated() {
+	function getLatestChangesForPackagesThatWillBeReleased() {
 		return executeOnPackages( pathsCollection.packages, repositoryPath => {
 			process.chdir( repositoryPath );
 
