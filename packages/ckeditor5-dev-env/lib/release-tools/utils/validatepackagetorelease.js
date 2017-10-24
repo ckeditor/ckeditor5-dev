@@ -19,11 +19,17 @@ module.exports = function validatePackageToRelease( options ) {
 	// Check whether the repository is ready for the release.
 	const status = exec( 'git status -sb', { verbosity: 'error' } ).trim();
 
-	// This way we'll catch if a branch is behind/ahead or contains uncommited files.
-	if ( status !== '## master...origin/master' ) {
-		errors.push( 'Not on master or master is not clean.' );
+	// Check whether current branch is "master".
+	if ( !status.startsWith( '## master...origin/master' ) ) {
+		errors.push( 'Not on master.' );
 	}
 
+	// Check whether the local branch is sync with the remote.
+	if ( status.match( /behind \d+/ ) ) {
+		errors.push( 'The branch is behind with the remote.' );
+	}
+
+	// Check whether specified the version.
 	if ( !options.version ) {
 		errors.push( `Passed an invalid version ("${ options.version }").` );
 

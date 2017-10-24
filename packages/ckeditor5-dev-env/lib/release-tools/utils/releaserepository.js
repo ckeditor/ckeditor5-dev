@@ -31,7 +31,7 @@ module.exports = function releaseRepository( options ) {
 	const packageJson = getPackageJson( cwd );
 
 	log.info( '' );
-	log.info( chalk.bold.blue( `Creating release for "${ packageJson.name }".` ) );
+	log.info( chalk.bold.blue( `Publishing the release of "${ packageJson.name }".` ) );
 
 	const promise = new Promise( ( resolve, reject ) => {
 		// Bump the version.

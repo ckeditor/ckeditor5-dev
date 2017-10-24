@@ -30,8 +30,8 @@ const transformCommitUtils = {
 	 * Order of messages generated in changelog.
 	 */
 	typesOrder: {
-		'Bug fixes': 1,
-		'Features': 2,
+		'Features': 1,
+		'Bug fixes': 2,
 		'Other changes': 3,
 
 		'BREAKING CHANGES': 1,
