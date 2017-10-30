@@ -16,7 +16,9 @@ module.exports = function parseArguments( args ) {
 		string: [
 			'files',
 			'browsers',
-			'reporter'
+			'reporter',
+			'username',
+			'access-key'
 		],
 
 		boolean: [
@@ -32,6 +34,9 @@ module.exports = function parseArguments( args ) {
 			c: 'coverage',
 			s: 'source-map',
 			v: 'verbose',
+			u: 'username',
+			a: 'access-key',
+			f: 'files'
 		},
 
 		default: {
@@ -46,11 +51,13 @@ module.exports = function parseArguments( args ) {
 		}
 	} );
 
+	options.accessKey = options[ 'access-key' ];
 	options.sourceMap = options[ 'source-map' ];
 	options.browsers = options.browsers.split( ',' );
 
 	if ( typeof options.files === 'string' ) {
 		options.files = options.files.split( ',' );
+		options.f = options.files; // Update an alias.
 	}
 
 	return options;
