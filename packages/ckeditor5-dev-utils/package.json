@@ -13,12 +13,7 @@
     "javascript-stringify": "^1.6.0",
     "pofile": "^1.0.9",
     "shelljs": "^0.7.8",
-    "through2": "^2.0.3",
-    "cssnano": "^3.10.0",
-    "postcss-cssnext": "^3.0.2",
-    "postcss-import": "^11.0.0",
-    "postcss-loader": "^2.0.8",
-    "postcss-mixins": "^6.2.0"
+    "through2": "^2.0.3"
   },
   "devDependencies": {
     "chai": "^4.1.2",

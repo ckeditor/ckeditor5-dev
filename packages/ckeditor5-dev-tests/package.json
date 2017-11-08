@@ -38,7 +38,12 @@
     "raw-loader": "^0.5.1",
     "sinon": "^4.0.0",
     "style-loader": "^0.18.2",
-    "webpack": "^3.6.0"
+    "webpack": "^3.6.0",
+    "cssnano": "^3.10.0",
+    "postcss-cssnext": "^3.0.2",
+    "postcss-import": "^11.0.0",
+    "postcss-loader": "^2.0.8",
+    "postcss-mixins": "^6.2.0"
   },
   "devDependencies": {
     "mockery": "^2.1.0"
