@@ -7,7 +7,7 @@
 
 const path = require( 'path' );
 const WebpackNotifierPlugin = require( './webpacknotifierplugin' );
-const getPostCssConfig = require( '@ckeditor/ckeditor5-dev-utils' ).themes.getPostCssConfig;
+const { getPostCssConfig } = require( '@ckeditor/ckeditor5-dev-utils' ).styles;
 
 /**
  * @param {Object} entryObject

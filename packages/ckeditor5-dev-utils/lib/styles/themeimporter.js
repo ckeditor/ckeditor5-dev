@@ -17,15 +17,23 @@ const processor = postcss( {
 	plugins: [ postCssImport() ]
 } );
 
-module.exports = postcss.plugin( 'postcss-ckeditor-theme-importer', options => {
+module.exports = postcss.plugin( 'postcss-ckeditor5-theme-importer', options => {
+	// A path to the theme e.g. "/foo/bar/ckeditor5-theme-baz"
 	const themePath = options.themePath;
+
+	// "ckeditor5-theme-baz"
 	const themeName = themePath.split( '/' ).slice( -1 );
 
 	log.info( `Using theme "${ gutil.colors.cyan( themeName ) }".` );
 
 	return ( root, result ) => {
+		// A CSS file to be themed, e.g. "/foo/bar/ckeditor5-qux/theme/components/button.css"
 		const inputFilePath = root.source.input.file;
+
+		// "ckeditor5-qux"
 		const packageName = getPackageName( inputFilePath );
+
+		// "components/button.css"
 		const inputFileName = inputFilePath.split( packageName + '/theme/' )[ 1 ];
 
 		// Don't load theme file for files not belonging to "ckeditor5-*/theme" folder.
@@ -33,6 +41,7 @@ module.exports = postcss.plugin( 'postcss-ckeditor-theme-importer', options => {
 			return;
 		}
 
+		// A corresponding theme file e.g. "/foo/bar/ckeditor5-theme-baz/theme/ckeditor5-qux/components/button.css".
 		const themeFilePath = path.resolve( __dirname, themePath, 'theme', packageName, inputFileName );
 
 		log.info( `Using theme file for "${ gutil.colors.cyan( inputFilePath ) }".` );
@@ -75,11 +84,7 @@ function appendThemeFile( root, result, inputFile, themeFilePath ) {
 	return importResult => {
 		log.info( `A theme file for "${ gutil.colors.cyan( root.source.input.file ) }" has been loaded.` );
 
-		importResult.root.nodes.forEach( node => {
-			node.parent = undefined;
-
-			root.append( node );
-		} );
+		root.append( importResult.root.nodes );
 
 		// Let the watcher know that the theme file should be observed too.
 		result.messages.push( {

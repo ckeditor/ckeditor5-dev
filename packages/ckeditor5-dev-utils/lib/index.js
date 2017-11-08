@@ -13,5 +13,5 @@ module.exports = {
 	workspace: require( './workspace' ),
 	translations: require( './translations/index' ),
 	bundler: require( './bundler/index' ),
-	themes: require( './themes/index' )
+	styles: require( './styles/index' )
 };

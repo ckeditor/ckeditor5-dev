@@ -29,6 +29,7 @@ module.exports = function getPostCssConfig( options ) {
 
 	if ( options.minify ) {
 		config.plugins.push( cssnano( {
+			preset: 'default',
 			autoprefixer: false
 		} ) );
 	}

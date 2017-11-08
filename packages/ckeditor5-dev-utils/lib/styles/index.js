@@ -6,6 +6,6 @@
 'use strict';
 
 module.exports = {
-	themeimporter: require( './themeimporter' ),
-	getPostCssConfig: require( './getpostcssconfig' )
+	getPostCssConfig: require( './getpostcssconfig' ),
+	themeImporter: require( './themeimporter' )
 };
