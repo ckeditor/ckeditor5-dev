@@ -45,8 +45,8 @@ module.exports = function getWebpackConfigForManualTests( entryObject, buildDir,
 						{
 							loader: 'style-loader',
 							options: {
-								// Note: https://github.com/webpack-contrib/style-loader/issues/134
-								// singleton: true,
+								// Note: "singleton" option does not work when sourceMap is enabled.
+								// See: https://github.com/webpack-contrib/style-loader/issues/134
 								sourceMap: true
 							}
 						},
