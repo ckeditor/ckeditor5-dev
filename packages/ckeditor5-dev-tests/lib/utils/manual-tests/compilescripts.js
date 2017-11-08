@@ -17,7 +17,7 @@ const getRelativeFilePath = require( '../getrelativefilepath' );
  * @param {Array.<String>} manualTestScriptsPatterns An array of patterns that resolve manual test scripts.
  * @returns {Promise}
  */
-module.exports = function compileManualTestScripts( buildDir, manualTestScriptsPatterns ) {
+module.exports = function compileManualTestScripts( buildDir, manualTestScriptsPatterns, themePath ) {
 	const entryFiles = manualTestScriptsPatterns.reduce( ( arr, manualTestPattern ) => {
 		return [
 			...arr,
@@ -26,7 +26,7 @@ module.exports = function compileManualTestScripts( buildDir, manualTestScriptsP
 	}, [] );
 
 	const entries = getWebpackEntryPoints( entryFiles );
-	const webpackConfig = getWebpackConfigForManualTests( entries, buildDir );
+	const webpackConfig = getWebpackConfigForManualTests( entries, buildDir, themePath );
 
 	return runWebpack( webpackConfig );
 };

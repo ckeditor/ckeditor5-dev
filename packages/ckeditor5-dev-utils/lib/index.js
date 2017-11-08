@@ -12,5 +12,6 @@ module.exports = {
 	stream: require( './stream' ),
 	workspace: require( './workspace' ),
 	translations: require( './translations/index' ),
-	bundler: require( './bundler/index' )
+	bundler: require( './bundler/index' ),
+	themes: require( './themes/index' )
 };
