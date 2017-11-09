@@ -22,12 +22,33 @@ module.exports = class TranslationService {
 	 * @param {Object} [options] Optional config.
 	 * @param {Function} [options.getPathToPoFile] Function that return a full path to the po file.
 	 */
-	constructor( language, options = {} ) {
-		this.language = language;
+	constructor( languages, options = {} ) {
+		/**
+		 * @readonly
+		 */
+		this.languages = languages;
+
+		/**
+		 * @readonly
+		 */
 		this.getPathToPoFile = options.getPathToPoFile || getDefaultPathToPoFile;
 
+		/**
+		 * @readonly
+		 */
 		this.packagePaths = new Set();
-		this.dictionary = new Map();
+
+		/**
+		 * @readonly
+		 */
+		this.dictionary = {};
+
+		/**
+		 * string -> hash dictionary.
+		 *
+		 * @readonly
+		 */
+		this.translationHashDictionary = {};
 	}
 
 	/**
@@ -42,9 +63,11 @@ module.exports = class TranslationService {
 
 		this.packagePaths.add( pathToPackage );
 
-		const pathToPoFile = this.getPathToPoFile( pathToPackage, this.language );
+		for ( const language of this.languages ) {
+			const pathToPoFile = this.getPathToPoFile( pathToPackage, language );
 
-		this._loadPoFile( pathToPoFile );
+			this._loadPoFile( language, pathToPoFile );
+		}
 	}
 
 	/**
@@ -79,7 +102,7 @@ module.exports = class TranslationService {
 				}
 
 				changesInCode = true;
-				node.arguments[ 0 ].value = this._translateString( node.arguments[ 0 ].value );
+				node.arguments[ 0 ].value = this.getHash( node.arguments[ 0 ].value );
 			}
 		} );
 
@@ -97,7 +120,7 @@ module.exports = class TranslationService {
 	}
 
 	// Loads translations from the po file.
-	_loadPoFile( pathToPoFile ) {
+	_loadPoFile( language, pathToPoFile ) {
 		if ( !fs.existsSync( pathToPoFile ) ) {
 			return;
 		}
@@ -105,22 +128,42 @@ module.exports = class TranslationService {
 		const poFileContent = fs.readFileSync( pathToPoFile, 'utf-8' );
 		const parsedTranslationFile = createDictionaryFromPoFileContent( poFileContent );
 
+		if ( !this.dictionary[ language ] ) {
+			this.dictionary[ language ] = {};
+		}
+
+		const dictionary = this.dictionary[ language ];
+
 		for ( const translationKey in parsedTranslationFile ) {
-			this.dictionary.set( translationKey, parsedTranslationFile[ translationKey ] );
+			dictionary[ translationKey ] = parsedTranslationFile[ translationKey ];
 		}
 	}
 
 	// Translates all t() call found in source text to the target language.
-	_translateString( originalString ) {
-		let translation = this.dictionary.get( originalString );
+	getHash( originalString ) {
+		// TODO - log when translation is missing.
 
-		if ( !translation ) {
-			logger.error( `Missing translation for: ${ originalString }.` );
+		let hash = this.translationHashDictionary[ originalString ];
 
-			translation = originalString;
+		if ( !hash ) {
+			hash = Math.random().toFixed( 10 ).slice( 2 );
+			this.translationHashDictionary[ originalString ] = hash;
 		}
 
-		return translation;
+		return hash;
+	}
+
+	getHashToTranslatedStringDictionary( lang ) {
+		const langDictionary = this.dictionary[ lang ];
+		const hashes = {};
+
+		for ( const stringName in langDictionary ) {
+			const hash = this.translationHashDictionary[ stringName ];
+
+			hashes[ hash ] = langDictionary[ stringName ];
+		}
+
+		return hashes;
 	}
 };
 
