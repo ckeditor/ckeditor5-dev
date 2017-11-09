@@ -110,7 +110,7 @@ module.exports = function getKarmaConfig( options ) {
 				os: 'Windows',
 				os_version: '10',
 				browser: 'edge',
-				browser_version: '16.0'
+				browser_version: '41.0'
 			},
 			Mavericks_Chrome: {
 				base: 'BrowserStack',
