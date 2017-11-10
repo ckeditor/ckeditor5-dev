@@ -6,11 +6,12 @@
 /* jshint browser: false, node: true, strict: true */
 'use strict';
 
+const fs = require( 'fs' );
 const path = require( 'path' );
 const glob = require( 'glob' );
 const minimatch = require( 'minimatch' );
 const tmp = require( 'tmp' );
-const log = require( 'karma/lib/logger.js' ).create( 'config' );
+const karmaLogger = require( 'karma/lib/logger.js' );
 const getWebpackConfigForAutomatedTests = require( './getwebpackconfig' );
 const transformFileOptionToTestGlob = require( '../transformfileoptiontotestglob' );
 
@@ -26,6 +27,7 @@ const AVAILABLE_REPORTERS = [
 module.exports = function getKarmaConfig( options ) {
 	const basePath = process.cwd();
 	const coverageDir = path.join( basePath, 'coverage' );
+	const log = karmaLogger.create( 'config' );
 
 	if ( !Array.isArray( options.files ) || options.files.length === 0 ) {
 		return log.error( 'Karma requires files to tests. `options.files` has to be non-empty array.' );
@@ -62,7 +64,6 @@ module.exports = function getKarmaConfig( options ) {
 		return log.error( 'Not found files to tests. Specified patterns are invalid.' );
 	}
 
-	const fs = require( 'fs' );
 	const tempFile = tmp.fileSync();
 
 	const filesImports = allFiles
