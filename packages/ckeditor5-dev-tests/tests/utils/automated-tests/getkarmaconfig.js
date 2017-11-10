@@ -11,7 +11,7 @@ const sinon = require( 'sinon' );
 const path = require( 'path' );
 const proxyquire = require( 'proxyquire' );
 
-describe.only( 'getKarmaConfig', () => {
+describe( 'getKarmaConfig', () => {
 	let getKarmaConfig, sandbox, stubs;
 	const originalEnv = process.env;
 
