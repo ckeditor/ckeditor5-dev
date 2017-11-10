@@ -16,7 +16,13 @@ module.exports = function runAutomatedTests( options ) {
 	return new Promise( ( resolve, reject ) => {
 		const config = getKarmaConfig( options );
 
+		if ( !config ) {
+			return reject();
+		}
+
 		const server = new KarmaServer( config, exitCode => {
+			config.removeEntryFile();
+
 			if ( exitCode === 0 ) {
 				resolve();
 			} else {
