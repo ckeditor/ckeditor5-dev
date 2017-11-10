@@ -1,15 +1,19 @@
 const utils = require( './utils' );
-const {	TranslationService } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
+const { TranslationService } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 const path = require( 'path' );
 
+/**
+ * Serve translations for multiple languages.
+ *
+ * @param {*} compiler Webpack compiler
+ * @param {*} languages
+ */
 module.exports = function serveTranslations( compiler, languages ) {
-	const allLanguages = [ languages.main, ...languages.additional ];
-
-	const translationService = new TranslationService( allLanguages );
+	const translationService = new TranslationService( languages );
 
 	compiler.options.translateSource = source => translationService.translateSource( source );
 
-	// Adds ckeditor5-core translations before translate-source-loader starts translating.
+	// Add ckeditor5-core translations before translate-source-loader starts translating.
 	compiler.plugin( 'after-resolvers', () => {
 		compiler.resolvers.normal.resolve(
 			process.cwd(),
@@ -32,7 +36,7 @@ module.exports = function serveTranslations( compiler, languages ) {
 		} );
 	} );
 
-	// Adds package to the translations if the resource comes from ckeditor5-* package.
+	// Add package to the translations if the resource comes from ckeditor5-* package.
 	function maybeLoadPackage( resolveOptions ) {
 		const packageNameRegExp = utils.CKEditor5PackageNameRegExp;
 		const match = resolveOptions.resource.match( packageNameRegExp );
@@ -45,29 +49,42 @@ module.exports = function serveTranslations( compiler, languages ) {
 		}
 	}
 
-	// Injects loader when the file comes from ckeditor5-* packages.
+	// Inject loader when the file comes from ckeditor5-* packages.
 	function maybeAddLoader( resolveOptions ) {
 		if ( resolveOptions.resource.match( utils.CKEditor5PackageSrcFileRegExp ) ) {
 			resolveOptions.loaders.unshift( path.join( __dirname, 'translatesourceloader.js' ) );
 		}
 	}
 
-	compiler.plugin( 'emit', ( compilation, done ) => {
-		for ( const lang of allLanguages ) {
-			const hashToTranslatedStringDictionary = translationService.getHashToTranslatedStringDictionary( lang );
+	compiler.plugin( 'compilation', compilation => {
+		compilation.plugin( 'additional-assets', done => {
+			for ( const lang of languages ) {
+				const hashToTranslatedStringDictionary = translationService.getHashToTranslatedStringDictionary( lang );
 
-			// TODO: Windows.
-			const outputPath = path.join( languages.outputDirectory, `${ lang }.json` );
-			const output = JSON.stringify( hashToTranslatedStringDictionary, null, 2 );
+				// TODO: Windows.
+				const outputPath = path.join( 'lang', `${ lang }.js` );
+				const stringifiedTranslations = JSON.stringify( hashToTranslatedStringDictionary, null, 2 );
+				const outputBody = `CKEDITOR_TRANSLATIONS.add( '${ lang }', ${ stringifiedTranslations } )`;
 
-			compilation.assets[ outputPath ] = {
-				source: () => output,
-				size: () => output.length,
-			};
+				compilation.assets[ outputPath ] = {
+					source: () => outputBody,
+					size: () => outputBody.length,
+				};
 
-			console.log( `Created ${ outputPath } translation file.` );
-		}
+				console.log( `Created ${ outputPath } translation file.` );
+			}
 
-		done();
+			done();
+		} );
 	} );
+
+	// compiler.plugin( 'emit', compilation => {
+	// 	for ( const chunk of compilation.chunks ) {
+	// 		const resources = chunk.modules.map( m => m.resource );
+
+	// 		console.log( chunk.files, resources );
+	// 	}
+
+	// 	process.exit();
+	// } );
 };

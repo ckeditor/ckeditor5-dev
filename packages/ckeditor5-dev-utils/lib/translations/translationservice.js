@@ -13,6 +13,28 @@ const walk = require( 'acorn/dist/walk' );
 const escodegen = require( 'escodegen' );
 const logger = require( '../logger' )();
 
+let idIndex = 0;
+
+function getNextId() {
+	let index = idIndex;
+	let id = '';
+
+	while ( true ) {
+		const char = String.fromCharCode( 97 + ( index % 26 ) );
+		index = Math.floor( index / 26 );
+
+		id = char + id;
+
+		if ( index === 0 ) {
+			break;
+		}
+	}
+
+	idIndex++;
+
+	return id;
+}
+
 /**
  *
  */
@@ -146,7 +168,7 @@ module.exports = class TranslationService {
 		let hash = this.translationHashDictionary[ originalString ];
 
 		if ( !hash ) {
-			hash = Math.random().toFixed( 10 ).slice( 2 );
+			hash = getNextId();
 			this.translationHashDictionary[ originalString ] = hash;
 		}
 
@@ -159,6 +181,12 @@ module.exports = class TranslationService {
 
 		for ( const stringName in langDictionary ) {
 			const hash = this.translationHashDictionary[ stringName ];
+
+			if ( !hash ) {
+				console.error( `Missing translation for ${ stringName } for ${ lang } language.` );
+
+				continue;
+			}
 
 			hashes[ hash ] = langDictionary[ stringName ];
 		}

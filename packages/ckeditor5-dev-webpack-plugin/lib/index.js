@@ -12,8 +12,8 @@ module.exports = class CKEditorWebpackPlugin {
 	/**
 	 * @param {Object} [options]
 	 * @param {Array.<String>} [options.packages] Array of directories in which packages will be looked for.
-	 * @param {Array.<String>} [options.languages] Array of languages.
-	 * TODO
+	 * @param {Object} [options.languages]
+	 * TODO: Fix params.
 	 */
 	constructor( options = {} ) {
 		this.options = options;
