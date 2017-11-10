@@ -43,8 +43,8 @@ const transformCommitUtils = {
 	 * `transformCommitUtils#getCommitType()` function.
 	 */
 	additionalCommitNotes: {
-		'Bug fixes': 'Besides changes in the dependencies, this version also contains these bug fixes:',
-		Features: 'Besides new features introduced in the dependencies, this build also introduces these features:'
+		'Bug fixes': 'Besides changes in the dependencies, this version also contains the following bug fixes:',
+		Features: 'Besides new features introduced by the dependencies, this version also introduces the following features:'
 	},
 
 	/**
