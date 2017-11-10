@@ -1,6 +1,23 @@
 Changelog
 =========
 
+## [6.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.13...@ckeditor/ckeditor5-dev-env@6.0.0) (2017-11-10)
+
+### Features
+
+* Introduced a task which allows generating a summary changelog for a repository. Closes [#289](https://github.com/ckeditor/ckeditor5-dev/issues/289). ([eaf76b4](https://github.com/ckeditor/ckeditor5-dev/commit/eaf76b4))
+
+### BREAKING CHANGES
+
+* Release tool won't generate changelogs for skipped packages anymore. This task will be handled by changelog generator.
+
+### NOTE
+
+* The changelog generator will propose `internal` bump version instead of `skip` if a package contains any commit.
+* If a package does not contain any commit, the changelog will propose `skip` bump version.
+* `internal` bump will increase the release version if the current version is specified as a release (`v1.0.0-alpha.1` becomes `v1.0.0-alpha.2`).
+
+
 ## [5.1.13](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.12...@ckeditor/ckeditor5-dev-env@5.1.13) (2017-10-20)
 
 ### Bug fixes

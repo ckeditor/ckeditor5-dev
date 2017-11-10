@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.8.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.8.0...@ckeditor/jsdoc-plugins@1.8.1) (2017-11-10)
+
+### Bug fixes
+
+* Add access property to events generated from observables. Closes [#300](https://github.com/ckeditor/ckeditor5-dev/issues/300). ([a80fe6e](https://github.com/ckeditor/ckeditor5-dev/commit/a80fe6e))
+
+
 ## [1.8.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.7.1...@ckeditor/jsdoc-plugins@1.8.0) (2017-10-10)
 
 ### Features
