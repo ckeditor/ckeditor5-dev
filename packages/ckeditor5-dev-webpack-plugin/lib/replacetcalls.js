@@ -6,7 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
-const {	TranslationService } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
+const { TranslationService } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 const utils = require( './utils' );
 
 /**
@@ -46,11 +46,14 @@ module.exports = function replaceTCalls( compiler, language ) {
 	// Adds package to the translations if the resource comes from ckeditor5-* package.
 	function maybeLoadPackage( resolveOptions ) {
 		const packageNameRegExp = utils.CKEditor5PackageNameRegExp;
-		const match = resolveOptions.resource.match( packageNameRegExp );
+
+		const relativePathToResource = path.relative( process.cwd(), resolveOptions.resource );
+
+		const match = relativePathToResource.match( packageNameRegExp );
 
 		if ( match ) {
-			const index = resolveOptions.resource.search( packageNameRegExp ) + match[ 0 ].length;
-			const pathToPackage = resolveOptions.resource.slice( 0, index );
+			const index = relativePathToResource.search( packageNameRegExp ) + match[ 0 ].length;
+			const pathToPackage = path.join( process.cwd(), relativePathToResource.slice( 0, index ) );
 
 			translationService.loadPackage( pathToPackage );
 		}
@@ -58,7 +61,9 @@ module.exports = function replaceTCalls( compiler, language ) {
 
 	// Injects loader when the file comes from ckeditor5-* packages.
 	function maybeAddLoader( resolveOptions ) {
-		if ( resolveOptions.resource.match( utils.CKEditor5PackageSrcFileRegExp ) ) {
+		const relativePathToResource = path.relative( process.cwd(), resolveOptions.resource );
+
+		if ( relativePathToResource.match( utils.CKEditor5PackageSrcFileRegExp ) ) {
 			resolveOptions.loaders.unshift( path.join( __dirname, 'translatesourceloader.js' ) );
 		}
 	}

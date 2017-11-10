@@ -35,7 +35,8 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 				},
 				longname: 'module:core/command~Command#isEnabled',
 				scope: 'instance',
-				memberof: 'module:core/command~Command'
+				memberof: 'module:core/command~Command',
+				access: 'protected'
 			} ];
 
 			const outputDoclets = addMissingEventDocletsForObservables( inputDoclets );
@@ -92,7 +93,8 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 					name: 'oldValue'
 				} ],
 				scope: 'instance',
-				memberof: 'module:core/command~Command'
+				memberof: 'module:core/command~Command',
+				access: 'protected'
 			} );
 		} );
 
@@ -157,7 +159,8 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 				},
 				longname: 'module:core/command~Command#isEnabled',
 				scope: 'instance',
-				memberof: 'module:core/command~Command'
+				memberof: 'module:core/command~Command',
+				access: 'public'
 			} ];
 
 			const outputDoclets = addMissingEventDocletsForObservables( inputDoclets );
@@ -244,7 +247,8 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 					name: 'oldValue'
 				} ],
 				scope: 'instance',
-				memberof: 'module:core/command~Command'
+				memberof: 'module:core/command~Command',
+				access: 'public'
 			} );
 		} );
 	} );
