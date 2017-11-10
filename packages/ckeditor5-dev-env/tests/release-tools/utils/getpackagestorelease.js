@@ -81,68 +81,9 @@ describe( 'dev-env/release-tools/utils', () => {
 
 					const corePackageDetails = packages.get( '@ckeditor/ckeditor5-core' );
 					expect( corePackageDetails.version ).to.equal( '0.6.0' );
-					expect( corePackageDetails.hasChangelog ).to.equal( true );
 
 					const enginePackageDetails = packages.get( '@ckeditor/ckeditor5-engine' );
 					expect( enginePackageDetails.version ).to.equal( '1.0.1' );
-					expect( enginePackageDetails.hasChangelog ).to.equal( true );
-				} );
-		} );
-
-		it( 'returns packages with changes and also dependent packages', () => {
-			const packagesToCheck = new Set( [
-				'/packages/ckeditor5-core',
-				'/packages/ckeditor5-engine',
-				'/packages/ckeditor5-basic-styles'
-			] );
-
-			// @ckeditor/ckeditor5-core
-			stubs.versions.getLastFromChangelog.onFirstCall().returns( '0.6.0' );
-			stubs.versions.getLastTagFromGit.onFirstCall().returns( '0.5.0' );
-			stubs.getPackageJson.onFirstCall().returns( {
-				name: '@ckeditor/ckeditor5-core',
-				version: '0.5.0'
-			} );
-
-			// @ckeditor/ckeditor5-engine
-			stubs.versions.getLastFromChangelog.onSecondCall().returns( '1.0.0' );
-			stubs.versions.getLastTagFromGit.onSecondCall().returns( '1.0.0' );
-			stubs.getPackageJson.onSecondCall().returns( {
-				name: '@ckeditor/ckeditor5-engine',
-				version: '1.0.0',
-				dependencies: {
-					'@ckeditor/ckeditor5-core': '^0.5.0'
-				}
-			} );
-
-			// @ckeditor/ckeditor5-basic-styles
-			// This package does not have any changes but will be released because
-			// its dependency (@ckeditor/ckeditor5-engine) will be release.
-			stubs.versions.getLastFromChangelog.onThirdCall().returns( '0.1.0' );
-			stubs.versions.getLastTagFromGit.onThirdCall().returns( '0.1.0' );
-			stubs.getPackageJson.onThirdCall().returns( {
-				name: '@ckeditor/ckeditor5-basic-styles',
-				version: '0.1.0',
-				dependencies: {
-					'@ckeditor/ckeditor5-engine': '^1.0.0'
-				}
-			} );
-
-			return getPackagesToRelease( packagesToCheck )
-				.then( packages => {
-					expect( packages.size ).to.equal( 3 );
-
-					const corePackageDetails = packages.get( '@ckeditor/ckeditor5-core' );
-					expect( corePackageDetails.version ).to.equal( '0.6.0' );
-					expect( corePackageDetails.hasChangelog ).to.equal( true );
-
-					const enginePackageDetails = packages.get( '@ckeditor/ckeditor5-engine' );
-					expect( enginePackageDetails.version ).to.equal( '1.0.1' );
-					expect( enginePackageDetails.hasChangelog ).to.equal( false );
-
-					const basicStylesPackageDetails = packages.get( '@ckeditor/ckeditor5-basic-styles' );
-					expect( basicStylesPackageDetails.version ).to.equal( '0.1.1' );
-					expect( basicStylesPackageDetails.hasChangelog ).to.equal( false );
 				} );
 		} );
 

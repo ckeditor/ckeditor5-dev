@@ -18,7 +18,9 @@
     "github": "^9.2.0",
     "glob": "^7.1.2",
     "inquirer": "^3.3.0",
+    "minimatch": "^3.0.4",
     "minimist": "^1.2.0",
+    "moment": "^2.18.1",
     "parse-github-url": "^1.0.0",
     "request": "^2.83.0",
     "semver": "^5.4.1"

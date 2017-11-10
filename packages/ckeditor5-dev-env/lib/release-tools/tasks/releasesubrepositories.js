@@ -12,13 +12,12 @@ const cli = require( '../utils/cli' );
 const createGithubRelease = require( '../utils/creategithubrelease' );
 const displaySkippedPackages = require( '../utils/displayskippedpackages' );
 const executeOnPackages = require( '../utils/executeonpackages' );
-const generateChangelogForSinglePackage = require( './generatechangelogforsinglepackage' );
+const { getChangesForVersion } = require( '../utils/changelog' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getPackagesToRelease = require( '../utils/getpackagestorelease' );
 const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
 const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
 const validatePackageToRelease = require( '../utils/validatepackagetorelease' );
-const { getChangesForVersion } = require( '../utils/changelog' );
 
 const BREAK_RELEASE_MESSAGE = 'You aborted publishing the release. Why? Oh why?!';
 
@@ -95,7 +94,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 			return updateDependenciesOfPackagesToRelease();
 		} )
-		.then( () => generateChangelogForPackagesThatDependenciesHaveUpdated() )
+		.then( () => getLatestChangesForPackagesThatWillBeReleased() )
 		.then( () => validateRepositories() )
 		.then( () => {
 			if ( errors.length ) {
@@ -174,29 +173,18 @@ module.exports = function releaseSubRepositories( options ) {
 		} );
 	}
 
-	function generateChangelogForPackagesThatDependenciesHaveUpdated() {
+	function getLatestChangesForPackagesThatWillBeReleased() {
 		return executeOnPackages( pathsCollection.packages, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
 			const releaseDetails = packagesToRelease.get( packageJson.name );
 
-			const hasChangelog = releaseDetails.hasChangelog;
 			const version = releaseDetails.version;
 
-			// This flag was required only for generating the changelog.
-			delete releaseDetails.hasChangelog;
+			releaseDetails.changes = getChangesForVersion( version, repositoryPath );
 
-			if ( hasChangelog ) {
-				releaseDetails.changes = getChangesForVersion( version, repositoryPath );
-
-				return Promise.resolve();
-			}
-
-			return generateChangelogForSinglePackage( version )
-				.then( () => {
-					releaseDetails.changes = getChangesForVersion( version, repositoryPath );
-				} );
+			return Promise.resolve();
 		} );
 	}
 

@@ -8,6 +8,7 @@
 const path = require( 'path' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 const getPackageJson = require( './getpackagejson' );
+const minimatch = require( 'minimatch' );
 
 /**
  * Returns a collection of paths to packages which are located in single repository.
@@ -15,7 +16,8 @@ const getPackageJson = require( './getpackagejson' );
  * @param {Object} options
  * @param {String} options.cwd Current work directory.
  * @param {String} options.packages A relative path to the packages.
- * @param {Array.<String>} options.skipPackages Name of packages which won't be touched.
+ * @param {String|Array.<String>} options.skipPackages Name or glob pattern of packages which won't be touched.
+ * @param {String} [options.scope] Package names have to match to specified glob pattern.
  * @returns {Object.<String, Set>} collections
  */
 module.exports = function getSubPackagesPaths( options ) {
@@ -30,12 +32,28 @@ module.exports = function getSubPackagesPaths( options ) {
 		const dependencyPath = path.join( packagesAbsolutePath, directory );
 		const dependencyName = getPackageJson( dependencyPath ).name;
 
-		if ( options.skipPackages.includes( dependencyName ) ) {
-			pathsCollection.skipped.add( dependencyPath );
-		} else {
+		if ( isValidPackage( dependencyName ) ) {
 			pathsCollection.packages.add( dependencyPath );
+		} else {
+			pathsCollection.skipped.add( dependencyPath );
 		}
 	}
 
 	return pathsCollection;
+
+	function isValidPackage( packageName ) {
+		const skipPackages = Array.isArray( options.skipPackages ) ? options.skipPackages : [ options.skipPackages ];
+
+		for ( const skipPackageGlob of skipPackages ) {
+			if ( minimatch( packageName, skipPackageGlob ) ) {
+				return false;
+			}
+		}
+
+		if ( options.scope ) {
+			return minimatch( packageName, options.scope );
+		}
+
+		return true;
+	}
 };

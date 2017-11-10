@@ -42,34 +42,33 @@ const cli = {
 	 *
 	 * @param {String} packageVersion
 	 * @param {String|null} releaseType
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.disableInternalVersion=false] Whether to "internal" version is enabled.
 	 * @returns {Promise}
 	 */
-	provideVersion( packageVersion, releaseType ) {
-		let suggestedVersion;
+	provideVersion( packageVersion, releaseType, options = {} ) {
+		const suggestedVersion = getSuggestedVersion();
 
-		if ( !releaseType ) {
-			// If package does not have changes, 'releaseType' is null and we don't want to generate the changelog.
-			suggestedVersion = 'skip';
-		} else if ( releaseType === 'major' && semver.gt( '1.0.0', packageVersion ) ) {
-			// If package is below the '1.0.0' version, bump the 'minor' instead of 'major'
-			suggestedVersion = semver.inc( packageVersion, 'minor' );
-		} else {
-			suggestedVersion = semver.inc( packageVersion, releaseType );
+		let message = 'Type the new version, "skip" or "internal"';
+
+		if ( options.disableInternalVersion ) {
+			message = 'Type the new version or "skip"';
 		}
+
+		message += ` (suggested: "${ suggestedVersion }", current: "${ packageVersion }"):`;
 
 		const versionQuestion = {
 			type: 'input',
 			name: 'version',
 			default: suggestedVersion,
-			message:
-				`Type the new version, "skip" or "internal" (suggested: "${ suggestedVersion }", current: "${ packageVersion }"):`,
+			message,
 
 			filter( input ) {
 				return input.trim();
 			},
 
 			validate( input ) {
-				if ( input === 'skip' || input === 'internal' ) {
+				if ( input === 'skip' || ( !options.disableInternalVersion && input === 'internal' ) ) {
 					return true;
 				}
 
@@ -80,6 +79,27 @@ const cli = {
 
 		return inquirer.prompt( [ versionQuestion ] )
 			.then( answers => answers.version );
+
+		function getSuggestedVersion() {
+			if ( !releaseType ) {
+				return 'skip';
+			}
+
+			if ( releaseType === 'internal' ) {
+				return options.disableInternalVersion ? 'skip' : 'internal';
+			}
+
+			if ( semver.prerelease( packageVersion ) ) {
+				releaseType = 'prerelease';
+			}
+
+			// If package's version is below the '1.0.0', bump the 'minor' instead of 'major'
+			if ( releaseType === 'major' && semver.gt( '1.0.0', packageVersion ) ) {
+				return semver.inc( packageVersion, 'minor' );
+			}
+
+			return semver.inc( packageVersion, releaseType );
+		}
 	},
 
 	/**

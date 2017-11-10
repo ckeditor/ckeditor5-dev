@@ -165,7 +165,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				} );
 		} );
 
-		it( 'allows generating changelog as "internal"', () => {
+		it( 'allows generating changelog as "internal" release', () => {
 			stubs.versionUtils.getLastFromChangelog.returns( '0.0.1' );
 			stubs.generateChangelogFromCommits.returns( Promise.resolve() );
 

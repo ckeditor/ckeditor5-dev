@@ -19,12 +19,6 @@ describe( 'dev-env/release-tools/utils', () => {
 		before( () => {
 			cwd = process.cwd();
 			tmpCwd = fs.mkdtempSync( __dirname + path.sep );
-			exec( `cd ${ tmpCwd } && git init` );
-
-			if ( process.env.CI ) {
-				exec( `cd ${ tmpCwd } && git config user.email "ckeditor5@ckeditor.com"` );
-				exec( `cd ${ tmpCwd } && git config user.name "CKEditor5 CI"` );
-			}
 		} );
 
 		after( () => {
@@ -35,7 +29,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			sandbox = sinon.sandbox.create();
 
 			stubs = {
-				transformCommit: sandbox.spy( commit => {
+				transformCommit: sandbox.stub().callsFake( commit => {
 					commit.rawType = commit.type;
 
 					return commit;
@@ -46,6 +40,13 @@ describe( 'dev-env/release-tools/utils', () => {
 			};
 
 			process.chdir( tmpCwd );
+
+			exec( 'git init' );
+
+			if ( process.env.CI ) {
+				exec( 'git config user.email "ckeditor5@ckeditor.com"' );
+				exec( 'git config user.name "CKEditor5 CI"' );
+			}
 
 			packageJson = {
 				name: 'test-package',
@@ -61,6 +62,8 @@ describe( 'dev-env/release-tools/utils', () => {
 
 		afterEach( () => {
 			process.chdir( cwd );
+			exec( `rm -rf ${ path.join( tmpCwd, '.git' ) }` );
+
 			sandbox.restore();
 		} );
 
@@ -76,6 +79,18 @@ describe( 'dev-env/release-tools/utils', () => {
 				);
 		} );
 
+		it( 'returns "skip" release for invalid commits', () => {
+			exec( 'git commit --allow-empty --message "Foo Bar."' );
+			exec( 'git commit --allow-empty --message "Foo Bar even more..."' );
+
+			stubs.transformCommit.returns( undefined );
+
+			return getNewReleaseType( stubs.transformCommit )
+				.then( response => {
+					expect( response.releaseType ).to.equal( 'skip' );
+				} );
+		} );
+
 		it( 'returns "patch" release for non-feature commits', () => {
 			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
 			exec( 'git commit --allow-empty --message "Other: Some change."' );
@@ -87,6 +102,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'ignores notes from commits which will not be included in changelog', () => {
+			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
 			exec( 'git commit --allow-empty --message "Docs: Nothing." --message "BREAKING CHANGES: It should not bump the major."' );
 
 			return getNewReleaseType( stubs.transformCommit )
@@ -96,6 +112,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'returns "minor" release for feature commit', () => {
+			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
 			exec( 'git commit --allow-empty --message "Feature: Nothing new."' );
 
 			return getNewReleaseType( stubs.transformCommit )
@@ -105,6 +122,8 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'returns "major" if any visible in changelog commit has breaking changes', () => {
+			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
+			exec( 'git commit --allow-empty --message "Feature: Nothing new."' );
 			exec( 'git commit --allow-empty --message "Other: Nothing." --message "BREAKING CHANGES: Bump the major!"' );
 
 			return getNewReleaseType( stubs.transformCommit )
@@ -113,7 +132,8 @@ describe( 'dev-env/release-tools/utils', () => {
 				} );
 		} );
 
-		it( 'returns "skip" if there are not any "public" commits since the last release', () => {
+		it( 'returns "skip" if there is no commit since the last release', () => {
+			exec( 'git commit --allow-empty --message "Other: Nothing." --message "BREAKING CHANGES: Bump the major!"' );
 			exec( 'git tag v1.0.0' );
 
 			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.0.0' } )
@@ -122,17 +142,24 @@ describe( 'dev-env/release-tools/utils', () => {
 				} );
 		} );
 
-		it( 'returns "patch" release for internal commits since the last release', () => {
+		it( 'returns "internal" release for internal commits since the last release', () => {
+			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
+			exec( 'git tag v1.0.0' );
 			exec( 'git commit --allow-empty --message "Docs: Added some notes to README #1."' );
 
 			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.0.0' } )
 				.then( response => {
-					expect( response.releaseType ).to.equal( 'patch' );
+					expect( response.releaseType ).to.equal( 'internal' );
 				} );
 		} );
 
 		it( 'transforms each commit since the last release', () => {
+			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
+			exec( 'git commit --allow-empty --message "Feature: Nothing new."' );
 			exec( 'git commit --allow-empty --message "Other: Nothing." --message "BREAKING CHANGES: Bump the major!"' );
+			exec( 'git tag v1.0.0' );
+			exec( 'git commit --allow-empty --message "Docs: Added some notes to README #1."' );
+			exec( 'git commit --allow-empty --message "Other: Nothing."' );
 			exec( 'git commit --allow-empty --message "Docs: Added some notes to README #2."' );
 
 			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.0.0' } )
@@ -145,7 +172,26 @@ describe( 'dev-env/release-tools/utils', () => {
 				} );
 		} );
 
+		it( 'transforms each commit since the last release until breaking changes commit', () => {
+			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
+			exec( 'git tag v1.0.0' );
+			exec( 'git commit --allow-empty --message "Docs: Added some notes to README #1."' );
+			exec( 'git commit --allow-empty --message "Other: Nothing." --message "BREAKING CHANGES: Bump the major!"' );
+			exec( 'git commit --allow-empty --message "Docs: Added some notes to README #2."' );
+
+			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.0.0' } )
+				.then( response => {
+					// transformCommit should be called for commits:
+					// (1) Docs: Added some notes to README #1.
+					// (2) Other: Nothing.
+					expect( stubs.transformCommit.calledTwice ).to.equal( true );
+					expect( response.releaseType ).to.equal( 'major' );
+				} );
+		} );
+
 		it( 'throws an error when given tag does not exist', () => {
+			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
+
 			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.1.2' } )
 				.then(
 					() => {
