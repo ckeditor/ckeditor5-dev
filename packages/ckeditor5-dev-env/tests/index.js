@@ -40,6 +40,7 @@ describe( 'dev-env/index', () => {
 				generateChangelogForSinglePackage: sandbox.stub(),
 				generateChangelogForSubPackages: sandbox.stub(),
 				generateChangelogForSubRepositories: sandbox.stub(),
+				generateSummaryChangelog: sandbox.stub()
 			}
 		};
 
@@ -67,6 +68,10 @@ describe( 'dev-env/index', () => {
 		mockery.registerMock(
 			'./release-tools/tasks/generatechangelogforsubrepositories',
 			stubs.releaseTools.generateChangelogForSubRepositories
+		);
+		mockery.registerMock(
+			'./release-tools/tasks/generatesummarychangelog',
+			stubs.releaseTools.generateSummaryChangelog
 		);
 
 		tasks = proxyquire( '../lib/index', {
@@ -145,6 +150,53 @@ describe( 'dev-env/index', () => {
 					expect( stubs.releaseTools.generateChangelogForSubRepositories.calledOnce ).to.equal( true );
 					expect( stubs.releaseTools.generateChangelogForSubRepositories.firstCall.args[ 0 ] ).to.equal( 123 );
 				} );
+		} );
+	} );
+
+	describe( 'generateSummaryChangelog()', () => {
+		it( 'generates a changelog', () => {
+			stubs.releaseTools.generateSummaryChangelog.returns( Promise.resolve( { result: true } ) );
+
+			return tasks.generateSummaryChangelog( 123 )
+				.then( response => {
+					expect( response.result ).to.equal( true );
+					expect( stubs.releaseTools.generateSummaryChangelog.calledOnce ).to.equal( true );
+					expect( stubs.releaseTools.generateSummaryChangelog.firstCall.args[ 0 ] ).to.equal( 123 );
+				} );
+		} );
+	} );
+
+	describe( 'collectTranslations()', () => {
+		it( 'should collect translations', () => {
+			tasks.collectTranslations();
+
+			sinon.assert.calledOnce( stubs.translations.collect );
+		} );
+	} );
+
+	describe( 'uploadTranslations()', () => {
+		it( 'should upload translations', () => {
+			stubs.translations.getToken.returns( Promise.resolve( { token: 'token' } ) );
+
+			return tasks.uploadTranslations().then( () => {
+				sinon.assert.calledOnce( stubs.translations.upload );
+				sinon.assert.alwaysCalledWithExactly( stubs.translations.upload, {
+					token: 'token',
+				} );
+			} );
+		} );
+	} );
+
+	describe( 'downloadTranslations()', () => {
+		it( 'should download translations', () => {
+			stubs.translations.getToken.returns( Promise.resolve( { token: 'token' } ) );
+
+			return tasks.downloadTranslations().then( () => {
+				sinon.assert.calledOnce( stubs.translations.download );
+				sinon.assert.alwaysCalledWithExactly( stubs.translations.download, {
+					token: 'token',
+				} );
+			} );
 		} );
 	} );
 } );

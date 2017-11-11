@@ -66,7 +66,7 @@ module.exports = function generateChangelogForSinglePackage( newVersion = null )
 
 			if ( version === 'internal' ) {
 				isInternalRelease = true;
-				version = semver.inc( packageJson.version, 'patch' );
+				version = semver.inc( packageJson.version, semver.prerelease( packageJson.version ) ? 'prerelease' : 'patch' );
 			}
 
 			const changelogOptions = {

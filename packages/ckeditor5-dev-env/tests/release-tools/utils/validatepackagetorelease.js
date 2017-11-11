@@ -73,16 +73,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			const errors = validatePackageToRelease( { changes: 'Some changes.', version: '1.0.0' } );
 
 			expect( errors.length ).to.equal( 1 );
-			expect( errors[ 0 ] ).to.equal( 'Not on master or master is not clean.' );
-		} );
-
-		it( 'returns an array with errors if master is ahead with origin', () => {
-			stubs.devUtils.tools.shExec.returns( '## master...origin/master [ahead 1]' );
-
-			const errors = validatePackageToRelease( { changes: 'Some changes.', version: '1.0.0' } );
-
-			expect( errors.length ).to.equal( 1 );
-			expect( errors[ 0 ] ).to.equal( 'Not on master or master is not clean.' );
+			expect( errors[ 0 ] ).to.equal( 'Not on master.' );
 		} );
 
 		it( 'returns an array with errors if master is behind with origin', () => {
@@ -91,7 +82,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			const errors = validatePackageToRelease( { changes: 'Some changes.', version: '1.0.0' } );
 
 			expect( errors.length ).to.equal( 1 );
-			expect( errors[ 0 ] ).to.equal( 'Not on master or master is not clean.' );
+			expect( errors[ 0 ] ).to.equal( 'The branch is behind with the remote.' );
 		} );
 	} );
 } );

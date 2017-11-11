@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-env",
-  "version": "5.1.12",
+  "version": "6.0.0",
   "description": "Tasks used during development of CKEditor 5.",
   "keywords": [],
   "main": "lib/index.js",
@@ -18,7 +18,9 @@
     "github": "^9.2.0",
     "glob": "^7.1.2",
     "inquirer": "^3.3.0",
+    "minimatch": "^3.0.4",
     "minimist": "^1.2.0",
+    "moment": "^2.18.1",
     "parse-github-url": "^1.0.0",
     "request": "^2.83.0",
     "semver": "^5.4.1"

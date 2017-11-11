@@ -4,5 +4,8 @@
   "dependencies": {
     "@ckeditor/alpha": "*",
     "@ckeditor/gamma": "*"
+  },
+  "repository": {
+    "url": "https://github.com/ckeditor/delta.git"
   }
 }

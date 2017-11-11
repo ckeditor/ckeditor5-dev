@@ -22,6 +22,7 @@ const INDENT_SIZE = 10;
  * @param {Commit} commit
  * @param {Object} context
  * @param {Boolean} context.displayLogs Whether to display the logs.
+ * @param {Boolean} [context.returnInvalidCommit=false] Whether invalid commit should be returned.
  * @param {Object} context.packageData Content from the 'package.json' for given package.
  * @returns {Commit}
  */
@@ -65,7 +66,7 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 	log.info( logMessage );
 
 	if ( !isCommitIncluded ) {
-		return;
+		return context.returnInvalidCommit ? commit : undefined;
 	}
 
 	// If a dot is missing at the end of the subject...

@@ -273,7 +273,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				} );
 		} );
 
-		it( 'allows generating changelog as "internal"', () => {
+		it( 'allows generating changelog as "internal" release', () => {
 			sandbox.stub( process, 'chdir' );
 			sandbox.stub( process, 'cwd' ).returns( '/ckeditor5-dev' );
 

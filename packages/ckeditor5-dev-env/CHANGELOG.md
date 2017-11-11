@@ -1,6 +1,43 @@
 Changelog
 =========
 
+## [6.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.13...@ckeditor/ckeditor5-dev-env@6.0.0) (2017-11-10)
+
+### Features
+
+* Introduced a task which allows generating a summary changelog for a repository. Closes [#289](https://github.com/ckeditor/ckeditor5-dev/issues/289). ([eaf76b4](https://github.com/ckeditor/ckeditor5-dev/commit/eaf76b4))
+
+### BREAKING CHANGES
+
+* Release tool won't generate changelogs for skipped packages anymore. This task will be handled by changelog generator.
+
+### NOTE
+
+* The changelog generator will propose `internal` bump version instead of `skip` if a package contains any commit.
+* If a package does not contain any commit, the changelog will propose `skip` bump version.
+* `internal` bump will increase the release version if the current version is specified as a release (`v1.0.0-alpha.1` becomes `v1.0.0-alpha.2`).
+
+
+## [5.1.13](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.12...@ckeditor/ckeditor5-dev-env@5.1.13) (2017-10-20)
+
+### Bug fixes
+
+* Changed order of commands executed by the release tool to optimize the time it takes from the first published package to the last. Closes [#272](https://github.com/ckeditor/ckeditor5-dev/issues/272). Closes [#292](https://github.com/ckeditor/ckeditor5-dev/issues/292). ([451ff8c](https://github.com/ckeditor/ckeditor5-dev/commit/451ff8c))
+
+  Due to releasing packages one after another, the builds on CI might break and users' `npm install` commands might fail too. Now release tool will:
+
+  * do all commits (generate missing changelogs or/and  update dependencies' versions),
+  * publish all packages on NPM (all packages will contain proper versions),
+  * do all pushes (CI will not crash because all versions are valid),
+  * make the GitHub releases.
+
+  This will ensure that the process takes minimum amount of time.
+
+### Other changes
+
+* Changed order of headers in generated changelog. Closes [#293](https://github.com/ckeditor/ckeditor5-dev/issues/293). ([ad660b4](https://github.com/ckeditor/ckeditor5-dev/commit/ad660b4))
+
+
 ## [5.1.12](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.10...@ckeditor/ckeditor5-dev-env@5.1.12) (2017-10-01)
 
 ### Bug fixes

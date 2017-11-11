@@ -6,7 +6,8 @@
 'use strict';
 
 const path = require( 'path' );
-const {	TranslationService } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
+const { TranslationService } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
+const utils = require( './utils' );
 
 /**
  * Replaces all function call parameters with translated strings for the t function.
@@ -26,9 +27,9 @@ module.exports = function replaceTCalls( compiler, language ) {
 			process.cwd(),
 			'@ckeditor/ckeditor5-core/src/editor/editor.js',
 			( err, result ) => {
-				const pathToCoreTranslationPackage = result.match( /.+\/ckeditor5-core/ )[ 0 ];
+				const pathToCoreTranslationPackage = result.match( utils.CKEditor5CoreRegExp )[ 0 ];
 
-				translationService.loadPackage( pathToCoreTranslationPackage.replace( '/', path.sep ) );
+				translationService.loadPackage( pathToCoreTranslationPackage );
 			}
 		);
 	} );
@@ -44,20 +45,25 @@ module.exports = function replaceTCalls( compiler, language ) {
 
 	// Adds package to the translations if the resource comes from ckeditor5-* package.
 	function maybeLoadPackage( resolveOptions ) {
-		const packageNameRegExp = /\/ckeditor5-[^/]+\//;
-		const match = resolveOptions.resource.match( packageNameRegExp );
+		const packageNameRegExp = utils.CKEditor5PackageNameRegExp;
+
+		const relativePathToResource = path.relative( process.cwd(), resolveOptions.resource );
+
+		const match = relativePathToResource.match( packageNameRegExp );
 
 		if ( match ) {
-			const index = resolveOptions.resource.search( packageNameRegExp ) + match[ 0 ].length;
-			const pathToPackage = resolveOptions.resource.slice( 0, index );
+			const index = relativePathToResource.search( packageNameRegExp ) + match[ 0 ].length;
+			const pathToPackage = path.join( process.cwd(), relativePathToResource.slice( 0, index ) );
 
-			translationService.loadPackage( pathToPackage.replace( '/', path.sep ) );
+			translationService.loadPackage( pathToPackage );
 		}
 	}
 
 	// Injects loader when the file comes from ckeditor5-* packages.
 	function maybeAddLoader( resolveOptions ) {
-		if ( resolveOptions.resource.match( /\/ckeditor5-[^/]+\/src\/.+\.js$/ ) ) {
+		const relativePathToResource = path.relative( process.cwd(), resolveOptions.resource );
+
+		if ( relativePathToResource.match( utils.CKEditor5PackageSrcFileRegExp ) ) {
 			resolveOptions.loaders.unshift( path.join( __dirname, 'translatesourceloader.js' ) );
 		}
 	}

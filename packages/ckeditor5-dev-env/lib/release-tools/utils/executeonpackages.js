@@ -8,7 +8,7 @@
 /**
  * The function allows running a function on locally installed packages.
  *
- * @param {Set} pathsToPackages A collection of paths to packages.
+ * @param {Iterable} pathsToPackages A collection of paths to packages.
  * @param {Function} functionToExecute A function that will be called on each package.
  * The function receives one argument:
  *   * `{String} dependencyPath An absolute path to the package.`

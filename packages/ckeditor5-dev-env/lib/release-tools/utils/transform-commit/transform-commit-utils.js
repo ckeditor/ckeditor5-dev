@@ -30,12 +30,21 @@ const transformCommitUtils = {
 	 * Order of messages generated in changelog.
 	 */
 	typesOrder: {
-		'Bug fixes': 1,
-		'Features': 2,
+		'Features': 1,
+		'Bug fixes': 2,
 		'Other changes': 3,
 
 		'BREAKING CHANGES': 1,
 		'NOTE': 2
+	},
+
+	/**
+	 * Additional descriptions used in summary changelog generator. Keys of the object must match to values returned by
+	 * `transformCommitUtils#getCommitType()` function.
+	 */
+	additionalCommitNotes: {
+		'Bug fixes': 'Besides changes in the dependencies, this version also contains the following bug fixes:',
+		Features: 'Besides new features introduced by the dependencies, this version also introduces the following features:'
 	},
 
 	/**
