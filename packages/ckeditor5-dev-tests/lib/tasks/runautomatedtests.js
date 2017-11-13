@@ -10,7 +10,7 @@
 const getKarmaConfig = require( '../utils/automated-tests/getkarmaconfig' );
 const KarmaServer = require( 'karma' ).Server;
 const path = require( 'path' );
-const gutil = require( 'gulp-util' );
+const chalk = require( 'chalk' );
 
 module.exports = function runAutomatedTests( options ) {
 	return new Promise( ( resolve, reject ) => {
@@ -41,7 +41,7 @@ module.exports = function runAutomatedTests( options ) {
 					const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 					const log = logger();
 
-					log.info( `Coverage report saved in '${ gutil.colors.cyan( coveragePath ) }'.` );
+					log.info( `Coverage report saved in '${ chalk.cyan( coveragePath ) }'.` );
 				} );
 			} );
 		}

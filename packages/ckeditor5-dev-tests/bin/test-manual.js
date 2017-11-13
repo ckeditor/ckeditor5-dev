@@ -21,7 +21,7 @@ if ( options.files.length === 0 ) {
 	}
 }
 
-tests.runAutomatedTests( options )
+tests.runManualTests( options )
 	.catch( error => {
 		// Mark result of this task as invalid.
 		process.exitCode = 1;
