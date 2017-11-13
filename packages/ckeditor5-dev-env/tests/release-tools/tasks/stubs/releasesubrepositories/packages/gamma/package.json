@@ -3,5 +3,8 @@
   "version": "0.3.0",
   "devDependencies": {
     "@ckeditor/epsilon": "*"
+  },
+  "repository": {
+    "url": "https://github.com/ckeditor/gamma.git"
   }
 }

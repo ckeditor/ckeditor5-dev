@@ -26,6 +26,10 @@ const tasks = {
 		return require( './release-tools/tasks/generatechangelogforsubrepositories' )( ...args );
 	},
 
+	generateSummaryChangelog( ...args ) {
+		return require( './release-tools/tasks/generatesummarychangelog' )( ...args );
+	},
+
 	/**
 	 * Collects translation strings ( from `t()` calls ) and stores them in ckeditor5/build/.transifex directory.
 	 */
