@@ -10,7 +10,7 @@
 const path = require( 'path' );
 const fs = require( 'fs-extra' );
 const _ = require( 'lodash' );
-const gutil = require( 'gulp-util' );
+const chalk = require( 'chalk' );
 const commonmark = require( 'commonmark' );
 const combine = require( 'dom-combiner' );
 const chokidar = require( 'chokidar' );
@@ -69,7 +69,7 @@ function compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate ) {
 	const absoluteHtmlFilePath = getRelativeFilePath( sourceHtmlFilePath );
 	const absoluteJSFilePath = getRelativeFilePath( sourceJSFilePath );
 
-	log.info( `Processing '${ gutil.colors.cyan( sourceFilePathBase ) }'...` );
+	log.info( `Processing '${ chalk.cyan( sourceFilePathBase ) }'...` );
 
 	// Compile test instruction (Markdown file).
 	const parsedMarkdownTree = reader.parse( fs.readFileSync( sourceMDFilePath, 'utf-8' ) );
@@ -92,7 +92,7 @@ function compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate ) {
 
 	fs.outputFileSync( outputFilePath, preparedHtml );
 
-	log.info( `Finished writing '${ gutil.colors.cyan( outputFilePath ) }'` );
+	log.info( `Finished writing '${ chalk.cyan( outputFilePath ) }'` );
 }
 
 // Copies all non JS/HTML/MD files to build dir. Their relative paths to JS/HTML files are maintained.

@@ -29,13 +29,13 @@ module.exports = class WebpackNotifierPlugin {
 		compiler.plugin( 'done', stats => {
 			if ( stats.compilation.errors.length ) {
 				for ( const item of stats.compilation.errors ) {
-					this.log.error( item.message, { raw: true } );
+					this.log.error( item.message );
 				}
 			}
 
 			if ( stats.compilation.warnings.length ) {
 				for ( const item of stats.compilation.warnings ) {
-					this.log.warning( item.message, { raw: true } );
+					this.log.warning( item.message );
 				}
 			}
 

@@ -5,7 +5,7 @@
 
 'use strict';
 
-const gutil = require( 'gulp-util' );
+const chalk = require( 'chalk' );
 const levels = new Map();
 
 // Displays everything.
@@ -56,52 +56,40 @@ module.exports = ( moduleVerbosity = 'info' ) => {
 		 * Displays a message when verbosity level is equal to 'info'.
 		 *
 		 * @param {String} message Message to log.
-		 * @param {Object} options
-		 * @param {Boolean} options.raw Whether to display non-modified message.
 		 */
-		info( message, options = { raw: false } ) {
-			this._log( 'info', message, options );
+		info( message ) {
+			this._log( 'info', message );
 		},
 
 		/**
 		 * Displays a warning message when verbosity level is equal to 'info' or 'warning'.
 		 *
 		 * @param {String} message Message to log.
-		 * @param {Object} options
-		 * @param {Boolean} [options.raw=false] Whether to display non-modified message.
 		 */
-		warning( message, options = { raw: false } ) {
-			this._log( 'warning', gutil.colors.yellow( message ), options );
+		warning( message ) {
+			this._log( 'warning', chalk.yellow( message ) );
 		},
 
 		/**
 		 * Displays an error message.
 		 *
 		 * @param {String} message Message to log.
-		 * @param {Object} options
-		 * @param {Boolean} [options.raw=false] Whether to display non-modified message.
 		 */
-		error( message, options = { raw: false } ) {
-			this._log( 'error', gutil.colors.red( message ), options );
+		error( message ) {
+			this._log( 'error', chalk.red( message ) );
 		},
 
 		/**
 		 * @private
 		 * @param {String} messageVerbosity Verbosity of particular message.
 		 * @param {String} message Message to log.
-		 * @param {Object} options
-		 * @param {Boolean} [options.raw=false] Whether to display non-modified message.
 		 */
-		_log( messageVerbosity, message, options ) {
+		_log( messageVerbosity, message ) {
 			if ( !levels.get( messageVerbosity ).has( moduleVerbosity ) ) {
 				return;
 			}
 
-			if ( options.raw ) {
-				console.log( message );
-			} else {
-				gutil.log( message );
-			}
+			console.log( message );
 		}
 	};
 };

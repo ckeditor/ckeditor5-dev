@@ -75,9 +75,7 @@ describe( 'utils', () => {
 				expect( errorSpy.called ).to.equal( false );
 				expect( infoSpy.calledTwice ).to.equal( true );
 				expect( infoSpy.firstCall.args[ 0 ] ).to.match( /out/ );
-				expect( infoSpy.firstCall.args[ 1 ] ).to.deep.equal( { raw: true } );
 				expect( infoSpy.secondCall.args[ 0 ] ).to.match( /err/ );
-				expect( infoSpy.secondCall.args[ 1 ] ).to.deep.equal( { raw: true } );
 			} );
 
 			it( 'should output using log functions when exit code is not equal to 0', () => {
@@ -93,9 +91,7 @@ describe( 'utils', () => {
 				expect( execStub.calledOnce ).to.equal( true );
 				expect( errorSpy.calledTwice ).to.equal( true );
 				expect( errorSpy.firstCall.args[ 0 ] ).to.match( /out/ );
-				expect( errorSpy.firstCall.args[ 1 ] ).to.deep.equal( { raw: true } );
 				expect( errorSpy.secondCall.args[ 0 ] ).to.match( /err/ );
-				expect( errorSpy.secondCall.args[ 1 ] ).to.deep.equal( { raw: true } );
 			} );
 
 			it( 'should not log if no output from executed command', () => {
