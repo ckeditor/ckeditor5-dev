@@ -154,8 +154,8 @@ class DocletValidator {
 	 * @protected
 	 */
 	_lintLinks() {
-		const allLinkRegExp = /\{@link\s+[^}\s]+[\s\w]*(\})/g;
-		const pathRegExp = /\{@link\s+([^}\s]+)[\s\w]*(\})/;
+		const allLinkRegExp = /\{@link\s+[^}\s]+[\s\w]*\}/g;
+		const pathRegExp = /^\{@link\s+([^}\s]+)[\s\w]*\}$/;
 
 		for ( const element of this._collection.getAll() ) {
 			if ( !element.comment ) {
@@ -344,7 +344,7 @@ class DocletValidator {
 	_isCorrectReference( type ) {
 		type = type.trim();
 		const doclets = this._collection.getAll();
-		const allRefs = doclets.map( el => el.longname );
+		const allRefs = this._collection.getLongnames();
 
 		if ( !type.includes( 'module:' ) ) {
 			return false;

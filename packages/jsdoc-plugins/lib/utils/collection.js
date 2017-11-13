@@ -14,6 +14,8 @@ class Collection {
 	 */
 	constructor() {
 		this._data = {};
+		this._allData = [];
+		this._longnames = [];
 	}
 
 	/**
@@ -28,6 +30,11 @@ class Collection {
 		}
 
 		this._data[ name ].push( record );
+		this._allData.push( record );
+
+		if ( record.longname ) {
+			this._longnames.push( record.longname );
+		}
 	}
 
 	/**
@@ -46,13 +53,16 @@ class Collection {
 	 * @returns {Object[]}
 	*/
 	getAll() {
-		const result = [];
+		return this._allData;
+	}
 
-		Object.keys( this._data ).forEach( key => {
-			result.push( ...this._data[ key ] );
-		} );
-
-		return result;
+	/**
+	 * Returns all longnames.
+	 *
+	 * @returns {Object[]}
+	 */
+	getLongnames() {
+		return this._longnames;
 	}
 }
 
