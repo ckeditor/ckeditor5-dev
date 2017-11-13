@@ -25,7 +25,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		it( 'resolves promsie when package list is empty', () => {
 			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
 
-			return executeOnPackages( new Set() )
+			return executeOnPackages( new Set(), functionToExecute )
 				.then( () => {
 					expect( functionToExecute.called ).to.equal( false );
 				} );
@@ -74,6 +74,28 @@ describe( 'dev-env/release-tools/utils', () => {
 						'/packages/ckeditor5-engine:started',
 						'/packages/ckeditor5-engine:resolved'
 					] );
+				} );
+		} );
+
+		it( 'works fine with array', () => {
+			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
+
+			return executeOnPackages( [ 1, 2 ], functionToExecute )
+				.then( () => {
+					expect( functionToExecute.calledTwice ).to.equal( true );
+					expect( functionToExecute.firstCall.args[ 0 ] ).to.equal( 1 );
+					expect( functionToExecute.secondCall.args[ 0 ] ).to.equal( 2 );
+				} );
+		} );
+
+		it( 'works fine with iterator', () => {
+			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
+			const simpleMap = new Map( [ [ 'a', 1 ], [ 'b', 2 ] ] );
+			return executeOnPackages( simpleMap.keys(), functionToExecute )
+				.then( () => {
+					expect( functionToExecute.calledTwice ).to.equal( true );
+					expect( functionToExecute.firstCall.args[ 0 ] ).to.equal( 'a' );
+					expect( functionToExecute.secondCall.args[ 0 ] ).to.equal( 'b' );
 				} );
 		} );
 	} );

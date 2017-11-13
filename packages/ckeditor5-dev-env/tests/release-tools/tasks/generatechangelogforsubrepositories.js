@@ -166,6 +166,9 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			// User provided "skip" as a new version for changelog entries.
 			stubs.generateChangelogForSinglePackage.onFirstCall().returns( Promise.resolve( null ) );
+			stubs.getPackageJson.withArgs( '/tmp/packages/ckeditor5-core' ).returns( {
+				dependencies: {}
+			} );
 
 			const options = {
 				cwd: '/tmp',
@@ -182,6 +185,127 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.displaySkippedPackages.firstCall.args[ 0 ] ).to.deep.equal( new Set( [
 						'/tmp/packages/ckeditor5-core'
 					] ) );
+				} );
+		} );
+
+		it( 'generates changelog for packages which dependencies have generated changelog', () => {
+			sandbox.stub( process, 'cwd' ).returns( '/tmp' );
+			const chdirStub = sandbox.stub( process, 'chdir' );
+
+			stubs.getSubRepositoriesPaths.returns( {
+				skipped: new Set(),
+				packages: new Set( [
+					'/tmp/packages/ckeditor5-autoformat',
+					'/tmp/packages/ckeditor5-basic-styles',
+					'/tmp/packages/ckeditor5-core',
+					'/tmp/packages/ckeditor5-fake-autoformat',
+					'/tmp/packages/ckeditor5-paragraph',
+				] )
+			} );
+
+			// For autoformat user provides "skip" as a new version.
+			stubs.generateChangelogForSinglePackage.onCall( 0 ).returns( Promise.resolve( null ) );
+
+			// For basic-styles user provides "skip" as a new version.
+			stubs.generateChangelogForSinglePackage.onCall( 1 ).returns( Promise.resolve( null ) );
+
+			// For core user provides a valid version,
+			stubs.generateChangelogForSinglePackage.onCall( 2 ).returns( Promise.resolve( 'v1.0.0' ) );
+
+			// For fake-autoformat user provides "skip" as a new version.
+			stubs.generateChangelogForSinglePackage.onCall( 3 ).returns( Promise.resolve( null ) );
+
+			// For paragraph user provides "skip" as a new version.
+			stubs.generateChangelogForSinglePackage.onCall( 4 ).returns( Promise.resolve( null ) );
+
+			stubs.getPackageJson.withArgs( '/tmp/packages/ckeditor5-autoformat' ).returns( {
+				name: '@ckeditor/ckeditor5-autoformat',
+				version: '1.0.0-alpha.1',
+				dependencies: {
+					'@ckeditor/ckeditor5-basic-styles': '*'
+				}
+			} );
+
+			stubs.getPackageJson.withArgs( '/tmp/packages/ckeditor5-basic-styles' ).returns( {
+				name: '@ckeditor/ckeditor5-basic-styles',
+				version: '1.0.0',
+				dependencies: {
+					'@ckeditor/ckeditor5-core': '*'
+				}
+			} );
+
+			stubs.getPackageJson.withArgs( '/tmp/packages/ckeditor5-core' ).returns( {
+				name: '@ckeditor/ckeditor5-core',
+				dependencies: {}
+			} );
+
+			stubs.getPackageJson.withArgs( '/tmp/packages/ckeditor5-fake-autoformat' ).returns( {
+				name: '@ckeditor/ckeditor5-fake-autoformat',
+				dependencies: {},
+				devDependencies: {
+					'@ckeditor/ckeditor5-autoformat': '*'
+				}
+			} );
+
+			stubs.getPackageJson.withArgs( '/tmp/packages/ckeditor5-paragraph' ).returns( {
+				name: '@ckeditor/ckeditor5-paragraph',
+				version: '1.0.0',
+				dependencies: {
+					'@ckeditor/ckeditor5-core': '*'
+				}
+			} );
+
+			// Changelogs for basic-styles and Paragraph will be generated too (cause the dependencies have changed).
+			stubs.generateChangelogForSinglePackage.onCall( 5 ).returns( Promise.resolve( 'v1.0.1' ) );
+			stubs.generateChangelogForSinglePackage.onCall( 6 ).returns( Promise.resolve( 'v1.0.1' ) );
+
+			// Changelog for autoformat will be generated too because basic-styles will be changed.
+			stubs.generateChangelogForSinglePackage.onCall( 7 ).returns( Promise.resolve( 'v1.0.0-alpha.2' ) );
+
+			const options = {
+				cwd: '/tmp',
+				packages: 'packages',
+			};
+
+			return generateChangelogForSubRepositories( options )
+				.then( () => {
+					expect( stubs.generateChangelogForSinglePackage.callCount ).to.equal( 8 );
+					expect( chdirStub.callCount ).to.equal( 9 );
+
+					// Calls 0-4 are done automatically by the tool.
+					// Calls 5-7 depends on the dependencies. Generator should be called with "internal" version.
+					expect( stubs.generateChangelogForSinglePackage.getCall( 5 ).args[ 0 ] ).to.equal( 'internal' );
+					expect( stubs.generateChangelogForSinglePackage.getCall( 6 ).args[ 0 ] ).to.equal( 'internal' );
+					expect( stubs.generateChangelogForSinglePackage.getCall( 7 ).args[ 0 ] ).to.equal( 'internal' );
+
+					expect( chdirStub.getCall( 0 ).args[ 0 ] ).to.equal( '/tmp/packages/ckeditor5-autoformat' );
+					expect( chdirStub.getCall( 1 ).args[ 0 ] ).to.equal( '/tmp/packages/ckeditor5-basic-styles' );
+					expect( chdirStub.getCall( 2 ).args[ 0 ] ).to.equal( '/tmp/packages/ckeditor5-core' );
+					expect( chdirStub.getCall( 3 ).args[ 0 ] ).to.equal( '/tmp/packages/ckeditor5-fake-autoformat' );
+					expect( chdirStub.getCall( 4 ).args[ 0 ] ).to.equal( '/tmp/packages/ckeditor5-paragraph' );
+					expect( chdirStub.getCall( 5 ).args[ 0 ] ).to.equal( '/tmp/packages/ckeditor5-basic-styles' );
+					expect( chdirStub.getCall( 6 ).args[ 0 ] ).to.equal( '/tmp/packages/ckeditor5-paragraph' );
+					expect( chdirStub.getCall( 7 ).args[ 0 ] ).to.equal( '/tmp/packages/ckeditor5-autoformat' );
+					expect( chdirStub.getCall( 8 ).args[ 0 ] ).to.equal( '/tmp' );
+
+					// @ckeditor/ckeditor5-fake-autoformat was skipped because it was set as a dev dependency.
+
+					expect( stubs.displayGeneratedChangelogs.calledOnce ).to.equal( true );
+
+					const generatedChangelogsMap = stubs.displayGeneratedChangelogs.firstCall.args[ 0 ];
+
+					expect( generatedChangelogsMap.size ).to.equal( 4 );
+					expect( generatedChangelogsMap.get( '@ckeditor/ckeditor5-core' ) ).to.equal( 'v1.0.0' );
+					expect( generatedChangelogsMap.get( '@ckeditor/ckeditor5-basic-styles' ) ).to.equal( 'v1.0.1' );
+					expect( generatedChangelogsMap.get( '@ckeditor/ckeditor5-paragraph' ) ).to.equal( 'v1.0.1' );
+					expect( generatedChangelogsMap.get( '@ckeditor/ckeditor5-autoformat' ) ).to.equal( 'v1.0.0-alpha.2' );
+
+					expect( stubs.displaySkippedPackages.calledOnce ).to.equal( true );
+
+					const skippedPackagesPaths = stubs.displaySkippedPackages.firstCall.args[ 0 ];
+
+					expect( skippedPackagesPaths.size ).to.equal( 1 );
+					expect( skippedPackagesPaths.has( '/tmp/packages/ckeditor5-fake-autoformat' ) ).to.equal( true );
 				} );
 		} );
 	} );

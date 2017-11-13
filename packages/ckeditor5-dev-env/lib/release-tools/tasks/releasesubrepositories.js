@@ -7,19 +7,19 @@
 
 const path = require( 'path' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const parseGithubUrl = require( 'parse-github-url' );
 const cli = require( '../utils/cli' );
+const createGithubRelease = require( '../utils/creategithubrelease' );
 const displaySkippedPackages = require( '../utils/displayskippedpackages' );
 const executeOnPackages = require( '../utils/executeonpackages' );
-const generateChangelogForSinglePackage = require( './generatechangelogforsinglepackage' );
+const { getChangesForVersion } = require( '../utils/changelog' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getPackagesToRelease = require( '../utils/getpackagestorelease' );
 const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
-const releaseRepository = require( '../utils/releaserepository' );
 const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
 const validatePackageToRelease = require( '../utils/validatepackagetorelease' );
-const { getChangesForVersion } = require( '../utils/changelog' );
 
-const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted by the user.';
+const BREAK_RELEASE_MESSAGE = 'You aborted publishing the release. Why? Oh why?!';
 
 /**
  * Releases all sub repositories found in specified path.
@@ -29,8 +29,15 @@ const BREAK_RELEASE_MESSAGE = 'Creating release has been aborted by the user.';
  *   - filters packages which should be released,
  *   - updated version of dependencies between all released sub repositories (even if some packages will not be released),
  *   - generates changelog for packages that dependencies have changed,
- *   - collects required parameters for release from the user,
- *   - finally, releases the packages.
+ *   - bumps version of all packages,
+ *   - publishes new version on NPM,
+ *   - pushes new version to the remote repository,
+ *   - creates a release which is displayed on "Releases" page on Gitub.
+ *
+ * Pushes are done at the end of the whole process because of Continues Integration. We need to publish all
+ * packages on NPM before starting the CI testing. If we won't do it, CI will fail because it won't be able
+ * to install packages which versions will match to specified in `package.json`.
+ * See {@link https://github.com/ckeditor/ckeditor5-dev/issues/272}.
  *
  * @param {Object} options
  * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
@@ -49,7 +56,8 @@ module.exports = function releaseSubRepositories( options ) {
 	} );
 
 	// These variables will be set during the function's execution.
-	let packagesToRelease, dependencies;
+	// List of packages to release; packages and their versions; options provided by the user (CLI).
+	let packagesToRelease, dependencies, releaseOptions;
 
 	// Errors are added to this array by the `validateRepositories` function.
 	const errors = [];
@@ -86,23 +94,29 @@ module.exports = function releaseSubRepositories( options ) {
 
 			return updateDependenciesOfPackagesToRelease();
 		} )
-		.then( () => generateChangelogForPackagesThatDependenciesHaveUpdated() )
+		.then( () => getLatestChangesForPackagesThatWillBeReleased() )
 		.then( () => validateRepositories() )
 		.then( () => {
 			if ( errors.length ) {
 				throw new Error( 'Releasing has been aborted due to errors.' );
 			}
 
-			return cli.configureReleaseOptions();
+			return cli.configureReleaseOptions()
+				.then( resolvedReleaseOptions => {
+					releaseOptions = resolvedReleaseOptions;
+				} );
 		} )
-		.then( releaseOptions => releasePackages( releaseOptions ) )
+		.then( () => bumpVersion() )
+		.then( () => releaseOnNpm() )
+		.then( () => pushRepositories() )
+		.then( () => releaseOnGithub() )
 		.then( () => process.chdir( cwd ) )
 		.catch( err => {
 			process.chdir( cwd );
 
 			// A user did not confirm the release process.
 			if ( err instanceof Error && err.message === BREAK_RELEASE_MESSAGE ) {
-				log.info( 'Aborted due to user\'s no confirmation.' );
+				log.info( 'Releasing has been aborted.' );
 
 				return Promise.resolve();
 			}
@@ -152,39 +166,25 @@ module.exports = function releaseSubRepositories( options ) {
 			if ( exec( 'git diff --name-only package.json' ).trim().length ) {
 				log.info( `Updating dependencies for "${ packageJson.name }"...` );
 				exec( 'git add package.json' );
-				exec( 'git commit -m "Internal: Updated dependencies."' );
-				exec( 'git pull && git push' );
+				exec( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
 			}
 
 			return Promise.resolve();
 		} );
 	}
 
-	function generateChangelogForPackagesThatDependenciesHaveUpdated() {
+	function getLatestChangesForPackagesThatWillBeReleased() {
 		return executeOnPackages( pathsCollection.packages, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
 			const releaseDetails = packagesToRelease.get( packageJson.name );
 
-			const hasChangelog = releaseDetails.hasChangelog;
 			const version = releaseDetails.version;
 
-			// This flag was required only for generating the changelog.
-			delete releaseDetails.hasChangelog;
+			releaseDetails.changes = getChangesForVersion( version, repositoryPath );
 
-			if ( hasChangelog ) {
-				releaseDetails.changes = getChangesForVersion( version, repositoryPath );
-
-				return Promise.resolve();
-			}
-
-			return generateChangelogForSinglePackage( version )
-				.then( () => {
-					exec( 'git pull && git push' );
-
-					releaseDetails.changes = getChangesForVersion( version, repositoryPath );
-				} );
+			return Promise.resolve();
 		} );
 	}
 
@@ -208,28 +208,78 @@ module.exports = function releaseSubRepositories( options ) {
 		} );
 	}
 
-	function releasePackages( releaseOptions ) {
+	function bumpVersion() {
 		return executeOnPackages( pathsCollection.packages, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
 			const releaseDetails = packagesToRelease.get( packageJson.name );
-			const releaseTaskOptions = {
-				token: releaseOptions.token,
-				skipGithub: releaseOptions.skipGithub,
-				skipNpm: releaseOptions.skipNpm,
-				version: releaseDetails.version,
-				changes: releaseDetails.changes
+
+			log.info( `Bumping version for "${ packageJson.name }"...` );
+			exec( `npm version ${ releaseDetails.version } --message "Release: v${ releaseDetails.version }."` );
+
+			return Promise.resolve();
+		} );
+	}
+
+	function releaseOnNpm() {
+		if ( releaseOptions.skipNpm ) {
+			return Promise.resolve();
+		}
+
+		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+			process.chdir( repositoryPath );
+
+			const packageJson = getPackageJson( repositoryPath );
+
+			log.info( `Publishing on NPM "${ packageJson.name }"...` );
+			exec( 'npm publish --access=public' );
+		} );
+	}
+
+	function pushRepositories() {
+		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+			process.chdir( repositoryPath );
+
+			const packageJson = getPackageJson( repositoryPath );
+			log.info( `Pushing a local repository into the remote for "${ packageJson.name }"...` );
+
+			exec( 'git push' );
+
+			return Promise.resolve();
+		} );
+	}
+
+	function releaseOnGithub() {
+		if ( releaseOptions.skipGithub ) {
+			return Promise.resolve();
+		}
+
+		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+			process.chdir( repositoryPath );
+
+			const packageJson = getPackageJson( repositoryPath );
+			const releaseDetails = packagesToRelease.get( packageJson.name );
+
+			log.info( `Creating a GitHub release for "${ packageJson.name }"...` );
+
+			const repositoryInfo = parseGithubUrl(
+				exec( 'git remote get-url origin --push' ).trim()
+			);
+
+			const githubReleaseOptions = {
+				repositoryOwner: repositoryInfo.owner,
+				repositoryName: repositoryInfo.name,
+				version: `v${ releaseDetails.version }`,
+				description: releaseDetails.changes
 			};
 
-			return releaseRepository( releaseTaskOptions )
-				.catch( err => {
-					const packageName = getPackageJson().name;
+			return createGithubRelease( releaseOptions.token, githubReleaseOptions )
+				.then( () => {
+					const url = `https://github.com/${ repositoryInfo.owner }/${ repositoryInfo.name }/releases/tag/v${ options.version }`;
+					log.info( `Created the release: ${ url }` );
 
-					log.error( `## ${ packageName }` );
-					log.error( err.message );
-
-					process.exitCode = -1;
+					return Promise.resolve();
 				} );
 		} );
 	}

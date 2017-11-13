@@ -103,7 +103,8 @@ function createMissingEventDoclets( doclets ) {
 				} ],
 				memberof: originalProperty.memberof,
 				longname: observableEvent.name,
-				scope: 'instance'
+				scope: 'instance',
+				access: originalProperty.access ? originalProperty.access : 'public'
 			};
 		} );
 }
