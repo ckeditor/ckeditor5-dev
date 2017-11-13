@@ -33,7 +33,7 @@ npm run coverage
 ## Releasing
 
 1. Fetch all changes and switch to `master`!
-1. Execute `gulp changelog`.
+1. Execute `npm run changelog`.
    * At the current stage, a single change will be added to all packages which it touched. Sometimes, this means that in one of these packages the entry will not have much sense. Browse the changes, check if they are relevant.
       * If not and the package should not be released, just type "skip". However, this is not the best option because Lerna will also recognised this package as changed and will try to release it.
       * If the changes are a bit irrelevant, but the package still should be released, pick the "patch" bump, remove all the irrelevant entries from the changelog and if it became empty after that, add the "Internal changes only (updated dependencies, documentation, etc.)" text.

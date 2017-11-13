@@ -34,10 +34,8 @@ describe( 'removeDir', () => {
 			} );
 		} );
 
-		mockery.registerMock( 'gulp-util', {
-			colors: {
-				cyan: message => `\u001b[36m${ message }\u001b[39m`
-			}
+		mockery.registerMock( 'chalk', {
+			cyan: message => `\u001b[36m${ message }\u001b[39m`
 		} );
 
 		removeDir = require( '../../../lib/utils/manual-tests/removedir' );

@@ -1,12 +1,12 @@
 {
   "name": "@ckeditor/ckeditor5-dev-tests",
-  "version": "8.2.4",
+  "version": "9.0.0",
   "description": "Testing environment for CKEditor 5.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^4.0.2",
-    "@ckeditor/ckeditor5-dev-webpack-plugin": "^2.0.20",
+    "@ckeditor/ckeditor5-dev-utils": "^5.0.0",
+    "@ckeditor/ckeditor5-dev-webpack-plugin": "^2.0.22",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
@@ -18,7 +18,6 @@
     "dom-combiner": "^0.1.2",
     "fs-extra": "^4.0.2",
     "glob": "^7.1.2",
-    "gulp-util": "^3.0.8",
     "istanbul-instrumenter-loader": "^3.0.0",
     "karma": "^1.7.1",
     "karma-chai": "^0.1.0",
@@ -51,6 +50,7 @@
   },
   "bin": {
     "ckeditor5-dev-tests": "./bin/test.js",
+    "ckeditor5-dev-tests-manual": "./bin/test-manual.js",
     "ckeditor5-dev-tests-travis": "./bin/test-travis.sh",
     "ckeditor5-dev-tests-create-mgit-json": "./bin/create-mgit-json.js",
     "ckeditor5-dev-tests-create-lerna-json": "./bin/create-lerna-json.js",

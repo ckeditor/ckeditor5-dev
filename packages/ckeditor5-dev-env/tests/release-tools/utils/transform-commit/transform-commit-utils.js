@@ -41,6 +41,12 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			} );
 		} );
 
+		describe( 'additionalCommitNotes', () => {
+			it( 'should be defined', () => {
+				expect( transformCommit.additionalCommitNotes ).to.be.a( 'Object' );
+			} );
+		} );
+
 		describe( 'linkToGithubUser()', () => {
 			it( 'makes a link to GitHub profile if a user was mentioned in a comment', () => {
 				expect( transformCommit.linkToGithubUser( 'Foo @CKSource Bar' ) )

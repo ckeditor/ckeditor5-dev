@@ -13,10 +13,11 @@ const versions = {
 	/**
 	 * Returns a last created version in changelog file.
 	 *
+	 * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
 	 * @returns {String|null}
 	 */
-	getLastFromChangelog() {
-		const changelog = changelogUtils.getChangelog();
+	getLastFromChangelog( cwd = process.cwd() ) {
+		const changelog = changelogUtils.getChangelog( cwd );
 
 		if ( !changelog ) {
 			return null;

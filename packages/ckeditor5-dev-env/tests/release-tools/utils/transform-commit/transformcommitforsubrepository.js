@@ -387,5 +387,25 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			// If the merge commit does not contain the second line, it should display only the one.
 			expect( stubs.logger.info.firstCall.args[ 0 ].split( '\n' ) ).length( 1 );
 		} );
+
+		it( 'allows returning invalid commit instead of removing', () => {
+			const commit = {
+				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+				header: 'Docs: README.',
+				type: 'Docs',
+				subject: 'README.',
+				body: null,
+				footer: null,
+				notes: []
+			};
+
+			const newCommit = transformCommitForSubRepository( commit, {
+				displayLogs: false,
+				packageData: packageJson,
+				returnInvalidCommit: true
+			} );
+
+			expect( newCommit ).to.deep.equal( commit );
+		} );
 	} );
 } );
