@@ -2,7 +2,7 @@
 
 set -e
 
-npm install gulp mgit2 lerna@^2.0.0-rc.1 codeclimate-test-reporter eslint-config-ckeditor5
+npm install mgit2 lerna@^2.0.0-rc.1 codeclimate-test-reporter eslint-config-ckeditor5
 
 node_modules/.bin/ckeditor5-dev-tests-create-mgit-json
 node_modules/.bin/ckeditor5-dev-tests-create-lerna-json

@@ -3,9 +3,9 @@
   "private": true,
   "devDependencies": {
     "@ckeditor/ckeditor5-dev-env": "^6.0.0",
+    "chalk": "^2.1.0",
     "eslint": "^4.8.0",
     "eslint-config-ckeditor5": "^1.0.6",
-    "gulp": "^3.9.1",
     "husky": "^0.14.3",
     "istanbul": "^0.4.4",
     "lerna": "^2.2.0",
@@ -23,6 +23,7 @@
   "scripts": {
     "test": "mocha `./scripts/get-test-directories.sh` --recursive",
     "coverage": "istanbul cover _mocha `./scripts/get-test-directories.sh` -- --recursive",
+    "changelog": "node ./scripts/changelog.js",
     "lint": "eslint --quiet '**/*.js'",
     "precommit": "lint-staged"
   },
@@ -31,5 +32,8 @@
       "eslint --quiet"
     ]
   },
+  "eslintIgnore": [
+    "coverage/**"
+  ],
   "version": "0.0.36"
 }

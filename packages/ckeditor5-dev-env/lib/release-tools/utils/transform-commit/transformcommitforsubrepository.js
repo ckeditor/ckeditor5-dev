@@ -9,9 +9,9 @@ const chalk = require( 'chalk' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const utils = require( './transform-commit-utils' );
 
-// A size of indent for a log. The number is equal to length of the Gulp log string:
-// '[XX:YY:ZZ] * 1234567 ', where '1234567' is a short commit id.
-const INDENT_SIZE = 21;
+// A size of indent for a log. The number is equal to length of the log string:
+// '* 1234567 ', where '1234567' is a short commit id.
+const INDENT_SIZE = 10;
 
 /**
  * Parses a single commit:

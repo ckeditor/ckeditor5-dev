@@ -7,8 +7,9 @@
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "^4.0.2",
     "@ckeditor/jsdoc-plugins": "^1.8.1",
-    "gulp": "^3.9.1",
-    "gulp-jsdoc3": "ckeditor/gulp-jsdoc3"
+    "jsdoc": "3.4.3",
+    "map-stream": "^0.0.7",
+    "vinyl-fs": "^2.4.4"
   },
   "engines": {
     "node": ">=6.0.0",
