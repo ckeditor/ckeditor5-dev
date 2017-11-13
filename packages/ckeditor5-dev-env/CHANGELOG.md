@@ -1,6 +1,24 @@
 Changelog
 =========
 
+## [7.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@6.0.0...@ckeditor/ckeditor5-dev-env@7.0.0) (2017-11-13)
+
+### Other changes
+
+* Removed gulp dependency across the whole project. Closes [#296](https://github.com/ckeditor/ckeditor5-dev/issues/296). ([723bee5](https://github.com/ckeditor/ckeditor5-dev/commit/723bee5))
+
+  Now all packages use only npm scripts. Depending on usage you might either create a `"script"` entry in `pacakge.json` to invoke bin executables or require the library into a script.
+
+  * Package `ckeditor5-dev-env` exposes new `translations` binary.
+  * Package `ckeditor5-dev-tests` exposes new `test:manual` binary.
+  * Removed `gulp-jsdoc3` from `ckeditor5-dev-docs`. Now `jsdoc` is invoked directly.
+  * Removed `options` param from logger methods. Logger no longer uses `gutil.log` method.
+
+### BREAKING CHANGES
+
+* Gulp tasks were removed. New npm scripts were introduced.
+
+
 ## [6.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@5.1.13...@ckeditor/ckeditor5-dev-env@6.0.0) (2017-11-10)
 
 ### Features
