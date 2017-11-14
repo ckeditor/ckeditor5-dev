@@ -7,6 +7,7 @@
 
 const getMissingDocletsData = require( './getmissingdocletsdata' );
 const cloneDeep = require( 'lodash' ).cloneDeep;
+const DocletCollection = require( '../utils/doclet-collection' );
 
 module.exports = addMissingDoclets;
 
@@ -20,6 +21,13 @@ module.exports = addMissingDoclets;
  */
 function addMissingDoclets( originalDoclets ) {
 	const clonedDoclets = cloneDeep( originalDoclets );
+	const docletCollection = new DocletCollection();
+
+	for ( const doclet of clonedDoclets ) {
+		// group doclets by memberof property
+		docletCollection.add( `memberof:${ doclet.memberof }`, doclet );
+	}
+
 	const entitiesWhichNeedNewDoclets = clonedDoclets.filter( d => {
 		return d.kind === 'class' || d.kind === 'interface' || d.kind === 'mixin';
 	} );
@@ -57,7 +65,7 @@ function addMissingDoclets( originalDoclets ) {
 	for ( const childDoclet of entitiesWhichNeedNewDoclets ) {
 		for ( const setting of settings ) {
 			const missingDocletsData = getMissingDocletsData(
-				clonedDoclets,
+				docletCollection,
 				childDoclet,
 				setting
 			);

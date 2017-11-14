@@ -14,7 +14,7 @@ module.exports = getMissingDocletsData;
  * Returns also doclets which should be ignored as no longer necessary.
  * This module requires the input to be processed by 'relationbuilder' first.
  *
- * @param {Array.<Doclet>} originalDoclets
+ * @param {DocletCollection} docletCollection
  * @param {Doclet} childDoclet Doclet representing an entity which has some inherited members missing.
  * @param {Object} options
  * @param {String} options.relation Name of relation between child entity and its ancestors (e.g. `augmentsNested`).
@@ -22,10 +22,10 @@ module.exports = getMissingDocletsData;
  * @returns {Object.newDoclets}
  * @returns {Object.docletsWhichShouldBeIgnored}
  */
-function getMissingDocletsData( originalDoclets, childDoclet, options ) {
+function getMissingDocletsData( docletCollection, childDoclet, options ) {
 	const newDoclets = [];
 	const docletsWhichShouldBeIgnored = [];
-	const docletsToAdd = getDocletsToAdd( originalDoclets, childDoclet, options );
+	const docletsToAdd = getDocletsToAdd( docletCollection, childDoclet, options );
 
 	for ( const d of docletsToAdd ) {
 		const clonedDoclet = cloneDeep( d );
@@ -34,14 +34,14 @@ function getMissingDocletsData( originalDoclets, childDoclet, options ) {
 		clonedDoclet.memberof = childDoclet.longname;
 
 		// Add property `inherited` or `mixed`.
-		const relationProperty = getRelationProperty( originalDoclets, childDoclet, d, options.relation );
+		const relationProperty = getRelationProperty( docletCollection.getAll(), childDoclet, d, options.relation );
 
 		if ( relationProperty ) {
 			clonedDoclet[ relationProperty ] = true;
 		}
 
-		const docletsOfSameMember = originalDoclets.filter( d => {
-			return d.memberof === clonedDoclet.memberof && d.name === clonedDoclet.name && d.kind === clonedDoclet.kind;
+		const docletsOfSameMember = docletCollection.get( `memberof:${ clonedDoclet.memberof }` ).filter( d => {
+			return d.name === clonedDoclet.name && d.kind === clonedDoclet.kind;
 		} );
 
 		if ( docletsOfSameMember.length === 0 && !options.onlyExplicitlyInherited ) {
@@ -63,7 +63,7 @@ function getMissingDocletsData( originalDoclets, childDoclet, options ) {
 
 // Gets doclets from entities related to current doclet (e.g. implemented by it)
 // and matching criteria given in options.filter.
-function getDocletsToAdd( allDoclets, childDoclet, options = {} ) {
+function getDocletsToAdd( docletCollection, childDoclet, options = {} ) {
 	if ( !isNonEmptyArray( childDoclet[ options.relation ] ) ) {
 		return [];
 	}
@@ -72,7 +72,7 @@ function getDocletsToAdd( allDoclets, childDoclet, options = {} ) {
 	const ancestors = childDoclet[ options.relation ];
 
 	return ancestors.reduce( ( docletsToAdd, longname ) => {
-		const toAdd = allDoclets.filter( d => {
+		const toAdd = docletCollection.get( `memberof:${ longname }` ).filter( d => {
 			let isMatchingFilterOptions = true;
 			// filter out ignored, inherited, undocumented
 			const isUnwanted = d.ignore === true ||
@@ -85,7 +85,7 @@ function getDocletsToAdd( allDoclets, childDoclet, options = {} ) {
 				}
 			}
 
-			return d.memberof === longname && isMatchingFilterOptions && !isUnwanted;
+			return isMatchingFilterOptions && !isUnwanted;
 		} );
 
 		docletsToAdd.push( ...toAdd );

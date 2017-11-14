@@ -5,6 +5,7 @@
 
 'use strict';
 
+const DocletCollection = require( '../utils/doclet-collection' );
 const cloneDeep = require( 'lodash' ).cloneDeep;
 const RELATIONS = {
 	implements: 'implementsNested',
@@ -27,15 +28,21 @@ module.exports = addRelationArrays;
  */
 function addRelationArrays( originalDoclets ) {
 	const clonedDoclets = cloneDeep( originalDoclets );
+	const docletCollection = new DocletCollection();
+
+	for ( const doclet of clonedDoclets ) {
+		// group doclets by longname
+		docletCollection.add( doclet.longname, doclet );
+	}
 
 	// Doclets for which we want to create relation arrays.
 	// We want classes, interfaces and mixins.
-	const subjectDoclets = clonedDoclets.filter( item => {
+	const subjectDoclets = docletCollection.getAll().filter( item => {
 		return item.kind === 'class' || item.kind === 'interface' || item.kind === 'mixin';
 	} );
 
 	subjectDoclets.forEach( d => {
-		const related = getAncestors( clonedDoclets, d, {
+		const related = getAncestors( docletCollection, d, {
 			relations: [ 'augments', 'implements', 'mixes' ]
 		} );
 
@@ -53,16 +60,16 @@ function addRelationArrays( originalDoclets ) {
 		Object.assign( d, { descendants } );
 	} );
 
-	return clonedDoclets;
+	return docletCollection.getAll();
 }
 
 // Gets longnames of currentDoclet's ancestors (classes it extends, interfaces it implements and so on).
 //
-// @param {Array.<Doclet>} allDoclets
+// @param {DocletCollection} docletCollection
 // @param {Doclet} currentDoclet
 // @param {Array} options.relations Array of relation names which should be used
 // @returns {Object} An object containing arrays of ancestors' longnames
-function getAncestors( allDoclets, currentDoclet, options ) {
+function getAncestors( docletCollection, currentDoclet, options ) {
 	const { relations } = options;
 	const resultRelations = {};
 
@@ -77,10 +84,10 @@ function getAncestors( allDoclets, currentDoclet, options ) {
 			resultRelations[ RELATIONS[ r ] ].push( ...currentDoclet[ r ] );
 
 			currentDoclet[ r ].forEach( longname => {
-				const ancestors = allDoclets.filter( d => d.longname === longname );
+				const ancestors = docletCollection.get( longname );
 
 				ancestors.forEach( ancestor => {
-					const ancestorsResultRelations = getAncestors( allDoclets, ancestor, {
+					const ancestorsResultRelations = getAncestors( docletCollection, ancestor, {
 						relations
 					} );
 
