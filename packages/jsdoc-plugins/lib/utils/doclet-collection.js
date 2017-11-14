@@ -6,11 +6,11 @@
 'use strict';
 
 /**
- * Collection of <String, Object[]> pairs.
+ * Collection of doclets as <String, Object[]> pairs. Also stores all doclets and their longnames as arrays.
  */
-class Collection {
+class DocletCollection {
 	/**
-	 * Creates collection of <String, Object[]> pairs
+	 * Creates collection of doclets
 	 */
 	constructor() {
 		this._data = {};
@@ -66,4 +66,4 @@ class Collection {
 	}
 }
 
-module.exports = Collection;
+module.exports = DocletCollection;

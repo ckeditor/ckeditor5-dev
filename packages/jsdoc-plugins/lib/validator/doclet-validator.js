@@ -5,7 +5,7 @@
 
 'use strict';
 
-const Collection = require( '../utils/collection' );
+const DocletCollection = require( '../utils/doclet-collection' );
 const { doesFieldExistInClass } = require( '../utils/doclet-utils' );
 const { ALL_TYPES, GENERIC_TYPES } = require( './types' );
 
@@ -27,7 +27,7 @@ class DocletValidator {
 		 * doclets grouped by doclet kind
 		 * @private
 		 */
-		this._collection = this._createCollection( doclets );
+		this._collection = this._createDocletCollection( doclets );
 	}
 
 	/**
@@ -35,8 +35,8 @@ class DocletValidator {
 	 * @private
 	 * @returns {Collection}
 	 */
-	_createCollection( doclets ) {
-		const collection = new Collection();
+	_createDocletCollection( doclets ) {
+		const collection = new DocletCollection();
 
 		for ( const doclet of doclets ) {
 			collection.add( doclet.kind, doclet );

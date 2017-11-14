@@ -7,7 +7,7 @@
 
 const chai = require( 'chai' );
 const expect = chai.expect;
-const Collection = require( '../lib/utils/collection' );
+const DocletCollection = require( '../lib/utils/doclet-collection' );
 
 describe( 'collection', () => {
 	let collection;
@@ -23,7 +23,7 @@ describe( 'collection', () => {
 			longname: 'module:M~ClassA#methodB',
 			kind: 'method'
 		};
-		collection = new Collection();
+		collection = new DocletCollection();
 		collection.add( recordA.kind, recordA );
 		collection.add( recordB.kind, recordB );
 	} );
