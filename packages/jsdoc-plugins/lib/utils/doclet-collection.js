@@ -6,14 +6,16 @@
 'use strict';
 
 /**
- * Collection of <String, Object[]> pairs.
+ * Collection of doclets as <String, Object[]> pairs. Also stores all doclets and their longnames as arrays.
  */
-class Collection {
+class DocletCollection {
 	/**
-	 * Creates collection of <String, Object[]> pairs
+	 * Creates collection of doclets
 	 */
 	constructor() {
 		this._data = {};
+		this._allData = [];
+		this._allLongnames = [];
 	}
 
 	/**
@@ -28,6 +30,11 @@ class Collection {
 		}
 
 		this._data[ name ].push( record );
+		this._allData.push( record );
+
+		if ( record.longname ) {
+			this._allLongnames.push( record.longname );
+		}
 	}
 
 	/**
@@ -46,14 +53,17 @@ class Collection {
 	 * @returns {Object[]}
 	*/
 	getAll() {
-		const result = [];
+		return this._allData;
+	}
 
-		Object.keys( this._data ).forEach( key => {
-			result.push( ...this._data[ key ] );
-		} );
-
-		return result;
+	/**
+	 * Returns all longnames.
+	 *
+	 * @returns {String[]}
+	 */
+	getAllLongnames() {
+		return this._allLongnames;
 	}
 }
 
-module.exports = Collection;
+module.exports = DocletCollection;
