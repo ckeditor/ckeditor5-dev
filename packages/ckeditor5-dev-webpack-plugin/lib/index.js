@@ -5,8 +5,11 @@
 
 'use strict';
 
-// const replaceTCalls = require( './replacetcalls' );
 const serveTranslations = require( './serve-translations' );
+const {
+	MultipleLanguageTranslationService,
+	SingleLanguageTranslationService
+} = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 
 module.exports = class CKEditorWebpackPlugin {
 	/**
@@ -20,14 +23,22 @@ module.exports = class CKEditorWebpackPlugin {
 	}
 
 	apply( compiler ) {
-		const { languages } = this.options;
+		if ( !this.options.languages ) {
+			return;
+		}
 
-		// if ( languages && languages.length == 1 ) {
-		// 	replaceTCalls( compiler, languages[ 0 ] );
-		// } else {
-		// 	throw new Error( 'Multi-language support is not implemented yet.' );
-		// }
+		let translationService;
 
-		serveTranslations( compiler, languages );
+		if ( this.options.optimizeBuildForOneLanguage ) {
+			if ( this.options.languages.length > 1 ) {
+				throw new Error( 'Only one language should be specified when `optimizeBuildForOneLanguage` option is on.' );
+			}
+
+			translationService = new SingleLanguageTranslationService( this.options.languages[ 0 ] );
+		} else {
+			translationService = new MultipleLanguageTranslationService( this.options.languages );
+		}
+
+		serveTranslations( compiler, this.options, translationService );
 	}
 };

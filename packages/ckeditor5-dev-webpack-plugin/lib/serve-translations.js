@@ -1,19 +1,24 @@
 const utils = require( './utils' );
-const { TranslationService } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 const path = require( 'path' );
+const flatten = require( 'lodash/flatten' );
+const chalk = require( 'chalk' );
 
 /**
- * Serve translations for multiple languages.
+ * Serve translations depending on the used translation service and passed options.
  *
  * @param {*} compiler Webpack compiler
- * @param {*} languages
+ * @param {Object} options Translation options
+ * @param {String} options.languages Target languages
+ * @param {Boolean} [options.throwErrorOnMissingTranslation] Throw when the translation is missing.
+ * By default original (english strings) are used when the target translation is missing.
+ * @param {String} [options.outputDirectory='lang'] Output directory for the emitted translation files.
+ * @param {TranslationService} translationService
  */
-module.exports = function serveTranslations( compiler, languages ) {
-	const translationService = new TranslationService( languages );
-
+module.exports = function serveTranslations( compiler, options, translationService ) {
+	// Provides translateSource method for the `translatesourceloader` loader.
 	compiler.options.translateSource = source => translationService.translateSource( source );
 
-	// Add ckeditor5-core translations before translate-source-loader starts translating.
+	// Add ckeditor5-core translations before `translatesourceloader` starts translating.
 	compiler.plugin( 'after-resolvers', () => {
 		compiler.resolvers.normal.resolve(
 			process.cwd(),
@@ -33,6 +38,14 @@ module.exports = function serveTranslations( compiler, languages ) {
 			maybeAddLoader( resolveOptions );
 
 			done( null, resolveOptions );
+		} );
+	} );
+
+	compiler.plugin( 'compilation', compilation => {
+		compilation.plugin( 'additional-assets', done => {
+			addAssetsToExistingOnes( compilation.assets );
+
+			done();
 		} );
 	} );
 
@@ -56,35 +69,24 @@ module.exports = function serveTranslations( compiler, languages ) {
 		}
 	}
 
-	compiler.plugin( 'compilation', compilation => {
-		compilation.plugin( 'additional-assets', done => {
-			for ( const lang of languages ) {
-				const hashToTranslatedStringDictionary = translationService.getHashToTranslatedStringDictionary( lang );
+	function addAssetsToExistingOnes( destinationAssets ) {
+		const generatedAssets = translationService.getAssets( { outputDirectory: options.outputDirectory } );
 
-				// TODO: Windows.
-				const outputPath = path.join( 'lang', `${ lang }.js` );
-				const stringifiedTranslations = JSON.stringify( hashToTranslatedStringDictionary, null, 2 );
-				const outputBody = `CKEDITOR_TRANSLATIONS.add( '${ lang }', ${ stringifiedTranslations } )`;
+		const errors = flatten( generatedAssets.map( asset => asset.errors ) );
 
-				compilation.assets[ outputPath ] = {
-					source: () => outputBody,
-					size: () => outputBody.length,
-				};
+		if ( errors.length && options.throwErrorOnMissingTranslation ) {
+			throw new Error( errors.join( '\n' ) + '\n' );
+		}
 
-				console.log( `Created ${ outputPath } translation file.` );
-			}
+		for ( const error of errors ) {
+			console.error( chalk.red( error ) );
+		}
 
-			done();
-		} );
-	} );
-
-	// compiler.plugin( 'emit', compilation => {
-	// 	for ( const chunk of compilation.chunks ) {
-	// 		const resources = chunk.modules.map( m => m.resource );
-
-	// 		console.log( chunk.files, resources );
-	// 	}
-
-	// 	process.exit();
-	// } );
+		for ( const asset of generatedAssets ) {
+			destinationAssets[ asset.outputPath ] = {
+				source: () => asset.outputBody,
+				size: () => asset.outputBody.length,
+			};
+		}
+	}
 };
