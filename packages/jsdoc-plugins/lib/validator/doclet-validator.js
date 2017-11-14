@@ -344,7 +344,7 @@ class DocletValidator {
 	_isCorrectReference( type ) {
 		type = type.trim();
 		const doclets = this._collection.getAll();
-		const allRefs = this._collection.getLongnames();
+		const allRefs = this._collection.getAllLongnames();
 
 		if ( !type.includes( 'module:' ) ) {
 			return false;

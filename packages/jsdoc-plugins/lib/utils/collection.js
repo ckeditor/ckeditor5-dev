@@ -15,7 +15,7 @@ class Collection {
 	constructor() {
 		this._data = {};
 		this._allData = [];
-		this._longnames = [];
+		this._allLongnames = [];
 	}
 
 	/**
@@ -33,7 +33,7 @@ class Collection {
 		this._allData.push( record );
 
 		if ( record.longname ) {
-			this._longnames.push( record.longname );
+			this._allLongnames.push( record.longname );
 		}
 	}
 
@@ -59,10 +59,10 @@ class Collection {
 	/**
 	 * Returns all longnames.
 	 *
-	 * @returns {Object[]}
+	 * @returns {String[]}
 	 */
-	getLongnames() {
-		return this._longnames;
+	getAllLongnames() {
+		return this._allLongnames;
 	}
 }
 
