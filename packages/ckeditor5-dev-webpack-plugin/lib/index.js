@@ -32,6 +32,12 @@ module.exports = class CKEditorWebpackPlugin {
 
 		let translationService;
 
+		if ( this.options.languages.length === 0 ) {
+			throw new Error( chalk.red(
+				'At least one target language should be specified.'
+			) );
+		}
+
 		if ( this.options.optimizeBuildForOneLanguage ) {
 			if ( this.options.languages.length > 1 ) {
 				throw new Error( chalk.red(

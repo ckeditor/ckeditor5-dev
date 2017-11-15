@@ -9,28 +9,26 @@ const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
 const translateSourceLoader = require( '../lib/translatesourceloader' );
 
-describe( 'webpack-plugin', () => {
-	describe( 'translateSourceLoader()', () => {
-		const sandbox = sinon.createSandbox();
+describe( 'webpack-plugin/translateSourceLoader()', () => {
+	const sandbox = sinon.createSandbox();
 
-		afterEach( () => {
-			sandbox.restore();
-		} );
+	afterEach( () => {
+		sandbox.restore();
+	} );
 
-		it( 'should return translated code', () => {
-			const ctx = {
-				options: {
-					translateSource: sandbox.spy( () => 'output' )
-				},
-				resourcePath: 'file.js'
-			};
+	it( 'should return translated code', () => {
+		const ctx = {
+			options: {
+				translateSource: sandbox.spy( () => 'output' )
+			},
+			resourcePath: 'file.js'
+		};
 
-			const result = translateSourceLoader.call( ctx, 'Source' );
+		const result = translateSourceLoader.call( ctx, 'Source' );
 
-			sinon.assert.calledOnce( ctx.options.translateSource );
-			sinon.assert.calledWithExactly( ctx.options.translateSource, 'Source', 'file.js' );
+		sinon.assert.calledOnce( ctx.options.translateSource );
+		sinon.assert.calledWithExactly( ctx.options.translateSource, 'Source', 'file.js' );
 
-			expect( result ).to.equal( 'output' );
-		} );
+		expect( result ).to.equal( 'output' );
 	} );
 } );

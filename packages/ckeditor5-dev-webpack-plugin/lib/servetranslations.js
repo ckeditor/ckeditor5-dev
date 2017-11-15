@@ -6,8 +6,7 @@ const chalk = require( 'chalk' );
  * Serve translations depending on the used translation service and passed options.
  * It takes care about whole Webpack compilation process.
  *
- * See https://webpack.js.org/api/compiler/#event-hooks and https://webpack.js.org/api/compilation/
- * for details about specific hooks.
+ * See https://webpack.js.org/api/compiler/#event-hooks and https://webpack.js.org/api/compilation/ for details about specific hooks.
  *
  * @param {Object} compiler Webpack compiler.
  * @param {Object} options Translation options.
@@ -16,7 +15,7 @@ const chalk = require( 'chalk' );
  * should be relative to the webpack context.
  * @param {Boolean} [options.throwErrorOnMissingTranslation] Option that make this function throw when the translation is missing.
  * By default original (english translation keys) are used when the target translation is missing.
- * @param {TranslationService} translationService
+ * @param {TranslationService} translationService Translation service that will load PO files, replace translation keys and generate assets.
  */
 module.exports = function serveTranslations( compiler, options, translationService ) {
 	const cwd = process.cwd();
