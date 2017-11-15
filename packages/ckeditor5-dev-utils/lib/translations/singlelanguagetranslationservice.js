@@ -16,7 +16,6 @@ const { EventEmitter } = require( 'events' );
  */
 module.exports = class SingleLanguageTranslationService extends EventEmitter {
 	/**
-	 *
 	 * @param {String} language Target language.
 	 */
 	constructor( language ) {

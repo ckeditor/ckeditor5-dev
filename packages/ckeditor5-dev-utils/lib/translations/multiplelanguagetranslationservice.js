@@ -16,7 +16,7 @@ const { EventEmitter } = require( 'events' );
  * `MultipleLanguageTranslationService` replaces `t()` call params with short ids
  * and provides assets that translate those ids to target languages.
  *
- * translationKey - original english string that occur in `t()` call params.
+ * `translationKey` - original english string that occur in `t()` call params.
  */
 module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	/**
@@ -36,7 +36,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		// @type {Object.<String,Object>}
 		this._translationIdsDictionary = {};
 
-		this._idCreator = new ShortIdGenerator();
+		this._idGenerator = new ShortIdGenerator();
 	}
 
 	/**
@@ -152,7 +152,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		let id = this._translationIdsDictionary[ originalString ];
 
 		if ( !id ) {
-			id = this._idCreator.getNextId();
+			id = this._idGenerator.getNextId();
 			this._translationIdsDictionary[ originalString ] = id;
 		}
 
