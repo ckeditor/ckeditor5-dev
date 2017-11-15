@@ -32,10 +32,18 @@ module.exports = class SingleLanguageTranslationService extends EventEmitter {
 	/**
 	 * Translate file's source and replace `t()` call strings with translated strings.
 	 *
+	 * @fires error
 	 * @param {String} source
+	 * @returns {String}
 	 */
 	translateSource( source ) {
-		return translateSource( source, originalString => this._translateString( originalString ) );
+		const { output, errors } = translateSource( source, originalString => this._translateString( originalString ) );
+
+		for ( const error of errors ) {
+			this.emit( 'error', error );
+		}
+
+		return output;
 	}
 
 	/**

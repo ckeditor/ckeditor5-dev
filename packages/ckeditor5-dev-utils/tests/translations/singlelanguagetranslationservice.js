@@ -11,26 +11,20 @@ const path = require( 'path' );
 const proxyquire = require( 'proxyquire' );
 
 describe( 'translations', () => {
-	describe( 'TranslationService', () => {
-		let TranslationService, stubs, files, fileContents, sandbox;
+	describe( 'SingleLanguageTranslationService', () => {
+		let SingleLanguageTranslationService, stubs, files, fileContents, sandbox;
 
 		beforeEach( () => {
 			sandbox = sinon.sandbox.create();
 
 			stubs = {
-				logger: {
-					info: sandbox.stub(),
-					warning: sandbox.stub(),
-					error: sandbox.stub()
-				},
 				fs: {
 					existsSync: path => files.includes( path ),
 					readFileSync: path => fileContents[ path ]
 				}
 			};
 
-			TranslationService = proxyquire( '../../lib/translations/translationservice', {
-				'../logger': () => stubs.logger,
+			SingleLanguageTranslationService = proxyquire( '../../lib/translations/singlelanguagetranslationservice', {
 				'fs': stubs.fs
 			} );
 		} );
@@ -40,37 +34,16 @@ describe( 'translations', () => {
 		} );
 
 		describe( 'constructor()', () => {
-			it( 'should be able to use custom function that returns path to the po file', () => {
-				const pathToTranslations = path.join( 'customPathToPackage', 'lang', 'translations', 'pl.po' );
+			it( 'should initialize `SingleLanguageTranslationService`', () => {
+				const translationService = new SingleLanguageTranslationService( 'pl' );
 
-				files = [ pathToTranslations ];
-
-				fileContents = {
-					[ pathToTranslations ]: [
-						'msgctxt "Label for the Save button."',
-						'msgid "Save"',
-						'msgstr "Zapisz"',
-						''
-					].join( '\n' )
-				};
-
-				const translationService = new TranslationService( 'pl', {
-					getPathToPoFile: ( pathToPackage, languageCode ) => {
-						return path.join( pathToPackage, 'lang', 'translations', `${ languageCode }.po` );
-					}
-				} );
-
-				translationService.loadPackage( 'customPathToPackage' );
-
-				expect( Array.from( translationService.dictionary ) ).to.deep.equal( [
-					[ 'Save', 'Zapisz' ]
-				] );
+				expect( translationService ).to.be.instanceof( SingleLanguageTranslationService );
 			} );
 		} );
 
 		describe( 'loadPackage()', () => {
 			it( 'should load po file from the package and load translations', () => {
-				const translationService = new TranslationService( 'pl' );
+				const translationService = new SingleLanguageTranslationService( 'pl' );
 				const pathToTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'pl.po' );
 
 				files = [ pathToTranslations ];
@@ -86,24 +59,22 @@ describe( 'translations', () => {
 
 				translationService.loadPackage( 'pathToPackage' );
 
-				expect( Array.from( translationService.dictionary ) ).to.deep.equal( [
-					[ 'Save', 'Zapisz' ]
-				] );
+				expect( translationService._dictionary ).to.deep.equal( { 'Save': 'Zapisz' } );
 			} );
 
 			it( 'should do nothing if the po file does not exist', () => {
-				const translationService = new TranslationService( 'pl' );
+				const translationService = new SingleLanguageTranslationService( 'pl' );
 
 				files = [];
 				fileContents = {};
 
 				translationService.loadPackage( 'pathToPackage' );
 
-				expect( Array.from( translationService.dictionary ) ).to.deep.equal( [] );
+				expect( translationService._dictionary ).to.deep.equal( {} );
 			} );
 
 			it( 'should load po file from the package only once', () => {
-				const translationService = new TranslationService( 'pl' );
+				const translationService = new SingleLanguageTranslationService( 'pl' );
 				const loadPoFileSpy = sandbox.stub( translationService, '_loadPoFile' );
 
 				translationService.loadPackage( 'pathToPackage' );
@@ -115,10 +86,10 @@ describe( 'translations', () => {
 
 		describe( 'translateSource()', () => {
 			it( 'should translate t() calls in the code', () => {
-				const translationService = new TranslationService( 'pl' );
+				const translationService = new SingleLanguageTranslationService( 'pl' );
 				const source = 't( \'Cancel\' )';
 
-				translationService.dictionary.set( 'Cancel', 'Anuluj' );
+				translationService._dictionary.Cancel = 'Anuluj';
 
 				const result = translationService.translateSource( source );
 
@@ -126,7 +97,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should return original source if there is no t() calls in the code', () => {
-				const translationService = new TranslationService( 'pl' );
+				const translationService = new SingleLanguageTranslationService( 'pl' );
 				const source = 'translate( \'Cancel\' )';
 
 				const result = translationService.translateSource( source );
@@ -134,28 +105,32 @@ describe( 'translations', () => {
 				expect( result ).to.equal( 'translate( \'Cancel\' )' );
 			} );
 
-			it( 'should lg the error and keep original string if the translation misses', () => {
-				const translationService = new TranslationService( 'pl' );
+			it( 'should emit an error and keep original string if the translation is missing', () => {
+				const translationService = new SingleLanguageTranslationService( 'pl' );
 				const source = 't( \'Cancel\' )';
+
+				const spy = sandbox.spy();
+				translationService.on( 'error', spy );
 
 				const result = translationService.translateSource( source );
 
 				expect( result ).to.equal( 't(\'Cancel\');' );
-				sinon.assert.calledOnce( stubs.logger.error );
-				sinon.assert.calledWithExactly( stubs.logger.error, 'Missing translation for: Cancel.' );
+				sinon.assert.calledOnce( spy );
+				sinon.assert.calledWithExactly( spy, 'Missing translation for Cancel for pl language.' );
 			} );
 
 			it( 'should throw an error when the t is called with the variable', () => {
-				const translationService = new TranslationService( 'pl' );
+				const translationService = new SingleLanguageTranslationService( 'pl' );
 				const source = 'const cancel = \'Cancel\';t( cancel );';
+
+				const spy = sandbox.spy();
+				translationService.on( 'error', spy );
 
 				const result = translationService.translateSource( source );
 
 				expect( result ).to.equal( 'const cancel = \'Cancel\';t( cancel );' );
-				sinon.assert.calledOnce( stubs.logger.error );
-				sinon.assert.calledWithExactly(
-					stubs.logger.error, 'First t() call argument should be a string literal.'
-				);
+				sinon.assert.calledOnce( spy );
+				sinon.assert.calledWithExactly( spy, 'First t() call argument should be a string literal.' );
 			} );
 		} );
 	} );

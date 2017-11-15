@@ -8,7 +8,6 @@
 const acorn = require( 'acorn' );
 const walk = require( 'acorn/dist/walk' );
 const escodegen = require( 'escodegen' );
-const logger = require( '../logger' )();
 
 /**
  * Parses source, translates `t()` call arguments and returns modified output.
@@ -20,6 +19,7 @@ const logger = require( '../logger' )();
 module.exports = function translateSource( source, translateString ) {
 	const comments = [];
 	const tokens = [];
+	const errors = [];
 
 	const ast = acorn.parse( source, {
 		sourceType: 'module',
@@ -37,7 +37,7 @@ module.exports = function translateSource( source, translateString ) {
 			}
 
 			if ( node.arguments[ 0 ].type !== 'Literal' ) {
-				logger.error( 'First t() call argument should be a string literal.' );
+				errors.push( 'First t() call argument should be a string literal.' );
 
 				return;
 			}
@@ -49,7 +49,7 @@ module.exports = function translateSource( source, translateString ) {
 
 	// Optimization for files without t() calls.
 	if ( !changesInCode ) {
-		return source;
+		return { output: source, errors };
 	}
 
 	escodegen.attachComments( ast, comments, tokens );
@@ -57,5 +57,5 @@ module.exports = function translateSource( source, translateString ) {
 		comment: true
 	} );
 
-	return output;
+	return { output, errors };
 };

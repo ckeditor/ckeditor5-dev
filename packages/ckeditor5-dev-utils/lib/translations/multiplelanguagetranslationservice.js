@@ -42,10 +42,18 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	/**
 	 * Translate file's source and replace `t()` call strings with short ids.
 	 *
+	 * @fires error
 	 * @param {String} source
+	 * @returns {String}
 	 */
 	translateSource( source ) {
-		return translateSource( source, translationKey => this._getId( translationKey ) );
+		const { output, errors } = translateSource( source, originalString => this._translateString( originalString ) );
+
+		for ( const error of errors ) {
+			this.emit( 'error', error );
+		}
+
+		return output;
 	}
 
 	/**
@@ -70,6 +78,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	/**
 	 * Return an array of assets based on the stored dictionaries.
 	 *
+	 * @fires error
 	 * @param {Object} param0
 	 * @param {String} [param0.outputDirectory]
 	 * @returns {Array.<Object>}
