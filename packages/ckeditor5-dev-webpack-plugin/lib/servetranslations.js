@@ -14,7 +14,7 @@ const chalk = require( 'chalk' );
  * @param {Array.<String>} options.languages Target languages.
  * @param {String} [options.outputDirectory='lang'] Output directory for the emitted translation files,
  * should be relative to the webpack context.
- * @param {Boolean} [options.throwErrorOnMissingTranslation] Throw when the translation is missing.
+ * @param {Boolean} [options.throwErrorOnMissingTranslation] Option that make this function throw when the translation is missing.
  * By default original (english translation keys) are used when the target translation is missing.
  * @param {TranslationService} translationService
  */

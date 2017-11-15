@@ -6,7 +6,7 @@
 'use strict';
 
 const chalk = require( 'chalk' );
-const serveTranslations = require( './serve-translations' );
+const serveTranslations = require( './servetranslations' );
 const SingleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/singlelanguagetranslationservice' );
 const MultipleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/multiplelanguagetranslationservice' );
 
@@ -16,9 +16,9 @@ module.exports = class CKEditorWebpackPlugin {
 	 * @param {Array.<String>} [options.languages] Target languages.
 	 * @param {String} [options.outputDirectory='lang'] Output directory for the emitted translation files,
 	 * should be relative to the webpack context.
-	 * @param {Boolean} [options.optimizeBuildForOneLanguage] Optimized build for one language (directly replaces translation
-	 * keys with the target language's strings.
-	 * @param {Boolean} [options.throwErrorOnMissingTranslation] Throw when the translation is missing.
+	 * @param {Boolean} [options.optimizeBuildForOneLanguage] Option that optimizes build for one language (directly replaces translation
+	 * keys with the target language's strings. Webpack won't emit any language file with that option enabled.
+	 * @param {Boolean} [options.throwErrorOnMissingTranslation] Option that make the plugin throw when the translation is missing.
 	 * By default original (english translation keys) are used when the target translation is missing.
 	 */
 	constructor( options = {} ) {
