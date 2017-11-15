@@ -8,7 +8,7 @@
 const path = require( 'path' );
 const fs = require( 'fs' );
 const createDictionaryFromPoFileContent = require( './createdictionaryfrompofilecontent' );
-const translateSource = require( './translateSource' );
+const translateSource = require( './translatesource' );
 const ShortIdGenerator = require( './shortidgenerator' );
 const { EventEmitter } = require( 'events' );
 

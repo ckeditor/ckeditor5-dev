@@ -5,7 +5,7 @@
 
 'use strict';
 
-const translateSource = require( './translateSource' );
+const translateSource = require( './translatesource' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const createDictionaryFromPoFileContent = require( './createdictionaryfrompofilecontent' );
