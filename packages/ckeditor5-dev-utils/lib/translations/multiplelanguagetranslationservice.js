@@ -47,7 +47,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @returns {String}
 	 */
 	translateSource( source ) {
-		const { output, errors } = translateSource( source, originalString => this._translateString( originalString ) );
+		const { output, errors } = translateSource( source, originalString => this._getId( originalString ) );
 
 		for ( const error of errors ) {
 			this.emit( 'error', error );
@@ -83,7 +83,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @param {String} [param0.outputDirectory]
 	 * @returns {Array.<Object>}
 	 */
-	getAssets( { outputDirectory = 'lang' } ) {
+	getAssets( { outputDirectory = 'lang' } = {} ) {
 		return this._languages.map( language => {
 			const translatedStrings = this._getIdToTranslatedStringDictionary( language );
 
@@ -141,15 +141,12 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		const dictionary = this._dictionary[ language ];
 
 		for ( const translationKey in parsedTranslationFile ) {
-			// TODO: ensure that translation files can't use the same translationKey.
 			dictionary[ translationKey ] = parsedTranslationFile[ translationKey ];
 		}
 	}
 
 	// Translate all t() call found in source text to the target language.
 	_getId( originalString ) {
-		// TODO - log when translation is missing.
-
 		let id = this._translationIdsDictionary[ originalString ];
 
 		if ( !id ) {

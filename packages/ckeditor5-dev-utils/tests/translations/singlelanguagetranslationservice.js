@@ -133,5 +133,14 @@ describe( 'translations', () => {
 				sinon.assert.calledWithExactly( spy, 'First t() call argument should be a string literal.' );
 			} );
 		} );
+
+		describe( 'getAssets()', () => {
+			it( 'should return an empty array', () => {
+				const translationService = new SingleLanguageTranslationService( [ 'pl', 'de' ] );
+				const assets = translationService.getAssets();
+
+				expect( assets ).to.deep.equal( [] );
+			} );
+		} );
 	} );
 } );

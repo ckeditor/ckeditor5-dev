@@ -10,7 +10,7 @@ const sinon = require( 'sinon' );
 const translateSource = require( '../../lib/translations/translatesource' );
 
 describe( 'translations', () => {
-	describe( 'translateSource', () => {
+	describe( 'translateSource()', () => {
 		let sandbox, translations;
 		const translateString = translationKey => translations[ translationKey ];
 
