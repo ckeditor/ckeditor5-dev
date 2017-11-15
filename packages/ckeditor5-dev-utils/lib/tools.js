@@ -5,7 +5,7 @@
 
 'use strict';
 
-const gutil = require( 'gulp-util' );
+const chalk = require( 'chalk' );
 const path = require( 'path' );
 const fs = require( 'fs-extra' );
 
@@ -27,27 +27,27 @@ module.exports = {
 		sh.config.silent = true;
 
 		const ret = sh.exec( command );
-		const logOptions = { raw: true };
-		const grey = gutil.colors.grey;
+
+		const grey = chalk.grey;
 
 		if ( ret.code ) {
 			if ( ret.stdout ) {
-				log.error( grey( ret.stdout ), logOptions );
+				log.error( grey( ret.stdout ) );
 			}
 
 			if ( ret.stderr ) {
-				log.error( grey( ret.stderr ), logOptions );
+				log.error( grey( ret.stderr ) );
 			}
 
 			throw new Error( `Error while executing ${ command }: ${ ret.stderr }` );
 		}
 
 		if ( ret.stdout ) {
-			log.info( grey( ret.stdout ), logOptions );
+			log.info( grey( ret.stdout ) );
 		}
 
 		if ( ret.stderr ) {
-			log.info( grey( ret.stderr ), logOptions );
+			log.info( grey( ret.stderr ) );
 		}
 
 		return ret.stdout;
@@ -335,7 +335,7 @@ module.exports = {
 				const log = require( './logger' )( options.verbosity );
 
 				paths.forEach( p => {
-					log.info( `Deleted file '${ gutil.colors.cyan( p ) }'.` );
+					log.info( `Deleted file '${ chalk.cyan( p ) }'.` );
 				} );
 			} );
 	}

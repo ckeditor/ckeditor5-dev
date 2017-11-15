@@ -5,10 +5,12 @@ Internal changes only (updated dependencies, documentation, etc.).
 
 {{else}}
 {{#each commitGroups}}
-{{#if title}}
 ### {{title}}
-{{/if}}
 
+{{#if (lookup ../additionalNotes title)}}
+{{ lookup ../additionalNotes title }}
+
+{{/if}}
 {{#each commits}}
 {{> commit root=@root}}
 {{/each}}

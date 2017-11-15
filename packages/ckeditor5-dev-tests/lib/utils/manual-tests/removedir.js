@@ -7,7 +7,7 @@
 
 const del = require( 'del' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const gutil = require( 'gulp-util' );
+const chalk = require( 'chalk' );
 
 /**
  * Removes directory
@@ -18,6 +18,6 @@ const gutil = require( 'gulp-util' );
  */
 module.exports = function removeDir( dir ) {
 	return del( dir ).then( () => {
-		logger().info( `Removed directory '${ gutil.colors.cyan( dir ) }'` );
+		logger().info( `Removed directory '${ chalk.cyan( dir ) }'` );
 	} );
 };

@@ -4,5 +4,8 @@
   "dependencies": {
     "@ckeditor/gamma": "*",
     "@ckeditor/epsilon": "*"
+  },
+  "repository": {
+    "url": "https://github.com/ckeditor/beta.git"
   }
 }

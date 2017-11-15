@@ -6,6 +6,7 @@
 'use strict';
 
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const chalk = require( 'chalk' );
 const executeOnPackages = require( '../utils/executeonpackages' );
 const displayGeneratedChangelogs = require( '../utils/displaygeneratedchangelogs' );
 const displaySkippedPackages = require( '../utils/displayskippedpackages' );
@@ -33,12 +34,48 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 	} );
 
 	const generatedChangelogsMap = new Map();
+	const skippedChangelogs = new Set();
 
 	return executeOnPackages( pathsCollection.packages, generateChangelogTask )
 		.then( () => {
+			log.info( '' );
+			log.info( chalk.underline( 'Checking whether dependencies of skipped packages have changed...' ) );
+
+			const internalChangelogsPaths = new Map();
+
+			let clearRun = false;
+
+			while ( !clearRun ) {
+				clearRun = true;
+
+				for ( const packagePath of skippedChangelogs ) {
+					const packageJson = getPackageJson( packagePath );
+
+					// Check whether the dependencies will be released.
+					const willUpdateDependencies = Object.keys( packageJson.dependencies || {} )
+						.some( dependencyName => {
+							return generatedChangelogsMap.has( dependencyName ) || internalChangelogsPaths.has( dependencyName );
+						} );
+
+					// If so, bump the patch version for current package and release it too.
+					if ( willUpdateDependencies ) {
+						internalChangelogsPaths.set( packageJson.name, packagePath );
+						skippedChangelogs.delete( packagePath );
+						clearRun = false;
+					}
+				}
+			}
+
+			return executeOnPackages( internalChangelogsPaths.values(), generateInternalChangelogTask );
+		} )
+		.then( () => {
 			process.chdir( cwd );
 
-			displaySkippedPackages( pathsCollection.skipped );
+			displaySkippedPackages( new Set( [
+				...pathsCollection.skipped,
+				...skippedChangelogs
+			].sort() ) );
+
 			displayGeneratedChangelogs( generatedChangelogsMap );
 
 			log.info( 'Done.' );
@@ -50,10 +87,22 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 		return generateChangelogForSinglePackage()
 			.then( newVersion => {
 				if ( newVersion ) {
-					generatedChangelogsMap.set( getPackageJson().name, newVersion );
+					generatedChangelogsMap.set( getPackageJson( dependencyPath ).name, newVersion );
 				} else {
-					pathsCollection.skipped.add( dependencyPath );
+					skippedChangelogs.add( dependencyPath );
 				}
+			} )
+			.catch( err => {
+				log.error( err );
+			} );
+	}
+
+	function generateInternalChangelogTask( dependencyPath ) {
+		process.chdir( dependencyPath );
+
+		return generateChangelogForSinglePackage( 'internal' )
+			.then( newVersion => {
+				generatedChangelogsMap.set( getPackageJson( dependencyPath ).name, newVersion );
 			} )
 			.catch( err => {
 				log.error( err );

@@ -9,9 +9,9 @@ const chalk = require( 'chalk' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const utils = require( './transform-commit-utils' );
 
-// A size of indent for a log. The number is equal to length of the Gulp log string:
-// '[XX:YY:ZZ] * 1234567 ', where '1234567' is a short commit id.
-const INDENT_SIZE = 21;
+// A size of indent for a log. The number is equal to length of the log string:
+// '* 1234567 ', where '1234567' is a short commit id.
+const INDENT_SIZE = 10;
 
 /**
  * Parses a single commit:
@@ -22,6 +22,7 @@ const INDENT_SIZE = 21;
  * @param {Commit} commit
  * @param {Object} context
  * @param {Boolean} context.displayLogs Whether to display the logs.
+ * @param {Boolean} [context.returnInvalidCommit=false] Whether invalid commit should be returned.
  * @param {Object} context.packageData Content from the 'package.json' for given package.
  * @returns {Commit}
  */
@@ -65,7 +66,7 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 	log.info( logMessage );
 
 	if ( !isCommitIncluded ) {
-		return;
+		return context.returnInvalidCommit ? commit : undefined;
 	}
 
 	// If a dot is missing at the end of the subject...

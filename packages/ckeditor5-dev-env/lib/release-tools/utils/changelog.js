@@ -55,9 +55,10 @@ const utils = {
 
 	/**
 	 * @param {String} content
+	 * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
 	 */
-	saveChangelog( content ) {
-		const changelogFile = path.resolve( utils.changelogFile );
+	saveChangelog( content, cwd = process.cwd() ) {
+		const changelogFile = path.join( cwd, utils.changelogFile );
 
 		fs.writeFileSync( changelogFile, content, 'utf-8' );
 	},
