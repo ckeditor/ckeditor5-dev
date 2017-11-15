@@ -50,7 +50,7 @@ You can also use the bin script for testing a package:
 * `source-map` - Whether to generate the source maps. Also available as an alias: `-s`.
 * `coverage` - Whether to generate code coverage. Also available as an alias: `-c`.
 * `verbose` - Whether to informs about Webpack's work. Also available as an alias: `-v`.
-* `files` - Specify file(s) to tests. Also available as an alias: `-f`.
+* `files` - Specify file(s) to test. Also available as an alias: `-f`.
 * `browsers` - Browsers which will be used to run the tests. Also available as an alias: `-b`.
 * `reporter` - Mocha reporter – either `mocha` (default) or `dots` (less verbose one).
 * `username` - Username to BrowserStack account. Also available as an alias: `-u`.
