@@ -41,18 +41,24 @@ module.exports = function parseArguments( args ) {
 
 		default: {
 			files: [],
-			browsers: 'Chrome',
+			browsers: 'CHROME_LOCAL',
 			reporter: 'mocha',
 			watch: false,
 			coverage: false,
 			verbose: false,
 			'source-map': false,
-			server: false
+			server: false,
+			browserStack: false
 		}
 	} );
 
 	options.accessKey = options[ 'access-key' ];
 	options.sourceMap = options[ 'source-map' ];
+
+	if ( options.username && options.accessKey ) {
+		options.browserStack = true;
+	}
+
 	options.browsers = options.browsers.split( ',' );
 
 	if ( typeof options.files === 'string' ) {

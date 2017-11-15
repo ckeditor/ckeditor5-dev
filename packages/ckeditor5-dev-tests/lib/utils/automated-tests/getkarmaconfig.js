@@ -161,7 +161,7 @@ module.exports = function getKarmaConfig( options ) {
 		delete karmaConfig.webpackMiddleware.stats;
 	}
 
-	if ( options.username && options.accessKey ) {
+	if ( options.browserStack ) {
 		karmaConfig.browserStack = {
 			username: options.username,
 			accessKey: options.accessKey
@@ -169,8 +169,20 @@ module.exports = function getKarmaConfig( options ) {
 
 		karmaConfig.reporters = [ 'dots', 'BrowserStack' ];
 
+		if ( options.browsers.length === 1 && options.browsers[ 0 ] === 'CHROME_LOCAL' ) {
+			options.browsers = [];
+		}
+
 		karmaConfig.browsers = Object.keys( karmaConfig.customLaunchers )
 			.filter( launcherName => karmaConfig.customLaunchers[ launcherName ].base === 'BrowserStack' );
+
+		if ( options.browsers.length ) {
+			karmaConfig.browsers = karmaConfig.browsers.filter( launcherName => {
+				const browserName = launcherName.split( '_' )[ 1 ].toLowerCase();
+
+				return options.browsers.some( browserFromOptions => browserFromOptions.toLowerCase() === browserName );
+			} );
+		}
 	}
 
 	if ( options.coverage ) {
