@@ -13,10 +13,11 @@ const escodegen = require( 'escodegen' );
  * Parses source, translates `t()` call arguments and returns modified output.
  *
  * @param {String} source JS source text which will be translated.
+ * @param {String} sourceFile JS source file name which will be translated.
  * @param {Function} translateString Function that will translate matched string to the destination language or hash.
  * @returns {String} Transformed source.
  */
-module.exports = function translateSource( source, translateString ) {
+module.exports = function translateSource( source, sourceFile, translateString ) {
 	const comments = [];
 	const tokens = [];
 	const errors = [];
@@ -37,7 +38,7 @@ module.exports = function translateSource( source, translateString ) {
 			}
 
 			if ( node.arguments[ 0 ].type !== 'Literal' ) {
-				errors.push( 'First t() call argument should be a string literal.' );
+				errors.push( `First t() call argument should be a string literal in ${ sourceFile }.` );
 
 				return;
 			}

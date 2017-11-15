@@ -33,11 +33,13 @@ module.exports = class SingleLanguageTranslationService extends EventEmitter {
 	 * Translate file's source and replace `t()` call strings with translated strings.
 	 *
 	 * @fires error
-	 * @param {String} source
+	 * @param {String} source Source of the file.
+	 * @param {String} fileName File name.
 	 * @returns {String}
 	 */
-	translateSource( source ) {
-		const { output, errors } = translateSource( source, originalString => this._translateString( originalString ) );
+	translateSource( source, fileName ) {
+		const translate = originalString => this._translateString( originalString, fileName );
+		const { output, errors } = translateSource( source, fileName, translate );
 
 		for ( const error of errors ) {
 			this.emit( 'error', error );
@@ -85,9 +87,9 @@ module.exports = class SingleLanguageTranslationService extends EventEmitter {
 		}
 	}
 
-	_translateString( originalString ) {
+	_translateString( originalString, sourceFile ) {
 		if ( !this._dictionary[ originalString ] ) {
-			this.emit( 'error', `Missing translation for ${ originalString } for ${ this._language } language.` );
+			this.emit( 'error', `Missing translation for ${ originalString } for ${ this._language } language in ${ sourceFile }.` );
 
 			return originalString;
 		}

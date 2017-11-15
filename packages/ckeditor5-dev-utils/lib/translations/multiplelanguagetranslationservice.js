@@ -43,11 +43,13 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * Translate file's source and replace `t()` call strings with short ids.
 	 *
 	 * @fires error
-	 * @param {String} source
+	 * @param {String} source Source of the file.
+	 * @param {String} fileName File name.
 	 * @returns {String}
 	 */
-	translateSource( source ) {
-		const { output, errors } = translateSource( source, originalString => this._getId( originalString ) );
+	translateSource( source, fileName ) {
+		const translate = originalString => this._getId( originalString );
+		const { output, errors } = translateSource( source, fileName, translate );
 
 		for ( const error of errors ) {
 			this.emit( 'error', error );

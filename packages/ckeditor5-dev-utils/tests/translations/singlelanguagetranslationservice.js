@@ -91,7 +91,7 @@ describe( 'translations', () => {
 
 				translationService._dictionary.Cancel = 'Anuluj';
 
-				const result = translationService.translateSource( source );
+				const result = translationService.translateSource( source, 'file.js' );
 
 				expect( result ).to.equal( 't(\'Anuluj\');' );
 			} );
@@ -100,7 +100,7 @@ describe( 'translations', () => {
 				const translationService = new SingleLanguageTranslationService( 'pl' );
 				const source = 'translate( \'Cancel\' )';
 
-				const result = translationService.translateSource( source );
+				const result = translationService.translateSource( source, 'file.js' );
 
 				expect( result ).to.equal( 'translate( \'Cancel\' )' );
 			} );
@@ -112,11 +112,11 @@ describe( 'translations', () => {
 				const spy = sandbox.spy();
 				translationService.on( 'error', spy );
 
-				const result = translationService.translateSource( source );
+				const result = translationService.translateSource( source, 'file.js' );
 
 				expect( result ).to.equal( 't(\'Cancel\');' );
 				sinon.assert.calledOnce( spy );
-				sinon.assert.calledWithExactly( spy, 'Missing translation for Cancel for pl language.' );
+				sinon.assert.calledWithExactly( spy, 'Missing translation for Cancel for pl language in file.js.' );
 			} );
 
 			it( 'should throw an error when the t is called with the variable', () => {
@@ -126,11 +126,11 @@ describe( 'translations', () => {
 				const spy = sandbox.spy();
 				translationService.on( 'error', spy );
 
-				const result = translationService.translateSource( source );
+				const result = translationService.translateSource( source, 'file.js' );
 
 				expect( result ).to.equal( 'const cancel = \'Cancel\';t( cancel );' );
 				sinon.assert.calledOnce( spy );
-				sinon.assert.calledWithExactly( spy, 'First t() call argument should be a string literal.' );
+				sinon.assert.calledWithExactly( spy, 'First t() call argument should be a string literal in file.js.' );
 			} );
 		} );
 

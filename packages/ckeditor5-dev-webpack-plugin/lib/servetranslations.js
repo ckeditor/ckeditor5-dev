@@ -22,7 +22,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 	const cwd = process.cwd();
 
 	// Provides translateSource method for the `translatesourceloader` loader.
-	compiler.options.translateSource = source => translationService.translateSource( source );
+	compiler.options.translateSource = ( source, sourceFile ) => translationService.translateSource( source, sourceFile );
 
 	// Watch for errors during translation process.
 	translationService.on( 'error', error => {

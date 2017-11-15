@@ -104,7 +104,7 @@ describe( 'translations', () => {
 				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'de' ] );
 				const source = 't( \'Cancel\' ), t( \'Save\' );';
 
-				const result = translationService.translateSource( source );
+				const result = translationService.translateSource( source, 'file.js' );
 
 				expect( result ).to.equal( 't(\'a\'), t(\'b\');' );
 				expect( translationService._translationIdsDictionary ).to.deep.equal( {
@@ -117,7 +117,7 @@ describe( 'translations', () => {
 				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'de' ] );
 				const source = 'translate( \'Cancel\' )';
 
-				const result = translationService.translateSource( source );
+				const result = translationService.translateSource( source, 'file.js' );
 
 				expect( result ).to.equal( 'translate( \'Cancel\' )' );
 
