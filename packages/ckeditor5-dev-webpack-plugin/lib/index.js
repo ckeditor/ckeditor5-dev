@@ -5,18 +5,21 @@
 
 'use strict';
 
+const chalk = require( 'chalk' );
 const serveTranslations = require( './serve-translations' );
-const {
-	MultipleLanguageTranslationService,
-	SingleLanguageTranslationService
-} = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
+const SingleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/singlelanguagetranslationservice' );
+const MultipleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/multiplelanguagetranslationservice' );
 
 module.exports = class CKEditorWebpackPlugin {
 	/**
-	 * @param {Object} [options]
-	 * @param {Array.<String>} [options.packages] Array of directories in which packages will be looked for.
-	 * @param {Object} [options.languages]
-	 * TODO: Fix params.
+	 * @param {Object} [options] Plugin options.
+	 * @param {Array.<String>} [options.languages] Target languages.
+	 * @param {String} [options.outputDirectory='lang'] Output directory for the emitted translation files,
+	 * should be relative to the webpack context.
+	 * @param {Boolean} [options.optimizeBuildForOneLanguage] Optimized build for one language (directly replaces translation
+	 * keys with the target language's strings.
+	 * @param {Boolean} [options.throwErrorOnMissingTranslation] Throw when the translation is missing.
+	 * By default original (english translation keys) are used when the target translation is missing.
 	 */
 	constructor( options = {} ) {
 		this.options = options;
@@ -31,7 +34,15 @@ module.exports = class CKEditorWebpackPlugin {
 
 		if ( this.options.optimizeBuildForOneLanguage ) {
 			if ( this.options.languages.length > 1 ) {
-				throw new Error( 'Only one language should be specified when `optimizeBuildForOneLanguage` option is on.' );
+				throw new Error( chalk.red(
+					'Only one language should be specified when `optimizeBuildForOneLanguage` option is on.'
+				) );
+			}
+
+			if ( this.options.outputDirectory ) {
+				console.error( chalk.red(
+					'`outputDirectory` option does not work with `optimizeBuildForOneLanguage` option. It will be ignored.'
+				) );
 			}
 
 			translationService = new SingleLanguageTranslationService( this.options.languages[ 0 ] );

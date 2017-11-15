@@ -9,32 +9,33 @@ const translateSource = require( './translateSource' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const createDictionaryFromPoFileContent = require( './createdictionaryfrompofilecontent' );
+const { EventEmitter } = require( 'events' );
 
 /**
- * `SingleLanguageTranslationService` replaces `t()` call strings with translated one directly in the build
+ * `SingleLanguageTranslationService` replaces `t()` call strings with translated one directly in the build.
  */
-module.exports = class SingleLanguageTranslationService {
-	constructor( languages ) {
-		/**
-		 * @readonly
-		 */
-		this.dictionary = {};
+module.exports = class SingleLanguageTranslationService extends EventEmitter {
+	/**
+	 *
+	 * @param {String} language Target language.
+	 */
+	constructor( language ) {
+		super();
 
-		/**
-		 * @readonly
-		 */
-		this.packagePaths = new Set();
+		this._language = language;
 
-		this.language = languages[ 0 ];
+		this._packagePaths = new Set();
+
+		this._dictionary = {};
 	}
 
 	/**
-	 * Translates file's source and replace `t()` call strings with translated strings.
+	 * Translate file's source and replace `t()` call strings with translated strings.
 	 *
 	 * @param {String} source
 	 */
 	translateSource( source ) {
-		return translateSource( source, originalString => this.translateString( originalString ) );
+		return translateSource( source, originalString => this._translateString( originalString ) );
 	}
 
 	/**
@@ -43,21 +44,25 @@ module.exports = class SingleLanguageTranslationService {
 	 * @param {String} pathToPackage Path to the package containing translations.
 	 */
 	loadPackage( pathToPackage ) {
-		if ( this.packagePaths.has( pathToPackage ) ) {
+		if ( this._packagePaths.has( pathToPackage ) ) {
 			return;
 		}
 
-		this.packagePaths.add( pathToPackage );
+		this._packagePaths.add( pathToPackage );
 
-		const pathToPoFile = this._getPathToPoFile( pathToPackage, this.language );
+		const pathToPoFile = this._getPathToPoFile( pathToPackage, this._language );
 
 		this._loadPoFile( pathToPoFile );
 	}
 
+	/**
+	 * That class doesn't generate any asset.
+	 */
 	getAssets() {
 		return [];
 	}
 
+	// Load translations from the PO file.
 	_loadPoFile( pathToPoFile ) {
 		if ( !fs.existsSync( pathToPoFile ) ) {
 			return;
@@ -68,12 +73,18 @@ module.exports = class SingleLanguageTranslationService {
 
 		for ( const translationKey in parsedTranslationFile ) {
 			// TODO: ensure that translation files can't use the same translationKey.
-			this.dictionary[ translationKey ] = parsedTranslationFile[ translationKey ];
+			this._dictionary[ translationKey ] = parsedTranslationFile[ translationKey ];
 		}
 	}
 
-	translateString( originalString ) {
-		return this.dictionary[ originalString ];
+	_translateString( originalString ) {
+		if ( !this._dictionary[ originalString ] ) {
+			this.emit( 'error', `Missing translation for ${ originalString } for ${ this._language } language.` );
+
+			return originalString;
+		}
+
+		return this._dictionary[ originalString ];
 	}
 
 	/**
