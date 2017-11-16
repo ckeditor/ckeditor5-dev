@@ -21,7 +21,8 @@ const chalk = require( 'chalk' );
  * @param {Boolean} [options.throwErrorOnMissingTranslation] Option that make this function throw when the translation is missing.
  * By default original (english translation keys) are used when the target translation is missing.
  * @param {TranslationService} translationService Translation service that will load PO files, replace translation keys and generate assets.
- * @param {Object} envUtils Environment utils that make it easy to test.
+ * @param {Object} envUtils Environment utils internally called within the `serveTranslations()`, that make `serveTranslations()`
+ * ckeditor5 - independent without hard-to-test logic.
  */
 module.exports = function serveTranslations( compiler, options, translationService, envUtils ) {
 	const cwd = process.cwd();
