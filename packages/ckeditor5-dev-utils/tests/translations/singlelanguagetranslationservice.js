@@ -116,7 +116,7 @@ describe( 'translations', () => {
 
 				expect( result ).to.equal( 't(\'Cancel\');' );
 				sinon.assert.calledOnce( spy );
-				sinon.assert.calledWithExactly( spy, 'Missing translation for Cancel for pl language in file.js.' );
+				sinon.assert.calledWithExactly( spy, 'Missing translation for \'Cancel\' for pl language in file.js.' );
 			} );
 
 			it( 'should throw an error when the t is called with the variable', () => {

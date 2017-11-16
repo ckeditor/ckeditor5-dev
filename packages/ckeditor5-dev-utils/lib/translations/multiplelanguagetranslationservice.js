@@ -118,7 +118,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			const translatedString = langDictionary[ originalString ];
 
 			if ( !translatedString ) {
-				this.emit( 'error', `Missing translation for ${ originalString } for ${ lang } language.` );
+				this.emit( 'error', `Missing translation for '${ originalString }' for ${ lang } language.` );
 			}
 
 			translatedStrings[ id ] = translatedString || originalString;

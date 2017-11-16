@@ -9,7 +9,7 @@ const chalk = require( 'chalk' );
 
 /**
  * Serve translations depending on the used translation service and passed options.
- * It takes care about whole Webpack compilation process.
+ * It takes care about whole Webpack compilation process and doesn't contain much logic that should be tested.
  *
  * See https://webpack.js.org/api/compiler/#event-hooks and https://webpack.js.org/api/compilation/ for details about specific hooks.
  *

@@ -181,8 +181,8 @@ describe( 'translations', () => {
 
 				sinon.assert.calledThrice( spy );
 				sinon.assert.calledWithExactly( spy, 'No translation found for xxx language.' );
-				sinon.assert.calledWithExactly( spy, 'Missing translation for Cancel for xxx language.' );
-				sinon.assert.calledWithExactly( spy, 'Missing translation for Save for xxx language.' );
+				sinon.assert.calledWithExactly( spy, 'Missing translation for \'Cancel\' for xxx language.' );
+				sinon.assert.calledWithExactly( spy, 'Missing translation for \'Save\' for xxx language.' );
 			} );
 
 			it( 'should feed missing translation with the translation key if the translated string is missing', () => {
