@@ -1,5 +1,10 @@
-const utils = require( './utils' );
-const path = require( 'path' );
+/**
+ * @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+'use strict';
+
 const chalk = require( 'chalk' );
 
 /**
@@ -16,8 +21,9 @@ const chalk = require( 'chalk' );
  * @param {Boolean} [options.throwErrorOnMissingTranslation] Option that make this function throw when the translation is missing.
  * By default original (english translation keys) are used when the target translation is missing.
  * @param {TranslationService} translationService Translation service that will load PO files, replace translation keys and generate assets.
+ * @param {Object} envUtils Environment utils that make it easy to test.
  */
-module.exports = function serveTranslations( compiler, options, translationService ) {
+module.exports = function serveTranslations( compiler, options, translationService, envUtils ) {
 	const cwd = process.cwd();
 
 	// Provides translateSource method for the `translatesourceloader` loader.
@@ -32,67 +38,38 @@ module.exports = function serveTranslations( compiler, options, translationServi
 		console.error( chalk.red( error ) );
 	} );
 
-	// Add ckeditor5-core translations before `translatesourceloader` starts translating.
+	// Add core translations before `translatesourceloader` starts translating.
 	compiler.plugin( 'after-resolvers', () => {
-		compiler.resolvers.normal.resolve( cwd, cwd, '@ckeditor/ckeditor5-core/src/editor/editor.js', ( err, result ) => {
-			const pathToCoreTranslationPackage = result.match( utils.CKEditor5CoreRegExp )[ 0 ];
+		const resolver = compiler.resolvers.normal;
 
-			translationService.loadPackage( pathToCoreTranslationPackage );
-		} );
+		envUtils.loadCoreTranslations( cwd, translationService, resolver );
 	} );
 
+	// Load translation files and add a loader if the package match requirements.
 	compiler.plugin( 'normal-module-factory', nmf => {
 		nmf.plugin( 'after-resolve', ( resolveOptions, done ) => {
-			maybeLoadPackage( resolveOptions );
-			maybeAddLoader( resolveOptions );
+			envUtils.maybeLoadPackage( cwd, translationService, resolveOptions.resource );
+			envUtils.maybeAddLoader( cwd, resolveOptions.resource, resolveOptions.loaders );
 
 			done( null, resolveOptions );
 		} );
 	} );
 
+	// At the end of the compilation add assets generated from the PO files.
 	compiler.plugin( 'compilation', compilation => {
 		compilation.plugin( 'additional-assets', done => {
-			addAssetsToExistingOnes( compilation.assets );
+			const generatedAssets = translationService.getAssets( { outputDirectory: options.outputDirectory } );
+
+			for ( const asset of generatedAssets ) {
+				compilation.assets[ asset.outputPath ] = {
+					source: () => asset.outputBody,
+					size: () => asset.outputBody.length,
+				};
+			}
 
 			done();
 		} );
 	} );
-
-	// Add package to the translations if the resource comes from ckeditor5-* package.
-	function maybeLoadPackage( resolveOptions ) {
-		const packageNameRegExp = utils.CKEditor5PackageNameRegExp;
-		const relativePathToResource = path.relative( cwd, resolveOptions.resource );
-
-		const match = relativePathToResource.match( packageNameRegExp );
-
-		if ( match ) {
-			const index = relativePathToResource.search( packageNameRegExp ) + match[ 0 ].length;
-			const pathToPackage = relativePathToResource.slice( 0, index );
-
-			translationService.loadPackage( pathToPackage );
-		}
-	}
-
-	// Inject loader when the file comes from ckeditor5-* packages.
-	function maybeAddLoader( resolveOptions ) {
-		const relativePathToResource = path.relative( cwd, resolveOptions.resource );
-
-		if ( relativePathToResource.match( utils.CKEditor5PackageSrcFileRegExp ) ) {
-			resolveOptions.loaders.unshift( path.join( __dirname, 'translatesourceloader.js' ) );
-		}
-	}
-
-	// At the end add assets generated from the PO files.
-	function addAssetsToExistingOnes( destinationAssets ) {
-		const generatedAssets = translationService.getAssets( { outputDirectory: options.outputDirectory } );
-
-		for ( const asset of generatedAssets ) {
-			destinationAssets[ asset.outputPath ] = {
-				source: () => asset.outputBody,
-				size: () => asset.outputBody.length,
-			};
-		}
-	}
 };
 
 /**
@@ -104,7 +81,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
  */
 
 /**
- * Return assets
+ * Load package translations.
  *
  * @method #loadPackage
  * @param {String} pathToPackage Path to the package.

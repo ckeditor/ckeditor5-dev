@@ -17,11 +17,13 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 
 	beforeEach( () => {
 		stubs = {
-			serveTranslations: sandbox.spy()
+			serveTranslations: sandbox.spy(),
+			ckeditor5EnvUtils: {}
 		};
 
 		CKEditorWebpackPlugin = proxyquire( '../lib/index', {
-			'./servetranslations': stubs.serveTranslations
+			'./servetranslations': stubs.serveTranslations,
+			'./ckeditor5-env-utils': stubs.ckeditor5EnvUtils
 		} );
 	} );
 
@@ -87,6 +89,7 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 			expect( stubs.serveTranslations.getCall( 0 ).args[ 0 ] ).to.equal( compiler );
 			expect( stubs.serveTranslations.getCall( 0 ).args[ 1 ] ).to.equal( options );
 			expect( stubs.serveTranslations.getCall( 0 ).args[ 2 ] ).to.be.instanceof( SingleLanguageTranslationService );
+			expect( stubs.serveTranslations.getCall( 0 ).args[ 3 ] ).to.equal( stubs.ckeditor5EnvUtils );
 		} );
 
 		it( 'should serve `MultipleLanguageTranslationService` if the `optimizeBuildForOneLanguage` is disabled.', () => {
@@ -103,6 +106,7 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 			expect( stubs.serveTranslations.getCall( 0 ).args[ 0 ] ).to.equal( compiler );
 			expect( stubs.serveTranslations.getCall( 0 ).args[ 1 ] ).to.equal( options );
 			expect( stubs.serveTranslations.getCall( 0 ).args[ 2 ] ).to.be.instanceof( MultipleLanguageTranslationService );
+			expect( stubs.serveTranslations.getCall( 0 ).args[ 3 ] ).to.equal( stubs.ckeditor5EnvUtils );
 		} );
 	} );
 } );

@@ -9,6 +9,7 @@ const chalk = require( 'chalk' );
 const serveTranslations = require( './servetranslations' );
 const SingleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/singlelanguagetranslationservice' );
 const MultipleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/multiplelanguagetranslationservice' );
+const ckeditor5EnvUtils = require( './ckeditor5-env-utils' );
 
 module.exports = class CKEditorWebpackPlugin {
 	/**
@@ -56,6 +57,6 @@ module.exports = class CKEditorWebpackPlugin {
 			translationService = new MultipleLanguageTranslationService( this.options.languages );
 		}
 
-		serveTranslations( compiler, this.options, translationService );
+		serveTranslations( compiler, this.options, translationService, ckeditor5EnvUtils );
 	}
 };
