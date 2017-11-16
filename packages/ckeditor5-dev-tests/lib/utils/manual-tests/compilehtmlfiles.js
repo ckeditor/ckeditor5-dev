@@ -116,6 +116,6 @@ function getFilePathWithoutExtension( file ) {
 function watchFiles( filePaths, onChange ) {
 	for ( const filePath of filePaths ) {
 		const debouncedOnChange = _.debounce( () => onChange( filePath ), 500 );
-		chokidar.watch( filePath ).on( 'all', debouncedOnChange );
+		chokidar.watch( filePath, { ignoreInitial: true } ).on( 'all', debouncedOnChange );
 	}
 }
