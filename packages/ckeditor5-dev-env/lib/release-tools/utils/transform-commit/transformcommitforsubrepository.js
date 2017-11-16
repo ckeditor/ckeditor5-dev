@@ -69,6 +69,9 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 		return context.returnInvalidCommit ? commit : undefined;
 	}
 
+	// Remove [skip ci] from the commit subject.
+	commit.subject = commit.subject.replace( /\[skip ci\]/, '' ).trim();
+
 	// If a dot is missing at the end of the subject...
 	if ( !commit.subject.endsWith( '.' ) ) {
 		// ...let's add it.
