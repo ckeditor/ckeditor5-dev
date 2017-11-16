@@ -7,90 +7,123 @@
 
 /* eslint-env node */
 
+const fs = require( 'fs' );
 const path = require( 'path' );
 const postcss = require( 'postcss' );
 const postCssImport = require( 'postcss-import' );
 const gutil = require( 'gulp-util' );
 const log = require( '../logger' )();
 
-const processor = postcss( {
-	plugins: [ postCssImport() ]
-} );
-
-module.exports = postcss.plugin( 'postcss-ckeditor5-theme-importer', options => {
-	// A path to the theme e.g. "/foo/bar/ckeditor5-theme-baz"
-	const themePath = options.themePath;
-
-	// "ckeditor5-theme-baz"
-	const themeName = themePath.split( '/' ).slice( -1 );
-
-	log.info( `Using theme "${ gutil.colors.cyan( themeName ) }".` );
+module.exports = postcss.plugin( 'postcss-ckeditor5-theme-importer', pluginOptions => {
+	let isThemeEntryLoaded = false;
 
 	return ( root, result ) => {
-		// A CSS file to be themed, e.g. "/foo/bar/ckeditor5-qux/theme/components/button.css"
-		const inputFilePath = root.source.input.file;
+		const options = Object.assign( {}, pluginOptions, {
+			postCssOptions: {
+				plugins: [ postCssImport() ]
+			},
+			root, result,
+		} );
 
-		// "ckeditor5-qux"
-		const packageName = getPackageName( inputFilePath );
+		if ( isThemeEntryLoaded ) {
+			return importThemeFile( options );
+		} else {
+			isThemeEntryLoaded = true;
 
-		// "components/button.css"
-		const inputFileName = inputFilePath.split( packageName + '/theme/' )[ 1 ];
-
-		// Don't load theme file for files not belonging to "ckeditor5-*/theme" folder.
-		if ( !inputFileName ) {
-			return;
+			return importThemeEntryPoint( options )
+				.then( importThemeFile( options ) );
 		}
-
-		// A corresponding theme file e.g. "/foo/bar/ckeditor5-theme-baz/theme/ckeditor5-qux/components/button.css".
-		const themeFilePath = path.resolve( __dirname, themePath, 'theme', packageName, inputFileName );
-
-		log.info( `Using theme file for "${ gutil.colors.cyan( inputFilePath ) }".` );
-
-		return processor
-			.process(
-				`@import "${ themeFilePath }";`,
-				getProcessingOptions( themeFilePath, options )
-			)
-			.then( appendThemeFile( root, result, inputFilePath, themeFilePath ) )
-			.catch( err => {
-				if ( err.toString().match( 'Failed to find' ) ) {
-					log.warning( `Couldn't load theme file for "${ gutil.colors.cyan( root.source.input.file ) }".` );
-				} else {
-					throw err;
-				}
-			} );
 	};
 } );
 
-function getPackageName( path ) {
-	const match = path.match( /ckeditor5-[^/]+/ );
+function importThemeEntryPoint( options ) {
+	const themeEntryPath = path.resolve( __dirname, options.themePath );
 
-	if ( match ) {
-		return match[ 0 ];
-	} else {
-		return null;
+	log.info( `[Theme] Loading entry point "${ gutil.colors.cyan( themeEntryPath ) }".` );
+
+	options.fileToImport = themeEntryPath;
+	options.fileToImportParent = themeEntryPath;
+
+	return importFile( options );
+}
+
+function importThemeFile( options ) {
+	const inputFilePath = options.root.source.input.file;
+
+	// A corresponding theme file e.g. "/foo/bar/ckeditor5-theme-baz/theme/ckeditor5-qux/components/button.css".
+	const themeFilePath = getThemeFilePath( options.themePath, inputFilePath );
+
+	if ( themeFilePath ) {
+		log.info( `[Theme] Loading for "${ gutil.colors.cyan( inputFilePath ) }".` );
+
+		options.fileToImport = themeFilePath;
+		options.fileToImportParent = inputFilePath;
+
+		return importFile( options );
 	}
 }
 
-function getProcessingOptions( themeFilePath, pluginOptions ) {
-	return {
-		from: themeFilePath,
-		to: themeFilePath,
-		map: pluginOptions.sourceMap ? { inline: true } : false
+function importFile( options ) {
+	const { root, result, sourceMap } = options;
+	const file = options.fileToImport;
+	const parent = options.fileToImportParent;
+	const processingOptions = {
+		from: file,
+		to: file,
+		map: sourceMap ? { inline: true } : false
 	};
+
+	if ( !fs.existsSync( file ) ) {
+		log.info( `[Theme] Failed to find "${ gutil.colors.yellow( file ) }".` );
+
+		return;
+	}
+
+	return postcss( options.postCssOptions )
+		.process( `@import "${ file }";`, processingOptions )
+		.then( importResult => {
+			// Merge the CSS trees.
+			root.append( importResult.root.nodes );
+
+			// Let the watcher know that the theme file should be observed too.
+			result.messages.push( {
+				file, parent,
+				type: 'dependency'
+			} );
+
+			log.info( `[Theme] Loaded "${ gutil.colors.green( file ) }".` );
+		} )
+		.catch( error => {
+			throw error;
+		} );
 }
 
-function appendThemeFile( root, result, inputFile, themeFilePath ) {
-	return importResult => {
-		log.info( `A theme file for "${ gutil.colors.cyan( root.source.input.file ) }" has been loaded.` );
+// A CSS file to be themed, e.g. "/foo/bar/ckeditor5-qux/theme/components/button.css"
+function getThemeFilePath( themePath, inputFilePath ) {
+	// ckeditor5-theme-foo/theme/theme.css -> ckeditor5-theme-foo/theme
+	themePath = path.dirname( themePath );
 
-		root.append( importResult.root.nodes );
+	// "ckeditor5-qux"
+	const packageName = getPackageName( inputFilePath );
 
-		// Let the watcher know that the theme file should be observed too.
-		result.messages.push( {
-			type: 'dependency',
-			file: themeFilePath,
-			parent: inputFile,
-		} );
-	};
+	// Don't load theme file for files not belonging to "ckeditor5-*/theme" folder.
+	if ( !packageName ) {
+		return;
+	}
+
+	// "components/button.css"
+	const inputFileName = inputFilePath.split( packageName + '/theme/' )[ 1 ];
+
+	// A corresponding theme file e.g. "/foo/bar/ckeditor5-theme-baz/theme/ckeditor5-qux/components/button.css".
+	return path.resolve( __dirname, themePath, packageName, inputFileName );
+}
+
+function getPackageName( inputFilePath ) {
+	const match = inputFilePath.match( /ckeditor5-[^/]+/g );
+
+	if ( match ) {
+		return match.pop();
+	} else {
+		return null;
+	}
 }

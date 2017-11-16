@@ -7,19 +7,14 @@
 
 /* eslint-env node */
 
-const postCssImport = require( 'postcss-import' );
-const postCssNext = require( 'postcss-cssnext' );
-const postCssMixins = require( 'postcss-mixins' );
-const themeImporter = require( './themeimporter' );
-const cssnano = require( 'cssnano' );
-
 module.exports = function getPostCssConfig( options ) {
 	const config = {
 		plugins: [
-			postCssImport(),
-			themeImporter( options ),
-			postCssMixins(),
-			postCssNext(),
+			require( 'postcss-import' ),
+			require( './themeimporter' )( options ),
+			require( 'postcss-mixins' ),
+			require( 'postcss-custom-selectors' ),
+			require( 'postcss-nesting' ),
 		]
 	};
 
@@ -28,7 +23,7 @@ module.exports = function getPostCssConfig( options ) {
 	}
 
 	if ( options.minify ) {
-		config.plugins.push( cssnano( {
+		config.plugins.push( require( 'cssnano' )( {
 			preset: 'default',
 			autoprefixer: false
 		} ) );

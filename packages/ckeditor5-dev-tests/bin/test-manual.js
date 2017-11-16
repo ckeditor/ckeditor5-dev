@@ -21,6 +21,9 @@ if ( options.files.length === 0 ) {
 	}
 }
 
+// "Lark" is the default theme for tests.
+options.themePath = require.resolve( '@ckeditor/ckeditor5-theme-lark' );
+
 tests.runManualTests( options )
 	.catch( error => {
 		// Mark result of this task as invalid.
