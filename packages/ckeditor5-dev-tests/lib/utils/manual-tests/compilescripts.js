@@ -25,14 +25,10 @@ module.exports = function compileManualTestScripts( buildDir, manualTestScriptsP
 		];
 	}, [] );
 
-	// Compile each entry file in separate webpack process so the postcss theme importer
-	// can load the theme entry point for each test.
-	return Promise.all( entryFiles.map( entryFile => {
-		const entry = getWebpackEntryPoint( entryFile );
-		const webpackConfig = getWebpackConfigForManualTests( entry, buildDir, themePath );
+	const entries = getWebpackEntryPoints( entryFiles );
+	const webpackConfig = getWebpackConfigForManualTests( entries, buildDir, themePath );
 
-		return runWebpack( webpackConfig );
-	} ) );
+	return runWebpack( webpackConfig );
 };
 
 /**
@@ -50,8 +46,12 @@ function runWebpack( webpackConfig ) {
 	} );
 }
 
-function getWebpackEntryPoint( entryFile ) {
-	return {
-		[ getRelativeFilePath( entryFile ).replace( /\.js$/, '' ) ]: entryFile
-	};
+function getWebpackEntryPoints( entryFiles ) {
+	const entryObject = {};
+
+	entryFiles.forEach( file => {
+		entryObject[ getRelativeFilePath( file ).replace( /\.js$/, '' ) ] = file;
+	} );
+
+	return entryObject;
 }

@@ -13,39 +13,23 @@ const postcss = require( 'postcss' );
 const postCssImport = require( 'postcss-import' );
 const gutil = require( 'gulp-util' );
 const log = require( '../logger' )();
+const themeLogger = require( './themelogger' );
 
 module.exports = postcss.plugin( 'postcss-ckeditor5-theme-importer', pluginOptions => {
-	let isThemeEntryLoaded = false;
-
 	return ( root, result ) => {
 		const options = Object.assign( {}, pluginOptions, {
 			postCssOptions: {
-				plugins: [ postCssImport() ]
+				plugins: [
+					postCssImport(),
+					themeLogger()
+				]
 			},
 			root, result,
 		} );
 
-		if ( isThemeEntryLoaded ) {
-			return importThemeFile( options );
-		} else {
-			isThemeEntryLoaded = true;
-
-			return importThemeEntryPoint( options )
-				.then( importThemeFile( options ) );
-		}
+		return importThemeFile( options );
 	};
 } );
-
-function importThemeEntryPoint( options ) {
-	const themeEntryPath = path.resolve( __dirname, options.themePath );
-
-	log.info( `[Theme] Loading entry point "${ gutil.colors.cyan( themeEntryPath ) }".` );
-
-	options.fileToImport = themeEntryPath;
-	options.fileToImportParent = themeEntryPath;
-
-	return importFile( options );
-}
 
 function importThemeFile( options ) {
 	const inputFilePath = options.root.source.input.file;
