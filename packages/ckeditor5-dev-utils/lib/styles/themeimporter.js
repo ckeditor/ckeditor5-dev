@@ -90,16 +90,16 @@ function getThemeFilePath( themePath, inputFilePath ) {
 	// "ckeditor5-qux"
 	const packageName = getPackageName( inputFilePath );
 
-	// Don't load theme file for files not belonging to "ckeditor5-*/theme" folder.
-	if ( !packageName ) {
-		return;
-	}
-
 	// "components/button.css"
 	const inputFileName = inputFilePath.split( packageName + '/theme/' )[ 1 ];
 
+	// Don't load theme file for files not belonging to "ckeditor5-*/theme" folder.
+	if ( !inputFileName ) {
+		return;
+	}
+
 	// A corresponding theme file e.g. "/foo/bar/ckeditor5-theme-baz/theme/ckeditor5-qux/components/button.css".
-	return path.resolve( __dirname, themePath, packageName, inputFileName );
+	return path.resolve( themePath, packageName, inputFileName );
 }
 
 function getPackageName( inputFilePath ) {
