@@ -53,7 +53,7 @@ describe( 'compileManualTestScripts', () => {
 	it( 'should compile manual test scripts', () => {
 		stubs.glob.returns( [ 'ckeditor5-foo/manual/file1', 'ckeditor5-foo/manual/file2' ] );
 
-		return compileManualTestScripts( 'buildDir', [ 'manualTestPattern' ] )
+		return compileManualTestScripts( 'buildDir', [ 'manualTestPattern' ], 'path/to/theme' )
 			.then( () => {
 				expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
 				expect( stubs.getWebpackConfig.firstCall.args[ 0 ] ).to.deep.equal( {
@@ -61,6 +61,7 @@ describe( 'compileManualTestScripts', () => {
 					'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
 				} );
 				expect( stubs.getWebpackConfig.firstCall.args[ 1 ] ).to.deep.equal( 'buildDir' );
+				expect( stubs.getWebpackConfig.firstCall.args[ 2 ] ).to.deep.equal( 'path/to/theme' );
 
 				expect( stubs.webpack.calledOnce ).to.equal( true );
 				expect( stubs.webpack.firstCall.args[ 0 ] ).to.deep.equal( {
