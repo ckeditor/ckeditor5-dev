@@ -130,7 +130,9 @@ describe( 'getWebpackConfigForAutomatedTests', () => {
 		} );
 
 		expect( postCssOptions ).to.deep.equal( {
-			themePath: 'path/to/theme',
+			themeimporter: {
+				themePath: 'path/to/theme'
+			},
 			minify: true
 		} );
 	} );

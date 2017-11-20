@@ -30,7 +30,9 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 						{
 							loader: 'postcss-loader',
 							options: getPostCssConfig( {
-								themePath: options.themePath,
+								themeimporter: {
+									themePath: options.themePath
+								},
 								minify: true
 							} )
 						},
