@@ -7,5 +7,6 @@
 
 module.exports = {
 	getPostCssConfig: require( './getpostcssconfig' ),
-	themeImporter: require( './themeimporter' )
+	themeImporter: require( './themeimporter' ),
+	themeLogger: require( './themelogger' )
 };

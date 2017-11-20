@@ -15,9 +15,38 @@ const gutil = require( 'gulp-util' );
 const log = require( '../logger' )();
 const themeLogger = require( './themelogger' );
 
-module.exports = postcss.plugin( 'postcss-ckeditor5-theme-importer', pluginOptions => {
+/**
+ * A PostCSS plugin that loads a theme files from specified path.
+ *
+ * For any CSS file processed by the PostCSS, this plugin tries to find a complementary
+ * theme file and load it (knowing the path to the theme). Theme files must be organized
+ * to reflect the structure of the CSS files in editor packages,
+ *
+ * E.g., if the path to the theme is:
+ *
+ *		"/foo/bar/ckeditor5-theme-foo/theme/theme.css"
+ *
+ * and the CSS to be themed is:
+ *
+ *		"/baz/qux/ckeditor5-qux/theme/components/button.css"
+ *
+ * the theme file for "button.css" should be located under
+ *
+ *		"/foo/bar/ckeditor5-theme-foo/ckeditor5-qux/theme/components/button.css"
+ *
+ * See the `ThemeImporterOptions` to learn about importer options.
+ *
+ * To learn more about PostCSS plugins, please refer to the API
+ * [documentation](http://api.postcss.org/postcss.html#.plugin) of the project.
+ *
+ * @param {ThemeImporterOptions} pluginOptions
+ * @returns {Function} A PostCSS plugin.
+ */
+module.exports = postcss.plugin( 'postcss-ckeditor5-theme-importer', ( pluginOptions = {} ) => {
 	return ( root, result ) => {
+		// Clone the options, don't alter the original options object.
 		const options = Object.assign( {}, pluginOptions, {
+			debug: pluginOptions.debug || false,
 			postCssOptions: {
 				plugins: [
 					postCssImport(),
@@ -31,6 +60,12 @@ module.exports = postcss.plugin( 'postcss-ckeditor5-theme-importer', pluginOptio
 	};
 } );
 
+// Imports a complementary theme file corresponding with a CSS file being processed by
+// PostCSS, if such theme file exists.
+//
+// @private
+// @param {Options} Plugin options.
+// @returns {Promise}
 function importThemeFile( options ) {
 	const inputFilePath = options.root.source.input.file;
 
@@ -38,7 +73,9 @@ function importThemeFile( options ) {
 	const themeFilePath = getThemeFilePath( options.themePath, inputFilePath );
 
 	if ( themeFilePath ) {
-		log.info( `[Theme] Loading for "${ gutil.colors.cyan( inputFilePath ) }".` );
+		if ( options.debug ) {
+			log.info( `[ThemeImporter] Loading for "${ gutil.colors.cyan( inputFilePath ) }".` );
+		}
 
 		options.fileToImport = themeFilePath;
 		options.fileToImportParent = inputFilePath;
@@ -47,6 +84,12 @@ function importThemeFile( options ) {
 	}
 }
 
+// Imports a CSS file specified in the options using the postcss-import
+// plugin and appends its content to the css tree (root).
+//
+// @private
+// @param {Options} Plugin options.
+// @returns {Promise}
 function importFile( options ) {
 	const { root, result, sourceMap } = options;
 	const file = options.fileToImport;
@@ -58,7 +101,9 @@ function importFile( options ) {
 	};
 
 	if ( !fs.existsSync( file ) ) {
-		log.info( `[Theme] Failed to find "${ gutil.colors.yellow( file ) }".` );
+		if ( options.debug ) {
+			log.info( `[ThemeImporter] Failed to find "${ gutil.colors.yellow( file ) }".` );
+		}
 
 		return;
 	}
@@ -75,14 +120,38 @@ function importFile( options ) {
 				type: 'dependency'
 			} );
 
-			log.info( `[Theme] Loaded "${ gutil.colors.green( file ) }".` );
+			if ( options.debug ) {
+				log.info( `[ThemeImporter] Loaded "${ gutil.colors.green( file ) }".` );
+			}
 		} )
 		.catch( error => {
 			throw error;
 		} );
 }
 
-// A CSS file to be themed, e.g. "/foo/bar/ckeditor5-qux/theme/components/button.css"
+// For given:
+//
+// * path to the theme,
+// * and path to the CSS file processed by PostCSS,
+//
+// it returns a path to the complementary file in the theme.
+//
+// E.g., if the path to the theme is:
+//
+//		"/foo/bar/ckeditor5-theme-foo/theme/theme.css"
+//
+// and the CSS to be themed is:
+//
+//		"/baz/qux/ckeditor5-qux/theme/components/button.css"
+//
+// this helper will return:
+//
+//		"/foo/bar/ckeditor5-theme-foo/ckeditor5-qux/theme/components/button.css"
+//
+// @private
+// @param {String} themePath Path to the theme.
+// @param {String} inputFilePath Path to the CSS file which is to be themed.
+// @returns {String}
 function getThemeFilePath( themePath, inputFilePath ) {
 	// ckeditor5-theme-foo/theme/theme.css -> ckeditor5-theme-foo/theme
 	themePath = path.dirname( themePath );
@@ -102,6 +171,19 @@ function getThemeFilePath( themePath, inputFilePath ) {
 	return path.resolve( themePath, packageName, inputFileName );
 }
 
+// Returns a (CKEditor 5) package name the file belongs to.
+//
+// E.g., for the path to the file:
+//
+//		"/foo/ckeditor5/packages/ckeditor5-bar/baz.css"
+//
+// it outputs
+//
+//		"ckeditor5-bar"
+//
+// @private
+// @param {String} inputFilePath A path to the file.
+// @returns {String} The name of the package.
 function getPackageName( inputFilePath ) {
 	const match = inputFilePath.match( /ckeditor5-[^/]+/g );
 
@@ -111,3 +193,28 @@ function getPackageName( inputFilePath ) {
 		return null;
 	}
 }
+
+/**
+ * The configuration of the "postcss-ckeditor5-theme-importer" plugin.
+ *
+ * @interface ThemeImporterOptions
+ */
+
+/**
+ * The path to any file belonging to the theme as resolved by `require.resolve()`.
+ * E.g.
+ *
+ *	{
+ *		...
+ *		themePath: require.resolve( '@ckeditor/ckeditor5-theme-lark' ),
+ *		...
+ *	}
+ *
+ * @member {String} [ThemeImporterOptions#themePath]
+ */
+
+/**
+ * When `true` it enables debug logs in the console.
+ *
+ * @member {String} [ThemeImporterOptions#debug=false]
+ */
