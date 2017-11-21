@@ -13,8 +13,8 @@ module.exports = function getPostCssConfig( options = {} ) {
 			require( 'postcss-import' )(),
 			require( './themeimporter' )( options.themeimporter ),
 			require( 'postcss-mixins' )(),
-			require( 'postcss-custom-selectors' )(),
 			require( 'postcss-nesting' )(),
+			require( 'postcss-custom-selectors' )(),
 			require( './themelogger' )(),
 		]
 	};

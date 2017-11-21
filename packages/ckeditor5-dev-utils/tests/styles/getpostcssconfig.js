@@ -28,8 +28,8 @@ describe( 'styles', () => {
 					'postcss-import',
 					'postcss-ckeditor5-theme-importer',
 					'postcss-mixins',
-					'postcss-custom-selectors',
 					'postcss-nesting',
+					'postcss-custom-selectors',
 					'postcss-ckeditor5-theme-logger'
 				] );
 		} );

@@ -10,10 +10,8 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const postcss = require( 'postcss' );
-const postCssImport = require( 'postcss-import' );
 const gutil = require( 'gulp-util' );
 const log = require( '../logger' )();
-const themeLogger = require( './themelogger' );
 
 /**
  * A PostCSS plugin that loads a theme files from specified path.
@@ -49,8 +47,8 @@ module.exports = postcss.plugin( 'postcss-ckeditor5-theme-importer', ( pluginOpt
 			debug: pluginOptions.debug || false,
 			postCssOptions: {
 				plugins: [
-					postCssImport(),
-					themeLogger()
+					require( 'postcss-import' )(),
+					require( './themelogger' )()
 				]
 			},
 			root, result,
