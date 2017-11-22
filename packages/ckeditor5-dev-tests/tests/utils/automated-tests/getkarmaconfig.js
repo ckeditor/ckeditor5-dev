@@ -159,7 +159,7 @@ describe( 'getKarmaConfig', () => {
 		expect( karmaConfig ).to.have.own.property( 'singleRun', true );
 	} );
 
-	it( 'should allows removing temporary entry point', () => {
+	it( 'allows removing temporary entry point', () => {
 		const allFiles = [
 			'workspace/packages/ckeditor5-autoformat/tests/foo.js',
 			'workspace/packages/ckeditor5-basic-styles/tests/bar.js',
