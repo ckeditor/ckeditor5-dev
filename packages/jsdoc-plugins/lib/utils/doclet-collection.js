@@ -6,11 +6,11 @@
 'use strict';
 
 /**
- * Collection of doclets as <String, Object[]> pairs. Also stores all doclets and their longnames as arrays.
+ * Collection of doclets as <String, Doclet[]> pairs. Also stores all doclets and their longnames as arrays.
  */
 class DocletCollection {
 	/**
-	 * Creates collection of doclets
+	 * Creates collection of doclets.
 	 */
 	constructor() {
 		this._data = {};
@@ -19,38 +19,38 @@ class DocletCollection {
 	}
 
 	/**
-	 * Adds record to collection
+	 * Adds doclet to collection.
 	 *
-	 * @param {String} name
-	 * @param {Object} record
+	 * @param {String} category
+	 * @param {Doclet} doclet
 	*/
-	add( name, record ) {
-		if ( !this._data[ name ] ) {
-			this._data[ name ] = [];
+	add( category, doclet ) {
+		if ( !this._data[ category ] ) {
+			this._data[ category ] = [];
 		}
 
-		this._data[ name ].push( record );
-		this._allData.push( record );
+		this._data[ category ].push( doclet );
+		this._allData.push( doclet );
 
-		if ( record.longname ) {
-			this._allLongnames.push( record.longname );
+		if ( doclet.longname ) {
+			this._allLongnames.push( doclet.longname );
 		}
 	}
 
 	/**
-	 * Returns records filtered by name.
+	 * Returns doclets filtered by category.
 	 *
-	 * @param {String} name
-	 * @returns {Object[]}
+	 * @param {String} category
+	 * @returns {Doclet[]}
 	 */
-	get( name ) {
-		return this._data[ name ] || [];
+	get( category ) {
+		return this._data[ category ] || [];
 	}
 
 	/**
-	 * Returns all records.
+	 * Returns all doclets.
 	 *
-	 * @returns {Object[]}
+	 * @returns {Doclet[]}
 	*/
 	getAll() {
 		return this._allData;

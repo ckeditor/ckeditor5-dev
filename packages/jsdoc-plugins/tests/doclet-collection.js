@@ -13,22 +13,22 @@ describe( 'collection', () => {
 	let collection;
 
 	beforeEach( () => {
-		const recordA = {
+		const docletA = {
 			name: 'ClassA',
 			longname: 'module:M~ClassA',
 			kind: 'class'
 		};
-		const recordB = {
+		const docletB = {
 			name: 'methodB',
 			longname: 'module:M~ClassA#methodB',
 			kind: 'method'
 		};
 		collection = new DocletCollection();
-		collection.add( recordA.kind, recordA );
-		collection.add( recordB.kind, recordB );
+		collection.add( docletA.kind, docletA );
+		collection.add( docletB.kind, docletB );
 	} );
 
-	it( 'should return records filtered by name', () => {
+	it( 'should return doclets filtered by category', () => {
 		expect( collection.get( 'class' ) ).to.deep.equal(
 			[
 				{
@@ -40,7 +40,7 @@ describe( 'collection', () => {
 		);
 	} );
 
-	it( 'should return all records', () => {
+	it( 'should return all doclets', () => {
 		expect( collection.getAll() ).to.deep.equal(
 			[
 				{
@@ -57,7 +57,7 @@ describe( 'collection', () => {
 		);
 	} );
 
-	it( 'should return all longnames of stored records', () => {
+	it( 'should return all longnames of stored doclets', () => {
 		expect( collection.getAllLongnames() ).to.deep.equal(
 			[
 				'module:M~ClassA',
