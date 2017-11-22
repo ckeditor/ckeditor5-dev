@@ -10,7 +10,7 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const postcss = require( 'postcss' );
-const gutil = require( 'gulp-util' );
+const chalk = require( 'chalk' );
 const log = require( '../logger' )();
 
 /**
@@ -72,7 +72,7 @@ function importThemeFile( options ) {
 
 	if ( themeFilePath ) {
 		if ( options.debug ) {
-			log.info( `[ThemeImporter] Loading for "${ gutil.colors.cyan( inputFilePath ) }".` );
+			log.info( `[ThemeImporter] Loading for "${ chalk.cyan( inputFilePath ) }".` );
 		}
 
 		options.fileToImport = themeFilePath;
@@ -100,7 +100,7 @@ function importFile( options ) {
 
 	if ( !fs.existsSync( file ) ) {
 		if ( options.debug ) {
-			log.info( `[ThemeImporter] Failed to find "${ gutil.colors.yellow( file ) }".` );
+			log.info( `[ThemeImporter] Failed to find "${ chalk.yellow( file ) }".` );
 		}
 
 		return;
@@ -119,7 +119,7 @@ function importFile( options ) {
 			} );
 
 			if ( options.debug ) {
-				log.info( `[ThemeImporter] Loaded "${ gutil.colors.green( file ) }".` );
+				log.info( `[ThemeImporter] Loaded "${ chalk.green( file ) }".` );
 			}
 		} )
 		.catch( error => {
