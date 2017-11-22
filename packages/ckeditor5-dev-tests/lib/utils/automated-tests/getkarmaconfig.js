@@ -31,7 +31,7 @@ const IGNORE_GLOBS = [
 
 /**
  * @param {Object} options
- * @returns {Object}
+ * @returns {Object|undefined}
  */
 module.exports = function getKarmaConfig( options ) {
 	const basePath = process.cwd();
