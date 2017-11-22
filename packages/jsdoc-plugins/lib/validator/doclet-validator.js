@@ -5,7 +5,7 @@
 
 'use strict';
 
-const Collection = require( '../utils/collection' );
+const DocletCollection = require( '../utils/doclet-collection' );
 const { doesFieldExistInClass } = require( '../utils/doclet-utils' );
 const { ALL_TYPES, GENERIC_TYPES } = require( './types' );
 
@@ -27,7 +27,7 @@ class DocletValidator {
 		 * doclets grouped by doclet kind
 		 * @private
 		 */
-		this._collection = this._createCollection( doclets );
+		this._collection = this._createDocletCollection( doclets );
 	}
 
 	/**
@@ -35,8 +35,8 @@ class DocletValidator {
 	 * @private
 	 * @returns {Collection}
 	 */
-	_createCollection( doclets ) {
-		const collection = new Collection();
+	_createDocletCollection( doclets ) {
+		const collection = new DocletCollection();
 
 		for ( const doclet of doclets ) {
 			collection.add( doclet.kind, doclet );
@@ -154,8 +154,8 @@ class DocletValidator {
 	 * @protected
 	 */
 	_lintLinks() {
-		const allLinkRegExp = /\{@link\s+[^}\s]+[\s\w]*(\})/g;
-		const pathRegExp = /\{@link\s+([^}\s]+)[\s\w]*(\})/;
+		const allLinkRegExp = /\{@link\s+[^}\s]+[\s\w]*\}/g;
+		const pathRegExp = /^\{@link\s+([^}\s]+)[\s\w]*\}$/;
 
 		for ( const element of this._collection.getAll() ) {
 			if ( !element.comment ) {
@@ -344,7 +344,7 @@ class DocletValidator {
 	_isCorrectReference( type ) {
 		type = type.trim();
 		const doclets = this._collection.getAll();
-		const allRefs = doclets.map( el => el.longname );
+		const allRefs = this._collection.getAllLongnames();
 
 		if ( !type.includes( 'module:' ) ) {
 			return false;
