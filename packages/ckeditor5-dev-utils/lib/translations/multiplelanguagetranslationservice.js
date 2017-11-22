@@ -21,11 +21,14 @@ const { EventEmitter } = require( 'events' );
 module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	/**
 	 * @param {Array.<String>} languages Target languages.
+	 * @param {Boolean} compileAllLanguages Flag indicates whether the languages are specified or should be found at runtime.
 	 */
-	constructor( languages ) {
+	constructor( languages, compileAllLanguages ) {
 		super();
 
-		this._languages = languages;
+		this._languages = new Set( languages );
+
+		this._compileAllLanguages = compileAllLanguages;
 
 		this._packagePaths = new Set();
 
@@ -70,8 +73,32 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 		this._packagePaths.add( pathToPackage );
 
+		const pathToTranslationDirectory = this._getPathToTranslationDirectory( pathToPackage );
+
+		if ( this._compileAllLanguages ) {
+			if ( !fs.existsSync( pathToTranslationDirectory ) ) {
+				return;
+			}
+
+			for ( const fileName of fs.readdirSync( pathToTranslationDirectory ) ) {
+				if ( !fileName.endsWith( '.po' ) ) {
+					this.emit( 'error', `Translation directory (${ pathToTranslationDirectory }) should contain only translation files.` );
+
+					continue;
+				}
+
+				const language = fileName.replace( /\.po$/, '' );
+				const pathToPoFile = path.join( pathToTranslationDirectory, fileName );
+
+				this._languages.add( language );
+				this._loadPoFile( language, pathToPoFile );
+			}
+
+			return;
+		}
+
 		for ( const language of this._languages ) {
-			const pathToPoFile = this._getPathToPoFile( pathToPackage, language );
+			const pathToPoFile = path.join( pathToTranslationDirectory, language + '.po' );
 
 			this._loadPoFile( language, pathToPoFile );
 		}
@@ -86,7 +113,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @returns {Array.<Object>}
 	 */
 	getAssets( { outputDirectory = 'lang' } = {} ) {
-		return this._languages.map( language => {
+		return Array.from( this._languages ).map( language => {
 			const translatedStrings = this._getIdToTranslatedStringDictionary( language );
 
 			const outputPath = path.join( outputDirectory, `${ language }.js` );
@@ -162,7 +189,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	/**
 	 * @protected
 	 */
-	_getPathToPoFile( pathToPackage, languageCode ) {
-		return path.join( pathToPackage, 'lang', 'translations', languageCode + '.po' );
+	_getPathToTranslationDirectory( pathToPackage ) {
+		return path.join( pathToPackage, 'lang', 'translations' );
 	}
 };

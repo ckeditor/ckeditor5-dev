@@ -248,17 +248,17 @@ describe( 'translations', () => {
 			} );
 		} );
 
-		describe( '_getPathToPackage', () => {
+		describe( '_getPathToTranslationDirectory', () => {
 			it( 'should be overridable to enable providing custom path to translation files', () => {
 				class CustomTranslationService extends MultipleLanguageTranslationService {
-					_getPathToPoFile( pathToPackage, languageCode ) {
-						return path.join( 'custom', 'path', 'to', pathToPackage, languageCode + '.PO' );
+					_getPathToTranslationDirectory( pathToPackage ) {
+						return path.join( 'custom', 'path', 'to', pathToPackage );
 					}
 				}
 
 				const translationService = new CustomTranslationService( [ 'en' ] );
 
-				const pathToTranslations = path.join( 'custom', 'path', 'to', 'pathToPackage', 'en.PO' );
+				const pathToTranslations = path.join( 'custom', 'path', 'to', 'pathToPackage', 'en.po' );
 
 				files = [ pathToTranslations ];
 

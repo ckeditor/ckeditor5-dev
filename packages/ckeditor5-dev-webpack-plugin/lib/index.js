@@ -32,15 +32,26 @@ module.exports = class CKEditorWebpackPlugin {
 		}
 
 		let translationService;
+		let compileAllLanguages = false;
+		let languages = this.options.languages;
 
-		if ( this.options.languages.length === 0 ) {
+		if ( typeof languages == 'string' ) {
+			if ( languages !== 'all' ) {
+				throw new Error( '`languages` option should be an array of language codes or `all`.' );
+			}
+
+			compileAllLanguages = true;
+			languages = []; // They will be searched in runtime.
+		}
+
+		if ( languages.length === 0 && !compileAllLanguages ) {
 			throw new Error( chalk.red(
 				'At least one target language should be specified.'
 			) );
 		}
 
 		if ( this.options.optimizeBuildForOneLanguage ) {
-			if ( this.options.languages.length > 1 ) {
+			if ( languages.length > 1 || compileAllLanguages ) {
 				throw new Error( chalk.red(
 					'Only one language should be specified when `optimizeBuildForOneLanguage` option is on.'
 				) );
@@ -52,9 +63,9 @@ module.exports = class CKEditorWebpackPlugin {
 				) );
 			}
 
-			translationService = new SingleLanguageTranslationService( this.options.languages[ 0 ] );
+			translationService = new SingleLanguageTranslationService( languages[ 0 ] );
 		} else {
-			translationService = new MultipleLanguageTranslationService( this.options.languages );
+			translationService = new MultipleLanguageTranslationService( languages, compileAllLanguages );
 		}
 
 		serveTranslations( compiler, this.options, translationService, ckeditor5EnvUtils );
