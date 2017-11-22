@@ -68,13 +68,13 @@ function getDocletsToAdd( docletCollection, childDoclet, options = {} ) {
 		return [];
 	}
 
-	// longnames of doclets which are related ( extended, mixed, implemented ) to childDoclet
+	// Longnames of doclets which are related ( extended, mixed, implemented ) to childDoclet.
 	const ancestors = childDoclet[ options.relation ];
 
 	return ancestors.reduce( ( docletsToAdd, longname ) => {
 		const toAdd = docletCollection.get( `memberof:${ longname }` ).filter( d => {
 			let isMatchingFilterOptions = true;
-			// filter out ignored, inherited, undocumented
+			// Filter out ignored, inherited, undocumented.
 			const isUnwanted = d.ignore === true ||
 				d.undocumented === true ||
 				d.inheritdoc !== undefined;

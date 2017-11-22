@@ -24,7 +24,7 @@ function addMissingDoclets( originalDoclets ) {
 	const docletCollection = new DocletCollection();
 
 	for ( const doclet of clonedDoclets ) {
-		// group doclets by memberof property
+		// Group doclets by memberof property.
 		docletCollection.add( `memberof:${ doclet.memberof }`, doclet );
 	}
 

@@ -31,7 +31,7 @@ function addRelationArrays( originalDoclets ) {
 	const docletCollection = new DocletCollection();
 
 	for ( const doclet of clonedDoclets ) {
-		// group doclets by longname
+		// Group doclets by longname.
 		docletCollection.add( doclet.longname, doclet );
 	}
 
@@ -73,7 +73,7 @@ function getAncestors( docletCollection, currentDoclet, options ) {
 	const { relations } = options;
 	const resultRelations = {};
 
-	// Init return object
+	// Init return object.
 	relations.forEach( r => {
 		resultRelations[ RELATIONS[ r ] ] = [];
 	} );
