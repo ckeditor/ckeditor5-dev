@@ -7,7 +7,6 @@
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "^5.0.0",
     "@ckeditor/ckeditor5-dev-webpack-plugin": "^2.0.22",
-    "@ckeditor/ckeditor5-theme-lark": "^1.0.0-alpha.1",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
