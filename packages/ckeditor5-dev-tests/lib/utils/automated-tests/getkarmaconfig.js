@@ -34,6 +34,8 @@ const IGNORE_GLOBS = [
  * @returns {Object|undefined}
  */
 module.exports = function getKarmaConfig( options ) {
+	karmaLogger.setupFromConfig( { logLevel: 'INFO' } );
+
 	const basePath = process.cwd();
 	const coverageDir = path.join( basePath, 'coverage' );
 	const log = karmaLogger.create( 'config' );

@@ -54,7 +54,8 @@ describe( 'getKarmaConfig', () => {
 				expect( name ).to.equal( 'config' );
 
 				return stubs.log;
-			}
+			},
+			setupFromConfig: sandbox.spy()
 		} );
 		mockery.registerMock( './getwebpackconfig', options => options );
 
