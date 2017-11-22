@@ -20,6 +20,15 @@ const AVAILABLE_REPORTERS = [
 	'dots'
 ];
 
+// Glob patterns that should be ignored. It means if specified test file
+// match to these patterns, this file will be skipped.
+const IGNORE_GLOBS = [
+	// Ignore files which are saved in `manual/` directory. There are manual tests.
+	path.join( '**', 'tests', '**', 'manual', '**', '*.js' ),
+	// Ignore `_utils` directory as well because there are saved utils for tests.
+	path.join( '**', 'tests', '**', '_utils', '**', '*.js' )
+];
+
 /**
  * @param {Object} options
  * @returns {Object}
@@ -49,15 +58,9 @@ module.exports = function getKarmaConfig( options ) {
 			log.warn( 'Pattern "%s" does not match any file.', singlePattern );
 		}
 
-		allFiles.push( ...files.filter( file => {
-			// Ignore files which are saved in `manual/` directory. There are manual tests.
-			if ( file.match( /manual/ ) ) {
-				return false;
-			}
-
-			// Ignore `_utils` directory as well because there are saved utils for tests.
-			return !minimatch( file, path.join( '**', 'tests', '**', '_utils', '**', '*.js' ) );
-		} ) );
+		allFiles.push(
+			...files.filter( file => !IGNORE_GLOBS.some( globPattern => minimatch( file, globPattern ) ) )
+		);
 	}
 
 	if ( !allFiles.length ) {
