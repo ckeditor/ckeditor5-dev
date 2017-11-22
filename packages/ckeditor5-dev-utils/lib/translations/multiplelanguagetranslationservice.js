@@ -21,14 +21,14 @@ const { EventEmitter } = require( 'events' );
 module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	/**
 	 * @param {Array.<String>} languages Target languages.
-	 * @param {Boolean} compileAllLanguages Flag indicates whether the languages are specified or should be found at runtime.
+	 * @param {Boolean} [compileAllLanguages] Flag indicates whether the languages are specified or should be found at runtime.
 	 */
 	constructor( languages, compileAllLanguages ) {
 		super();
 
 		this._languages = new Set( languages );
 
-		this._compileAllLanguages = compileAllLanguages;
+		this._compileAllLanguages = !!compileAllLanguages;
 
 		this._packagePaths = new Set();
 

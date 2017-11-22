@@ -108,5 +108,22 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 			expect( stubs.serveTranslations.getCall( 0 ).args[ 2 ] ).to.be.instanceof( MultipleLanguageTranslationService );
 			expect( stubs.serveTranslations.getCall( 0 ).args[ 3 ] ).to.equal( stubs.ckeditor5EnvUtils );
 		} );
+
+		it( 'should serve `MultipleLanguageTranslationService` if the `languages` is set to `all`.', () => {
+			const options = {
+				languages: 'all'
+			};
+
+			const compiler = {};
+
+			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
+			ckeditorWebpackPlugin.apply( compiler );
+
+			sinon.assert.calledOnce( stubs.serveTranslations );
+			expect( stubs.serveTranslations.getCall( 0 ).args[ 0 ] ).to.equal( compiler );
+			expect( stubs.serveTranslations.getCall( 0 ).args[ 1 ] ).to.equal( options );
+			expect( stubs.serveTranslations.getCall( 0 ).args[ 2 ] ).to.be.instanceof( MultipleLanguageTranslationService );
+			expect( stubs.serveTranslations.getCall( 0 ).args[ 3 ] ).to.equal( stubs.ckeditor5EnvUtils );
+		} );
 	} );
 } );

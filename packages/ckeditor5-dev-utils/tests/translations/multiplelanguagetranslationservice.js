@@ -12,15 +12,19 @@ const proxyquire = require( 'proxyquire' );
 
 describe( 'translations', () => {
 	describe( 'MultipleLanguageTranslationService', () => {
-		let MultipleLanguageTranslationService, stubs, files, fileContents, sandbox;
+		let MultipleLanguageTranslationService, stubs, filesAndDirs, fileContents, dirContents;
+		const sandbox = sinon.sandbox.create();
 
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			filesAndDirs = [];
+			fileContents = {};
+			dirContents = {};
 
 			stubs = {
 				fs: {
-					existsSync: path => files.includes( path ),
-					readFileSync: path => fileContents[ path ]
+					existsSync: path => filesAndDirs.includes( path ),
+					readFileSync: path => fileContents[ path ],
+					readdirSync: dir => dirContents[ dir ]
 				}
 			};
 
@@ -42,12 +46,12 @@ describe( 'translations', () => {
 		} );
 
 		describe( 'loadPackage()', () => {
-			it( 'should load po file from the package and load translations', () => {
+			it( 'should load PO file from the package and load translations', () => {
 				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'de' ] );
 				const pathToPlTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'pl.po' );
 				const pathToDeTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'de.po' );
 
-				files = [ pathToPlTranslations, pathToDeTranslations ];
+				filesAndDirs = [ pathToPlTranslations, pathToDeTranslations ];
 
 				fileContents = {
 					[ pathToPlTranslations ]: [
@@ -76,10 +80,10 @@ describe( 'translations', () => {
 				} );
 			} );
 
-			it( 'should do nothing if the po file does not exist', () => {
+			it( 'should do nothing if the PO file does not exist', () => {
 				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'de' ] );
 
-				files = [];
+				filesAndDirs = [];
 				fileContents = {};
 
 				translationService.loadPackage( 'pathToPackage' );
@@ -87,7 +91,7 @@ describe( 'translations', () => {
 				expect( translationService._dictionary ).to.deep.equal( {} );
 			} );
 
-			it( 'should load po file from the package only once per language', () => {
+			it( 'should load PO file from the package only once per language', () => {
 				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'de' ] );
 				const loadPoFileSpy = sandbox.stub( translationService, '_loadPoFile' );
 
@@ -96,6 +100,48 @@ describe( 'translations', () => {
 				translationService.loadPackage( 'pathToPackage' );
 
 				sinon.assert.calledTwice( loadPoFileSpy );
+			} );
+
+			it( 'should load all PO files for the current package and add languages to the language list', () => {
+				const translationService = new MultipleLanguageTranslationService( [], true );
+
+				const pathToTranslations = path.join( 'pathToPackage', 'lang', 'translations' );
+				const pathToPlTranslations = path.join( pathToTranslations, 'pl.po' );
+				const pathToDeTranslations = path.join( pathToTranslations, 'de.po' );
+
+				filesAndDirs = [ pathToPlTranslations, pathToDeTranslations, pathToTranslations ];
+
+				fileContents = {
+					[ pathToPlTranslations ]: [
+						'msgctxt "Label for the Save button."',
+						'msgid "Save"',
+						'msgstr "Zapisz"',
+						''
+					].join( '\n' ),
+					[ pathToDeTranslations ]: [
+						'msgctxt "Label for the Save button."',
+						'msgid "Save"',
+						'msgstr "Speichern"',
+						''
+					].join( '\n' )
+				};
+
+				dirContents = {
+					[ pathToTranslations ]: [ 'pl.po', 'de.po' ]
+				};
+
+				translationService.loadPackage( 'pathToPackage' );
+
+				expect( translationService._dictionary ).to.deep.equal( {
+					pl: {
+						'Save': 'Zapisz'
+					},
+					de: {
+						'Save': 'Speichern'
+					}
+				} );
+
+				expect( Array.from( translationService._languages ) ).to.deep.equal( [ 'pl', 'de' ] );
 			} );
 		} );
 
@@ -260,7 +306,7 @@ describe( 'translations', () => {
 
 				const pathToTranslations = path.join( 'custom', 'path', 'to', 'pathToPackage', 'en.po' );
 
-				files = [ pathToTranslations ];
+				filesAndDirs = [ pathToTranslations ];
 
 				fileContents = {
 					[ pathToTranslations ]: [
@@ -287,7 +333,7 @@ describe( 'translations', () => {
 				const pathToPlTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'pl.po' );
 				const pathToDeTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'de.po' );
 
-				files = [ pathToPlTranslations, pathToDeTranslations ];
+				filesAndDirs = [ pathToPlTranslations, pathToDeTranslations ];
 
 				fileContents = {
 					[ pathToPlTranslations ]: [
