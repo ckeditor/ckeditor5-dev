@@ -21,12 +21,17 @@ const { EventEmitter } = require( 'events' );
 module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	/**
 	 * @param {Array.<String>} languages Target languages.
-	 * @param {Boolean} [compileAllLanguages=false] Flag indicates whether the languages are specified or should be found at runtime.
+	 * @param {Object} options
+	 * @param {Boolean} [options.compileAllLanguages=false] Flag indicates whether the languages are specified
+	 * or should be found at runtime.
+	 * @param {Boolean} [options.defaultLanguage] Default language that will be added to the main bundle (if possible).
 	 */
-	constructor( languages, compileAllLanguages = false ) {
+	constructor( languages, { compileAllLanguages = false, defaultLanguage } = {} ) {
 		super();
 
 		this._languages = new Set( languages );
+
+		this._defaultLanguage = defaultLanguage || languages[ 0 ];
 
 		this._compileAllLanguages = compileAllLanguages;
 
@@ -108,12 +113,45 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * Return an array of assets based on the stored dictionaries.
 	 *
 	 * @fires error
-	 * @param {Object} param0
+	 * @param {Object} [param0]
 	 * @param {String} [param0.outputDirectory]
+	 * @param {String} [param0.compilationAssets]
 	 * @returns {Array.<Object>}
 	 */
-	getAssets( { outputDirectory = 'lang' } = {} ) {
-		return Array.from( this._languages ).map( language => {
+	getAssets( { outputDirectory = 'lang', compilationAssets } = {} ) {
+		const compilationAssetNames = Object.keys( compilationAssets )
+			.filter( name => name.endsWith( '.js' ) );
+
+		if ( compilationAssetNames.length > 1 ) {
+			this.emit( 'error', [
+				'Because of the many found bundles, none bundle will contain the default language.',
+				`You should add it directly to the application from the '${ outputDirectory }/${ this._defaultLanguage }.js'.`
+			].join( '\n' ) );
+
+			return this._getTranslationAssets( outputDirectory, this._languages );
+		}
+
+		const mainAssetName = compilationAssetNames[ 0 ];
+		const mainCompilationAsset = compilationAssets[ mainAssetName ];
+
+		const mainTranslationAsset = this._getTranslationAssets( outputDirectory, [ this._defaultLanguage ] )[ 0 ];
+
+		const mergedCompilationAsset = {
+			outputBody: mainCompilationAsset.source() + '\n;' + mainTranslationAsset.outputBody,
+			outputPath: mainAssetName
+		};
+
+		const otherLanguages = Array.from( this._languages )
+			.filter( lang => lang !== this._defaultLanguage );
+
+		return [
+			mergedCompilationAsset,
+			...this._getTranslationAssets( outputDirectory, otherLanguages )
+		];
+	}
+
+	_getTranslationAssets( outputDirectory, languages ) {
+		return Array.from( languages ).map( language => {
 			const translatedStrings = this._getIdToTranslatedStringDictionary( language );
 
 			const outputPath = path.join( outputDirectory, `${ language }.js` );
@@ -122,7 +160,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 			const outputBody = `CKEDITOR_TRANSLATIONS.add('${ language }',${ stringifiedTranslations })`;
 
-			return { outputPath, outputBody };
+			return { outputBody, outputPath };
 		} );
 	}
 

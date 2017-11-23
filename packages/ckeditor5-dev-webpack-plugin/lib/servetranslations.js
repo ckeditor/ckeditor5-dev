@@ -39,6 +39,10 @@ module.exports = function serveTranslations( compiler, options, translationServi
 		console.error( chalk.red( error ) );
 	} );
 
+	translationService.on( 'warning', warning => {
+		console.warn( chalk.yellow( warning ) );
+	} );
+
 	// Add core translations before `translatesourceloader` starts translating.
 	compiler.plugin( 'after-resolvers', () => {
 		const resolver = compiler.resolvers.normal;
@@ -57,19 +61,20 @@ module.exports = function serveTranslations( compiler, options, translationServi
 	} );
 
 	// At the end of the compilation add assets generated from the PO files.
-	compiler.plugin( 'compilation', compilation => {
-		compilation.plugin( 'additional-assets', done => {
-			const generatedAssets = translationService.getAssets( { outputDirectory: options.outputDirectory } );
-
-			for ( const asset of generatedAssets ) {
-				compilation.assets[ asset.outputPath ] = {
-					source: () => asset.outputBody,
-					size: () => asset.outputBody.length,
-				};
-			}
-
-			done();
+	compiler.plugin( 'emit', ( compilation, done ) => {
+		const generatedAssets = translationService.getAssets( {
+			outputDirectory: options.outputDirectory,
+			compilationAssets: compilation.assets
 		} );
+
+		for ( const asset of generatedAssets ) {
+			compilation.assets[ asset.outputPath ] = {
+				source: () => asset.outputBody,
+				size: () => asset.outputBody.length,
+			};
+		}
+
+		done();
 	} );
 };
 

@@ -14,11 +14,10 @@ const ckeditor5EnvUtils = require( './ckeditor5-env-utils' );
 module.exports = class CKEditorWebpackPlugin {
 	/**
 	 * @param {Object} [options] Plugin options.
-	 * @param {Array.<String>} [options.languages] Target languages.
+	 * @param {Array.<String>|'all'} [options.languages] Target languages. Build is optimized if only one language is provided.
 	 * @param {String} [options.outputDirectory='lang'] Output directory for the emitted translation files,
 	 * should be relative to the webpack context.
-	 * @param {Boolean} [options.optimizeBuildForOneLanguage] Option that optimizes build for one language (directly replaces translation
-	 * keys with the target language's strings. Webpack won't emit any language file with that option enabled.
+	 * @param {String} [options.defaultLanguage] Default language for the build.
 	 * @param {Boolean} [options.throwErrorOnMissingTranslation] Option that make the plugin throw when the translation is missing.
 	 * By default original (english translation keys) are used when the target translation is missing.
 	 */
@@ -44,28 +43,24 @@ module.exports = class CKEditorWebpackPlugin {
 			languages = []; // They will be searched in runtime.
 		}
 
+		const defaultLanguage = this.options.defaultLanguage || languages[ 0 ];
+
 		if ( languages.length === 0 && !compileAllLanguages ) {
 			throw new Error( chalk.red(
 				'At least one target language should be specified.'
 			) );
 		}
 
-		if ( this.options.optimizeBuildForOneLanguage ) {
-			if ( languages.length > 1 || compileAllLanguages ) {
-				throw new Error( chalk.red(
-					'Only one language should be specified when `optimizeBuildForOneLanguage` option is on.'
-				) );
-			}
-
+		if ( languages.length === 1 ) {
 			if ( this.options.outputDirectory ) {
-				console.error( chalk.red(
+				console.warn( chalk.red(
 					'`outputDirectory` option does not work with `optimizeBuildForOneLanguage` option. It will be ignored.'
 				) );
 			}
 
 			translationService = new SingleLanguageTranslationService( languages[ 0 ] );
 		} else {
-			translationService = new MultipleLanguageTranslationService( languages, compileAllLanguages );
+			translationService = new MultipleLanguageTranslationService( languages, { compileAllLanguages, defaultLanguage } );
 		}
 
 		serveTranslations( compiler, this.options, translationService, ckeditor5EnvUtils );

@@ -48,7 +48,7 @@ module.exports = class SingleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
-	 * Loads package and tries to get the po file from the package.
+	 * Loads package and tries to get the PO file from the package.
 	 *
 	 * @param {String} pathToPackage Path to the package containing translations.
 	 */
