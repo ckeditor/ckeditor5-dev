@@ -31,7 +31,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 		this._languages = new Set( languages );
 
-		this._defaultLanguage = defaultLanguage || languages[ 0 ];
+		this._defaultLanguage = defaultLanguage;
 
 		this._compileAllLanguages = compileAllLanguages;
 
@@ -67,8 +67,10 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
-	 * Load package and tries to get the po file from the package.
+	 * Load package and tries to get PO files from the package if it's unknown.
+	 * If the compileAllLanguages flag is set to true, language set will be enhanced by found languages.
 	 *
+	 * @fires error
 	 * @param {String} pathToPackage Path to the package containing translations.
 	 */
 	loadPackage( pathToPackage ) {
@@ -80,11 +82,11 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 		const pathToTranslationDirectory = this._getPathToTranslationDirectory( pathToPackage );
 
-		if ( this._compileAllLanguages ) {
-			if ( !fs.existsSync( pathToTranslationDirectory ) ) {
-				return;
-			}
+		if ( !fs.existsSync( pathToTranslationDirectory ) ) {
+			return;
+		}
 
+		if ( this._compileAllLanguages ) {
 			for ( const fileName of fs.readdirSync( pathToTranslationDirectory ) ) {
 				if ( !fileName.endsWith( '.po' ) ) {
 					this.emit( 'error', `Translation directory (${ pathToTranslationDirectory }) should contain only translation files.` );
@@ -113,19 +115,19 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * Return an array of assets based on the stored dictionaries.
 	 *
 	 * @fires error
-	 * @param {Object} [param0]
-	 * @param {String} [param0.outputDirectory]
-	 * @param {String} [param0.compilationAssets]
+	 * @param {Object} options
+	 * @param {String} [options.outputDirectory] Output directory for the translation files relative to the output.
+	 * @param {Object} options.compilationAssets Original assets from the compiler (e.g. Webpack).
 	 * @returns {Array.<Object>}
 	 */
-	getAssets( { outputDirectory = 'lang', compilationAssets } = {} ) {
+	getAssets( { outputDirectory = 'lang', compilationAssets } ) {
 		const compilationAssetNames = Object.keys( compilationAssets )
 			.filter( name => name.endsWith( '.js' ) );
 
 		if ( compilationAssetNames.length > 1 ) {
-			this.emit( 'error', [
+			this.emit( 'warning', [
 				'Because of the many found bundles, none bundle will contain the default language.',
-				`You should add it directly to the application from the '${ outputDirectory }/${ this._defaultLanguage }.js'.`
+				`You should add it directly to the application from the '${ outputDirectory }${ path.sep }${ this._defaultLanguage }.js'.`
 			].join( '\n' ) );
 
 			return this._getTranslationAssets( outputDirectory, this._languages );

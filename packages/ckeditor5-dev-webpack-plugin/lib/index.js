@@ -15,6 +15,7 @@ module.exports = class CKEditorWebpackPlugin {
 	/**
 	 * @param {Object} [options] Plugin options.
 	 * @param {Array.<String>|'all'} [options.languages] Target languages. Build is optimized if only one language is provided.
+	 * When option is set to 'all' then script will be looking for all languages and according translations during the compilation.
 	 * @param {String} [options.outputDirectory='lang'] Output directory for the emitted translation files,
 	 * should be relative to the webpack context.
 	 * @param {String} [options.defaultLanguage] Default language for the build.
@@ -54,7 +55,7 @@ module.exports = class CKEditorWebpackPlugin {
 		if ( languages.length === 1 ) {
 			if ( this.options.outputDirectory ) {
 				console.warn( chalk.red(
-					'`outputDirectory` option does not work with `optimizeBuildForOneLanguage` option. It will be ignored.'
+					'`outputDirectory` option does not work for one language because zero files will be emitted. It will be ignored.'
 				) );
 			}
 
