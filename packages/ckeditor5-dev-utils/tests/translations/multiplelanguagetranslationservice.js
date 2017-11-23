@@ -148,7 +148,7 @@ describe( 'translations', () => {
 		} );
 
 		describe( 'translateSource()', () => {
-			it( 'should replace t() call params with the translation id, starting with `a`', () => {
+			it( 'should replace t() call params with the translation key, starting with `a`', () => {
 				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'de' ] );
 				const source = 't( \'Cancel\' ), t( \'Save\' );';
 
@@ -158,6 +158,18 @@ describe( 'translations', () => {
 				expect( translationService._translationIdsDictionary ).to.deep.equal( {
 					Cancel: 'a',
 					Save: 'b'
+				} );
+			} );
+
+			it( 'should not create new id for the same translation key', () => {
+				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'de' ] );
+				const source = 't( \'Cancel\' ), t( \'Cancel\' );';
+
+				const result = translationService.translateSource( source, 'file.js' );
+
+				expect( result ).to.equal( 't(\'a\'), t(\'a\');' );
+				expect( translationService._translationIdsDictionary ).to.deep.equal( {
+					Cancel: 'a'
 				} );
 			} );
 
