@@ -15,6 +15,7 @@ const fakeDirname = path.dirname( require.resolve( '../../../lib/utils/manual-te
 describe( 'compileHtmlFiles', () => {
 	let sandbox, stubs, files, compileHtmlFiles;
 	let patternFiles = {};
+	let separator = '/';
 
 	beforeEach( () => {
 		mockery.enable( {
@@ -34,7 +35,20 @@ describe( 'compileHtmlFiles', () => {
 			},
 
 			path: {
-				join: sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) )
+				join: sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( separator ) ),
+				parse: sandbox.stub( path, 'parse' ).callsFake( pathToParse => {
+					const chunks = pathToParse.split( separator );
+					const fileName = chunks.pop();
+
+					return {
+						dir: chunks.join( separator ),
+						name: fileName.split( '.' ).slice( 0, -1 ).join( '.' )
+					};
+				} ),
+				dirname: sandbox.stub( path, 'dirname' ).callsFake( pathToParse => {
+					return pathToParse.split( separator ).slice( 0, -1 ).join( separator );
+				} ),
+				sep: sandbox.stub( path, 'sep' ).value( separator )
 			},
 
 			logger: {
@@ -250,5 +264,48 @@ describe( 'compileHtmlFiles', () => {
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true } );
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true } );
 		sinon.assert.neverCalledWith( stubs.fs.copySync, 'some.file.md', path.join( 'buildDir', 'some.file.md' ) );
+	} );
+
+	it( 'should work on Windows environments', () => {
+		separator = '\\';
+		stubs.path.sep.reset();
+		stubs.path.sep.value( separator );
+
+		// Our wrapper on Glob returns proper paths for Unix and Windows.
+		patternFiles = {
+			'manualTestPattern\\*.js': [ 'path\\to\\manual\\file.js' ],
+			'path\\to\\manual\\**\\*.!(js|html|md)': [ 'static-file.png' ]
+		};
+
+		files = {
+			[ fakeDirname + '\\template.html' ]: '<div>template html content</div>',
+			'path\\to\\manual\\file.md': '## Markdown header',
+			'path\\to\\manual\\file.html': '<div>html file content</div>'
+		};
+
+		compileHtmlFiles( 'buildDir', [ path.join( 'manualTestPattern', '*.js' ) ] );
+
+		sinon.assert.calledWithExactly( stubs.commonmark.parse, '## Markdown header' );
+		sinon.assert.calledWithExactly( stubs.fs.ensureDirSync, 'buildDir' );
+
+		/* eslint-disable max-len */
+		sinon.assert.calledWithExactly(
+			stubs.fs.outputFileSync,
+			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
+				'<div>template html content</div>',
+				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
+				'<div>html file content</div>',
+				`<body class="manual-test-container"><script src="/${ path.join( 'path', 'to', 'manual', 'file.js' ) }"></script></body>`
+			].join( '\n' )
+		);
+		/* eslint-enable max-len */
+
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true } );
+		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true } );
+		sinon.assert.calledWithExactly(
+			stubs.fs.copySync, 'static-file.png', path.join( 'buildDir', 'static-file.png' )
+		);
+
+		separator = '/';
 	} );
 } );
