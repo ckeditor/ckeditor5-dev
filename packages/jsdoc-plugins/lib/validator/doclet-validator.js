@@ -86,8 +86,9 @@ class DocletValidator {
 		this._collection.getAll()
 			.filter( el => el.memberof && !el.memberof.includes( 'module:' ) )
 			.filter( el => el.memberof.indexOf( '<anonymous>' ) === -1 ) // local variables, functions
-			.forEach( el =>	{
-				this._addError( el, `Memberof property should start with 'module:'. Got ${ el.memberof } instead` );
+			.filter( el => !el.undocumented ) // undocummented inner code.
+			.forEach( el => {
+				this._addError( el, `Memberof property should start with 'module:'. Got '${ el.memberof }' instead.` );
 			} );
 	}
 
@@ -99,7 +100,7 @@ class DocletValidator {
 
 				return match && match[ 1 ] === match[ 2 ];
 			} )
-			.forEach( el =>	this._addError( el, `Incorrect class reference name. Got ${ el.longname }` ) );
+			.forEach( el => this._addError( el, `Incorrect class reference name. Got ${ el.longname }` ) );
 	}
 
 	_lintLongnameProperty() {
