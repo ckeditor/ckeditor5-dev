@@ -33,7 +33,7 @@ module.exports = class CKEditorWebpackPlugin {
 	 * When option is set to 'all' then script will be looking for all languages and according translations during the compilation.
 	 * @param {String} [options.outputDirectory='lang'] Output directory for the emitted translation files,
 	 * should be relative to the webpack context.
-	 * @param {String} [options.defaultLanguage] Default language for the build.
+	 * @param {String} [options.defaultLanguage] Default language for the build. If not set, the first language will be used.
 	 * @param {Boolean} [options.throwErrorOnMissingTranslation] Option that make the plugin throw when the translation is missing.
 	 * By default original (english translation keys) are used when the target translation is missing.
 	 */

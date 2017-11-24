@@ -377,7 +377,7 @@ describe( 'translations', () => {
 
 				sinon.assert.calledOnce( spy );
 				sinon.assert.alwaysCalledWithExactly( spy, [
-					'Because of the many found bundles, none bundle will contain the default language.',
+					'Because of the many found bundles, none of the bundles will contain the default language.',
 					`You should add it directly to the application from the 'lang${ path.sep }pl.js'.`
 				].join( '\n' ) );
 
