@@ -85,8 +85,8 @@ class DocletValidator {
 	_lintMemberofProperty() {
 		this._collection.getAll()
 			.filter( el => el.memberof && !el.memberof.includes( 'module:' ) )
-			.filter( el => el.memberof.indexOf( '<anonymous>' ) === -1 ) // local variables, functions
-			.filter( el => !el.undocumented ) // undocummented inner code.
+			.filter( el => el.memberof.indexOf( '<anonymous>' ) === -1 ) // Local variables, functions.
+			.filter( el => !el.undocumented ) // Undocummented inner code. E.g members of local variables.
 			.forEach( el => {
 				this._addError( el, `Memberof property should start with 'module:'. Got '${ el.memberof }' instead.` );
 			} );
