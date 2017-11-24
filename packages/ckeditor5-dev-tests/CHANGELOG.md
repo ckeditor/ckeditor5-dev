@@ -1,6 +1,19 @@
 Changelog
 =========
 
+## [9.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@9.0.0...@ckeditor/ckeditor5-dev-tests@9.1.0) (2017-11-24)
+
+### Features
+
+* Changed a way how the tests are executed. Karma will receive a single entry point which will import all tests. Closes [#290](https://github.com/ckeditor/ckeditor5-dev/issues/290). ([5fc685f](https://github.com/ckeditor/ckeditor5-dev/commit/5fc685f))
+
+### Bug fixes
+
+* Disabled initial compilation of manual tests by the file watcher. Closes [#318](https://github.com/ckeditor/ckeditor5-dev/issues/318). ([aa72c3f](https://github.com/ckeditor/ckeditor5-dev/commit/aa72c3f))
+* Manual tests will work in Windows environments properly. Closes: [#325](https://github.com/ckeditor/ckeditor5-dev/issues/325). ([615b93e](https://github.com/ckeditor/ckeditor5-dev/commit/615b93e))
+* Webpack SVG loader will work properly on Windows machines. Closes [#323](https://github.com/ckeditor/ckeditor5-dev/issues/323). ([652849e](https://github.com/ckeditor/ckeditor5-dev/commit/652849e))
+
+
 ## [9.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@8.2.5...@ckeditor/ckeditor5-dev-tests@9.0.0) (2017-11-13)
 
 ### Other changes
