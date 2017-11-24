@@ -39,7 +39,7 @@ describe( 'translations', () => {
 
 		describe( 'constructor()', () => {
 			it( 'should initialize `SingleLanguageTranslationService`', () => {
-				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'de' ] );
+				const translationService = new MultipleLanguageTranslationService( 'en', { additionalLanguages: [ 'pl', 'de' ] } );
 
 				expect( translationService ).to.be.instanceof( MultipleLanguageTranslationService );
 			} );
@@ -47,7 +47,7 @@ describe( 'translations', () => {
 
 		describe( 'loadPackage()', () => {
 			it( 'should load PO file from the package and load translations', () => {
-				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'de' ] );
+				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
 				const pathToTranslationsDirectory = path.join( 'pathToPackage', 'lang', 'translations' );
 				const pathToPlTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'pl.po' );
 				const pathToDeTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'de.po' );
@@ -82,7 +82,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should do nothing if the PO file does not exist', () => {
-				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'de' ] );
+				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
 
 				translationService.loadPackage( 'pathToPackage' );
 
@@ -90,7 +90,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should load PO file from the package only once per language', () => {
-				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'de' ] );
+				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
 				const loadPoFileSpy = sandbox.stub( translationService, '_loadPoFile' );
 
 				const pathToTranslationsDirectory = path.join( 'pathToPackage', 'lang', 'translations' );
@@ -105,7 +105,9 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should load all PO files for the current package and add languages to the language list', () => {
-				const translationService = new MultipleLanguageTranslationService( [], { compileAllLanguages: true } );
+				const translationService = new MultipleLanguageTranslationService( 'pl', {
+					compileAllLanguages: true, additionalLanguages: []
+				} );
 
 				const pathToTranslations = path.join( 'pathToPackage', 'lang', 'translations' );
 				const pathToPlTranslations = path.join( pathToTranslations, 'pl.po' );
@@ -149,7 +151,7 @@ describe( 'translations', () => {
 
 		describe( 'translateSource()', () => {
 			it( 'should replace t() call params with the translation key, starting with `a`', () => {
-				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'de' ] );
+				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
 				const source = 't( \'Cancel\' ), t( \'Save\' );';
 
 				const result = translationService.translateSource( source, 'file.js' );
@@ -162,7 +164,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should not create new id for the same translation key', () => {
-				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'de' ] );
+				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
 				const source = 't( \'Cancel\' ), t( \'Cancel\' );';
 
 				const result = translationService.translateSource( source, 'file.js' );
@@ -174,7 +176,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should return original source if there is no t() calls in the code', () => {
-				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'de' ] );
+				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
 				const source = 'translate( \'Cancel\' )';
 
 				const result = translationService.translateSource( source, 'file.js' );
@@ -187,7 +189,7 @@ describe( 'translations', () => {
 
 		describe( 'getAssets()', () => {
 			it( 'should return an array of assets', () => {
-				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'en' ], { defaultLanguage: 'pl' } );
+				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'en' ] } );
 
 				translationService._translationIdsDictionary = {
 					Cancel: 'a',
@@ -224,7 +226,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should emit an error if the language is not present in language list', () => {
-				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'xxx' ], { defaultLanguage: 'pl' } );
+				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'xxx' ] } );
 				const spy = sandbox.spy();
 
 				translationService.on( 'error', spy );
@@ -254,7 +256,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should feed missing translation with the translation key if the translated string is missing', () => {
-				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'xxx' ], { defaultLanguage: 'pl' } );
+				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'xxx' ] } );
 				const spy = sandbox.spy();
 
 				translationService.on( 'error', spy );
@@ -290,7 +292,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should emit an error if the main translation is missing', () => {
-				const translationService = new MultipleLanguageTranslationService( [ 'pl' ], { defaultLanguage: 'xxx' } );
+				const translationService = new MultipleLanguageTranslationService( 'xxx', { additionalLanguages: [ 'pl' ] } );
 				const spy = sandbox.spy();
 
 				translationService.on( 'error', spy );
@@ -320,7 +322,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should bound to assets only used translations', () => {
-				const translationService = new MultipleLanguageTranslationService( [ 'pl' ], { defaultLanguage: 'pl' } );
+				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [] } );
 
 				translationService._translationIdsDictionary = {
 					Cancel: 'a',
@@ -351,7 +353,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should emit warning when many assets will be emitted by compilator and return only translation assets', () => {
-				const translationService = new MultipleLanguageTranslationService( [ 'pl' ], { defaultLanguage: 'pl' } );
+				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [] } );
 				const spy = sandbox.spy();
 
 				translationService.on( 'warning', spy );
@@ -377,7 +379,7 @@ describe( 'translations', () => {
 
 				sinon.assert.calledOnce( spy );
 				sinon.assert.alwaysCalledWithExactly( spy, [
-					'Because of the many found bundles, none of the bundles will contain the default language.',
+					'Because of the many found bundles, none of the bundles will contain the main language.',
 					`You should add it directly to the application from the 'lang${ path.sep }pl.js'.`
 				].join( '\n' ) );
 
@@ -398,7 +400,7 @@ describe( 'translations', () => {
 					}
 				}
 
-				const translationService = new CustomTranslationService( [ 'en' ], { defaultLanguage: 'en' } );
+				const translationService = new CustomTranslationService( 'en', { additionalLanguages: [] } );
 
 				const pathToPlTranslations = path.join( 'custom', 'path', 'to', 'pathToPackage', 'en.po' );
 				const pathToTranslationDirectory = path.join( 'custom', 'path', 'to', 'pathToPackage' );
@@ -426,7 +428,7 @@ describe( 'translations', () => {
 
 		describe( 'integration test', () => {
 			it( 'test #1', () => {
-				const translationService = new MultipleLanguageTranslationService( [ 'pl', 'de' ], { defaultLanguage: 'pl' } );
+				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
 				const pathToPlTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'pl.po' );
 				const pathToDeTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'de.po' );
 				const pathToTranslationsDirectory = path.join( 'pathToPackage', 'lang', 'translations' );

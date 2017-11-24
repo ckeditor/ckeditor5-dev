@@ -20,18 +20,19 @@ const { EventEmitter } = require( 'events' );
  */
 module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	/**
-	 * @param {Array.<String>} languages Target languages.
+	 * @param {String} language Main language.
 	 * @param {Object} options
 	 * @param {Boolean} [options.compileAllLanguages=false] Flag indicates whether the languages are specified
 	 * or should be found at runtime.
-	 * @param {Boolean} [options.defaultLanguage] Default language that will be added to the main bundle (if possible).
+	 * @param {Array.<String>} options.additionalLanguages Additional languages. Build is optimized for this option is not set.
+	 * When option is set to 'all' then script will be looking for all languages and according translations during the compilation.
 	 */
-	constructor( languages, { compileAllLanguages = false, defaultLanguage } = {} ) {
+	constructor( language, { additionalLanguages, compileAllLanguages = false } = {} ) {
 		super();
 
-		this._languages = new Set( languages );
+		this._mainLanguage = language;
 
-		this._defaultLanguage = defaultLanguage;
+		this._languages = new Set( [ language, ...additionalLanguages ] );
 
 		this._compileAllLanguages = compileAllLanguages;
 
@@ -130,8 +131,8 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 		if ( compilationAssetNames.length > 1 ) {
 			this.emit( 'warning', [
-				'Because of the many found bundles, none bundle will contain the default language.',
-				`You should add it directly to the application from the '${ outputDirectory }${ path.sep }${ this._defaultLanguage }.js'.`
+				'Because of the many found bundles, none of the bundles will contain the main language.',
+				`You should add it directly to the application from the '${ outputDirectory }${ path.sep }${ this._mainLanguage }.js'.`
 			].join( '\n' ) );
 
 			return this._getTranslationAssets( outputDirectory, this._languages );
@@ -140,7 +141,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		const mainAssetName = compilationAssetNames[ 0 ];
 		const mainCompilationAsset = compilationAssets[ mainAssetName ];
 
-		const mainTranslationAsset = this._getTranslationAssets( outputDirectory, [ this._defaultLanguage ] )[ 0 ];
+		const mainTranslationAsset = this._getTranslationAssets( outputDirectory, [ this._mainLanguage ] )[ 0 ];
 
 		const mergedCompilationAsset = {
 			outputBody: mainCompilationAsset.source() + '\n;' + mainTranslationAsset.outputBody,
@@ -148,7 +149,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		};
 
 		const otherLanguages = Array.from( this._languages )
-			.filter( lang => lang !== this._defaultLanguage );
+			.filter( lang => lang !== this._mainLanguage );
 
 		return [
 			mergedCompilationAsset,

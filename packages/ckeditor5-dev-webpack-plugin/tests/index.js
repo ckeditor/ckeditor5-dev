@@ -44,7 +44,7 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 
 	describe( 'constructor()', () => {
 		it( 'should initialize with passed options', () => {
-			const options = { languages: [] };
+			const options = { language: 'pl' };
 
 			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
 
@@ -53,17 +53,7 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 	} );
 
 	describe( 'apply()', () => {
-		it( 'should throw if language array is empty', () => {
-			const options = { languages: [] };
-
-			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
-
-			expect( () => ckeditorWebpackPlugin.apply( {} ) ).to.throw(
-				'At least one target language should be specified.'
-			);
-		} );
-
-		it( 'should return and do nothing if language array is not specified', () => {
+		it( 'should return and do nothing if language is not specified', () => {
 			const options = {};
 
 			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
@@ -74,7 +64,7 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 
 		it( 'should call serveTranslations() if the options are correct', () => {
 			const options = {
-				languages: [ 'pl' ]
+				language: 'pl'
 			};
 
 			const compiler = {};
@@ -88,7 +78,7 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 
 		it( 'should serve `SingleLanguageTranslationService` if only one language is provided.', () => {
 			const options = {
-				languages: [ 'pl' ]
+				language: 'pl'
 			};
 
 			const compiler = {};
@@ -102,7 +92,8 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 
 		it( 'should serve `MultipleLanguageTranslationService` if more than 1 language is provided.', () => {
 			const options = {
-				languages: [ 'pl', 'en' ]
+				language: 'pl',
+				additionalLanguages: [ 'en' ]
 			};
 
 			const compiler = {};
@@ -115,14 +106,15 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 			sinon.assert.calledOnce( stubs.MultipleLanguageTranslationService );
 			sinon.assert.calledWithExactly(
 				stubs.MultipleLanguageTranslationService,
-				[ 'pl', 'en' ],
-				{ compileAllLanguages: false, defaultLanguage: 'pl' }
+				'pl',
+				{ compileAllLanguages: false, additionalLanguages: [ 'en' ] }
 			);
 		} );
 
-		it( 'should serve `MultipleLanguageTranslationService` if the `languages` is set to `all`.', () => {
+		it( 'should serve `MultipleLanguageTranslationService` if the `additionalLanguages` is set to `all`.', () => {
 			const options = {
-				languages: 'all'
+				language: 'en',
+				additionalLanguages: 'all'
 			};
 
 			const compiler = {};
@@ -135,27 +127,8 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 			sinon.assert.calledOnce( stubs.MultipleLanguageTranslationService );
 			sinon.assert.calledWithExactly(
 				stubs.MultipleLanguageTranslationService,
-				[],
-				{ compileAllLanguages: true, defaultLanguage: undefined }
-			);
-		} );
-
-		it( 'should set default language for `MultipleLanguageTranslationService` if provided with options', () => {
-			const options = {
-				languages: 'all',
-				defaultLanguage: 'de'
-			};
-
-			const compiler = {};
-
-			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
-			ckeditorWebpackPlugin.apply( compiler );
-
-			sinon.assert.calledOnce( stubs.MultipleLanguageTranslationService );
-			sinon.assert.calledWithExactly(
-				stubs.MultipleLanguageTranslationService,
-				[],
-				{ compileAllLanguages: true, defaultLanguage: 'de' }
+				'en',
+				{ compileAllLanguages: true, additionalLanguages: [] }
 			);
 		} );
 	} );
