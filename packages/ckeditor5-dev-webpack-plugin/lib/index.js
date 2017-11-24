@@ -11,6 +11,21 @@ const SingleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-utils
 const MultipleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/multiplelanguagetranslationservice' );
 const ckeditor5EnvUtils = require( './ckeditor5-env-utils' );
 
+/**
+ * CKEditorWebpackPlugin, for now, implements only the Translation Service (@ckeditor/ckeditor5#624, @ckeditor/ckeditor5#387).
+ *
+ * Workflow:
+ *
+ * One entry point (or to be precise one output JS file):
+ * - one language in `languages` -> build optimized version
+ * - many languages in `languages` –> get first or `defaultLanguage` as the main language that will be built into the main bundle
+ * (e.g. `ckeditor.js`) (`languages` must support `all` option, that's why the `defaultLanguage` option is needed)
+ *
+ * Multiple output JS files
+ * - one language in `languages` -> build optimized version
+ * - many languages in `languages` –> emit all translation files separately and warn user,
+ * that he needs to load translation file manually to get editor working
+ */
 module.exports = class CKEditorWebpackPlugin {
 	/**
 	 * @param {Object} [options] Plugin options.

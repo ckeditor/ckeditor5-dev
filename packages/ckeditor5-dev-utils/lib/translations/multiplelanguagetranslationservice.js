@@ -14,7 +14,7 @@ const { EventEmitter } = require( 'events' );
 
 /**
  * `MultipleLanguageTranslationService` replaces `t()` call params with short ids
- * and provides assets that translate those ids to target languages.
+ * and provides language assets that can translate those ids to the target languages.
  *
  * `translationKey` - original english string that occur in `t()` call params.
  */
@@ -35,7 +35,8 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 		this._compileAllLanguages = compileAllLanguages;
 
-		this._packagePaths = new Set();
+		// Set of handled packages that speed things up.
+		this._handledPackages = new Set();
 
 		// language -> translationKey -> targetTranslation dictionary.
 		this._dictionary = {};
@@ -49,6 +50,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 	/**
 	 * Translate file's source and replace `t()` call strings with short ids.
+	 * Fire an error when the acorn parser face a trouble.
 	 *
 	 * @fires error
 	 * @param {String} source Source of the file.
@@ -68,17 +70,17 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 	/**
 	 * Load package and tries to get PO files from the package if it's unknown.
-	 * If the compileAllLanguages flag is set to true, language set will be enhanced by found languages.
+	 * If the `compileAllLanguages` flag is set to true, language's set will be expanded by the found languages.
 	 *
 	 * @fires error
 	 * @param {String} pathToPackage Path to the package containing translations.
 	 */
 	loadPackage( pathToPackage ) {
-		if ( this._packagePaths.has( pathToPackage ) ) {
+		if ( this._handledPackages.has( pathToPackage ) ) {
 			return;
 		}
 
-		this._packagePaths.add( pathToPackage );
+		this._handledPackages.add( pathToPackage );
 
 		const pathToTranslationDirectory = this._getPathToTranslationDirectory( pathToPackage );
 
@@ -113,6 +115,8 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 	/**
 	 * Return an array of assets based on the stored dictionaries.
+	 * If there is one `compilationAssets`, merge main translation with that asset and join with other assets built outside.
+	 * Otherwise fire an error and retuen an array of assets built outside of the `compilationAssets`.
 	 *
 	 * @fires error
 	 * @param {Object} options
@@ -152,13 +156,16 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		];
 	}
 
+	// Return assets for the given directory and languages.
 	_getTranslationAssets( outputDirectory, languages ) {
 		return Array.from( languages ).map( language => {
 			const translatedStrings = this._getIdToTranslatedStringDictionary( language );
 
 			const outputPath = path.join( outputDirectory, `${ language }.js` );
+
+			// Stringify translations and remove unnecessary `""` around property names.
 			const stringifiedTranslations = JSON.stringify( translatedStrings )
-				.replace( /"([a-z]+)":/g, '$1:' ); // removes unnecessary `""` around property names.
+				.replace( /"([a-z]+)":/g, '$1:' );
 
 			const outputBody = `CKEDITOR_TRANSLATIONS.add('${ language }',${ stringifiedTranslations })`;
 
@@ -227,6 +234,8 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
+	 * Make this fn overridable, so the class might be used in other environments than CKE5.
+	 *
 	 * @protected
 	 */
 	_getPathToTranslationDirectory( pathToPackage ) {
