@@ -1,6 +1,14 @@
 Changelog
 =========
 
+## [1.8.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.8.1...@ckeditor/jsdoc-plugins@1.8.2) (2017-11-24)
+
+### Bug fixes
+
+* Optimized doclet validator plugin. Closes [#306](https://github.com/ckeditor/ckeditor5-dev/issues/306). ([664fb2d](https://github.com/ckeditor/ckeditor5-dev/commit/664fb2d))
+* Optimized Relation Fixer plugin. Closes [#312](https://github.com/ckeditor/ckeditor5-dev/issues/312). ([f575d77](https://github.com/ckeditor/ckeditor5-dev/commit/f575d77))
+
+
 ## [1.8.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.8.0...@ckeditor/jsdoc-plugins@1.8.1) (2017-11-10)
 
 ### Bug fixes
