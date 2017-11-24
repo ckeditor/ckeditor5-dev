@@ -24,7 +24,7 @@ describe( 'Linter plugin', () => {
 	} );
 
 	describe( '_lintMemberofProperty()', () => {
-		it( 'should emit error for inner variables', () => {
+		it( 'should not emit error if the doclet comes from inner variable', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'member',
 				name: 'module:ckeditor5/path',
@@ -37,7 +37,7 @@ describe( 'Linter plugin', () => {
 			expect( linter._errors.length ).to.be.equal( 0 );
 		} );
 
-		it( 'should emit error for invalid memberof', () => {
+		it( 'should emit error if the doclet contains invalid `memberof` property', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'member',
 				name: 'module:ckeditor5/wrong_path',
@@ -50,7 +50,7 @@ describe( 'Linter plugin', () => {
 			expect( linter._errors.length ).to.be.equal( 1 );
 		} );
 
-		it( 'should not emit error for correct reference', () => {
+		it( 'should not emit error when the doclets\' `memberof` starts with `module:`', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'member',
 				name: 'module:ckeditor5/editor',
@@ -63,7 +63,7 @@ describe( 'Linter plugin', () => {
 			expect( linter._errors.length ).to.be.equal( 0 );
 		} );
 
-		it( 'should not emit error if the code is undocumented inside some private stuff', () => {
+		it( 'should not emit error if the doclet comes from undocumented code', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'member',
 				undocumented: 'true',
