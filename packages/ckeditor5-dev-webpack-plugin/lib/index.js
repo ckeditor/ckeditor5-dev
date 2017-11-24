@@ -17,13 +17,13 @@ const ckeditor5EnvUtils = require( './ckeditor5-env-utils' );
  * Workflow:
  *
  * One entry point (or to be precise one output JS file):
- * - `additinalLanguages` not set -> build optimized version
- * - `additinalLanguages` set –> `language` will be built into the main bundle (e.g. `ckeditor.js`).
+ * - `additionalLanguages` not set -> build optimized version
+ * - `additionalLanguages` set –> `language` will be built into the main bundle (e.g. `ckeditor.js`).
  * Translation files will be emitted in the `outputDirectory` or 'lang' directory.
  *
  * Multiple output JS files
- * - `additinalLanguages` not set -> build optimized version
- * - `additinalLanguages` set –> emit all translation files separately and warn user,
+ * - `additionalLanguages` not set -> build optimized version
+ * - `additionalLanguages` set –> emit all translation files separately and warn user,
  * that he needs to load at least one translation file manually to get editor working
  */
 module.exports = class CKEditorWebpackPlugin {
@@ -54,7 +54,7 @@ module.exports = class CKEditorWebpackPlugin {
 
 		if ( typeof additionalLanguages == 'string' ) {
 			if ( additionalLanguages !== 'all' ) {
-				throw new Error( '`additinalLanguages` option should be an array of language codes or `all`.' );
+				throw new Error( '`additionalLanguages` option should be an array of language codes or `all`.' );
 			}
 
 			compileAllLanguages = true;
