@@ -16,13 +16,7 @@ module.exports = function runAutomatedTests( options ) {
 	return new Promise( ( resolve, reject ) => {
 		const config = getKarmaConfig( options );
 
-		if ( !config ) {
-			return reject( 'Cannot load the configuration file because specified options are invalid.' );
-		}
-
 		const server = new KarmaServer( config, exitCode => {
-			config.removeEntryFile();
-
 			if ( exitCode === 0 ) {
 				resolve();
 			} else {
