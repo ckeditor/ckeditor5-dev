@@ -14,6 +14,9 @@ module.exports = class ShortIdGenerator {
 		this._idNumber = 0;
 	}
 
+	/**
+	 * Generate next id from chars in [a-z] range.
+	 */
 	getNextId() {
 		let number = this._idNumber;
 		const chars = [];
