@@ -8,7 +8,7 @@
 const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 
-describe( 'getWebpackConfigForAutomatedTests', () => {
+describe( 'getWebpackConfigForAutomatedTests()', () => {
 	const escapedPathSep = require( 'path' ).sep == '/' ? '/' : '\\\\';
 	let getWebpackConfigForAutomatedTests, postCssOptions;
 
@@ -135,5 +135,21 @@ describe( 'getWebpackConfigForAutomatedTests', () => {
 			},
 			minify: true
 		} );
+	} );
+
+	it( 'should load svg files properly', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {} );
+		const svgRule = webpackConfig.module.rules.find( rule => {
+			return rule.test.toString().endsWith( '.svg$/' );
+		} );
+
+		if ( !svgRule ) {
+			throw new Error( 'Not found loader for "svg".' );
+		}
+
+		const svgRegExp = svgRule.test;
+
+		expect( 'C:\\Program Files\\ckeditor\\ckeditor5-basic-styles\\theme\\icons\\italic.svg' ).to.match( svgRegExp, 'Windows' );
+		expect( '/home/ckeditor/ckeditor5-basic-styles/theme/icons/italic.svg' ).to.match( svgRegExp, 'Linux' );
 	} );
 } );

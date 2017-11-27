@@ -34,7 +34,8 @@ describe( 'compileManualTestScripts', () => {
 				buildDir
 			} ) ),
 			getRelativeFilePath: sandbox.spy( x => x ),
-			pathJoin: sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) )
+			pathJoin: sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) ),
+			pathSep: sandbox.stub( path, 'sep' ).value( '/' )
 		};
 
 		mockery.registerMock( '../glob', stubs.glob );
@@ -145,6 +146,26 @@ describe( 'compileManualTestScripts', () => {
 				expect(
 					stubs.getRelativeFilePath.neverCalledWith( 'ckeditor5-build-classic/tests/ckeditor.js' )
 				).to.equal( true );
+			} );
+	} );
+
+	it( 'works on Windows environments', () => {
+		stubs.pathSep.reset();
+		stubs.pathSep.value( '\\' );
+
+		const manualTestScriptsPatterns = [
+			'ckeditor5-build-classic/tests/**/*.js',
+		];
+
+		stubs.glob.onFirstCall().returns( [
+			'ckeditor5-build-classic\\tests\\manual\\ckeditor.js',
+		] );
+
+		return compileManualTestScripts( 'buildDir', manualTestScriptsPatterns )
+			.then( () => {
+				expect( stubs.getRelativeFilePath.calledOnce ).to.equal( true );
+				expect( stubs.getRelativeFilePath.firstCall.args[ 0 ] )
+					.to.equal( 'ckeditor5-build-classic\\tests\\manual\\ckeditor.js' );
 			} );
 	} );
 } );

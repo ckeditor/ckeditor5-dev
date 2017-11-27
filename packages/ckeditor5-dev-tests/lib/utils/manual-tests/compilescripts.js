@@ -7,6 +7,7 @@
 
 'use strict';
 
+const path = require( 'path' );
 const webpack = require( 'webpack' );
 const globSync = require( '../glob' );
 const getWebpackConfigForManualTests = require( './getwebpackconfig' );
@@ -21,7 +22,8 @@ module.exports = function compileManualTestScripts( buildDir, manualTestScriptsP
 	const entryFiles = manualTestScriptsPatterns.reduce( ( arr, manualTestPattern ) => {
 		return [
 			...arr,
-			...globSync( manualTestPattern ).filter( manualTestFile => manualTestFile.includes( '/manual/' ) )
+			...globSync( manualTestPattern )
+				.filter( manualTestFile => manualTestFile.includes( path.sep + 'manual' + path.sep ) )
 		];
 	}, [] );
 

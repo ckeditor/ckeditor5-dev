@@ -33,7 +33,7 @@ module.exports = function compileHtmlFiles( buildDir, manualTestScriptsPatterns 
 		return [
 			...arr,
 			...globSync( manualTestPattern )
-				.filter( manualTestFile => manualTestFile.includes( '/manual/' ) )
+				.filter( manualTestFile => manualTestFile.includes( path.sep + 'manual' + path.sep ) )
 				.map( jsFile => setExtension( jsFile, 'md' ) )
 		];
 	}, [] );
