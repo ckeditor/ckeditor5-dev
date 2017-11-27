@@ -24,8 +24,8 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @param {Object} options
 	 * @param {Boolean} [options.compileAllLanguages=false] Flag indicates whether the languages are specified
 	 * or should be found at runtime.
-	 * @param {Array.<String>} options.additionalLanguages Additional languages. Build is optimized for this option is not set.
-	 * When option is set to 'all' then script will be looking for all languages and according translations during the compilation.
+	 * @param {Array.<String>} options.additionalLanguages Additional languages which files will be emitted.
+	 * When option is set to 'all', all languages found during the compilation will be added.
 	 */
 	constructor( language, { additionalLanguages, compileAllLanguages = false } = {} ) {
 		super();
