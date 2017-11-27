@@ -36,6 +36,8 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 			'@ckeditor/ckeditor5-dev-utils/lib/translations/singlelanguagetranslationservice': stubs.SingleLanguageTranslationService,
 			'@ckeditor/ckeditor5-dev-utils/lib/translations/multiplelanguagetranslationservice': stubs.MultipleLanguageTranslationService
 		} );
+
+		sandbox.stub( console, 'warn' );
 	} );
 
 	afterEach( () => {
@@ -53,11 +55,14 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 	} );
 
 	describe( 'apply()', () => {
-		it( 'should return and do nothing if language is not specified', () => {
-			const options = {};
-
-			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
+		it( 'should log a warning and do nothing if language is not specified', () => {
+			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( {} );
 			ckeditorWebpackPlugin.apply( {} );
+
+			sinon.assert.calledOnce( console.warn );
+			expect( console.warn.getCall( 0 ).args[ 0 ] ).to.match(
+				/Warning: `language` option is required for CKEditorWebpackPlugin plugin\./
+			);
 
 			sinon.assert.notCalled( stubs.serveTranslations );
 		} );
@@ -76,30 +81,26 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 			sinon.assert.calledWith( stubs.serveTranslations, compiler, options );
 		} );
 
-		it( 'should serve `SingleLanguageTranslationService` if only one language is provided.', () => {
+		it( 'should serve `SingleLanguageTranslationService` if only one language is provided', () => {
 			const options = {
 				language: 'pl'
 			};
 
-			const compiler = {};
-
 			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
-			ckeditorWebpackPlugin.apply( compiler );
+			ckeditorWebpackPlugin.apply( {} );
 
 			sinon.assert.calledOnce( stubs.SingleLanguageTranslationService );
 			sinon.assert.calledWithExactly( stubs.SingleLanguageTranslationService, 'pl' );
 		} );
 
-		it( 'should serve `MultipleLanguageTranslationService` if more than 1 language is provided.', () => {
+		it( 'should serve `MultipleLanguageTranslationService` if more than 1 language is provided', () => {
 			const options = {
 				language: 'pl',
 				additionalLanguages: [ 'en' ]
 			};
 
-			const compiler = {};
-
 			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
-			ckeditorWebpackPlugin.apply( compiler );
+			ckeditorWebpackPlugin.apply( {} );
 
 			sinon.assert.calledOnce( stubs.serveTranslations );
 
@@ -111,16 +112,14 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 			);
 		} );
 
-		it( 'should serve `MultipleLanguageTranslationService` if the `additionalLanguages` is set to `all`.', () => {
+		it( 'should serve `MultipleLanguageTranslationService` if the `additionalLanguages` is set to `all`', () => {
 			const options = {
 				language: 'en',
 				additionalLanguages: 'all'
 			};
 
-			const compiler = {};
-
 			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
-			ckeditorWebpackPlugin.apply( compiler );
+			ckeditorWebpackPlugin.apply( {} );
 
 			sinon.assert.calledOnce( stubs.serveTranslations );
 
@@ -129,6 +128,34 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 				stubs.MultipleLanguageTranslationService,
 				'en',
 				{ compileAllLanguages: true, additionalLanguages: [] }
+			);
+		} );
+
+		it( 'should log a warning if `additionalLanguages` is not specified while `outputDirectory` is set', () => {
+			const options = {
+				language: 'en',
+				outputDirectory: 'custom-lang'
+			};
+
+			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
+			ckeditorWebpackPlugin.apply( {} );
+
+			sinon.assert.calledOnce( console.warn );
+			expect( console.warn.getCall( 0 ).args[ 0 ] ).to.match(
+				/Warning: `outputDirectory` option does not work for one language\. It will be ignored\./
+			);
+		} );
+
+		it( 'should throw an error when provided `additionalLanguages` is type of string, but not `all`', () => {
+			const options = {
+				language: 'en',
+				additionalLanguages: 'abc'
+			};
+
+			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
+
+			expect( () => ckeditorWebpackPlugin.apply( {} ) ).to.throw(
+				/Error: `additionalLanguages` option should be an array of language codes or `all`\./
 			);
 		} );
 	} );

@@ -42,6 +42,10 @@ module.exports = class CKEditorWebpackPlugin {
 
 	apply( compiler ) {
 		if ( !this.options.language ) {
+			console.warn( chalk.yellow(
+				'Warning: `language` option is required for CKEditorWebpackPlugin plugin.'
+			) );
+
 			return;
 		}
 
@@ -52,7 +56,7 @@ module.exports = class CKEditorWebpackPlugin {
 
 		if ( typeof additionalLanguages == 'string' ) {
 			if ( additionalLanguages !== 'all' ) {
-				throw new Error( '`additionalLanguages` option should be an array of language codes or `all`.' );
+				throw new Error( 'Error: `additionalLanguages` option should be an array of language codes or `all`.' );
 			}
 
 			compileAllLanguages = true;
@@ -61,8 +65,8 @@ module.exports = class CKEditorWebpackPlugin {
 
 		if ( !additionalLanguages ) {
 			if ( this.options.outputDirectory ) {
-				console.warn( chalk.red(
-					'`outputDirectory` option does not work for one language because zero files will be emitted. It will be ignored.'
+				console.warn( chalk.yellow(
+					'Warning: `outputDirectory` option does not work for one language. It will be ignored.'
 				) );
 			}
 
