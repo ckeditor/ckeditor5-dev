@@ -36,25 +36,31 @@ module.exports = function serveTranslations( compiler, options, translationServi
 			throw new Error( chalk.red( error ) );
 		}
 
-		console.error( chalk.red( error ) );
+		console.error( chalk.red( `Error: ${ error }` ) );
 	} );
 
 	translationService.on( 'warning', warning => {
-		console.warn( chalk.yellow( warning ) );
+		console.warn( chalk.yellow( `Warning: ${ warning }` ) );
 	} );
 
 	// Add core translations before `translatesourceloader` starts translating.
 	compiler.plugin( 'after-resolvers', () => {
 		const resolver = compiler.resolvers.normal;
 
-		envUtils.loadCoreTranslations( cwd, translationService, resolver );
+		envUtils.getCorePackage( cwd, resolver ).then( corePackage => {
+			translationService.loadPackage( corePackage );
+		} );
 	} );
 
 	// Load translation files and add a loader if the package match requirements.
 	compiler.plugin( 'normal-module-factory', nmf => {
 		nmf.plugin( 'after-resolve', ( resolveOptions, done ) => {
-			envUtils.maybeLoadPackage( cwd, translationService, resolveOptions.resource );
-			envUtils.maybeAddLoader( cwd, resolveOptions.resource, resolveOptions.loaders );
+			const pathToPackage = envUtils.getPathToPackage( cwd, resolveOptions.resource );
+			resolveOptions.loaders = envUtils.getLoaders( cwd, resolveOptions.resource, resolveOptions.loaders );
+
+			if ( pathToPackage ) {
+				translationService.loadPackage( pathToPackage );
+			}
 
 			done( null, resolveOptions );
 		} );

@@ -44,114 +44,96 @@ describe( 'webpack-plugin/ckeditor5-env-utils', () => {
 		mockery.deregisterAll();
 	} );
 
-	describe( 'loadCoreTranslations()', () => {
-		it( 'should load core translations', () => {
+	describe( 'getCorePackage()', () => {
+		it( 'should return path to the core package', () => {
 			const resolver = {
 				resolve: ( context, requester, request, cb ) => {
 					cb( null, 'path/to/' + request );
 				}
 			};
 
-			const translationService = {
-				loadPackage: sandbox.spy()
-			};
-
-			envUtils.loadCoreTranslations( 'cwd', translationService, resolver );
-
-			sinon.assert.calledOnce( translationService.loadPackage );
-			sinon.assert.calledWithExactly(
-				translationService.loadPackage,
-				'path/to/@ckeditor/ckeditor5-core'
-			);
+			return envUtils.getCorePackage( 'cwd', resolver ).then( coreTranslations => {
+				expect( coreTranslations ).to.equal( 'path/to/@ckeditor/ckeditor5-core' );
+			} );
 		} );
 	} );
 
-	describe( 'maybeLoadPackage()', () => {
-		it( 'should load package if the path match the regexp', () => {
-			const translationService = {
-				loadPackage: sandbox.spy()
-			};
+	describe( 'getPathToPackage()', () => {
+		it( 'should return package if the path match the regexp', () => {
+			const pathToPackage = envUtils.getPathToPackage( 'path', 'path/to/@ckeditor/ckeditor5-utils/src/util.js' );
 
-			envUtils.maybeLoadPackage( 'path', translationService, 'path/to/@ckeditor/ckeditor5-utils/src/util.js' );
-
-			sinon.assert.calledOnce( translationService.loadPackage );
-			sinon.assert.calledWithExactly( translationService.loadPackage, 'to/@ckeditor/ckeditor5-utils/' );
+			expect( pathToPackage ).to.equal( 'to/@ckeditor/ckeditor5-utils/' );
 		} );
 
-		it( 'should not load package if the path do not match the regexp', () => {
-			const translationService = {
-				loadPackage: sandbox.spy()
-			};
+		it( 'should return null if the path does not match the regexp', () => {
+			const pathToPackage = envUtils.getPathToPackage( 'path', 'path/to/@ckeditor/ckeditor5/src/util.js' );
 
-			envUtils.maybeLoadPackage( 'path', translationService, 'path/to/@ckeditor/ckeditor5/src/util.js' );
-
-			sinon.assert.notCalled( translationService.loadPackage );
+			expect( pathToPackage ).to.equal( null );
 		} );
 
 		it( 'should work with Windows paths', () => {
 			useWindowsPaths();
 
-			const translationService = {
-				loadPackage: sandbox.spy()
-			};
+			const pathToPackage = envUtils.getPathToPackage( 'path', 'path\\to\\@ckeditor\\ckeditor5-utils\\src\\util.js' );
 
-			envUtils.maybeLoadPackage( 'path', translationService, 'path\\to\\@ckeditor\\ckeditor5-utils\\src\\util.js' );
-
-			sinon.assert.calledOnce( translationService.loadPackage );
-			sinon.assert.calledWithExactly( translationService.loadPackage, 'to\\@ckeditor\\ckeditor5-utils\\' );
+			expect( pathToPackage ).to.equal( 'to\\@ckeditor\\ckeditor5-utils\\' );
 		} );
 
 		it( 'should work with nested ckeditor5 packages', () => {
-			const translationService = {
-				loadPackage: sandbox.spy()
-			};
-
-			envUtils.maybeLoadPackage(
+			const pathToPackage = envUtils.getPathToPackage(
 				'path/to/ckeditor5-build-classic',
-				translationService,
 				'path/to/ckeditor5-build-classic/node_modules/@ckeditor/ckeditor5-utils/src/util.js'
 			);
 
-			sinon.assert.calledOnce( translationService.loadPackage );
-			sinon.assert.calledWithExactly( translationService.loadPackage, 'node_modules/@ckeditor/ckeditor5-utils/' );
+			expect( pathToPackage ).to.equal( 'node_modules/@ckeditor/ckeditor5-utils/' );
 		} );
 	} );
 
-	describe( 'maybeAddLoader()', () => {
-		it( 'should add a loader ot the resource if the resource\'s path match the RegExp on posix systems', () => {
+	describe( 'getLoaders()', () => {
+		it( 'should return an array of loaders if the resource\'s path match the RegExp on posix systems', () => {
 			const cwd = 'path';
 			const resource = 'path/to/@ckeditor/ckeditor5-utils/src/util.js';
 			const loaders = [];
 
-			envUtils.maybeAddLoader( cwd, resource, loaders );
+			const newLoaders = envUtils.getLoaders( cwd, resource, loaders );
 
-			expect( loaders ).does.deep.equal( [
+			expect( newLoaders ).to.deep.equal( [
 				originalPath.normalize( originalPath.join( __dirname, '../lib/translatesourceloader.js' ) )
 			] );
 		} );
 
-		it( 'should add a loader ot the resource if the resource\'s path match the RegExp on the Windows systems', () => {
+		it( 'should not change the original array of loaders', () => {
+			const cwd = 'path';
+			const resource = 'path/to/@ckeditor/ckeditor5-utils/src/util.js';
+			const loaders = [];
+
+			envUtils.getLoaders( cwd, resource, loaders );
+
+			expect( loaders ).to.deep.equal( [] );
+		} );
+
+		it( 'should add a loader to the resource if the resource\'s path match the RegExp on the Windows systems', () => {
 			useWindowsPaths();
 
 			const cwd = 'path';
 			const resource = 'path\\to\\@ckeditor\\ckeditor5-utils\\src\\util.js';
 			const loaders = [];
 
-			envUtils.maybeAddLoader( cwd, resource, loaders );
+			const newLoaders = envUtils.getLoaders( cwd, resource, loaders );
 
-			expect( loaders ).does.deep.equal( [
+			expect( newLoaders ).to.deep.equal( [
 				path.normalize( path.join( __dirname, '..\\lib\\translatesourceloader.js' ) )
 			] );
 		} );
 
-		it( 'should not add a loader ot the resource if the resource\'s path do not match the RegExp on posix systems', () => {
+		it( 'should not add a loader to the resource if the resource\'s path do not match the RegExp on posix systems', () => {
 			const cwd = 'path';
 			const resource = 'path/to/@ckeditor/ckeditor5/src/util.js';
 			const loaders = [];
 
-			envUtils.maybeAddLoader( cwd, resource, loaders );
+			const newLoaders = envUtils.getLoaders( cwd, resource, loaders );
 
-			expect( loaders.length ).to.equal( 0 );
+			expect( newLoaders.length ).to.equal( 0 );
 		} );
 
 		it( 'should work with nested ckeditor5 packages', () => {
@@ -159,9 +141,9 @@ describe( 'webpack-plugin/ckeditor5-env-utils', () => {
 			const resource = 'path/to/ckeditor5-build-classic/node_modules/@ckeditor/ckeditor5/src/util.js';
 			const loaders = [];
 
-			envUtils.maybeAddLoader( cwd, resource, loaders );
+			const newLoaders = envUtils.getLoaders( cwd, resource, loaders );
 
-			expect( loaders.length ).to.equal( 0 );
+			expect( newLoaders.length ).to.equal( 0 );
 		} );
 
 		it( 'should work with nested ckeditor5 packages #2', () => {
@@ -169,9 +151,9 @@ describe( 'webpack-plugin/ckeditor5-env-utils', () => {
 			const resource = 'path/to/ckeditor5-build-classic/node_modules/@ckeditor/ckeditor5-utils/src/util.js';
 			const loaders = [];
 
-			envUtils.maybeAddLoader( cwd, resource, loaders );
+			const newLoaders = envUtils.getLoaders( cwd, resource, loaders );
 
-			expect( loaders ).does.deep.equal( [
+			expect( newLoaders ).does.deep.equal( [
 				path.normalize( path.join( __dirname, '../lib/translatesourceloader.js' ) )
 			] );
 		} );
