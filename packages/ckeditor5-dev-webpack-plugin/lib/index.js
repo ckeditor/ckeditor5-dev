@@ -14,16 +14,13 @@ const ckeditor5EnvUtils = require( './ckeditor5-env-utils' );
 /**
  * CKEditorWebpackPlugin, for now, implements only the Translation Service (@ckeditor/ckeditor5#624, @ckeditor/ckeditor5#387).
  *
- * Workflow:
+ * When one entry point (or to be precise one output JS file) is defined, language specified in `language` option will be
+ * statically added to the bundle. When `additionalLanguages` option is set, languages specified there will be stored
+ * in separate files.
  *
- * One entry point (or to be precise one output JS file):
- * - `additionalLanguages` not set -> build optimized version
- * - `additionalLanguages` set –> `language` will be built into the main bundle (e.g. `ckeditor.js`)
- *
- * Multiple output JS files:
- * - `additionalLanguages` not set -> build optimized version
- * - `additionalLanguages` set –> emit all translation files separately and warn user,
- * that he needs to load at least one translation file manually to get editor working
+ * When multiple outputs are defined, all languages (from both `language` and `additionalLanguages` options) will be
+ * stored in separate files. In that situation user will be warned that he needs to load at least one translation file
+ * manually to get editor working.
  *
  * Translation files will be emitted in the `outputDirectory` or `'lang'` directory if `outputDirectory` is not set.
  */
