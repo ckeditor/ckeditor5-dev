@@ -23,43 +23,59 @@ describe( 'Linter plugin', () => {
 		expect( linter._errors.length ).to.be.equal( 1 );
 	} );
 
-	it( '_lintMemberofProperty() - var, let', () => {
-		const linter = new DocletValidator( [ {
-			kind: 'member',
-			name: 'module:ckeditor5/path',
-			memberof: '<anonymous>',
-			meta: { fileName: '', path: '' },
-		} ], getTestedModules() );
+	describe( '_lintMemberofProperty()', () => {
+		it( 'should not emit error if the doclet comes from inner variable', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'member',
+				name: 'module:ckeditor5/path',
+				memberof: '<anonymous>',
+				meta: { fileName: '', path: '' },
+			} ], getTestedModules() );
 
-		linter._lintMemberofProperty();
+			linter._lintMemberofProperty();
 
-		expect( linter._errors.length ).to.be.equal( 0 );
-	} );
+			expect( linter._errors.length ).to.be.equal( 0 );
+		} );
 
-	it( '_lintMemberofProperty() - wrong memberof', () => {
-		const linter = new DocletValidator( [ {
-			kind: 'member',
-			name: 'module:ckeditor5/wrong_path',
-			memberof: 'wrongMemberof',
-			meta: { fileName: '', path: '' },
-		} ], getTestedModules() );
+		it( 'should emit error if the doclet contains invalid `memberof` property', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'member',
+				name: 'module:ckeditor5/wrong_path',
+				memberof: 'wrongMemberof',
+				meta: { fileName: '', path: '' },
+			} ], getTestedModules() );
 
-		linter._lintMemberofProperty();
+			linter._lintMemberofProperty();
 
-		expect( linter._errors.length ).to.be.equal( 1 );
-	} );
+			expect( linter._errors.length ).to.be.equal( 1 );
+		} );
 
-	it( '_lintMemberofProperty() - correct reference', () => {
-		const linter = new DocletValidator( [ {
-			kind: 'member',
-			name: 'module:ckeditor5/editor',
-			memberof: 'module:ckeditor5/editor',
-			meta: { fileName: '', path: '' },
-		} ], getTestedModules() );
+		it( 'should not emit error when the doclets\' `memberof` starts with `module:`', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'member',
+				name: 'module:ckeditor5/editor',
+				memberof: 'module:ckeditor5/editor',
+				meta: { fileName: '', path: '' },
+			} ], getTestedModules() );
 
-		linter._lintMemberofProperty();
+			linter._lintMemberofProperty();
 
-		expect( linter._errors.length ).to.be.equal( 0 );
+			expect( linter._errors.length ).to.be.equal( 0 );
+		} );
+
+		it( 'should not emit error if the doclet comes from undocumented code', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'member',
+				undocumented: 'true',
+				name: '⌘',
+				memberof: 'macGlyphsToModifiers',
+				meta: { fileName: '', path: '' },
+			} ], getTestedModules() );
+
+			linter._lintMemberofProperty();
+
+			expect( linter._errors.length ).to.be.equal( 0 );
+		} );
 	} );
 
 	describe( '_lintParams()', () => {
