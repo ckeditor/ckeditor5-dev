@@ -407,5 +407,25 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 			expect( newCommit ).to.deep.equal( commit );
 		} );
+
+		it( 'removes [skip ci] from the commit message', () => {
+			const commit = {
+				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+				header: 'Fix: README. [skip ci]',
+				type: 'Fix',
+				subject: 'README. [skip ci]',
+				body: null,
+				footer: null,
+				notes: []
+			};
+
+			transformCommitForSubRepository( commit, {
+				displayLogs: false,
+				packageData: packageJson,
+				returnInvalidCommit: true
+			} );
+
+			expect( commit.subject ).to.equal( 'README.' );
+		} );
 	} );
 } );
