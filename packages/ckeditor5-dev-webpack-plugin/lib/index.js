@@ -35,6 +35,7 @@ module.exports = class CKEditorWebpackPlugin {
 	 * should be relative to the webpack context.
 	 * @param {Boolean} [options.throwErrorOnMissingTranslation] Option that make the plugin throw when the translation is missing.
 	 * By default original (english translation keys) are used when the target translation is missing.
+	 * @param {Boolean} [options.verbose] Option that make this plugin log everything into the console.
 	 */
 	constructor( options = {} ) {
 		this.options = options;
@@ -64,7 +65,7 @@ module.exports = class CKEditorWebpackPlugin {
 		}
 
 		if ( !additionalLanguages ) {
-			if ( this.options.outputDirectory ) {
+			if ( this.options.outputDirectory && this.options.verbose ) {
 				console.warn( chalk.yellow(
 					'Warning: `outputDirectory` option does not work for one language. It will be ignored.'
 				) );

@@ -105,18 +105,18 @@ describe( 'translations', () => {
 				expect( result ).to.equal( 'translate( \'Cancel\' )' );
 			} );
 
-			it( 'should emit an error and keep original string if the translation is missing', () => {
+			it( 'should emit a warning and keep original string if the translation is missing', () => {
 				const translationService = new SingleLanguageTranslationService( 'pl' );
 				const source = 't( \'Cancel\' )';
 
 				const spy = sandbox.spy();
-				translationService.on( 'error', spy );
+				translationService.on( 'warning', spy );
 
 				const result = translationService.translateSource( source, 'file.js' );
 
 				expect( result ).to.equal( 't(\'Cancel\');' );
 				sinon.assert.calledOnce( spy );
-				sinon.assert.calledWithExactly( spy, 'Missing translation for \'Cancel\' for pl language in file.js.' );
+				sinon.assert.calledWithExactly( spy, 'Missing translation for \'Cancel\' for \'pl\' language in file.js.' );
 			} );
 
 			it( 'should throw an error when the t is called with the variable', () => {

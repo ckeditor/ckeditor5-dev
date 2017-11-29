@@ -88,7 +88,7 @@ module.exports = class SingleLanguageTranslationService extends EventEmitter {
 
 	_translateString( originalString, sourceFile ) {
 		if ( !this._dictionary[ originalString ] ) {
-			this.emit( 'error', `Missing translation for '${ originalString }' for ${ this._language } language in ${ sourceFile }.` );
+			this.emit( 'warning', `Missing translation for '${ originalString }' for '${ this._language }' language in ${ sourceFile }.` );
 
 			return originalString;
 		}

@@ -20,6 +20,7 @@ const chalk = require( 'chalk' );
  * should be relative to the webpack context.
  * @param {Boolean} [options.throwErrorOnMissingTranslation] Option that make this function throw when the translation is missing.
  * By default original (english translation keys) are used when the target translation is missing.
+ * @param {Boolean} [options.verbose] Option that make this function log everything into the console.
  * @param {TranslationService} translationService Translation service that will load PO files, replace translation keys and generate assets.
  * @param {Object} envUtils Environment utils internally called within the `serveTranslations()`, that make `serveTranslations()`
  * ckeditor5 - independent without hard-to-test logic.
@@ -30,7 +31,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 	// Provides translateSource method for the `translatesourceloader` loader.
 	compiler.options.translateSource = ( source, sourceFile ) => translationService.translateSource( source, sourceFile );
 
-	// Watch for errors during translation process.
+	// Watch for warnings and errors during translation process.
 	translationService.on( 'error', error => {
 		if ( options.throwErrorOnMissingTranslation ) {
 			throw new Error( chalk.red( error ) );
@@ -40,7 +41,9 @@ module.exports = function serveTranslations( compiler, options, translationServi
 	} );
 
 	translationService.on( 'warning', warning => {
-		console.warn( chalk.yellow( `Warning: ${ warning }` ) );
+		if ( options.verbose ) {
+			console.warn( chalk.yellow( `Warning: ${ warning }` ) );
+		}
 	} );
 
 	// Add core translations before `translatesourceloader` starts translating.

@@ -73,7 +73,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * Load package and tries to get PO files from the package if it's unknown.
 	 * If the `compileAllLanguages` flag is set to true, language's set will be expanded by the found languages.
 	 *
-	 * @fires error
+	 * @fires warning
 	 * @param {String} pathToPackage Path to the package containing translations.
 	 */
 	loadPackage( pathToPackage ) {
@@ -92,7 +92,10 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		if ( this._compileAllLanguages ) {
 			for ( const fileName of fs.readdirSync( pathToTranslationDirectory ) ) {
 				if ( !fileName.endsWith( '.po' ) ) {
-					this.emit( 'error', `Translation directory (${ pathToTranslationDirectory }) should contain only translation files.` );
+					this.emit(
+						'warning',
+						`Translation directory (${ pathToTranslationDirectory }) should contain only translation files.`
+					);
 
 					continue;
 				}
@@ -117,8 +120,9 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	/**
 	 * Return an array of assets based on the stored dictionaries.
 	 * If there is one `compilationAssets`, merge main translation with that asset and join with other assets built outside.
-	 * Otherwise fire an error and retuen an array of assets built outside of the `compilationAssets`.
+	 * Otherwise fire an warning and return an array of assets built outside of the `compilationAssets`.
 	 *
+	 * @fires warning
 	 * @fires error
 	 * @param {Object} options
 	 * @param {String} [options.outputDirectory] Output directory for the translation files relative to the output.
@@ -193,7 +197,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			const translatedString = langDictionary[ originalString ];
 
 			if ( !translatedString ) {
-				this.emit( 'error', `Missing translation for '${ originalString }' for ${ lang } language.` );
+				this.emit( 'warning', `Missing translation for '${ originalString }' for '${ lang }' language.` );
 			}
 
 			translatedStrings[ id ] = translatedString || originalString;

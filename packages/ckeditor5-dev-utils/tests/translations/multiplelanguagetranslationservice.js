@@ -249,10 +249,8 @@ describe( 'translations', () => {
 					}
 				} );
 
-				sinon.assert.calledThrice( spy );
+				sinon.assert.calledOnce( spy );
 				sinon.assert.calledWithExactly( spy, 'No translation found for xxx language.' );
-				sinon.assert.calledWithExactly( spy, 'Missing translation for \'Cancel\' for xxx language.' );
-				sinon.assert.calledWithExactly( spy, 'Missing translation for \'Save\' for xxx language.' );
 			} );
 
 			it( 'should feed missing translation with the translation key if the translated string is missing', () => {
@@ -291,11 +289,14 @@ describe( 'translations', () => {
 				] );
 			} );
 
-			it( 'should emit an error if the main translation is missing', () => {
-				const translationService = new MultipleLanguageTranslationService( 'xxx', { additionalLanguages: [ 'pl' ] } );
-				const spy = sandbox.spy();
+			it( 'should emit an error if the translations for the main language are missing', () => {
+				const translationService = new MultipleLanguageTranslationService( 'xxx', {
+					additionalLanguages: [ 'pl' ]
+				} );
 
-				translationService.on( 'error', spy );
+				const errorSpy = sandbox.spy();
+
+				translationService.on( 'error', errorSpy );
 
 				translationService._translationIdsDictionary = {
 					Cancel: 'a',
@@ -315,10 +316,37 @@ describe( 'translations', () => {
 					}
 				} );
 
-				sinon.assert.calledThrice( spy );
-				sinon.assert.calledWithExactly( spy, 'No translation found for xxx language.' );
-				sinon.assert.calledWithExactly( spy, 'Missing translation for \'Cancel\' for xxx language.' );
-				sinon.assert.calledWithExactly( spy, 'Missing translation for \'Save\' for xxx language.' );
+				sinon.assert.calledOnce( errorSpy );
+				sinon.assert.calledWithExactly( errorSpy, 'No translation found for xxx language.' );
+			} );
+
+			it( 'should emit an warning if the translation is missing', () => {
+				const translationService = new MultipleLanguageTranslationService( 'pl', {
+					additionalLanguages: []
+				} );
+				const warningSpy = sandbox.spy();
+
+				translationService.on( 'warning', warningSpy );
+
+				translationService._translationIdsDictionary = {
+					Cancel: 'a',
+					Save: 'b'
+				};
+
+				translationService._dictionary = {
+					pl: {
+						Cancel: 'Anuluj'
+					}
+				};
+
+				translationService.getAssets( {
+					compilationAssets: {
+						'ckeditor.js': { source: () => 'source' }
+					}
+				} );
+
+				sinon.assert.calledOnce( warningSpy );
+				sinon.assert.calledWithExactly( warningSpy, 'Missing translation for \'Save\' for \'pl\' language.' );
 			} );
 
 			it( 'should bound to assets only used translations', () => {
