@@ -134,7 +134,7 @@ module.exports = function generateSummaryChangelog( options ) {
 						dependencies,
 						newVersion: version,
 						currentVersion: packageJson.version,
-						repositoryUrl: packageJson.repository.url.replace( /\.git^/, '' ),
+						repositoryUrl: packageJson.repository.url.replace( /\.git$/, '' ),
 					} );
 
 					// Part of the changelog generated from commits should be attached to changelog entries.
@@ -492,7 +492,7 @@ module.exports = function generateSummaryChangelog( options ) {
 	// @returns {String}
 	function formatChangelogEntry( packageName, nextVersion, currentVersion = null ) {
 		const packageJson = getPackageJson( getPathToRepository( packageName ) );
-		const repositoryUrl = packageJson.repository.url.replace( /\.git^/, '' );
+		const repositoryUrl = packageJson.repository.url.replace( /\.git$/, '' );
 		const githubUrl = `${ repositoryUrl }/releases/tag/v${ nextVersion }`;
 		const npmUrl = `https://www.npmjs.com/package/${ packageName }`;
 

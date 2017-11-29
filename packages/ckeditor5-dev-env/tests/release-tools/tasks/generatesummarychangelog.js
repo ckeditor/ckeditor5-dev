@@ -145,21 +145,21 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return generateSummaryChangelog( options )
 				.then( () => {
 					/* eslint-disable max-len */
-					const expectedNewChangelog = `## [1.0.0](https://github.com/ckeditor/alpha.git/compare/v0.0.1...v1.0.0) (2017-10-09)
+					const expectedNewChangelog = `## [1.0.0](https://github.com/ckeditor/alpha/compare/v0.0.1...v1.0.0) (2017-10-09)
 
 ### Dependencies
 
 Major releases (contain breaking changes):
 
-* [@ckeditor/epsilon](https://www.npmjs.com/package/@ckeditor/epsilon): v0.5.0 => [v1.0.0](https://github.com/ckeditor/epsilon.git/releases/tag/v1.0.0)
+* [@ckeditor/epsilon](https://www.npmjs.com/package/@ckeditor/epsilon): v0.5.0 => [v1.0.0](https://github.com/ckeditor/epsilon/releases/tag/v1.0.0)
 
 Minor releases:
 
-* [@ckeditor/gamma](https://www.npmjs.com/package/@ckeditor/gamma): v0.3.0 => [v0.4.0](https://github.com/ckeditor/gamma.git/releases/tag/v0.4.0)
+* [@ckeditor/gamma](https://www.npmjs.com/package/@ckeditor/gamma): v0.3.0 => [v0.4.0](https://github.com/ckeditor/gamma/releases/tag/v0.4.0)
 
 Patch releases (bug fixes, internal changes):
 
-* [@ckeditor/beta](https://www.npmjs.com/package/@ckeditor/beta): v0.2.0 => [v0.2.1](https://github.com/ckeditor/beta.git/releases/tag/v0.2.1)
+* [@ckeditor/beta](https://www.npmjs.com/package/@ckeditor/beta): v0.2.0 => [v0.2.1](https://github.com/ckeditor/beta/releases/tag/v0.2.1)
 `;
 					/* eslint-enable max-len */
 
@@ -238,15 +238,15 @@ Patch releases (bug fixes, internal changes):
 			return generateSummaryChangelog( options )
 				.then( () => {
 					/* eslint-disable max-len */
-					const expectedNewChangelog = `## [0.1.0](https://github.com/ckeditor/alpha.git/compare/v0.0.1...v0.1.0) (2017-10-09)
+					const expectedNewChangelog = `## [0.1.0](https://github.com/ckeditor/alpha/compare/v0.0.1...v0.1.0) (2017-10-09)
 
 ### Dependencies
 
 Patch releases (bug fixes, internal changes):
 
-* [@ckeditor/beta](https://www.npmjs.com/package/@ckeditor/beta): v0.2.0 => [v0.2.1](https://github.com/ckeditor/beta.git/releases/tag/v0.2.1)
-* [@ckeditor/epsilon](https://www.npmjs.com/package/@ckeditor/epsilon): v0.5.0 => [v0.5.1](https://github.com/ckeditor/epsilon.git/releases/tag/v0.5.1)
-* [@ckeditor/gamma](https://www.npmjs.com/package/@ckeditor/gamma): v0.3.0 => [v0.3.1](https://github.com/ckeditor/gamma.git/releases/tag/v0.3.1)
+* [@ckeditor/beta](https://www.npmjs.com/package/@ckeditor/beta): v0.2.0 => [v0.2.1](https://github.com/ckeditor/beta/releases/tag/v0.2.1)
+* [@ckeditor/epsilon](https://www.npmjs.com/package/@ckeditor/epsilon): v0.5.0 => [v0.5.1](https://github.com/ckeditor/epsilon/releases/tag/v0.5.1)
+* [@ckeditor/gamma](https://www.npmjs.com/package/@ckeditor/gamma): v0.3.0 => [v0.3.1](https://github.com/ckeditor/gamma/releases/tag/v0.3.1)
 
 Changelog entries generated from commits.
 `;
@@ -339,20 +339,20 @@ Changelog entries generated from commits.
 			return generateSummaryChangelog( options )
 				.then( () => {
 					/* eslint-disable max-len */
-					const expectedNewChangelog = `## [0.2.0](https://github.com/ckeditor/foo-bar.git/compare/v0.1.0...v0.2.0) (2017-10-09)
+					const expectedNewChangelog = `## [0.2.0](https://github.com/ckeditor/foo-bar/compare/v0.1.0...v0.2.0) (2017-10-09)
 
 ### Dependencies
 
 New packages:
 
-* [@ckeditor/alpha](https://www.npmjs.com/package/@ckeditor/alpha): [v0.1.0](https://github.com/ckeditor/alpha.git/releases/tag/v0.1.0)
+* [@ckeditor/alpha](https://www.npmjs.com/package/@ckeditor/alpha): [v0.1.0](https://github.com/ckeditor/alpha/releases/tag/v0.1.0)
 
 Patch releases (bug fixes, internal changes):
 
-* [@ckeditor/beta](https://www.npmjs.com/package/@ckeditor/beta): v0.2.0 => [v0.2.1](https://github.com/ckeditor/beta.git/releases/tag/v0.2.1)
-* [@ckeditor/delta](https://www.npmjs.com/package/@ckeditor/delta): v0.4.0 => [v0.4.1](https://github.com/ckeditor/delta.git/releases/tag/v0.4.1)
-* [@ckeditor/epsilon](https://www.npmjs.com/package/@ckeditor/epsilon): v0.5.0 => [v0.5.1](https://github.com/ckeditor/epsilon.git/releases/tag/v0.5.1)
-* [@ckeditor/gamma](https://www.npmjs.com/package/@ckeditor/gamma): v0.3.0 => [v0.3.1](https://github.com/ckeditor/gamma.git/releases/tag/v0.3.1)
+* [@ckeditor/beta](https://www.npmjs.com/package/@ckeditor/beta): v0.2.0 => [v0.2.1](https://github.com/ckeditor/beta/releases/tag/v0.2.1)
+* [@ckeditor/delta](https://www.npmjs.com/package/@ckeditor/delta): v0.4.0 => [v0.4.1](https://github.com/ckeditor/delta/releases/tag/v0.4.1)
+* [@ckeditor/epsilon](https://www.npmjs.com/package/@ckeditor/epsilon): v0.5.0 => [v0.5.1](https://github.com/ckeditor/epsilon/releases/tag/v0.5.1)
+* [@ckeditor/gamma](https://www.npmjs.com/package/@ckeditor/gamma): v0.3.0 => [v0.3.1](https://github.com/ckeditor/gamma/releases/tag/v0.3.1)
 
 Changelog entries generated from commits.
 `;
