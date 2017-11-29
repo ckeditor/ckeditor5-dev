@@ -29,7 +29,6 @@ describe( 'styles', () => {
 					'postcss-ckeditor5-theme-importer',
 					'postcss-mixins',
 					'postcss-nesting',
-					'postcss-custom-selectors',
 					'postcss-ckeditor5-theme-logger'
 				] );
 		} );
