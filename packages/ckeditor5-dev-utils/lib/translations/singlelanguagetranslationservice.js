@@ -21,10 +21,25 @@ module.exports = class SingleLanguageTranslationService extends EventEmitter {
 	constructor( language ) {
 		super();
 
+		/**
+		 * Main language that should be built in to the bundle.
+		 *
+		 * @private
+		 */
 		this._language = language;
 
-		this._packagePaths = new Set();
+		/**
+		 * Set of handled packages that speeds up the translation process.
+		 *
+		 * @private
+		 */
+		this._handledPackages = new Set();
 
+		/**
+		 * translationKey -> targetTranslation dictionary.
+		 *
+		 * @private
+		 */
 		this._dictionary = {};
 	}
 
@@ -32,6 +47,7 @@ module.exports = class SingleLanguageTranslationService extends EventEmitter {
 	 * Translate file's source and replace `t()` call strings with translated strings.
 	 *
 	 * @fires error
+	 * @fires warning
 	 * @param {String} source Source of the file.
 	 * @param {String} fileName File name.
 	 * @returns {String}
@@ -53,25 +69,33 @@ module.exports = class SingleLanguageTranslationService extends EventEmitter {
 	 * @param {String} pathToPackage Path to the package containing translations.
 	 */
 	loadPackage( pathToPackage ) {
-		if ( this._packagePaths.has( pathToPackage ) ) {
+		if ( this._handledPackages.has( pathToPackage ) ) {
 			return;
 		}
 
-		this._packagePaths.add( pathToPackage );
+		this._handledPackages.add( pathToPackage );
 
-		const pathToPoFile = this._getPathToPoFile( pathToPackage, this._language );
+		const pathToTranslationDirectory = this._getPathToTranslationDirectory( pathToPackage, this._language );
+		const pathToPoFile = pathToTranslationDirectory + path.sep + this._language + '.po';
 
 		this._loadPoFile( pathToPoFile );
 	}
 
 	/**
 	 * That class doesn't generate any asset.
+	 *
+	 * @returns {Array}
 	 */
 	getAssets() {
 		return [];
 	}
 
-	// Load translations from the PO file.
+	/**
+	 * Load translations from the PO file.
+	 *
+	 * @private
+	 * @param {String} pathToPoFile Path to the target PO file.
+	 */
 	_loadPoFile( pathToPoFile ) {
 		if ( !fs.existsSync( pathToPoFile ) ) {
 			return;
@@ -86,6 +110,13 @@ module.exports = class SingleLanguageTranslationService extends EventEmitter {
 		}
 	}
 
+	/**
+	 * Translate original string for the target language.
+	 *
+	 * @private
+	 * @param {String} originalString
+	 * @param {String} sourceFile Path to the original string's file.
+	 */
 	_translateString( originalString, sourceFile ) {
 		if ( !this._dictionary[ originalString ] ) {
 			this.emit( 'warning', `Missing translation for '${ originalString }' for '${ this._language }' language in ${ sourceFile }.` );
@@ -97,9 +128,14 @@ module.exports = class SingleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
+	 * Return path to the translation directory depending on the path to package.
+	 * This method is protected to enable this class usage in other environments than CKE5.
+	 *
 	 * @protected
+	 * @param {String} pathToPackage
+	 * @returns {String}
 	 */
-	_getPathToPoFile( pathToPackage, languageCode ) {
-		return path.join( pathToPackage, 'lang', 'translations', languageCode + '.po' );
+	_getPathToTranslationDirectory( pathToPackage ) {
+		return path.join( pathToPackage, 'lang', 'translations' );
 	}
 };

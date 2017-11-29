@@ -30,22 +30,55 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	constructor( language, { additionalLanguages, compileAllLanguages = false } = {} ) {
 		super();
 
+		/**
+		 * Main language that should be built in to the bundle.
+		 *
+		 * @private
+		 */
 		this._mainLanguage = language;
 
+		/**
+		 * Set of languages that will be used by translator. This set might be expanded by found languages,
+		 * if `compileAllLanguages` is turned on.
+		 *
+		 * @private
+		 */
 		this._languages = new Set( [ language, ...additionalLanguages ] );
 
+		/**
+		 * Option indicates whether the languages are specified or should be found at runtime.
+		 *
+		 * @private
+		 */
 		this._compileAllLanguages = compileAllLanguages;
 
-		// Set of handled packages that speed things up.
+		/**
+		 * Set of handled packages that speeds up the translation process.
+		 *
+		 * @private
+		 */
 		this._handledPackages = new Set();
 
-		// language -> translationKey -> targetTranslation dictionary.
+		/**
+		 * language -> translationKey -> targetTranslation dictionary.
+		 *
+		 * @private
+		 */
 		this._dictionary = {};
 
-		// translationKey -> id dictionary gathered from files parsed by loader.
-		// @type {Object.<String,Object>}
+		/**
+		 * translationKey -> id dictionary gathered from files parsed by loader.
+		 *
+		 * @private
+		 * @type {Object.<String,Object>}
+		 */
 		this._translationIdsDictionary = {};
 
+		/**
+		 * Id generator that's used to replace translation strings with short ids and generate translation files.
+		 *
+		 * @private
+		 */
 		this._idGenerator = new ShortIdGenerator();
 	}
 
@@ -161,7 +194,13 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		];
 	}
 
-	// Return assets for the given directory and languages.
+	/**
+	 * Return assets for the given directory and languages.
+	 *
+	 * @private
+	 * @param outputDirectory Output directory for assets.
+	 * @param {Iterable.<String>} languages Languages for assets.
+	 */
 	_getTranslationAssets( outputDirectory, languages ) {
 		return Array.from( languages ).map( language => {
 			const translatedStrings = this._getIdToTranslatedStringDictionary( language );
@@ -178,8 +217,14 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		} );
 	}
 
-	// Walk through the `translationIdsDictionary` and find corresponding strings in the target language's dictionary.
-	// Use original strings if translated ones are missing.
+	/**
+	 * Walk through the `translationIdsDictionary` and find corresponding strings in the target language's dictionary.
+	 * Use original strings if translated ones are missing.
+	 *
+	 * @private
+	 * @param {String} lang Target language.
+	 * @returns {Object.<String,String>}
+	 */
 	_getIdToTranslatedStringDictionary( lang ) {
 		let langDictionary = this._dictionary[ lang ];
 
@@ -206,7 +251,13 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		return translatedStrings;
 	}
 
-	// Load translations from the PO files.
+	/**
+	 * Load translations from the PO files.
+	 *
+	 * @private
+	 * @param {String} language PO file's language.
+	 * @param {String} pathToPoFile Path to the target PO file.
+	 */
 	_loadPoFile( language, pathToPoFile ) {
 		if ( !fs.existsSync( pathToPoFile ) ) {
 			return;
@@ -226,7 +277,13 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		}
 	}
 
-	// Translate all t() call found in source text to the target language.
+	/**
+	 * Return an id for the original string. If it's stored in the `_translationIdsDictionary` return it instead of generating new one.
+	 *
+	 * @private
+	 * @param {String} originalString
+	 * @returns {String}
+	 */
 	_getId( originalString ) {
 		let id = this._translationIdsDictionary[ originalString ];
 
@@ -239,9 +296,12 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
-	 * Make this fn overridable, so the class might be used in other environments than CKE5.
+	 * Return path to the translation directory depending on the path to package.
+	 * This method is protected to enable this class usage in other environments than CKE5.
 	 *
 	 * @protected
+	 * @param {String} pathToPackage
+	 * @returns {String}
 	 */
 	_getPathToTranslationDirectory( pathToPackage ) {
 		return path.join( pathToPackage, 'lang', 'translations' );
