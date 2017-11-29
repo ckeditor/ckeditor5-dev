@@ -69,7 +69,7 @@ module.exports = function getKarmaConfig( options ) {
 		return log.error( 'Not found files to tests. Specified patterns are invalid.' );
 	}
 
-	const tempFile = tmp.fileSync();
+	const tempFile = tmp.fileSync( { postfix: '.js' } );
 
 	const filesImports = allFiles
 		.map( file => 'import "' + file + '";' )
@@ -102,7 +102,7 @@ module.exports = function getKarmaConfig( options ) {
 		preprocessors: preprocessorMap,
 
 		webpack: getWebpackConfigForAutomatedTests( {
-			files: allFiles,
+			files: options.files,
 			sourceMap: options.sourceMap,
 			coverage: options.coverage
 		} ),

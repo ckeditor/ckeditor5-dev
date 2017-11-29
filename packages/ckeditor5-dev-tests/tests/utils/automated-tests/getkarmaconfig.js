@@ -151,7 +151,7 @@ describe( 'getKarmaConfig', () => {
 		expect( karmaConfig ).to.have.own.property( 'files' );
 		expect( karmaConfig ).to.have.own.property( 'preprocessors' );
 		expect( karmaConfig ).to.have.own.property( 'webpack' );
-		expect( karmaConfig.webpack.files ).to.deep.equal( allFiles );
+		expect( karmaConfig.webpack.files ).to.deep.equal( [ '*' ] );
 		expect( karmaConfig.webpack.sourceMap ).to.equal( false );
 		expect( karmaConfig.webpack.coverage ).to.equal( false );
 		expect( karmaConfig ).to.have.own.property( 'webpackMiddleware' );
