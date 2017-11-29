@@ -33,9 +33,8 @@ module.exports = class CKEditorWebpackPlugin {
 	 * the compilation.
 	 * @param {String} [options.outputDirectory='lang'] Output directory for the emitted translation files,
 	 * should be relative to the webpack context.
-	 * @param {Boolean} [options.throwErrorOnMissingTranslation] Option that make the plugin throw when the translation is missing.
-	 * By default original (english translation keys) are used when the target translation is missing.
-	 * @param {Boolean} [options.verbose] Option that make this plugin log everything into the console.
+	 * @param {Boolean} [options.strict] Option that make the plugin throw when the error is found during the compilation.
+	 * @param {Boolean} [options.verbose] Option that make this plugin log all warnings into the console.
 	 */
 	constructor( options = {} ) {
 		this.options = options;

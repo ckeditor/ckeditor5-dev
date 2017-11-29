@@ -134,7 +134,8 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 		it( 'should log a warning if `additionalLanguages` is not specified while `outputDirectory` is set', () => {
 			const options = {
 				language: 'en',
-				outputDirectory: 'custom-lang'
+				outputDirectory: 'custom-lang',
+				verbose: true
 			};
 
 			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );

@@ -18,8 +18,7 @@ const chalk = require( 'chalk' );
  * @param {Array.<String>} options.languages Target languages.
  * @param {String} [options.outputDirectory='lang'] Output directory for the emitted translation files,
  * should be relative to the webpack context.
- * @param {Boolean} [options.throwErrorOnMissingTranslation] Option that make this function throw when the translation is missing.
- * By default original (english translation keys) are used when the target translation is missing.
+ * @param {Boolean} [options.strict] Option that make this function throw when the error is found during the compilation.
  * @param {Boolean} [options.verbose] Option that make this function log everything into the console.
  * @param {TranslationService} translationService Translation service that will load PO files, replace translation keys and generate assets.
  * @param {Object} envUtils Environment utils internally called within the `serveTranslations()`, that make `serveTranslations()`
@@ -33,7 +32,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 
 	// Watch for warnings and errors during translation process.
 	translationService.on( 'error', error => {
-		if ( options.throwErrorOnMissingTranslation ) {
+		if ( options.strict ) {
 			throw new Error( chalk.red( error ) );
 		}
 
