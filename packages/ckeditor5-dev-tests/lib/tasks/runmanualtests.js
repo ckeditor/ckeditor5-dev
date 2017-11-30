@@ -29,7 +29,7 @@ module.exports = function runManualTests( options ) {
 	return Promise.resolve()
 		.then( () => removeDir( buildDir ) )
 		.then( () => Promise.all( [
-			compileManualTestScripts( buildDir, manualTestFilesPattern ),
+			compileManualTestScripts( buildDir, manualTestFilesPattern, options.themePath ),
 			compileManualTestHtmlFiles( buildDir, manualTestFilesPattern )
 		] ) )
 		.then( () => createManualTestServer( buildDir ) );

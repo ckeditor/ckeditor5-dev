@@ -12,7 +12,10 @@
     "javascript-stringify": "^1.6.0",
     "pofile": "^1.0.9",
     "shelljs": "^0.7.8",
-    "through2": "^2.0.3"
+    "through2": "^2.0.3",
+    "postcss-import": "^11.0.0",
+    "postcss-mixins": "^6.2.0",
+    "postcss-nesting": "^4.2.1"
   },
   "devDependencies": {
     "chai": "^4.1.2",

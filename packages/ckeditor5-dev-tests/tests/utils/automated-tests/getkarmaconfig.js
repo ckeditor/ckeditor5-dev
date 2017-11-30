@@ -47,7 +47,8 @@ describe( 'getKarmaConfig', () => {
 			coverage: false,
 			browsers: [ 'Chrome' ],
 			watch: false,
-			verbose: false
+			verbose: false,
+			themePath: 'path/to/theme'
 		} );
 
 		const expectedFile = 'workspace/packages/ckeditor5-*/tests/**/*.js';
@@ -67,6 +68,7 @@ describe( 'getKarmaConfig', () => {
 				files: [ expectedFile ],
 				sourceMap: false,
 				coverage: false,
+				themePath: 'path/to/theme'
 			},
 			webpackMiddleware: {
 				noInfo: true,

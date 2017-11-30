@@ -7,6 +7,7 @@
 
 const path = require( 'path' );
 const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
+const { getPostCssConfig } = require( '@ckeditor/ckeditor5-dev-utils' ).styles;
 
 /**
  * @param {Object} options
@@ -22,9 +23,20 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 					use: [ 'raw-loader' ]
 				},
 				{
-					// test: **/ckeditor5-*/theme/**/*.scss
-					test: /\.scss$/,
-					use: [ 'style-loader', 'css-loader', require.resolve( 'sass-loader' ) ]
+					// test: **/ckeditor5-*/theme/**/*.css
+					test: /\.css$/,
+					use: [
+						'style-loader',
+						{
+							loader: 'postcss-loader',
+							options: getPostCssConfig( {
+								themeImporter: {
+									themePath: options.themePath
+								},
+								minify: true
+							} )
+						},
+					]
 				},
 				{
 					test: /\.(txt|html)$/,
