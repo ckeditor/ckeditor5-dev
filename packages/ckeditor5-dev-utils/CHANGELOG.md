@@ -5,11 +5,7 @@ Changelog
 
 ### Features
 
-* Implement TranslationService v2 (ckeditor5-dev part). Closes [ckeditor/ckeditor5#666](https://github.com/ckeditor/ckeditor5/issues/666). Closes [ckeditor/ckeditor5#624](https://github.com/ckeditor/ckeditor5/issues/624). ([ee2a1d2](https://github.com/ckeditor/ckeditor5-dev/commit/ee2a1d2))
-
-### BREAKING CHANGES
-
-* `CKEditorWebpackPlugin` plugin supports now `language` and `additionalLanguages` options instead of `languages`. If only `language` is set, the plugin will translate code directly into the main bundle. When `additionalLanguages` are provided, then the plugin will output bundle with the main language and rest translation files separately.
+* `TranslationService` v2. Closes [ckeditor/ckeditor5#666](https://github.com/ckeditor/ckeditor5/issues/666). Closes [ckeditor/ckeditor5#624](https://github.com/ckeditor/ckeditor5/issues/624). ([ee2a1d2](https://github.com/ckeditor/ckeditor5-dev/commit/ee2a1d2))
 
 
 ## [5.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@4.0.2...@ckeditor/ckeditor5-dev-utils@5.0.0) (2017-11-13)
