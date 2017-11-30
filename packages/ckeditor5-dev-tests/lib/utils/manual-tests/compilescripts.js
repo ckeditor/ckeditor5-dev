@@ -16,6 +16,7 @@ const getRelativeFilePath = require( '../getrelativefilepath' );
 /**
  * @param {String} buildDir A path where compiled files will be saved.
  * @param {Array.<String>} manualTestScriptsPatterns An array of patterns that resolve manual test scripts.
+ * @param {String} themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
  * @returns {Promise}
  */
 module.exports = function compileManualTestScripts( buildDir, manualTestScriptsPatterns, themePath ) {
