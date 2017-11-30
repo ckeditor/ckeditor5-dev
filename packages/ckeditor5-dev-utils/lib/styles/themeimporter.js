@@ -158,7 +158,7 @@ function getThemeFilePath( themePath, inputFilePath ) {
 	const packageName = getPackageName( inputFilePath );
 
 	// "components/button.css"
-	const inputFileName = inputFilePath.split( path.join( packageName, 'theme' ) )[ 1 ];
+	const inputFileName = inputFilePath.split( path.join( packageName, 'theme', path.sep ) )[ 1 ];
 
 	// Don't load theme file for files not belonging to "ckeditor5-*/theme" folder.
 	if ( !inputFileName ) {
@@ -166,7 +166,7 @@ function getThemeFilePath( themePath, inputFilePath ) {
 	}
 
 	// A corresponding theme file e.g. "/foo/bar/ckeditor5-theme-baz/theme/ckeditor5-qux/components/button.css".
-	return path.join( themePath, packageName, inputFileName );
+	return path.resolve( themePath, packageName, inputFileName );
 }
 
 // Returns a (CKEditor 5) package name the file belongs to.
@@ -183,7 +183,7 @@ function getThemeFilePath( themePath, inputFilePath ) {
 // @param {String} inputFilePath A path to the file.
 // @returns {String} The name of the package.
 function getPackageName( inputFilePath ) {
-	const match = inputFilePath.match( /ckeditor5-[^/]+/g );
+	const match = inputFilePath.match( `ckeditor5-[^${ path.sep }]+` );
 
 	if ( match ) {
 		return match.pop();
