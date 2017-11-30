@@ -6,67 +6,101 @@
 /* jshint browser: false, node: true, strict: true */
 'use strict';
 
+const fs = require( 'fs' );
 const path = require( 'path' );
+const glob = require( 'glob' );
+const minimatch = require( 'minimatch' );
+const tmp = require( 'tmp' );
+const karmaLogger = require( 'karma/lib/logger.js' );
 const getWebpackConfigForAutomatedTests = require( './getwebpackconfig' );
 const transformFileOptionToTestGlob = require( '../transformfileoptiontotestglob' );
 
-const reporters = [
+const AVAILABLE_REPORTERS = [
 	'mocha',
 	'dots'
 ];
 
-const coverageDir = path.join( process.cwd(), 'coverage' );
+// Glob patterns that should be ignored. It means if specified test file
+// match to these patterns, this file will be skipped.
+const IGNORE_GLOBS = [
+	// Ignore files which are saved in `manual/` directory. There are manual tests.
+	path.join( '**', 'tests', '**', 'manual', '**', '*.js' ),
+	// Ignore `_utils` directory as well because there are saved utils for tests.
+	path.join( '**', 'tests', '**', '_utils', '**', '*.js' )
+];
 
 /**
  * @param {Object} options
- * @returns {Object}
+ * @returns {Object|undefined}
  */
 module.exports = function getKarmaConfig( options ) {
+	const basePath = process.cwd();
+	const coverageDir = path.join( basePath, 'coverage' );
+	const log = karmaLogger.create( 'config' );
+
 	if ( !Array.isArray( options.files ) || options.files.length === 0 ) {
-		throw new Error( 'Karma requires files to tests. `options.files` has to be non-empty array.' );
+		return log.error( 'Karma requires files to tests. `options.files` has to be non-empty array.' );
 	}
 
-	if ( !reporters.includes( options.reporter ) ) {
-		throw new Error( `Given Mocha reporter is not supported. Available reporters: ${ reporters.join( ', ' ) }.` );
+	if ( !AVAILABLE_REPORTERS.includes( options.reporter ) ) {
+		return log.error( 'Specified reporter is not supported. Available reporters: %s.', AVAILABLE_REPORTERS.join( ', ' ) );
 	}
 
-	const files = options.files.map( file => transformFileOptionToTestGlob( file ) );
+	const globPatterns = options.files.map( file => transformFileOptionToTestGlob( file ) );
+	const allFiles = [];
 
-	const preprocessorMap = {};
+	// We want to create a single entry point for Karma.
+	// Every pattern must be resolved before Karma starts work.
+	for ( const singlePattern of globPatterns ) {
+		const files = glob.sync( singlePattern );
 
-	for ( const file of files ) {
-		preprocessorMap[ file ] = [ 'webpack' ];
-
-		if ( options.sourceMap ) {
-			preprocessorMap[ file ].push( 'sourcemap' );
+		if ( !files.length ) {
+			log.warn( 'Pattern "%s" does not match any file.', singlePattern );
 		}
+
+		allFiles.push(
+			...files.filter( file => !IGNORE_GLOBS.some( globPattern => minimatch( file, globPattern ) ) )
+		);
+	}
+
+	if ( !allFiles.length ) {
+		return log.error( 'Not found files to tests. Specified patterns are invalid.' );
+	}
+
+	const tempFile = tmp.fileSync( { postfix: '.js' } );
+
+	const filesImports = allFiles
+		.map( file => 'import "' + file + '";' )
+		.join( '\n' );
+
+	fs.writeFileSync( tempFile.name, filesImports );
+
+	log.info( 'Entry file saved in "%s".', tempFile.name );
+
+	const preprocessorMap = {
+		[ tempFile.name ]: [ 'webpack' ]
+	};
+
+	if ( options.sourceMap ) {
+		preprocessorMap[ tempFile.name ].push( 'sourcemap' );
 	}
 
 	const karmaConfig = {
 		// Base path that will be used to resolve all patterns (eg. files, exclude).
-		basePath: process.cwd(),
+		basePath,
 
 		// Frameworks to use. Available frameworks: https://npmjs.org/browse/keyword/karma-adapter
 		frameworks: [ 'mocha', 'chai', 'sinon' ],
 
 		// List of files/patterns to load in the browser.
-		files,
-
-		// List of files to exclude.
-		exclude: [
-			// Ignore all utils which aren't tests.
-			path.join( '**', 'tests', '**', '_utils', '**', '*.js' ),
-
-			// And all manual tests.
-			path.join( '**', 'tests', '**', 'manual', '**', '*.js' )
-		],
+		files: [ tempFile.name ],
 
 		// Preprocess matching files before serving them to the browser.
 		// Available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
 		preprocessors: preprocessorMap,
 
 		webpack: getWebpackConfigForAutomatedTests( {
-			files,
+			files: options.files,
 			sourceMap: options.sourceMap,
 			coverage: options.coverage
 		} ),
@@ -119,6 +153,10 @@ module.exports = function getKarmaConfig( options ) {
 		// Shows differences in object comparison.
 		mochaReporter: {
 			showDiff: true
+		},
+
+		removeEntryFile() {
+			return tempFile.removeCallback();
 		}
 	};
 
