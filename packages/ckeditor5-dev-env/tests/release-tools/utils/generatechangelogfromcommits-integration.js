@@ -422,6 +422,56 @@ Besides changes in the dependencies, this version also contains the following bu
 					release();
 				} );
 		} );
+
+		it( 'adds two blank lines for internal release (user specified "internal" version)', () => {
+			return generateChangelog( '0.5.6', true )
+				.then( () => {
+					const changelogAsArray = getChangelog().split( '\n' ).slice( 0, 9 );
+
+					expect( changelogAsArray[ 0 ], 'Index: 0' ).to.equal( 'Changelog' );
+					expect( changelogAsArray[ 1 ], 'Index: 1' ).to.equal( '=========' );
+					expect( changelogAsArray[ 2 ], 'Index: 2' ).to.equal( '' );
+					expect( replaceDates( changelogAsArray[ 3 ] ), 'Index: 3' ).to.equal(
+						'## [0.5.6](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.5.5...v0.5.6) (0000-00-00)'
+					);
+					expect( changelogAsArray[ 4 ], 'Index: 4' ).to.equal( '' );
+					expect( changelogAsArray[ 5 ], 'Index: 5' ).to.equal(
+						'Internal changes only (updated dependencies, documentation, etc.).'
+					);
+					expect( changelogAsArray[ 6 ], 'Index: 6' ).to.equal( '' );
+					expect( changelogAsArray[ 7 ], 'Index: 7' ).to.equal( '' );
+					expect( replaceDates( changelogAsArray[ 8 ] ), 'Index: 8' ).to.equal(
+						'## [0.5.5](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.5.4...v0.5.5) (0000-00-00)'
+					);
+
+					release();
+				} );
+		} );
+
+		it( 'adds two blank lines for internal release (user provides a version but no commits were made)', () => {
+			return generateChangelog( '0.5.7' )
+				.then( () => {
+					const changelogAsArray = getChangelog().split( '\n' ).slice( 0, 9 );
+
+					expect( changelogAsArray[ 0 ], 'Index: 0' ).to.equal( 'Changelog' );
+					expect( changelogAsArray[ 1 ], 'Index: 1' ).to.equal( '=========' );
+					expect( changelogAsArray[ 2 ], 'Index: 2' ).to.equal( '' );
+					expect( replaceDates( changelogAsArray[ 3 ] ), 'Index: 3' ).to.equal(
+						'## [0.5.7](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.5.6...v0.5.7) (0000-00-00)'
+					);
+					expect( changelogAsArray[ 4 ], 'Index: 4' ).to.equal( '' );
+					expect( changelogAsArray[ 5 ], 'Index: 5' ).to.equal(
+						'Internal changes only (updated dependencies, documentation, etc.).'
+					);
+					expect( changelogAsArray[ 6 ], 'Index: 6' ).to.equal( '' );
+					expect( changelogAsArray[ 7 ], 'Index: 7' ).to.equal( '' );
+					expect( replaceDates( changelogAsArray[ 8 ] ), 'Index: 8' ).to.equal(
+						'## [0.5.6](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.5.5...v0.5.6) (0000-00-00)'
+					);
+
+					release();
+				} );
+		} );
 	} );
 
 	function exec( command ) {

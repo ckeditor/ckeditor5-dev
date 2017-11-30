@@ -17,7 +17,7 @@ const corePackageName = 'ckeditor5-core';
 
 const utils = {
 	/**
-	 * Collect translations and returns array of translations.
+	 * Collect translations and return array of translations.
 	 *
 	 * @returns {Array.<Object>}
 	 */
@@ -39,7 +39,7 @@ const utils = {
 	},
 
 	/**
-	 * Traverse all packages and returns Map of the all founded language contexts informations
+	 * Traverse all packages and return Map of the all founded language contexts information
 	 * (file content and file name).
 	 *
 	 * @returns {Map.<String, Object>}

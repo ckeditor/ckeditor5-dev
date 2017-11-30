@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.8.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.8.2...@ckeditor/jsdoc-plugins@1.8.3) (2017-11-28)
+
+### Bug fixes
+
+* Improved linting the `memberof` property. Closes [ckeditor/ckeditor5-utils#209](https://github.com/ckeditor/ckeditor5-utils/issues/209). ([b57fe29](https://github.com/ckeditor/ckeditor5-dev/commit/b57fe29))
+
+
 ## [1.8.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.8.1...@ckeditor/jsdoc-plugins@1.8.2) (2017-11-24)
 
 ### Bug fixes
