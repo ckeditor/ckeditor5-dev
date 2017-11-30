@@ -23,7 +23,7 @@ if ( options.files.length === 0 ) {
 }
 
 // "Lark" is the default theme for tests.
-options.themePath = path.resolve( cwd, 'node_modules', '@ckeditor', 'ckeditor5-theme-lark', 'theme', 'theme.css' );
+options.themePath = path.resolve( cwd, 'packages', 'ckeditor5-theme-lark', 'theme', 'theme.css' );
 
 tests.runManualTests( options )
 	.catch( error => {
