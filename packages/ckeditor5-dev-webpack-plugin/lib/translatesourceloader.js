@@ -13,5 +13,5 @@
  * @returns {String}
  */
 module.exports = function translateSourceLoader( source ) {
-	return this.options.translateSource( source );
+	return this.options.translateSource( source, this.resourcePath );
 };

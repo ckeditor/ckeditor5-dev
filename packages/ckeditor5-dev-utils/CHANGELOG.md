@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [6.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@5.0.0...@ckeditor/ckeditor5-dev-utils@6.0.0) (2017-11-30)
+
+### Features
+
+* `TranslationService` v2. Closes [ckeditor/ckeditor5#666](https://github.com/ckeditor/ckeditor5/issues/666). Closes [ckeditor/ckeditor5#624](https://github.com/ckeditor/ckeditor5/issues/624). ([ee2a1d2](https://github.com/ckeditor/ckeditor5-dev/commit/ee2a1d2))
+
+
 ## [5.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@4.0.2...@ckeditor/ckeditor5-dev-utils@5.0.0) (2017-11-13)
 
 ### Other changes

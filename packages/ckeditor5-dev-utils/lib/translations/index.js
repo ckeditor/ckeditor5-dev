@@ -6,7 +6,8 @@
 'use strict';
 
 module.exports = {
-	TranslationService: require( './translationservice' ),
+	MultipleLanguageTranslationService: require( './multiplelanguagetranslationservice' ),
+	SingleLanguageTranslationService: require( './singlelanguagetranslationservice' ),
 	findOriginalStrings: require( './findoriginalstrings' ),
 	createDictionaryFromPoFileContent: require( './createdictionaryfrompofilecontent' ),
 	cleanPoFileContent: require( './cleanpofilecontent' ),

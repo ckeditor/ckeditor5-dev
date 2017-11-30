@@ -1,6 +1,22 @@
 Changelog
 =========
 
+## [8.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@7.0.1...@ckeditor/ckeditor5-dev-env@8.0.0) (2017-11-30)
+
+### Features
+
+* `TranslationService` v2. Closes [ckeditor/ckeditor5#666](https://github.com/ckeditor/ckeditor5/issues/666). Closes [ckeditor/ckeditor5#624](https://github.com/ckeditor/ckeditor5/issues/624). ([ee2a1d2](https://github.com/ckeditor/ckeditor5-dev/commit/ee2a1d2))
+
+
+## [7.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@7.0.0...@ckeditor/ckeditor5-dev-env@7.0.1) (2017-11-28)
+
+### Bug fixes
+
+* Additional tags for continuous integration services used in commit message will be removed during generating the changelog. Closes [#309](https://github.com/ckeditor/ckeditor5-dev/issues/309). ([600f36e](https://github.com/ckeditor/ckeditor5-dev/commit/600f36e))
+* Changelog generator for internal releases will always add two blank lines. Closes [#308](https://github.com/ckeditor/ckeditor5-dev/issues/308). ([b7b5453](https://github.com/ckeditor/ckeditor5-dev/commit/b7b5453))
+* Links to releases will be generated correctly. Closes [#310](https://github.com/ckeditor/ckeditor5-dev/issues/310). ([5f98f9e](https://github.com/ckeditor/ckeditor5-dev/commit/5f98f9e))
+
+
 ## [7.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@6.0.0...@ckeditor/ckeditor5-dev-env@7.0.0) (2017-11-13)
 
 ### Other changes

@@ -1,6 +1,10 @@
 Changelog
 =========
 
+## [9.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@9.1.0...@ckeditor/ckeditor5-dev-tests@9.2.0) (2017-11-24)
+
+Reverted the fix for [#290](https://github.com/ckeditor/ckeditor5-dev/issues/290). ([5c3d9ec](https://github.com/ckeditor/ckeditor5-dev/commit/5c3d9ec))
+
 ## [9.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@9.0.0...@ckeditor/ckeditor5-dev-tests@9.1.0) (2017-11-24)
 
 ### Features
