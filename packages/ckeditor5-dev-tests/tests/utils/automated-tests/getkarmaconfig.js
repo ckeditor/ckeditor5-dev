@@ -50,6 +50,7 @@ describe( 'getKarmaConfig', () => {
 		} );
 
 		mockery.registerMock( 'karma/lib/logger.js', {
+			setupFromConfig: sandbox.spy(),
 			create( name ) {
 				expect( name ).to.equal( 'config' );
 
