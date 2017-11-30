@@ -53,7 +53,7 @@ module.exports = function getWebpackConfigForManualTests( entryObject, buildDir,
 						{
 							loader: 'postcss-loader',
 							options: getPostCssConfig( {
-								themeimporter: {
+								themeImporter: {
 									themePath,
 									debug: true
 								},

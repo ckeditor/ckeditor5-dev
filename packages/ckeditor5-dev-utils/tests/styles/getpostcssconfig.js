@@ -45,7 +45,7 @@ describe( 'styles', () => {
 			mockery.registerMock( './themeimporter', themeImporterSpy );
 
 			getPostCssConfig( {
-				themeimporter: {
+				themeImporter: {
 					themePath: 'abc',
 					debug: true
 				}

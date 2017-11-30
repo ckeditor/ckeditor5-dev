@@ -11,7 +11,7 @@ module.exports = function getPostCssConfig( options = {} ) {
 	const config = {
 		plugins: [
 			require( 'postcss-import' )(),
-			require( './themeimporter' )( options.themeimporter ),
+			require( './themeimporter' )( options.themeImporter ),
 			require( 'postcss-mixins' )(),
 			require( 'postcss-nesting' )(),
 			require( './themelogger' )(),

@@ -130,7 +130,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		} );
 
 		expect( postCssOptions ).to.deep.equal( {
-			themeimporter: {
+			themeImporter: {
 				themePath: 'path/to/theme'
 			},
 			minify: true
