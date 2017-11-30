@@ -68,6 +68,7 @@ describe( 'getKarmaConfig', () => {
 				files: [ expectedFile ],
 				sourceMap: false,
 				coverage: false,
+				themePath: 'path/to/theme'
 			},
 			webpackMiddleware: {
 				noInfo: true,
