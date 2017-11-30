@@ -105,6 +105,34 @@ module.exports = function getKarmaConfig( options ) {
 				base: 'Chrome',
 				flags: [ '--disable-background-timer-throttling' ]
 			},
+			Windows_Edge: {
+				base: 'BrowserStack',
+				os: 'Windows',
+				os_version: '10',
+				browser: 'edge',
+				browser_version: '16.0'
+			},
+			Mavericks_Chrome: {
+				base: 'BrowserStack',
+				os: 'OS X',
+				os_version: 'Mavericks',
+				browser: 'chrome',
+				browser_version: '62.0'
+			},
+			Yosemite_Firefox: {
+				base: 'BrowserStack',
+				os: 'OS X',
+				os_version: 'Yosemite',
+				browser: 'firefox',
+				browser_version: '56.0'
+			},
+			HighSierra_Safari: {
+				base: 'BrowserStack',
+				os: 'OS X',
+				os_version: 'High Sierra',
+				browser: 'safari',
+				browser_version: '11.0'
+			}
 		},
 
 		// Continuous Integration mode. If true, Karma captures browsers, runs the tests and exits.
@@ -131,6 +159,30 @@ module.exports = function getKarmaConfig( options ) {
 	if ( options.verbose ) {
 		karmaConfig.webpackMiddleware.noInfo = false;
 		delete karmaConfig.webpackMiddleware.stats;
+	}
+
+	if ( options.browserStack ) {
+		karmaConfig.browserStack = {
+			username: options.username,
+			accessKey: options.accessKey
+		};
+
+		karmaConfig.reporters = [ 'dots', 'BrowserStack' ];
+
+		if ( options.browsers.length === 1 && options.browsers[ 0 ] === 'CHROME_LOCAL' ) {
+			options.browsers = [];
+		}
+
+		karmaConfig.browsers = Object.keys( karmaConfig.customLaunchers )
+			.filter( launcherName => karmaConfig.customLaunchers[ launcherName ].base === 'BrowserStack' );
+
+		if ( options.browsers.length ) {
+			karmaConfig.browsers = karmaConfig.browsers.filter( launcherName => {
+				const browserName = launcherName.split( '_' )[ 1 ].toLowerCase();
+
+				return options.browsers.some( browserFromOptions => browserFromOptions.toLowerCase() === browserName );
+			} );
+		}
 	}
 
 	if ( options.coverage ) {

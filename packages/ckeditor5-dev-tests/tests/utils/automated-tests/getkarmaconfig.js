@@ -8,28 +8,36 @@
 const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
-const path = require( 'path' );
+const proxyquire = require( 'proxyquire' );
 
 describe( 'getKarmaConfig', () => {
-	let getKarmaConfig, sandbox;
+	let getKarmaConfig, sandbox, stubs;
 	const originalEnv = process.env;
 
 	beforeEach( () => {
 		sandbox = sinon.sandbox.create();
 		sandbox.stub( process, 'cwd' ).returns( 'workspace' );
 
-		// sinon cannot stub non-existing props.
-		process.env = Object.assign( {}, originalEnv, { TRAVIS: false } );
-		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
-		sandbox.stub( path, 'sep' ).value( '/' );
+		stubs = {
+			fs: {
+				writeFileSync: sandbox.stub()
+			},
+			glob: {
+				sync: sandbox.stub()
+			}
+		};
 
 		mockery.enable( {
 			warnOnReplace: false,
 			warnOnUnregistered: false
 		} );
+
 		mockery.registerMock( './getwebpackconfig', options => options );
 
-		getKarmaConfig = require( '../../../lib/utils/automated-tests/getkarmaconfig' );
+		getKarmaConfig = proxyquire( '../../../lib/utils/automated-tests/getkarmaconfig', {
+			fs: stubs.fs,
+			glob: stubs.glob
+		} );
 	} );
 
 	afterEach( () => {
@@ -40,6 +48,14 @@ describe( 'getKarmaConfig', () => {
 	} );
 
 	it( 'should return basic karma config for all tested files', () => {
+		const allFiles = [
+			'workspace/packages/ckeditor5-autoformat/tests/foo.js',
+			'workspace/packages/ckeditor5-basic-styles/tests/bar.js',
+			'workspace/packages/ckeditor5-engine/tests/foo/bar.js'
+		];
+
+		stubs.glob.sync.returns( allFiles );
+
 		const karmaConfig = getKarmaConfig( {
 			files: [ '*' ],
 			reporter: 'mocha',
@@ -50,52 +66,18 @@ describe( 'getKarmaConfig', () => {
 			verbose: false
 		} );
 
-		const expectedFile = 'workspace/packages/ckeditor5-*/tests/**/*.js';
-
-		expect( karmaConfig ).to.deep.equal( {
-			basePath: 'workspace',
-			frameworks: [ 'mocha', 'chai', 'sinon' ],
-			files: [ expectedFile ],
-			exclude: [
-				path.join( '**', 'tests', '**', '_utils', '**', '*.js' ),
-				path.join( '**', 'tests', '**', 'manual', '**', '*.js' )
-			],
-			preprocessors: {
-				[ expectedFile ]: [ 'webpack' ]
-			},
-			webpack: {
-				files: [ expectedFile ],
-				sourceMap: false,
-				coverage: false,
-			},
-			webpackMiddleware: {
-				noInfo: true,
-				stats: {
-					chunks: false
-				}
-			},
-			reporters: [ 'mocha' ],
-			port: 9876,
-			colors: true,
-			logLevel: 'INFO',
-			browsers: [ 'CHROME_LOCAL' ],
-			customLaunchers: {
-				CHROME_TRAVIS_CI: {
-					base: 'Chrome',
-					flags: [ '--no-sandbox', '--disable-background-timer-throttling' ]
-				},
-				CHROME_LOCAL: {
-					base: 'Chrome',
-					flags: [ '--disable-background-timer-throttling' ]
-				},
-			},
-			singleRun: true,
-			concurrency: Infinity,
-			browserNoActivityTimeout: 0,
-			mochaReporter: {
-				showDiff: true
-			}
-		} );
+		expect( karmaConfig ).to.have.own.property( 'basePath', 'workspace' );
+		expect( karmaConfig ).to.have.own.property( 'frameworks' );
+		expect( karmaConfig ).to.have.own.property( 'files' );
+		expect( karmaConfig ).to.have.own.property( 'preprocessors' );
+		expect( karmaConfig ).to.have.own.property( 'webpack' );
+		expect( karmaConfig.webpack.files ).to.deep.equal( [ 'workspace/packages/ckeditor5-*/tests/**/*.js' ] );
+		expect( karmaConfig.webpack.sourceMap ).to.equal( false );
+		expect( karmaConfig.webpack.coverage ).to.equal( false );
+		expect( karmaConfig ).to.have.own.property( 'webpackMiddleware' );
+		expect( karmaConfig ).to.have.own.property( 'reporters' );
+		expect( karmaConfig ).to.have.own.property( 'browsers' );
+		expect( karmaConfig ).to.have.own.property( 'singleRun', true );
 	} );
 
 	it( 'should return karma config with current package\'s tests', () => {
