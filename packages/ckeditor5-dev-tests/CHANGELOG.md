@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [10.0.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@10.0.3...@ckeditor/ckeditor5-dev-tests@10.0.4) (2017-12-01)
+
+### Bug fixes
+
+* Reverting Friday's mistake. ([7443782](https://github.com/ckeditor/ckeditor5-dev/commit/7443782))
+
+
 ## [10.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@10.0.0...@ckeditor/ckeditor5-dev-tests@10.0.3) (2017-12-01)
 
 ### Bug fixes
