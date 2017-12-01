@@ -3,7 +3,9 @@ Changelog
 
 ## [1.0.7](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@1.0.5...eslint-config-ckeditor5@1.0.7) (2017-12-01)
 
-Internal changes only (updated dependencies, documentation, etc.).
+### Bug fixes
+
+* We should require space after words like `new`, `typeof` or `delete`. ([97266f2](https://github.com/ckeditor/ckeditor5-dev/commit/97266f2))
 
 
 ## [1.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@1.0.4...eslint-config-ckeditor5@1.0.5) (2017-05-17)
