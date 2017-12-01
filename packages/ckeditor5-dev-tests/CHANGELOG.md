@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [10.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@10.0.0...@ckeditor/ckeditor5-dev-tests@10.0.3) (2017-12-01)
+
+### Bug fixes
+
+* Increase available memory for all tests. Closes [#320](https://github.com/ckeditor/ckeditor5-dev/issues/320). ([208f656](https://github.com/ckeditor/ckeditor5-dev/commit/208f656))
+
+
 ## [10.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@9.2.0...@ckeditor/ckeditor5-dev-tests@10.0.0) (2017-11-30)
 
 ### Features
