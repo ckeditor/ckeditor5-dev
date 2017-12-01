@@ -157,6 +157,11 @@ function getThemeFilePath( themePath, inputFilePath ) {
 	// "ckeditor5-qux"
 	const packageName = getPackageName( inputFilePath );
 
+	// Don't load theme file for files not belonging to a "ckeditor5-*" package.
+	if ( !packageName ) {
+		return;
+	}
+
 	// "components/button.css"
 	const inputFileName = inputFilePath.split( path.join( packageName, 'theme', path.sep ) )[ 1 ];
 
