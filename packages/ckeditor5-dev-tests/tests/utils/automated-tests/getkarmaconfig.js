@@ -9,6 +9,7 @@ const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
+const path = require( 'path' );
 
 describe( 'getKarmaConfig', () => {
 	let getKarmaConfig, sandbox, stubs;
@@ -63,21 +64,85 @@ describe( 'getKarmaConfig', () => {
 			coverage: false,
 			browsers: [ 'Chrome' ],
 			watch: false,
-			verbose: false
+			verbose: false,
+			themePath: 'path/to/theme'
 		} );
 
-		expect( karmaConfig ).to.have.own.property( 'basePath', 'workspace' );
-		expect( karmaConfig ).to.have.own.property( 'frameworks' );
-		expect( karmaConfig ).to.have.own.property( 'files' );
-		expect( karmaConfig ).to.have.own.property( 'preprocessors' );
-		expect( karmaConfig ).to.have.own.property( 'webpack' );
-		expect( karmaConfig.webpack.files ).to.deep.equal( [ 'workspace/packages/ckeditor5-*/tests/**/*.js' ] );
-		expect( karmaConfig.webpack.sourceMap ).to.equal( false );
-		expect( karmaConfig.webpack.coverage ).to.equal( false );
-		expect( karmaConfig ).to.have.own.property( 'webpackMiddleware' );
-		expect( karmaConfig ).to.have.own.property( 'reporters' );
-		expect( karmaConfig ).to.have.own.property( 'browsers' );
-		expect( karmaConfig ).to.have.own.property( 'singleRun', true );
+		const expectedFile = 'workspace/packages/ckeditor5-*/tests/**/*.js';
+
+		expect( karmaConfig ).to.deep.equal( {
+			basePath: 'workspace',
+			frameworks: [ 'mocha', 'chai', 'sinon' ],
+			files: [ expectedFile ],
+			exclude: [
+				path.join( '**', 'tests', '**', '_utils', '**', '*.js' ),
+				path.join( '**', 'tests', '**', 'manual', '**', '*.js' )
+			],
+			preprocessors: {
+				[ expectedFile ]: [ 'webpack' ]
+			},
+			webpack: {
+				files: [ expectedFile ],
+				sourceMap: false,
+				coverage: false,
+				themePath: 'path/to/theme'
+			},
+			webpackMiddleware: {
+				noInfo: true,
+				stats: {
+					chunks: false
+				}
+			},
+			reporters: [ 'mocha' ],
+			port: 9876,
+			colors: true,
+			logLevel: 'INFO',
+			browsers: [ 'CHROME_LOCAL' ],
+			customLaunchers: {
+				CHROME_TRAVIS_CI: {
+					base: 'Chrome',
+					flags: [ '--no-sandbox', '--disable-background-timer-throttling' ]
+				},
+				CHROME_LOCAL: {
+					base: 'Chrome',
+					flags: [ '--disable-background-timer-throttling' ]
+				},
+				Windows_Edge: {
+					base: 'BrowserStack',
+					os: 'Windows',
+					os_version: '10',
+					browser: 'edge',
+					browser_version: '16.0'
+				},
+				Mavericks_Chrome: {
+					base: 'BrowserStack',
+					os: 'OS X',
+					os_version: 'Mavericks',
+					browser: 'chrome',
+					browser_version: '62.0'
+				},
+				Yosemite_Firefox: {
+					base: 'BrowserStack',
+					os: 'OS X',
+					os_version: 'Yosemite',
+					browser: 'firefox',
+					browser_version: '56.0'
+				},
+				HighSierra_Safari: {
+					base: 'BrowserStack',
+					os: 'OS X',
+					os_version: 'High Sierra',
+					browser: 'safari',
+					browser_version: '11.0'
+				}
+			},
+			singleRun: true,
+			concurrency: Infinity,
+			browserNoActivityTimeout: 0,
+			mochaReporter: {
+				showDiff: true
+			}
+		} );
 	} );
 
 	it( 'should return karma config with current package\'s tests', () => {

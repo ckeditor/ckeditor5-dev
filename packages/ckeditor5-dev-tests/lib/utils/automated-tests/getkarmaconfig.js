@@ -68,7 +68,8 @@ module.exports = function getKarmaConfig( options ) {
 		webpack: getWebpackConfigForAutomatedTests( {
 			files,
 			sourceMap: options.sourceMap,
-			coverage: options.coverage
+			coverage: options.coverage,
+			themePath: options.themePath
 		} ),
 
 		webpackMiddleware: {
