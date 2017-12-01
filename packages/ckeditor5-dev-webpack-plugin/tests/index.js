@@ -50,7 +50,24 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 
 			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
 
-			expect( ckeditorWebpackPlugin.options ).to.equal( options );
+			expect( ckeditorWebpackPlugin.options ).to.be.an( 'object' );
+			expect( ckeditorWebpackPlugin.options.language ).to.equal( 'pl' );
+		} );
+
+		it( 'should initialize default value for `outputDirectory` option', () => {
+			const options = {};
+
+			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
+
+			expect( ckeditorWebpackPlugin.options.outputDirectory ).to.equal( 'lang' );
+		} );
+
+		it( 'should use `outputDirectory` if passed', () => {
+			const options = { outputDirectory: 'custom' };
+
+			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
+
+			expect( ckeditorWebpackPlugin.options.outputDirectory ).to.equal( 'custom' );
 		} );
 	} );
 
@@ -78,7 +95,6 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 			ckeditorWebpackPlugin.apply( compiler );
 
 			sinon.assert.calledOnce( stubs.serveTranslations );
-			sinon.assert.calledWith( stubs.serveTranslations, compiler, options );
 		} );
 
 		it( 'should serve `SingleLanguageTranslationService` if only one language is provided', () => {

@@ -6,6 +6,9 @@
 'use strict';
 
 const chalk = require( 'chalk' );
+const rimraf = require( 'rimraf' );
+const fs = require( 'fs' );
+const path = require( 'path' );
 
 /**
  * Serve translations depending on the used translation service and passed options.
@@ -15,9 +18,7 @@ const chalk = require( 'chalk' );
  *
  * @param {Object} compiler Webpack compiler.
  * @param {Object} options Translation options.
- * @param {Array.<String>} options.languages Target languages.
- * @param {String} [options.outputDirectory='lang'] Output directory for the emitted translation files,
- * should be relative to the webpack context.
+ * @param {String} options.outputDirectory Output directory for the emitted translation files, relative to the webpack context.
  * @param {Boolean} [options.strict] Option that make this function throw when the error is found during the compilation.
  * @param {Boolean} [options.verbose] Option that make this function log everything into the console.
  * @param {TranslationService} translationService Translation service that will load PO files, replace translation keys and generate assets.
@@ -31,19 +32,26 @@ module.exports = function serveTranslations( compiler, options, translationServi
 	compiler.options.translateSource = ( source, sourceFile ) => translationService.translateSource( source, sourceFile );
 
 	// Watch for warnings and errors during translation process.
-	translationService.on( 'error', error => {
-		if ( options.strict ) {
-			throw new Error( chalk.red( error ) );
-		}
+	translationService.on( 'error', emitError );
+	translationService.on( 'warning', emitWarning );
 
-		console.error( chalk.red( `Error: ${ error }` ) );
-	} );
+	// Remove old translation files.
+	// Assert whether the translation output directory exists inside the cwd.
+	const pathToLanguages = path.join( compiler.options.output.path, options.outputDirectory );
 
-	translationService.on( 'warning', warning => {
-		if ( options.verbose ) {
-			console.warn( chalk.yellow( `Warning: ${ warning }` ) );
+	if ( fs.existsSync( pathToLanguages ) ) {
+		if ( pathToLanguages.includes( cwd ) && cwd !== pathToLanguages ) {
+			rimraf.sync( pathToLanguages );
+
+			if ( options.verbose ) {
+				console.log( `Removed ${ pathToLanguages }. directory to be sure, that all translation files will be correct.` );
+			}
+		} else {
+			emitError(
+				`Can't remove path to translation files directory (${ pathToLanguages }). Assert whether you specified a correct path.`
+			);
 		}
-	} );
+	}
 
 	// Add core translations before `translatesourceloader` starts translating.
 	compiler.plugin( 'after-resolvers', () => {
@@ -84,6 +92,20 @@ module.exports = function serveTranslations( compiler, options, translationServi
 
 		done();
 	} );
+
+	function emitError( error ) {
+		if ( options.strict ) {
+			throw new Error( chalk.red( error ) );
+		}
+
+		console.error( chalk.red( `Error: ${ error }` ) );
+	}
+
+	function emitWarning( warning ) {
+		if ( options.verbose ) {
+			console.warn( chalk.yellow( `Warning: ${ warning }` ) );
+		}
+	}
 };
 
 /**

@@ -158,11 +158,11 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @fires warning
 	 * @fires error
 	 * @param {Object} options
-	 * @param {String} [options.outputDirectory] Output directory for the translation files relative to the output.
+	 * @param {String} options.outputDirectory Output directory for the translation files relative to the output.
 	 * @param {Object} options.compilationAssets Original assets from the compiler (e.g. Webpack).
 	 * @returns {Array.<Object>}
 	 */
-	getAssets( { outputDirectory = 'lang', compilationAssets } ) {
+	getAssets( { outputDirectory, compilationAssets } ) {
 		const compilationAssetNames = Object.keys( compilationAssets )
 			.filter( name => name.endsWith( '.js' ) );
 
