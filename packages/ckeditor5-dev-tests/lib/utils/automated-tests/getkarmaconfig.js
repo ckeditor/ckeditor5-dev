@@ -125,7 +125,7 @@ module.exports = function getKarmaConfig( options ) {
 				os: 'OS X',
 				os_version: 'Yosemite',
 				browser: 'firefox',
-				browser_version: '56.0'
+				browser_version: '57.0'
 			},
 			HighSierra_Safari: {
 				base: 'BrowserStack',
