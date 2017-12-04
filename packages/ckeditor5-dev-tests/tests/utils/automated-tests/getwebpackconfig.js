@@ -5,21 +5,32 @@
 
 'use strict';
 
-const getWebpackConfigForAutomatedTests = require( '../../../lib/utils/automated-tests/getwebpackconfig' );
 const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 
 describe( 'getWebpackConfigForAutomatedTests()', () => {
 	const escapedPathSep = require( 'path' ).sep == '/' ? '/' : '\\\\';
+	let getWebpackConfigForAutomatedTests, postCssOptions;
 
 	beforeEach( () => {
 		mockery.enable( {
 			warnOnReplace: false,
 			warnOnUnregistered: false
 		} );
+
+		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
+			styles: {
+				getPostCssConfig: options => {
+					postCssOptions = options;
+				}
+			}
+		} );
+
 		mockery.registerMock( 'CKEditorWebpackPlugin', function CKEditorWebpackPlugin( options ) {
 			this.options = options;
 		} );
+
+		getWebpackConfigForAutomatedTests = require( '../../../lib/utils/automated-tests/getwebpackconfig' );
 	} );
 
 	afterEach( () => {
@@ -111,6 +122,19 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 
 		expect( secondPath ).to.match( /node_modules$/ );
 		expect( require( 'fs' ).existsSync( secondPath ) ).to.equal( true );
+	} );
+
+	it( 'should return webpack configutation with the correct setup of the postcss-loader', () => {
+		getWebpackConfigForAutomatedTests( {
+			themePath: 'path/to/theme'
+		} );
+
+		expect( postCssOptions ).to.deep.equal( {
+			themeImporter: {
+				themePath: 'path/to/theme'
+			},
+			minify: true
+		} );
 	} );
 
 	it( 'should load svg files properly', () => {

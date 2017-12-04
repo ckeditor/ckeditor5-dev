@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-utils",
-  "version": "6.0.0",
+  "version": "7.0.2",
   "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
   "main": "lib/index.js",
@@ -11,6 +11,9 @@
     "fs-extra": "^4.0.2",
     "javascript-stringify": "^1.6.0",
     "pofile": "^1.0.9",
+    "postcss-import": "^11.0.0",
+    "postcss-mixins": "^6.2.0",
+    "postcss-nesting": "^4.2.1",
     "shelljs": "^0.7.8",
     "through2": "^2.0.3"
   },

@@ -1,6 +1,25 @@
 Changelog
 =========
 
+## [7.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@7.0.1...@ckeditor/ckeditor5-dev-utils@7.0.2) (2017-12-01)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
+## [7.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@7.0.0...@ckeditor/ckeditor5-dev-utils@7.0.1) (2017-12-01)
+
+### Bug fixes
+
+* Theme importer PostCSS plugin should not throw when processing styles when building a documentation. ([c9fcf66](https://github.com/ckeditor/ckeditor5-dev/commit/c9fcf66))
+
+
+## [7.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@6.0.0...@ckeditor/ckeditor5-dev-utils@7.0.0) (2017-11-30)
+
+### Features
+
+* Added support for multiple themes in output builds. Migrated various utilities from SASS to PostCSS. Closes [#321](https://github.com/ckeditor/ckeditor5-dev/issues/321). ([908e3af](https://github.com/ckeditor/ckeditor5-dev/commit/908e3af))
+
+
 ## [6.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@5.0.0...@ckeditor/ckeditor5-dev-utils@6.0.0) (2017-11-30)
 
 ### Features

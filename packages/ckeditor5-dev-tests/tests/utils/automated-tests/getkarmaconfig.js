@@ -63,7 +63,8 @@ describe( 'getKarmaConfig', () => {
 			coverage: false,
 			browsers: [ 'Chrome' ],
 			watch: false,
-			verbose: false
+			verbose: false,
+			themePath: 'path/to/theme'
 		} );
 
 		expect( karmaConfig ).to.have.own.property( 'basePath', 'workspace' );
@@ -74,6 +75,7 @@ describe( 'getKarmaConfig', () => {
 		expect( karmaConfig.webpack.files ).to.deep.equal( [ 'workspace/packages/ckeditor5-*/tests/**/*.js' ] );
 		expect( karmaConfig.webpack.sourceMap ).to.equal( false );
 		expect( karmaConfig.webpack.coverage ).to.equal( false );
+		expect( karmaConfig.webpack.themePath ).to.equal( 'path/to/theme' );
 		expect( karmaConfig ).to.have.own.property( 'webpackMiddleware' );
 		expect( karmaConfig ).to.have.own.property( 'reporters' );
 		expect( karmaConfig ).to.have.own.property( 'browsers' );

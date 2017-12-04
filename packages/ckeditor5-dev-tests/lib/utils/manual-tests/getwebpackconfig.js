@@ -7,13 +7,14 @@
 
 const path = require( 'path' );
 const WebpackNotifierPlugin = require( './webpacknotifierplugin' );
+const { getPostCssConfig } = require( '@ckeditor/ckeditor5-dev-utils' ).styles;
 
 /**
  * @param {Object} entryObject
  * @param {String} buildDir
  * @returns {Object}
  */
-module.exports = function getWebpackConfigForManualTests( entryObject, buildDir ) {
+module.exports = function getWebpackConfigForManualTests( entryObject, buildDir, themePath ) {
 	return {
 		// Use cheap source maps because Safari had problem with ES6 + inline source maps.
 		// We could use cheap source maps every where but karma-webpack doesn't support it:
@@ -39,12 +40,27 @@ module.exports = function getWebpackConfigForManualTests( entryObject, buildDir 
 					use: [ 'raw-loader' ]
 				},
 				{
-					test: /\.scss$/,
-					use: [ 'style-loader', 'css-loader', 'sass-loader' ]
-				},
-				{
 					test: /\.css$/,
-					use: [ 'style-loader', 'css-loader' ]
+					use: [
+						{
+							loader: 'style-loader',
+							options: {
+								// Note: "singleton" option does not work when sourceMap is enabled.
+								// See: https://github.com/webpack-contrib/style-loader/issues/134
+								sourceMap: true
+							}
+						},
+						{
+							loader: 'postcss-loader',
+							options: getPostCssConfig( {
+								themeImporter: {
+									themePath,
+									debug: true
+								},
+								sourceMap: true
+							} )
+						},
+					]
 				},
 				{
 					test: /\.(txt|html)$/,

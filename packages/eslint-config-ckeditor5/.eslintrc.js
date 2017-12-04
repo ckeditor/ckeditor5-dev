@@ -232,7 +232,7 @@ module.exports = {
 		'space-unary-ops': [
 			'error',
 			{
-				words: false,
+				words: true,
 				nonwords: false
 			}
 		],
