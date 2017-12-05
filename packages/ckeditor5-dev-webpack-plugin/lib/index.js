@@ -23,6 +23,9 @@ const ckeditor5EnvUtils = require( './ckeditor5-env-utils' );
  * manually to get editor working.
  *
  * Translation files will be emitted in the `outputDirectory` or `'lang'` directory if `outputDirectory` is not set.
+ *
+ * Plugin tries to clean the output translation directory before each build to make sure, that all translations are correct.
+ * See https://github.com/ckeditor/ckeditor5/issues/700 for more information.
  */
 module.exports = class CKEditorWebpackPlugin {
 	/**
@@ -37,7 +40,13 @@ module.exports = class CKEditorWebpackPlugin {
 	 * @param {Boolean} [options.verbose] Option that make this plugin log all warnings into the console.
 	 */
 	constructor( options = {} ) {
-		this.options = options;
+		this.options = {
+			language: options.language,
+			additionalLanguages: options.additionalLanguages,
+			outputDirectory: options.outputDirectory || 'lang',
+			strict: !!options.strict,
+			verbose: !!options.verbose
+		};
 	}
 
 	apply( compiler ) {

@@ -208,6 +208,7 @@ describe( 'translations', () => {
 				};
 
 				const assets = translationService.getAssets( {
+					outputDirectory: 'lang',
 					compilationAssets: {
 						'ckeditor.js': { source: () => 'source' }
 					}
@@ -244,6 +245,7 @@ describe( 'translations', () => {
 				};
 
 				translationService.getAssets( {
+					outputDirectory: 'lang',
 					compilationAssets: {
 						'ckeditor.js': { source: () => 'source' }
 					}
@@ -272,6 +274,7 @@ describe( 'translations', () => {
 				};
 
 				const assets = translationService.getAssets( {
+					outputDirectory: 'lang',
 					compilationAssets: {
 						'ckeditor.js': { source: () => 'source' }
 					}
@@ -311,6 +314,7 @@ describe( 'translations', () => {
 				};
 
 				translationService.getAssets( {
+					outputDirectory: 'lang',
 					compilationAssets: {
 						'ckeditor.js': { source: () => 'source' }
 					}
@@ -340,6 +344,7 @@ describe( 'translations', () => {
 				};
 
 				translationService.getAssets( {
+					outputDirectory: 'lang',
 					compilationAssets: {
 						'ckeditor.js': { source: () => 'source' }
 					}
@@ -366,6 +371,7 @@ describe( 'translations', () => {
 				};
 
 				const assets = translationService.getAssets( {
+					outputDirectory: 'lang',
 					compilationAssets: {
 						'ckeditor.js': { source: () => 'source' }
 					}
@@ -399,6 +405,7 @@ describe( 'translations', () => {
 				};
 
 				const assets = translationService.getAssets( {
+					outputDirectory: 'lang',
 					compilationAssets: {
 						'ckeditor.js': { source: () => 'source' },
 						'ckeditor2.js': { source: () => 'source' }
@@ -415,6 +422,46 @@ describe( 'translations', () => {
 					{
 						outputPath: path.join( 'lang', 'pl.js' ),
 						outputBody: 'CKEDITOR_TRANSLATIONS.add(\'pl\',{a:"Anuluj",b:"Zapisz"})'
+					}
+				] );
+			} );
+
+			it( 'should use output directory', () => {
+				const translationService = new MultipleLanguageTranslationService( 'pl', {
+					additionalLanguages: [ 'en' ],
+				} );
+				const spy = sandbox.spy();
+
+				translationService.on( 'warning', spy );
+
+				translationService._translationIdsDictionary = {
+					Cancel: 'a'
+				};
+
+				translationService._dictionary = {
+					pl: {
+						Cancel: 'Anuluj'
+					},
+					en: {
+						Cancel: 'Cancel'
+					}
+				};
+
+				const assets = translationService.getAssets( {
+					outputDirectory: 'custom-lang-path',
+					compilationAssets: {
+						'ckeditor.js': { source: () => 'source' }
+					}
+				} );
+
+				expect( assets ).to.deep.equal( [
+					{
+						outputPath: 'ckeditor.js',
+						outputBody: 'source\n;CKEDITOR_TRANSLATIONS.add(\'pl\',{a:"Anuluj"})'
+					},
+					{
+						outputPath: path.join( 'custom-lang-path', 'en.js' ),
+						outputBody: 'CKEDITOR_TRANSLATIONS.add(\'en\',{a:"Cancel"})'
 					}
 				] );
 			} );
@@ -482,6 +529,7 @@ describe( 'translations', () => {
 				translationService.translateSource( 't( \'Save\' );' );
 
 				const assets = translationService.getAssets( {
+					outputDirectory: 'lang',
 					compilationAssets: {
 						'ckeditor.js': { source: () => 'source' }
 					}
