@@ -65,7 +65,7 @@ You can use BrowserStack to execute the tests on different browsers. At this mom
 1. Firefox 6757 - OS X Yosemite
 1. Safari 11 - OS X High Sierra
 
-In order to run BrowserStack, you need to specify the `--username` and `--access-key` options. By default we
+In order to run BrowserStack, you need to specify the `--username` and `--access-key` options. By default, we
 execute the tests on all browsers listed above. You can use an option `--browser` to change it.
 
 #### Examples
