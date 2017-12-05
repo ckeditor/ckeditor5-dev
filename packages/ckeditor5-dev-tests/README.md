@@ -110,7 +110,7 @@ $ npm test -- -username [...] -a [...] --files engine
 Test the `ckeditor5-image` and `ckeditor5-ui` using BrowserStack on Safari and Edge:
 
 ```bash
-$ npm test -- -username [...] -a [...] --files image,ui --browser=safari,edge
+$ npm test -- -username [...] -a [...] --files image,ui --browsers=safari,edge
 ```
 
 ### Rules for converting `--files` option to glob pattern:
