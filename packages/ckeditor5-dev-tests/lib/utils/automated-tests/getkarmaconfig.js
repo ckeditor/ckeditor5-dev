@@ -170,15 +170,19 @@ module.exports = function getKarmaConfig( options ) {
 
 		karmaConfig.reporters = [ 'dots', 'BrowserStack' ];
 
+		// If user does not specified browser, restore default value.
 		if ( options.browsers.length === 1 && options.browsers[ 0 ] === 'CHROME_LOCAL' ) {
 			options.browsers = [];
 		}
 
+		// Use all specified browsers connected with BrowserStack.
 		karmaConfig.browsers = Object.keys( karmaConfig.customLaunchers )
 			.filter( launcherName => karmaConfig.customLaunchers[ launcherName ].base === 'BrowserStack' );
 
+		// If user specified browsers, filters out invalid ones.
 		if ( options.browsers.length ) {
 			karmaConfig.browsers = karmaConfig.browsers.filter( launcherName => {
+				// Keys match to format: OperationSystem_Browser.
 				const browserName = launcherName.split( '_' )[ 1 ].toLowerCase();
 
 				return options.browsers.some( browserFromOptions => browserFromOptions.toLowerCase() === browserName );
