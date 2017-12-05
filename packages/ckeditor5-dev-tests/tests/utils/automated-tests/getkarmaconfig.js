@@ -18,6 +18,9 @@ describe( 'getKarmaConfig', () => {
 		sandbox = sinon.sandbox.create();
 		sandbox.stub( process, 'cwd' ).returns( 'workspace' );
 
+		// Sinon cannot stub non-existing props.
+		process.env = Object.assign( {}, originalEnv, { TRAVIS: false } );
+
 		stubs = {
 			fs: {
 				writeFileSync: sandbox.stub()
