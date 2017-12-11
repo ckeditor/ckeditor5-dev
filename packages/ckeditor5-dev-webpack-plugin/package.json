@@ -5,7 +5,8 @@
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^7.0.2"
+	"@ckeditor/ckeditor5-dev-utils": "^7.0.2",
+	"rimraf": "^2.6.2"
   },
   "engines": {
     "node": ">=6.0.0",
