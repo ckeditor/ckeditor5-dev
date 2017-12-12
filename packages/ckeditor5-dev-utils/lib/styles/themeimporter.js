@@ -188,7 +188,7 @@ function getThemeFilePath( themePath, inputFilePath ) {
 // @param {String} inputFilePath A path to the file.
 // @returns {String} The name of the package.
 function getPackageName( inputFilePath ) {
-	const match = inputFilePath.match( `ckeditor5-[^${ path.sep }]+` );
+	const match = inputFilePath.match( /ckeditor5-[^\\/]+/ );
 
 	if ( match ) {
 		return match.pop();
