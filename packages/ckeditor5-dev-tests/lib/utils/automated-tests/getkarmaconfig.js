@@ -102,7 +102,7 @@ module.exports = function getKarmaConfig( options ) {
 		preprocessors: preprocessorMap,
 
 		webpack: getWebpackConfigForAutomatedTests( {
-			files: options.files,
+			files: globPatterns,
 			sourceMap: options.sourceMap,
 			coverage: options.coverage,
 			themePath: options.themePath
