@@ -8,6 +8,7 @@
 'use strict';
 
 const chalk = require( 'chalk' );
+const path = require( 'path' );
 const tests = require( '../lib/index' );
 
 const cwd = process.cwd();
@@ -20,6 +21,9 @@ if ( options.files.length === 0 ) {
 		options.files = [ '/' ];
 	}
 }
+
+// "Lark" is the default theme for tests.
+options.themePath = path.resolve( cwd, 'packages', 'ckeditor5-theme-lark', 'theme', 'theme.css' );
 
 tests.runAutomatedTests( options )
 	.catch( error => {

@@ -67,6 +67,7 @@ describe( 'runManualTests', () => {
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
 				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
 				expect( spies.scriptCompiler.firstCall.args[ 1 ] ).to.deep.equal( [ testsToExecute ] );
+				expect( spies.scriptCompiler.firstCall.args[ 2 ] ).to.be.undefined;
 
 				expect( spies.server.calledOnce ).to.equal( true );
 				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
@@ -86,7 +87,8 @@ describe( 'runManualTests', () => {
 			files: [
 				'build-classic',
 				'editor-classic/manual/classic.js'
-			]
+			],
+			themePath: 'path/to/theme'
 		};
 
 		return runManualTests( options )
@@ -108,6 +110,7 @@ describe( 'runManualTests', () => {
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
 				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
 				expect( spies.scriptCompiler.firstCall.args[ 1 ] ).to.deep.equal( testsToExecute );
+				expect( spies.scriptCompiler.firstCall.args[ 2 ] ).to.deep.equal( 'path/to/theme' );
 
 				expect( spies.server.calledOnce ).to.equal( true );
 				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );

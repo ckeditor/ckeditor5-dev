@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.0.7](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@1.0.5...eslint-config-ckeditor5@1.0.7) (2017-12-01)
+
+### Bug fixes
+
+* We should require space after words like `new`, `typeof` or `delete`. ([97266f2](https://github.com/ckeditor/ckeditor5-dev/commit/97266f2))
+
+
 ## [1.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@1.0.4...eslint-config-ckeditor5@1.0.5) (2017-05-17)
 
 * Aligned spacing around stars. Now, for real. Closes [#204](https://github.com/ckeditor/ckeditor5-dev/issues/204). ([3afdc90](https://github.com/ckeditor/ckeditor5-dev/commit/3afdc90))
