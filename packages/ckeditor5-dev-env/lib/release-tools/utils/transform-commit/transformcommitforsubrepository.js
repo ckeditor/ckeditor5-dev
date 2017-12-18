@@ -85,7 +85,20 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 		commit.subject = makeLinks( commit.subject );
 	}
 
-	if ( commit.footer && !commit.body && !commit.notes.length ) {
+	// Remove additional notes from commit's footer.
+	// Additional notes are added to footer. In order to avoid duplication, they should be removed.
+	if ( commit.footer && commit.notes.length ) {
+		commit.footer = commit.footer.split( '\n' )
+			.filter( footerLine => {
+				// For each footer line checks whether the line starts with note prefix ("NOTE": ...).
+				// If so, this footer line should be removed.
+				return !commit.notes.some( note => footerLine.startsWith( note.title ) );
+			} )
+			.join( '\n' )
+			.trim();
+	}
+
+	if ( commit.footer && !commit.body ) {
 		commit.body = commit.footer;
 		commit.footer = null;
 	}
