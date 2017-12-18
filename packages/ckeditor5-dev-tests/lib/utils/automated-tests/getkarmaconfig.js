@@ -22,6 +22,8 @@ const coverageDir = path.join( process.cwd(), 'coverage' );
  * @returns {Object}
  */
 module.exports = function getKarmaConfig( options ) {
+	const isBrowserStackEnabled = process.env.BROWSER_STACK_ACCESS_KEY && process.env.BROWSER_STACK_USERNAME;
+
 	if ( !Array.isArray( options.files ) || options.files.length === 0 ) {
 		throw new Error( 'Karma requires files to tests. `options.files` has to be non-empty array.' );
 	}
@@ -106,28 +108,14 @@ module.exports = function getKarmaConfig( options ) {
 				base: 'Chrome',
 				flags: [ '--disable-background-timer-throttling' ]
 			},
-			Windows_Edge: {
+			BrowserStack_Edge: {
 				base: 'BrowserStack',
 				os: 'Windows',
 				os_version: '10',
 				browser: 'edge',
 				browser_version: '16.0'
 			},
-			Mavericks_Chrome: {
-				base: 'BrowserStack',
-				os: 'OS X',
-				os_version: 'Mavericks',
-				browser: 'chrome',
-				browser_version: '62.0'
-			},
-			Yosemite_Firefox: {
-				base: 'BrowserStack',
-				os: 'OS X',
-				os_version: 'Yosemite',
-				browser: 'firefox',
-				browser_version: '57.0'
-			},
-			HighSierra_Safari: {
+			BrowserStack_Safari: {
 				base: 'BrowserStack',
 				os: 'OS X',
 				os_version: 'High Sierra',
@@ -162,32 +150,15 @@ module.exports = function getKarmaConfig( options ) {
 		delete karmaConfig.webpackMiddleware.stats;
 	}
 
-	if ( options.browserStack ) {
+	if ( isBrowserStackEnabled ) {
 		karmaConfig.browserStack = {
-			username: options.username,
-			accessKey: options.accessKey
+			username: process.env.BROWSER_STACK_USERNAME,
+			accessKey: process.env.BROWSER_STACK_ACCESS_KEY,
+			build: process.env.TRAVIS_REPO_SLUG,
+			project: 'ckeditor5'
 		};
 
 		karmaConfig.reporters = [ 'dots', 'BrowserStack' ];
-
-		// If user does not specified browser, restore default value.
-		if ( options.browsers.length === 1 && options.browsers[ 0 ] === 'CHROME_LOCAL' ) {
-			options.browsers = [];
-		}
-
-		// Use all specified browsers connected with BrowserStack.
-		karmaConfig.browsers = Object.keys( karmaConfig.customLaunchers )
-			.filter( launcherName => karmaConfig.customLaunchers[ launcherName ].base === 'BrowserStack' );
-
-		// If user specified browsers, filters out invalid ones.
-		if ( options.browsers.length ) {
-			karmaConfig.browsers = karmaConfig.browsers.filter( launcherName => {
-				// Keys match to format: OperationSystem_Browser.
-				const browserName = launcherName.split( '_' )[ 1 ].toLowerCase();
-
-				return options.browsers.some( browserFromOptions => browserFromOptions.toLowerCase() === browserName );
-			} );
-		}
 	}
 
 	if ( options.coverage ) {
@@ -218,19 +189,15 @@ module.exports = function getKarmaConfig( options ) {
 // Returns the value of Karma's browser option.
 // @returns {Array|null}
 function getBrowsers( options ) {
-	if ( process.env.TRAVIS ) {
-		return [ 'CHROME_TRAVIS_CI' ];
-	}
-
 	if ( options.server || !options.browsers ) {
 		return null;
 	}
 
 	return options.browsers.map( browser => {
-		if ( browser === 'Chrome' ) {
-			return 'CHROME_LOCAL';
+		if ( browser !== 'Chrome' ) {
+			return browser;
 		}
 
-		return browser;
+		return process.env.TRAVIS ? 'CHROME_TRAVIS_CI' : 'CHROME_LOCAL';
 	} );
 }

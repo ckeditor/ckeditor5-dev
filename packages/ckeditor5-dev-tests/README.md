@@ -53,20 +53,16 @@ You can also use the bin script for testing a package:
 * `files` - Specify file(s) to test. Also available as an alias: `-f`.
 * `browsers` - Browsers which will be used to run the tests. Also available as an alias: `-b`.
 * `reporter` - Mocha reporter – either `mocha` (default) or `dots` (less verbose one).
-* `username` - Username to BrowserStack account. Also available as an alias: `-u`.
-* `access-key` - Access key related to specified account on BrowserStack. Also available as an alias: `-a`.
 
 #### BrowserStack
 
-You can use BrowserStack to execute the tests on different browsers. At this moment we have defined 4 browsers:
+You can use BrowserStack to execute the tests on different browsers. At this moment we have defined 2 browsers:
 
-1. Edge 16 - Windows 10
-1. Chrome 62 - OS X Mavericks
-1. Firefox 6757 - OS X Yosemite
-1. Safari 11 - OS X High Sierra
+1. Edge 16 - Windows 10 (`BrowserStack_Edge`)
+1. Safari 11 - OS X High Sierra (`BrowserStack_Safari`)
 
-In order to run BrowserStack, you need to specify the `--username` and `--access-key` options. By default, we
-execute the tests on all browsers listed above. You can use an option `--browsers` to change it.
+In order to run BrowserStack, you need to specify the environment variables: `BROWSER_STACK_USERNAME` and `BROWSER_STACK_ACCESS_KEY`.
+By default, the tests will be executed on Chrome that is installed on your machine. You can use an option `--browsers` to specify the browsers.
 
 #### Examples
 
@@ -101,16 +97,16 @@ $ npm t -- --files='!(engine)'
 $ npm t -- --files='!(engine|ui)'
 ```
 
-Test the `ckeditor5-engine` using BrowserStack and all available browsers:
+Test the `ckeditor5-engine` using BrowserStack on Edge:
 
 ```bash
-$ npm test -- -username [...] -a [...] --files engine
+$ BROWSER_STACK_USERNAME=[...] BROWSER_STACK_ACCESS_KEY=[...] npm test -- --files engine --browsers=BrowserStack_Edge
 ```
 
 Test the `ckeditor5-image` and `ckeditor5-ui` using BrowserStack on Safari and Edge:
 
 ```bash
-$ npm test -- -username [...] -a [...] --files image,ui --browsers=safari,edge
+$ BROWSER_STACK_USERNAME=[...] BROWSER_STACK_ACCESS_KEY=[...] npm test -- --files image,ui --browsers=BrowserStack_Safari,BrowserStack_Edge
 ```
 
 ### Rules for converting `--files` option to glob pattern:
