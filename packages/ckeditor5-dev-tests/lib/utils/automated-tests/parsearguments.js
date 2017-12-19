@@ -16,9 +16,7 @@ module.exports = function parseArguments( args ) {
 		string: [
 			'files',
 			'browsers',
-			'reporter',
-			'username',
-			'access-key'
+			'reporter'
 		],
 
 		boolean: [
@@ -34,15 +32,13 @@ module.exports = function parseArguments( args ) {
 			c: 'coverage',
 			s: 'source-map',
 			v: 'verbose',
-			u: 'username',
-			a: 'access-key',
 			f: 'files',
 			b: 'browsers'
 		},
 
 		default: {
 			files: [],
-			browsers: 'CHROME_LOCAL',
+			browsers: 'Chrome',
 			reporter: 'mocha',
 			watch: false,
 			coverage: false,
@@ -54,13 +50,7 @@ module.exports = function parseArguments( args ) {
 	};
 	const options = minimist( args, minimistConfig );
 
-	options.accessKey = options[ 'access-key' ];
 	options.sourceMap = options[ 'source-map' ];
-
-	if ( options.username && options.accessKey ) {
-		options.browserStack = true;
-	}
-
 	options.browsers = options.browsers.split( ',' );
 
 	if ( typeof options.files === 'string' ) {
