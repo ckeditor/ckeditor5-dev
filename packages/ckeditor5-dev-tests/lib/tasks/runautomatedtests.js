@@ -89,6 +89,11 @@ function createEntryFile( globPatterns ) {
 		.join( '\n' );
 
 	fs.writeFileSync( ENTRY_FILE_PATH, filesImports + '\n' );
+
+	// See: https://github.com/webpack/watchpack/issues/25.
+	const now = Date.now() / 1000;
+	const then = now - 5;
+	fs.utimesSync( ENTRY_FILE_PATH, then, then );
 }
 
 function runKarma( options ) {
