@@ -94,6 +94,7 @@ function createEntryFile( globPatterns ) {
 	// A ugly hack blocks the loop and tests are executed once.
 	// See: https://github.com/webpack/watchpack/issues/25.
 	const now = Date.now() / 1000;
+	// 10 sec is default value of FS_ACCURENCY (which is hardcoded in Webpack watcher).
 	const then = now - 10;
 	fs.utimesSync( ENTRY_FILE_PATH, then, then );
 }
