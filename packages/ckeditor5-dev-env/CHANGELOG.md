@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [8.0.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@8.0.0...@ckeditor/ckeditor5-dev-env@8.0.4) (2017-12-20)
+
+### Bug fixes
+
+* Additional notes will be removed from commit's footer. Closes [#341](https://github.com/ckeditor/ckeditor5-dev/issues/341). ([95bcfd8](https://github.com/ckeditor/ckeditor5-dev/commit/95bcfd8))
+
+
 ## [8.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@7.0.1...@ckeditor/ckeditor5-dev-env@8.0.0) (2017-11-30)
 
 ### Features

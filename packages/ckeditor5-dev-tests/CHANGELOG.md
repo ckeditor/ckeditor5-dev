@@ -1,6 +1,22 @@
 Changelog
 =========
 
+## [10.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@10.0.5...@ckeditor/ckeditor5-dev-tests@10.1.0) (2017-12-20)
+
+### Features
+
+* Restored previous Karma behavior. Tests will be compiled to a single entry point. Closes [#290](https://github.com/ckeditor/ckeditor5-dev/issues/290). ([e0acc1a](https://github.com/ckeditor/ckeditor5-dev/commit/e0acc1a))
+* Tests can be executed using BrowserStack. Closes [#334](https://github.com/ckeditor/ckeditor5-dev/issues/334). ([25109ff](https://github.com/ckeditor/ckeditor5-dev/commit/25109ff))
+
+### Bug fixes
+
+* Karma will not execute the tests multiple times when works in watch mode. Closes [#346](https://github.com/ckeditor/ckeditor5-dev/issues/346). ([1a6b3ad](https://github.com/ckeditor/ckeditor5-dev/commit/1a6b3ad))
+
+### NOTE
+
+* In order to execute tests using BrowserStack, you need to call `BROWSER_STACK_USERNAME=[...] BROWSER_STACK_ACCESS_KEY=[...] npm test -- --browsers=[...]`.
+
+
 ## [10.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@10.0.4...@ckeditor/ckeditor5-dev-tests@10.0.5) (2017-12-01)
 
 ### Bug fixes

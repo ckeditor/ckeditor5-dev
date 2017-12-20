@@ -1,6 +1,18 @@
 Changelog
 =========
 
+## [7.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@7.0.2...@ckeditor/ckeditor5-dev-utils@7.0.3) (2017-12-20)
+
+### Bug fixes
+
+* Added language directory cleaning before each webpack build. Closes [ckeditor/ckeditor5#700](https://github.com/ckeditor/ckeditor5/issues/700). ([07a22cf](https://github.com/ckeditor/ckeditor5-dev/commit/07a22cf))
+* Changed invalid regexp on Windows environments for importing themes (PostCSS). Closes [#343](https://github.com/ckeditor/ckeditor5-dev/issues/343). ([4bf9443](https://github.com/ckeditor/ckeditor5-dev/commit/4bf9443))
+
+### Other changes
+
+* Reverted original escodegen package. Closes [#337](https://github.com/ckeditor/ckeditor5-dev/issues/337). ([6bfae99](https://github.com/ckeditor/ckeditor5-dev/commit/6bfae99))
+
+
 ## [7.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@7.0.1...@ckeditor/ckeditor5-dev-utils@7.0.2) (2017-12-01)
 
 Internal changes only (updated dependencies, documentation, etc.).

@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [3.0.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@3.0.0...@ckeditor/ckeditor5-dev-webpack-plugin@3.0.4) (2017-12-20)
+
+### Bug fixes
+
+* Added language directory cleaning before each webpack build. Closes [ckeditor/ckeditor5#700](https://github.com/ckeditor/ckeditor5/issues/700). ([07a22cf](https://github.com/ckeditor/ckeditor5-dev/commit/07a22cf))
+
+
 ## [3.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@2.0.21...@ckeditor/ckeditor5-dev-webpack-plugin@3.0.0) (2017-11-30)
 
 ### Features
