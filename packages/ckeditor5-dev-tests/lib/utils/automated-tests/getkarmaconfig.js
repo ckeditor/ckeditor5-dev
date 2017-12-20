@@ -19,12 +19,13 @@ const AVAILABLE_REPORTERS = [
  * @returns {Object}
  */
 module.exports = function getKarmaConfig( options ) {
-	const basePath = process.cwd();
-	const coverageDir = path.join( basePath, 'coverage' );
-
 	if ( !AVAILABLE_REPORTERS.includes( options.reporter ) ) {
 		throw new Error( `Specified reporter is not supported. Available reporters: ${ AVAILABLE_REPORTERS.join( ', ' ) }.` );
 	}
+
+	const basePath = process.cwd();
+	const coverageDir = path.join( basePath, 'coverage' );
+	const isBrowserStackEnabled = process.env.BROWSER_STACK_ACCESS_KEY && process.env.BROWSER_STACK_USERNAME;
 
 	const preprocessorMap = {
 		[ options.entryFile ]: [ 'webpack' ]
@@ -89,6 +90,18 @@ module.exports = function getKarmaConfig( options ) {
 				base: 'Chrome',
 				flags: [ '--disable-background-timer-throttling' ]
 			},
+			BrowserStack_Edge: {
+				base: 'BrowserStack',
+				os: 'Windows',
+				os_version: '10',
+				browser: 'edge'
+			},
+			BrowserStack_Safari: {
+				base: 'BrowserStack',
+				os: 'OS X',
+				os_version: 'High Sierra',
+				browser: 'safari'
+			}
 		},
 
 		// Continuous Integration mode. If true, Karma captures browsers, runs the tests and exits.
@@ -115,6 +128,17 @@ module.exports = function getKarmaConfig( options ) {
 	if ( options.verbose ) {
 		karmaConfig.webpackMiddleware.noInfo = false;
 		delete karmaConfig.webpackMiddleware.stats;
+	}
+
+	if ( isBrowserStackEnabled ) {
+		karmaConfig.browserStack = {
+			username: process.env.BROWSER_STACK_USERNAME,
+			accessKey: process.env.BROWSER_STACK_ACCESS_KEY,
+			build: process.env.TRAVIS_REPO_SLUG,
+			project: 'ckeditor5'
+		};
+
+		karmaConfig.reporters = [ 'dots', 'BrowserStack' ];
 	}
 
 	if ( options.coverage ) {
@@ -145,19 +169,15 @@ module.exports = function getKarmaConfig( options ) {
 // Returns the value of Karma's browser option.
 // @returns {Array|null}
 function getBrowsers( options ) {
-	if ( process.env.TRAVIS ) {
-		return [ 'CHROME_TRAVIS_CI' ];
-	}
-
 	if ( options.server || !options.browsers ) {
 		return null;
 	}
 
 	return options.browsers.map( browser => {
-		if ( browser === 'Chrome' ) {
-			return 'CHROME_LOCAL';
+		if ( browser !== 'Chrome' ) {
+			return browser;
 		}
 
-		return browser;
+		return process.env.TRAVIS ? 'CHROME_TRAVIS_CI' : 'CHROME_LOCAL';
 	} );
 }

@@ -12,7 +12,7 @@ const minimist = require( 'minimist' );
  * @returns {Object}
  */
 module.exports = function parseArguments( args ) {
-	const options = minimist( args, {
+	const minimistConfig = {
 		string: [
 			'files',
 			'browsers',
@@ -32,6 +32,8 @@ module.exports = function parseArguments( args ) {
 			c: 'coverage',
 			s: 'source-map',
 			v: 'verbose',
+			f: 'files',
+			b: 'browsers'
 		},
 
 		default: {
@@ -42,15 +44,23 @@ module.exports = function parseArguments( args ) {
 			coverage: false,
 			verbose: false,
 			'source-map': false,
-			server: false
+			server: false,
+			browserStack: false
 		}
-	} );
+	};
+	const options = minimist( args, minimistConfig );
 
 	options.sourceMap = options[ 'source-map' ];
 	options.browsers = options.browsers.split( ',' );
 
 	if ( typeof options.files === 'string' ) {
 		options.files = options.files.split( ',' );
+	}
+
+	// Delete all aliases because we don't want to use them in the code.
+	// They are useful when calling command but useless after that.
+	for ( const alias of Object.keys( minimistConfig.alias ) ) {
+		delete options[ alias ];
 	}
 
 	return options;

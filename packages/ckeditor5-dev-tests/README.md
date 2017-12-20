@@ -50,9 +50,19 @@ You can also use the bin script for testing a package:
 * `source-map` - Whether to generate the source maps. Also available as an alias: `-s`.
 * `coverage` - Whether to generate code coverage. Also available as an alias: `-c`.
 * `verbose` - Whether to informs about Webpack's work. Also available as an alias: `-v`.
-* `files` - Specify file(s) to tests.
-* `browsers` - Browsers which will be used to run the tests.
-* `reporter` - Mocha reporter – either `karma` (default) or `dots` (less verbose one).
+* `files` - Specify file(s) to test. Also available as an alias: `-f`.
+* `browsers` - Browsers which will be used to run the tests. Also available as an alias: `-b`.
+* `reporter` - Mocha reporter – either `mocha` (default) or `dots` (less verbose one).
+
+#### BrowserStack
+
+You can use BrowserStack to execute the tests on different browsers. At this moment we have defined 2 browsers:
+
+1. Edge 16 - Windows 10 (`BrowserStack_Edge`)
+1. Safari 11 - OS X High Sierra (`BrowserStack_Safari`)
+
+In order to run BrowserStack, you need to specify the environment variables: `BROWSER_STACK_USERNAME` and `BROWSER_STACK_ACCESS_KEY`.
+By default, the tests will be executed on Chrome that is installed on your machine. You can use an option `--browsers` to specify the browsers.
 
 #### Examples
 
@@ -71,7 +81,7 @@ $ npm t -- -w --files=engine/view
 Test specified files in `ckeditor5-basic-styles` on two browsers (Chrome and Firefox) you can use:
 
 ```bash
-$ npm t -- --browsers=Chrome,Firefox --files=basic-styles/boldengine.js,basic-styles/italicengine.js
+$ npm t -- --browsers=chrome,firefox --files=basic-styles/boldengine.js,basic-styles/italicengine.js
 ```
 
 Test all installed packages:
@@ -85,6 +95,18 @@ Test all installed packages except one (or more):
 ```bash
 $ npm t -- --files='!(engine)'
 $ npm t -- --files='!(engine|ui)'
+```
+
+Test the `ckeditor5-engine` using BrowserStack on Edge:
+
+```bash
+$ BROWSER_STACK_USERNAME=[...] BROWSER_STACK_ACCESS_KEY=[...] npm test -- --files engine --browsers=BrowserStack_Edge
+```
+
+Test the `ckeditor5-image` and `ckeditor5-ui` using BrowserStack on Safari and Edge:
+
+```bash
+$ BROWSER_STACK_USERNAME=[...] BROWSER_STACK_ACCESS_KEY=[...] npm test -- --files image,ui --browsers=BrowserStack_Safari,BrowserStack_Edge
 ```
 
 ### Rules for converting `--files` option to glob pattern:
