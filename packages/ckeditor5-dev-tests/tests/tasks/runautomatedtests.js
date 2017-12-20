@@ -25,7 +25,8 @@ describe( 'runAutomatedTests', () => {
 
 		stubs = {
 			fs: {
-				writeFileSync: sandbox.stub()
+				writeFileSync: sandbox.stub(),
+				utimesSync: sandbox.stub(),
 			},
 			log: {
 				info: sandbox.stub(),
