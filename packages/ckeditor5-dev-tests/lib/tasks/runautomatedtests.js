@@ -92,7 +92,7 @@ function createEntryFile( globPatterns ) {
 
 	// See: https://github.com/webpack/watchpack/issues/25.
 	const now = Date.now() / 1000;
-	const then = now - 5;
+	const then = now - 10;
 	fs.utimesSync( ENTRY_FILE_PATH, then, then );
 }
 
