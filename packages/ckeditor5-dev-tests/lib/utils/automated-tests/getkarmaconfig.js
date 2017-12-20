@@ -8,67 +8,49 @@
 
 const path = require( 'path' );
 const getWebpackConfigForAutomatedTests = require( './getwebpackconfig' );
-const transformFileOptionToTestGlob = require( '../transformfileoptiontotestglob' );
 
-const reporters = [
+const AVAILABLE_REPORTERS = [
 	'mocha',
 	'dots'
 ];
-
-const coverageDir = path.join( process.cwd(), 'coverage' );
 
 /**
  * @param {Object} options
  * @returns {Object}
  */
 module.exports = function getKarmaConfig( options ) {
+	if ( !AVAILABLE_REPORTERS.includes( options.reporter ) ) {
+		throw new Error( `Specified reporter is not supported. Available reporters: ${ AVAILABLE_REPORTERS.join( ', ' ) }.` );
+	}
+
+	const basePath = process.cwd();
+	const coverageDir = path.join( basePath, 'coverage' );
 	const isBrowserStackEnabled = process.env.BROWSER_STACK_ACCESS_KEY && process.env.BROWSER_STACK_USERNAME;
 
-	if ( !Array.isArray( options.files ) || options.files.length === 0 ) {
-		throw new Error( 'Karma requires files to tests. `options.files` has to be non-empty array.' );
-	}
+	const preprocessorMap = {
+		[ options.entryFile ]: [ 'webpack' ]
+	};
 
-	if ( !reporters.includes( options.reporter ) ) {
-		throw new Error( `Given Mocha reporter is not supported. Available reporters: ${ reporters.join( ', ' ) }.` );
-	}
-
-	const files = options.files.map( file => transformFileOptionToTestGlob( file ) );
-
-	const preprocessorMap = {};
-
-	for ( const file of files ) {
-		preprocessorMap[ file ] = [ 'webpack' ];
-
-		if ( options.sourceMap ) {
-			preprocessorMap[ file ].push( 'sourcemap' );
-		}
+	if ( options.sourceMap ) {
+		preprocessorMap[ options.entryFile ].push( 'sourcemap' );
 	}
 
 	const karmaConfig = {
 		// Base path that will be used to resolve all patterns (eg. files, exclude).
-		basePath: process.cwd(),
+		basePath,
 
 		// Frameworks to use. Available frameworks: https://npmjs.org/browse/keyword/karma-adapter
 		frameworks: [ 'mocha', 'chai', 'sinon' ],
 
 		// List of files/patterns to load in the browser.
-		files,
-
-		// List of files to exclude.
-		exclude: [
-			// Ignore all utils which aren't tests.
-			path.join( '**', 'tests', '**', '_utils', '**', '*.js' ),
-
-			// And all manual tests.
-			path.join( '**', 'tests', '**', 'manual', '**', '*.js' )
-		],
+		files: [ options.entryFile ],
 
 		// Preprocess matching files before serving them to the browser.
 		// Available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
 		preprocessors: preprocessorMap,
 
 		webpack: getWebpackConfigForAutomatedTests( {
-			files,
+			files: Object.keys( options.globPatterns ).map( key => options.globPatterns[ key ] ),
 			sourceMap: options.sourceMap,
 			coverage: options.coverage,
 			themePath: options.themePath

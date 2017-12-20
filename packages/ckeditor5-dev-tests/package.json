@@ -33,6 +33,7 @@
     "lodash": "^4.17.4",
     "mgit2": "^0.7.2",
     "minimist": "^1.2.0",
+    "mkdirp": "^0.5.1",
     "mocha": "^3.5.3",
     "mockery": "^2.1.0",
     "postcss-loader": "^2.0.8",
