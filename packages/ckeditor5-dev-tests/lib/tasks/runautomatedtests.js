@@ -90,6 +90,8 @@ function createEntryFile( globPatterns ) {
 
 	fs.writeFileSync( ENTRY_FILE_PATH, filesImports + '\n' );
 
+	// Webpack watcher compiles the file in a loop. It causes to Karma that runs tests multiple times in watch mode.
+	// A ugly hack blocks the loop and tests are executed once.
 	// See: https://github.com/webpack/watchpack/issues/25.
 	const now = Date.now() / 1000;
 	const then = now - 10;
