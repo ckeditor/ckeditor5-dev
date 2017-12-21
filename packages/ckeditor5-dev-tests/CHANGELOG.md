@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [10.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@10.1.0...@ckeditor/ckeditor5-dev-tests@10.2.0) (2017-12-21)
+
+### Other changes
+
+* Switched from CodeClimate to Coveralls. Closes [#348](https://github.com/ckeditor/ckeditor5-dev/issues/348). ([2238b04](https://github.com/ckeditor/ckeditor5-dev/commit/2238b04))
+
+
 ## [10.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@10.0.5...@ckeditor/ckeditor5-dev-tests@10.1.0) (2017-12-20)
 
 ### Features
