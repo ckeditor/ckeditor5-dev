@@ -144,19 +144,24 @@ module.exports = function getKarmaConfig( options ) {
 	if ( options.coverage ) {
 		karmaConfig.reporters.push( 'coverage' );
 
+		if ( process.env.TRAVIS ) {
+			karmaConfig.reporters.push( 'coveralls' );
+		}
+
 		karmaConfig.coverageReporter = {
 			reporters: [
+				// Prints a table after tests result.
 				{
 					type: 'text-summary'
 				},
+				// Generates HTML tables with the results.
 				{
 					dir: coverageDir,
 					type: 'html'
 				},
-				// Generates "./coverage/lcov.info". Used by CodeClimate.
+				// Generates "lcov.info" file. It's used by external code coverage services.
 				{
 					type: 'lcovonly',
-					subdir: '.',
 					dir: coverageDir
 				}
 			]
