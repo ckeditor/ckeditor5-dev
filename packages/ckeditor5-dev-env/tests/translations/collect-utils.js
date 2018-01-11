@@ -271,8 +271,12 @@ msgstr "util"
 
 			const header = utils.createPotFileHeader();
 
+			const part1 = '# Copyright (c)';
+			const part2 = ' 2003-2100, CKSource - Frederico Knabben. All rights reserved.\n\n';
+
 			expect( header )
-				.to.equal( '# Copyright (c) Copyright (c) 2003-2100, CKSource - Frederico Knabben. All rights reserved.\n\n' );
+				// Use a concatenated string to not have this date updated by the bump-year.js script.
+				.to.equal( part1 + part2 );
 			sinon.assert.calledOnce( getFullYearStub );
 		} );
 	} );
