@@ -4,12 +4,12 @@
   "devDependencies": {
     "@ckeditor/ckeditor5-dev-env": "^8.0.4",
     "chalk": "^2.1.0",
-    "eslint": "^4.8.0",
+    "eslint": "^4.15.0",
     "eslint-config-ckeditor5": "^1.0.7",
     "husky": "^0.14.3",
     "istanbul": "^0.4.4",
     "lerna": "^2.2.0",
-    "lint-staged": "^4.2.3",
+    "lint-staged": "^6.0.0",
     "mocha": "^3.5.3"
   },
   "engines": {
