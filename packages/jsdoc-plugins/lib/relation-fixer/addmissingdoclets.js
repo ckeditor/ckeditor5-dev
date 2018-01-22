@@ -22,10 +22,15 @@ module.exports = addMissingDoclets;
 function addMissingDoclets( originalDoclets ) {
 	const clonedDoclets = cloneDeep( originalDoclets );
 	const docletCollection = new DocletCollection();
+	const typedefDoclets = [];
 
 	for ( const doclet of clonedDoclets ) {
 		// Group doclets by memberof property.
 		docletCollection.add( `memberof:${ doclet.memberof }`, doclet );
+
+		if ( doclet.kind === 'typedef' ) {
+			typedefDoclets.push( doclet );
+		}
 	}
 
 	const entitiesWhichNeedNewDoclets = clonedDoclets.filter( d => {
@@ -80,5 +85,26 @@ function addMissingDoclets( originalDoclets ) {
 	} );
 	clonedDoclets.push( ...newDocletsToAdd );
 
+	extendTypedefs( typedefDoclets );
+
 	return clonedDoclets;
+}
+
+// Copy properties from parent typedefs to typedefs which extend them.
+function extendTypedefs( typedefDoclets ) {
+	for ( const typedefDoclet of typedefDoclets ) {
+		for ( const parentLongname of typedefDoclet.augmentsNested ) {
+			const parentDoclet = typedefDoclets.find( d => d.longname === parentLongname ) || {};
+
+			if ( parentDoclet.properties ) {
+				parentDoclet.properties.forEach( parentProperty => {
+					if ( typedefDoclet.properties && !typedefDoclet.properties.find( p => p.name === parentProperty.name ) ) {
+						const inheritedProperty = cloneDeep( parentProperty );
+						inheritedProperty.inherited = true;
+						typedefDoclet.properties.push( inheritedProperty );
+					}
+				} );
+			}
+		}
+	}
 }

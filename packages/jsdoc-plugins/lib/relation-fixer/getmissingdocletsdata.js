@@ -118,20 +118,35 @@ function getRelationProperty( allDoclets, childDoclet, memberDoclet, relation ) 
 
 	const memberDocletParent = allDoclets.find( d => d.longname === memberDoclet.memberof );
 
+	let isInherited = false;
+	let isMixed = false;
+
+	// If doclet is a child of a mixin, it's 'mixed'. Else if it's a child of another class, it's 'inhertied'.
 	if ( isNonEmptyArray( memberDocletParent.descendants ) ) {
 		for ( const longname of memberDocletParent.descendants ) {
 			const doclet = allDoclets.find( d => d.longname === longname );
 
-			if ( doclet && doclet.kind === 'class' ) {
+			if ( doclet && doclet.kind === 'mixin' ) {
 				if ( isNonEmptyArray( doclet.descendants ) &&
 					doclet.descendants.indexOf( childDoclet.longname ) !== -1 ) {
-					return 'inherited';
+					isMixed = true;
+				}
+			} else if ( doclet && doclet.kind === 'class' ) {
+				if ( isNonEmptyArray( doclet.descendants ) &&
+					doclet.descendants.indexOf( childDoclet.longname ) !== -1 ) {
+					isInherited = true;
 				}
 			}
 		}
 	}
 
-	return null;
+	if ( isMixed ) {
+		return 'mixed';
+	} else if ( isInherited ) {
+		return 'inherited';
+	} else {
+		return null;
+	}
 }
 
 function checkIfExplicitlyInherits( doclets ) {

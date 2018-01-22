@@ -74,6 +74,50 @@ describe( 'JSDoc relation-fixer plugin', () => {
 				scope: 'static',
 				memberof: 'classB',
 				inheritdoc: ''
+			},
+			{
+				name: 'typedefA',
+				longname: 'typedefA',
+				kind: 'typedef',
+				properties: [
+					{
+						type: {
+							names: [
+								'String'
+							]
+						},
+						description: 'Some description',
+						name: 'modelElement'
+					},
+					{
+						type: {
+							names: [
+								'String'
+							]
+						},
+						description: 'Another description',
+						name: 'viewElement'
+					}
+				]
+			},
+			{
+				name: 'typedefB',
+				longname: 'typedefB',
+				kind: 'typedef',
+				augments: [
+					'typedefA'
+				],
+				properties: [
+					{
+						type: {
+							names: [
+								'String'
+							]
+						},
+						description: 'Some other description',
+						name: 'modelElement'
+					}
+				]
 			}
 		];
 	} );
@@ -87,7 +131,7 @@ describe( 'JSDoc relation-fixer plugin', () => {
 			scope: 'static',
 			memberof: 'classB',
 			description: 'Interface B prop description',
-			inherited: true
+			mixed: true
 		};
 
 		expect( newDoclets ).to.deep.include( expectedDoclet );
@@ -101,7 +145,8 @@ describe( 'JSDoc relation-fixer plugin', () => {
 			kind: 'member',
 			scope: 'static',
 			memberof: 'classA',
-			description: 'Interface B prop description'
+			description: 'Interface B prop description',
+			mixed: true
 		};
 
 		expect( newDoclets ).to.deep.include( expectedDoclet );
@@ -115,6 +160,47 @@ describe( 'JSDoc relation-fixer plugin', () => {
 			kind: 'event',
 			memberof: 'classB',
 			inherited: true
+		};
+
+		expect( newDoclets ).to.deep.include( expectedDoclet );
+	} );
+
+	it( 'should extend typedefs', () => {
+		const newDoclets = addMissingDoclets( buildRelations( testDoclets ) );
+		const expectedDoclet = {
+			name: 'typedefB',
+			longname: 'typedefB',
+			kind: 'typedef',
+			augments: [
+				'typedefA'
+			],
+			augmentsNested: [
+				'typedefA'
+			],
+			implementsNested: [],
+			mixesNested: [],
+			descendants: [],
+			properties: [
+				{
+					type: {
+						names: [
+							'String'
+						]
+					},
+					description: 'Some other description',
+					name: 'modelElement'
+				},
+				{
+					type: {
+						names: [
+							'String'
+						]
+					},
+					description: 'Another description',
+					name: 'viewElement',
+					inherited: true
+				}
+			]
 		};
 
 		expect( newDoclets ).to.deep.include( expectedDoclet );

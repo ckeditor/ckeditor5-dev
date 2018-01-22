@@ -38,7 +38,7 @@ function addRelationArrays( originalDoclets ) {
 	// Doclets for which we want to create relation arrays.
 	// We want classes, interfaces and mixins.
 	const subjectDoclets = docletCollection.getAll().filter( item => {
-		return item.kind === 'class' || item.kind === 'interface' || item.kind === 'mixin';
+		return item.kind === 'class' || item.kind === 'interface' || item.kind === 'mixin' || item.kind === 'typedef';
 	} );
 
 	subjectDoclets.forEach( d => {
