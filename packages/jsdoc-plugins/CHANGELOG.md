@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.9.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.8.3...@ckeditor/jsdoc-plugins@1.9.0) (2018-01-22)
+
+### Features
+
+* JSDoc: Added support for using `@extends` with `@typedef`s. Closes [#355](https://github.com/ckeditor/ckeditor5-dev/issues/355). ([a3dd8c5](https://github.com/ckeditor/ckeditor5-dev/commit/a3dd8c5))
+
+
 ## [1.8.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.8.2...@ckeditor/jsdoc-plugins@1.8.3) (2017-11-28)
 
 ### Bug fixes

@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## [7.0.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@7.0.3...@ckeditor/ckeditor5-dev-utils@7.0.4) (2018-01-22)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
 ## [7.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@7.0.2...@ckeditor/ckeditor5-dev-utils@7.0.3) (2017-12-20)
 
 ### Bug fixes

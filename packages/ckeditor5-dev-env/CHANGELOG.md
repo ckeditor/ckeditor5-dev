@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [8.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@8.0.4...@ckeditor/ckeditor5-dev-env@8.0.5) (2018-01-22)
+
+### Bug fixes
+
+* Translation utils will now add correct license headers. ([c054c17](https://github.com/ckeditor/ckeditor5-dev/commit/c054c17))
+
+
 ## [8.0.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@8.0.0...@ckeditor/ckeditor5-dev-env@8.0.4) (2017-12-20)
 
 ### Bug fixes

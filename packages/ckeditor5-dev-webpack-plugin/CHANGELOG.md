@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## [3.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@3.0.4...@ckeditor/ckeditor5-dev-webpack-plugin@3.0.5) (2018-01-22)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
 ## [3.0.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@3.0.0...@ckeditor/ckeditor5-dev-webpack-plugin@3.0.4) (2017-12-20)
 
 ### Bug fixes

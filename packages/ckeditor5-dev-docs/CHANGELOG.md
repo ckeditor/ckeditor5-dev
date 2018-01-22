@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [8.0.8](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@8.0.0...@ckeditor/ckeditor5-dev-docs@8.0.8) (2018-01-22)
+
+### Other changes
+
+* Removed script for publishing nightly builds of the docs. See https://github.com/ckeditor/ckeditor5/issues/769. ([fa847e0](https://github.com/ckeditor/ckeditor5-dev/commit/fa847e0))
+
+
 ## [8.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.5.0...@ckeditor/ckeditor5-dev-docs@8.0.0) (2017-11-13)
 
 ### Other changes
