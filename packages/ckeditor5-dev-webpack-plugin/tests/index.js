@@ -59,7 +59,7 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 
 			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
 
-			expect( ckeditorWebpackPlugin.options.outputDirectory ).to.equal( 'lang' );
+			expect( ckeditorWebpackPlugin.options.outputDirectory ).to.equal( 'translations' );
 		} );
 
 		it( 'should use `outputDirectory` if passed', () => {
@@ -145,6 +145,8 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 				'en',
 				{ compileAllLanguages: true, additionalLanguages: [] }
 			);
+
+			sinon.assert.notCalled( console.warn );
 		} );
 
 		it( 'should log a warning if `additionalLanguages` is not specified while `outputDirectory` is set', () => {
