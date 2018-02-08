@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [3.0.6](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@3.0.5...@ckeditor/ckeditor5-dev-webpack-plugin@3.0.6) (2018-02-08)
+
+### Other changes
+
+* Changed default output directory name for translations. Closes [#354](https://github.com/ckeditor/ckeditor5-dev/issues/354). ([c4ef879](https://github.com/ckeditor/ckeditor5-dev/commit/c4ef879))
+
+
 ## [3.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@3.0.4...@ckeditor/ckeditor5-dev-webpack-plugin@3.0.5) (2018-01-22)
 
 Internal changes only (updated dependencies, documentation, etc.).
