@@ -34,7 +34,7 @@ module.exports = class CKEditorWebpackPlugin {
 	 * @param {Array.<String>|'all'} [options.additionalLanguages] Additional languages. Build is optimized when this option is not set.
 	 * When `additionalLanguages` is set to 'all' then script will be looking for all languages and according translations during
 	 * the compilation.
-	 * @param {String} [options.outputDirectory='lang'] Output directory for the emitted translation files,
+	 * @param {String} [options.outputDirectory='translations'] Output directory for the emitted translation files,
 	 * should be relative to the webpack context.
 	 * @param {Boolean} [options.strict] Option that make the plugin throw when the error is found during the compilation.
 	 * @param {Boolean} [options.verbose] Option that make this plugin log all warnings into the console.
@@ -43,7 +43,7 @@ module.exports = class CKEditorWebpackPlugin {
 		this.options = {
 			language: options.language,
 			additionalLanguages: options.additionalLanguages,
-			outputDirectory: options.outputDirectory || 'lang',
+			outputDirectory: options.outputDirectory || 'translations',
 			strict: !!options.strict,
 			verbose: !!options.verbose
 		};
@@ -73,7 +73,7 @@ module.exports = class CKEditorWebpackPlugin {
 		}
 
 		if ( !additionalLanguages ) {
-			if ( this.options.outputDirectory && this.options.verbose ) {
+			if ( this.options.outputDirectory !== 'translations' && this.options.verbose ) {
 				console.warn( chalk.yellow(
 					'Warning: `outputDirectory` option does not work for one language. It will be ignored.'
 				) );
