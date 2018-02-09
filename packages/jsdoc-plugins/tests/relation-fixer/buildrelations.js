@@ -13,6 +13,7 @@ const buildRelations = require( '../../lib/relation-fixer/buildrelations' );
 
 describe( 'JSDoc relation-fixer buildrelations module', () => {
 	let testDoclets;
+	let testDoclets2;
 
 	beforeEach( () => {
 		testDoclets = [
@@ -64,6 +65,34 @@ describe( 'JSDoc relation-fixer buildrelations module', () => {
 					'classA',
 					'classA'
 				]
+			}
+		];
+
+		testDoclets2 = [
+			{
+				name: 'interfaceA',
+				longname: 'interfaceA',
+				kind: 'interface'
+			},
+			{
+				name: 'interfaceB',
+				longname: 'interfaceB',
+				kind: 'interface',
+				augments: [ 'interfaceA' ]
+			},
+			{
+				name: 'classA',
+				longname: 'classA',
+				kind: 'class',
+				implements: [
+					'interfaceB'
+				]
+			},
+			{
+				name: 'classB',
+				longname: 'classB',
+				kind: 'class',
+				augments: [ 'classA' ]
 			}
 		];
 	} );
@@ -134,5 +163,12 @@ describe( 'JSDoc relation-fixer buildrelations module', () => {
 		expect( testedClass ).to.have.property( 'mixesNested' ).and.to.deep.equal( expectedMixesNested );
 		expect( testedClass ).to.have.property( 'augmentsNested' ).and.to.deep.equal( expectedAugmentsNested );
 		expect( testedInterface ).to.have.property( 'descendants' ).and.to.deep.equal( expectedDescendants );
+	} );
+
+	it( 'should not put non-classes to inheritance hierarchy', () => {
+		const newDoclets = buildRelations( testDoclets2 );
+		const testedDoclet = newDoclets.find( d => d.longname === 'classB' );
+
+		expect( testedDoclet ).to.have.property( 'augmentsNested' ).and.to.deep.equal( [ 'classA' ] );
 	} );
 } );
