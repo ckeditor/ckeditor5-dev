@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.9.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.9.0...@ckeditor/jsdoc-plugins@1.9.1) (2018-02-12)
+
+### Bug fixes
+
+* Fixed JSDoc relation-fixer plugin to not include interfaces in inheritance hierarchy. Closes [#361](https://github.com/ckeditor/ckeditor5-dev/issues/361). ([e46efbf](https://github.com/ckeditor/ckeditor5-dev/commit/e46efbf) and [d22fd7d](https://github.com/ckeditor/ckeditor5-dev/commit/d22fd7d))
+
+
 ## [1.9.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.8.3...@ckeditor/jsdoc-plugins@1.9.0) (2018-01-22)
 
 ### Features
