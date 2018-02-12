@@ -93,8 +93,8 @@ function getAncestors( docletCollection, currentDoclet, options ) {
 
 					// Push relation arrays of doclet's ancestors to current doclet resultRelations.
 					for ( const key of Object.keys( resultRelations ) ) {
-						// Only classes can be put in inheritance tree. See #361.
-						if ( key === 'augmentsNested' && ancestor.kind !== 'class' ) {
+						// Only items of same kind can be put in inheritance tree. See #361.
+						if ( key === 'augmentsNested' && ancestor.kind !== currentDoclet.kind ) {
 							continue;
 						}
 
