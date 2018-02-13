@@ -158,79 +158,97 @@ describe( 'Linter plugin', () => {
 		} );
 	} );
 
-	it( '_lintLinks()', () => {
-		const linter = new DocletValidator( [ {
-			comment:
-				`* {@link module:utils/a~A#method1}
-				 * {@link module:utils/b~Some1} `,
-			meta: { fileName: '', path: '' },
-		} ], getTestedModules() );
+	describe( '_lintLinks()', () => {
+		it( 'case 1', () => {
+			const linter = new DocletValidator( [ {
+				comment:
+					`* {@link module:utils/a~A#method1}
+					* {@link module:utils/b~Some1} `,
+				meta: { fileName: '', path: '' },
+			} ], getTestedModules() );
 
-		linter._lintLinks();
+			linter._lintLinks();
 
-		expect( linter._errors.length ).to.be.equal( 2 );
-	} );
+			expect( linter._errors.length ).to.be.equal( 2 );
+		} );
 
-	it( '_lintLinks() 2', () => {
-		const linter = new DocletValidator( [ {
-			comment:
-				`/** Linking test:\n *\n * * a:\n *
-				 * {@link module:ckeditor5/a~A} `,
-			meta: { fileName: '', path: '' },
-		}, {
-			comment: '',
-			longname: 'module:ckeditor5/a~A',
-			meta: { fileName: '', path: '' },
-		} ], getTestedModules() );
+		it( 'case 2', () => {
+			const linter = new DocletValidator( [ {
+				comment:
+					`/** Linking test:\n *\n * * a:\n *
+					* {@link module:ckeditor5/a~A} `,
+				meta: { fileName: '', path: '' },
+			}, {
+				comment: '',
+				longname: 'module:ckeditor5/a~A',
+				meta: { fileName: '', path: '' },
+			} ], getTestedModules() );
 
-		linter._lintLinks();
+			linter._lintLinks();
 
-		expect( linter._errors.length ).to.be.equal( 0 );
-	} );
+			expect( linter._errors.length ).to.be.equal( 0 );
+		} );
 
-	it( '_lintLinks() with link name', () => {
-		const linter = new DocletValidator( [ {
-			comment: ' {@link module:ckeditor5/a~A classA} ',
-			meta: { fileName: '', path: '' },
-		}, {
-			comment: '',
-			longname: 'module:ckeditor5/a~A',
-			meta: { fileName: '', path: '' },
-		} ], getTestedModules() );
+		it( 'should validate links with name', () => {
+			const linter = new DocletValidator( [ {
+				comment: ' {@link module:ckeditor5/a~A classA} ',
+				meta: { fileName: '', path: '' },
+			}, {
+				comment: '',
+				longname: 'module:ckeditor5/a~A',
+				meta: { fileName: '', path: '' },
+			} ], getTestedModules() );
 
-		linter._lintLinks();
+			linter._lintLinks();
 
-		expect( linter._errors.length ).to.be.equal( 0 );
-	} );
+			expect( linter._errors.length ).to.be.equal( 0 );
+		} );
 
-	it( '_lintLinks() with whitespaces', () => {
-		const linter = new DocletValidator( [ {
-			comment: ' {@link \n module:ckeditor5/a~A \n\t classA} ',
-			meta: { fileName: '', path: '' },
-		}, {
-			comment: '',
-			longname: 'module:ckeditor5/a~A',
-			meta: { fileName: '', path: '' },
-		} ], getTestedModules() );
+		it( 'should validate links with white spaces', () => {
+			const linter = new DocletValidator( [ {
+				comment: ' {@link \n module:ckeditor5/a~A \n\t classA} ',
+				meta: { fileName: '', path: '' },
+			}, {
+				comment: '',
+				longname: 'module:ckeditor5/a~A',
+				meta: { fileName: '', path: '' },
+			} ], getTestedModules() );
 
-		linter._lintLinks();
+			linter._lintLinks();
 
-		expect( linter._errors.length ).to.be.equal( 0 );
-	} );
+			expect( linter._errors.length ).to.be.equal( 0 );
+		} );
 
-	it( '_lintLinks() with multi-word link', () => {
-		const linter = new DocletValidator( [ {
-			comment: ' {@link module:ckeditor5/a~A with multi word link} ',
-			meta: { fileName: '', path: '' },
-		}, {
-			comment: '',
-			longname: 'module:ckeditor5/a~A',
-			meta: { fileName: '', path: '' },
-		} ], getTestedModules() );
+		it( 'should validate links with multi-word link', () => {
+			const linter = new DocletValidator( [ {
+				comment: ' {@link module:ckeditor5/a~A with multi word link} ',
+				meta: { fileName: '', path: '' },
+			}, {
+				comment: '',
+				longname: 'module:ckeditor5/a~A',
+				meta: { fileName: '', path: '' },
+			} ], getTestedModules() );
 
-		linter._lintLinks();
+			linter._lintLinks();
 
-		expect( linter._errors.length ).to.be.equal( 0 );
+			expect( linter._errors.length ).to.be.equal( 0 );
+		} );
+
+		it( 'should validate links that contain double link keyword', () => {
+			const linter = new DocletValidator( [ {
+				comment: '{@link @link module:ckeditor5/a~A with multi word link} ',
+				meta: { fileName: '', path: '' },
+			}, {
+				comment: '',
+				longname: 'module:ckeditor5/a~A',
+				meta: { fileName: '', path: '' },
+			} ], getTestedModules() );
+
+			linter._lintLinks();
+
+			expect( linter._errors.length ).to.be.equal( 1 );
+			expect( linter._errors[ 0 ].message ).to.match( /Incorrect link:/ );
+		} );
 	} );
 
 	it( '_lintEvents()', () => {
