@@ -71,4 +71,57 @@ describe( 'getKarmaConfig', () => {
 		expect( karmaConfig ).to.have.own.property( 'browsers' );
 		expect( karmaConfig ).to.have.own.property( 'singleRun', true );
 	} );
+
+	describe( 'BrowserStack integration', () => {
+		beforeEach( () => {
+			process.env.BROWSER_STACK_USERNAME = 'username';
+			process.env.BROWSER_STACK_ACCESS_KEY = 'access-key';
+		} );
+
+		// BROWSER_STACK_USERNAME=username BROWSER_STACK_ACCESS_KEY=access-key npm run test -- --files=autoformat
+		it( 'should be enabled when tests were called on a dev machine', () => {
+			const karmaConfig = getKarmaConfig( { reporter: 'mocha', globPatterns: {} } );
+
+			expect( karmaConfig.browserStack ).to.not.be.a( 'undefined' );
+		} );
+
+		// A team member made a commit. Travis should use BrowserStack.
+		it( 'should be enabled for commit build on Travis', () => {
+			process.env.TRAVIS = true;
+			process.env.TRAVIS_EVENT_TYPE = 'push';
+
+			const karmaConfig = getKarmaConfig( { reporter: 'mocha', globPatterns: {} } );
+
+			expect( karmaConfig.browserStack ).to.not.be.a( 'undefined' );
+		} );
+
+		// A team member made a pull request. Travis should use BrowserStack.
+		it( 'should be enabled for pull request build on Travis', () => {
+			process.env.TRAVIS = true;
+			process.env.TRAVIS_EVENT_TYPE = 'pull_request';
+			process.env.TRAVIS_PULL_REQUEST_SLUG = 'ckeditor/ckeditor-foo';
+			process.env.TRAVIS_REPO_SLUG = 'ckeditor/ckeditor-foo';
+
+			const karmaConfig = getKarmaConfig( { reporter: 'mocha', globPatterns: {} } );
+
+			expect( karmaConfig.browserStack ).to.not.be.a( 'undefined' );
+		} );
+
+		// A community member made a pull request. Travis should not use BrowserStack.
+		it( 'should be disabled for pull request build on Travis that comes from community', () => {
+			process.env.TRAVIS = true;
+			process.env.TRAVIS_EVENT_TYPE = 'pull_request';
+			process.env.TRAVIS_PULL_REQUEST_SLUG = 'ckeditor-forked/ckeditor-foo';
+			process.env.TRAVIS_REPO_SLUG = 'ckeditor/ckeditor-foo';
+
+			// Encrypted environment variables are not available to pull requests from forks due to
+			// the security risk of exposing such information to unknown code.
+			delete process.env.BROWSER_STACK_USERNAME;
+			delete process.env.BROWSER_STACK_ACCESS_KEY;
+
+			const karmaConfig = getKarmaConfig( { reporter: 'mocha', globPatterns: {} } );
+
+			expect( karmaConfig.browserStack ).to.be.a( 'undefined' );
+		} );
+	} );
 } );
