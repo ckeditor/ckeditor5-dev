@@ -25,7 +25,6 @@ module.exports = function getKarmaConfig( options ) {
 
 	const basePath = process.cwd();
 	const coverageDir = path.join( basePath, 'coverage' );
-	const isBrowserStackEnabled = process.env.BROWSER_STACK_ACCESS_KEY && process.env.BROWSER_STACK_USERNAME;
 
 	const preprocessorMap = {
 		[ options.entryFile ]: [ 'webpack' ]
@@ -130,7 +129,7 @@ module.exports = function getKarmaConfig( options ) {
 		delete karmaConfig.webpackMiddleware.stats;
 	}
 
-	if ( isBrowserStackEnabled ) {
+	if ( shouldEnableBrowserStack() ) {
 		karmaConfig.browserStack = {
 			username: process.env.BROWSER_STACK_USERNAME,
 			accessKey: process.env.BROWSER_STACK_ACCESS_KEY,
@@ -185,4 +184,18 @@ function getBrowsers( options ) {
 
 		return process.env.TRAVIS ? 'CHROME_TRAVIS_CI' : 'CHROME_LOCAL';
 	} );
+}
+
+function shouldEnableBrowserStack() {
+	if ( !process.env.BROWSER_STACK_USERNAME ) {
+		return false;
+	}
+
+	if ( !process.env.BROWSER_STACK_ACCESS_KEY ) {
+		return false;
+	}
+
+	// If the repository slugs are different, the pull request comes from the community (forked repository).
+	// For such builds, BrowserStack will be disabled. Read more: https://github.com/ckeditor/ckeditor5-dev/issues/358.
+	return ( process.env.TRAVIS_EVENT_TYPE !== 'pull_request' || process.env.TRAVIS_PULL_REQUEST_SLUG === process.env.TRAVIS_REPO_SLUG );
 }
