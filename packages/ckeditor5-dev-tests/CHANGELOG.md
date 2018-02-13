@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [10.2.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@10.2.1...@ckeditor/ckeditor5-dev-tests@10.2.3) (2018-02-13)
+
+### Bug fixes
+
+* BrowserStack will be disabled for PR builds that come from the community. Closes [#358](https://github.com/ckeditor/ckeditor5-dev/issues/358). ([b4f98ac](https://github.com/ckeditor/ckeditor5-dev/commit/b4f98ac))
+
+
 ## [10.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@10.2.0...@ckeditor/ckeditor5-dev-tests@10.2.1) (2018-01-22)
 
 Internal changes only (updated dependencies, documentation, etc.).
