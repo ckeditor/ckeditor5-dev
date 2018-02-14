@@ -159,7 +159,7 @@ describe( 'Linter plugin', () => {
 	} );
 
 	describe( '_lintLinks()', () => {
-		it( 'case 1', () => {
+		it( 'should validate links and adds errors if they are incorrect', () => {
 			const linter = new DocletValidator( [ {
 				comment:
 					`* {@link module:utils/a~A#method1}
@@ -172,7 +172,7 @@ describe( 'Linter plugin', () => {
 			expect( linter._errors.length ).to.be.equal( 2 );
 		} );
 
-		it( 'case 2', () => {
+		it( 'should not produce errors if links are correct', () => {
 			const linter = new DocletValidator( [ {
 				comment:
 					`/** Linking test:\n *\n * * a:\n *
