@@ -61,7 +61,7 @@ function createMissingEventDoclets( doclets ) {
 				originalProperty.type.names :
 				[ '*' ];
 
-			return {
+			const eventDoclet = {
 				comment: '',
 				meta: cloneDeep( originalProperty.meta ),
 				description: `<p>Fired when the <code>${ originalProperty.name }</code> property changed value.<p>`,
@@ -104,8 +104,20 @@ function createMissingEventDoclets( doclets ) {
 				memberof: originalProperty.memberof,
 				longname: observableEvent.name,
 				scope: 'instance',
-				access: originalProperty.access ? originalProperty.access : 'public'
+				access: originalProperty.access ? originalProperty.access : 'public',
+				inherited: originalProperty.inherited,
+				mixed: originalProperty.mixed
 			};
+
+			if ( originalProperty.inherited ) {
+				eventDoclet.inherited = true;
+			}
+
+			if ( originalProperty.mixed ) {
+				eventDoclet.mixed = true;
+			}
+
+			return eventDoclet;
 		} );
 }
 
