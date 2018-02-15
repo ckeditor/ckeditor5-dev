@@ -251,5 +251,37 @@ describe( 'jsdoc-plugins/observable-event-provider', () => {
 				access: 'public'
 			} );
 		} );
+
+		it( 'should mark new event doclet as inherited if the observable property inherited from other class', () => {
+			const inputDoclets = [ {
+				comment: '...',
+				meta: {
+					range: [
+						1861,
+						2061
+					],
+					filename: 'command.js',
+					lineno: 56,
+					path: '/workspace/ckeditor5/packages/ckeditor5-core/src',
+					code: {}
+				},
+				description: '<p>Flag indicating whether a command is enabled or disabled.</p>',
+				observable: true,
+				readonly: true,
+				kind: 'member',
+				name: 'isEnabled',
+				longname: 'module:core/command~Command#isEnabled',
+				scope: 'instance',
+				memberof: 'module:core/command~Command',
+				inherited: true,
+				mixed: true
+			} ];
+
+			const outputDoclets = addMissingEventDocletsForObservables( inputDoclets );
+
+			expect( outputDoclets.length ).to.equal( 2 );
+			expect( outputDoclets[ 1 ].inherited ).to.be.true;
+			expect( outputDoclets[ 1 ].mixed ).to.be.true;
+		} );
 	} );
 } );

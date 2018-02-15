@@ -104,9 +104,7 @@ function createMissingEventDoclets( doclets ) {
 				memberof: originalProperty.memberof,
 				longname: observableEvent.name,
 				scope: 'instance',
-				access: originalProperty.access ? originalProperty.access : 'public',
-				inherited: originalProperty.inherited,
-				mixed: originalProperty.mixed
+				access: originalProperty.access ? originalProperty.access : 'public'
 			};
 
 			if ( originalProperty.inherited ) {
