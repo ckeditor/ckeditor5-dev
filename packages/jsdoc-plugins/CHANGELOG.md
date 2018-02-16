@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.9.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.9.1...@ckeditor/jsdoc-plugins@1.9.2) (2018-02-16)
+
+### Bug fixes
+
+* Fixed inheritance in event doclets for observables. Closes [#368](https://github.com/ckeditor/ckeditor5-dev/issues/368). ([3fc1acc](https://github.com/ckeditor/ckeditor5-dev/commit/3fc1acc))
+
+
 ## [1.9.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.9.0...@ckeditor/jsdoc-plugins@1.9.1) (2018-02-12)
 
 ### Bug fixes
