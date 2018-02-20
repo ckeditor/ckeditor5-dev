@@ -155,8 +155,8 @@ class DocletValidator {
 	 * @protected
 	 */
 	_lintLinks() {
-		const allLinkRegExp = /\{@link\s+[^}\s]+[\s\w]*\}/g;
-		const pathRegExp = /^\{@link\s+([^}\s]+)[\s\w]*\}$/;
+		const allLinkRegExp = /\{@link\s+[^}]+\}/g;
+		const pathRegExp = /^\{@link\s+([^}\s]+)[^}]*\}$/;
 
 		for ( const element of this._collection.getAll() ) {
 			if ( !element.comment ) {
