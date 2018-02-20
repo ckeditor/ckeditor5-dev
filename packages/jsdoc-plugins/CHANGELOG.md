@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.9.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.9.2...@ckeditor/jsdoc-plugins@1.9.3) (2018-02-20)
+
+### Bug fixes
+
+* Improved links detection and validation. Closes [#365](https://github.com/ckeditor/ckeditor5-dev/issues/365). ([00d5b10](https://github.com/ckeditor/ckeditor5-dev/commit/00d5b10))
+
+
 ## [1.9.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.9.1...@ckeditor/jsdoc-plugins@1.9.2) (2018-02-16)
 
 ### Bug fixes
