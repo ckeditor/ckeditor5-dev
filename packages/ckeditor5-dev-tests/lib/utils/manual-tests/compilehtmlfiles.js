@@ -73,7 +73,11 @@ function compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate ) {
 
 	// Compile test instruction (Markdown file).
 	const parsedMarkdownTree = reader.parse( fs.readFileSync( sourceMDFilePath, 'utf-8' ) );
-	const manualTestInstruction = '<div class="manual-test-sidebar">' + writer.render( parsedMarkdownTree ) + '</div>';
+	const manualTestInstruction =
+		'<div class="manual-test-sidebar">' +
+			'<a href="/" class="manual-test-root-link">&larr; Back to the list</a>' +
+			writer.render( parsedMarkdownTree ) +
+		'</div>';
 
 	// Load test view (HTML file).
 	const htmlView = fs.readFileSync( sourceHtmlFilePath, 'utf-8' );
