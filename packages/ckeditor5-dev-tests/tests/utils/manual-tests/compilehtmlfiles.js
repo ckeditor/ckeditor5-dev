@@ -132,7 +132,7 @@ describe( 'compileHtmlFiles', () => {
 			stubs.fs.outputFileSync,
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
-				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
+				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
 				'<div>html file content</div>',
 				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script></body>`
 			].join( '\n' )
@@ -165,7 +165,7 @@ describe( 'compileHtmlFiles', () => {
 			stubs.fs.outputFileSync,
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.abc.html' ), [
 				'<div>template html content</div>',
-				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
+				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
 				'<div>html file content</div>',
 				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.abc.js' ) }"></script></body>`
 			].join( '\n' )
@@ -253,7 +253,7 @@ describe( 'compileHtmlFiles', () => {
 			stubs.fs.outputFileSync,
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
-				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
+				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
 				'<div>html file content</div>',
 				`<body class="manual-test-container"><script src="${ path.sep +
 				path.join( 'path', 'to', 'manual', 'file.js' ) }"></script></body>`
@@ -293,7 +293,7 @@ describe( 'compileHtmlFiles', () => {
 			stubs.fs.outputFileSync,
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
-				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
+				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
 				'<div>html file content</div>',
 				`<body class="manual-test-container"><script src="/${ path.join( 'path', 'to', 'manual', 'file.js' ) }"></script></body>`
 			].join( '\n' )
