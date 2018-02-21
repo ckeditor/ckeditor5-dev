@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [10.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@10.2.3...@ckeditor/ckeditor5-dev-tests@10.3.0) (2018-02-21)
+
+### Features
+
+* Implemented a responsive manual test layout with a 'back' button. Improved readability of the sidebar. Closes [#369](https://github.com/ckeditor/ckeditor5-dev/issues/369). ([edf9e15](https://github.com/ckeditor/ckeditor5-dev/commit/edf9e15))
+
+
 ## [10.2.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@10.2.1...@ckeditor/ckeditor5-dev-tests@10.2.3) (2018-02-13)
 
 ### Bug fixes
