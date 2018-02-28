@@ -64,14 +64,18 @@ function getPathToPackage( cwd, resource ) {
  * @param {String} cwd Current working directory.
  * @param {String} resource Absolute path to the resource.
  * @param {Array.<String|Object>} loaders Array of Webpack loaders.
+ * @param {Object} options Options for the new loader.
  * @returns {Array.<String|Object>}
  */
-function getLoaders( cwd, resource, loaders ) {
+function getLoaders( cwd, resource, loaders, options ) {
 	const relativePathToResource = path.relative( cwd, resource );
 
 	if ( relativePathToResource.match( CKEditor5PackageSrcFileRegExp ) ) {
 		return [
-			path.join( __dirname, 'translatesourceloader.js' ),
+			{
+				loader: path.join( __dirname, 'translatesourceloader.js' ),
+				options
+			},
 			...loaders
 		];
 	}

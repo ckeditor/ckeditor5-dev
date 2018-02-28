@@ -29,8 +29,8 @@ const { RawSource, ConcatSource } = require( 'webpack-sources' );
 module.exports = function serveTranslations( compiler, options, translationService, envUtils ) {
 	const cwd = process.cwd();
 
-	// Provides translateSource method for the `translatesourceloader` loader.
-	compiler.options.translateSource = ( source, sourceFile ) => translationService.translateSource( source, sourceFile );
+	// Provides translateSource function for the `translatesourceloader` loader.
+	const translateSource = ( source, sourceFile ) => translationService.translateSource( source, sourceFile );
 
 	// Watch for warnings and errors during translation process.
 	translationService.on( 'error', emitError );
@@ -67,7 +67,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 	compiler.plugin( 'normal-module-factory', nmf => {
 		nmf.plugin( 'after-resolve', ( resolveOptions, done ) => {
 			const pathToPackage = envUtils.getPathToPackage( cwd, resolveOptions.resource );
-			resolveOptions.loaders = envUtils.getLoaders( cwd, resolveOptions.resource, resolveOptions.loaders );
+			resolveOptions.loaders = envUtils.getLoaders( cwd, resolveOptions.resource, resolveOptions.loaders, { translateSource } );
 
 			if ( pathToPackage ) {
 				translationService.loadPackage( pathToPackage );
