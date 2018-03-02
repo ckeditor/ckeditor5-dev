@@ -15,7 +15,8 @@ const CKEditor5PackageSrcFileRegExp = /[/\\]ckeditor5-[^/\\]+[/\\]src[/\\].+\.js
  * Easily replaceable and testable set of CKEditor5 - related methods used by CKEditorWebpackPlugin internally.
  */
 module.exports = {
-	getCorePackage,
+	getCorePackageSampleResource,
+	getCorePackagePath,
 	getPathToPackage,
 	getLoaders
 };
@@ -27,14 +28,24 @@ module.exports = {
  * @param {Object} resolver Webpack resolver that can resolve the resource's request.
  * @returns {Promise<String>}
  */
-function getCorePackage( cwd, resolver ) {
-	return new Promise( res => {
-		resolver.resolve( cwd, cwd, '@ckeditor/ckeditor5-core/src/editor/editor.js', ( err, result ) => {
-			const pathToCoreTranslationPackage = result.match( CKEditor5CoreRegExp )[ 0 ];
 
-			res( pathToCoreTranslationPackage );
-		} );
-	} );
+/**
+ * Returns sample resource in CKEditor5-core.
+ *
+ * @returns {String}
+ */
+function getCorePackageSampleResource() {
+	return '@ckeditor/ckeditor5-core/src/editor/editor.js';
+}
+
+/**
+ * Returns path to the core package.
+ *
+ * @param {String} resource Sample resource.
+ * @returns {String}
+ */
+function getCorePackagePath( resource ) {
+	return resource.match( CKEditor5CoreRegExp )[ 0 ];
 }
 
 /**
