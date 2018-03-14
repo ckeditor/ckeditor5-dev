@@ -11,7 +11,7 @@ const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 const proxyquire = require( 'proxyquire' );
 
-describe( 'upload', () => {
+describe( 'uploadSourceFiles()', () => {
 	let sandbox, stubs, upload, packageNames, serverResources, fileContents;
 
 	beforeEach( () => {
@@ -46,7 +46,7 @@ describe( 'upload', () => {
 
 		sandbox.stub( process, 'cwd' ).returns( path.join( 'workspace', 'ckeditor5' ) );
 
-		upload = proxyquire( '../../lib/translations/upload', {
+		upload = proxyquire( '../../lib/translations/uploadsourcefiles', {
 			'@ckeditor/ckeditor5-dev-utils': {
 				logger: () => stubs.logger
 			},

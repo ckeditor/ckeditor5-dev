@@ -11,12 +11,12 @@ const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 const transifexService = require( './transifex-service' );
 
 /**
- * Uploads translations to the Transifex from collected files that are saved at 'ckeditor5/build/.transifex'.
+ * Uploads source files to the Transifex from collected files that are saved in the 'ckeditor5/build/.transifex' directory.
  *
  * @param {Object} loginConfig
  * @param {String} config.token Token to the Transifex API.
  */
-module.exports = function upload( loginConfig ) {
+module.exports = function uploadSourceFiles( loginConfig ) {
 	const pathToPoTranslations = path.join( process.cwd(), 'build', '.transifex' );
 	const potFiles = fs.readdirSync( pathToPoTranslations ).map( packageName => ( {
 		packageName,

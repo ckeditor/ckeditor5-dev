@@ -7,17 +7,17 @@
 
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 
-const utils = require( './collect-utils' );
+const utils = require( './source-files-generation-utils' );
 
 /**
- * Function collects translations using following steps:
+ * Function generates POT source files using following steps:
  *
  * 1. Collect translation contexts from each package.
  * 2. Collect t() calls arguments with usage of acorn from each package.
  * 3. Assert whether contexts and translations are correct. If not, log the errors and break the script.
- * 4. Create po files from the translation contexts."
+ * 4. Create POT files from the translation contexts."
  */
-module.exports = function collect() {
+module.exports = function generateSourceFiles() {
 	const contexts = utils.getContexts();
 	const translations = utils.collectTranslations();
 

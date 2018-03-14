@@ -13,21 +13,21 @@ const task = process.argv[ 2 ];
 
 const tasks = {
 	/**
-	 * Collects translation strings ( from `t()` calls ) and stores them in ckeditor5/build/.transifex directory.
+	 * Generates POT source files from the code and stores them in the 'ckeditor5/build/.transifex' directory.
 	 */
-	collect() {
-		const collectTranslations = require( './../lib/translations/collect' );
+	generateSourceFiles() {
+		const generateSourceFiles = require( './../lib/translations/generatesourcefiles' );
 
-		collectTranslations();
+		generateSourceFiles();
 	},
 
 	/**
-	 * Uploads translation strings on the Transifex server.
+	 * Uploads source files previously collected in the 'ckeditor5/build/.transifex' directory the Transifex server.
 	 *
 	 * @returns {Promise}
 	 */
-	upload() {
-		const uploadTranslations = require( './../lib/translations/upload' );
+	uploadSourceFiles() {
+		const uploadTranslations = require( './../lib/translations/uploadsourcefiles' );
 		const getToken = require( './../lib/translations/gettoken' );
 
 		return getToken()
@@ -35,16 +35,35 @@ const tasks = {
 	},
 
 	/**
-	 * Download translations from the Transifex server.
+	 * Downloads translations from the Transifex server.
 	 *
 	 * @returns {Promise}
 	 */
-	download() {
-		const downloadTranslations = require( './../lib/translations/download' );
+	downloadTranslations() {
+		const downloadTranslations = require( './../lib/translations/downloadtranslations' );
 		const getToken = require( './../lib/translations/gettoken' );
 
 		return getToken()
 			.then( credentials => downloadTranslations( credentials ) );
+	},
+
+	/**
+	 * Uploads translations to the Transifex for the given package from translation files
+	 * that are saved in the 'ckeditor5/packages/ckeditor5-[packageName]/lang/translations' directory.
+	 *
+	 * IMPORTANT: Take care, this will overwrite existing translations on the Transifex.
+	 *
+	 * @returns {Promise}
+	 */
+	uploadTranslations() {
+		const updateTranslations = require( './../lib/translations/uploadtranslations' );
+		const getToken = require( './../lib/translations/gettoken' );
+		const minimist = require( 'minimist' );
+
+		const args = minimist( process.argv, { string: [ 'package' ] } );
+
+		return getToken()
+			.then( credentials => updateTranslations( credentials, args.package ) );
 	}
 };
 

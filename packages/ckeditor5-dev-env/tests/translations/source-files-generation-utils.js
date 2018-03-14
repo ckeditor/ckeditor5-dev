@@ -12,7 +12,7 @@ const glob = require( 'glob' );
 const fs = require( 'fs-extra' );
 const proxyquire = require( 'proxyquire' );
 
-describe( 'collect-utils', () => {
+describe( 'source-files-generation-utils', () => {
 	let sandbox, utils, stubs, originalStringMap;
 
 	beforeEach( () => {
@@ -32,7 +32,7 @@ describe( 'collect-utils', () => {
 
 		sandbox.stub( process, 'cwd' ).returns( path.join( 'workspace', 'ckeditor5' ) );
 
-		utils = proxyquire( '../../lib/translations/collect-utils', {
+		utils = proxyquire( '../../lib/translations/source-files-generation-utils', {
 			'@ckeditor/ckeditor5-dev-utils': {
 				logger: () => stubs.logger,
 				translations: stubs.translations

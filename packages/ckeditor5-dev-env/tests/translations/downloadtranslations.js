@@ -10,7 +10,7 @@ const path = require( 'path' );
 const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 
-describe( 'download', () => {
+describe( 'downloadTranslations()', () => {
 	let sandbox, stubs, download, resources, resourcesDetails, translations, fileContents;
 
 	beforeEach( () => {
@@ -58,7 +58,7 @@ describe( 'download', () => {
 		mockery.registerMock( 'del', stubs.del );
 		mockery.registerMock( './transifex-service', stubs.transifexService );
 
-		download = require( '../../lib/translations/download' );
+		download = require( '../../lib/translations/downloadtranslations' );
 	} );
 
 	afterEach( () => {

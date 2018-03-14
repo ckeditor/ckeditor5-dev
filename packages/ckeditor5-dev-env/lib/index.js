@@ -31,21 +31,21 @@ const tasks = {
 	},
 
 	/**
-	 * Collects translation strings ( from `t()` calls ) and stores them in ckeditor5/build/.transifex directory.
+	 * Generates POT source files from the code and stores them in the 'ckeditor5/build/.transifex' directory.
 	 */
-	collectTranslations() {
-		const collectTranslations = require( './translations/collect' );
+	generateSourceFiles() {
+		const generateSourceFiles = require( './translations/generatesourcefiles' );
 
-		collectTranslations();
+		generateSourceFiles();
 	},
 
 	/**
-	 * Uploads translation strings on the Transifex server.
+	 * Uploads source files previously collected in the 'ckeditor5/build/.transifex' directory to the Transifex server.
 	 *
 	 * @returns {Promise}
 	 */
-	uploadTranslations() {
-		const uploadTranslations = require( './translations/upload' );
+	uploadSourceFiles() {
+		const uploadTranslations = require( './translations/uploadsourcefiles' );
 		const getToken = require( './translations/gettoken' );
 
 		return getToken()
@@ -53,16 +53,33 @@ const tasks = {
 	},
 
 	/**
-	 * Download translations from the Transifex server.
+	 * Downloads translations from the Transifex server.
 	 *
 	 * @returns {Promise}
 	 */
 	downloadTranslations() {
-		const downloadTranslations = require( './translations/download' );
+		const downloadTranslations = require( './translations/downloadtranslations' );
 		const getToken = require( './translations/gettoken' );
 
 		return getToken()
 			.then( credentials => downloadTranslations( credentials ) );
+	},
+
+	/**
+	 * Uploads translations to the Transifex for the given package from translation files
+	 * that are saved in the 'ckeditor5/packages/ckeditor5-[packageName]/lang/translations' directory.
+	 *
+	 * IMPORTANT: Take care, this will overwrite existing translations on the Transifex.
+	 *
+	 * @param {String} packageName
+	 * @returns {Promise}
+	 */
+	uploadTranslations( packageName ) {
+		const updateTranslations = require( './translations/uploadtranslations' );
+		const getToken = require( './translations/gettoken' );
+
+		return getToken()
+			.then( credentials => updateTranslations( credentials, packageName ) );
 	}
 };
 

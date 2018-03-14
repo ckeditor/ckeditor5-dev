@@ -29,9 +29,10 @@ describe( 'dev-env/index', () => {
 				error: sandbox.spy()
 			},
 			translations: {
-				upload: sandbox.spy(),
-				download: sandbox.spy(),
-				collect: sandbox.spy(),
+				uploadSourceFiles: sandbox.spy(),
+				downloadTranslations: sandbox.spy(),
+				generateSourceFiles: sandbox.spy(),
+				uploadTranslations: sandbox.spy(),
 				getToken: sandbox.stub()
 			},
 			releaseTools: {
@@ -44,10 +45,11 @@ describe( 'dev-env/index', () => {
 			}
 		};
 
-		mockery.registerMock( './translations/upload', stubs.translations.upload );
+		mockery.registerMock( './translations/uploadsourcefiles', stubs.translations.uploadSourceFiles );
 		mockery.registerMock( './translations/gettoken', stubs.translations.getToken );
-		mockery.registerMock( './translations/download', stubs.translations.download );
-		mockery.registerMock( './translations/collect', stubs.translations.collect );
+		mockery.registerMock( './translations/downloadtranslations', stubs.translations.downloadTranslations );
+		mockery.registerMock( './translations/generatesourcefiles', stubs.translations.generateSourceFiles );
+		mockery.registerMock( './translations/uploadtranslations', stubs.translations.uploadTranslations );
 
 		mockery.registerMock(
 			'./release-tools/tasks/releaserepository',
@@ -166,21 +168,21 @@ describe( 'dev-env/index', () => {
 		} );
 	} );
 
-	describe( 'collectTranslations()', () => {
-		it( 'should collect translations', () => {
-			tasks.collectTranslations();
+	describe( 'generateSourceFiles()', () => {
+		it( 'should generate source files', () => {
+			tasks.generateSourceFiles();
 
-			sinon.assert.calledOnce( stubs.translations.collect );
+			sinon.assert.calledOnce( stubs.translations.generateSourceFiles );
 		} );
 	} );
 
-	describe( 'uploadTranslations()', () => {
-		it( 'should upload translations', () => {
+	describe( 'uploadSourceFiles()', () => {
+		it( 'should upload source files', () => {
 			stubs.translations.getToken.returns( Promise.resolve( { token: 'token' } ) );
 
-			return tasks.uploadTranslations().then( () => {
-				sinon.assert.calledOnce( stubs.translations.upload );
-				sinon.assert.alwaysCalledWithExactly( stubs.translations.upload, {
+			return tasks.uploadSourceFiles().then( () => {
+				sinon.assert.calledOnce( stubs.translations.uploadSourceFiles );
+				sinon.assert.alwaysCalledWithExactly( stubs.translations.uploadSourceFiles, {
 					token: 'token',
 				} );
 			} );
@@ -192,10 +194,23 @@ describe( 'dev-env/index', () => {
 			stubs.translations.getToken.returns( Promise.resolve( { token: 'token' } ) );
 
 			return tasks.downloadTranslations().then( () => {
-				sinon.assert.calledOnce( stubs.translations.download );
-				sinon.assert.alwaysCalledWithExactly( stubs.translations.download, {
+				sinon.assert.calledOnce( stubs.translations.downloadTranslations );
+				sinon.assert.alwaysCalledWithExactly( stubs.translations.downloadTranslations, {
 					token: 'token',
 				} );
+			} );
+		} );
+	} );
+
+	describe( 'uploadTranslations()', () => {
+		it( 'should upload translations for the given package', () => {
+			stubs.translations.getToken.returns( Promise.resolve( { token: 'token' } ) );
+
+			return tasks.uploadTranslations( 'packageName' ).then( () => {
+				sinon.assert.calledOnce( stubs.translations.uploadTranslations );
+				sinon.assert.alwaysCalledWithExactly( stubs.translations.uploadTranslations, {
+					token: 'token',
+				}, 'packageName' );
 			} );
 		} );
 	} );

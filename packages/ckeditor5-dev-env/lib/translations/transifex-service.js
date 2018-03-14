@@ -44,7 +44,7 @@ module.exports = {
 	 * @param {Object} config
 	 * @param {String} config.token Token to the Transifex API.
 	 * @param {String} config.slug Resource slug.
-	 * @param {String} config.content Resource content.
+	 * @param {String} config.content PO file's read stream with a source file for the given resource.
 	 * @param {String} config.name Resource name.
 	 * @returns {Promise.<Object>}
 	 */
@@ -112,6 +112,27 @@ module.exports = {
 				request.get( `${ PROJECT_URL }/resource/${ slug }/translation/${ lang }/`, {
 					auth: { username: 'api', password: token }
 				}, createJsonResponseHandler( resolve, reject, 'getTranslation' ) );
+			} );
+		} );
+	},
+
+	/**
+	 * Put translations on the Transifex for the given language and resource slug.
+	 *
+	 * @param {Object} config
+	 * @param {String} config.token Token to the Transifex API.
+	 * @param {String} config.slug Resource slug.
+	 * @param {String} config.lang Target language.
+	 * @param {String} config.content PO file's read stream with translations for the given language and resource.
+	 * @returns {Promise.<Object>}
+	 */
+	putTranslations( { token, slug, lang, content } ) {
+		return retryAsyncFunction( () => {
+			return new Promise( ( resolve, reject ) => {
+				request.put( `${ PROJECT_URL }/resource/${ slug }/translation/${ lang }/`, {
+					auth: { username: 'api', password: token },
+					formData: { content, 'i18n_type': 'PO' }
+				}, createJsonResponseHandler( resolve, reject, 'putTranslations' ) );
 			} );
 		} );
 	}
