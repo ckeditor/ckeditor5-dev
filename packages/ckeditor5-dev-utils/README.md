@@ -1,7 +1,7 @@
 CKEditor 5 development utilities library
 ========================================
 
-Utils for [CKEditor 5](https://ckeditor5.github.io) development tools packages.
+Utils for [CKEditor 5](https://ckeditor.com) development tools packages.
 
 More information about development tools packages can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev>.
 

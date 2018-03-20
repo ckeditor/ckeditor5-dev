@@ -1,7 +1,7 @@
 CKEditor 5 testing environment
 ==============================
 
-Testing environment for [CKEditor 5](https://ckeditor5.github.io). It's based on [Karma](https://karma-runner.github.io/) and [Webpack](https://webpack.github.io/) and it's normally used from the [CKEditor 5 development environment](https://github.com/ckeditor/ckeditor5).
+Testing environment for [CKEditor 5](https://ckeditor.com). It's based on [Karma](https://karma-runner.github.io/) and [webpack](https://webpack.github.io/) and it's normally used from the [CKEditor 5 development environment](https://github.com/ckeditor/ckeditor5).
 
 More information about development tools packages can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev>.
 
@@ -24,7 +24,7 @@ An example npm task to test CKEditor 5 packages (used e.g. in https://github.com
 }
 ```
 
-If you encounter problems with big test folders pass `--max_old_space_size=4096` option to node runner: 
+If you encounter problems with big test folders pass `--max_old_space_size=4096` option to node runner:
 
 ```json
 {

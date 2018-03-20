@@ -1,7 +1,7 @@
 CKEditor 5 development environment tasks
 ========================================
 
-Tasks used during development of [CKEditor 5](https://ckeditor5.github.io).
+Tasks used during development of [CKEditor 5](https://ckeditor.com).
 
 More information about development tools packages can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev>.
 
@@ -16,7 +16,7 @@ npm i --save-dev @ckeditor/ckeditor5-dev-env
 Then create a script that run tasks:
 
 ```js
-// scripts/changelog-self.js: Generate changelog for the current package. 
+// scripts/changelog-self.js: Generate changelog for the current package.
 require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForSinglePackage();
 ```
 
