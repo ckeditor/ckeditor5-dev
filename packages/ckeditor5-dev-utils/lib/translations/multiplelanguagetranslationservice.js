@@ -218,7 +218,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 						`d['${ language }']||{},` +
 						`${ stringifiedTranslations }` +
 					')' +
-				'})(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
+				'}(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={})));'
 			);
 
 			return { outputBody, outputPath };
