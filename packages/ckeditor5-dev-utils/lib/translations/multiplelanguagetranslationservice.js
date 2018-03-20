@@ -213,12 +213,12 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 			const outputBody = (
 				// We need to ensure that the CKEDITOR_TRANSLATIONS variable exist and if it exists, we need to extend it.
-				'(function(d){' +
+				'(d=>' +
 					`d['${ language }']=Object.assign(` +
 						`d['${ language }']||{},` +
 						`${ stringifiedTranslations }` +
 					')' +
-				'}(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={})));'
+				')(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
 			);
 
 			return { outputBody, outputPath };

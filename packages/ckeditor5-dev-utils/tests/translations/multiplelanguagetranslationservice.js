@@ -217,13 +217,13 @@ describe( 'translations', () => {
 				expect( assets ).to.deep.equal( [
 					{
 						outputPath: 'ckeditor.js',
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"})}' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={})));\nsource'
+						outputBody: '(d=>d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"}))' +
+							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));\nsource'
 					},
 					{
 						outputPath: path.join( 'lang', 'en.js' ),
-						outputBody: '(function(d){d[\'en\']=Object.assign(d[\'en\']||{},{a:"Cancel",b:"Save"})}' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={})));'
+						outputBody: '(d=>d[\'en\']=Object.assign(d[\'en\']||{},{a:"Cancel",b:"Save"}))' +
+							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
 					}
 				] );
 			} );
@@ -285,13 +285,13 @@ describe( 'translations', () => {
 				expect( assets ).to.deep.equal( [
 					{
 						outputPath: 'ckeditor.js',
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"})}' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={})));\nsource'
+						outputBody: '(d=>d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"}))' +
+							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));\nsource'
 					},
 					{
 						outputPath: path.join( 'lang', 'xxx.js' ),
-						outputBody: '(function(d){d[\'xxx\']=Object.assign(d[\'xxx\']||{},{a:"Cancel",b:"Save"})}' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={})));'
+						outputBody: '(d=>d[\'xxx\']=Object.assign(d[\'xxx\']||{},{a:"Cancel",b:"Save"}))' +
+							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
 					}
 				] );
 			} );
@@ -385,8 +385,8 @@ describe( 'translations', () => {
 				expect( assets ).to.deep.equal( [
 					{
 						outputPath: 'ckeditor.js',
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"})}' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={})));\nsource'
+						outputBody: '(d=>d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"}))' +
+							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));\nsource'
 					}
 				] );
 			} );
@@ -426,8 +426,8 @@ describe( 'translations', () => {
 				expect( assets ).to.deep.equal( [
 					{
 						outputPath: path.join( 'lang', 'pl.js' ),
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"})}' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={})));'
+						outputBody: '(d=>d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"}))' +
+							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
 					}
 				] );
 			} );
@@ -463,13 +463,13 @@ describe( 'translations', () => {
 				expect( assets ).to.deep.equal( [
 					{
 						outputPath: 'ckeditor.js',
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj"})}' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={})));\nsource'
+						outputBody: '(d=>d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj"}))' +
+							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));\nsource'
 					},
 					{
 						outputPath: path.join( 'custom-lang-path', 'en.js' ),
-						outputBody: '(function(d){d[\'en\']=Object.assign(d[\'en\']||{},{a:"Cancel"})}' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={})));'
+						outputBody: '(d=>d[\'en\']=Object.assign(d[\'en\']||{},{a:"Cancel"}))' +
+							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
 					}
 				] );
 			} );
@@ -546,13 +546,13 @@ describe( 'translations', () => {
 				expect( assets ).to.deep.equal( [
 					{
 						outputPath: 'ckeditor.js',
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Zapisz"})}' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={})));\nsource'
+						outputBody: '(d=>d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Zapisz"}))' +
+							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));\nsource'
 					},
 					{
 						outputPath: path.join( 'lang', 'de.js' ),
-						outputBody: '(function(d){d[\'de\']=Object.assign(d[\'de\']||{},{a:"Speichern"})}' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={})));'
+						outputBody: '(d=>d[\'de\']=Object.assign(d[\'de\']||{},{a:"Speichern"}))' +
+							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
 					}
 				] );
 			} );
