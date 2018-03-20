@@ -9,7 +9,7 @@ const chalk = require( 'chalk' );
 const rimraf = require( 'rimraf' );
 const fs = require( 'fs' );
 const path = require( 'path' );
-const { RawSource } = require( 'webpack-sources' );
+const { RawSource, ConcatSource } = require( 'webpack-sources' );
 
 /**
  * Serve translations depending on the used translation service and passed options.
@@ -86,8 +86,25 @@ module.exports = function serveTranslations( compiler, options, translationServi
 				compilationAssets: compilation.assets
 			} );
 
+			const allFiles = chunks.reduce( ( acc, chunk ) => [ ...acc, ...chunk.files ], [] );
+
 			for ( const asset of generatedAssets ) {
-				compilation.assets[ asset.outputPath ] = new RawSource( asset.outputBody );
+				if ( asset.shouldConcat ) {
+					// We need to concat sources here to support source maps for CKE5 code.
+					const originalAsset = compilation.assets[ asset.outputPath ];
+					compilation.assets[ asset.outputPath ] = new ConcatSource( asset.outputBody, '\n', originalAsset );
+				} else {
+					const chunkExists = allFiles.includes( asset.outputPath );
+
+					if ( !chunkExists ) {
+						// RawSource is used when corresponding chunk does not exist.
+						compilation.assets[ asset.outputPath ] = new RawSource( asset.outputBody );
+					} else {
+						// String is used when corresponding chunk exists and maintain proper sourcemaps.
+						// Changing to RawSource would drop source maps.
+						compilation.assets[ asset.outputPath ] = asset.outputBody;
+					}
+				}
 			}
 
 			done();

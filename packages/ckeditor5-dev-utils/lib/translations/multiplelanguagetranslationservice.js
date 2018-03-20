@@ -176,13 +176,13 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		}
 
 		const mainAssetName = compilationAssetNames[ 0 ];
-		const mainCompilationAsset = compilationAssets[ mainAssetName ];
 
 		const mainTranslationAsset = this._getTranslationAssets( outputDirectory, [ this._mainLanguage ] )[ 0 ];
 
 		const mergedCompilationAsset = {
-			outputBody: mainTranslationAsset.outputBody + '\n' + mainCompilationAsset.source(),
-			outputPath: mainAssetName
+			outputBody: mainTranslationAsset.outputBody,
+			outputPath: mainAssetName,
+			shouldConcat: true
 		};
 
 		const otherLanguages = Array.from( this._languages )

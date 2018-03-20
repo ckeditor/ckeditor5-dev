@@ -218,7 +218,8 @@ describe( 'translations', () => {
 					{
 						outputPath: 'ckeditor.js',
 						outputBody: '(d=>d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"}))' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));\nsource'
+							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));',
+						shouldConcat: true
 					},
 					{
 						outputPath: path.join( 'lang', 'en.js' ),
@@ -286,7 +287,8 @@ describe( 'translations', () => {
 					{
 						outputPath: 'ckeditor.js',
 						outputBody: '(d=>d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"}))' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));\nsource'
+							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));',
+						shouldConcat: true
 					},
 					{
 						outputPath: path.join( 'lang', 'xxx.js' ),
@@ -386,7 +388,8 @@ describe( 'translations', () => {
 					{
 						outputPath: 'ckeditor.js',
 						outputBody: '(d=>d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"}))' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));\nsource'
+							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));',
+						shouldConcat: true
 					}
 				] );
 			} );
@@ -464,7 +467,8 @@ describe( 'translations', () => {
 					{
 						outputPath: 'ckeditor.js',
 						outputBody: '(d=>d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj"}))' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));\nsource'
+							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));',
+						shouldConcat: true
 					},
 					{
 						outputPath: path.join( 'custom-lang-path', 'en.js' ),
@@ -547,7 +551,8 @@ describe( 'translations', () => {
 					{
 						outputPath: 'ckeditor.js',
 						outputBody: '(d=>d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Zapisz"}))' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));\nsource'
+							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));',
+						shouldConcat: true
 					},
 					{
 						outputPath: path.join( 'lang', 'de.js' ),
