@@ -84,7 +84,7 @@ describe( 'getKarmaConfig', () => {
 			process.env.TRAVIS_EVENT_TYPE = null;
 			process.env.TRAVIS_REPO_SLUG = null;
 			process.env.TRAVIS_PULL_REQUEST_SLUG = null;
-			
+
 			const karmaConfig = getKarmaConfig( { reporter: 'mocha', globPatterns: {} } );
 
 			expect( karmaConfig.browserStack ).to.not.be.a( 'undefined' );
