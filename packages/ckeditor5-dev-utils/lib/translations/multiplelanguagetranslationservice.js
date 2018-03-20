@@ -181,7 +181,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		const mainTranslationAsset = this._getTranslationAssets( outputDirectory, [ this._mainLanguage ] )[ 0 ];
 
 		const mergedCompilationAsset = {
-			outputBody: mainCompilationAsset.source() + '\n;' + mainTranslationAsset.outputBody,
+			outputBody: mainTranslationAsset.outputBody + '\n' + mainCompilationAsset.source() + '\n;',
 			outputPath: mainAssetName
 		};
 
@@ -211,7 +211,15 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			const stringifiedTranslations = JSON.stringify( translatedStrings )
 				.replace( /"([a-z]+)":/g, '$1:' );
 
-			const outputBody = `CKEDITOR_TRANSLATIONS.add('${ language }',${ stringifiedTranslations })`;
+			const outputBody = (
+				// We need to ensure that the CKEDITOR_TRANSLATIONS variable exist and if it exists, we need to extend it.
+				'(function(d){' +
+					`d['${ language }']=Object.assign(` +
+						`d['${ language }']||{},` +
+						`${ stringifiedTranslations }` +
+					')' +
+				'})(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
+			);
 
 			return { outputBody, outputPath };
 		} );

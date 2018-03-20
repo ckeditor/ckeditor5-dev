@@ -9,6 +9,7 @@ const chalk = require( 'chalk' );
 const rimraf = require( 'rimraf' );
 const fs = require( 'fs' );
 const path = require( 'path' );
+const { RawSource } = require( 'webpack-sources' );
 
 /**
  * Serve translations depending on the used translation service and passed options.
@@ -77,20 +78,20 @@ module.exports = function serveTranslations( compiler, options, translationServi
 	} );
 
 	// At the end of the compilation add assets generated from the PO files.
-	compiler.plugin( 'emit', ( compilation, done ) => {
-		const generatedAssets = translationService.getAssets( {
-			outputDirectory: options.outputDirectory,
-			compilationAssets: compilation.assets
+	// Use `optimize-chunk-assets` instead of `emit` to emit assets before the `webpack.BannerPlugin`.
+	compiler.plugin( 'compilation', compilation => {
+		compilation.plugin( 'optimize-chunk-assets', ( chunks, done ) => {
+			const generatedAssets = translationService.getAssets( {
+				outputDirectory: options.outputDirectory,
+				compilationAssets: compilation.assets
+			} );
+
+			for ( const asset of generatedAssets ) {
+				compilation.assets[ asset.outputPath ] = new RawSource( asset.outputBody );
+			}
+
+			done();
 		} );
-
-		for ( const asset of generatedAssets ) {
-			compilation.assets[ asset.outputPath ] = {
-				source: () => asset.outputBody,
-				size: () => asset.outputBody.length,
-			};
-		}
-
-		done();
 	} );
 
 	function emitError( error ) {
