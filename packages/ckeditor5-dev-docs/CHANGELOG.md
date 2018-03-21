@@ -62,7 +62,7 @@ Internal changes only (updated dependencies, documentation, etc.).
 
 ### Bug fixes
 
-* Nightly docs should be available in latest/ and <version>/ directories on ckeditor5.github.io. Closes [#242](https://github.com/ckeditor/ckeditor5-dev/issues/242). ([ff487ee](https://github.com/ckeditor/ckeditor5-dev/commit/ff487ee))
+* Nightly docs should be available in latest/ and <version>/ directories on ckeditor.com. Closes [#242](https://github.com/ckeditor/ckeditor5-dev/issues/242). ([ff487ee](https://github.com/ckeditor/ckeditor5-dev/commit/ff487ee))
 
 
 ## [7.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@7.2.0...@ckeditor/ckeditor5-dev-docs@7.2.1) (2017-07-11)

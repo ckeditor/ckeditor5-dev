@@ -1,7 +1,7 @@
 CKEditor 5 documentation builder
 ================================
 
-Tasks used to build documentation for [CKEditor 5](https://ckeditor5.github.io).
+Tasks used to build documentation for [CKEditor 5](https://ckeditor.com).
 
 More information about development tools packages can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev>.
 

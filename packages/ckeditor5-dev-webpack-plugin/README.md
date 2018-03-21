@@ -1,9 +1,9 @@
 CKEditor 5 Webpack plugin
 =========================
 
-Intergrate [CKEditor 5](https://ckeditor5.github.io)'s build process with your [Webpack](https://webpack.js.org) setup.
+Intergrate [CKEditor 5](https://ckeditor.com)'s build process with your [webpack](https://webpack.js.org) setup.
 
-Requires Webpack >=2.0.0.
+Requires webpack >=2.0.0.
 
 More information about development tools packages can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev>.
 
