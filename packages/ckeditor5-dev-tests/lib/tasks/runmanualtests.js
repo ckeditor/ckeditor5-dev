@@ -23,7 +23,7 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
  */
 module.exports = function runManualTests( options ) {
 	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
-	const files = ( options.files && options.files.length ) ? options.files : [ '*' ];
+	const files = normalizeFiles( options.files );
 	const manualTestFilesPattern = files.map( file => transformFileOptionToTestGlob( file, true ) );
 
 	return Promise.resolve()
@@ -34,3 +34,18 @@ module.exports = function runManualTests( options ) {
 		] ) )
 		.then( () => createManualTestServer( buildDir ) );
 };
+
+function normalizeFiles( files ) {
+	if ( !files || !files.length ) {
+		return [ '*' ];
+	}
+
+	// '/' means tests from current package will be compiled. The main repository
+	// does not contain any test so it doesn't make sense to have '/' here.
+	// Using '*' allows compiling all packages tests'.
+	if ( files.length === 1 && files[ 0 ] === '/' ) {
+		return [ '*' ];
+	}
+
+	return files;
+}
