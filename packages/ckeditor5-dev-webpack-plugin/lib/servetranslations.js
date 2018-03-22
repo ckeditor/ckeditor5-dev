@@ -82,39 +82,38 @@ module.exports = function serveTranslations( compiler, options, translationServi
 				translationService.loadPackage( pathToPackage );
 			}
 		} );
-	} );
 
-	// At the end of the compilation add assets generated from the PO files.
-	// Use `optimize-chunk-assets` instead of `emit` to emit assets before the `webpack.BannerPlugin`.
-	compiler.hooks.emit.tap( 'CKEditor5Plugin', compilation => {
-		compilation.plugin( 'optimize-chunk-assets', ( chunks, done ) => {
-			const generatedAssets = translationService.getAssets( {
-				outputDirectory: options.outputDirectory,
-				compilationAssets: compilation.assets
-			} );
+		// At the end of the compilation add assets generated from the PO files.
+		// Use `optimize-chunk-assets` instead of `emit` to emit assets before the `webpack.BannerPlugin`.
+		compilation.hooks.optimizeChunks.tap( 'CKEditor5Plugin', chunks => {
+			compiler.hooks.emit.tap( 'CKEditor5Plugin', () => {
+				const generatedAssets = translationService.getAssets( {
+					outputDirectory: options.outputDirectory,
+					compilationAssets: compilation.assets
+				} );
 
-			const allFiles = chunks.reduce( ( acc, chunk ) => [ ...acc, ...chunk.files ], [] );
+				const allFiles = chunks.reduce( ( acc, chunk ) => [ ...acc, ...chunk.files ], [] );
 
-			for ( const asset of generatedAssets ) {
-				if ( asset.shouldConcat ) {
-					// We need to concat sources here to support source maps for CKE5 code.
-					const originalAsset = compilation.assets[ asset.outputPath ];
-					compilation.assets[ asset.outputPath ] = new ConcatSource( asset.outputBody, '\n', originalAsset );
-				} else {
-					const chunkExists = allFiles.includes( asset.outputPath );
+				for ( const asset of generatedAssets ) {
+					if ( asset.shouldConcat ) {
+						// We need to concat sources here to support source maps for CKE5 code.
+						const originalAsset = compilation.assets[ asset.outputPath ];
 
-					if ( !chunkExists ) {
-						// RawSource is used when corresponding chunk does not exist.
-						compilation.assets[ asset.outputPath ] = new RawSource( asset.outputBody );
+						compilation.assets[ asset.outputPath ] = new ConcatSource( asset.outputBody, '\n', originalAsset );
 					} else {
-						// String is used when corresponding chunk exists and maintain proper sourcemaps.
-						// Changing to RawSource would drop source maps.
-						compilation.assets[ asset.outputPath ] = asset.outputBody;
+						const chunkExists = allFiles.includes( asset.outputPath );
+
+						if ( !chunkExists ) {
+							// RawSource is used when corresponding chunk does not exist.
+							compilation.assets[ asset.outputPath ] = new RawSource( asset.outputBody );
+						} else {
+							// String is used when corresponding chunk exists and maintain proper sourcemaps.
+							// Changing to RawSource would drop source maps.
+							compilation.assets[ asset.outputPath ] = asset.outputBody;
+						}
 					}
 				}
-			}
-
-			done();
+			} );
 		} );
 	} );
 
