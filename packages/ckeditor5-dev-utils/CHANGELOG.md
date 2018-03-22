@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [7.0.6](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@7.0.5...@ckeditor/ckeditor5-dev-utils@7.0.6) (2018-03-22)
+
+### Bug fixes
+
+* Theme importer should work when CKEditor 5's development repository or one of its builds is located in a path which contains a `ckeditor5-` fragment. Closes [#351](https://github.com/ckeditor/ckeditor5-dev/issues/351). Closes [#381](https://github.com/ckeditor/ckeditor5-dev/issues/381). ([ec82d7a](https://github.com/ckeditor/ckeditor5-dev/commit/ec82d7a))
+
+
 ## [7.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@7.0.4...@ckeditor/ckeditor5-dev-utils@7.0.5) (2018-03-15)
 
 ### Bug fixes

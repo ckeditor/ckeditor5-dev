@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [10.3.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@10.3.0...@ckeditor/ckeditor5-dev-tests@10.3.2) (2018-03-22)
+
+### Bug fixes
+
+* Manual tests server should work when CKEditor 5's development repository is located in a path which contains `ckeditor5-` fragment. Closes [#351](https://github.com/ckeditor/ckeditor5-dev/issues/351). Closes [#381](https://github.com/ckeditor/ckeditor5-dev/issues/381). ([ec82d7a](https://github.com/ckeditor/ckeditor5-dev/commit/ec82d7a))
+
+
 ## [10.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@10.2.3...@ckeditor/ckeditor5-dev-tests@10.3.0) (2018-02-21)
 
 ### Features
