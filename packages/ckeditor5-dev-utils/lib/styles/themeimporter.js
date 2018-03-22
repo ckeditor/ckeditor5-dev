@@ -12,6 +12,7 @@ const path = require( 'path' );
 const postcss = require( 'postcss' );
 const chalk = require( 'chalk' );
 const log = require( '../logger' )();
+const getPackageName = require( './utils/getpackagename' );
 
 /**
  * A PostCSS plugin that loads a theme files from specified path.
@@ -172,29 +173,6 @@ function getThemeFilePath( themePath, inputFilePath ) {
 
 	// A corresponding theme file e.g. "/foo/bar/ckeditor5-theme-baz/theme/ckeditor5-qux/components/button.css".
 	return path.resolve( themePath, packageName, inputFileName );
-}
-
-// Returns a (CKEditor 5) package name the file belongs to.
-//
-// E.g., for the path to the file:
-//
-//		"/foo/ckeditor5/packages/ckeditor5-bar/baz.css"
-//
-// it outputs
-//
-//		"ckeditor5-bar"
-//
-// @private
-// @param {String} inputFilePath A path to the file.
-// @returns {String} The name of the package.
-function getPackageName( inputFilePath ) {
-	const match = inputFilePath.match( /ckeditor5-[^\\/]+/ );
-
-	if ( match ) {
-		return match.pop();
-	} else {
-		return null;
-	}
 }
 
 /**

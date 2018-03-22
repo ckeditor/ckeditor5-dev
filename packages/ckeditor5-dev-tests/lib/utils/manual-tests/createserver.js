@@ -12,9 +12,6 @@ const combine = require( 'dom-combiner' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const globSync = require( '../glob' );
 
-// TODO this bit repeats in 3 files.
-const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
-
 /**
  * Basic HTTP server.
  *
@@ -117,8 +114,7 @@ function generateIndex( sourcePath ) {
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 	const listElements = globSync( path.join( sourcePath, '**', '*.html' ) )
 		.map( file => {
-			// TODO this bit repeates in runmanualtests.js
-			const relativeFilePath = file.replace( new RegExp( '^.+?' + escapedPathSep + 'ckeditor5-' ), 'ckeditor5-' );
+			const relativeFilePath = file.replace( sourcePath + path.sep, '' );
 
 			return `<li><a href="${ relativeFilePath }">${ relativeFilePath }</a></li>`;
 		} );
