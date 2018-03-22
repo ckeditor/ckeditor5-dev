@@ -1,11 +1,12 @@
 {
   "name": "@ckeditor/ckeditor5-dev-utils",
-  "version": "7.0.4",
+  "version": "7.0.5",
   "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
     "acorn": "^5.1.2",
+    "cssnano": "^3.10.0",
     "del": "^3.0.0",
     "escodegen": "^1.9.0",
     "fs-extra": "^4.0.2",
