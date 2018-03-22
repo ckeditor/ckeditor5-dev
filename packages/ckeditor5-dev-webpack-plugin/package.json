@@ -8,6 +8,9 @@
     "@ckeditor/ckeditor5-dev-utils": "^9.0.1",
     "rimraf": "^2.6.2"
   },
+  "peerDependencies": {
+	  "webpack": "^4.0.0"
+  },
   "engines": {
     "node": ">=6.0.0",
     "npm": ">=3.0.0"
