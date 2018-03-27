@@ -297,6 +297,14 @@ describe( 'dev-env/release-tools/tasks', function() {
 				.then( () => {
 					expect( executedCommand.length ).to.equal( 14 );
 					expect( stubs.createGithubRelease.callCount ).to.equal( 2 );
+					expect( stubs.logger.info.callCount ).to.equal( 12 );
+
+					expect( stubs.logger.info.getCall( 9 ).args[ 0 ] ).to.equal(
+						'Created the release: https://github.com/ckeditor/ckeditor5-test-alpha/releases/tag/v0.1.0'
+					);
+					expect( stubs.logger.info.getCall( 11 ).args[ 0 ] ).to.equal(
+						'Created the release: https://github.com/ckeditor/ckeditor5-test-beta/releases/tag/v0.2.1'
+					);
 
 					// Alpha
 					expect( executedCommand[ 0 ], 'Alpha diff' ).to.equal( 'git diff --name-only package.json' );
