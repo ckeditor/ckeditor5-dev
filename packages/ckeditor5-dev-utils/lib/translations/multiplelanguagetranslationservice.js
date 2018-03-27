@@ -212,13 +212,14 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 				.replace( /"([a-z]+)":/g, '$1:' );
 
 			const outputBody = (
-				// We need to ensure that the CKEDITOR_TRANSLATIONS variable exist and if it exists, we need to extend it.
-				'(d=>' +
+				// We need to ensure that the CKEDITOR_TRANSLATIONS variable exists and if it exists, we need to extend it.
+				// Use ES5 because this bit will not be transpiled!
+				'(function(d){' +
 					`d['${ language }']=Object.assign(` +
 						`d['${ language }']||{},` +
 						`${ stringifiedTranslations }` +
 					')' +
-				')(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
+				'})(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
 			);
 
 			return { outputBody, outputPath };
