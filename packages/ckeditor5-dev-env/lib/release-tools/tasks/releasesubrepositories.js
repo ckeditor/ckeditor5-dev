@@ -276,7 +276,8 @@ module.exports = function releaseSubRepositories( options ) {
 
 			return createGithubRelease( releaseOptions.token, githubReleaseOptions )
 				.then( () => {
-					const url = `https://github.com/${ repositoryInfo.owner }/${ repositoryInfo.name }/releases/tag/v${ options.version }`;
+					// eslint-disable-next-line max-len
+					const url = `https://github.com/${ repositoryInfo.owner }/${ repositoryInfo.name }/releases/tag/v${ releaseDetails.version }`;
 					log.info( `Created the release: ${ url }` );
 
 					return Promise.resolve();
