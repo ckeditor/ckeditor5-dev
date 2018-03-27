@@ -1,6 +1,18 @@
 Changelog
 =========
 
+## [8.0.8](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@8.0.7...@ckeditor/ckeditor5-dev-env@8.0.8) (2018-03-27)
+
+### Bug fixes
+
+* An invalid parameter was passed to the logger and it caused that logs were displayed incorrectly. Closes [#380](https://github.com/ckeditor/ckeditor5-dev/issues/380). ([27aaa13](https://github.com/ckeditor/ckeditor5-dev/commit/27aaa13))
+
+
+## [8.0.7](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@8.0.5...@ckeditor/ckeditor5-dev-env@8.0.7) (2018-03-22)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
 ## [8.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@8.0.4...@ckeditor/ckeditor5-dev-env@8.0.5) (2018-01-22)
 
 ### Bug fixes

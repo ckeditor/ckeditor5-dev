@@ -1,10 +1,10 @@
 {
   "name": "@ckeditor/jsdoc-plugins",
-  "version": "1.9.3",
+  "version": "1.9.4",
   "description": "Various JSDoc plugins developed by the CKEditor 5 team.",
   "keywords": [],
   "dependencies": {
-    "fs-extra": "^4.0.2",
+    "fs-extra": "^5.0.0",
     "lodash": "^4.17.4"
   },
   "devDependencies": {
