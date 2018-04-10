@@ -446,5 +446,173 @@ Changelog entries generated from commits.
 					expect( stubs.displayGeneratedChangelogs.firstCall.args[ 0 ].size ).to.equal( 0 );
 				} );
 		} );
+
+		it( 'does not attach the "Dependencies" header if any dependency has not been added or changed', () => {
+			stubs.getSubRepositoriesPaths.returns( {
+				packages: new Set( [
+					packagesPaths.alpha
+				] ),
+				skipped: new Set( [
+					packagesPaths.beta,
+					packagesPaths.gamma,
+					packagesPaths.delta,
+					packagesPaths.epsilon
+				] )
+			} );
+
+			stubs.executeOnPackages.callsFake( executeOnPackages );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.beta ).returns( '0.2.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.beta ).returns( '0.2.0' );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.gamma ).returns( '0.3.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.gamma ).returns( '0.3.0' );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
+
+			stubs.getNewReleaseType.resolves( { releaseType: 'skip' } );
+
+			stubs.cliUtils.provideVersion.resolves( '1.0.0' );
+
+			stubs.moment.format.returns( '2017-10-09' );
+
+			stubs.fs.existsSync.returns( true );
+
+			stubs.changelogUtils.getChangelog.returns( '' );
+
+			sandbox.stub( process, 'chdir' );
+
+			const options = {
+				cwd: mainPackagePath,
+				packages: 'packages',
+				skipMainRepository: true
+			};
+
+			return generateSummaryChangelog( options )
+				.then( () => {
+					const expectedNewChangelog = '## [1.0.0](https://github.com/ckeditor/alpha/compare/v0.0.1...v1.0.0) (2017-10-09)\n';
+
+					expect( stubs.changelogUtils.saveChangelog.calledOnce ).to.equal( true );
+					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 0 ] ).to.equal( expectedNewChangelog );
+					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 1 ] ).to.equal( packagesPaths.alpha );
+				} );
+		} );
+
+		describe( 'additional notes for group of commits', () => {
+			it( 'are visible when dependencies has been added or changed', () => {
+				stubs.getSubRepositoriesPaths.returns( {
+					packages: new Set(),
+					skipped: new Set( [
+						packagesPaths.alpha,
+						packagesPaths.beta,
+						packagesPaths.gamma,
+						packagesPaths.delta,
+						packagesPaths.epsilon
+					] )
+				} );
+
+				stubs.executeOnPackages.callsFake( executeOnPackages );
+
+				stubs.versionUtils.getCurrent.withArgs( packagesPaths.alpha ).returns( '0.0.1' );
+				stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.alpha ).returns( '0.1.0' );
+
+				stubs.versionUtils.getCurrent.withArgs( packagesPaths.beta ).returns( '0.2.0' );
+				stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.beta ).returns( '0.2.1' );
+
+				stubs.versionUtils.getCurrent.withArgs( packagesPaths.gamma ).returns( '0.3.0' );
+				stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.gamma ).returns( '0.3.1' );
+
+				stubs.versionUtils.getCurrent.withArgs( packagesPaths.delta ).returns( '0.4.0' );
+				stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.delta ).returns( '0.4.1' );
+
+				stubs.versionUtils.getCurrent.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
+				stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.epsilon ).returns( '0.5.1' );
+
+				stubs.getNewReleaseType.resolves( { releaseType: 'minor' } );
+
+				stubs.generateChangelogFromCommits.resolves(
+					'## Changelog header (will be removed)\n\n' +
+					'Changelog entries generated from commits.'
+				);
+
+				stubs.cliUtils.provideVersion.resolves( '0.2.0' );
+
+				stubs.moment.format.returns( '2017-10-09' );
+
+				stubs.fs.existsSync.returns( true );
+
+				stubs.changelogUtils.getChangelog.returns( '' );
+
+				sandbox.stub( process, 'chdir' );
+
+				const options = {
+					cwd: mainPackagePath,
+					packages: 'packages'
+				};
+
+				return generateSummaryChangelog( options )
+					.then( () => {
+						expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.have.property( 'additionalNotes', true );
+					} );
+			} );
+
+			it( 'are hidden when dependencies has not been added or changed', () => {
+				stubs.getSubRepositoriesPaths.returns( {
+					packages: new Set(),
+					skipped: new Set( [
+						packagesPaths.alpha,
+						packagesPaths.beta,
+						packagesPaths.gamma,
+						packagesPaths.delta,
+						packagesPaths.epsilon
+					] )
+				} );
+
+				stubs.executeOnPackages.callsFake( executeOnPackages );
+
+				stubs.versionUtils.getCurrent.withArgs( packagesPaths.alpha ).returns( '0.0.1' );
+				stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.alpha ).returns( '0.0.1' );
+
+				stubs.versionUtils.getCurrent.withArgs( packagesPaths.beta ).returns( '0.2.0' );
+				stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.beta ).returns( '0.2.0' );
+
+				stubs.versionUtils.getCurrent.withArgs( packagesPaths.gamma ).returns( '0.3.0' );
+				stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.gamma ).returns( '0.3.0' );
+
+				stubs.versionUtils.getCurrent.withArgs( packagesPaths.delta ).returns( '0.4.0' );
+				stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.delta ).returns( '0.4.0' );
+
+				stubs.versionUtils.getCurrent.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
+				stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
+
+				stubs.getNewReleaseType.resolves( { releaseType: 'minor' } );
+
+				stubs.generateChangelogFromCommits.resolves(
+					'## Changelog header (will be removed)\n\n' +
+					'Changelog entries generated from commits.'
+				);
+
+				stubs.cliUtils.provideVersion.resolves( '0.2.0' );
+
+				stubs.moment.format.returns( '2017-10-09' );
+
+				stubs.fs.existsSync.returns( true );
+
+				stubs.changelogUtils.getChangelog.returns( '' );
+
+				sandbox.stub( process, 'chdir' );
+
+				const options = {
+					cwd: mainPackagePath,
+					packages: 'packages'
+				};
+
+				return generateSummaryChangelog( options )
+					.then( () => {
+						expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.have.property( 'additionalNotes', false );
+					} );
+			} );
+		} );
 	} );
 } );
