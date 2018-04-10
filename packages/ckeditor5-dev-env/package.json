@@ -15,7 +15,7 @@
     "del": "^3.0.0",
     "fs-extra": "^5.0.0",
     "git-raw-commits": "^1.2.0",
-    "github": "^14.0.0",
+    "github": "^9.2.0",
     "glob": "^7.1.2",
     "inquirer": "^5.2.0",
     "minimatch": "^3.0.4",
