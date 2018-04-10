@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## [8.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@7.0.7...@ckeditor/ckeditor5-dev-utils@8.0.0) (2018-04-10)
+
+### Bug fixes
+
+* Enabled builds to work with RequireJS. Closes [ckeditor/ckeditor5#914](https://github.com/ckeditor/ckeditor5/issues/914). ([6c69057](https://github.com/ckeditor/ckeditor5-dev/commit/6c69057))
+
+### BREAKING CHANGES
+
+* Due to a new format of translation snippets the new version of `CKEditor5WebpackPlugin` will only be compatible with CKEditor 5 v1.0.0-beta.2 or later.
+
+
 ## [7.0.7](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@7.0.6...@ckeditor/ckeditor5-dev-utils@7.0.7) (2018-03-27)
 
 Internal changes only (updated dependencies, documentation, etc.).
