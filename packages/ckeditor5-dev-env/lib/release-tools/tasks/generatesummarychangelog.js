@@ -161,7 +161,7 @@ module.exports = function generateSummaryChangelog( options ) {
 					currentChangelog = currentChangelog.replace( changelogUtils.changelogHeader, '' );
 
 					// Concat header, new and current changelog.
-					let newChangelog = changelogUtils.changelogHeader + changelogEntries + '\n\n' + currentChangelog.trim();
+					let newChangelog = changelogUtils.changelogHeader + changelogEntries + '\n\n\n' + currentChangelog.trim();
 					newChangelog = newChangelog.trim() + '\n';
 
 					// Save the changelog.
