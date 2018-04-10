@@ -5,7 +5,7 @@
 
 'use strict';
 
-const GitHubApi = require( 'github' );
+const GitHubApi = require( '@octokit/rest' );
 
 /**
  * Create a Github release.
