@@ -66,14 +66,6 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 		config.module.rules.push(
 			{
 				test: /\.js$/,
-				loader: 'babel-loader',
-				query: {
-					cacheDirectory: true,
-					plugins: [ require( 'babel-plugin-transform-es2015-modules-commonjs' ) ]
-				}
-			},
-			{
-				test: /\.js$/,
 				loader: 'istanbul-instrumenter-loader',
 				include: getPathsToIncludeForCoverage( options.files ),
 				exclude: [
