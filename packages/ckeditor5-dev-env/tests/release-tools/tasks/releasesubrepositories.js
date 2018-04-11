@@ -547,6 +547,87 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( stubs.logger.error.getCall( 4 ).args[ 0 ] ).to.equal( '* Cannot find changelog entry for version 0.2.1.' );
 				} );
 		} );
+
+		it( 'error during publishing on github does not break the process', () => {
+			const options = {
+				cwd: mainPackagePath,
+				packages: 'packages'
+			};
+
+			makeCommit( 'alpha', 'Feature: This is an initial commit.' );
+			makeChangelog( 'alpha', [
+				'Changelog',
+				'=========',
+				'',
+				'## 0.1.0 (2017-06-08)',
+				'',
+				'### Features',
+				'',
+				'* This is an initial commit.',
+				''
+			].join( '\n' ) );
+			makeCommit( 'alpha', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
+
+			makeCommit( 'beta', 'Fix: Some fix.' );
+			makeChangelog( 'beta', [
+				'Changelog',
+				'=========',
+				'',
+				'## [0.2.1](https://github.com/ckeditor) (2017-06-08)',
+				'',
+				'### Fix',
+				'',
+				'* Some fix.',
+				''
+			].join( '\n' ) );
+			makeCommit( 'beta', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
+
+			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
+
+			const token = 'fooToken';
+			const rejectError = new Error( 'Some error.' );
+
+			stubs.cli.configureReleaseOptions.resolves( {
+				token,
+				skipNpm: true,
+				skipGithub: false
+			} );
+
+			stubs.validatePackageToRelease.returns( [] );
+			stubs.createGithubRelease.onFirstCall().rejects( rejectError );
+			stubs.createGithubRelease.onSecondCall().resolves();
+
+			return releaseSubRepositories( options )
+				.then( () => {
+					expect( executedCommand.length ).to.equal( 12 );
+					expect( stubs.createGithubRelease.callCount ).to.equal( 2 );
+
+					expect( stubs.logger.error.callCount ).to.equal( 1 );
+					expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal( rejectError );
+
+					expect( stubs.logger.info.callCount ).to.equal( 10 );
+					expect( stubs.logger.info.getCall( 0 ).args[ 0 ] )
+						.to.equal( 'Updating dependencies for "@ckeditor/alpha"...' );
+					expect( stubs.logger.info.getCall( 1 ).args[ 0 ] )
+						.to.equal( 'Updating dependencies for "@ckeditor/beta"...' );
+					expect( stubs.logger.info.getCall( 2 ).args[ 0 ] )
+						.to.equal( 'Bumping version for "@ckeditor/alpha"...' );
+					expect( stubs.logger.info.getCall( 3 ).args[ 0 ] )
+						.to.equal( 'Bumping version for "@ckeditor/beta"...' );
+					expect( stubs.logger.info.getCall( 4 ).args[ 0 ] )
+						.to.equal( 'Pushing a local repository into the remote for "@ckeditor/alpha"...' );
+					expect( stubs.logger.info.getCall( 5 ).args[ 0 ] )
+						.to.equal( 'Pushing a local repository into the remote for "@ckeditor/beta"...' );
+					expect( stubs.logger.info.getCall( 6 ).args[ 0 ] )
+						.to.equal( 'Creating a GitHub release for "@ckeditor/alpha"...' );
+					expect( stubs.logger.info.getCall( 7 ).args[ 0 ] )
+						.to.equal( 'Cannot create a release on GitHub. Skipping that package.' );
+					expect( stubs.logger.info.getCall( 8 ).args[ 0 ] )
+						.to.equal( 'Creating a GitHub release for "@ckeditor/beta"...' );
+					expect( stubs.logger.info.getCall( 9 ).args[ 0 ] )
+						.to.equal( 'Created the release: https://github.com/ckeditor/ckeditor5-test-beta/releases/tag/v0.2.1' );
+				} );
+		} );
 	} );
 } );
 
