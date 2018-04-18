@@ -116,27 +116,30 @@ module.exports = function generateSummaryChangelog( options ) {
 
 				let promise = Promise.resolve();
 
+				// Generate the changelog entries based on dependencies.
+				let changelogEntries = getChangelogFromDependencies( {
+					dependencies,
+					newVersion: version,
+					currentVersion: packageJson.version,
+					repositoryUrl: packageJson.repository.url.replace( /\.git$/, '' ),
+				} );
+
+				// Additional notes for changelog generated from commits should be added if any dependency has been added or changed.
+				const additionalNotes = changelogEntries.trim().split( '\n' ).length !== 1;
+
 				if ( suggestedBumpFromCommits !== 'skip' ) {
 					promise = generateChangelogFromCommits( {
 						version,
+						additionalNotes,
 						currentTag: 'v' + version,
 						previousTag: tagName,
 						transformCommit: transformCommitFunction,
 						isInternalRelease: false,
-						additionalNotes: true,
 						doNotSave: true
 					} );
 				}
 
 				return promise.then( changesBasedOnCommits => {
-					// Generate the changelog entries based on dependencies.
-					let changelogEntries = getChangelogFromDependencies( {
-						dependencies,
-						newVersion: version,
-						currentVersion: packageJson.version,
-						repositoryUrl: packageJson.repository.url.replace( /\.git$/, '' ),
-					} );
-
 					// Part of the changelog generated from commits should be attached to changelog entries.
 					if ( changesBasedOnCommits ) {
 						changelogEntries += '\n\n' + changesBasedOnCommits.split( '\n' )
@@ -158,7 +161,7 @@ module.exports = function generateSummaryChangelog( options ) {
 					currentChangelog = currentChangelog.replace( changelogUtils.changelogHeader, '' );
 
 					// Concat header, new and current changelog.
-					let newChangelog = changelogUtils.changelogHeader + changelogEntries + '\n\n' + currentChangelog.trim();
+					let newChangelog = changelogUtils.changelogHeader + changelogEntries + '\n\n\n' + currentChangelog.trim();
 					newChangelog = newChangelog.trim() + '\n';
 
 					// Save the changelog.
@@ -348,8 +351,6 @@ module.exports = function generateSummaryChangelog( options ) {
 			// eslint-disable-next-line max-len
 			`## [${ options.newVersion }](${ options.repositoryUrl }/compare/v${ options.currentVersion }...v${ options.newVersion }) (${ date })`,
 			'',
-			'### Dependencies',
-			''
 		];
 
 		const allowBreakingChangeInMinor = areBreakingChangesAcceptable( options.newVersion );
@@ -371,6 +372,12 @@ module.exports = function generateSummaryChangelog( options ) {
 				minorReleasePackages.set( packageName, versions );
 				majorReleasePackages.delete( packageName );
 			}
+		}
+
+		// Push the "Dependencies" header to entries list if any package has been added or changed.
+		if ( newPackages.size || majorReleasePackages.size || minorReleasePackages.size || patchReleasePackages.size ) {
+			entries.push( '### Dependencies' );
+			entries.push( '' );
 		}
 
 		if ( newPackages.size ) {
