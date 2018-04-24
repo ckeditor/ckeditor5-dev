@@ -177,13 +177,22 @@ function getBrowsers( options ) {
 		return null;
 	}
 
-	return options.browsers.map( browser => {
-		if ( browser !== 'Chrome' ) {
-			return browser;
-		}
+	const browsers = options.browsers
+		.map( browser => {
+			if ( browser !== 'Chrome' ) {
+				return browser;
+			}
 
-		return process.env.TRAVIS ? 'CHROME_TRAVIS_CI' : 'CHROME_LOCAL';
-	} );
+			return process.env.TRAVIS ? 'CHROME_TRAVIS_CI' : 'CHROME_LOCAL';
+		} );
+
+	if ( shouldEnableBrowserStack() ) {
+		return browsers;
+	}
+
+	// If the BrowserStack is disabled, all browsers that start with a prefix "BrowserStack" should be filtered out.
+	// See: https://github.com/ckeditor/ckeditor5-dev/issues/358 and https://github.com/ckeditor/ckeditor5-dev/issues/402.
+	return browsers.filter( browser => !browser.startsWith( 'BrowserStack' ) );
 }
 
 function shouldEnableBrowserStack() {
