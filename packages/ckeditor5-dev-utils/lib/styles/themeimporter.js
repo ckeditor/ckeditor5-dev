@@ -119,6 +119,10 @@ function importFile( options ) {
 				type: 'dependency'
 			} );
 
+			importResult.messages.forEach( message => {
+				result.messages.push( message );
+			} );
+
 			if ( options.debug ) {
 				log.info( `[ThemeImporter] Loaded "${ chalk.green( file ) }".` );
 			}
