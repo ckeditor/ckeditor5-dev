@@ -119,6 +119,8 @@ function importFile( options ) {
 				type: 'dependency'
 			} );
 
+			// `importResult` contains references to all dependencies that were used.
+			// We need to inform the base file (the file which imports the *.css file) that these dependencies should be watched too.
 			importResult.messages.forEach( message => {
 				result.messages.push( message );
 			} );
