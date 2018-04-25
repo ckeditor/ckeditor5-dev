@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## [11.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@10.3.5...@ckeditor/ckeditor5-dev-tests@11.0.0) (2018-04-25)
+
+### Other changes
+
+* Changed the license to GPL2+ only. See [ckeditor/ckeditor5#991](https://github.com/ckeditor/ckeditor5/issues/991). ([e392d7d](https://github.com/ckeditor/ckeditor5-dev/commit/e392d7d))
+
+### BREAKING CHANGES
+
+* The license under which CKEditor 5 is released has been changed from a triple GPL, LGPL and MPL license to GPL2+ only. See [ckeditor/ckeditor5#991](https://github.com/ckeditor/ckeditor5/issues/991) for more information.
+
+
 ## [10.3.5](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@10.3.3...@ckeditor/ckeditor5-dev-tests@10.3.5) (2018-04-11)
 
 Internal changes only (updated dependencies, documentation, etc.).
