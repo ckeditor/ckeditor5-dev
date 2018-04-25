@@ -18,7 +18,7 @@
     ".eslintrc.js"
   ],
   "author": "CKSource (http://cksource.com/)",
-  "license": "GPL-2.0-or-later",
+  "license": "MIT",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/eslint-config-ckeditor5",
   "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
   "repository": "https://github.com/ckeditor/ckeditor5-dev"
