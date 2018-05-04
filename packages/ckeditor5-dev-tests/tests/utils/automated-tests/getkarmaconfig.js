@@ -85,9 +85,12 @@ describe( 'getKarmaConfig', () => {
 			process.env.TRAVIS_REPO_SLUG = null;
 			process.env.TRAVIS_PULL_REQUEST_SLUG = null;
 
-			const karmaConfig = getKarmaConfig( { reporter: 'mocha', globPatterns: {} } );
+			const karmaConfig = getKarmaConfig( { reporter: 'mocha', globPatterns: {}, browsers: [ 'BrowserStack_Edge' ] } );
 
 			expect( karmaConfig.browserStack ).to.not.be.a( 'undefined' );
+			expect( karmaConfig.browsers ).to.deep.equal( [
+				'BrowserStack_Edge'
+			] );
 		} );
 
 		// A team member made a commit. Travis should use BrowserStack.
@@ -95,9 +98,12 @@ describe( 'getKarmaConfig', () => {
 			process.env.TRAVIS = true;
 			process.env.TRAVIS_EVENT_TYPE = 'push';
 
-			const karmaConfig = getKarmaConfig( { reporter: 'mocha', globPatterns: {} } );
+			const karmaConfig = getKarmaConfig( { reporter: 'mocha', globPatterns: {}, browsers: [ 'BrowserStack_Edge' ] } );
 
 			expect( karmaConfig.browserStack ).to.not.be.a( 'undefined' );
+			expect( karmaConfig.browsers ).to.deep.equal( [
+				'BrowserStack_Edge'
+			] );
 		} );
 
 		// A team member made a pull request. Travis should use BrowserStack.
@@ -107,9 +113,12 @@ describe( 'getKarmaConfig', () => {
 			process.env.TRAVIS_PULL_REQUEST_SLUG = 'ckeditor/ckeditor-foo';
 			process.env.TRAVIS_REPO_SLUG = 'ckeditor/ckeditor-foo';
 
-			const karmaConfig = getKarmaConfig( { reporter: 'mocha', globPatterns: {} } );
+			const karmaConfig = getKarmaConfig( { reporter: 'mocha', globPatterns: {}, browsers: [ 'BrowserStack_Edge' ] } );
 
 			expect( karmaConfig.browserStack ).to.not.be.a( 'undefined' );
+			expect( karmaConfig.browsers ).to.deep.equal( [
+				'BrowserStack_Edge'
+			] );
 		} );
 
 		// A community member made a pull request. Travis should not use BrowserStack.
@@ -124,9 +133,17 @@ describe( 'getKarmaConfig', () => {
 			delete process.env.BROWSER_STACK_USERNAME;
 			delete process.env.BROWSER_STACK_ACCESS_KEY;
 
-			const karmaConfig = getKarmaConfig( { reporter: 'mocha', globPatterns: {} } );
+			const karmaConfig = getKarmaConfig( {
+				reporter: 'mocha',
+				globPatterns: {},
+				browsers: [ 'BrowserStack_Edge', 'Firefox', 'Chrome', 'BrowserStack_Safari' ]
+			} );
 
 			expect( karmaConfig.browserStack ).to.be.a( 'undefined' );
+			expect( karmaConfig.browsers ).to.deep.equal( [
+				'Firefox',
+				'CHROME_TRAVIS_CI'
+			] );
 		} );
 	} );
 } );
