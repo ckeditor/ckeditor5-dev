@@ -21,8 +21,8 @@
   "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme",
   "scripts": {
-    "test": "mocha `./scripts/get-test-directories.sh` --recursive",
-    "coverage": "istanbul cover _mocha `./scripts/get-test-directories.sh` -- --recursive",
+    "test": "mocha packages/*/tests --recursive --timeout 5000",
+    "coverage": "istanbul cover _mocha packages/*/tests -- --recursive --timeout 5000",
     "changelog": "node ./scripts/changelog.js",
     "lint": "eslint --quiet '**/*.js'",
     "precommit": "lint-staged"
