@@ -31,7 +31,7 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^2.0.13",
     "lodash": "^4.17.4",
-    "mgit2": "^0.7.2",
+    "mgit2": "^0.8.0",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "mocha": "^5.0.5",
