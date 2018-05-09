@@ -1,6 +1,27 @@
 Changelog
 =========
 
+## [9.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@9.0.0...@ckeditor/ckeditor5-dev-env@9.0.1) (2018-05-04)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
+## [9.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@8.0.9...@ckeditor/ckeditor5-dev-env@9.0.0) (2018-04-25)
+
+### Bug fixes
+
+* An error that occurs during publishing a package on GitHub will not break the whole process and the rest packages would be published. Closes [#397](https://github.com/ckeditor/ckeditor5-dev/issues/397). ([7f66531](https://github.com/ckeditor/ckeditor5-dev/commit/7f66531))
+* The "Dependencies" header will not appear if no dependencies have been added or changed. Also, fixed the invalid spacing between two versions in the generated changelog. Closes [#398](https://github.com/ckeditor/ckeditor5-dev/issues/398). ([77bc394](https://github.com/ckeditor/ckeditor5-dev/commit/77bc394))
+
+### Other changes
+
+* Changed the license to GPL2+ only. See [ckeditor/ckeditor5#991](https://github.com/ckeditor/ckeditor5/issues/991). ([e392d7d](https://github.com/ckeditor/ckeditor5-dev/commit/e392d7d))
+
+### BREAKING CHANGES
+
+* The license under which CKEditor 5 is released has been changed from a triple GPL, LGPL and MPL license to GPL2+ only. See [ckeditor/ckeditor5#991](https://github.com/ckeditor/ckeditor5/issues/991) for more information.
+
+
 ## [8.0.9](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@8.0.8...@ckeditor/ckeditor5-dev-env@8.0.9) (2018-04-10)
 
 Internal changes only (updated dependencies, documentation, etc.).
