@@ -35,7 +35,8 @@ module.exports = function getPostCssConfig( options = {} ) {
 	if ( options.minify ) {
 		config.plugins.push( require( 'cssnano' )( {
 			preset: 'default',
-			autoprefixer: false
+			autoprefixer: false,
+			reduceIdents: true
 		} ) );
 	}
 
