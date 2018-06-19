@@ -134,21 +134,6 @@ describe( 'collect-utils', () => {
 			] );
 		} );
 
-		it( 'should return an error when lang/contexts.json could be missing', () => {
-			const contexts = new Map( [
-				[ 'ckeditor5-core', { content: {} } ]
-			] );
-			const translations = [ {
-				package: 'ckeditor5-utils',
-				key: 'util'
-			} ];
-			const errors = utils.getMissingContextErrorMessages( contexts, translations );
-
-			expect( errors ).to.deep.equal( [
-				'contexts.json file or context for the translation key is missing (ckeditor5-utils, util).'
-			] );
-		} );
-
 		it( 'should return an error when the translation does not exist', () => {
 			const contexts = new Map( [
 				[ 'ckeditor5-core', { content: {} } ],
@@ -188,6 +173,21 @@ describe( 'collect-utils', () => {
 			const translations = [ {
 				package: 'ckeditor5-utils',
 				key: 'util'
+			} ];
+			const errors = utils.getMissingContextErrorMessages( contexts, translations );
+
+			expect( errors ).to.deep.equal( [] );
+		} );
+
+		it( 'should not return errors when translation exists in other package', () => {
+			const contexts = new Map( [
+				[ 'ckeditor5-core', { content: {} } ],
+				[ 'ckeditor5-heading', { content: {} } ],
+				[ 'ckeditor5-paragraph', { content: { paragraph: 'Paragraph' } } ]
+			] );
+			const translations = [ {
+				package: 'ckeditor5-heading',
+				key: 'paragraph'
 			} ];
 			const errors = utils.getMissingContextErrorMessages( contexts, translations );
 
