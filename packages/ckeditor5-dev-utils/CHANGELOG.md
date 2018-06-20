@@ -1,6 +1,14 @@
 Changelog
 =========
 
+## [9.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@9.0.0...@ckeditor/ckeditor5-dev-utils@9.0.1) (2018-06-20)
+
+### Bug fixes
+
+* CSS `@keyframes` should not be minified by cssnano to prevent naming collisions. Closes [#350](https://github.com/ckeditor/ckeditor5-dev/issues/350). ([8483615](https://github.com/ckeditor/ckeditor5-dev/commit/8483615))
+* Deep CSS imports should be observed by the Webpack watcher. Closes [#359](https://github.com/ckeditor/ckeditor5-dev/issues/359). ([3e4aa8a](https://github.com/ckeditor/ckeditor5-dev/commit/3e4aa8a))
+
+
 ## [9.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@8.0.0...@ckeditor/ckeditor5-dev-utils@9.0.0) (2018-04-25)
 
 ### Other changes
