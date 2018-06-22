@@ -201,22 +201,23 @@ const utils = {
 	},
 
 	_validateContexts( contexts, translation ) {
-		const packageContext = contexts.get( translation.package );
 		const corePackageContext = contexts.get( corePackageName );
-		let error;
 
 		if ( !corePackageContext ) {
-			error = `${ corePackageName }/lang/contexts.json file is missing.`;
-		} else if ( !corePackageContext.content[ translation.key ] && !packageContext ) {
-			error = 'contexts.json file or context for the translation key is missing ' +
-				`(${ translation.package }, ${ translation.key }).`;
-		}
-		// xxx
-		else if ( !corePackageContext.content[ translation.key ] && !packageContext.content[ translation.key ] ) {
-			error = `Context for the translation key is missing (${ translation.package }, ${ translation.key }).`;
+			return `${ corePackageName }/lang/contexts.json file is missing.`;
 		}
 
-		return error;
+		let contextExists = false;
+
+		for ( const [ , currentPackageContext ] of contexts ) {
+			if ( currentPackageContext.content[ translation.key ] ) {
+				contextExists = true;
+			}
+		}
+
+		if ( !contextExists ) {
+			return `Context for the translation key is missing (${ translation.package }, ${ translation.key }).`;
+		}
 	}
 };
 
