@@ -46,7 +46,8 @@ module.exports = function generateChangelogFromCommits( options ) {
 			displayLogs: false,
 			isInternalRelease: options.isInternalRelease || false,
 			additionalNotes: {},
-			showLinks: typeof options.skipLinks == 'undefined' ? true : !options.skipLinks
+			linkCommit: typeof options.skipLinks == 'undefined' ? true : !options.skipLinks,
+			linkCompare: typeof options.skipLinks == 'undefined' ? true : !options.skipLinks
 		};
 
 		if ( options.additionalNotes ) {

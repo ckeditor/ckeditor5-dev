@@ -491,12 +491,27 @@ Besides changes in the dependencies, this version also contains the following bu
 				} );
 		} );
 
-		it.only( 'does not generate links to commits and release', () => {
-			exec( 'git commit --allow-empty --message "Feature: Some amazing feature. Closes #1."' );
+		it( 'does not generate links to commits and release', () => {
+			exec( 'git commit --allow-empty --message "Feature: Some amazing feature."' );
 
-			return generateChangelog( '0.6.0' )
+			return generateChangelog( '0.6.0', { skipLinks: true } )
 				.then( () => {
-					console.log( getChangesForVersion( '0.6.0' ) );
+					const changelogAsArray = getChangelog().split( '\n' ).slice( 0, 10 );
+
+					expect( changelogAsArray[ 0 ], 'Index: 0' ).to.equal( 'Changelog' );
+					expect( changelogAsArray[ 1 ], 'Index: 1' ).to.equal( '=========' );
+					expect( changelogAsArray[ 2 ], 'Index: 2' ).to.equal( '' );
+					expect( replaceDates( changelogAsArray[ 3 ] ), 'Index: 3' ).to.equal(
+						'## 0.6.0 (0000-00-00)'
+					);
+					expect( changelogAsArray[ 4 ], 'Index: 4' ).to.equal( '' );
+					expect( changelogAsArray[ 5 ], 'Index: 5' ).to.equal( '### Features' );
+					expect( changelogAsArray[ 6 ], 'Index: 6' ).to.equal( '' );
+					expect( changelogAsArray[ 7 ], 'Index: 7' ).to.equal(
+						'* Some amazing feature.'
+					);
+					expect( changelogAsArray[ 8 ], 'Index: 8' ).to.equal( '' );
+					expect( changelogAsArray[ 9 ], 'Index: 9' ).to.equal( '' );
 
 					release();
 				} );
