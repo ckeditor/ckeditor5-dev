@@ -62,6 +62,10 @@ module.exports = function generateChangelogFromCommits( options ) {
 
 		const writerOptions = getWriterOptions( options.transformCommit );
 
+		if ( process.env.DEBUG ) {
+			writerOptions.debug = getDebugFuntion();
+		}
+
 		conventionalChangelog( {}, context, gitRawCommitsOpts, parserOptions, writerOptions )
 			.pipe( changelogPipe( options.version, resolve, {
 				doNotSave: options.doNotSave
@@ -89,4 +93,10 @@ function changelogPipe( version, done, options ) {
 
 		done( version );
 	} );
+}
+
+function getDebugFuntion() {
+	return ( ...params ) => {
+		console.log( ...params );
+	};
 }

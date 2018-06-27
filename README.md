@@ -19,13 +19,25 @@ CKEditor 5 development tools packages
 
 Tests:
 
-```
+```bash
 npm test
+```
+
+Tests with Debug mode:
+
+```bash
+DEBUG=true npm test 
+```
+
+Test a single package:
+
+```bash
+./node_modules/.bin/mocha packages/ckeditor5-dev-env/tests/* --recursive
 ```
 
 Code coverage:
 
-```
+```bash
 npm run coverage
 ```
 
