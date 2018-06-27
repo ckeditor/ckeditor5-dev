@@ -159,7 +159,8 @@ describe( 'dev-env/release-tools/utils', () => {
 						previousTag: 'v0.5.0',
 						currentTag: 'v1.0.0',
 						isInternalRelease: false,
-						additionalNotes: {}
+						additionalNotes: {},
+						showLinks: true
 					} );
 					expect( conventionalChangelogArguments[ 2 ] ).to.have.property( 'from', 'v0.5.0' );
 					expect( conventionalChangelogArguments[ 4 ] ).to.deep.equal( { foo: 'bar' } );
@@ -194,7 +195,8 @@ describe( 'dev-env/release-tools/utils', () => {
 						previousTag: 'v0.5.0',
 						currentTag: 'v0.5.1',
 						isInternalRelease: true,
-						additionalNotes: {}
+						additionalNotes: {},
+						showLinks: true
 					} );
 				} );
 		} );
@@ -264,7 +266,47 @@ describe( 'dev-env/release-tools/utils', () => {
 						previousTag: 'v0.5.0',
 						currentTag: 'v0.5.1',
 						isInternalRelease: false,
-						additionalNotes: additionalCommitNotes
+						additionalNotes: additionalCommitNotes,
+						showLinks: true
+					} );
+				} );
+		} );
+
+		it( 'allows generating changelog without links to commits ("skipLinks" option)', () => {
+			const newChangelogChunk = [
+				'## 1.0.0',
+				'',
+				'### Features',
+				'',
+				'Besides new features introduced in the dependencies, this build also introduces these features:',
+				'',
+				'* This test should pass!'
+			].join( '\n' );
+
+			changelogBuffer = Buffer.from( newChangelogChunk );
+
+			stubs.fs.existsSync.returns( true );
+			stubs.changelogUtils.getChangelog.returns( changelogUtils.changelogHeader );
+
+			const options = {
+				version: '0.5.1',
+				transformCommit: stubs.transformCommit,
+				tagName: 'v0.5.0',
+				newTagName: 'v0.5.1',
+				skipLinks: true
+			};
+
+			return generateChangelogFromCommits( options )
+				.then( () => {
+					expect( conventionalChangelogArguments ).to.be.an( 'array' );
+					expect( conventionalChangelogArguments[ 1 ] ).to.deep.equal( {
+						displayLogs: false,
+						version: '0.5.1',
+						previousTag: 'v0.5.0',
+						currentTag: 'v0.5.1',
+						isInternalRelease: false,
+						additionalNotes: {},
+						showLinks: false
 					} );
 				} );
 		} );

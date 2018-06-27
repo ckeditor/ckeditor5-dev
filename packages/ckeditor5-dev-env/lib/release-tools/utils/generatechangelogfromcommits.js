@@ -26,6 +26,7 @@ const { additionalCommitNotes } = require( './transform-commit/transform-commit-
  * @param {Boolean} [options.doNotSave=false] If set on `true`, changes will be resolved in returned promise
  * instead of saving in CHANGELOG file.
  * @param {Boolean} [options.additionalNotes=false] If set on `true, each category will contain additional description.
+ * @param {Boolean} [options.skipLinks=false] If set on true, links to release or commits will be omitted.
  * @returns {Promise}
  */
 module.exports = function generateChangelogFromCommits( options ) {
@@ -45,6 +46,7 @@ module.exports = function generateChangelogFromCommits( options ) {
 			displayLogs: false,
 			isInternalRelease: options.isInternalRelease || false,
 			additionalNotes: {},
+			showLinks: typeof options.skipLinks == 'undefined' ? true : !options.skipLinks
 		};
 
 		if ( options.additionalNotes ) {

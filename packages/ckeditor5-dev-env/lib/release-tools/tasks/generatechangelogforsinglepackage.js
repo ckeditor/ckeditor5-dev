@@ -25,9 +25,11 @@ const transformCommitFunction = require( '../utils/transform-commit/transformcom
  * should be generated.
  *
  * @param {String|null} [newVersion=null] A version for which changelog will be generated.
+ * @param {Object} [options={}] Additional options.
+ * @param {Boolean} [options.skipLinks=false] If set on true, links to release or commits will be omitted.
  * @returns {Promise}
  */
-module.exports = function generateChangelogForSinglePackage( newVersion = null ) {
+module.exports = function generateChangelogForSinglePackage( newVersion = null, options = {} ) {
 	const log = logger();
 	const packageJson = getPackageJson();
 
@@ -74,7 +76,8 @@ module.exports = function generateChangelogForSinglePackage( newVersion = null )
 				tagName,
 				isInternalRelease,
 				newTagName: 'v' + version,
-				transformCommit: transformCommitFunction
+				transformCommit: transformCommitFunction,
+				skipLinks: !!options.skipLinks
 			};
 
 			return generateChangelogFromCommits( changelogOptions )

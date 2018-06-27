@@ -267,7 +267,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				'--message "NOTE: Please read #1." ' +
 				'--message "BREAKING CHANGES: Some breaking change." ' );
 
-			return generateChangelog( '0.4.2', true )
+			return generateChangelog( '0.4.2', { isInternalRelease: true } )
 				.then( () => {
 					const latestChangelog = getChangesForVersion( lastChangelogVersion );
 
@@ -403,7 +403,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				'--message "Fix: Foo Bar."'
 			);
 
-			return generateChangelog( '0.5.5', false, true )
+			return generateChangelog( '0.5.5', { additionalNotes: true } )
 				.then( () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
 
@@ -424,7 +424,7 @@ Besides changes in the dependencies, this version also contains the following bu
 		} );
 
 		it( 'adds two blank lines for internal release (user specified "internal" version)', () => {
-			return generateChangelog( '0.5.6', true )
+			return generateChangelog( '0.5.6', { isInternalRelease: true } )
 				.then( () => {
 					const changelogAsArray = getChangelog().split( '\n' ).slice( 0, 9 );
 
@@ -472,24 +472,40 @@ Besides changes in the dependencies, this version also contains the following bu
 					release();
 				} );
 		} );
+
+		it.only( 'does not generate links to commits and release', () => {
+			exec( 'git commit --allow-empty --message "Feature: Some amazing feature. Closes #1."' );
+
+			return generateChangelog( '0.6.0' )
+				.then( () => {
+					console.log( getChangesForVersion( '0.6.0' ) );
+
+					release();
+				} );
+		} );
 	} );
 
 	function exec( command ) {
 		return tools.shExec( command, { verbosity: 'error' } );
 	}
 
-	function generateChangelog( version, isInternalRelease = false, shouldAppendAdditionalNotes = false ) {
+	function generateChangelog( version, options = {} ) {
 		lastChangelogVersion = version;
+
+		const isInternalRelease = !!options.isInternalRelease;
+		const additionalNotes = !!options.additionalNotes;
+		const skipLinks = !!options.skipLinks;
 
 		const transform = require( '../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository' );
 
 		return generateChangelogFromCommits( {
 			version,
 			isInternalRelease,
+			additionalNotes,
+			skipLinks,
 			newTagName: 'v' + version,
 			tagName: lastReleasedVersion ? 'v' + lastReleasedVersion : null,
-			transformCommit: transform,
-			additionalNotes: shouldAppendAdditionalNotes
+			transformCommit: transform
 		} );
 	}
 

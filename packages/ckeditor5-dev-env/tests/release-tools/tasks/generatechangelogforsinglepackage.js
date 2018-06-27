@@ -85,7 +85,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 						tagName: 'v0.5.0',
 						newTagName: 'v1.0.0',
 						transformCommit: stubs.transformCommit,
-						isInternalRelease: false
+						isInternalRelease: false,
+						skipLinks: false
 					} );
 
 					expect( stubs.logger.info.calledThrice ).to.equal( true );
@@ -115,7 +116,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 						tagName: null,
 						newTagName: 'v0.1.0',
 						transformCommit: stubs.transformCommit,
-						isInternalRelease: false
+						isInternalRelease: false,
+						skipLinks: false
 					} );
 
 					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
@@ -177,7 +179,30 @@ describe( 'dev-env/release-tools/tasks', () => {
 						tagName: 'v0.0.1',
 						newTagName: 'v0.0.2',
 						transformCommit: stubs.transformCommit,
-						isInternalRelease: true
+						isInternalRelease: true,
+						skipLinks: false
+					} );
+				} );
+		} );
+
+		it( 'passes the "skipLinks" option to the changelog generator', () => {
+			stubs.getNewReleaseType.returns( Promise.resolve( {
+				releaseType: 'minor'
+			} ) );
+			stubs.cli.provideVersion.returns( Promise.resolve( '0.1.0' ) );
+			stubs.versionUtils.getLastFromChangelog.returns( null );
+			stubs.generateChangelogFromCommits.returns( Promise.resolve() );
+
+			return generateChangelogForSinglePackage( null, { skipLinks: true } )
+				.then( () => {
+					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
+					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						version: '0.1.0',
+						tagName: null,
+						newTagName: 'v0.1.0',
+						transformCommit: stubs.transformCommit,
+						isInternalRelease: false,
+						skipLinks: true
 					} );
 				} );
 		} );
