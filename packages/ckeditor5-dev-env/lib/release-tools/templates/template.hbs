@@ -8,8 +8,8 @@ Internal changes only (updated dependencies, documentation, etc.).
 {{#each commitGroups}}
 ### {{title}}
 
-{{#if (lookup ../additionalNotes title)}}
-{{ lookup ../additionalNotes title }}
+{{#if (lookup @root.additionalNotes title)}}
+{{ lookup @root.additionalNotes title }}
 
 {{/if}}
 {{#each commits}}
