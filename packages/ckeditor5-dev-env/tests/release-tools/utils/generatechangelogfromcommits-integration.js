@@ -51,8 +51,8 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		after( () => {
-			exec( `rm -rf ${ tmpCwd }` );
 			process.chdir( cwd );
+			exec( `rm -rf ${ tmpCwd }` );
 		} );
 
 		beforeEach( () => {
