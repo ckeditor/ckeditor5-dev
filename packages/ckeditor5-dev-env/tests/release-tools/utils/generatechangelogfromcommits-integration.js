@@ -11,7 +11,25 @@ const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 const { tools, stream } = require( '@ckeditor/ckeditor5-dev-utils' );
-const { changelogHeader, getChangelog, getChangesForVersion } = require( '../../../lib/release-tools/utils/changelog' );
+const {
+	changelogHeader,
+	getChangelog: _getChangelog,
+	getChangesForVersion: _getChangesForVersion
+} = require( '../../../lib/release-tools/utils/changelog' );
+
+// Because of the Windows end of the line, we need to normalize them.
+// If we won't do it, some of the assertions will fail because strings will be ending with "\r" that wasn't expected.
+function normalizeStrings( content ) {
+	return content.replace( /\r\n/g, '\n' );
+}
+
+function getChangelog() {
+	return normalizeStrings( _getChangelog() );
+}
+
+function getChangesForVersion( ...params ) {
+	return normalizeStrings( _getChangesForVersion( ...params ) );
+}
 
 describe( 'dev-env/release-tools/utils', () => {
 	const url = 'https://github.com/ckeditor/ckeditor5-test-package';
@@ -118,13 +136,13 @@ describe( 'dev-env/release-tools/utils', () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
 
 					/* eslint-disable max-len */
-					const expectedChangelog = `
+					const expectedChangelog = normalizeStrings( `
 ### Features
 
 * Another feature. Closes [#2](https://github.com/ckeditor/ckeditor5-test-package/issues/2). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
 
   This PR also closes [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4).
-`;
+` );
 					/* eslint-enable max-len */
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
@@ -144,13 +162,13 @@ describe( 'dev-env/release-tools/utils', () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
 
 					/* eslint-disable max-len */
-					const expectedChangelog = `
+					const expectedChangelog = normalizeStrings( `
 ### Bug fixes
 
 * Amazing fix. Closes [#5](https://github.com/ckeditor/ckeditor5-test-package/issues/5). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
 
   The PR also finally closes [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4). So good!
-`;
+` );
 					/* eslint-enable max-len */
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
@@ -172,7 +190,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
 
 					/* eslint-disable max-len */
-					const expectedChangelog = `
+					const expectedChangelog = normalizeStrings( `
 ### Other changes
 
 * Some docs improvements. Closes [#6](https://github.com/ckeditor/ckeditor5-test-package/issues/6). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
@@ -186,7 +204,7 @@ describe( 'dev-env/release-tools/utils', () => {
 ### NOTE
 
 * Please read [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
-`;
+` );
 					/* eslint-enable max-len */
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
@@ -207,7 +225,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
 
 					/* eslint-disable max-len */
-					const expectedChangelog = `
+					const expectedChangelog = normalizeStrings( `
 ### Features
 
 * Issues will not be hoisted. Closes [#8](https://github.com/ckeditor/ckeditor5-test-package/issues/8). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
@@ -221,7 +239,7 @@ describe( 'dev-env/release-tools/utils', () => {
 ### NOTE
 
 * Please read [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
-`;
+` );
 					/* eslint-enable max-len */
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
@@ -246,7 +264,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					const changelogAsArray = replaceDates( getChangelog() ).replace( changelogHeader, '' ).split( '\n' );
 
 					expectedChangelogeEntries.forEach( ( row, index ) => {
-						expect( row ).to.equal( changelogAsArray[ index ], `Index: ${ index }` );
+						expect( row.trim() ).to.equal( changelogAsArray[ index ].trim(), `Index: ${ index }` );
 					} );
 
 					release();
@@ -287,11 +305,11 @@ describe( 'dev-env/release-tools/utils', () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
 
 					/* eslint-disable max-len */
-					const expectedChangelog = `
+					const expectedChangelog = normalizeStrings( `
 ### Features
 
 * Another feature. Closes [#2](https://github.com/ckeditor/ckeditor5-test-package/issues/2). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-`;
+` );
 					/* eslint-enable max-len */
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
@@ -312,11 +330,11 @@ describe( 'dev-env/release-tools/utils', () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
 
 					/* eslint-disable max-len */
-					const expectedChangelog = `
+					const expectedChangelog = normalizeStrings( `
 ### Bug fixes
 
 * Foo. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-`;
+` );
 					/* eslint-enable max-len */
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
@@ -337,11 +355,11 @@ describe( 'dev-env/release-tools/utils', () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
 
 					/* eslint-disable max-len */
-					const expectedChangelog = `
+					const expectedChangelog = normalizeStrings( `
 ### Bug fixes
 
 * Foo. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-`;
+` );
 					/* eslint-enable max-len */
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
@@ -361,11 +379,11 @@ describe( 'dev-env/release-tools/utils', () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
 
 					/* eslint-disable max-len */
-					const expectedChangelog = `
+					const expectedChangelog = normalizeStrings( `
 ### Bug fixes
 
 * Foo Bar. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-`;
+` );
 					/* eslint-enable max-len */
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
@@ -385,11 +403,11 @@ describe( 'dev-env/release-tools/utils', () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
 
 					/* eslint-disable max-len */
-					const expectedChangelog = `
+					const expectedChangelog = normalizeStrings( `
 ### Bug fixes
 
 * Bar Foo. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-`;
+` );
 					/* eslint-enable max-len */
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
@@ -408,13 +426,13 @@ describe( 'dev-env/release-tools/utils', () => {
 					const latestChangelog = replaceCommitIds( getChangesForVersion( lastChangelogVersion ) );
 
 					/* eslint-disable max-len */
-					const expectedChangelog = `
+					const expectedChangelog = normalizeStrings( `
 ### Bug fixes
 
 Besides changes in the dependencies, this version also contains the following bug fixes:
 
 * Foo Bar. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-`;
+` );
 					/* eslint-enable max-len */
 
 					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
@@ -492,17 +510,13 @@ Besides changes in the dependencies, this version also contains the following bu
 	function generateChangelog( version, options = {} ) {
 		lastChangelogVersion = version;
 
-		const isInternalRelease = !!options.isInternalRelease;
-		const additionalNotes = !!options.additionalNotes;
-		const skipLinks = !!options.skipLinks;
-
 		const transform = require( '../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository' );
 
 		return generateChangelogFromCommits( {
 			version,
-			isInternalRelease,
-			additionalNotes,
-			skipLinks,
+			isInternalRelease: options.isInternalRelease,
+			additionalNotes: options.additionalNotes,
+			skipLinks: options.skipLinks,
 			newTagName: 'v' + version,
 			tagName: lastReleasedVersion ? 'v' + lastReleasedVersion : null,
 			transformCommit: transform
@@ -526,6 +540,6 @@ Besides changes in the dependencies, this version also contains the following bu
 	}
 
 	function replaceDates( changelog ) {
-		return changelog.replace( /\) \(\d{4}-\d{2}-\d{2}\)/g, ') (0000-00-00)' );
+		return changelog.replace( /\d{4}-\d{2}-\d{2}/g, '0000-00-00' );
 	}
 } );
