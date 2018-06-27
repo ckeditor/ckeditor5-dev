@@ -62,13 +62,15 @@ module.exports = function generateChangelogFromCommits( options ) {
 		const writerOptions = getWriterOptions( options.transformCommit );
 
 		conventionalChangelog( {}, context, gitRawCommitsOpts, parserOptions, writerOptions )
-			.pipe( saveChangelogPipe( options.version, resolve, options.doNotSave ) );
+			.pipe( changelogPipe( options.version, resolve, {
+				doNotSave: options.doNotSave
+			} ) );
 	} );
 };
 
-function saveChangelogPipe( version, done, doNotSave = false ) {
+function changelogPipe( version, done, options ) {
 	return stream.noop( changes => {
-		if ( doNotSave ) {
+		if ( options.doNotSave ) {
 			return done( changes.toString() );
 		}
 

@@ -104,7 +104,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				} );
 		} );
 
-		it( 'does not crate a changelog file if is not present but the "doNotSave" option is set on `true`', () => {
+		it( 'does not create a changelog file if is not present but the "doNotSave" option is set on `true`', () => {
 			changelogBuffer = Buffer.from( 'Changelog.' );
 
 			stubs.fs.existsSync.returns( false );
@@ -230,7 +230,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				} );
 		} );
 
-		it( 'allows appending additional notes for groups of commits ', () => {
+		it( 'allows appending additional notes for groups of commits', () => {
 			const newChangelogChunk = [
 				'## 1.0.0',
 				'',
