@@ -88,7 +88,7 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
 		} );
 
-		it( 'hide the commit hash', () => {
+		it( 'hides the commit hash', () => {
 			rootOptions.linkCommit = false;
 
 			const data = { subject: 'Test', hash: '1234qwe' };
