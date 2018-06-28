@@ -62,7 +62,10 @@ module.exports = function generateChangelogFromCommits( options ) {
 
 		const writerOptions = getWriterOptions( options.transformCommit );
 
+		/* istanbul ignore next */
 		if ( process.env.DEBUG ) {
+			// Displays the final `context` which will be used to generate the changelog.
+			// It contains grouped commits, repository details, etc.
 			writerOptions.debug = getDebugFuntion();
 		}
 
