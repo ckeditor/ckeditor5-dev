@@ -26,11 +26,12 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 			repository: 'repository',
 			commit: 'commit',
 			issue: 'issues',
-			linkReferences: true
+			linkReferences: true,
+			skipCommitsLink: false
 		};
 		templateOptions = {
 			data: {
-				root: rootOptions
+				root: rootOptions,
 			}
 		};
 	} );
@@ -84,6 +85,15 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 
 			const expectedEntry = '* Test ([1234qwe](https://github.com/organization/repository/commit/1234qwe))' +
 				'\n\n  Some paragraph.\n\n  * List Item 1.\n  * List Item 2.';
+			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
+		} );
+
+		it( 'hides the commit hash', () => {
+			rootOptions.skipCommitsLink = true;
+
+			const data = { subject: 'Test', hash: '1234qwe' };
+
+			const expectedEntry = '* Test';
 			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
 		} );
 	} );

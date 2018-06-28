@@ -104,7 +104,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				} );
 		} );
 
-		it( 'does not crate a changelog file if is not present but the "doNotSave" option is set on `true`', () => {
+		it( 'does not create a changelog file if is not present but the "doNotSave" option is set on `true`', () => {
 			changelogBuffer = Buffer.from( 'Changelog.' );
 
 			stubs.fs.existsSync.returns( false );
@@ -159,7 +159,9 @@ describe( 'dev-env/release-tools/utils', () => {
 						previousTag: 'v0.5.0',
 						currentTag: 'v1.0.0',
 						isInternalRelease: false,
-						additionalNotes: {}
+						additionalNotes: {},
+						skipCommitsLink: false,
+						skipCompareLink: false
 					} );
 					expect( conventionalChangelogArguments[ 2 ] ).to.have.property( 'from', 'v0.5.0' );
 					expect( conventionalChangelogArguments[ 4 ] ).to.deep.equal( { foo: 'bar' } );
@@ -194,7 +196,9 @@ describe( 'dev-env/release-tools/utils', () => {
 						previousTag: 'v0.5.0',
 						currentTag: 'v0.5.1',
 						isInternalRelease: true,
-						additionalNotes: {}
+						additionalNotes: {},
+						skipCommitsLink: false,
+						skipCompareLink: false
 					} );
 				} );
 		} );
@@ -228,18 +232,8 @@ describe( 'dev-env/release-tools/utils', () => {
 				} );
 		} );
 
-		it( 'allows appending additional notes for groups of commits ', () => {
-			const newChangelogChunk = [
-				'## 1.0.0',
-				'',
-				'### Features',
-				'',
-				'Besides new features introduced in the dependencies, this build also introduces these features:',
-				'',
-				'* This test should pass!'
-			].join( '\n' );
-
-			changelogBuffer = Buffer.from( newChangelogChunk );
+		it( 'allows appending additional notes for groups of commits', () => {
+			changelogBuffer = Buffer.from( 'Changelog.' );
 
 			stubs.fs.existsSync.returns( true );
 			stubs.changelogUtils.getChangelog.returns( changelogUtils.changelogHeader );
@@ -264,7 +258,39 @@ describe( 'dev-env/release-tools/utils', () => {
 						previousTag: 'v0.5.0',
 						currentTag: 'v0.5.1',
 						isInternalRelease: false,
-						additionalNotes: additionalCommitNotes
+						additionalNotes: additionalCommitNotes,
+						skipCommitsLink: false,
+						skipCompareLink: false
+					} );
+				} );
+		} );
+
+		it( 'allows generating changelog without links to commits ("skipLinks" option)', () => {
+			changelogBuffer = Buffer.from( 'Changelog.' );
+
+			stubs.fs.existsSync.returns( true );
+			stubs.changelogUtils.getChangelog.returns( changelogUtils.changelogHeader );
+
+			const options = {
+				version: '0.5.1',
+				transformCommit: stubs.transformCommit,
+				tagName: 'v0.5.0',
+				newTagName: 'v0.5.1',
+				skipLinks: true
+			};
+
+			return generateChangelogFromCommits( options )
+				.then( () => {
+					expect( conventionalChangelogArguments ).to.be.an( 'array' );
+					expect( conventionalChangelogArguments[ 1 ] ).to.deep.equal( {
+						displayLogs: false,
+						version: '0.5.1',
+						previousTag: 'v0.5.0',
+						currentTag: 'v0.5.1',
+						isInternalRelease: false,
+						additionalNotes: {},
+						skipCommitsLink: true,
+						skipCompareLink: true
 					} );
 				} );
 		} );
