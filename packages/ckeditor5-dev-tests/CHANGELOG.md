@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [11.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@11.0.2...@ckeditor/ckeditor5-dev-tests@11.0.3) (2018-06-28)
+
+### Bug fixes
+
+* The Script for saving revisions will correctly and fully synchronise `master-revisions` with `master`. Closes [#375](https://github.com/ckeditor/ckeditor5-dev/issues/375). ([9009c12](https://github.com/ckeditor/ckeditor5-dev/commit/9009c12))
+
+
 ## [11.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@11.0.1...@ckeditor/ckeditor5-dev-tests@11.0.2) (2018-06-20)
 
 Internal changes only (updated dependencies, documentation, etc.).
