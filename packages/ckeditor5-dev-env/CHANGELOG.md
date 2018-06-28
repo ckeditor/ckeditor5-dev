@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## [10.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@9.0.3...@ckeditor/ckeditor5-dev-env@10.0.0) (2018-06-28)
+
+### Features
+
+* The changelog generator for a single package (`generateChangelogForSinglePackage()`) will allow hiding a link to compare releases on GitHub and links to particular commits. Closes [#415](https://github.com/ckeditor/ckeditor5-dev/issues/415). ([4d7dc4b](https://github.com/ckeditor/ckeditor5-dev/commit/4d7dc4b))
+
+### BREAKING CHANGES
+
+* An optional parameter `newVersion` for `generateChangelogForSinglePackage()` method has been replaced with an `options` object (of which it is a key).
+
+
 ## [9.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@9.0.1...@ckeditor/ckeditor5-dev-env@9.0.3) (2018-06-28)
 
 Internal changes only (updated dependencies, documentation, etc.).
