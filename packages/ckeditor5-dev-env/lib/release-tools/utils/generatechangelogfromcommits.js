@@ -44,7 +44,7 @@ module.exports = function generateChangelogFromCommits( options ) {
 			currentTag: options.newTagName,
 			previousTag: options.tagName,
 			displayLogs: false,
-			isInternalRelease: options.isInternalRelease || false,
+			isInternalRelease: Boolean( options.isInternalRelease ),
 			additionalNotes: {},
 			skipCommitsLink: Boolean( options.skipLinks ),
 			skipCompareLink: Boolean( options.skipLinks )
