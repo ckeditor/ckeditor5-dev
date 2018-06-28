@@ -274,9 +274,9 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 					// Calls 0-4 are done automatically by the tool.
 					// Calls 5-7 depends on the dependencies. Generator should be called with "internal" version.
-					expect( stubs.generateChangelogForSinglePackage.getCall( 5 ).args[ 0 ] ).to.equal( 'internal' );
-					expect( stubs.generateChangelogForSinglePackage.getCall( 6 ).args[ 0 ] ).to.equal( 'internal' );
-					expect( stubs.generateChangelogForSinglePackage.getCall( 7 ).args[ 0 ] ).to.equal( 'internal' );
+					expect( stubs.generateChangelogForSinglePackage.getCall( 5 ).args[ 0 ] ).to.deep.equal( { newVersion: 'internal' } );
+					expect( stubs.generateChangelogForSinglePackage.getCall( 6 ).args[ 0 ] ).to.deep.equal( { newVersion: 'internal' } );
+					expect( stubs.generateChangelogForSinglePackage.getCall( 7 ).args[ 0 ] ).to.deep.equal( { newVersion: 'internal' } );
 
 					expect( chdirStub.getCall( 0 ).args[ 0 ] ).to.equal( '/tmp/packages/ckeditor5-autoformat' );
 					expect( chdirStub.getCall( 1 ).args[ 0 ] ).to.equal( '/tmp/packages/ckeditor5-basic-styles' );

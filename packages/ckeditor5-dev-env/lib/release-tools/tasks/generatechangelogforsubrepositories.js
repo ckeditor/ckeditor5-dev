@@ -100,7 +100,7 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 	function generateInternalChangelogTask( dependencyPath ) {
 		process.chdir( dependencyPath );
 
-		return generateChangelogForSinglePackage( 'internal' )
+		return generateChangelogForSinglePackage( { newVersion: 'internal' } )
 			.then( newVersion => {
 				generatedChangelogsMap.set( getPackageJson( dependencyPath ).name, newVersion );
 			} )

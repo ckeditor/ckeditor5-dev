@@ -24,12 +24,12 @@ const transformCommitFunction = require( '../utils/transform-commit/transformcom
  * If package does not have any commits, user has to confirm whether the changelog
  * should be generated.
  *
- * @param {String|null} [newVersion=null] A version for which changelog will be generated.
  * @param {Object} [options={}] Additional options.
+ * @param {String} [options.newVersion=null] A version for which changelog will be generated.
  * @param {Boolean} [options.skipLinks=false] If set on true, links to release or commits will be omitted.
  * @returns {Promise}
  */
-module.exports = function generateChangelogForSinglePackage( newVersion = null, options = {} ) {
+module.exports = function generateChangelogForSinglePackage( options = {} ) {
 	const log = logger();
 	const packageJson = getPackageJson();
 
@@ -42,6 +42,7 @@ module.exports = function generateChangelogForSinglePackage( newVersion = null, 
 	log.info( '' );
 	log.info( chalk.bold.blue( `Generating changelog for "${ packageJson.name }"...` ) );
 
+	const newVersion = options.newVersion || null;
 	let promise = Promise.resolve();
 
 	if ( !newVersion ) {

@@ -77,7 +77,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			stubs.versionUtils.getLastFromChangelog.returns( '0.5.0' );
 			stubs.generateChangelogFromCommits.returns( Promise.resolve() );
 
-			return generateChangelogForSinglePackage( '1.0.0' )
+			return generateChangelogForSinglePackage( { newVersion: '1.0.0' } )
 				.then( () => {
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
@@ -159,7 +159,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			stubs.versionUtils.getLastFromChangelog.returns( '0.5.0' );
 			stubs.generateChangelogFromCommits.returns( Promise.resolve() );
 
-			return generateChangelogForSinglePackage( '1.0.0' )
+			return generateChangelogForSinglePackage( { newVersion: '1.0.0' } )
 				.then( () => {
 					expect( stubs.tools.shExec.secondCall.args[ 0 ] ).to.equal(
 						'git commit -m "Docs: Changelog. [skip ci]"'
@@ -171,7 +171,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			stubs.versionUtils.getLastFromChangelog.returns( '0.0.1' );
 			stubs.generateChangelogFromCommits.returns( Promise.resolve() );
 
-			return generateChangelogForSinglePackage( 'internal' )
+			return generateChangelogForSinglePackage( { newVersion: 'internal' } )
 				.then( () => {
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
@@ -193,7 +193,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			stubs.versionUtils.getLastFromChangelog.returns( null );
 			stubs.generateChangelogFromCommits.returns( Promise.resolve() );
 
-			return generateChangelogForSinglePackage( null, { skipLinks: true } )
+			return generateChangelogForSinglePackage( { skipLinks: true } )
 				.then( () => {
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
