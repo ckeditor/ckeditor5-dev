@@ -27,7 +27,7 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 			commit: 'commit',
 			issue: 'issues',
 			linkReferences: true,
-			linkCommit: true
+			skipCommitsLink: false
 		};
 		templateOptions = {
 			data: {
@@ -89,7 +89,7 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 		} );
 
 		it( 'hides the commit hash', () => {
-			rootOptions.linkCommit = false;
+			rootOptions.skipCommitsLink = true;
 
 			const data = { subject: 'Test', hash: '1234qwe' };
 

@@ -1,4 +1,4 @@
-## {{#if @root.linkCompare~}}
+## {{#unless @root.skipCompareLink~}}
 	[{{version}}](
 	{{~#if @root.repository~}}
 		{{~#if @root.host}}
@@ -14,6 +14,6 @@
 	/compare/{{previousTag}}...{{currentTag}})
 {{~else}}
 	{{~version}}
-{{~/if}}
+{{~/unless}}
 {{~#if date}} ({{date}})
 {{/if}}

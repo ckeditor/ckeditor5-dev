@@ -160,8 +160,8 @@ describe( 'dev-env/release-tools/utils', () => {
 						currentTag: 'v1.0.0',
 						isInternalRelease: false,
 						additionalNotes: {},
-						linkCommit: true,
-						linkCompare: true
+						skipCommitsLink: false,
+						skipCompareLink: false
 					} );
 					expect( conventionalChangelogArguments[ 2 ] ).to.have.property( 'from', 'v0.5.0' );
 					expect( conventionalChangelogArguments[ 4 ] ).to.deep.equal( { foo: 'bar' } );
@@ -197,8 +197,8 @@ describe( 'dev-env/release-tools/utils', () => {
 						currentTag: 'v0.5.1',
 						isInternalRelease: true,
 						additionalNotes: {},
-						linkCommit: true,
-						linkCompare: true
+						skipCommitsLink: false,
+						skipCompareLink: false
 					} );
 				} );
 		} );
@@ -259,8 +259,8 @@ describe( 'dev-env/release-tools/utils', () => {
 						currentTag: 'v0.5.1',
 						isInternalRelease: false,
 						additionalNotes: additionalCommitNotes,
-						linkCommit: true,
-						linkCompare: true
+						skipCommitsLink: false,
+						skipCompareLink: false
 					} );
 				} );
 		} );
@@ -289,8 +289,8 @@ describe( 'dev-env/release-tools/utils', () => {
 						currentTag: 'v0.5.1',
 						isInternalRelease: false,
 						additionalNotes: {},
-						linkCommit: false,
-						linkCompare: false
+						skipCommitsLink: true,
+						skipCompareLink: true
 					} );
 				} );
 		} );

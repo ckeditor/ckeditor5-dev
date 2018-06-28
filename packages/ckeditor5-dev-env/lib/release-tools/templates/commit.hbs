@@ -4,7 +4,7 @@
   {{~title}}
 {{~/if}}
 
-{{~#if @root.linkCommit}}
+{{~#unless @root.skipCommitsLink}}
 	{{~!-- commit link --}} {{#if @root.linkReferences~}}
 	  ([{{hash}}](
 	  {{~#if @root.repository}}
@@ -22,7 +22,7 @@
 	{{~else}}
 	  {{~hash}}
 	{{~/if}}
-{{/if}}
+{{/unless}}
 {{#if body}}
 
 
