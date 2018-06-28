@@ -24,6 +24,7 @@ const BASIC_TYPES = [
 
 	// DOM API
 	'Node',
+	'NodeList',
 	'HTMLElement',
 	'Document',
 	'Element',
