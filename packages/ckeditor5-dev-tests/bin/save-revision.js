@@ -23,11 +23,11 @@ const revisionBranch = `${ branch }-revisions`;
 // Clone the repository.
 exec( `git clone ${ mainRepoUrl }.git` );
 
-// And check out to the revision branch.
-exec( `git checkout ${ revisionBranch } ` );
-
 // Change current dir to cloned repository.
 process.chdir( path.join( process.cwd(), 'ckeditor5' ) );
+
+// And check out to the revision branch.
+exec( `git checkout ${ revisionBranch } ` );
 
 // Install Mgit.
 exec( 'npm install -g mgit2' );
