@@ -21,16 +21,22 @@ const mainRepoUrl = 'https://github.com/ckeditor/ckeditor5';
 const revisionBranch = `${ branch }-revisions`;
 
 // Clone the repository.
-exec( `git clone -b ${ revisionBranch } ${ mainRepoUrl }.git` );
+exec( `git clone ${ mainRepoUrl }.git` );
 
 // Change current dir to cloned repository.
 process.chdir( path.join( process.cwd(), 'ckeditor5' ) );
 
+// And check out to the revision branch.
+exec( `git checkout ${ revisionBranch } ` );
+
 // Install Mgit.
 exec( 'npm install -g mgit2' );
 
-// Get the latest `mgit.json`.
-exec( `git checkout origin/${ branch } .` );
+// Sync the revision branch with the master.
+exec( `git checkout ${ branch } -- .` );
+
+// Remove all files from "staged".
+exec( 'git reset -q .' );
 
 // Install dependencies.
 exec( 'mgit bootstrap --recursive --resolver-url-template="https://github.com/\\${ path }.git"' );
@@ -38,7 +44,8 @@ exec( 'mgit bootstrap --recursive --resolver-url-template="https://github.com/\\
 // Save hashes from all dependencies.
 exec( 'mgit save-hashes' );
 
-exec( 'git add mgit.json' );
+// Add all files (perhaps the changes from master will be committed).
+exec( 'git add .' );
 
 const repository = process.env.TRAVIS_REPO_SLUG;
 const commit = process.env.TRAVIS_COMMIT;
