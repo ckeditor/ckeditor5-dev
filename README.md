@@ -23,7 +23,7 @@ Tests:
 npm test
 ```
 
-Tests with Debug mode:
+Tests with the debug mode on:
 
 ```bash
 DEBUG=true npm test 
