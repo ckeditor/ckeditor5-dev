@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.9.5](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.9.4...@ckeditor/jsdoc-plugins@1.9.5) (2018-06-28)
+
+### Other changes
+
+* Added NodeList to known types. ([158f60b](https://github.com/ckeditor/ckeditor5-dev/commit/158f60b))
+
+
 ## [1.9.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.9.3...@ckeditor/jsdoc-plugins@1.9.4) (2018-03-27)
 
 Internal changes only (updated dependencies, documentation, etc.).
