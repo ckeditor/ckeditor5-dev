@@ -33,7 +33,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				warnOnUnregistered: false
 			} );
 
-			mockery.registerMock( 'github', function GitHubApi() {
+			mockery.registerMock( '@octokit/rest', function GitHubApi() {
 				return {
 					authenticate: stubs.authenticate,
 					repos: {

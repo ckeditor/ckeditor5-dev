@@ -47,18 +47,11 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		expect( webpackConfig.devtool ).to.equal( undefined );
 	} );
 
-	it( 'should return webpack configutation with babel loader and istanbul loader', () => {
+	it( 'should return webpack configutation with istanbul loader', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
 			coverage: true,
 			files: [ '**/*.js' ],
 		} );
-
-		const babelLoader = webpackConfig.module.rules
-			.find( rule => rule.loader === 'babel-loader' );
-
-		expect( babelLoader.query.plugins ).to.contain(
-			require( 'babel-plugin-transform-es2015-modules-commonjs' )
-		);
 
 		const istanbulLoader = webpackConfig.module.rules
 			.find( rule => rule.loader === 'istanbul-instrumenter-loader' );

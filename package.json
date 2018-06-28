@@ -2,14 +2,14 @@
   "name": "ckeditor5-dev",
   "private": true,
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-env": "^8.0.8",
+    "@ckeditor/ckeditor5-dev-env": "^10.0.0",
     "chalk": "^2.1.0",
     "eslint": "^4.15.0",
     "eslint-config-ckeditor5": "^1.0.8",
     "husky": "^0.14.3",
     "istanbul": "^0.4.4",
     "lerna": "^2.2.0",
-    "lint-staged": "^7.0.0",
+    "lint-staged": "^7.2.0",
     "mocha": "^5.0.5"
   },
   "engines": {
@@ -17,12 +17,12 @@
     "npm": ">=3.0.0"
   },
   "author": "CKSource (http://cksource.com/)",
-  "license": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",
+  "license": "GPL-2.0-or-later",
   "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme",
   "scripts": {
-    "test": "mocha `./scripts/get-test-directories.sh` --recursive",
-    "coverage": "istanbul cover _mocha `./scripts/get-test-directories.sh` -- --recursive",
+    "test": "mocha packages/*/tests --recursive --timeout 5000",
+    "coverage": "istanbul cover _mocha packages/*/tests -- --recursive --timeout 5000",
     "changelog": "node ./scripts/changelog.js",
     "lint": "eslint --quiet '**/*.js'",
     "precommit": "lint-staged"
@@ -35,5 +35,5 @@
   "eslintIgnore": [
     "coverage/**"
   ],
-  "version": "0.0.59"
+  "version": "0.0.66"
 }

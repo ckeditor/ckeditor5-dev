@@ -1,6 +1,36 @@
 Changelog
 =========
 
+## [9.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@9.0.0...@ckeditor/ckeditor5-dev-utils@9.0.1) (2018-06-20)
+
+### Bug fixes
+
+* CSS `@keyframes` should not be minified by cssnano to prevent naming collisions. Closes [#350](https://github.com/ckeditor/ckeditor5-dev/issues/350). ([8483615](https://github.com/ckeditor/ckeditor5-dev/commit/8483615))
+* Deep CSS imports should be observed by the Webpack watcher. Closes [#359](https://github.com/ckeditor/ckeditor5-dev/issues/359). ([3e4aa8a](https://github.com/ckeditor/ckeditor5-dev/commit/3e4aa8a))
+
+
+## [9.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@8.0.0...@ckeditor/ckeditor5-dev-utils@9.0.0) (2018-04-25)
+
+### Other changes
+
+* Changed the license to GPL2+ only. See [ckeditor/ckeditor5#991](https://github.com/ckeditor/ckeditor5/issues/991). ([e392d7d](https://github.com/ckeditor/ckeditor5-dev/commit/e392d7d))
+
+### BREAKING CHANGES
+
+* The license under which CKEditor 5 is released has been changed from a triple GPL, LGPL and MPL license to GPL2+ only. See [ckeditor/ckeditor5#991](https://github.com/ckeditor/ckeditor5/issues/991) for more information.
+
+
+## [8.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@7.0.7...@ckeditor/ckeditor5-dev-utils@8.0.0) (2018-04-10)
+
+### Bug fixes
+
+* Enabled builds to work with RequireJS. Closes [ckeditor/ckeditor5#914](https://github.com/ckeditor/ckeditor5/issues/914). ([6c69057](https://github.com/ckeditor/ckeditor5-dev/commit/6c69057))
+
+### BREAKING CHANGES
+
+* Due to a new format of translation snippets the new version of `CKEditor5WebpackPlugin` will only be compatible with CKEditor 5 v1.0.0-beta.2 or later.
+
+
 ## [7.0.7](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@7.0.6...@ckeditor/ckeditor5-dev-utils@7.0.7) (2018-03-27)
 
 Internal changes only (updated dependencies, documentation, etc.).

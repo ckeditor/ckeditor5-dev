@@ -19,13 +19,25 @@ CKEditor 5 development tools packages
 
 Tests:
 
-```
+```bash
 npm test
+```
+
+Tests with the debug mode on:
+
+```bash
+DEBUG=true npm test 
+```
+
+Test a single package:
+
+```bash
+./node_modules/.bin/mocha packages/ckeditor5-dev-env/tests/* --recursive
 ```
 
 Code coverage:
 
-```
+```bash
 npm run coverage
 ```
 
@@ -45,4 +57,4 @@ npm run coverage
 
 ## License
 
-Licensed under the GPL, LGPL and MPL licenses, at your choice. For full details about the license, please check the `LICENSE.md` file.
+Licensed under the terms of [GNU General Public License Version 2 or later](http://www.gnu.org/licenses/gpl.html). For full details about the license, please check the `LICENSE.md` file.

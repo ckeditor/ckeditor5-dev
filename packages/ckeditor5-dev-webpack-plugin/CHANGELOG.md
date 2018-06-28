@@ -1,6 +1,28 @@
 Changelog
 =========
 
+## [5.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@4.0.0...@ckeditor/ckeditor5-dev-webpack-plugin@5.0.0) (2018-04-25)
+
+### Other changes
+
+* Changed the license to GPL2+ only. See [ckeditor/ckeditor5#991](https://github.com/ckeditor/ckeditor5/issues/991). ([e392d7d](https://github.com/ckeditor/ckeditor5-dev/commit/e392d7d))
+
+### BREAKING CHANGES
+
+* The license under which CKEditor 5 is released has been changed from a triple GPL, LGPL and MPL license to GPL2+ only. See [ckeditor/ckeditor5#991](https://github.com/ckeditor/ckeditor5/issues/991) for more information.
+
+
+## [4.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@3.0.8...@ckeditor/ckeditor5-dev-webpack-plugin@4.0.0) (2018-04-10)
+
+### Bug fixes
+
+* Enabled builds to work with RequireJS. Closes [ckeditor/ckeditor5#914](https://github.com/ckeditor/ckeditor5/issues/914). ([6c69057](https://github.com/ckeditor/ckeditor5-dev/commit/6c69057))
+
+### BREAKING CHANGES
+
+* Due to a new format of translation snippets the new version of `CKEditor5WebpackPlugin` will only be compatible with CKEditor 5 v1.0.0-beta.2 or later.
+
+
 ## [3.0.8](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@3.0.6...@ckeditor/ckeditor5-dev-webpack-plugin@3.0.8) (2018-03-22)
 
 Internal changes only (updated dependencies, documentation, etc.).

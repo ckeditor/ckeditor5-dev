@@ -1,11 +1,11 @@
 {
   "name": "@ckeditor/ckeditor5-dev-webpack-plugin",
-  "version": "3.0.9",
-  "description": "CKEditor 5 plugin for Webpack.",
+  "version": "5.0.1",
+  "description": "CKEditor 5 plugin for webpack.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^7.0.7",
+    "@ckeditor/ckeditor5-dev-utils": "^9.0.1",
     "rimraf": "^2.6.2"
   },
   "engines": {
@@ -13,7 +13,7 @@
     "npm": ">=3.0.0"
   },
   "author": "CKSource (http://cksource.com/)",
-  "license": "(GPL-2.0 OR LGPL-2.1 OR MPL-1.1)",
+  "license": "GPL-2.0-or-later",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-webpack-plugin",
   "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
   "repository": "https://github.com/ckeditor/ckeditor5-dev"

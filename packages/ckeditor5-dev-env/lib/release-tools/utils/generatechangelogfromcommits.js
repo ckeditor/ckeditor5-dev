@@ -26,6 +26,7 @@ const { additionalCommitNotes } = require( './transform-commit/transform-commit-
  * @param {Boolean} [options.doNotSave=false] If set on `true`, changes will be resolved in returned promise
  * instead of saving in CHANGELOG file.
  * @param {Boolean} [options.additionalNotes=false] If set on `true, each category will contain additional description.
+ * @param {Boolean} [options.skipLinks=false] If set on true, links to release or commits will be omitted.
  * @returns {Promise}
  */
 module.exports = function generateChangelogFromCommits( options ) {
@@ -43,8 +44,10 @@ module.exports = function generateChangelogFromCommits( options ) {
 			currentTag: options.newTagName,
 			previousTag: options.tagName,
 			displayLogs: false,
-			isInternalRelease: options.isInternalRelease || false,
+			isInternalRelease: Boolean( options.isInternalRelease ),
 			additionalNotes: {},
+			skipCommitsLink: Boolean( options.skipLinks ),
+			skipCompareLink: Boolean( options.skipLinks )
 		};
 
 		if ( options.additionalNotes ) {
@@ -59,14 +62,23 @@ module.exports = function generateChangelogFromCommits( options ) {
 
 		const writerOptions = getWriterOptions( options.transformCommit );
 
+		/* istanbul ignore next */
+		if ( process.env.DEBUG ) {
+			// Displays the final `context` which will be used to generate the changelog.
+			// It contains grouped commits, repository details, etc.
+			writerOptions.debug = getDebugFuntion();
+		}
+
 		conventionalChangelog( {}, context, gitRawCommitsOpts, parserOptions, writerOptions )
-			.pipe( saveChangelogPipe( options.version, resolve, options.doNotSave ) );
+			.pipe( changelogPipe( options.version, resolve, {
+				doNotSave: options.doNotSave
+			} ) );
 	} );
 };
 
-function saveChangelogPipe( version, done, doNotSave = false ) {
+function changelogPipe( version, done, options ) {
 	return stream.noop( changes => {
-		if ( doNotSave ) {
+		if ( options.doNotSave ) {
 			return done( changes.toString() );
 		}
 
@@ -84,4 +96,10 @@ function saveChangelogPipe( version, done, doNotSave = false ) {
 
 		done( version );
 	} );
+}
+
+function getDebugFuntion() {
+	return ( ...params ) => {
+		console.log( ...params );
+	};
 }

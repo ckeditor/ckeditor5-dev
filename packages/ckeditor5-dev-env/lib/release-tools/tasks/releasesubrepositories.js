@@ -275,13 +275,21 @@ module.exports = function releaseSubRepositories( options ) {
 			};
 
 			return createGithubRelease( releaseOptions.token, githubReleaseOptions )
-				.then( () => {
-					// eslint-disable-next-line max-len
-					const url = `https://github.com/${ repositoryInfo.owner }/${ repositoryInfo.name }/releases/tag/v${ releaseDetails.version }`;
-					log.info( `Created the release: ${ url }` );
+				.then(
+					() => {
+						// eslint-disable-next-line max-len
+						const url = `https://github.com/${ repositoryInfo.owner }/${ repositoryInfo.name }/releases/tag/v${ releaseDetails.version }`;
+						log.info( `Created the release: ${ url }` );
 
-					return Promise.resolve();
-				} );
+						return Promise.resolve();
+					},
+					err => {
+						log.info( 'Cannot create a release on GitHub. Skipping that package.' );
+						log.error( err );
+
+						return Promise.resolve();
+					}
+				);
 		} );
 	}
 
