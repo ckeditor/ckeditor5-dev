@@ -233,17 +233,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'allows appending additional notes for groups of commits', () => {
-			const newChangelogChunk = [
-				'## 1.0.0',
-				'',
-				'### Features',
-				'',
-				'Besides new features introduced in the dependencies, this build also introduces these features:',
-				'',
-				'* This test should pass!'
-			].join( '\n' );
-
-			changelogBuffer = Buffer.from( newChangelogChunk );
+			changelogBuffer = Buffer.from( 'Changelog.' );
 
 			stubs.fs.existsSync.returns( true );
 			stubs.changelogUtils.getChangelog.returns( changelogUtils.changelogHeader );
@@ -276,17 +266,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'allows generating changelog without links to commits ("skipLinks" option)', () => {
-			const newChangelogChunk = [
-				'## 1.0.0',
-				'',
-				'### Features',
-				'',
-				'Besides new features introduced in the dependencies, this build also introduces these features:',
-				'',
-				'* This test should pass!'
-			].join( '\n' );
-
-			changelogBuffer = Buffer.from( newChangelogChunk );
+			changelogBuffer = Buffer.from( 'Changelog.' );
 
 			stubs.fs.existsSync.returns( true );
 			stubs.changelogUtils.getChangelog.returns( changelogUtils.changelogHeader );
