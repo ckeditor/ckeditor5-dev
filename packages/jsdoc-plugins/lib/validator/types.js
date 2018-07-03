@@ -33,6 +33,7 @@ const BASIC_TYPES = [
 	'Range',
 	'Selection',
 	'Event',
+	'FocusEvent',
 	'ClientRect',
 	'Window',
 
