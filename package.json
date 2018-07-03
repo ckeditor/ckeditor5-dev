@@ -33,7 +33,8 @@
     ]
   },
   "eslintIgnore": [
-    "coverage/**"
+	"coverage/**",
+	"packages/*/node_modules/**"
   ],
   "version": "0.0.67"
 }
