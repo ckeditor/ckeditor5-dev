@@ -19,7 +19,7 @@ An example npm task to test CKEditor 5 packages (used e.g. in https://github.com
 {
   "scripts": {
       "test": "node ./node_modules/.bin/ckeditor5-dev-tests",
-      "test:manual": "node ./node_modules/.bin/ckeditor5-dev-tests-manual"
+      "manual": "node ./node_modules/.bin/ckeditor5-dev-tests-manual"
   }
 }
 ```
