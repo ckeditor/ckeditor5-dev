@@ -29,7 +29,7 @@
     "karma-mocha-reporter": "^2.2.4",
     "karma-sinon": "^1.0.5",
     "karma-sourcemap-loader": "^0.3.7",
-    "karma-webpack": "^2.0.13",
+    "karma-webpack": "^3.0.0",
     "lodash": "^4.17.4",
     "mgit2": "^0.8.0",
     "minimist": "^1.2.0",
@@ -39,7 +39,7 @@
     "postcss-loader": "^2.1.1",
     "raw-loader": "^0.5.1",
     "sinon": "^4.0.0",
-    "style-loader": "^0.20.3",
+    "style-loader": "^0.21.0",
     "webpack": "^4.2.0"
   },
   "devDependencies": {
