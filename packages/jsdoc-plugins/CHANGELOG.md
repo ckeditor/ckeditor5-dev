@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.9.6](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.9.5...@ckeditor/jsdoc-plugins@1.9.6) (2018-07-03)
+
+### Other changes
+
+* Added FocusEvent to known types. ([9dd3b90](https://github.com/ckeditor/ckeditor5-dev/commit/9dd3b90))
+
+
 ## [1.9.5](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.9.4...@ckeditor/jsdoc-plugins@1.9.5) (2018-06-28)
 
 ### Other changes
