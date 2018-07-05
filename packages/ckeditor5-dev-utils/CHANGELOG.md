@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## [10.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@9.0.1...@ckeditor/ckeditor5-dev-utils@10.0.0) (2018-07-05)
+
+### Other changes
+
+* Updated `CKEditorWebpackPlugin` and related tools to support `webpack@4`. Closes [#371](https://github.com/ckeditor/ckeditor5-dev/issues/371). ([d0cbbca](https://github.com/ckeditor/ckeditor5-dev/commit/d0cbbca))
+
+### BREAKING CHANGES
+
+* This package requires `webpack@4`.
+
+
 ## [9.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@9.0.0...@ckeditor/ckeditor5-dev-utils@9.0.1) (2018-06-20)
 
 ### Bug fixes
