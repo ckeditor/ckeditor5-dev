@@ -26,10 +26,6 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			}
 		} );
 
-		mockery.registerMock( 'CKEditorWebpackPlugin', function CKEditorWebpackPlugin( options ) {
-			this.options = options;
-		} );
-
 		getWebpackConfigForAutomatedTests = require( '../../../lib/utils/automated-tests/getwebpackconfig' );
 	} );
 

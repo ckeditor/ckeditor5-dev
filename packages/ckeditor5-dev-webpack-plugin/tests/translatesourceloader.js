@@ -18,7 +18,7 @@ describe( 'webpack-plugin/translateSourceLoader()', () => {
 
 	it( 'should return translated code', () => {
 		const ctx = {
-			options: {
+			query: {
 				translateSource: sandbox.spy( () => 'output' )
 			},
 			resourcePath: 'file.js'
@@ -26,8 +26,8 @@ describe( 'webpack-plugin/translateSourceLoader()', () => {
 
 		const result = translateSourceLoader.call( ctx, 'Source' );
 
-		sinon.assert.calledOnce( ctx.options.translateSource );
-		sinon.assert.calledWithExactly( ctx.options.translateSource, 'Source', 'file.js' );
+		sinon.assert.calledOnce( ctx.query.translateSource );
+		sinon.assert.calledWithExactly( ctx.query.translateSource, 'Source', 'file.js' );
 
 		expect( result ).to.equal( 'output' );
 	} );

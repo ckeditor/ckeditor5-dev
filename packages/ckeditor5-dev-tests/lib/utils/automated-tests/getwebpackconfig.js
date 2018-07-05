@@ -15,6 +15,8 @@ const { getPostCssConfig } = require( '@ckeditor/ckeditor5-dev-utils' ).styles;
  */
 module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	const config = {
+		mode: 'development',
+
 		module: {
 			rules: [
 				{

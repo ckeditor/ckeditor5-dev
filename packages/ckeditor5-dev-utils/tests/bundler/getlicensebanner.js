@@ -10,6 +10,6 @@ const getLicenseBanner = require( '../../lib/bundler/getlicensebanner' );
 
 describe( 'bundler', () => {
 	describe( 'getLicenseBanner()', () => {
-		expect( getLicenseBanner() ).to.match( /\/\*\*[\S\s]+\*\//g );
+		expect( getLicenseBanner() ).to.match( /\/\*![\S\s]+\*\//g );
 	} );
 } );

@@ -16,6 +16,8 @@ const { getPostCssConfig } = require( '@ckeditor/ckeditor5-dev-utils' ).styles;
  */
 module.exports = function getWebpackConfigForManualTests( entryObject, buildDir, themePath ) {
 	return {
+		mode: 'development',
+
 		// Use cheap source maps because Safari had problem with ES6 + inline source maps.
 		// We could use cheap source maps every where but karma-webpack doesn't support it:
 		// https://github.com/webpack/karma-webpack/pull/76
