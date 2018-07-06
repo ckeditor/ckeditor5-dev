@@ -14,7 +14,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		let getPackagesToRelease, sandbox, stubs;
 
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 
 			stubs = {
 				chdir: sandbox.stub( process, 'chdir' ),

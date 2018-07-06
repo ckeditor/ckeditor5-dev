@@ -15,7 +15,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		let getSubRepositoriesPaths, sandbox, getPackageJsonStub, getDirectoriesStub;
 
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 
 			getPackageJsonStub = sandbox.stub();
 			getDirectoriesStub = sandbox.stub();

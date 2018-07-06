@@ -24,7 +24,7 @@ describe( 'compileHtmlFiles', () => {
 			warnOnUnregistered: false
 		} );
 
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		stubs = {
 			fs: {

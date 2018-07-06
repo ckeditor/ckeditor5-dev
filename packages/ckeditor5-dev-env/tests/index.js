@@ -14,7 +14,7 @@ describe( 'dev-env/index', () => {
 	let tasks, sandbox, stubs;
 
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		mockery.enable( {
 			useCleanCache: true,

@@ -14,7 +14,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		let updateDependenciesVersions, sandbox;
 
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 
 			updateDependenciesVersions = require( '../../../lib/release-tools/utils/updatedependenciesversions' );
 		} );

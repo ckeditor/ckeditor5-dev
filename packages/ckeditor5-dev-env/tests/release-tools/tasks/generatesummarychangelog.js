@@ -27,7 +27,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 	let generateSummaryChangelog, sandbox, stubs;
 
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		mockery.enable( {
 			useCleanCache: true,

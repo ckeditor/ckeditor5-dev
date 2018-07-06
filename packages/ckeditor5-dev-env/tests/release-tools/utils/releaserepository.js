@@ -15,7 +15,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 		let releaseRepository, sandbox, stubs, options;
 
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 
 			mockery.enable( {
 				useCleanCache: true,

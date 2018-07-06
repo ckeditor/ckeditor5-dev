@@ -39,7 +39,7 @@ describe( 'removeDir', () => {
 		} );
 
 		removeDir = require( '../../../lib/utils/manual-tests/removedir' );
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 	} );
 
 	after( () => {

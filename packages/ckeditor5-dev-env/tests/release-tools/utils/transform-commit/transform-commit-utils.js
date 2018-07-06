@@ -14,7 +14,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 	describe( 'transformCommitUtils', () => {
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 
 			stubs = {
 				getPackageJson: sandbox.stub()

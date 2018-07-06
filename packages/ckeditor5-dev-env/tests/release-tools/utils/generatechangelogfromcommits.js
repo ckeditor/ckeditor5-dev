@@ -17,7 +17,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		let generateChangelogFromCommits, sandbox, stubs, changelogBuffer, conventionalChangelogArguments;
 
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 
 			stubs = {
 				conventionalChangelog( ...args ) {

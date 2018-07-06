@@ -64,7 +64,7 @@ function createEntryFile( globPatterns ) {
 	mkdirp.sync( path.dirname( ENTRY_FILE_PATH ) );
 	karmaLogger.setupFromConfig( { logLevel: 'INFO' } );
 
-	const log = karmaLogger.create( 'config' );
+	const log = karmaLogger.createSandbox( 'config' );
 	const allFiles = [];
 
 	for ( const singleFile of Object.keys( globPatterns ) ) {

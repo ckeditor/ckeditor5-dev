@@ -22,7 +22,7 @@ describe( 'compileManualTestScripts', () => {
 			warnOnUnregistered: false
 		} );
 
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		stubs = {
 			glob: sandbox.stub(),

@@ -15,7 +15,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 	describe( 'versions', () => {
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 
 			changelogStub = sandbox.stub();
 			getPackageJsonStub = sandbox.stub();

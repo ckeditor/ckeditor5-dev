@@ -13,7 +13,7 @@ describe( 'dev-tests/utils', () => {
 	let transformFileOptionToTestGlob, sandbox;
 
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		transformFileOptionToTestGlob = require( '../../lib/utils/transformfileoptiontotestglob' );
 

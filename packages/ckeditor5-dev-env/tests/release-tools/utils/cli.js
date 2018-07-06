@@ -14,7 +14,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 	describe( 'cli', () => {
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 			questionItems = [];
 
 			mockery.enable( {

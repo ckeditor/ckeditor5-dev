@@ -15,7 +15,7 @@ describe( 'getKarmaConfig', () => {
 	const originalEnv = process.env;
 
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		sandbox.stub( process, 'cwd' ).returns( 'workspace' );
 		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );

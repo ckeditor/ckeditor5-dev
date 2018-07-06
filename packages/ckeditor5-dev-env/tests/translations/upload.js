@@ -15,7 +15,7 @@ describe( 'upload', () => {
 	let sandbox, stubs, upload, packageNames, serverResources, fileContents;
 
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		mockery.enable( {
 			useCleanCache: true,

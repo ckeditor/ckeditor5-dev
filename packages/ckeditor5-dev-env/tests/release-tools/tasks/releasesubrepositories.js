@@ -63,7 +63,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 
 		process.chdir( cwd );
 
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		mockery.enable( {
 			useCleanCache: true,
