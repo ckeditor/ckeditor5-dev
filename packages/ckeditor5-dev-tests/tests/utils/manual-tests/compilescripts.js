@@ -150,7 +150,7 @@ describe( 'compileManualTestScripts', () => {
 	} );
 
 	it( 'works on Windows environments', () => {
-		stubs.pathSep.reset();
+		stubs.pathSep.resetHistory();
 		stubs.pathSep.value( '\\' );
 
 		const manualTestScriptsPatterns = [

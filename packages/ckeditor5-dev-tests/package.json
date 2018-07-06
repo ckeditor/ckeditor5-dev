@@ -13,7 +13,7 @@
     "chai": "^4.1.2",
     "chokidar": "^2.0.3",
     "commonmark": "^0.28.1",
-    "cssnano": "^3.10.0",
+    "cssnano": "^4.0.0",
     "del": "^3.0.0",
     "dom-combiner": "^0.1.2",
     "fs-extra": "^5.0.0",
@@ -38,7 +38,7 @@
     "mockery": "^2.1.0",
     "postcss-loader": "^2.1.1",
     "raw-loader": "^0.5.1",
-    "sinon": "^4.0.0",
+    "sinon": "^6.1.2",
     "style-loader": "^0.21.0",
     "webpack": "^4.2.0"
   },
@@ -46,7 +46,7 @@
     "mockery": "^2.1.0"
   },
   "engines": {
-    "node": ">=6.0.0",
+    "node": ">=6.9.0",
     "npm": ">=3.0.0"
   },
   "bin": {
