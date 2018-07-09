@@ -84,5 +84,13 @@ describe( 'dev-env/release-tools/utils', () => {
 			expect( errors.length ).to.equal( 1 );
 			expect( errors[ 0 ] ).to.equal( 'The branch is behind with the remote.' );
 		} );
+
+		it( 'allows skipping the branch check', () => {
+			stubs.devUtils.tools.shExec.returns( '## develop...origin/develop' );
+
+			const errors = validatePackageToRelease( { changes: 'Some changes.', version: '1.0.0', allowOtherBranch: true } );
+
+			expect( errors.length ).to.equal( 0 );
+		} );
 	} );
 } );

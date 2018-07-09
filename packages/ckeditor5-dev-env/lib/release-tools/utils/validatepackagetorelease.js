@@ -11,6 +11,7 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {Object} options
  * @param {String} options.version Version of the current release.
  * @param {String} options.changes Changelog entries for the current release.
+ * @param {Boolean} [options.allowOtherBranch=false] If set on true, branch checking will be skipped.
  * @returns {Array.<String>}
  */
 module.exports = function validatePackageToRelease( options ) {
@@ -19,9 +20,11 @@ module.exports = function validatePackageToRelease( options ) {
 	// Check whether the repository is ready for the release.
 	const status = exec( 'git status -sb', { verbosity: 'error' } ).trim();
 
-	// Check whether current branch is "master".
-	if ( !status.startsWith( '## master...origin/master' ) ) {
-		errors.push( 'Not on master.' );
+	if ( !options.allowOtherBranch ) {
+		// Check whether current branch is "master".
+		if ( !status.startsWith( '## master...origin/master' ) ) {
+			errors.push( 'Not on master.' );
+		}
 	}
 
 	// Check whether the local branch is sync with the remote.
