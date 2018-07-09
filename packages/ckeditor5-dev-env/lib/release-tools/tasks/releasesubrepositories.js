@@ -6,6 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
+const chalk = require( 'chalk' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const parseGithubUrl = require( 'parse-github-url' );
 const cli = require( '../utils/cli' );
@@ -13,6 +14,7 @@ const createGithubRelease = require( '../utils/creategithubrelease' );
 const displaySkippedPackages = require( '../utils/displayskippedpackages' );
 const executeOnPackages = require( '../utils/executeonpackages' );
 const { getChangesForVersion } = require( '../utils/changelog' );
+const { getLastFromChangelog: getLastVersionFromChangelog } = require( '../utils/versions' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getPackagesToRelease = require( '../utils/getpackagestorelease' );
 const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
@@ -43,11 +45,20 @@ const BREAK_RELEASE_MESSAGE = 'You aborted publishing the release. Why? Oh why?!
  * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
  * @param {String} options.packages Where to look for other packages (dependencies).
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be released.
+ * @param {Boolean} [options.dryRun=false] If set on true, nothing will be published:
+ *   - npm version will not create a tag (only the commit will be made)
+ *   - npm pack will be called instead of npm publish (it packs the whole release to a ZIP archive)
+ *   - "git push" will be replaced with a log on the screen
+ *   - creating a release on GitHub will be replaced with a log on the screen
+ *   - every called command will be displayed
  * @returns {Promise}
  */
 module.exports = function releaseSubRepositories( options ) {
 	const cwd = process.cwd();
 	const log = logger();
+	const dryRun = Boolean( options.dryRun );
+	const mainPackageJson = getPackageJson( cwd );
+	const mainPackageChangelogVersion = getLastVersionFromChangelog( cwd );
 
 	const pathsCollection = getSubRepositoriesPaths( {
 		cwd: options.cwd,
@@ -61,6 +72,8 @@ module.exports = function releaseSubRepositories( options ) {
 
 	// Errors are added to this array by the `validateRepositories` function.
 	const errors = [];
+
+	log.info( chalk.blue( 'Collecting packages that will be released...' ) );
 
 	return getPackagesToRelease( pathsCollection.packages )
 		.then( packages => {
@@ -87,6 +100,11 @@ module.exports = function releaseSubRepositories( options ) {
 			for ( const pathToPackage of pathsCollection.packages ) {
 				const packageName = getPackageJson( pathToPackage ).name;
 
+				// The main package won't be released but we need to keep its version in order to update peerDependencies.
+				if ( packageName === mainPackageJson.name ) {
+					continue;
+				}
+
 				if ( !packagesToRelease.has( packageName ) ) {
 					pathsCollection.packages.delete( pathToPackage );
 				}
@@ -110,7 +128,11 @@ module.exports = function releaseSubRepositories( options ) {
 		.then( () => releaseOnNpm() )
 		.then( () => pushRepositories() )
 		.then( () => releaseOnGithub() )
-		.then( () => process.chdir( cwd ) )
+		.then( () => {
+			process.chdir( cwd );
+
+			log.info( chalk.green( `Finished releasing ${ pathsCollection.packages.size } packages.` ) );
+		} )
 		.catch( err => {
 			process.chdir( cwd );
 
@@ -147,6 +169,9 @@ module.exports = function releaseSubRepositories( options ) {
 				dependencies.set( packageJson.name, packageJson.version );
 			}
 		}
+
+		// Add main package (it could be added as a peer-dependency).
+		dependencies.set( mainPackageJson.name, mainPackageChangelogVersion );
 
 		return dependencies;
 	}
@@ -196,7 +221,8 @@ module.exports = function releaseSubRepositories( options ) {
 			const releaseDetails = packagesToRelease.get( packageJson.name );
 			const errorsForPackage = validatePackageToRelease( {
 				changes: releaseDetails.changes,
-				version: releaseDetails.version
+				version: releaseDetails.version,
+				allowOtherBranch: dryRun === true
 			} );
 
 			if ( errorsForPackage.length ) {
@@ -216,7 +242,19 @@ module.exports = function releaseSubRepositories( options ) {
 			const releaseDetails = packagesToRelease.get( packageJson.name );
 
 			log.info( `Bumping version for "${ packageJson.name }"...` );
-			exec( `npm version ${ releaseDetails.version } --message "Release: v${ releaseDetails.version }."` );
+
+			const commitMessage = `--message "Release: v${ releaseDetails.version }."`;
+			let versionCommand = `npm version ${ releaseDetails.version }`;
+
+			if ( dryRun ) {
+				// `npm version` creates a Git tag by default. Adding "--no-git-tag-version" option will disable committing and tagging.
+				versionCommand += ` --no-git-tag-version && git add package.json && git commit ${ commitMessage }`;
+			} else {
+				// Attach a message to the release commit.
+				versionCommand += ` ${ commitMessage }`;
+			}
+
+			exec( versionCommand );
 
 			return Promise.resolve();
 		} );
@@ -233,7 +271,12 @@ module.exports = function releaseSubRepositories( options ) {
 			const packageJson = getPackageJson( repositoryPath );
 
 			log.info( `Publishing on NPM "${ packageJson.name }"...` );
-			exec( 'npm publish --access=public' );
+
+			if ( dryRun ) {
+				exec( 'npm pack' );
+			} else {
+				exec( 'npm publish --access=public' );
+			}
 		} );
 	}
 
@@ -244,7 +287,11 @@ module.exports = function releaseSubRepositories( options ) {
 			const packageJson = getPackageJson( repositoryPath );
 			log.info( `Pushing a local repository into the remote for "${ packageJson.name }"...` );
 
-			exec( 'git push' );
+			if ( dryRun ) {
+				exec( 'echo "Pushing the repository to the remote..."' );
+			} else {
+				exec( 'git push' );
+			}
 
 			return Promise.resolve();
 		} );
@@ -267,6 +314,14 @@ module.exports = function releaseSubRepositories( options ) {
 				exec( 'git remote get-url origin --push' ).trim()
 			);
 
+			const url = `https://github.com/${ repositoryInfo.owner }/${ repositoryInfo.name }/releases/tag/v${ releaseDetails.version }`;
+
+			if ( dryRun ) {
+				log.info( `Created release will be available under: ${ chalk.green( url ) }` );
+
+				return Promise.resolve();
+			}
+
 			const githubReleaseOptions = {
 				repositoryOwner: repositoryInfo.owner,
 				repositoryName: repositoryInfo.name,
@@ -278,8 +333,7 @@ module.exports = function releaseSubRepositories( options ) {
 				.then(
 					() => {
 						// eslint-disable-next-line max-len
-						const url = `https://github.com/${ repositoryInfo.owner }/${ repositoryInfo.name }/releases/tag/v${ releaseDetails.version }`;
-						log.info( `Created the release: ${ url }` );
+						log.info( `Created the release: ${ chalk.green( url ) }` );
 
 						return Promise.resolve();
 					},
@@ -294,6 +348,10 @@ module.exports = function releaseSubRepositories( options ) {
 	}
 
 	function exec( command ) {
+		if ( dryRun ) {
+			log.info( `${ chalk.underline( 'Executing:' ) } "${ chalk.cyan( command ) }" in "${ chalk.italic( process.cwd() ) }".` );
+		}
+
 		return tools.shExec( command, { verbosity: 'error' } );
 	}
 };
