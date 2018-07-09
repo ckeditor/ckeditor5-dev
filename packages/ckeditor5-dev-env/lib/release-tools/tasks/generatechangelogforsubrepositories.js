@@ -20,7 +20,10 @@ const generateChangelogForSinglePackage = require( './generatechangelogforsingle
  * @param {Object} options
  * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
  * @param {String} options.packages Where to look for other packages.
- * @param {Array.<String>} options.skipPackages Name of packages which won't be touched.
+ * @param {String} [options.scope] Package names have to match to specified glob pattern.
+ * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be touched.
+ * @param {String} [options.newVersion=null] If specified, the tool will use the version. User won't be able to provide
+ * its version based on history of commits.
  * @returns {Promise}
  */
 module.exports = function generateChangelogForSubRepositories( options ) {
@@ -30,8 +33,11 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 	const pathsCollection = getSubRepositoriesPaths( {
 		cwd: options.cwd,
 		packages: options.packages,
+		scope: options.scope || null,
 		skipPackages: options.skipPackages || []
 	} );
+
+	const newVersion = options.newVersion || null;
 
 	const generatedChangelogsMap = new Map();
 	const skippedChangelogs = new Set();
@@ -84,10 +90,10 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 	function generateChangelogTask( dependencyPath ) {
 		process.chdir( dependencyPath );
 
-		return generateChangelogForSinglePackage()
-			.then( newVersion => {
-				if ( newVersion ) {
-					generatedChangelogsMap.set( getPackageJson( dependencyPath ).name, newVersion );
+		return generateChangelogForSinglePackage( { newVersion } )
+			.then( newVersionInChangelog => {
+				if ( newVersionInChangelog ) {
+					generatedChangelogsMap.set( getPackageJson( dependencyPath ).name, newVersionInChangelog );
 				} else {
 					skippedChangelogs.add( dependencyPath );
 				}
