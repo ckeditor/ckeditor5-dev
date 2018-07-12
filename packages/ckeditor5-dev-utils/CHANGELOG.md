@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [9.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@9.0.1...@ckeditor/ckeditor5-dev-utils@9.0.2) (2018-07-12)
+
+### Bug fixes
+
+* Fixed compatibility with `mini-text-extract-plugin` and `extract-text-webpack-plugin`. Closes [#425](https://github.com/ckeditor/ckeditor5-dev/issues/425). ([7b6ed67e](https://github.com/ckeditor/ckeditor5-dev/commit/7b6ed67e))
+
+
 ## [9.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@9.0.0...@ckeditor/ckeditor5-dev-utils@9.0.1) (2018-06-20)
 
 ### Bug fixes
