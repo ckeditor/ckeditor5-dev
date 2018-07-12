@@ -229,6 +229,19 @@ describe( 'translations', () => {
 				] );
 			} );
 
+			it( 'should return an array of empty assets when called for webpack plugins instead of ckeditor script', () => {
+				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'en' ] } );
+
+				const assets = translationService.getAssets( {
+					outputDirectory: 'lang',
+					compilationAssets: {
+						'SomeWebpackPlugin': { source: () => 'source' }
+					}
+				} );
+
+				expect( assets ).to.deep.equal( [] );
+			} );
+
 			it( 'should emit an error if the language is not present in language list', () => {
 				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'xxx' ] } );
 				const spy = sandbox.spy();
