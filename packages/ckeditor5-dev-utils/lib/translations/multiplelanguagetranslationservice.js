@@ -166,6 +166,10 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		const compilationAssetNames = Object.keys( compilationAssets )
 			.filter( name => name.endsWith( '.js' ) );
 
+		if ( compilationAssetNames.length == 0 ) {
+			return [];
+		}
+
 		if ( compilationAssetNames.length > 1 ) {
 			this.emit( 'warning', [
 				'Because of the many found bundles, none of the bundles will contain the main language.',
