@@ -57,9 +57,7 @@ module.exports = function getKarmaConfig( options ) {
 
 		webpackMiddleware: {
 			noInfo: true,
-			stats: {
-				chunks: false
-			}
+			stats: 'minimal'
 		},
 
 		// Test results reporter to use. Possible values: 'dots', 'progress'.
