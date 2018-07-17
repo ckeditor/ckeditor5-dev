@@ -17,6 +17,9 @@
     "node": ">=6.0.0",
     "npm": ">=3.0.0"
   },
+  "files": [
+    "lib"
+  ],
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-webpack-plugin",

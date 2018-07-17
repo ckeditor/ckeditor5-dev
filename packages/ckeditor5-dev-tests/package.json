@@ -49,6 +49,10 @@
     "node": ">=6.0.0",
     "npm": ">=3.0.0"
   },
+  "files": [
+    "lib",
+    "bin"
+  ],
   "bin": {
     "ckeditor5-dev-tests": "./bin/test.js",
     "ckeditor5-dev-tests-manual": "./bin/test-manual.js",
