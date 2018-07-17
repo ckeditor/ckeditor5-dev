@@ -89,7 +89,10 @@ describe( 'dev-env/release-tools/tasks', function() {
 				italic: sandbox.stub().callsFake( text => text ),
 				blue: sandbox.stub().callsFake( text => text ),
 				cyan: sandbox.stub().callsFake( text => text ),
-				green: sandbox.stub().callsFake( text => text )
+				green: sandbox.stub().callsFake( text => text ),
+				yellow: sandbox.stub().callsFake( text => text ),
+				grey: sandbox.stub().callsFake( text => text ),
+				bold: sandbox.stub().callsFake( text => text )
 			},
 			displaySkippedPackages: sandbox.stub(),
 			validatePackageToRelease: sandbox.stub(),
@@ -712,21 +715,21 @@ describe( 'dev-env/release-tools/tasks', function() {
 
 			return releaseSubRepositories( options )
 				.then( () => {
-					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( 'Collecting packages that will be released...' );
+					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.equal( 'Collecting packages that will be released...' );
 
 					expect( executedCommand.length ).to.equal( 14 );
 					expect( stubs.createGithubRelease.callCount ).to.equal( 0 );
 
 					// Executing shell command should print the command on the screen.
-					expect( stubs.logger.info.callCount ).to.equal( 28 );
+					expect( stubs.logger.info.callCount ).to.equal( 29 );
 
-					expect( stubs.logger.info.getCall( 23 ).args[ 0 ] ).to.equal(
+					expect( stubs.logger.info.getCall( 24 ).args[ 0 ] ).to.equal(
 						'Created release will be available under: https://github.com/ckeditor/ckeditor5-test-alpha/releases/tag/v0.1.0'
 					);
-					expect( stubs.logger.info.getCall( 26 ).args[ 0 ] ).to.equal(
+					expect( stubs.logger.info.getCall( 27 ).args[ 0 ] ).to.equal(
 						'Created release will be available under: https://github.com/ckeditor/ckeditor5-test-beta/releases/tag/v0.2.1'
 					);
-					expect( stubs.logger.info.getCall( 27 ).args[ 0 ] ).to.equal(
+					expect( stubs.logger.info.getCall( 28 ).args[ 0 ] ).to.equal(
 						'Finished releasing 2 packages.'
 					);
 
@@ -742,8 +745,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 12 ], 'Alpha remote' ).to.equal( 'git remote get-url origin --push' );
 					expect( stubs.validatePackageToRelease.getCall( 0 ).args[ 0 ] ).to.deep.equal( {
 						version: '0.1.0',
-						changes: '### Features\n\n* This is an initial commit.',
-						ignoreBranchCheck: true
+						changes: '### Features\n\n* This is an initial commit.'
 					} );
 
 					// Beta
@@ -758,8 +760,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 13 ], 'Beta remote' ).to.equal( 'git remote get-url origin --push' );
 					expect( stubs.validatePackageToRelease.getCall( 1 ).args[ 0 ] ).to.deep.equal( {
 						version: '0.2.1',
-						changes: '### Fix\n\n* Some fix.',
-						ignoreBranchCheck: true
+						changes: '### Fix\n\n* Some fix.'
 					} );
 				} );
 		} );

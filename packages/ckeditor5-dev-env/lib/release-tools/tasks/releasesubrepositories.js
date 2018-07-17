@@ -73,6 +73,10 @@ module.exports = function releaseSubRepositories( options ) {
 	// Errors are added to this array by the `validateRepositories` function.
 	const errors = [];
 
+	if ( dryRun ) {
+		log.info( chalk.bold( chalk.yellow( '\n[DRY RUN mode]\n' ) ) );
+	}
+
 	log.info( chalk.blue( 'Collecting packages that will be released...' ) );
 
 	return getPackagesToRelease( pathsCollection.packages )
@@ -221,8 +225,7 @@ module.exports = function releaseSubRepositories( options ) {
 			const releaseDetails = packagesToRelease.get( packageJson.name );
 			const errorsForPackage = validatePackageToRelease( {
 				changes: releaseDetails.changes,
-				version: releaseDetails.version,
-				ignoreBranchCheck: dryRun
+				version: releaseDetails.version
 			} );
 
 			if ( errorsForPackage.length ) {
@@ -349,7 +352,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 	function exec( command ) {
 		if ( dryRun ) {
-			log.info( `${ chalk.underline( 'Executing:' ) } "${ chalk.cyan( command ) }" in "${ chalk.italic( process.cwd() ) }".` );
+			log.info( `${ chalk.grey( '[DRY RUN]:' ) } "${ chalk.cyan( command ) }" in "${ chalk.italic( process.cwd() ) }".` );
 		}
 
 		return tools.shExec( command, { verbosity: 'error' } );
