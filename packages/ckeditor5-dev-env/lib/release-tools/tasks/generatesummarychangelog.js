@@ -41,7 +41,9 @@ const bumpTypesPriority = {
  * @param {String} options.packages Where to look for other packages.
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be touched.
  * @param {Boolean} [options.skipMainRepository=false] Whether to skip the main repository.
- * @param {RegExp} [options.scope] Package names have to match to specified pattern.
+ * @param {String} [options.scope=null] Package names have to match to specified glob pattern.
+ * @param {String} [options.newVersion=null] If specified, the tool will use the version. User won't be able to provide
+ * its version based on history of commits.
  */
 module.exports = function generateSummaryChangelog( options ) {
 	const log = logger();
@@ -50,13 +52,15 @@ module.exports = function generateSummaryChangelog( options ) {
 	const pathsCollection = getSubRepositoriesPaths( {
 		cwd: options.cwd,
 		packages: options.packages,
-		scope: options.scope,
+		scope: options.scope || null,
 		skipPackages: options.skipPackages || []
 	} );
 
 	if ( !options.skipMainRepository ) {
 		pathsCollection.packages.add( options.cwd );
 	}
+
+	const newVersion = options.newVersion || null;
 
 	const generatedChangelogMap = new Map();
 
@@ -92,23 +96,31 @@ module.exports = function generateSummaryChangelog( options ) {
 			tagName = 'v' + tagName;
 		}
 
-		return getNewReleaseType( transformCommitFunction, { tagName } )
-			.then( result => {
-				suggestedBumpFromCommits = result.releaseType === 'internal' ? 'skip' : result.releaseType;
+		let promise = Promise.resolve();
 
-				let newReleaseType;
+		if ( !newVersion ) {
+			promise = promise.then( () => getNewReleaseType( transformCommitFunction, { tagName } ) )
+				.then( result => {
+					suggestedBumpFromCommits = result.releaseType === 'internal' ? 'skip' : result.releaseType;
 
-				const commitsWeight = bumpTypesPriority[ suggestedBumpFromCommits ];
-				const packagesWeight = bumpTypesPriority[ suggestedBumpFromDependencies ];
+					let newReleaseType;
 
-				if ( !packagesWeight || commitsWeight > packagesWeight ) {
-					newReleaseType = suggestedBumpFromCommits;
-				} else {
-					newReleaseType = suggestedBumpFromDependencies;
-				}
+					const commitsWeight = bumpTypesPriority[ suggestedBumpFromCommits ];
+					const packagesWeight = bumpTypesPriority[ suggestedBumpFromDependencies ];
 
-				return cliUtils.provideVersion( packageJson.version, newReleaseType, { disableInternalVersion: true } );
-			} )
+					if ( !packagesWeight || commitsWeight > packagesWeight ) {
+						newReleaseType = suggestedBumpFromCommits;
+					} else {
+						newReleaseType = suggestedBumpFromDependencies;
+					}
+
+					return cliUtils.provideVersion( packageJson.version, newReleaseType, { disableInternalVersion: true } );
+				} );
+		} else {
+			promise = promise.then( () => newVersion );
+		}
+
+		return promise
 			.then( version => {
 				if ( version === 'skip' ) {
 					return Promise.resolve();

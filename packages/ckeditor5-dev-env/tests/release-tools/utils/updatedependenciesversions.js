@@ -139,5 +139,44 @@ describe( 'dev-env/release-tools/utils', () => {
 			expect( json.devDependencies[ 'package-b' ] ).to.equal( '^2.1.0' );
 			expect( json.devDependencies[ 'package-c' ] ).to.equal( '^3.0.0' );
 		} );
+
+		it( 'updates peerDependencies too', () => {
+			let json = {
+				dependencies: {
+					'package-deps-a': '^1.0.0',
+					'package-deps-b': '^1.0.0',
+				},
+				devDependencies: {
+					'package-dev-a': '^2.0.0'
+				},
+				peerDependencies: {
+					'package-a': '^2.0.0',
+					'package-b': '^2.1.0',
+					'package-c': '^2.2.0'
+				}
+			};
+
+			const dependencies = new Map( [
+				[ 'package-deps-a', '1.0.1' ],
+				[ 'package-deps-b', '1.0.2' ],
+				[ 'package-dev-a', '2.0.1' ],
+				[ 'package-a', '2.0.1' ],
+				[ 'package-b', '2.1.1' ],
+				[ 'package-c', '2.2.1' ]
+			] );
+
+			sandbox.stub( tools, 'updateJSONFile' ).callsFake( ( pathToJson, editJsonFunction ) => {
+				json = editJsonFunction( json );
+			} );
+
+			updateDependenciesVersions( dependencies, 'path/to/json/file' );
+
+			expect( json.dependencies[ 'package-deps-a' ] ).to.equal( '^1.0.1' );
+			expect( json.dependencies[ 'package-deps-b' ] ).to.equal( '^1.0.2' );
+			expect( json.devDependencies[ 'package-dev-a' ] ).to.equal( '^2.0.1' );
+			expect( json.peerDependencies[ 'package-a' ] ).to.equal( '2.0.1' );
+			expect( json.peerDependencies[ 'package-b' ] ).to.equal( '2.1.1' );
+			expect( json.peerDependencies[ 'package-c' ] ).to.equal( '2.2.1' );
+		} );
 	} );
 } );

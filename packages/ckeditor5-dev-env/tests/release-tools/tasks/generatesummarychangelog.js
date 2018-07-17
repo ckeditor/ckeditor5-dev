@@ -186,6 +186,67 @@ Patch releases (bug fixes, internal changes):
 				} );
 		} );
 
+		it( 'allows specifying version (it will not be taken from commits)', () => {
+			sandbox.stub( process, 'chdir' );
+
+			stubs.getSubRepositoriesPaths.returns( {
+				packages: new Set( [
+					packagesPaths.alpha
+				] ),
+				skipped: new Set( [
+					packagesPaths.beta,
+					packagesPaths.gamma,
+					packagesPaths.delta,
+					packagesPaths.epsilon
+				] )
+			} );
+
+			stubs.executeOnPackages.callsFake( executeOnPackages );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.beta ).returns( '0.2.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.beta ).returns( '0.2.1' );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.gamma ).returns( '0.3.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.gamma ).returns( '0.4.0' );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.epsilon ).returns( '1.0.0' );
+
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.alpha ).returns( '1.0.0' );
+
+			stubs.generateChangelogFromCommits.resolves(
+				'## Changelog header (will be removed)\n\n' +
+				'Changelog entries generated from commits.'
+			);
+
+			stubs.fs.existsSync.returns( true );
+
+			stubs.changelogUtils.getChangelog.returns( '' );
+
+			const options = {
+				cwd: mainPackagePath,
+				packages: 'packages',
+				skipMainRepository: true,
+				newVersion: '2.0.0'
+			};
+
+			return generateSummaryChangelog( options )
+				.then( () => {
+					expect( stubs.getNewReleaseType.called ).to.equal( false );
+					expect( stubs.cliUtils.provideVersion.called ).to.equal( false );
+
+					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						version: '2.0.0',
+						additionalNotes: true,
+						currentTag: 'v2.0.0',
+						previousTag: 'v1.0.0',
+						transformCommit: stubs.transformCommitFunction,
+						isInternalRelease: false,
+						doNotSave: true
+					} );
+				} );
+		} );
+
 		it( 'attaches notes from commits in the package', () => {
 			stubs.getSubRepositoriesPaths.returns( {
 				packages: new Set( [

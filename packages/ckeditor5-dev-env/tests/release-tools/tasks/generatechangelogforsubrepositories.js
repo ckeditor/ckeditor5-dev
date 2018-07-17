@@ -95,6 +95,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.getSubRepositoriesPaths.firstCall.args[ 0 ] ).to.deep.equal( {
 						cwd: options.cwd,
 						packages: options.packages,
+						scope: null,
 						skipPackages: []
 					} );
 
@@ -102,6 +103,10 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( chdirStub.firstCall.args[ 0 ] ).to.equal( '/tmp/packages/ckeditor5-core' );
 					expect( chdirStub.secondCall.args[ 0 ] ).to.equal( '/tmp/packages/ckeditor5-engine' );
 					expect( chdirStub.thirdCall.args[ 0 ] ).to.equal( '/tmp' );
+
+					expect( stubs.generateChangelogForSinglePackage.calledTwice ).to.equal( true );
+					expect( stubs.generateChangelogForSinglePackage.firstCall.args[ 0 ] ).to.deep.equal( { newVersion: null } );
+					expect( stubs.generateChangelogForSinglePackage.secondCall.args[ 0 ] ).to.deep.equal( { newVersion: null } );
 
 					expect( stubs.displayGeneratedChangelogs.calledOnce ).to.equal( true );
 					expect( stubs.displayGeneratedChangelogs.firstCall.args[ 0 ] ).to.deep.equal(
@@ -138,6 +143,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.getSubRepositoriesPaths.firstCall.args[ 0 ] ).to.deep.equal( {
 						cwd: options.cwd,
 						packages: options.packages,
+						scope: null,
 						skipPackages: options.skipPackages
 					} );
 
@@ -306,6 +312,56 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 					expect( skippedPackagesPaths.size ).to.equal( 1 );
 					expect( skippedPackagesPaths.has( '/tmp/packages/ckeditor5-fake-autoformat' ) ).to.equal( true );
+				} );
+		} );
+
+		it( 'allows specifying version for all packages', () => {
+			sandbox.stub( process, 'cwd' ).returns( '/tmp' );
+			sandbox.stub( process, 'chdir' );
+
+			stubs.getSubRepositoriesPaths.returns( {
+				skipped: new Set(),
+				packages: new Set( [
+					'/tmp/packages/ckeditor5-core',
+					'/tmp/packages/ckeditor5-engine'
+				] )
+			} );
+
+			stubs.generateChangelogForSinglePackage.onFirstCall().returns( Promise.resolve( '1.0.0' ) );
+			stubs.generateChangelogForSinglePackage.onSecondCall().returns( Promise.resolve( '1.0.0' ) );
+
+			stubs.getPackageJson.onFirstCall().returns( { name: '@ckeditor/ckeditor5-core' } );
+			stubs.getPackageJson.onSecondCall().returns( { name: '@ckeditor/ckeditor5-engine' } );
+
+			const generatedChangelogsMap = new Map( [
+				[ '@ckeditor/ckeditor5-core', '1.0.0' ],
+				[ '@ckeditor/ckeditor5-engine', '1.0.0' ]
+			] );
+
+			const options = {
+				cwd: '/tmp',
+				packages: 'packages',
+				newVersion: '1.0.0'
+			};
+
+			return generateChangelogForSubRepositories( options )
+				.then( () => {
+					expect( stubs.getSubRepositoriesPaths.calledOnce ).to.equal( true );
+					expect( stubs.getSubRepositoriesPaths.firstCall.args[ 0 ] ).to.deep.equal( {
+						cwd: options.cwd,
+						packages: options.packages,
+						scope: null,
+						skipPackages: []
+					} );
+
+					expect( stubs.generateChangelogForSinglePackage.calledTwice ).to.equal( true );
+					expect( stubs.generateChangelogForSinglePackage.firstCall.args[ 0 ] ).to.deep.equal( { newVersion: '1.0.0' } );
+					expect( stubs.generateChangelogForSinglePackage.secondCall.args[ 0 ] ).to.deep.equal( { newVersion: '1.0.0' } );
+
+					expect( stubs.displayGeneratedChangelogs.calledOnce ).to.equal( true );
+					expect( stubs.displayGeneratedChangelogs.firstCall.args[ 0 ] ).to.deep.equal(
+						generatedChangelogsMap
+					);
 				} );
 		} );
 	} );
