@@ -88,7 +88,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		it( 'allows skipping the branch check', () => {
 			stubs.devUtils.tools.shExec.returns( '## develop...origin/develop' );
 
-			const errors = validatePackageToRelease( { changes: 'Some changes.', version: '1.0.0', allowOtherBranch: true } );
+			const errors = validatePackageToRelease( { changes: 'Some changes.', version: '1.0.0', ignoreBranchCheck: true } );
 
 			expect( errors.length ).to.equal( 0 );
 		} );

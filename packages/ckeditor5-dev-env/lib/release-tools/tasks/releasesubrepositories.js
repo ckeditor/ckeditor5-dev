@@ -222,7 +222,7 @@ module.exports = function releaseSubRepositories( options ) {
 			const errorsForPackage = validatePackageToRelease( {
 				changes: releaseDetails.changes,
 				version: releaseDetails.version,
-				allowOtherBranch: dryRun === true
+				ignoreBranchCheck: dryRun
 			} );
 
 			if ( errorsForPackage.length ) {

@@ -743,7 +743,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( stubs.validatePackageToRelease.getCall( 0 ).args[ 0 ] ).to.deep.equal( {
 						version: '0.1.0',
 						changes: '### Features\n\n* This is an initial commit.',
-						allowOtherBranch: true
+						ignoreBranchCheck: true
 					} );
 
 					// Beta
@@ -759,7 +759,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( stubs.validatePackageToRelease.getCall( 1 ).args[ 0 ] ).to.deep.equal( {
 						version: '0.2.1',
 						changes: '### Fix\n\n* Some fix.',
-						allowOtherBranch: true
+						ignoreBranchCheck: true
 					} );
 				} );
 		} );
