@@ -339,7 +339,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 0 ], 'Alpha diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 1 ], 'Alpha add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 2 ], 'Alpha commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
-					expect( executedCommand[ 6 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0."' );
+					expect( executedCommand[ 6 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0. [skip ci]"' );
 					expect( executedCommand[ 8 ], 'Alpha publish' ).to.equal( 'npm publish --access=public' );
 					expect( executedCommand[ 10 ], 'Alpha push' ).to.equal( 'git push' );
 					expect( executedCommand[ 12 ], 'Alpha remote' ).to.equal( 'git remote get-url origin --push' );
@@ -355,7 +355,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 3 ], 'Beta diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 4 ], 'Beta add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 5 ], 'Beta commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
-					expect( executedCommand[ 7 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1."' );
+					expect( executedCommand[ 7 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1. [skip ci]"' );
 					expect( executedCommand[ 9 ], 'Beta publish' ).to.equal( 'npm publish --access=public' );
 					expect( executedCommand[ 11 ], 'Beta push' ).to.equal( 'git push' );
 					expect( executedCommand[ 13 ], 'Beta remote' ).to.equal( 'git remote get-url origin --push' );
@@ -425,7 +425,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 0 ], 'Alpha diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 1 ], 'Alpha add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 2 ], 'Alpha commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
-					expect( executedCommand[ 6 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0."' );
+					expect( executedCommand[ 6 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0. [skip ci]"' );
 					expect( executedCommand[ 8 ], 'Alpha push' ).to.equal( 'git push' );
 					expect( executedCommand[ 10 ], 'Alpha remote' ).to.equal( 'git remote get-url origin --push' );
 					expect( stubs.createGithubRelease.getCall( 0 ).args[ 0 ] ).to.equal( token );
@@ -440,7 +440,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 3 ], 'Beta diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 4 ], 'Beta add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 5 ], 'Beta commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
-					expect( executedCommand[ 7 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1."' );
+					expect( executedCommand[ 7 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1. [skip ci]"' );
 					expect( executedCommand[ 9 ], 'Beta push' ).to.equal( 'git push' );
 					expect( executedCommand[ 11 ], 'Beta remote' ).to.equal( 'git remote get-url origin --push' );
 					expect( stubs.createGithubRelease.getCall( 1 ).args[ 0 ] ).to.equal( token );
@@ -506,7 +506,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 0 ], 'Alpha diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 1 ], 'Alpha add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 2 ], 'Alpha commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
-					expect( executedCommand[ 6 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0."' );
+					expect( executedCommand[ 6 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0. [skip ci]"' );
 					expect( executedCommand[ 8 ], 'Alpha publish' ).to.equal( 'npm publish --access=public' );
 					expect( executedCommand[ 10 ], 'Alpha push' ).to.equal( 'git push' );
 
@@ -514,7 +514,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 3 ], 'Beta diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 4 ], 'Beta add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 5 ], 'Beta commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
-					expect( executedCommand[ 7 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1."' );
+					expect( executedCommand[ 7 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1. [skip ci]"' );
 					expect( executedCommand[ 9 ], 'Beta publish' ).to.equal( 'npm publish --access=public' );
 					expect( executedCommand[ 11 ], 'Beta push' ).to.equal( 'git push' );
 				} );
@@ -738,7 +738,8 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 1 ], 'Alpha add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 2 ], 'Alpha commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
 					expect( executedCommand[ 6 ], 'Alpha version' ).to.equal(
-						'npm version 0.1.0 --no-git-tag-version && git add package.json && git commit --message "Release: v0.1.0."'
+						'npm version 0.1.0 --no-git-tag-version && git add package.json && ' +
+						'git commit --message "Release: v0.1.0. [skip ci]"'
 					);
 					expect( executedCommand[ 8 ], 'Alpha publish' ).to.equal( 'npm pack' );
 					expect( executedCommand[ 10 ], 'Alpha push' ).to.equal( 'echo "Pushing the repository to the remote..."' );
@@ -753,7 +754,8 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 4 ], 'Beta add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 5 ], 'Beta commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
 					expect( executedCommand[ 7 ], 'Beta version' ).to.equal(
-						'npm version 0.2.1 --no-git-tag-version && git add package.json && git commit --message "Release: v0.2.1."'
+						'npm version 0.2.1 --no-git-tag-version && git add package.json && ' +
+						'git commit --message "Release: v0.2.1. [skip ci]"'
 					);
 					expect( executedCommand[ 9 ], 'Beta publish' ).to.equal( 'npm pack' );
 					expect( executedCommand[ 11 ], 'Beta push' ).to.equal( 'echo "Pushing the repository to the remote..."' );

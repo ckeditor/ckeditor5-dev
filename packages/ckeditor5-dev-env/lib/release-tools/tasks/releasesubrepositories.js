@@ -74,7 +74,7 @@ module.exports = function releaseSubRepositories( options ) {
 	const errors = [];
 
 	if ( dryRun ) {
-		log.info( chalk.bold( chalk.yellow( '\n[DRY RUN mode]\n' ) ) );
+		log.info( chalk.bold( chalk.yellow( '[DRY RUN mode]\n' ) ) );
 	}
 
 	log.info( chalk.blue( 'Collecting packages that will be released...' ) );
@@ -246,7 +246,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 			log.info( `Bumping version for "${ packageJson.name }"...` );
 
-			const commitMessage = `--message "Release: v${ releaseDetails.version }."`;
+			const commitMessage = `--message "Release: v${ releaseDetails.version }. [skip ci]"`;
 			let versionCommand = `npm version ${ releaseDetails.version }`;
 
 			if ( dryRun ) {
