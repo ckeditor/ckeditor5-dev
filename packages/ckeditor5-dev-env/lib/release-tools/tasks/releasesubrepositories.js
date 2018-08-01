@@ -79,7 +79,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 	log.info( chalk.blue( 'Collecting packages that will be released...' ) );
 
-	return getPackagesToRelease( pathsCollection.packages )
+	return getPackagesToRelease( pathsCollection.matched )
 		.then( packages => {
 			packagesToRelease = packages;
 
@@ -101,7 +101,7 @@ module.exports = function releaseSubRepositories( options ) {
 			dependencies = dependenciesWithVersions;
 
 			// Filter out packages which won't be released.
-			for ( const pathToPackage of pathsCollection.packages ) {
+			for ( const pathToPackage of pathsCollection.matched ) {
 				const packageName = getPackageJson( pathToPackage ).name;
 
 				// The main package won't be released but we need to keep its version in order to update peerDependencies.
@@ -110,7 +110,7 @@ module.exports = function releaseSubRepositories( options ) {
 				}
 
 				if ( !packagesToRelease.has( packageName ) ) {
-					pathsCollection.packages.delete( pathToPackage );
+					pathsCollection.matched.delete( pathToPackage );
 				}
 			}
 
@@ -135,7 +135,7 @@ module.exports = function releaseSubRepositories( options ) {
 		.then( () => {
 			process.chdir( cwd );
 
-			log.info( chalk.green( `Finished releasing ${ pathsCollection.packages.size } packages.` ) );
+			log.info( chalk.green( `Finished releasing ${ pathsCollection.matched.size } packages.` ) );
 		} )
 		.catch( err => {
 			process.chdir( cwd );
@@ -166,7 +166,7 @@ module.exports = function releaseSubRepositories( options ) {
 			dependencies.set( packageJson.name, packageJson.version );
 		}
 
-		for ( const packagePath of pathsCollection.packages ) {
+		for ( const packagePath of pathsCollection.matched ) {
 			const packageJson = getPackageJson( packagePath );
 
 			if ( !dependencies.has( packageJson.name ) ) {
@@ -181,7 +181,7 @@ module.exports = function releaseSubRepositories( options ) {
 	}
 
 	function updateDependenciesOfPackagesToRelease() {
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+		return executeOnPackages( pathsCollection.matched, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
@@ -203,7 +203,7 @@ module.exports = function releaseSubRepositories( options ) {
 	}
 
 	function getLatestChangesForPackagesThatWillBeReleased() {
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+		return executeOnPackages( pathsCollection.matched, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
@@ -218,7 +218,7 @@ module.exports = function releaseSubRepositories( options ) {
 	}
 
 	function validateRepositories() {
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+		return executeOnPackages( pathsCollection.matched, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
@@ -238,7 +238,7 @@ module.exports = function releaseSubRepositories( options ) {
 	}
 
 	function bumpVersion() {
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+		return executeOnPackages( pathsCollection.matched, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
@@ -268,7 +268,7 @@ module.exports = function releaseSubRepositories( options ) {
 			return Promise.resolve();
 		}
 
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+		return executeOnPackages( pathsCollection.matched, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
@@ -284,7 +284,7 @@ module.exports = function releaseSubRepositories( options ) {
 	}
 
 	function pushRepositories() {
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+		return executeOnPackages( pathsCollection.matched, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
@@ -305,7 +305,7 @@ module.exports = function releaseSubRepositories( options ) {
 			return Promise.resolve();
 		}
 
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+		return executeOnPackages( pathsCollection.matched, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );

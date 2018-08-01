@@ -62,11 +62,11 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			const pathsCollection = getSubRepositoriesPaths( options );
 
-			expect( pathsCollection.packages ).to.be.instanceof( Set );
-			expect( pathsCollection.packages.size ).to.equal( 3 );
-			expect( pathsCollection.packages.has( '/tmp/packages/ckeditor5-core' ) ).to.equal( true );
-			expect( pathsCollection.packages.has( '/tmp/packages/ckeditor5-engine' ) ).to.equal( true );
-			expect( pathsCollection.packages.has( '/tmp/packages/ckeditor5-utils' ) ).to.equal( true );
+			expect( pathsCollection.matched ).to.be.instanceof( Set );
+			expect( pathsCollection.matched.size ).to.equal( 3 );
+			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-core' ) ).to.equal( true );
+			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-engine' ) ).to.equal( true );
+			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-utils' ) ).to.equal( true );
 		} );
 
 		it( 'skips packages which are not specified in the package.json', () => {
@@ -93,8 +93,8 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			const pathsCollection = getSubRepositoriesPaths( options );
 
-			expect( pathsCollection.packages ).to.be.instanceof( Set );
-			expect( pathsCollection.packages.size ).to.equal( 2 );
+			expect( pathsCollection.matched ).to.be.instanceof( Set );
+			expect( pathsCollection.matched.size ).to.equal( 2 );
 
 			expect( pathsCollection.skipped ).to.be.instanceof( Set );
 			expect( pathsCollection.skipped.size ).to.equal( 1 );
@@ -128,8 +128,8 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			const pathsCollection = getSubRepositoriesPaths( options );
 
-			expect( pathsCollection.packages ).to.be.instanceof( Set );
-			expect( pathsCollection.packages.size ).to.equal( 2 );
+			expect( pathsCollection.matched ).to.be.instanceof( Set );
+			expect( pathsCollection.matched.size ).to.equal( 2 );
 
 			expect( pathsCollection.skipped ).to.be.instanceof( Set );
 			expect( pathsCollection.skipped.size ).to.equal( 1 );
@@ -161,8 +161,8 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			const pathsCollection = getSubRepositoriesPaths( options );
 
-			expect( pathsCollection.packages ).to.be.instanceof( Set );
-			expect( pathsCollection.packages.size ).to.equal( 2 );
+			expect( pathsCollection.matched ).to.be.instanceof( Set );
+			expect( pathsCollection.matched.size ).to.equal( 2 );
 
 			expect( pathsCollection.skipped ).to.be.instanceof( Set );
 			expect( pathsCollection.skipped.size ).to.equal( 1 );
@@ -203,10 +203,10 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			const pathsCollection = getSubRepositoriesPaths( options );
 
-			expect( pathsCollection.packages ).to.be.instanceof( Set );
-			expect( pathsCollection.packages.size ).to.equal( 2 );
-			expect( pathsCollection.packages.has( '/tmp/packages/ckeditor5-build-classic' ) ).to.equal( true );
-			expect( pathsCollection.packages.has( '/tmp/packages/ckeditor5-build-inline' ) ).to.equal( true );
+			expect( pathsCollection.matched ).to.be.instanceof( Set );
+			expect( pathsCollection.matched.size ).to.equal( 2 );
+			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-build-classic' ) ).to.equal( true );
+			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-build-inline' ) ).to.equal( true );
 
 			expect( pathsCollection.skipped ).to.be.instanceof( Set );
 			expect( pathsCollection.skipped.size ).to.equal( 3 );
@@ -251,9 +251,9 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			const pathsCollection = getSubRepositoriesPaths( options );
 
-			expect( pathsCollection.packages ).to.be.instanceof( Set );
-			expect( pathsCollection.packages.size ).to.equal( 1 );
-			expect( pathsCollection.packages.has( '/tmp/packages/ckeditor5-build-classic' ) ).to.equal( true );
+			expect( pathsCollection.matched ).to.be.instanceof( Set );
+			expect( pathsCollection.matched.size ).to.equal( 1 );
+			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-build-classic' ) ).to.equal( true );
 
 			expect( pathsCollection.skipped ).to.be.instanceof( Set );
 			expect( pathsCollection.skipped.size ).to.equal( 4 );

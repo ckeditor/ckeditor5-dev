@@ -57,14 +57,14 @@ module.exports = function generateSummaryChangelog( options ) {
 	} );
 
 	if ( !options.skipMainRepository ) {
-		pathsCollection.packages.add( options.cwd );
+		pathsCollection.matched.add( options.cwd );
 	}
 
 	const newVersion = options.newVersion || null;
 
 	const generatedChangelogMap = new Map();
 
-	return executeOnPackages( pathsCollection.packages, generateSummaryChangelogForSingleRepository )
+	return executeOnPackages( pathsCollection.matched, generateSummaryChangelogForSingleRepository )
 		.then( () => {
 			displayGeneratedChangelogs( generatedChangelogMap );
 
@@ -229,7 +229,7 @@ module.exports = function generateSummaryChangelog( options ) {
 			}
 
 			// If package is not installed locally, we aren't able to get the changelog entries.
-			if ( !pathsCollection.skipped.has( currentPackagePath ) && !pathsCollection.packages.has( currentPackagePath ) ) {
+			if ( !pathsCollection.skipped.has( currentPackagePath ) && !pathsCollection.matched.has( currentPackagePath ) ) {
 				continue;
 			}
 

@@ -42,7 +42,7 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 	const generatedChangelogsMap = new Map();
 	const skippedChangelogs = new Set();
 
-	return executeOnPackages( pathsCollection.packages, generateChangelogTask )
+	return executeOnPackages( pathsCollection.matched, generateChangelogTask )
 		.then( () => {
 			log.info( '' );
 			log.info( chalk.underline( 'Checking whether dependencies of skipped packages have changed...' ) );

@@ -10,14 +10,21 @@ const getPackageJson = require( './getpackagejson' );
 const versionUtils = require( './versions' );
 
 /**
- * Returns a list of packages to release.
+ * Returns a list of packages which should be releases based on changes in a changelog file and tags created in Git repository.
  *
- * @param {Set} pathsToPackages A collection of paths to packages.
- * @returns {Promise}
+ * @param {Set} pathsToPackages A collection of paths to packages that should be checked.
+ * @returns {Promise.<Map>}
  */
 module.exports = function getPackagesToRelease( pathsToPackages ) {
 	const cwd = process.cwd();
 	const packagesToRelease = new Map();
+
+	return executeOnPackages( pathsToPackages, filterPackagesToRelease )
+		.then( () => {
+			process.chdir( cwd );
+
+			return Promise.resolve( packagesToRelease );
+		} );
 
 	function filterPackagesToRelease( repositoryPath ) {
 		process.chdir( repositoryPath );
@@ -27,8 +34,9 @@ module.exports = function getPackagesToRelease( pathsToPackages ) {
 		const packageJson = getPackageJson();
 		const repositoryName = packageJson.name;
 
+		// If these versions aren't equal, it means that the package is ready to release
+		// because we assume that a version from changelog is the latest.
 		if ( gitVersion !== changelogVersion ) {
-			// Package is ready to release.
 			packagesToRelease.set( repositoryName, {
 				previousVersion: packageJson.version,
 				version: changelogVersion,
@@ -37,11 +45,4 @@ module.exports = function getPackagesToRelease( pathsToPackages ) {
 
 		return Promise.resolve();
 	}
-
-	return executeOnPackages( pathsToPackages, filterPackagesToRelease )
-		.then( () => {
-			process.chdir( cwd );
-
-			return Promise.resolve( packagesToRelease );
-		} );
 };
