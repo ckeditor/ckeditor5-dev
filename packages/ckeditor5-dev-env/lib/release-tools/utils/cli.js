@@ -16,7 +16,7 @@ const cli = {
 	 * @returns {Promise}
 	 */
 	confirmRelease( packages ) {
-		let message = 'Packages to release:\n';
+		let message = 'Packages and their old and new versions:\n';
 
 		for ( const packageName of Array.from( packages.keys() ).sort() ) {
 			const packageDetails = packages.get( packageName );

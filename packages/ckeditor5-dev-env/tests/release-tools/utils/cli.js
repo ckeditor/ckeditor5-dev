@@ -150,7 +150,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					.then( () => {
 						const question = questionItems[ 0 ];
 
-						expect( question.message ).to.match( /^Packages to release:/ );
+						expect( question.message ).to.match( /^Packages and their old and new versions:/ );
 						expect( question.message ).to.match( /"@ckeditor\/ckeditor5-engine": v1\.0\.0 => v1\.1\.0/ );
 						expect( question.message ).to.match( /"@ckeditor\/ckeditor5-core": v0\.7\.0 => v0\.7\.1/ );
 						expect( question.message ).to.match( /Continue\?$/ );
