@@ -13,7 +13,7 @@ const versionUtils = require( './versions' );
  * Returns a list of packages which should be releases based on changes in a changelog file and tags created in Git repository.
  *
  * @param {Set} pathsToPackages A collection of paths to packages that should be checked.
- * @returns {Promise.<Map>}
+ * @returns {Promise.<Map.<String, ReleaseDetails>>}
  */
 module.exports = function getPackagesToRelease( pathsToPackages ) {
 	const cwd = process.cwd();
@@ -46,3 +46,13 @@ module.exports = function getPackagesToRelease( pathsToPackages ) {
 		return Promise.resolve();
 	}
 };
+
+/**
+ * @typedef {Object} ReleaseDetails
+ *
+ * @property {String|null} previousVersion Version defined in `package.json` file.
+ *
+ * @property {String} version Latest version from the changelog file.
+ *
+ * @property {String} [changes] Description of changes for specified `version`.
+ */
