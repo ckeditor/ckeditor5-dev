@@ -24,6 +24,7 @@ const getPackageJson = require( './getpackagejson' );
  * @param {String} options.packages Name of directory where to look for packages.
  * @param {String|Array.<String>} options.skipPackages Glob pattern(s) which describes which packages should be skipped.
  * @param {String} [options.scope] Package names have to match to specified glob pattern.
+ * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in "cwd" will be skipped.
  * @returns {PathsCollection}
  */
 module.exports = function getSubRepositoriesPaths( options ) {
@@ -37,6 +38,12 @@ module.exports = function getSubRepositoriesPaths( options ) {
 		matched: new Set(),
 		skipped: new Set()
 	};
+
+	if ( options.skipMainRepository ) {
+		collection.skipped.add( options.cwd );
+	} else {
+		collection.matched.add( options.cwd );
+	}
 
 	for ( const directory of tools.getDirectories( packagesPath ) ) {
 		const dependencyPath = path.join( packagesPath, directory );
