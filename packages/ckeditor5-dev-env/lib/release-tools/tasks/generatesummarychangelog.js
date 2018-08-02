@@ -53,10 +53,13 @@ module.exports = function generateSummaryChangelog( options ) {
 		cwd: options.cwd,
 		packages: options.packages,
 		scope: options.scope || null,
-		skipPackages: options.skipPackages || []
+		skipPackages: options.skipPackages || [],
+		skipMainRepository: true
 	} );
 
+	// The main repository must be at the end because its changelog is a summary of all changes that have been done.
 	if ( !options.skipMainRepository ) {
+		pathsCollection.skipped.delete( options.cwd );
 		pathsCollection.matched.add( options.cwd );
 	}
 
