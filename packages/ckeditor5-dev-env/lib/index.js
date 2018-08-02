@@ -14,6 +14,10 @@ const tasks = {
 		return require( './release-tools/tasks/releasesubrepositories' )( ...args );
 	},
 
+	bumpVersions( ...args ) {
+		return require( './release-tools/tasks/bumpversions' )( ...args );
+	},
+
 	generateChangelogForSinglePackage( ...args ) {
 		return require( './release-tools/tasks/generatechangelogforsinglepackage' )( ...args );
 	},
