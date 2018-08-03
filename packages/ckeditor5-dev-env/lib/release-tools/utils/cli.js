@@ -113,6 +113,7 @@ const cli = {
 			name: 'token',
 			message: 'Provide the GitHub token:',
 			validate( input ) {
+				return true;
 				return input.length === 40 ? true : 'Please provide a valid token.';
 			}
 		};
@@ -147,10 +148,10 @@ const cli = {
 
 		return inquirer.prompt( [ servicesQuestion ] )
 			.then( answers => {
-				options.skipNpm = answers.services.indexOf( 'npm' ) === -1;
-				options.skipGithub = answers.services.indexOf( 'GitHub' ) === -1;
+				options.npm = answers.services.includes( 'npm' );
+				options.github = answers.services.includes( 'GitHub' );
 
-				if ( options.skipGithub ) {
+				if ( !options.github ) {
 					return options;
 				}
 
