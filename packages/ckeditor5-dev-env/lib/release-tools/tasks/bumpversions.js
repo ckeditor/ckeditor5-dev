@@ -27,7 +27,8 @@ const BREAK_RELEASE_MESSAGE = 'You aborted updating versions. Why? Oh why?!';
  *   - finds paths to sub repositories,
  *   - filters packages which versions should be updated,
  *   - updates versions of all dependencies (even if some packages will not be released, its version will be updated in released packages),
- *   - bumps version of all packages.
+ *   - bumps version of all packages,
+ *   - pushes all changes to the remotes.
  *
  * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
  * @param {String} options.packages Where to look for other packages (dependencies).
@@ -66,6 +67,7 @@ module.exports = function bumpVersions( options ) {
 		.then( packages => getLatestChangesForPackagesThatWillBeReleased( packages ) )
 		.then( packages => validateRepositories( packages ) )
 		.then( packages => bumpVersion( packages ) )
+		.then( packages => pushPackages( packages ) )
 		.then( () => {
 			process.chdir( cwd );
 
@@ -269,7 +271,7 @@ module.exports = function bumpVersions( options ) {
 		}
 	}
 
-	// Gather descriptions of the release for all packages.
+	// Updates versions of packages.
 	//
 	// @params {Map.<String, ReleaseDetails>} packages
 	// @returns {Promise.<Map.<String, ReleaseDetails>>}
@@ -304,7 +306,32 @@ module.exports = function bumpVersions( options ) {
 			}
 
 			return Promise.resolve();
-		} );
+		} ).then( () => packages );
+	}
+
+	// Pushes all changes to remote.
+	//
+	// @params {Map.<String, ReleaseDetails>} packages
+	// @returns {Promise.<Map.<String, ReleaseDetails>>}
+	function pushPackages( packages ) {
+		logProcess( 'Pushing packages to the remote...' );
+
+		return executeOnPackages( pathsCollection.matched, repositoryPath => {
+			process.chdir( repositoryPath );
+
+			const packageJson = getPackageJson( repositoryPath );
+			const releaseDetails = packages.get( packageJson.name );
+
+			log.info( `\nPushing "${ chalk.underline( packageJson.name ) }" package...` );
+
+			if ( dryRun ) {
+				logDryRun( `Command: "git push origin master v${ releaseDetails.version }" would be executed.` );
+			} else {
+				exec( `git push origin master v${ releaseDetails.version }` );
+			}
+
+			return Promise.resolve();
+		} ).then( () => packages );
 	}
 
 	function exec( command ) {
