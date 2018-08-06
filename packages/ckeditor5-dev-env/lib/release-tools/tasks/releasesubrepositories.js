@@ -21,6 +21,7 @@ const GitHubApi = require( '@octokit/rest' );
 
 const PACKAGE_JSON_TEMPLATE_PATH = require.resolve( '../templates/release-package.json' );
 const BREAK_RELEASE_MESSAGE = 'You aborted publishing the release. Why? Oh why?!';
+const NO_RELEASE_MESSAGE = 'No changes for publishing. Why? Oh why?!';
 
 // That files will be copied from source to the temporary directory and will be released too.
 const additionalFiles = [
@@ -148,11 +149,19 @@ module.exports = function releaseSubRepositories( options ) {
 		.catch( err => {
 			process.chdir( cwd );
 
-			// A user did not confirm the release process.
-			if ( err instanceof Error && err.message === BREAK_RELEASE_MESSAGE ) {
-				logProcess( 'Publishing has been aborted.' );
+			// A user did not confirm the release process or there is nothing to release.
+			if ( err instanceof Error ) {
+				if ( err.message === BREAK_RELEASE_MESSAGE ) {
+					logProcess( 'Publishing has been aborted.' );
 
-				return Promise.resolve();
+					return Promise.resolve();
+				}
+
+				if ( err.message === NO_RELEASE_MESSAGE ) {
+					logProcess( 'There is nothing to release. The process was aborted.' );
+
+					return Promise.resolve();
+				}
 			}
 
 			log.error( dryRun ? err.stack : err.message );
@@ -242,7 +251,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 				releasesOnNpm.add( repositoryPath );
 			} else {
-				log.info( 'Nothing to release.' );
+				log.info( '❌  Nothing to release.' );
 			}
 
 			return Promise.resolve();
@@ -282,7 +291,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 						releasesOnGithub.add( repositoryPath );
 					} else {
-						log.info( 'Nothing to publish.' );
+						log.info( '❌  Nothing to publish.' );
 					}
 				} )
 				.catch( err => {
@@ -313,6 +322,11 @@ module.exports = function releaseSubRepositories( options ) {
 	// @params {Map.<String, ReleaseDetails>} packages
 	// @returns {Promise}
 	function confirmRelease() {
+		// No packages for releasing...
+		if ( !releasesOnNpm.size && !releasesOnGithub.size ) {
+			throw new Error( NO_RELEASE_MESSAGE );
+		}
+
 		logProcess( 'Should we continue?' );
 
 		return cli.confirmRelease( packages )
