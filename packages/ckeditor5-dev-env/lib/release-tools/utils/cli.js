@@ -7,6 +7,7 @@
 
 const inquirer = require( 'inquirer' );
 const semver = require( 'semver' );
+const chalk = require( 'chalk' );
 
 const cli = {
 	/**
@@ -28,6 +29,73 @@ const cli = {
 
 		const confirmQuestion = {
 			message,
+			type: 'confirm',
+			name: 'confirm',
+			default: true,
+		};
+
+		return inquirer.prompt( [ confirmQuestion ] )
+			.then( answers => answers.confirm );
+	},
+
+	/**
+	 * Asks a user for a confirmation for creating the releases.
+	 *
+	 * @param {Map} packages Packages to release.
+	 * @returns {Promise}
+	 */
+	confirmRelease( packages ) {
+		let message = 'Services where the release will be created:\n';
+
+		for ( const packageName of Array.from( packages.keys() ).sort() ) {
+			const packageDetails = packages.get( packageName );
+
+			let packageMessage = `  * "${ packageName }" - version: ${ packageDetails.version }`;
+
+			const services = [];
+
+			if ( packageDetails.npmRelease ) {
+				services.push( 'NPM' );
+			}
+
+			if ( packageDetails.githubRelease ) {
+				services.push( 'GitHub' );
+			}
+
+			let color;
+
+			if ( services.length ) {
+				color = chalk.magenta;
+				packageMessage += ` - services: ${ services.join( ', ' ) } `;
+			} else {
+				color = chalk.gray;
+				packageMessage += ' - nothing to release';
+			}
+
+			message += color( packageMessage ) + '\n';
+		}
+
+		message += 'Continue?';
+
+		const confirmQuestion = {
+			message,
+			type: 'confirm',
+			name: 'confirm',
+			default: true,
+		};
+
+		return inquirer.prompt( [ confirmQuestion ] )
+			.then( answers => answers.confirm );
+	},
+
+	/**
+	 * Asks a user for a confirmation for removing archives created by `npm pack` command.
+	 *
+	 * @returns {Promise}
+	 */
+	confirmRemovingFiles() {
+		const confirmQuestion = {
+			message: 'Remove created archives?',
 			type: 'confirm',
 			name: 'confirm',
 			default: true,
@@ -113,7 +181,6 @@ const cli = {
 			name: 'token',
 			message: 'Provide the GitHub token:',
 			validate( input ) {
-				return true;
 				return input.length === 40 ? true : 'Please provide a valid token.';
 			}
 		};
