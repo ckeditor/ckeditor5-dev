@@ -47,12 +47,17 @@ module.exports = function getSubRepositoriesPaths( options ) {
 
 	for ( const directory of tools.getDirectories( packagesPath ) ) {
 		const dependencyPath = path.join( packagesPath, directory );
-		const dependencyName = getPackageJson( dependencyPath ).name;
 
-		if ( isValidPackage( dependencyName ) ) {
-			collection.matched.add( dependencyPath );
-		} else {
-			collection.skipped.add( dependencyPath );
+		try {
+			const dependencyName = getPackageJson( dependencyPath ).name;
+
+			if ( isValidPackage( dependencyName ) ) {
+				collection.matched.add( dependencyPath );
+			} else {
+				collection.skipped.add( dependencyPath );
+			}
+		} catch ( err ) {
+			console.warn( `Missing "package.json file in "${ dependencyPath }". Skipping.` );
 		}
 	}
 
