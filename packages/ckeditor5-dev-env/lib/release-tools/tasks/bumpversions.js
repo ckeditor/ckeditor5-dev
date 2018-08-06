@@ -110,7 +110,7 @@ module.exports = function bumpVersions( options ) {
 	function confirmUpdate( packages ) {
 		logProcess( 'Should we continue?' );
 
-		return cli.confirmRelease( packages )
+		return cli.confirmUpdatingVersions( packages )
 			.then( isConfirmed => {
 				if ( !isConfirmed ) {
 					throw new Error( BREAK_RELEASE_MESSAGE );

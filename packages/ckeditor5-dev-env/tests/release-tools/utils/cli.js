@@ -133,7 +133,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			} );
 		} );
 
-		describe( 'confirmRelease()', () => {
+		describe( 'confirmUpdatingVersions()', () => {
 			it( 'displays packages and their versions (current and proposed) to release', () => {
 				const packagesMap = new Map();
 
@@ -146,7 +146,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					version: '0.7.1'
 				} );
 
-				return cli.confirmRelease( packagesMap )
+				return cli.confirmUpdatingVersions( packagesMap )
 					.then( () => {
 						const question = questionItems[ 0 ];
 
@@ -167,7 +167,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				packagesMap.set( '@ckeditor/ckeditor5-link', {} );
 				packagesMap.set( '@ckeditor/ckeditor5-build-classic', {} );
 
-				return cli.confirmRelease( packagesMap )
+				return cli.confirmUpdatingVersions( packagesMap )
 					.then( () => {
 						const packagesAsArray = questionItems[ 0 ].message
 							.split( '\n' )

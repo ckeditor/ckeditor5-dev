@@ -10,12 +10,12 @@ const semver = require( 'semver' );
 
 const cli = {
 	/**
-	 * Asks a user for a confirmation for creating the releases.
+	 * Asks a user for a confirmation for updating and tagging versions of the packages.
 	 *
 	 * @param {Map} packages Packages to release.
 	 * @returns {Promise}
 	 */
-	confirmRelease( packages ) {
+	confirmUpdatingVersions( packages ) {
 		let message = 'Packages and their old and new versions:\n';
 
 		for ( const packageName of Array.from( packages.keys() ).sort() ) {
