@@ -329,7 +329,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 		logProcess( 'Should we continue?' );
 
-		return cli.confirmRelease( packages )
+		return cli.confirmPublishing( packages )
 			.then( isConfirmed => {
 				if ( !isConfirmed ) {
 					throw new Error( BREAK_RELEASE_MESSAGE );

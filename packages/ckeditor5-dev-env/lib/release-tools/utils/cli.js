@@ -39,12 +39,12 @@ const cli = {
 	},
 
 	/**
-	 * Asks a user for a confirmation for creating the releases.
+	 * Asks a user for a confirmation for publishing changes.
 	 *
 	 * @param {Map} packages Packages to release.
 	 * @returns {Promise}
 	 */
-	confirmRelease( packages ) {
+	confirmPublishing( packages ) {
 		let message = 'Services where the release will be created:\n';
 
 		for ( const packageName of Array.from( packages.keys() ).sort() ) {
