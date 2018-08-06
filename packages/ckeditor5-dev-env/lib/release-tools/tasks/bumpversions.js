@@ -190,7 +190,7 @@ module.exports = function bumpVersions( options ) {
 
 			const packageJson = getPackageJson( repositoryPath );
 
-			log.info( `Updating dependencies for "${ chalk.underline( packageJson.name ) }"...` );
+			log.info( `\nUpdating dependencies for "${ chalk.underline( packageJson.name ) }"...` );
 
 			updateDependenciesVersions( dependencies, path.join( repositoryPath, 'package.json' ) );
 
