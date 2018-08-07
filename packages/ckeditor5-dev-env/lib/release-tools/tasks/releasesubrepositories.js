@@ -244,9 +244,9 @@ module.exports = function releaseSubRepositories( options ) {
 			logDryRun( `Versions: package.json: "${ releaseDetails.version }", npm: "${ npmVersion }".` );
 
 			releaseDetails.npmVersion = npmVersion;
-			releaseDetails.npmRelease = npmVersion !== releaseDetails.version;
+			releaseDetails.shouldReleaseOnNpm = npmVersion !== releaseDetails.version;
 
-			if ( releaseDetails.npmRelease ) {
+			if ( releaseDetails.shouldReleaseOnNpm ) {
 				logDryRun( 'Package will be released.' );
 
 				releasesOnNpm.add( repositoryPath );
@@ -284,9 +284,9 @@ module.exports = function releaseSubRepositories( options ) {
 					logDryRun( `Versions: package.json: "${ releaseDetails.version }", GitHub: "${ githubVersion }".` );
 
 					releaseDetails.githubVersion = githubVersion;
-					releaseDetails.githubRelease = githubVersion !== releaseDetails.version;
+					releaseDetails.shouldReleaseOnGithub = githubVersion !== releaseDetails.version;
 
-					if ( releaseDetails.githubRelease ) {
+					if ( releaseDetails.shouldReleaseOnGithub ) {
 						logDryRun( 'Package will be published.' );
 
 						releasesOnGithub.add( repositoryPath );

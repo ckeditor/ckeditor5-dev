@@ -50,9 +50,23 @@ module.exports = function getPackagesToRelease( pathsToPackages ) {
 /**
  * @typedef {Object} ReleaseDetails
  *
- * @property {String|null} previousVersion Version defined in `package.json` file.
+ * @property {String} version The latest version of the package.
  *
- * @property {String} version Latest version from the changelog file.
+ * @property {String|null} [previousVersion] Previous version of the package.
  *
- * @property {String} [changes] Description of changes for specified `version`.
+ * @property {String} [changes] Description of changes for specified `version`. Should be taken from the changelog file.
+ *
+ * @property {String} [repositoryOwner] A name of organization that publishes the repository.
+ * E.g. for "ckeditor/ckeditor5" it is "ckeditor".
+ *
+ * @property {String} [repositoryName] A name of the repository.
+ * E.g. for "ckeditor/ckeditor5" it is "ckeditor5".
+ *
+ * @property {String} [npmVersion] The latest version of package published on NPM.
+ *
+ * @property {Boolean} [shouldReleaseOnNpm] Whether the package should be published on NPM.
+ *
+ * @property {String} [githubVersion] The latest version of package published on Github.
+ *
+ * @property {Boolean} [shouldReleaseOnGithub] Whether the package should have created a release on GitHub..
  */

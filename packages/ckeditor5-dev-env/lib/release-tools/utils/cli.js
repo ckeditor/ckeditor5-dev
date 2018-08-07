@@ -54,11 +54,11 @@ const cli = {
 
 			const services = [];
 
-			if ( packageDetails.npmRelease ) {
+			if ( packageDetails.shouldReleaseOnNpm ) {
 				services.push( 'NPM' );
 			}
 
-			if ( packageDetails.githubRelease ) {
+			if ( packageDetails.shouldReleaseOnGithub ) {
 				services.push( 'GitHub' );
 			}
 
