@@ -204,7 +204,7 @@ function getBuildName() {
 		return;
 	}
 
-	const repositoryName = repoSlug.split( '/' )[ 1 ];
+	const repositoryName = repoSlug.split( '/' )[ 1 ].replace( /-/g, '_' );
 	const date = new Date().getTime();
 
 	return `${ repositoryName } ${ date }`;
