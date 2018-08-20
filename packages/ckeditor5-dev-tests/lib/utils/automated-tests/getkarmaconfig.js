@@ -207,7 +207,7 @@ function getBuildName() {
 	const repositoryName = repoSlug.split( '/' )[ 1 ];
 	const date = new Date().getTime();
 
-	return `${ repositoryName }_${ date }`;
+	return `${ repositoryName } ${ date }`;
 }
 
 function shouldEnableBrowserStack() {
