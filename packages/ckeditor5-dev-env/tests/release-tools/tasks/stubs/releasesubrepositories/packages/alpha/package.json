@@ -8,6 +8,9 @@
   "devDependencies": {
     "@ckeditor/epsilon": "*"
   },
+  "peerDependencies": {
+    "ckeditor5-dev": "0.0.1"
+  },
   "repository": {
     "url": "https://github.com/ckeditor/alpha.git"
   }

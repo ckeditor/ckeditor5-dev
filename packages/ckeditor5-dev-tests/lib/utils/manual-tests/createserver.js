@@ -112,17 +112,35 @@ function getContentType( fileExtension ) {
 // @returns {String}
 function generateIndex( sourcePath ) {
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
-	const listElements = globSync( path.join( sourcePath, '**', '*.html' ) )
-		.map( file => {
-			const relativeFilePath = file.replace( sourcePath + path.sep, '' );
+	const testFiles = globSync( path.join( sourcePath, '**', '*.html' ) );
+	const testTree = {};
 
-			return `<li><a href="${ relativeFilePath }">${ relativeFilePath }</a></li>`;
+	let testList = '<ul>';
+
+	for ( const file of testFiles ) {
+		const relativeFilePath = file.replace( sourcePath + path.sep, '' );
+		const packageName = relativeFilePath.match( /^[^/]+/g )[ 0 ];
+		const shortTestName = relativeFilePath.replace( packageName + '/tests/', '' );
+
+		if ( !testTree[ packageName ] ) {
+			testTree[ packageName ] = [];
+		}
+
+		testTree[ packageName ].push( {
+			relativeFilePath,
+			shortTestName
 		} );
+	}
 
-	listElements.unshift( '<ul>' );
-	listElements.push( '</ul>' );
+	for ( const packageName in testTree ) {
+		testList += `<li><strong>${ packageName }</strong><ul>`;
+		testList += testTree[ packageName ]
+			.map( data => `<li><a href="${ data.relativeFilePath }">${ data.shortTestName }</a></li>` )
+			.join( '' );
+		testList += '</ul></li>';
+	}
 
-	const headerHtml = '<body><h1>CKEditor 5 manual tests</h1></body>';
+	const headerHtml = '<body class="manual-test-list-container"><h1>CKEditor 5 manual tests</h1></body>';
 
-	return combine( viewTemplate, headerHtml, listElements.join( '\n' ) );
+	return combine( viewTemplate, headerHtml, testList );
 }

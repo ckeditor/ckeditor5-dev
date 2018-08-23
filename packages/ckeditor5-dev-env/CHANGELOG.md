@@ -1,6 +1,26 @@
 Changelog
 =========
 
+## [11.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@11.1.0...@ckeditor/ckeditor5-dev-env@11.1.1) (2018-07-17)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
+## [11.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@11.0.0...@ckeditor/ckeditor5-dev-env@11.1.0) (2018-07-17)
+
+### Features
+
+* The release tool supports updating the `peerDependencies` in `package.json`. Introduced a `dryRun` mode which allows testing the whole release process without publishing anything. The changelog generator for sub-repositories accepts the `newVersion` parameter. All generated changelog will use the version instead of analyzing a history of commits in a given repository. See [ckeditor/ckeditor5#1061](https://github.com/ckeditor/ckeditor5/issues/1061). ([263f37b](https://github.com/ckeditor/ckeditor5-dev/commit/263f37b))
+
+  Dry run mode for release sub-repositories:
+
+    - `npm version` will not create a tag (only the commit will be made),
+    - `npm pack` will be called instead of `npm publish` (it packs the whole release to a ZIP archive),
+    - `git push` will be replaced with a log on the screen,
+    - creating a release on GitHub will be replaced with a log that will contain a URL to the release,
+    - every called command will be displayed.
+
+
 ## [11.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@10.0.0...@ckeditor/ckeditor5-dev-env@11.0.0) (2018-07-05)
 
 ### Other changes

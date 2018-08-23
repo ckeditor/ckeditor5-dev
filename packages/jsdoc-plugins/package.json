@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/jsdoc-plugins",
-  "version": "1.9.6",
+  "version": "1.9.7",
   "description": "Various JSDoc plugins developed by the CKEditor 5 team.",
   "keywords": [],
   "dependencies": {
@@ -14,6 +14,9 @@
     "node": ">=6.9.0",
     "npm": ">=3.0.0"
   },
+  "files": [
+    "lib"
+  ],
   "author": "CKSource (http://cksource.com/)",
   "license": "MIT",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/jsdoc-plugins",

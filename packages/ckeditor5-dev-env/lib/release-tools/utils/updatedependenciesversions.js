@@ -22,6 +22,8 @@ module.exports = function updateDependenciesVersions( dependencies, packageJsonP
 				json.dependencies[ item ] = `^${ version }`;
 			} else if ( json.devDependencies && json.devDependencies[ item ] ) {
 				json.devDependencies[ item ] = `^${ version }`;
+			} else if ( json.peerDependencies && json.peerDependencies[ item ] ) {
+				json.peerDependencies[ item ] = version;
 			}
 		}
 

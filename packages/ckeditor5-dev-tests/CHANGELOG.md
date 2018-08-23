@@ -1,6 +1,23 @@
 Changelog
 =========
 
+## [12.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@12.1.1...@ckeditor/ckeditor5-dev-tests@12.1.2) (2018-07-17)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
+## [12.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@12.1.0...@ckeditor/ckeditor5-dev-tests@12.1.1) (2018-07-17)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
+## [12.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@12.0.0...@ckeditor/ckeditor5-dev-tests@12.1.0) (2018-07-12)
+
+### Features
+
+* Grouped manual tests in the list. Slightly redesigned the manual test index. Closes [#422](https://github.com/ckeditor/ckeditor5-dev/issues/422). ([9744296](https://github.com/ckeditor/ckeditor5-dev/commit/9744296))
+
+
 ## [12.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@11.0.3...@ckeditor/ckeditor5-dev-tests@12.0.0) (2018-07-05)
 
 ### Other changes

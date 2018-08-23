@@ -81,11 +81,25 @@ describe( 'dev-env/release-tools/tasks', function() {
 				warning: sandbox.spy(),
 				error: sandbox.spy()
 			},
+			versions: {
+				getLastFromChangelog: sandbox.stub().returns( '1.0.0' )
+			},
+			chalk: {
+				underline: sandbox.stub().callsFake( text => text ),
+				italic: sandbox.stub().callsFake( text => text ),
+				blue: sandbox.stub().callsFake( text => text ),
+				cyan: sandbox.stub().callsFake( text => text ),
+				green: sandbox.stub().callsFake( text => text ),
+				yellow: sandbox.stub().callsFake( text => text ),
+				grey: sandbox.stub().callsFake( text => text ),
+				bold: sandbox.stub().callsFake( text => text )
+			},
 			displaySkippedPackages: sandbox.stub(),
 			validatePackageToRelease: sandbox.stub(),
 			createGithubRelease: sandbox.stub()
 		};
 
+		mockery.registerMock( '../utils/versions', stubs.versions );
 		mockery.registerMock( '../utils/displayskippedpackages', stubs.displaySkippedPackages );
 		mockery.registerMock( '../utils/cli', stubs.cli );
 		mockery.registerMock( '../utils/validatepackagetorelease', stubs.validatePackageToRelease );
@@ -106,6 +120,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 
 						const response = tools.shExec( command, options );
 
+						// Replace "branch" response with the "branch and remote branch".
 						if ( response.trim() === '## master' ) {
 							return '## master...origin/master';
 						}
@@ -116,14 +131,17 @@ describe( 'dev-env/release-tools/tasks', function() {
 				logger() {
 					return stubs.logger;
 				}
-			}
+			},
+			'chalk': stubs.chalk
 		} );
 	} );
 
 	afterEach( () => {
 		for ( const packageName of Object.keys( packagesPaths ) ) {
 			removeChangelog( packageName );
+
 			exec( `rm -rf ${ path.join( packagesPaths[ packageName ], '.git' ) }` );
+			exec( `rm -rf ${ path.join( packagesPaths[ packageName ], 'ckeditor*.tgz' ) }` );
 		}
 
 		for ( const filePath of Object.keys( originalFilesContent ) ) {
@@ -143,6 +161,9 @@ describe( 'dev-env/release-tools/tasks', function() {
 
 			return releaseSubRepositories( options )
 				.then( () => {
+					expect( stubs.logger.info.calledOnce ).to.equal( true );
+					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( 'Collecting packages that will be released...' );
+
 					expect( stubs.logger.error.calledOnce ).to.equal( true );
 					expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal(
 						'None of the packages contains any changes since its last release. Aborting.'
@@ -173,8 +194,9 @@ describe( 'dev-env/release-tools/tasks', function() {
 
 			return releaseSubRepositories( options )
 				.then( () => {
-					expect( stubs.logger.info.calledOnce ).to.equal( true );
-					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal(
+					expect( stubs.logger.info.calledTwice ).to.equal( true );
+					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( 'Collecting packages that will be released...' );
+					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.equal(
 						'Releasing has been aborted.'
 					);
 				} );
@@ -205,7 +227,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 				} );
 		} );
 
-		it( 'updates version of dependencies (even if they will not be released)', () => {
+		it( 'updates version of dependencies, devDependencies and peerDependencies (even if they will not be released)', () => {
 			const options = {
 				cwd: mainPackagePath,
 				packages: 'packages',
@@ -243,6 +265,8 @@ describe( 'dev-env/release-tools/tasks', function() {
 
 					expect( packageJson.dependencies[ '@ckeditor/alpha' ] ).to.equal( '^0.0.1' );
 					expect( packageJson.dependencies[ '@ckeditor/gamma' ] ).to.equal( '^0.3.0' );
+					expect( packageJson.devDependencies[ '@ckeditor/beta' ] ).to.equal( '^0.2.0' );
+					expect( packageJson.peerDependencies[ 'ckeditor5-dev' ] ).to.equal( '1.0.0' );
 				} );
 		} );
 
@@ -295,22 +319,27 @@ describe( 'dev-env/release-tools/tasks', function() {
 
 			return releaseSubRepositories( options )
 				.then( () => {
+					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( 'Collecting packages that will be released...' );
+
 					expect( executedCommand.length ).to.equal( 14 );
 					expect( stubs.createGithubRelease.callCount ).to.equal( 2 );
-					expect( stubs.logger.info.callCount ).to.equal( 12 );
+					expect( stubs.logger.info.callCount ).to.equal( 14 );
 
-					expect( stubs.logger.info.getCall( 9 ).args[ 0 ] ).to.equal(
+					expect( stubs.logger.info.getCall( 10 ).args[ 0 ] ).to.equal(
 						'Created the release: https://github.com/ckeditor/ckeditor5-test-alpha/releases/tag/v0.1.0'
 					);
-					expect( stubs.logger.info.getCall( 11 ).args[ 0 ] ).to.equal(
+					expect( stubs.logger.info.getCall( 12 ).args[ 0 ] ).to.equal(
 						'Created the release: https://github.com/ckeditor/ckeditor5-test-beta/releases/tag/v0.2.1'
+					);
+					expect( stubs.logger.info.getCall( 13 ).args[ 0 ] ).to.equal(
+						'Finished releasing 2 packages.'
 					);
 
 					// Alpha
 					expect( executedCommand[ 0 ], 'Alpha diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 1 ], 'Alpha add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 2 ], 'Alpha commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
-					expect( executedCommand[ 6 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0."' );
+					expect( executedCommand[ 6 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0. [skip ci]"' );
 					expect( executedCommand[ 8 ], 'Alpha publish' ).to.equal( 'npm publish --access=public' );
 					expect( executedCommand[ 10 ], 'Alpha push' ).to.equal( 'git push' );
 					expect( executedCommand[ 12 ], 'Alpha remote' ).to.equal( 'git remote get-url origin --push' );
@@ -326,7 +355,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 3 ], 'Beta diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 4 ], 'Beta add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 5 ], 'Beta commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
-					expect( executedCommand[ 7 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1."' );
+					expect( executedCommand[ 7 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1. [skip ci]"' );
 					expect( executedCommand[ 9 ], 'Beta publish' ).to.equal( 'npm publish --access=public' );
 					expect( executedCommand[ 11 ], 'Beta push' ).to.equal( 'git push' );
 					expect( executedCommand[ 13 ], 'Beta remote' ).to.equal( 'git remote get-url origin --push' );
@@ -396,7 +425,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 0 ], 'Alpha diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 1 ], 'Alpha add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 2 ], 'Alpha commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
-					expect( executedCommand[ 6 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0."' );
+					expect( executedCommand[ 6 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0. [skip ci]"' );
 					expect( executedCommand[ 8 ], 'Alpha push' ).to.equal( 'git push' );
 					expect( executedCommand[ 10 ], 'Alpha remote' ).to.equal( 'git remote get-url origin --push' );
 					expect( stubs.createGithubRelease.getCall( 0 ).args[ 0 ] ).to.equal( token );
@@ -411,7 +440,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 3 ], 'Beta diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 4 ], 'Beta add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 5 ], 'Beta commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
-					expect( executedCommand[ 7 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1."' );
+					expect( executedCommand[ 7 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1. [skip ci]"' );
 					expect( executedCommand[ 9 ], 'Beta push' ).to.equal( 'git push' );
 					expect( executedCommand[ 11 ], 'Beta remote' ).to.equal( 'git remote get-url origin --push' );
 					expect( stubs.createGithubRelease.getCall( 1 ).args[ 0 ] ).to.equal( token );
@@ -477,7 +506,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 0 ], 'Alpha diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 1 ], 'Alpha add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 2 ], 'Alpha commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
-					expect( executedCommand[ 6 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0."' );
+					expect( executedCommand[ 6 ], 'Alpha version' ).to.equal( 'npm version 0.1.0 --message "Release: v0.1.0. [skip ci]"' );
 					expect( executedCommand[ 8 ], 'Alpha publish' ).to.equal( 'npm publish --access=public' );
 					expect( executedCommand[ 10 ], 'Alpha push' ).to.equal( 'git push' );
 
@@ -485,7 +514,7 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( executedCommand[ 3 ], 'Beta diff' ).to.equal( 'git diff --name-only package.json' );
 					expect( executedCommand[ 4 ], 'Beta add to commit' ).to.equal( 'git add package.json' );
 					expect( executedCommand[ 5 ], 'Beta commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
-					expect( executedCommand[ 7 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1."' );
+					expect( executedCommand[ 7 ], 'Beta version' ).to.equal( 'npm version 0.2.1 --message "Release: v0.2.1. [skip ci]"' );
 					expect( executedCommand[ 9 ], 'Beta publish' ).to.equal( 'npm publish --access=public' );
 					expect( executedCommand[ 11 ], 'Beta push' ).to.equal( 'git push' );
 				} );
@@ -605,27 +634,136 @@ describe( 'dev-env/release-tools/tasks', function() {
 					expect( stubs.logger.error.callCount ).to.equal( 1 );
 					expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal( rejectError );
 
-					expect( stubs.logger.info.callCount ).to.equal( 10 );
-					expect( stubs.logger.info.getCall( 0 ).args[ 0 ] )
-						.to.equal( 'Updating dependencies for "@ckeditor/alpha"...' );
+					expect( stubs.logger.info.callCount ).to.equal( 12 );
+
+					expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.equal(
+						'Collecting packages that will be released...'
+					);
 					expect( stubs.logger.info.getCall( 1 ).args[ 0 ] )
-						.to.equal( 'Updating dependencies for "@ckeditor/beta"...' );
+						.to.equal( 'Updating dependencies for "@ckeditor/alpha"...' );
 					expect( stubs.logger.info.getCall( 2 ).args[ 0 ] )
-						.to.equal( 'Bumping version for "@ckeditor/alpha"...' );
+						.to.equal( 'Updating dependencies for "@ckeditor/beta"...' );
 					expect( stubs.logger.info.getCall( 3 ).args[ 0 ] )
-						.to.equal( 'Bumping version for "@ckeditor/beta"...' );
+						.to.equal( 'Bumping version for "@ckeditor/alpha"...' );
 					expect( stubs.logger.info.getCall( 4 ).args[ 0 ] )
-						.to.equal( 'Pushing a local repository into the remote for "@ckeditor/alpha"...' );
+						.to.equal( 'Bumping version for "@ckeditor/beta"...' );
 					expect( stubs.logger.info.getCall( 5 ).args[ 0 ] )
-						.to.equal( 'Pushing a local repository into the remote for "@ckeditor/beta"...' );
+						.to.equal( 'Pushing a local repository into the remote for "@ckeditor/alpha"...' );
 					expect( stubs.logger.info.getCall( 6 ).args[ 0 ] )
-						.to.equal( 'Creating a GitHub release for "@ckeditor/alpha"...' );
+						.to.equal( 'Pushing a local repository into the remote for "@ckeditor/beta"...' );
 					expect( stubs.logger.info.getCall( 7 ).args[ 0 ] )
-						.to.equal( 'Cannot create a release on GitHub. Skipping that package.' );
+						.to.equal( 'Creating a GitHub release for "@ckeditor/alpha"...' );
 					expect( stubs.logger.info.getCall( 8 ).args[ 0 ] )
-						.to.equal( 'Creating a GitHub release for "@ckeditor/beta"...' );
+						.to.equal( 'Cannot create a release on GitHub. Skipping that package.' );
 					expect( stubs.logger.info.getCall( 9 ).args[ 0 ] )
+						.to.equal( 'Creating a GitHub release for "@ckeditor/beta"...' );
+					expect( stubs.logger.info.getCall( 10 ).args[ 0 ] )
 						.to.equal( 'Created the release: https://github.com/ckeditor/ckeditor5-test-beta/releases/tag/v0.2.1' );
+					expect( stubs.logger.info.getCall( 11 ).args[ 0 ] ).to.equal(
+						'Finished releasing 2 packages.'
+					);
+				} );
+		} );
+
+		it( 'allows "dry run" which must not publish or push anything', () => {
+			const options = {
+				cwd: mainPackagePath,
+				packages: 'packages',
+				dryRun: true
+			};
+
+			makeCommit( 'alpha', 'Feature: This is an initial commit.' );
+			makeChangelog( 'alpha', [
+				'Changelog',
+				'=========',
+				'',
+				'## 0.1.0 (2017-06-08)',
+				'',
+				'### Features',
+				'',
+				'* This is an initial commit.',
+				''
+			].join( '\n' ) );
+			makeCommit( 'alpha', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
+
+			makeCommit( 'beta', 'Fix: Some fix.' );
+			makeChangelog( 'beta', [
+				'Changelog',
+				'=========',
+				'',
+				'## [0.2.1](https://github.com/ckeditor) (2017-06-08)',
+				'',
+				'### Fix',
+				'',
+				'* Some fix.',
+				''
+			].join( '\n' ) );
+			makeCommit( 'beta', 'Docs: Changelog. [skip ci]', [ 'CHANGELOG.md' ] );
+
+			stubs.cli.confirmRelease.returns( Promise.resolve( true ) );
+
+			const token = 'fooToken';
+
+			stubs.cli.configureReleaseOptions.resolves( {
+				token,
+				skipNpm: false,
+				skipGithub: false
+			} );
+
+			stubs.validatePackageToRelease.returns( [] );
+			stubs.createGithubRelease.resolves();
+
+			return releaseSubRepositories( options )
+				.then( () => {
+					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.equal( 'Collecting packages that will be released...' );
+
+					expect( executedCommand.length ).to.equal( 14 );
+					expect( stubs.createGithubRelease.callCount ).to.equal( 0 );
+
+					// Executing shell command should print the command on the screen.
+					expect( stubs.logger.info.callCount ).to.equal( 29 );
+
+					expect( stubs.logger.info.getCall( 24 ).args[ 0 ] ).to.equal(
+						'Created release will be available under: https://github.com/ckeditor/ckeditor5-test-alpha/releases/tag/v0.1.0'
+					);
+					expect( stubs.logger.info.getCall( 27 ).args[ 0 ] ).to.equal(
+						'Created release will be available under: https://github.com/ckeditor/ckeditor5-test-beta/releases/tag/v0.2.1'
+					);
+					expect( stubs.logger.info.getCall( 28 ).args[ 0 ] ).to.equal(
+						'Finished releasing 2 packages.'
+					);
+
+					// Alpha
+					expect( executedCommand[ 0 ], 'Alpha diff' ).to.equal( 'git diff --name-only package.json' );
+					expect( executedCommand[ 1 ], 'Alpha add to commit' ).to.equal( 'git add package.json' );
+					expect( executedCommand[ 2 ], 'Alpha commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
+					expect( executedCommand[ 6 ], 'Alpha version' ).to.equal(
+						'npm version 0.1.0 --no-git-tag-version && git add package.json && ' +
+						'git commit --message "Release: v0.1.0. [skip ci]"'
+					);
+					expect( executedCommand[ 8 ], 'Alpha publish' ).to.equal( 'npm pack' );
+					expect( executedCommand[ 10 ], 'Alpha push' ).to.equal( 'echo "Pushing the repository to the remote..."' );
+					expect( executedCommand[ 12 ], 'Alpha remote' ).to.equal( 'git remote get-url origin --push' );
+					expect( stubs.validatePackageToRelease.getCall( 0 ).args[ 0 ] ).to.deep.equal( {
+						version: '0.1.0',
+						changes: '### Features\n\n* This is an initial commit.'
+					} );
+
+					// Beta
+					expect( executedCommand[ 3 ], 'Beta diff' ).to.equal( 'git diff --name-only package.json' );
+					expect( executedCommand[ 4 ], 'Beta add to commit' ).to.equal( 'git add package.json' );
+					expect( executedCommand[ 5 ], 'Beta commit' ).to.equal( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
+					expect( executedCommand[ 7 ], 'Beta version' ).to.equal(
+						'npm version 0.2.1 --no-git-tag-version && git add package.json && ' +
+						'git commit --message "Release: v0.2.1. [skip ci]"'
+					);
+					expect( executedCommand[ 9 ], 'Beta publish' ).to.equal( 'npm pack' );
+					expect( executedCommand[ 11 ], 'Beta push' ).to.equal( 'echo "Pushing the repository to the remote..."' );
+					expect( executedCommand[ 13 ], 'Beta remote' ).to.equal( 'git remote get-url origin --push' );
+					expect( stubs.validatePackageToRelease.getCall( 1 ).args[ 0 ] ).to.deep.equal( {
+						version: '0.2.1',
+						changes: '### Fix\n\n* Some fix.'
+					} );
 				} );
 		} );
 	} );
