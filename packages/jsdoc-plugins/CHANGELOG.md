@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## [2.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.9.7...@ckeditor/jsdoc-plugins@2.0.0) (2018-08-23)
+
+Updated required Node.js version to `>=6.9.0`.
+
+
 ## [1.9.7](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.9.6...@ckeditor/jsdoc-plugins@1.9.7) (2018-07-17)
 
 Internal changes only (updated dependencies, documentation, etc.).

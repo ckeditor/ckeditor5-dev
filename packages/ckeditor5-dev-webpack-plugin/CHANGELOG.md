@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## [7.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@6.0.3...@ckeditor/ckeditor5-dev-webpack-plugin@7.0.0) (2018-08-23)
+
+Updated required Node.js version to `>=6.9.0`.
+
+
 ## [6.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@6.0.2...@ckeditor/ckeditor5-dev-webpack-plugin@6.0.3) (2018-07-17)
 
 Internal changes only (updated dependencies, documentation, etc.).
