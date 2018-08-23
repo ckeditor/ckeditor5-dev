@@ -16,7 +16,7 @@ let sandbox;
 
 describe( 'utils', () => {
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 	} );
 
 	afterEach( () => {

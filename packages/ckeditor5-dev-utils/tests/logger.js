@@ -15,7 +15,7 @@ describe( 'logger', () => {
 	let sandbox, log;
 
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 	} );
 
 	afterEach( () => {

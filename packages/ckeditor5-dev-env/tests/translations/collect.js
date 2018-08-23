@@ -9,7 +9,7 @@ const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 
 describe( 'collect', () => {
-	const sandbox = sinon.sandbox.create();
+	const sandbox = sinon.createSandbox();
 	let collect, stubs;
 
 	beforeEach( () => {

@@ -6,26 +6,26 @@
   "main": "lib/index.js",
   "dependencies": {
     "acorn": "^5.1.2",
-    "cssnano": "^3.10.0",
+    "cssnano": "^4.0.0",
     "del": "^3.0.0",
     "escodegen": "^1.9.0",
-    "fs-extra": "^5.0.0",
+    "fs-extra": "^6.0.1",
     "javascript-stringify": "^1.6.0",
     "pofile": "^1.0.9",
     "postcss-import": "^11.0.0",
     "postcss-mixins": "^6.2.0",
-    "postcss-nesting": "^4.2.1",
+    "postcss-nesting": "^6.0.0",
     "shelljs": "^0.8.1",
     "through2": "^2.0.3"
   },
   "devDependencies": {
     "chai": "^4.1.2",
     "mockery": "^2.1.0",
-    "sinon": "^4.0.0",
+    "sinon": "^6.1.2",
     "vinyl": "^2.1.0"
   },
   "engines": {
-    "node": ">=6.0.0",
+    "node": ">=6.9.0",
     "npm": ">=3.0.0"
   },
   "files": [

@@ -16,7 +16,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 		let generateChangelogForSinglePackage, sandbox, stubs;
 
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 
 			stubs = {
 				changelogUtils: {

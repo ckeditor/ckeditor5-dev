@@ -13,7 +13,7 @@ const proxyquire = require( 'proxyquire' );
 describe( 'translations', () => {
 	describe( 'MultipleLanguageTranslationService', () => {
 		let MultipleLanguageTranslationService, stubs, filesAndDirs, fileContents, dirContents;
-		const sandbox = sinon.sandbox.create();
+		const sandbox = sinon.createSandbox();
 
 		beforeEach( () => {
 			filesAndDirs = [];

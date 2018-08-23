@@ -15,7 +15,7 @@ describe( 'runAutomatedTests', () => {
 
 	beforeEach( () => {
 		karmaServerCallback = null;
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		mockery.enable( {
 			useCleanCache: true,

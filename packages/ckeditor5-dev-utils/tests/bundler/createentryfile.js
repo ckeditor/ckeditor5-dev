@@ -14,7 +14,7 @@ describe( 'bundler', () => {
 	let createEntryFile, sandbox;
 
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		createEntryFile = require( '../../lib/bundler/createentryfile' );
 	} );

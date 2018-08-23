@@ -13,7 +13,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		let executeOnPackages, sandbox;
 
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 
 			executeOnPackages = require( '../../../lib/release-tools/utils/executeonpackages' );
 		} );

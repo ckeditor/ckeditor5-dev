@@ -13,7 +13,7 @@ describe( 'dev-env/release-tools/utils', () => {
 	let displaySkippedPackages, sandbox, stubs;
 
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		stubs = {
 			logger: {

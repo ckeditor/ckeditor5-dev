@@ -22,7 +22,7 @@ describe( 'compileManualTestScripts', () => {
 			warnOnUnregistered: false
 		} );
 
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		stubs = {
 			glob: sandbox.stub(),
@@ -150,7 +150,7 @@ describe( 'compileManualTestScripts', () => {
 	} );
 
 	it( 'works on Windows environments', () => {
-		stubs.pathSep.reset();
+		stubs.pathSep.resetHistory();
 		stubs.pathSep.value( '\\' );
 
 		const manualTestScriptsPatterns = [

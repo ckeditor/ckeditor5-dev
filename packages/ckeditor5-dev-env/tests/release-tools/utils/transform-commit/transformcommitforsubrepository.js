@@ -15,7 +15,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		let transformCommitForSubRepository, sandbox, stubs, loggerVerbosity, packageJson;
 
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 
 			mockery.enable( {
 				useCleanCache: true,

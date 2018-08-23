@@ -10,7 +10,7 @@ const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 
 describe( 'findOriginalStrings', () => {
-	const sandbox = sinon.sandbox.create();
+	const sandbox = sinon.createSandbox();
 	let findOriginalStrings, stubs;
 
 	beforeEach( () => {

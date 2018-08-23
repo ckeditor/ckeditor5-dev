@@ -15,7 +15,7 @@ describe( 'translations', () => {
 		let SingleLanguageTranslationService, stubs, files, fileContents, sandbox;
 
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 
 			stubs = {
 				fs: {

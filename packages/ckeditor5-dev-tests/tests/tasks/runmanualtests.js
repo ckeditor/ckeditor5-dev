@@ -14,7 +14,7 @@ describe( 'runManualTests', () => {
 	let sandbox, spies, testsToExecute, runManualTests;
 
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		mockery.enable( {
 			useCleanCache: true,
