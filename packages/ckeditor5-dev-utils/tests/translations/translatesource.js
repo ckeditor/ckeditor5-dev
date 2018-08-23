@@ -15,7 +15,7 @@ describe( 'translations', () => {
 		const translateString = translationKey => translations[ translationKey ];
 
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 
 			translations = { 'Cancel': 'Anuluj' };
 		} );

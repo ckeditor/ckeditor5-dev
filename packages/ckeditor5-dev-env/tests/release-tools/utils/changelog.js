@@ -17,7 +17,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		beforeEach( () => {
 			utils = require( '../../../lib/release-tools/utils/changelog' );
 
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 		} );
 
 		afterEach( () => {

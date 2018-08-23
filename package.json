@@ -13,7 +13,7 @@
     "mocha": "^5.0.5"
   },
   "engines": {
-    "node": ">=6.0.0",
+    "node": ">=6.9.0",
     "npm": ">=3.0.0"
   },
   "author": "CKSource (http://cksource.com/)",
@@ -36,5 +36,5 @@
     "coverage/**",
     "packages/*/node_modules/**"
   ],
-  "version": "1.1.1"
+  "version": "1.1.2"
 }

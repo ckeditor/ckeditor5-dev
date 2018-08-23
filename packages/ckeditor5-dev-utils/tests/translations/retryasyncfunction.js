@@ -15,7 +15,7 @@ describe( 'translations', () => {
 	describe( 'retryAsyncFunction()', () => {
 		let sandbox, stubs, retryAsyncFunction;
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 
 			mockery.enable( {
 				useCleanCache: true,

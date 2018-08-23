@@ -14,7 +14,7 @@ describe( 'download', () => {
 	let sandbox, stubs, download, resources, resourcesDetails, translations, fileContents;
 
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		mockery.enable( {
 			useCleanCache: true,

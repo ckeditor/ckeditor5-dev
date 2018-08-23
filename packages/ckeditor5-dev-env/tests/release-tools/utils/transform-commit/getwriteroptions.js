@@ -13,7 +13,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 	beforeEach( () => {
 		transformSpy = sinon.spy();
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		getWriterOptions = require( '../../../../lib/release-tools/utils/transform-commit/getwriteroptions' );
 	} );

@@ -24,7 +24,7 @@ describe( 'compileHtmlFiles', () => {
 			warnOnUnregistered: false
 		} );
 
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		stubs = {
 			fs: {
@@ -268,7 +268,7 @@ describe( 'compileHtmlFiles', () => {
 
 	it( 'should work on Windows environments', () => {
 		separator = '\\';
-		stubs.path.sep.reset();
+		stubs.path.sep.resetHistory();
 		stubs.path.sep.value( separator );
 
 		// Our wrapper on Glob returns proper paths for Unix and Windows.

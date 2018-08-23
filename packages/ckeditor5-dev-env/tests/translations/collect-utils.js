@@ -16,7 +16,7 @@ describe( 'collect-utils', () => {
 	let sandbox, utils, stubs, originalStringMap;
 
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		stubs = {
 			logger: {

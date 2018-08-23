@@ -17,7 +17,7 @@ describe( 'utils', () => {
 	let sandbox, infoSpy, errorSpy, loggerVerbosity;
 
 	beforeEach( () => {
-		sandbox = sinon.sandbox.create();
+		sandbox = sinon.createSandbox();
 
 		mockery.enable( {
 			warnOnReplace: false,

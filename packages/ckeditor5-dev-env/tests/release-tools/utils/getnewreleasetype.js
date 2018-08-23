@@ -26,7 +26,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		beforeEach( () => {
-			sandbox = sinon.sandbox.create();
+			sandbox = sinon.createSandbox();
 
 			stubs = {
 				transformCommit: sandbox.stub().callsFake( commit => {
