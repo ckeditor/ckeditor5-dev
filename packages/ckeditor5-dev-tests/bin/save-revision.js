@@ -8,9 +8,10 @@
 'use strict';
 
 const branch = process.env.TRAVIS_BRANCH;
+const buildType = process.env.TRAVIS_EVENT_TYPE;
 
-// Save revision only when master branches are updated.
-if ( branch !== 'master' ) {
+// Save revision only when commit has made directly on the "master" branch.
+if ( branch !== 'master' || buildType !== 'push' ) {
 	process.exit();
 }
 
@@ -63,6 +64,8 @@ if ( exec( 'git status -s' ).trim().length ) {
 
 	const lastCommit = exec( 'git log -1 --format="%h"' );
 	console.log( `Successfully saved the revision under ${ mainRepoUrl }/commit/${ lastCommit }` );
+} else {
+	console.log( 'Nothing to commit.' );
 }
 
 function exec( command ) {
