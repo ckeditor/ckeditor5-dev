@@ -65,7 +65,7 @@ if ( exec( 'git status -s' ).trim().length ) {
 	const lastCommit = exec( 'git log -1 --format="%h"' );
 	console.log( `Successfully saved the revision under ${ mainRepoUrl }/commit/${ lastCommit }` );
 } else {
-	console.log( 'Nothing to commit.' );
+	console.log( 'Nothing to commit. The revision log is up to date.' );
 }
 
 function exec( command ) {
