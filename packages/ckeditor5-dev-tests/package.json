@@ -41,8 +41,8 @@
     "postcss-loader": "^3.0.0",
     "raw-loader": "^0.5.1",
     "sinon": "^6.3.4",
-    "style-loader": "^0.21.0",
-    "webpack": "^4.19.1"
+    "style-loader": "^0.23.0",
+    "webpack": "^4.15.0"
   },
   "devDependencies": {
     "mockery": "^2.1.0",
