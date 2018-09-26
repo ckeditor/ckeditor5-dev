@@ -104,8 +104,20 @@ describe( 'dev-env/release-tools/utils', () => {
 			return generateChangelog( '0.0.1' )
 				.then( () => {
 					expect( stubs.logger.warning.calledOnce ).to.equal( true );
-					expect( getChangelog() ).to.contain( changelogHeader );
-					expect( getChangesForVersion( lastChangelogVersion ) ).to.contain(
+
+					const generatedChangelog = getChangelog();
+
+					expect( generatedChangelog ).to.contain( changelogHeader );
+
+					const changelogWithoutHeader = generatedChangelog.replace( changelogHeader, '' );
+					const changelogTitle = changelogWithoutHeader.split( '\n' )[ 0 ];
+					const changes = changelogWithoutHeader.split( '\n' ).slice( 1 ).join( '\n' ).trim();
+
+					expect( replaceDates( changelogTitle ) ).to.contain(
+						'## [0.0.1](https://github.com/ckeditor/ckeditor5-test-package/tree/v0.0.1) (0000-00-00)'
+					);
+
+					expect( changes ).to.contain(
 						'Internal changes only (updated dependencies, documentation, etc.).'
 					);
 
