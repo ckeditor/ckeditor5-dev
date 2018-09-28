@@ -11,7 +11,11 @@
 	{{~else}}
 		{{~@root.repoUrl}}
 	{{~/if~}}
-	/compare/{{previousTag}}...{{currentTag}})
+	{{~#if previousTag~}}
+		/compare/{{previousTag}}...{{currentTag}}
+	{{~else~}}
+		/tree/{{currentTag}}
+	{{~/if}})
 {{~else}}
 	{{~version}}
 {{~/unless}}
