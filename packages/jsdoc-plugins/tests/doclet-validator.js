@@ -264,12 +264,27 @@ describe( 'Linter plugin', () => {
 				comment: '',
 				longname: 'module:ckeditor5/a~A',
 				meta: { fileName: '', path: '' },
+			}, {
+				comment: '',
+				longname: 'module:ckeditor5/a~B',
+				meta: { fileName: '', path: '' },
 			} ], getTestedModules() );
 
 			linter._lintLinks();
 
 			expect( linter._errors.length ).to.be.equal( 1 );
 			expect( linter._errors[ 0 ].message ).to.match( /Link misses the '@link' part: \{module:ckeditor5\/a~B\}/ );
+		} );
+
+		it( 'should validate comment without any link', () => {
+			const linter = new DocletValidator( [ {
+				comment: 'Some comment without any valid nor invalid link',
+				meta: { fileName: '', path: '' },
+			} ], getTestedModules() );
+
+			linter._lintLinks();
+
+			expect( linter._errors ).to.deep.equal( [] );
 		} );
 	} );
 
