@@ -6,7 +6,7 @@ cache:
 install:
   - npm install
   - npm install coveralls
-  - lerna bootstrap
+  - lerna bootstrap --no-ci
 script:
   - npm run lint
   - npm run coverage
