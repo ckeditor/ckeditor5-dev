@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [12.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@12.0.1...@ckeditor/ckeditor5-dev-env@12.0.2) (2018-10-02)
+
+### Bug fixes
+
+* Generated a changelog for the first time will have a proper link (in a header). Closes [#430](https://github.com/ckeditor/ckeditor5-dev/issues/430). ([e68c35b](https://github.com/ckeditor/ckeditor5-dev/commit/e68c35b))
+
+
 ## [12.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@12.0.0...@ckeditor/ckeditor5-dev-env@12.0.1) (2018-09-24)
 
 Internal changes only (updated dependencies, documentation, etc.).
