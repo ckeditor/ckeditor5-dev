@@ -249,6 +249,28 @@ describe( 'Linter plugin', () => {
 			expect( linter._errors.length ).to.be.equal( 1 );
 			expect( linter._errors[ 0 ].message ).to.match( /Incorrect link:/ );
 		} );
+
+		it( 'should validate links that does not contain the @link part', () => {
+			const linter = new DocletValidator( [ {
+				comment: `
+				@param {module:ckeditor5/a~A}
+				@returns {module:ckeditor5/a~A}
+				Correct link: {@link module:ckeditor5/a~A}
+				Random comment: {priority: 'high'}
+				Invalid link: {module:ckeditor5/a~A}
+				`,
+				meta: { fileName: '', path: '' },
+			}, {
+				comment: '',
+				longname: 'module:ckeditor5/a~A',
+				meta: { fileName: '', path: '' },
+			} ], getTestedModules() );
+
+			linter._lintLinks();
+
+			expect( linter._errors.length ).to.be.equal( 1 );
+			expect( linter._errors[ 0 ].message ).to.match( /Link misses the '@link' part:/ );
+		} );
 	} );
 
 	it( '_lintEvents()', () => {
