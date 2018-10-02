@@ -6,13 +6,12 @@
     "minimatch": "^3.0.4"
   },
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-env": "^12.0.1",
     "chalk": "^2.4.1",
     "eslint": "^5.6.0",
     "eslint-config-ckeditor5": "^1.0.8",
     "husky": "^0.14.3",
     "istanbul": "^0.4.4",
-    "lerna": "^2.2.0",
+    "lerna": "^3.4.0",
     "lint-staged": "^7.3.0",
     "mocha": "^5.0.5"
   },
