@@ -257,7 +257,7 @@ describe( 'Linter plugin', () => {
 				@returns {module:ckeditor5/a~A}
 				Correct link: {@link module:ckeditor5/a~A}
 				Random comment: {priority: 'high'}
-				Invalid link: {module:ckeditor5/a~A}
+				Invalid link: {module:ckeditor5/a~B}
 				`,
 				meta: { fileName: '', path: '' },
 			}, {
@@ -269,7 +269,7 @@ describe( 'Linter plugin', () => {
 			linter._lintLinks();
 
 			expect( linter._errors.length ).to.be.equal( 1 );
-			expect( linter._errors[ 0 ].message ).to.match( /Link misses the '@link' part:/ );
+			expect( linter._errors[ 0 ].message ).to.match( /Link misses the '@link' part: \{module:ckeditor5\/a~B\}/ );
 		} );
 	} );
 
