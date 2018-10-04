@@ -158,9 +158,21 @@ class DocletValidator {
 		const allLinkRegExp = /\{@link\s+[^}]+\}/g;
 		const pathRegExp = /^\{@link\s+([^}\s]+)[^}]*\}$/;
 
+		const optionalTagWithBracedContentRegExp = /(@[a-z]+ )?\{[^}]+\}/g;
+
 		for ( const element of this._collection.getAll() ) {
 			if ( !element.comment ) {
 				continue;
+			}
+
+			// Find all missing `@link` parts inside comments.
+			for ( const commentPart of element.comment.match( optionalTagWithBracedContentRegExp ) || [] ) {
+				if ( commentPart.startsWith( '{module:' ) ) {
+					// If the comment part starts with the '{module:' it means that:
+					// * it's not a normal tag (tags starts with `@` and the tagName).
+					// * it's not a link (the part misses the `@link` part), but it supposed to be (it contains the `module:` part).
+					this._addError( element, `Link misses the '@link' part: ${ commentPart }` );
+				}
 			}
 
 			const refs = ( element.comment.match( allLinkRegExp ) || [] )

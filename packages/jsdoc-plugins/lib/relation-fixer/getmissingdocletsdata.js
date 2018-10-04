@@ -26,6 +26,7 @@ function getMissingDocletsData( docletCollection, childDoclet, options ) {
 	const newDoclets = [];
 	const docletsWhichShouldBeIgnored = [];
 	const docletsToAdd = getDocletsToAdd( docletCollection, childDoclet, options );
+	const docletMap = createDocletMap( docletCollection );
 
 	for ( const d of docletsToAdd ) {
 		const clonedDoclet = cloneDeep( d );
@@ -34,7 +35,7 @@ function getMissingDocletsData( docletCollection, childDoclet, options ) {
 		clonedDoclet.memberof = childDoclet.longname;
 
 		// Add property `inherited` or `mixed`.
-		const relationProperty = getRelationProperty( docletCollection.getAll(), childDoclet, d, options.relation );
+		const relationProperty = getRelationProperty( docletMap, childDoclet, d, options.relation );
 
 		if ( relationProperty ) {
 			clonedDoclet[ relationProperty ] = true;
@@ -59,6 +60,20 @@ function getMissingDocletsData( docletCollection, childDoclet, options ) {
 		newDoclets,
 		docletsWhichShouldBeIgnored
 	};
+}
+
+// Creates a <longname, doclet> map.
+//
+// @param {DocletCollection} doclets
+// @returns {Object}
+function createDocletMap( doclets ) {
+	const map = {};
+
+	for ( const doclet of doclets.getAll() ) {
+		map[ doclet.longname ] = doclet;
+	}
+
+	return map;
 }
 
 // Gets doclets from entities related to current doclet (e.g. implemented by it)
@@ -107,7 +122,7 @@ function getLongnameForNewDoclet( parentDoclet, childDoclet ) {
 }
 
 // Gets property which should be added to new doclet (e.g. inherited, mixed).
-function getRelationProperty( allDoclets, childDoclet, memberDoclet, relation ) {
+function getRelationProperty( docletMap, childDoclet, memberDoclet, relation ) {
 	if ( relation === 'augmentsNested' ) {
 		return 'inherited';
 	}
@@ -116,7 +131,7 @@ function getRelationProperty( allDoclets, childDoclet, memberDoclet, relation ) 
 		return 'mixed';
 	}
 
-	const memberDocletParent = allDoclets.find( d => d.longname === memberDoclet.memberof );
+	const memberDocletParent = docletMap[ memberDoclet.memberof ];
 
 	let isInherited = false;
 	let isMixed = false;
@@ -124,7 +139,7 @@ function getRelationProperty( allDoclets, childDoclet, memberDoclet, relation ) 
 	// If doclet is a child of a mixin, it's 'mixed'. Else if it's a child of another class, it's 'inhertied'.
 	if ( isNonEmptyArray( memberDocletParent.descendants ) ) {
 		for ( const longname of memberDocletParent.descendants ) {
-			const doclet = allDoclets.find( d => d.longname === longname );
+			const doclet = docletMap[ longname ];
 
 			if ( doclet && doclet.kind === 'mixin' ) {
 				if ( isNonEmptyArray( doclet.descendants ) &&

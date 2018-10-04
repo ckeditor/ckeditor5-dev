@@ -7,7 +7,7 @@
 
 'use strict';
 
-require( '@ckeditor/ckeditor5-dev-env' )
+require( '../packages/ckeditor5-dev-env' )
 	.generateChangelogForSubPackages( {
 		cwd: process.cwd(),
 		packages: 'packages'

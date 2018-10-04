@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## [11.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@11.0.0...@ckeditor/ckeditor5-dev-utils@11.0.1) (2018-09-24)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
 ## [11.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@10.0.3...@ckeditor/ckeditor5-dev-utils@11.0.0) (2018-08-23)
 
 Updated required Node.js version to `>=6.9.0`.

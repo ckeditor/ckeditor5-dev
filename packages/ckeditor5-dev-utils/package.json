@@ -1,18 +1,20 @@
 {
   "name": "@ckeditor/ckeditor5-dev-utils",
-  "version": "11.0.0",
+  "version": "11.0.1",
   "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
     "acorn": "^5.1.2",
+    "chalk": "^2.4.1",
     "cssnano": "^4.0.0",
     "del": "^3.0.0",
     "escodegen": "^1.9.0",
-    "fs-extra": "^6.0.1",
+    "fs-extra": "^7.0.0",
     "javascript-stringify": "^1.6.0",
     "pofile": "^1.0.9",
-    "postcss-import": "^11.0.0",
+    "postcss": "^6.0.23",
+    "postcss-import": "^12.0.0",
     "postcss-mixins": "^6.2.0",
     "postcss-nesting": "^6.0.0",
     "shelljs": "^0.8.1",
@@ -20,8 +22,10 @@
   },
   "devDependencies": {
     "chai": "^4.1.2",
+    "lodash": "^4.17.11",
     "mockery": "^2.1.0",
-    "sinon": "^6.1.2",
+    "proxyquire": "^2.1.0",
+    "sinon": "^6.3.4",
     "vinyl": "^2.1.0"
   },
   "engines": {

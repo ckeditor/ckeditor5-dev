@@ -1,6 +1,18 @@
 Changelog
 =========
 
+## [2.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@2.0.1...@ckeditor/jsdoc-plugins@2.0.2) (2018-10-02)
+
+### Other changes
+
+* Improved performance of the `relation-fixer` plugin by the factor of 10x. Closes [#438](https://github.com/ckeditor/ckeditor5-dev/issues/438). ([ef1dc21](https://github.com/ckeditor/ckeditor5-dev/commit/ef1dc21))
+
+
+## [2.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@2.0.0...@ckeditor/jsdoc-plugins@2.0.1) (2018-09-24)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
 ## [2.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@1.9.7...@ckeditor/jsdoc-plugins@2.0.0) (2018-08-23)
 
 Updated required Node.js version to `>=6.9.0`.
