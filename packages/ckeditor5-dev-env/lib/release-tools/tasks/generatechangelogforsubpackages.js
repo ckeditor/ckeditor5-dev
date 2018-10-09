@@ -42,12 +42,12 @@ module.exports = function generateChangelogForSubPackages( options ) {
 	const skippedPackages = new Set();
 	const generatedChangelogsMap = new Map();
 
-	return executeOnPackages( pathsCollection.packages, generateChangelogTask )
+	return executeOnPackages( pathsCollection.matched, generateChangelogTask )
 		.then( () => {
 			process.chdir( cwd );
 
 			// No changelog has generated. Abort.
-			if ( skippedPackages.size === pathsCollection.packages.size ) {
+			if ( skippedPackages.size === pathsCollection.matched.size ) {
 				return;
 			}
 
