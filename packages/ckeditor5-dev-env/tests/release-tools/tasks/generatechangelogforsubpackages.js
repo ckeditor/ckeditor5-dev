@@ -85,7 +85,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			stubs.getSubPackagesPaths.returns( {
 				skipped: new Set(),
-				packages: new Set( [
+				matched: new Set( [
 					'/ckeditor5-dev/packages/ckeditor5-dev-foo',
 					'/ckeditor5-dev/packages/ckeditor5-dev-bar'
 				] )
@@ -185,7 +185,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				skipped: new Set( [
 					'/ckeditor5-dev/packages/ckeditor5-dev-bar'
 				] ),
-				packages: new Set( [
+				matched: new Set( [
 					'/ckeditor5-dev/packages/ckeditor5-dev-foo',
 				] )
 			} );
@@ -234,7 +234,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			stubs.getSubPackagesPaths.returns( {
 				skipped: new Set(),
-				packages: new Set( [
+				matched: new Set( [
 					'/ckeditor5-dev/packages/ckeditor5-dev-foo',
 				] )
 			} );
@@ -279,7 +279,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			stubs.getSubPackagesPaths.returns( {
 				skipped: new Set(),
-				packages: new Set( [
+				matched: new Set( [
 					'/ckeditor5-dev/packages/ckeditor5-dev-foo',
 					'/ckeditor5-dev/packages/ckeditor5-dev-bar'
 				] )
