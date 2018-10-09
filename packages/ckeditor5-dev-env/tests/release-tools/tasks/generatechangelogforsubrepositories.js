@@ -66,8 +66,10 @@ describe( 'dev-env/release-tools/tasks', () => {
 			const chdirStub = sandbox.stub( process, 'chdir' );
 
 			stubs.getSubRepositoriesPaths.returns( {
-				skipped: new Set(),
-				packages: new Set( [
+				skipped: new Set( [
+					'/tmp'
+				] ),
+				matched: new Set( [
 					'/tmp/packages/ckeditor5-core',
 					'/tmp/packages/ckeditor5-engine'
 				] )
@@ -86,7 +88,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			const options = {
 				cwd: '/tmp',
-				packages: 'packages'
+				packages: 'packages',
+				skipMainRepository: true
 			};
 
 			return generateChangelogForSubRepositories( options )
@@ -96,7 +99,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 						cwd: options.cwd,
 						packages: options.packages,
 						scope: null,
-						skipPackages: []
+						skipPackages: [],
+						skipMainRepository: true
 					} );
 
 					expect( chdirStub.calledThrice ).to.equal( true );
@@ -121,9 +125,10 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			stubs.getSubRepositoriesPaths.returns( {
 				skipped: new Set( [
-					'/tmp/packages/ckeditor5-engine'
+					'/tmp/packages/ckeditor5-engine',
+					'/tmp'
 				] ),
-				packages: new Set( [
+				matched: new Set( [
 					'/tmp/packages/ckeditor5-core'
 				] )
 			} );
@@ -134,7 +139,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 			const options = {
 				cwd: '/tmp',
 				packages: 'packages',
-				skipPackages: [ '@ckeditor/ckeditor5-engine' ]
+				skipPackages: [ '@ckeditor/ckeditor5-engine' ],
+				skipMainRepository: true,
 			};
 
 			return generateChangelogForSubRepositories( options )
@@ -144,7 +150,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 						cwd: options.cwd,
 						packages: options.packages,
 						scope: null,
-						skipPackages: options.skipPackages
+						skipPackages: options.skipPackages,
+						skipMainRepository: true
 					} );
 
 					expect( chdirStub.calledTwice ).to.equal( true );
@@ -154,7 +161,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.displaySkippedPackages.calledOnce ).to.equal( true );
 
 					expect( stubs.displaySkippedPackages.firstCall.args[ 0 ] ).to.deep.equal( new Set( [
-						'/tmp/packages/ckeditor5-engine'
+						'/tmp/packages/ckeditor5-engine',
+						'/tmp'
 					] ) );
 				} );
 		} );
@@ -165,7 +173,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			stubs.getSubRepositoriesPaths.returns( {
 				skipped: new Set(),
-				packages: new Set( [
+				matched: new Set( [
 					'/tmp/packages/ckeditor5-core'
 				] )
 			} );
@@ -200,7 +208,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			stubs.getSubRepositoriesPaths.returns( {
 				skipped: new Set(),
-				packages: new Set( [
+				matched: new Set( [
 					'/tmp/packages/ckeditor5-autoformat',
 					'/tmp/packages/ckeditor5-basic-styles',
 					'/tmp/packages/ckeditor5-core',
@@ -320,8 +328,10 @@ describe( 'dev-env/release-tools/tasks', () => {
 			sandbox.stub( process, 'chdir' );
 
 			stubs.getSubRepositoriesPaths.returns( {
-				skipped: new Set(),
-				packages: new Set( [
+				skipped: new Set( [
+					'/tmp'
+				] ),
+				matched: new Set( [
 					'/tmp/packages/ckeditor5-core',
 					'/tmp/packages/ckeditor5-engine'
 				] )
@@ -341,7 +351,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 			const options = {
 				cwd: '/tmp',
 				packages: 'packages',
-				newVersion: '1.0.0'
+				newVersion: '1.0.0',
+				skipMainRepository: true
 			};
 
 			return generateChangelogForSubRepositories( options )
@@ -351,7 +362,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 						cwd: options.cwd,
 						packages: options.packages,
 						scope: null,
-						skipPackages: []
+						skipPackages: [],
+						skipMainRepository: true
 					} );
 
 					expect( stubs.generateChangelogForSinglePackage.calledTwice ).to.equal( true );

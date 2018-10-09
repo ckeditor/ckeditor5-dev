@@ -5,6 +5,7 @@
 
 'use strict';
 
+const fs = require( 'fs' );
 const path = require( 'path' );
 const chalk = require( 'chalk' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
@@ -14,27 +15,55 @@ const createGithubRelease = require( '../utils/creategithubrelease' );
 const displaySkippedPackages = require( '../utils/displayskippedpackages' );
 const executeOnPackages = require( '../utils/executeonpackages' );
 const { getChangesForVersion } = require( '../utils/changelog' );
-const { getLastFromChangelog: getLastVersionFromChangelog } = require( '../utils/versions' );
 const getPackageJson = require( '../utils/getpackagejson' );
-const getPackagesToRelease = require( '../utils/getpackagestorelease' );
 const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
-const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
-const validatePackageToRelease = require( '../utils/validatepackagetorelease' );
+const GitHubApi = require( '@octokit/rest' );
 
+const PACKAGE_JSON_TEMPLATE_PATH = require.resolve( '../templates/release-package.json' );
 const BREAK_RELEASE_MESSAGE = 'You aborted publishing the release. Why? Oh why?!';
+const NO_RELEASE_MESSAGE = 'No changes for publishing. Why? Oh why?!';
+
+// That files will be copied from source to the temporary directory and will be released too.
+const additionalFiles = [
+	'CHANGELOG.md',
+	'LICENSE.md',
+	'README.md'
+];
 
 /**
- * Releases all sub repositories found in specified path.
+ * Releases all sub-repositories (packages) found in specified path.
  *
  * This task does:
  *   - finds paths to sub repositories,
- *   - filters packages which should be released,
- *   - updated version of dependencies between all released sub repositories (even if some packages will not be released),
- *   - generates changelog for packages that dependencies have changed,
- *   - bumps version of all packages,
+ *   - filters packages which should be released by comparing the latest version published on NPM and GitHub,,
  *   - publishes new version on NPM,
  *   - pushes new version to the remote repository,
- *   - creates a release which is displayed on "Releases" page on Gitub.
+ *   - creates a release which is displayed on "Releases" page on GitHub.
+ *
+ * If you want to publish an empty repository (only with required files for NPM), you can specify the package name
+ * as `options.emptyReleases`. Packages specified in the array will be published from temporary directory. `package.json` of that package
+ * will be created based on a template. See `packages/ckeditor5-dev-env/lib/release-tools/templates/release-package.json` file.
+ *
+ * Content of `package.json` can be adjusted using `options.packageJsonForEmptyReleases` options. If you need to copy values from
+ * real `package.json` that are not defined in template, you can add these keys as null. Values will be copied automatically.
+ *
+ * Example usage:
+ *
+ *     require( '@ckeditor/ckeditor5-dev-env' )
+ *         .releaseSubRepositories( {
+ *		        cwd: process.cwd(),
+ *		        packages: 'packages',
+ *		        emptyReleases: [
+ *			        'ckeditor5' // "ckeditor5" will be released as an empty repository.
+ *		        ],
+ *		        packageJsonForEmptyReleases: {
+ *			        ckeditor5: { // These properties will overwrite those ones that are defined in package's `package.json`
+ *				        description: 'Custom description', // "description" of real package will be overwritten.
+ *				        devDependencies: null // The template does not contain "devDependencies" but we want to add it.
+ *			        }
+ *		        },
+ *		        dryRun: process.argv.includes( '--dry-run' )
+ *	} );
  *
  * Pushes are done at the end of the whole process because of Continues Integration. We need to publish all
  * packages on NPM before starting the CI testing. If we won't do it, CI will fail because it won't be able
@@ -46,288 +75,433 @@ const BREAK_RELEASE_MESSAGE = 'You aborted publishing the release. Why? Oh why?!
  * @param {String} options.packages Where to look for other packages (dependencies).
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be released.
  * @param {Boolean} [options.dryRun=false] If set on true, nothing will be published:
- *   - npm version will not create a tag (only the commit will be made)
- *   - npm pack will be called instead of npm publish (it packs the whole release to a ZIP archive)
- *   - "git push" will be replaced with a log on the screen
- *   - creating a release on GitHub will be replaced with a log on the screen
- *   - every called command will be displayed
+ *   - npm pack will be called instead of npm publish (it packs the whole release to a ZIP archive),
+ *   - "git push" will be replaced with a log on the screen,
+ *   - creating a release on GitHub will be replaced with a log on the screen,
+ *   - every called command will be displayed.
+ * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in "cwd" will be skipped.
+ * @param {Array.<String>>} [options.emptyReleases=[]] Name of packages that should be published as an empty directory
+ * except the real content from repository.
+ * @param {Object} [options.packageJsonForEmptyReleases={}] Additional fields that will be added to `package.json` for packages which
+ * will publish an empty directory. All properties copied from original package's "package.json" file will be overwritten by fields
+ * specified in this option.
+ * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in "cwd" will be skipped.
  * @returns {Promise}
  */
 module.exports = function releaseSubRepositories( options ) {
 	const cwd = process.cwd();
 	const log = logger();
 	const dryRun = Boolean( options.dryRun );
-	const mainPackageJson = getPackageJson( cwd );
-	const mainPackageChangelogVersion = getLastVersionFromChangelog( cwd );
+	const emptyReleases = Array.isArray( options.emptyReleases ) ? options.emptyReleases : [ options.emptyReleases ].filter( Boolean );
 
 	const pathsCollection = getSubRepositoriesPaths( {
 		cwd: options.cwd,
 		packages: options.packages,
-		skipPackages: options.skipPackages || []
+		skipPackages: options.skipPackages || [],
+		skipMainRepository: options.skipMainRepository
 	} );
 
-	// These variables will be set during the function's execution.
-	// List of packages to release; packages and their versions; options provided by the user (CLI).
-	let packagesToRelease, dependencies, releaseOptions;
+	logDryRun( '⚠️  DRY RUN mode ⚠️' );
+	logDryRun( 'The script WILL NOT publish anything but will create some files.' );
+	logProcess( 'Configuring the release...' );
 
-	// Errors are added to this array by the `validateRepositories` function.
-	const errors = [];
+	const github = new GitHubApi( {
+		version: '3.0.0'
+	} );
 
-	if ( dryRun ) {
-		log.info( chalk.bold( chalk.yellow( '[DRY RUN mode]\n' ) ) );
-	}
+	// Collections of paths where different kind of releases should be done.
+	// `releasesOnNpm` - the release on NPM that contains the entire repository (npm publish is executed inside the repository)
+	// `emptyReleasesOnNpm` - the release on NPM that contains an empty repository (npm publish is executed from a temporary directory)
+	// `releasesOnGithub` - the release on GitHub (there is only one command called - `git push` and creating the release via REST API)
+	const releasesOnNpm = new Set();
+	const releasesOnGithub = new Set();
+	const emptyReleasesOnNpm = new Map();
 
-	log.info( chalk.blue( 'Collecting packages that will be released...' ) );
+	// List of packages that were released on NPM or/and GitHub.
+	const releasedPackages = new Set();
 
-	return getPackagesToRelease( pathsCollection.packages )
-		.then( packages => {
-			packagesToRelease = packages;
+	// List of files that should be removed in DRY RUN mode. This is a result of command `npm pack`.
+	const filesToRemove = new Set();
 
-			displaySkippedPackages( pathsCollection.skipped );
+	// List of all details required for releasing packages.
+	const packages = new Map();
 
-			if ( packagesToRelease.size === 0 ) {
-				throw new Error( 'None of the packages contains any changes since its last release. Aborting.' );
-			}
+	let releaseOptions;
 
-			return cli.confirmRelease( packagesToRelease )
-				.then( isConfirmed => {
-					if ( !isConfirmed ) {
-						throw new Error( BREAK_RELEASE_MESSAGE );
-					}
-				} );
-		} )
-		.then( () => prepareDependenciesVersions() )
-		.then( dependenciesWithVersions => {
-			dependencies = dependenciesWithVersions;
-
-			// Filter out packages which won't be released.
-			for ( const pathToPackage of pathsCollection.packages ) {
-				const packageName = getPackageJson( pathToPackage ).name;
-
-				// The main package won't be released but we need to keep its version in order to update peerDependencies.
-				if ( packageName === mainPackageJson.name ) {
-					continue;
-				}
-
-				if ( !packagesToRelease.has( packageName ) ) {
-					pathsCollection.packages.delete( pathToPackage );
-				}
-			}
-
-			return updateDependenciesOfPackagesToRelease();
-		} )
-		.then( () => getLatestChangesForPackagesThatWillBeReleased() )
-		.then( () => validateRepositories() )
-		.then( () => {
-			if ( errors.length ) {
-				throw new Error( 'Releasing has been aborted due to errors.' );
-			}
-
-			return cli.configureReleaseOptions()
-				.then( resolvedReleaseOptions => {
-					releaseOptions = resolvedReleaseOptions;
-				} );
-		} )
-		.then( () => bumpVersion() )
-		.then( () => releaseOnNpm() )
-		.then( () => pushRepositories() )
-		.then( () => releaseOnGithub() )
+	return cli.configureReleaseOptions()
+		.then( _releaseOptions => saveReleaseOptions( _releaseOptions ) )
+		.then( () => preparePackagesToRelease() )
+		.then( () => filterPackagesToReleaseOnNpm() )
+		.then( () => filterPackagesToReleaseOnGitHub() )
+		.then( () => confirmRelease() )
+		.then( () => prepareDirectoriesForEmptyReleases() )
+		.then( () => releasePackagesOnNpm() )
+		.then( () => pushPackages() )
+		.then( () => createReleasesOnGitHub() )
+		.then( () => removeTemporaryDirectories() )
+		.then( () => removeReleaseArchives() )
 		.then( () => {
 			process.chdir( cwd );
 
-			log.info( chalk.green( `Finished releasing ${ pathsCollection.packages.size } packages.` ) );
+			logProcess( `Finished releasing ${ chalk.underline( releasedPackages.size ) } packages.` );
+			logDryRun( 'Because of the DRY RUN mode, nothing has been changed. All changes were reverted.' );
 		} )
 		.catch( err => {
 			process.chdir( cwd );
 
-			// A user did not confirm the release process.
-			if ( err instanceof Error && err.message === BREAK_RELEASE_MESSAGE ) {
-				log.info( 'Releasing has been aborted.' );
+			// A user did not confirm the release process or there is nothing to release.
+			if ( err instanceof Error ) {
+				if ( err.message === BREAK_RELEASE_MESSAGE ) {
+					logProcess( 'Publishing has been aborted.' );
 
-				return Promise.resolve();
+					return Promise.resolve();
+				}
+
+				if ( err.message === NO_RELEASE_MESSAGE ) {
+					logProcess( 'There is nothing to release. The process was aborted.' );
+
+					return Promise.resolve();
+				}
 			}
 
-			log.error( err.message );
-			errors.forEach( log.error.bind( log ) );
+			log.error( dryRun ? err.stack : err.message );
 
 			process.exitCode = -1;
 		} );
 
-	function prepareDependenciesVersions() {
-		const dependencies = new Map();
+	// Saves the options provided by a user.
+	//
+	// @param {Object} _releaseOptions
+	function saveReleaseOptions( _releaseOptions ) {
+		releaseOptions = _releaseOptions;
 
-		for ( const [ packageName, { version } ] of packagesToRelease ) {
-			dependencies.set( packageName, version );
+		if ( !releaseOptions.npm && !releaseOptions.github ) {
+			throw new Error( BREAK_RELEASE_MESSAGE );
 		}
 
-		for ( const packagePath of pathsCollection.skipped ) {
-			const packageJson = getPackageJson( packagePath );
-
-			dependencies.set( packageJson.name, packageJson.version );
+		if ( releaseOptions.github ) {
+			github.authenticate( {
+				token: releaseOptions.token,
+				type: 'oauth',
+			} );
 		}
-
-		for ( const packagePath of pathsCollection.packages ) {
-			const packageJson = getPackageJson( packagePath );
-
-			if ( !dependencies.has( packageJson.name ) ) {
-				dependencies.set( packageJson.name, packageJson.version );
-			}
-		}
-
-		// Add main package (it could be added as a peer-dependency).
-		dependencies.set( mainPackageJson.name, mainPackageChangelogVersion );
-
-		return dependencies;
 	}
 
-	function updateDependenciesOfPackagesToRelease() {
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+	// Prepares a version, a description and other necessary things that must be done before starting
+	// the entire a releasing process.
+	//
+	// @returns {Promise}
+	function preparePackagesToRelease() {
+		logProcess( 'Preparing packages that will be released...' );
+
+		displaySkippedPackages( pathsCollection.skipped );
+
+		return executeOnPackages( pathsCollection.matched, repositoryPath => {
+			process.chdir( repositoryPath );
+
+			const packageJson = getPackageJson( repositoryPath );
+			const releaseDetails = {
+				version: packageJson.version,
+				changes: getChangesForVersion( packageJson.version, repositoryPath )
+			};
+
+			packages.set( packageJson.name, releaseDetails );
+
+			if ( releaseOptions.github ) {
+				const repositoryInfo = parseGithubUrl(
+					exec( 'git remote get-url origin --push' ).trim()
+				);
+
+				releaseDetails.repositoryOwner = repositoryInfo.owner;
+				releaseDetails.repositoryName = repositoryInfo.name;
+			}
+
+			return Promise.resolve();
+		} );
+	}
+
+	// Checks which packages should be published on NPM. It compares version defined in `package.json`
+	// and the latest released on NPM.
+	//
+	// @returns {Promise}
+	function filterPackagesToReleaseOnNpm() {
+		if ( !releaseOptions.npm ) {
+			return Promise.resolve();
+		}
+
+		logProcess( 'Collecting the latest versions of packages published on NPM...' );
+
+		return executeOnPackages( pathsCollection.matched, repositoryPath => {
+			process.chdir( repositoryPath );
+
+			const packageJson = getPackageJson( repositoryPath );
+			const releaseDetails = packages.get( packageJson.name );
+
+			log.info( `\nChecking "${ chalk.underline( packageJson.name ) }"...` );
+
+			const npmVersion = exec( `npm show ${ packageJson.name } version` ).trim();
+
+			logDryRun( `Versions: package.json: "${ releaseDetails.version }", npm: "${ npmVersion }".` );
+
+			releaseDetails.npmVersion = npmVersion;
+			releaseDetails.shouldReleaseOnNpm = npmVersion !== releaseDetails.version;
+
+			if ( releaseDetails.shouldReleaseOnNpm ) {
+				logDryRun( 'Package will be released.' );
+
+				releasesOnNpm.add( repositoryPath );
+			} else {
+				log.info( '❌  Nothing to release.' );
+			}
+
+			return Promise.resolve();
+		} );
+	}
+
+	// Checks for which packages GitHub release should be created. It compares version defined in `package.json`
+	// and the latest release on GitHub.
+	//
+	// @returns {Promise}
+	function filterPackagesToReleaseOnGitHub() {
+		if ( !releaseOptions.github ) {
+			return Promise.resolve();
+		}
+
+		logProcess( 'Collecting the latest releases published on GitHub...' );
+
+		return executeOnPackages( pathsCollection.matched, repositoryPath => {
+			process.chdir( repositoryPath );
+
+			const packageJson = getPackageJson( repositoryPath );
+			const releaseDetails = packages.get( packageJson.name );
+
+			log.info( `\nChecking "${ chalk.underline( packageJson.name ) }"...` );
+
+			return getLastRelease( releaseDetails.repositoryOwner, releaseDetails.repositoryName )
+				.then( ( { data } ) => {
+					const githubVersion = data.tag_name.replace( /^v/, '' );
+
+					logDryRun( `Versions: package.json: "${ releaseDetails.version }", GitHub: "${ githubVersion }".` );
+
+					releaseDetails.githubVersion = githubVersion;
+					releaseDetails.shouldReleaseOnGithub = githubVersion !== releaseDetails.version;
+
+					if ( releaseDetails.shouldReleaseOnGithub ) {
+						logDryRun( 'Package will be published.' );
+
+						releasesOnGithub.add( repositoryPath );
+					} else {
+						log.info( '❌  Nothing to publish.' );
+					}
+				} )
+				.catch( err => {
+					log.warning( err );
+				} );
+		} );
+
+		function getLastRelease( repositoryOwner, repositoryName ) {
+			const requestParams = {
+				owner: repositoryOwner,
+				repo: repositoryName
+			};
+
+			return new Promise( ( resolve, reject ) => {
+				github.repos.getLatestRelease( requestParams, ( err, responses ) => {
+					if ( err ) {
+						return reject( err );
+					}
+
+					return resolve( responses );
+				} );
+			} );
+		}
+	}
+
+	// Asks a user whether the process should be continued.
+	//
+	// @params {Map.<String, ReleaseDetails>} packages
+	// @returns {Promise}
+	function confirmRelease() {
+		// No packages for releasing...
+		if ( !releasesOnNpm.size && !releasesOnGithub.size ) {
+			throw new Error( NO_RELEASE_MESSAGE );
+		}
+
+		logProcess( 'Should we continue?' );
+
+		return cli.confirmPublishing( packages )
+			.then( isConfirmed => {
+				if ( !isConfirmed ) {
+					throw new Error( BREAK_RELEASE_MESSAGE );
+				}
+			} );
+	}
+
+	// Prepares empty repositories that will be released.
+	//
+	// @returns {Promise}
+	function prepareDirectoriesForEmptyReleases() {
+		if ( !releaseOptions.npm ) {
+			return Promise.resolve();
+		}
+
+		logProcess( 'Preparing directories for empty releases...' );
+
+		return executeOnPackages( releasesOnNpm, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
 
-			if ( !packagesToRelease.has( packageJson.name ) ) {
+			if ( !emptyReleases.includes( packageJson.name ) ) {
 				return Promise.resolve();
 			}
 
-			updateDependenciesVersions( dependencies, path.join( repositoryPath, 'package.json' ) );
+			log.info( `\nPreparing "${ chalk.underline( packageJson.name ) }"...` );
 
-			if ( exec( 'git diff --name-only package.json' ).trim().length ) {
-				log.info( `Updating dependencies for "${ packageJson.name }"...` );
-				exec( 'git add package.json' );
-				exec( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
+			const tmpDir = fs.mkdtempSync( repositoryPath + path.sep + '.release-directory-' );
+			const tmpPackageJsonPath = path.join( tmpDir, 'package.json' );
+
+			releasesOnNpm.delete( repositoryPath );
+			emptyReleasesOnNpm.set( tmpDir, repositoryPath );
+
+			// Copy `package.json` template.
+			exec( `cp ${ PACKAGE_JSON_TEMPLATE_PATH } ${ tmpPackageJsonPath }` );
+
+			// Copy additional files.
+			for ( const file of additionalFiles ) {
+				exec( `cp ${ path.join( repositoryPath, file ) } ${ path.join( tmpDir, file ) }` );
 			}
 
-			return Promise.resolve();
-		} );
-	}
+			logDryRun( 'Updating package.json...' );
 
-	function getLatestChangesForPackagesThatWillBeReleased() {
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
-			process.chdir( repositoryPath );
+			// Update `package.json` file. It uses values from source `package.json`
+			// but only these ones which are defined in the template.
+			// Properties that were passed as `options.packageJsonForEmptyReleases` will not be overwritten.
+			tools.updateJSONFile( tmpPackageJsonPath, jsonFile => {
+				const additionalPackageJson = options.packageJsonForEmptyReleases[ packageJson.name ] || {};
 
-			const packageJson = getPackageJson( repositoryPath );
-			const releaseDetails = packagesToRelease.get( packageJson.name );
+				// Overwrite custom values specified in `options.packageJsonForEmptyReleases`.
+				for ( const property of Object.keys( additionalPackageJson ) ) {
+					jsonFile[ property ] = additionalPackageJson[ property ];
+				}
 
-			const version = releaseDetails.version;
+				// Copy values from original package.json file.
+				for ( const property of Object.keys( jsonFile ) ) {
+					// If the `property` is set, leave it.
+					if ( jsonFile[ property ] ) {
+						continue;
+					}
 
-			releaseDetails.changes = getChangesForVersion( version, repositoryPath );
+					jsonFile[ property ] = packageJson[ property ];
+				}
 
-			return Promise.resolve();
-		} );
-	}
-
-	function validateRepositories() {
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
-			process.chdir( repositoryPath );
-
-			const packageJson = getPackageJson( repositoryPath );
-			const releaseDetails = packagesToRelease.get( packageJson.name );
-			const errorsForPackage = validatePackageToRelease( {
-				changes: releaseDetails.changes,
-				version: releaseDetails.version
+				return jsonFile;
 			} );
 
-			if ( errorsForPackage.length ) {
-				errors.push( `## ${ packageJson.name }` );
-				errors.push( ...errorsForPackage.map( err => '* ' + err ) );
-			}
-
 			return Promise.resolve();
 		} );
 	}
 
-	function bumpVersion() {
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
-			process.chdir( repositoryPath );
-
-			const packageJson = getPackageJson( repositoryPath );
-			const releaseDetails = packagesToRelease.get( packageJson.name );
-
-			log.info( `Bumping version for "${ packageJson.name }"...` );
-
-			const commitMessage = `--message "Release: v${ releaseDetails.version }. [skip ci]"`;
-			let versionCommand = `npm version ${ releaseDetails.version }`;
-
-			if ( dryRun ) {
-				// `npm version` creates a Git tag by default. Adding "--no-git-tag-version" option will disable committing and tagging.
-				versionCommand += ` --no-git-tag-version && git add package.json && git commit ${ commitMessage }`;
-			} else {
-				// Attach a message to the release commit.
-				versionCommand += ` ${ commitMessage }`;
-			}
-
-			exec( versionCommand );
-
-			return Promise.resolve();
-		} );
-	}
-
-	function releaseOnNpm() {
-		if ( releaseOptions.skipNpm ) {
+	// Publishes all packages on npm. In `dry run` mode it will create an archive instead of publishing the package.
+	//
+	// @returns {Promise}
+	function releasePackagesOnNpm() {
+		if ( !releaseOptions.npm ) {
 			return Promise.resolve();
 		}
 
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+		logProcess( 'Publishing on NPM...' );
+
+		const paths = [
+			...emptyReleasesOnNpm.keys(),
+			...releasesOnNpm
+		];
+
+		return executeOnPackages( paths, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
 
-			log.info( `Publishing on NPM "${ packageJson.name }"...` );
+			log.info( `\nPublishing "${ chalk.underline( packageJson.name ) }" as "v${ packageJson.version }"...` );
+			logDryRun( 'Do not panic. DRY RUN mode is active. An archive with the release will be created instead.' );
+
+			const repositoryRealPath = emptyReleasesOnNpm.get( repositoryPath ) || repositoryPath;
 
 			if ( dryRun ) {
+				const archiveName = packageJson.name.replace( '@', '' ).replace( '/', '-' ) + `-${ packageJson.version }.tgz`;
+
 				exec( 'npm pack' );
+
+				// Move created archive from temporary directory because the directory will be removed automatically.
+				if ( emptyReleasesOnNpm.has( repositoryPath ) ) {
+					exec( `mv ${ path.join( repositoryPath, archiveName ) } ${ path.resolve( repositoryRealPath ) }` );
+				}
+
+				// Mark created archive as a file to remove.
+				filesToRemove.add( path.join( repositoryRealPath, archiveName ) );
 			} else {
 				exec( 'npm publish --access=public' );
 			}
+
+			releasedPackages.add( repositoryRealPath );
 		} );
 	}
 
-	function pushRepositories() {
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+	// Pushes all changes to remote.
+	//
+	// @params {Map.<String, ReleaseDetails>} packages
+	// @returns {Promise}
+	function pushPackages() {
+		logProcess( 'Pushing packages to the remote...' );
+
+		return executeOnPackages( releasesOnGithub, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
-			log.info( `Pushing a local repository into the remote for "${ packageJson.name }"...` );
+			const releaseDetails = packages.get( packageJson.name );
+
+			log.info( `\nPushing "${ chalk.underline( packageJson.name ) }" package...` );
 
 			if ( dryRun ) {
-				exec( 'echo "Pushing the repository to the remote..."' );
+				logDryRun( `Command: "git push origin master v${ releaseDetails.version }" would be executed.` );
 			} else {
-				exec( 'git push' );
+				exec( `git push origin master v${ releaseDetails.version }` );
 			}
 
 			return Promise.resolve();
 		} );
 	}
 
-	function releaseOnGithub() {
-		if ( releaseOptions.skipGithub ) {
+	// Creates the releases on GitHub. In `dry run` mode it will just print a URL to release.
+	//
+	// @returns {Promise}
+	function createReleasesOnGitHub() {
+		if ( !releaseOptions.github ) {
 			return Promise.resolve();
 		}
 
-		return executeOnPackages( pathsCollection.packages, repositoryPath => {
+		logProcess( 'Creating releases on GitHub...' );
+
+		return executeOnPackages( releasesOnGithub, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
-			const releaseDetails = packagesToRelease.get( packageJson.name );
+			const releaseDetails = packages.get( packageJson.name );
 
-			log.info( `Creating a GitHub release for "${ packageJson.name }"...` );
+			log.info( `\nCreating a GitHub release for "${ packageJson.name }"...` );
 
-			const repositoryInfo = parseGithubUrl(
-				exec( 'git remote get-url origin --push' ).trim()
-			);
+			// eslint-disable-next-line max-len
+			const url = `https://github.com/${ releaseDetails.repositoryOwner }/${ releaseDetails.repositoryName }/releases/tag/v${ releaseDetails.version }`;
 
-			const url = `https://github.com/${ repositoryInfo.owner }/${ repositoryInfo.name }/releases/tag/v${ releaseDetails.version }`;
+			logDryRun( `Created release will be available under: ${ chalk.underline( url ) }` );
 
 			if ( dryRun ) {
-				log.info( `Created release will be available under: ${ chalk.green( url ) }` );
-
 				return Promise.resolve();
 			}
 
 			const githubReleaseOptions = {
-				repositoryOwner: repositoryInfo.owner,
-				repositoryName: repositoryInfo.name,
+				repositoryOwner: releaseDetails.repositoryOwner,
+				repositoryName: releaseDetails.repositoryName,
 				version: `v${ releaseDetails.version }`,
 				description: releaseDetails.changes
 			};
@@ -335,7 +509,8 @@ module.exports = function releaseSubRepositories( options ) {
 			return createGithubRelease( releaseOptions.token, githubReleaseOptions )
 				.then(
 					() => {
-						// eslint-disable-next-line max-len
+						releasedPackages.add( repositoryPath );
+
 						log.info( `Created the release: ${ chalk.green( url ) }` );
 
 						return Promise.resolve();
@@ -350,11 +525,65 @@ module.exports = function releaseSubRepositories( options ) {
 		} );
 	}
 
+	// Removes all temporary directories that were created for publishing an empty repository.
+	//
+	// @returns {Promise}
+	function removeTemporaryDirectories() {
+		if ( !releaseOptions.npm ) {
+			return Promise.resolve();
+		}
+
+		logProcess( 'Removing temporary directories that were created for publishing on NPM...' );
+
+		return executeOnPackages( emptyReleasesOnNpm.keys(), repositoryPath => {
+			process.chdir( emptyReleasesOnNpm.get( repositoryPath ) );
+
+			exec( `rm -rf ${ repositoryPath }` );
+		} );
+	}
+
+	// Asks the user whether created archives should be removed. It so, the script will remove them.
+	//
+	// @returns {Promise}
+	function removeReleaseArchives() {
+		if ( !releaseOptions.npm ) {
+			return Promise.resolve();
+		}
+
+		logProcess( 'Removing archives created by "npm pack" command...' );
+
+		return cli.confirmRemovingFiles()
+			.then( shouldRemove => {
+				process.chdir( cwd );
+
+				if ( !shouldRemove ) {
+					logDryRun( 'You can remove these files manually by calling `git clean -f` command.' );
+					logDryRun( 'It will also work using mgit: `mgit exec "git clean -f"`' );
+
+					return;
+				}
+
+				for ( const file of filesToRemove ) {
+					exec( `rm ${ file }` );
+				}
+			} );
+	}
+
 	function exec( command ) {
 		if ( dryRun ) {
-			log.info( `${ chalk.grey( '[DRY RUN]:' ) } "${ chalk.cyan( command ) }" in "${ chalk.italic( process.cwd() ) }".` );
+			log.info( `⚠️  ${ chalk.grey( 'Execute:' ) } "${ chalk.cyan( command ) }" in "${ chalk.grey.italic( process.cwd() ) }".` );
 		}
 
 		return tools.shExec( command, { verbosity: 'error' } );
+	}
+
+	function logProcess( message ) {
+		log.info( '\n📍  ' + chalk.blue( message ) );
+	}
+
+	function logDryRun( message ) {
+		if ( dryRun ) {
+			log.info( 'ℹ️  ' + chalk.yellow( message ) );
+		}
 	}
 };

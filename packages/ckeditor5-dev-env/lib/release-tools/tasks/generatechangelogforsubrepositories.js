@@ -24,6 +24,7 @@ const generateChangelogForSinglePackage = require( './generatechangelogforsingle
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be touched.
  * @param {String} [options.newVersion=null] If specified, the tool will use the version. User won't be able to provide
  * its version based on history of commits.
+ * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in "cwd" will be skipped.
  * @returns {Promise}
  */
 module.exports = function generateChangelogForSubRepositories( options ) {
@@ -34,7 +35,8 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 		cwd: options.cwd,
 		packages: options.packages,
 		scope: options.scope || null,
-		skipPackages: options.skipPackages || []
+		skipPackages: options.skipPackages || [],
+		skipMainRepository: options.skipMainRepository
 	} );
 
 	const newVersion = options.newVersion || null;
@@ -42,7 +44,7 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 	const generatedChangelogsMap = new Map();
 	const skippedChangelogs = new Set();
 
-	return executeOnPackages( pathsCollection.packages, generateChangelogTask )
+	return executeOnPackages( pathsCollection.matched, generateChangelogTask )
 		.then( () => {
 			log.info( '' );
 			log.info( chalk.underline( 'Checking whether dependencies of skipped packages have changed...' ) );

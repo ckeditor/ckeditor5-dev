@@ -36,7 +36,12 @@ require( '@ckeditor/ckeditor5-dev-env' ).releaseRepository();
 ```
 
 ```js
-// scripts/release-packages.js: Create release for all dependencies.
+// scripts/release-bump-versions.js: Validates and updates version for all packages (includes the package found in options.cwd)
+require( '@ckeditor/ckeditor5-dev-env' ).bumpVersions( /* options */ );
+```
+
+```js
+// scripts/release-packages.js: Publish all changes.
 require( '@ckeditor/ckeditor5-dev-env' ).releaseSubRepositories( /* options */ );
 ```
 
@@ -48,7 +53,7 @@ Read more about the [git commit message convention](https://github.com/ckeditor/
 
 ### Creating a release for multiple repositories
 
-**Note:** Before running the release task you need to generate the changelog for changes in the version to be released.
+**Note:** Before running the bumping versions task you need to generate the changelog for changes in the version to be released.
 
 The process implemented by the tool:
 
@@ -56,11 +61,18 @@ The process implemented by the tool:
 1. Filter out packages which won't be released (no changes or dependencies has not changed),
 1. Update new versions of packages in `package.json` for all released packages,
 1. Commit these changes as `Release: vX.Y.Z.`,
-1. Create a tag `vX.Y.Z`,
-1. Push the commit and tag,
-1. Optional: create a [GitHub release](https://help.github.com/articles/creating-releases/) or/and [NPM](https://docs.npmjs.com/getting-started/publishing-npm-packages).
+1. Create a tag `vX.Y.Z`.
 
-	Notes for the release are taken from the changelog.
+### Publishing changes
+
+**Note:** Before publishing changes you need to bump versions in all dependencies.
+
+The process implemented by the tool:
+
+1. Compares versions released on NPM and GitHub. Based on that, the tool know what should be published. You can call the same script multiple times and nothing wrong happens.
+1. If choose publish on NPM: the tool publish changes on NPM.
+1. If choose publish on GitHub: the tool creates a [GitHub release](https://help.github.com/articles/creating-releases/). Notes for the release are taken from the changelog.
+1. If nothing was selected: the tool does nothing. No publish, no push, no creating releases.
 
 ## Translation tools
 

@@ -40,7 +40,8 @@ describe( 'dev-env/index', () => {
 				generateChangelogForSinglePackage: sandbox.stub(),
 				generateChangelogForSubPackages: sandbox.stub(),
 				generateChangelogForSubRepositories: sandbox.stub(),
-				generateSummaryChangelog: sandbox.stub()
+				generateSummaryChangelog: sandbox.stub(),
+				bumpVersions: sandbox.stub(),
 			}
 		};
 
@@ -72,6 +73,10 @@ describe( 'dev-env/index', () => {
 		mockery.registerMock(
 			'./release-tools/tasks/generatesummarychangelog',
 			stubs.releaseTools.generateSummaryChangelog
+		);
+		mockery.registerMock(
+			'./release-tools/tasks/bumpversions',
+			stubs.releaseTools.bumpVersions
 		);
 
 		tasks = proxyquire( '../lib/index', {
@@ -162,6 +167,19 @@ describe( 'dev-env/index', () => {
 					expect( response.result ).to.equal( true );
 					expect( stubs.releaseTools.generateSummaryChangelog.calledOnce ).to.equal( true );
 					expect( stubs.releaseTools.generateSummaryChangelog.firstCall.args[ 0 ] ).to.equal( 123 );
+				} );
+		} );
+	} );
+
+	describe( 'bumpVersions()', () => {
+		it( 'updates version of dependencies', () => {
+			stubs.releaseTools.bumpVersions.returns( Promise.resolve( { result: true } ) );
+
+			return tasks.bumpVersions( 123 )
+				.then( response => {
+					expect( response.result ).to.equal( true );
+					expect( stubs.releaseTools.bumpVersions.calledOnce ).to.equal( true );
+					expect( stubs.releaseTools.bumpVersions.firstCall.args[ 0 ] ).to.equal( 123 );
 				} );
 		} );
 	} );

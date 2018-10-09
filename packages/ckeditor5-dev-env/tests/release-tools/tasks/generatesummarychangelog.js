@@ -102,7 +102,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 	describe( 'generateSummaryChangelog()', () => {
 		it( 'generates a summary changelog for single package', () => {
 			stubs.getSubRepositoriesPaths.returns( {
-				packages: new Set( [
+				matched: new Set( [
 					packagesPaths.alpha
 				] ),
 				skipped: new Set( [
@@ -190,7 +190,7 @@ Patch releases (bug fixes, internal changes):
 			sandbox.stub( process, 'chdir' );
 
 			stubs.getSubRepositoriesPaths.returns( {
-				packages: new Set( [
+				matched: new Set( [
 					packagesPaths.alpha
 				] ),
 				skipped: new Set( [
@@ -249,7 +249,7 @@ Patch releases (bug fixes, internal changes):
 
 		it( 'attaches notes from commits in the package', () => {
 			stubs.getSubRepositoriesPaths.returns( {
-				packages: new Set( [
+				matched: new Set( [
 					packagesPaths.alpha
 				] ),
 				skipped: new Set( [
@@ -348,7 +348,7 @@ Changelog entries generated from commits.
 
 		it( 'allows generating changelog for main repository', () => {
 			stubs.getSubRepositoriesPaths.returns( {
-				packages: new Set(),
+				matched: new Set(),
 				skipped: new Set( [
 					packagesPaths.alpha,
 					packagesPaths.beta,
@@ -433,7 +433,7 @@ Changelog entries generated from commits.
 
 		it( 'allows restricting the packages scope', () => {
 			stubs.getSubRepositoriesPaths.returns( {
-				packages: new Set(),
+				matched: new Set(),
 				skipped: new Set()
 			} );
 
@@ -454,6 +454,7 @@ Changelog entries generated from commits.
 					expect( stubs.getSubRepositoriesPaths.firstCall.args[ 0 ] ).to.deep.equal( {
 						cwd: options.cwd,
 						packages: options.packages,
+						skipMainRepository: true,
 						skipPackages,
 						scope
 					} );
@@ -462,7 +463,7 @@ Changelog entries generated from commits.
 
 		it( 'does not generate the changelog if user provides "skip" as new version', () => {
 			stubs.getSubRepositoriesPaths.returns( {
-				packages: new Set( [
+				matched: new Set( [
 					packagesPaths.alpha
 				] ),
 				skipped: new Set( [
@@ -510,7 +511,7 @@ Changelog entries generated from commits.
 
 		it( 'does not attach the "Dependencies" header if any dependency has not been added or changed', () => {
 			stubs.getSubRepositoriesPaths.returns( {
-				packages: new Set( [
+				matched: new Set( [
 					packagesPaths.alpha
 				] ),
 				skipped: new Set( [
@@ -563,7 +564,7 @@ Changelog entries generated from commits.
 		describe( 'additional notes for group of commits', () => {
 			it( 'are visible when dependencies has been added or changed', () => {
 				stubs.getSubRepositoriesPaths.returns( {
-					packages: new Set(),
+					matched: new Set(),
 					skipped: new Set( [
 						packagesPaths.alpha,
 						packagesPaths.beta,
@@ -620,7 +621,7 @@ Changelog entries generated from commits.
 
 			it( 'are hidden when dependencies has not been added or changed', () => {
 				stubs.getSubRepositoriesPaths.returns( {
-					packages: new Set(),
+					matched: new Set(),
 					skipped: new Set( [
 						packagesPaths.alpha,
 						packagesPaths.beta,

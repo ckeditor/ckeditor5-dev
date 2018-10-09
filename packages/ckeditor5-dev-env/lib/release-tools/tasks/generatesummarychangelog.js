@@ -53,18 +53,21 @@ module.exports = function generateSummaryChangelog( options ) {
 		cwd: options.cwd,
 		packages: options.packages,
 		scope: options.scope || null,
-		skipPackages: options.skipPackages || []
+		skipPackages: options.skipPackages || [],
+		skipMainRepository: true
 	} );
 
+	// The main repository must be at the end because its changelog is a summary of all changes that have been done.
 	if ( !options.skipMainRepository ) {
-		pathsCollection.packages.add( options.cwd );
+		pathsCollection.skipped.delete( options.cwd );
+		pathsCollection.matched.add( options.cwd );
 	}
 
 	const newVersion = options.newVersion || null;
 
 	const generatedChangelogMap = new Map();
 
-	return executeOnPackages( pathsCollection.packages, generateSummaryChangelogForSingleRepository )
+	return executeOnPackages( pathsCollection.matched, generateSummaryChangelogForSingleRepository )
 		.then( () => {
 			displayGeneratedChangelogs( generatedChangelogMap );
 
@@ -229,7 +232,7 @@ module.exports = function generateSummaryChangelog( options ) {
 			}
 
 			// If package is not installed locally, we aren't able to get the changelog entries.
-			if ( !pathsCollection.skipped.has( currentPackagePath ) && !pathsCollection.packages.has( currentPackagePath ) ) {
+			if ( !pathsCollection.skipped.has( currentPackagePath ) && !pathsCollection.matched.has( currentPackagePath ) ) {
 				continue;
 			}
 

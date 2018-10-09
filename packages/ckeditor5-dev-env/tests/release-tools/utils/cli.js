@@ -133,7 +133,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			} );
 		} );
 
-		describe( 'confirmRelease()', () => {
+		describe( 'confirmUpdatingVersions()', () => {
 			it( 'displays packages and their versions (current and proposed) to release', () => {
 				const packagesMap = new Map();
 
@@ -146,11 +146,11 @@ describe( 'dev-env/release-tools/utils', () => {
 					version: '0.7.1'
 				} );
 
-				return cli.confirmRelease( packagesMap )
+				return cli.confirmUpdatingVersions( packagesMap )
 					.then( () => {
 						const question = questionItems[ 0 ];
 
-						expect( question.message ).to.match( /^Packages to release:/ );
+						expect( question.message ).to.match( /^Packages and their old and new versions:/ );
 						expect( question.message ).to.match( /"@ckeditor\/ckeditor5-engine": v1\.0\.0 => v1\.1\.0/ );
 						expect( question.message ).to.match( /"@ckeditor\/ckeditor5-core": v0\.7\.0 => v0\.7\.1/ );
 						expect( question.message ).to.match( /Continue\?$/ );
@@ -167,7 +167,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				packagesMap.set( '@ckeditor/ckeditor5-link', {} );
 				packagesMap.set( '@ckeditor/ckeditor5-build-classic', {} );
 
-				return cli.confirmRelease( packagesMap )
+				return cli.confirmUpdatingVersions( packagesMap )
 					.then( () => {
 						const packagesAsArray = questionItems[ 0 ].message
 							.split( '\n' )
