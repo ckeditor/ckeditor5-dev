@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [2.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@2.0.2...@ckeditor/jsdoc-plugins@2.1.0) (2018-10-09)
+
+### Features
+
+* Added missing `@link` part validation to JSDoc validation. Closes [#433](https://github.com/ckeditor/ckeditor5-dev/issues/433). ([41c3014](https://github.com/ckeditor/ckeditor5-dev/commit/41c3014))
+
+
 ## [2.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@2.0.1...@ckeditor/jsdoc-plugins@2.0.2) (2018-10-02)
 
 ### Other changes

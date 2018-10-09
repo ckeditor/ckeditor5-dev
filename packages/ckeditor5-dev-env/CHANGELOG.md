@@ -1,6 +1,34 @@
 Changelog
 =========
 
+## [13.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@12.0.2...@ckeditor/ckeditor5-dev-env@13.0.0) (2018-10-09)
+
+### Features
+
+* Releasing packages has been split from single step to two. Both steps support a `dry-run` mode which allows testing every step of the release process without publishing anything. Closes [#427](https://github.com/ckeditor/ckeditor5-dev/issues/427). ([f00cd31](https://github.com/ckeditor/ckeditor5-dev/commit/f00cd31))
+
+  For tagging repositories use `tasks.bumpVersions()` which updates version across all packages in the project. Before starting the updating process, the task validates whether all ingredients are defined (mostly whether changelogs were generated).
+
+  For publishing changes use `tasks.releaseSubRepositories()` which cares about publishing changes on NPM and/or GitHub. It checks versions of packages published on NPM and GitHub so there is no risk to publish the same changes twice.
+
+  Both tasks contain a dry-run mode which allows testing the whole process without a pain about pushing or publishing. The dry-run mode prints every called command on the screen. Instead of publishing package, it creates an archive that contains content which will be published. All commits made by `npm version` (and its hooks like `pre` or `post`) will be removed.
+
+### Bug fixes
+
+* Fixed invalid key name. ([2413072](https://github.com/ckeditor/ckeditor5-dev/commit/2413072))
+
+### BREAKING CHANGES
+
+* `tasks.releaseSubRepositories()` does not updates versions any more. Use it together with `tasks.bumpVersions()`.
+* `cli.configureReleaseOptions()` returns `npm` and `github` keys (and opposite values) instead of `skipNpm` and `skipGithub`
+
+BREAKNG CHANGES: `getSubRepositoriesPaths()` returns an object that contains two keys: `matched` and `skipped`. Was: `packages` and `skipped`.
+
+### NOTE
+
+* `tasks.generateChangelogForSubRepositories()` accepts `skipMainRepository` option which is passed to `getSubRepositoriesPaths()` util. If `skipMainRepository` option is set on true, the package defined in `options.cwd` will be added as `skipped`, if on false, as `matched`.
+
+
 ## [12.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@12.0.1...@ckeditor/ckeditor5-dev-env@12.0.2) (2018-10-02)
 
 ### Bug fixes
