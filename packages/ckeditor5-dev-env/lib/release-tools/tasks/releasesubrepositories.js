@@ -562,7 +562,8 @@ module.exports = function releaseSubRepositories( options ) {
 	//
 	// @returns {Promise}
 	function removeReleaseArchives() {
-		if ( !releaseOptions.npm ) {
+		// This step should be skipped if packages won't be released on NPM or if dry run mode is disabled.
+		if ( !releaseOptions.npm || !dryRun ) {
 			return Promise.resolve();
 		}
 
