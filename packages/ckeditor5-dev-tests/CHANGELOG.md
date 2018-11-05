@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## [13.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.0.3...@ckeditor/ckeditor5-dev-tests@13.1.0) (2018-11-05)
+
+### Features
+
+* Added meta "viewport" to the manual test template to make testing on mobiles easier. Closes [#450](https://github.com/ckeditor/ckeditor5-dev/issues/450). ([fa96dac](https://github.com/ckeditor/ckeditor5-dev/commit/fa96dac))
+
+### Other changes
+
+* The `.rtf` files are now loaded via `raw-loader`. Closes [#448](https://github.com/ckeditor/ckeditor5-dev/issues/448). ([769cec0](https://github.com/ckeditor/ckeditor5-dev/commit/769cec0))
+
+
 ## [13.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.0.2...@ckeditor/ckeditor5-dev-tests@13.0.3) (2018-10-02)
 
 Internal changes only (updated dependencies, documentation, etc.).
