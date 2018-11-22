@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## [13.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.1.0...@ckeditor/ckeditor5-dev-tests@13.1.1) (2018-11-22)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
 ## [13.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.0.3...@ckeditor/ckeditor5-dev-tests@13.1.0) (2018-11-05)
 
 ### Features
