@@ -11,6 +11,9 @@
     "eslintconfig"
   ],
   "main": ".eslintrc.js",
+  "dependencies": {
+    "eslint-plugin-ckeditor5-rules": "^1.0.0"
+  },
   "peerDependencies": {
     "eslint": ">=3.0.0"
   },
