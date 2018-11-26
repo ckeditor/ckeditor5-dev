@@ -10,6 +10,9 @@
     "ckeditor",
     "eslintplugin"
   ],
+  "peerDependencies": {
+    "eslint": ">=3.0.0"
+  },
   "main": "lib/index.js",
   "author": "CKSource (http://cksource.com/)",
   "license": "MIT",
