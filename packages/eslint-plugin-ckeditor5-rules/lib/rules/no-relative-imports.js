@@ -9,7 +9,7 @@ module.exports = {
 			category: 'CKEditor5'
 		},
 		fixable: 'code',
-		schema: [] // no options
+		schema: []
 	},
 	create( context ) {
 		return {
