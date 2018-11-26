@@ -1,7 +1,12 @@
+/**
+ * @license Copyright (c) 2003-2018, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 'use strict';
 
 module.exports = {
 	rules: {
-		'no-relative-imports': require('./rules/no-relative-imports')
+		'no-relative-imports': require( './rules/no-relative-imports' )
 	}
 };
