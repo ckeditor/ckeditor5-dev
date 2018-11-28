@@ -19,9 +19,9 @@ module.exports = {
 		expect: true,
 		sinon: true
 	},
-	// plugins: [
-	// 	'ckeditor5-rules'
-	// ],
+	plugins: [
+		'ckeditor5-rules'
+	],
 	rules: {
 		// ## Possible errors
 		// Offing because we keep the browser env disabled so when using a console you need to define
@@ -291,7 +291,7 @@ module.exports = {
 		"yield-star-spacing": [
 			"error",
 			"after"
-		]
-		// 'ckeditor5-rules/no-relative-imports': 'error'
+		],
+		'ckeditor5-rules/no-relative-imports': 'error'
 	}
 };
