@@ -1,5 +1,5 @@
 CKEditor 5 ESLint Plugins
-========================
+=========================
 
 A set of plugins used by the [CKEditor 5](https://ckeditor.com) team for [Eslint](https://eslint.org/) 
 
@@ -18,7 +18,7 @@ Configure ESLint with a `.eslintrc` file using the following contents:
 	// ...
 	plugins: [
 		// ...
-		'ckeditor5-rules' // Add the plugin to the Linter.
+		'ckeditor5-rules' // Add the plugin to the linter.
 	],
 	rules: {
 		'ckeditor5-rules/no-relative-imports': 'error'
@@ -28,7 +28,9 @@ Configure ESLint with a `.eslintrc` file using the following contents:
 }
 ```
 
-## no-relative-imports
+## Rules
+
+### no-relative-imports
 
 A rule that inspects for relative imports to other [CKEditor 5](https://ckeditor.com)'s packages:
 
