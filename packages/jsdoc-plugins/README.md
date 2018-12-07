@@ -2,30 +2,67 @@
 
 ## Overview
 
-There're 2 types of references available in the plugin. External references works everywhere, but have long names, so this plugin enables references with shorter names.
+This repository consist of few plugins that validate and simplify usage of the https://github.com/jsdoc3/jsdoc, add few custom tags and fixes support for the inheritance and other common problems.
 
+The list of plugins goes as follows:
+* lib/validator/validator - validates usage of JSDoc types
+* lib/export-fixer/export-fixer - fixes an error with `export default` syntax
+* lib/custom-tags/error - provides support for custom `@error` tag
+* lib/relation-fixer - fixes problem with inheritance
+* lib/longname-fixer/longname-fixer - enables short notation
+* lib/utils/doclet-logger - util that enables logging output into the `<CWD>/docs/api/output.json`
 
-## External references
+* lib/event-extender/event-extender - CKEditor 5-specific util, that inserts parameter to all events.
+* lib/custom-tags/observable - CKEditor 5-specific tag for observable properties
+* lib/observable-event-provider - CKEditor 5-specific
+
+## Usage
+
+### JSDoc configuration
+
+To enable above plugins they need to be listed in the `plugins` array of JSDoc config file.
+
+```json
+{
+    "plugins": [
+        "node_modules/@ckeditor/jsdoc-plugins/lib/validator/validator",
+        "node_modules/@ckeditor/jsdoc-plugins/lib/longname-fixer/longname-fixer"
+    ],
+    // ...
+}
+```
+
+Then, having the https://github.com/jsdoc3/jsdoc installed, we need to
+
+```bash
+jsdoc -c path/to/config.json
+```
+
+## Types of references
+
+There're 2 types of references available in the plugin. External references work everywhere but have long names, so the `lib/longname-fixer/longname-fixer.js` plugin enables references with shorter names.
+
+### External references / Full references
 
 External references start with `module:`.
 
 ```
 class Editor {
-	/**
-	 * Method execute takes a command.
-	 *
-	 * @param {module:command~Command} command
-	 */
+    /**
+     * Method execute takes a command.
+     *
+     * @param {module:command~Command} command
+     */
 
-	execute( command ) {
+    execute( command ) {
 
-	}
+    }
 }
 ```
 
-## Internal references
+### Internal references
 
-Short references to methods and properties are available from JSDoc comments inside the same class or interface. These references **cannot** link to symbols inside another classes / interfaces even if they are in the same module.
+Short references to methods and properties are available from JSDoc comments inside the same class or interface. These references **cannot** link to symbols inside another classes/interfaces even if they are in the same module.
 
 Here, two types of references are available.
 
@@ -36,26 +73,26 @@ But you can use them as well for the methods and members, e.g. `{@link ~Editor#c
 
 ```
 class Editor {
-	/**
-	 * This property represents {@link ~Editor editor} name.
-	 *
-	 * @member {String} #name
-	 */
+    /**
+     * This property represents {@link ~Editor editor} name.
+     *
+     * @member {String} #name
+     */
 
-	/**
-	 * This property represents editor version.
-	 * See editor {@link #name name}.
-	 *
-	 * @member {String} #version
-	 */
+    /**
+     * This property represents editor version.
+     * See editor {@link #name name}.
+     *
+     * @member {String} #version
+     */
 
-	 /**
-	  * Get version of the editor
-	  * Note - '@method getVersion' isn't needed here
-	  */
-	 getVersion() {
-		 return this.version;
-	 }
+     /**
+      * Get version of the editor
+      * Note - '@method getVersion' isn't needed here
+      */
+     getVersion() {
+         return this.version;
+     }
 }
 ```
 
@@ -73,22 +110,23 @@ Short reference can be either `event:eventName` or `eventName`.
 
 ```
 class FocusTracker {
-	/**
-	 * @private
-	 * @fires blur
-	 */
-	_blur() { }
+    /**
+     * @private
+     * @fires blur
+     */
+    _blur() { }
 
-	/**
-	 * @fires focus
-	 * @fires module:focustracker~FocusTracker#event:focus // this will link to the same event as above
-	 */
+    /**
+     * @fires focus
+     * @fires module:focustracker~FocusTracker#event:focus // this will link to the same event as above
+     */
 
-	/**
-	 * @event blur
-	 */
+    /**
+     * @event blur
+     */
 }
 
+// Note: the following event will be bound to the `FocusTracker` class.
 /**
  * @event focus
  */
@@ -99,6 +137,8 @@ class FocusTracker {
 ### Overview
 
 `doclet-validator` plugin is supposed to validate references and types in JSDoc comments.
+
+Note that the `@module` tag is required on top of each file to make the validation possible. Without that tag, the validator will complain with the message:
 
 During the JSDoc compilation the errors are thrown to the standard output for each invalid reference / type.
 
@@ -129,7 +169,7 @@ These types can be used together, e.g.:
 
 ```
 /**
- * @param {Map<*>} map
+ * @param {Map.<*>} map
  * @param {'left'|'right'} direction
  * @param {Object.<String, *>} dictionary
  * @returns {Array.<Number|module:somemodule~SomeInteface>}
@@ -142,7 +182,7 @@ Basic types and generic types are listed in `jsdoc/validator/types.js`.
 
 ### Unsupported short references
 
-For now there're still few unsupported tags, which require full references:
+For now, there're still few unsupported tags, which require full references:
 
 * `@param`
 * `@typedef`
@@ -156,20 +196,22 @@ There're also tags which are not validated for now:
 
 ## Inheritance of class members
 
+This feature is implemented by the `lib/relation-fixer/index.js` plugin.
+
 ### Overview
 
 As of version 3.4.3 JSDoc [does not support inheritance of static members](https://github.com/jsdoc3/jsdoc/issues/1229).
 
 If class B extends class A and class A has a static property, JSDoc will not output documentation of that static property to documentation of class B.
 
-`relation-fixer` plugin checks for such cases and updates documentation of child classes with documentation of inherited, implemented or mixed static members.
+zThe `lib/relation-fixer` plugin checks for such cases and updates documentation of child classes with documentation of inherited, implemented or mixed static members.
 
-It also adds additional properties to doclets of classes, interfaces and mixins to show related doclets. These properties are:
+It also adds additional properties to doclets of classes, interfaces, and mixins to show related doclets. These properties are:
 
-* `augmentsNested` - array of longnames of all parent classes,
-* `implementsNested` - array of longnames of implemented interfaces,
-* `mixesNested` - array of longnames of mixed mixins,
-* `descendants` - array of longnames of entities which implement, mix or extend the doclet.
+* `augmentsNested` - an array of references to all parent classes,
+* `implementsNested` - an array of references to implemented interfaces,
+* `mixesNested` - an array of references to mixed mixins,
+* `descendants` - an array of references to entities which implement, mix or extend the doclet.
 
 ## Changelog
 
