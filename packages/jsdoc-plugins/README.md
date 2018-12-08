@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository consist of few plugins that validate and simplify usage of the https://github.com/jsdoc3/jsdoc, add few custom tags and fixes support for the inheritance and other common problems.
+This repository consists of few plugins that i.a. validate and simplify usage of the https://github.com/jsdoc3/jsdoc. They also add support for a few custom tags and fix support for the inheritance and other common problems.
 
 The list of plugins goes as follows:
 * lib/validator/validator.js - validates usage of JSDoc types
