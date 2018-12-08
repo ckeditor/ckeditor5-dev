@@ -5,12 +5,12 @@
 This repository consist of few plugins that validate and simplify usage of the https://github.com/jsdoc3/jsdoc, add few custom tags and fixes support for the inheritance and other common problems.
 
 The list of plugins goes as follows:
-* lib/validator/validator - validates usage of JSDoc types
-* lib/export-fixer/export-fixer - fixes an error with `export default` syntax
-* lib/custom-tags/error - provides support for the custom `@error` tag
-* lib/relation-fixer - fixes problem with inheritance
-* lib/longname-fixer/longname-fixer - enables short notation
-* lib/utils/doclet-logger - enables logging output into the `<CWD>/docs/api/output.json`
+* lib/validator/validator.js - validates usage of JSDoc types
+* lib/export-fixer/export-fixer.js - fixes an error with `export default` syntax
+* lib/custom-tags/error.js - provides support for the custom `@error` tag
+* lib/relation-fixer.js - fixes problem with inheritance
+* lib/longname-fixer/longname-fixer.js - enables short notation
+* lib/utils/doclet-logger.js - enables logging output into the `<CWD>/docs/api/output.json`
 
 * lib/event-extender/event-extender - CKEditor 5 specific util, that inserts parameter to all events.
 * lib/custom-tags/observable - CKEditor 5 specific tag for observable properties
@@ -40,26 +40,28 @@ jsdoc -c path/to/config.json
 
 ## Types of references
 
-There're 2 types of references available inside JSDoc comments. External references work everywhere but have long names, so the `lib/longname-fixer/longname-fixer.js` plugin enables referencing using shorter names whenever it's possible.
+The reference system is improved by the `lib/longname-fixer/longname-fixer.js` plugin.
 
-### External references / Full references
+### Overview
 
-External references start with `module:`. The first part of that syntax needs to match the `@module` tag in the corresponding class.
+There're 2 types of references available inside JSDoc comments. First of them are called `Full references`. They work everywhere but the con of using them are long names. The second ones are short references that can be used to point symbols that are present in the same file.
+
+### Full references
+
+Full references start with `module:`. The first part of that syntax needs to match the `@module` tag in the corresponding class.
 
 Here are a few examples:
 * `@param {module:command~Command}`
 * `{@link module:core/editor/editor~Editor editor}`
 * `@member {module:core/editor/editor~Editor}`
 
-### Internal references / Short references
+### Short references
 
-Short references to methods and properties are available when pointing to the same class or interface. These references **cannot** link to symbols inside another classes or interfaces even if they are in the same module.
+There are two types of short references available.
 
-Here, two types of short references are available.
+References starting with `#` are available for members methods and events, e.g. `{@link #create}`. These refs can be used to point members and methods inside the same class or interface.
 
-References starting with `#` are available for members and methods, e.g. `{@link #create}`.
-
-References starting with `~` are available for classes and interfaces, e.g. `{@link ~Editor}` but you can use them as well for the methods and members, e.g. `{@link ~Editor#create}`.
+References starting with `~` are available to point classes and interfaces, e.g. `{@link ~Editor}`. **There's a known issue with pointing things that are declared later, the full ref should be used then instead.**
 
 ```js
 class Editor {
@@ -78,7 +80,7 @@ class Editor {
 
      /**
       * Get version of the editor
-      * Note - '@method getVersion' isn't needed here
+      * Note - '@method getVersion' isn't needed here because the method is declared.
       */
      getVersion() {
          return this.version;
@@ -91,9 +93,9 @@ class Editor {
 
 Events can be assigned to the classes.
 
-Tags `@fires` and `@event` work well with external references to the events and with internal references to the current `class` / `interface` / `mixin`.
+The `@fires` and `@event` tags work well with full references and with short references to the current `class` / `interface` / `mixin`.
 
-Events can be declared in class bodies and after them (internal references are available in both cases).
+Events can be declared in class bodies and after them (short references are available in both cases).
 
 Full reference to the events must have the following syntax: `module:somemodule~SomeClass#event:eventName`. Note that `event:` part is required here.
 Short reference can be either `event:eventName` or `eventName`.
@@ -126,7 +128,7 @@ class FocusTracker {
 
 ### Overview
 
-`doclet-validator` plugin is supposed to validate references and types in JSDoc comments.
+The `lib/validator/validator.js` plugin is supposed to validate references and check types in JSDoc comments.
 
 Note that the `@module` tag is required on top of each file to make the validation possible. Without that tag, the validator will complain about it with the message: `Memberof property should start with 'module:'`.
 
@@ -179,7 +181,7 @@ For now, there are still few unsupported tags, which require full references:
 
 ### Missing validation
 
-There're also tags which are not validated for now:
+There're also tags which are not validated:
 
 * `@mixes`
 * `@augments` / `@extends`
