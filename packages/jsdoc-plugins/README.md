@@ -7,20 +7,20 @@ This repository consist of few plugins that validate and simplify usage of the h
 The list of plugins goes as follows:
 * lib/validator/validator - validates usage of JSDoc types
 * lib/export-fixer/export-fixer - fixes an error with `export default` syntax
-* lib/custom-tags/error - provides support for custom `@error` tag
+* lib/custom-tags/error - provides support for the custom `@error` tag
 * lib/relation-fixer - fixes problem with inheritance
 * lib/longname-fixer/longname-fixer - enables short notation
-* lib/utils/doclet-logger - util that enables logging output into the `<CWD>/docs/api/output.json`
+* lib/utils/doclet-logger - enables logging output into the `<CWD>/docs/api/output.json`
 
-* lib/event-extender/event-extender - CKEditor 5-specific util, that inserts parameter to all events.
-* lib/custom-tags/observable - CKEditor 5-specific tag for observable properties
-* lib/observable-event-provider - CKEditor 5-specific
+* lib/event-extender/event-extender - CKEditor 5 specific util, that inserts parameter to all events.
+* lib/custom-tags/observable - CKEditor 5 specific tag for observable properties
+* lib/observable-event-provider - CKEditor 5 specific
 
 ## Usage
 
 ### JSDoc configuration
 
-To enable above plugins they need to be listed in the `plugins` array of JSDoc config file.
+To enable above plugins you need to list them in the `plugins` array of JSDoc config file.
 
 ```json
 {
@@ -32,7 +32,7 @@ To enable above plugins they need to be listed in the `plugins` array of JSDoc c
 }
 ```
 
-Then, having the https://github.com/jsdoc3/jsdoc installed, we need to
+Then, having the https://github.com/jsdoc3/jsdoc installed, the only thing to do is to call the command with the `-c` flag pointing to the configuration file.
 
 ```bash
 jsdoc -c path/to/config.json
@@ -40,38 +40,28 @@ jsdoc -c path/to/config.json
 
 ## Types of references
 
-There're 2 types of references available in the plugin. External references work everywhere but have long names, so the `lib/longname-fixer/longname-fixer.js` plugin enables references with shorter names.
+There're 2 types of references available inside JSDoc comments. External references work everywhere but have long names, so the `lib/longname-fixer/longname-fixer.js` plugin enables referencing using shorter names whenever it's possible.
 
 ### External references / Full references
 
-External references start with `module:`.
+External references start with `module:`. The first part of that syntax needs to match the `@module` tag in the corresponding class.
 
-```
-class Editor {
-    /**
-     * Method execute takes a command.
-     *
-     * @param {module:command~Command} command
-     */
+Here are a few examples:
+* `@param {module:command~Command}`
+* `{@link module:core/editor/editor~Editor editor}`
+* `@member {module:core/editor/editor~Editor}`
 
-    execute( command ) {
+### Internal references / Short references
 
-    }
-}
-```
+Short references to methods and properties are available when pointing to the same class or interface. These references **cannot** link to symbols inside another classes or interfaces even if they are in the same module.
 
-### Internal references
-
-Short references to methods and properties are available from JSDoc comments inside the same class or interface. These references **cannot** link to symbols inside another classes/interfaces even if they are in the same module.
-
-Here, two types of references are available.
+Here, two types of short references are available.
 
 References starting with `#` are available for members and methods, e.g. `{@link #create}`.
 
-References starting with `~` are available for classes and interfaces, e.g. `{@link ~Editor}`.
-But you can use them as well for the methods and members, e.g. `{@link ~Editor#create}`
+References starting with `~` are available for classes and interfaces, e.g. `{@link ~Editor}` but you can use them as well for the methods and members, e.g. `{@link ~Editor#create}`.
 
-```
+```js
 class Editor {
     /**
      * This property represents {@link ~Editor editor} name.
@@ -105,10 +95,10 @@ Tags `@fires` and `@event` work well with external references to the events and 
 
 Events can be declared in class bodies and after them (internal references are available in both cases).
 
-Full reference to the events must have following syntax: `module:somemodule~SomeClass#event:eventName`. Note that `event:` part is required here.
+Full reference to the events must have the following syntax: `module:somemodule~SomeClass#event:eventName`. Note that `event:` part is required here.
 Short reference can be either `event:eventName` or `eventName`.
 
-```
+```js
 class FocusTracker {
     /**
      * @private
@@ -138,9 +128,9 @@ class FocusTracker {
 
 `doclet-validator` plugin is supposed to validate references and types in JSDoc comments.
 
-Note that the `@module` tag is required on top of each file to make the validation possible. Without that tag, the validator will complain with the message:
+Note that the `@module` tag is required on top of each file to make the validation possible. Without that tag, the validator will complain about it with the message: `Memberof property should start with 'module:'`.
 
-During the JSDoc compilation the errors are thrown to the standard output for each invalid reference / type.
+During the JSDoc compilation, the errors are thrown to the standard output for each invalid reference or type.
 
 ### Validated tags
 
@@ -167,7 +157,7 @@ There're few kind of types available with following syntax:
 
 These types can be used together, e.g.:
 
-```
+```js
 /**
  * @param {Map.<*>} map
  * @param {'left'|'right'} direction
@@ -176,13 +166,13 @@ These types can be used together, e.g.:
  */
 ```
 
-Basic types and generic types are listed in `jsdoc/validator/types.js`.
+Basic types and generic types are listed in the `jsdoc/validator/types.js`.
 
 ## TODO
 
 ### Unsupported short references
 
-For now, there're still few unsupported tags, which require full references:
+For now, there are still few unsupported tags, which require full references:
 
 * `@param`
 * `@typedef`
@@ -204,7 +194,7 @@ As of version 3.4.3 JSDoc [does not support inheritance of static members](https
 
 If class B extends class A and class A has a static property, JSDoc will not output documentation of that static property to documentation of class B.
 
-zThe `lib/relation-fixer` plugin checks for such cases and updates documentation of child classes with documentation of inherited, implemented or mixed static members.
+The `lib/relation-fixer` plugin checks for such cases and updates documentation of child classes with documentation of inherited, implemented or mixed static members.
 
 It also adds additional properties to doclets of classes, interfaces, and mixins to show related doclets. These properties are:
 
