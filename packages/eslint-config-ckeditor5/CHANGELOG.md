@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## [1.0.9](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@1.0.7...eslint-config-ckeditor5@1.0.9) (2018-12-19)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
 ## [1.0.7](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@1.0.5...eslint-config-ckeditor5@1.0.7) (2017-12-01)
 
 ### Bug fixes

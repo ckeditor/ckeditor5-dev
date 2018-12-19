@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [13.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.1.1...@ckeditor/ckeditor5-dev-tests@13.1.2) (2018-12-19)
+
+### Other changes
+
+* Enforce Edge 17 in BrowserStack tests. ([56ae7d3](https://github.com/ckeditor/ckeditor5-dev/commit/56ae7d3))
+
+
 ## [13.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.1.0...@ckeditor/ckeditor5-dev-tests@13.1.1) (2018-11-22)
 
 Internal changes only (updated dependencies, documentation, etc.).
