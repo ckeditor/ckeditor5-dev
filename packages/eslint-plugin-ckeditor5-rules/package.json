@@ -1,28 +1,22 @@
 {
-  "name": "eslint-config-ckeditor5",
-  "version": "1.0.9",
+  "name": "eslint-plugin-ckeditor5-rules",
+  "version": "0.0.1",
   "description": "CKEditor 5 ESLint preset.",
   "keywords": [
-    "style guide",
     "eslint",
+    "imports",
     "config",
     "lint",
     "ckeditor",
-    "eslintconfig"
+    "eslintplugin"
   ],
-  "main": ".eslintrc.js",
-  "dependencies": {
-    "eslint-plugin-ckeditor5-rules": "^0.0.1"
-  },
   "peerDependencies": {
     "eslint": ">=3.0.0"
   },
-  "files": [
-    ".eslintrc.js"
-  ],
+  "main": "lib/index.js",
   "author": "CKSource (http://cksource.com/)",
   "license": "MIT",
-  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/eslint-config-ckeditor5",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/eslint-plugin-ckeditor5-rules",
   "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
   "repository": "https://github.com/ckeditor/ckeditor5-dev"
 }

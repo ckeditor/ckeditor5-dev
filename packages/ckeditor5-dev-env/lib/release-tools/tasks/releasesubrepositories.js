@@ -279,9 +279,16 @@ module.exports = function releaseSubRepositories( options ) {
 
 			return getLastRelease( releaseDetails.repositoryOwner, releaseDetails.repositoryName )
 				.then( ( { data } ) => {
-					const githubVersion = data.tag_name.replace( /^v/, '' );
+					// It can be `null` if there is no releases on GitHub.
+					let githubVersion = data.tag_name;
 
-					logDryRun( `Versions: package.json: "${ releaseDetails.version }", GitHub: "${ githubVersion }".` );
+					if ( githubVersion ) {
+						githubVersion = data.tag_name.replace( /^v/, '' );
+					}
+
+					logDryRun(
+						`Versions: package.json: "${ releaseDetails.version }", GitHub: "${ githubVersion || 'initial release' }".`
+					);
 
 					releaseDetails.githubVersion = githubVersion;
 					releaseDetails.shouldReleaseOnGithub = githubVersion !== releaseDetails.version;
@@ -308,6 +315,15 @@ module.exports = function releaseSubRepositories( options ) {
 			return new Promise( ( resolve, reject ) => {
 				github.repos.getLatestRelease( requestParams, ( err, responses ) => {
 					if ( err ) {
+						// No releases on GitHub. It will be the first one.
+						if ( err.message.toLowerCase() == 'not found' ) {
+							return resolve( {
+								data: {
+									tag_name: null
+								}
+							} );
+						}
+
 						return reject( err );
 					}
 
@@ -546,7 +562,8 @@ module.exports = function releaseSubRepositories( options ) {
 	//
 	// @returns {Promise}
 	function removeReleaseArchives() {
-		if ( !releaseOptions.npm ) {
+		// This step should be skipped if packages won't be released on NPM or if dry run mode is disabled.
+		if ( !releaseOptions.npm || !dryRun ) {
 			return Promise.resolve();
 		}
 
