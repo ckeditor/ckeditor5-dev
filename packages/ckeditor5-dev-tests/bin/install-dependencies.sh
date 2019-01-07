@@ -4,7 +4,7 @@ set -e
 
 npm install -g mgit2
 
-# Creates a `mgit.json` file.
+# Creates an `mgit.json` file.
 ckeditor5-dev-tests-create-mgit-json
 
 # Adds a workspace definition to `package.json` (used by Yarn).
