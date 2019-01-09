@@ -85,7 +85,7 @@ module.exports = function getKarmaConfig( options ) {
 			},
 			CHROME_LOCAL: {
 				base: 'Chrome',
-				flags: [ '--disable-background-timer-throttling' ]
+				flags: [ '--disable-background-timer-throttling', '--js-flags="--expose-gc"' ]
 			},
 			BrowserStack_Edge: {
 				base: 'BrowserStack',
