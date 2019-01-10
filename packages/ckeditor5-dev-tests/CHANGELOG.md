@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [14.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.1.2...@ckeditor/ckeditor5-dev-tests@14.0.0) (2019-01-10)
+
+### Other changes
+
+* Changed scripts in the `@ckeditor/ckeditor5-dev-tests` package after switching development environment to Yarn. See [ckeditor/ckeditor5#1214](https://github.com/ckeditor/ckeditor5/issues/1214). ([18b0dd0](https://github.com/ckeditor/ckeditor5-dev/commit/18b0dd0))
+
+
 ## [13.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.1.1...@ckeditor/ckeditor5-dev-tests@13.1.2) (2018-12-19)
 
 ### Other changes
