@@ -22,6 +22,7 @@
     "istanbul-instrumenter-loader": "^3.0.0",
     "karma": "^3.0.0",
     "karma-browserstack-launcher": "^1.3.0",
+    "karma-coveralls": "^1.1.2",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-coverage": "^1.1.1",
@@ -61,7 +62,7 @@
     "ckeditor5-dev-tests-manual": "./bin/test-manual.js",
     "ckeditor5-dev-tests-travis": "./bin/test-travis.sh",
     "ckeditor5-dev-tests-create-mgit-json": "./bin/create-mgit-json.js",
-    "ckeditor5-dev-tests-create-lerna-json": "./bin/create-lerna-json.js",
+    "ckeditor5-dev-tests-add-workspace-to-package-json": "./bin/add-workspace-to-package-json.js",
     "ckeditor5-dev-tests-install-dependencies": "./bin/install-dependencies.sh",
     "ckeditor5-dev-tests-save-revision": "./bin/save-revision.js",
     "ckeditor5-dev-tests-check-dependencies": "./bin/check-dependencies.js"
