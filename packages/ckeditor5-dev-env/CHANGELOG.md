@@ -1,6 +1,21 @@
 Changelog
 =========
 
+## [13.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@13.0.1...@ckeditor/ckeditor5-dev-env@13.0.2) (2018-11-22)
+
+### Bug fixes
+
+* Small fixes for the tool that publishes the packages. Closes [#445](https://github.com/ckeditor/ckeditor5-dev/issues/445). Closes [#446](https://github.com/ckeditor/ckeditor5-dev/issues/446). ([c593561](https://github.com/ckeditor/ckeditor5-dev/commit/c593561))
+
+    * For the real release, the tool won't ask about removing ZIP archives that are created when dry run mode is active. See [#445](https://github.com/ckeditor/ckeditor5-dev/issues/445).
+    * Publishing a package for the first time on GitHub will work properly. It didn't work because GitHub API returned `Not Found` response and the tool couldn't understand it. See [#446](https://github.com/ckeditor/ckeditor5-dev/issues/446).
+
+
+## [13.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@13.0.0...@ckeditor/ckeditor5-dev-env@13.0.1) (2018-11-05)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
 ## [13.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@12.0.2...@ckeditor/ckeditor5-dev-env@13.0.0) (2018-10-09)
 
 ### Features

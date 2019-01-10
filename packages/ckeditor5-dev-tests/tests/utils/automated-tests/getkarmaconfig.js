@@ -78,7 +78,7 @@ describe( 'getKarmaConfig', () => {
 			process.env.BROWSER_STACK_ACCESS_KEY = 'access-key';
 		} );
 
-		// BROWSER_STACK_USERNAME=username BROWSER_STACK_ACCESS_KEY=access-key npm run test -- --files=autoformat
+		// BROWSER_STACK_USERNAME=username BROWSER_STACK_ACCESS_KEY=access-key yarn run test --files=autoformat
 		it( 'should be enabled when tests were called on a dev machine', () => {
 			// Removes the Travis variables. It protects tests on Travis where the env variables are set by default.
 			process.env.TRAVIS_EVENT_TYPE = null;

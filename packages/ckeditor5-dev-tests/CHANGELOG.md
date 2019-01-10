@@ -1,6 +1,36 @@
 Changelog
 =========
 
+## [14.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.1.2...@ckeditor/ckeditor5-dev-tests@14.0.0) (2019-01-10)
+
+### Other changes
+
+* Changed scripts in the `@ckeditor/ckeditor5-dev-tests` package after switching development environment to Yarn. See [ckeditor/ckeditor5#1214](https://github.com/ckeditor/ckeditor5/issues/1214). ([18b0dd0](https://github.com/ckeditor/ckeditor5-dev/commit/18b0dd0))
+
+
+## [13.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.1.1...@ckeditor/ckeditor5-dev-tests@13.1.2) (2018-12-19)
+
+### Other changes
+
+* Enforce Edge 17 in BrowserStack tests. ([56ae7d3](https://github.com/ckeditor/ckeditor5-dev/commit/56ae7d3))
+
+
+## [13.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.1.0...@ckeditor/ckeditor5-dev-tests@13.1.1) (2018-11-22)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
+## [13.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.0.3...@ckeditor/ckeditor5-dev-tests@13.1.0) (2018-11-05)
+
+### Features
+
+* Added meta "viewport" to the manual test template to make testing on mobiles easier. Closes [#450](https://github.com/ckeditor/ckeditor5-dev/issues/450). ([fa96dac](https://github.com/ckeditor/ckeditor5-dev/commit/fa96dac))
+
+### Other changes
+
+* The `.rtf` files are now loaded via `raw-loader`. Closes [#448](https://github.com/ckeditor/ckeditor5-dev/issues/448). ([769cec0](https://github.com/ckeditor/ckeditor5-dev/commit/769cec0))
+
+
 ## [13.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.0.2...@ckeditor/ckeditor5-dev-tests@13.0.3) (2018-10-02)
 
 Internal changes only (updated dependencies, documentation, etc.).

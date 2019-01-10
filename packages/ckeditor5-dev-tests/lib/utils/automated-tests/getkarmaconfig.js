@@ -91,7 +91,8 @@ module.exports = function getKarmaConfig( options ) {
 				base: 'BrowserStack',
 				os: 'Windows',
 				os_version: '10',
-				browser: 'edge'
+				browser: 'edge',
+				browser_version: '17.0'
 			},
 			BrowserStack_Safari: {
 				base: 'BrowserStack',
