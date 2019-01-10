@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [14.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@14.0.0...@ckeditor/ckeditor5-dev-tests@14.1.0) (2019-01-10)
+
+### Other changes
+
+* Compatibility with Node 10. ([9e47285](https://github.com/ckeditor/ckeditor5-dev/commit/9e47285))
+
+
 ## [14.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.1.2...@ckeditor/ckeditor5-dev-tests@14.0.0) (2019-01-10)
 
 ### Other changes
