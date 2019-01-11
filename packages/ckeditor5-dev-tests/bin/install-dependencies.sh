@@ -11,7 +11,7 @@ ckeditor5-dev-tests-create-mgit-json
 ckeditor5-dev-tests-add-workspace-to-package-json
 
 # Clones repositories to `packages/` directory.
-mgit bootstrap --recursive --resolver-path=@ckeditor/ckeditor5-dev-tests/lib/mgit-resolver.js
+mgit sync --recursive --resolver-path=@ckeditor/ckeditor5-dev-tests/lib/mgit-resolver.js
 
 # We need to ignore the newly created packages dir with all its content (see #203).
 echo -e "\npackages/**\n" >> .gitignore
