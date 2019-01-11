@@ -14,6 +14,7 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 tools.updateJSONFile( path.join( cwd, 'package.json' ), json => {
 	json.private = true;
 	json.workspaces = [
+		'*',
 		'packages/*'
 	];
 
