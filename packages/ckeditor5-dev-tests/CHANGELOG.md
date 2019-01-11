@@ -1,6 +1,20 @@
 Changelog
 =========
 
+## [15.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@15.0.0...@ckeditor/ckeditor5-dev-tests@15.0.1) (2019-01-11)
+
+### Bug fixes
+
+* Forgot to bump mgit2 itself. ([3f7a2b9](https://github.com/ckeditor/ckeditor5-dev/commit/3f7a2b9))
+
+
+## [15.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@14.1.0...@ckeditor/ckeditor5-dev-tests@15.0.0) (2019-01-11)
+
+### Other changes
+
+* Compatibility with `mgit2@0.10.0`. See [cksource/mgit2#82](https://github.com/cksource/mgit2/issues/82). ([b263242](https://github.com/ckeditor/ckeditor5-dev/commit/b263242))
+
+
 ## [14.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@14.0.0...@ckeditor/ckeditor5-dev-tests@14.1.0) (2019-01-10)
 
 ### Other changes
