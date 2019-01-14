@@ -19,3 +19,6 @@ $NPM_BIN/mgit sync --recursive --resolver-path=$(pwd)/node_modules/@ckeditor/cke
 echo -e "\npackages/**\n" >> .gitignore
 
 yarn install
+
+# Links current package to node_modules dependencies (see #470).
+$NPM_BIN/ckeditor5-dev-tests-link-package-to-node-modules
