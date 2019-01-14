@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [15.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@15.0.2...@ckeditor/ckeditor5-dev-tests@15.0.3) (2019-01-14)
+
+### Bug fixes
+
+* Link package inside its node_module's directory for tests. Closes [#470](https://github.com/ckeditor/ckeditor5-dev/issues/470). ([06dbb9f](https://github.com/ckeditor/ckeditor5-dev/commit/06dbb9f))
+
+
 ## [15.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@15.0.1...@ckeditor/ckeditor5-dev-tests@15.0.2) (2019-01-14)
 
 ### Bug fixes
