@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [15.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@15.0.1...@ckeditor/ckeditor5-dev-tests@15.0.2) (2019-01-14)
+
+### Bug fixes
+
+* The main repository should be added to yarn workspaces. Closes [ckeditor/ckeditor5-paragraph#39](https://github.com/ckeditor/ckeditor5-paragraph/issues/39). ([6a96700](https://github.com/ckeditor/ckeditor5-dev/commit/6a96700))
+
+
 ## [15.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@15.0.0...@ckeditor/ckeditor5-dev-tests@15.0.1) (2019-01-11)
 
 ### Bug fixes
