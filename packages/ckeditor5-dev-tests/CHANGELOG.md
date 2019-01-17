@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [15.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@15.0.3...@ckeditor/ckeditor5-dev-tests@15.1.0) (2019-01-17)
+
+### Other changes
+
+* Added the `'--js-flags="--expose-gc"'` flag to Karma Chrome launcher configuration. See [ckeditor/ckeditor5#1341](https://github.com/ckeditor/ckeditor5/issues/1341). ([f2c0d05](https://github.com/ckeditor/ckeditor5-dev/commit/f2c0d05))
+
+
 ## [15.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@15.0.2...@ckeditor/ckeditor5-dev-tests@15.0.3) (2019-01-14)
 
 ### Bug fixes
