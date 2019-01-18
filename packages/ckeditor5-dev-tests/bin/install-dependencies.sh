@@ -2,23 +2,46 @@
 
 set -e
 
-NPM_BIN=$(pwd)/node_modules/.bin
+# Current work directory.
+PACKAGE_ROOT=$(pwd)
 
-yarn add mgit2
+# Path to the executable in CWD.
+ROOT_BIN=${PACKAGE_ROOT}/node_modules/.bin
 
-# Creates an `mgit.json` file.
-$NPM_BIN/ckeditor5-dev-tests-create-mgit-json
+# Path to the testing environment.
+TEST_DIR=$(mktemp -d)
 
-# Adds a workspace definition to `package.json` (used by Yarn).
-$NPM_BIN/ckeditor5-dev-tests-add-workspace-to-package-json
+# Path to the executable in the testing environment.
+TEST_BIN=${TEST_DIR}/node_modules/.bin
+
+# Creates required files for Mgit and Yarn.
+echo '{}' > ${TEST_DIR}/package.json
+echo '{}' > ${TEST_DIR}/mgit.json
+mkdir ${TEST_DIR}/packages
+
+# Prepare `package.json`. It creates a "temporary" package.
+${ROOT_BIN}/ckeditor5-dev-tests-prepare-package-json ${PACKAGE_ROOT} ${TEST_DIR}
+
+# Prepare `mgit.json`.
+${ROOT_BIN}/ckeditor5-dev-tests-prepare-mgit-json ${TEST_DIR}
+
+# Install Mgit.
+cd ${TEST_DIR} && yarn add mgit2 --ignore-workspace-root-check
 
 # Clones repositories to `packages/` directory.
-$NPM_BIN/mgit sync --recursive --resolver-path=$(pwd)/node_modules/@ckeditor/ckeditor5-dev-tests/lib/mgit-resolver.js
+cd ${TEST_DIR} && ${TEST_BIN}/mgit sync --recursive --resolver-path=${PACKAGE_ROOT}/node_modules/@ckeditor/ckeditor5-dev-tests/lib/mgit-resolver.js
 
 # We need to ignore the newly created packages dir with all its content (see #203).
-echo -e "\npackages/**\n" >> .gitignore
+cd ${TEST_DIR} && echo -e "\npackages/**\n" >> .gitignore
 
-yarn install
+# Dependencies for CKEditor5-like project.
+cd ${TEST_DIR} && yarn install
 
-# Links current package to node_modules dependencies (see #470).
-$NPM_BIN/ckeditor5-dev-tests-link-package-to-node-modules
+# Dependencies for tested package.
+cd $PACKAGE_ROOT && yarn install
+
+# Be sure that the testing environment path can be available for other scripts...
+echo ${TEST_DIR} > ${PACKAGE_ROOT}/.ckeditor5_test_environment
+
+# ...and CWD is set to the proper directory.
+cd ${PACKAGE_ROOT}

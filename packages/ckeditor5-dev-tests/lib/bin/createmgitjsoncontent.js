@@ -7,9 +7,13 @@
  * Creates content for the `mgit.json` file based on the `package.json` dependencies.
  *
  * @param {Object} packageJson Parsed package.json.
+ * @param {Object} [options]
+ * @param {String} options.name The name of package that `options.commit` will be specified as a version to check out.
+ * @param {String} options.commit The specified commit.
  */
-module.exports = function createMgitJsonContent( packageJson ) {
+module.exports = function createMgitJsonContent( packageJson, options ) {
 	const mgitJson = {
+		packages: 'packages/',
 		dependencies: {}
 	};
 
@@ -35,6 +39,15 @@ module.exports = function createMgitJsonContent( packageJson ) {
 			// Removes '@' from the scoped npm package name.
 			mgitJson.dependencies[ dependencyName ] = dependencyName.slice( 1 );
 		}
+	}
+
+	if ( !options ) {
+		return mgitJson;
+	}
+
+	// For testing package we need to use a specified commit instead of the latest master.
+	if ( mgitJson.dependencies[ options.packageName ] ) {
+		mgitJson.dependencies[ options.packageName ] = mgitJson.dependencies[ options.packageName ] + '#' + options.commit;
 	}
 
 	return mgitJson;
