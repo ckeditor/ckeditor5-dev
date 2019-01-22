@@ -8,8 +8,8 @@
 const PO = require( 'pofile' );
 
 /**
- * Returns translations stripped from personal data, but with added banner
- * containing informations where a user should add missing translations or fix existing one.
+ * Returns translations stripped from the personal data, but with an added banner
+ * containing information where to add new translations or fix the existing ones.
  *
  * @param {String} poFileContent Content of the translation file.
  * @returns {String}
