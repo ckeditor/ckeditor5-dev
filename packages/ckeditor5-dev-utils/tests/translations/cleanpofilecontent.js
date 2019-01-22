@@ -11,7 +11,7 @@ const cleanPoFileContent = require( '../../lib/translations/cleanpofilecontent' 
 
 describe( 'translations', () => {
 	describe( 'cleanPoFileContent()', () => {
-		it( 'clean po files from personal data', () => {
+		it( 'clean po files from personal data and add the special header', () => {
 			const poFileContent =
 // eslint-disable-next-line max-len
 `# Copyright (c) 2003-2018, CKSource - Frederico Knabben. All rights reserved.
@@ -32,6 +32,17 @@ msgstr "URL del enllaz"
 			const expectedResult =
 // eslint-disable-next-line max-len
 `# Copyright (c) 2003-2018, CKSource - Frederico Knabben. All rights reserved.
+#
+#                                     !!! IMPORTANT !!!
+#
+#         Before you edit this file, please keep in mind that contributing to the project
+#                translations is possible ONLY via the Transifex online service.
+#
+#         To submit your translations, visit https://www.transifex.com/ckeditor/ckeditor5.
+#
+#                   To learn more, check out the official contributor's guide:
+#     https://ckeditor.com/docs/ckeditor5/latest/framework/guides/contributing/contributing.html
+#
 msgid ""
 msgstr ""
 "Language: ast\\n"
