@@ -2,15 +2,23 @@
 
 set -e
 
-npm install mgit2 lerna@^2.0.0-rc.1 eslint-config-ckeditor5 karma-coveralls@^1.1.2
+NPM_BIN=$(pwd)/node_modules/.bin
 
-node_modules/.bin/ckeditor5-dev-tests-create-mgit-json
-node_modules/.bin/ckeditor5-dev-tests-create-lerna-json
+yarn add mgit2
 
-mgit bootstrap --recursive --resolver-path=@ckeditor/ckeditor5-dev-tests/lib/mgit-resolver.js
+# Creates an `mgit.json` file.
+$NPM_BIN/ckeditor5-dev-tests-create-mgit-json
+
+# Adds a workspace definition to `package.json` (used by Yarn).
+$NPM_BIN/ckeditor5-dev-tests-add-workspace-to-package-json
+
+# Clones repositories to `packages/` directory.
+$NPM_BIN/mgit sync --recursive --resolver-path=$(pwd)/node_modules/@ckeditor/ckeditor5-dev-tests/lib/mgit-resolver.js
 
 # We need to ignore the newly created packages dir with all its content (see #203).
 echo -e "\npackages/**\n" >> .gitignore
 
-lerna init
-lerna bootstrap
+yarn install
+
+# Links current package to node_modules dependencies (see #470).
+$NPM_BIN/ckeditor5-dev-tests-link-package-to-node-modules

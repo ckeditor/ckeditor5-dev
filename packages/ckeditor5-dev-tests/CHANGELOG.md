@@ -1,6 +1,62 @@
 Changelog
 =========
 
+## [15.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@15.0.3...@ckeditor/ckeditor5-dev-tests@15.1.0) (2019-01-17)
+
+### Other changes
+
+* Added the `'--js-flags="--expose-gc"'` flag to Karma Chrome launcher configuration. See [ckeditor/ckeditor5#1341](https://github.com/ckeditor/ckeditor5/issues/1341). ([f2c0d05](https://github.com/ckeditor/ckeditor5-dev/commit/f2c0d05))
+
+
+## [15.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@15.0.2...@ckeditor/ckeditor5-dev-tests@15.0.3) (2019-01-14)
+
+### Bug fixes
+
+* Link package inside its node_module's directory for tests. Closes [#470](https://github.com/ckeditor/ckeditor5-dev/issues/470). ([06dbb9f](https://github.com/ckeditor/ckeditor5-dev/commit/06dbb9f))
+
+
+## [15.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@15.0.1...@ckeditor/ckeditor5-dev-tests@15.0.2) (2019-01-14)
+
+### Bug fixes
+
+* The main repository should be added to yarn workspaces. Closes [ckeditor/ckeditor5-paragraph#39](https://github.com/ckeditor/ckeditor5-paragraph/issues/39). ([6a96700](https://github.com/ckeditor/ckeditor5-dev/commit/6a96700))
+
+
+## [15.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@15.0.0...@ckeditor/ckeditor5-dev-tests@15.0.1) (2019-01-11)
+
+### Bug fixes
+
+* Forgot to bump mgit2 itself. ([3f7a2b9](https://github.com/ckeditor/ckeditor5-dev/commit/3f7a2b9))
+
+
+## [15.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@14.1.0...@ckeditor/ckeditor5-dev-tests@15.0.0) (2019-01-11)
+
+### Other changes
+
+* Compatibility with `mgit2@0.10.0`. See [cksource/mgit2#82](https://github.com/cksource/mgit2/issues/82). ([b263242](https://github.com/ckeditor/ckeditor5-dev/commit/b263242))
+
+
+## [14.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@14.0.0...@ckeditor/ckeditor5-dev-tests@14.1.0) (2019-01-10)
+
+### Other changes
+
+* Compatibility with Node 10. ([9e47285](https://github.com/ckeditor/ckeditor5-dev/commit/9e47285))
+
+
+## [14.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.1.2...@ckeditor/ckeditor5-dev-tests@14.0.0) (2019-01-10)
+
+### Other changes
+
+* Changed scripts in the `@ckeditor/ckeditor5-dev-tests` package after switching development environment to Yarn. See [ckeditor/ckeditor5#1214](https://github.com/ckeditor/ckeditor5/issues/1214). ([18b0dd0](https://github.com/ckeditor/ckeditor5-dev/commit/18b0dd0))
+
+
+## [13.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.1.1...@ckeditor/ckeditor5-dev-tests@13.1.2) (2018-12-19)
+
+### Other changes
+
+* Enforce Edge 17 in BrowserStack tests. ([56ae7d3](https://github.com/ckeditor/ckeditor5-dev/commit/56ae7d3))
+
+
 ## [13.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@13.1.0...@ckeditor/ckeditor5-dev-tests@13.1.1) (2018-11-22)
 
 Internal changes only (updated dependencies, documentation, etc.).

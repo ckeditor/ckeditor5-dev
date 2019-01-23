@@ -40,10 +40,10 @@ exec( `git checkout ${ branch } -- .` );
 exec( 'git reset -q .' );
 
 // Install dependencies.
-exec( 'mgit bootstrap --recursive --resolver-url-template="https://github.com/\\${ path }.git"' );
+exec( 'mgit sync --recursive --resolver-url-template="https://github.com/\\${ path }.git"' );
 
 // Save hashes from all dependencies.
-exec( 'mgit save-hashes' );
+exec( 'mgit save --hash' );
 
 // Add all files (perhaps the changes from master will be committed).
 exec( 'git add .' );
