@@ -2,19 +2,22 @@
 
 ## Overview
 
-This repository consists of few plugins that i.a. validate and simplify usage of the https://github.com/jsdoc3/jsdoc. They also add support for a few custom tags and fix support for the inheritance and other common problems.
+This repository consists of few plugins which extend the capabilities of [JSDoc](https://github.com/jsdoc3/jsdoc).
 
-The list of plugins goes as follows:
-* lib/validator/validator.js - validates usage of JSDoc types
-* lib/export-fixer/export-fixer.js - fixes an error with `export default` syntax
-* lib/custom-tags/error.js - provides support for the custom `@error` tag
-* lib/relation-fixer.js - fixes problem with inheritance
-* lib/longname-fixer/longname-fixer.js - enables short notation
-* lib/utils/doclet-logger.js - enables logging output into the `<CWD>/docs/api/output.json`
+The list of generic plugins:
 
-* lib/event-extender/event-extender - CKEditor 5 specific util, that inserts parameter to all events.
-* lib/custom-tags/observable - CKEditor 5 specific tag for observable properties
-* lib/observable-event-provider - CKEditor 5 specific
+* `lib/validator/validator.js` - validates if references to types used in params lists or property types are defined elsewhere, whether links point to existing properties/classes/modules, etc.
+* `lib/export-fixer/export-fixer.js` - fixes an error with `export default` syntax
+* `lib/custom-tags/error.js` - provides support for the custom `@error` tag
+* `lib/relation-fixer.js` - fixes problem with inheritance (extends child classes with properties from parent classes)
+* `lib/longname-fixer/longname-fixer.js` - enables short notation in links
+* `lib/utils/doclet-logger.js` - enables logging output into the `<CWD>/docs/api/output.json`
+
+CKEditor 5 specific plugins
+
+* `lib/event-extender/event-extender.js` - CKEditor 5 specific util that inserts parameter to all events.
+* `lib/custom-tags/observable.js` - CKEditor 5 specific tag for observable properties
+* `lib/observable-event-provider.js` - CKEditor 5 specific
 
 ## Usage
 
@@ -51,6 +54,7 @@ There're 2 types of references available inside JSDoc comments. First of them ar
 Full references start with `module:`. The first part of that syntax needs to match the `@module` tag in the corresponding class.
 
 Here are a few examples:
+
 * `@param {module:command~Command}`
 * `{@link module:core/editor/editor~Editor editor}`
 * `@member {module:core/editor/editor~Editor}`
@@ -138,13 +142,13 @@ During the JSDoc compilation, the errors are thrown to the standard output for e
 
 References for the following tags are validated:
 
-* `@link` - matches *references*.
-* `@member` - matches *types*.
-* `@fires` – matches *events*.
+* `@link` - matches *references*
+* `@member` - matches *types*
+* `@fires` – matches *events*
 * `@param` - matches *types*
-* `@implements` – matches *interfaces*.
-* `@returns` - matches *types*.
-* `@see` - matches *references*.
+* `@implements` – matches *interfaces*
+* `@returns` - matches *types*
+* `@see` - matches *references*
 
 ### Available types
 
