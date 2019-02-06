@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2018, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2019, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
  */
 
@@ -86,7 +86,7 @@ class DocletValidator {
 		this._collection.getAll()
 			.filter( el => el.memberof && !el.memberof.includes( 'module:' ) )
 			.filter( el => el.memberof.indexOf( '<anonymous>' ) === -1 ) // Local variables, functions.
-			.filter( el => !el.undocumented ) // Undocummented inner code. E.g members of local variables.
+			.filter( el => !el.undocumented ) // Undocumented inner code. E.g members of local variables.
 			.forEach( el => {
 				this._addError( el, `Memberof property should start with 'module:'. Got '${ el.memberof }' instead.` );
 			} );
