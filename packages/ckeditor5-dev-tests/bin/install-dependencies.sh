@@ -37,9 +37,6 @@ cd ${TEST_DIR} && echo -e "\npackages/**\n" >> .gitignore
 # Dependencies for CKEditor5-like project.
 cd ${TEST_DIR} && yarn install
 
-# Dependencies for tested package.
-cd $PACKAGE_ROOT && yarn install
-
 # Be sure that the testing environment path can be available for other scripts...
 echo ${TEST_DIR} > ${PACKAGE_ROOT}/.ckeditor5_test_environment
 
