@@ -5,7 +5,7 @@
  * @property {String} longname Long name of the doclet (including the `module:` part).
  * @property {String} name Short name of the doclet (e.g. the name of the method).
  * @property {String} memberof Where the doclet belongs to (parent of the symbol).
- * @property {'class'|'interface'|'mixin'|'function'|'typedef'} kind
+ * @property {'class'|'interface'|'mixin'|'function'|'typedef'|'event'|'member'|'constant'|'module'} kind The kind of the doclet's symbol.
  * @property {Boolean} [ignore] `true` for internal doclets which should not be published
  * @property {Boolean} [undocumented] `true` when a doclet's symbol does not have API docs written above the declaration.
  * @property {String} [inheritdoc] Warning: When the `@inheritdoc` is present, then in most cases the property
@@ -19,6 +19,7 @@
  * @property {String} [description]
  * @property {Object[]} [params]
  * @property {String} [scope]
+ * @property {String[]} [fires] An array of events that a method or a property can fire.
  * @property {Object} meta Doclet's metadata - filename, line number, etc.
  * @property {String[]} [augments] An array of classes that the doclet's symbol extends.
  * Applies for `@class`, `@mixin`, `@interface`.

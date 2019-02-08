@@ -6,7 +6,7 @@
 
 'use strict';
 
-const cloneDeep = require( 'lodash' ).cloneDeep;
+const { cloneDeep } = require( 'lodash' );
 
 module.exports = getMissingDocletsData;
 

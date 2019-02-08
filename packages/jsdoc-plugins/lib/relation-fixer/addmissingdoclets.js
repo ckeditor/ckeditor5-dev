@@ -6,8 +6,8 @@
 
 'use strict';
 
+const { cloneDeep } = require( 'lodash' );
 const getMissingDocletsData = require( './getmissingdocletsdata' );
-const cloneDeep = require( 'lodash' ).cloneDeep;
 const DocletCollection = require( '../utils/doclet-collection' );
 
 module.exports = addMissingDoclets;

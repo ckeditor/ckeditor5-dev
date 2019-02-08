@@ -6,8 +6,8 @@
 
 'use strict';
 
-const DocletCollection = require( '../utils/doclet-collection' );
 const { cloneDeep, uniq } = require( 'lodash' );
+const DocletCollection = require( '../utils/doclet-collection' );
 const RELATIONS = {
 	implements: 'implementsNested',
 	mixes: 'mixesNested',
