@@ -7,7 +7,7 @@
 'use strict';
 
 const DocletCollection = require( '../utils/doclet-collection' );
-const { cloneDeep } = require( 'lodash' );
+const { cloneDeep, uniq } = require( 'lodash' );
 const RELATIONS = {
 	implements: 'implementsNested',
 	mixes: 'mixesNested',
@@ -41,11 +41,15 @@ function buildRelations( doclets ) {
 	}
 
 	/**
-	 * Doclets, for which we want to create relation arrays.
-	 * We want classes, interfaces and mixins.
+	 * An array of doclets, for which we want to create relation arrays.
 	 */
-	const subjectDoclets = docletCollection.getAll().filter( item => {
-		return item.kind === 'class' || item.kind === 'interface' || item.kind === 'mixin' || item.kind === 'typedef';
+	const subjectDoclets = doclets.filter( item => {
+		return (
+			item.kind === 'class' ||
+			item.kind === 'interface' ||
+			item.kind === 'mixin' ||
+			item.kind === 'typedef'
+		);
 	} );
 
 	for ( const doclet of subjectDoclets ) {
@@ -55,19 +59,17 @@ function buildRelations( doclets ) {
 
 		// Remove duplicates.
 		for ( const relation of Object.keys( related ) ) {
-			related[ relation ] = Array.from( new Set( related[ relation ] ) );
+			related[ relation ] = uniq( related[ relation ] );
 		}
 
 		Object.assign( doclet, related );
 	}
 
 	for ( const doclet of subjectDoclets ) {
-		const descendants = Array.from( new Set( getDescendants( subjectDoclets, doclet ) ) );
-
-		Object.assign( doclet, { descendants } );
+		doclet.descendants = uniq( getDescendants( subjectDoclets, doclet ) );
 	}
 
-	return docletCollection.getAll();
+	return doclets;
 }
 
 /**

@@ -54,6 +54,7 @@ function getMissingDocletsData( docletCollection, interfaceClassOrMixinDoclet, o
 			// If all doclets in the chain for that member already existed and used `inheritdoc` or `overrides`.
 			// Add `ignore` property to existing doclets. Unless 'onlyImplicitlyInherited' option is set.
 			docletsWhichShouldBeIgnored.push( ...docletsOfSameMember );
+
 			newDoclets.push( clonedDoclet );
 		} else if ( docletsOfSameMember.length >= 2 ) {
 			const correctDoclet = cloneDeep( docletsOfSameMember[ 0 ] );
