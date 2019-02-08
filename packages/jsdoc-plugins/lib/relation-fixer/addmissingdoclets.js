@@ -2,6 +2,7 @@
  * @license Copyright (c) 2003-2019, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
  */
+// @ts-check
 
 'use strict';
 
@@ -38,6 +39,10 @@ function addMissingDoclets( originalDoclets ) {
 	} );
 	const newDocletsToAdd = [];
 	const docletsToIgnore = [];
+
+	/**
+	 * @type {Array<{relation: 'augmentsNested'|'mixesNested'|'implementsNested';filter?:Object;onlyImplicitlyInherited?:Boolean}>}
+	 **/
 	const settings = [
 		// Missing statics inherited from parent classes.
 		{
@@ -67,11 +72,13 @@ function addMissingDoclets( originalDoclets ) {
 		}
 	];
 
-	for ( const childDoclet of entitiesWhichNeedNewDoclets ) {
+	console.log( clonedDoclets.filter( d => d.longname === 'module:engine/controller/datacontroller~DataController#set' ) );
+
+	for ( const interfaceClassOrMixinDoclet of entitiesWhichNeedNewDoclets ) {
 		for ( const setting of settings ) {
 			const missingDocletsData = getMissingDocletsData(
 				docletCollection,
-				childDoclet,
+				interfaceClassOrMixinDoclet,
 				setting
 			);
 
@@ -80,23 +87,29 @@ function addMissingDoclets( originalDoclets ) {
 		}
 	}
 
-	docletsToIgnore.forEach( d => {
-		d.ignore = true;
-	} );
+	for ( const docletToIgnore of docletsToIgnore ) {
+		docletToIgnore.ignore = true;
+	}
+
 	clonedDoclets.push( ...newDocletsToAdd );
 
 	extendTypedefs( typedefDoclets );
 
-	return clonedDoclets;
+	return clonedDoclets
+		.filter( d => !d.ignore );
 }
 
-// Copy properties from parent typedefs to typedefs which extend them.
+/**
+ * Copy properties from parent typedefs to typedefs which extend them.
+ *
+ * @param {Doclet[]} typedefDoclets
+ */
 function extendTypedefs( typedefDoclets ) {
 	for ( const typedefDoclet of typedefDoclets ) {
 		for ( const parentLongname of typedefDoclet.augmentsNested ) {
-			const parentDoclet = typedefDoclets.find( d => d.longname === parentLongname ) || {};
+			const parentDoclet = typedefDoclets.find( doclet => doclet.longname === parentLongname );
 
-			if ( parentDoclet.properties ) {
+			if ( parentDoclet && parentDoclet.properties ) {
 				parentDoclet.properties.forEach( parentProperty => {
 					if ( typedefDoclet.properties && !typedefDoclet.properties.find( p => p.name === parentProperty.name ) ) {
 						const inheritedProperty = cloneDeep( parentProperty );
