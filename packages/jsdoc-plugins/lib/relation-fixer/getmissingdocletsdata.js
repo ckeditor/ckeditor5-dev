@@ -11,12 +11,12 @@ const cloneDeep = require( 'lodash' ).cloneDeep;
 module.exports = getMissingDocletsData;
 
 /**
- * Gets missing doclets of members coming from implemented interfaces and extended classes.
- * Returns also doclets which should be ignored as no longer necessary.
- * This module requires the input to be processed by 'buildrelations' first.
+ * Gets missing doclets of members coming from implemented interfaces, extended classes and mixins.
+ * It returns also doclets which should be ignored as no longer necessary.
+ * This module requires the input preprocessed by the `buildRelations()` function.
  *
  * @param {DocletCollection} docletCollection
- * @param {Doclet} interfaceClassOrMixinDoclet Doclet representing an entity which might have some inherited members missing.
+ * @param {Readonly<Doclet>} interfaceClassOrMixinDoclet Doclet representing an entity which might have some inherited members missing.
  * @param {Object} options
  * @param {'augmentsNested'|'mixesNested'|'implementsNested'} options.relation Name of relation between child entity
  * and its ancestors.
@@ -76,7 +76,7 @@ function getMissingDocletsData( docletCollection, interfaceClassOrMixinDoclet, o
  * and matching criteria given in options.filter.
  *
  * @param {DocletCollection} docletCollection
- * @param {Doclet} childDoclet
+ * @param {Readonly<Doclet>} childDoclet
  * @param {Object} options
  * @param {'augmentsNested'|'mixesNested'|'implementsNested'} options.relation
  * @param {Partial<Doclet>} [options.filter] An object used to filter missing doclets (e.g. { scope: 'static' }).
@@ -124,8 +124,8 @@ function isNonEmptyArray( obj ) {
 }
 
 /**
- * @param {Doclet} parentDoclet
- * @param {Doclet} childDoclet
+ * @param {Readonly<Doclet>} parentDoclet
+ * @param {Readonly<Doclet>} childDoclet
  */
 function getLongnameForNewDoclet( parentDoclet, childDoclet ) {
 	const dotIndex = parentDoclet.longname.lastIndexOf( '.' );

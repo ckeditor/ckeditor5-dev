@@ -27,10 +27,10 @@
  * @property {String[]} [implements] An array of interfaces that the doclet's symbol implements.
  * Applies for `@class` and `@mixin`.
  * @property {String[]} [augmentsNested] [A custom property used by the relation fixer] -
- * an array of all class augmenting the current doclet's symbol.
+ * an array of all classes in the inheritance chain augmenting the current doclet's symbol.
  * @property {String[]} [mixesNested] [A custom property used by the relation fixer] -
- * an array of all mixins augmenting the current doclet's symbol.
+ * an array of all mixins in the inheritance chain augmenting the current doclet's symbol.
  * @property {String[]} [implementsNested] [A custom  property used by the relation fixer] -
- * an array of all interfaces, which the current doclet's symbol implements.
+ * an array of all interfaces in the inheritance chain, which the current doclet's symbol implements.
  */
 

@@ -13,9 +13,9 @@ const DocletCollection = require( '../utils/doclet-collection' );
 module.exports = addMissingDoclets;
 
 /**
- * Adds missing doclets of members coming from implemented interfaces and extended classes.
- * JSDoc does not support inheritance of static members which is why the plugin was made.
- * This module requires the input to be processed by 'buildrelations' module first.
+ * Adds missing doclets for members coming from implemented interfaces, extended classes, and mixins.
+ * It does also support inheritance of static members which isn't supported by the JSDoc.
+ * This module requires the input preprocessed by the `buildRelations()` function.
  *
  * @param {Array.<Doclet>} originalDoclets
  * @returns {Array.<Doclet>}
@@ -34,8 +34,12 @@ function addMissingDoclets( originalDoclets ) {
 		}
 	}
 
-	const entitiesWhichNeedNewDoclets = clonedDoclets.filter( d => {
-		return d.kind === 'class' || d.kind === 'interface' || d.kind === 'mixin';
+	const extensibleDoclets = clonedDoclets.filter( doclet => {
+		return (
+			doclet.kind === 'class' ||
+			doclet.kind === 'interface' ||
+			doclet.kind === 'mixin'
+		);
 	} );
 	const newDocletsToAdd = [];
 	const docletsToIgnore = [];
@@ -72,11 +76,11 @@ function addMissingDoclets( originalDoclets ) {
 		}
 	];
 
-	for ( const interfaceClassOrMixinDoclet of entitiesWhichNeedNewDoclets ) {
+	for ( const extensibleDoclet of extensibleDoclets ) {
 		for ( const setting of settings ) {
 			const missingDocletsData = getMissingDocletsData(
 				docletCollection,
-				interfaceClassOrMixinDoclet,
+				extensibleDoclet,
 				setting
 			);
 
