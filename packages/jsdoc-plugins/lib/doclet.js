@@ -11,14 +11,13 @@
  * @property {String} [inheritdoc] Warning: When the `@inheritdoc` is present, then in most cases the property
  * becomes  an empty string!
  * @property {Boolean} [overrides]
- * @property {String[]} [descendants]
- * @property {{inherited?: Boolean, name?: String}[]} [properties]
- * @property {Boolean} [inherited]
- * @property {String} [inherits] The longname of the parent's method.
- * @property {String} [comment]
- * @property {String} [description]
- * @property {Object[]} [params]
- * @property {String} [scope]
+ * @property {{inherited?: Boolean, name: String, type: Object, description: string}[]} [properties] Typedef properties.
+ * @property {Boolean} [inherited] `true` for a property / method which is inherited from the parent class.
+ * @property {String} [inherits] The longname of the parent class / interface method.
+ * @property {String} [comment] Raw API comment.
+ * @property {String} [description] API Comment wrapped in HTML tags.
+ * @property {Object[]} [params] Event and function params.
+ * @property {'instance'|'inner'|'static'} [scope]
  * @property {String[]} [fires] An array of events that a method or a property can fire.
  * @property {Object} meta Doclet's metadata - filename, line number, etc.
  * @property {String[]} [augments] An array of classes that the doclet's symbol extends.
@@ -33,5 +32,7 @@
  * an array of all mixins in the inheritance chain augmenting the current doclet's symbol.
  * @property {String[]} [implementsNested] [A custom  property used by the relation fixer] -
  * an array of all interfaces in the inheritance chain, which the current doclet's symbol implements.
+ * @property {String[]} [descendants] [A custom  property used by the relation fixer] -
+ * an array of doclets which inherits / implements / mixes the doclet's symbol.
  */
 
