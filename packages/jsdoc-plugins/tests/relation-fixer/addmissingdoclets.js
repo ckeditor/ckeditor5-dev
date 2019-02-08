@@ -13,9 +13,8 @@ const inheritanceImplicitTestData = require( './test-data/inheritance-implicit' 
 const inheritanceInheritdocTestData = require( './test-data/inheritance-inheritdoc' );
 const unwantedDocletsTestData = require( './test-data/unwanted-doclets' );
 const mixinTestData = require( './test-data/mixins' );
-const cloneDeep = require( 'lodash' ).cloneDeep;
 
-describe( 'JSDoc relation-fixer addmissingdoclets module', () => {
+describe( 'JSDoc/relation-fixer/addMissingDoclets()', () => {
 	let interfaceTestDoclets;
 	let inheritanceImplicitTestDoclets;
 	let inheritanceInheritdocTestDoclets;
@@ -23,11 +22,11 @@ describe( 'JSDoc relation-fixer addmissingdoclets module', () => {
 	let mixinTestDoclets;
 
 	beforeEach( () => {
-		interfaceTestDoclets = cloneDeep( interfaceTestData );
-		inheritanceImplicitTestDoclets = cloneDeep( inheritanceImplicitTestData );
-		inheritanceInheritdocTestDoclets = cloneDeep( inheritanceInheritdocTestData );
-		unwantedTestDoclets = cloneDeep( unwantedDocletsTestData );
-		mixinTestDoclets = cloneDeep( mixinTestData );
+		interfaceTestDoclets = interfaceTestData;
+		inheritanceImplicitTestDoclets = inheritanceImplicitTestData;
+		inheritanceInheritdocTestDoclets = inheritanceInheritdocTestData;
+		unwantedTestDoclets = unwantedDocletsTestData;
+		mixinTestDoclets = mixinTestData;
 	} );
 
 	it( 'should add missing doclets coming from interfaces', () => {

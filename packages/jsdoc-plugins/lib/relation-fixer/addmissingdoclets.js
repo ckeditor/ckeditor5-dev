@@ -14,18 +14,21 @@ module.exports = addMissingDoclets;
 
 /**
  * Adds missing doclets for members coming from implemented interfaces, extended classes, and mixins.
- * It does also support inheritance of static members which isn't supported by the JSDoc.
+ * It does also support inheriting static members and typedef inheritance, which both are not supported by the JSDoc.
  * This module requires the input preprocessed by the `buildRelations()` function.
  *
- * @param {Array.<Doclet>} originalDoclets
+ * @param {Array.<Doclet>} doclets
  * @returns {Array.<Doclet>}
  */
-function addMissingDoclets( originalDoclets ) {
-	const clonedDoclets = cloneDeep( originalDoclets );
+function addMissingDoclets( doclets ) {
+	doclets = cloneDeep( doclets );
+
 	const docletCollection = new DocletCollection();
+
+	/** @type {Doclet[]} */
 	const typedefDoclets = [];
 
-	for ( const doclet of clonedDoclets ) {
+	for ( const doclet of doclets ) {
 		// Group doclets by memberof property.
 		docletCollection.add( `memberof:${ doclet.memberof }`, doclet );
 
@@ -34,14 +37,20 @@ function addMissingDoclets( originalDoclets ) {
 		}
 	}
 
-	const extensibleDoclets = clonedDoclets.filter( doclet => {
+	extendTypedefs( typedefDoclets );
+
+	const extensibleDoclets = doclets.filter( doclet => {
 		return (
 			doclet.kind === 'class' ||
 			doclet.kind === 'interface' ||
 			doclet.kind === 'mixin'
 		);
 	} );
+
+	/** @type {Doclet[]} */
 	const newDocletsToAdd = [];
+
+	/** @type {Doclet[]} */
 	const docletsToIgnore = [];
 
 	/**
@@ -89,15 +98,15 @@ function addMissingDoclets( originalDoclets ) {
 		}
 	}
 
+	// Ignore doclets that shouldn't be used anymore. They will be removed afterward.
 	for ( const docletToIgnore of docletsToIgnore ) {
 		docletToIgnore.ignore = true;
 	}
 
-	clonedDoclets.push( ...newDocletsToAdd );
-
-	extendTypedefs( typedefDoclets );
-
-	return clonedDoclets;
+	return [
+		...doclets,
+		...newDocletsToAdd
+	];
 }
 
 /**
