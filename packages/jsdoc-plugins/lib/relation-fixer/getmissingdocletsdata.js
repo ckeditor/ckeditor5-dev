@@ -20,7 +20,7 @@ module.exports = getMissingDocletsData;
  * @param {Object} options
  * @param {'augmentsNested'|'mixesNested'|'implementsNested'} options.relation Name of relation between child entity
  * and its ancestors.
- * @param {Object} [options.filter] Object used to filter missing doclets (e.g. { scope: 'static' }).
+ * @param {Partial.<Doclet>} [options.filter] Object used to filter missing doclets (e.g. { scope: 'static' }).
  * @param {Boolean} [options.onlyImplicitlyInherited]
  * @returns {{newDoclets: Doclet[], docletsWhichShouldBeIgnored: Doclet[]}}
  */
@@ -48,41 +48,20 @@ function getMissingDocletsData( docletCollection, interfaceClassOrMixinDoclet, o
 		} );
 
 		if ( docletsOfSameMember.length === 0 ) {
-			if ( clonedDoclet.longname === 'module:engine/controller/datacontroller~DataController#set' ) {
-				console.log( { childDoclet: interfaceClassOrMixinDoclet } );
-				console.log( '\n' );
-				console.log( { docletsOfSameMember } );
-				console.log( '\n' );
-				console.log( { clonedDoclet } );
-				console.log( '\n' );
-				console.log( { options } );
-				console.log( '\n' );
-				console.log( relationProperty );
-				console.log( '\n\n\n' );
-			}
-
 			// If there was no doclet for that member, simply add it to new doclets.
 			newDoclets.push( clonedDoclet );
 		} else if ( doAllParentsExplicitlyInherit( docletsOfSameMember ) && !options.onlyImplicitlyInherited ) {
-			// If doclet for that member already existed and used `inheritdoc` or `overrides`.
+			// If all doclets in the chain for that member already existed and used `inheritdoc` or `overrides`.
 			// Add `ignore` property to existing doclets. Unless 'onlyImplicitlyInherited' option is set.
 			docletsWhichShouldBeIgnored.push( ...docletsOfSameMember );
 			newDoclets.push( clonedDoclet );
 		} else if ( docletsOfSameMember.length >= 2 ) {
-			if ( docletsOfSameMember.find( doclet => {
-				return doclet.longname === 'module:engine/controller/datacontroller~DataController#set';
-			} ) ) {
-				console.log( { childDoclet: interfaceClassOrMixinDoclet } );
-				console.log( '\n' );
-				console.log( { docletsOfSameMember } );
-				console.log( '\n' );
-				console.log( { clonedDoclet } );
-				console.log( '\n' );
-				console.log( { options } );
-				console.log( '\n' );
-				console.log( relationProperty );
-				console.log( '\n\n\n' );
-			}
+			const correctDoclet = cloneDeep( docletsOfSameMember[ 0 ] );
+
+			correctDoclet[ relationProperty ] = true;
+
+			docletsWhichShouldBeIgnored.push( ...docletsOfSameMember );
+			newDoclets.push( correctDoclet );
 		}
 	}
 
@@ -230,8 +209,10 @@ function createDocletMap( doclets ) {
 	/** @type {DocletMap} */
 	const docletMap = {};
 
-	for ( const doclet of doclets.getAll().reverse() ) {
-		docletMap[ doclet.longname ] = doclet;
+	for ( const doclet of doclets.getAll() ) {
+		if ( !docletMap[ doclet.longname ] ) {
+			docletMap[ doclet.longname ] = doclet;
+		}
 	}
 
 	return docletMap;

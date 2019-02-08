@@ -72,8 +72,6 @@ function addMissingDoclets( originalDoclets ) {
 		}
 	];
 
-	console.log( clonedDoclets.filter( d => d.longname === 'module:engine/controller/datacontroller~DataController#set' ) );
-
 	for ( const interfaceClassOrMixinDoclet of entitiesWhichNeedNewDoclets ) {
 		for ( const setting of settings ) {
 			const missingDocletsData = getMissingDocletsData(
@@ -95,8 +93,7 @@ function addMissingDoclets( originalDoclets ) {
 
 	extendTypedefs( typedefDoclets );
 
-	return clonedDoclets
-		.filter( d => !d.ignore );
+	return clonedDoclets;
 }
 
 /**

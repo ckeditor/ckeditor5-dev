@@ -73,7 +73,7 @@ describe( 'JSDoc relation-fixer addmissingdoclets module', () => {
 		expect( newDoclets ).to.deep.include( expectedDoclet );
 	} );
 
-	it( 'should ignore exising doclets when `inheritdoc` was used', () => {
+	it( 'should ignore existing doclets when `inheritdoc` was used', () => {
 		const expectedDoclet = {
 			name: 'classAProp',
 			longname: 'classB.prop',
