@@ -10,7 +10,9 @@ const glob = require( 'glob' );
 const path = require( 'path' );
 
 module.exports = function parseFiles() {
-	const files = glob.sync( path.join( __dirname, '../data/*.js' ) );
+	const files = glob.sync( path.join( __dirname, '../data/*.jsdoc' ) );
+
+	console.log( files );
 
 	const jsDocConfig = {
 		plugins: [
