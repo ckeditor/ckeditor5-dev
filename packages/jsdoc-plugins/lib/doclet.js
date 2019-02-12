@@ -14,8 +14,8 @@
  * @property {'class'|'interface'|'mixin'|'function'|'typedef'|'event'|'member'|'constant'|'module'} kind The kind of the doclet's symbol.
  * @property {Boolean} [ignore] `true` for internal doclets which should not be published
  * @property {Boolean} [undocumented] `true` when a doclet's symbol does not have API docs written above the declaration.
- * @property {String} [inheritdoc] Warning: When the `@inheritdoc` is present, then in most cases the property
- * becomes  an empty string!
+ * @property {String} [inheritdoc] Specifies whether the `@inheritdoc` tag is present. Warning: When the `@inheritdoc` tag is
+ * present without no additional docs, then this property becomes an empty string!
  * @property {Boolean} [overrides]
  * @property {Array.<Property>} [properties] Typedef properties.
  * @property {Boolean} [inherited] `true` for a property / method which is inherited from the parent class.

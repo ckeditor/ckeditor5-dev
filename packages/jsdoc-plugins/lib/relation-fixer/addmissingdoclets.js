@@ -54,9 +54,9 @@ function addMissingDoclets( doclets ) {
 	const docletsToIgnore = [];
 
 	/**
-	 * @type {Array<{relation: 'augmentsNested'|'mixesNested'|'implementsNested';filter?:Object;onlyImplicitlyInherited?:Boolean}>}
+	 * @type {Array.<import('./getmissingdocletsdata').Options>}
 	 **/
-	const settings = [
+	const options = [
 		// Missing statics inherited from parent classes.
 		{
 			relation: 'augmentsNested',
@@ -86,11 +86,11 @@ function addMissingDoclets( doclets ) {
 	];
 
 	for ( const extensibleDoclet of extensibleDoclets ) {
-		for ( const setting of settings ) {
+		for ( const option of options ) {
 			const missingDocletsData = getMissingDocletsData(
 				docletCollection,
 				extensibleDoclet,
-				setting
+				option
 			);
 
 			newDocletsToAdd.push( ...missingDocletsData.newDoclets );

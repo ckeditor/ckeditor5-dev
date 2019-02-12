@@ -17,11 +17,7 @@ module.exports = getMissingDocletsData;
  *
  * @param {DocletCollection} docletCollection
  * @param {Readonly<Doclet>} interfaceClassOrMixinDoclet Doclet representing an entity which might have some inherited members missing.
- * @param {Object} options
- * @param {'augmentsNested'|'mixesNested'|'implementsNested'} options.relation Name of relation between child entity
- * and its ancestors.
- * @param {Partial.<Doclet>} [options.filter] Object used to filter missing doclets (e.g. { scope: 'static' }).
- * @param {Boolean} [options.onlyImplicitlyInherited]
+ * @param {Options} options
  * @returns {{newDoclets: Array.<Doclet>, docletsWhichShouldBeIgnored: Array.<Doclet>}}
  */
 function getMissingDocletsData( docletCollection, interfaceClassOrMixinDoclet, options ) {
@@ -78,9 +74,7 @@ function getMissingDocletsData( docletCollection, interfaceClassOrMixinDoclet, o
  *
  * @param {DocletCollection} docletCollection
  * @param {Readonly<Doclet>} childDoclet
- * @param {Object} options
- * @param {'augmentsNested'|'mixesNested'|'implementsNested'} options.relation
- * @param {Partial<Doclet>} [options.filter] An object used to filter missing doclets (e.g. { scope: 'static' }).
+ * @param {Options} options
  */
 function getDocletsToAdd( docletCollection, childDoclet, options ) {
 	if ( !isNonEmptyArray( childDoclet[ options.relation ] ) ) {
@@ -218,6 +212,15 @@ function createDocletMap( doclets ) {
 
 	return docletMap;
 }
+
+/**
+ * @typedef {Object} Options
+ *
+ * @property {'augmentsNested'|'mixesNested'|'implementsNested'} relation Name of relation between child entity
+ * and its ancestors.
+ * @property {Partial<Doclet>} [filter] Object used to filter missing doclets (e.g. { scope: 'static' }).
+ * @property {Boolean} [onlyImplicitlyInherited]
+ */
 
 /** @typedef {{ [longname: string]: Doclet}} DocletMap */
 
