@@ -9,7 +9,7 @@
 /**
  * Filters out doclet that won't be displayed.
  *
- * @param {Doclet[]} doclets
+ * @param {Array.<Doclet>} doclets
  */
 module.exports = function filterOutInternalDoclets( doclets ) {
 	return doclets

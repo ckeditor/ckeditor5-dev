@@ -79,12 +79,12 @@ function buildRelations( doclets ) {
  * @param {Doclet} currentDoclet
  * @param {Object} options
  * @param {Array.<'augments'|'implements'|'mixes'>} options.relations An array of relation names which should be used.
- * @returns {{ [relation: string ]: String[]}} An object containing arrays of ancestors' longnames.
+ * @returns {{ [relation: string ]: Array.<String>}} An object containing arrays of ancestors' longnames.
  */
 function getAncestors( docletCollection, currentDoclet, options ) {
 	const { relations } = options;
 
-	/** @type {{ [relation: string ]: string[]}} */
+	/** @type {{ [relation: string ]: Array.<String>}} */
 	const resultRelations = {};
 
 	// Initialize the returned object.

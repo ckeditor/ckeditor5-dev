@@ -22,7 +22,7 @@ module.exports = getMissingDocletsData;
  * and its ancestors.
  * @param {Partial.<Doclet>} [options.filter] Object used to filter missing doclets (e.g. { scope: 'static' }).
  * @param {Boolean} [options.onlyImplicitlyInherited]
- * @returns {{newDoclets: Doclet[], docletsWhichShouldBeIgnored: Doclet[]}}
+ * @returns {{newDoclets: Array.<Doclet>, docletsWhichShouldBeIgnored: Array.<Doclet>}}
  */
 function getMissingDocletsData( docletCollection, interfaceClassOrMixinDoclet, options ) {
 	const newDoclets = [];
@@ -188,7 +188,7 @@ function getRelationProperty( docletMap, childDoclet, memberDoclet, relation ) {
 }
 
 /**
- * @param {Doclet[]} doclets
+ * @param {Array.<Doclet>} doclets
  */
 function doAllParentsExplicitlyInherit( doclets ) {
 	for ( const doclet of doclets ) {

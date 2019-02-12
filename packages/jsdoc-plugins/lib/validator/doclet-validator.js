@@ -47,7 +47,7 @@ class DocletValidator {
 
 	/**
 	 * @public
-	 * @returns {Object[]}
+	 * @returns {Array.<Object>}
 	 */
 	findErrors() {
 		this._errors = [];

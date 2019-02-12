@@ -25,7 +25,7 @@ function addMissingDoclets( doclets ) {
 
 	const docletCollection = new DocletCollection();
 
-	/** @type {Doclet[]} */
+	/** @type {Array.<Doclet>} */
 	const typedefDoclets = [];
 
 	for ( const doclet of doclets ) {
@@ -47,10 +47,10 @@ function addMissingDoclets( doclets ) {
 		);
 	} );
 
-	/** @type {Doclet[]} */
+	/** @type {Array.<Doclet>} */
 	const newDocletsToAdd = [];
 
-	/** @type {Doclet[]} */
+	/** @type {Array.<Doclet>} */
 	const docletsToIgnore = [];
 
 	/**
@@ -112,7 +112,7 @@ function addMissingDoclets( doclets ) {
 /**
  * Copy properties from parent typedefs to typedefs which extend them.
  *
- * @param {Doclet[]} typedefDoclets
+ * @param {Array.<Doclet>} typedefDoclets
  */
 function extendTypedefs( typedefDoclets ) {
 	for ( const typedefDoclet of typedefDoclets ) {
