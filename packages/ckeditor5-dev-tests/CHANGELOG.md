@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [15.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@15.1.0...@ckeditor/ckeditor5-dev-tests@15.2.0) (2019-02-12)
+
+### Other changes
+
+* Enabled Content Security Policy settings in all manual tests (see [[ckeditor/ckeditor5#335](https://github.com/ckeditor/ckeditor5/issues/335)](https://github.com/ckeditor/ckeditor5/issues/335)). ([3b417c7](https://github.com/ckeditor/ckeditor5-dev/commit/3b417c7))
+
+
 ## [15.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@15.0.3...@ckeditor/ckeditor5-dev-tests@15.1.0) (2019-01-17)
 
 ### Other changes
