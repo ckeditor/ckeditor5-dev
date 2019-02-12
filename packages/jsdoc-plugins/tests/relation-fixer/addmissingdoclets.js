@@ -14,7 +14,7 @@ const inheritanceInheritdocTestDoclets = require( './test-data/inheritance-inher
 const unwantedTestDoclets = require( './test-data/unwanted-doclets' );
 const mixinTestDoclets = require( './test-data/mixins' );
 
-describe( 'JSDoc/relation-fixer/addMissingDoclets()', () => {
+describe( 'jsdoc-plugins/relation-fixer/addMissingDoclets()', () => {
 	it( 'should add missing doclets coming from interfaces', () => {
 		const expectedDoclet = {
 			name: 'intAProperty',
