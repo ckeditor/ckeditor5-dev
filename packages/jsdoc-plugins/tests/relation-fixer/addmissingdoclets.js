@@ -8,27 +8,13 @@
 const chai = require( 'chai' );
 const expect = chai.expect;
 const addMissingDoclets = require( '../../lib/relation-fixer/addmissingdoclets' );
-const interfaceTestData = require( './test-data/interface' );
-const inheritanceImplicitTestData = require( './test-data/inheritance-implicit' );
-const inheritanceInheritdocTestData = require( './test-data/inheritance-inheritdoc' );
-const unwantedDocletsTestData = require( './test-data/unwanted-doclets' );
-const mixinTestData = require( './test-data/mixins' );
+const interfaceTestDoclets = require( './test-data/interface' );
+const inheritanceImplicitTestDoclets = require( './test-data/inheritance-implicit' );
+const inheritanceInheritdocTestDoclets = require( './test-data/inheritance-inheritdoc' );
+const unwantedTestDoclets = require( './test-data/unwanted-doclets' );
+const mixinTestDoclets = require( './test-data/mixins' );
 
 describe( 'JSDoc/relation-fixer/addMissingDoclets()', () => {
-	let interfaceTestDoclets;
-	let inheritanceImplicitTestDoclets;
-	let inheritanceInheritdocTestDoclets;
-	let unwantedTestDoclets;
-	let mixinTestDoclets;
-
-	beforeEach( () => {
-		interfaceTestDoclets = interfaceTestData;
-		inheritanceImplicitTestDoclets = inheritanceImplicitTestData;
-		inheritanceInheritdocTestDoclets = inheritanceInheritdocTestData;
-		unwantedTestDoclets = unwantedDocletsTestData;
-		mixinTestDoclets = mixinTestData;
-	} );
-
 	it( 'should add missing doclets coming from interfaces', () => {
 		const expectedDoclet = {
 			name: 'intAProperty',
