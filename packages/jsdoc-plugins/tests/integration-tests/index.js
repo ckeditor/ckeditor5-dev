@@ -24,7 +24,6 @@ describe( 'integration test', () => {
 		it( 'EmitterMixin doclet should contain correct longname', () => {
 			const emitterMixinDoclet = doclets.find( d => d.name === 'EmitterMixin' );
 
-			// expect( emitterMixins.length ).to.equal( 1 );
 			expect( emitterMixinDoclet.longname ).to.equal( 'module:utils/emittermixin~EmitterMixin' );
 			expect( emitterMixinDoclet.memberof ).to.equal( 'module:utils/emittermixin' );
 		} );
@@ -38,7 +37,7 @@ describe( 'integration test', () => {
 		it( 'Emitter#on doclet should be generated for the `on` method', () => {
 			const emitterOnDoclet = doclets.find( d => d.longname == 'module:utils/emittermixin~Emitter#on' );
 
-			expect( emitterOnDoclet ).to.be.ok;
+			expect( emitterOnDoclet ).to.be.an( 'object' );
 			expect( emitterOnDoclet.description ).to.equal(
 				'Registers a callback function to be executed when an event is fired.'
 			);
@@ -50,7 +49,7 @@ describe( 'integration test', () => {
 		it( 'EmitterMixin#on doclet should be generated for the `on` method and should inherit docs ', () => {
 			const emitterMixinOnDoclet = doclets.find( d => d.longname == 'module:utils/emittermixin~EmitterMixin#on' );
 
-			expect( emitterMixinOnDoclet ).to.be.ok;
+			expect( emitterMixinOnDoclet ).to.be.an( 'object' );
 
 			expect( emitterMixinOnDoclet.description ).to.equal(
 				'Registers a callback function to be executed when an event is fired.'
@@ -65,13 +64,40 @@ describe( 'integration test', () => {
 		it( 'doclet for MAGIC_CONSTANT should be generated', () => {
 			const magicConstantDoclet = doclets.find( d => d.longname == 'module:engine/magic~MAGIC_CONSTANT' );
 
-			expect( magicConstantDoclet ).to.be.ok;
+			expect( magicConstantDoclet ).to.be.an( 'object' );
 		} );
 
 		it( 'doclet for magicVariable should be generated', () => {
 			const magicVariableDoclet = doclets.find( d => d.longname == 'module:engine/magic~magicVariable' );
 
-			expect( magicVariableDoclet ).to.be.ok;
+			expect( magicVariableDoclet ).to.be.an( 'object' );
+		} );
+	} );
+
+	describe( 'class extending mixins that implements interfaces', () => {
+		it( 'doclet for the Emitter class should be generated', () => {
+			const emitterDoclet = doclets.find( d => d.longname == 'module:engine/emitter~Emitter' );
+
+			expect( emitterDoclet ).to.be.an( 'object' );
+
+			expect( emitterDoclet.implementsNested ).to.deep.equal( [
+				'module:utils/emittermixin~Emitter'
+			] );
+
+			expect( emitterDoclet.mixesNested ).to.deep.equal( [
+				'module:utils/emittermixin~EmitterMixin'
+			] );
+		} );
+
+		it( 'doclet for the `on` method should be generated', () => {
+			const emitterOnDoclet = doclets.find( d => d.longname == 'module:engine/emitter~Emitter#on' );
+
+			expect( emitterOnDoclet ).to.be.an( 'object' );
+
+			expect( emitterOnDoclet.scope ).to.equal( 'instance' );
+			expect( emitterOnDoclet.memberof ).to.equal( 'module:engine/emitter~Emitter' );
+
+			expect( emitterOnDoclet.mixed ).to.equal( true );
 		} );
 	} );
 } );
