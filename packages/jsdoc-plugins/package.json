@@ -1,16 +1,16 @@
 {
   "name": "@ckeditor/jsdoc-plugins",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Various JSDoc plugins developed by the CKEditor 5 team.",
   "keywords": [
-	"jsdoc",
-	"jsdoc3",
-	"plugins",
-	"ckeditor",
-	"validator",
-	"validation",
-	"short references",
-	"inheritance"
+    "jsdoc",
+    "jsdoc3",
+    "plugins",
+    "ckeditor",
+    "validator",
+    "validation",
+    "short references",
+    "inheritance"
   ],
   "dependencies": {
     "fs-extra": "^7.0.0",

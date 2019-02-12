@@ -1,6 +1,6 @@
 {
   "name": "eslint-config-ckeditor5",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "CKEditor 5 ESLint preset.",
   "keywords": [
     "style guide",
@@ -12,7 +12,7 @@
   ],
   "main": ".eslintrc.js",
   "dependencies": {
-    "eslint-plugin-ckeditor5-rules": "^0.0.1"
+    "eslint-plugin-ckeditor5-rules": "^0.0.2"
   },
   "peerDependencies": {
     "eslint": ">=3.0.0"
