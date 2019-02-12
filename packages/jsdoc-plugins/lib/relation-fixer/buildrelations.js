@@ -129,7 +129,7 @@ function getAncestors( docletCollection, currentDoclet, options ) {
 /**
  * Returns `true` when the input in equal to `undefined` or is an empty array.
  *
- * @param {Array.<any>|undefined} arr
+ * @param {Array|undefined} arr
  */
 function isEmpty( arr ) {
 	return !arr || arr.length === 0;
