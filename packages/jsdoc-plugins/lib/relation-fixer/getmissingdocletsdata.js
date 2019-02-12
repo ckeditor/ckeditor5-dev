@@ -16,7 +16,7 @@ module.exports = getMissingDocletsData;
  * This module requires the input preprocessed by the `buildRelations()` function.
  *
  * @param {DocletCollection} docletCollection
- * @param {Readonly<Doclet>} interfaceClassOrMixinDoclet Doclet representing an entity which might have some inherited members missing.
+ * @param {Doclet} interfaceClassOrMixinDoclet Doclet representing an entity which might have some inherited members missing.
  * @param {Options} options
  * @returns {{newDoclets: Array.<Doclet>, docletsWhichShouldBeIgnored: Array.<Doclet>}}
  */
@@ -73,7 +73,7 @@ function getMissingDocletsData( docletCollection, interfaceClassOrMixinDoclet, o
  * and matching criteria given in options.filter.
  *
  * @param {DocletCollection} docletCollection
- * @param {Readonly<Doclet>} childDoclet
+ * @param {Doclet} childDoclet
  * @param {Options} options
  */
 function getDocletsToAdd( docletCollection, childDoclet, options ) {
@@ -119,8 +119,8 @@ function isNonEmptyArray( obj ) {
 }
 
 /**
- * @param {Readonly<Doclet>} parentDoclet
- * @param {Readonly<Doclet>} childDoclet
+ * @param {Doclet} parentDoclet
+ * @param {Doclet} childDoclet
  */
 function getLongnameForNewDoclet( parentDoclet, childDoclet ) {
 	const dotIndex = parentDoclet.longname.lastIndexOf( '.' );
@@ -133,9 +133,9 @@ function getLongnameForNewDoclet( parentDoclet, childDoclet ) {
 /**
  * Gets property which should be added to the new doclet (e.g. inherited, mixed).
  *
- * @param {Readonly<DocletMap>} docletMap
- * @param {Readonly<Doclet>} childDoclet
- * @param {Readonly<Doclet>} memberDoclet
+ * @param {DocletMap} docletMap
+ * @param {Doclet} childDoclet
+ * @param {Doclet} memberDoclet
  * @param {'augmentsNested'|'mixesNested'|'implementsNested'} relation
  * @returns {'inherited'|'mixed'|null}
  */
