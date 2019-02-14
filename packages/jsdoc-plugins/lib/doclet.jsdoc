@@ -68,7 +68,7 @@
 /**
  * @typedef {Object} Property
  *
- * @property {String } name
+ * @property {String} name
  *
  * @property {Object} type
  *
