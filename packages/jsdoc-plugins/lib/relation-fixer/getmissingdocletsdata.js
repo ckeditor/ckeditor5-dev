@@ -2,7 +2,6 @@
  * @license Copyright (c) 2003-2019, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
  */
-// @ts-check
 
 'use strict';
 
@@ -84,7 +83,7 @@ function getDocletsToAdd( docletCollection, childDoclet, options ) {
 	// Longnames of doclets which are related ( extended, mixed, implemented ) to childDoclet.
 	const ancestors = childDoclet[ options.relation ];
 
-	const docletToAdd = ancestors.reduce( ( /** @type {Array.<Doclet>} */ docletsToAdd, longname ) => {
+	const docletToAdd = ancestors.reduce( ( docletsToAdd, longname ) => {
 		const toAdd = docletCollection.get( `memberof:${ longname }` ).filter( doclet => {
 			let matchingFilterOptions = true;
 
@@ -121,6 +120,7 @@ function isNonEmptyArray( obj ) {
 /**
  * @param {Doclet} parentDoclet
  * @param {Doclet} childDoclet
+ * @returns {String}
  */
 function getLongnameForNewDoclet( parentDoclet, childDoclet ) {
 	const dotIndex = parentDoclet.longname.lastIndexOf( '.' );
@@ -183,6 +183,7 @@ function getRelationProperty( docletMap, childDoclet, memberDoclet, relation ) {
 
 /**
  * @param {Array.<Doclet>} doclets
+ * @returns {Boolean}
  */
 function doAllParentsExplicitlyInherit( doclets ) {
 	for ( const doclet of doclets ) {
@@ -198,10 +199,9 @@ function doAllParentsExplicitlyInherit( doclets ) {
  * Creates a <longname, doclet> map.
  *
  * @param {DocletCollection} doclets
- * @returns {DocletMap}
+ * @returns {Object}
  */
 function createDocletMap( doclets ) {
-	/** @type {DocletMap} */
 	const docletMap = {};
 
 	for ( const doclet of doclets.getAll() ) {
@@ -221,7 +221,3 @@ function createDocletMap( doclets ) {
  * @property {Partial<Doclet>} [filter] Object used to filter missing doclets (e.g. { scope: 'static' }).
  * @property {Boolean} [onlyImplicitlyInherited]
  */
-
-/** @typedef {{ [longname: string]: Doclet}} DocletMap */
-
-/** @typedef {import('../utils/doclet-collection')} DocletCollection */

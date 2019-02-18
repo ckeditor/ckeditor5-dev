@@ -2,7 +2,6 @@
  * @license Copyright (c) 2003-2019, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
  */
-// @ts-check
 
 'use strict';
 
@@ -79,12 +78,12 @@ function buildRelations( doclets ) {
  * @param {Doclet} currentDoclet
  * @param {Object} options
  * @param {Array.<'augments'|'implements'|'mixes'>} options.relations An array of relation names which should be used.
- * @returns {{ [relation: string ]: Array.<String>}} An object containing arrays of ancestors' longnames.
+ * @returns {Object} An object containing arrays of ancestors' longnames.
  */
 function getAncestors( docletCollection, currentDoclet, options ) {
 	const { relations } = options;
 
-	/** @type {{ [relation: string ]: Array.<String>}} */
+	/** @type {Object} */
 	const resultRelations = {};
 
 	// Initialize the returned object.
