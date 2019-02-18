@@ -6,7 +6,7 @@
 'use strict';
 
 /**
- * Collection of doclets as <String, Doclet[]> pairs. Also stores all doclets and their longnames as arrays.
+ * Collection of doclets as <String, Array.<Doclet>> pairs. Also stores all doclets and their longnames as arrays.
  */
 class DocletCollection {
 	/**
@@ -41,7 +41,7 @@ class DocletCollection {
 	 * Returns doclets filtered by category.
 	 *
 	 * @param {String} category
-	 * @returns {Doclet[]}
+	 * @returns {Array.<Doclet>}
 	 */
 	get( category ) {
 		return this._data[ category ] || [];
@@ -50,7 +50,7 @@ class DocletCollection {
 	/**
 	 * Returns all doclets.
 	 *
-	 * @returns {Doclet[]}
+	 * @returns {Array.<Doclet>}
 	*/
 	getAll() {
 		return this._allData;
@@ -59,7 +59,7 @@ class DocletCollection {
 	/**
 	 * Returns all longnames.
 	 *
-	 * @returns {String[]}
+	 * @returns {Array.<String>}
 	 */
 	getAllLongnames() {
 		return this._allLongnames;

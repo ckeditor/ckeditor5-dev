@@ -5,26 +5,29 @@
 
 'use strict';
 
+const { cloneDeep } = require( 'lodash' );
 const getMissingDocletsData = require( './getmissingdocletsdata' );
-const cloneDeep = require( 'lodash' ).cloneDeep;
 const DocletCollection = require( '../utils/doclet-collection' );
 
 module.exports = addMissingDoclets;
 
 /**
- * Adds missing doclets of members coming from implemented interfaces and extended classes.
- * JSDoc does not support inheritance of static members which is why the plugin was made.
- * This module requires the input to be processed by 'buildrelations' module first.
+ * Adds missing doclets for members coming from implemented interfaces, extended classes, and mixins.
+ * It does also support inheriting static members and typedef inheritance, which both are not supported by the JSDoc.
+ * This module requires the input preprocessed by the `buildRelations()` function.
  *
- * @param {Array.<Doclet>} originalDoclets
+ * @param {Array.<Doclet>} doclets
  * @returns {Array.<Doclet>}
  */
-function addMissingDoclets( originalDoclets ) {
-	const clonedDoclets = cloneDeep( originalDoclets );
+function addMissingDoclets( doclets ) {
+	doclets = cloneDeep( doclets );
+
 	const docletCollection = new DocletCollection();
+
+	/** @type {Array.<Doclet>} */
 	const typedefDoclets = [];
 
-	for ( const doclet of clonedDoclets ) {
+	for ( const doclet of doclets ) {
 		// Group doclets by memberof property.
 		docletCollection.add( `memberof:${ doclet.memberof }`, doclet );
 
@@ -33,12 +36,26 @@ function addMissingDoclets( originalDoclets ) {
 		}
 	}
 
-	const entitiesWhichNeedNewDoclets = clonedDoclets.filter( d => {
-		return d.kind === 'class' || d.kind === 'interface' || d.kind === 'mixin';
+	extendTypedefs( typedefDoclets );
+
+	const extensibleDoclets = doclets.filter( doclet => {
+		return (
+			doclet.kind === 'class' ||
+			doclet.kind === 'interface' ||
+			doclet.kind === 'mixin'
+		);
 	} );
+
+	/** @type {Array.<Doclet>} */
 	const newDocletsToAdd = [];
+
+	/** @type {Array.<Doclet>} */
 	const docletsToIgnore = [];
-	const settings = [
+
+	/**
+	 * @type {Array.<Object>}
+	 **/
+	const options = [
 		// Missing statics inherited from parent classes.
 		{
 			relation: 'augmentsNested',
@@ -67,12 +84,12 @@ function addMissingDoclets( originalDoclets ) {
 		}
 	];
 
-	for ( const childDoclet of entitiesWhichNeedNewDoclets ) {
-		for ( const setting of settings ) {
+	for ( const extensibleDoclet of extensibleDoclets ) {
+		for ( const option of options ) {
 			const missingDocletsData = getMissingDocletsData(
 				docletCollection,
-				childDoclet,
-				setting
+				extensibleDoclet,
+				option
 			);
 
 			newDocletsToAdd.push( ...missingDocletsData.newDoclets );
@@ -80,23 +97,28 @@ function addMissingDoclets( originalDoclets ) {
 		}
 	}
 
-	docletsToIgnore.forEach( d => {
-		d.ignore = true;
-	} );
-	clonedDoclets.push( ...newDocletsToAdd );
+	// Ignore doclets that shouldn't be used anymore. They will be removed afterward.
+	for ( const docletToIgnore of docletsToIgnore ) {
+		docletToIgnore.ignore = true;
+	}
 
-	extendTypedefs( typedefDoclets );
-
-	return clonedDoclets;
+	return [
+		...doclets,
+		...newDocletsToAdd
+	];
 }
 
-// Copy properties from parent typedefs to typedefs which extend them.
+/**
+ * Copy properties from parent typedefs to typedefs which extend them.
+ *
+ * @param {Array.<Doclet>} typedefDoclets
+ */
 function extendTypedefs( typedefDoclets ) {
 	for ( const typedefDoclet of typedefDoclets ) {
 		for ( const parentLongname of typedefDoclet.augmentsNested ) {
-			const parentDoclet = typedefDoclets.find( d => d.longname === parentLongname ) || {};
+			const parentDoclet = typedefDoclets.find( doclet => doclet.longname === parentLongname );
 
-			if ( parentDoclet.properties ) {
+			if ( parentDoclet && parentDoclet.properties ) {
 				parentDoclet.properties.forEach( parentProperty => {
 					if ( typedefDoclet.properties && !typedefDoclet.properties.find( p => p.name === parentProperty.name ) ) {
 						const inheritedProperty = cloneDeep( parentProperty );

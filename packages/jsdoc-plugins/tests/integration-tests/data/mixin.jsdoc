@@ -1,0 +1,40 @@
+/**
+ * @license Copyright (c) 2003-2019, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+/**
+ * @module utils/emittermixin
+ */
+
+/**
+ * Mixin that injects the {@link ~Emitter events API} into its host.
+ *
+ * @mixin EmitterMixin
+ * @implements module:utils/emittermixin~Emitter
+ */
+const EmitterMixin = {
+	/**
+	 * @inheritDoc
+	 */
+	on( event, callback, options = {} ) {
+		this.listenTo( this, event, callback, options );
+	},
+};
+
+export default EmitterMixin;
+
+/**
+ * Emitter/listener interface.
+ *
+ * @interface Emitter
+ */
+
+/**
+ * Registers a callback function to be executed when an event is fired.
+ *
+ * @method #on
+ * @param {String} event The name of the event.
+ * @param {Function} callback The function to be called on event.
+ * @param {Object} [options={}] Additional options.
+ */

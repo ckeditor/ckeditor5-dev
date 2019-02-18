@@ -7,9 +7,15 @@
 
 const buildRelations = require( './buildrelations' );
 const addMissingDoclets = require( './addmissingdoclets' );
+const compose = require( '../utils/compose-functions' );
+const filterOutInternalDoclets = require( './filteroutintenraldoclets' );
 
 exports.handlers = {
 	processingComplete( e ) {
-		e.doclets = addMissingDoclets( buildRelations( e.doclets ) );
+		e.doclets = compose(
+			buildRelations,
+			addMissingDoclets,
+			filterOutInternalDoclets
+		)( e.doclets );
 	}
 };

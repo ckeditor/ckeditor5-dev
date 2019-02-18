@@ -8,28 +8,13 @@
 const chai = require( 'chai' );
 const expect = chai.expect;
 const addMissingDoclets = require( '../../lib/relation-fixer/addmissingdoclets' );
-const interfaceTestData = require( './test-data/interface' );
-const inheritanceImplicitTestData = require( './test-data/inheritance-implicit' );
-const inheritanceInheritdocTestData = require( './test-data/inheritance-inheritdoc' );
-const unwantedDocletsTestData = require( './test-data/unwanted-doclets' );
-const mixinTestData = require( './test-data/mixins' );
-const cloneDeep = require( 'lodash' ).cloneDeep;
+const interfaceTestDoclets = require( './test-data/interface' );
+const inheritanceImplicitTestDoclets = require( './test-data/inheritance-implicit' );
+const inheritanceInheritdocTestDoclets = require( './test-data/inheritance-inheritdoc' );
+const unwantedTestDoclets = require( './test-data/unwanted-doclets' );
+const mixinTestDoclets = require( './test-data/mixins' );
 
-describe( 'JSDoc relation-fixer addmissingdoclets module', () => {
-	let interfaceTestDoclets;
-	let inheritanceImplicitTestDoclets;
-	let inheritanceInheritdocTestDoclets;
-	let unwantedTestDoclets;
-	let mixinTestDoclets;
-
-	beforeEach( () => {
-		interfaceTestDoclets = cloneDeep( interfaceTestData );
-		inheritanceImplicitTestDoclets = cloneDeep( inheritanceImplicitTestData );
-		inheritanceInheritdocTestDoclets = cloneDeep( inheritanceInheritdocTestData );
-		unwantedTestDoclets = cloneDeep( unwantedDocletsTestData );
-		mixinTestDoclets = cloneDeep( mixinTestData );
-	} );
-
+describe( 'jsdoc-plugins/relation-fixer/addMissingDoclets()', () => {
 	it( 'should add missing doclets coming from interfaces', () => {
 		const expectedDoclet = {
 			name: 'intAProperty',
@@ -73,7 +58,7 @@ describe( 'JSDoc relation-fixer addmissingdoclets module', () => {
 		expect( newDoclets ).to.deep.include( expectedDoclet );
 	} );
 
-	it( 'should ignore exising doclets when `inheritdoc` was used', () => {
+	it( 'should ignore existing doclets when `inheritdoc` was used', () => {
 		const expectedDoclet = {
 			name: 'classAProp',
 			longname: 'classB.prop',

@@ -5,129 +5,159 @@
 
 'use strict';
 
+const { cloneDeep, uniq } = require( 'lodash' );
 const DocletCollection = require( '../utils/doclet-collection' );
-const cloneDeep = require( 'lodash' ).cloneDeep;
 const RELATIONS = {
 	implements: 'implementsNested',
 	mixes: 'mixesNested',
 	augments: 'augmentsNested'
 };
 
-module.exports = addRelationArrays;
+module.exports = buildRelations;
 
 /**
- * Checks ascendants of every doclet and adds them to relation array.
+ * Checks ascendants of every doclet and adds them to the relation array.
  * Handles nested inheritance, mixins and implementation of interfaces.
- * Also adds array of descendants to doclet. Descendants are entities which extend, implement or mix a doclet.
+ * Also adds descendants to doclet. Descendants are entities that extend, implement or mix a doclet.
  * For example: If ClassB extends ClassA and ClassA implements InterfaceC,
  * ClassB and ClassA will have a property 'implementsNested': [ 'InterfaceC' ],
  * also InterfaceC will have a property 'descendants': [ 'ClassA', 'ClassB' ] etc.
  *
- * @param {Array.<Doclet>} originalDoclets
+ * @param {Array.<Doclet>} doclets
  * @returns {Array.<Doclet>}
  */
-function addRelationArrays( originalDoclets ) {
-	const clonedDoclets = cloneDeep( originalDoclets );
+function buildRelations( doclets ) {
+	// Preserve original doclets from modification for easier testing.
+	doclets = cloneDeep( doclets );
+
+	/**
+	 * Doclets grouped by their longnames.
+	 */
 	const docletCollection = new DocletCollection();
 
-	for ( const doclet of clonedDoclets ) {
-		// Group doclets by longname.
+	for ( const doclet of doclets ) {
 		docletCollection.add( doclet.longname, doclet );
 	}
 
-	// Doclets for which we want to create relation arrays.
-	// We want classes, interfaces and mixins.
-	const subjectDoclets = docletCollection.getAll().filter( item => {
-		return item.kind === 'class' || item.kind === 'interface' || item.kind === 'mixin' || item.kind === 'typedef';
+	/**
+	 * An array of doclets, for which we want to create relation arrays.
+	 */
+	const subjectDoclets = doclets.filter( item => {
+		return (
+			item.kind === 'class' ||
+			item.kind === 'interface' ||
+			item.kind === 'mixin' ||
+			item.kind === 'typedef'
+		);
 	} );
 
-	subjectDoclets.forEach( d => {
-		const related = getAncestors( docletCollection, d, {
+	for ( const doclet of subjectDoclets ) {
+		const related = getAncestors( docletCollection, doclet, {
 			relations: [ 'augments', 'implements', 'mixes' ]
 		} );
 
 		// Remove duplicates.
 		for ( const relation of Object.keys( related ) ) {
-			related[ relation ] = Array.from( new Set( related[ relation ] ) );
+			related[ relation ] = uniq( related[ relation ] );
 		}
 
-		Object.assign( d, related );
-	} );
+		Object.assign( doclet, related );
+	}
 
-	subjectDoclets.forEach( d => {
-		const descendants = Array.from( new Set( getDescendants( subjectDoclets, d ) ) );
+	for ( const doclet of subjectDoclets ) {
+		doclet.descendants = uniq( getDescendants( subjectDoclets, doclet ) );
+	}
 
-		Object.assign( d, { descendants } );
-	} );
-
-	return docletCollection.getAll();
+	return doclets;
 }
 
-// Gets longnames of currentDoclet's ancestors (classes it extends, interfaces it implements and so on).
-//
-// @param {DocletCollection} docletCollection
-// @param {Doclet} currentDoclet
-// @param {Array} options.relations Array of relation names which should be used
-// @returns {Object} An object containing arrays of ancestors' longnames
+/**
+ * Gets long names of the current doclet ancestors (classes it extends, interfaces it implements and so on).
+ *
+ * @param {DocletCollection} docletCollection Doclets grouped by their longnames
+ * @param {Doclet} currentDoclet
+ * @param {Object} options
+ * @param {Array.<'augments'|'implements'|'mixes'>} options.relations An array of relation names which should be used.
+ * @returns {Object} An object containing arrays of ancestors' longnames.
+ */
 function getAncestors( docletCollection, currentDoclet, options ) {
 	const { relations } = options;
+
+	/** @type {Object} */
 	const resultRelations = {};
 
-	// Init return object.
-	relations.forEach( r => {
-		resultRelations[ RELATIONS[ r ] ] = [];
-	} );
+	// Initialize the returned object.
+	for ( const baseRelation of relations ) {
+		resultRelations[ RELATIONS[ baseRelation ] ] = [];
+	}
 
 	// For every relation take doclets which are related to current doclet and run `getAncestors` function on them recursively.
-	relations.forEach( r => {
-		if ( isNonEmptyArray( currentDoclet[ r ] ) ) {
-			resultRelations[ RELATIONS[ r ] ].push( ...currentDoclet[ r ] );
+	for ( const baseRelation of relations ) {
+		const relation = RELATIONS[ baseRelation ];
 
-			currentDoclet[ r ].forEach( longname => {
-				const ancestors = docletCollection.get( longname );
-
-				ancestors.forEach( ancestor => {
-					const ancestorsResultRelations = getAncestors( docletCollection, ancestor, {
-						relations
-					} );
-
-					// Push relation arrays of doclet's ancestors to current doclet resultRelations.
-					for ( const key of Object.keys( resultRelations ) ) {
-						// Only items of same kind can be put in inheritance tree. See #361.
-						if ( key === 'augmentsNested' && ancestor.kind !== currentDoclet.kind ) {
-							continue;
-						}
-
-						resultRelations[ key ].push( ...ancestorsResultRelations[ key ] );
-					}
-				} );
-			} );
+		if ( isEmpty( currentDoclet[ baseRelation ] ) ) {
+			continue;
 		}
-	} );
+
+		resultRelations[ relation ].push( ...currentDoclet[ baseRelation ] );
+
+		for ( const longname of currentDoclet[ baseRelation ] ) {
+			const ancestors = docletCollection.get( longname );
+
+			for ( const ancestor of ancestors ) {
+				const ancestorsResultRelations = getAncestors( docletCollection, ancestor, {
+					relations
+				} );
+
+				// Push relation arrays of doclet's ancestors to current doclet resultRelations.
+				for ( const key of Object.keys( resultRelations ) ) {
+					// Only items of same kind can be put in inheritance tree. See #361.
+					if ( key === 'augmentsNested' && ancestor.kind !== currentDoclet.kind ) {
+						continue;
+					}
+
+					resultRelations[ key ].push( ...ancestorsResultRelations[ key ] );
+				}
+			}
+		}
+	}
 
 	return resultRelations;
 }
 
-function isNonEmptyArray( obj ) {
-	return Array.isArray( obj ) && obj.length > 0;
+/**
+ * Returns `true` when the input in equal to `undefined` or is an empty array.
+ *
+ * @param {Array|undefined} arr
+ */
+function isEmpty( arr ) {
+	return !arr || arr.length === 0;
 }
 
-// Gets longnames of descendants – i.e. entities which extend, implement or mix a doclet.
-//
-// @param {Array.<Doclet>} searchedDoclets
-// @param {Doclet} currentDoclet
-// @returns {Array.<String>} Array of longnames
+/**
+ * Gets long names of descendants – i.e. entities which extend, implement or mix a doclet.
+ *
+ * @param {Array.<Doclet>} searchedDoclets
+ * @param {Doclet} currentDoclet
+ * @returns {Array.<String>} An array of long names.
+ */
 function getDescendants( searchedDoclets, currentDoclet ) {
+	/** @type {Set.<String>} */
 	const descendants = new Set();
 
 	for ( const doclet of searchedDoclets ) {
-		for ( const r of Object.keys( RELATIONS ) ) {
-			if ( isNonEmptyArray( doclet[ RELATIONS[ r ] ] ) && doclet[ RELATIONS[ r ] ].includes( currentDoclet.longname ) ) {
+		for ( const baseRelation in RELATIONS ) {
+			const relation = RELATIONS[ baseRelation ];
+
+			if (
+				!isEmpty( doclet[ relation ] ) &&
+				doclet[ relation ].includes( currentDoclet.longname )
+			) {
 				descendants.add( doclet.longname );
 				break;
 			}
 		}
 	}
 
-	return [ ...descendants ];
+	return Array.from( descendants );
 }
