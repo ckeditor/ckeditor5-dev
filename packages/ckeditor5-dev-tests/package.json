@@ -61,12 +61,11 @@
     "ckeditor5-dev-tests": "./bin/test.js",
     "ckeditor5-dev-tests-manual": "./bin/test-manual.js",
     "ckeditor5-dev-tests-travis": "./bin/test-travis.sh",
-    "ckeditor5-dev-tests-create-mgit-json": "./bin/create-mgit-json.js",
-    "ckeditor5-dev-tests-add-workspace-to-package-json": "./bin/add-workspace-to-package-json.js",
+    "ckeditor5-dev-tests-prepare-mgit-json": "./bin/prepare-mgit-json.js",
+    "ckeditor5-dev-tests-prepare-package-json": "./bin/prepare-package-json.js",
     "ckeditor5-dev-tests-install-dependencies": "./bin/install-dependencies.sh",
     "ckeditor5-dev-tests-save-revision": "./bin/save-revision.js",
-    "ckeditor5-dev-tests-check-dependencies": "./bin/check-dependencies.js",
-    "ckeditor5-dev-tests-link-package-to-node-modules": "./bin/link-package-to-node-modules.js"
+    "ckeditor5-dev-tests-check-dependencies": "./bin/check-dependencies.js"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",

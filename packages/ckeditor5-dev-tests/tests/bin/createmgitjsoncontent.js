@@ -17,7 +17,7 @@ describe( 'dev-tests/bin/create-mgit-json', () => {
 	it( 'should return a valid mgit config when no dependency in package.json present', () => {
 		const mgitJson = createMgitJson( {} );
 
-		expect( mgitJson ).to.deep.equal( { dependencies: {} } );
+		expect( mgitJson ).to.deep.equal( { dependencies: {}, packages: 'packages/' } );
 	} );
 
 	it( 'should return an object with dependency names for npm versions of dependencies', () => {
@@ -36,7 +36,8 @@ describe( 'dev-tests/bin/create-mgit-json', () => {
 				'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core',
 				'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',
 				'@ckeditor/ckeditor5-basic-styles': 'ckeditor/ckeditor5-basic-styles'
-			}
+			},
+			packages: 'packages/'
 		} );
 	} );
 
@@ -58,7 +59,8 @@ describe( 'dev-tests/bin/create-mgit-json', () => {
 				'@ckeditor/ckeditor5-paragraph': 'ckeditor/ckeditor5-paragraph#a171de3',
 				'ckeditor5-some-package': 'git@github.com:cksource/ckeditor5-some-package.git#1234567',
 				'ckeditor-some-package': 'git@github.com:cksource/ckeditor-some-package.git#abcdef0'
-			}
+			},
+			packages: 'packages/'
 		} );
 	} );
 
@@ -75,7 +77,32 @@ describe( 'dev-tests/bin/create-mgit-json', () => {
 		} );
 
 		expect( mgitJson ).to.deep.equal( {
-			dependencies: {}
+			dependencies: {},
+			packages: 'packages/'
+		} );
+	} );
+
+	it( 'modifies version of specified package (it sets proper commit)', () => {
+		const mgitJson = createMgitJson( {
+			dependencies: {
+				'@ckeditor/ckeditor5-core': '^0.8.1',
+				'@ckeditor/ckeditor5-engine': '0.10.0'
+			},
+			devDependencies: {
+				'@ckeditor/ckeditor5-basic-styles': '^0.8.1'
+			}
+		}, {
+			packageName: '@ckeditor/ckeditor5-core',
+			commit: 'abcd1234'
+		} );
+
+		expect( mgitJson ).to.deep.equal( {
+			dependencies: {
+				'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core#abcd1234',
+				'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',
+				'@ckeditor/ckeditor5-basic-styles': 'ckeditor/ckeditor5-basic-styles'
+			},
+			packages: 'packages/'
 		} );
 	} );
 } );
