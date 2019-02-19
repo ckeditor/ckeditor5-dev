@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## [3.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@2.1.1...@ckeditor/jsdoc-plugins@3.0.0) (2019-02-19)
+
+### Bug fixes
+
+* Fixed inheritance mechanism and filtered out internal doclets. Closes [#465](https://github.com/ckeditor/ckeditor5-dev/issues/465). ([04a147b](https://github.com/ckeditor/ckeditor5-dev/commit/04a147b))
+
+### Other changes
+
+* Upgraded minimal versions of Node and npm. See: [ckeditor/ckeditor5#1507](https://github.com/ckeditor/ckeditor5/issues/1507). ([0e8b901](https://github.com/ckeditor/ckeditor5-dev/commit/0e8b901))
+
+
 ## [2.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@2.1.0...@ckeditor/jsdoc-plugins@2.1.1) (2019-02-12)
 
 Internal changes only (updated dependencies, documentation, etc.).
