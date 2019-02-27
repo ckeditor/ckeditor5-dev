@@ -23,6 +23,8 @@ tools.updateJSONFile( path.join( TEST_DIR_PATH, 'mgit.json' ), () => {
 
 	return createMgitJsonContent( testingPackageJson, {
 		packageName: originalPackageJson.name,
-		commit: process.env.TRAVIS_COMMIT
+		// For PR build we want to get the latest commit from given PR instead of Merge Commit.
+		// See: https://github.com/ckeditor/ckeditor5-dev/issues/484
+		commit: process.env.TRAVIS_PULL_REQUEST_SHA || process.env.TRAVIS_COMMIT
 	} );
 } );
