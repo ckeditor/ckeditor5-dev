@@ -11,6 +11,7 @@ const path = require( 'path' );
 const createManualTestServer = require( '../utils/manual-tests/createserver' );
 const compileManualTestScripts = require( '../utils/manual-tests/compilescripts' );
 const compileManualTestHtmlFiles = require( '../utils/manual-tests/compilehtmlfiles' );
+const copyAssets = require( '../utils/manual-tests/copyassets' );
 const removeDir = require( '../utils/manual-tests/removedir' );
 const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontotestglob' );
 
@@ -30,7 +31,8 @@ module.exports = function runManualTests( options ) {
 		.then( () => removeDir( buildDir ) )
 		.then( () => Promise.all( [
 			compileManualTestScripts( buildDir, manualTestFilesPattern, options.themePath ),
-			compileManualTestHtmlFiles( buildDir, manualTestFilesPattern )
+			compileManualTestHtmlFiles( buildDir, manualTestFilesPattern ),
+			copyAssets( buildDir )
 		] ) )
 		.then( () => createManualTestServer( buildDir ) );
 };
