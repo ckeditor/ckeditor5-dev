@@ -16,9 +16,9 @@ Changelog
 
 * Rewrote a script that prepares the testing environment on CI. Now it creates a ckeditor5-like project that contains a proper version of all dependencies. Closes [#471](https://github.com/ckeditor/ckeditor5-dev/issues/471). ([a491c7f](https://github.com/ckeditor/ckeditor5-dev/commit/a491c7f))
 
-### Other changes
+### BREAKING CHANGES
 
-* Upgraded minimal versions of Node and npm. See: [ckeditor/ckeditor5#1507](https://github.com/ckeditor/ckeditor5/issues/1507). ([0e8b901](https://github.com/ckeditor/ckeditor5-dev/commit/0e8b901))
+* Upgraded minimal versions of Node to `8.0.0` and npm to `5.7.1`. See: [ckeditor/ckeditor5#1507](https://github.com/ckeditor/ckeditor5/issues/1507). ([612ea3c](https://github.com/ckeditor/ckeditor5-cloud-services/commit/612ea3c))
 
 
 ## [15.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@15.1.0...@ckeditor/ckeditor5-dev-tests@15.2.0) (2019-02-12)
