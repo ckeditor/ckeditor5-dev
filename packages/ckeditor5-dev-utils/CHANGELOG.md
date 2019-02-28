@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## [12.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@12.0.0...@ckeditor/ckeditor5-dev-utils@12.0.1) (2019-02-28)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
 ## [12.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@11.0.2...@ckeditor/ckeditor5-dev-utils@12.0.0) (2019-02-19)
 
 ### BREAKING CHANGES

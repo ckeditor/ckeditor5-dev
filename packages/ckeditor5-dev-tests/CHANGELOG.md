@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [16.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.0.1...@ckeditor/ckeditor5-dev-tests@16.1.0) (2019-02-28)
+
+### Features
+
+* Enabled ckeditor5-inspector in all manual tests. Closes [#489](https://github.com/ckeditor/ckeditor5-dev/issues/489). ([1b3f781](https://github.com/ckeditor/ckeditor5-dev/commit/1b3f781))
+
+
 ## [16.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.0.0...@ckeditor/ckeditor5-dev-tests@16.0.1) (2019-02-28)
 
 ### Bug fixes

@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## [3.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@3.0.0...@ckeditor/jsdoc-plugins@3.0.1) (2019-02-28)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
 ## [3.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@2.1.1...@ckeditor/jsdoc-plugins@3.0.0) (2019-02-19)
 
 ### Bug fixes
