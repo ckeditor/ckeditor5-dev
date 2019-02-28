@@ -27,6 +27,7 @@ describe( 'runManualTests', () => {
 			htmlFileCompiler: sandbox.spy( () => Promise.resolve() ),
 			scriptCompiler: sandbox.spy( () => Promise.resolve() ),
 			removeDir: sandbox.spy( () => Promise.resolve() ),
+			copyAssets: sandbox.spy(),
 			transformFileOptionToTestGlob: sandbox.stub()
 		};
 
@@ -34,6 +35,7 @@ describe( 'runManualTests', () => {
 		mockery.registerMock( '../utils/manual-tests/compilehtmlfiles', spies.htmlFileCompiler );
 		mockery.registerMock( '../utils/manual-tests/compilescripts', spies.scriptCompiler );
 		mockery.registerMock( '../utils/manual-tests/removedir', spies.removeDir );
+		mockery.registerMock( '../utils/manual-tests/copyassets', spies.copyAssets );
 		mockery.registerMock( '../utils/transformfileoptiontotestglob', spies.transformFileOptionToTestGlob );
 
 		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );

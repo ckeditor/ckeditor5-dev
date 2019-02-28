@@ -134,7 +134,11 @@ describe( 'compileHtmlFiles', () => {
 				'<div>template html content</div>',
 				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
 				'<div>html file content</div>',
-				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script></body>`
+				'<body class="manual-test-container">' +
+					'<script src="/assets/inspector.js"></script>' +
+					'<script src="/assets/attachinspector.js"></script>' +
+					`<script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script>` +
+				'</body>'
 			].join( '\n' )
 		);
 		/* eslint-enable max-len */
@@ -167,7 +171,11 @@ describe( 'compileHtmlFiles', () => {
 				'<div>template html content</div>',
 				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
 				'<div>html file content</div>',
-				`<body class="manual-test-container"><script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.abc.js' ) }"></script></body>`
+				'<body class="manual-test-container">' +
+					'<script src="/assets/inspector.js"></script>' +
+					'<script src="/assets/attachinspector.js"></script>' +
+					`<script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.abc.js' ) }"></script>` +
+				'</body>'
 			].join( '\n' )
 		);
 		/* eslint-enable max-len */
@@ -255,8 +263,11 @@ describe( 'compileHtmlFiles', () => {
 				'<div>template html content</div>',
 				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
 				'<div>html file content</div>',
-				`<body class="manual-test-container"><script src="${ path.sep +
-				path.join( 'path', 'to', 'manual', 'file.js' ) }"></script></body>`
+				'<body class="manual-test-container">' +
+					'<script src="/assets/inspector.js"></script>' +
+					'<script src="/assets/attachinspector.js"></script>' +
+					`<script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script>` +
+				'</body>'
 			].join( '\n' )
 		);
 		/* eslint-enable max-len */
@@ -295,7 +306,11 @@ describe( 'compileHtmlFiles', () => {
 				'<div>template html content</div>',
 				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
 				'<div>html file content</div>',
-				`<body class="manual-test-container"><script src="/${ path.join( 'path', 'to', 'manual', 'file.js' ) }"></script></body>`
+				'<body class="manual-test-container">' +
+					'<script src="/assets/inspector.js"></script>' +
+					'<script src="/assets/attachinspector.js"></script>' +
+					`<script src="/${ path.join( 'path', 'to', 'manual', 'file.js' ) }"></script>` +
+				'</body>'
 			].join( '\n' )
 		);
 		/* eslint-enable max-len */
