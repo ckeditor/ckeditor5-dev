@@ -1,6 +1,15 @@
 Changelog
 =========
 
+## [16.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.0.0...@ckeditor/ckeditor5-dev-tests@16.0.1) (2019-02-28)
+
+### Bug fixes
+
+* Pull requests builds will use proper commit SHA-1. Closes [#484](https://github.com/ckeditor/ckeditor5-dev/issues/484). ([39740c7](https://github.com/ckeditor/ckeditor5-dev/commit/39740c7))
+
+  Instead of testing the merge commit which does not exist in the git tree, it will use the latest commit from a branch that a user wants to merge.
+
+
 ## [16.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@15.2.0...@ckeditor/ckeditor5-dev-tests@16.0.0) (2019-02-19)
 
 ### Features
