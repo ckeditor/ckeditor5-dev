@@ -85,6 +85,8 @@ function compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate ) {
 	// Attach script file to the view.
 	const scriptTag =
 		'<body class="manual-test-container">' +
+			'<script src="/assets/inspector.js"></script>' +
+			'<script src="/assets/attachinspector.js"></script>' +
 			`<script src="/${ absoluteJSFilePath }"></script>` +
 		'</body>';
 

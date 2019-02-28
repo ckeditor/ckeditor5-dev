@@ -1,0 +1,24 @@
+/**
+ * @license Copyright (c) 2003-2019, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+/* global CKEditorInspector, window */
+
+/*
+ * This script attaches the inspector (https://github.com/ckeditor/ckeditor5-inspector) to
+ * all editors created in manual tests and referred under the global `window.editor` property.
+ */
+( () => {
+	let editor = null;
+
+	Object.defineProperty( window, 'editor', {
+		set: value => {
+			editor = value;
+
+			CKEditorInspector.attach( 'editor', editor );
+		},
+		get: () => editor
+	} );
+} )();
+
