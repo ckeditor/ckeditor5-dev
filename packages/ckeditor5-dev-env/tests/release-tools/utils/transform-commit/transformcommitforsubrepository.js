@@ -203,13 +203,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( commit.subject ).to.equal( 'Introduced a brand new release tools with a new set of requirements. ' +
 				'See [#64](https://github.com/ckeditor/ckeditor5-dev/issues/64).' );
 			expect( commit.body ).to.equal( commitDescriptionWithIndents );
-
-			// expect( stubs.logger.info.calledOnce ).to.equal( true );
-			//
-			// expect( stubs.logger.info.firstCall.args[ 0 ].includes(
-			// 	'Feature: Introduced a brand new release tools with a new set of requirements. See #64.'
-			// ) ).to.equal( true );
-			// expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'INCLUDED' ) ).to.equal( true );
 		} );
 
 		it( 'removes references to issues', () => {
