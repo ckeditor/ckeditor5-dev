@@ -15,7 +15,6 @@ const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
  *
  * @param {Commit} commit
  * @param {Object} context
- * @param {Boolean} context.displayLogs Whether to display the logs.
  * @param {Object} context.packageData Content from the 'package.json' for given package.
  * @returns {Commit}
  */
