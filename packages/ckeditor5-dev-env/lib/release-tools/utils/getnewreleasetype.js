@@ -53,7 +53,10 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 			} )
 			.pipe( conventionalCommitsParser( parserOptions ) )
 			.pipe( concat( data => {
-				const commits = conventionalCommitsFilter( data );
+				const commits = conventionalCommitsFilter( data )
+					.map( commit => transformCommit( commit, context ) )
+					.filter( commit => commit );
+
 				const releaseType = getNewVersionType( commits );
 
 				return resolve( { releaseType } );
@@ -65,48 +68,29 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 	// @param {Array} commits
 	// @returns {String}
 	function getNewVersionType( commits ) {
-		let haveValidChanges = false;
+		// Repository does not have new changes.
+		if ( !commits.length ) {
+			return 'skip';
+		}
+
+		const publicCommits = commits.filter( commit => availableCommitTypes.get( commit.rawType ) );
+
+		if ( !publicCommits.length ) {
+			return 'internal';
+		}
+
 		let newFeatures = false;
-		let publicChanges = false;
-		let internalChanges = false;
 
-		for ( const item of commits ) {
-			const singleCommit = transformCommit( item, context );
-
-			if ( !singleCommit ) {
-				continue;
-			}
-
-			haveValidChanges = true;
-
-			// Check whether the commit is visible in changelog.
-			if ( !availableCommitTypes.get( singleCommit.rawType ) ) {
-				internalChanges = true;
-
-				continue;
-			}
-
-			publicChanges = true;
-
-			for ( const note of singleCommit.notes ) {
+		for ( const commit of publicCommits ) {
+			for ( const note of commit.notes ) {
 				if ( note.title === 'BREAKING CHANGES' ) {
 					return 'major';
 				}
 			}
 
-			if ( !newFeatures && singleCommit.rawType === 'Feature' ) {
+			if ( !newFeatures && commit.rawType === 'Feature' ) {
 				newFeatures = true;
 			}
-		}
-
-		// Repository does not have new changes.
-		if ( !haveValidChanges ) {
-			return 'skip';
-		}
-
-		// Repository contains internal changes only.
-		if ( !publicChanges && internalChanges ) {
-			return 'internal';
 		}
 
 		// Repository has new features without breaking changes.
