@@ -23,6 +23,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					changelogFile: changelogUtils.changelogFile,
 				},
 				getNewReleaseType: sandbox.stub(),
+				displayCommits: sandbox.stub(),
 				logger: {
 					info: sandbox.stub(),
 					warning: sandbox.stub(),
@@ -49,6 +50,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			mockery.registerMock( '../utils/cli', stubs.cli );
 			mockery.registerMock( '../utils/getnewreleasetype', stubs.getNewReleaseType );
+			mockery.registerMock( '../utils/displaycommits', stubs.displayCommits );
 			mockery.registerMock( '../utils/generatechangelogfromcommits', stubs.generateChangelogFromCommits );
 			mockery.registerMock( '../utils/transform-commit/transformcommitforsubrepository', stubs.transformCommit );
 
@@ -101,8 +103,11 @@ describe( 'dev-env/release-tools/tasks', () => {
 		} );
 
 		it( 'generates changelog for version provided by a user', () => {
+			const commits = [ {}, {} ];
+
 			stubs.getNewReleaseType.returns( Promise.resolve( {
-				releaseType: 'minor'
+				releaseType: 'minor',
+				commits
 			} ) );
 			stubs.cli.provideVersion.returns( Promise.resolve( '0.1.0' ) );
 			stubs.versionUtils.getLastFromChangelog.returns( null );
@@ -126,12 +131,18 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.cli.provideVersion.calledOnce ).to.equal( true );
 					expect( stubs.cli.provideVersion.firstCall.args[ 0 ] ).to.equal( '0.0.1' );
 					expect( stubs.cli.provideVersion.firstCall.args[ 1 ] ).to.equal( 'minor' );
+
+					expect( stubs.displayCommits.calledOnce ).to.equal( true );
+					expect( stubs.displayCommits.firstCall.args[ 0 ] ).to.deep.equal( commits );
 				} );
 		} );
 
 		it( 'does not generate if a user provides "skip" as a new version (suggested a "minor" release)', () => {
+			const commits = [ {}, {} ];
+
 			stubs.getNewReleaseType.returns( Promise.resolve( {
-				releaseType: 'minor'
+				releaseType: 'minor',
+				commits
 			} ) );
 
 			stubs.cli.provideVersion.returns( Promise.resolve( 'skip' ) );
@@ -139,12 +150,18 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return generateChangelogForSinglePackage()
 				.then( () => {
 					expect( stubs.generateChangelogFromCommits.called ).to.equal( false );
+
+					expect( stubs.displayCommits.calledOnce ).to.equal( true );
+					expect( stubs.displayCommits.firstCall.args[ 0 ] ).to.deep.equal( commits );
 				} );
 		} );
 
 		it( 'does not generate if a user provides "skip" as a new version (suggested a "skip" release)', () => {
+			const commits = [ {}, {} ];
+
 			stubs.getNewReleaseType.returns( Promise.resolve( {
-				releaseType: 'skip'
+				releaseType: 'skip',
+				commits
 			} ) );
 
 			stubs.cli.provideVersion.returns( Promise.resolve( 'skip' ) );
@@ -152,6 +169,9 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return generateChangelogForSinglePackage()
 				.then( () => {
 					expect( stubs.generateChangelogFromCommits.called ).to.equal( false );
+
+					expect( stubs.displayCommits.calledOnce ).to.equal( true );
+					expect( stubs.displayCommits.firstCall.args[ 0 ] ).to.deep.equal( commits );
 				} );
 		} );
 

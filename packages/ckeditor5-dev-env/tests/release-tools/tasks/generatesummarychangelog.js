@@ -59,6 +59,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			transformCommitFunction: sandbox.stub(),
 			generateChangelogFromCommits: sandbox.stub(),
 			getNewReleaseType: sandbox.stub(),
+			displayCommits: sandbox.stub(),
 			executeOnPackages: sandbox.stub(),
 			moment: {
 				format: sandbox.stub()
@@ -74,6 +75,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 		mockery.registerMock( '../utils/generatechangelogfromcommits', stubs.generateChangelogFromCommits );
 		mockery.registerMock( '../utils/executeonpackages', stubs.executeOnPackages );
 		mockery.registerMock( '../utils/getnewreleasetype', stubs.getNewReleaseType );
+		mockery.registerMock( '../utils/displaycommits', stubs.displayCommits );
 		mockery.registerMock( '../utils/versions', stubs.versionUtils );
 		mockery.registerMock( '../utils/cli', stubs.cliUtils );
 
@@ -101,6 +103,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 	describe( 'generateSummaryChangelog()', () => {
 		it( 'generates a summary changelog for single package', () => {
+			const commits = [ {}, {} ];
+
 			stubs.getSubRepositoriesPaths.returns( {
 				matched: new Set( [
 					packagesPaths.alpha
@@ -124,7 +128,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			stubs.versionUtils.getCurrent.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
 			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.epsilon ).returns( '1.0.0' );
 
-			stubs.getNewReleaseType.resolves( { releaseType: 'skip' } );
+			stubs.getNewReleaseType.resolves( { commits, releaseType: 'skip' } );
 
 			stubs.cliUtils.provideVersion.resolves( '1.0.0' );
 
@@ -183,6 +187,8 @@ Patch releases (bug fixes, internal changes):
 					const genetatedChangelogMap = stubs.displayGeneratedChangelogs.firstCall.args[ 0 ];
 
 					expect( genetatedChangelogMap.has( '@ckeditor/alpha' ) ).to.equal( true );
+					expect( stubs.displayCommits.calledOnce ).to.equal( true );
+					expect( stubs.displayCommits.firstCall.args[ 0 ] ).to.deep.equal( commits );
 				} );
 		} );
 
@@ -347,6 +353,8 @@ Changelog entries generated from commits.
 		} );
 
 		it( 'allows generating changelog for main repository', () => {
+			const commits = [ {}, {} ];
+
 			stubs.getSubRepositoriesPaths.returns( {
 				matched: new Set(),
 				skipped: new Set( [
@@ -375,7 +383,7 @@ Changelog entries generated from commits.
 			stubs.versionUtils.getCurrent.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
 			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.epsilon ).returns( '0.5.1' );
 
-			stubs.getNewReleaseType.resolves( { releaseType: 'minor' } );
+			stubs.getNewReleaseType.resolves( { commits, releaseType: 'minor' } );
 
 			stubs.generateChangelogFromCommits.resolves(
 				'## Changelog header (will be removed)\n\n' +
@@ -428,6 +436,9 @@ Changelog entries generated from commits.
 
 					expect( processChidirStub.firstCall.args[ 0 ] ).to.equal( mainPackagePath );
 					expect( processChidirStub.secondCall.args[ 0 ] ).to.equal( testCwd );
+
+					expect( stubs.displayCommits.calledOnce ).to.equal( true );
+					expect( stubs.displayCommits.firstCall.args[ 0 ] ).to.deep.equal( commits );
 				} );
 		} );
 

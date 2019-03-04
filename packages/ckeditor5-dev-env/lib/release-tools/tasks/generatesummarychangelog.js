@@ -13,6 +13,7 @@ const moment = require( 'moment' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const changelogUtils = require( '../utils/changelog' );
 const cliUtils = require( '../utils/cli' );
+const displayCommits = require( '../utils/displaycommits' );
 const displayGeneratedChangelogs = require( '../utils/displaygeneratedchangelogs' );
 const executeOnPackages = require( '../utils/executeonpackages' );
 const generateChangelogFromCommits = require( '../utils/generatechangelogfromcommits' );
@@ -104,6 +105,8 @@ module.exports = function generateSummaryChangelog( options ) {
 		if ( !newVersion ) {
 			promise = promise.then( () => getNewReleaseType( transformCommitFunction, { tagName } ) )
 				.then( result => {
+					displayCommits( result.commits );
+
 					suggestedBumpFromCommits = result.releaseType === 'internal' ? 'skip' : result.releaseType;
 
 					let newReleaseType;

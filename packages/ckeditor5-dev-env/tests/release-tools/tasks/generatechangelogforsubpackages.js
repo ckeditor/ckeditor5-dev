@@ -34,6 +34,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				changelogFile: 'CHANGELOG.md',
 			},
 			getNewReleaseType: sandbox.stub(),
+			displayCommits: sandbox.stub(),
 			logger: {
 				info: sandbox.spy(),
 				warning: sandbox.spy(),
@@ -58,6 +59,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 		mockery.registerMock( '../utils/cli', stubs.cli );
 		mockery.registerMock( '../utils/versions', stubs.versionUtils );
 		mockery.registerMock( '../utils/getnewreleasetype', stubs.getNewReleaseType );
+		mockery.registerMock( '../utils/displaycommits', stubs.displayCommits );
 
 		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
 
@@ -80,6 +82,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 	describe( 'generateChangelogForSubPackages()', () => {
 		it( 'generates changelog entries for found sub packages', () => {
+			const commits = [ {}, {} ];
 			const chdirStub = sandbox.stub( process, 'chdir' );
 			sandbox.stub( process, 'cwd' ).returns( '/ckeditor5-dev' );
 
@@ -96,7 +99,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				version: '1.0.0'
 			} );
 			stubs.versionUtils.getLastFromChangelog.onFirstCall().returns( '1.0.0' );
-			stubs.getNewReleaseType.onFirstCall().returns( Promise.resolve( { releaseType: 'patch' } ) );
+			stubs.getNewReleaseType.onFirstCall().returns( Promise.resolve( { commits, releaseType: 'patch' } ) );
 			stubs.cli.provideVersion.onFirstCall().returns( Promise.resolve( '1.0.1' ) );
 			stubs.generateChangelogFromCommits.onFirstCall().returns( Promise.resolve( '1.0.1' ) );
 
@@ -105,7 +108,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				version: '2.0.0'
 			} );
 			stubs.versionUtils.getLastFromChangelog.onSecondCall().returns( '2.0.0' );
-			stubs.getNewReleaseType.onSecondCall().returns( Promise.resolve( { releaseType: 'minor' } ) );
+			stubs.getNewReleaseType.onSecondCall().returns( Promise.resolve( { commits, releaseType: 'minor' } ) );
 			stubs.cli.provideVersion.onSecondCall().returns( Promise.resolve( '2.1.0' ) );
 			stubs.generateChangelogFromCommits.onSecondCall().returns( Promise.resolve( '2.1.0' ) );
 
@@ -174,10 +177,15 @@ describe( 'dev-env/release-tools/tasks', () => {
 						newTagName: '@ckeditor/ckeditor5-dev-bar@2.1.0',
 						isInternalRelease: false
 					} );
+
+					expect( stubs.displayCommits.calledTwice ).to.equal( true );
+					expect( stubs.displayCommits.firstCall.args[ 0 ] ).to.deep.equal( commits );
+					expect( stubs.displayCommits.secondCall.args[ 0 ] ).to.deep.equal( commits );
 				} );
 		} );
 
 		it( 'ignores specified packages', () => {
+			const commits = [ {}, {} ];
 			const chdirStub = sandbox.stub( process, 'chdir' );
 			sandbox.stub( process, 'cwd' ).returns( '/ckeditor5-dev' );
 
@@ -195,7 +203,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				version: '1.0.0'
 			} );
 			stubs.versionUtils.getLastFromChangelog.onFirstCall().returns( '1.0.0' );
-			stubs.getNewReleaseType.onFirstCall().returns( Promise.resolve( { releaseType: 'patch' } ) );
+			stubs.getNewReleaseType.onFirstCall().returns( Promise.resolve( { commits, releaseType: 'patch' } ) );
 			stubs.cli.provideVersion.onFirstCall().returns( Promise.resolve( '1.0.1' ) );
 			stubs.generateChangelogFromCommits.onFirstCall().returns( Promise.resolve( '1.0.1' ) );
 
@@ -225,6 +233,9 @@ describe( 'dev-env/release-tools/tasks', () => {
 						newTagName: '@ckeditor/ckeditor5-dev-foo@1.0.1',
 						isInternalRelease: false
 					} );
+
+					expect( stubs.displayCommits.calledOnce ).to.equal( true );
+					expect( stubs.displayCommits.firstCall.args[ 0 ] ).to.deep.equal( commits );
 				} );
 		} );
 
