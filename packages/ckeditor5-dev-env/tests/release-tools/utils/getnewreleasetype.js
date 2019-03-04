@@ -13,66 +13,60 @@ const proxyquire = require( 'proxyquire' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-env/release-tools/utils', () => {
-	let getNewReleaseType, sandbox, stubs, tmpCwd, cwd, packageJson;
-
-	before( () => {
-		cwd = process.cwd();
-		tmpCwd = fs.mkdtempSync( __dirname + path.sep );
-	} );
-
-	after( () => {
-		exec( `rm -rf ${ tmpCwd }` );
-	} );
-
-	beforeEach( () => {
-		sandbox = sinon.createSandbox();
-
-		stubs = {
-			transformCommit: sandbox.stub().callsFake( commit => {
-				commit.rawType = commit.type;
-				commit.hash = commit.hash.substring( 0, 7 );
-
-				return commit;
-			} ),
-			versionUtils: {
-				getLastFromChangelog: sandbox.stub()
-			}
-		};
-
-		getNewReleaseType = proxyquire( '../../../lib/release-tools/utils/getnewreleasetype', {
-			'./versions': stubs.versionUtils,
-			'@ckeditor/ckeditor5-dev-utils': {
-				logger() {
-					return stubs.logger;
-				}
-			}
-		} );
-
-		process.chdir( tmpCwd );
-
-		exec( 'git init' );
-
-		if ( process.env.CI ) {
-			exec( 'git config user.email "ckeditor5@ckeditor.com"' );
-			exec( 'git config user.name "CKEditor5 CI"' );
-		}
-
-		packageJson = {
-			name: 'test-package',
-			bugs: 'some-url'
-		};
-
-		fs.writeFileSync( path.join( tmpCwd, 'package.json' ), JSON.stringify( packageJson, null, '\t' ) );
-	} );
-
-	afterEach( () => {
-		sandbox.restore();
-
-		process.chdir( cwd );
-		exec( `rm -rf ${ path.join( tmpCwd, '.git' ) }` );
-	} );
+	let tmpCwd, cwd, getNewReleaseType, sandbox, packageJson, stubs;
 
 	describe( 'getNewReleaseType()', () => {
+		before( () => {
+			cwd = process.cwd();
+			tmpCwd = fs.mkdtempSync( __dirname + path.sep );
+		} );
+
+		after( () => {
+			exec( `rm -rf ${ tmpCwd }` );
+		} );
+
+		beforeEach( () => {
+			sandbox = sinon.createSandbox();
+
+			stubs = {
+				transformCommit: sandbox.stub().callsFake( commit => {
+					commit.rawType = commit.type;
+
+					return commit;
+				} ),
+				versionUtils: {
+					getLastFromChangelog: sandbox.stub()
+				}
+			};
+
+			process.chdir( tmpCwd );
+
+			exec( 'git init' );
+
+			if ( process.env.CI ) {
+				exec( 'git config user.email "ckeditor5@ckeditor.com"' );
+				exec( 'git config user.name "CKEditor5 CI"' );
+			}
+
+			packageJson = {
+				name: 'test-package',
+				bugs: 'some-url'
+			};
+
+			fs.writeFileSync( path.join( tmpCwd, 'package.json' ), JSON.stringify( packageJson, null, '\t' ) );
+
+			getNewReleaseType = proxyquire( '../../../lib/release-tools/utils/getnewreleasetype', {
+				'./versions': stubs.versionUtils
+			} );
+		} );
+
+		afterEach( () => {
+			process.chdir( cwd );
+			exec( `rm -rf ${ path.join( tmpCwd, '.git' ) }` );
+
+			sandbox.restore();
+		} );
+
 		it( 'throws an error when repository is empty', () => {
 			return getNewReleaseType( stubs.transformCommit )
 				.then(
@@ -81,22 +75,6 @@ describe( 'dev-env/release-tools/utils', () => {
 					},
 					err => {
 						expect( err.message ).to.equal( 'Given repository is empty.' );
-					}
-				);
-		} );
-
-		it( 'throws an error when given tag does not exist', () => {
-			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
-
-			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.1.2' } )
-				.then(
-					() => {
-						throw new Error( 'Supposed to be rejected.' );
-					},
-					err => {
-						expect( err.message ).to.equal(
-							'Cannot find tag "v1.1.2" (the latest version from the changelog) in given repository.'
-						);
 					}
 				);
 		} );
@@ -202,6 +180,22 @@ describe( 'dev-env/release-tools/utils', () => {
 					// (3) Docs: Added some notes to README #2.
 					expect( stubs.transformCommit.calledThrice ).to.equal( true );
 				} );
+		} );
+
+		it( 'throws an error when given tag does not exist', () => {
+			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
+
+			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.1.2' } )
+				.then(
+					() => {
+						throw new Error( 'Supposed to be rejected.' );
+					},
+					err => {
+						const message = 'Cannot find tag "v1.1.2" (the latest version' +
+							' from the changelog) in given repository.';
+						expect( err.message ).to.equal( message );
+					}
+				);
 		} );
 	} );
 
