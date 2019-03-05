@@ -18,7 +18,7 @@ const getPackageJson = require( './getpackagejson' );
  *
  * If given package has not changed, suggested version will be equal to 'skip'.
  *
- * It returns a promise that resolves the `releaseType` and all `commits` that have been checked.
+ * It returns a promise that resolves to the `releaseType` and all `commits` that have been checked.
  *
  * @param {Function} transformCommit
  * @param {Object} options
