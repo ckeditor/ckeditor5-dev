@@ -13,10 +13,13 @@ const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
  *
  * The commit will be parsed only if its at least one file is located in current processing package.
  *
+ * Returns `undefined` if given commit should not be added to the changelog. This behavior can be changed
+ * using the `context.returnInvalidCommit` option.
+ *
  * @param {Commit} commit
  * @param {Object} context
  * @param {Object} context.packageData Content from the 'package.json' for given package.
- * @returns {Commit}
+ * @returns {Commit|undefined}
  */
 module.exports = function transformCommitForSubPackage( commit, context ) {
 	// Skip the Lerna "Publish" commit.

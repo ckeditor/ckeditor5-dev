@@ -13,10 +13,13 @@ const utils = require( './transform-commit-utils' );
  *   - filters out the commit if it should not be visible in the changelog,
  *   - makes links to issues and organizations on GitHub.
  *
+ * Returns `undefined` if given commit should not be added to the changelog. This behavior can be changed
+ * using the `context.returnInvalidCommit` option.
+ *
  * @param {Commit} rawCommit
  * @param {Object} [context={}]
  * @param {Boolean} [context.returnInvalidCommit=false] Whether invalid commit should be returned.
- * @returns {Commit}
+ * @returns {Commit|undefined}
  */
 module.exports = function transformCommitForSubRepository( rawCommit, context = {} ) {
 	// Let's clone the commit. We don't want to modify the reference.
