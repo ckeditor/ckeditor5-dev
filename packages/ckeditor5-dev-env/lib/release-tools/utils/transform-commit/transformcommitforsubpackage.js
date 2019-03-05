@@ -50,9 +50,10 @@ module.exports = function transformCommitForSubPackage( rawCommit, context ) {
 		return;
 	}
 
-	const packageName = context.packageData.name.split( '/' )[ 1 ];
+	const packageName = context.packageData.name;
+	const packageDirectory = packageName.startsWith( '@' ) ? packageName.split( '/' )[ 1 ] : packageName;
 
-	if ( !isValidCommit( files, packageName ) ) {
+	if ( !isValidCommit( files, packageDirectory ) ) {
 		return;
 	}
 

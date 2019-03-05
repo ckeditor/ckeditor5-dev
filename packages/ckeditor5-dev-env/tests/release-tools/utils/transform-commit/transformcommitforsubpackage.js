@@ -220,5 +220,27 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				transformCommitForSubPackage( rawCommit, context );
 			} ).to.not.throw( Error );
 		} );
+
+		it( 'works for packages without scoped name', () => {
+			context = {
+				packageData: {
+					name: 'eslint-config-ckeditor5'
+				}
+			};
+
+			const rawCommit = {
+				hash: 'abcd123',
+				notes: []
+			};
+
+			stubs.getChangedFilesForCommit.returns( [
+				'packages/eslint-config-ckeditor5/README.md'
+			] );
+
+			const commit = transformCommitForSubPackage( rawCommit, context );
+
+			expect( stubs.transformCommitForSubRepository.called ).to.equal( true );
+			expect( commit ).to.deep.equal( rawCommit );
+		} );
 	} );
 } );
