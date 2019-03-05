@@ -89,7 +89,7 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 				}
 			}
 
-			if ( !newFeatures && commit.rawType === 'Feature' ) {
+			if ( commit.rawType === 'Feature' ) {
 				newFeatures = true;
 			}
 		}
