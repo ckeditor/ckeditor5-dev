@@ -228,18 +228,19 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				}
 			};
 
-			const commit = {
-				hash: 'abcd123'
+			const rawCommit = {
+				hash: 'abcd123',
+				notes: []
 			};
 
 			stubs.getChangedFilesForCommit.returns( [
 				'packages/eslint-config-ckeditor5/README.md'
 			] );
 
-			stubs.transformCommitForSubRepository.returnsArg( 0 );
+			const commit = transformCommitForSubPackage( rawCommit, context );
 
-			expect( transformCommitForSubPackage( commit, context ) ).to.equal( commit );
 			expect( stubs.transformCommitForSubRepository.called ).to.equal( true );
+			expect( commit ).to.deep.equal( rawCommit );
 		} );
 	} );
 } );
