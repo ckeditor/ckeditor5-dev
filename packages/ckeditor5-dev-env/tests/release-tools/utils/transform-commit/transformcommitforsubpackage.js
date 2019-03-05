@@ -132,6 +132,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			stubs.transformCommitForSubRepository.reset();
 			stubs.transformCommitForSubRepository.callsFake( commit => {
 				commit.hash = commit.hash.substring( 0, 7 );
+
 				return commit;
 			} );
 
