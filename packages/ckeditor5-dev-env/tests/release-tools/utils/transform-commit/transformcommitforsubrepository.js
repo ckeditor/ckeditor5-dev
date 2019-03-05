@@ -33,6 +33,11 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		} );
 
 		it( 'returns a new instance of object instead od modifying passed one', () => {
+			const notes = [
+				{ title: 'Foo', text: 'Foo-Text' },
+				{ title: 'Bar', text: 'Bar-Text' }
+			];
+
 			const rawCommit = {
 				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
 				header: 'Fix: Simple fix.',
@@ -40,13 +45,17 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				subject: 'Simple fix.',
 				body: null,
 				footer: null,
-				notes: []
+				notes
 			};
 
 			const commit = transformCommitForSubRepository( rawCommit );
 
 			// `transformCommit` modifies `hash` of given commit.
 			expect( commit.hash ).to.not.equal( rawCommit.hash );
+
+			// Notes cannot be the same but they should be equal.
+			expect( commit.notes ).to.not.equal( rawCommit.notes );
+			expect( commit.notes ).to.deep.equal( rawCommit.notes );
 		} );
 
 		it( 'returns "undefined" if given commit should not be visible in the changelog', () => {

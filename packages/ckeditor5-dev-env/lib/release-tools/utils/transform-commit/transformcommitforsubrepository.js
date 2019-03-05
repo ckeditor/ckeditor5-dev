@@ -23,15 +23,11 @@ const utils = require( './transform-commit-utils' );
  */
 module.exports = function transformCommitForSubRepository( rawCommit, context = {} ) {
 	// Let's clone the commit. We don't want to modify the reference.
-	const commit = Object.assign( {}, rawCommit );
-	commit.notes = [];
-
-	for ( const note of rawCommit.notes ) {
-		commit.notes.push( Object.assign( {}, note ) );
-	}
-
-	// Copy the original `type` of the commit.
-	commit.rawType = commit.type;
+	const commit = Object.assign( {}, rawCommit, {
+		// Copy the original `type` of the commit.
+		rawType: rawCommit.type,
+		notes: rawCommit.notes.map( note => Object.assign( {}, note ) )
+	} );
 
 	// Whether the commit will be printed in the changelog.
 	const isCommitIncluded = utils.availableCommitTypes.get( commit.rawType );
