@@ -88,6 +88,8 @@ describe( 'dev-env/release-tools/utils', () => {
 			return getNewReleaseType( stubs.transformCommit )
 				.then( response => {
 					expect( response.releaseType ).to.equal( 'skip' );
+					expect( response.commits ).to.be.an( 'Array' );
+					expect( response.commits.length ).to.equal( 0 );
 				} );
 		} );
 
@@ -98,6 +100,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			return getNewReleaseType( stubs.transformCommit )
 				.then( response => {
 					expect( response.releaseType ).to.equal( 'patch' );
+					expect( response.commits.length ).to.equal( 2 );
 				} );
 		} );
 
@@ -108,6 +111,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			return getNewReleaseType( stubs.transformCommit )
 				.then( response => {
 					expect( response.releaseType ).to.equal( 'patch' );
+					expect( response.commits.length ).to.equal( 2 );
 				} );
 		} );
 
@@ -118,6 +122,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			return getNewReleaseType( stubs.transformCommit )
 				.then( response => {
 					expect( response.releaseType ).to.equal( 'minor' );
+					expect( response.commits.length ).to.equal( 2 );
 				} );
 		} );
 
@@ -129,6 +134,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			return getNewReleaseType( stubs.transformCommit )
 				.then( response => {
 					expect( response.releaseType ).to.equal( 'major' );
+					expect( response.commits.length ).to.equal( 3 );
 				} );
 		} );
 
@@ -139,6 +145,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.0.0' } )
 				.then( response => {
 					expect( response.releaseType ).to.equal( 'skip' );
+					expect( response.commits.length ).to.equal( 0 );
 				} );
 		} );
 
@@ -146,10 +153,13 @@ describe( 'dev-env/release-tools/utils', () => {
 			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
 			exec( 'git tag v1.0.0' );
 			exec( 'git commit --allow-empty --message "Docs: Added some notes to README #1."' );
+			exec( 'git commit --allow-empty --message "Docs: Added some notes to README #2."' );
+			exec( 'git commit --allow-empty --message "Docs: Added some notes to README #3."' );
 
 			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.0.0' } )
 				.then( response => {
 					expect( response.releaseType ).to.equal( 'internal' );
+					expect( response.commits.length ).to.equal( 3 );
 				} );
 		} );
 
@@ -169,23 +179,6 @@ describe( 'dev-env/release-tools/utils', () => {
 					// (2) Other: Nothing.
 					// (3) Docs: Added some notes to README #2.
 					expect( stubs.transformCommit.calledThrice ).to.equal( true );
-				} );
-		} );
-
-		it( 'transforms each commit since the last release until breaking changes commit', () => {
-			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
-			exec( 'git tag v1.0.0' );
-			exec( 'git commit --allow-empty --message "Docs: Added some notes to README #1."' );
-			exec( 'git commit --allow-empty --message "Other: Nothing." --message "BREAKING CHANGES: Bump the major!"' );
-			exec( 'git commit --allow-empty --message "Docs: Added some notes to README #2."' );
-
-			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.0.0' } )
-				.then( response => {
-					// transformCommit should be called for commits:
-					// (1) Docs: Added some notes to README #1.
-					// (2) Other: Nothing.
-					expect( stubs.transformCommit.calledTwice ).to.equal( true );
-					expect( response.releaseType ).to.equal( 'major' );
 				} );
 		} );
 
