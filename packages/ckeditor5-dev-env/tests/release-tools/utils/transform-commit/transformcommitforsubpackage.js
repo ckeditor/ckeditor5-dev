@@ -177,5 +177,26 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( commit.header ).to.equal( 'Merge branch \'master\' of github.com:ckeditor/ckeditor5-dev' );
 			expect( commit.body ).to.equal( null );
 		} );
+
+		it( 'works for packages without scoped name', () => {
+			context = {
+				packageData: {
+					name: 'eslint-config-ckeditor5'
+				}
+			};
+
+			const commit = {
+				hash: 'abcd123'
+			};
+
+			stubs.getChangedFilesForCommit.returns( [
+				'packages/eslint-config-ckeditor5/README.md'
+			] );
+
+			stubs.transformCommitForSubRepository.returnsArg( 0 );
+
+			expect( transformCommitForSubPackage( commit, context ) ).to.equal( commit );
+			expect( stubs.transformCommitForSubRepository.called ).to.equal( true );
+		} );
 	} );
 } );
