@@ -34,7 +34,7 @@ module.exports = function transformCommitForSubRepository( rawCommit, context = 
 	commit.rawType = commit.type;
 
 	// Whether the commit will be printed in the changelog.
-	const isCommitIncluded = utils.availableCommitTypes.get( commit.type );
+	const isCommitIncluded = utils.availableCommitTypes.get( commit.rawType );
 
 	// Our merge commit always contains two lines:
 	// Merge ...
@@ -67,7 +67,7 @@ module.exports = function transformCommitForSubRepository( rawCommit, context = 
 	}
 
 	// The `type` below will be key for grouping commits.
-	commit.type = utils.getCommitType( commit.type );
+	commit.type = utils.getCommitType( commit.rawType );
 
 	if ( typeof commit.subject === 'string' ) {
 		commit.subject = makeLinks( commit.subject );
