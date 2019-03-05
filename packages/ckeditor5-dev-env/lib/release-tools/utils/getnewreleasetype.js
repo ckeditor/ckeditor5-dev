@@ -18,10 +18,12 @@ const getPackageJson = require( './getpackagejson' );
  *
  * If given package has not changed, suggested version will be equal to 'skip'.
  *
+ * It returns a promise that resolves to the `releaseType` and all `commits` that have been checked.
+ *
  * @param {Function} transformCommit
  * @param {Object} options
  * @param {String|null} options.tagName Name of the last created tag for the repository.
- * @returns {Promise}
+ * @returns {Promise.<Object>}
  */
 module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 	const gitRawCommitsOpts = {
@@ -32,7 +34,6 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 	};
 
 	const context = {
-		displayLogs: true,
 		returnInvalidCommit: true,
 		packageData: getPackageJson()
 	};
@@ -44,8 +45,7 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 					reject( new Error( 'Given repository is empty.' ) );
 				} else if ( err.message.match( new RegExp( `'${ options.tagName }\\.\\.HEAD': unknown` ) ) ) {
 					reject( new Error(
-						`Cannot find tag "${ options.tagName }" (the latest version from the changelog) ` +
-						'in given repository.'
+						`Cannot find tag "${ options.tagName }" (the latest version from the changelog) in given repository.`
 					) );
 				} else {
 					reject( err );
@@ -53,60 +53,45 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 			} )
 			.pipe( conventionalCommitsParser( parserOptions ) )
 			.pipe( concat( data => {
-				const commits = conventionalCommitsFilter( data );
-				const releaseType = getNewVersionType( commits );
+				const commits = conventionalCommitsFilter( data )
+					.map( commit => transformCommit( commit, context ) )
+					.filter( commit => commit );
 
-				return resolve( { releaseType } );
+				return resolve( {
+					releaseType: getNewVersionType( commits ),
+					commits
+				} );
 			} ) );
 	} );
 
 	// Returns a type of version for a release based on the commits.
 	//
-	// @param {Array} commits
+	// @param {Array.<Commit>} commits
 	// @returns {String}
 	function getNewVersionType( commits ) {
-		let haveValidChanges = false;
+		// Repository does not have new changes.
+		if ( !commits.length ) {
+			return 'skip';
+		}
+
+		const publicCommits = commits.filter( commit => availableCommitTypes.get( commit.rawType ) );
+
+		if ( !publicCommits.length ) {
+			return 'internal';
+		}
+
 		let newFeatures = false;
-		let publicChanges = false;
-		let internalChanges = false;
 
-		for ( const item of commits ) {
-			const singleCommit = transformCommit( item, context );
-
-			if ( !singleCommit ) {
-				continue;
-			}
-
-			haveValidChanges = true;
-
-			// Check whether the commit is visible in changelog.
-			if ( !availableCommitTypes.get( singleCommit.rawType ) ) {
-				internalChanges = true;
-
-				continue;
-			}
-
-			publicChanges = true;
-
-			for ( const note of singleCommit.notes ) {
+		for ( const commit of publicCommits ) {
+			for ( const note of commit.notes ) {
 				if ( note.title === 'BREAKING CHANGES' ) {
 					return 'major';
 				}
 			}
 
-			if ( !newFeatures && singleCommit.rawType === 'Feature' ) {
+			if ( commit.rawType === 'Feature' ) {
 				newFeatures = true;
 			}
-		}
-
-		// Repository does not have new changes.
-		if ( !haveValidChanges ) {
-			return 'skip';
-		}
-
-		// Repository contains internal changes only.
-		if ( !publicChanges && internalChanges ) {
-			return 'internal';
 		}
 
 		// Repository has new features without breaking changes.

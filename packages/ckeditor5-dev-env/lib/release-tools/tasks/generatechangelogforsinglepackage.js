@@ -11,6 +11,7 @@ const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const cli = require( '../utils/cli' );
 const versionUtils = require( '../utils/versions' );
 const changelogUtils = require( '../utils/changelog' );
+const displayCommits = require( '../utils/displaycommits' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
 const generateChangelogFromCommits = require( '../utils/generatechangelogfromcommits' );
@@ -50,8 +51,10 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 			.then( () => {
 				return getNewReleaseType( transformCommitFunction, { tagName } );
 			} )
-			.then( response => {
-				const newReleaseType = response.releaseType !== 'skip' ? response.releaseType : null;
+			.then( result => {
+				displayCommits( result.commits );
+
+				const newReleaseType = result.releaseType !== 'skip' ? result.releaseType : null;
 
 				return cli.provideVersion( packageJson.version, newReleaseType );
 			} );

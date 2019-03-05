@@ -50,6 +50,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					}
 				}
 			} );
+
+			stubs.transformCommitForSubRepository.returnsArg( 0 );
 		} );
 
 		afterEach( () => {
@@ -59,7 +61,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 		it( 'rejects the commit if no files were changed', () => {
 			const commit = {
-				hash: 'abcd123'
+				hash: 'abcd123',
+				notes: []
 			};
 
 			stubs.getChangedFilesForCommit.returns( [] );
@@ -70,7 +73,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 		it( 'rejects the commit when it changed files in other package', () => {
 			const commit = {
-				hash: 'abcd123'
+				hash: 'abcd123',
+				notes: []
 			};
 
 			stubs.getChangedFilesForCommit.returns( [
@@ -104,41 +108,20 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( stubs.transformCommitForSubRepository.called ).to.equal( false );
 		} );
 
-		it( 'accepts the commit when it has changed files in proper and other packages', () => {
-			const commit = {
-				hash: 'abcd123'
-			};
+		it( 'returns a new instance of object instead od modifying passed one', () => {
+			const notes = [
+				{ title: 'Foo', text: 'Foo-Text' },
+				{ title: 'Bar', text: 'Bar-Text' }
+			];
 
-			stubs.getChangedFilesForCommit.returns( [
-				'packages/ckeditor5-dev-env/README.md',
-				'packages/ckeditor5-dev-tests/README.md'
-			] );
-
-			stubs.transformCommitForSubRepository.returnsArg( 0 );
-
-			expect( transformCommitForSubPackage( commit, context ) ).to.equal( commit );
-			expect( stubs.transformCommitForSubRepository.called ).to.equal( true );
-		} );
-
-		it( 'accepts the commit when it has changed files in proper packages and root of the repository', () => {
-			const commit = {
-				hash: 'abcd123'
-			};
-
-			stubs.getChangedFilesForCommit.returns( [
-				'packages/ckeditor5-dev-env/README.md',
-				'README.md'
-			] );
-
-			stubs.transformCommitForSubRepository.returnsArg( 0 );
-
-			expect( transformCommitForSubPackage( commit, context ) ).to.equal( commit );
-			expect( stubs.transformCommitForSubRepository.called ).to.equal( true );
-		} );
-
-		it( 'accepts the commit when it has changed files for proper package', () => {
-			const commit = {
-				hash: 'abcd123'
+			const rawCommit = {
+				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+				header: 'Fix: Simple fix.',
+				type: 'Fix',
+				subject: 'Simple fix.',
+				body: null,
+				footer: null,
+				notes
 			};
 
 			stubs.getChangedFilesForCommit.returns( [
@@ -146,14 +129,79 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				'packages/ckeditor5-dev-env/package.json',
 			] );
 
-			stubs.transformCommitForSubRepository.returnsArg( 0 );
+			stubs.transformCommitForSubRepository.reset();
+			stubs.transformCommitForSubRepository.callsFake( commit => {
+				commit.hash = commit.hash.substring( 0, 7 );
 
-			expect( transformCommitForSubPackage( commit, context ) ).to.equal( commit );
+				return commit;
+			} );
+
+			const commit = transformCommitForSubPackage( rawCommit, context );
+
 			expect( stubs.transformCommitForSubRepository.calledOnce ).to.equal( true );
+
+			// `transformCommitForSubRepository` modifies `hash` of given commit and returns the same object.
+			// `transformCommitForSubPackage` must care about cloning the object before any operation.
+			expect( commit.hash ).to.not.equal( rawCommit.hash );
+
+			// Notes cannot be the same but they should be equal.
+			expect( commit.notes ).to.not.equal( rawCommit.notes );
+			expect( commit.notes ).to.deep.equal( rawCommit.notes );
+		} );
+
+		it( 'accepts the commit when it has changed files in proper and other packages', () => {
+			const rawCommit = {
+				hash: 'abcd123',
+				notes: []
+			};
+
+			stubs.getChangedFilesForCommit.returns( [
+				'packages/ckeditor5-dev-env/README.md',
+				'packages/ckeditor5-dev-tests/README.md'
+			] );
+
+			const commit = transformCommitForSubPackage( rawCommit, context );
+
+			expect( stubs.transformCommitForSubRepository.called ).to.equal( true );
+			expect( commit ).to.deep.equal( rawCommit );
+		} );
+
+		it( 'accepts the commit when it has changed files in proper packages and root of the repository', () => {
+			const rawCommit = {
+				hash: 'abcd123',
+				notes: []
+			};
+
+			stubs.getChangedFilesForCommit.returns( [
+				'README.md',
+				'packages/ckeditor5-dev-env/README.md'
+			] );
+
+			const commit = transformCommitForSubPackage( rawCommit, context );
+
+			expect( stubs.transformCommitForSubRepository.called ).to.equal( true );
+			expect( commit ).to.deep.equal( rawCommit );
+		} );
+
+		it( 'accepts the commit when it has changed files for proper package', () => {
+			const rawCommit = {
+				hash: 'abcd123',
+				notes: []
+			};
+
+			stubs.getChangedFilesForCommit.returns( [
+				'packages/ckeditor5-dev-env/README.md',
+				'packages/ckeditor5-dev-env/package.json',
+			] );
+
+			const commit = transformCommitForSubPackage( rawCommit, context );
+
+			expect( stubs.transformCommitForSubRepository.called ).to.equal( true );
+			expect( commit ).to.deep.equal( rawCommit );
 		} );
 
 		it( 'does not crash if the merge commit does not contain the second line', () => {
-			const commit = {
+			const rawCommit = {
 				type: null,
 				subject: null,
 				merge: 'Merge branch \'master\' of github.com:ckeditor/ckeditor5-dev',
@@ -169,13 +217,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			stubs.getChangedFilesForCommit.returns( [] );
 
 			expect( () => {
-				transformCommitForSubPackage( commit, context );
+				transformCommitForSubPackage( rawCommit, context );
 			} ).to.not.throw( Error );
-
-			expect( stubs.getChangedFilesForCommit.firstCall.args[ 0 ] ).to.equal( '575e00bc8ece48826adefe226c4fb1fe071c73a7' );
-			expect( commit.hash ).to.equal( '575e00bc8ece48826adefe226c4fb1fe071c73a7' );
-			expect( commit.header ).to.equal( 'Merge branch \'master\' of github.com:ckeditor/ckeditor5-dev' );
-			expect( commit.body ).to.equal( null );
 		} );
 
 		it( 'works for packages without scoped name', () => {

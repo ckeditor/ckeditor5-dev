@@ -5,13 +5,7 @@
 
 'use strict';
 
-const chalk = require( 'chalk' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const utils = require( './transform-commit-utils' );
-
-// A size of indent for a log. The number is equal to length of the log string:
-// '* 1234567 ', where '1234567' is a short commit id.
-const INDENT_SIZE = 10;
 
 /**
  * Parses a single commit:
@@ -19,18 +13,24 @@ const INDENT_SIZE = 10;
  *   - filters out the commit if it should not be visible in the changelog,
  *   - makes links to issues and organizations on GitHub.
  *
- * @param {Commit} commit
- * @param {Object} context
- * @param {Boolean} context.displayLogs Whether to display the logs.
+ * Returns `undefined` if given commit should not be added to the changelog. This behavior can be changed
+ * using the `context.returnInvalidCommit` option.
+ *
+ * @param {Commit} rawCommit
+ * @param {Object} [context={}]
  * @param {Boolean} [context.returnInvalidCommit=false] Whether invalid commit should be returned.
- * @param {Object} context.packageData Content from the 'package.json' for given package.
- * @returns {Commit}
+ * @returns {Commit|undefined}
  */
-module.exports = function transformCommitForSubRepository( commit, context ) {
-	const log = logger( context.displayLogs ? 'info' : 'error' );
+module.exports = function transformCommitForSubRepository( rawCommit, context = {} ) {
+	// Let's clone the commit. We don't want to modify the reference.
+	const commit = Object.assign( {}, rawCommit, {
+		// Copy the original `type` of the commit.
+		rawType: rawCommit.type,
+		notes: rawCommit.notes.map( note => Object.assign( {}, note ) )
+	} );
 
-	const hasCorrectType = utils.availableCommitTypes.has( commit.type );
-	const isCommitIncluded = utils.availableCommitTypes.get( commit.type );
+	// Whether the commit will be printed in the changelog.
+	const isCommitIncluded = utils.availableCommitTypes.get( commit.rawType );
 
 	// Our merge commit always contains two lines:
 	// Merge ...
@@ -48,23 +48,7 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 		commit.hash = commit.hash.substring( 0, 7 );
 	}
 
-	let logMessage = `* ${ chalk.yellow( commit.hash ) } "${ utils.truncate( commit.header, 100 ) }" `;
-
-	if ( hasCorrectType && isCommitIncluded ) {
-		logMessage += chalk.green( 'INCLUDED' );
-	} else if ( hasCorrectType && !isCommitIncluded ) {
-		logMessage += chalk.grey( 'SKIPPED' );
-	} else {
-		logMessage += chalk.red( 'INVALID' );
-	}
-
-	// Avoid displaying commit merge twice.
-	if ( commit.merge && commit.merge !== commit.header ) {
-		logMessage += `\n${ ' '.repeat( INDENT_SIZE ) }${ commit.merge }`;
-	}
-
-	log.info( logMessage );
-
+	// It's used only for displaying the commit. Changelog generator will filter out the invalid entries.
 	if ( !isCommitIncluded ) {
 		return context.returnInvalidCommit ? commit : undefined;
 	}
@@ -78,15 +62,15 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 		commit.subject += '.';
 	}
 
-	commit.rawType = commit.type;
-	commit.type = utils.getCommitType( commit.type );
+	// The `type` below will be key for grouping commits.
+	commit.type = utils.getCommitType( commit.rawType );
 
 	if ( typeof commit.subject === 'string' ) {
 		commit.subject = makeLinks( commit.subject );
 	}
 
-	// Remove additional notes from commit's footer.
-	// Additional notes are added to footer. In order to avoid duplication, they should be removed.
+	// Remove additional notes from the commit's footer.
+	// Additional notes are added to the footer. In order to avoid duplication, they should be removed.
 	if ( commit.footer && commit.notes.length ) {
 		commit.footer = commit.footer.split( '\n' )
 			.filter( footerLine => {
@@ -98,6 +82,7 @@ module.exports = function transformCommitForSubRepository( commit, context ) {
 			.trim();
 	}
 
+	// If `body` of the commit is empty but the `footer` isn't, let's swap those.
 	if ( commit.footer && !commit.body ) {
 		commit.body = commit.footer;
 		commit.footer = null;
@@ -141,7 +126,11 @@ function makeLinks( comment ) {
 /**
  * @typedef {Object} Commit
  *
- * @property {String} [type] Type of the commit.
+ * @property {String} rawType Type of the commit without any modifications.
+ *
+ * @property {String} type Type of the commit (it can be modified).
+ *
+ * @property {String} hash The commit SHA-1 id.
  *
  * @property {String} [subject] Subject of the commit.
  *
@@ -153,13 +142,12 @@ function makeLinks( comment ) {
  *
  * @property {Array.<CommitNote>} [notes] Notes for the commit.
  *
- * @property {String} [hash] The commit SHA-1 id.
- *
  */
+
 /**
  * @typedef {Object} CommitNote
  *
- * @property {String} [title] Type of the note.
+ * @property {String} title Type of the note.
  *
- * @property {String} [text] Text of the note.
+ * @property {String} text Text of the note.
  */
