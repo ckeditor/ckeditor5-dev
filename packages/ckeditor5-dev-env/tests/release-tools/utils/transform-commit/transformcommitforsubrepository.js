@@ -289,5 +289,23 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 			expect( commit.subject ).to.equal( 'README.' );
 		} );
+
+		it( 'always ignores merge "stable" commit', () => {
+			const rawCommit = {
+				type: null,
+				subject: null,
+				merge: 'Merge branch \'stable\'',
+				header: '-hash-',
+				body: '575e00bc8ece48826adefe226c4fb1fe071c73a7',
+				footer: null,
+				notes: [],
+				references: [],
+				mentions: [],
+				revert: null
+			};
+
+			expect( transformCommitForSubRepository( rawCommit ) ).to.equal( undefined );
+			expect( transformCommitForSubRepository( rawCommit, { returnInvalidCommit: true } ) ).to.equal( undefined );
+		} );
 	} );
 } );
