@@ -99,12 +99,12 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'title of the next release should be a link which compares current version with the previous one', () => {
-			exec( 'git commit --allow-empty --message "Internal: An initial commit."' );
+			makeCommit( 'Internal: An initial commit.' );
 
 			return makeInitialRelease()
 				.then( () => {
-					exec( 'git commit --allow-empty --message "Internal: An initial commit."' );
-					exec( 'git commit --allow-empty --message "Feature: Some amazing feature. Closes #1."' );
+					makeCommit( 'Internal: An initial commit.' );
+					makeCommit( 'Feature: Some amazing feature. Closes #1.' );
 
 					return generateChangelog( '0.1.0' );
 				} )
@@ -119,8 +119,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		it( 'handles a commit which does not end with a dot', () => {
 			return makeInitialRelease()
 				.then( () => {
-					exec( 'git commit --allow-empty ' +
-						'--message "Feature: Another feature. Closes #2"' );
+					makeCommit( 'Feature: Another feature. Closes #2' );
 
 					return generateChangelog( '0.1.0' );
 				} )
@@ -143,9 +142,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			it( 'does not hoist issues from the commit body', () => {
 				return makeInitialRelease()
 					.then( () => {
-						exec( 'git commit --allow-empty ' +
-							'--message "Feature: Another feature. Closes #2." ' +
-							'--message "This PR also closes #3 and #4."' );
+						makeCommit( 'Feature: Another feature. Closes #2.', 'This PR also closes #3 and #4.' );
 
 						return generateChangelog( '0.1.0' );
 					} )
@@ -169,10 +166,11 @@ describe( 'dev-env/release-tools/utils', () => {
 			it( 'does not hoist issues from the commit body for merge commit', () => {
 				return makeInitialRelease()
 					.then( () => {
-						exec( 'git commit --allow-empty ' +
-							'--message "Merge pull request #5 from ckeditor/t/4" ' +
-							'--message "Fix: Amazing fix. Closes #5." ' +
-							'--message "The PR also finally closes #3 and #4. So good!"' );
+						makeCommit(
+							'Merge pull request #5 from ckeditor/t/4',
+							'Fix: Amazing fix. Closes #5.',
+							'The PR also finally closes #3 and #4. So good!'
+						);
 
 						return generateChangelog( '0.1.1' );
 					} )
@@ -196,12 +194,13 @@ describe( 'dev-env/release-tools/utils', () => {
 			it( 'does not hoist issues from the commit body with additional notes for merge commit', () => {
 				return makeInitialRelease()
 					.then( () => {
-						exec( 'git commit --allow-empty ' +
-							'--message "Merge pull request #7 from ckeditor/t/6" ' +
-							'--message "Other: Some docs improvements. Closes #6." ' +
-							'--message "Did you see the #3 and #4?" ' +
-							'--message "NOTE: Please read #1." ' +
-							'--message "BREAKING CHANGES: Some breaking change." ' );
+						makeCommit(
+							'Merge pull request #7 from ckeditor/t/6',
+							'Other: Some docs improvements. Closes #6.',
+							'Did you see the #3 and #4?',
+							'NOTE: Please read #1.',
+							'BREAKING CHANGES: Some breaking change.'
+						);
 
 						return generateChangelog( '0.2.0' );
 					} )
@@ -233,11 +232,12 @@ describe( 'dev-env/release-tools/utils', () => {
 			it( 'does not hoist issues from the commit body with additional notes', () => {
 				return makeInitialRelease()
 					.then( () => {
-						exec( 'git commit --allow-empty ' +
-							'--message "Feature: Issues will not be hoisted. Closes #8." ' +
-							'--message "All details have been described in #1." ' +
-							'--message "NOTE: Please read #1." ' +
-							'--message "BREAKING CHANGES: Some breaking change." ' );
+						makeCommit(
+							'Feature: Issues will not be hoisted. Closes #8.',
+							'All details have been described in #1.',
+							'NOTE: Please read #1.',
+							'BREAKING CHANGES: Some breaking change.'
+						);
 
 						return generateChangelog( '0.2.0' );
 					} )
@@ -272,9 +272,9 @@ describe( 'dev-env/release-tools/utils', () => {
 			it( 'works with merge commit which is not a pull request #1', () => {
 				return makeInitialRelease()
 					.then( () => {
-						exec( 'git commit --allow-empty ' +
-							'--message "Merge t/ckeditor5-link/52 into master" ' +
-							'--message "Fix: Foo."'
+						makeCommit(
+							'Merge t/ckeditor5-link/52 into master',
+							'Fix: Foo.'
 						);
 
 						return generateChangelog( '0.1.0' );
@@ -297,9 +297,9 @@ describe( 'dev-env/release-tools/utils', () => {
 			it( 'works with merge commit which is not a pull request #2', () => {
 				return makeInitialRelease()
 					.then( () => {
-						exec( 'git commit --allow-empty ' +
-							'--message "Merge branch t/ckedtor5-engine/660 to master" ' +
-							'--message "Fix: Foo."'
+						makeCommit(
+							'Merge branch t/ckedtor5-engine/660 to master',
+							'Fix: Foo.'
 						);
 
 						return generateChangelog( '0.1.0' );
@@ -325,9 +325,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			it( 'works with prefix "Fixes"', () => {
 				return makeInitialRelease()
 					.then( () => {
-						exec( 'git commit --allow-empty ' +
-							'--message "Fixes: Foo Bar."'
-						);
+						makeCommit( 'Fixes: Foo Bar.' );
 
 						return generateChangelog( '0.0.2' );
 					} )
@@ -349,9 +347,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			it( 'works with prefix "Fixed"', () => {
 				return makeInitialRelease()
 					.then( () => {
-						exec( 'git commit --allow-empty ' +
-							'--message "Fixed: Foo Bar."'
-						);
+						makeCommit( 'Fixed: Foo Bar.' );
 
 						return generateChangelog( '0.0.2' );
 					} )
@@ -427,7 +423,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			it( 'changelog should contain 2 blank lines for changelog with internal changes', () => {
 				return makeInitialRelease()
 					.then( () => {
-						exec( 'git commit --allow-empty --message "Docs: Updated README."' );
+						makeCommit( 'Docs: Updated README.' );
 
 						return generateChangelog( '0.0.2' );
 					} )
@@ -453,9 +449,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			it( 'attaches additional description for "Bug fixes" section', () => {
 				return makeInitialRelease()
 					.then( () => {
-						exec( 'git commit --allow-empty ' +
-							'--message "Fix: Foo Bar."'
-						);
+						makeCommit( 'Fix: Foo Bar.' );
 
 						return generateChangelog( '0.0.2', { additionalNotes: true } );
 					} )
@@ -480,17 +474,19 @@ Besides changes in the dependencies, this version also contains the following bu
 			it( 'forces generating changelog as "internal" even if commits were made', () => {
 				return makeInitialRelease()
 					.then( () => {
-						exec( 'git commit --allow-empty ' +
-							'--message "Feature: Issues will not be hoisted. Closes #8." ' +
-							'--message "All details have been described in #1." ' +
-							'--message "NOTE: Please read #1." ' +
-							'--message "BREAKING CHANGES: Some breaking change." ' );
+						makeCommit(
+							'Feature: Issues will not be hoisted. Closes #8.',
+							'All details have been described in #1.',
+							'NOTE: Please read #1.',
+							'BREAKING CHANGES: Some breaking change.'
+						);
 
-						exec( 'git commit --allow-empty ' +
-							'--message "Feature: Issues will not be hoisted. Closes #8." ' +
-							'--message "All details have been described in #1." ' +
-							'--message "NOTE: Please read #1." ' +
-							'--message "BREAKING CHANGES: Some breaking change." ' );
+						makeCommit(
+							'Feature: Issues will not be hoisted. Closes #8.',
+							'All details have been described in #1.',
+							'NOTE: Please read #1.',
+							'BREAKING CHANGES: Some breaking change.'
+						);
 
 						return generateChangelog( '0.1.0', { isInternalRelease: true } );
 					} )
@@ -504,7 +500,7 @@ Besides changes in the dependencies, this version also contains the following bu
 			it( 'does not generate links to commits and release', () => {
 				return makeInitialRelease()
 					.then( () => {
-						exec( 'git commit --allow-empty --message "Feature: Some amazing feature."' );
+						makeCommit( 'Feature: Some amazing feature.' );
 
 						return generateChangelog( '0.1.0', { skipLinks: true } );
 					} )
@@ -544,6 +540,10 @@ Besides changes in the dependencies, this version also contains the following bu
 		return normalizeStrings( _getChangesForVersion( version ) );
 	}
 
+	function makeCommit( ...messages ) {
+		return exec( 'git commit --allow-empty ' + messages.map( m => `--message "${ m }"` ).join( ' ' ) );
+	}
+
 	function exec( command ) {
 		return tools.shExec( command, { verbosity: 'error' } );
 	}
@@ -578,7 +578,7 @@ Besides changes in the dependencies, this version also contains the following bu
 	// Almost all testes (except the initial release) require the initial release because we're checking
 	// how the changelog looks between releases.
 	function makeInitialRelease() {
-		exec( 'git commit --allow-empty --message "Internal: An initial commit."' );
+		makeCommit( 'Internal: An initial commit.' );
 
 		return generateChangelog( '0.0.1', { isFirstRelease: true } )
 			.then( () => {
@@ -586,7 +586,7 @@ Besides changes in the dependencies, this version also contains the following bu
 
 				exec( `npm version ${ version } --no-git-tag-version` );
 				exec( 'git add package.json' );
-				exec( `git commit --message "Release: v${ version }."` );
+				makeCommit( `Release: v${ version }.` );
 				exec( `git tag v${ version }` );
 			} );
 	}
