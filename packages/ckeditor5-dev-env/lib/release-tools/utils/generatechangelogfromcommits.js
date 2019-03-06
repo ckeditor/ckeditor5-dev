@@ -117,13 +117,13 @@ function groupUpdatedTranslationsCommits( changelog ) {
 	const removedEntries = [];
 
 	// An array that contains changelog without duplicated entries.
-	const uniqueEntries = changelogAsArray.filter( row => {
-		if ( !row.startsWith( UPDATED_TRANSLATION_COMMIT ) ) {
+	const uniqueEntries = changelogAsArray.filter( line => {
+		if ( !line.startsWith( UPDATED_TRANSLATION_COMMIT ) ) {
 			return true;
 		}
 
 		if ( foundUpdatedTranslationCommit ) {
-			removedEntries.push( row );
+			removedEntries.push( line );
 
 			return false;
 		}
@@ -133,13 +133,13 @@ function groupUpdatedTranslationsCommits( changelog ) {
 		return true;
 	} );
 
-	return uniqueEntries.map( row => {
-		if ( !row.startsWith( UPDATED_TRANSLATION_COMMIT ) ) {
-			return row;
+	return uniqueEntries.map( line => {
+		if ( !line.startsWith( UPDATED_TRANSLATION_COMMIT ) ) {
+			return line;
 		}
 
-		return row + ' ' + removedEntries.map( row => {
-			return row.match( /(\(\[.{7}\]\([^)]+\)\))/ )[ 1 ];
+		return line + ' ' + removedEntries.map( entry => {
+			return entry.match( /(\(\[.{7}\]\([^)]+\)\))/ )[ 1 ];
 		} ).join( ' ' );
 	} ).join( '\n' );
 }
