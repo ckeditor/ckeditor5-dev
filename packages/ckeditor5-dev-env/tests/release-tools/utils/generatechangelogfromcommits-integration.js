@@ -524,6 +524,94 @@ Besides changes in the dependencies, this version also contains the following bu
 					} );
 			} );
 		} );
+
+		describe( 'grouping "Updated translation" commits as the single entry', () => {
+			it( 'works fine when translations have been updated few times (and nothing more has been changed)', () => {
+				return makeInitialRelease()
+					.then( () => {
+						makeCommit( 'Other: Updated translations. [skip ci]' );
+						makeCommit( 'Other: Updated translations. [skip ci]' );
+						makeCommit( 'Other: Updated translations. [skip ci]' );
+
+						return generateChangelog( '0.0.2' );
+					} )
+					.then( () => {
+						const latestChangelog = replaceCommitIds( getChangesForVersion( '0.0.2' ) );
+
+						/* eslint-disable max-len */
+						const expectedChangelog = normalizeStrings( `
+### Other changes
+
+* Updated translations. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX)) ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX)) ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+` );
+						/* eslint-enable max-len */
+
+						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
+					} );
+			} );
+
+			it( 'works fine for complex iteration', () => {
+				return makeInitialRelease()
+					.then( () => {
+						makeCommit( 'Feature: Another feature. Closes #2' );
+						makeCommit( 'Other: Updated translations. [skip ci]' );
+						makeCommit(
+							'Feature: Issues will not be hoisted. Closes #8.',
+							'All details have been described in #1.',
+							'NOTE: Please read #1.',
+							'BREAKING CHANGES: Some breaking change.'
+						);
+						makeCommit( 'Other: Updated translations. [skip ci]' );
+						makeCommit(
+							'Merge t/ckeditor5-link/52 into master',
+							'Fix: Foo Bar. Closes #9.'
+						);
+						makeCommit( 'Other: Updated translations. [skip ci]' );
+						makeCommit(
+							'Fix: Amazing fix. Closes #5.',
+							'The PR also finally closes #3 and #4. So good!'
+						);
+						makeCommit( 'Other: Updated translations.' );
+
+						return generateChangelog( '1.0.0' );
+					} )
+					.then( () => {
+						const latestChangelog = replaceCommitIds( getChangesForVersion( '1.0.0' ) );
+
+						/* eslint-disable max-len */
+						const expectedChangelog = normalizeStrings( `
+### Features
+
+* Another feature. Closes [#2](https://github.com/ckeditor/ckeditor5-test-package/issues/2). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+* Issues will not be hoisted. Closes [#8](https://github.com/ckeditor/ckeditor5-test-package/issues/8). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+
+  All details have been described in [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
+
+### Bug fixes
+
+* Amazing fix. Closes [#5](https://github.com/ckeditor/ckeditor5-test-package/issues/5). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+
+  The PR also finally closes [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4). So good!
+* Foo Bar. Closes [#9](https://github.com/ckeditor/ckeditor5-test-package/issues/9). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+
+### Other changes
+
+* Updated translations. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX)) ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX)) ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX)) ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+
+### BREAKING CHANGES
+
+* Some breaking change.
+
+### NOTE
+
+* Please read [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
+` );
+						/* eslint-enable max-len */
+
+						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
+					} );
+			} );
+		} );
 	} );
 
 	// Because of the Windows end of the line, we need to normalize them.

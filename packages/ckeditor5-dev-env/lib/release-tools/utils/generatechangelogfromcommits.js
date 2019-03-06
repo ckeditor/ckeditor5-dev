@@ -13,6 +13,8 @@ const parserOptions = require( './transform-commit/parser-options' );
 const { stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const { additionalCommitNotes } = require( './transform-commit/transform-commit-utils' );
 
+const UPDATED_TRANSLATION_COMMIT = '* Updated translations.';
+
 /**
  * Generates a changelog based on user's commits in the repository and saves
  * it in the changelog file.
@@ -78,8 +80,10 @@ module.exports = function generateChangelogFromCommits( options ) {
 
 function changelogPipe( version, done, options ) {
 	return stream.noop( changes => {
+		const newEntries = groupUpdatedTranslationsCommits( changes.toString() );
+
 		if ( options.doNotSave ) {
-			return done( changes.toString() );
+			return done( newEntries );
 		}
 
 		let currentChangelog = changelogUtils.getChangelog();
@@ -88,7 +92,7 @@ function changelogPipe( version, done, options ) {
 		currentChangelog = currentChangelog.replace( changelogUtils.changelogHeader, '' );
 
 		// Concat header, new and current changelog.
-		let newChangelog = changelogUtils.changelogHeader + changes.toString() + currentChangelog.trim();
+		let newChangelog = changelogUtils.changelogHeader + newEntries + currentChangelog.trim();
 		newChangelog = newChangelog.trim() + '\n';
 
 		// Save the changelog.
@@ -102,4 +106,40 @@ function getDebugFuntion() {
 	return ( ...params ) => {
 		console.log( ...params );
 	};
+}
+
+function groupUpdatedTranslationsCommits( changelog ) {
+	let foundUpdatedTranslationCommit = false;
+
+	const changelogAsArray = changelog.split( '\n' );
+
+	// An array that contains duplicated commits.
+	const removedEntries = [];
+
+	// An array that contains changelog without duplicated entries.
+	const uniqueEntries = changelogAsArray.filter( row => {
+		if ( !row.startsWith( UPDATED_TRANSLATION_COMMIT ) ) {
+			return true;
+		}
+
+		if ( foundUpdatedTranslationCommit ) {
+			removedEntries.push( row );
+
+			return false;
+		}
+
+		foundUpdatedTranslationCommit = true;
+
+		return true;
+	} );
+
+	return uniqueEntries.map( row => {
+		if ( !row.startsWith( UPDATED_TRANSLATION_COMMIT ) ) {
+			return row;
+		}
+
+		return row + ' ' + removedEntries.map( row => {
+			return row.match( /(\(\[.{7}\]\([^)]+\)\))/ )[ 1 ];
+		} ).join( ' ' );
+	} ).join( '\n' );
 }
