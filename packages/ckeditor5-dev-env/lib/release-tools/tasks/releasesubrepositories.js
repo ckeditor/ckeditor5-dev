@@ -22,6 +22,7 @@ const GitHubApi = require( '@octokit/rest' );
 const PACKAGE_JSON_TEMPLATE_PATH = require.resolve( '../templates/release-package.json' );
 const BREAK_RELEASE_MESSAGE = 'You aborted publishing the release. Why? Oh why?!';
 const NO_RELEASE_MESSAGE = 'No changes for publishing. Why? Oh why?!';
+const AUTH_REQUIRED = 'This command requires you to be logged in.';
 
 // That files will be copied from source to the temporary directory and will be released too.
 const additionalFiles = [
@@ -103,7 +104,6 @@ module.exports = function releaseSubRepositories( options ) {
 
 	logDryRun( '⚠️  DRY RUN mode ⚠️' );
 	logDryRun( 'The script WILL NOT publish anything but will create some files.' );
-	logProcess( 'Configuring the release...' );
 
 	const github = new GitHubApi( {
 		version: '3.0.0'
@@ -128,7 +128,8 @@ module.exports = function releaseSubRepositories( options ) {
 
 	let releaseOptions;
 
-	return cli.configureReleaseOptions()
+	return authCheck()
+		.then( () => configureRelease() )
 		.then( _releaseOptions => saveReleaseOptions( _releaseOptions ) )
 		.then( () => preparePackagesToRelease() )
 		.then( () => filterPackagesToReleaseOnNpm() )
@@ -149,16 +150,23 @@ module.exports = function releaseSubRepositories( options ) {
 		.catch( err => {
 			process.chdir( cwd );
 
-			// A user did not confirm the release process or there is nothing to release.
 			if ( err instanceof Error ) {
-				if ( err.message === BREAK_RELEASE_MESSAGE ) {
-					logProcess( 'Publishing has been aborted.' );
+				let message;
 
-					return Promise.resolve();
+				switch ( err.message ) {
+					case BREAK_RELEASE_MESSAGE:
+						message = 'Publishing has been aborted.';
+						break;
+					case NO_RELEASE_MESSAGE:
+						message = 'There is nothing to release. The process was aborted.';
+						break;
+					case AUTH_REQUIRED:
+						message = 'Before you starting releasing, you need to login to npm.';
+						break;
 				}
 
-				if ( err.message === NO_RELEASE_MESSAGE ) {
-					logProcess( 'There is nothing to release. The process was aborted.' );
+				if ( message ) {
+					logProcess( message );
 
 					return Promise.resolve();
 				}
@@ -168,6 +176,38 @@ module.exports = function releaseSubRepositories( options ) {
 
 			process.exitCode = -1;
 		} );
+
+	// Checks whether to a user is logged to npm.
+	//
+	// @returns {Promise}
+	function authCheck() {
+		logProcess( 'Checking whether you are logged to npm...' );
+
+		try {
+			const whoami = exec( 'npm whoami' );
+
+			log.info( `🔑 Logged as "${ chalk.underline( whoami.trim() ) }".` );
+
+			return Promise.resolve();
+		} catch ( err ) {
+			logDryRun( '⛔️ You are not logged to NPM. ⛔️' );
+
+			if ( dryRun ) {
+				return Promise.resolve();
+			}
+
+			return Promise.reject( new Error( AUTH_REQUIRED ) );
+		}
+	}
+
+	// Configures release options.
+	//
+	// @returns {Promise.<Object>}
+	function configureRelease() {
+		logProcess( 'Configuring the release...' );
+
+		return cli.configureReleaseOptions();
+	}
 
 	// Saves the options provided by a user.
 	//

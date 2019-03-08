@@ -5,12 +5,19 @@
 
 'use strict';
 
+const chalk = require( 'chalk' );
 const versionUtils = require( '../utils/versions' );
 const cli = require( '../utils/cli' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const { getChangesForVersion } = require( '../utils/changelog' );
 const releaseRepositoryUtil = require( '../utils/releaserepository' );
 const validatePackageToRelease = require( '../utils/validatepackagetorelease' );
+
+const GENERATE_CHANGELOG = 'Before starting the release process, you should generate the changelog.';
+const FAILED_VALIDATION = 'Releasing has been aborted due to errors.';
+const AUTH_REQUIRED = 'This command requires you to be logged in.';
+
+const log = logger();
 
 /**
  * Releases the package defined in the current work directory.
@@ -24,7 +31,17 @@ module.exports = function releaseRepository() {
 	const changelogVersion = versionUtils.getLastFromChangelog();
 
 	if ( gitVersion === changelogVersion ) {
-		return reject( 'Before starting the release process, you should generate the changelog.' );
+		return showWarning( GENERATE_CHANGELOG );
+	}
+
+	log.info( 'Checking whether you are logged to npm...' );
+
+	const whoami = authCheck();
+
+	if ( whoami ) {
+		log.info( `🔑 Logged as "${ chalk.underline( whoami ) }".` );
+	} else {
+		return showWarning( AUTH_REQUIRED );
 	}
 
 	const releaseTaskOptions = {
@@ -35,12 +52,10 @@ module.exports = function releaseRepository() {
 	const errors = validatePackageToRelease( releaseTaskOptions );
 
 	if ( errors.length ) {
-		const log = logger();
-
 		log.error( 'Unexpected errors occured:' );
 		errors.map( err => '* ' + err ).forEach( log.error.bind( log ) );
 
-		return reject( 'Releasing has been aborted due to errors.' );
+		return showWarning( FAILED_VALIDATION );
 	}
 
 	return cli.configureReleaseOptions()
@@ -48,9 +63,28 @@ module.exports = function releaseRepository() {
 			const options = Object.assign( {}, releaseTaskOptions, userOptions );
 
 			return releaseRepositoryUtil( options );
+		} )
+		.catch( err => {
+			log.error( err.message );
+
+			process.exitCode = -1;
 		} );
 };
 
-function reject( message ) {
-	return Promise.reject( new Error( message ) );
+function authCheck() {
+	try {
+		return exec( 'npm whoami' ).trim();
+	} catch ( err ) {
+		return false;
+	}
+}
+
+function exec( command ) {
+	return tools.shExec( command, { verbosity: 'error' } );
+}
+
+function showWarning( message ) {
+	log.warning( message );
+
+	return Promise.resolve();
 }
