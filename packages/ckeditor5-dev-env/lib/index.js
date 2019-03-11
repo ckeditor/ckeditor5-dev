@@ -6,10 +6,6 @@
 'use strict';
 
 const tasks = {
-	releaseRepository( ...args ) {
-		return require( './release-tools/tasks/releaserepository' )( ...args );
-	},
-
 	releaseSubRepositories( ...args ) {
 		return require( './release-tools/tasks/releasesubrepositories' )( ...args );
 	},
