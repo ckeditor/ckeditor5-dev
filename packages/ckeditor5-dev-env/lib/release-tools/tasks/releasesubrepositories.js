@@ -73,7 +73,8 @@ const additionalFiles = [
  *
  * @param {Object} options
  * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
- * @param {String} options.packages Where to look for other packages (dependencies).
+ * @param {String|null} options.packages Where to look for other packages (dependencies). If `null`, only repository specified under
+ * `options.cwd` will be used in the task.
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be released.
  * @param {Boolean} [options.dryRun=false] If set on true, nothing will be published:
  *   - npm pack will be called instead of npm publish (it packs the whole release to a ZIP archive),

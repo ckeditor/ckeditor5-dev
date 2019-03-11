@@ -30,7 +30,8 @@ const BREAK_RELEASE_MESSAGE = 'You aborted updating versions. Why? Oh why?!';
  *   - bumps version of all packages.
  *
  * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
- * @param {String} options.packages Where to look for other packages (dependencies).
+ @param {String|null} options.packages Where to look for other packages (dependencies). If `null`, only repository specified under
+ * `options.cwd` will be used in the task.
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be touched.
  * @param {Boolean} [options.dryRun=false] If set on true, all changes will be printed on the screen. Changes produced by commands like
  * `npm version` will be reverted. Every called command will be displayed.
