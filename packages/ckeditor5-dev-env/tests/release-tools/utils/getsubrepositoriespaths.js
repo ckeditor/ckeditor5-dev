@@ -326,5 +326,38 @@ describe( 'dev-env/release-tools/utils', () => {
 			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-build-inline' ) ).to.equal( true );
 			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-build-classic' ) ).to.equal( true );
 		} );
+
+		it( 'allows returning the main repository only (skipMainRepository=false)', () => {
+			const options = {
+				cwd: '/tmp',
+				packages: null,
+			};
+
+			const pathsCollection = getSubRepositoriesPaths( options );
+
+			expect( pathsCollection.matched ).to.be.instanceof( Set );
+			expect( pathsCollection.matched.size ).to.equal( 1 );
+			expect( pathsCollection.matched.has( '/tmp' ) ).to.equal( true );
+
+			expect( pathsCollection.skipped ).to.be.instanceof( Set );
+			expect( pathsCollection.skipped.size ).to.equal( 0 );
+		} );
+
+		it( 'allows returning the main repository only (skipMainRepository=true)', () => {
+			const options = {
+				cwd: '/tmp',
+				packages: null,
+				skipMainRepository: true
+			};
+
+			const pathsCollection = getSubRepositoriesPaths( options );
+
+			expect( pathsCollection.matched ).to.be.instanceof( Set );
+			expect( pathsCollection.matched.size ).to.equal( 0 );
+
+			expect( pathsCollection.skipped ).to.be.instanceof( Set );
+			expect( pathsCollection.skipped.size ).to.equal( 1 );
+			expect( pathsCollection.skipped.has( '/tmp' ) ).to.equal( true );
+		} );
 	} );
 } );
