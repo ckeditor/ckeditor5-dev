@@ -128,9 +128,9 @@ module.exports = function releaseSubRepositories( options ) {
 
 	let releaseOptions;
 
-	return authCheck()
-		.then( () => configureRelease() )
+	return configureRelease()
 		.then( _releaseOptions => saveReleaseOptions( _releaseOptions ) )
+		.then( () => authCheck() )
 		.then( () => preparePackagesToRelease() )
 		.then( () => filterPackagesToReleaseOnNpm() )
 		.then( () => filterPackagesToReleaseOnGitHub() )
@@ -177,29 +177,6 @@ module.exports = function releaseSubRepositories( options ) {
 			process.exitCode = -1;
 		} );
 
-	// Checks whether to a user is logged to npm.
-	//
-	// @returns {Promise}
-	function authCheck() {
-		logProcess( 'Checking whether you are logged to npm...' );
-
-		try {
-			const whoami = exec( 'npm whoami' );
-
-			log.info( `🔑 Logged as "${ chalk.underline( whoami.trim() ) }".` );
-
-			return Promise.resolve();
-		} catch ( err ) {
-			logDryRun( '⛔️ You are not logged to NPM. ⛔️' );
-
-			if ( dryRun ) {
-				return Promise.resolve();
-			}
-
-			return Promise.reject( new Error( AUTH_REQUIRED ) );
-		}
-	}
-
 	// Configures release options.
 	//
 	// @returns {Promise.<Object>}
@@ -224,6 +201,34 @@ module.exports = function releaseSubRepositories( options ) {
 				token: releaseOptions.token,
 				type: 'oauth',
 			} );
+		}
+	}
+
+	// Checks whether to a user is logged to npm.
+	//
+	// @returns {Promise}
+	function authCheck() {
+		if ( !releaseOptions.npm ) {
+			return Promise.resolve();
+		}
+
+		logProcess( 'Checking whether you are logged to npm...' );
+
+		try {
+			const whoami = exec( 'npm whoami' );
+
+			log.info( `🔑 Logged as "${ chalk.underline( whoami.trim() ) }".` );
+
+			return Promise.resolve();
+		} catch ( err ) {
+			logDryRun( '⛔️ You are not logged to NPM. ⛔️' );
+			logDryRun( chalk.italic( 'But this is a DRY RUN so you can continue safely.' ) );
+
+			if ( dryRun ) {
+				return Promise.resolve();
+			}
+
+			return Promise.reject( new Error( AUTH_REQUIRED ) );
 		}
 	}
 
