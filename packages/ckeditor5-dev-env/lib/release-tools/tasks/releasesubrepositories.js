@@ -247,7 +247,7 @@ module.exports = function releaseSubRepositories( options ) {
 			releaseDetails.shouldReleaseOnNpm = npmVersion !== releaseDetails.version;
 
 			if ( releaseDetails.shouldReleaseOnNpm ) {
-				logDryRun( 'Package will be released.' );
+				log.info( '✅  Added to release.' );
 
 				releasesOnNpm.add( repositoryPath );
 			} else {
@@ -314,11 +314,11 @@ module.exports = function releaseSubRepositories( options ) {
 					releaseDetails.shouldReleaseOnGithub = githubVersion !== releaseDetails.version;
 
 					if ( releaseDetails.shouldReleaseOnGithub ) {
-						logDryRun( 'Package will be published.' );
+						log.info( '✅  Added to release.' );
 
 						releasesOnGithub.add( repositoryPath );
 					} else {
-						log.info( '❌  Nothing to publish.' );
+						log.info( '❌  Nothing to release.' );
 					}
 				} )
 				.catch( err => {
