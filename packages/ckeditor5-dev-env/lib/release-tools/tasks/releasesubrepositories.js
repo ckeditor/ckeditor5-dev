@@ -273,7 +273,7 @@ module.exports = function releaseSubRepositories( options ) {
 					return null;
 				}
 
-				throw new Error( err );
+				throw err;
 			}
 		}
 	}
