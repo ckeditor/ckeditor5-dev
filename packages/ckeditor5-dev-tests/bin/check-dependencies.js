@@ -14,6 +14,9 @@ const depCheck = require( 'depcheck' );
 const chalk = require( 'chalk' );
 const { table, getBorderCharacters } = require( 'table' );
 
+const cwd = process.cwd();
+const packageJson = require( path.join( cwd, 'package.json' ) );
+
 const tableData = [
 	[
 		chalk.yellow( 'Invalid itself imports' ),
@@ -24,18 +27,19 @@ const tableData = [
 	]
 ];
 
-const cwd = process.cwd();
-
 const depCheckOptions = {
 	ignoreDirs: [ 'docs', 'build' ],
 	ignoreMatches: [ 'eslint', 'husky', 'lint-staged', 'webpack-cli' ]
 };
 
+if ( Array.isArray( packageJson.depcheckIgnore ) ) {
+	depCheckOptions.ignoreMatches.push( ...packageJson.depcheckIgnore );
+}
+
 console.log( 'Checking dependencies...' );
 
 depCheck( cwd, depCheckOptions )
 	.then( unused => {
-		const packageJson = require( path.join( cwd, 'package.json' ) );
 		const missingPackages = groupMissingPackages( unused.missing, packageJson.name );
 
 		const tableRow = [
