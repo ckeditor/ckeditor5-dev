@@ -44,6 +44,7 @@
     "postcss-loader": "^3.0.0",
     "raw-loader": "^1.0.0",
     "sinon": "^6.3.4",
+    "slack-notify": "^0.1.7",
     "style-loader": "^0.23.0",
     "table": "^5.2.3",
     "webpack": "^4.15.0"
@@ -68,7 +69,8 @@
     "ckeditor5-dev-tests-prepare-package-json": "./bin/prepare-package-json.js",
     "ckeditor5-dev-tests-install-dependencies": "./bin/install-dependencies.sh",
     "ckeditor5-dev-tests-save-revision": "./bin/save-revision.js",
-    "ckeditor5-dev-tests-check-dependencies": "./bin/check-dependencies.js"
+    "ckeditor5-dev-tests-check-dependencies": "./bin/check-dependencies.js",
+    "ckeditor5-dev-tests-notify-travis-status": "./bin/notify-travis-status.js"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",

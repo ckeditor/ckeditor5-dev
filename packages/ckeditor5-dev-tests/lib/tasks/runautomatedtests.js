@@ -107,9 +107,7 @@ function runKarma( options ) {
 			if ( exitCode === 0 ) {
 				resolve();
 			} else {
-				reject();
-
-				process.exit( exitCode );
+				reject( new Error( `Karma exited with ${ exitCode }.` ) );
 			}
 		} );
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Current work directory.
 PACKAGE_ROOT=$(pwd)
 
