@@ -10,105 +10,118 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const glob = require( 'glob' );
+const depCheck = require( 'depcheck' );
+const chalk = require( 'chalk' );
+const { table, getBorderCharacters } = require( 'table' );
+
+const tableData = [
+	[
+		chalk.yellow( 'Invalid itself imports' ),
+		chalk.red( 'Missing dependencies' ),
+		chalk.red( 'Missing devDependencies' ),
+		chalk.cyan( 'Unused dependencies' ),
+		chalk.cyan( 'Unused devDependencies' ),
+	]
+];
 
 const cwd = process.cwd();
-const packageJson = require( path.join( cwd, 'package.json' ) );
-const currentPackageName = packageJson.name;
 
-const dependencies = Object.keys( packageJson.dependencies || {} );
-const devDependencies = Object.keys( packageJson.devDependencies || {} );
+const depCheckOptions = {
+	ignoreDirs: [ 'docs', 'build' ],
+	ignoreMatches: [ 'eslint', 'husky', 'lint-staged', 'webpack-cli' ]
+};
 
-const missingDependencies = new Set();
-const missingDevDependencies = new Set();
-const invalidFiles = new Set();
-const invalidImportsItself = new Set();
+console.log( 'Checking dependencies...' );
 
-const globPattern = path.join( cwd, '@(src|tests)/**/*.js' );
+depCheck( cwd, depCheckOptions )
+	.then( unused => {
+		const packageJson = require( path.join( cwd, 'package.json' ) );
+		const missingPackages = groupMissingPackages( unused.missing, packageJson.name );
 
-for ( const filePath of glob.sync( globPattern ) ) {
-	// Skip "src/lib" directory.
-	if ( filePath.match( /\/src\/lib\// ) ) {
-		continue;
-	}
+		const tableRow = [
+			[ ...getInvalidItselfImports( cwd ) ].join( '\n' ),
+			missingPackages.dependencies.join( '\n' ),
+			missingPackages.devDependencies.join( '\n' ),
+			unused.dependencies.join( '\n' ),
+			unused.devDependencies.filter( packageName => !unused.dependencies.includes( packageName ) ).join( '\n' ),
+		];
 
-	const fileContent = fs.readFileSync( filePath, 'utf-8' );
-	const matchedImports = fileContent.match( /^import[^;]+from '(@ckeditor\/[^/]+)[^']+';/mg );
+		const hasErrors = tableRow.some( entry => !!entry );
 
-	if ( !matchedImports ) {
-		continue;
-	}
+		if ( !hasErrors ) {
+			console.log( chalk.green( 'All dependencies are defined correctly.' ) );
 
-	matchedImports
-		.forEach( importLine => {
-			const matchedImport = importLine.match( /(@ckeditor\/[^/]+)/ );
+			return;
+		}
 
-			if ( !matchedImport ) {
-				return;
-			}
+		tableData.push( tableRow );
 
-			const packageName = matchedImport[ 1 ];
+		console.log( chalk.red( 'Found some issue with dependencies.\n' ) );
 
-			// Current package should use relative links to itself.
-			if ( currentPackageName === packageName ) {
-				invalidImportsItself.add( filePath.replace( cwd + '/', './' ) );
-
-				return;
-			}
-
-			// Check whether the package is defined as dependency and dev-dependency.
-			const containPackageAsDependency = dependencies.includes( packageName );
-			const containPackageAsDevDependency = devDependencies.includes( packageName );
-
-			// If so, current checking line is fine.
-			if ( containPackageAsDependency || containPackageAsDevDependency ) {
-				return;
-			}
-
-			// If found package is missing and current file is "source" file, add the package as a missing dependency.
-			if ( !containPackageAsDependency && filePath.match( /\/src\// ) ) {
-				missingDependencies.add( packageName );
-			}
-
-			// If found package is missing and current file is "test" file, add the package as a missing dev-dependency.
-			if ( !containPackageAsDevDependency && filePath.match( /\/tests\// ) ) {
-				missingDevDependencies.add( packageName );
-			}
-
-			// Mark current file as invalid (it can help for manual debugging).
-			invalidFiles.add( filePath.replace( cwd + '/', './' ) );
+		const preparedTable = table( tableData, {
+			border: getBorderCharacters( 'norc' )
 		} );
-}
 
-if ( invalidFiles.size || invalidImportsItself.size ) {
-	console.error( '\n' + '='.repeat( 120 ) );
+		console.log( preparedTable );
 
-	if ( invalidImportsItself.size ) {
-		console.error(
-			'\nThe files listed below should use relative paths to import modules ' +
-			'from the package in which they are defined:\n'
-		);
-		console.error( [ ...invalidImportsItself ].map( formatLine ).join( '\n' ) + '\n' );
-	}
+		process.exit( -1 );
+	} );
 
-	if ( invalidFiles.size ) {
-		console.error( '\nThe files listed below require dependencies which are not defined in "package.json":\n' );
-		console.error( [ ...invalidFiles ].map( formatLine ).join( '\n' ) + '\n' );
+/**
+ * Returns a Set that contains list of files that import modules using full package name instead of relative path.
+ *
+ * @param repositoryPath An absolute path to the directory which should be ckecked.
+ * @returns {Set<String>}
+ */
+function getInvalidItselfImports( repositoryPath ) {
+	const packageJson = require( path.join( repositoryPath, 'package.json' ) );
+	const globPattern = path.join( repositoryPath, '@(src|tests)/**/*.js' );
+	const invalidImportsItself = new Set();
 
-		if ( missingDependencies.size ) {
-			console.error( 'Missing dependencies:\n' );
-			console.error( [ ...missingDependencies ].map( formatLine ).join( '\n' ) + '\n' );
+	for ( const filePath of glob.sync( globPattern ) ) {
+		const fileContent = fs.readFileSync( filePath, 'utf-8' );
+		const matchedImports = fileContent.match( /^import[^;]+from '(@ckeditor\/[^/]+)[^']+';/mg );
+
+		if ( !matchedImports ) {
+			continue;
 		}
 
-		if ( missingDevDependencies.size ) {
-			console.error( 'Missing devDependencies:\n' );
-			console.error( [ ...missingDevDependencies ].map( formatLine ).join( '\n' ) + '\n' );
+		matchedImports
+			.map( importLine => importLine.match( /(@ckeditor\/[^/]+)/ ) )
+			.filter( matchedImport => !!matchedImport )
+			.forEach( matchedImport => {
+				// Current package should use relative links to itself.
+				if ( packageJson.name === matchedImport[ 1 ] ) {
+					invalidImportsItself.add( filePath.replace( repositoryPath + '/', '' ) );
+				}
+			} );
+	}
+
+	return invalidImportsItself;
+}
+
+/**
+ * Groups missing dependencies returned by `depcheck` as `dependencies` or `devDependencies`.
+ *
+ * @param {Object} missingPackages The `missing` value from object returned by `depcheck`.
+ * @param {String} currentPackage Name of current package.
+ * @returns {Object.<String, Array.<String>>}
+ */
+function groupMissingPackages( missingPackages, currentPackage ) {
+	delete missingPackages[ currentPackage ];
+
+	const dependencies = [];
+	const devDependencies = [];
+
+	for ( const packageName of Object.keys( missingPackages ) ) {
+		const isDevDependency = missingPackages[ packageName ].every( absolutePath => absolutePath.match( /tests/ ) );
+
+		if ( isDevDependency ) {
+			devDependencies.push( packageName );
+		} else {
+			dependencies.push( packageName );
 		}
 	}
 
-	console.error( '='.repeat( 120 ) );
-	process.exit( 1 );
-}
-
-function formatLine( line ) {
-	return '  - ' + line;
+	return { dependencies, devDependencies };
 }
