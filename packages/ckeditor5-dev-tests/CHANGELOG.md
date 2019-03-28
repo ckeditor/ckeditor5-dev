@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [16.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.2.0...@ckeditor/ckeditor5-dev-tests@16.2.1) (2019-03-28)
+
+### Other changes
+
+* Support for the "depcheckIgnore" key in "package.json" which defines a list of packages that should be ignored during dependency checking. ([9f5e037](https://github.com/ckeditor/ckeditor5-dev/commit/9f5e037))
+
+
 ## [16.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.1.0...@ckeditor/ckeditor5-dev-tests@16.2.0) (2019-03-28)
 
 ### Features
