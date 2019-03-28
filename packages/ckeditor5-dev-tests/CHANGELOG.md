@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## [16.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.1.0...@ckeditor/ckeditor5-dev-tests@16.2.0) (2019-03-28)
+
+### Features
+
+* Improved the script which checks dependencies on CI. Added two new informations – which dependencies and devDependencies are unused in the package. The entire script response is now displayed in a table. Closes [#392](https://github.com/ckeditor/ckeditor5-dev/issues/392). ([1642316](https://github.com/ckeditor/ckeditor5-dev/commit/1642316))
+
+### Bug fixes
+
+* Editor Inspector in manual tests should not crash when `window.editor` is set `null`. Closes [#502](https://github.com/ckeditor/ckeditor5-dev/issues/502). ([7ca8762](https://github.com/ckeditor/ckeditor5-dev/commit/7ca8762))
+
+
 ## [16.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.0.1...@ckeditor/ckeditor5-dev-tests@16.1.0) (2019-02-28)
 
 ### Features

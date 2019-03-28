@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [1.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@1.0.9...eslint-config-ckeditor5@1.1.0) (2019-03-28)
+
+### Features
+
+* Rewrote a script that prepares the testing environment on CI. Now it creates a ckeditor5-like project that contains a proper version of all dependencies. Closes [#471](https://github.com/ckeditor/ckeditor5-dev/issues/471). ([a491c7f](https://github.com/ckeditor/ckeditor5-dev/commit/a491c7f))
+
+
 ## [1.0.9](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@1.0.7...eslint-config-ckeditor5@1.0.9) (2018-12-19)
 
 Internal changes only (updated dependencies, documentation, etc.).

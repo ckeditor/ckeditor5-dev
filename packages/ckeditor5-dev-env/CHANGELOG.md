@@ -1,6 +1,19 @@
 Changelog
 =========
 
+## [14.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@14.0.1...@ckeditor/ckeditor5-dev-env@14.1.0) (2019-03-28)
+
+### Features
+
+* Multiple "Updated translations." commits will be merged into a single entry in the changelog. Closes [#486](https://github.com/ckeditor/ckeditor5-dev/issues/486). ([1479e67](https://github.com/ckeditor/ckeditor5-dev/commit/1479e67))
+
+### Bug fixes
+
+* Fixed generating changelog for non-scoped packages. Closes [#331](https://github.com/ckeditor/ckeditor5-dev/issues/331). ([a365f08](https://github.com/ckeditor/ckeditor5-dev/commit/a365f08))
+* Made all commits display properly during generating the changelog. Closes [#488](https://github.com/ckeditor/ckeditor5-dev/issues/488). ([fa9ae30](https://github.com/ckeditor/ckeditor5-dev/commit/fa9ae30))
+* Merge 'stable' branch commit will be ignored during generating the changelog. Closes [#487](https://github.com/ckeditor/ckeditor5-dev/issues/487). ([7a401ef](https://github.com/ckeditor/ckeditor5-dev/commit/7a401ef))
+
+
 ## [14.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@14.0.0...@ckeditor/ckeditor5-dev-env@14.0.1) (2019-02-28)
 
 Internal changes only (updated dependencies, documentation, etc.).
