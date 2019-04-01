@@ -5,7 +5,6 @@
 
 'use strict';
 
-const { cloneDeep } = require( 'lodash' );
 const getMissingDocletsData = require( './getmissingdocletsdata' );
 const DocletCollection = require( '../utils/doclet-collection' );
 
@@ -20,8 +19,6 @@ module.exports = addMissingDoclets;
  * @returns {Array.<Doclet>}
  */
 function addMissingDoclets( doclets ) {
-	doclets = cloneDeep( doclets );
-
 	const docletCollection = new DocletCollection();
 
 	/** @type {Array.<Doclet>} */
@@ -35,10 +32,6 @@ function addMissingDoclets( doclets ) {
 			typedefDoclets.push( doclet );
 		}
 	}
-
-	extendTypedefs( typedefDoclets );
-
-	doclets.push( ...createTypedefPropertyDoclets( typedefDoclets ) );
 
 	const extensibleDoclets = doclets.filter( doclet => {
 		return (
@@ -108,59 +101,4 @@ function addMissingDoclets( doclets ) {
 		...doclets,
 		...newDocletsToAdd
 	];
-}
-
-/**
- * Copy properties from parent typedefs to typedefs which extend them.
- *
- * @param {Array.<Doclet>} typedefDoclets
- */
-function extendTypedefs( typedefDoclets ) {
-	for ( const typedefDoclet of typedefDoclets ) {
-		for ( const parentLongname of typedefDoclet.augmentsNested ) {
-			const parentDoclet = typedefDoclets.find( doclet => doclet.longname === parentLongname );
-
-			if ( parentDoclet && parentDoclet.properties ) {
-				parentDoclet.properties.forEach( parentProperty => {
-					if ( typedefDoclet.properties && !typedefDoclet.properties.find( p => p.name === parentProperty.name ) ) {
-						const inheritedProperty = cloneDeep( parentProperty );
-						inheritedProperty.inherited = true;
-						typedefDoclet.properties.push( inheritedProperty );
-					}
-				} );
-			}
-		}
-	}
-}
-
-/**
- * Creates and returns doclets for `@typedef` properties.
- *
- * @param {Doclet[]} doclets
- */
-function createTypedefPropertyDoclets( doclets ) {
-	const typedefDoclets = doclets.filter( doclet => doclet.kind === 'typedef' );
-	const typedefPropertyDoclets = [];
-
-	for ( const typedefDoclet of typedefDoclets ) {
-		for ( const property of typedefDoclet.properties || [] ) {
-			const propertyDoclet = {
-				comment: property.description || '',
-				description: property.description,
-
-				// Use the typedef's metadata.
-				meta: cloneDeep( typedefDoclet.meta ),
-				kind: 'member',
-				name: property.name,
-				type: property.type,
-				longname: typedefDoclet.longname + '#' + property.name,
-				scope: 'instance',
-				memberof: typedefDoclet.longname
-			};
-
-			typedefPropertyDoclets.push( propertyDoclet );
-		}
-	}
-
-	return typedefPropertyDoclets;
 }
