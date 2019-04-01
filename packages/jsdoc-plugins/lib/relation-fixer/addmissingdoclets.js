@@ -12,9 +12,9 @@ const DocletCollection = require( '../utils/doclet-collection' );
 module.exports = addMissingDoclets;
 
 /**
- * Adds missing doclets for members coming from implemented interfaces, extended classes, and mixins.
+ * Adds missing doclets for members coming from implemented interfaces, extended classes, mixins and typedefs.
  * It does also support inheriting static members and typedef inheritance, which both are not supported by the JSDoc.
- * This module requires the input preprocessed by the `buildRelations()` function.
+ * This function requires input to be preprocessed by the `buildRelations()` function.
  *
  * @param {Array.<Doclet>} doclets
  * @returns {Array.<Doclet>}
@@ -37,6 +37,8 @@ function addMissingDoclets( doclets ) {
 	}
 
 	extendTypedefs( typedefDoclets );
+
+	doclets.push( ...createTypedefPropertyDoclets( typedefDoclets ) );
 
 	const extensibleDoclets = doclets.filter( doclet => {
 		return (
@@ -129,4 +131,36 @@ function extendTypedefs( typedefDoclets ) {
 			}
 		}
 	}
+}
+
+/**
+ * Creates and returns doclets for `@typedef` properties.
+ *
+ * @param {Doclet[]} doclets
+ */
+function createTypedefPropertyDoclets( doclets ) {
+	const typedefDoclets = doclets.filter( doclet => doclet.kind === 'typedef' );
+	const typedefPropertyDoclets = [];
+
+	for ( const typedefDoclet of typedefDoclets ) {
+		for ( const property of typedefDoclet.properties || [] ) {
+			const propertyDoclet = {
+				comment: property.description || '',
+				description: property.description,
+
+				// Use the typedef's metadata.
+				meta: cloneDeep( typedefDoclet.meta ),
+				kind: 'member',
+				name: property.name,
+				type: property.type,
+				longname: typedefDoclet.longname + '#' + property.name,
+				scope: 'instance',
+				memberof: typedefDoclet.longname
+			};
+
+			typedefPropertyDoclets.push( propertyDoclet );
+		}
+	}
+
+	return typedefPropertyDoclets;
 }
