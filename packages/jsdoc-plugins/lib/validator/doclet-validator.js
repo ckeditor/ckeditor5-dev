@@ -33,7 +33,7 @@ class DocletValidator {
 	/**
 	 * Creates doclets grouped by doclet kind
 	 * @private
-	 * @returns {Collection}
+	 * @returns {DocletCollection}
 	 */
 	_createDocletCollection( doclets ) {
 		const collection = new DocletCollection();
@@ -288,13 +288,9 @@ class DocletValidator {
 		}
 	}
 
-	_getAllLongNames() {
-		return this._collection.getAll()
-			.map( el => el.longname );
-	}
-
 	/**
 	 * @private
+	 * @param {Doclet} doclet
 	 * @param {string} errorMessage
 	 */
 	_addError( doclet, errorMessage ) {
@@ -305,7 +301,7 @@ class DocletValidator {
 
 	/**
 	 * @private
-	 * @param {Object} member
+	 * @param {Doclet} doclet
 	 */
 	_getErrorData( doclet ) {
 		return {
@@ -320,7 +316,6 @@ class DocletValidator {
 	 *
 	 * @protected
 	 * @param {String} type to assert
-	 * @param {Array.<Object>} [additionalTypes]
 	 *
 	 * @returns {Boolean}
 	 */
@@ -345,7 +340,7 @@ class DocletValidator {
 		}
 
 		if ( type.includes( 'module:' ) ) {
-			return this._isCorrectReference( type );
+			return this._isCorrectReferenceType( type );
 		}
 
 		type = type.trim();
@@ -354,6 +349,10 @@ class DocletValidator {
 			/^'[^']+'$/.test( type ); // string literal type - e.g. 'forward', 'backward';
 	}
 
+	/**
+	 * @private
+	 * @param {String} type
+	 */
 	_isCorrectReference( type ) {
 		type = type.trim();
 		const doclets = this._collection.getAll();
@@ -368,6 +367,35 @@ class DocletValidator {
 		}
 
 		return allRefs.includes( type );
+	}
+
+	/**
+	 * Returns `true` when the reference points to the symbol which is one of:
+	 * * class
+	 * * interface
+	 * * typedef
+	 * * function
+	 *
+	 * @private
+	 * @param {String} type
+	 */
+	_isCorrectReferenceType( type ) {
+		type = type.trim();
+
+		if ( !type.includes( 'module:' ) ) {
+			return false;
+		}
+
+		const doclet = this._collection.getAll().find( doclet => doclet.longname === type );
+
+		if ( !doclet ) {
+			return false;
+		}
+
+		return doclet.kind === 'class' ||
+			doclet.kind === 'interface' ||
+			doclet.kind === 'typedef' ||
+			doclet.kind === 'function';
 	}
 }
 
