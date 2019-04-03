@@ -68,7 +68,7 @@ module.exports = function bumpVersions( options ) {
 		.then( () => {
 			process.chdir( cwd );
 
-			logProcess( `Finished updating versions of ${ chalk.underline( pathsCollection.matched.size ) } packages.` );
+			logProcess( `Finished updating versions of ${ chalk.underline( pathsCollection.matched.size ) } package(s).` );
 			logDryRun( 'Because of the DRY RUN mode, nothing has been changed. All changes were reverted.' );
 		} )
 		.catch( err => {
