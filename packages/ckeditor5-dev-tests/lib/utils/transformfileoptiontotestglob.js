@@ -21,49 +21,49 @@
  * @returns {String}
  */
 module.exports = function transformFileOptionToTestGlob( fileOption, isManualTest = false ) {
-	const pathJoin = ( ...pathParts ) => pathParts.join( '/' );
 	const path = require( 'path' );
 	const globSep = '/';
+	const globJoin = ( ...pathParts ) => pathParts.join( globSep );
 	const globCwd = process.cwd().split( path.sep ).join( globSep );
-	const nodeModulesPath = pathJoin( globCwd, 'packages' );
-	const chunks = fileOption.split( '/' );
+	const packagesPath = globJoin( globCwd, 'packages' );
+	const chunks = fileOption.split( globSep );
 	const packageName = chunks.shift();
-	let globSuffix = pathJoin( 'tests', '**' );
+	let globSuffix = globJoin( 'tests', '**' );
 
 	if ( isManualTest ) {
-		globSuffix += globSep + pathJoin( 'manual', '**' );
+		globSuffix += globSep + globJoin( 'manual', '**' );
 	}
 
 	globSuffix += globSep + '*.js';
 
 	// 0.
 	if ( fileOption === '/' ) {
-		return pathJoin( globCwd, globSuffix );
+		return globJoin( globCwd, globSuffix );
 	}
 
 	// 1. 2. 3.
 	if ( chunks.length === 0 ) {
 		// 1.
 		if ( packageName == '*' ) {
-			return pathJoin( nodeModulesPath, 'ckeditor5-*', globSuffix );
+			return globJoin( packagesPath, 'ckeditor5-*', globSuffix );
 		}
 
 		// 3.
 		if ( packageName.startsWith( '!' ) ) {
-			return pathJoin( nodeModulesPath, 'ckeditor5-!(' + packageName.slice( 1 ) + ')*', globSuffix );
+			return globJoin( packagesPath, 'ckeditor5-!(' + packageName.slice( 1 ) + ')*', globSuffix );
 		}
 
 		// 2.
-		return pathJoin( nodeModulesPath, 'ckeditor5-' + packageName, globSuffix );
+		return globJoin( packagesPath, 'ckeditor5-' + packageName, globSuffix );
 	}
 
 	let glob = chunks.join( globSep );
 
 	// 4.
 	if ( !glob.endsWith( '.js' ) ) {
-		glob = pathJoin( glob, '**', '*.js' );
+		glob = globJoin( glob, '**', '*.js' );
 	}
 
 	// 5.
-	return pathJoin( nodeModulesPath, 'ckeditor5-' + packageName, 'tests', glob );
+	return globJoin( packagesPath, 'ckeditor5-' + packageName, 'tests', glob );
 };
