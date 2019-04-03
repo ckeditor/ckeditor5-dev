@@ -21,14 +21,12 @@
  * @returns {String}
  */
 module.exports = function transformFileOptionToTestGlob( fileOption, isManualTest = false ) {
-	const path = require( 'path' );
 	const globSep = '/';
-	const cwdChunks = process.cwd().split( path.sep );
-	const packagesPathChunks = cwdChunks.concat( [ 'packages' ] );
+	const cwdChunks = process.cwd().split( require( 'path' ).sep );
 	const chunks = fileOption.split( globSep );
 	const packageName = chunks.shift();
 	const globSuffix = [ 'tests', '**' ];
-	let returnChunks = [];
+	let returnChunks = cwdChunks.concat( [ 'packages' ] );
 
 	if ( isManualTest ) {
 		globSuffix.push( 'manual', '**' );
@@ -42,19 +40,17 @@ module.exports = function transformFileOptionToTestGlob( fileOption, isManualTes
 	} else if ( chunks.length === 0 ) {
 		// 1.
 		if ( packageName == '*' ) {
-			returnChunks = packagesPathChunks.concat( [ 'ckeditor5-*' ], globSuffix );
-		}
-
-		// 3.
-		if ( packageName.startsWith( '!' ) ) {
-			returnChunks = packagesPathChunks.concat( [ 'ckeditor5-!(' + packageName.slice( 1 ) + ')*' ], globSuffix );
+			returnChunks.push( 'ckeditor5-*', ...globSuffix );
+		} else if ( packageName.startsWith( '!' ) ) {
+			// 3.
+			returnChunks.push( 'ckeditor5-!(' + packageName.slice( 1 ) + ')*', ...globSuffix );
 		} else {
 			// 2.
-			returnChunks = packagesPathChunks.concat( [ 'ckeditor5-' + packageName ], globSuffix );
+			returnChunks.push( 'ckeditor5-' + packageName, ...globSuffix );
 		}
 	} else {
 		// 5.
-		returnChunks = packagesPathChunks.concat( [ 'ckeditor5-' + packageName, 'tests' ], chunks );
+		returnChunks.push( 'ckeditor5-' + packageName, 'tests', ...chunks );
 
 		if ( !chunks[ chunks.length - 1 ].endsWith( '.js' ) ) {
 			// 4.
