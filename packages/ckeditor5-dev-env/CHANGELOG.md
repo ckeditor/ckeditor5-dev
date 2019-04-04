@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [14.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@14.1.0...@ckeditor/ckeditor5-dev-env@14.1.1) (2019-04-04)
+
+### Bug fixes
+
+* Release tool will not crash when publishing a package for the first time. Closes [#491](https://github.com/ckeditor/ckeditor5-dev/issues/491). ([fcc875d](https://github.com/ckeditor/ckeditor5-dev/commit/fcc875d))
+
+
 ## [14.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@14.0.1...@ckeditor/ckeditor5-dev-env@14.1.0) (2019-03-28)
 
 ### Features
