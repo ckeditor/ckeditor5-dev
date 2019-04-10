@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# Breaks the entire script if any command returned exit code other than 0.
 set -e
 
 # Current work directory.
