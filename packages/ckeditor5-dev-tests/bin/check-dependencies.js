@@ -12,20 +12,9 @@ const path = require( 'path' );
 const glob = require( 'glob' );
 const depCheck = require( 'depcheck' );
 const chalk = require( 'chalk' );
-const { table, getBorderCharacters } = require( 'table' );
 
 const cwd = process.cwd();
 const packageJson = require( path.join( cwd, 'package.json' ) );
-
-const tableData = [
-	[
-		chalk.yellow( 'Invalid itself imports' ),
-		chalk.red( 'Missing dependencies' ),
-		chalk.red( 'Missing devDependencies' ),
-		chalk.cyan( 'Unused dependencies' ),
-		chalk.cyan( 'Unused devDependencies' ),
-	]
-];
 
 const depCheckOptions = {
 	ignoreDirs: [ 'docs', 'build' ],
@@ -42,15 +31,35 @@ depCheck( cwd, depCheckOptions )
 	.then( unused => {
 		const missingPackages = groupMissingPackages( unused.missing, packageJson.name );
 
-		const tableRow = [
-			[ ...getInvalidItselfImports( cwd ) ].join( '\n' ),
-			missingPackages.dependencies.join( '\n' ),
-			missingPackages.devDependencies.join( '\n' ),
-			unused.dependencies.join( '\n' ),
-			unused.devDependencies.filter( packageName => !unused.dependencies.includes( packageName ) ).join( '\n' ),
+		const data = [
+			// Invalid itself imports.
+			[ ...getInvalidItselfImports( cwd ) ]
+				.map( entry => '- ' + entry )
+				.join( '\n' ),
+
+			// Missing dependencies.
+			missingPackages.dependencies
+				.map( entry => '- ' + entry )
+				.join( '\n' ),
+
+			// Missing devDependencies.
+			missingPackages.devDependencies
+				.map( entry => '- ' + entry )
+				.join( '\n' ),
+
+			// Unused dependencies.
+			unused.dependencies
+				.map( entry => '- ' + entry )
+				.join( '\n' ),
+
+			// Unused devDependencies.
+			unused.devDependencies
+				.filter( packageName => !unused.dependencies.includes( packageName ) )
+				.map( entry => '- ' + entry )
+				.join( '\n' ),
 		];
 
-		const hasErrors = tableRow.some( entry => !!entry );
+		const hasErrors = data.some( entry => !!entry );
 
 		if ( !hasErrors ) {
 			console.log( chalk.green( 'All dependencies are defined correctly.' ) );
@@ -58,15 +67,32 @@ depCheck( cwd, depCheckOptions )
 			return;
 		}
 
-		tableData.push( tableRow );
-
 		console.log( chalk.red( 'Found some issue with dependencies.\n' ) );
 
-		const preparedTable = table( tableData, {
-			border: getBorderCharacters( 'norc' )
-		} );
+		if ( data[ 0 ] ) {
+			console.log( chalk.yellow( 'Invalid itself imports:' ) );
+			console.log( data[ 0 ] + '\n' );
+		}
 
-		console.log( preparedTable );
+		if ( data[ 1 ] ) {
+			console.log( chalk.red( 'Missing dependencies:' ) );
+			console.log( data[ 1 ] + '\n' );
+		}
+
+		if ( data[ 2 ] ) {
+			console.log( chalk.red( 'Missing devDependencies:' ) );
+			console.log( data[ 2 ] + '\n' );
+		}
+
+		if ( data[ 3 ] ) {
+			console.log( chalk.cyan( 'Unused dependencies:' ) );
+			console.log( data[ 3 ] + '\n' );
+		}
+
+		if ( data[ 4 ] ) {
+			console.log( chalk.cyan( 'Unused devDependencies:' ) );
+			console.log( data[ 4 ] + '\n' );
+		}
 
 		process.exit( -1 );
 	} );
