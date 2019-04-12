@@ -29,7 +29,7 @@ const tableData = [
 
 const depCheckOptions = {
 	ignoreDirs: [ 'docs', 'build' ],
-	ignoreMatches: [ 'eslint', 'husky', 'lint-staged', 'webpack-cli' ]
+	ignoreMatches: [ 'eslint', 'eslint-plugin-ckeditor5-rules', 'husky', 'lint-staged', 'webpack-cli' ]
 };
 
 if ( Array.isArray( packageJson.depcheckIgnore ) ) {
