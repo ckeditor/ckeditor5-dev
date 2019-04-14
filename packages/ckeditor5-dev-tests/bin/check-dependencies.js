@@ -17,6 +17,14 @@ const cwd = process.cwd();
 const packageJson = require( path.join( cwd, 'package.json' ) );
 
 const depCheckOptions = {
+	// We need to add all values manually because if we modify it, the rest is being lost.
+	parsers: {
+		'*.css': parsePostCSS,
+		'*.js': depCheck.parser.es6,
+		'*.jsx': depCheck.parser.jsx,
+		'*.ts': depCheck.parser.typescript,
+		'*.vue': depCheck.parser.vue
+	},
 	ignoreDirs: [ 'docs', 'build' ],
 	ignoreMatches: [ 'eslint', 'eslint-plugin-ckeditor5-rules', 'husky', 'lint-staged', 'webpack-cli' ]
 };
@@ -47,8 +55,10 @@ depCheck( cwd, depCheckOptions )
 				.map( entry => '- ' + entry )
 				.join( '\n' ),
 
-			// Unused dependencies.
+			// Unused dependencies. We need to removes `unused` dependencies if they are already defined as `missing`.
+			// Such situation can occur for *.css files.
 			unused.dependencies
+				.filter( entry => missingPackages.dependencies.includes( entry ) )
 				.map( entry => '- ' + entry )
 				.join( '\n' ),
 
@@ -154,4 +164,35 @@ function groupMissingPackages( missingPackages, currentPackage ) {
 	}
 
 	return { dependencies, devDependencies };
+}
+
+/**
+ * Checks whether all packages that have been imported by the CSS file are defined in `package.json` as `dependencies`.
+ * Returned array contains list of missing packages.
+ *
+ * @param {String} fileContent Content of the checking file.
+ * @param {String} filePath An absolute path to the checking file.
+ * @param {Array.<String>>} dependencies Merged list of dependencies and devDependencies.
+ * @returns {Array.<String>|undefined}
+ */
+function parsePostCSS( fileContent, filePath, dependencies ) {
+	const matchedImports = fileContent.match( /^@import "(@ckeditor\/[^/]+)[^"]+";/mg );
+
+	if ( !matchedImports ) {
+		return;
+	}
+
+	const missingPackages = new Set();
+
+	matchedImports
+		.map( importLine => importLine.match( /(@ckeditor\/[^/]+)/ ) )
+		.filter( matchedImport => !!matchedImport )
+		.map( matchedImport => matchedImport[ 0 ] )
+		.forEach( packageName => {
+			if ( !dependencies.includes( packageName ) ) {
+				missingPackages.add( packageName );
+			}
+		} );
+
+	return [ ...missingPackages ];
 }
