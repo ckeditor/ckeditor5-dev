@@ -163,7 +163,7 @@ function getInvalidItselfImports( repositoryPath ) {
  *
  * @param {Object} missingPackages The `missing` value from object returned by `depcheck`.
  * @param {String} currentPackage Name of current package.
- * @returns {Object.<String, Array.<String>}
+ * @returns {Object.<String, Array.<String>>}
  */
 function groupMissingPackages( missingPackages, currentPackage ) {
 	delete missingPackages[ currentPackage ];
