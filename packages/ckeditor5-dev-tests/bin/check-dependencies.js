@@ -15,6 +15,7 @@ const chalk = require( 'chalk' );
 
 const cwd = process.cwd();
 const packageJson = require( path.join( cwd, 'package.json' ) );
+const nonExistingCSSFiles = [];
 
 const depCheckOptions = {
 	// We need to add all values manually because if we modify it, the rest is being lost.
@@ -55,18 +56,30 @@ depCheck( cwd, depCheckOptions )
 				.map( entry => '- ' + entry )
 				.join( '\n' ),
 
-			// Unused dependencies. We need to removes `unused` dependencies if they are already defined as `missing`.
-			// Such situation can occur for *.css files.
+			// Unused dependencies.
+			// We need to remove packages which are already defined as `missing`.
+			// `unused.dependencies` lists packages used by JS files. It does not touch CSS files where
+			// a package can be used.
 			unused.dependencies
 				.filter( entry => missingPackages.dependencies.includes( entry ) )
 				.map( entry => '- ' + entry )
 				.join( '\n' ),
 
 			// Unused devDependencies.
+			// We need to remove packages listed as `unused.dependencies` in order to avoid duplicating them.
+			// Also, we need to filter `unused.devDependencies`. See `unused.dependencies` in order to know why.
 			unused.devDependencies
+				.filter( entry => missingPackages.dependencies.includes( entry ) )
 				.filter( packageName => !unused.dependencies.includes( packageName ) )
 				.map( entry => '- ' + entry )
 				.join( '\n' ),
+
+			// Relative CSS imports (files do not exist).
+			nonExistingCSSFiles
+				.map( entry => {
+					return `- "${ chalk.italic( entry.file ) }" imports "${ chalk.italic( entry.import ) }"`;
+				} )
+				.join( '\n' )
 		];
 
 		const hasErrors = data.some( entry => !!entry );
@@ -102,6 +115,11 @@ depCheck( cwd, depCheckOptions )
 		if ( data[ 4 ] ) {
 			console.log( chalk.cyan( 'Unused devDependencies:' ) );
 			console.log( data[ 4 ] + '\n' );
+		}
+
+		if ( data[ 5 ] ) {
+			console.log( chalk.yellow( 'Importing CSS files that do not exist:' ) );
+			console.log( data[ 5 ] + '\n' );
 		}
 
 		process.exit( -1 );
@@ -145,7 +163,7 @@ function getInvalidItselfImports( repositoryPath ) {
  *
  * @param {Object} missingPackages The `missing` value from object returned by `depcheck`.
  * @param {String} currentPackage Name of current package.
- * @returns {Object.<String, Array.<String>>}
+ * @returns {Object.<String, Array.<String>}
  */
 function groupMissingPackages( missingPackages, currentPackage ) {
 	delete missingPackages[ currentPackage ];
@@ -172,11 +190,11 @@ function groupMissingPackages( missingPackages, currentPackage ) {
  *
  * @param {String} fileContent Content of the checking file.
  * @param {String} filePath An absolute path to the checking file.
- * @param {Array.<String>>} dependencies Merged list of dependencies and devDependencies.
+ * @param {Array.<String>} dependencies Merged list of dependencies and devDependencies.
  * @returns {Array.<String>|undefined}
  */
 function parsePostCSS( fileContent, filePath, dependencies ) {
-	const matchedImports = fileContent.match( /^@import "(@ckeditor\/[^/]+)[^"]+";/mg );
+	const matchedImports = fileContent.match( /^@import "[^"]+";/mg );
 
 	if ( !matchedImports ) {
 		return;
@@ -185,12 +203,51 @@ function parsePostCSS( fileContent, filePath, dependencies ) {
 	const missingPackages = new Set();
 
 	matchedImports
-		.map( importLine => importLine.match( /(@ckeditor\/[^/]+)/ ) )
-		.filter( matchedImport => !!matchedImport )
-		.map( matchedImport => matchedImport[ 0 ] )
-		.forEach( packageName => {
-			if ( !dependencies.includes( packageName ) ) {
-				missingPackages.add( packageName );
+		.map( importLine => {
+			const importedFile = importLine.match( /"([^"]+)"/ )[ 1 ];
+
+			// Scoped package.
+			// @import "@foo/bar/...";
+			// @import "@foo/bar"; and its package.json: { "main": "foo-bar.css" }
+			if ( importedFile.startsWith( '@' ) ) {
+				return {
+					type: 'package',
+					name: importedFile.split( '/' ).slice( 0, 2 ).join( '/' )
+				};
+			}
+
+			// Relative import.
+			// @import "./file.css"; or @import "../file.css";
+			if ( importedFile.startsWith( './' ) || importedFile.startsWith( '../' ) ) {
+				return {
+					type: 'file',
+					path: importedFile
+				};
+			}
+
+			// Non-scoped package.
+			return {
+				type: 'package',
+				name: importedFile.split( '/' )[ 0 ]
+			};
+		} )
+		.forEach( importDetails => {
+			// If checked file import another file, check whether imported file exists.
+			if ( importDetails.type == 'file' ) {
+				const fileToImport = path.resolve( filePath, '..', importDetails.path );
+
+				if ( !fs.existsSync( fileToImport ) ) {
+					nonExistingCSSFiles.push( {
+						file: filePath,
+						import: importDetails.path
+					} );
+				}
+
+				return;
+			}
+
+			if ( !dependencies.includes( importDetails.name ) ) {
+				missingPackages.add( importDetails.name );
 			}
 		} );
 
