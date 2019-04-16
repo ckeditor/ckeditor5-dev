@@ -232,7 +232,7 @@ function parsePostCSS( fileContent, filePath, dependencies ) {
 			};
 		} )
 		.forEach( importDetails => {
-			// If checked file import another file, check whether imported file exists.
+			// If checked file imports another file, checks whether imported file exists.
 			if ( importDetails.type == 'file' ) {
 				const fileToImport = path.resolve( filePath, '..', importDetails.path );
 
