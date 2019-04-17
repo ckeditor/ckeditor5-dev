@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# Breaks the entire script if any command returned exit code other than 0.
 set -e
 
 # Current work directory.
@@ -13,10 +14,9 @@ PACKAGE_NAME=$(node -e "console.log( require( process.cwd() + '/package.json' ).
 # The `.ckeditor5_test_environment` file is created by the "install-dependencies" script.
 CKEDITOR5_TEST_ENVIRONMENT=$(cat ${PACKAGE_ROOT}/.ckeditor5_test_environment)
 
-# Those tasks must be executed from the original package.
+# Linter and dependency checker tasks must be executed from the original package.
 yarn run lint && \
-${ROOT_BIN}/ckeditor5-dev-tests-check-dependencies
-
+${ROOT_BIN}/ckeditor5-dev-tests-check-dependencies && \
 cd ${CKEDITOR5_TEST_ENVIRONMENT} && \
 node --max_old_space_size=4096 $ROOT_BIN/ckeditor5-dev-tests --files=$PACKAGE_NAME --coverage --reporter=dots --browsers=Chrome && \
 node --max_old_space_size=4096 $ROOT_BIN/ckeditor5-dev-tests --files=$PACKAGE_NAME --reporter=dots --browsers=Firefox,BrowserStack_Edge,BrowserStack_Safari

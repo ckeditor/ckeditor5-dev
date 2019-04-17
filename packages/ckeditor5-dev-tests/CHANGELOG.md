@@ -1,6 +1,15 @@
 Changelog
 =========
 
+## [16.2.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.2.2...@ckeditor/ckeditor5-dev-tests@16.2.3) (2019-04-12)
+
+### Bug fixes
+
+* Fixed code coverage matching for Windows. Closes [#509](https://github.com/ckeditor/ckeditor5-dev/issues/509). ([4ac75cc](https://github.com/ckeditor/ckeditor5-dev/commit/4ac75cc))
+* Fixed issues related to a new dependency checker on Travis. Closes [ckeditor/ckeditor5#1662](https://github.com/ckeditor/ckeditor5/issues/1662). ([dfc9477](https://github.com/ckeditor/ckeditor5-dev/commit/dfc9477))
+* List with dependency issues will be displayed in a more readable way. Closes [#512](https://github.com/ckeditor/ckeditor5-dev/issues/512). ([8a62270](https://github.com/ckeditor/ckeditor5-dev/commit/8a62270))
+
+
 ## [16.2.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.2.1...@ckeditor/ckeditor5-dev-tests@16.2.2) (2019-04-04)
 
 Internal changes only (updated dependencies, documentation, etc.).

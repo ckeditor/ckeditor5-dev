@@ -107,7 +107,7 @@ function runKarma( options ) {
 			if ( exitCode === 0 ) {
 				resolve();
 			} else {
-				reject( new Error( `Karma exited with ${ exitCode }.` ) );
+				reject( new Error( `Karma finished with "${ exitCode }" code.` ) );
 			}
 		} );
 
