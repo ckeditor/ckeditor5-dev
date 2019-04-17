@@ -1,6 +1,18 @@
 Changelog
 =========
 
+## [16.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.2.3...@ckeditor/ckeditor5-dev-tests@16.3.0) (2019-04-17)
+
+### Features
+
+* Moved script for sending Slack notifications from the main repository. Closes [ckeditor/ckeditor5#1655](https://github.com/ckeditor/ckeditor5/issues/1655). ([3f00d26](https://github.com/ckeditor/ckeditor5-dev/commit/3f00d26))
+
+### Other changes
+
+* Introduced support for CSS files in `depcheck`. See [ckeditor/ckeditor5#1662](https://github.com/ckeditor/ckeditor5/issues/1662). ([55f2e98](https://github.com/ckeditor/ckeditor5-dev/commit/55f2e98))
+* Upgraded a version of Safari. Closes [#517](https://github.com/ckeditor/ckeditor5-dev/issues/517). ([eeb5819](https://github.com/ckeditor/ckeditor5-dev/commit/eeb5819))
+
+
 ## [16.2.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.2.2...@ckeditor/ckeditor5-dev-tests@16.2.3) (2019-04-12)
 
 ### Bug fixes
