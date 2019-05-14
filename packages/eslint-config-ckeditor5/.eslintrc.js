@@ -230,7 +230,11 @@ module.exports = {
 		],
 		'space-before-function-paren': [
 			'error',
-			'never'
+			{
+				anonymous: 'never',
+				named: 'never',
+				asyncArrow: 'always'
+			}
 		],
 		'space-infix-ops': 'error',
 		'space-in-parens': [
