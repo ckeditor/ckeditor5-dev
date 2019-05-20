@@ -97,7 +97,7 @@ module.exports = function getKarmaConfig( options ) {
 			BrowserStack_Safari: {
 				base: 'BrowserStack',
 				os: 'OS X',
-				os_version: 'High Sierra',
+				os_version: 'Mojave',
 				browser: 'safari'
 			}
 		},
