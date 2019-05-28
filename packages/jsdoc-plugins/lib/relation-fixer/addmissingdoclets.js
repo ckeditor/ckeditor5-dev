@@ -21,16 +21,9 @@ module.exports = addMissingDoclets;
 function addMissingDoclets( doclets ) {
 	const docletCollection = new DocletCollection();
 
-	/** @type {Array.<Doclet>} */
-	const typedefDoclets = [];
-
 	for ( const doclet of doclets ) {
 		// Group doclets by memberof property.
 		docletCollection.add( `memberof:${ doclet.memberof }`, doclet );
-
-		if ( doclet.kind === 'typedef' ) {
-			typedefDoclets.push( doclet );
-		}
 	}
 
 	const extensibleDoclets = doclets.filter( doclet => {
