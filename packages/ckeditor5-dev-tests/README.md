@@ -54,16 +54,6 @@ You can also use the bin script for testing a package:
 * `browsers` - Browsers which will be used to run the tests. Also available as an alias: `-b`.
 * `reporter` - Mocha reporter – either `mocha` (default) or `dots` (less verbose one).
 
-#### BrowserStack
-
-You can use BrowserStack to execute the tests on different browsers. At this moment we have defined 2 browsers:
-
-1. Edge 16 - Windows 10 (`BrowserStack_Edge`)
-1. Safari 11 - OS X High Sierra (`BrowserStack_Safari`)
-
-In order to run BrowserStack, you need to specify the environment variables: `BROWSER_STACK_USERNAME` and `BROWSER_STACK_ACCESS_KEY`.
-By default, the tests will be executed on Chrome that is installed on your machine. You can use an option `--browsers` to specify the browsers.
-
 #### Examples
 
 Test the `ckeditor5-enter` and `ckeditor5-paragraph` packages and generate code coverage report:
@@ -95,18 +85,6 @@ Test all installed packages except one (or more):
 ```bash
 $ npm t -- --files='!(engine)'
 $ npm t -- --files='!(engine|ui)'
-```
-
-Test the `ckeditor5-engine` using BrowserStack on Edge:
-
-```bash
-$ BROWSER_STACK_USERNAME=[...] BROWSER_STACK_ACCESS_KEY=[...] npm test -- --files engine --browsers=BrowserStack_Edge
-```
-
-Test the `ckeditor5-image` and `ckeditor5-ui` using BrowserStack on Safari and Edge:
-
-```bash
-$ BROWSER_STACK_USERNAME=[...] BROWSER_STACK_ACCESS_KEY=[...] npm test -- --files image,ui --browsers=BrowserStack_Safari,BrowserStack_Edge
 ```
 
 ### Rules for converting `--files` option to glob pattern:
