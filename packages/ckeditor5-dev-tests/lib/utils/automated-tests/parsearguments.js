@@ -44,8 +44,7 @@ module.exports = function parseArguments( args ) {
 			coverage: false,
 			verbose: false,
 			'source-map': false,
-			server: false,
-			browserStack: false
+			server: false
 		}
 	};
 	const options = minimist( args, minimistConfig );
