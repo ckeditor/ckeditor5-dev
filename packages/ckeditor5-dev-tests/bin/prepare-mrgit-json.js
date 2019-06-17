@@ -14,14 +14,14 @@ if ( !TEST_DIR_PATH ) {
 }
 
 const path = require( 'path' );
-const createMgitJsonContent = require( '../lib/bin/createmgitjsoncontent' );
+const createMrGitJsonContent = require( '../lib/bin/createmrgitjsoncontent' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
-tools.updateJSONFile( path.join( TEST_DIR_PATH, 'mgit.json' ), () => {
+tools.updateJSONFile( path.join( TEST_DIR_PATH, 'mrgit.json' ), () => {
 	const originalPackageJson = require( path.join( process.cwd(), 'package.json' ) );
 	const testingPackageJson = require( path.join( TEST_DIR_PATH, 'package.json' ) );
 
-	return createMgitJsonContent( testingPackageJson, {
+	return createMrGitJsonContent( testingPackageJson, {
 		packageName: originalPackageJson.name,
 		// For PR build we want to get the latest commit from given PR instead of Merge Commit.
 		// See: https://github.com/ckeditor/ckeditor5-dev/issues/484
