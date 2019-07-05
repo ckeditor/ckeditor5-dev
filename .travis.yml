@@ -6,7 +6,7 @@ cache:
 cache:
   - node_modules
 before_install:
-  - npm i -g yarn
+  - npm i -g yarn lerna
 install:
   - lerna bootstrap
   - yarn add coveralls --ignore-workspace-root-check
