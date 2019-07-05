@@ -10,9 +10,9 @@ const { cloneDeep } = require( 'lodash' );
 module.exports = getMissingDocletsData;
 
 /**
- * Gets missing doclets of members coming from implemented interfaces, extended classes and mixins.
+ * Gets missing doclets of members coming from implemented interfaces, extended classes, mixins and typedefs.
  * It returns also doclets which should be ignored as no longer necessary.
- * This module requires the input preprocessed by the `buildRelations()` function.
+ * This function requires input to be preprocessed by the `buildRelations()` function.
  *
  * @param {DocletCollection} docletCollection
  * @param {Doclet} interfaceClassOrMixinDoclet Doclet representing an entity which might have some inherited members missing.
@@ -22,6 +22,7 @@ module.exports = getMissingDocletsData;
 function getMissingDocletsData( docletCollection, interfaceClassOrMixinDoclet, options ) {
 	const newDoclets = [];
 	const docletsWhichShouldBeIgnored = [];
+
 	const docletsToAdd = getDocletsToAdd( docletCollection, interfaceClassOrMixinDoclet, options );
 	const docletMap = createDocletMap( docletCollection );
 
@@ -69,48 +70,42 @@ function getMissingDocletsData( docletCollection, interfaceClassOrMixinDoclet, o
 
 /**
  * Gets doclets from entities related to current doclet (e.g. implemented by it)
- * and matching criteria given in options.filter.
+ * and matching criteria given via the `options.filter` query.
  *
  * @param {DocletCollection} docletCollection
  * @param {Doclet} childDoclet
  * @param {Options} options
  */
 function getDocletsToAdd( docletCollection, childDoclet, options ) {
-	if ( !isNonEmptyArray( childDoclet[ options.relation ] ) ) {
-		return [];
-	}
-
 	// Longnames of doclets which are related ( extended, mixed, implemented ) to childDoclet.
-	const ancestors = childDoclet[ options.relation ];
+	const ancestors = childDoclet[ options.relation ] || [];
 
-	const docletToAdd = ancestors.reduce( ( docletsToAdd, longname ) => {
-		const toAdd = docletCollection.get( `memberof:${ longname }` ).filter( doclet => {
-			let matchingFilterOptions = true;
-
-			// Filter out ignored, inherited, undocumented.
-			if ( doclet.ignore ||
-				doclet.undocumented ||
-				typeof doclet.inheritdoc == 'string'
-			) {
-				return false;
-			}
-
-			for ( const key of Object.keys( options.filter || {} ) ) {
-				if ( doclet[ key ] !== options.filter[ key ] ) {
-					matchingFilterOptions = false;
-				}
-			}
-
-			return matchingFilterOptions;
-		} );
-
+	return ancestors.reduce( ( docletsToAdd, longname ) => {
 		return [
 			...docletsToAdd,
-			...toAdd
+			...docletCollection.get( `memberof:${ longname }` ).filter( shouldDocletBeAdded )
 		];
 	}, [] );
 
-	return docletToAdd;
+	/** @param {Doclet} doclet */
+	function shouldDocletBeAdded( doclet ) {
+		// Filter out ignored, inherited, undocumented.
+		if (
+			doclet.ignore ||
+			doclet.undocumented ||
+			typeof doclet.inheritdoc == 'string'
+		) {
+			return false;
+		}
+
+		for ( const key of Object.keys( options.filter || {} ) ) {
+			if ( doclet[ key ] !== options.filter[ key ] ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 }
 
 function isNonEmptyArray( obj ) {
@@ -131,7 +126,7 @@ function getLongnameForNewDoclet( parentDoclet, childDoclet ) {
 }
 
 /**
- * Gets property which should be added to the new doclet (e.g. inherited, mixed).
+ * Gets property which should be added to the new doclet (e.g. `inherited` or `mixed`).
  *
  * @param {DocletMap} docletMap
  * @param {Doclet} childDoclet
@@ -153,7 +148,7 @@ function getRelationProperty( docletMap, childDoclet, memberDoclet, relation ) {
 	let isInherited = false;
 	let isMixed = false;
 
-	// If doclet is a child of a mixin, it's 'mixed'. Else if it's a child of another class, it's 'inhertied'.
+	// If doclet is a child of a mixin, it's 'mixed'. Else if it's a child of another class, it's 'inherited'.
 	if ( isNonEmptyArray( memberDocletParent.descendants ) ) {
 		for ( const longname of memberDocletParent.descendants ) {
 			const doclet = docletMap[ longname ];
