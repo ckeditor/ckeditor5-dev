@@ -66,8 +66,8 @@ describe( 'runManualTests', () => {
 				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: [ testsToExecute ],
-					language: 'en',
-					additionalLanguages: null
+					language: undefined,
+					additionalLanguages: undefined
 				} );
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
@@ -75,8 +75,8 @@ describe( 'runManualTests', () => {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: [ testsToExecute ],
 					themePath: null,
-					language: 'en',
-					additionalLanguages: null
+					language: undefined,
+					additionalLanguages: undefined
 				} );
 
 				expect( spies.server.calledOnce ).to.equal( true );
@@ -117,8 +117,8 @@ describe( 'runManualTests', () => {
 				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: testsToExecute,
-					language: 'en',
-					additionalLanguages: null
+					language: undefined,
+					additionalLanguages: undefined
 				} );
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
@@ -126,8 +126,8 @@ describe( 'runManualTests', () => {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: testsToExecute,
 					themePath: 'path/to/theme',
-					language: 'en',
-					additionalLanguages: null
+					language: undefined,
+					additionalLanguages: undefined
 				} );
 
 				expect( spies.server.calledOnce ).to.equal( true );
@@ -151,7 +151,10 @@ describe( 'runManualTests', () => {
 			],
 			themePath: 'path/to/theme',
 			language: 'pl',
-			additionalLanguages: 'ar,en'
+			additionalLanguages: [
+				'ar',
+				'en'
+			]
 		};
 
 		return runManualTests( options )
