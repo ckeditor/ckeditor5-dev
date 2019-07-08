@@ -122,7 +122,11 @@ describe( 'compileHtmlFiles', () => {
 			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ]
 		};
 
-		compileHtmlFiles( 'buildDir', [ path.join( 'manualTestPattern', '*.js' ) ] );
+		compileHtmlFiles( {
+			buildDir: 'buildDir',
+			language: 'en',
+			patterns: [ path.join( 'manualTestPattern', '*.js' ) ]
+		} );
 
 		sinon.assert.calledWithExactly( stubs.commonmark.parse, '## Markdown header' );
 		sinon.assert.calledWithExactly( stubs.fs.ensureDirSync, 'buildDir' );
@@ -150,6 +154,34 @@ describe( 'compileHtmlFiles', () => {
 		);
 	} );
 
+	it( 'should compile files with options#language specified', () => {
+		compileHtmlFiles( {
+			buildDir: 'buildDir',
+			language: 'en',
+			additionalLanguages: [ 'pl', 'ar' ],
+			patterns: [ path.join( 'manualTestPattern', '*.js' ) ]
+		} );
+
+		/* eslint-disable max-len */
+		sinon.assert.calledWithExactly(
+			stubs.fs.outputFileSync,
+			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
+				'<div>template html content</div>',
+				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<div>html file content</div>',
+				'<body class="manual-test-container">' +
+					'<script src="/assets/inspector.js"></script>' +
+					'<script src="/assets/attachinspector.js"></script>' +
+					'<script src="/translations/en.js"></script>' +
+					'<script src="/translations/pl.js"></script>' +
+					'<script src="/translations/ar.js"></script>' +
+					`<script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script>` +
+				'</body>'
+			].join( '\n' )
+		);
+		/* eslint-enable max-len */
+	} );
+
 	it( 'should work with files containing dots in their names', () => {
 		files = {
 			[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
@@ -162,7 +194,10 @@ describe( 'compileHtmlFiles', () => {
 			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: []
 		};
 
-		compileHtmlFiles( 'buildDir', [ path.join( 'manualTestPattern', '*.js' ) ] );
+		compileHtmlFiles( {
+			buildDir: 'buildDir',
+			patterns: [ path.join( 'manualTestPattern', '*.js' ) ]
+		} );
 
 		/* eslint-disable max-len */
 		sinon.assert.calledWith(
@@ -197,10 +232,13 @@ describe( 'compileHtmlFiles', () => {
 			[ path.join( 'path', 'to', 'another', 'manual', '**', '*.!(js|html|md)' ) ]: []
 		};
 
-		compileHtmlFiles( 'buildDir', [
-			path.join( 'manualTestPattern', '*.js' ),
-			path.join( 'anotherPattern', '*.js' )
-		] );
+		compileHtmlFiles( {
+			buildDir: 'buildDir',
+			patterns: [
+				path.join( 'manualTestPattern', '*.js' ),
+				path.join( 'anotherPattern', '*.js' )
+			]
+		} );
 
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true } );
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true } );
@@ -227,10 +265,13 @@ describe( 'compileHtmlFiles', () => {
 			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ]
 		};
 
-		compileHtmlFiles( 'buildDir', [
-			path.join( 'manualTestPattern', '*.js' ),
-			path.join( 'anotherPattern', '*.js' )
-		] );
+		compileHtmlFiles( {
+			buildDir: 'buildDir',
+			patterns: [
+				path.join( 'manualTestPattern', '*.js' ),
+				path.join( 'anotherPattern', '*.js' )
+			]
+		} );
 
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true } );
 		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true } );
@@ -251,7 +292,12 @@ describe( 'compileHtmlFiles', () => {
 			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'some.file.md' ]
 		};
 
-		compileHtmlFiles( 'buildDir', [ path.join( 'manualTestPattern', '*.js' ) ] );
+		compileHtmlFiles( {
+			buildDir: 'buildDir',
+			patterns: [
+				path.join( 'manualTestPattern', '*.js' )
+			]
+		} );
 
 		sinon.assert.calledWithExactly( stubs.commonmark.parse, '## Markdown header' );
 		sinon.assert.calledWithExactly( stubs.fs.ensureDirSync, 'buildDir' );
@@ -294,7 +340,10 @@ describe( 'compileHtmlFiles', () => {
 			'path\\to\\manual\\file.html': '<div>html file content</div>'
 		};
 
-		compileHtmlFiles( 'buildDir', [ path.join( 'manualTestPattern', '*.js' ) ] );
+		compileHtmlFiles( {
+			buildDir: 'buildDir',
+			patterns: [ path.join( 'manualTestPattern', '*.js' ) ]
+		} );
 
 		sinon.assert.calledWithExactly( stubs.commonmark.parse, '## Markdown header' );
 		sinon.assert.calledWithExactly( stubs.fs.ensureDirSync, 'buildDir' );

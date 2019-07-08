@@ -19,19 +19,34 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
  * Main function that runs manual tests.
  *
  * @param {Object} options
- * @param {Array.<String>} options.files
+ * @param {Array.<String>} options.files Glob patterns specifying which tests to run.
+ * @param {String} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
+ * @param {String} [options.language] A language passed to `CKEditorWebpackPlugin`.
+ * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
  * @returns {Promise}
  */
 module.exports = function runManualTests( options ) {
 	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
 	const files = ( options.files && options.files.length ) ? options.files : [ '*' ];
-	const manualTestFilesPattern = files.map( file => transformFileOptionToTestGlob( file, true ) );
+	const patterns = files.map( file => transformFileOptionToTestGlob( file, true ) );
+	const additionalLanguages = options.additionalLanguages ? options.additionalLanguages.split( ',' ) : null;
 
 	return Promise.resolve()
 		.then( () => removeDir( buildDir ) )
 		.then( () => Promise.all( [
-			compileManualTestScripts( buildDir, manualTestFilesPattern, options.themePath ),
-			compileManualTestHtmlFiles( buildDir, manualTestFilesPattern ),
+			compileManualTestScripts( {
+				buildDir,
+				patterns,
+				themePath: options.themePath || null,
+				language: options.language || 'en',
+				additionalLanguages
+			} ),
+			compileManualTestHtmlFiles( {
+				buildDir,
+				patterns,
+				language: options.language || 'en',
+				additionalLanguages
+			} ),
 			copyAssets( buildDir )
 		] ) )
 		.then( () => createManualTestServer( buildDir ) );

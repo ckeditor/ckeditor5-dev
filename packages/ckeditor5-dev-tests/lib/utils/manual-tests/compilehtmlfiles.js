@@ -22,14 +22,18 @@ const reader = new commonmark.Parser();
 const writer = new commonmark.HtmlRenderer();
 
 /**
- * @param {String} buildDir A path where compiled files will be saved.
- * @param {Array.<String>} manualTestScriptsPatterns An array of patterns that resolves manual test scripts.
+ * @param {Object} options
+ * @param {String} options.buildDir A path where compiled files will be saved.
+ * @param {Array.<String>} options.patterns An array of patterns that resolve manual test scripts.
+ * @param {String} options.language A language passed to `CKEditorWebpackPlugin`.
+ * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
  * @returns {Promise}
  */
-module.exports = function compileHtmlFiles( buildDir, manualTestScriptsPatterns ) {
+module.exports = function compileHtmlFiles( options ) {
+	const buildDir = options.buildDir;
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 
-	const sourceMDFiles = manualTestScriptsPatterns.reduce( ( arr, manualTestPattern ) => {
+	const sourceMDFiles = options.patterns.reduce( ( arr, manualTestPattern ) => {
 		return [
 			...arr,
 			...globSync( manualTestPattern )
@@ -44,6 +48,11 @@ module.exports = function compileHtmlFiles( buildDir, manualTestScriptsPatterns 
 	const staticFiles = _.flatten( sourceDirs.map( sourceDir => {
 		return globSync( path.join( sourceDir, '**', '*.!(js|html|md)' ) );
 	} ) ).filter( file => !file.match( /\.(js|html|md)$/ ) );
+	const languagesToLoad = [];
+
+	if ( options.additionalLanguages ) {
+		languagesToLoad.push( options.language, ...options.additionalLanguages );
+	}
 
 	fs.ensureDirSync( buildDir );
 
@@ -52,15 +61,15 @@ module.exports = function compileHtmlFiles( buildDir, manualTestScriptsPatterns 
 	staticFiles.forEach( staticFile => copyStaticFile( buildDir, staticFile ) );
 
 	// Generate real HTML files out of the MD + HTML files of each test.
-	sourceFilePathBases.forEach( sourceFilePathBase => compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate ) );
+	sourceFilePathBases.forEach( sourceFilePathBase => compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate, languagesToLoad ) );
 
 	// Watch files and compile on change.
 	watchFiles( [ ...sourceMDFiles, ...sourceHtmlFiles ], file => {
-		compileHtmlFile( buildDir, getFilePathWithoutExtension( file ), viewTemplate );
+		compileHtmlFile( buildDir, getFilePathWithoutExtension( file ), viewTemplate, languagesToLoad );
 	} );
 };
 
-function compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate ) {
+function compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate, languagesToLoad ) {
 	const log = logger();
 	const sourceMDFilePath = sourceFilePathBase + '.md';
 	const sourceHtmlFilePath = sourceFilePathBase + '.html';
@@ -87,6 +96,9 @@ function compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate ) {
 		'<body class="manual-test-container">' +
 			'<script src="/assets/inspector.js"></script>' +
 			'<script src="/assets/attachinspector.js"></script>' +
+			`${ languagesToLoad.map( language => {
+				return `<script src="/translations/${ language }.js"></script>`;
+			} ).join( '' ) }` +
 			`<script src="/${ absoluteJSFilePath }"></script>` +
 		'</body>';
 
