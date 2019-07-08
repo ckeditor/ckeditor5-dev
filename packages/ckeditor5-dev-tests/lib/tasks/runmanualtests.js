@@ -22,13 +22,14 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
  * @param {Array.<String>} options.files Glob patterns specifying which tests to run.
  * @param {String} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
  * @param {String} [options.language] A language passed to `CKEditorWebpackPlugin`.
- * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
+ * @param {String} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
  * @returns {Promise}
  */
 module.exports = function runManualTests( options ) {
 	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
 	const files = ( options.files && options.files.length ) ? options.files : [ '*' ];
 	const patterns = files.map( file => transformFileOptionToTestGlob( file, true ) );
+	const language = options.language || 'en';
 	const additionalLanguages = options.additionalLanguages ? options.additionalLanguages.split( ',' ) : null;
 
 	return Promise.resolve()
@@ -38,13 +39,13 @@ module.exports = function runManualTests( options ) {
 				buildDir,
 				patterns,
 				themePath: options.themePath || null,
-				language: options.language || 'en',
+				language,
 				additionalLanguages
 			} ),
 			compileManualTestHtmlFiles( {
 				buildDir,
 				patterns,
-				language: options.language || 'en',
+				language,
 				additionalLanguages
 			} ),
 			copyAssets( buildDir )
