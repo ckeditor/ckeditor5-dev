@@ -3,7 +3,14 @@ Changelog
 
 ## [2.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@1.0.14...eslint-config-ckeditor5@2.0.0) (2019-07-09)
 
-Internal changes only (updated dependencies, documentation, etc.).
+### Other changes
+
+* Updated `ecmaVersion` from `es6` to `es2018` (`es9`).
+* Changed the `space-before-function-paren` rule to preserve spaces before async arrow functions. Closes [#521](https://github.com/ckeditor/ckeditor5-dev/issues/521).
+
+### BREAKING CHANGES
+
+* The `space-before-function-paren` option was changed to make spaces before async arrow functions required.
 
 
 ## [1.0.14](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@1.0.12...eslint-config-ckeditor5@1.0.14) (2019-04-04)

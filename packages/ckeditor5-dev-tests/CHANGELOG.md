@@ -3,6 +3,10 @@ Changelog
 
 ## [16.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.3.0...@ckeditor/ckeditor5-dev-tests@16.4.0) (2019-07-09)
 
+### Features
+
+* Enabled `CKEditorWebpackPlugin` in `getWebpackConfigForManualTests()`. Allowed configuring `language` and `additionalLanguages`. Closes [#529](https://github.com/ckeditor/ckeditor5-dev/issues/529).
+
 ### Other changes
 
 * Removed the BrowserStack integration from `ckeditor5-dev` repository. See [ckeditor/ckeditor5#1742](https://github.com/ckeditor/ckeditor5/issues/1742). ([a753590](https://github.com/ckeditor/ckeditor5-dev/commit/a753590))
