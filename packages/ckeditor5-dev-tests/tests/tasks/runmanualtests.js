@@ -63,20 +63,28 @@ describe( 'runManualTests', () => {
 				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 1 ] ).to.equal( true );
 
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
-				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
-				expect( spies.htmlFileCompiler.firstCall.args[ 1 ] ).to.deep.equal( [ testsToExecute ] );
+				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+					buildDir: 'workspace/build/.manual-tests',
+					patterns: [ testsToExecute ],
+					language: undefined,
+					additionalLanguages: undefined
+				} );
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
-				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
-				expect( spies.scriptCompiler.firstCall.args[ 1 ] ).to.deep.equal( [ testsToExecute ] );
-				expect( spies.scriptCompiler.firstCall.args[ 2 ] ).to.be.undefined;
+				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+					buildDir: 'workspace/build/.manual-tests',
+					patterns: [ testsToExecute ],
+					themePath: null,
+					language: undefined,
+					additionalLanguages: undefined
+				} );
 
 				expect( spies.server.calledOnce ).to.equal( true );
 				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
 			} );
 	} );
 
-	it( 'run specified manual tests', () => {
+	it( 'runs specified manual tests', () => {
 		testsToExecute = [
 			'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
 			'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js'
@@ -106,13 +114,77 @@ describe( 'runManualTests', () => {
 				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 1 ] ).to.equal( true );
 
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
-				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
-				expect( spies.htmlFileCompiler.firstCall.args[ 1 ] ).to.deep.equal( testsToExecute );
+				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+					buildDir: 'workspace/build/.manual-tests',
+					patterns: testsToExecute,
+					language: undefined,
+					additionalLanguages: undefined
+				} );
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
-				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
-				expect( spies.scriptCompiler.firstCall.args[ 1 ] ).to.deep.equal( testsToExecute );
-				expect( spies.scriptCompiler.firstCall.args[ 2 ] ).to.deep.equal( 'path/to/theme' );
+				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+					buildDir: 'workspace/build/.manual-tests',
+					patterns: testsToExecute,
+					themePath: 'path/to/theme',
+					language: undefined,
+					additionalLanguages: undefined
+				} );
+
+				expect( spies.server.calledOnce ).to.equal( true );
+				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+			} );
+	} );
+
+	it( 'allows specifying language and additionalLanguages (to CKEditorWebpackPlugin)', () => {
+		testsToExecute = [
+			'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
+			'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js'
+		];
+
+		spies.transformFileOptionToTestGlob.onFirstCall().returns( testsToExecute[ 0 ] );
+		spies.transformFileOptionToTestGlob.onSecondCall().returns( testsToExecute[ 1 ] );
+
+		const options = {
+			files: [
+				'build-classic',
+				'editor-classic/manual/classic.js'
+			],
+			themePath: 'path/to/theme',
+			language: 'pl',
+			additionalLanguages: [
+				'ar',
+				'en'
+			]
+		};
+
+		return runManualTests( options )
+			.then( () => {
+				expect( spies.removeDir.calledOnce ).to.equal( true );
+				expect( spies.removeDir.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+
+				expect( spies.transformFileOptionToTestGlob.calledTwice ).to.equal( true );
+				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( 'build-classic' );
+				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 1 ] ).to.equal( true );
+				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 0 ] )
+					.to.equal( 'editor-classic/manual/classic.js' );
+				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 1 ] ).to.equal( true );
+
+				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
+				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+					buildDir: 'workspace/build/.manual-tests',
+					patterns: testsToExecute,
+					language: 'pl',
+					additionalLanguages: [ 'ar', 'en' ],
+				} );
+
+				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
+				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+					buildDir: 'workspace/build/.manual-tests',
+					patterns: testsToExecute,
+					themePath: 'path/to/theme',
+					language: 'pl',
+					additionalLanguages: [ 'ar', 'en' ]
+				} );
 
 				expect( spies.server.calledOnce ).to.equal( true );
 				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
