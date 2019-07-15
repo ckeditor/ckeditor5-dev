@@ -22,7 +22,7 @@ const GitHubApi = require( '@octokit/rest' );
 const PACKAGE_JSON_TEMPLATE_PATH = require.resolve( '../templates/release-package.json' );
 const BREAK_RELEASE_MESSAGE = 'You aborted publishing the release. Why? Oh why?!';
 const NO_RELEASE_MESSAGE = 'No changes for publishing. Why? Oh why?!';
-const AUTH_REQUIRED = 'This command requires you to be logged in.';
+const AUTH_REQUIRED = 'You must be logged to execute this command.';
 
 // That files will be copied from source to the temporary directory and will be released too.
 const additionalFiles = [
