@@ -1,6 +1,41 @@
 Changelog
 =========
 
+## [15.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@14.1.2...@ckeditor/ckeditor5-dev-env@15.0.0) (2019-07-15)
+
+### Features
+
+* Before starting the publishing process on NPM, the task will check whether the current user is logged to npm. Removed `tasks.releaseRepository()`. It's now possible to release a single repo with the multi-repo release task. Closes [#496](https://github.com/ckeditor/ckeditor5-dev/issues/496). Closes [#498](https://github.com/ckeditor/ckeditor5-dev/issues/498). ([90dc7a1](https://github.com/ckeditor/ckeditor5-dev/commit/90dc7a1))
+
+  In order to release a single repository, first, you need to bump its version. Then you will be able to publish changes. For bumping version, you can use the following code:
+
+  ```js
+  require( '@ckeditor/ckeditor5-dev-env' )
+  	.bumpVersions( {
+  		cwd: process.cwd(),
+  		packages: null, // <-- It means that you want to call the script for single package.
+  		dryRun: process.argv.includes( '--dry-run' )
+  	} );
+  ```
+
+  For publishing changes:
+
+  ```js
+  require( '@ckeditor/ckeditor5-dev-env' )
+  	.releaseSubRepositories( {
+  		cwd: process.cwd(),
+  		packages: null, // <-- It means that you want to call the script for single package.
+  		dryRun: process.argv.includes( '--dry-run' )
+  	} );
+  ```
+
+  You can call both scripts with `--dry-run` option that allows you testing the entire process. Those scripts won't publish anything in this mode.
+
+### BREAKING CHANGES
+
+* `tasks.releaseRepository()` has been removed. Use `tasks.bumpVersions()` and `tasks.releaseSubRepositories()` instead. 
+
+
 ## [14.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@14.1.1...@ckeditor/ckeditor5-dev-env@14.1.2) (2019-07-15)
 
 ### Other changes
