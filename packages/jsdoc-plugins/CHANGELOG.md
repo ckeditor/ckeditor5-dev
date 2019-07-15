@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [3.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@3.0.2...@ckeditor/jsdoc-plugins@3.0.3) (2019-07-15)
+
+### Other changes
+
+* Upgraded dependencies for most of the packages. Merged Lerna + Yarn and they can work together now. Closes [#527](https://github.com/ckeditor/ckeditor5-dev/issues/527). Closes [#466](https://github.com/ckeditor/ckeditor5-dev/issues/466). ([dcc3215](https://github.com/ckeditor/ckeditor5-dev/commit/dcc3215))
+
+
 ## [3.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@3.0.1...@ckeditor/jsdoc-plugins@3.0.2) (2019-07-09)
 
 ### Other changes

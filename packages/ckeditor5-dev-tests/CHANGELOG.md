@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [16.4.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.4.0...@ckeditor/ckeditor5-dev-tests@16.4.1) (2019-07-15)
+
+### Other changes
+
+* Upgraded dependencies for most of the packages. Merged Lerna + Yarn and they can work together now. Closes [#527](https://github.com/ckeditor/ckeditor5-dev/issues/527). Closes [#466](https://github.com/ckeditor/ckeditor5-dev/issues/466). ([dcc3215](https://github.com/ckeditor/ckeditor5-dev/commit/dcc3215))
+
+
 ## [16.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.3.0...@ckeditor/ckeditor5-dev-tests@16.4.0) (2019-07-09)
 
 ### Features
