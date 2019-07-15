@@ -21,19 +21,14 @@ const getPackageJson = require( './getpackagejson' );
  *
  * @param {Object} options
  * @param {String} options.cwd Current work directory.
- * @param {String} options.packages Name of directory where to look for packages.
+ * @param {String|null} options.packages Name of directory where to look for packages. If `null`, only repository specified under
+ * `options.cwd` will be returned.
  * @param {String|Array.<String>} options.skipPackages Glob pattern(s) which describes which packages should be skipped.
  * @param {String} [options.scope] Package names have to match to specified glob pattern.
- * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in "cwd" will be skipped.
+ * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in `options.cwd` will be skipped.
  * @returns {PathsCollection}
  */
 module.exports = function getSubRepositoriesPaths( options ) {
-	const packagesPath = path.join( options.cwd, options.packages );
-	const skipPackages = Array.isArray( options.skipPackages ) ? options.skipPackages : [ options.skipPackages ];
-
-	const packageJson = getPackageJson( options.cwd );
-	const dependencies = Object.keys( packageJson.dependencies || {} );
-
 	const collection = {
 		matched: new Set(),
 		skipped: new Set()
@@ -44,6 +39,16 @@ module.exports = function getSubRepositoriesPaths( options ) {
 	} else {
 		collection.matched.add( options.cwd );
 	}
+
+	if ( !options.packages ) {
+		return collection;
+	}
+
+	const packagesPath = path.join( options.cwd, options.packages );
+	const skipPackages = Array.isArray( options.skipPackages ) ? options.skipPackages : [ options.skipPackages ];
+
+	const packageJson = getPackageJson( options.cwd );
+	const dependencies = Object.keys( packageJson.dependencies || {} );
 
 	for ( const directory of tools.getDirectories( packagesPath ) ) {
 		const dependencyPath = path.join( packagesPath, directory );
