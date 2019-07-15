@@ -8,13 +8,18 @@
 const path = require( 'path' );
 const WebpackNotifierPlugin = require( './webpacknotifierplugin' );
 const { getPostCssConfig } = require( '@ckeditor/ckeditor5-dev-utils' ).styles;
+const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
 
 /**
- * @param {Object} entryObject
- * @param {String} buildDir
+ * @param {Object} options
+ * @param {Object} options.entries
+ * @param {String} options.buildDir
+ * @param {String} options.themePath
+ * @param {String} [options.language]
+ * @param {Array.<String>} [options.additionalLanguages]
  * @returns {Object}
  */
-module.exports = function getWebpackConfigForManualTests( entryObject, buildDir, themePath ) {
+module.exports = function getWebpackConfigForManualTests( options ) {
 	return {
 		mode: 'development',
 
@@ -25,14 +30,19 @@ module.exports = function getWebpackConfigForManualTests( entryObject, buildDir,
 
 		watch: true,
 
-		entry: entryObject,
+		entry: options.entries,
 
 		output: {
-			path: buildDir
+			path: options.buildDir
 		},
 
 		plugins: [
-			new WebpackNotifierPlugin()
+			new WebpackNotifierPlugin(),
+			new CKEditorWebpackPlugin( {
+				// See https://ckeditor.com/docs/ckeditor5/latest/features/ui-language.html
+				language: options.language,
+				additionalLanguages: options.additionalLanguages
+			} )
 		],
 
 		module: {
@@ -56,8 +66,7 @@ module.exports = function getWebpackConfigForManualTests( entryObject, buildDir,
 							loader: 'postcss-loader',
 							options: getPostCssConfig( {
 								themeImporter: {
-									themePath,
-									debug: true
+									themePath: options.themePath
 								},
 								sourceMap: true
 							} )

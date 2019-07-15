@@ -16,7 +16,9 @@
 		set: value => {
 			editor = value;
 
-			CKEditorInspector.attach( 'editor', editor );
+			if ( editor ) {
+				CKEditorInspector.attach( 'editor', editor );
+			}
 		},
 		get: () => editor
 	} );

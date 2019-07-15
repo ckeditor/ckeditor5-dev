@@ -44,6 +44,11 @@ module.exports = function transformCommitForSubRepository( rawCommit, context = 
 		commit.body = null;
 	}
 
+	// Ignore the `stable` merge branch.
+	if ( commit.merge === 'Merge branch \'stable\'' ) {
+		return;
+	}
+
 	if ( typeof commit.hash === 'string' ) {
 		commit.hash = commit.hash.substring( 0, 7 );
 	}

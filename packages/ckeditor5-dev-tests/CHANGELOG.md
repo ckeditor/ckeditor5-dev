@@ -1,6 +1,68 @@
 Changelog
 =========
 
+## [16.4.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.4.0...@ckeditor/ckeditor5-dev-tests@16.4.1) (2019-07-15)
+
+### Other changes
+
+* Upgraded dependencies for most of the packages. Merged Lerna + Yarn and they can work together now. Closes [#527](https://github.com/ckeditor/ckeditor5-dev/issues/527). Closes [#466](https://github.com/ckeditor/ckeditor5-dev/issues/466). ([dcc3215](https://github.com/ckeditor/ckeditor5-dev/commit/dcc3215))
+
+
+## [16.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.3.0...@ckeditor/ckeditor5-dev-tests@16.4.0) (2019-07-09)
+
+### Features
+
+* Enabled `CKEditorWebpackPlugin` in `getWebpackConfigForManualTests()`. Allowed configuring `language` and `additionalLanguages`. Closes [#529](https://github.com/ckeditor/ckeditor5-dev/issues/529).
+
+### Other changes
+
+* Removed the BrowserStack integration from `ckeditor5-dev` repository. See [ckeditor/ckeditor5#1742](https://github.com/ckeditor/ckeditor5/issues/1742). ([a753590](https://github.com/ckeditor/ckeditor5-dev/commit/a753590))
+
+
+## [16.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.2.3...@ckeditor/ckeditor5-dev-tests@16.3.0) (2019-04-17)
+
+### Features
+
+* Moved script for sending Slack notifications from the main repository. Closes [ckeditor/ckeditor5#1655](https://github.com/ckeditor/ckeditor5/issues/1655). ([3f00d26](https://github.com/ckeditor/ckeditor5-dev/commit/3f00d26))
+
+### Other changes
+
+* Introduced support for CSS files in `depcheck`. See [ckeditor/ckeditor5#1662](https://github.com/ckeditor/ckeditor5/issues/1662). ([55f2e98](https://github.com/ckeditor/ckeditor5-dev/commit/55f2e98))
+* Upgraded a version of Safari. Closes [#517](https://github.com/ckeditor/ckeditor5-dev/issues/517). ([eeb5819](https://github.com/ckeditor/ckeditor5-dev/commit/eeb5819))
+
+
+## [16.2.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.2.2...@ckeditor/ckeditor5-dev-tests@16.2.3) (2019-04-12)
+
+### Bug fixes
+
+* Fixed code coverage matching for Windows. Closes [#509](https://github.com/ckeditor/ckeditor5-dev/issues/509). ([4ac75cc](https://github.com/ckeditor/ckeditor5-dev/commit/4ac75cc))
+* Fixed issues related to a new dependency checker on Travis. Closes [ckeditor/ckeditor5#1662](https://github.com/ckeditor/ckeditor5/issues/1662). ([dfc9477](https://github.com/ckeditor/ckeditor5-dev/commit/dfc9477))
+* List with dependency issues will be displayed in a more readable way. Closes [#512](https://github.com/ckeditor/ckeditor5-dev/issues/512). ([8a62270](https://github.com/ckeditor/ckeditor5-dev/commit/8a62270))
+
+
+## [16.2.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.2.1...@ckeditor/ckeditor5-dev-tests@16.2.2) (2019-04-04)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
+## [16.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.2.0...@ckeditor/ckeditor5-dev-tests@16.2.1) (2019-03-28)
+
+### Other changes
+
+* Support for the "depcheckIgnore" key in "package.json" which defines a list of packages that should be ignored during dependency checking. ([9f5e037](https://github.com/ckeditor/ckeditor5-dev/commit/9f5e037))
+
+
+## [16.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.1.0...@ckeditor/ckeditor5-dev-tests@16.2.0) (2019-03-28)
+
+### Features
+
+* Improved the script which checks dependencies on CI. Added two new informations – which dependencies and devDependencies are unused in the package. The entire script response is now displayed in a table. Closes [#392](https://github.com/ckeditor/ckeditor5-dev/issues/392). ([1642316](https://github.com/ckeditor/ckeditor5-dev/commit/1642316))
+
+### Bug fixes
+
+* Editor Inspector in manual tests should not crash when `window.editor` is set `null`. Closes [#502](https://github.com/ckeditor/ckeditor5-dev/issues/502). ([7ca8762](https://github.com/ckeditor/ckeditor5-dev/commit/7ca8762))
+
+
 ## [16.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.0.1...@ckeditor/ckeditor5-dev-tests@16.1.0) (2019-02-28)
 
 ### Features

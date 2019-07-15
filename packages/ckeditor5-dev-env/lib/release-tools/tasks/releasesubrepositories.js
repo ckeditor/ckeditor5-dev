@@ -145,7 +145,7 @@ module.exports = function releaseSubRepositories( options ) {
 		.then( () => {
 			process.chdir( cwd );
 
-			logProcess( `Finished releasing ${ chalk.underline( releasedPackages.size ) } packages.` );
+			logProcess( `Finished releasing ${ chalk.underline( releasedPackages.size ) } package(s).` );
 			logDryRun( 'Because of the DRY RUN mode, nothing has been changed. All changes were reverted.' );
 		} )
 		.catch( err => {
@@ -285,15 +285,15 @@ module.exports = function releaseSubRepositories( options ) {
 
 			log.info( `\nChecking "${ chalk.underline( packageJson.name ) }"...` );
 
-			const npmVersion = exec( `npm show ${ packageJson.name } version` ).trim();
+			const npmVersion = getVersionFromNpm( packageJson.name );
 
-			logDryRun( `Versions: package.json: "${ releaseDetails.version }", npm: "${ npmVersion }".` );
+			logDryRun( `Versions: package.json: "${ releaseDetails.version }", npm: "${ npmVersion || 'initial release' }".` );
 
 			releaseDetails.npmVersion = npmVersion;
 			releaseDetails.shouldReleaseOnNpm = npmVersion !== releaseDetails.version;
 
 			if ( releaseDetails.shouldReleaseOnNpm ) {
-				logDryRun( 'Package will be released.' );
+				log.info( '✅  Added to release.' );
 
 				releasesOnNpm.add( repositoryPath );
 			} else {
@@ -302,6 +302,26 @@ module.exports = function releaseSubRepositories( options ) {
 
 			return Promise.resolve();
 		} );
+
+		// Checks whether specified `packageName` has been published on npm.
+		// If so, returns its version. Otherwise returns `null` which means that
+		// this package will be published for the first time.
+		function getVersionFromNpm( packageName ) {
+			try {
+				return exec( `npm show ${ packageName } version` ).trim();
+			} catch ( err ) {
+				const errorAsArray = err.message.split( '\n' ).slice( 0, 2 );
+
+				if (
+					errorAsArray[ 0 ].endsWith( 'npm ERR! code E404' ) &&
+					errorAsArray[ 1 ] === `npm ERR! 404 '${ packageName }' is not in the npm registry.`
+				) {
+					return null;
+				}
+
+				throw err;
+			}
+		}
 	}
 
 	// Checks for which packages GitHub release should be created. It compares version defined in `package.json`
@@ -340,11 +360,11 @@ module.exports = function releaseSubRepositories( options ) {
 					releaseDetails.shouldReleaseOnGithub = githubVersion !== releaseDetails.version;
 
 					if ( releaseDetails.shouldReleaseOnGithub ) {
-						logDryRun( 'Package will be published.' );
+						log.info( '✅  Added to release.' );
 
 						releasesOnGithub.add( repositoryPath );
 					} else {
-						log.info( '❌  Nothing to publish.' );
+						log.info( '❌  Nothing to release.' );
 					}
 				} )
 				.catch( err => {
@@ -362,7 +382,7 @@ module.exports = function releaseSubRepositories( options ) {
 				github.repos.getLatestRelease( requestParams, ( err, responses ) => {
 					if ( err ) {
 						// No releases on GitHub. It will be the first one.
-						if ( err.message.toLowerCase() == 'not found' ) {
+						if ( err.status.toLowerCase() == 'not found' ) {
 							return resolve( {
 								data: {
 									tag_name: null

@@ -12,6 +12,10 @@
  *
  * @property {String} name Short name of the doclet (e.g. the name of the method).
  *
+ * @property {Type} [type] A type of the member.
+ *
+ * @property {ReturnData[]} [returns] The metadata for the function or method return type and description.
+ *
  * @property {String} memberof Where the doclet belongs to (parent of the symbol).
  *
  * @property {'class'|'interface'|'mixin'|'function'|'typedef'|'event'|'member'|'constant'|'module'} kind The kind of the doclet's symbol.
@@ -70,9 +74,24 @@
  *
  * @property {String} name
  *
- * @property {Object} type
+ * @property {Type} type
  *
  * @property {String} description
  *
  * @property {Boolean} [inherited] [A custom  property used by the relation fixer]
+ */
+
+/**
+ * @typedef {Object} Type
+ *
+ * @property {Array.<String>} names
+*/
+
+/**
+ * @typedef {Object} ReturnData
+ *
+ * @property {Type} type Type of the return statement. I.e. what the function should return.
+ * It's gathered from the text after the `@returns` tag.
+ *
+ * @property {String} description Description for the return statement (after the `@returns` tag and type).
  */
