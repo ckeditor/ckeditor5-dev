@@ -9,11 +9,13 @@ const buildRelations = require( './buildrelations' );
 const addMissingDoclets = require( './addmissingdoclets' );
 const compose = require( '../utils/compose-functions' );
 const filterOutInternalDoclets = require( './filteroutintenraldoclets' );
+const addTypedefProperties = require( './addtypedefproperties' );
 
 exports.handlers = {
 	processingComplete( e ) {
 		e.doclets = compose(
 			buildRelations,
+			addTypedefProperties,
 			addMissingDoclets,
 			filterOutInternalDoclets
 		)( e.doclets );

@@ -9,6 +9,7 @@ const chai = require( 'chai' );
 const expect = chai.expect;
 const buildRelations = require( '../../lib/relation-fixer/buildrelations' );
 const addMissingDoclets = require( '../../lib/relation-fixer/addmissingdoclets' );
+const addTypedefProperties = require( '../../lib/relation-fixer/addtypedefproperties' );
 
 describe( 'JSDoc relation-fixer plugin', () => {
 	let testDoclets;
@@ -166,7 +167,7 @@ describe( 'JSDoc relation-fixer plugin', () => {
 	} );
 
 	it( 'should extend typedefs', () => {
-		const newDoclets = addMissingDoclets( buildRelations( testDoclets ) );
+		const newDoclets = addMissingDoclets( addTypedefProperties( buildRelations( testDoclets ) ) );
 		const expectedDoclet = {
 			name: 'typedefB',
 			longname: 'typedefB',
