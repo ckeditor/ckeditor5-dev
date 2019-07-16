@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [15.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@15.0.1...@ckeditor/ckeditor5-dev-env@15.0.2) (2019-07-16)
+
+### Bug fixes
+
+* Adjusted usage of GitHub API inside createGithubRelease() util. Closes [ckeditor/ckeditor5#1889](https://github.com/ckeditor/ckeditor5/issues/1889). ([d9befaf](https://github.com/ckeditor/ckeditor5-dev/commit/d9befaf))
+
+
 ## [15.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@15.0.0...@ckeditor/ckeditor5-dev-env@15.0.1) (2019-07-16)
 
 ### Bug fixes
