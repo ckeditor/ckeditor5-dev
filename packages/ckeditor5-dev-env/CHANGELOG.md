@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [15.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@15.0.0...@ckeditor/ckeditor5-dev-env@15.0.1) (2019-07-16)
+
+### Bug fixes
+
+* Adjusted usage of GitHub API to the latest version. All API's methods return an instance of Promise instead of requiring a callback as the last parameter. Closes [ckeditor/ckeditor5#1889](https://github.com/ckeditor/ckeditor5/issues/1889). ([486f732](https://github.com/ckeditor/ckeditor5-dev/commit/486f732))
+
+
 ## [15.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@14.1.2...@ckeditor/ckeditor5-dev-env@15.0.0) (2019-07-15)
 
 ### Features
