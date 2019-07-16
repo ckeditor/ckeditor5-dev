@@ -106,9 +106,9 @@ module.exports = function releaseSubRepositories( options ) {
 	logDryRun( '⚠️  DRY RUN mode ⚠️' );
 	logDryRun( 'The script WILL NOT publish anything but will create some files.' );
 
-	const github = new GitHubApi( {
-		version: '3.0.0'
-	} );
+	// The variable is set only if "release on github" option has been chosen during configuration the release.
+	// See `configureRelease()` function.
+	let github;
 
 	// Collections of paths where different kind of releases should be done.
 	// `releasesOnNpm` - the release on NPM that contains the entire repository (npm publish is executed inside the repository)
@@ -198,9 +198,10 @@ module.exports = function releaseSubRepositories( options ) {
 		}
 
 		if ( releaseOptions.github ) {
-			github.authenticate( {
-				token: releaseOptions.token,
-				type: 'oauth',
+			// Because `octokit.authenticate()` is deprecated, the entire API object is created here.
+			github = new GitHubApi( {
+				version: '3.0.0',
+				auth: `token ${ releaseOptions.token }`
 			} );
 		}
 	}
@@ -378,24 +379,20 @@ module.exports = function releaseSubRepositories( options ) {
 				repo: repositoryName
 			};
 
-			return new Promise( ( resolve, reject ) => {
-				github.repos.getLatestRelease( requestParams, ( err, responses ) => {
-					if ( err ) {
-						// No releases on GitHub. It will be the first one.
-						if ( err.status.toLowerCase() == 'not found' ) {
-							return resolve( {
-								data: {
-									tag_name: null
-								}
-							} );
-						}
-
-						return reject( err );
+			return github.repos.getLatestRelease( requestParams )
+				.catch( err => {
+					// If the "last release" returned the 404 error page, it means that this release
+					// will be the first one for specified `repositoryOwner/repositoryName` package.
+					if ( err.status == 404 ) {
+						return Promise.resolve( {
+							data: {
+								tag_name: null
+							}
+						} );
 					}
 
-					return resolve( responses );
+					return Promise.reject( err );
 				} );
-			} );
 		}
 	}
 
