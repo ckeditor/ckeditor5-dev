@@ -20,12 +20,8 @@ const GitHubApi = require( '@octokit/rest' );
  */
 module.exports = function createGithubRelease( token, options ) {
 	const github = new GitHubApi( {
-		version: '3.0.0'
-	} );
-
-	github.authenticate( {
-		token,
-		type: 'oauth',
+		version: '3.0.0',
+		auth: `token ${ token }`
 	} );
 
 	const releaseParams = {
@@ -35,13 +31,5 @@ module.exports = function createGithubRelease( token, options ) {
 		body: options.description
 	};
 
-	return new Promise( ( resolve, reject ) => {
-		github.repos.createRelease( releaseParams, ( err, responses ) => {
-			if ( err ) {
-				return reject( err );
-			}
-
-			resolve( responses );
-		} );
-	} );
+	return github.repos.createRelease( releaseParams );
 };
