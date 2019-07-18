@@ -12,6 +12,7 @@ const logger = require( '../logger' )();
 module.exports = function findOriginalStrings( source ) {
 	const ast = acorn.parse( source, {
 		sourceType: 'module',
+		ecmaVersion: '2018'
 	} );
 
 	const originalStrings = [];
