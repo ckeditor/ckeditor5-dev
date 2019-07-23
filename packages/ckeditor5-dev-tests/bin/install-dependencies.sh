@@ -14,7 +14,7 @@ TEST_DIR=$(mktemp -d)
 # Path to the executable in the testing environment.
 TEST_BIN=${TEST_DIR}/node_modules/.bin
 
-# Creates required files for Mgit and Yarn.
+# Creates required files for mrgit and yarn.
 echo '{}' > ${TEST_DIR}/package.json
 echo '{}' > ${TEST_DIR}/mrgit.json
 mkdir ${TEST_DIR}/packages
@@ -25,7 +25,7 @@ ${ROOT_BIN}/ckeditor5-dev-tests-prepare-package-json ${PACKAGE_ROOT} ${TEST_DIR}
 # Prepare `mrgit.json`.
 ${ROOT_BIN}/ckeditor5-dev-tests-prepare-mrgit-json ${TEST_DIR}
 
-# Install Mgit.
+# Install mrgit.
 cd ${TEST_DIR} && yarn add mrgit --ignore-workspace-root-check
 
 # Clones repositories to `packages/` directory.
