@@ -2,8 +2,8 @@
   "packages": [
     "packages/*"
   ],
-  "hoist": true,
-  "nohoist": "guppy-pre-commit",
+  "npmClient": "yarn",
+  "useWorkspaces": true,
   "version": "independent",
   "command": {
     "bootstrap": {

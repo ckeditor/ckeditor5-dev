@@ -64,7 +64,7 @@ describe( 'dev-tests/bin/create-mrgit-json', () => {
 		} );
 	} );
 
-	it( 'should correctly filter dependencies', () => {
+	it( 'should filter out all non "ckeditor5-*" and all "ckeditor5-dev-*" packages', () => {
 		const mrgitJson = createMrGitJsonContent( {
 			dependencies: {
 				'@scope/package1': 'abc/def#1ca5608',
@@ -72,7 +72,7 @@ describe( 'dev-tests/bin/create-mrgit-json', () => {
 				'package3': '^2.2.2'
 			},
 			devDependencies: {
-				'@ckeditor/ckeditor5-dev-lint': '^3.1.0'
+				'@ckeditor/ckeditor5-dev-docs': '^11.0.0'
 			}
 		} );
 

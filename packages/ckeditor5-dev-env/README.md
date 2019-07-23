@@ -23,26 +23,33 @@ require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForSinglePackage();
 ```js
 // scripts/changelog-repos.js: Generate changelog for all dependencies (repository using multiple repositories).
 require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForSubRepositories( /* options */ );
+
+// See the `options` argument:
+// https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-env/lib/release-tools/tasks/generatechangelogforsubrepositories.js#L20-L27
 ```
 
 ```js
 // scripts/changelog-packages.js: Generate changelog for all packages (repository contains multiple packages).
 require( '@ckeditor/ckeditor5-dev-env' ).generateChangelogForSubPackages( /* options */ );
-```
 
-```js
-// scripts/release-self.js: Create release for the current package.
-require( '@ckeditor/ckeditor5-dev-env' ).releaseRepository();
+// See the `options` argument:
+// https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-env/lib/release-tools/tasks/generatechangelogforsubpackages.js#L20-L27
 ```
 
 ```js
 // scripts/release-bump-versions.js: Validates and updates version for all packages (includes the package found in options.cwd)
 require( '@ckeditor/ckeditor5-dev-env' ).bumpVersions( /* options */ );
+
+// See the `options` argument:
+// https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-env/lib/release-tools/tasks/bumpversions.js#L20-L27
 ```
 
 ```js
 // scripts/release-packages.js: Publish all changes.
 require( '@ckeditor/ckeditor5-dev-env' ).releaseSubRepositories( /* options */ );
+
+// See the `options` argument:
+// https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-env/lib/release-tools/tasks/releasesubrepositories.js#L20-L27
 ```
 
 ### Generating changelog

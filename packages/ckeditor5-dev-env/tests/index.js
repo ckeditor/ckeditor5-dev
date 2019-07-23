@@ -51,10 +51,6 @@ describe( 'dev-env/index', () => {
 		mockery.registerMock( './translations/collect', stubs.translations.collect );
 
 		mockery.registerMock(
-			'./release-tools/tasks/releaserepository',
-			stubs.releaseTools.releaseRepository
-		);
-		mockery.registerMock(
 			'./release-tools/tasks/releasesubrepositories',
 			stubs.releaseTools.releaseSubRepositories
 		);
@@ -91,19 +87,6 @@ describe( 'dev-env/index', () => {
 	afterEach( () => {
 		sandbox.restore();
 		mockery.disable();
-	} );
-
-	describe( 'releaseRepository()', () => {
-		it( 'creates release for sub repository', () => {
-			stubs.releaseTools.releaseRepository.returns( Promise.resolve( { result: true } ) );
-
-			return tasks.releaseRepository( 'arg' )
-				.then( response => {
-					expect( response.result ).to.equal( true );
-					expect( stubs.releaseTools.releaseRepository.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.releaseRepository.firstCall.args[ 0 ] ).to.equal( 'arg' );
-				} );
-		} );
 	} );
 
 	describe( 'releaseSubRepositories()', () => {

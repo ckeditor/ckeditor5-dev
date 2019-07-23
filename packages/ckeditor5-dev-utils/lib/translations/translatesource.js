@@ -26,7 +26,8 @@ module.exports = function translateSource( source, sourceFile, translateString )
 		sourceType: 'module',
 		ranges: true,
 		onComment: comments,
-		onToken: tokens
+		onToken: tokens,
+		ecmaVersion: '2018'
 	} );
 
 	let changesInCode = false;
