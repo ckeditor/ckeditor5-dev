@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [12.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@12.0.2...@ckeditor/ckeditor5-dev-utils@12.0.3) (2019-07-23)
+
+### Bug fixes
+
+* Added ECMA version to `acorn` parser options. Closes [#534](https://github.com/ckeditor/ckeditor5-dev/issues/534). ([0a1fbec](https://github.com/ckeditor/ckeditor5-dev/commit/0a1fbec))
+
+
 ## [12.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@12.0.1...@ckeditor/ckeditor5-dev-utils@12.0.2) (2019-07-15)
 
 ### Other changes

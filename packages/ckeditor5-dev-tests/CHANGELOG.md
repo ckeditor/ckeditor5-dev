@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [16.4.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.4.1...@ckeditor/ckeditor5-dev-tests@16.4.2) (2019-07-23)
+
+### Other changes
+
+* Adjusted repository, documentation and scripts to changes done in mgit/mrgit. See: [cksource/mgit2#85](https://github.com/cksource/mgit2/issues/85). ([8b4d08d](https://github.com/ckeditor/ckeditor5-dev/commit/8b4d08d))
+
+
 ## [16.4.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.4.0...@ckeditor/ckeditor5-dev-tests@16.4.1) (2019-07-15)
 
 ### Other changes
