@@ -5,7 +5,7 @@
 
 'use strict';
 
-const parseRepositoryUrl = require( 'mgit2/lib/utils/parserepositoryurl' );
+const parseRepositoryUrl = require( 'mrgit/lib/utils/parserepositoryurl' );
 
 /**
  * Resolves repository URL for a given package name.

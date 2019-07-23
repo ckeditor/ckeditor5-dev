@@ -7,21 +7,21 @@
 
 const { expect } = require( 'chai' );
 
-describe( 'dev-tests/bin/create-mgit-json', () => {
-	let createMgitJson;
+describe( 'dev-tests/bin/create-mrgit-json', () => {
+	let createMrGitJsonContent;
 
 	beforeEach( () => {
-		createMgitJson = require( '../../lib/bin/createmgitjsoncontent' );
+		createMrGitJsonContent = require( '../../lib/bin/createmrgitjsoncontent' );
 	} );
 
-	it( 'should return a valid mgit config when no dependency in package.json present', () => {
-		const mgitJson = createMgitJson( {} );
+	it( 'should return a valid mrgit config when no dependency in package.json present', () => {
+		const mrgitJson = createMrGitJsonContent( {} );
 
-		expect( mgitJson ).to.deep.equal( { dependencies: {}, packages: 'packages/' } );
+		expect( mrgitJson ).to.deep.equal( { dependencies: {}, packages: 'packages/' } );
 	} );
 
 	it( 'should return an object with dependency names for npm versions of dependencies', () => {
-		const mgitJson = createMgitJson( {
+		const mrgitJson = createMrGitJsonContent( {
 			dependencies: {
 				'@ckeditor/ckeditor5-core': '^0.8.1',
 				'@ckeditor/ckeditor5-engine': '0.10.0'
@@ -31,7 +31,7 @@ describe( 'dev-tests/bin/create-mgit-json', () => {
 			}
 		} );
 
-		expect( mgitJson ).to.deep.equal( {
+		expect( mrgitJson ).to.deep.equal( {
 			dependencies: {
 				'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core',
 				'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',
@@ -42,7 +42,7 @@ describe( 'dev-tests/bin/create-mgit-json', () => {
 	} );
 
 	it( 'should return an object with hashed dependency versions for hashed github versions of dependencies', () => {
-		const mgitJson = createMgitJson( {
+		const mrgitJson = createMrGitJsonContent( {
 			dependencies: {
 				'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core#1ca5608',
 				'ckeditor5-some-package': 'git@github.com:cksource/ckeditor5-some-package.git#1234567',
@@ -53,7 +53,7 @@ describe( 'dev-tests/bin/create-mgit-json', () => {
 			}
 		} );
 
-		expect( mgitJson ).to.deep.equal( {
+		expect( mrgitJson ).to.deep.equal( {
 			dependencies: {
 				'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core#1ca5608',
 				'@ckeditor/ckeditor5-paragraph': 'ckeditor/ckeditor5-paragraph#a171de3',
@@ -65,7 +65,7 @@ describe( 'dev-tests/bin/create-mgit-json', () => {
 	} );
 
 	it( 'should filter out all non "ckeditor5-*" and all "ckeditor5-dev-*" packages', () => {
-		const mgitJson = createMgitJson( {
+		const mrgitJson = createMrGitJsonContent( {
 			dependencies: {
 				'@scope/package1': 'abc/def#1ca5608',
 				'@scope/package2': '^1.1.1',
@@ -76,14 +76,14 @@ describe( 'dev-tests/bin/create-mgit-json', () => {
 			}
 		} );
 
-		expect( mgitJson ).to.deep.equal( {
+		expect( mrgitJson ).to.deep.equal( {
 			dependencies: {},
 			packages: 'packages/'
 		} );
 	} );
 
 	it( 'modifies version of specified package (it sets proper commit)', () => {
-		const mgitJson = createMgitJson( {
+		const mrgitJson = createMrGitJsonContent( {
 			dependencies: {
 				'@ckeditor/ckeditor5-core': '^0.8.1',
 				'@ckeditor/ckeditor5-engine': '0.10.0'
@@ -96,7 +96,7 @@ describe( 'dev-tests/bin/create-mgit-json', () => {
 			commit: 'abcd1234'
 		} );
 
-		expect( mgitJson ).to.deep.equal( {
+		expect( mrgitJson ).to.deep.equal( {
 			dependencies: {
 				'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core#abcd1234',
 				'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',

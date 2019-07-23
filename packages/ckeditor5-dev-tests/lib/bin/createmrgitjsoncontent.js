@@ -4,15 +4,15 @@
  */
 
 /**
- * Creates content for the `mgit.json` file based on the `package.json` dependencies.
+ * Creates content for the `mrgit.json` file based on the `package.json` dependencies.
  *
  * @param {Object} packageJson Parsed package.json.
  * @param {Object} [options]
  * @param {String} options.name The name of package that `options.commit` will be specified as a version to check out.
  * @param {String} options.commit The specified commit.
  */
-module.exports = function createMgitJsonContent( packageJson, options ) {
-	const mgitJson = {
+module.exports = function createMrGitJsonContent( packageJson, options ) {
+	const mrgitJson = {
 		packages: 'packages/',
 		dependencies: {}
 	};
@@ -34,23 +34,23 @@ module.exports = function createMgitJsonContent( packageJson, options ) {
 		}
 
 		if ( isHashedDependency( dependencyVersion ) ) {
-			mgitJson.dependencies[ dependencyName ] = dependencyVersion;
+			mrgitJson.dependencies[ dependencyName ] = dependencyVersion;
 		} else {
 			// Removes '@' from the scoped npm package name.
-			mgitJson.dependencies[ dependencyName ] = dependencyName.slice( 1 );
+			mrgitJson.dependencies[ dependencyName ] = dependencyName.slice( 1 );
 		}
 	}
 
 	if ( !options ) {
-		return mgitJson;
+		return mrgitJson;
 	}
 
 	// For testing package we need to use a specified commit instead of the latest master.
-	if ( mgitJson.dependencies[ options.packageName ] ) {
-		mgitJson.dependencies[ options.packageName ] = mgitJson.dependencies[ options.packageName ] + '#' + options.commit;
+	if ( mrgitJson.dependencies[ options.packageName ] ) {
+		mrgitJson.dependencies[ options.packageName ] = mrgitJson.dependencies[ options.packageName ] + '#' + options.commit;
 	}
 
-	return mgitJson;
+	return mrgitJson;
 };
 
 function isHashedDependency( dependency ) {

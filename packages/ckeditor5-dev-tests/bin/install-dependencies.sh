@@ -14,22 +14,22 @@ TEST_DIR=$(mktemp -d)
 # Path to the executable in the testing environment.
 TEST_BIN=${TEST_DIR}/node_modules/.bin
 
-# Creates required files for Mgit and Yarn.
+# Creates required files for mrgit and yarn.
 echo '{}' > ${TEST_DIR}/package.json
-echo '{}' > ${TEST_DIR}/mgit.json
+echo '{}' > ${TEST_DIR}/mrgit.json
 mkdir ${TEST_DIR}/packages
 
 # Prepare `package.json`. It creates a "temporary" package.
 ${ROOT_BIN}/ckeditor5-dev-tests-prepare-package-json ${PACKAGE_ROOT} ${TEST_DIR}
 
-# Prepare `mgit.json`.
-${ROOT_BIN}/ckeditor5-dev-tests-prepare-mgit-json ${TEST_DIR}
+# Prepare `mrgit.json`.
+${ROOT_BIN}/ckeditor5-dev-tests-prepare-mrgit-json ${TEST_DIR}
 
-# Install Mgit.
-cd ${TEST_DIR} && yarn add mgit2 --ignore-workspace-root-check
+# Install mrgit.
+cd ${TEST_DIR} && yarn add mrgit --ignore-workspace-root-check
 
 # Clones repositories to `packages/` directory.
-cd ${TEST_DIR} && ${TEST_BIN}/mgit sync --recursive --resolver-path=${PACKAGE_ROOT}/node_modules/@ckeditor/ckeditor5-dev-tests/lib/mgit-resolver.js
+cd ${TEST_DIR} && ${TEST_BIN}/mrgit sync --recursive --resolver-path=${PACKAGE_ROOT}/node_modules/@ckeditor/ckeditor5-dev-tests/lib/mrgit-resolver.js
 
 # We need to ignore the newly created packages dir with all its content (see #203).
 cd ${TEST_DIR} && echo -e "\npackages/**\n" >> .gitignore

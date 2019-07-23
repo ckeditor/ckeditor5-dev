@@ -30,8 +30,8 @@ process.chdir( path.join( process.cwd(), 'ckeditor5' ) );
 // And check out to the revision branch.
 exec( `git checkout ${ revisionBranch } ` );
 
-// Install Mgit.
-exec( 'npm install -g mgit2' );
+// Install Mr. Git.
+exec( 'npm install -g mrgit' );
 
 // Sync the revision branch with the master.
 exec( `git checkout ${ branch } -- .` );
@@ -40,10 +40,10 @@ exec( `git checkout ${ branch } -- .` );
 exec( 'git reset -q .' );
 
 // Install dependencies.
-exec( 'mgit sync --recursive --resolver-url-template="https://github.com/\\${ path }.git"' );
+exec( 'mrgit sync --recursive --resolver-url-template="https://github.com/\\${ path }.git"' );
 
 // Save hashes from all dependencies.
-exec( 'mgit save --hash' );
+exec( 'mrgit save --hash' );
 
 // Add all files (perhaps the changes from master will be committed).
 exec( 'git add .' );
