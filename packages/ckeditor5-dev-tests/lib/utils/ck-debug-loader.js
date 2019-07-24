@@ -14,19 +14,11 @@ module.exports = function ckDebugLoader( source, map ) {
 		const options = {
 			CK_DEBUG: true,
 			...this.options
-		}
-
-		// Missing param in webpack loader config
-		if ( !( flagName in options ) ) {
-			// Unfortunately it's impossible to log a file name here.
-			console.warn( `Invalid debugging flag found: "${ flagName }" in ${ match }.` );
-
-			return match;
-		}
+		};
 
 		const flagValue = options[ flagName ];
 
-		// Do nothing when the provided flag value is falsy.
+		// Do not unccoment the code if the flag is missing or falsy.
 		if ( !flagValue ) {
 			return match;
 		}
