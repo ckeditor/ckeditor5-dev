@@ -81,7 +81,8 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 					test: /\.js$/,
 					loader: require.resolve( '../ck-debug-loader' ),
 					options: {
-						CK_DEBUG: true
+						CK_DEBUG: true,
+						...options.debugFlags
 					}
 				}
 			]

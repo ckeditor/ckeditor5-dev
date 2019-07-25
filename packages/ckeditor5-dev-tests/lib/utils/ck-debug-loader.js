@@ -11,20 +11,10 @@ module.exports = function ckDebugLoader( source, map ) {
 	source = source.replace( /\/\/ @if (!?[\w]+) \/\/(.+)/g, ( match, flagName, body ) => {
 		// `this.options` comes from the webpack loader configuration.
 
-		const options = {
-			CK_DEBUG: true,
-			...this.options
-		};
-
-		const flagValue = options[ flagName ];
-
-		// Do not unccoment the code if the flag is missing or falsy.
-		if ( !flagValue ) {
+		// Do not unccoment the code if the flag is missing / falsy.
+		if ( !this.options.includes( flagName ) ) {
 			return match;
 		}
-
-		// Replace the option in body with evaluated value.
-		body = body.replace( new RegExp( flagName, 'g' ), options[ flagName ] );
 
 		// Uncomment the code with a same length string to not break the source maps.
 		return `/* @if ${ flagName } */ ${ body }`;

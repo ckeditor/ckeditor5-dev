@@ -56,6 +56,17 @@ module.exports = function parseArguments( args ) {
 		options.files = options.files.split( ',' );
 	}
 
+	if ( options.debug === 'false' ) {
+		options.debug = [];
+	} else if ( typeof options.debug === 'string' ) {
+		options.debug = [
+			'CK_DEBUG',
+			options.debug.split( ',' ).map( flag => 'CK_DEBUG_' + flag.toUpperCase() )
+		];
+	} else {
+		options.debug = [ 'CK_DEBUG' ];
+	}
+
 	options.language = options.language || 'en';
 	options.additionalLanguages = options.additionalLanguages ? options.additionalLanguages.split( ',' ) : null;
 	options.themePath = options.themePath ? options.themePath : null;
