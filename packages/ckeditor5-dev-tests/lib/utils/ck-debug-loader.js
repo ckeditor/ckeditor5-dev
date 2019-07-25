@@ -9,10 +9,10 @@
  */
 module.exports = function ckDebugLoader( source, map ) {
 	source = source.replace( /\/\/ @if (!?[\w]+) \/\/(.+)/g, ( match, flagName, body ) => {
-		// `this.options` comes from the webpack loader configuration.
+		// `this.query` comes from the webpack loader configuration.
 
 		// Do not unccoment the code if the flag is missing / falsy.
-		if ( !this.options.includes( flagName ) ) {
+		if ( !this.query.debugFlags.includes( flagName ) ) {
 			return match;
 		}
 

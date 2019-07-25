@@ -52,7 +52,8 @@ module.exports = function getKarmaConfig( options ) {
 			files: Object.keys( options.globPatterns ).map( key => options.globPatterns[ key ] ),
 			sourceMap: options.sourceMap,
 			coverage: options.coverage,
-			themePath: options.themePath
+			themePath: options.themePath,
+			debug: options.debug
 		} ),
 
 		webpackMiddleware: {

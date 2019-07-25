@@ -47,7 +47,9 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 				{
 					test: /\.js$/,
 					loader: require.resolve( '../ck-debug-loader' ),
-					options: options.debugFlags
+					query: {
+						debugFlags: options.debug
+					}
 				}
 			]
 		},
