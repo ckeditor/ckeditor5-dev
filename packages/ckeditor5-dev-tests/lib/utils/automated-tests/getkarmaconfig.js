@@ -41,8 +41,16 @@ module.exports = function getKarmaConfig( options ) {
 		// Frameworks to use. Available frameworks: https://npmjs.org/browse/keyword/karma-adapter
 		frameworks: [ 'mocha', 'chai', 'sinon' ],
 
+		// Files saved in directory `ckeditor5/packages/ckeditor5-utils/tests/_assets/` are available under: http://0.0.0.0:9876/assets/
+		proxies: {
+			'/assets/': '/base/packages/ckeditor5-utils/tests/_assets/'
+		},
+
 		// List of files/patterns to load in the browser.
-		files: [ options.entryFile ],
+		files: [
+			options.entryFile,
+			{ pattern: 'packages/ckeditor5-utils/tests/_assets/**/*', watched: false, included: false, served: true, nocache: false }
+		],
 
 		// Preprocess matching files before serving them to the browser.
 		// Available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
