@@ -1,6 +1,6 @@
 /**
  * The loader matches sentences like: `// @if CK_DEBUG // someDebugCode();` and uncomment them.
- * If also uncomments code after specific flags if they are provided to the webpack configuration.
+ * It also uncomments code after specific flags if they are provided to the webpack configuration.
  * E.g. if the `CK_DEBUG_ENGINE` flag is set to true, then all lines starting with
  * `// @if CK_DEBUG_ENGINE //` will be uncommented.
  *
