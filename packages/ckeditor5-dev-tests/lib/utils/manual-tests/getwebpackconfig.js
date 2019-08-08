@@ -55,12 +55,7 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 					test: /\.css$/,
 					use: [
 						{
-							loader: 'style-loader',
-							options: {
-								// Note: "singleton" option does not work when sourceMap is enabled.
-								// See: https://github.com/webpack-contrib/style-loader/issues/134
-								sourceMap: true
-							}
+							loader: 'style-loader'
 						},
 						{
 							loader: 'postcss-loader',
