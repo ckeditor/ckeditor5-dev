@@ -29,6 +29,6 @@ tools.updateJSONFile( path.join( TEST_DIR_PATH, 'mrgit.json' ), () => {
 		// Specify a repository that provides the package specified as `packageName` and which should be cloned.
 		// Forked repositories should be able to execute the test scenario as well.
 		// See: https://github.com/ckeditor/ckeditor5-dev/issues/542.
-		repository: process.env.TRAVIS_REPO_SLUG
+		repository: process.env.TRAVIS_PULL_REQUEST_SLUG || process.env.TRAVIS_REPO_SLUG
 	} );
 } );
