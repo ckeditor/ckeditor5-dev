@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [16.5.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.4.2...@ckeditor/ckeditor5-dev-tests@16.5.0) (2019-08-09)
+
+### Features
+
+* Added a proxy for static assets resources. Closes [#139](https://github.com/ckeditor/ckeditor5-dev/issues/139). ([5a47226](https://github.com/ckeditor/ckeditor5-dev/commit/5a47226))
+
+
 ## [16.4.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.4.1...@ckeditor/ckeditor5-dev-tests@16.4.2) (2019-07-23)
 
 ### Other changes

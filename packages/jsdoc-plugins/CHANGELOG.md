@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [3.0.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@3.0.3...@ckeditor/jsdoc-plugins@3.0.4) (2019-08-09)
+
+### Other changes
+
+* Added `ErrorEvent` and `PromiseRejectionEvent` types to the JSDoc validator. Part of [ckeditor/ckeditor5-watchdog#3](https://github.com/ckeditor/ckeditor5-watchdog/issues/3). ([799b272](https://github.com/ckeditor/ckeditor5-dev/commit/799b272))
+
+
 ## [3.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@3.0.2...@ckeditor/jsdoc-plugins@3.0.3) (2019-07-15)
 
 ### Other changes
