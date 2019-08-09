@@ -8,8 +8,9 @@
  *
  * @param {Object} packageJson Parsed package.json.
  * @param {Object} [options]
- * @param {String} options.name The name of package that `options.commit` will be specified as a version to check out.
+ * @param {String} options.name The name of the package that `options.commit` or `options.repository` will be modified.
  * @param {String} options.commit The specified commit.
+ * @param {String} options.repository The specified repository.
  */
 module.exports = function createMrGitJsonContent( packageJson, options ) {
 	const mrgitJson = {
@@ -45,9 +46,20 @@ module.exports = function createMrGitJsonContent( packageJson, options ) {
 		return mrgitJson;
 	}
 
-	// For testing package we need to use a specified commit instead of the latest master.
+	// Do not modify value of the repository if specified package belongs to our ecosystem.
+	if ( options.repository === mrgitJson.dependencies[ options.packageName ] ) {
+		delete options.repository;
+	}
+
+	// If `options.repository` is defined, use that value as a repository that should be cloned.
+	const repository = options.repository ? options.repository : mrgitJson.dependencies[ options.packageName ];
+
+	// If `options.commit` is defined, use that value as a commit which cloned repository should be checked out.
+	const commit = options.commit ? '#' + options.commit : '';
+
+	// If the package is defined, let's modify those values.
 	if ( mrgitJson.dependencies[ options.packageName ] ) {
-		mrgitJson.dependencies[ options.packageName ] = mrgitJson.dependencies[ options.packageName ] + '#' + options.commit;
+		mrgitJson.dependencies[ options.packageName ] = repository + commit;
 	}
 
 	return mrgitJson;
