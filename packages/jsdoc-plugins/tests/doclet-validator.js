@@ -118,6 +118,50 @@ describe( 'Linter plugin', () => {
 			expect( linter._errors[ 0 ].message ).to.equal( 'Incorrect param type: module:engine/ckeditor5/editor' );
 		} );
 
+		it( 'should not log an error if an allowed member is passed as parameter type', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				params: [ {
+					type: {
+						names: [ 'module:engine/foo~ClassFoo' ]
+					}
+				}, {
+					type: {
+						names: [ 'module:engine/foo~InterfaceBar' ]
+					}
+				}, {
+					type: {
+						names: [ 'module:engine/foo~TypedefBaz' ]
+					}
+				}, {
+					type: {
+						names: [ 'module:engine/foo~FunctionAbc' ]
+					}
+				} ],
+				meta: { fileName: '', path: '' },
+			}, {
+				kind: 'class',
+				longname: 'module:engine/foo~ClassFoo',
+				meta: { fileName: '', path: '' },
+			}, {
+				kind: 'interface',
+				longname: 'module:engine/foo~InterfaceBar',
+				meta: { fileName: '', path: '' },
+			}, {
+				kind: 'typedef',
+				longname: 'module:engine/foo~TypedefBaz',
+				meta: { fileName: '', path: '' },
+			}, {
+				kind: 'function',
+				longname: 'module:engine/foo~FunctionAbc',
+				meta: { fileName: '', path: '' },
+			} ], getTestedModules() );
+
+			linter._lintParams();
+
+			expect( linter._errors.length ).to.be.equal( 0 );
+		} );
+
 		it( 'should handle built-in types', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'class',
@@ -138,7 +182,7 @@ describe( 'Linter plugin', () => {
 			expect( linter._errors.length ).to.be.equal( 0 );
 		} );
 
-		it( 'should handle wrong types', () => {
+		it( 'should log an error if an incorrect type is passed', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'class',
 				params: [ {
