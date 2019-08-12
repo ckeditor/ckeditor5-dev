@@ -203,7 +203,7 @@ describe( 'Linter plugin', () => {
 		} );
 	} );
 
-	describe( '_lintLinks()', () => {
+	describe( 'linting links', () => {
 		it( 'should validate links and adds errors if they are incorrect', () => {
 			const linter = new DocletValidator( [ {
 				comment:
@@ -329,53 +329,88 @@ describe( 'Linter plugin', () => {
 
 			linter._lintLinks();
 
-			expect( linter._errors ).to.deep.equal( [] );
+			expect( linter._errors.length ).to.equal( 0 );
 		} );
 	} );
 
-	it( '_lintEvents()', () => {
-		const linter = new DocletValidator( [ {
-			kind: 'class',
-			longname: 'module:abc/SomeClass',
-			meta: { fileName: '', path: '' },
-			fires: [ 'someEvent' ],
-		} ], getTestedModules() );
+	describe( 'linting extensibility', () => {
+		it( 'should assert that the type in the `@extends` tag exsits (positive)', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				longname: 'module:abc/SomeClass',
+				augments: [ 'module:abc/SomeOtherClass' ],
+				meta: { fileName: '', path: '' }
+			}, {
+				kind: 'class',
+				longname: 'module:abc/SomeOtherClass',
+				meta: { fileName: '', path: '' }
+			} ], getTestedModules() );
 
-		linter._lintEvents();
+			linter._lintExensibility();
 
-		expect( linter._errors.length ).to.be.equal( 1 );
+			expect( linter._errors.length ).to.equal( 0 );
+		} );
+
+		it( 'should assert that the type in the `@extends` tag exsits (negative)', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				longname: 'module:abc/SomeClass',
+				augments: [ 'module:abc/SomeOtherClass' ],
+				meta: { fileName: '', path: '' }
+			} ], getTestedModules() );
+
+			linter._lintExensibility();
+
+			expect( linter._errors.length ).to.equal( 1 );
+			expect( linter._errors[ 0 ].message ).to.equal( 'Invalid @extends reference: module:abc/SomeOtherClass.' );
+		} );
 	} );
 
-	it( '_lintEvents() 2', () => {
-		const linter = new DocletValidator( [ {
-			kind: 'class',
-			longname: 'module:abc/SomeClass',
-			meta: { fileName: '', path: '' },
-			fires: [ 'module:abc/SomeClass#event:someEvent' ],
-		}, {
-			kind: 'event',
-			longname: 'module:abc/SomeClass#event:someEvent'
-		} ], getTestedModules() );
+	describe( 'linting events', () => {
+		it( 'should assert that references in `fires` exist (positive)', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				longname: 'module:abc/SomeClass',
+				meta: { fileName: '', path: '' },
+				fires: [ 'someEvent' ],
+			} ], getTestedModules() );
 
-		linter._lintEvents();
+			linter._lintEvents();
 
-		expect( linter._errors.length ).to.be.equal( 0 );
-	} );
+			expect( linter._errors.length ).to.be.equal( 1 );
+		} );
 
-	it( '_lintEvents() - fires should match with events only', () => {
-		const linter = new DocletValidator( [ {
-			kind: 'class',
-			longname: 'module:abc/SomeClass',
-			meta: { fileName: '', path: '' },
-			fires: [ 'module:abc/SomeClass#event:someEvent' ],
-		}, {
-			kind: 'not-event',
-			longname: 'module:abc/SomeClass#event:someEvent'
-		} ], getTestedModules() );
+		it( 'should assert that references in `fires` exist (negative)', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				longname: 'module:abc/SomeClass',
+				meta: { fileName: '', path: '' },
+				fires: [ 'module:abc/SomeClass#event:someEvent' ],
+			}, {
+				kind: 'event',
+				longname: 'module:abc/SomeClass#event:someEvent'
+			} ], getTestedModules() );
 
-		linter._lintEvents();
+			linter._lintEvents();
 
-		expect( linter._errors.length ).to.be.equal( 1 );
+			expect( linter._errors.length ).to.be.equal( 0 );
+		} );
+
+		it( 'should assert that references in `fires` are only events', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				longname: 'module:abc/SomeClass',
+				meta: { fileName: '', path: '' },
+				fires: [ 'module:abc/SomeClass#event:someEvent' ],
+			}, {
+				kind: 'not-event',
+				longname: 'module:abc/SomeClass#event:someEvent'
+			} ], getTestedModules() );
+
+			linter._lintEvents();
+
+			expect( linter._errors.length ).to.be.equal( 1 );
+		} );
 	} );
 
 	it( '_lintModuleDocumentedExports()', () => {

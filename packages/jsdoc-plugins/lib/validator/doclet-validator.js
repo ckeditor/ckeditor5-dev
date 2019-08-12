@@ -63,6 +63,7 @@ class DocletValidator {
 		this._lintReturnTypes();
 		this._lintSeeReferences();
 		this._lintTypedefs();
+		this._lintExensibility();
 
 		return this._errors;
 	}
@@ -290,6 +291,24 @@ class DocletValidator {
 	}
 
 	/**
+	 * Checks whether the reference in the `@extends` tag is correct.
+	 *
+	 * @protected
+	 */
+	_lintExensibility() {
+		for ( const doclet of this._collection.getAll() ) {
+			for ( const base of doclet.augments || [] ) {
+				if ( !this._isCorrectReference( base ) && !this._isValidBuiltInType( base ) ) {
+					this._addError(
+						doclet,
+						`Invalid @extends reference: ${ base }.`
+					);
+				}
+			}
+		}
+	}
+
+	/**
 	 * @private
 	 * @param {Doclet} doclet
 	 * @param {string} errorMessage
@@ -346,8 +365,22 @@ class DocletValidator {
 
 		type = type.trim();
 
-		return ALL_TYPES.includes( type ) ||
-			/^'[^']+'$/.test( type ); // string literal type - e.g. 'forward', 'backward';
+		return this._isValidBuiltInType( type ) ||
+			this._isStringLiteralType( type );
+	}
+
+	/** @private */
+	_isValidBuiltInType( type ) {
+		return ALL_TYPES.includes( type );
+	}
+
+	/**
+	 * A string literal type - e.g. 'forward' or 'backward';
+	 *
+	 * @private
+	 */
+	_isStringLiteralType( type ) {
+		return /^'[^']+'$/.test( type );
 	}
 
 	/**
