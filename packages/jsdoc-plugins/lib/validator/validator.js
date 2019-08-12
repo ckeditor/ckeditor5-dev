@@ -38,7 +38,7 @@ function printErrors( errors, maxSize ) {
 
 	for ( const error of errors.slice( 0, maxSize ) ) {
 		errorMessages.push( error.message );
-		errorMessages.push( `\tat ${ error.file } (line ${ error.line })\n` );
+		errorMessages.push( `\tat ${ error.file }:${ error.line }\n` );
 	}
 
 	errorMessages.push( '\nValidation Summary:' );

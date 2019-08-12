@@ -78,7 +78,7 @@ describe( 'Linter plugin', () => {
 		} );
 	} );
 
-	describe( '_lintParams()', () => {
+	describe( 'linting function parameters', () => {
 		it( 'should handle not existing types', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'function',
@@ -97,7 +97,7 @@ describe( 'Linter plugin', () => {
 			expect( linter._errors.length ).to.be.equal( 1 );
 		} );
 
-		it( 'should handle existing types', () => {
+		it( 'should log an error if a module is passed as parameter type', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'class',
 				params: [ {
@@ -109,6 +109,51 @@ describe( 'Linter plugin', () => {
 			}, {
 				kind: 'module',
 				longname: 'module:engine/ckeditor5/editor',
+				meta: { fileName: '', path: '' },
+			} ], getTestedModules() );
+
+			linter._lintParams();
+
+			expect( linter._errors.length ).to.be.equal( 1 );
+			expect( linter._errors[ 0 ].message ).to.equal( 'Incorrect param type: module:engine/ckeditor5/editor' );
+		} );
+
+		it( 'should not log an error if an allowed member is passed as parameter type', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				params: [ {
+					type: {
+						names: [ 'module:engine/foo~ClassFoo' ]
+					}
+				}, {
+					type: {
+						names: [ 'module:engine/foo~InterfaceBar' ]
+					}
+				}, {
+					type: {
+						names: [ 'module:engine/foo~TypedefBaz' ]
+					}
+				}, {
+					type: {
+						names: [ 'module:engine/foo~FunctionAbc' ]
+					}
+				} ],
+				meta: { fileName: '', path: '' },
+			}, {
+				kind: 'class',
+				longname: 'module:engine/foo~ClassFoo',
+				meta: { fileName: '', path: '' },
+			}, {
+				kind: 'interface',
+				longname: 'module:engine/foo~InterfaceBar',
+				meta: { fileName: '', path: '' },
+			}, {
+				kind: 'typedef',
+				longname: 'module:engine/foo~TypedefBaz',
+				meta: { fileName: '', path: '' },
+			}, {
+				kind: 'function',
+				longname: 'module:engine/foo~FunctionAbc',
 				meta: { fileName: '', path: '' },
 			} ], getTestedModules() );
 
@@ -137,7 +182,7 @@ describe( 'Linter plugin', () => {
 			expect( linter._errors.length ).to.be.equal( 0 );
 		} );
 
-		it( 'should handle wrong types', () => {
+		it( 'should log an error if an incorrect type is passed', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'class',
 				params: [ {
@@ -158,7 +203,7 @@ describe( 'Linter plugin', () => {
 		} );
 	} );
 
-	describe( '_lintLinks()', () => {
+	describe( 'linting links', () => {
 		it( 'should validate links and adds errors if they are incorrect', () => {
 			const linter = new DocletValidator( [ {
 				comment:
@@ -284,53 +329,88 @@ describe( 'Linter plugin', () => {
 
 			linter._lintLinks();
 
-			expect( linter._errors ).to.deep.equal( [] );
+			expect( linter._errors.length ).to.equal( 0 );
 		} );
 	} );
 
-	it( '_lintEvents()', () => {
-		const linter = new DocletValidator( [ {
-			kind: 'class',
-			longname: 'module:abc/SomeClass',
-			meta: { fileName: '', path: '' },
-			fires: [ 'someEvent' ],
-		} ], getTestedModules() );
+	describe( 'linting extensibility', () => {
+		it( 'should assert that the type in the `@extends` tag exsits (positive)', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				longname: 'module:abc/SomeClass',
+				augments: [ 'module:abc/SomeOtherClass' ],
+				meta: { fileName: '', path: '' }
+			}, {
+				kind: 'class',
+				longname: 'module:abc/SomeOtherClass',
+				meta: { fileName: '', path: '' }
+			} ], getTestedModules() );
 
-		linter._lintEvents();
+			linter._lintExensibility();
 
-		expect( linter._errors.length ).to.be.equal( 1 );
+			expect( linter._errors.length ).to.equal( 0 );
+		} );
+
+		it( 'should assert that the type in the `@extends` tag exsits (negative)', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				longname: 'module:abc/SomeClass',
+				augments: [ 'module:abc/SomeOtherClass' ],
+				meta: { fileName: '', path: '' }
+			} ], getTestedModules() );
+
+			linter._lintExensibility();
+
+			expect( linter._errors.length ).to.equal( 1 );
+			expect( linter._errors[ 0 ].message ).to.equal( 'Invalid @extends reference: module:abc/SomeOtherClass.' );
+		} );
 	} );
 
-	it( '_lintEvents() 2', () => {
-		const linter = new DocletValidator( [ {
-			kind: 'class',
-			longname: 'module:abc/SomeClass',
-			meta: { fileName: '', path: '' },
-			fires: [ 'module:abc/SomeClass#event:someEvent' ],
-		}, {
-			kind: 'event',
-			longname: 'module:abc/SomeClass#event:someEvent'
-		} ], getTestedModules() );
+	describe( 'linting events', () => {
+		it( 'should assert that references in `fires` exist (positive)', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				longname: 'module:abc/SomeClass',
+				meta: { fileName: '', path: '' },
+				fires: [ 'someEvent' ],
+			} ], getTestedModules() );
 
-		linter._lintEvents();
+			linter._lintEvents();
 
-		expect( linter._errors.length ).to.be.equal( 0 );
-	} );
+			expect( linter._errors.length ).to.be.equal( 1 );
+		} );
 
-	it( '_lintEvents() - fires should match with events only', () => {
-		const linter = new DocletValidator( [ {
-			kind: 'class',
-			longname: 'module:abc/SomeClass',
-			meta: { fileName: '', path: '' },
-			fires: [ 'module:abc/SomeClass#event:someEvent' ],
-		}, {
-			kind: 'not-event',
-			longname: 'module:abc/SomeClass#event:someEvent'
-		} ], getTestedModules() );
+		it( 'should assert that references in `fires` exist (negative)', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				longname: 'module:abc/SomeClass',
+				meta: { fileName: '', path: '' },
+				fires: [ 'module:abc/SomeClass#event:someEvent' ],
+			}, {
+				kind: 'event',
+				longname: 'module:abc/SomeClass#event:someEvent'
+			} ], getTestedModules() );
 
-		linter._lintEvents();
+			linter._lintEvents();
 
-		expect( linter._errors.length ).to.be.equal( 1 );
+			expect( linter._errors.length ).to.be.equal( 0 );
+		} );
+
+		it( 'should assert that references in `fires` are only events', () => {
+			const linter = new DocletValidator( [ {
+				kind: 'class',
+				longname: 'module:abc/SomeClass',
+				meta: { fileName: '', path: '' },
+				fires: [ 'module:abc/SomeClass#event:someEvent' ],
+			}, {
+				kind: 'not-event',
+				longname: 'module:abc/SomeClass#event:someEvent'
+			} ], getTestedModules() );
+
+			linter._lintEvents();
+
+			expect( linter._errors.length ).to.be.equal( 1 );
+		} );
 	} );
 
 	it( '_lintModuleDocumentedExports()', () => {

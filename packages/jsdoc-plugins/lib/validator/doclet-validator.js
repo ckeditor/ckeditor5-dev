@@ -33,7 +33,7 @@ class DocletValidator {
 	/**
 	 * Creates doclets grouped by doclet kind
 	 * @private
-	 * @returns {Collection}
+	 * @returns {DocletCollection}
 	 */
 	_createDocletCollection( doclets ) {
 		const collection = new DocletCollection();
@@ -63,6 +63,7 @@ class DocletValidator {
 		this._lintReturnTypes();
 		this._lintSeeReferences();
 		this._lintTypedefs();
+		this._lintExensibility();
 
 		return this._errors;
 	}
@@ -113,7 +114,8 @@ class DocletValidator {
 
 	/**
 	 * Finds errors in parameter types
-	 * @protected */
+	 * @protected
+	 */
 	_lintParams() {
 		const collections = [
 			...this._collection.get( 'function' ),
@@ -288,13 +290,27 @@ class DocletValidator {
 		}
 	}
 
-	_getAllLongNames() {
-		return this._collection.getAll()
-			.map( el => el.longname );
+	/**
+	 * Checks whether the reference in the `@extends` tag is correct.
+	 *
+	 * @protected
+	 */
+	_lintExensibility() {
+		for ( const doclet of this._collection.getAll() ) {
+			for ( const base of doclet.augments || [] ) {
+				if ( !this._isCorrectReference( base ) && !this._isValidBuiltInType( base ) ) {
+					this._addError(
+						doclet,
+						`Invalid @extends reference: ${ base }.`
+					);
+				}
+			}
+		}
 	}
 
 	/**
 	 * @private
+	 * @param {Doclet} doclet
 	 * @param {string} errorMessage
 	 */
 	_addError( doclet, errorMessage ) {
@@ -305,7 +321,7 @@ class DocletValidator {
 
 	/**
 	 * @private
-	 * @param {Object} member
+	 * @param {Doclet} doclet
 	 */
 	_getErrorData( doclet ) {
 		return {
@@ -320,7 +336,6 @@ class DocletValidator {
 	 *
 	 * @protected
 	 * @param {String} type to assert
-	 * @param {Array.<Object>} [additionalTypes]
 	 *
 	 * @returns {Boolean}
 	 */
@@ -345,15 +360,33 @@ class DocletValidator {
 		}
 
 		if ( type.includes( 'module:' ) ) {
-			return this._isCorrectReference( type );
+			return this._isCorrectReferenceType( type );
 		}
 
 		type = type.trim();
 
-		return ALL_TYPES.includes( type ) ||
-			/^'[^']+'$/.test( type ); // string literal type - e.g. 'forward', 'backward';
+		return this._isValidBuiltInType( type ) ||
+			this._isStringLiteralType( type );
 	}
 
+	/** @private */
+	_isValidBuiltInType( type ) {
+		return ALL_TYPES.includes( type );
+	}
+
+	/**
+	 * A string literal type - e.g. 'forward' or 'backward';
+	 *
+	 * @private
+	 */
+	_isStringLiteralType( type ) {
+		return /^'[^']+'$/.test( type );
+	}
+
+	/**
+	 * @private
+	 * @param {String} type
+	 */
 	_isCorrectReference( type ) {
 		type = type.trim();
 		const doclets = this._collection.getAll();
@@ -368,6 +401,35 @@ class DocletValidator {
 		}
 
 		return allRefs.includes( type );
+	}
+
+	/**
+	 * Returns `true` when the reference points to the symbol which is one of:
+	 * * class
+	 * * interface
+	 * * typedef
+	 * * function
+	 *
+	 * @private
+	 * @param {String} type
+	 */
+	_isCorrectReferenceType( type ) {
+		type = type.trim();
+
+		if ( !type.includes( 'module:' ) ) {
+			return false;
+		}
+
+		const doclet = this._collection.getAll().find( doclet => doclet.longname === type );
+
+		if ( !doclet ) {
+			return false;
+		}
+
+		return doclet.kind === 'class' ||
+			doclet.kind === 'interface' ||
+			doclet.kind === 'typedef' ||
+			doclet.kind === 'function';
 	}
 }
 
