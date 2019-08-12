@@ -22,6 +22,7 @@ const GitHubApi = require( '@octokit/rest' );
 const PACKAGE_JSON_TEMPLATE_PATH = require.resolve( '../templates/release-package.json' );
 const BREAK_RELEASE_MESSAGE = 'You aborted publishing the release. Why? Oh why?!';
 const NO_RELEASE_MESSAGE = 'No changes for publishing. Why? Oh why?!';
+const AUTH_REQUIRED = 'You must be logged to execute this command.';
 
 // That files will be copied from source to the temporary directory and will be released too.
 const additionalFiles = [
@@ -72,7 +73,8 @@ const additionalFiles = [
  *
  * @param {Object} options
  * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
- * @param {String} options.packages Where to look for other packages (dependencies).
+ * @param {String|null} options.packages Where to look for other packages (dependencies). If `null`, only repository specified under
+ * `options.cwd` will be used in the task.
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be released.
  * @param {Boolean} [options.dryRun=false] If set on true, nothing will be published:
  *   - npm pack will be called instead of npm publish (it packs the whole release to a ZIP archive),
@@ -103,11 +105,10 @@ module.exports = function releaseSubRepositories( options ) {
 
 	logDryRun( '⚠️  DRY RUN mode ⚠️' );
 	logDryRun( 'The script WILL NOT publish anything but will create some files.' );
-	logProcess( 'Configuring the release...' );
 
-	const github = new GitHubApi( {
-		version: '3.0.0'
-	} );
+	// The variable is set only if "release on github" option has been chosen during configuration the release.
+	// See `configureRelease()` function.
+	let github;
 
 	// Collections of paths where different kind of releases should be done.
 	// `releasesOnNpm` - the release on NPM that contains the entire repository (npm publish is executed inside the repository)
@@ -128,8 +129,9 @@ module.exports = function releaseSubRepositories( options ) {
 
 	let releaseOptions;
 
-	return cli.configureReleaseOptions()
+	return configureRelease()
 		.then( _releaseOptions => saveReleaseOptions( _releaseOptions ) )
+		.then( () => authCheck() )
 		.then( () => preparePackagesToRelease() )
 		.then( () => filterPackagesToReleaseOnNpm() )
 		.then( () => filterPackagesToReleaseOnGitHub() )
@@ -143,22 +145,29 @@ module.exports = function releaseSubRepositories( options ) {
 		.then( () => {
 			process.chdir( cwd );
 
-			logProcess( `Finished releasing ${ chalk.underline( releasedPackages.size ) } packages.` );
+			logProcess( `Finished releasing ${ chalk.underline( releasedPackages.size ) } package(s).` );
 			logDryRun( 'Because of the DRY RUN mode, nothing has been changed. All changes were reverted.' );
 		} )
 		.catch( err => {
 			process.chdir( cwd );
 
-			// A user did not confirm the release process or there is nothing to release.
 			if ( err instanceof Error ) {
-				if ( err.message === BREAK_RELEASE_MESSAGE ) {
-					logProcess( 'Publishing has been aborted.' );
+				let message;
 
-					return Promise.resolve();
+				switch ( err.message ) {
+					case BREAK_RELEASE_MESSAGE:
+						message = 'Publishing has been aborted.';
+						break;
+					case NO_RELEASE_MESSAGE:
+						message = 'There is nothing to release. The process was aborted.';
+						break;
+					case AUTH_REQUIRED:
+						message = 'Before you starting releasing, you need to login to npm.';
+						break;
 				}
 
-				if ( err.message === NO_RELEASE_MESSAGE ) {
-					logProcess( 'There is nothing to release. The process was aborted.' );
+				if ( message ) {
+					logProcess( message );
 
 					return Promise.resolve();
 				}
@@ -168,6 +177,15 @@ module.exports = function releaseSubRepositories( options ) {
 
 			process.exitCode = -1;
 		} );
+
+	// Configures release options.
+	//
+	// @returns {Promise.<Object>}
+	function configureRelease() {
+		logProcess( 'Configuring the release...' );
+
+		return cli.configureReleaseOptions();
+	}
 
 	// Saves the options provided by a user.
 	//
@@ -180,10 +198,39 @@ module.exports = function releaseSubRepositories( options ) {
 		}
 
 		if ( releaseOptions.github ) {
-			github.authenticate( {
-				token: releaseOptions.token,
-				type: 'oauth',
+			// Because `octokit.authenticate()` is deprecated, the entire API object is created here.
+			github = new GitHubApi( {
+				version: '3.0.0',
+				auth: `token ${ releaseOptions.token }`
 			} );
+		}
+	}
+
+	// Checks whether to a user is logged to npm.
+	//
+	// @returns {Promise}
+	function authCheck() {
+		if ( !releaseOptions.npm ) {
+			return Promise.resolve();
+		}
+
+		logProcess( 'Checking whether you are logged to npm...' );
+
+		try {
+			const whoami = exec( 'npm whoami' );
+
+			log.info( `🔑 Logged as "${ chalk.underline( whoami.trim() ) }".` );
+
+			return Promise.resolve();
+		} catch ( err ) {
+			logDryRun( '⛔️ You are not logged to NPM. ⛔️' );
+			logDryRun( chalk.italic( 'But this is a DRY RUN so you can continue safely.' ) );
+
+			if ( dryRun ) {
+				return Promise.resolve();
+			}
+
+			return Promise.reject( new Error( AUTH_REQUIRED ) );
 		}
 	}
 
@@ -239,15 +286,15 @@ module.exports = function releaseSubRepositories( options ) {
 
 			log.info( `\nChecking "${ chalk.underline( packageJson.name ) }"...` );
 
-			const npmVersion = exec( `npm show ${ packageJson.name } version` ).trim();
+			const npmVersion = getVersionFromNpm( packageJson.name );
 
-			logDryRun( `Versions: package.json: "${ releaseDetails.version }", npm: "${ npmVersion }".` );
+			logDryRun( `Versions: package.json: "${ releaseDetails.version }", npm: "${ npmVersion || 'initial release' }".` );
 
 			releaseDetails.npmVersion = npmVersion;
 			releaseDetails.shouldReleaseOnNpm = npmVersion !== releaseDetails.version;
 
 			if ( releaseDetails.shouldReleaseOnNpm ) {
-				logDryRun( 'Package will be released.' );
+				log.info( '✅  Added to release.' );
 
 				releasesOnNpm.add( repositoryPath );
 			} else {
@@ -256,6 +303,26 @@ module.exports = function releaseSubRepositories( options ) {
 
 			return Promise.resolve();
 		} );
+
+		// Checks whether specified `packageName` has been published on npm.
+		// If so, returns its version. Otherwise returns `null` which means that
+		// this package will be published for the first time.
+		function getVersionFromNpm( packageName ) {
+			try {
+				return exec( `npm show ${ packageName } version` ).trim();
+			} catch ( err ) {
+				const errorAsArray = err.message.split( '\n' ).slice( 0, 2 );
+
+				if (
+					errorAsArray[ 0 ].endsWith( 'npm ERR! code E404' ) &&
+					errorAsArray[ 1 ] === `npm ERR! 404 '${ packageName }' is not in the npm registry.`
+				) {
+					return null;
+				}
+
+				throw err;
+			}
+		}
 	}
 
 	// Checks for which packages GitHub release should be created. It compares version defined in `package.json`
@@ -294,11 +361,11 @@ module.exports = function releaseSubRepositories( options ) {
 					releaseDetails.shouldReleaseOnGithub = githubVersion !== releaseDetails.version;
 
 					if ( releaseDetails.shouldReleaseOnGithub ) {
-						logDryRun( 'Package will be published.' );
+						log.info( '✅  Added to release.' );
 
 						releasesOnGithub.add( repositoryPath );
 					} else {
-						log.info( '❌  Nothing to publish.' );
+						log.info( '❌  Nothing to release.' );
 					}
 				} )
 				.catch( err => {
@@ -312,24 +379,20 @@ module.exports = function releaseSubRepositories( options ) {
 				repo: repositoryName
 			};
 
-			return new Promise( ( resolve, reject ) => {
-				github.repos.getLatestRelease( requestParams, ( err, responses ) => {
-					if ( err ) {
-						// No releases on GitHub. It will be the first one.
-						if ( err.message.toLowerCase() == 'not found' ) {
-							return resolve( {
-								data: {
-									tag_name: null
-								}
-							} );
-						}
-
-						return reject( err );
+			return github.repos.getLatestRelease( requestParams )
+				.catch( err => {
+					// If the "last release" returned the 404 error page, it means that this release
+					// will be the first one for specified `repositoryOwner/repositoryName` package.
+					if ( err.status == 404 ) {
+						return Promise.resolve( {
+							data: {
+								tag_name: null
+							}
+						} );
 					}
 
-					return resolve( responses );
+					return Promise.reject( err );
 				} );
-			} );
 		}
 	}
 
@@ -575,7 +638,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 				if ( !shouldRemove ) {
 					logDryRun( 'You can remove these files manually by calling `git clean -f` command.' );
-					logDryRun( 'It will also work using mgit: `mgit exec "git clean -f"`' );
+					logDryRun( 'It will also work using mrgit: `mrgit exec "git clean -f"`' );
 
 					return;
 				}

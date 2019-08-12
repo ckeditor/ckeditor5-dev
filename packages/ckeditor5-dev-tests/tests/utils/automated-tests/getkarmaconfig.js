@@ -10,7 +10,7 @@ const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
 const path = require( 'path' );
 
-describe( 'getKarmaConfig', () => {
+describe( 'getKarmaConfig()', () => {
 	let getKarmaConfig, sandbox;
 	const originalEnv = process.env;
 
@@ -72,78 +72,28 @@ describe( 'getKarmaConfig', () => {
 		expect( karmaConfig ).to.have.own.property( 'singleRun', true );
 	} );
 
-	describe( 'BrowserStack integration', () => {
-		beforeEach( () => {
-			process.env.BROWSER_STACK_USERNAME = 'username';
-			process.env.BROWSER_STACK_ACCESS_KEY = 'access-key';
+	it( 'should define proxies to static assets resources', () => {
+		const karmaConfig = getKarmaConfig( {
+			files: [ '*' ],
+			reporter: 'mocha',
+			sourceMap: false,
+			coverage: false,
+			browsers: [ 'Chrome' ],
+			watch: false,
+			verbose: false,
+			themePath: 'workspace/path/to/theme.css',
+			entryFile: 'workspace/entry-file.js',
+			globPatterns: {
+				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
+			}
 		} );
 
-		// BROWSER_STACK_USERNAME=username BROWSER_STACK_ACCESS_KEY=access-key yarn run test --files=autoformat
-		it( 'should be enabled when tests were called on a dev machine', () => {
-			// Removes the Travis variables. It protects tests on Travis where the env variables are set by default.
-			process.env.TRAVIS_EVENT_TYPE = null;
-			process.env.TRAVIS_REPO_SLUG = null;
-			process.env.TRAVIS_PULL_REQUEST_SLUG = null;
+		expect( karmaConfig ).to.have.own.property( 'proxies' );
+		expect( karmaConfig.proxies ).to.have.own.property( '/assets/' );
 
-			const karmaConfig = getKarmaConfig( { reporter: 'mocha', globPatterns: {}, browsers: [ 'BrowserStack_Edge' ] } );
-
-			expect( karmaConfig.browserStack ).to.not.be.a( 'undefined' );
-			expect( karmaConfig.browsers ).to.deep.equal( [
-				'BrowserStack_Edge'
-			] );
-		} );
-
-		// A team member made a commit. Travis should use BrowserStack.
-		it( 'should be enabled for commit build on Travis', () => {
-			process.env.TRAVIS = true;
-			process.env.TRAVIS_EVENT_TYPE = 'push';
-
-			const karmaConfig = getKarmaConfig( { reporter: 'mocha', globPatterns: {}, browsers: [ 'BrowserStack_Edge' ] } );
-
-			expect( karmaConfig.browserStack ).to.not.be.a( 'undefined' );
-			expect( karmaConfig.browsers ).to.deep.equal( [
-				'BrowserStack_Edge'
-			] );
-		} );
-
-		// A team member made a pull request. Travis should use BrowserStack.
-		it( 'should be enabled for pull request build on Travis', () => {
-			process.env.TRAVIS = true;
-			process.env.TRAVIS_EVENT_TYPE = 'pull_request';
-			process.env.TRAVIS_PULL_REQUEST_SLUG = 'ckeditor/ckeditor-foo';
-			process.env.TRAVIS_REPO_SLUG = 'ckeditor/ckeditor-foo';
-
-			const karmaConfig = getKarmaConfig( { reporter: 'mocha', globPatterns: {}, browsers: [ 'BrowserStack_Edge' ] } );
-
-			expect( karmaConfig.browserStack ).to.not.be.a( 'undefined' );
-			expect( karmaConfig.browsers ).to.deep.equal( [
-				'BrowserStack_Edge'
-			] );
-		} );
-
-		// A community member made a pull request. Travis should not use BrowserStack.
-		it( 'should be disabled for pull request build on Travis that comes from community', () => {
-			process.env.TRAVIS = true;
-			process.env.TRAVIS_EVENT_TYPE = 'pull_request';
-			process.env.TRAVIS_PULL_REQUEST_SLUG = 'ckeditor-forked/ckeditor-foo';
-			process.env.TRAVIS_REPO_SLUG = 'ckeditor/ckeditor-foo';
-
-			// Encrypted environment variables are not available to pull requests from forks due to
-			// the security risk of exposing such information to unknown code.
-			delete process.env.BROWSER_STACK_USERNAME;
-			delete process.env.BROWSER_STACK_ACCESS_KEY;
-
-			const karmaConfig = getKarmaConfig( {
-				reporter: 'mocha',
-				globPatterns: {},
-				browsers: [ 'BrowserStack_Edge', 'Firefox', 'Chrome', 'BrowserStack_Safari' ]
-			} );
-
-			expect( karmaConfig.browserStack ).to.be.a( 'undefined' );
-			expect( karmaConfig.browsers ).to.deep.equal( [
-				'Firefox',
-				'CHROME_TRAVIS_CI'
-			] );
-		} );
+		expect( karmaConfig.files ).to.be.an( 'array' );
+		expect( karmaConfig.files.length ).to.equal( 2 );
+		expect( karmaConfig.files[ 0 ] ).to.equal( 'workspace/entry-file.js' );
+		expect( karmaConfig.files[ 1 ].pattern ).to.equal( 'packages/ckeditor5-utils/tests/_assets/**/*' );
 	} );
 } );

@@ -44,8 +44,7 @@ module.exports = function parseArguments( args ) {
 			coverage: false,
 			verbose: false,
 			'source-map': false,
-			server: false,
-			browserStack: false
+			server: false
 		}
 	};
 	const options = minimist( args, minimistConfig );
@@ -56,6 +55,10 @@ module.exports = function parseArguments( args ) {
 	if ( typeof options.files === 'string' ) {
 		options.files = options.files.split( ',' );
 	}
+
+	options.language = options.language || 'en';
+	options.additionalLanguages = options.additionalLanguages ? options.additionalLanguages.split( ',' ) : null;
+	options.themePath = options.themePath ? options.themePath : null;
 
 	// Delete all aliases because we don't want to use them in the code.
 	// They are useful when calling command but useless after that.

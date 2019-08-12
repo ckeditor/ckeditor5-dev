@@ -1,6 +1,25 @@
 Changelog
 =========
 
+## [12.0.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@12.0.3...@ckeditor/ckeditor5-dev-utils@12.0.4) (2019-08-12)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
+## [12.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@12.0.2...@ckeditor/ckeditor5-dev-utils@12.0.3) (2019-07-23)
+
+### Bug fixes
+
+* Added ECMA version to `acorn` parser options. Closes [#534](https://github.com/ckeditor/ckeditor5-dev/issues/534). ([0a1fbec](https://github.com/ckeditor/ckeditor5-dev/commit/0a1fbec))
+
+
+## [12.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@12.0.1...@ckeditor/ckeditor5-dev-utils@12.0.2) (2019-07-15)
+
+### Other changes
+
+* Upgraded dependencies for most of the packages. Merged Lerna + Yarn and they can work together now. Closes [#527](https://github.com/ckeditor/ckeditor5-dev/issues/527). Closes [#466](https://github.com/ckeditor/ckeditor5-dev/issues/466). ([dcc3215](https://github.com/ckeditor/ckeditor5-dev/commit/dcc3215))
+
+
 ## [12.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@12.0.0...@ckeditor/ckeditor5-dev-utils@12.0.1) (2019-02-28)
 
 Internal changes only (updated dependencies, documentation, etc.).

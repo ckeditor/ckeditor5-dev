@@ -26,9 +26,11 @@ if ( options.files.length === 0 ) {
 options.themePath = path.resolve( cwd, 'packages', 'ckeditor5-theme-lark', 'theme', 'theme.css' );
 
 tests.runAutomatedTests( options )
+	.then( () => {
+		process.exit( 0 );
+	} )
 	.catch( error => {
-		// Mark result of this task as invalid.
-		process.exitCode = 1;
-
 		console.log( chalk.red( error ) );
+
+		process.exit( 1 );
 	} );

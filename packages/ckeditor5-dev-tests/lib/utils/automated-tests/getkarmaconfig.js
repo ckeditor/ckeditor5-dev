@@ -41,8 +41,16 @@ module.exports = function getKarmaConfig( options ) {
 		// Frameworks to use. Available frameworks: https://npmjs.org/browse/keyword/karma-adapter
 		frameworks: [ 'mocha', 'chai', 'sinon' ],
 
+		// Files saved in directory `ckeditor5/packages/ckeditor5-utils/tests/_assets/` are available under: http://0.0.0.0:9876/assets/
+		proxies: {
+			'/assets/': '/base/packages/ckeditor5-utils/tests/_assets/'
+		},
+
 		// List of files/patterns to load in the browser.
-		files: [ options.entryFile ],
+		files: [
+			options.entryFile,
+			{ pattern: 'packages/ckeditor5-utils/tests/_assets/**/*', watched: false, included: false, served: true, nocache: false }
+		],
 
 		// Preprocess matching files before serving them to the browser.
 		// Available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
@@ -85,20 +93,7 @@ module.exports = function getKarmaConfig( options ) {
 			},
 			CHROME_LOCAL: {
 				base: 'Chrome',
-				flags: [ '--disable-background-timer-throttling', '--js-flags="--expose-gc"' ]
-			},
-			BrowserStack_Edge: {
-				base: 'BrowserStack',
-				os: 'Windows',
-				os_version: '10',
-				browser: 'edge',
-				browser_version: '17.0'
-			},
-			BrowserStack_Safari: {
-				base: 'BrowserStack',
-				os: 'OS X',
-				os_version: 'High Sierra',
-				browser: 'safari'
+				flags: [ '--disable-background-timer-throttling', '--js-flags="--expose-gc"', '--remote-debugging-port=9222' ]
 			}
 		},
 
@@ -126,17 +121,6 @@ module.exports = function getKarmaConfig( options ) {
 	if ( options.verbose ) {
 		karmaConfig.webpackMiddleware.noInfo = false;
 		delete karmaConfig.webpackMiddleware.stats;
-	}
-
-	if ( shouldEnableBrowserStack() ) {
-		karmaConfig.browserStack = {
-			username: process.env.BROWSER_STACK_USERNAME,
-			accessKey: process.env.BROWSER_STACK_ACCESS_KEY,
-			build: getBuildName(),
-			project: 'ckeditor5'
-		};
-
-		karmaConfig.reporters = [ 'dots', 'BrowserStack' ];
 	}
 
 	if ( options.coverage ) {
@@ -176,51 +160,11 @@ function getBrowsers( options ) {
 		return null;
 	}
 
-	const browsers = options.browsers
-		.map( browser => {
-			if ( browser !== 'Chrome' ) {
-				return browser;
-			}
+	return options.browsers.map( browser => {
+		if ( browser !== 'Chrome' ) {
+			return browser;
+		}
 
-			return process.env.TRAVIS ? 'CHROME_TRAVIS_CI' : 'CHROME_LOCAL';
-		} );
-
-	if ( shouldEnableBrowserStack() ) {
-		return browsers;
-	}
-
-	// If the BrowserStack is disabled, all browsers that start with a prefix "BrowserStack" should be filtered out.
-	// See: https://github.com/ckeditor/ckeditor5-dev/issues/358 and https://github.com/ckeditor/ckeditor5-dev/issues/402.
-	return browsers.filter( browser => !browser.startsWith( 'BrowserStack' ) );
-}
-
-// Formats name of the build for BrowserStack. It merges repository name and current timestamp.
-// If env variable `TRAVIS_REPO_SLUG` is not available, the function returns `undefined`.
-//
-// @returns {String|undefined}
-function getBuildName() {
-	const repoSlug = process.env.TRAVIS_REPO_SLUG;
-
-	if ( !repoSlug ) {
-		return;
-	}
-
-	const repositoryName = repoSlug.split( '/' )[ 1 ].replace( /-/g, '_' );
-	const date = new Date().getTime();
-
-	return `${ repositoryName } ${ date }`;
-}
-
-function shouldEnableBrowserStack() {
-	if ( !process.env.BROWSER_STACK_USERNAME ) {
-		return false;
-	}
-
-	if ( !process.env.BROWSER_STACK_ACCESS_KEY ) {
-		return false;
-	}
-
-	// If the repository slugs are different, the pull request comes from the community (forked repository).
-	// For such builds, BrowserStack will be disabled. Read more: https://github.com/ckeditor/ckeditor5-dev/issues/358.
-	return ( process.env.TRAVIS_EVENT_TYPE !== 'pull_request' || process.env.TRAVIS_PULL_REQUEST_SLUG === process.env.TRAVIS_REPO_SLUG );
+		return process.env.TRAVIS ? 'CHROME_TRAVIS_CI' : 'CHROME_LOCAL';
+	} );
 }

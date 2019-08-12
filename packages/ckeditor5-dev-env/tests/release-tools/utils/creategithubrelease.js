@@ -11,20 +11,15 @@ const mockery = require( 'mockery' );
 
 describe( 'dev-env/release-tools/tasks', () => {
 	describe( 'createGithubRelease()', () => {
-		let createGithubRelease, sandbox, stubs, error;
+		let createGithubRelease, sandbox, stubs, octokitOptions;
 
 		beforeEach( () => {
+			octokitOptions = null;
 			sandbox = sinon.createSandbox();
 
 			stubs = {
 				authenticate: sandbox.stub(),
-				createRelease: sandbox.spy( ( options, callback ) => {
-					if ( error ) {
-						return callback( error );
-					}
-
-					callback( null, 'Response.' );
-				} )
+				createRelease: sandbox.stub()
 			};
 
 			mockery.enable( {
@@ -33,12 +28,12 @@ describe( 'dev-env/release-tools/tasks', () => {
 				warnOnUnregistered: false
 			} );
 
-			mockery.registerMock( '@octokit/rest', function GitHubApi() {
-				return {
-					authenticate: stubs.authenticate,
-					repos: {
-						createRelease: stubs.createRelease
-					}
+			mockery.registerMock( '@octokit/rest', function GitHubApi( options ) {
+				octokitOptions = options;
+
+				this.authenticate = stubs.authenticate;
+				this.repos = {
+					createRelease: stubs.createRelease
 				};
 			} );
 
@@ -50,7 +45,29 @@ describe( 'dev-env/release-tools/tasks', () => {
 			mockery.disable();
 		} );
 
+		it( 'must not use "octokit.authenticate()" method', () => {
+			stubs.createRelease.resolves();
+
+			const options = {
+				repositoryOwner: 'organization',
+				repositoryName: 'repository',
+				version: 'v1.0.0',
+				description: 'Changes.'
+			};
+
+			return createGithubRelease( 'token-123', options )
+				.then( () => {
+					expect( stubs.authenticate.called ).to.equal( false );
+					expect( octokitOptions ).to.deep.equal( {
+						version: '3.0.0',
+						auth: 'token token-123'
+					} );
+				} );
+		} );
+
 		it( 'uses GitHub API to create a release', () => {
+			stubs.createRelease.resolves( { done: true } );
+
 			const options = {
 				repositoryOwner: 'organization',
 				repositoryName: 'repository',
@@ -60,29 +77,21 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			return createGithubRelease( 'token-123', options )
 				.then( response => {
-					expect( response ).to.equal( 'Response.' );
-
-					expect( stubs.authenticate.calledOnce ).to.equal( true );
-					expect( stubs.authenticate.firstCall.args[ 0 ] ).to.deep.equal( {
-						token: 'token-123',
-						type: 'oauth'
-					} );
-
+					expect( response ).to.deep.equal( { done: true } );
 					expect( stubs.createRelease.calledOnce ).to.equal( true );
 
-					// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 					expect( stubs.createRelease.firstCall.args[ 0 ] ).to.deep.equal( {
 						owner: 'organization',
 						repo: 'repository',
 						tag_name: 'v1.0.0',
 						body: 'Changes.'
 					} );
-					// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 				} );
 		} );
 
 		it( 'rejects promise when something went wrong', () => {
-			error = new Error( 'Unexpected error.' );
+			const error = new Error( 'Unexpected error.' );
+			stubs.createRelease.rejects( error );
 
 			return createGithubRelease( 'token-123', {} )
 				.then(

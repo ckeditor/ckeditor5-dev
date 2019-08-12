@@ -14,13 +14,16 @@ const getWebpackConfigForManualTests = require( './getwebpackconfig' );
 const getRelativeFilePath = require( '../getrelativefilepath' );
 
 /**
- * @param {String} buildDir A path where compiled files will be saved.
- * @param {Array.<String>} manualTestScriptsPatterns An array of patterns that resolve manual test scripts.
- * @param {String} themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
+ * @param {Object} options
+ * @param {String} options.buildDir A path where compiled files will be saved.
+ * @param {Array.<String>} options.patterns An array of patterns that resolve manual test scripts.
+ * @param {String} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
+ * @param {String} options.language A language passed to `CKEditorWebpackPlugin`.
+ * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
  * @returns {Promise}
  */
-module.exports = function compileManualTestScripts( buildDir, manualTestScriptsPatterns, themePath ) {
-	const entryFiles = manualTestScriptsPatterns.reduce( ( arr, manualTestPattern ) => {
+module.exports = function compileManualTestScripts( options ) {
+	const entryFiles = options.patterns.reduce( ( arr, manualTestPattern ) => {
 		return [
 			...arr,
 			...globSync( manualTestPattern )
@@ -29,7 +32,13 @@ module.exports = function compileManualTestScripts( buildDir, manualTestScriptsP
 	}, [] );
 
 	const entries = getWebpackEntryPoints( entryFiles );
-	const webpackConfig = getWebpackConfigForManualTests( entries, buildDir, themePath );
+	const webpackConfig = getWebpackConfigForManualTests( {
+		entries,
+		buildDir: options.buildDir,
+		themePath: options.themePath,
+		language: options.language,
+		additionalLanguages: options.additionalLanguages
+	} );
 
 	return runWebpack( webpackConfig );
 };

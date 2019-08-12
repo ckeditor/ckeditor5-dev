@@ -21,47 +21,42 @@
  * @returns {String}
  */
 module.exports = function transformFileOptionToTestGlob( fileOption, isManualTest = false ) {
-	const path = require( 'path' );
-	const nodeModulesPath = path.join( process.cwd(), 'packages' );
-
-	const chunks = fileOption.split( '/' );
+	const globSep = '/';
+	const cwdChunks = process.cwd().split( require( 'path' ).sep );
+	const chunks = fileOption.split( globSep );
 	const packageName = chunks.shift();
-	let globSuffix = path.join( 'tests', '**' );
+	const globSuffix = [ 'tests', '**' ];
+	let returnChunks = cwdChunks.concat( [ 'packages' ] );
 
 	if ( isManualTest ) {
-		globSuffix += path.sep + path.join( 'manual', '**' );
+		globSuffix.push( 'manual', '**' );
 	}
 
-	globSuffix += path.sep + '*.js';
+	globSuffix.push( '*.js' );
 
 	// 0.
 	if ( fileOption === '/' ) {
-		return path.join( process.cwd(), globSuffix );
-	}
-
-	// 1. 2. 3.
-	if ( chunks.length === 0 ) {
+		returnChunks = cwdChunks.concat( globSuffix );
+	} else if ( chunks.length === 0 ) {
 		// 1.
 		if ( packageName == '*' ) {
-			return path.join( nodeModulesPath, 'ckeditor5-*', globSuffix );
+			returnChunks.push( 'ckeditor5-*', ...globSuffix );
+		} else if ( packageName.startsWith( '!' ) ) {
+			// 3.
+			returnChunks.push( 'ckeditor5-!(' + packageName.slice( 1 ) + ')*', ...globSuffix );
+		} else {
+			// 2.
+			returnChunks.push( 'ckeditor5-' + packageName, ...globSuffix );
 		}
+	} else {
+		// 5.
+		returnChunks.push( 'ckeditor5-' + packageName, 'tests', ...chunks );
 
-		// 3.
-		if ( packageName.startsWith( '!' ) ) {
-			return path.join( nodeModulesPath, 'ckeditor5-!(' + packageName.slice( 1 ) + ')*', globSuffix );
+		if ( !chunks[ chunks.length - 1 ].endsWith( '.js' ) ) {
+			// 4.
+			returnChunks.push( '**', '*.js' );
 		}
-
-		// 2.
-		return path.join( nodeModulesPath, 'ckeditor5-' + packageName, globSuffix );
 	}
 
-	let glob = chunks.join( path.sep );
-
-	// 4.
-	if ( !glob.endsWith( '.js' ) ) {
-		glob = path.join( glob, '**', '*.js' );
-	}
-
-	// 5.
-	return path.join( nodeModulesPath, 'ckeditor5-' + packageName, 'tests', glob );
+	return returnChunks.join( globSep );
 };
