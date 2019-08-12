@@ -58,7 +58,7 @@ module.exports = function parseArguments( args ) {
 		options.files = options.files.split( ',' );
 	}
 
-	if ( options.debug === 'false' ) {
+	if ( options.debug === 'false' || options.debug === false ) {
 		options.debug = [];
 	} else if ( typeof options.debug === 'string' ) {
 		options.debug = [
