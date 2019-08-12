@@ -113,7 +113,8 @@ class DocletValidator {
 
 	/**
 	 * Finds errors in parameter types
-	 * @protected */
+	 * @protected
+	 */
 	_lintParams() {
 		const collections = [
 			...this._collection.get( 'function' ),

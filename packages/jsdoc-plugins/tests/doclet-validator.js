@@ -78,7 +78,7 @@ describe( 'Linter plugin', () => {
 		} );
 	} );
 
-	describe( '_lintParams()', () => {
+	describe( 'linting function parameters', () => {
 		it( 'should handle not existing types', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'function',
@@ -97,7 +97,7 @@ describe( 'Linter plugin', () => {
 			expect( linter._errors.length ).to.be.equal( 1 );
 		} );
 
-		it( 'should handle existing types', () => {
+		it( 'should log an error if a module is passed as parameter type', () => {
 			const linter = new DocletValidator( [ {
 				kind: 'class',
 				params: [ {
@@ -114,7 +114,8 @@ describe( 'Linter plugin', () => {
 
 			linter._lintParams();
 
-			expect( linter._errors.length ).to.be.equal( 0 );
+			expect( linter._errors.length ).to.be.equal( 1 );
+			expect( linter._errors[ 0 ].message ).to.equal( 'Incorrect param type: module:engine/ckeditor5/editor' );
 		} );
 
 		it( 'should handle built-in types', () => {
