@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [16.7.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.6.0...@ckeditor/ckeditor5-dev-tests@16.7.0) (2019-08-12)
+
+### Features
+
+* Added support for debugging flags in automated and manual tests available via the `--debug` (`-d`) flag. Closes [ckeditor/ckeditor5#383](https://github.com/ckeditor/ckeditor5/issues/383). ([e55c8c2](https://github.com/ckeditor/ckeditor5-dev/commit/e55c8c2))
+
+
 ## [16.6.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.5.0...@ckeditor/ckeditor5-dev-tests@16.6.0) (2019-08-09)
 
 ### Features

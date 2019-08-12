@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [3.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@3.0.4...@ckeditor/jsdoc-plugins@3.0.5) (2019-08-12)
+
+### Other changes
+
+* The doclet validator is improved. Now, during parameters linting it logs an error if the doclet cannot be a valid type (e.g. a method, property or a mixin cannot be a valid type). It also checks now whether the [@extends](https://github.com/extends) tag points to the valid reference. Closes [#507](https://github.com/ckeditor/ckeditor5-dev/issues/507). ([c5a8b08](https://github.com/ckeditor/ckeditor5-dev/commit/c5a8b08))
+
+
 ## [3.0.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@3.0.3...@ckeditor/jsdoc-plugins@3.0.4) (2019-08-09)
 
 ### Other changes
