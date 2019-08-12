@@ -36,6 +36,8 @@ const BASIC_TYPES = [
 	'FocusEvent',
 	'ClientRect',
 	'Window',
+	'ErrorEvent',
+	'PromiseRejectionEvent',
 
 	// Web APIs
 	'File',
