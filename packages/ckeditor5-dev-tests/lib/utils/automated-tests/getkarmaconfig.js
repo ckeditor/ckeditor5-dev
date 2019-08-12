@@ -93,7 +93,7 @@ module.exports = function getKarmaConfig( options ) {
 			},
 			CHROME_LOCAL: {
 				base: 'Chrome',
-				flags: [ '--disable-background-timer-throttling', '--js-flags="--expose-gc"' ]
+				flags: [ '--disable-background-timer-throttling', '--js-flags="--expose-gc"', '--remote-debugging-port=9222' ]
 			}
 		},
 

@@ -6,13 +6,13 @@
 'use strict';
 
 const acorn = require( 'acorn' );
-const walk = require( 'acorn/dist/walk' );
+const walk = require( 'acorn-walk' );
 const logger = require( '../logger' )();
 
 module.exports = function findOriginalStrings( source ) {
 	const ast = acorn.parse( source, {
 		sourceType: 'module',
-		ecmaVersion: '2018'
+		ecmaVersion: 9
 	} );
 
 	const originalStrings = [];

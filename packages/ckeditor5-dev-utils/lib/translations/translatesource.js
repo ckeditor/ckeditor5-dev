@@ -6,7 +6,7 @@
 'use strict';
 
 const acorn = require( 'acorn' );
-const walk = require( 'acorn/dist/walk' );
+const walk = require( 'acorn-walk' );
 const escodegen = require( 'escodegen' );
 
 /**
@@ -27,7 +27,7 @@ module.exports = function translateSource( source, sourceFile, translateString )
 		ranges: true,
 		onComment: comments,
 		onToken: tokens,
-		ecmaVersion: '2018'
+		ecmaVersion: 9
 	} );
 
 	let changesInCode = false;
