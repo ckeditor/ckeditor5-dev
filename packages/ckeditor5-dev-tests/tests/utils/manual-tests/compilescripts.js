@@ -59,7 +59,8 @@ describe( 'compileManualTestScripts', () => {
 			patterns: [ 'manualTestPattern' ],
 			themePath: 'path/to/theme',
 			language: 'en',
-			additionalLanguages: [ 'pl', 'ar' ]
+			additionalLanguages: [ 'pl', 'ar' ],
+			debug: [ 'CK_DEBUG' ]
 		} ).then( () => {
 			expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
 
@@ -71,7 +72,8 @@ describe( 'compileManualTestScripts', () => {
 				entries: {
 					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
 					'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
-				}
+				},
+				debug: [ 'CK_DEBUG' ]
 			} );
 
 			expect( stubs.webpack.calledOnce ).to.equal( true );

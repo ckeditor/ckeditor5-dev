@@ -76,7 +76,8 @@ describe( 'runManualTests', () => {
 					patterns: [ testsToExecute ],
 					themePath: null,
 					language: undefined,
-					additionalLanguages: undefined
+					additionalLanguages: undefined,
+					debug: undefined
 				} );
 
 				expect( spies.server.calledOnce ).to.equal( true );
@@ -98,7 +99,8 @@ describe( 'runManualTests', () => {
 				'build-classic',
 				'editor-classic/manual/classic.js'
 			],
-			themePath: 'path/to/theme'
+			themePath: 'path/to/theme',
+			debug: [ 'CK_DEBUG' ]
 		};
 
 		return runManualTests( options )
@@ -127,7 +129,8 @@ describe( 'runManualTests', () => {
 					patterns: testsToExecute,
 					themePath: 'path/to/theme',
 					language: undefined,
-					additionalLanguages: undefined
+					additionalLanguages: undefined,
+					debug: [ 'CK_DEBUG' ]
 				} );
 
 				expect( spies.server.calledOnce ).to.equal( true );
@@ -154,7 +157,8 @@ describe( 'runManualTests', () => {
 			additionalLanguages: [
 				'ar',
 				'en'
-			]
+			],
+			debug: [ 'CK_DEBUG' ]
 		};
 
 		return runManualTests( options )
@@ -183,7 +187,8 @@ describe( 'runManualTests', () => {
 					patterns: testsToExecute,
 					themePath: 'path/to/theme',
 					language: 'pl',
-					additionalLanguages: [ 'ar', 'en' ]
+					additionalLanguages: [ 'ar', 'en' ],
+					debug: [ 'CK_DEBUG' ]
 				} );
 
 				expect( spies.server.calledOnce ).to.equal( true );

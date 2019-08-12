@@ -16,7 +16,8 @@ module.exports = function parseArguments( args ) {
 		string: [
 			'files',
 			'browsers',
-			'reporter'
+			'reporter',
+			'debug'
 		],
 
 		boolean: [
@@ -33,7 +34,8 @@ module.exports = function parseArguments( args ) {
 			s: 'source-map',
 			v: 'verbose',
 			f: 'files',
-			b: 'browsers'
+			b: 'browsers',
+			d: 'debug'
 		},
 
 		default: {
@@ -54,6 +56,17 @@ module.exports = function parseArguments( args ) {
 
 	if ( typeof options.files === 'string' ) {
 		options.files = options.files.split( ',' );
+	}
+
+	if ( options.debug === 'false' || options.debug === false ) {
+		options.debug = [];
+	} else if ( typeof options.debug === 'string' ) {
+		options.debug = [
+			'CK_DEBUG',
+			...options.debug.split( ',' ).map( flag => 'CK_DEBUG_' + flag.toUpperCase() )
+		];
+	} else {
+		options.debug = [ 'CK_DEBUG' ];
 	}
 
 	options.language = options.language || 'en';
