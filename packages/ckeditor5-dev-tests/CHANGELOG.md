@@ -1,6 +1,31 @@
 Changelog
 =========
 
+## [16.7.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.6.0...@ckeditor/ckeditor5-dev-tests@16.7.0) (2019-08-12)
+
+### Features
+
+* Added support for debugging flags in automated and manual tests available via the `--debug` (`-d`) flag. Closes [ckeditor/ckeditor5#383](https://github.com/ckeditor/ckeditor5/issues/383). ([e55c8c2](https://github.com/ckeditor/ckeditor5-dev/commit/e55c8c2))
+
+
+## [16.6.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.5.0...@ckeditor/ckeditor5-dev-tests@16.6.0) (2019-08-09)
+
+### Features
+
+* Enabled automated test remote debugging in Chrome (Karma). Closes [#544](https://github.com/ckeditor/ckeditor5-dev/issues/544). ([4e18f95](https://github.com/ckeditor/ckeditor5-dev/commit/4e18f95))
+
+### Bug fixes
+
+* Forked repositories should be cloned properly on CI. Closes [#542](https://github.com/ckeditor/ckeditor5-dev/issues/542). ([84444de](https://github.com/ckeditor/ckeditor5-dev/commit/84444de))
+
+
+## [16.5.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.4.2...@ckeditor/ckeditor5-dev-tests@16.5.0) (2019-08-09)
+
+### Features
+
+* Added a proxy for static assets resources. Closes [#139](https://github.com/ckeditor/ckeditor5-dev/issues/139). ([5a47226](https://github.com/ckeditor/ckeditor5-dev/commit/5a47226))
+
+
 ## [16.4.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.4.1...@ckeditor/ckeditor5-dev-tests@16.4.2) (2019-07-23)
 
 ### Other changes

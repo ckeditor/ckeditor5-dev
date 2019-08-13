@@ -41,7 +41,8 @@ module.exports = function runManualTests( options ) {
 				patterns,
 				themePath,
 				language,
-				additionalLanguages
+				additionalLanguages,
+				debug: options.debug
 			} ),
 			compileManualTestHtmlFiles( {
 				buildDir,

@@ -37,7 +37,8 @@ module.exports = function compileManualTestScripts( options ) {
 		buildDir: options.buildDir,
 		themePath: options.themePath,
 		language: options.language,
-		additionalLanguages: options.additionalLanguages
+		additionalLanguages: options.additionalLanguages,
+		debug: options.debug
 	} );
 
 	return runWebpack( webpackConfig );

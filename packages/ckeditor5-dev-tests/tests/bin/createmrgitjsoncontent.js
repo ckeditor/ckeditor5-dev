@@ -105,4 +105,131 @@ describe( 'dev-tests/bin/create-mrgit-json', () => {
 			packages: 'packages/'
 		} );
 	} );
+
+	it( 'does not modify anything because required "packageName" is not specified', () => {
+		const mrgitJson = createMrGitJsonContent( {
+			dependencies: {
+				'@ckeditor/ckeditor5-core': '^0.8.1',
+				'@ckeditor/ckeditor5-engine': '0.10.0'
+			},
+			devDependencies: {
+				'@ckeditor/ckeditor5-basic-styles': '^0.8.1'
+			}
+		}, {
+			packageName: '@ckeditor/ckeditor5-utils',
+			commit: 'abcd1234'
+		} );
+
+		expect( mrgitJson ).to.deep.equal( {
+			dependencies: {
+				'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core',
+				'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',
+				'@ckeditor/ckeditor5-basic-styles': 'ckeditor/ckeditor5-basic-styles'
+			},
+			packages: 'packages/'
+		} );
+	} );
+
+	describe( 'forked repository', () => {
+		it( 'allows using forked repository (without specifying a commit)', () => {
+			const mrgitJson = createMrGitJsonContent( {
+				dependencies: {
+					'@ckeditor/ckeditor5-core': '^0.8.1',
+					'@ckeditor/ckeditor5-engine': '0.10.0'
+				},
+				devDependencies: {
+					'@ckeditor/ckeditor5-basic-styles': '^0.8.1'
+				}
+			}, {
+				packageName: '@ckeditor/ckeditor5-core',
+				repository: 'foo/bar'
+			} );
+
+			expect( mrgitJson ).to.deep.equal( {
+				dependencies: {
+					'@ckeditor/ckeditor5-core': 'foo/bar',
+					'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',
+					'@ckeditor/ckeditor5-basic-styles': 'ckeditor/ckeditor5-basic-styles'
+				},
+				packages: 'packages/'
+			} );
+		} );
+
+		it( 'allows using forked repository (with setting a proper commit)', () => {
+			const mrgitJson = createMrGitJsonContent( {
+				dependencies: {
+					'@ckeditor/ckeditor5-core': '^0.8.1',
+					'@ckeditor/ckeditor5-engine': '0.10.0'
+				},
+				devDependencies: {
+					'@ckeditor/ckeditor5-basic-styles': '^0.8.1'
+				}
+			}, {
+				packageName: '@ckeditor/ckeditor5-core',
+				repository: 'foo/bar',
+				commit: 'abcd1234'
+			} );
+
+			expect( mrgitJson ).to.deep.equal( {
+				dependencies: {
+					'@ckeditor/ckeditor5-core': 'foo/bar#abcd1234',
+					'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',
+					'@ckeditor/ckeditor5-basic-styles': 'ckeditor/ckeditor5-basic-styles'
+				},
+				packages: 'packages/'
+			} );
+		} );
+
+		it( 'does not modify anything because required "packageName" is not specified', () => {
+			const mrgitJson = createMrGitJsonContent( {
+				dependencies: {
+					'@ckeditor/ckeditor5-core': '^0.8.1',
+					'@ckeditor/ckeditor5-engine': '0.10.0'
+				},
+				devDependencies: {
+					'@ckeditor/ckeditor5-basic-styles': '^0.8.1'
+				}
+			}, {
+				packageName: '@ckeditor/ckeditor5-utils',
+				repository: 'foo/bar'
+			} );
+
+			expect( mrgitJson ).to.deep.equal( {
+				dependencies: {
+					'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core',
+					'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',
+					'@ckeditor/ckeditor5-basic-styles': 'ckeditor/ckeditor5-basic-styles'
+				},
+				packages: 'packages/'
+			} );
+		} );
+
+		it( 'removes `options.repository` value if the repository belongs to our ecosystem', () => {
+			const options = {
+				packageName: '@ckeditor/ckeditor5-core',
+				repository: 'ckeditor/ckeditor5-core'
+			};
+
+			const mrgitJson = createMrGitJsonContent( {
+				dependencies: {
+					'@ckeditor/ckeditor5-core': '^0.8.1',
+					'@ckeditor/ckeditor5-engine': '0.10.0'
+				},
+				devDependencies: {
+					'@ckeditor/ckeditor5-basic-styles': '^0.8.1'
+				}
+			}, options );
+
+			expect( mrgitJson ).to.deep.equal( {
+				dependencies: {
+					'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core',
+					'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',
+					'@ckeditor/ckeditor5-basic-styles': 'ckeditor/ckeditor5-basic-styles'
+				},
+				packages: 'packages/'
+			} );
+
+			expect( options.repository ).to.be.undefined;
+		} );
+	} );
 } );

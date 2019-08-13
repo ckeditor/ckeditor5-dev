@@ -60,7 +60,8 @@ module.exports = function getKarmaConfig( options ) {
 			files: Object.keys( options.globPatterns ).map( key => options.globPatterns[ key ] ),
 			sourceMap: options.sourceMap,
 			coverage: options.coverage,
-			themePath: options.themePath
+			themePath: options.themePath,
+			debug: options.debug
 		} ),
 
 		webpackMiddleware: {
@@ -93,7 +94,7 @@ module.exports = function getKarmaConfig( options ) {
 			},
 			CHROME_LOCAL: {
 				base: 'Chrome',
-				flags: [ '--disable-background-timer-throttling', '--js-flags="--expose-gc"' ]
+				flags: [ '--disable-background-timer-throttling', '--js-flags="--expose-gc"', '--remote-debugging-port=9222' ]
 			}
 		},
 

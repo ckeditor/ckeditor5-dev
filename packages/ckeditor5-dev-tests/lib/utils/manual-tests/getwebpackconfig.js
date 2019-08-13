@@ -71,6 +71,13 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 				{
 					test: /\.(txt|html)$/,
 					use: [ 'raw-loader' ]
+				},
+				{
+					test: /\.js$/,
+					loader: require.resolve( '../ck-debug-loader' ),
+					query: {
+						debugFlags: options.debug
+					}
 				}
 			]
 		},
