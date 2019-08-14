@@ -21,6 +21,11 @@ exports.handlers = {
 		// Prints only first 50 errors to stdout.
 		printErrors( errors, 50 );
 
+		// Mark the process as ended with error.
+		if ( errors.length ) {
+			process.exitCode = 1;
+		}
+
 		if ( process.env.JSDOC_VALIDATE_ONLY ) {
 			process.exit();
 		}
