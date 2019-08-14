@@ -44,7 +44,7 @@
     "raw-loader": "^3.1.0",
     "sinon": "^7.3.2",
     "slack-notify": "^0.1.7",
-    "style-loader": "1.0.0",
+    "style-loader": "^1.0.0",
     "webpack": "^4.39.1"
   },
   "devDependencies": {
