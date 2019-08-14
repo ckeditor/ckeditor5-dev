@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## [16.7.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.7.0...@ckeditor/ckeditor5-dev-tests@16.7.1) (2019-08-14)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
 ## [16.7.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.6.0...@ckeditor/ckeditor5-dev-tests@16.7.0) (2019-08-12)
 
 ### Features
