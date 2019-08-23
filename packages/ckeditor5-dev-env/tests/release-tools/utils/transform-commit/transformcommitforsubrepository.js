@@ -11,7 +11,7 @@ const mockery = require( 'mockery' );
 
 describe( 'dev-env/release-tools/utils/transform-commit', () => {
 	describe( 'transformCommitForSubRepository()', () => {
-		let transformCommitForSubRepository, sandbox;
+		let transformCommitForSubRepository, sandbox, stubs;
 
 		beforeEach( () => {
 			sandbox = sinon.createSandbox();
@@ -21,6 +21,16 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				warnOnReplace: false,
 				warnOnUnregistered: false
 			} );
+
+			stubs = {
+				getPackageJson: () => {
+					return {
+						repository: 'https://github.com/ckeditor/ckeditor5-dev'
+					};
+				}
+			};
+
+			mockery.registerMock( '../getpackagejson', stubs.getPackageJson );
 
 			transformCommitForSubRepository = require(
 				'../../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository'
