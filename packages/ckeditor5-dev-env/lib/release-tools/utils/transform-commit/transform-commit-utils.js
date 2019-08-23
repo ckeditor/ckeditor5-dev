@@ -79,7 +79,7 @@ const transformCommitUtils = {
 			const packageJson = getPackageJson();
 
 			// Due to merging our issue trackers, `packageJson.bugs` will point to the same place for every package.
-			// We cannot relay on this value anymore. See: https://github.com/ckeditor/ckeditor5/issues/1988.
+			// We cannot rely on this value anymore. See: https://github.com/ckeditor/ckeditor5/issues/1988.
 			// Instead of we can take a value from `packageJson.repository` and adjust it to match to our requirements.
 			let issuesUrl = ( typeof packageJson.repository === 'object' ) ? packageJson.repository.url : packageJson.repository;
 
