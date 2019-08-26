@@ -77,13 +77,26 @@ const transformCommitUtils = {
 			}
 
 			const packageJson = getPackageJson();
-			const issuesUrl = ( typeof packageJson.bugs === 'object' ) ? packageJson.bugs.url : packageJson.bugs;
+
+			// Due to merging our issue trackers, `packageJson.bugs` will point to the same place for every package.
+			// We cannot rely on this value anymore. See: https://github.com/ckeditor/ckeditor5/issues/1988.
+			// Instead of we can take a value from `packageJson.repository` and adjust it to match to our requirements.
+			let issuesUrl = ( typeof packageJson.repository === 'object' ) ? packageJson.repository.url : packageJson.repository;
 
 			if ( !issuesUrl ) {
-				throw new Error( `The package.json for "${ packageJson.name }" must contain the "bugs" property.` );
+				throw new Error( `The package.json for "${ packageJson.name }" must contain the "repository" property.` );
 			}
 
-			return `[#${ issueId }](${ issuesUrl }/${ issueId })`;
+			// If the value ends with ".git", we need to remove it.
+			issuesUrl = issuesUrl.replace( /\.git$/, '' );
+
+			// If the value contains "/issues" suffix, we don't need to add it.
+			if ( issuesUrl.match( /\/issues/ ) ) {
+				return `[#${ issueId }](${ issuesUrl }/${ issueId })`;
+			}
+
+			// But if doesn't, let's add it.
+			return `[#${ issueId }](${ issuesUrl }/issues/${ issueId })`;
 		} );
 	},
 

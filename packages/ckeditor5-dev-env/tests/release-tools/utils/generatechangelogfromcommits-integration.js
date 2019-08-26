@@ -39,8 +39,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			const packageJson = {
 				name: '@ckeditor/ckeditor5-test-package',
-				bugs: `${ url }/issues`,
-				repository: url
+				repository: `${ url }`
 			};
 
 			fs.writeFileSync(
