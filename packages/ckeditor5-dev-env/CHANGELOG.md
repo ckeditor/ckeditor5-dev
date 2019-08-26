@@ -1,6 +1,17 @@
 Changelog
 =========
 
+## [16.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@15.0.3...@ckeditor/ckeditor5-dev-env@16.0.0) (2019-08-26)
+
+### Other changes
+
+* Adjusted the changelog generator to match to planned changes related to merging issue trackers. Closes [ckeditor/ckeditor5#1988](https://github.com/ckeditor/ckeditor5/issues/1988). ([acfe1a6](https://github.com/ckeditor/ckeditor5-dev/commit/acfe1a6))
+
+### BREAKING CHANGES
+
+* Due to merging our issue trackers, pkgJson.bugs will point to the same place for every package. We cannot rely on this value anymore. See [ckeditor/ckeditor5#1988](https://github.com/ckeditor/ckeditor5/issues/1988). Instead of we can take a value from pkgJson.repository and adjust it to match to our requirements.
+
+
 ## [15.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@15.0.2...@ckeditor/ckeditor5-dev-env@15.0.3) (2019-07-23)
 
 ### Other changes
