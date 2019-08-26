@@ -60,7 +60,7 @@ function transformFilesToTestGlob( files ) {
 	return globMap;
 }
 
-function createEntryFile( globPatterns ) {
+function createEntryFile( globPatterns, consoleAllowed = false ) {
 	mkdirp.sync( path.dirname( ENTRY_FILE_PATH ) );
 	karmaLogger.setupFromConfig( { logLevel: 'INFO' } );
 
@@ -85,10 +85,22 @@ function createEntryFile( globPatterns ) {
 	}
 
 	const filesImports = allFiles
-		.map( file => 'import "' + file + '";' )
-		.join( '\n' );
+		.map( file => 'import "' + file + '";' );
 
-	fs.writeFileSync( ENTRY_FILE_PATH, filesImports + '\n' );
+	if ( !consoleAllowed ) {
+		filesImports.unshift( `
+		console.log( 'Console is not allowed.' );
+		const originalWarn = console.warn;
+
+		beforeEach( () => {
+			console.log = log => { originalWarn( 'Detected \`console.log()\`:', log ); throw new Error(); };
+			console.warn = warn => { originalWarn( 'Detected \`console.warn()\`:', warn ); throw new Error(); };
+			console.error = error => { originalWarn( 'Detected \`console.error()\`:', error ); throw new Error(); };
+		} );
+		` );
+	}
+
+	fs.writeFileSync( ENTRY_FILE_PATH, filesImports.join( '\n' ) + '\n' );
 
 	// Webpack watcher compiles the file in a loop. It causes to Karma that runs tests multiple times in watch mode.
 	// A ugly hack blocks the loop and tests are executed once.
