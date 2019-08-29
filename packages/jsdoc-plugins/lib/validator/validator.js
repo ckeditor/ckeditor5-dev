@@ -14,6 +14,7 @@ const logger = require( 'jsdoc/util/logger' );
 
 exports.handlers = {
 	processingComplete( e ) {
+		const isValidateOnly = process.env.JSDOC_VALIDATE_ONLY;
 		const validator = new DocletValidator( e.doclets );
 
 		const errors = validator.findErrors();
@@ -21,7 +22,16 @@ exports.handlers = {
 		// Prints only first 50 errors to stdout.
 		printErrors( errors, 50 );
 
-		if ( process.env.JSDOC_VALIDATE_ONLY ) {
+		// Mark the process as ended with error.
+		if ( errors.length ) {
+			process.exitCode = 1;
+
+			if ( isValidateOnly ) {
+				return logger.fatal( 'Aborted due to errors.' );
+			}
+		}
+
+		if ( isValidateOnly ) {
 			process.exit();
 		}
 	}
@@ -49,8 +59,4 @@ function printErrors( errors, maxSize ) {
 	}
 
 	process.stderr.write( errorMessages.join( '\n' ) );
-
-	if ( process.env.JSDOC_VALIDATE_ONLY ) {
-		logger.fatal( 'Aborted due to errors.' );
-	}
 }
