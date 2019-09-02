@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [3.0.6](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@3.0.5...@ckeditor/jsdoc-plugins@3.0.6) (2019-09-02)
+
+### Bug fixes
+
+* JSDoc validator will end with proper exit code if, during the validation, any error occurred. Closes [#550](https://github.com/ckeditor/ckeditor5-dev/issues/550). ([30f02e7](https://github.com/ckeditor/ckeditor5-dev/commit/30f02e7))
+
+
 ## [3.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@3.0.4...@ckeditor/jsdoc-plugins@3.0.5) (2019-08-12)
 
 ### Other changes
