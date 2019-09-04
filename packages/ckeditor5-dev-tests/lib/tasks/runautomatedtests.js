@@ -67,17 +67,24 @@ function createEntryFile( globPatterns ) {
 	const log = karmaLogger.create( 'config' );
 	const allFiles = [];
 
-	for ( const singleFile of Object.keys( globPatterns ) ) {
-		const resolvedPattern = globPatterns[ singleFile ];
-		const files = glob.sync( resolvedPattern );
+	for ( const singlePattern of Object.keys( globPatterns ) ) {
+		let hasFiles = false;
 
-		if ( !files.length ) {
-			log.warn( 'Pattern "%s" does not match any file.', singleFile );
+		for ( const resolvedPattern of globPatterns[ singlePattern ] ) {
+			const files = glob.sync( resolvedPattern );
+
+			if ( !files.length ) {
+				hasFiles = true;
+			}
+
+			allFiles.push(
+				...files.filter( file => !IGNORE_GLOBS.some( globPattern => minimatch( file, globPattern ) ) )
+			);
 		}
 
-		allFiles.push(
-			...files.filter( file => !IGNORE_GLOBS.some( globPattern => minimatch( file, globPattern ) ) )
-		);
+		if ( !hasFiles ) {
+			log.warn( 'Pattern "%s" does not match any file.', singlePattern );
+		}
 	}
 
 	if ( !allFiles.length ) {
