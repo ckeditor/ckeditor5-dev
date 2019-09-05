@@ -92,12 +92,17 @@ describe( 'runAutomatedTests', () => {
 			]
 		};
 
-		stubs.transformFileOptionToTestGlob.returns( '/workspace/packages/ckeditor5-basic-styles/tests/**/*.js' );
+		stubs.transformFileOptionToTestGlob.returns( [
+			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
+			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
+		] );
 
-		stubs.glob.sync.returns( [
+		stubs.glob.sync.onFirstCall().returns( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
 			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
 		] );
+
+		stubs.glob.sync.onSecondCall().returns( [] );
 
 		const expectedEntryPointContent = [
 			'import "/workspace/packages/ckeditor5-basic-styles/tests/bold.js";',
@@ -143,8 +148,15 @@ describe( 'runAutomatedTests', () => {
 			]
 		};
 
-		stubs.transformFileOptionToTestGlob.onFirstCall().returns( '/workspace/packages/ckeditor5-basic-foo/tests/**/*.js' );
-		stubs.transformFileOptionToTestGlob.onSecondCall().returns( '/workspace/packages/ckeditor5-bar-core/tests/**/*.js' );
+		stubs.transformFileOptionToTestGlob.onFirstCall().returns( [
+			'/workspace/packages/ckeditor5-basic-foo/tests/**/*.js',
+			'/workspace/packages/ckeditor-basic-foo/tests/**/*.js',
+		] );
+
+		stubs.transformFileOptionToTestGlob.onSecondCall().returns( [
+			'/workspace/packages/ckeditor5-bar-core/tests/**/*.js',
+			'/workspace/packages/ckeditor-bar-core/tests/**/*.js'
+		] );
 
 		stubs.glob.sync.returns( [] );
 

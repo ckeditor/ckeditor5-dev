@@ -11,7 +11,7 @@ const path = require( 'path' );
 const expect = require( 'chai' ).expect;
 
 describe( 'runManualTests', () => {
-	let sandbox, spies, testsToExecute, runManualTests;
+	let sandbox, spies, runManualTests;
 
 	beforeEach( () => {
 		sandbox = sinon.createSandbox();
@@ -50,8 +50,10 @@ describe( 'runManualTests', () => {
 	} );
 
 	it( 'should run all manual tests and return promise', () => {
-		const testsToExecute = 'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js';
-		spies.transformFileOptionToTestGlob.returns( testsToExecute );
+		spies.transformFileOptionToTestGlob.returns( [
+			'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+			'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
+		] );
 
 		return runManualTests( {} )
 			.then( () => {
@@ -65,7 +67,10 @@ describe( 'runManualTests', () => {
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
 				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
 					buildDir: 'workspace/build/.manual-tests',
-					patterns: [ testsToExecute ],
+					patterns: [
+						'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
+					],
 					language: undefined,
 					additionalLanguages: undefined
 				} );
@@ -73,7 +78,10 @@ describe( 'runManualTests', () => {
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
 				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
 					buildDir: 'workspace/build/.manual-tests',
-					patterns: [ testsToExecute ],
+					patterns: [
+						'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
+					],
 					themePath: null,
 					language: undefined,
 					additionalLanguages: undefined,
@@ -86,13 +94,15 @@ describe( 'runManualTests', () => {
 	} );
 
 	it( 'runs specified manual tests', () => {
-		testsToExecute = [
+		spies.transformFileOptionToTestGlob.onFirstCall().returns( [
 			'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
-			'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js'
-		];
+			'workspace/packages/ckeditor-build-classic/tests/**/manual/**/*.js'
+		] );
 
-		spies.transformFileOptionToTestGlob.onFirstCall().returns( testsToExecute[ 0 ] );
-		spies.transformFileOptionToTestGlob.onSecondCall().returns( testsToExecute[ 1 ] );
+		spies.transformFileOptionToTestGlob.onSecondCall().returns( [
+			'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js',
+			'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
+		] );
 
 		const options = {
 			files: [
@@ -118,7 +128,12 @@ describe( 'runManualTests', () => {
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
 				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
 					buildDir: 'workspace/build/.manual-tests',
-					patterns: testsToExecute,
+					patterns: [
+						'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor-build-classic/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js',
+						'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
+					],
 					language: undefined,
 					additionalLanguages: undefined
 				} );
@@ -126,7 +141,12 @@ describe( 'runManualTests', () => {
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
 				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
 					buildDir: 'workspace/build/.manual-tests',
-					patterns: testsToExecute,
+					patterns: [
+						'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor-build-classic/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js',
+						'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
+					],
 					themePath: 'path/to/theme',
 					language: undefined,
 					additionalLanguages: undefined,
@@ -139,13 +159,14 @@ describe( 'runManualTests', () => {
 	} );
 
 	it( 'allows specifying language and additionalLanguages (to CKEditorWebpackPlugin)', () => {
-		testsToExecute = [
+		spies.transformFileOptionToTestGlob.onFirstCall().returns( [
 			'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
-			'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js'
-		];
-
-		spies.transformFileOptionToTestGlob.onFirstCall().returns( testsToExecute[ 0 ] );
-		spies.transformFileOptionToTestGlob.onSecondCall().returns( testsToExecute[ 1 ] );
+			'workspace/packages/ckeditor4-build-classic/tests/**/manual/**/*.js'
+		] );
+		spies.transformFileOptionToTestGlob.onSecondCall().returns( [
+			'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js',
+			'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
+		] );
 
 		const options = {
 			files: [
@@ -176,7 +197,12 @@ describe( 'runManualTests', () => {
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
 				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
 					buildDir: 'workspace/build/.manual-tests',
-					patterns: testsToExecute,
+					patterns: [
+						'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor4-build-classic/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js',
+						'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
+					],
 					language: 'pl',
 					additionalLanguages: [ 'ar', 'en' ],
 				} );
@@ -184,7 +210,12 @@ describe( 'runManualTests', () => {
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
 				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
 					buildDir: 'workspace/build/.manual-tests',
-					patterns: testsToExecute,
+					patterns: [
+						'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor4-build-classic/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js',
+						'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
+					],
 					themePath: 'path/to/theme',
 					language: 'pl',
 					additionalLanguages: [ 'ar', 'en' ],

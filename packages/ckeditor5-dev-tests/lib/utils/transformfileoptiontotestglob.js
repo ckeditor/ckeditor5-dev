@@ -18,12 +18,19 @@
  *
  * @param {String} globPattern A path or pattern to determine the tests to execute.
  * @param {Boolean} [isManualTest=false] Whether the tests are manual or automated.
- * @returns {Array.<String>}
+ * @returns {Iterable.<String>}
  */
 module.exports = function transformFileOptionToTestGlob( globPattern, isManualTest = false ) {
+	const transformedPath = transformSingleGlobPattern( globPattern, { isManualTest } );
+	const transformedPathWithCKEditorPrefix = transformSingleGlobPattern( globPattern, { isManualTest, useCKEditorPrefix: true } );
+
+	if ( transformedPath === transformedPathWithCKEditorPrefix ) {
+		return [ transformedPath ];
+	}
+
 	return [
-		transformSingleGlobPattern( globPattern, { isManualTest } ),
-		transformSingleGlobPattern( globPattern, { isManualTest, useCKEditorPrefix: true } ),
+		transformedPath,
+		transformedPathWithCKEditorPrefix
 	];
 };
 
