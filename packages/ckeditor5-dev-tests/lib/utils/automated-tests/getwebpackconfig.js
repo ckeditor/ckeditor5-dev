@@ -96,14 +96,25 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 // E.g. workspace/ckeditor5-utils and ckeditor5/node_modules/ckeditor5-utils and every other path.
 function getPathsToIncludeForCoverage( globs ) {
 	return globs
-		.map( glob => {
-			const match = glob.match( /\/(ckeditor5-[^/]+)\// );
+		.reduce( ( returnedPatterns, globPatterns ) => {
+			returnedPatterns.push( ...globPatterns );
 
-			if ( match ) {
-				const packageName = match[ 1 ]
+			return returnedPatterns;
+		}, [] )
+		.map( glob => {
+			const matchCKEditor5 = glob.match( /\/(ckeditor5-[^/]+)\// );
+			const matchCKEditor = glob.match( /\/(ckeditor-[^/]+)\// );
+
+			if ( matchCKEditor5 ) {
+				const packageName = matchCKEditor5[ 1 ]
 					// A special case when --files='!engine' or --files='!engine|ui' was passed.
 					// Convert it to /ckeditor5-(?!engine)[^/]\/src\//.
 					.replace( /ckeditor5-!\(([^)]+)\)\*/, 'ckeditor5-(?!$1)[^' + escapedPathSep + ']+' );
+
+				return new RegExp( packageName + escapedPathSep + 'src' + escapedPathSep );
+			} else if ( matchCKEditor ) {
+				const packageName = matchCKEditor[ 1 ]
+					.replace( /ckeditor-!\(([^)]+)\)\*/, 'ckeditor-(?!$1)[^' + escapedPathSep + ']+' );
 
 				return new RegExp( packageName + escapedPathSep + 'src' + escapedPathSep );
 			}

@@ -27,70 +27,91 @@ describe( 'dev-tests/utils', () => {
 
 	describe( 'converts "/" to current package\'s tests', () => {
 		it( 'for automated tests', () => {
-			expect( transformFileOptionToTestGlob( '/' ) ).to.equal( '/workspace/tests/**/*.js' );
+			expect( transformFileOptionToTestGlob( '/' ) ).to.deep.equal( [ '/workspace/tests/**/*.js' ] );
 		} );
 
 		it( 'for manual tests', () => {
-			expect( transformFileOptionToTestGlob( '/', true ) ).to.equal( '/workspace/tests/**/manual/**/*.js' );
+			expect( transformFileOptionToTestGlob( '/', true ) ).to.deep.equal( [ '/workspace/tests/**/manual/**/*.js' ] );
 		} );
 	} );
 
 	describe( 'converts "*" to all packages\' files', () => {
 		it( 'for automated tests', () => {
-			expect( transformFileOptionToTestGlob( '*' ) ).to.equal( '/workspace/packages/ckeditor5-*/tests/**/*.js' );
+			expect( transformFileOptionToTestGlob( '*' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-*/tests/**/*.js',
+				'/workspace/packages/ckeditor-*/tests/**/*.js'
+			] );
 		} );
 
 		it( 'for manual tests', () => {
-			expect( transformFileOptionToTestGlob( '*', true ) )
-				.to.equal( '/workspace/packages/ckeditor5-*/tests/**/manual/**/*.js' );
+			expect( transformFileOptionToTestGlob( '*', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+				'/workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
+			] );
 		} );
 	} );
 
 	describe( 'converts package name to its files', () => {
 		it( 'for automated tests', () => {
-			expect( transformFileOptionToTestGlob( 'engine' ) )
-				.to.equal( '/workspace/packages/ckeditor5-engine/tests/**/*.js' );
+			expect( transformFileOptionToTestGlob( 'engine' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/**/*.js',
+				'/workspace/packages/ckeditor-engine/tests/**/*.js'
+			] );
 		} );
 
 		it( 'for manual tests', () => {
-			expect( transformFileOptionToTestGlob( 'engine', true ) )
-				.to.equal( '/workspace/packages/ckeditor5-engine/tests/**/manual/**/*.js' );
+			expect( transformFileOptionToTestGlob( 'engine', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/**/manual/**/*.js',
+				'/workspace/packages/ckeditor-engine/tests/**/manual/**/*.js'
+			] );
 		} );
 	} );
 
 	describe( 'ignores package starting with "!"', () => {
 		it( 'for automated tests', () => {
-			expect( transformFileOptionToTestGlob( '!engine' ) )
-				.to.equal( '/workspace/packages/ckeditor5-!(engine)*/tests/**/*.js' );
+			expect( transformFileOptionToTestGlob( '!engine' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-!(engine)*/tests/**/*.js',
+				'/workspace/packages/ckeditor-!(engine)*/tests/**/*.js'
+			] );
 		} );
 
 		it( 'for manual tests', () => {
-			expect( transformFileOptionToTestGlob( '!engine', true ) )
-				.to.equal( '/workspace/packages/ckeditor5-!(engine)*/tests/**/manual/**/*.js' );
+			expect( transformFileOptionToTestGlob( '!engine', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-!(engine)*/tests/**/manual/**/*.js',
+				'/workspace/packages/ckeditor-!(engine)*/tests/**/manual/**/*.js'
+			] );
 		} );
 	} );
 
 	describe( 'converts path to files', () => {
 		it( 'for automated tests', () => {
-			expect( transformFileOptionToTestGlob( 'engine/view' ) )
-				.to.equal( '/workspace/packages/ckeditor5-engine/tests/view/**/*.js' );
+			expect( transformFileOptionToTestGlob( 'engine/view' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/view/**/*.js',
+				'/workspace/packages/ckeditor-engine/tests/view/**/*.js'
+			] );
 		} );
 
 		it( 'for manual tests', () => {
-			expect( transformFileOptionToTestGlob( 'engine/view/manual', true ) )
-				.to.equal( '/workspace/packages/ckeditor5-engine/tests/view/manual/**/*.js' );
+			expect( transformFileOptionToTestGlob( 'engine/view/manual', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/view/manual/**/*.js',
+				'/workspace/packages/ckeditor-engine/tests/view/manual/**/*.js'
+			] );
 		} );
 	} );
 
 	describe( 'converts simplified glob to all files', () => {
 		it( 'for automated tests', () => {
-			expect( transformFileOptionToTestGlob( 'engine/view/*' ) )
-				.to.equal( '/workspace/packages/ckeditor5-engine/tests/view/*/**/*.js' );
+			expect( transformFileOptionToTestGlob( 'engine/view/*' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/view/*/**/*.js',
+				'/workspace/packages/ckeditor-engine/tests/view/*/**/*.js'
+			] );
 		} );
 
 		it( 'for manual tests', () => {
-			expect( transformFileOptionToTestGlob( 'engine/view/manual/*.js', true ) )
-				.to.equal( '/workspace/packages/ckeditor5-engine/tests/view/manual/*.js' );
+			expect( transformFileOptionToTestGlob( 'engine/view/manual/*.js', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/view/manual/*.js',
+				'/workspace/packages/ckeditor-engine/tests/view/manual/*.js'
+			] );
 		} );
 	} );
 } );

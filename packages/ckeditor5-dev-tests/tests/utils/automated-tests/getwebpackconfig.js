@@ -68,29 +68,41 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 	it( 'should return webpack configutation with istanbul loader containing include regexp', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
 			coverage: true,
-			files: [ 'node_modules/ckeditor5-utils/tests/**/*.js' ],
+			files: [
+				[
+					'node_modules/ckeditor5-utils/tests/**/*.js',
+					'node_modules/ckeditor-utils/tests/**/*.js',
+				]
+			],
 		} );
 
 		const istanbulLoader = webpackConfig.module.rules
 			.find( rule => rule.loader === 'istanbul-instrumenter-loader' );
 
-		const expectedRegExp = new RegExp( [ 'ckeditor5-utils', 'src', '' ].join( escapedPathSep ) );
-
-		expect( istanbulLoader.include ).to.deep.equal( [ expectedRegExp ] );
+		expect( istanbulLoader.include ).to.deep.equal( [
+			new RegExp( [ 'ckeditor5-utils', 'src', '' ].join( escapedPathSep ) ),
+			new RegExp( [ 'ckeditor-utils', 'src', '' ].join( escapedPathSep ) )
+		] );
 	} );
 
 	it( 'should return webpack configutation with istanbul loader containing include regexp', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
 			coverage: true,
-			files: [ 'node_modules/ckeditor5-!(utils)/tests/**/*.js' ],
+			files: [
+				[
+					'node_modules/ckeditor5-!(utils)/tests/**/*.js',
+					'node_modules/ckeditor-!(utils)/tests/**/*.js'
+				]
+			],
 		} );
 
 		const istanbulLoader = webpackConfig.module.rules
 			.find( rule => rule.loader === 'istanbul-instrumenter-loader' );
 
-		const expectedRegExp = new RegExp( [ 'ckeditor5-!(utils)', 'src', '' ].join( escapedPathSep ) );
-
-		expect( istanbulLoader.include ).to.deep.equal( [ expectedRegExp ] );
+		expect( istanbulLoader.include ).to.deep.equal( [
+			new RegExp( [ 'ckeditor5-!(utils)', 'src', '' ].join( escapedPathSep ) ),
+			new RegExp( [ 'ckeditor-!(utils)', 'src', '' ].join( escapedPathSep ) )
+		] );
 	} );
 
 	it( 'should return webpack configutation with correct devtool', () => {

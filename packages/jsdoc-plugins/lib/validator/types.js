@@ -38,6 +38,7 @@ const BASIC_TYPES = [
 	'Window',
 	'ErrorEvent',
 	'PromiseRejectionEvent',
+	'Blob',
 
 	// Web APIs
 	'File',

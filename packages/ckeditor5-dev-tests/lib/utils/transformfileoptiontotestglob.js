@@ -16,14 +16,39 @@
  * 4. path – 'engine/view' -> 'ckeditor5-engine/tests/view/**\/*.js'
  * 5. simplified glob – 'engine/view/**\/*.js' -> 'ckeditor5-engine/tests/view/**\/*.js'
  *
- * @param {String} fileOption A path or pattern to determine the tests to execute.
+ * @param {String} globPattern A path or pattern to determine the tests to execute.
  * @param {Boolean} [isManualTest=false] Whether the tests are manual or automated.
+ * @returns {Iterable.<String>}
+ */
+module.exports = function transformFileOptionToTestGlob( globPattern, isManualTest = false ) {
+	const transformedPath = transformSingleGlobPattern( globPattern, { isManualTest } );
+	const transformedPathWithCKEditorPrefix = transformSingleGlobPattern( globPattern, { isManualTest, useCKEditorPrefix: true } );
+
+	if ( transformedPath === transformedPathWithCKEditorPrefix ) {
+		return [ transformedPath ];
+	}
+
+	return [
+		transformedPath,
+		transformedPathWithCKEditorPrefix
+	];
+};
+
+/**
+ * @param {String} globPattern
+ * @param {Object} [options={}]
+ * @param {Boolean} [options.isManualTest=false] Whether the tests are manual or automated.
+ * @param {Boolean} [options.useCKEditorPrefix=false] If true, the returned path will use 'ckeditor' prefix instead of 'ckeditor5'.
  * @returns {String}
  */
-module.exports = function transformFileOptionToTestGlob( fileOption, isManualTest = false ) {
+function transformSingleGlobPattern( globPattern, options ) {
+	const isManualTest = options.isManualTest || false;
+	const useCKEditorPrefix = options.useCKEditorPrefix || false;
+	const prefix = useCKEditorPrefix ? 'ckeditor' : 'ckeditor5';
+
 	const globSep = '/';
 	const cwdChunks = process.cwd().split( require( 'path' ).sep );
-	const chunks = fileOption.split( globSep );
+	const chunks = globPattern.split( globSep );
 	const packageName = chunks.shift();
 	const globSuffix = [ 'tests', '**' ];
 	let returnChunks = cwdChunks.concat( [ 'packages' ] );
@@ -35,22 +60,22 @@ module.exports = function transformFileOptionToTestGlob( fileOption, isManualTes
 	globSuffix.push( '*.js' );
 
 	// 0.
-	if ( fileOption === '/' ) {
+	if ( globPattern === '/' ) {
 		returnChunks = cwdChunks.concat( globSuffix );
 	} else if ( chunks.length === 0 ) {
 		// 1.
 		if ( packageName == '*' ) {
-			returnChunks.push( 'ckeditor5-*', ...globSuffix );
+			returnChunks.push( prefix + '-*', ...globSuffix );
 		} else if ( packageName.startsWith( '!' ) ) {
 			// 3.
-			returnChunks.push( 'ckeditor5-!(' + packageName.slice( 1 ) + ')*', ...globSuffix );
+			returnChunks.push( prefix + '-!(' + packageName.slice( 1 ) + ')*', ...globSuffix );
 		} else {
 			// 2.
-			returnChunks.push( 'ckeditor5-' + packageName, ...globSuffix );
+			returnChunks.push( prefix + '-' + packageName, ...globSuffix );
 		}
 	} else {
 		// 5.
-		returnChunks.push( 'ckeditor5-' + packageName, 'tests', ...chunks );
+		returnChunks.push( prefix + '-' + packageName, 'tests', ...chunks );
 
 		if ( !chunks[ chunks.length - 1 ].endsWith( '.js' ) ) {
 			// 4.
@@ -59,4 +84,4 @@ module.exports = function transformFileOptionToTestGlob( fileOption, isManualTes
 	}
 
 	return returnChunks.join( globSep );
-};
+}

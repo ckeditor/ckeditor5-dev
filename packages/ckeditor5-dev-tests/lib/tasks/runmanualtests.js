@@ -28,7 +28,12 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
 module.exports = function runManualTests( options ) {
 	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
 	const files = ( options.files && options.files.length ) ? options.files : [ '*' ];
-	const patterns = files.map( file => transformFileOptionToTestGlob( file, true ) );
+	const patterns = files.map( file => transformFileOptionToTestGlob( file, true ) )
+		.reduce( ( returnedPatterns, globPatterns ) => {
+			returnedPatterns.push( ...globPatterns );
+
+			return returnedPatterns;
+		}, [] );
 	const themePath = options.themePath || null;
 	const language = options.language;
 	const additionalLanguages = options.additionalLanguages;
