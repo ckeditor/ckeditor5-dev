@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [3.0.7](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@3.0.6...@ckeditor/jsdoc-plugins@3.0.7) (2019-09-09)
+
+### Other changes
+
+* Adjusted dev tools to work with "ckeditor-" prefix. See [ckeditor/ckeditor5#924](https://github.com/ckeditor/ckeditor5/issues/924). ([75b226f](https://github.com/ckeditor/ckeditor5-dev/commit/75b226f))
+
+
 ## [3.0.6](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@3.0.5...@ckeditor/jsdoc-plugins@3.0.6) (2019-09-02)
 
 ### Bug fixes

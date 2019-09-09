@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [16.7.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.7.1...@ckeditor/ckeditor5-dev-tests@16.7.2) (2019-09-09)
+
+### Other changes
+
+* Adjusted dev tools to work with "ckeditor-" prefix. See [ckeditor/ckeditor5#924](https://github.com/ckeditor/ckeditor5/issues/924). ([75b226f](https://github.com/ckeditor/ckeditor5-dev/commit/75b226f))
+
+
 ## [16.7.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.7.0...@ckeditor/ckeditor5-dev-tests@16.7.1) (2019-08-14)
 
 Internal changes only (updated dependencies, documentation, etc.).
