@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [16.7.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.7.2...@ckeditor/ckeditor5-dev-tests@16.7.3) (2019-09-10)
+
+### Bug fixes
+
+* Fixed a script that extracts a package name from a current testing package. Now it uses a regular expression and works with ckeditor- prefix as well. ([2b96d7c](https://github.com/ckeditor/ckeditor5-dev/commit/2b96d7c))
+
+
 ## [16.7.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.7.1...@ckeditor/ckeditor5-dev-tests@16.7.2) (2019-09-09)
 
 ### Other changes
