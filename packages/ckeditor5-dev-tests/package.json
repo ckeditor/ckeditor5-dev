@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-tests",
-  "version": "16.7.3",
+  "version": "16.7.4",
   "description": "Testing environment for CKEditor 5.",
   "keywords": [],
   "main": "lib/index.js",
