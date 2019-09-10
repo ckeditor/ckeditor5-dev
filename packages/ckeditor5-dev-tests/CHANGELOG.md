@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [16.7.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.7.3...@ckeditor/ckeditor5-dev-tests@16.7.4) (2019-09-10)
+
+### Bug fixes
+
+* Mr. Git will handle "ckeditor-" packages on CI. ([03b2bac](https://github.com/ckeditor/ckeditor5-dev/commit/03b2bac))
+
+
 ## [16.7.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.7.2...@ckeditor/ckeditor5-dev-tests@16.7.3) (2019-09-10)
 
 ### Bug fixes
