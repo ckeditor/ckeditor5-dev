@@ -24,7 +24,7 @@ module.exports = function createMrGitJsonContent( packageJson, options ) {
 		const dependencyVersion = dependencies[ dependencyName ];
 
 		if (
-			!dependencyName.startsWith( '@ckeditor/ckeditor5' ) &&
+			!dependencyName.match( /^@ckeditor\/ckeditor5?/ ) &&
 			!dependencyVersion.includes( 'cksource/ckeditor' )
 		) {
 			continue;

@@ -41,6 +41,27 @@ describe( 'dev-tests/bin/create-mrgit-json', () => {
 		} );
 	} );
 
+	it( 'should work with "ckeditor-" prefix', () => {
+		const mrgitJson = createMrGitJsonContent( {
+			dependencies: {
+				'@ckeditor/ckeditor-core': '^0.8.1',
+				'@ckeditor/ckeditor-engine': '0.10.0'
+			},
+			devDependencies: {
+				'@ckeditor/ckeditor5-basic-styles': '^0.8.1'
+			}
+		} );
+
+		expect( mrgitJson ).to.deep.equal( {
+			dependencies: {
+				'@ckeditor/ckeditor-core': 'ckeditor/ckeditor-core',
+				'@ckeditor/ckeditor-engine': 'ckeditor/ckeditor-engine',
+				'@ckeditor/ckeditor5-basic-styles': 'ckeditor/ckeditor5-basic-styles'
+			},
+			packages: 'packages/'
+		} );
+	} );
+
 	it( 'should return an object with hashed dependency versions for hashed github versions of dependencies', () => {
 		const mrgitJson = createMrGitJsonContent( {
 			dependencies: {

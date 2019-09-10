@@ -18,7 +18,7 @@ module.exports = function resolver( packageName, options ) {
 	let repositoryUrl = options.dependencies[ packageName ];
 
 	if ( !repositoryUrl ) {
-		if ( packageName.match( /^@ckeditor\/ckeditor5-(?!dev)/ ) ) {
+		if ( packageName.match( /^@ckeditor\/ckeditor5?-(?!dev)/ ) ) {
 			repositoryUrl = packageName.slice( 1 );
 		} else {
 			return null;
