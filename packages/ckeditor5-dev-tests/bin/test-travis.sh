@@ -9,7 +9,7 @@ PACKAGE_ROOT=$(pwd)
 # Path to the exeutable in CWD.
 ROOT_BIN=${PACKAGE_ROOT}/node_modules/.bin
 
-PACKAGE_NAME=$(node -e "console.log( require( process.cwd() + '/package.json' ).name.replace( '@ckeditor/ckeditor5-', '' ) )");
+PACKAGE_NAME=$(node -e "console.log( require( process.cwd() + '/package.json' ).name.replace( /@ckeditor\/ckeditor5?-/, '' ) )");
 
 # The `.ckeditor5_test_environment` file is created by the "install-dependencies" script.
 CKEDITOR5_TEST_ENVIRONMENT=$(cat ${PACKAGE_ROOT}/.ckeditor5_test_environment)
