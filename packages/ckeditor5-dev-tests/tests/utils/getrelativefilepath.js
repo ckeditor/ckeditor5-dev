@@ -42,6 +42,14 @@ describe( 'dev-tests/utils', () => {
 				);
 				/* eslint-enable max-len */
 			} );
+
+			it( 'returns a proper path for "ckeditor-" prefix', () => {
+				checkPath( '/work/space/ckeditor-foo/tests/manual/foo.js', 'ckeditor-foo/tests/manual/foo.js' );
+			} );
+
+			it( 'returns a proper path to from the main (root) package', () => {
+				checkPath( '/work/space/ckeditor5/tests/manual/foo.js', 'ckeditor5/tests/manual/foo.js' );
+			} );
 		} );
 
 		describe( 'Windows paths', () => {
