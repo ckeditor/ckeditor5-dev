@@ -25,7 +25,8 @@ module.exports = function parseArguments( args ) {
 			'coverage',
 			'source-map',
 			'verbose',
-			'server'
+			'server',
+			'disallow-console-use'
 		],
 
 		alias: {
@@ -46,11 +47,13 @@ module.exports = function parseArguments( args ) {
 			coverage: false,
 			verbose: false,
 			'source-map': false,
-			server: false
+			server: false,
+			'disallow-console-use': false
 		}
 	};
 	const options = minimist( args, minimistConfig );
 
+	options.disallowConsoleUse = options[ 'disallow-console-use' ];
 	options.sourceMap = options[ 'source-map' ];
 	options.browsers = options.browsers.split( ',' );
 

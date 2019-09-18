@@ -30,20 +30,23 @@ const IGNORE_GLOBS = [
 // An absolute path to the entry file that will be passed to Karma.
 const ENTRY_FILE_PATH = path.join( process.cwd(), 'build', '.automated-tests', 'entry-point.js' );
 
-module.exports = function runAutomatedTests( options ) {
-	return Promise.resolve()
-		.then( () => {
-			const globPatterns = transformFilesToTestGlob( options.files );
+module.exports = async function runAutomatedTests( options ) {
+	if ( !options.disallowConsoleUse ) {
+		console.warn( chalk.yellow(
+			'⚠ Console use is allowed. Use `--disallow-console-use` to disallow console use.'
+		) );
+	}
 
-			createEntryFile( globPatterns );
+	const globPatterns = transformFilesToTestGlob( options.files );
 
-			const optionsForKarma = Object.assign( {}, options, {
-				entryFile: ENTRY_FILE_PATH,
-				globPatterns
-			} );
+	createEntryFile( globPatterns, options.disallowConsoleUse );
 
-			return runKarma( optionsForKarma );
-		} );
+	const optionsForKarma = Object.assign( {}, options, {
+		entryFile: ENTRY_FILE_PATH,
+		globPatterns
+	} );
+
+	return runKarma( optionsForKarma );
 };
 
 function transformFilesToTestGlob( files ) {
@@ -60,7 +63,7 @@ function transformFilesToTestGlob( files ) {
 	return globMap;
 }
 
-function createEntryFile( globPatterns, consoleAllowed = false ) {
+function createEntryFile( globPatterns, disallowConsoleUse ) {
 	mkdirp.sync( path.dirname( ENTRY_FILE_PATH ) );
 	karmaLogger.setupFromConfig( { logLevel: 'INFO' } );
 
@@ -94,16 +97,15 @@ function createEntryFile( globPatterns, consoleAllowed = false ) {
 	const filesImports = allFiles
 		.map( file => 'import "' + file + '";' );
 
-	if ( !consoleAllowed ) {
+	if ( disallowConsoleUse ) {
 		filesImports.unshift( `
-		console.log( 'Console is not allowed.' );
-		const originalWarn = console.warn;
+const originalWarn = console.warn;
 
-		beforeEach( () => {
-			console.log = log => { originalWarn( 'Detected \`console.log()\`:', log ); throw new Error(); };
-			console.warn = warn => { originalWarn( 'Detected \`console.warn()\`:', warn ); throw new Error(); };
-			console.error = error => { originalWarn( 'Detected \`console.error()\`:', error ); throw new Error(); };
-		} );
+beforeEach( () => {
+	console.log = log => { originalWarn( 'Detected \`console.log()\`:', log ); throw new Error(); };
+	console.warn = warn => { originalWarn( 'Detected \`console.warn()\`:', warn ); throw new Error(); };
+	console.error = error => { originalWarn( 'Detected \`console.error()\`:', error ); throw new Error(); };
+} );
 		` );
 	}
 
