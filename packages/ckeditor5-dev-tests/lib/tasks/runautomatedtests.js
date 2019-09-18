@@ -94,22 +94,31 @@ function createEntryFile( globPatterns, disallowConsoleUse ) {
 		throw new Error( 'Not found files to tests. Specified patterns are invalid.' );
 	}
 
-	const filesImports = allFiles
+	const entryFileContent = allFiles
 		.map( file => 'import "' + file + '";' );
 
 	if ( disallowConsoleUse ) {
-		filesImports.unshift( `
+		entryFileContent.unshift( `
 const originalWarn = console.warn;
 
 beforeEach( () => {
-	console.log = log => { originalWarn( 'Detected \`console.log()\`:', log ); throw new Error(); };
-	console.warn = warn => { originalWarn( 'Detected \`console.warn()\`:', warn ); throw new Error(); };
-	console.error = error => { originalWarn( 'Detected \`console.error()\`:', error ); throw new Error(); };
+	console.log = ( ...data ) => {
+		originalWarn( 'Detected \`console.log()\`:', ...data );
+		throw new Error( 'Detected \`console.log()\`' );
+	};
+	console.warn = ( ...data ) => {
+		originalWarn( 'Detected \`console.warn()\`:', ...data );
+		throw new Error( 'Detected \`console.warn()\`' );
+	};
+	console.error = ( ...data ) => {
+		originalWarn( 'Detected \`console.error()\`:', ...data );
+		throw new Error( 'Detected \`console.error()\`' );
+	};
 } );
 		` );
 	}
 
-	fs.writeFileSync( ENTRY_FILE_PATH, filesImports.join( '\n' ) + '\n' );
+	fs.writeFileSync( ENTRY_FILE_PATH, entryFileContent.join( '\n' ) + '\n' );
 
 	// Webpack watcher compiles the file in a loop. It causes to Karma that runs tests multiple times in watch mode.
 	// A ugly hack blocks the loop and tests are executed once.
