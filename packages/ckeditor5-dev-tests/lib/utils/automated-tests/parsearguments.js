@@ -82,5 +82,22 @@ module.exports = function parseArguments( args ) {
 		delete options[ alias ];
 	}
 
+	
+	if ( process.platform === 'win32' ) {
+		const exePath = process.env.EXEPATH;
+
+		options.files = options.files.map( file => {
+			if ( normalizePath( file ) === normalizePath( exePath ) ) {
+				return '/';
+			}
+
+			return file;
+		} );
+	}
+
 	return options;
 };
+
+function normalizePath( file ) {
+	return file.replace(/\\/g, '/').replace(/\/$/, '');
+}
