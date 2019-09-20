@@ -112,10 +112,9 @@ describe( 'runAutomatedTests', () => {
 			''
 		].join( '\n' );
 
-		// Timeout simulates a Karma's work.
 		setTimeout( () => {
 			karmaServerCallback( 0 );
-		}, 1000 );
+		} );
 
 		runAutomatedTests( options )
 			.then( () => {
@@ -202,10 +201,9 @@ describe( 'runAutomatedTests', () => {
 
 		stubs.glob.sync.onSecondCall().returns( [] );
 
-		// Timeout simulates a Karma's work.
 		setTimeout( () => {
 			karmaServerCallback( 0 );
-		}, 1000 );
+		} );
 
 		return runAutomatedTests( options )
 			.then( () => {
@@ -265,10 +263,9 @@ beforeEach( () => {
 
 		stubs.glob.sync.onSecondCall().returns( [] );
 
-		// Timeout simulates a Karma's work.
 		setTimeout( () => {
 			karmaServerCallback( 0 );
-		}, 1000 );
+		} );
 
 		return runAutomatedTests( options )
 			.then( () => {
@@ -322,10 +319,9 @@ beforeEach( () => {
 
 		stubs.glob.sync.onSecondCall().returns( [] );
 
-		// Timeout simulates a Karma's work.
 		setTimeout( () => {
 			karmaServerCallback( 0 );
-		}, 1000 );
+		} );
 
 		return runAutomatedTests( options )
 			.then( () => {
