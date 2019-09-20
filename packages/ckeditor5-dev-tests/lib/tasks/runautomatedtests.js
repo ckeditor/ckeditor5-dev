@@ -30,7 +30,7 @@ const IGNORE_GLOBS = [
 // An absolute path to the entry file that will be passed to Karma.
 const ENTRY_FILE_PATH = path.join( process.cwd(), 'build', '.automated-tests', 'entry-point.js' );
 
-module.exports = async function runAutomatedTests( options ) {
+module.exports = function runAutomatedTests( options ) {
 	if ( !options.disallowConsoleUse ) {
 		console.warn( chalk.yellow(
 			'⚠ Console use is allowed. Use `--disallow-console-use` to disallow console use.'
