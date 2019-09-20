@@ -104,26 +104,12 @@ function createEntryFile( globPatterns, disallowConsoleUse ) {
 const originalWarn = console.warn;
 
 beforeEach( () => {
-	console.log = ( ...data ) => {
-		originalWarn( 'Detected \`console.log()\`:', ...data );
-		throw new Error( 'Detected \`console.log()\`' );
-	};
-	console.warn = ( ...data ) => {
-		originalWarn( 'Detected \`console.warn()\`:', ...data );
-		throw new Error( 'Detected \`console.warn()\`' );
-	};
-	console.error = ( ...data ) => {
-		originalWarn( 'Detected \`console.error()\`:', ...data );
-		throw new Error( 'Detected \`console.error()\`' );
-	};
-	console.info = ( ...data ) => {
-		originalWarn( 'Detected \`console.info()\`:', ...data );
-		throw new Error( 'Detected \`console.info()\`' );
-	};
-	console.debug = ( ...data ) => {
-		originalWarn( 'Detected \`console.debug()\`:', ...data );
-		throw new Error( 'Detected \`console.debug()\`' );
-	};
+	Object.getOwnPropertyNames( console ).forEach( method => {
+		console[ method ] = ( ...data ) => {
+			originalWarn( 'Detected \`console.' + method + '()\`:', ...data );
+			throw new Error( 'Detected \`console.' + method + '()\`:' );
+		}
+	} );
 } );
 		` );
 	}

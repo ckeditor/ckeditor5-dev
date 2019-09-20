@@ -14,6 +14,19 @@ const chalk = require( 'chalk' );
 describe( 'runAutomatedTests', () => {
 	let sandbox, stubs, runAutomatedTests, karmaServerCallback;
 
+	const codeMakingConsoleUseThrowErrors = `
+const originalWarn = console.warn;
+
+beforeEach( () => {
+	Object.getOwnPropertyNames( console ).forEach( method => {
+		console[ method ] = ( ...data ) => {
+			originalWarn( 'Detected \`console.' + method + '()\`:', ...data );
+			throw new Error( 'Detected \`console.' + method + '()\`:' );
+		}
+	} );
+} );
+	`;
+
 	beforeEach( () => {
 		karmaServerCallback = null;
 		sandbox = sinon.createSandbox();
@@ -216,32 +229,6 @@ describe( 'runAutomatedTests', () => {
 	} );
 
 	it( 'should not add the code making console use throw an error when the `disallowConsoleUse` option is set to false', () => {
-		const codeMakingConsoleUseThrowErrors = `
-const originalWarn = console.warn;
-
-beforeEach( () => {
-	console.log = ( ...data ) => {
-		originalWarn( 'Detected \`console.log()\`:', ...data );
-		throw new Error( 'Detected \`console.log()\`' );
-	};
-	console.warn = ( ...data ) => {
-		originalWarn( 'Detected \`console.warn()\`:', ...data );
-		throw new Error( 'Detected \`console.warn()\`' );
-	};
-	console.error = ( ...data ) => {
-		originalWarn( 'Detected \`console.error()\`:', ...data );
-		throw new Error( 'Detected \`console.error()\`' );
-	};
-	console.info = ( ...data ) => {
-		originalWarn( 'Detected \`console.info()\`:', ...data );
-		throw new Error( 'Detected \`console.info()\`' );
-	};
-	console.debug = ( ...data ) => {
-		originalWarn( 'Detected \`console.debug()\`:', ...data );
-		throw new Error( 'Detected \`console.debug()\`' );
-	};
-} );`;
-
 		const options = {
 			files: [
 				'basic-styles'
@@ -274,32 +261,6 @@ beforeEach( () => {
 	} );
 
 	it( 'should add the code making console use throw an error when the `disallowConsoleUse` option is set to true', () => {
-		const codeMakingConsoleUseThrowErrors = `
-const originalWarn = console.warn;
-
-beforeEach( () => {
-	console.log = ( ...data ) => {
-		originalWarn( 'Detected \`console.log()\`:', ...data );
-		throw new Error( 'Detected \`console.log()\`' );
-	};
-	console.warn = ( ...data ) => {
-		originalWarn( 'Detected \`console.warn()\`:', ...data );
-		throw new Error( 'Detected \`console.warn()\`' );
-	};
-	console.error = ( ...data ) => {
-		originalWarn( 'Detected \`console.error()\`:', ...data );
-		throw new Error( 'Detected \`console.error()\`' );
-	};
-	console.info = ( ...data ) => {
-		originalWarn( 'Detected \`console.info()\`:', ...data );
-		throw new Error( 'Detected \`console.info()\`' );
-	};
-	console.debug = ( ...data ) => {
-		originalWarn( 'Detected \`console.debug()\`:', ...data );
-		throw new Error( 'Detected \`console.debug()\`' );
-	};
-} );`;
-
 		const options = {
 			files: [
 				'basic-styles'
