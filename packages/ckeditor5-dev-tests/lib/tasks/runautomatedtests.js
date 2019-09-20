@@ -116,6 +116,14 @@ beforeEach( () => {
 		originalWarn( 'Detected \`console.error()\`:', ...data );
 		throw new Error( 'Detected \`console.error()\`' );
 	};
+	console.info = ( ...data ) => {
+		originalWarn( 'Detected \`console.info()\`:', ...data );
+		throw new Error( 'Detected \`console.info()\`' );
+	};
+	console.debug = ( ...data ) => {
+		originalWarn( 'Detected \`console.debug()\`:', ...data );
+		throw new Error( 'Detected \`console.debug()\`' );
+	};
 } );
 		` );
 	}

@@ -53,7 +53,7 @@ You can also use the bin script for testing a package:
 * `files` - Specify file(s) to test. Also available as an alias: `-f`.
 * `browsers` - Browsers which will be used to run the tests. Also available as an alias: `-b`.
 * `reporter` - Mocha reporter – either `mocha` (default) or `dots` (less verbose one).
-* `disallow-console-use` - Makes `console.log()/warn()/error()` throw an error when set to `true`
+* `disallow-console-use` - Whether to throw an error when the `console.log()/warn()/error()/info()/debug()` is executed.
 
 #### Examples
 
