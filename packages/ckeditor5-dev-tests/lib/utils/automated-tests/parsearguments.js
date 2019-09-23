@@ -82,22 +82,13 @@ module.exports = function parseArguments( args ) {
 		delete options[ alias ];
 	}
 
-	
-	if ( process.platform === 'win32' ) {
-		const exePath = process.env.EXEPATH;
+	// Due to issues with `/` in Git bash (on Windows environments), we needed to introduce an additional CLI parameter.
+	// See: https://github.com/ckeditor/ckeditor5-dev/issues/558#issuecomment-534008612
+	if ( options[ 'include-root' ] && !options.files.includes( '/' ) ) {
+		options.files.push( '/' );
 
-		options.files = options.files.map( file => {
-			if ( normalizePath( file ) === normalizePath( exePath ) ) {
-				return '/';
-			}
-
-			return file;
-		} );
+		delete options[ 'include-root' ];
 	}
 
 	return options;
 };
-
-function normalizePath( file ) {
-	return file.replace(/\\/g, '/').replace(/\/$/, '');
-}
