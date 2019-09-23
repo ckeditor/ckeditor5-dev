@@ -93,7 +93,7 @@ module.exports = function parseArguments( args ) {
 	}
 
 	// `--only-root` means that we want to compile manual tests from the main repository only.
-	// E.g.: `yarn run manual --include-root` => `yarn run manual -f /`
+	// E.g.: `yarn run manual --only-root` => `yarn run manual -f /`
 	if ( options[ 'only-root' ] ) {
 		options.files = [ '/' ];
 
