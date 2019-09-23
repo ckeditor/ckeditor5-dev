@@ -31,19 +31,24 @@ const IGNORE_GLOBS = [
 const ENTRY_FILE_PATH = path.join( process.cwd(), 'build', '.automated-tests', 'entry-point.js' );
 
 module.exports = function runAutomatedTests( options ) {
-	return Promise.resolve()
-		.then( () => {
-			const globPatterns = transformFilesToTestGlob( options.files );
+	return Promise.resolve().then( () => {
+		if ( !options.disallowConsoleUse ) {
+			console.warn( chalk.yellow(
+				'⚠ Console use is allowed. Use `--disallow-console-use` to disallow console use.'
+			) );
+		}
 
-			createEntryFile( globPatterns );
+		const globPatterns = transformFilesToTestGlob( options.files );
 
-			const optionsForKarma = Object.assign( {}, options, {
-				entryFile: ENTRY_FILE_PATH,
-				globPatterns
-			} );
+		createEntryFile( globPatterns, options.disallowConsoleUse );
 
-			return runKarma( optionsForKarma );
+		const optionsForKarma = Object.assign( {}, options, {
+			entryFile: ENTRY_FILE_PATH,
+			globPatterns
 		} );
+
+		return runKarma( optionsForKarma );
+	} );
 };
 
 function transformFilesToTestGlob( files ) {
@@ -60,7 +65,7 @@ function transformFilesToTestGlob( files ) {
 	return globMap;
 }
 
-function createEntryFile( globPatterns ) {
+function createEntryFile( globPatterns, disallowConsoleUse ) {
 	mkdirp.sync( path.dirname( ENTRY_FILE_PATH ) );
 	karmaLogger.setupFromConfig( { logLevel: 'INFO' } );
 
@@ -91,11 +96,25 @@ function createEntryFile( globPatterns ) {
 		throw new Error( 'Not found files to tests. Specified patterns are invalid.' );
 	}
 
-	const filesImports = allFiles
-		.map( file => 'import "' + file + '";' )
-		.join( '\n' );
+	const entryFileContent = allFiles
+		.map( file => 'import "' + file + '";' );
 
-	fs.writeFileSync( ENTRY_FILE_PATH, filesImports + '\n' );
+	if ( disallowConsoleUse ) {
+		entryFileContent.unshift( `
+const originalWarn = console.warn;
+
+beforeEach( () => {
+	Object.getOwnPropertyNames( console ).forEach( method => {
+		console[ method ] = ( ...data ) => {
+			originalWarn( 'Detected \`console.' + method + '()\`:', ...data );
+			throw new Error( 'Detected \`console.' + method + '()\`:' );
+		}
+	} );
+} );
+		` );
+	}
+
+	fs.writeFileSync( ENTRY_FILE_PATH, entryFileContent.join( '\n' ) + '\n' );
 
 	// Webpack watcher compiles the file in a loop. It causes to Karma that runs tests multiple times in watch mode.
 	// A ugly hack blocks the loop and tests are executed once.

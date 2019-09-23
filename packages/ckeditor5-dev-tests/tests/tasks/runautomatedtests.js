@@ -9,9 +9,23 @@ const mockery = require( 'mockery' );
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 const expect = require( 'chai' ).expect;
+const chalk = require( 'chalk' );
 
 describe( 'runAutomatedTests', () => {
 	let sandbox, stubs, runAutomatedTests, karmaServerCallback;
+
+	const codeMakingConsoleUseThrowErrors = `
+const originalWarn = console.warn;
+
+beforeEach( () => {
+	Object.getOwnPropertyNames( console ).forEach( method => {
+		console[ method ] = ( ...data ) => {
+			originalWarn( 'Detected \`console.' + method + '()\`:', ...data );
+			throw new Error( 'Detected \`console.' + method + '()\`:' );
+		}
+	} );
+} );
+	`;
 
 	beforeEach( () => {
 		karmaServerCallback = null;
@@ -89,7 +103,8 @@ describe( 'runAutomatedTests', () => {
 		const options = {
 			files: [
 				'basic-styles'
-			]
+			],
+			disallowConsoleUse: true
 		};
 
 		stubs.transformFileOptionToTestGlob.returns( [
@@ -110,10 +125,9 @@ describe( 'runAutomatedTests', () => {
 			''
 		].join( '\n' );
 
-		// Timeout simulates a Karma's work.
 		setTimeout( () => {
 			karmaServerCallback( 0 );
-		}, 1000 );
+		} );
 
 		runAutomatedTests( options )
 			.then( () => {
@@ -122,14 +136,14 @@ describe( 'runAutomatedTests', () => {
 
 				expect( stubs.fs.writeFileSync.calledOnce ).to.equal( true );
 				expect( stubs.fs.writeFileSync.firstCall.args[ 0 ] ).to.equal( '/workspace/build/.automated-tests/entry-point.js' );
-				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.equal( expectedEntryPointContent );
+				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.include( expectedEntryPointContent );
 
 				done();
 			} );
 	} );
 
 	it( 'throws when files are not specified', () => {
-		return runAutomatedTests( {} )
+		return runAutomatedTests( { disallowConsoleUse: true } )
 			.then(
 				() => {
 					throw new Error( 'Expected to be rejected.' );
@@ -145,7 +159,8 @@ describe( 'runAutomatedTests', () => {
 			files: [
 				'basic-foo',
 				'bar-core',
-			]
+			],
+			disallowConsoleUse: true
 		};
 
 		stubs.transformFileOptionToTestGlob.onFirstCall().returns( [
@@ -175,5 +190,103 @@ describe( 'runAutomatedTests', () => {
 					expect( err.message ).to.equal( 'Not found files to tests. Specified patterns are invalid.' );
 				}
 			);
+	} );
+
+	it( 'should warn when the `disallowConsoleUse` option is set to `false`', () => {
+		const options = {
+			files: [
+				'basic-styles'
+			],
+			disallowConsoleUse: false
+		};
+
+		const consoleWarnStub = sandbox.stub( console, 'warn' );
+
+		stubs.transformFileOptionToTestGlob.returns( [
+			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
+			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
+		] );
+
+		stubs.glob.sync.onFirstCall().returns( [
+			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
+			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
+		] );
+
+		stubs.glob.sync.onSecondCall().returns( [] );
+
+		setTimeout( () => {
+			karmaServerCallback( 0 );
+		} );
+
+		return runAutomatedTests( options )
+			.then( () => {
+				sinon.assert.calledOnce( consoleWarnStub );
+				sinon.assert.calledWith(
+					consoleWarnStub,
+					chalk.yellow( '⚠ Console use is allowed. Use `--disallow-console-use` to disallow console use.' )
+				);
+			} );
+	} );
+
+	it( 'should not add the code making console use throw an error when the `disallowConsoleUse` option is set to false', () => {
+		const options = {
+			files: [
+				'basic-styles'
+			],
+			disallowConsoleUse: false
+		};
+
+		sandbox.stub( console, 'warn' );
+
+		stubs.transformFileOptionToTestGlob.returns( [
+			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
+			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
+		] );
+
+		stubs.glob.sync.onFirstCall().returns( [
+			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
+			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
+		] );
+
+		stubs.glob.sync.onSecondCall().returns( [] );
+
+		setTimeout( () => {
+			karmaServerCallback( 0 );
+		} );
+
+		return runAutomatedTests( options )
+			.then( () => {
+				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.not.include( codeMakingConsoleUseThrowErrors );
+			} );
+	} );
+
+	it( 'should add the code making console use throw an error when the `disallowConsoleUse` option is set to true', () => {
+		const options = {
+			files: [
+				'basic-styles'
+			],
+			disallowConsoleUse: true
+		};
+
+		stubs.transformFileOptionToTestGlob.returns( [
+			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
+			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
+		] );
+
+		stubs.glob.sync.onFirstCall().returns( [
+			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
+			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
+		] );
+
+		stubs.glob.sync.onSecondCall().returns( [] );
+
+		setTimeout( () => {
+			karmaServerCallback( 0 );
+		} );
+
+		return runAutomatedTests( options )
+			.then( () => {
+				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.include( codeMakingConsoleUseThrowErrors );
+			} );
 	} );
 } );
