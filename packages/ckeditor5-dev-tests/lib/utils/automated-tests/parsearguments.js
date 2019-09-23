@@ -82,7 +82,7 @@ module.exports = function parseArguments( args ) {
 		delete options[ alias ];
 	}
 
-	// Due to issues with `/` in Git bash (on Windows environments), we needed to introduce an additional CLI parameter.
+	// Due to issues with `/` in Git bash (on Windows environments), we needed to introduce more CLI parameters.
 	// See: https://github.com/ckeditor/ckeditor5-dev/issues/558#issuecomment-534008612
 	// `--include-root` appends `/` to the `--files` list.
 	// E.g.: `yarn run manual -f core --include-root` => `yarn run manual -f core,/`
