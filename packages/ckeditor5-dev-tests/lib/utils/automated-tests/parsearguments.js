@@ -51,6 +51,7 @@ module.exports = function parseArguments( args ) {
 			'disallow-console-use': false
 		}
 	};
+
 	const options = minimist( args, minimistConfig );
 
 	options.disallowConsoleUse = options[ 'disallow-console-use' ];
@@ -77,7 +78,7 @@ module.exports = function parseArguments( args ) {
 	options.themePath = options.themePath ? options.themePath : null;
 
 	// Delete all aliases because we don't want to use them in the code.
-	// They are useful when calling command but useless after that.
+	// They are useful when calling a command but useless after that.
 	for ( const alias of Object.keys( minimistConfig.alias ) ) {
 		delete options[ alias ];
 	}
