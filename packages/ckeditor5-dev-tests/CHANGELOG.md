@@ -5,7 +5,7 @@ Changelog
 
 ### Features
 
-* Introduced the `--disallow-console-use` flag in automated tests. Disallowed console use in CI tests. Part of [[ckeditor/ckeditor5#1996](https://github.com/ckeditor/ckeditor5/issues/1996)](https://github.com/ckeditor/ckeditor5/issues/1996). ([8376907](https://github.com/ckeditor/ckeditor5-dev/commit/8376907))
+* Introduced the `--disallow-console-use` flag in automated tests. Disallowed console use in CI tests. See [ckeditor/ckeditor5#1996](https://github.com/ckeditor/ckeditor5/issues/1996). ([8376907](https://github.com/ckeditor/ckeditor5-dev/commit/8376907))
 * Support for running manual tests from the main repository. See [ckeditor/ckeditor5#2054](https://github.com/ckeditor/ckeditor5/issues/2054). ([f4e639c](https://github.com/ckeditor/ckeditor5-dev/commit/f4e639c))
 
 
