@@ -54,7 +54,7 @@ You can also use the bin script for testing a package:
 * `browsers` - Browsers which will be used to run the tests. Also available as an alias: `-b`.
 * `reporter` - Mocha reporter – either `mocha` (default) or `dots` (less verbose one).
 * `disallow-console-use` - Whether to throw an error when one of the console methods (e.g. `console.log()`) is executed.
-* `root-only` - Whether to run tests only for root repository. Equivalent of `--files /`.
+* `only-root` - Whether to run tests only for root repository. Equivalent of `--files /`.
 * `include-root` - Whether to append root repository to tests matched by `--files`.
 
 #### Examples
