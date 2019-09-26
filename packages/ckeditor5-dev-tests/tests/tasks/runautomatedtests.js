@@ -18,12 +18,14 @@ describe( 'runAutomatedTests', () => {
 const originalWarn = console.warn;
 
 beforeEach( () => {
-	Object.getOwnPropertyNames( console ).forEach( method => {
-		console[ method ] = ( ...data ) => {
-			originalWarn( 'Detected \`console.' + method + '()\`:', ...data );
-			throw new Error( 'Detected \`console.' + method + '()\`:' );
-		}
-	} );
+	Object.keys( console )
+		.filter( methodOrProperty => typeof console[ methodOrProperty ] === 'function' )
+		.forEach( method => {
+			console[ method ] = ( ...data ) => {
+				originalWarn( 'Detected \`console.' + method + '()\`:', ...data );
+				throw new Error( 'Detected \`console.' + method + '()\`:' );
+			}
+		} );
 } );
 	`;
 
