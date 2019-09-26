@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [16.9.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.8.0...@ckeditor/ckeditor5-dev-tests@16.9.0) (2019-09-26)
+
+### Bug fixes
+
+* Console is now patching methods only. Closes [#566](https://github.com/ckeditor/ckeditor5-dev/issues/566). ([867918f](https://github.com/ckeditor/ckeditor5-dev/commit/867918f))
+
+
 ## [16.8.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.7.4...@ckeditor/ckeditor5-dev-tests@16.8.0) (2019-09-23)
 
 ### Features
