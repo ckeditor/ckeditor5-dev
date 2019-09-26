@@ -6,10 +6,13 @@ const utils = require( './transform-commit/transform-commit-utils' );
 // '* 1234567 ', where '1234567' is a short commit id.
 const INDENT_SIZE = 10;
 
+/**
+ * @param {Array.<Commit>|Set.<Commit>} commits
+ */
 module.exports = function displayCommits( commits ) {
 	const log = logger();
 
-	if ( !commits.length ) {
+	if ( !( commits.length || commits.size ) ) {
 		log.info( chalk.italic( 'No commits to display.' ) );
 	}
 
