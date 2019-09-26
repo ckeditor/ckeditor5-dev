@@ -229,7 +229,24 @@ const cli = {
 						return options;
 					} );
 			} );
-	}
+	},
+
+	/**
+	 * Asks a user for a confirmation for removing archives created by `npm pack` command.
+	 *
+	 * @returns {Promise}
+	 */
+	confirmMajorBreakingChangeRelease( haveMajorBreakingChangeCommits ) {
+		const confirmQuestion = {
+			message: 'Should the next versions be treated as a major bump?',
+			type: 'confirm',
+			name: 'confirm',
+			default: haveMajorBreakingChangeCommits,
+		};
+
+		return inquirer.prompt( [ confirmQuestion ] )
+			.then( answers => answers.confirm );
+	},
 };
 
 module.exports = cli;
