@@ -9,7 +9,6 @@ const utils = require( './transform-commit-utils' );
 
 /**
  * Parses a single commit:
- *   - displays a log when the commit has invalid format of the message,
  *   - filters out the commit if it should not be visible in the changelog,
  *   - makes links to issues and organizations on GitHub.
  *
@@ -107,13 +106,7 @@ module.exports = function transformCommitForSubRepository( rawCommit, context = 
 		commit.body = makeLinks( commit.body );
 	}
 
-	for ( const note of commit.notes ) {
-		if ( note.title === 'BREAKING CHANGE' ) {
-			note.title = 'BREAKING CHANGES';
-		}
-
-		note.text = makeLinks( note.text );
-	}
+	normalizeNotes( commit );
 
 	// Clear the references array - we don't want to hoist the issues.
 	delete commit.references;
@@ -126,6 +119,32 @@ function makeLinks( comment ) {
 	comment = utils.linkToGithubUser( comment );
 
 	return comment;
+}
+
+function normalizeNotes( commit ) {
+	for ( const note of commit.notes ) {
+		// "BREAKING CHANGE" => "BREAKING CHANGES"
+		if ( note.title === 'BREAKING CHANGE' ) {
+			note.title = 'BREAKING CHANGES';
+		}
+
+		// "BREAKING CHANGES" => "MAJOR BREAKING CHANGES"
+		if ( note.title === 'BREAKING CHANGES' ) {
+			note.title = 'MAJOR BREAKING CHANGES';
+		}
+
+		// "MAJOR BREAKING CHANGE" => "MAJOR BREAKING CHANGES"
+		if ( note.title === 'MAJOR BREAKING CHANGE' ) {
+			note.title = 'MAJOR BREAKING CHANGES';
+		}
+
+		// "MINOR BREAKING CHANGE" => "MINOR BREAKING CHANGES"
+		if ( note.title === 'MINOR BREAKING CHANGE' ) {
+			note.title = 'MINOR BREAKING CHANGES';
+		}
+
+		note.text = makeLinks( note.text );
+	}
 }
 
 /**
