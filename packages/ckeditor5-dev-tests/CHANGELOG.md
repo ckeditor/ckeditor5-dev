@@ -3,6 +3,10 @@ Changelog
 
 ## [16.9.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.8.0...@ckeditor/ckeditor5-dev-tests@16.9.0) (2019-09-26)
 
+### Features
+
+* Introduced new CLI parameters: `--include-root` and `--only-root` that allow specifying whether the main repository should be added to the test file query. It's a workaround due to bug in Git Bash (on Windows environment) that does not allow to use `'/'` as value for an option in CLI. Closes [#558](https://github.com/ckeditor/ckeditor5-dev/issues/558).
+
 ### Bug fixes
 
 * Console is now patching methods only. Closes [#566](https://github.com/ckeditor/ckeditor5-dev/issues/566). ([867918f](https://github.com/ckeditor/ckeditor5-dev/commit/867918f))
