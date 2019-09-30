@@ -20,7 +20,7 @@ const generateChangelogFromCommits = require( '../utils/generatechangelogfromcom
 const getPackageJson = require( '../utils/getpackagejson' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
 const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
-const transformCommitFunction = require( '../utils/transform-commit/transformcommitforsubrepositoryfactory' );
+const transformCommitFunctionFactory = require( '../utils/transform-commit/transformcommitforsubrepositoryfactory' );
 const versionUtils = require( '../utils/versions' );
 
 const bumpTypesPriority = {
@@ -43,8 +43,6 @@ const bumpTypesPriority = {
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be touched.
  * @param {Boolean} [options.skipMainRepository=false] Whether to skip the main repository.
  * @param {String} [options.scope=null] Package names have to match to specified glob pattern.
- * @param {String} [options.newVersion=null] If specified, the tool will use the version. User won't be able to provide
- * its version based on history of commits.
  */
 module.exports = function generateSummaryChangelog( options ) {
 	const log = logger();
@@ -64,7 +62,8 @@ module.exports = function generateSummaryChangelog( options ) {
 		pathsCollection.matched.add( options.cwd );
 	}
 
-	const newVersion = options.newVersion || null;
+	// const newVersion = options.newVersion || null;
+	const newVersion = null;
 
 	const generatedChangelogMap = new Map();
 
@@ -84,8 +83,7 @@ module.exports = function generateSummaryChangelog( options ) {
 
 		const packageJson = getPackageJson( repositoryPath );
 
-		log.info( '' );
-		log.info( chalk.bold.blue( `Generating changelog for "${ packageJson.name }"...` ) );
+		log.info( '\n' + chalk.bold.blue( `Generating changelog for "${ packageJson.name }"...` ) );
 
 		const dependencies = getMapWithDependenciesVersions(
 			getAllDependenciesForRepository( repositoryPath )
@@ -103,6 +101,10 @@ module.exports = function generateSummaryChangelog( options ) {
 		let promise = Promise.resolve();
 
 		if ( !newVersion ) {
+			const transformCommitFunction = transformCommitFunctionFactory( {
+				returnInvalidCommit: true
+			} );
+
 			promise = promise.then( () => getNewReleaseType( transformCommitFunction, { tagName } ) )
 				.then( result => {
 					displayCommits( result.commits );
@@ -151,7 +153,7 @@ module.exports = function generateSummaryChangelog( options ) {
 						additionalNotes,
 						currentTag: 'v' + version,
 						previousTag: tagName,
-						transformCommit: transformCommitFunction,
+						transformCommit: transformCommitFunctionFactory(),
 						isInternalRelease: false,
 						doNotSave: true
 					} );
@@ -200,7 +202,7 @@ module.exports = function generateSummaryChangelog( options ) {
 				process.chdir( cwd );
 			} )
 			.catch( err => {
-				log.error( err );
+				log.error( err.stack );
 			} );
 	}
 
@@ -285,9 +287,9 @@ module.exports = function generateSummaryChangelog( options ) {
 		const dependenciesVersions = new Map();
 
 		for ( const packageName of [ ...dependencies ].sort() ) {
-			const packagePath = getPathToRepository( packageName );
-			const nextVersion = versionUtils.getLastFromChangelog( packagePath );
-			const currentVersion = versionUtils.getCurrent( packagePath );
+			const repositoryPath = getPathToRepository( packageName );
+			const nextVersion = versionUtils.getLastFromChangelog( repositoryPath );
+			const currentVersion = versionUtils.getCurrent( repositoryPath );
 
 			// If "nextVersion" is null, the changelog for the package hasn't been generated.
 			if ( !nextVersion ) {
@@ -298,7 +300,7 @@ module.exports = function generateSummaryChangelog( options ) {
 			// Version specified in `package.json` is bumping during the release process,
 			// we can assume that the versions are different.
 			if ( nextVersion !== currentVersion ) {
-				dependenciesVersions.set( packageName, { currentVersion, nextVersion } );
+				dependenciesVersions.set( packageName, { currentVersion, nextVersion, repositoryPath } );
 			}
 		}
 
@@ -371,7 +373,7 @@ module.exports = function generateSummaryChangelog( options ) {
 			'',
 		];
 
-		const allowBreakingChangeInMinor = areBreakingChangesAcceptable( options.newVersion );
+		const allowBreakingChangeInMinor = areBreakingChangesAcceptableInVersion( options.newVersion );
 		const newPackages = getNewPackages( options.dependencies );
 
 		// We need to remove new packages from the whole collection
@@ -381,8 +383,15 @@ module.exports = function generateSummaryChangelog( options ) {
 		}
 
 		const majorReleasePackages = getMajorReleasePackages( options.dependencies );
+		const majorBreakingChangesReleasePackages = getMajorBreakingChangesReleasePackages( majorReleasePackages );
 		const minorReleasePackages = getMinorReleasePackages( options.dependencies );
+		const minorBreakingChangesReleasePackages = getMinorBreakingChangesReleasePackages( minorReleasePackages );
 		const patchReleasePackages = getPatchReleasePackages( options.dependencies );
+
+		// `major|minorBreakingChangesReleasePackages` are duplicated in `major|minorReleasePackages` collections.
+		// Because we don't want to duplicate them, let's clean it before starting generating changelog entries.
+		removeDependencies( majorBreakingChangesReleasePackages, majorReleasePackages );
+		removeDependencies( minorBreakingChangesReleasePackages, minorReleasePackages );
 
 		// If the next release is below the `1.0.0` version, we accept breaking changes in `major` releases.
 		if ( allowBreakingChangeInMinor ) {
@@ -390,10 +399,24 @@ module.exports = function generateSummaryChangelog( options ) {
 				minorReleasePackages.set( packageName, versions );
 				majorReleasePackages.delete( packageName );
 			}
+
+			for ( const [ packageName, versions ] of majorBreakingChangesReleasePackages ) {
+				minorBreakingChangesReleasePackages.set( packageName, versions );
+				majorBreakingChangesReleasePackages.delete( packageName );
+			}
 		}
 
+		const hasChangesInAnyOfPackages = [
+			newPackages.size,
+			majorReleasePackages.size,
+			majorBreakingChangesReleasePackages.size,
+			minorReleasePackages.size,
+			minorBreakingChangesReleasePackages.size,
+			patchReleasePackages.size
+		].some( number => number > 0 );
+
 		// Push the "Dependencies" header to entries list if any package has been added or changed.
-		if ( newPackages.size || majorReleasePackages.size || minorReleasePackages.size || patchReleasePackages.size ) {
+		if ( hasChangesInAnyOfPackages ) {
 			entries.push( '### Dependencies' );
 			entries.push( '' );
 		}
@@ -408,10 +431,34 @@ module.exports = function generateSummaryChangelog( options ) {
 			entries.push( '' );
 		}
 
+		if ( majorBreakingChangesReleasePackages.size ) {
+			entries.push( 'Major releases (contain major breaking changes):\n' );
+
+			for ( const [ packageName, { currentVersion, nextVersion } ] of majorBreakingChangesReleasePackages ) {
+				entries.push( formatChangelogEntry( packageName, nextVersion, currentVersion ) );
+			}
+
+			entries.push( '' );
+		}
+
 		if ( majorReleasePackages.size ) {
-			entries.push( 'Major releases (contain breaking changes):\n' );
+			entries.push( 'Major releases (dependencies of those packages have breaking changes):\n' );
 
 			for ( const [ packageName, { currentVersion, nextVersion } ] of majorReleasePackages ) {
+				entries.push( formatChangelogEntry( packageName, nextVersion, currentVersion ) );
+			}
+
+			entries.push( '' );
+		}
+
+		if ( minorBreakingChangesReleasePackages.size ) {
+			if ( allowBreakingChangeInMinor ) {
+				entries.push( 'Minor releases (possible breaking changes):\n' );
+			} else {
+				entries.push( 'Minor releases (containing minor breaking changes):\n' );
+			}
+
+			for ( const [ packageName, { currentVersion, nextVersion } ] of minorBreakingChangesReleasePackages ) {
 				entries.push( formatChangelogEntry( packageName, nextVersion, currentVersion ) );
 			}
 
@@ -422,7 +469,7 @@ module.exports = function generateSummaryChangelog( options ) {
 			if ( allowBreakingChangeInMinor ) {
 				entries.push( 'Minor releases (possible breaking changes):\n' );
 			} else {
-				entries.push( 'Minor releases:\n' );
+				entries.push( 'Minor releases (new features, no breaking changes):\n' );
 			}
 
 			for ( const [ packageName, { currentVersion, nextVersion } ] of minorReleasePackages ) {
@@ -450,8 +497,19 @@ module.exports = function generateSummaryChangelog( options ) {
 	// @params {Map} dependencies
 	// @returns {Map}
 	function getNewPackages( dependencies ) {
-		return filterPackages( dependencies, ( packageName, currentVersion ) => {
+		return filterPackages( dependencies, ( packageName, { currentVersion } ) => {
 			return semver.eq( currentVersion, '0.0.1' );
+		} );
+	}
+
+	// Returns a collection of packages which the future release is marked as "major" and contain "MAJOR BREAKING CHANGES"
+	// entries in their changelogs.
+	//
+	// @params {Map} dependencies
+	// @returns {Map}
+	function getMajorBreakingChangesReleasePackages( dependencies ) {
+		return filterPackages( dependencies, ( packageName, { nextVersion, repositoryPath } ) => {
+			return changelogUtils.hasMajorBreakingChanges( nextVersion, repositoryPath );
 		} );
 	}
 
@@ -460,10 +518,21 @@ module.exports = function generateSummaryChangelog( options ) {
 	// @params {Map} dependencies
 	// @returns {Map}
 	function getMajorReleasePackages( dependencies ) {
-		return filterPackages( dependencies, ( packageName, currentVersion, nextVersion ) => {
+		return filterPackages( dependencies, ( packageName, { currentVersion, nextVersion } ) => {
 			const versionDiff = semver.diff( currentVersion, nextVersion );
 
 			return versionDiff === 'major' || versionDiff === 'premajor' || versionDiff === 'prerelease';
+		} );
+	}
+
+	// Returns a collection of packages which the future release is marked as "minor" and contain "MINOR BREAKING CHANGES"
+	// entries in their changelogs.
+	//
+	// @params {Map} dependencies
+	// @returns {Map}
+	function getMinorBreakingChangesReleasePackages( dependencies ) {
+		return filterPackages( dependencies, ( packageName, { nextVersion, repositoryPath } ) => {
+			return changelogUtils.hasMinorBreakingChanges( nextVersion, repositoryPath );
 		} );
 	}
 
@@ -472,7 +541,7 @@ module.exports = function generateSummaryChangelog( options ) {
 	// @params {Map} dependencies
 	// @returns {Map}
 	function getMinorReleasePackages( dependencies ) {
-		return filterPackages( dependencies, ( packageName, currentVersion, nextVersion ) => {
+		return filterPackages( dependencies, ( packageName, { currentVersion, nextVersion } ) => {
 			const versionDiff = semver.diff( currentVersion, nextVersion );
 
 			return versionDiff === 'minor' || versionDiff === 'preminor';
@@ -484,7 +553,7 @@ module.exports = function generateSummaryChangelog( options ) {
 	// @params {Map} dependencies
 	// @returns {Map}
 	function getPatchReleasePackages( dependencies ) {
-		return filterPackages( dependencies, ( packageName, currentVersion, nextVersion ) => {
+		return filterPackages( dependencies, ( packageName, { currentVersion, nextVersion } ) => {
 			const versionDiff = semver.diff( currentVersion, nextVersion );
 
 			return versionDiff === 'patch' || versionDiff === 'prepatch';
@@ -500,13 +569,23 @@ module.exports = function generateSummaryChangelog( options ) {
 	function filterPackages( dependencies, callback ) {
 		const packages = new Map();
 
-		for ( const [ packageName, { currentVersion, nextVersion } ] of dependencies ) {
-			if ( callback( packageName, currentVersion, nextVersion ) ) {
-				packages.set( packageName, { currentVersion, nextVersion } );
+		for ( const [ packageName, options ] of dependencies ) {
+			if ( callback( packageName, options ) ) {
+				packages.set( packageName, Object.assign( {}, options ) );
 			}
 		}
 
 		return packages;
+	}
+
+	// Removes packages from the collection (`removeFrom`) based on items in the `dependenciesToRemove` collection.
+	//
+	// @params {Map} dependenciesToRemove
+	// @params {Map} removeFrom
+	function removeDependencies( dependenciesToRemove, removeFrom ) {
+		for ( const [ packageName ] of dependenciesToRemove ) {
+			removeFrom.delete( packageName );
+		}
 	}
 
 	// Returns a formatted string for changelog.
@@ -532,7 +611,7 @@ module.exports = function generateSummaryChangelog( options ) {
 	//
 	// @params {String} version
 	// @returns {Boolean}
-	function areBreakingChangesAcceptable( version ) {
+	function areBreakingChangesAcceptableInVersion( version ) {
 		// For any version above the `1.0.0`, breaking changes mean that "major" version will be bumped.
 		if ( !semver.gt( '1.0.0', version ) ) {
 			return false;

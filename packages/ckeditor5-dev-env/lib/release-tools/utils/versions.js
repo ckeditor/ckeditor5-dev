@@ -24,7 +24,6 @@ const versions = {
 		}
 
 		const regexp = /\n## \[?([\da-z.\-+]+)/i;
-
 		const matches = changelog.match( regexp );
 
 		return matches ? matches[ 1 ] : null;
@@ -40,8 +39,7 @@ const versions = {
 			const lastTag = tools.shExec( 'git describe --abbrev=0 --tags 2> /dev/null', { verbosity: 'error' } );
 
 			return lastTag.trim().replace( /^v/, '' ) || null;
-		}
-		catch ( err ) {
+		} catch ( err ) {
 			return null;
 		}
 	},

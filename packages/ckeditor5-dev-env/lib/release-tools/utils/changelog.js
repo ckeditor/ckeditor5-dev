@@ -20,11 +20,11 @@ const utils = {
 	changelogHeader: 'Changelog\n=========\n\n',
 
 	/**
-	 * Retrieves changes from the changelog for the given tag.
+	 * Retrieves changes from the changelog for the given version (tag).
 	 *
 	 * @param {String} version
 	 * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
-	 * @returns {String}
+	 * @returns {String|null}
 	 */
 	getChangesForVersion( version, cwd = process.cwd() ) {
 		version = version.replace( /^v/, '' );
@@ -62,6 +62,42 @@ const utils = {
 
 		fs.writeFileSync( changelogFile, content, 'utf-8' );
 	},
+
+	/**
+	 * Checks whether specified `version` contains the "MAJOR BREAKING CHANGES" header.
+	 *
+	 * TODO: Tests.
+	 * @param {String} version Version to check.
+	 * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
+	 * @returns {Boolean}
+	 */
+	hasMajorBreakingChanges( version, cwd = process.cwd() ) {
+		const changes = utils.getChangesForVersion( version, cwd );
+
+		if ( !changes ) {
+			throw new Error( `Entries for specified version (${ version } cannot be found.` );
+		}
+
+		return !!changes.match( /### MAJOR BREAKING CHANGES/ );
+	},
+
+	/**
+	 * Checks whether specified `version` contains the "MINOR BREAKING CHANGES" header.
+	 *
+	 * TODO: Tests.
+	 * @param {String} version Version to check.
+	 * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
+	 * @returns {Boolean}
+	 */
+	hasMinorBreakingChanges( version, cwd = process.cwd() ) {
+		const changes = utils.getChangesForVersion( version, cwd );
+
+		if ( !changes ) {
+			throw new Error( `Entries for specified version (${ version } cannot be found.` );
+		}
+
+		return !!changes.match( /### MINOR BREAKING CHANGES/ );
+	}
 };
 
 module.exports = utils;

@@ -27,8 +27,6 @@ const versionUtils = require( '../utils/versions' );
  * @param {String} options.packages Where to look for other packages.
  * @param {String} [options.scope] Package names have to match to specified glob pattern.
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be touched.
- * @param {String} [options.newVersion=null] If specified, the tool will use the version. User won't be able to provide
- * its version based on history of commits. It can be also a level how to increase a current version of a package.
  * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in "cwd" will be skipped.
  * @returns {Promise}
  */
