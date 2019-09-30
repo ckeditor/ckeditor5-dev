@@ -71,15 +71,24 @@ module.exports = function generateChangelogFromCommits( options ) {
 			writerOptions.debug = getDebugFuntion();
 		}
 
-		conventionalChangelog( {}, context, gitRawCommitsOpts, parserOptions, writerOptions )
+		const changelogStream = conventionalChangelog( {}, context, gitRawCommitsOpts, parserOptions, writerOptions );
+
+		changelogStream
 			.pipe( changelogPipe( options.version, resolve, {
 				doNotSave: options.doNotSave
+			} ) )
+			.pipe( stream.noop( () => {
+				// When the CHANGELOG.md is being created for the first time by the script, `conventionalChangelog()`
+				// is being called twice. It causes generating the changelog twice. The first one for the specified package (current cwd),
+				// the second one is being generated for the next cwd in a queue (or the cwd where the entire script was called).
+				// We need to destroy the stream manually in order to avoid calling it more than once.
+				changelogStream.destroy();
 			} ) );
 	} );
 };
 
 function changelogPipe( version, done, options ) {
-	return stream.noop( changes => {
+	return stream.noop( function( changes ) {
 		const newEntries = groupUpdatedTranslationsCommits( changes.toString() );
 
 		if ( options.doNotSave ) {

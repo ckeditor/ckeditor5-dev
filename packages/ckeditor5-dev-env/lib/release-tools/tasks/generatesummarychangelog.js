@@ -20,7 +20,7 @@ const generateChangelogFromCommits = require( '../utils/generatechangelogfromcom
 const getPackageJson = require( '../utils/getpackagejson' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
 const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
-const transformCommitFunction = require( '../utils/transform-commit/transformcommitforsubrepository' );
+const transformCommitFunction = require( '../utils/transform-commit/transformcommitforsubrepositoryfactory' );
 const versionUtils = require( '../utils/versions' );
 
 const bumpTypesPriority = {

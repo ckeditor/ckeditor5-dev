@@ -34,7 +34,6 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 	};
 
 	const context = {
-		returnInvalidCommit: true,
 		packageData: getPackageJson()
 	};
 
@@ -67,6 +66,7 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 	// Returns a type of version for a release based on the commits.
 	//
 	// @param {Array.<Commit>} commits
+	// @param {Object} options
 	// @returns {String}
 	function getNewVersionType( commits ) {
 		// Repository does not have new changes.
@@ -81,11 +81,16 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 		}
 
 		let newFeatures = false;
+		let minorBreakingChanges = false;
 
 		for ( const commit of publicCommits ) {
 			for ( const note of commit.notes ) {
-				if ( note.title === 'BREAKING CHANGES' ) {
+				if ( note.title === 'MAJOR BREAKING CHANGES' ) {
 					return 'major';
+				}
+
+				if ( note.title === 'MINOR BREAKING CHANGES' ) {
+					minorBreakingChanges = true;
 				}
 			}
 
@@ -94,8 +99,8 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 			}
 		}
 
-		// Repository has new features without breaking changes.
-		if ( newFeatures ) {
+		// Repository has new features or minor breaking changes.
+		if ( minorBreakingChanges || newFeatures ) {
 			return 'minor';
 		}
 

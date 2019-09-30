@@ -16,7 +16,7 @@ const generateChangelogForSinglePackage = require( './generatechangelogforsingle
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
-const transformCommitFunction = require( '../utils/transform-commit/transformcommitforsubrepository' );
+const transformCommitForSubRepositoryFactory = require( '../utils/transform-commit/transformcommitforsubrepositoryfactory' );
 const versionUtils = require( '../utils/versions' );
 
 /**
@@ -92,7 +92,7 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 				tagName = 'v' + tagName;
 			}
 
-			return getNewReleaseType( transformCommitFunction, { tagName } )
+			return getNewReleaseType( transformCommitForSubRepositoryFactory(), { tagName } )
 				.then( result => {
 					packagesCommit.set( packageJson.name, new Set( result.commits ) );
 				} );
@@ -139,7 +139,7 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 		return executeOnPackages( pathsCollection.matched, repositoryPath => {
 			process.chdir( repositoryPath );
 
-			return generateChangelogForSinglePackage( { newVersion } )
+			return generateChangelogForSinglePackage( { newVersion, disableMajorBump: !willBeMajorBump } )
 				.then( newVersionInChangelog => {
 					if ( newVersionInChangelog ) {
 						generatedChangelogsMap.set( getPackageJson( repositoryPath ).name, newVersionInChangelog );

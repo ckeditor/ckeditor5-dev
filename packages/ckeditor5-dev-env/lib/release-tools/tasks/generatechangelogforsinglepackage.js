@@ -15,7 +15,7 @@ const displayCommits = require( '../utils/displaycommits' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getNewReleaseType = require( '../utils/getnewreleasetype' );
 const generateChangelogFromCommits = require( '../utils/generatechangelogfromcommits' );
-const transformCommitFunction = require( '../utils/transform-commit/transformcommitforsubrepository' );
+const transformCommitForSubRepositoryFactory = require( '../utils/transform-commit/transformcommitforsubrepositoryfactory' );
 
 const VALID_SEMVER_INCREMENT_LEVEL = [
 	'major',
@@ -42,6 +42,7 @@ const VALID_SEMVER_INCREMENT_LEVEL = [
  * @param {String} [options.newVersion=null] A version or a type of increase level for the current version
  * for which changelog will be generated.
  * @param {Boolean} [options.skipLinks=false] If set on true, links to release or commits will be omitted.
+ * @param {Boolean} [options.disableMajorBump=false] If set on true, detected breaking change won't bump the major version.
  * @param {Boolean} [options.isInternalRelease=false] If set on true, the changelog will contain a note about internal release
  * instead of data that comes from commits.
  * @returns {Promise}
@@ -79,6 +80,11 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 			promise = promise.then( () => cli.provideVersion( packageJson.version, newVersion ) );
 		}
 	} else {
+		const transformCommitFunction = transformCommitForSubRepositoryFactory( {
+			treatMajorAsMinorBreakingChange: options.disableMajorBump,
+			returnInvalidCommit: true
+		} );
+
 		promise = promise
 			.then( () => getNewReleaseType( transformCommitFunction, { tagName } ) )
 			.then( result => {
@@ -101,7 +107,9 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 				tagName,
 				isInternalRelease,
 				newTagName: 'v' + version,
-				transformCommit: transformCommitFunction,
+				transformCommit: transformCommitForSubRepositoryFactory( {
+					treatMajorAsMinorBreakingChange: options.disableMajorBump
+				} ),
 				skipLinks: !!options.skipLinks
 			};
 
