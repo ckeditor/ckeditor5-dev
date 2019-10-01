@@ -376,11 +376,8 @@ module.exports = function generateSummaryChangelog( options ) {
 		const allowBreakingChangeInMinor = areBreakingChangesAcceptableInVersion( options.newVersion );
 		const newPackages = getNewPackages( options.dependencies );
 
-		// We need to remove new packages from the whole collection
-		// because we don't want to have duplicates (as minor or major) release.
-		for ( const [ packageName ] of newPackages ) {
-			options.dependencies.delete( packageName );
-		}
+		// We need to remove new packages from the whole collection because we don't want to have duplicated (as minor or major) releases.
+		removeDependencies( newPackages, options.dependencies );
 
 		const majorReleasePackages = getMajorReleasePackages( options.dependencies );
 		const majorBreakingChangesReleasePackages = getMajorBreakingChangesReleasePackages( majorReleasePackages );
