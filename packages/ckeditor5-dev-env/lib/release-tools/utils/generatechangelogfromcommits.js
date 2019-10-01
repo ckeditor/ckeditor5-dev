@@ -21,13 +21,14 @@ const UPDATED_TRANSLATION_COMMIT = '* Updated translations.';
  *
  * @param {Object} options
  * @param {String} options.version A version for generated changelog.
- * @param {Function} options.transformCommit A function which transforms the commit.
+ * @param {Function} options.transformCommit A function which transforms commits.
  * @param {String|null} options.tagName Name of the last created tag for the repository.
  * @param {String} options.newTagName Name of the tag for current version.
  * @param {Boolean} [options.isInternalRelease=false] Whether the changelog is generated for internal release.
  * @param {Boolean} [options.doNotSave=false] If set on `true`, changes will be resolved in returned promise
- * instead of saving in CHANGELOG file.
+ * instead of saved in CHANGELOG file.
  * @param {Boolean} [options.additionalNotes=false] If set on `true, each category will contain additional description.
+ * See: `/packages/ckeditor5-dev-env/lib/release-tools/utils/transform-commit/transform-commit-utils.js#additionalCommitNotes`
  * @param {Boolean} [options.skipLinks=false] If set on true, links to release or commits will be omitted.
  * @returns {Promise}
  */
@@ -45,7 +46,6 @@ module.exports = function generateChangelogFromCommits( options ) {
 			version: options.version,
 			currentTag: options.newTagName,
 			previousTag: options.tagName,
-			displayLogs: false,
 			isInternalRelease: Boolean( options.isInternalRelease ),
 			additionalNotes: {},
 			skipCommitsLink: Boolean( options.skipLinks ),
@@ -78,8 +78,8 @@ module.exports = function generateChangelogFromCommits( options ) {
 				doNotSave: options.doNotSave
 			} ) )
 			.pipe( stream.noop( () => {
-				// When the CHANGELOG.md is being created for the first time by the script, `conventionalChangelog()`
-				// is being called twice. It causes generating the changelog twice. The first one for the specified package (current cwd),
+				// When the CHANGELOG.md is being created for the first time by the script, `conventionalChangelog()` receives
+				// data in the stream twice. It causes generating the changelog twice. The first one for the specified package (cwd),
 				// the second one is being generated for the next cwd in a queue (or the cwd where the entire script was called).
 				// We need to destroy the stream manually in order to avoid calling it more than once.
 				changelogStream.destroy();
