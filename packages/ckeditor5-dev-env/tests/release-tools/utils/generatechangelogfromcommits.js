@@ -316,7 +316,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			return generateChangelogFromCommits( options )
 				.then( () => {
-					console.log( stubs.changelogUtils.saveChangelog.callCount );
+					expect( stubs.changelogUtils.saveChangelog.callCount ).to.equal( 1 );
 				} );
 		} );
 	} );
