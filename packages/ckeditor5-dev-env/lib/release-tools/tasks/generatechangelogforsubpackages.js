@@ -117,6 +117,10 @@ module.exports = function generateChangelogForSubPackages( options ) {
 
 				return generateChangelogFromCommits( changelogOptions )
 					.then( newVersion => {
+						log.info(
+							chalk.green( `Changelog for "${ dependencyName }" (v${ newVersion }) has been generated.` )
+						);
+
 						generatedChangelogsMap.set( dependencyName, newVersion );
 					} );
 			} )
