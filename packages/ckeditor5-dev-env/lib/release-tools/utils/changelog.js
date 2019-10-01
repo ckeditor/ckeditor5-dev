@@ -66,7 +66,6 @@ const utils = {
 	/**
 	 * Checks whether specified `version` contains the "MAJOR BREAKING CHANGES" header.
 	 *
-	 * TODO: Tests.
 	 * @param {String} version Version to check.
 	 * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
 	 * @returns {Boolean}
@@ -75,7 +74,7 @@ const utils = {
 		const changes = utils.getChangesForVersion( version, cwd );
 
 		if ( !changes ) {
-			throw new Error( `Entries for specified version (${ version } cannot be found.` );
+			throw new Error( `Entries for specified version (${ version }) cannot be found.` );
 		}
 
 		return !!changes.match( /### MAJOR BREAKING CHANGES/ );
@@ -84,7 +83,6 @@ const utils = {
 	/**
 	 * Checks whether specified `version` contains the "MINOR BREAKING CHANGES" header.
 	 *
-	 * TODO: Tests.
 	 * @param {String} version Version to check.
 	 * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
 	 * @returns {Boolean}
@@ -93,7 +91,7 @@ const utils = {
 		const changes = utils.getChangesForVersion( version, cwd );
 
 		if ( !changes ) {
-			throw new Error( `Entries for specified version (${ version } cannot be found.` );
+			throw new Error( `Entries for specified version (${ version }) cannot be found.` );
 		}
 
 		return !!changes.match( /### MINOR BREAKING CHANGES/ );

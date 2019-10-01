@@ -159,6 +159,22 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 
 			note.text = makeLinks( note.text );
 		}
+
+		// Place all "NOTE" at the end.
+		commit.notes.sort( ( a, b ) => {
+			// Do not swap two notes. Their weight is equal to each other.
+			if ( a.title === 'NOTE' && b.title === 'NOTE' ) {
+				return 0;
+			}
+
+			if ( a.title === 'NOTE' ) {
+				return 1;
+			} else if ( b.title === 'NOTE' ) {
+				return -1;
+			}
+
+			return 0;
+		} );
 	}
 };
 

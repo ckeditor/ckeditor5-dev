@@ -16,6 +16,9 @@ const {
 	getChangelog: _getChangelog,
 	getChangesForVersion: _getChangesForVersion
 } = require( '../../../lib/release-tools/utils/changelog' );
+const transformCommitForSubRepositoryFactory = require(
+	'../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepositoryfactory'
+);
 
 describe( 'dev-env/release-tools/utils', () => {
 	const url = 'https://github.com/ckeditor/ckeditor5-test-package';
@@ -208,19 +211,19 @@ describe( 'dev-env/release-tools/utils', () => {
 
 						/* eslint-disable max-len */
 						const expectedChangelog = normalizeStrings( `
-### Other changes
-
-* Some docs improvements. Closes [#6](https://github.com/ckeditor/ckeditor5-test-package/issues/6). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-
-  Did you see the [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4)?
-
-### BREAKING CHANGES
+### MAJOR BREAKING CHANGES
 
 * Some breaking change.
 
 ### NOTE
 
 * Please read [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
+
+### Other changes
+
+* Some docs improvements. Closes [#6](https://github.com/ckeditor/ckeditor5-test-package/issues/6). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+
+  Did you see the [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4)?
 ` );
 						/* eslint-enable max-len */
 
@@ -245,19 +248,19 @@ describe( 'dev-env/release-tools/utils', () => {
 
 						/* eslint-disable max-len */
 						const expectedChangelog = normalizeStrings( `
-### Features
-
-* Issues will not be hoisted. Closes [#8](https://github.com/ckeditor/ckeditor5-test-package/issues/8). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-
-  All details have been described in [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
-
-### BREAKING CHANGES
+### MAJOR BREAKING CHANGES
 
 * Some breaking change.
 
 ### NOTE
 
 * Please read [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
+
+### Features
+
+* Issues will not be hoisted. Closes [#8](https://github.com/ckeditor/ckeditor5-test-package/issues/8). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+
+  All details have been described in [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
 ` );
 						/* eslint-enable max-len */
 
@@ -579,6 +582,14 @@ Besides changes in the dependencies, this version also contains the following bu
 
 						/* eslint-disable max-len */
 						const expectedChangelog = normalizeStrings( `
+### MAJOR BREAKING CHANGES
+
+* Some breaking change.
+
+### NOTE
+
+* Please read [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
+
 ### Features
 
 * Another feature. Closes [#2](https://github.com/ckeditor/ckeditor5-test-package/issues/2). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
@@ -596,15 +607,68 @@ Besides changes in the dependencies, this version also contains the following bu
 ### Other changes
 
 * Updated translations. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX)) ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX)) ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX)) ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-
-### BREAKING CHANGES
-
-* Some breaking change.
-
-### NOTE
-
-* Please read [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
 ` );
+						/* eslint-enable max-len */
+
+						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
+					} );
+			} );
+		} );
+
+		describe( 'treats "MAJOR BREAKING CHANGES" as "MINOR BREAKING CHANGES', () => {
+			it( 'works fine for complex iteration', () => {
+				return makeInitialRelease()
+					.then( () => {
+						makeCommit( 'Feature: Another feature. Closes #2' );
+						makeCommit(
+							'Feature: Issues will not be hoisted. Closes #8.',
+							'All details have been described in #1.',
+							'MAJOR BREAKING CHANGES: Breaking change NO 1.'
+						);
+						makeCommit(
+							'Merge t/ckeditor5-link/52 into master',
+							'Fix: Foo Bar. Closes #9.',
+							'MAJOR BREAKING CHANGE: Breaking change NO 2.'
+						);
+						makeCommit(
+							'Fix: Amazing fix. Closes #5.',
+							'The PR also finally closes #3 and #4. So good!',
+							'BREAKING CHANGES: Breaking change NO 3.'
+						);
+
+						const options = {
+							transformCommit: transformCommitForSubRepositoryFactory( {
+								treatMajorAsMinorBreakingChange: true
+							} )
+						};
+
+						return generateChangelog( '1.0.0', options );
+					} )
+					.then( () => {
+						const latestChangelog = replaceCommitIds( getChangesForVersion( '1.0.0' ) );
+
+						/* eslint-disable max-len */
+						const expectedChangelog = normalizeStrings( `
+### MINOR BREAKING CHANGES
+
+* Breaking change NO 3.
+* Breaking change NO 2.
+* Breaking change NO 1.
+
+### Features
+
+* Another feature. Closes [#2](https://github.com/ckeditor/ckeditor5-test-package/issues/2). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+* Issues will not be hoisted. Closes [#8](https://github.com/ckeditor/ckeditor5-test-package/issues/8). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+
+  All details have been described in [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
+
+### Bug fixes
+
+* Amazing fix. Closes [#5](https://github.com/ckeditor/ckeditor5-test-package/issues/5). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+
+  The PR also finally closes [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4). So good!
+* Foo Bar. Closes [#9](https://github.com/ckeditor/ckeditor5-test-package/issues/9). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+						` );
 						/* eslint-enable max-len */
 
 						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
@@ -636,8 +700,6 @@ Besides changes in the dependencies, this version also contains the following bu
 	}
 
 	function generateChangelog( version, options = {} ) {
-		const transform = require( '../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository' );
-
 		return generateChangelogFromCommits( {
 			version,
 			isInternalRelease: options.isInternalRelease,
@@ -645,7 +707,7 @@ Besides changes in the dependencies, this version also contains the following bu
 			skipLinks: options.skipLinks,
 			newTagName: 'v' + version,
 			tagName: !options.isFirstRelease ? 'v0.0.1' : null,
-			transformCommit: transform
+			transformCommit: options.transformCommit || transformCommitForSubRepositoryFactory()
 		} );
 	}
 

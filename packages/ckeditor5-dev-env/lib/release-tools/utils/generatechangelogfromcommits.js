@@ -74,25 +74,25 @@ module.exports = function generateChangelogFromCommits( options ) {
 		const changelogStream = conventionalChangelog( {}, context, gitRawCommitsOpts, parserOptions, writerOptions );
 
 		changelogStream
-			.pipe( changelogPipe( options.version, resolve, {
-				doNotSave: options.doNotSave
-			} ) )
-			.pipe( stream.noop( () => {
-				// When the CHANGELOG.md is being created for the first time by the script, `conventionalChangelog()` receives
-				// data in the stream twice. It causes generating the changelog twice. The first one for the specified package (cwd),
-				// the second one is being generated for the next cwd in a queue (or the cwd where the entire script was called).
-				// We need to destroy the stream manually in order to avoid calling it more than once.
-				changelogStream.destroy();
+			.pipe( changelogPipe( {
+				done: resolve,
+				doNotSave: options.doNotSave,
+				version: options.version,
+				stream: changelogStream
 			} ) );
 	} );
 };
 
-function changelogPipe( version, done, options ) {
+function changelogPipe( options ) {
 	return stream.noop( function( changes ) {
+		if ( options.stream.destroyed ) {
+			return;
+		}
+
 		const newEntries = groupUpdatedTranslationsCommits( changes.toString() );
 
 		if ( options.doNotSave ) {
-			return done( newEntries );
+			return options.done( newEntries );
 		}
 
 		let currentChangelog = changelogUtils.getChangelog();
@@ -107,11 +107,17 @@ function changelogPipe( version, done, options ) {
 		// Save the changelog.
 		changelogUtils.saveChangelog( newChangelog );
 
-		done( version );
+		// When the CHANGELOG.md is being created for the first time by the script, `conventionalChangelog()` receives
+		// data in the stream twice. It causes generating the changelog twice. The first one for the specified package (cwd),
+		// the second one is being generated for the next cwd in a queue (or the cwd where the entire script was called).
+		// We need to destroy the stream manually in order to avoid calling it more than once.
+		options.stream.destroy();
+		options.done( options.version );
 	} );
 }
 
 function getDebugFuntion() {
+	/* istanbul ignore next */
 	return ( ...params ) => {
 		console.log( ...params );
 	};
