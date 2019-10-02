@@ -182,6 +182,11 @@ Patch releases (bug fixes, internal changes):
 
 * [@ckeditor/beta](https://www.npmjs.com/package/@ckeditor/beta): v0.2.0 => [v0.2.1](https://github.com/ckeditor/beta/releases/tag/v0.2.1)
 `;
+					expect( stubs.transformCommitFunctionFactory.calledOnce ).to.equal( true );
+					expect( stubs.transformCommitFunctionFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true
+					} );
+
 					/* eslint-enable max-len */
 					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
 					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit[ 0 ] );
@@ -278,6 +283,12 @@ Patch releases (bug fixes, internal changes):
 Changelog entries generated from commits.
 `;
 					/* eslint-enable max-len */
+
+					expect( stubs.transformCommitFunctionFactory.calledTwice ).to.equal( true );
+					expect( stubs.transformCommitFunctionFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true
+					} );
+					expect( stubs.transformCommitFunctionFactory.secondCall.args ).to.deep.equal( [] );
 
 					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
 					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit[ 0 ] );
@@ -387,6 +398,11 @@ Major releases (dependencies of those packages have breaking changes):
 Changelog entries generated from commits.
 `;
 					/* eslint-enable max-len */
+					expect( stubs.transformCommitFunctionFactory.calledTwice ).to.equal( true );
+					expect( stubs.transformCommitFunctionFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true
+					} );
+					expect( stubs.transformCommitFunctionFactory.secondCall.args ).to.deep.equal( [] );
 
 					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
 					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit[ 0 ] );
@@ -496,6 +512,11 @@ Minor releases (new features, no breaking changes):
 Changelog entries generated from commits.
 `;
 					/* eslint-enable max-len */
+					expect( stubs.transformCommitFunctionFactory.calledTwice ).to.equal( true );
+					expect( stubs.transformCommitFunctionFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true
+					} );
+					expect( stubs.transformCommitFunctionFactory.secondCall.args ).to.deep.equal( [] );
 
 					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
 					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit[ 0 ] );
@@ -607,6 +628,11 @@ Minor releases (new features, no breaking changes):
 Changelog entries generated from commits.
 `;
 					/* eslint-enable max-len */
+					expect( stubs.transformCommitFunctionFactory.calledTwice ).to.equal( true );
+					expect( stubs.transformCommitFunctionFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true
+					} );
+					expect( stubs.transformCommitFunctionFactory.secondCall.args ).to.deep.equal( [] );
 
 					// There is no "major" bump so the function should be never called.
 					expect( stubs.changelogUtils.hasMajorBreakingChanges.called ).to.equal( false );
@@ -722,8 +748,12 @@ Patch releases (bug fixes, internal changes):
 
 Changelog entries generated from commits.
 `;
-
 					/* eslint-enable max-len */
+					expect( stubs.transformCommitFunctionFactory.calledTwice ).to.equal( true );
+					expect( stubs.transformCommitFunctionFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true
+					} );
+					expect( stubs.transformCommitFunctionFactory.secondCall.args ).to.deep.equal( [] );
 
 					expect( stubs.changelogUtils.saveChangelog.calledOnce ).to.equal( true );
 					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 0 ] ).to.equal( expectedNewChangelog );
