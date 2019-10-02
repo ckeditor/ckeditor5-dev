@@ -14,7 +14,7 @@ const cli = {
 	 * Asks a user for a confirmation for updating and tagging versions of the packages.
 	 *
 	 * @param {Map} packages Packages to release.
-	 * @returns {Promise}
+	 * @returns {Promise.<Boolean>}
 	 */
 	confirmUpdatingVersions( packages ) {
 		let message = 'Packages and their old and new versions:\n';
@@ -42,7 +42,7 @@ const cli = {
 	 * Asks a user for a confirmation for publishing changes.
 	 *
 	 * @param {Map} packages Packages to release.
-	 * @returns {Promise}
+	 * @returns {Promise.<Boolean>}
 	 */
 	confirmPublishing( packages ) {
 		let message = 'Services where the release will be created:\n';
@@ -91,7 +91,7 @@ const cli = {
 	/**
 	 * Asks a user for a confirmation for removing archives created by `npm pack` command.
 	 *
-	 * @returns {Promise}
+	 * @returns {Promise.<Boolean>}
 	 */
 	confirmRemovingFiles() {
 		const confirmQuestion = {
@@ -112,7 +112,7 @@ const cli = {
 	 * @param {String|null} releaseType
 	 * @param {Object} [options]
 	 * @param {Boolean} [options.disableInternalVersion=false] Whether to "internal" version is enabled.
-	 * @returns {Promise}
+	 * @returns {Promise.<String>}
 	 */
 	provideVersion( packageVersion, releaseType, options = {} ) {
 		const suggestedVersion = getSuggestedVersion();
@@ -173,7 +173,7 @@ const cli = {
 	/**
 	 * Asks a user for providing the GitHub token.
 	 *
-	 * @returns {Promise}
+	 * @returns {Promise.<String>}
 	 */
 	provideToken() {
 		const tokenQuestion = {
@@ -194,7 +194,7 @@ const cli = {
 	 *
 	 * If the user choices a GitHub, required token also has to be provided.
 	 *
-	 * @returns {Promise}
+	 * @returns {Promise.<Object>}
 	 */
 	configureReleaseOptions() {
 		const options = {};
@@ -234,7 +234,7 @@ const cli = {
 	/**
 	 * Asks a user for a confirmation for removing archives created by `npm pack` command.
 	 *
-	 * @returns {Promise}
+	 * @returns {Promise.<Boolean>}
 	 */
 	confirmMajorBreakingChangeRelease( haveMajorBreakingChangeCommits ) {
 		const confirmQuestion = {

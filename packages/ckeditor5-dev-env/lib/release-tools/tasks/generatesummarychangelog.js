@@ -62,9 +62,6 @@ module.exports = function generateSummaryChangelog( options ) {
 		pathsCollection.matched.add( options.cwd );
 	}
 
-	// const newVersion = options.newVersion || null;
-	const newVersion = null;
-
 	const generatedChangelogMap = new Map();
 
 	return executeOnPackages( pathsCollection.matched, generateSummaryChangelogForSingleRepository )
@@ -89,46 +86,37 @@ module.exports = function generateSummaryChangelog( options ) {
 			getAllDependenciesForRepository( repositoryPath )
 		);
 
-		let suggestedBumpFromCommits;
-		const suggestedBumpFromDependencies = getSuggestedBumpVersionType( dependencies );
-
 		let tagName = versionUtils.getLastFromChangelog( repositoryPath );
+		let suggestedBumpFromCommits;
 
 		if ( tagName ) {
 			tagName = 'v' + tagName;
 		}
 
-		let promise = Promise.resolve();
+		const transformCommitFunction = transformCommitFunctionFactory( {
+			returnInvalidCommit: true
+		} );
 
-		if ( !newVersion ) {
-			const transformCommitFunction = transformCommitFunctionFactory( {
-				returnInvalidCommit: true
-			} );
+		return getNewReleaseType( transformCommitFunction, { tagName } )
+			.then( result => {
+				suggestedBumpFromCommits = result.releaseType === 'internal' ? 'skip' : result.releaseType;
 
-			promise = promise.then( () => getNewReleaseType( transformCommitFunction, { tagName } ) )
-				.then( result => {
-					displayCommits( result.commits );
+				displayCommits( result.commits );
 
-					suggestedBumpFromCommits = result.releaseType === 'internal' ? 'skip' : result.releaseType;
+				const suggestedBumpFromDependencies = getSuggestedBumpVersionType( dependencies );
+				const commitsWeight = bumpTypesPriority[ suggestedBumpFromCommits ];
+				const packagesWeight = bumpTypesPriority[ suggestedBumpFromDependencies ];
 
-					let newReleaseType;
+				let newReleaseType;
 
-					const commitsWeight = bumpTypesPriority[ suggestedBumpFromCommits ];
-					const packagesWeight = bumpTypesPriority[ suggestedBumpFromDependencies ];
+				if ( !packagesWeight || commitsWeight > packagesWeight ) {
+					newReleaseType = suggestedBumpFromCommits;
+				} else {
+					newReleaseType = suggestedBumpFromDependencies;
+				}
 
-					if ( !packagesWeight || commitsWeight > packagesWeight ) {
-						newReleaseType = suggestedBumpFromCommits;
-					} else {
-						newReleaseType = suggestedBumpFromDependencies;
-					}
-
-					return cliUtils.provideVersion( packageJson.version, newReleaseType, { disableInternalVersion: true } );
-				} );
-		} else {
-			promise = promise.then( () => newVersion );
-		}
-
-		return promise
+				return cliUtils.provideVersion( packageJson.version, newReleaseType, { disableInternalVersion: true } );
+			} )
 			.then( version => {
 				if ( version === 'skip' ) {
 					return Promise.resolve();
@@ -187,9 +175,7 @@ module.exports = function generateSummaryChangelog( options ) {
 					// Save the changelog.
 					changelogUtils.saveChangelog( newChangelog, repositoryPath );
 
-					log.info(
-						chalk.green( `Changelog for "${ packageJson.name }" (v${ version }) has been generated.` )
-					);
+					log.info( chalk.green( `Changelog for "${ packageJson.name }" (v${ version }) has been generated.` ) );
 
 					// Commit the new changelog.
 					tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
@@ -390,19 +376,6 @@ module.exports = function generateSummaryChangelog( options ) {
 		removeDependencies( majorBreakingChangesReleasePackages, majorReleasePackages );
 		removeDependencies( minorBreakingChangesReleasePackages, minorReleasePackages );
 
-		// If the next release is below the `1.0.0` version, we accept breaking changes in `major` releases.
-		if ( allowBreakingChangeInMinor ) {
-			for ( const [ packageName, versions ] of majorReleasePackages ) {
-				minorReleasePackages.set( packageName, versions );
-				majorReleasePackages.delete( packageName );
-			}
-
-			for ( const [ packageName, versions ] of majorBreakingChangesReleasePackages ) {
-				minorBreakingChangesReleasePackages.set( packageName, versions );
-				majorBreakingChangesReleasePackages.delete( packageName );
-			}
-		}
-
 		const hasChangesInAnyOfPackages = [
 			newPackages.size,
 			majorReleasePackages.size,
@@ -450,7 +423,7 @@ module.exports = function generateSummaryChangelog( options ) {
 
 		if ( minorBreakingChangesReleasePackages.size ) {
 			if ( allowBreakingChangeInMinor ) {
-				entries.push( 'Minor releases (possible breaking changes):\n' );
+				entries.push( 'Minor releases (containing major/minor breaking changes):\n' );
 			} else {
 				entries.push( 'Minor releases (containing minor breaking changes):\n' );
 			}
@@ -463,11 +436,7 @@ module.exports = function generateSummaryChangelog( options ) {
 		}
 
 		if ( minorReleasePackages.size ) {
-			if ( allowBreakingChangeInMinor ) {
-				entries.push( 'Minor releases (possible breaking changes):\n' );
-			} else {
-				entries.push( 'Minor releases (new features, no breaking changes):\n' );
-			}
+			entries.push( 'Minor releases (new features, no breaking changes):\n' );
 
 			for ( const [ packageName, { currentVersion, nextVersion } ] of minorReleasePackages ) {
 				entries.push( formatChangelogEntry( packageName, nextVersion, currentVersion ) );

@@ -1,0 +1,9 @@
+{
+  "name": "@ckeditor/ckeditor5-dev-kappa",
+  "version": "1.0.0",
+  "dependencies": {},
+  "devDependencies": {},
+  "repository": {
+    "url": "https://github.com/ckeditor/ckeditor5-dev-kappa.git"
+  }
+}
