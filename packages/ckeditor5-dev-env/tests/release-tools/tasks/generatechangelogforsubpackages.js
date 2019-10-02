@@ -24,7 +24,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 		} );
 
 		stubs = {
-			transformCommit: sandbox.spy(),
+			transformCommitFunctionFactory: sandbox.stub(),
+			transformCommit: [],
 			getSubPackagesPaths: sandbox.stub(),
 			displaySkippedPackages: sandbox.stub(),
 			displayGeneratedChangelogs: sandbox.stub(),
@@ -51,7 +52,12 @@ describe( 'dev-env/release-tools/tasks', () => {
 			}
 		};
 
-		mockery.registerMock( '../utils/transform-commit/transformcommitforsubpackage', stubs.transformCommit );
+		for ( let i = 0; i < 4; ++i ) {
+			stubs.transformCommit.push( sandbox.stub() );
+			stubs.transformCommitFunctionFactory.onCall( i ).returns( stubs.transformCommit[ i ] );
+		}
+
+		mockery.registerMock( '../utils/transform-commit/transformcommitforsubpackagefactory', stubs.transformCommitFunctionFactory );
 		mockery.registerMock( '../utils/generatechangelogfromcommits', stubs.generateChangelogFromCommits );
 		mockery.registerMock( '../utils/getsubpackagespaths', stubs.getSubPackagesPaths );
 		mockery.registerMock( '../utils/displayskippedpackages', stubs.displaySkippedPackages );
@@ -130,11 +136,11 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( chdirStub.thirdCall.args[ 0 ] ).to.equal( '/ckeditor5-dev' );
 
 					expect( stubs.getNewReleaseType.calledTwice ).to.equal( true );
-					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit );
+					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit[ 0 ] );
 					expect( stubs.getNewReleaseType.firstCall.args[ 1 ] ).to.deep.equal( {
 						tagName: '@ckeditor/ckeditor5-dev-foo@1.0.0'
 					} );
-					expect( stubs.getNewReleaseType.secondCall.args[ 0 ] ).to.equal( stubs.transformCommit );
+					expect( stubs.getNewReleaseType.secondCall.args[ 0 ] ).to.equal( stubs.transformCommit[ 2 ] );
 					expect( stubs.getNewReleaseType.secondCall.args[ 1 ] ).to.deep.equal( {
 						tagName: '@ckeditor/ckeditor5-dev-bar@2.0.0'
 					} );
@@ -145,10 +151,10 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.cli.provideVersion.secondCall.args[ 0 ] ).to.equal( '2.0.0' );
 					expect( stubs.cli.provideVersion.secondCall.args[ 1 ] ).to.equal( 'minor' );
 
-					expect( stubs.logger.info.getCall( 1 ).args[ 0 ] ).to.match(
+					expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.match(
 						/Generating changelog for "@ckeditor\/ckeditor5-dev-foo"\.\.\./
 					);
-					expect( stubs.logger.info.getCall( 3 ).args[ 0 ] ).to.match(
+					expect( stubs.logger.info.getCall( 2 ).args[ 0 ] ).to.match(
 						/Generating changelog for "@ckeditor\/ckeditor5-dev-bar"\.\.\./
 					);
 					expect( stubs.logger.info.getCall( 4 ).args[ 0 ] ).to.match( /Committing generated changelogs\./ );
@@ -165,14 +171,14 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.generateChangelogFromCommits.calledTwice ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
 						version: '1.0.1',
-						transformCommit: stubs.transformCommit,
+						transformCommit: stubs.transformCommit[ 1 ],
 						tagName: '@ckeditor/ckeditor5-dev-foo@1.0.0',
 						newTagName: '@ckeditor/ckeditor5-dev-foo@1.0.1',
 						isInternalRelease: false
 					} );
 					expect( stubs.generateChangelogFromCommits.secondCall.args[ 0 ] ).to.deep.equal( {
 						version: '2.1.0',
-						transformCommit: stubs.transformCommit,
+						transformCommit: stubs.transformCommit[ 3 ],
 						tagName: '@ckeditor/ckeditor5-dev-bar@2.0.0',
 						newTagName: '@ckeditor/ckeditor5-dev-bar@2.1.0',
 						isInternalRelease: false
@@ -228,7 +234,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
 						version: '1.0.1',
-						transformCommit: stubs.transformCommit,
+						transformCommit: stubs.transformCommit[ 1 ],
 						tagName: '@ckeditor/ckeditor5-dev-foo@1.0.0',
 						newTagName: '@ckeditor/ckeditor5-dev-foo@1.0.1',
 						isInternalRelease: false
@@ -324,14 +330,14 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.generateChangelogFromCommits.calledTwice ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
 						version: '1.0.1',
-						transformCommit: stubs.transformCommit,
+						transformCommit: stubs.transformCommit[ 1 ],
 						tagName: '@ckeditor/ckeditor5-dev-foo@1.0.0',
 						newTagName: '@ckeditor/ckeditor5-dev-foo@1.0.1',
 						isInternalRelease: true
 					} );
 					expect( stubs.generateChangelogFromCommits.secondCall.args[ 0 ] ).to.deep.equal( {
 						version: '2.0.1',
-						transformCommit: stubs.transformCommit,
+						transformCommit: stubs.transformCommit[ 3 ],
 						tagName: '@ckeditor/ckeditor5-dev-bar@2.0.0',
 						newTagName: '@ckeditor/ckeditor5-dev-bar@2.0.1',
 						isInternalRelease: true

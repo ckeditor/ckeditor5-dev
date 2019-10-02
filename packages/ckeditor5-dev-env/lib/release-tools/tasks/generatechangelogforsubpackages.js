@@ -77,8 +77,7 @@ module.exports = function generateChangelogForSubPackages( options ) {
 			tagName = packageJson.name + '@' + tagName;
 		}
 
-		log.info( '' );
-		log.info( chalk.bold.blue( `Generating changelog for "${ dependencyName }"...` ) );
+		log.info( '\n' + chalk.bold.blue( `Generating changelog for "${ dependencyName }"...` ) );
 
 		const transformCommitFunction = transformCommitForSubPackageFactory( {
 			returnInvalidCommit: true
