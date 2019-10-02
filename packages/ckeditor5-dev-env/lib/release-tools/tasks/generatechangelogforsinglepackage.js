@@ -57,8 +57,13 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 		tagName = 'v' + tagName;
 	}
 
-	const isInternalRelease = options.isInternalRelease || false;
-	const newVersion = options.newVersion || null;
+	let isInternalRelease = options.isInternalRelease || false;
+	let newVersion = options.newVersion || null;
+
+	if ( newVersion === 'internal' ) {
+		isInternalRelease = true;
+		newVersion = 'patch';
+	}
 
 	log.info( '\n' + chalk.bold.blue( `Generating changelog for "${ packageJson.name }"...` ) );
 

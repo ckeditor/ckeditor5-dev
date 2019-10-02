@@ -35,12 +35,19 @@ describe( 'dev-env/release-tools/tasks', () => {
 				cli: {
 					provideVersion: sandbox.stub()
 				},
-				transformCommit: sandbox.spy(),
+				transformCommitFactory: sandbox.stub(),
+				transformCommit: [
+					sandbox.stub(),
+					sandbox.stub()
+				],
 				generateChangelogFromCommits: sandbox.stub(),
 				versionUtils: {
 					getLastFromChangelog: sandbox.stub()
 				}
 			};
+
+			stubs.transformCommitFactory.onFirstCall().returns( stubs.transformCommit[ 0 ] );
+			stubs.transformCommitFactory.onSecondCall().returns( stubs.transformCommit[ 1 ] );
 
 			mockery.enable( {
 				useCleanCache: true,
@@ -52,7 +59,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			mockery.registerMock( '../utils/getnewreleasetype', stubs.getNewReleaseType );
 			mockery.registerMock( '../utils/displaycommits', stubs.displayCommits );
 			mockery.registerMock( '../utils/generatechangelogfromcommits', stubs.generateChangelogFromCommits );
-			mockery.registerMock( '../utils/transform-commit/transformcommitforsubrepository', stubs.transformCommit );
+			mockery.registerMock( '../utils/transform-commit/transformcommitforsubrepositoryfactory', stubs.transformCommitFactory );
 
 			generateChangelogForSinglePackage = proxyquire( '../../../lib/release-tools/tasks/generatechangelogforsinglepackage', {
 				'../utils/changelog': stubs.changelogUtils,
@@ -86,17 +93,16 @@ describe( 'dev-env/release-tools/tasks', () => {
 						version: '1.0.0',
 						tagName: 'v0.5.0',
 						newTagName: 'v1.0.0',
-						transformCommit: stubs.transformCommit,
+						transformCommit: stubs.transformCommit[ 0 ],
 						isInternalRelease: false,
 						skipLinks: false
 					} );
 
-					expect( stubs.logger.info.calledThrice ).to.equal( true );
-					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( '' );
-					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.match(
+					expect( stubs.logger.info.calledTwice ).to.equal( true );
+					expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match(
 						/Generating changelog for "test-package".../
 					);
-					expect( stubs.logger.info.thirdCall.args[ 0 ] ).to.match(
+					expect( stubs.logger.info.secondCall.args[ 0 ] ).to.match(
 						/Changelog for "test-package" \(v1\.0\.0\) has been generated\./
 					);
 				} );
@@ -115,18 +121,30 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			return generateChangelogForSinglePackage()
 				.then( () => {
+					expect( stubs.transformCommitFactory.calledTwice ).to.equal( true );
+					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true,
+						treatMajorAsMinorBreakingChange: undefined
+					} );
+					expect( stubs.transformCommitFactory.secondCall.args[ 0 ] ).to.deep.equal( {
+						treatMajorAsMinorBreakingChange: undefined
+					} );
+
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
 						version: '0.1.0',
 						tagName: null,
 						newTagName: 'v0.1.0',
-						transformCommit: stubs.transformCommit,
+						transformCommit: stubs.transformCommit[ 1 ],
 						isInternalRelease: false,
 						skipLinks: false
 					} );
 
 					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
-					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit );
+					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit[ 0 ] );
+					expect( stubs.getNewReleaseType.firstCall.args[ 1 ] ).to.deep.equal( {
+						tagName: null
+					} );
 
 					expect( stubs.cli.provideVersion.calledOnce ).to.equal( true );
 					expect( stubs.cli.provideVersion.firstCall.args[ 0 ] ).to.equal( '0.0.1' );
@@ -134,6 +152,42 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 					expect( stubs.displayCommits.calledOnce ).to.equal( true );
 					expect( stubs.displayCommits.firstCall.args[ 0 ] ).to.deep.equal( commits );
+				} );
+		} );
+
+		it( '"options.newVersion" can be defined as an increment level ', () => {
+			const commits = [ {}, {} ];
+
+			stubs.getNewReleaseType.returns( Promise.resolve( {
+				releaseType: 'minor',
+				commits
+			} ) );
+			stubs.cli.provideVersion.returns( Promise.resolve( '0.1.0' ) );
+			stubs.versionUtils.getLastFromChangelog.returns( null );
+			stubs.generateChangelogFromCommits.returns( Promise.resolve() );
+
+			return generateChangelogForSinglePackage( { newVersion: 'minor' } )
+				.then( () => {
+					expect( stubs.transformCommitFactory.calledOnce ).to.equal( true );
+					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						treatMajorAsMinorBreakingChange: undefined
+					} );
+
+					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
+					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						version: '0.1.0',
+						tagName: null,
+						newTagName: 'v0.1.0',
+						transformCommit: stubs.transformCommit[ 0 ],
+						isInternalRelease: false,
+						skipLinks: false
+					} );
+
+					expect( stubs.cli.provideVersion.calledOnce ).to.equal( true );
+					expect( stubs.cli.provideVersion.firstCall.args[ 0 ] ).to.equal( '0.0.1' );
+					expect( stubs.cli.provideVersion.firstCall.args[ 1 ] ).to.equal( 'minor' );
+
+					expect( stubs.displayCommits.called ).to.equal( false );
 				} );
 		} );
 
@@ -149,6 +203,12 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			return generateChangelogForSinglePackage()
 				.then( () => {
+					expect( stubs.transformCommitFactory.calledOnce ).to.equal( true );
+					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true,
+						treatMajorAsMinorBreakingChange: undefined
+					} );
+
 					expect( stubs.generateChangelogFromCommits.called ).to.equal( false );
 
 					expect( stubs.displayCommits.calledOnce ).to.equal( true );
@@ -168,6 +228,12 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			return generateChangelogForSinglePackage()
 				.then( () => {
+					expect( stubs.transformCommitFactory.calledOnce ).to.equal( true );
+					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true,
+						treatMajorAsMinorBreakingChange: undefined
+					} );
+
 					expect( stubs.generateChangelogFromCommits.called ).to.equal( false );
 
 					expect( stubs.displayCommits.calledOnce ).to.equal( true );
@@ -193,12 +259,16 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			return generateChangelogForSinglePackage( { newVersion: 'internal' } )
 				.then( () => {
+					expect( stubs.transformCommitFactory.calledOnce ).to.equal( true );
+					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						treatMajorAsMinorBreakingChange: undefined
+					} );
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
 						version: '0.0.2',
 						tagName: 'v0.0.1',
 						newTagName: 'v0.0.2',
-						transformCommit: stubs.transformCommit,
+						transformCommit: stubs.transformCommit[ 0 ],
 						isInternalRelease: true,
 						skipLinks: false
 					} );
@@ -215,14 +285,54 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			return generateChangelogForSinglePackage( { skipLinks: true } )
 				.then( () => {
+					expect( stubs.transformCommitFactory.calledTwice ).to.equal( true );
+					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true,
+						treatMajorAsMinorBreakingChange: undefined
+					} );
+					expect( stubs.transformCommitFactory.secondCall.args[ 0 ] ).to.deep.equal( {
+						treatMajorAsMinorBreakingChange: undefined
+					} );
+
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
 						version: '0.1.0',
 						tagName: null,
 						newTagName: 'v0.1.0',
-						transformCommit: stubs.transformCommit,
+						transformCommit: stubs.transformCommit[ 1 ],
 						isInternalRelease: false,
 						skipLinks: true
+					} );
+				} );
+		} );
+
+		it( 'treats MAJOR BREAKING CHANGES as MINOR BREAKING CHANGES', () => {
+			stubs.getNewReleaseType.returns( Promise.resolve( {
+				releaseType: 'minor'
+			} ) );
+			stubs.cli.provideVersion.returns( Promise.resolve( '0.1.0' ) );
+			stubs.versionUtils.getLastFromChangelog.returns( null );
+			stubs.generateChangelogFromCommits.returns( Promise.resolve() );
+
+			return generateChangelogForSinglePackage( { disableMajorBump: true } )
+				.then( () => {
+					expect( stubs.transformCommitFactory.calledTwice ).to.equal( true );
+					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true,
+						treatMajorAsMinorBreakingChange: true
+					} );
+					expect( stubs.transformCommitFactory.secondCall.args[ 0 ] ).to.deep.equal( {
+						treatMajorAsMinorBreakingChange: true
+					} );
+
+					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
+					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						version: '0.1.0',
+						tagName: null,
+						newTagName: 'v0.1.0',
+						transformCommit: stubs.transformCommit[ 1 ],
+						isInternalRelease: false,
+						skipLinks: false
 					} );
 				} );
 		} );
