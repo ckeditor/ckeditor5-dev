@@ -19,7 +19,7 @@ const executeOnPackages = require( '../utils/executeonpackages' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getSubPackagesPaths = require( '../utils/getsubpackagespaths' );
 const generateChangelogFromCommits = require( '../utils/generatechangelogfromcommits' );
-const transformCommitFunction = require( '../utils/transform-commit/transformcommitforsubpackage' );
+const transformCommitForSubPackageFactory = require( '../utils/transform-commit/transformcommitforsubpackagefactory' );
 
 /**
  * Generates the changelog for packages located in single repository.
@@ -77,8 +77,11 @@ module.exports = function generateChangelogForSubPackages( options ) {
 			tagName = packageJson.name + '@' + tagName;
 		}
 
-		log.info( '' );
-		log.info( chalk.bold.blue( `Generating changelog for "${ dependencyName }"...` ) );
+		log.info( '\n' + chalk.bold.blue( `Generating changelog for "${ dependencyName }"...` ) );
+
+		const transformCommitFunction = transformCommitForSubPackageFactory( {
+			returnInvalidCommit: true
+		} );
 
 		return getNewReleaseType( transformCommitFunction, { tagName } )
 			.then( result => {
@@ -108,11 +111,15 @@ module.exports = function generateChangelogForSubPackages( options ) {
 					tagName,
 					isInternalRelease,
 					newTagName: packageJson.name + '@' + version,
-					transformCommit: transformCommitFunction
+					transformCommit: transformCommitForSubPackageFactory()
 				};
 
 				return generateChangelogFromCommits( changelogOptions )
 					.then( newVersion => {
+						log.info(
+							chalk.green( `Changelog for "${ dependencyName }" (v${ newVersion }) has been generated.` )
+						);
+
 						generatedChangelogsMap.set( dependencyName, newVersion );
 					} );
 			} )

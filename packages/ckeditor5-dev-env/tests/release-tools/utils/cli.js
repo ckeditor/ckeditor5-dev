@@ -10,10 +10,11 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 
 describe( 'dev-env/release-tools/utils', () => {
-	let cli, sandbox, questionItems;
+	let cli, sandbox, questionItems, userAnswer;
 
 	describe( 'cli', () => {
 		beforeEach( () => {
+			userAnswer = undefined;
 			sandbox = sinon.createSandbox();
 			questionItems = [];
 
@@ -28,8 +29,10 @@ describe( 'dev-env/release-tools/utils', () => {
 					questionItems.push( ...questions );
 					const questionItem = questions[ 0 ];
 
-					// Returns suggested value as a user input.
-					return Promise.resolve( { version: questionItem.default } );
+					// If `userAnswer` is undefined, return a suggested value as a user input.
+					return Promise.resolve( {
+						[ questionItem.name ]: typeof userAnswer != 'undefined' ? userAnswer : questionItem.default
+					} );
 				}
 			} );
 
@@ -39,6 +42,111 @@ describe( 'dev-env/release-tools/utils', () => {
 		afterEach( () => {
 			sandbox.restore();
 			mockery.disable();
+		} );
+
+		describe( 'confirmUpdatingVersions()', () => {
+			it( 'displays packages and their versions (current and proposed) to release', () => {
+				const packagesMap = new Map();
+
+				packagesMap.set( '@ckeditor/ckeditor5-engine', {
+					previousVersion: '1.0.0',
+					version: '1.1.0'
+				} );
+				packagesMap.set( '@ckeditor/ckeditor5-core', {
+					previousVersion: '0.7.0',
+					version: '0.7.1'
+				} );
+
+				return cli.confirmUpdatingVersions( packagesMap )
+					.then( () => {
+						const question = questionItems[ 0 ];
+
+						expect( question.message ).to.match( /^Packages and their old and new versions:/ );
+						expect( question.message ).to.match( /"@ckeditor\/ckeditor5-engine": v1\.0\.0 => v1\.1\.0/ );
+						expect( question.message ).to.match( /"@ckeditor\/ckeditor5-core": v0\.7\.0 => v0\.7\.1/ );
+						expect( question.message ).to.match( /Continue\?$/ );
+					} );
+			} );
+
+			it( 'sorts the packages alphabetically', () => {
+				const packagesMap = new Map();
+
+				packagesMap.set( '@ckeditor/ckeditor5-list', {} );
+				packagesMap.set( '@ckeditor/ckeditor5-autoformat', {} );
+				packagesMap.set( '@ckeditor/ckeditor5-basic-styles', {} );
+				packagesMap.set( '@ckeditor/ckeditor5-core', {} );
+				packagesMap.set( '@ckeditor/ckeditor5-link', {} );
+				packagesMap.set( '@ckeditor/ckeditor5-build-classic', {} );
+
+				return cli.confirmUpdatingVersions( packagesMap )
+					.then( () => {
+						const packagesAsArray = questionItems[ 0 ].message
+							.split( '\n' )
+							// Remove header and footer from the message.
+							.slice( 1, -1 )
+							// Extract package name from the whole line.
+							.map( line => line.replace( /.*"([^"]+)".*/, '$1' ) );
+
+						expect( packagesAsArray.length ).to.equal( 6 );
+						expect( packagesAsArray[ 0 ] ).to.equal( '@ckeditor/ckeditor5-autoformat' );
+						expect( packagesAsArray[ 1 ] ).to.equal( '@ckeditor/ckeditor5-basic-styles' );
+						expect( packagesAsArray[ 2 ] ).to.equal( '@ckeditor/ckeditor5-build-classic' );
+						expect( packagesAsArray[ 3 ] ).to.equal( '@ckeditor/ckeditor5-core' );
+						expect( packagesAsArray[ 4 ] ).to.equal( '@ckeditor/ckeditor5-link' );
+						expect( packagesAsArray[ 5 ] ).to.equal( '@ckeditor/ckeditor5-list' );
+					} );
+			} );
+		} );
+
+		describe( 'confirmPublishing()', () => {
+			it( 'displays packages and services where they should be released', () => {
+				const packagesMap = new Map();
+
+				packagesMap.set( '@ckeditor/ckeditor5-engine', {
+					version: '1.1.0',
+					shouldReleaseOnNpm: true,
+					shouldReleaseOnGithub: true
+				} );
+				packagesMap.set( '@ckeditor/ckeditor5-core', {
+					version: '0.7.0',
+					shouldReleaseOnNpm: false,
+					shouldReleaseOnGithub: true
+				} );
+				packagesMap.set( '@ckeditor/ckeditor5-utils', {
+					version: '1.7.0',
+					shouldReleaseOnNpm: true,
+					shouldReleaseOnGithub: false
+				} );
+				packagesMap.set( '@ckeditor/ckeditor5-widget', {
+					version: '2.0.0',
+					shouldReleaseOnNpm: false,
+					shouldReleaseOnGithub: false
+				} );
+
+				return cli.confirmPublishing( packagesMap )
+					.then( () => {
+						const question = questionItems[ 0 ];
+
+						expect( question.message ).to.match( /^Services where the release will be created:/ );
+						expect( question.message ).to.match( /"@ckeditor\/ckeditor5-core" - version: 0\.7\.0 - services: GitHub/ );
+						expect( question.message ).to.match( /"@ckeditor\/ckeditor5-engine" - version: 1\.1\.0 - services: NPM, GitHub/ );
+						expect( question.message ).to.match( /"@ckeditor\/ckeditor5-utils" - version: 1\.7\.0 - services: NPM/ );
+						expect( question.message ).to.match( /"@ckeditor\/ckeditor5-widget" - version: 2\.0\.0 - nothing to release/ );
+						expect( question.message ).to.match( /Continue\?$/ );
+					} );
+			} );
+		} );
+
+		describe( 'confirmRemovingFiles()', () => {
+			it( 'user can disagree with the proposed value', () => {
+				return cli.confirmRemovingFiles()
+					.then( () => {
+						const question = questionItems[ 0 ];
+
+						expect( question.message ).to.match( /^Remove created archives\?/ );
+						expect( question.type ).to.equal( 'confirm' );
+					} );
+			} );
 		} );
 
 		describe( 'provideVersion()', () => {
@@ -131,58 +239,110 @@ describe( 'dev-env/release-tools/utils', () => {
 						expect( newVersion ).to.equal( '1.0.0-alpha.2' );
 					} );
 			} );
-		} );
 
-		describe( 'confirmUpdatingVersions()', () => {
-			it( 'displays packages and their versions (current and proposed) to release', () => {
-				const packagesMap = new Map();
-
-				packagesMap.set( '@ckeditor/ckeditor5-engine', {
-					previousVersion: '1.0.0',
-					version: '1.1.0'
-				} );
-				packagesMap.set( '@ckeditor/ckeditor5-core', {
-					previousVersion: '0.7.0',
-					version: '0.7.1'
-				} );
-
-				return cli.confirmUpdatingVersions( packagesMap )
+			it( 'removes spaces from provided version', () => {
+				return cli.provideVersion( '1.0.0', 'major' )
 					.then( () => {
-						const question = questionItems[ 0 ];
+						const { filter } = questionItems[ 0 ];
 
-						expect( question.message ).to.match( /^Packages and their old and new versions:/ );
-						expect( question.message ).to.match( /"@ckeditor\/ckeditor5-engine": v1\.0\.0 => v1\.1\.0/ );
-						expect( question.message ).to.match( /"@ckeditor\/ckeditor5-core": v0\.7\.0 => v0\.7\.1/ );
-						expect( question.message ).to.match( /Continue\?$/ );
+						expect( filter( '   0.0.1' ) ).to.equal( '0.0.1' );
+						expect( filter( '0.0.1   ' ) ).to.equal( '0.0.1' );
+						expect( filter( '    0.0.1   ' ) ).to.equal( '0.0.1' );
 					} );
 			} );
 
-			it( 'sorts the packages alphabetically', () => {
-				const packagesMap = new Map();
-
-				packagesMap.set( '@ckeditor/ckeditor5-list', {} );
-				packagesMap.set( '@ckeditor/ckeditor5-autoformat', {} );
-				packagesMap.set( '@ckeditor/ckeditor5-basic-styles', {} );
-				packagesMap.set( '@ckeditor/ckeditor5-core', {} );
-				packagesMap.set( '@ckeditor/ckeditor5-link', {} );
-				packagesMap.set( '@ckeditor/ckeditor5-build-classic', {} );
-
-				return cli.confirmUpdatingVersions( packagesMap )
+			it( 'validates the provided version (disableInternalVersion=false)', () => {
+				return cli.provideVersion( '1.0.0', 'major' )
 					.then( () => {
-						const packagesAsArray = questionItems[ 0 ].message
-							.split( '\n' )
-							// Remove header and footer from the message.
-							.slice( 1, -1 )
-							// Extract package name from the whole line.
-							.map( line => line.replace( /.*"([^"]+)".*/, '$1' ) );
+						const { validate } = questionItems[ 0 ];
 
-						expect( packagesAsArray.length ).to.equal( 6 );
-						expect( packagesAsArray[ 0 ] ).to.equal( '@ckeditor/ckeditor5-autoformat' );
-						expect( packagesAsArray[ 1 ] ).to.equal( '@ckeditor/ckeditor5-basic-styles' );
-						expect( packagesAsArray[ 2 ] ).to.equal( '@ckeditor/ckeditor5-build-classic' );
-						expect( packagesAsArray[ 3 ] ).to.equal( '@ckeditor/ckeditor5-core' );
-						expect( packagesAsArray[ 4 ] ).to.equal( '@ckeditor/ckeditor5-link' );
-						expect( packagesAsArray[ 5 ] ).to.equal( '@ckeditor/ckeditor5-list' );
+						expect( validate( 'skip' ) ).to.equal( true );
+						expect( validate( 'internal' ) ).to.equal( true );
+						expect( validate( '2.0.0' ) ).to.equal( true );
+						expect( validate( '0.1' ) ).to.equal( 'Please provide a valid version.' );
+					} );
+			} );
+
+			it( 'validates the provided version (disableInternalVersion=true)', () => {
+				return cli.provideVersion( '1.0.0', 'major', { disableInternalVersion: true } )
+					.then( () => {
+						const { validate } = questionItems[ 0 ];
+
+						expect( validate( 'skip' ) ).to.equal( true );
+						expect( validate( 'internal' ) ).to.equal( 'Please provide a valid version.' );
+						expect( validate( '2.0.0' ) ).to.equal( true );
+						expect( validate( '0.1' ) ).to.equal( 'Please provide a valid version.' );
+					} );
+			} );
+		} );
+
+		describe( 'provideToken()', () => {
+			it( 'user is able to provide the token', () => {
+				return cli.provideToken()
+					.then( () => {
+						const question = questionItems[ 0 ];
+
+						expect( question.message ).to.match( /^Provide the GitHub token/ );
+						expect( question.type ).to.equal( 'password' );
+					} );
+			} );
+
+			it( 'token must contain 40 characters', () => {
+				return cli.provideToken()
+					.then( () => {
+						const { validate } = questionItems[ 0 ];
+
+						expect( validate( 'abc' ) ).to.equal( 'Please provide a valid token.' );
+						expect( validate( 'a'.repeat( 40 ) ) ).to.equal( true );
+					} );
+			} );
+		} );
+
+		describe( 'configureReleaseOptions()', () => {
+			it( 'by default returns both services and requires Github token', () => {
+				sandbox.stub( cli, 'provideToken' ).resolves( 'a'.repeat( 40 ) );
+
+				return cli.configureReleaseOptions()
+					.then( options => {
+						const question = questionItems[ 0 ];
+
+						expect( question.message ).to.match( /^Select services where packages will be released:/ );
+						expect( question.type ).to.equal( 'checkbox' );
+
+						expect( cli.provideToken.calledOnce ).to.equal( true );
+
+						expect( options ).to.deep.equal( {
+							npm: true,
+							github: true,
+							token: 'a'.repeat( 40 )
+						} );
+					} );
+			} );
+
+			it( 'does not ask about the GitHub token if ignores GitHub release', () => {
+				sandbox.stub( cli, 'provideToken' );
+				userAnswer = [ 'npm' ];
+
+				return cli.configureReleaseOptions()
+					.then( options => {
+						expect( cli.provideToken.called ).to.equal( false );
+
+						expect( options ).to.deep.equal( {
+							npm: true,
+							github: false
+						} );
+					} );
+			} );
+		} );
+
+		describe( 'confirmMajorBreakingChangeRelease()', () => {
+			it( 'user can disagree with the proposed value', () => {
+				return cli.confirmMajorBreakingChangeRelease( true )
+					.then( () => {
+						const question = questionItems[ 0 ];
+
+						expect( question.message ).to.match( /^Should the next versions be treated as a major bump\?/ );
+						expect( question.type ).to.equal( 'confirm' );
 					} );
 			} );
 		} );

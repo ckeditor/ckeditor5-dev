@@ -6,7 +6,8 @@
     "@ckeditor/beta": "*",
     "@ckeditor/gamma": "*",
     "@ckeditor/delta": "*",
-    "@ckeditor/epsilon": "*"
+    "@ckeditor/epsilon": "*",
+    "@ckeditor/ckeditor5-dev-kappa": "*"
   },
   "repository": {
     "url": "https://github.com/ckeditor/foo-bar.git"

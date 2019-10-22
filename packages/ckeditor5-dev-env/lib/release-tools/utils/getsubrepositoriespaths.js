@@ -11,13 +11,16 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 const getPackageJson = require( './getpackagejson' );
 
 /**
- * Returns two collections of paths to packages which are located in single repository.
+ * Returns an object with two collections of paths to packages which are located in single repository.
  * Those packages must be defined as dependencies in the repository found in `options.cwd`.
  *
- * The first one is marked as "matched" and means that packages specified in those paths match to given criteria.
- * The second one is marked as "skipped" and means that packages should not be processed.
+ *   - The first one is marked as `matched` and means that packages specified in a path (which is a combination of values specified as
+ *     `options.cwd` and  `options.packages`) match to given criteria.
+ *   - The second one is marked as `skipped` and means that packages should not be processed. They aren't defined in the main
+ *     `package.json` as dependencies or were listed as packages to skip (`options.skipPackages` or don't mach to `options.scope`).
  *
- * Subrepositories mean that packages which have own repositories are located inside another repository (similar to git submodules).
+ * By "sub repositories" we understand that packages have their own repositories and they are located inside another
+ * repository (similar to git submodules).
  *
  * @param {Object} options
  * @param {String} options.cwd Current work directory.

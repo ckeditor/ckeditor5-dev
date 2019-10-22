@@ -18,10 +18,14 @@ const packagesPaths = {
 	beta: path.join( mainPackagePath, 'packages', 'beta' ),
 	gamma: path.join( mainPackagePath, 'packages', 'gamma' ),
 	delta: path.join( mainPackagePath, 'packages', 'delta' ),
-	epsilon: path.join( mainPackagePath, 'packages', 'epsilon' )
+	epsilon: path.join( mainPackagePath, 'packages', 'epsilon' ),
+	omega: path.join( mainPackagePath, 'packages', 'omega' ),
+	devKappa: path.join( mainPackagePath, 'packages', 'dev-kappa' )
 };
 
 const testCwd = process.cwd();
+
+// Tests below use real files (as mocks). See: "/packages/ckeditor5-dev-env/tests/release-tools/tasks/stubs/releasesubrepositories".
 
 describe( 'dev-env/release-tools/tasks', () => {
 	let generateSummaryChangelog, sandbox, stubs;
@@ -52,11 +56,17 @@ describe( 'dev-env/release-tools/tasks', () => {
 			changelogUtils: {
 				getChangelog: sandbox.stub(),
 				saveChangelog: sandbox.stub(),
+				hasMajorBreakingChanges: sandbox.stub(),
+				hasMinorBreakingChanges: sandbox.stub(),
 				changelogHeader: ''
 			},
 			displayGeneratedChangelogs: sandbox.stub(),
 			getSubRepositoriesPaths: sandbox.stub(),
-			transformCommitFunction: sandbox.stub(),
+			transformCommitFunctionFactory: sandbox.stub(),
+			transformCommit: [
+				sandbox.stub(),
+				sandbox.stub()
+			],
 			generateChangelogFromCommits: sandbox.stub(),
 			getNewReleaseType: sandbox.stub(),
 			displayCommits: sandbox.stub(),
@@ -69,9 +79,12 @@ describe( 'dev-env/release-tools/tasks', () => {
 			}
 		};
 
+		stubs.transformCommitFunctionFactory.onFirstCall().returns( stubs.transformCommit[ 0 ] );
+		stubs.transformCommitFunctionFactory.onSecondCall().returns( stubs.transformCommit[ 1 ] );
+
 		mockery.registerMock( 'moment', () => stubs.moment );
 		mockery.registerMock( '../utils/displaygeneratedchangelogs', stubs.displayGeneratedChangelogs );
-		mockery.registerMock( '../utils/transform-commit/transformcommitforsubrepository', stubs.transformCommitFunction );
+		mockery.registerMock( '../utils/transform-commit/transformcommitforsubrepositoryfactory', stubs.transformCommitFunctionFactory );
 		mockery.registerMock( '../utils/generatechangelogfromcommits', stubs.generateChangelogFromCommits );
 		mockery.registerMock( '../utils/executeonpackages', stubs.executeOnPackages );
 		mockery.registerMock( '../utils/getnewreleasetype', stubs.getNewReleaseType );
@@ -122,11 +135,15 @@ describe( 'dev-env/release-tools/tasks', () => {
 			stubs.versionUtils.getCurrent.withArgs( packagesPaths.beta ).returns( '0.2.0' );
 			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.beta ).returns( '0.2.1' );
 
+			// Minor release (no minor breaking changes).
 			stubs.versionUtils.getCurrent.withArgs( packagesPaths.gamma ).returns( '0.3.0' );
 			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.gamma ).returns( '0.4.0' );
+			stubs.changelogUtils.hasMinorBreakingChanges.withArgs( '0.4.0', packagesPaths.gamma ).returns( false );
 
+			// Major release (no major breaking changes).
 			stubs.versionUtils.getCurrent.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
 			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.epsilon ).returns( '1.0.0' );
+			stubs.changelogUtils.hasMajorBreakingChanges.withArgs( '1.0.0', packagesPaths.epsilon ).returns( false );
 
 			stubs.getNewReleaseType.resolves( { commits, releaseType: 'skip' } );
 
@@ -153,11 +170,11 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 ### Dependencies
 
-Major releases (contain breaking changes):
+Major releases (dependencies of those packages have breaking changes):
 
 * [@ckeditor/epsilon](https://www.npmjs.com/package/@ckeditor/epsilon): v0.5.0 => [v1.0.0](https://github.com/ckeditor/epsilon/releases/tag/v1.0.0)
 
-Minor releases:
+Minor releases (new features, no breaking changes):
 
 * [@ckeditor/gamma](https://www.npmjs.com/package/@ckeditor/gamma): v0.3.0 => [v0.4.0](https://github.com/ckeditor/gamma/releases/tag/v0.4.0)
 
@@ -165,13 +182,22 @@ Patch releases (bug fixes, internal changes):
 
 * [@ckeditor/beta](https://www.npmjs.com/package/@ckeditor/beta): v0.2.0 => [v0.2.1](https://github.com/ckeditor/beta/releases/tag/v0.2.1)
 `;
+					expect( stubs.transformCommitFunctionFactory.calledOnce ).to.equal( true );
+					expect( stubs.transformCommitFunctionFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true
+					} );
+
 					/* eslint-enable max-len */
+					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
+					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit[ 0 ] );
+					expect( stubs.getNewReleaseType.firstCall.args[ 1 ] ).to.deep.equal( { tagName: undefined } );
 
 					expect( stubs.changelogUtils.saveChangelog.calledOnce ).to.equal( true );
 					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 0 ] ).to.equal( expectedNewChangelog );
 					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 1 ] ).to.equal( packagesPaths.alpha );
 
 					expect( stubs.cliUtils.provideVersion.firstCall.args[ 0 ] ).to.equal( '0.0.1' );
+
 					// Major bump was suggested because of packages changes.
 					expect( stubs.cliUtils.provideVersion.firstCall.args[ 1 ] ).to.equal( 'major' );
 					expect( stubs.cliUtils.provideVersion.firstCall.args[ 2 ] ).to.deep.equal( {
@@ -189,67 +215,6 @@ Patch releases (bug fixes, internal changes):
 					expect( genetatedChangelogMap.has( '@ckeditor/alpha' ) ).to.equal( true );
 					expect( stubs.displayCommits.calledOnce ).to.equal( true );
 					expect( stubs.displayCommits.firstCall.args[ 0 ] ).to.deep.equal( commits );
-				} );
-		} );
-
-		it( 'allows specifying version (it will not be taken from commits)', () => {
-			sandbox.stub( process, 'chdir' );
-
-			stubs.getSubRepositoriesPaths.returns( {
-				matched: new Set( [
-					packagesPaths.alpha
-				] ),
-				skipped: new Set( [
-					packagesPaths.beta,
-					packagesPaths.gamma,
-					packagesPaths.delta,
-					packagesPaths.epsilon
-				] )
-			} );
-
-			stubs.executeOnPackages.callsFake( executeOnPackages );
-
-			stubs.versionUtils.getCurrent.withArgs( packagesPaths.beta ).returns( '0.2.0' );
-			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.beta ).returns( '0.2.1' );
-
-			stubs.versionUtils.getCurrent.withArgs( packagesPaths.gamma ).returns( '0.3.0' );
-			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.gamma ).returns( '0.4.0' );
-
-			stubs.versionUtils.getCurrent.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
-			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.epsilon ).returns( '1.0.0' );
-
-			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.alpha ).returns( '1.0.0' );
-
-			stubs.generateChangelogFromCommits.resolves(
-				'## Changelog header (will be removed)\n\n' +
-				'Changelog entries generated from commits.'
-			);
-
-			stubs.fs.existsSync.returns( true );
-
-			stubs.changelogUtils.getChangelog.returns( '' );
-
-			const options = {
-				cwd: mainPackagePath,
-				packages: 'packages',
-				skipMainRepository: true,
-				newVersion: '2.0.0'
-			};
-
-			return generateSummaryChangelog( options )
-				.then( () => {
-					expect( stubs.getNewReleaseType.called ).to.equal( false );
-					expect( stubs.cliUtils.provideVersion.called ).to.equal( false );
-
-					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
-						version: '2.0.0',
-						additionalNotes: true,
-						currentTag: 'v2.0.0',
-						previousTag: 'v1.0.0',
-						transformCommit: stubs.transformCommitFunction,
-						isInternalRelease: false,
-						doNotSave: true
-					} );
 				} );
 		} );
 
@@ -319,6 +284,16 @@ Changelog entries generated from commits.
 `;
 					/* eslint-enable max-len */
 
+					expect( stubs.transformCommitFunctionFactory.calledTwice ).to.equal( true );
+					expect( stubs.transformCommitFunctionFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true
+					} );
+					expect( stubs.transformCommitFunctionFactory.secondCall.args ).to.deep.equal( [] );
+
+					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
+					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit[ 0 ] );
+					expect( stubs.getNewReleaseType.firstCall.args[ 1 ] ).to.deep.equal( { tagName: 'v0.0.1' } );
+
 					expect( stubs.changelogUtils.saveChangelog.calledOnce ).to.equal( true );
 					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 0 ] ).to.equal( expectedNewChangelog );
 					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 1 ] ).to.equal( packagesPaths.alpha );
@@ -334,7 +309,354 @@ Changelog entries generated from commits.
 						version: '0.1.0',
 						currentTag: 'v0.1.0',
 						previousTag: 'v0.0.1',
-						transformCommit: stubs.transformCommitFunction,
+						transformCommit: stubs.transformCommit[ 1 ],
+						isInternalRelease: false,
+						additionalNotes: true,
+						doNotSave: true
+					} );
+
+					expect( processChidirStub.callCount ).to.equal( 2 );
+					expect( processChidirStub.firstCall.args[ 0 ] ).to.equal( packagesPaths.alpha );
+					expect( processChidirStub.secondCall.args[ 0 ] ).to.equal( testCwd );
+
+					expect( stubs.displayGeneratedChangelogs.calledOnce ).to.equal( true );
+
+					const genetatedChangelogMap = stubs.displayGeneratedChangelogs.firstCall.args[ 0 ];
+
+					expect( genetatedChangelogMap.has( '@ckeditor/alpha' ) ).to.equal( true );
+				} );
+		} );
+
+		it( 'splits major releases as "MAJOR BREAKING CHANGES" and major dependencies update', () => {
+			stubs.getSubRepositoriesPaths.returns( {
+				matched: new Set( [
+					packagesPaths.omega
+				] ),
+				skipped: new Set( [
+					packagesPaths.beta,
+					packagesPaths.gamma,
+					packagesPaths.delta,
+					packagesPaths.epsilon
+				] )
+			} );
+
+			stubs.executeOnPackages.callsFake( executeOnPackages );
+
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.omega ).returns( '1.0.0' );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.beta ).returns( '0.2.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.beta ).returns( '1.0.0' );
+			stubs.changelogUtils.hasMajorBreakingChanges.withArgs( '1.0.0', packagesPaths.beta ).returns( false );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.gamma ).returns( '0.3.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.gamma ).returns( '1.0.0' );
+			stubs.changelogUtils.hasMajorBreakingChanges.withArgs( '1.0.0', packagesPaths.gamma ).returns( true );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.epsilon ).returns( '1.0.0' );
+			stubs.changelogUtils.hasMajorBreakingChanges.withArgs( '1.0.0', packagesPaths.epsilon ).returns( false );
+
+			stubs.getNewReleaseType.resolves( { releaseType: 'major' } );
+
+			stubs.generateChangelogFromCommits.resolves(
+				'## Changelog header (will be removed)\n\n' +
+				'Changelog entries generated from commits.'
+			);
+
+			stubs.cliUtils.provideVersion.resolves( '2.0.0' );
+
+			stubs.moment.format.returns( '2017-10-09' );
+
+			stubs.fs.existsSync.returns( true );
+
+			stubs.changelogUtils.getChangelog.returns( '' );
+
+			const processChidirStub = sandbox.stub( process, 'chdir' );
+
+			const options = {
+				cwd: mainPackagePath,
+				packages: 'packages',
+				skipMainRepository: true
+			};
+
+			return generateSummaryChangelog( options )
+				.then( () => {
+					/* eslint-disable max-len */
+					const expectedNewChangelog = `## [2.0.0](https://github.com/ckeditor/omega/compare/v1.0.0...v2.0.0) (2017-10-09)
+
+### Dependencies
+
+Major releases (contain major breaking changes):
+
+* [@ckeditor/gamma](https://www.npmjs.com/package/@ckeditor/gamma): v0.3.0 => [v1.0.0](https://github.com/ckeditor/gamma/releases/tag/v1.0.0)
+
+Major releases (dependencies of those packages have breaking changes):
+
+* [@ckeditor/beta](https://www.npmjs.com/package/@ckeditor/beta): v0.2.0 => [v1.0.0](https://github.com/ckeditor/beta/releases/tag/v1.0.0)
+* [@ckeditor/epsilon](https://www.npmjs.com/package/@ckeditor/epsilon): v0.5.0 => [v1.0.0](https://github.com/ckeditor/epsilon/releases/tag/v1.0.0)
+
+Changelog entries generated from commits.
+`;
+					/* eslint-enable max-len */
+					expect( stubs.transformCommitFunctionFactory.calledTwice ).to.equal( true );
+					expect( stubs.transformCommitFunctionFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true
+					} );
+					expect( stubs.transformCommitFunctionFactory.secondCall.args ).to.deep.equal( [] );
+
+					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
+					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit[ 0 ] );
+					expect( stubs.getNewReleaseType.firstCall.args[ 1 ] ).to.deep.equal( { tagName: 'v1.0.0' } );
+
+					expect( stubs.changelogUtils.saveChangelog.calledOnce ).to.equal( true );
+					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 0 ] ).to.equal( expectedNewChangelog );
+					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 1 ] ).to.equal( packagesPaths.omega );
+
+					expect( stubs.cliUtils.provideVersion.firstCall.args[ 0 ] ).to.equal( '1.0.0' );
+					// Minor bump was suggested because of commits.
+					expect( stubs.cliUtils.provideVersion.firstCall.args[ 1 ] ).to.equal( 'major' );
+					expect( stubs.cliUtils.provideVersion.firstCall.args[ 2 ] ).to.deep.equal( {
+						disableInternalVersion: true
+					} );
+
+					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						version: '2.0.0',
+						currentTag: 'v2.0.0',
+						previousTag: 'v1.0.0',
+						transformCommit: stubs.transformCommit[ 1 ],
+						isInternalRelease: false,
+						additionalNotes: true,
+						doNotSave: true
+					} );
+
+					expect( processChidirStub.callCount ).to.equal( 2 );
+					expect( processChidirStub.firstCall.args[ 0 ] ).to.equal( packagesPaths.omega );
+					expect( processChidirStub.secondCall.args[ 0 ] ).to.equal( testCwd );
+
+					expect( stubs.displayGeneratedChangelogs.calledOnce ).to.equal( true );
+
+					const genetatedChangelogMap = stubs.displayGeneratedChangelogs.firstCall.args[ 0 ];
+
+					expect( genetatedChangelogMap.has( '@ckeditor/omega' ) ).to.equal( true );
+				} );
+		} );
+
+		it( 'splits minor releases as "MINOR BREAKING CHANGES" and new features', () => {
+			stubs.getSubRepositoriesPaths.returns( {
+				matched: new Set( [
+					packagesPaths.omega
+				] ),
+				skipped: new Set( [
+					packagesPaths.beta,
+					packagesPaths.gamma,
+					packagesPaths.delta,
+					packagesPaths.epsilon
+				] )
+			} );
+
+			stubs.executeOnPackages.callsFake( executeOnPackages );
+
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.omega ).returns( '1.0.0' );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.beta ).returns( '0.2.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.beta ).returns( '0.3.0' );
+			stubs.changelogUtils.hasMinorBreakingChanges.withArgs( '0.3.0', packagesPaths.beta ).returns( false );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.gamma ).returns( '0.3.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.gamma ).returns( '0.4.0' );
+			stubs.changelogUtils.hasMinorBreakingChanges.withArgs( '0.4.0', packagesPaths.gamma ).returns( false );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.epsilon ).returns( '0.6.0' );
+			stubs.changelogUtils.hasMinorBreakingChanges.withArgs( '0.6.0', packagesPaths.epsilon ).returns( true );
+
+			stubs.getNewReleaseType.resolves( { releaseType: 'minor' } );
+
+			stubs.generateChangelogFromCommits.resolves(
+				'## Changelog header (will be removed)\n\n' +
+				'Changelog entries generated from commits.'
+			);
+
+			stubs.cliUtils.provideVersion.resolves( '1.1.0' );
+
+			stubs.moment.format.returns( '2017-10-09' );
+
+			stubs.fs.existsSync.returns( true );
+
+			stubs.changelogUtils.getChangelog.returns( '' );
+
+			const processChidirStub = sandbox.stub( process, 'chdir' );
+
+			const options = {
+				cwd: mainPackagePath,
+				packages: 'packages',
+				skipMainRepository: true
+			};
+
+			return generateSummaryChangelog( options )
+				.then( () => {
+					/* eslint-disable max-len */
+					const expectedNewChangelog = `## [1.1.0](https://github.com/ckeditor/omega/compare/v1.0.0...v1.1.0) (2017-10-09)
+
+### Dependencies
+
+Minor releases (containing minor breaking changes):
+
+* [@ckeditor/epsilon](https://www.npmjs.com/package/@ckeditor/epsilon): v0.5.0 => [v0.6.0](https://github.com/ckeditor/epsilon/releases/tag/v0.6.0)
+
+Minor releases (new features, no breaking changes):
+
+* [@ckeditor/beta](https://www.npmjs.com/package/@ckeditor/beta): v0.2.0 => [v0.3.0](https://github.com/ckeditor/beta/releases/tag/v0.3.0)
+* [@ckeditor/gamma](https://www.npmjs.com/package/@ckeditor/gamma): v0.3.0 => [v0.4.0](https://github.com/ckeditor/gamma/releases/tag/v0.4.0)
+
+Changelog entries generated from commits.
+`;
+					/* eslint-enable max-len */
+					expect( stubs.transformCommitFunctionFactory.calledTwice ).to.equal( true );
+					expect( stubs.transformCommitFunctionFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true
+					} );
+					expect( stubs.transformCommitFunctionFactory.secondCall.args ).to.deep.equal( [] );
+
+					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
+					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit[ 0 ] );
+					expect( stubs.getNewReleaseType.firstCall.args[ 1 ] ).to.deep.equal( { tagName: 'v1.0.0' } );
+
+					expect( stubs.changelogUtils.saveChangelog.calledOnce ).to.equal( true );
+					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 0 ] ).to.equal( expectedNewChangelog );
+					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 1 ] ).to.equal( packagesPaths.omega );
+
+					expect( stubs.cliUtils.provideVersion.firstCall.args[ 0 ] ).to.equal( '1.0.0' );
+					// Minor bump was suggested because of commits.
+					expect( stubs.cliUtils.provideVersion.firstCall.args[ 1 ] ).to.equal( 'minor' );
+					expect( stubs.cliUtils.provideVersion.firstCall.args[ 2 ] ).to.deep.equal( {
+						disableInternalVersion: true
+					} );
+
+					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						version: '1.1.0',
+						currentTag: 'v1.1.0',
+						previousTag: 'v1.0.0',
+						transformCommit: stubs.transformCommit[ 1 ],
+						isInternalRelease: false,
+						additionalNotes: true,
+						doNotSave: true
+					} );
+
+					expect( processChidirStub.callCount ).to.equal( 2 );
+					expect( processChidirStub.firstCall.args[ 0 ] ).to.equal( packagesPaths.omega );
+					expect( processChidirStub.secondCall.args[ 0 ] ).to.equal( testCwd );
+
+					expect( stubs.displayGeneratedChangelogs.calledOnce ).to.equal( true );
+
+					const genetatedChangelogMap = stubs.displayGeneratedChangelogs.firstCall.args[ 0 ];
+
+					expect( genetatedChangelogMap.has( '@ckeditor/omega' ) ).to.equal( true );
+				} );
+		} );
+
+		it( 'handles MAJOR/MINOR changes for initial release', () => {
+			stubs.getSubRepositoriesPaths.returns( {
+				matched: new Set( [
+					packagesPaths.alpha
+				] ),
+				skipped: new Set( [
+					packagesPaths.beta,
+					packagesPaths.gamma,
+					packagesPaths.delta,
+					packagesPaths.epsilon
+				] )
+			} );
+
+			stubs.executeOnPackages.callsFake( executeOnPackages );
+
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.alpha ).returns( '0.0.1' );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.beta ).returns( '0.2.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.beta ).returns( '0.3.0' );
+			stubs.changelogUtils.hasMinorBreakingChanges.withArgs( '0.3.0', packagesPaths.beta ).returns( true );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.gamma ).returns( '0.3.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.gamma ).returns( '0.4.0' );
+			stubs.changelogUtils.hasMajorBreakingChanges.withArgs( '0.4.0', packagesPaths.gamma ).returns( false );
+			stubs.changelogUtils.hasMinorBreakingChanges.withArgs( '0.4.0', packagesPaths.gamma ).returns( false );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.epsilon ).returns( '0.6.0' );
+			stubs.changelogUtils.hasMajorBreakingChanges.withArgs( '0.6.0', packagesPaths.epsilon ).returns( false );
+			stubs.changelogUtils.hasMinorBreakingChanges.withArgs( '0.6.0', packagesPaths.epsilon ).returns( true );
+
+			stubs.getNewReleaseType.resolves( { releaseType: 'minor' } );
+
+			stubs.generateChangelogFromCommits.resolves(
+				'## Changelog header (will be removed)\n\n' +
+				'Changelog entries generated from commits.'
+			);
+
+			stubs.cliUtils.provideVersion.resolves( '0.1.0' );
+
+			stubs.moment.format.returns( '2017-10-09' );
+
+			stubs.fs.existsSync.returns( true );
+
+			stubs.changelogUtils.getChangelog.returns( '' );
+
+			const processChidirStub = sandbox.stub( process, 'chdir' );
+
+			const options = {
+				cwd: mainPackagePath,
+				packages: 'packages',
+				skipMainRepository: true
+			};
+
+			return generateSummaryChangelog( options )
+				.then( () => {
+					/* eslint-disable max-len */
+					const expectedNewChangelog = `## [0.1.0](https://github.com/ckeditor/alpha/compare/v0.0.1...v0.1.0) (2017-10-09)
+
+### Dependencies
+
+Minor releases (containing major/minor breaking changes):
+
+* [@ckeditor/beta](https://www.npmjs.com/package/@ckeditor/beta): v0.2.0 => [v0.3.0](https://github.com/ckeditor/beta/releases/tag/v0.3.0)
+* [@ckeditor/epsilon](https://www.npmjs.com/package/@ckeditor/epsilon): v0.5.0 => [v0.6.0](https://github.com/ckeditor/epsilon/releases/tag/v0.6.0)
+
+Minor releases (new features, no breaking changes):
+
+* [@ckeditor/gamma](https://www.npmjs.com/package/@ckeditor/gamma): v0.3.0 => [v0.4.0](https://github.com/ckeditor/gamma/releases/tag/v0.4.0)
+
+Changelog entries generated from commits.
+`;
+					/* eslint-enable max-len */
+					expect( stubs.transformCommitFunctionFactory.calledTwice ).to.equal( true );
+					expect( stubs.transformCommitFunctionFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true
+					} );
+					expect( stubs.transformCommitFunctionFactory.secondCall.args ).to.deep.equal( [] );
+
+					// There is no "major" bump so the function should be never called.
+					expect( stubs.changelogUtils.hasMajorBreakingChanges.called ).to.equal( false );
+
+					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
+					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit[ 0 ] );
+					expect( stubs.getNewReleaseType.firstCall.args[ 1 ] ).to.deep.equal( { tagName: 'v0.0.1' } );
+
+					expect( stubs.changelogUtils.saveChangelog.calledOnce ).to.equal( true );
+					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 0 ] ).to.equal( expectedNewChangelog );
+					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 1 ] ).to.equal( packagesPaths.alpha );
+
+					expect( stubs.cliUtils.provideVersion.firstCall.args[ 0 ] ).to.equal( '0.0.1' );
+					// Minor bump was suggested because of commits.
+					expect( stubs.cliUtils.provideVersion.firstCall.args[ 1 ] ).to.equal( 'minor' );
+					expect( stubs.cliUtils.provideVersion.firstCall.args[ 2 ] ).to.deep.equal( {
+						disableInternalVersion: true
+					} );
+
+					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						version: '0.1.0',
+						currentTag: 'v0.1.0',
+						previousTag: 'v0.0.1',
+						transformCommit: stubs.transformCommit[ 1 ],
 						isInternalRelease: false,
 						additionalNotes: true,
 						doNotSave: true
@@ -362,7 +684,8 @@ Changelog entries generated from commits.
 					packagesPaths.beta,
 					packagesPaths.gamma,
 					packagesPaths.delta,
-					packagesPaths.epsilon
+					packagesPaths.epsilon,
+					packagesPaths.devKappa
 				] )
 			} );
 
@@ -425,8 +748,12 @@ Patch releases (bug fixes, internal changes):
 
 Changelog entries generated from commits.
 `;
-
 					/* eslint-enable max-len */
+					expect( stubs.transformCommitFunctionFactory.calledTwice ).to.equal( true );
+					expect( stubs.transformCommitFunctionFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true
+					} );
+					expect( stubs.transformCommitFunctionFactory.secondCall.args ).to.deep.equal( [] );
 
 					expect( stubs.changelogUtils.saveChangelog.calledOnce ).to.equal( true );
 					expect( stubs.changelogUtils.saveChangelog.firstCall.args[ 0 ] ).to.equal( expectedNewChangelog );
@@ -494,7 +821,7 @@ Changelog entries generated from commits.
 			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.gamma ).returns( '0.4.0' );
 
 			stubs.versionUtils.getCurrent.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
-			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.epsilon ).returns( '1.0.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.epsilon ).returns( '0.1.0' );
 
 			stubs.getNewReleaseType.resolves( { releaseType: 'skip' } );
 
@@ -573,7 +900,7 @@ Changelog entries generated from commits.
 		} );
 
 		describe( 'additional notes for group of commits', () => {
-			it( 'are visible when dependencies has been added or changed', () => {
+			it( 'are visible when dependencies have been added or changed', () => {
 				stubs.getSubRepositoriesPaths.returns( {
 					matched: new Set(),
 					skipped: new Set( [
@@ -630,7 +957,7 @@ Changelog entries generated from commits.
 					} );
 			} );
 
-			it( 'are hidden when dependencies has not been added or changed', () => {
+			it( 'are hidden when dependencies have not been added or changed', () => {
 				stubs.getSubRepositoriesPaths.returns( {
 					matched: new Set(),
 					skipped: new Set( [

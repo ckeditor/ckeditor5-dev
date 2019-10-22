@@ -8,12 +8,15 @@
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
-const transformCommitForSubRepository = require( '../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepository' );
+const transformCommitFactory = require( '../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepositoryfactory' );
 
 describe( 'dev-env/release-tools/utils', () => {
-	let displayCommits, sandbox, stubs;
+	let displayCommits, transformCommit, sandbox, stubs;
 
 	beforeEach( () => {
+		transformCommit = transformCommitFactory( {
+			returnInvalidCommit: true
+		} );
 		sandbox = sinon.createSandbox();
 
 		stubs = {
@@ -38,7 +41,14 @@ describe( 'dev-env/release-tools/utils', () => {
 	} );
 
 	describe( 'displayCommits()', () => {
-		it( 'attaches valid "external" commit to the changelog', () => {
+		it( 'prints if there is no commit to display', () => {
+			displayCommits( [] );
+
+			expect( stubs.logger.info.calledOnce ).to.equal( true );
+			expect( stubs.logger.info.firstCall.args[ 0 ] ).includes( 'No commits to display.' );
+		} );
+
+		it( 'attaches valid "external" commit to the changelog (as Array)', () => {
 			const rawCommit = {
 				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
 				header: 'Fix: Simple fix.',
@@ -49,9 +59,29 @@ describe( 'dev-env/release-tools/utils', () => {
 				notes: []
 			};
 
-			const commit = transformCommitForSubRepository( rawCommit );
+			const commit = transformCommit( rawCommit );
 
 			displayCommits( [ commit ] );
+
+			expect( stubs.logger.info.calledOnce ).to.equal( true );
+			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'Fix: Simple fix.' ) ).to.equal( true );
+			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'INCLUDED' ) ).to.equal( true );
+		} );
+
+		it( 'attaches valid "external" commit to the changelog (as Set)', () => {
+			const rawCommit = {
+				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+				header: 'Fix: Simple fix.',
+				type: 'Fix',
+				subject: 'Simple fix.',
+				body: null,
+				footer: null,
+				notes: []
+			};
+
+			const commit = transformCommit( rawCommit );
+
+			displayCommits( new Set( [ commit ] ) );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
 			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'Fix: Simple fix.' ) ).to.equal( true );
@@ -71,7 +101,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				notes: []
 			};
 
-			const commit = transformCommitForSubRepository( rawCommit );
+			const commit = transformCommit( rawCommit );
 
 			displayCommits( [ commit ] );
 
@@ -93,7 +123,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				notes: []
 			};
 
-			const commit = transformCommitForSubRepository( rawCommit, { returnInvalidCommit: true } );
+			const commit = transformCommit( rawCommit, { returnInvalidCommit: true } );
 
 			displayCommits( [ commit ] );
 
@@ -113,7 +143,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				notes: []
 			};
 
-			const commit = transformCommitForSubRepository( rawCommit, { returnInvalidCommit: true } );
+			const commit = transformCommit( rawCommit, { returnInvalidCommit: true } );
 
 			displayCommits( [ commit ] );
 
@@ -135,7 +165,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				notes: []
 			};
 
-			const commit = transformCommitForSubRepository( rawCommit );
+			const commit = transformCommit( rawCommit );
 
 			displayCommits( [ commit ] );
 
@@ -165,7 +195,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				revert: null
 			};
 
-			const commit = transformCommitForSubRepository( rawCommit, { returnInvalidCommit: true } );
+			const commit = transformCommit( rawCommit, { returnInvalidCommit: true } );
 
 			displayCommits( [ commit ] );
 

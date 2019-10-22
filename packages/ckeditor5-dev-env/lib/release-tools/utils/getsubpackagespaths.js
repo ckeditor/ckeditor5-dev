@@ -11,12 +11,14 @@ const getPackageJson = require( './getpackagejson' );
 const minimatch = require( 'minimatch' );
 
 /**
- * Returns two collections of paths to packages which are located in single repository.
+ * Returns an object with two collections of paths to packages which are located in single repository.
  *
- * The first one is marked as "matched" and means that packages specified in those paths match to given criteria.
- * The second one is marked as "skipped" and means that packages should not be processed.
+ *   - The first one is marked as `matched` and means that packages specified in a path (which is a combination of values specified as
+ *     `options.cwd` and  `options.packages`) match to given criteria.
+ *   - The second one is marked as `skipped` and means that packages should not be processed. They were listed as packages
+ *     to skip (`options.skipPackages` or don't mach to `options.scope`).
  *
- * Subpackages mean that packages are located in single repository (they do not own separate repositories).
+ * By "sub packages" we understand that packages are located in single repository (they do not own separate repositories).
  *
  * @param {Object} options
  * @param {String} options.cwd Current work directory.

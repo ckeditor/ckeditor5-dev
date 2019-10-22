@@ -104,9 +104,20 @@ describe( 'dev-env/release-tools/utils', () => {
 				} );
 		} );
 
-		it( 'ignores notes from commits which will not be included in changelog', () => {
+		it( 'ignores notes from commits which will not be included in changelog (MAJOR BREAKING CHANGES)', () => {
 			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
-			exec( 'git commit --allow-empty --message "Docs: Nothing." --message "BREAKING CHANGES: It should not bump the major."' );
+			exec( 'git commit --allow-empty --message "Docs: Nothing." --message "MAJOR BREAKING CHANGES: It should not bump the major."' );
+
+			return getNewReleaseType( stubs.transformCommit )
+				.then( response => {
+					expect( response.releaseType ).to.equal( 'patch' );
+					expect( response.commits.length ).to.equal( 2 );
+				} );
+		} );
+
+		it( 'ignores notes from commits which will not be included in changelog (MINOR BREAKING CHANGES)', () => {
+			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
+			exec( 'git commit --allow-empty --message "Docs: Nothing." --message "MINOR BREAKING CHANGES: It should not bump the major."' );
 
 			return getNewReleaseType( stubs.transformCommit )
 				.then( response => {
@@ -129,7 +140,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		it( 'returns "major" if any visible in changelog commit has breaking changes', () => {
 			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
 			exec( 'git commit --allow-empty --message "Feature: Nothing new."' );
-			exec( 'git commit --allow-empty --message "Other: Nothing." --message "BREAKING CHANGES: Bump the major!"' );
+			exec( 'git commit --allow-empty --message "Other: Nothing." --message "MAJOR BREAKING CHANGES: Bump the major!"' );
 
 			return getNewReleaseType( stubs.transformCommit )
 				.then( response => {
@@ -138,8 +149,52 @@ describe( 'dev-env/release-tools/utils', () => {
 				} );
 		} );
 
+		it( 'returns "major" even if "MINOR BREAKING CHANGE" was found first', () => {
+			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
+			exec( 'git commit --allow-empty --message "Feature: Nothing new." --message "MINOR BREAKING CHANGES: Bump the minor!"' );
+			exec( 'git commit --allow-empty --message "Other: Nothing." --message "MAJOR BREAKING CHANGES: Bump the major!"' );
+
+			return getNewReleaseType( stubs.transformCommit )
+				.then( response => {
+					expect( response.releaseType ).to.equal( 'major' );
+					expect( response.commits.length ).to.equal( 3 );
+				} );
+		} );
+
+		it( 'returns "minor" when found "MINOR BREAKING CHANGES" in features commits', () => {
+			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
+			exec( 'git commit --allow-empty --message "Feature: Nothing new." --message "MINOR BREAKING CHANGES: Bump the minor!"' );
+
+			return getNewReleaseType( stubs.transformCommit )
+				.then( response => {
+					expect( response.releaseType ).to.equal( 'minor' );
+					expect( response.commits.length ).to.equal( 2 );
+				} );
+		} );
+
+		it( 'returns "minor" when found "MINOR BREAKING CHANGES" in fixes commits', () => {
+			exec( 'git commit --allow-empty --message "Fix: Some fix." --message "MINOR BREAKING CHANGES: Bump the minor!"' );
+			exec( 'git commit --allow-empty --message "Fix: Some other fix." --message "MINOR BREAKING CHANGES: Moved utils outside."' );
+
+			return getNewReleaseType( stubs.transformCommit )
+				.then( response => {
+					expect( response.releaseType ).to.equal( 'minor' );
+					expect( response.commits.length ).to.equal( 2 );
+				} );
+		} );
+
+		it( 'returns "minor" when found "MINOR BREAKING CHANGES" in "Other" commits', () => {
+			exec( 'git commit --allow-empty --message "Other: Updated whatever." --message "MINOR BREAKING CHANGES: Bump the minor!"' );
+
+			return getNewReleaseType( stubs.transformCommit )
+				.then( response => {
+					expect( response.releaseType ).to.equal( 'minor' );
+					expect( response.commits.length ).to.equal( 1 );
+				} );
+		} );
+
 		it( 'returns "skip" if there is no commit since the last release', () => {
-			exec( 'git commit --allow-empty --message "Other: Nothing." --message "BREAKING CHANGES: Bump the major!"' );
+			exec( 'git commit --allow-empty --message "Other: Nothing." --message "MAJOR BREAKING CHANGES: Bump the major!"' );
 			exec( 'git tag v1.0.0' );
 
 			return getNewReleaseType( stubs.transformCommit, { tagName: 'v1.0.0' } )
@@ -164,9 +219,8 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'transforms each commit since the last release', () => {
-			exec( 'git commit --allow-empty --message "Fix: Some fix."' );
 			exec( 'git commit --allow-empty --message "Feature: Nothing new."' );
-			exec( 'git commit --allow-empty --message "Other: Nothing." --message "BREAKING CHANGES: Bump the major!"' );
+			exec( 'git commit --allow-empty --message "Other: Nothing." --message "MAJOR BREAKING CHANGES: Bump the major!"' );
 			exec( 'git tag v1.0.0' );
 			exec( 'git commit --allow-empty --message "Docs: Added some notes to README #1."' );
 			exec( 'git commit --allow-empty --message "Other: Nothing."' );

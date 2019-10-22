@@ -20,19 +20,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			sandbox = sinon.createSandbox();
 
 			stubs = {
-				conventionalChangelog( ...args ) {
-					conventionalChangelogArguments = args;
-
-					return new class extends require( 'stream' ).Readable {
-						_read() {
-							if ( changelogBuffer instanceof Buffer ) {
-								this.push( changelogBuffer );
-							}
-
-							this.push( null );
-						}
-					}();
-				},
+				conventionalChangelog: sandbox.stub(),
 				fs: {
 					existsSync: sandbox.stub( fs, 'existsSync' )
 				},
@@ -55,6 +43,20 @@ describe( 'dev-env/release-tools/utils', () => {
 				useCleanCache: true,
 				warnOnReplace: false,
 				warnOnUnregistered: false
+			} );
+
+			stubs.conventionalChangelog.callsFake( ( ...args ) => {
+				conventionalChangelogArguments = args;
+
+				return new class extends require( 'stream' ).Readable {
+					_read() {
+						if ( changelogBuffer instanceof Buffer ) {
+							this.push( changelogBuffer );
+						}
+
+						this.push( null );
+					}
+				}();
 			} );
 
 			mockery.registerMock( 'conventional-changelog', stubs.conventionalChangelog );
@@ -154,7 +156,6 @@ describe( 'dev-env/release-tools/utils', () => {
 
 					expect( conventionalChangelogArguments ).to.be.an( 'array' );
 					expect( conventionalChangelogArguments[ 1 ] ).to.deep.equal( {
-						displayLogs: false,
 						version: '1.0.0',
 						previousTag: 'v0.5.0',
 						currentTag: 'v1.0.0',
@@ -191,7 +192,6 @@ describe( 'dev-env/release-tools/utils', () => {
 				.then( () => {
 					expect( conventionalChangelogArguments ).to.be.an( 'array' );
 					expect( conventionalChangelogArguments[ 1 ] ).to.deep.equal( {
-						displayLogs: false,
 						version: '0.5.1',
 						previousTag: 'v0.5.0',
 						currentTag: 'v0.5.1',
@@ -253,7 +253,6 @@ describe( 'dev-env/release-tools/utils', () => {
 
 					expect( conventionalChangelogArguments ).to.be.an( 'array' );
 					expect( conventionalChangelogArguments[ 1 ] ).to.deep.equal( {
-						displayLogs: false,
 						version: '0.5.1',
 						previousTag: 'v0.5.0',
 						currentTag: 'v0.5.1',
@@ -283,7 +282,6 @@ describe( 'dev-env/release-tools/utils', () => {
 				.then( () => {
 					expect( conventionalChangelogArguments ).to.be.an( 'array' );
 					expect( conventionalChangelogArguments[ 1 ] ).to.deep.equal( {
-						displayLogs: false,
 						version: '0.5.1',
 						previousTag: 'v0.5.0',
 						currentTag: 'v0.5.1',
@@ -292,6 +290,33 @@ describe( 'dev-env/release-tools/utils', () => {
 						skipCommitsLink: true,
 						skipCompareLink: true
 					} );
+				} );
+		} );
+
+		it( 'calls the changelog stream pipes once', () => {
+			stubs.conventionalChangelog.reset();
+			stubs.conventionalChangelog.callsFake( () => {
+				return new class extends require( 'stream' ).Readable {
+					_read() {
+						this.push( Buffer.from( 'Changelog.' ) );
+					}
+				}();
+			} );
+
+			stubs.fs.existsSync.returns( true );
+			stubs.changelogUtils.getChangelog.returns( changelogUtils.changelogHeader );
+
+			const options = {
+				version: '0.5.1',
+				transformCommit: stubs.transformCommit,
+				tagName: 'v0.5.0',
+				newTagName: 'v0.5.1',
+				skipLinks: true
+			};
+
+			return generateChangelogFromCommits( options )
+				.then( () => {
+					expect( stubs.changelogUtils.saveChangelog.callCount ).to.equal( 1 );
 				} );
 		} );
 	} );
