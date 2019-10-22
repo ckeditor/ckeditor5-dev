@@ -1,6 +1,25 @@
 Changelog
 =========
 
+## [16.9.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.8.0...@ckeditor/ckeditor5-dev-tests@16.9.0) (2019-09-26)
+
+### Features
+
+* Introduced new CLI parameters: `--include-root` and `--only-root` that allow specifying whether the main repository should be added to the test file query. It's a workaround due to bug in Git Bash (on Windows environment) that does not allow to use `'/'` as value for an option in CLI. Closes [#558](https://github.com/ckeditor/ckeditor5-dev/issues/558).
+
+### Bug fixes
+
+* Console is now patching methods only. Closes [#566](https://github.com/ckeditor/ckeditor5-dev/issues/566). ([867918f](https://github.com/ckeditor/ckeditor5-dev/commit/867918f))
+
+
+## [16.8.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.7.4...@ckeditor/ckeditor5-dev-tests@16.8.0) (2019-09-23)
+
+### Features
+
+* Introduced the `--disallow-console-use` flag in automated tests. Disallowed console use in CI tests. See [ckeditor/ckeditor5#1996](https://github.com/ckeditor/ckeditor5/issues/1996). ([8376907](https://github.com/ckeditor/ckeditor5-dev/commit/8376907))
+* Support for running manual tests from the main repository. See [ckeditor/ckeditor5#2054](https://github.com/ckeditor/ckeditor5/issues/2054). ([f4e639c](https://github.com/ckeditor/ckeditor5-dev/commit/f4e639c))
+
+
 ## [16.7.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.7.3...@ckeditor/ckeditor5-dev-tests@16.7.4) (2019-09-10)
 
 ### Bug fixes
