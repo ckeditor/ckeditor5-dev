@@ -1,6 +1,33 @@
 Changelog
 =========
 
+## [17.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@16.0.0...@ckeditor/ckeditor5-dev-env@17.0.0) (2019-10-22)
+
+### MAJOR BREAKING CHANGES
+
+* `generateChangelogForSubRepositories()` and `generateSummaryChangelog()` do not accept `options.newVersion` as an option anymore.
+* `transformCommitForSubPackage()` and `transformCommitForSubRepository()` end with a suffix `Factory` (included as lower case in their file names). Now those functions return a new function that parses the commit (module replaced with a factory pattern). The `returnInvalidCommit` option was moved from `context` object to a factory function (as `options`).
+
+### NOTE
+
+* `generateChangelogForSinglePackage()` accepts an option `options.isInternalRelease` that specifies whether the release is "internal". Because the `options.newVersion` option can be specified as `'major'`, we need an additional parameter that will keep the internal release note. If `options.newVersion` is specified as `'internal'`, the function will behave as `options.isInternalRelease` is set on `true`.
+
+### Other changes
+
+* Changed rules how changelog generators work. See: [ckeditor/ckeditor5#1746](https://github.com/ckeditor/ckeditor5/issues/1746). ([501cbad](https://github.com/ckeditor/ckeditor5-dev/commit/501cbad))
+
+  - Notes from all commits will be saved in the changelog before "Features", "Bug fixes", "Other changes". They have been moved from the bottom to the top.
+  - Introduced new types of notes:
+      * `MAJOR BREAKING CHANGES` which means that the public API of the package has been changed,
+      * `MINOR BREAKING CHANGES` which means that the public API of the package has not been changed but some internals (utils, helpers, etc.) have changed.
+  - `BREAKING CHANGES` are treated as `MAJOR BREAKING CHANGES`,
+  - Before starting the generating changelog process, all `MAJOR BREAKING CHANGES` commits are printed out. A user must confirm whether those changes are really "MAJOR". The user can specify the version number but the commit list won't be shown.
+  - If the user confirms major changes, the tool will bump `major` versions for all packages.
+  - If the user rejects (no major changes), the tool will bump `minor|patch|internal` based on commits in packages. All commits will be printed out.
+  - Removed support for `options.newVersion` in `generateChangelogForSubRepositories()` and `generateSummaryChangelog()` tasks.
+  - `transformCommitForSubPackage()` and `transformCommitForSubRepository()` are "factories" now. They return a new function that parses the commit. See the "BREAKING CHANGES" section.
+
+
 ## [16.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@15.0.3...@ckeditor/ckeditor5-dev-env@16.0.0) (2019-08-26)
 
 ### Other changes
