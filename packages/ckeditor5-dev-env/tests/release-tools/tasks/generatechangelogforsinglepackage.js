@@ -155,6 +155,91 @@ describe( 'dev-env/release-tools/tasks', () => {
 				} );
 		} );
 
+		it( 'generates changelog (as "patch" bump) for "internal" version provided by a user', () => {
+			const commits = [ {}, {} ];
+
+			stubs.getNewReleaseType.returns( Promise.resolve( {
+				releaseType: 'minor',
+				commits
+			} ) );
+			stubs.cli.provideVersion.returns( Promise.resolve( 'internal' ) );
+			stubs.versionUtils.getLastFromChangelog.returns( null );
+			stubs.generateChangelogFromCommits.returns( Promise.resolve() );
+
+			return generateChangelogForSinglePackage()
+				.then( () => {
+					expect( stubs.transformCommitFactory.calledTwice ).to.equal( true );
+					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true,
+						treatMajorAsMinorBreakingChange: undefined
+					} );
+					expect( stubs.transformCommitFactory.secondCall.args[ 0 ] ).to.deep.equal( {
+						treatMajorAsMinorBreakingChange: undefined
+					} );
+
+					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
+					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						version: '0.0.2',
+						tagName: null,
+						newTagName: 'v0.0.2',
+						transformCommit: stubs.transformCommit[ 1 ],
+						isInternalRelease: true,
+						skipLinks: false
+					} );
+
+					expect( stubs.getNewReleaseType.calledOnce ).to.equal( true );
+					expect( stubs.getNewReleaseType.firstCall.args[ 0 ] ).to.equal( stubs.transformCommit[ 0 ] );
+					expect( stubs.getNewReleaseType.firstCall.args[ 1 ] ).to.deep.equal( {
+						tagName: null
+					} );
+
+					expect( stubs.cli.provideVersion.calledOnce ).to.equal( true );
+					expect( stubs.cli.provideVersion.firstCall.args[ 0 ] ).to.equal( '0.0.1' );
+					expect( stubs.cli.provideVersion.firstCall.args[ 1 ] ).to.equal( 'minor' );
+
+					expect( stubs.displayCommits.calledOnce ).to.equal( true );
+					expect( stubs.displayCommits.firstCall.args[ 0 ] ).to.deep.equal( commits );
+				} );
+		} );
+
+		it( 'generates changelog (as "patch" bump) for "internal" version provided by a user even if provided suggested bump type', () => {
+			const commits = [ {}, {} ];
+
+			stubs.getNewReleaseType.returns( Promise.resolve( {
+				releaseType: 'minor',
+				commits
+			} ) );
+			stubs.cli.provideVersion.returns( Promise.resolve( 'internal' ) );
+			stubs.versionUtils.getLastFromChangelog.returns( null );
+			stubs.generateChangelogFromCommits.returns( Promise.resolve() );
+
+			return generateChangelogForSinglePackage( { newVersion: 'minor' } )
+				.then( () => {
+					expect( stubs.transformCommitFactory.calledOnce ).to.equal( true );
+					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						treatMajorAsMinorBreakingChange: undefined
+					} );
+
+					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
+					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						version: '0.0.2',
+						tagName: null,
+						newTagName: 'v0.0.2',
+						transformCommit: stubs.transformCommit[ 0 ],
+						isInternalRelease: true,
+						skipLinks: false
+					} );
+
+					expect( stubs.getNewReleaseType.called ).to.equal( false );
+
+					expect( stubs.cli.provideVersion.calledOnce ).to.equal( true );
+					expect( stubs.cli.provideVersion.firstCall.args[ 0 ] ).to.equal( '0.0.1' );
+					expect( stubs.cli.provideVersion.firstCall.args[ 1 ] ).to.equal( 'minor' );
+
+					expect( stubs.displayCommits.called ).to.equal( false );
+				} );
+		} );
+
 		it( '"options.newVersion" can be defined as an increment level ', () => {
 			const commits = [ {}, {} ];
 

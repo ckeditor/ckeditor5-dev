@@ -107,6 +107,12 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 				return Promise.resolve();
 			}
 
+			// If the user provided "internal" as a new version, we treat it as a "patch" bump.
+			if ( version === 'internal' ) {
+				isInternalRelease = true;
+				version = semver.inc( packageJson.version, 'patch' );
+			}
+
 			const changelogOptions = {
 				version,
 				tagName,
