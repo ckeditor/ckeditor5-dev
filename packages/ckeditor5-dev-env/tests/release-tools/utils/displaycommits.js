@@ -205,5 +205,102 @@ describe( 'dev-env/release-tools/utils', () => {
 			// If the merge commit does not contain the second line, it should display only the one.
 			expect( stubs.logger.info.firstCall.args[ 0 ].split( '\n' ) ).length( 1 );
 		} );
+
+		describe( 'options.attachLinkToCommit', () => {
+			it( 'adds a link to displayed commit', () => {
+				const commit = {
+					hash: '684997d',
+					header: 'Fix: Simple fix.',
+					type: 'Bug fixes',
+					subject: 'Simple fix.',
+					body: null,
+					footer: null,
+					notes: [],
+					rawType: 'Fix',
+					repositoryUrl: 'https://github.com/ckeditor/ckeditor5-foo'
+				};
+
+				displayCommits( [ commit ], { attachLinkToCommit: true } );
+
+				expect( stubs.logger.info.calledOnce ).to.equal( true );
+
+				const logMessage = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
+
+				expect( logMessage[ 0 ].includes( 'Fix: Simple fix.' ) ).to.equal( true );
+				expect( logMessage[ 0 ].includes( 'INCLUDED' ) ).to.equal( true );
+				expect( logMessage[ 1 ].includes( 'https://github.com/ckeditor/ckeditor5-foo/commit/684997d' ) ).to.equal( true );
+			} );
+		} );
+
+		describe( 'options.indentLevel', () => {
+			it( 'is equal to 1 by default', () => {
+				const commit = {
+					hash: '684997d',
+					header: 'Fix: Simple fix.',
+					type: 'Bug fixes',
+					subject: 'Simple fix.',
+					body: null,
+					footer: null,
+					notes: [],
+					rawType: 'Fix'
+				};
+
+				displayCommits( [ commit ] );
+
+				expect( stubs.logger.info.calledOnce ).to.equal( true );
+
+				const logMessage = stubs.logger.info.firstCall.args[ 0 ];
+
+				expect( logMessage.substring( 0, 3 ) ).to.equal( '   ' );
+			} );
+
+			it( 'indents second line properly', () => {
+				const commit = {
+					hash: '684997d',
+					merge: 'Merge pull request #75 from ckeditor/t/64',
+					header: 'Feature: Introduced a brand new release tools with a new set of requirements.',
+					type: 'Feature',
+					subject: 'Introduced a brand new release tools with a new set of requirements.',
+					body: null,
+					footer: null,
+					notes: [],
+					rawType: 'Fix'
+				};
+
+				displayCommits( [ commit ] );
+
+				expect( stubs.logger.info.calledOnce ).to.equal( true );
+
+				const [ firstLine, secondLine ] = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
+
+				expect( firstLine.substring( 0, 3 ) ).to.equal( ' '.repeat( 3 ) );
+				expect( secondLine.substring( 0, 13 ) ).to.equal( ' '.repeat( 13 ) );
+			} );
+
+			it( 'works with "options.attachLinkToCommit"', () => {
+				const commit = {
+					hash: '684997d',
+					merge: 'Merge pull request #75 from ckeditor/t/64',
+					header: 'Feature: Introduced a brand new release tools with a new set of requirements.',
+					type: 'Feature',
+					subject: 'Introduced a brand new release tools with a new set of requirements.',
+					body: null,
+					footer: null,
+					notes: [],
+					rawType: 'Fix',
+					repositoryUrl: 'https://github.com/ckeditor/ckeditor5-foo'
+				};
+
+				displayCommits( [ commit ], { attachLinkToCommit: true, indentLevel: 2 } );
+
+				expect( stubs.logger.info.calledOnce ).to.equal( true );
+
+				const [ firstLine, secondLine, thirdLine ] = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
+
+				expect( firstLine.substring( 0, 6 ) ).to.equal( ' '.repeat( 6 ) );
+				expect( secondLine.substring( 0, 16 ) ).to.equal( ' '.repeat( 16 ) );
+				expect( thirdLine.substring( 0, 16 ) ).to.equal( ' '.repeat( 16 ) );
+			} );
+		} );
 	} );
 } );
