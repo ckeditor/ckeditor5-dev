@@ -295,6 +295,40 @@ describe( 'dev-env/release-tools/utils', () => {
 			} );
 		} );
 
+		describe( 'provideNewMajorReleaseVersion()', () => {
+			it( 'bumps major version', () => {
+				return cli.provideNewMajorReleaseVersion( '1.0.0', '@ckeditor/foo' )
+					.then( newVersion => {
+						expect( newVersion ).to.equal( '2.0.0' );
+					} );
+			} );
+
+			it( 'removes spaces from provided version', () => {
+				return cli.provideNewMajorReleaseVersion( '1.0.0', '@ckeditor/foo' )
+					.then( () => {
+						const { filter } = questionItems[ 0 ];
+
+						expect( filter( '   0.0.1' ) ).to.equal( '0.0.1' );
+						expect( filter( '0.0.1   ' ) ).to.equal( '0.0.1' );
+						expect( filter( '    0.0.1   ' ) ).to.equal( '0.0.1' );
+					} );
+			} );
+
+			it( 'validates the provided version', () => {
+				return cli.provideNewMajorReleaseVersion( '1.0.0', '@ckeditor/foo' )
+					.then( () => {
+						const { validate } = questionItems[ 0 ];
+
+						expect( validate( '2.0.0' ) ).to.equal( true );
+						expect( validate( '1.1.0' ) ).to.equal( true );
+						expect( validate( '1.0.0' ) ).to.equal( 'Provided version must be higher than "1.0.0".' );
+						expect( validate( 'skip' ) ).to.equal( 'Please provide a valid version.' );
+						expect( validate( 'internal' ) ).to.equal( 'Please provide a valid version.' );
+						expect( validate( '0.1' ) ).to.equal( 'Please provide a valid version.' );
+					} );
+			} );
+		} );
+
 		describe( 'provideToken()', () => {
 			it( 'user is able to provide the token', () => {
 				return cli.provideToken()

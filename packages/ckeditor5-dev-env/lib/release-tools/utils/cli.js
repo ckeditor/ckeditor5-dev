@@ -187,6 +187,40 @@ const cli = {
 	},
 
 	/**
+	 * Asks a user for providing the new version for a major release.
+	 *
+	 * @param {String} version
+	 * @param {String} foundPackage
+	 * @returns {Promise.<String>}
+	 */
+	provideNewMajorReleaseVersion( version, foundPackage ) {
+		const newVersion = semver.inc( version, 'major' );
+
+		const versionQuestion = {
+			type: 'input',
+			name: 'version',
+			default: newVersion,
+			message: `Type the new version (suggested: "${ newVersion }", current highest: “${ version }" ` +
+				`found in "${ chalk.underline( foundPackage ) }"):`,
+
+			filter( input ) {
+				return input.trim();
+			},
+
+			validate( input ) {
+				if ( !semver.valid( input ) ) {
+					return 'Please provide a valid version.';
+				}
+
+				return semver.gt( input, version ) ? true : `Provided version must be higher than "${ version }".`;
+			}
+		};
+
+		return inquirer.prompt( [ versionQuestion ] )
+			.then( answers => answers.version );
+	},
+
+	/**
 	 * Asks a user for providing the GitHub token.
 	 *
 	 * @returns {Promise.<String>}
