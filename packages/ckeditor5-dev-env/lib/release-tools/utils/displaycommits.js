@@ -1,14 +1,14 @@
+/**
+ * @license Copyright (c) 2003-2019, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+'use strict';
+
 const chalk = require( 'chalk' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const utils = require( './transform-commit/transform-commit-utils' );
-
-// A size of default indent for a log.
-const INDENT_SIZE = 3;
-
-// A size of indent for a second and next lines in a log. The number is equal to length of the log string:
-// '* 1234567 ', where '1234567' is a short commit id.
-// It does not include a value from INDENT_SIZE.
-const COMMIT_INDENT_SIZE = 10;
+const { INDENT_SIZE, COMMIT_INDENT_SIZE } = require( './cli' );
 
 /**
  * @param {Array.<Commit>|Set.<Commit>} commits

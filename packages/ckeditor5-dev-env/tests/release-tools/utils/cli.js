@@ -44,6 +44,18 @@ describe( 'dev-env/release-tools/utils', () => {
 			mockery.disable();
 		} );
 
+		describe( 'INDENT_SIZE', () => {
+			it( 'is defined', () => {
+				expect( cli.INDENT_SIZE ).to.be.a( 'Number' );
+			} );
+		} );
+
+		describe( 'COMMIT_INDENT_SIZE', () => {
+			it( 'is defined', () => {
+				expect( cli.COMMIT_INDENT_SIZE ).to.be.a( 'Number' );
+			} );
+		} );
+
 		describe( 'confirmUpdatingVersions()', () => {
 			it( 'displays packages and their versions (current and proposed) to release', () => {
 				const packagesMap = new Map();

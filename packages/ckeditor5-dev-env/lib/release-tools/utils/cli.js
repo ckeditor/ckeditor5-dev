@@ -11,6 +11,18 @@ const chalk = require( 'chalk' );
 
 const cli = {
 	/**
+	 * A size of default indent for a log.
+	 */
+	INDENT_SIZE: 3,
+
+	/**
+	 * A size of indent for a second and next lines in a log. The number is equal to length of the log string:
+	 * '* 1234567 ', where '1234567' is a short commit id.
+	 * It does not include a value from `cli.INDENT_SIZE`.
+	 */
+	COMMIT_INDENT_SIZE: 10,
+
+	/**
 	 * Asks a user for a confirmation for updating and tagging versions of the packages.
 	 *
 	 * @param {Map} packages Packages to release.
