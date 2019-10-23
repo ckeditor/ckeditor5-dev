@@ -347,7 +347,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				expect( commit.subject ).to.equal( 'README.' );
 			} );
 
-			it( 'always ignores merge "stable" commit', () => {
+			it( 'ignores merge "stable" commit', () => {
 				const rawCommit = {
 					type: null,
 					subject: null,
@@ -393,6 +393,27 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					{ title: 'NOTE', text: 'Note 4.' },
 					{ title: 'NOTE', text: 'Note 6.' }
 				] );
+			} );
+
+			it( 'includes "repositoryUrl" where the commit has been done', () => {
+				const notes = [
+					{ title: 'Foo', text: 'Foo-Text' },
+					{ title: 'Bar', text: 'Bar-Text' }
+				];
+
+				const rawCommit = {
+					hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+					header: 'Fix: Simple fix.',
+					type: 'Fix',
+					subject: 'Simple fix.',
+					body: null,
+					footer: null,
+					notes
+				};
+
+				const commit = transformCommitForSubRepository( rawCommit );
+
+				expect( commit.repositoryUrl ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev' );
 			} );
 		} );
 	} );

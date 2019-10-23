@@ -120,6 +120,8 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 		// Clear the references array - we don't want to hoist the issues.
 		delete commit.references;
 
+		commit.repositoryUrl = utils.getRepositoryUrl();
+
 		return commit;
 	};
 
@@ -186,6 +188,8 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
  * @property {String} type Type of the commit (it can be modified).
  *
  * @property {String} hash The commit SHA-1 id.
+ *
+ * @property {String} repositoryUrl The URL to the repository where the parsed commit has been done.
  *
  * @property {String} [subject] Subject of the commit.
  *

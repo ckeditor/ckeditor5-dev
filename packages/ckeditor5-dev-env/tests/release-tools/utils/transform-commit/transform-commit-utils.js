@@ -90,77 +90,10 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		} );
 
 		describe( 'linkToGithubIssue()', () => {
-			it( 'throws an error if package.json does not contain the "repository" property', () => {
-				stubs.getPackageJson.returns( {
-					name: 'test-package'
-				} );
-
-				expect( () => transformCommit.linkToGithubIssue( '#123' ) )
-					.to.throw( Error, 'The package.json for "test-package" must contain the "repository" property.' );
-			} );
-
 			it( 'replaces "#ID" with a link to GitHub issue (packageJson.repository as a string)', () => {
 				stubs.getPackageJson.returns( {
 					name: 'test-package',
 					repository: 'https://github.com/ckeditor/ckeditor5-dev'
-				} );
-
-				expect( transformCommit.linkToGithubIssue( 'Some issue #1.' ) )
-					.to.equal( 'Some issue [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1).' );
-			} );
-
-			it( 'replaces "#ID" with a link to GitHub issue (packageJson.repository as a string, contains "/issues")', () => {
-				stubs.getPackageJson.returns( {
-					name: 'test-package',
-					repository: 'https://github.com/ckeditor/ckeditor5-dev/issues'
-				} );
-
-				expect( transformCommit.linkToGithubIssue( 'Some issue #1.' ) )
-					.to.equal( 'Some issue [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1).' );
-			} );
-
-			it( 'replaces "#ID" with a link to GitHub issue (packageJson.repository as a string, ends with ".git")', () => {
-				stubs.getPackageJson.returns( {
-					name: 'test-package',
-					repository: 'https://github.com/ckeditor/ckeditor5-dev.git'
-				} );
-
-				expect( transformCommit.linkToGithubIssue( 'Some issue #1.' ) )
-					.to.equal( 'Some issue [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1).' );
-			} );
-
-			it( 'replaces "#ID" with a link to GitHub issue (packageJson.repository as an object)', () => {
-				stubs.getPackageJson.returns( {
-					name: 'test-package',
-					repository: {
-						url: 'https://github.com/ckeditor/ckeditor5-dev'
-					}
-				} );
-
-				expect( transformCommit.linkToGithubIssue( 'Some issue #1.' ) )
-					.to.equal( 'Some issue [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1).' );
-			} );
-
-			it( 'replaces "#ID" with a link to GitHub issue (packageJson.repository as an object, contains "/issues")', () => {
-				stubs.getPackageJson.returns( {
-					name: 'test-package',
-					repository: {
-						url: 'https://github.com/ckeditor/ckeditor5-dev/issues',
-						type: 'git'
-					}
-				} );
-
-				expect( transformCommit.linkToGithubIssue( 'Some issue #1.' ) )
-					.to.equal( 'Some issue [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1).' );
-			} );
-
-			it( 'replaces "#ID" with a link to GitHub issue (packageJson.repository as an object, ends with ".git")', () => {
-				stubs.getPackageJson.returns( {
-					name: 'test-package',
-					repository: {
-						url: 'https://github.com/ckeditor/ckeditor5-dev.git',
-						type: 'git'
-					}
 				} );
 
 				expect( transformCommit.linkToGithubIssue( 'Some issue #1.' ) )
@@ -217,6 +150,82 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				const sentence = 'This is a short sentence.';
 
 				expect( transformCommit.truncate( sentence, 13 ) ).to.equal( 'This is a...' );
+			} );
+		} );
+
+		describe( 'getRepositoryUrl()', () => {
+			it( 'throws an error if package.json does not contain the "repository" property', () => {
+				stubs.getPackageJson.returns( {
+					name: 'test-package'
+				} );
+
+				expect( () => transformCommit.getRepositoryUrl() )
+					.to.throw( Error, 'The package.json for "test-package" must contain the "repository" property.' );
+			} );
+
+			it( 'passes specified `cwd` to `getPackageJson()` util', () => {
+				stubs.getPackageJson.returns( {
+					name: 'test-package',
+					repository: 'https://github.com/ckeditor/ckeditor5-dev/issues'
+				} );
+
+				transformCommit.getRepositoryUrl( 'foo' );
+
+				expect( stubs.getPackageJson.calledOnce ).to.equal( true );
+				expect( stubs.getPackageJson.firstCall.args[ 0 ] ).to.equal( 'foo' );
+			} );
+
+			it( 'returns the repository URL (packageJson.repository as a string, contains "/issues")', () => {
+				stubs.getPackageJson.returns( {
+					name: 'test-package',
+					repository: 'https://github.com/ckeditor/ckeditor5-dev/issues'
+				} );
+
+				expect( transformCommit.getRepositoryUrl() ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev' );
+			} );
+
+			it( 'returns the repository URL (packageJson.repository as a string, ends with ".git")', () => {
+				stubs.getPackageJson.returns( {
+					name: 'test-package',
+					repository: 'https://github.com/ckeditor/ckeditor5-dev.git'
+				} );
+
+				expect( transformCommit.getRepositoryUrl() ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev' );
+			} );
+
+			it( 'returns the repository URL (packageJson.repository as an object)', () => {
+				stubs.getPackageJson.returns( {
+					name: 'test-package',
+					repository: {
+						url: 'https://github.com/ckeditor/ckeditor5-dev'
+					}
+				} );
+
+				expect( transformCommit.getRepositoryUrl() ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev' );
+			} );
+
+			it( 'returns the repository URL (packageJson.repository as an object, contains "/issues")', () => {
+				stubs.getPackageJson.returns( {
+					name: 'test-package',
+					repository: {
+						url: 'https://github.com/ckeditor/ckeditor5-dev/issues',
+						type: 'git'
+					}
+				} );
+
+				expect( transformCommit.getRepositoryUrl() ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev' );
+			} );
+
+			it( 'returns the repository URL (packageJson.repository as an object, ends with ".git")', () => {
+				stubs.getPackageJson.returns( {
+					name: 'test-package',
+					repository: {
+						url: 'https://github.com/ckeditor/ckeditor5-dev.git',
+						type: 'git'
+					}
+				} );
+
+				expect( transformCommit.getRepositoryUrl() ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev' );
 			} );
 		} );
 	} );
