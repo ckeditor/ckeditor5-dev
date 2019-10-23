@@ -121,12 +121,12 @@ const cli = {
 	 * Asks a user for providing the new version.
 	 *
 	 * @param {String} packageVersion
-	 * @param {String|null} releaseType
+	 * @param {String|null} releaseTypeOrNewVersion
 	 * @param {Object} [options]
 	 * @param {Boolean} [options.disableInternalVersion=false] Whether to "internal" version is enabled.
 	 * @returns {Promise.<String>}
 	 */
-	provideVersion( packageVersion, releaseType, options = {} ) {
+	provideVersion( packageVersion, releaseTypeOrNewVersion, options = {} ) {
 		const suggestedVersion = getSuggestedVersion();
 
 		let message = 'Type the new version, "skip" or "internal"';
@@ -161,24 +161,28 @@ const cli = {
 			.then( answers => answers.version );
 
 		function getSuggestedVersion() {
-			if ( !releaseType ) {
+			if ( semver.valid( releaseTypeOrNewVersion ) ) {
+				return releaseTypeOrNewVersion;
+			}
+
+			if ( !releaseTypeOrNewVersion ) {
 				return 'skip';
 			}
 
-			if ( releaseType === 'internal' ) {
+			if ( releaseTypeOrNewVersion === 'internal' ) {
 				return options.disableInternalVersion ? 'skip' : 'internal';
 			}
 
 			if ( semver.prerelease( packageVersion ) ) {
-				releaseType = 'prerelease';
+				releaseTypeOrNewVersion = 'prerelease';
 			}
 
 			// If package's version is below the '1.0.0', bump the 'minor' instead of 'major'
-			if ( releaseType === 'major' && semver.gt( '1.0.0', packageVersion ) ) {
+			if ( releaseTypeOrNewVersion === 'major' && semver.gt( '1.0.0', packageVersion ) ) {
 				return semver.inc( packageVersion, 'minor' );
 			}
 
-			return semver.inc( packageVersion, releaseType );
+			return semver.inc( packageVersion, releaseTypeOrNewVersion );
 		}
 	},
 

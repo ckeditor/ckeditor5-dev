@@ -162,6 +162,13 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		describe( 'provideVersion()', () => {
+			it( 'suggests specified version', () => {
+				return cli.provideVersion( '1.0.0', '1.1.0' )
+					.then( newVersion => {
+						expect( newVersion ).to.equal( '1.1.0' );
+					} );
+			} );
+
 			it( 'should suggest proper "major" version for public package', () => {
 				return cli.provideVersion( '1.0.0', 'major' )
 					.then( newVersion => {
