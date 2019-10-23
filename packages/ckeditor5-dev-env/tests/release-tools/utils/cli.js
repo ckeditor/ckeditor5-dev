@@ -394,7 +394,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					.then( () => {
 						const question = questionItems[ 0 ];
 
-						expect( question.message ).to.match( /^Should the next versions be treated as a major bump\?/ );
+						expect( question.message ).to.match( /Should this be a major release\?/ );
 						expect( question.type ).to.equal( 'confirm' );
 					} );
 			} );

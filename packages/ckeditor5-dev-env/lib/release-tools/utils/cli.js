@@ -288,7 +288,10 @@ const cli = {
 	 */
 	confirmMajorBreakingChangeRelease( haveMajorBreakingChangeCommits ) {
 		const confirmQuestion = {
-			message: 'Should the next versions be treated as a major bump?',
+			message: [
+				'If at least one of those changes is really a major breaking change, this will be a major release.',
+				'Should this be a major release?'
+			].join( '\n' ),
 			type: 'confirm',
 			name: 'confirm',
 			default: haveMajorBreakingChangeCommits,
