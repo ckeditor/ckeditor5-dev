@@ -225,6 +225,6 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 	}
 
 	function logProcess( message ) {
-		log.info( '\n📍  ' + chalk.blue( message ) );
+		log.info( '\n📍  ' + chalk.cyan( message ) );
 	}
 };
