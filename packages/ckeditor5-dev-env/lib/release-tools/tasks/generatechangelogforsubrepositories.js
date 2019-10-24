@@ -7,6 +7,7 @@
 
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const chalk = require( 'chalk' );
+const semver = require( 'semver' );
 const cli = require( '../utils/cli' );
 const displayCommits = require( '../utils/displaycommits' );
 const displayGeneratedChangelogs = require( '../utils/displaygeneratedchangelogs' );
@@ -47,11 +48,15 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 	// all packages must be released as a major change.
 	let willBeMajorBump = false;
 
+	// If the next release will be the major bump, this variable will contain next version for all packages.
+	let nextVersion = null;
+
 	const generatedChangelogsMap = new Map();
 	const skippedChangelogs = new Set();
 
 	return collectPackagesCommits()
 		.then( packagesCommit => confirmMajorVersionBump( packagesCommit ) )
+		.then( () => typeNewProposalVersionForAllPackages() )
 		.then( () => generateChangelogs() )
 		.then( () => generateInternalChangelogs() )
 		.then( () => {
@@ -113,14 +118,47 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 			if ( majorBreakingChangesCommits.size ) {
 				hasMajorBreakingChanges = true;
 
-				log.info( `\n🔸 Found in "${ chalk.underline( packageName ) }"...` );
-				displayCommits( majorBreakingChangesCommits );
+				log.info( `\n${ ' '.repeat( cli.INDENT_SIZE ) }${ chalk.bold( `Found in "${ chalk.underline( packageName ) }"...` ) }` );
+				displayCommits( majorBreakingChangesCommits, { attachLinkToCommit: true, indentLevel: 2 } );
 			}
 		}
+
+		// An empty line here increases the readability.
+		console.log( '' );
 
 		return cli.confirmMajorBreakingChangeRelease( hasMajorBreakingChanges )
 			.then( result => {
 				willBeMajorBump = result;
+			} );
+	}
+
+	/**
+	 * If the next release will be the major release, the user needs to provide the version which will be used
+	 * a the proposal version for all packages.
+	 *
+	 * @returns {Promise.<undefined>}
+	 */
+	function typeNewProposalVersionForAllPackages() {
+		if ( !willBeMajorBump ) {
+			return Promise.resolve();
+		}
+
+		logProcess( 'Looking for the highest version in all packages...' );
+
+		const [ packageHighestVersion, highestVersion ] = [ ...pathsCollection.matched ]
+			.reduce( ( currentHighest, repositoryPath ) => {
+				const packageJson = getPackageJson( repositoryPath );
+
+				if ( semver.gt( packageJson.version, currentHighest[ 1 ] ) ) {
+					return [ packageJson.name, packageJson.version ];
+				}
+
+				return currentHighest;
+			}, [ null, '0.0.0' ] );
+
+		return cli.provideNewMajorReleaseVersion( highestVersion, packageHighestVersion )
+			.then( version => {
+				nextVersion = version;
 			} );
 	}
 
@@ -132,12 +170,16 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 	function generateChangelogs() {
 		logProcess( 'Generating changelogs for packages...' );
 
-		const newVersion = willBeMajorBump ? 'major' : null;
-
 		return executeOnPackages( pathsCollection.matched, repositoryPath => {
 			process.chdir( repositoryPath );
 
-			return generateChangelogForSinglePackage( { newVersion, disableMajorBump: !willBeMajorBump } )
+			const changelogOptions = {
+				newVersion: nextVersion,
+				disableMajorBump: !willBeMajorBump,
+				indentLevel: 1
+			};
+
+			return generateChangelogForSinglePackage( changelogOptions )
 				.then( newVersionInChangelog => {
 					if ( newVersionInChangelog ) {
 						generatedChangelogsMap.set( getPackageJson( repositoryPath ).name, newVersionInChangelog );
@@ -165,7 +207,7 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 		log.info( '\n' + chalk.underline( '' ) );
 
 		const internalChangelogsPaths = new Map();
-		const newVersion = willBeMajorBump ? 'major' : 'patch';
+		const newVersion = willBeMajorBump ? nextVersion : 'patch';
 		let clearRun = false;
 
 		while ( !clearRun ) {
@@ -193,7 +235,13 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 		return executeOnPackages( internalChangelogsPaths.values(), repositoryPath => {
 			process.chdir( repositoryPath );
 
-			return generateChangelogForSinglePackage( { newVersion, isInternalRelease: true } )
+			const changelogOptions = {
+				newVersion,
+				isInternalRelease: true,
+				indentLevel: 1
+			};
+
+			return generateChangelogForSinglePackage( changelogOptions )
 				.then( newVersion => {
 					generatedChangelogsMap.set( getPackageJson( repositoryPath ).name, newVersion );
 				} )
