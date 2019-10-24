@@ -47,6 +47,9 @@ const VALID_SEMVER_INCREMENT_LEVEL = [
  * instead of data that comes from commits.
  * @param {Number} [options.indentLevel=0] The indent level. This function could be used inside another (bigger) script. If we would like to
  * display indents logs, we need to increase/decrease indent level manually.
+ * @param {Boolean} [options.useExplicitBreakingChangeGroups] If set on `true`, notes from parsed commits will be grouped as
+ * "MINOR BREAKING CHANGES" and "MAJOR BREAKING CHANGES'. If set on `false` (by default), all breaking changes notes will be treated
+ * as "BREAKING CHANGES".
  * @returns {Promise}
  */
 module.exports = function generateChangelogForSinglePackage( options = {} ) {
@@ -84,7 +87,8 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 	} else {
 		const transformCommitFunction = transformCommitForSubRepositoryFactory( {
 			treatMajorAsMinorBreakingChange: options.disableMajorBump,
-			returnInvalidCommit: true
+			returnInvalidCommit: true,
+			useExplicitBreakingChangeGroups: !!options.useExplicitBreakingChangeGroups
 		} );
 
 		promise = promise
@@ -114,7 +118,8 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 				isInternalRelease,
 				newTagName: 'v' + version,
 				transformCommit: transformCommitForSubRepositoryFactory( {
-					treatMajorAsMinorBreakingChange: options.disableMajorBump
+					treatMajorAsMinorBreakingChange: options.disableMajorBump,
+					useExplicitBreakingChangeGroups: !!options.useExplicitBreakingChangeGroups
 				} ),
 				skipLinks: !!options.skipLinks
 			};

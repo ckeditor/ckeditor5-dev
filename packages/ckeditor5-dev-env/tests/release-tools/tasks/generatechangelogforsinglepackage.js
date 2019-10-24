@@ -82,6 +82,40 @@ describe( 'dev-env/release-tools/tasks', () => {
 			mockery.disable();
 		} );
 
+		it( 'passes options to "transformCommitForSubRepositoryFactory" correctly', () => {
+			const commits = [ {}, {} ];
+
+			stubs.getNewReleaseType.returns( Promise.resolve( {
+				releaseType: 'minor',
+				commits
+			} ) );
+
+			stubs.versionUtils.getLastFromChangelog.returns( '0.5.0' );
+			stubs.generateChangelogFromCommits.returns( Promise.resolve() );
+			stubs.cli.provideVersion.returns( Promise.resolve( '1.0.0' ) );
+
+			const options = {
+				newVersion: '1.0.0',
+				disableMajorBump: false,
+				useExplicitBreakingChangeGroups: true
+			};
+
+			return generateChangelogForSinglePackage( options )
+				.then( () => {
+					expect( stubs.transformCommitFactory.calledTwice ).to.equal( true );
+
+					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
+						returnInvalidCommit: true,
+						treatMajorAsMinorBreakingChange: false,
+						useExplicitBreakingChangeGroups: true
+					} );
+					expect( stubs.transformCommitFactory.secondCall.args[ 0 ] ).to.deep.equal( {
+						treatMajorAsMinorBreakingChange: false,
+						useExplicitBreakingChangeGroups: true
+					} );
+				} );
+		} );
+
 		it( 'generates the changelog for specified version (user must confirm)', () => {
 			const commits = [ {}, {} ];
 
@@ -97,13 +131,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return generateChangelogForSinglePackage( { newVersion: '1.0.0' } )
 				.then( () => {
 					expect( stubs.transformCommitFactory.calledTwice ).to.equal( true );
-					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
-						returnInvalidCommit: true,
-						treatMajorAsMinorBreakingChange: undefined
-					} );
-					expect( stubs.transformCommitFactory.secondCall.args[ 0 ] ).to.deep.equal( {
-						treatMajorAsMinorBreakingChange: undefined
-					} );
 
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
@@ -139,13 +166,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return generateChangelogForSinglePackage()
 				.then( () => {
 					expect( stubs.transformCommitFactory.calledTwice ).to.equal( true );
-					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
-						returnInvalidCommit: true,
-						treatMajorAsMinorBreakingChange: undefined
-					} );
-					expect( stubs.transformCommitFactory.secondCall.args[ 0 ] ).to.deep.equal( {
-						treatMajorAsMinorBreakingChange: undefined
-					} );
 
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
@@ -186,13 +206,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return generateChangelogForSinglePackage()
 				.then( () => {
 					expect( stubs.transformCommitFactory.calledTwice ).to.equal( true );
-					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
-						returnInvalidCommit: true,
-						treatMajorAsMinorBreakingChange: undefined
-					} );
-					expect( stubs.transformCommitFactory.secondCall.args[ 0 ] ).to.deep.equal( {
-						treatMajorAsMinorBreakingChange: undefined
-					} );
 
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
@@ -233,13 +246,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return generateChangelogForSinglePackage( { newVersion: 'minor' } )
 				.then( () => {
 					expect( stubs.transformCommitFactory.calledTwice ).to.equal( true );
-					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
-						returnInvalidCommit: true,
-						treatMajorAsMinorBreakingChange: undefined
-					} );
-					expect( stubs.transformCommitFactory.secondCall.args[ 0 ] ).to.deep.equal( {
-						treatMajorAsMinorBreakingChange: undefined
-					} );
 
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
@@ -272,13 +278,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return generateChangelogForSinglePackage()
 				.then( () => {
 					expect( stubs.transformCommitFactory.calledOnce ).to.equal( true );
-					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
-						returnInvalidCommit: true,
-						treatMajorAsMinorBreakingChange: undefined
-					} );
-
 					expect( stubs.generateChangelogFromCommits.called ).to.equal( false );
-
 					expect( stubs.displayCommits.calledOnce ).to.equal( true );
 					expect( stubs.displayCommits.firstCall.args[ 0 ] ).to.deep.equal( commits );
 				} );
@@ -297,13 +297,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return generateChangelogForSinglePackage()
 				.then( () => {
 					expect( stubs.transformCommitFactory.calledOnce ).to.equal( true );
-					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
-						returnInvalidCommit: true,
-						treatMajorAsMinorBreakingChange: undefined
-					} );
-
 					expect( stubs.generateChangelogFromCommits.called ).to.equal( false );
-
 					expect( stubs.displayCommits.calledOnce ).to.equal( true );
 					expect( stubs.displayCommits.firstCall.args[ 0 ] ).to.deep.equal( commits );
 				} );
@@ -336,9 +330,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return generateChangelogForSinglePackage( { newVersion: '0.1.0', isInternalRelease: true } )
 				.then( () => {
 					expect( stubs.transformCommitFactory.calledOnce ).to.equal( true );
-					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
-						treatMajorAsMinorBreakingChange: undefined
-					} );
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
 						version: '0.1.0',
@@ -358,9 +349,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return generateChangelogForSinglePackage( { newVersion: 'major', isInternalRelease: true } )
 				.then( () => {
 					expect( stubs.transformCommitFactory.calledOnce ).to.equal( true );
-					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
-						treatMajorAsMinorBreakingChange: undefined
-					} );
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
 						version: '1.0.0',
@@ -401,14 +389,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return generateChangelogForSinglePackage( { skipLinks: true } )
 				.then( () => {
 					expect( stubs.transformCommitFactory.calledTwice ).to.equal( true );
-					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
-						returnInvalidCommit: true,
-						treatMajorAsMinorBreakingChange: undefined
-					} );
-					expect( stubs.transformCommitFactory.secondCall.args[ 0 ] ).to.deep.equal( {
-						treatMajorAsMinorBreakingChange: undefined
-					} );
-
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
 						version: '0.1.0',
@@ -421,7 +401,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 				} );
 		} );
 
-		it( 'treats MAJOR BREAKING CHANGES as MINOR BREAKING CHANGES', () => {
+		it( 'treats "MAJOR BREAKING CHANGES" as "MINOR BREAKING CHANGES"', () => {
 			stubs.getNewReleaseType.returns( Promise.resolve( {
 				releaseType: 'minor'
 			} ) );
@@ -432,13 +412,6 @@ describe( 'dev-env/release-tools/tasks', () => {
 			return generateChangelogForSinglePackage( { disableMajorBump: true } )
 				.then( () => {
 					expect( stubs.transformCommitFactory.calledTwice ).to.equal( true );
-					expect( stubs.transformCommitFactory.firstCall.args[ 0 ] ).to.deep.equal( {
-						returnInvalidCommit: true,
-						treatMajorAsMinorBreakingChange: true
-					} );
-					expect( stubs.transformCommitFactory.secondCall.args[ 0 ] ).to.deep.equal( {
-						treatMajorAsMinorBreakingChange: true
-					} );
 
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {

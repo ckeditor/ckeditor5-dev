@@ -83,6 +83,9 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 		logProcess( 'Collecting commits for packages since the last release...' );
 
 		const packagesCommit = new Map();
+		const transformCommitFunction = transformCommitForSubRepositoryFactory( {
+			useExplicitBreakingChangeGroups: true
+		} );
 
 		return executeOnPackages( pathsCollection.matched, repositoryPath => {
 			process.chdir( repositoryPath );
@@ -95,7 +98,7 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 				tagName = 'v' + tagName;
 			}
 
-			return getNewReleaseType( transformCommitForSubRepositoryFactory(), { tagName } )
+			return getNewReleaseType( transformCommitFunction, { tagName } )
 				.then( result => {
 					packagesCommit.set( packageJson.name, new Set( result.commits ) );
 				} );
@@ -121,6 +124,13 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 				log.info( `\n${ ' '.repeat( cli.INDENT_SIZE ) }${ chalk.bold( `Found in "${ chalk.underline( packageName ) }"...` ) }` );
 				displayCommits( majorBreakingChangesCommits, { attachLinkToCommit: true, indentLevel: 2 } );
 			}
+		}
+
+		if ( !hasMajorBreakingChanges ) {
+			console.log( chalk.italic(
+				' '.repeat( cli.INDENT_SIZE ) +
+				'Not found any "MAJOR BREAKING CHANGES" commit but you can decide whether a next release should be treated as a major.'
+			) );
 		}
 
 		// An empty line here increases the readability.
@@ -176,7 +186,8 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 			const changelogOptions = {
 				newVersion: nextVersion,
 				disableMajorBump: !willBeMajorBump,
-				indentLevel: 1
+				indentLevel: 1,
+				useExplicitBreakingChangeGroups: true
 			};
 
 			return generateChangelogForSinglePackage( changelogOptions )
@@ -238,7 +249,8 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 			const changelogOptions = {
 				newVersion,
 				isInternalRelease: true,
-				indentLevel: 1
+				indentLevel: 1,
+				useExplicitBreakingChangeGroups: true
 			};
 
 			return generateChangelogForSinglePackage( changelogOptions )
