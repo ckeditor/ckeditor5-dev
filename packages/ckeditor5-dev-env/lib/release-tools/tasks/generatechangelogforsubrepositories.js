@@ -29,7 +29,7 @@ const versionUtils = require( '../utils/versions' );
  * @param {String} [options.scope] Package names have to match to specified glob pattern.
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be touched.
  * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in "cwd" will be skipped.
- * @returns {Promise}
+ * @returns {Promise.<SummaryChangelogResponse>}
  */
 module.exports = function generateChangelogForSubRepositories( options ) {
 	const log = logger();
@@ -57,19 +57,24 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 	return collectPackagesCommits()
 		.then( packagesCommit => confirmMajorVersionBump( packagesCommit ) )
 		.then( () => typeNewProposalVersionForAllPackages() )
-		.then( () => generateChangelogs() )
-		.then( () => generateInternalChangelogs() )
+		// .then( () => generateChangelogs() )
+		// .then( () => generateInternalChangelogs() )
 		.then( () => {
 			process.chdir( cwd );
 
-			displaySkippedPackages( new Set( [
-				...pathsCollection.skipped,
-				...skippedChangelogs
-			].sort() ) );
+			// displaySkippedPackages( new Set( [
+			// 	...pathsCollection.skipped,
+			// 	...skippedChangelogs
+			// ].sort() ) );
 
-			displayGeneratedChangelogs( generatedChangelogsMap );
+			// displayGeneratedChangelogs( generatedChangelogsMap );
 
 			log.info( 'Done.' );
+
+			return {
+				wasMajorRelease: willBeMajorBump,
+				version: nextVersion
+			};
 		} );
 
 	/**
@@ -288,3 +293,11 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 		log.info( '\n📍 ' + chalk.cyan( message ) );
 	}
 };
+
+/**
+ * @typedef {Object} SummaryChangelogResponse
+ *
+ * @property {Boolean} wasMajorRelease Determines whether generated changelogs were generated as a major breaking release.
+ *
+ * @property {String|null} version If `wasMajorRelease` is `true`, `version` contains a proposed version by a user.
+ */

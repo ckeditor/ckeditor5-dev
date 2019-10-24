@@ -116,6 +116,7 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 				version,
 				tagName,
 				isInternalRelease,
+				indentLevel,
 				newTagName: 'v' + version,
 				transformCommit: transformCommitForSubRepositoryFactory( {
 					treatMajorAsMinorBreakingChange: options.disableMajorBump,

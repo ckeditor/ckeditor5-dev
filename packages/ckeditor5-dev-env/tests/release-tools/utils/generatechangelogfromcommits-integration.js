@@ -204,7 +204,13 @@ describe( 'dev-env/release-tools/utils', () => {
 							'BREAKING CHANGES: Some breaking change.'
 						);
 
-						return generateChangelog( '0.2.0' );
+						const options = {
+							transformCommit: transformCommitForSubRepositoryFactory( {
+								useExplicitBreakingChangeGroups: true
+							} )
+						};
+
+						return generateChangelog( '0.2.0', options );
 					} )
 					.then( () => {
 						const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.0' ) );
@@ -241,7 +247,13 @@ describe( 'dev-env/release-tools/utils', () => {
 							'BREAKING CHANGES: Some breaking change.'
 						);
 
-						return generateChangelog( '0.2.0' );
+						const options = {
+							transformCommit: transformCommitForSubRepositoryFactory( {
+								useExplicitBreakingChangeGroups: true
+							} )
+						};
+
+						return generateChangelog( '0.2.0', options );
 					} )
 					.then( () => {
 						const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.0' ) );
@@ -575,7 +587,13 @@ Besides changes in the dependencies, this version also contains the following bu
 						);
 						makeCommit( 'Other: Updated translations.' );
 
-						return generateChangelog( '1.0.0' );
+						const options = {
+							transformCommit: transformCommitForSubRepositoryFactory( {
+								useExplicitBreakingChangeGroups: true
+							} )
+						};
+
+						return generateChangelog( '1.0.0', options );
 					} )
 					.then( () => {
 						const latestChangelog = replaceCommitIds( getChangesForVersion( '1.0.0' ) );
@@ -615,7 +633,7 @@ Besides changes in the dependencies, this version also contains the following bu
 			} );
 		} );
 
-		describe( 'treats "MAJOR BREAKING CHANGES" as "MINOR BREAKING CHANGES', () => {
+		describe( 'treats "MAJOR BREAKING CHANGES" as "MINOR BREAKING CHANGES"', () => {
 			it( 'works fine for complex iteration', () => {
 				return makeInitialRelease()
 					.then( () => {
@@ -638,7 +656,8 @@ Besides changes in the dependencies, this version also contains the following bu
 
 						const options = {
 							transformCommit: transformCommitForSubRepositoryFactory( {
-								treatMajorAsMinorBreakingChange: true
+								treatMajorAsMinorBreakingChange: true,
+								useExplicitBreakingChangeGroups: true
 							} )
 						};
 
@@ -650,6 +669,61 @@ Besides changes in the dependencies, this version also contains the following bu
 						/* eslint-disable max-len */
 						const expectedChangelog = normalizeStrings( `
 ### MINOR BREAKING CHANGES
+
+* Breaking change NO 3.
+* Breaking change NO 2.
+* Breaking change NO 1.
+
+### Features
+
+* Another feature. Closes [#2](https://github.com/ckeditor/ckeditor5-test-package/issues/2). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+* Issues will not be hoisted. Closes [#8](https://github.com/ckeditor/ckeditor5-test-package/issues/8). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+
+  All details have been described in [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
+
+### Bug fixes
+
+* Amazing fix. Closes [#5](https://github.com/ckeditor/ckeditor5-test-package/issues/5). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+
+  The PR also finally closes [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4). So good!
+* Foo Bar. Closes [#9](https://github.com/ckeditor/ckeditor5-test-package/issues/9). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+						` );
+						/* eslint-enable max-len */
+
+						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
+					} );
+			} );
+		} );
+
+		describe( 'treats "MAJOR BREAKING CHANGES" and "MINOR BREAKING CHANGES" as "BREAKING CHANGE"', () => {
+			it( 'works fine for complex iteration', () => {
+				return makeInitialRelease()
+					.then( () => {
+						makeCommit( 'Feature: Another feature. Closes #2' );
+						makeCommit(
+							'Feature: Issues will not be hoisted. Closes #8.',
+							'All details have been described in #1.',
+							'MAJOR BREAKING CHANGES: Breaking change NO 1.'
+						);
+						makeCommit(
+							'Merge t/ckeditor5-link/52 into master',
+							'Fix: Foo Bar. Closes #9.',
+							'MINOR BREAKING CHANGE: Breaking change NO 2.'
+						);
+						makeCommit(
+							'Fix: Amazing fix. Closes #5.',
+							'The PR also finally closes #3 and #4. So good!',
+							'BREAKING CHANGES: Breaking change NO 3.'
+						);
+
+						return generateChangelog( '1.0.0' );
+					} )
+					.then( () => {
+						const latestChangelog = replaceCommitIds( getChangesForVersion( '1.0.0' ) );
+
+						/* eslint-disable max-len */
+						const expectedChangelog = normalizeStrings( `
+### BREAKING CHANGES
 
 * Breaking change NO 3.
 * Breaking change NO 2.

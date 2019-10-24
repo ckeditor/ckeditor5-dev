@@ -12,6 +12,7 @@ const getWriterOptions = require( './transform-commit/getwriteroptions' );
 const parserOptions = require( './transform-commit/parser-options' );
 const { stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const { additionalCommitNotes } = require( './transform-commit/transform-commit-utils' );
+const cli = require( './cli' );
 
 const UPDATED_TRANSLATION_COMMIT = '* Updated translations.';
 
@@ -30,14 +31,18 @@ const UPDATED_TRANSLATION_COMMIT = '* Updated translations.';
  * @param {Boolean} [options.additionalNotes=false] If set on `true, each category will contain additional description.
  * See: `/packages/ckeditor5-dev-env/lib/release-tools/utils/transform-commit/transform-commit-utils.js#additionalCommitNotes`
  * @param {Boolean} [options.skipLinks=false] If set on true, links to release or commits will be omitted.
+ * @param {Number} [options.indentLevel=0] The indent level. This function could be used inside another (bigger) script. If we would like to
+ * display indents logs, we need to increase/decrease indent level manually.
  * @returns {Promise}
  */
 module.exports = function generateChangelogFromCommits( options ) {
 	const log = logger();
+	const indentLevel = options.indentLevel || 0;
+	const indent = ' '.repeat( indentLevel * cli.INDENT_SIZE );
 
 	return new Promise( resolve => {
 		if ( !options.doNotSave && !fs.existsSync( changelogUtils.changelogFile ) ) {
-			log.warning( 'Changelog file does not exist. Creating...' );
+			log.warning( indent + 'Changelog file does not exist. Creating...' );
 
 			changelogUtils.saveChangelog( changelogUtils.changelogHeader );
 		}
