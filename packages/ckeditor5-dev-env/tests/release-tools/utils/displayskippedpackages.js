@@ -40,12 +40,6 @@ describe( 'dev-env/release-tools/utils', () => {
 
 	describe( 'displaySkippedPackages()', () => {
 		it( 'displays name of packages that have been skipped', () => {
-			const logMessage = [
-				'Packages listed below have been skipped:',
-				'  * @ckeditor/ckeditor5-foo',
-				'  * @ckeditor/ckeditor5-bar'
-			].join( '\n' );
-
 			stubs.getPackageJson.onFirstCall().returns( { name: '@ckeditor/ckeditor5-foo' } );
 			stubs.getPackageJson.onSecondCall().returns( { name: '@ckeditor/ckeditor5-bar' } );
 
@@ -55,7 +49,12 @@ describe( 'dev-env/release-tools/utils', () => {
 			] ) );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( logMessage );
+
+			const logMessage = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
+
+			expect( logMessage[ 0 ].includes( 'Packages listed below have been skipped:' ) ).to.equal( true );
+			expect( logMessage[ 1 ].includes( '  * @ckeditor/ckeditor5-foo' ) ).to.equal( true );
+			expect( logMessage[ 2 ].includes( '  * @ckeditor/ckeditor5-bar' ) ).to.equal( true );
 		} );
 
 		it( 'does not display if given list is empty', () => {

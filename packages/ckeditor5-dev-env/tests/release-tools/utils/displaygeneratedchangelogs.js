@@ -38,19 +38,18 @@ describe( 'dev-env/release-tools/utils', () => {
 
 	describe( 'displayGeneratedChangelogs()', () => {
 		it( 'displays name of packages that have been skipped', () => {
-			const logMessage = [
-				'Generated changelog for the following packages:',
-				'  * "@ckeditor/ckeditor5-foo": v1.0.0',
-				'  * "@ckeditor/ckeditor5-bar": v2.0.0'
-			].join( '\n' );
-
 			displayGeneratedChangelogs( new Map( [
 				[ '@ckeditor/ckeditor5-foo', '1.0.0' ],
 				[ '@ckeditor/ckeditor5-bar', '2.0.0' ]
 			] ) );
 
 			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.equal( logMessage );
+
+			const logMessage = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
+
+			expect( logMessage[ 0 ].includes( 'Generated changelog for the following packages:' ) ).to.equal( true );
+			expect( logMessage[ 1 ].includes( '  * "@ckeditor/ckeditor5-foo": v1.0.0' ) ).to.equal( true );
+			expect( logMessage[ 2 ].includes( '  * "@ckeditor/ckeditor5-bar": v2.0.0' ) ).to.equal( true );
 		} );
 
 		it( 'does not display if given list is empty', () => {
