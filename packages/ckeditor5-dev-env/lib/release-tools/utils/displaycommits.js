@@ -48,6 +48,14 @@ module.exports = function displayCommits( commits, options = {} ) {
 			logMessage += `\n${ listEntriesIndent }${ chalk.italic( singleCommit.merge ) }`;
 		}
 
+		for ( const note of singleCommit.notes ) {
+			if ( note.title.match( /^(MAJOR|MINOR)/ ) ) {
+				const limit = 100 - note.title.length;
+
+				logMessage += `\n${ listEntriesIndent }${ note.title }: ${ utils.truncate( note.text, limit ) } `;
+			}
+		}
+
 		if ( attachLinkToCommit ) {
 			logMessage += `\n${ listEntriesIndent }🔹 ${ singleCommit.repositoryUrl }/commit/${ singleCommit.hash }`;
 		}

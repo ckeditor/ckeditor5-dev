@@ -15,7 +15,8 @@ describe( 'dev-env/release-tools/utils', () => {
 
 	beforeEach( () => {
 		transformCommit = transformCommitFactory( {
-			returnInvalidCommit: true
+			returnInvalidCommit: true,
+			useExplicitBreakingChangeGroups: true
 		} );
 		sandbox = sinon.createSandbox();
 
@@ -204,6 +205,47 @@ describe( 'dev-env/release-tools/utils', () => {
 			// Merge ...
 			// If the merge commit does not contain the second line, it should display only the one.
 			expect( stubs.logger.info.firstCall.args[ 0 ].split( '\n' ) ).length( 1 );
+		} );
+
+		it( 'attaches breaking changes notes to displayed message', () => {
+			const rawCommit = {
+				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+				header: 'Feature: Simple foo.',
+				type: 'Feature',
+				subject: 'Simple foo.',
+				body: null,
+				footer: null,
+				notes: [
+					{
+						title: 'BREAKING CHANGE',
+						text: '1 - Reference site about Lorem Ipsum, giving information on its origins, as well as ' +
+							'a random Lipsum generator.'
+					},
+					{
+						title: 'MAJOR BREAKING CHANGE',
+						text: '2 - Reference site about Lorem Ipsum, giving information on its origins, as well as ' +
+							'a random Lipsum generator.'
+					},
+					{
+						title: 'MINOR BREAKING CHANGE',
+						text: '3 - Reference site about Lorem Ipsum, giving information on its origins, as well as ' +
+							'a random Lipsum generator.'
+					}
+				]
+			};
+
+			const commit = transformCommit( rawCommit );
+
+			displayCommits( [ commit ] );
+
+			const message = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
+
+			/* eslint-disable max-len */
+			expect( message[ 0 ].includes( 'Feature: Simple foo.' ) ).to.equal( true );
+			expect( message[ 1 ].includes( 'MAJOR BREAKING CHANGES: 1 - Reference site about Lorem Ipsum, giving information on its origins, as...' ) ).to.equal( true );
+			expect( message[ 2 ].includes( 'MAJOR BREAKING CHANGES: 2 - Reference site about Lorem Ipsum, giving information on its origins, as...' ) ).to.equal( true );
+			expect( message[ 3 ].includes( 'MINOR BREAKING CHANGES: 3 - Reference site about Lorem Ipsum, giving information on its origins, as...' ) ).to.equal( true );
+			/* eslint-enable max-len */
 		} );
 
 		describe( 'options.attachLinkToCommit', () => {
