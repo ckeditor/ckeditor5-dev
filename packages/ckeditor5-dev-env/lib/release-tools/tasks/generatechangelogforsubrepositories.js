@@ -57,17 +57,17 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 	return collectPackagesCommits()
 		.then( packagesCommit => confirmMajorVersionBump( packagesCommit ) )
 		.then( () => typeNewProposalVersionForAllPackages() )
-		// .then( () => generateChangelogs() )
-		// .then( () => generateInternalChangelogs() )
+		.then( () => generateChangelogs() )
+		.then( () => generateInternalChangelogs() )
 		.then( () => {
 			process.chdir( cwd );
 
-			// displaySkippedPackages( new Set( [
-			// 	...pathsCollection.skipped,
-			// 	...skippedChangelogs
-			// ].sort() ) );
+			displaySkippedPackages( new Set( [
+				...pathsCollection.skipped,
+				...skippedChangelogs
+			].sort() ) );
 
-			// displayGeneratedChangelogs( generatedChangelogsMap );
+			displayGeneratedChangelogs( generatedChangelogsMap );
 
 			log.info( 'Done.' );
 
