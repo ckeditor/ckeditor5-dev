@@ -50,17 +50,16 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'attaches valid "external" commit to the changelog (as Array)', () => {
-			const rawCommit = {
-				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+			const commit = {
+				hash: '684997d',
 				header: 'Fix: Simple fix.',
-				type: 'Fix',
+				type: 'Bug fixes',
+				rawType: 'Fix',
 				subject: 'Simple fix.',
 				body: null,
 				footer: null,
 				notes: []
 			};
-
-			const commit = transformCommit( rawCommit );
 
 			displayCommits( [ commit ] );
 
@@ -70,17 +69,16 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'attaches valid "external" commit to the changelog (as Set)', () => {
-			const rawCommit = {
-				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+			const commit = {
+				hash: '684997d',
 				header: 'Fix: Simple fix.',
-				type: 'Fix',
+				type: 'Bug fixes',
+				rawType: 'Fix',
 				subject: 'Simple fix.',
 				body: null,
 				footer: null,
 				notes: []
 			};
-
-			const commit = transformCommit( rawCommit );
 
 			displayCommits( new Set( [ commit ] ) );
 
@@ -90,19 +88,18 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'truncates too long commit\'s subject', () => {
-			const rawCommit = {
-				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+			const commit = {
+				hash: '684997d',
 				header: 'Fix: Reference site about Lorem Ipsum, giving information on its origins, as well as ' +
 					'a random Lipsum generator.',
-				type: 'Fix',
+				type: 'Bug fixes',
+				rawType: 'Fix',
 				subject: 'Reference site about Lorem Ipsum, giving information on its origins, as well as ' +
 					'a random Lipsum generator.',
 				body: null,
 				footer: null,
 				notes: []
 			};
-
-			const commit = transformCommit( rawCommit );
 
 			displayCommits( [ commit ] );
 
@@ -114,17 +111,16 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'does not attach valid "internal" commit to the changelog', () => {
-			const rawCommit = {
-				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+			const commit = {
+				hash: '684997d',
 				header: 'Docs: README.',
 				type: 'Docs',
+				rawType: 'Docs',
 				subject: 'README.',
 				body: null,
 				footer: null,
 				notes: []
 			};
-
-			const commit = transformCommit( rawCommit, { returnInvalidCommit: true } );
 
 			displayCommits( [ commit ] );
 
@@ -134,8 +130,8 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'does not attach invalid commit to the changelog', () => {
-			const rawCommit = {
-				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+			const commit = {
+				hash: '684997d',
 				header: 'Invalid commit.',
 				type: null,
 				subject: null,
@@ -143,8 +139,6 @@ describe( 'dev-env/release-tools/utils', () => {
 				footer: null,
 				notes: []
 			};
-
-			const commit = transformCommit( rawCommit, { returnInvalidCommit: true } );
 
 			displayCommits( [ commit ] );
 
@@ -154,19 +148,18 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'attaches additional subject for merge commits to the commit list', () => {
-			const rawCommit = {
+			const commit = {
 				merge: 'Merge pull request #75 from ckeditor/t/64',
-				hash: 'dea35014ab610be0c2150343c6a8a68620cfe5ad',
+				hash: 'dea3501',
 				header: 'Feature: Introduced a brand new release tools with a new set of requirements.',
 				type: 'Feature',
+				rawType: 'Feature',
 				subject: 'Introduced a brand new release tools with a new set of requirements.',
 				body: null,
 				footer: null,
 				mentions: [],
 				notes: []
 			};
-
-			const commit = transformCommit( rawCommit );
 
 			displayCommits( [ commit ] );
 
@@ -208,33 +201,32 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'attaches breaking changes notes to displayed message', () => {
-			const rawCommit = {
-				hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+			const commit = {
+				hash: '684997d',
 				header: 'Feature: Simple foo.',
 				type: 'Feature',
+				rawType: 'Feature',
 				subject: 'Simple foo.',
 				body: null,
 				footer: null,
 				notes: [
 					{
-						title: 'BREAKING CHANGE',
+						title: 'MAJOR BREAKING CHANGES',
 						text: '1 - Reference site about Lorem Ipsum, giving information on its origins, as well as ' +
 							'a random Lipsum generator.'
 					},
 					{
-						title: 'MAJOR BREAKING CHANGE',
+						title: 'MAJOR BREAKING CHANGES',
 						text: '2 - Reference site about Lorem Ipsum, giving information on its origins, as well as ' +
 							'a random Lipsum generator.'
 					},
 					{
-						title: 'MINOR BREAKING CHANGE',
+						title: 'MINOR BREAKING CHANGES',
 						text: '3 - Reference site about Lorem Ipsum, giving information on its origins, as well as ' +
 							'a random Lipsum generator.'
 					}
 				]
 			};
-
-			const commit = transformCommit( rawCommit );
 
 			displayCommits( [ commit ] );
 

@@ -377,7 +377,12 @@ module.exports = function generateSummaryChangelog( options ) {
 
 		const majorReleasePackages = getMajorReleasePackages( options.dependencies );
 		const majorBreakingChangesReleasePackages = getMajorBreakingChangesReleasePackages( majorReleasePackages );
-		const majorReleaseWithMinorChanges = getMinorBreakingChangesReleasePackages( options.dependencies );
+		let majorReleaseWithMinorChanges = new Set();
+
+		// For major releases, we would like to display in a separately category packages that have "MINOR BREAKING CHANGES".
+		if ( majorReleasePackages.size ) {
+			majorReleaseWithMinorChanges = getMinorBreakingChangesReleasePackages( options.dependencies );
+		}
 
 		const minorReleasePackages = getMinorReleasePackages( options.dependencies );
 		const minorBreakingChangesReleasePackages = getMinorBreakingChangesReleasePackages( minorReleasePackages );

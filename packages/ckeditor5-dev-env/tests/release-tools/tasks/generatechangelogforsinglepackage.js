@@ -82,7 +82,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			mockery.disable();
 		} );
 
-		it( 'passes options to "transformCommitForSubRepositoryFactory" correctly', () => {
+		it( 'passes options to "transformCommitForSubRepositoryFactory()" correctly', () => {
 			const commits = [ {}, {} ];
 
 			stubs.getNewReleaseType.returns( Promise.resolve( {
@@ -116,6 +116,38 @@ describe( 'dev-env/release-tools/tasks', () => {
 				} );
 		} );
 
+		it( 'passes `options.indentLevel` to "generateChangelogFromCommits()" correctly', () => {
+			const commits = [ {}, {} ];
+
+			stubs.getNewReleaseType.returns( Promise.resolve( {
+				releaseType: 'minor',
+				commits
+			} ) );
+
+			stubs.versionUtils.getLastFromChangelog.returns( '0.5.0' );
+			stubs.generateChangelogFromCommits.returns( Promise.resolve() );
+			stubs.cli.provideVersion.returns( Promise.resolve( '1.0.0' ) );
+
+			const options = {
+				newVersion: '1.0.0',
+				indentLevel: 3
+			};
+
+			return generateChangelogForSinglePackage( options )
+				.then( () => {
+					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
+					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						indentLevel: 3,
+						version: '1.0.0',
+						tagName: 'v0.5.0',
+						newTagName: 'v1.0.0',
+						transformCommit: stubs.transformCommit[ 1 ],
+						isInternalRelease: false,
+						skipLinks: false
+					} );
+				} );
+		} );
+
 		it( 'generates the changelog for specified version (user must confirm)', () => {
 			const commits = [ {}, {} ];
 
@@ -134,6 +166,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						indentLevel: 0,
 						version: '1.0.0',
 						tagName: 'v0.5.0',
 						newTagName: 'v1.0.0',
@@ -169,6 +202,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						indentLevel: 0,
 						version: '0.1.0',
 						tagName: null,
 						newTagName: 'v0.1.0',
@@ -209,6 +243,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						indentLevel: 0,
 						version: '0.0.2',
 						tagName: null,
 						newTagName: 'v0.0.2',
@@ -249,6 +284,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						indentLevel: 0,
 						version: '0.1.0',
 						tagName: null,
 						newTagName: 'v0.1.0',
@@ -332,6 +368,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.transformCommitFactory.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						indentLevel: 0,
 						version: '0.1.0',
 						tagName: 'v0.0.1',
 						newTagName: 'v0.1.0',
@@ -351,6 +388,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.transformCommitFactory.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						indentLevel: 0,
 						version: '1.0.0',
 						tagName: 'v0.0.1',
 						newTagName: 'v1.0.0',
@@ -391,6 +429,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					expect( stubs.transformCommitFactory.calledTwice ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						indentLevel: 0,
 						version: '0.1.0',
 						tagName: null,
 						newTagName: 'v0.1.0',
@@ -415,6 +454,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 					expect( stubs.generateChangelogFromCommits.calledOnce ).to.equal( true );
 					expect( stubs.generateChangelogFromCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						indentLevel: 0,
 						version: '0.1.0',
 						tagName: null,
 						newTagName: 'v0.1.0',
