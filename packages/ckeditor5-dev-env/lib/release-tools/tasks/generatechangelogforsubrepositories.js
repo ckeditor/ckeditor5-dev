@@ -60,16 +60,22 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 		.then( () => generateChangelogs() )
 		.then( () => generateInternalChangelogs() )
 		.then( () => {
+			logProcess( 'Summary' );
+
 			process.chdir( cwd );
+
+			// An empty line increases the readability.
+			console.log( '' );
 
 			displaySkippedPackages( new Set( [
 				...pathsCollection.skipped,
 				...skippedChangelogs
 			].sort() ) );
 
-			displayGeneratedChangelogs( generatedChangelogsMap );
+			// An empty line between two lists increases the readability.
+			console.log( '' );
 
-			log.info( 'Done.' );
+			displayGeneratedChangelogs( generatedChangelogsMap );
 
 			return {
 				wasMajorRelease: willBeMajorBump,
@@ -219,8 +225,6 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 	 */
 	function generateInternalChangelogs() {
 		logProcess( 'Checking whether dependencies of skipped packages have changed...' );
-
-		log.info( '\n' + chalk.underline( '' ) );
 
 		const internalChangelogsPaths = new Map();
 		const newVersion = willBeMajorBump ? nextVersion : 'patch';

@@ -161,12 +161,12 @@ const cli = {
 			.then( answers => answers.version );
 
 		function getSuggestedVersion() {
-			if ( semver.valid( releaseTypeOrNewVersion ) ) {
-				return releaseTypeOrNewVersion;
+			if ( !releaseTypeOrNewVersion || releaseTypeOrNewVersion === 'skip' ) {
+				return 'skip';
 			}
 
-			if ( !releaseTypeOrNewVersion ) {
-				return 'skip';
+			if ( semver.valid( releaseTypeOrNewVersion ) ) {
+				return releaseTypeOrNewVersion;
 			}
 
 			if ( releaseTypeOrNewVersion === 'internal' ) {

@@ -47,7 +47,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			const logMessage = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
 
-			expect( logMessage[ 0 ].includes( 'Generated changelog for the following packages:' ) ).to.equal( true );
+			expect( logMessage[ 0 ].includes( 'Changelogs for the following packages have been generated:' ) ).to.equal( true );
 			expect( logMessage[ 1 ].includes( '  * @ckeditor/ckeditor5-foo: v1.0.0' ) ).to.equal( true );
 			expect( logMessage[ 2 ].includes( '  * @ckeditor/ckeditor5-bar: v2.0.0' ) ).to.equal( true );
 		} );

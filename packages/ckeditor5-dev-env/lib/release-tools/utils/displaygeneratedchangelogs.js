@@ -21,11 +21,11 @@ module.exports = function displayGeneratedChangelogs( generatedChangelogsMap ) {
 
 	const indent = ' '.repeat( INDENT_SIZE );
 
-	let message = indent + chalk.bold.underline( 'Generated changelog for the following packages:' ) + '\n';
+	let message = indent + chalk.bold.underline( 'Changelogs for the following packages have been generated:' ) + '\n';
 
 	for ( const [ packageName, version ] of generatedChangelogsMap ) {
-		message += `  * ${ packageName }: v${ version }\n`;
+		message += indent + `  * ${ packageName }: v${ version }\n`;
 	}
 
-	logger().info( message.trim() );
+	logger().info( message );
 };

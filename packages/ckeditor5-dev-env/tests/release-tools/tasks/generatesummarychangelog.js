@@ -26,7 +26,7 @@ const packagesPaths = {
 const testCwd = process.cwd();
 
 // Tests below use real files (as mocks). See: "/packages/ckeditor5-dev-env/tests/release-tools/tasks/stubs/releasesubrepositories".
-
+// `console.log` calls are mocked (See L85) because the task at the end prints an empty line which breaks the test logs.
 describe( 'dev-env/release-tools/tasks', () => {
 	let generateSummaryChangelog, sandbox, stubs;
 
@@ -81,6 +81,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 		stubs.transformCommitFunctionFactory.onFirstCall().returns( stubs.transformCommit[ 0 ] );
 		stubs.transformCommitFunctionFactory.onSecondCall().returns( stubs.transformCommit[ 1 ] );
+
+		sandbox.stub( console, 'log' );
 
 		mockery.registerMock( 'moment', () => stubs.moment );
 		mockery.registerMock( '../utils/displaygeneratedchangelogs', stubs.displayGeneratedChangelogs );
@@ -309,7 +311,7 @@ Patch releases (bug fixes, internal changes):
 
 			stubs.generateChangelogFromCommits.resolves(
 				'## [0.1.0](https://github.com/ckeditor/alpha/compare/v0.0.1...v0.1.0) (2017-10-09)\n\n' +
-				'Changelog entries generated from commits.'
+				'Changelog entries generated from commits.\n\n'
 			);
 
 			stubs.cliUtils.provideVersion.resolves( '0.1.0' );
@@ -423,7 +425,7 @@ Patch releases (bug fixes, internal changes):
 
 			stubs.generateChangelogFromCommits.resolves(
 				'## [2.0.0](https://github.com/ckeditor/omega/compare/v1.0.0...v2.0.0) (2017-10-09)\n\n' +
-				'Changelog entries generated from commits.'
+				'Changelog entries generated from commits.\n\n'
 			);
 
 			stubs.cliUtils.provideVersion.resolves( '2.0.0' );
@@ -540,7 +542,7 @@ Major releases (dependencies of those packages have breaking changes):
 
 			stubs.generateChangelogFromCommits.resolves(
 				'## [1.1.0](https://github.com/ckeditor/omega/compare/v1.0.0...v1.1.0) (2017-10-09)\n\n' +
-				'Changelog entries generated from commits.'
+				'Changelog entries generated from commits.\n\n'
 			);
 
 			stubs.cliUtils.provideVersion.resolves( '1.1.0' );
@@ -656,7 +658,7 @@ Minor releases (new features, no breaking changes):
 
 			stubs.generateChangelogFromCommits.resolves(
 				'## [0.1.0](https://github.com/ckeditor/alpha/compare/v0.0.1...v0.1.0) (2017-10-09)\n\n' +
-				'Changelog entries generated from commits.'
+				'Changelog entries generated from commits.\n\n'
 			);
 
 			stubs.cliUtils.provideVersion.resolves( '0.1.0' );
@@ -776,7 +778,7 @@ Minor releases (new features, no breaking changes):
 
 			stubs.generateChangelogFromCommits.resolves(
 				'## [0.2.0](https://github.com/ckeditor/foo-bar/compare/v0.1.0...v0.2.0) (2017-10-09)\n\n' +
-				'Changelog entries generated from commits.'
+				'Changelog entries generated from commits.\n\n'
 			);
 
 			stubs.cliUtils.provideVersion.resolves( '0.2.0' );
@@ -999,7 +1001,7 @@ Patch releases (bug fixes, internal changes):
 
 				stubs.generateChangelogFromCommits.resolves(
 					'## Changelog header (will be removed)\n\n' +
-					'Changelog entries generated from commits.'
+					'Changelog entries generated from commits.\n\n'
 				);
 
 				stubs.cliUtils.provideVersion.resolves( '0.2.0' );
@@ -1056,7 +1058,7 @@ Patch releases (bug fixes, internal changes):
 
 				stubs.generateChangelogFromCommits.resolves(
 					'## Changelog header (will be removed)\n\n' +
-					'Changelog entries generated from commits.'
+					'Changelog entries generated from commits.\n\n'
 				);
 
 				stubs.cliUtils.provideVersion.resolves( '0.2.0' );

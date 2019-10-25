@@ -194,8 +194,15 @@ describe( 'dev-env/release-tools/utils', () => {
 					} );
 			} );
 
-			it( 'should suggest "skip" version for package which does not contain changes', () => {
+			it( 'should suggest "skip" version for package which does not contain changes (proposed null)', () => {
 				return cli.provideVersion( '1.0.0', null )
+					.then( newVersion => {
+						expect( newVersion ).to.equal( 'skip' );
+					} );
+			} );
+
+			it( 'should suggest "skip" version for package which does not contain changes (proposed "skip")', () => {
+				return cli.provideVersion( '1.0.0', 'skip' )
 					.then( newVersion => {
 						expect( newVersion ).to.equal( 'skip' );
 					} );

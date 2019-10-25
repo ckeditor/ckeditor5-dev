@@ -71,9 +71,11 @@ module.exports = function generateSummaryChangelog( options ) {
 
 	return executeOnPackages( pathsCollection.matched, generateSummaryChangelogForSingleRepository )
 		.then( () => {
-			displayGeneratedChangelogs( generatedChangelogMap );
+			logProcess( 'Summary' );
 
-			log.info( 'Done.' );
+			// An empty line increases the readability.
+			console.log( '' );
+			displayGeneratedChangelogs( generatedChangelogMap );
 		} );
 
 	// Generates the summary changelog for specified repository.
@@ -157,7 +159,7 @@ module.exports = function generateSummaryChangelog( options ) {
 				return promise.then( changesBasedOnCommits => {
 					// Part of the changelog generated from commits should be attached to changelog entries.
 					if ( changesBasedOnCommits ) {
-						changelogEntries = changesBasedOnCommits + '\n\n' +
+						changelogEntries = changesBasedOnCommits.trim() + '\n\n' +
 							changelogEntries.split( '\n' )
 								.slice( 1 ) // First line contains a header which is already generated.
 								.join( '\n' )
