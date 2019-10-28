@@ -132,7 +132,7 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 			if ( majorBreakingChangesCommits.size ) {
 				hasMajorBreakingChanges = true;
 
-				log.info( `\n${ ' '.repeat( cli.INDENT_SIZE ) }${ chalk.bold( `Found in "${ chalk.underline( packageName ) }"...` ) }` );
+				log.info( `\n${ ' '.repeat( cli.INDENT_SIZE ) }${ chalk.bold( `Commits in "${ chalk.underline( packageName ) }"...` ) }` );
 				displayCommits( majorBreakingChangesCommits, { attachLinkToCommit: true, indentLevel: 2 } );
 			}
 		}

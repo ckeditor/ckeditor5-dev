@@ -57,7 +57,9 @@ module.exports = function displayCommits( commits, options = {} ) {
 		}
 
 		if ( attachLinkToCommit ) {
-			logMessage += `\n${ listEntriesIndent }🔹 ${ singleCommit.repositoryUrl }/commit/${ singleCommit.hash }`;
+			const url = `${ singleCommit.repositoryUrl }/commit/${ singleCommit.hash }`;
+
+			logMessage += `\n${ listEntriesIndent }${ chalk.gray( url ) }`;
 		}
 
 		log.info( logMessage );
