@@ -15,14 +15,7 @@ const cwd = process.cwd();
 const options = tests.parseArguments( process.argv.slice( 2 ) );
 
 if ( options.files.length === 0 ) {
-	// Checks whether the test command was called from the main repository.
-	// If so then take all packages files to tests.
-	if ( require( path.join( cwd, 'package.json' ) ).name === 'ckeditor5' ) {
-		options.files = [ '*', '/' ];
-	} else {
-	// In other case take files from the current package.
-		options.files = [ '/' ];
-	}
+	options.files = [ '*', 'ckeditor5' ];
 }
 
 // "Lark" is the default theme for tests.
