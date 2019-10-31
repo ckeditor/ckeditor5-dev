@@ -9,7 +9,7 @@
  * Converts values of --files argument to proper globs.
  * There are 5 supported types of values now:
  *
- * 0. current package's tests (when run in context of a package – e.g. on CI) - '/'
+ * 0. the main repository - 'ckeditor5'
  * 1. all packages' files – '*'
  * 2. given package files – 'engine'
  * 3. everything except the given package – '!engine'
@@ -60,7 +60,7 @@ function transformSingleGlobPattern( globPattern, options ) {
 	globSuffix.push( '*.js' );
 
 	// 0.
-	if ( globPattern === '/' ) {
+	if ( globPattern === 'ckeditor5' ) {
 		returnChunks = cwdChunks.concat( globSuffix );
 	} else if ( chunks.length === 0 ) {
 		// 1.

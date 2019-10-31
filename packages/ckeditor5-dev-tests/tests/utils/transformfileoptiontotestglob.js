@@ -25,13 +25,13 @@ describe( 'dev-tests/utils', () => {
 		sandbox.restore();
 	} );
 
-	describe( 'converts "/" to current package\'s tests', () => {
+	describe( 'converts "ckeditor5" to the root package tests', () => {
 		it( 'for automated tests', () => {
-			expect( transformFileOptionToTestGlob( '/' ) ).to.deep.equal( [ '/workspace/tests/**/*.js' ] );
+			expect( transformFileOptionToTestGlob( 'ckeditor5' ) ).to.deep.equal( [ '/workspace/tests/**/*.js' ] );
 		} );
 
 		it( 'for manual tests', () => {
-			expect( transformFileOptionToTestGlob( '/', true ) ).to.deep.equal( [ '/workspace/tests/**/manual/**/*.js' ] );
+			expect( transformFileOptionToTestGlob( 'ckeditor5', true ) ).to.deep.equal( [ '/workspace/tests/**/manual/**/*.js' ] );
 		} );
 	} );
 

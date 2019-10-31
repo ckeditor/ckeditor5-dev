@@ -54,8 +54,6 @@ You can also use the bin script for testing a package:
 * `browsers` - Browsers which will be used to run the tests. Also available as an alias: `-b`.
 * `reporter` - Mocha reporter – either `mocha` (default) or `dots` (less verbose one).
 * `disallow-console-use` - Whether to throw an error when one of the console methods (e.g. `console.log()`) is executed.
-* `only-root` - Whether to run tests only for root repository. Equivalent of `--files /`.
-* `include-root` - Whether to append root repository to tests matched by `--files`.
 
 #### Examples
 
@@ -99,7 +97,7 @@ $ npm t -- --files='!(engine|ui)'
 | `engine/view/so/**/me/glob.js` | `node_modules/ckeditor5-engine/tests/view/so/**/me/*glob.js` | |
 | `!(engine)` | `node_modules/ckeditor5-!(engine)*/tests/**/*.js` | all tests except of given package(s) – works with multiple names `!(engine|ui|utils)` |
 | `*` | `node_modules/ckeditor5-*/tests/**/*.js` | all installed package's tests |
-| `/` | `tests/**/*.js` | current package's tests only |
+| `ckeditor5` | `tests/**/*.js` | tests from the main repository |
 
 ## Changelog
 
