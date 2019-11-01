@@ -83,23 +83,5 @@ module.exports = function parseArguments( args ) {
 		delete options[ alias ];
 	}
 
-	// Due to issues with `/` in Git bash (on Windows environments), we needed to introduce more CLI parameters.
-	// See: https://github.com/ckeditor/ckeditor5-dev/issues/558#issuecomment-534008612
-	// `--include-root` appends `/` to the `--files` list.
-	// E.g.: `yarn run manual -f core --include-root` => `yarn run manual -f core,/`
-	if ( options[ 'include-root' ] && !options.files.includes( '/' ) ) {
-		options.files.push( '/' );
-
-		delete options[ 'include-root' ];
-	}
-
-	// `--only-root` means that we want to compile manual tests from the main repository only.
-	// E.g.: `yarn run manual --only-root` => `yarn run manual -f /`
-	if ( options[ 'only-root' ] ) {
-		options.files = [ '/' ];
-
-		delete options[ 'only-root' ];
-	}
-
 	return options;
 };
