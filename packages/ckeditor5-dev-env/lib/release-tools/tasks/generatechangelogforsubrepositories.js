@@ -144,10 +144,7 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 			) );
 		}
 
-		// An empty line here increases the readability.
-		console.log( '' );
-
-		return cli.confirmMajorBreakingChangeRelease( hasMajorBreakingChanges )
+		return cli.confirmMajorBreakingChangeRelease( hasMajorBreakingChanges, { indentLevel: 1 } )
 			.then( result => {
 				willBeMajorBump = result;
 			} );
@@ -177,7 +174,10 @@ module.exports = function generateChangelogForSubRepositories( options ) {
 				return currentHighest;
 			}, [ null, '0.0.0' ] );
 
-		return cli.provideNewMajorReleaseVersion( highestVersion, packageHighestVersion )
+		// An empty line increases the readability.
+		console.log( '' );
+
+		return cli.provideNewMajorReleaseVersion( highestVersion, packageHighestVersion, { indentLevel: 1 } )
 			.then( version => {
 				nextVersion = version;
 			} );

@@ -96,7 +96,9 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 			.then( result => {
 				displayCommits( result.commits, { indentLevel: indentLevel + 1 } );
 
-				return cli.provideVersion( packageJson.version, semver.valid( newVersion ) ? newVersion : result.releaseType );
+				const releaseTypeOrVersion = semver.valid( newVersion ) ? newVersion : result.releaseType;
+
+				return cli.provideVersion( packageJson.version, releaseTypeOrVersion, { indentLevel } );
 			} );
 	}
 
