@@ -72,7 +72,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	}
 
 	if ( options.coverage ) {
-		config.module.rules.push(
+		config.module.rules.unshift(
 			{
 				test: /\.js$/,
 				loader: 'istanbul-instrumenter-loader',
