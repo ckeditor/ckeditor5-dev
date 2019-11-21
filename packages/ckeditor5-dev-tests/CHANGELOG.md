@@ -1,6 +1,21 @@
 Changelog
 =========
 
+## [17.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.9.0...@ckeditor/ckeditor5-dev-tests@17.0.0) (2019-11-21)
+
+### MAJOR BREAKING CHANGES
+
+* Removed support for `--only-root`, `--include-root` and `--files=/` options. Use `--files=ckeditor5` instead.
+
+### Bug fixes
+
+* Changed order of loaders in the webpack configuration for unit tests. Closes [ckeditor/ckeditor5#5771](https://github.com/ckeditor/ckeditor5/issues/5771). ([6bc5d4c](https://github.com/ckeditor/ckeditor5-dev/commit/6bc5d4c))
+
+### Other changes
+
+* Removed support for `--only-root`, `--include-root` and `--files=/` options. In order to run tests from the main repository, type `--files=ckeditor5`. Closes [#570](https://github.com/ckeditor/ckeditor5-dev/issues/570). ([586d272](https://github.com/ckeditor/ckeditor5-dev/commit/586d272))
+
+
 ## [16.9.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.8.0...@ckeditor/ckeditor5-dev-tests@16.9.0) (2019-09-26)
 
 ### Features
