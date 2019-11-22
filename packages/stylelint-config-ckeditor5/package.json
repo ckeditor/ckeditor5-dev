@@ -13,7 +13,7 @@
     "stylelint-config-recommended": "^3.0.0"
   },
   "peerDependencies": {
-    "stylelint": ">=11.0.0"
+    "stylelint": ">=12.0.0"
   },
   "files": [
     ".stylelintrc"
