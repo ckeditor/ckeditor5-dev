@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [17.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@17.0.0...@ckeditor/ckeditor5-dev-tests@17.1.0) (2019-11-27)
+
+### Features
+
+* Execute the `stylelint` task on CI. Closes [#578](https://github.com/ckeditor/ckeditor5-dev/issues/578). ([7cd687c](https://github.com/ckeditor/ckeditor5-dev/commit/7cd687c))
+
+
 ## [17.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@16.9.0...@ckeditor/ckeditor5-dev-tests@17.0.0) (2019-11-21)
 
 ### MAJOR BREAKING CHANGES
