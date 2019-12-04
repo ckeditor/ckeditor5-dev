@@ -71,7 +71,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		describe( 'options.treatMajorAsMinorBreakingChange = true', () => {
 			it( 'treats "MAJOR BREAKING CHANGES" as "MINOR BREAKING CHANGES"', () => {
 				const transformCommitForSubRepository = transformCommitForSubRepositoryFactory( {
-					treatMajorAsMinorBreakingChange: true
+					treatMajorAsMinorBreakingChange: true,
+					useExplicitBreakingChangeGroups: true
 				} );
 
 				const rawCommit = {
@@ -157,6 +158,9 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					]
 				};
 
+				const transformCommitForSubRepository = transformCommitForSubRepositoryFactory( {
+					useExplicitBreakingChangeGroups: true
+				} );
 				const commit = transformCommitForSubRepository( rawCommit );
 
 				expect( commit.notes[ 0 ].title ).to.equal( 'MAJOR BREAKING CHANGES' );
@@ -347,7 +351,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				expect( commit.subject ).to.equal( 'README.' );
 			} );
 
-			it( 'always ignores merge "stable" commit', () => {
+			it( 'ignores merge "stable" commit', () => {
 				const rawCommit = {
 					type: null,
 					subject: null,
@@ -383,6 +387,9 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					]
 				};
 
+				const transformCommitForSubRepository = transformCommitForSubRepositoryFactory( {
+					useExplicitBreakingChangeGroups: true
+				} );
 				const commit = transformCommitForSubRepository( rawCommit );
 
 				expect( commit.notes ).to.deep.equal( [
@@ -393,6 +400,55 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					{ title: 'NOTE', text: 'Note 4.' },
 					{ title: 'NOTE', text: 'Note 6.' }
 				] );
+			} );
+
+			it( 'includes "repositoryUrl" where the commit has been done', () => {
+				const notes = [
+					{ title: 'Foo', text: 'Foo-Text' },
+					{ title: 'Bar', text: 'Bar-Text' }
+				];
+
+				const rawCommit = {
+					hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+					header: 'Fix: Simple fix.',
+					type: 'Fix',
+					subject: 'Simple fix.',
+					body: null,
+					footer: null,
+					notes
+				};
+
+				const commit = transformCommitForSubRepository( rawCommit );
+
+				expect( commit.repositoryUrl ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev' );
+			} );
+
+			it( 'treats all "* BREAKING CHANGES" notes as "BREAKING CHANGE"', () => {
+				const rawCommit = {
+					hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+					header: 'Fix: Simple fix.',
+					type: 'Fix',
+					subject: 'Simple fix.',
+					body: null,
+					footer: null,
+					notes: [
+						{ title: 'BREAKING CHANGE', text: 'Note 1.' },
+						{ title: 'BREAKING CHANGES', text: 'Note 2.' },
+						{ title: 'MAJOR BREAKING CHANGE', text: 'Note 3.' },
+						{ title: 'MAJOR BREAKING CHANGES', text: 'Note 4.' },
+						{ title: 'MINOR BREAKING CHANGE', text: 'Note 5.' },
+						{ title: 'MINOR BREAKING CHANGES', text: 'Note 6.' }
+					]
+				};
+
+				const commit = transformCommitForSubRepository( rawCommit );
+
+				expect( commit.notes[ 0 ].title ).to.equal( 'BREAKING CHANGES' );
+				expect( commit.notes[ 1 ].title ).to.equal( 'BREAKING CHANGES' );
+				expect( commit.notes[ 2 ].title ).to.equal( 'BREAKING CHANGES' );
+				expect( commit.notes[ 3 ].title ).to.equal( 'BREAKING CHANGES' );
+				expect( commit.notes[ 4 ].title ).to.equal( 'BREAKING CHANGES' );
+				expect( commit.notes[ 5 ].title ).to.equal( 'BREAKING CHANGES' );
 			} );
 		} );
 	} );

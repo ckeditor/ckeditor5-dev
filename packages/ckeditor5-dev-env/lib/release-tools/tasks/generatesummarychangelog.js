@@ -43,11 +43,14 @@ const bumpTypesPriority = {
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be touched.
  * @param {Boolean} [options.skipMainRepository=false] Whether to skip the main repository.
  * @param {String} [options.scope=null] Package names have to match to specified glob pattern.
+ * @param {String|null} [options.version=null] If specified, this version will be used as proposed
+ * during generating a changelog for a package.
  */
 module.exports = function generateSummaryChangelog( options ) {
 	const log = logger();
 	const cwd = process.cwd();
 
+	const indent = ' '.repeat( cliUtils.INDENT_SIZE );
 	const pathsCollection = getSubRepositoriesPaths( {
 		cwd: options.cwd,
 		packages: options.packages,
@@ -64,11 +67,15 @@ module.exports = function generateSummaryChangelog( options ) {
 
 	const generatedChangelogMap = new Map();
 
+	logProcess( 'Generating summary changelogs...' );
+
 	return executeOnPackages( pathsCollection.matched, generateSummaryChangelogForSingleRepository )
 		.then( () => {
-			displayGeneratedChangelogs( generatedChangelogMap );
+			logProcess( 'Summary' );
 
-			log.info( 'Done.' );
+			// An empty line increases the readability.
+			console.log( '' );
+			displayGeneratedChangelogs( generatedChangelogMap );
 		} );
 
 	// Generates the summary changelog for specified repository.
@@ -80,7 +87,7 @@ module.exports = function generateSummaryChangelog( options ) {
 
 		const packageJson = getPackageJson( repositoryPath );
 
-		log.info( '\n' + chalk.bold.blue( `Generating changelog for "${ packageJson.name }"...` ) );
+		log.info( '\n' + indent + chalk.bold( `Generating changelog for "${ chalk.underline( packageJson.name ) }"...` ) );
 
 		const dependencies = getMapWithDependenciesVersions(
 			getAllDependenciesForRepository( repositoryPath )
@@ -101,7 +108,7 @@ module.exports = function generateSummaryChangelog( options ) {
 			.then( result => {
 				suggestedBumpFromCommits = result.releaseType === 'internal' ? 'skip' : result.releaseType;
 
-				displayCommits( result.commits );
+				displayCommits( result.commits, { indentLevel: 2 } );
 
 				const suggestedBumpFromDependencies = getSuggestedBumpVersionType( dependencies );
 				const commitsWeight = bumpTypesPriority[ suggestedBumpFromCommits ];
@@ -109,7 +116,9 @@ module.exports = function generateSummaryChangelog( options ) {
 
 				let newReleaseType;
 
-				if ( !packagesWeight || commitsWeight > packagesWeight ) {
+				if ( options.version ) {
+					newReleaseType = options.version;
+				} else if ( !packagesWeight || commitsWeight > packagesWeight ) {
 					newReleaseType = suggestedBumpFromCommits;
 				} else {
 					newReleaseType = suggestedBumpFromDependencies;
@@ -150,15 +159,15 @@ module.exports = function generateSummaryChangelog( options ) {
 				return promise.then( changesBasedOnCommits => {
 					// Part of the changelog generated from commits should be attached to changelog entries.
 					if ( changesBasedOnCommits ) {
-						changelogEntries += '\n\n' + changesBasedOnCommits.split( '\n' )
-							// First line contains a header which is already generated.
-							.slice( 1 )
-							.join( '\n' )
-							.trim();
+						changelogEntries = changesBasedOnCommits.trim() + '\n\n' +
+							changelogEntries.split( '\n' )
+								.slice( 1 ) // First line contains a header which is already generated.
+								.join( '\n' )
+								.trim();
 					}
 
 					if ( !fs.existsSync( changelogUtils.changelogFile ) ) {
-						log.warning( 'Changelog file does not exist. Creating...' );
+						log.warning( indent + 'Changelog file does not exist. Creating...' );
 
 						changelogUtils.saveChangelog( changelogUtils.changelogHeader );
 					}
@@ -175,7 +184,10 @@ module.exports = function generateSummaryChangelog( options ) {
 					// Save the changelog.
 					changelogUtils.saveChangelog( newChangelog, repositoryPath );
 
-					log.info( chalk.green( `Changelog for "${ packageJson.name }" (v${ version }) has been generated.` ) );
+					log.info(
+						indent +
+						chalk.green( `Changelog for "${ chalk.underline( packageJson.name ) }" (v${ version }) has been generated.` )
+					);
 
 					// Commit the new changelog.
 					tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
@@ -367,12 +379,21 @@ module.exports = function generateSummaryChangelog( options ) {
 
 		const majorReleasePackages = getMajorReleasePackages( options.dependencies );
 		const majorBreakingChangesReleasePackages = getMajorBreakingChangesReleasePackages( majorReleasePackages );
+		let majorReleaseWithMinorChanges = new Set();
+
+		// For major releases, we would like to display in a separately category packages that have "MINOR BREAKING CHANGES".
+		if ( majorReleasePackages.size ) {
+			majorReleaseWithMinorChanges = getMinorBreakingChangesReleasePackages( options.dependencies );
+		}
+
 		const minorReleasePackages = getMinorReleasePackages( options.dependencies );
 		const minorBreakingChangesReleasePackages = getMinorBreakingChangesReleasePackages( minorReleasePackages );
+
 		const patchReleasePackages = getPatchReleasePackages( options.dependencies );
 
 		// `major|minorBreakingChangesReleasePackages` are duplicated in `major|minorReleasePackages` collections.
 		// Because we don't want to duplicate them, let's clean it before starting generating changelog entries.
+		removeDependencies( majorReleaseWithMinorChanges, majorReleasePackages );
 		removeDependencies( majorBreakingChangesReleasePackages, majorReleasePackages );
 		removeDependencies( minorBreakingChangesReleasePackages, minorReleasePackages );
 
@@ -405,6 +426,16 @@ module.exports = function generateSummaryChangelog( options ) {
 			entries.push( 'Major releases (contain major breaking changes):\n' );
 
 			for ( const [ packageName, { currentVersion, nextVersion } ] of majorBreakingChangesReleasePackages ) {
+				entries.push( formatChangelogEntry( packageName, nextVersion, currentVersion ) );
+			}
+
+			entries.push( '' );
+		}
+
+		if ( majorReleaseWithMinorChanges.size ) {
+			entries.push( 'Major releases (contain minor breaking changes):\n' );
+
+			for ( const [ packageName, { currentVersion, nextVersion } ] of majorReleaseWithMinorChanges ) {
 				entries.push( formatChangelogEntry( packageName, nextVersion, currentVersion ) );
 			}
 
@@ -585,5 +616,9 @@ module.exports = function generateSummaryChangelog( options ) {
 
 		// "prerelease" below `1.0.0` should be parsed as "major" release.
 		return semver.diff( version, '1.0.0' ) !== 'prerelease';
+	}
+
+	function logProcess( message ) {
+		log.info( '\n📍 ' + chalk.cyan( message ) );
 	}
 };

@@ -44,6 +44,18 @@ describe( 'dev-env/release-tools/utils', () => {
 			mockery.disable();
 		} );
 
+		describe( 'INDENT_SIZE', () => {
+			it( 'is defined', () => {
+				expect( cli.INDENT_SIZE ).to.be.a( 'Number' );
+			} );
+		} );
+
+		describe( 'COMMIT_INDENT_SIZE', () => {
+			it( 'is defined', () => {
+				expect( cli.COMMIT_INDENT_SIZE ).to.be.a( 'Number' );
+			} );
+		} );
+
 		describe( 'confirmUpdatingVersions()', () => {
 			it( 'displays packages and their versions (current and proposed) to release', () => {
 				const packagesMap = new Map();
@@ -150,6 +162,13 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		describe( 'provideVersion()', () => {
+			it( 'suggests specified version', () => {
+				return cli.provideVersion( '1.0.0', '1.1.0' )
+					.then( newVersion => {
+						expect( newVersion ).to.equal( '1.1.0' );
+					} );
+			} );
+
 			it( 'should suggest proper "major" version for public package', () => {
 				return cli.provideVersion( '1.0.0', 'major' )
 					.then( newVersion => {
@@ -175,8 +194,15 @@ describe( 'dev-env/release-tools/utils', () => {
 					} );
 			} );
 
-			it( 'should suggest "skip" version for package which does not contain changes', () => {
+			it( 'should suggest "skip" version for package which does not contain changes (proposed null)', () => {
 				return cli.provideVersion( '1.0.0', null )
+					.then( newVersion => {
+						expect( newVersion ).to.equal( 'skip' );
+					} );
+			} );
+
+			it( 'should suggest "skip" version for package which does not contain changes (proposed "skip")', () => {
+				return cli.provideVersion( '1.0.0', 'skip' )
 					.then( newVersion => {
 						expect( newVersion ).to.equal( 'skip' );
 					} );
@@ -276,6 +302,40 @@ describe( 'dev-env/release-tools/utils', () => {
 			} );
 		} );
 
+		describe( 'provideNewMajorReleaseVersion()', () => {
+			it( 'bumps major version', () => {
+				return cli.provideNewMajorReleaseVersion( '1.0.0', '@ckeditor/foo' )
+					.then( newVersion => {
+						expect( newVersion ).to.equal( '2.0.0' );
+					} );
+			} );
+
+			it( 'removes spaces from provided version', () => {
+				return cli.provideNewMajorReleaseVersion( '1.0.0', '@ckeditor/foo' )
+					.then( () => {
+						const { filter } = questionItems[ 0 ];
+
+						expect( filter( '   0.0.1' ) ).to.equal( '0.0.1' );
+						expect( filter( '0.0.1   ' ) ).to.equal( '0.0.1' );
+						expect( filter( '    0.0.1   ' ) ).to.equal( '0.0.1' );
+					} );
+			} );
+
+			it( 'validates the provided version', () => {
+				return cli.provideNewMajorReleaseVersion( '1.0.0', '@ckeditor/foo' )
+					.then( () => {
+						const { validate } = questionItems[ 0 ];
+
+						expect( validate( '2.0.0' ) ).to.equal( true );
+						expect( validate( '1.1.0' ) ).to.equal( true );
+						expect( validate( '1.0.0' ) ).to.equal( 'Provided version must be higher than "1.0.0".' );
+						expect( validate( 'skip' ) ).to.equal( 'Please provide a valid version.' );
+						expect( validate( 'internal' ) ).to.equal( 'Please provide a valid version.' );
+						expect( validate( '0.1' ) ).to.equal( 'Please provide a valid version.' );
+					} );
+			} );
+		} );
+
 		describe( 'provideToken()', () => {
 			it( 'user is able to provide the token', () => {
 				return cli.provideToken()
@@ -341,7 +401,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					.then( () => {
 						const question = questionItems[ 0 ];
 
-						expect( question.message ).to.match( /^Should the next versions be treated as a major bump\?/ );
+						expect( question.message ).to.match( /Should this be a major release\?/ );
 						expect( question.type ).to.equal( 'confirm' );
 					} );
 			} );

@@ -5,7 +5,9 @@
 
 'use strict';
 
+const chalk = require( 'chalk' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { INDENT_SIZE } = require( './cli' );
 
 /**
  * Displays package names and their new versions.
@@ -17,11 +19,13 @@ module.exports = function displayGeneratedChangelogs( generatedChangelogsMap ) {
 		return;
 	}
 
-	let message = 'Generated changelog for the following packages:\n';
+	const indent = ' '.repeat( INDENT_SIZE );
+
+	let message = indent + chalk.bold.underline( 'Changelogs for the following packages have been generated:' ) + '\n';
 
 	for ( const [ packageName, version ] of generatedChangelogsMap ) {
-		message += `  * "${ packageName }": v${ version }\n`;
+		message += indent + `  * ${ packageName }: v${ version }\n`;
 	}
 
-	logger().info( message.trim() );
+	logger().info( message );
 };

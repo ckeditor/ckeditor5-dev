@@ -9,7 +9,21 @@ const inquirer = require( 'inquirer' );
 const semver = require( 'semver' );
 const chalk = require( 'chalk' );
 
+const QUESTION_MARK = chalk.cyan( '?' );
+
 const cli = {
+	/**
+	 * A size of default indent for a log.
+	 */
+	INDENT_SIZE: 3,
+
+	/**
+	 * A size of indent for a second and next lines in a log. The number is equal to length of the log string:
+	 * '* 1234567 ', where '1234567' is a short commit id.
+	 * It does not include a value from `cli.INDENT_SIZE`.
+	 */
+	COMMIT_INDENT_SIZE: 10,
+
 	/**
 	 * Asks a user for a confirmation for updating and tagging versions of the packages.
 	 *
@@ -109,12 +123,14 @@ const cli = {
 	 * Asks a user for providing the new version.
 	 *
 	 * @param {String} packageVersion
-	 * @param {String|null} releaseType
+	 * @param {String|null} releaseTypeOrNewVersion
 	 * @param {Object} [options]
 	 * @param {Boolean} [options.disableInternalVersion=false] Whether to "internal" version is enabled.
+	 * @param {Number} [options.indentLevel=0] The indent level.
 	 * @returns {Promise.<String>}
 	 */
-	provideVersion( packageVersion, releaseType, options = {} ) {
+	provideVersion( packageVersion, releaseTypeOrNewVersion, options = {} ) {
+		const indentLevel = options.indentLevel || 0;
 		const suggestedVersion = getSuggestedVersion();
 
 		let message = 'Type the new version, "skip" or "internal"';
@@ -142,32 +158,76 @@ const cli = {
 
 				// TODO: Check whether provided version is available.
 				return semver.valid( input ) ? true : 'Please provide a valid version.';
-			}
+			},
+
+			prefix: getPrefix( indentLevel )
 		};
 
 		return inquirer.prompt( [ versionQuestion ] )
 			.then( answers => answers.version );
 
 		function getSuggestedVersion() {
-			if ( !releaseType ) {
+			if ( !releaseTypeOrNewVersion || releaseTypeOrNewVersion === 'skip' ) {
 				return 'skip';
 			}
 
-			if ( releaseType === 'internal' ) {
+			if ( semver.valid( releaseTypeOrNewVersion ) ) {
+				return releaseTypeOrNewVersion;
+			}
+
+			if ( releaseTypeOrNewVersion === 'internal' ) {
 				return options.disableInternalVersion ? 'skip' : 'internal';
 			}
 
 			if ( semver.prerelease( packageVersion ) ) {
-				releaseType = 'prerelease';
+				releaseTypeOrNewVersion = 'prerelease';
 			}
 
 			// If package's version is below the '1.0.0', bump the 'minor' instead of 'major'
-			if ( releaseType === 'major' && semver.gt( '1.0.0', packageVersion ) ) {
+			if ( releaseTypeOrNewVersion === 'major' && semver.gt( '1.0.0', packageVersion ) ) {
 				return semver.inc( packageVersion, 'minor' );
 			}
 
-			return semver.inc( packageVersion, releaseType );
+			return semver.inc( packageVersion, releaseTypeOrNewVersion );
 		}
+	},
+
+	/**
+	 * Asks a user for providing the new version for a major release.
+	 *
+	 * @param {String} version
+	 * @param {String} foundPackage
+	 * @param {Object} [options={}]
+	 * @param {Number} [options.indentLevel=0] The indent level.
+	 * @returns {Promise.<String>}
+	 */
+	provideNewMajorReleaseVersion( version, foundPackage, options = {} ) {
+		const newVersion = semver.inc( version, 'major' );
+		const indentLevel = options.indentLevel || 0;
+
+		const versionQuestion = {
+			type: 'input',
+			name: 'version',
+			default: newVersion,
+			message: `Type the new version (suggested: "${ newVersion }", current highest: “${ version }" ` +
+				`found in "${ chalk.underline( foundPackage ) }"):`,
+
+			filter( input ) {
+				return input.trim();
+			},
+
+			validate( input ) {
+				if ( !semver.valid( input ) ) {
+					return 'Please provide a valid version.';
+				}
+
+				return semver.gt( input, version ) ? true : `Provided version must be higher than "${ version }".`;
+			},
+			prefix: getPrefix( indentLevel )
+		};
+
+		return inquirer.prompt( [ versionQuestion ] )
+			.then( answers => answers.version );
 	},
 
 	/**
@@ -234,13 +294,21 @@ const cli = {
 	/**
 	 * Asks a user for a confirmation for removing archives created by `npm pack` command.
 	 *
+	 * @param {Boolean} haveMajorBreakingChangeCommits Whether the answer for the question should be "Yes".
+	 * @param {Object} [options={}]
+	 * @param {Number} [options.indentLevel=0] The indent level.
 	 * @returns {Promise.<Boolean>}
 	 */
-	confirmMajorBreakingChangeRelease( haveMajorBreakingChangeCommits ) {
+	confirmMajorBreakingChangeRelease( haveMajorBreakingChangeCommits, options = {} ) {
+		const indentLevel = options.indentLevel || 0;
 		const confirmQuestion = {
-			message: 'Should the next versions be treated as a major bump?',
+			message: [
+				'If at least one of those changes is really a major breaking change, this will be a major release.',
+				'Should this be a major release?'
+			].join( ' ' ),
 			type: 'confirm',
 			name: 'confirm',
+			prefix: getPrefix( indentLevel ),
 			default: haveMajorBreakingChangeCommits,
 		};
 
@@ -250,3 +318,7 @@ const cli = {
 };
 
 module.exports = cli;
+
+function getPrefix( indent ) {
+	return ' '.repeat( indent * cli.INDENT_SIZE ) + QUESTION_MARK;
+}

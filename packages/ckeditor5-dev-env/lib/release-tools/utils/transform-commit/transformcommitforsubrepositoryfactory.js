@@ -20,8 +20,12 @@ const utils = require( './transform-commit-utils' );
  *
  * @param {Object} [options={}]
  * @param {Boolean} [options.treatMajorAsMinorBreakingChange=false] If set on true, all "MAJOR BREAKING CHANGES" notes will be replaced
- * with "MINOR BREAKING CHANGES".
+ * with "MINOR BREAKING CHANGES". This behaviour is being disabled automatically if `options.useExplicitBreakingChangeGroups` is
+ * set on `false` because all commits will be treated as "BREAKING CHANGES".
  * @param {Boolean} [options.returnInvalidCommit=false] Whether an invalid commit should be returned.
+ * @param {Boolean} [options.useExplicitBreakingChangeGroups] If set on `true`, notes from parsed commits will be grouped as
+ * "MINOR BREAKING CHANGES" and "MAJOR BREAKING CHANGES'. If set on `false` (by default), all breaking changes notes will be treated
+ * as "BREAKING CHANGES".
  * @returns {Function}
  */
 module.exports = function transformCommitForSubRepositoryFactory( options = {} ) {
@@ -120,6 +124,8 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 		// Clear the references array - we don't want to hoist the issues.
 		delete commit.references;
 
+		commit.repositoryUrl = utils.getRepositoryUrl();
+
 		return commit;
 	};
 
@@ -157,6 +163,11 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 				note.title = 'MINOR BREAKING CHANGES';
 			}
 
+			// If explicit breaking changes groups option is disabled, let's remove MINOR/MAJOR prefix from the title.
+			if ( !options.useExplicitBreakingChangeGroups ) {
+				note.title = note.title.replace( /^(MINOR|MAJOR) /, '' );
+			}
+
 			note.text = makeLinks( note.text );
 		}
 
@@ -186,6 +197,8 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
  * @property {String} type Type of the commit (it can be modified).
  *
  * @property {String} hash The commit SHA-1 id.
+ *
+ * @property {String} repositoryUrl The URL to the repository where the parsed commit has been done.
  *
  * @property {String} [subject] Subject of the commit.
  *

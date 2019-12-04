@@ -45,11 +45,18 @@ const VALID_SEMVER_INCREMENT_LEVEL = [
  * @param {Boolean} [options.disableMajorBump=false] If set on true, detected breaking change won't bump the major version.
  * @param {Boolean} [options.isInternalRelease=false] If set on true, the changelog will contain a note about internal release
  * instead of data that comes from commits.
+ * @param {Number} [options.indentLevel=0] The indent level. This function could be used inside another (bigger) script. If we would like to
+ * display indents logs, we need to increase/decrease indent level manually.
+ * @param {Boolean} [options.useExplicitBreakingChangeGroups] If set on `true`, notes from parsed commits will be grouped as
+ * "MINOR BREAKING CHANGES" and "MAJOR BREAKING CHANGES'. If set on `false` (by default), all breaking changes notes will be treated
+ * as "BREAKING CHANGES".
  * @returns {Promise}
  */
 module.exports = function generateChangelogForSinglePackage( options = {} ) {
 	const log = logger();
 	const packageJson = getPackageJson();
+	const indentLevel = options.indentLevel || 0;
+	const indent = ' '.repeat( indentLevel * cli.INDENT_SIZE );
 
 	let tagName = versionUtils.getLastFromChangelog();
 
@@ -58,46 +65,40 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 	}
 
 	let isInternalRelease = options.isInternalRelease || false;
-	let newVersion = options.newVersion || null;
+	const newVersion = options.newVersion || null;
 
-	if ( newVersion === 'internal' ) {
-		isInternalRelease = true;
-		newVersion = 'patch';
-	}
-
-	log.info( '\n' + chalk.bold.blue( `Generating changelog for "${ packageJson.name }"...` ) );
+	log.info( '\n' + indent + chalk.bold( `Generating changelog for "${ chalk.underline( packageJson.name ) }"...` ) );
 
 	let promise = Promise.resolve();
 
-	// There are three cases that we need to handle:
-	// 1. `newVersion` is a valid version, e.g. "1.0.0". Use the version without providing additional data.
-	// 2. `newVersion` is a level that describes how to increase a current version of the package. The user has to type the new version.
-	// 3. `newVersion` is not specified. All commits will be printed out and the user must type the new version.
-	if ( semver.valid( newVersion ) ) {
-		promise = promise.then( () => newVersion );
-	} else if ( VALID_SEMVER_INCREMENT_LEVEL.includes( newVersion ) ) {
-		// For the internal releases the user does not have to confirm anything. The internal release is called automatically
-		// when changelogs of package's dependencies have been changed. We mark the package as "ready to release"
-		// in order to update versions of the dependencies.
-		if ( isInternalRelease ) {
+	// For the internal release, the user does not have to confirm anything. The internal release is called automatically
+	// when changelogs of package's dependencies have been changed. We mark the package as "ready to release"
+	// in order to update versions of the dependencies.
+	if ( isInternalRelease ) {
+		if ( VALID_SEMVER_INCREMENT_LEVEL.includes( newVersion ) ) {
 			promise = promise.then( () => semver.inc( packageJson.version, newVersion ) );
+		} else if ( semver.valid( newVersion ) ) {
+			promise = promise.then( () => newVersion );
 		} else {
-			promise = promise.then( () => cli.provideVersion( packageJson.version, newVersion ) );
+			return Promise.reject( new Error(
+				`If "isInternalRelease" is set on true, "newVersion" must be a version or increment level. Given "${ newVersion }".`
+			) );
 		}
 	} else {
 		const transformCommitFunction = transformCommitForSubRepositoryFactory( {
 			treatMajorAsMinorBreakingChange: options.disableMajorBump,
-			returnInvalidCommit: true
+			returnInvalidCommit: true,
+			useExplicitBreakingChangeGroups: !!options.useExplicitBreakingChangeGroups
 		} );
 
 		promise = promise
 			.then( () => getNewReleaseType( transformCommitFunction, { tagName } ) )
 			.then( result => {
-				displayCommits( result.commits );
+				displayCommits( result.commits, { indentLevel: indentLevel + 1 } );
 
-				const newReleaseType = result.releaseType !== 'skip' ? result.releaseType : null;
+				const releaseTypeOrVersion = semver.valid( newVersion ) ? newVersion : result.releaseType;
 
-				return cli.provideVersion( packageJson.version, newReleaseType );
+				return cli.provideVersion( packageJson.version, releaseTypeOrVersion, { indentLevel } );
 			} );
 	}
 
@@ -107,13 +108,21 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 				return Promise.resolve();
 			}
 
+			// If the user provided "internal" as a new version, we treat it as a "patch" bump.
+			if ( version === 'internal' ) {
+				isInternalRelease = true;
+				version = semver.inc( packageJson.version, 'patch' );
+			}
+
 			const changelogOptions = {
 				version,
 				tagName,
 				isInternalRelease,
+				indentLevel,
 				newTagName: 'v' + version,
 				transformCommit: transformCommitForSubRepositoryFactory( {
-					treatMajorAsMinorBreakingChange: options.disableMajorBump
+					treatMajorAsMinorBreakingChange: options.disableMajorBump,
+					useExplicitBreakingChangeGroups: !!options.useExplicitBreakingChangeGroups
 				} ),
 				skipLinks: !!options.skipLinks
 			};
@@ -123,9 +132,9 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 					tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
 					tools.shExec( 'git commit -m "Docs: Changelog. [skip ci]"', { verbosity: 'error' } );
 
-					log.info(
-						chalk.green( `Changelog for "${ packageJson.name }" (v${ version }) has been generated.` )
-					);
+					const message = `Changelog for "${ chalk.underline( packageJson.name ) }" (v${ version }) has been generated.`;
+
+					log.info( chalk.green( indent + message ) );
 
 					return Promise.resolve( version );
 				} );

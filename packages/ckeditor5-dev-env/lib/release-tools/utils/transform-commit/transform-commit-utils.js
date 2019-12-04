@@ -76,27 +76,10 @@ const transformCommitUtils = {
 				return `[${ maybeRepository }#${ issueId }](https://github.com/${ maybeRepository }/issues/${ issueId })`;
 			}
 
-			const packageJson = getPackageJson();
-
-			// Due to merging our issue trackers, `packageJson.bugs` will point to the same place for every package.
-			// We cannot rely on this value anymore. See: https://github.com/ckeditor/ckeditor5/issues/1988.
-			// Instead of we can take a value from `packageJson.repository` and adjust it to match to our requirements.
-			let issuesUrl = ( typeof packageJson.repository === 'object' ) ? packageJson.repository.url : packageJson.repository;
-
-			if ( !issuesUrl ) {
-				throw new Error( `The package.json for "${ packageJson.name }" must contain the "repository" property.` );
-			}
-
-			// If the value ends with ".git", we need to remove it.
-			issuesUrl = issuesUrl.replace( /\.git$/, '' );
-
-			// If the value contains "/issues" suffix, we don't need to add it.
-			if ( issuesUrl.match( /\/issues/ ) ) {
-				return `[#${ issueId }](${ issuesUrl }/${ issueId })`;
-			}
+			const repositoryUrl = transformCommitUtils.getRepositoryUrl();
 
 			// But if doesn't, let's add it.
-			return `[#${ issueId }](${ issuesUrl }/issues/${ issueId })`;
+			return `[#${ issueId }](${ repositoryUrl }/issues/${ issueId })`;
 		} );
 	},
 
@@ -135,6 +118,33 @@ const transformCommitUtils = {
 		}
 
 		return sentence.slice( 0, length - 3 ).trim() + '...';
+	},
+
+	/**
+	 * Returns a URL to the repository whether the commit is being parsed.
+	 *
+	 * @param {String} [cwd=process.cwd()]
+	 * @returns {String}
+	 */
+	getRepositoryUrl( cwd = process.cwd() ) {
+		const packageJson = getPackageJson( cwd );
+
+		// Due to merging our issue trackers, `packageJson.bugs` will point to the same place for every package.
+		// We cannot rely on this value anymore. See: https://github.com/ckeditor/ckeditor5/issues/1988.
+		// Instead of we can take a value from `packageJson.repository` and adjust it to match to our requirements.
+		let repositoryUrl = ( typeof packageJson.repository === 'object' ) ? packageJson.repository.url : packageJson.repository;
+
+		if ( !repositoryUrl ) {
+			throw new Error( `The package.json for "${ packageJson.name }" must contain the "repository" property.` );
+		}
+
+		// If the value ends with ".git", we need to remove it.
+		repositoryUrl = repositoryUrl.replace( /\.git$/, '' );
+
+		// Remove "/issues" suffix as well.
+		repositoryUrl = repositoryUrl.replace( /\/issues/, '' );
+
+		return repositoryUrl;
 	}
 };
 

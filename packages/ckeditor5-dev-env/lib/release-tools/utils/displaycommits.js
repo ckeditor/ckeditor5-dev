@@ -1,26 +1,39 @@
+/**
+ * @license Copyright (c) 2003-2019, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+'use strict';
+
 const chalk = require( 'chalk' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const utils = require( './transform-commit/transform-commit-utils' );
-
-// A size of indent for a log. The number is equal to length of the log string:
-// '* 1234567 ', where '1234567' is a short commit id.
-const INDENT_SIZE = 10;
+const { INDENT_SIZE, COMMIT_INDENT_SIZE } = require( './cli' );
 
 /**
  * @param {Array.<Commit>|Set.<Commit>} commits
+ * @param {Object} [options={}]
+ * @param {Boolean} [options.attachLinkToCommit=false] Whether to attach a link to parsed commit.
+ * @param {Number} [options.indentLevel=1] The indent level.
  */
-module.exports = function displayCommits( commits ) {
+module.exports = function displayCommits( commits, options = {} ) {
 	const log = logger();
 
+	const attachLinkToCommit = options.attachLinkToCommit || false;
+	const indentLevel = options.indentLevel || 1;
+
+	const listIndent = ' '.repeat( INDENT_SIZE * indentLevel );
+	const listEntriesIndent = ' '.repeat( INDENT_SIZE * indentLevel + COMMIT_INDENT_SIZE );
+
 	if ( !( commits.length || commits.size ) ) {
-		log.info( chalk.italic( 'No commits to display.' ) );
+		log.info( listIndent + chalk.italic( 'No commits to display.' ) );
 	}
 
 	for ( const singleCommit of commits ) {
 		const hasCorrectType = utils.availableCommitTypes.has( singleCommit.rawType );
 		const isCommitIncluded = utils.availableCommitTypes.get( singleCommit.rawType );
 
-		let logMessage = `* ${ chalk.yellow( singleCommit.hash ) } "${ utils.truncate( singleCommit.header, 100 ) }" `;
+		let logMessage = `${ listIndent }* ${ chalk.yellow( singleCommit.hash ) } "${ utils.truncate( singleCommit.header, 100 ) }" `;
 
 		if ( hasCorrectType && isCommitIncluded ) {
 			logMessage += chalk.green( 'INCLUDED' );
@@ -32,7 +45,21 @@ module.exports = function displayCommits( commits ) {
 
 		// Avoid displaying singleCommit merge twice.
 		if ( singleCommit.merge && singleCommit.merge !== singleCommit.header ) {
-			logMessage += `\n${ ' '.repeat( INDENT_SIZE ) }${ chalk.italic( singleCommit.merge ) }`;
+			logMessage += `\n${ listEntriesIndent }${ chalk.italic( singleCommit.merge ) }`;
+		}
+
+		for ( const note of singleCommit.notes ) {
+			if ( note.title.match( /^(MAJOR|MINOR)/ ) ) {
+				const limit = 100 - note.title.length;
+
+				logMessage += `\n${ listEntriesIndent }${ note.title }: ${ utils.truncate( note.text, limit ) } `;
+			}
+		}
+
+		if ( attachLinkToCommit ) {
+			const url = `${ singleCommit.repositoryUrl }/commit/${ singleCommit.hash }`;
+
+			logMessage += `\n${ listEntriesIndent }${ chalk.gray( url ) }`;
 		}
 
 		log.info( logMessage );

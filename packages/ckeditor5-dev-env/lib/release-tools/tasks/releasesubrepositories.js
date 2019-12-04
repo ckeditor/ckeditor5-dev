@@ -658,7 +658,7 @@ module.exports = function releaseSubRepositories( options ) {
 	}
 
 	function logProcess( message ) {
-		log.info( '\n📍  ' + chalk.blue( message ) );
+		log.info( '\n📍 ' + chalk.cyan( message ) );
 	}
 
 	function logDryRun( message ) {

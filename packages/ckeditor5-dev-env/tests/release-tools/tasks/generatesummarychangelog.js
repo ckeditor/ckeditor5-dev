@@ -26,7 +26,7 @@ const packagesPaths = {
 const testCwd = process.cwd();
 
 // Tests below use real files (as mocks). See: "/packages/ckeditor5-dev-env/tests/release-tools/tasks/stubs/releasesubrepositories".
-
+// `console.log` calls are mocked (See L85) because the task at the end prints an empty line which breaks the test logs.
 describe( 'dev-env/release-tools/tasks', () => {
 	let generateSummaryChangelog, sandbox, stubs;
 
@@ -81,6 +81,8 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 		stubs.transformCommitFunctionFactory.onFirstCall().returns( stubs.transformCommit[ 0 ] );
 		stubs.transformCommitFunctionFactory.onSecondCall().returns( stubs.transformCommit[ 1 ] );
+
+		sandbox.stub( console, 'log' );
 
 		mockery.registerMock( 'moment', () => stubs.moment );
 		mockery.registerMock( '../utils/displaygeneratedchangelogs', stubs.displayGeneratedChangelogs );
@@ -218,6 +220,67 @@ Patch releases (bug fixes, internal changes):
 				} );
 		} );
 
+		it( 'uses specified version as proposed when asking about it', () => {
+			const commits = [ {}, {} ];
+
+			stubs.getSubRepositoriesPaths.returns( {
+				matched: new Set( [
+					packagesPaths.alpha
+				] ),
+				skipped: new Set( [
+					packagesPaths.beta,
+					packagesPaths.gamma,
+					packagesPaths.delta,
+					packagesPaths.epsilon
+				] )
+			} );
+
+			stubs.executeOnPackages.callsFake( executeOnPackages );
+
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.beta ).returns( '0.2.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.beta ).returns( '0.2.1' );
+
+			// Minor release (no minor breaking changes).
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.gamma ).returns( '0.3.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.gamma ).returns( '0.4.0' );
+			stubs.changelogUtils.hasMinorBreakingChanges.withArgs( '0.4.0', packagesPaths.gamma ).returns( false );
+
+			// Major release (no major breaking changes).
+			stubs.versionUtils.getCurrent.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
+			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.epsilon ).returns( '1.0.0' );
+			stubs.changelogUtils.hasMajorBreakingChanges.withArgs( '1.0.0', packagesPaths.epsilon ).returns( false );
+
+			stubs.getNewReleaseType.resolves( { commits, releaseType: 'skip' } );
+
+			stubs.cliUtils.provideVersion.resolves( '1.0.0' );
+
+			stubs.moment.format.returns( '2017-10-09' );
+
+			stubs.fs.existsSync.returns( true );
+
+			stubs.changelogUtils.getChangelog.returns( '' );
+
+			const processChidirStub = sandbox.stub( process, 'chdir' );
+
+			const options = {
+				cwd: mainPackagePath,
+				packages: 'packages',
+				skipMainRepository: true,
+				version: '1.0.0'
+			};
+
+			return generateSummaryChangelog( options )
+				.then( () => {
+					// '1.0.0' bump was suggested because of `options.version`.
+					expect( stubs.cliUtils.provideVersion.firstCall.args[ 1 ] ).to.equal( '1.0.0' );
+					expect( stubs.cliUtils.provideVersion.firstCall.args[ 2 ] ).to.deep.equal( {
+						disableInternalVersion: true
+					} );
+
+					expect( processChidirStub.callCount ).to.equal( 2 );
+				} );
+		} );
+
 		it( 'attaches notes from commits in the package', () => {
 			stubs.getSubRepositoriesPaths.returns( {
 				matched: new Set( [
@@ -247,8 +310,8 @@ Patch releases (bug fixes, internal changes):
 			stubs.getNewReleaseType.resolves( { releaseType: 'minor' } );
 
 			stubs.generateChangelogFromCommits.resolves(
-				'## Changelog header (will be removed)\n\n' +
-				'Changelog entries generated from commits.'
+				'## [0.1.0](https://github.com/ckeditor/alpha/compare/v0.0.1...v0.1.0) (2017-10-09)\n\n' +
+				'Changelog entries generated from commits.\n\n'
 			);
 
 			stubs.cliUtils.provideVersion.resolves( '0.1.0' );
@@ -272,6 +335,8 @@ Patch releases (bug fixes, internal changes):
 					/* eslint-disable max-len */
 					const expectedNewChangelog = `## [0.1.0](https://github.com/ckeditor/alpha/compare/v0.0.1...v0.1.0) (2017-10-09)
 
+Changelog entries generated from commits.
+
 ### Dependencies
 
 Patch releases (bug fixes, internal changes):
@@ -279,8 +344,6 @@ Patch releases (bug fixes, internal changes):
 * [@ckeditor/beta](https://www.npmjs.com/package/@ckeditor/beta): v0.2.0 => [v0.2.1](https://github.com/ckeditor/beta/releases/tag/v0.2.1)
 * [@ckeditor/epsilon](https://www.npmjs.com/package/@ckeditor/epsilon): v0.5.0 => [v0.5.1](https://github.com/ckeditor/epsilon/releases/tag/v0.5.1)
 * [@ckeditor/gamma](https://www.npmjs.com/package/@ckeditor/gamma): v0.3.0 => [v0.3.1](https://github.com/ckeditor/gamma/releases/tag/v0.3.1)
-
-Changelog entries generated from commits.
 `;
 					/* eslint-enable max-len */
 
@@ -347,6 +410,7 @@ Changelog entries generated from commits.
 			stubs.versionUtils.getCurrent.withArgs( packagesPaths.beta ).returns( '0.2.0' );
 			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.beta ).returns( '1.0.0' );
 			stubs.changelogUtils.hasMajorBreakingChanges.withArgs( '1.0.0', packagesPaths.beta ).returns( false );
+			stubs.changelogUtils.hasMinorBreakingChanges.withArgs( '1.0.0', packagesPaths.epsilon ).returns( false );
 
 			stubs.versionUtils.getCurrent.withArgs( packagesPaths.gamma ).returns( '0.3.0' );
 			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.gamma ).returns( '1.0.0' );
@@ -355,12 +419,13 @@ Changelog entries generated from commits.
 			stubs.versionUtils.getCurrent.withArgs( packagesPaths.epsilon ).returns( '0.5.0' );
 			stubs.versionUtils.getLastFromChangelog.withArgs( packagesPaths.epsilon ).returns( '1.0.0' );
 			stubs.changelogUtils.hasMajorBreakingChanges.withArgs( '1.0.0', packagesPaths.epsilon ).returns( false );
+			stubs.changelogUtils.hasMinorBreakingChanges.withArgs( '1.0.0', packagesPaths.epsilon ).returns( true );
 
 			stubs.getNewReleaseType.resolves( { releaseType: 'major' } );
 
 			stubs.generateChangelogFromCommits.resolves(
-				'## Changelog header (will be removed)\n\n' +
-				'Changelog entries generated from commits.'
+				'## [2.0.0](https://github.com/ckeditor/omega/compare/v1.0.0...v2.0.0) (2017-10-09)\n\n' +
+				'Changelog entries generated from commits.\n\n'
 			);
 
 			stubs.cliUtils.provideVersion.resolves( '2.0.0' );
@@ -384,18 +449,21 @@ Changelog entries generated from commits.
 					/* eslint-disable max-len */
 					const expectedNewChangelog = `## [2.0.0](https://github.com/ckeditor/omega/compare/v1.0.0...v2.0.0) (2017-10-09)
 
+Changelog entries generated from commits.
+
 ### Dependencies
 
 Major releases (contain major breaking changes):
 
 * [@ckeditor/gamma](https://www.npmjs.com/package/@ckeditor/gamma): v0.3.0 => [v1.0.0](https://github.com/ckeditor/gamma/releases/tag/v1.0.0)
 
+Major releases (contain minor breaking changes):
+
+* [@ckeditor/epsilon](https://www.npmjs.com/package/@ckeditor/epsilon): v0.5.0 => [v1.0.0](https://github.com/ckeditor/epsilon/releases/tag/v1.0.0)
+
 Major releases (dependencies of those packages have breaking changes):
 
 * [@ckeditor/beta](https://www.npmjs.com/package/@ckeditor/beta): v0.2.0 => [v1.0.0](https://github.com/ckeditor/beta/releases/tag/v1.0.0)
-* [@ckeditor/epsilon](https://www.npmjs.com/package/@ckeditor/epsilon): v0.5.0 => [v1.0.0](https://github.com/ckeditor/epsilon/releases/tag/v1.0.0)
-
-Changelog entries generated from commits.
 `;
 					/* eslint-enable max-len */
 					expect( stubs.transformCommitFunctionFactory.calledTwice ).to.equal( true );
@@ -473,8 +541,8 @@ Changelog entries generated from commits.
 			stubs.getNewReleaseType.resolves( { releaseType: 'minor' } );
 
 			stubs.generateChangelogFromCommits.resolves(
-				'## Changelog header (will be removed)\n\n' +
-				'Changelog entries generated from commits.'
+				'## [1.1.0](https://github.com/ckeditor/omega/compare/v1.0.0...v1.1.0) (2017-10-09)\n\n' +
+				'Changelog entries generated from commits.\n\n'
 			);
 
 			stubs.cliUtils.provideVersion.resolves( '1.1.0' );
@@ -498,6 +566,8 @@ Changelog entries generated from commits.
 					/* eslint-disable max-len */
 					const expectedNewChangelog = `## [1.1.0](https://github.com/ckeditor/omega/compare/v1.0.0...v1.1.0) (2017-10-09)
 
+Changelog entries generated from commits.
+
 ### Dependencies
 
 Minor releases (containing minor breaking changes):
@@ -508,8 +578,6 @@ Minor releases (new features, no breaking changes):
 
 * [@ckeditor/beta](https://www.npmjs.com/package/@ckeditor/beta): v0.2.0 => [v0.3.0](https://github.com/ckeditor/beta/releases/tag/v0.3.0)
 * [@ckeditor/gamma](https://www.npmjs.com/package/@ckeditor/gamma): v0.3.0 => [v0.4.0](https://github.com/ckeditor/gamma/releases/tag/v0.4.0)
-
-Changelog entries generated from commits.
 `;
 					/* eslint-enable max-len */
 					expect( stubs.transformCommitFunctionFactory.calledTwice ).to.equal( true );
@@ -589,8 +657,8 @@ Changelog entries generated from commits.
 			stubs.getNewReleaseType.resolves( { releaseType: 'minor' } );
 
 			stubs.generateChangelogFromCommits.resolves(
-				'## Changelog header (will be removed)\n\n' +
-				'Changelog entries generated from commits.'
+				'## [0.1.0](https://github.com/ckeditor/alpha/compare/v0.0.1...v0.1.0) (2017-10-09)\n\n' +
+				'Changelog entries generated from commits.\n\n'
 			);
 
 			stubs.cliUtils.provideVersion.resolves( '0.1.0' );
@@ -614,6 +682,8 @@ Changelog entries generated from commits.
 					/* eslint-disable max-len */
 					const expectedNewChangelog = `## [0.1.0](https://github.com/ckeditor/alpha/compare/v0.0.1...v0.1.0) (2017-10-09)
 
+Changelog entries generated from commits.
+
 ### Dependencies
 
 Minor releases (containing major/minor breaking changes):
@@ -624,8 +694,6 @@ Minor releases (containing major/minor breaking changes):
 Minor releases (new features, no breaking changes):
 
 * [@ckeditor/gamma](https://www.npmjs.com/package/@ckeditor/gamma): v0.3.0 => [v0.4.0](https://github.com/ckeditor/gamma/releases/tag/v0.4.0)
-
-Changelog entries generated from commits.
 `;
 					/* eslint-enable max-len */
 					expect( stubs.transformCommitFunctionFactory.calledTwice ).to.equal( true );
@@ -709,8 +777,8 @@ Changelog entries generated from commits.
 			stubs.getNewReleaseType.resolves( { commits, releaseType: 'minor' } );
 
 			stubs.generateChangelogFromCommits.resolves(
-				'## Changelog header (will be removed)\n\n' +
-				'Changelog entries generated from commits.'
+				'## [0.2.0](https://github.com/ckeditor/foo-bar/compare/v0.1.0...v0.2.0) (2017-10-09)\n\n' +
+				'Changelog entries generated from commits.\n\n'
 			);
 
 			stubs.cliUtils.provideVersion.resolves( '0.2.0' );
@@ -733,6 +801,8 @@ Changelog entries generated from commits.
 					/* eslint-disable max-len */
 					const expectedNewChangelog = `## [0.2.0](https://github.com/ckeditor/foo-bar/compare/v0.1.0...v0.2.0) (2017-10-09)
 
+Changelog entries generated from commits.
+
 ### Dependencies
 
 New packages:
@@ -745,8 +815,6 @@ Patch releases (bug fixes, internal changes):
 * [@ckeditor/delta](https://www.npmjs.com/package/@ckeditor/delta): v0.4.0 => [v0.4.1](https://github.com/ckeditor/delta/releases/tag/v0.4.1)
 * [@ckeditor/epsilon](https://www.npmjs.com/package/@ckeditor/epsilon): v0.5.0 => [v0.5.1](https://github.com/ckeditor/epsilon/releases/tag/v0.5.1)
 * [@ckeditor/gamma](https://www.npmjs.com/package/@ckeditor/gamma): v0.3.0 => [v0.3.1](https://github.com/ckeditor/gamma/releases/tag/v0.3.1)
-
-Changelog entries generated from commits.
 `;
 					/* eslint-enable max-len */
 					expect( stubs.transformCommitFunctionFactory.calledTwice ).to.equal( true );
@@ -933,7 +1001,7 @@ Changelog entries generated from commits.
 
 				stubs.generateChangelogFromCommits.resolves(
 					'## Changelog header (will be removed)\n\n' +
-					'Changelog entries generated from commits.'
+					'Changelog entries generated from commits.\n\n'
 				);
 
 				stubs.cliUtils.provideVersion.resolves( '0.2.0' );
@@ -990,7 +1058,7 @@ Changelog entries generated from commits.
 
 				stubs.generateChangelogFromCommits.resolves(
 					'## Changelog header (will be removed)\n\n' +
-					'Changelog entries generated from commits.'
+					'Changelog entries generated from commits.\n\n'
 				);
 
 				stubs.cliUtils.provideVersion.resolves( '0.2.0' );
