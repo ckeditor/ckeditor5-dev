@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [17.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@17.0.0...@ckeditor/ckeditor5-dev-env@17.1.0) (2019-12-04)
+
+### Features
+
+* Introduced several improvements for `generateSummaryChangelog()` and `generateChangelogForSubRepositories()` tasks. Closes [#571](https://github.com/ckeditor/ckeditor5-dev/issues/571). ([ec6282f](https://github.com/ckeditor/ckeditor5-dev/commit/ec6282f))
+
+
 ## [17.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@16.0.0...@ckeditor/ckeditor5-dev-env@17.0.0) (2019-10-22)
 
 ### MAJOR BREAKING CHANGES
