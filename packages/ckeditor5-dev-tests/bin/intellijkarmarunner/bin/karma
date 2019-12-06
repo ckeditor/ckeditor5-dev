@@ -1,0 +1,36 @@
+#!/usr/bin/env node
+
+/**
+ * @license Copyright (c) 2003-2019, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+// This file is the one called by IntelliJ's test runner.
+//
+// Out goal here is intercepting the command line arguments sent by IntelliJ and transform
+// them so our test script adds the IntelliJ test reporter when running karma.
+
+// The following proccess.argv is received from the IntelliJ runner:
+// 	[
+// 		'/local path.../node',
+//
+// 		// This file.
+// 		'/local path.../ckeditor5-dev-tests/bin/intellijkarmarunner/bin/karma',
+//
+// 		'start',
+//
+//		// InlelliJ configuration for Karma, which injects its reporters.
+// 		'/local path.../karma-intellij/lib/intellij.conf.js',
+//
+//		// Karma arguments, if set in the test runner configuration dialog.
+// 		...
+// 	]
+
+// Take the IntelliJ configuration file path.
+const intellijConfig = process.argv.find( item => item.includes( 'intellij.conf.js' ) );
+
+// Set the path as an command line argument that is understood by our test script.
+process.argv.push( '--karma-config-overrides=' + intellijConfig );
+
+// Now running the tests.
+require( '../../test' );
