@@ -151,6 +151,15 @@ module.exports = function getKarmaConfig( options ) {
 		};
 	}
 
+	if ( options.karmaConfigOverrides ) {
+		// Add the plugins config with its default value, because if it'll be added by
+		// the override, "karma-*" plugins will not be loaded and things will break.
+		karmaConfig.plugins = [ 'karma-*' ];
+
+		const overrides = require( options.karmaConfigOverrides );
+		overrides( karmaConfig );
+	}
+
 	return karmaConfig;
 };
 

@@ -17,7 +17,8 @@ module.exports = function parseArguments( args ) {
 			'files',
 			'browsers',
 			'reporter',
-			'debug'
+			'debug',
+			'karma-config-overrides'
 		],
 
 		boolean: [
@@ -54,6 +55,7 @@ module.exports = function parseArguments( args ) {
 
 	const options = minimist( args, minimistConfig );
 
+	options.karmaConfigOverrides = options[ 'karma-config-overrides' ];
 	options.disallowConsoleUse = options[ 'disallow-console-use' ];
 	options.sourceMap = options[ 'source-map' ];
 	options.browsers = options.browsers.split( ',' );
