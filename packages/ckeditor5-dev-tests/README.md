@@ -99,6 +99,12 @@ $ npm t -- --files='!(engine|ui)'
 | `*` | `node_modules/ckeditor5-*/tests/**/*.js` | all installed package's tests |
 | `ckeditor5` | `tests/**/*.js` | tests from the main repository |
 
+## IDE integrations
+
+The CKEditor 5 can be integrated with IDEs via integrations.
+
+Currently only the IntelliJ based IDEs are supported (WebStorm, PHPStorm, etc). Detailed information are provided in [`bin/intellijkarmarunner/README.md`](./bin/intellijkarmarunner/README.md).
+
 ## Changelog
 
 See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-tests/CHANGELOG.md) file.
