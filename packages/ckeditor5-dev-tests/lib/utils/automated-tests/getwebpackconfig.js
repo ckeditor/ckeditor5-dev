@@ -109,12 +109,14 @@ function getPathsToIncludeForCoverage( globs ) {
 				const packageName = matchCKEditor5[ 1 ]
 					// A special case when --files='!engine' or --files='!engine|ui' was passed.
 					// Convert it to /ckeditor5-(?!engine)[^/]\/src\//.
-					.replace( /ckeditor5-!\(([^)]+)\)\*/, 'ckeditor5-(?!$1)[^' + escapedPathSep + ']+' );
+					.replace( /ckeditor5-!\(([^)]+)\)\*/, 'ckeditor5-(?!$1)[^' + escapedPathSep + ']+' )
+					.replace( 'ckeditor5-*', 'ckeditor5-[a-z]+' );
 
 				return new RegExp( packageName + escapedPathSep + 'src' + escapedPathSep );
 			} else if ( matchCKEditor ) {
 				const packageName = matchCKEditor[ 1 ]
-					.replace( /ckeditor-!\(([^)]+)\)\*/, 'ckeditor-(?!$1)[^' + escapedPathSep + ']+' );
+					.replace( /ckeditor-!\(([^)]+)\)\*/, 'ckeditor-(?!$1)[^' + escapedPathSep + ']+' )
+					.replace( 'ckeditor-*', 'ckeditor-[a-z]+' );
 
 				return new RegExp( packageName + escapedPathSep + 'src' + escapedPathSep );
 			}
