@@ -1,4 +1,9 @@
 /**
+ * @license Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+/**
  * The loader matches sentences like: `// @if CK_DEBUG // someDebugCode();` and uncomment them.
  * It also uncomments code after specific flags if they are provided to the webpack configuration.
  * E.g. if the `CK_DEBUG_ENGINE` flag is set to true, then all lines starting with

@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) 2003-2019, CKSource - Frederico Knabben
+Copyright (c) 2003-2020, CKSource - Frederico Knabben
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

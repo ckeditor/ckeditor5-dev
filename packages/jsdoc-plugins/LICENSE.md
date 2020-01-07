@@ -2,7 +2,7 @@ Software License Agreement
 ==========================
 
 @ckeditor/jsdoc-plugins – Various JSDoc plugins developed by the CKEditor 5 team.
-Copyright (c) 2003-2019, CKSource – Frederico Knabben. All rights reserved.
+Copyright (c) 2003-2020, CKSource – Frederico Knabben. All rights reserved.
 
 Licensed under the terms of the MIT License (see Appendix A):
 
@@ -18,7 +18,7 @@ Appendix A: The MIT License
 
 The MIT License (MIT)
 
-Copyright (c) 2003-2019, CKSource – Frederico Knabben
+Copyright (c) 2003-2020, CKSource – Frederico Knabben
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
