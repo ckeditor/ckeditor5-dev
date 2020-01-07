@@ -228,7 +228,7 @@ beforeEach( () => {
 				sinon.assert.calledWith(
 					consoleWarnStub,
 					chalk.yellow( '⚠ You\'re running tests in dev mode - some error protections are loose. ' +
-						'Use the `--protection` flag to use strictest verification methods.' )
+						'Use the `--production` flag to use strictest verification methods.' )
 				);
 			} );
 	} );
