@@ -34,7 +34,7 @@ module.exports = function runAutomatedTests( options ) {
 	return Promise.resolve().then( () => {
 		if ( !options.production ) {
 			console.warn( chalk.yellow(
-				'⚠ You\'re running tests in dev mode - some error protections are loose. Use the `--protection` flag' +
+				'⚠ You\'re running tests in dev mode - some error protections are loose. Use the `--protection` flag ' +
 				'to use strictest verification methods.'
 			) );
 		}

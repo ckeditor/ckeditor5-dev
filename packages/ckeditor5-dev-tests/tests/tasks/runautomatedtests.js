@@ -17,6 +17,8 @@ describe( 'runAutomatedTests', () => {
 	const codeMakingConsoleUseThrowErrors = `
 const originalWarn = console.warn;
 
+window.production = true;
+
 beforeEach( () => {
 	Object.keys( console )
 		.filter( methodOrProperty => typeof console[ methodOrProperty ] === 'function' )
@@ -106,7 +108,7 @@ beforeEach( () => {
 			files: [
 				'basic-styles'
 			],
-			disallowConsoleUse: true
+			production: true
 		};
 
 		stubs.transformFileOptionToTestGlob.returns( [
@@ -145,7 +147,7 @@ beforeEach( () => {
 	} );
 
 	it( 'throws when files are not specified', () => {
-		return runAutomatedTests( { disallowConsoleUse: true } )
+		return runAutomatedTests( { production: true } )
 			.then(
 				() => {
 					throw new Error( 'Expected to be rejected.' );
@@ -162,7 +164,7 @@ beforeEach( () => {
 				'basic-foo',
 				'bar-core',
 			],
-			disallowConsoleUse: true
+			production: true
 		};
 
 		stubs.transformFileOptionToTestGlob.onFirstCall().returns( [
@@ -194,12 +196,12 @@ beforeEach( () => {
 			);
 	} );
 
-	it( 'should warn when the `disallowConsoleUse` option is set to `false`', () => {
+	it( 'should warn when the `production` option is set to `false`', () => {
 		const options = {
 			files: [
 				'basic-styles'
 			],
-			disallowConsoleUse: false
+			production: false
 		};
 
 		const consoleWarnStub = sandbox.stub( console, 'warn' );
@@ -225,17 +227,18 @@ beforeEach( () => {
 				sinon.assert.calledOnce( consoleWarnStub );
 				sinon.assert.calledWith(
 					consoleWarnStub,
-					chalk.yellow( '⚠ Console use is allowed. Use `--disallow-console-use` to disallow console use.' )
+					chalk.yellow( '⚠ You\'re running tests in dev mode - some error protections are loose. ' +
+						'Use the `--protection` flag to use strictest verification methods.' )
 				);
 			} );
 	} );
 
-	it( 'should not add the code making console use throw an error when the `disallowConsoleUse` option is set to false', () => {
+	it( 'should not add the code making console use throw an error when the `production` option is set to false', () => {
 		const options = {
 			files: [
 				'basic-styles'
 			],
-			disallowConsoleUse: false
+			production: false
 		};
 
 		sandbox.stub( console, 'warn' );
@@ -262,12 +265,12 @@ beforeEach( () => {
 			} );
 	} );
 
-	it( 'should add the code making console use throw an error when the `disallowConsoleUse` option is set to true', () => {
+	it( 'should add the code making console use throw an error when the `production` option is set to true', () => {
 		const options = {
 			files: [
 				'basic-styles'
 			],
-			disallowConsoleUse: true
+			production: true
 		};
 
 		stubs.transformFileOptionToTestGlob.returns( [
