@@ -19,6 +19,7 @@
 
 			lastDomElementsCount = document.body.childElementCount;
 
+			// See https://github.com/ckeditor/ckeditor5-dev/issues/586#issuecomment-571573488.
 			if ( window.production ) {
 				throw new Error( errorMessage );
 			} else {
