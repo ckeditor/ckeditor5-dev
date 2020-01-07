@@ -27,7 +27,7 @@ module.exports = function parseArguments( args ) {
 			'source-map',
 			'verbose',
 			'server',
-			'disallow-console-use'
+			'production'
 		],
 
 		alias: {
@@ -49,14 +49,13 @@ module.exports = function parseArguments( args ) {
 			verbose: false,
 			'source-map': false,
 			server: false,
-			'disallow-console-use': false
+			production: false
 		}
 	};
 
 	const options = minimist( args, minimistConfig );
 
 	options.karmaConfigOverrides = options[ 'karma-config-overrides' ];
-	options.disallowConsoleUse = options[ 'disallow-console-use' ];
 	options.sourceMap = options[ 'source-map' ];
 	options.browsers = options.browsers.split( ',' );
 

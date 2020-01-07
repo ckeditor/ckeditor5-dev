@@ -48,7 +48,6 @@ module.exports = function getKarmaConfig( options ) {
 
 		// List of files/patterns to load in the browser.
 		files: [
-			'tests/_utils/leakdetector.js',
 			options.entryFile,
 			{ pattern: 'packages/ckeditor5-utils/tests/_assets/**/*', watched: false, included: false, served: true, nocache: false }
 		],

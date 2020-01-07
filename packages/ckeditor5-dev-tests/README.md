@@ -53,7 +53,7 @@ You can also use the bin script for testing a package:
 * `files` - Specify file(s) to test. Also available as an alias: `-f`.
 * `browsers` - Browsers which will be used to run the tests. Also available as an alias: `-b`.
 * `reporter` - Mocha reporter – either `mocha` (default) or `dots` (less verbose one).
-* `disallow-console-use` - Whether to throw an error when one of the console methods (e.g. `console.log()`) is executed.
+* `production` - Run strictest set of checks. E.g. it fails test run when there are [console calls](https://github.com/ckeditor/ckeditor5/issues/1996) or [DOM leaks](https://github.com/ckeditor/ckeditor5/issues/6002).
 
 #### Examples
 
