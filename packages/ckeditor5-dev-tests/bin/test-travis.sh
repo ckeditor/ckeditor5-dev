@@ -19,5 +19,5 @@ yarn run lint && \
 yarn run stylelint && \
 ${ROOT_BIN}/ckeditor5-dev-tests-check-dependencies && \
 cd ${CKEDITOR5_TEST_ENVIRONMENT} && \
-node --max_old_space_size=4096 $ROOT_BIN/ckeditor5-dev-tests --files=$PACKAGE_NAME --coverage --reporter=dots --browsers=Chrome --disallow-console-use && \
-node --max_old_space_size=4096 $ROOT_BIN/ckeditor5-dev-tests --files=$PACKAGE_NAME --reporter=dots --browsers=Firefox --disallow-console-use
+node --max_old_space_size=4096 $ROOT_BIN/ckeditor5-dev-tests --files=$PACKAGE_NAME --coverage --reporter=dots --browsers=Chrome --production && \
+node --max_old_space_size=4096 $ROOT_BIN/ckeditor5-dev-tests --files=$PACKAGE_NAME --reporter=dots --browsers=Firefox --production

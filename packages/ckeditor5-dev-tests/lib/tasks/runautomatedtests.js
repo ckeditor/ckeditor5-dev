@@ -32,15 +32,16 @@ const ENTRY_FILE_PATH = path.join( process.cwd(), 'build', '.automated-tests', '
 
 module.exports = function runAutomatedTests( options ) {
 	return Promise.resolve().then( () => {
-		if ( !options.disallowConsoleUse ) {
+		if ( !options.production ) {
 			console.warn( chalk.yellow(
-				'⚠ Console use is allowed. Use `--disallow-console-use` to disallow console use.'
+				'⚠ You\'re running tests in dev mode - some error protections are loose. Use the `--production` flag ' +
+				'to use strictest verification methods.'
 			) );
 		}
 
 		const globPatterns = transformFilesToTestGlob( options.files );
 
-		createEntryFile( globPatterns, options.disallowConsoleUse );
+		createEntryFile( globPatterns, options.production );
 
 		const optionsForKarma = Object.assign( {}, options, {
 			entryFile: ENTRY_FILE_PATH,
@@ -65,7 +66,7 @@ function transformFilesToTestGlob( files ) {
 	return globMap;
 }
 
-function createEntryFile( globPatterns, disallowConsoleUse ) {
+function createEntryFile( globPatterns, production ) {
 	mkdirp.sync( path.dirname( ENTRY_FILE_PATH ) );
 	karmaLogger.setupFromConfig( { logLevel: 'INFO' } );
 
@@ -96,12 +97,16 @@ function createEntryFile( globPatterns, disallowConsoleUse ) {
 		throw new Error( 'Not found files to tests. Specified patterns are invalid.' );
 	}
 
+	allFiles.push( path.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetector.js' ).replace( /\\/g, '/' ) );
+
 	const entryFileContent = allFiles
 		.map( file => 'import "' + file + '";' );
 
-	if ( disallowConsoleUse ) {
+	if ( production ) {
 		entryFileContent.unshift( `
 const originalWarn = console.warn;
+
+window.production = true;
 
 beforeEach( () => {
 	Object.keys( console )
