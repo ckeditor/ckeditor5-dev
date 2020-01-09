@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## [2.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@2.0.0...eslint-config-ckeditor5@2.0.1) (2020-01-09)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
 ## [2.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@1.0.14...eslint-config-ckeditor5@2.0.0) (2019-07-09)
 
 ### Other changes

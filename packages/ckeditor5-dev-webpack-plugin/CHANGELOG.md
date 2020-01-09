@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## [8.0.6](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@8.0.1...@ckeditor/ckeditor5-dev-webpack-plugin@8.0.6) (2020-01-09)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
 ## [8.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@8.0.0...@ckeditor/ckeditor5-dev-webpack-plugin@8.0.1) (2019-02-28)
 
 Internal changes only (updated dependencies, documentation, etc.).

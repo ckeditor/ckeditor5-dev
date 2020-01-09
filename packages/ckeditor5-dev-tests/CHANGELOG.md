@@ -1,6 +1,22 @@
 Changelog
 =========
 
+## [18.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@17.1.0...@ckeditor/ckeditor5-dev-tests@18.0.0) (2020-01-09)
+
+### MAJOR BREAKING CHANGES
+
+* `--disallow-console-use` flag was removed, use `--production` instead.
+
+### Features
+
+* Added integration with Intellij IDEs. Closes [#582](https://github.com/ckeditor/ckeditor5-dev/issues/582). ([c6dfe99](https://github.com/ckeditor/ckeditor5-dev/commit/c6dfe99))
+* Introduced automatic DOM leak detection for unit tests. Closes [#586](https://github.com/ckeditor/ckeditor5-dev/issues/586). ([f8c392f](https://github.com/ckeditor/ckeditor5-dev/commit/f8c392f))
+
+### Bug fixes
+
+* RegExp pattern for coverage files now properly matches all `ckeditor-` and `ckeditor5-` packages. Closes [#584](https://github.com/ckeditor/ckeditor5-dev/issues/584). ([d80cf5e](https://github.com/ckeditor/ckeditor5-dev/commit/d80cf5e))
+
+
 ## [17.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@17.0.0...@ckeditor/ckeditor5-dev-tests@17.1.0) (2019-11-27)
 
 ### Features
