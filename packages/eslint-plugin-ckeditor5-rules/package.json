@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-ckeditor5-rules",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "CKEditor 5 ESLint preset.",
   "keywords": [
     "eslint",
