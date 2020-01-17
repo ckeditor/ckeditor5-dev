@@ -7,7 +7,7 @@
   "dependencies": {
     "acorn": "^6.2.1",
     "acorn-walk": "^6.2.0",
-    "chalk": "^2.4.1",
+    "chalk": "^3.0.0",
     "cssnano": "^4.0.0",
     "del": "^5.0.0",
     "escodegen": "^1.9.0",
