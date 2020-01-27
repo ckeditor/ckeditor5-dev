@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [11.0.11](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@11.0.10...@ckeditor/ckeditor5-dev-docs@11.0.11) (2020-01-27)
+
+### Bug fixes
+
+* Switched to a fork of JSDoc with version 3.4.3 patched to be compatible with NodeJS 12. Also, bumped chalk library to fix thrown error. Closes [#525](https://github.com/ckeditor/ckeditor5-dev/issues/525). ([a7599ba](https://github.com/ckeditor/ckeditor5-dev/commit/a7599ba))
+
+
 ## [11.0.10](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-docs@11.0.1...@ckeditor/ckeditor5-dev-docs@11.0.10) (2020-01-09)
 
 Internal changes only (updated dependencies, documentation, etc.).
