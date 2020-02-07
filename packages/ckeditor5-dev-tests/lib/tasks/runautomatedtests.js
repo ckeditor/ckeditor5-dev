@@ -77,7 +77,9 @@ function createEntryFile( globPatterns, production ) {
 		let hasFiles = false;
 
 		for ( const resolvedPattern of globPatterns[ singlePattern ] ) {
-			const files = glob.sync( resolvedPattern );
+			const files = glob.sync( resolvedPattern, {
+				absolute: resolvedPattern.startsWith( './' )
+			} );
 
 			if ( files.length ) {
 				hasFiles = true;
