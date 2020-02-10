@@ -12,24 +12,32 @@ const path = require( 'path' );
 const { RawSource, ConcatSource } = require( 'webpack-sources' );
 
 /**
+ * @typedef {import('@ckeditor/ckeditor5-dev-utils/lib/translations/singlelanguagetranslationservice')
+ * | import('@ckeditor/ckeditor5-dev-utils/lib/translations/multiplelanguagetranslationservice')
+ * } TranslationService
+ */
+
+/**
  * Serve translations depending on the used translation service and passed options.
  * It takes care about whole Webpack compilation process and doesn't contain much logic that should be tested.
  *
  * See https://webpack.js.org/api/compiler/#event-hooks and https://webpack.js.org/api/compilation/ for details about specific hooks.
  *
- * @param {Object} compiler Webpack compiler.
- * @param {Object} options Translation options.
- * @param {String} options.outputDirectory Output directory for the emitted translation files, relative to the webpack context.
- * @param {Boolean} [options.strict] Option that make this function throw when the error is found during the compilation.
- * @param {Boolean} [options.verbose] Option that make this function log everything into the console.
+ * @param {import('webpack').Compiler} compiler Webpack compiler.
+ * @param {import('./index').PluginOptions} options Translation options.
  * @param {TranslationService} translationService Translation service that will load PO files, replace translation keys and generate assets.
- * @param {Object} envUtils Environment utils internally called within the `serveTranslations()`, that make `serveTranslations()`
+ * @param {import('./ckeditor5-env-utils')} envUtils
+ * Environment utils internally called within the `serveTranslations()`, that make `serveTranslations()`
  * ckeditor5 - independent without hard-to-test logic.
  */
 module.exports = function serveTranslations( compiler, options, translationService, envUtils ) {
 	const cwd = process.cwd();
 
-	// Provides translateSource function for the `translatesourceloader` loader.
+	/**
+	 * Provides translateSource function for the `translatesourceloader` loader.
+	 * @param {String} source
+	 * @param {String} sourceFile
+	 */
 	const translateSource = ( source, sourceFile ) => translationService.translateSource( source, sourceFile );
 
 	// Watch for warnings and errors during translation process.

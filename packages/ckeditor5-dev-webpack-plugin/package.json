@@ -10,6 +10,12 @@
     "rimraf": "^2.6.2",
     "webpack-sources": "^1.1.0"
   },
+  "devDependencies": {
+    "@types/chalk": "^2.2.0",
+    "@types/rimraf": "^2.0.3",
+    "@types/webpack": "^4.41.5",
+    "@types/webpack-sources": "^0.1.6"
+  },
   "peerDependencies": {
     "webpack": "^4.0.0"
   },

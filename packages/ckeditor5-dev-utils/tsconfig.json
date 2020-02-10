@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": true,
+        "esModuleInterop": true,
+		"lib": ["ESNext"],
+		"maxNodeModuleJsDepth": 1,
+        "module": "ESNext",
+        "moduleResolution": "node",
+		"noEmit": true,
+		"strict": true,
+        "target": "ESNext"
+    }
+}

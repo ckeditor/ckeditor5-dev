@@ -5,11 +5,25 @@
 
 'use strict';
 
-const chalk = require( 'chalk' );
+// const chalk = /** @type {import('chalk').default} */ ( /** @type {any} */ ( require( 'chalk' ) ) );
+const chalk = require( 'chalk' ).default;
 const serveTranslations = require( './servetranslations' );
 const SingleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/singlelanguagetranslationservice' );
 const MultipleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/multiplelanguagetranslationservice' );
 const ckeditor5EnvUtils = require( './ckeditor5-env-utils' );
+
+/**
+ * @typedef PluginOptions
+ * @property {String} [language] Main language of the build that will be added to the bundle.
+ * @property {Array.<String> | 'all'} [additionalLanguages] Additional languages.
+ * Build is optimized when this option is not set.
+ * When `additionalLanguages` is set to 'all' then script will be looking for all languages and according translations during
+ * the compilation.
+ * @property {String} [outputDirectory] Output directory for the emitted translation files,
+ * should be relative to the webpack context.
+ * @property {Boolean} [strict] Option that make the plugin throw when the error is found during the compilation.
+ * @property {Boolean} [verbose] Option that make this plugin log all warnings into the console.
+ */
 
 /**
  * CKEditorWebpackPlugin, for now, implements only the Translation Service (@ckeditor/ckeditor5#624, @ckeditor/ckeditor5#387).
@@ -29,15 +43,7 @@ const ckeditor5EnvUtils = require( './ckeditor5-env-utils' );
  */
 module.exports = class CKEditorWebpackPlugin {
 	/**
-	 * @param {Object} [options] Plugin options.
-	 * @param {String} options.language Main language of the build that will be added to the bundle.
-	 * @param {Array.<String>|'all'} [options.additionalLanguages] Additional languages. Build is optimized when this option is not set.
-	 * When `additionalLanguages` is set to 'all' then script will be looking for all languages and according translations during
-	 * the compilation.
-	 * @param {String} [options.outputDirectory='translations'] Output directory for the emitted translation files,
-	 * should be relative to the webpack context.
-	 * @param {Boolean} [options.strict] Option that make the plugin throw when the error is found during the compilation.
-	 * @param {Boolean} [options.verbose] Option that make this plugin log all warnings into the console.
+	 * @param {PluginOptions} [options] Plugin options.
 	 */
 	constructor( options = {} ) {
 		this.options = {
@@ -49,6 +55,9 @@ module.exports = class CKEditorWebpackPlugin {
 		};
 	}
 
+	/**
+	 * @param {import('webpack').Compiler} compiler
+	 */
 	apply( compiler ) {
 		if ( !this.options.language ) {
 			console.warn( chalk.yellow(
