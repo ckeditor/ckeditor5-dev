@@ -186,9 +186,9 @@ const utils = {
 		return translationObjects.map( translationObject => {
 			// Note that order is important.
 			return [
-				`msgctxt "${ translationObject.ctxt }"`,
-				`msgid "${ translationObject.id }"`,
-				`msgstr "${ translationObject.str }"`
+				`msgctxt ${ JSON.stringify( translationObject.ctxt ) }`,
+				`msgid ${ JSON.stringify( translationObject.id ) }`,
+				`msgstr ${ JSON.stringify( translationObject.str ) }`
 			].map( x => x + '\n' ).join( '' );
 		} ).join( '\n' );
 	},
