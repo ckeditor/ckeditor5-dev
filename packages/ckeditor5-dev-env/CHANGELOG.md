@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [17.1.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@17.1.2...@ckeditor/ckeditor5-dev-env@17.1.3) (2020-02-14)
+
+### Bug fixes
+
+* Fixed handling of the " character in translation messages and contexts. Closes [#523](https://github.com/ckeditor/ckeditor5-dev/issues/523). ([1d2da09](https://github.com/ckeditor/ckeditor5-dev/commit/1d2da09))
+
+
 ## [17.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@17.1.1...@ckeditor/ckeditor5-dev-env@17.1.2) (2020-01-27)
 
 ### Bug fixes
