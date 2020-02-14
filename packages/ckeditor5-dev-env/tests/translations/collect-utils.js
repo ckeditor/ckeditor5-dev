@@ -263,6 +263,20 @@ msgstr "util"
 			);
 			/* eslint-enable indent */
 		} );
+
+		it( 'should support the `"` character', () => {
+			const context = { content: { '"foo"': '"bar"' } };
+			const poContent = utils.createPotFileContent( context );
+
+			/* eslint-disable indent */
+			expect( poContent ).to.be.equal(
+`msgctxt "\\"bar\\""
+msgid "\\"foo\\""
+msgstr "\\"foo\\""
+`
+			);
+			/* eslint-enable indent */
+		} );
 	} );
 
 	describe( 'createPotFileHeader', () => {

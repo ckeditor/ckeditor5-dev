@@ -132,6 +132,18 @@ describe( 'translations', () => {
 				sinon.assert.calledOnce( spy );
 				sinon.assert.calledWithExactly( spy, 'First t() call argument should be a string literal in file.js.' );
 			} );
+
+			it( 'should handle correctly the special characters', () => {
+				const translationService = new SingleLanguageTranslationService( 'pl' );
+				const source = 't( \'Cancel\' )';
+
+				translationService._dictionary.Cancel = 'foo"\'';
+
+				const result = translationService.translateSource( source, 'file.js' );
+
+				// eslint-disable-next-line quotes
+				expect( result ).to.equal( `t('foo"\\'');` );
+			} );
 		} );
 
 		describe( 'getAssets()', () => {
