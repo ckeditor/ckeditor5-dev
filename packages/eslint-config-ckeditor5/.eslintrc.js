@@ -20,7 +20,8 @@ module.exports = {
 		sinon: true
 	},
 	plugins: [
-		'ckeditor5-rules'
+		'ckeditor5-rules',
+		'mocha'
 	],
 	rules: {
 		// ## Possible errors
@@ -296,6 +297,15 @@ module.exports = {
 			"error",
 			"after"
 		],
-		'ckeditor5-rules/no-relative-imports': 'error'
+		'ckeditor5-rules/no-relative-imports': 'error',
+		'mocha/handle-done-callback': 'error',
+		'mocha/no-async-describe': 'error',
+		'mocha/no-exclusive-tests': 'error',
+		'mocha/no-global-tests': 'error',
+		'mocha/no-identical-title': 'warn',
+		'mocha/no-nested-tests': 'error',
+		'mocha/no-pending-tests': 'error',
+		'mocha/no-sibling-hooks': 'error',
+		'mocha/no-top-level-hooks': 'error'
 	}
 };
