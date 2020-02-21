@@ -35,7 +35,7 @@ describe( 'translations', () => {
 				'msgctxt "Label for the Save button."',
 				'msgid "Save"',
 				'msgstr ""',
-				'',
+				''
 			].join( '\n' ) );
 
 			expect( result ).to.deep.equal( {} );

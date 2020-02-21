@@ -28,12 +28,12 @@ function fixIncorrectClassConstructor( object ) {
 			memberof: doclet.memberof.replace( '.' + match[ 1 ], '' ),
 			kind: 'function',
 			scope: 'instance',
-			name: 'constructor',
+			name: 'constructor'
 		} );
 	} else {
 		doclet = Object.assign( {}, doclet, {
 			longname: doclet.longname.replace( '.' + match[ 1 ], '' ),
-			memberof: doclet.memberof.replace( '.' + match[ 1 ], '' ),
+			memberof: doclet.memberof.replace( '.' + match[ 1 ], '' )
 		} );
 	}
 

@@ -37,7 +37,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 								},
 								minify: true
 							} )
-						},
+						}
 					]
 				},
 				{

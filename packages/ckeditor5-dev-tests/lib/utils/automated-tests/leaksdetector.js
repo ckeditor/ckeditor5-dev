@@ -8,10 +8,12 @@
 ( function() {
 	let lastDomElementsCount;
 
+	// eslint-disable-next-line mocha/no-top-level-hooks
 	beforeEach( () => {
 		lastDomElementsCount = document.body.childElementCount;
 	} );
 
+	// eslint-disable-next-line mocha/no-top-level-hooks
 	afterEach( () => {
 		if ( document.body.childElementCount !== lastDomElementsCount ) {
 			const leaksCount = document.body.childElementCount - lastDomElementsCount;

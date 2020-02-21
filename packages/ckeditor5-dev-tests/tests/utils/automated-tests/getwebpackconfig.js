@@ -46,7 +46,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 	it( 'should return webpack configutation with istanbul loader', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
 			coverage: true,
-			files: [ '**/*.js' ],
+			files: [ '**/*.js' ]
 		} );
 
 		const istanbulLoader = webpackConfig.module.rules
@@ -71,9 +71,9 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			files: [
 				[
 					'node_modules/ckeditor5-utils/tests/**/*.js',
-					'node_modules/ckeditor-utils/tests/**/*.js',
+					'node_modules/ckeditor-utils/tests/**/*.js'
 				]
-			],
+			]
 		} );
 
 		const istanbulLoader = webpackConfig.module.rules
@@ -85,7 +85,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		] );
 	} );
 
-	it( 'should return webpack configutation with istanbul loader containing include regexp', () => {
+	it( 'should return webpack configutation with istanbul loader containing include regexp (exclude pattern)', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
 			coverage: true,
 			files: [
@@ -93,7 +93,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 					'node_modules/ckeditor5-!(utils)/tests/**/*.js',
 					'node_modules/ckeditor-!(utils)/tests/**/*.js'
 				]
-			],
+			]
 		} );
 
 		const istanbulLoader = webpackConfig.module.rules

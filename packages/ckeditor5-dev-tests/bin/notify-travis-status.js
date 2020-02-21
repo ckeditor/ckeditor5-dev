@@ -81,7 +81,7 @@ const data = {
 					title: 'Repository (branch)',
 					value: [
 						`<https://github.com/${ owner }/${ repo }|${ repo }>`,
-						`(<https://github.com/${ owner }/${ repo }/tree/${ buildBranch }|${ buildBranch }>)`,
+						`(<https://github.com/${ owner }/${ repo }/tree/${ buildBranch }|${ buildBranch }>)`
 					].join( ' ' ),
 					short: true
 				},
@@ -104,9 +104,9 @@ const data = {
 					title: 'Commit message',
 					value: getFormattedMessage( process.env.TRAVIS_COMMIT_MESSAGE, owner, repo ),
 					short: false
-				},
+				}
 			]
-		},
+		}
 	]
 };
 

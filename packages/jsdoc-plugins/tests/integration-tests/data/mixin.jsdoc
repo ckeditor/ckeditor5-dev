@@ -19,7 +19,7 @@ const EmitterMixin = {
 	 */
 	on( event, callback, options = {} ) {
 		this.listenTo( this, event, callback, options );
-	},
+	}
 };
 
 export default EmitterMixin;

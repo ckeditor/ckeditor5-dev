@@ -71,7 +71,7 @@ describe( 'download', () => {
 
 		resources = [
 			{ slug: 'ckeditor5-core' },
-			{ slug: 'ckeditor5-ui' },
+			{ slug: 'ckeditor5-ui' }
 		];
 
 		resourcesDetails = {
@@ -127,7 +127,7 @@ describe( 'download', () => {
 
 		resources = [
 			{ slug: 'ckeditor5-core' },
-			{ slug: 'ckeditor5-ui' },
+			{ slug: 'ckeditor5-ui' }
 		];
 
 		// jscs:disable requireCamelCaseOrUpperCaseIdentifiers

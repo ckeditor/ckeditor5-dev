@@ -22,7 +22,7 @@ module.exports = function parseFiles() {
 			require.resolve( '../../../lib/longname-fixer/longname-fixer' ),
 			require.resolve( '../../../lib/event-extender/event-extender' ),
 
-			require.resolve( './logger' ),
+			require.resolve( './logger' )
 		],
 		source: {
 			include: files

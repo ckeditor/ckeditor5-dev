@@ -57,7 +57,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					info: sandbox.stub(),
 					warning: sandbox.stub(),
 					error: sandbox.stub()
-				},
+				}
 			};
 
 			generateChangelogFromCommits = proxyquire( '../../../lib/release-tools/utils/generatechangelogfromcommits', {

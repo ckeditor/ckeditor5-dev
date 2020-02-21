@@ -46,7 +46,7 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 					filename: 'interface.js'
 				},
 				longname: '#destroy',
-				name: 'destroy',
+				name: 'destroy'
 			}
 		} );
 
@@ -73,7 +73,7 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 					filename: 'editormixin.js'
 				},
 				longname: '#destroy',
-				name: 'destroy',
+				name: 'destroy'
 			}
 		} );
 
@@ -101,8 +101,8 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 				},
 				longname: 'module:someModule~SomeOtherClass#destroy',
 				memberof: 'module:someModule~SomeOtherClass',
-				name: 'destroy',
-			},
+				name: 'destroy'
+			}
 		} );
 
 		expect( result.doclet.memberof ).to.be.equal( 'module:someModule~SomeOtherClass' );
@@ -128,8 +128,8 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 					filename: 'editor.js'
 				},
 				longname: '~Editor#name',
-				name: 'name',
-			},
+				name: 'name'
+			}
 		} );
 
 		expect( result.doclet.longname ).to.be.equal( 'module:editor~Editor#name' );
@@ -146,7 +146,7 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 				meta: {
 					path: '/',
 					filename: 'editor.js'
-				},
+				}
 			},
 			doclet: {
 				kind: 'event',
@@ -157,7 +157,7 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 				name: 'blur',
 				longname: 'event:blur',
 				memberof: 'module:editor~Editor'
-			},
+			}
 		} );
 
 		expect( result.doclet.longname ).to.be.equal(
@@ -175,7 +175,7 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 				meta: {
 					path: '/',
 					filename: 'editor.js'
-				},
+				}
 			},
 			doclet: {
 				kind: 'event',
@@ -186,7 +186,7 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 				name: 'event:blur',
 				longname: 'module:editor2~Editor#event:blur',
 				memberof: 'module:editor2~Editor'
-			},
+			}
 		} );
 
 		expect( result.doclet.longname ).to.be.equal(
@@ -204,7 +204,7 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 				meta: {
 					path: '/',
 					filename: 'editor.js'
-				},
+				}
 			},
 			doclet: {
 				kind: 'function',
@@ -216,7 +216,7 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 				fires: [ 'event:execute' ],
 				longname: 'module:editor~Editor#execute',
 				memberof: 'module:editor~Editor'
-			},
+			}
 		} );
 
 		expect( result.doclet.fires[ 0 ] ).to.be.equal(
@@ -234,7 +234,7 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 				meta: {
 					path: '/',
 					filename: 'editor.js'
-				},
+				}
 			},
 			doclet: {
 				kind: 'function',
@@ -246,7 +246,7 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 				fires: [ 'change:attribute' ],
 				longname: 'module:editor~Editor#attr',
 				memberof: 'module:editor~Editor'
-			},
+			}
 		} );
 
 		expect( result.doclet.fires[ 0 ] ).to.be.equal(
@@ -264,7 +264,7 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 				meta: {
 					path: '/',
 					filename: 'editor.js'
-				},
+				}
 			},
 			doclet: {
 				kind: 'function',
@@ -276,7 +276,7 @@ describe( 'Long name fix plugin - fixShortRefs()', () => {
 				see: [ '#create' ],
 				longname: 'module:editor~Editor#attr',
 				memberof: 'module:editor~Editor'
-			},
+			}
 		} );
 
 		expect( result.doclet.see[ 0 ] ).to.be.equal(

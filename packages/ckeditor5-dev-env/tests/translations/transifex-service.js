@@ -131,7 +131,7 @@ describe( 'transifex-service', () => {
 				token: 'token',
 				name: 'name',
 				slug: 'slug',
-				content: 'content',
+				content: 'content'
 			} ).then( () => {
 				sinon.assert.calledWith(
 					spy,
@@ -161,7 +161,7 @@ describe( 'transifex-service', () => {
 			return transifexService.putResourceContent( {
 				token: 'token',
 				slug: 'slug',
-				content: 'content',
+				content: 'content'
 			} ).then( () => {
 				sinon.assert.calledWith(
 					spy,
@@ -188,7 +188,7 @@ describe( 'transifex-service', () => {
 
 			return transifexService.getResourceDetails( {
 				token: 'token',
-				slug: 'slug',
+				slug: 'slug'
 			} ).then( () => {
 				sinon.assert.calledWith(
 					spy,

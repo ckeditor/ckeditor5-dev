@@ -103,7 +103,7 @@ describe( 'webpack-plugin/ckeditor5-env-utils', () => {
 			expect( newLoaders ).to.deep.equal( [
 				{
 					loader: originalPath.normalize( originalPath.join( __dirname, '../lib/translatesourceloader.js' ) ),
-					options,
+					options
 				}
 			] );
 		} );
@@ -131,7 +131,7 @@ describe( 'webpack-plugin/ckeditor5-env-utils', () => {
 
 			expect( newLoaders ).to.deep.equal( [ {
 				loader: path.normalize( path.join( __dirname, '..\\lib\\translatesourceloader.js' ) ),
-				options,
+				options
 			} ] );
 		} );
 
@@ -167,7 +167,7 @@ describe( 'webpack-plugin/ckeditor5-env-utils', () => {
 
 			expect( newLoaders ).does.deep.equal( [ {
 				loader: path.normalize( path.join( __dirname, '../lib/translatesourceloader.js' ) ),
-				options,
+				options
 			} ] );
 		} );
 	} );

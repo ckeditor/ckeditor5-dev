@@ -50,12 +50,12 @@ function fixShortRefsInLongnameAndMemeberof( options ) {
 	if ( firstNameChar === '~' ) {
 		doclet = assign( {}, doclet, {
 			memberof: lastInterfaceOrClass.memberof + '~' + lastInterfaceOrClass.name,
-			longname: lastInterfaceOrClass.memberof + doclet.longname,
+			longname: lastInterfaceOrClass.memberof + doclet.longname
 		} );
 	} else if ( firstNameChar === '#' ) {
 		doclet = assign( {}, doclet, {
 			memberof: lastInterfaceOrClass.longname,
-			longname: lastInterfaceOrClass.longname + doclet.longname,
+			longname: lastInterfaceOrClass.longname + doclet.longname
 		} );
 	}
 
@@ -63,12 +63,12 @@ function fixShortRefsInLongnameAndMemeberof( options ) {
 	if ( doclet.kind === 'event' && !doclet.name.includes( 'event' ) && doclet.longname.includes( 'module:' ) ) {
 		doclet = assign( {}, doclet, {
 			memberof: lastInterfaceOrClass.longname,
-			longname: lastInterfaceOrClass.longname + '#event:' + doclet.name,
+			longname: lastInterfaceOrClass.longname + '#event:' + doclet.name
 		} );
 	} else if ( doclet.kind === 'event' && !doclet.longname.includes( 'module:' ) ) {
 		doclet = assign( {}, doclet, {
 			memberof: lastInterfaceOrClass.longname,
-			longname: lastInterfaceOrClass.longname + '#' + doclet.longname,
+			longname: lastInterfaceOrClass.longname + '#' + doclet.longname
 		} );
 	}
 

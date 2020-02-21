@@ -199,7 +199,7 @@ describe( 'translations', () => {
 				translationService._dictionary = {
 					pl: {
 						Cancel: 'Anuluj',
-						Save: 'Zapisz',
+						Save: 'Zapisz'
 					},
 					en: {
 						Cancel: 'Cancel',
@@ -256,7 +256,7 @@ describe( 'translations', () => {
 				translationService._dictionary = {
 					pl: {
 						Cancel: 'Anuluj',
-						Save: 'Zapisz',
+						Save: 'Zapisz'
 					}
 				};
 
@@ -285,7 +285,7 @@ describe( 'translations', () => {
 				translationService._dictionary = {
 					pl: {
 						Cancel: 'Anuluj',
-						Save: 'Zapisz',
+						Save: 'Zapisz'
 					}
 				};
 
@@ -328,7 +328,7 @@ describe( 'translations', () => {
 				translationService._dictionary = {
 					pl: {
 						Cancel: 'Anuluj',
-						Save: 'Zapisz',
+						Save: 'Zapisz'
 					}
 				};
 
@@ -385,7 +385,7 @@ describe( 'translations', () => {
 					pl: {
 						Cancel: 'Anuluj',
 						Save: 'Zapisz',
-						Close: 'Zamknij',
+						Close: 'Zamknij'
 					}
 				};
 
@@ -421,7 +421,7 @@ describe( 'translations', () => {
 				translationService._dictionary = {
 					pl: {
 						Cancel: 'Anuluj',
-						Save: 'Zapisz',
+						Save: 'Zapisz'
 					}
 				};
 
@@ -450,7 +450,7 @@ describe( 'translations', () => {
 
 			it( 'should use output directory', () => {
 				const translationService = new MultipleLanguageTranslationService( 'pl', {
-					additionalLanguages: [ 'en' ],
+					additionalLanguages: [ 'en' ]
 				} );
 				const spy = sandbox.spy();
 

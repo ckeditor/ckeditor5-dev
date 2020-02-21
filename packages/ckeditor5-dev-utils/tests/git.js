@@ -85,7 +85,7 @@ describe( 'utils', () => {
 				expect( urlInfo.branch ).to.equal( 't/122' );
 			} );
 
-			it( 'should parse full GitHub URL (git)', () => {
+			it( 'should parse full GitHub URL (git@)', () => {
 				const urlInfo = git.parseRepositoryUrl( 'git@github.com:ckeditor/ckeditor5-core.git' );
 
 				expect( urlInfo.server ).to.equal( 'git@github.com:' );
@@ -95,7 +95,7 @@ describe( 'utils', () => {
 				expect( urlInfo.branch ).to.equal( 'master' );
 			} );
 
-			it( 'should parse full GitHub URL (git)', () => {
+			it( 'should parse full GitHub URL (git://)', () => {
 				const urlInfo = git.parseRepositoryUrl( 'git://github.com/ckeditor/ckeditor5-core.git' );
 
 				expect( urlInfo.server ).to.equal( 'git://github.com/' );

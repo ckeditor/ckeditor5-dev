@@ -52,7 +52,7 @@ module.exports = postcss.plugin( 'postcss-ckeditor5-theme-importer', ( pluginOpt
 					require( './themelogger' )()
 				]
 			},
-			root, result,
+			root, result
 		} );
 
 		return importThemeFile( options );

@@ -32,7 +32,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			generateChangelogFromCommits: sandbox.stub(),
 			getPackageJson: sandbox.stub(),
 			changelogUtils: {
-				changelogFile: 'CHANGELOG.md',
+				changelogFile: 'CHANGELOG.md'
 			},
 			getNewReleaseType: sandbox.stub(),
 			displayCommits: sandbox.stub(),
@@ -200,7 +200,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 					'/ckeditor5-dev/packages/ckeditor5-dev-bar'
 				] ),
 				matched: new Set( [
-					'/ckeditor5-dev/packages/ckeditor5-dev-foo',
+					'/ckeditor5-dev/packages/ckeditor5-dev-foo'
 				] )
 			} );
 
@@ -252,7 +252,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 			stubs.getSubPackagesPaths.returns( {
 				skipped: new Set(),
 				matched: new Set( [
-					'/ckeditor5-dev/packages/ckeditor5-dev-foo',
+					'/ckeditor5-dev/packages/ckeditor5-dev-foo'
 				] )
 			} );
 

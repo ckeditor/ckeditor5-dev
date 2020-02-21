@@ -48,10 +48,10 @@ describe( 'dev-env/release-tools/tasks', () => {
 			},
 			versionUtils: {
 				getLastFromChangelog: sandbox.stub(),
-				getCurrent: sandbox.stub(),
+				getCurrent: sandbox.stub()
 			},
 			cliUtils: {
-				provideVersion: sandbox.stub(),
+				provideVersion: sandbox.stub()
 			},
 			changelogUtils: {
 				getChangelog: sandbox.stub(),

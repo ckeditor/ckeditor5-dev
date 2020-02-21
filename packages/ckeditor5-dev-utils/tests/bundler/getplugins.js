@@ -31,7 +31,7 @@ describe( 'bundler', () => {
 		it( 'does not duplicate plugins with the same name', () => {
 			const plugins = getPlugins( [
 				'@ckeditor/ckeditor5-essentials/src/essentials',
-				'ckeditor5-foo/src/essentials',
+				'ckeditor5-foo/src/essentials'
 			] );
 
 			expect( plugins ).to.have.property( 'EssentialsPlugin', '@ckeditor/ckeditor5-essentials/src/essentials' );

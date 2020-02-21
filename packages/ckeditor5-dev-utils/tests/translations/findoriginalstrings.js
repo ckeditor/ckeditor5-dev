@@ -19,7 +19,7 @@ describe( 'findOriginalStrings', () => {
 				info: sandbox.stub(),
 				warning: sandbox.stub(),
 				error: sandbox.stub()
-			},
+			}
 		};
 
 		findOriginalStrings = proxyquire( '../../lib/translations/findoriginalstrings', {

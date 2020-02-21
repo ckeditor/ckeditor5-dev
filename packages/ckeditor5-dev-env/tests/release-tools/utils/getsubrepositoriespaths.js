@@ -127,7 +127,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				dependencies: {
 					'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core',
 					'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',
-					'@ckeditor/ckeditor5-utils': 'ckeditor/ckeditor5-utils',
+					'@ckeditor/ckeditor5-utils': 'ckeditor/ckeditor5-utils'
 				}
 			} );
 			getPackageJsonStub.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-core' } );
@@ -162,7 +162,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				dependencies: {
 					'@ckeditor/ckeditor5-core': 'ckeditor/ckeditor5-core',
 					'@ckeditor/ckeditor5-engine': 'ckeditor/ckeditor5-engine',
-					'@ckeditor/ckeditor5-utils': 'ckeditor/ckeditor5-utils',
+					'@ckeditor/ckeditor5-utils': 'ckeditor/ckeditor5-utils'
 				}
 			} );
 			getPackageJsonStub.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-core' } );
@@ -186,7 +186,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				'ckeditor5-engine',
 				'ckeditor5-utils',
 				'ckeditor5-build-classic',
-				'ckeditor5-build-inline',
+				'ckeditor5-build-inline'
 			] );
 
 			const options = {
@@ -234,7 +234,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				'ckeditor5-engine',
 				'ckeditor5-utils',
 				'ckeditor5-build-classic',
-				'ckeditor5-build-inline',
+				'ckeditor5-build-inline'
 			] );
 
 			const options = {
@@ -284,7 +284,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				'ckeditor5-engine',
 				'ckeditor5-utils',
 				'ckeditor5-build-classic',
-				'ckeditor5-build-inline',
+				'ckeditor5-build-inline'
 			] );
 
 			const options = {
@@ -330,7 +330,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		it( 'allows returning the main repository only (skipMainRepository=false)', () => {
 			const options = {
 				cwd: '/tmp',
-				packages: null,
+				packages: null
 			};
 
 			const pathsCollection = getSubRepositoriesPaths( options );

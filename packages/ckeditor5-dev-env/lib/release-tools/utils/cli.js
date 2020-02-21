@@ -45,7 +45,7 @@ const cli = {
 			message,
 			type: 'confirm',
 			name: 'confirm',
-			default: true,
+			default: true
 		};
 
 		return inquirer.prompt( [ confirmQuestion ] )
@@ -95,7 +95,7 @@ const cli = {
 			message,
 			type: 'confirm',
 			name: 'confirm',
-			default: true,
+			default: true
 		};
 
 		return inquirer.prompt( [ confirmQuestion ] )
@@ -112,7 +112,7 @@ const cli = {
 			message: 'Remove created archives?',
 			type: 'confirm',
 			name: 'confirm',
-			default: true,
+			default: true
 		};
 
 		return inquirer.prompt( [ confirmQuestion ] )
@@ -309,12 +309,12 @@ const cli = {
 			type: 'confirm',
 			name: 'confirm',
 			prefix: getPrefix( indentLevel ),
-			default: haveMajorBreakingChangeCommits,
+			default: haveMajorBreakingChangeCommits
 		};
 
 		return inquirer.prompt( [ confirmQuestion ] )
 			.then( answers => answers.confirm );
-	},
+	}
 };
 
 module.exports = cli;

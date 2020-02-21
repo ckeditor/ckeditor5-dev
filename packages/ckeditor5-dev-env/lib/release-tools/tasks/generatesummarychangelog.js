@@ -138,7 +138,7 @@ module.exports = function generateSummaryChangelog( options ) {
 					dependencies,
 					newVersion: version,
 					currentVersion: packageJson.version,
-					repositoryUrl: packageJson.repository.url.replace( /\.git$/, '' ),
+					repositoryUrl: packageJson.repository.url.replace( /\.git$/, '' )
 				} );
 
 				// Additional notes for changelog generated from commits should be added if any dependency has been added or changed.
@@ -368,7 +368,7 @@ module.exports = function generateSummaryChangelog( options ) {
 		const entries = [
 			// eslint-disable-next-line max-len
 			`## [${ options.newVersion }](${ options.repositoryUrl }/compare/v${ options.currentVersion }...v${ options.newVersion }) (${ date })`,
-			'',
+			''
 		];
 
 		const allowBreakingChangeInMinor = areBreakingChangesAcceptableInVersion( options.newVersion );
