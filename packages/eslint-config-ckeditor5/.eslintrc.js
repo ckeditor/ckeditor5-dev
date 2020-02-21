@@ -116,6 +116,7 @@ module.exports = {
 				'properties': 'never'
 			}
 		],
+		'comma-dangle': [ 'error', 'never' ],
 		'comma-spacing': [
 			'error',
 			{
