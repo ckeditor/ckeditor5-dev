@@ -271,9 +271,9 @@ module.exports = {
 		'arrow-spacing': 'error',
 		// This is too pedantic. It makes writing callbacks such as `value => value ? 1 : 2` impossible
 		// 'no-confusing-arrow': 'error',
-		"generator-star-spacing": [
-			"error",
-			"after"
+		'generator-star-spacing': [
+			'error',
+			'after'
 		],
 		'no-duplicate-imports': 'error',
 		'no-useless-computed-key': 'error',
@@ -294,9 +294,9 @@ module.exports = {
 			'error',
 			'always'
 		],
-		"yield-star-spacing": [
-			"error",
-			"after"
+		'yield-star-spacing': [
+			'error',
+			'after'
 		],
 		'ckeditor5-rules/no-relative-imports': 'error',
 		'mocha/handle-done-callback': 'error',
