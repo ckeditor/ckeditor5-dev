@@ -97,7 +97,9 @@ function createEntryFile( globPatterns, production ) {
 		throw new Error( 'Not found files to tests. Specified patterns are invalid.' );
 	}
 
-	allFiles.push( path.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetector.js' ).replace( /\\/g, '/' ) );
+	// Inject the leak detector root hooks. Need to be split into two parts due to #598.
+	allFiles.splice( 0, 0, path.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ).replace( /\\/g, '/' ) );
+	allFiles.push( path.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ).replace( /\\/g, '/' ) );
 
 	const entryFileContent = allFiles
 		.map( file => 'import "' + file + '";' );

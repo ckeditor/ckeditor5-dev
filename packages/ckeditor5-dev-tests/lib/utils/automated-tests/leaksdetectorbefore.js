@@ -1,0 +1,10 @@
+/**
+ * @license Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+/* global document */
+
+beforeEach( function() {
+	this._lastDomElementsCount = document.body.childElementCount;
+} );
