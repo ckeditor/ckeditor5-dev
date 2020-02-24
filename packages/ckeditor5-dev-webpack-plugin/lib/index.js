@@ -5,8 +5,7 @@
 
 'use strict';
 
-// const chalk = /** @type {import('chalk').default} */ ( /** @type {any} */ ( require( 'chalk' ) ) );
-const chalk = require( 'chalk' ).default;
+const chalk = require( 'chalk' );
 const serveTranslations = require( './servetranslations' );
 const SingleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/singlelanguagetranslationservice' );
 const MultipleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/multiplelanguagetranslationservice' );

@@ -31,7 +31,9 @@ module.exports = function createDictionaryFromPoFileContent( poFileContent ) {
 			value = value[ 0 ];
 		}
 
-		localeData[ key ] = value;
+		if ( value ) {
+			localeData[ key ] = value;
+		}
 	}
 
 	const pluralForms = po.headers[ 'Plural-Forms' ];

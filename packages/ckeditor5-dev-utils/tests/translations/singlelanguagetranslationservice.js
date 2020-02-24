@@ -50,7 +50,7 @@ describe( 'translations', () => {
 
 				fileContents = {
 					[ pathToTranslations ]: [
-						'msgctxt "Label for the Save button."',
+						'msgctxt "Toolbar"',
 						'msgid "Save"',
 						'msgstr "Zapisz"',
 						''
@@ -59,7 +59,7 @@ describe( 'translations', () => {
 
 				translationService.loadPackage( 'pathToPackage' );
 
-				expect( translationService._dictionary ).to.deep.equal( { 'Save': 'Zapisz' } );
+				expect( translationService._dictionary ).to.deep.equal( { 'toolbar|save': 'Zapisz' } );
 			} );
 
 			it( 'should do nothing if the po file does not exist', () => {

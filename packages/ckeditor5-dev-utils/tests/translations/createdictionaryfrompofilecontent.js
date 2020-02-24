@@ -14,25 +14,25 @@ describe( 'translations', () => {
 		// More functional rather than unit test to check whole conversion process.
 		it( 'should parse content and return js object with key - value pairs', () => {
 			const result = createDicitionaryFromPoFileContent( [
-				'msgctxt "Label for the Save button."',
+				'msgctxt "Toolbar"',
 				'msgid "Save"',
 				'msgstr "Zapisz"',
 				'',
-				'msgctxt "Label for the Cancel button."',
+				'msgctxt "Toolbar"',
 				'msgid "Cancel"',
 				'msgstr "Anuluj"',
 				''
 			].join( '\n' ) );
 
 			expect( result ).to.deep.equal( {
-				Save: 'Zapisz',
-				Cancel: 'Anuluj'
+				'toolbar|save': 'Zapisz',
+				'toolbar|cancel': 'Anuluj'
 			} );
 		} );
 
 		it( 'should skip the objects that do not contain msgstr property', () => {
 			const result = createDicitionaryFromPoFileContent( [
-				'msgctxt "Label for the Save button."',
+				'msgctxt "Toolbar"',
 				'msgid "Save"',
 				'msgstr ""',
 				'',

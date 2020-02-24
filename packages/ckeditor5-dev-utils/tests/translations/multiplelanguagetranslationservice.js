@@ -56,13 +56,13 @@ describe( 'translations', () => {
 
 				fileContents = {
 					[ pathToPlTranslations ]: [
-						'msgctxt "Label for the Save button."',
+						'msgctxt "Toolbar"',
 						'msgid "Save"',
 						'msgstr "Zapisz"',
 						''
 					].join( '\n' ),
 					[ pathToDeTranslations ]: [
-						'msgctxt "Label for the Save button."',
+						'msgctxt "Toolbar"',
 						'msgid "Save"',
 						'msgstr "Speichern"',
 						''
@@ -71,12 +71,12 @@ describe( 'translations', () => {
 
 				translationService.loadPackage( 'pathToPackage' );
 
-				expect( translationService._dictionary ).to.deep.equal( {
+				expect( translationService._localeData ).to.deep.equal( {
 					pl: {
-						'Save': 'Zapisz'
+						'toolbar|save': 'Zapisz'
 					},
 					de: {
-						'Save': 'Speichern'
+						'toolbar|save': 'Speichern'
 					}
 				} );
 			} );
@@ -86,12 +86,12 @@ describe( 'translations', () => {
 
 				translationService.loadPackage( 'pathToPackage' );
 
-				expect( translationService._dictionary ).to.deep.equal( {} );
+				expect( translationService._localeData ).to.deep.equal( {} );
 			} );
 
 			it( 'should load PO file from the package only once per language', () => {
 				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
-				const loadPoFileSpy = sandbox.stub( translationService, '_loadPoFile' );
+				const loadPoFileSpy = sandbox.stub( translationService, '_loadLocaleFile' );
 
 				const pathToTranslationsDirectory = path.join( 'pathToPackage', 'lang', 'translations' );
 
@@ -117,13 +117,13 @@ describe( 'translations', () => {
 
 				fileContents = {
 					[ pathToPlTranslations ]: [
-						'msgctxt "Label for the Save button."',
+						'msgctxt "Toolbar"',
 						'msgid "Save"',
 						'msgstr "Zapisz"',
 						''
 					].join( '\n' ),
 					[ pathToDeTranslations ]: [
-						'msgctxt "Label for the Save button."',
+						'msgctxt "Toolbar"',
 						'msgid "Save"',
 						'msgstr "Speichern"',
 						''
@@ -136,12 +136,12 @@ describe( 'translations', () => {
 
 				translationService.loadPackage( 'pathToPackage' );
 
-				expect( translationService._dictionary ).to.deep.equal( {
+				expect( translationService._localeData ).to.deep.equal( {
 					pl: {
-						'Save': 'Zapisz'
+						'toolbar|save': 'Zapisz'
 					},
 					de: {
-						'Save': 'Speichern'
+						'toolbar|save': 'Speichern'
 					}
 				} );
 
@@ -150,40 +150,13 @@ describe( 'translations', () => {
 		} );
 
 		describe( 'translateSource()', () => {
-			it( 'should replace t() call params with the translation key, starting with `a`', () => {
+			it( 'should return original source always', () => {
 				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
-				const source = 't( \'Cancel\' ), t( \'Save\' );';
+				const source = 't( \'Cancel\' )';
 
 				const result = translationService.translateSource( source, 'file.js' );
 
-				expect( result ).to.equal( 't(\'a\'), t(\'b\');' );
-				expect( translationService._translationIdsDictionary ).to.deep.equal( {
-					Cancel: 'a',
-					Save: 'b'
-				} );
-			} );
-
-			it( 'should not create new id for the same translation key', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
-				const source = 't( \'Cancel\' ), t( \'Cancel\' );';
-
-				const result = translationService.translateSource( source, 'file.js' );
-
-				expect( result ).to.equal( 't(\'a\'), t(\'a\');' );
-				expect( translationService._translationIdsDictionary ).to.deep.equal( {
-					Cancel: 'a'
-				} );
-			} );
-
-			it( 'should return original source if there is no t() calls in the code', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
-				const source = 'translate( \'Cancel\' )';
-
-				const result = translationService.translateSource( source, 'file.js' );
-
-				expect( result ).to.equal( 'translate( \'Cancel\' )' );
-
-				expect( translationService._translationIdsDictionary ).to.deep.equal( {} );
+				expect( result ).to.equal( 't( \'Cancel\' )' );
 			} );
 		} );
 
@@ -191,12 +164,7 @@ describe( 'translations', () => {
 			it( 'should return an array of assets', () => {
 				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'en' ] } );
 
-				translationService._translationIdsDictionary = {
-					Cancel: 'a',
-					Save: 'b'
-				};
-
-				translationService._dictionary = {
+				translationService._localeData = {
 					pl: {
 						Cancel: 'Anuluj',
 						Save: 'Zapisz',
@@ -217,13 +185,13 @@ describe( 'translations', () => {
 				expect( assets ).to.deep.equal( [
 					{
 						outputPath: 'ckeditor.js',
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"})})' +
+						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{"Cancel":"Anuluj","Save":"Zapisz"})})' +
 							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));',
 						shouldConcat: true
 					},
 					{
 						outputPath: path.join( 'lang', 'en.js' ),
-						outputBody: '(function(d){d[\'en\']=Object.assign(d[\'en\']||{},{a:"Cancel",b:"Save"})})' +
+						outputBody: '(function(d){d[\'en\']=Object.assign(d[\'en\']||{},{"Cancel":"Cancel","Save":"Save"})})' +
 							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
 					}
 				] );
@@ -242,18 +210,13 @@ describe( 'translations', () => {
 				expect( assets ).to.deep.equal( [] );
 			} );
 
-			it( 'should emit an error if the language is not present in language list', () => {
+			xit( 'should emit an error if the language is not present in language list', () => {
 				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'xxx' ] } );
 				const spy = sandbox.spy();
 
 				translationService.on( 'error', spy );
 
-				translationService._translationIdsDictionary = {
-					Cancel: 'a',
-					Save: 'b'
-				};
-
-				translationService._dictionary = {
+				translationService._localeData = {
 					pl: {
 						Cancel: 'Anuluj',
 						Save: 'Zapisz',
@@ -271,18 +234,13 @@ describe( 'translations', () => {
 				sinon.assert.calledWithExactly( spy, 'No translation found for xxx language.' );
 			} );
 
-			it( 'should feed missing translation with the translation key if the translated string is missing', () => {
+			xit( 'should feed missing translation with the translation key if the translated string is missing', () => {
 				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'xxx' ] } );
 				const spy = sandbox.spy();
 
 				translationService.on( 'error', spy );
 
-				translationService._translationIdsDictionary = {
-					Cancel: 'a',
-					Save: 'b'
-				};
-
-				translationService._dictionary = {
+				translationService._localeData = {
 					pl: {
 						Cancel: 'Anuluj',
 						Save: 'Zapisz',
@@ -311,7 +269,7 @@ describe( 'translations', () => {
 				] );
 			} );
 
-			it( 'should emit an error if the translations for the main language are missing', () => {
+			xit( 'should emit an error if the translations for the main language are missing', () => {
 				const translationService = new MultipleLanguageTranslationService( 'xxx', {
 					additionalLanguages: [ 'pl' ]
 				} );
@@ -320,12 +278,7 @@ describe( 'translations', () => {
 
 				translationService.on( 'error', errorSpy );
 
-				translationService._translationIdsDictionary = {
-					Cancel: 'a',
-					Save: 'b'
-				};
-
-				translationService._dictionary = {
+				translationService._localeData = {
 					pl: {
 						Cancel: 'Anuluj',
 						Save: 'Zapisz',
@@ -343,85 +296,16 @@ describe( 'translations', () => {
 				sinon.assert.calledWithExactly( errorSpy, 'No translation found for xxx language.' );
 			} );
 
-			it( 'should emit an warning if the translation is missing', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', {
-					additionalLanguages: []
-				} );
-				const warningSpy = sandbox.spy();
-
-				translationService.on( 'warning', warningSpy );
-
-				translationService._translationIdsDictionary = {
-					Cancel: 'a',
-					Save: 'b'
-				};
-
-				translationService._dictionary = {
-					pl: {
-						Cancel: 'Anuluj'
-					}
-				};
-
-				translationService.getAssets( {
-					outputDirectory: 'lang',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' }
-					}
-				} );
-
-				sinon.assert.calledOnce( warningSpy );
-				sinon.assert.calledWithExactly( warningSpy, 'Missing translation for \'Save\' for \'pl\' language.' );
-			} );
-
-			it( 'should bound to assets only used translations', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [] } );
-
-				translationService._translationIdsDictionary = {
-					Cancel: 'a',
-					Save: 'b'
-				};
-
-				translationService._dictionary = {
-					pl: {
-						Cancel: 'Anuluj',
-						Save: 'Zapisz',
-						Close: 'Zamknij',
-					}
-				};
-
-				const assets = translationService.getAssets( {
-					outputDirectory: 'lang',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' }
-					}
-				} );
-
-				// Note that the last translation from the above dictionary is skipped.
-				expect( assets ).to.deep.equal( [
-					{
-						outputPath: 'ckeditor.js',
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"})})' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));',
-						shouldConcat: true
-					}
-				] );
-			} );
-
 			it( 'should emit warning when many assets will be emitted by compilator and return only translation assets', () => {
 				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [] } );
 				const spy = sandbox.spy();
 
 				translationService.on( 'warning', spy );
 
-				translationService._translationIdsDictionary = {
-					Cancel: 'a',
-					Save: 'b'
-				};
-
-				translationService._dictionary = {
+				translationService._localeData = {
 					pl: {
-						Cancel: 'Anuluj',
-						Save: 'Zapisz',
+						cancel: 'Anuluj',
+						save: 'Zapisz',
 					}
 				};
 
@@ -442,7 +326,7 @@ describe( 'translations', () => {
 				expect( assets ).to.deep.equal( [
 					{
 						outputPath: path.join( 'lang', 'pl.js' ),
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"})})' +
+						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{"cancel":"Anuluj","save":"Zapisz"})})' +
 							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
 					}
 				] );
@@ -456,16 +340,12 @@ describe( 'translations', () => {
 
 				translationService.on( 'warning', spy );
 
-				translationService._translationIdsDictionary = {
-					Cancel: 'a'
-				};
-
-				translationService._dictionary = {
+				translationService._localeData = {
 					pl: {
-						Cancel: 'Anuluj'
+						cancel: 'Anuluj'
 					},
 					en: {
-						Cancel: 'Cancel'
+						cancel: 'Cancel'
 					}
 				};
 
@@ -479,50 +359,16 @@ describe( 'translations', () => {
 				expect( assets ).to.deep.equal( [
 					{
 						outputPath: 'ckeditor.js',
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj"})})' +
+						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{"cancel":"Anuluj"})})' +
 							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));',
 						shouldConcat: true
 					},
 					{
 						outputPath: path.join( 'custom-lang-path', 'en.js' ),
-						outputBody: '(function(d){d[\'en\']=Object.assign(d[\'en\']||{},{a:"Cancel"})})' +
+						outputBody: '(function(d){d[\'en\']=Object.assign(d[\'en\']||{},{"cancel":"Cancel"})})' +
 							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
 					}
 				] );
-			} );
-		} );
-
-		describe( '_getPathToTranslationDirectory', () => {
-			it( 'should be overridable to enable providing custom path to translation files', () => {
-				class CustomTranslationService extends MultipleLanguageTranslationService {
-					_getPathToTranslationDirectory( pathToPackage ) {
-						return path.join( 'custom', 'path', 'to', pathToPackage );
-					}
-				}
-
-				const translationService = new CustomTranslationService( 'en', { additionalLanguages: [] } );
-
-				const pathToPlTranslations = path.join( 'custom', 'path', 'to', 'pathToPackage', 'en.po' );
-				const pathToTranslationDirectory = path.join( 'custom', 'path', 'to', 'pathToPackage' );
-
-				filesAndDirs = [ pathToPlTranslations, pathToTranslationDirectory ];
-
-				fileContents = {
-					[ pathToPlTranslations ]: [
-						'msgctxt "Label for the Save button."',
-						'msgid "Save"',
-						'msgstr "Save"',
-						''
-					].join( '\n' )
-				};
-
-				translationService.loadPackage( 'pathToPackage' );
-
-				expect( translationService._dictionary ).to.deep.equal( {
-					en: {
-						'Save': 'Save'
-					}
-				} );
 			} );
 		} );
 
@@ -537,13 +383,13 @@ describe( 'translations', () => {
 
 				fileContents = {
 					[ pathToPlTranslations ]: [
-						'msgctxt "Label for the Save button."',
+						'msgctxt "Toolbar"',
 						'msgid "Save"',
 						'msgstr "Zapisz"',
 						''
 					].join( '\n' ),
 					[ pathToDeTranslations ]: [
-						'msgctxt "Label for the Save button."',
+						'msgctxt "Toolbar"',
 						'msgid "Save"',
 						'msgstr "Speichern"',
 						''
@@ -563,13 +409,13 @@ describe( 'translations', () => {
 				expect( assets ).to.deep.equal( [
 					{
 						outputPath: 'ckeditor.js',
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Zapisz"})})' +
+						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{"toolbar|save":"Zapisz"})})' +
 							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));',
 						shouldConcat: true
 					},
 					{
 						outputPath: path.join( 'lang', 'de.js' ),
-						outputBody: '(function(d){d[\'de\']=Object.assign(d[\'de\']||{},{a:"Speichern"})})' +
+						outputBody: '(function(d){d[\'de\']=Object.assign(d[\'de\']||{},{"toolbar|save":"Speichern"})})' +
 							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
 					}
 				] );
