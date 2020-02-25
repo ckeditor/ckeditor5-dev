@@ -134,4 +134,18 @@ describe( 'dev-tests/utils', () => {
 			] );
 		} );
 	} );
+
+	describe( 'keep ./ paths intact', () => {
+		it( 'for automated tests', () => {
+			expect( transformFileOptionToTestGlob( './tests/**/*.js' ) ).to.deep.equal( [
+				'./tests/**/*.js'
+			] );
+		} );
+
+		it( 'for manual tests', () => {
+			expect( transformFileOptionToTestGlob( './tests/**/manual/*.js', true ) ).to.deep.equal( [
+				'./tests/**/manual/*.js'
+			] );
+		} );
+	} );
 } );
