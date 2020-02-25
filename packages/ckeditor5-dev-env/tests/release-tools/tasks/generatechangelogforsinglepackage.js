@@ -20,7 +20,7 @@ describe( 'dev-env/release-tools/tasks', () => {
 
 			stubs = {
 				changelogUtils: {
-					changelogFile: changelogUtils.changelogFile,
+					changelogFile: changelogUtils.changelogFile
 				},
 				getNewReleaseType: sandbox.stub(),
 				displayCommits: sandbox.stub(),

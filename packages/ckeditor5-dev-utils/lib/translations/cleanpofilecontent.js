@@ -21,7 +21,7 @@ module.exports = function cleanPoFileContent( poFileContent ) {
 	po.headers = {
 		Language: po.headers.Language,
 		'Language-Team': po.headers[ 'Language-Team' ],
-		'Plural-Forms': po.headers[ 'Plural-Forms' ],
+		'Plural-Forms': po.headers[ 'Plural-Forms' ]
 	};
 
 	// Clean comments.
@@ -37,7 +37,7 @@ module.exports = function cleanPoFileContent( poFileContent ) {
 		'',
 		'                  To learn more, check out the official contributor\'s guide:',
 		'    https://ckeditor.com/docs/ckeditor5/latest/framework/guides/contributing/contributing.html',
-		'',
+		''
 	];
 
 	return po.toString();

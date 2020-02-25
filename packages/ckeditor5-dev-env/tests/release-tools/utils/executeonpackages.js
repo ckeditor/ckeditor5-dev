@@ -36,7 +36,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			const packages = new Set( [
 				'/packages/ckeditor5-core',
-				'/packages/ckeditor5-engine',
+				'/packages/ckeditor5-engine'
 			] );
 
 			return executeOnPackages( packages, functionToExecute )
@@ -63,7 +63,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			const packages = new Set( [
 				'/packages/ckeditor5-core',
-				'/packages/ckeditor5-engine',
+				'/packages/ckeditor5-engine'
 			] );
 
 			return executeOnPackages( packages, functionToExecute )

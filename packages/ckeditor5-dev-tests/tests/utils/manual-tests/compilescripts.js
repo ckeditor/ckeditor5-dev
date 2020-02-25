@@ -151,7 +151,7 @@ describe( 'compileManualTestScripts', () => {
 
 	it( 'compiles only manual test files', () => {
 		const manualTestScriptsPatterns = [
-			'ckeditor5-build-classic/tests/**/*.js',
+			'ckeditor5-build-classic/tests/**/*.js'
 		];
 
 		stubs.glob.onFirstCall().returns( [
@@ -181,11 +181,11 @@ describe( 'compileManualTestScripts', () => {
 		stubs.pathSep.value( '\\' );
 
 		const manualTestScriptsPatterns = [
-			'ckeditor5-build-classic/tests/**/*.js',
+			'ckeditor5-build-classic/tests/**/*.js'
 		];
 
 		stubs.glob.onFirstCall().returns( [
-			'ckeditor5-build-classic\\tests\\manual\\ckeditor.js',
+			'ckeditor5-build-classic\\tests\\manual\\ckeditor.js'
 		] );
 
 		return compileManualTestScripts( {

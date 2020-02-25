@@ -244,12 +244,12 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			it( 'attaches additional commit description with correct indent', () => {
 				const commitDescription = [
 					'* Release task - rebuilt module for collecting dependencies to release.',
-					'* Used `semver` package for bumping the version (instead of a custom module).',
+					'* Used `semver` package for bumping the version (instead of a custom module).'
 				];
 
 				const commitDescriptionWithIndents = [
 					'  * Release task - rebuilt module for collecting dependencies to release.',
-					'  * Used `semver` package for bumping the version (instead of a custom module).',
+					'  * Used `semver` package for bumping the version (instead of a custom module).'
 				].join( '\n' );
 
 				const rawCommit = {

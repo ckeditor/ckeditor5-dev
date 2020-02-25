@@ -31,7 +31,7 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 		};
 		templateOptions = {
 			data: {
-				root: rootOptions,
+				root: rootOptions
 			}
 		};
 	} );

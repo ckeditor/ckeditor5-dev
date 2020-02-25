@@ -8,5 +8,5 @@
 module.exports = {
 	runAutomatedTests: require( './tasks/runautomatedtests' ),
 	runManualTests: require( './tasks/runmanualtests' ),
-	parseArguments: require( './utils/automated-tests/parsearguments' ),
+	parseArguments: require( './utils/automated-tests/parsearguments' )
 };

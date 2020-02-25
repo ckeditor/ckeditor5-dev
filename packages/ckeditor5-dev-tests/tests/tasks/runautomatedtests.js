@@ -44,7 +44,7 @@ beforeEach( () => {
 		stubs = {
 			fs: {
 				writeFileSync: sandbox.stub(),
-				utimesSync: sandbox.stub(),
+				utimesSync: sandbox.stub()
 			},
 			log: {
 				info: sandbox.stub(),
@@ -75,7 +75,7 @@ beforeEach( () => {
 				karmaServerStart: sandbox.stub()
 			},
 			getKarmaConfig: sandbox.stub(),
-			transformFileOptionToTestGlob: sandbox.stub(),
+			transformFileOptionToTestGlob: sandbox.stub()
 		};
 
 		sandbox.stub( process, 'cwd' ).returns( '/workspace' );
@@ -94,7 +94,7 @@ beforeEach( () => {
 
 		runAutomatedTests = proxyquire( '../../lib/tasks/runautomatedtests', {
 			fs: stubs.fs,
-			glob: stubs.glob,
+			glob: stubs.glob
 		} );
 	} );
 
@@ -162,14 +162,14 @@ beforeEach( () => {
 		const options = {
 			files: [
 				'basic-foo',
-				'bar-core',
+				'bar-core'
 			],
 			production: true
 		};
 
 		stubs.transformFileOptionToTestGlob.onFirstCall().returns( [
 			'/workspace/packages/ckeditor5-basic-foo/tests/**/*.js',
-			'/workspace/packages/ckeditor-basic-foo/tests/**/*.js',
+			'/workspace/packages/ckeditor-basic-foo/tests/**/*.js'
 		] );
 
 		stubs.transformFileOptionToTestGlob.onSecondCall().returns( [

@@ -144,7 +144,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			let json = {
 				dependencies: {
 					'package-deps-a': '^1.0.0',
-					'package-deps-b': '^1.0.0',
+					'package-deps-b': '^1.0.0'
 				},
 				devDependencies: {
 					'package-dev-a': '^2.0.0'

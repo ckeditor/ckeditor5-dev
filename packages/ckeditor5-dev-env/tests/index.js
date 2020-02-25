@@ -41,7 +41,7 @@ describe( 'dev-env/index', () => {
 				generateChangelogForSubPackages: sandbox.stub(),
 				generateChangelogForSubRepositories: sandbox.stub(),
 				generateSummaryChangelog: sandbox.stub(),
-				bumpVersions: sandbox.stub(),
+				bumpVersions: sandbox.stub()
 			}
 		};
 
@@ -182,7 +182,7 @@ describe( 'dev-env/index', () => {
 			return tasks.uploadTranslations().then( () => {
 				sinon.assert.calledOnce( stubs.translations.upload );
 				sinon.assert.alwaysCalledWithExactly( stubs.translations.upload, {
-					token: 'token',
+					token: 'token'
 				} );
 			} );
 		} );
@@ -195,7 +195,7 @@ describe( 'dev-env/index', () => {
 			return tasks.downloadTranslations().then( () => {
 				sinon.assert.calledOnce( stubs.translations.download );
 				sinon.assert.alwaysCalledWithExactly( stubs.translations.download, {
-					token: 'token',
+					token: 'token'
 				} );
 			} );
 		} );

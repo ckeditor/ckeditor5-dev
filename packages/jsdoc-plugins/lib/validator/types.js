@@ -61,7 +61,7 @@ const GENERIC_TYPES = [
 
 	// Object that contains next() method and satisfies the Iterator protocol.
 	// https://developer.mozilla.org/pl/docs/Web/JavaScript/Reference/Iteration_protocols
-	'Iterator',
+	'Iterator'
 ];
 
 module.exports = {

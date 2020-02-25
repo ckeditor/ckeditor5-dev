@@ -20,7 +20,8 @@ module.exports = {
 		sinon: true
 	},
 	plugins: [
-		'ckeditor5-rules'
+		'ckeditor5-rules',
+		'mocha'
 	],
 	rules: {
 		// ## Possible errors
@@ -115,6 +116,7 @@ module.exports = {
 				'properties': 'never'
 			}
 		],
+		'comma-dangle': [ 'error', 'never' ],
 		'comma-spacing': [
 			'error',
 			{
@@ -269,9 +271,9 @@ module.exports = {
 		'arrow-spacing': 'error',
 		// This is too pedantic. It makes writing callbacks such as `value => value ? 1 : 2` impossible
 		// 'no-confusing-arrow': 'error',
-		"generator-star-spacing": [
-			"error",
-			"after"
+		'generator-star-spacing': [
+			'error',
+			'after'
 		],
 		'no-duplicate-imports': 'error',
 		'no-useless-computed-key': 'error',
@@ -292,10 +294,19 @@ module.exports = {
 			'error',
 			'always'
 		],
-		"yield-star-spacing": [
-			"error",
-			"after"
+		'yield-star-spacing': [
+			'error',
+			'after'
 		],
-		'ckeditor5-rules/no-relative-imports': 'error'
+		'ckeditor5-rules/no-relative-imports': 'error',
+		'mocha/handle-done-callback': 'error',
+		'mocha/no-async-describe': 'error',
+		'mocha/no-exclusive-tests': 'error',
+		'mocha/no-global-tests': 'error',
+		'mocha/no-identical-title': 'warn',
+		'mocha/no-nested-tests': 'error',
+		'mocha/no-pending-tests': 'error',
+		'mocha/no-sibling-hooks': 'error',
+		'mocha/no-top-level-hooks': 'error'
 	}
 };

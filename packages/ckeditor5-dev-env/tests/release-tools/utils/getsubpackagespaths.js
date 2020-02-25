@@ -67,7 +67,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			getDirectoriesStub.returns( [
 				'ckeditor5-core',
 				'ckeditor5-engine',
-				'ckeditor5-utils',
+				'ckeditor5-utils'
 			] );
 
 			const options = {
@@ -125,7 +125,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				'ckeditor5-engine',
 				'ckeditor5-utils',
 				'ckeditor5-build-classic',
-				'ckeditor5-build-inline',
+				'ckeditor5-build-inline'
 			] );
 
 			const options = {
@@ -161,7 +161,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				'ckeditor5-engine',
 				'ckeditor5-utils',
 				'ckeditor5-build-classic',
-				'ckeditor5-build-inline',
+				'ckeditor5-build-inline'
 			] );
 
 			const options = {

@@ -143,7 +143,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 				stubs.getChangedFilesForCommit.returns( [
 					'packages/ckeditor5-dev-env/README.md',
-					'packages/ckeditor5-dev-env/package.json',
+					'packages/ckeditor5-dev-env/package.json'
 				] );
 
 				stubs.transformCommitForSubRepositoryFactory.reset();
@@ -210,7 +210,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 				stubs.getChangedFilesForCommit.returns( [
 					'packages/ckeditor5-dev-env/README.md',
-					'packages/ckeditor5-dev-env/package.json',
+					'packages/ckeditor5-dev-env/package.json'
 				] );
 
 				const commit = transformCommitForSubPackage( rawCommit, context );

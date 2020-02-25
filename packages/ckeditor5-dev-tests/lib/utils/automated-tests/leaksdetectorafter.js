@@ -5,6 +5,7 @@
 
 /* global window, document */
 
+// eslint-disable-next-line mocha/no-top-level-hooks
 afterEach( function() {
 	if ( document.body.childElementCount !== this._lastDomElementsCount ) {
 		const leaksCount = document.body.childElementCount - this._lastDomElementsCount;

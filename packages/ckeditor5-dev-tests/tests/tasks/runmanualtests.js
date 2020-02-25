@@ -204,7 +204,7 @@ describe( 'runManualTests', () => {
 						'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
 					],
 					language: 'pl',
-					additionalLanguages: [ 'ar', 'en' ],
+					additionalLanguages: [ 'ar', 'en' ]
 				} );
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );

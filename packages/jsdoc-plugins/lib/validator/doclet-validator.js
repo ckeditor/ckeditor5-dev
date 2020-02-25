@@ -119,7 +119,7 @@ class DocletValidator {
 	_lintParams() {
 		const collections = [
 			...this._collection.get( 'function' ),
-			...this._collection.get( 'class' ),
+			...this._collection.get( 'class' )
 		]
 			.filter( el => !!el.params );
 
@@ -315,7 +315,7 @@ class DocletValidator {
 	 */
 	_addError( doclet, errorMessage ) {
 		this._errors.push( Object.assign( {
-			message: errorMessage,
+			message: errorMessage
 		}, this._getErrorData( doclet ) ) );
 	}
 
@@ -327,7 +327,7 @@ class DocletValidator {
 		return {
 			parent: doclet.memberof,
 			line: doclet.meta.lineno,
-			file: doclet.meta.path + '/' + doclet.meta.filename,
+			file: doclet.meta.path + '/' + doclet.meta.filename
 		};
 	}
 

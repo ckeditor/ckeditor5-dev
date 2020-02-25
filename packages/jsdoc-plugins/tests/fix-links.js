@@ -21,7 +21,7 @@ describe( 'Long name fix plugin - formatLinks()', () => {
 		const doclet = formatLinksInDoclet( {
 			comment: 'Creates {@link ~EditorInterface} instance',
 			description: '<p>Creates {@link ~EditorInterface} instance</p>',
-			memberof: 'module:ckeditor5/editor/editorinterface',
+			memberof: 'module:ckeditor5/editor/editorinterface'
 		} );
 
 		expect( doclet.comment ).to.be.equal(
@@ -35,7 +35,7 @@ describe( 'Long name fix plugin - formatLinks()', () => {
 	it( 'formatLinks() hash', () => {
 		const doclet = formatLinksInDoclet( {
 			comment: 'Method {@link #create} creates instance',
-			memberof: 'module:ckeditor5/editor/editorinterface~EditorInterface',
+			memberof: 'module:ckeditor5/editor/editorinterface~EditorInterface'
 		} );
 
 		expect( doclet.comment ).to.be.equal(
@@ -46,7 +46,7 @@ describe( 'Long name fix plugin - formatLinks()', () => {
 	it( 'formatLinks() with link description', () => {
 		const doclet = formatLinksInDoclet( {
 			comment: 'Creates {@link ~EditorInterface editor} instance with a given name.',
-			memberof: 'module:ckeditor5/editor/editorinterface',
+			memberof: 'module:ckeditor5/editor/editorinterface'
 		} );
 
 		expect( doclet.comment ).to.be.equal(
@@ -57,7 +57,7 @@ describe( 'Long name fix plugin - formatLinks()', () => {
 	it( 'formatLinks() with more complicated path', () => {
 		const doclet = formatLinksInDoclet( {
 			comment: 'Method {@link ~EditorInterface#create create} creates Editor',
-			memberof: 'module:ckeditor5/editor/editorinterface',
+			memberof: 'module:ckeditor5/editor/editorinterface'
 		} );
 
 		expect( doclet.comment ).to.be.equal(
@@ -69,7 +69,7 @@ describe( 'Long name fix plugin - formatLinks()', () => {
 		const doclet = formatLinksInDoclet( {
 			comment: '',
 			description: 'You can later destroy it with {@link ~EditorInterface#destroy}',
-			memberof: 'module:ckeditor5/editor/editorinterface',
+			memberof: 'module:ckeditor5/editor/editorinterface'
 		} );
 
 		expect( doclet.description ).to.be.equal(
@@ -80,7 +80,7 @@ describe( 'Long name fix plugin - formatLinks()', () => {
 	it( 'formatLinks() multiple links', () => {
 		const doclet = formatLinksInDoclet( {
 			comment: '{@link #destroy} {@link #destroy}',
-			memberof: 'module:editor/editorinterface',
+			memberof: 'module:editor/editorinterface'
 		} );
 
 		expect( doclet.comment ).to.be.equal(
@@ -91,7 +91,7 @@ describe( 'Long name fix plugin - formatLinks()', () => {
 	it( 'formatLinks() link to parent: class / interface', () => {
 		const doclet = formatLinksInDoclet( {
 			comment: '{@link ~EditorInterface}',
-			memberof: 'module:editor/editorinterface~EditorInterface',
+			memberof: 'module:editor/editorinterface~EditorInterface'
 		} );
 
 		expect( doclet.comment ).to.be.equal(
@@ -102,7 +102,7 @@ describe( 'Long name fix plugin - formatLinks()', () => {
 	it( 'formatLinks() with multi-word link', () => {
 		const doclet = formatLinksInDoclet( {
 			comment: 'Creates {@link ~EditorInterface some editor} instance with a given name.',
-			memberof: 'module:ckeditor5/editor/editorinterface',
+			memberof: 'module:ckeditor5/editor/editorinterface'
 		} );
 
 		expect( doclet.comment ).to.be.equal(
@@ -116,10 +116,10 @@ describe( 'Long name fix plugin - formatLinks()', () => {
 			doclet: {
 				kind: 'error',
 				comment: 'The {@link #constructor source} of a rect in an HTML element',
-				description: '<p>The {@link #constructor source} of a rect in an HTML element</p>',
+				description: '<p>The {@link #constructor source} of a rect in an HTML element</p>'
 			},
 			lastInterfaceOrClass: {
-				longname: 'module:ckeditor5-utils/dom/rect~Rect',
+				longname: 'module:ckeditor5-utils/dom/rect~Rect'
 			}
 		};
 
@@ -127,10 +127,10 @@ describe( 'Long name fix plugin - formatLinks()', () => {
 			doclet: {
 				kind: 'error',
 				comment: 'The {@link module:ckeditor5-utils/dom/rect~Rect#constructor source} of a rect in an HTML element',
-				description: '<p>The {@link module:ckeditor5-utils/dom/rect~Rect#constructor source} of a rect in an HTML element</p>',
+				description: '<p>The {@link module:ckeditor5-utils/dom/rect~Rect#constructor source} of a rect in an HTML element</p>'
 			},
 			lastInterfaceOrClass: {
-				longname: 'module:ckeditor5-utils/dom/rect~Rect',
+				longname: 'module:ckeditor5-utils/dom/rect~Rect'
 			}
 		} );
 	} );

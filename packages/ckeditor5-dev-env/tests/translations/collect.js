@@ -29,7 +29,7 @@ describe( 'collect', () => {
 				createPotFileHeader: sandbox.stub(),
 				createPotFileContent: sandbox.stub(),
 				savePotFile: sandbox.spy(),
-				removeExistingPotFiles: sandbox.spy(),
+				removeExistingPotFiles: sandbox.spy()
 			}
 		};
 

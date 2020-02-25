@@ -34,15 +34,13 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				exec( 'git config user.email "ckeditor5@ckeditor.com"' );
 				exec( 'git config user.name "CKEditor5 CI"' );
 			}
+
+			getChangedFilesForCommit = require( '../../../../lib/release-tools/utils/transform-commit/getchangedfilesforcommit' );
 		} );
 
 		afterEach( () => {
 			exec( `rm -rf ${ path.join( tmpCwd, '.git' ) }` );
 			exec( `rm -rf ${ path.join( tmpCwd, '*' ) }` );
-		} );
-
-		beforeEach( () => {
-			getChangedFilesForCommit = require( '../../../../lib/release-tools/utils/transform-commit/getchangedfilesforcommit' );
 		} );
 
 		it( 'returns files for initial commit', () => {
@@ -61,7 +59,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				'2.txt',
 				'3.txt',
 				'4.txt',
-				'5.txt',
+				'5.txt'
 			] );
 		} );
 
@@ -85,7 +83,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( files ).to.deep.equal( [
 				'2.js',
 				'3.js',
-				'4.js',
+				'4.js'
 			] );
 		} );
 
@@ -114,7 +112,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 			expect( files ).to.deep.equal( [
 				'5.json',
-				'6.json',
+				'6.json'
 			] );
 		} );
 
@@ -153,7 +151,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 
 			expect( files ).to.deep.equal( [
 				'5.json',
-				'6.json',
+				'6.json'
 			] );
 		} );
 	} );

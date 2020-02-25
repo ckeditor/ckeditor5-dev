@@ -51,7 +51,7 @@ describe( 'collect-utils', () => {
 		it( 'should collect info about t() calls', () => {
 			const fileContents = {
 				'/ckeditor5-core/file1.js': 't( \'Bold\' );',
-				'/ckeditor5-utils/file2.js': 't( \'Italic [context: italic style]\' );',
+				'/ckeditor5-utils/file2.js': 't( \'Italic [context: italic style]\' );'
 			};
 
 			originalStringMap = {
@@ -84,13 +84,13 @@ describe( 'collect-utils', () => {
 				key: 'Bold',
 				package: 'ckeditor5-core',
 				context: null,
-				sentence: 'Bold',
+				sentence: 'Bold'
 			}, {
 				filePath: '/ckeditor5-utils/file2.js',
 				key: 'Italic [context: italic style]',
 				package: 'ckeditor5-utils',
 				context: 'italic style',
-				sentence: 'Italic',
+				sentence: 'Italic'
 			} ] );
 		} );
 	} );
@@ -125,7 +125,7 @@ describe( 'collect-utils', () => {
 		it( 'should return an error when ckeditor5-core is missing', () => {
 			const contexts = new Map();
 			const translations = [ {
-				package: 'ckeditor5-utils',
+				package: 'ckeditor5-utils'
 			} ];
 			const errors = utils.getMissingContextErrorMessages( contexts, translations );
 

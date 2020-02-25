@@ -62,7 +62,7 @@ describe( 'upload', () => {
 	it( 'should create and update resources on the Transifex', () => {
 		packageNames = [
 			'ckeditor5-core',
-			'ckeditor5-ui',
+			'ckeditor5-ui'
 		];
 
 		serverResources = [ {
@@ -71,7 +71,7 @@ describe( 'upload', () => {
 
 		fileContents = {
 			'workspace/ckeditor5/build/.transifex/ckeditor5-ui/en.pot': '# ckeditor-ui en.pot content',
-			'workspace/ckeditor5/build/.transifex/ckeditor5-core/en.pot': '# ckeditor-core en.pot content',
+			'workspace/ckeditor5/build/.transifex/ckeditor5-core/en.pot': '# ckeditor-core en.pot content'
 		};
 
 		return upload( { token: 'secretToken' } )

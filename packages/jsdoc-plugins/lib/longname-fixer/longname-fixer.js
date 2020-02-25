@@ -36,5 +36,5 @@ const docletHandler = ( () => {
 } )();
 
 exports.handlers = {
-	newDoclet: docletHandler,
+	newDoclet: docletHandler
 };

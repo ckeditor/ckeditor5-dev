@@ -176,7 +176,7 @@ const utils = {
 					key: originalString,
 					package: packageMatch[ 1 ],
 					context: contextMatch ? contextMatch[ 1 ] : null,
-					sentence: sentenceMatch[ 0 ].trim(),
+					sentence: sentenceMatch[ 0 ].trim()
 				};
 			} )
 			.filter( translationCall => !!translationCall );

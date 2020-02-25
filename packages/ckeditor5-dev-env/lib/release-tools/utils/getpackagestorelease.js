@@ -39,7 +39,7 @@ module.exports = function getPackagesToRelease( pathsToPackages ) {
 		if ( gitVersion !== changelogVersion ) {
 			packagesToRelease.set( repositoryName, {
 				previousVersion: packageJson.version,
-				version: changelogVersion,
+				version: changelogVersion
 			} );
 		}
 

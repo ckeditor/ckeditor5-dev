@@ -49,5 +49,5 @@ module.exports = [
 			'classA'
 		],
 		mixesNested: [ 'mixinA' ]
-	},
+	}
 ];

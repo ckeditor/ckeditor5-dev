@@ -36,7 +36,7 @@ describe( 'bundler', () => {
 				editor: '@ckeditor/ckeditor5-editor-classic/src/editor',
 				config: {
 					undo: {
-						step: 3,
+						step: 3
 					},
 					toolbar: [
 						'image'
