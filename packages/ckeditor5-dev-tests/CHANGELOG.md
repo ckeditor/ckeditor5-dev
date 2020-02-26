@@ -1,6 +1,11 @@
 Changelog
 =========
 
+## [18.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@18.0.1...@ckeditor/ckeditor5-dev-tests@18.0.3) (2020-02-26)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+
 ## [18.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@18.0.0...@ckeditor/ckeditor5-dev-tests@18.0.1) (2020-01-27)
 
 ### Bug fixes

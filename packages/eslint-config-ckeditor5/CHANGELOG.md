@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [2.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@2.0.1...eslint-config-ckeditor5@2.1.0) (2020-02-26)
+
+### Features
+
+* Add "eslint-plugin-mocha" rules to the default ESLint configuration and configure `dangling-coma` rule. Closes [#481](https://github.com/ckeditor/ckeditor5-dev/issues/481). Closes [ckeditor/ckeditor5#6246](https://github.com/ckeditor/ckeditor5/issues/6246). ([0bd390a](https://github.com/ckeditor/ckeditor5-dev/commit/0bd390a))
+
+
 ## [2.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/eslint-config-ckeditor5@2.0.0...eslint-config-ckeditor5@2.0.1) (2020-01-09)
 
 Internal changes only (updated dependencies, documentation, etc.).
