@@ -27,7 +27,7 @@ const depCheckOptions = {
 		'*.vue': depCheck.parser.vue
 	},
 	ignoreDirs: [ 'docs', 'build' ],
-	ignoreMatches: [ 'eslint', 'eslint-plugin-ckeditor5-rules', 'husky', 'lint-staged', 'webpack-cli' ]
+	ignoreMatches: [ 'eslint', 'eslint-plugin-ckeditor5-rules', 'eslint-plugin-mocha', 'husky', 'lint-staged', 'webpack-cli' ]
 };
 
 if ( Array.isArray( packageJson.depcheckIgnore ) ) {
