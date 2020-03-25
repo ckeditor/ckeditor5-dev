@@ -72,7 +72,8 @@ $ npm t -- -w --files=engine/view
 Test specified files in `ckeditor5-basic-styles` on two browsers (Chrome and Firefox) you can use:
 
 ```bash
-$ npm t -- --browsers=chrome,firefox --files=basic-styles/boldengine.js,basic-styles/italicengine.js
+$ npm t -- --browsers=Chrome,Firefox --files=basic-styles/boldengine.js,basic
+-styles/italicengine.js
 ```
 
 Test all installed packages:
