@@ -28,7 +28,15 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 					// test: **/ckeditor5-*/theme/**/*.css
 					test: /\.css$/,
 					use: [
-						'style-loader',
+						{
+							loader: 'style-loader',
+							options: {
+								injectType: 'singletonStyleTag',
+								attributes: {
+									'data-cke': true
+								}
+							}
+						},
 						{
 							loader: 'postcss-loader',
 							options: getPostCssConfig( {
