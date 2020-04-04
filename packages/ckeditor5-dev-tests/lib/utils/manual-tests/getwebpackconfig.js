@@ -55,7 +55,13 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 					test: /\.css$/,
 					use: [
 						{
-							loader: 'style-loader'
+							loader: 'style-loader',
+							options: {
+								injectType: 'singletonStyleTag',
+								attributes: {
+									'data-cke': true
+								}
+							}
 						},
 						{
 							loader: 'postcss-loader',
