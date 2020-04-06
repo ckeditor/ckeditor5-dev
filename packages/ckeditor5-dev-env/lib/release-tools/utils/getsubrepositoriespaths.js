@@ -32,19 +32,19 @@ const getPackageJson = require( './getpackagejson' );
  * @returns {PathsCollection}
  */
 module.exports = function getSubRepositoriesPaths( options ) {
-	const collection = {
+	const pathsCollection = {
 		matched: new Set(),
 		skipped: new Set()
 	};
 
 	if ( options.skipMainRepository ) {
-		collection.skipped.add( options.cwd );
+		pathsCollection.skipped.add( options.cwd );
 	} else {
-		collection.matched.add( options.cwd );
+		pathsCollection.matched.add( options.cwd );
 	}
 
 	if ( !options.packages ) {
-		return collection;
+		return pathsCollection;
 	}
 
 	const packagesPath = path.join( options.cwd, options.packages );
@@ -60,16 +60,16 @@ module.exports = function getSubRepositoriesPaths( options ) {
 			const dependencyName = getPackageJson( dependencyPath ).name;
 
 			if ( isValidPackage( dependencyName ) ) {
-				collection.matched.add( dependencyPath );
+				pathsCollection.matched.add( dependencyPath );
 			} else {
-				collection.skipped.add( dependencyPath );
+				pathsCollection.skipped.add( dependencyPath );
 			}
 		} catch ( err ) {
 			console.warn( `Missing "package.json file in "${ dependencyPath }". Skipping.` );
 		}
 	}
 
-	return collection;
+	return pathsCollection;
 
 	function isValidPackage( packageName ) {
 		if ( !dependencies.includes( packageName ) ) {

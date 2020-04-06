@@ -9,28 +9,28 @@ const path = require( 'path' );
 const chalk = require( 'chalk' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const cli = require( '../utils/cli' );
+const versions = require( '../utils/versions' );
+const changelog = require( '../utils/changelog' );
 const displaySkippedPackages = require( '../utils/displayskippedpackages' );
 const executeOnPackages = require( '../utils/executeonpackages' );
-const { getChangesForVersion } = require( '../utils/changelog' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getPackagesToRelease = require( '../utils/getpackagestorelease' );
-const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
+const getSubPackagesPaths = require( '../utils/getsubpackagespaths' );
 const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
 const validatePackageToRelease = require( '../utils/validatepackagetorelease' );
 
 const BREAK_RELEASE_MESSAGE = 'You aborted updating versions. Why? Oh why?!';
 
 /**
- * Updates version of all sub-repositories found in specified path.
+ * Updates version of all subpackages found in specified path.
  *
  * This task does:
- *   - finds paths to sub repositories,
- *   - filters packages which versions should be updated,
+ *   - finds paths to subpackages,
  *   - updates versions of all dependencies (even if some packages will not be released, its version will be updated in released packages),
  *   - bumps version of all packages.
  *
  * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
- @param {String|null} options.packages Where to look for other packages (dependencies). If `null`, only repository specified under
+ * @param {String|null} options.packages Where to look for other packages (dependencies). If `null`, only repository specified under
  * `options.cwd` will be used in the task.
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be touched.
  * @param {Boolean} [options.dryRun=false] If set on true, all changes will be printed on the screen. Changes produced by commands like
@@ -44,12 +44,15 @@ module.exports = function bumpVersions( options ) {
 
 	const dryRun = Boolean( options.dryRun );
 
-	const pathsCollection = getSubRepositoriesPaths( {
+	const pathsCollection = getSubPackagesPaths( {
 		cwd: options.cwd,
 		packages: options.packages,
 		skipPackages: options.skipPackages || [],
 		skipMainRepository: options.skipMainRepository
 	} );
+
+	const mainRepositoryVersion = versions.getLastFromChangelog( options.cwd );
+	const mainChangelog = changelog.getChangesForVersion( mainRepositoryVersion );
 
 	logDryRun( '⚠️  DRY RUN mode ⚠️' );
 	logDryRun( 'All changes made by this script will be reverted automatically.' );
@@ -57,14 +60,14 @@ module.exports = function bumpVersions( options ) {
 
 	// In order to avoid setting global variables, every function passes `packages` variable to another function.
 
-	return getPackagesToRelease( pathsCollection.matched )
+	return getPackagesToRelease( pathsCollection.matched, { changes: mainChangelog, version: mainRepositoryVersion } )
 		.then( packages => isAnythingForRelease( packages ) )
 		.then( packages => confirmUpdate( packages ) )
 		.then( packages => prepareDependenciesVersions( packages ) )
 		.then( ( { packages, dependencies } ) => filterPackagesThatWillNotBeReleased( packages, dependencies ) )
 		.then( ( { packages, dependencies } ) => updateDependenciesOfPackages( packages, dependencies ) )
-		.then( packages => getLatestChangesForPackagesThatWillBeReleased( packages ) )
-		.then( packages => validateRepositories( packages ) )
+		.then( packages => updateLatestChangesForMainRepository( packages, mainRepositoryVersion ) )
+		.then( packages => validateRepository( packages ) )
 		.then( packages => bumpVersion( packages ) )
 		.then( () => {
 			process.chdir( cwd );
@@ -185,6 +188,7 @@ module.exports = function bumpVersions( options ) {
 	// @returns {Promise.<Map.<String, ReleaseDetails>>}
 	function updateDependenciesOfPackages( packages, dependencies ) {
 		logProcess( 'Updating dependencies for packages that will be released...' );
+		let hasUpdatedAnyPackage = false;
 
 		return executeOnPackages( pathsCollection.matched, repositoryPath => {
 			process.chdir( repositoryPath );
@@ -202,71 +206,64 @@ module.exports = function bumpVersions( options ) {
 					log.info( chalk.grey( exec( 'git diff --word-diff package.json' ) ) );
 					exec( 'git checkout package.json' );
 				} else {
+					hasUpdatedAnyPackage = true;
+
 					exec( 'git add package.json' );
-					exec( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
 				}
 			}
 
 			return Promise.resolve();
-		} ).then( () => packages );
+		} ).then( () => {
+			process.chdir( cwd );
+
+			if ( hasUpdatedAnyPackage ) {
+				exec( 'git commit -m "Internal: Updated dependencies. [skip ci]"' );
+			}
+
+			return packages;
+		} );
 	}
 
 	// Gather descriptions of the release for all packages.
 	//
 	// @params {Map.<String, ReleaseDetails>} packages
-	// @returns {Promise.<Map.<String, ReleaseDetails>>}
-	function getLatestChangesForPackagesThatWillBeReleased( packages ) {
-		logProcess( 'Gathering changes from changelog for specified versions...' );
+	// @returns {<Map.<String, ReleaseDetails>}
+	function updateLatestChangesForMainRepository( packages, changes ) {
+		logProcess( 'Updating changes for the main repossitory...' );
 
-		return executeOnPackages( pathsCollection.matched, repositoryPath => {
-			process.chdir( repositoryPath );
+		const packageJson = getPackageJson( cwd );
+		const releaseDetails = packages.get( packageJson.name );
 
-			const packageJson = getPackageJson( repositoryPath );
-			const releaseDetails = packages.get( packageJson.name );
+		releaseDetails.changes = changes;
 
-			releaseDetails.changes = getChangesForVersion( releaseDetails.version, repositoryPath );
-
-			return Promise.resolve();
-		} ).then( () => packages );
+		return packages;
 	}
 
-	// Validate the repositories.
+	// Validate the main repository.
 	//
 	// @params {Map.<String, ReleaseDetails>} packages
-	// @returns {Promise.<Map.<String, ReleaseDetails>>}
-	function validateRepositories( packages ) {
-		logProcess( 'Validating the repositories...' );
+	// @returns {Map.<String, ReleaseDetails>}
+	function validateRepository( packages ) {
+		logProcess( 'Validating the main repository...' );
 
-		const errors = [];
+		const mainPackageJson = getPackageJson( options.cwd );
+		const releaseDetails = packages.get( mainPackageJson.name );
 
-		return executeOnPackages( pathsCollection.matched, validateSingleRepository )
-			.then( () => {
-				if ( errors.length ) {
-					errors.forEach( log.error.bind( log ) );
+		const errors = validatePackageToRelease( {
+			changes: releaseDetails.changes,
+			version: releaseDetails.version
+		} );
 
-					throw new Error( 'Updating has been aborted due to errors.' );
-				}
-
-				return packages;
+		if ( errors.length ) {
+			log.error( `‼️  ${ chalk.underline( mainPackageJson.name ) }` );
+			errors.forEach( err => {
+				log.error( '* ' + err );
 			} );
 
-		function validateSingleRepository( repositoryPath ) {
-			process.chdir( repositoryPath );
-
-			const packageJson = getPackageJson( repositoryPath );
-			const releaseDetails = packages.get( packageJson.name );
-			const errorsForPackage = validatePackageToRelease( {
-				changes: releaseDetails.changes,
-				version: releaseDetails.version
-			} );
-
-			if ( errorsForPackage.length ) {
-				errors.push( `‼️  ${ chalk.underline( packageJson.name ) }` );
-				errors.push( ...errorsForPackage.map( err => '* ' + err ) );
-			}
-
-			return Promise.resolve();
+			throw new Error( 'Updating has been aborted due to errors.' );
 		}
+
+		return packages;
 	}
 
 	// Updates versions of packages.
@@ -276,7 +273,39 @@ module.exports = function bumpVersions( options ) {
 	function bumpVersion( packages ) {
 		logProcess( 'Tagging new versions of packages...' );
 
-		return executeOnPackages( pathsCollection.matched, repositoryPath => {
+		let numberOfCommitsBeforeVersioning;
+
+		// Based on number of commits before and after executing `npm version`, we will be able to revert all changes
+		// that have been done. It allows reverting changes done by npm `preversion` and/or `postversion` hooks.
+		if ( dryRun ) {
+			numberOfCommitsBeforeVersioning = Number( exec( 'git rev-list --count HEAD' ) );
+		}
+
+		return executeOnPackages( pathsCollection.matched, bumpVersionForSinglePackage )
+			.then( () => {
+				process.chdir( cwd );
+
+				const packageJson = getPackageJson( cwd );
+				const releaseDetails = packages.get( packageJson.name );
+
+				log.info( '\nCommitting and tagging changes...' );
+
+				exec( `git commit --message "Release: v${ releaseDetails.version }. [skip ci]"` );
+				exec( `git tag v${ releaseDetails.version }` );
+
+				if ( dryRun ) {
+					const numberOfCommitsAfterVersioning = Number( exec( 'git rev-list --count HEAD' ) );
+					const commitsToRevert = numberOfCommitsAfterVersioning - numberOfCommitsBeforeVersioning;
+
+					logDryRun( `Reverting changes made by "npm version". Removing a tag and ${ commitsToRevert } commit(s).` );
+					exec( `git reset --hard HEAD~${ commitsToRevert }` );
+					exec( `git tag -d v${ releaseDetails.version }` );
+				}
+
+				return packages;
+			} );
+
+		function bumpVersionForSinglePackage( repositoryPath ) {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
@@ -284,27 +313,9 @@ module.exports = function bumpVersions( options ) {
 
 			log.info( `\nBumping version for "${ chalk.underline( packageJson.name ) }"...` );
 
-			let numberOfCommitsBeforeVersioning;
-
-			// Based on number of commits before and after executing `npm version`, we will be able to revert all changes
-			// that have been done. It allows reverting changes done by `npm preversion` or `npm postversion` hooks.
-			if ( dryRun ) {
-				numberOfCommitsBeforeVersioning = Number( exec( 'git rev-list --count HEAD' ) );
-			}
-
-			exec( `npm version ${ releaseDetails.version } --message "Release: v${ releaseDetails.version }. [skip ci]"` );
-
-			if ( dryRun ) {
-				const numberOfCommitsAfterVersioning = Number( exec( 'git rev-list --count HEAD' ) );
-				const commitsToRevert = numberOfCommitsAfterVersioning - numberOfCommitsBeforeVersioning;
-
-				logDryRun( `Reverting changes made by "npm version". Removing a tag and ${ commitsToRevert } commit(s).` );
-				exec( `git reset --hard HEAD~${ commitsToRevert }` );
-				exec( `git tag -d v${ releaseDetails.version }` );
-			}
-
-			return Promise.resolve();
-		} ).then( () => packages );
+			exec( `npm version ${ releaseDetails.version } --no-git-tag-version` );
+			exec( 'git add .' );
+		}
 	}
 
 	function exec( command ) {

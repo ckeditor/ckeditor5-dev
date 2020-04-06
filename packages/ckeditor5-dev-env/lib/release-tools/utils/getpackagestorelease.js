@@ -7,15 +7,18 @@
 
 const executeOnPackages = require( './executeonpackages' );
 const getPackageJson = require( './getpackagejson' );
-const versionUtils = require( './versions' );
 
 /**
  * Returns a list of packages which should be releases based on changes in a changelog file and tags created in Git repository.
  *
  * @param {Set} pathsToPackages A collection of paths to packages that should be checked.
+ * @param {Object} options
+ * @param {String} options.changes A description of changes for the main repository. It should contain a script-friendly list that provides
+ * new versions for parsed packages. If didn't find, `options.version` will be used instead.
+ * @param {String} options.version New version for the main repository.
  * @returns {Promise.<Map.<String, ReleaseDetails>>}
  */
-module.exports = function getPackagesToRelease( pathsToPackages ) {
+module.exports = function getPackagesToRelease( pathsToPackages, options ) {
 	const cwd = process.cwd();
 	const packagesToRelease = new Map();
 
@@ -29,23 +32,42 @@ module.exports = function getPackagesToRelease( pathsToPackages ) {
 	function filterPackagesToRelease( repositoryPath ) {
 		process.chdir( repositoryPath );
 
-		const gitVersion = versionUtils.getLastTagFromGit();
-		const changelogVersion = versionUtils.getLastFromChangelog();
 		const packageJson = getPackageJson();
 		const repositoryName = packageJson.name;
 
+		const newVersion = findVersionInChangelog( options.changes, repositoryName ) || options.version;
+
 		// If these versions aren't equal, it means that the package is ready to release
-		// because we assume that a version from changelog is the latest.
-		if ( gitVersion !== changelogVersion ) {
+		// because we assume that a version from `package.json` is the latest.
+		if ( packageJson.version !== newVersion ) {
 			packagesToRelease.set( repositoryName, {
 				previousVersion: packageJson.version,
-				version: changelogVersion
+				version: newVersion
 			} );
 		}
 
 		return Promise.resolve();
 	}
 };
+
+// Search for a new version for specified package in the main changelog description.
+// It must be defined as following:
+//
+//      [packageName](https://www.npmjs.com/package/packageName): v0.0.1 => [v1.0.0](https://github.com/.../releases/tag/v1.0.0)
+//
+// where:
+//   `v0.0.1` is the current version (already published),
+//   `v1.0.0` is the new version what we're looking for.
+//
+// @param {String} changelog Changes.
+// @param {String} packageName Package to look.
+// @returns {String|null} `null` if the version was not found.
+function findVersionInChangelog( changelog, packageName ) {
+	const versionRegexp = new RegExp( `\\[${ packageName.replace( '/', '\\/' ) }\\].*\\[v([\\d.]+)\\]` );
+	const match = changelog.match( versionRegexp );
+
+	return match ? match[ 1 ] : null;
+}
 
 /**
  * @typedef {Object} ReleaseDetails
