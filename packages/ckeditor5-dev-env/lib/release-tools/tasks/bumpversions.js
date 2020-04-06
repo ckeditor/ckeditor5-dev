@@ -231,7 +231,7 @@ module.exports = function bumpVersions( options ) {
 	function updateLatestChangesForMainRepository( packages, changes ) {
 		logProcess( 'Updating changes for the main repossitory...' );
 
-		const packageJson = getPackageJson( cwd );
+		const packageJson = getPackageJson( options.cwd );
 		const releaseDetails = packages.get( packageJson.name );
 
 		releaseDetails.changes = changes;
@@ -283,9 +283,9 @@ module.exports = function bumpVersions( options ) {
 
 		return executeOnPackages( pathsCollection.matched, bumpVersionForSinglePackage )
 			.then( () => {
-				process.chdir( cwd );
+				process.chdir( options.cwd );
 
-				const packageJson = getPackageJson( cwd );
+				const packageJson = getPackageJson( options.cwd );
 				const releaseDetails = packages.get( packageJson.name );
 
 				log.info( '\nCommitting and tagging changes...' );
