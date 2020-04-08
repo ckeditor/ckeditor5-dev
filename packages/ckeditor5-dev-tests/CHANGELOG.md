@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [18.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@18.0.5...@ckeditor/ckeditor5-dev-tests@18.1.0) (2020-04-08)
+
+### Other changes
+
+* The `<style>` element that is being produced by webpack for the editor styles will have the `data-cke="true"` attribute in order to help find CKEditor 5 styles. Closes [ckeditor/ckeditor5#6454](https://github.com/ckeditor/ckeditor5/issues/6454). ([223df34](https://github.com/ckeditor/ckeditor5-dev/commit/223df34))
+
+
 ## [18.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@18.0.4...@ckeditor/ckeditor5-dev-tests@18.0.5) (2020-03-27)
 
 Internal changes only (updated dependencies, documentation, etc.).
