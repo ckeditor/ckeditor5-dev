@@ -2,6 +2,9 @@
 	"extends": "stylelint-config-recommended",
 	"rules": {
 		"at-rule-no-unknown": null,
-		"indentation": "tab"
+		"indentation": "tab",
+		"declaration-property-value-blacklist": {
+			"/color/": ["/^#/", "/^rgb/"]
+		}
 	}
 }
