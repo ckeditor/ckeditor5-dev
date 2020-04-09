@@ -7,7 +7,6 @@
 
 const chalk = require( 'chalk' );
 const serveTranslations = require( './servetranslations' );
-const SingleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/singlelanguagetranslationservice' );
 const MultipleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/multiplelanguagetranslationservice' );
 const ckeditor5EnvUtils = require( './ckeditor5-env-utils' );
 
@@ -46,6 +45,10 @@ module.exports = class CKEditorWebpackPlugin {
 			outputDirectory: options.outputDirectory || 'translations',
 			strict: !!options.strict,
 			verbose: !!options.verbose
+
+			// TODO - source file regexp
+			// TODO - package name regexp
+			// TODO - main package regexp
 		};
 	}
 
@@ -61,7 +64,7 @@ module.exports = class CKEditorWebpackPlugin {
 		const language = this.options.language;
 		let translationService;
 		let compileAllLanguages = false;
-		let additionalLanguages = this.options.additionalLanguages;
+		let additionalLanguages = this.options.additionalLanguages || [];
 
 		if ( typeof additionalLanguages == 'string' ) {
 			if ( additionalLanguages !== 'all' ) {
@@ -72,17 +75,7 @@ module.exports = class CKEditorWebpackPlugin {
 			additionalLanguages = []; // They will be searched in runtime.
 		}
 
-		if ( !additionalLanguages ) {
-			if ( this.options.outputDirectory !== 'translations' && this.options.verbose ) {
-				console.warn( chalk.yellow(
-					'Warning: `outputDirectory` option does not work for one language. It will be ignored.'
-				) );
-			}
-
-			translationService = new SingleLanguageTranslationService( language );
-		} else {
-			translationService = new MultipleLanguageTranslationService( language, { compileAllLanguages, additionalLanguages } );
-		}
+		translationService = new MultipleLanguageTranslationService( language, { compileAllLanguages, additionalLanguages } );
 
 		serveTranslations( compiler, this.options, translationService, ckeditor5EnvUtils );
 	}

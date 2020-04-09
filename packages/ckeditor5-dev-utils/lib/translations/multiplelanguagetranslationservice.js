@@ -7,20 +7,19 @@
 
 const path = require( 'path' );
 const fs = require( 'fs' );
-const createDictionaryFromPoFileContent = require( './createdictionaryfrompofilecontent' );
-const translateSource = require( './translatesource' );
-const ShortIdGenerator = require( './shortidgenerator' );
+const findMessageIds = require( './findmessageids' );
 const { EventEmitter } = require( 'events' );
+const PO = require( 'pofile' );
+const { promisify } = require( 'util' );
+
+const readFile = promisify( fs.readFile );
 
 /**
- * `MultipleLanguageTranslationService` replaces `t()` call params with short ids
- * and provides language assets that can translate those ids to the target languages.
- *
- * `translationKey` - original english string that occur in `t()` call params.
+ * TODO
  */
 module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	/**
-	 * @param {String} language Main language.
+	 * @param {String} language The target language that will be bundled into the main webpack asset.
 	 * @param {Object} options
 	 * @param {Boolean} [options.compileAllLanguages=false] Flag indicates whether the languages are specified
 	 * or should be found at runtime.
@@ -60,26 +59,20 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		this._handledPackages = new Set();
 
 		/**
-		 * language -> translationKey -> targetTranslation dictionary.
+		 * language -> messageId -> translations dictionaries.
 		 *
+		 * @type {Object.<String, Object.<String,Array.<String>>>}
 		 * @private
 		 */
-		this._dictionary = {};
+		this._dictionaries = {};
+
+		this._pluralFormsRules = {};
 
 		/**
-		 * translationKey -> id dictionary gathered from files parsed by loader.
-		 *
-		 * @private
-		 * @type {Object.<String,Object>}
+		 * A set of message ids that were found in parsed source files and will be presented in the editor's UI.
+		 * For each message id we need to find translations (single and possible plural forms) for the target languages.
 		 */
-		this._translationIdsDictionary = {};
-
-		/**
-		 * Id generator that's used to replace translation strings with short ids and generate translation files.
-		 *
-		 * @private
-		 */
-		this._idGenerator = new ShortIdGenerator();
+		this._foundMessageIds = new Set();
 	}
 
 	/**
@@ -88,18 +81,17 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 *
 	 * @fires error
 	 * @param {String} source Source of the file.
-	 * @param {String} fileName File name.
 	 * @returns {String}
 	 */
-	translateSource( source, fileName ) {
-		const translate = originalString => this._getId( originalString );
-		const { output, errors } = translateSource( source, fileName, translate );
+	translateSource( source, sourceFile ) {
+		findMessageIds(
+			source,
+			sourceFile,
+			messageId => this._foundMessageIds.add( messageId ),
+			error => this.emit( 'warning', error )
+		);
 
-		for ( const error of errors ) {
-			this.emit( 'error', error );
-		}
-
-		return output;
+		return source;
 	}
 
 	/**
@@ -172,28 +164,19 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 		if ( compilationAssetNames.length > 1 ) {
 			this.emit( 'warning', [
-				'Because of the many found bundles, none of the bundles will contain the main language.',
-				`You should add it directly to the application from the '${ outputDirectory }${ path.sep }${ this._mainLanguage }.js'.`
+				'Found many webpack assets and CKEditor 5 translations for the main language were added to all of them',
 			].join( '\n' ) );
-
-			return this._getTranslationAssets( outputDirectory, this._languages );
 		}
-
-		const mainAssetName = compilationAssetNames[ 0 ];
-
-		const mainTranslationAsset = this._getTranslationAssets( outputDirectory, [ this._mainLanguage ] )[ 0 ];
-
-		const mergedCompilationAsset = {
-			outputBody: mainTranslationAsset.outputBody,
-			outputPath: mainAssetName,
-			shouldConcat: true
-		};
 
 		const otherLanguages = Array.from( this._languages )
 			.filter( lang => lang !== this._mainLanguage );
 
 		return [
-			mergedCompilationAsset,
+			...compilationAssetNames.map( assetName => ( {
+				outputBody: this._getTranslationAssets( outputDirectory, [ this._mainLanguage ] )[ 0 ].outputBody,
+				outputPath: assetName,
+				shouldConcat: true
+			} ) ),
 			...this._getTranslationAssets( outputDirectory, otherLanguages )
 		];
 	}
@@ -207,22 +190,38 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 */
 	_getTranslationAssets( outputDirectory, languages ) {
 		return Array.from( languages ).map( language => {
-			const translatedStrings = this._getIdToTranslatedStringDictionary( language );
-
 			const outputPath = path.join( outputDirectory, `${ language }.js` );
 
+			if ( !this._dictionaries[ language ] ) {
+				this.emit( 'error', `No translation found for ${ language } language.` );
+
+				return { outputBody, outputPath };
+			}
+
+			const translations = this._getTranslations( language );
+
+			// A plural form is in the form of .pluralForms="nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2)"
+			/** @type {String} */
+			const pluralForms = this._pluralFormsRules[ language ];
+			const pluralFormFunctionBodyMatch = pluralForms.match( /(?:plural=\()(.+)(?:\))/ );
+
+			// Add support for ES5 - this function won't be transpiled.
+			const pluralFormFunction = `function(n){return ${ pluralFormFunctionBodyMatch[ 1 ] };}`;
+
 			// Stringify translations and remove unnecessary `""` around property names.
-			const stringifiedTranslations = JSON.stringify( translatedStrings )
-				.replace( /"([a-z]+)":/g, '$1:' );
+			const stringifiedTranslations = JSON.stringify( translations )
+				.replace( /"([\w_]+)":/g, '$1:' );
 
 			const outputBody = (
 				// We need to ensure that the CKEDITOR_TRANSLATIONS variable exists and if it exists, we need to extend it.
 				// Use ES5 because this bit will not be transpiled!
 				'(function(d){' +
-					`d['${ language }']=Object.assign(` +
-						`d['${ language }']||{},` +
-						`${ stringifiedTranslations }` +
-					')' +
+				`	const l = d['${ language }'] = d['${ language }'] || {};` +
+				`	l.dictionary=Object.assign(` +
+				`		l.dictionary||{},` +
+				`		${ stringifiedTranslations }` +
+				'	);' +
+				`	l.getFormIndex=${ pluralFormFunction };` +
 				'})(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
 			);
 
@@ -235,37 +234,33 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * Use original strings if translated ones are missing.
 	 *
 	 * @private
-	 * @param {String} lang Target language.
-	 * @returns {Object.<String,String>}
+	 * @param {String} language Target language.
+	 * @returns {Object.<String,String|String[]>}
 	 */
-	_getIdToTranslatedStringDictionary( lang ) {
-		let langDictionary = this._dictionary[ lang ];
-
-		if ( !langDictionary ) {
-			this.emit( 'error', `No translation found for ${ lang } language.` );
-
-			// Fallback to the original translation strings.
-			langDictionary = {};
-		}
-
+	_getTranslations( language ) {
+		const langDictionary = this._dictionaries[ language ];
 		const translatedStrings = {};
 
-		for ( const originalString in this._translationIdsDictionary ) {
-			const id = this._translationIdsDictionary[ originalString ];
-			const translatedString = langDictionary[ originalString ];
+		for ( const messageId of this._foundMessageIds ) {
+			const translatedMessage = langDictionary[ messageId ];
 
-			if ( !translatedString ) {
-				this.emit( 'warning', `Missing translation for '${ originalString }' for '${ lang }' language.` );
+			if ( !translatedMessage || translatedMessage.length === 0 ) {
+				// this.emit( 'warning', `Missing translation for '${ messageId }' for '${ language }' language.` );
+
+				continue;
 			}
 
-			translatedStrings[ id ] = translatedString || originalString;
+			// Register only the single form (a string) if no plural form is provided.
+			translatedStrings[ messageId ] = translatedMessage.length > 1 ?
+				translatedMessage :
+				translatedMessage[ 0 ];
 		}
 
 		return translatedStrings;
 	}
 
 	/**
-	 * Load translations from the PO files.
+	 * Load translations from the PO file if that file exists.
 	 *
 	 * @private
 	 * @param {String} language PO file's language.
@@ -276,36 +271,19 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			return;
 		}
 
-		const poFileContent = fs.readFileSync( pathToPoFile, 'utf-8' );
-		const parsedTranslationFile = createDictionaryFromPoFileContent( poFileContent );
+		const parsedTranslationFile = PO.parse( fs.readFileSync( pathToPoFile, 'utf-8' ) );
 
-		if ( !this._dictionary[ language ] ) {
-			this._dictionary[ language ] = {};
+		this._pluralFormsRules[ language ] = this._pluralFormsRules[ language ] || parsedTranslationFile.headers[ 'Plural-Forms' ];
+
+		if ( !this._dictionaries[ language ] ) {
+			this._dictionaries[ language ] = {};
 		}
 
-		const dictionary = this._dictionary[ language ];
+		const dictionary = this._dictionaries[ language ];
 
-		for ( const translationKey in parsedTranslationFile ) {
-			dictionary[ translationKey ] = parsedTranslationFile[ translationKey ];
+		for ( const item of parsedTranslationFile.items ) {
+			dictionary[ item.msgid ] = item.msgstr;
 		}
-	}
-
-	/**
-	 * Return an id for the original string. If it's stored in the `_translationIdsDictionary` return it instead of generating new one.
-	 *
-	 * @private
-	 * @param {String} originalString
-	 * @returns {String}
-	 */
-	_getId( originalString ) {
-		let id = this._translationIdsDictionary[ originalString ];
-
-		if ( !id ) {
-			id = this._idGenerator.getNextId();
-			this._translationIdsDictionary[ originalString ] = id;
-		}
-
-		return id;
 	}
 
 	/**

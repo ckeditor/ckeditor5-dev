@@ -7,7 +7,6 @@
 
 module.exports = {
 	MultipleLanguageTranslationService: require( './multiplelanguagetranslationservice' ),
-	SingleLanguageTranslationService: require( './singlelanguagetranslationservice' ),
 	findOriginalStrings: require( './findoriginalstrings' ),
 	createDictionaryFromPoFileContent: require( './createdictionaryfrompofilecontent' ),
 	cleanPoFileContent: require( './cleanpofilecontent' ),
