@@ -4,7 +4,8 @@
 		"at-rule-no-unknown": null,
 		"indentation": "tab",
 		"declaration-property-value-blacklist": {
-			"/color/": ["/^#/", "/^rgb/"]
-		}
+			"/.*/": ["/#/", "/rgb/"]
+		},
+		color-named: "never"
 	}
 }
