@@ -5,10 +5,12 @@
 
 'use strict';
 
-const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
-
-const utils = require( './collect-utils' );
 const glob = require( 'glob' );
+const path = require( 'path' );
+const fs = require( 'fs' );
+
+const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
+const utils = require( './collect-utils' );
 
 /**
  * Collects i18n messages for all packages using source messages from `t()` calls
@@ -17,31 +19,41 @@ const glob = require( 'glob' );
  * @param {Object} options
  * @param {String[]} [options.sourceFiles] An array of source files that contain messages to translate.
  * @param {String[]} [options.packagePaths] An array of paths to packages, which will be used to find message contexts.
+ * @param {String} [options.corePackagePath] A path to the ckeditor5-core package.
+ * @param {Boolean} [options.ignoreErrors]
  */
 module.exports = function collect( {
 	sourceFiles = getCKEditor5SourceFiles(),
-	packagePaths = getCKEditor5PackagePaths()
+	packagePaths = getCKEditor5PackagePaths(),
+	corePackagePath = 'packages/ckeditor5-core',
+	ignoreErrors = false
 } ) {
-	const contexts = utils.getContexts( packagePaths );
+	const contexts = utils.getContexts( packagePaths, corePackagePath );
 	const sourceMessages = utils.collectSourceMessages( sourceFiles );
 
-	const errors = [
+	const errorsMessages = [
 		...utils.getUnusedContextErrorMessages( contexts, sourceMessages ),
 		...utils.getMissingContextErrorMessages( contexts, sourceMessages ),
 		...utils.getRepeatedContextErrorMessages( contexts )
 	];
 
-	if ( errors.length > 0 ) {
-		errors.forEach( error => logger.error( error ) );
+	if ( errorsMessages.length > 0 ) {
+		errorsMessages.forEach( error => logger.error( error ) );
 
-		return;
+		if ( !ignoreErrors ) {
+			logger.error( 'Fix the above errors or run script with the `--ignore-errors` flag.' );
+			process.exit( 1 );
+		}
 	}
+
+	const packageNames = packagePaths.map( p => p.replace( /.+[/\\]/, '' ) );
 
 	utils.removeExistingPotFiles();
 
-	for ( const [ packageName, context ] of contexts ) {
+	for ( const packageName of packageNames ) {
+		const context = contexts.get( packageName );
 		const potFileHeader = utils.createPotFileHeader();
-		const potFileContent = utils.createPotFileContent( context, sourceMessages );
+		const potFileContent = utils.createPotFileContent( packageName, sourceMessages, context );
 
 		utils.savePotFile( packageName, potFileHeader + potFileContent );
 	}

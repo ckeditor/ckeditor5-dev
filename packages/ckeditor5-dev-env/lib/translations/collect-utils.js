@@ -22,9 +22,14 @@ const utils = {
 	 * TODO: Context should be retrieved from t( {} ) as well.
 	 *
 	 * @param {String[]} packagePaths An array of paths to packages, which will be used to find message contexts.
-	 * @returns {Map.<String, Object>}
+	 * @returns {Map.<String, Context>}
 	 */
-	getContexts( packagePaths ) {
+	getContexts( packagePaths, corePackagePath ) {
+		// Add path to core package if not included in the package paths.
+		if ( !packagePaths.includes( corePackagePath ) ) {
+			packagePaths = [ ...packagePaths, corePackagePath ];
+		}
+
 		const mapEntries = packagePaths
 			.filter( packageName => utils._containsContextFile( packageName ) )
 			.map( packageName => {
@@ -43,7 +48,7 @@ const utils = {
 	/**
 	 * Returns an array of i18n source messages found in all source files.
 	 *
-	 * @returns {Array.<Object>}
+	 * @returns {Array.<Message>}
 	 */
 	collectSourceMessages( sourceFiles ) {
 		const messages = [];
@@ -58,18 +63,33 @@ const utils = {
 	},
 
 	/**
-	 * @param {Map.<String, Object>} contexts A map of language contexts.
-	 * @param {Array.<Object>} sourceMessages An array of i18n source messages.
+	 * @param {Map.<String, Context>} contexts A map of language contexts.
+	 * @param {Array.<Message>} sourceMessages An array of i18n source messages.
 	 * @returns {Array.<String>}
 	 */
 	getMissingContextErrorMessages( contexts, sourceMessages ) {
 		const errors = [];
+		const contextSet = new Set();
+
+		for ( const { content } of contexts.values() ) {
+			for ( const messageId in content ) {
+				contextSet.add( messageId );
+			}
+		}
 
 		for ( const sourceMessage of sourceMessages ) {
-			const errorMessage = utils._validateContexts( contexts, sourceMessage );
+			if ( sourceMessage.context && contextSet.has( sourceMessage.id ) ) {
+				// TODO - a context is overwrite warning.
+			}
 
-			if ( errorMessage ) {
-				errors.push( errorMessage );
+			if ( sourceMessage.context ) {
+				continue;
+			}
+
+			if ( !contextSet.has( sourceMessage.id ) ) {
+				errors.push(
+					`Context for the message id is missing ('${ sourceMessage.id }' from ${ sourceMessage.filePath }).`
+				);
 			}
 		}
 
@@ -77,8 +97,8 @@ const utils = {
 	},
 
 	/**
-	 * @param {Map.<String, Object>} contexts A map of language contexts.
-	 * @param {Array.<Object>} sourceMessages An array of i18n source messages.
+	 * @param {Map.<String, Context>} contexts A map of language contexts.
+	 * @param {Array.<Message>} sourceMessages An array of i18n source messages.
 	 * @returns {Array.<String>}
 	 */
 	getUnusedContextErrorMessages( contexts, sourceMessages ) {
@@ -101,20 +121,20 @@ const utils = {
 	},
 
 	/**
-	 * @param {Map.<String, Object>} contexts A map of language contexts.
+	 * @param {Map.<String, Context>} contexts A map of language contexts.
 	 * @returns {Array.<String>}
 	 */
 	getRepeatedContextErrorMessages( contexts ) {
 		const errors = [];
-		const ids = new Set();
+		const idOrigins = new Map();
 
 		for ( const context of contexts.values() ) {
 			for ( const id in context.content ) {
-				if ( ids.has( id ) ) {
-					errors.push( `Context is duplicated for the id: ${ id }.` );
+				if ( idOrigins.has( id ) ) {
+					errors.push( `Context is duplicated for the id: '${ id }' in ${ context.filePath } and ${ idOrigins.get( id ) }.` );
 				}
 
-				ids.add( id );
+				idOrigins.set( id, context.filePath );
 			}
 		}
 
@@ -131,19 +151,23 @@ const utils = {
 	 *
 	 * It merges source messages for the given package with corresponding contexts.
 	 *
-	 * @param {Object} context
+	 * @param {String} packageName A package name.
+	 * @param {Message[]} sourceMessages A package name.
+	 * @param {Context} [context] A context file for the given package.
 	 * @returns {String}
 	 */
-	createPotFileContent( context, sourceMessages ) {
+	createPotFileContent( packageName, sourceMessages, context ) {
 		const packageSourceMessages = sourceMessages
-			.filter( sourceMessage => context.packageName === sourceMessage.packageName );
+			.filter( sourceMessage => sourceMessage.packageName === packageName );
 
 		const messages = packageSourceMessages.map( sourceMessage => {
 			const message = { ...sourceMessage };
 
-			if ( !message.context ) {
-				message.context = context.content[ message.id ]
+			if ( context && !message.context ) {
+				message.context = context.content[ message.id ];
 			}
+
+			return message;
 		} );
 
 		return utils._createPotFile( messages );
@@ -180,20 +204,28 @@ const utils = {
 	 *
 	 * @param {String} filePath
 	 * @param {String} fileContent
+	 * @returns {Message[]}
 	 */
 	_getSourceMessagesFromFile( filePath, fileContent ) {
-		const packageMatch = filePath.match( /\/(ckeditor5-[^/]+)\// );
+		const packageMatch = filePath.match( /[/\\]([^/\\]+)[/\\]src[/\\]/ );
+		const sourceMessages = [];
 
-		return findMessages( fileContent )
-			.map( message => ( {
+		findMessages( fileContent, filePath, message => {
+			sourceMessages.push( {
 				filePath,
 				packageName: packageMatch[ 1 ],
 				...message
-			} ) );
+			} );
+		}, err => console.error( err ) );
+
+		return sourceMessages;
 	},
 
 	/**
 	 * Creates a POT file from the given i18n messages.
+	 *
+	 * @param {Message[]} messages
+	 * @returns {String}
 	 */
 	_createPotFile( messages ) {
 		return messages.map( message => {
@@ -228,27 +260,26 @@ const utils = {
 	 */
 	_containsContextFile( packageDirectory ) {
 		return fs.existsSync( path.join( packageDirectory, langContextSuffix ) );
-	},
-
-	_validateContexts( contexts, sourceMessage ) {
-		const corePackageContext = contexts.get( corePackageName );
-
-		if ( !corePackageContext ) {
-			return `${ corePackageName }/${ langContextSuffix } file is missing.`;
-		}
-
-		let contextExists = false;
-
-		for ( const [ , currentPackageContext ] of contexts ) {
-			if ( currentPackageContext.content[ sourceMessage.id ] ) {
-				contextExists = true;
-			}
-		}
-
-		if ( !contextExists ) {
-			return `Context for the message id is missing (${ sourceMessage.packageName }, ${ sourceMessage.id }).`;
-		}
 	}
 };
 
 module.exports = utils;
+
+/**
+ * @typedef {Object} Message
+ *
+ * @property {String} id
+ * @property {String} string
+ * @property {String} filePath
+ * @property {String} packageName
+ * @property {String} [context]
+ * @property {String} [plural]
+*/
+
+/**
+ * @typedef {Object} Context
+ *
+ * @property {String} filePath A path to the context file.
+ * @property {Object} content The context file content - a map of messageId->messageContext records.
+ * @property {String} packageName An owner of the context file.
+ */
