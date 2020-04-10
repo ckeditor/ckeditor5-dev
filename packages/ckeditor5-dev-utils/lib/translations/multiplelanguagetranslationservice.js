@@ -7,12 +7,9 @@
 
 const path = require( 'path' );
 const fs = require( 'fs' );
-const findMessageIds = require( './findmessageids' );
+const findMessages = require( './findmessages' );
 const { EventEmitter } = require( 'events' );
 const PO = require( 'pofile' );
-const { promisify } = require( 'util' );
-
-const readFile = promisify( fs.readFile );
 
 /**
  * TODO
@@ -76,18 +73,19 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
-	 * Translate file's source and replace `t()` call strings with short ids.
-	 * Fire an error when the acorn parser face a trouble.
+	 * Collects found message ids. Emits a warning when the acorn parser faces a trouble.
 	 *
-	 * @fires error
+	 * TODO - method name.
+	 *
+	 * @fires warning
 	 * @param {String} source Source of the file.
 	 * @returns {String}
 	 */
 	translateSource( source, sourceFile ) {
-		findMessageIds(
+		findMessages(
 			source,
 			sourceFile,
-			messageId => this._foundMessageIds.add( messageId ),
+			message => this._foundMessageIds.add( message.id ),
 			error => this.emit( 'warning', error )
 		);
 
@@ -95,8 +93,8 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
-	 * Load package and tries to get PO files from the package if it's unknown.
-	 * If the `compileAllLanguages` flag is set to true, language's set will be expanded by the found languages.
+	 * Loads package and tries to get PO files from the package if it was not registered yet.
+	 * If the `compileAllLanguages` flag is set to true then the language set will be expanded to all found languages.
 	 *
 	 * @fires warning
 	 * @param {String} pathToPackage Path to the package containing translations.
@@ -143,9 +141,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
-	 * Return an array of assets based on the stored dictionaries.
-	 * If there is one `compilationAssets`, merge main translation with that asset and join with other assets built outside.
-	 * Otherwise fire an warning and return an array of assets built outside of the `compilationAssets`.
+	 * Returns an array of assets based on the stored dictionaries.
 	 *
 	 * @fires warning
 	 * @fires error

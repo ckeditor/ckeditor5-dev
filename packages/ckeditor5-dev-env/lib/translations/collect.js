@@ -8,22 +8,26 @@
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 
 const utils = require( './collect-utils' );
+const glob = require( 'glob' );
 
 /**
- * Function collects translations using following steps:
+ * Collects i18n messages for all packages using source messages from `t()` calls
+ * and context files and saves them as POT files in the `build/.transifex` directory.
  *
- * 1. Collect translation contexts from each package.
- * 2. Collect t() calls arguments with usage of acorn from each package.
- * 3. Assert whether contexts and translations are correct. If not, log the errors and break the script.
- * 4. Create po files from the translation contexts."
+ * @param {Object} options
+ * @param {String[]} [options.sourceFiles] An array of source files that contain messages to translate.
+ * @param {String[]} [options.packagePaths] An array of paths to packages, which will be used to find message contexts.
  */
-module.exports = function collect() {
-	const contexts = utils.getContexts();
-	const translations = utils.collectTranslations();
+module.exports = function collect( {
+	sourceFiles = getCKEditor5SourceFiles(),
+	packagePaths = getCKEditor5PackagePaths()
+} ) {
+	const contexts = utils.getContexts( packagePaths );
+	const sourceMessages = utils.collectSourceMessages( sourceFiles );
 
 	const errors = [
-		...utils.getUnusedContextErrorMessages( contexts, translations ),
-		...utils.getMissingContextErrorMessages( contexts, translations ),
+		...utils.getUnusedContextErrorMessages( contexts, sourceMessages ),
+		...utils.getMissingContextErrorMessages( contexts, sourceMessages ),
 		...utils.getRepeatedContextErrorMessages( contexts )
 	];
 
@@ -37,7 +41,21 @@ module.exports = function collect() {
 
 	for ( const [ packageName, context ] of contexts ) {
 		const potFileHeader = utils.createPotFileHeader();
-		const potFileContent = utils.createPotFileContent( context );
+		const potFileContent = utils.createPotFileContent( context, sourceMessages );
+
 		utils.savePotFile( packageName, potFileHeader + potFileContent );
 	}
 };
+
+function getCKEditor5SourceFiles() {
+	const srcPaths = [ process.cwd(), 'packages', '*', 'src', '**', '*.js' ].join( '/' );
+
+	return glob.sync( srcPaths ).filter( srcPath => !srcPath.match( /packages\/[^/]+\/src\/lib\// ) );
+}
+
+function getCKEditor5PackagePaths() {
+	const ckeditor5PackagesDir = path.join( process.cwd(), 'packages' );
+
+	return fs.readdirSync( ckeditor5PackagesDir )
+		.map( packageName => path.join( ckeditor5PackagesDir, packageName ) );
+}

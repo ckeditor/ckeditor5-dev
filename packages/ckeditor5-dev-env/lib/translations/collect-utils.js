@@ -6,68 +6,67 @@
 'use strict';
 
 const del = require( 'del' );
-const glob = require( 'glob' );
 const fs = require( 'fs-extra' );
 const path = require( 'path' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
-const { findOriginalStrings } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
+const { findMessages } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 
 const langContextSuffix = path.join( 'lang', 'contexts.json' );
 const corePackageName = 'ckeditor5-core';
 
 const utils = {
 	/**
-	 * Collect translations and return array of translations.
-	 *
-	 * @returns {Array.<Object>}
-	 */
-	collectTranslations() {
-		const srcPaths = [ process.cwd(), 'packages', '*', 'src', '**', '*.js' ].join( '/' );
-
-		const files = glob.sync( srcPaths )
-			.filter( srcPath => !srcPath.match( /packages\/[^/]+\/src\/lib\// ) );
-
-		const translations = [];
-
-		for ( const filePath of files ) {
-			const content = fs.readFileSync( filePath, 'utf-8' );
-
-			translations.push( ...utils._getTranslationCallsFromFile( filePath, content ) );
-		}
-
-		return translations;
-	},
-
-	/**
-	 * Traverse all packages and return Map of the all founded language contexts information
+	 * Traverses all packages and returns a map of all found language contexts
 	 * (file content and file name).
 	 *
+	 * TODO: Context should be retrieved from t( {} ) as well.
+	 *
+	 * @param {String[]} packagePaths An array of paths to packages, which will be used to find message contexts.
 	 * @returns {Map.<String, Object>}
 	 */
-	getContexts() {
-		const ckeditor5PackagesDir = path.join( process.cwd(), 'packages' );
-		const mapEntries = utils._getPackagesContainingContexts( ckeditor5PackagesDir ).map( packageName => {
-			const pathToContext = path.join( ckeditor5PackagesDir, packageName, langContextSuffix );
+	getContexts( packagePaths ) {
+		const mapEntries = packagePaths
+			.filter( packageName => utils._containsContextFile( packageName ) )
+			.map( packageName => {
+				const pathToContext = path.join( packageName, langContextSuffix );
 
-			return [ packageName, {
-				filePath: pathToContext,
-				content: JSON.parse( fs.readFileSync( pathToContext, 'utf-8' ) )
-			} ];
-		} );
+				return [ packageName, {
+					filePath: pathToContext,
+					content: JSON.parse( fs.readFileSync( pathToContext, 'utf-8' ) ),
+					packageName
+				} ];
+			} );
 
 		return new Map( mapEntries );
 	},
 
 	/**
-	 * @param {Map.<String, Object>} contexts Map of the language contexts.
-	 * @param {Array.<Object>} translations Array of the translations.
+	 * Returns an array of i18n source messages found in all source files.
+	 *
+	 * @returns {Array.<Object>}
+	 */
+	collectSourceMessages( sourceFiles ) {
+		const messages = [];
+
+		for ( const sourceFile of sourceFiles ) {
+			const content = fs.readFileSync( sourceFile, 'utf-8' );
+
+			messages.push( ...utils._getSourceMessagesFromFile( sourceFile, content ) );
+		}
+
+		return messages;
+	},
+
+	/**
+	 * @param {Map.<String, Object>} contexts A map of language contexts.
+	 * @param {Array.<Object>} sourceMessages An array of i18n source messages.
 	 * @returns {Array.<String>}
 	 */
-	getMissingContextErrorMessages( contexts, translations ) {
+	getMissingContextErrorMessages( contexts, sourceMessages ) {
 		const errors = [];
 
-		for ( const translation of translations ) {
-			const errorMessage = utils._validateContexts( contexts, translation );
+		for ( const sourceMessage of sourceMessages ) {
+			const errorMessage = utils._validateContexts( contexts, sourceMessage );
 
 			if ( errorMessage ) {
 				errors.push( errorMessage );
@@ -78,44 +77,44 @@ const utils = {
 	},
 
 	/**
-	 * @param {Map.<String, Object>} contexts Map of the language contexts.
-	 * @param {Array.<Object>} translations Array of the translations.
+	 * @param {Map.<String, Object>} contexts A map of language contexts.
+	 * @param {Array.<Object>} sourceMessages An array of i18n source messages.
 	 * @returns {Array.<String>}
 	 */
-	getUnusedContextErrorMessages( contexts, translations ) {
+	getUnusedContextErrorMessages( contexts, sourceMessages ) {
 		const usedContextMap = new Map();
 
 		for ( const [ packageName, context ] of contexts ) {
-			for ( const key in context.content ) {
-				usedContextMap.set( packageName + '/' + key, false );
+			for ( const id in context.content ) {
+				usedContextMap.set( packageName + '/' + id, false );
 			}
 		}
 
-		for ( const translation of translations ) {
-			usedContextMap.set( translation.package + '/' + translation.key, true );
-			usedContextMap.set( corePackageName + '/' + translation.key, true );
+		for ( const message of sourceMessages ) {
+			usedContextMap.set( message.packageName + '/' + message.id, true );
+			usedContextMap.set( corePackageName + '/' + message.id, true );
 		}
 
 		return [ ...usedContextMap ]
 			.filter( ( [ , usage ] ) => !usage )
-			.map( ( [ key ] ) => `Unused context: ${ key }.` );
+			.map( ( [ id ] ) => `Unused context: ${ id }.` );
 	},
 
 	/**
-	 * @param {Map.<String, Object>} contexts Map of the language contexts.
+	 * @param {Map.<String, Object>} contexts A map of language contexts.
 	 * @returns {Array.<String>}
 	 */
 	getRepeatedContextErrorMessages( contexts ) {
 		const errors = [];
-		const keys = new Set();
+		const ids = new Set();
 
 		for ( const context of contexts.values() ) {
-			for ( const key in context.content ) {
-				if ( keys.has( key ) ) {
-					errors.push( `Context is duplicated for the key: ${ key }.` );
+			for ( const id in context.content ) {
+				if ( ids.has( id ) ) {
+					errors.push( `Context is duplicated for the id: ${ id }.` );
 				}
 
-				keys.add( key );
+				ids.add( id );
 			}
 		}
 
@@ -128,20 +127,32 @@ const utils = {
 	},
 
 	/**
-	 * @param {Object} context Language contexts for a package.
+	 * Creates a POT file for the given package.
+	 *
+	 * It merges source messages for the given package with corresponding contexts.
+	 *
+	 * @param {Object} context
 	 * @returns {String}
 	 */
-	createPotFileContent( context ) {
-		const translationObjects = Object.keys( context.content ).map( str => ( {
-			id: str,
-			str,
-			ctxt: context.content[ str ]
-		} ) );
+	createPotFileContent( context, sourceMessages ) {
+		const packageSourceMessages = sourceMessages
+			.filter( sourceMessage => context.packageName === sourceMessage.packageName );
 
-		return utils._stringifyTranslationObjects( translationObjects );
+		const messages = packageSourceMessages.map( sourceMessage => {
+			const message = { ...sourceMessage };
+
+			if ( !message.context ) {
+				message.context = context.content[ message.id ]
+			}
+		} );
+
+		return utils._createPotFile( messages );
 	},
 
 	/**
+	 * Creates a POT file for the given package and POT file content.
+	 * The default place is `build/.transifex/[packageName]/en.pot`.
+	 *
 	 * @param {String} packageName
 	 * @param {String} fileContent
 	 */
@@ -154,6 +165,8 @@ const utils = {
 	},
 
 	/**
+	 * Creates a POT file header.
+	 *
 	 * @returns {String}
 	 */
 	createPotFileHeader() {
@@ -162,61 +175,78 @@ const utils = {
 		return `# Copyright (c) 2003-${ year }, CKSource - Frederico Knabben. All rights reserved.\n\n`;
 	},
 
-	_getTranslationCallsFromFile( filePath, fileContent ) {
-		const originalStrings = findOriginalStrings( fileContent );
+	/**
+	 * Returns source messages found in the given file with additional data (`filePath` and `packageName`).
+	 *
+	 * @param {String} filePath
+	 * @param {String} fileContent
+	 */
+	_getSourceMessagesFromFile( filePath, fileContent ) {
+		const packageMatch = filePath.match( /\/(ckeditor5-[^/]+)\// );
 
-		return originalStrings
-			.map( originalString => {
-				const contextMatch = originalString.match( /\[context: ([^\]]+)\]/ );
-				const sentenceMatch = originalString.match( /^[^[]+/ );
-				const packageMatch = filePath.match( /\/(ckeditor5-[^/]+)\// );
-
-				return {
-					filePath,
-					key: originalString,
-					package: packageMatch[ 1 ],
-					context: contextMatch ? contextMatch[ 1 ] : null,
-					sentence: sentenceMatch[ 0 ].trim()
-				};
-			} )
-			.filter( translationCall => !!translationCall );
+		return findMessages( fileContent )
+			.map( message => ( {
+				filePath,
+				packageName: packageMatch[ 1 ],
+				...message
+			} ) );
 	},
 
-	_stringifyTranslationObjects( translationObjects ) {
-		return translationObjects.map( translationObject => {
-			// Note that order is important.
-			return [
-				`msgctxt ${ JSON.stringify( translationObject.ctxt ) }`,
-				`msgid ${ JSON.stringify( translationObject.id ) }`,
-				`msgstr ${ JSON.stringify( translationObject.str ) }`
-			].map( x => x + '\n' ).join( '' );
+	/**
+	 * Creates a POT file from the given i18n messages.
+	 */
+	_createPotFile( messages ) {
+		return messages.map( message => {
+			const potFileMessageEntry = [];
+
+			// Note the usage of `JSON.stringify()` instead of `"` + `"`.
+			// It's because the message can contain an apostrophe.
+			// Note also that the order is important.
+
+			if ( message.context ) {
+				potFileMessageEntry.push( `msgctxt ${ JSON.stringify( message.context ) }` );
+			}
+
+			potFileMessageEntry.push( `msgid ${ JSON.stringify( message.id ) }` );
+
+			if ( message.plural ) {
+				potFileMessageEntry.push( `msgid_plural ${ JSON.stringify( message.plural ) }` );
+				potFileMessageEntry.push( `msgstr[0] ${ JSON.stringify( message.string ) }` );
+				potFileMessageEntry.push( `msgstr[1] ${ JSON.stringify( message.plural ) }` );
+			} else {
+				potFileMessageEntry.push( `msgstr ${ JSON.stringify( message.string ) }` );
+			}
+
+			return potFileMessageEntry
+				.map( x => x + '\n' )
+				.join( '' );
 		} ).join( '\n' );
 	},
 
-	_getPackagesContainingContexts( ckeditor5PackagesDir ) {
-		return fs.readdirSync( ckeditor5PackagesDir )
-			.filter( packageName => fs.existsSync(
-				path.join( ckeditor5PackagesDir, packageName, langContextSuffix )
-			) );
+	/**
+	 * @param {String} packageDirectory
+	 */
+	_containsContextFile( packageDirectory ) {
+		return fs.existsSync( path.join( packageDirectory, langContextSuffix ) );
 	},
 
-	_validateContexts( contexts, translation ) {
+	_validateContexts( contexts, sourceMessage ) {
 		const corePackageContext = contexts.get( corePackageName );
 
 		if ( !corePackageContext ) {
-			return `${ corePackageName }/lang/contexts.json file is missing.`;
+			return `${ corePackageName }/${ langContextSuffix } file is missing.`;
 		}
 
 		let contextExists = false;
 
 		for ( const [ , currentPackageContext ] of contexts ) {
-			if ( currentPackageContext.content[ translation.key ] ) {
+			if ( currentPackageContext.content[ sourceMessage.id ] ) {
 				contextExists = true;
 			}
 		}
 
 		if ( !contextExists ) {
-			return `Context for the translation key is missing (${ translation.package }, ${ translation.key }).`;
+			return `Context for the message id is missing (${ sourceMessage.packageName }, ${ sourceMessage.id }).`;
 		}
 	}
 };
