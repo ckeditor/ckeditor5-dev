@@ -32,7 +32,7 @@ module.exports = function findMessages( source, sourceFile, onMessageFound, onEr
 				return;
 			}
 
-			const firstArgument = node.arguments[ 0 ]
+			const firstArgument = node.arguments[ 0 ];
 
 			if ( firstArgument.type === 'ObjectExpression' ) {
 				const properties = firstArgument.properties || [];
@@ -78,7 +78,8 @@ module.exports = function findMessages( source, sourceFile, onMessageFound, onEr
 			}
 
 			onErrorFound(
-				`First t() call argument should be a string literal or an object literal in ${ sourceFile }. See https://github.com/ckeditor/ckeditor5/issues/6526.`
+				`First t() call argument should be a string literal or an object literal in ${ sourceFile }. ` +
+				'See https://github.com/ckeditor/ckeditor5/issues/6526.'
 			);
 		}
 	} );
