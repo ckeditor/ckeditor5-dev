@@ -16,14 +16,14 @@ const PO = require( 'pofile' );
  */
 module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	/**
-	 * @param {String} language The target language that will be bundled into the main webpack asset.
 	 * @param {Object} options
-	 * @param {Boolean} [options.compileAllLanguages=false] Flag indicates whether the languages are specified
-	 * or should be found at runtime.
+	 * @param {String} options.mainLanguage The target language that will be bundled into the main webpack asset.
 	 * @param {Array.<String>} options.additionalLanguages Additional languages which files will be emitted.
 	 * When option is set to 'all', all languages found during the compilation will be added.
+	 * @param {Boolean} options.compileAllLanguages Flag indicates whether the languages are specified
+	 * or should be found at runtime.
 	 */
-	constructor( language, { additionalLanguages, compileAllLanguages = false } = {} ) {
+	constructor( { mainLanguage, additionalLanguages, compileAllLanguages = false } = {} ) {
 		super();
 
 		/**
@@ -31,7 +31,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		 *
 		 * @private
 		 */
-		this._mainLanguage = language;
+		this._mainLanguage = mainLanguage;
 
 		/**
 		 * Set of languages that will be used by translator. This set might be expanded by found languages,
@@ -39,7 +39,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		 *
 		 * @private
 		 */
-		this._languages = new Set( [ language, ...additionalLanguages ] );
+		this._languages = new Set( [ mainLanguage, ...additionalLanguages ] );
 
 		/**
 		 * Option indicates whether the languages are specified or should be found at runtime.
@@ -93,11 +93,11 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
-	 * Loads package and tries to get PO files from the package if it was not registered yet.
-	 * If the `compileAllLanguages` flag is set to true then the language set will be expanded to all found languages.
+	 * Loads PO files from the package if the package was not registered already.
+	 * If the `compileAllLanguages` flag is set to `true`, then the language set will be expanded to all found languages.
 	 *
 	 * @fires warning
-	 * @param {String} pathToPackage Path to the package containing translations.
+	 * @param {String} pathToPackage A path to the package containing translations.
 	 */
 	loadPackage( pathToPackage ) {
 		if ( this._handledPackages.has( pathToPackage ) ) {
@@ -141,7 +141,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
-	 * Returns an array of assets based on the stored dictionaries.
+	 * Returns an array of partial assets containing translations in the executable JS form.
 	 *
 	 * @fires warning
 	 * @fires error
@@ -160,7 +160,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 		if ( compilationAssetNames.length > 1 ) {
 			this.emit( 'warning', [
-				'Found many webpack assets and CKEditor 5 translations for the main language were added to all of them',
+				'Found many webpack assets and CKEditor 5 translations for the main language were added to all of them'
 			].join( '\n' ) );
 		}
 
@@ -178,30 +178,32 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
-	 * Return assets for the given directory and languages.
+	 * Returns assets for the given directory and languages.
 	 *
 	 * @private
-	 * @param outputDirectory Output directory for assets.
-	 * @param {Iterable.<String>} languages Languages for assets.
+	 * @param outputDirectory The output directory for assets.
+	 * @param {Array.<String>} languages Languages for assets.
 	 */
 	_getTranslationAssets( outputDirectory, languages ) {
-		return Array.from( languages ).map( language => {
+		return languages.map( language => {
 			const outputPath = path.join( outputDirectory, `${ language }.js` );
 
 			if ( !this._dictionaries[ language ] ) {
 				this.emit( 'error', `No translation found for ${ language } language.` );
 
-				return { outputBody, outputPath };
+				return { outputBody: '', outputPath };
 			}
 
 			const translations = this._getTranslations( language );
 
-			// A plural form is in the form of .pluralForms="nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2)"
+			// An example of plural forms:
+			// pluralForms="nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2)"
+
 			/** @type {String} */
 			const pluralForms = this._pluralFormsRules[ language ];
 			const pluralFormFunctionBodyMatch = pluralForms.match( /(?:plural=\()(.+)(?:\))/ );
 
-			// Add support for ES5 - this function won't be transpiled.
+			// Add support for ES5 - this function will not be transpiled.
 			const pluralFormFunction = `function(n){return ${ pluralFormFunctionBodyMatch[ 1 ] };}`;
 
 			// Stringify translations and remove unnecessary `""` around property names.
@@ -209,12 +211,10 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 				.replace( /"([\w_]+)":/g, '$1:' );
 
 			const outputBody = (
-				// We need to ensure that the CKEDITOR_TRANSLATIONS variable exists and if it exists, we need to extend it.
-				// Use ES5 because this bit will not be transpiled!
 				'(function(d){' +
 				`	const l = d['${ language }'] = d['${ language }'] || {};` +
-				`	l.dictionary=Object.assign(` +
-				`		l.dictionary||{},` +
+				'	l.dictionary=Object.assign(' +
+				'		l.dictionary||{},' +
 				`		${ stringifiedTranslations }` +
 				'	);' +
 				`	l.getFormIndex=${ pluralFormFunction };` +
@@ -226,8 +226,8 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
-	 * Walk through the `translationIdsDictionary` and find corresponding strings in the target language's dictionary.
-	 * Use original strings if translated ones are missing.
+	 * Walks through the `translationIdsDictionary` and finds corresponding strings in the target language's dictionary.
+	 * Uses original strings if the translated ones are missing.
 	 *
 	 * @private
 	 * @param {String} language Target language.
@@ -256,7 +256,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
-	 * Load translations from the PO file if that file exists.
+	 * Loads translations from the PO file if that file exists.
 	 *
 	 * @private
 	 * @param {String} language PO file's language.
@@ -283,8 +283,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
-	 * Return path to the translation directory depending on the path to package.
-	 * This method is protected to enable this class usage in other environments than CKE5.
+	 * Returns a path to the translation directory depending on the path to the package.
 	 *
 	 * @protected
 	 * @param {String} pathToPackage

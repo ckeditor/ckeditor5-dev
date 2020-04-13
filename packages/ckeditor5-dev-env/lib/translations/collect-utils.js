@@ -143,6 +143,7 @@ const utils = {
 
 	removeExistingPotFiles() {
 		const pathToTransifexDirectory = path.join( process.cwd(), 'build', '.transifex' );
+
 		del.sync( pathToTransifexDirectory );
 	},
 

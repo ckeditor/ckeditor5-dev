@@ -100,7 +100,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 
 			for ( const asset of generatedAssets ) {
 				if ( asset.shouldConcat ) {
-					// We need to concat sources here to support source maps for CKE5 code.
+					// Concatenate sources to not break the file's sourcemap.
 					const originalAsset = compilation.assets[ asset.outputPath ];
 
 					compilation.assets[ asset.outputPath ] = new ConcatSource( asset.outputBody, '\n', originalAsset );
@@ -108,11 +108,11 @@ module.exports = function serveTranslations( compiler, options, translationServi
 					const chunkExists = allFiles.includes( asset.outputPath );
 
 					if ( !chunkExists ) {
-						// RawSource is used when corresponding chunk does not exist.
+						// Assign `RawSource` when the corresponding chunk does not exist.
 						compilation.assets[ asset.outputPath ] = new RawSource( asset.outputBody );
 					} else {
-						// String is used when corresponding chunk exists and maintain proper sourcemaps.
-						// Changing to RawSource would drop source maps.
+						// Assign a string when the corresponding chunk exists and maintains the proper sourcemap.
+						// Changing it to RawSource would break sourcemaps.
 						compilation.assets[ asset.outputPath ] = asset.outputBody;
 					}
 				}

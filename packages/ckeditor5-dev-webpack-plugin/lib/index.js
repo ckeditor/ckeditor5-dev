@@ -8,10 +8,10 @@
 const chalk = require( 'chalk' );
 const serveTranslations = require( './servetranslations' );
 const MultipleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/multiplelanguagetranslationservice' );
-const ckeditor5EnvUtils = require( './ckeditor5-env-utils' );
 
 /**
- * CKEditorWebpackPlugin, for now, consists only of the translation mechanism (@ckeditor/ckeditor5#624, @ckeditor/ckeditor5#387, @ckeditor/ckeditor5#6526).
+ * CKEditorWebpackPlugin, for now, consists only of the translation mechanism (@ckeditor/ckeditor5#624, @ckeditor/ckeditor5#387,
+ * @ckeditor/ckeditor5#6526).
  *
  * When one entry point (or to be precise one output JS file) is defined, language specified in `language` option will be
  * statically added to the bundle. When `additionalLanguages` option is set, languages specified there will be stored
@@ -62,8 +62,7 @@ module.exports = class CKEditorWebpackPlugin {
 			return;
 		}
 
-		const language = this.options.language;
-		let translationService;
+		const mainLanguage = this.options.language;
 		let compileAllLanguages = false;
 		let additionalLanguages = this.options.additionalLanguages || [];
 
@@ -82,8 +81,8 @@ module.exports = class CKEditorWebpackPlugin {
 		// and is used by the `serveTranslation() function that uses the API.
 		// See the TranslationService interface in the `servetranslation.js` file.
 
-		translationService = new MultipleLanguageTranslationService( language, { compileAllLanguages, additionalLanguages } );
+		const translationService = new MultipleLanguageTranslationService( { mainLanguage, compileAllLanguages, additionalLanguages } );
 
-		serveTranslations( compiler, this.options, translationService, ckeditor5EnvUtils );
+		serveTranslations( compiler, this.options, translationService );
 	}
 };
