@@ -202,9 +202,7 @@ describe( 'translations', () => {
 
 				const assets = translationService.getAssets( {
 					outputDirectory: 'lang',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' }
-					}
+					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
 				expect( assets ).to.be.an( 'array' );
@@ -237,9 +235,7 @@ describe( 'translations', () => {
 
 				const assets = translationService.getAssets( {
 					outputDirectory: 'lang',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' }
-					}
+					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
 				eval( assets[ 0 ].outputBody );
@@ -278,9 +274,7 @@ describe( 'translations', () => {
 
 				const assets = translationService.getAssets( {
 					outputDirectory: 'lang',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' }
-					}
+					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
 				eval( assets[ 0 ].outputBody );
@@ -322,9 +316,7 @@ describe( 'translations', () => {
 
 				const assets = translationService.getAssets( {
 					outputDirectory: 'lang',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' }
-					}
+					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
 				eval( assets[ 0 ].outputBody );
@@ -358,9 +350,7 @@ describe( 'translations', () => {
 
 				const assets = translationService.getAssets( {
 					outputDirectory: 'lang',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' }
-					}
+					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
 				eval( assets[ 0 ].outputBody );
@@ -395,9 +385,7 @@ describe( 'translations', () => {
 
 				const assets = translationService.getAssets( {
 					outputDirectory: 'lang',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' }
-					}
+					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
 				eval( assets[ 0 ].outputBody );
@@ -424,9 +412,7 @@ describe( 'translations', () => {
 
 				const assets = translationService.getAssets( {
 					outputDirectory: 'lang',
-					compilationAssets: {
-						'SomeWebpackPlugin': { source: () => 'source' }
-					}
+					compilationAssetNames: [ 'SomeWebpackPlugin' ]
 				} );
 
 				expect( assets ).to.deep.equal( [] );
@@ -456,9 +442,7 @@ describe( 'translations', () => {
 
 				const assets = translationService.getAssets( {
 					outputDirectory: 'lang',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' }
-					}
+					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
 				expect( assets[ 1 ] ).to.have.property( 'outputPath', path.join( 'lang', 'xxx.js' ) );
@@ -496,9 +480,7 @@ describe( 'translations', () => {
 
 				const assets = translationService.getAssets( {
 					outputDirectory: 'lang',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' }
-					}
+					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
 				expect( assets[ 1 ] ).to.have.property( 'outputPath', path.join( 'lang', 'xxx.js' ) );
@@ -538,9 +520,7 @@ describe( 'translations', () => {
 
 				translationService.getAssets( {
 					outputDirectory: 'lang',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' }
-					}
+					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
 				// TODO
@@ -558,27 +538,25 @@ describe( 'translations', () => {
 
 				translationService.on( 'error', errorSpy );
 
-				translationService._translationIdsDictionary = {
-					Cancel: 'a',
-					Save: 'b'
-				};
+				translationService._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
 
 				translationService._dictionaries = {
 					pl: {
-						Cancel: 'Anuluj',
-						Save: 'Zapisz'
+						Cancel: [ 'Anuluj' ],
+						Save: [ 'Zapisz' ]
 					}
 				};
 
 				translationService.getAssets( {
 					outputDirectory: 'lang',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' }
-					}
+					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
 				sinon.assert.calledOnce( errorSpy );
-				sinon.assert.calledWithExactly( errorSpy, 'No translation found for xxx language.' );
+				sinon.assert.calledWithExactly( errorSpy, 'No translation found for the xxx language.' );
 			} );
 
 			it( 'should emit a warning if the translation is missing', () => {
@@ -590,67 +568,59 @@ describe( 'translations', () => {
 
 				translationService.on( 'warning', warningSpy );
 
-				translationService._translationIdsDictionary = {
-					Cancel: 'a',
-					Save: 'b'
-				};
+				translationService._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
 
 				translationService._dictionaries = {
 					pl: {
-						Cancel: 'Anuluj'
+						Cancel: [ 'Anuluj' ]
 					}
 				};
 
 				translationService.getAssets( {
 					outputDirectory: 'lang',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' }
-					}
+					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
 				sinon.assert.calledOnce( warningSpy );
-				sinon.assert.calledWithExactly( warningSpy, 'Missing translation for \'Save\' for \'pl\' language.' );
+				sinon.assert.calledWithExactly( warningSpy, 'Missing translation for \'Save\' in the \'pl\' language.' );
 			} );
 
-			it( 'should emit a warning when there are multiple assets', () => {
+			it( 'should emit a warning when there are multiple JS assets', () => {
 				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [] } );
 				const spy = sandbox.spy();
 
 				translationService.on( 'warning', spy );
 
-				translationService._translationIdsDictionary = {
-					Cancel: 'a',
-					Save: 'b'
-				};
+				translationService._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
 
 				translationService._dictionaries = {
 					pl: {
-						Cancel: 'Anuluj',
-						Save: 'Zapisz'
+						Cancel: [ 'Anuluj' ],
+						Save: [ 'Zapisz' ]
 					}
 				};
 
 				const assets = translationService.getAssets( {
 					outputDirectory: 'lang',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' },
-						'ckeditor2.js': { source: () => 'source' }
-					}
+					compilationAssetNames: [ 'ckeditor.js', 'ckeditor1.js' ]
 				} );
 
 				sinon.assert.calledOnce( spy );
 				sinon.assert.alwaysCalledWithExactly( spy, [
-					'Because of the many found bundles, none of the bundles will contain the main language.',
-					`You should add it directly to the application from the 'lang${ path.sep }pl.js'.`
+					'CKEditor 5 Webpack plugin found many webpack assets during compilation. ' +
+					'You should add translation assets directly to the application from the `lang` directory. ' +
+					'Use `allowMultipleJSAssets` option to add the main language translations to all assets.'
 				].join( '\n' ) );
 
-				expect( assets ).to.deep.equal( [
-					{
-						outputPath: path.join( 'lang', 'pl.js' ),
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"})})' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
-					}
-				] );
+				expect( assets ).to.have.length( 1 );
+				expect( assets[ 0 ] ).to.have.property( 'outputPath', path.join( 'lang', 'pl.js' ) );
+				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
 			} );
 
 			it( 'should use the `outputDirectory` option for translation assets generated as new files', () => {
@@ -662,9 +632,9 @@ describe( 'translations', () => {
 
 				translationService.on( 'warning', spy );
 
-				translationService._translationIdsDictionary = {
-					Cancel: 'a'
-				};
+				translationService._foundMessageIds = new Set( [
+					'Cancel'
+				] );
 
 				translationService._dictionaries = {
 					pl: {
@@ -677,9 +647,7 @@ describe( 'translations', () => {
 
 				const assets = translationService.getAssets( {
 					outputDirectory: 'custom-lang-path',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' }
-					}
+					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
 				expect( assets[ 0 ].outputPath ).to.equal( 'ckeditor.js' );
@@ -752,9 +720,7 @@ describe( 'translations', () => {
 
 				const assets = translationService.getAssets( {
 					outputDirectory: 'lang',
-					compilationAssets: {
-						'ckeditor.js': { source: () => 'source' }
-					}
+					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
 				expect( assets ).to.have.length( 2 );

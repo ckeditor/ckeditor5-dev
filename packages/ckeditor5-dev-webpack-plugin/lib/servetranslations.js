@@ -93,7 +93,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 		compilation.hooks.optimizeChunkAssets.tap( 'CKEditor5Plugin', chunks => {
 			const generatedAssets = translationService.getAssets( {
 				outputDirectory: options.outputDirectory,
-				compilationAssets: compilation.assets
+				compilationAssetNames: Object.keys( compilation.assets )
 			} );
 
 			const allFiles = chunks.reduce( ( acc, chunk ) => [ ...acc, ...chunk.files ], [] );

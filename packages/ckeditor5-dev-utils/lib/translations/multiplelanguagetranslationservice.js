@@ -20,10 +20,11 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @param {String} options.mainLanguage The target language that will be bundled into the main webpack asset.
 	 * @param {Array.<String>} [options.additionalLanguages] Additional languages which files will be emitted.
 	 * When option is set to 'all', all languages found during the compilation will be added.
-	 * @param {Boolean} [options.compileAllLanguages] A flag indicates whether the languages are specified
-	 * or should be found at runtime.
+	 * @param {Boolean} [options.compileAllLanguages] When set to `true` languages will be found at runtime.
+	 * @param {Boolean} [options.allowMultipleJSAssets] When set to `true` the service will not complain about multiple JS assets and will
+	 * output translations for the main language to all found asset.
 	 */
-	constructor( { mainLanguage, additionalLanguages = [], compileAllLanguages = false } ) {
+	constructor( { mainLanguage, additionalLanguages = [], compileAllLanguages = false, allowMultipleJSAssets = false } ) {
 		super();
 
 		/**
@@ -47,6 +48,11 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		 * @private
 		 */
 		this._compileAllLanguages = compileAllLanguages;
+
+		/**
+		 * TODO
+		 */
+		this.allowMultipleJSAssets = allowMultipleJSAssets;
 
 		/**
 		 * A set of handled packages that speeds up the translation process.
@@ -148,25 +154,37 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @fires error
 	 * @param {Object} options
 	 * @param {String} options.outputDirectory Output directory for the translation files relative to the output.
-	 * @param {Object} options.compilationAssets Original assets from the compiler (e.g. Webpack).
+	 * @param {String[]} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
 	 * @returns {Array.<Object>}
 	 */
-	getAssets( { outputDirectory, compilationAssets } ) {
-		const compilationAssetNames = Object.keys( compilationAssets )
+	getAssets( { outputDirectory, compilationAssetNames } ) {
+		compilationAssetNames = compilationAssetNames
 			.filter( name => name.endsWith( '.js' ) );
 
+		let mainLanguage = this._mainLanguage;
+
 		if ( compilationAssetNames.length == 0 ) {
+			this.emit( 'warning', [
+				'CKEditor 5 Webpack plugin found an issue during compilation: no JS asset was found during the compilation. ' +
+				'You should add translation assets directly to the application from the \'lang\' directory.'
+			].join( '\n' ) );
+
 			return [];
 		}
 
-		if ( compilationAssetNames.length > 1 ) {
+		if ( compilationAssetNames.length > 1 && !this.allowMultipleJSAssets ) {
 			this.emit( 'warning', [
-				'Found many webpack assets and CKEditor 5 translations for the main language were added to all of them'
+				'CKEditor 5 Webpack plugin found many webpack assets during compilation. ' +
+				'You should add translation assets directly to the application from the `lang` directory. ' +
+				'Use `allowMultipleJSAssets` option to add the main language translations to all assets.'
 			].join( '\n' ) );
+
+			compilationAssetNames = [];
+			mainLanguage = null;
 		}
 
 		const otherLanguages = Array.from( this._languages )
-			.filter( lang => lang !== this._mainLanguage );
+			.filter( lang => lang !== mainLanguage );
 
 		return [
 			...compilationAssetNames.map( assetName => ( {
@@ -190,7 +208,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			const outputPath = path.join( outputDirectory, `${ language }.js` );
 
 			if ( !this._dictionaries[ language ] ) {
-				this.emit( 'error', `No translation found for ${ language } language.` );
+				this.emit( 'error', `No translation found for the ${ language } language.` );
 
 				return { outputBody: '', outputPath };
 			}
@@ -206,6 +224,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			let pluralFormFunction = false;
 
 			if ( !pluralForms ) {
+				// TODO
 				console.warn();
 			} else {
 				const pluralFormFunctionBodyMatch = pluralForms.match( /(?:plural=\()(.+)(?:\))/ );
@@ -249,7 +268,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			const translatedMessage = langDictionary[ messageId ];
 
 			if ( !translatedMessage || translatedMessage.length === 0 ) {
-				// this.emit( 'warning', `Missing translation for '${ messageId }' for '${ language }' language.` );
+				this.emit( 'warning', `Missing translation for '${ messageId }' in the '${ language }' language.` );
 
 				continue;
 			}
