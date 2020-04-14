@@ -1,3 +1,5 @@
+/* eslint-disable no-eval */
+
 /**
  * @license Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md.
@@ -14,6 +16,7 @@ describe( 'translations', () => {
 	describe( 'MultipleLanguageTranslationService', () => {
 		let MultipleLanguageTranslationService, stubs, filesAndDirs, fileContents, dirContents;
 		const sandbox = sinon.createSandbox();
+		let window;
 
 		beforeEach( () => {
 			filesAndDirs = [];
@@ -31,6 +34,8 @@ describe( 'translations', () => {
 			MultipleLanguageTranslationService = proxyquire( '../../lib/translations/multiplelanguagetranslationservice', {
 				'fs': stubs.fs
 			} );
+
+			window = {};
 		} );
 
 		afterEach( () => {
@@ -174,7 +179,10 @@ describe( 'translations', () => {
 
 		describe( 'getAssets()', () => {
 			it( 'should return an array of assets', () => {
-				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'en' ] } );
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
+					additionalLanguages: [ 'en' ]
+				} );
 
 				translationService._foundMessageIds = new Set( [
 					'Cancel',
@@ -199,23 +207,81 @@ describe( 'translations', () => {
 					}
 				} );
 
-				expect( assets ).to.deep.equal( [
-					{
-						outputPath: 'ckeditor.js',
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"})})' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));',
-						shouldConcat: true
-					},
-					{
-						outputPath: path.join( 'lang', 'en.js' ),
-						outputBody: '(function(d){d[\'en\']=Object.assign(d[\'en\']||{},{a:"Cancel",b:"Save"})})' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
-					}
-				] );
+				expect( assets ).to.be.an( 'array' );
+
+				expect( assets[ 0 ] ).to.have.property( 'outputPath', 'ckeditor.js' );
+				expect( assets[ 0 ] ).to.have.property( 'shouldConcat', true );
+				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
+
+				expect( assets[ 1 ] ).to.have.property( 'outputPath', path.join( 'lang', 'en.js' ) );
+				expect( assets[ 1 ] ).to.not.have.property( 'shouldConcat' );
+				expect( assets[ 1 ] ).to.have.property( 'outputBody' );
 			} );
 
+			it( 'should return executable translation assets', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
+					additionalLanguages: [ 'en' ]
+				} );
+
+				translationService._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
+
+				translationService._dictionaries = {
+					pl: {
+						Cancel: [ 'Anuluj' ],
+						Save: [ 'Zapisz' ]
+					},
+					en: {
+						Cancel: [ 'Cancel' ],
+						Save: [ 'Save' ]
+					}
+				};
+
+				const assets = translationService.getAssets( {
+					outputDirectory: 'lang',
+					compilationAssets: {
+						'ckeditor.js': { source: () => 'source' }
+					}
+				} );
+
+				eval( assets[ 0 ].outputBody );
+
+				expect( window.CKEDITOR_TRANSLATIONS ).to.deep.equal( {
+					pl: {
+						dictionary: {
+							Cancel: 'Anuluj',
+							Save: 'Zapisz'
+						}
+					}
+				} );
+
+				eval( assets[ 1 ].outputBody );
+
+				expect( window.CKEDITOR_TRANSLATIONS ).to.deep.equal( {
+					pl: {
+						dictionary: {
+							Cancel: 'Anuluj',
+							Save: 'Zapisz'
+						}
+					},
+					en: {
+						dictionary: {
+							Cancel: 'Cancel',
+							Save: 'Save'
+						}
+					}
+				} );
+			} );
+
+			// TODO
 			it( 'should return an array of empty assets when called for webpack plugins instead of ckeditor script', () => {
-				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'en' ] } );
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
+					additionalLanguages: [ 'en' ]
+				} );
 
 				const assets = translationService.getAssets( {
 					outputDirectory: 'lang',
@@ -227,21 +293,24 @@ describe( 'translations', () => {
 				expect( assets ).to.deep.equal( [] );
 			} );
 
-			it( 'should emit an error if the language is not present in language list', () => {
-				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'xxx' ] } );
+			it( 'should emit an error if the language is not present in the language set', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
+					additionalLanguages: [ 'xxx' ]
+				} );
 				const spy = sandbox.spy();
 
 				translationService.on( 'error', spy );
 
-				translationService._translationIdsDictionary = {
-					Cancel: 'a',
-					Save: 'b'
-				};
+				translationService._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
 
 				translationService._dictionaries = {
 					pl: {
-						Cancel: 'Anuluj',
-						Save: 'Zapisz'
+						Cancel: [ 'Anuluj' ],
+						Save: [ 'Zapisz' ]
 					}
 				};
 
@@ -252,25 +321,30 @@ describe( 'translations', () => {
 					}
 				} );
 
+				// TODO
 				sinon.assert.calledOnce( spy );
-				sinon.assert.calledWithExactly( spy, 'No translation found for xxx language.' );
+				sinon.assert.calledWithExactly( spy, 'No translation found for the xxx language.' );
 			} );
 
-			it( 'should feed missing translation with the translation key if the translated string is missing', () => {
-				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'xxx' ] } );
+			it( 'should return an empty output if there is no translation present for the given language', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
+					additionalLanguages: [ 'xxx' ]
+				} );
+
 				const spy = sandbox.spy();
 
 				translationService.on( 'error', spy );
 
-				translationService._translationIdsDictionary = {
-					Cancel: 'a',
-					Save: 'b'
-				};
+				translationService._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
 
 				translationService._dictionaries = {
 					pl: {
-						Cancel: 'Anuluj',
-						Save: 'Zapisz'
+						Cancel: [ 'Anuluj' ],
+						Save: [ 'Zapisz' ]
 					}
 				};
 
@@ -281,22 +355,61 @@ describe( 'translations', () => {
 					}
 				} );
 
-				expect( assets ).to.deep.equal( [
-					{
-						outputPath: 'ckeditor.js',
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj",b:"Zapisz"})})' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));',
-						shouldConcat: true
-					},
-					{
-						outputPath: path.join( 'lang', 'xxx.js' ),
-						outputBody: '(function(d){d[\'xxx\']=Object.assign(d[\'xxx\']||{},{a:"Cancel",b:"Save"})})' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
-					}
-				] );
+				expect( assets[ 1 ] ).to.have.property( 'outputPath', path.join( 'lang', 'xxx.js' ) );
+				expect( assets[ 1 ] ).to.have.property( 'outputBody', '' );
+
+				eval( assets[ 1 ].outputBody );
+
+				expect( window.CKEDITOR_TRANSLATIONS ).to.be.undefined;
 			} );
 
-			it( 'should emit an error if the translations for the main language are missing', () => {
+			it( 'should omit missing translations', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
+					additionalLanguages: [ 'xxx' ]
+				} );
+
+				const spy = sandbox.spy();
+
+				translationService.on( 'error', spy );
+
+				translationService._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
+
+				translationService._dictionaries = {
+					pl: {
+						Cancel: [ 'Anuluj' ],
+						Save: [ 'Zapisz' ]
+					},
+					xxx: {
+						Cancel: [ 'Foo' ]
+					}
+				};
+
+				const assets = translationService.getAssets( {
+					outputDirectory: 'lang',
+					compilationAssets: {
+						'ckeditor.js': { source: () => 'source' }
+					}
+				} );
+
+				expect( assets[ 1 ] ).to.have.property( 'outputPath', path.join( 'lang', 'xxx.js' ) );
+				expect( assets[ 1 ] ).to.have.property( 'outputBody' );
+
+				eval( assets[ 1 ].outputBody );
+
+				expect( window.CKEDITOR_TRANSLATIONS ).to.deep.equal( {
+					xxx: {
+						dictionary: {
+							Cancel: 'Foo'
+						}
+					}
+				} );
+			} );
+
+			it( 'should emit an error if translations for the main language are missing', () => {
 				const translationService = new MultipleLanguageTranslationService( {
 					mainLanguage: 'xxx',
 					additionalLanguages: [ 'pl' ]
@@ -329,7 +442,7 @@ describe( 'translations', () => {
 				sinon.assert.calledWithExactly( errorSpy, 'No translation found for xxx language.' );
 			} );
 
-			it( 'should emit an warning if the translation is missing', () => {
+			it( 'should emit a warning if the translation is missing', () => {
 				const translationService = new MultipleLanguageTranslationService( {
 					mainLanguage: 'pl',
 					additionalLanguages: []
@@ -363,16 +476,16 @@ describe( 'translations', () => {
 			it( 'should bound to assets only used translations', () => {
 				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [] } );
 
-				translationService._translationIdsDictionary = {
-					Cancel: 'a',
-					Save: 'b'
-				};
+				translationService._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
 
 				translationService._dictionaries = {
 					pl: {
-						Cancel: 'Anuluj',
-						Save: 'Zapisz',
-						Close: 'Zamknij'
+						Cancel: [ 'Anuluj' ],
+						Save: [ 'Zapisz' ],
+						Close: [ 'Zamknij' ]
 					}
 				};
 

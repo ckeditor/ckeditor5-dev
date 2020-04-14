@@ -225,7 +225,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 				'		l.dictionary||{},' +
 				`		${ stringifiedTranslations }` +
 				'	);' +
-				pluralFormFunction ? `l.getPluralForm=${ pluralFormFunction };` : '' +
+				( pluralFormFunction ? `l.getPluralForm=${ pluralFormFunction };` : '' ) +
 				'})(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
 			);
 
