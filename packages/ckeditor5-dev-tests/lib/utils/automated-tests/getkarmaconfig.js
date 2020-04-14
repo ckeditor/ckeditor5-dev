@@ -142,6 +142,10 @@ module.exports = function getKarmaConfig( options ) {
 					dir: coverageDir,
 					type: 'html'
 				},
+				{
+					dir: coverageDir,
+					type: 'json'
+				},
 				// Generates "lcov.info" file. It's used by external code coverage services.
 				{
 					type: 'lcovonly',
