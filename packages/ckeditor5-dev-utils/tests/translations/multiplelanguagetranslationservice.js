@@ -653,7 +653,7 @@ describe( 'translations', () => {
 				] );
 			} );
 
-			it( 'should use output directory', () => {
+			it( 'should use the `outputDirectory` option for translation assets generated as new files', () => {
 				const translationService = new MultipleLanguageTranslationService( {
 					mainLanguage: 'pl',
 					additionalLanguages: [ 'en' ]
@@ -668,10 +668,10 @@ describe( 'translations', () => {
 
 				translationService._dictionaries = {
 					pl: {
-						Cancel: 'Anuluj'
+						Cancel: [ 'Anuluj' ]
 					},
 					en: {
-						Cancel: 'Cancel'
+						Cancel: [ 'Cancel' ]
 					}
 				};
 
@@ -682,19 +682,8 @@ describe( 'translations', () => {
 					}
 				} );
 
-				expect( assets ).to.deep.equal( [
-					{
-						outputPath: 'ckeditor.js',
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Anuluj"})})' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));',
-						shouldConcat: true
-					},
-					{
-						outputPath: path.join( 'custom-lang-path', 'en.js' ),
-						outputBody: '(function(d){d[\'en\']=Object.assign(d[\'en\']||{},{a:"Cancel"})})' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
-					}
-				] );
+				expect( assets[ 0 ].outputPath ).to.equal( 'ckeditor.js' );
+				expect( assets[ 1 ].outputPath ).to.equal( path.join( 'custom-lang-path', 'en.js' ) );
 			} );
 		} );
 
@@ -741,6 +730,8 @@ describe( 'translations', () => {
 
 				filesAndDirs = [ pathToPlTranslations, pathToDeTranslations, pathToTranslationsDirectory ];
 
+				// TODO - plural rules.
+
 				fileContents = {
 					[ pathToPlTranslations ]: [
 						'msgctxt "Label for the Save button."',
@@ -766,19 +757,25 @@ describe( 'translations', () => {
 					}
 				} );
 
-				expect( assets ).to.deep.equal( [
-					{
-						outputPath: 'ckeditor.js',
-						outputBody: '(function(d){d[\'pl\']=Object.assign(d[\'pl\']||{},{a:"Zapisz"})})' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));',
-						shouldConcat: true
+				expect( assets ).to.have.length( 2 );
+				expect( assets[ 0 ] ).to.have.property( 'outputPath', 'ckeditor.js' );
+				expect( assets[ 1 ] ).to.have.property( 'outputPath', path.join( 'lang', 'de.js' ) );
+
+				eval( assets[ 0 ].outputBody );
+				eval( assets[ 1 ].outputBody );
+
+				expect( window.CKEDITOR_TRANSLATIONS ).to.deep.equal( {
+					pl: {
+						dictionary: {
+							Save: 'Zapisz'
+						}
 					},
-					{
-						outputPath: path.join( 'lang', 'de.js' ),
-						outputBody: '(function(d){d[\'de\']=Object.assign(d[\'de\']||{},{a:"Speichern"})})' +
-							'(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
+					de: {
+						dictionary: {
+							Save: 'Speichern'
+						}
 					}
-				] );
+				} );
 			} );
 		} );
 	} );
