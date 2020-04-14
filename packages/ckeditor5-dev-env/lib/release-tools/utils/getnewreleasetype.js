@@ -5,13 +5,17 @@
 
 'use strict';
 
+const through = require( 'through2' );
 const conventionalCommitsParser = require( 'conventional-commits-parser' );
 const conventionalCommitsFilter = require( 'conventional-commits-filter' );
 const gitRawCommits = require( 'git-raw-commits' );
 const concat = require( 'concat-stream' );
+const { stream } = require( '@ckeditor/ckeditor5-dev-utils' );
 const parserOptions = require( './transform-commit/parser-options' );
 const { availableCommitTypes } = require( './transform-commit/transform-commit-utils' );
 const getPackageJson = require( './getpackagejson' );
+
+const REGEXP = /(?:Feature|Other|Fix) \([\w\-, ]+?\):/g;
 
 /**
  * Returns a type (major, minor, patch) of the next release based on commits.
@@ -54,6 +58,15 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 			.pipe( concat( data => {
 				const commits = conventionalCommitsFilter( data )
 					.map( commit => transformCommit( commit, context ) )
+					.reduce( ( allCommits, commit ) => {
+						if ( Array.isArray( commit ) ) {
+							allCommits.push( ...commit );
+						} else {
+							allCommits.push( commit );
+						}
+
+						return allCommits;
+					}, [] )
 					.filter( commit => commit );
 
 				return resolve( {

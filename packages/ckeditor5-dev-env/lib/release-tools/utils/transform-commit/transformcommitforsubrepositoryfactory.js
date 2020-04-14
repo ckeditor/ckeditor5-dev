@@ -7,6 +7,8 @@
 
 const utils = require( './transform-commit-utils' );
 
+const MULTI_ENTRIES_COMMIT_REGEXP = /(?:Feature|Other|Fix)(?: \([\w\-, ]+?\))?:/g;
+
 /**
  * Factory function.
  *
@@ -30,8 +32,21 @@ const utils = require( './transform-commit-utils' );
  */
 module.exports = function transformCommitForSubRepositoryFactory( options = {} ) {
 	/**
+	 * If returned an instance of the Array, it means that single commit contains more than one entry for the changelog.
+	 *
+	 * E.g. for the commit below:
+	 *
+	 *      Feature: Introduced the `Editor` component. See #123.
+	 *
+	 *      Additional description.
+	 *
+	 *      Fix: The commit also fixes...
+	 *
+	 * the function will return an array with two commits. The first one is the real commit, the second one is a fake commit
+	 * but its description will be inserted to the changelog.
+	 *
 	 * @param {Commit} rawCommit
-	 * @returns {Commit|undefined}
+	 * @returns {Commit|Array.<Commit>|undefined}
 	 */
 	return function transformCommitForSubRepository( rawCommit ) {
 		// Let's clone the commit. We don't want to modify the reference.
@@ -40,6 +55,11 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 			rawType: rawCommit.type,
 			notes: rawCommit.notes.map( note => Object.assign( {}, note ) )
 		} );
+
+		const parsedType = getTypeAndScope( commit.rawType );
+
+		commit.rawType = parsedType.rawType;
+		commit.scope = parsedType.scope;
 
 		// Whether the commit will be printed in the changelog.
 		const isCommitIncluded = utils.availableCommitTypes.get( commit.rawType );
@@ -126,7 +146,56 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 
 		commit.repositoryUrl = utils.getRepositoryUrl();
 
-		return commit;
+		if ( !commit.body ) {
+			return commit;
+		}
+
+		const commitEntries = commit.body.match( MULTI_ENTRIES_COMMIT_REGEXP );
+
+		if ( !commitEntries.length ) {
+			return commit;
+		}
+
+		// Single commit contains a few entries that should be inserted to the changelog.
+		// All of those entries are defined in the array.
+		// Additional commits/entries will be called as "fake commits".
+		const separatedCommit = [ commit ];
+
+		// Descriptions of additional entries.
+		const parts = commit.body.split( MULTI_ENTRIES_COMMIT_REGEXP );
+
+		// If the descriptions array contains more entries than fake commit entries,
+		// it means that the first element in descriptions array describes the main (real) commit.
+		if ( parts.length > commitEntries.length ) {
+			commit.body = escapeNewLines( parts.shift() );
+		} else {
+			commit.body = null;
+		}
+
+		// For each fake commit, copy hash and repository of the parent.
+		for ( let i = 0; i < parts.length; ++i ) {
+			const newCommit = {
+				hash: commit.hash,
+				repositoryUrl: commit.repositoryUrl,
+				notes: []
+			};
+
+			const details = getTypeAndScope( commitEntries[ i ].replace( /:$/, '' ) );
+
+			newCommit.rawType = details.rawType;
+			newCommit.scope = details.scope;
+			newCommit.type = utils.getCommitType( newCommit.rawType );
+
+			const commitDescription = parts[ i ];
+			const subject = commitDescription.match( /^(.*)$/m )[ 0 ];
+
+			newCommit.subject = subject.trim();
+			newCommit.body = escapeNewLines( commitDescription.replace( subject, '' ) );
+
+			separatedCommit.push( newCommit );
+		}
+
+		return separatedCommit;
 	};
 
 	function makeLinks( comment ) {
@@ -186,6 +255,32 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 
 			return 0;
 		} );
+	}
+
+	function getTypeAndScope( type ) {
+		if ( !type ) {
+			return {};
+		}
+
+		const parts = type.split( ' (' );
+		const data = {
+			rawType: parts[ 0 ],
+			scope: null
+		};
+
+		if ( parts[ 1 ] ) {
+			data.scope = parts[ 1 ].replace( /^\(|\)$/g, '' )
+				.split( ',' )
+				.map( p => p.trim() )
+				.filter( p => p );
+		}
+
+		return data;
+	}
+
+	function escapeNewLines( message ) {
+		// Accept spaces before a sentence because they are ready to be rendered in the changelog template.
+		return message.replace(/^\n+|\s+$/g, '');
 	}
 };
 

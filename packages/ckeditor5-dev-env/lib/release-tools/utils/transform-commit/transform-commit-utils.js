@@ -14,8 +14,8 @@ const transformCommitUtils = {
 	 */
 	availableCommitTypes: new Map( [
 		[ 'Fix', true ],
-		[ 'Fixes', true ],
-		[ 'Fixed', true ],
+		[ 'Fixes', true ], // TODO: Remove.
+		[ 'Fixed', true ], // TODO: Remove.
 		[ 'Feature', true ],
 		[ 'Other', true ],
 		[ 'Code style', false ],
