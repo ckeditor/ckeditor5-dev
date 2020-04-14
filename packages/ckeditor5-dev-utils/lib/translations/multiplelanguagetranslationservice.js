@@ -18,12 +18,12 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	/**
 	 * @param {Object} options
 	 * @param {String} options.mainLanguage The target language that will be bundled into the main webpack asset.
-	 * @param {Array.<String>} options.additionalLanguages Additional languages which files will be emitted.
+	 * @param {Array.<String>} [options.additionalLanguages] Additional languages which files will be emitted.
 	 * When option is set to 'all', all languages found during the compilation will be added.
 	 * @param {Boolean} [options.compileAllLanguages] A flag indicates whether the languages are specified
 	 * or should be found at runtime.
 	 */
-	constructor( { mainLanguage, additionalLanguages, compileAllLanguages = false } = {} ) {
+	constructor( { mainLanguage, additionalLanguages = [], compileAllLanguages = false } ) {
 		super();
 
 		/**
@@ -46,7 +46,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		 *
 		 * @private
 		 */
-		this._compileAllLanguages = compileAllLanguages || false;
+		this._compileAllLanguages = compileAllLanguages;
 
 		/**
 		 * A set of handled packages that speeds up the translation process.
