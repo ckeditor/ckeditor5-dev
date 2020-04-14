@@ -7,7 +7,7 @@
 
 const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
-const translateSource = require( '../../lib/translations/translatesource' );
+const findMessages = require( '../../lib/translations/findmessages' );
 
 describe( 'translations', () => {
 	describe( 'translateSource()', () => {
@@ -27,7 +27,7 @@ describe( 'translations', () => {
 		it( 'should translate t() calls in the code', () => {
 			const source = 't( \'Cancel\' )';
 
-			const { output, errors } = translateSource( source, 'file.js', translateString );
+			const { output, errors } = findMessages( source, 'file.js', translateString );
 
 			expect( output ).to.equal( 't(\'Anuluj\');' );
 			expect( errors.length ).to.equal( 0 );
@@ -36,7 +36,7 @@ describe( 'translations', () => {
 		it( 'should return original source if there is no t() calls in the code', () => {
 			const source = 'translate( \'Cancel\' )';
 
-			const { output, errors } = translateSource( source, 'file.js', translateString );
+			const { output, errors } = findMessages( source, 'file.js', translateString );
 
 			expect( output ).to.equal( 'translate( \'Cancel\' )' );
 			expect( errors.length ).to.equal( 0 );
@@ -45,7 +45,7 @@ describe( 'translations', () => {
 		it( 'should throw an error when the t is called with the variable', () => {
 			const source = 'const cancel = \'Cancel\';t( cancel );';
 
-			const { output, errors } = translateSource( source, 'file.js', translateString );
+			const { output, errors } = findMessages( source, 'file.js', translateString );
 
 			expect( output ).to.equal( 'const cancel = \'Cancel\';t( cancel );' );
 			expect( errors ).to.deep.equal( [ 'First t() call argument should be a string literal in file.js.' ] );

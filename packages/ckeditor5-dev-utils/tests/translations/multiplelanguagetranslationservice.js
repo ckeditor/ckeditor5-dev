@@ -39,7 +39,7 @@ describe( 'translations', () => {
 
 		describe( 'constructor()', () => {
 			it( 'should initialize `SingleLanguageTranslationService`', () => {
-				const translationService = new MultipleLanguageTranslationService( 'en', { additionalLanguages: [ 'pl', 'de' ] } );
+				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'en', additionalLanguages: [ 'pl' ] } );
 
 				expect( translationService ).to.be.instanceof( MultipleLanguageTranslationService );
 			} );
@@ -47,7 +47,7 @@ describe( 'translations', () => {
 
 		describe( 'loadPackage()', () => {
 			it( 'should load PO file from the package and load translations', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
+				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'de' ] } );
 				const pathToTranslationsDirectory = path.join( 'pathToPackage', 'lang', 'translations' );
 				const pathToPlTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'pl.po' );
 				const pathToDeTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'de.po' );
@@ -71,26 +71,26 @@ describe( 'translations', () => {
 
 				translationService.loadPackage( 'pathToPackage' );
 
-				expect( translationService._dictionary ).to.deep.equal( {
+				expect( translationService._dictionaries ).to.deep.equal( {
 					pl: {
-						'Save': 'Zapisz'
+						'Save': [ 'Zapisz' ]
 					},
 					de: {
-						'Save': 'Speichern'
+						'Save': [ 'Speichern' ]
 					}
 				} );
 			} );
 
 			it( 'should do nothing if the PO file does not exist', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
+				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'de' ] } );
 
 				translationService.loadPackage( 'pathToPackage' );
 
-				expect( translationService._dictionary ).to.deep.equal( {} );
+				expect( translationService._dictionaries ).to.deep.equal( {} );
 			} );
 
 			it( 'should load PO file from the package only once per language', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
+				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'de' ] } );
 				const loadPoFileSpy = sandbox.stub( translationService, '_loadPoFile' );
 
 				const pathToTranslationsDirectory = path.join( 'pathToPackage', 'lang', 'translations' );
@@ -105,8 +105,10 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should load all PO files for the current package and add languages to the language list', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', {
-					compileAllLanguages: true, additionalLanguages: []
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
+					compileAllLanguages: true,
+					additionalLanguages: []
 				} );
 
 				const pathToTranslations = path.join( 'pathToPackage', 'lang', 'translations' );
@@ -136,12 +138,12 @@ describe( 'translations', () => {
 
 				translationService.loadPackage( 'pathToPackage' );
 
-				expect( translationService._dictionary ).to.deep.equal( {
+				expect( translationService._dictionaries ).to.deep.equal( {
 					pl: {
-						'Save': 'Zapisz'
+						'Save': [ 'Zapisz' ]
 					},
 					de: {
-						'Save': 'Speichern'
+						'Save': [ 'Speichern' ]
 					}
 				} );
 
@@ -150,60 +152,43 @@ describe( 'translations', () => {
 		} );
 
 		describe( 'translateSource()', () => {
-			it( 'should replace t() call params with the translation key, starting with `a`', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
+			it( 'should return the original source code', () => {
+				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'de' ] } );
 				const source = 't( \'Cancel\' ), t( \'Save\' );';
-
 				const result = translationService.translateSource( source, 'file.js' );
 
-				expect( result ).to.equal( 't(\'a\'), t(\'b\');' );
-				expect( translationService._translationIdsDictionary ).to.deep.equal( {
-					Cancel: 'a',
-					Save: 'b'
-				} );
+				expect( result ).to.equal( 't( \'Cancel\' ), t( \'Save\' );' );
 			} );
 
-			it( 'should not create new id for the same translation key', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
-				const source = 't( \'Cancel\' ), t( \'Cancel\' );';
+			it( 'should collect found unique message ids', () => {
+				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'de' ] } );
+				const source = 't( \'Cancel\' ), t( \'Cancel\' ), t( \'Save\' );';
+				translationService.translateSource( source, 'file.js' );
 
-				const result = translationService.translateSource( source, 'file.js' );
-
-				expect( result ).to.equal( 't(\'a\'), t(\'a\');' );
-				expect( translationService._translationIdsDictionary ).to.deep.equal( {
-					Cancel: 'a'
-				} );
-			} );
-
-			it( 'should return original source if there is no t() calls in the code', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
-				const source = 'translate( \'Cancel\' )';
-
-				const result = translationService.translateSource( source, 'file.js' );
-
-				expect( result ).to.equal( 'translate( \'Cancel\' )' );
-
-				expect( translationService._translationIdsDictionary ).to.deep.equal( {} );
+				expect( Array.from( translationService._foundMessageIds ) ).to.deep.equal( [
+					'Cancel',
+					'Save'
+				] );
 			} );
 		} );
 
 		describe( 'getAssets()', () => {
 			it( 'should return an array of assets', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'en' ] } );
+				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'en' ] } );
 
-				translationService._translationIdsDictionary = {
-					Cancel: 'a',
-					Save: 'b'
-				};
+				translationService._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
 
-				translationService._dictionary = {
+				translationService._dictionaries = {
 					pl: {
-						Cancel: 'Anuluj',
-						Save: 'Zapisz'
+						Cancel: [ 'Anuluj' ],
+						Save: [ 'Zapisz' ]
 					},
 					en: {
-						Cancel: 'Cancel',
-						Save: 'Save'
+						Cancel: [ 'Cancel' ],
+						Save: [ 'Save' ]
 					}
 				};
 
@@ -230,7 +215,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should return an array of empty assets when called for webpack plugins instead of ckeditor script', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'en' ] } );
+				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'en' ] } );
 
 				const assets = translationService.getAssets( {
 					outputDirectory: 'lang',
@@ -243,7 +228,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should emit an error if the language is not present in language list', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'xxx' ] } );
+				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'xxx' ] } );
 				const spy = sandbox.spy();
 
 				translationService.on( 'error', spy );
@@ -253,7 +238,7 @@ describe( 'translations', () => {
 					Save: 'b'
 				};
 
-				translationService._dictionary = {
+				translationService._dictionaries = {
 					pl: {
 						Cancel: 'Anuluj',
 						Save: 'Zapisz'
@@ -272,7 +257,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should feed missing translation with the translation key if the translated string is missing', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'xxx' ] } );
+				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'xxx' ] } );
 				const spy = sandbox.spy();
 
 				translationService.on( 'error', spy );
@@ -282,7 +267,7 @@ describe( 'translations', () => {
 					Save: 'b'
 				};
 
-				translationService._dictionary = {
+				translationService._dictionaries = {
 					pl: {
 						Cancel: 'Anuluj',
 						Save: 'Zapisz'
@@ -312,7 +297,8 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should emit an error if the translations for the main language are missing', () => {
-				const translationService = new MultipleLanguageTranslationService( 'xxx', {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'xxx',
 					additionalLanguages: [ 'pl' ]
 				} );
 
@@ -325,7 +311,7 @@ describe( 'translations', () => {
 					Save: 'b'
 				};
 
-				translationService._dictionary = {
+				translationService._dictionaries = {
 					pl: {
 						Cancel: 'Anuluj',
 						Save: 'Zapisz'
@@ -344,7 +330,8 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should emit an warning if the translation is missing', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
 					additionalLanguages: []
 				} );
 				const warningSpy = sandbox.spy();
@@ -356,7 +343,7 @@ describe( 'translations', () => {
 					Save: 'b'
 				};
 
-				translationService._dictionary = {
+				translationService._dictionaries = {
 					pl: {
 						Cancel: 'Anuluj'
 					}
@@ -374,14 +361,14 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should bound to assets only used translations', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [] } );
+				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [] } );
 
 				translationService._translationIdsDictionary = {
 					Cancel: 'a',
 					Save: 'b'
 				};
 
-				translationService._dictionary = {
+				translationService._dictionaries = {
 					pl: {
 						Cancel: 'Anuluj',
 						Save: 'Zapisz',
@@ -408,7 +395,7 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should emit warning when many assets will be emitted by compilator and return only translation assets', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [] } );
+				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [] } );
 				const spy = sandbox.spy();
 
 				translationService.on( 'warning', spy );
@@ -418,7 +405,7 @@ describe( 'translations', () => {
 					Save: 'b'
 				};
 
-				translationService._dictionary = {
+				translationService._dictionaries = {
 					pl: {
 						Cancel: 'Anuluj',
 						Save: 'Zapisz'
@@ -449,7 +436,8 @@ describe( 'translations', () => {
 			} );
 
 			it( 'should use output directory', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
 					additionalLanguages: [ 'en' ]
 				} );
 				const spy = sandbox.spy();
@@ -460,7 +448,7 @@ describe( 'translations', () => {
 					Cancel: 'a'
 				};
 
-				translationService._dictionary = {
+				translationService._dictionaries = {
 					pl: {
 						Cancel: 'Anuluj'
 					},
@@ -500,7 +488,7 @@ describe( 'translations', () => {
 					}
 				}
 
-				const translationService = new CustomTranslationService( 'en', { additionalLanguages: [] } );
+				const translationService = new CustomTranslationService( { mainLanguage: 'en', additionalLanguages: [] } );
 
 				const pathToPlTranslations = path.join( 'custom', 'path', 'to', 'pathToPackage', 'en.po' );
 				const pathToTranslationDirectory = path.join( 'custom', 'path', 'to', 'pathToPackage' );
@@ -518,9 +506,9 @@ describe( 'translations', () => {
 
 				translationService.loadPackage( 'pathToPackage' );
 
-				expect( translationService._dictionary ).to.deep.equal( {
+				expect( translationService._dictionaries ).to.deep.equal( {
 					en: {
-						'Save': 'Save'
+						'Save': [ 'Save' ]
 					}
 				} );
 			} );
@@ -528,7 +516,7 @@ describe( 'translations', () => {
 
 		describe( 'integration test', () => {
 			it( 'test #1', () => {
-				const translationService = new MultipleLanguageTranslationService( 'pl', { additionalLanguages: [ 'de' ] } );
+				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'de' ] } );
 				const pathToPlTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'pl.po' );
 				const pathToDeTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'de.po' );
 				const pathToTranslationsDirectory = path.join( 'pathToPackage', 'lang', 'translations' );

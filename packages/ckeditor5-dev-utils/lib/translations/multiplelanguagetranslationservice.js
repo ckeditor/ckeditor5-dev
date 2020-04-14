@@ -12,7 +12,7 @@ const { EventEmitter } = require( 'events' );
 const PO = require( 'pofile' );
 
 /**
- * TODO
+ * A service that serves translations assets based on the found PO files in the registered packages.
  */
 module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	/**
@@ -20,7 +20,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @param {String} options.mainLanguage The target language that will be bundled into the main webpack asset.
 	 * @param {Array.<String>} options.additionalLanguages Additional languages which files will be emitted.
 	 * When option is set to 'all', all languages found during the compilation will be added.
-	 * @param {Boolean} options.compileAllLanguages Flag indicates whether the languages are specified
+	 * @param {Boolean} [options.compileAllLanguages] A flag indicates whether the languages are specified
 	 * or should be found at runtime.
 	 */
 	constructor( { mainLanguage, additionalLanguages, compileAllLanguages = false } = {} ) {
@@ -34,48 +34,49 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		this._mainLanguage = mainLanguage;
 
 		/**
-		 * Set of languages that will be used by translator. This set might be expanded by found languages,
-		 * if `compileAllLanguages` is turned on.
+		 * A set of languages that will be used by translator. This set may be expanded by found languages
+		 * if the `compileAllLanguages` flag is turned on.
 		 *
 		 * @private
 		 */
 		this._languages = new Set( [ mainLanguage, ...additionalLanguages ] );
 
 		/**
-		 * Option indicates whether the languages are specified or should be found at runtime.
+		 * An option indicating if the languages should be found at runtime.
 		 *
 		 * @private
 		 */
-		this._compileAllLanguages = compileAllLanguages;
+		this._compileAllLanguages = compileAllLanguages || false;
 
 		/**
-		 * Set of handled packages that speeds up the translation process.
+		 * A set of handled packages that speeds up the translation process.
 		 *
 		 * @private
 		 */
 		this._handledPackages = new Set();
 
 		/**
-		 * language -> messageId -> translations dictionaries.
+		 * Dictionaries in the `language -> messageId -> dictionary` format.
 		 *
 		 * @type {Object.<String, Object.<String,Array.<String>>>}
 		 * @private
 		 */
 		this._dictionaries = {};
 
+		/**
+		 * Plural form rules that will be added to generated translation assets.
+		 */
 		this._pluralFormsRules = {};
 
 		/**
-		 * A set of message ids that were found in parsed source files and will be presented in the editor's UI.
-		 * For each message id we need to find translations (single and possible plural forms) for the target languages.
+		 * A set of message ids that are found in parsed source files. For each message id a translation
+		 * (with single and possible plural forms) should be found for the target languages.
 		 */
 		this._foundMessageIds = new Set();
 	}
 
 	/**
-	 * Collects found message ids. Emits a warning when the acorn parser faces a trouble.
-	 *
-	 * TODO - method name.
+	 * Collects found message ids. Emits a warning when there is a suspicion that the message is incorrectly written.
 	 *
 	 * @fires warning
 	 * @param {String} source Source of the file.
@@ -201,10 +202,17 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 			/** @type {String} */
 			const pluralForms = this._pluralFormsRules[ language ];
-			const pluralFormFunctionBodyMatch = pluralForms.match( /(?:plural=\()(.+)(?:\))/ );
 
-			// Add support for ES5 - this function will not be transpiled.
-			const pluralFormFunction = `function(n){return ${ pluralFormFunctionBodyMatch[ 1 ] };}`;
+			let pluralFormFunction = false;
+
+			if ( !pluralForms ) {
+				console.warn();
+			} else {
+				const pluralFormFunctionBodyMatch = pluralForms.match( /(?:plural=\()(.+)(?:\))/ );
+
+				// Add support for ES5 - this function will not be transpiled.
+				pluralFormFunction = `function(n){return ${ pluralFormFunctionBodyMatch[ 1 ] };}`;
+			}
 
 			// Stringify translations and remove unnecessary `""` around property names.
 			const stringifiedTranslations = JSON.stringify( translations )
@@ -217,7 +225,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 				'		l.dictionary||{},' +
 				`		${ stringifiedTranslations }` +
 				'	);' +
-				`	l.getFormIndex=${ pluralFormFunction };` +
+				pluralFormFunction ? `l.getPluralForm=${ pluralFormFunction };` : '' +
 				'})(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
 			);
 
