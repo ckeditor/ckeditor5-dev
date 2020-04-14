@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [18.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@18.1.0...@ckeditor/ckeditor5-dev-tests@18.2.0) (2020-04-14)
+
+### Features
+
+* Code coverage is also stored as a JSON file. Closes [#615](https://github.com/ckeditor/ckeditor5-dev/issues/615). ([075f5c1](https://github.com/ckeditor/ckeditor5-dev/commit/075f5c1))
+
+
 ## [18.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@18.0.5...@ckeditor/ckeditor5-dev-tests@18.1.0) (2020-04-08)
 
 ### Other changes
