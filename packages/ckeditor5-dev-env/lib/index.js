@@ -31,25 +31,25 @@ const tasks = {
 	},
 
 	/**
-	 * Collects translation strings ( from `t()` calls ) and stores them in ckeditor5/build/.transifex directory.
+	 * Collects messages to translate (from `t()` calls) and stores them in the `ckeditor5/build/.transifex` directory.
 	 */
-	collectTranslations() {
-		const collectTranslations = require( './translations/collect' );
+	createPotFiles( ...args ) {
+		const createPotFiles = require( './translations/createpotfiles' );
 
-		collectTranslations();
+		createPotFiles( ...args );
 	},
 
 	/**
-	 * Uploads translation strings on the Transifex server.
+	 * Uploads messages to translate on the Transifex server.
 	 *
 	 * @returns {Promise}
 	 */
-	uploadTranslations() {
-		const uploadTranslations = require( './translations/upload' );
+	uploadPotFiles() {
+		const uploadPotFiles = require( './translations/upload' );
 		const getToken = require( './translations/gettoken' );
 
 		return getToken()
-			.then( credentials => uploadTranslations( credentials ) );
+			.then( credentials => uploadPotFiles( credentials ) );
 	},
 
 	/**
