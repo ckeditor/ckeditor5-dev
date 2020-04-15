@@ -103,7 +103,7 @@ describe( 'createPotFiles()', () => {
 	} );
 
 	it( 'should create a POT file entry for one message with a corresponding context', () => {
-		createFakeContext( path.join( 'ckeditor5-foo', 'lang', 'contexts.json' ), { foo_id: 'Foo' } );
+		createFakeContextFile( path.join( 'ckeditor5-foo', 'lang', 'contexts.json' ), { foo_id: 'foo_context' } );
 
 		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
 			{ string: 'foo', id: 'foo_id' }
@@ -122,7 +122,7 @@ describe( 'createPotFiles()', () => {
 			path.join( 'cwd', 'build', '.transifex', 'ckeditor5-foo', 'en.pot' ),
 			`# Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
 
-msgctxt "Foo"
+msgctxt "foo_context"
 msgid "foo_id"
 msgstr "foo"
 `
@@ -278,19 +278,59 @@ msgstr[1] "foo_plural"
 		);
 	} );
 
-	function createFakeSourceFileWithMessages( file, messages ) {
+	it( 'should log an error if the file contains a message that cannot be parsed', () => {
+		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [], [ 'parse_error' ] );
+
+		createPotFiles( {
+			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
+			packagePaths: [ 'ckeditor5-foo' ],
+			corePackagePath: 'ckeditor5-core'
+		} );
+
+		sinon.assert.calledOnce( stubs.logger.error );
+
+		sinon.assert.calledWithExactly(
+			stubs.logger.error,
+			'parse_error'
+		);
+	} );
+
+	it( 'should log an error if two contexts contain the same id', () => {
+		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
+			{ string: 'foo', id: 'foo_id' }
+		] );
+
+		createFakeContextFile( path.join( 'ckeditor5-foo', 'lang', 'contexts.json' ), { foo_id: 'foo_context1' } );
+		createFakeContextFile( path.join( 'ckeditor5-core', 'lang', 'contexts.json' ), { foo_id: 'foo_context2' } );
+
+		createPotFiles( {
+			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
+			packagePaths: [ 'ckeditor5-foo' ],
+			corePackagePath: 'ckeditor5-core'
+		} );
+
+		sinon.assert.calledOnce( stubs.logger.error );
+
+		sinon.assert.calledWithExactly(
+			stubs.logger.error,
+			'Context is duplicated for the id: \'foo_id\' in ckeditor5-core/lang/contexts.json and ckeditor5-foo/lang/contexts.json.'
+		);
+	} );
+
+	function createFakeSourceFileWithMessages( file, messages, errors = [] ) {
 		const content = file + '_content';
 
 		stubs.fs.readFileSync
 			.withArgs( file ).returns( content );
 
 		stubs.translations.findMessages
-			.withArgs( content ).callsFake( ( fileContent, filePath, onFoundMessage ) => {
+			.withArgs( content ).callsFake( ( fileContent, filePath, onFoundMessage, onErrorFound ) => {
 				messages.forEach( message => onFoundMessage( message ) );
+				errors.forEach( error => onErrorFound( error ) );
 			} );
 	}
 
-	function createFakeContext( pathToContext, content ) {
+	function createFakeContextFile( pathToContext, content ) {
 		stubs.fs.readFileSync
 			.withArgs( pathToContext ).returns( JSON.stringify( content ) );
 

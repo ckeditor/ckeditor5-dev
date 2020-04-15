@@ -44,7 +44,7 @@ module.exports = function createPotFiles( {
 		errorsMessages.forEach( error => logger.error( error ) );
 
 		if ( !ignoreErrors ) {
-			logger.error( 'Fix the above errors or run script with the `--ignore-errors` flag.' );
+			// logger.error( 'Fix the above errors or run script with the `--ignore-errors` flag.' );
 			// process.exit( 1 );
 		}
 	}
@@ -176,7 +176,7 @@ function getUnusedContextErrorMessages( contexts, sourceMessages ) {
 
 	return [ ...usedContextMap ]
 		.filter( ( [ , usage ] ) => !usage )
-		.map( ( [ id ] ) => `Unused context: ${ id }.` );
+		.map( ( [ id ] ) => `Unused context: ${ id }` );
 }
 
 /**
