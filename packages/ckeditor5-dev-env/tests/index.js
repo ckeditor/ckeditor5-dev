@@ -167,15 +167,15 @@ describe( 'dev-env/index', () => {
 		} );
 	} );
 
-	describe( 'collectTranslations()', () => {
-		it( 'should collect translations', () => {
-			tasks.collectTranslations();
+	describe( 'createPotFiles()', () => {
+		it( 'should create a POT file', () => {
+			tasks.createPotFiles();
 
-			sinon.assert.calledOnce( stubs.translations.collect );
+			sinon.assert.calledOnce( stubs.translations.createPotFiles );
 		} );
 	} );
 
-	describe( 'uploadTranslations()', () => {
+	describe( 'uploadPotFiles()', () => {
 		it( 'should upload translations', () => {
 			stubs.translations.getToken.returns( Promise.resolve( { token: 'token' } ) );
 
