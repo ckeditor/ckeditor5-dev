@@ -16,9 +16,14 @@ const tasks = {
 	 * Collects translation strings ( from `t()` calls ) and stores them in ckeditor5/build/.transifex directory.
 	 */
 	collect() {
-		const collectTranslations = require( './../lib/translations/collect' );
+		// TODO - ignore-errors flag.
+		const createPotFiles = require( '../lib/translations/createpotfiles' );
 
-		collectTranslations();
+		createPotFiles( {
+			sourceFiles: getCKEditor5SourceFiles(),
+			packagePaths: getCKEditor5PackagePaths(),
+			corePackagePath: 'packages/ckeditor5-core'
+		} );
 	},
 
 	/**
@@ -57,3 +62,19 @@ if ( !task || !tasks[ task ] ) {
 }
 
 tasks[ task ]();
+
+function getCKEditor5SourceFiles() {
+	const glob = require( 'glob' );
+	const srcPaths = [ process.cwd(), 'packages', '*', 'src', '**', '*.js' ].join( '/' );
+
+	return glob.sync( srcPaths ).filter( srcPath => !srcPath.match( /packages\/[^/]+\/src\/lib\// ) );
+}
+
+function getCKEditor5PackagePaths() {
+	const path = require( 'path' );
+	const fs = require( 'fs' );
+	const ckeditor5PackagesDir = path.join( process.cwd(), 'packages' );
+
+	return fs.readdirSync( ckeditor5PackagesDir )
+		.map( packageName => path.join( ckeditor5PackagesDir, packageName ) );
+}
