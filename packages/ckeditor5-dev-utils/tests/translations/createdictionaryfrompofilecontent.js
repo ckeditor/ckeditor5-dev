@@ -7,13 +7,13 @@
 
 const chai = require( 'chai' );
 const expect = chai.expect;
-const createDicitionaryFromPoFileContent = require( '../../lib/translations/createdictionaryfrompofilecontent' );
+const createDictionaryFromPoFileContent = require( '../../lib/translations/createdictionaryfrompofilecontent' );
 
 describe( 'translations', () => {
 	describe( 'parsePoFileContent()', () => {
 		// More functional rather than unit test to check whole conversion process.
 		it( 'should parse content and return js object with key - value pairs', () => {
-			const result = createDicitionaryFromPoFileContent( [
+			const result = createDictionaryFromPoFileContent( [
 				'msgctxt "Label for the Save button."',
 				'msgid "Save"',
 				'msgstr "Zapisz"',
@@ -25,13 +25,13 @@ describe( 'translations', () => {
 			].join( '\n' ) );
 
 			expect( result ).to.deep.equal( {
-				Save: 'Zapisz',
-				Cancel: 'Anuluj'
+				Save: [ 'Zapisz' ],
+				Cancel: [ 'Anuluj' ]
 			} );
 		} );
 
 		it( 'should skip the objects that do not contain msgstr property', () => {
-			const result = createDicitionaryFromPoFileContent( [
+			const result = createDictionaryFromPoFileContent( [
 				'msgctxt "Label for the Save button."',
 				'msgid "Save"',
 				'msgstr ""',
