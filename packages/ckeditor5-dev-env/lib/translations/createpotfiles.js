@@ -207,7 +207,7 @@ function createPotFileContent( packageName, sourceMessages, context ) {
 		.filter( sourceMessage => sourceMessage.packageName === packageName );
 
 	const messages = packageSourceMessages.map( sourceMessage => {
-		const message = { ...sourceMessage };
+		const message = Object.assign( {}, sourceMessage );
 
 		if ( context && !message.context ) {
 			message.context = context.content[ message.id ];
@@ -257,11 +257,10 @@ function getSourceMessagesFromFile( filePath, fileContent ) {
 	const sourceMessages = [];
 
 	findMessages( fileContent, filePath, message => {
-		sourceMessages.push( {
+		sourceMessages.push( Object.assign( {
 			filePath,
-			packageName: packageMatch[ 1 ],
-			...message
-		} );
+			packageName: packageMatch[ 1 ]
+		}, message ) );
 	}, err => console.error( err ) );
 
 	return sourceMessages;
