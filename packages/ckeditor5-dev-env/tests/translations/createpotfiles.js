@@ -52,7 +52,17 @@ describe( 'createPotFiles()', () => {
 		sinon.restore();
 	} );
 
-	it( 'should create an empty POT file when no message is found', () => {
+	it( 'should not create any POT file if no package is passed', () => {
+		createPotFiles( {
+			sourceFiles: [],
+			packagePaths: [],
+			corePackagePath: 'ckeditor5-core'
+		} );
+
+		sinon.assert.notCalled( stubs.fs.outputFileSync );
+	} );
+
+	it( 'should create an empty POT file when a package does not contain any message', () => {
 		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [] );
 
 		createPotFiles( {
@@ -67,6 +77,28 @@ describe( 'createPotFiles()', () => {
 			stubs.fs.outputFileSync,
 			path.join( 'cwd', 'build', '.transifex', 'ckeditor5-foo', 'en.pot' ),
 			'# Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.\n\n'
+		);
+	} );
+
+	it( 'should delete the build directory before creating POT files', () => {
+		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [] );
+
+		createPotFiles( {
+			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
+			packagePaths: [ 'ckeditor5-foo' ],
+			corePackagePath: 'ckeditor5-core'
+		} );
+
+		sinon.assert.calledOnce( stubs.del.sync );
+
+		sinon.assert.calledWithExactly(
+			stubs.del.sync,
+			path.join( 'cwd', 'build', '.transifex' )
+		);
+
+		sinon.assert.callOrder(
+			stubs.del.sync,
+			stubs.fs.outputFileSync
 		);
 	} );
 
