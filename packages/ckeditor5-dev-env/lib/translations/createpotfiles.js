@@ -56,7 +56,21 @@ module.exports = function createPotFiles( {
 	for ( const packageName of packageNames ) {
 		const context = packageContexts.get( packageName );
 		const potFileHeader = createPotFileHeader();
-		const potFileContent = createPotFileContent( packageName, sourceMessages, context );
+
+		const packageSourceMessages = sourceMessages
+			.filter( sourceMessage => sourceMessage.packageName === packageName );
+
+		const messages = packageSourceMessages.map( sourceMessage => {
+			const message = Object.assign( {}, sourceMessage );
+
+			if ( context && !message.context ) {
+				message.context = context.content[ message.id ];
+			}
+
+			return message;
+		} );
+
+		const potFileContent = createPotFileContent( messages );
 
 		savePotFile( packageName, potFileHeader + potFileContent );
 	}
@@ -193,33 +207,6 @@ function removeExistingPotFiles() {
 }
 
 /**
- * Creates a POT file for the given package.
- *
- * It merges source messages for the given package with corresponding contexts.
- *
- * @param {String} packageName A package name.
- * @param {Message[]} sourceMessages A package name.
- * @param {Context} [context] A context file for the given package.
- * @returns {String}
- */
-function createPotFileContent( packageName, sourceMessages, context ) {
-	const packageSourceMessages = sourceMessages
-		.filter( sourceMessage => sourceMessage.packageName === packageName );
-
-	const messages = packageSourceMessages.map( sourceMessage => {
-		const message = Object.assign( {}, sourceMessage );
-
-		if ( context && !message.context ) {
-			message.context = context.content[ message.id ];
-		}
-
-		return message;
-	} );
-
-	return createPotFile( messages );
-}
-
-/**
  * Creates a POT file for the given package and POT file content.
  * The default place is `build/.transifex/[packageName]/en.pot`.
  *
@@ -272,7 +259,7 @@ function getSourceMessagesFromFile( filePath, fileContent ) {
  * @param {Message[]} messages
  * @returns {String}
  */
-function createPotFile( messages ) {
+function createPotFileContent( messages ) {
 	return messages.map( message => {
 		const potFileMessageEntry = [];
 
