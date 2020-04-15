@@ -9,7 +9,7 @@ const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 const path = require( 'path' );
 
-describe( 'createPotFiles', () => {
+describe( 'createPotFiles()', () => {
 	let stubs;
 	let createPotFiles;
 
@@ -53,11 +53,7 @@ describe( 'createPotFiles', () => {
 	} );
 
 	it( 'should create an empty POT file when no message is found', () => {
-		stubs.fs.readFileSync
-			.withArgs( 'ckeditor5-foo/src/foo.js' ).returns( 'foo_js_content' );
-
-		stubs.translations.findMessages
-			.withArgs( 'foo_js_content' ).callsFake( () => { } );
+		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [] );
 
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
@@ -75,17 +71,11 @@ describe( 'createPotFiles', () => {
 	} );
 
 	it( 'should create a POT file entry for one message with a corresponding context', () => {
-		stubs.fs.readFileSync
-			.withArgs( path.join( 'ckeditor5-foo', 'lang', 'contexts.json' ) ).returns( '{"foo_id": "Foo"}' )
-			.withArgs( 'ckeditor5-foo/src/foo.js' ).returns( 'foo_js_content' );
+		createFakeContext( path.join( 'ckeditor5-foo', 'lang', 'contexts.json' ), { foo_id: 'Foo' } );
 
-		stubs.fs.existsSync
-			.withArgs( path.join( 'ckeditor5-foo', 'lang', 'contexts.json' ) ).returns( true );
-
-		stubs.translations.findMessages
-			.withArgs( 'foo_js_content' ).callsFake( ( fileContent, filePath, onFoundMessage ) => {
-				onFoundMessage( { string: 'foo', id: 'foo_id' } );
-			} );
+		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
+			{ string: 'foo', id: 'foo_id' }
+		] );
 
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
@@ -108,13 +98,9 @@ msgstr "foo"
 	} );
 
 	it( 'should create a POT file entry for one message with a defined context', () => {
-		stubs.fs.readFileSync
-			.withArgs( 'ckeditor5-foo/src/foo.js' ).returns( 'foo_js_content' );
-
-		stubs.translations.findMessages
-			.withArgs( 'foo_js_content' ).callsFake( ( fileContent, filePath, onFoundMessage ) => {
-				onFoundMessage( { string: 'foo', id: 'foo_id', context: 'foo_context' } );
-			} );
+		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
+			{ string: 'foo', id: 'foo_id', context: 'foo_context' }
+		] );
 
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
@@ -137,14 +123,10 @@ msgstr "foo"
 	} );
 
 	// TODO
-	it( 'should warn if no context is defined', () => {
-		stubs.fs.readFileSync
-			.withArgs( 'ckeditor5-foo/src/foo.js' ).returns( 'foo_js_content' );
-
-		stubs.translations.findMessages
-			.withArgs( 'foo_js_content' ).callsFake( ( fileContent, filePath, onFoundMessage ) => {
-				onFoundMessage( { string: 'foo', id: 'foo_id' } );
-			} );
+	it.skip( 'should warn if no context is defined', () => {
+		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
+			{ string: 'foo', id: 'foo_id' }
+		] );
 
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
@@ -166,17 +148,13 @@ msgstr "foo"
 	} );
 
 	it( 'should create a POT file entry for every defined package', () => {
-		stubs.fs.readFileSync
-			.withArgs( 'ckeditor5-foo/src/foo.js' ).returns( 'foo_js_content' )
-			.withArgs( 'ckeditor5-bar/src/bar.js' ).returns( 'bar_js_content' );
+		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
+			{ string: 'foo', id: 'foo_id', context: 'foo_context' }
+		] );
 
-		stubs.translations.findMessages
-			.withArgs( 'foo_js_content' ).callsFake( ( fileContent, filePath, onFoundMessage ) => {
-				onFoundMessage( { string: 'foo', id: 'foo_id', context: 'foo_context' } );
-			} )
-			.withArgs( 'bar_js_content' ).callsFake( ( fileContent, filePath, onFoundMessage ) => {
-				onFoundMessage( { string: 'bar', id: 'bar_id', context: 'bar_context' } );
-			} );
+		createFakeSourceFileWithMessages( 'ckeditor5-bar/src/bar.js', [
+			{ string: 'bar', id: 'bar_id', context: 'bar_context' }
+		] );
 
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js', 'ckeditor5-bar/src/bar.js' ],
@@ -209,17 +187,13 @@ msgstr "bar"
 	} );
 
 	it( 'should create one POT file entry from multiple files in the same package', () => {
-		stubs.fs.readFileSync
-			.withArgs( 'ckeditor5-foo/src/foo.js' ).returns( 'foo_js_content' )
-			.withArgs( 'ckeditor5-foo/src/bar.js' ).returns( 'bar_js_content' );
+		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
+			{ string: 'foo', id: 'foo_id', context: 'foo_context' }
+		] );
 
-		stubs.translations.findMessages
-			.withArgs( 'foo_js_content' ).callsFake( ( fileContent, filePath, onFoundMessage ) => {
-				onFoundMessage( { string: 'foo', id: 'foo_id', context: 'foo_context' } );
-			} )
-			.withArgs( 'bar_js_content' ).callsFake( ( fileContent, filePath, onFoundMessage ) => {
-				onFoundMessage( { string: 'bar', id: 'bar_id', context: 'bar_context' } );
-			} );
+		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/bar.js', [
+			{ string: 'bar', id: 'bar_id', context: 'bar_context' }
+		] );
 
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js', 'ckeditor5-foo/src/bar.js' ],
@@ -246,13 +220,9 @@ msgstr "bar"
 	} );
 
 	it( 'should create a POT entry filled with plural forms for message that contains has defined plural forms', () => {
-		stubs.fs.readFileSync
-			.withArgs( 'ckeditor5-foo/src/foo.js' ).returns( 'foo_js_content' );
-
-		stubs.translations.findMessages
-			.withArgs( 'foo_js_content' ).callsFake( ( fileContent, filePath, onFoundMessage ) => {
-				onFoundMessage( { string: 'foo', id: 'foo_id', context: 'foo_context', plural: 'foo_plural' } );
-			} );
+		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
+			{ string: 'foo', id: 'foo_id', context: 'foo_context', plural: 'foo_plural' }
+		] );
 
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
@@ -275,4 +245,24 @@ msgstr[1] "foo_plural"
 `
 		);
 	} );
+
+	function createFakeSourceFileWithMessages( file, messages ) {
+		const content = file + '_content';
+
+		stubs.fs.readFileSync
+			.withArgs( file ).returns( content );
+
+		stubs.translations.findMessages
+			.withArgs( content ).callsFake( ( fileContent, filePath, onFoundMessage ) => {
+				messages.forEach( message => onFoundMessage( message ) );
+			} );
+	}
+
+	function createFakeContext( pathToContext, content ) {
+		stubs.fs.readFileSync
+			.withArgs( pathToContext ).returns( JSON.stringify( content ) );
+
+		stubs.fs.existsSync
+			.withArgs( pathToContext ).returns( true );
+	}
 } );

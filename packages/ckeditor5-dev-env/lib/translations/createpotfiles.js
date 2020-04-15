@@ -248,7 +248,7 @@ function getSourceMessagesFromFile( filePath, fileContent ) {
 			filePath,
 			packageName: packageMatch[ 1 ]
 		}, message ) );
-	}, err => console.error( err ) );
+	}, err => logger.error( err ) );
 
 	return sourceMessages;
 }
