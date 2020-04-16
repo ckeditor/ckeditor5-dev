@@ -124,24 +124,27 @@ function collectSourceMessages( { sourceFiles, logger } ) {
  */
 function assertNoMissingContext( { packageContexts, sourceMessages, logger } ) {
 	const errors = [];
-	const contextSet = new Set();
+	const contextIdOrigins = new Map();
 
-	for ( const { content } of packageContexts.values() ) {
+	for ( const [ packageName, { content } ] of packageContexts ) {
 		for ( const messageId in content ) {
-			contextSet.add( messageId );
+			contextIdOrigins.set( messageId, packageName );
 		}
 	}
 
 	for ( const sourceMessage of sourceMessages ) {
-		if ( sourceMessage.context && contextSet.has( sourceMessage.id ) ) {
-			// TODO - a context is overwrite warning.
+		if ( sourceMessage.context && contextIdOrigins.has( sourceMessage.id ) ) {
+			const contextFilePath = path.join( contextIdOrigins.get( sourceMessage.id ), langContextSuffix );
+
+			logger.error( `Context is duplicated for the id: '${ sourceMessage.id }'` +
+			` in ${ sourceMessage.filePath } and ${ contextFilePath }.` );
 		}
 
 		if ( sourceMessage.context ) {
 			continue;
 		}
 
-		if ( !contextSet.has( sourceMessage.id ) ) {
+		if ( !contextIdOrigins.has( sourceMessage.id ) ) {
 			logger.error(
 				`Context for the message id is missing ('${ sourceMessage.id }' from ${ sourceMessage.filePath }).`
 			);

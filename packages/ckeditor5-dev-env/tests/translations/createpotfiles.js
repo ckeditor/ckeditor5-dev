@@ -7,7 +7,7 @@
 
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
-const path = require( 'path' );
+const { posix } = require( 'path' );
 
 describe( 'createPotFiles()', () => {
 	let stubs;
@@ -41,7 +41,8 @@ describe( 'createPotFiles()', () => {
 			'fs-extra': stubs.fs,
 			'@ckeditor/ckeditor5-dev-utils': {
 				translations: stubs.translations
-			}
+			},
+			'path': posix
 		} );
 
 		sinon.stub( process, 'cwd' ).returns( 'cwd' );
@@ -76,7 +77,7 @@ describe( 'createPotFiles()', () => {
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			path.join( 'cwd', 'build', '.transifex', 'ckeditor5-foo', 'en.pot' ),
+			'cwd/build/.transifex/ckeditor5-foo/en.pot',
 			'# Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.\n\n'
 		);
 	} );
@@ -95,7 +96,7 @@ describe( 'createPotFiles()', () => {
 
 		sinon.assert.calledWithExactly(
 			stubs.del.sync,
-			path.join( 'cwd', 'build', '.transifex' )
+			'cwd/build/.transifex'
 		);
 
 		sinon.assert.callOrder(
@@ -105,7 +106,7 @@ describe( 'createPotFiles()', () => {
 	} );
 
 	it( 'should create a POT file entry for one message with a corresponding context', () => {
-		createFakeContextFile( path.join( 'ckeditor5-foo', 'lang', 'contexts.json' ), { foo_id: 'foo_context' } );
+		createFakeContextFile( 'ckeditor5-foo/lang/contexts.json', { foo_id: 'foo_context' } );
 
 		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
 			{ string: 'foo', id: 'foo_id' }
@@ -122,7 +123,7 @@ describe( 'createPotFiles()', () => {
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			path.join( 'cwd', 'build', '.transifex', 'ckeditor5-foo', 'en.pot' ),
+			'cwd/build/.transifex/ckeditor5-foo/en.pot',
 			`# Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
 
 msgctxt "foo_context"
@@ -148,7 +149,7 @@ msgstr "foo"
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			path.join( 'cwd', 'build', '.transifex', 'ckeditor5-foo', 'en.pot' ),
+			'cwd/build/.transifex/ckeditor5-foo/en.pot',
 			`# Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
 
 msgctxt "foo_context"
@@ -158,8 +159,7 @@ msgstr "foo"
 		);
 	} );
 
-	// TODO
-	it.skip( 'should warn if no context is defined', () => {
+	it( 'should warn if no context is defined', () => {
 		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
 			{ string: 'foo', id: 'foo_id' }
 		] );
@@ -171,11 +171,17 @@ msgstr "foo"
 			logger: stubs.logger
 		} );
 
+		sinon.assert.calledOnce( stubs.logger.error );
+		sinon.assert.calledWithExactly(
+			stubs.logger.error,
+			'Context for the message id is missing (\'foo_id\' from ckeditor5-foo/src/foo.js).'
+		);
+
 		sinon.assert.calledOnce( stubs.fs.outputFileSync );
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			path.join( 'cwd', 'build', '.transifex', 'ckeditor5-foo', 'en.pot' ),
+			'cwd/build/.transifex/ckeditor5-foo/en.pot',
 			`# Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
 
 msgid "foo_id"
@@ -204,7 +210,7 @@ msgstr "foo"
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			path.join( 'cwd', 'build', '.transifex', 'ckeditor5-foo', 'en.pot' ),
+			'cwd/build/.transifex/ckeditor5-foo/en.pot',
 			`# Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
 
 msgctxt "foo_context"
@@ -214,7 +220,7 @@ msgstr "foo"
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			path.join( 'cwd', 'build', '.transifex', 'ckeditor5-bar', 'en.pot' ),
+			'cwd/build/.transifex/ckeditor5-bar/en.pot',
 			`# Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
 
 msgctxt "bar_context"
@@ -244,7 +250,7 @@ msgstr "bar"
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			path.join( 'cwd', 'build', '.transifex', 'ckeditor5-foo', 'en.pot' ),
+			'cwd/build/.transifex/ckeditor5-foo/en.pot',
 			`# Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
 
 msgctxt "foo_context"
@@ -274,7 +280,7 @@ msgstr "bar"
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			path.join( 'cwd', 'build', '.transifex', 'ckeditor5-foo', 'en.pot' ),
+			'cwd/build/.transifex/ckeditor5-foo/en.pot',
 			`# Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
 
 msgctxt "foo_context"
@@ -309,8 +315,8 @@ msgstr[1] "foo_plural"
 			{ string: 'foo', id: 'foo_id' }
 		] );
 
-		createFakeContextFile( path.join( 'ckeditor5-foo', 'lang', 'contexts.json' ), { foo_id: 'foo_context1' } );
-		createFakeContextFile( path.join( 'ckeditor5-core', 'lang', 'contexts.json' ), { foo_id: 'foo_context2' } );
+		createFakeContextFile( 'ckeditor5-foo/lang/contexts.json', { foo_id: 'foo_context1' } );
+		createFakeContextFile( 'ckeditor5-core/lang/contexts.json', { foo_id: 'foo_context2' } );
 
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
@@ -324,6 +330,28 @@ msgstr[1] "foo_plural"
 		sinon.assert.calledWithExactly(
 			stubs.logger.error,
 			'Context is duplicated for the id: \'foo_id\' in ckeditor5-core/lang/contexts.json and ckeditor5-foo/lang/contexts.json.'
+		);
+	} );
+
+	it( 'should log an error if a context is duplicated in the message and a context file', () => {
+		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
+			{ string: 'foo', id: 'foo_id', context: 'foo_context' }
+		] );
+
+		createFakeContextFile( 'ckeditor5-foo/lang/contexts.json', { foo_id: 'foo_context1' } );
+
+		createPotFiles( {
+			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
+			packagePaths: [ 'ckeditor5-foo' ],
+			corePackagePath: 'ckeditor5-core',
+			logger: stubs.logger
+		} );
+
+		sinon.assert.calledOnce( stubs.logger.error );
+
+		sinon.assert.calledWithExactly(
+			stubs.logger.error,
+			'Context is duplicated for the id: \'foo_id\' in ckeditor5-foo/src/foo.js and ckeditor5-foo/lang/contexts.json.'
 		);
 	} );
 
