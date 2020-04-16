@@ -18,11 +18,20 @@ const tasks = {
 	collect() {
 		// TODO - ignore-errors flag.
 		const createPotFiles = require( '../lib/translations/createpotfiles' );
+		const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
+		const ignoreErrors = false;
+
+		if ( !ignoreErrors ) {
+			logger.on( 'error', errorMessage => {
+				throw new Error( errorMessage );
+			} );
+		}
 
 		createPotFiles( {
 			sourceFiles: getCKEditor5SourceFiles(),
 			packagePaths: getCKEditor5PackagePaths(),
-			corePackagePath: 'packages/ckeditor5-core'
+			corePackagePath: 'packages/ckeditor5-core',
+			logger
 		} );
 	},
 

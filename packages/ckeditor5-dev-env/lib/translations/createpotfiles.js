@@ -9,7 +9,6 @@ const path = require( 'path' );
 const fs = require( 'fs-extra' );
 const del = require( 'del' );
 
-const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 const { findMessages } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 
 const langContextSuffix = path.join( 'lang', 'contexts.json' );
@@ -23,31 +22,20 @@ const corePackageName = 'ckeditor5-core';
  * @param {String[]} options.sourceFiles An array of source files that contain messages to translate.
  * @param {String[]} options.packagePaths An array of paths to packages, which will be used to find message contexts.
  * @param {String} options.corePackagePath A path to the ckeditor5-core package.
- * @param {Boolean} [options.ignoreErrors] When set to `true` the tool
+ * @param {Logger} [logger] A logger.
  */
 module.exports = function createPotFiles( {
 	sourceFiles,
 	packagePaths,
 	corePackagePath,
-	ignoreErrors = false
+	logger
 } ) {
 	const packageContexts = getPackageContexts( packagePaths, corePackagePath );
-	const sourceMessages = collectSourceMessages( sourceFiles );
+	const sourceMessages = collectSourceMessages( { sourceFiles, logger } );
 
-	const errorsMessages = [
-		...getUnusedContextErrorMessages( packageContexts, sourceMessages ),
-		...getMissingContextErrorMessages( packageContexts, sourceMessages ),
-		...getRepeatedContextErrorMessages( packageContexts )
-	];
-
-	if ( errorsMessages.length > 0 ) {
-		errorsMessages.forEach( error => logger.error( error ) );
-
-		if ( !ignoreErrors ) {
-			// logger.error( 'Fix the above errors or run script with the `--ignore-errors` flag.' );
-			// process.exit( 1 );
-		}
-	}
+	assertNoMissingContext( { packageContexts, sourceMessages, logger } );
+	assertAllContextUsed( { packageContexts, sourceMessages, logger } );
+	assertNoRepeatedContext( { packageContexts, logger } );
 
 	const packageNames = packagePaths.map( p => p.replace( /.+[/\\]/, '' ) );
 
@@ -72,7 +60,11 @@ module.exports = function createPotFiles( {
 
 		const potFileContent = createPotFileContent( messages );
 
-		savePotFile( packageName, potFileHeader + potFileContent );
+		savePotFile( {
+			packageName,
+			fileContent: potFileHeader + potFileContent,
+			logger
+		} );
 	}
 };
 
@@ -109,28 +101,32 @@ function getPackageContexts( packagePaths, corePackagePath ) {
  *
  * @returns {Array.<Message>}
  */
-function collectSourceMessages( sourceFiles ) {
+function collectSourceMessages( { sourceFiles, logger } ) {
 	const messages = [];
 
 	for ( const sourceFile of sourceFiles ) {
-		const content = fs.readFileSync( sourceFile, 'utf-8' );
+		const fileContent = fs.readFileSync( sourceFile, 'utf-8' );
 
-		messages.push( ...getSourceMessagesFromFile( sourceFile, content ) );
+		messages.push(
+			...getSourceMessagesFromFile( { filePath: sourceFile, fileContent, logger } )
+		);
 	}
 
 	return messages;
 }
 
 /**
- * @param {Map.<String, Context>} contexts A map of language contexts.
- * @param {Array.<Message>} sourceMessages An array of i18n source messages.
+ * @param {Object} options
+ * @param {Map.<String, Context>} options.packageContexts A map of language contexts.
+ * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
+ * @param {Function} options.logger A logger.
  * @returns {Array.<String>}
  */
-function getMissingContextErrorMessages( contexts, sourceMessages ) {
+function assertNoMissingContext( { packageContexts, sourceMessages, logger } ) {
 	const errors = [];
 	const contextSet = new Set();
 
-	for ( const { content } of contexts.values() ) {
+	for ( const { content } of packageContexts.values() ) {
 		for ( const messageId in content ) {
 			contextSet.add( messageId );
 		}
@@ -146,7 +142,7 @@ function getMissingContextErrorMessages( contexts, sourceMessages ) {
 		}
 
 		if ( !contextSet.has( sourceMessage.id ) ) {
-			errors.push(
+			logger.error(
 				`Context for the message id is missing ('${ sourceMessage.id }' from ${ sourceMessage.filePath }).`
 			);
 		}
@@ -156,14 +152,16 @@ function getMissingContextErrorMessages( contexts, sourceMessages ) {
 }
 
 /**
- * @param {Map.<String, Context>} contexts A map of language contexts.
- * @param {Array.<Message>} sourceMessages An array of i18n source messages.
+ * @param {Object} options
+ * @param {Map.<String, Context>} options.packageContexts A map of language contexts.
+ * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
+ * @param {Function} options.logger A logger.
  * @returns {Array.<String>}
  */
-function getUnusedContextErrorMessages( contexts, sourceMessages ) {
+function assertAllContextUsed( { packageContexts, sourceMessages, logger } ) {
 	const usedContextMap = new Map();
 
-	for ( const [ packageName, context ] of contexts ) {
+	for ( const [ packageName, context ] of packageContexts ) {
 		for ( const id in context.content ) {
 			usedContextMap.set( packageName + '/' + id, false );
 		}
@@ -174,23 +172,27 @@ function getUnusedContextErrorMessages( contexts, sourceMessages ) {
 		usedContextMap.set( corePackageName + '/' + message.id, true );
 	}
 
-	return [ ...usedContextMap ]
-		.filter( ( [ , usage ] ) => !usage )
-		.map( ( [ id ] ) => `Unused context: ${ id }` );
+	for ( const [ id, used ] of usedContextMap ) {
+		if ( !used ) {
+			logger.error( `Unused context: ${ id }` );
+		}
+	}
 }
 
 /**
- * @param {Map.<String, Context>} contexts A map of language contexts.
+ * @param {Object} options
+ * @param {Map.<String, Context>} options.packageContexts A map of language contexts.
+ * @param {Function} options.logger The error callback.
  * @returns {Array.<String>}
  */
-function getRepeatedContextErrorMessages( contexts ) {
+function assertNoRepeatedContext( { packageContexts, logger } ) {
 	const errors = [];
 	const idOrigins = new Map();
 
-	for ( const context of contexts.values() ) {
+	for ( const context of packageContexts.values() ) {
 		for ( const id in context.content ) {
 			if ( idOrigins.has( id ) ) {
-				errors.push( `Context is duplicated for the id: '${ id }' in ${ context.filePath } and ${ idOrigins.get( id ) }.` );
+				logger.error( `Context is duplicated for the id: '${ id }' in ${ context.filePath } and ${ idOrigins.get( id ) }.` );
 			}
 
 			idOrigins.set( id, context.filePath );
@@ -210,10 +212,12 @@ function removeExistingPotFiles() {
  * Creates a POT file for the given package and POT file content.
  * The default place is `build/.transifex/[packageName]/en.pot`.
  *
- * @param {String} packageName
- * @param {String} fileContent
+ * @param {Object} options
+ * @param {Logger} options.logger
+ * @param {String} options.packageName
+ * @param {String} options.fileContent
  */
-function savePotFile( packageName, fileContent ) {
+function savePotFile( { packageName, fileContent, logger } ) {
 	const outputFilePath = path.join( process.cwd(), 'build', '.transifex', packageName, 'en.pot' );
 
 	fs.outputFileSync( outputFilePath, fileContent );
@@ -239,7 +243,7 @@ function createPotFileHeader() {
  * @param {String} fileContent
  * @returns {Message[]}
  */
-function getSourceMessagesFromFile( filePath, fileContent ) {
+function getSourceMessagesFromFile( { filePath, fileContent, logger } ) {
 	const packageMatch = filePath.match( /([^/\\]+)[/\\]src[/\\]/ );
 	const sourceMessages = [];
 

@@ -40,7 +40,6 @@ describe( 'createPotFiles()', () => {
 			'del': stubs.del,
 			'fs-extra': stubs.fs,
 			'@ckeditor/ckeditor5-dev-utils': {
-				logger: () => stubs.logger,
 				translations: stubs.translations
 			}
 		} );
@@ -56,7 +55,8 @@ describe( 'createPotFiles()', () => {
 		createPotFiles( {
 			sourceFiles: [],
 			packagePaths: [],
-			corePackagePath: 'ckeditor5-core'
+			corePackagePath: 'ckeditor5-core',
+			logger: stubs.logger
 		} );
 
 		sinon.assert.notCalled( stubs.fs.outputFileSync );
@@ -68,7 +68,8 @@ describe( 'createPotFiles()', () => {
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'ckeditor5-foo' ],
-			corePackagePath: 'ckeditor5-core'
+			corePackagePath: 'ckeditor5-core',
+			logger: stubs.logger
 		} );
 
 		sinon.assert.calledOnce( stubs.fs.outputFileSync );
@@ -86,7 +87,8 @@ describe( 'createPotFiles()', () => {
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'ckeditor5-foo' ],
-			corePackagePath: 'ckeditor5-core'
+			corePackagePath: 'ckeditor5-core',
+			logger: stubs.logger
 		} );
 
 		sinon.assert.calledOnce( stubs.del.sync );
@@ -112,7 +114,8 @@ describe( 'createPotFiles()', () => {
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'ckeditor5-foo' ],
-			corePackagePath: 'ckeditor5-core'
+			corePackagePath: 'ckeditor5-core',
+			logger: stubs.logger
 		} );
 
 		sinon.assert.calledOnce( stubs.fs.outputFileSync );
@@ -137,7 +140,8 @@ msgstr "foo"
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'ckeditor5-foo' ],
-			corePackagePath: 'ckeditor5-core'
+			corePackagePath: 'ckeditor5-core',
+			logger: stubs.logger
 		} );
 
 		sinon.assert.calledOnce( stubs.fs.outputFileSync );
@@ -163,7 +167,8 @@ msgstr "foo"
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'ckeditor5-foo' ],
-			corePackagePath: 'ckeditor5-core'
+			corePackagePath: 'ckeditor5-core',
+			logger: stubs.logger
 		} );
 
 		sinon.assert.calledOnce( stubs.fs.outputFileSync );
@@ -191,7 +196,8 @@ msgstr "foo"
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js', 'ckeditor5-bar/src/bar.js' ],
 			packagePaths: [ 'ckeditor5-foo', 'ckeditor5-bar' ],
-			corePackagePath: 'ckeditor5-core'
+			corePackagePath: 'ckeditor5-core',
+			logger: stubs.logger
 		} );
 
 		sinon.assert.calledTwice( stubs.fs.outputFileSync );
@@ -230,7 +236,8 @@ msgstr "bar"
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js', 'ckeditor5-foo/src/bar.js' ],
 			packagePaths: [ 'ckeditor5-foo' ],
-			corePackagePath: 'ckeditor5-core'
+			corePackagePath: 'ckeditor5-core',
+			logger: stubs.logger
 		} );
 
 		sinon.assert.calledOnce( stubs.fs.outputFileSync );
@@ -259,7 +266,8 @@ msgstr "bar"
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'ckeditor5-foo' ],
-			corePackagePath: 'ckeditor5-core'
+			corePackagePath: 'ckeditor5-core',
+			logger: stubs.logger
 		} );
 
 		sinon.assert.calledOnce( stubs.fs.outputFileSync );
@@ -284,7 +292,8 @@ msgstr[1] "foo_plural"
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'ckeditor5-foo' ],
-			corePackagePath: 'ckeditor5-core'
+			corePackagePath: 'ckeditor5-core',
+			logger: stubs.logger
 		} );
 
 		sinon.assert.calledOnce( stubs.logger.error );
@@ -295,7 +304,7 @@ msgstr[1] "foo_plural"
 		);
 	} );
 
-	it( 'should log an error if two contexts contain the same id', () => {
+	it( 'should log an error if two context files contain contexts the same id', () => {
 		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
 			{ string: 'foo', id: 'foo_id' }
 		] );
@@ -306,7 +315,8 @@ msgstr[1] "foo_plural"
 		createPotFiles( {
 			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'ckeditor5-foo' ],
-			corePackagePath: 'ckeditor5-core'
+			corePackagePath: 'ckeditor5-core',
+			logger: stubs.logger
 		} );
 
 		sinon.assert.calledOnce( stubs.logger.error );
