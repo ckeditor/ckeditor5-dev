@@ -176,8 +176,11 @@ function assertAllContextUsed( { packageContexts, sourceMessages, logger } ) {
 	}
 
 	for ( const [ id, used ] of usedContextMap ) {
+		const [ packageName, messageId ] = id.split( '/' );
+		const contextFilePath = path.join( packageName, langContextSuffix );
+
 		if ( !used ) {
-			logger.error( `Unused context: ${ id }` );
+			logger.error( `Unused context: '${ messageId }' in ${ contextFilePath }` );
 		}
 	}
 }

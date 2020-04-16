@@ -292,6 +292,25 @@ msgstr[1] "foo_plural"
 		);
 	} );
 
+	it( 'should load the core context file once', () => {
+		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
+			{ string: 'foo', id: 'foo_id' }
+		] );
+
+		createFakeContextFile( 'ckeditor5-core/lang/contexts.json', {
+			foo_id: 'foo_context'
+		} );
+
+		createPotFiles( {
+			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
+			packagePaths: [ 'ckeditor5-foo', 'ckeditor5-core' ],
+			corePackagePath: 'ckeditor5-core',
+			logger: stubs.logger
+		} );
+
+		sinon.assert.notCalled( stubs.logger.error );
+	} );
+
 	it( 'should log an error if the file contains a message that cannot be parsed', () => {
 		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [], [ 'parse_error' ] );
 
@@ -352,6 +371,31 @@ msgstr[1] "foo_plural"
 		sinon.assert.calledWithExactly(
 			stubs.logger.error,
 			'Context is duplicated for the id: \'foo_id\' in ckeditor5-foo/src/foo.js and ckeditor5-foo/lang/contexts.json.'
+		);
+	} );
+
+	it( 'should log an error if a context is unused', () => {
+		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
+			{ string: 'foo', id: 'foo_id' }
+		] );
+
+		createFakeContextFile( 'ckeditor5-foo/lang/contexts.json', {
+			foo_id: 'foo_context',
+			bar_id: 'foo_context'
+		} );
+
+		createPotFiles( {
+			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
+			packagePaths: [ 'ckeditor5-foo' ],
+			corePackagePath: 'ckeditor5-core',
+			logger: stubs.logger
+		} );
+
+		sinon.assert.calledOnce( stubs.logger.error );
+
+		sinon.assert.calledWithExactly(
+			stubs.logger.error,
+			'Unused context: \'bar_id\' in ckeditor5-foo/lang/contexts.json'
 		);
 	} );
 
