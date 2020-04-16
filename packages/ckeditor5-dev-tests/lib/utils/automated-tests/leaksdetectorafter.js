@@ -8,21 +8,17 @@
 // eslint-disable-next-line mocha/no-top-level-hooks
 afterEach( function() {
 	let leaksCount = 0;
-	const lines = [];
-
-	Array.from( document.body.children ).forEach( el => {
-		if ( !this._lastDomElements.has( el ) ) {
-			const html = el.outerHTML.length > 80 ?
-				el.outerHTML.substr( 0, 77 ) + '...' :
-				el.outerHTML;
-			lines.push( html );
-			leaksCount++;
-		}
+	const leakedElementMarkups = Array.from( document.body.children ).filter( el => !this._lastDomElements.has( el ) ).map( el => {
+		const html = el.outerHTML.length > 80 ?
+			el.outerHTML.substr( 0, 77 ) + '...' :
+			el.outerHTML;
+		leaksCount++;
+		return html;
 	} );
 
 	if ( leaksCount ) {
 		const errorMessage = `Elements leaked (${ leaksCount }):\n` +
-			lines.join( '\n' ) + '\n' +
+			leakedElementMarkups.join( '\n' ) + '\n' +
 			'Be a good citizen and clean your DOM once you\'re done with it.';
 
 		this._lastDomElements = null;
