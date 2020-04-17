@@ -120,7 +120,16 @@ module.exports = function serveTranslations( compiler, options, translationServi
 		} );
 	} );
 
+	// A set of unique messages that prevents message duplications.
+	const uniqueMessages = new Set();
+
 	function emitError( error ) {
+		if ( uniqueMessages.has( error ) ) {
+			return;
+		}
+
+		uniqueMessages.add( error );
+
 		if ( options.strict ) {
 			throw new Error( chalk.red( error ) );
 		}
@@ -129,6 +138,12 @@ module.exports = function serveTranslations( compiler, options, translationServi
 	}
 
 	function emitWarning( warning ) {
+		if ( uniqueMessages.has( warning ) ) {
+			return;
+		}
+
+		uniqueMessages.add( warning );
+
 		if ( options.verbose ) {
 			console.warn( chalk.yellow( `Warning: ${ warning }` ) );
 		}
