@@ -8,6 +8,7 @@
 const path = require( 'path' );
 const fs = require( 'fs-extra' );
 const del = require( 'del' );
+const defaultLogger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 
 const { findMessages } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 
@@ -28,7 +29,7 @@ module.exports = function createPotFiles( {
 	sourceFiles,
 	packagePaths,
 	corePackagePath,
-	logger
+	logger = defaultLogger
 } ) {
 	const packageContexts = getPackageContexts( packagePaths, corePackagePath );
 	const sourceMessages = collectSourceMessages( { sourceFiles, logger } );

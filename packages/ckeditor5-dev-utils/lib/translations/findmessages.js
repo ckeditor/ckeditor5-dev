@@ -78,8 +78,7 @@ module.exports = function findMessages( source, sourceFile, onMessageFound, onEr
 			}
 
 			onErrorFound(
-				`First t() call argument should be a string literal or an object literal in ${ sourceFile }. ` +
-				'See https://github.com/ckeditor/ckeditor5/issues/6526.'
+				`First t() call argument should be a string literal or an object literal (${ sourceFile }).`
 			);
 		}
 	} );
