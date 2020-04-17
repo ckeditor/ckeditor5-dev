@@ -49,7 +49,8 @@ module.exports = class CKEditorWebpackPlugin {
 			sourceFilesPattern: options.sourceFileRegexp || /[/\\]ckeditor5-[^/\\]+[/\\]src[/\\].+\.js$/,
 			packageNamesPattern: options.packageNamesPattern || /[/\\]ckeditor5-[^/\\]+[/\\]/,
 			corePackagePattern: options.corePackagePattern || /[/\\]ckeditor5-core/,
-			corePackageSampleResourcePath: options.corePackageSampleResourcePath || '@ckeditor/ckeditor5-core/src/editor/editor.js'
+			corePackageSampleResourcePath: options.corePackageSampleResourcePath || '@ckeditor/ckeditor5-core/src/editor/editor.js',
+			allowMultipleJSAssets: options.allowMultipleJSAssets // TODO - docs
 		};
 	}
 
@@ -62,7 +63,7 @@ module.exports = class CKEditorWebpackPlugin {
 			return;
 		}
 
-		const mainLanguage = this.options.language;
+		const { allowMultipleJSAssets, language: mainLanguage } = this.options;
 		let compileAllLanguages = false;
 		let additionalLanguages = this.options.additionalLanguages || [];
 
@@ -81,7 +82,12 @@ module.exports = class CKEditorWebpackPlugin {
 		// and is used by the `serveTranslation() function that uses the API.
 		// See the TranslationService interface in the `servetranslation.js` file.
 
-		const translationService = new MultipleLanguageTranslationService( { mainLanguage, compileAllLanguages, additionalLanguages } );
+		const translationService = new MultipleLanguageTranslationService( {
+			mainLanguage,
+			compileAllLanguages,
+			additionalLanguages,
+			allowMultipleJSAssets
+		} );
 
 		serveTranslations( compiler, this.options, translationService );
 	}
