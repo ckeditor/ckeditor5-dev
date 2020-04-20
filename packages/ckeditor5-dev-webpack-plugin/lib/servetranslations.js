@@ -21,6 +21,7 @@ const { RawSource, ConcatSource } = require( 'webpack-sources' );
  * @param {Object} options Translation options.
  * @param {String} options.outputDirectory The output directory for the emitted translation files, relative to the webpack context.
  * @param {Boolean} [options.strict] An option that make this function throw when the error is found during the compilation.
+ * @param {Boolean} [options.verbose] An option that make this function log everything into the console.
  * @param {String} [options.sourceFilesPattern] The source files pattern
  * @param {String} [options.packageNamesPattern] The package names pattern.
  * @param {String} [options.corePackagePattern] The core package pattern.
@@ -141,7 +142,9 @@ module.exports = function serveTranslations( compiler, options, translationServi
 
 		uniqueMessages.add( warning );
 
-		console.warn( chalk.yellow( `Warning: ${ warning }` ) );
+		if ( options.verbose ) {
+			console.warn( chalk.yellow( `Warning: ${ warning }` ) );
+		}
 	}
 };
 
