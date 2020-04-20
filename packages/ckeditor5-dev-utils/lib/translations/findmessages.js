@@ -26,7 +26,7 @@ module.exports = function findMessages( source, sourceFile, onMessageFound, onEr
 
 	walk.simple( ast, {
 		CallExpression: node => {
-			// Add warning for the `editor.t()` calls which aren't supported yet.
+			// Log a warning for the `editor.t()` calls and similar which aren't supported yet.
 			if ( isTMethodCallExpression( node ) ) {
 				const objName = node.callee.object.name;
 				const propName = node.callee.property.name;
@@ -97,6 +97,9 @@ function isTMethodCallExpression( node ) {
 	return (
 		node.callee.type === 'MemberExpression' &&
 		node.callee.property.name === 't' &&
+
+		// Skip this.t() calls.
+		// These calls can be used frequently in the minified/ obfuscated code.
 		node.callee.object.type !== 'ThisExpression'
 	);
 }
