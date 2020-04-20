@@ -102,7 +102,12 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 				sinon.assert.calledOnce( stubs.MultipleLanguageTranslationService );
 				sinon.assert.calledWithExactly(
 					stubs.MultipleLanguageTranslationService,
-					{ mainLanguage: 'pl', compileAllLanguages: false, additionalLanguages: [] }
+					{
+						mainLanguage: 'pl',
+						compileAllLanguages: false,
+						additionalLanguages: [],
+						allowMultipleJSAssets: false
+					}
 				);
 			} );
 
@@ -120,7 +125,12 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 				sinon.assert.calledOnce( stubs.MultipleLanguageTranslationService );
 				sinon.assert.calledWithExactly(
 					stubs.MultipleLanguageTranslationService,
-					{ mainLanguage: 'pl', compileAllLanguages: false, additionalLanguages: [ 'en' ] }
+					{
+						mainLanguage: 'pl',
+						compileAllLanguages: false,
+						additionalLanguages: [ 'en' ],
+						allowMultipleJSAssets: false
+					}
 				);
 			} );
 
@@ -138,27 +148,16 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 				sinon.assert.calledOnce( stubs.MultipleLanguageTranslationService );
 				sinon.assert.calledWithExactly(
 					stubs.MultipleLanguageTranslationService,
-					{ mainLanguage: 'en', compileAllLanguages: true, additionalLanguages: [] }
+					{
+						mainLanguage: 'en',
+						compileAllLanguages: true,
+						additionalLanguages: [],
+						allowMultipleJSAssets: false
+					}
 				);
 
 				sinon.assert.notCalled( console.warn );
 			} );
-		} );
-
-		it.skip( 'should log a warning if `additionalLanguages` is not specified while `outputDirectory` is set', () => {
-			const options = {
-				language: 'en',
-				outputDirectory: 'custom-lang',
-				verbose: true
-			};
-
-			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
-			ckeditorWebpackPlugin.apply( {} );
-
-			sinon.assert.calledOnce( console.warn );
-			expect( console.warn.getCall( 0 ).args[ 0 ] ).to.match(
-				/Warning: `outputDirectory` option does not work for one language\. It will be ignored\./
-			);
 		} );
 
 		it( 'should throw an error when provided `additionalLanguages` is type of string, but not `all`', () => {
