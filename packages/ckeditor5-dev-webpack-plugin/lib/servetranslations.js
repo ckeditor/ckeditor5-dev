@@ -21,7 +21,6 @@ const { RawSource, ConcatSource } = require( 'webpack-sources' );
  * @param {Object} options Translation options.
  * @param {String} options.outputDirectory The output directory for the emitted translation files, relative to the webpack context.
  * @param {Boolean} [options.strict] An option that make this function throw when the error is found during the compilation.
- * @param {Boolean} [options.verbose] An option that make this function log everything into the console.
  * @param {String} [options.sourceFilesPattern] The source files pattern
  * @param {String} [options.packageNamesPattern] The package names pattern.
  * @param {String} [options.corePackagePattern] The core package pattern.
@@ -45,10 +44,6 @@ module.exports = function serveTranslations( compiler, options, translationServi
 	if ( fs.existsSync( pathToLanguages ) ) {
 		if ( pathToLanguages.includes( cwd ) && cwd !== pathToLanguages ) {
 			rimraf.sync( pathToLanguages );
-
-			if ( options.verbose ) {
-				console.log( `Removed ${ pathToLanguages }. directory to be sure, that all translation files will be correct.` );
-			}
 		} else {
 			emitError(
 				`Can't remove path to translation files directory (${ pathToLanguages }). Assert whether you specified a correct path.`
@@ -146,9 +141,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 
 		uniqueMessages.add( warning );
 
-		if ( options.verbose ) {
-			console.warn( chalk.yellow( `Warning: ${ warning }` ) );
-		}
+		console.warn( chalk.yellow( `Warning: ${ warning }` ) );
 	}
 };
 

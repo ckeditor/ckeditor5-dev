@@ -40,7 +40,6 @@ module.exports = class CKEditorWebpackPlugin {
 	 * @param {String} [options.outputDirectory='translations'] The output directory for the emitted translation files,
 	 * should be relative to the webpack context.
 	 * @param {Boolean} [options.strict] An option that make the plugin throw when the error is found during the compilation.
-	 * @param {Boolean} [options.verbose] An option that make this plugin log all warnings into the console.
  	 * @param {Boolean} [options.allowMultipleJSOutputs] An option that allows outputting translations to more than one JS asset.
  	 * @param {String} [options.sourceFilesPattern] An option that allows override the default pattern for CKEditor 5 source files.
  	 * @param {String} [options.packageNamesPattern] An option that allows override the default pattern for CKEditor 5 package names.
@@ -52,7 +51,6 @@ module.exports = class CKEditorWebpackPlugin {
 			additionalLanguages: options.additionalLanguages,
 			outputDirectory: options.outputDirectory || 'translations',
 			strict: !!options.strict,
-			verbose: !!options.verbose,
 			allowMultipleJSOutputs: !!options.allowMultipleJSOutputs,
 			sourceFilesPattern: options.sourceFileRegexp || /[/\\]ckeditor5-[^/\\]+[/\\]src[/\\].+\.js$/,
 			packageNamesPattern: options.packageNamesPattern || /[/\\]ckeditor5-[^/\\]+[/\\]/,

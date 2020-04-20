@@ -237,11 +237,11 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			/** @type {String} */
 			const pluralForms = this._pluralFormsRules[ language ];
 
-			let pluralFormFunction = false;
+			let pluralFormFunction;
 
 			if ( !pluralForms ) {
-				// TODO
-				console.warn();
+				// This could be improved in the future by using a 3-rd party library for plural forms.
+				this.emit( 'warning', `The plural form function for the '${ language }' language has not been set.` );
 			} else {
 				const pluralFormFunctionBodyMatch = pluralForms.match( /(?:plural=\()(.+)(?:\))/ );
 

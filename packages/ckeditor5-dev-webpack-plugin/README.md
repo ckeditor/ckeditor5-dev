@@ -25,17 +25,15 @@ const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' 
 			// The bundle is optimized for one language when this option is omitted.
 			additionalLanguages: 'all',
 
-			// Optional directory for emitted translations. Relative to the webpack's output.
+			// An optional directory for emitted translations. Relative to the webpack's output.
 			// Defaults to `'translations'`.
 			// outputDirectory: 'ckeditor5-translations',
 
-			// Whether the build process should fail if an error occurs.
+			// A flag that stops the webpack compilation when an error occurs.
 			// Defaults to `false`.
 			// strict: true,
 
-			// Whether to log all warnings to the console.
-			// Defaults to `false`.
-			// verbose: true
+			TODO
 		} ),
 
 		// Other webpack plugins...
