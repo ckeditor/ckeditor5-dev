@@ -15,7 +15,6 @@ const proxyquire = require( 'proxyquire' );
 describe( 'translations', () => {
 	describe( 'MultipleLanguageTranslationService', () => {
 		let MultipleLanguageTranslationService, stubs, filesAndDirs, fileContents, dirContents;
-		const sandbox = sinon.createSandbox();
 		let window;
 
 		beforeEach( () => {
@@ -39,7 +38,7 @@ describe( 'translations', () => {
 		} );
 
 		afterEach( () => {
-			sandbox.restore();
+			sinon.restore();
 		} );
 
 		describe( 'constructor()', () => {
@@ -76,7 +75,7 @@ describe( 'translations', () => {
 
 				translationService.loadPackage( 'pathToPackage' );
 
-				expect( translationService._dictionaries ).to.deep.equal( {
+				expect( translationService._translationDictionaries ).to.deep.equal( {
 					pl: {
 						'Save': [ 'Zapisz' ]
 					},
@@ -91,12 +90,12 @@ describe( 'translations', () => {
 
 				translationService.loadPackage( 'pathToPackage' );
 
-				expect( translationService._dictionaries ).to.deep.equal( {} );
+				expect( translationService._translationDictionaries ).to.deep.equal( {} );
 			} );
 
 			it( 'should load PO file from the package only once per language', () => {
 				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'de' ] } );
-				const loadPoFileSpy = sandbox.stub( translationService, '_loadPoFile' );
+				const loadPoFileSpy = sinon.stub( translationService, '_loadPoFile' );
 
 				const pathToTranslationsDirectory = path.join( 'pathToPackage', 'lang', 'translations' );
 
@@ -143,7 +142,7 @@ describe( 'translations', () => {
 
 				translationService.loadPackage( 'pathToPackage' );
 
-				expect( translationService._dictionaries ).to.deep.equal( {
+				expect( translationService._translationDictionaries ).to.deep.equal( {
 					pl: {
 						'Save': [ 'Zapisz' ]
 					},
@@ -189,7 +188,7 @@ describe( 'translations', () => {
 					'Save'
 				] );
 
-				translationService._dictionaries = {
+				translationService._translationDictionaries = {
 					pl: {
 						Cancel: [ 'Anuluj' ],
 						Save: [ 'Zapisz' ]
@@ -226,7 +225,7 @@ describe( 'translations', () => {
 					'Save'
 				] );
 
-				translationService._dictionaries = {
+				translationService._translationDictionaries = {
 					pl: {
 						Cancel: [ 'Anuluj' ],
 						Save: [ 'Zapisz' ]
@@ -261,7 +260,7 @@ describe( 'translations', () => {
 					'Save'
 				] );
 
-				translationService._dictionaries = {
+				translationService._translationDictionaries = {
 					pl: {
 						Cancel: [ 'Anuluj' ],
 						Save: [ 'Zapisz' ]
@@ -307,7 +306,7 @@ describe( 'translations', () => {
 					'Save'
 				] );
 
-				translationService._dictionaries = {
+				translationService._translationDictionaries = {
 					pl: {
 						Cancel: [ 'Anuluj' ],
 						Save: [ 'Zapisz' ]
@@ -341,7 +340,7 @@ describe( 'translations', () => {
 					'Add %0 button'
 				] );
 
-				translationService._dictionaries = {
+				translationService._translationDictionaries = {
 					pl: {
 						'Add %0 button': [ 'Dodaj przycisk', 'Dodaj %0 przyciski', 'Dodaj %0 przycisków' ]
 					}
@@ -372,7 +371,7 @@ describe( 'translations', () => {
 					'Add %0 button'
 				] );
 
-				translationService._dictionaries = {
+				translationService._translationDictionaries = {
 					pl: {
 						'Add %0 button': [ 'Dodaj przycisk', 'Dodaj %0 przyciski', 'Dodaj %0 przycisków' ]
 					}
@@ -403,11 +402,15 @@ describe( 'translations', () => {
 				expect( window.CKEDITOR_TRANSLATIONS.pl.getPluralForm( 103 ) ).to.equal( 1 );
 			} );
 
-			it( 'should not return translation assets for non JS files', () => {
+			it( 'should log an error if no JS assets was passed', () => {
 				const translationService = new MultipleLanguageTranslationService( {
 					mainLanguage: 'pl',
 					additionalLanguages: [ 'en' ]
 				} );
+
+				const errorSpy = sinon.spy();
+
+				translationService.on( 'error', errorSpy );
 
 				const assets = translationService.getAssets( {
 					outputDirectory: 'lang',
@@ -415,6 +418,13 @@ describe( 'translations', () => {
 				} );
 
 				expect( assets ).to.deep.equal( [] );
+
+				sinon.assert.calledOnce( errorSpy );
+				sinon.assert.calledWithExactly(
+					errorSpy,
+					'No JS asset has been found during the compilation. ' +
+					'You should add translation assets directly to the application from the \'lang\' directory.'
+				);
 			} );
 
 			it( 'should return an empty asset for the language that has no translation defined', () => {
@@ -423,7 +433,7 @@ describe( 'translations', () => {
 					additionalLanguages: [ 'xxx' ]
 				} );
 
-				const spy = sandbox.spy();
+				const spy = sinon.spy();
 
 				translationService.on( 'error', spy );
 
@@ -432,7 +442,7 @@ describe( 'translations', () => {
 					'Save'
 				] );
 
-				translationService._dictionaries = {
+				translationService._translationDictionaries = {
 					pl: {
 						Cancel: [ 'Anuluj' ],
 						Save: [ 'Zapisz' ]
@@ -458,7 +468,7 @@ describe( 'translations', () => {
 					additionalLanguages: [ 'xxx' ]
 				} );
 
-				const spy = sandbox.spy();
+				const spy = sinon.spy();
 
 				translationService.on( 'error', spy );
 
@@ -467,7 +477,7 @@ describe( 'translations', () => {
 					'Save'
 				] );
 
-				translationService._dictionaries = {
+				translationService._translationDictionaries = {
 					pl: {
 						Cancel: [ 'Anuluj' ],
 						Save: [ 'Zapisz' ]
@@ -501,7 +511,7 @@ describe( 'translations', () => {
 					mainLanguage: 'pl',
 					additionalLanguages: [ 'xxx' ]
 				} );
-				const spy = sandbox.spy();
+				const spy = sinon.spy();
 
 				translationService.on( 'error', spy );
 
@@ -510,7 +520,7 @@ describe( 'translations', () => {
 					'Save'
 				] );
 
-				translationService._dictionaries = {
+				translationService._translationDictionaries = {
 					pl: {
 						Cancel: [ 'Anuluj' ],
 						Save: [ 'Zapisz' ]
@@ -523,7 +533,7 @@ describe( 'translations', () => {
 				} );
 
 				sinon.assert.calledOnce( spy );
-				sinon.assert.calledWithExactly( spy, 'No translation found for the xxx language.' );
+				sinon.assert.calledWithExactly( spy, 'No translation has been found for the xxx language.' );
 			} );
 
 			it( 'should emit an error if translations for the main language are missing', () => {
@@ -532,7 +542,7 @@ describe( 'translations', () => {
 					additionalLanguages: [ 'pl' ]
 				} );
 
-				const errorSpy = sandbox.spy();
+				const errorSpy = sinon.spy();
 
 				translationService.on( 'error', errorSpy );
 
@@ -541,7 +551,7 @@ describe( 'translations', () => {
 					'Save'
 				] );
 
-				translationService._dictionaries = {
+				translationService._translationDictionaries = {
 					pl: {
 						Cancel: [ 'Anuluj' ],
 						Save: [ 'Zapisz' ]
@@ -554,7 +564,7 @@ describe( 'translations', () => {
 				} );
 
 				sinon.assert.calledOnce( errorSpy );
-				sinon.assert.calledWithExactly( errorSpy, 'No translation found for the xxx language.' );
+				sinon.assert.calledWithExactly( errorSpy, 'No translation has been found for the xxx language.' );
 			} );
 
 			it( 'should emit a warning if the translation is missing', () => {
@@ -562,7 +572,7 @@ describe( 'translations', () => {
 					mainLanguage: 'pl',
 					additionalLanguages: []
 				} );
-				const warningSpy = sandbox.spy();
+				const warningSpy = sinon.spy();
 
 				translationService.on( 'warning', warningSpy );
 
@@ -571,11 +581,13 @@ describe( 'translations', () => {
 					'Save'
 				] );
 
-				translationService._dictionaries = {
+				translationService._translationDictionaries = {
 					pl: {
 						Cancel: [ 'Anuluj' ]
 					}
 				};
+
+				translationService._pluralFormsRules = { pl: 'plural=(() => 0)' };
 
 				translationService.getAssets( {
 					outputDirectory: 'lang',
@@ -583,21 +595,21 @@ describe( 'translations', () => {
 				} );
 
 				sinon.assert.calledOnce( warningSpy );
-				sinon.assert.calledWithExactly( warningSpy, 'Missing translation for \'Save\' in the \'pl\' language.' );
+				sinon.assert.calledWithExactly( warningSpy, 'A translation is missing for \'Save\' in the \'pl\' language.' );
 			} );
 
-			it( 'should emit a warning when there are multiple JS assets', () => {
+			it( 'should emit an error when there are multiple JS assets', () => {
 				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [] } );
-				const spy = sandbox.spy();
+				const errorSpy = sinon.spy();
 
-				translationService.on( 'warning', spy );
+				translationService.on( 'error', errorSpy );
 
 				translationService._foundMessageIds = new Set( [
 					'Cancel',
 					'Save'
 				] );
 
-				translationService._dictionaries = {
+				translationService._translationDictionaries = {
 					pl: {
 						Cancel: [ 'Anuluj' ],
 						Save: [ 'Zapisz' ]
@@ -609,11 +621,11 @@ describe( 'translations', () => {
 					compilationAssetNames: [ 'ckeditor.js', 'ckeditor1.js' ]
 				} );
 
-				sinon.assert.calledOnce( spy );
-				sinon.assert.alwaysCalledWithExactly( spy, [
-					'CKEditor 5 Webpack plugin found many webpack assets during compilation. ' +
-					'You should add translation assets directly to the application from the `lang` directory. ' +
-					'Use `allowMultipleJSOutputs` option to add the main language translations to all assets.'
+				sinon.assert.calledOnce( errorSpy );
+				sinon.assert.alwaysCalledWithExactly( errorSpy, [
+					'Too many JS assets has been found during the compilation. ' +
+					'You should add translation assets directly to the application from the `lang` directory or ' +
+					'use the `allowMultipleJSOutputs` option to add translations for the main language to all assets.'
 				].join( '\n' ) );
 
 				expect( assets ).to.have.length( 1 );
@@ -626,7 +638,7 @@ describe( 'translations', () => {
 					mainLanguage: 'pl',
 					additionalLanguages: [ 'en' ]
 				} );
-				const spy = sandbox.spy();
+				const spy = sinon.spy();
 
 				translationService.on( 'warning', spy );
 
@@ -634,7 +646,7 @@ describe( 'translations', () => {
 					'Cancel'
 				] );
 
-				translationService._dictionaries = {
+				translationService._translationDictionaries = {
 					pl: {
 						Cancel: [ 'Anuluj' ]
 					},
@@ -679,7 +691,7 @@ describe( 'translations', () => {
 
 				translationService.loadPackage( 'pathToPackage' );
 
-				expect( translationService._dictionaries ).to.deep.equal( {
+				expect( translationService._translationDictionaries ).to.deep.equal( {
 					en: {
 						'Save': [ 'Save' ]
 					}
