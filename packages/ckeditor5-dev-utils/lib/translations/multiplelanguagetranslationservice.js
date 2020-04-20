@@ -231,8 +231,9 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 			const translations = this._getTranslations( language );
 
-			// An example of plural forms:
+			// Examples of plural forms:
 			// pluralForms="nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2)"
+			// pluralForms="nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2"
 
 			/** @type {String} */
 			const pluralFormsRule = this._pluralFormsRules[ language ];
