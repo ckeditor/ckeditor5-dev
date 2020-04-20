@@ -29,14 +29,15 @@ const MultipleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-uti
 module.exports = class CKEditorWebpackPlugin {
 	/**
 	 * @param {Object} [options] Plugin options.
-	 * @param {String} options.language Main language of the build that will be added to the bundle.
+	 * @param {String} options.language The main language for internationalization - translations for that language
+	 * will be added to the bundle(s).
 	 * @param {Array.<String>|'all'} [options.additionalLanguages] Additional languages. Build is optimized when this option is not set.
 	 * When `additionalLanguages` is set to 'all' then script will be looking for all languages and according translations during
 	 * the compilation.
-	 * @param {String} [options.outputDirectory='translations'] Output directory for the emitted translation files,
+	 * @param {String} [options.outputDirectory='translations'] The output directory for the emitted translation files,
 	 * should be relative to the webpack context.
-	 * @param {Boolean} [options.strict] Option that make the plugin throw when the error is found during the compilation.
-	 * @param {Boolean} [options.verbose] Option that make this plugin log all warnings into the console.
+	 * @param {Boolean} [options.strict] An option that make the plugin throw when the error is found during the compilation.
+	 * @param {Boolean} [options.verbose] An option that make this plugin log all warnings into the console.
  	 * @param {Boolean} [options.allowMultipleJSAssets] An option that allows outputting translations to more than one JS asset.
  	 * @param {String} [options.sourceFilesPattern] An option that allows override the default pattern for CKEditor 5 source files.
  	 * @param {String} [options.packageNamesPattern] An option that allows override the default pattern for CKEditor 5 package names.
@@ -79,12 +80,10 @@ module.exports = class CKEditorWebpackPlugin {
 			additionalLanguages = []; // They will be searched in runtime.
 		}
 
-		// Currently there is only one strategy to build translation files.
-		// Though take in mind that there might be need for a different build strategy in the future,
-		// hence the translation service is separated from the webpack-specific environment,
-		// and is used by the `serveTranslation() function that uses the API.
+		// Currently, there is only one strategy to build translation files.
+		// Though, bear in mind that there might be a need for a different build strategy in the future,
+		// hence the translation service is separated from the webpack-specific environment.
 		// See the TranslationService interface in the `servetranslation.js` file.
-
 		const translationService = new MultipleLanguageTranslationService( {
 			mainLanguage,
 			compileAllLanguages,

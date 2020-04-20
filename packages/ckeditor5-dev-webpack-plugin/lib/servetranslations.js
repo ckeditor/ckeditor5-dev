@@ -17,12 +17,14 @@ const { RawSource, ConcatSource } = require( 'webpack-sources' );
  *
  * See https://webpack.js.org/api/compiler/#event-hooks and https://webpack.js.org/api/compilation/ for details about specific hooks.
  *
- * @param {Object} compiler Webpack compiler.
+ * @param {Object} compiler The webpack compiler.
  * @param {Object} options Translation options.
- * @param {String} options.outputDirectory Output directory for the emitted translation files, relative to the webpack context.
- * @param {Boolean} [options.strict] Option that make this function throw when the error is found during the compilation.
- * @param {Boolean} [options.verbose] Option that make this function log everything into the console.
- * TODO
+ * @param {String} options.outputDirectory The output directory for the emitted translation files, relative to the webpack context.
+ * @param {Boolean} [options.strict] An option that make this function throw when the error is found during the compilation.
+ * @param {Boolean} [options.verbose] An option that make this function log everything into the console.
+ * @param {String} [options.sourceFilesPattern] The source files pattern
+ * @param {String} [options.packageNamesPattern] The package names pattern.
+ * @param {String} [options.corePackagePattern] The core package pattern.
  * @param {TranslationService} translationService Translation service that will load PO files, replace translation keys and generate assets.
  * ckeditor5 - independent without hard-to-test logic.
  */
