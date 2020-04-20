@@ -60,7 +60,7 @@ module.exports = class CKEditorWebpackPlugin {
 	apply( compiler ) {
 		if ( !this.options.language ) {
 			console.warn( chalk.yellow(
-				'Warning: `language` option is required for CKEditorWebpackPlugin plugin.'
+				'Warning: The `language` option is required for CKEditorWebpackPlugin plugin.'
 			) );
 
 			return;
@@ -72,7 +72,7 @@ module.exports = class CKEditorWebpackPlugin {
 
 		if ( typeof additionalLanguages == 'string' ) {
 			if ( additionalLanguages !== 'all' ) {
-				throw new Error( 'Error: `additionalLanguages` option should be an array of language codes or `all`.' );
+				throw new Error( 'Error: The `additionalLanguages` option should be an array of language codes or `all`.' );
 			}
 
 			compileAllLanguages = true;

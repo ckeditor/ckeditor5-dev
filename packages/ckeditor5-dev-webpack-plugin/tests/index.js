@@ -69,7 +69,7 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 
 			sinon.assert.calledOnce( console.warn );
 			expect( console.warn.getCall( 0 ).args[ 0 ] ).to.match(
-				/Warning: `language` option is required for CKEditorWebpackPlugin plugin\./
+				/Warning: The `language` option is required for CKEditorWebpackPlugin plugin\./
 			);
 
 			sinon.assert.notCalled( stubs.serveTranslations );
@@ -169,7 +169,7 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
 
 			expect( () => ckeditorWebpackPlugin.apply( {} ) ).to.throw(
-				/Error: `additionalLanguages` option should be an array of language codes or `all`\./
+				/Error: The `additionalLanguages` option should be an array of language codes or `all`\./
 			);
 		} );
 	} );
