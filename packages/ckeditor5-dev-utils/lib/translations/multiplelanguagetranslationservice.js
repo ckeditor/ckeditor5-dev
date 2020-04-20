@@ -31,6 +31,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		 * Main language that should be built in to the bundle.
 		 *
 		 * @private
+		 * @type {String}
 		 */
 		this._mainLanguage = mainLanguage;
 
@@ -39,6 +40,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		 * if the `compileAllLanguages` flag is turned on.
 		 *
 		 * @private
+		 * @type {Set.<String>}
 		 */
 		this._languages = new Set( [ mainLanguage, ...additionalLanguages ] );
 
@@ -46,37 +48,49 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		 * An option indicating if the languages should be found at runtime.
 		 *
 		 * @private
+		 * @type {Boolean}
 		 */
 		this._compileAllLanguages = compileAllLanguages;
 
 		/**
-		 * TODO
+		 * A boolean option. When set to `true` this service won't complain about multiple JS assets
+		 * and will add translation for the main language to all of them. Useful option for manual tests, etc.
+		 *
+		 * @private
+		 * @type {Boolean}
 		 */
-		this.allowMultipleJSAssets = allowMultipleJSAssets;
+		this._allowMultipleJSAssets = allowMultipleJSAssets;
 
 		/**
 		 * A set of handled packages that speeds up the translation process.
 		 *
 		 * @private
+		 * @type {Set.<String>}
 		 */
 		this._handledPackages = new Set();
 
 		/**
 		 * Dictionaries in the `language -> messageId -> dictionary` format.
 		 *
-		 * @type {Object.<String, Object.<String,Array.<String>>>}
 		 * @private
+		 * @type {Object.<String, Object.<String,Array.<String>>>}
 		 */
 		this._dictionaries = {};
 
 		/**
 		 * Plural form rules that will be added to generated translation assets.
+		 *
+		 * @private
+		 * @type {Object.<String, String>}
 		 */
 		this._pluralFormsRules = {};
 
 		/**
 		 * A set of message ids that are found in parsed source files. For each message id a translation
 		 * (with single and possible plural forms) should be found for the target languages.
+		 *
+		 * @private
+		 * @type {Set.<String>}
 		 */
 		this._foundMessageIds = new Set();
 	}
@@ -172,7 +186,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			return [];
 		}
 
-		if ( compilationAssetNames.length > 1 && !this.allowMultipleJSAssets ) {
+		if ( compilationAssetNames.length > 1 && !this._allowMultipleJSAssets ) {
 			this.emit( 'warning', [
 				'CKEditor 5 Webpack plugin found many webpack assets during compilation. ' +
 				'You should add translation assets directly to the application from the `lang` directory. ' +
