@@ -13,17 +13,20 @@ const MultipleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-uti
  * CKEditorWebpackPlugin, for now, consists only of the translation mechanism (@ckeditor/ckeditor5#624, @ckeditor/ckeditor5#387,
  * @ckeditor/ckeditor5#6526).
  *
- * When one entry point (or to be precise one output JS file) is defined, language specified in `language` option will be
- * statically added to the bundle. When `additionalLanguages` option is set, languages specified there will be stored
- * in separate files.
+ * The main language specified in `language` option will be statically added to the bundle. Translations for all languages from
+ * the `additionalLanguages` option (if set) will be saved separately in the directory specified by the `outputDirectory` option
+ * (which defaults to `lang`).
  *
- * When multiple outputs are defined, all languages (from both `language` and `additionalLanguages` options) will be
- * stored in separate files. In that situation user will be warned that he needs to load at least one translation file
- * manually to get editor working.
+ * If the `allowMultipleJSOutputs` is unset (or set to `false`) and when multiple outputs are defined, then translations for all languages
+ * (from both `language` and `additionalLanguages` options) will be saved separately.
+ * In that situation user will be warned that he needs to load at least one translation file manually to get editor working.
+ *
+ * If the `allowMultipleJSOutputs` is set to `true` and when multiple JS outputs are defined, then translations for the main language
+ * will be added to all JS outputs and other translations will be saved separately.
  *
  * Translation files will be emitted in the `outputDirectory` or `'lang'` directory if `outputDirectory` is not set.
  *
- * Plugin tries to clean the output translation directory before each build to make sure, that all translations are correct.
+ * This plugin tries to clean the output translation directory before each build to make sure, that all translations are correct.
  * See https://github.com/ckeditor/ckeditor5/issues/700 for more information.
  */
 module.exports = class CKEditorWebpackPlugin {
@@ -38,7 +41,7 @@ module.exports = class CKEditorWebpackPlugin {
 	 * should be relative to the webpack context.
 	 * @param {Boolean} [options.strict] An option that make the plugin throw when the error is found during the compilation.
 	 * @param {Boolean} [options.verbose] An option that make this plugin log all warnings into the console.
- 	 * @param {Boolean} [options.allowMultipleJSAssets] An option that allows outputting translations to more than one JS asset.
+ 	 * @param {Boolean} [options.allowMultipleJSOutputs] An option that allows outputting translations to more than one JS asset.
  	 * @param {String} [options.sourceFilesPattern] An option that allows override the default pattern for CKEditor 5 source files.
  	 * @param {String} [options.packageNamesPattern] An option that allows override the default pattern for CKEditor 5 package names.
  	 * @param {String} [options.corePackagePattern] An option that allows override the default CKEditor 5 core package pattern.
@@ -50,7 +53,7 @@ module.exports = class CKEditorWebpackPlugin {
 			outputDirectory: options.outputDirectory || 'translations',
 			strict: !!options.strict,
 			verbose: !!options.verbose,
-			allowMultipleJSAssets: !!options.allowMultipleJSAssets,
+			allowMultipleJSOutputs: !!options.allowMultipleJSOutputs,
 			sourceFilesPattern: options.sourceFileRegexp || /[/\\]ckeditor5-[^/\\]+[/\\]src[/\\].+\.js$/,
 			packageNamesPattern: options.packageNamesPattern || /[/\\]ckeditor5-[^/\\]+[/\\]/,
 			corePackagePattern: options.corePackagePattern || /[/\\]ckeditor5-core/,
@@ -67,7 +70,7 @@ module.exports = class CKEditorWebpackPlugin {
 			return;
 		}
 
-		const { allowMultipleJSAssets, language: mainLanguage } = this.options;
+		const { allowMultipleJSOutputs, language: mainLanguage } = this.options;
 		let compileAllLanguages = false;
 		let additionalLanguages = this.options.additionalLanguages || [];
 
@@ -88,7 +91,7 @@ module.exports = class CKEditorWebpackPlugin {
 			mainLanguage,
 			compileAllLanguages,
 			additionalLanguages,
-			allowMultipleJSAssets
+			allowMultipleJSOutputs
 		} );
 
 		serveTranslations( compiler, this.options, translationService );

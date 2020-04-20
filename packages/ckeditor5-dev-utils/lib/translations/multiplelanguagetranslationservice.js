@@ -21,10 +21,10 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @param {Array.<String>} [options.additionalLanguages] Additional languages which files will be emitted.
 	 * When option is set to 'all', all languages found during the compilation will be added.
 	 * @param {Boolean} [options.compileAllLanguages] When set to `true` languages will be found at runtime.
-	 * @param {Boolean} [options.allowMultipleJSAssets] When set to `true` the service will not complain about multiple JS assets and will
+	 * @param {Boolean} [options.allowMultipleJSOutputs] When set to `true` the service will not complain about multiple JS assets and will
 	 * output translations for the main language to all found asset.
 	 */
-	constructor( { mainLanguage, additionalLanguages = [], compileAllLanguages = false, allowMultipleJSAssets = false } ) {
+	constructor( { mainLanguage, additionalLanguages = [], compileAllLanguages = false, allowMultipleJSOutputs = false } ) {
 		super();
 
 		/**
@@ -59,7 +59,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		 * @private
 		 * @type {Boolean}
 		 */
-		this._allowMultipleJSAssets = allowMultipleJSAssets;
+		this._allowMultipleJSOutputs = allowMultipleJSOutputs;
 
 		/**
 		 * A set of handled packages that speeds up the translation process.
@@ -188,11 +188,11 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			return [];
 		}
 
-		if ( compilationAssetNames.length > 1 && !this._allowMultipleJSAssets ) {
+		if ( compilationAssetNames.length > 1 && !this._allowMultipleJSOutputs ) {
 			this.emit( 'warning', [
 				'CKEditor 5 Webpack plugin found many webpack assets during compilation. ' +
 				'You should add translation assets directly to the application from the `lang` directory. ' +
-				'Use `allowMultipleJSAssets` option to add the main language translations to all assets.'
+				'Use `allowMultipleJSOutputs` option to add the main language translations to all assets.'
 			].join( '\n' ) );
 
 			compilationAssetNames = [];

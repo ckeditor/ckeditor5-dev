@@ -615,7 +615,7 @@ describe( 'translations', () => {
 				sinon.assert.alwaysCalledWithExactly( spy, [
 					'CKEditor 5 Webpack plugin found many webpack assets during compilation. ' +
 					'You should add translation assets directly to the application from the `lang` directory. ' +
-					'Use `allowMultipleJSAssets` option to add the main language translations to all assets.'
+					'Use `allowMultipleJSOutputs` option to add the main language translations to all assets.'
 				].join( '\n' ) );
 
 				expect( assets ).to.have.length( 1 );

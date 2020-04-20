@@ -106,7 +106,7 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 						mainLanguage: 'pl',
 						compileAllLanguages: false,
 						additionalLanguages: [],
-						allowMultipleJSAssets: false
+						allowMultipleJSOutputs: false
 					}
 				);
 			} );
@@ -129,7 +129,7 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 						mainLanguage: 'pl',
 						compileAllLanguages: false,
 						additionalLanguages: [ 'en' ],
-						allowMultipleJSAssets: false
+						allowMultipleJSOutputs: false
 					}
 				);
 			} );
@@ -152,7 +152,7 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 						mainLanguage: 'en',
 						compileAllLanguages: true,
 						additionalLanguages: [],
-						allowMultipleJSAssets: false
+						allowMultipleJSOutputs: false
 					}
 				);
 
