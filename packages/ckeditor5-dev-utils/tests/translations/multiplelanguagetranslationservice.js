@@ -332,7 +332,6 @@ describe( 'translations', () => {
 				} );
 			} );
 
-			// TODO
 			it( 'should return assets with plural forms', () => {
 				const translationService = new MultipleLanguageTranslationService( {
 					mainLanguage: 'pl'
@@ -523,7 +522,6 @@ describe( 'translations', () => {
 					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
-				// TODO
 				sinon.assert.calledOnce( spy );
 				sinon.assert.calledWithExactly( spy, 'No translation found for the xxx language.' );
 			} );
@@ -689,16 +687,14 @@ describe( 'translations', () => {
 			} );
 		} );
 
-		describe( 'integration test', () => {
-			it( 'test #1', () => {
+		describe( 'integration tests', () => {
+			it( 'should build executable translation assets', () => {
 				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'de' ] } );
 				const pathToPlTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'pl.po' );
 				const pathToDeTranslations = path.join( 'pathToPackage', 'lang', 'translations', 'de.po' );
 				const pathToTranslationsDirectory = path.join( 'pathToPackage', 'lang', 'translations' );
 
 				filesAndDirs = [ pathToPlTranslations, pathToDeTranslations, pathToTranslationsDirectory ];
-
-				// TODO - plural rules.
 
 				fileContents = {
 					[ pathToPlTranslations ]: [
@@ -743,6 +739,8 @@ describe( 'translations', () => {
 					}
 				} );
 			} );
+
+			// TODO - an integration test for plural rules.
 		} );
 	} );
 } );
