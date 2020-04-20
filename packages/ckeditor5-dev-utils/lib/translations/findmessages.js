@@ -36,8 +36,6 @@ module.exports = function findMessages( source, sourceFile, onMessageFound, onEr
 					`Found '${ objName }.${ propName }()' in the ${ sourceFile }. ` +
 					'Only messages from direct \'t()\' calls will be handled by CKEditor 5 translation mechanisms.'
 				);
-
-				return;
 			}
 
 			if ( !isTFunctionCallExpression( node ) ) {
@@ -96,7 +94,11 @@ function isTFunctionCallExpression( node ) {
 }
 
 function isTMethodCallExpression( node ) {
-	return node.callee.type === 'MemberExpression' && node.callee.property.name === 't';
+	return (
+		node.callee.type === 'MemberExpression' &&
+		node.callee.property.name === 't' &&
+		node.callee.object.type !== 'ThisExpression'
+	);
 }
 
 /**

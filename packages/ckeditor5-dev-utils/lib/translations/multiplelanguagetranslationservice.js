@@ -96,16 +96,18 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
-	 * Collects found message ids. Emits a warning when there is a suspicion that the message is incorrectly written.
+	 * Collects found message ids. Emits a warning when there is a suspicion that the message is created incorrectly
+	 * (e.g. an incorrect `t()` call).
 	 *
 	 * @fires warning
-	 * @param {String} source Source of the file.
+	 * @param {String} source Content of the source file.
+	 * @param {String} fileName Source file name
 	 * @returns {String}
 	 */
-	translateSource( source, sourceFile ) {
+	translateSource( source, fileName ) {
 		findMessages(
 			source,
-			sourceFile,
+			fileName,
 			message => this._foundMessageIds.add( message.id ),
 			error => this.emit( 'warning', error )
 		);
@@ -214,7 +216,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * Returns assets for the given directory and languages.
 	 *
 	 * @private
-	 * @param outputDirectory The output directory for assets.
+	 * @param {String} outputDirectory The output directory for assets.
 	 * @param {Array.<String>} languages Languages for assets.
 	 */
 	_getTranslationAssets( outputDirectory, languages ) {
