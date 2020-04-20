@@ -24,11 +24,23 @@ module.exports = function findMessages( source, sourceFile, onMessageFound, onEr
 		ecmaVersion: 10
 	} );
 
-	// TODO - methods - add support or a warning.
-
 	walk.simple( ast, {
 		CallExpression: node => {
-			if ( node.callee.name !== 't' ) {
+			// Add warning for the `editor.t()` calls which aren't supported yet.
+			if ( isTMethodCallExpression( node ) ) {
+				const objName = node.callee.object.name;
+				const propName = node.callee.property.name;
+
+				onErrorFound(
+					// TODO - ${ objName }.${ propName } is naive.
+					`Found '${ objName }.${ propName }()' in the ${ sourceFile }. ` +
+					'Only messages from direct \'t()\' calls will be handled by CKEditor 5 translation mechanisms.'
+				);
+
+				return;
+			}
+
+			if ( !isTFunctionCallExpression( node ) ) {
 				return;
 			}
 
@@ -41,22 +53,17 @@ module.exports = function findMessages( source, sourceFile, onMessageFound, onEr
 				const stringProperty = properties.find( p => p.key.type === 'Identifier' && p.key.name === 'string' );
 				const pluralProperty = properties.find( p => p.key.type === 'Identifier' && p.key.name === 'plural' );
 
-				// if ( contextProperty && stringProperty ) {
-				// 	onMessageIdFound( stringProperty.value.value + '_' + contextProperty.value.value );
-				// } else if ( stringProperty ) {
-
 				// TODO - value assertions.
 
 				/** @type {Message} */
 				const message = {
 					string: stringProperty.value.value,
-
-					// TODO: stringProperty.value.value + '_' + contextProperty.value.value
 					id: stringProperty.value.value
 				};
 
 				if ( contextProperty ) {
 					message.context = contextProperty.value.value;
+					message.id = stringProperty.value.value + '_' + contextProperty.value.value;
 				}
 
 				if ( pluralProperty ) {
@@ -83,6 +90,14 @@ module.exports = function findMessages( source, sourceFile, onMessageFound, onEr
 		}
 	} );
 };
+
+function isTFunctionCallExpression( node ) {
+	return node.callee.name === 't';
+}
+
+function isTMethodCallExpression( node ) {
+	return node.callee.type === 'MemberExpression' && node.callee.property.name === 't';
+}
 
 /**
  * @typedef {Object} Message

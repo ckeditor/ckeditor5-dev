@@ -13,10 +13,9 @@ const task = process.argv[ 2 ];
 
 const tasks = {
 	/**
-	 * Collects translation strings ( from `t()` calls ) and stores them in ckeditor5/build/.transifex directory.
+	 * Collects translation messages (from `t()` calls and context files) and stores them in the `ckeditor5/build/.transifex` directory.
 	 */
 	collect() {
-		// TODO - ignore-errors flag.
 		const createPotFiles = require( '../lib/translations/createpotfiles' );
 		const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 		const ignoreErrors = false;
@@ -36,7 +35,7 @@ const tasks = {
 	},
 
 	/**
-	 * Uploads translation strings on the Transifex server.
+	 * Uploads translation messages on the Transifex server.
 	 *
 	 * @returns {Promise}
 	 */

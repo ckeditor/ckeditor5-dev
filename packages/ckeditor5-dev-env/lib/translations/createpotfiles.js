@@ -165,6 +165,8 @@ function assertNoMissingContext( { packageContexts, sourceMessages, logger } ) {
 function assertAllContextUsed( { packageContexts, sourceMessages, logger } ) {
 	const usedContextMap = new Map();
 
+	// TODO - Message id might contain the `/` character.
+
 	for ( const [ packageName, context ] of packageContexts ) {
 		for ( const id in context.content ) {
 			usedContextMap.set( packageName + '/' + id, false );
@@ -177,8 +179,10 @@ function assertAllContextUsed( { packageContexts, sourceMessages, logger } ) {
 	}
 
 	for ( const [ id, used ] of usedContextMap ) {
-		const [ packageName, messageId ] = id.split( '/' );
-		const contextFilePath = path.join( packageName, langContextSuffix );
+		const packageNameParts = id.split( '/' );
+		const messageId = packageNameParts.pop();
+
+		const contextFilePath = path.join( ...packageNameParts, langContextSuffix );
 
 		if ( !used ) {
 			logger.error( `Unused context: '${ messageId }' in ${ contextFilePath }` );
