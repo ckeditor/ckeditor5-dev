@@ -247,7 +247,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 				// This could be improved in the future by using a 3-rd party library for plural forms.
 				this.emit( 'warning', `The plural form function for the '${ language }' language has not been set.` );
 			} else {
-				const pluralFormFunctionBodyMatch = pluralFormsRule.match( /(?:plural=)(.+)(?:)/ );
+				const pluralFormFunctionBodyMatch = pluralFormsRule.match( /(?:plural=)(.+)/ );
 
 				// Add support for ES5 - this function will not be transpiled.
 				pluralFormFunction = `function(n){return ${ pluralFormFunctionBodyMatch[ 1 ] };}`;
