@@ -132,7 +132,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 			throw new Error( chalk.red( error ) );
 		}
 
-		console.error( chalk.red( `Error: ${ error }` ) );
+		console.error( chalk.red( `[CKEditorWebpackPlugin] Error: ${ error }` ) );
 	}
 
 	function emitWarning( warning ) {
@@ -143,7 +143,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 		uniqueMessages.add( warning );
 
 		if ( options.verbose ) {
-			console.warn( chalk.yellow( `Warning: ${ warning }` ) );
+			console.warn( chalk.yellow( `[CKEditorWebpackPlugin] Warning: ${ warning }` ) );
 		}
 	}
 };
