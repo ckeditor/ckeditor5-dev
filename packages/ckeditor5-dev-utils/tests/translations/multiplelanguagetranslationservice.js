@@ -249,6 +249,45 @@ describe( 'translations', () => {
 				} );
 			} );
 
+			it( 'should return deterministic assets', () => {
+				const translationServiceA = new MultipleLanguageTranslationService( { mainLanguage: 'pl' } );
+				const translationServiceB = new MultipleLanguageTranslationService( { mainLanguage: 'pl' } );
+
+				translationServiceA._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
+				translationServiceB._foundMessageIds = new Set( [
+					'Save',
+					'Cancel'
+				] );
+
+				translationServiceA._translationDictionaries = {
+					pl: {
+						Cancel: [ 'Anuluj' ],
+						Save: [ 'Zapisz' ]
+					}
+				};
+				translationServiceB._translationDictionaries = {
+					pl: {
+						Save: [ 'Zapisz' ],
+						Cancel: [ 'Anuluj' ]
+					}
+				};
+
+				const assetsA = translationServiceA.getAssets( {
+					outputDirectory: 'lang',
+					compilationAssetNames: [ 'ckeditor.js' ]
+				} );
+
+				const assetsB = translationServiceA.getAssets( {
+					outputDirectory: 'lang',
+					compilationAssetNames: [ 'ckeditor.js' ]
+				} );
+
+				expect( assetsA ).to.deep.equal( assetsB );
+			} );
+
 			it( 'should return assets that merges different languages after the execution', () => {
 				const translationService = new MultipleLanguageTranslationService( {
 					mainLanguage: 'pl',

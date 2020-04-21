@@ -220,6 +220,9 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @param {Array.<String>} languages Languages for assets.
 	 */
 	_getTranslationAssets( outputDirectory, languages ) {
+		// Sort the array of message ids to provide deterministic results.
+		const sortedMessageIds = Array.from( this._foundMessageIds ).sort( ( a, b ) => a.localeCompare( b ) );
+
 		return languages.map( language => {
 			const outputPath = path.join( outputDirectory, `${ language }.js` );
 
@@ -229,7 +232,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 				return { outputBody: '', outputPath };
 			}
 
-			const translations = this._getTranslations( language );
+			const translations = this._getTranslations( language, sortedMessageIds );
 
 			// Examples of plural forms:
 			// pluralForms="nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2)"
@@ -274,14 +277,15 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * Skips messages that lacks their translations.
 	 *
 	 * @private
-	 * @param {String} language The target language.
+	 * @param {String} language The target language
+	 * @param {String} sortedMessageIds An array of sorted message ids.
 	 * @returns {Object.<String,String|String[]>}
 	 */
-	_getTranslations( language ) {
+	_getTranslations( language, sortedMessageIds ) {
 		const langDictionary = this._translationDictionaries[ language ];
 		const translatedStrings = {};
 
-		for ( const messageId of this._foundMessageIds ) {
+		for ( const messageId of sortedMessageIds ) {
 			const translatedMessage = langDictionary[ messageId ];
 
 			if ( !translatedMessage || translatedMessage.length === 0 ) {
