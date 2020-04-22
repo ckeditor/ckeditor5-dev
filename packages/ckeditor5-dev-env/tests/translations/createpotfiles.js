@@ -282,6 +282,26 @@ msgstr "foo"
 		);
 	} );
 
+	it( 'should not create a POT file for the context file if that was not added to the list of packages', () => {
+		createFakeSourceFileWithMessages( 'packages/ckeditor5-foo/src/foo.js', [
+			{ string: 'foo', id: 'foo_id' }
+		] );
+
+		createFakeContextFile( 'packages/ckeditor5-core/lang/contexts.json', {
+			foo_id: 'foo_context'
+		} );
+
+		createPotFiles( {
+			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js' ],
+			packagePaths: [ 'packages/ckeditor5-foo' ],
+			corePackagePath: 'packages/ckeditor5-core',
+			logger: stubs.logger
+		} );
+
+		sinon.assert.notCalled( stubs.logger.error );
+		sinon.assert.notCalled( stubs.fs.outputFileSync );
+	} );
+
 	it( 'should log an error if the file contains a message that cannot be parsed', () => {
 		createFakeSourceFileWithMessages( 'packages/ckeditor5-foo/src/foo.js', [], [ 'parse_error' ] );
 
