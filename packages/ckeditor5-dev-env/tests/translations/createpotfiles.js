@@ -133,33 +133,7 @@ msgstr "foo"
 		);
 	} );
 
-	it( 'should create a POT file entry for one message with a defined context', () => {
-		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
-			{ string: 'foo', id: 'foo_id', context: 'foo_context' }
-		] );
-
-		createPotFiles( {
-			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
-			packagePaths: [ 'ckeditor5-foo' ],
-			corePackagePath: 'ckeditor5-core',
-			logger: stubs.logger
-		} );
-
-		sinon.assert.calledOnce( stubs.fs.outputFileSync );
-
-		sinon.assert.calledWithExactly(
-			stubs.fs.outputFileSync,
-			'cwd/build/.transifex/ckeditor5-foo/en.pot',
-			`# Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
-
-msgctxt "foo_context"
-msgid "foo_id"
-msgstr "foo"
-`
-		);
-	} );
-
-	it( 'should warn if no context is defined', () => {
+	it( 'should warn if the message context is defined', () => {
 		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
 			{ string: 'foo', id: 'foo_id' }
 		] );
@@ -191,12 +165,15 @@ msgstr "foo"
 	} );
 
 	it( 'should create a POT file entry for every defined package', () => {
+		createFakeContextFile( 'ckeditor5-foo/lang/contexts.json', { foo_id: 'foo_context' } );
+		createFakeContextFile( 'ckeditor5-bar/lang/contexts.json', { bar_id: 'bar_context' } );
+
 		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
-			{ string: 'foo', id: 'foo_id', context: 'foo_context' }
+			{ string: 'foo', id: 'foo_id' }
 		] );
 
 		createFakeSourceFileWithMessages( 'ckeditor5-bar/src/bar.js', [
-			{ string: 'bar', id: 'bar_id', context: 'bar_context' }
+			{ string: 'bar', id: 'bar_id' }
 		] );
 
 		createPotFiles( {
@@ -231,12 +208,17 @@ msgstr "bar"
 	} );
 
 	it( 'should create one POT file entry from multiple files in the same package', () => {
+		createFakeContextFile( 'ckeditor5-foo/lang/contexts.json', {
+			foo_id: 'foo_context',
+			bar_id: 'bar_context'
+		} );
+
 		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
-			{ string: 'foo', id: 'foo_id', context: 'foo_context' }
+			{ string: 'foo', id: 'foo_id' }
 		] );
 
 		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/bar.js', [
-			{ string: 'bar', id: 'bar_id', context: 'bar_context' }
+			{ string: 'bar', id: 'bar_id' }
 		] );
 
 		createPotFiles( {
@@ -265,8 +247,12 @@ msgstr "bar"
 	} );
 
 	it( 'should create a POT entry filled with plural forms for message that contains has defined plural forms', () => {
+		createFakeContextFile( 'ckeditor5-foo/lang/contexts.json', {
+			foo_id: 'foo_context'
+		} );
+
 		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
-			{ string: 'foo', id: 'foo_id', context: 'foo_context', plural: 'foo_plural' }
+			{ string: 'foo', id: 'foo_id', plural: 'foo_plural' }
 		] );
 
 		createPotFiles( {
@@ -349,28 +335,6 @@ msgstr[1] "foo_plural"
 		sinon.assert.calledWithExactly(
 			stubs.logger.error,
 			'Context is duplicated for the id: \'foo_id\' in ckeditor5-core/lang/contexts.json and ckeditor5-foo/lang/contexts.json.'
-		);
-	} );
-
-	it( 'should log an error if a context is duplicated in the message and a context file', () => {
-		createFakeSourceFileWithMessages( 'ckeditor5-foo/src/foo.js', [
-			{ string: 'foo', id: 'foo_id', context: 'foo_context' }
-		] );
-
-		createFakeContextFile( 'ckeditor5-foo/lang/contexts.json', { foo_id: 'foo_context1' } );
-
-		createPotFiles( {
-			sourceFiles: [ 'ckeditor5-foo/src/foo.js' ],
-			packagePaths: [ 'ckeditor5-foo' ],
-			corePackagePath: 'ckeditor5-core',
-			logger: stubs.logger
-		} );
-
-		sinon.assert.calledOnce( stubs.logger.error );
-
-		sinon.assert.calledWithExactly(
-			stubs.logger.error,
-			'Context is duplicated for the id: \'foo_id\' in ckeditor5-foo/src/foo.js and ckeditor5-foo/lang/contexts.json.'
 		);
 	} );
 

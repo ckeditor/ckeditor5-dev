@@ -47,7 +47,7 @@ module.exports = function findMessages( source, sourceFile, onMessageFound, onEr
 			if ( firstArgument.type === 'ObjectExpression' ) {
 				const properties = firstArgument.properties || [];
 
-				const contextProperty = properties.find( p => p.key.type === 'Identifier' && p.key.name === 'context' );
+				const idProperty = properties.find( p => p.key.type === 'Identifier' && p.key.name === 'id' );
 				const stringProperty = properties.find( p => p.key.type === 'Identifier' && p.key.name === 'string' );
 				const pluralProperty = properties.find( p => p.key.type === 'Identifier' && p.key.name === 'plural' );
 
@@ -59,9 +59,8 @@ module.exports = function findMessages( source, sourceFile, onMessageFound, onEr
 					id: stringProperty.value.value
 				};
 
-				if ( contextProperty ) {
-					message.context = contextProperty.value.value;
-					message.id = stringProperty.value.value + '_' + contextProperty.value.value;
+				if ( idProperty ) {
+					message.id = idProperty.value.value;
 				}
 
 				if ( pluralProperty ) {
@@ -109,6 +108,5 @@ function isTMethodCallExpression( node ) {
  *
  * @property {String} id
  * @property {String} string
- * @property {String} [context]
  * @property {String} [plural]
  */

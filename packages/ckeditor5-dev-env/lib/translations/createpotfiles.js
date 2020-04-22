@@ -43,20 +43,26 @@ module.exports = function createPotFiles( {
 	removeExistingPotFiles();
 
 	for ( const packageName of packageNames ) {
-		const context = packageContexts.get( packageName );
+		const packageContext = packageContexts.get( packageName );
+		const coreContexts = packageContexts.get( packageName );
+
+		// Merge core package contexts and package contexts to return the correct one.
+		const contexts = Object.assign(
+			{},
+			coreContexts && coreContexts.content,
+			packageContext && packageContext.content
+		);
+
 		const potFileHeader = createPotFileHeader();
 
 		const packageSourceMessages = sourceMessages
 			.filter( sourceMessage => sourceMessage.packageName === packageName );
 
+		// Add contexts to source messages.
 		const messages = packageSourceMessages.map( sourceMessage => {
-			const message = Object.assign( {}, sourceMessage );
-
-			if ( context && !message.context ) {
-				message.context = context.content[ message.id ];
-			}
-
-			return message;
+			return Object.assign( {}, sourceMessage, {
+				context: contexts[ sourceMessage.id ]
+			} );
 		} );
 
 		const potFileContent = createPotFileContent( messages );
@@ -134,17 +140,6 @@ function assertNoMissingContext( { packageContexts, sourceMessages, logger } ) {
 	}
 
 	for ( const sourceMessage of sourceMessages ) {
-		if ( sourceMessage.context && contextIdOrigins.has( sourceMessage.id ) ) {
-			const contextFilePath = path.join( contextIdOrigins.get( sourceMessage.id ), langContextSuffix );
-
-			logger.error( `Context is duplicated for the id: '${ sourceMessage.id }'` +
-			` in ${ sourceMessage.filePath } and ${ contextFilePath }.` );
-		}
-
-		if ( sourceMessage.context ) {
-			continue;
-		}
-
 		if ( !contextIdOrigins.has( sourceMessage.id ) ) {
 			logger.error(
 				`Context for the message id is missing ('${ sourceMessage.id }' from ${ sourceMessage.filePath }).`
@@ -179,6 +174,7 @@ function assertAllContextUsed( { packageContexts, sourceMessages, logger } ) {
 	}
 
 	for ( const [ id, used ] of usedContextMap ) {
+		// TODO - splitting by the `/` char is risky.
 		const packageNameParts = id.split( '/' );
 		const messageId = packageNameParts.pop();
 
@@ -316,7 +312,7 @@ function containsContextFile( packageDirectory ) {
  * @property {String} string
  * @property {String} filePath
  * @property {String} packageName
- * @property {String} [context]
+ * @property {String} context
  * @property {String} [plural]
 */
 

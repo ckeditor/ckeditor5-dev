@@ -40,9 +40,9 @@ describe( 'findMessages', () => {
 			`function x() {
                 const t = this.t;
                 t( { string: 'Image' } );
-                t( { string: 'Image', context: 'An image' } );
+                t( { string: 'Image', id: 'AN_IMAGE' } );
                 t( { string: 'Image', plural: 'Images' } );
-                t( { string: 'Image', plural: 'Images', context: 'An image' } );
+                t( { string: 'Image', plural: 'Images', id: 'AN_IMAGE' } );
 			}`,
 			'foo.js',
 			message => messages.push( message )
@@ -50,9 +50,9 @@ describe( 'findMessages', () => {
 
 		expect( messages ).to.deep.equal( [
 			{ id: 'Image', string: 'Image' },
-			{ id: 'Image_An image', string: 'Image', context: 'An image' },
+			{ id: 'AN_IMAGE', string: 'Image' },
 			{ id: 'Image', string: 'Image', plural: 'Images' },
-			{ id: 'Image_An image', string: 'Image', plural: 'Images', context: 'An image' }
+			{ id: 'AN_IMAGE', string: 'Image', plural: 'Images' }
 		] );
 	} );
 
