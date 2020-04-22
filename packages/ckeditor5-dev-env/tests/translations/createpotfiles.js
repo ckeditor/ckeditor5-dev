@@ -63,7 +63,7 @@ describe( 'createPotFiles()', () => {
 		sinon.assert.notCalled( stubs.fs.outputFileSync );
 	} );
 
-	it( 'should create an empty POT file when a package does not contain any message', () => {
+	it( 'should skip creating an empty POT file when a package does not contain any message', () => {
 		createFakeSourceFileWithMessages( 'packages/ckeditor5-foo/src/foo.js', [] );
 
 		createPotFiles( {
@@ -73,17 +73,12 @@ describe( 'createPotFiles()', () => {
 			logger: stubs.logger
 		} );
 
-		sinon.assert.calledOnce( stubs.fs.outputFileSync );
-
-		sinon.assert.calledWithExactly(
-			stubs.fs.outputFileSync,
-			'cwd/build/.transifex/ckeditor5-foo/en.pot',
-			'# Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.\n\n'
-		);
+		sinon.assert.notCalled( stubs.fs.outputFileSync );
 	} );
 
 	it( 'should delete the build directory before creating POT files', () => {
-		createFakeSourceFileWithMessages( 'packages/ckeditor5-foo/src/foo.js', [] );
+		createFakeContextFile( 'packages/ckeditor5-foo/lang/contexts.json', { foo_id: 'foo_context' } );
+		createFakeSourceFileWithMessages( 'packages/ckeditor5-foo/src/foo.js', [ { string: 'foo', id: 'foo_id' } ] );
 
 		createPotFiles( {
 			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js' ],
@@ -296,6 +291,8 @@ msgstr[1] "foo_plural"
 
 		sinon.assert.notCalled( stubs.logger.error );
 
+		sinon.assert.calledOnce( stubs.fs.outputFileSync );
+
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
 			'cwd/build/.transifex/ckeditor5-foo/en.pot',
@@ -304,14 +301,6 @@ msgstr[1] "foo_plural"
 msgctxt "foo_context"
 msgid "foo_id"
 msgstr "foo"
-`
-		);
-
-		sinon.assert.calledWithExactly(
-			stubs.fs.outputFileSync,
-			'cwd/build/.transifex/ckeditor5-core/en.pot',
-			`# Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
-
 `
 		);
 	} );

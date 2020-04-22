@@ -64,6 +64,11 @@ module.exports = function createPotFiles( {
 			} );
 		} );
 
+		// Skip packages which don't provide any message.
+		if ( messages.length === 0 ) {
+			continue;
+		}
+
 		const potFileContent = createPotFileContent( messages );
 
 		savePotFile( {
