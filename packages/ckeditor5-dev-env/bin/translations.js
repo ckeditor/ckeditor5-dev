@@ -77,5 +77,5 @@ function getCKEditor5PackagePaths() {
 	const ckeditor5PackagesDir = path.join( process.cwd(), 'packages' );
 
 	return fs.readdirSync( ckeditor5PackagesDir )
-		.map( packageName => path.join( ckeditor5PackagesDir, packageName ) );
+		.map( packageName => path.join( 'packages', packageName ) );
 }

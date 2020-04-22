@@ -40,34 +40,16 @@ module.exports = function createPotFiles( {
 
 	removeExistingPotFiles();
 
-	for ( const packagePath of packagePaths ) {
-		const packageName = packagePath.split( /[/\\]/ ).pop();
-		const coreContexts = packageContexts.get( corePackageName );
-		const packageContext = packageContexts.get( packageName );
-
-		// Merge core package contexts and package contexts to return the correct one.
-		const contexts = Object.assign(
-			{},
-			coreContexts && coreContexts.content,
-			packageContext && packageContext.content
-		);
-
+	for ( const { packageName, content } of packageContexts.values() ) {
 		const potFileHeader = createPotFileHeader();
 
-		const packageSourceMessages = sourceMessages
-			.filter( sourceMessage => sourceMessage.packageName === packageName );
-
-		// Add contexts to source messages.
-		const messages = packageSourceMessages.map( sourceMessage => {
-			return Object.assign( {}, sourceMessage, {
-				context: contexts[ sourceMessage.id ]
-			} );
+		// Create message from source messages and corresponding contexts.
+		const messages = Object.keys( content ).map( messageId => {
+			return Object.assign(
+				{ context: content[ messageId ] },
+				sourceMessages.find( message => message.id === messageId )
+			);
 		} );
-
-		// Skip packages which don't provide any message.
-		if ( messages.length === 0 ) {
-			continue;
-		}
 
 		const potFileContent = createPotFileContent( messages );
 
