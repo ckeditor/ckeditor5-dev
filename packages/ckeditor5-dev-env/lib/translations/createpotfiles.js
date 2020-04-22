@@ -149,7 +149,6 @@ function assertNoMissingContext( { packageContexts, sourceMessages, logger } ) {
  * @param {Map.<String, Context>} options.packageContexts A map of language contexts.
  * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
  * @param {Function} options.logger A logger.
- * @returns {Array.<String>}
  */
 function assertAllContextUsed( { packageContexts, sourceMessages, logger } ) {
 	const usedContextMap = new Map();
