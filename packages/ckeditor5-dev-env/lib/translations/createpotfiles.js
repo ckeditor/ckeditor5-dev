@@ -38,13 +38,12 @@ module.exports = function createPotFiles( {
 	assertAllContextUsed( { packageContexts, sourceMessages, logger } );
 	assertNoRepeatedContext( { packageContexts, logger } );
 
-	const packageNames = packagePaths.map( p => p.replace( /.+[/\\]/, '' ) );
-
 	removeExistingPotFiles();
 
-	for ( const packageName of packageNames ) {
+	for ( const packagePath of packagePaths ) {
+		const packageName = packagePath.split( /[/\\]/ ).pop();
+		const coreContexts = packageContexts.get( corePackageName );
 		const packageContext = packageContexts.get( packageName );
-		const coreContexts = packageContexts.get( packageName );
 
 		// Merge core package contexts and package contexts to return the correct one.
 		const contexts = Object.assign(
@@ -89,13 +88,15 @@ function getPackageContexts( packagePaths, corePackagePath ) {
 	}
 
 	const mapEntries = packagePaths
-		.filter( packageName => containsContextFile( packageName ) )
-		.map( packageName => {
-			const pathToContext = path.join( packageName, langContextSuffix );
+		.filter( packagePath => containsContextFile( packagePath ) )
+		.map( packagePath => {
+			const pathToContext = path.join( packagePath, langContextSuffix );
+			const packageName = packagePath.split( /[\\/]/ ).pop();
 
 			return [ packageName, {
 				filePath: pathToContext,
 				content: JSON.parse( fs.readFileSync( pathToContext, 'utf-8' ) ),
+				packagePath,
 				packageName
 			} ];
 		} );
@@ -311,7 +312,7 @@ function containsContextFile( packageDirectory ) {
  * @property {String} id
  * @property {String} string
  * @property {String} filePath
- * @property {String} packageName
+ * @property {String} packagePath
  * @property {String} context
  * @property {String} [plural]
 */
@@ -321,5 +322,6 @@ function containsContextFile( packageDirectory ) {
  *
  * @property {String} filePath A path to the context file.
  * @property {Object} content The context file content - a map of messageId->messageContext records.
- * @property {String} packageName An owner of the context file.
+ * @property {String} packagePath The owner of the context file.
+ * @property {String} packageName The owner package name.
  */
