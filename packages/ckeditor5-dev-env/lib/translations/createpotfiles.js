@@ -41,6 +41,12 @@ module.exports = function createPotFiles( {
 	removeExistingPotFiles();
 
 	for ( const { packageName, content } of packageContexts.values() ) {
+		// Skip generating packages for the core package if the core package was not
+		// added to the list of packages.
+		if ( packageName === corePackageName && !packagePaths.includes( corePackagePath ) ) {
+			continue;
+		}
+
 		const potFileHeader = createPotFileHeader();
 
 		// Create message from source messages and corresponding contexts.
