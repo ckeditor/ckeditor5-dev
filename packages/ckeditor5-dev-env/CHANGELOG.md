@@ -5,12 +5,12 @@ Changelog
 
 ### BREAKING CHANGES
 
-* Omitting the language property in the CKEditorWebpackPlugin will not have any effect from now. This means that in both cases only the main language (language) will be added to the main bundle and translations for other languages will be saved in separate files.
-* The translation process no longer creates short ids for message strings. From now, the source code will not be changed by the translation process, translations for the main language will be added to the bundle(s) and translations for other languages will be outputted to separate executable JS files.
+* Omitting the language property in the `CKEditorWebpackPlugin` will not have any effect from now. This means that in both cases only the main `language` will be added to the main bundle and translations for other languages will be saved in separate files.
+* The translation process no longer creates short ids for message strings. From now, the source code will not be changed by the translation process, translations for the main language will be added to the bundle(s) and translations for other languages will be outputted to separate executable Javascript files.
 
 ### Features
 
-* Provided support for plural forms i18n. Closes [ckeditor/ckeditor5#6526](https://github.com/ckeditor/ckeditor5/issues/6526). Closes [ckeditor/ckeditor5#988](https://github.com/ckeditor/ckeditor5/issues/988). ([305590e](https://github.com/ckeditor/ckeditor5-dev/commit/305590e))
+* Introduced support for plural translation forms. Closes [ckeditor/ckeditor5#6526](https://github.com/ckeditor/ckeditor5/issues/6526). Closes [ckeditor/ckeditor5#988](https://github.com/ckeditor/ckeditor5/issues/988). ([305590e](https://github.com/ckeditor/ckeditor5-dev/commit/305590e))
 
 
 ## [17.1.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@17.1.3...@ckeditor/ckeditor5-dev-env@17.1.4) (2020-02-26)
@@ -135,7 +135,7 @@ Internal changes only (updated dependencies, documentation, etc.).
 
 ### BREAKING CHANGES
 
-* `tasks.releaseRepository()` has been removed. Use `tasks.bumpVersions()` and `tasks.releaseSubRepositories()` instead. 
+* `tasks.releaseRepository()` has been removed. Use `tasks.bumpVersions()` and `tasks.releaseSubRepositories()` instead.
 
 
 ## [14.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@14.1.1...@ckeditor/ckeditor5-dev-env@14.1.2) (2019-07-15)
