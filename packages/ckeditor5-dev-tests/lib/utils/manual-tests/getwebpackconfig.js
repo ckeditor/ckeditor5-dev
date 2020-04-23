@@ -42,7 +42,7 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 				// See https://ckeditor.com/docs/ckeditor5/latest/features/ui-language.html
 				language: options.language,
 				additionalLanguages: options.additionalLanguages,
-				allowMultipleJSOutputs: true
+				addMainLanguageTranslationsToAllAssets: true
 			} )
 		],
 
