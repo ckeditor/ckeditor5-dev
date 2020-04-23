@@ -21,10 +21,18 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @param {Array.<String>} [options.additionalLanguages] Additional languages which files will be emitted.
 	 * When option is set to 'all', all languages found during the compilation will be added.
 	 * @param {Boolean} [options.compileAllLanguages] When set to `true` languages will be found at runtime.
-	 * @param {Boolean} [options.allowMultipleJSOutputs] When set to `true` the service will not complain about multiple JS assets and will
-	 * output translations for the main language to all found asset.
+	 * @param {Boolean} [options.addMainLanguageTranslationsToAllAssets] When set to `true` the service will not complain
+	 * about multiple JS assets and will output translations for the main language to all found assets.
+	 * @param {Boolean} [buildAllTranslationsToSeparateFiles] When set to `true` the service will output all translations
+	 * to separate files.
 	 */
-	constructor( { mainLanguage, additionalLanguages = [], compileAllLanguages = false, allowMultipleJSOutputs = false } ) {
+	constructor( {
+		mainLanguage,
+		additionalLanguages = [],
+		compileAllLanguages = false,
+		addMainLanguageTranslationsToAllAssets = false,
+		buildAllTranslationsToSeparateFiles = false
+	} ) {
 		super();
 
 		/**
@@ -59,7 +67,15 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		 * @private
 		 * @type {Boolean}
 		 */
-		this._allowMultipleJSOutputs = allowMultipleJSOutputs;
+		this._addMainLanguageTranslationsToAllAssets = addMainLanguageTranslationsToAllAssets;
+
+		/**
+		 * A boolean option. When set to `true` outputs all translations to separate files.
+		 *
+		 * @private
+		 * @type {Boolean}
+		 */
+		this._buildAllTranslationsToSeparateFiles = buildAllTranslationsToSeparateFiles;
 
 		/**
 		 * A set of handled packages that speeds up the translation process.
@@ -171,7 +187,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @param {Object} options
 	 * @param {String} options.outputDirectory Output directory for the translation files relative to the output.
 	 * @param {String[]} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
-	 * @returns {Array.<Object>}
+	 * @returns {Array.<Object>} Returns new and modified assets that will be added to original ones.
 	 */
 	getAssets( { outputDirectory, compilationAssetNames } ) {
 		compilationAssetNames = compilationAssetNames
@@ -179,20 +195,24 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 		let mainLanguage = this._mainLanguage;
 
-		if ( compilationAssetNames.length == 0 ) {
+		if ( compilationAssetNames.length == 0 && !this._buildAllTranslationsToSeparateFiles ) {
 			this.emit( 'error', [
 				'No JS asset has been found during the compilation. ' +
-				'You should add translation assets directly to the application from the \'lang\' directory.'
+				'You should add translation assets directly to the application from the `translations` directory. ' +
+				'If that was intentional use the `buildAllTranslationsToSeparateFiles` option to get rif of the error.'
 			].join( '\n' ) );
 
-			return [];
-		}
-
-		if ( compilationAssetNames.length > 1 && !this._allowMultipleJSOutputs ) {
+			compilationAssetNames = [];
+			mainLanguage = null;
+		} else if ( this._buildAllTranslationsToSeparateFiles ) {
+			mainLanguage = null;
+			compilationAssetNames = [];
+		} else if ( compilationAssetNames.length > 1 && !this._addMainLanguageTranslationsToAllAssets ) {
 			this.emit( 'error', [
 				'Too many JS assets has been found during the compilation. ' +
-				'You should add translation assets directly to the application from the `lang` directory or ' +
-				'use the `allowMultipleJSOutputs` option to add translations for the main language to all assets.'
+				'You should add translation assets directly to the application from the `translations` directory or ' +
+				'use the `addMainLanguageTranslationsToAllAssets` option to add translations for the main language to all assets ' +
+				'or use the `buildAllTranslationsToSeparateFiles` if you want to add translation files on your own.'
 			].join( '\n' ) );
 
 			compilationAssetNames = [];
@@ -203,11 +223,14 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			.filter( lang => lang !== mainLanguage );
 
 		return [
+			// Assets where translations for the main language will be added.
 			...compilationAssetNames.map( assetName => ( {
 				outputBody: this._getTranslationAssets( outputDirectory, [ this._mainLanguage ] )[ 0 ].outputBody,
 				outputPath: assetName,
 				shouldConcat: true
 			} ) ),
+
+			// Translation assets outputted to separate translation files.
 			...this._getTranslationAssets( outputDirectory, otherLanguages )
 		];
 	}

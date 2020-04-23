@@ -41,10 +41,12 @@ module.exports = class CKEditorWebpackPlugin {
 	 * should be relative to the webpack context.
 	 * @param {Boolean} [options.strict] An option that make the plugin throw when the error is found during the compilation.
 	 * @param {Boolean} [options.verbose] An option that make this plugin log all warnings into the console.
- 	 * @param {Boolean} [options.allowMultipleJSOutputs] An option that allows outputting translations to more than one JS asset.
- 	 * @param {String} [options.sourceFilesPattern] An option that allows override the default pattern for CKEditor 5 source files.
- 	 * @param {String} [options.packageNamesPattern] An option that allows override the default pattern for CKEditor 5 package names.
- 	 * @param {String} [options.corePackagePattern] An option that allows override the default CKEditor 5 core package pattern.
+	 * @param {Boolean} [options.addMainLanguageTranslationsToAllAssets] An option that allows outputting translations to more than one
+	 * JS asset.
+	 * @param {Boolean} [options.buildAllTranslationsToSeparateFiles] An option that makes all translations output to separate files.
+	 * @param {String} [options.sourceFilesPattern] An option that allows override the default pattern for CKEditor 5 source files.
+	 * @param {String} [options.packageNamesPattern] An option that allows override the default pattern for CKEditor 5 package names.
+	 * @param {String} [options.corePackagePattern] An option that allows override the default CKEditor 5 core package pattern.
 	 */
 	constructor( options = {} ) {
 		this.options = {
@@ -53,7 +55,8 @@ module.exports = class CKEditorWebpackPlugin {
 			outputDirectory: options.outputDirectory || 'translations',
 			strict: !!options.strict,
 			verbose: !!options.verbose,
-			allowMultipleJSOutputs: !!options.allowMultipleJSOutputs,
+			addMainLanguageTranslationsToAllAssets: !!options.addMainLanguageTranslationsToAllAssets,
+			buildAllTranslationsToSeparateFiles: !!options.buildAllTranslationsToSeparateFiles,
 			sourceFilesPattern: options.sourceFileRegexp || /[/\\]ckeditor5-[^/\\]+[/\\]src[/\\].+\.js$/,
 			packageNamesPattern: options.packageNamesPattern || /[/\\]ckeditor5-[^/\\]+[/\\]/,
 			corePackagePattern: options.corePackagePattern || /[/\\]ckeditor5-core/,
@@ -70,7 +73,12 @@ module.exports = class CKEditorWebpackPlugin {
 			return;
 		}
 
-		const { allowMultipleJSOutputs, language: mainLanguage } = this.options;
+		const {
+			addMainLanguageTranslationsToAllAssets,
+			buildAllTranslationsToSeparateFiles,
+			language: mainLanguage
+		} = this.options;
+
 		let compileAllLanguages = false;
 		let additionalLanguages = this.options.additionalLanguages || [];
 
@@ -91,7 +99,8 @@ module.exports = class CKEditorWebpackPlugin {
 			mainLanguage,
 			compileAllLanguages,
 			additionalLanguages,
-			allowMultipleJSOutputs
+			addMainLanguageTranslationsToAllAssets,
+			buildAllTranslationsToSeparateFiles
 		} );
 
 		serveTranslations( compiler, this.options, translationService );

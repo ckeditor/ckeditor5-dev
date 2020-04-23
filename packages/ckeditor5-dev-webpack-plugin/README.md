@@ -45,10 +45,13 @@ When set to `true` stops the webpack compilation when an error occurs. Defaults 
 
 When set to `true` logs all warnings found during the compilation. Defaults to `false`.
 
-### allowMultipleJSOutputs
+### addMainLanguageTranslationsToAllAssets
 
-When set to `true` allows adding translations for the main language to all JS assets.
-Otherwise when more than one assets is added all translations will be outputted to separate files.
+When set to `true` all generated assets (bundles) will include translations for the main language.
+
+### buildAllTranslationsToSeparateFiles
+
+When set to `true` all translations will be outputted to the `translations` directory (or the directory specified by the [`outputDirectory` option](#outputDirectory)).
 
 ### packageNamesPattern
 
