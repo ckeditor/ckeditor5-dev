@@ -1,6 +1,18 @@
 Changelog
 =========
 
+## [18.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@17.1.4...@ckeditor/ckeditor5-dev-env@18.0.0) (2020-04-23)
+
+### BREAKING CHANGES
+
+* Omitting the language property in the CKEditorWebpackPlugin will not have any effect from now. This means that in both cases only the main language (language) will be added to the main bundle and translations for other languages will be saved in separate files.
+* The translation process no longer creates short ids for message strings. From now, the source code will not be changed by the translation process, translations for the main language will be added to the bundle(s) and translations for other languages will be outputted to separate executable JS files.
+
+### Features
+
+* Provided support for plural forms i18n. Closes [ckeditor/ckeditor5#6526](https://github.com/ckeditor/ckeditor5/issues/6526). Closes [ckeditor/ckeditor5#988](https://github.com/ckeditor/ckeditor5/issues/988). ([305590e](https://github.com/ckeditor/ckeditor5-dev/commit/305590e))
+
+
 ## [17.1.4](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-env@17.1.3...@ckeditor/ckeditor5-dev-env@17.1.4) (2020-02-26)
 
 Internal changes only (updated dependencies, documentation, etc.).
