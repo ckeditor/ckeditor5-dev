@@ -13,16 +13,22 @@ const task = process.argv[ 2 ];
 
 const tasks = {
 	/**
-	 * Collects translation strings ( from `t()` calls ) and stores them in ckeditor5/build/.transifex directory.
+	 * Collects translation messages (from `t()` calls and context files) and stores them in the `ckeditor5/build/.transifex` directory.
 	 */
 	collect() {
-		const collectTranslations = require( './../lib/translations/collect' );
+		const createPotFiles = require( '../lib/translations/createpotfiles' );
+		const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 
-		collectTranslations();
+		createPotFiles( {
+			sourceFiles: getCKEditor5SourceFiles(),
+			packagePaths: getCKEditor5PackagePaths(),
+			corePackagePath: 'packages/ckeditor5-core',
+			logger
+		} );
 	},
 
 	/**
-	 * Uploads translation strings on the Transifex server.
+	 * Uploads translation messages on the Transifex server.
 	 *
 	 * @returns {Promise}
 	 */
@@ -57,3 +63,19 @@ if ( !task || !tasks[ task ] ) {
 }
 
 tasks[ task ]();
+
+function getCKEditor5SourceFiles() {
+	const glob = require( 'glob' );
+	const srcPaths = [ process.cwd(), 'packages', '*', 'src', '**', '*.js' ].join( '/' );
+
+	return glob.sync( srcPaths ).filter( srcPath => !srcPath.match( /packages\/[^/]+\/src\/lib\// ) );
+}
+
+function getCKEditor5PackagePaths() {
+	const path = require( 'path' );
+	const fs = require( 'fs' );
+	const ckeditor5PackagesDir = path.join( process.cwd(), 'packages' );
+
+	return fs.readdirSync( ckeditor5PackagesDir )
+		.map( packageName => path.join( 'packages', packageName ) );
+}

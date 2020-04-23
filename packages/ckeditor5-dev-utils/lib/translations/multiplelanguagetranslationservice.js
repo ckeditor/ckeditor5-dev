@@ -7,107 +7,136 @@
 
 const path = require( 'path' );
 const fs = require( 'fs' );
-const createDictionaryFromPoFileContent = require( './createdictionaryfrompofilecontent' );
-const translateSource = require( './translatesource' );
-const ShortIdGenerator = require( './shortidgenerator' );
+const findMessages = require( './findmessages' );
 const { EventEmitter } = require( 'events' );
+const PO = require( 'pofile' );
 
 /**
- * `MultipleLanguageTranslationService` replaces `t()` call params with short ids
- * and provides language assets that can translate those ids to the target languages.
- *
- * `translationKey` - original english string that occur in `t()` call params.
+ * A service that serves translations assets based on the found PO files in the registered packages.
  */
 module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	/**
-	 * @param {String} language Main language.
 	 * @param {Object} options
-	 * @param {Boolean} [options.compileAllLanguages=false] Flag indicates whether the languages are specified
-	 * or should be found at runtime.
-	 * @param {Array.<String>} options.additionalLanguages Additional languages which files will be emitted.
+	 * @param {String} options.mainLanguage The target language that will be bundled into the main webpack asset.
+	 * @param {Array.<String>} [options.additionalLanguages] Additional languages which files will be emitted.
 	 * When option is set to 'all', all languages found during the compilation will be added.
+	 * @param {Boolean} [options.compileAllLanguages] When set to `true` languages will be found at runtime.
+	 * @param {Boolean} [options.addMainLanguageTranslationsToAllAssets] When set to `true` the service will not complain
+	 * about multiple JS assets and will output translations for the main language to all found assets.
+	 * @param {Boolean} [buildAllTranslationsToSeparateFiles] When set to `true` the service will output all translations
+	 * to separate files.
 	 */
-	constructor( language, { additionalLanguages, compileAllLanguages = false } = {} ) {
+	constructor( {
+		mainLanguage,
+		additionalLanguages = [],
+		compileAllLanguages = false,
+		addMainLanguageTranslationsToAllAssets = false,
+		buildAllTranslationsToSeparateFiles = false
+	} ) {
 		super();
 
 		/**
 		 * Main language that should be built in to the bundle.
 		 *
 		 * @private
+		 * @type {String}
 		 */
-		this._mainLanguage = language;
+		this._mainLanguage = mainLanguage;
 
 		/**
-		 * Set of languages that will be used by translator. This set might be expanded by found languages,
-		 * if `compileAllLanguages` is turned on.
+		 * A set of languages that will be used by translator. This set may be expanded by found languages
+		 * if the `compileAllLanguages` flag is turned on.
 		 *
 		 * @private
+		 * @type {Set.<String>}
 		 */
-		this._languages = new Set( [ language, ...additionalLanguages ] );
+		this._languages = new Set( [ mainLanguage, ...additionalLanguages ] );
 
 		/**
-		 * Option indicates whether the languages are specified or should be found at runtime.
+		 * An option indicating if the languages should be found at runtime.
 		 *
 		 * @private
+		 * @type {Boolean}
 		 */
 		this._compileAllLanguages = compileAllLanguages;
 
 		/**
-		 * Set of handled packages that speeds up the translation process.
+		 * A boolean option. When set to `true` this service won't complain about multiple JS assets
+		 * and will add translation for the main language to all of them. Useful option for manual tests, etc.
 		 *
 		 * @private
+		 * @type {Boolean}
+		 */
+		this._addMainLanguageTranslationsToAllAssets = addMainLanguageTranslationsToAllAssets;
+
+		/**
+		 * A boolean option. When set to `true` outputs all translations to separate files.
+		 *
+		 * @private
+		 * @type {Boolean}
+		 */
+		this._buildAllTranslationsToSeparateFiles = buildAllTranslationsToSeparateFiles;
+
+		/**
+		 * A set of handled packages that speeds up the translation process.
+		 *
+		 * @private
+		 * @type {Set.<String>}
 		 */
 		this._handledPackages = new Set();
 
 		/**
-		 * language -> translationKey -> targetTranslation dictionary.
+		 * A map of translation dictionaries in the `language -> messageId -> single & plural forms` format.
 		 *
 		 * @private
+		 * @type {Object.<String, Object.<String,Array.<String>>>}
 		 */
-		this._dictionary = {};
+		this._translationDictionaries = {};
 
 		/**
-		 * translationKey -> id dictionary gathered from files parsed by loader.
+		 * Plural form rules that will be added to generated translation assets.
 		 *
 		 * @private
-		 * @type {Object.<String,Object>}
+		 * @type {Object.<String, String>}
 		 */
-		this._translationIdsDictionary = {};
+		this._pluralFormsRules = {};
 
 		/**
-		 * Id generator that's used to replace translation strings with short ids and generate translation files.
+		 * A set of message ids that are found in parsed JS files. For each message id a translation
+		 * (with a single and possible plural forms) should be found for the target languages.
 		 *
 		 * @private
+		 * @type {Set.<String>}
 		 */
-		this._idGenerator = new ShortIdGenerator();
+		this._foundMessageIds = new Set();
 	}
 
 	/**
-	 * Translate file's source and replace `t()` call strings with short ids.
-	 * Fire an error when the acorn parser face a trouble.
+	 * Collects found message ids. Emits a warning when there is a suspicion that the message is created incorrectly
+	 * (e.g. an incorrect `t()` call).
 	 *
-	 * @fires error
-	 * @param {String} source Source of the file.
-	 * @param {String} fileName File name.
+	 * @fires warning
+	 * @param {String} source Content of the source file.
+	 * @param {String} fileName Source file name
 	 * @returns {String}
 	 */
 	translateSource( source, fileName ) {
-		const translate = originalString => this._getId( originalString );
-		const { output, errors } = translateSource( source, fileName, translate );
+		findMessages(
+			source,
+			fileName,
+			message => this._foundMessageIds.add( message.id ),
+			error => this.emit( 'warning', error )
+		);
 
-		for ( const error of errors ) {
-			this.emit( 'error', error );
-		}
-
-		return output;
+		return source;
 	}
 
 	/**
-	 * Load package and tries to get PO files from the package if it's unknown.
-	 * If the `compileAllLanguages` flag is set to true, language's set will be expanded by the found languages.
+	 * Loads PO files from the package if the package was not registered already.
+	 * If the `compileAllLanguages` flag is set to `true`, then the language set will be expanded to all found languages.
 	 *
 	 * @fires warning
-	 * @param {String} pathToPackage Path to the package containing translations.
+	 * @param {String} pathToPackage A path to the package containing translations.
 	 */
 	loadPackage( pathToPackage ) {
 		if ( this._handledPackages.has( pathToPackage ) ) {
@@ -126,7 +155,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			for ( const fileName of fs.readdirSync( pathToTranslationDirectory ) ) {
 				if ( !fileName.endsWith( '.po' ) ) {
 					this.emit(
-						'warning',
+						'error',
 						`Translation directory (${ pathToTranslationDirectory }) should contain only translation files.`
 					);
 
@@ -151,78 +180,114 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
-	 * Return an array of assets based on the stored dictionaries.
-	 * If there is one `compilationAssets`, merge main translation with that asset and join with other assets built outside.
-	 * Otherwise fire an warning and return an array of assets built outside of the `compilationAssets`.
+	 * Returns an array of partial assets containing translations in the executable JS form.
 	 *
 	 * @fires warning
 	 * @fires error
 	 * @param {Object} options
 	 * @param {String} options.outputDirectory Output directory for the translation files relative to the output.
-	 * @param {Object} options.compilationAssets Original assets from the compiler (e.g. Webpack).
-	 * @returns {Array.<Object>}
+	 * @param {String[]} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
+	 * @returns {Array.<Object>} Returns new and modified assets that will be added to original ones.
 	 */
-	getAssets( { outputDirectory, compilationAssets } ) {
-		const compilationAssetNames = Object.keys( compilationAssets )
+	getAssets( { outputDirectory, compilationAssetNames } ) {
+		compilationAssetNames = compilationAssetNames
 			.filter( name => name.endsWith( '.js' ) );
 
-		if ( compilationAssetNames.length == 0 ) {
-			return [];
-		}
+		let mainLanguage = this._mainLanguage;
 
-		if ( compilationAssetNames.length > 1 ) {
-			this.emit( 'warning', [
-				'Because of the many found bundles, none of the bundles will contain the main language.',
-				`You should add it directly to the application from the '${ outputDirectory }${ path.sep }${ this._mainLanguage }.js'.`
+		if ( compilationAssetNames.length == 0 && !this._buildAllTranslationsToSeparateFiles ) {
+			this.emit( 'error', [
+				'No JS asset has been found during the compilation. ' +
+				'You should add translation assets directly to the application from the `translations` directory. ' +
+				'If that was intentional use the `buildAllTranslationsToSeparateFiles` option to get rif of the error.'
 			].join( '\n' ) );
 
-			return this._getTranslationAssets( outputDirectory, this._languages );
+			compilationAssetNames = [];
+			mainLanguage = null;
+		} else if ( this._buildAllTranslationsToSeparateFiles ) {
+			mainLanguage = null;
+			compilationAssetNames = [];
+		} else if ( compilationAssetNames.length > 1 && !this._addMainLanguageTranslationsToAllAssets ) {
+			this.emit( 'error', [
+				'Too many JS assets has been found during the compilation. ' +
+				'You should add translation assets directly to the application from the `translations` directory or ' +
+				'use the `addMainLanguageTranslationsToAllAssets` option to add translations for the main language to all assets ' +
+				'or use the `buildAllTranslationsToSeparateFiles` if you want to add translation files on your own.'
+			].join( '\n' ) );
+
+			compilationAssetNames = [];
+			mainLanguage = null;
 		}
 
-		const mainAssetName = compilationAssetNames[ 0 ];
-
-		const mainTranslationAsset = this._getTranslationAssets( outputDirectory, [ this._mainLanguage ] )[ 0 ];
-
-		const mergedCompilationAsset = {
-			outputBody: mainTranslationAsset.outputBody,
-			outputPath: mainAssetName,
-			shouldConcat: true
-		};
-
 		const otherLanguages = Array.from( this._languages )
-			.filter( lang => lang !== this._mainLanguage );
+			.filter( lang => lang !== mainLanguage );
 
 		return [
-			mergedCompilationAsset,
+			// Assets where translations for the main language will be added.
+			...compilationAssetNames.map( assetName => ( {
+				outputBody: this._getTranslationAssets( outputDirectory, [ this._mainLanguage ] )[ 0 ].outputBody,
+				outputPath: assetName,
+				shouldConcat: true
+			} ) ),
+
+			// Translation assets outputted to separate translation files.
 			...this._getTranslationAssets( outputDirectory, otherLanguages )
 		];
 	}
 
 	/**
-	 * Return assets for the given directory and languages.
+	 * Returns assets for the given directory and languages.
 	 *
 	 * @private
-	 * @param outputDirectory Output directory for assets.
-	 * @param {Iterable.<String>} languages Languages for assets.
+	 * @param {String} outputDirectory The output directory for assets.
+	 * @param {Array.<String>} languages Languages for assets.
 	 */
 	_getTranslationAssets( outputDirectory, languages ) {
-		return Array.from( languages ).map( language => {
-			const translatedStrings = this._getIdToTranslatedStringDictionary( language );
+		// Sort the array of message ids to provide deterministic results.
+		const sortedMessageIds = Array.from( this._foundMessageIds ).sort( ( a, b ) => a.localeCompare( b ) );
 
+		return languages.map( language => {
 			const outputPath = path.join( outputDirectory, `${ language }.js` );
 
+			if ( !this._translationDictionaries[ language ] ) {
+				this.emit( 'error', `No translation has been found for the ${ language } language.` );
+
+				return { outputBody: '', outputPath };
+			}
+
+			const translations = this._getTranslations( language, sortedMessageIds );
+
+			// Examples of plural forms:
+			// pluralForms="nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2)"
+			// pluralForms="nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2"
+
+			/** @type {String} */
+			const pluralFormsRule = this._pluralFormsRules[ language ];
+
+			let pluralFormFunction;
+
+			if ( !pluralFormsRule ) {
+				// This could be improved in the future by using a 3-rd party library for plural forms.
+				this.emit( 'warning', `The plural form function for the '${ language }' language has not been set.` );
+			} else {
+				const pluralFormFunctionBodyMatch = pluralFormsRule.match( /(?:plural=)(.+)/ );
+
+				// Add support for ES5 - this function will not be transpiled.
+				pluralFormFunction = `function(n){return ${ pluralFormFunctionBodyMatch[ 1 ] };}`;
+			}
+
 			// Stringify translations and remove unnecessary `""` around property names.
-			const stringifiedTranslations = JSON.stringify( translatedStrings )
-				.replace( /"([a-z]+)":/g, '$1:' );
+			const stringifiedTranslations = JSON.stringify( translations )
+				.replace( /"([\w_]+)":/g, '$1:' );
 
 			const outputBody = (
-				// We need to ensure that the CKEDITOR_TRANSLATIONS variable exists and if it exists, we need to extend it.
-				// Use ES5 because this bit will not be transpiled!
 				'(function(d){' +
-					`d['${ language }']=Object.assign(` +
-						`d['${ language }']||{},` +
-						`${ stringifiedTranslations }` +
-					')' +
+				`	const l = d['${ language }'] = d['${ language }'] || {};` +
+				'	l.dictionary=Object.assign(' +
+				'		l.dictionary||{},' +
+				`		${ stringifiedTranslations }` +
+				'	);' +
+				( pluralFormFunction ? `l.getPluralForm=${ pluralFormFunction };` : '' ) +
 				'})(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));'
 			);
 
@@ -231,41 +296,38 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
-	 * Walk through the `translationIdsDictionary` and find corresponding strings in the target language's dictionary.
-	 * Use original strings if translated ones are missing.
+	 * Walks through the set of found message ids and collects corresponding strings in the target language dictionary.
+	 * Skips messages that lacks their translations.
 	 *
 	 * @private
-	 * @param {String} lang Target language.
-	 * @returns {Object.<String,String>}
+	 * @param {String} language The target language
+	 * @param {String} sortedMessageIds An array of sorted message ids.
+	 * @returns {Object.<String,String|String[]>}
 	 */
-	_getIdToTranslatedStringDictionary( lang ) {
-		let langDictionary = this._dictionary[ lang ];
-
-		if ( !langDictionary ) {
-			this.emit( 'error', `No translation found for ${ lang } language.` );
-
-			// Fallback to the original translation strings.
-			langDictionary = {};
-		}
-
+	_getTranslations( language, sortedMessageIds ) {
+		const langDictionary = this._translationDictionaries[ language ];
 		const translatedStrings = {};
 
-		for ( const originalString in this._translationIdsDictionary ) {
-			const id = this._translationIdsDictionary[ originalString ];
-			const translatedString = langDictionary[ originalString ];
+		for ( const messageId of sortedMessageIds ) {
+			const translatedMessage = langDictionary[ messageId ];
 
-			if ( !translatedString ) {
-				this.emit( 'warning', `Missing translation for '${ originalString }' for '${ lang }' language.` );
+			if ( !translatedMessage || translatedMessage.length === 0 ) {
+				this.emit( 'warning', `A translation is missing for '${ messageId }' in the '${ language }' language.` );
+
+				continue;
 			}
 
-			translatedStrings[ id ] = translatedString || originalString;
+			// Register first form as a default form if only one form was provided.
+			translatedStrings[ messageId ] = translatedMessage.length > 1 ?
+				translatedMessage :
+				translatedMessage[ 0 ];
 		}
 
 		return translatedStrings;
 	}
 
 	/**
-	 * Load translations from the PO files.
+	 * Loads translations from the PO file if that file exists.
 	 *
 	 * @private
 	 * @param {String} language PO file's language.
@@ -276,41 +338,23 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			return;
 		}
 
-		const poFileContent = fs.readFileSync( pathToPoFile, 'utf-8' );
-		const parsedTranslationFile = createDictionaryFromPoFileContent( poFileContent );
+		const parsedTranslationFile = PO.parse( fs.readFileSync( pathToPoFile, 'utf-8' ) );
 
-		if ( !this._dictionary[ language ] ) {
-			this._dictionary[ language ] = {};
+		this._pluralFormsRules[ language ] = this._pluralFormsRules[ language ] || parsedTranslationFile.headers[ 'Plural-Forms' ];
+
+		if ( !this._translationDictionaries[ language ] ) {
+			this._translationDictionaries[ language ] = {};
 		}
 
-		const dictionary = this._dictionary[ language ];
+		const dictionary = this._translationDictionaries[ language ];
 
-		for ( const translationKey in parsedTranslationFile ) {
-			dictionary[ translationKey ] = parsedTranslationFile[ translationKey ];
+		for ( const item of parsedTranslationFile.items ) {
+			dictionary[ item.msgid ] = item.msgstr;
 		}
 	}
 
 	/**
-	 * Return an id for the original string. If it's stored in the `_translationIdsDictionary` return it instead of generating new one.
-	 *
-	 * @private
-	 * @param {String} originalString
-	 * @returns {String}
-	 */
-	_getId( originalString ) {
-		let id = this._translationIdsDictionary[ originalString ];
-
-		if ( !id ) {
-			id = this._idGenerator.getNextId();
-			this._translationIdsDictionary[ originalString ] = id;
-		}
-
-		return id;
-	}
-
-	/**
-	 * Return path to the translation directory depending on the path to package.
-	 * This method is protected to enable this class usage in other environments than CKE5.
+	 * Returns a path to the translation directory depending on the path to the package.
 	 *
 	 * @protected
 	 * @param {String} pathToPackage

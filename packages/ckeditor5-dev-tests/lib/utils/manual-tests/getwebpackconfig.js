@@ -41,7 +41,8 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 			new CKEditorWebpackPlugin( {
 				// See https://ckeditor.com/docs/ckeditor5/latest/features/ui-language.html
 				language: options.language,
-				additionalLanguages: options.additionalLanguages
+				additionalLanguages: options.additionalLanguages,
+				addMainLanguageTranslationsToAllAssets: true
 			} )
 		],
 

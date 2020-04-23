@@ -7,8 +7,7 @@
 
 module.exports = {
 	MultipleLanguageTranslationService: require( './multiplelanguagetranslationservice' ),
-	SingleLanguageTranslationService: require( './singlelanguagetranslationservice' ),
-	findOriginalStrings: require( './findoriginalstrings' ),
+	findMessages: require( './findmessages' ),
 	createDictionaryFromPoFileContent: require( './createdictionaryfrompofilecontent' ),
 	cleanPoFileContent: require( './cleanpofilecontent' ),
 	retryAsyncFunction: require( './retryasyncfunction' )

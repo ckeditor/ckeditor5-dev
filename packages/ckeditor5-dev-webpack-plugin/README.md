@@ -16,32 +16,61 @@ const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' 
 
 // Define webpack plugins ...
 	plugins: [
-		new CKEditorWebpackPlugin( {
-			// Main language that will be built into the main bundle.
-			language: 'en',
-
-			// Additional languages that will be emitted to the `outputDirectory`.
-			// This option can be set to an array of language codes or `'all'` to build all found languages.
-			// The bundle is optimized for one language when this option is omitted.
-			additionalLanguages: 'all',
-
-			// Optional directory for emitted translations. Relative to the webpack's output.
-			// Defaults to `'translations'`.
-			// outputDirectory: 'ckeditor5-translations',
-
-			// Whether the build process should fail if an error occurs.
-			// Defaults to `false`.
-			// strict: true,
-
-			// Whether to log all warnings to the console.
-			// Defaults to `false`.
-			// verbose: true
-		} ),
+		new CKEditorWebpackPlugin( options ),
 
 		// Other webpack plugins...
 	]
 // ...
 ```
+
+### Options:
+
+#### language
+
+The main language that will be built into the main bundle. e.g. `en`.
+
+#### additionalLanguages
+
+Additional languages that will be emitted to the `outputDirectory`. This option can be set to an array of language codes or `'all'` to build all found languages. The bundle is optimized for one language when this option is omitted.
+
+### outputDirectory
+
+An optional directory for emitted translations. Relative to the webpack's output. Defaults to `'translations'`.
+
+### strict
+
+When set to `true` stops the webpack compilation when an error occurs. Defaults to `false`.
+
+### verbose
+
+When set to `true` logs all warnings found during the compilation. Defaults to `false`.
+
+### addMainLanguageTranslationsToAllAssets
+
+When set to `true` all generated assets (bundles) will include translations for the main language.
+
+### buildAllTranslationsToSeparateFiles
+
+When set to `true` all translations will be outputted to the `translations` directory (or the directory specified by the [`outputDirectory` option](#outputDirectory)).
+
+### packageNamesPattern
+
+A pattern which is used for determining if a package may contain translations (PO files) in the `<package_name>/lang/translations` directory. Defaults to `/[/\\]ckeditor5-[^/\\]+[/\\]/`.
+
+### sourceFilesPattern
+
+A pattern which is used for determining if the file may contain messages to translate. Defaults to `/[/\\]ckeditor5-[^/\\]+[/\\]src[/\\].+\.js$/`.
+
+### corePackagePattern
+
+(internal)
+A pattern which is used to get a path to the core translation package from `corePackageSampleResourcePath`, which contains the main translations. Defaults to /[/\\]ckeditor5-core/.
+
+### corePackageSampleResourcePath
+
+(internal)
+A sample path to the `ckeditor5-core` package. A test import to this file shows if the `ckeditor5-core` package is available and allows to load the core package
+translations first.
 
 You can read more about localizing the editor in the [Setting the UI language](https://docs.ckeditor.com/ckeditor5/latest/features/ui-language.html) guide.
 

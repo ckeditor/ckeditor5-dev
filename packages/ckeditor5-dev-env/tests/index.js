@@ -29,9 +29,9 @@ describe( 'dev-env/index', () => {
 				error: sandbox.spy()
 			},
 			translations: {
-				upload: sandbox.spy(),
+				uploadPotFiles: sandbox.spy(),
 				download: sandbox.spy(),
-				collect: sandbox.spy(),
+				createPotFiles: sandbox.spy(),
 				getToken: sandbox.stub()
 			},
 			releaseTools: {
@@ -45,10 +45,10 @@ describe( 'dev-env/index', () => {
 			}
 		};
 
-		mockery.registerMock( './translations/upload', stubs.translations.upload );
+		mockery.registerMock( './translations/upload', stubs.translations.uploadPotFiles );
 		mockery.registerMock( './translations/gettoken', stubs.translations.getToken );
 		mockery.registerMock( './translations/download', stubs.translations.download );
-		mockery.registerMock( './translations/collect', stubs.translations.collect );
+		mockery.registerMock( './translations/createpotfiles', stubs.translations.createPotFiles );
 
 		mockery.registerMock(
 			'./release-tools/tasks/releasesubrepositories',
@@ -167,21 +167,25 @@ describe( 'dev-env/index', () => {
 		} );
 	} );
 
-	describe( 'collectTranslations()', () => {
-		it( 'should collect translations', () => {
-			tasks.collectTranslations();
+	describe( 'createPotFiles()', () => {
+		it( 'should create a POT file', () => {
+			tasks.createPotFiles( {
+				sourceFiles: [],
+				packagePaths: [],
+				corePackagePath: 'ckeditor5-core'
+			} );
 
-			sinon.assert.calledOnce( stubs.translations.collect );
+			sinon.assert.calledOnce( stubs.translations.createPotFiles );
 		} );
 	} );
 
-	describe( 'uploadTranslations()', () => {
+	describe( 'uploadPotFiles()', () => {
 		it( 'should upload translations', () => {
 			stubs.translations.getToken.returns( Promise.resolve( { token: 'token' } ) );
 
-			return tasks.uploadTranslations().then( () => {
-				sinon.assert.calledOnce( stubs.translations.upload );
-				sinon.assert.alwaysCalledWithExactly( stubs.translations.upload, {
+			return tasks.uploadPotFiles().then( () => {
+				sinon.assert.calledOnce( stubs.translations.uploadPotFiles );
+				sinon.assert.alwaysCalledWithExactly( stubs.translations.uploadPotFiles, {
 					token: 'token'
 				} );
 			} );
