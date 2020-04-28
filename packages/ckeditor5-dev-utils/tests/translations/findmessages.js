@@ -56,6 +56,73 @@ describe( 'findMessages', () => {
 		] );
 	} );
 
+	it( 'should parse provided code and find messages inside the `t()` function calls on objects with stringified properties', () => {
+		const messages = [];
+
+		findMessages(
+			`function x() {
+                const t = this.t;
+                t( { 'string': 'Image' } );
+                t( { 'string': 'Image', 'id': 'AN_IMAGE' } );
+                t( { 'string': 'Image', 'plural': 'Images' } );
+                t( { 'string': 'Image', 'plural': 'Images', 'id': 'AN_IMAGE' } );
+			}`,
+			'foo.js',
+			message => messages.push( message )
+		);
+
+		expect( messages ).to.deep.equal( [
+			{ id: 'Image', string: 'Image' },
+			{ id: 'AN_IMAGE', string: 'Image' },
+			{ id: 'Image', string: 'Image', plural: 'Images' },
+			{ id: 'AN_IMAGE', string: 'Image', plural: 'Images' }
+		] );
+	} );
+
+	it( 'should parse provided code and find messages inside the `t()` function calls on simple conditional expressions', () => {
+		const messages = [];
+
+		findMessages(
+			`function x() {
+                const t = this.t;
+                t( x ? 'foo1' : 'bar1' );
+                t( x ? 'foo2' : { 'string': 'bar2' } );
+                t( x ? { string: 'Image', id: 'AN_IMAGE' } : { 'string': 'space', 'plural': '%0 spaces', 'id': 'SPACE' } );
+			}`,
+			'foo.js',
+			message => messages.push( message )
+		);
+
+		expect( messages ).to.deep.equal( [
+			{ id: 'foo1', string: 'foo1' },
+			{ id: 'bar1', string: 'bar1' },
+
+			{ id: 'foo2', string: 'foo2' },
+			{ id: 'bar2', string: 'bar2' },
+
+			{ id: 'AN_IMAGE', string: 'Image' },
+			{ id: 'SPACE', string: 'space', plural: '%0 spaces' }
+		] );
+	} );
+
+	it( 'should omit invalid t() calls', () => {
+		const messages = [];
+		const errors = [];
+
+		findMessages(
+			`function x() {
+				t( {} );
+                t( { bar: {} } );
+			}`,
+			'foo.js',
+			message => messages.push( message ),
+			error => errors.push( error )
+		);
+
+		expect( messages ).to.have.length( 0 );
+		expect( errors ).to.have.length( 2 );
+	} );
+
 	it( 'should log warnings for method `t` calls', () => {
 		const messages = [];
 		const errors = [];
