@@ -53,10 +53,10 @@ module.exports = function findMessages( source, sourceFile, onMessageFound, onEr
 
 		const firstArgument = node.arguments[ 0 ];
 
-		findMessageInArgument( firstArgument );
+		findMessagesInExpression( firstArgument );
 	}
 
-	function findMessageInArgument( node ) {
+	function findMessagesInExpression( node ) {
 		// Matches t( { string: 'foo' } ) and t( { 'string': 'foo' } ).
 		// (also `plural` and `id` properties)
 		if ( node.type === 'ObjectExpression' ) {
@@ -99,8 +99,8 @@ module.exports = function findMessages( source, sourceFile, onMessageFound, onEr
 
 		// Matches t( foo ? 'bar' : { string: 'baz', plural: 'biz' } );
 		if ( node.type === 'ConditionalExpression' ) {
-			findMessageInArgument( node.consequent );
-			findMessageInArgument( node.alternate );
+			findMessagesInExpression( node.consequent );
+			findMessagesInExpression( node.alternate );
 
 			return;
 		}
