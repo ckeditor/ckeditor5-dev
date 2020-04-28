@@ -26,67 +26,104 @@ module.exports = function findMessages( source, sourceFile, onMessageFound, onEr
 
 	walk.simple( ast, {
 		CallExpression: node => {
-			// Log a warning for the `editor.t()` calls and similar which aren't supported yet.
-			if ( isTMethodCallExpression( node ) ) {
-				const objName = node.callee.object.name;
-				const propName = node.callee.property.name;
-
-				onErrorFound(
-					// TODO - ${ objName }.${ propName } is naive.
-					`Found '${ objName }.${ propName }()' in the ${ sourceFile }. ` +
-					'Only messages from direct \'t()\' calls will be handled by CKEditor 5 translation mechanisms.'
-				);
+			try {
+				findMessagesInNode( node );
+			} catch ( err ) {
+				onErrorFound( 'CKEditor5 Translation tool found problem. \n' + err.stack );
 			}
-
-			if ( !isTFunctionCallExpression( node ) ) {
-				return;
-			}
-
-			const firstArgument = node.arguments[ 0 ];
-
-			if ( firstArgument.type === 'ObjectExpression' ) {
-				const properties = firstArgument.properties || [];
-
-				const idProperty = properties.find( p => p.key.type === 'Identifier' && p.key.name === 'id' );
-				const stringProperty = properties.find( p => p.key.type === 'Identifier' && p.key.name === 'string' );
-				const pluralProperty = properties.find( p => p.key.type === 'Identifier' && p.key.name === 'plural' );
-
-				// TODO - value assertions.
-
-				/** @type {Message} */
-				const message = {
-					string: stringProperty.value.value,
-					id: stringProperty.value.value
-				};
-
-				if ( idProperty ) {
-					message.id = idProperty.value.value;
-				}
-
-				if ( pluralProperty ) {
-					message.plural = pluralProperty.value.value;
-				}
-
-				onMessageFound( message );
-
-				return;
-			}
-
-			if ( firstArgument.type === 'Literal' ) {
-				onMessageFound( {
-					string: firstArgument.value,
-					id: firstArgument.value
-				} );
-
-				return;
-			}
-
-			onErrorFound(
-				`First t() call argument should be a string literal or an object literal (${ sourceFile }).`
-			);
 		}
 	} );
+
+	function findMessagesInNode( node ) {
+		// Log a warning for the `editor.t()` calls and similar which aren't supported yet.
+		if ( isTMethodCallExpression( node ) ) {
+			const objName = node.callee.object.name;
+			const propName = node.callee.property.name;
+
+			onErrorFound(
+				// TODO - ${ objName }.${ propName } is naive.
+				`Found '${ objName }.${ propName }()' in the ${ sourceFile }. ` +
+				'Only messages from direct \'t()\' calls will be handled by CKEditor 5 translation mechanisms.'
+			);
+		}
+
+		if ( !isTFunctionCallExpression( node ) ) {
+			return;
+		}
+
+		const firstArgument = node.arguments[ 0 ];
+
+		findMessageInArgument( firstArgument );
+	}
+
+	function findMessageInArgument( node ) {
+		// Matches t( { string: 'foo' } ) and t( { 'string': 'foo' } ).
+		// (also `plural` and `id` properties)
+		if ( node.type === 'ObjectExpression' ) {
+			const properties = node.properties || [];
+
+			const idProperty = getProperty( properties, 'id' );
+			const stringProperty = getProperty( properties, 'string' );
+			const pluralProperty = getProperty( properties, 'plural' );
+
+			// TODO - value assertions.
+
+			/** @type {Message} */
+			const message = {
+				string: stringProperty.value.value,
+				id: stringProperty.value.value
+			};
+
+			if ( idProperty ) {
+				message.id = idProperty.value.value;
+			}
+
+			if ( pluralProperty ) {
+				message.plural = pluralProperty.value.value;
+			}
+
+			onMessageFound( message );
+
+			return;
+		}
+
+		// Matches t( 'foo' )
+		if ( node.type === 'Literal' ) {
+			onMessageFound( {
+				string: node.value,
+				id: node.value
+			} );
+
+			return;
+		}
+
+		// Matches t( foo ? 'bar' : { string: 'baz', plural: 'biz' } );
+		if ( node.type === 'ConditionalExpression' ) {
+			findMessageInArgument( node.consequent );
+			findMessageInArgument( node.alternate );
+
+			return;
+		}
+
+		onErrorFound(
+			`First t() call argument should be a string literal or an object literal (${ sourceFile }).`
+		);
+	}
 };
+
+// Get property from the list of properties
+// It supports both forms: `{ propertyName: foo }` and `{ 'propertyName': 'foo' }`
+function getProperty( properties, propertyName ) {
+	return properties.find( property => {
+		if ( property.key.type === 'Identifier' ) {
+			return property.key.name === propertyName;
+		}
+
+		if ( property.key.type === 'Literal' ) {
+			return property.key.value === propertyName;
+		}
+	} );
+}
 
 function isTFunctionCallExpression( node ) {
 	return node.callee.name === 't';
