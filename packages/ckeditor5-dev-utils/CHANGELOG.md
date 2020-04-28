@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [13.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@13.0.0...@ckeditor/ckeditor5-dev-utils@13.0.1) (2020-04-28)
+
+### Bug fixes
+
+* Added support for advanced structures of messages inside `t()` calls. Closes [#622](https://github.com/ckeditor/ckeditor5-dev/issues/622). ([c21919b](https://github.com/ckeditor/ckeditor5-dev/commit/c21919b))
+
+
 ## [13.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@12.0.9...@ckeditor/ckeditor5-dev-utils@13.0.0) (2020-04-23)
 
 ### BREAKING CHANGES
