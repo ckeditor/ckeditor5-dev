@@ -12,13 +12,13 @@ use( sinonChai );
 const http = require( 'http' );
 
 describe( 'createManualTestServer', () => {
-	let sandbox, httpCreateServerStub, createManualTestServer;
+	let sandbox, httpCreateServerStub, createManualTestServer, server;
 
 	beforeEach( () => {
 		sandbox = sinon.createSandbox();
 
 		httpCreateServerStub = sandbox.stub( http, 'createServer' ).callsFake( function stubbedCreateServer( ...theArgs ) {
-			const server = httpCreateServerStub.wrappedMethod( ...theArgs );
+			server = httpCreateServerStub.wrappedMethod( ...theArgs );
 			sandbox.spy( server, 'listen' );
 
 			return server;
@@ -29,6 +29,7 @@ describe( 'createManualTestServer', () => {
 
 	afterEach( () => {
 		sandbox.restore();
+		server.close();
 	} );
 
 	it( 'should start http server', () => {
