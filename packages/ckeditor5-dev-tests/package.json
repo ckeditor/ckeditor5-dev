@@ -39,7 +39,6 @@
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "mocha": "^6.1.4",
-    "mrgit": "^1.0.0",
     "postcss-loader": "^3.0.0",
     "raw-loader": "^3.1.0",
     "sinon": "^7.3.2",
@@ -62,11 +61,6 @@
   "bin": {
     "ckeditor5-dev-tests": "./bin/test.js",
     "ckeditor5-dev-tests-manual": "./bin/test-manual.js",
-    "ckeditor5-dev-tests-travis": "./bin/test-travis.sh",
-    "ckeditor5-dev-tests-prepare-mrgit-json": "./bin/prepare-mrgit-json.js",
-    "ckeditor5-dev-tests-prepare-package-json": "./bin/prepare-package-json.js",
-    "ckeditor5-dev-tests-install-dependencies": "./bin/install-dependencies.sh",
-    "ckeditor5-dev-tests-save-revision": "./bin/save-revision.js",
     "ckeditor5-dev-tests-check-dependencies": "./bin/check-dependencies.js",
     "ckeditor5-dev-tests-notify-travis-status": "./bin/notify-travis-status.js"
   },
