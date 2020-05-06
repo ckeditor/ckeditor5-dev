@@ -13,7 +13,7 @@ const glob = require( 'glob' );
 const depCheck = require( 'depcheck' );
 const chalk = require( 'chalk' );
 
-const packageDirectory = process.argv[ 2 ] || process.cwd();
+const packageDirectory = process.argv[ 2 ] ? path.resolve( process.argv[ 2 ] ) : process.cwd();
 const packageJson = require( path.join( packageDirectory, 'package.json' ) );
 const nonExistingCSSFiles = [];
 
