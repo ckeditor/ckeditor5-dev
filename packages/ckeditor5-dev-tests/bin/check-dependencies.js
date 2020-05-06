@@ -13,8 +13,8 @@ const glob = require( 'glob' );
 const depCheck = require( 'depcheck' );
 const chalk = require( 'chalk' );
 
-const cwd = process.cwd();
-const packageJson = require( path.join( cwd, 'package.json' ) );
+const packageDirectory = process.argv[ 2 ] || process.cwd();
+const packageJson = require( path.join( packageDirectory, 'package.json' ) );
 const nonExistingCSSFiles = [];
 
 const depCheckOptions = {
@@ -36,13 +36,13 @@ if ( Array.isArray( packageJson.depcheckIgnore ) ) {
 
 console.log( 'Checking dependencies...' );
 
-depCheck( cwd, depCheckOptions )
+depCheck( packageDirectory, depCheckOptions )
 	.then( unused => {
 		const missingPackages = groupMissingPackages( unused.missing, packageJson.name );
 
 		const data = [
 			// Invalid itself imports.
-			[ ...getInvalidItselfImports( cwd ) ]
+			[ ...getInvalidItselfImports( packageDirectory ) ]
 				.map( entry => '- ' + entry )
 				.join( '\n' ),
 
@@ -128,7 +128,7 @@ depCheck( cwd, depCheckOptions )
 /**
  * Returns a Set that contains list of files that import modules using full package name instead of relative path.
  *
- * @param repositoryPath An absolute path to the directory which should be ckecked.
+ * @param repositoryPath An absolute path to the directory which should be checked.
  * @returns {Set<String>}
  */
 function getInvalidItselfImports( repositoryPath ) {
