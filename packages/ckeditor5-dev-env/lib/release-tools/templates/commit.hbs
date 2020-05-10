@@ -1,12 +1,8 @@
-* {{#if subject}}
-  {{~subject}}
-{{~else}}
-  {{~title}}
-{{~/if}}
+* {{#if scope}}**{{~scope.[0]}}**: {{/if}}{{subject}}
 
 {{~#unless @root.skipCommitsLink}}
 	{{~!-- commit link --}} {{#if @root.linkReferences~}}
-	  ([{{hash}}](
+	  ([commit](
 	  {{~#if @root.repository}}
 		{{~#if @root.host}}
 		  {{~@root.host}}/

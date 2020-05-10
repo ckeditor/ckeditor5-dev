@@ -26,5 +26,8 @@ module.exports = function getChangedFilesForCommit( commitId ) {
 	// other-file2      <-- files from last commit before merge
 	// We need to filter out files from commit before merge.
 
-	return changedFiles.split( '\n\n' )[ 0 ].split( '\n' );
+	return changedFiles.split( '\n\n' )[ 0 ]
+		.split( '\n' )
+		.map( file => file.trim() )
+		.filter( item => item );
 };

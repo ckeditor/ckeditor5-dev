@@ -292,7 +292,7 @@ const cli = {
 	},
 
 	/**
-	 * Asks a user for a confirmation for removing archives created by `npm pack` command.
+	 * Asks a user for a confirmation for major breaking release.
 	 *
 	 * @param {Boolean} haveMajorBreakingChangeCommits Whether the answer for the question should be "Yes".
 	 * @param {Object} [options={}]
@@ -304,7 +304,7 @@ const cli = {
 		const confirmQuestion = {
 			message: [
 				'If at least one of those changes is really a major breaking change, this will be a major release.',
-				'Should this be a major release?'
+				'Should it be the major release?'
 			].join( ' ' ),
 			type: 'confirm',
 			name: 'confirm',

@@ -6,6 +6,7 @@
 'use strict';
 
 const utils = require( './transform-commit-utils' );
+const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
 
 const MULTI_ENTRIES_COMMIT_REGEXP = /(?:Feature|Other|Fix)(?: \([\w\-, ]+?\))?:/g;
 
@@ -58,11 +59,12 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 
 		const parsedType = getTypeAndScope( commit.rawType );
 
+		commit.files = [];
 		commit.rawType = parsedType.rawType;
 		commit.scope = parsedType.scope;
 
 		// Whether the commit will be printed in the changelog.
-		const isCommitIncluded = utils.availableCommitTypes.get( commit.rawType );
+		commit.isPublicCommit = utils.availableCommitTypes.get( commit.rawType ) || false;
 
 		// Our merge commit always contains two lines:
 		// Merge ...
@@ -81,70 +83,64 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 			return;
 		}
 
-		if ( typeof commit.hash === 'string' ) {
-			commit.hash = commit.hash.substring( 0, 7 );
-		}
-
-		// It's used only for displaying the commit. Changelog generator will filter out the invalid entries.
-		if ( !isCommitIncluded ) {
-			return options.returnInvalidCommit ? commit : undefined;
-		}
-
-		// Remove [skip ci] from the commit subject.
-		commit.subject = commit.subject.replace( /\[skip ci\]/, '' ).trim();
-
-		// If a dot is missing at the end of the subject...
-		if ( !commit.subject.endsWith( '.' ) ) {
-			// ...let's add it.
-			commit.subject += '.';
-		}
-
-		// The `type` below will be key for grouping commits.
-		commit.type = utils.getCommitType( commit.rawType );
-
-		if ( typeof commit.subject === 'string' ) {
-			commit.subject = makeLinks( commit.subject );
-		}
-
-		// Remove additional notes from the commit's footer.
-		// Additional notes are added to the footer. In order to avoid duplication, they should be removed.
-		if ( commit.footer && commit.notes.length ) {
-			commit.footer = commit.footer.split( '\n' )
-				.filter( footerLine => {
-					// For each footer line checks whether the line starts with note prefix ("NOTE": ...).
-					// If so, this footer line should be removed.
-					return !commit.notes.some( note => footerLine.startsWith( note.title ) );
-				} )
-				.join( '\n' )
-				.trim();
-		}
-
-		// If `body` of the commit is empty but the `footer` isn't, let's swap those.
-		if ( commit.footer && !commit.body ) {
-			commit.body = commit.footer;
-			commit.footer = null;
-		}
-
-		if ( typeof commit.body === 'string' ) {
-			commit.body = commit.body.split( '\n' )
-				.map( line => {
-					if ( !line.length ) {
-						return '';
-					}
-
-					return '  ' + line;
-				} )
-				.join( '\n' );
-
-			commit.body = makeLinks( commit.body );
-		}
-
-		normalizeNotes( commit );
-
-		// Clear the references array - we don't want to hoist the issues.
-		delete commit.references;
-
+		commit.files = getChangedFilesForCommit( commit.hash ) || [];
 		commit.repositoryUrl = utils.getRepositoryUrl();
+
+		if ( commit.isPublicCommit ) {
+			// Remove [skip ci] from the commit subject.
+			commit.subject = commit.subject.replace( /\[skip ci\]/, '' ).trim();
+
+			// If a dot is missing at the end of the subject...
+			if ( !commit.subject.endsWith( '.' ) ) {
+				// ...let's add it.
+				commit.subject += '.';
+			}
+
+			// The `type` below will be key for grouping commits.
+			commit.type = utils.getCommitType( commit.rawType );
+
+			if ( typeof commit.subject === 'string' ) {
+				commit.subject = makeLinks( commit.subject );
+			}
+
+			// Remove additional notes from the commit's footer.
+			// Additional notes are added to the footer. In order to avoid duplication, they should be removed.
+			if ( commit.footer && commit.notes.length ) {
+				commit.footer = commit.footer.split( '\n' )
+					.filter( footerLine => {
+						// For each footer line checks whether the line starts with note prefix ("NOTE": ...).
+						// If so, this footer line should be removed.
+						return !commit.notes.some( note => footerLine.startsWith( note.title ) );
+					} )
+					.join( '\n' )
+					.trim();
+			}
+
+			// If `body` of the commit is empty but the `footer` isn't, let's swap those.
+			if ( commit.footer && !commit.body ) {
+				commit.body = commit.footer;
+				commit.footer = null;
+			}
+
+			if ( typeof commit.body === 'string' ) {
+				commit.body = commit.body.split( '\n' )
+					.map( line => {
+						if ( !line.length ) {
+							return '';
+						}
+
+						return '  ' + line;
+					} )
+					.join( '\n' );
+
+				commit.body = makeLinks( commit.body );
+			}
+
+			normalizeNotes( commit );
+
+			// Clear the references array - we don't want to hoist the issues.
+			delete commit.references;
+		}
 
 		if ( !commit.body ) {
 			return commit;
@@ -152,7 +148,7 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 
 		const commitEntries = commit.body.match( MULTI_ENTRIES_COMMIT_REGEXP );
 
-		if ( !commitEntries.length ) {
+		if ( !commitEntries || !commitEntries.length ) {
 			return commit;
 		}
 
@@ -176,6 +172,7 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 		for ( let i = 0; i < parts.length; ++i ) {
 			const newCommit = {
 				hash: commit.hash,
+				files: commit.files,
 				repositoryUrl: commit.repositoryUrl,
 				notes: []
 			};
@@ -272,7 +269,8 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 			data.scope = parts[ 1 ].replace( /^\(|\)$/g, '' )
 				.split( ',' )
 				.map( p => p.trim() )
-				.filter( p => p );
+				.filter( p => p )
+				.sort();
 		}
 
 		return data;
@@ -287,9 +285,13 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 /**
  * @typedef {Object} Commit
  *
+ * @property {Boolean} isPublicCommit Whether the commit should be added in the changelog.
+ *
  * @property {String} rawType Type of the commit without any modifications.
  *
  * @property {String} type Type of the commit (it can be modified).
+ *
+ * @property {Array.<String>|null} scope Scope of the changes.
  *
  * @property {String} hash The commit SHA-1 id.
  *

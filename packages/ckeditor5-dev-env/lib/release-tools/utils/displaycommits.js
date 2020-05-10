@@ -32,8 +32,9 @@ module.exports = function displayCommits( commits, options = {} ) {
 	for ( const singleCommit of commits ) {
 		const hasCorrectType = utils.availableCommitTypes.has( singleCommit.rawType );
 		const isCommitIncluded = utils.availableCommitTypes.get( singleCommit.rawType );
+		const hash = singleCommit.hash.substring( 0, 7 );
 
-		let logMessage = `${ listIndent }* ${ chalk.yellow( singleCommit.hash ) } "${ utils.truncate( singleCommit.header, 100 ) }" `;
+		let logMessage = `${ listIndent }* ${ chalk.yellow( hash ) } "${ utils.truncate( singleCommit.header, 100 ) }" `;
 
 		if ( hasCorrectType && isCommitIncluded ) {
 			logMessage += chalk.green( 'INCLUDED' );
