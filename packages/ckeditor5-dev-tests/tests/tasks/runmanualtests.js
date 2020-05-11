@@ -226,4 +226,30 @@ describe( 'runManualTests', () => {
 				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
 			} );
 	} );
+
+	it( 'allows specifying port', () => {
+		spies.transformFileOptionToTestGlob.onFirstCall().returns( [
+			'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
+			'workspace/packages/ckeditor4-build-classic/tests/**/manual/**/*.js'
+		] );
+		spies.transformFileOptionToTestGlob.onSecondCall().returns( [
+			'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js',
+			'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
+		] );
+
+		const options = {
+			files: [
+				'build-classic',
+				'editor-classic/manual/classic.js'
+			],
+			port: 8888
+		};
+
+		return runManualTests( options )
+			.then( () => {
+				expect( spies.server.calledOnce ).to.equal( true );
+				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+				expect( spies.server.firstCall.args[ 1 ] ).to.equal( 8888 );
+			} );
+	} );
 } );

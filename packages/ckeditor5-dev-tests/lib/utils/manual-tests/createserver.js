@@ -16,12 +16,13 @@ const globSync = require( '../glob' );
  * Basic HTTP server.
  *
  * @param {String} sourcePath Base path where the compiler saved the files.
+ * @param {Number} [port=8125] Port to listen at.
  */
-module.exports = function createManualTestServer( sourcePath ) {
+module.exports = function createManualTestServer( sourcePath, port = 8125 ) {
 	return new Promise( resolve => {
 		const server = http.createServer( ( request, response ) => {
 			onRequest( sourcePath, request, response );
-		} ).listen( 8125 );
+		} ).listen( port );
 
 		// SIGINT isn't caught on Windows in process. However CTRL+C can be catch
 		// by `readline` module. After that we can emit SIGINT to the process manually.
@@ -45,7 +46,7 @@ module.exports = function createManualTestServer( sourcePath ) {
 			process.exit();
 		} );
 
-		logger().info( '[Server] Server running at http://localhost:8125/' );
+		logger().info( `[Server] Server running at http://localhost:${ port }/` );
 	} );
 };
 

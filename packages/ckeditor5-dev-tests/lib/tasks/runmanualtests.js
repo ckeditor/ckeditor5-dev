@@ -23,6 +23,7 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
  * @param {String} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
  * @param {String} [options.language] A language passed to `CKEditorWebpackPlugin`.
  * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
+ * @param {Number} [options.port] A port number used by the `createManualTestServer`.
  * @returns {Promise}
  */
 module.exports = function runManualTests( options ) {
@@ -57,5 +58,5 @@ module.exports = function runManualTests( options ) {
 			} ),
 			copyAssets( buildDir )
 		] ) )
-		.then( () => createManualTestServer( buildDir ) );
+		.then( () => createManualTestServer( buildDir, options.port ) );
 };
