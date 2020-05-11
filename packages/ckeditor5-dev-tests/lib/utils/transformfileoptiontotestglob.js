@@ -23,14 +23,25 @@
 module.exports = function transformFileOptionToTestGlob( globPattern, isManualTest = false ) {
 	const transformedPath = transformSingleGlobPattern( globPattern, { isManualTest } );
 	const transformedPathWithCKEditorPrefix = transformSingleGlobPattern( globPattern, { isManualTest, useCKEditorPrefix: true } );
+	const transformedPathForExternalPackages = transformSingleGlobPattern( globPattern, { isManualTest, externalPackages: true } );
+	const transformedPathForExternalPackagesWithCKEditorPrefix = transformSingleGlobPattern( globPattern, {
+		isManualTest,
+		externalPackages: true,
+		useCKEditorPrefix: true
+	} );
 
-	if ( transformedPath === transformedPathWithCKEditorPrefix ) {
-		return [ transformedPath ];
+	if (
+		transformedPath === transformedPathWithCKEditorPrefix &&
+		transformedPathForExternalPackages === transformedPathForExternalPackagesWithCKEditorPrefix
+	) {
+		return [ transformedPath, transformedPathForExternalPackages ];
 	}
 
 	return [
 		transformedPath,
-		transformedPathWithCKEditorPrefix
+		transformedPathWithCKEditorPrefix,
+		transformedPathForExternalPackages,
+		transformedPathForExternalPackagesWithCKEditorPrefix
 	];
 };
 
@@ -51,7 +62,7 @@ function transformSingleGlobPattern( globPattern, options ) {
 	const chunks = globPattern.split( globSep );
 	const packageName = chunks.shift();
 	const globSuffix = [ 'tests', '**' ];
-	let returnChunks = cwdChunks.concat( [ 'packages' ] );
+	let returnChunks = cwdChunks.concat( options.externalPackages ? [ 'external', '**', 'packages' ] : [ 'packages' ] );
 
 	if ( isManualTest ) {
 		globSuffix.push( 'manual', '**' );
