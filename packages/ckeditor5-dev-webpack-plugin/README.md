@@ -1,4 +1,4 @@
-CKEditor 5 Webpack plugin
+CKEditor 5 webpack plugin
 =========================
 
 Intergrate [CKEditor 5](https://ckeditor.com)'s build process with your [webpack](https://webpack.js.org) setup.
@@ -9,7 +9,7 @@ More information about development tools packages can be found at the following 
 
 ## Usage
 
-The current functionality of this plugin is limited to localizing the editor builds. Add this plugin to your webpack config to change the language of the editor's interface or build the editor with support for multiple languages (by extracting multiple language files):
+The current functionality of this plugin is limited to localizing the editor builds. Add this plugin to your webpack configuration to change the language of the editor's interface or build the editor with support for multiple languages (by extracting multiple language files):
 
 ```js
 const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
@@ -25,52 +25,51 @@ const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' 
 
 ### Options:
 
-#### language
+#### `language`
 
-The main language that will be built into the main bundle. e.g. `en`.
+The main language that will be built into the main bundle, e.g. `en`.
 
-#### additionalLanguages
+#### `additionalLanguages`
 
 Additional languages that will be emitted to the `outputDirectory`. This option can be set to an array of language codes or `'all'` to build all found languages. The bundle is optimized for one language when this option is omitted.
 
-### outputDirectory
+### `outputDirectory`
 
 An optional directory for emitted translations. Relative to the webpack's output. Defaults to `'translations'`.
 
-### strict
+### `strict`
 
-When set to `true` stops the webpack compilation when an error occurs. Defaults to `false`.
+When set to `true`, it stops the webpack compilation when an error occurs. Defaults to `false`.
 
-### verbose
+### `verbose`
 
-When set to `true` logs all warnings found during the compilation. Defaults to `false`.
+When set to `true`, it logs all warnings found during the compilation. Defaults to `false`.
 
-### addMainLanguageTranslationsToAllAssets
+### `addMainLanguageTranslationsToAllAssets`
 
-When set to `true` all generated assets (bundles) will include translations for the main language.
+When set to `true`, all generated assets (bundles) will include translations for the main language.
 
-### buildAllTranslationsToSeparateFiles
+### `buildAllTranslationsToSeparateFiles`
 
-When set to `true` all translations will be outputted to the `translations` directory (or the directory specified by the [`outputDirectory` option](#outputDirectory)).
+When set to `true`, all translations will be output to the `translations` directory (or the directory specified by the [`outputDirectory` option](#outputDirectory)).
 
-### packageNamesPattern
+### `packageNamesPattern`
 
 A pattern which is used for determining if a package may contain translations (PO files) in the `<package_name>/lang/translations` directory. Defaults to `/[/\\]ckeditor5-[^/\\]+[/\\]/`.
 
-### sourceFilesPattern
+### `sourceFilesPattern`
 
-A pattern which is used for determining if the file may contain messages to translate. Defaults to `/[/\\]ckeditor5-[^/\\]+[/\\]src[/\\].+\.js$/`.
+A pattern which is used for determining if a file may contain messages to translate. Defaults to `/[/\\]ckeditor5-[^/\\]+[/\\]src[/\\].+\.js$/`.
 
-### corePackagePattern
+### `corePackagePattern`
 
 (internal)
 A pattern which is used to get a path to the core translation package from `corePackageSampleResourcePath`, which contains the main translations. Defaults to /[/\\]ckeditor5-core/.
 
-### corePackageSampleResourcePath
+### `corePackageSampleResourcePath`
 
 (internal)
-A sample path to the `ckeditor5-core` package. A test import to this file shows if the `ckeditor5-core` package is available and allows to load the core package
-translations first.
+A sample path to the `ckeditor5-core` package. A test import to this file shows if the `ckeditor5-core` package is available and allows to load the core package translations first.
 
 You can read more about localizing the editor in the [Setting the UI language](https://docs.ckeditor.com/ckeditor5/latest/features/ui-language.html) guide.
 
