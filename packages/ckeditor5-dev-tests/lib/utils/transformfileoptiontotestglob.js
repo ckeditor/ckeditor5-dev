@@ -50,6 +50,7 @@ module.exports = function transformFileOptionToTestGlob( globPattern, isManualTe
  * @param {Object} [options={}]
  * @param {Boolean} [options.isManualTest=false] Whether the tests are manual or automated.
  * @param {Boolean} [options.useCKEditorPrefix=false] If true, the returned path will use 'ckeditor' prefix instead of 'ckeditor5'.
+ * @param {Boolean} [options.externalPackages] If true, the returned path will contain "external\/**\/packages".
  * @returns {String}
  */
 function transformSingleGlobPattern( globPattern, options ) {
