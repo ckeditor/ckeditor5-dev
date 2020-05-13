@@ -6,6 +6,7 @@ Changelog
 ### Features
 
 * Make port number configurable for manual tests server. Closes [#632](https://github.com/ckeditor/ckeditor5-dev/issues/632). ([ff50385](https://github.com/ckeditor/ckeditor5-dev/commit/ff50385))
+* It's now possible to pass a custom path to the `ckeditor5-dev-tests-check-dependencies` bin as a CLI argument. Closes [#630](https://github.com/ckeditor/ckeditor5-dev/issues/630). ([5ee2e7f](https://github.com/ckeditor/ckeditor5-dev/commit/5ee2e7f))
 
 
 ## [19.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@18.2.1...@ckeditor/ckeditor5-dev-tests@19.0.0) (2020-04-23)
