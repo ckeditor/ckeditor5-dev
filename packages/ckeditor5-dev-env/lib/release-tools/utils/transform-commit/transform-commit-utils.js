@@ -9,16 +9,19 @@ const getPackageJson = require( '../getpackagejson' );
 
 const transformCommitUtils = {
 	/**
+	 * A regexp for extracting additional changelog entries from the single commit.
+	 * Prefixes of the commit must be synchronized the `getCommitType()` util.
+	 */
+	MULTI_ENTRIES_COMMIT_REGEXP: /(?:Feature|Other|Fix)(?: \([\w\-, ]+?\))?:/g,
+
+	/**
 	 * Map of available types of the commits.
 	 * Types marked as `false` will be ignored during generating the changelog.
 	 */
 	availableCommitTypes: new Map( [
 		[ 'Fix', true ],
-		[ 'Fixes', true ], // TODO: Remove.
-		[ 'Fixed', true ], // TODO: Remove.
 		[ 'Feature', true ],
 		[ 'Other', true ],
-		[ 'Code style', false ],
 		[ 'Docs', false ],
 		[ 'Internal', false ],
 		[ 'Tests', false ],
@@ -34,8 +37,9 @@ const transformCommitUtils = {
 		'Bug fixes': 2,
 		'Other changes': 3,
 
-		'BREAKING CHANGES': 1,
-		'NOTE': 2
+		'MAJOR BREAKING CHANGES': 1,
+		'MINOR BREAKING CHANGES': 2,
+		'BREAKING CHANGES': 3
 	},
 
 	/**
@@ -86,6 +90,8 @@ const transformCommitUtils = {
 	/**
 	 * Changes a singular type of commit to plural which will be displayed in a changelog.
 	 *
+	 * The switch cases must be synchronized with the `MULTI_ENTRIES_COMMIT_REGEXP` regexp.
+	 *
 	 * @param {String} commitType
 	 * @returns {String}
 	 */
@@ -95,8 +101,6 @@ const transformCommitUtils = {
 				return 'Features';
 
 			case 'Fix':
-			case 'Fixes':
-			case 'Fixed':
 				return 'Bug fixes';
 
 			case 'Other':

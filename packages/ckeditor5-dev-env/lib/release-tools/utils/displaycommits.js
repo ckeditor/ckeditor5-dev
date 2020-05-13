@@ -50,11 +50,9 @@ module.exports = function displayCommits( commits, options = {} ) {
 		}
 
 		for ( const note of singleCommit.notes ) {
-			if ( note.title.match( /^(MAJOR|MINOR)/ ) ) {
-				const limit = 100 - note.title.length;
+			const limit = 100 - note.title.length;
 
-				logMessage += `\n${ listEntriesIndent }${ note.title }: ${ utils.truncate( note.text, limit ) } `;
-			}
+			logMessage += `\n${ listEntriesIndent }${ note.title }: ${ utils.truncate( note.text, limit ) } `;
 		}
 
 		if ( attachLinkToCommit ) {

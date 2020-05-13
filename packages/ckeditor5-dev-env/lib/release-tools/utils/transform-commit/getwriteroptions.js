@@ -11,7 +11,7 @@ const templatePath = path.join( __dirname, '..', '..', 'templates' );
 const { typesOrder } = require( './transform-commit-utils' );
 
 /**
- * @param {Function} transform
+ * @param {Function|Object} transform
  * @returns {Object}
  */
 module.exports = function getWriterOptions( transform ) {
@@ -25,7 +25,6 @@ module.exports = function getWriterOptions( transform ) {
 		noteGroupsSort( a, b ) {
 			return typesOrder[ a.title ] - typesOrder[ b.title ];
 		},
-		notesSort: require( 'compare-func' ),
 		mainTemplate: fs.readFileSync( path.join( templatePath, 'template.hbs' ), 'utf-8' ),
 		headerPartial: fs.readFileSync( path.join( templatePath, 'header.hbs' ), 'utf-8' ),
 		commitPartial: fs.readFileSync( path.join( templatePath, 'commit.hbs' ), 'utf-8' ),

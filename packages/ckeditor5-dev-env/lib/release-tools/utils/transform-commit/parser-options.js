@@ -18,8 +18,7 @@ module.exports = {
 		'MINOR BREAKING CHANGES',
 		'MINOR BREAKING CHANGE',
 		'BREAKING CHANGES', // It will be treated as "MAJOR BREAKING CHANGES"
-		'BREAKING CHANGE', // An alias for "BREAKING CHANGES".
-		'NOTE' // TODO: Remove.
+		'BREAKING CHANGE' // An alias for "BREAKING CHANGES".
 	],
 	revertPattern: /^Revert:\s([\s\S]*?)\s*This reverts commit (\w*)\./,
 	revertCorrespondence: [ 'header', 'hash' ],

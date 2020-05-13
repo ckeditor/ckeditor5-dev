@@ -3,7 +3,7 @@
 ### {{title}}
 
 {{#each notes}}
-* {{text}}
+* {{#if scope}}**{{~scope.[0]}}**: {{/if}}{{text}}
 {{/each}}
 
 {{/each}}

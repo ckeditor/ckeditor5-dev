@@ -8,8 +8,6 @@
 const utils = require( './transform-commit-utils' );
 const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
 
-const MULTI_ENTRIES_COMMIT_REGEXP = /(?:Feature|Other|Fix)(?: \([\w\-, ]+?\))?:/g;
-
 /**
  * Factory function.
  *
@@ -26,6 +24,7 @@ const MULTI_ENTRIES_COMMIT_REGEXP = /(?:Feature|Other|Fix)(?: \([\w\-, ]+?\))?:/
  * with "MINOR BREAKING CHANGES". This behaviour is being disabled automatically if `options.useExplicitBreakingChangeGroups` is
  * set on `false` because all commits will be treated as "BREAKING CHANGES".
  * @param {Boolean} [options.returnInvalidCommit=false] Whether an invalid commit should be returned.
+ * TODO: Consider removing the option after rewriting "generateSingleChangelog()".
  * @param {Boolean} [options.useExplicitBreakingChangeGroups] If set on `true`, notes from parsed commits will be grouped as
  * "MINOR BREAKING CHANGES" and "MAJOR BREAKING CHANGES'. If set on `false` (by default), all breaking changes notes will be treated
  * as "BREAKING CHANGES".
@@ -57,7 +56,7 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 			notes: rawCommit.notes.map( note => Object.assign( {}, note ) )
 		} );
 
-		const parsedType = getTypeAndScope( commit.rawType );
+		const parsedType = extractScopeFromPrefix( commit.rawType );
 
 		commit.files = [];
 		commit.rawType = parsedType.rawType;
@@ -143,22 +142,23 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 		}
 
 		if ( !commit.body ) {
-			return commit;
+			// It's used only for displaying the commit. Changelog generator will filter out the invalid entries.
+			return options.returnInvalidCommit ? commit : undefined;
 		}
 
-		const commitEntries = commit.body.match( MULTI_ENTRIES_COMMIT_REGEXP );
+		const commitEntries = commit.body.match( utils.MULTI_ENTRIES_COMMIT_REGEXP );
 
 		if ( !commitEntries || !commitEntries.length ) {
-			return commit;
+			return options.returnInvalidCommit ? commit : undefined;
 		}
 
 		// Single commit contains a few entries that should be inserted to the changelog.
 		// All of those entries are defined in the array.
 		// Additional commits/entries will be called as "fake commits".
-		const separatedCommit = [ commit ];
+		const separatedCommits = [ commit ];
 
 		// Descriptions of additional entries.
-		const parts = commit.body.split( MULTI_ENTRIES_COMMIT_REGEXP );
+		const parts = commit.body.split( utils.MULTI_ENTRIES_COMMIT_REGEXP );
 
 		// If the descriptions array contains more entries than fake commit entries,
 		// it means that the first element in descriptions array describes the main (real) commit.
@@ -171,28 +171,34 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 		// For each fake commit, copy hash and repository of the parent.
 		for ( let i = 0; i < parts.length; ++i ) {
 			const newCommit = {
+				revert: null,
+				merge: null,
+				footer: null,
 				hash: commit.hash,
 				files: commit.files,
 				repositoryUrl: commit.repositoryUrl,
-				notes: []
+				notes: [],
+				mentions: []
 			};
 
-			const details = getTypeAndScope( commitEntries[ i ].replace( /:$/, '' ) );
+			const details = extractScopeFromPrefix( commitEntries[ i ].replace( /:$/, '' ) );
 
 			newCommit.rawType = details.rawType;
 			newCommit.scope = details.scope;
 			newCommit.type = utils.getCommitType( newCommit.rawType );
+			newCommit.isPublicCommit = utils.availableCommitTypes.get( commit.rawType );
 
 			const commitDescription = parts[ i ];
 			const subject = commitDescription.match( /^(.*)$/m )[ 0 ];
 
 			newCommit.subject = subject.trim();
+			newCommit.header = commitEntries[ i ] + subject.trim();
 			newCommit.body = escapeNewLines( commitDescription.replace( subject, '' ) );
 
-			separatedCommit.push( newCommit );
+			separatedCommits.push( newCommit );
 		}
 
-		return separatedCommit;
+		return separatedCommits;
 	};
 
 	function makeLinks( comment ) {
@@ -204,6 +210,11 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 
 	function normalizeNotes( commit ) {
 		for ( const note of commit.notes ) {
+			const details = extractScopeFromNote( note.text );
+
+			note.text = details.text;
+			note.scope = details.scope;
+
 			// "BREAKING CHANGE" => "BREAKING CHANGES"
 			if ( note.title === 'BREAKING CHANGE' ) {
 				note.title = 'BREAKING CHANGES';
@@ -229,32 +240,28 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 				note.title = 'MINOR BREAKING CHANGES';
 			}
 
-			// If explicit breaking changes groups option is disabled, let's remove MINOR/MAJOR prefix from the title.
+			// If explicit breaking changes groups option is disabled, remove MINOR/MAJOR prefix from the title.
 			if ( !options.useExplicitBreakingChangeGroups ) {
 				note.title = note.title.replace( /^(MINOR|MAJOR) /, '' );
 			}
 
 			note.text = makeLinks( note.text );
 		}
-
-		// Place all "NOTE" at the end.
-		commit.notes.sort( ( a, b ) => {
-			// Do not swap two notes. Their weight is equal to each other.
-			if ( a.title === 'NOTE' && b.title === 'NOTE' ) {
-				return 0;
-			}
-
-			if ( a.title === 'NOTE' ) {
-				return 1;
-			} else if ( b.title === 'NOTE' ) {
-				return -1;
-			}
-
-			return 0;
-		} );
 	}
 
-	function getTypeAndScope( type ) {
+	/**
+	 * Extracts the prefix and scope from the `Commit#subject`.
+	 *
+	 * E.g.:
+	 *   - input: `Fix (engine): Fixed...
+	 *   - output: { rawType: 'Fix', scope: [ 'engine'] }
+	 *
+	 * For commits with no scope, `null` will be returned instead of the array (as `scope`).
+	 *
+	 * @param {String} type First line from the commit message.
+	 * @returns {Object}
+	 */
+	function extractScopeFromPrefix( type ) {
 		if ( !type ) {
 			return {};
 		}
@@ -276,9 +283,43 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 		return data;
 	}
 
+	/**
+	 * Extracts the prefix and scope from the `CommitNote#text`.
+	 *
+	 * E.g.:
+	 *   - input: `(engine): Removed...
+	 *   - output: { text: 'Removed...', scope: [ 'engine'] }
+	 *
+	 * For notes with no scope, `null` will be returned instead of the array (as `scope`).
+	 *
+	 * @param {String} text A text that describes a note.
+	 * @returns {Object}
+	 */
+	function extractScopeFromNote( text ) {
+		const scopeAsText = text.match( /\(([^)]+)\):/ );
+
+		if ( !scopeAsText ) {
+			return {
+				text,
+				scope: null
+			};
+		}
+
+		const scope = scopeAsText[ 1 ]
+			.split( ',' )
+			.map( p => p.trim() )
+			.filter( p => p )
+			.sort();
+
+		return {
+			text: text.replace( scopeAsText[ 0 ], '' ).trim(),
+			scope
+		};
+	}
+
 	function escapeNewLines( message ) {
 		// Accept spaces before a sentence because they are ready to be rendered in the changelog template.
-		return message.replace(/^\n+|\s+$/g, '');
+		return message.replace( /^\n+|\s+$/g, '' );
 	}
 };
 
@@ -291,22 +332,23 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
  *
  * @property {String} type Type of the commit (it can be modified).
  *
+ * @property {String} header First line of the commit message.
+ *
  * @property {Array.<String>|null} scope Scope of the changes.
  *
- * @property {String} hash The commit SHA-1 id.
+ * @property {Array.<String>} files A list of files tha the commit modified.
+ *
+ * @property {String} hash The full commit SHA-1 id.
  *
  * @property {String} repositoryUrl The URL to the repository where the parsed commit has been done.
  *
  * @property {String} [subject] Subject of the commit.
- *
- * @property {String} [header] First line of the commit message.
  *
  * @property {String|null} [body] Body of the commit message.
  *
  * @property {String|null} [footer] Footer of the commit message.
  *
  * @property {Array.<CommitNote>} [notes] Notes for the commit.
- *
  */
 
 /**
@@ -315,4 +357,6 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
  * @property {String} title Type of the note.
  *
  * @property {String} text Text of the note.
+ *
+ * @property {Array.<String>} scope Scope of the note.
  */
