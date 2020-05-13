@@ -25,7 +25,7 @@
   "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme",
   "scripts": {
-    "test": "mocha packages/*/tests --recursive --timeout 5000",
+    "test": "mocha packages/ckeditor5-dev-env/tests --recursive --timeout 5000",
     "coverage": "istanbul cover _mocha packages/*/tests -- --recursive --timeout 5000",
     "changelog": "node ./scripts/changelog.js",
     "lint": "eslint --quiet '**/*.js'",

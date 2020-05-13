@@ -192,7 +192,7 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 			const subject = commitDescription.match( /^(.*)$/m )[ 0 ];
 
 			newCommit.subject = subject.trim();
-			newCommit.header = commitEntries[ i ] + subject.trim();
+			newCommit.header = commitEntries[ i ].trim() + ' ' + subject.trim();
 			newCommit.body = escapeNewLines( commitDescription.replace( subject, '' ) );
 
 			separatedCommits.push( newCommit );

@@ -61,40 +61,6 @@ const utils = {
 		const changelogFile = path.join( cwd, utils.changelogFile );
 
 		fs.writeFileSync( changelogFile, content, 'utf-8' );
-	},
-
-	/**
-	 * Checks whether specified `version` contains the "MAJOR BREAKING CHANGES" header.
-	 *
-	 * @param {String} version Version to check.
-	 * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
-	 * @returns {Boolean}
-	 */
-	hasMajorBreakingChanges( version, cwd = process.cwd() ) {
-		const changes = utils.getChangesForVersion( version, cwd );
-
-		if ( !changes ) {
-			throw new Error( `Entries for specified version (${ version }) cannot be found.` );
-		}
-
-		return !!changes.match( /### MAJOR BREAKING CHANGES/ );
-	},
-
-	/**
-	 * Checks whether specified `version` contains the "MINOR BREAKING CHANGES" header.
-	 *
-	 * @param {String} version Version to check.
-	 * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
-	 * @returns {Boolean}
-	 */
-	hasMinorBreakingChanges( version, cwd = process.cwd() ) {
-		const changes = utils.getChangesForVersion( version, cwd );
-
-		if ( !changes ) {
-			throw new Error( `Entries for specified version (${ version }) cannot be found.` );
-		}
-
-		return !!changes.match( /### MINOR BREAKING CHANGES/ );
 	}
 };
 

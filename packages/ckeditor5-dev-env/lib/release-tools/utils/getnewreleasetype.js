@@ -10,8 +10,8 @@ const conventionalCommitsFilter = require( 'conventional-commits-filter' );
 const gitRawCommits = require( 'git-raw-commits' );
 const concat = require( 'concat-stream' );
 const parserOptions = require( './transform-commit/parser-options' );
-const { availableCommitTypes } = require( './transform-commit/transform-commit-utils' );
 const getPackageJson = require( './getpackagejson' );
+const getNewVersionType = require( './getnewversiontype' );
 
 /**
  * Returns a type (major, minor, patch) of the next release based on commits.
@@ -71,47 +71,4 @@ module.exports = function getNewReleaseType( transformCommit, options = {} ) {
 				} );
 			} ) );
 	} );
-
-	// Returns a type of version for a release based on the commits.
-	//
-	// @param {Array.<Commit>} commits
-	// @returns {String}
-	function getNewVersionType( commits ) {
-		// Repository does not have new changes.
-		if ( !commits.length ) {
-			return 'skip';
-		}
-
-		const publicCommits = commits.filter( commit => availableCommitTypes.get( commit.rawType ) );
-
-		if ( !publicCommits.length ) {
-			return 'internal';
-		}
-
-		let newFeatures = false;
-		let minorBreakingChanges = false;
-
-		for ( const commit of publicCommits ) {
-			for ( const note of commit.notes ) {
-				if ( note.title === 'MAJOR BREAKING CHANGES' ) {
-					return 'major';
-				}
-
-				if ( note.title === 'MINOR BREAKING CHANGES' ) {
-					minorBreakingChanges = true;
-				}
-			}
-
-			if ( commit.rawType === 'Feature' ) {
-				newFeatures = true;
-			}
-		}
-
-		// Repository has new features or minor breaking changes.
-		if ( minorBreakingChanges || newFeatures ) {
-			return 'minor';
-		}
-
-		return 'patch';
-	}
 };

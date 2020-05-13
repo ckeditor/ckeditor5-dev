@@ -7,8 +7,8 @@
 
 const path = require( 'path' );
 const { Readable } = require( 'stream' );
-const compareFunc = require( 'compare-func' );
 const { tools, stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const compareFunc = require( 'compare-func' );
 const conventionalChangelogWriter = require( 'conventional-changelog-writer' );
 const chalk = require( 'chalk' );
 const minimatch = require( 'minimatch' );
@@ -32,14 +32,23 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
  * Generates the changelog for the mono repository.
  *
  * @param {Object} options
+ *
  * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
+ *
  * @param {String} options.packages Where to look for packages.
+ *
  * @param {Function} options.transformScope A function that returns a URL to a package from a scope of a commit.
+ *
  * @param {String} [options.scope] Package names have to match to specified glob pattern in order to be processed.
+ *
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be touched.
+ *
  * @param {String} [options.from] A commit or tag name that will be the first param of the range of commits to collect.
+ *
  * @param {Boolean} [options.highlightsPlaceholder=false] Whether to add a note about release highlights.
+ *
  * @param {Boolean} [options.collaborationFeatures=false] Whether to add a note about collaboration features.
+ *
  * @returns {Promise}
  */
 module.exports = function generateChangelogForMonoRepository( options ) {
@@ -231,7 +240,9 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 				logInfo( `Processing "${ chalk.underline( pkgJson.name ) }"...`, { indentLevel: 1, startWithNewLine: true } );
 
 				const packageCommits = filterCommitsByPath( allCommits, packagePath );
-				const releaseTypeOrVersion = willBeMajorBump ? nextVersion : getNewVersionType( packageCommits );
+				const releaseTypeOrVersion = willBeMajorBump ? nextVersion : getNewVersionType( packageCommits, {
+					useExplicitBreakingChangeGroups: true
+				} );
 
 				displayCommits( packageCommits, { indentLevel: 2 } );
 
