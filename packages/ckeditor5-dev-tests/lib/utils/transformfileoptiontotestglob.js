@@ -63,7 +63,7 @@ function transformSingleGlobPattern( globPattern, options ) {
 	const chunks = globPattern.split( globSep );
 	const packageName = chunks.shift();
 	const globSuffix = [ 'tests', '**' ];
-	let returnChunks = cwdChunks.concat( options.externalPackages ? [ 'external', '**', 'packages' ] : [ 'packages' ] );
+	let returnChunks = cwdChunks.concat( options.externalPackages ? [ 'external', '*', 'packages' ] : [ 'packages' ] );
 
 	if ( isManualTest ) {
 		globSuffix.push( 'manual', '**' );
