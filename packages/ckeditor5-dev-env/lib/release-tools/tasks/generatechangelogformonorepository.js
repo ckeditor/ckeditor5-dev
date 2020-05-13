@@ -42,7 +42,7 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
  * @param {Boolean} [options.collaborationFeatures=false] Whether to add a note about collaboration features.
  * @returns {Promise}
  */
-module.exports = function generateChangelogForSubRepositories( options ) {
+module.exports = function generateChangelogForMonoRepository( options ) {
 	const log = logger();
 	const cwd = process.cwd();
 	const pkgJson = getPackageJson( options.cwd );

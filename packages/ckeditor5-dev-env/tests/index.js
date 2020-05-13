@@ -34,13 +34,11 @@ describe( 'dev-env/index', () => {
 				createPotFiles: sandbox.spy(),
 				getToken: sandbox.stub()
 			},
-			releaseTools: {
-				releaseRepository: sandbox.stub(),
+			release: {
 				releaseSubRepositories: sandbox.stub(),
 				generateChangelogForSinglePackage: sandbox.stub(),
 				generateChangelogForSubPackages: sandbox.stub(),
-				generateChangelogForSubRepositories: sandbox.stub(),
-				generateSummaryChangelog: sandbox.stub(),
+				generateChangelogForMonoRepository: sandbox.stub(),
 				bumpVersions: sandbox.stub()
 			}
 		};
@@ -50,30 +48,13 @@ describe( 'dev-env/index', () => {
 		mockery.registerMock( './translations/download', stubs.translations.download );
 		mockery.registerMock( './translations/createpotfiles', stubs.translations.createPotFiles );
 
-		mockery.registerMock(
-			'./release-tools/tasks/releasesubrepositories',
-			stubs.releaseTools.releaseSubRepositories
-		);
-		mockery.registerMock(
-			'./release-tools/tasks/generatechangelogforsinglepackage',
-			stubs.releaseTools.generateChangelogForSinglePackage
-		);
-		mockery.registerMock(
-			'./release-tools/tasks/generatechangelogforsubpackages',
-			stubs.releaseTools.generateChangelogForSubPackages
-		);
-		mockery.registerMock(
-			'./release-tools/tasks/generatechangelogforsubrepositories',
-			stubs.releaseTools.generateChangelogForSubRepositories
-		);
-		mockery.registerMock(
-			'./release-tools/tasks/generatesummarychangelog',
-			stubs.releaseTools.generateSummaryChangelog
-		);
-		mockery.registerMock(
-			'./release-tools/tasks/bumpversions',
-			stubs.releaseTools.bumpVersions
-		);
+		const releaseTools = stubs.release;
+
+		mockery.registerMock( './release-tools/tasks/bumpversions', releaseTools.bumpVersions );
+		mockery.registerMock( './release-tools/tasks/generatechangelogforsinglepackage', releaseTools.generateChangelogForSinglePackage );
+		mockery.registerMock( './release-tools/tasks/releasesubrepositories', releaseTools.releaseSubRepositories );
+		mockery.registerMock( './release-tools/tasks/generatechangelogforsubpackages', releaseTools.generateChangelogForSubPackages );
+		mockery.registerMock( './release-tools/tasks/generatechangelogformonorepository', releaseTools.generateChangelogForMonoRepository );
 
 		tasks = proxyquire( '../lib/index', {
 			'@ckeditor/ckeditor5-dev-utils': {
@@ -91,78 +72,65 @@ describe( 'dev-env/index', () => {
 
 	describe( 'releaseSubRepositories()', () => {
 		it( 'creates release for sub repositories', () => {
-			stubs.releaseTools.releaseSubRepositories.returns( Promise.resolve( { result: true } ) );
+			stubs.release.releaseSubRepositories.returns( Promise.resolve( { result: true } ) );
 
 			return tasks.releaseSubRepositories( 'arg' )
 				.then( response => {
 					expect( response.result ).to.equal( true );
-					expect( stubs.releaseTools.releaseSubRepositories.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.releaseSubRepositories.firstCall.args[ 0 ] ).to.equal( 'arg' );
+					expect( stubs.release.releaseSubRepositories.calledOnce ).to.equal( true );
+					expect( stubs.release.releaseSubRepositories.firstCall.args[ 0 ] ).to.equal( 'arg' );
 				} );
 		} );
 	} );
 
 	describe( 'generateChangelogForSinglePackage()', () => {
 		it( 'generates a changelog for package', () => {
-			stubs.releaseTools.generateChangelogForSinglePackage.returns( Promise.resolve( { result: true } ) );
+			stubs.release.generateChangelogForSinglePackage.returns( Promise.resolve( { result: true } ) );
 
 			return tasks.generateChangelogForSinglePackage( 'arg' )
 				.then( response => {
 					expect( response.result ).to.equal( true );
-					expect( stubs.releaseTools.generateChangelogForSinglePackage.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.generateChangelogForSinglePackage.firstCall.args[ 0 ] ).to.equal( 'arg' );
+					expect( stubs.release.generateChangelogForSinglePackage.calledOnce ).to.equal( true );
+					expect( stubs.release.generateChangelogForSinglePackage.firstCall.args[ 0 ] ).to.equal( 'arg' );
 				} );
 		} );
 	} );
 
 	describe( 'generateChangelogForSubPackages()', () => {
 		it( 'generates a changelog for sub packages', () => {
-			stubs.releaseTools.generateChangelogForSubPackages.returns( Promise.resolve( { result: true } ) );
+			stubs.release.generateChangelogForSubPackages.returns( Promise.resolve( { result: true } ) );
 
 			return tasks.generateChangelogForSubPackages( 'arg' )
 				.then( response => {
 					expect( response.result ).to.equal( true );
-					expect( stubs.releaseTools.generateChangelogForSubPackages.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.generateChangelogForSubPackages.firstCall.args[ 0 ] ).to.equal( 'arg' );
+					expect( stubs.release.generateChangelogForSubPackages.calledOnce ).to.equal( true );
+					expect( stubs.release.generateChangelogForSubPackages.firstCall.args[ 0 ] ).to.equal( 'arg' );
 				} );
 		} );
 	} );
 
-	describe( 'generateChangelogForSubRepositories()', () => {
+	describe( 'generateChangelogForMonoRepository()', () => {
 		it( 'generates a changelog for sub repositories', () => {
-			stubs.releaseTools.generateChangelogForSubRepositories.returns( Promise.resolve( { result: true } ) );
+			stubs.release.generateChangelogForMonoRepository.returns( Promise.resolve( { result: true } ) );
 
-			return tasks.generateChangelogForSubRepositories( 123 )
+			return tasks.generateChangelogForMonoRepository( 123 )
 				.then( response => {
 					expect( response.result ).to.equal( true );
-					expect( stubs.releaseTools.generateChangelogForSubRepositories.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.generateChangelogForSubRepositories.firstCall.args[ 0 ] ).to.equal( 123 );
-				} );
-		} );
-	} );
-
-	describe( 'generateSummaryChangelog()', () => {
-		it( 'generates a changelog', () => {
-			stubs.releaseTools.generateSummaryChangelog.returns( Promise.resolve( { result: true } ) );
-
-			return tasks.generateSummaryChangelog( 123 )
-				.then( response => {
-					expect( response.result ).to.equal( true );
-					expect( stubs.releaseTools.generateSummaryChangelog.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.generateSummaryChangelog.firstCall.args[ 0 ] ).to.equal( 123 );
+					expect( stubs.release.generateChangelogForMonoRepository.calledOnce ).to.equal( true );
+					expect( stubs.release.generateChangelogForMonoRepository.firstCall.args[ 0 ] ).to.equal( 123 );
 				} );
 		} );
 	} );
 
 	describe( 'bumpVersions()', () => {
 		it( 'updates version of dependencies', () => {
-			stubs.releaseTools.bumpVersions.returns( Promise.resolve( { result: true } ) );
+			stubs.release.bumpVersions.returns( Promise.resolve( { result: true } ) );
 
 			return tasks.bumpVersions( 123 )
 				.then( response => {
 					expect( response.result ).to.equal( true );
-					expect( stubs.releaseTools.bumpVersions.calledOnce ).to.equal( true );
-					expect( stubs.releaseTools.bumpVersions.firstCall.args[ 0 ] ).to.equal( 123 );
+					expect( stubs.release.bumpVersions.calledOnce ).to.equal( true );
+					expect( stubs.release.bumpVersions.firstCall.args[ 0 ] ).to.equal( 123 );
 				} );
 		} );
 	} );

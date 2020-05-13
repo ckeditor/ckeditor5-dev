@@ -22,12 +22,8 @@ const tasks = {
 		return require( './release-tools/tasks/generatechangelogforsubpackages' )( ...args );
 	},
 
-	generateChangelogForSubRepositories( ...args ) {
-		return require( './release-tools/tasks/generatechangelogforsubrepositories' )( ...args );
-	},
-
-	generateSummaryChangelog( ...args ) {
-		return require( './release-tools/tasks/generatesummarychangelog' )( ...args );
+	generateChangelogForMonoRepository( ...args ) {
+		return require( './release-tools/tasks/generatechangelogformonorepository' )( ...args );
 	},
 
 	/**
