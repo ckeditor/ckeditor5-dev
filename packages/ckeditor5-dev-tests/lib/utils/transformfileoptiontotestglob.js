@@ -30,13 +30,12 @@ module.exports = function transformFileOptionToTestGlob( globPattern, isManualTe
 		useCKEditorPrefix: true
 	} );
 
-	if ( globPattern === 'ckeditor5' && transformedPath === transformedPathWithCKEditorPrefix ) {
-		return [ transformedPath ];
-	} else if (
+	if (
 		transformedPath === transformedPathWithCKEditorPrefix &&
-		transformedPathForExternalPackages === transformedPathForExternalPackagesWithCKEditorPrefix
+		transformedPathForExternalPackages === transformedPathForExternalPackagesWithCKEditorPrefix &&
+		transformedPath === transformedPathForExternalPackages
 	) {
-		return [ transformedPath, transformedPathForExternalPackages ];
+		return [ transformedPath ];
 	}
 
 	return [
