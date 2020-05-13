@@ -40,8 +40,8 @@ describe( 'dev-tests/utils', () => {
 			expect( transformFileOptionToTestGlob( '*' ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-*/tests/**/*.js',
 				'/workspace/packages/ckeditor-*/tests/**/*.js',
-				'/workspace/external/**/packages/ckeditor5-*/tests/**/*.js',
-				'/workspace/external/**/packages/ckeditor-*/tests/**/*.js'
+				'/workspace/external/*/packages/ckeditor5-*/tests/**/*.js',
+				'/workspace/external/*/packages/ckeditor-*/tests/**/*.js'
 			] );
 		} );
 
@@ -49,8 +49,8 @@ describe( 'dev-tests/utils', () => {
 			expect( transformFileOptionToTestGlob( '*', true ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
 				'/workspace/packages/ckeditor-*/tests/**/manual/**/*.js',
-				'/workspace/external/**/packages/ckeditor5-*/tests/**/manual/**/*.js',
-				'/workspace/external/**/packages/ckeditor-*/tests/**/manual/**/*.js'
+				'/workspace/external/*/packages/ckeditor5-*/tests/**/manual/**/*.js',
+				'/workspace/external/*/packages/ckeditor-*/tests/**/manual/**/*.js'
 			] );
 		} );
 	} );
@@ -60,8 +60,8 @@ describe( 'dev-tests/utils', () => {
 			expect( transformFileOptionToTestGlob( 'engine' ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-engine/tests/**/*.js',
 				'/workspace/packages/ckeditor-engine/tests/**/*.js',
-				'/workspace/external/**/packages/ckeditor5-engine/tests/**/*.js',
-				'/workspace/external/**/packages/ckeditor-engine/tests/**/*.js'
+				'/workspace/external/*/packages/ckeditor5-engine/tests/**/*.js',
+				'/workspace/external/*/packages/ckeditor-engine/tests/**/*.js'
 			] );
 		} );
 
@@ -69,8 +69,8 @@ describe( 'dev-tests/utils', () => {
 			expect( transformFileOptionToTestGlob( 'engine', true ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-engine/tests/**/manual/**/*.js',
 				'/workspace/packages/ckeditor-engine/tests/**/manual/**/*.js',
-				'/workspace/external/**/packages/ckeditor5-engine/tests/**/manual/**/*.js',
-				'/workspace/external/**/packages/ckeditor-engine/tests/**/manual/**/*.js'
+				'/workspace/external/*/packages/ckeditor5-engine/tests/**/manual/**/*.js',
+				'/workspace/external/*/packages/ckeditor-engine/tests/**/manual/**/*.js'
 			] );
 		} );
 	} );
@@ -80,8 +80,8 @@ describe( 'dev-tests/utils', () => {
 			expect( transformFileOptionToTestGlob( '!engine' ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-!(engine)*/tests/**/*.js',
 				'/workspace/packages/ckeditor-!(engine)*/tests/**/*.js',
-				'/workspace/external/**/packages/ckeditor5-!(engine)*/tests/**/*.js',
-				'/workspace/external/**/packages/ckeditor-!(engine)*/tests/**/*.js'
+				'/workspace/external/*/packages/ckeditor5-!(engine)*/tests/**/*.js',
+				'/workspace/external/*/packages/ckeditor-!(engine)*/tests/**/*.js'
 			] );
 		} );
 
@@ -89,8 +89,8 @@ describe( 'dev-tests/utils', () => {
 			expect( transformFileOptionToTestGlob( '!engine', true ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-!(engine)*/tests/**/manual/**/*.js',
 				'/workspace/packages/ckeditor-!(engine)*/tests/**/manual/**/*.js',
-				'/workspace/external/**/packages/ckeditor5-!(engine)*/tests/**/manual/**/*.js',
-				'/workspace/external/**/packages/ckeditor-!(engine)*/tests/**/manual/**/*.js'
+				'/workspace/external/*/packages/ckeditor5-!(engine)*/tests/**/manual/**/*.js',
+				'/workspace/external/*/packages/ckeditor-!(engine)*/tests/**/manual/**/*.js'
 			] );
 		} );
 	} );
@@ -100,8 +100,8 @@ describe( 'dev-tests/utils', () => {
 			expect( transformFileOptionToTestGlob( 'engine/view' ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-engine/tests/view/**/*.js',
 				'/workspace/packages/ckeditor-engine/tests/view/**/*.js',
-				'/workspace/external/**/packages/ckeditor5-engine/tests/view/**/*.js',
-				'/workspace/external/**/packages/ckeditor-engine/tests/view/**/*.js'
+				'/workspace/external/*/packages/ckeditor5-engine/tests/view/**/*.js',
+				'/workspace/external/*/packages/ckeditor-engine/tests/view/**/*.js'
 			] );
 		} );
 
@@ -109,8 +109,8 @@ describe( 'dev-tests/utils', () => {
 			expect( transformFileOptionToTestGlob( 'engine/view/manual', true ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-engine/tests/view/manual/**/*.js',
 				'/workspace/packages/ckeditor-engine/tests/view/manual/**/*.js',
-				'/workspace/external/**/packages/ckeditor5-engine/tests/view/manual/**/*.js',
-				'/workspace/external/**/packages/ckeditor-engine/tests/view/manual/**/*.js'
+				'/workspace/external/*/packages/ckeditor5-engine/tests/view/manual/**/*.js',
+				'/workspace/external/*/packages/ckeditor-engine/tests/view/manual/**/*.js'
 			] );
 		} );
 	} );
@@ -120,8 +120,8 @@ describe( 'dev-tests/utils', () => {
 			expect( transformFileOptionToTestGlob( 'engine/view/*' ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-engine/tests/view/*/**/*.js',
 				'/workspace/packages/ckeditor-engine/tests/view/*/**/*.js',
-				'/workspace/external/**/packages/ckeditor5-engine/tests/view/*/**/*.js',
-				'/workspace/external/**/packages/ckeditor-engine/tests/view/*/**/*.js'
+				'/workspace/external/*/packages/ckeditor5-engine/tests/view/*/**/*.js',
+				'/workspace/external/*/packages/ckeditor-engine/tests/view/*/**/*.js'
 			] );
 		} );
 
@@ -129,8 +129,8 @@ describe( 'dev-tests/utils', () => {
 			expect( transformFileOptionToTestGlob( 'engine/view/manual/*.js', true ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-engine/tests/view/manual/*.js',
 				'/workspace/packages/ckeditor-engine/tests/view/manual/*.js',
-				'/workspace/external/**/packages/ckeditor5-engine/tests/view/manual/*.js',
-				'/workspace/external/**/packages/ckeditor-engine/tests/view/manual/*.js'
+				'/workspace/external/*/packages/ckeditor5-engine/tests/view/manual/*.js',
+				'/workspace/external/*/packages/ckeditor-engine/tests/view/manual/*.js'
 			] );
 		} );
 	} );
