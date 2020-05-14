@@ -1,6 +1,13 @@
 Changelog
 =========
 
+## [19.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@19.1.0...@ckeditor/ckeditor5-dev-tests@19.2.0) (2020-05-14)
+
+### Features
+
+* Allowed `ckeditor5-dev-tests` package to search for test files in the `external/*/packages/` directory. See [ckeditor/ckeditor5#6787](https://github.com/ckeditor/ckeditor5/issues/6787). ([df44a5e](https://github.com/ckeditor/ckeditor5-dev/commit/df44a5e))
+
+
 ## [19.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-tests@19.0.0...@ckeditor/ckeditor5-dev-tests@19.1.0) (2020-05-13)
 
 ### Features
