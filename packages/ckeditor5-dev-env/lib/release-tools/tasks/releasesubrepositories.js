@@ -17,7 +17,7 @@ const executeOnPackages = require( '../utils/executeonpackages' );
 const { getChangesForVersion } = require( '../utils/changelog' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getSubPackagesPaths = require( '../utils/getsubpackagespaths' );
-const GitHubApi = require( '@octokit/rest' );
+const { Octokit } = require( '@octokit/rest' );
 
 const PACKAGE_JSON_TEMPLATE_PATH = require.resolve( '../templates/release-package.json' );
 const BREAK_RELEASE_MESSAGE = 'You aborted publishing the release. Why? Oh why?!';
@@ -199,7 +199,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 		if ( releaseOptions.github ) {
 			// Because `octokit.authenticate()` is deprecated, the entire API object is created here.
-			github = new GitHubApi( {
+			github = new Octokit( {
 				version: '3.0.0',
 				auth: `token ${ releaseOptions.token }`
 			} );
