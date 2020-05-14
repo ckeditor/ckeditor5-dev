@@ -23,14 +23,26 @@
 module.exports = function transformFileOptionToTestGlob( globPattern, isManualTest = false ) {
 	const transformedPath = transformSingleGlobPattern( globPattern, { isManualTest } );
 	const transformedPathWithCKEditorPrefix = transformSingleGlobPattern( globPattern, { isManualTest, useCKEditorPrefix: true } );
+	const transformedPathForExternalPackages = transformSingleGlobPattern( globPattern, { isManualTest, externalPackages: true } );
+	const transformedPathForExternalPackagesWithCKEditorPrefix = transformSingleGlobPattern( globPattern, {
+		isManualTest,
+		externalPackages: true,
+		useCKEditorPrefix: true
+	} );
 
-	if ( transformedPath === transformedPathWithCKEditorPrefix ) {
+	if (
+		transformedPath === transformedPathWithCKEditorPrefix &&
+		transformedPathForExternalPackages === transformedPathForExternalPackagesWithCKEditorPrefix &&
+		transformedPath === transformedPathForExternalPackages
+	) {
 		return [ transformedPath ];
 	}
 
 	return [
 		transformedPath,
-		transformedPathWithCKEditorPrefix
+		transformedPathWithCKEditorPrefix,
+		transformedPathForExternalPackages,
+		transformedPathForExternalPackagesWithCKEditorPrefix
 	];
 };
 
@@ -39,6 +51,7 @@ module.exports = function transformFileOptionToTestGlob( globPattern, isManualTe
  * @param {Object} [options={}]
  * @param {Boolean} [options.isManualTest=false] Whether the tests are manual or automated.
  * @param {Boolean} [options.useCKEditorPrefix=false] If true, the returned path will use 'ckeditor' prefix instead of 'ckeditor5'.
+ * @param {Boolean} [options.externalPackages] If true, the returned path will contain "external\/**\/packages".
  * @returns {String}
  */
 function transformSingleGlobPattern( globPattern, options ) {
@@ -51,7 +64,7 @@ function transformSingleGlobPattern( globPattern, options ) {
 	const chunks = globPattern.split( globSep );
 	const packageName = chunks.shift();
 	const globSuffix = [ 'tests', '**' ];
-	let returnChunks = cwdChunks.concat( [ 'packages' ] );
+	let returnChunks = cwdChunks.concat( options.externalPackages ? [ 'external', '*', 'packages' ] : [ 'packages' ] );
 
 	if ( isManualTest ) {
 		globSuffix.push( 'manual', '**' );
