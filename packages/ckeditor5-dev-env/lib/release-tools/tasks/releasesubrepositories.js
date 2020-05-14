@@ -87,7 +87,7 @@ const additionalFiles = [
  * @param {Object} [options.packageJsonForEmptyReleases={}] Additional fields that will be added to `package.json` for packages which
  * will publish an empty directory. All properties copied from original package's "package.json" file will be overwritten by fields
  * specified in this option.
- * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in "cwd" will be skipped.
+ * @param {Array.<String>} [options.skipNpmPublish=[]] Name of packages that should not be published on NPM.
  * @returns {Promise}
  */
 module.exports = function releaseSubRepositories( options ) {
@@ -117,6 +117,9 @@ module.exports = function releaseSubRepositories( options ) {
 	const releasesOnNpm = new Set();
 	const releasesOnGithub = new Set();
 	const emptyReleasesOnNpm = new Map();
+
+	// A list of packages that should not be published on NPM.
+	const skipNpmPublish = new Set( options.skipNpmPublish || [] );
 
 	// List of packages that were released on NPM or/and GitHub.
 	const releasedPackages = new Set();
@@ -310,9 +313,16 @@ module.exports = function releaseSubRepositories( options ) {
 			releaseDetails.shouldReleaseOnNpm = npmVersion !== releaseDetails.version;
 
 			if ( releaseDetails.shouldReleaseOnNpm ) {
-				log.info( '✅  Added to release.' );
+				if ( skipNpmPublish.has( packageJson.name ) ) {
+					releaseDetails.shouldReleaseOnNpm = false;
+					log.warning( '⚠️  Skipping because the package was listed as `options.skipNpmPublish`.' );
 
-				releasesOnNpm.add( repositoryPath );
+					return Promise.resolve();
+				} else {
+					log.info( '✅  Added to release.' );
+
+					releasesOnNpm.add( repositoryPath );
+				}
 			} else {
 				log.info( '❌  Nothing to release.' );
 			}
