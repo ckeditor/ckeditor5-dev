@@ -53,18 +53,32 @@ module.exports = function getPackagesToRelease( pathsToPackages, options ) {
 // Search for a new version for specified package in the main changelog description.
 // It must be defined as following:
 //
-//      [packageName](https://www.npmjs.com/package/packageName): v0.0.1 => [v1.0.0](https://github.com/.../releases/tag/v1.0.0)
+//      [packageName](https://www.npmjs.com/package/packageName): v0.0.1 => v1.0.0
 //
 // where:
 //   `v0.0.1` is the current version (already published),
 //   `v1.0.0` is the new version what we're looking for.
 //
+// or:
+//
+//      [packageName](https://www.npmjs.com/package/packageName): v0.0.1
+//
+// where:
+//   `v0.0.1` is the current version (not published yet),
+//
 // @param {String} changelog Changes.
 // @param {String} packageName Package to look.
 // @returns {String|null} `null` if the version was not found.
 function findVersionInChangelog( changelog, packageName ) {
-	const versionRegexp = new RegExp( `\\[${ packageName.replace( '/', '\\/' ) }\\].*\\[v([\\d.]+)\\]` );
-	const match = changelog.match( versionRegexp );
+	const existingPackageRegExp = new RegExp( `\\[${ packageName.replace( '/', '\\/' ) }\\].*v[\\d.]+\\ => v([\\d.]+)` );
+	let match = changelog.match( existingPackageRegExp );
+
+	if ( match ) {
+		return match[ 1 ];
+	}
+
+	const newPackageRegExp = new RegExp( `\\[${ packageName.replace( '/', '\\/' ) }\\].*v([\\d.]+)` );
+	match = changelog.match( newPackageRegExp );
 
 	return match ? match[ 1 ] : null;
 }
