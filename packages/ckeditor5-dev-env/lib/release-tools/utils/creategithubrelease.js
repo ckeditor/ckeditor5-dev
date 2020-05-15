@@ -5,7 +5,7 @@
 
 'use strict';
 
-const GitHubApi = require( '@octokit/rest' );
+const { Octokit } = require( '@octokit/rest' );
 
 /**
  * Create a Github release.
@@ -19,7 +19,7 @@ const GitHubApi = require( '@octokit/rest' );
  * @returns {Promise}
  */
 module.exports = function createGithubRelease( token, options ) {
-	const github = new GitHubApi( {
+	const github = new Octokit( {
 		version: '3.0.0',
 		auth: `token ${ token }`
 	} );

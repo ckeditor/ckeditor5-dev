@@ -28,13 +28,15 @@ describe( 'dev-env/release-tools/tasks', () => {
 				warnOnUnregistered: false
 			} );
 
-			mockery.registerMock( '@octokit/rest', function GitHubApi( options ) {
-				octokitOptions = options;
+			mockery.registerMock( '@octokit/rest', {
+				Octokit: function GitHubApi( options ) {
+					octokitOptions = options;
 
-				this.authenticate = stubs.authenticate;
-				this.repos = {
-					createRelease: stubs.createRelease
-				};
+					this.authenticate = stubs.authenticate;
+					this.repos = {
+						createRelease: stubs.createRelease
+					};
+				}
 			} );
 
 			createGithubRelease = require( '../../../lib/release-tools/utils/creategithubrelease' );
