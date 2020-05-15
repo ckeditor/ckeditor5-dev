@@ -126,6 +126,7 @@ const cli = {
 	 * @param {String|null} releaseTypeOrNewVersion
 	 * @param {Object} [options]
 	 * @param {Boolean} [options.disableInternalVersion=false] Whether to "internal" version is enabled.
+	 * @param {Boolean} [options.disableSkipVersion=false] Whether to "skip" version is enabled.
 	 * @param {Number} [options.indentLevel=0] The indent level.
 	 * @returns {Promise.<String>}
 	 */
@@ -152,7 +153,11 @@ const cli = {
 			},
 
 			validate( input ) {
-				if ( input === 'skip' || ( !options.disableInternalVersion && input === 'internal' ) ) {
+				if ( !options.disableSkipVersion && input === 'skip' ) {
+					return true;
+				}
+
+				if ( !options.disableInternalVersion && input === 'internal' ) {
 					return true;
 				}
 

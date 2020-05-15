@@ -230,6 +230,7 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 	function confirmVersionForPackages() {
 		logProcess( 'Preparing new version for all packages...' );
 
+		const mainPackageName = pkgJson.name;
 		let promise = Promise.resolve();
 
 		for ( const packagePath of pathsCollection.matched ) {
@@ -248,7 +249,12 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 
 				displayCommits( packageCommits, { indentLevel: 2 } );
 
-				return cli.provideVersion( pkgJson.version, releaseTypeOrVersion, { indentLevel: 2 } )
+				const provideVersionOptions = {
+					indentLevel: 2,
+					disableSkipVersion: mainPackageName === pkgJson.name
+				};
+
+				return cli.provideVersion( pkgJson.version, releaseTypeOrVersion, provideVersionOptions )
 					.then( version => {
 						if ( version === 'skip' ) {
 							skippedChangelogs.add( packagePath );
