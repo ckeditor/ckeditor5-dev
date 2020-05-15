@@ -13,10 +13,10 @@ require( '../packages/ckeditor5-dev-env' )
 		packages: 'packages',
 		from: 'e0728059369dba60b77e2bb903ed1b1a6f25501f', // TODO: Remove the line after the nearest release.
 		transformScope: name => {
-			if ( name.startsWith( 'dev-' ) ) {
-				return 'https://www.npmjs.com/package/@ckeditor/ckeditor5-' + name;
+			if ( name === 'jsdoc' ) {
+				return 'https://www.npmjs.com/package/@ckeditor/jsdoc-plugins';
 			}
 
-			return 'https://www.npmjs.com/package/@ckeditor/' + name;
+			return 'https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-' + name;
 		}
 	} );
