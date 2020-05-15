@@ -17,7 +17,7 @@ const executeOnPackages = require( '../utils/executeonpackages' );
 const { getChangesForVersion } = require( '../utils/changelog' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getPackagesPaths = require( '../utils/getpackagespaths' );
-const GitHubApi = require( '@octokit/rest' );
+const { Octokit } = require( '@octokit/rest' );
 
 const PACKAGE_JSON_TEMPLATE_PATH = require.resolve( '../templates/release-package.json' );
 const BREAK_RELEASE_MESSAGE = 'You aborted publishing the release. Why? Oh why?!';
@@ -87,7 +87,7 @@ const additionalFiles = [
  * @param {Object} [options.packageJsonForEmptyReleases={}] Additional fields that will be added to `package.json` for packages which
  * will publish an empty directory. All properties copied from original package's "package.json" file will be overwritten by fields
  * specified in this option.
- * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in "cwd" will be skipped.
+ * @param {Array.<String>} [options.skipNpmPublish=[]] Name of packages that should not be published on NPM.
  * @returns {Promise}
  */
 module.exports = function releaseSubRepositories( options ) {
@@ -117,6 +117,9 @@ module.exports = function releaseSubRepositories( options ) {
 	const releasesOnNpm = new Set();
 	const releasesOnGithub = new Set();
 	const emptyReleasesOnNpm = new Map();
+
+	// A list of packages that should not be published on NPM.
+	const skipNpmPublish = new Set( options.skipNpmPublish || [] );
 
 	// List of packages that were released on NPM or/and GitHub.
 	const releasedPackages = new Set();
@@ -199,7 +202,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 		if ( releaseOptions.github ) {
 			// Because `octokit.authenticate()` is deprecated, the entire API object is created here.
-			github = new GitHubApi( {
+			github = new Octokit( {
 				version: '3.0.0',
 				auth: `token ${ releaseOptions.token }`
 			} );
@@ -243,28 +246,44 @@ module.exports = function releaseSubRepositories( options ) {
 
 		displaySkippedPackages( pathsCollection.skipped );
 
-		return executeOnPackages( pathsCollection.matched, repositoryPath => {
-			process.chdir( repositoryPath );
+		return Promise.resolve()
+			.then( () => {
+				// Prepare the main repository release details.
+				const packageJson = getPackageJson( options.cwd );
+				const releaseDetails = {
+					version: packageJson.version,
+					changes: getChangesForVersion( packageJson.version, options.cwd )
+				};
 
-			const packageJson = getPackageJson( repositoryPath );
-			const releaseDetails = {
-				version: packageJson.version,
-				changes: getChangesForVersion( packageJson.version, repositoryPath )
-			};
+				if ( releaseOptions.github ) {
+					const repositoryInfo = parseGithubUrl(
+						exec( 'git remote get-url origin --push' ).trim()
+					);
 
-			packages.set( packageJson.name, releaseDetails );
+					releaseDetails.repositoryOwner = repositoryInfo.owner;
+					releaseDetails.repositoryName = repositoryInfo.name;
+				}
 
-			if ( releaseOptions.github ) {
-				const repositoryInfo = parseGithubUrl(
-					exec( 'git remote get-url origin --push' ).trim()
-				);
+				packages.set( packageJson.name, releaseDetails );
 
-				releaseDetails.repositoryOwner = repositoryInfo.owner;
-				releaseDetails.repositoryName = repositoryInfo.name;
-			}
+				return executeOnPackages( pathsCollection.matched, repositoryPath => {
+					// The main repository is handled before calling the `executeOnPackages()` function.
+					if ( repositoryPath === options.cwd ) {
+						return;
+					}
 
-			return Promise.resolve();
-		} );
+					const packageJson = getPackageJson( repositoryPath );
+
+					packages.set( packageJson.name, {
+						version: packageJson.version
+					} );
+
+					return Promise.resolve();
+				} );
+			} )
+			.then( () => {
+				process.chdir( cwd );
+			} );
 	}
 
 	// Checks which packages should be published on NPM. It compares version defined in `package.json`
@@ -294,9 +313,16 @@ module.exports = function releaseSubRepositories( options ) {
 			releaseDetails.shouldReleaseOnNpm = npmVersion !== releaseDetails.version;
 
 			if ( releaseDetails.shouldReleaseOnNpm ) {
-				log.info( '✅  Added to release.' );
+				if ( skipNpmPublish.has( packageJson.name ) ) {
+					releaseDetails.shouldReleaseOnNpm = false;
+					log.warning( '⚠️  Skipping because the package was listed as `options.skipNpmPublish`.' );
 
-				releasesOnNpm.add( repositoryPath );
+					return Promise.resolve();
+				} else {
+					log.info( '✅  Added to release.' );
+
+					releasesOnNpm.add( repositoryPath );
+				}
 			} else {
 				log.info( '❌  Nothing to release.' );
 			}
@@ -336,42 +362,40 @@ module.exports = function releaseSubRepositories( options ) {
 
 		logProcess( 'Collecting the latest releases published on GitHub...' );
 
-		return executeOnPackages( pathsCollection.matched, repositoryPath => {
-			process.chdir( repositoryPath );
+		process.chdir( options.cwd );
 
-			const packageJson = getPackageJson( repositoryPath );
-			const releaseDetails = packages.get( packageJson.name );
+		const packageJson = getPackageJson( options.cwd );
+		const releaseDetails = packages.get( packageJson.name );
 
-			log.info( `\nChecking "${ chalk.underline( packageJson.name ) }"...` );
+		log.info( `\nChecking "${ chalk.underline( packageJson.name ) }"...` );
 
-			return getLastRelease( releaseDetails.repositoryOwner, releaseDetails.repositoryName )
-				.then( ( { data } ) => {
-					// It can be `null` if there is no releases on GitHub.
-					let githubVersion = data.tag_name;
+		return getLastRelease( releaseDetails.repositoryOwner, releaseDetails.repositoryName )
+			.then( ( { data } ) => {
+				// It can be `null` if there is no releases on GitHub.
+				let githubVersion = data.tag_name;
 
-					if ( githubVersion ) {
-						githubVersion = data.tag_name.replace( /^v/, '' );
-					}
+				if ( githubVersion ) {
+					githubVersion = data.tag_name.replace( /^v/, '' );
+				}
 
-					logDryRun(
-						`Versions: package.json: "${ releaseDetails.version }", GitHub: "${ githubVersion || 'initial release' }".`
-					);
+				logDryRun(
+					`Versions: package.json: "${ releaseDetails.version }", GitHub: "${ githubVersion || 'initial release' }".`
+				);
 
-					releaseDetails.githubVersion = githubVersion;
-					releaseDetails.shouldReleaseOnGithub = githubVersion !== releaseDetails.version;
+				releaseDetails.githubVersion = githubVersion;
+				releaseDetails.shouldReleaseOnGithub = githubVersion !== releaseDetails.version;
 
-					if ( releaseDetails.shouldReleaseOnGithub ) {
-						log.info( '✅  Added to release.' );
+				if ( releaseDetails.shouldReleaseOnGithub ) {
+					log.info( '✅  Added to release.' );
 
-						releasesOnGithub.add( repositoryPath );
-					} else {
-						log.info( '❌  Nothing to release.' );
-					}
-				} )
-				.catch( err => {
-					log.warning( err );
-				} );
-		} );
+					releasesOnGithub.add( options.cwd );
+				} else {
+					log.info( '❌  Nothing to release.' );
+				}
+			} )
+			.catch( err => {
+				log.warning( err );
+			} );
 
 		function getLastRelease( repositoryOwner, repositoryName ) {
 			const requestParams = {
@@ -533,22 +557,20 @@ module.exports = function releaseSubRepositories( options ) {
 	function pushPackages() {
 		logProcess( 'Pushing packages to the remote...' );
 
-		return executeOnPackages( releasesOnGithub, repositoryPath => {
-			process.chdir( repositoryPath );
+		process.chdir( options.cwd );
 
-			const packageJson = getPackageJson( repositoryPath );
-			const releaseDetails = packages.get( packageJson.name );
+		const packageJson = getPackageJson( options.cwd );
+		const releaseDetails = packages.get( packageJson.name );
 
-			log.info( `\nPushing "${ chalk.underline( packageJson.name ) }" package...` );
+		log.info( `\nPushing "${ chalk.underline( packageJson.name ) }" package...` );
 
-			if ( dryRun ) {
-				logDryRun( `Command: "git push origin master v${ releaseDetails.version }" would be executed.` );
-			} else {
-				exec( `git push origin master v${ releaseDetails.version }` );
-			}
+		if ( dryRun ) {
+			logDryRun( `Command: "git push origin master v${ releaseDetails.version }" would be executed.` );
+		} else {
+			exec( `git push origin master v${ releaseDetails.version }` );
+		}
 
-			return Promise.resolve();
-		} );
+		return Promise.resolve();
 	}
 
 	// Creates the releases on GitHub. In `dry run` mode it will just print a URL to release.
@@ -561,47 +583,45 @@ module.exports = function releaseSubRepositories( options ) {
 
 		logProcess( 'Creating releases on GitHub...' );
 
-		return executeOnPackages( releasesOnGithub, repositoryPath => {
-			process.chdir( repositoryPath );
+		process.chdir( options.cwd );
 
-			const packageJson = getPackageJson( repositoryPath );
-			const releaseDetails = packages.get( packageJson.name );
+		const packageJson = getPackageJson( options.cwd );
+		const releaseDetails = packages.get( packageJson.name );
 
-			log.info( `\nCreating a GitHub release for "${ packageJson.name }"...` );
+		log.info( `\nCreating a GitHub release for "${ packageJson.name }"...` );
 
-			// eslint-disable-next-line max-len
-			const url = `https://github.com/${ releaseDetails.repositoryOwner }/${ releaseDetails.repositoryName }/releases/tag/v${ releaseDetails.version }`;
+		// eslint-disable-next-line max-len
+		const url = `https://github.com/${ releaseDetails.repositoryOwner }/${ releaseDetails.repositoryName }/releases/tag/v${ releaseDetails.version }`;
 
-			logDryRun( `Created release will be available under: ${ chalk.underline( url ) }` );
+		logDryRun( `Created release will be available under: ${ chalk.underline( url ) }` );
 
-			if ( dryRun ) {
-				return Promise.resolve();
-			}
+		if ( dryRun ) {
+			return Promise.resolve();
+		}
 
-			const githubReleaseOptions = {
-				repositoryOwner: releaseDetails.repositoryOwner,
-				repositoryName: releaseDetails.repositoryName,
-				version: `v${ releaseDetails.version }`,
-				description: releaseDetails.changes
-			};
+		const githubReleaseOptions = {
+			repositoryOwner: releaseDetails.repositoryOwner,
+			repositoryName: releaseDetails.repositoryName,
+			version: `v${ releaseDetails.version }`,
+			description: releaseDetails.changes
+		};
 
-			return createGithubRelease( releaseOptions.token, githubReleaseOptions )
-				.then(
-					() => {
-						releasedPackages.add( repositoryPath );
+		return createGithubRelease( releaseOptions.token, githubReleaseOptions )
+			.then(
+				() => {
+					releasedPackages.add( options.cwd );
 
-						log.info( `Created the release: ${ chalk.green( url ) }` );
+					log.info( `Created the release: ${ chalk.green( url ) }` );
 
-						return Promise.resolve();
-					},
-					err => {
-						log.info( 'Cannot create a release on GitHub. Skipping that package.' );
-						log.error( err );
+					return Promise.resolve();
+				},
+				err => {
+					log.info( 'Cannot create a release on GitHub. Skipping that package.' );
+					log.error( err );
 
-						return Promise.resolve();
-					}
-				);
-		} );
+					return Promise.resolve();
+				}
+			);
 	}
 
 	// Removes all temporary directories that were created for publishing an empty repository.
@@ -638,7 +658,6 @@ module.exports = function releaseSubRepositories( options ) {
 
 				if ( !shouldRemove ) {
 					logDryRun( 'You can remove these files manually by calling `git clean -f` command.' );
-					logDryRun( 'It will also work using mrgit: `mrgit exec "git clean -f"`' );
 
 					return;
 				}
