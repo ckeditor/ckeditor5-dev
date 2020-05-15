@@ -638,7 +638,6 @@ module.exports = function releaseSubRepositories( options ) {
 
 				if ( !shouldRemove ) {
 					logDryRun( 'You can remove these files manually by calling `git clean -f` command.' );
-					logDryRun( 'It will also work using mrgit: `mrgit exec "git clean -f"`' );
 
 					return;
 				}
