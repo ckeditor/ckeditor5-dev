@@ -41,7 +41,7 @@ module.exports = function getKarmaConfig( options ) {
 		// Frameworks to use. Available frameworks: https://npmjs.org/browse/keyword/karma-adapter
 		frameworks: [ 'mocha', 'chai', 'sinon' ],
 
-		// Files saved in directory `ckeditor5/packages/ckeditor5-utils/tests/_assets/` are available under: http://0.0.0.0:9876/assets/
+		// Files saved in directory `ckeditor5/packages/ckeditor5-utils/tests/_assets/` are available under: http://0.0.0.0:{port}/assets/
 		proxies: {
 			'/assets/': '/base/packages/ckeditor5-utils/tests/_assets/'
 		},
@@ -74,7 +74,7 @@ module.exports = function getKarmaConfig( options ) {
 		reporters: [ options.reporter ],
 
 		// Web server port.
-		port: 9876,
+		port: options.port || 9876,
 
 		// Enable/Disable colors in the output (reporters and logs).
 		colors: true,
