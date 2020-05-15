@@ -16,11 +16,9 @@ const getPackageJson = require( './getpackagejson' );
  *
  *   - The first one is marked as `matched` and means that packages specified in a path (which is a combination of values specified as
  *     `options.cwd` and  `options.packages`) match to given criteria.
- *   - The second one is marked as `skipped` and means that packages should not be processed. They aren't defined in the main
- *     `package.json` as dependencies or were listed as packages to skip (`options.skipPackages` or don't mach to `options.scope`).
+ *   - The second one is marked as `skipped` and means that packages should not be processed. They were listed as packages to skip
+ *     (`options.skipPackages` or don't mach to `options.scope`).
  *
- * By "sub repositories" we understand that packages have their own repositories and they are located inside another
- * repository (similar to git submodules).
  *
  * @param {Object} options
  * @param {String} options.cwd Current work directory.
@@ -31,7 +29,7 @@ const getPackageJson = require( './getpackagejson' );
  * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in `options.cwd` will be skipped.
  * @returns {PathsCollection}
  */
-module.exports = function getSubRepositoriesPaths( options ) {
+module.exports = function getPackagesPaths( options ) {
 	const collection = {
 		matched: new Set(),
 		skipped: new Set()
@@ -49,9 +47,6 @@ module.exports = function getSubRepositoriesPaths( options ) {
 
 	const packagesPath = path.join( options.cwd, options.packages );
 	const skipPackages = Array.isArray( options.skipPackages ) ? options.skipPackages : [ options.skipPackages ];
-
-	const packageJson = getPackageJson( options.cwd );
-	const dependencies = Object.keys( packageJson.dependencies || {} );
 
 	for ( const directory of tools.getDirectories( packagesPath ) ) {
 		const dependencyPath = path.join( packagesPath, directory );
@@ -72,10 +67,6 @@ module.exports = function getSubRepositoriesPaths( options ) {
 	return collection;
 
 	function isValidPackage( packageName ) {
-		if ( !dependencies.includes( packageName ) ) {
-			return false;
-		}
-
 		for ( const skipPackageGlob of skipPackages ) {
 			if ( minimatch( packageName, skipPackageGlob ) ) {
 				return false;

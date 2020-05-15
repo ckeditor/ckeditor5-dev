@@ -14,7 +14,7 @@ const executeOnPackages = require( '../utils/executeonpackages' );
 const { getChangesForVersion } = require( '../utils/changelog' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getPackagesToRelease = require( '../utils/getpackagestorelease' );
-const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
+const getPackagesPaths = require( '../utils/getpackagespaths' );
 const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
 const validatePackageToRelease = require( '../utils/validatepackagetorelease' );
 
@@ -44,7 +44,7 @@ module.exports = function bumpVersions( options ) {
 
 	const dryRun = Boolean( options.dryRun );
 
-	const pathsCollection = getSubRepositoriesPaths( {
+	const pathsCollection = getPackagesPaths( {
 		cwd: options.cwd,
 		packages: options.packages,
 		skipPackages: options.skipPackages || [],

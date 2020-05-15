@@ -19,7 +19,7 @@ const displayCommits = require( '../utils/displaycommits' );
 const displaySkippedPackages = require( '../utils/displayskippedpackages' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getNewVersionType = require( '../utils/getnewversiontype' );
-const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
+const getPackagesPaths = require( '../utils/getpackagespaths' );
 const getCommits = require( '../utils/getcommits' );
 const getWriterOptions = require( '../utils/transform-commit/getwriteroptions' );
 const { getRepositoryUrl } = require( '../utils/transform-commit/transform-commit-utils' );
@@ -29,7 +29,8 @@ const VERSIONING_POLICY_URL = 'https://ckeditor.com/docs/ckeditor5/latest/framew
 const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)`;
 
 /**
- * Generates the changelog for the mono repository.
+ * Generates the single changelog for the mono repository. It means that changes which have been done in all packages
+ * will be described in the changelog file located in the `options.cwd` directory.
  *
  * @param {Object} options
  *
@@ -61,7 +62,7 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 		returnInvalidCommit: true
 	} );
 
-	const pathsCollection = getSubRepositoriesPaths( {
+	const pathsCollection = getPackagesPaths( {
 		cwd: options.cwd,
 		packages: options.packages,
 		scope: options.scope || null,

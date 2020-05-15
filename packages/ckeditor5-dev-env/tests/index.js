@@ -37,7 +37,6 @@ describe( 'dev-env/index', () => {
 			release: {
 				releaseSubRepositories: sandbox.stub(),
 				generateChangelogForSinglePackage: sandbox.stub(),
-				generateChangelogForSubPackages: sandbox.stub(),
 				generateChangelogForMonoRepository: sandbox.stub(),
 				bumpVersions: sandbox.stub()
 			}
@@ -53,7 +52,6 @@ describe( 'dev-env/index', () => {
 		mockery.registerMock( './release-tools/tasks/bumpversions', releaseTools.bumpVersions );
 		mockery.registerMock( './release-tools/tasks/generatechangelogforsinglepackage', releaseTools.generateChangelogForSinglePackage );
 		mockery.registerMock( './release-tools/tasks/releasesubrepositories', releaseTools.releaseSubRepositories );
-		mockery.registerMock( './release-tools/tasks/generatechangelogforsubpackages', releaseTools.generateChangelogForSubPackages );
 		mockery.registerMock( './release-tools/tasks/generatechangelogformonorepository', releaseTools.generateChangelogForMonoRepository );
 
 		tasks = proxyquire( '../lib/index', {
@@ -92,19 +90,6 @@ describe( 'dev-env/index', () => {
 					expect( response.result ).to.equal( true );
 					expect( stubs.release.generateChangelogForSinglePackage.calledOnce ).to.equal( true );
 					expect( stubs.release.generateChangelogForSinglePackage.firstCall.args[ 0 ] ).to.equal( 'arg' );
-				} );
-		} );
-	} );
-
-	describe( 'generateChangelogForSubPackages()', () => {
-		it( 'generates a changelog for sub packages', () => {
-			stubs.release.generateChangelogForSubPackages.returns( Promise.resolve( { result: true } ) );
-
-			return tasks.generateChangelogForSubPackages( 'arg' )
-				.then( response => {
-					expect( response.result ).to.equal( true );
-					expect( stubs.release.generateChangelogForSubPackages.calledOnce ).to.equal( true );
-					expect( stubs.release.generateChangelogForSubPackages.firstCall.args[ 0 ] ).to.equal( 'arg' );
 				} );
 		} );
 	} );

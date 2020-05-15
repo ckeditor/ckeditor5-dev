@@ -16,7 +16,7 @@ const displaySkippedPackages = require( '../utils/displayskippedpackages' );
 const executeOnPackages = require( '../utils/executeonpackages' );
 const { getChangesForVersion } = require( '../utils/changelog' );
 const getPackageJson = require( '../utils/getpackagejson' );
-const getSubRepositoriesPaths = require( '../utils/getsubrepositoriespaths' );
+const getPackagesPaths = require( '../utils/getpackagespaths' );
 const GitHubApi = require( '@octokit/rest' );
 
 const PACKAGE_JSON_TEMPLATE_PATH = require.resolve( '../templates/release-package.json' );
@@ -96,7 +96,7 @@ module.exports = function releaseSubRepositories( options ) {
 	const dryRun = Boolean( options.dryRun );
 	const emptyReleases = Array.isArray( options.emptyReleases ) ? options.emptyReleases : [ options.emptyReleases ].filter( Boolean );
 
-	const pathsCollection = getSubRepositoriesPaths( {
+	const pathsCollection = getPackagesPaths( {
 		cwd: options.cwd,
 		packages: options.packages,
 		skipPackages: options.skipPackages || [],

@@ -5,6 +5,7 @@
 
 'use strict';
 
+const fs = require( 'fs' );
 const { Readable } = require( 'stream' );
 const { tools, stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const chalk = require( 'chalk' );
@@ -39,9 +40,9 @@ const transformCommitForSubRepositoryFactory = require( '../utils/transform-comm
  */
 module.exports = function generateChangelogForSinglePackage( options = {} ) {
 	const log = logger();
-	const packageJson = getPackageJson();
+	const pkgJson = getPackageJson();
 
-	logProcess( chalk.bold( `Generating changelog for "${ chalk.underline( packageJson.name ) }"...` ) );
+	logProcess( chalk.bold( `Generating changelog for "${ chalk.underline( pkgJson.name ) }"...` ) );
 
 	const transformCommit = transformCommitForSubRepositoryFactory( {
 		returnInvalidCommit: true
@@ -50,11 +51,11 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 	logProcess( 'Collecting all commits since the last release...' );
 
 	const commitOptions = {
-		from: options.from ? options.from : 'v' + packageJson.version
+		from: options.from ? options.from : 'v' + pkgJson.version
 	};
 
 	// Initial release.
-	if ( semver.eq( packageJson.version, '0.0.1' ) ) {
+	if ( semver.eq( pkgJson.version, '0.0.1' ) ) {
 		commitOptions.from = null;
 	}
 
@@ -77,7 +78,7 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 
 			displayCommits( allCommits, { indentLevel: 1 } );
 
-			return cli.provideVersion( packageJson.version, releaseType, { indentLevel: 1 } );
+			return cli.provideVersion( pkgJson.version, releaseType, { indentLevel: 1 } );
 		} )
 		.then( version => {
 			if ( version === 'skip' ) {
@@ -87,7 +88,7 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 			const isInternalRelease = version === 'internal';
 
 			if ( version === 'internal' ) {
-				version = semver.inc( packageJson.version, 'patch' );
+				version = semver.inc( pkgJson.version, 'patch' );
 			}
 
 			newVersion = version;
@@ -97,7 +98,7 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 			const commitStream = new Readable( { objectMode: true } );
 			commitStream._read = function() {};
 
-			const previousTag = commitOptions.from ? 'v' + packageJson.version : null;
+			const previousTag = commitOptions.from ? 'v' + pkgJson.version : null;
 
 			const writerContext = {
 				version,
@@ -105,7 +106,7 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 				repoUrl: getRepositoryUrl(),
 				currentTag: 'v' + version,
 				previousTag,
-				isPatch: semver.diff( version, packageJson.version ) === 'patch',
+				isPatch: semver.diff( version, pkgJson.version ) === 'patch',
 				isInternalRelease,
 				highlightsPlaceholder: Boolean( options.highlightsPlaceholder ),
 				collaborationFeatures: Boolean( options.collaborationFeatures ),
@@ -150,6 +151,12 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 		.then( changesFromCommits => {
 			logProcess( 'Saving changelog...' );
 
+			if ( fs.existsSync( changelogUtils.changelogFile ) ) {
+				logInfo( 'Changelog file does not exist. Creating...', { isWarning: true, indentLevel: 1 } );
+
+				changelogUtils.saveChangelog( changelogUtils.changelogHeader );
+			}
+
 			let currentChangelog = changelogUtils.getChangelog();
 
 			// Remove header from current changelog.
@@ -168,7 +175,7 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 			logInfo( 'Saved.', { indentLevel: 1 } );
 		} )
 		.then( () => {
-			logInfo( `Changelog for "${ chalk.underline( packageJson.name ) }" (v${ newVersion }) has been generated.` );
+			logInfo( `Changelog for "${ chalk.underline( pkgJson.name ) }" (v${ newVersion }) has been generated.` );
 		} );
 
 	function logProcess( message ) {
@@ -180,11 +187,13 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 	 * @param {Object} [options={}]
 	 * @param {Number} [options.indentLevel=0]
 	 * @param {Boolean} [options.startWithNewLine=false] Whether to append a new line before the message.
+	 * @param {Boolean} [options.isWarning=false] Whether to use `warning` method instead of `log`.
 	 */
 	function logInfo( message, options = {} ) {
 		const indentLevel = options.indentLevel || 0;
 		const startWithNewLine = options.startWithNewLine || false;
+		const method = options.isWarning ? 'warning' : 'info';
 
-		log.info( `${ startWithNewLine ? '\n' : '' }${ ' '.repeat( indentLevel * cli.INDENT_SIZE ) }` + message );
+		log[ method ]( `${ startWithNewLine ? '\n' : '' }${ ' '.repeat( indentLevel * cli.INDENT_SIZE ) }` + message );
 	}
 };

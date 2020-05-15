@@ -18,10 +18,6 @@ const tasks = {
 		return require( './release-tools/tasks/generatechangelogforsinglepackage' )( ...args );
 	},
 
-	generateChangelogForSubPackages( ...args ) {
-		return require( './release-tools/tasks/generatechangelogforsubpackages' )( ...args );
-	},
-
 	generateChangelogForMonoRepository( ...args ) {
 		return require( './release-tools/tasks/generatechangelogformonorepository' )( ...args );
 	},
