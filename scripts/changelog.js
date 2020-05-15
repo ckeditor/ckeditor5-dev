@@ -8,7 +8,14 @@
 'use strict';
 
 require( '../packages/ckeditor5-dev-env' )
-	.generateChangelogForSubPackages( {
+	.generateChangelogForMonoRepository( {
 		cwd: process.cwd(),
-		packages: 'packages'
+		packages: 'packages',
+		transformScope: name => {
+			if ( name.startsWith( 'dev-' ) ) {
+				return 'https://www.npmjs.com/package/@ckeditor/ckeditor5-' + name;
+			}
+
+			return 'https://www.npmjs.com/package/@ckeditor/' + name;
+		}
 	} );

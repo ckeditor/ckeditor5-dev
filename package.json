@@ -23,11 +23,17 @@
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
   "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ckeditor/ckeditor5-dev.git"
+  },
   "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme",
   "scripts": {
-    "test": "mocha packages/ckeditor5-dev-env/tests --recursive --timeout 5000",
+    "test": "mocha packages/*/tests --recursive --timeout 5000",
     "coverage": "istanbul cover _mocha packages/*/tests -- --recursive --timeout 5000",
-    "changelog": "node ./scripts/changelog.js",
+    "changelog": "node ./scripts/release/changelog.js",
+    "release:bump-version": "node ./scripts/release/bump-versions.js",
+    "release:publish": "node ./scripts/release/publish.js",
     "lint": "eslint --quiet '**/*.js'",
     "precommit": "lint-staged"
   },
