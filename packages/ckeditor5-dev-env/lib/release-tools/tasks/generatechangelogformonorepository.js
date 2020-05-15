@@ -5,6 +5,7 @@
 
 'use strict';
 
+const fs = require( 'fs' );
 const path = require( 'path' );
 const { Readable } = require( 'stream' );
 const { tools, stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
@@ -429,6 +430,12 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 	function saveChangelog( changesFromCommits ) {
 		logProcess( 'Saving changelog...' );
 
+		if ( !fs.existsSync( changelogUtils.changelogFile ) ) {
+			logInfo( 'Changelog file does not exist. Creating...', { isWarning: true, indentLevel: 1 } );
+
+			changelogUtils.saveChangelog( changelogUtils.changelogHeader );
+		}
+
 		logInfo( 'Preparing a summary of version changes in packages.', { indentLevel: 1 } );
 
 		const dependenciesSummary = generateSummaryOfChangesInPackages();
@@ -642,12 +649,14 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 	 * @param {Object} [options={}]
 	 * @param {Number} [options.indentLevel=0]
 	 * @param {Boolean} [options.startWithNewLine=false] Whether to append a new line before the message.
+	 * @param {Boolean} [options.isWarning=false] Whether to use `warning` method instead of `log`.
 	 */
 	function logInfo( message, options = {} ) {
 		const indentLevel = options.indentLevel || 0;
 		const startWithNewLine = options.startWithNewLine || false;
+		const method = options.isWarning ? 'warning' : 'info';
 
-		log.info( `${ startWithNewLine ? '\n' : '' }${ ' '.repeat( indentLevel * cli.INDENT_SIZE ) }` + message );
+		log[ method ]( `${ startWithNewLine ? '\n' : '' }${ ' '.repeat( indentLevel * cli.INDENT_SIZE ) }` + message );
 	}
 };
 

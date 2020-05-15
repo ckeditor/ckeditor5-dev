@@ -151,7 +151,7 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 		.then( changesFromCommits => {
 			logProcess( 'Saving changelog...' );
 
-			if ( fs.existsSync( changelogUtils.changelogFile ) ) {
+			if ( !fs.existsSync( changelogUtils.changelogFile ) ) {
 				logInfo( 'Changelog file does not exist. Creating...', { isWarning: true, indentLevel: 1 } );
 
 				changelogUtils.saveChangelog( changelogUtils.changelogHeader );
