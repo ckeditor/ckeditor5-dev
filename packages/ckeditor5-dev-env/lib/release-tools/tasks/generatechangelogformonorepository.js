@@ -495,51 +495,44 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 		const entries = [
 			'### Released packages\n',
 			`Check out the [Versioning policy](${ VERSIONING_POLICY_URL }) guide for more information.\n`,
-			'<details><summary>Released packages (summary)</summary>'
+			'<details>',
+			'<summary>Released packages (summary)</summary>'
 		];
 
 		if ( newPackages.size ) {
-			entries.push( 'New packages:\n' );
+			entries.push( '\nNew packages:\n' );
 
 			for ( const [ packageName, version ] of [ ...newPackages ].sort( sortByPackageName ) ) {
 				entries.push( formatChangelogEntry( packageName, version.next ) );
 			}
-
-			entries.push( '' );
 		}
 
 		if ( majorBreakingChangesPackages.size ) {
-			entries.push( 'Major releases (contain major breaking changes):\n' );
+			entries.push( '\nMajor releases (contain major breaking changes):\n' );
 
 			for ( const [ packageName, version ] of [ ...majorBreakingChangesPackages ].sort( sortByPackageName ) ) {
 				entries.push( formatChangelogEntry( packageName, version.next, version.current ) );
 			}
-
-			entries.push( '' );
 		}
 
 		if ( minorBreakingChangesPackages.size ) {
-			entries.push( 'Minor releases (contain minor breaking changes):\n' );
+			entries.push( '\nMinor releases (contain minor breaking changes):\n' );
 
 			for ( const [ packageName, version ] of [ ...minorBreakingChangesPackages ].sort( sortByPackageName ) ) {
 				entries.push( formatChangelogEntry( packageName, version.next, version.current ) );
 			}
-
-			entries.push( '' );
 		}
 
 		if ( newFeaturesPackages.size ) {
-			entries.push( 'Releases containing new features:\n' );
+			entries.push( '\nReleases containing new features:\n' );
 
 			for ( const [ packageName, version ] of [ ...newFeaturesPackages ].sort( sortByPackageName ) ) {
 				entries.push( formatChangelogEntry( packageName, version.next, version.current ) );
 			}
-
-			entries.push( '' );
 		}
 
 		if ( dependencies.size ) {
-			entries.push( 'Other releases:\n' );
+			entries.push( '\nOther releases:\n' );
 
 			for ( const [ packageName, version ] of [ ...dependencies ].sort( sortByPackageName ) ) {
 				entries.push( formatChangelogEntry( packageName, version.next, version.current ) );
