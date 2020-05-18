@@ -330,6 +330,8 @@ module.exports = function transformCommitFactory( options = {} ) {
  *
  * @property {String} header First line of the commit message.
  *
+ * @property {String} subject Subject of the commit. It's the header without the type.
+ *
  * @property {Array.<String>|null} scope Scope of the changes.
  *
  * @property {Array.<String>} files A list of files tha the commit modified.
@@ -337,9 +339,7 @@ module.exports = function transformCommitFactory( options = {} ) {
  * @property {String} hash The full commit SHA-1 id.
  *
  * @property {String} repositoryUrl The URL to the repository where the parsed commit has been done.
- *
- * @property {String} [subject] Subject of the commit.
- *
+ **
  * @property {String|null} [body] Body of the commit message.
  *
  * @property {String|null} [footer] Footer of the commit message.

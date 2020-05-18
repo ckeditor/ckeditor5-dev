@@ -5,812 +5,903 @@
 
 'use strict';
 
-const fs = require( 'fs' );
-const path = require( 'path' );
 const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
-const { tools, stream } = require( '@ckeditor/ckeditor5-dev-utils' );
-const {
-	changelogHeader,
-	getChangelog: _getChangelog,
-	getChangesForVersion: _getChangesForVersion
-} = require( '../../../lib/release-tools/utils/changelog' );
-const transformCommitFactory = require(
-	'../../../lib/release-tools/utils/transformcommitfactory'
-);
+const compareFunc = require( 'compare-func' );
+const getWriterOptions = require( '../../../lib/release-tools/utils/getwriteroptions' );
+const generateChangelog = require( '../../../lib/release-tools/utils/generatechangelog' );
 
 describe.only( 'dev-env/release-tools/utils', () => {
-	const url = 'https://github.com/ckeditor/ckeditor5-test-package';
+	const url = 'https://github.com/ckeditor/ckeditor5-package';
 
-	let tmpCwd, cwd, generateChangelogFromCommits, stubs, sandbox;
-
-	describe( 'generateChangelogFromCommits() - integration test', function() {
-		this.timeout( 15 * 1000 );
-
-		beforeEach( () => {
-			cwd = process.cwd();
-			tmpCwd = fs.mkdtempSync( __dirname + path.sep );
-			process.chdir( tmpCwd );
-
-			exec( 'git init' );
-
-			if ( process.env.CI ) {
-				exec( 'git config user.email "ckeditor5@ckeditor.com"' );
-				exec( 'git config user.name "CKEditor5 CI"' );
-			}
-
-			const packageJson = {
-				name: '@ckeditor/ckeditor5-test-package',
-				repository: `${ url }`
-			};
-
-			fs.writeFileSync(
-				path.join( tmpCwd, 'package.json' ),
-				JSON.stringify( packageJson, null, '\t' )
-			);
-
-			sandbox = sinon.createSandbox();
-
-			stubs = {
-				logger: {
-					info: sandbox.stub(),
-					warning: sandbox.stub(),
-					error: sandbox.stub()
-				}
-			};
-
-			generateChangelogFromCommits = proxyquire( '../../../lib/release-tools/utils/generatechangelogfromcommits', {
-				'@ckeditor/ckeditor5-dev-utils': {
-					stream,
-					logger() {
-						return stubs.logger;
+	/**
+	 * Type of commits must be equal to values returned by `transformcommitutils.getCommitType()` function.
+	 * Since we're creating all commits manually, we need to "transform" those to proper structures.
+	 */
+	describe( 'generateChangelog()', () => {
+		describe( 'initial changelog (without "previousTag")', () => {
+			it( 'generates "Features" correctly', () => {
+				const commits = [
+					{
+						type: 'Features',
+						header: 'Feature: The first an amazing feature.',
+						subject: 'The first an amazing feature.',
+						hash: 'x'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Features',
+						header: 'Feature: The second an amazing feature.',
+						subject: 'The second an amazing feature.',
+						hash: 'z'.repeat( 40 ),
+						notes: []
 					}
-				}
-			} );
-		} );
+				];
 
-		afterEach( () => {
-			process.chdir( cwd );
-			exec( `rm -rf ${ tmpCwd }` );
+				const context = {
+					version: '1.0.0',
+					repoUrl: url,
+					currentTag: 'v1.0.0',
+					commit: 'commit'
+				};
 
-			sandbox.restore();
-		} );
-
-		it( 'generates a changelog for the first time', () => {
-			return makeInitialRelease()
-				.then( () => {
-					expect( stubs.logger.warning.calledOnce ).to.equal( true );
-
-					const generatedChangelog = getChangelog();
-
-					expect( generatedChangelog ).to.contain( changelogHeader );
-
-					const changelogWithoutHeader = generatedChangelog.replace( changelogHeader, '' );
-					const changelogTitle = changelogWithoutHeader.split( '\n' )[ 0 ];
-					const changes = changelogWithoutHeader.split( '\n' ).slice( 1 ).join( '\n' ).trim();
-
-					expect( replaceDates( changelogTitle ) ).to.contain(
-						'## [0.0.1](https://github.com/ckeditor/ckeditor5-test-package/tree/v0.0.1) (0000-00-00)'
-					);
-
-					expect( changes ).to.contain(
-						'Internal changes only (updated dependencies, documentation, etc.).'
-					);
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 7 )
 				} );
-		} );
 
-		it( 'title of the next release should be a link which compares current version with the previous one', () => {
-			makeCommit( 'Internal: An initial commit.' );
+				return generateChangelog( commits, context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
 
-			return makeInitialRelease()
-				.then( () => {
-					makeCommit( 'Internal: An initial commit.' );
-					makeCommit( 'Feature: Some amazing feature. Closes #1.' );
+						const changesAsArray = changes.split( '\n' )
+							.map( line => line.trim() )
+							.filter( line => line.length );
 
-					return generateChangelog( '0.1.0' );
-				} )
-				.then( () => {
-					expect( getChangelog() ).to.contain(
-						'## [0.1.0](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.0.1...v0.1.0)'
-					);
+						expect( changesAsArray[ 0 ] ).to.equal(
+							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
+						);
+						expect( changesAsArray[ 1 ] ).to.equal(
+							'### Features'
+						);
+						expect( changesAsArray[ 2 ] ).to.equal(
+							'* The first an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/xxxxxxx))'
+						);
+						expect( changesAsArray[ 3 ] ).to.equal(
+							'* The second an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
+						);
+					} );
+			} );
+
+			it( 'generates "Bug fixes" correctly', () => {
+				const commits = [
+					{
+						type: 'Bug fixes',
+						header: 'Fix: The first an amazing bug fix.',
+						subject: 'The first an amazing bug fix.',
+						hash: 'x'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Bug fixes',
+						header: 'Fix: The second an amazing bug fix.',
+						subject: 'The second an amazing bug fix.',
+						hash: 'z'.repeat( 40 ),
+						notes: []
+					}
+				];
+
+				const context = {
+					version: '1.0.0',
+					repoUrl: url,
+					currentTag: 'v1.0.0',
+					commit: 'commit'
+				};
+
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 7 )
 				} );
-		} );
 
-		// See: https://github.com/ckeditor/ckeditor5-dev/issues/270#issuecomment-326807018
-		it( 'handles a commit which does not end with a dot', () => {
-			return makeInitialRelease()
-				.then( () => {
-					makeCommit( 'Feature: Another feature. Closes #2' );
+				return generateChangelog( commits, context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
 
-					return generateChangelog( '0.1.0' );
-				} )
-				.then( () => {
-					const latestChangelog = replaceCommitIds( getChangesForVersion( '0.1.0' ) );
+						const changesAsArray = changes.split( '\n' )
+							.map( line => line.trim() )
+							.filter( line => line.length );
 
-					/* eslint-disable max-len */
-					const expectedChangelog = normalizeStrings( `
-### Features
+						expect( changesAsArray[ 0 ] ).to.equal(
+							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
+						);
+						expect( changesAsArray[ 1 ] ).to.equal(
+							'### Bug fixes'
+						);
+						expect( changesAsArray[ 2 ] ).to.equal(
+							'* The first an amazing bug fix. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/xxxxxxx))'
+						);
+						expect( changesAsArray[ 3 ] ).to.equal(
+							'* The second an amazing bug fix. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
+						);
+					} );
+			} );
 
-* Another feature. Closes [#2](https://github.com/ckeditor/ckeditor5-test-package/issues/2). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-` );
-					/* eslint-enable max-len */
+			it( 'generates "Other changes" correctly', () => {
+				const commits = [
+					{
+						type: 'Other changes',
+						header: 'Other: The first an amazing commit.',
+						subject: 'The first an amazing commit.',
+						hash: 'x'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Other changes',
+						header: 'Other: The second an amazing commit.',
+						subject: 'The second an amazing commit.',
+						hash: 'z'.repeat( 40 ),
+						notes: []
+					}
+				];
 
-					expect( latestChangelog ).to.equal( expectedChangelog.trim() );
+				const context = {
+					version: '1.0.0',
+					repoUrl: url,
+					currentTag: 'v1.0.0',
+					commit: 'commit'
+				};
+
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 7 )
 				} );
+
+				return generateChangelog( commits, context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
+
+						const changesAsArray = changes.split( '\n' )
+							.map( line => line.trim() )
+							.filter( line => line.length );
+
+						expect( changesAsArray[ 0 ] ).to.equal(
+							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
+						);
+						expect( changesAsArray[ 1 ] ).to.equal(
+							'### Other changes'
+						);
+						expect( changesAsArray[ 2 ] ).to.equal(
+							'* The first an amazing commit. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/xxxxxxx))'
+						);
+						expect( changesAsArray[ 3 ] ).to.equal(
+							'* The second an amazing commit. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
+						);
+					} );
+			} );
+
+			it( 'generates all groups correctly', () => {
+				const commits = [
+					{
+						type: 'Features',
+						header: 'Feature: An amazing feature.',
+						subject: 'An amazing feature.',
+						hash: 'x'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Bug fixes',
+						header: 'Fix: An amazing bug fix.',
+						subject: 'An amazing bug fix.',
+						hash: 'z'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Other changes',
+						header: 'Other: An amazing commit.',
+						subject: 'An amazing commit.',
+						hash: 'y'.repeat( 40 ),
+						notes: []
+					}
+				];
+
+				const context = {
+					version: '1.0.0',
+					repoUrl: url,
+					currentTag: 'v1.0.0',
+					commit: 'commit'
+				};
+
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 7 )
+				} );
+
+				return generateChangelog( commits, context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
+
+						const changesAsArray = changes.split( '\n' )
+							.map( line => line.trim() )
+							.filter( line => line.length );
+
+						expect( changesAsArray[ 0 ] ).to.equal(
+							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
+						);
+						expect( changesAsArray[ 1 ] ).to.equal(
+							'### Features'
+						);
+						expect( changesAsArray[ 2 ] ).to.equal(
+							'* An amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/xxxxxxx))'
+						);
+						expect( changesAsArray[ 3 ] ).to.equal(
+							'### Bug fixes'
+						);
+						expect( changesAsArray[ 4 ] ).to.equal(
+							'* An amazing bug fix. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
+						);
+						expect( changesAsArray[ 5 ] ).to.equal(
+							'### Other changes'
+						);
+						expect( changesAsArray[ 6 ] ).to.equal(
+							'* An amazing commit. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/yyyyyyy))'
+						);
+					} );
+			} );
+
+			it( 'removes URLs to commits (context.skipCommitsLink=true)', () => {
+				const commits = [
+					{
+						type: 'Features',
+						header: 'Feature: The first an amazing feature.',
+						subject: 'The first an amazing feature.',
+						hash: 'x'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Features',
+						header: 'Feature: The second an amazing feature.',
+						subject: 'The second an amazing feature.',
+						hash: 'z'.repeat( 40 ),
+						notes: []
+					}
+				];
+
+				const context = {
+					version: '1.0.0',
+					repoUrl: url,
+					currentTag: 'v1.0.0',
+					skipCommitsLink: true
+				};
+
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 7 )
+				} );
+
+				return generateChangelog( commits, context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
+
+						const changesAsArray = changes.split( '\n' )
+							.map( line => line.trim() )
+							.filter( line => line.length );
+
+						expect( changesAsArray[ 0 ] ).to.equal(
+							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
+						);
+						expect( changesAsArray[ 1 ] ).to.equal(
+							'### Features'
+						);
+						expect( changesAsArray[ 2 ] ).to.equal(
+							'* The first an amazing feature.'
+						);
+						expect( changesAsArray[ 3 ] ).to.equal(
+							'* The second an amazing feature.'
+						);
+					} );
+			} );
+
+			it( 'removes compare link from the header (context.skipCompareLink=true)', () => {
+				const context = {
+					version: '1.0.0',
+					repoUrl: url,
+					currentTag: 'v1.0.0',
+					commit: 'commit',
+					skipCompareLink: true
+				};
+
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 7 )
+				} );
+
+				return generateChangelog( [], context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
+
+						const changesAsArray = changes.split( '\n' )
+							.map( line => line.trim() )
+							.filter( line => line.length );
+
+						expect( changesAsArray[ 0 ] ).to.equal(
+							'## 1.0.0 (0000-00-00)'
+						);
+					} );
+			} );
+
+			it( 'generates additional commit message below the subject', () => {
+				const commits = [
+					{
+						type: 'Other changes',
+						header: 'Other: The first an amazing commit.',
+						subject: 'The first an amazing commit.',
+						body: [
+							'  First line: Lorem Ipsum (1).',
+							'  Second line: Lorem Ipsum (2).'
+						].join( '\n' ),
+						hash: 'x'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Other changes',
+						header: 'Other: The second an amazing commit.',
+						subject: 'The second an amazing commit.',
+						body: [
+							'  First line: Lorem Ipsum (1).',
+							'  Second line: Lorem Ipsum (2).',
+							'  Third line: Lorem Ipsum (3).'
+						].join( '\n' ),
+						hash: 'z'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Other changes',
+						header: 'Other: The third an amazing commit.',
+						subject: 'The third an amazing commit.',
+						hash: 'y'.repeat( 40 ),
+						notes: []
+					}
+				];
+
+				const context = {
+					version: '1.0.0',
+					repoUrl: url,
+					currentTag: 'v1.0.0',
+					commit: 'commit'
+				};
+
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 7 )
+				} );
+
+				return generateChangelog( commits, context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
+
+						const changelog = [
+							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)',
+							'',
+							'### Other changes',
+							'',
+							'* The first an amazing commit. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/xxxxxxx))',
+							'',
+							'  First line: Lorem Ipsum (1).',
+							'  Second line: Lorem Ipsum (2).',
+							'* The second an amazing commit. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))',
+							'',
+							'  First line: Lorem Ipsum (1).',
+							'  Second line: Lorem Ipsum (2).',
+							'  Third line: Lorem Ipsum (3).',
+							'* The third an amazing commit. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/yyyyyyy))'
+						].join( '\n' );
+
+						expect( changes.trim() ).to.equal( changelog );
+					} );
+			} );
+
+			it( 'groups "Updated translations." commits as the single entry (merged links)', () => {
+				const commits = [
+					{
+						type: 'Other changes',
+						header: 'Other: Updated translations.',
+						subject: 'Updated translations.',
+						hash: 'a'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Other changes',
+						header: 'Other: Updated translations.',
+						subject: 'Updated translations.',
+						hash: 'b'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Other changes',
+						header: 'Other: Updated translations.',
+						subject: 'Updated translations.',
+						hash: 'c'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Other changes',
+						header: 'Other: Updated translations.',
+						subject: 'Updated translations.',
+						hash: 'd'.repeat( 40 ),
+						notes: []
+					}
+				];
+
+				const context = {
+					version: '1.0.0',
+					repoUrl: url,
+					currentTag: 'v1.0.0',
+					commit: 'c'
+				};
+
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 2 )
+				} );
+
+				return generateChangelog( commits, context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
+
+						const changesAsArray = changes.split( '\n' )
+							.map( line => line.trim() )
+							.filter( line => line.length );
+
+						expect( changesAsArray[ 0 ] ).to.equal(
+							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
+						);
+						expect( changesAsArray[ 1 ] ).to.equal(
+							'### Other changes'
+						);
+						/* eslint-disable max-len */
+						expect( changesAsArray[ 2 ] ).to.equal(
+							'* Updated translations. ([commit](https://github.com/ckeditor/ckeditor5-package/c/aa), [commit](https://github.com/ckeditor/ckeditor5-package/c/bb), [commit](https://github.com/ckeditor/ckeditor5-package/c/cc), [commit](https://github.com/ckeditor/ckeditor5-package/c/dd))'
+						);
+						/* eslint-enable max-len */
+					} );
+			} );
+
+			it( 'groups "Updated translations." commits as the single entry (removed links, context.skipCommitsLink=true)', () => {
+				const commits = [
+					{
+						type: 'Other changes',
+						header: 'Other: Updated translations.',
+						subject: 'Updated translations.',
+						hash: 'a'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Other changes',
+						header: 'Other: Updated translations.',
+						subject: 'Updated translations.',
+						hash: 'b'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Other changes',
+						header: 'Other: Updated translations.',
+						subject: 'Updated translations.',
+						hash: 'c'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Other changes',
+						header: 'Other: Updated translations.',
+						subject: 'Updated translations.',
+						hash: 'd'.repeat( 40 ),
+						notes: []
+					}
+				];
+
+				const context = {
+					version: '1.0.0',
+					repoUrl: url,
+					currentTag: 'v1.0.0',
+					skipCommitsLink: true
+				};
+
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 2 )
+				} );
+
+				return generateChangelog( commits, context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
+
+						const changesAsArray = changes.split( '\n' )
+							.map( line => line.trim() )
+							.filter( line => line.length );
+
+						expect( changesAsArray[ 0 ] ).to.equal(
+							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
+						);
+						expect( changesAsArray[ 1 ] ).to.equal(
+							'### Other changes'
+						);
+						expect( changesAsArray[ 2 ] ).to.equal(
+							'* Updated translations.'
+						);
+					} );
+			} );
 		} );
 
-		describe( 'hoisting issues', () => {
-			it( 'does not hoist issues from the commit body', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit( 'Feature: Another feature. Closes #2.', 'This PR also closes #3 and #4.' );
+		describe( 'non-initial changelog (with "previousTag")', () => {
+			it( 'allows generating "internal release" (set by option, ignored all commits)', () => {
+				const commits = [
+					{
+						type: 'Other changes',
+						header: 'Other: The first an amazing commit.',
+						subject: 'The first an amazing commit.',
+						hash: 'x'.repeat( 40 ),
+						notes: []
+					}
+				];
 
-						return generateChangelog( '0.1.0' );
-					} )
-					.then( () => {
-						const latestChangelog = replaceCommitIds( getChangesForVersion( '0.1.0' ) );
+				const context = {
+					version: '1.1.0',
+					repoUrl: url,
+					currentTag: 'v1.1.0',
+					previousTag: 'v1.0.0',
+					commit: 'commit',
+					isInternalRelease: true
+				};
 
-						/* eslint-disable max-len */
-						const expectedChangelog = normalizeStrings( `
-### Features
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 7 )
+				} );
 
-* Another feature. Closes [#2](https://github.com/ckeditor/ckeditor5-test-package/issues/2). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
+				return generateChangelog( commits, context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
 
-  This PR also closes [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4).
-` );
-						/* eslint-enable max-len */
+						const changesAsArray = changes.split( '\n' )
+							.map( line => line.trim() )
+							.filter( line => line.length );
 
-						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
-					} );
-			} );
-
-			it( 'does not hoist issues from the commit body for merge commit', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit(
-							'Merge pull request #5 from ckeditor/t/4',
-							'Fix: Amazing fix. Closes #5.',
-							'The PR also finally closes #3 and #4. So good!'
+						expect( changesAsArray[ 0 ] ).to.equal(
+							'## [1.1.0](https://github.com/ckeditor/ckeditor5-package/compare/v1.0.0...v1.1.0) (0000-00-00)'
 						);
-
-						return generateChangelog( '0.1.1' );
-					} )
-					.then( () => {
-						const latestChangelog = replaceCommitIds( getChangesForVersion( '0.1.1' ) );
-
-						/* eslint-disable max-len */
-						const expectedChangelog = normalizeStrings( `
-### Bug fixes
-
-* Amazing fix. Closes [#5](https://github.com/ckeditor/ckeditor5-test-package/issues/5). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-
-  The PR also finally closes [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4). So good!
-` );
-						/* eslint-enable max-len */
-
-						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
-					} );
-			} );
-
-			it( 'does not hoist issues from the commit body with additional notes for merge commit', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit(
-							'Merge pull request #7 from ckeditor/t/6',
-							'Other: Some docs improvements. Closes #6.',
-							'Did you see the #3 and #4?',
-							'NOTE: Please read #1.',
-							'BREAKING CHANGES: Some breaking change.'
-						);
-
-						const options = {
-							transformCommit: transformCommitFactory( {
-								useExplicitBreakingChangeGroups: true
-							} )
-						};
-
-						return generateChangelog( '0.2.0', options );
-					} )
-					.then( () => {
-						const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.0' ) );
-
-						/* eslint-disable max-len */
-						const expectedChangelog = normalizeStrings( `
-### MAJOR BREAKING CHANGES
-
-* Some breaking change.
-
-### NOTE
-
-* Please read [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
-
-### Other changes
-
-* Some docs improvements. Closes [#6](https://github.com/ckeditor/ckeditor5-test-package/issues/6). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-
-  Did you see the [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4)?
-` );
-						/* eslint-enable max-len */
-
-						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
-					} );
-			} );
-
-			it( 'does not hoist issues from the commit body with additional notes', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit(
-							'Feature: Issues will not be hoisted. Closes #8.',
-							'All details have been described in #1.',
-							'NOTE: Please read #1.',
-							'BREAKING CHANGES: Some breaking change.'
-						);
-
-						const options = {
-							transformCommit: transformCommitFactory( {
-								useExplicitBreakingChangeGroups: true
-							} )
-						};
-
-						return generateChangelog( '0.2.0', options );
-					} )
-					.then( () => {
-						const latestChangelog = replaceCommitIds( getChangesForVersion( '0.2.0' ) );
-
-						/* eslint-disable max-len */
-						const expectedChangelog = normalizeStrings( `
-### MAJOR BREAKING CHANGES
-
-* Some breaking change.
-
-### NOTE
-
-* Please read [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
-
-### Features
-
-* Issues will not be hoisted. Closes [#8](https://github.com/ckeditor/ckeditor5-test-package/issues/8). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-
-  All details have been described in [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
-` );
-						/* eslint-enable max-len */
-
-						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
-					} );
-			} );
-		} );
-
-		// See: https://github.com/ckeditor/ckeditor5-dev/issues/270
-		describe( 'merge commits', () => {
-			it( 'works with merge commit which is not a pull request #1', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit(
-							'Merge t/ckeditor5-link/52 into master',
-							'Fix: Foo.'
-						);
-
-						return generateChangelog( '0.1.0' );
-					} )
-					.then( () => {
-						const latestChangelog = replaceCommitIds( getChangesForVersion( '0.1.0' ) );
-
-						/* eslint-disable max-len */
-						const expectedChangelog = normalizeStrings( `
-### Bug fixes
-
-* Foo. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-` );
-						/* eslint-enable max-len */
-
-						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
-					} );
-			} );
-
-			it( 'works with merge commit which is not a pull request #2', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit(
-							'Merge branch t/ckedtor5-engine/660 to master',
-							'Fix: Foo.'
-						);
-
-						return generateChangelog( '0.1.0' );
-					} )
-					.then( () => {
-						const latestChangelog = replaceCommitIds( getChangesForVersion( '0.1.0' ) );
-
-						/* eslint-disable max-len */
-						const expectedChangelog = normalizeStrings( `
-### Bug fixes
-
-* Foo. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-` );
-						/* eslint-enable max-len */
-
-						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
-					} );
-			} );
-		} );
-
-		// See: https://github.com/ckeditor/ckeditor5-dev/issues/271
-		describe( 'prefixes for bug fixing', () => {
-			it( 'works with prefix "Fixes"', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit( 'Fixes: Foo Bar.' );
-
-						return generateChangelog( '0.0.2' );
-					} )
-					.then( () => {
-						const latestChangelog = replaceCommitIds( getChangesForVersion( '0.0.2' ) );
-
-						/* eslint-disable max-len */
-						const expectedChangelog = normalizeStrings( `
-### Bug fixes
-
-* Foo Bar. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-` );
-						/* eslint-enable max-len */
-
-						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
-					} );
-			} );
-
-			it( 'works with prefix "Fixed"', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit( 'Fixed: Foo Bar.' );
-
-						return generateChangelog( '0.0.2' );
-					} )
-					.then( () => {
-						const latestChangelog = replaceCommitIds( getChangesForVersion( '0.0.2' ) );
-
-						/* eslint-disable max-len */
-						const expectedChangelog = normalizeStrings( `
-### Bug fixes
-
-* Foo Bar. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-` );
-						/* eslint-enable max-len */
-
-						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
-					} );
-			} );
-		} );
-
-		describe( 'spacing between entries', () => {
-			it( 'adds two blank lines for internal release (user specified "internal" version)', () => {
-				return makeInitialRelease()
-					.then( () => {
-						return generateChangelog( '0.1.0', { isInternalRelease: true } );
-					} )
-					.then( () => {
-						const changelogAsArray = getChangelog().split( '\n' ).slice( 0, 9 );
-
-						expect( changelogAsArray[ 0 ], 'Index: 0' ).to.equal( 'Changelog' );
-						expect( changelogAsArray[ 1 ], 'Index: 1' ).to.equal( '=========' );
-						expect( changelogAsArray[ 2 ], 'Index: 2' ).to.equal( '' );
-						expect( replaceDates( changelogAsArray[ 3 ] ), 'Index: 3' ).to.equal(
-							'## [0.1.0](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.0.1...v0.1.0) (0000-00-00)'
-						);
-						expect( changelogAsArray[ 4 ], 'Index: 4' ).to.equal( '' );
-						expect( changelogAsArray[ 5 ], 'Index: 5' ).to.equal(
+						expect( changesAsArray[ 1 ] ).to.equal(
 							'Internal changes only (updated dependencies, documentation, etc.).'
 						);
-						expect( changelogAsArray[ 6 ], 'Index: 6' ).to.equal( '' );
-						expect( changelogAsArray[ 7 ], 'Index: 7' ).to.equal( '' );
-						expect( replaceDates( changelogAsArray[ 8 ] ), 'Index: 8' ).to.equal(
-							'## [0.0.1](https://github.com/ckeditor/ckeditor5-test-package/tree/v0.0.1) (0000-00-00)'
-						);
 					} );
 			} );
 
-			it( 'adds two blank lines for internal release (user provides a version but no commits were made)', () => {
-				return makeInitialRelease()
-					.then( () => {
-						return generateChangelog( '0.1.0', { isInternalRelease: true } );
-					} )
-					.then( () => {
-						const changelogAsArray = getChangelog().split( '\n' ).slice( 0, 9 );
+			it( 'allows generating "internal release" (passed an empty array of commits)', () => {
+				const context = {
+					version: '1.1.0',
+					repoUrl: url,
+					currentTag: 'v1.1.0',
+					previousTag: 'v1.0.0',
+					commit: 'commit'
+				};
 
-						expect( changelogAsArray[ 0 ], 'Index: 0' ).to.equal( 'Changelog' );
-						expect( changelogAsArray[ 1 ], 'Index: 1' ).to.equal( '=========' );
-						expect( changelogAsArray[ 2 ], 'Index: 2' ).to.equal( '' );
-						expect( replaceDates( changelogAsArray[ 3 ] ), 'Index: 3' ).to.equal(
-							'## [0.1.0](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.0.1...v0.1.0) (0000-00-00)'
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 7 )
+				} );
+
+				return generateChangelog( [], context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
+
+						const changesAsArray = changes.split( '\n' )
+							.map( line => line.trim() )
+							.filter( line => line.length );
+
+						expect( changesAsArray[ 0 ] ).to.equal(
+							'## [1.1.0](https://github.com/ckeditor/ckeditor5-package/compare/v1.0.0...v1.1.0) (0000-00-00)'
 						);
-						expect( changelogAsArray[ 4 ], 'Index: 4' ).to.equal( '' );
-						expect( changelogAsArray[ 5 ], 'Index: 5' ).to.equal(
+						expect( changesAsArray[ 1 ] ).to.equal(
 							'Internal changes only (updated dependencies, documentation, etc.).'
 						);
-						expect( changelogAsArray[ 6 ], 'Index: 6' ).to.equal( '' );
-						expect( changelogAsArray[ 7 ], 'Index: 7' ).to.equal( '' );
-						expect( replaceDates( changelogAsArray[ 8 ] ), 'Index: 8' ).to.equal(
-							'## [0.0.1](https://github.com/ckeditor/ckeditor5-test-package/tree/v0.0.1) (0000-00-00)'
+					} );
+			} );
+
+			it( 'attaches the release highlights placeholder', () => {
+				const commits = [
+					{
+						type: 'Features',
+						header: 'Feature: The first an amazing feature.',
+						subject: 'The first an amazing feature.',
+						hash: 'x'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Features',
+						header: 'Feature: The second an amazing feature.',
+						subject: 'The second an amazing feature.',
+						hash: 'z'.repeat( 40 ),
+						notes: []
+					}
+				];
+
+				const context = {
+					version: '1.1.0',
+					repoUrl: url,
+					currentTag: 'v1.1.0',
+					previousTag: 'v1.0.0',
+					commit: 'commit',
+					highlightsPlaceholder: true
+				};
+
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 7 )
+				} );
+
+				return generateChangelog( commits, context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
+
+						const changesAsArray = changes.split( '\n' )
+							.map( line => line.trim() )
+							.filter( line => line.length );
+
+						expect( changesAsArray[ 0 ] ).to.equal(
+							'## [1.1.0](https://github.com/ckeditor/ckeditor5-package/compare/v1.0.0...v1.1.0) (0000-00-00)'
+						);
+						expect( changesAsArray[ 1 ] ).to.equal(
+							'### Release highlights'
+						);
+						expect( changesAsArray[ 2 ] ).to.equal(
+							'TODO: Add a link to the blog post.'
+						);
+						expect( changesAsArray[ 3 ] ).to.equal(
+							'### Features'
+						);
+						expect( changesAsArray[ 4 ] ).to.equal(
+							'* The first an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/xxxxxxx))'
+						);
+						expect( changesAsArray[ 5 ] ).to.equal(
+							'* The second an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
 						);
 					} );
 			} );
 
-			it( 'changelog should contain 2 blank lines for changelog with internal changes', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit( 'Docs: Updated README.' );
+			it( 'attaches the collaboration features changelog', () => {
+				const commits = [
+					{
+						type: 'Features',
+						header: 'Feature: The first an amazing feature.',
+						subject: 'The first an amazing feature.',
+						hash: 'x'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Features',
+						header: 'Feature: The second an amazing feature.',
+						subject: 'The second an amazing feature.',
+						hash: 'z'.repeat( 40 ),
+						notes: []
+					}
+				];
 
-						return generateChangelog( '0.0.2' );
-					} )
-					.then( () => {
-						const expectedChangelogeEntries = [
-							'## [0.0.2](https://github.com/ckeditor/ckeditor5-test-package/compare/v0.0.1...v0.0.2) (0000-00-00)',
-							'',
-							'Internal changes only (updated dependencies, documentation, etc.).',
-							'',
-							'',
-							'## [0.0.1](https://github.com/ckeditor/ckeditor5-test-package/tree/v0.0.1) (0000-00-00)'
-						];
-						const changelogAsArray = replaceDates( getChangelog() ).replace( changelogHeader, '' ).split( '\n' );
+				const context = {
+					version: '1.1.0',
+					repoUrl: url,
+					currentTag: 'v1.1.0',
+					previousTag: 'v1.0.0',
+					commit: 'commit',
+					collaborationFeatures: true
+				};
 
-						expectedChangelogeEntries.forEach( ( row, index ) => {
-							expect( row.trim() ).to.equal( changelogAsArray[ index ].trim(), `Index: ${ index }` );
-						} );
-					} );
-			} );
-		} );
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 7 )
+				} );
 
-		describe( 'additional options', () => {
-			it( 'attaches additional description for "Bug fixes" section', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit( 'Fix: Foo Bar.' );
+				return generateChangelog( commits, context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
+						const changelog = 'https://ckeditor.com/collaboration/changelog';
 
-						return generateChangelog( '0.0.2', { additionalNotes: true } );
-					} )
-					.then( () => {
-						const latestChangelog = replaceCommitIds( getChangesForVersion( '0.0.2' ) );
+						const changesAsArray = changes.split( '\n' )
+							.map( line => line.trim() )
+							.filter( line => line.length );
 
-						/* eslint-disable max-len */
-						const expectedChangelog = normalizeStrings( `
-### Bug fixes
-
-Besides changes in the dependencies, this version also contains the following bug fixes:
-
-* Foo Bar. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-` );
-						/* eslint-enable max-len */
-
-						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
-					} );
-			} );
-
-			// See: https://github.com/ckeditor/ckeditor5-dev/issues/184
-			it( 'forces generating changelog as "internal" even if commits were made', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit(
-							'Feature: Issues will not be hoisted. Closes #8.',
-							'All details have been described in #1.',
-							'NOTE: Please read #1.',
-							'BREAKING CHANGES: Some breaking change.'
+						expect( changesAsArray[ 0 ] ).to.equal(
+							'## [1.1.0](https://github.com/ckeditor/ckeditor5-package/compare/v1.0.0...v1.1.0) (0000-00-00)'
 						);
-
-						makeCommit(
-							'Feature: Issues will not be hoisted. Closes #8.',
-							'All details have been described in #1.',
-							'NOTE: Please read #1.',
-							'BREAKING CHANGES: Some breaking change.'
+						expect( changesAsArray[ 1 ] ).to.equal(
+							'### Collaboration features'
 						);
-
-						return generateChangelog( '0.1.0', { isInternalRelease: true } );
-					} )
-					.then( () => {
-						const latestChangelog = getChangesForVersion( '0.1.0' );
-
-						expect( latestChangelog ).to.equal( 'Internal changes only (updated dependencies, documentation, etc.).' );
+						expect( changesAsArray[ 2 ] ).to.equal(
+							`The CKEditor 5 Collaboration features changelog can be found here: ${ changelog }.`
+						);
+						expect( changesAsArray[ 3 ] ).to.equal(
+							'### Features'
+						);
+						expect( changesAsArray[ 4 ] ).to.equal(
+							'* The first an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/xxxxxxx))'
+						);
+						expect( changesAsArray[ 5 ] ).to.equal(
+							'* The second an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
+						);
 					} );
 			} );
 
-			it( 'does not generate links to commits and release', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit( 'Feature: Some amazing feature.' );
+			it( 'generates complex changelog', () => {
+				const commits = [
+					{
+						type: 'Features',
+						header: 'Feature (engine): The first an amazing feature.',
+						subject: 'The first an amazing feature.',
+						scope: [ 'engine' ],
+						hash: 'x'.repeat( 40 ),
+						notes: [
+							{
+								title: 'MINOR BREAKING CHANGES',
+								text: 'Nothing but I would like to use the note - engine.',
+								scope: [ 'engine' ]
+							}
+						]
+					},
+					{
+						type: 'Features',
+						header: 'Feature: The second an amazing feature.',
+						subject: 'The second an amazing feature.',
+						hash: 'z'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Bug fixes',
+						header: 'Fix (ui): The first amazing bug fix.',
+						subject: 'The first amazing bug fix.',
+						scope: [ 'ui' ],
+						hash: 'y'.repeat( 40 ),
+						notes: [
+							{
+								title: 'MINOR BREAKING CHANGES',
+								text: 'Nothing but I would like to use the note - ui.',
+								scope: [ 'ui' ]
+							}
+						]
+					},
+					{
+						type: 'Other changes',
+						header: 'Other: Use the newest version of Node.js on CI.',
+						subject: 'Use the newest version of Node.js on CI.',
+						hash: 'a'.repeat( 40 ),
+						notes: [
+							{
+								title: 'MAJOR BREAKING CHANGES',
+								text: 'This change should be scoped too but the script should work if the scope is being missed.',
+								scope: []
+							}
+						]
+					},
+					{
+						type: 'Features',
+						header: 'Feature (autoformat): It just works.',
+						subject: 'It just works.',
+						scope: [
+							'autoformat',
+							// The tool supports multi-scoped changes but only the first one will be printed in the changelog.
+							'engine'
+						],
+						hash: 'b'.repeat( 40 ),
+						notes: []
+					}
+				];
 
-						return generateChangelog( '0.1.0', { skipLinks: true } );
-					} )
-					.then( () => {
-						const changelogAsArray = getChangelog().split( '\n' ).slice( 0, 10 );
+				const context = {
+					version: '1.1.0',
+					repoUrl: url,
+					currentTag: 'v1.1.0',
+					previousTag: 'v1.0.0',
+					commit: 'c',
+					highlightsPlaceholder: true,
+					collaborationFeatures: true
+				};
 
-						expect( changelogAsArray[ 0 ], 'Index: 0' ).to.equal( 'Changelog' );
-						expect( changelogAsArray[ 1 ], 'Index: 1' ).to.equal( '=========' );
-						expect( changelogAsArray[ 2 ], 'Index: 2' ).to.equal( '' );
-						expect( replaceDates( changelogAsArray[ 3 ] ), 'Index: 3' ).to.equal(
-							'## 0.1.0 (0000-00-00)'
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 2 )
+				} );
+
+				const sortFunction = compareFunc( item => {
+					if ( Array.isArray( item.scope ) ) {
+						return item.scope[ 0 ];
+					}
+
+					// A hack that allows moving all non-scoped commits or breaking changes notes at the end of the list.
+					return 'z'.repeat( 15 );
+				} );
+
+				options.commitsSort = sortFunction;
+				options.notesSort = sortFunction;
+
+				return generateChangelog( commits, context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
+						const changelog = 'https://ckeditor.com/collaboration/changelog';
+
+						const changesAsArray = changes.split( '\n' )
+							.map( line => line.trim() )
+							.filter( line => line.length );
+
+						expect( changesAsArray[ 0 ] ).to.equal(
+							'## [1.1.0](https://github.com/ckeditor/ckeditor5-package/compare/v1.0.0...v1.1.0) (0000-00-00)'
 						);
-						expect( changelogAsArray[ 4 ], 'Index: 4' ).to.equal( '' );
-						expect( changelogAsArray[ 5 ], 'Index: 5' ).to.equal( '### Features' );
-						expect( changelogAsArray[ 6 ], 'Index: 6' ).to.equal( '' );
-						expect( changelogAsArray[ 7 ], 'Index: 7' ).to.equal(
-							'* Some amazing feature.'
+						expect( changesAsArray[ 1 ] ).to.equal(
+							'### Release highlights'
 						);
-						expect( changelogAsArray[ 8 ], 'Index: 8' ).to.equal( '' );
-						expect( changelogAsArray[ 9 ], 'Index: 9' ).to.equal( '' );
+						expect( changesAsArray[ 2 ] ).to.equal(
+							'TODO: Add a link to the blog post.'
+						);
+						expect( changesAsArray[ 3 ] ).to.equal(
+							'### Collaboration features'
+						);
+						expect( changesAsArray[ 4 ] ).to.equal(
+							`The CKEditor 5 Collaboration features changelog can be found here: ${ changelog }.`
+						);
+						expect( changesAsArray[ 5 ] ).to.equal(
+							'### MAJOR BREAKING CHANGES'
+						);
+						expect( changesAsArray[ 6 ] ).to.equal(
+							'* This change should be scoped too but the script should work if the scope is being missed.'
+						);
+						expect( changesAsArray[ 7 ] ).to.equal(
+							'### MINOR BREAKING CHANGES'
+						);
+						expect( changesAsArray[ 8 ] ).to.equal(
+							'* **engine**: Nothing but I would like to use the note - engine.'
+						);
+						expect( changesAsArray[ 9 ] ).to.equal(
+							'* **ui**: Nothing but I would like to use the note - ui.'
+						);
+						expect( changesAsArray[ 10 ] ).to.equal(
+							'### Features'
+						);
+						expect( changesAsArray[ 11 ] ).to.equal(
+							'* **autoformat**: It just works. ([commit](https://github.com/ckeditor/ckeditor5-package/c/bb))'
+						);
+						expect( changesAsArray[ 12 ] ).to.equal(
+							'* **engine**: The first an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/c/xx))'
+						);
+						expect( changesAsArray[ 13 ] ).to.equal(
+							'* The second an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/c/zz))'
+						);
+						expect( changesAsArray[ 14 ] ).to.equal(
+							'### Bug fixes'
+						);
+						expect( changesAsArray[ 15 ] ).to.equal(
+							'* **ui**: The first amazing bug fix. ([commit](https://github.com/ckeditor/ckeditor5-package/c/yy))'
+						);
+						expect( changesAsArray[ 16 ] ).to.equal(
+							'### Other changes'
+						);
+						expect( changesAsArray[ 17 ] ).to.equal(
+							'* Use the newest version of Node.js on CI. ([commit](https://github.com/ckeditor/ckeditor5-package/c/aa))'
+						);
 					} );
 			} );
-		} );
 
-		describe( 'grouping "Updated translation" commits as the single entry', () => {
-			it( 'works fine when translations have been updated few times (and nothing more has been changed)', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit( 'Other: Updated translations. [skip ci]' );
-						makeCommit( 'Other: Updated translations. [skip ci]' );
-						makeCommit( 'Other: Updated translations. [skip ci]' );
+			it( 'removes compare link from the header (context.skipCompareLink=true)', () => {
+				const context = {
+					version: '1.1.0',
+					repoUrl: url,
+					currentTag: 'v1.1.0',
+					previousTag: 'v1.0.0',
+					skipCompareLink: true
+				};
 
-						return generateChangelog( '0.0.2' );
-					} )
-					.then( () => {
-						const latestChangelog = replaceCommitIds( getChangesForVersion( '0.0.2' ) );
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 7 )
+				} );
 
-						/* eslint-disable max-len */
-						const expectedChangelog = normalizeStrings( `
-### Other changes
+				return generateChangelog( [], context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
 
-* Updated translations. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX)) ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX)) ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-` );
-						/* eslint-enable max-len */
+						const changesAsArray = changes.split( '\n' )
+							.map( line => line.trim() )
+							.filter( line => line.length );
 
-						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
-					} );
-			} );
-
-			it( 'works fine for complex iteration', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit( 'Feature: Another feature. Closes #2' );
-						makeCommit( 'Other: Updated translations. [skip ci]' );
-						makeCommit(
-							'Feature: Issues will not be hoisted. Closes #8.',
-							'All details have been described in #1.',
-							'NOTE: Please read #1.',
-							'BREAKING CHANGES: Some breaking change.'
+						expect( changesAsArray[ 0 ] ).to.equal(
+							'## 1.1.0 (0000-00-00)'
 						);
-						makeCommit( 'Other: Updated translations. [skip ci]' );
-						makeCommit(
-							'Merge t/ckeditor5-link/52 into master',
-							'Fix: Foo Bar. Closes #9.'
-						);
-						makeCommit( 'Other: Updated translations. [skip ci]' );
-						makeCommit(
-							'Fix: Amazing fix. Closes #5.',
-							'The PR also finally closes #3 and #4. So good!'
-						);
-						makeCommit( 'Other: Updated translations.' );
-
-						const options = {
-							transformCommit: transformCommitFactory( {
-								useExplicitBreakingChangeGroups: true
-							} )
-						};
-
-						return generateChangelog( '1.0.0', options );
-					} )
-					.then( () => {
-						const latestChangelog = replaceCommitIds( getChangesForVersion( '1.0.0' ) );
-
-						/* eslint-disable max-len */
-						const expectedChangelog = normalizeStrings( `
-### MAJOR BREAKING CHANGES
-
-* Some breaking change.
-
-### NOTE
-
-* Please read [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
-
-### Features
-
-* Another feature. Closes [#2](https://github.com/ckeditor/ckeditor5-test-package/issues/2). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-* Issues will not be hoisted. Closes [#8](https://github.com/ckeditor/ckeditor5-test-package/issues/8). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-
-  All details have been described in [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
-
-### Bug fixes
-
-* Amazing fix. Closes [#5](https://github.com/ckeditor/ckeditor5-test-package/issues/5). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-
-  The PR also finally closes [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4). So good!
-* Foo Bar. Closes [#9](https://github.com/ckeditor/ckeditor5-test-package/issues/9). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-
-### Other changes
-
-* Updated translations. ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX)) ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX)) ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX)) ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-` );
-						/* eslint-enable max-len */
-
-						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
-					} );
-			} );
-		} );
-
-		describe( 'treats "MAJOR BREAKING CHANGES" as "MINOR BREAKING CHANGES"', () => {
-			it( 'works fine for complex iteration', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit( 'Feature: Another feature. Closes #2' );
-						makeCommit(
-							'Feature: Issues will not be hoisted. Closes #8.',
-							'All details have been described in #1.',
-							'MAJOR BREAKING CHANGES: Breaking change NO 1.'
-						);
-						makeCommit(
-							'Merge t/ckeditor5-link/52 into master',
-							'Fix: Foo Bar. Closes #9.',
-							'MAJOR BREAKING CHANGE: Breaking change NO 2.'
-						);
-						makeCommit(
-							'Fix: Amazing fix. Closes #5.',
-							'The PR also finally closes #3 and #4. So good!',
-							'BREAKING CHANGES: Breaking change NO 3.'
-						);
-
-						const options = {
-							transformCommit: transformCommitFactory( {
-								treatMajorAsMinorBreakingChange: true,
-								useExplicitBreakingChangeGroups: true
-							} )
-						};
-
-						return generateChangelog( '1.0.0', options );
-					} )
-					.then( () => {
-						const latestChangelog = replaceCommitIds( getChangesForVersion( '1.0.0' ) );
-
-						/* eslint-disable max-len */
-						const expectedChangelog = normalizeStrings( `
-### MINOR BREAKING CHANGES
-
-* Breaking change NO 3.
-* Breaking change NO 2.
-* Breaking change NO 1.
-
-### Features
-
-* Another feature. Closes [#2](https://github.com/ckeditor/ckeditor5-test-package/issues/2). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-* Issues will not be hoisted. Closes [#8](https://github.com/ckeditor/ckeditor5-test-package/issues/8). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-
-  All details have been described in [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
-
-### Bug fixes
-
-* Amazing fix. Closes [#5](https://github.com/ckeditor/ckeditor5-test-package/issues/5). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-
-  The PR also finally closes [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4). So good!
-* Foo Bar. Closes [#9](https://github.com/ckeditor/ckeditor5-test-package/issues/9). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-						` );
-						/* eslint-enable max-len */
-
-						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
-					} );
-			} );
-		} );
-
-		describe( 'treats "MAJOR BREAKING CHANGES" and "MINOR BREAKING CHANGES" as "BREAKING CHANGE"', () => {
-			it( 'works fine for complex iteration', () => {
-				return makeInitialRelease()
-					.then( () => {
-						makeCommit( 'Feature: Another feature. Closes #2' );
-						makeCommit(
-							'Feature: Issues will not be hoisted. Closes #8.',
-							'All details have been described in #1.',
-							'MAJOR BREAKING CHANGES: Breaking change NO 1.'
-						);
-						makeCommit(
-							'Merge t/ckeditor5-link/52 into master',
-							'Fix: Foo Bar. Closes #9.',
-							'MINOR BREAKING CHANGE: Breaking change NO 2.'
-						);
-						makeCommit(
-							'Fix: Amazing fix. Closes #5.',
-							'The PR also finally closes #3 and #4. So good!',
-							'BREAKING CHANGES: Breaking change NO 3.'
-						);
-
-						return generateChangelog( '1.0.0' );
-					} )
-					.then( () => {
-						const latestChangelog = replaceCommitIds( getChangesForVersion( '1.0.0' ) );
-
-						/* eslint-disable max-len */
-						const expectedChangelog = normalizeStrings( `
-### BREAKING CHANGES
-
-* Breaking change NO 3.
-* Breaking change NO 2.
-* Breaking change NO 1.
-
-### Features
-
-* Another feature. Closes [#2](https://github.com/ckeditor/ckeditor5-test-package/issues/2). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-* Issues will not be hoisted. Closes [#8](https://github.com/ckeditor/ckeditor5-test-package/issues/8). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-
-  All details have been described in [#1](https://github.com/ckeditor/ckeditor5-test-package/issues/1).
-
-### Bug fixes
-
-* Amazing fix. Closes [#5](https://github.com/ckeditor/ckeditor5-test-package/issues/5). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-
-  The PR also finally closes [#3](https://github.com/ckeditor/ckeditor5-test-package/issues/3) and [#4](https://github.com/ckeditor/ckeditor5-test-package/issues/4). So good!
-* Foo Bar. Closes [#9](https://github.com/ckeditor/ckeditor5-test-package/issues/9). ([XXXXXXX](https://github.com/ckeditor/ckeditor5-test-package/commit/XXXXXXX))
-						` );
-						/* eslint-enable max-len */
-
-						expect( latestChangelog ).to.equal( expectedChangelog.trim() );
 					} );
 			} );
 		} );
 	} );
 
-	// Because of the Windows end of the line, we need to normalize them.
-	// If we won't do it, some of the assertions will fail because strings will be ending with "\r" that wasn't expected.
-	function normalizeStrings( content ) {
-		return content.replace( /\r\n/g, '\n' );
-	}
-
-	function getChangelog() {
-		return normalizeStrings( _getChangelog() );
-	}
-
-	function getChangesForVersion( version ) {
-		return normalizeStrings( _getChangesForVersion( version ) );
-	}
-
-	function makeCommit( ...messages ) {
-		return exec( 'git commit --allow-empty ' + messages.map( m => `--message "${ m }"` ).join( ' ' ) );
-	}
-
-	function exec( command ) {
-		return tools.shExec( command, { verbosity: 'error' } );
-	}
-
-	function generateChangelog( version, options = {} ) {
-		return generateChangelogFromCommits( {
-			version,
-			isInternalRelease: options.isInternalRelease,
-			additionalNotes: options.additionalNotes,
-			skipLinks: options.skipLinks,
-			newTagName: 'v' + version,
-			tagName: !options.isFirstRelease ? 'v0.0.1' : null,
-			transformCommit: options.transformCommit || transformCommitFactory()
-		} );
-	}
-
-	// Replaces commits hashes to known string. It allows comparing changelog entries to strings
-	// which makes the test easier to read.
-	function replaceCommitIds( changelog ) {
-		return changelog.replace( /\[[a-z0-9]{7}\]/g, '[XXXXXXX]' )
-			.replace( /commit\/[a-z0-9]{7}/g, 'commit/XXXXXXX' );
-	}
-
 	// Replaces dates to known string. It allows comparing changelog entries to strings
 	// which don't depend on the date.
 	function replaceDates( changelog ) {
 		return changelog.replace( /\d{4}-\d{2}-\d{2}/g, '0000-00-00' );
-	}
-
-	// Almost all testes (except the initial release) require the initial release because we're checking
-	// how the changelog looks between releases.
-	function makeInitialRelease() {
-		makeCommit( 'Internal: An initial commit.' );
-
-		return generateChangelog( '0.0.1', { isFirstRelease: true } )
-			.then( () => {
-				const version = '0.0.1';
-
-				exec( `npm version ${ version } --no-git-tag-version` );
-				exec( 'git add package.json' );
-				makeCommit( `Release: v${ version }.` );
-				exec( `git tag v${ version }` );
-			} );
 	}
 } );
