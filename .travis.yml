@@ -6,9 +6,9 @@ cache:
 cache:
   - node_modules
 before_install:
-  - npm i -g yarn lerna
+  - npm i -g yarn
 install:
-  - lerna bootstrap
+  - yarn install
 script:
   - yarn run lint
   - yarn run coverage
