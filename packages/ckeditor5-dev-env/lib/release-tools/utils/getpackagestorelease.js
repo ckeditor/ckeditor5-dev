@@ -35,11 +35,19 @@ module.exports = function getPackagesToRelease( pathsToPackages, options ) {
 		const packageJson = getPackageJson();
 		const repositoryName = packageJson.name;
 
-		const newVersion = findVersionInChangelog( options.changes, repositoryName ) || options.version;
+		let newVersion;
+
+		// For the main package/repository use the version specified as `options.cwd`.
+		// For the rest packages, find a version in the changelog file.
+		if ( repositoryPath === cwd ) {
+			newVersion = options.version;
+		} else {
+			newVersion = findVersionInChangelog( options.changes, repositoryName );
+		}
 
 		// If these versions aren't equal, it means that the package is ready to release
 		// because we assume that a version from `package.json` is the latest.
-		if ( packageJson.version !== newVersion ) {
+		if ( newVersion && packageJson.version !== newVersion ) {
 			packagesToRelease.set( repositoryName, {
 				previousVersion: packageJson.version,
 				version: newVersion
