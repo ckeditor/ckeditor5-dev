@@ -133,7 +133,7 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 
 			logInfo(
 				`Changelog for "${ chalk.underline( pkgJson.name ) }" (v${ packagesVersion.get( pkgJson.name ) }) has been generated.`,
-				{ indentLevel: 1 }
+				{ indentLevel: 1, startWithNewLine: true }
 			);
 
 			process.chdir( cwd );
