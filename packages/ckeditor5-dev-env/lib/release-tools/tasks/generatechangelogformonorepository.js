@@ -59,8 +59,7 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 	const pkgJson = getPackageJson( options.cwd );
 
 	const transformCommit = transformCommitForSubRepositoryFactory( {
-		useExplicitBreakingChangeGroups: true,
-		returnInvalidCommit: true
+		useExplicitBreakingChangeGroups: true
 	} );
 
 	const pathsCollection = getPackagesPaths( {

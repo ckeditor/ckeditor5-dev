@@ -23,8 +23,6 @@ const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
  * @param {Boolean} [options.treatMajorAsMinorBreakingChange=false] If set on true, all "MAJOR BREAKING CHANGES" notes will be replaced
  * with "MINOR BREAKING CHANGES". This behaviour is being disabled automatically if `options.useExplicitBreakingChangeGroups` is
  * set on `false` because all commits will be treated as "BREAKING CHANGES".
- * @param {Boolean} [options.returnInvalidCommit=false] Whether an invalid commit should be returned.
- * TODO: Consider removing the option after rewriting "generateSingleChangelog()".
  * @param {Boolean} [options.useExplicitBreakingChangeGroups] If set on `true`, notes from parsed commits will be grouped as
  * "MINOR BREAKING CHANGES" and "MAJOR BREAKING CHANGES'. If set on `false` (by default), all breaking changes notes will be treated
  * as "BREAKING CHANGES".
@@ -143,13 +141,13 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 
 		if ( !commit.body ) {
 			// It's used only for displaying the commit. Changelog generator will filter out the invalid entries.
-			return options.returnInvalidCommit ? commit : undefined;
+			return commit;
 		}
 
 		const commitEntries = commit.body.match( utils.MULTI_ENTRIES_COMMIT_REGEXP );
 
 		if ( !commitEntries || !commitEntries.length ) {
-			return options.returnInvalidCommit ? commit : undefined;
+			return commit;
 		}
 
 		// Single commit contains a few entries that should be inserted to the changelog.

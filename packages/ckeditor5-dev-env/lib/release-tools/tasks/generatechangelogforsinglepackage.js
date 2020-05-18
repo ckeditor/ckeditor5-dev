@@ -44,9 +44,7 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 
 	logProcess( chalk.bold( `Generating changelog for "${ chalk.underline( pkgJson.name ) }"...` ) );
 
-	const transformCommit = transformCommitForSubRepositoryFactory( {
-		returnInvalidCommit: true
-	} );
+	const transformCommit = transformCommitForSubRepositoryFactory();
 
 	logProcess( 'Collecting all commits since the last release...' );
 
