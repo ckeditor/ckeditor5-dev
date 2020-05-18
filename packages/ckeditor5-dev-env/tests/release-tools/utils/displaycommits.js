@@ -8,7 +8,7 @@
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
-const transformCommitFactory = require( '../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepositoryfactory' );
+const transformCommitFactory = require( '../../../lib/release-tools/utils/transformcommitfactory' );
 
 describe( 'dev-env/release-tools/utils', () => {
 	let displayCommits, transformCommit, sandbox, stubs;

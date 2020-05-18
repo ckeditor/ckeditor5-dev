@@ -6,20 +6,19 @@
 'use strict';
 
 const fs = require( 'fs' );
-const { Readable } = require( 'stream' );
-const { tools, stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const chalk = require( 'chalk' );
-const conventionalChangelogWriter = require( 'conventional-changelog-writer' );
 const semver = require( 'semver' );
 const cli = require( '../utils/cli' );
 const changelogUtils = require( '../utils/changelog' );
 const displayCommits = require( '../utils/displaycommits' );
+const generateChangelog = require( '../utils/generatechangelog' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getNewVersionType = require( '../utils/getnewversiontype' );
 const getCommits = require( '../utils/getcommits' );
-const getWriterOptions = require( '../utils/transform-commit/getwriteroptions' );
-const { getRepositoryUrl } = require( '../utils/transform-commit/transform-commit-utils' );
-const transformCommitForSubRepositoryFactory = require( '../utils/transform-commit/transformcommitforsubrepositoryfactory' );
+const getWriterOptions = require( '../utils/getwriteroptions' );
+const { getRepositoryUrl } = require( '../utils/transformcommitutils' );
+const transformCommitForSubRepositoryFactory = require( '../utils/transformcommitfactory' );
 
 /**
  * Generates the changelog based on commit messages in a package that is located under current work directory (cwd).
@@ -93,9 +92,6 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 
 			logProcess( 'Generating the changelog...' );
 
-			const commitStream = new Readable( { objectMode: true } );
-			commitStream._read = function() {};
-
 			const previousTag = commitOptions.from ? 'v' + pkgJson.version : null;
 
 			const writerContext = {
@@ -130,21 +126,12 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 					return commit;
 				} );
 
-			for ( const commit of publicCommits ) {
-				commitStream.push( commit );
-			}
+			return generateChangelog( publicCommits, writerContext, writerOptions )
+				.then( changes => {
+					logInfo( 'Changes based on commits have been generated.', { indentLevel: 1 } );
 
-			commitStream.push( null );
-
-			return new Promise( ( resolve, reject ) => {
-				commitStream
-					.pipe( conventionalChangelogWriter( writerContext, writerOptions ) )
-					.pipe( stream.noop( changes => {
-						logInfo( 'Changes based on commits have been generated.', { indentLevel: 1 } );
-						resolve( changes.toString() );
-					} ) )
-					.on( 'error', reject );
-			} );
+					return Promise.resolve( changes );
+				} );
 		} )
 		.then( changesFromCommits => {
 			logProcess( 'Saving changelog...' );

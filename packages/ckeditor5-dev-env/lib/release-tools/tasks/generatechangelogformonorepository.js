@@ -7,10 +7,8 @@
 
 const fs = require( 'fs' );
 const path = require( 'path' );
-const { Readable } = require( 'stream' );
-const { tools, stream, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const compareFunc = require( 'compare-func' );
-const conventionalChangelogWriter = require( 'conventional-changelog-writer' );
 const chalk = require( 'chalk' );
 const minimatch = require( 'minimatch' );
 const semver = require( 'semver' );
@@ -18,13 +16,14 @@ const changelogUtils = require( '../utils/changelog' );
 const cli = require( '../utils/cli' );
 const displayCommits = require( '../utils/displaycommits' );
 const displaySkippedPackages = require( '../utils/displayskippedpackages' );
+const generateChangelog = require( '../utils/generatechangelog' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getNewVersionType = require( '../utils/getnewversiontype' );
 const getPackagesPaths = require( '../utils/getpackagespaths' );
 const getCommits = require( '../utils/getcommits' );
-const getWriterOptions = require( '../utils/transform-commit/getwriteroptions' );
-const { getRepositoryUrl } = require( '../utils/transform-commit/transform-commit-utils' );
-const transformCommitForSubRepositoryFactory = require( '../utils/transform-commit/transformcommitforsubrepositoryfactory' );
+const getWriterOptions = require( '../utils/getwriteroptions' );
+const { getRepositoryUrl } = require( '../utils/transformcommitutils' );
+const transformCommitFactory = require( '../utils/transformcommitfactory' );
 
 const VERSIONING_POLICY_URL = 'https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html';
 const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)`;
@@ -58,7 +57,7 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 	const cwd = process.cwd();
 	const pkgJson = getPackageJson( options.cwd );
 
-	const transformCommit = transformCommitForSubRepositoryFactory( {
+	const transformCommit = transformCommitFactory( {
 		useExplicitBreakingChangeGroups: true
 	} );
 
@@ -341,9 +340,6 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 	function generateChangelogFromCommits() {
 		logProcess( 'Generating the changelog...' );
 
-		const commitStream = new Readable( { objectMode: true } );
-		commitStream._read = function() {};
-
 		const version = packagesVersion.get( pkgJson.name );
 
 		const writerContext = {
@@ -405,21 +401,12 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 				return commit;
 			} );
 
-		for ( const commit of publicCommits ) {
-			commitStream.push( commit );
-		}
+		return generateChangelog( publicCommits, writerContext, writerOptions )
+			.then( changes => {
+				logInfo( 'Changes based on commits have been generated.', { indentLevel: 1 } );
 
-		commitStream.push( null );
-
-		return new Promise( ( resolve, reject ) => {
-			commitStream
-				.pipe( conventionalChangelogWriter( writerContext, writerOptions ) )
-				.pipe( stream.noop( changes => {
-					logInfo( 'Changes based on commits have been generated.', { indentLevel: 1 } );
-					resolve( changes.toString() );
-				} ) )
-				.on( 'error', reject );
-		} );
+				return Promise.resolve( changes );
+			} );
 
 		function scopeToLink( name ) {
 			return `[${ name }](${ options.transformScope( name ) })`;

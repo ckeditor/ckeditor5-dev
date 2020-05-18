@@ -5,19 +5,17 @@
 
 'use strict';
 
-const utils = require( './transform-commit-utils' );
+const utils = require( './transformcommitutils' );
 const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
 
 /**
  * Factory function.
  *
  * It returns a function that parses a single commit:
- *   - filters out the commit if it should not be visible in the changelog,
  *   - makes links to issues and organizations on GitHub,
- *   - normalizes notes (e.g. "MAJOR BREAKING CHANGE" will be replaced with "MAJOR BREAKING CHANGES").
- *
- * Returns `undefined` if the parsed commit should not be visible to the changelog. This behavior can be changed
- * using the `options.returnInvalidCommit` option.
+ *   - if the commit contains multi changelog entries, the function will return an array of the commits,
+ *   - normalizes notes (e.g. "MAJOR BREAKING CHANGE" will be replaced with "MAJOR BREAKING CHANGES"),
+ *   - the commit is always being returned. Even, if it should not be added to the changelog.
  *
  * @param {Object} [options={}]
  * @param {Boolean} [options.treatMajorAsMinorBreakingChange=false] If set on true, all "MAJOR BREAKING CHANGES" notes will be replaced
@@ -28,7 +26,7 @@ const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
  * as "BREAKING CHANGES".
  * @returns {Function}
  */
-module.exports = function transformCommitForSubRepositoryFactory( options = {} ) {
+module.exports = function transformCommitFactory( options = {} ) {
 	/**
 	 * If returned an instance of the Array, it means that single commit contains more than one entry for the changelog.
 	 *
@@ -46,7 +44,7 @@ module.exports = function transformCommitForSubRepositoryFactory( options = {} )
 	 * @param {Commit} rawCommit
 	 * @returns {Commit|Array.<Commit>|undefined}
 	 */
-	return function transformCommitForSubRepository( rawCommit ) {
+	return function transformCommit( rawCommit ) {
 		// Let's clone the commit. We don't want to modify the reference.
 		const commit = Object.assign( {}, rawCommit, {
 			// Copy the original `type` of the commit.

@@ -16,11 +16,11 @@ const {
 	getChangelog: _getChangelog,
 	getChangesForVersion: _getChangesForVersion
 } = require( '../../../lib/release-tools/utils/changelog' );
-const transformCommitForSubRepositoryFactory = require(
-	'../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepositoryfactory'
+const transformCommitFactory = require(
+	'../../../lib/release-tools/utils/transformcommitfactory'
 );
 
-describe( 'dev-env/release-tools/utils', () => {
+describe.only( 'dev-env/release-tools/utils', () => {
 	const url = 'https://github.com/ckeditor/ckeditor5-test-package';
 
 	let tmpCwd, cwd, generateChangelogFromCommits, stubs, sandbox;
@@ -205,7 +205,7 @@ describe( 'dev-env/release-tools/utils', () => {
 						);
 
 						const options = {
-							transformCommit: transformCommitForSubRepositoryFactory( {
+							transformCommit: transformCommitFactory( {
 								useExplicitBreakingChangeGroups: true
 							} )
 						};
@@ -248,7 +248,7 @@ describe( 'dev-env/release-tools/utils', () => {
 						);
 
 						const options = {
-							transformCommit: transformCommitForSubRepositoryFactory( {
+							transformCommit: transformCommitFactory( {
 								useExplicitBreakingChangeGroups: true
 							} )
 						};
@@ -588,7 +588,7 @@ Besides changes in the dependencies, this version also contains the following bu
 						makeCommit( 'Other: Updated translations.' );
 
 						const options = {
-							transformCommit: transformCommitForSubRepositoryFactory( {
+							transformCommit: transformCommitFactory( {
 								useExplicitBreakingChangeGroups: true
 							} )
 						};
@@ -655,7 +655,7 @@ Besides changes in the dependencies, this version also contains the following bu
 						);
 
 						const options = {
-							transformCommit: transformCommitForSubRepositoryFactory( {
+							transformCommit: transformCommitFactory( {
 								treatMajorAsMinorBreakingChange: true,
 								useExplicitBreakingChangeGroups: true
 							} )
@@ -781,7 +781,7 @@ Besides changes in the dependencies, this version also contains the following bu
 			skipLinks: options.skipLinks,
 			newTagName: 'v' + version,
 			tagName: !options.isFirstRelease ? 'v0.0.1' : null,
-			transformCommit: options.transformCommit || transformCommitForSubRepositoryFactory()
+			transformCommit: options.transformCommit || transformCommitFactory()
 		} );
 	}
 

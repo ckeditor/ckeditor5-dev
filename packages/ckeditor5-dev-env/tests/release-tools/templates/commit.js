@@ -49,7 +49,7 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 		it( 'displays commit subject and hash as an URL to Github', () => {
 			const data = { subject: 'Test', hash: '1234qwe' };
 
-			const expectedEntry = '* Test ([1234qwe](https://github.com/organization/repository/commit/1234qwe))';
+			const expectedEntry = '* Test ([commit](https://github.com/organization/repository/commit/1234qwe))';
 			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
 		} );
 
@@ -67,7 +67,7 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 				]
 			};
 
-			const expectedEntry = '* Test ([1234qwe](https://github.com/organization/repository/commit/1234qwe))';
+			const expectedEntry = '* Test ([commit](https://github.com/organization/repository/commit/1234qwe))';
 			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
 		} );
 
@@ -83,7 +83,7 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 				].join( '\n' )
 			};
 
-			const expectedEntry = '* Test ([1234qwe](https://github.com/organization/repository/commit/1234qwe))' +
+			const expectedEntry = '* Test ([commit](https://github.com/organization/repository/commit/1234qwe))' +
 				'\n\n  Some paragraph.\n\n  * List Item 1.\n  * List Item 2.';
 			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
 		} );
@@ -94,6 +94,21 @@ describe( 'dev-env/release-tools/changelog/templates', () => {
 			const data = { subject: 'Test', hash: '1234qwe' };
 
 			const expectedEntry = '* Test';
+			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
+		} );
+
+		it( 'adds a scope if specified', () => {
+			rootOptions.linkReferences = false;
+
+			const data = {
+				subject: 'Test',
+				hash: '1234qwe',
+				scope: [
+					'ckeditor5-dev'
+				]
+			};
+
+			const expectedEntry = '* **ckeditor5-dev**: Test 1234qwe';
 			expect( template( data, templateOptions ) ).to.equal( expectedEntry + '\n' );
 		} );
 	} );

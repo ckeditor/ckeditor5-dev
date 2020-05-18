@@ -35,7 +35,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				exec( 'git config user.name "CKEditor5 CI"' );
 			}
 
-			getChangedFilesForCommit = require( '../../../../lib/release-tools/utils/transform-commit/getchangedfilesforcommit' );
+			getChangedFilesForCommit = require( '../../../lib/release-tools/utils/getchangedfilesforcommit' );
 		} );
 
 		afterEach( () => {

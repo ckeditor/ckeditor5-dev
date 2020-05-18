@@ -12,7 +12,7 @@ const mockery = require( 'mockery' );
 const MODULE_PATH = '../../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepositoryfactory';
 
 describe( 'dev-env/release-tools/utils/transform-commit', () => {
-	describe( 'transformCommitForSubRepositoryFactory()', () => {
+	describe( 'transformCommitFactory()', () => {
 		let transformCommitForSubRepositoryFactory, sandbox, stubs;
 
 		beforeEach( () => {

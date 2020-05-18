@@ -11,7 +11,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 	let parserOptions;
 
 	beforeEach( () => {
-		parserOptions = require( '../../../../lib/release-tools/utils/transform-commit/parser-options' );
+		parserOptions = require( '../../../lib/release-tools/utils/parseroptions' );
 	} );
 
 	describe( 'parser-options', () => {

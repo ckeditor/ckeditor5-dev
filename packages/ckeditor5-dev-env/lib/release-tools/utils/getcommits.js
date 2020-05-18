@@ -9,7 +9,7 @@ const conventionalCommitsParser = require( 'conventional-commits-parser' );
 const conventionalCommitsFilter = require( 'conventional-commits-filter' );
 const gitRawCommits = require( 'git-raw-commits' );
 const concat = require( 'concat-stream' );
-const parserOptions = require( './transform-commit/parser-options' );
+const parserOptions = require( './parseroptions' );
 const getPackageJson = require( './getpackagejson' );
 
 /**

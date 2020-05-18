@@ -7,8 +7,8 @@
 
 const fs = require( 'fs' );
 const path = require( 'path' );
-const templatePath = path.join( __dirname, '..', '..', 'templates' );
-const { typesOrder } = require( './transform-commit-utils' );
+const templatePath = path.join( __dirname, '..', 'templates' );
+const { typesOrder } = require( './transformcommitutils' );
 
 /**
  * @param {Function|Object} transform

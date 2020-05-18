@@ -5,9 +5,9 @@
 
 'use strict';
 
-const getPackageJson = require( '../getpackagejson' );
+const getPackageJson = require( './getpackagejson' );
 
-const transformCommitUtils = {
+const transformcommitutils = {
 	/**
 	 * A regexp for extracting additional changelog entries from the single commit.
 	 * Prefixes of the commit must be synchronized the `getCommitType()` util.
@@ -22,6 +22,7 @@ const transformCommitUtils = {
 		[ 'Fix', true ],
 		[ 'Feature', true ],
 		[ 'Other', true ],
+
 		[ 'Docs', false ],
 		[ 'Internal', false ],
 		[ 'Tests', false ],
@@ -71,7 +72,7 @@ const transformCommitUtils = {
 				return `[${ maybeRepository }#${ issueId }](https://github.com/${ maybeRepository }/issues/${ issueId })`;
 			}
 
-			const repositoryUrl = transformCommitUtils.getRepositoryUrl();
+			const repositoryUrl = transformcommitutils.getRepositoryUrl();
 
 			// But if doesn't, let's add it.
 			return `[#${ issueId }](${ repositoryUrl }/issues/${ issueId })`;
@@ -143,4 +144,4 @@ const transformCommitUtils = {
 	}
 };
 
-module.exports = transformCommitUtils;
+module.exports = transformcommitutils;

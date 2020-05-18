@@ -401,7 +401,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					.then( () => {
 						const question = questionItems[ 0 ];
 
-						expect( question.message ).to.match( /Should this be a major release\?/ );
+						expect( question.message ).to.match( /Should it be the major release\?/ );
 						expect( question.type ).to.equal( 'confirm' );
 					} );
 			} );
