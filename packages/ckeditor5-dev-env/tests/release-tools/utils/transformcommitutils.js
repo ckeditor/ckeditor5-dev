@@ -9,7 +9,7 @@ const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 
-describe( 'dev-env/release-tools/utils/transform-commit', () => {
+describe( 'dev-env/release-tools/utils', () => {
 	let transformCommit, sandbox, stubs;
 
 	describe( 'transformCommitUtils', () => {
@@ -20,8 +20,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				getPackageJson: sandbox.stub()
 			};
 
-			transformCommit = proxyquire( '../../../../lib/release-tools/utils/transform-commit/transform-commit-utils', {
-				'../getpackagejson': stubs.getPackageJson
+			transformCommit = proxyquire( '../../../lib/release-tools/utils/transformcommitutils', {
+				'./getpackagejson': stubs.getPackageJson
 			} );
 		} );
 
@@ -41,9 +41,9 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			} );
 		} );
 
-		describe( 'additionalCommitNotes', () => {
+		describe( 'MULTI_ENTRIES_COMMIT_REGEXP', () => {
 			it( 'should be defined', () => {
-				expect( transformCommit.additionalCommitNotes ).to.be.a( 'Object' );
+				expect( transformCommit.MULTI_ENTRIES_COMMIT_REGEXP ).to.be.a( 'RegExp' );
 			} );
 		} );
 
@@ -131,11 +131,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				expect( transformCommit.getCommitType( 'Feature' ) ).to.equal( 'Features' );
 				expect( transformCommit.getCommitType( 'Fix' ) ).to.equal( 'Bug fixes' );
 				expect( transformCommit.getCommitType( 'Other' ) ).to.equal( 'Other changes' );
-			} );
-
-			it( 'should support aliases for the "Fix" type', () => {
-				expect( transformCommit.getCommitType( 'Fixes' ), 'Fixes' ).to.equal( 'Bug fixes' );
-				expect( transformCommit.getCommitType( 'Fixed' ), 'Fixed' ).to.equal( 'Bug fixes' );
 			} );
 		} );
 

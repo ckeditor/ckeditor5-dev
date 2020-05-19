@@ -9,11 +9,9 @@ const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 
-const MODULE_PATH = '../../../../lib/release-tools/utils/transform-commit/transformcommitforsubrepositoryfactory';
-
-describe( 'dev-env/release-tools/utils/transform-commit', () => {
+describe( 'dev-env/release-tools/utils', () => {
 	describe( 'transformCommitFactory()', () => {
-		let transformCommitForSubRepositoryFactory, sandbox, stubs;
+		let transformCommitFactory, sandbox, stubs;
 
 		beforeEach( () => {
 			sandbox = sinon.createSandbox();
@@ -29,12 +27,14 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					return {
 						repository: 'https://github.com/ckeditor/ckeditor5-dev'
 					};
-				}
+				},
+				getChangedFilesForCommit: sandbox.stub()
 			};
 
-			mockery.registerMock( '../getpackagejson', stubs.getPackageJson );
+			mockery.registerMock( './getpackagejson', stubs.getPackageJson );
+			mockery.registerMock( './getchangedfilesforcommit', stubs.getChangedFilesForCommit );
 
-			transformCommitForSubRepositoryFactory = require( MODULE_PATH );
+			transformCommitFactory = require( '../../../lib/release-tools/utils/transformcommitfactory' );
 		} );
 
 		afterEach( () => {
@@ -43,34 +43,12 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		} );
 
 		it( 'returns a function', () => {
-			expect( transformCommitForSubRepositoryFactory() ).to.be.a( 'function' );
-		} );
-
-		describe( 'options.returnInvalidCommit = true', () => {
-			it( 'allows returning invalid commit instead of removing', () => {
-				const transformCommitForSubRepository = transformCommitForSubRepositoryFactory( {
-					returnInvalidCommit: true
-				} );
-
-				const rawCommit = {
-					hash: '684997d',
-					header: 'Docs: README.',
-					type: 'Docs',
-					subject: 'README.',
-					body: null,
-					footer: null,
-					notes: []
-				};
-
-				const newCommit = transformCommitForSubRepository( rawCommit );
-
-				expect( newCommit ).to.not.equal( undefined );
-			} );
+			expect( transformCommitFactory() ).to.be.a( 'function' );
 		} );
 
 		describe( 'options.treatMajorAsMinorBreakingChange = true', () => {
 			it( 'treats "MAJOR BREAKING CHANGES" as "MINOR BREAKING CHANGES"', () => {
-				const transformCommitForSubRepository = transformCommitForSubRepositoryFactory( {
+				const transformCommit = transformCommitFactory( {
 					treatMajorAsMinorBreakingChange: true,
 					useExplicitBreakingChangeGroups: true
 				} );
@@ -88,24 +66,24 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					]
 				};
 
-				const commit = transformCommitForSubRepository( rawCommit );
+				const commit = transformCommit( rawCommit );
 
 				expect( commit.notes[ 0 ].title ).to.equal( 'MINOR BREAKING CHANGES' );
 				expect( commit.notes[ 1 ].title ).to.equal( 'MINOR BREAKING CHANGES' );
 			} );
 		} );
 
-		describe( 'transformCommitForSubRepository()', () => {
-			let transformCommitForSubRepository;
+		describe( 'transformCommit()', () => {
+			let transformCommit;
 
 			beforeEach( () => {
-				transformCommitForSubRepository = transformCommitForSubRepositoryFactory();
+				transformCommit = transformCommitFactory();
 			} );
 
 			it( 'returns a new instance of object instead od modifying passed one', () => {
 				const notes = [
-					{ title: 'Foo', text: 'Foo-Text' },
-					{ title: 'Bar', text: 'Bar-Text' }
+					{ title: 'BREAKING CHANGES', text: 'Foo-Text', scope: null },
+					{ title: 'BREAKING CHANGES', text: 'Bar-Text', scope: null }
 				];
 
 				const rawCommit = {
@@ -118,17 +96,38 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					notes
 				};
 
-				const commit = transformCommitForSubRepository( rawCommit );
-
-				// `transformCommit` modifies `hash` of given commit.
-				expect( commit.hash ).to.not.equal( rawCommit.hash );
+				const commit = transformCommit( rawCommit );
 
 				// Notes cannot be the same but they should be equal.
 				expect( commit.notes ).to.not.equal( rawCommit.notes );
 				expect( commit.notes ).to.deep.equal( rawCommit.notes );
 			} );
 
-			it( 'returns "undefined" if given commit should not be visible in the changelog', () => {
+			it( 'returns files that were changed with the commit', () => {
+				const rawCommit = {
+					hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+					header: 'Fix: Simple fix.',
+					type: 'Fix',
+					subject: 'Simple fix.',
+					body: null,
+					footer: null,
+					notes: []
+				};
+
+				const files = [
+					'a/b/y.txt',
+					'c/d/z.md'
+				];
+
+				stubs.getChangedFilesForCommit.returns( files );
+
+				const commit = transformCommit( rawCommit );
+
+				expect( stubs.getChangedFilesForCommit.calledOnce ).to.equal( true );
+				expect( commit.files ).to.deep.equal( files );
+			} );
+
+			it( 'returns non-public commit', () => {
 				const rawCommit = {
 					hash: '684997d',
 					header: 'Docs: README.',
@@ -139,9 +138,9 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					notes: []
 				};
 
-				const newCommit = transformCommitForSubRepository( rawCommit );
+				const newCommit = transformCommit( rawCommit );
 
-				expect( newCommit ).to.equal( undefined );
+				expect( newCommit ).to.not.equal( undefined );
 			} );
 
 			it( 'groups "BREAKING CHANGES" and "BREAKING CHANGE" as "MAJOR BREAKING CHANGES"', () => {
@@ -158,10 +157,10 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					]
 				};
 
-				const transformCommitForSubRepository = transformCommitForSubRepositoryFactory( {
+				const transformCommit = transformCommitFactory( {
 					useExplicitBreakingChangeGroups: true
 				} );
-				const commit = transformCommitForSubRepository( rawCommit );
+				const commit = transformCommit( rawCommit );
 
 				expect( commit.notes[ 0 ].title ).to.equal( 'MAJOR BREAKING CHANGES' );
 				expect( commit.notes[ 1 ].title ).to.equal( 'MAJOR BREAKING CHANGES' );
@@ -178,7 +177,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					notes: []
 				};
 
-				const commit = transformCommitForSubRepository( rawCommit );
+				const commit = transformCommit( rawCommit );
 
 				const expectedSubject = 'Simple fix. ' +
 					'See [ckeditor/ckeditor5#1](https://github.com/ckeditor/ckeditor5/issues/1). ' +
@@ -199,7 +198,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					notes: []
 				};
 
-				const commit = transformCommitForSubRepository( rawCommit );
+				const commit = transformCommit( rawCommit );
 
 				// Remember about the indent in commit body.
 				const expectedBody = '  See [ckeditor/ckeditor5#1](https://github.com/ckeditor/ckeditor5/issues/1). ' +
@@ -223,13 +222,13 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 							text: 'See ckeditor/ckeditor5#1. Thanks to @CKEditor.'
 						},
 						{
-							title: 'NOTE',
+							title: 'BREAKING CHANGES',
 							text: 'Read more #2.'
 						}
 					]
 				};
 
-				const commit = transformCommitForSubRepository( rawCommit );
+				const commit = transformCommit( rawCommit );
 
 				const expectedFirstNoteText = 'See [ckeditor/ckeditor5#1](https://github.com/ckeditor/ckeditor5/issues/1). ' +
 					'Thanks to [@CKEditor](https://github.com/CKEditor).';
@@ -263,7 +262,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					notes: []
 				};
 
-				const commit = transformCommitForSubRepository( rawCommit );
+				const commit = transformCommit( rawCommit );
 
 				expect( commit.type ).to.equal( 'Features' );
 				expect( commit.subject ).to.equal( 'Introduced a brand new release tools with a new set of requirements. ' +
@@ -286,7 +285,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					]
 				};
 
-				const commit = transformCommitForSubRepository( rawCommit, { displayLogs: false } );
+				const commit = transformCommit( rawCommit );
 
 				expect( commit.references ).to.equal( undefined );
 			} );
@@ -302,7 +301,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					notes: []
 				};
 
-				const commit = transformCommitForSubRepository( rawCommit, { displayLogs: false } );
+				const commit = transformCommit( rawCommit );
 
 				expect( commit.body ).to.equal(
 					'  Additional description has been parsed as a footer but it should be a body.'
@@ -324,13 +323,13 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					revert: null
 				};
 
-				const transformCommitForSubRepository = transformCommitForSubRepositoryFactory( {
+				const transformCommit = transformCommitFactory( {
 					returnInvalidCommit: true
 				} );
 
-				const commit = transformCommitForSubRepository( rawCommit, { returnInvalidCommit: true } );
+				const commit = transformCommit( rawCommit );
 
-				expect( commit.hash ).to.equal( '575e00b' );
+				expect( commit.hash ).to.equal( '575e00bc8ece48826adefe226c4fb1fe071c73a7' );
 				expect( commit.header ).to.equal( 'Merge branch \'master\' of github.com:ckeditor/ckeditor5-dev' );
 				expect( commit.body ).to.equal( null );
 			} );
@@ -346,7 +345,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					notes: []
 				};
 
-				const commit = transformCommitForSubRepository( rawCommit );
+				const commit = transformCommit( rawCommit );
 
 				expect( commit.subject ).to.equal( 'README.' );
 			} );
@@ -365,41 +364,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					revert: null
 				};
 
-				expect( transformCommitForSubRepository( rawCommit ) ).to.equal( undefined );
-				expect( transformCommitForSubRepository( rawCommit, { returnInvalidCommit: true } ) ).to.equal( undefined );
-			} );
-
-			it( 'sorts notes', () => {
-				const rawCommit = {
-					hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
-					header: 'Fix: Simple fix.',
-					type: 'Fix',
-					subject: 'Simple fix.',
-					body: null,
-					footer: null,
-					notes: [
-						{ title: 'NOTE', text: 'Note 1.' },
-						{ title: 'BREAKING CHANGES', text: 'Note 2.' },
-						{ title: 'MAJOR BREAKING CHANGES', text: 'Note 3.' },
-						{ title: 'NOTE', text: 'Note 4.' },
-						{ title: 'MINOR BREAKING CHANGES', text: 'Note 5.' },
-						{ title: 'NOTE', text: 'Note 6.' }
-					]
-				};
-
-				const transformCommitForSubRepository = transformCommitForSubRepositoryFactory( {
-					useExplicitBreakingChangeGroups: true
-				} );
-				const commit = transformCommitForSubRepository( rawCommit );
-
-				expect( commit.notes ).to.deep.equal( [
-					{ title: 'MAJOR BREAKING CHANGES', text: 'Note 2.' },
-					{ title: 'MAJOR BREAKING CHANGES', text: 'Note 3.' },
-					{ title: 'MINOR BREAKING CHANGES', text: 'Note 5.' },
-					{ title: 'NOTE', text: 'Note 1.' },
-					{ title: 'NOTE', text: 'Note 4.' },
-					{ title: 'NOTE', text: 'Note 6.' }
-				] );
+				expect( transformCommit( rawCommit ) ).to.equal( undefined );
+				expect( transformCommit( rawCommit ) ).to.equal( undefined );
 			} );
 
 			it( 'includes "repositoryUrl" where the commit has been done', () => {
@@ -418,7 +384,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					notes
 				};
 
-				const commit = transformCommitForSubRepository( rawCommit );
+				const commit = transformCommit( rawCommit );
 
 				expect( commit.repositoryUrl ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev' );
 			} );
@@ -441,7 +407,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 					]
 				};
 
-				const commit = transformCommitForSubRepository( rawCommit );
+				const commit = transformCommit( rawCommit );
 
 				expect( commit.notes[ 0 ].title ).to.equal( 'BREAKING CHANGES' );
 				expect( commit.notes[ 1 ].title ).to.equal( 'BREAKING CHANGES' );
@@ -449,6 +415,289 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 				expect( commit.notes[ 3 ].title ).to.equal( 'BREAKING CHANGES' );
 				expect( commit.notes[ 4 ].title ).to.equal( 'BREAKING CHANGES' );
 				expect( commit.notes[ 5 ].title ).to.equal( 'BREAKING CHANGES' );
+			} );
+
+			describe( 'scopes', () => {
+				it( 'returns null if the scope is being missed', () => {
+					const rawCommit = {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Fix: Simple fix.',
+						type: 'Fix',
+						subject: 'Simple fix.',
+						body: null,
+						footer: null,
+						notes: []
+					};
+
+					const commit = transformCommit( rawCommit );
+
+					expect( commit.scope ).to.be.equal( null );
+				} );
+
+				it( 'extracts the scope from the commit type', () => {
+					const rawCommit = {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Fix (package): Simple fix.',
+						type: 'Fix (package)',
+						subject: 'Simple fix.',
+						body: null,
+						footer: null,
+						notes: []
+					};
+
+					const commit = transformCommit( rawCommit );
+
+					expect( commit.scope ).to.be.an( 'Array' );
+					expect( commit.scope.length ).to.equal( 1 );
+					expect( commit.scope[ 0 ] ).to.equal( 'package' );
+					expect( commit.rawType ).to.equal( 'Fix' );
+				} );
+
+				it( 'works with multi-scoped changes (commit type)', () => {
+					const rawCommit = {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Feature (foo, bar): Simple fix.',
+						type: 'Feature (foo, bar)',
+						subject: 'Simple fix.',
+						body: null,
+						footer: null,
+						notes: []
+					};
+
+					const commit = transformCommit( rawCommit );
+
+					expect( commit.scope ).to.be.an( 'Array' );
+					expect( commit.scope.length ).to.equal( 2 );
+					expect( commit.scope[ 0 ] ).to.equal( 'bar' );
+					expect( commit.scope[ 1 ] ).to.equal( 'foo' );
+					expect( commit.rawType ).to.equal( 'Feature' );
+				} );
+
+				it( 'extracts the scope from notes', () => {
+					const rawCommit = {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Fix: Simple fix.',
+						type: 'Fix',
+						subject: 'Simple fix.',
+						body: null,
+						footer: null,
+						notes: [
+							{
+								title: 'BREAKING CHANGES',
+								text: '(package): Foo.'
+							}
+						]
+					};
+
+					const commit = transformCommit( rawCommit );
+
+					expect( commit.notes ).to.be.an( 'Array' );
+					expect( commit.notes.length ).to.equal( 1 );
+					expect( commit.notes[ 0 ] ).to.be.an( 'Object' );
+					expect( commit.notes[ 0 ].text ).to.equal( 'Foo.' );
+					expect( commit.notes[ 0 ].title ).to.equal( 'BREAKING CHANGES' );
+					expect( commit.notes[ 0 ].scope ).to.be.an( 'Array' );
+					expect( commit.notes[ 0 ].scope.length ).to.equal( 1 );
+					expect( commit.notes[ 0 ].scope[ 0 ] ).to.equal( 'package' );
+				} );
+
+				it( 'works with multi-scoped notes', () => {
+					const rawCommit = {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Fix: Simple fix.',
+						type: 'Fix',
+						subject: 'Simple fix.',
+						body: null,
+						footer: null,
+						notes: [
+							{
+								title: 'BREAKING CHANGES',
+								text: '(foo, bar): Package.'
+							}
+						]
+					};
+
+					const commit = transformCommit( rawCommit );
+
+					expect( commit.notes ).to.be.an( 'Array' );
+					expect( commit.notes.length ).to.equal( 1 );
+					expect( commit.notes[ 0 ] ).to.be.an( 'Object' );
+					expect( commit.notes[ 0 ].text ).to.equal( 'Package.' );
+					expect( commit.notes[ 0 ].title ).to.equal( 'BREAKING CHANGES' );
+					expect( commit.notes[ 0 ].scope ).to.be.an( 'Array' );
+					expect( commit.notes[ 0 ].scope.length ).to.equal( 2 );
+					expect( commit.notes[ 0 ].scope[ 0 ] ).to.equal( 'bar' );
+					expect( commit.notes[ 0 ].scope[ 1 ] ).to.equal( 'foo' );
+				} );
+			} );
+
+			describe( 'multi-entries commit', () => {
+				it( 'returns an array with all entries', () => {
+					const rawCommit = {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Feature: Simple feature (1).',
+						type: 'Feature',
+						subject: 'Simple feature (1).',
+						body: [
+							'Fix: Simple fix (2).',
+							'',
+							'Other: Simple other change (3).'
+						].join( '\n' ),
+						footer: null,
+						notes: []
+					};
+
+					const commits = transformCommit( rawCommit );
+
+					expect( commits ).to.be.an( 'Array' );
+					expect( commits.length ).to.equal( 3 );
+
+					expect( commits[ 0 ] ).to.deep.equal( {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Feature: Simple feature (1).',
+						type: 'Features',
+						subject: 'Simple feature (1).',
+						body: '',
+						footer: null,
+						notes: [],
+						rawType: 'Feature',
+						files: [],
+						scope: null,
+						isPublicCommit: true,
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev'
+					} );
+
+					expect( commits[ 1 ] ).to.deep.equal( {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Fix: Simple fix (2).',
+						type: 'Bug fixes',
+						subject: 'Simple fix (2).',
+						body: '',
+						revert: null,
+						merge: null,
+						footer: null,
+						notes: [],
+						rawType: 'Fix',
+						files: [],
+						mentions: [],
+						scope: null,
+						isPublicCommit: true,
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev'
+					} );
+
+					expect( commits[ 2 ] ).to.deep.equal( {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Other: Simple other change (3).',
+						type: 'Other changes',
+						subject: 'Simple other change (3).',
+						body: '',
+						revert: null,
+						merge: null,
+						footer: null,
+						notes: [],
+						rawType: 'Other',
+						files: [],
+						mentions: [],
+						scope: null,
+						isPublicCommit: true,
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev'
+					} );
+				} );
+
+				it( 'adds a dot at the subject if missing in new commit', () => {
+					const rawCommit = {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Feature: Simple feature (1).',
+						type: 'Feature',
+						subject: 'Simple feature (1).',
+						body: [
+							'Fix: Simple fix (2)'
+						].join( '\n' ),
+						footer: null,
+						notes: []
+					};
+
+					const commits = transformCommit( rawCommit );
+
+					expect( commits ).to.be.an( 'Array' );
+					expect( commits.length ).to.equal( 2 );
+
+					expect( commits[ 1 ].subject ).to.equal( 'Simple fix (2).' );
+				} );
+
+				it( 'copies an array with changed files across all commits', () => {
+					const files = [ 'a', 'b', 'c' ];
+
+					stubs.getChangedFilesForCommit.returns( files );
+
+					const rawCommit = {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Feature: Simple feature (1).',
+						type: 'Feature',
+						subject: 'Simple feature (1).',
+						body: [
+							'Fix: Simple fix (2)',
+							'',
+							'Other: Simple other change (3).'
+						].join( '\n' ),
+						footer: null,
+						notes: []
+					};
+
+					const commits = transformCommit( rawCommit );
+
+					expect( commits[ 0 ].files ).to.equal( files );
+					expect( commits[ 1 ].files ).to.equal( files );
+					expect( commits[ 2 ].files ).to.equal( files );
+				} );
+
+				it( 'does not extract non-public commits', () => {
+					const rawCommit = {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Feature: Simple feature (1).',
+						type: 'Feature',
+						subject: 'Simple feature (1).',
+						body: [
+							'Docs: Simple docs change (2)',
+							'',
+							'Internal: Simple internal change (3).'
+						].join( '\n' ),
+						footer: null,
+						notes: []
+					};
+
+					const commits = transformCommit( rawCommit );
+
+					expect( commits ).to.not.be.an( 'Array' );
+				} );
+
+				it( 'handles scoped and non-scoped changes', () => {
+					const rawCommit = {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Feature: Simple feature (1).',
+						type: 'Feature',
+						subject: 'Simple feature (1).',
+						body: [
+							'Fix (foo): Simple fix (2).',
+							'',
+							'Other: Simple other change (3).',
+							'',
+							'Feature (foo, bar): Simple other change (4).'
+						].join( '\n' ),
+						footer: null,
+						notes: []
+					};
+
+					const commits = transformCommit( rawCommit );
+
+					expect( commits ).to.be.an( 'Array' );
+					expect( commits.length ).to.equal( 4 );
+
+					expect( commits[ 0 ].scope ).to.equal( null );
+					expect( commits[ 1 ].scope ).to.deep.equal( [ 'foo' ] );
+					expect( commits[ 2 ].scope ).to.equal( null );
+					expect( commits[ 3 ].scope ).to.deep.equal( [ 'bar', 'foo' ] );
+				} );
 			} );
 		} );
 	} );

@@ -9,13 +9,9 @@
  * Proposes new version based on commits.
  *
  * @param {Array.<Commit>} commits
- * @param {Object} [options={}]
- * @param {Boolean} [options.useExplicitBreakingChangeGroups] If set on `true`, notes from parsed commits will be grouped as
- * "MINOR BREAKING CHANGES" and "MAJOR BREAKING CHANGES'. If set on `false` (by default), all breaking changes notes will be treated
- * as "BREAKING CHANGES".
  * @returns {String}
  */
-module.exports = function getNewVersionType( commits, options = {} ) {
+module.exports = function getNewVersionType( commits ) {
 	// No commits = no changes.
 	if ( !commits.length ) {
 		return 'skip';
@@ -33,18 +29,13 @@ module.exports = function getNewVersionType( commits, options = {} ) {
 
 	for ( const commit of publicCommits ) {
 		for ( const note of commit.notes ) {
-			if ( options.useExplicitBreakingChangeGroups ) {
-				if ( note.title === 'MAJOR BREAKING CHANGES' ) {
-					return 'major';
-				}
+			if ( note.title === 'MAJOR BREAKING CHANGES' ) {
+				return 'major';
+			}
 
-				if ( note.title === 'MINOR BREAKING CHANGES' ) {
-					minorBreakingChanges = true;
-				}
-			} else {
-				if ( note.title === 'BREAKING CHANGES' ) {
-					return 'major';
-				}
+			/* istanbul ignore else */
+			if ( note.title === 'MINOR BREAKING CHANGES' ) {
+				minorBreakingChanges = true;
 			}
 		}
 

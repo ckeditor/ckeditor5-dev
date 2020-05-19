@@ -10,7 +10,6 @@ const conventionalCommitsFilter = require( 'conventional-commits-filter' );
 const gitRawCommits = require( 'git-raw-commits' );
 const concat = require( 'concat-stream' );
 const parserOptions = require( './parseroptions' );
-const getPackageJson = require( './getpackagejson' );
 
 /**
  * Returns a promise that resolves an array of commits since the last tag specified as `options.from`.
@@ -26,10 +25,6 @@ module.exports = function getCommits( transformCommit, options = {} ) {
 		from: options.from,
 		merges: undefined,
 		firstParent: true
-	};
-
-	const context = {
-		packageData: getPackageJson()
 	};
 
 	return new Promise( ( resolve, reject ) => {
@@ -49,7 +44,7 @@ module.exports = function getCommits( transformCommit, options = {} ) {
 		stream.pipe( conventionalCommitsParser( parserOptions ) )
 			.pipe( concat( data => {
 				const commits = conventionalCommitsFilter( data )
-					.map( commit => transformCommit( commit, context ) )
+					.map( commit => transformCommit( commit ) )
 					.reduce( ( allCommits, commit ) => {
 						if ( Array.isArray( commit ) ) {
 							allCommits.push( ...commit );

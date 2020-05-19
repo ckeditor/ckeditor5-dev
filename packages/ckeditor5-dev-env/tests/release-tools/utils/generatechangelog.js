@@ -10,7 +10,7 @@ const compareFunc = require( 'compare-func' );
 const getWriterOptions = require( '../../../lib/release-tools/utils/getwriteroptions' );
 const generateChangelog = require( '../../../lib/release-tools/utils/generatechangelog' );
 
-describe.only( 'dev-env/release-tools/utils', () => {
+describe( 'dev-env/release-tools/utils', () => {
 	const url = 'https://github.com/ckeditor/ckeditor5-package';
 
 	/**

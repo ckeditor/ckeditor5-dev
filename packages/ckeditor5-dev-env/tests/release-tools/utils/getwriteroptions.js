@@ -8,7 +8,7 @@
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 
-describe( 'dev-env/release-tools/utils/transform-commit', () => {
+describe( 'dev-env/release-tools/utils', () => {
 	let getWriterOptions, sandbox, transformSpy;
 
 	beforeEach( () => {
@@ -31,7 +31,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( writerOptions ).to.have.property( 'commitGroupsSort' );
 			expect( writerOptions ).to.have.property( 'commitsSort' );
 			expect( writerOptions ).to.have.property( 'noteGroupsSort' );
-			expect( writerOptions ).to.have.property( 'notesSort' );
 			expect( writerOptions ).to.have.property( 'mainTemplate' );
 			expect( writerOptions ).to.have.property( 'headerPartial' );
 			expect( writerOptions ).to.have.property( 'footerPartial' );
@@ -39,7 +38,6 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 			expect( writerOptions.commitsSort ).to.be.a( 'array' );
 			expect( writerOptions.commitGroupsSort ).to.be.a( 'function' );
 			expect( writerOptions.noteGroupsSort ).to.be.a( 'function' );
-			expect( writerOptions.notesSort ).to.be.a( 'function' );
 		} );
 	} );
 } );

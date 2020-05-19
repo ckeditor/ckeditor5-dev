@@ -41,6 +41,9 @@ module.exports = function transformCommitFactory( options = {} ) {
 	 * the function will return an array with two commits. The first one is the real commit, the second one is a fake commit
 	 * but its description will be inserted to the changelog.
 	 *
+	 * In most of cases the function will return the commit (even if its structure is invalid). However, "Merge branch 'stable'" commits
+	 * will be always ignored and `undefined` will be returned.
+	 *
 	 * @param {Commit} rawCommit
 	 * @returns {Commit|Array.<Commit>|undefined}
 	 */
@@ -190,6 +193,12 @@ module.exports = function transformCommitFactory( options = {} ) {
 			newCommit.subject = subject.trim();
 			newCommit.header = commitEntries[ i ].trim() + ' ' + subject.trim();
 			newCommit.body = escapeNewLines( commitDescription.replace( subject, '' ) );
+
+			// If a dot is missing at the end of the subject...
+			if ( !newCommit.subject.endsWith( '.' ) ) {
+				// ...let's add it.
+				newCommit.subject += '.';
+			}
 
 			separatedCommits.push( newCommit );
 		}

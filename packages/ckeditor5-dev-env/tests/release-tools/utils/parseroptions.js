@@ -7,7 +7,7 @@
 
 const expect = require( 'chai' ).expect;
 
-describe( 'dev-env/release-tools/utils/transform-commit', () => {
+describe( 'dev-env/release-tools/utils', () => {
 	let parserOptions;
 
 	beforeEach( () => {

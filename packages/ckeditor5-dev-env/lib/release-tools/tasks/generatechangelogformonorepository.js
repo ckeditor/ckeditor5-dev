@@ -241,9 +241,7 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 				logInfo( `Processing "${ chalk.underline( pkgJson.name ) }"...`, { indentLevel: 1, startWithNewLine: true } );
 
 				const packageCommits = filterCommitsByPath( allCommits, packagePath );
-				const releaseTypeOrVersion = willBeMajorBump ? nextVersion : getNewVersionType( packageCommits, {
-					useExplicitBreakingChangeGroups: true
-				} );
+				const releaseTypeOrVersion = willBeMajorBump ? nextVersion : getNewVersionType( packageCommits );
 
 				displayCommits( packageCommits, { indentLevel: 2 } );
 
