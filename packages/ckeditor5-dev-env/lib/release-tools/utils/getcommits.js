@@ -30,6 +30,7 @@ module.exports = function getCommits( transformCommit, options = {} ) {
 	return new Promise( ( resolve, reject ) => {
 		const stream = gitRawCommits( gitRawCommitsOpts )
 			.on( 'error', err => {
+				/* istanbul ignore else */
 				if ( err.message.match( /'HEAD': unknown/ ) ) {
 					reject( new Error( 'Given repository is empty.' ) );
 				} else if ( err.message.match( new RegExp( `'${ options.from }\\.\\.HEAD': unknown` ) ) ) {

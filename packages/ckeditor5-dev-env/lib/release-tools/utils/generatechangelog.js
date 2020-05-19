@@ -42,6 +42,7 @@ const UPDATED_TRANSLATION_COMMIT = '* Updated translations.';
  */
 module.exports = function generateChangelog( commits, context, options ) {
 	const commitStream = new Readable( { objectMode: true } );
+	/* istanbul ignore next */
 	commitStream._read = function() {};
 
 	for ( const commitItem of commits ) {

@@ -56,6 +56,18 @@ describe( 'dev-env/release-tools/utils', () => {
 				);
 		} );
 
+		it( 'throws an error when repository is empty', () => {
+			return getCommits( transformCommit, { from: 'foobar' } )
+				.then(
+					() => {
+						throw new Error( 'Supposed to be rejected.' );
+					},
+					err => {
+						expect( err.message ).to.equal( 'Cannot find tag or commit "foobar" in given repository.' );
+					}
+				);
+		} );
+
 		it( 'returns an array of commits after "git init"', () => {
 			exec( 'git commit --allow-empty --message "First."' );
 			exec( 'git commit --allow-empty --message "Second."' );
@@ -130,6 +142,23 @@ describe( 'dev-env/release-tools/utils', () => {
 				.then( commits => {
 					expect( commits.length ).to.equal( 1 );
 					expect( commits[ 0 ].header ).to.equal( 'Second.' );
+				} );
+		} );
+
+		it( 'handles arrays returned by the "transformCommit" mapper', () => {
+			const transformCommit = sinon.stub();
+
+			transformCommit.onFirstCall().callsFake( commit => {
+				return [ commit, commit ];
+			} );
+
+			exec( 'git commit --allow-empty --message "First."' );
+
+			return getCommits( transformCommit )
+				.then( commits => {
+					expect( commits.length ).to.equal( 2 );
+					expect( commits[ 0 ].header ).to.equal( 'First.' );
+					expect( commits[ 1 ].header ).to.equal( 'First.' );
 				} );
 		} );
 	} );
