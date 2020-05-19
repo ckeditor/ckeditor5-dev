@@ -96,11 +96,8 @@ module.exports = function transformCommitFactory( options = {} ) {
 
 			// The `type` below will be key for grouping commits.
 			commit.type = utils.getCommitType( commit.rawType );
-
-			/* istanbul ignore else */
-			if ( typeof commit.subject === 'string' ) {
-				commit.subject = makeLinks( commit.subject );
-			}
+			commit.subject = mergeCloseReferences( commit.subject );
+			commit.subject = makeLinks( commit.subject );
 
 			// Remove additional notes from the commit's footer.
 			// Additional notes are added to the footer. In order to avoid duplication, they should be removed.
@@ -217,6 +214,39 @@ module.exports = function transformCommitFactory( options = {} ) {
 
 		return separatedCommits;
 	};
+
+	/**
+	 * Merges multiple "Closes #x" references as "Closes #x, #y.".
+	 *
+	 * @param {String} subject
+	 * @returns {String}
+	 */
+	function mergeCloseReferences( subject ) {
+		const refs = [];
+
+		let newSubject = subject;
+		let insertedPlaceholder = false;
+
+		const regexp = /Closes #(\d+)\.?/g;
+		let match;
+
+		while ( ( match = regexp.exec( subject ) ) ) {
+			refs.push( match[ 1 ] );
+
+			if ( insertedPlaceholder ) {
+				newSubject = newSubject.replace( match[ 0 ], '' ).trim();
+			} else {
+				insertedPlaceholder = true;
+				newSubject = newSubject.replace( match[ 0 ], '[[--COMMIT_REFERENCES--]]' ).trim();
+			}
+		}
+
+		newSubject = newSubject.replace(
+			/\[\[--COMMIT_REFERENCES--\]] ?/,
+			'Closes ' + refs.map( ref => '#' + ref ).join( ', ' ) + '.' );
+
+		return newSubject;
+	}
 
 	function makeLinks( comment ) {
 		comment = utils.linkToGithubIssue( comment );

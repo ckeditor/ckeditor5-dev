@@ -443,6 +443,49 @@ describe( 'dev-env/release-tools/utils', () => {
 				expect( commit.notes ).to.deep.equal( notes );
 			} );
 
+			it( 'merges multiple "Closes #" references into single entry', () => {
+				const rawCommit = {
+					hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+					header: 'Fix: Simple fix. Closes #1. Closes #2. Closes #3.',
+					type: 'Fix',
+					subject: 'Simple fix. Closes #1. Closes #2. Closes #3.',
+					body: null,
+					footer: null,
+					notes: []
+				};
+
+				const commit = transformCommit( rawCommit );
+
+				const expectedSubject = 'Simple fix. Closes ' +
+					'[#1](https://github.com/ckeditor/ckeditor5-dev/issues/1), ' +
+					'[#2](https://github.com/ckeditor/ckeditor5-dev/issues/2), ' +
+					'[#3](https://github.com/ckeditor/ckeditor5-dev/issues/3).';
+
+				expect( commit.subject ).to.equal( expectedSubject );
+			} );
+
+			it( 'merges multiple "Closes #" references into single entry and does not touch "See #" references.', () => {
+				const rawCommit = {
+					hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+					header: 'Fix: Simple fix. Closes #1. Closes #2. See #3, #.',
+					type: 'Fix',
+					subject: 'Simple fix. Closes #1. Closes #2. See #3, #4.',
+					body: null,
+					footer: null,
+					notes: []
+				};
+
+				const commit = transformCommit( rawCommit );
+
+				const expectedSubject = 'Simple fix. Closes ' +
+					'[#1](https://github.com/ckeditor/ckeditor5-dev/issues/1), ' +
+					'[#2](https://github.com/ckeditor/ckeditor5-dev/issues/2). ' +
+					'See [#3](https://github.com/ckeditor/ckeditor5-dev/issues/3), ' +
+					'[#4](https://github.com/ckeditor/ckeditor5-dev/issues/4).';
+
+				expect( commit.subject ).to.equal( expectedSubject );
+			} );
+
 			describe( 'scopes', () => {
 				it( 'returns null if the scope is being missed', () => {
 					const rawCommit = {
