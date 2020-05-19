@@ -8,16 +8,11 @@
 const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
-const transformCommitFactory = require( '../../../lib/release-tools/utils/transformcommitfactory' );
 
 describe( 'dev-env/release-tools/utils', () => {
-	let displayCommits, transformCommit, sandbox, stubs;
+	let displayCommits, sandbox, stubs;
 
 	beforeEach( () => {
-		transformCommit = transformCommitFactory( {
-			returnInvalidCommit: true,
-			useExplicitBreakingChangeGroups: true
-		} );
 		sandbox = sinon.createSandbox();
 
 		stubs = {
@@ -176,20 +171,24 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'displays proper log if commit does not contain the second line', () => {
-			const rawCommit = {
+			const commit = {
 				type: null,
 				subject: null,
 				merge: 'Merge branch \'master\' of github.com:ckeditor/ckeditor5-dev',
-				header: '-hash-',
-				body: '575e00bc8ece48826adefe226c4fb1fe071c73a7',
+				header: 'Merge branch \'master\' of github.com:ckeditor/ckeditor5-dev',
+				body: null,
 				footer: null,
 				notes: [],
 				references: [],
 				mentions: [],
-				revert: null
+				revert: null,
+				rawType: undefined,
+				files: [],
+				scope: undefined,
+				isPublicCommit: false,
+				hash: 'a'.repeat( 40 ),
+				repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev'
 			};
-
-			const commit = transformCommit( rawCommit, { returnInvalidCommit: true } );
 
 			displayCommits( [ commit ] );
 
