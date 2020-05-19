@@ -59,6 +59,7 @@ module.exports = function getPackagesPaths( options ) {
 				pathsCollection.skipped.add( dependencyPath );
 			}
 		} catch ( err ) {
+			/* istanbul ignore next */
 			console.warn( `Missing "package.json file in "${ dependencyPath }". Skipping.` );
 		}
 	}

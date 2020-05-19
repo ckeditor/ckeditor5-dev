@@ -36,6 +36,12 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		describe( 'getLastFromChangelog()', () => {
+			it( 'returns null if the changelog is invalid', () => {
+				changelogStub.returns( 'Example changelog.' );
+
+				expect( version.getLastFromChangelog() ).to.equal( null );
+			} );
+
 			it( 'returns version from changelog #1', () => {
 				changelogStub.returns( '\n## [1.0.0](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1' );
 

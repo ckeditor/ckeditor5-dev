@@ -417,6 +417,32 @@ describe( 'dev-env/release-tools/utils', () => {
 				expect( commit.notes[ 5 ].title ).to.equal( 'BREAKING CHANGES' );
 			} );
 
+			it( 'removes duplicated notes from the footer', () => {
+				const notes = [
+					{ title: 'BREAKING CHANGES', text: 'Foo.', scope: null },
+					{ title: 'BREAKING CHANGES', text: 'Bar-Text.', scope: null }
+				];
+
+				const rawCommit = {
+					hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+					header: 'Fix: Simple fix.',
+					type: 'Fix',
+					subject: 'Simple fix.',
+					body: null,
+					footer: [
+						'BREAKING CHANGES: Foo.',
+						'NOTE: Do not remove me.',
+						'BREAKING CHANGES: Bar-Text.'
+					].join( '\n' ),
+					notes
+				};
+
+				const commit = transformCommit( rawCommit );
+
+				expect( commit.body ).to.equal( '  NOTE: Do not remove me.' );
+				expect( commit.notes ).to.deep.equal( notes );
+			} );
+
 			describe( 'scopes', () => {
 				it( 'returns null if the scope is being missed', () => {
 					const rawCommit = {
@@ -590,6 +616,82 @@ describe( 'dev-env/release-tools/utils', () => {
 						header: 'Other: Simple other change (3).',
 						type: 'Other changes',
 						subject: 'Simple other change (3).',
+						body: '',
+						revert: null,
+						merge: null,
+						footer: null,
+						notes: [],
+						rawType: 'Other',
+						files: [],
+						mentions: [],
+						scope: null,
+						isPublicCommit: true,
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev'
+					} );
+				} );
+
+				it( 'preserves the description of the first commit', () => {
+					const rawCommit = {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Feature: Simple feature (1).',
+						type: 'Feature',
+						subject: 'Simple feature (1).',
+						body: [
+							'Lorem ipsum.',
+							'',
+							'Fix: Simple fix (2).',
+							'',
+							'Second lorem ipsum.',
+							'',
+							'Other: Other simple change (3).'
+						].join( '\n' ),
+						footer: null,
+						notes: []
+					};
+
+					const commits = transformCommit( rawCommit );
+
+					expect( commits ).to.be.an( 'Array' );
+					expect( commits.length ).to.equal( 3 );
+
+					expect( commits[ 0 ] ).to.deep.equal( {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Feature: Simple feature (1).',
+						type: 'Features',
+						subject: 'Simple feature (1).',
+						body: '  Lorem ipsum.',
+						footer: null,
+						notes: [],
+						rawType: 'Feature',
+						files: [],
+						scope: null,
+						isPublicCommit: true,
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev'
+					} );
+
+					expect( commits[ 1 ] ).to.deep.equal( {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Fix: Simple fix (2).',
+						type: 'Bug fixes',
+						subject: 'Simple fix (2).',
+						body: '  Second lorem ipsum.',
+						revert: null,
+						merge: null,
+						footer: null,
+						notes: [],
+						rawType: 'Fix',
+						files: [],
+						mentions: [],
+						scope: null,
+						isPublicCommit: true,
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev'
+					} );
+
+					expect( commits[ 2 ] ).to.deep.equal( {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Other: Other simple change (3).',
+						type: 'Other changes',
+						subject: 'Other simple change (3).',
 						body: '',
 						revert: null,
 						merge: null,

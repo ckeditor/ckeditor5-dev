@@ -97,6 +97,7 @@ module.exports = function transformCommitFactory( options = {} ) {
 			// The `type` below will be key for grouping commits.
 			commit.type = utils.getCommitType( commit.rawType );
 
+			/* istanbul ignore else */
 			if ( typeof commit.subject === 'string' ) {
 				commit.subject = makeLinks( commit.subject );
 			}
@@ -104,11 +105,23 @@ module.exports = function transformCommitFactory( options = {} ) {
 			// Remove additional notes from the commit's footer.
 			// Additional notes are added to the footer. In order to avoid duplication, they should be removed.
 			if ( commit.footer && commit.notes.length ) {
+				// Clone the notes in order to avoid cleaning those.
+				const commitsNotes = commit.notes.slice();
+
 				commit.footer = commit.footer.split( '\n' )
 					.filter( footerLine => {
-						// For each footer line checks whether the line starts with note prefix ("NOTE": ...).
+						// For each footer line checks whether the line starts with note prefix.
 						// If so, this footer line should be removed.
-						return !commit.notes.some( note => footerLine.startsWith( note.title ) );
+						const noteToRemove = commitsNotes.find( note => {
+							return footerLine == `${ note.title }: ${ note.text }`;
+						} );
+
+						// In order to avoid checking the same note, remove it.
+						if ( noteToRemove ) {
+							commitsNotes.splice( commitsNotes.indexOf( noteToRemove ), 1 );
+						}
+
+						return !noteToRemove;
 					} )
 					.join( '\n' )
 					.trim();
@@ -161,10 +174,9 @@ module.exports = function transformCommitFactory( options = {} ) {
 
 		// If the descriptions array contains more entries than fake commit entries,
 		// it means that the first element in descriptions array describes the main (real) commit.
+		/* istanbul ignore else */
 		if ( parts.length > commitEntries.length ) {
 			commit.body = escapeNewLines( parts.shift() );
-		} else {
-			commit.body = null;
 		}
 
 		// For each fake commit, copy hash and repository of the parent.
