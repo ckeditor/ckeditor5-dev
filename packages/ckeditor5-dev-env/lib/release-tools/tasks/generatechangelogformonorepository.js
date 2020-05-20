@@ -157,7 +157,7 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 			displayCommits( majorBreakingChangesCommits, { attachLinkToCommit: true, indentLevel: 2 } );
 		} else {
 			logInfo( chalk.italic(
-				'Not found any "MAJOR BREAKING CHANGES" commit but you can decide whether a next release should be treated as a major.'
+				'No "MAJOR BREAKING CHANGES" commits found but you can decide whether a next release should be treated as a major.'
 			), { indentLevel: 1 } );
 		}
 
