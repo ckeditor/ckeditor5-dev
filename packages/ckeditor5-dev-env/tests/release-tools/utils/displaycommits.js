@@ -335,5 +335,298 @@ describe( 'dev-env/release-tools/utils', () => {
 				expect( thirdLine.substring( 0, 16 ) ).to.equal( ' '.repeat( 16 ) );
 			} );
 		} );
+
+		describe( 'grouping commits', () => {
+			it( 'works for a group of two commits between single commit groups', () => {
+				// Displayed log:
+				//
+				//  * aaaaaaa "Fix: Another fix." INCLUDED
+				// ---------------------------------------------
+				// |* bbbbbbb "Fix: Simple fix." INCLUDED
+				// |* bbbbbbb "Feature: A new feature." INCLUDED
+				// ---------------------------------------------
+				//  * ccccccc "Fix: Another fix." INCLUDED
+
+				displayCommits( [
+					{
+						hash: 'a'.repeat( 40 ),
+						header: 'Fix: Another fix.',
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'Another fix.',
+						body: null,
+						footer: null,
+						notes: []
+					},
+					{
+						hash: 'b'.repeat( 40 ),
+						header: 'Fix: Simple fix.',
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'Simple fix.',
+						body: null,
+						footer: null,
+						notes: []
+					},
+					{
+						hash: 'b'.repeat( 40 ),
+						header: 'Feature: A new feature.',
+						type: 'Features',
+						rawType: 'Feature',
+						subject: 'A new feature.',
+						body: null,
+						footer: null,
+						notes: []
+					},
+					{
+						hash: 'c'.repeat( 40 ),
+						header: 'Fix: Another fix.',
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'Another fix.',
+						body: null,
+						footer: null,
+						notes: []
+					}
+				] );
+
+				// Calls: 0, 2, 3, and 5 display the commit data.
+				expect( stubs.logger.info.callCount ).to.equal( 6 );
+				expect( stubs.logger.info.getCall( 1 ).args[ 0 ] ).to.match( /-----/ );
+				expect( stubs.logger.info.getCall( 4 ).args[ 0 ] ).to.match( /-----/ );
+			} );
+
+			it( 'works for a group of two commits that follows a single commit group', () => {
+				// Displayed log:
+				//
+				//  * aaaaaaa "Fix: Another fix." INCLUDED
+				// ---------------------------------------------
+				// |* bbbbbbb "Fix: Simple fix." INCLUDED
+				// |* bbbbbbb "Feature: A new feature." INCLUDED
+				// ---------------------------------------------
+				displayCommits( [
+					{
+						hash: 'a'.repeat( 40 ),
+						header: 'Fix: Another fix.',
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'Another fix.',
+						body: null,
+						footer: null,
+						notes: []
+					},
+					{
+						hash: 'b'.repeat( 40 ),
+						header: 'Fix: Simple fix.',
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'Simple fix.',
+						body: null,
+						footer: null,
+						notes: []
+					},
+					{
+						hash: 'b'.repeat( 40 ),
+						header: 'Feature: A new feature.',
+						type: 'Features',
+						rawType: 'Feature',
+						subject: 'A new feature.',
+						body: null,
+						footer: null,
+						notes: []
+					}
+				] );
+
+				// Calls: 0, 2, and 3  display the commit data.
+				expect( stubs.logger.info.callCount ).to.equal( 5 );
+				expect( stubs.logger.info.getCall( 1 ).args[ 0 ] ).to.match( /-----/ );
+				expect( stubs.logger.info.getCall( 4 ).args[ 0 ] ).to.match( /-----/ );
+			} );
+
+			it( 'works for a single commit group that follows group of two commits ', () => {
+				// Displayed log:
+				//
+				// ---------------------------------------------
+				// |* bbbbbbb "Fix: Simple fix." INCLUDED
+				// |* bbbbbbb "Feature: A new feature." INCLUDED
+				// ---------------------------------------------
+				//  * ccccccc "Fix: Another fix." INCLUDED
+
+				displayCommits( [
+					{
+						hash: 'b'.repeat( 40 ),
+						header: 'Fix: Simple fix.',
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'Simple fix.',
+						body: null,
+						footer: null,
+						notes: []
+					},
+					{
+						hash: 'b'.repeat( 40 ),
+						header: 'Feature: A new feature.',
+						type: 'Features',
+						rawType: 'Feature',
+						subject: 'A new feature.',
+						body: null,
+						footer: null,
+						notes: []
+					},
+					{
+						hash: 'c'.repeat( 40 ),
+						header: 'Fix: Another fix.',
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'Another fix.',
+						body: null,
+						footer: null,
+						notes: []
+					}
+				] );
+
+				// Calls: 1, 2, and 4 display the commit data.
+				expect( stubs.logger.info.callCount ).to.equal( 5 );
+				expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.match( /-----/ );
+				expect( stubs.logger.info.getCall( 3 ).args[ 0 ] ).to.match( /-----/ );
+			} );
+
+			it( 'does not duplicate the separator for commit groups', () => {
+				// Displayed log:
+				//
+				// ---------------------------------------------
+				// |* bbbbbbb "Fix: Simple fix." INCLUDED
+				// |* bbbbbbb "Feature: A new feature." INCLUDED
+				// ---------------------------------------------
+				// |* ccccccc "Fix: One Another fix." INCLUDED
+				// |* ccccccc "Fix: Another fix." INCLUDED
+				// ---------------------------------------------
+
+				displayCommits( [
+					{
+						hash: 'b'.repeat( 40 ),
+						header: 'Fix: Simple fix.',
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'Simple fix.',
+						body: null,
+						footer: null,
+						notes: []
+					},
+					{
+						hash: 'b'.repeat( 40 ),
+						header: 'Feature: A new feature.',
+						type: 'Features',
+						rawType: 'Feature',
+						subject: 'A new feature.',
+						body: null,
+						footer: null,
+						notes: []
+					},
+					{
+						hash: 'c'.repeat( 40 ),
+						header: 'Fix: One Another fix.',
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'One Another fix.',
+						body: null,
+						footer: null,
+						notes: []
+					},
+					{
+						hash: 'c'.repeat( 40 ),
+						header: 'Fix: Another fix.',
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'Another fix.',
+						body: null,
+						footer: null,
+						notes: []
+					}
+				] );
+
+				// Calls: 1, 2, 4, and 5 display the commit data.
+				expect( stubs.logger.info.callCount ).to.equal( 7 );
+				expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.match( /-----/ );
+				expect( stubs.logger.info.getCall( 3 ).args[ 0 ] ).to.match( /-----/ );
+				expect( stubs.logger.info.getCall( 4 ).args[ 0 ] ).to.not.match( /-----/ );
+				expect( stubs.logger.info.getCall( 6 ).args[ 0 ] ).to.match( /-----/ );
+			} );
+
+			it( 'groups two groups of commits separated by a single commit group', () => {
+				// Displayed log:
+				//
+				// ---------------------------------------------
+				// |* bbbbbbb "Fix: Simple fix." INCLUDED
+				// |* bbbbbbb "Feature: A new feature." INCLUDED
+				// ---------------------------------------------
+				//  * aaaaaaa "Fix: Another fix." INCLUDED
+				// ---------------------------------------------
+				// |* ccccccc "Fix: One Another fix." INCLUDED
+				// |* ccccccc "Fix: Another fix." INCLUDED
+				// ---------------------------------------------
+
+				displayCommits( [
+					{
+						hash: 'b'.repeat( 40 ),
+						header: 'Fix: Simple fix.',
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'Simple fix.',
+						body: null,
+						footer: null,
+						notes: []
+					},
+					{
+						hash: 'b'.repeat( 40 ),
+						header: 'Feature: A new feature.',
+						type: 'Features',
+						rawType: 'Feature',
+						subject: 'A new feature.',
+						body: null,
+						footer: null,
+						notes: []
+					},
+					{
+						hash: 'a'.repeat( 40 ),
+						header: 'Fix: Another fix.',
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'Another fix.',
+						body: null,
+						footer: null,
+						notes: []
+					},
+					{
+						hash: 'c'.repeat( 40 ),
+						header: 'Fix: One Another fix.',
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'One Another fix.',
+						body: null,
+						footer: null,
+						notes: []
+					},
+					{
+						hash: 'c'.repeat( 40 ),
+						header: 'Fix: Another fix.',
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'Another fix.',
+						body: null,
+						footer: null,
+						notes: []
+					}
+				] );
+
+				// Calls: 1, 2, 4, 6, and 7 display the commit data.
+				expect( stubs.logger.info.callCount ).to.equal( 9 );
+				expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.match( /-----/ );
+				expect( stubs.logger.info.getCall( 3 ).args[ 0 ] ).to.match( /-----/ );
+
+				expect( stubs.logger.info.getCall( 5 ).args[ 0 ] ).to.match( /-----/ );
+				expect( stubs.logger.info.getCall( 8 ).args[ 0 ] ).to.match( /-----/ );
+			} );
+		} );
 	} );
 } );
