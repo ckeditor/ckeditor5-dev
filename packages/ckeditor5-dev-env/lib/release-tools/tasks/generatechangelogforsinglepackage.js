@@ -160,10 +160,7 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 			logInfo( 'Saved.', { indentLevel: 1 } );
 		} )
 		.then( () => {
-			logInfo( `Changelog for "${ chalk.underline( pkgJson.name ) }" (v${ newVersion }) has been generated.`, {
-				indentLevel: 1,
-				startWithNewLine: true
-			} );
+			logInfo( `Changelog for "${ chalk.underline( pkgJson.name ) }" (v${ newVersion }) has been generated.`, { indentLevel: 1 } );
 		} );
 
 	function logProcess( message ) {
