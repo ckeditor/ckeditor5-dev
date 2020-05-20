@@ -1,6 +1,10 @@
 Changelog
 =========
 
+All changes in the package are documented in the main repository. See: https://github.com/ckeditor/ckeditor5-dev/blob/master/CHANGELOG.md.
+
+Changes for the past releases are available below.
+
 ## [9.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-webpack-plugin@9.0.0...@ckeditor/ckeditor5-dev-webpack-plugin@9.0.2) (2020-05-13)
 
 Internal changes only (updated dependencies, documentation, etc.).

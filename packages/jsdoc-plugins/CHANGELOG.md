@@ -1,6 +1,10 @@
 Changelog
 =========
 
+All changes in the package are documented in the main repository. See: https://github.com/ckeditor/ckeditor5-dev/blob/master/CHANGELOG.md.
+
+Changes for the past releases are available below.
+
 ## [3.0.9](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/jsdoc-plugins@3.0.8...@ckeditor/jsdoc-plugins@3.0.9) (2020-02-26)
 
 Internal changes only (updated dependencies, documentation, etc.).

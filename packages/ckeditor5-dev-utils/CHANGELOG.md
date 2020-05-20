@@ -1,6 +1,10 @@
 Changelog
 =========
 
+All changes in the package are documented in the main repository. See: https://github.com/ckeditor/ckeditor5-dev/blob/master/CHANGELOG.md.
+
+Changes for the past releases are available below.
+
 ## [13.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/@ckeditor/ckeditor5-dev-utils@13.0.0...@ckeditor/ckeditor5-dev-utils@13.0.1) (2020-04-28)
 
 ### Bug fixes

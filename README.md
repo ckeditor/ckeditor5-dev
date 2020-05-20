@@ -52,20 +52,37 @@ Code coverage:
 yarn run coverage
 ```
 
-## Releasing
+## Releasing packages
+
+### Changelog
 
 1. Fetch all changes and switch to `master`!
-1. Execute `yarn run changelog`.
-	* This task checks what changed in each package and bumps the version accordingly. If nothing changed at all, it won't create a new changelog entry. If changes were irrelevant (e.g. only depedencies) it will create an "internal changes" entry.
-	* Scan the logs which are printed by the tool in search for errors (incorrect changelog entries). Incorrect entries (e.g. ones without the type) are being ignored. You may need to create entries for them manually. This is done directly in `CHANGELOG.md` of the specific package. Make sure to verify the proposed version after you modify the changelog.
-   * When unsure what has really changed in this version of a specific package, use `git diff <hash of previous release> packages/ckeditor5-dev-<name>/`.
-1. After reviewing the changelog and committing all changes do `git push`.
-1. Now, you can release the changed packages by using `lerna publish`.
-	* Lerna may propose to release more packages than you'd want – e.g. one of the packages might have some totally irrelevant change which you don't want to release now. You can do that by calling e.g.: `lerna publish --scope="@ckeditor/ckeditor5-dev-?(env|utils|webpack-plugin)"`. However, this means that if one of ignored packages depends on one of the release ones it won't have a version bump... so **usually it's better to just release everything**.
-	* Lerna will propose to release more packages than the one in which new changelog entries were generated – those are packages which depend on the ones which were really updated. That's fine.
-	* You need to pick version number of every package that Lerna wants to release. Do that based on what `yarn run changelog` proposed.
-	* Finally, Lerna says it will publish also `ckeditor5-dev` itself. This isn't true as its a private package, but it will be tagged anyway. **Whenever there's a major release in any of the sub packages, make sure to pick major release of `ckeditor5-dev` too**. Thanks to that it's possible later to get back to the previous stable releases e.g. if a hot fix is needed.
-1. Your job's done. You can go now to `ckeditor5`, remove `yarn.lock`, potentially update something in `package.json`, run `yarn install` and commit that as `"Internal: Updated dependencies."`.
+2. Execute `yarn run changelog`:
+  * This task checks what changed in each package and bumps the version accordingly. If nothing changed at all, it won't create a new changelog entry. If changes were irrelevant (e.g. only depedencies) it will create an "internal changes" entry.
+  * Scan the logs which are printed by the tool in search for errors (incorrect changelog entries). Incorrect entries (e.g. ones without the type) are being ignored. You may need to create entries for them manually. This is done directly in `CHANGELOG.md` (in the root directory). Make sure to verify the proposed version after you modify the changelog.
+    * When unsure what has really changed in this version of a specific package, use `git diff <hash of previous release> packages/ckeditor5-dev-<name>/`.
+
+### Publishing
+
+After generating the changelog, you are able to release the package.
+
+First, you need to bump the version:
+
+```bash
+yarn run release:bump-version
+```
+
+You can also use the `--dry-run` option in order to see what this task does.
+
+After bumping the version, you can publish the changes:
+
+```bash
+yarn run release:publish
+```
+
+As in the previous task, the `--dry-run` option is also available.
+
+Your job's done. You can go now to `ckeditor5`, remove `yarn.lock`, potentially update something in `package.json`, run `yarn install` and commit that as `"Internal: Updated dependencies."`.
 
 ## License
 

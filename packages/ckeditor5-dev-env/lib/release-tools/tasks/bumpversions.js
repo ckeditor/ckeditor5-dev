@@ -15,7 +15,7 @@ const displaySkippedPackages = require( '../utils/displayskippedpackages' );
 const executeOnPackages = require( '../utils/executeonpackages' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getPackagesToRelease = require( '../utils/getpackagestorelease' );
-const getSubPackagesPaths = require( '../utils/getsubpackagespaths' );
+const getPackagesPaths = require( '../utils/getpackagespaths' );
 const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
 const validatePackageToRelease = require( '../utils/validatepackagetorelease' );
 
@@ -44,7 +44,7 @@ module.exports = function bumpVersions( options ) {
 
 	const dryRun = Boolean( options.dryRun );
 
-	const pathsCollection = getSubPackagesPaths( {
+	const pathsCollection = getPackagesPaths( {
 		cwd: options.cwd,
 		packages: options.packages,
 		skipPackages: options.skipPackages || [],

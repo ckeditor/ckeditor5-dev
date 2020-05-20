@@ -126,6 +126,7 @@ const cli = {
 	 * @param {String|null} releaseTypeOrNewVersion
 	 * @param {Object} [options]
 	 * @param {Boolean} [options.disableInternalVersion=false] Whether to "internal" version is enabled.
+	 * @param {Boolean} [options.disableSkipVersion=false] Whether to "skip" version is enabled.
 	 * @param {Number} [options.indentLevel=0] The indent level.
 	 * @returns {Promise.<String>}
 	 */
@@ -152,7 +153,11 @@ const cli = {
 			},
 
 			validate( input ) {
-				if ( input === 'skip' || ( !options.disableInternalVersion && input === 'internal' ) ) {
+				if ( !options.disableSkipVersion && input === 'skip' ) {
+					return true;
+				}
+
+				if ( !options.disableInternalVersion && input === 'internal' ) {
 					return true;
 				}
 
@@ -292,7 +297,7 @@ const cli = {
 	},
 
 	/**
-	 * Asks a user for a confirmation for removing archives created by `npm pack` command.
+	 * Asks a user for a confirmation for major breaking release.
 	 *
 	 * @param {Boolean} haveMajorBreakingChangeCommits Whether the answer for the question should be "Yes".
 	 * @param {Object} [options={}]
@@ -304,7 +309,7 @@ const cli = {
 		const confirmQuestion = {
 			message: [
 				'If at least one of those changes is really a major breaking change, this will be a major release.',
-				'Should this be a major release?'
+				'Should it be the major release?'
 			].join( ' ' ),
 			type: 'confirm',
 			name: 'confirm',

@@ -40,6 +40,7 @@ const versions = {
 
 			return lastTag.trim().replace( /^v/, '' ) || null;
 		} catch ( err ) {
+			/* istanbul ignore next */
 			return null;
 		}
 	},
