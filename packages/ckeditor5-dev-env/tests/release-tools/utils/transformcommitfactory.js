@@ -796,7 +796,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					expect( commits[ 2 ].files ).to.equal( files );
 				} );
 
-				it( 'does not extract non-public commits', () => {
+				it( 'works with non-public commits', () => {
 					const rawCommit = {
 						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
 						header: 'Feature: Simple feature (1).',
@@ -813,7 +813,12 @@ describe( 'dev-env/release-tools/utils', () => {
 
 					const commits = transformCommit( rawCommit );
 
-					expect( commits ).to.not.be.an( 'Array' );
+					expect( commits ).to.be.an( 'Array' );
+					expect( commits.length ).to.equal( 3 );
+
+					expect( commits[ 0 ].isPublicCommit ).to.equal( true );
+					expect( commits[ 1 ].isPublicCommit ).to.equal( false );
+					expect( commits[ 2 ].isPublicCommit ).to.equal( false );
 				} );
 
 				it( 'handles scoped and non-scoped changes', () => {

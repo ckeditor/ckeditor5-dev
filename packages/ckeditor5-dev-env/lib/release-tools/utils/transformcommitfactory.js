@@ -193,8 +193,11 @@ module.exports = function transformCommitFactory( options = {} ) {
 
 			newCommit.rawType = details.rawType;
 			newCommit.scope = details.scope;
-			newCommit.type = utils.getCommitType( newCommit.rawType );
-			newCommit.isPublicCommit = utils.availableCommitTypes.get( commit.rawType );
+			newCommit.isPublicCommit = utils.availableCommitTypes.get( newCommit.rawType );
+
+			if ( newCommit.isPublicCommit ) {
+				newCommit.type = utils.getCommitType( newCommit.rawType );
+			}
 
 			const commitDescription = parts[ i ];
 			const subject = commitDescription.match( /^(.*)$/m )[ 0 ];

@@ -12,7 +12,7 @@ const transformcommitutils = {
 	 * A regexp for extracting additional changelog entries from the single commit.
 	 * Prefixes of the commit must be synchronized the `getCommitType()` util.
 	 */
-	MULTI_ENTRIES_COMMIT_REGEXP: /(?:Feature|Other|Fix)(?: \([\w\-, ]+?\))?:/g,
+	MULTI_ENTRIES_COMMIT_REGEXP: /(?:Feature|Other|Fix|Docs|Internal|Tests|Revert|Release)(?: \([\w\-, ]+?\))?:/g,
 
 	/**
 	 * Map of available types of the commits.
