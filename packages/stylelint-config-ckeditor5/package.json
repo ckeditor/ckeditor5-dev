@@ -21,6 +21,6 @@
   "author": "CKSource (http://cksource.com/)",
   "license": "MIT",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/stylelint-config-ckeditor5",
-  "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
   "repository": "https://github.com/ckeditor/ckeditor5-dev"
 }

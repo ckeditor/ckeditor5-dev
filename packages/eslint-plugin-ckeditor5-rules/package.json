@@ -17,6 +17,6 @@
   "author": "CKSource (http://cksource.com/)",
   "license": "MIT",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/eslint-plugin-ckeditor5-rules",
-  "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
   "repository": "https://github.com/ckeditor/ckeditor5-dev"
 }
