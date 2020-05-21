@@ -10,17 +10,14 @@ const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 
 describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
-	const sandbox = sinon.createSandbox();
-	let CKEditorWebpackPlugin, stubs;
+	let sandbox, CKEditorWebpackPlugin, stubs;
 
 	beforeEach( () => {
-		class MultipleLanguageTranslationService { }
+		sandbox = sinon.createSandbox();
 
 		stubs = {
 			serveTranslations: sandbox.spy(),
-			MultipleLanguageTranslationService: sandbox.spy( function() {
-				return sinon.createStubInstance( MultipleLanguageTranslationService );
-			} )
+			MultipleLanguageTranslationService: sandbox.spy()
 		};
 
 		CKEditorWebpackPlugin = proxyquire( '../lib/index', {
