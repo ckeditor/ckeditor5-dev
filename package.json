@@ -15,8 +15,8 @@
     "mocha": "^7.1.2"
   },
   "engines": {
-    "node": ">=8.0.0",
-    "npm": ">=5.7.1"
+    "node": ">=10.0.0",
+    "npm": ">=6.0.0"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
