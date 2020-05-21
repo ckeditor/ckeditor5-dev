@@ -53,7 +53,7 @@ const tasks = {
 		const getToken = require( './../lib/translations/gettoken' );
 		const path = require( 'path' );
 
-		const { token } = await getToken();
+		const token = await getToken();
 
 		const packages = new Map( getCKEditor5PackageNames().map( packageName => [
 			packageName,

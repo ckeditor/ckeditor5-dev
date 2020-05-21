@@ -38,8 +38,8 @@ module.exports = async function downloadTranslations( config ) {
  * @param {String} config.token Token to the Transifex API.
  */
 async function getLocalizablePackages( config ) {
+	const packageNames = new Set( config.packages.keys() );
 	const resources = await transifexService.getResources( config );
-	const packageNames = new Set( config.packages.values() );
 
 	return resources.map( resource => resource.slug )
 		.filter( packageName => packageNames.has( packageName ) );

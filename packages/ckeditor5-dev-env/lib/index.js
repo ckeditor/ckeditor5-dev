@@ -54,7 +54,7 @@ const tasks = {
 		const downloadTranslations = require( './translations/download' );
 		const getToken = require( './translations/gettoken' );
 
-		const { token } = await getToken();
+		const token = await getToken();
 
 		await downloadTranslations( { token, packages } );
 	}
