@@ -10,6 +10,9 @@
     "ckeditor",
     "eslintplugin"
   ],
+  "devDependencies": {
+    "eslint": ">=7.0.0"
+  },
   "peerDependencies": {
     "eslint": ">=7.0.0"
   },
