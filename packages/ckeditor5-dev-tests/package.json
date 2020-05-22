@@ -6,8 +6,8 @@
   "main": "lib/index.js",
   "dependencies": {
     "@babel/core": "^7.0.0",
-    "@ckeditor/ckeditor5-dev-utils": "^13.0.1",
-    "@ckeditor/ckeditor5-dev-webpack-plugin": "^9.0.2",
+    "@ckeditor/ckeditor5-dev-utils": "^20.0.0",
+    "@ckeditor/ckeditor5-dev-webpack-plugin": "^20.0.0",
     "@ckeditor/ckeditor5-inspector": "^2.0.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^8.0.2",
