@@ -25,7 +25,7 @@ module.exports = function validatePackageToRelease( options ) {
 	if ( !options.ignoreBranchCheck ) {
 		// Check whether current branch is "master".
 		if ( !status.startsWith( `## ${ branch }...origin/${ branch }` ) ) {
-			errors.push( 'Not on master.' );
+			errors.push( `Not on ${ branch } branch.` );
 		}
 	}
 
