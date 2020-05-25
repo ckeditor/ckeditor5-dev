@@ -92,5 +92,27 @@ describe( 'dev-env/release-tools/utils', () => {
 
 			expect( errors.length ).to.equal( 0 );
 		} );
+
+		it( 'uses non-master branch for releasing if specified', () => {
+			stubs.devUtils.tools.shExec.returns( '## release...origin/release' );
+
+			const errors = validatePackageToRelease( { branch: 'release', changes: 'Some changes.', version: '1.0.0' } );
+
+			expect( errors ).to.be.an( 'Array' );
+			expect( errors.length ).to.equal( 0 );
+		} );
+
+		it( 'allows skipping the branch check (even if specified)', () => {
+			stubs.devUtils.tools.shExec.returns( '## develop...origin/develop' );
+
+			const errors = validatePackageToRelease( {
+				branch: 'release',
+				changes: 'Some changes.',
+				version: '1.0.0',
+				ignoreBranchCheck: true
+			} );
+
+			expect( errors.length ).to.equal( 0 );
+		} );
 	} );
 } );
