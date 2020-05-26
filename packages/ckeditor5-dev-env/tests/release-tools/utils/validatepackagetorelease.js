@@ -73,7 +73,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			const errors = validatePackageToRelease( { changes: 'Some changes.', version: '1.0.0' } );
 
 			expect( errors.length ).to.equal( 1 );
-			expect( errors[ 0 ] ).to.equal( 'Not on master.' );
+			expect( errors[ 0 ] ).to.equal( 'Not on master branch.' );
 		} );
 
 		it( 'returns an array with errors if master is behind with origin', () => {
