@@ -1,6 +1,33 @@
 Changelog
 =========
 
+## [20.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v20.0.0...v20.1.0) (2020-05-27)
+
+### Features
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Allows releasing packages from the non-master branch. Closes [ckeditor/ckeditor5#7271](https://github.com/ckeditor/ckeditor5/issues/7271). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/d5ad37b15c6c33cac0cbe7eb113f5bd477edc114))
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: The getRelativeFilePath() util will return proper paths for CKEditor 5 builds. Closes [ckeditor/ckeditor5#7280](https://github.com/ckeditor/ckeditor5/issues/7280). Closes [ckeditor/ckeditor5#7093](https://github.com/ckeditor/ckeditor5/issues/7093). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ccd299e24974285606d2110ddd5e7fc438f14186))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v20.0.0 => v20.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v20.0.0 => v20.0.1
+</details>
+
+
 ## [20.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/ckeditor5-dev@6.4.3...v20.0.0) (2020-05-22)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
