@@ -293,7 +293,7 @@ module.exports = function bumpVersions( options ) {
 
 				log.info( '\nCommitting and tagging changes...' );
 
-				exec( `git commit --message "Release: v${ releaseDetails.version }. [skip ci]"` );
+				exec( `git commit --message "Release: v${ releaseDetails.version }."` );
 				exec( `git tag v${ releaseDetails.version }` );
 
 				if ( dryRun ) {
