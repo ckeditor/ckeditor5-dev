@@ -443,47 +443,128 @@ describe( 'dev-env/release-tools/utils', () => {
 				expect( commit.notes ).to.deep.equal( notes );
 			} );
 
-			it( 'merges multiple "Closes #" references into single entry', () => {
-				const rawCommit = {
-					hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
-					header: 'Fix: Simple fix. Closes #1. Closes #2. Closes #3.',
-					type: 'Fix',
-					subject: 'Simple fix. Closes #1. Closes #2. Closes #3.',
-					body: null,
-					footer: null,
-					notes: []
-				};
+			describe( '"Closes" references - merging into single entry', () => {
+				it( 'works for #id pattern', () => {
+					const rawCommit = {
+						hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+						header: 'Fix: Simple fix. Closes #1. Closes #2. Closes #3.',
+						type: 'Fix',
+						subject: 'Simple fix. Closes #1. Closes #2. Closes #3.',
+						body: null,
+						footer: null,
+						notes: []
+					};
 
-				const commit = transformCommit( rawCommit );
+					const commit = transformCommit( rawCommit );
 
-				const expectedSubject = 'Simple fix. Closes ' +
-					'[#1](https://github.com/ckeditor/ckeditor5-dev/issues/1), ' +
-					'[#2](https://github.com/ckeditor/ckeditor5-dev/issues/2), ' +
-					'[#3](https://github.com/ckeditor/ckeditor5-dev/issues/3).';
+					const expectedSubject = 'Simple fix. Closes ' +
+						'[#1](https://github.com/ckeditor/ckeditor5-dev/issues/1), ' +
+						'[#2](https://github.com/ckeditor/ckeditor5-dev/issues/2), ' +
+						'[#3](https://github.com/ckeditor/ckeditor5-dev/issues/3).';
 
-				expect( commit.subject ).to.equal( expectedSubject );
-			} );
+					expect( commit.subject ).to.equal( expectedSubject );
+				} );
 
-			it( 'merges multiple "Closes #" references into single entry and does not touch "See #" references.', () => {
-				const rawCommit = {
-					hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
-					header: 'Fix: Simple fix. Closes #1. Closes #2. See #3, #.',
-					type: 'Fix',
-					subject: 'Simple fix. Closes #1. Closes #2. See #3, #4.',
-					body: null,
-					footer: null,
-					notes: []
-				};
+				it( 'works for org/repo#id pattern', () => {
+					const rawCommit = {
+						hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+						header: 'Fix: Simple fix. Closes ckeditor/ckeditor5#1. Closes ckeditor/ckeditor5#2. Closes ckeditor/ckeditor5#3.',
+						type: 'Fix',
+						subject: 'Simple fix. Closes ckeditor/ckeditor5#1. Closes ckeditor/ckeditor5#2. Closes ckeditor/ckeditor5#3.',
+						body: null,
+						footer: null,
+						notes: []
+					};
 
-				const commit = transformCommit( rawCommit );
+					const commit = transformCommit( rawCommit );
 
-				const expectedSubject = 'Simple fix. Closes ' +
-					'[#1](https://github.com/ckeditor/ckeditor5-dev/issues/1), ' +
-					'[#2](https://github.com/ckeditor/ckeditor5-dev/issues/2). ' +
-					'See [#3](https://github.com/ckeditor/ckeditor5-dev/issues/3), ' +
-					'[#4](https://github.com/ckeditor/ckeditor5-dev/issues/4).';
+					const expectedSubject = 'Simple fix. Closes ' +
+						'[ckeditor/ckeditor5#1](https://github.com/ckeditor/ckeditor5/issues/1), ' +
+						'[ckeditor/ckeditor5#2](https://github.com/ckeditor/ckeditor5/issues/2), ' +
+						'[ckeditor/ckeditor5#3](https://github.com/ckeditor/ckeditor5/issues/3).';
 
-				expect( commit.subject ).to.equal( expectedSubject );
+					expect( commit.subject ).to.equal( expectedSubject );
+				} );
+
+				it( 'works for mixed #id and org/repo#id patterns, starting with #id', () => {
+					const rawCommit = {
+						hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+						header: 'Fix: Simple fix. Closes #1. Closes #2. Closes ckeditor/ckeditor5#3.',
+						type: 'Fix',
+						subject: 'Simple fix. Closes #1. Closes #2. Closes ckeditor/ckeditor5#3.',
+						body: null,
+						footer: null,
+						notes: []
+					};
+
+					const commit = transformCommit( rawCommit );
+
+					const expectedSubject = 'Simple fix. Closes ' +
+						'[#1](https://github.com/ckeditor/ckeditor5-dev/issues/1), ' +
+						'[#2](https://github.com/ckeditor/ckeditor5-dev/issues/2), ' +
+						'[ckeditor/ckeditor5#3](https://github.com/ckeditor/ckeditor5/issues/3).';
+
+					expect( commit.subject ).to.equal( expectedSubject );
+				} );
+
+				it( 'works for mixed #id and org/repo#id patterns, starting with org/repo#id', () => {
+					const rawCommit = {
+						hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+						header: 'Fix: Simple fix. Closes ckeditor/ckeditor5#1. Closes ckeditor/ckeditor5#2. Closes #3.',
+						type: 'Fix',
+						subject: 'Simple fix. Closes ckeditor/ckeditor5#1. Closes ckeditor/ckeditor5#2. Closes #3.',
+						body: null,
+						footer: null,
+						notes: []
+					};
+
+					const commit = transformCommit( rawCommit );
+
+					const expectedSubject = 'Simple fix. Closes ' +
+						'[ckeditor/ckeditor5#1](https://github.com/ckeditor/ckeditor5/issues/1), ' +
+						'[ckeditor/ckeditor5#2](https://github.com/ckeditor/ckeditor5/issues/2), ' +
+						'[#3](https://github.com/ckeditor/ckeditor5-dev/issues/3).';
+
+					expect( commit.subject ).to.equal( expectedSubject );
+				} );
+
+				it( 'does no touch the "See #" references.', () => {
+					const rawCommit = {
+						hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+						header: 'Fix: Simple fix. Closes #1. Closes #2. See #3, #.',
+						type: 'Fix',
+						subject: 'Simple fix. Closes #1. Closes #2. See #3, #4.',
+						body: null,
+						footer: null,
+						notes: []
+					};
+
+					const commit = transformCommit( rawCommit );
+
+					const expectedSubject = 'Simple fix. Closes ' +
+						'[#1](https://github.com/ckeditor/ckeditor5-dev/issues/1), ' +
+						'[#2](https://github.com/ckeditor/ckeditor5-dev/issues/2). ' +
+						'See [#3](https://github.com/ckeditor/ckeditor5-dev/issues/3), ' +
+						'[#4](https://github.com/ckeditor/ckeditor5-dev/issues/4).';
+
+					expect( commit.subject ).to.equal( expectedSubject );
+				} );
+
+				it( 'does not replace paths with hash as github issue', () => {
+					const rawCommit = {
+						hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
+						header: 'Fix: Simple fix. Closes i/am/path5#1.',
+						type: 'Fix',
+						subject: 'Fix: Simple fix. Closes i/am/path5#1.',
+						body: null,
+						footer: null,
+						notes: []
+					};
+
+					const commit = transformCommit( rawCommit );
+
+					expect( commit.subject ).to.equal( 'Fix: Simple fix. Closes i/am/path5#1.' );
+				} );
 			} );
 
 			describe( 'scopes', () => {
@@ -680,11 +761,11 @@ describe( 'dev-env/release-tools/utils', () => {
 						type: 'Feature',
 						subject: 'Simple feature (1).',
 						body: [
-							'Lorem ipsum.',
+							'Lorem ipsum. #1',
 							'',
 							'Fix: Simple fix (2).',
 							'',
-							'Second lorem ipsum.',
+							'Second lorem ipsum. #2',
 							'',
 							'Other: Other simple change (3).'
 						].join( '\n' ),
@@ -702,7 +783,7 @@ describe( 'dev-env/release-tools/utils', () => {
 						header: 'Feature: Simple feature (1).',
 						type: 'Features',
 						subject: 'Simple feature (1).',
-						body: '  Lorem ipsum.',
+						body: '  Lorem ipsum. [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1)',
 						footer: null,
 						notes: [],
 						rawType: 'Feature',
@@ -717,7 +798,7 @@ describe( 'dev-env/release-tools/utils', () => {
 						header: 'Fix: Simple fix (2).',
 						type: 'Bug fixes',
 						subject: 'Simple fix (2).',
-						body: '  Second lorem ipsum.',
+						body: '  Second lorem ipsum. [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2)',
 						revert: null,
 						merge: null,
 						footer: null,
@@ -847,6 +928,81 @@ describe( 'dev-env/release-tools/utils', () => {
 					expect( commits[ 1 ].scope ).to.deep.equal( [ 'foo' ] );
 					expect( commits[ 2 ].scope ).to.equal( null );
 					expect( commits[ 3 ].scope ).to.deep.equal( [ 'bar', 'foo' ] );
+				} );
+
+				it( 'merges "Closes" references in multi-entries commit', () => {
+					const rawCommit = {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Feature: Simple feature Closes #1.',
+						type: 'Feature',
+						subject: 'Simple feature Closes #1.',
+						body: [
+							'Fix: Simple fix. Closes #2. Closes ckeditor/ckeditor5#2. See ckeditor/ckeditor5#1000.',
+							'',
+							'Other: Simple other change. Closes ckeditor/ckeditor5#3. Closes #3.'
+						].join( '\n' ),
+						footer: null,
+						notes: []
+					};
+
+					const commits = transformCommit( rawCommit );
+
+					expect( commits ).to.be.an( 'Array' );
+					expect( commits.length ).to.equal( 3 );
+
+					expect( commits[ 0 ] ).to.deep.equal( {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Feature: Simple feature Closes #1.',
+						type: 'Features',
+						subject: 'Simple feature Closes [#1](https://github.com/ckeditor/ckeditor5-dev/issues/1).',
+						body: '',
+						footer: null,
+						notes: [],
+						rawType: 'Feature',
+						files: [],
+						scope: null,
+						isPublicCommit: true,
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev'
+					} );
+
+					expect( commits[ 1 ] ).to.deep.equal( {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Fix: Simple fix. Closes #2. Closes ckeditor/ckeditor5#2. See ckeditor/ckeditor5#1000.',
+						type: 'Bug fixes',
+						subject: 'Simple fix. Closes [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2), ' +
+							'[ckeditor/ckeditor5#2](https://github.com/ckeditor/ckeditor5/issues/2). ' +
+							'See [ckeditor/ckeditor5#1000](https://github.com/ckeditor/ckeditor5/issues/1000).',
+						body: '',
+						revert: null,
+						merge: null,
+						footer: null,
+						notes: [],
+						rawType: 'Fix',
+						files: [],
+						mentions: [],
+						scope: null,
+						isPublicCommit: true,
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev'
+					} );
+
+					expect( commits[ 2 ] ).to.deep.equal( {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Other: Simple other change. Closes ckeditor/ckeditor5#3. Closes #3.',
+						type: 'Other changes',
+						subject: 'Simple other change. Closes [ckeditor/ckeditor5#3](https://github.com/ckeditor/ckeditor5/issues/3), ' +
+							'[#3](https://github.com/ckeditor/ckeditor5-dev/issues/3).',
+						body: '',
+						revert: null,
+						merge: null,
+						footer: null,
+						notes: [],
+						rawType: 'Other',
+						files: [],
+						mentions: [],
+						scope: null,
+						isPublicCommit: true,
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev'
+					} );
 				} );
 			} );
 		} );
