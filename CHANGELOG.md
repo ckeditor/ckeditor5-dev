@@ -1,6 +1,31 @@
 Changelog
 =========
 
+## [20.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v20.1.0...v20.2.0) (2020-05-31)
+
+### Features
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Release commit will trigger a Continuous Integration service. Closes [ckeditor/ckeditor5#7302](https://github.com/ckeditor/ckeditor5/issues/7302). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e3495c82ff447b49882cc58d485f2c2d7cda665f))
+
+### Bug fixes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The changelog generator will properly merge the `Closes` references. Closes [ckeditor/ckeditor5#7298](https://github.com/ckeditor/ckeditor5/issues/7298). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/4f0737da0d10168547ec8b523d4df36cb958dcff))
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: References to issues in additional commits will be merged and linked. See [ckeditor/ckeditor5#7298](https://github.com/ckeditor/ckeditor5/issues/7298). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/4f0737da0d10168547ec8b523d4df36cb958dcff))
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `releaseSubRepositories()` task should not throw any error if publishing from the non-master branch. Closes [ckeditor/ckeditor5#7300](https://github.com/ckeditor/ckeditor5/issues/7300). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e74f022e3270e9aeafca6c8ede39ce43d9433095))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v20.1.0 => v20.2.0
+</details>
+
+
 ## [20.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v20.0.0...v20.1.0) (2020-05-27)
 
 ### Features
