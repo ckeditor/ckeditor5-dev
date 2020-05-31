@@ -12,18 +12,20 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {String} options.version Version of the current release.
  * @param {String} options.changes Changelog entries for the current release.
  * @param {Boolean} [options.ignoreBranchCheck=false] If set on true, branch checking will be skipped.
+ * @param {String} [options.branch='master'] A name of the branch that should be used for releasing packages.
  * @returns {Array.<String>}
  */
 module.exports = function validatePackageToRelease( options ) {
 	const errors = [];
+	const branch = options.branch || 'master';
 
 	// Check whether the repository is ready for the release.
 	const status = exec( 'git status -sb', { verbosity: 'error' } ).trim();
 
 	if ( !options.ignoreBranchCheck ) {
 		// Check whether current branch is "master".
-		if ( !status.startsWith( '## master...origin/master' ) ) {
-			errors.push( 'Not on master.' );
+		if ( !status.startsWith( `## ${ branch }...origin/${ branch }` ) ) {
+			errors.push( `Not on ${ branch } branch.` );
 		}
 	}
 

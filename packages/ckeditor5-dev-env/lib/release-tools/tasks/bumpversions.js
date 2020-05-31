@@ -36,6 +36,7 @@ const BREAK_RELEASE_MESSAGE = 'You aborted updating versions. Why? Oh why?!';
  * @param {Boolean} [options.dryRun=false] If set on true, all changes will be printed on the screen. Changes produced by commands like
  * `npm version` will be reverted. Every called command will be displayed.
  * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in "cwd" will be skipped.
+ * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
  * @returns {Promise}
  */
 module.exports = function bumpVersions( options ) {
@@ -53,6 +54,7 @@ module.exports = function bumpVersions( options ) {
 
 	const mainRepositoryVersion = versions.getLastFromChangelog( options.cwd );
 	const mainChangelog = changelog.getChangesForVersion( mainRepositoryVersion );
+	const releaseBranch = options.releaseBranch || 'master';
 
 	logDryRun( '⚠️  DRY RUN mode ⚠️' );
 	logDryRun( 'All changes made by this script will be reverted automatically.' );
@@ -250,6 +252,7 @@ module.exports = function bumpVersions( options ) {
 		const releaseDetails = packages.get( mainPackageJson.name );
 
 		const errors = validatePackageToRelease( {
+			branch: releaseBranch,
 			changes: releaseDetails.changes,
 			version: releaseDetails.version
 		} );
@@ -290,7 +293,7 @@ module.exports = function bumpVersions( options ) {
 
 				log.info( '\nCommitting and tagging changes...' );
 
-				exec( `git commit --message "Release: v${ releaseDetails.version }. [skip ci]"` );
+				exec( `git commit --message "Release: v${ releaseDetails.version }."` );
 				exec( `git tag v${ releaseDetails.version }` );
 
 				if ( dryRun ) {
