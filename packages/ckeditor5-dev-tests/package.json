@@ -8,7 +8,7 @@
     "@babel/core": "^7.0.0",
     "@ckeditor/ckeditor5-dev-utils": "^20.0.0",
     "@ckeditor/ckeditor5-dev-webpack-plugin": "^20.0.0",
-    "@ckeditor/ckeditor5-inspector": "^2.0.0",
+    "@ckeditor/ckeditor5-inspector": "^2.1.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^8.0.2",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
