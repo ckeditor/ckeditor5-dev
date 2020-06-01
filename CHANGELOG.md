@@ -1,6 +1,23 @@
 Changelog
 =========
 
+## [20.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/v20.2.0...v20.2.1) (2020-06-01)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v20.0.1 => v20.0.2
+</details>
+
+
 ## [20.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v20.1.0...v20.2.0) (2020-05-31)
 
 ### Features
