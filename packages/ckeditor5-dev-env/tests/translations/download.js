@@ -28,19 +28,19 @@ describe( 'download', () => {
 			},
 
 			fs: {
-				outputFileSync: sinon.spy(),
-				removeSync: sinon.spy()
+				outputFileSync: sinon.stub(),
+				removeSync: sinon.stub()
 			},
 
 			translationUtils: {
-				createDictionaryFromPoFileContent: sinon.spy( poFileContent => fileContents[ poFileContent ] ),
+				createDictionaryFromPoFileContent: sinon.stub().callsFake( poFileContent => fileContents[ poFileContent ] ),
 				cleanPoFileContent: x => x
 			},
 
 			transifexService: {
-				getResources: sinon.spy( () => Promise.resolve( resources ) ),
-				getResourceDetails: sinon.spy( ( { slug } ) => Promise.resolve( resourcesDetails[ slug ] ) ),
-				getTranslation: sinon.spy( ( { lang, slug } ) => Promise.resolve( translations[ slug ][ lang ] ) )
+				getResources: sinon.stub().callsFake( () => Promise.resolve( resources ) ),
+				getResourceDetails: sinon.stub().callsFake( ( { slug } ) => Promise.resolve( resourcesDetails[ slug ] ) ),
+				getTranslation: sinon.stub().callsFake( ( { lang, slug } ) => Promise.resolve( translations[ slug ][ lang ] ) )
 			}
 		};
 
@@ -251,7 +251,7 @@ describe( 'download', () => {
 	it( 'should fail with an error when the transifex service responses with an error', async () => {
 		const error = new Error();
 
-		stubs.transifexService.getResources = sinon.stub().rejects( error );
+		stubs.transifexService.getResources.rejects( error );
 
 		try {
 			await download( {
