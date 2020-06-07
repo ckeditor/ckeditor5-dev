@@ -26,7 +26,7 @@ module.exports = async function downloadTranslations( config ) {
 	for ( const packageName of localizablePackageNames ) {
 		const translations = await downloadPoFiles( config, packageName );
 
-		removeOldTranslation( packageName );
+		removeOldTranslation( config.packages.get( packageName ) );
 		saveNewTranslations( packageName, config.packages.get( packageName ), translations );
 	}
 
@@ -45,8 +45,11 @@ async function getLocalizablePackages( config ) {
 		.filter( packageName => packageNames.has( packageName ) );
 }
 
-function removeOldTranslation( packageName ) {
-	fs.removeSync( getPathToTranslations( packageName ) );
+/**
+ * @param {String} packagePath Package path.
+ */
+function removeOldTranslation( packagePath ) {
+	fs.removeSync( getPathToTranslations( packagePath ) );
 }
 
 /**
