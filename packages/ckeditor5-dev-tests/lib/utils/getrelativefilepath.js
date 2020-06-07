@@ -5,23 +5,31 @@
 
 'use strict';
 
+const path = require( 'path' );
+
 /**
  * Get a path to a source file which will uniquely identify this file in
  * a build directory, once all packages are gathered together.
  *
- * In order to do that, everything up to `ckeditor5?-packageName` is removed:
- * /work/space/ckeditor5/tests/manual/foo.js -> ckeditor5/tests/manual/foo.js
- * /work/space/ckeditor/tests/manual/foo.js -> ckeditor/tests/manual/foo.js
- * /work/space/ckeditor5-foo/tests/manual/foo.js -> ckeditor5-foo/tests/manual/foo.js
- * /work/space/ckeditor-foo/tests/manual/foo.js -> ckeditor-foo/tests/manual/foo.js
+ * E.g.:
+ *   - /work/space/ckeditor5/tests/manual/foo.js -> ckeditor5/tests/manual/foo.js
+ *   - /work/space/ckeditor/tests/manual/foo.js -> ckeditor/tests/manual/foo.js
+ *   - /work/space/packages/ckeditor5-foo/tests/manual/foo.js -> ckeditor5-foo/tests/manual/foo.js
+ *   - /work/space/packages/ckeditor-foo/tests/manual/foo.js -> ckeditor-foo/tests/manual/foo.js
  *
  * @param {String} filePath
+ * @param {String} [cwd=process.cwd()]
  * @returns {String}
  */
-module.exports = function getRelativeFilePath( filePath ) {
-	return filePath.replace( /^.+[/\\]ckeditor(5)?(-)?/, ( ...match ) => {
-		const ckeditor = match[ 1 ] ? 'ckeditor5' : 'ckeditor';
+module.exports = function getRelativeFilePath( filePath, cwd = process.cwd() ) {
+	// The path ends with the directory separator.
+	const relativePath = filePath.replace( cwd, '' ).slice( 1 );
 
-		return match[ 2 ] ? `${ ckeditor }-` : ckeditor;
-	} );
+	// A package.
+	if ( relativePath.startsWith( 'packages' ) ) {
+		return relativePath.replace( 'packages', '' ).slice( 1 );
+	}
+
+	// The main repository.
+	return path.join( 'ckeditor5', relativePath );
 };

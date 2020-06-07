@@ -57,7 +57,7 @@ yarn run coverage
 ### Changelog
 
 1. Fetch all changes and switch to `master`!
-2. Execute `yarn run changelog`:
+2. Execute `npm run changelog`:
   * This task checks what changed in each package and bumps the version accordingly. If nothing changed at all, it won't create a new changelog entry. If changes were irrelevant (e.g. only depedencies) it will create an "internal changes" entry.
   * Scan the logs which are printed by the tool in search for errors (incorrect changelog entries). Incorrect entries (e.g. ones without the type) are being ignored. You may need to create entries for them manually. This is done directly in `CHANGELOG.md` (in the root directory). Make sure to verify the proposed version after you modify the changelog.
     * When unsure what has really changed in this version of a specific package, use `git diff <hash of previous release> packages/ckeditor5-dev-<name>/`.
@@ -69,7 +69,7 @@ After generating the changelog, you are able to release the package.
 First, you need to bump the version:
 
 ```bash
-yarn run release:bump-version
+npm run release:bump-version
 ```
 
 You can also use the `--dry-run` option in order to see what this task does.
@@ -77,7 +77,7 @@ You can also use the `--dry-run` option in order to see what this task does.
 After bumping the version, you can publish the changes:
 
 ```bash
-yarn run release:publish
+npm run release:publish
 ```
 
 As in the previous task, the `--dry-run` option is also available.

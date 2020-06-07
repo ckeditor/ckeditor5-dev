@@ -11,7 +11,6 @@ require( '../packages/ckeditor5-dev-env' )
 	.generateChangelogForMonoRepository( {
 		cwd: process.cwd(),
 		packages: 'packages',
-		from: 'e0728059369dba60b77e2bb903ed1b1a6f25501f', // TODO: Remove the line after the nearest release.
 		transformScope: name => {
 			if ( name === 'jsdoc' ) {
 				return 'https://www.npmjs.com/package/@ckeditor/jsdoc-plugins';

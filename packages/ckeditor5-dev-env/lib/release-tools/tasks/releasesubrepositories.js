@@ -88,12 +88,15 @@ const additionalFiles = [
  * will publish an empty directory. All properties copied from original package's "package.json" file will be overwritten by fields
  * specified in this option.
  * @param {Array.<String>} [options.skipNpmPublish=[]] Name of packages that should not be published on NPM.
+ * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
  * @returns {Promise}
  */
 module.exports = function releaseSubRepositories( options ) {
 	const cwd = process.cwd();
 	const log = logger();
+
 	const dryRun = Boolean( options.dryRun );
+	const releaseBranch = options.releaseBranch || 'master';
 	const emptyReleases = Array.isArray( options.emptyReleases ) ? options.emptyReleases : [ options.emptyReleases ].filter( Boolean );
 
 	const pathsCollection = getPackagesPaths( {
@@ -150,6 +153,11 @@ module.exports = function releaseSubRepositories( options ) {
 
 			logProcess( `Finished releasing ${ chalk.underline( releasedPackages.size ) } package(s).` );
 			logDryRun( 'Because of the DRY RUN mode, nothing has been changed. All changes were reverted.' );
+
+			// For the real release from non-master branch, show the "merge" tip.
+			if ( !dryRun && releaseBranch !== 'master' ) {
+				log.info( '⚠️  ' + chalk.underline( `Do not forget about merging "${ releaseBranch }" to the "master".` ) );
+			}
 		} )
 		.catch( err => {
 			process.chdir( cwd );
@@ -565,9 +573,9 @@ module.exports = function releaseSubRepositories( options ) {
 		log.info( `\nPushing "${ chalk.underline( packageJson.name ) }" package...` );
 
 		if ( dryRun ) {
-			logDryRun( `Command: "git push origin master v${ releaseDetails.version }" would be executed.` );
+			logDryRun( `Command: "git push origin ${ releaseBranch } v${ releaseDetails.version }" would be executed.` );
 		} else {
-			exec( `git push origin master v${ releaseDetails.version }` );
+			exec( `git push origin ${ releaseBranch } v${ releaseDetails.version }` );
 		}
 
 		return Promise.resolve();

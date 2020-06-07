@@ -140,8 +140,6 @@ module.exports = function transformCommitFactory( options = {} ) {
 						return '  ' + line;
 					} )
 					.join( '\n' );
-
-				commit.body = makeLinks( commit.body );
 			}
 
 			normalizeNotes( commit );
@@ -157,7 +155,10 @@ module.exports = function transformCommitFactory( options = {} ) {
 
 		const commitEntries = commit.body.match( utils.MULTI_ENTRIES_COMMIT_REGEXP );
 
+		// The commit does not provide additional entries.
 		if ( !commitEntries || !commitEntries.length ) {
+			commit.body = makeLinks( commit.body );
+
 			return commit;
 		}
 
@@ -174,6 +175,7 @@ module.exports = function transformCommitFactory( options = {} ) {
 		/* istanbul ignore else */
 		if ( parts.length > commitEntries.length ) {
 			commit.body = escapeNewLines( parts.shift() );
+			commit.body = makeLinks( commit.body );
 		}
 
 		// For each fake commit, copy hash and repository of the parent.
@@ -202,9 +204,13 @@ module.exports = function transformCommitFactory( options = {} ) {
 			const commitDescription = parts[ i ];
 			const subject = commitDescription.match( /^(.*)$/m )[ 0 ];
 
-			newCommit.subject = subject.trim();
 			newCommit.header = commitEntries[ i ].trim() + ' ' + subject.trim();
+
+			newCommit.subject = mergeCloseReferences( subject.trim() );
+			newCommit.subject = makeLinks( newCommit.subject );
+
 			newCommit.body = escapeNewLines( commitDescription.replace( subject, '' ) );
+			newCommit.body = makeLinks( newCommit.body );
 
 			// If a dot is missing at the end of the subject...
 			if ( !newCommit.subject.endsWith( '.' ) ) {
@@ -230,23 +236,27 @@ module.exports = function transformCommitFactory( options = {} ) {
 		let newSubject = subject;
 		let insertedPlaceholder = false;
 
-		const regexp = /Closes #(\d+)\.?/g;
+		const regexp = /Closes (\/?[\w-]+\/[\w-]+)?#([\d]+)\./ig;
 		let match;
 
 		while ( ( match = regexp.exec( subject ) ) ) {
-			refs.push( match[ 1 ] );
+			const [ matchedText, maybeRepository, issueId ] = match;
+
+			if ( maybeRepository ) {
+				refs.push( maybeRepository + '#' + issueId );
+			} else {
+				refs.push( '#' + issueId );
+			}
 
 			if ( insertedPlaceholder ) {
-				newSubject = newSubject.replace( match[ 0 ], '' ).trim();
+				newSubject = newSubject.replace( matchedText, '' ).trim();
 			} else {
 				insertedPlaceholder = true;
-				newSubject = newSubject.replace( match[ 0 ], '[[--COMMIT_REFERENCES--]]' ).trim();
+				newSubject = newSubject.replace( matchedText, '[[--COMMIT_REFERENCES--]]' ).trim();
 			}
 		}
 
-		newSubject = newSubject.replace(
-			/\[\[--COMMIT_REFERENCES--\]] ?/,
-			'Closes ' + refs.map( ref => '#' + ref ).join( ', ' ) + '.' );
+		newSubject = newSubject.replace( /\[\[--COMMIT_REFERENCES--\]] ?/, 'Closes ' + refs.join( ', ' ) + '.' );
 
 		return newSubject;
 	}
