@@ -175,8 +175,7 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 				return;
 			}
 
-			log.error( err.stack );
-			process.exitCode = -1;
+			throw err;
 		} );
 
 	function logProcess( message ) {
