@@ -20,6 +20,8 @@ const getWriterOptions = require( '../utils/getwriteroptions' );
 const { getRepositoryUrl } = require( '../utils/transformcommitutils' );
 const transformCommitForSubRepositoryFactory = require( '../utils/transformcommitfactory' );
 
+const SKIP_GENERATE_CHANGELOG = 'Typed "skip" as a new version. Aborting.';
+
 /**
  * Generates the changelog based on commit messages in a package that is located under current work directory (cwd).
  *
@@ -79,7 +81,7 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 		} )
 		.then( version => {
 			if ( version === 'skip' ) {
-				return Promise.resolve();
+				throw new Error( SKIP_GENERATE_CHANGELOG );
 			}
 
 			const isInternalRelease = version === 'internal';
@@ -161,6 +163,20 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 		} )
 		.then( () => {
 			logInfo( `Changelog for "${ chalk.underline( pkgJson.name ) }" (v${ newVersion }) has been generated.`, { indentLevel: 1 } );
+		} )
+		.catch( err => {
+			if ( err.message === SKIP_GENERATE_CHANGELOG ) {
+				logInfo( `Skipping generating the changelog for "${ chalk.underline( pkgJson.name ) }".`, {
+					indentLevel: 1,
+					isWarning: true,
+					startWithNewLine: true
+				} );
+
+				return;
+			}
+
+			log.error( err.stack );
+			process.exitCode = -1;
 		} );
 
 	function logProcess( message ) {
