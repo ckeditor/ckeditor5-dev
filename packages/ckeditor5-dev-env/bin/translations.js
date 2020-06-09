@@ -32,12 +32,15 @@ const tasks = {
 	 *
 	 * @returns {Promise}
 	 */
-	upload() {
-		const uploadTranslations = require( './../lib/translations/upload' );
+	async upload() {
+		const uploadPotFiles = require( './../lib/translations/upload' );
 		const getToken = require( './../lib/translations/gettoken' );
 
-		return getToken()
-			.then( credentials => uploadTranslations( credentials ) );
+		const token = await getToken();
+
+		await uploadPotFiles( {
+			token
+		} );
 	},
 
 	/**
@@ -45,12 +48,19 @@ const tasks = {
 	 *
 	 * @returns {Promise}
 	 */
-	download() {
+	async download() {
 		const downloadTranslations = require( './../lib/translations/download' );
 		const getToken = require( './../lib/translations/gettoken' );
+		const path = require( 'path' );
 
-		return getToken()
-			.then( credentials => downloadTranslations( credentials ) );
+		const token = await getToken();
+
+		const packages = new Map( getCKEditor5PackageNames().map( packageName => [
+			packageName,
+			path.join( 'packages', packageName )
+		] ) );
+
+		await downloadTranslations( { token, packages } );
 	}
 };
 
@@ -62,7 +72,13 @@ if ( !task || !tasks[ task ] ) {
 	process.exit( 1 );
 }
 
-tasks[ task ]();
+Promise.resolve()
+	.then( () => tasks[ task ]() )
+	.catch( err => {
+		console.error( err );
+
+		process.exit( 1 );
+	} );
 
 function getCKEditor5SourceFiles() {
 	const glob = require( 'glob' );
@@ -73,9 +89,15 @@ function getCKEditor5SourceFiles() {
 
 function getCKEditor5PackagePaths() {
 	const path = require( 'path' );
+
+	return getCKEditor5PackageNames()
+		.map( packageName => path.join( 'packages', packageName ) );
+}
+
+function getCKEditor5PackageNames() {
+	const path = require( 'path' );
 	const fs = require( 'fs' );
 	const ckeditor5PackagesDir = path.join( process.cwd(), 'packages' );
 
-	return fs.readdirSync( ckeditor5PackagesDir )
-		.map( packageName => path.join( 'packages', packageName ) );
+	return fs.readdirSync( ckeditor5PackagesDir );
 }

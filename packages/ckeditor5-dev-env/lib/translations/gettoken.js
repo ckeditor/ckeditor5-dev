@@ -12,10 +12,12 @@ const inquirer = require( 'inquirer' );
  *
  * @returns {Promise.<Object>}
  */
-module.exports = function getToken() {
-	return inquirer.prompt( [ {
+module.exports = async function getToken() {
+	const { token } = await inquirer.prompt( [ {
 		type: 'password',
 		message: 'Provide the Transifex token (generate it here: https://www.transifex.com/user/settings/api/):',
 		name: 'token'
 	} ] );
+
+	return token;
 };

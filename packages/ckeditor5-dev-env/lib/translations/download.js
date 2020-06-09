@@ -10,92 +10,82 @@ const path = require( 'path' );
 const transifexService = require( './transifex-service' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 const { cleanPoFileContent, createDictionaryFromPoFileContent } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
+const languageCodeMap = require( './languagecodemap.json' );
 
 /**
- * Downloads translations from the Transifex for each package and language.
+ * Downloads translations from the Transifex for each CF localizable package.
+ * It creates PO files out of the translations and replaces old translations with the downloaded ones.
  *
- * @param {Object} loginConfig
- * @param {String} loginConfig.token Token to the Transifex API.
+ * @param {Object} config
+ * @param {String} config.token Token to the Transifex API.
+ * @param {Map.<String,String>} config.packages A resource name -> package path map for which translations should be downloaded.
  */
-module.exports = function download( loginConfig ) {
-	return Promise.resolve()
-		.then( () => getPackageNames( loginConfig ) )
-		.then( packageNames => downloadAndReplaceTranslations( loginConfig, packageNames ) )
-		.then( () => {
-			logger.info( 'Saved all translations.' );
-		} )
-		.catch( err => {
-			logger.error( err );
-			throw err;
-		} );
-};
+module.exports = async function downloadTranslations( config ) {
+	const localizablePackageNames = await getLocalizablePackages( config );
 
-function getPackageNames( loginConfig ) {
-	return transifexService.getResources( loginConfig )
-		.then( resources => resources.map( resource => resource.slug ) );
-}
+	for ( const packageName of localizablePackageNames ) {
+		const translations = await downloadPoFiles( config, packageName );
 
-function downloadAndReplaceTranslations( loginConfig, packageNames ) {
-	let promise = Promise.resolve();
-
-	for ( const packageName of packageNames ) {
-		promise = promise.then( () => downloadAndReplaceTranslationsForPackage( loginConfig, packageName ) );
+		removeOldTranslation( config.packages.get( packageName ) );
+		saveNewTranslations( packageName, config.packages.get( packageName ), translations );
 	}
 
-	return promise;
+	logger.info( 'Saved all translations.' );
+};
+
+/**
+ * @param {Object} config
+ * @param {String} config.token Token to the Transifex API.
+ */
+async function getLocalizablePackages( config ) {
+	const packageNames = new Set( config.packages.keys() );
+	const resources = await transifexService.getResources( config );
+
+	return resources.map( resource => resource.slug )
+		.filter( packageName => packageNames.has( packageName ) );
 }
 
-function downloadAndReplaceTranslationsForPackage( loginConfig, packageName ) {
-	let translations;
-
-	return downloadPoFilesForPackage( loginConfig, packageName )
-		.then( _translations => { translations = _translations; } )
-		.then( () => removeOldTranslationForPackage( packageName ) )
-		.then( () => { saveTranslations( packageName, translations ); } );
+/**
+ * @param {String} packagePath Package path.
+ */
+function removeOldTranslation( packagePath ) {
+	fs.removeSync( getPathToTranslations( packagePath ) );
 }
 
-function removeOldTranslationForPackage( packageName ) {
-	const del = require( 'del' );
-	const glob = path.join( process.cwd(), 'packages', packageName, 'lang', 'translations', '**' );
+/**
+ * Downloads translations for the given package and returns a languageCode -> translations map.
+ *
+ * @param {Object} config Configuration.
+ * @param {String} config.token Token to the Transifex API.
+ * @param {String} packageName Package name.
+ * @returns {Promise<Map.<String, Object>>}
+ */
+async function downloadPoFiles( config, packageName ) {
+	const packageOptions = Object.assign( {}, config, { slug: packageName } );
+	const resourceDetails = await transifexService.getResourceDetails( packageOptions );
 
-	return del( glob );
+	const languageCodes = resourceDetails.available_languages.map( languageInfo => languageInfo.code );
+	const translations = await Promise.all( languageCodes.map( lang => downloadPoFile( config, lang, packageName ) ) );
+
+	return new Map( translations.map( ( languageTranslations, index ) => [
+		languageCodes[ index ],
+		languageTranslations
+	] ) );
 }
 
-function downloadPoFilesForPackage( loginConfig, packageName ) {
-	const resourceDetailsPromise = transifexService.getResourceDetails( Object.assign( {}, loginConfig, {
-		slug: packageName
-	} ) );
-	let languageCodes;
-
-	const translationsForPackagePromise = resourceDetailsPromise.then( resourceDetails => {
-		languageCodes = resourceDetails.available_languages.map( languageInfo => languageInfo.code );
-
-		return Promise.all(
-			languageCodes.map( lang => downloadPoFile( loginConfig, lang, packageName ) )
-		);
-	} );
-
-	return translationsForPackagePromise.then( translationsForPackage => {
-		const translationMapEntries = translationsForPackage
-			.map( ( translations, index ) => [ languageCodes[ index ], translations ] );
-
-		return new Map( translationMapEntries );
-	} );
-}
-
-function downloadPoFile( loginConfig, lang, packageName ) {
-	const config = Object.assign( {}, loginConfig, {
+async function downloadPoFile( config, lang, packageName ) {
+	const packageOptions = Object.assign( {}, config, {
 		lang,
 		slug: packageName
 	} );
 
-	return transifexService.getTranslation( config )
-		.then( data => data.content );
+	const data = await transifexService.getTranslation( packageOptions );
+
+	return data.content;
 }
 
-function saveTranslations( packageName, translations ) {
-	const languageCodeMap = require( './languagecodemap.json' );
-	let savedTranslations = 0;
+function saveNewTranslations( packageName, packagePath, translations ) {
+	let savedFiles = 0;
 
 	for ( let [ lang, poFileContent ] of translations ) {
 		if ( !isPoFileContainingTranslations( poFileContent ) ) {
@@ -108,17 +98,22 @@ function saveTranslations( packageName, translations ) {
 
 		poFileContent = cleanPoFileContent( poFileContent );
 
-		const pathToSave = path.join( process.cwd(), 'packages', packageName, 'lang', 'translations', lang + '.po' );
+		const pathToSave = path.join( getPathToTranslations( packagePath ), lang + '.po' );
 
 		fs.outputFileSync( pathToSave, poFileContent );
-		savedTranslations++;
+		savedFiles++;
 	}
 
-	logger.info( `Saved ${ savedTranslations } PO files for ${ packageName } package.` );
+	logger.info( `Saved ${ savedFiles } PO files for ${ packageName } package.` );
+}
+
+function getPathToTranslations( packagePath ) {
+	return path.join( process.cwd(), packagePath, 'lang', 'translations' );
 }
 
 function isPoFileContainingTranslations( poFileContent ) {
 	const translations = createDictionaryFromPoFileContent( poFileContent );
 
-	return Object.keys( translations ).some( key => translations[ key ] !== '' );
+	return Object.keys( translations )
+		.some( msgId => translations[ msgId ] !== '' );
 }

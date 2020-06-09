@@ -193,7 +193,11 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		compilationAssetNames = compilationAssetNames
 			.filter( name => name.endsWith( '.js' ) );
 
-		let mainLanguage = this._mainLanguage;
+		let bundledLanguage = this._mainLanguage;
+
+		if ( this._addMainLanguageTranslationsToAllAssets ) {
+			console.log( true );
+		}
 
 		if ( compilationAssetNames.length == 0 && !this._buildAllTranslationsToSeparateFiles ) {
 			this.emit( 'error', [
@@ -203,9 +207,9 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			].join( '\n' ) );
 
 			compilationAssetNames = [];
-			mainLanguage = null;
+			bundledLanguage = null;
 		} else if ( this._buildAllTranslationsToSeparateFiles ) {
-			mainLanguage = null;
+			bundledLanguage = null;
 			compilationAssetNames = [];
 		} else if ( compilationAssetNames.length > 1 && !this._addMainLanguageTranslationsToAllAssets ) {
 			this.emit( 'error', [
@@ -216,11 +220,11 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			].join( '\n' ) );
 
 			compilationAssetNames = [];
-			mainLanguage = null;
+			bundledLanguage = null;
 		}
 
-		const otherLanguages = Array.from( this._languages )
-			.filter( lang => lang !== mainLanguage );
+		const assetLanguages = Array.from( this._languages )
+			.filter( lang => lang !== bundledLanguage );
 
 		return [
 			// Assets where translations for the main language will be added.
@@ -231,7 +235,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			} ) ),
 
 			// Translation assets outputted to separate translation files.
-			...this._getTranslationAssets( outputDirectory, otherLanguages )
+			...this._getTranslationAssets( outputDirectory, assetLanguages )
 		];
 	}
 
