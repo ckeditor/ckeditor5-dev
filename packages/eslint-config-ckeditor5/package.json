@@ -13,10 +13,10 @@
   "main": ".eslintrc.js",
   "dependencies": {
     "eslint-plugin-ckeditor5-rules": "^0.0.5",
-    "eslint-plugin-mocha": "^6.3.0"
+    "eslint-plugin-mocha": "^7.0.0"
   },
   "peerDependencies": {
-    "eslint": ">=3.0.0"
+    "eslint": ">=7.0.0"
   },
   "files": [
     ".eslintrc.js"
@@ -24,6 +24,6 @@
   "author": "CKSource (http://cksource.com/)",
   "license": "MIT",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/eslint-config-ckeditor5",
-  "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
   "repository": "https://github.com/ckeditor/ckeditor5-dev"
 }

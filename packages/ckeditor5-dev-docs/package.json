@@ -9,11 +9,11 @@
     "@ckeditor/jsdoc-plugins": "^20.0.0",
     "jsdoc": "ckeditor/jsdoc#node12",
     "map-stream": "^0.0.7",
-    "tmp": "^0.0.33",
-    "vinyl-fs": "^3.0.2"
+    "tmp": "^0.2.1",
+    "vinyl-fs": "^3.0.3"
   },
   "engines": {
-    "node": ">=8.0.0",
+    "node": ">=12.0.0",
     "npm": ">=5.7.1"
   },
   "files": [
@@ -22,7 +22,7 @@
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-docs",
-  "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/ckeditor/ckeditor5-dev.git",

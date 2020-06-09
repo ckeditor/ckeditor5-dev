@@ -10,13 +10,16 @@
     "ckeditor",
     "eslintplugin"
   ],
+  "devDependencies": {
+    "eslint": "^7.0.0"
+  },
   "peerDependencies": {
-    "eslint": ">=3.0.0"
+    "eslint": ">=7.0.0"
   },
   "main": "lib/index.js",
   "author": "CKSource (http://cksource.com/)",
   "license": "MIT",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/eslint-plugin-ckeditor5-rules",
-  "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
   "repository": "https://github.com/ckeditor/ckeditor5-dev"
 }
