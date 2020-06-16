@@ -39,13 +39,15 @@
  *
  * @property {String} [description] API Comment wrapped in HTML tags.
  *
+ * @property {String[]} [see] `@see {}` tag contents.
+ *
  * @property {Array.<Object>} [params] Event and function params.
  *
- * @property {'instance'|'inner'|'static'} [scope]
+ * @property {'instance'|'inner'|'static'|'global'} [scope]
  *
  * @property {Array.<String>} [fires] An array of events that a method or a property can fire.
  *
- * @property {Object} meta Doclet's metadata - filename, line number, etc.
+ * @property {{ filename: String; lineno: Number; path: String }} meta Doclet's metadata - filename, line number, etc.
  *
  * @property {Array.<String>} [augments] An array of classes that the doclet's symbol extends.
  * Applies for `@class`, `@mixin`, `@interface`.

@@ -1,0 +1,40 @@
+/**
+ * @license Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
+ * Licensed under the terms of the MIT License (see LICENSE.md).
+ */
+
+'use strict';
+
+/**
+ * Fixes:
+ * module:utils/ckeditorerror~CKEditorError.CKEditorError to module:utils/ckeditorerror~CKEditorError#constructor
+ * module:utils/ckeditorerror~CKEditorError.CKEditorError#someMethod to module:utils/ckeditorerror~CKEditorError#someMethod
+ *
+ * @param {Doclet[]} doclets
+ */
+function fixIncorrectClassConstructor( doclets ) {
+	for ( const doclet of doclets ) {
+		const match = doclet.longname.match( /~([\w]+)\.([\w]+)/ );
+
+		if ( !match || match[ 1 ] !== match[ 2 ] ) {
+			continue;
+		}
+
+		if ( doclet.kind === 'class' ) {
+			Object.assign( doclet, {
+				longname: doclet.longname.replace( '.' + match[ 1 ], '#constructor' ),
+				memberof: doclet.memberof.replace( '.' + match[ 1 ], '' ),
+				kind: 'function',
+				scope: 'instance',
+				name: 'constructor'
+			} );
+		} else {
+			Object.assign( doclet, {
+				longname: doclet.longname.replace( '.' + match[ 1 ], '' ),
+				memberof: doclet.memberof.replace( '.' + match[ 1 ], '' )
+			} );
+		}
+	}
+}
+
+module.exports = fixIncorrectClassConstructor;

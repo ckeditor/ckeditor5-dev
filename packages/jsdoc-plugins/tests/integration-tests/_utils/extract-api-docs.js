@@ -9,8 +9,20 @@ const { execSync } = require( 'child_process' );
 const glob = require( 'glob' );
 const path = require( 'path' );
 
-module.exports = function parseFiles() {
-	const files = glob.sync( path.join( __dirname, '../data/*.jsdoc' ) );
+module.exports = function extractApiDocs( dirname ) {
+	const filePattern1 = path.join( dirname, '/input/**/*.jsdoc' );
+	const filePattern2 = path.join( dirname, '/input.jsdoc' );
+
+	const files = [
+		...glob.sync( filePattern1 ),
+		...glob.sync( filePattern2 )
+	];
+
+	if ( files.length === 0 ) {
+		throw new Error(
+			`No file matching the '${ filePattern1 }' pattern was found by the 'extractApiDocs' test utility.`
+		);
+	}
 
 	const jsDocConfig = {
 		plugins: [
@@ -21,7 +33,10 @@ module.exports = function parseFiles() {
 			require.resolve( '../../../lib/relation-fixer' ),
 			require.resolve( '../../../lib/longname-fixer/longname-fixer' ),
 			require.resolve( '../../../lib/event-extender/event-extender' ),
+			require.resolve( '../../../lib/cleanup' ),
 
+			// The logger prints the JSON to stdout.
+			// This way the generated structure can be fetched by integration tests.
 			require.resolve( './logger' )
 		],
 		source: {
@@ -41,7 +56,7 @@ module.exports = function parseFiles() {
 
 	const cmd = require.resolve( 'jsdoc/jsdoc.js' );
 
-	const rawOutput = execSync( `${ cmd } -c ${ tmpConfig.name }`, { shell: true } ).toString();
+	const rawOutput = execSync( `${ cmd } -c ${ tmpConfig.name }` ).toString();
 
 	const doclets = JSON.parse( rawOutput ).doclets;
 

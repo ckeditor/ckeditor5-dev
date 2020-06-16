@@ -1,0 +1,30 @@
+/**
+ * @module foo
+ */
+
+/**
+ * The `Foo` class documentation.
+ */
+export default class Foo {
+	/**
+	 * Fires the `change` event.
+	 *
+	 * @fires change
+	 * @fires move
+	 */
+	bar() {
+
+	}
+
+	/**
+	 * An event documented inside the class.
+	 *
+	 * @event change
+	 */
+}
+
+/**
+ * An event documented outside the class.
+ *
+ * @event move
+ */

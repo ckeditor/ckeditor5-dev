@@ -1,0 +1,226 @@
+/**
+ * @license Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
+ * Licensed under the terms of the MIT License (see LICENSE.md).
+ */
+
+'use strict';
+
+const assign = Object.assign;
+
+/** @param {Doclet[]} doclets */
+function convertShortRefsToFullRefs( doclets ) {
+	addMissingModulePart( doclets );
+	convertShortRefsInLongnameAndMemberof( doclets );
+	convertShortRefsInFireTag( doclets );
+	convertShortRefsInSeeTag( doclets );
+	convertShortRefsInLinks( doclets );
+}
+
+/** @param {Doclet[]} doclets */
+function addMissingModulePart( doclets ) {
+	/** @type {Record<String,Doclet>} */
+	const fileNameModuleDoclets = {};
+
+	for ( const doclet of doclets ) {
+		if ( doclet.kind === 'module' ) {
+			fileNameModuleDoclets[ doclet.meta.filename ] = doclet;
+		}
+	}
+
+	for ( const doclet of doclets ) {
+		if ( [ 'interface', 'class', 'mixin' ].includes( doclet.kind ) ) {
+			if (
+				!doclet.longname.startsWith( 'module:' ) &&
+				fileNameModuleDoclets[ doclet.meta.filename ]
+			) {
+				const module = fileNameModuleDoclets[ doclet.meta.filename ];
+
+				assign( doclet, {
+					scope: 'inner',
+					memberof: module.longname,
+					longname: module.longname + '~' + doclet.longname
+				} );
+			}
+		}
+	}
+}
+
+/** @param {Doclet[]} doclets */
+function convertShortRefsInLongnameAndMemberof( doclets ) {
+	const fileDoclets = groupDocletsByFiles( doclets );
+
+	for ( const doclet of doclets ) {
+		const parentDoclet = getCorrespondingParent( fileDoclets[ doclet.meta.filename ], doclet );
+
+		const firstNameChar = doclet.longname[ 0 ];
+
+		if ( firstNameChar === '~' ) {
+			assign( doclet, {
+				memberof: parentDoclet.memberof + '~' + parentDoclet.name,
+				longname: parentDoclet.memberof + doclet.longname
+			} );
+		} else if ( firstNameChar === '#' ) {
+			assign( doclet, {
+				memberof: parentDoclet.longname,
+				longname: parentDoclet.longname + doclet.longname
+			} );
+		}
+
+		// Fixes longname in events containing ':' in their names (e.g. change:attribute)
+		if ( doclet.kind === 'event' && !doclet.name.includes( 'event' ) && doclet.longname.includes( 'module:' ) ) {
+			assign( doclet, {
+				memberof: parentDoclet.longname,
+				longname: parentDoclet.longname + '#event:' + doclet.name
+			} );
+		} else if ( doclet.kind === 'event' && !doclet.longname.includes( 'module:' ) ) {
+			assign( doclet, {
+				memberof: parentDoclet.longname,
+				longname: parentDoclet.longname + '#' + doclet.longname
+			} );
+		}
+	}
+}
+
+/** @param {Doclet[]} doclets */
+function convertShortRefsInFireTag( doclets ) {
+	for ( const doclet of doclets ) {
+		if ( !doclet.fires ) {
+			continue;
+		}
+
+		doclet.fires = doclet.fires.map( event => {
+			if ( event.includes( 'module:' ) ) {
+				return event;
+			}
+
+			if ( !event.includes( 'event:' ) ) {
+				event = 'event:' + event;
+			}
+
+			if ( doclet.memberof.includes( '~' ) ) {
+				return doclet.memberof + '#' + event;
+			}
+
+			return doclet.longname + '#' + event;
+		} );
+	}
+}
+
+/** @param {Doclet[]} doclets */
+function convertShortRefsInSeeTag( doclets ) {
+	/** @type {Doclet} */
+	let lastInterfaceOrClass;
+
+	for ( const doclet of doclets ) {
+		if ( [ 'interface', 'class', 'mixin' ].includes( doclet.kind ) ) {
+			lastInterfaceOrClass = doclet;
+		}
+
+		if ( !doclet.see ) {
+			continue;
+		}
+
+		doclet.see = doclet.see.map( see => {
+			if ( see[ 0 ] === '#' ) {
+				return lastInterfaceOrClass.longname + see;
+			}
+
+			if ( see[ 0 ] === '~' ) {
+				return lastInterfaceOrClass.memberof + see;
+			}
+
+			return see;
+		} );
+	}
+}
+
+function convertShortRefsInLinks( doclets ) {
+	/** @type {Doclet} */
+	let lastInterfaceOrClass;
+
+	for ( const doclet of doclets ) {
+		if ( [ 'interface', 'class', 'mixin' ].includes( doclet.kind ) ) {
+			lastInterfaceOrClass = doclet;
+		}
+
+		let memberof = doclet.memberof;
+
+		// Errors have their own module 'module/errors'.
+		// Shortened links in error descriptions should link to the class items, not the error module.
+		if ( doclet.kind === 'error' ) {
+			memberof = lastInterfaceOrClass.longname;
+		}
+
+		const linkRegExp = /{@link *([~#][^}]+)}/g;
+		const replacer = ( _fullLink, linkContent ) => {
+			const [ ref, ...linkDescription ] = linkContent.split( ' ' );
+			const [ className, methodName ] = ref.split( '#' );
+
+			let result = '{@link ' + memberof;
+
+			if ( !memberof.includes( className ) ) {
+				return result + linkContent + '}';
+			}
+
+			if ( methodName ) {
+				result += '#' + methodName;
+			}
+
+			result += linkDescription.map( word => ' ' + word ).join( ' ' );
+
+			return result + '}';
+		};
+
+		const comment = doclet.comment.replace( linkRegExp, replacer );
+
+		let description = doclet.description;
+
+		if ( description ) {
+			description = doclet.description.replace( linkRegExp, replacer );
+		}
+
+		Object.assign( doclet, { comment, description } );
+	}
+}
+
+/**
+ * @param {Doclet[]} doclets
+ */
+function groupDocletsByFiles( doclets ) {
+	/** @type {Record.<String,Doclet[]>}*/
+	const files = {};
+
+	for ( const doclet of doclets ) {
+		if ( !files[ doclet.meta.filename ] ) {
+			files[ doclet.meta.filename ] = [];
+		}
+
+		files[ doclet.meta.filename ].push( doclet );
+	}
+
+	return files;
+}
+
+/**
+ * Finds within the same file the parent doclet (`class`, `interface` or `mixin`).
+ *
+ * @param {Doclet[]} fileDoclets
+ * @param {Doclet} doclet
+*/
+function getCorrespondingParent( fileDoclets, doclet ) {
+	let closestParent = null;
+	let closestLine = -1;
+
+	for ( const fileDoclet of fileDoclets ) {
+		if ( [ 'interface', 'class', 'mixin' ].includes( fileDoclet.kind ) ) {
+			if ( fileDoclet.meta.lineno > closestLine && fileDoclet.meta.lineno <= doclet.meta.lineno ) {
+				closestParent = fileDoclet;
+				closestLine = fileDoclet.meta.lineno;
+			}
+		}
+	}
+
+	return closestParent;
+}
+
+module.exports = convertShortRefsToFullRefs;

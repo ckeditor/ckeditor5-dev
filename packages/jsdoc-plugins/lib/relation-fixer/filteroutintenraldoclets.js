@@ -11,25 +11,29 @@
  * @param {Array.<Doclet>} doclets
  */
 module.exports = function filterOutInternalDoclets( doclets ) {
-	return doclets
+	doclets = doclets
 		.filter( doclet => !doclet.ignore )
-		.filter( doclet => doclet.memberof != '<anonymous>' )
-		.filter( doclet => filterOutReExportedSymbols( doclet, doclets ) );
+		.filter( doclet => doclet.memberof != '<anonymous>' );
+
+	return filterOutReExportedSymbols( doclets );
 };
 
 /**
- * @param {Doclet} doclet
  * @param {Array.<Doclet>} doclets
  */
-function filterOutReExportedSymbols( doclet, doclets ) {
-	// Filter out exported symbols that are defined previously (JSDoc creates doclets for both).
-	const isUnwanted = ( doclet.scope == 'inner' && doclet.kind == 'constant' && doclet.undocumented );
+function filterOutReExportedSymbols( doclets ) {
+	const constants = doclets.filter( doclet => doclet.kind === 'constant' );
 
-	if ( isUnwanted ) {
-		if ( doclets.find( d => doclet.longname === d.longname && d !== doclet ) ) {
-			return false;
-		}
-	}
+	return doclets.filter( doclet => {
+		// // Filter out exported symbols that are defined previously (JSDoc creates doclets for both).
+		// const isUnwanted = ( doclet.scope == 'inner' && doclet.kind == 'constant' && doclet.undocumented );
 
-	return true;
+		// if ( isUnwanted ) {
+		// 	if ( constants.find( d => doclet.longname === d.longname && d !== doclet ) ) {
+		// 		return false;
+		// 	}
+		// }
+
+		return true;
+	} );
 }

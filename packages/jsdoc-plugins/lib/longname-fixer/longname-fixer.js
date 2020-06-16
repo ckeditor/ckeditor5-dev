@@ -9,32 +9,12 @@
 
 'use strict';
 
-const fixLinks = require( './fixers/fix-links' );
-const fixShortRefs = require( './fixers/fix-short-refs' );
-const fixIncorrectClassLongname = require( './fixers/fix-incorrect-class-longname' );
-const composeFunctions = require( '../utils/compose-functions' );
-
-const setNewDoclet = doclet => {
-	return config => {
-		return Object.assign( {}, config, { doclet } );
-	};
-};
-
-const docletHandler = ( () => {
-	let config = {};
-
-	return function( e ) {
-		config = composeFunctions(
-			setNewDoclet( e.doclet ),
-			fixIncorrectClassLongname,
-			fixShortRefs,
-			fixLinks
-		)( config );
-
-		e.doclet = config.doclet;
-	};
-} )();
+const convertShortRefsToFullRefs = require( './fixers/convert-short-refs-to-full-refs' );
+const fixIncorrectClassConstructor = require( './fixers/fix-incorrect-class-constructor' );
 
 exports.handlers = {
-	newDoclet: docletHandler
+	parseComplete: ( { doclets } ) => {
+		fixIncorrectClassConstructor( doclets );
+		convertShortRefsToFullRefs( doclets );
+	}
 };
