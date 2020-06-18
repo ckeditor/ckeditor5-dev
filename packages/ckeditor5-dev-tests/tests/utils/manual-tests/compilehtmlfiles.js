@@ -7,6 +7,7 @@
 
 const mockery = require( 'mockery' );
 const sinon = require( 'sinon' );
+const expect = require( 'chai' ).expect;
 const path = require( 'path' );
 const chokidar = require( 'chokidar' );
 
@@ -128,12 +129,11 @@ describe( 'compileHtmlFiles', () => {
 			patterns: [ path.join( 'manualTestPattern', '*.js' ) ]
 		} );
 
-		sinon.assert.calledWithExactly( stubs.commonmark.parse, '## Markdown header' );
-		sinon.assert.calledWithExactly( stubs.fs.ensureDirSync, 'buildDir' );
+		expect( stubs.commonmark.parse ).to.be.calledWithExactly( '## Markdown header' );
+		expect( stubs.fs.ensureDirSync ).to.be.calledWithExactly( 'buildDir' );
 
 		/* eslint-disable max-len */
-		sinon.assert.calledWithExactly(
-			stubs.fs.outputFileSync,
+		expect(	stubs.fs.outputFileSync ).to.be.calledWithExactly(
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
 				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
@@ -147,10 +147,14 @@ describe( 'compileHtmlFiles', () => {
 		);
 		/* eslint-enable max-len */
 
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true } );
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true } );
-		sinon.assert.calledWithExactly(
-			stubs.fs.copySync, 'static-file.png', path.join( 'buildDir', 'static-file.png' )
+		expect( stubs.chokidar.watch ).to.be.calledWithExactly(
+			path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true }
+		);
+		expect( stubs.chokidar.watch ).to.be.calledWithExactly(
+			path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true }
+		);
+		expect( stubs.fs.copySync ).to.be.calledWithExactly(
+			'static-file.png', path.join( 'buildDir', 'static-file.png' )
 		);
 	} );
 
@@ -163,8 +167,7 @@ describe( 'compileHtmlFiles', () => {
 		} );
 
 		/* eslint-disable max-len */
-		sinon.assert.calledWithExactly(
-			stubs.fs.outputFileSync,
+		expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
 				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
@@ -200,8 +203,7 @@ describe( 'compileHtmlFiles', () => {
 		} );
 
 		/* eslint-disable max-len */
-		sinon.assert.calledWith(
-			stubs.fs.outputFileSync,
+		expect( stubs.fs.outputFileSync ).to.be.calledWith(
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.abc.html' ), [
 				'<div>template html content</div>',
 				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
@@ -240,13 +242,17 @@ describe( 'compileHtmlFiles', () => {
 			]
 		} );
 
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true } );
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true } );
-		sinon.assert.calledWithExactly(
-			stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'manual', 'file.html' ), { ignoreInitial: true }
+		expect( stubs.chokidar.watch ).to.be.calledWithExactly(
+			path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true }
 		);
-		sinon.assert.calledWithExactly(
-			stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'manual', 'file.html' ), { ignoreInitial: true }
+		expect( stubs.chokidar.watch ).to.be.calledWithExactly(
+			path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true }
+		);
+		expect( stubs.chokidar.watch ).to.be.calledWithExactly(
+			path.join( 'path', 'to', 'another', 'manual', 'file.html' ), { ignoreInitial: true }
+		);
+		expect( stubs.chokidar.watch ).to.be.calledWithExactly(
+			path.join( 'path', 'to', 'another', 'manual', 'file.html' ), { ignoreInitial: true }
 		);
 	} );
 
@@ -273,10 +279,18 @@ describe( 'compileHtmlFiles', () => {
 			]
 		} );
 
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true } );
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true } );
-		sinon.assert.neverCalledWith( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'file.html' ), { ignoreInitial: true } );
-		sinon.assert.neverCalledWith( stubs.chokidar.watch, path.join( 'path', 'to', 'another', 'file.html' ), { ignoreInitial: true } );
+		expect( stubs.chokidar.watch ).to.be.calledWithExactly(
+			path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true }
+		);
+		expect( stubs.chokidar.watch ).to.be.calledWithExactly(
+			path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true }
+		);
+		expect( stubs.chokidar.watch ).not.to.be.calledWith(
+			path.join( 'path', 'to', 'another', 'file.html' ), { ignoreInitial: true }
+		);
+		expect( stubs.chokidar.watch ).not.to.be.calledWith(
+			path.join( 'path', 'to', 'another', 'file.html' ), { ignoreInitial: true }
+		);
 	} );
 
 	it( 'should not copy md files containing dots in their file names', () => {
@@ -299,12 +313,11 @@ describe( 'compileHtmlFiles', () => {
 			]
 		} );
 
-		sinon.assert.calledWithExactly( stubs.commonmark.parse, '## Markdown header' );
-		sinon.assert.calledWithExactly( stubs.fs.ensureDirSync, 'buildDir' );
+		expect( stubs.commonmark.parse ).to.be.calledWithExactly( '## Markdown header' );
+		expect( stubs.fs.ensureDirSync ).to.be.calledWithExactly( 'buildDir' );
 
 		/* eslint-disable max-len */
-		sinon.assert.calledWithExactly(
-			stubs.fs.outputFileSync,
+		expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
 				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
@@ -318,9 +331,15 @@ describe( 'compileHtmlFiles', () => {
 		);
 		/* eslint-enable max-len */
 
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true } );
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true } );
-		sinon.assert.neverCalledWith( stubs.fs.copySync, 'some.file.md', path.join( 'buildDir', 'some.file.md' ) );
+		expect( stubs.chokidar.watch ).to.be.calledWithExactly(
+			path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true }
+		);
+		expect( stubs.chokidar.watch ).to.be.calledWithExactly(
+			path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true }
+		);
+		expect( stubs.fs.copySync ).not.to.be.calledWith(
+			'some.file.md', path.join( 'buildDir', 'some.file.md' )
+		);
 	} );
 
 	it( 'should work on Windows environments', () => {
@@ -345,12 +364,11 @@ describe( 'compileHtmlFiles', () => {
 			patterns: [ path.join( 'manualTestPattern', '*.js' ) ]
 		} );
 
-		sinon.assert.calledWithExactly( stubs.commonmark.parse, '## Markdown header' );
-		sinon.assert.calledWithExactly( stubs.fs.ensureDirSync, 'buildDir' );
+		expect( stubs.commonmark.parse ).to.be.calledWithExactly( '## Markdown header' );
+		expect( stubs.fs.ensureDirSync ).to.be.calledWithExactly( 'buildDir' );
 
 		/* eslint-disable max-len */
-		sinon.assert.calledWithExactly(
-			stubs.fs.outputFileSync,
+		expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
 				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
@@ -364,10 +382,14 @@ describe( 'compileHtmlFiles', () => {
 		);
 		/* eslint-enable max-len */
 
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true } );
-		sinon.assert.calledWithExactly( stubs.chokidar.watch, path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true } );
-		sinon.assert.calledWithExactly(
-			stubs.fs.copySync, 'static-file.png', path.join( 'buildDir', 'static-file.png' )
+		expect( stubs.chokidar.watch ).to.be.calledWithExactly( 
+			path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true }
+		);
+		expect( stubs.chokidar.watch ).to.be.calledWithExactly( 
+			path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true }
+		);
+		expect( stubs.fs.copySync ).to.be.calledWithExactly(
+			'static-file.png', path.join( 'buildDir', 'static-file.png' )
 		);
 
 		separator = '/';
