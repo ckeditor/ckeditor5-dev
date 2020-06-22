@@ -12,7 +12,7 @@
   ],
   "main": ".eslintrc.js",
   "dependencies": {
-    "eslint-plugin-ckeditor5-rules": "^0.0.5",
+    "eslint-plugin-ckeditor5-rules": "^1.0.0",
     "eslint-plugin-mocha": "^7.0.0"
   },
   "peerDependencies": {
