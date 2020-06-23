@@ -89,6 +89,10 @@ module.exports = function serveTranslations( compiler, options, translationServi
 		// At the end of the compilation add assets generated from the PO files.
 		// Use `optimize-chunk-assets` instead of `emit` to emit assets before the `webpack.BannerPlugin`.
 		compilation.hooks.optimizeChunkAssets.tap( 'CKEditor5Plugin', chunks => {
+			if(chunks.length === 1 && chunks[0].name === 'mini-css-extract-plugin') {
+				return 
+			}
+			
 			const generatedAssets = translationService.getAssets( {
 				outputDirectory: options.outputDirectory,
 				compilationAssetNames: Object.keys( compilation.assets )
