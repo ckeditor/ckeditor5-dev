@@ -443,6 +443,32 @@ describe( 'dev-env/release-tools/utils', () => {
 				expect( commit.notes ).to.deep.equal( notes );
 			} );
 
+			// See: https://github.com/ckeditor/ckeditor5/issues/7495.
+			it( 'removes duplicated scoped notes from the footer', () => {
+				const rawCommit = {
+					type: 'Other (table)',
+					subject: 'Extracted `TableMouse` plugin from `TableSelection` plugin. Closes #6757.',
+					merge: 'Merge pull request #7355 from ckeditor/i/6757',
+					header: 'Other (table): Extracted `TableMouse` plugin from `TableSelection` plugin. Closes #6757.',
+					body: null,
+					footer: 'MINOR BREAKING CHANGE (table): The `TableNavigation` plugin renamed to `TableKeyboard`.',
+					notes: [
+						{
+							title: 'MINOR BREAKING CHANGE',
+							text: '(table): The `TableNavigation` plugin renamed to `TableKeyboard`.'
+						}
+					],
+					references: [],
+					mentions: [],
+					revert: null,
+					hash: '4d2f5f9b9f298601b332f304da66333c52673cb8'
+				};
+
+				const commit = transformCommit( rawCommit );
+
+				expect( commit.footer ).to.equal( null );
+			} );
+
 			describe( '"Closes" references - merging into single entry', () => {
 				it( 'works for #id pattern', () => {
 					const rawCommit = {
