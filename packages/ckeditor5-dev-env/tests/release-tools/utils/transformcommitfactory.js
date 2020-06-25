@@ -350,24 +350,6 @@ describe( 'dev-env/release-tools/utils', () => {
 				expect( commit.subject ).to.equal( 'README.' );
 			} );
 
-			it( 'ignores merge "stable" commit', () => {
-				const rawCommit = {
-					type: null,
-					subject: null,
-					merge: 'Merge branch \'stable\'',
-					header: '-hash-',
-					body: '575e00bc8ece48826adefe226c4fb1fe071c73a7',
-					footer: null,
-					notes: [],
-					references: [],
-					mentions: [],
-					revert: null
-				};
-
-				expect( transformCommit( rawCommit ) ).to.equal( undefined );
-				expect( transformCommit( rawCommit ) ).to.equal( undefined );
-			} );
-
 			it( 'includes "repositoryUrl" where the commit has been done', () => {
 				const notes = [
 					{ title: 'Foo', text: 'Foo-Text' },
@@ -441,6 +423,65 @@ describe( 'dev-env/release-tools/utils', () => {
 
 				expect( commit.body ).to.equal( '  NOTE: Do not remove me.' );
 				expect( commit.notes ).to.deep.equal( notes );
+			} );
+
+			// See: https://github.com/ckeditor/ckeditor5/issues/7489.
+			describe.only( 'internal merge commits', () => {
+				const mergeCommitsToIgnore = [
+					'Merge branch \'stable\'',
+					'Merge branch \'master\'',
+					'Merge branch \'release\'',
+					'Merge \'stable\' into \'master\'',
+					'Merge \'master\' into \'release\'',
+					'Merge \'release\' into \'stable\'',
+					'Merge branch \'stable\' into \'master\'',
+					'Merge branch \'master\' into \'release\'',
+					'Merge branch \'release\' into \'stable\'',
+					'Merge branch \'stable\' into master',
+					'Merge branch \'master\' into release',
+					'Merge branch \'release\' into stable',
+					'Merge branch stable into \'master\'',
+					'Merge branch master into \'release\'',
+					'Merge branch release into \'stable\'',
+					'Merge branch stable into master',
+					'Merge branch master into release',
+					'Merge branch release into stable',
+					'Merge remote-tracking branch \'origin/master\' into i/6788-feature-branch',
+					'Merge branch \'master\' into i/6788-feature-branch',
+					'Merge branch master into i/6788-feature-branch'
+				];
+
+				const validMergeCommits = [
+					'Merge pull request #7485 from ckeditor/i/6788-feature-branch',
+					'Merge branch \'i/6788-feature-branch\'',
+					'Merge branch i/6788-feature-branch'
+				];
+
+				for ( const commitTitle of mergeCommitsToIgnore ) {
+					it( `ignores a commit: "${ commitTitle }"`, () => {
+						const rawCommit = {
+							merge: commitTitle,
+							header: '-hash-',
+							body: '575e00bc8ece48826adefe226c4fb1fe071c73a7',
+							notes: []
+						};
+
+						expect( transformCommit( rawCommit ) ).to.equal( undefined );
+					} );
+				}
+
+				for ( const commitTitle of validMergeCommits ) {
+					it( `does not ignore a commit: "${ commitTitle }"`, () => {
+						const rawCommit = {
+							merge: commitTitle,
+							header: '-hash-',
+							body: '575e00bc8ece48826adefe226c4fb1fe071c73a7',
+							notes: []
+						};
+
+						expect( transformCommit( rawCommit ) ).to.not.equal( undefined );
+					} );
+				}
 			} );
 
 			describe( '"Closes" references - merging into single entry', () => {
