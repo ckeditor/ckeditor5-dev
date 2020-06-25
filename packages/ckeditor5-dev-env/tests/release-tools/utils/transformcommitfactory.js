@@ -426,7 +426,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			} );
 
 			// See: https://github.com/ckeditor/ckeditor5/issues/7489.
-			describe.only( 'internal merge commits', () => {
+			describe( 'internal merge commits', () => {
 				const mergeCommitsToIgnore = [
 					'Merge branch \'stable\'',
 					'Merge branch \'master\'',
