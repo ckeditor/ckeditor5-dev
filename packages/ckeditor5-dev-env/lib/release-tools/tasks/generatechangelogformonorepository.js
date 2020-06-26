@@ -50,6 +50,8 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
  *
  * @param {Boolean} [options.collaborationFeatures=false] Whether to add a note about collaboration features.
  *
+ * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
+ *
  * @returns {Promise}
  */
 module.exports = function generateChangelogForMonoRepository( options ) {
@@ -102,7 +104,8 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 	const packagesPaths = new Map();
 
 	const commitOptions = {
-		from: options.from ? options.from : 'v' + pkgJson.version
+		from: options.from ? options.from : 'v' + pkgJson.version,
+		releaseBranch: options.releaseBranch
 	};
 
 	return getCommits( transformCommit, commitOptions )
