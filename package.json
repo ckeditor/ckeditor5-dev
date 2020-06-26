@@ -28,7 +28,7 @@
   "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme",
   "scripts": {
     "test": "mocha packages/*/tests --recursive --timeout 5000",
-    "coverage": "nyc mocha packages/*/tests -- --recursive --timeout 5000",
+    "coverage": "nyc --reporter=lcov --reporter=text-summary mocha packages/*/tests -- --recursive --timeout 5000",
     "changelog": "node ./scripts/changelog.js",
     "release:bump-version": "node ./scripts/bump-versions.js",
     "release:publish": "node ./scripts/publish.js",
