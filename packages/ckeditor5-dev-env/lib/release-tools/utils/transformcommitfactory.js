@@ -77,7 +77,7 @@ module.exports = function transformCommitFactory( options = {} ) {
 		}
 
 		// Ignore the `stable` merge branch.
-		if ( commit.merge === 'Merge branch \'stable\'' ) {
+		if ( isInternalMergeCommit( commit ) ) {
 			return;
 		}
 
@@ -380,6 +380,25 @@ module.exports = function transformCommitFactory( options = {} ) {
 	function escapeNewLines( message ) {
 		// Accept spaces before a sentence because they are ready to be rendered in the changelog template.
 		return message.replace( /^\n+|\s+$/g, '' );
+	}
+
+	function isInternalMergeCommit( commit ) {
+		if ( !commit.merge ) {
+			return false;
+		}
+
+		// Internal merges between branches. When creating a release, synchronising the documentation, etc.
+		// Also merge those branches into the feature branch.
+		if ( commit.merge.match( /^Merge( branch)? '?(master|release|stable)'?( into '?(master|release|stable)'?)?/ ) ) {
+			return true;
+		}
+
+		// Merge `origin/master` into the feature branch.
+		if ( commit.merge.match( /^Merge remote-tracking branch 'origin\/master/ ) ) {
+			return true;
+		}
+
+		return false;
 	}
 };
 
