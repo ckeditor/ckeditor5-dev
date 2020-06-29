@@ -206,16 +206,13 @@ const cli = {
 	 * @param {Number} [options.indentLevel=0] The indent level.
 	 * @returns {Promise.<String>}
 	 */
-	provideNewMajorReleaseVersion( version, foundPackage, options = {} ) {
-		const newVersion = semver.inc( version, 'major' );
+	provideNewVersionForMonoRepository( version, foundPackage, options = {} ) {
 		const indentLevel = options.indentLevel || 0;
 
 		const versionQuestion = {
 			type: 'input',
 			name: 'version',
-			default: newVersion,
-			message: `Type the new version (suggested: "${ newVersion }", current highest: “${ version }" ` +
-				`found in "${ chalk.underline( foundPackage ) }"):`,
+			message: `Type the new version (current highest: "${ version }" found in "${ chalk.underline( foundPackage ) }"):`,
 
 			filter( input ) {
 				return input.trim();
@@ -294,31 +291,6 @@ const cli = {
 						return options;
 					} );
 			} );
-	},
-
-	/**
-	 * Asks a user for a confirmation for major breaking release.
-	 *
-	 * @param {Boolean} haveMajorBreakingChangeCommits Whether the answer for the question should be "Yes".
-	 * @param {Object} [options={}]
-	 * @param {Number} [options.indentLevel=0] The indent level.
-	 * @returns {Promise.<Boolean>}
-	 */
-	confirmMajorBreakingChangeRelease( haveMajorBreakingChangeCommits, options = {} ) {
-		const indentLevel = options.indentLevel || 0;
-		const confirmQuestion = {
-			message: [
-				'If at least one of those changes is really a major breaking change, this will be a major release.',
-				'Should it be the major release?'
-			].join( ' ' ),
-			type: 'confirm',
-			name: 'confirm',
-			prefix: getPrefix( indentLevel ),
-			default: haveMajorBreakingChangeCommits
-		};
-
-		return inquirer.prompt( [ confirmQuestion ] )
-			.then( answers => answers.confirm );
 	}
 };
 
