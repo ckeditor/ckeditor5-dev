@@ -309,31 +309,6 @@ describe( 'dev-env/release-tools/utils', () => {
 				expect( commit.footer ).to.equal( null );
 			} );
 
-			it( 'fixes the commit which does not contain the second line', () => {
-				const rawCommit = {
-					type: null,
-					subject: null,
-					merge: 'Merge branch \'master\' of github.com:ckeditor/ckeditor5-dev',
-					header: '-hash-',
-					body: '575e00bc8ece48826adefe226c4fb1fe071c73a7',
-					footer: null,
-					notes: [],
-					references: [],
-					mentions: [],
-					revert: null
-				};
-
-				const transformCommit = transformCommitFactory( {
-					returnInvalidCommit: true
-				} );
-
-				const commit = transformCommit( rawCommit );
-
-				expect( commit.hash ).to.equal( '575e00bc8ece48826adefe226c4fb1fe071c73a7' );
-				expect( commit.header ).to.equal( 'Merge branch \'master\' of github.com:ckeditor/ckeditor5-dev' );
-				expect( commit.body ).to.equal( null );
-			} );
-
 			it( 'removes [skip ci] from the commit message', () => {
 				const rawCommit = {
 					hash: '684997d0eb2eca76b9e058fb1c3fa00b50059cdc',
