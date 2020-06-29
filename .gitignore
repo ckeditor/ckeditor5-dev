@@ -3,5 +3,6 @@
 # Be sure to append /** to folders to have everything inside them ignored.
 
 **/node_modules/**
+.nyc_output/**
 coverage/**
 npm-debug.log
