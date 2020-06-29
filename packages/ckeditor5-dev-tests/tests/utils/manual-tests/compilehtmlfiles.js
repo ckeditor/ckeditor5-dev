@@ -382,10 +382,10 @@ describe( 'compileHtmlFiles', () => {
 		);
 		/* eslint-enable max-len */
 
-		expect( stubs.chokidar.watch ).to.be.calledWithExactly( 
+		expect( stubs.chokidar.watch ).to.be.calledWithExactly(
 			path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true }
 		);
-		expect( stubs.chokidar.watch ).to.be.calledWithExactly( 
+		expect( stubs.chokidar.watch ).to.be.calledWithExactly(
 			path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true }
 		);
 		expect( stubs.fs.copySync ).to.be.calledWithExactly(
