@@ -77,7 +77,7 @@ module.exports = function transformCommitFactory( options = {} ) {
 		}
 
 		// Ignore the `stable` merge branch.
-		if ( commit.merge === 'Merge branch \'stable\'' ) {
+		if ( isInternalMergeCommit( commit ) ) {
 			return;
 		}
 
@@ -110,7 +110,7 @@ module.exports = function transformCommitFactory( options = {} ) {
 						// For each footer line checks whether the line starts with note prefix.
 						// If so, this footer line should be removed.
 						const noteToRemove = commitsNotes.find( note => {
-							return footerLine == `${ note.title }: ${ note.text }`;
+							return footerLine.startsWith( note.title ) && footerLine.endsWith( note.text );
 						} );
 
 						// In order to avoid checking the same note, remove it.
@@ -121,7 +121,7 @@ module.exports = function transformCommitFactory( options = {} ) {
 						return !noteToRemove;
 					} )
 					.join( '\n' )
-					.trim();
+					.trim() || null;
 			}
 
 			// If `body` of the commit is empty but the `footer` isn't, let's swap those.
@@ -314,7 +314,7 @@ module.exports = function transformCommitFactory( options = {} ) {
 	 *
 	 * E.g.:
 	 *   - input: `Fix (engine): Fixed...
-	 *   - output: { rawType: 'Fix', scope: [ 'engine'] }
+	 *   - output: { rawType: 'Fix', scope: [ 'engine' ] }
 	 *
 	 * For commits with no scope, `null` will be returned instead of the array (as `scope`).
 	 *
@@ -348,7 +348,7 @@ module.exports = function transformCommitFactory( options = {} ) {
 	 *
 	 * E.g.:
 	 *   - input: `(engine): Removed...
-	 *   - output: { text: 'Removed...', scope: [ 'engine'] }
+	 *   - output: { text: 'Removed...', scope: [ 'engine' ] }
 	 *
 	 * For notes with no scope, `null` will be returned instead of the array (as `scope`).
 	 *
@@ -380,6 +380,25 @@ module.exports = function transformCommitFactory( options = {} ) {
 	function escapeNewLines( message ) {
 		// Accept spaces before a sentence because they are ready to be rendered in the changelog template.
 		return message.replace( /^\n+|\s+$/g, '' );
+	}
+
+	function isInternalMergeCommit( commit ) {
+		if ( !commit.merge ) {
+			return false;
+		}
+
+		// Internal merges between branches. When creating a release, synchronising the documentation, etc.
+		// Also merge those branches into the feature branch.
+		if ( commit.merge.match( /^Merge( branch)? '?(master|release|stable)'?( into '?(master|release|stable)'?)?/ ) ) {
+			return true;
+		}
+
+		// Merge `origin/master` into the feature branch.
+		if ( commit.merge.match( /^Merge remote-tracking branch 'origin\/master/ ) ) {
+			return true;
+		}
+
+		return false;
 	}
 };
 
