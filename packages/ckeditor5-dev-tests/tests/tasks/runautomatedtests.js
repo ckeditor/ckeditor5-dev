@@ -224,9 +224,8 @@ beforeEach( () => {
 
 		return runAutomatedTests( options )
 			.then( () => {
-				sinon.assert.calledOnce( consoleWarnStub );
-				sinon.assert.calledWith(
-					consoleWarnStub,
+				expect( consoleWarnStub ).to.be.calledOnce;
+				expect( consoleWarnStub ).to.be.calledWith(
 					chalk.yellow( '⚠ You\'re running tests in dev mode - some error protections are loose. ' +
 						'Use the `--production` flag to use strictest verification methods.' )
 				);
