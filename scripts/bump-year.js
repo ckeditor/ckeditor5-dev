@@ -25,7 +25,7 @@ const includeDotFiles = {
 	dot: true
 };
 
-glob( '!(node_modules|coverage)/**', updateYear );
+glob( '!(node_modules|coverage|.nyc_output)/**', updateYear );
 
 // LICENSE.md, .eslintrc.js, etc.
 glob( '*', includeDotFiles, updateYear );
