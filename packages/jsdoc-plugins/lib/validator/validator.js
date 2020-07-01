@@ -20,7 +20,7 @@ exports.handlers = {
 		const errors = validator.findErrors();
 
 		// Prints only first 50 errors to stdout.
-		printErrors( errors, 50 );
+		printErrors( errors, 5000 );
 
 		// Mark the process as ended with error.
 		if ( errors.length ) {

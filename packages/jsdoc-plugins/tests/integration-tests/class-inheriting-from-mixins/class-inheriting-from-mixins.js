@@ -16,8 +16,8 @@ describe.only( 'integration test/class inheriting from mixins', () => {
 	/** @type {Array.<Doclet>} */
 	let apiDocs;
 
-	before( () => {
-		originalApiDocs = extractApiDocs( __dirname );
+	before( async () => {
+		originalApiDocs = await extractApiDocs( __dirname );
 	} );
 
 	beforeEach( () => {
@@ -34,6 +34,8 @@ describe.only( 'integration test/class inheriting from mixins', () => {
 
 		it( 'EmitterMixin doclet should be generated only once', () => {
 			const emitterMixinDoclets = apiDocs.filter( d => d.name === 'EmitterMixin' );
+
+			console.log( emitterMixinDoclets );
 
 			expect( emitterMixinDoclets.length ).to.equal( 1 );
 		} );

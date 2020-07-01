@@ -16,8 +16,8 @@ describe.only( 'integration test/event basics', () => {
 	/** @type {Array.<Doclet>} */
 	let apiDocs;
 
-	before( () => {
-		originalApiDocs = extractApiDocs( __dirname );
+	before( async () => {
+		originalApiDocs = await extractApiDocs( __dirname );
 	} );
 
 	beforeEach( () => {
@@ -25,8 +25,8 @@ describe.only( 'integration test/event basics', () => {
 	} );
 
 	describe( 'integration/events basics', () => {
-		it( 'should contain 4 doclets', () => {
-			expect( apiDocs.length ).to.equal( 4 );
+		it( 'should contain 5 doclets', () => {
+			expect( apiDocs.length ).to.equal( 5 );
 		} );
 
 		it( 'should contain the module doclet', () => {
@@ -64,18 +64,46 @@ describe.only( 'integration test/event basics', () => {
 			} );
 		} );
 
-		it( 'should include the event doclet', () => {
-			const doclet = apiDocs.find( d => d.longname === 'module:foo~Foo#event:move' );
+		it( 'should include a doclet for event declared outside the class', () => {
+			const doclet = apiDocs.find( d => d.longname === 'module:foo~Foo#event:outside' );
 
 			expect( doclet ).to.deep.equal( {
-				'comment': '/**\n * An event documented outside the class.\n *\n * @event move\n */',
+				'comment': '/**\n * An event documented outside the class.\n *\n * @event outside\n */',
 				'meta': {
 					'filename': 'input.jsdoc'
 				},
 				'description': 'An event documented outside the class.',
 				'kind': 'event',
-				'name': 'move',
-				'longname': 'module:foo~Foo#event:move',
+				'name': 'outside',
+				'longname': 'module:foo~Foo#event:outside',
+				'scope': 'inner',
+				'memberof': 'module:foo~Foo',
+				'params': [
+					{
+						'type': {
+							'names': [
+								'module:utils/eventinfo~EventInfo'
+							]
+						},
+						'description': '<p>An object containing information about the fired event.</p>',
+						'name': 'eventInfo'
+					}
+				]
+			} );
+		} );
+
+		it( 'should include a doclet for event declared at the bottom of the class body', () => {
+			const doclet = apiDocs.find( d => d.longname === 'module:foo~Foo#event:inside' );
+
+			expect( doclet ).to.deep.equal( {
+				'comment': '/**\n\t * An event documented inside the class.\n\t *\n\t * @event inside\n\t */',
+				'meta': {
+					'filename': 'input.jsdoc'
+				},
+				'description': 'An event documented inside the class.',
+				'kind': 'event',
+				'name': 'inside',
+				'longname': 'module:foo~Foo#event:inside',
 				'scope': 'inner',
 				'memberof': 'module:foo~Foo',
 				'params': [
@@ -96,14 +124,14 @@ describe.only( 'integration test/event basics', () => {
 			const doclet = apiDocs.find( d => d.longname === 'module:foo~Foo#bar' );
 
 			expect( doclet ).to.deep.equal( {
-				'comment': '/**\n\t * Fires the `change` event.\n\t *\n\t * @fires change\n\t * @fires move\n\t */',
+				'comment': '/**\n\t * Fires two events.\n\t *\n\t * @fires inside\n\t * @fires outside\n\t */',
 				'meta': {
 					'filename': 'input.jsdoc'
 				},
-				'description': 'Fires the `change` event.',
+				'description': 'Fires two events.',
 				'fires': [
-					'module:foo~Foo#event:change',
-					'module:foo~Foo#event:move'
+					'module:foo~Foo#event:inside',
+					'module:foo~Foo#event:outside'
 				],
 				'name': 'bar',
 				'longname': 'module:foo~Foo#bar',

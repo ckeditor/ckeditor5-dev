@@ -16,8 +16,8 @@ describe.only( 'integration test/exported-variables', () => {
 	/** @type {Array.<Doclet>} */
 	let apiDocs;
 
-	before( () => {
-		originalApiDocs = extractApiDocs( __dirname );
+	before( async () => {
+		originalApiDocs = await extractApiDocs( __dirname );
 	} );
 
 	beforeEach( () => {
@@ -26,18 +26,36 @@ describe.only( 'integration test/exported-variables', () => {
 
 	describe( 'exported constants and variables', () => {
 		it( 'doclet for MAGIC_CONSTANT should be generated', () => {
-			const magicConstantDoclet = apiDocs.find( d => d.longname == 'module:engine/magic~MAGIC_CONSTANT' );
+			const magicConstantDoclet = apiDocs.find( d => d.longname == 'module:engine/magic.MAGIC_CONSTANT' );
 
 			expect( magicConstantDoclet ).to.deep.equal( {
-
+				comment: '/**\n * Magic constant\n */',
+				description: 'Magic constant',
+				kind: 'constant',
+				longname: 'module:engine/magic.MAGIC_CONSTANT',
+				memberof: 'module:engine/magic',
+				meta: {
+					filename: 'input.jsdoc'
+				},
+				name: 'MAGIC_CONSTANT',
+				scope: 'static'
 			} );
 		} );
 
 		it( 'doclet for magicVariable should be generated', () => {
-			const magicVariableDoclet = apiDocs.find( d => d.longname == 'module:engine/magic~magicVariable' );
+			const magicVariableDoclet = apiDocs.find( d => d.longname == 'module:engine/magic.magicVariable' );
 
 			expect( magicVariableDoclet ).to.deep.equal( {
-
+				comment: '/**\n * Magic variable\n */',
+				description: 'Magic variable',
+				kind: 'member',
+				longname: 'module:engine/magic.magicVariable',
+				memberof: 'module:engine/magic',
+				meta: {
+					filename: 'input.jsdoc'
+				},
+				name: 'magicVariable',
+				scope: 'static'
 			} );
 		} );
 	} );

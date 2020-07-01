@@ -9,7 +9,7 @@ const { execSync } = require( 'child_process' );
 const glob = require( 'glob' );
 const path = require( 'path' );
 
-module.exports = function extractApiDocs( dirname ) {
+module.exports = async function extractApiDocs( dirname ) {
 	const filePattern1 = path.join( dirname, '/input/**/*.jsdoc' );
 	const filePattern2 = path.join( dirname, '/input.jsdoc' );
 

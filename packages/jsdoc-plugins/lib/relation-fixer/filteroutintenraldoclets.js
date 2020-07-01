@@ -15,7 +15,9 @@ module.exports = function filterOutInternalDoclets( doclets ) {
 		.filter( doclet => !doclet.ignore )
 		.filter( doclet => doclet.memberof != '<anonymous>' );
 
-	return filterOutReExportedSymbols( doclets );
+	// return filterOutReExportedSymbols( doclets );
+
+	return doclets;
 };
 
 /**

@@ -135,20 +135,17 @@ function convertShortRefsInSeeTag( doclets ) {
 }
 
 function convertShortRefsInLinks( doclets ) {
-	/** @type {Doclet} */
-	let lastInterfaceOrClass;
+	const fileDoclets = groupDocletsByFiles( doclets );
 
 	for ( const doclet of doclets ) {
-		if ( [ 'interface', 'class', 'mixin' ].includes( doclet.kind ) ) {
-			lastInterfaceOrClass = doclet;
-		}
+		const parentDoclet = getCorrespondingParent( fileDoclets[ doclet.meta.filename ], doclet );
 
 		let memberof = doclet.memberof;
 
 		// Errors have their own module 'module/errors'.
 		// Shortened links in error descriptions should link to the class items, not the error module.
-		if ( doclet.kind === 'error' ) {
-			memberof = lastInterfaceOrClass.longname;
+		if ( doclet.kind === 'error' && parentDoclet ) {
+			memberof = parentDoclet.longname;
 		}
 
 		const linkRegExp = /{@link *([~#][^}]+)}/g;

@@ -7,10 +7,10 @@
  */
 export default class Foo {
 	/**
-	 * Fires the `change` event.
+	 * Fires two events.
 	 *
-	 * @fires change
-	 * @fires move
+	 * @fires inside
+	 * @fires outside
 	 */
 	bar() {
 
@@ -19,12 +19,12 @@ export default class Foo {
 	/**
 	 * An event documented inside the class.
 	 *
-	 * @event change
+	 * @event inside
 	 */
 }
 
 /**
  * An event documented outside the class.
  *
- * @event move
+ * @event outside
  */

@@ -16,8 +16,8 @@ describe.only( 'integration test/exported-variables', () => {
 	/** @type {Array.<Doclet>} */
 	let apiDocs;
 
-	before( () => {
-		originalApiDocs = extractApiDocs( __dirname );
+	before( async () => {
+		originalApiDocs = await extractApiDocs( __dirname );
 	} );
 
 	beforeEach( () => {
