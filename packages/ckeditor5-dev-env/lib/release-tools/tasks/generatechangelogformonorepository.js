@@ -20,6 +20,7 @@ const generateChangelog = require( '../utils/generatechangelog' );
 const getPackageJson = require( '../utils/getpackagejson' );
 const getPackagesPaths = require( '../utils/getpackagespaths' );
 const getCommits = require( '../utils/getcommits' );
+const getNewVersionType = require( '../utils/getnewversiontype' );
 const getWriterOptions = require( '../utils/getwriteroptions' );
 const { getRepositoryUrl } = require( '../utils/transformcommitutils' );
 const transformCommitFactory = require( '../utils/transformcommitfactory' );
@@ -154,7 +155,14 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 				return currentHighest;
 			}, [ null, '0.0.0' ] );
 
-		return cli.provideNewVersionForMonoRepository( highestVersion, packageHighestVersion, { indentLevel: 1 } )
+		let bumpType = getNewVersionType( allCommits );
+
+		// When made commits are not public, bump the `patch` version.
+		if ( bumpType === 'internal' ) {
+			bumpType = 'patch';
+		}
+
+		return cli.provideNewVersionForMonoRepository( highestVersion, packageHighestVersion, bumpType, { indentLevel: 1 } )
 			.then( version => {
 				nextVersion = version;
 

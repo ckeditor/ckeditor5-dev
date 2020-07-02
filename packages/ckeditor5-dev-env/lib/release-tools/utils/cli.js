@@ -202,17 +202,23 @@ const cli = {
 	 *
 	 * @param {String} version
 	 * @param {String} foundPackage
+	 * @param {String} bumpType
 	 * @param {Object} [options={}]
 	 * @param {Number} [options.indentLevel=0] The indent level.
 	 * @returns {Promise.<String>}
 	 */
-	provideNewVersionForMonoRepository( version, foundPackage, options = {} ) {
+	provideNewVersionForMonoRepository( version, foundPackage, bumpType, options = {} ) {
 		const indentLevel = options.indentLevel || 0;
+		const suggestedVersion = semver.inc( version, bumpType );
+
+		const message = 'Type the new version ' +
+			`(current highest: "${ version }" found in "${ chalk.underline( foundPackage ) }", suggested: "${ suggestedVersion }"):`;
 
 		const versionQuestion = {
 			type: 'input',
 			name: 'version',
-			message: `Type the new version (current highest: "${ version }" found in "${ chalk.underline( foundPackage ) }"):`,
+			default: suggestedVersion,
+			message,
 
 			filter( input ) {
 				return input.trim();
