@@ -6,33 +6,28 @@
 'use strict';
 
 /**
- * Fixes:
- * module:utils/ckeditorerror~CKEditorError.CKEditorError to module:utils/ckeditorerror~CKEditorError#constructor
- * module:utils/ckeditorerror~CKEditorError.CKEditorError#someMethod to module:utils/ckeditorerror~CKEditorError#someMethod
+ * Marks constructor doclets as class special methods.
+ * JSDoc saves creates constructor doclets as the second class doclet.
  *
  * @param {Doclet[]} doclets
  */
 function fixIncorrectClassConstructor( doclets ) {
 	for ( const doclet of doclets ) {
-		const match = doclet.longname.match( /~([\w]+)\.([\w]+)/ );
-
-		if ( !match || match[ 1 ] !== match[ 2 ] ) {
-			continue;
-		}
-
-		if ( doclet.kind === 'class' ) {
+		// Constructor doclets have the same longname as class doclets.
+		if ( doclet.kind === 'class' && doclet.params ) {
 			Object.assign( doclet, {
-				longname: doclet.longname.replace( '.' + match[ 1 ], '#constructor' ),
-				memberof: doclet.memberof.replace( '.' + match[ 1 ], '' ),
+				longname: doclet.longname + '#constructor',
+				memberof: doclet.longname,
 				kind: 'function',
 				scope: 'instance',
 				name: 'constructor'
 			} );
-		} else {
-			Object.assign( doclet, {
-				longname: doclet.longname.replace( '.' + match[ 1 ], '' ),
-				memberof: doclet.memberof.replace( '.' + match[ 1 ], '' )
-			} );
+
+			if ( doclet.comment ) {
+				delete doclet.undocumented;
+			}
+
+			continue;
 		}
 	}
 }

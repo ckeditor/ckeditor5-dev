@@ -59,7 +59,7 @@ class DocletValidator {
 		this._lintLongnamePropertyInClasses();
 		this._lintParams();
 		this._lintLinks();
-		this._lintEvents();
+		// this._lintEvents();
 		this._lintInterfaces();
 		this._lintModuleDocumentedExports();
 		this._lintReturnTypes();
