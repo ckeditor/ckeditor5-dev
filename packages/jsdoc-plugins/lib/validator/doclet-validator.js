@@ -28,6 +28,8 @@ class DocletValidator {
 		 * @private
 		 */
 		this._collection = this._createDocletCollection( doclets );
+
+		this._docletMap = createDocletMap( doclets );
 	}
 
 	/**
@@ -63,14 +65,14 @@ class DocletValidator {
 		this._lintReturnTypes();
 		this._lintSeeReferences();
 		this._lintTypedefs();
-		this._lintExensibility();
+		this._lintExtensibility();
 
 		return this._errors;
 	}
 
 	/**
 	 * Finds errors in member names
-	 * JSDoc changes member name 'a' to module:someModule/a when founds no such name
+	 * JSDoc changes member name `a` to `module:someModule/a` when founds no such name.
 	 * @protected
 	*/
 	_lintMembers() {
@@ -81,7 +83,7 @@ class DocletValidator {
 	}
 
 	/**
-	 * protected
+	 * @protected
 	 */
 	_lintMemberofProperty() {
 		this._collection.getAll()
@@ -93,6 +95,9 @@ class DocletValidator {
 			} );
 	}
 
+	/**
+	 * @protected
+	 */
 	_lintLongnamePropertyInClasses() {
 		this._collection.getAll()
 			.filter( el => el.longname )
@@ -104,6 +109,9 @@ class DocletValidator {
 			.forEach( el => this._addError( el, `Incorrect class reference name. Got ${ el.longname }` ) );
 	}
 
+	/**
+	 * @protected
+	 */
 	_lintLongnameProperty() {
 		this._collection.getAll()
 			.filter( el => el.longname && !el.longname.includes( 'module:' ) )
@@ -295,7 +303,7 @@ class DocletValidator {
 	 *
 	 * @protected
 	 */
-	_lintExensibility() {
+	_lintExtensibility() {
 		for ( const doclet of this._collection.getAll() ) {
 			for ( const base of doclet.augments || [] ) {
 				if ( !this._isCorrectReference( base ) && !this._isValidBuiltInType( base ) ) {
@@ -389,18 +397,16 @@ class DocletValidator {
 	 */
 	_isCorrectReference( type ) {
 		type = type.trim();
-		const doclets = this._collection.getAll();
-		const allRefs = this._collection.getAllLongnames();
 
 		if ( !type.includes( 'module:' ) ) {
 			return false;
 		}
 
 		if ( type.includes( '#' ) ) {
-			return doesFieldExistInClass( doclets, type );
+			return doesFieldExistInClass( this._docletMap, type );
 		}
 
-		return allRefs.includes( type );
+		return !!this._docletMap[ type ];
 	}
 
 	/**
@@ -420,7 +426,7 @@ class DocletValidator {
 			return false;
 		}
 
-		const doclet = this._collection.getAll().find( doclet => doclet.longname === type );
+		const doclet = this._docletMap[ type ];
 
 		if ( !doclet ) {
 			return false;
@@ -431,6 +437,16 @@ class DocletValidator {
 			doclet.kind === 'typedef' ||
 			doclet.kind === 'function';
 	}
+}
+
+function createDocletMap( doclets ) {
+	const map = {};
+
+	for ( const doclet of doclets ) {
+		map[ doclet.longname ] = doclet;
+	}
+
+	return map;
 }
 
 module.exports = DocletValidator;

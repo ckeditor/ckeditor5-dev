@@ -6,20 +6,20 @@
 'use strict';
 
 /**
- * @param {Array.<Object>} doclets
+ * @param {Record.<String,Object>} doclets
  * @param {String} methodLongname
  * @returns {Boolean}
  */
 function doesFieldExistInClass( doclets, methodLongname ) {
 	const [ className, methodName ] = methodLongname.split( '#' );
-	let currentClass = doclets.find( doclet => doclet.longname === className );
+	let currentClass = doclets[ className ];
 
 	while ( true ) {
 		if ( !currentClass ) {
 			return false;
 		}
 
-		if ( doclets.find( doclet => doclet.longname === currentClass.longname + '#' + methodName ) ) {
+		if ( doclets[ currentClass.longname + '#' + methodName ] ) {
 			return true;
 		}
 
@@ -27,7 +27,7 @@ function doesFieldExistInClass( doclets, methodLongname ) {
 			return false;
 		}
 
-		currentClass = doclets.find( doclet => doclet.longname === currentClass.augments[ 0 ] );
+		currentClass = doclets[ currentClass.augments[ 0 ] ];
 	}
 }
 

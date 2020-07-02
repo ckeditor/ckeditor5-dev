@@ -14,17 +14,17 @@ module.exports = getMissingDocletsData;
  * It returns also doclets which should be ignored as no longer necessary.
  * This function requires input to be preprocessed by the `buildRelations()` function.
  *
+ * @param {Map.<String,Doclet>} docletMap
  * @param {DocletCollection} docletCollection
  * @param {Doclet} interfaceClassOrMixinDoclet Doclet representing an entity which might have some inherited members missing.
  * @param {Options} options
  * @returns {{newDoclets: Array.<Doclet>, docletsWhichShouldBeIgnored: Array.<Doclet>}}
  */
-function getMissingDocletsData( docletCollection, interfaceClassOrMixinDoclet, options ) {
+function getMissingDocletsData( docletMap, docletCollection, interfaceClassOrMixinDoclet, options ) {
 	const newDoclets = [];
 	const docletsWhichShouldBeIgnored = [];
 
 	const docletsToAdd = getDocletsToAdd( docletCollection, interfaceClassOrMixinDoclet, options );
-	const docletMap = createDocletMap( docletCollection );
 
 	for ( const docletToAdd of docletsToAdd ) {
 		const clonedDoclet = cloneDeep( docletToAdd );
@@ -188,24 +188,6 @@ function doAllParentsExplicitlyInherit( doclets ) {
 	}
 
 	return true;
-}
-
-/**
- * Creates a <longname, doclet> map.
- *
- * @param {DocletCollection} doclets
- * @returns {Object}
- */
-function createDocletMap( doclets ) {
-	const docletMap = {};
-
-	for ( const doclet of doclets.getAll() ) {
-		if ( !docletMap[ doclet.longname ] ) {
-			docletMap[ doclet.longname ] = doclet;
-		}
-	}
-
-	return docletMap;
 }
 
 /**

@@ -72,9 +72,12 @@ function addMissingDoclets( doclets ) {
 		}
 	];
 
+	const docletMap = createDocletMap( docletCollection );
+
 	for ( const extensibleDoclet of extensibleDoclets ) {
 		for ( const option of options ) {
 			const missingDocletsData = getMissingDocletsData(
+				docletMap,
 				docletCollection,
 				extensibleDoclet,
 				option
@@ -94,4 +97,22 @@ function addMissingDoclets( doclets ) {
 		...doclets,
 		...newDocletsToAdd
 	];
+}
+
+/**
+ * Creates a <longname, doclet> map.
+ *
+ * @param {DocletCollection} doclets
+ * @returns {Object}
+ */
+function createDocletMap( doclets ) {
+	const docletMap = {};
+
+	for ( const doclet of doclets.getAll() ) {
+		if ( !docletMap[ doclet.longname ] ) {
+			docletMap[ doclet.longname ] = doclet;
+		}
+	}
+
+	return docletMap;
 }
