@@ -16,5 +16,14 @@ exports.handlers = {
 	parseComplete: ( { doclets } ) => {
 		fixIncorrectClassConstructor( doclets );
 		convertShortRefsToFullRefs( doclets );
+
+		// Fix exported functions.
+		// All exported functions should be marked as module's `inner`.
+		for ( const doclet of doclets ) {
+			if ( doclet.kind === 'function' && doclet.scope === 'static' && doclet.memberof.match( /module:[a-zA-Z]+(\/[a-zA-Z]+)*$/ ) ) {
+				doclet.scope = 'inner';
+				doclet.longname = doclet.longname.replace( /\./, '~' );
+			}
+		}
 	}
 };
