@@ -29,6 +29,15 @@ function fixIncorrectClassConstructor( doclets ) {
 
 			continue;
 		}
+
+		// Class doclets contains comments for the class in the `classdesc` part (HTML).
+		// Normalize behavior.
+		if ( doclet.kind === 'class' && doclet.classdesc ) {
+			doclet.description = doclet.classdesc;
+			doclet.comment = '';
+
+			delete doclet.classdesc;
+		}
 	}
 }
 

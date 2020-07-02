@@ -14,8 +14,8 @@ const fsExtra = require( 'fs-extra' );
 exports.handlers = {
 	processingComplete( e ) {
 		const doclets = e.doclets
-			// .filter( d => !d.undocumented );
+			.filter( d => !d.undocumented );
 
-		fsExtra.outputFileSync( process.cwd() + '/docs/api/output.json', JSON.stringify( doclets, null, 4 ) );
+		fsExtra.outputFileSync( process.cwd() + '/docs/api/output.json', JSON.stringify( { doclets }, null, 4 ) );
 	}
 };

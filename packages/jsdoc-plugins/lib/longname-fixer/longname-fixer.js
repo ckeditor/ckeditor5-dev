@@ -12,6 +12,8 @@
 const convertShortRefsToFullRefs = require( './fixers/convert-short-refs-to-full-refs' );
 const fixIncorrectClassConstructor = require( './fixers/fix-incorrect-class-constructor' );
 
+const modulePattern = /module:[\w-]+(\/[\w-]+)*$/;
+
 exports.handlers = {
 	parseComplete: ( { doclets } ) => {
 		fixIncorrectClassConstructor( doclets );
@@ -20,7 +22,7 @@ exports.handlers = {
 		// Fix exported functions.
 		// All exported functions should be marked as module's `inner`.
 		for ( const doclet of doclets ) {
-			if ( doclet.kind === 'function' && doclet.scope === 'static' && doclet.memberof.match( /module:[a-zA-Z]+(\/[a-zA-Z]+)*$/ ) ) {
+			if ( doclet.kind === 'function' && doclet.scope === 'static' && modulePattern.test( doclet.memberof ) ) {
 				doclet.scope = 'inner';
 				doclet.longname = doclet.longname.replace( /\./, '~' );
 			}

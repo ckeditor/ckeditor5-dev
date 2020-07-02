@@ -23,7 +23,7 @@ function addMissingModulePart( doclets ) {
 
 	for ( const doclet of doclets ) {
 		if ( doclet.kind === 'module' ) {
-			fileNameModuleDoclets[ doclet.meta.filename ] = doclet;
+			fileNameModuleDoclets[ doclet.meta.path + '/' + doclet.meta.filename ] = doclet;
 		}
 	}
 
@@ -31,9 +31,9 @@ function addMissingModulePart( doclets ) {
 		if ( [ 'interface', 'class', 'mixin' ].includes( doclet.kind ) ) {
 			if (
 				!doclet.longname.startsWith( 'module:' ) &&
-				fileNameModuleDoclets[ doclet.meta.filename ]
+				fileNameModuleDoclets[ doclet.meta.path + '/' + doclet.meta.filename ]
 			) {
-				const module = fileNameModuleDoclets[ doclet.meta.filename ];
+				const module = fileNameModuleDoclets[ doclet.meta.path + '/' + doclet.meta.filename ];
 
 				assign( doclet, {
 					scope: 'inner',
@@ -50,7 +50,7 @@ function convertShortRefsInLongnameAndMemberof( doclets ) {
 	const fileDoclets = groupDocletsByFiles( doclets );
 
 	for ( const doclet of doclets ) {
-		const parentDoclet = getCorrespondingParent( fileDoclets[ doclet.meta.filename ], doclet );
+		const parentDoclet = getCorrespondingParent( fileDoclets[ doclet.meta.path + '/' + doclet.meta.filename ], doclet );
 
 		const firstNameChar = doclet.longname[ 0 ];
 
@@ -67,16 +67,18 @@ function convertShortRefsInLongnameAndMemberof( doclets ) {
 		}
 
 		// Fixes longname in events containing ':' in their names (e.g. change:attribute)
-		if ( doclet.kind === 'event' && !doclet.name.includes( 'event' ) && doclet.longname.includes( 'module:' ) ) {
-			assign( doclet, {
-				memberof: parentDoclet.longname,
-				longname: parentDoclet.longname + '#event:' + doclet.name
-			} );
-		} else if ( doclet.kind === 'event' && !doclet.longname.includes( 'module:' ) ) {
-			assign( doclet, {
-				memberof: parentDoclet.longname,
-				longname: parentDoclet.longname + '#' + doclet.longname
-			} );
+		if ( doclet.kind === 'event' ) {
+			if ( doclet.longname.includes( '~' ) && doclet.longname.includes( '#' ) ) {
+				continue;
+			}
+
+			doclet.memberof = parentDoclet.longname;
+
+			if ( !doclet.name.includes( 'event' ) ) {
+				doclet.longname = parentDoclet.longname + '#event:' + doclet.name;
+			} else {
+				doclet.longname = parentDoclet.longname + '#' + doclet.name;
+			}
 		}
 	}
 }
@@ -138,7 +140,7 @@ function convertShortRefsInLinks( doclets ) {
 	const fileDoclets = groupDocletsByFiles( doclets );
 
 	for ( const doclet of doclets ) {
-		const parentDoclet = getCorrespondingParent( fileDoclets[ doclet.meta.filename ], doclet );
+		const parentDoclet = getCorrespondingParent( fileDoclets[ doclet.meta.path + '/' + doclet.meta.filename ], doclet );
 
 		let memberof = doclet.memberof;
 
@@ -188,11 +190,11 @@ function groupDocletsByFiles( doclets ) {
 	const files = {};
 
 	for ( const doclet of doclets ) {
-		if ( !files[ doclet.meta.filename ] ) {
-			files[ doclet.meta.filename ] = [];
+		if ( !files[ doclet.meta.path + '/' + doclet.meta.filename ] ) {
+			files[ doclet.meta.path + '/' + doclet.meta.filename ] = [];
 		}
 
-		files[ doclet.meta.filename ].push( doclet );
+		files[ doclet.meta.path + '/' + doclet.meta.filename ].push( doclet );
 	}
 
 	return files;

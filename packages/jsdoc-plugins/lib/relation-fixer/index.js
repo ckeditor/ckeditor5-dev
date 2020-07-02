@@ -14,22 +14,10 @@ const addTypedefProperties = require( './addtypedefproperties' );
 exports.handlers = {
 	processingComplete( e ) {
 		e.doclets = compose(
-			trackTime( buildRelations, 'buildRelations' ),
-			trackTime( addTypedefProperties, 'addTypedefProperties' ),
-			trackTime( addMissingDoclets, 'addMissingDoclets' ),
-			trackTime( filterOutInternalDoclets, 'filterOutInternalDoclets' )
+			buildRelations,
+			addTypedefProperties,
+			addMissingDoclets,
+			filterOutInternalDoclets
 		)( e.doclets );
 	}
 };
-
-function trackTime( fn, name ) {
-	return function( ...args ) {
-		const d = Date.now();
-
-		const result = fn( ...args );
-
-		console.log( name, Date.now() - d );
-
-		return result;
-	};
-}
