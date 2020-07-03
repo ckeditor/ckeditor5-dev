@@ -9,7 +9,7 @@ const extractApiDocs = require( '../_utils/extract-api-docs' );
 const { cloneDeep } = require( 'lodash' );
 const { expect } = require( 'chai' );
 
-describe( 'integration test/class inheriting from mixins', () => {
+describe.only( 'integration test/class inheriting from mixins', () => {
 	/** @type {Array.<Doclet>} */
 	let originalApiDocs;
 
@@ -34,8 +34,6 @@ describe( 'integration test/class inheriting from mixins', () => {
 
 		it( 'EmitterMixin doclet should be generated only once', () => {
 			const emitterMixinDoclets = apiDocs.filter( d => d.name === 'EmitterMixin' );
-
-			console.log( emitterMixinDoclets );
 
 			expect( emitterMixinDoclets.length ).to.equal( 1 );
 		} );

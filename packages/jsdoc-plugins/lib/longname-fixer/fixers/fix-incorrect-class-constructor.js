@@ -36,7 +36,7 @@ function fixIncorrectClassConstructor( doclets ) {
 			doclet.description = doclet.classdesc;
 			doclet.comment = '';
 
-			delete doclet.classdesc;
+			// delete doclet.classdesc;
 		}
 	}
 }

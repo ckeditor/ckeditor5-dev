@@ -56,6 +56,7 @@ function build( config ) {
 						require.resolve( '@ckeditor/jsdoc-plugins/lib/relation-fixer' ),
 						require.resolve( '@ckeditor/jsdoc-plugins/lib/longname-fixer/longname-fixer' ),
 						require.resolve( '@ckeditor/jsdoc-plugins/lib/event-extender/event-extender' ),
+						require.resolve( '@ckeditor/jsdoc-plugins/lib/cleanup' ),
 						require.resolve( '@ckeditor/jsdoc-plugins/lib/validator/validator' ),
 						require.resolve( '@ckeditor/jsdoc-plugins/lib/utils/doclet-logger' )
 					],

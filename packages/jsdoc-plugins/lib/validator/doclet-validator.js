@@ -66,6 +66,7 @@ class DocletValidator {
 		this._lintSeeReferences();
 		this._lintTypedefs();
 		this._lintExtensibility();
+		this._checkDuplicatedDoclets();
 
 		return this._errors;
 	}
@@ -437,16 +438,28 @@ class DocletValidator {
 			doclet.kind === 'typedef' ||
 			doclet.kind === 'function';
 	}
+
+	_checkDuplicatedDoclets() {
+		const docletLongNames = new Set();
+
+		for ( const doclet of this._collection.getAll() ) {
+			if ( docletLongNames.has( doclet.longname ) ) {
+				this._addError( doclet, 'Duplicated doclets with longname: ' + doclet.longname );
+			}
+
+			docletLongNames.add( doclet.longname );
+		}
+	}
 }
 
 function createDocletMap( doclets ) {
-	const map = {};
+	const docletMap = {};
 
 	for ( const doclet of doclets ) {
-		map[ doclet.longname ] = doclet;
+		docletMap[ doclet.longname ] = doclet;
 	}
 
-	return map;
+	return docletMap;
 }
 
 module.exports = DocletValidator;

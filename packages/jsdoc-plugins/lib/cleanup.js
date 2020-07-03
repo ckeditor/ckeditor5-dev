@@ -2,13 +2,16 @@ exports.handlers = {
 	processingComplete( e ) {
 		e.doclets = e.doclets
 			.filter( doclet => doclet.kind !== 'package' )
-			.filter( doclet => !doclet.undocumented );
+			.filter( doclet => {
+				if ( doclet.undocumented ) {
+					return (
+						!!doclet.description ||
+						!!doclet.comment ||
+						!!doclet.classdesc
+					);
+				}
 
-		// for ( const doclet of e.doclets ) {
-		// 	delete doclet.augmentsNested;
-		// 	delete doclet.implementsNested;
-		// 	delete doclet.mixesNested;
-		// 	delete doclet.descendants;
-		// }
+				return true;
+			} );
 	}
 };

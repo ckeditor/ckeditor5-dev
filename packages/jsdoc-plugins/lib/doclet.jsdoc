@@ -55,6 +55,8 @@
  * @property {Array.<String>} [mixes] An array of mixins that the doclet's symbol mixes.
  * Applies for `@class` and `@mixin`.
  *
+ * @property {Boolean} [mixed] `true` when a property or method comes from a mixin.
+ *
  * @property {Array.<String>} [implements] An array of interfaces that the doclet's symbol implements.
  * Applies for `@class` and `@mixin`.
  *
