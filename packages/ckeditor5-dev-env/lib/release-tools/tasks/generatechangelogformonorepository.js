@@ -206,7 +206,10 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 		}
 
 		logInfo( '🔸 Commits since the last release:', infoOptions );
-		displayCommits( allCommits, { indentLevel: 2 } );
+
+		const commits = allCommits.sort( sortFunctionFactory( 'scope' ) );
+
+		displayCommits( commits, { indentLevel: 2 } );
 
 		logInfo( '💡 Review commits listed above and propose the new version for all packages in the upcoming release.', infoOptions );
 	}
@@ -281,22 +284,8 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 			hash: hash => hash
 		} );
 
-		const sortFunction = compareFunc( item => {
-			if ( Array.isArray( item.rawScope ) ) {
-				// A hack that allows moving all scoped commits from the main repository/package at the beginning of the list.
-				if ( item.rawScope[ 0 ] === pkgJson.name ) {
-					return 'a'.repeat( 15 );
-				}
-
-				return item.rawScope[ 0 ];
-			}
-
-			// A hack that allows moving all non-scoped commits or breaking changes notes at the end of the list.
-			return 'z'.repeat( 15 );
-		} );
-
-		writerOptions.commitsSort = sortFunction;
-		writerOptions.notesSort = sortFunction;
+		writerOptions.commitsSort = sortFunctionFactory( 'rawScope' );
+		writerOptions.notesSort = sortFunctionFactory( 'rawScope' );
 
 		publicCommits = [ ...allCommits ]
 			.filter( commit => commit.isPublicCommit )
@@ -546,6 +535,28 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 		}
 
 		return `* [${ packageName }](${ npmUrl }): v${ nextVersion }`;
+	}
+
+	/**
+	 * Returns a function that is being used when sorting commits.
+	 *
+	 * @param {String} scopeField A name of the field that saves the commit's scope.
+	 * @returns {Function}
+	 */
+	function sortFunctionFactory( scopeField ) {
+		return compareFunc( item => {
+			if ( Array.isArray( item[ scopeField ] ) ) {
+				// A hack that allows moving all scoped commits from the main repository/package at the beginning of the list.
+				if ( item[ scopeField ][ 0 ] === pkgJson.name ) {
+					return 'a'.repeat( 15 );
+				}
+
+				return item[ scopeField ][ 0 ];
+			}
+
+			// A hack that allows moving all non-scoped commits or breaking changes notes at the end of the list.
+			return 'z'.repeat( 15 );
+		} );
 	}
 
 	function logProcess( message ) {
