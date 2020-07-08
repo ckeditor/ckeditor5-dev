@@ -93,9 +93,12 @@ function addMissingDoclets( doclets ) {
 		docletToIgnore.ignore = true;
 	}
 
+	const existingDocletNames = new Set( doclets.map( d => d.longname ) );
+
 	return [
 		...doclets,
-		...newDocletsToAdd
+		// Do not output doclets for doclets having its own documentation.
+		...newDocletsToAdd.filter( doclet => !existingDocletNames.has( doclet.longname ) )
 	];
 }
 

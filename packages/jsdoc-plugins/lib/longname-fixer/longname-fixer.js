@@ -15,7 +15,9 @@ const fixIncorrectClassConstructor = require( './fixers/fix-incorrect-class-cons
 const modulePattern = /module:[\w-]+(\/[\w-]+)*$/;
 
 exports.handlers = {
-	parseComplete: ( { doclets } ) => {
+	parseComplete: e => {
+		const doclets = e.doclets;
+
 		fixIncorrectClassConstructor( doclets );
 		convertShortRefsToFullRefs( doclets );
 
@@ -26,6 +28,14 @@ exports.handlers = {
 				doclet.scope = 'inner';
 				doclet.longname = doclet.longname.replace( /\./, '~' );
 			}
+
+			if ( doclet.kind === 'constant' && doclet.scope === 'static' && modulePattern.test( doclet.memberof ) ) {
+				doclet.scope = 'inner';
+				doclet.longname = doclet.longname.replace( /\./, '~' );
+			}
 		}
+
+		// Filter out incorrect doclets.
+		e.doclets = doclets.filter( doclet => !doclet.ignore );
 	}
 };

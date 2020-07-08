@@ -39,6 +39,8 @@
  *
  * @property {String} [description] API Comment wrapped in HTML tags.
  *
+ * @property {String} [classdesc] Description for the class.
+ *
  * @property {String[]} [see] `@see {}` tag contents.
  *
  * @property {Array.<Object>} [params] Event and function params.

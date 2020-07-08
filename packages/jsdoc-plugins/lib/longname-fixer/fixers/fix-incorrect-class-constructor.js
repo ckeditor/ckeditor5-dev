@@ -5,13 +5,20 @@
 
 'use strict';
 
+const { isEqual } = require( 'lodash' );
+
 /**
- * Marks constructor doclets as class special methods.
- * JSDoc saves creates constructor doclets as the second class doclet.
+ * This function is supposed to fix both constructor and class doclets.
+ *
+ * JSDoc completely messes up doclets for constructors and classes.
+ * They are duplicated (where only one contains valuable data), has invalid descriptions, etc.
  *
  * @param {Doclet[]} doclets
  */
-function fixIncorrectClassConstructor( doclets ) {
+module.exports = function fixIncorrectClassConstructor( doclets ) {
+	const knownConstructorDoclets = new Set();
+	const knownDoclets = new Map();
+
 	for ( const doclet of doclets ) {
 		// Constructor doclets have the same longname as class doclets.
 		if ( doclet.kind === 'class' && doclet.params ) {
@@ -26,19 +33,40 @@ function fixIncorrectClassConstructor( doclets ) {
 			if ( doclet.comment ) {
 				delete doclet.undocumented;
 			}
-
-			continue;
 		}
 
-		// Class doclets contains comments for the class in the `classdesc` part (HTML).
-		// Normalize behavior.
-		if ( doclet.kind === 'class' && doclet.classdesc ) {
-			doclet.description = doclet.classdesc;
-			doclet.comment = '';
+		if ( doclet.kind === 'function' && doclet.name === 'constructor' ) {
+			if ( knownConstructorDoclets.has( doclet.longname ) ) {
+				doclet.ignore = true;
+			}
 
-			// delete doclet.classdesc;
+			knownConstructorDoclets.add( doclet.longname );
+		}
+
+		if ( doclet.kind === 'class' && doclet.classdesc ) {
+			if ( doclet.description && doclet.description !== doclet.classdesc ) {
+				doclet.ignore = true;
+			} else {
+				if ( doclet.classdesc ) {
+					delete doclet.undocumented;
+				}
+			}
+
+			if ( !doclet.comment || doclet.comment.includes( '@inheritDoc' ) ) {
+				doclet.ignore = true;
+			}
+		}
+
+		// Remove duplicates (mostly they are created by the relation-fixer).
+		// The whole relation-fixer's logic should be rewritten.
+		if ( knownDoclets.has( doclet.longname ) && isEqual( doclet, knownDoclets.get( doclet.longname ) ) ) {
+			doclet.ignore = true;
+		}
+
+		knownDoclets.set( doclet.longname, doclet );
+
+		if ( doclet.inheritdoc === '' ) {
+			doclet.ignore = true;
 		}
 	}
-}
-
-module.exports = fixIncorrectClassConstructor;
+};

@@ -317,6 +317,24 @@ class DocletValidator {
 		}
 	}
 
+	_checkDuplicatedDoclets() {
+		const docletLongNames = new Set();
+
+		for ( const doclet of this._collection.getAll() ) {
+			// Skip modules.
+			// Module descriptions are mergeable.
+			if ( doclet.kind === 'module' ) {
+				continue;
+			}
+
+			if ( docletLongNames.has( doclet.longname ) ) {
+				this._addError( doclet, 'Duplicated doclets with longname: ' + doclet.longname );
+			}
+
+			docletLongNames.add( doclet.longname );
+		}
+	}
+
 	/**
 	 * @private
 	 * @param {Doclet} doclet
@@ -437,18 +455,6 @@ class DocletValidator {
 			doclet.kind === 'interface' ||
 			doclet.kind === 'typedef' ||
 			doclet.kind === 'function';
-	}
-
-	_checkDuplicatedDoclets() {
-		const docletLongNames = new Set();
-
-		for ( const doclet of this._collection.getAll() ) {
-			if ( docletLongNames.has( doclet.longname ) ) {
-				this._addError( doclet, 'Duplicated doclets with longname: ' + doclet.longname );
-			}
-
-			docletLongNames.add( doclet.longname );
-		}
 	}
 }
 

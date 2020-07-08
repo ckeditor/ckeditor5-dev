@@ -47,12 +47,11 @@ describe.only( 'integration test/event basics', () => {
 			const doclet = apiDocs.find( d => d.longname === 'module:foo~Foo' );
 
 			expect( doclet ).to.deep.equal( {
-				'comment': '',
+				'comment': '/**\n * The `Foo` class documentation.\n */',
 				'meta': {
 					'filename': 'input.jsdoc'
 				},
 				'classdesc': 'The `Foo` class documentation.',
-				'description': 'The `Foo` class documentation.',
 				'name': 'Foo',
 				'longname': 'module:foo~Foo',
 				'kind': 'class',
