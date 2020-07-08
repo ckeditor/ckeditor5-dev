@@ -1,0 +1,48 @@
+/**
+ * @module foo/bar/baz
+ */
+
+/**
+ * Docs for class `Foo`.
+ */
+export class Foo {
+	/**
+	 * Docs for the constructor.
+	 */
+	constructor() {
+		this.undocumentedVariable = true;
+	}
+}
+
+/**
+ * Docs for the `Bar` class.
+ *
+ * @extends module:foo/bar/baz~Foo
+ */
+export class Bar extends Foo {
+	/**
+	 * @inheritdoc
+	 */
+	constructor() {
+		super();
+
+		this.undocumentedVariable = false;
+	}
+}
+
+/**
+ * Docs for the `Baz` class.
+ *
+ * @extends module:foo/bar/baz~Foo
+ */
+export class Baz extends Foo {
+	/**
+	 * Docs for the `Baz` class constructor.
+	 */
+	constructor() {
+		super();
+
+		this.undocumentedVariable = false;
+	}
+}
+
