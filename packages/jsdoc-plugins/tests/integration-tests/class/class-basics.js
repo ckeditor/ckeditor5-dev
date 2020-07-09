@@ -93,6 +93,7 @@ describe.only( 'integration test/exported-class', () => {
 	} );
 
 	it( 'should generate a doclet for an inherited class constructor', () => {
+		console.log( apiDocs );
 		const constructorDoclets = apiDocs.filter( doclet => doclet.longname === 'module:foo/bar/baz~Bar#constructor' );
 
 		expect( constructorDoclets.length ).to.equal( 1 );

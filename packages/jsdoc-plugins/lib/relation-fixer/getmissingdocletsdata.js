@@ -75,60 +75,65 @@ function getMissingDocletsData( docletMap, docletCollection, interfaceClassOrMix
  * @param {DocletCollection} docletCollection
  * @param {Doclet} childDoclet
  * @param {Options} options
+ * @returns {Doclet[]}
  */
 function getDocletsToAdd( docletCollection, childDoclet, options ) {
 	// Longnames of doclets which are related ( extended, mixed, implemented ) to childDoclet.
 	const ancestors = childDoclet[ options.relation ] || [];
 
-	return ancestors.reduce( ( docletsToAdd, longname ) => {
-		return [
-			...docletsToAdd,
-			...docletCollection.get( `memberof:${ longname }` ).filter( shouldDocletBeAdded )
-		];
-	}, [] );
+	/** @type {Doclet[]} */
+	const docletsToAdd = [];
 
-	/** @param {Doclet} doclet */
-	function shouldDocletBeAdded( doclet ) {
-		// Filter out ignored, inherited, undocumented.
-		if (
-			doclet.ignore ||
-			doclet.undocumented ||
-			typeof doclet.inheritdoc == 'string'
-		) {
-			return false;
-		}
-
-		for ( const key of Object.keys( options.filter || {} ) ) {
-			if ( doclet[ key ] !== options.filter[ key ] ) {
-				return false;
-			}
-		}
-
-		return true;
+	for ( const ancestor of ancestors ) {
+		docletsToAdd.push(
+			...docletCollection.get( `memberof:${ ancestor }` )
+				.filter( doclet => shouldDocletBeAdded( doclet, options ) )
+		);
 	}
-}
 
-function isNonEmptyArray( obj ) {
-	return Array.isArray( obj ) && obj.length > 0;
+	return docletsToAdd;
 }
 
 /**
- * @param {Doclet} parentDoclet
+ * @param {Doclet} doclet
+ * @param {Object} options
+ */
+function shouldDocletBeAdded( doclet, options ) {
+	// Filter out ignored, inherited, undocumented.
+	if (
+		doclet.ignore ||
+		doclet.undocumented ||
+		typeof doclet.inheritdoc == 'string'
+	) {
+		return false;
+	}
+
+	for ( const key of Object.keys( options.filter || {} ) ) {
+		if ( doclet[ key ] !== options.filter[ key ] ) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
  * @param {Doclet} childDoclet
+ * @param {Doclet} parentDoclet
  * @returns {String}
  */
-function getLongnameForNewDoclet( parentDoclet, childDoclet ) {
-	const dotIndex = parentDoclet.longname.lastIndexOf( '.' );
-	const hashIndex = parentDoclet.longname.lastIndexOf( '#' );
-	const name = parentDoclet.longname.slice( Math.max( dotIndex, hashIndex ) );
+function getLongnameForNewDoclet( childDoclet, parentDoclet ) {
+	const dotIndex = childDoclet.longname.lastIndexOf( '.' );
+	const hashIndex = childDoclet.longname.lastIndexOf( '#' );
+	const name = childDoclet.longname.slice( Math.max( dotIndex, hashIndex ) );
 
-	return childDoclet.longname + name;
+	return parentDoclet.longname + name;
 }
 
 /**
  * Gets property which should be added to the new doclet (e.g. `inherited` or `mixed`).
  *
- * @param {DocletMap} docletMap
+ * @param {Map.<String,Doclet>} docletMap
  * @param {Doclet} childDoclet
  * @param {Doclet} memberDoclet
  * @param {'augmentsNested'|'mixesNested'|'implementsNested'} relation
@@ -149,20 +154,18 @@ function getRelationProperty( docletMap, childDoclet, memberDoclet, relation ) {
 	let isMixed = false;
 
 	// If doclet is a child of a mixin, it's 'mixed'. Else if it's a child of another class, it's 'inherited'.
-	if ( isNonEmptyArray( memberDocletParent.descendants ) ) {
+	if ( memberDocletParent.descendants ) {
 		for ( const longname of memberDocletParent.descendants ) {
 			const doclet = docletMap[ longname ];
 
-			if ( doclet && doclet.kind === 'mixin' ) {
-				if ( isNonEmptyArray( doclet.descendants ) &&
-					doclet.descendants.indexOf( childDoclet.longname ) !== -1 ) {
-					isMixed = true;
-				}
-			} else if ( doclet && doclet.kind === 'class' ) {
-				if ( isNonEmptyArray( doclet.descendants ) &&
-					doclet.descendants.indexOf( childDoclet.longname ) !== -1 ) {
-					isInherited = true;
-				}
+			if ( !doclet || !doclet.descendants || !doclet.descendants.includes( childDoclet.longname ) ) {
+				continue;
+			}
+
+			if ( doclet.kind === 'mixin' ) {
+				isMixed = true;
+			} else if ( doclet.kind === 'class' ) {
+				isInherited = true;
 			}
 		}
 	}

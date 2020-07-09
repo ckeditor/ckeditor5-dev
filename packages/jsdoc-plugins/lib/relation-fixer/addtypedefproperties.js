@@ -45,7 +45,7 @@ function addTypedefProperties( doclets ) {
  * @param {Array.<Doclet>} typedefDoclets
  */
 function extendTypedef( typedef, typedefDoclets ) {
-	if ( !typedef.properties || !typedef.augmentsNested.length ) {
+	if ( !typedef.properties || !typedef.augmentsNested || !typedef.augmentsNested.length ) {
 		return typedef;
 	}
 

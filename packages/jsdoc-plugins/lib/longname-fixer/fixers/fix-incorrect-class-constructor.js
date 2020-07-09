@@ -65,8 +65,8 @@ module.exports = function fixIncorrectClassConstructor( doclets ) {
 
 		knownDoclets.set( doclet.longname, doclet );
 
-		if ( doclet.inheritdoc === '' ) {
-			doclet.ignore = true;
-		}
+		// if ( doclet.inheritdoc === '' ) {
+		// 	doclet.ignore = true;
+		// }
 	}
 };

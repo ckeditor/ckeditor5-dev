@@ -21,7 +21,7 @@ export class Foo {
  */
 export class Bar extends Foo {
 	/**
-	 * @inheritdoc
+	 * @inheritDoc
 	 */
 	constructor() {
 		super();
