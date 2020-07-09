@@ -52,6 +52,14 @@ function precleanInheritance( doclets ) {
 
 			delete ignoredOriginalDoclet.ignore;
 		}
+
+		if ( doclets.some( d => !!d.comment ) ) {
+			for ( const doclet of doclets ) {
+				if ( !doclet.comment ) {
+					doclet.ignore = true;
+				}
+			}
+		}
 	}
 
 	return doclets.filter( d => !d.ignore );

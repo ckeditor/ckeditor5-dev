@@ -93,12 +93,26 @@ function addMissingDoclets( doclets ) {
 		docletToIgnore.ignore = true;
 	}
 
-	const existingDocletNames = new Set( doclets.map( d => d.longname ) );
+	const existingDoclets = new Map( doclets.map( d => [ d.longname, d ] ) );
 
 	return [
-		...doclets,
+		...doclets.filter( doclet => {
+			const docletToAdd = newDocletsToAdd.find( d => d.longname === doclet.longname );
+
+			// If the doclet has inherited property don't output it
+			// as it should be replaced by the parent's class/interface/mixin method doclet.
+			if ( docletToAdd && doclet.inherited === undefined ) {
+				return false;
+			}
+
+			return true;
+		} ),
 		// Do not output doclets for doclets having its own documentation.
-		...newDocletsToAdd.filter( doclet => !existingDocletNames.has( doclet.longname ) )
+		...newDocletsToAdd.filter( doclet => {
+			const existingDoclet = existingDoclets.get( doclet.longname );
+
+			return ( !existingDoclet || existingDoclet.inherited === undefined );
+		} )
 	];
 }
 
