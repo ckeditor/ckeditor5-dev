@@ -26,19 +26,19 @@ describe.only( 'integration test/exported-variables', () => {
 
 	describe( 'exported constants and variables', () => {
 		it( 'doclet for MAGIC_CONSTANT should be generated', () => {
-			const magicConstantDoclet = apiDocs.find( d => d.longname == 'module:engine/magic.MAGIC_CONSTANT' );
+			const magicConstantDoclet = apiDocs.find( d => d.longname == 'module:engine/magic~MAGIC_CONSTANT' );
 
 			expect( magicConstantDoclet ).to.deep.equal( {
 				comment: '/**\n * Magic constant\n */',
 				description: 'Magic constant',
 				kind: 'constant',
-				longname: 'module:engine/magic.MAGIC_CONSTANT',
+				longname: 'module:engine/magic~MAGIC_CONSTANT',
 				memberof: 'module:engine/magic',
 				meta: {
 					filename: 'input.jsdoc'
 				},
 				name: 'MAGIC_CONSTANT',
-				scope: 'static'
+				scope: 'inner'
 			} );
 		} );
 

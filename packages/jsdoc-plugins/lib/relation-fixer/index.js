@@ -62,5 +62,16 @@ function precleanInheritance( doclets ) {
 		}
 	}
 
-	return doclets.filter( d => !d.ignore );
+	// Filter out member doclets that miss their comments.
+	for ( const doclet of doclets ) {
+		if ( ( doclet.kind === 'member' || doclet.kind === 'function' ) && ( doclet.inheritdoc === '' || !doclet.comment ) ) {
+			if ( doclet.name !== 'constructor' ) {
+				doclet.ignore = true;
+			}
+		}
+	}
+
+	doclets = doclets.filter( d => !d.ignore );
+
+	return doclets;
 }

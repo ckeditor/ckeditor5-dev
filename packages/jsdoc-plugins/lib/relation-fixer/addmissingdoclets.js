@@ -7,6 +7,7 @@
 
 const getMissingDocletsData = require( './getmissingdocletsdata' );
 const DocletCollection = require( '../utils/doclet-collection' );
+const { isEqual } = require( 'lodash' );
 
 module.exports = addMissingDoclets;
 
@@ -35,7 +36,7 @@ function addMissingDoclets( doclets ) {
 	} );
 
 	/** @type {Array.<Doclet>} */
-	const newDocletsToAdd = [];
+	let newDocletsToAdd = [];
 
 	/** @type {Array.<Doclet>} */
 	const docletsToIgnore = [];
@@ -57,6 +58,14 @@ function addMissingDoclets( doclets ) {
 			relation: 'augmentsNested',
 			filter: {
 				kind: 'event'
+			}
+		},
+
+		// Missing properties from interfaces.
+		{
+			relation: 'augmentsNested',
+			filter: {
+				kind: 'member'
 			}
 		},
 
@@ -93,25 +102,41 @@ function addMissingDoclets( doclets ) {
 		docletToIgnore.ignore = true;
 	}
 
+	doclets = doclets.filter( doclet => !doclet.ignore );
+
+	const docletToAddMap = new Map(
+		newDocletsToAdd
+			.filter( d => !d.ignore )
+			.map( d => [ d.longname, d ] )
+	);
+
 	const existingDoclets = new Map( doclets.map( d => [ d.longname, d ] ) );
 
 	return [
 		...doclets.filter( doclet => {
-			const docletToAdd = newDocletsToAdd.find( d => d.longname === doclet.longname );
+			const willDocletBeAdded = docletToAddMap.has( doclet.longname );
 
 			// If the doclet has inherited property don't output it
 			// as it should be replaced by the parent's class/interface/mixin method doclet.
-			if ( docletToAdd && doclet.inherited === undefined ) {
+			if ( willDocletBeAdded && doclet.inherited === undefined ) {
 				return false;
 			}
 
 			return true;
 		} ),
 		// Do not output doclets for doclets having its own documentation.
-		...newDocletsToAdd.filter( doclet => {
+		...[ ...docletToAddMap.values() ].filter( doclet => {
 			const existingDoclet = existingDoclets.get( doclet.longname );
 
-			return ( !existingDoclet || existingDoclet.inherited === undefined );
+			if ( !existingDoclet ) {
+				return true;
+			}
+
+			if ( existingDoclet.inherited === undefined ) {
+				return true;
+			}
+
+			return false;
 		} )
 	];
 }

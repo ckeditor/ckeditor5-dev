@@ -118,16 +118,16 @@ function shouldDocletBeAdded( doclet, options ) {
 }
 
 /**
- * @param {Doclet} childDoclet
  * @param {Doclet} parentDoclet
+ * @param {Doclet} childDoclet
  * @returns {String}
  */
-function getLongnameForNewDoclet( childDoclet, parentDoclet ) {
-	const dotIndex = childDoclet.longname.lastIndexOf( '.' );
-	const hashIndex = childDoclet.longname.lastIndexOf( '#' );
-	const name = childDoclet.longname.slice( Math.max( dotIndex, hashIndex ) );
+function getLongnameForNewDoclet( parentDoclet, childDoclet ) {
+	const dotIndex = parentDoclet.longname.lastIndexOf( '.' );
+	const hashIndex = parentDoclet.longname.lastIndexOf( '#' );
+	const name = parentDoclet.longname.slice( Math.max( dotIndex, hashIndex ) );
 
-	return parentDoclet.longname + name;
+	return childDoclet.longname + name;
 }
 
 /**
@@ -154,19 +154,17 @@ function getRelationProperty( docletMap, childDoclet, memberDoclet, relation ) {
 	let isMixed = false;
 
 	// If doclet is a child of a mixin, it's 'mixed'. Else if it's a child of another class, it's 'inherited'.
-	if ( memberDocletParent.descendants ) {
-		for ( const longname of memberDocletParent.descendants ) {
-			const doclet = docletMap[ longname ];
+	for ( const longname of memberDocletParent.descendants || [] ) {
+		const doclet = docletMap[ longname ];
 
-			if ( !doclet || !doclet.descendants || !doclet.descendants.includes( childDoclet.longname ) ) {
-				continue;
-			}
+		if ( !doclet || !doclet.descendants || !doclet.descendants.includes( childDoclet.longname ) ) {
+			continue;
+		}
 
-			if ( doclet.kind === 'mixin' ) {
-				isMixed = true;
-			} else if ( doclet.kind === 'class' ) {
-				isInherited = true;
-			}
+		if ( doclet.kind === 'mixin' ) {
+			isMixed = true;
+		} else if ( doclet.kind === 'class' ) {
+			isInherited = true;
 		}
 	}
 

@@ -99,7 +99,7 @@ describe.only( 'integration test/exported-class', () => {
 		expect( constructorDoclets.length ).to.equal( 1 );
 
 		expect( constructorDoclets[ 0 ] ).to.deep.equal( {
-			comment: '/**\n\t * @inheritdoc\n\t */',
+			comment: '/**\n\t * @inheritDoc\n\t */',
 			meta: { filename: 'input.jsdoc' },
 			inheritdoc: '',
 			name: 'constructor',

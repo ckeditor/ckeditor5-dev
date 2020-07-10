@@ -76,7 +76,7 @@ describe.only( 'integration test/event basics', () => {
 				'kind': 'event',
 				'name': 'outside',
 				'longname': 'module:foo~Foo#event:outside',
-				'scope': 'inner',
+				'scope': 'instance',
 				'memberof': 'module:foo~Foo',
 				'params': [
 					{
@@ -104,7 +104,7 @@ describe.only( 'integration test/event basics', () => {
 				'kind': 'event',
 				'name': 'inside',
 				'longname': 'module:foo~Foo#event:inside',
-				'scope': 'inner',
+				'scope': 'instance',
 				'memberof': 'module:foo~Foo',
 				'params': [
 					{
