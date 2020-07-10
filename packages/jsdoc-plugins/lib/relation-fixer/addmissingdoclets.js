@@ -7,7 +7,6 @@
 
 const getMissingDocletsData = require( './getmissingdocletsdata' );
 const DocletCollection = require( '../utils/doclet-collection' );
-const { isEqual } = require( 'lodash' );
 
 module.exports = addMissingDoclets;
 
@@ -36,7 +35,7 @@ function addMissingDoclets( doclets ) {
 	} );
 
 	/** @type {Array.<Doclet>} */
-	let newDocletsToAdd = [];
+	const newDocletsToAdd = [];
 
 	/** @type {Array.<Doclet>} */
 	const docletsToIgnore = [];
@@ -66,6 +65,14 @@ function addMissingDoclets( doclets ) {
 			relation: 'augmentsNested',
 			filter: {
 				kind: 'member'
+			}
+		},
+
+		// Missing methods from interfaces.
+		{
+			relation: 'augmentsNested',
+			filter: {
+				kind: 'function'
 			}
 		},
 
@@ -118,7 +125,7 @@ function addMissingDoclets( doclets ) {
 
 			// If the doclet has inherited property don't output it
 			// as it should be replaced by the parent's class/interface/mixin method doclet.
-			if ( willDocletBeAdded && doclet.inherited === undefined ) {
+			if ( willDocletBeAdded && doclet.inheritdoc === undefined ) {
 				return false;
 			}
 
@@ -132,7 +139,7 @@ function addMissingDoclets( doclets ) {
 				return true;
 			}
 
-			if ( existingDoclet.inherited === undefined ) {
+			if ( existingDoclet.inheritdoc === undefined ) {
 				return true;
 			}
 
