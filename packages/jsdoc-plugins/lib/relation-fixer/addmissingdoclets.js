@@ -44,36 +44,13 @@ function addMissingDoclets( doclets ) {
 	 * @type {Array.<Object>}
 	 **/
 	const options = [
-		// Missing statics inherited from parent classes.
+		// Missing inherited items:
+		// - statics methods
+		// - methods
+		// - properties
+		// - events
 		{
-			relation: 'augmentsNested',
-			filter: {
-				scope: 'static'
-			}
-		},
-
-		// Missing events inherited from parent classes.
-		{
-			relation: 'augmentsNested',
-			filter: {
-				kind: 'event'
-			}
-		},
-
-		// Missing properties from interfaces.
-		{
-			relation: 'augmentsNested',
-			filter: {
-				kind: 'member'
-			}
-		},
-
-		// Missing methods from interfaces.
-		{
-			relation: 'augmentsNested',
-			filter: {
-				kind: 'function'
-			}
+			relation: 'augmentsNested'
 		},
 
 		// Everything mixed, except existing mixed items.
