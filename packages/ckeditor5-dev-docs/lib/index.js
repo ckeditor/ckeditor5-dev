@@ -5,10 +5,9 @@
 
 'use strict';
 
-const fs = require( 'fs' );
+const fs = require( 'fs-extra' );
 const tmp = require( 'tmp' );
-const map = require( 'map-stream' );
-const vfs = require( 'vinyl-fs' );
+const glob = require( 'fast-glob' );
 
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
@@ -24,74 +23,78 @@ module.exports = {
  * @param {String} config.readmePath Path to `README.md`.
  * @param {Boolean} [config.validateOnly=false] Whether JSDoc should only validate the documentation and finish
  * with error code `1`. If not passed, the errors will be printed to the console but the task will finish with `0`.
+ * @param {String} [config.outputPath] A path to the place where extracted doclets will be saved.
+ * @param {String} [config.extraPlugins] An array of path to extra plugins that will be added to JSDoc.
+ *
  * @returns {Promise}
  */
-function build( config ) {
-	const sourceFiles = [
+async function build( config ) {
+	const sourceFilePatterns = [
 		config.readmePath,
 		...config.sourceFiles
 	];
 
+	const extraPlugins = config.extraPlugins || [];
+	const outputPath = config.outputPath || 'docs/api/output.json';
 	const validateOnly = config.validateOnly || false;
 
+	// Pass options to plugins via env variables.
+	// Since plugins are added using `require` calls other forms are currently impossible.
+	process.env.JSDOC_OUTPUT_PATH = outputPath;
+
 	if ( validateOnly ) {
-		process.env.JSDOC_VALIDATE_ONLY = true;
+		process.env.JSDOC_VALIDATE_ONLY = 'true';
 	}
 
-	const files = [];
+	const files = await glob( sourceFilePatterns );
 
-	return new Promise( ( resolve, reject ) => {
-		vfs.src( sourceFiles )
-			.pipe( map( ( file, callback ) => {
-				files.push( file.path );
-				callback( null, file );
-			} ).on( 'end', () => {
-				const jsDocConfig = {
-					plugins: [
-						require.resolve( 'jsdoc/plugins/markdown' ),
-						require.resolve( '@ckeditor/jsdoc-plugins/lib/export-fixer/export-fixer' ),
-						require.resolve( '@ckeditor/jsdoc-plugins/lib/custom-tags/error' ),
-						require.resolve( '@ckeditor/jsdoc-plugins/lib/custom-tags/observable' ),
-						require.resolve( '@ckeditor/jsdoc-plugins/lib/observable-event-provider' ),
-						require.resolve( '@ckeditor/jsdoc-plugins/lib/relation-fixer' ),
-						require.resolve( '@ckeditor/jsdoc-plugins/lib/longname-fixer/longname-fixer' ),
-						require.resolve( '@ckeditor/jsdoc-plugins/lib/event-extender/event-extender' ),
-						require.resolve( '@ckeditor/jsdoc-plugins/lib/cleanup' ),
-						require.resolve( '@ckeditor/jsdoc-plugins/lib/validator/validator' ),
-						require.resolve( '@ckeditor/jsdoc-plugins/lib/utils/doclet-logger' )
-					],
-					source: {
-						include: files
-					},
-					opts: {
-						encoding: 'utf8',
-						recurse: true,
-						access: 'all',
-						template: 'templates/silent'
-					}
-				};
+	const jsDocConfig = {
+		plugins: [
+			require.resolve( 'jsdoc/plugins/markdown' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/skip-not-modules' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/export-fixer/export-fixer' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/custom-tags/error' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/custom-tags/observable' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/observable-event-provider' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/longname-fixer/longname-fixer' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/fix-code-snippets' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/relation-fixer' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/event-extender/event-extender' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/cleanup' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/validator/validator' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/utils/doclet-logger' ),
+			...extraPlugins
+		],
+		source: {
+			include: files
+		},
+		opts: {
+			encoding: 'utf8',
+			recurse: true,
+			access: 'all',
+			template: 'templates/silent'
+		}
+	};
 
-				const tmpConfig = tmp.fileSync();
+	const tmpConfig = tmp.fileSync();
 
-				fs.writeFile( tmpConfig.name, JSON.stringify( jsDocConfig ), 'utf8', error => {
-					if ( error ) {
-						return reject( error );
-					}
+	await fs.writeFile( tmpConfig.name, JSON.stringify( jsDocConfig ) );
 
-					const cmd = require.resolve( 'jsdoc/jsdoc.js' );
+	console.log( 'JSDoc started...' );
 
-					console.log( 'JSDoc started...' );
+	try {
+		// Not so beautiful API as for 2020...
+		// See more in https://github.com/jsdoc/jsdoc/issues/938.
+		const cmd = require.resolve( 'jsdoc/jsdoc.js' );
 
-					try {
-						tools.shExec( `${ cmd } -c ${ tmpConfig.name }`, { verbosity: 'info' } );
-					} catch ( error ) {
-						return reject( `Error during JSDoc generation: ${ error.message }` );
-					}
+		// The `node` command is used for explicitly needed for Windows.
+		// See https://github.com/ckeditor/ckeditor5/issues/7212.
+		tools.shExec( `node ${ cmd } -c ${ tmpConfig.name }`, { verbosity: 'info' } );
+	} catch ( error ) {
+		console.error( 'An error was thrown by JSDoc:' );
 
-					console.log( `Documented ${ files.length } files!` );
+		throw error;
+	}
 
-					resolve();
-				} );
-			} ) );
-	} );
+	console.log( `Documented ${ files.length } files!` );
 }
