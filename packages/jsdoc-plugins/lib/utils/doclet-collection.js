@@ -8,7 +8,7 @@
 /**
  * Collection of doclets as <String, Array.<Doclet>> pairs. Also stores all doclets and their longnames as arrays.
  */
-class DocletCollection {
+module.exports = class DocletCollection {
 	/**
 	 * Creates collection of doclets.
 	 */
@@ -64,6 +64,4 @@ class DocletCollection {
 	getAllLongnames() {
 		return this._allLongnames;
 	}
-}
-
-module.exports = DocletCollection;
+};

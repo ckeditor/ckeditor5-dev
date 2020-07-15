@@ -17,7 +17,7 @@ exports.handlers = {
 		const isValidateOnly = process.env.JSDOC_VALIDATE_ONLY;
 		const validator = new DocletValidator( e.doclets );
 
-		const errors = validator.findErrors();
+		const errors = validator.validate();
 
 		// Prints only first 50 errors to stdout.
 		printErrors( errors, 50 );
@@ -52,10 +52,10 @@ function printErrors( errors, maxSize ) {
 	}
 
 	errorMessages.push( '\nValidation Summary:' );
-	errorMessages.push( ` * Validator found ${ errors.length } errors.` );
+	errorMessages.push( `* Validator found ${ errors.length } errors.` );
 
 	if ( errors.length > maxSize ) {
-		errorMessages.push( ` * ${ errors.length - maxSize } errors not shown in the console.` );
+		errorMessages.push( `* ${ errors.length - maxSize } errors not shown in the console.` );
 	}
 
 	process.stderr.write( errorMessages.join( '\n' ) );
