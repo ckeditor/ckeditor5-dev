@@ -346,7 +346,7 @@ describe( 'Linter plugin', () => {
 				meta: { fileName: '', path: '' }
 			} ], getTestedModules() );
 
-			linter._lintExensibility();
+			linter._lintExtensibility();
 
 			expect( linter._errors.length ).to.equal( 0 );
 		} );
@@ -359,7 +359,7 @@ describe( 'Linter plugin', () => {
 				meta: { fileName: '', path: '' }
 			} ], getTestedModules() );
 
-			linter._lintExensibility();
+			linter._lintExtensibility();
 
 			expect( linter._errors.length ).to.equal( 1 );
 			expect( linter._errors[ 0 ].message ).to.equal( 'Invalid @extends reference: module:abc/SomeOtherClass.' );

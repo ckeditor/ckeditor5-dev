@@ -59,18 +59,11 @@ describe( 'jsdoc-plugins/relation-fixer/addMissingDoclets()', () => {
 	} );
 
 	it( 'should ignore existing doclets when `inheritdoc` was used', () => {
-		const expectedDoclet = {
-			name: 'classAProp',
-			longname: 'classB.prop',
-			kind: 'member',
-			scope: 'static',
-			memberof: 'classB',
-			inheritdoc: '',
-			ignore: true
-		};
-
 		const newDoclets = addMissingDoclets( inheritanceInheritdocTestDoclets );
-		expect( newDoclets ).to.deep.include( expectedDoclet );
+		const classBPropDoclets = newDoclets.filter( d => d.longname === 'classB.prop' );
+
+		expect( classBPropDoclets.length ).to.equal( 1 );
+		expect( classBPropDoclets[ 0 ].inheritdoc ).to.equal( undefined );
 	} );
 
 	it( 'should add missing doclets of mixed stuff', () => {

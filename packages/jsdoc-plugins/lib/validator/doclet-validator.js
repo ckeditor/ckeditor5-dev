@@ -6,7 +6,6 @@
 'use strict';
 
 const DocletCollection = require( '../utils/doclet-collection' );
-const { doesFieldExistInClass } = require( '../utils/doclet-utils' );
 const { ALL_TYPES, GENERIC_TYPES } = require( './types' );
 
 /**
@@ -419,10 +418,6 @@ class DocletValidator {
 
 		if ( !type.includes( 'module:' ) ) {
 			return false;
-		}
-
-		if ( type.includes( '#' ) ) {
-			return doesFieldExistInClass( this._docletMap, type );
 		}
 
 		return !!this._docletMap[ type ];
