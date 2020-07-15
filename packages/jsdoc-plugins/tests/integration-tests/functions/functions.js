@@ -9,7 +9,7 @@ const extractApiDocs = require( '../_utils/extract-api-docs' );
 const { cloneDeep } = require( 'lodash' );
 const { expect } = require( 'chai' );
 
-describe.only( 'integration test/exported-functions', () => {
+describe( 'integration test/exported-functions', () => {
 	/** @type {Array.<Doclet>} */
 	let originalApiDocs;
 
@@ -24,7 +24,7 @@ describe.only( 'integration test/exported-functions', () => {
 		apiDocs = cloneDeep( originalApiDocs );
 	} );
 
-	describe.only( 'exported functions', () => {
+	describe( 'exported functions', () => {
 		it( '3 doclets should be generated', () => {
 			expect( apiDocs.length ).to.equal( 3 );
 		} );

@@ -9,7 +9,7 @@ const extractApiDocs = require( '../_utils/extract-api-docs' );
 const { cloneDeep } = require( 'lodash' );
 const { expect } = require( 'chai' );
 
-describe.only( 'integration test/exported-class', () => {
+describe( 'integration test/exported-class', () => {
 	/** @type {Array.<Doclet>} */
 	let originalApiDocs;
 
