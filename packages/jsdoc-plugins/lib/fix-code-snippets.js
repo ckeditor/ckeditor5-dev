@@ -23,8 +23,8 @@ exports.handlers = {
 };
 
 function fixDescription( desc ) {
-	return desc.replace( /<pre><code>(.*?)<\/code><\/pre>/gs, ( _match, content ) => {
-		const codeRows = content.split( '\n' );
+	return desc.replace( /<pre><code>(.*?)<\/code><\/pre>/gs, ( _match, codeSnippetContent ) => {
+		const codeRows = codeSnippetContent.split( '\n' );
 
 		let paddingSize = 0;
 
