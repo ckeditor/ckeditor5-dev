@@ -18,7 +18,8 @@
  *
  * @property {String} memberof Where the doclet belongs to (parent of the symbol).
  *
- * @property {'class'|'interface'|'mixin'|'function'|'typedef'|'event'|'member'|'constant'|'module'} kind The kind of the doclet's symbol.
+ * @property {'class'|'interface'|'mixin'|'function'|'typedef'|'event'|'member'|'constant'|'module'|'error'} kind
+ * The kind of the doclet's symbol.
  *
  * @property {Boolean} [ignore] `true` for internal doclets which should not be published
  *

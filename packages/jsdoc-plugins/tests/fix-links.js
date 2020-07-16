@@ -5,24 +5,21 @@
 
 'use strict';
 
-const chai = require( 'chai' );
-const expect = chai.expect;
-const fixLinks = require( '../lib/longname-fixer/fixers/fix-links' );
+const { expect } = require( 'chai' );
+const convertShortRefsToFullRefs = require( '../lib/longname-fixer/fixers/convert-short-refs-to-full-refs' );
 
-// Helper function that provides easier test.
-function formatLinksInDoclet( doclet ) {
-	const result = fixLinks( { doclet } );
-
-	return result.doclet;
-}
-
-describe.skip( 'Long name fix plugin - formatLinks()', () => {
+describe( 'jsdoc-plugins/longname-fixer/fix-links', () => {
 	it( 'formatLinks()', () => {
-		const doclet = formatLinksInDoclet( {
+		const doclet = {
 			comment: 'Creates {@link ~EditorInterface} instance',
 			description: '<p>Creates {@link ~EditorInterface} instance</p>',
-			memberof: 'module:ckeditor5/editor/editorinterface'
-		} );
+			memberof: 'module:ckeditor5/editor/editorinterface',
+			longname: 'module:ckeditor5/editor/editorinterface~EditorInterface',
+			kind: 'interface',
+			meta: { fileName: 'foo.js', path: 'foo/bar' }
+		};
+
+		convertShortRefsToFullRefs( [ doclet ] );
 
 		expect( doclet.comment ).to.be.equal(
 			'Creates {@link module:ckeditor5/editor/editorinterface~EditorInterface} instance'
@@ -33,10 +30,15 @@ describe.skip( 'Long name fix plugin - formatLinks()', () => {
 	} );
 
 	it( 'formatLinks() hash', () => {
-		const doclet = formatLinksInDoclet( {
+		const doclet = {
 			comment: 'Method {@link #create} creates instance',
-			memberof: 'module:ckeditor5/editor/editorinterface~EditorInterface'
-		} );
+			memberof: 'module:ckeditor5/editor/editorinterface~EditorInterface',
+			longname: 'module:ckeditor5/editor/editorinterface~EditorInterface#create',
+			kind: 'function',
+			meta: { fileName: 'foo.js', path: 'foo/bar' }
+		};
+
+		convertShortRefsToFullRefs( [ doclet ] );
 
 		expect( doclet.comment ).to.be.equal(
 			'Method {@link module:ckeditor5/editor/editorinterface~EditorInterface#create} creates instance'
@@ -44,10 +46,15 @@ describe.skip( 'Long name fix plugin - formatLinks()', () => {
 	} );
 
 	it( 'formatLinks() with link description', () => {
-		const doclet = formatLinksInDoclet( {
+		const doclet = {
 			comment: 'Creates {@link ~EditorInterface editor} instance with a given name.',
-			memberof: 'module:ckeditor5/editor/editorinterface'
-		} );
+			memberof: 'module:ckeditor5/editor/editorinterface',
+			longname: 'module:ckeditor5/editor/editorinterface~EditorInterface',
+			kind: 'interface',
+			meta: { fileName: 'foo.js', path: 'foo/bar' }
+		};
+
+		convertShortRefsToFullRefs( [ doclet ] );
 
 		expect( doclet.comment ).to.be.equal(
 			'Creates {@link module:ckeditor5/editor/editorinterface~EditorInterface editor} instance with a given name.'
@@ -55,10 +62,15 @@ describe.skip( 'Long name fix plugin - formatLinks()', () => {
 	} );
 
 	it( 'formatLinks() with more complicated path', () => {
-		const doclet = formatLinksInDoclet( {
+		const doclet = {
 			comment: 'Method {@link ~EditorInterface#create create} creates Editor',
-			memberof: 'module:ckeditor5/editor/editorinterface'
-		} );
+			memberof: 'module:ckeditor5/editor/editorinterface',
+			longname: 'module:ckeditor5/editor/editorinterface~EditorInterface',
+			kind: 'interface',
+			meta: { fileName: 'foo.js', path: 'foo/bar' }
+		};
+
+		convertShortRefsToFullRefs( [ doclet ] );
 
 		expect( doclet.comment ).to.be.equal(
 			'Method {@link module:ckeditor5/editor/editorinterface~EditorInterface#create create} creates Editor'
@@ -66,11 +78,16 @@ describe.skip( 'Long name fix plugin - formatLinks()', () => {
 	} );
 
 	it( 'formatLinks() in description', () => {
-		const doclet = formatLinksInDoclet( {
+		const doclet = {
 			comment: '',
 			description: 'You can later destroy it with {@link ~EditorInterface#destroy}',
-			memberof: 'module:ckeditor5/editor/editorinterface'
-		} );
+			memberof: 'module:ckeditor5/editor/editorinterface',
+			longname: 'module:ckeditor5/editor/editorinterface~EditorInterface',
+			kind: 'interface',
+			meta: { fileName: 'foo.js', path: 'foo/bar' }
+		};
+
+		convertShortRefsToFullRefs( [ doclet ] );
 
 		expect( doclet.description ).to.be.equal(
 			'You can later destroy it with {@link module:ckeditor5/editor/editorinterface~EditorInterface#destroy}'
@@ -78,10 +95,15 @@ describe.skip( 'Long name fix plugin - formatLinks()', () => {
 	} );
 
 	it( 'formatLinks() multiple links', () => {
-		const doclet = formatLinksInDoclet( {
+		const doclet = {
 			comment: '{@link #destroy} {@link #destroy}',
-			memberof: 'module:editor/editorinterface'
-		} );
+			memberof: 'module:editor/editorinterface',
+			longname: 'module:ckeditor5/editor/editorinterface~EditorInterface',
+			kind: 'interface',
+			meta: { fileName: 'foo.js', path: 'foo/bar' }
+		};
+
+		convertShortRefsToFullRefs( [ doclet ] );
 
 		expect( doclet.comment ).to.be.equal(
 			'{@link module:editor/editorinterface#destroy} {@link module:editor/editorinterface#destroy}'
@@ -89,10 +111,15 @@ describe.skip( 'Long name fix plugin - formatLinks()', () => {
 	} );
 
 	it( 'formatLinks() link to parent: class / interface', () => {
-		const doclet = formatLinksInDoclet( {
+		const doclet = {
 			comment: '{@link ~EditorInterface}',
-			memberof: 'module:editor/editorinterface~EditorInterface'
-		} );
+			memberof: 'module:editor/editorinterface~EditorInterface',
+			longname: 'module:ckeditor5/editor/editorinterface~EditorInterface',
+			kind: 'interface',
+			meta: { fileName: 'foo.js', path: 'foo/bar' }
+		};
+
+		convertShortRefsToFullRefs( [ doclet ] );
 
 		expect( doclet.comment ).to.be.equal(
 			'{@link module:editor/editorinterface~EditorInterface}'
@@ -100,10 +127,15 @@ describe.skip( 'Long name fix plugin - formatLinks()', () => {
 	} );
 
 	it( 'formatLinks() with multi-word link', () => {
-		const doclet = formatLinksInDoclet( {
+		const doclet = {
 			comment: 'Creates {@link ~EditorInterface some editor} instance with a given name.',
-			memberof: 'module:ckeditor5/editor/editorinterface'
-		} );
+			memberof: 'module:ckeditor5/editor/editorinterface',
+			longname: 'module:ckeditor5/editor/editorinterface~EditorInterface',
+			kind: 'interface',
+			meta: { fileName: 'foo.js', path: 'foo/bar' }
+		};
+
+		convertShortRefsToFullRefs( [ doclet ] );
 
 		expect( doclet.comment ).to.be.equal(
 			'Creates {@link module:ckeditor5/editor/editorinterface~EditorInterface some editor} ' +
@@ -112,26 +144,53 @@ describe.skip( 'Long name fix plugin - formatLinks()', () => {
 	} );
 
 	it( 'should fix links in error doclets', () => {
-		const options = {
-			doclet: {
-				kind: 'error',
-				comment: 'The {@link #constructor source} of a rect in an HTML element',
-				description: '<p>The {@link #constructor source} of a rect in an HTML element</p>'
-			},
-			lastInterfaceOrClass: {
-				longname: 'module:ckeditor5-utils/dom/rect~Rect'
-			}
-		};
+		/** @type {Array.<Doclet>} */
+		const doclets = [ {
+			longname: 'module:errors~some-error',
+			memberof: 'module:errors',
+			kind: 'error',
+			comment: 'The {@link #constructor source} of a rect in an HTML element',
+			description: '<p>The {@link #constructor source} of a rect in an HTML element</p>',
+			meta: { fileName: 'foo.js', path: 'foo/bar', lineno: 40 }
+		}, {
+			longname: 'module:ckeditor5-utils/dom/rect~Rect',
+			kind: 'class',
+			comment: '',
+			description: '',
+			meta: { fileName: 'foo.js', path: 'foo/bar', lineno: 30 }
+		}, {
+			longname: 'module:ckeditor5-utils/dom/rect~Rect#constructor',
+			kind: 'function',
+			comment: '',
+			description: '',
+			meta: { fileName: 'foo.js', path: 'foo/bar', lineno: 32 }
+		} ];
 
-		expect( fixLinks( options ) ).to.be.deep.equal( {
-			doclet: {
+		convertShortRefsToFullRefs( doclets );
+
+		expect( doclets ).to.be.deep.equal( [
+			{
+				longname: 'module:errors~some-error',
+				memberof: 'module:errors',
 				kind: 'error',
 				comment: 'The {@link module:ckeditor5-utils/dom/rect~Rect#constructor source} of a rect in an HTML element',
-				description: '<p>The {@link module:ckeditor5-utils/dom/rect~Rect#constructor source} of a rect in an HTML element</p>'
+				description: '<p>The {@link module:ckeditor5-utils/dom/rect~Rect#constructor source} of a rect in an HTML element</p>',
+				meta: { fileName: 'foo.js', path: 'foo/bar', lineno: 40 }
 			},
-			lastInterfaceOrClass: {
-				longname: 'module:ckeditor5-utils/dom/rect~Rect'
+			{
+				longname: 'module:ckeditor5-utils/dom/rect~Rect',
+				comment: '',
+				description: '',
+				kind: 'class',
+				meta: { fileName: 'foo.js', path: 'foo/bar', lineno: 30 }
+			},
+			{
+				longname: 'module:ckeditor5-utils/dom/rect~Rect#constructor',
+				kind: 'function',
+				comment: '',
+				description: '',
+				meta: { fileName: 'foo.js', path: 'foo/bar', lineno: 32 }
 			}
-		} );
+		] );
 	} );
 } );

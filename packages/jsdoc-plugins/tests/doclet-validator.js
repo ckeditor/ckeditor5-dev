@@ -25,7 +25,7 @@ describe( 'jsdoc-plugins/Validator', () => {
 	} );
 
 	describe( '_validateMemberofProperty()', () => {
-		it( 'should not emit error if the doclet comes from inner variable', () => {
+		it( 'should emit error if the doclet comes from inner variable', () => {
 			const validator = new DocletValidator( [ {
 				kind: 'member',
 				name: 'module:ckeditor5/path',
@@ -35,7 +35,7 @@ describe( 'jsdoc-plugins/Validator', () => {
 
 			validator._validateMemberofProperty();
 
-			expect( validator.errors.length ).to.be.equal( 0 );
+			expect( validator.errors.length ).to.be.equal( 1 );
 		} );
 
 		it( 'should emit error if the doclet contains invalid `memberof` property', () => {
@@ -64,7 +64,7 @@ describe( 'jsdoc-plugins/Validator', () => {
 			expect( validator.errors.length ).to.be.equal( 0 );
 		} );
 
-		it( 'should not emit error if the doclet comes from undocumented code', () => {
+		it( 'should emit error if the doclet comes from undocumented code', () => {
 			const validator = new DocletValidator( [ {
 				kind: 'member',
 				undocumented: 'true',
@@ -75,7 +75,7 @@ describe( 'jsdoc-plugins/Validator', () => {
 
 			validator._validateMemberofProperty();
 
-			expect( validator.errors.length ).to.be.equal( 0 );
+			expect( validator.errors.length ).to.be.equal( 1 );
 		} );
 	} );
 
