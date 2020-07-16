@@ -7,7 +7,7 @@
 
 const chai = require( 'chai' );
 const expect = chai.expect;
-// const fixShortRefs = require( '../lib/longname-fixer/fixers/fix-short-refs' );
+const fixShortRefs = require( '../lib/longname-fixer/fixers/convert-short-refs-to-full-refs' );
 
 describe.skip( 'Long name fix plugin - fixShortRefs()', () => {
 	it( 'remember last interface', () => {

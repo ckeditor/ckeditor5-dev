@@ -598,11 +598,3 @@ describe( 'jsdoc-plugins/Validator', () => {
 		} );
 	} );
 } );
-
-function getTestedModules() {
-	return [
-		'module:utils',
-		'module:engine',
-		'module:ckeditor5'
-	];
-}

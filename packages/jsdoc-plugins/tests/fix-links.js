@@ -7,7 +7,7 @@
 
 const chai = require( 'chai' );
 const expect = chai.expect;
-// const fixLinks = require( '../lib/longname-fixer/fixers/fix-links' );
+const fixLinks = require( '../lib/longname-fixer/fixers/fix-links' );
 
 // Helper function that provides easier test.
 function formatLinksInDoclet( doclet ) {

@@ -19,23 +19,3 @@ module.exports = function filterOutInternalDoclets( doclets ) {
 
 	return doclets;
 };
-
-/**
- * @param {Array.<Doclet>} doclets
- */
-function filterOutReExportedSymbols( doclets ) {
-	const constants = doclets.filter( doclet => doclet.kind === 'constant' );
-
-	return doclets.filter( doclet => {
-		// // Filter out exported symbols that are defined previously (JSDoc creates doclets for both).
-		// const isUnwanted = ( doclet.scope == 'inner' && doclet.kind == 'constant' && doclet.undocumented );
-
-		// if ( isUnwanted ) {
-		// 	if ( constants.find( d => doclet.longname === d.longname && d !== doclet ) ) {
-		// 		return false;
-		// 	}
-		// }
-
-		return true;
-	} );
-}
