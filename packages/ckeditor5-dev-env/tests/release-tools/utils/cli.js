@@ -302,16 +302,37 @@ describe( 'dev-env/release-tools/utils', () => {
 			} );
 		} );
 
-		describe( 'provideNewMajorReleaseVersion()', () => {
+		describe( 'provideNewVersionForMonoRepository()', () => {
 			it( 'bumps major version', () => {
-				return cli.provideNewMajorReleaseVersion( '1.0.0', '@ckeditor/foo' )
+				return cli.provideNewVersionForMonoRepository( '1.0.0', '@ckeditor/foo', 'major' )
 					.then( newVersion => {
 						expect( newVersion ).to.equal( '2.0.0' );
 					} );
 			} );
 
+			it( 'bumps minor version', () => {
+				return cli.provideNewVersionForMonoRepository( '1.0.0', '@ckeditor/foo', 'minor' )
+					.then( newVersion => {
+						expect( newVersion ).to.equal( '1.1.0' );
+					} );
+			} );
+
+			it( 'bumps patch version', () => {
+				return cli.provideNewVersionForMonoRepository( '1.0.0', '@ckeditor/foo', 'patch' )
+					.then( newVersion => {
+						expect( newVersion ).to.equal( '1.0.1' );
+					} );
+			} );
+
+			it( 'suggest new version', () => {
+				return cli.provideNewVersionForMonoRepository( '1.0.0', '@ckeditor/foo', 'minor' )
+					.then( () => {
+						expect( questionItems[ 0 ].default ).to.equal( '1.1.0' );
+					} );
+			} );
+
 			it( 'removes spaces from provided version', () => {
-				return cli.provideNewMajorReleaseVersion( '1.0.0', '@ckeditor/foo' )
+				return cli.provideNewVersionForMonoRepository( '1.0.0', '@ckeditor/foo' )
 					.then( () => {
 						const { filter } = questionItems[ 0 ];
 
@@ -322,7 +343,7 @@ describe( 'dev-env/release-tools/utils', () => {
 			} );
 
 			it( 'validates the provided version', () => {
-				return cli.provideNewMajorReleaseVersion( '1.0.0', '@ckeditor/foo' )
+				return cli.provideNewVersionForMonoRepository( '1.0.0', '@ckeditor/foo' )
 					.then( () => {
 						const { validate } = questionItems[ 0 ];
 
@@ -391,18 +412,6 @@ describe( 'dev-env/release-tools/utils', () => {
 							npm: true,
 							github: false
 						} );
-					} );
-			} );
-		} );
-
-		describe( 'confirmMajorBreakingChangeRelease()', () => {
-			it( 'user can disagree with the proposed value', () => {
-				return cli.confirmMajorBreakingChangeRelease( true )
-					.then( () => {
-						const question = questionItems[ 0 ];
-
-						expect( question.message ).to.match( /Should it be the major release\?/ );
-						expect( question.type ).to.equal( 'confirm' );
 					} );
 			} );
 		} );

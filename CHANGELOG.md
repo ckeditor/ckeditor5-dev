@@ -1,6 +1,45 @@
 Changelog
 =========
 
+## [21.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v20.2.1...v21.0.0) (2020-06-22)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* Minimal version of Node.js for all packages included in the repository has been increased to 12.0.0.
+
+### Features
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Translation tools can handle external packages outside the CKEditor 5 repository. Closes [ckeditor/ckeditor5#6635](https://github.com/ckeditor/ckeditor5/issues/6635). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/5771fc51e716754babcb89e37dbb13bfbf832118))
+
+### Bug fixes
+
+* When typed `"skip"` as a new version, the changelog generator should abort the process instead of writing invalid entries to the changelog file. Closes [ckeditor/ckeditor5#7402](https://github.com/ckeditor/ckeditor5/issues/7402). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/682d31e304692f513df9c92a87de56153c04fbc3))
+
+### Other changes
+
+* Upgraded versions of all dependencies. See [ckeditor/ckeditor5#7202](https://github.com/ckeditor/ckeditor5/issues/7202). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f771fb0221db07f802bbdf0da1450fe5d79314c9))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Major releases (contain major breaking changes):
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v20.0.0 => v21.0.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v20.2.0 => v21.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v20.0.2 => v21.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v20.0.0 => v21.0.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v20.0.0 => v21.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v20.0.0 => v21.0.0
+* [eslint-config-ckeditor5](https://www.npmjs.com/package/eslint-config-ckeditor5): v2.1.0 => v3.0.0
+* [eslint-plugin-ckeditor5-rules](https://www.npmjs.com/package/eslint-plugin-ckeditor5-rules): v0.0.5 => v1.0.0
+* [stylelint-config-ckeditor5](https://www.npmjs.com/package/stylelint-config-ckeditor5): v1.0.3 => v2.0.0
+</details>
+
+
 ## [20.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/v20.2.0...v20.2.1) (2020-06-01)
 
 Internal changes only (updated dependencies, documentation, etc.).

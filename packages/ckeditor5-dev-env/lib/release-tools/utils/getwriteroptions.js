@@ -8,7 +8,7 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const templatePath = path.join( __dirname, '..', 'templates' );
-const { typesOrder } = require( './transformcommitutils' );
+const { getTypeOrder } = require( './transformcommitutils' );
 
 /**
  * @param {Function|Object} transform
@@ -18,16 +18,16 @@ module.exports = function getWriterOptions( transform ) {
 	return {
 		transform,
 		groupBy: 'type',
-		commitGroupsSort( a, b ) {
-			return typesOrder[ a.title ] - typesOrder[ b.title ];
-		},
+		commitGroupsSort: sortFunction,
 		commitsSort: [ 'subject' ],
-		noteGroupsSort( a, b ) {
-			return typesOrder[ a.title ] - typesOrder[ b.title ];
-		},
+		noteGroupsSort: sortFunction,
 		mainTemplate: fs.readFileSync( path.join( templatePath, 'template.hbs' ), 'utf-8' ),
 		headerPartial: fs.readFileSync( path.join( templatePath, 'header.hbs' ), 'utf-8' ),
 		commitPartial: fs.readFileSync( path.join( templatePath, 'commit.hbs' ), 'utf-8' ),
 		footerPartial: fs.readFileSync( path.join( templatePath, 'footer.hbs' ), 'utf-8' )
 	};
 };
+
+function sortFunction( a, b ) {
+	return getTypeOrder( a.title ) - getTypeOrder( b.title );
+}

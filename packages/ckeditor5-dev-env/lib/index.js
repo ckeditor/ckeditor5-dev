@@ -36,12 +36,13 @@ const tasks = {
 	 *
 	 * @returns {Promise}
 	 */
-	uploadPotFiles() {
+	async uploadPotFiles() {
 		const uploadPotFiles = require( './translations/upload' );
 		const getToken = require( './translations/gettoken' );
 
-		return getToken()
-			.then( credentials => uploadPotFiles( credentials ) );
+		const token = await getToken();
+
+		await uploadPotFiles( { token } );
 	},
 
 	/**
@@ -49,12 +50,13 @@ const tasks = {
 	 *
 	 * @returns {Promise}
 	 */
-	downloadTranslations() {
+	async downloadTranslations( { packages } ) {
 		const downloadTranslations = require( './translations/download' );
 		const getToken = require( './translations/gettoken' );
 
-		return getToken()
-			.then( credentials => downloadTranslations( credentials ) );
+		const token = await getToken();
+
+		await downloadTranslations( { token, packages } );
 	}
 };
 

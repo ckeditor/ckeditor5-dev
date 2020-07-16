@@ -70,7 +70,7 @@ describe( 'dev-env/index', () => {
 
 	describe( 'releaseSubRepositories()', () => {
 		it( 'creates release for sub repositories', () => {
-			stubs.release.releaseSubRepositories.returns( Promise.resolve( { result: true } ) );
+			stubs.release.releaseSubRepositories.resolves( { result: true } );
 
 			return tasks.releaseSubRepositories( 'arg' )
 				.then( response => {
@@ -83,7 +83,7 @@ describe( 'dev-env/index', () => {
 
 	describe( 'generateChangelogForSinglePackage()', () => {
 		it( 'generates a changelog for package', () => {
-			stubs.release.generateChangelogForSinglePackage.returns( Promise.resolve( { result: true } ) );
+			stubs.release.generateChangelogForSinglePackage.resolves( { result: true } );
 
 			return tasks.generateChangelogForSinglePackage( 'arg' )
 				.then( response => {
@@ -96,7 +96,7 @@ describe( 'dev-env/index', () => {
 
 	describe( 'generateChangelogForMonoRepository()', () => {
 		it( 'generates a changelog for sub repositories', () => {
-			stubs.release.generateChangelogForMonoRepository.returns( Promise.resolve( { result: true } ) );
+			stubs.release.generateChangelogForMonoRepository.resolves( { result: true } );
 
 			return tasks.generateChangelogForMonoRepository( 123 )
 				.then( response => {
@@ -109,7 +109,7 @@ describe( 'dev-env/index', () => {
 
 	describe( 'bumpVersions()', () => {
 		it( 'updates version of dependencies', () => {
-			stubs.release.bumpVersions.returns( Promise.resolve( { result: true } ) );
+			stubs.release.bumpVersions.resolves( { result: true } );
 
 			return tasks.bumpVersions( 123 )
 				.then( response => {
@@ -133,27 +133,29 @@ describe( 'dev-env/index', () => {
 	} );
 
 	describe( 'uploadPotFiles()', () => {
-		it( 'should upload translations', () => {
-			stubs.translations.getToken.returns( Promise.resolve( { token: 'token' } ) );
+		it( 'should upload translations', async () => {
+			stubs.translations.getToken.resolves( 'token' );
 
-			return tasks.uploadPotFiles().then( () => {
-				sinon.assert.calledOnce( stubs.translations.uploadPotFiles );
-				sinon.assert.alwaysCalledWithExactly( stubs.translations.uploadPotFiles, {
-					token: 'token'
-				} );
+			await tasks.uploadPotFiles();
+
+			sinon.assert.calledOnce( stubs.translations.uploadPotFiles );
+			sinon.assert.alwaysCalledWithExactly( stubs.translations.uploadPotFiles, {
+				token: 'token'
 			} );
 		} );
 	} );
 
 	describe( 'downloadTranslations()', () => {
-		it( 'should download translations', () => {
-			stubs.translations.getToken.returns( Promise.resolve( { token: 'token' } ) );
+		it( 'should download translations', async () => {
+			stubs.translations.getToken.resolves( 'token' );
+			const packages = [];
 
-			return tasks.downloadTranslations().then( () => {
-				sinon.assert.calledOnce( stubs.translations.download );
-				sinon.assert.alwaysCalledWithExactly( stubs.translations.download, {
-					token: 'token'
-				} );
+			await tasks.downloadTranslations( { packages } );
+
+			sinon.assert.calledOnce( stubs.translations.download );
+			sinon.assert.alwaysCalledWithExactly( stubs.translations.download, {
+				token: 'token',
+				packages
 			} );
 		} );
 	} );

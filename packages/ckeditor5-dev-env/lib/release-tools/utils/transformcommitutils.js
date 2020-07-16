@@ -7,7 +7,7 @@
 
 const getPackageJson = require( './getpackagejson' );
 
-const transformcommitutils = {
+const transformCommitUtils = {
 	/**
 	 * A regexp for extracting additional changelog entries from the single commit.
 	 * Prefixes of the commit must be synchronized the `getCommitType()` util.
@@ -44,6 +44,22 @@ const transformcommitutils = {
 	},
 
 	/**
+	 * Returns an order of a message in the changelog.
+	 *
+	 * @param {String} title
+	 * @returns {Number}
+	 */
+	getTypeOrder( title ) {
+		for ( const typeTitle of Object.keys( transformCommitUtils.typesOrder ) ) {
+			if ( title.startsWith( typeTitle ) ) {
+				return transformCommitUtils.typesOrder[ typeTitle ];
+			}
+		}
+
+		return 10;
+	},
+
+	/**
 	 * Replaces reference to the user (`@name`) with a link to the user's profile.
 	 *
 	 * @param {String} comment
@@ -72,7 +88,7 @@ const transformcommitutils = {
 				return `[${ maybeRepository }#${ issueId }](https://github.com/${ maybeRepository }/issues/${ issueId })`;
 			}
 
-			const repositoryUrl = transformcommitutils.getRepositoryUrl();
+			const repositoryUrl = transformCommitUtils.getRepositoryUrl();
 
 			// But if doesn't, let's add it.
 			return `[#${ issueId }](${ repositoryUrl }/issues/${ issueId })`;
@@ -144,4 +160,4 @@ const transformcommitutils = {
 	}
 };
 
-module.exports = transformcommitutils;
+module.exports = transformCommitUtils;

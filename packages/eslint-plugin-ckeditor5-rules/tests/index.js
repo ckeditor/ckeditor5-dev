@@ -6,9 +6,9 @@
 'use strict';
 
 const rule = require( '../lib/rules/no-relative-imports' );
-const RuleTester = require( 'eslint/lib/testers/rule-tester' );
+const RuleTester = require( 'eslint' ).RuleTester;
 
-const ruleTester = new RuleTester( { parserOptions: { sourceType: 'module' } } );
+const ruleTester = new RuleTester( { parserOptions: { sourceType: 'module', ecmaVersion: 2015 } } );
 
 const importError = { message: 'Imports of CKEditor5 packages shouldn\'t be relative.' };
 

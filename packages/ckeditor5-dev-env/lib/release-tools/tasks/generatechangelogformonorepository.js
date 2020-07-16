@@ -18,9 +18,9 @@ const displayCommits = require( '../utils/displaycommits' );
 const displaySkippedPackages = require( '../utils/displayskippedpackages' );
 const generateChangelog = require( '../utils/generatechangelog' );
 const getPackageJson = require( '../utils/getpackagejson' );
-const getNewVersionType = require( '../utils/getnewversiontype' );
 const getPackagesPaths = require( '../utils/getpackagespaths' );
 const getCommits = require( '../utils/getcommits' );
+const getNewVersionType = require( '../utils/getnewversiontype' );
 const getWriterOptions = require( '../utils/getwriteroptions' );
 const { getRepositoryUrl } = require( '../utils/transformcommitutils' );
 const transformCommitFactory = require( '../utils/transformcommitfactory' );
@@ -31,6 +31,8 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
 /**
  * Generates the single changelog for the mono repository. It means that changes which have been done in all packages
  * will be described in the changelog file located in the `options.cwd` directory.
+ *
+ * The typed version will be the same for all packages. See: https://github.com/ckeditor/ckeditor5/issues/7323.
  *
  * @param {Object} options
  *
@@ -81,16 +83,8 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 	// Collection of public entries that will be inserted in the changelog.
 	let publicCommits;
 
-	// Whether the next release will be bumped as "major" release.
-	// It depends on commits. If there is any of them that contains a "MAJOR BREAKING CHANGES" note,
-	// all packages must be released as a major change.
-	let willBeMajorBump = false;
-
-	// If the next release will be the major bump, this variable will contain next version for all packages.
+	// The next version for the upcoming release.
 	let nextVersion = null;
-
-	// Packages which during typing the new versions, the user proposed "skip" version.
-	const skippedChangelogs = new Set();
 
 	// A map contains packages and their new versions.
 	const packagesVersion = new Map();
@@ -111,18 +105,14 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 
 			logInfo( `Found ${ commits.length } entries to parse.`, { indentLevel: 1 } );
 		} )
-		.then( () => confirmMajorVersionBump() )
-		.then( () => typeNewProposalVersionForAllPackages() )
-		.then( () => confirmVersionForPackages() )
-		.then( () => findPackagesWithInternalBumps() )
+		.then( () => typeNewVersionForAllPackages() )
 		.then( () => generateChangelogFromCommits() )
 		.then( changesFromCommits => saveChangelog( changesFromCommits ) )
 		.then( () => {
 			logProcess( 'Summary' );
 
 			displaySkippedPackages( new Set( [
-				...pathsCollection.skipped,
-				...skippedChangelogs
+				...pathsCollection.skipped
 			].sort() ) );
 
 			// Make a commit from the repository where we started.
@@ -142,29 +132,86 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 		} );
 
 	/**
-	 * Asks the user whether found "MAJOR BREAKING CHANGES" commits are true.
+	 * Asks the user about the new version for all packages for the upcoming release.
 	 *
 	 * @returns {Promise}
 	 */
-	function confirmMajorVersionBump() {
-		logProcess( 'Looking for "MAJOR BREAKING CHANGES" commits...' );
+	function typeNewVersionForAllPackages() {
+		logProcess( 'Determining the new version...' );
 
-		const majorBreakingChangesCommits = filterCommitsByNoteTitle( allCommits, 'MAJOR BREAKING CHANGES' );
-		const hasMajorBreakingChanges = majorBreakingChangesCommits.length > 0;
+		displayAllChanges();
 
-		if ( hasMajorBreakingChanges ) {
-			logInfo( `Found ${ chalk.bold( 'MAJOR BREAKING CHANGES' ) }:`, { indentLevel: 1 } );
-			displayCommits( majorBreakingChangesCommits, { attachLinkToCommit: true, indentLevel: 2 } );
-		} else {
-			logInfo( chalk.italic(
-				'No "MAJOR BREAKING CHANGES" commits found but you can decide whether a next release should be treated as a major.'
-			), { indentLevel: 1 } );
+		// Find the highest version in all packages.
+		const [ packageHighestVersion, highestVersion ] = [ ...pathsCollection.matched ]
+			.reduce( ( currentHighest, repositoryPath ) => {
+				const packageJson = getPackageJson( repositoryPath );
+
+				currentPackagesVersion.set( packageJson.name, packageJson.version );
+
+				if ( semver.gt( packageJson.version, currentHighest[ 1 ] ) ) {
+					return [ packageJson.name, packageJson.version ];
+				}
+
+				return currentHighest;
+			}, [ null, '0.0.0' ] );
+
+		let bumpType = getNewVersionType( allCommits );
+
+		// When made commits are not public, bump the `patch` version.
+		if ( bumpType === 'internal' ) {
+			bumpType = 'patch';
 		}
 
-		return cli.confirmMajorBreakingChangeRelease( hasMajorBreakingChanges, { indentLevel: 1 } )
-			.then( result => {
-				willBeMajorBump = result;
+		return cli.provideNewVersionForMonoRepository( highestVersion, packageHighestVersion, bumpType, { indentLevel: 1 } )
+			.then( version => {
+				nextVersion = version;
+
+				let promise = Promise.resolve();
+
+				// Update the version for all packages.
+				for ( const packagePath of pathsCollection.matched ) {
+					promise = promise.then( () => {
+						const pkgJson = getPackageJson( packagePath );
+
+						packagesPaths.set( pkgJson.name, packagePath );
+						packagesVersion.set( pkgJson.name, nextVersion );
+					} );
+				}
+
+				return promise;
 			} );
+	}
+
+	/**
+	 * Displays breaking changes and commits.
+	 */
+	function displayAllChanges() {
+		const majorBreakingChangesCommits = filterCommitsByNoteTitle( allCommits, 'MAJOR BREAKING CHANGES' );
+		const infoOptions = { indentLevel: 1, startWithNewLine: true };
+
+		if ( majorBreakingChangesCommits.length > 0 ) {
+			logInfo( `🔸 Found ${ chalk.bold( 'MAJOR BREAKING CHANGES' ) }:`, infoOptions );
+			displayCommits( majorBreakingChangesCommits, { attachLinkToCommit: true, indentLevel: 2 } );
+		} else {
+			logInfo( `🔸 ${ chalk.bold( 'MAJOR BREAKING CHANGES' ) } commits have not been found.`, infoOptions );
+		}
+
+		const minorBreakingChangesCommits = filterCommitsByNoteTitle( allCommits, 'MINOR BREAKING CHANGES' );
+
+		if ( minorBreakingChangesCommits.length > 0 ) {
+			logInfo( `🔸 Found ${ chalk.bold( 'MINOR BREAKING CHANGES' ) }:`, infoOptions );
+			displayCommits( minorBreakingChangesCommits, { attachLinkToCommit: true, indentLevel: 2 } );
+		} else {
+			logInfo( `🔸 ${ chalk.bold( 'MINOR BREAKING CHANGES' ) } commits have not been found.`, infoOptions );
+		}
+
+		logInfo( '🔸 Commits since the last release:', infoOptions );
+
+		const commits = allCommits.sort( sortFunctionFactory( 'scope' ) );
+
+		displayCommits( commits, { indentLevel: 2 } );
+
+		logInfo( '💡 Review commits listed above and propose the new version for all packages in the upcoming release.', infoOptions );
 	}
 
 	/**
@@ -189,89 +236,6 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 	}
 
 	/**
-	 * If the next release will be the major release, the user needs to provide the version which will be used
-	 * as the proposal version for all packages.
-	 *
-	 * @returns {Promise}
-	 */
-	function typeNewProposalVersionForAllPackages() {
-		if ( !willBeMajorBump ) {
-			return Promise.resolve();
-		}
-
-		logProcess( 'Looking for the highest version in all packages...' );
-
-		const [ packageHighestVersion, highestVersion ] = [ ...pathsCollection.matched ]
-			.reduce( ( currentHighest, repositoryPath ) => {
-				const packageJson = getPackageJson( repositoryPath );
-
-				currentPackagesVersion.set( packageJson.name, packageJson.version );
-
-				if ( semver.gt( packageJson.version, currentHighest[ 1 ] ) ) {
-					return [ packageJson.name, packageJson.version ];
-				}
-
-				return currentHighest;
-			}, [ null, '0.0.0' ] );
-
-		return cli.provideNewMajorReleaseVersion( highestVersion, packageHighestVersion, { indentLevel: 1 } )
-			.then( version => {
-				nextVersion = version;
-			} );
-	}
-
-	/**
-	 * Asks the user about new versions for all packages.
-	 *
-	 * @returns {Promise}
-	 */
-	function confirmVersionForPackages() {
-		logProcess( 'Preparing new version for all packages...' );
-
-		const mainPackageName = pkgJson.name;
-		let promise = Promise.resolve();
-
-		for ( const packagePath of pathsCollection.matched ) {
-			promise = promise.then( () => {
-				const pkgJson = getPackageJson( packagePath );
-
-				packagesPaths.set( pkgJson.name, packagePath );
-				currentPackagesVersion.set( pkgJson.name, pkgJson.version );
-
-				logInfo( `Processing "${ chalk.underline( pkgJson.name ) }"...`, { indentLevel: 1, startWithNewLine: true } );
-
-				const packageCommits = filterCommitsByPath( allCommits, packagePath );
-				const releaseTypeOrVersion = willBeMajorBump ? nextVersion : getNewVersionType( packageCommits );
-
-				displayCommits( packageCommits, { indentLevel: 2 } );
-
-				const provideVersionOptions = {
-					indentLevel: 2,
-					disableSkipVersion: mainPackageName === pkgJson.name
-				};
-
-				return cli.provideVersion( pkgJson.version, releaseTypeOrVersion, provideVersionOptions )
-					.then( version => {
-						if ( version === 'skip' ) {
-							skippedChangelogs.add( packagePath );
-
-							return Promise.resolve();
-						}
-
-						// If the user provided "internal" as a new version, we treat it as a "patch" bump.
-						if ( version === 'internal' ) {
-							version = semver.inc( pkgJson.version, 'patch' );
-						}
-
-						packagesVersion.set( pkgJson.name, version );
-					} );
-			} );
-		}
-
-		return promise;
-	}
-
-	/**
 	 * Finds commits that touched the package under `packagePath` directory.
 	 *
 	 * @param {Array.<Commit>} commits
@@ -292,42 +256,6 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 				return file.startsWith( shortPackagePath );
 			} );
 		} );
-	}
-
-	/**
-	 * Finds packages that were skipped or didn't have any committed changes.
-	 *
-	 * For such packages we want to bump the "patch" version.
-	 * Unless, there should be a major bump.
-	 *
-	 * @returns {Promise}
-	 */
-	function findPackagesWithInternalBumps() {
-		logProcess( 'Checking whether dependencies of skipped packages have changed...' );
-
-		let clearRun = false;
-
-		while ( !clearRun ) {
-			clearRun = true;
-
-			for ( const packagePath of skippedChangelogs ) {
-				const pkgJson = getPackageJson( packagePath );
-
-				// Check whether the dependencies of the current processing package will be released.
-				const willUpdateDependencies = Object.keys( pkgJson.dependencies || {} )
-					.some( dependencyName => packagesVersion.has( dependencyName ) );
-
-				// If so, bump the version for current package and release it too.
-				// The bump can be specified as `major` or `patch`. It depends whether we had the "MAJOR BREAKING CHANGES" commit.
-				if ( willUpdateDependencies ) {
-					const version = willBeMajorBump ? nextVersion : semver.inc( pkgJson.version, 'patch' );
-
-					packagesVersion.set( pkgJson.name, version );
-					skippedChangelogs.delete( packagePath );
-					clearRun = false;
-				}
-			}
-		}
 	}
 
 	/**
@@ -356,22 +284,8 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 			hash: hash => hash
 		} );
 
-		const sortFunction = compareFunc( item => {
-			if ( Array.isArray( item.rawScope ) ) {
-				// A hack that allows moving all scoped commits from the main repository/package at the beginning of the list.
-				if ( item.rawScope[ 0 ] === pkgJson.name ) {
-					return 'a'.repeat( 15 );
-				}
-
-				return item.rawScope[ 0 ];
-			}
-
-			// A hack that allows moving all non-scoped commits or breaking changes notes at the end of the list.
-			return 'z'.repeat( 15 );
-		} );
-
-		writerOptions.commitsSort = sortFunction;
-		writerOptions.notesSort = sortFunction;
+		writerOptions.commitsSort = sortFunctionFactory( 'rawScope' );
+		writerOptions.notesSort = sortFunctionFactory( 'rawScope' );
 
 		publicCommits = [ ...allCommits ]
 			.filter( commit => commit.isPublicCommit )
@@ -621,6 +535,28 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 		}
 
 		return `* [${ packageName }](${ npmUrl }): v${ nextVersion }`;
+	}
+
+	/**
+	 * Returns a function that is being used when sorting commits.
+	 *
+	 * @param {String} scopeField A name of the field that saves the commit's scope.
+	 * @returns {Function}
+	 */
+	function sortFunctionFactory( scopeField ) {
+		return compareFunc( item => {
+			if ( Array.isArray( item[ scopeField ] ) ) {
+				// A hack that allows moving all scoped commits from the main repository/package at the beginning of the list.
+				if ( item[ scopeField ][ 0 ] === pkgJson.name ) {
+					return 'a'.repeat( 15 );
+				}
+
+				return item[ scopeField ][ 0 ];
+			}
+
+			// A hack that allows moving all non-scoped commits or breaking changes notes at the end of the list.
+			return 'z'.repeat( 15 );
+		} );
 	}
 
 	function logProcess( message ) {

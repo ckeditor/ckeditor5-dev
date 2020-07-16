@@ -22,8 +22,8 @@ describe( 'dev-env/release-tools/utils', () => {
 			sandbox.restore();
 		} );
 
-		it( 'resolves promsie when package list is empty', () => {
-			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
+		it( 'resolves promise when package list is empty', () => {
+			const functionToExecute = sandbox.stub().resolves();
 
 			return executeOnPackages( new Set(), functionToExecute )
 				.then( () => {
@@ -32,7 +32,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'executes a function for each package found as a dependency in package.json in CWD', () => {
-			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
+			const functionToExecute = sandbox.stub().resolves();
 
 			const packages = new Set( [
 				'/packages/ckeditor5-core',
@@ -78,7 +78,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'works fine with array', () => {
-			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
+			const functionToExecute = sandbox.stub().resolves();
 
 			return executeOnPackages( [ 1, 2 ], functionToExecute )
 				.then( () => {
@@ -89,8 +89,9 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		it( 'works fine with iterator', () => {
-			const functionToExecute = sandbox.stub().returns( Promise.resolve() );
+			const functionToExecute = sandbox.stub().resolves();
 			const simpleMap = new Map( [ [ 'a', 1 ], [ 'b', 2 ] ] );
+
 			return executeOnPackages( simpleMap.keys(), functionToExecute )
 				.then( () => {
 					expect( functionToExecute.calledTwice ).to.equal( true );

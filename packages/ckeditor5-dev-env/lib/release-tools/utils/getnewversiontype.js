@@ -9,7 +9,7 @@
  * Proposes new version based on commits.
  *
  * @param {Array.<Commit>} commits
- * @returns {String}
+ * @returns {String|null}
  */
 module.exports = function getNewVersionType( commits ) {
 	// No commits = no changes.
