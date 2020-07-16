@@ -11,37 +11,43 @@
 exports.handlers = {
 	parseComplete: e => {
 		for ( const doclet of e.doclets ) {
-			if ( !doclet.description ) {
-				continue;
+			if ( doclet.description ) {
+				doclet.description = fixDescription( doclet.description );
 			}
 
-			doclet.description = doclet.description.replace( /<pre><code>(.*?)<\/code><\/pre>/gs, ( _match, content ) => {
-				const codeRows = content.split( '\n' );
-
-				let paddingSize = 0;
-
-				while ( true ) {
-					const paddingText = codeRows[ 0 ].slice( 0, paddingSize + 1 );
-
-					// When some row starts with a different text or
-					// padding contains some non-whitespace characters
-					// then it means that it is no loner a padding.
-					if (
-						( codeRows.some( row => /\S/.test( row ) && !row.startsWith( paddingText ) ) ) ||
-						/\S/.test( paddingText )
-					) {
-						break;
-					}
-
-					paddingSize++;
-				}
-
-				return (
-					'<pre><code>' +
-					codeRows.map( row => row.slice( paddingSize ) ).join( '\n' ) +
-					'</code></pre>'
-				);
-			} );
+			if ( doclet.classdesc ) {
+				doclet.classdesc = fixDescription( doclet.classdesc );
+			}
 		}
 	}
 };
+
+function fixDescription( desc ) {
+	return desc.replace( /<pre><code>(.*?)<\/code><\/pre>/gs, ( _match, content ) => {
+		const codeRows = content.split( '\n' );
+
+		let paddingSize = 0;
+
+		while ( true ) {
+			const paddingText = codeRows[ 0 ].slice( 0, paddingSize + 1 );
+
+			// When some row starts with a different text or
+			// padding contains some non-whitespace characters
+			// then it means that it is no loner a padding.
+			if (
+				( codeRows.some( row => /\S/.test( row ) && !row.startsWith( paddingText ) ) ) ||
+				/\S/.test( paddingText )
+			) {
+				break;
+			}
+
+			paddingSize++;
+		}
+
+		return (
+			'<pre><code>' +
+			codeRows.map( row => row.slice( paddingSize ) ).join( '\n' ) +
+			'</code></pre>'
+		);
+	} );
+}
