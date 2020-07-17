@@ -14,7 +14,7 @@
   ],
   "dependencies": {
     "fs-extra": "^8.1.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "jsdoc": "ckeditor/jsdoc#node12"
   },
   "devDependencies": {
