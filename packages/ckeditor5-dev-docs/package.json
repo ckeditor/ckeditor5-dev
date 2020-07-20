@@ -5,8 +5,8 @@
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^21.0.0",
-    "@ckeditor/jsdoc-plugins": "^21.0.0",
+    "@ckeditor/ckeditor5-dev-utils": "^22.0.0",
+    "@ckeditor/jsdoc-plugins": "^22.0.0",
     "jsdoc": "ckeditor/jsdoc#node12",
     "map-stream": "^0.0.7",
     "tmp": "^0.2.1",
