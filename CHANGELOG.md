@@ -44,9 +44,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v21.0.0 => v22.0.0
 * [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v21.0.0 => v22.0.0
 * [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v21.0.0 => v22.0.0
-* [eslint-config-ckeditor5](https://www.npmjs.com/package/eslint-config-ckeditor5): v3.0.0 => v22.0.0
-* [eslint-plugin-ckeditor5-rules](https://www.npmjs.com/package/eslint-plugin-ckeditor5-rules): v1.0.0 => v22.0.0
-* [stylelint-config-ckeditor5](https://www.npmjs.com/package/stylelint-config-ckeditor5): v2.0.0 => v22.0.0
 </details>
 
 
