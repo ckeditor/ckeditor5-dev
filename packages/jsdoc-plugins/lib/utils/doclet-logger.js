@@ -6,6 +6,7 @@
 'use strict';
 
 const fsExtra = require( 'fs-extra' );
+const path = require( 'path' );
 
 /**
  * Created for testing purpose.
@@ -13,6 +14,8 @@ const fsExtra = require( 'fs-extra' );
  */
 exports.handlers = {
 	processingComplete( e ) {
-		fsExtra.outputFileSync( process.cwd() + '/docs/api/output.json', JSON.stringify( e, null, 4 ) );
+		const outputPath = process.env.JSDOC_OUTPUT_PATH;
+
+		fsExtra.outputFileSync( path.resolve( outputPath ), JSON.stringify( e, null, 4 ) );
 	}
 };

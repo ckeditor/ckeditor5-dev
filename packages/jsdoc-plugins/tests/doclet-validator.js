@@ -9,78 +9,79 @@ const chai = require( 'chai' );
 const expect = chai.expect;
 const DocletValidator = require( '../lib/validator/doclet-validator.js' );
 
-describe( 'Linter plugin', () => {
-	it( '_lintMembers()', () => {
-		const linter = new DocletValidator( [ {
+// TODO - These tests should be rewritten to use doclets created from the API docs extraction.
+describe( 'jsdoc-plugins/Validator', () => {
+	it( '_validateMembers()', () => {
+		const validator = new DocletValidator( [ {
 			kind: 'member',
 			name: 'module:ckeditor5/wrong_path',
 			scope: 'inner',
 			meta: { fileName: '', path: '' }
-		} ], getTestedModules() );
+		} ] );
 
-		linter._lintMembers();
+		validator._validateMembers();
 
-		expect( linter._errors.length ).to.be.equal( 1 );
+		expect( validator.errors.length ).to.be.equal( 1 );
 	} );
 
-	describe( '_lintMemberofProperty()', () => {
-		it( 'should not emit error if the doclet comes from inner variable', () => {
-			const linter = new DocletValidator( [ {
+	describe( '_validateMemberofProperty()', () => {
+		it( 'should emit error if the doclet comes from inner variable', () => {
+			const validator = new DocletValidator( [ {
 				kind: 'member',
 				name: 'module:ckeditor5/path',
 				memberof: '<anonymous>',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintMemberofProperty();
+			validator._validateMemberofProperty();
 
-			expect( linter._errors.length ).to.be.equal( 0 );
+			expect( validator.errors.length ).to.be.equal( 1 );
 		} );
 
 		it( 'should emit error if the doclet contains invalid `memberof` property', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				kind: 'member',
 				name: 'module:ckeditor5/wrong_path',
 				memberof: 'wrongMemberof',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintMemberofProperty();
+			validator._validateMemberofProperty();
 
-			expect( linter._errors.length ).to.be.equal( 1 );
+			expect( validator.errors.length ).to.be.equal( 1 );
 		} );
 
 		it( 'should not emit error when the doclets\' `memberof` starts with `module:`', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				kind: 'member',
 				name: 'module:ckeditor5/editor',
 				memberof: 'module:ckeditor5/editor',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintMemberofProperty();
+			validator._validateMemberofProperty();
 
-			expect( linter._errors.length ).to.be.equal( 0 );
+			expect( validator.errors.length ).to.be.equal( 0 );
 		} );
 
-		it( 'should not emit error if the doclet comes from undocumented code', () => {
-			const linter = new DocletValidator( [ {
+		it( 'should emit error if the doclet comes from undocumented code', () => {
+			const validator = new DocletValidator( [ {
 				kind: 'member',
 				undocumented: 'true',
 				name: '⌘',
 				memberof: 'macGlyphsToModifiers',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintMemberofProperty();
+			validator._validateMemberofProperty();
 
-			expect( linter._errors.length ).to.be.equal( 0 );
+			expect( validator.errors.length ).to.be.equal( 1 );
 		} );
 	} );
 
 	describe( 'linting function parameters', () => {
 		it( 'should handle not existing types', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				kind: 'function',
 				params: [ {
 					type: {
@@ -90,15 +91,15 @@ describe( 'Linter plugin', () => {
 				longname: 'abc',
 				scope: 'inner',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintParams();
+			validator._validateParameters();
 
-			expect( linter._errors.length ).to.be.equal( 1 );
+			expect( validator.errors.length ).to.be.equal( 1 );
 		} );
 
 		it( 'should log an error if a module is passed as parameter type', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				kind: 'class',
 				params: [ {
 					type: {
@@ -110,16 +111,16 @@ describe( 'Linter plugin', () => {
 				kind: 'module',
 				longname: 'module:engine/ckeditor5/editor',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintParams();
+			validator._validateParameters();
 
-			expect( linter._errors.length ).to.be.equal( 1 );
-			expect( linter._errors[ 0 ].message ).to.equal( 'Incorrect param type: module:engine/ckeditor5/editor' );
+			expect( validator.errors.length ).to.be.equal( 1 );
+			expect( validator.errors[ 0 ].message ).to.equal( 'Incorrect param type: module:engine/ckeditor5/editor' );
 		} );
 
 		it( 'should not log an error if an allowed member is passed as parameter type', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				kind: 'class',
 				params: [ {
 					type: {
@@ -155,15 +156,15 @@ describe( 'Linter plugin', () => {
 				kind: 'function',
 				longname: 'module:engine/foo~FunctionAbc',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintParams();
+			validator._validateParameters();
 
-			expect( linter._errors.length ).to.be.equal( 0 );
+			expect( validator.errors.length ).to.be.equal( 0 );
 		} );
 
 		it( 'should handle built-in types', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				kind: 'class',
 				params: [ {
 					type: {
@@ -175,15 +176,15 @@ describe( 'Linter plugin', () => {
 					}
 				} ],
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintParams();
+			validator._validateParameters();
 
-			expect( linter._errors.length ).to.be.equal( 0 );
+			expect( validator.errors.length ).to.be.equal( 0 );
 		} );
 
 		it( 'should log an error if an incorrect type is passed', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				kind: 'class',
 				params: [ {
 					type: {
@@ -195,30 +196,30 @@ describe( 'Linter plugin', () => {
 					}
 				} ],
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintParams();
+			validator._validateParameters();
 
-			expect( linter._errors.length ).to.be.equal( 1 );
+			expect( validator.errors.length ).to.be.equal( 1 );
 		} );
 	} );
 
 	describe( 'linting links', () => {
 		it( 'should validate links and adds errors if they are incorrect', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				comment:
 					`* {@link module:utils/a~A#method1}
 					* {@link module:utils/b~Some1} `,
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintLinks();
+			validator._validateLinks();
 
-			expect( linter._errors.length ).to.be.equal( 2 );
+			expect( validator.errors.length ).to.be.equal( 2 );
 		} );
 
 		it( 'should not produce errors if links are correct', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				comment:
 					`/** Linking test:\n *\n * * a:\n *
 					* {@link module:ckeditor5/a~A} `,
@@ -227,76 +228,76 @@ describe( 'Linter plugin', () => {
 				comment: '',
 				longname: 'module:ckeditor5/a~A',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintLinks();
+			validator._validateLinks();
 
-			expect( linter._errors.length ).to.be.equal( 0 );
+			expect( validator.errors.length ).to.be.equal( 0 );
 		} );
 
 		it( 'should validate links with name', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				comment: ' {@link module:ckeditor5/a~A classA} ',
 				meta: { fileName: '', path: '' }
 			}, {
 				comment: '',
 				longname: 'module:ckeditor5/a~A',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintLinks();
+			validator._validateLinks();
 
-			expect( linter._errors.length ).to.be.equal( 0 );
+			expect( validator.errors.length ).to.be.equal( 0 );
 		} );
 
 		it( 'should validate links with white spaces', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				comment: ' {@link \n module:ckeditor5/a~A \n\t classA} ',
 				meta: { fileName: '', path: '' }
 			}, {
 				comment: '',
 				longname: 'module:ckeditor5/a~A',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintLinks();
+			validator._validateLinks();
 
-			expect( linter._errors.length ).to.be.equal( 0 );
+			expect( validator.errors.length ).to.be.equal( 0 );
 		} );
 
 		it( 'should validate links with multi-word link', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				comment: ' {@link module:ckeditor5/a~A with multi word link} ',
 				meta: { fileName: '', path: '' }
 			}, {
 				comment: '',
 				longname: 'module:ckeditor5/a~A',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintLinks();
+			validator._validateLinks();
 
-			expect( linter._errors.length ).to.be.equal( 0 );
+			expect( validator.errors.length ).to.be.equal( 0 );
 		} );
 
 		it( 'should validate links that contain double link keyword', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				comment: '{@link @link module:ckeditor5/a~A with multi word link} ',
 				meta: { fileName: '', path: '' }
 			}, {
 				comment: '',
 				longname: 'module:ckeditor5/a~A',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintLinks();
+			validator._validateLinks();
 
-			expect( linter._errors.length ).to.be.equal( 1 );
-			expect( linter._errors[ 0 ].message ).to.match( /Incorrect link:/ );
+			expect( validator.errors.length ).to.be.equal( 1 );
+			expect( validator.errors[ 0 ].message ).to.match( /Incorrect link:/ );
 		} );
 
 		it( 'should validate links that does not contain the @link part', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				comment: `
 				@param {module:ckeditor5/a~A}
 				@returns {module:ckeditor5/a~A}
@@ -313,29 +314,29 @@ describe( 'Linter plugin', () => {
 				comment: '',
 				longname: 'module:ckeditor5/a~B',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintLinks();
+			validator._validateLinks();
 
-			expect( linter._errors.length ).to.be.equal( 1 );
-			expect( linter._errors[ 0 ].message ).to.match( /Link misses the '@link' part: \{module:ckeditor5\/a~B\}/ );
+			expect( validator.errors.length ).to.be.equal( 1 );
+			expect( validator.errors[ 0 ].message ).to.match( /Link misses the '@link' part: \{module:ckeditor5\/a~B\}/ );
 		} );
 
 		it( 'should validate comment without any link', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				comment: 'Some comment without any valid nor invalid link',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintLinks();
+			validator._validateLinks();
 
-			expect( linter._errors.length ).to.equal( 0 );
+			expect( validator.errors.length ).to.equal( 0 );
 		} );
 	} );
 
 	describe( 'linting extensibility', () => {
 		it( 'should assert that the type in the `@extends` tag exsits (positive)', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				kind: 'class',
 				longname: 'module:abc/SomeClass',
 				augments: [ 'module:abc/SomeOtherClass' ],
@@ -344,44 +345,44 @@ describe( 'Linter plugin', () => {
 				kind: 'class',
 				longname: 'module:abc/SomeOtherClass',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintExensibility();
+			validator._validateExtensibility();
 
-			expect( linter._errors.length ).to.equal( 0 );
+			expect( validator.errors.length ).to.equal( 0 );
 		} );
 
 		it( 'should assert that the type in the `@extends` tag exsits (negative)', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				kind: 'class',
 				longname: 'module:abc/SomeClass',
 				augments: [ 'module:abc/SomeOtherClass' ],
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintExensibility();
+			validator._validateExtensibility();
 
-			expect( linter._errors.length ).to.equal( 1 );
-			expect( linter._errors[ 0 ].message ).to.equal( 'Invalid @extends reference: module:abc/SomeOtherClass.' );
+			expect( validator.errors.length ).to.equal( 1 );
+			expect( validator.errors[ 0 ].message ).to.equal( 'Invalid @extends reference: module:abc/SomeOtherClass.' );
 		} );
 	} );
 
 	describe( 'linting events', () => {
 		it( 'should assert that references in `fires` exist (positive)', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				kind: 'class',
 				longname: 'module:abc/SomeClass',
 				meta: { fileName: '', path: '' },
 				fires: [ 'someEvent' ]
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintEvents();
+			validator._validateEvents();
 
-			expect( linter._errors.length ).to.be.equal( 1 );
+			expect( validator.errors.length ).to.be.equal( 1 );
 		} );
 
 		it( 'should assert that references in `fires` exist (negative)', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				kind: 'class',
 				longname: 'module:abc/SomeClass',
 				meta: { fileName: '', path: '' },
@@ -389,15 +390,15 @@ describe( 'Linter plugin', () => {
 			}, {
 				kind: 'event',
 				longname: 'module:abc/SomeClass#event:someEvent'
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintEvents();
+			validator._validateEvents();
 
-			expect( linter._errors.length ).to.be.equal( 0 );
+			expect( validator.errors.length ).to.be.equal( 0 );
 		} );
 
 		it( 'should assert that references in `fires` are only events', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				kind: 'class',
 				longname: 'module:abc/SomeClass',
 				meta: { fileName: '', path: '' },
@@ -405,16 +406,16 @@ describe( 'Linter plugin', () => {
 			}, {
 				kind: 'not-event',
 				longname: 'module:abc/SomeClass#event:someEvent'
-			} ], getTestedModules() );
+			} ] );
 
-			linter._lintEvents();
+			validator._validateEvents();
 
-			expect( linter._errors.length ).to.be.equal( 1 );
+			expect( validator.errors.length ).to.be.equal( 1 );
 		} );
 	} );
 
-	it( '_lintModuleDocumentedExports() - show errors', () => {
-		const linter = new DocletValidator( [ {
+	it( '_validateModuleDocumentedExports() - show errors', () => {
+		const validator = new DocletValidator( [ {
 			kind: 'member',
 			scope: 'inner',
 			memberof: 'module:utils/emittermixin',
@@ -423,28 +424,28 @@ describe( 'Linter plugin', () => {
 			kind: 'module',
 			longname: 'module:utils/emittermixin',
 			meta: { fileName: '', path: '' }
-		} ], getTestedModules() );
+		} ] );
 
-		linter._lintModuleDocumentedExports();
+		validator._validateModuleDocumentedExports();
 
-		expect( linter._errors.length ).to.be.equal( 1 );
+		expect( validator.errors.length ).to.be.equal( 1 );
 	} );
 
-	it( '_lintModuleDocumentedExports()', () => {
-		const linter = new DocletValidator( [ {
+	it( '_validateModuleDocumentedExports()', () => {
+		const validator = new DocletValidator( [ {
 			kind: 'member',
 			scope: 'inner',
 			memberof: 'module:utils/emittermixin~EmitterMixin',
 			meta: { fileName: '', path: '' }
-		} ], getTestedModules() );
+		} ] );
 
-		linter._lintModuleDocumentedExports();
+		validator._validateModuleDocumentedExports();
 
-		expect( linter._errors.length ).to.be.equal( 0 );
+		expect( validator.errors.length ).to.be.equal( 0 );
 	} );
 
 	it( 'lintSeeReferences()', () => {
-		const linter = new DocletValidator( [ {
+		const validator = new DocletValidator( [ {
 			kind: 'class',
 			longname: 'module:utils/emittermixin~EmitterMixin',
 			see: [
@@ -455,29 +456,29 @@ describe( 'Linter plugin', () => {
 			kind: 'member',
 			longname: 'module:utils/emittermixin~EmitterMixin#constructor',
 			meta: { fileName: '', path: '' }
-		} ], getTestedModules() );
+		} ] );
 
-		linter._lintSeeReferences();
+		validator._validateSeeReferences();
 
-		expect( linter._errors.length ).to.be.equal( 0 );
+		expect( validator.errors.length ).to.be.equal( 0 );
 	} );
 
 	it( 'lintSeeReferences() - invalid', () => {
-		const linter = new DocletValidator( [ {
+		const validator = new DocletValidator( [ {
 			kind: 'class',
 			see: [
 				'module:utils/emittermixin~EmitterMixin'
 			],
 			meta: { fileName: '', path: '' }
-		} ], getTestedModules() );
+		} ] );
 
-		linter._lintSeeReferences();
+		validator._validateSeeReferences();
 
-		expect( linter._errors.length ).to.be.equal( 1 );
+		expect( validator.errors.length ).to.be.equal( 1 );
 	} );
 
-	it( '_lintTypedefs()', () => {
-		const linter = new DocletValidator( [ {
+	it( '_validateTypedefs()', () => {
+		const validator = new DocletValidator( [ {
 			type: 'typedef',
 			properties: [ {
 				type: {
@@ -488,15 +489,15 @@ describe( 'Linter plugin', () => {
 				}
 			} ],
 			meta: { fileName: '', path: '' }
-		} ], getTestedModules() );
+		} ] );
 
-		linter._lintTypedefs();
+		validator._validateTypedefs();
 
-		expect( linter._errors.length ).to.be.equal( 0 );
+		expect( validator.errors.length ).to.be.equal( 0 );
 	} );
 
-	it( '_lintTypedefs() - invalid', () => {
-		const linter = new DocletValidator( [ {
+	it( '_validateTypedefs() - invalid', () => {
+		const validator = new DocletValidator( [ {
 			type: 'typedef',
 			properties: [ {
 				type: {
@@ -506,102 +507,94 @@ describe( 'Linter plugin', () => {
 				}
 			} ],
 			meta: { fileName: '', path: '' }
-		} ], getTestedModules() );
+		} ] );
 
-		linter._lintTypedefs();
+		validator._validateTypedefs();
 
-		expect( linter._errors.length ).to.be.equal( 1 );
+		expect( validator.errors.length ).to.be.equal( 1 );
 	} );
 
 	describe( '_isCorrectType', () => {
 		it( 'Should validate union type', () => {
-			const linter = new DocletValidator( [] );
-			const result = linter._isCorrectType( 'String|Array' );
+			const validator = new DocletValidator( [] );
+			const result = validator._isCorrectType( 'String|Array' );
 
 			expect( result ).to.be.equal( true );
 		} );
 
 		it( 'Should validate generic type (Array.<Node>)', () => {
-			const linter = new DocletValidator( [] );
-			const result = linter._isCorrectType( 'Array.<Node>' );
+			const validator = new DocletValidator( [] );
+			const result = validator._isCorrectType( 'Array.<Node>' );
 
 			expect( result ).to.be.equal( true );
 		} );
 
 		it( 'Should validate generic union type', () => {
-			const linter = new DocletValidator( [] );
-			const result = linter._isCorrectType( 'Array.<Object|String>' );
+			const validator = new DocletValidator( [] );
+			const result = validator._isCorrectType( 'Array.<Object|String>' );
 
 			expect( result ).to.be.equal( true );
 		} );
 
 		it( 'Should validate union type with parenthesis', () => {
-			const linter = new DocletValidator( [] );
-			const result = linter._isCorrectType( 'Array.<(Object|String)>' );
+			const validator = new DocletValidator( [] );
+			const result = validator._isCorrectType( 'Array.<(Object|String)>' );
 
 			expect( result ).to.be.equal( true );
 		} );
 
 		it( 'Should validate incorrect union type', () => {
-			const linter = new DocletValidator( [] );
-			const result = linter._isCorrectType( 'Array.<(Object|IncorrectType)>' );
+			const validator = new DocletValidator( [] );
+			const result = validator._isCorrectType( 'Array.<(Object|IncorrectType)>' );
 
 			expect( result ).to.be.equal( false );
 		} );
 
 		it( 'Should validate full path to class', () => {
-			const linter = new DocletValidator( [ {
+			const validator = new DocletValidator( [ {
 				longname: 'module:core/editor~Editor',
 				kind: 'function',
 				meta: { fileName: '', path: '' }
-			} ], getTestedModules() );
+			} ] );
 
-			const result = linter._isCorrectType( 'Array.<module:core/editor~Editor>' );
+			const result = validator._isCorrectType( 'Array.<module:core/editor~Editor>' );
 
 			expect( result ).to.be.equal( true );
 		} );
 
 		it( 'Should validate generic type (Array)', () => {
-			const linter = new DocletValidator( [] );
-			const result = linter._isCorrectType( 'Array.<*>' );
+			const validator = new DocletValidator( [] );
+			const result = validator._isCorrectType( 'Array.<*>' );
 
 			expect( result ).to.be.equal( true );
 		} );
 
 		it( 'Should validate invalid generic type', () => {
-			const linter = new DocletValidator( [] );
-			const result = linter._isCorrectType( 'String.<Boolean>' );
+			const validator = new DocletValidator( [] );
+			const result = validator._isCorrectType( 'String.<Boolean>' );
 
 			expect( result ).to.be.equal( false );
 		} );
 
 		it( 'Should validate string literal type', () => {
-			const linter = new DocletValidator( [] );
-			const result = linter._isCorrectType( '\'forward\'' );
+			const validator = new DocletValidator( [] );
+			const result = validator._isCorrectType( '\'forward\'' );
 
 			expect( result ).to.be.equal( true );
 		} );
 
 		it( 'Should validate generic type with more than one template type', () => {
-			const linter = new DocletValidator( [] );
-			const result = linter._isCorrectType( 'Object.<String, Number | Boolean>' );
+			const validator = new DocletValidator( [] );
+			const result = validator._isCorrectType( 'Object.<String, Number | Boolean>' );
 
 			expect( result ).to.be.equal( true );
 		} );
 
 		it( 'Should accept spaces', () => {
-			const linter = new DocletValidator( [] );
-			const result = linter._isCorrectType( ' String | Number | Boolean ' );
+			const validator = new DocletValidator( [] );
+			const result = validator._isCorrectType( ' String | Number | Boolean ' );
 
 			expect( result ).to.be.equal( true );
 		} );
 	} );
 } );
-
-function getTestedModules() {
-	return [
-		'module:utils',
-		'module:engine',
-		'module:ckeditor5'
-	];
-}

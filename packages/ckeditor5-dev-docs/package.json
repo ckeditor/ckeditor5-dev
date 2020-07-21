@@ -7,10 +7,9 @@
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "^22.0.0",
     "@ckeditor/jsdoc-plugins": "^22.0.0",
-    "jsdoc": "ckeditor/jsdoc#node12",
-    "map-stream": "^0.0.7",
-    "tmp": "^0.2.1",
-    "vinyl-fs": "^3.0.3"
+    "fast-glob": "^3.2.4",
+    "jsdoc": "ckeditor/jsdoc#fixed-trailing-comment-doclets",
+    "tmp": "^0.2.1"
   },
   "engines": {
     "node": ">=12.0.0",

@@ -44,20 +44,13 @@ function addMissingDoclets( doclets ) {
 	 * @type {Array.<Object>}
 	 **/
 	const options = [
-		// Missing statics inherited from parent classes.
+		// Missing inherited items:
+		// - statics methods
+		// - methods
+		// - properties
+		// - events
 		{
-			relation: 'augmentsNested',
-			filter: {
-				scope: 'static'
-			}
-		},
-
-		// Missing events inherited from parent classes.
-		{
-			relation: 'augmentsNested',
-			filter: {
-				kind: 'event'
-			}
+			relation: 'augmentsNested'
 		},
 
 		// Everything mixed, except existing mixed items.
@@ -72,9 +65,12 @@ function addMissingDoclets( doclets ) {
 		}
 	];
 
+	const docletMap = createDocletMap( docletCollection );
+
 	for ( const extensibleDoclet of extensibleDoclets ) {
 		for ( const option of options ) {
 			const missingDocletsData = getMissingDocletsData(
+				docletMap,
 				docletCollection,
 				extensibleDoclet,
 				option
@@ -90,8 +86,63 @@ function addMissingDoclets( doclets ) {
 		docletToIgnore.ignore = true;
 	}
 
+	doclets = doclets.filter( doclet => !doclet.ignore );
+
+	const docletToAddMap = new Map(
+		newDocletsToAdd
+			.filter( d => !d.ignore )
+			.map( d => [ d.longname, d ] )
+	);
+
+	const existingDoclets = new Map( doclets.map( d => [ d.longname, d ] ) );
+
+	// The code here is hackish...
+	// We need to smartly determine which doclet should be get from the native JSDoc inheritance
+	// and which should be added from our custom inheritance mechanism.
 	return [
-		...doclets,
-		...newDocletsToAdd
+		...doclets.filter( doclet => {
+			const willDocletBeAdded = docletToAddMap.has( doclet.longname );
+
+			// If the doclet has inherited property don't output it
+			// as it should be replaced by the parent's class/interface/mixin method doclet.
+			if ( willDocletBeAdded && doclet.inheritdoc === undefined ) {
+				return false;
+			}
+
+			return true;
+		} ),
+
+		// Do not output doclets that have its own documentation.
+		...Array.from( docletToAddMap.values() ).filter( doclet => {
+			const existingDoclet = existingDoclets.get( doclet.longname );
+
+			if ( !existingDoclet ) {
+				return true;
+			}
+
+			if ( existingDoclet.inheritdoc === undefined ) {
+				return true;
+			}
+
+			return false;
+		} )
 	];
+}
+
+/**
+ * Creates a <longname, doclet> map.
+ *
+ * @param {DocletCollection} doclets
+ * @returns {Object}
+ */
+function createDocletMap( doclets ) {
+	const docletMap = {};
+
+	for ( const doclet of doclets.getAll() ) {
+		if ( !docletMap[ doclet.longname ] ) {
+			docletMap[ doclet.longname ] = doclet;
+		}
+	}
+
+	return docletMap;
 }

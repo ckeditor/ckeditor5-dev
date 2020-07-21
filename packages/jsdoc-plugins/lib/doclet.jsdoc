@@ -18,7 +18,8 @@
  *
  * @property {String} memberof Where the doclet belongs to (parent of the symbol).
  *
- * @property {'class'|'interface'|'mixin'|'function'|'typedef'|'event'|'member'|'constant'|'module'} kind The kind of the doclet's symbol.
+ * @property {'class'|'interface'|'mixin'|'function'|'typedef'|'event'|'member'|'constant'|'module'|'error'} kind
+ * The kind of the doclet's symbol.
  *
  * @property {Boolean} [ignore] `true` for internal doclets which should not be published
  *
@@ -39,19 +40,25 @@
  *
  * @property {String} [description] API Comment wrapped in HTML tags.
  *
+ * @property {String} [classdesc] Description for the class.
+ *
+ * @property {String[]} [see] `@see {}` tag contents.
+ *
  * @property {Array.<Object>} [params] Event and function params.
  *
- * @property {'instance'|'inner'|'static'} [scope]
+ * @property {'instance'|'inner'|'static'|'global'} [scope]
  *
  * @property {Array.<String>} [fires] An array of events that a method or a property can fire.
  *
- * @property {Object} meta Doclet's metadata - filename, line number, etc.
+ * @property {{ filename: String; lineno: Number; path: String }} meta Doclet's metadata - filename, line number, etc.
  *
  * @property {Array.<String>} [augments] An array of classes that the doclet's symbol extends.
  * Applies for `@class`, `@mixin`, `@interface`.
  *
  * @property {Array.<String>} [mixes] An array of mixins that the doclet's symbol mixes.
  * Applies for `@class` and `@mixin`.
+ *
+ * @property {Boolean} [mixed] `true` when a property or method comes from a mixin.
  *
  * @property {Array.<String>} [implements] An array of interfaces that the doclet's symbol implements.
  * Applies for `@class` and `@mixin`.

@@ -1,0 +1,17 @@
+/**
+ * @module foo
+ */
+
+/**
+ * Function `foo`.
+ */
+export default function foo() {
+	bar();
+}
+
+/**
+ * Helper function `bar`.
+ */
+export function bar() {
+
+}

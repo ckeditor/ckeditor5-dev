@@ -5,6 +5,7 @@
 
 'use strict';
 
+/** @type {Array.<Doclet>} */
 module.exports = [
 	{
 		name: 'mixinA',

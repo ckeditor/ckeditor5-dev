@@ -1,0 +1,30 @@
+/**
+ * @module foo
+ */
+
+/**
+ * The `Foo` class documentation.
+ */
+export default class Foo {
+	/**
+	 * Fires two events.
+	 *
+	 * @fires inside
+	 * @fires outside
+	 */
+	bar() {
+
+	}
+
+	/**
+	 * An event documented inside the class.
+	 *
+	 * @event inside
+	 */
+}
+
+/**
+ * An event documented outside the class.
+ *
+ * @event outside
+ */

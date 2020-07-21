@@ -14,17 +14,17 @@ module.exports = getMissingDocletsData;
  * It returns also doclets which should be ignored as no longer necessary.
  * This function requires input to be preprocessed by the `buildRelations()` function.
  *
+ * @param {Map.<String,Doclet>} docletMap
  * @param {DocletCollection} docletCollection
  * @param {Doclet} interfaceClassOrMixinDoclet Doclet representing an entity which might have some inherited members missing.
  * @param {Options} options
  * @returns {{newDoclets: Array.<Doclet>, docletsWhichShouldBeIgnored: Array.<Doclet>}}
  */
-function getMissingDocletsData( docletCollection, interfaceClassOrMixinDoclet, options ) {
+function getMissingDocletsData( docletMap, docletCollection, interfaceClassOrMixinDoclet, options ) {
 	const newDoclets = [];
 	const docletsWhichShouldBeIgnored = [];
 
 	const docletsToAdd = getDocletsToAdd( docletCollection, interfaceClassOrMixinDoclet, options );
-	const docletMap = createDocletMap( docletCollection );
 
 	for ( const docletToAdd of docletsToAdd ) {
 		const clonedDoclet = cloneDeep( docletToAdd );
@@ -75,41 +75,47 @@ function getMissingDocletsData( docletCollection, interfaceClassOrMixinDoclet, o
  * @param {DocletCollection} docletCollection
  * @param {Doclet} childDoclet
  * @param {Options} options
+ * @returns {Array.<Doclet>}
  */
 function getDocletsToAdd( docletCollection, childDoclet, options ) {
 	// Longnames of doclets which are related ( extended, mixed, implemented ) to childDoclet.
 	const ancestors = childDoclet[ options.relation ] || [];
 
-	return ancestors.reduce( ( docletsToAdd, longname ) => {
-		return [
-			...docletsToAdd,
-			...docletCollection.get( `memberof:${ longname }` ).filter( shouldDocletBeAdded )
-		];
-	}, [] );
+	/** @type {Array.<Doclet>} */
+	const docletsToAdd = [];
 
-	/** @param {Doclet} doclet */
-	function shouldDocletBeAdded( doclet ) {
-		// Filter out ignored, inherited, undocumented.
-		if (
-			doclet.ignore ||
-			doclet.undocumented ||
-			typeof doclet.inheritdoc == 'string'
-		) {
-			return false;
-		}
-
-		for ( const key of Object.keys( options.filter || {} ) ) {
-			if ( doclet[ key ] !== options.filter[ key ] ) {
-				return false;
-			}
-		}
-
-		return true;
+	for ( const ancestor of ancestors ) {
+		docletsToAdd.push(
+			...docletCollection
+				.get( `memberof:${ ancestor }` )
+				.filter( doclet => shouldDocletBeAdded( doclet, options ) )
+		);
 	}
+
+	return docletsToAdd;
 }
 
-function isNonEmptyArray( obj ) {
-	return Array.isArray( obj ) && obj.length > 0;
+/**
+ * @param {Doclet} doclet
+ * @param {Object} options
+ */
+function shouldDocletBeAdded( doclet, options ) {
+	// Filter out ignored, inherited, undocumented.
+	if (
+		doclet.ignore ||
+		doclet.undocumented ||
+		typeof doclet.inheritdoc == 'string'
+	) {
+		return false;
+	}
+
+	for ( const key of Object.keys( options.filter || {} ) ) {
+		if ( doclet[ key ] !== options.filter[ key ] ) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 /**
@@ -128,7 +134,7 @@ function getLongnameForNewDoclet( parentDoclet, childDoclet ) {
 /**
  * Gets property which should be added to the new doclet (e.g. `inherited` or `mixed`).
  *
- * @param {DocletMap} docletMap
+ * @param {Map.<String,Doclet>} docletMap
  * @param {Doclet} childDoclet
  * @param {Doclet} memberDoclet
  * @param {'augmentsNested'|'mixesNested'|'implementsNested'} relation
@@ -149,21 +155,17 @@ function getRelationProperty( docletMap, childDoclet, memberDoclet, relation ) {
 	let isMixed = false;
 
 	// If doclet is a child of a mixin, it's 'mixed'. Else if it's a child of another class, it's 'inherited'.
-	if ( isNonEmptyArray( memberDocletParent.descendants ) ) {
-		for ( const longname of memberDocletParent.descendants ) {
-			const doclet = docletMap[ longname ];
+	for ( const longname of memberDocletParent.descendants || [] ) {
+		const doclet = docletMap[ longname ];
 
-			if ( doclet && doclet.kind === 'mixin' ) {
-				if ( isNonEmptyArray( doclet.descendants ) &&
-					doclet.descendants.indexOf( childDoclet.longname ) !== -1 ) {
-					isMixed = true;
-				}
-			} else if ( doclet && doclet.kind === 'class' ) {
-				if ( isNonEmptyArray( doclet.descendants ) &&
-					doclet.descendants.indexOf( childDoclet.longname ) !== -1 ) {
-					isInherited = true;
-				}
-			}
+		if ( !doclet || !doclet.descendants || !doclet.descendants.includes( childDoclet.longname ) ) {
+			continue;
+		}
+
+		if ( doclet.kind === 'mixin' ) {
+			isMixed = true;
+		} else if ( doclet.kind === 'class' ) {
+			isInherited = true;
 		}
 	}
 
@@ -188,24 +190,6 @@ function doAllParentsExplicitlyInherit( doclets ) {
 	}
 
 	return true;
-}
-
-/**
- * Creates a <longname, doclet> map.
- *
- * @param {DocletCollection} doclets
- * @returns {Object}
- */
-function createDocletMap( doclets ) {
-	const docletMap = {};
-
-	for ( const doclet of doclets.getAll() ) {
-		if ( !docletMap[ doclet.longname ] ) {
-			docletMap[ doclet.longname ] = doclet;
-		}
-	}
-
-	return docletMap;
 }
 
 /**
