@@ -1,6 +1,52 @@
 Changelog
 =========
 
+## [22.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v21.0.0...v22.0.0) (2020-07-20)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Task `generateChangelogForMonoRepository()` will generate the changelog uses the same version for all packages.
+
+### Features
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added `sinon-chai` to automated tests. Closes https://github.com/ckeditor/ckeditor5/issues/7456. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e82040e6a17e87bae6b450df29e5ac7084b5e5be))
+
+### Bug fixes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `getCommit()` util will return a proper array with commits if the release branch in the project is other than `master`. Due to `--first-parent` flag which is used for collecting the commits, when the release branch is other than `master`, commits made on `master` could not be collected directly from the branch. Now those commits are collected in two ranges: from the last tag to the [base commit](https://git-scm.com/docs/git-merge-base) and from the base commit to HEAD and merged together. Closes [ckeditor/ckeditor5#7492](https://github.com/ckeditor/ckeditor5/issues/7492). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e18db62d33c11dbe2a98a845e46cbde73186fa9d))
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Scoped breaking changes notes won't be duplicated in the changelog. Closes [ckeditor/ckeditor5#7495](https://github.com/ckeditor/ckeditor5/issues/7495). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e4eefa669bce9a8d1ccca6ce1c92914a17151825))
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Commit and note groups should be sorted properly. Closes [ckeditor/ckeditor5#7496](https://github.com/ckeditor/ckeditor5/issues/7496). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/a08020cbb29bf62cabc28a71926278abe32f54bf))
+
+### Other changes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `generateChangelogForMonoRepository()` task supports `options.releaseBranch` that is passed directly to the `getCommit()` util. See [ckeditor/ckeditor5#7492](https://github.com/ckeditor/ckeditor5/issues/7492). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e18db62d33c11dbe2a98a845e46cbde73186fa9d))
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The changelog generator for mono repository will use the same version for all packages. On the screen, a user will see all changes: `MAJOR BREAKING CHANGES`, `MINOR BREAKING CHANGES`, and all commits since the last release. The user must review it and provide the version. Closes [ckeditor/ckeditor5#7323](https://github.com/ckeditor/ckeditor5/issues/7323). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/4036b6e359238db764be695f7491e7e3e85901bd))
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Merge commits between `stable/release/master` branches will be ignored when generating the changelog, to reduce the noise. Closes [ckeditor/ckeditor5#7489](https://github.com/ckeditor/ckeditor5/issues/7489). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/cedc53f350aef74621f80f8a2e953d18892f5c52))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Major releases (contain major breaking changes):
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v21.0.0 => v22.0.0
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v21.0.0 => v22.0.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v21.0.0 => v22.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v21.0.0 => v22.0.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v21.0.0 => v22.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v21.0.0 => v22.0.0
+</details>
+
+
 ## [21.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v20.2.1...v21.0.0) (2020-06-22)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
