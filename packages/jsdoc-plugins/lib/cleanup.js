@@ -24,7 +24,7 @@ exports.handlers = {
 			delete doclet.overrides;
 		}
 
-		/** @type {Map.<String,Doclet[]>} */
+		/** @type {Map.<String,Array.<Doclet>>} */
 		const docletMap = new Map();
 
 		for ( const doclet of e.doclets ) {
