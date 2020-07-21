@@ -75,7 +75,7 @@ function getMissingDocletsData( docletMap, docletCollection, interfaceClassOrMix
  * @param {DocletCollection} docletCollection
  * @param {Doclet} childDoclet
  * @param {Options} options
- * @returns {Doclet[]}
+ * @returns {Array.<Doclet>}
  */
 function getDocletsToAdd( docletCollection, childDoclet, options ) {
 	// Longnames of doclets which are related ( extended, mixed, implemented ) to childDoclet.
@@ -86,7 +86,8 @@ function getDocletsToAdd( docletCollection, childDoclet, options ) {
 
 	for ( const ancestor of ancestors ) {
 		docletsToAdd.push(
-			...docletCollection.get( `memberof:${ ancestor }` )
+			...docletCollection
+				.get( `memberof:${ ancestor }` )
 				.filter( doclet => shouldDocletBeAdded( doclet, options ) )
 		);
 	}

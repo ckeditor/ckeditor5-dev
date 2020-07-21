@@ -11,7 +11,7 @@ const { isEqual } = require( 'lodash' );
  * This function is supposed to fix both constructor and class doclets.
  *
  * JSDoc completely messes up doclets for constructors and classes.
- * They are duplicated (where only one contains valuable data), has invalid descriptions, etc.
+ * They are duplicated (where the only one contains valuable data), have invalid descriptions, etc.
  *
  * @param {Doclet[]} doclets
  */

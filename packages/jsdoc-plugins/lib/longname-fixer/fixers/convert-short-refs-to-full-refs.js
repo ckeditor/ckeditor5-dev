@@ -7,7 +7,9 @@
 
 const assign = Object.assign;
 
-/** @param {Doclet[]} doclets */
+/**
+ * @param {Array.<Doclet>} doclets 
+ */
 function convertShortRefsToFullRefs( doclets ) {
 	addMissingModulePart( doclets );
 	convertShortRefsInLongnameAndMemberof( doclets );
