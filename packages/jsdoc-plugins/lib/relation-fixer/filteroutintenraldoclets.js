@@ -11,11 +11,7 @@
  * @param {Array.<Doclet>} doclets
  */
 module.exports = function filterOutInternalDoclets( doclets ) {
-	doclets = doclets
+	return doclets
 		.filter( doclet => !doclet.ignore )
 		.filter( doclet => doclet.memberof != '<anonymous>' );
-
-	// return filterOutReExportedSymbols( doclets );
-
-	return doclets;
 };

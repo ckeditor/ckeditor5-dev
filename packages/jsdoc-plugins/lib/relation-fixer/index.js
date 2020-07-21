@@ -24,11 +24,11 @@ exports.handlers = {
  * Revert missing doclets that were marked as ignored.
  * Remove ignored doclets.
  *
- * @param {Doclet[]} doclets
+ * @param {Array.<Doclet>} doclets
  */
 function precleanInheritance( doclets ) {
 	// Group doclet by longnames
-	/** @type {Map.<String,Doclet[]>} */
+	/** @type {Map.<String,Array.<Doclet>>} */
 	const docletMap = new Map();
 
 	for ( const doclet of doclets ) {

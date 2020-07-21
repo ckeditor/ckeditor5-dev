@@ -81,7 +81,7 @@ function getDocletsToAdd( docletCollection, childDoclet, options ) {
 	// Longnames of doclets which are related ( extended, mixed, implemented ) to childDoclet.
 	const ancestors = childDoclet[ options.relation ] || [];
 
-	/** @type {Doclet[]} */
+	/** @type {Array.<Doclet>} */
 	const docletsToAdd = [];
 
 	for ( const ancestor of ancestors ) {

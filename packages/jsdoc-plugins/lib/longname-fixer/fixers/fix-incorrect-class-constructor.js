@@ -13,7 +13,7 @@ const { isEqual } = require( 'lodash' );
  * JSDoc completely messes up doclets for constructors and classes.
  * They are duplicated (where the only one contains valuable data), have invalid descriptions, etc.
  *
- * @param {Doclet[]} doclets
+ * @param {Array.<Doclet>} doclets
  */
 module.exports = function fixIncorrectClassConstructor( doclets ) {
 	const knownConstructorDoclets = new Set();
@@ -64,9 +64,5 @@ module.exports = function fixIncorrectClassConstructor( doclets ) {
 		}
 
 		knownDoclets.set( doclet.longname, doclet );
-
-		// if ( doclet.inheritdoc === '' ) {
-		// 	doclet.ignore = true;
-		// }
 	}
 };

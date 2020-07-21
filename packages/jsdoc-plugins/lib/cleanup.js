@@ -66,11 +66,6 @@ exports.handlers = {
 					);
 				}
 
-				// Filter out private doclet classes.
-				// if ( doclet.kind === 'class' && doclet.access === 'private' ) {
-				// 	return false;
-				// }
-
 				return true;
 			} );
 	}

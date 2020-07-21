@@ -78,7 +78,7 @@ function extendTypedef( typedef, typedefDoclets ) {
 /**
  * Creates and returns doclets for `@typedef` properties.
  *
- * @param {Doclet[]} typedefDoclets
+ * @param {Array.<Doclet>} typedefDoclets
  */
 function createTypedefPropertyDoclets( typedefDoclets ) {
 	const typedefPropertyDoclets = [];

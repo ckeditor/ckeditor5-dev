@@ -8,7 +8,7 @@
 const assign = Object.assign;
 
 /**
- * @param {Array.<Doclet>} doclets 
+ * @param {Array.<Doclet>} doclets
  */
 function convertShortRefsToFullRefs( doclets ) {
 	addMissingModulePart( doclets );
@@ -18,7 +18,7 @@ function convertShortRefsToFullRefs( doclets ) {
 	convertShortRefsInLinks( doclets );
 }
 
-/** @param {Doclet[]} doclets */
+/** @param {Array.<Doclet>} doclets */
 function addMissingModulePart( doclets ) {
 	/** @type {Record<String,Doclet>} */
 	const fileNameModuleDoclets = {};
@@ -47,7 +47,7 @@ function addMissingModulePart( doclets ) {
 	}
 }
 
-/** @param {Doclet[]} doclets */
+/** @param {Array.<Doclet>} doclets */
 function convertShortRefsInLongnameAndMemberof( doclets ) {
 	const fileDoclets = groupDocletsByFiles( doclets );
 
@@ -85,7 +85,7 @@ function convertShortRefsInLongnameAndMemberof( doclets ) {
 	}
 }
 
-/** @param {Doclet[]} doclets */
+/** @param {Array.<Doclet>} doclets */
 function convertShortRefsInFireTag( doclets ) {
 	for ( const doclet of doclets ) {
 		if ( !doclet.fires ) {
@@ -110,7 +110,7 @@ function convertShortRefsInFireTag( doclets ) {
 	}
 }
 
-/** @param {Doclet[]} doclets */
+/** @param {Array.<Doclet>} doclets */
 function convertShortRefsInSeeTag( doclets ) {
 	/** @type {Doclet} */
 	let lastInterfaceOrClass;
@@ -185,10 +185,10 @@ function convertShortRefsInLinks( doclets ) {
 }
 
 /**
- * @param {Doclet[]} doclets
+ * @param {Array.<Doclet>} doclets
  */
 function groupDocletsByFiles( doclets ) {
-	/** @type {Record.<String,Doclet[]>}*/
+	/** @type {Record.<String,Array.<Doclet>>}*/
 	const files = {};
 
 	for ( const doclet of doclets ) {
@@ -205,7 +205,7 @@ function groupDocletsByFiles( doclets ) {
 /**
  * Finds within the same file the parent doclet (`class`, `interface` or `mixin`).
  *
- * @param {Doclet[]} fileDoclets
+ * @param {Array.<Doclet>} fileDoclets
  * @param {Doclet} doclet
 */
 function getCorrespondingParent( fileDoclets, doclet ) {
