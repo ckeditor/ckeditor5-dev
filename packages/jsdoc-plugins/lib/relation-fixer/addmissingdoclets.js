@@ -96,6 +96,9 @@ function addMissingDoclets( doclets ) {
 
 	const existingDoclets = new Map( doclets.map( d => [ d.longname, d ] ) );
 
+	// The code here is hackish...
+	// We need to smartly determine which doclet should be get from the native JSDoc inheritance
+	// and which should be added from our custom inheritance mechanism.
 	return [
 		...doclets.filter( doclet => {
 			const willDocletBeAdded = docletToAddMap.has( doclet.longname );
@@ -108,8 +111,9 @@ function addMissingDoclets( doclets ) {
 
 			return true;
 		} ),
-		// Do not output doclets for doclets having its own documentation.
-		...[ ...docletToAddMap.values() ].filter( doclet => {
+
+		// Do not output doclets that have its own documentation.
+		...Array.from( docletToAddMap.values() ).filter( doclet => {
 			const existingDoclet = existingDoclets.get( doclet.longname );
 
 			if ( !existingDoclet ) {
