@@ -23,15 +23,17 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @param {Boolean} [options.compileAllLanguages] When set to `true` languages will be found at runtime.
 	 * @param {Boolean} [options.addMainLanguageTranslationsToAllAssets] When set to `true` the service will not complain
 	 * about multiple JS assets and will output translations for the main language to all found assets.
-	 * @param {Boolean} [buildAllTranslationsToSeparateFiles] When set to `true` the service will output all translations
+	 * @param {Boolean} [options.buildAllTranslationsToSeparateFiles] When set to `true` the service will output all translations
 	 * to separate files.
+	 * @param {String|Function|RegExp} [options.translationsOutputFile]
 	 */
 	constructor( {
 		mainLanguage,
 		additionalLanguages = [],
 		compileAllLanguages = false,
 		addMainLanguageTranslationsToAllAssets = false,
-		buildAllTranslationsToSeparateFiles = false
+		buildAllTranslationsToSeparateFiles = false,
+		translationsOutputFile
 	} ) {
 		super();
 
@@ -109,6 +111,8 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		 * @type {Set.<String>}
 		 */
 		this._foundMessageIds = new Set();
+
+		this._translationsOutputFile = translationsOutputFile;
 	}
 
 	/**
@@ -195,20 +199,34 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 		let bundledLanguage = this._mainLanguage;
 
-		if ( this._addMainLanguageTranslationsToAllAssets ) {
-			console.log( true );
+		if ( compilationAssetNames.length === 0 ) {
+			return [];
 		}
 
-		if ( compilationAssetNames.length == 0 && !this._buildAllTranslationsToSeparateFiles ) {
-			this.emit( 'error', [
-				'No JS asset has been found during the compilation. ' +
-				'You should add translation assets directly to the application from the `translations` directory. ' +
-				'If that was intentional use the `buildAllTranslationsToSeparateFiles` option to get rif of the error.'
-			].join( '\n' ) );
+		if ( this._translationsOutputFile ) {
+			// Assets where translations for the main language will be added.
 
-			compilationAssetNames = [];
-			bundledLanguage = null;
-		} else if ( this._buildAllTranslationsToSeparateFiles ) {
+			const assetName = match( this._translationsOutputFile, compilationAssetNames );
+
+			if ( !assetName && typeof this._translationsOutputFile !== 'string' ) {
+				throw new Error( 'No file was matching the `translationsOutputFile` option.' );
+			}
+
+			const translationsBundle = this._getTranslationAssets( outputDirectory, Array.from( this._languages ) )
+				.map( asset => asset.outputBody )
+				.join( '' );
+
+			if ( typeof this._translationsOutputFile === 'string' ) {
+				return [ {
+					outputBody: translationsBundle,
+					outputPath: assetName || this._translationsOutputFile,
+					// Concat with existing asset if it exists.
+					shouldConcat: compilationAssetNames.some( assetName => assetName === this._translationsOutputFile )
+				} ];
+			}
+		}
+
+		if ( this._buildAllTranslationsToSeparateFiles ) {
 			bundledLanguage = null;
 			compilationAssetNames = [];
 		} else if ( compilationAssetNames.length > 1 && !this._addMainLanguageTranslationsToAllAssets ) {
@@ -305,7 +323,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 *
 	 * @private
 	 * @param {String} language The target language
-	 * @param {String} sortedMessageIds An array of sorted message ids.
+	 * @param {String[]} sortedMessageIds An array of sorted message ids.
 	 * @returns {Object.<String,String|String[]>}
 	 */
 	_getTranslations( language, sortedMessageIds ) {
@@ -368,3 +386,27 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		return path.join( pathToPackage, 'lang', 'translations' );
 	}
 };
+
+/**
+ *
+ * @param {String|((name: string) => boolean)|RegExp} predicate
+ * @param {String[]} options
+ */
+function match( predicate, options ) {
+	if ( typeof predicate === 'function' ) {
+		return options.find( predicate );
+	}
+
+	if ( typeof predicate === 'string' ) {
+		return options.find( option => predicate === option );
+	}
+
+	if ( predicate instanceof RegExp ) {
+		return options.find( option => predicate.test( option ) );
+	}
+
+	throw new Error(
+		'The CKEditorWebpackPlugin matching function got an unsupported type of a predicate.' +
+		`Got ${ predicate } (${ typeof predicate } ) where supported values are only 'string', 'regexp' and 'function'`
+	);
+}
