@@ -113,7 +113,7 @@ module.exports = class CKEditorWebpackPlugin {
  * @property {Boolean} [verbose] An option that make this plugin log all warnings into the console.
  * @property {Boolean} [addMainLanguageTranslationsToAllAssets] An option that allows outputting translations to more than one
  * JS asset.
- * @property {String} corePackageSampleResourcePath
+ * @property {String} [corePackageSampleResourcePath] TODO
  * @property {Boolean} [buildAllTranslationsToSeparateFiles] An option that makes all translations output to separate files.
  * @property {String} [sourceFilesPattern] An option that allows override the default pattern for CKEditor 5 source files.
  * @property {String} [packageNamesPattern] An option that allows override the default pattern for CKEditor 5 package names.

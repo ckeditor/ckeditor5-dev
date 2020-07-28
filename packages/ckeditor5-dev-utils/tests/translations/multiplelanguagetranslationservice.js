@@ -12,7 +12,7 @@ const sinon = require( 'sinon' );
 const path = require( 'path' );
 const proxyquire = require( 'proxyquire' );
 
-describe( 'translations', () => {
+describe.only( 'translations', () => {
 	describe( 'MultipleLanguageTranslationService', () => {
 		let MultipleLanguageTranslationService, stubs, filesAndDirs, fileContents, dirContents;
 		let window;
@@ -441,7 +441,7 @@ describe( 'translations', () => {
 				expect( window.CKEDITOR_TRANSLATIONS.pl.getPluralForm( 103 ) ).to.equal( 1 );
 			} );
 
-			it( 'should log an error if no JS assets was passed', () => {
+			it( 'should do nothing when no JS assets was passed', () => {
 				const translationService = new MultipleLanguageTranslationService( {
 					mainLanguage: 'pl',
 					additionalLanguages: [ 'en' ]
@@ -472,21 +472,9 @@ describe( 'translations', () => {
 					compilationAssetNames: [ 'SomeWebpackPlugin' ]
 				} );
 
-				sinon.assert.calledOnce( errorSpy );
-				sinon.assert.calledWithExactly(
-					errorSpy,
-					'No JS asset has been found during the compilation. ' +
-					'You should add translation assets directly to the application from the `translations` directory. ' +
-					'If that was intentional use the `buildAllTranslationsToSeparateFiles` option to get rif of the error.'
-				);
+				sinon.assert.notCalled( errorSpy );
 
-				expect( assets.length ).to.deep.equal( 2 );
-
-				expect( assets[ 0 ] ).to.have.property( 'outputPath', path.join( 'lang', 'pl.js' ) );
-				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
-
-				expect( assets[ 1 ] ).to.have.property( 'outputPath', path.join( 'lang', 'en.js' ) );
-				expect( assets[ 1 ] ).to.have.property( 'outputBody' );
+				expect( assets.length ).to.deep.equal( 0 );
 			} );
 
 			it( 'should return an empty asset for the language that has no translation defined', () => {
@@ -765,10 +753,46 @@ describe( 'translations', () => {
 
 				sinon.assert.notCalled( errorSpy );
 
+				expect( assets ).to.have.length( 0 );
+			} );
+
+			it( 'should emit all files to a file specified by the `translationsOutputFile` option when it is specified', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
+					additionalLanguages: [],
+					translationsOutputFile: 'foo/bar'
+				} );
+
+				const errorSpy = sinon.spy();
+
+				translationService.on( 'error', errorSpy );
+
+				translationService._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
+
+				translationService._translationDictionaries = {
+					pl: {
+						Cancel: [ 'Anuluj' ],
+						Save: [ 'Zapisz' ]
+					}
+				};
+
+				const assets = translationService.getAssets( {
+					outputDirectory: 'lang',
+					compilationAssetNames: [
+						'app.js'
+					]
+				} );
+
+				sinon.assert.notCalled( errorSpy );
+
 				expect( assets ).to.have.length( 1 );
 
-				expect( assets[ 0 ] ).to.have.property( 'outputPath', path.join( 'lang', 'pl.js' ) );
+				expect( assets[ 0 ] ).to.have.property( 'outputPath', 'foo/bar' );
 				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
+				expect( assets[ 0 ].outputBody ).to.have.length.greaterThan( 0 );
 			} );
 
 			it( 'should use the `outputDirectory` option for translation assets generated as new files', () => {
