@@ -10,13 +10,40 @@
  */
 exports.handlers = {
 	parseComplete: e => {
-		for ( const doclet of e.doclets ) {
+		/** @type {Array.<Doclet>} */
+		const doclets = e.doclets;
+
+		for ( const doclet of doclets ) {
 			if ( doclet.description ) {
 				doclet.description = fixDescription( doclet.description );
 			}
 
 			if ( doclet.classdesc ) {
 				doclet.classdesc = fixDescription( doclet.classdesc );
+			}
+
+			if ( doclet.params ) {
+				for ( const param of doclet.params ) {
+					if ( param.description ) {
+						param.description = fixDescription( param.description );
+					}
+				}
+			}
+
+			if ( doclet.returns ) {
+				for ( const returnObject of doclet.returns ) {
+					if ( returnObject.description ) {
+						returnObject.description = fixDescription( returnObject.description );
+					}
+				}
+			}
+
+			if ( doclet.properties ) {
+				for ( const property of doclet.properties ) {
+					if ( property.description ) {
+						property.description = fixDescription( property.description );
+					}
+				}
 			}
 		}
 	}

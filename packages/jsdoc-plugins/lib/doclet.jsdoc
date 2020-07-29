@@ -14,7 +14,7 @@
  *
  * @property {Type} [type] A type of the member.
  *
- * @property {ReturnData[]} [returns] The metadata for the function or method return type and description.
+ * @property {Array.<ReturnData>} [returns] The metadata for the function or method return type and description.
  *
  * @property {String} memberof Where the doclet belongs to (parent of the symbol).
  *
@@ -44,7 +44,7 @@
  *
  * @property {String[]} [see] `@see {}` tag contents.
  *
- * @property {Array.<Object>} [params] Event and function params.
+ * @property {Array.<Parameter>} [params] Event and function params.
  *
  * @property {'instance'|'inner'|'static'|'global'} [scope]
  *
@@ -83,7 +83,7 @@
  *
  * @property {Type} type
  *
- * @property {String} description
+ * @property {String} [description]
  *
  * @property {Boolean} [inherited] [A custom  property used by the relation fixer]
  */
@@ -100,5 +100,15 @@
  * @property {Type} type Type of the return statement. I.e. what the function should return.
  * It's gathered from the text after the `@returns` tag.
  *
- * @property {String} description Description for the return statement (after the `@returns` tag and type).
+ * @property {String} [description] Description for the return statement (after the `@returns` tag and type).
+ */
+
+/**
+ * @typedef {Object} Parameter
+ *
+ * @property {Type} type Type of the parameter.
+ *
+ * @property {String} name Name of the paramter.
+ *
+ * @property {String} [description] Description of the parameter.
  */
