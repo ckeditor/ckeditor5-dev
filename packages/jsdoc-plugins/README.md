@@ -9,6 +9,7 @@ The list of generic plugins:
 * `lib/validator/validator.js` - validates if references to types used in params lists or property types are defined elsewhere, whether links point to existing properties/classes/modules, etc.
 * `lib/export-fixer/export-fixer.js` - fixes an error with `export default` syntax
 * `lib/custom-tags/error.js` - provides support for the custom `@error` tag
+* `lib/custom-tags/skipsource.js` - provides support for the custom `@skipsource` tag
 * `lib/relation-fixer.js` - fixes problem with inheritance (extends child classes with properties from parent classes)
 * `lib/longname-fixer/longname-fixer.js` - enables short notation in links
 * `lib/utils/doclet-logger.js` - enables logging output into the `<CWD>/docs/api/output.json`
