@@ -116,4 +116,79 @@ describe( 'jsdoc-plugins/fix-code-snippets', () => {
 			'<pre><code>foo\nbar</code></pre>'
 		);
 	} );
+
+	it( 'should fix property descriptions', () => {
+		const doclet = {
+			properties: [ {
+				name: 'foo',
+				description: '<pre><code>\tfoo\n\tbar</code></pre>'
+			}, {
+				name: 'bar',
+				description: '<pre><code>\tfoo\n\tbar</code></pre>'
+			}, {
+				name: 'baz'
+				// The `baz` property has no description.
+			} ]
+		};
+
+		fixCodeSnippets.handlers.parseComplete( { doclets: [ doclet ] } );
+
+		expect( doclet.properties[ 0 ].description ).to.equal(
+			'<pre><code>foo\nbar</code></pre>'
+		);
+
+		expect( doclet.properties[ 1 ].description ).to.equal(
+			'<pre><code>foo\nbar</code></pre>'
+		);
+	} );
+
+	it( 'should fix descriptions of the return tags', () => {
+		const doclet = {
+			returns: [ {
+				type: 'String',
+				description: '<pre><code>\tfoo\n\tbar</code></pre>'
+			}, {
+				type: 'Array',
+				description: '<pre><code>\tfoo\n\tbar</code></pre>'
+			}, {
+				type: 'Boolean'
+				// Third return overload has no description.
+			} ]
+		};
+
+		fixCodeSnippets.handlers.parseComplete( { doclets: [ doclet ] } );
+
+		expect( doclet.returns[ 0 ].description ).to.equal(
+			'<pre><code>foo\nbar</code></pre>'
+		);
+
+		expect( doclet.returns[ 1 ].description ).to.equal(
+			'<pre><code>foo\nbar</code></pre>'
+		);
+	} );
+
+	it( 'should fix descriptions of parameters', () => {
+		const doclet = {
+			params: [ {
+				name: 'foo',
+				description: '<pre><code>\tfoo\n\tbar</code></pre>'
+			}, {
+				name: 'bar',
+				description: '<pre><code>\tfoo\n\tbar</code></pre>'
+			}, {
+				name: 'baz'
+				// The `baz` parameter has no description.
+			} ]
+		};
+
+		fixCodeSnippets.handlers.parseComplete( { doclets: [ doclet ] } );
+
+		expect( doclet.params[ 0 ].description ).to.equal(
+			'<pre><code>foo\nbar</code></pre>'
+		);
+
+		expect( doclet.params[ 1 ].description ).to.equal(
+			'<pre><code>foo\nbar</code></pre>'
+		);
+	} );
 } );
