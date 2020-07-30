@@ -1,6 +1,42 @@
 Changelog
 =========
 
+## [23.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v22.0.0...v23.0.0) (2020-07-21)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-jsdoc-plugins)**: Functions documented in a module will no longer be documented as static functions. Therefore links to functions will not contain the `static-` part and links created in the past will no longer work.
+
+### Features
+
+* **[jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-jsdoc-plugins)**: Updated JSDoc and align custom JSDoc plugins. Part of [ckeditor/ckeditor5#7575](https://github.com/ckeditor/ckeditor5/issues/7575). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/755e29cde71f67332554cb4bc0c23982651bb524))
+
+  * Improved performance,
+  * Fixed incorrectly and inconsistently documented functions. Previously they were marked as static/instance using the `.` or `#` symbols. Now they are documented the same as classes, interfaces, and mixins using the `~` symbol. (e.g. `module:widget/utils~toWidget`),
+  * Validator was improved, now it detects duplicated modules and previously hidden mistakes.
+  * Updated JSDoc allows for modern JS syntax, `async/await` among others.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Major releases (contain major breaking changes):
+
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v22.0.0 => v23.0.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v22.0.0 => v23.0.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v22.0.0 => v23.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v22.0.0 => v23.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v22.0.0 => v23.0.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v22.0.0 => v23.0.0
+</details>
+
+
 ## [22.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v21.0.0...v22.0.0) (2020-07-20)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
