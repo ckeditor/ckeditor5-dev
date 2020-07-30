@@ -194,9 +194,6 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @returns {Array.<Object>} Returns new and modified assets that will be added to original ones.
 	 */
 	getAssets( { outputDirectory, compilationAssetNames } ) {
-		compilationAssetNames = compilationAssetNames
-			.filter( name => name.endsWith( '.js' ) );
-
 		let bundledLanguage = this._mainLanguage;
 
 		if ( compilationAssetNames.length === 0 ) {
@@ -204,26 +201,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		}
 
 		if ( this._translationsOutputFile ) {
-			// Assets where translations for the main language will be added.
-
-			const assetName = match( this._translationsOutputFile, compilationAssetNames );
-
-			if ( !assetName && typeof this._translationsOutputFile !== 'string' ) {
-				throw new Error( 'No file was matching the `translationsOutputFile` option.' );
-			}
-
-			const translationsBundle = this._getTranslationAssets( outputDirectory, Array.from( this._languages ) )
-				.map( asset => asset.outputBody )
-				.join( '' );
-
-			if ( typeof this._translationsOutputFile === 'string' ) {
-				return [ {
-					outputBody: translationsBundle,
-					outputPath: assetName || this._translationsOutputFile,
-					// Concat with existing asset if it exists.
-					shouldConcat: compilationAssetNames.some( assetName => assetName === this._translationsOutputFile )
-				} ];
-			}
+			return this._getAssetsWithTranslationsBundledToTheOutputFile( { outputDirectory, compilationAssetNames } );
 		}
 
 		if ( this._buildAllTranslationsToSeparateFiles ) {
@@ -255,6 +233,32 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			// Translation assets outputted to separate translation files.
 			...this._getTranslationAssets( outputDirectory, assetLanguages )
 		];
+	}
+
+	/**
+	 * @param {Object} options
+	 * @param {String} options.outputDirectory Output directory for the translation files relative to the output.
+	 * @param {String[]} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
+	 */
+	_getAssetsWithTranslationsBundledToTheOutputFile( { outputDirectory, compilationAssetNames } ) {
+		const assetName = match( this._translationsOutputFile, compilationAssetNames );
+
+		if ( !assetName && typeof this._translationsOutputFile !== 'string' ) {
+			throw new Error( 'No file was matching the `translationsOutputFile` option.' );
+		}
+
+		const translationsBundle = this._getTranslationAssets( outputDirectory, Array.from( this._languages ) )
+			.map( asset => asset.outputBody )
+			.join( '' );
+
+		if ( typeof this._translationsOutputFile === 'string' ) {
+			return [ {
+				outputBody: translationsBundle,
+				outputPath: assetName || this._translationsOutputFile,
+				// Concat with an existing asset if it exists.
+				shouldConcat: compilationAssetNames.some( assetName => assetName === this._translationsOutputFile )
+			} ];
+		}
 	}
 
 	/**
@@ -391,6 +395,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
  *
  * @param {String|((name: string) => boolean)|RegExp} predicate
  * @param {String[]} options
+ * @returns {String|undefined}
  */
 function match( predicate, options ) {
 	if ( typeof predicate === 'function' ) {

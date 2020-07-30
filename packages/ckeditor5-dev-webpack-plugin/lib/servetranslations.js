@@ -92,6 +92,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 			const generatedAssets = translationService.getAssets( {
 				outputDirectory: options.outputDirectory,
 				compilationAssetNames: Object.keys( compilation.assets )
+					.filter( name => name.endsWith( '.js' ) )
 			} );
 
 			const allFiles = chunks.reduce( ( acc, chunk ) => [ ...acc, ...chunk.files ], [] );

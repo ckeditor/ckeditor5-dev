@@ -12,7 +12,7 @@ const sinon = require( 'sinon' );
 const path = require( 'path' );
 const proxyquire = require( 'proxyquire' );
 
-describe.only( 'translations', () => {
+describe( 'translations', () => {
 	describe( 'MultipleLanguageTranslationService', () => {
 		let MultipleLanguageTranslationService, stubs, filesAndDirs, fileContents, dirContents;
 		let window;
@@ -441,42 +441,6 @@ describe.only( 'translations', () => {
 				expect( window.CKEDITOR_TRANSLATIONS.pl.getPluralForm( 103 ) ).to.equal( 1 );
 			} );
 
-			it( 'should do nothing when no JS assets was passed', () => {
-				const translationService = new MultipleLanguageTranslationService( {
-					mainLanguage: 'pl',
-					additionalLanguages: [ 'en' ]
-				} );
-
-				const errorSpy = sinon.spy();
-
-				translationService.on( 'error', errorSpy );
-
-				translationService._foundMessageIds = new Set( [
-					'Cancel',
-					'Save'
-				] );
-
-				translationService._translationDictionaries = {
-					pl: {
-						Cancel: [ 'Anuluj' ],
-						Save: [ 'Zapisz' ]
-					},
-					en: {
-						Cancel: [ 'Cancel' ],
-						Save: [ 'Save' ]
-					}
-				};
-
-				const assets = translationService.getAssets( {
-					outputDirectory: 'lang',
-					compilationAssetNames: [ 'SomeWebpackPlugin' ]
-				} );
-
-				sinon.assert.notCalled( errorSpy );
-
-				expect( assets.length ).to.deep.equal( 0 );
-			} );
-
 			it( 'should return an empty asset for the language that has no translation defined', () => {
 				const translationService = new MultipleLanguageTranslationService( {
 					mainLanguage: 'pl',
@@ -764,8 +728,10 @@ describe.only( 'translations', () => {
 				} );
 
 				const errorSpy = sinon.spy();
+				const warningSpy = sinon.spy();
 
 				translationService.on( 'error', errorSpy );
+				translationService.on( 'warning', warningSpy );
 
 				translationService._foundMessageIds = new Set( [
 					'Cancel',
@@ -779,6 +745,8 @@ describe.only( 'translations', () => {
 					}
 				};
 
+				translationService._pluralFormsRules = { pl: 'plural=(() => 0)' };
+
 				const assets = translationService.getAssets( {
 					outputDirectory: 'lang',
 					compilationAssetNames: [
@@ -786,13 +754,14 @@ describe.only( 'translations', () => {
 					]
 				} );
 
-				sinon.assert.notCalled( errorSpy );
-
 				expect( assets ).to.have.length( 1 );
 
 				expect( assets[ 0 ] ).to.have.property( 'outputPath', 'foo/bar' );
 				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
 				expect( assets[ 0 ].outputBody ).to.have.length.greaterThan( 0 );
+
+				expect( warningSpy ).to.have.not.be.called;
+				expect( errorSpy ).to.have.not.be.called;
 			} );
 
 			it( 'should use the `outputDirectory` option for translation assets generated as new files', () => {
@@ -800,9 +769,12 @@ describe.only( 'translations', () => {
 					mainLanguage: 'pl',
 					additionalLanguages: [ 'en' ]
 				} );
-				const spy = sinon.spy();
 
-				translationService.on( 'warning', spy );
+				const warningSpy = sinon.spy();
+				const errorSpy = sinon.spy();
+
+				translationService.on( 'warning', warningSpy );
+				translationService.on( 'error', errorSpy );
 
 				translationService._foundMessageIds = new Set( [
 					'Cancel'
@@ -817,6 +789,8 @@ describe.only( 'translations', () => {
 					}
 				};
 
+				translationService._pluralFormsRules = { pl: 'plural=(() => 0)', en: 'plural=(() => 0)' };
+
 				const assets = translationService.getAssets( {
 					outputDirectory: 'custom-lang-path',
 					compilationAssetNames: [ 'ckeditor.js' ]
@@ -824,6 +798,9 @@ describe.only( 'translations', () => {
 
 				expect( assets[ 0 ].outputPath ).to.equal( 'ckeditor.js' );
 				expect( assets[ 1 ].outputPath ).to.equal( path.join( 'custom-lang-path', 'en.js' ) );
+
+				expect( warningSpy ).to.have.not.be.called;
+				expect( errorSpy ).to.have.not.be.called;
 			} );
 		} );
 
