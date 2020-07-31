@@ -251,14 +251,12 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			.map( asset => asset.outputBody )
 			.join( '' );
 
-		if ( typeof this._translationsOutputFile === 'string' ) {
-			return [ {
-				outputBody: translationsBundle,
-				outputPath: assetName || this._translationsOutputFile,
-				// Concat with an existing asset if it exists.
-				shouldConcat: compilationAssetNames.some( assetName => assetName === this._translationsOutputFile )
-			} ];
-		}
+		return [ {
+			outputBody: translationsBundle,
+			outputPath: assetName || this._translationsOutputFile,
+			// Concat with an existing asset if it exists.
+			shouldConcat: compilationAssetNames.some( name => name === assetName )
+		} ];
 	}
 
 	/**

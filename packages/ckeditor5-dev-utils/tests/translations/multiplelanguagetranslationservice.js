@@ -720,7 +720,7 @@ describe( 'translations', () => {
 				expect( assets ).to.have.length( 0 );
 			} );
 
-			it( 'should emit all files to a file specified by the `translationsOutputFile` option when it is specified', () => {
+			it( 'should emit all files to a file specified by the `translationsOutputFile` option when it is specified (as string)', () => {
 				const translationService = new MultipleLanguageTranslationService( {
 					mainLanguage: 'pl',
 					additionalLanguages: [],
@@ -757,6 +757,96 @@ describe( 'translations', () => {
 				expect( assets ).to.have.length( 1 );
 
 				expect( assets[ 0 ] ).to.have.property( 'outputPath', 'foo/bar' );
+				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
+				expect( assets[ 0 ].outputBody ).to.have.length.greaterThan( 0 );
+
+				expect( warningSpy ).to.have.not.be.called;
+				expect( errorSpy ).to.have.not.be.called;
+			} );
+
+			it( 'should emit all files to a file specified by the `translationsOutputFile` option when it is specified (as regexp)', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
+					additionalLanguages: [],
+					translationsOutputFile: /app\.js/
+				} );
+
+				const errorSpy = sinon.spy();
+				const warningSpy = sinon.spy();
+
+				translationService.on( 'error', errorSpy );
+				translationService.on( 'warning', warningSpy );
+
+				translationService._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
+
+				translationService._translationDictionaries = {
+					pl: {
+						Cancel: [ 'Anuluj' ],
+						Save: [ 'Zapisz' ]
+					}
+				};
+
+				translationService._pluralFormsRules = { pl: 'plural=(() => 0)' };
+
+				const assets = translationService.getAssets( {
+					outputDirectory: 'lang',
+					compilationAssetNames: [
+						'app.js',
+						'bar.js'
+					]
+				} );
+
+				expect( assets ).to.have.length( 1 );
+
+				expect( assets[ 0 ] ).to.have.property( 'outputPath', 'app.js' );
+				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
+				expect( assets[ 0 ].outputBody ).to.have.length.greaterThan( 0 );
+
+				expect( warningSpy ).to.have.not.be.called;
+				expect( errorSpy ).to.have.not.be.called;
+			} );
+
+			it( 'should emit all files to a file specified by the `translationsOutputFile` option when it is specified (as func.)', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
+					additionalLanguages: [],
+					translationsOutputFile: name => /app\.js/.test( name )
+				} );
+
+				const errorSpy = sinon.spy();
+				const warningSpy = sinon.spy();
+
+				translationService.on( 'error', errorSpy );
+				translationService.on( 'warning', warningSpy );
+
+				translationService._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
+
+				translationService._translationDictionaries = {
+					pl: {
+						Cancel: [ 'Anuluj' ],
+						Save: [ 'Zapisz' ]
+					}
+				};
+
+				translationService._pluralFormsRules = { pl: 'plural=(() => 0)' };
+
+				const assets = translationService.getAssets( {
+					outputDirectory: 'lang',
+					compilationAssetNames: [
+						'app.js',
+						'bar.js'
+					]
+				} );
+
+				expect( assets ).to.have.length( 1 );
+
+				expect( assets[ 0 ] ).to.have.property( 'outputPath', 'app.js' );
 				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
 				expect( assets[ 0 ].outputBody ).to.have.length.greaterThan( 0 );
 
