@@ -79,6 +79,11 @@ depCheck( packageDirectory, depCheckOptions )
 				.map( entry => {
 					return `- "${ chalk.italic( entry.file ) }" imports "${ chalk.italic( entry.import ) }"`;
 				} )
+				.join( '\n' ),
+
+			// Duplicated `dependencies` and `devDependencies`.
+			findDuplicatedDependencies( packageJson.dependencies, packageJson.devDependencies )
+				.map( entry => '- ' + entry )
 				.join( '\n' )
 		];
 
@@ -120,6 +125,11 @@ depCheck( packageDirectory, depCheckOptions )
 		if ( data[ 5 ] ) {
 			console.log( chalk.yellow( 'Importing CSS files that do not exist:' ) );
 			console.log( data[ 5 ] + '\n' );
+		}
+
+		if ( data[ 6 ] ) {
+			console.log( chalk.yellow( 'Duplicated `dependencies` and `devDependencies`:' ) );
+			console.log( data[ 6 ] + '\n' );
 		}
 
 		process.exit( -1 );
@@ -252,4 +262,31 @@ function parsePostCSS( fileContent, filePath, dependencies ) {
 		} );
 
 	return [ ...missingPackages ];
+}
+
+/**
+ * Checks whether packages specified as `devDependencies` are not duplicated with items defined as `dependencies`.
+ *
+ * @see https://github.com/ckeditor/ckeditor5/issues/7706#issuecomment-665569410
+ * @param {Object|undefined} dependencies
+ * @param {Object|undefined} devDependencies
+ * @returns {Array.<String>}
+ */
+function findDuplicatedDependencies( dependencies, devDependencies ) {
+	const deps = Object.keys( dependencies || {} );
+	const devDeps = Object.keys( devDependencies || {} );
+
+	if ( !deps.length || !devDeps.length ) {
+		return [];
+	}
+
+	const duplicatedPackages = new Set();
+
+	for ( const packageName of deps ) {
+		if ( devDeps.includes( packageName ) ) {
+			duplicatedPackages.add( packageName );
+		}
+	}
+
+	return Array.from( duplicatedPackages );
 }
