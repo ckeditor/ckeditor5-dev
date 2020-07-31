@@ -104,7 +104,8 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 						compileAllLanguages: false,
 						additionalLanguages: [],
 						buildAllTranslationsToSeparateFiles: false,
-						addMainLanguageTranslationsToAllAssets: false
+						addMainLanguageTranslationsToAllAssets: false,
+						translationsOutputFile: undefined
 					}
 				);
 			} );
@@ -128,7 +129,8 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 						compileAllLanguages: false,
 						additionalLanguages: [ 'en' ],
 						buildAllTranslationsToSeparateFiles: false,
-						addMainLanguageTranslationsToAllAssets: false
+						addMainLanguageTranslationsToAllAssets: false,
+						translationsOutputFile: undefined
 					}
 				);
 			} );
@@ -152,7 +154,8 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 						compileAllLanguages: true,
 						additionalLanguages: [],
 						buildAllTranslationsToSeparateFiles: false,
-						addMainLanguageTranslationsToAllAssets: false
+						addMainLanguageTranslationsToAllAssets: false,
+						translationsOutputFile: undefined
 					}
 				);
 
