@@ -1,6 +1,38 @@
 Changelog
 =========
 
+## [23.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v23.0.0...v23.1.0) (2020-08-03)
+
+### Features
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Dependency checker will look for duplicated dependencies. Closes [ckeditor/ckeditor5#7706](https://github.com/ckeditor/ckeditor5/issues/7706). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/29ecdb282fe0acb9c993cd2d59643f5116ad59bb))
+* **[webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin)**: Add support for the `translationsOutputFile` option for `CKEditorWebpackPlugin` allowing specifying the target bundle for translations. Closes [ckeditor/ckeditor5#7688](https://github.com/ckeditor/ckeditor5/issues/7688). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f385e09f0be5bc5bb40fee8af68006760bb07e2c))
+
+### Bug fixes
+
+* **[jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-jsdoc-plugins)**: Whitespaces from code blocks should be removed properly. Closes [ckeditor/ckeditor5#7742](https://github.com/ckeditor/ckeditor5/issues/7742). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/71a1637474ff4d9451fa76a24be6472514601497))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v23.0.0 => v23.1.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v23.0.0 => v23.1.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v23.0.0 => v23.1.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v23.0.0 => v23.1.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v23.0.0 => v23.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v23.0.0 => v23.1.0
+</details>
+
+
 ## [23.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v22.0.0...v23.0.0) (2020-07-21)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
