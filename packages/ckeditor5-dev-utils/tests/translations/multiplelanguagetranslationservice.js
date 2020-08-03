@@ -636,12 +636,9 @@ describe( 'translations', () => {
 				} );
 
 				sinon.assert.calledOnce( errorSpy );
-				sinon.assert.alwaysCalledWithExactly( errorSpy, [
-					'Too many JS assets has been found during the compilation. ' +
-					'You should add translation assets directly to the application from the `translations` directory or ' +
-					'use the `addMainLanguageTranslationsToAllAssets` option to add translations for the main language to all assets ' +
-					'or use the `buildAllTranslationsToSeparateFiles` if you want to add translation files on your own.'
-				].join( '\n' ) );
+				expect( errorSpy.getCalls()[ 0 ] ).to.match(
+					/Too many JS assets has been found during the compilation./
+				);
 
 				expect( assets ).to.have.length( 1 );
 				expect( assets[ 0 ] ).to.have.property( 'outputPath', path.join( 'lang', 'pl.js' ) );

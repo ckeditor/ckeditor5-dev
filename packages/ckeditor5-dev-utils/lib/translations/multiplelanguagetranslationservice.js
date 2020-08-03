@@ -212,9 +212,11 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		} else if ( compilationAssetNames.length > 1 && !this._addMainLanguageTranslationsToAllAssets ) {
 			this.emit( 'error', [
 				'Too many JS assets has been found during the compilation. ' +
-				'You should add translation assets directly to the application from the `translations` directory or ' +
-				'use the `addMainLanguageTranslationsToAllAssets` option to add translations for the main language to all assets ' +
-				'or use the `buildAllTranslationsToSeparateFiles` if you want to add translation files on your own.'
+				'You should use one of the following options to specify the strategy:\n' +
+				'- use `addMainLanguageTranslationsToAllAssets` to add translations for the main language to all assets,' +
+				'- use `buildAllTranslationsToSeparateFiles` to add translation files via `<script>` tags in HTML file,' +
+				'- use `translationsOutputFile` to append translation to the existing file or create a new asset.' +
+				'For more details visit https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-webpack-plugin.'
 			].join( '\n' ) );
 
 			compilationAssetNames = [];
