@@ -25,7 +25,9 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * about multiple JS assets and will output translations for the main language to all found assets.
 	 * @param {Boolean} [options.buildAllTranslationsToSeparateFiles] When set to `true` the service will output all translations
 	 * to separate files.
-	 * @param {String|Function|RegExp} [options.translationsOutputFile]
+	 * @param {String|Function|RegExp} [options.translationsOutputFile] An option allowing outputting all translation file
+	 * to the given file. If a file specified by a path (string) does not exist, then it will be created. Otherwise, translations
+	 * will be outputted to the file.
 	 */
 	constructor( {
 		mainLanguage,
