@@ -31,7 +31,7 @@ const MultipleLanguageTranslationService = require( '@ckeditor/ckeditor5-dev-uti
  */
 module.exports = class CKEditorWebpackPlugin {
 	/**
-	 * @param {CKEditorWebpackPluginOptions} [options] Plugin options.
+	 * @param {CKEditorWebpackPluginOptions} options Plugin options.
 	 */
 	constructor( options ) {
 		if ( !options ) {
