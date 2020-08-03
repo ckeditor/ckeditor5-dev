@@ -393,7 +393,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 };
 
 /**
- * @param {String|((name: string) => boolean)|RegExp} predicate
+ * @param {String|Function|RegExp} predicate
  * @param {Array.<String>} options
  * @returns {String|undefined}
  */
