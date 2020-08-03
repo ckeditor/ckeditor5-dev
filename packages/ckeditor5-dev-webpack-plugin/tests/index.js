@@ -60,18 +60,6 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 	} );
 
 	describe( 'apply()', () => {
-		it( 'should log a warning and do nothing if language is not specified', () => {
-			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( {} );
-			ckeditorWebpackPlugin.apply( {} );
-
-			sinon.assert.calledOnce( console.warn );
-			expect( console.warn.getCall( 0 ).args[ 0 ] ).to.match(
-				/Warning: The `language` option is required for CKEditorWebpackPlugin plugin\./
-			);
-
-			sinon.assert.notCalled( stubs.serveTranslations );
-		} );
-
 		it( 'should call serveTranslations() if the options are correct', () => {
 			const options = {
 				language: 'pl'
@@ -104,7 +92,8 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 						compileAllLanguages: false,
 						additionalLanguages: [],
 						buildAllTranslationsToSeparateFiles: false,
-						addMainLanguageTranslationsToAllAssets: false
+						addMainLanguageTranslationsToAllAssets: false,
+						translationsOutputFile: undefined
 					}
 				);
 			} );
@@ -128,7 +117,8 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 						compileAllLanguages: false,
 						additionalLanguages: [ 'en' ],
 						buildAllTranslationsToSeparateFiles: false,
-						addMainLanguageTranslationsToAllAssets: false
+						addMainLanguageTranslationsToAllAssets: false,
+						translationsOutputFile: undefined
 					}
 				);
 			} );
@@ -152,7 +142,8 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 						compileAllLanguages: true,
 						additionalLanguages: [],
 						buildAllTranslationsToSeparateFiles: false,
-						addMainLanguageTranslationsToAllAssets: false
+						addMainLanguageTranslationsToAllAssets: false,
+						translationsOutputFile: undefined
 					}
 				);
 

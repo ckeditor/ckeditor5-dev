@@ -20,8 +20,8 @@ const corePackageName = 'ckeditor5-core';
  * and context files and saves them as POT files in the `build/.transifex` directory.
  *
  * @param {Object} options
- * @param {String[]} options.sourceFiles An array of source files that contain messages to translate.
- * @param {String[]} options.packagePaths An array of paths to packages, which will be used to find message contexts.
+ * @param {Array.<String>} options.sourceFiles An array of source files that contain messages to translate.
+ * @param {Array.<String>} options.packagePaths An array of paths to packages, which will be used to find message contexts.
  * @param {String} options.corePackagePath A path to the ckeditor5-core package.
  * @param {Logger} [logger] A logger.
  */
@@ -71,7 +71,7 @@ module.exports = function createPotFiles( {
  * Traverses all packages and returns a map of all found language contexts
  * (file content and file name).
  *
- * @param {String[]} packagePaths An array of paths to packages, which will be used to find message contexts.
+ * @param {Array.<String>} packagePaths An array of paths to packages, which will be used to find message contexts.
  * @returns {Map.<String, Context>}
  */
 function getPackageContexts( packagePaths, corePackagePath ) {
@@ -241,7 +241,7 @@ function createPotFileHeader() {
  *
  * @param {String} filePath
  * @param {String} fileContent
- * @returns {Message[]}
+ * @returns {Array.<Message>}
  */
 function getSourceMessagesFromFile( { filePath, fileContent, logger } ) {
 	const packageMatch = filePath.match( /([^/\\]+)[/\\]src[/\\]/ );
@@ -260,7 +260,7 @@ function getSourceMessagesFromFile( { filePath, fileContent, logger } ) {
 /**
  * Creates a POT file from the given i18n messages.
  *
- * @param {Message[]} messages
+ * @param {Array.<Message>} messages
  * @returns {String}
  */
 function createPotFileContent( messages ) {

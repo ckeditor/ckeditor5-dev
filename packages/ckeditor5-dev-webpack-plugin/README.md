@@ -61,6 +61,10 @@ A pattern which is used for determining if a package may contain translations (P
 
 A pattern which is used for determining if a file may contain messages to translate. Defaults to `/[/\\]ckeditor5-[^/\\]+[/\\]src[/\\].+\.js$/`.
 
+### `translationsOutputFile`
+
+An option that allows specifying the target file to which all translations will be outputted. This option supports a string, regular expression and a function. If no asset exists with the name, it will be created automatically and filled with translations.
+
 ### `corePackagePattern`
 
 (internal)

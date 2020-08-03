@@ -441,54 +441,6 @@ describe( 'translations', () => {
 				expect( window.CKEDITOR_TRANSLATIONS.pl.getPluralForm( 103 ) ).to.equal( 1 );
 			} );
 
-			it( 'should log an error if no JS assets was passed', () => {
-				const translationService = new MultipleLanguageTranslationService( {
-					mainLanguage: 'pl',
-					additionalLanguages: [ 'en' ]
-				} );
-
-				const errorSpy = sinon.spy();
-
-				translationService.on( 'error', errorSpy );
-
-				translationService._foundMessageIds = new Set( [
-					'Cancel',
-					'Save'
-				] );
-
-				translationService._translationDictionaries = {
-					pl: {
-						Cancel: [ 'Anuluj' ],
-						Save: [ 'Zapisz' ]
-					},
-					en: {
-						Cancel: [ 'Cancel' ],
-						Save: [ 'Save' ]
-					}
-				};
-
-				const assets = translationService.getAssets( {
-					outputDirectory: 'lang',
-					compilationAssetNames: [ 'SomeWebpackPlugin' ]
-				} );
-
-				sinon.assert.calledOnce( errorSpy );
-				sinon.assert.calledWithExactly(
-					errorSpy,
-					'No JS asset has been found during the compilation. ' +
-					'You should add translation assets directly to the application from the `translations` directory. ' +
-					'If that was intentional use the `buildAllTranslationsToSeparateFiles` option to get rif of the error.'
-				);
-
-				expect( assets.length ).to.deep.equal( 2 );
-
-				expect( assets[ 0 ] ).to.have.property( 'outputPath', path.join( 'lang', 'pl.js' ) );
-				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
-
-				expect( assets[ 1 ] ).to.have.property( 'outputPath', path.join( 'lang', 'en.js' ) );
-				expect( assets[ 1 ] ).to.have.property( 'outputBody' );
-			} );
-
 			it( 'should return an empty asset for the language that has no translation defined', () => {
 				const translationService = new MultipleLanguageTranslationService( {
 					mainLanguage: 'pl',
@@ -684,12 +636,9 @@ describe( 'translations', () => {
 				} );
 
 				sinon.assert.calledOnce( errorSpy );
-				sinon.assert.alwaysCalledWithExactly( errorSpy, [
-					'Too many JS assets has been found during the compilation. ' +
-					'You should add translation assets directly to the application from the `translations` directory or ' +
-					'use the `addMainLanguageTranslationsToAllAssets` option to add translations for the main language to all assets ' +
-					'or use the `buildAllTranslationsToSeparateFiles` if you want to add translation files on your own.'
-				].join( '\n' ) );
+				expect( errorSpy.getCalls()[ 0 ] ).to.match(
+					/Too many JS assets has been found during the compilation./
+				);
 
 				expect( assets ).to.have.length( 1 );
 				expect( assets[ 0 ] ).to.have.property( 'outputPath', path.join( 'lang', 'pl.js' ) );
@@ -765,10 +714,141 @@ describe( 'translations', () => {
 
 				sinon.assert.notCalled( errorSpy );
 
+				expect( assets ).to.have.length( 0 );
+			} );
+
+			it( 'should emit all files to a file specified by the `translationsOutputFile` option when it is specified (as string)', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
+					additionalLanguages: [],
+					translationsOutputFile: 'foo/bar'
+				} );
+
+				const errorSpy = sinon.spy();
+				const warningSpy = sinon.spy();
+
+				translationService.on( 'error', errorSpy );
+				translationService.on( 'warning', warningSpy );
+
+				translationService._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
+
+				translationService._translationDictionaries = {
+					pl: {
+						Cancel: [ 'Anuluj' ],
+						Save: [ 'Zapisz' ]
+					}
+				};
+
+				translationService._pluralFormsRules = { pl: 'plural=(() => 0)' };
+
+				const assets = translationService.getAssets( {
+					outputDirectory: 'lang',
+					compilationAssetNames: [
+						'app.js'
+					]
+				} );
+
 				expect( assets ).to.have.length( 1 );
 
-				expect( assets[ 0 ] ).to.have.property( 'outputPath', path.join( 'lang', 'pl.js' ) );
+				expect( assets[ 0 ] ).to.have.property( 'outputPath', 'foo/bar' );
 				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
+				expect( assets[ 0 ].outputBody ).to.have.length.greaterThan( 0 );
+
+				expect( warningSpy ).to.have.not.be.called;
+				expect( errorSpy ).to.have.not.be.called;
+			} );
+
+			it( 'should emit all files to a file specified by the `translationsOutputFile` option when it is specified (as regexp)', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
+					additionalLanguages: [],
+					translationsOutputFile: /app\.js/
+				} );
+
+				const errorSpy = sinon.spy();
+				const warningSpy = sinon.spy();
+
+				translationService.on( 'error', errorSpy );
+				translationService.on( 'warning', warningSpy );
+
+				translationService._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
+
+				translationService._translationDictionaries = {
+					pl: {
+						Cancel: [ 'Anuluj' ],
+						Save: [ 'Zapisz' ]
+					}
+				};
+
+				translationService._pluralFormsRules = { pl: 'plural=(() => 0)' };
+
+				const assets = translationService.getAssets( {
+					outputDirectory: 'lang',
+					compilationAssetNames: [
+						'app.js',
+						'bar.js'
+					]
+				} );
+
+				expect( assets ).to.have.length( 1 );
+
+				expect( assets[ 0 ] ).to.have.property( 'outputPath', 'app.js' );
+				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
+				expect( assets[ 0 ].outputBody ).to.have.length.greaterThan( 0 );
+
+				expect( warningSpy ).to.have.not.be.called;
+				expect( errorSpy ).to.have.not.be.called;
+			} );
+
+			it( 'should emit all files to a file specified by the `translationsOutputFile` option when it is specified (as func.)', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
+					additionalLanguages: [],
+					translationsOutputFile: name => /app\.js/.test( name )
+				} );
+
+				const errorSpy = sinon.spy();
+				const warningSpy = sinon.spy();
+
+				translationService.on( 'error', errorSpy );
+				translationService.on( 'warning', warningSpy );
+
+				translationService._foundMessageIds = new Set( [
+					'Cancel',
+					'Save'
+				] );
+
+				translationService._translationDictionaries = {
+					pl: {
+						Cancel: [ 'Anuluj' ],
+						Save: [ 'Zapisz' ]
+					}
+				};
+
+				translationService._pluralFormsRules = { pl: 'plural=(() => 0)' };
+
+				const assets = translationService.getAssets( {
+					outputDirectory: 'lang',
+					compilationAssetNames: [
+						'app.js',
+						'bar.js'
+					]
+				} );
+
+				expect( assets ).to.have.length( 1 );
+
+				expect( assets[ 0 ] ).to.have.property( 'outputPath', 'app.js' );
+				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
+				expect( assets[ 0 ].outputBody ).to.have.length.greaterThan( 0 );
+
+				expect( warningSpy ).to.have.not.be.called;
+				expect( errorSpy ).to.have.not.be.called;
 			} );
 
 			it( 'should use the `outputDirectory` option for translation assets generated as new files', () => {
@@ -776,9 +856,12 @@ describe( 'translations', () => {
 					mainLanguage: 'pl',
 					additionalLanguages: [ 'en' ]
 				} );
-				const spy = sinon.spy();
 
-				translationService.on( 'warning', spy );
+				const warningSpy = sinon.spy();
+				const errorSpy = sinon.spy();
+
+				translationService.on( 'warning', warningSpy );
+				translationService.on( 'error', errorSpy );
 
 				translationService._foundMessageIds = new Set( [
 					'Cancel'
@@ -793,6 +876,8 @@ describe( 'translations', () => {
 					}
 				};
 
+				translationService._pluralFormsRules = { pl: 'plural=(() => 0)', en: 'plural=(() => 0)' };
+
 				const assets = translationService.getAssets( {
 					outputDirectory: 'custom-lang-path',
 					compilationAssetNames: [ 'ckeditor.js' ]
@@ -800,6 +885,9 @@ describe( 'translations', () => {
 
 				expect( assets[ 0 ].outputPath ).to.equal( 'ckeditor.js' );
 				expect( assets[ 1 ].outputPath ).to.equal( path.join( 'custom-lang-path', 'en.js' ) );
+
+				expect( warningSpy ).to.have.not.be.called;
+				expect( errorSpy ).to.have.not.be.called;
 			} );
 		} );
 

@@ -23,15 +23,19 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @param {Boolean} [options.compileAllLanguages] When set to `true` languages will be found at runtime.
 	 * @param {Boolean} [options.addMainLanguageTranslationsToAllAssets] When set to `true` the service will not complain
 	 * about multiple JS assets and will output translations for the main language to all found assets.
-	 * @param {Boolean} [buildAllTranslationsToSeparateFiles] When set to `true` the service will output all translations
+	 * @param {Boolean} [options.buildAllTranslationsToSeparateFiles] When set to `true` the service will output all translations
 	 * to separate files.
+	 * @param {String|Function|RegExp} [options.translationsOutputFile] An option allowing outputting all translation file
+	 * to the given file. If a file specified by a path (string) does not exist, then it will be created. Otherwise, translations
+	 * will be outputted to the file.
 	 */
 	constructor( {
 		mainLanguage,
 		additionalLanguages = [],
 		compileAllLanguages = false,
 		addMainLanguageTranslationsToAllAssets = false,
-		buildAllTranslationsToSeparateFiles = false
+		buildAllTranslationsToSeparateFiles = false,
+		translationsOutputFile
 	} ) {
 		super();
 
@@ -109,6 +113,8 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		 * @type {Set.<String>}
 		 */
 		this._foundMessageIds = new Set();
+
+		this._translationsOutputFile = translationsOutputFile;
 	}
 
 	/**
@@ -186,37 +192,31 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @fires error
 	 * @param {Object} options
 	 * @param {String} options.outputDirectory Output directory for the translation files relative to the output.
-	 * @param {String[]} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
+	 * @param {Array.<String>} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
 	 * @returns {Array.<Object>} Returns new and modified assets that will be added to original ones.
 	 */
 	getAssets( { outputDirectory, compilationAssetNames } ) {
-		compilationAssetNames = compilationAssetNames
-			.filter( name => name.endsWith( '.js' ) );
-
 		let bundledLanguage = this._mainLanguage;
 
-		if ( this._addMainLanguageTranslationsToAllAssets ) {
-			console.log( true );
+		if ( compilationAssetNames.length === 0 ) {
+			return [];
 		}
 
-		if ( compilationAssetNames.length == 0 && !this._buildAllTranslationsToSeparateFiles ) {
-			this.emit( 'error', [
-				'No JS asset has been found during the compilation. ' +
-				'You should add translation assets directly to the application from the `translations` directory. ' +
-				'If that was intentional use the `buildAllTranslationsToSeparateFiles` option to get rif of the error.'
-			].join( '\n' ) );
+		if ( this._translationsOutputFile ) {
+			return this._getAssetsWithTranslationsBundledToTheOutputFile( { outputDirectory, compilationAssetNames } );
+		}
 
-			compilationAssetNames = [];
-			bundledLanguage = null;
-		} else if ( this._buildAllTranslationsToSeparateFiles ) {
+		if ( this._buildAllTranslationsToSeparateFiles ) {
 			bundledLanguage = null;
 			compilationAssetNames = [];
 		} else if ( compilationAssetNames.length > 1 && !this._addMainLanguageTranslationsToAllAssets ) {
 			this.emit( 'error', [
 				'Too many JS assets has been found during the compilation. ' +
-				'You should add translation assets directly to the application from the `translations` directory or ' +
-				'use the `addMainLanguageTranslationsToAllAssets` option to add translations for the main language to all assets ' +
-				'or use the `buildAllTranslationsToSeparateFiles` if you want to add translation files on your own.'
+				'You should use one of the following options to specify the strategy:\n' +
+				'- use `addMainLanguageTranslationsToAllAssets` to add translations for the main language to all assets,' +
+				'- use `buildAllTranslationsToSeparateFiles` to add translation files via `<script>` tags in HTML file,' +
+				'- use `translationsOutputFile` to append translation to the existing file or create a new asset.' +
+				'For more details visit https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-webpack-plugin.'
 			].join( '\n' ) );
 
 			compilationAssetNames = [];
@@ -237,6 +237,31 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			// Translation assets outputted to separate translation files.
 			...this._getTranslationAssets( outputDirectory, assetLanguages )
 		];
+	}
+
+	/**
+	 * @param {Object} options
+	 * @param {String} options.outputDirectory Output directory for the translation files relative to the output.
+	 * @param {Array.<String>} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
+	 * @returns {Array.<Object>} Returns an array with one asset that
+	 */
+	_getAssetsWithTranslationsBundledToTheOutputFile( { outputDirectory, compilationAssetNames } ) {
+		const assetName = match( this._translationsOutputFile, compilationAssetNames );
+
+		if ( !assetName && typeof this._translationsOutputFile !== 'string' ) {
+			throw new Error( 'No file was matching the `translationsOutputFile` option.' );
+		}
+
+		const translationsBundle = this._getTranslationAssets( outputDirectory, Array.from( this._languages ) )
+			.map( asset => asset.outputBody )
+			.join( '' );
+
+		return [ {
+			outputBody: translationsBundle,
+			outputPath: assetName || this._translationsOutputFile,
+			// Concat with an existing asset if it exists.
+			shouldConcat: compilationAssetNames.some( name => name === assetName )
+		} ];
 	}
 
 	/**
@@ -305,7 +330,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 *
 	 * @private
 	 * @param {String} language The target language
-	 * @param {String} sortedMessageIds An array of sorted message ids.
+	 * @param {Array.<String>} sortedMessageIds An array of sorted message ids.
 	 * @returns {Object.<String,String|String[]>}
 	 */
 	_getTranslations( language, sortedMessageIds ) {
@@ -368,3 +393,27 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		return path.join( pathToPackage, 'lang', 'translations' );
 	}
 };
+
+/**
+ * @param {String|Function|RegExp} predicate
+ * @param {Array.<String>} options
+ * @returns {String|undefined}
+ */
+function match( predicate, options ) {
+	if ( typeof predicate === 'function' ) {
+		return options.find( predicate );
+	}
+
+	if ( typeof predicate === 'string' ) {
+		return options.find( option => predicate === option );
+	}
+
+	if ( predicate instanceof RegExp ) {
+		return options.find( option => predicate.test( option ) );
+	}
+
+	throw new Error(
+		'The CKEditorWebpackPlugin matching function got an unsupported type of a predicate.' +
+		`Got '${ predicate }' (${ typeof predicate } ) where supported values are only 'string', 'regexp' and 'function'.`
+	);
+}
