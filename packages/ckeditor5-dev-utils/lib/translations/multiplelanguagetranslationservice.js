@@ -239,6 +239,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @param {Object} options
 	 * @param {String} options.outputDirectory Output directory for the translation files relative to the output.
 	 * @param {Array.<String>} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
+	 * @returns {Array.<Object>} Returns an array with one asset that
 	 */
 	_getAssetsWithTranslationsBundledToTheOutputFile( { outputDirectory, compilationAssetNames } ) {
 		const assetName = match( this._translationsOutputFile, compilationAssetNames );
@@ -390,7 +391,6 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 };
 
 /**
- *
  * @param {String|((name: string) => boolean)|RegExp} predicate
  * @param {Array.<String>} options
  * @returns {String|undefined}
@@ -410,6 +410,6 @@ function match( predicate, options ) {
 
 	throw new Error(
 		'The CKEditorWebpackPlugin matching function got an unsupported type of a predicate.' +
-		`Got ${ predicate } (${ typeof predicate } ) where supported values are only 'string', 'regexp' and 'function'`
+		`Got '${ predicate }' (${ typeof predicate } ) where supported values are only 'string', 'regexp' and 'function'.`
 	);
 }
