@@ -42,7 +42,7 @@
  *
  * @property {String} [classdesc] Description for the class.
  *
- * @property {String[]} [see] `@see {}` tag contents.
+ * @property {Array.<String>} [see] `@see {}` tag contents.
  *
  * @property {Array.<Parameter>} [params] Event and function params.
  *

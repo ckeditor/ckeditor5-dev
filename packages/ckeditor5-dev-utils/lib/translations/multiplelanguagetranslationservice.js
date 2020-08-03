@@ -190,7 +190,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * @fires error
 	 * @param {Object} options
 	 * @param {String} options.outputDirectory Output directory for the translation files relative to the output.
-	 * @param {String[]} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
+	 * @param {Array.<String>} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
 	 * @returns {Array.<Object>} Returns new and modified assets that will be added to original ones.
 	 */
 	getAssets( { outputDirectory, compilationAssetNames } ) {
@@ -238,7 +238,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	/**
 	 * @param {Object} options
 	 * @param {String} options.outputDirectory Output directory for the translation files relative to the output.
-	 * @param {String[]} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
+	 * @param {Array.<String>} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
 	 */
 	_getAssetsWithTranslationsBundledToTheOutputFile( { outputDirectory, compilationAssetNames } ) {
 		const assetName = match( this._translationsOutputFile, compilationAssetNames );
@@ -325,7 +325,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 *
 	 * @private
 	 * @param {String} language The target language
-	 * @param {String[]} sortedMessageIds An array of sorted message ids.
+	 * @param {Array.<String>} sortedMessageIds An array of sorted message ids.
 	 * @returns {Object.<String,String|String[]>}
 	 */
 	_getTranslations( language, sortedMessageIds ) {
@@ -392,7 +392,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 /**
  *
  * @param {String|((name: string) => boolean)|RegExp} predicate
- * @param {String[]} options
+ * @param {Array.<String>} options
  * @returns {String|undefined}
  */
 function match( predicate, options ) {
