@@ -248,7 +248,6 @@ describe( 'upload', () => {
 
 	it( 'should print a table with summary (created items only)', () => {
 		stubs.table.toString.onFirstCall().returns( '┻━┻' );
-		stubs.table.toString.onSecondCall().returns( '┳━┳' );
 
 		// Random order by design.
 		packageNames = [
@@ -306,8 +305,7 @@ describe( 'upload', () => {
 	} );
 
 	it( 'should print a table with summary (updated items only)', () => {
-		stubs.table.toString.onFirstCall().returns( '┻━┻' );
-		stubs.table.toString.onSecondCall().returns( '┳━┳' );
+		stubs.table.toString.onFirstCall().returns( '┳━┳' );
 
 		// Random order by design.
 		packageNames = [
@@ -353,7 +351,7 @@ describe( 'upload', () => {
 
 				// Drawing the tables.
 				expect( stubs.logger.info.getCall( 5 ).args[ 0 ] ).to.equal( 'Updated resources:\n' );
-				expect( stubs.logger.info.getCall( 6 ).args[ 0 ] ).to.equal( '┻━┻' );
+				expect( stubs.logger.info.getCall( 6 ).args[ 0 ] ).to.equal( '┳━┳' );
 
 				// Each package should be added into a table.
 				expect( stubs.table.push.callCount ).to.equal( 4 );
