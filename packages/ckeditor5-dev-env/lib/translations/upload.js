@@ -9,6 +9,8 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 const transifexService = require( './transifex-service' );
+const Table = require( 'cli-table' );
+const chalk = require( 'chalk' );
 
 /**
  * Uploads translations to the Transifex from collected files that are saved at 'ckeditor5/build/.transifex'.
@@ -22,13 +24,21 @@ module.exports = function upload( loginConfig ) {
 		packageName,
 		path: path.join( pathToPoTranslations, packageName, 'en.pot' )
 	} ) );
+	const summaryCollection = {
+		created: [],
+		updated: []
+	};
 
 	return Promise.resolve()
 		.then( () => transifexService.getResources( loginConfig ) )
 		.then( resources => resources.map( resource => resource.slug ) )
 		.then( uploadedPackageNames => getUploadedPackages( potFiles, uploadedPackageNames ) )
-		.then( areUploadedResources => createOrUpdateResources( loginConfig, areUploadedResources, potFiles ) )
-		.then( () => logger.info( 'All resources uploaded.\n' ) )
+		.then( areUploadedResources => createOrUpdateResources( loginConfig, areUploadedResources, potFiles, summaryCollection ) )
+		.then( () => {
+			logger.info( 'All resources uploaded.\n' );
+
+			printSummary( summaryCollection );
+		} )
 		.catch( err => {
 			logger.error( err );
 			throw err;
@@ -39,15 +49,15 @@ function getUploadedPackages( potFiles, uploadedPackageNames ) {
 	return potFiles.map( potFile => uploadedPackageNames.includes( potFile.packageName ) );
 }
 
-function createOrUpdateResources( loginConfig, areUploadedResources, potFiles ) {
+function createOrUpdateResources( loginConfig, areUploadedResources, potFiles, summaryCollection ) {
 	return Promise.all(
 		areUploadedResources.map( ( isUploadedResource, index ) => {
-			return createOrUpdateResource( loginConfig, potFiles[ index ], isUploadedResource );
+			return createOrUpdateResource( loginConfig, potFiles[ index ], isUploadedResource, summaryCollection );
 		} )
 	);
 }
 
-function createOrUpdateResource( config, potFile, isUploadedResource ) {
+function createOrUpdateResource( config, potFile, isUploadedResource, summaryCollection ) {
 	const { packageName, path } = potFile;
 	const resConfig = Object.assign( {}, config, {
 		name: packageName,
@@ -55,25 +65,79 @@ function createOrUpdateResource( config, potFile, isUploadedResource ) {
 		content: fs.createReadStream( path )
 	} );
 
+	logger.info( `Processing "${ packageName }"...` );
+
 	if ( isUploadedResource ) {
 		return transifexService.putResourceContent( resConfig )
-			.then( parsedResponse => logPutResponse( packageName, parsedResponse ) );
+			.then( parsedResponse => {
+				summaryCollection.updated.push( [ packageName, parsedResponse ]);
+			} );
 	}
 
 	return transifexService.postResource( resConfig )
-		.then( parsedResponse => logPostResponse( packageName, parsedResponse ) );
+		.then( parsedResponse => {
+			summaryCollection.created.push( [ packageName, parsedResponse ]);
+		} );
 }
 
-function logPutResponse( packageName, parsedResponse ) {
-	logger.info( `Package: ${ packageName }` );
-	logger.info( `New: ${ parsedResponse.strings_added }` );
-	logger.info( `Updated: ${ parsedResponse.strings_updated }` );
-	logger.info( `Deleted: ${ parsedResponse.strings_delete }` );
-	logger.info( '-------------------------------' );
-}
+function printSummary( summaryCollection ) {
+	if ( summaryCollection.created.length ) {
+		logger.info( chalk.underline( 'Created resources:' ) + '\n' );
 
-function logPostResponse( packageName, parsedResponse ) {
-	logger.info( `Package: ${ packageName }` );
-	logger.info( `New: ${ parsedResponse[ 0 ] }` );
-	logger.info( '-------------------------------' );
+		const table = new Table( {
+			head: [ 'Package name', 'Added' ],
+			style: { compact: true }
+		} );
+
+		const items = summaryCollection.created.sort( sortByPackageName() );
+
+		for ( const [ packageName, response ] of items ) {
+			table.push( [ packageName, response[ 0 ] ] );
+		}
+
+		logger.info( table.toString() + '\n' );
+	}
+
+	if ( summaryCollection.updated.length ) {
+		logger.info( chalk.underline( 'Updated resources:' ) + '\n' );
+
+		const table = new Table( {
+			head: [ 'Package name', 'Added', 'Updated', 'Removed' ],
+			style: { compact: true }
+		} );
+
+		const changedItems = summaryCollection.updated
+			.filter( item => ( item[ 1 ].strings_added + item[ 1 ].strings_updated + item[ 1 ].strings_delete ) > 0 )
+			.sort( sortByPackageName() );
+
+		const nonChangedItems = summaryCollection.updated
+			.filter( item => !changedItems.includes( item ) )
+			.sort( sortByPackageName() );
+
+		for ( const [ packageName, response ] of changedItems ) {
+			table.push( [ packageName, response.strings_added, response.strings_updated, response.strings_delete ] );
+		}
+
+		for ( const [ packageName, response ] of nonChangedItems ) {
+			const rowData = [ packageName, response.strings_added, response.strings_updated, response.strings_delete ];
+
+			table.push( rowData.map( item => chalk.gray( item ) ) );
+		}
+
+		logger.info( table.toString() );
+	}
+
+	function sortByPackageName() {
+		return ( a, b ) => {
+			/* istanbul ignore else */
+			if ( a[ 0 ] < b[ 0 ] ) {
+				return -1;
+			} else if ( a[ 0 ] > b[ 0 ] ) {
+				return 1;
+			}
+
+			/* istanbul ignore next */
+			return 0;
+		};
+	}
 }
