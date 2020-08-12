@@ -31,6 +31,16 @@ module.exports = {
 
 				console.warn( `File ${ filename } did not start with '@module' tag and hence it will be ignored while building docs.` );
 			}
+		},
+
+		processingComplete( evt ) {
+			for ( const doclet of evt.doclets ) {
+				if ( doclet.meta && doclet.meta.path ) {
+					if ( isPrivatePackageFile( doclet.meta.path ) ) {
+						delete doclet.meta;
+					}
+				}
+			}
 		}
 	},
 
