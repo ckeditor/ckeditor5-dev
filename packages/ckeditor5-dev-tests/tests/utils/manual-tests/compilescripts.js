@@ -149,13 +149,14 @@ describe( 'compileManualTestScripts', () => {
 		);
 	} );
 
-	it( 'compiles only manual test files', () => {
+	it( 'compiles only manual test files (ignores utils and files outside the manual directory)', () => {
 		const manualTestScriptsPatterns = [
 			'ckeditor5-build-classic/tests/**/*.js'
 		];
 
 		stubs.glob.onFirstCall().returns( [
 			'ckeditor5-build-classic/tests/manual/ckeditor.js',
+			'ckeditor5-build-classic/tests/manual/_utils/secretplugin.js',
 			'ckeditor5-build-classic/tests/ckeditor.js'
 		] );
 
