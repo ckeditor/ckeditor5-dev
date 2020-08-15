@@ -20,6 +20,7 @@ const getRelativeFilePath = require( '../getrelativefilepath' );
  * @param {String} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
  * @param {String} options.language A language passed to `CKEditorWebpackPlugin`.
  * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
+ * @param {String} [options.identityFile] A file that provides secret keys used in the test scripts.
  * @returns {Promise}
  */
 module.exports = function compileManualTestScripts( options ) {
@@ -41,7 +42,8 @@ module.exports = function compileManualTestScripts( options ) {
 		themePath: options.themePath,
 		language: options.language,
 		additionalLanguages: options.additionalLanguages,
-		debug: options.debug
+		debug: options.debug,
+		identityFile: options.identityFile
 	} );
 
 	return runWebpack( webpackConfig );

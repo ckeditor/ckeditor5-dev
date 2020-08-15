@@ -85,7 +85,8 @@ describe( 'runManualTests', () => {
 					themePath: null,
 					language: undefined,
 					additionalLanguages: undefined,
-					debug: undefined
+					debug: undefined,
+					identityFile: null
 				} );
 
 				expect( spies.server.calledOnce ).to.equal( true );
@@ -150,7 +151,8 @@ describe( 'runManualTests', () => {
 					themePath: 'path/to/theme',
 					language: undefined,
 					additionalLanguages: undefined,
-					debug: [ 'CK_DEBUG' ]
+					debug: [ 'CK_DEBUG' ],
+					identityFile: null
 				} );
 
 				expect( spies.server.calledOnce ).to.equal( true );
@@ -219,7 +221,8 @@ describe( 'runManualTests', () => {
 					themePath: 'path/to/theme',
 					language: 'pl',
 					additionalLanguages: [ 'ar', 'en' ],
-					debug: [ 'CK_DEBUG' ]
+					debug: [ 'CK_DEBUG' ],
+					identityFile: null
 				} );
 
 				expect( spies.server.calledOnce ).to.equal( true );
@@ -250,6 +253,86 @@ describe( 'runManualTests', () => {
 				expect( spies.server.calledOnce ).to.equal( true );
 				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
 				expect( spies.server.firstCall.args[ 1 ] ).to.equal( 8888 );
+			} );
+	} );
+
+	it( 'allows specifying identity file (absolute path)', () => {
+		spies.transformFileOptionToTestGlob.onFirstCall().returns( [
+			'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
+			'workspace/packages/ckeditor4-build-classic/tests/**/manual/**/*.js'
+		] );
+		spies.transformFileOptionToTestGlob.onSecondCall().returns( [
+			'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js',
+			'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
+		] );
+
+		const options = {
+			files: [
+				'build-classic',
+				'editor-classic/manual/classic.js'
+			],
+			identityFile: '/absolute/path/to/secrets.js'
+		};
+
+		return runManualTests( options )
+			.then( () => {
+				expect( spies.server.calledOnce ).to.equal( true );
+				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+
+				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+					buildDir: 'workspace/build/.manual-tests',
+					patterns: [
+						'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor4-build-classic/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js',
+						'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
+					],
+					themePath: null,
+					language: undefined,
+					debug: undefined,
+					additionalLanguages: undefined,
+					identityFile: '/absolute/path/to/secrets.js'
+				} );
+			} );
+	} );
+
+	it( 'allows specifying identity file (relative path)', () => {
+		spies.transformFileOptionToTestGlob.onFirstCall().returns( [
+			'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
+			'workspace/packages/ckeditor4-build-classic/tests/**/manual/**/*.js'
+		] );
+		spies.transformFileOptionToTestGlob.onSecondCall().returns( [
+			'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js',
+			'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
+		] );
+
+		const options = {
+			files: [
+				'build-classic',
+				'editor-classic/manual/classic.js'
+			],
+			identityFile: 'path/to/secrets.js'
+		};
+
+		return runManualTests( options )
+			.then( () => {
+				expect( spies.server.calledOnce ).to.equal( true );
+				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+
+				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+					buildDir: 'workspace/build/.manual-tests',
+					patterns: [
+						'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor4-build-classic/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor5-editor-classic/tests/manual/**/*.js',
+						'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
+					],
+					themePath: null,
+					language: undefined,
+					debug: undefined,
+					additionalLanguages: undefined,
+					identityFile: 'workspace/path/to/secrets.js'
+				} );
 			} );
 	} );
 } );

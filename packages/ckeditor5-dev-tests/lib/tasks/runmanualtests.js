@@ -24,6 +24,7 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
  * @param {String} [options.language] A language passed to `CKEditorWebpackPlugin`.
  * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
  * @param {Number} [options.port] A port number used by the `createManualTestServer`.
+ * @param {String} [options.identityFile] A file that provides secret keys used in the test scripts.
  * @returns {Promise}
  */
 module.exports = function runManualTests( options ) {
@@ -38,6 +39,7 @@ module.exports = function runManualTests( options ) {
 	const themePath = options.themePath || null;
 	const language = options.language;
 	const additionalLanguages = options.additionalLanguages;
+	const identityFile = normalizeIdentityFile( options.identityFile );
 
 	return Promise.resolve()
 		.then( () => removeDir( buildDir ) )
@@ -48,7 +50,8 @@ module.exports = function runManualTests( options ) {
 				themePath,
 				language,
 				additionalLanguages,
-				debug: options.debug
+				debug: options.debug,
+				identityFile
 			} ),
 			compileManualTestHtmlFiles( {
 				buildDir,
@@ -60,3 +63,21 @@ module.exports = function runManualTests( options ) {
 		] ) )
 		.then( () => createManualTestServer( buildDir, options.port ) );
 };
+
+/**
+ * @param {String|null} identityFile
+ * @returns {String|null}
+ */
+function normalizeIdentityFile( identityFile ) {
+	if ( !identityFile ) {
+		return null;
+	}
+
+	// Passed an absolute path.
+	if ( path.isAbsolute( identityFile ) ) {
+		return identityFile;
+	}
+
+	// Passed a relative path. Merge it with the current working directory.
+	return path.join( process.cwd(), identityFile );
+}

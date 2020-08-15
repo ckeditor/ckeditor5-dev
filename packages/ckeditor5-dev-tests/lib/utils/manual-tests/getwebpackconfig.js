@@ -9,6 +9,7 @@ const path = require( 'path' );
 const WebpackNotifierPlugin = require( './webpacknotifierplugin' );
 const { getPostCssConfig } = require( '@ckeditor/ckeditor5-dev-utils' ).styles;
 const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
+const webpack = require( 'webpack' );
 
 /**
  * @param {Object} options
@@ -17,9 +18,12 @@ const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' 
  * @param {String} options.themePath
  * @param {String} [options.language]
  * @param {Array.<String>} [options.additionalLanguages]
+ * @param {String|null} [options.identityFile]
  * @returns {Object}
  */
 module.exports = function getWebpackConfigForManualTests( options ) {
+	const definitions = Object.assign( {}, getDefinitionsFromFile( options.identityFile ) );
+
 	return {
 		mode: 'development',
 
@@ -43,7 +47,8 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 				language: options.language,
 				additionalLanguages: options.additionalLanguages,
 				addMainLanguageTranslationsToAllAssets: true
-			} )
+			} ),
+			new webpack.DefinePlugin( definitions )
 		],
 
 		module: {
@@ -97,3 +102,21 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 		}
 	};
 };
+
+/**
+ * @param {String|null} definitionSource
+ * @returns {Object}
+ */
+function getDefinitionsFromFile( definitionSource ) {
+	if ( !definitionSource ) {
+		return {};
+	}
+
+	try {
+		return require( definitionSource );
+	} catch ( err ) {
+		console.error( err.message );
+
+		return {};
+	}
+}

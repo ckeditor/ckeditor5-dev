@@ -73,7 +73,8 @@ describe( 'compileManualTestScripts', () => {
 					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
 					'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
 				},
-				debug: [ 'CK_DEBUG' ]
+				debug: [ 'CK_DEBUG' ],
+				identityFile: undefined
 			} );
 
 			expect( stubs.webpack.calledOnce ).to.equal( true );
@@ -199,6 +200,48 @@ describe( 'compileManualTestScripts', () => {
 			expect( stubs.getRelativeFilePath.calledOnce ).to.equal( true );
 			expect( stubs.getRelativeFilePath.firstCall.args[ 0 ] )
 				.to.equal( 'ckeditor5-build-classic\\tests\\manual\\ckeditor.js' );
+		} );
+	} );
+
+	it( 'should pass identity file to Webpack configuration factory', () => {
+		stubs.glob.returns( [ 'ckeditor5-foo/manual/file1', 'ckeditor5-foo/manual/file2' ] );
+		const identityFile = '/foo/bar.js';
+
+		return compileManualTestScripts( {
+			buildDir: 'buildDir',
+			patterns: [ 'manualTestPattern' ],
+			themePath: 'path/to/theme',
+			language: 'en',
+			additionalLanguages: [ 'pl', 'ar' ],
+			debug: [ 'CK_DEBUG' ],
+			identityFile
+		} ).then( () => {
+			expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
+
+			expect( stubs.getWebpackConfig.firstCall.args[ 0 ] ).to.deep.equal( {
+				buildDir: 'buildDir',
+				themePath: 'path/to/theme',
+				language: 'en',
+				additionalLanguages: [ 'pl', 'ar' ],
+				entries: {
+					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
+					'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
+				},
+				debug: [ 'CK_DEBUG' ],
+				identityFile
+			} );
+
+			expect( stubs.webpack.calledOnce ).to.equal( true );
+			expect( stubs.webpack.firstCall.args[ 0 ] ).to.deep.equal( {
+				buildDir: 'buildDir',
+				entries: {
+					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
+					'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
+				}
+			} );
+
+			expect( stubs.glob.calledOnce ).to.equal( true );
+			expect( stubs.glob.firstCall.args[ 0 ] ).to.equal( 'manualTestPattern' );
 		} );
 	} );
 } );
