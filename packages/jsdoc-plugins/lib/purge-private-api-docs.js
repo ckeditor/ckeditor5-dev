@@ -38,6 +38,8 @@ module.exports = {
 				if ( doclet.meta && doclet.meta.path ) {
 					if ( isPrivatePackageFile( doclet.meta.path ) ) {
 						delete doclet.meta;
+
+						doclet.skipSource = true;
 					}
 				}
 			}
