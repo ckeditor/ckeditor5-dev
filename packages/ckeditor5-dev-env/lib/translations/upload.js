@@ -70,13 +70,13 @@ function createOrUpdateResource( config, potFile, isUploadedResource, summaryCol
 	if ( isUploadedResource ) {
 		return transifexService.putResourceContent( resConfig )
 			.then( parsedResponse => {
-				summaryCollection.updated.push( [ packageName, parsedResponse ]);
+				summaryCollection.updated.push( [ packageName, parsedResponse ] );
 			} );
 	}
 
 	return transifexService.postResource( resConfig )
 		.then( parsedResponse => {
-			summaryCollection.created.push( [ packageName, parsedResponse ]);
+			summaryCollection.created.push( [ packageName, parsedResponse ] );
 		} );
 }
 
