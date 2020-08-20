@@ -67,7 +67,9 @@ function onRequest( sourcePath, request, response ) {
 
 	// In other cases - return a static file.
 	try {
-		const content = fs.readFileSync( path.join( sourcePath, request.url ) );
+		// Remove the query part of the request.
+		const url = request.url.replace( /\?.+$/, '' );
+		const content = fs.readFileSync( path.join( sourcePath, url ) );
 
 		response.end( content, 'utf-8' );
 	} catch ( error ) {
