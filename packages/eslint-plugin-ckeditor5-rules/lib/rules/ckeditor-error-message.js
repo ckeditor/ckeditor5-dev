@@ -8,10 +8,12 @@
 module.exports = {
 	meta: {
 		type: 'problem',
-
 		docs: {
 			description: 'Disallow relative imports from CKEditor5 packages.',
 			category: 'CKEditor5'
+		},
+		messages: {
+			'invalidMessageFormat': 'The error message has invalid format - it must follow kebab case.'
 		},
 		schema: []
 	},
@@ -22,12 +24,13 @@ module.exports = {
 				const errorName = throwExpression.callee.name;
 
 				if ( errorName === 'CKEditorError' ) {
-					const [ message, contextArg ] = throwExpression.arguments;
+					const [ message ] = throwExpression.arguments;
 
-					if ( !isValidMessage( message ) ) {
+					if ( !isValidFormat( message ) ) {
+						// TODO: might include fixer
 						context.report( {
 							node: message,
-							message: 'Invalid error message format'
+							messageId: 'invalidMessageFormat'
 						} );
 					}
 				}
@@ -36,14 +39,12 @@ module.exports = {
 	}
 };
 
-function isValidMessage( messageNode ) {
+const VALID_MESSAGE_ID = /^[a-z-0-9]+$/;
+
+function isValidFormat( messageNode ) {
 	if ( messageNode.type !== 'Literal' ) {
 		return false;
 	}
 
-	if ( messageNode.value.includes( ':' ) ) {
-		return false;
-	}
-
-	return true;
+	return VALID_MESSAGE_ID.test( messageNode.value );
 }

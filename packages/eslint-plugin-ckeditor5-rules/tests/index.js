@@ -52,6 +52,7 @@ ruleTester.run( 'eslint-plugin-ckeditor5-rules/ckeditor-error-message', require(
 		'throw new CKEditorError( \'collection-add-called-without-an-item\', this );'
 	],
 	invalid: [
+		// Deprecated message id with a semicolon after error id.
 		{
 			code:
 				'/**\n' +
@@ -61,8 +62,59 @@ ruleTester.run( 'eslint-plugin-ckeditor5-rules/ckeditor-error-message', require(
 				' */\n' +
 				'throw new CKEditorError( \'collection-add-invalid-call: Missing item.\', this );',
 			errors: [
-				{ message: 'Invalid error message format' }
+				{ messageId: 'invalidMessageFormat' }
+			]
+		},
+		// No @error clause.
+		{
+			code:
+				'/**\n' +
+				' * Missing item.\n' +
+				' */\n' +
+				'throw new CKEditorError( \'collection-add-invalid-call: Missing item.\', this );',
+			errors: [
+				{ messageId: 'invalidMessageFormat' }
+			]
+		},
+		// Wrong ID format - not in lower case.
+		{
+			code:
+				'/**\n' +
+				' * Missing item.\n' +
+				' *\n' +
+				' * @error CoLlEcTiOn-Add-INVALID-call\n' +
+				' */\n' +
+				'throw new CKEditorError( \'CoLlEcTiOn-Add-INVALID-call\', this );',
+			errors: [
+				{ messageId: 'invalidMessageFormat' }
+			]
+		},
+		// Wrong ID format - a sentence.
+		{
+			code:
+				'/**\n' +
+				' * Missing item.\n' +
+				' *\n' +
+				' * @error CoLlEcTiOn-Add-INVALID-call\n' +
+				' */\n' +
+				'throw new CKEditorError( \'Collection add invalid call\', this );',
+			errors: [
+				{ messageId: 'invalidMessageFormat' }
 			]
 		}
+
+		// Error id & @error clause mismatch.
+		// {
+		// 	code:
+		// 		'/**\n' +
+		// 		' * Missing item.\n' +
+		// 		' *\n' +
+		// 		' * @error some-other-error\n' +
+		// 		' */\n' +
+		// 		'throw new CKEditorError( \'collection-add-invalid-call\', this );',
+		// 	errors: [
+		// 		{ messageId: 'invalidMessageFormat' }
+		// 	]
+		// },
 	]
 } );
