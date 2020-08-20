@@ -1,6 +1,39 @@
 Changelog
 =========
 
+## [23.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v23.1.1...v23.2.0) (2020-08-20)
+
+### Features
+
+* **[jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-jsdoc-plugins)**: Introduced a plugin that hides the package documentation if in the package's `package.json` file the `private` key is set to `true`. However, by adding the `@publicApi` annotation, you can mark blocks of the code that should not be hidden. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/374efa83b258e40b36a6451a288e494582f8c5ac))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Manual test server accepts a new flag: `--identity-file` (alias: `-i`) that allows defining global constants in manual tests. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/374efa83b258e40b36a6451a288e494582f8c5ac))
+
+### Other changes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Improved output displayed while the `translations.upload()` function is working. Instead of displaying `console.log()` after each package, summary tables will be displayed when the function finishes its job. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/fb88a3ed7450c148debbd4bdc5e2a1fbbd82b1f8))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Manual test script will not search for tests in the `./manual/_utils` directory. If any of a manual test requires additional utils to work, those can be placed in the `_utils` directory. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/374efa83b258e40b36a6451a288e494582f8c5ac))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v23.1.1 => v23.2.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v23.1.1 => v23.2.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v23.1.1 => v23.2.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v23.1.1 => v23.2.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v23.1.1 => v23.2.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v23.1.1 => v23.2.0
+</details>
+
+
 ## [23.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/v23.1.0...v23.1.1) (2020-08-05)
 
 Internal changes only (updated dependencies, documentation, etc.).
