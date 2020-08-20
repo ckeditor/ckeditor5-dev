@@ -13,24 +13,40 @@ module.exports = {
 			category: 'CKEditor5'
 		},
 		messages: {
-			'invalidMessageFormat': 'The error message has invalid format - it must follow kebab case.'
+			'invalidMessageFormat': 'The error message has invalid format - it must follow kebab case.',
+			'missingErrorAnnotation': 'The error "{{ messageId }}" has no matching @error JSDoc definition.'
 		},
 		schema: []
 	},
 	create( context ) {
 		return {
 			ThrowStatement: node => {
-				const throwExpression = node.argument;
-				const errorName = throwExpression.callee.name;
+				const newExpression = node.argument;
+				const errorName = newExpression.callee.name;
 
 				if ( errorName === 'CKEditorError' ) {
-					const [ message ] = throwExpression.arguments;
+					const [ message ] = newExpression.arguments;
 
 					if ( !isValidFormat( message ) ) {
 						// TODO: might include fixer
 						context.report( {
 							node: message,
 							messageId: 'invalidMessageFormat'
+						} );
+
+						return;
+					}
+
+					// At this point CKEditorError has properly formatted errorId.
+					const errorId = message.value;
+
+					if ( !hasMatchingAnnotation( context.getSourceCode(), errorId ) ) {
+						context.report( {
+							node: message,
+							messageId: 'missingErrorAnnotation',
+							data: {
+								messageId: errorId
+							}
 						} );
 					}
 				}
@@ -47,4 +63,23 @@ function isValidFormat( messageNode ) {
 	}
 
 	return VALID_MESSAGE_ID.test( messageNode.value );
+}
+
+const isCommentBlockWithError = comment => comment.type === 'Block' && comment.value.includes( '@error' );
+
+function hasMatchingAnnotation( sourceCode, messageId ) {
+	const isErrorWithMessageId = getMessageIdValidator( messageId );
+
+	const matchingComment = sourceCode.getAllComments()
+		.filter( isCommentBlockWithError )
+		.find( comment => !!comment.value.split( '\n' ).find( isErrorWithMessageId ) );
+
+	return !!matchingComment;
+}
+
+function getMessageIdValidator( messageId ) {
+	const pattern = `@error ${ messageId }$`;
+	const isValidRe = new RegExp( pattern );
+
+	return string => isValidRe.test( string );
 }
