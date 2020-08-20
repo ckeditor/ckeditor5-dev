@@ -37,7 +37,8 @@ module.exports = function parseArguments( args ) {
 			v: 'verbose',
 			f: 'files',
 			b: 'browsers',
-			d: 'debug'
+			d: 'debug',
+			i: 'identity-file'
 		},
 
 		default: {
@@ -49,7 +50,8 @@ module.exports = function parseArguments( args ) {
 			verbose: false,
 			'source-map': false,
 			server: false,
-			production: false
+			production: false,
+			'identity-file': null
 		}
 	};
 
@@ -57,6 +59,7 @@ module.exports = function parseArguments( args ) {
 
 	options.karmaConfigOverrides = options[ 'karma-config-overrides' ];
 	options.sourceMap = options[ 'source-map' ];
+	options.identityFile = options[ 'identity-file' ];
 	options.browsers = options.browsers.split( ',' );
 
 	if ( typeof options.files === 'string' ) {

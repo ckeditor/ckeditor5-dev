@@ -37,7 +37,10 @@ module.exports = function compileHtmlFiles( options ) {
 		return [
 			...arr,
 			...globSync( manualTestPattern )
+				// Accept only files saved in the `/manual/` directory.
 				.filter( manualTestFile => manualTestFile.includes( path.sep + 'manual' + path.sep ) )
+				// But do not parse manual tests utils saved in the `/manual/_utils/` directory.
+				.filter( manualTestFile => !manualTestFile.includes( path.sep + 'manual' + path.sep + '_utils' + path.sep ) )
 				.map( jsFile => setExtension( jsFile, 'md' ) )
 		];
 	}, [] );

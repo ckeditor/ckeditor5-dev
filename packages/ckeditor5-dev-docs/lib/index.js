@@ -51,6 +51,7 @@ async function build( config ) {
 	const jsDocConfig = {
 		plugins: [
 			require.resolve( 'jsdoc/plugins/markdown' ),
+			require.resolve( '@ckeditor/jsdoc-plugins/lib/purge-private-api-docs' ),
 			require.resolve( '@ckeditor/jsdoc-plugins/lib/export-fixer/export-fixer' ),
 			require.resolve( '@ckeditor/jsdoc-plugins/lib/custom-tags/error' ),
 			require.resolve( '@ckeditor/jsdoc-plugins/lib/custom-tags/observable' ),

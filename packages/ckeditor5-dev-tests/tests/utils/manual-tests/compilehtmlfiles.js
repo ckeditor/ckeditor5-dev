@@ -266,7 +266,10 @@ describe( 'compileHtmlFiles', () => {
 		};
 
 		patternFiles = {
-			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
+			[ path.join( 'manualTestPattern', '*.js' ) ]: [
+				path.join( 'path', 'to', 'manual', 'file.js' ),
+				path.join( 'path', 'to', 'manual', '_utils', 'secretplugin.js' )
+			],
 			[ path.join( 'anotherPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'another', 'file.js' ) ],
 			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ]
 		};
