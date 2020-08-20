@@ -41,15 +41,26 @@ ruleTester.run( 'eslint-plugin-ckeditor5-rules/no-relative-imports', require( '.
 	]
 } );
 
+const validJSDoc = '/**\n' +
+	' * This method always needs to be executed with an item. And so on...\n' +
+	' *\n' +
+	' * @error collection-add-called-without-an-item\n' +
+	' */\n';
+
+const validThrow = 'throw new CKEditorError( \'collection-add-called-without-an-item\', this );\n';
+
 ruleTester.run( 'eslint-plugin-ckeditor5-rules/ckeditor-error-message', require( '../lib/rules/ckeditor-error-message' ), {
 	valid: [
-		'/**\n' +
-		' * The {@link module:utils/collection~Collection#add `Collection#add()`} method was called without\n' +
-		' * an item. This method always needs to be executed with an item. And so on...\n' +
-		' *\n' +
-		' * @error collection-add-called-without-an-item\n' +
-		' */\n' +
-		'throw new CKEditorError( \'collection-add-called-without-an-item\', this );'
+		validJSDoc + validThrow,
+
+		// // Annotation in other place in the source code (before).
+		validJSDoc +
+		'if ( fooBar ) {\n' +
+		'\t' + validThrow +
+		'}',
+
+		// Annotation in other place in the source code (after).
+		validThrow + validJSDoc
 	],
 	invalid: [
 		// Deprecated message id with a semicolon after error id.
@@ -101,20 +112,20 @@ ruleTester.run( 'eslint-plugin-ckeditor5-rules/ckeditor-error-message', require(
 			errors: [
 				{ messageId: 'invalidMessageFormat' }
 			]
-		}
+		},
 
 		// Error id & @error clause mismatch.
-		// {
-		// 	code:
-		// 		'/**\n' +
-		// 		' * Missing item.\n' +
-		// 		' *\n' +
-		// 		' * @error some-other-error\n' +
-		// 		' */\n' +
-		// 		'throw new CKEditorError( \'collection-add-invalid-call\', this );',
-		// 	errors: [
-		// 		{ messageId: 'invalidMessageFormat' }
-		// 	]
-		// },
+		{
+			code:
+				'/**\n' +
+				' * Missing item.\n' +
+				' *\n' +
+				' * @error some-other-error\n' +
+				' */\n' +
+				'throw new CKEditorError( \'collection-add-invalid-call\', this );',
+			errors: [
+				{ messageId: 'missingErrorAnnotation' }
+			]
+		}
 	]
 } );
