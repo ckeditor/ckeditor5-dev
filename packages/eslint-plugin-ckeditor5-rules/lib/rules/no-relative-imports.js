@@ -8,7 +8,6 @@
 module.exports = {
 	meta: {
 		type: 'problem',
-
 		docs: {
 			description: 'Disallow relative imports from CKEditor5 packages.',
 			category: 'CKEditor5'

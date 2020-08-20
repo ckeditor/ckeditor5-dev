@@ -12,6 +12,7 @@ module.exports = {
 			description: 'Disallow relative imports from CKEditor5 packages.',
 			category: 'CKEditor5'
 		},
+		fixable: 'code',
 		messages: {
 			'invalidMessageFormat': 'The error message has invalid format - it must follow kebab case.',
 			'missingErrorAnnotation': 'The error "{{ messageId }}" has no matching @error JSDoc definition.'
@@ -20,29 +21,41 @@ module.exports = {
 	},
 	create( context ) {
 		return {
-			ThrowStatement: node => {
-				const newExpression = node.argument;
-				const errorName = newExpression.callee.name;
+			NewExpression: node => {
+				const callee = node.callee;
+
+				if ( callee.name !== 'CKEditorError' ) {
+					return;
+				}
+
+				const errorName = callee.name;
 
 				if ( errorName === 'CKEditorError' ) {
-					const [ message ] = newExpression.arguments;
+					const [ firstArgument ] = node.arguments;
+					const message = safeMessageOrNull( firstArgument );
 
-					if ( !isValidFormat( message ) ) {
-						// TODO: might include fixer
+					if ( !message ) {
+						return;
+					}
+
+					if ( !isValidFormat( firstArgument ) ) {
 						context.report( {
-							node: message,
-							messageId: 'invalidMessageFormat'
+							node: firstArgument,
+							messageId: 'invalidMessageFormat',
+							fix: fixer => {
+								return fixer.replaceTextRange( firstArgument.range, `'${ formatMessage( message ) }'` );
+							}
 						} );
 
 						return;
 					}
 
 					// At this point CKEditorError has properly formatted errorId.
-					const errorId = message.value;
+					const errorId = message;
 
 					if ( !hasMatchingAnnotation( context.getSourceCode(), errorId ) ) {
 						context.report( {
-							node: message,
+							node: firstArgument,
 							messageId: 'missingErrorAnnotation',
 							data: {
 								messageId: errorId
@@ -82,4 +95,28 @@ function getMessageIdValidator( messageId ) {
 	const isValidRe = new RegExp( pattern );
 
 	return string => isValidRe.test( string );
+}
+
+function safeMessageOrNull( node ) {
+	if ( !node ) {
+		return null;
+	}
+
+	if ( node.type === 'Literal' ) {
+		return node.value;
+	}
+
+	if ( node.type === 'BinaryExpression' ) {
+		const { left, right } = node;
+
+		return left.value + right.value;
+	}
+
+	return null;
+}
+
+function formatMessage( string ) {
+	const [ id ] = string.split( ':' );
+
+	return id.toLowerCase().replace( / /g, '-' );
 }
