@@ -113,7 +113,15 @@ function getDefinitionsFromFile( definitionSource ) {
 	}
 
 	try {
-		return require( definitionSource );
+		const definitions = require( definitionSource );
+
+		const stringifiedDefinitions = {};
+
+		for ( const definitionName in definitions ) {
+			stringifiedDefinitions[ definitionName ] = JSON.stringify( definitions[ definitionName ] );
+		}
+
+		return stringifiedDefinitions;
 	} catch ( err ) {
 		console.error( err.message );
 
