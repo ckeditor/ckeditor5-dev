@@ -83,8 +83,7 @@ ruleTester.run( 'eslint-plugin-ckeditor5-rules/ckeditor-error-message', require(
 	invalid: [
 		// Deprecated message id with a semicolon after error id.
 		{
-			code:
-				validJSDoc +
+			code: validJSDoc +
 				'throw new CKEditorError( \'method-id-is-kebab: Missing item.\', this );\n',
 			output: validJSDoc + validThrow,
 			errors: [
@@ -94,8 +93,7 @@ ruleTester.run( 'eslint-plugin-ckeditor5-rules/ckeditor-error-message', require(
 
 		// Wrong ID format - not in lower case.
 		{
-			code:
-				validJSDoc +
+			code: validJSDoc +
 				'throw new CKEditorError( \'METHOD-ID-IS-KEBAB\', this );\n',
 			output: validJSDoc + validThrow,
 			errors: [
@@ -104,10 +102,17 @@ ruleTester.run( 'eslint-plugin-ckeditor5-rules/ckeditor-error-message', require(
 		},
 		// Wrong ID format - a sentence.
 		{
-			code:
-
-				validJSDoc +
+			code: validJSDoc +
 				'throw new CKEditorError( \'Method ID is kebab\', this );\n',
+			output: validJSDoc + validThrow,
+			errors: [
+				{ messageId: 'invalidMessageFormat' }
+			]
+		},
+		// Wrong ID format - multiple string concatenation.
+		{
+			code: validJSDoc +
+				'throw new CKEditorError( \'method-id-is-kebab:\' + \'This\' + \' is \' + \'wrong!\', this );\n',
 			output: validJSDoc + validThrow,
 			errors: [
 				{ messageId: 'invalidMessageFormat' }

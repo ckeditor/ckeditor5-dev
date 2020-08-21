@@ -102,17 +102,51 @@ function safeMessageOrNull( node ) {
 		return null;
 	}
 
+	// Single string.
 	if ( node.type === 'Literal' ) {
 		return node.value;
 	}
 
+	// Message is constructing by string concatenation using "foo" + "bar" + "baz".
 	if ( node.type === 'BinaryExpression' ) {
-		const { left, right } = node;
-
-		return left.value + right.value;
+		return computeLiteralFromExpression( node );
 	}
 
+	// Anything else - let's keep that.
 	return null;
+}
+
+/**
+ * Computes String value from string concatenation.
+ *
+ * This method assumes that error message might be a result of string concatenation:
+ *
+ *		new CKEditorError( 'message-id:' +
+ *			'Very long text' +
+ *			'broken into multiple lines'
+ *		);
+ *
+ * @param node
+ * @returns {String}
+ */
+function computeLiteralFromExpression( node ) {
+	let concatenatedString = '';
+	let binaryExpressionOrLiteral = node;
+	let leftSide;
+
+	do {
+		const rightSide = binaryExpressionOrLiteral.right;
+		leftSide = binaryExpressionOrLiteral.left;
+
+		// Expression evaluation is done from right to left.
+		concatenatedString = rightSide.value + concatenatedString;
+
+		// Evaluate left side in next step.
+		binaryExpressionOrLiteral = leftSide;
+	} while ( leftSide.type === 'BinaryExpression' );
+
+	// Safety check - I'm not sure what else might be as the first part of concatenation but let's not break at least:
+	return leftSide.type === 'Literal' ? leftSide.value + concatenatedString : concatenatedString;
 }
 
 function formatMessage( string ) {
