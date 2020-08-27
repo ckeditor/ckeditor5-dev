@@ -639,7 +639,7 @@ describe( 'dev-env/release-tools/utils', () => {
 							'### Release highlights'
 						);
 						expect( changesAsArray[ 2 ] ).to.equal(
-							'TODO: Add a link to the blog post.'
+							'<!-- TODO: Add a link to the blog post. -->'
 						);
 						expect( changesAsArray[ 3 ] ).to.equal(
 							'### Features'
@@ -820,7 +820,7 @@ describe( 'dev-env/release-tools/utils', () => {
 							'### Release highlights'
 						);
 						expect( changesAsArray[ 2 ] ).to.equal(
-							'TODO: Add a link to the blog post.'
+							'<!-- TODO: Add a link to the blog post. -->'
 						);
 						expect( changesAsArray[ 3 ] ).to.equal(
 							'### Collaboration features'
