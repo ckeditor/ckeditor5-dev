@@ -136,9 +136,13 @@ describe( 'compileHtmlFiles', () => {
 		expect(	stubs.fs.outputFileSync ).to.be.calledWithExactly(
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
-				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<div class="manual-test-sidebar"><a href="/" class="manual-test-sidebar__root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
+					'<span></span><span></span><span></span>' +
+				'</button>',
 				'<div>html file content</div>',
-				'<body class="manual-test-container">' +
+				'<body class="manual-test-container manual-test-container_no-transitions">' +
+					'<script src="/assets/togglesidebar.js"></script>' +
 					'<script src="/assets/inspector.js"></script>' +
 					'<script src="/assets/attachinspector.js"></script>' +
 					`<script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script>` +
@@ -170,9 +174,13 @@ describe( 'compileHtmlFiles', () => {
 		expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
-				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<div class="manual-test-sidebar"><a href="/" class="manual-test-sidebar__root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
+					'<span></span><span></span><span></span>' +
+				'</button>',
 				'<div>html file content</div>',
-				'<body class="manual-test-container">' +
+				'<body class="manual-test-container manual-test-container_no-transitions">' +
+					'<script src="/assets/togglesidebar.js"></script>' +
 					'<script src="/assets/inspector.js"></script>' +
 					'<script src="/assets/attachinspector.js"></script>' +
 					'<script src="/translations/en.js"></script>' +
@@ -206,9 +214,13 @@ describe( 'compileHtmlFiles', () => {
 		expect( stubs.fs.outputFileSync ).to.be.calledWith(
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.abc.html' ), [
 				'<div>template html content</div>',
-				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<div class="manual-test-sidebar"><a href="/" class="manual-test-sidebar__root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
+					'<span></span><span></span><span></span>' +
+				'</button>',
 				'<div>html file content</div>',
-				'<body class="manual-test-container">' +
+				'<body class="manual-test-container manual-test-container_no-transitions">' +
+					'<script src="/assets/togglesidebar.js"></script>' +
 					'<script src="/assets/inspector.js"></script>' +
 					'<script src="/assets/attachinspector.js"></script>' +
 					`<script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.abc.js' ) }"></script>` +
@@ -323,9 +335,13 @@ describe( 'compileHtmlFiles', () => {
 		expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
-				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<div class="manual-test-sidebar"><a href="/" class="manual-test-sidebar__root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
+					'<span></span><span></span><span></span>' +
+				'</button>',
 				'<div>html file content</div>',
-				'<body class="manual-test-container">' +
+				'<body class="manual-test-container manual-test-container_no-transitions">' +
+					'<script src="/assets/togglesidebar.js"></script>' +
 					'<script src="/assets/inspector.js"></script>' +
 					'<script src="/assets/attachinspector.js"></script>' +
 					`<script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script>` +
@@ -374,9 +390,13 @@ describe( 'compileHtmlFiles', () => {
 		expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
-				'<div class="manual-test-sidebar"><a href="/" class="manual-test-root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<div class="manual-test-sidebar"><a href="/" class="manual-test-sidebar__root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
+					'<span></span><span></span><span></span>' +
+				'</button>',
 				'<div>html file content</div>',
-				'<body class="manual-test-container">' +
+				'<body class="manual-test-container manual-test-container_no-transitions">' +
+					'<script src="/assets/togglesidebar.js"></script>' +
 					'<script src="/assets/inspector.js"></script>' +
 					'<script src="/assets/attachinspector.js"></script>' +
 					`<script src="/${ path.join( 'path', 'to', 'manual', 'file.js' ) }"></script>` +

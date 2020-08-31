@@ -6,6 +6,12 @@
 	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src 'self' https://cksource.com http://*.cke-cs.com; script-src 'self' https://cksource.com; img-src * data:; style-src 'self' 'unsafe-inline'; frame-src *">
 	<title>Manual Test</title>
 	<style>
+		:root {
+			--ck-manual-test-sidebar-width: 390px;
+			--ck-manual-test-container-padding: 40px;
+			--ck-manual-test-transition-time: .2s;
+		}
+
 		.manual-test-list-container,
 		.manual-test-sidebar {
 			font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -21,19 +27,35 @@
 		}
 
 		.manual-test-container {
-			padding: 30px;
-			padding-left: 420px;
+			padding: var(--ck-manual-test-container-padding);
+			transition: padding .2s ease-in-out;
 		}
+
+		/*
+		 * Disable all transitions until the DOM is fully loaded. This prevents
+		 * annoying unnecessary animations on page load
+		 */
+		.manual-test-container.manual-test-container_no-transitions,
+		.manual-test-container.manual-test-container_no-transitions > .manual-test-sidebar,
+		.manual-test-container.manual-test-container_no-transitions > .manual-test-sidebar__toggle,
+		.manual-test-container.manual-test-container_no-transitions > .manual-test-sidebar__toggle > * {
+			transition: none !important;
+		}
+
+		.manual-test-container_pinned-sidebar {
+			padding-left: calc( var(--ck-manual-test-sidebar-width) + var(--ck-manual-test-container-padding));
+		}
+
+		/* ------------ Sidebar ----------------------------------------------------------------- */
 
 		.manual-test-sidebar {
 			line-height: 18px;
-
 			box-sizing: border-box;
 			position: fixed;
 			top: 0;
-			left: 0;
+			left: calc( -1 * var(--ck-manual-test-sidebar-width) );
 			bottom: 0;
-			width: 390px;
+			width: min(100vw, var(--ck-manual-test-sidebar-width));
 			background-color: #f7f7f7;
 			border-right: 1px solid #bfbfbf;
 			color: #333;
@@ -41,6 +63,11 @@
 			overflow-x: hidden;
 			overflow-y: auto;
 			z-index: 9999;
+			transition: left var(--ck-manual-test-transition-time) ease-in-out;
+		}
+
+		.manual-test-container_pinned-sidebar .manual-test-sidebar {
+			left: 0;
 			box-shadow: 0 0 8px rgba(0,0,0,.15);
 		}
 
@@ -60,7 +87,70 @@
 			font-size: 14px;
 		}
 
-		.manual-test-root-link {
+		/* ------------ Sidebar toggle button ----------------------------------------------------------------- */
+
+		.manual-test-sidebar__toggle {
+			background: none;
+			width: 24px;
+			height: 24px;
+			display: block;
+			overflow: hidden;
+			position: fixed;
+			top: 10px;
+			left: 10px;
+			border: none;
+			padding: 0;
+			margin: 0;
+			outline: none;
+			transition: left var(--ck-manual-test-transition-time) ease-in-out;
+			opacity: .5;
+			z-index: 10000;
+		}
+
+		.manual-test-sidebar__toggle:hover {
+			opacity: 1;
+		}
+
+		.manual-test-sidebar__toggle span {
+			display: block;
+			width: 20px;
+			height: 3px;
+			background: black;
+			border-radius: 3px;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			transition: transform var(--ck-manual-test-transition-time) ease-in-out, opacity var(--ck-manual-test-transition-time) ease-in-out;
+		}
+
+		.manual-test-sidebar__toggle span:nth-child(1) {
+			transform: translate(-50%, calc(-50% - 5px));
+		}
+
+		.manual-test-sidebar__toggle span:nth-child(3) {
+			transform: translate(-50%, calc(-50% + 5px));
+		}
+
+		.manual-test-container_pinned-sidebar .manual-test-sidebar__toggle {
+			left: min(calc(100vw - 35px), 350px);
+		}
+
+		.manual-test-container_pinned-sidebar .manual-test-sidebar__toggle span:nth-child(1) {
+			transform: translate(-50%, -50%) rotate(-45deg);
+		}
+
+		.manual-test-container_pinned-sidebar .manual-test-sidebar__toggle span:nth-child(2) {
+			opacity: 0;
+		}
+
+		.manual-test-container_pinned-sidebar .manual-test-sidebar__toggle span:nth-child(3) {
+			transform: translate(-50%, -50%) rotate(45deg);
+		}
+
+		/* ------------ "Back to the list" button styles ----------------------------------------------------------------- */
+
+		.manual-test-sidebar__root-link {
 			display: inline-block;
 			padding: 8px 0;
 			text-align: center;
@@ -69,23 +159,8 @@
 			text-decoration: none;
 		}
 
-		.manual-test-root-link:hover {
+		.manual-test-sidebar__root-link:hover {
 			text-decoration: underline;
-		}
-
-		@media only screen and (max-width: 920px)  {
-			.manual-test-container {
-				padding-left: 45px;
-			}
-
-			.manual-test-sidebar {
-				left: -375px;
-				transition: .15s;
-			}
-
-			.manual-test-sidebar:hover {
-				left: 0;
-			}
 		}
 	</style>
 </head>
