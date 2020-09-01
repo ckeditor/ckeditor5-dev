@@ -46,14 +46,18 @@ You can also use the bin script for testing a package:
 
 #### CLI options
 
-* `watch` - Whether to watch the files and executing tests whenever any file changes. Also available as an alias: `-w`.
-* `source-map` - Whether to generate the source maps. Also available as an alias: `-s`.
-* `coverage` - Whether to generate code coverage. Also available as an alias: `-c`.
-* `verbose` - Whether to informs about Webpack's work. Also available as an alias: `-v`.
-* `files` - Specify file(s) to test. Also available as an alias: `-f`.
 * `browsers` - Browsers which will be used to run the tests. Also available as an alias: `-b`.
-* `reporter` - Mocha reporter – either `mocha` (default) or `dots` (less verbose one).
+* `coverage` - Whether to generate code coverage. Also available as an alias: `-c`.
+* `debug` - Allows specifying custom debug flags. For example, the `--debug engine` option uncomments the `// @if CK_DEBUG_ENGINE //` lines in the code. By default `--debug` is set to true even if you did not specify it. This enables the base set of debug logs (`// @if CK_DEBUG //`) which should always be enabled in the testing environment. You can completely turn off the debug mode by setting the `--debug false` option or `--no-debug`.
+* `files` - Package names, directories or files to tests. Also available as an alias: `-f`.
+* `language` – Specifies a language that will be used while building tests. By default it is `en`.
 * `production` - Run strictest set of checks. E.g. it fails test run when there are [console calls](https://github.com/ckeditor/ckeditor5/issues/1996) or [DOM leaks](https://github.com/ckeditor/ckeditor5/issues/6002).
+* `repositories` - The names of repositories where the tool should look for packages. Those repositories should be cloned into the `external/` directory in the root directory of the project. It allows omitting specifying all packages names' as `--files` option because those names will be read by the tool automatically. 
+* `reporter` - Mocha reporter – either `mocha` (default) or `dots` (less verbose one).
+* `server` - Whether to run the server without opening any browser.
+* `source-map` - Whether to generate the source maps. Also available as an alias: `-s`.
+* `verbose` - Whether to informs about Webpack's work. Also available as an alias: `-v`.
+* `watch` - Whether to watch the files and executing tests whenever any file changes. Also available as an alias: `-w`.
 
 #### Examples
 
