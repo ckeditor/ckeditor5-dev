@@ -5,81 +5,70 @@
 
 'use strict';
 
+const path = require( 'path' );
 const minimist = require( 'minimist' );
+const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * @param {Array.<String>} args
  * @returns {Object}
  */
 module.exports = function parseArguments( args ) {
+	const log = logger();
+
 	const minimistConfig = {
 		string: [
-			'files',
 			'browsers',
+			'files',
 			'reporter',
 			'debug',
-			'karma-config-overrides'
+			'karma-config-overrides',
+			'repositories',
+			'language',
+			'theme-path',
+			'additional-languages'
 		],
 
 		boolean: [
-			'watch',
 			'coverage',
+			'production',
+			'server',
 			'source-map',
 			'verbose',
-			'server',
-			'production'
+			'watch'
 		],
 
 		alias: {
-			w: 'watch',
+			b: 'browsers',
 			c: 'coverage',
+			d: 'debug',
+			f: 'files',
+			i: 'identity-file',
+			r: 'repositories',
 			s: 'source-map',
 			v: 'verbose',
-			f: 'files',
-			b: 'browsers',
-			d: 'debug',
-			i: 'identity-file'
+			w: 'watch'
 		},
 
 		default: {
 			files: [],
 			browsers: 'Chrome',
 			reporter: 'mocha',
+			language: 'en',
 			watch: false,
 			coverage: false,
 			verbose: false,
 			'source-map': false,
 			server: false,
 			production: false,
-			'identity-file': null
+			'identity-file': null,
+			repositories: [],
+			'theme-path': null,
+			'additional-languages': null
 		}
 	};
 
 	const options = minimist( args, minimistConfig );
-
-	options.karmaConfigOverrides = options[ 'karma-config-overrides' ];
-	options.sourceMap = options[ 'source-map' ];
-	options.identityFile = options[ 'identity-file' ];
-	options.browsers = options.browsers.split( ',' );
-
-	if ( typeof options.files === 'string' ) {
-		options.files = options.files.split( ',' );
-	}
-
-	if ( options.debug === 'false' || options.debug === false ) {
-		options.debug = [];
-	} else if ( typeof options.debug === 'string' ) {
-		options.debug = [
-			'CK_DEBUG',
-			...options.debug.split( ',' ).map( flag => 'CK_DEBUG_' + flag.toUpperCase() )
-		];
-	} else {
-		options.debug = [ 'CK_DEBUG' ];
-	}
-
-	options.language = options.language || 'en';
-	options.additionalLanguages = options.additionalLanguages ? options.additionalLanguages.split( ',' ) : null;
-	options.themePath = options.themePath ? options.themePath : null;
 
 	// Delete all aliases because we don't want to use them in the code.
 	// They are useful when calling a command but useless after that.
@@ -87,5 +76,143 @@ module.exports = function parseArguments( args ) {
 		delete options[ alias ];
 	}
 
+	replaceKebabCaseWithCamelCase( options, [
+		'source-map',
+		'identity-file',
+		'theme-path',
+		'karma-config-overrides',
+		'additional-languages'
+	] );
+	splitOptionsToArray( options, [
+		'browsers',
+		'files',
+		'repositories',
+		'additionalLanguages'
+	] );
+	parseDebugOption( options );
+	parseRepositoriesOption( options );
+
 	return options;
+
+	/**
+	 * Replaces all kebab-case keys in the `options` object with camelCase entries.
+	 * Kebab-case keys will be removed.
+	 *
+	 * @param {Object} options
+	 * @param {Array.<String>} keys Kebab-case keys in `options` object.
+	 */
+	function replaceKebabCaseWithCamelCase( options, keys ) {
+		for ( const key of keys ) {
+			const camelCaseKey = toCamelCase( key );
+
+			options[ camelCaseKey ] = options[ key ];
+			delete options[ key ];
+		}
+	}
+
+	/**
+	 * Parses the `--debug` option.
+	 *
+	 * @param {Object} options
+	 */
+	function parseDebugOption( options ) {
+		if ( options.debug === 'false' || options.debug === false ) {
+			options.debug = [];
+		} else if ( typeof options.debug === 'string' ) {
+			options.debug = [
+				'CK_DEBUG',
+				...options.debug.split( ',' ).map( flag => 'CK_DEBUG_' + flag.toUpperCase() )
+			];
+		} else {
+			options.debug = [ 'CK_DEBUG' ];
+		}
+	}
+
+	/**
+	 * Parses the `--repositories` option if specified.
+	 *
+	 * All packages found in the `packages/` directory inside the root repository or the `external/[repository-name]/packages/` directory
+	 * will be added as `options.files`.
+	 *
+	 * The `ckeditor5-` prefix will be removed.
+	 *
+	 * @param {Object} options
+	 */
+	function parseRepositoriesOption( options ) {
+		if ( !options.repositories.length ) {
+			return;
+		}
+
+		const cwd = process.cwd();
+		const shouldCheckExternalDirectory = tools.isDirectory( path.join( cwd, 'external' ) );
+
+		if ( !shouldCheckExternalDirectory ) {
+			log.warning( 'The `external/` directory does not exist. Only the root repository will be checked.' );
+		}
+
+		const files = new Set( options.files );
+
+		for ( const repositoryName of options.repositories ) {
+			// Check the main repository.
+			if ( repositoryName === tools.readPackageName( cwd ) ) {
+				addPackagesToCollection( files, path.join( cwd, 'packages' ) );
+
+				continue;
+			}
+
+			// If the `external/` directory does not exist, do not check anything.
+			if ( !shouldCheckExternalDirectory ) {
+				continue;
+			}
+
+			const externalRepositoryPath = path.join( cwd, 'external', repositoryName );
+
+			// Check the "external" directory.
+			if ( tools.isDirectory( externalRepositoryPath ) ) {
+				addPackagesToCollection( files, path.join( externalRepositoryPath, 'packages' ) );
+			} else {
+				log.warning( `Did not find repository "${ repositoryName }" in the root repository or the "external/" directory.` );
+			}
+		}
+
+		options.files = [ ...files ];
+
+		function addPackagesToCollection( collection, directoryPath ) {
+			for ( const directory of tools.getDirectories( directoryPath ) ) {
+				collection.add( directory.replace( /ckeditor5?-/, '' ) );
+			}
+		}
+	}
+
+	/**
+	 * Splits by a comma (`,`) all values specified under keys to array.
+	 *
+	 * @param {Object} options
+	 * @param {Array.<String>} keys Kebab-case keys in `options` object.
+	 */
+	function splitOptionsToArray( options, keys ) {
+		for ( const key of keys ) {
+			if ( typeof options[ key ] === 'string' ) {
+				options[ key ] = options[ key ].split( ',' );
+			}
+		}
+	}
+
+	/**
+	 * Returns a camel case value for specified kebab-case `value`.
+	 *
+	 * @param {String} value Kebab-case string.
+	 * @returns {String}
+	 */
+	function toCamelCase( value ) {
+		return value.split( '-' )
+			.map( ( item, index ) => {
+				if ( !index ) {
+					return item.toLowerCase();
+				}
+
+				return item.charAt( 0 ).toUpperCase() + item.slice( 1 ).toLowerCase();
+			} )
+			.join( '' );
+	}
 };
