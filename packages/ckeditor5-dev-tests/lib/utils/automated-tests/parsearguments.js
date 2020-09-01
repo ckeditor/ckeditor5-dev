@@ -171,7 +171,7 @@ module.exports = function parseArguments( args ) {
 			if ( tools.isDirectory( externalRepositoryPath ) ) {
 				addPackagesToCollection( files, path.join( externalRepositoryPath, 'packages' ) );
 			} else {
-				log.warning( `Did not find repository "${ repositoryName }" in the root repository or the "external/" directory.` );
+				log.warning( `Did not find the repository "${ repositoryName }" in the root repository or the "external/" directory.` );
 			}
 		}
 
@@ -179,7 +179,7 @@ module.exports = function parseArguments( args ) {
 
 		function addPackagesToCollection( collection, directoryPath ) {
 			for ( const directory of tools.getDirectories( directoryPath ) ) {
-				collection.add( directory.replace( /ckeditor5?-/, '' ) );
+				collection.add( directory.replace( /^ckeditor5?-/, '' ) );
 			}
 		}
 	}
