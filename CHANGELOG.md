@@ -1,6 +1,37 @@
 Changelog
 =========
 
+## [23.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/v23.2.0...v23.3.0) (2020-09-01)
+
+### Features
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Implemented the toggle button for the manual tests sidebar. Closes [ckeditor/ckeditor5#7962](https://github.com/ckeditor/ckeditor5/issues/7962). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e21464545ba78968dea804a52f8eea3852a51b33))
+
+### Other changes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The changelog generator now produces a commented out blog post placeholder by default. Closes [ckeditor/ckeditor5#7954](https://github.com/ckeditor/ckeditor5/issues/7954). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/8ce5f25f38c3eaad903b74306b7739794e27e940))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v23.2.0 => v23.3.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v23.2.0 => v23.3.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v23.2.0 => v23.3.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v23.2.0 => v23.3.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v23.2.0 => v23.3.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v23.2.0 => v23.3.0
+</details>
+
+
 ## [23.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v23.1.1...v23.2.0) (2020-08-20)
 
 ### Features
