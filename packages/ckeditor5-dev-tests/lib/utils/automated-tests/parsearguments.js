@@ -207,7 +207,7 @@ module.exports = function parseArguments( args ) {
 	function toCamelCase( value ) {
 		return value.split( '-' )
 			.map( ( item, index ) => {
-				if ( !index ) {
+				if ( index == 0 ) {
 					return item.toLowerCase();
 				}
 
