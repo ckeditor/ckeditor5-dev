@@ -5,7 +5,7 @@ Changelog
 
 ### Features
 
-* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Introduced the --repositories (also known as -r) that allows specifying a name of a repository (or repositories, separated by a comma, similar to the --files option) where the tool should look for packages that should be tested. Thanks to that, you do not have to specify all packages of a repository that was cloned into the external/ directory. Closes [ckeditor/ckeditor5#7889](https://github.com/ckeditor/ckeditor5/issues/7889). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/1e8edca9f77b8435d5a2b210c5fa9d7a7ab8c11c))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Introduced the `--repositories` (also known as `-r`) option that allows specifying a name of a repository (or repositories, separated by a comma, similar to the `--files` option) where the tool should look for packages that should be tested. Thanks to that, you do not have to specify all packages of a repository that was cloned into the `external/` directory. Closes [ckeditor/ckeditor5#7889](https://github.com/ckeditor/ckeditor5/issues/7889). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/1e8edca9f77b8435d5a2b210c5fa9d7a7ab8c11c))
 
 ### Released packages
 
@@ -25,9 +25,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v23.3.0 => v23.4.0
 * [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v23.3.0 => v23.4.0
 * [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v23.3.0 => v23.4.0
-* [eslint-config-ckeditor5](https://www.npmjs.com/package/eslint-config-ckeditor5): v3.0.0 => v23.4.0
-* [eslint-plugin-ckeditor5-rules](https://www.npmjs.com/package/eslint-plugin-ckeditor5-rules): v1.0.0 => v23.4.0
-* [stylelint-config-ckeditor5](https://www.npmjs.com/package/stylelint-config-ckeditor5): v2.0.0 => v23.4.0
 </details>
 
 
