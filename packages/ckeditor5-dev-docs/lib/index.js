@@ -23,6 +23,8 @@ module.exports = {
  * @param {String} config.readmePath Path to `README.md`.
  * @param {Boolean} [config.validateOnly=false] Whether JSDoc should only validate the documentation and finish
  * with error code `1`. If not passed, the errors will be printed to the console but the task will finish with `0`.
+ * @param {Boolean} [config.strict=false] If `true`, errors found during the validation will finish the process
+ * and exit code will be changed to `1`.
  * @param {String} [config.outputPath] A path to the place where extracted doclets will be saved.
  * @param {String} [config.extraPlugins] An array of path to extra plugins that will be added to JSDoc.
  *
@@ -37,6 +39,7 @@ async function build( config ) {
 	const extraPlugins = config.extraPlugins || [];
 	const outputPath = config.outputPath || 'docs/api/output.json';
 	const validateOnly = config.validateOnly || false;
+	const strictCheck = config.strict || false;
 
 	// Pass options to plugins via env variables.
 	// Since plugins are added using `require` calls other forms are currently impossible.
@@ -44,6 +47,10 @@ async function build( config ) {
 
 	if ( validateOnly ) {
 		process.env.JSDOC_VALIDATE_ONLY = 'true';
+	}
+
+	if ( strictCheck ) {
+		process.env.JSDOC_STRICT_CHECK = 'true';
 	}
 
 	const files = await glob( sourceFilePatterns );
