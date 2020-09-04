@@ -126,7 +126,7 @@ function safeMessageOrNull( node ) {
  *			'broken into multiple lines'
  *		);
  *
- * @param node
+ * @param {Object} node
  * @returns {String}
  */
 function computeLiteralFromExpression( node ) {
