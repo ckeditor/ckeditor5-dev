@@ -1,6 +1,33 @@
 Changelog
 =========
 
+## [23.5.0](https://github.com/ckeditor/ckeditor5-dev/compare/v23.4.0...v23.5.0) (2020-09-04)
+
+### Features
+
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: Added an option to make strict check while building the documentation. See [ckeditor/ckeditor5#7994](https://github.com/ckeditor/ckeditor5/issues/7994). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/759cad55ff9a837b74ec6afdcc5a349cdefb85ff))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v23.4.0 => v23.5.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v23.4.0 => v23.5.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v23.4.0 => v23.5.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v23.4.0 => v23.5.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v23.4.0 => v23.5.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v23.4.0 => v23.5.0
+</details>
+
+
 ## [23.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/v23.3.0...v23.4.0) (2020-09-02)
 
 ### Features
