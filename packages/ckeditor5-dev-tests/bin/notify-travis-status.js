@@ -27,7 +27,8 @@ const acceptedBranches = [
 
 const acceptedEvents = [
 	'push',
-	'cron'
+	'cron',
+	'api'
 ];
 
 printDebugLog( 'Starting script: ' + __filename );
@@ -91,12 +92,12 @@ const data = {
 					short: true
 				},
 				{
-					title: 'Build',
+					title: 'Build number',
 					value: `<${ buildUrl }|#${ buildId }>`,
 					short: true
 				},
 				{
-					title: 'Testing time',
+					title: 'Build time',
 					value: `${ execTime.mins } min ${ execTime.secs } sec`,
 					short: true
 				},
