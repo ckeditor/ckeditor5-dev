@@ -2727,6 +2727,19 @@ escodegen@^1.9.0:
   optionalDependencies:
     source-map "~0.6.1"
 
+eslint-config-ckeditor5@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/eslint-config-ckeditor5/-/eslint-config-ckeditor5-3.1.0.tgz#b8a82b80c71680dfe8b7426833b7223348e8f152"
+  integrity sha512-oqcE8EqXOq4miV+zxCrP7U7gdvbJI7YiUpSRQ8bxXpJY7PWXdr7Ex5jFfLd5S/1r+pTolRuVTQVzQQ7Yph67Hw==
+  dependencies:
+    eslint-plugin-ckeditor5-rules "^1.0.0"
+    eslint-plugin-mocha "^7.0.0"
+
+eslint-plugin-ckeditor5-rules@^1.0.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-ckeditor5-rules/-/eslint-plugin-ckeditor5-rules-1.1.0.tgz#a4122ed66185d24e22ee993c78ffef8993173143"
+  integrity sha512-pd7u5BE6jnGZf1xddqKiaHloAoqT1fuRq6ASs/DYBoYe2nu8HO5s3QfWrNad5gpYHS5y+MmiKWCsy/IOLSAjaQ==
+
 eslint-plugin-mocha@^7.0.0:
   version "7.0.1"
   resolved "https://registry.yarnpkg.com/eslint-plugin-mocha/-/eslint-plugin-mocha-7.0.1.tgz#b2e9e8ebef7836f999a83f8bab25d0e0c05f0d28"
@@ -7213,11 +7226,6 @@ stylehacks@^4.0.0:
     browserslist "^4.0.0"
     postcss "^7.0.0"
     postcss-selector-parser "^3.0.0"
-
-stylelint-config-recommended@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/stylelint-config-recommended/-/stylelint-config-recommended-3.0.0.tgz#e0e547434016c5539fe2650afd58049a2fd1d657"
-  integrity sha512-F6yTRuc06xr1h5Qw/ykb2LuFynJ2IxkKfCMf+1xqPffkxh0S09Zc902XCffcsw/XMFq/OzQ1w54fLIDtmRNHnQ==
 
 sugarss@^2.0.0:
   version "2.0.0"
