@@ -299,6 +299,7 @@ module.exports = {
 			'after'
 		],
 		'ckeditor5-rules/no-relative-imports': 'error',
+		'ckeditor5-rules/ckeditor-error-message': 'error',
 		'mocha/handle-done-callback': 'error',
 		'mocha/no-async-describe': 'error',
 		'mocha/no-exclusive-tests': 'error',

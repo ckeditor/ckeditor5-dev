@@ -5,39 +5,5 @@
 
 'use strict';
 
-const rule = require( '../lib/rules/no-relative-imports' );
-const RuleTester = require( 'eslint' ).RuleTester;
-
-const ruleTester = new RuleTester( { parserOptions: { sourceType: 'module', ecmaVersion: 2015 } } );
-
-const importError = { message: 'Imports of CKEditor5 packages shouldn\'t be relative.' };
-
-ruleTester.run( 'eslint-plugin-ckeditor5-rules/no-relative-imports', rule, {
-	valid: [
-		'import Foo from \'../foo\';',
-		'import Foo from \'../../foo\';',
-		'import Position from \'@ckeditor5/ckeditor5-engine/src/model/position\';'
-	],
-	invalid: [
-		{
-			code: 'import Position from \'../ckeditor5-engine/src/model/position\';',
-			output: 'import Position from \'@ckeditor/ckeditor5-engine/src/model/position\';',
-			errors: [ importError ]
-		},
-		{
-			code: 'import Foo from \'../ckeditor5-media-embed/src/foo\';',
-			output: 'import Foo from \'@ckeditor/ckeditor5-media-embed/src/foo\';',
-			errors: [ importError ]
-		},
-		{
-			code: 'import Position from \'../../ckeditor5-engine/src/model/position\';',
-			output: 'import Position from \'@ckeditor/ckeditor5-engine/src/model/position\';',
-			errors: [ importError ]
-		},
-		{
-			code: 'import Position from \'../../../../../../../../../../ckeditor5-engine/src/model/position\';',
-			output: 'import Position from \'@ckeditor/ckeditor5-engine/src/model/position\';',
-			errors: [ importError ]
-		}
-	]
-} );
+require( './ckeditor-error-messages' );
+require( './no-relative-imports' );

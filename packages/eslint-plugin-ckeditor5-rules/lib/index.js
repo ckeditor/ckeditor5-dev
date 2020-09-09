@@ -7,6 +7,7 @@
 
 module.exports = {
 	rules: {
-		'no-relative-imports': require( './rules/no-relative-imports' )
+		'no-relative-imports': require( './rules/no-relative-imports' ),
+		'ckeditor-error-message': require( './rules/ckeditor-error-message' )
 	}
 };

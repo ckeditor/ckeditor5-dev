@@ -16,6 +16,9 @@
   "peerDependencies": {
     "eslint": ">=7.0.0"
   },
+  "scripts": {
+    "test": "node tests/index.js"
+  },
   "main": "lib/index.js",
   "author": "CKSource (http://cksource.com/)",
   "license": "MIT",
