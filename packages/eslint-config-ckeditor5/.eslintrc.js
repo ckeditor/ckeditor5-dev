@@ -71,8 +71,7 @@ module.exports = {
 		'no-return-assign': 'error',
 		'no-self-compare': 'error',
 		'no-sequences': 'error',
-		// We can't use it because of https://github.com/eslint/eslint/issues/2102
-		// 'no-unused-expressions': 'error',
+		'no-unused-expressions': 'error', // See rule overrides for tests files.
 		'no-useless-call': 'error',
 		'no-useless-concat': 'error',
 		'no-useless-escape': 'error',
@@ -309,5 +308,13 @@ module.exports = {
 		'mocha/no-pending-tests': 'error',
 		'mocha/no-sibling-hooks': 'error',
 		'mocha/no-top-level-hooks': 'error'
-	}
+	},
+	'overrides': [
+		{
+			'files': [ '**/tests/**/*.js' ],
+			'rules': {
+				'no-unused-expressions': 'off'
+			}
+		}
+	]
 };
