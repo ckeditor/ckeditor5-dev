@@ -54,7 +54,7 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 		module: {
 			rules: [
 				{
-					test: /\.svg$/,
+					test: /\.(svg|txt|html)$/,
 					use: [ 'raw-loader' ]
 				},
 				{
@@ -69,25 +69,26 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 								}
 							}
 						},
+						'css-loader',
 						{
 							loader: 'postcss-loader',
-							options: getPostCssConfig( {
-								themeImporter: {
-									themePath: options.themePath
-								},
-								sourceMap: true
-							} )
+							options: {
+								postcssOptions: getPostCssConfig( {
+									themeImporter: {
+										themePath: require.resolve(
+											path.join( process.cwd(), 'node_modules', '@ckeditor/ckeditor5-theme-lark' )
+										)
+									},
+									minify: true
+								} )
+							}
 						}
 					]
 				},
 				{
-					test: /\.(txt|html)$/,
-					use: [ 'raw-loader' ]
-				},
-				{
 					test: /\.js$/,
 					loader: require.resolve( '../ck-debug-loader' ),
-					query: {
+					options: {
 						debugFlags: options.debug
 					}
 				}

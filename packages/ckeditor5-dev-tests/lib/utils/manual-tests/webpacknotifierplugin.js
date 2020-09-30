@@ -17,16 +17,16 @@ module.exports = class WebpackNotifierPlugin {
 
 	/**
 	 * Applies plugin to the Webpack.
-	 * See: https://webpack.github.io/docs/plugins.html#the-compiler-instance
+	 * See: https://webpack.js.org/contribute/writing-a-plugin/
 	 *
 	 * @param {*} compiler
 	 */
 	apply( compiler ) {
-		compiler.plugin( 'compile', () => {
+		compiler.hooks.compile.tap( this.constructor.name, () => {
 			this.log.info( '[Webpack] Starting scripts compilation...' );
 		} );
 
-		compiler.plugin( 'done', stats => {
+		compiler.hooks.done.tap( this.constructor.name, stats => {
 			if ( stats.compilation.errors.length ) {
 				for ( const item of stats.compilation.errors ) {
 					this.log.error( item.message );
