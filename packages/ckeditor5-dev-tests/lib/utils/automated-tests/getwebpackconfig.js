@@ -37,14 +37,19 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 								}
 							}
 						},
+						'css-loader',
 						{
 							loader: 'postcss-loader',
-							options: getPostCssConfig( {
-								themeImporter: {
-									themePath: options.themePath
-								},
-								minify: true
-							} )
+							options: {
+								postcssOptions: getPostCssConfig( {
+									themeImporter: {
+										themePath: require.resolve(
+											path.join( process.cwd(), 'node_modules', '@ckeditor/ckeditor5-theme-lark' )
+										)
+									},
+									minify: true
+								} )
+							}
 						}
 					]
 				},
@@ -55,7 +60,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 				{
 					test: /\.js$/,
 					loader: require.resolve( '../ck-debug-loader' ),
-					query: {
+					options: {
 						debugFlags: options.debug
 					}
 				}
@@ -88,7 +93,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 				exclude: [
 					new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
 				],
-				query: {
+				options: {
 					esModules: true
 				}
 			}
