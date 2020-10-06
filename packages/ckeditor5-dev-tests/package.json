@@ -44,7 +44,7 @@
     "sinon-chai": "^3.5.0",
     "slack-notify": "^0.1.7",
     "style-loader": "^1.2.1",
-    "webpack": "^5.0.0-rc.2"
+    "webpack": "^5.0.0-rc.3"
   },
   "devDependencies": {
     "mockery": "^2.1.0",
