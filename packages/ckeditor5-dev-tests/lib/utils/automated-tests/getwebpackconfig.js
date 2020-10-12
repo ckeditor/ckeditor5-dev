@@ -43,9 +43,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 							options: {
 								postcssOptions: getPostCssConfig( {
 									themeImporter: {
-										themePath: require.resolve(
-											path.join( process.cwd(), 'node_modules', '@ckeditor/ckeditor5-theme-lark' )
-										)
+										themePath: getThemePath( options )
 									},
 									minify: true
 								} )
@@ -136,4 +134,15 @@ function getPathsToIncludeForCoverage( globs ) {
 		} )
 		// Filter undefined ones.
 		.filter( path => path );
+}
+
+function getThemePath( options ) {
+	if ( options.themePath ) {
+		return options.themePath;
+	}
+
+	const themePackagePath = path.join( process.cwd(), 'node_modules', '@ckeditor/ckeditor5-theme-lark' );
+	const themePackageJson = require( path.join( themePackagePath, 'package.json' ) );
+
+	return path.join( themePackagePath, themePackageJson.main );
 }

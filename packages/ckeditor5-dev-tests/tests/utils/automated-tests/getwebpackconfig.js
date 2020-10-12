@@ -6,6 +6,7 @@
 'use strict';
 
 const mockery = require( 'mockery' );
+const sinon = require( 'sinon' );
 const { expect } = require( 'chai' );
 
 describe( 'getWebpackConfigForAutomatedTests()', () => {
@@ -26,10 +27,25 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			}
 		} );
 
+		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
+			styles: {
+				getPostCssConfig: options => {
+					postCssOptions = options;
+				}
+			}
+		} );
+
+		mockery.registerMock( '/tmp/node_modules/@ckeditor/ckeditor5-theme-lark/package.json', {
+			main: 'theme/theme.css'
+		} );
+
+		sinon.stub( process, 'cwd' ).returns( '/tmp' );
+
 		getWebpackConfigForAutomatedTests = require( '../../../lib/utils/automated-tests/getwebpackconfig' );
 	} );
 
 	afterEach( () => {
+		sinon.restore();
 		mockery.disable();
 		mockery.deregisterAll();
 	} );
@@ -59,7 +75,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			exclude: [
 				new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
 			],
-			query: {
+			options: {
 				esModules: true
 			}
 		} );
@@ -125,7 +141,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		expect( require( 'fs' ).existsSync( secondPath ) ).to.equal( true );
 	} );
 
-	it( 'should return webpack configutation with the correct setup of the postcss-loader', () => {
+	it( 'should return webpack configuration  with the correct setup of the postcss-loader', () => {
 		getWebpackConfigForAutomatedTests( {
 			themePath: 'path/to/theme'
 		} );
@@ -133,6 +149,17 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		expect( postCssOptions ).to.deep.equal( {
 			themeImporter: {
 				themePath: 'path/to/theme'
+			},
+			minify: true
+		} );
+	} );
+
+	it( 'should return a path to the main file if `options.themePath` is not specified loader', () => {
+		getWebpackConfigForAutomatedTests( {} );
+
+		expect( postCssOptions ).to.deep.equal( {
+			themeImporter: {
+				themePath: '/tmp/node_modules/@ckeditor/ckeditor5-theme-lark/theme/theme.css'
 			},
 			minify: true
 		} );
