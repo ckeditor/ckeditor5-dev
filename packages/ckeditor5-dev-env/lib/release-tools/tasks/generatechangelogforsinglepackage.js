@@ -18,7 +18,7 @@ const getNewVersionType = require( '../utils/getnewversiontype' );
 const getCommits = require( '../utils/getcommits' );
 const getWriterOptions = require( '../utils/getwriteroptions' );
 const { getRepositoryUrl } = require( '../utils/transformcommitutils' );
-const transformCommitForSubRepositoryFactory = require( '../utils/transformcommitfactory' );
+const transformCommitFactory = require( '../utils/transformcommitfactory' );
 
 const SKIP_GENERATE_CHANGELOG = 'Typed "skip" as a new version. Aborting.';
 
@@ -37,6 +37,8 @@ const SKIP_GENERATE_CHANGELOG = 'Typed "skip" as a new version. Aborting.';
  *
  * @param {Boolean} [options.collaborationFeatures=false] Whether to add a note about collaboration features.
  *
+ * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
+ *
  * @returns {Promise}
  */
 module.exports = function generateChangelogForSinglePackage( options = {} ) {
@@ -45,12 +47,13 @@ module.exports = function generateChangelogForSinglePackage( options = {} ) {
 
 	logProcess( chalk.bold( `Generating changelog for "${ chalk.underline( pkgJson.name ) }"...` ) );
 
-	const transformCommit = transformCommitForSubRepositoryFactory();
+	const transformCommit = transformCommitFactory();
 
 	logProcess( 'Collecting all commits since the last release...' );
 
 	const commitOptions = {
-		from: options.from ? options.from : 'v' + pkgJson.version
+		from: options.from ? options.from : 'v' + pkgJson.version,
+		releaseBranch: options.releaseBranch
 	};
 
 	// Initial release.
