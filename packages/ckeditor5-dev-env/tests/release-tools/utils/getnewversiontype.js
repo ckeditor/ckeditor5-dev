@@ -25,6 +25,13 @@ describe( 'dev-env/release-tools/utils', () => {
 			expect( getNewVersionType( commits ) ).to.equal( 'major' );
 		} );
 
+		it( 'returns "major" if BREAKING CHANGES was introduced in "type:Other" commit', () => {
+			const commits = [
+				{ isPublicCommit: true, notes: [ { title: 'BREAKING CHANGES' } ], rawType: 'Other' }
+			];
+			expect( getNewVersionType( commits ) ).to.equal( 'major' );
+		} );
+
 		it( 'returns "major" if MAJOR BREAKING CHANGES was introduced in "type:Fix" commit', () => {
 			const commits = [
 				{ isPublicCommit: true, notes: [ { title: 'MAJOR BREAKING CHANGES' } ], rawType: 'Fix' }
@@ -32,9 +39,23 @@ describe( 'dev-env/release-tools/utils', () => {
 			expect( getNewVersionType( commits ) ).to.equal( 'major' );
 		} );
 
+		it( 'returns "major" if BREAKING CHANGES was introduced in "type:Fix" commit', () => {
+			const commits = [
+				{ isPublicCommit: true, notes: [ { title: 'BREAKING CHANGES' } ], rawType: 'Fix' }
+			];
+			expect( getNewVersionType( commits ) ).to.equal( 'major' );
+		} );
+
 		it( 'returns "major" if MAJOR BREAKING CHANGES was introduced in "type:Feature" commit', () => {
 			const commits = [
 				{ isPublicCommit: true, notes: [ { title: 'MAJOR BREAKING CHANGES' } ], rawType: 'Feature' }
+			];
+			expect( getNewVersionType( commits ) ).to.equal( 'major' );
+		} );
+
+		it( 'returns "major" if BREAKING CHANGES was introduced in "type:Feature" commit', () => {
+			const commits = [
+				{ isPublicCommit: true, notes: [ { title: 'BREAKING CHANGES' } ], rawType: 'Feature' }
 			];
 			expect( getNewVersionType( commits ) ).to.equal( 'major' );
 		} );

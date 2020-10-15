@@ -29,7 +29,7 @@ module.exports = function getNewVersionType( commits ) {
 
 	for ( const commit of publicCommits ) {
 		for ( const note of commit.notes ) {
-			if ( note.title === 'MAJOR BREAKING CHANGES' ) {
+			if ( note.title === 'MAJOR BREAKING CHANGES' || note.title === 'BREAKING CHANGES' ) {
 				return 'major';
 			}
 
