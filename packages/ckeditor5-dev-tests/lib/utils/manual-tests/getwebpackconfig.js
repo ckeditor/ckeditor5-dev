@@ -54,7 +54,7 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 		module: {
 			rules: [
 				{
-					test: /\.(svg|txt|html)$/,
+					test: /\.svg$/,
 					use: [ 'raw-loader' ]
 				},
 				{
@@ -84,6 +84,10 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 							}
 						}
 					]
+				},
+				{
+					test: /\.(txt|html)$/,
+					use: [ 'raw-loader' ]
 				},
 				{
 					test: /\.js$/,
