@@ -98,8 +98,9 @@ depCheck( packageDirectory, depCheckOptions )
 		console.log( chalk.red( 'Found some issue with dependencies.\n' ) );
 
 		if ( data[ 0 ] ) {
-			console.log( chalk.yellow( 'Invalid itself imports:' ) );
+			console.log( chalk.yellow( 'Invalid itself imports found in:' ) );
 			console.log( data[ 0 ] + '\n' );
+			console.log( '🧾 Imports from local package must always use relative path.\n' );
 		}
 
 		if ( data[ 1 ] ) {
