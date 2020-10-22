@@ -1,6 +1,42 @@
 Changelog
 =========
 
+## [23.6.0](https://github.com/ckeditor/ckeditor5-dev/compare/v23.5.1...v23.6.0) (2020-10-22)
+
+### Features
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: `generateChangelogForMonoRepository()` accepts a new option `options.skipLinks` (which is `false` by default) to omit release and commit links in the generated changelog. Closes [ckeditor/ckeditor5#8167](https://github.com/ckeditor/ckeditor5/issues/8167). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/4ef99ed3b8cb5e77adec58cd9943a19a99fda70b))
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: `generateChangelogForSinglePackage()` accept an optional option: `options.releaseBranch` (which defaults to `master`). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/9c25333d283105853902a16c87b3f2cee655c130))
+
+### Bug fixes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `getNewVersionType()` util returns a proper version when generating the changelog for a single package. Closes [ckeditor/ckeditor5#8265](https://github.com/ckeditor/ckeditor5/issues/8265). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/9c25333d283105853902a16c87b3f2cee655c130))
+
+### Other changes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Improved linter error message for self-imports. Closes [ckeditor/ckeditor5#8245](https://github.com/ckeditor/ckeditor5/issues/8245). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/bbb54952335415fe8fded20e4926b024e34c7bd7))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v23.5.1 => v23.6.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v23.5.1 => v23.6.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v23.5.1 => v23.6.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v23.5.1 => v23.6.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v23.5.1 => v23.6.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v23.5.1 => v23.6.0
+</details>
+
+
 ## [23.5.1](https://github.com/ckeditor/ckeditor5-dev/compare/v23.5.0...v23.5.1) (2020-09-04)
 
 ### Other changes
