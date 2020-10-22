@@ -46,6 +46,8 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
  *
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be touched.
  *
+ * @param {Boolean} [options.skipLinks=false] If set on true, links to release or commits will be omitted.
+ *
  * @param {String} [options.from] A commit or tag name that will be the first param of the range of commits to collect.
  *
  * @param {Boolean} [options.highlightsPlaceholder=false] Whether to add a note about release highlights.
@@ -279,7 +281,9 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 			previousTag: 'v' + pkgJson.version,
 			isPatch: semver.diff( version, pkgJson.version ) === 'patch',
 			highlightsPlaceholder: options.highlightsPlaceholder || false,
-			collaborationFeatures: options.collaborationFeatures || false
+			collaborationFeatures: options.collaborationFeatures || false,
+			skipCommitsLink: Boolean( options.skipLinks ),
+			skipCompareLink: Boolean( options.skipLinks )
 		};
 
 		const writerOptions = getWriterOptions( {
