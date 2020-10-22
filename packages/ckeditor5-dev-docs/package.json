@@ -5,8 +5,8 @@
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^23.5.1",
-    "@ckeditor/jsdoc-plugins": "^23.5.1",
+    "@ckeditor/ckeditor5-dev-utils": "^23.6.0",
+    "@ckeditor/jsdoc-plugins": "^23.6.0",
     "fast-glob": "^3.2.4",
     "jsdoc": "ckeditor/jsdoc#fixed-trailing-comment-doclets",
     "tmp": "^0.2.1"
