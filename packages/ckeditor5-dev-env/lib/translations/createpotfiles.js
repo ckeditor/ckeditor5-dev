@@ -22,7 +22,7 @@ const corePackageName = 'ckeditor5-core';
  * @param {Object} options
  * @param {Array.<String>} options.sourceFiles An array of source files that contain messages to translate.
  * @param {Array.<String>} options.packagePaths An array of paths to packages, which will be used to find message contexts.
- * @param {String} options.corePackagePath A path to the ckeditor5-core package.
+ * @param {String} options.corePackagePath A relative to `process.cwd()` path to the `@ckeditor/ckeditor5-core` package.
  * @param {Logger} [logger] A logger.
  */
 module.exports = function createPotFiles( {
