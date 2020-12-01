@@ -7,6 +7,7 @@
 
 'use strict';
 
+const path = require( 'path' );
 const chalk = require( 'chalk' );
 
 const task = process.argv[ 2 ];
@@ -14,14 +15,19 @@ const task = process.argv[ 2 ];
 const tasks = {
 	/**
 	 * Collects translation messages (from `t()` calls and context files) and stores them in the `ckeditor5/build/.transifex` directory.
+	 *
+	 * The script by default does not check the `external/` directory. Add the `--include-external-directory` flag to enable
+	 * checking packages located in the directory.
 	 */
 	collect() {
+		const includeExternalDirectory = process.argv.includes( '--include-external-directory' );
+
 		const createPotFiles = require( '../lib/translations/createpotfiles' );
 		const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 
 		createPotFiles( {
-			sourceFiles: getCKEditor5SourceFiles(),
-			packagePaths: getCKEditor5PackagePaths(),
+			sourceFiles: getCKEditor5SourceFiles( { includeExternalDirectory } ),
+			packagePaths: getCKEditor5PackagePaths( { includeExternalDirectory } ),
 			corePackagePath: 'packages/ckeditor5-core',
 			logger
 		} );
@@ -51,7 +57,6 @@ const tasks = {
 	async download() {
 		const downloadTranslations = require( './../lib/translations/download' );
 		const getToken = require( './../lib/translations/gettoken' );
-		const path = require( 'path' );
 
 		const token = await getToken();
 
@@ -80,22 +85,63 @@ Promise.resolve()
 		process.exit( 1 );
 	} );
 
-function getCKEditor5SourceFiles() {
+/**
+ * Returns absolute paths to CKEditor 5 sources. By default the function does not check the `external/` directory.
+ *
+ * @param {Object} options
+ * @param {Boolean} options.includeExternalDirectory If set to `true`, files from the `external/` directory will be returned too.
+ * @returns {Array.<String>}
+ */
+function getCKEditor5SourceFiles( { includeExternalDirectory } ) {
 	const glob = require( 'glob' );
-	const srcPaths = [ process.cwd(), 'packages', '*', 'src', '**', '*.js' ].join( '/' );
 
-	return glob.sync( srcPaths ).filter( srcPath => !srcPath.match( /packages\/[^/]+\/src\/lib\// ) );
+	const patterns = [
+		path.posix.join( process.cwd(), 'packages', '*', 'src', '**', '*.js' )
+	];
+
+	if ( includeExternalDirectory ) {
+		path.posix.join( process.cwd(), 'external', '*', 'packages', '*', 'src', '**', '*.js' );
+	}
+
+	const sourceFiles = [];
+
+	for ( const item of patterns ) {
+		sourceFiles.push(
+			...glob.sync( item ).filter( srcPath => !srcPath.match( /packages\/[^/]+\/src\/lib\// ) )
+		);
+	}
+
+	return sourceFiles;
 }
 
-function getCKEditor5PackagePaths() {
-	const path = require( 'path' );
+/**
+ * Returns relative paths to CKEditor 5 packages. By default the function does not check the `external/` directory.
+ *
+ * @param {Object} options
+ * @param {Boolean} options.includeExternalDirectory If set to `true`, packages from the `external/` directory will be returned too.
+ * @returns {Array.<String>}
+ */
+function getCKEditor5PackagePaths( { includeExternalDirectory } ) {
+	const glob = require( 'glob' );
 
-	return getCKEditor5PackageNames()
-		.map( packageName => path.join( 'packages', packageName ) );
+	const patterns = [
+		path.posix.join( 'packages', '* ' )
+	];
+
+	if ( includeExternalDirectory ) {
+		patterns.push( [ 'external', '*', 'packages', '*' ].join( '/' ) );
+	}
+
+	const packagePaths = [];
+
+	for ( const item of patterns ) {
+		packagePaths.push( ...glob.sync( item ) );
+	}
+
+	return packagePaths;
 }
 
 function getCKEditor5PackageNames() {
-	const path = require( 'path' );
 	const fs = require( 'fs' );
 	const ckeditor5PackagesDir = path.join( process.cwd(), 'packages' );
 
