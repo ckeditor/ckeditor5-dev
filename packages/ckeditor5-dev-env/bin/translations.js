@@ -100,7 +100,9 @@ function getCKEditor5SourceFiles( { includeExternalDirectory } ) {
 	];
 
 	if ( includeExternalDirectory ) {
-		path.posix.join( process.cwd(), 'external', '*', 'packages', '*', 'src', '**', '*.js' );
+		patterns.push(
+			path.posix.join( process.cwd(), 'external', '*', 'packages', '*', 'src', '**', '*.js' )
+		);
 	}
 
 	const sourceFiles = [];
@@ -129,7 +131,9 @@ function getCKEditor5PackagePaths( { includeExternalDirectory } ) {
 	];
 
 	if ( includeExternalDirectory ) {
-		patterns.push( [ 'external', '*', 'packages', '*' ].join( '/' ) );
+		patterns.push(
+			path.posix.join( 'external', '*', 'packages', '*' )
+		);
 	}
 
 	const packagePaths = [];
