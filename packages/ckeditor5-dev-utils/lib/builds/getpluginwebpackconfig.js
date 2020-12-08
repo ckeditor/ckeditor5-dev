@@ -7,58 +7,55 @@
 
 const path = require( 'path' );
 const webpack = require( 'webpack' );
-const TerserPlugin = require( 'terser-webpack-plugin' );
 const bundler = require( '../bundler' );
 const styles = require( '../styles' );
 const tools = require( '../tools' );
 
 /**
+ * Returns a webpack configuration that creates a bundle file for the specified package. Thanks to that, plugins exported
+ * by the package can be added to ready-to-use builds.
+ *
  * @param {Object} options
- * @param {String} options.themePath Configuration of the theme-importer PostCSS plugin.
+ * @param {String} options.themePath An absolute path to the theme package.
  * @param {String} options.packagePath An absolute path to the root directory of the package.
- * @param {'production'|'development'} [options.mode='production'] Type of the bundle.
  * @returns {Object}
  */
 module.exports = function getPluginWebpackConfig( options ) {
 	const packageName = tools.readPackageName( options.packagePath );
+	const dllManifestPath = path.join( options.packagePath, '..', '..', 'build', 'ckeditor5-dll.manifest.json' );
+	const fileName = getIndexFileName( packageName );
 
 	return {
-		mode: options.mode || 'production',
+		mode: 'development',
 
 		devtool: 'source-map',
 
 		performance: { hints: false },
 
-		entry: path.join( options.packagePath, 'src', 'index.js' ),
+		entry: path.join( options.packagePath, fileName ),
 
 		output: {
-			library: [ 'CKEditor5', getShortPackageName( packageName ) ],
+			library: [ 'CKEditor5', getGlobalKeyForPackage( packageName ) ],
 
-			path: path.join( options.packagePath, 'dist' ),
-			filename: 'ckeditor.js',
+			path: path.join( options.packagePath, 'build' ),
+			filename: fileName,
 			libraryTarget: 'umd',
 			libraryExport: 'default'
 		},
 
 		optimization: {
-			minimizer: [
-				new TerserPlugin( {
-					sourceMap: true,
-					terserOptions: {
-						output: {
-							// Preserve CKEditor 5 license comments.
-							comments: /^!/
-						}
-					},
-					extractComments: false
-				} )
-			]
+			minimize: false,
+			moduleIds: 'named'
 		},
 
 		plugins: [
 			new webpack.BannerPlugin( {
 				banner: bundler.getLicenseBanner(),
 				raw: true
+			} ),
+			new webpack.DllReferencePlugin( {
+				manifest: require( dllManifestPath ),
+				scope: 'ckeditor5/src'
 			} )
 		],
 
@@ -97,11 +94,24 @@ module.exports = function getPluginWebpackConfig( options ) {
 };
 
 /**
+ * Transforms the package name (`@ckeditor/ckeditor5-foo-bar`) to the name that will be used while
+ * exporting the library into the global scope.
+ *
  * @param {String} packageName
  * @returns {String}
  */
-function getShortPackageName( packageName ) {
+function getGlobalKeyForPackage( packageName ) {
 	return packageName
 		.replace( /^@ckeditor\/ckeditor5?-/, '' )
 		.replace( /-([a-z])/g, ( match, p1 ) => p1.toUpperCase() );
+}
+
+/**
+ * Extracts the main file name from the package name.
+ *
+ * @param packageName
+ * @returns {String}
+ */
+function getIndexFileName( packageName ) {
+	return packageName.replace( /^@ckeditor\/ckeditor5?-/, '' ) + '.js';
 }
