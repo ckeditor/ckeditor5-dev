@@ -21,7 +21,7 @@ const tools = require( '../tools' );
  * @param {String} options.manifestPath An absolute path to the DLL manifest file.
  * @returns {Object}
  */
-module.exports = function getPluginWebpackConfig( options ) {
+module.exports = function getDLLPluginWebpackConfig( options ) {
 	const packageName = tools.readPackageName( options.packagePath );
 	const fileName = getIndexFileName( packageName );
 
