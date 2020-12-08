@@ -18,11 +18,11 @@ const tools = require( '../tools' );
  * @param {Object} options
  * @param {String} options.themePath An absolute path to the theme package.
  * @param {String} options.packagePath An absolute path to the root directory of the package.
+ * @param {String} options.manifestPath An absolute path to the DLL manifest file.
  * @returns {Object}
  */
 module.exports = function getPluginWebpackConfig( options ) {
 	const packageName = tools.readPackageName( options.packagePath );
-	const dllManifestPath = path.join( options.packagePath, '..', '..', 'build', 'ckeditor5-dll.manifest.json' );
 	const fileName = getIndexFileName( packageName );
 
 	return {
@@ -54,7 +54,7 @@ module.exports = function getPluginWebpackConfig( options ) {
 				raw: true
 			} ),
 			new webpack.DllReferencePlugin( {
-				manifest: require( dllManifestPath ),
+				manifest: require( options.manifestPath ),
 				scope: 'ckeditor5/src'
 			} )
 		],
