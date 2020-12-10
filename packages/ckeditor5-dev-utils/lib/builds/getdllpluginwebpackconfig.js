@@ -54,7 +54,8 @@ module.exports = function getDLLPluginWebpackConfig( options ) {
 			} ),
 			new webpack.DllReferencePlugin( {
 				manifest: require( options.manifestPath ),
-				scope: 'ckeditor5/src'
+				scope: 'ckeditor5/src',
+				name: 'CKEditor5.dll'
 			} )
 		],
 
