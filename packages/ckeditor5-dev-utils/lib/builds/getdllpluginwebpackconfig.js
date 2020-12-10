@@ -23,7 +23,6 @@ const tools = require( '../tools' );
  */
 module.exports = function getDLLPluginWebpackConfig( options ) {
 	const packageName = tools.readPackageName( options.packagePath );
-	const fileName = getIndexFileName( packageName );
 
 	return {
 		mode: 'development',
@@ -32,13 +31,13 @@ module.exports = function getDLLPluginWebpackConfig( options ) {
 
 		performance: { hints: false },
 
-		entry: path.join( options.packagePath, fileName ),
+		entry: path.join( options.packagePath, 'src', 'index.js' ),
 
 		output: {
 			library: [ 'CKEditor5', getGlobalKeyForPackage( packageName ) ],
 
 			path: path.join( options.packagePath, 'build' ),
-			filename: fileName,
+			filename: getIndexFileName( packageName ),
 			libraryTarget: 'umd',
 			libraryExport: 'default'
 		},
