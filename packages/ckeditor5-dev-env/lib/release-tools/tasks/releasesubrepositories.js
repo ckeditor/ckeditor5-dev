@@ -36,17 +36,20 @@ const additionalFiles = [
  *
  * This task does:
  *   - finds paths to sub repositories,
- *   - filters packages which should be released by comparing the latest version published on NPM and GitHub,,
- *   - publishes new version on NPM,
+ *   - filters packages which should be released by comparing the latest version published on npm and GitHub,,
+ *   - publishes new version on npm,
  *   - pushes new version to the remote repository,
  *   - creates a release which is displayed on "Releases" page on GitHub.
  *
- * If you want to publish an empty repository (only with required files for NPM), you can specify the package name
- * as `options.emptyReleases`. Packages specified in the array will be published from temporary directory. `package.json` of that package
+ * If you want to publish an empty repository (it will contain required files for npm), you can specify the package name
+ * as `options.customReleases`. Packages specified in the array will be published from temporary directory. `package.json` of that package
  * will be created based on a template. See `packages/ckeditor5-dev-env/lib/release-tools/templates/release-package.json` file.
  *
- * Content of `package.json` can be adjusted using `options.packageJsonForEmptyReleases` options. If you need to copy values from
+ * Content of `package.json` can be adjusted using `options.packageJsonForCustomReleases` options. If you need to copy values from
  * real `package.json` that are not defined in template, you can add these keys as null. Values will be copied automatically.
+ *
+ * If you want to add files from the source package directory to the temporary directory, you can use the
+ * `options.customReleasesFiles` option.
  *
  * Example usage:
  *
@@ -54,41 +57,61 @@ const additionalFiles = [
  *         .releaseSubRepositories( {
  *		        cwd: process.cwd(),
  *		        packages: 'packages',
- *		        emptyReleases: [
+ *		        customReleases: [
  *			        'ckeditor5' // "ckeditor5" will be released as an empty repository.
  *		        ],
- *		        packageJsonForEmptyReleases: {
+ *		        packageJsonForCustomReleases: {
  *			        ckeditor5: { // These properties will overwrite those ones that are defined in package's `package.json`
  *				        description: 'Custom description', // "description" of real package will be overwritten.
  *				        devDependencies: null // The template does not contain "devDependencies" but we want to add it.
  *			        }
  *		        },
+ *		        customReleasesFiles: {
+ *			        ckeditor5: [ // An array of glob patterns. Files that match to those patterns will be released.
+ *				        'src/*.js' // Copy all JS files from the `src/` directory.
+ *			        ]
+ *		        },
  *		        dryRun: process.argv.includes( '--dry-run' )
  *	} );
  *
  * Pushes are done at the end of the whole process because of Continues Integration. We need to publish all
- * packages on NPM before starting the CI testing. If we won't do it, CI will fail because it won't be able
+ * packages on npm before starting the CI testing. If we won't do it, CI will fail because it won't be able
  * to install packages which versions will match to specified in `package.json`.
  * See {@link https://github.com/ckeditor/ckeditor5-dev/issues/272}.
  *
  * @param {Object} options
+ *
  * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
+ *
  * @param {String|null} options.packages Where to look for other packages (dependencies). If `null`, only repository specified under
  * `options.cwd` will be used in the task.
+ *
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be released.
+ *
  * @param {Boolean} [options.dryRun=false] If set on true, nothing will be published:
  *   - npm pack will be called instead of npm publish (it packs the whole release to a ZIP archive),
  *   - "git push" will be replaced with a log on the screen,
  *   - creating a release on GitHub will be replaced with a log on the screen,
  *   - every called command will be displayed.
+ *
  * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in "cwd" will be skipped.
- * @param {Array.<String>>} [options.emptyReleases=[]] Name of packages that should be published as an empty directory
- * except the real content from repository.
- * @param {Object} [options.packageJsonForEmptyReleases={}] Additional fields that will be added to `package.json` for packages which
- * will publish an empty directory. All properties copied from original package's "package.json" file will be overwritten by fields
- * specified in this option.
- * @param {Array.<String>} [options.skipNpmPublish=[]] Name of packages that should not be published on NPM.
+ *
+ * @param {Array.<String>>} [options.customReleases=[]] Name of packages that should be published from the temporary directory
+ * instead of the package directory. It was used for publishing an empty package (with files that are required for npm). By using
+ * the `options.packageJsonForCustomReleases`, you can specify the content for the `package.json` file. By using
+ * the `options.customReleasesFiles` option, you can specify which files should be copied to the temporary directory.
+ *
+ * @param {Object} [options.packageJsonForCustomReleases={}] Additional fields that will be added to `package.json` for packages which
+ * will be published using the custom release option. All properties copied from original package's `package.json` file
+ * will be overwritten by fields specified in this option.
+ *
+ * @param {Object} [options.customReleasesFiles={}] Glob patterns of files that will be copied to the temporary for packages which
+ * will be published using the custom release option.
+ *
+ * @param {Array.<String>} [options.skipNpmPublish=[]] Name of packages that should not be published on npm.
+ *
  * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
+ *
  * @returns {Promise}
  */
 module.exports = function releaseSubRepositories( options ) {
@@ -97,7 +120,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 	const dryRun = Boolean( options.dryRun );
 	const releaseBranch = options.releaseBranch || 'master';
-	const emptyReleases = Array.isArray( options.emptyReleases ) ? options.emptyReleases : [ options.emptyReleases ].filter( Boolean );
+	const customReleases = Array.isArray( options.customReleases ) ? options.customReleases : [ options.customReleases ].filter( Boolean );
 
 	const pathsCollection = getPackagesPaths( {
 		cwd: options.cwd,
@@ -114,17 +137,18 @@ module.exports = function releaseSubRepositories( options ) {
 	let github;
 
 	// Collections of paths where different kind of releases should be done.
-	// `releasesOnNpm` - the release on NPM that contains the entire repository (npm publish is executed inside the repository)
-	// `emptyReleasesOnNpm` - the release on NPM that contains an empty repository (npm publish is executed from a temporary directory)
-	// `releasesOnGithub` - the release on GitHub (there is only one command called - `git push` and creating the release via REST API)
+	// - `releasesOnNpm` - the release on npm that contains the entire repository (npm publish is executed inside the repository)
+	// - `customReleasesOnNpm` - the release on npm that contains a specified files instead of the entire content of the package.
+	//    For this releases, the `npm publish` command is executed from a temporary directory.
+	// - `releasesOnGithub` - the release on GitHub (there is only one command called - `git push` and creating the release via REST API)
 	const releasesOnNpm = new Set();
 	const releasesOnGithub = new Set();
-	const emptyReleasesOnNpm = new Map();
+	const customReleasesOnNpm = new Map();
 
-	// A list of packages that should not be published on NPM.
+	// A list of packages that should not be published on npm.
 	const skipNpmPublish = new Set( options.skipNpmPublish || [] );
 
-	// List of packages that were released on NPM or/and GitHub.
+	// List of packages that were released on npm or/and GitHub.
 	const releasedPackages = new Set();
 
 	// List of files that should be removed in DRY RUN mode. This is a result of command `npm pack`.
@@ -142,7 +166,7 @@ module.exports = function releaseSubRepositories( options ) {
 		.then( () => filterPackagesToReleaseOnNpm() )
 		.then( () => filterPackagesToReleaseOnGitHub() )
 		.then( () => confirmRelease() )
-		.then( () => prepareDirectoriesForEmptyReleases() )
+		.then( () => prepareDirectoriesForCustomReleases() )
 		.then( () => releasePackagesOnNpm() )
 		.then( () => pushPackages() )
 		.then( () => createReleasesOnGitHub() )
@@ -234,7 +258,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 			return Promise.resolve();
 		} catch ( err ) {
-			logDryRun( '⛔️ You are not logged to NPM. ⛔️' );
+			logDryRun( '⛔️ You are not logged to npm. ⛔️' );
 			logDryRun( chalk.italic( 'But this is a DRY RUN so you can continue safely.' ) );
 
 			if ( dryRun ) {
@@ -294,8 +318,8 @@ module.exports = function releaseSubRepositories( options ) {
 			} );
 	}
 
-	// Checks which packages should be published on NPM. It compares version defined in `package.json`
-	// and the latest released on NPM.
+	// Checks which packages should be published on npm. It compares version defined in `package.json`
+	// and the latest released on npm.
 	//
 	// @returns {Promise}
 	function filterPackagesToReleaseOnNpm() {
@@ -303,7 +327,7 @@ module.exports = function releaseSubRepositories( options ) {
 			return Promise.resolve();
 		}
 
-		logProcess( 'Collecting the latest versions of packages published on NPM...' );
+		logProcess( 'Collecting the latest versions of packages published on npm...' );
 
 		return executeOnPackages( pathsCollection.matched, repositoryPath => {
 			process.chdir( repositoryPath );
@@ -448,22 +472,22 @@ module.exports = function releaseSubRepositories( options ) {
 			} );
 	}
 
-	// Prepares empty repositories that will be released.
+	// Prepares custom repositories that will be released.
 	//
 	// @returns {Promise}
-	function prepareDirectoriesForEmptyReleases() {
+	function prepareDirectoriesForCustomReleases() {
 		if ( !releaseOptions.npm ) {
 			return Promise.resolve();
 		}
 
-		logProcess( 'Preparing directories for empty releases...' );
+		logProcess( 'Preparing directories for custom releases...' );
 
 		return executeOnPackages( releasesOnNpm, repositoryPath => {
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
 
-			if ( !emptyReleases.includes( packageJson.name ) ) {
+			if ( !customReleases.includes( packageJson.name ) ) {
 				return Promise.resolve();
 			}
 
@@ -473,7 +497,7 @@ module.exports = function releaseSubRepositories( options ) {
 			const tmpPackageJsonPath = path.join( tmpDir, 'package.json' );
 
 			releasesOnNpm.delete( repositoryPath );
-			emptyReleasesOnNpm.set( tmpDir, repositoryPath );
+			customReleasesOnNpm.set( tmpDir, repositoryPath );
 
 			// Copy `package.json` template.
 			exec( `cp ${ PACKAGE_JSON_TEMPLATE_PATH } ${ tmpPackageJsonPath }` );
@@ -487,11 +511,11 @@ module.exports = function releaseSubRepositories( options ) {
 
 			// Update `package.json` file. It uses values from source `package.json`
 			// but only these ones which are defined in the template.
-			// Properties that were passed as `options.packageJsonForEmptyReleases` will not be overwritten.
+			// Properties that were passed as `options.packageJsonForCustomReleases` will not be overwritten.
 			tools.updateJSONFile( tmpPackageJsonPath, jsonFile => {
-				const additionalPackageJson = options.packageJsonForEmptyReleases[ packageJson.name ] || {};
+				const additionalPackageJson = options.packageJsonForCustomReleases[ packageJson.name ] || {};
 
-				// Overwrite custom values specified in `options.packageJsonForEmptyReleases`.
+				// Overwrite custom values specified in `options.packageJsonForCustomReleases`.
 				for ( const property of Object.keys( additionalPackageJson ) ) {
 					jsonFile[ property ] = additionalPackageJson[ property ];
 				}
@@ -521,10 +545,10 @@ module.exports = function releaseSubRepositories( options ) {
 			return Promise.resolve();
 		}
 
-		logProcess( 'Publishing on NPM...' );
+		logProcess( 'Publishing on npm...' );
 
 		const paths = [
-			...emptyReleasesOnNpm.keys(),
+			...customReleasesOnNpm.keys(),
 			...releasesOnNpm
 		];
 
@@ -536,7 +560,7 @@ module.exports = function releaseSubRepositories( options ) {
 			log.info( `\nPublishing "${ chalk.underline( packageJson.name ) }" as "v${ packageJson.version }"...` );
 			logDryRun( 'Do not panic. DRY RUN mode is active. An archive with the release will be created instead.' );
 
-			const repositoryRealPath = emptyReleasesOnNpm.get( repositoryPath ) || repositoryPath;
+			const repositoryRealPath = customReleasesOnNpm.get( repositoryPath ) || repositoryPath;
 
 			if ( dryRun ) {
 				const archiveName = packageJson.name.replace( '@', '' ).replace( '/', '-' ) + `-${ packageJson.version }.tgz`;
@@ -544,7 +568,7 @@ module.exports = function releaseSubRepositories( options ) {
 				exec( 'npm pack' );
 
 				// Move created archive from temporary directory because the directory will be removed automatically.
-				if ( emptyReleasesOnNpm.has( repositoryPath ) ) {
+				if ( customReleasesOnNpm.has( repositoryPath ) ) {
 					exec( `mv ${ path.join( repositoryPath, archiveName ) } ${ path.resolve( repositoryRealPath ) }` );
 				}
 
@@ -632,7 +656,7 @@ module.exports = function releaseSubRepositories( options ) {
 			);
 	}
 
-	// Removes all temporary directories that were created for publishing an empty repository.
+	// Removes all temporary directories that were created for publishing an custom repository.
 	//
 	// @returns {Promise}
 	function removeTemporaryDirectories() {
@@ -640,10 +664,10 @@ module.exports = function releaseSubRepositories( options ) {
 			return Promise.resolve();
 		}
 
-		logProcess( 'Removing temporary directories that were created for publishing on NPM...' );
+		logProcess( 'Removing temporary directories that were created for publishing on npm...' );
 
-		return executeOnPackages( emptyReleasesOnNpm.keys(), repositoryPath => {
-			process.chdir( emptyReleasesOnNpm.get( repositoryPath ) );
+		return executeOnPackages( customReleasesOnNpm.keys(), repositoryPath => {
+			process.chdir( customReleasesOnNpm.get( repositoryPath ) );
 
 			exec( `rm -rf ${ repositoryPath }` );
 		} );
@@ -653,7 +677,7 @@ module.exports = function releaseSubRepositories( options ) {
 	//
 	// @returns {Promise}
 	function removeReleaseArchives() {
-		// This step should be skipped if packages won't be released on NPM or if dry run mode is disabled.
+		// This step should be skipped if packages won't be released on npm or if dry run mode is disabled.
 		if ( !releaseOptions.npm || !dryRun ) {
 			return Promise.resolve();
 		}
