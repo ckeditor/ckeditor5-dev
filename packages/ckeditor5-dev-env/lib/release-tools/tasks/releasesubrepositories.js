@@ -8,6 +8,8 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const chalk = require( 'chalk' );
+const glob = require( 'glob' );
+const mkdirp = require( 'mkdirp' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const parseGithubUrl = require( 'parse-github-url' );
 const cli = require( '../utils/cli' );
@@ -69,6 +71,7 @@ const additionalFiles = [
  *		        customReleasesFiles: {
  *			        ckeditor5: [ // An array of glob patterns. Files that match to those patterns will be released.
  *				        'src/*.js' // Copy all JS files from the `src/` directory.
+ *				        'scripts/**' // Copy everything from the `script/` directory.
  *			        ]
  *		        },
  *		        dryRun: process.argv.includes( '--dry-run' )
@@ -483,6 +486,8 @@ module.exports = function releaseSubRepositories( options ) {
 		logProcess( 'Preparing directories for custom releases...' );
 
 		return executeOnPackages( releasesOnNpm, repositoryPath => {
+			let promise = Promise.resolve();
+
 			process.chdir( repositoryPath );
 
 			const packageJson = getPackageJson( repositoryPath );
@@ -500,40 +505,54 @@ module.exports = function releaseSubRepositories( options ) {
 			customReleasesOnNpm.set( tmpDir, repositoryPath );
 
 			// Copy `package.json` template.
-			exec( `cp ${ PACKAGE_JSON_TEMPLATE_PATH } ${ tmpPackageJsonPath }` );
+			promise = promise.then( () => copyFile( PACKAGE_JSON_TEMPLATE_PATH, tmpPackageJsonPath ) );
 
-			// Copy additional files.
+			// Copy files required by npm.
 			for ( const file of additionalFiles ) {
-				exec( `cp ${ path.join( repositoryPath, file ) } ${ path.join( tmpDir, file ) }` );
+				promise = promise.then( () => copyFile( path.join( repositoryPath, file ), path.join( tmpDir, file ) ) );
 			}
 
-			logDryRun( 'Updating package.json...' );
+			// Copy additional files.
+			const customReleasesFiles = options.customReleasesFiles[ packageJson.name ] || [];
+			const globOptions = {
+				cwd: repositoryPath,
+				dot: true,
+				nodir: true
+			};
 
-			// Update `package.json` file. It uses values from source `package.json`
-			// but only these ones which are defined in the template.
-			// Properties that were passed as `options.packageJsonForCustomReleases` will not be overwritten.
-			tools.updateJSONFile( tmpPackageJsonPath, jsonFile => {
-				const additionalPackageJson = options.packageJsonForCustomReleases[ packageJson.name ] || {};
-
-				// Overwrite custom values specified in `options.packageJsonForCustomReleases`.
-				for ( const property of Object.keys( additionalPackageJson ) ) {
-					jsonFile[ property ] = additionalPackageJson[ property ];
+			for ( const globPattern of customReleasesFiles ) {
+				for ( const file of glob.sync( globPattern, globOptions ) ) {
+					promise = promise.then( () => copyFile( path.join( repositoryPath, file ), path.join( tmpDir, file ) ) );
 				}
+			}
 
-				// Copy values from original package.json file.
-				for ( const property of Object.keys( jsonFile ) ) {
-					// If the `property` is set, leave it.
-					if ( jsonFile[ property ] ) {
-						continue;
+			return promise.then( () => {
+				logDryRun( 'Updating package.json...' );
+
+				// Update `package.json` file. It uses values from source `package.json`
+				// but only these ones which are defined in the template.
+				// Properties that were passed as `options.packageJsonForCustomReleases` will not be overwritten.
+				tools.updateJSONFile( tmpPackageJsonPath, jsonFile => {
+					const additionalPackageJson = options.packageJsonForCustomReleases[ packageJson.name ] || {};
+
+					// Overwrite custom values specified in `options.packageJsonForCustomReleases`.
+					for ( const property of Object.keys( additionalPackageJson ) ) {
+						jsonFile[ property ] = additionalPackageJson[ property ];
 					}
 
-					jsonFile[ property ] = packageJson[ property ];
-				}
+					// Copy values from original package.json file.
+					for ( const property of Object.keys( jsonFile ) ) {
+						// If the `property` is set, leave it.
+						if ( jsonFile[ property ] ) {
+							continue;
+						}
 
-				return jsonFile;
+						jsonFile[ property ] = packageJson[ property ];
+					}
+
+					return jsonFile;
+				} );
 			} );
-
-			return Promise.resolve();
 		} );
 	}
 
@@ -698,6 +717,31 @@ module.exports = function releaseSubRepositories( options ) {
 					exec( `rm ${ file }` );
 				}
 			} );
+	}
+
+	/**
+	 * Copy a file from the `source` path to the `destination` path.
+	 *
+	 * @param {String} source
+	 * @param {String} destination
+	 * @returns {Promise}
+	 */
+	function copyFile( source, destination ) {
+		return new Promise( ( resolve, reject ) => {
+			if ( dryRun ) {
+				log.info(
+					`⚠️  ${ chalk.grey( 'Copy file:' ) } From: "${ chalk.italic( source ) }" to "${ chalk.italic( destination ) }".`
+				);
+			}
+
+			mkdirp.sync( path.dirname( destination ) );
+
+			const stream = fs.createReadStream( source )
+				.pipe( fs.createWriteStream( destination ) );
+
+			stream.on( 'finish', resolve );
+			stream.on( 'error', reject );
+		} );
 	}
 
 	function exec( command ) {
