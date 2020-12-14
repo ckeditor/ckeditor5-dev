@@ -675,7 +675,7 @@ module.exports = function releaseSubRepositories( options ) {
 			);
 	}
 
-	// Removes all temporary directories that were created for publishing an custom repository.
+	// Removes all temporary directories that were created for publishing the custom repository.
 	//
 	// @returns {Promise}
 	function removeTemporaryDirectories() {
