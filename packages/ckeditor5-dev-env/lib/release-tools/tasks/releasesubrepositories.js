@@ -493,7 +493,7 @@ module.exports = function releaseSubRepositories( options ) {
 			const packageJson = getPackageJson( repositoryPath );
 
 			if ( !customReleases.includes( packageJson.name ) ) {
-				return Promise.resolve();
+				return promise;
 			}
 
 			log.info( `\nPreparing "${ chalk.underline( packageJson.name ) }"...` );
