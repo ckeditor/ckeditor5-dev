@@ -43,8 +43,7 @@ module.exports = function getDllPluginWebpackConfig( options ) {
 		},
 
 		optimization: {
-			minimize: false,
-			moduleIds: 'named'
+			minimize: false
 		},
 
 		plugins: [
