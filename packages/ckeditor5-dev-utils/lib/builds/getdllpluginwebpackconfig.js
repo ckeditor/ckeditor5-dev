@@ -7,6 +7,7 @@
 
 const path = require( 'path' );
 const webpack = require( 'webpack' );
+const TerserPlugin = require( 'terser-webpack-plugin' );
 const bundler = require( '../bundler' );
 const styles = require( '../styles' );
 const tools = require( '../tools' );
@@ -19,15 +20,14 @@ const tools = require( '../tools' );
  * @param {String} options.themePath An absolute path to the theme package.
  * @param {String} options.packagePath An absolute path to the root directory of the package.
  * @param {String} options.manifestPath An absolute path to the DLL manifest file.
+ * @param {Boolean} options.isDevelopmentMode Whether to build a dev mode of the package.
  * @returns {Object}
  */
 module.exports = function getDllPluginWebpackConfig( options ) {
 	const packageName = tools.readPackageName( options.packagePath );
 
-	return {
-		mode: 'development',
-
-		devtool: 'source-map',
+	const webpackConfig = {
+		mode: options.isDevelopmentMode ? 'development' : 'production',
 
 		performance: { hints: false },
 
@@ -91,6 +91,26 @@ module.exports = function getDllPluginWebpackConfig( options ) {
 			]
 		}
 	};
+
+	if ( options.isDevelopmentMode ) {
+		webpackConfig.devtool = 'source-map';
+	} else {
+		webpackConfig.optimization.minimize = true;
+
+		webpackConfig.optimization.minimizer = [
+			new TerserPlugin( {
+				terserOptions: {
+					output: {
+						// Preserve CKEditor 5 license comments.
+						comments: /^!/
+					}
+				},
+				extractComments: false
+			} )
+		];
+	}
+
+	return webpackConfig;
 };
 
 /**
