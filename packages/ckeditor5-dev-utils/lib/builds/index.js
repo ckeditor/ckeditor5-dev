@@ -6,5 +6,5 @@
 'use strict';
 
 module.exports = {
-	getDLLPluginWebpackConfig: require( './getdllpluginwebpackconfig' )
+	getDllPluginWebpackConfig: require( './getdllpluginwebpackconfig' )
 };
