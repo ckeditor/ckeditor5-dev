@@ -38,7 +38,7 @@ const additionalFiles = [
  *
  * This task does:
  *   - finds paths to sub repositories,
- *   - filters packages which should be released by comparing the latest version published on npm and GitHub,,
+ *   - filters packages which should be released by comparing the latest version published on npm and GitHub,
  *   - publishes new version on npm,
  *   - pushes new version to the remote repository,
  *   - creates a release which is displayed on "Releases" page on GitHub.
@@ -730,7 +730,7 @@ module.exports = function releaseSubRepositories( options ) {
 		return new Promise( ( resolve, reject ) => {
 			if ( dryRun ) {
 				log.info(
-					`⚠️  ${ chalk.grey( 'Copy file:' ) } From: "${ chalk.italic( source ) }" to "${ chalk.italic( destination ) }".`
+					`ℹ️  ${ chalk.grey( 'Copy file:' ) } From: "${ chalk.italic( source ) }" to "${ chalk.italic( destination ) }".`
 				);
 			}
 
@@ -746,7 +746,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 	function exec( command ) {
 		if ( dryRun ) {
-			log.info( `⚠️  ${ chalk.grey( 'Execute:' ) } "${ chalk.cyan( command ) }" in "${ chalk.grey.italic( process.cwd() ) }".` );
+			log.info( `ℹ️  ${ chalk.grey( 'Execute:' ) } "${ chalk.cyan( command ) }" in "${ chalk.grey.italic( process.cwd() ) }".` );
 		}
 
 		return tools.shExec( command, { verbosity: 'error' } );
