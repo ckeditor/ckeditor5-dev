@@ -37,12 +37,21 @@ module.exports = {
 			for ( const doclet of evt.doclets ) {
 				if ( doclet.meta && doclet.meta.path ) {
 					if ( isPrivatePackageFile( doclet.meta.path ) ) {
-						delete doclet.meta;
-
 						doclet.skipSource = true;
 					}
 				}
 			}
+
+			// Filter out protected and private doclets.
+			// It's a simple and naive approach, this way private and protected
+			// doclets from inherited public resources are also filtered out.
+			evt.doclets = evt.doclets.filter( doclet => {
+				if ( !doclet.skipSource ) {
+					return true;
+				}
+
+				return doclet.access !== 'private';
+			} );
 		}
 	},
 
