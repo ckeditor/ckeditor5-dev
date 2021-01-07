@@ -94,7 +94,7 @@ function isPrivatePackageFile( fileName ) {
 		// Root's dirname is equal to the root,
 		// So if this check passes, then we should break this endless loop.
 		if ( dirName === path.dirname( dirName ) ) {
-			throw new Error( `${ fileName } is not placed inside the NPM project.`)
+			throw new Error( `${ fileName } is not placed inside the NPM project.` );
 		}
 	}
 }
