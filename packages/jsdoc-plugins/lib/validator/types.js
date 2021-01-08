@@ -21,6 +21,7 @@ const BASIC_TYPES = [
 	'function', // JSDoc renames Function into function.
 	'RegExp',
 	'Symbol',
+	'Date',
 
 	// DOM API
 	'Node',
@@ -52,6 +53,12 @@ const GENERIC_TYPES = [
 	'WeakMap',
 	'WeakSet',
 	'Promise',
+	'Uint8Array',
+	'Uint16Array',
+	'Uint32Array',
+	'Int8Array',
+	'Int16Array',
+	'Int32Array',
 
 	// Object treated as a dictionary, e.g. Object.<String, Number>.
 	'Object',
