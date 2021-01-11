@@ -1,6 +1,39 @@
 Changelog
 =========
 
+## [24.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v23.6.1...v24.0.0) (2021-01-11)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Renamed `options.packageJsonForEmptyReleases` to `options.packageJsonForCustomReleases` in the `releaseSubRepositories()` function.
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Renamed `options.emptyReleases` to `options.customReleases` in the `releaseSubRepositories()` function.
+
+### Features
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The idea of having "emptyReleases" has been changed to "customReleases" that allows specifying which files from the original package should be copied. Introduced the `customReleasesFiles` option for the `releaseSubRepositories()` function. It allows specifying glob patterns of files that should be copied to the temporary directory from which the package will be published on npm. Closes [[ckeditor/ckeditor5#8616](https://github.com/ckeditor/ckeditor5/issues/8616)](https://github.com/ckeditor/ckeditor5/issues/8616). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/763e69d95048f006c6048c0014e574bc23246a8b))
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Added the "--include-external-directory" to the translations:collect task that allows checking packages located in the "external/" directory. See [ckeditor/ckeditor5#7901](https://github.com/ckeditor/ckeditor5/issues/7901). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/2ab50ca526a7d7f45d5fef0167a8d27728b04233))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Major releases (contain major breaking changes):
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v23.6.1 => v24.0.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v23.6.1 => v24.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v23.6.1 => v24.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v23.6.1 => v24.0.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v23.6.1 => v24.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v23.6.1 => v24.0.0
+</details>
+
+
 ## [23.6.1](https://github.com/ckeditor/ckeditor5-dev/compare/v23.6.0...v23.6.1) (2020-11-06)
 
 Internal changes only (updated dependencies, documentation, etc.).
