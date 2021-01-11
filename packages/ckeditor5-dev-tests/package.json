@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-tests",
-  "version": "23.6.1",
+  "version": "24.0.0",
   "description": "Testing environment for CKEditor 5.",
   "keywords": [],
   "main": "lib/index.js",
@@ -60,10 +60,10 @@
     "bin"
   ],
   "bin": {
-    "ckeditor5-dev-tests": "./bin/test.js",
-    "ckeditor5-dev-tests-manual": "./bin/test-manual.js",
-    "ckeditor5-dev-tests-check-dependencies": "./bin/check-dependencies.js",
-    "ckeditor5-dev-tests-notify-travis-status": "./bin/notify-travis-status.js"
+    "ckeditor5-dev-tests": "bin/test.js",
+    "ckeditor5-dev-tests-manual": "bin/test-manual.js",
+    "ckeditor5-dev-tests-check-dependencies": "bin/check-dependencies.js",
+    "ckeditor5-dev-tests-notify-travis-status": "bin/notify-travis-status.js"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
