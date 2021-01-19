@@ -37,12 +37,15 @@ async function checkDependencies( packagePaths ) {
  * Checks dependencies in provided package. If the folder does not contain a package.json file the function quits with success.
  *
  * @param {String} packagePath Relative path to package.
+ * @returns {Boolean} The result of checking the dependencies in the package: true = no errors found.
  */
 async function checkDependenciesInPackage( packagePath ) {
 	const packageAbsolutePath = path.resolve( packagePath );
 	const packageJsonPath = path.join( packageAbsolutePath, 'package.json' );
 
 	if ( !fs.existsSync( packageJsonPath ) ) {
+		console.log( `⚠️  Missing package.json file in ${ chalk.bold( packagePath ) }, skipping...` );
+
 		return true;
 	}
 
