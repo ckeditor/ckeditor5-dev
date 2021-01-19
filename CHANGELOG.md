@@ -1,6 +1,31 @@
 Changelog
 =========
 
+## [24.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v24.0.0...v24.0.1) (2021-01-19)
+
+### Bug fixes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Changed packages in the generated changelog will be grouped properly by exact comparing their scopes instead of matching values. Closes [ckeditor/ckeditor5#8596](https://github.com/ckeditor/ckeditor5/issues/8596). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/a825e12b63f122ef048ac347629db75b212bf1ab))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Improved the dependency checker in detecting missing, unused, or misplaced packages from JS, CSS, and `package.json` files. Closes [ckeditor/ckeditor5#8817](https://github.com/ckeditor/ckeditor5/issues/8817). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f74fc02260ad60cdaaeacad3333a5613c208fc03))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v24.0.0 => v24.0.1
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v24.0.0 => v24.0.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v24.0.0 => v24.0.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v24.0.0 => v24.0.1
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v24.0.0 => v24.0.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v24.0.0 => v24.0.1
+</details>
+
+
 ## [24.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v23.6.1...v24.0.0) (2021-01-11)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
