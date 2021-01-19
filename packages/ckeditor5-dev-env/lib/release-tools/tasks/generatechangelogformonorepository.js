@@ -10,7 +10,6 @@ const path = require( 'path' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const compareFunc = require( 'compare-func' );
 const chalk = require( 'chalk' );
-const minimatch = require( 'minimatch' );
 const semver = require( 'semver' );
 const changelogUtils = require( '../utils/changelog' );
 const cli = require( '../utils/cli' );
@@ -490,10 +489,10 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 		}
 
 		for ( const [ packageName, version ] of dependencies ) {
-			const packageWithoutScope = packageName.replace( /^@ckeditor\//, '' );
+			const packageScope = packageName.replace( /^@ckeditor\/ckeditor5?-/, '' );
 
 			for ( const singleScope of scopes ) {
-				if ( minimatch( packageWithoutScope, '*' + singleScope ) ) {
+				if ( packageScope === singleScope ) {
 					packages.set( packageName, version );
 					dependencies.delete( packageName );
 				}
