@@ -1,6 +1,33 @@
 Changelog
 =========
 
+## [24.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/v24.0.1...v24.0.2) (2021-01-20)
+
+### Other changes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Minor improvements for the dependency checker that is exposed as a binary script by the `@ckeditor/ckeditor5-dev-tests` package (`ckeditor5-dev-tests-check-dependencies`). Closes https://github.com/ckeditor/ckeditor5/issues/8862. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/6e27bc78c2ada87c2facc4b9f2efb4ea4b6dd956))
+
+  - Added a flag `--quiet` that allows display logs only if found issues with dependencies,
+  - If packages were not specified in arguments, all packages found in the `packages/` directory will be checked by default.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v24.0.1 => v24.0.2
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v24.0.1 => v24.0.2
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v24.0.1 => v24.0.2
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v24.0.1 => v24.0.2
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v24.0.1 => v24.0.2
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v24.0.1 => v24.0.2
+</details>
+
+
 ## [24.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v24.0.0...v24.0.1) (2021-01-19)
 
 ### Bug fixes
