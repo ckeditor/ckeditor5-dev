@@ -7,13 +7,13 @@
 
 'use strict';
 
-const childProcess = require( 'child_process' );
 const fs = require( 'fs' );
 const path = require( 'path' );
 const glob = require( 'glob' );
 const depCheck = require( 'depcheck' );
 const chalk = require( 'chalk' );
 const minimist = require( 'minimist' );
+const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 const { packagePaths, options } = parseArguments( process.argv.slice( 2 ) );
 
@@ -183,16 +183,16 @@ function parseArguments( args ) {
 }
 
 /**
- * Extracts relative paths to packages. If no paths are provided, returns all found paths from CWD.
+ * Returns relative (to the current work directory) paths to packages. If the provided `args` array is empty,
+ * the packages will be read from the `packages/` directory.
  *
  * @param {Array.<String>} args CLI arguments with relative or absolute package paths.
  * @returns {Set.<String>} Relative package paths.
  */
 function getPackagePaths( args ) {
 	if ( !args.length ) {
-		return childProcess.execSync( 'ls packages -1', {
-			encoding: 'utf8'
-		} ).toString().trim().split( '\n' ).map( packageName => `packages/${ packageName }` );
+		return tools.getDirectories( path.join( process.cwd(), 'packages' ) )
+			.map( packageName => `packages/${ packageName }` );
 	}
 
 	const PACKAGE_RELATIVE_PATH_REGEXP = /packages\/ckeditor5?-[^/]+/;
