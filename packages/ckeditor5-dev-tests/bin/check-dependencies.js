@@ -12,8 +12,12 @@ const path = require( 'path' );
 const glob = require( 'glob' );
 const depCheck = require( 'depcheck' );
 const chalk = require( 'chalk' );
+const minimist = require( 'minimist' );
+const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
-const packagePaths = getPackagePaths( process.argv.slice( 2 ) );
+const { packagePaths, options } = parseArguments( process.argv.slice( 2 ) );
+
+const QUIET_MODE = options.quiet;
 
 checkDependencies( packagePaths );
 
@@ -44,7 +48,7 @@ async function checkDependenciesInPackage( packagePath ) {
 	const packageJsonPath = path.join( packageAbsolutePath, 'package.json' );
 
 	if ( !fs.existsSync( packageJsonPath ) ) {
-		console.log( `⚠️  Missing package.json file in ${ chalk.bold( packagePath ) }, skipping...` );
+		console.log( `⚠️  Missing package.json file in ${ chalk.bold( packagePath ) }, skipping...\n` );
 
 		return true;
 	}
@@ -71,7 +75,9 @@ async function checkDependenciesInPackage( packagePath ) {
 		depCheckOptions.ignoreMatches.push( ...packageJson.depcheckIgnore );
 	}
 
-	console.log( `🔎 Checking dependencies in ${ chalk.bold( packageJson.name ) }...` );
+	if ( !QUIET_MODE ) {
+		console.log( `🔎 Checking dependencies in ${ chalk.bold( packageJson.name ) }...` );
+	}
 
 	const result = await depCheck( packageAbsolutePath, depCheckOptions );
 
@@ -129,12 +135,14 @@ async function checkDependenciesInPackage( packagePath ) {
 	const hasErrors = errors.some( error => !!error );
 
 	if ( !hasErrors ) {
-		console.log( chalk.green.bold( '✨ All dependencies are defined correctly.\n' ) );
+		if ( !QUIET_MODE ) {
+			console.log( chalk.green.bold( '✨ All dependencies are defined correctly.\n' ) );
+		}
 
 		return true;
 	}
 
-	console.log( chalk.red.bold( '🔥 Found some issue with dependencies.\n' ) );
+	console.log( chalk.red.bold( `🔥 Found some issue with dependencies in ${ chalk.bold( packageJson.name ) }.\n` ) );
 
 	showErrors( errors );
 
@@ -142,12 +150,51 @@ async function checkDependenciesInPackage( packagePath ) {
 }
 
 /**
- * Extracts relative paths to packages.
+ * Parses CLI arguments and options.
+ *
+ * @param {Array.<String>} args CLI arguments containing package paths and options.
+ * @returns {Object} result
+ * @returns {Set.<String>} result.packagePaths Relative package paths.
+ * @returns {Object.<String, Boolean} result.options Configuration options.
+ */
+function parseArguments( args ) {
+	const config = {
+		boolean: [
+			'quiet'
+		],
+
+		default: {
+			quiet: false
+		}
+	};
+
+	const parsedArgs = minimist( args, config );
+
+	const options = Object.assign( {}, parsedArgs );
+
+	// Delete arguments that didn't have an explicit option associated with them.
+	// In our case this is all package paths.
+	delete options._;
+
+	return {
+		packagePaths: getPackagePaths( parsedArgs._ ),
+		options
+	};
+}
+
+/**
+ * Returns relative (to the current work directory) paths to packages. If the provided `args` array is empty,
+ * the packages will be read from the `packages/` directory.
  *
  * @param {Array.<String>} args CLI arguments with relative or absolute package paths.
  * @returns {Set.<String>} Relative package paths.
  */
 function getPackagePaths( args ) {
+	if ( !args.length ) {
+		return tools.getDirectories( path.join( process.cwd(), 'packages' ) )
+			.map( packageName => `packages/${ packageName }` );
+	}
+
 	const PACKAGE_RELATIVE_PATH_REGEXP = /packages\/ckeditor5?-[^/]+/;
 
 	const getPackageRelativePathFromAbsolutePath = path => {
@@ -342,11 +389,11 @@ function findMisplacedDependencies( dependencies, devDependencies, dependenciesT
 
 	const misplacedPackages = {
 		missingInDependencies: {
-			description: '🧾 The following packages are used in the source and should be moved to `dependencies`',
+			description: 'The following packages are used in the source and should be moved to `dependencies`',
 			packageNames: new Set()
 		},
 		missingInDevDependencies: {
-			description: '🧾 The following packages are not used in the source and should be moved to `devDependencies`',
+			description: 'The following packages are not used in the source and should be moved to `devDependencies`',
 			packageNames: new Set()
 		}
 	};
@@ -369,7 +416,7 @@ function findMisplacedDependencies( dependencies, devDependencies, dependenciesT
 		.values( misplacedPackages )
 		.filter( item => item.packageNames.size > 0 )
 		.map( item => ( {
-			description: item.description,
+			description: chalk.gray( item.description ),
 			packageNames: [ ...item.packageNames ].sort()
 		} ) );
 }
@@ -393,7 +440,7 @@ function showErrors( data ) {
 	if ( data[ 0 ] ) {
 		console.log( chalk.red( '❌ Invalid itself imports found in:' ) );
 		console.log( data[ 0 ] + '\n' );
-		console.log( '🧾 Imports from local package must always use relative path.\n' );
+		console.log( chalk.gray( 'Imports from local package must always use relative path.\n' ) );
 	}
 
 	if ( data[ 1 ] ) {
@@ -427,7 +474,7 @@ function showErrors( data ) {
 	}
 
 	if ( data[ 7 ] ) {
-		console.log( chalk.red( '❌ Misplaced dependencies (`dependencies` ⮀ `devDependencies`):' ) );
+		console.log( chalk.red( '❌ Misplaced dependencies (`dependencies` or `devDependencies`):' ) );
 		console.log( data[ 7 ] + '\n' );
 	}
 }
