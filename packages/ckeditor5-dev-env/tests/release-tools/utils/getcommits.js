@@ -295,6 +295,7 @@ describe( 'dev-env/release-tools/utils', () => {
 							to: baseCommit,
 							format: '%B%n-hash-%n%H',
 							merges: undefined,
+							showSignature: false,
 							firstParent: true
 						} );
 
@@ -303,6 +304,7 @@ describe( 'dev-env/release-tools/utils', () => {
 							from: baseCommit,
 							format: '%B%n-hash-%n%H',
 							merges: undefined,
+							showSignature: false,
 							firstParent: true
 						} );
 					} );
