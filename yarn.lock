@@ -284,17 +284,17 @@
     "@octokit/types" "^6.0.0"
     universal-user-agent "^6.0.0"
 
-"@octokit/openapi-types@^2.3.1":
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/@octokit/openapi-types/-/openapi-types-2.3.1.tgz#4e06e97bfcce5ad64fe89a1b5bdbed05e31ed1ab"
-  integrity sha512-KTzpRDT07euvbBYbPs121YDqq5DT94nBDFIyogsDhOnWL8yDCHev6myeiPTgS+VLmyUbdNCYu6L/gVj+Bd1q8Q==
+"@octokit/openapi-types@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@octokit/openapi-types/-/openapi-types-3.0.0.tgz#f73d48af2d21bf4f97fbf38fae43b54699e0dbba"
+  integrity sha512-jOp1CVRw+OBJaZtG9QzZggvJXvyzgDXuW948SWsDiwmyDuCjeYCiF3TDD/qvhpF580RfP7iBIos4AVU6yhgMlA==
 
 "@octokit/plugin-paginate-rest@^2.2.0":
-  version "2.7.1"
-  resolved "https://registry.yarnpkg.com/@octokit/plugin-paginate-rest/-/plugin-paginate-rest-2.7.1.tgz#4a0d9b180e3041d3ce5b08771647fb24f091b40f"
-  integrity sha512-dUsxsEIrBqhlQNfXRhMhXOTQi0SSG38+QWcPGO226HFPFJk44vWukegHfMG3496vLv9T2oT7IuAGssGpcUg5bQ==
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/@octokit/plugin-paginate-rest/-/plugin-paginate-rest-2.8.0.tgz#2b41e12b494e895bf5fb5b12565d2c80a0ecc6ae"
+  integrity sha512-HtuEQ2AYE4YFEBQN0iHmMsIvVucd5RsnwJmRKIsfAg1/ZeoMaU+jXMnTAZqIUEmcVJA27LjHUm3f1hxf8Fpdxw==
   dependencies:
-    "@octokit/types" "^6.3.1"
+    "@octokit/types" "^6.4.0"
 
 "@octokit/plugin-request-log@^1.0.0":
   version "1.0.2"
@@ -356,12 +356,12 @@
   dependencies:
     "@types/node" ">= 8"
 
-"@octokit/types@^6.0.0", "@octokit/types@^6.0.3", "@octokit/types@^6.3.1":
-  version "6.3.2"
-  resolved "https://registry.yarnpkg.com/@octokit/types/-/types-6.3.2.tgz#d57069a0c3c1ae57a87342f1700e4184c9e038ed"
-  integrity sha512-H6cbnDumWOQJneyNKCBWgnktRqTWcEm6gq2cIS3frtVgpCqB8zguromnjIWJW375btjnxwmbYBTEAEouruZ2Yw==
+"@octokit/types@^6.0.0", "@octokit/types@^6.0.3", "@octokit/types@^6.4.0":
+  version "6.4.0"
+  resolved "https://registry.yarnpkg.com/@octokit/types/-/types-6.4.0.tgz#f3f47be70bcdb3c26f2c2619f3dd0ced466a265c"
+  integrity sha512-1FEmuVppZE2zG0rBdQlviRz5cp0udyI63zyhBVPrm0FRNAsQkAXU7IYWQg1XvhChFut8YbFYN1usQpk54D6/4w==
   dependencies:
-    "@octokit/openapi-types" "^2.3.1"
+    "@octokit/openapi-types" "^3.0.0"
     "@types/node" ">= 8"
 
 "@sinonjs/commons@^1", "@sinonjs/commons@^1.3.0", "@sinonjs/commons@^1.4.0", "@sinonjs/commons@^1.6.0", "@sinonjs/commons@^1.7.0", "@sinonjs/commons@^1.8.1":
@@ -1475,9 +1475,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001173:
-  version "1.0.30001178"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001178.tgz#3ad813b2b2c7d585b0be0a2440e1e233c6eabdbc"
-  integrity sha512-VtdZLC0vsXykKni8Uztx45xynytOi71Ufx9T8kHptSw9AL4dpqailUJJHavttuzUe1KYuBYtChiWv+BAb7mPmQ==
+  version "1.0.30001179"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001179.tgz#b0803883b4471a6c62066fb1752756f8afc699c8"
+  integrity sha512-blMmO0QQujuUWZKyVrD1msR4WNDAqb/UPO1Sw2WWsQ7deoM5bJiicKnWJ1Y0NS/aGINSnKPIWBMw5luX+NDUCA==
 
 caseless@~0.12.0:
   version "0.12.0"
@@ -4673,9 +4673,9 @@ lint-staged@^10.2.4:
     stringify-object "^3.3.0"
 
 listr2@^3.2.2:
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/listr2/-/listr2-3.2.3.tgz#ef9e0d790862f038dde8a9837be552b1adfd1c07"
-  integrity sha512-vUb80S2dSUi8YxXahO8/I/s29GqnOL8ozgHVLjfWQXa03BNEeS1TpBLjh2ruaqq5ufx46BRGvfymdBSuoXET5w==
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/listr2/-/listr2-3.3.0.tgz#fab51211e4152d88bab7d91e4f7f896b0d9e5ba1"
+  integrity sha512-G9IFI/m65icgVlifS0wMQnvn35/8VJGzEb3crpE4NnaegQYQOn/wP7yqi9TTJQ/eoxme4UaPbffBK1XqKP/DOg==
   dependencies:
     chalk "^4.1.0"
     cli-truncate "^2.1.0"
@@ -4685,6 +4685,7 @@ listr2@^3.2.2:
     p-map "^4.0.0"
     rxjs "^6.6.3"
     through "^2.3.8"
+    wrap-ansi "^7.0.0"
 
 loader-runner@^2.4.0:
   version "2.4.0"
