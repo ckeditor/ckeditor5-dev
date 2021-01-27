@@ -519,6 +519,70 @@ describe( 'dev-env/release-tools/utils', () => {
 						);
 					} );
 			} );
+
+			it( 'allows removing a URL to commit per commit', () => {
+				const commits = [
+					{
+						type: 'Features',
+						header: 'Feature: (a) The first an amazing feature.',
+						subject: '(a) The first an amazing feature.',
+						hash: 'x'.repeat( 40 ),
+						notes: [],
+						skipCommitsLink: true
+					},
+					{
+						type: 'Features',
+						header: 'Feature: (b) The second an amazing feature.',
+						subject: '(b) The second an amazing feature.',
+						hash: 'z'.repeat( 40 ),
+						notes: []
+					},
+					{
+						type: 'Features',
+						header: 'Feature: (c) The last one an amazing feature.',
+						subject: '(c) The last one an amazing feature.',
+						hash: 'y'.repeat( 40 ),
+						notes: [],
+						skipCommitsLink: true
+					}
+				];
+
+				const context = {
+					version: '1.0.0',
+					repoUrl: url,
+					currentTag: 'v1.0.0',
+					commit: 'commit'
+				};
+
+				const options = getWriterOptions( {
+					hash: hash => hash.slice( 0, 7 )
+				} );
+
+				return generateChangelog( commits, context, options )
+					.then( changes => {
+						changes = replaceDates( changes );
+
+						const changesAsArray = changes.split( '\n' )
+							.map( line => line.trim() )
+							.filter( line => line.length );
+
+						expect( changesAsArray[ 0 ] ).to.equal(
+							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
+						);
+						expect( changesAsArray[ 1 ] ).to.equal(
+							'### Features'
+						);
+						expect( changesAsArray[ 2 ] ).to.equal(
+							'* (a) The first an amazing feature.'
+						);
+						expect( changesAsArray[ 3 ] ).to.equal(
+							'* (b) The second an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
+						);
+						expect( changesAsArray[ 4 ] ).to.equal(
+							'* (c) The last one an amazing feature.'
+						);
+					} );
+			} );
 		} );
 
 		describe( 'non-initial changelog (with "previousTag")', () => {
