@@ -485,6 +485,8 @@ module.exports = function releaseSubRepositories( options ) {
 
 		logProcess( 'Preparing directories for custom releases...' );
 
+		const customReleasesFiles = options.customReleasesFiles || {};
+
 		return executeOnPackages( releasesOnNpm, repositoryPath => {
 			let promise = Promise.resolve();
 
@@ -513,14 +515,14 @@ module.exports = function releaseSubRepositories( options ) {
 			}
 
 			// Copy additional files.
-			const customReleasesFiles = options.customReleasesFiles[ packageJson.name ] || [];
+			const customReleasesFilesForPackage = customReleasesFiles[ packageJson.name ] || [];
 			const globOptions = {
 				cwd: repositoryPath,
 				dot: true,
 				nodir: true
 			};
 
-			for ( const globPattern of customReleasesFiles ) {
+			for ( const globPattern of customReleasesFilesForPackage ) {
 				for ( const file of glob.sync( globPattern, globOptions ) ) {
 					promise = promise.then( () => copyFile( path.join( repositoryPath, file ), path.join( tmpDir, file ) ) );
 				}
