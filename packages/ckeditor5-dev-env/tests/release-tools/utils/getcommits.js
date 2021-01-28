@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2021, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -295,6 +295,7 @@ describe( 'dev-env/release-tools/utils', () => {
 							to: baseCommit,
 							format: '%B%n-hash-%n%H',
 							merges: undefined,
+							showSignature: false,
 							firstParent: true
 						} );
 
@@ -303,6 +304,7 @@ describe( 'dev-env/release-tools/utils', () => {
 							from: baseCommit,
 							format: '%B%n-hash-%n%H',
 							merges: undefined,
+							showSignature: false,
 							firstParent: true
 						} );
 					} );

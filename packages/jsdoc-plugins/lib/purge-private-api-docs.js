@@ -1,3 +1,8 @@
+/**
+ * @license Copyright (c) 2003-2021, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 // A plugin for JSDoc that should purge non-public API docs.
 // Public API docs should contain the `@publicApi` tag below the `@module` tag.
 
