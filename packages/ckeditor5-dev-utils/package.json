@@ -16,9 +16,13 @@
     "pofile": "^1.0.9",
     "postcss": "^7.0.17",
     "postcss-import": "^12.0.0",
+    "postcss-loader": "^3.0.0",
     "postcss-mixins": "^6.2.0",
     "postcss-nesting": "^7.0.0",
+    "raw-loader": "^4.0.1",
     "shelljs": "^0.8.1",
+    "style-loader": "^1.2.1",
+    "terser-webpack-plugin": "^3.0.2",
     "through2": "^3.0.1"
   },
   "devDependencies": {
