@@ -1,6 +1,38 @@
 Changelog
 =========
 
+## [24.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v24.0.2...v24.1.0) (2021-02-01)
+
+### Features
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Support for collecting commits from additional mono-repositories in the `generateChangelogForMonoRepository()` function. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/3d7d5c2654f626e6644da3cd3bc88d5940024a67))
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Added a module (`builds.getDllPluginWebpackConfig()`) that produces the webpack configuration for DLL. See [ckeditor/ckeditor5#8395](https://github.com/ckeditor/ckeditor5/issues/8395). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/7dad0adc149259d77371f2d6f42ec9213b11f075))
+
+### Bug fixes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The "releaserepositories.js" script should not throw an error if the "options.customReleasesFiles" option is not specified. Closes [ckeditor/ckeditor5#8932](https://github.com/ckeditor/ckeditor5/issues/8932). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/1726e5fb3fba0ef9d3dcdcd966760ce380c9246a))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v24.0.2 => v24.1.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v24.0.2 => v24.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v24.0.2 => v24.1.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v24.0.2 => v24.1.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v24.0.2 => v24.1.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v24.0.2 => v24.1.0
+</details>
+
+
 ## [24.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/v24.0.1...v24.0.2) (2021-01-20)
 
 ### Other changes
