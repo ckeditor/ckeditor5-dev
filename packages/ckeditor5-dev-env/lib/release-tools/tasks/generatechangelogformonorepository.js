@@ -55,6 +55,9 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
  *
  * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
  *
+ * @param {Array.<ExternalRepository>} [options.externalRepositories=[]] An array of object with additional repositories
+ * that the function takes into consideration while gathering commits. It assumes that those directories are also mono repositories.
+ *
  * @returns {Promise}
  */
 module.exports = function generateChangelogForMonoRepository( options ) {
@@ -62,21 +65,15 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 	const cwd = process.cwd();
 	const pkgJson = getPackageJson( options.cwd );
 
-	const transformCommit = transformCommitFactory( {
-		useExplicitBreakingChangeGroups: true
-	} );
+	logProcess( 'Collecting paths to packages...' );
 
-	const pathsCollection = getPackagesPaths( {
+	const pathsCollection = gatherAllPackagesPaths( {
 		cwd: options.cwd,
 		packages: options.packages,
 		scope: options.scope || null,
 		skipPackages: options.skipPackages || [],
-		skipMainRepository: true
+		externalRepositories: options.externalRepositories || []
 	} );
-
-	// The main repository should be at the end of the list.
-	pathsCollection.skipped.delete( options.cwd );
-	pathsCollection.matched.add( options.cwd );
 
 	logProcess( 'Collecting all commits since the last release...' );
 
@@ -99,15 +96,17 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 	const packagesPaths = new Map();
 
 	const commitOptions = {
+		cwd: options.cwd,
 		from: options.from ? options.from : 'v' + pkgJson.version,
-		releaseBranch: options.releaseBranch
+		releaseBranch: options.releaseBranch || 'master',
+		externalRepositories: options.externalRepositories || []
 	};
 
-	return getCommits( transformCommit, commitOptions )
+	return gatherAllCommits( commitOptions )
 		.then( commits => {
 			allCommits = commits;
 
-			logInfo( `Found ${ commits.length } entries to parse.`, { indentLevel: 1 } );
+			logInfo( `Found ${ commits.length } entries to parse.`, { indentLevel: 1, startWithNewLine: true } );
 		} )
 		.then( () => typeNewVersionForAllPackages() )
 		.then( () => generateChangelogFromCommits() )
@@ -134,6 +133,116 @@ module.exports = function generateChangelogForMonoRepository( options ) {
 		.catch( err => {
 			console.log( err );
 		} );
+
+	/**
+	 * Returns collections with packages found in the `options.cwd` directory and the external repositories.
+	 *
+	 * @param {Object} options
+	 * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
+	 * @param {String} options.packages Where to look for packages.
+	 * @param {String} options.scope Package names have to match to specified glob pattern in order to be processed.
+	 * @param {Array.<String>} options.skipPackages Name of packages which won't be touched.
+	 * @param {Array.<ExternalRepository>} options.externalRepositories An array of object with additional repositories
+	 * that the function takes into consideration while gathering packages.
+	 * @returns {PathsCollection}
+	 */
+	function gatherAllPackagesPaths( options ) {
+		logInfo( `Processing "${ options.cwd }"...`, { indentLevel: 1 } );
+
+		const pathsCollection = getPackagesPaths( {
+			cwd: options.cwd,
+			packages: options.packages,
+			scope: options.scope,
+			skipPackages: options.skipPackages,
+			skipMainRepository: true
+		} );
+
+		for ( const externalRepository of options.externalRepositories ) {
+			logInfo( `Processing "${ externalRepository.cwd }"...`, { indentLevel: 1 } );
+
+			const externalPackages = getPackagesPaths( {
+				cwd: externalRepository.cwd,
+				packages: externalRepository.packages,
+				scope: externalRepository.scope || null,
+				skipPackages: externalRepository.skipPackages || [],
+				skipMainRepository: true
+			} );
+
+			// The main package in an external repository is a private package.
+			externalPackages.skipped.delete( externalRepository.cwd );
+
+			// Merge results with the object that will be returned.
+			[ ...externalPackages.matched ].forEach( item => pathsCollection.matched.add( item ) );
+			[ ...externalPackages.skipped ].forEach( item => pathsCollection.skipped.add( item ) );
+		}
+
+		// The main repository should be at the end of the list.
+		pathsCollection.skipped.delete( options.cwd );
+		pathsCollection.matched.add( options.cwd );
+
+		return pathsCollection;
+	}
+
+	/**
+	 * Returns a promise that resolves an array of commits since the last tag specified as `options.from`.
+	 *
+	 * @param {Object} options
+	 * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
+	 * @param {String} options.from A commit or tag name that will be the first param of the range of commits to collect.
+	 * @param {String} options.releaseBranch A name of the branch that should be used for releasing packages.
+	 * @param {Array.<ExternalRepository>} options.externalRepositories An array of object with additional repositories
+	 * that the function takes into consideration while gathering commits.
+	 * @returns {Promise.<Array.<Commit>>}
+	 */
+	function gatherAllCommits( options ) {
+		logInfo( `Processing "${ options.cwd }"...`, { indentLevel: 1 } );
+
+		const transformCommit = transformCommitFactory( {
+			useExplicitBreakingChangeGroups: true
+		} );
+
+		const commitOptions = {
+			from: options.from,
+			releaseBranch: options.releaseBranch
+		};
+
+		let promise = getCommits( transformCommit, commitOptions )
+			.then( commits => {
+				logInfo( `Found ${ commits.length } entries in "${ options.cwd }".`, { indentLevel: 1 } );
+
+				return commits;
+			} );
+
+		for ( const externalRepository of options.externalRepositories ) {
+			promise = promise.then( commits => {
+				logInfo( `Processing "${ externalRepository.cwd }"...`, { indentLevel: 1, startWithNewLine: true } );
+				process.chdir( externalRepository.cwd );
+
+				const commitOptions = {
+					from: externalRepository.from || options.from,
+					releaseBranch: externalRepository.releaseBranch || options.releaseBranch
+				};
+
+				return getCommits( transformCommit, commitOptions )
+					.then( newCommits => {
+						logInfo( `Found ${ newCommits.length } entries in "${ externalRepository.cwd }".`, { indentLevel: 1 } );
+
+						for ( const singleCommit of newCommits ) {
+							singleCommit.skipCommitsLink = externalRepository.skipLinks || false;
+						}
+
+						// Merge arrays with the commits.
+						return [].concat( commits, newCommits );
+					} );
+			} );
+		}
+
+		return promise.then( commits => {
+			process.chdir( options.cwd );
+
+			return commits;
+		} );
+	}
 
 	/**
 	 * Asks the user about the new version for all packages for the upcoming release.
@@ -591,4 +700,24 @@ module.exports = function generateChangelogForMonoRepository( options ) {
  * @param {Boolean} current The current version defined in the `package.json` file.
  *
  * @param {Boolean} next The next version defined during generating the changelog file.
+ */
+
+/**
+ * @typedef {Object} ExternalRepository
+ *
+ * @param {String} cwd An absolute path to the repository.
+ *
+ * @param {String} packages Subdirectory in a given `cwd` that should searched for packages. E.g. `'packages'`.
+ *
+ * @param {String} [scope] Glob pattern for package names to be processed.
+ *
+ * @param {Array.<String>} [skipPackages] Name of packages which won't be touched.
+ *
+ * @param {Boolean} [skipLinks] If set on `true`, a URL to commit (hash) will be omitted.
+ *
+ * @param {String} [from] A commit or tag name that will be the first param of the range of commits to collect. If not specified,
+ * the option will inherit its value from the function's `options` object.
+ *
+ * @param {String} [releaseBranch] A name of the branch that should be used for releasing packages. If not specified, the branch
+ * used for the main repository will be used.
  */
