@@ -707,9 +707,9 @@ module.exports = function generateChangelogForMonoRepository( options ) {
  *
  * @param {String} cwd An absolute path to the repository.
  *
- * @param {String} packages Where to look for packages.
+ * @param {String} packages Subdirectory in a given `cwd` that should searched for packages. E.g. `'packages'`.
  *
- * @param {String} [scope] Package names have to match to specified glob pattern in order to be processed.
+ * @param {String} [scope] Glob pattern for package names to be processed.
  *
  * @param {Array.<String>} [skipPackages] Name of packages which won't be touched.
  *
