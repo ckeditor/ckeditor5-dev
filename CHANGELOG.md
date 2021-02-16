@@ -1,6 +1,43 @@
 Changelog
 =========
 
+## [24.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v24.1.0...v24.2.0) (2021-02-16)
+
+### Features
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `bumpVersions()` function can read the changelog file from an external directory (using `options.changelogDirectory`). Thanks to that, the private packages from the mono-repository can be released using a public changelog. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/faa1d1e7aafa5f870e038e94b56a8e03fff48e4f))
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `bumpVersions()` function allows skipping upgrading versions of dependencies between updated packages (using `options.skipUpdatingDependencies` which is `false` by default). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/faa1d1e7aafa5f870e038e94b56a8e03fff48e4f))
+
+### Bug fixes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Simplified a check whether a package was published on NPM in the `releaseSubRepositories()` function. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/faa1d1e7aafa5f870e038e94b56a8e03fff48e4f))
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: A DLL-consumer package produced by webpack should be assigned to the `window` object. See [ckeditor/ckeditor5#9039](https://github.com/ckeditor/ckeditor5/issues/9039). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/72c063a3854b6336fcc8528c94887d04b9afa1cf))
+
+### Other changes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `bumpVersions()` function returns a promise with a collection that contains all updated packages. Previously the promise didn't resolve anything. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/faa1d1e7aafa5f870e038e94b56a8e03fff48e4f))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v24.1.0 => v24.2.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v24.1.0 => v24.2.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v24.1.0 => v24.2.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v24.1.0 => v24.2.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v24.1.0 => v24.2.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v24.1.0 => v24.2.0
+</details>
+
+
 ## [24.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v24.0.2...v24.1.0) (2021-02-01)
 
 ### Features
