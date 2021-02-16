@@ -286,8 +286,7 @@ module.exports = function releaseSubRepositories( options ) {
 				// Prepare the main repository release details.
 				const packageJson = getPackageJson( options.cwd );
 				const releaseDetails = {
-					version: packageJson.version,
-					changes: getChangesForVersion( packageJson.version, options.cwd )
+					version: packageJson.version
 				};
 
 				if ( releaseOptions.github ) {
@@ -295,6 +294,7 @@ module.exports = function releaseSubRepositories( options ) {
 						exec( 'git remote get-url origin --push' ).trim()
 					);
 
+					releaseDetails.changes = getChangesForVersion( packageJson.version, options.cwd );
 					releaseDetails.repositoryOwner = repositoryInfo.owner;
 					releaseDetails.repositoryName = repositoryInfo.name;
 				}
@@ -372,12 +372,7 @@ module.exports = function releaseSubRepositories( options ) {
 			try {
 				return exec( `npm show ${ packageName } version` ).trim();
 			} catch ( err ) {
-				const errorAsArray = err.message.split( '\n' ).slice( 0, 2 );
-
-				if (
-					errorAsArray[ 0 ].endsWith( 'npm ERR! code E404' ) &&
-					errorAsArray[ 1 ] === `npm ERR! 404 '${ packageName }' is not in the npm registry.`
-				) {
+				if ( err.message.match( /npm ERR! 404/ ) ) {
 					return null;
 				}
 

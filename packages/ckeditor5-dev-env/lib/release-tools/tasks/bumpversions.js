@@ -37,7 +37,10 @@ const BREAK_RELEASE_MESSAGE = 'You aborted updating versions. Why? Oh why?!';
  * `npm version` will be reverted. Every called command will be displayed.
  * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in "cwd" will be skipped.
  * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
- * @returns {Promise}
+ * @param {String} [options.changelogDirectory] An absolute path to the directory where the `CHANGELOG.md` file is saved. If not specified,
+ * the `options.cwd` value will be used instead.
+ * @param {Boolean} [options.skipUpdatingDependencies=false] Whether to skip updating version of dependencies between updated packages.
+ * @returns {Promise} A collection with packages that were updated.
  */
 module.exports = function bumpVersions( options ) {
 	const cwd = process.cwd();
@@ -52,8 +55,10 @@ module.exports = function bumpVersions( options ) {
 		skipMainRepository: options.skipMainRepository
 	} );
 
-	const mainRepositoryVersion = versions.getLastFromChangelog( options.cwd );
-	const mainChangelog = changelog.getChangesForVersion( mainRepositoryVersion );
+	const changelogDirectory = options.changelogDirectory || options.cwd;
+
+	const mainRepositoryVersion = versions.getLastFromChangelog( changelogDirectory );
+	const mainChangelog = changelog.getChangesForVersion( mainRepositoryVersion, changelogDirectory );
 	const releaseBranch = options.releaseBranch || 'master';
 
 	logDryRun( '⚠️  DRY RUN mode ⚠️' );
@@ -76,6 +81,8 @@ module.exports = function bumpVersions( options ) {
 
 			logProcess( `Finished updating versions of ${ chalk.underline( pathsCollection.matched.size ) } package(s).` );
 			logDryRun( 'Because of the DRY RUN mode, nothing has been changed. All changes were reverted.' );
+
+			return Promise.resolve( pathsCollection.matched );
 		} )
 		.catch( err => {
 			process.chdir( cwd );
@@ -189,6 +196,12 @@ module.exports = function bumpVersions( options ) {
 	// @params {Map} dependencies
 	// @returns {Promise.<Map.<String, ReleaseDetails>>}
 	function updateDependenciesOfPackages( packages, dependencies ) {
+		if ( options.skipUpdatingDependencies ) {
+			logProcess( 'Skipping updating dependencies...' );
+
+			return Promise.resolve( packages );
+		}
+
 		logProcess( 'Updating dependencies for packages that will be released...' );
 		let hasUpdatedAnyPackage = false;
 
@@ -231,7 +244,7 @@ module.exports = function bumpVersions( options ) {
 	// @params {Map.<String, ReleaseDetails>} packages
 	// @returns {<Map.<String, ReleaseDetails>}
 	function updateLatestChangesForMainRepository( packages, changes ) {
-		logProcess( 'Updating changes for the main repossitory...' );
+		logProcess( 'Updating changes for the main repository...' );
 
 		const packageJson = getPackageJson( options.cwd );
 		const releaseDetails = packages.get( packageJson.name );
