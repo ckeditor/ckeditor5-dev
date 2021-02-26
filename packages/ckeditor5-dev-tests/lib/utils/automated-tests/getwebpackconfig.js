@@ -55,7 +55,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 				{
 					test: /\.js$/,
 					loader: require.resolve( '../ck-debug-loader' ),
-					options: {
+					query: {
 						debugFlags: options.debug
 					}
 				}
@@ -88,7 +88,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 				exclude: [
 					new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
 				],
-				options: {
+				query: {
 					esModules: true
 				}
 			}
