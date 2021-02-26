@@ -30,6 +30,7 @@ const { RawSource, ConcatSource } = require( 'webpack-sources' );
  */
 module.exports = function serveTranslations( compiler, options, translationService ) {
 	const cwd = process.cwd();
+	const { NormalModule } = compiler.webpack;
 
 	// Provides translateSource function for the `translatesourceloader` loader.
 	const translateSource = ( source, sourceFile ) => translationService.translateSource( source, sourceFile );
@@ -56,7 +57,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 	compiler.hooks.normalModuleFactory.tap( 'CKEditor5Plugin', normalModuleFactory => {
 		const resolver = normalModuleFactory.getResolver( 'normal' );
 
-		resolver.resolve( cwd, cwd, options.corePackageSampleResourcePath, {}, ( err, pathToResource ) => {
+		resolver.resolve( { cwd }, cwd, options.corePackageSampleResourcePath, {}, ( err, pathToResource ) => {
 			if ( err ) {
 				console.warn( 'Cannot find the CKEditor 5 core translation package (which defaults to `@ckeditor/ckeditor5-core`).' );
 
@@ -71,7 +72,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 
 	// Load translation files and add a loader if the package match requirements.
 	compiler.hooks.compilation.tap( 'CKEditor5Plugin', compilation => {
-		compilation.hooks.normalModuleLoader.tap( 'CKEditor5Plugin', ( context, module ) => {
+		NormalModule.getCompilationHooks( compilation ).loader.tap( 'CKEditor5Plugin', ( context, module ) => {
 			const relativePathToResource = path.relative( cwd, module.resource );
 
 			if ( relativePathToResource.match( options.sourceFilesPattern ) ) {
@@ -88,14 +89,14 @@ module.exports = function serveTranslations( compiler, options, translationServi
 
 		// At the end of the compilation add assets generated from the PO files.
 		// Use `optimize-chunk-assets` instead of `emit` to emit assets before the `webpack.BannerPlugin`.
-		compilation.hooks.optimizeChunkAssets.tap( 'CKEditor5Plugin', chunks => {
+		compilation.hooks.processAssets.tap( 'CKEditor5Plugin', chunks => {
 			const generatedAssets = translationService.getAssets( {
 				outputDirectory: options.outputDirectory,
 				compilationAssetNames: Object.keys( compilation.assets )
 					.filter( name => name.endsWith( '.js' ) )
 			} );
 
-			const allFiles = chunks.reduce( ( acc, chunk ) => [ ...acc, ...chunk.files ], [] );
+			const allFiles = Object.keys( chunks );
 
 			for ( const asset of generatedAssets ) {
 				if ( asset.shouldConcat ) {

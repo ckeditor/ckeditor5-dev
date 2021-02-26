@@ -22,11 +22,11 @@ module.exports = class WebpackNotifierPlugin {
 	 * @param {*} compiler
 	 */
 	apply( compiler ) {
-		compiler.plugin( 'compile', () => {
+		compiler.hooks.compile.tap( this.constructor.name, () => {
 			this.log.info( '[Webpack] Starting scripts compilation...' );
 		} );
 
-		compiler.plugin( 'done', stats => {
+		compiler.hooks.done.tap( this.constructor.name, stats => {
 			if ( stats.compilation.errors.length ) {
 				for ( const item of stats.compilation.errors ) {
 					this.log.error( item.message );

@@ -39,7 +39,7 @@ module.exports = function getKarmaConfig( options ) {
 		basePath,
 
 		// Frameworks to use. Available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-		frameworks: [ 'mocha', 'sinon-chai' ],
+		frameworks: [ 'mocha', 'sinon-chai', 'webpack' ],
 
 		// Files saved in directory `ckeditor5/packages/ckeditor5-utils/tests/_assets/` are available under: http://0.0.0.0:{port}/assets/
 		proxies: {
