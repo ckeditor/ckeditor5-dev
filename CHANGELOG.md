@@ -1,6 +1,33 @@
 Changelog
 =========
 
+## [24.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/v24.2.0...v24.3.0) (2021-03-01)
+
+### Features
+
+* **[webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin)**: Support for Webpack 5. The plugin will also work with Webpack 4. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/986c2407bb1f5d3205a3822836313d9bd65eeb3e))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v24.2.0 => v24.3.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v24.2.0 => v24.3.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v24.2.0 => v24.3.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v24.2.0 => v24.3.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v24.2.0 => v24.3.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v24.2.0 => v24.3.0
+</details>
+
+
 ## [24.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v24.1.0...v24.2.0) (2021-02-16)
 
 ### Features
