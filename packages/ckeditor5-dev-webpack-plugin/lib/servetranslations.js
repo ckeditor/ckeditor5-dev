@@ -210,7 +210,7 @@ function getFilesFromChunks( chunks ) {
 		return chunks.reduce( ( acc, chunk ) => [ ...acc, ...chunk.files ], [] );
 	}
 
-	// Webpack 5+.
+	// Webpack 5.
 	return Object.keys( chunks );
 }
 
@@ -249,4 +249,3 @@ function getFilesFromChunks( chunks ) {
  *
  * @fires error
  */
-
