@@ -9,6 +9,9 @@ const chalk = require( 'chalk' );
 const rimraf = require( 'rimraf' );
 const fs = require( 'fs' );
 const path = require( 'path' );
+const semver = require( 'semver' );
+const { NormalModule } = require( 'webpack' );
+const { version: webpackVersion } = require( 'webpack/package.json' );
 const { RawSource, ConcatSource } = require( 'webpack-sources' );
 
 /**
@@ -56,7 +59,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 	compiler.hooks.normalModuleFactory.tap( 'CKEditor5Plugin', normalModuleFactory => {
 		const resolver = normalModuleFactory.getResolver( 'normal' );
 
-		resolver.resolve( cwd, cwd, options.corePackageSampleResourcePath, {}, ( err, pathToResource ) => {
+		resolver.resolve( { cwd }, cwd, options.corePackageSampleResourcePath, {}, ( err, pathToResource ) => {
 			if ( err ) {
 				console.warn( 'Cannot find the CKEditor 5 core translation package (which defaults to `@ckeditor/ckeditor5-core`).' );
 
@@ -71,7 +74,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 
 	// Load translation files and add a loader if the package match requirements.
 	compiler.hooks.compilation.tap( 'CKEditor5Plugin', compilation => {
-		compilation.hooks.normalModuleLoader.tap( 'CKEditor5Plugin', ( context, module ) => {
+		getCompilationHooks( compilation ).tap( 'CKEditor5Plugin', ( context, module ) => {
 			const relativePathToResource = path.relative( cwd, module.resource );
 
 			if ( relativePathToResource.match( options.sourceFilesPattern ) ) {
@@ -88,14 +91,14 @@ module.exports = function serveTranslations( compiler, options, translationServi
 
 		// At the end of the compilation add assets generated from the PO files.
 		// Use `optimize-chunk-assets` instead of `emit` to emit assets before the `webpack.BannerPlugin`.
-		compilation.hooks.optimizeChunkAssets.tap( 'CKEditor5Plugin', chunks => {
+		getChunkAssets( compilation ).tap( 'CKEditor5Plugin', chunks => {
 			const generatedAssets = translationService.getAssets( {
 				outputDirectory: options.outputDirectory,
 				compilationAssetNames: Object.keys( compilation.assets )
 					.filter( name => name.endsWith( '.js' ) )
 			} );
 
-			const allFiles = chunks.reduce( ( acc, chunk ) => [ ...acc, ...chunk.files ], [] );
+			const allFiles = getFilesFromChunks( chunks );
 
 			for ( const asset of generatedAssets ) {
 				if ( asset.shouldConcat ) {
@@ -171,6 +174,47 @@ function getPathToPackage( cwd, resource, packageNamePattern ) {
 }
 
 /**
+ * Returns an object with the compilation hooks depending on the Webpack version.
+ *
+ * @param {Object} compilation
+ * @returns {Object}
+ */
+function getCompilationHooks( compilation ) {
+	if ( semver.major( webpackVersion ) === 4 ) {
+		return compilation.hooks.normalModuleLoader;
+	}
+
+	return NormalModule.getCompilationHooks( compilation ).loader;
+}
+
+/**
+ * Returns an object with the chunk assets depending on the Webpack version.
+ *
+ * @param {Object} compilation
+ * @returns {Object}
+ */
+function getChunkAssets( compilation ) {
+	// Webpack 5 vs Webpack 4.
+	return compilation.hooks.processAssets || compilation.hooks.optimizeChunkAssets;
+}
+
+/**
+ * Returns an array with list of loaded files depending on the Webpack version.
+ *
+ * @param {Object|Array} chunks
+ * @returns {Array}
+ */
+function getFilesFromChunks( chunks ) {
+	// Webpack 4.
+	if ( Array.isArray( chunks ) ) {
+		return chunks.reduce( ( acc, chunk ) => [ ...acc, ...chunk.files ], [] );
+	}
+
+	// Webpack 5.
+	return Object.keys( chunks );
+}
+
+/**
  * TranslationService interface.
  *
  * It should extend or mix NodeJS' EventEmitter to provide `on()` method.
@@ -205,4 +249,3 @@ function getPathToPackage( cwd, resource, packageNamePattern ) {
  *
  * @fires error
  */
-
