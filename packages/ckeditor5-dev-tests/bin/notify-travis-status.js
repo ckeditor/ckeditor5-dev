@@ -11,6 +11,8 @@
 // - SLACK_WEBHOOK_URL - a URL where the notification should be sent
 // - START_TIME - POSIX time (when the script has begun the job)
 // - END_TIME - POSIX time (when the script has finished the job)
+// - GITHUB_TOKEN - token to a Github account with the scope: "repos". It is requires for obtaining an author of
+//   the commit if the build failed. The repository can be private and we can't use the public API.
 //
 // If the `SLACK_NOTIFY_COMMIT_URL` environment variable is defined, the script use the URL as the commit URL.
 // Otherwise, a marge of variables `TRAVIS_REPO_SLUG` and `TRAVIS_COMMIT` will be used.
