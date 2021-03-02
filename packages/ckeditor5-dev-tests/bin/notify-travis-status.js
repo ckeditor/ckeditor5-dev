@@ -200,7 +200,6 @@ function getCommitAuthor() {
 	const curlOutput = childProcess.spawnSync( 'curl', curlArguments, {
 		encoding: 'utf8',
 		shell: true,
-		stdout: 'inherit',
 		stderr: 'inherit'
 	} );
 
