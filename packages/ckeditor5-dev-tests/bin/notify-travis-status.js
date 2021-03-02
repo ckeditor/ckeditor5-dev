@@ -7,16 +7,20 @@
 
 /* eslint-env node */
 
-/*
+// This script assumes that is being executed on Travis CI. It requires three environment variables:
+// - SLACK_WEBHOOK_URL - a URL where the notification should be sent
+// - START_TIME - POSIX time (when the script has begun the job)
+// - END_TIME - POSIX time (when the script has finished the job)
+//
+// If the `SLACK_NOTIFY_COMMIT_URL` environment variable is defined, the script use the URL as the commit URL.
+// Otherwise, a marge of variables `TRAVIS_REPO_SLUG` and `TRAVIS_COMMIT` will be used.
+//
+// In order to enable the debug mode, set the `DEBUG=true` as the environment variable.
 
-This script assumes that is being executed on Travis CI. It requires three environment variables:
-- SLACK_WEBHOOK_URL - a URL where the notification should be sent
-- START_TIME - POSIX time (when the script has begun the job)
-- END_TIME - POSIX time (when the script has finished the job)
+const childProcess = require( 'child_process' );
 
-In order to enable the debug mode, set the `DEBUG=true` as the environment variable.
-
- */
+// A map that translates Github accounts to Slack ids.
+const members = require( './members.json' );
 
 const buildBranch = process.env.TRAVIS_BRANCH;
 
@@ -111,6 +115,18 @@ const data = {
 	]
 };
 
+const commitAuthor = getCommitAuthor();
+
+if ( commitAuthor ) {
+	const slackAccount = members[ commitAuthor ];
+
+	if ( slackAccount ) {
+		data.text = `<@${ slackAccount }>, could you take a look?`;
+	} else {
+		data.text = '_An author of the commit could not be obtained._';
+	}
+}
+
 slack.send( data );
 
 /**
@@ -149,6 +165,52 @@ function getFormattedMessage( message, repoOwner, repoName ) {
 		.replace( /([\w-]+\/[\w-]+)#(\d+)/g, ( _, repoSlug, issueId ) => {
 			return `<https://github.com/${ repoSlug }/issues/${ issueId }|${ repoSlug }#${ issueId }>`;
 		} );
+}
+
+/**
+ * Returns a URL to GitHub API which returns details of the commit that caused the CI to fail its job.
+ *
+ * @returns {String}
+ */
+function getGithubApiUrl() {
+	let commitUrl;
+
+	const { SLACK_NOTIFY_COMMIT_URL, TRAVIS_REPO_SLUG, TRAVIS_COMMIT } = process.env;
+
+	if ( SLACK_NOTIFY_COMMIT_URL ) {
+		commitUrl = SLACK_NOTIFY_COMMIT_URL;
+	} else {
+		commitUrl = `https://github.com/${ TRAVIS_REPO_SLUG }/commit/${ TRAVIS_COMMIT }`;
+	}
+
+	return commitUrl.replace( 'github.com/', 'api.github.com/repos/' ).replace( '/commit/', '/commits/' );
+}
+
+/**
+ * Returns a name of an account that made the commit. If couldn't be obtained, returns `null` instead.
+ *
+ * @returns {String|null}
+ */
+function getCommitAuthor() {
+	const curlArguments = [
+		`-H "Authorization: token ${ process.env.GITHUB_TOKEN }"`,
+		getGithubApiUrl()
+	];
+
+	const curlOutput = childProcess.spawnSync( 'curl', curlArguments, {
+		encoding: 'utf8',
+		shell: true,
+		stdout: 'inherit',
+		stderr: 'inherit'
+	} );
+
+	try {
+		const curlDetails = JSON.parse( curlOutput.stdout );
+
+		return curlDetails.author.login;
+	} catch ( err ) {
+		return null;
+	}
 }
 
 function printDebugLog( message ) {
