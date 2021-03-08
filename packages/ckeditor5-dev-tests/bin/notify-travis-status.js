@@ -7,7 +7,7 @@
 
 /* eslint-env node */
 
-// This script assumes that is being executed on Travis CI. It requires three environment variables:
+// This script assumes that is being executed on Travis CI. It requires following environment variables:
 // - SLACK_WEBHOOK_URL - a URL where the notification should be sent
 // - START_TIME - POSIX time (when the script has begun the job)
 // - END_TIME - POSIX time (when the script has finished the job)
@@ -125,7 +125,7 @@ if ( commitAuthor ) {
 	if ( slackAccount ) {
 		data.text = `<@${ slackAccount }>, could you take a look?`;
 	} else {
-		data.text = '_An author of the commit could not be obtained._';
+		data.text = '_The author of the commit could not be obtained._';
 	}
 }
 
