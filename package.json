@@ -1,6 +1,6 @@
 {
   "name": "ckeditor5-dev",
-  "version": "24.3.0",
+  "version": "24.4.0",
   "private": true,
   "dependencies": {
     "glob": "^7.1.6",
