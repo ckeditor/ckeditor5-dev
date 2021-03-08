@@ -1,6 +1,33 @@
 Changelog
 =========
 
+## [24.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/v24.3.0...v24.4.0) (2021-03-08)
+
+### Features
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: The `notify-travis-status` script will mention an author of a commit that caused to fail the CI. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/d0dcf250698a7b93e335a2c8e32dbdd32c1f0b7b))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v24.3.0 => v24.4.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v24.3.0 => v24.4.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v24.3.0 => v24.4.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v24.3.0 => v24.4.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v24.3.0 => v24.4.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v24.3.0 => v24.4.0
+</details>
+
+
 ## [24.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/v24.2.0...v24.3.0) (2021-03-01)
 
 ### Features
