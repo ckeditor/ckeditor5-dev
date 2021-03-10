@@ -101,10 +101,13 @@
 			border: none;
 			padding: 0;
 			margin: 0;
-			outline: none;
 			transition: left var(--ck-manual-test-transition-time) ease-in-out;
 			opacity: .5;
 			z-index: 10000;
+		}
+
+		.manual-test-sidebar__toggle:not(:focus) {
+			outline: none;
 		}
 
 		.manual-test-sidebar__toggle:hover {
