@@ -25,6 +25,7 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
  * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
  * @param {Number} [options.port] A port number used by the `createManualTestServer`.
  * @param {String} [options.identityFile] A file that provides secret keys used in the test scripts.
+ * @param {Boolean} [options.silent=false] Whether to hide files that will be processed by the script.
  * @returns {Promise}
  */
 module.exports = function runManualTests( options ) {
@@ -40,9 +41,10 @@ module.exports = function runManualTests( options ) {
 	const language = options.language;
 	const additionalLanguages = options.additionalLanguages;
 	const identityFile = normalizeIdentityFile( options.identityFile );
+	const silent = options.silent || false;
 
 	return Promise.resolve()
-		.then( () => removeDir( buildDir ) )
+		.then( () => removeDir( buildDir, { silent } ) )
 		.then( () => Promise.all( [
 			compileManualTestScripts( {
 				buildDir,
@@ -57,7 +59,8 @@ module.exports = function runManualTests( options ) {
 				buildDir,
 				patterns,
 				language,
-				additionalLanguages
+				additionalLanguages,
+				silent
 			} ),
 			copyAssets( buildDir )
 		] ) )

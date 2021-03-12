@@ -64,4 +64,14 @@ describe( 'removeDir', () => {
 			] );
 		} );
 	} );
+
+	it( 'should remove directory and does not inform about it', () => {
+		return removeDir( 'workspace/directory', { silent: true } ).then( () => {
+			expect( logMessages ).to.deep.equal( [] );
+
+			expect( deletedPaths ).to.deep.equal( [
+				'workspace/directory'
+			] );
+		} );
+	} );
 } );

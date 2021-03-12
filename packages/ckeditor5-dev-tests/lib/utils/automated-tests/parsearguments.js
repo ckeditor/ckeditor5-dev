@@ -35,7 +35,8 @@ module.exports = function parseArguments( args ) {
 			'server',
 			'source-map',
 			'verbose',
-			'watch'
+			'watch',
+			'silent'
 		],
 
 		alias: {
@@ -64,7 +65,8 @@ module.exports = function parseArguments( args ) {
 			'identity-file': null,
 			repositories: [],
 			'theme-path': null,
-			'additional-languages': null
+			'additional-languages': null,
+			silent: false
 		}
 	};
 
