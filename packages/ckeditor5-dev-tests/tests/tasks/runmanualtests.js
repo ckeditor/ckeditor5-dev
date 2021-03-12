@@ -72,7 +72,8 @@ describe( 'runManualTests', () => {
 						'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
 					],
 					language: undefined,
-					additionalLanguages: undefined
+					additionalLanguages: undefined,
+					silent: false
 				} );
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
@@ -136,7 +137,8 @@ describe( 'runManualTests', () => {
 						'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
 					],
 					language: undefined,
-					additionalLanguages: undefined
+					additionalLanguages: undefined,
+					silent: false
 				} );
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
@@ -206,7 +208,8 @@ describe( 'runManualTests', () => {
 						'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
 					],
 					language: 'pl',
-					additionalLanguages: [ 'ar', 'en' ]
+					additionalLanguages: [ 'ar', 'en' ],
+					silent: false
 				} );
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
@@ -333,6 +336,53 @@ describe( 'runManualTests', () => {
 					additionalLanguages: undefined,
 					identityFile: 'workspace/path/to/secrets.js'
 				} );
+			} );
+	} );
+
+	it( 'should allow hiding processed files in the console', () => {
+		spies.transformFileOptionToTestGlob.returns( [
+			'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+			'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
+		] );
+
+		return runManualTests( { silent: true } )
+			.then( () => {
+				expect( spies.removeDir.calledOnce ).to.equal( true );
+				expect( spies.removeDir.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+				expect( spies.removeDir.firstCall.args[ 1 ] ).to.deep.equal( { silent: true } );
+
+				expect( spies.transformFileOptionToTestGlob.calledOnce ).to.equal( true );
+				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( '*' );
+				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 1 ] ).to.equal( true );
+
+				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
+				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+					buildDir: 'workspace/build/.manual-tests',
+					patterns: [
+						'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
+					],
+					language: undefined,
+					additionalLanguages: undefined,
+					silent: true
+				} );
+
+				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
+				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+					buildDir: 'workspace/build/.manual-tests',
+					patterns: [
+						'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
+					],
+					themePath: null,
+					language: undefined,
+					additionalLanguages: undefined,
+					debug: undefined,
+					identityFile: null
+				} );
+
+				expect( spies.server.calledOnce ).to.equal( true );
+				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
 			} );
 	} );
 } );

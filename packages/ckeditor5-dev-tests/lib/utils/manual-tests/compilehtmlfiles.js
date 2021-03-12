@@ -27,11 +27,13 @@ const writer = new commonmark.HtmlRenderer();
  * @param {Array.<String>} options.patterns An array of patterns that resolve manual test scripts.
  * @param {String} options.language A language passed to `CKEditorWebpackPlugin`.
  * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
+ * @param {Boolean} [options.silent=false] Whether to hide files that will be processed by the script.
  * @returns {Promise}
  */
 module.exports = function compileHtmlFiles( options ) {
 	const buildDir = options.buildDir;
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
+	const silent = options.silent || false;
 
 	const sourceMDFiles = options.patterns.reduce( ( arr, manualTestPattern ) => {
 		return [
@@ -64,15 +66,38 @@ module.exports = function compileHtmlFiles( options ) {
 	staticFiles.forEach( staticFile => copyStaticFile( buildDir, staticFile ) );
 
 	// Generate real HTML files out of the MD + HTML files of each test.
-	sourceFilePathBases.forEach( sourceFilePathBase => compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate, languagesToLoad ) );
+	sourceFilePathBases.forEach( sourceFilePathBase => compileHtmlFile( buildDir, {
+		filePath: sourceFilePathBase,
+		template: viewTemplate,
+		languages: languagesToLoad,
+		silent
+	} ) );
 
 	// Watch files and compile on change.
 	watchFiles( [ ...sourceMDFiles, ...sourceHtmlFiles ], file => {
-		compileHtmlFile( buildDir, getFilePathWithoutExtension( file ), viewTemplate, languagesToLoad );
+		compileHtmlFile( buildDir, {
+			filePath: getFilePathWithoutExtension( file ),
+			template: viewTemplate,
+			languages: languagesToLoad,
+			silent
+		} );
 	} );
 };
 
-function compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate, languagesToLoad ) {
+/**
+ * @param {String} buildDir An absolute path to the directory where the processed file should be saved.
+ * @param {Object} options
+ * @param {String} options.filePath An absolute path to the manual test assets without the extension.
+ * @param {String} options.template The HTML template which will be merged with the manual test HTML file.
+ * @param {Array.<String>} options.languages Name of translations that should be added to the manual test.
+ * @param {Boolean} options.silent Whether to hide files that will be processed by the script.
+ */
+function compileHtmlFile( buildDir, options ) {
+	const sourceFilePathBase = options.filePath;
+	const viewTemplate = options.template;
+	const languagesToLoad = options.languages;
+	const silent = options.silent;
+
 	const log = logger();
 	const sourceMDFilePath = sourceFilePathBase + '.md';
 	const sourceHtmlFilePath = sourceFilePathBase + '.html';
@@ -81,7 +106,9 @@ function compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate, languagesT
 	const absoluteHtmlFilePath = getRelativeFilePath( sourceHtmlFilePath );
 	const absoluteJSFilePath = getRelativeFilePath( sourceJSFilePath );
 
-	log.info( `Processing '${ chalk.cyan( sourceFilePathBase ) }'...` );
+	if ( !silent ) {
+		log.info( `Processing '${ chalk.cyan( sourceFilePathBase ) }'...` );
+	}
 
 	// Compile test instruction (Markdown file).
 	const parsedMarkdownTree = reader.parse( fs.readFileSync( sourceMDFilePath, 'utf-8' ) );
@@ -118,7 +145,9 @@ function compileHtmlFile( buildDir, sourceFilePathBase, viewTemplate, languagesT
 
 	fs.outputFileSync( outputFilePath, preparedHtml );
 
-	log.info( `Finished writing '${ chalk.cyan( outputFilePath ) }'` );
+	if ( !silent ) {
+		log.info( `Finished writing '${ chalk.cyan( outputFilePath ) }'` );
+	}
 }
 
 // Copies all non JS/HTML/MD files to build dir. Their relative paths to JS/HTML files are maintained.

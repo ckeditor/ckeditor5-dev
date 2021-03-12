@@ -160,6 +160,10 @@ describe( 'compileHtmlFiles', () => {
 		expect( stubs.fs.copySync ).to.be.calledWithExactly(
 			'static-file.png', path.join( 'buildDir', 'static-file.png' )
 		);
+
+		expect( stubs.logger.info.callCount ).to.equal( 2 );
+		expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /^Processing/ );
+		expect( stubs.logger.info.secondCall.args[ 0 ] ).to.match( /^Finished writing/ );
 	} );
 
 	it( 'should compile files with options#language specified', () => {
@@ -416,5 +420,30 @@ describe( 'compileHtmlFiles', () => {
 		);
 
 		separator = '/';
+	} );
+
+	it( 'should compile the manual test and do not inform about the processed file', () => {
+		files = {
+			[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
+			[ path.join( 'path', 'to', 'manual', 'file.md' ) ]: '## Markdown header',
+			[ path.join( 'path', 'to', 'manual', 'file.html' ) ]: '<div>html file content</div>'
+		};
+
+		patternFiles = {
+			[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
+			[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ]
+		};
+
+		compileHtmlFiles( {
+			buildDir: 'buildDir',
+			language: 'en',
+			patterns: [ path.join( 'manualTestPattern', '*.js' ) ],
+			silent: true
+		} );
+
+		expect( stubs.commonmark.parse ).to.be.calledWithExactly( '## Markdown header' );
+		expect( stubs.fs.ensureDirSync ).to.be.calledWithExactly( 'buildDir' );
+
+		expect( stubs.logger.info.callCount ).to.equal( 0 );
 	} );
 } );
