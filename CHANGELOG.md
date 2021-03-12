@@ -1,6 +1,34 @@
 Changelog
 =========
 
+## [24.4.1](https://github.com/ckeditor/ckeditor5-dev/compare/v24.4.0...v24.4.1) (2021-03-12)
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added the focus style for the colapse button in the manual tests template. Closes [ckeditor/ckeditor5#7987](https://github.com/ckeditor/ckeditor5/issues/7987). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/c567710c5457ecec99005fea805aa3b94c135dbd))
+
+### Other changes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added the `--silent` flag to the manual test server that allows hiding names of the processed files. Closes [ckeditor/ckeditor5#9220](https://github.com/ckeditor/ckeditor5/issues/9220). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b6dc12ef77342e0f08e0aead6f48c421237d90b2))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v24.4.0 => v24.4.1
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v24.4.0 => v24.4.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v24.4.0 => v24.4.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v24.4.0 => v24.4.1
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v24.4.0 => v24.4.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v24.4.0 => v24.4.1
+</details>
+
+
 ## [24.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/v24.3.0...v24.4.0) (2021-03-08)
 
 ### Features
