@@ -1,7 +1,7 @@
 CKEditor 5 development tools packages
 =====================================
 
-[![Build Status](https://travis-ci.org/ckeditor/ckeditor5-dev.svg?branch=master)](https://travis-ci.org/ckeditor/ckeditor5-dev)
+[![Build Status](https://travis-ci.com/ckeditor/ckeditor5-dev.svg?branch=master)](https://travis-ci.com/ckeditor/ckeditor5-dev)
 [![Coverage Status](https://coveralls.io/repos/github/ckeditor/ckeditor5-dev/badge.svg?branch=master)](https://coveralls.io/github/ckeditor/ckeditor5-dev?branch=master)
 
 ## Packages
