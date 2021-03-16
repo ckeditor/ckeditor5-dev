@@ -17,6 +17,9 @@
 // If the `SLACK_NOTIFY_COMMIT_URL` environment variable is defined, the script use the URL as the commit URL.
 // Otherwise, a marge of variables `TRAVIS_REPO_SLUG` and `TRAVIS_COMMIT` will be used.
 //
+// Pinging an author of the commit can be disabled by defining the `SLACK_NOTIFY_HIDE_AUTHOR` environment variable
+// to `"true"` (`SLACK_NOTIFY_HIDE_AUTHOR="true"`). See: https://github.com/ckeditor/ckeditor5/issues/9252.
+//
 // In order to enable the debug mode, set the `DEBUG=true` as the environment variable.
 
 const childProcess = require( 'child_process' );
@@ -117,15 +120,19 @@ const data = {
 	]
 };
 
-const commitAuthor = getCommitAuthor();
+if ( process.env.SLACK_NOTIFY_HIDE_AUTHOR == 'true' ) {
+	data.text = '_The author of the commit was hidden. <https://github.com/ckeditor/ckeditor5/issues/9252|Read more about why.>_';
+} else {
+	const commitAuthor = getCommitAuthor();
 
-if ( commitAuthor ) {
-	const slackAccount = members[ commitAuthor ];
+	if ( commitAuthor ) {
+		const slackAccount = members[ commitAuthor ];
 
-	if ( slackAccount ) {
-		data.text = `<@${ slackAccount }>, could you take a look?`;
-	} else {
-		data.text = '_The author of the commit could not be obtained._';
+		if ( slackAccount ) {
+			data.text = `<@${ slackAccount }>, could you take a look?`;
+		} else {
+			data.text = '_The author of the commit could not be obtained._';
+		}
 	}
 }
 
