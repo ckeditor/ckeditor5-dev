@@ -38,8 +38,7 @@ module.exports = function getDllPluginWebpackConfig( options ) {
 
 			path: path.join( options.packagePath, 'build' ),
 			filename: getIndexFileName( packageName ),
-			libraryTarget: 'window',
-			libraryExport: 'default'
+			libraryTarget: 'window'
 		},
 
 		optimization: {

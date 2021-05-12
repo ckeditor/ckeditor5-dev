@@ -120,4 +120,16 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 		expect( webpackConfig.optimization.minimize ).to.equal( false );
 		expect( webpackConfig.optimization.minimizer ).to.be.undefined;
 	} );
+
+	it( 'should not export any library by default', () => {
+		stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
+
+		const webpackConfig = getDllPluginWebpackConfig( {
+			packagePath: '/package/path',
+			themePath: '/theme/path',
+			manifestPath: '/manifest/path'
+		} );
+
+		expect( webpackConfig.output.libraryTarget ).to.be.undefined;
+	} );
 } );
