@@ -130,6 +130,6 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			manifestPath: '/manifest/path'
 		} );
 
-		expect( webpackConfig.output.libraryTarget ).to.be.undefined;
+		expect( webpackConfig.output.libraryExport ).to.be.undefined;
 	} );
 } );
