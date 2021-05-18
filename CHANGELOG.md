@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [25.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v24.4.2...v25.0.0) (2021-05-18)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The webpack configuration returned by the `builds.getDllPluginWebpackConfig()` function will not export the default library (`libraryExport`) anymore. See [ckeditor/ckeditor5#9134](https://github.com/ckeditor/ckeditor5/issues/9134).
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v24.4.2 => v25.0.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v24.4.2 => v25.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v24.4.2 => v25.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v24.4.2 => v25.0.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v24.4.2 => v25.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v24.4.2 => v25.0.0
+</details>
+
+
 ## [24.4.2](https://github.com/ckeditor/ckeditor5-dev/compare/v24.4.1...v24.4.2) (2021-03-16)
 
 ### Other changes
