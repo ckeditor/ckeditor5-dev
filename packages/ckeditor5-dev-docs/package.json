@@ -1,13 +1,18 @@
 {
   "name": "@ckeditor/ckeditor5-dev-docs",
   "version": "25.0.0",
-  "description": "Tasks used to build documentation for CKEditor 5.",
+  "description": "Tasks used to build and verify the documentation for CKEditor 5.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "^25.0.0",
     "@ckeditor/jsdoc-plugins": "^25.0.0",
     "fast-glob": "^3.2.4",
+    "puppeteer": "^8.0.0",
+    "chalk": "^4.1.0",
+    "strip-ansi": "^6.0.0",
+    "ora": "^5.2.0",
+    "minimist": "^1.2.5",
     "jsdoc": "ckeditor/jsdoc#fixed-trailing-comment-doclets",
     "tmp": "^0.2.1"
   },
