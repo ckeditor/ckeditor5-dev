@@ -1,6 +1,33 @@
 Changelog
 =========
 
+## [25.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v25.0.0...v25.1.0) (2021-05-19)
+
+### Features
+
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: Introduced a web crawler that allows verifying whether subpages under the specified URL can be opened without any errors. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ae7879b007704c2cf2f2253e5980a7aae51c1b93))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v25.0.0 => v25.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v25.0.0 => v25.1.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v25.0.0 => v25.1.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v25.0.0 => v25.1.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v25.0.0 => v25.1.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v25.0.0 => v25.1.0
+</details>
+
+
 ## [25.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v24.4.2...v25.0.0) (2021-05-18)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
