@@ -36,16 +36,17 @@ const {
  * @param {Array.<String>} options.exclusions An array of patterns to exclude links. Empty array by default to not exclude anything.
  * @param {Number} options.concurrency Number of concurrent pages (browser tabs) to be used during crawling. One by default.
  * @param {Boolean} options.quit Terminates the scan as soon as an error is found. False (off) by default.
+ * @param {Boolean} [options.disableBrowserSandbox] Whether the browser should be created with the `--no-sandbox` flag.
  * @returns {Promise} Promise is resolved, when the crawler has finished the whole crawling procedure.
  */
-module.exports = async function verify( { url, depth, exclusions, concurrency, quit } ) {
+module.exports = async function verify( options ) {
+	const { url, depth, exclusions, concurrency, quit, disableBrowserSandbox } = options;
+
 	console.log( chalk.bold( '\n🔎 Starting the Crawler\n' ) );
 
 	const spinner = createSpinner();
-
 	const errors = new Map();
-
-	const browser = await createBrowser();
+	const browser = await createBrowser( { disableBrowserSandbox } );
 
 	spinner.start( 'Checking pages…' );
 
@@ -83,10 +84,22 @@ module.exports = async function verify( { url, depth, exclusions, concurrency, q
 /**
  * Creates a new browser instance and closes the default blank page.
  *
+ * @param {Object} options
+ * @param {Boolean} [options.disableBrowserSandbox] Whether the browser should be created with the `--no-sandbox` flag.
+ *
  * @returns {Promise.<Object>} A promise, which resolves to the Puppeteer browser instance.
  */
-async function createBrowser() {
-	const browser = await puppeteer.launch();
+async function createBrowser( options ) {
+	const browserOptions = {
+		args: []
+	};
+
+	if ( options.disableBrowserSandbox ) {
+		browserOptions.args.push( '--no-sandbox' );
+		browserOptions.args.push( '--disable-setuid-sandbox' );
+	}
+
+	const browser = await puppeteer.launch( browserOptions );
 
 	const [ defaultBlankPage ] = await browser.pages();
 
