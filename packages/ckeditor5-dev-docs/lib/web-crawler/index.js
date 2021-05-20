@@ -11,7 +11,7 @@ const puppeteer = require( 'puppeteer' );
 const chalk = require( 'chalk' );
 const stripAnsiEscapeCodes = require( 'strip-ansi' );
 const { getBaseUrl, getFirstLineFromErrorMessage, toArray } = require( './utils' );
-const { createSpinner, getProgressHandler } = require( './spinner' );
+const { createSpinner, getProgressHandler: getSpinnerProgressHandler } = require( './spinner' );
 
 const {
 	DEFAULT_TIMEOUT,
@@ -36,19 +36,18 @@ const {
  * @param {Array.<String>} options.exclusions An array of patterns to exclude links. Empty array by default to not exclude anything.
  * @param {Number} options.concurrency Number of concurrent pages (browser tabs) to be used during crawling. One by default.
  * @param {Boolean} options.quit Terminates the scan as soon as an error is found. False (off) by default.
- * @param {Boolean} [options.disableBrowserSandbox] Whether the browser should be created with the `--no-sandbox` flag.
+ * @param {Boolean} [options.disableBrowserSandbox=false] Whether the browser should be created with the `--no-sandbox` flag.
+ * @param {Boolean} [options.noSpinner=false] Whether to display the spinner with progress or a message with current progress.
  * @returns {Promise} Promise is resolved, when the crawler has finished the whole crawling procedure.
  */
 module.exports = async function verify( options ) {
-	const { url, depth, exclusions, concurrency, quit, disableBrowserSandbox } = options;
+	const { url, depth, exclusions, concurrency, quit, disableBrowserSandbox, noSpinner } = options;
 
 	console.log( chalk.bold( '\n🔎 Starting the Crawler\n' ) );
 
 	const spinner = createSpinner();
 	const errors = new Map();
 	const browser = await createBrowser( { disableBrowserSandbox } );
-
-	spinner.start( 'Checking pages…' );
 
 	let status = 'Done';
 
@@ -64,13 +63,25 @@ module.exports = async function verify( options ) {
 		exclusions,
 		concurrency,
 		quit,
-		onError: getErrorHandler( errors ),
-		onProgress: getProgressHandler( spinner )
+		onBeforeStart() {
+			if ( noSpinner ) {
+				console.log( chalk.gray( 'Running the crawler in the "verbose" mode.' ) );
+			} else {
+				spinner.start( 'Checking pages…' );
+			}
+		},
+		onAfterEnd() {
+			if ( noSpinner ) {
+				console.log( chalk.grey( 'Done.' ) );
+			} else {
+				spinner.succeed( `Checking pages… ${ chalk.bold( status ) }` );
+			}
+		},
+		onProgress: getProgressHandler( spinner, { noSpinner } ),
+		onError: getErrorHandler( errors )
 	} ).catch( () => {
 		status = 'Terminated on first error';
 	} );
-
-	spinner.succeed( `Checking pages… ${ chalk.bold( status ) }` );
 
 	await browser.close();
 
@@ -150,61 +161,73 @@ function getErrorHandler( errors ) {
  * @param {Boolean} data.quit Terminates the scan as soon as an error is found.
  * @param {Function} data.onError Callback called ever time an error has been found.
  * @param {Function} data.onProgress Callback called every time just before opening a new link.
+ * @param {Function} [data.onBeforeStart] Callback called once, before opening the first URL.
+ * @param {Function} [data.onAfterEnd] Callback called once, after opening the last URL.
  * @returns {Promise} Promise is resolved, when all links have been visited.
  */
-async function openLinks( browser, { baseUrl, linksQueue, foundLinks, exclusions, concurrency, quit, onError, onProgress } ) {
+async function openLinks( browser, data ) {
+	const { baseUrl, linksQueue, foundLinks, exclusions, concurrency, quit, onError, onProgress, onBeforeStart, onAfterEnd } = data;
 	const numberOfOpenPages = ( await browser.pages() ).length;
+
+	if ( typeof onBeforeStart == 'function' ) {
+		onBeforeStart();
+	}
 
 	// Check if the limit of simultaneously opened pages in the browser has been reached.
 	if ( numberOfOpenPages >= concurrency ) {
 		return;
 	}
 
-	return Promise.all(
-		linksQueue
-			// Get links from the queue, up to the concurrency limit...
-			.splice( 0, concurrency - numberOfOpenPages )
-			// ...and open each of them in a dedicated page to collect nested links and errors (if any) they contain.
-			.map( async link => {
-				let newErrors = [];
-				let newLinks = [];
+	const linksQueuePromises = linksQueue
+		// Get links from the queue, up to the concurrency limit...
+		.splice( 0, concurrency - numberOfOpenPages )
+		// ...and open each of them in a dedicated page to collect nested links and errors (if any) they contain.
+		.map( async link => {
+			let newErrors = [];
+			let newLinks = [];
 
-				onProgress( {
-					total: foundLinks.length
+			onProgress( {
+				total: foundLinks.length
+			} );
+
+			// If opening a given link causes an error, try opening it again until the limit of remaining attempts is reached.
+			do {
+				const { errors, links } = await openLink( browser, { baseUrl, link, foundLinks, exclusions } );
+
+				link.remainingAttempts--;
+
+				newErrors = [ ...errors ];
+				newLinks = [ ...links ];
+			} while ( newErrors.length && link.remainingAttempts );
+
+			newErrors.forEach( newError => onError( newError ) );
+
+			newLinks.forEach( newLink => {
+				foundLinks.push( newLink );
+
+				linksQueue.push( {
+					url: newLink,
+					parentUrl: link.url,
+					remainingNestedLevels: link.remainingNestedLevels - 1,
+					remainingAttempts: DEFAULT_REMAINING_ATTEMPTS
 				} );
+			} );
 
-				// If opening a given link causes an error, try opening it again until the limit of remaining attempts is reached.
-				do {
-					const { errors, links } = await openLink( browser, { baseUrl, link, foundLinks, exclusions } );
+			// Terminate the scan as soon as an error is found, if `--quit` or `-q` CLI argument has been set.
+			if ( newErrors.length > 0 && quit ) {
+				return Promise.reject();
+			}
 
-					link.remainingAttempts--;
+			// When currently examined link has been checked, try to open new links up to the concurrency limit.
+			return openLinks( browser, { baseUrl, linksQueue, foundLinks, exclusions, concurrency, quit, onError, onProgress } );
+		} );
 
-					newErrors = [ ...errors ];
-					newLinks = [ ...links ];
-				} while ( newErrors.length && link.remainingAttempts );
-
-				newErrors.forEach( newError => onError( newError ) );
-
-				newLinks.forEach( newLink => {
-					foundLinks.push( newLink );
-
-					linksQueue.push( {
-						url: newLink,
-						parentUrl: link.url,
-						remainingNestedLevels: link.remainingNestedLevels - 1,
-						remainingAttempts: DEFAULT_REMAINING_ATTEMPTS
-					} );
-				} );
-
-				// Terminate the scan as soon as an error is found, if `--quit` or `-q` CLI argument has been set.
-				if ( newErrors.length > 0 && quit ) {
-					return Promise.reject();
-				}
-
-				// When currently examined link has been checked, try to open new links up to the concurrency limit.
-				return openLinks( browser, { baseUrl, linksQueue, foundLinks, exclusions, concurrency, quit, onError, onProgress } );
-			} )
-	);
+	return Promise.all( linksQueuePromises )
+		.then( () => {
+			if ( typeof onAfterEnd == 'function' ) {
+				onAfterEnd();
+			}
+		} );
 }
 
 /**
@@ -623,6 +646,32 @@ function logErrors( errors ) {
 
 	// Blank message only to separate the errors output log.
 	console.log();
+}
+
+/**
+ * Returns a progress handler, which is called every time just before opening a new link. The returned callback
+ * depends on the `options.noSpinner` flag. If the crawler was executed with `noSpinner:true`, returned function
+ * will just print the progress instead of manipulating the spinner.
+ *
+ * @param {Object} spinner Spinner instance
+ * @param {Object} options
+ * @param {Boolean} [options.noSpinner=false] Whether to display the spinner with progress or a message with current progress.
+ * @return {Function}
+ */
+function getProgressHandler( spinner, options ) {
+	if ( !options.noSpinner ) {
+		return getSpinnerProgressHandler( spinner );
+	}
+
+	let current = 0;
+
+	return ( { total } ) => {
+		current++;
+
+		const progress = Math.round( current / total * 100 );
+
+		console.log( `Progress… ${ progress }% (${ current } of ${ total }).` );
+	};
 }
 
 /**
