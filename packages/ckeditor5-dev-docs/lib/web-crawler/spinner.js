@@ -20,6 +20,8 @@ function createSpinner( { noSpinner } ) {
 		spinner: {
 			frames: [ '⣾', '⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽' ]
 		},
+		// Do not render the spinner if the `verbose` mode is enabled.
+		isSilent: noSpinner,
 		stream: noSpinner ? process.stdout : process.stderr
 	} );
 }
@@ -34,11 +36,6 @@ function createSpinner( { noSpinner } ) {
  */
 function getProgressHandler( spinner, { verbose } ) {
 	let current = 0;
-
-	// Do not render the spinner if the `verbose` mode is enabled.
-	if ( verbose ) {
-		spinner.isSilent = true;
-	}
 
 	return ( { total } ) => {
 		current++;
