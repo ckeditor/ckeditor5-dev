@@ -77,7 +77,7 @@ module.exports = async function verify( options ) {
 
 	logErrors( errors );
 
-	// Always exit the script because `spinner` can freeze the process of the crawler is executed in the `noSpinner:true` mode.
+	// Always exit the script because `spinner` can freeze the process of the crawler if it is executed in the `noSpinner:true` mode.
 	process.exit( errors.size ? 1 : 0 );
 };
 
