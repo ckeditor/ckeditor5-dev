@@ -43,11 +43,12 @@ function getProgressHandler( spinner, { verbose } ) {
 		current++;
 
 		const progress = Math.round( current / total * 100 );
+		const logMessage = `Checking pages… ${ chalk.bold( `${ progress }% (${ current } of ${ total })` ) }`;
 
 		if ( verbose ) {
-			console.log( `Checking pages… ${ chalk.bold( `${ progress }% (${ current } of ${ total })` ) }` );
+			console.log( logMessage );
 		} else {
-			spinner.text = `Checking pages… ${ chalk.bold( `${ progress }% (${ current } of ${ total })` ) }`;
+			spinner.text = logMessage;
 		}
 	};
 }
