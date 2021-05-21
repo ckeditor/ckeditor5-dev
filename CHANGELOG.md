@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [25.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/v25.2.0...v25.2.1) (2021-05-21)
+
+### Other changes
+
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: Support for the `options.noSpinner` flag when executing in terminals that do not support the spinner. Closes [ckeditor/ckeditor5#9737](https://github.com/ckeditor/ckeditor5/issues/9737). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/c5edb5a5804b5f99d3656dba16988cc9d8c32b0c))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v25.2.0 => v25.2.1
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v25.2.0 => v25.2.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v25.2.0 => v25.2.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v25.2.0 => v25.2.1
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v25.2.0 => v25.2.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v25.2.0 => v25.2.1
+</details>
+
+
 ## [25.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v25.1.0...v25.2.0) (2021-05-20)
 
 ### Features
