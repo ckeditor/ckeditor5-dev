@@ -36,15 +36,16 @@ const {
  * @param {Array.<String>} options.exclusions An array of patterns to exclude links. Empty array by default to not exclude anything.
  * @param {Number} options.concurrency Number of concurrent pages (browser tabs) to be used during crawling. One by default.
  * @param {Boolean} options.quit Terminates the scan as soon as an error is found. False (off) by default.
- * @param {Boolean} [options.disableBrowserSandbox] Whether the browser should be created with the `--no-sandbox` flag.
+ * @param {Boolean} [options.disableBrowserSandbox=false] Whether the browser should be created with the `--no-sandbox` flag.
+ * @param {Boolean} [options.noSpinner=false] Whether to display the spinner with progress or a raw message with current progress.
  * @returns {Promise} Promise is resolved, when the crawler has finished the whole crawling procedure.
  */
 module.exports = async function verify( options ) {
-	const { url, depth, exclusions, concurrency, quit, disableBrowserSandbox } = options;
+	const { url, depth, exclusions, concurrency, quit, disableBrowserSandbox, noSpinner } = options;
 
 	console.log( chalk.bold( '\n🔎 Starting the Crawler\n' ) );
 
-	const spinner = createSpinner();
+	const spinner = createSpinner( { noSpinner } );
 	const errors = new Map();
 	const browser = await createBrowser( { disableBrowserSandbox } );
 
@@ -65,7 +66,7 @@ module.exports = async function verify( options ) {
 		concurrency,
 		quit,
 		onError: getErrorHandler( errors ),
-		onProgress: getProgressHandler( spinner )
+		onProgress: getProgressHandler( spinner, { verbose: noSpinner } )
 	} ).catch( () => {
 		status = 'Terminated on first error';
 	} );
@@ -76,9 +77,8 @@ module.exports = async function verify( options ) {
 
 	logErrors( errors );
 
-	if ( errors.size ) {
-		process.exit( 1 );
-	}
+	// Always exit the script because `spinner` can freeze the process of the crawler if it is executed in the `noSpinner:true` mode.
+	process.exit( errors.size ? 1 : 0 );
 };
 
 /**
