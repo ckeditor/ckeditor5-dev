@@ -12,6 +12,7 @@ const ora = require( 'ora' );
 
 /**
  * Creates nice-looking CLI spinner.
+ * @param {Object} options
  * @param {Boolean} [options.noSpinner=false] Whether to display the spinner with progress or a message with current progress.
  */
 function createSpinner( { noSpinner } ) {
