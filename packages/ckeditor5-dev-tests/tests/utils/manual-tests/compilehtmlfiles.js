@@ -136,9 +136,12 @@ describe( 'compileHtmlFiles', () => {
 		expect(	stubs.fs.outputFileSync ).to.be.calledWithExactly(
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
-				'<div class="manual-test-sidebar"><a href="/" class="manual-test-sidebar__root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 				'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
 					'<span></span><span></span><span></span>' +
+				'</button>',
+				'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
+					'<span></span><span></span><span></span><span></span>' +
 				'</button>',
 				'<div>html file content</div>',
 				'<body class="manual-test-container manual-test-container_no-transitions">' +
@@ -178,9 +181,12 @@ describe( 'compileHtmlFiles', () => {
 		expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
-				'<div class="manual-test-sidebar"><a href="/" class="manual-test-sidebar__root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 				'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
 					'<span></span><span></span><span></span>' +
+				'</button>',
+				'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
+					'<span></span><span></span><span></span><span></span>' +
 				'</button>',
 				'<div>html file content</div>',
 				'<body class="manual-test-container manual-test-container_no-transitions">' +
@@ -218,9 +224,12 @@ describe( 'compileHtmlFiles', () => {
 		expect( stubs.fs.outputFileSync ).to.be.calledWith(
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.abc.html' ), [
 				'<div>template html content</div>',
-				'<div class="manual-test-sidebar"><a href="/" class="manual-test-sidebar__root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 				'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
 					'<span></span><span></span><span></span>' +
+				'</button>',
+				'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
+					'<span></span><span></span><span></span><span></span>' +
 				'</button>',
 				'<div>html file content</div>',
 				'<body class="manual-test-container manual-test-container_no-transitions">' +
@@ -339,9 +348,12 @@ describe( 'compileHtmlFiles', () => {
 		expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
-				'<div class="manual-test-sidebar"><a href="/" class="manual-test-sidebar__root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 				'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
 					'<span></span><span></span><span></span>' +
+				'</button>',
+				'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
+					'<span></span><span></span><span></span><span></span>' +
 				'</button>',
 				'<div>html file content</div>',
 				'<body class="manual-test-container manual-test-container_no-transitions">' +
@@ -394,9 +406,12 @@ describe( 'compileHtmlFiles', () => {
 		expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
 			path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
 				'<div>template html content</div>',
-				'<div class="manual-test-sidebar"><a href="/" class="manual-test-sidebar__root-link">&larr; Back to the list</a><h2>Markdown header</h2></div>',
+				'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 				'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
 					'<span></span><span></span><span></span>' +
+				'</button>',
+				'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
+					'<span></span><span></span><span></span><span></span>' +
 				'</button>',
 				'<div>html file content</div>',
 				'<body class="manual-test-container manual-test-container_no-transitions">' +

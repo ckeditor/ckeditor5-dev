@@ -31,6 +31,33 @@
 			transition: padding .2s ease-in-out;
 		}
 
+		.manual-test-list-container strong {
+			font-size: 1.2em;
+			margin: .5em 0;
+			display: block;
+		}
+
+		.manual-test-list-container ul li {
+			list-style-type: none;
+		}
+
+		.manual-test-list-container ul {
+			padding-left: 20px;
+		}
+
+		.manual-test-list-container > ul {
+			padding: 0;
+		}
+
+		.manual-test-list-container li a {
+			display: block;
+			font-family: monospace;
+		}
+
+		.manual-test-list-container li a:hover {
+			background-color: hsl(0deg 0% 97%);
+		}
+
 		/*
 		 * Disable all transitions until the DOM is fully loaded. This prevents
 		 * annoying unnecessary animations on page load
@@ -38,7 +65,9 @@
 		.manual-test-container.manual-test-container_no-transitions,
 		.manual-test-container.manual-test-container_no-transitions > .manual-test-sidebar,
 		.manual-test-container.manual-test-container_no-transitions > .manual-test-sidebar__toggle,
-		.manual-test-container.manual-test-container_no-transitions > .manual-test-sidebar__toggle > * {
+		.manual-test-container.manual-test-container_no-transitions > .manual-test-sidebar__toggle > *,
+		.manual-test-container.manual-test-container_no-transitions > .manual-test-sidebar__root-link-button,
+		.manual-test-container.manual-test-container_no-transitions > .manual-test-sidebar__root-link-button > * {
 			transition: none !important;
 		}
 
@@ -59,7 +88,7 @@
 			background-color: #f7f7f7;
 			border-right: 1px solid #bfbfbf;
 			color: #333;
-			padding: 15px;
+			padding: 35px 15px 15px;
 			overflow-x: hidden;
 			overflow-y: auto;
 			z-index: 9999;
@@ -87,83 +116,133 @@
 			font-size: 14px;
 		}
 
-		/* ------------ Sidebar toggle button ----------------------------------------------------------------- */
+		/* ------------ Main buttons ----------------------------------------------------------------- */
 
-		.manual-test-sidebar__toggle {
+		.manual-test-sidebar__toggle,
+		.manual-test-sidebar__root-link-button {
 			background: none;
 			width: 24px;
 			height: 24px;
 			display: block;
 			overflow: hidden;
 			position: fixed;
-			top: 10px;
-			left: 10px;
 			border: none;
 			padding: 0;
 			margin: 0;
-			transition: left var(--ck-manual-test-transition-time) ease-in-out;
 			opacity: .5;
 			z-index: 10000;
+			cursor: default;
+			transition: left var(--ck-manual-test-transition-time) ease-in-out, top var(--ck-manual-test-transition-time) ease-in-out;
 		}
 
-		.manual-test-sidebar__toggle:not(:focus) {
+		.manual-test-sidebar__toggle:not(:focus),
+		.manual-test-sidebar__root-link-button:not(:focus) {
 			outline: none;
 		}
 
-		.manual-test-sidebar__toggle:hover {
+		.manual-test-sidebar__toggle:hover,
+		.manual-test-sidebar__root-link-button:hover {
 			opacity: 1;
 		}
 
-		.manual-test-sidebar__toggle span {
+		.manual-test-sidebar__toggle span,
+		.manual-test-sidebar__root-link-button span {
 			display: block;
 			width: 20px;
-			height: 3px;
+			height: 2px;
 			background: black;
 			border-radius: 3px;
 			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
+		}
+
+		/* ------------ Sidebar toggle button ----------------------------------------------------------------- */
+
+		.manual-test-sidebar__toggle {
+			top: 45px;
+			left: 10px;
+		}
+
+		.manual-test-sidebar__toggle span {
 			transition: transform var(--ck-manual-test-transition-time) ease-in-out, opacity var(--ck-manual-test-transition-time) ease-in-out;
 		}
 
 		.manual-test-sidebar__toggle span:nth-child(1) {
-			transform: translate(-50%, calc(-50% - 5px));
+			transform: translate(0%, -50%);
+			width: 19px;
+			height: 15px;
+			border: 2px solid #000;
+			background: transparent;
+		}
+
+		.manual-test-sidebar__toggle span:nth-child(2) {
+			width: 3px;
+			height: 3px;
+			background: transparent;
+			border-width: 2px 2px 0 0;
+			border-style: solid;
+			border-color: #000;
+			transform: translate(1px, -2px) rotate(45deg);
 		}
 
 		.manual-test-sidebar__toggle span:nth-child(3) {
-			transform: translate(-50%, calc(-50% + 5px));
+			transform: translate(-2px, -1px) rotate(90deg);
+			height: 2px;
+			width: 19px;
 		}
 
 		.manual-test-container_pinned-sidebar .manual-test-sidebar__toggle {
-			left: min(calc(100vw - 35px), 350px);
-		}
-
-		.manual-test-container_pinned-sidebar .manual-test-sidebar__toggle span:nth-child(1) {
-			transform: translate(-50%, -50%) rotate(-45deg);
+			left: min(calc(100vw - 40px), 345px);
+			top: 10px;
 		}
 
 		.manual-test-container_pinned-sidebar .manual-test-sidebar__toggle span:nth-child(2) {
-			opacity: 0;
+			transform: translate(5px, -2px) rotate(-135deg);
 		}
 
 		.manual-test-container_pinned-sidebar .manual-test-sidebar__toggle span:nth-child(3) {
-			transform: translate(-50%, -50%) rotate(45deg);
+			transform: translate(3px, -1px) rotate(90deg);
 		}
 
-		/* ------------ "Back to the list" button styles ----------------------------------------------------------------- */
+		/* ------------ "Back to the list" button ----------------------------------------------------------------- */
 
-		.manual-test-sidebar__root-link {
-			display: inline-block;
-			padding: 8px 0;
-			text-align: center;
-			border-radius: 2px;
-			line-height: 15px;
-			text-decoration: none;
+		.manual-test-sidebar__root-link-button {
+			top: 10px;
+			left: 10px;
 		}
 
-		.manual-test-sidebar__root-link:hover {
-			text-decoration: underline;
+		.manual-test-sidebar__root-link-button span:nth-child(1) {
+			transform: translate(-1px, 6px) rotate( -40deg );
+			width: 15px;
+		}
+
+		.manual-test-sidebar__root-link-button span:nth-child(2) {
+			width: 14px;
+			height: 10px;
+			transform: translate(3px, 9px);
+			background: transparent;
+			border-color: #000;
+			border-width: 0 2px 2px;
+			border-style: solid;
+			border-radius: 0 0 2px 2px;
+		}
+
+		.manual-test-sidebar__root-link-button span:nth-child(3) {
+			transform: translate(10px, 6px) rotate(40deg);
+			width: 15px;
+		}
+
+		.manual-test-sidebar__root-link-button span:nth-child(4) {
+			width: 2px;
+			height: 4px;
+			border: 2px solid #000;
+			transform: translate(9px, 13px);
+			border-radius: 0;
+			background: transparent;
+		}
+
+		.manual-test-container_pinned-sidebar .manual-test-sidebar__root-link-button {
+			top: 10px;
+			left: 15px;
 		}
 	</style>
 </head>
