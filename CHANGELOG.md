@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [25.2.2](https://github.com/ckeditor/ckeditor5-dev/compare/v25.2.1...v25.2.2) (2021-06-10)
+
+### Other changes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added the always visible button that navigates back to the list of manual tests. Refined the look of the list of manual tests. Closes [ckeditor/ckeditor5#9843](https://github.com/ckeditor/ckeditor5/issues/9843). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/102a966dd603f14b8531b7d9f11d2944821fbff0))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v25.2.1 => v25.2.2
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v25.2.1 => v25.2.2
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v25.2.1 => v25.2.2
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v25.2.1 => v25.2.2
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v25.2.1 => v25.2.2
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v25.2.1 => v25.2.2
+</details>
+
+
 ## [25.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/v25.2.0...v25.2.1) (2021-05-21)
 
 ### Other changes
