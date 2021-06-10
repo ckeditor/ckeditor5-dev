@@ -114,13 +114,16 @@ function compileHtmlFile( buildDir, options ) {
 	const parsedMarkdownTree = reader.parse( fs.readFileSync( sourceMDFilePath, 'utf-8' ) );
 	const manualTestInstruction =
 		'<div class="manual-test-sidebar">' +
-			'<a href="/" class="manual-test-sidebar__root-link">&larr; Back to the list</a>' +
 			writer.render( parsedMarkdownTree ) +
 		'</div>';
 
 	const manualTestSidebarToggleButton = '<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
 			'<span></span><span></span><span></span>' +
 		'</button>';
+
+	const manualTestSidebarBackButton = '<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
+		'<span></span><span></span><span></span><span></span>' +
+	'</button>';
 
 	// Load test view (HTML file).
 	const htmlView = fs.readFileSync( sourceHtmlFilePath, 'utf-8' );
@@ -138,7 +141,14 @@ function compileHtmlFile( buildDir, options ) {
 		'</body>';
 
 	// Concat the all HTML parts to single one.
-	const preparedHtml = combine( viewTemplate, manualTestInstruction, manualTestSidebarToggleButton, htmlView, scriptTag );
+	const preparedHtml = combine(
+		viewTemplate,
+		manualTestInstruction,
+		manualTestSidebarToggleButton,
+		manualTestSidebarBackButton,
+		htmlView,
+		scriptTag
+	);
 
 	// Prepare output path.
 	const outputFilePath = path.join( buildDir, absoluteHtmlFilePath );
