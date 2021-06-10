@@ -1,23 +1,21 @@
 language: node_js
 node_js:
-- '12'
+  - '12'
 cache:
-- node_modules
+  yarn: true
+cache:
+  - node_modules
 before_install:
-- export START_TIME=$( date +%s )
-- npm i -g yarn
+  - export START_TIME=$( date +%s ) 
+  - npm i -g yarn
 install:
-- yarn install
+  - yarn install
 script:
-- yarn run lint
-- yarn run coverage
-after_script:
-- export END_TIME=$( date +%s )
-- "./packages/ckeditor5-dev-tests/bin/notify-travis-status.js"
+  - yarn run lint
+  - yarn run coverage
+after_script: 
+  - export END_TIME=$( date +%s )
+  - ./packages/ckeditor5-dev-tests/bin/notify-travis-status.js
 after_success:
-- yarn add coveralls --ignore-workspace-root-check
-- cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
-env:
-  global:
-  - secure: cXeoAsoR1LbjUuabdtkISuobgc3CwvDdAuzcXcktnsTSfOL54wySAM5rCw5IMtJuC9nyZQBilI2D0aUm4VJdkdH+qoXUOFcUEk4aSSTkkF7GHsIlehVDatWEOiGUqzsv656IIAdf+DMMPuaNDqMvsIE54EdlGejsBkGZl04dLVH75pdx2HDFpsP82dIFQTBMZi8uR1FE8NVI/3dacs/svcvBJjUVk/vOqrDQLCzlY+SrDIQ0yWquYRCYc2MAV6GM5IqbUICWZYbt+t6bdNI0yO5nnPzgqKzlGRBDuAa1CDk/ifJsWvbcInrBEEFnREGVtZAr/7i7yI1QRWp4XEup4F94BHvAEAWatumjQWNVsMI3mC5Z3rZ0tkQgh8GRt0exazJTIgeeY6b0/0541ybIJ1PbnraeCfasdB9TCrIhzRliRIopxAn1+LyoGh4HR2Io9+lZC0LKtB/J8ofbDADuoKx6hZWmALg3YmKfiBbvEfgO4h7UbkVKykGDdDFnxi9OtHKuT/A7es8EKBlXESjZdWDPDbaiWG/iw6XaiznS8hgDBkcWgIxl20NbE53FINPM6s5T+YJBg165zwEyNlle1PpbxoZ49xW++Cxw+77pVh73BO+NoKaMPdtcmO/P6H1x1GM8T/x4ALr+PZFDj98ZZJQabb/qLj5TPT0RmTXuvX0=
-  - secure: GT1UprP9+BTvkXq7zEypxZSsUNwraQ2viw2GUEvYm0UKBhLAYfQ+BVdjHT7ZHQrZL4JmiYK9KVe2I3/pMh+33L0IY72eMl+o2ELv+lFZEyJEcfYvNlroy1mCsYdkqyji4Y+I8CAGMK5LVZVYU/iNBHoXnRvoBXGiZ/VJeYMwjonu9UAQFYYyS6DHVqEfEyxBwjZLBR3MFiC0bM2Nhdd6e9NRa1nV9oWdQpaPCQPsR3v3BNGpEZ5ZU8wY5zmGXpsCHpkWjSDRtE6NUnD4YGxF6iO0HW5F6qOA1qiIoJb23PP7s9fEmNYWHxnM8hjvLHKEhY8Igjm75Af0ZTac2VzDsyIh71O6y7bsN1lvhkND9Gf2afnXCb+ao8kKg3tGv/wzqRCy6UkmLSkC6OnVSPMGj708pM6bED17Ph3plz4ewyWB56GuRW52wEfZNh62sXuNGJyq5ndc1TyAcj4VEPQA5YGfQoF7g0r9C5IrnlmJC2vSVXzXrp3TSWG7teuGu8vmys9DZL81TGzR7lWzVgruv9duAEhpgcZPaNsy5JXoUfAyNQGE44jmSpwdAfM7CrVz5C2Qwei9/KfQvG87Gnu0jCB4prIw9ke1Zo4vftwGqwP42qkCb6TAMXcI+HcmM3wuf3EtUWHO9uD8pi9PHeb6EqgoQ1H1Z/8MvnjfkVO7Oz8=
+  - yarn add coveralls --ignore-workspace-root-check
+  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
