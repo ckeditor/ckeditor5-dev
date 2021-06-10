@@ -6,12 +6,16 @@ cache:
 cache:
   - node_modules
 before_install:
+  - export START_TIME=$( date +%s ) 
   - npm i -g yarn
 install:
   - yarn install
 script:
   - yarn run lint
   - yarn run coverage
+after_script: 
+  - export END_TIME=$( date +%s )
+  - ./packages/ckeditor5-dev-tests/bin/notify-travis-status.js
 after_success:
   - yarn add coveralls --ignore-workspace-root-check
   - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
