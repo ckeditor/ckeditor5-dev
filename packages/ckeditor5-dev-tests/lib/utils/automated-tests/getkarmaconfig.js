@@ -44,6 +44,8 @@ module.exports = function getKarmaConfig( options ) {
 		// Files saved in directory `ckeditor5/packages/ckeditor5-utils/tests/_assets/` are available under: http://0.0.0.0:{port}/assets/
 		proxies: {
 			'/assets/': '/base/packages/ckeditor5-utils/tests/_assets/',
+
+			// See: https://github.com/ckeditor/ckeditor5/issues/8823.
 			'/example.com/image.png': '/base/packages/ckeditor5-utils/tests/_assets/sample.png',
 			'/www.example.com/image.png': '/base/packages/ckeditor5-utils/tests/_assets/sample.png'
 		},
