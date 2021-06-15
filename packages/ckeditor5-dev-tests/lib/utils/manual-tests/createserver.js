@@ -122,7 +122,7 @@ function generateIndex( sourcePath ) {
 
 	for ( const file of testFiles ) {
 		const relativeFilePath = file.replace( sourcePath + path.sep, '' );
-		const packageName = relativeFilePath.match( /([^/]+)\/tests\/([^/]+\/)*manual/ )[ 1 ];
+		const packageName = relativeFilePath.match( /([^/\\]+)[/\\]tests[/\\]([^/\\]+[/\\])*manual/ )[ 1 ];
 		const shortTestName = relativeFilePath.replace( /.*\/manual\//g, '' );
 
 		if ( !testTree[ packageName ] ) {
