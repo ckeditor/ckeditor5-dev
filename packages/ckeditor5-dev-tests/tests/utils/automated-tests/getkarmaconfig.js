@@ -96,4 +96,26 @@ describe( 'getKarmaConfig()', () => {
 		expect( karmaConfig.files[ 0 ] ).to.equal( 'workspace/entry-file.js' );
 		expect( karmaConfig.files[ 1 ].pattern ).to.equal( 'packages/ckeditor5-utils/tests/_assets/**/*' );
 	} );
+
+	// See: https://github.com/ckeditor/ckeditor5/issues/8823
+	it( 'should define proxies to static assets resources', () => {
+		const karmaConfig = getKarmaConfig( {
+			files: [ '*' ],
+			reporter: 'mocha',
+			sourceMap: false,
+			coverage: false,
+			browsers: [ 'Chrome' ],
+			watch: false,
+			verbose: false,
+			themePath: 'workspace/path/to/theme.css',
+			entryFile: 'workspace/entry-file.js',
+			globPatterns: {
+				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
+			}
+		} );
+
+		expect( karmaConfig ).to.have.own.property( 'proxies' );
+		expect( karmaConfig.proxies ).to.have.own.property( '/example.com/image.png' );
+		expect( karmaConfig.proxies ).to.have.own.property( '/www.example.com/image.png' );
+	} );
 } );
