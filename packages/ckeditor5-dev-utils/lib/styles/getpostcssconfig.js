@@ -23,7 +23,7 @@ module.exports = function getPostCssConfig( options = {} ) {
 			require( 'postcss-import' )(),
 			require( './themeimporter' )( options.themeImporter ),
 			require( 'postcss-mixins' )(),
-			require( 'postcss-nesting' )(),
+			require( 'postcss-nested' )(),
 			require( './themelogger' )()
 		]
 	};

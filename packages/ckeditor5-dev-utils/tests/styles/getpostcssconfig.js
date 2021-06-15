@@ -18,7 +18,7 @@ describe( 'styles', () => {
 			'./themeimporter': sinon.stub().returns( 'postcss-ckeditor5-theme-importer' ),
 			'postcss-import': sinon.stub().returns( 'postcss-import' ),
 			'postcss-mixins': sinon.stub().returns( 'postcss-mixins' ),
-			'postcss-nesting': sinon.stub().returns( 'postcss-nesting' ),
+			'postcss-nested': sinon.stub().returns( 'postcss-nested' ),
 			'./themelogger': sinon.stub().returns( 'postcss-ckeditor5-theme-logger' ),
 			cssnano: sinon.stub().returns( 'cssnano' )
 		};
@@ -47,7 +47,7 @@ describe( 'styles', () => {
 					'postcss-import',
 					'postcss-ckeditor5-theme-importer',
 					'postcss-mixins',
-					'postcss-nesting',
+					'postcss-nested',
 					'postcss-ckeditor5-theme-logger'
 				] );
 		} );
