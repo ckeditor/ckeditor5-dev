@@ -22,19 +22,17 @@
 //
 // In order to enable the debug mode, set the `DEBUG=true` as the environment variable.
 
-const childProcess = require( 'child_process' );
-
-// A map that translates Github accounts to Slack ids.
-const members = require( './members.json' );
+const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
 
 const buildBranch = process.env.TRAVIS_BRANCH;
 
-const acceptedBranches = [
+const ALLOWED_BRANCHES = [
+	'stable',
 	'master',
 	'master-revisions'
 ];
 
-const acceptedEvents = [
+const ALLOWED_EVENTS = [
 	'push',
 	'cron',
 	'api'
@@ -43,14 +41,14 @@ const acceptedEvents = [
 printDebugLog( 'Starting script: ' + __filename );
 
 // Send a notification only for main branches...
-if ( !acceptedBranches.includes( buildBranch ) ) {
+if ( !ALLOWED_BRANCHES.includes( buildBranch ) ) {
 	printDebugLog( `Aborting due to an invalid branch (${ buildBranch }).` );
 
 	process.exit();
 }
 
 // ...and an event that triggered the build is correct...
-if ( !acceptedEvents.includes( process.env.TRAVIS_EVENT_TYPE ) ) {
+if ( !ALLOWED_EVENTS.includes( process.env.TRAVIS_EVENT_TYPE ) ) {
 	printDebugLog( `Aborting due to an invalid event type (${ process.env.TRAVIS_EVENT_TYPE }).` );
 
 	process.exit();
@@ -63,80 +61,80 @@ if ( process.env.TRAVIS_TEST_RESULT == 0 ) {
 	process.exit();
 }
 
-const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
+const fetch = require( 'node-fetch' );
+const slack = require( 'slack-notify' )( process.env.SLACK_WEBHOOK_URL );
 
-const slack = require( 'slack-notify' )( SLACK_WEBHOOK_URL );
-
-const buildId = process.env.TRAVIS_JOB_NUMBER.split( '.' )[ 0 ];
-const buildUrl = process.env.TRAVIS_JOB_WEB_URL;
-const buildCommit = process.env.TRAVIS_COMMIT;
-const [ owner, repo ] = process.env.TRAVIS_REPO_SLUG.split( '/' );
-const commitUrl = `https://github.com/${ owner }/${ repo }/commit/${ buildCommit }`;
-const shortCommit = buildCommit.substring( 0, 7 );
-const execTime = getExecutionTime( parseInt( process.env.END_TIME ), parseInt( process.env.START_TIME ) );
+// A map that translates GitHub accounts to Slack ids.
+const members = require( './members.json' );
 
 slack.onError = err => {
 	console.log( 'API error occurred:', err );
 };
 
-const data = {
-	icon_url: 'https://a.slack-edge.com/66f9/img/services/travis_36.png',
-	unfurl_links: 1,
-	username: 'Travis CI',
-	attachments: [
-		{
-			color: 'danger',
-			fields: [
-				{
-					title: 'Repository (branch)',
-					value: [
-						`<https://github.com/${ owner }/${ repo }|${ repo }>`,
-						`(<https://github.com/${ owner }/${ repo }/tree/${ buildBranch }|${ buildBranch }>)`
-					].join( ' ' ),
-					short: true
-				},
-				{
-					title: 'Commit',
-					value: `<${ commitUrl }|${ shortCommit }>`,
-					short: true
-				},
-				{
-					title: 'Build number',
-					value: `<${ buildUrl }|#${ buildId }>`,
-					short: true
-				},
-				{
-					title: 'Build time',
-					value: `${ execTime.mins } min ${ execTime.secs } sec`,
-					short: true
-				},
-				{
-					title: 'Commit message',
-					value: getFormattedMessage( process.env.TRAVIS_COMMIT_MESSAGE, owner, repo ),
-					short: false
-				}
-			]
-		}
-	]
-};
+main();
 
-if ( process.env.SLACK_NOTIFY_HIDE_AUTHOR == 'true' ) {
-	data.text = '_The author of the commit was hidden. <https://github.com/ckeditor/ckeditor5/issues/9252|Read more about why.>_';
-} else {
-	const commitAuthor = getCommitAuthor();
+/**
+ * The main function.
+ *
+ * @async
+ */
+async function main() {
+	const commitUrl = getCommitUrl();
+	const commitDetails = await getCommitDetails( commitUrl );
 
-	if ( commitAuthor ) {
-		const slackAccount = members[ commitAuthor ];
+	const [ buildRepoOwner, buildRepoName ] = process.env.TRAVIS_REPO_SLUG.split( '/' );
+	const execTime = getExecutionTime( parseInt( process.env.END_TIME ), parseInt( process.env.START_TIME ) );
 
-		if ( slackAccount ) {
-			data.text = `<@${ slackAccount }>, could you take a look?`;
-		} else {
-			data.text = '_The author of the commit could not be obtained._';
-		}
-	}
+	const slackAccount = members[ commitDetails.author ];
+	const shortCommit = commitUrl.split( '/' ).pop().substring( 0, 7 );
+	const repoMatch = commitUrl.match( REPOSITORY_REGEXP );
+
+	printDebugLog( 'Sending a message.' );
+
+	slack.send( {
+		username: 'Travis CI',
+		text: getNotifierMessage( slackAccount, commitDetails.author ),
+		icon_url: 'https://a.slack-edge.com/66f9/img/services/travis_36.png',
+		unfurl_links: 1,
+		attachments: [
+			{
+				color: 'danger',
+				fields: [
+					{
+						title: 'Repository (branch)',
+						value: [
+							`<https://github.com/${ buildRepoOwner }/${ buildRepoName }|${ buildRepoName }>`,
+							`(<https://github.com/${ buildRepoOwner }/${ buildRepoName }/tree/${ buildBranch }|${ buildBranch }>)`
+						].join( ' ' ),
+						short: true
+					},
+					{
+						title: 'Commit',
+						value: `<${ commitUrl }|${ shortCommit }>`,
+						short: true
+					},
+					{
+						title: 'Build number',
+						value: `<${ process.env.TRAVIS_JOB_WEB_URL }|#${ process.env.TRAVIS_JOB_NUMBER }>`,
+						short: true
+					},
+					{
+						title: 'Build time',
+						value: `${ execTime.mins } min ${ execTime.secs } sec`,
+						short: true
+					},
+					{
+						title: 'Commit message',
+						value: getFormattedMessage( commitDetails.message, repoMatch[ 1 ], repoMatch[ 2 ] ),
+						short: false
+					}
+				]
+			}
+		]
+	} );
+
+	printDebugLog( 'Sent.' );
 }
-
-slack.send( data );
 
 /**
  * Returns an object that compares two dates.
@@ -177,50 +175,81 @@ function getFormattedMessage( message, repoOwner, repoName ) {
 }
 
 /**
- * Returns a URL to GitHub API which returns details of the commit that caused the CI to fail its job.
+ * Returns a URL to the commit details on GitHub.
  *
  * @returns {String}
  */
-function getGithubApiUrl() {
-	let commitUrl;
-
+function getCommitUrl() {
 	const { SLACK_NOTIFY_COMMIT_URL, TRAVIS_REPO_SLUG, TRAVIS_COMMIT } = process.env;
 
 	if ( SLACK_NOTIFY_COMMIT_URL ) {
-		commitUrl = SLACK_NOTIFY_COMMIT_URL;
-	} else {
-		commitUrl = `https://github.com/${ TRAVIS_REPO_SLUG }/commit/${ TRAVIS_COMMIT }`;
+		return SLACK_NOTIFY_COMMIT_URL;
 	}
 
+	return `https://github.com/${ TRAVIS_REPO_SLUG }/commit/${ TRAVIS_COMMIT }`;
+}
+
+/**
+ * Returns a URL to GitHub API which returns details of the commit that caused the CI to fail its job.
+ *
+ * @param {String} commitUrl The URL to the commit on GitHub.
+ * @returns {String}
+ */
+function getGithubApiUrl( commitUrl ) {
 	return commitUrl.replace( 'github.com/', 'api.github.com/repos/' ).replace( '/commit/', '/commits/' );
 }
 
 /**
- * Returns a name of an account that made the commit. If couldn't be obtained, returns `null` instead.
+ * Returns a promise that resolves the commit details (author and message) based on the specified GitHub URL.
  *
- * @returns {String|null}
+ * @param {String} commitUrl The URL to the commit on GitHub.
+ * @returns {Promise.<Object>}
  */
-function getCommitAuthor() {
-	const curlArguments = [
-		`-H "Authorization: token ${ process.env.GITHUB_TOKEN }"`,
-		getGithubApiUrl()
-	];
+function getCommitDetails( commitUrl ) {
+	const apiGithubUrlCommit = getGithubApiUrl( commitUrl );
+	const options = {
+		method: 'GET',
+		credentials: 'include',
+		headers: {
+			authorization: `token ${ process.env.GITHUB_TOKEN }`
+		}
+	};
 
-	const curlOutput = childProcess.spawnSync( 'curl', curlArguments, {
-		encoding: 'utf8',
-		shell: true,
-		stderr: 'inherit'
-	} );
-
-	try {
-		const curlDetails = JSON.parse( curlOutput.stdout );
-
-		return curlDetails.author.login;
-	} catch ( err ) {
-		return null;
-	}
+	return fetch( apiGithubUrlCommit, options )
+		.then( response => response.json() )
+		.then( json => ( {
+			author: json.author.login,
+			message: json.commit.message
+		} ) );
 }
 
+/**
+ * Returns the additional message that will be added to the notifier post.
+ *
+ * @param {String} slackAccount
+ * @param {String} githubAccount
+ * @returns {String}
+ */
+function getNotifierMessage( slackAccount, githubAccount ) {
+	if ( process.env.SLACK_NOTIFY_HIDE_AUTHOR == 'true' ) {
+		return '_The author of the commit was hidden. <https://github.com/ckeditor/ckeditor5/issues/9252|Read more about why.>_';
+	}
+
+	if ( !slackAccount ) {
+		return '_The author of the commit could not be obtained._';
+	}
+
+	// Slack and GitHub names for bots are equal.
+	if ( slackAccount === githubAccount ) {
+		return '_This commit is a result of merging a branch into another branch._';
+	}
+
+	return `<@${ slackAccount }>, could you take a look?`;
+}
+
+/**
+ * @param {String} message
+ */
 function printDebugLog( message ) {
 	if ( process.env.DEBUG == 'true' ) {
 		console.log( '[Slack Notification]', message );
