@@ -1,6 +1,36 @@
 Changelog
 =========
 
+## [25.2.3](https://github.com/ckeditor/ckeditor5-dev/compare/v25.2.2...v25.2.3) (2021-06-21)
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Fixed a faulty regexp that did not care about Windows environments for manual tests. Closes [ckeditor/ckeditor5#9849](https://github.com/ckeditor/ckeditor5/issues/9849). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/48046b229e9d69bca6ca07c99f5bdb632fec8dc5))
+
+### Other changes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: The Slack notifier script will read the commit message from GitHub API for a particular commit. If the `SLACK_NOTIFY_COMMIT_URL` variable is specified, the value will be treated as the commit. Otherwise, a concatenation of `TRAVIS_REPO_SLUG`, and `TRAVIS_COMMIT` variables will be used. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/2ae29b30e9c719abc7b45c8e314bb36188b98b9d))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: The Slack notifier will print a message if a commit was made by a bot (as a result of merging branches). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/2ae29b30e9c719abc7b45c8e314bb36188b98b9d))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: The Slack notifier script will work if a commit comes from the `#stable` branch. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/2ae29b30e9c719abc7b45c8e314bb36188b98b9d))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v25.2.2 => v25.2.3
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v25.2.2 => v25.2.3
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v25.2.2 => v25.2.3
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v25.2.2 => v25.2.3
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v25.2.2 => v25.2.3
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v25.2.2 => v25.2.3
+</details>
+
+
 ## [25.2.2](https://github.com/ckeditor/ckeditor5-dev/compare/v25.2.1...v25.2.2) (2021-06-10)
 
 ### Other changes
