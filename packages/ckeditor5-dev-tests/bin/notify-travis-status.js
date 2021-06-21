@@ -177,7 +177,7 @@ function getFormattedMessage( message, repoOwner, repoName ) {
 /**
  * Returns a URL to the commit details on GitHub.
  *
- * @return {String}
+ * @returns {String}
  */
 function getCommitUrl() {
 	const { SLACK_NOTIFY_COMMIT_URL, TRAVIS_REPO_SLUG, TRAVIS_COMMIT } = process.env;
@@ -228,7 +228,7 @@ function getCommitDetails( commitUrl ) {
  *
  * @param {String} slackAccount
  * @param {String} githubAccount
- * @return {String}
+ * @returns {String}
  */
 function getNotifierMessage( slackAccount, githubAccount ) {
 	if ( process.env.SLACK_NOTIFY_HIDE_AUTHOR == 'true' ) {
