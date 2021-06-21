@@ -174,14 +174,19 @@ function getFormattedMessage( message, repoOwner, repoName ) {
 		} );
 }
 
+/**
+ * Returns a URL to the commit details on GitHub.
+ *
+ * @return {String}
+ */
 function getCommitUrl() {
 	const { SLACK_NOTIFY_COMMIT_URL, TRAVIS_REPO_SLUG, TRAVIS_COMMIT } = process.env;
 
 	if ( SLACK_NOTIFY_COMMIT_URL ) {
 		return SLACK_NOTIFY_COMMIT_URL;
-	} else {
-		return `https://github.com/${ TRAVIS_REPO_SLUG }/commit/${ TRAVIS_COMMIT }`;
 	}
+
+	return `https://github.com/${ TRAVIS_REPO_SLUG }/commit/${ TRAVIS_COMMIT }`;
 }
 
 /**
