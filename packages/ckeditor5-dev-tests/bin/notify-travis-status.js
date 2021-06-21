@@ -86,7 +86,7 @@ async function main() {
 	const execTime = getExecutionTime( parseInt( process.env.END_TIME ), parseInt( process.env.START_TIME ) );
 
 	const slackAccount = members[ commitDetails.author ];
-	const shortCommit = commitUrl.split( '/' ).reverse()[ 0 ].substring( 0, 7 );
+	const shortCommit = commitUrl.split( '/' ).pop().substring( 0, 7 );
 	const repoMatch = commitUrl.match( REPOSITORY_REGEXP );
 
 	printDebugLog( 'Sending a message.' );
