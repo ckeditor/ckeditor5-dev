@@ -151,7 +151,13 @@ module.exports = function getKarmaConfig( options ) {
 					type: 'lcovonly',
 					dir: coverageDir
 				}
-			]
+			],
+			watermarks: {
+				statements: [ 50, 100 ],
+				functions: [ 50, 100 ],
+				branches: [ 50, 100 ],
+				lines: [ 50, 100 ]
+			}
 		};
 	}
 
