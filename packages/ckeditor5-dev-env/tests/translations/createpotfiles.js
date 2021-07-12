@@ -8,6 +8,7 @@
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 const { posix } = require( 'path' );
+const { expect } = require( 'chai' );
 
 describe( 'createPotFiles()', () => {
 	let stubs;
@@ -134,6 +135,9 @@ msgstr "foo"
 		);
 
 		sinon.assert.notCalled( stubs.fs.outputFileSync );
+
+		// Mark the process as failed in case of the error.
+		expect( process.exitCode ).to.equal( 1 );
 	} );
 
 	it( 'should create a POT file entry for every defined package', () => {
@@ -318,6 +322,9 @@ msgstr "foo"
 			stubs.logger.error,
 			'parse_error'
 		);
+
+		// Mark the process as failed in case of the error.
+		expect( process.exitCode ).to.equal( 1 );
 	} );
 
 	it( 'should log an error if two context files contain contexts the same id', () => {
@@ -342,6 +349,9 @@ msgstr "foo"
 			'Context is duplicated for the id: \'foo_id\' in ' +
 			'packages/ckeditor5-core/lang/contexts.json and packages/ckeditor5-foo/lang/contexts.json.'
 		);
+
+		// Mark the process as failed in case of the error.
+		expect( process.exitCode ).to.equal( 1 );
 	} );
 
 	it( 'should log an error if a context is unused', () => {
@@ -367,6 +377,9 @@ msgstr "foo"
 			stubs.logger.error,
 			'Unused context: \'bar_id\' in ckeditor5-foo/lang/contexts.json'
 		);
+
+		// Mark the process as failed in case of the error.
+		expect( process.exitCode ).to.equal( 1 );
 	} );
 
 	function createFakeSourceFileWithMessages( file, messages, errors = [] ) {

@@ -34,9 +34,16 @@ module.exports = function createPotFiles( {
 	const packageContexts = getPackageContexts( packagePaths, corePackagePath );
 	const sourceMessages = collectSourceMessages( { sourceFiles, logger } );
 
-	assertNoMissingContext( { packageContexts, sourceMessages, logger } );
-	assertAllContextUsed( { packageContexts, sourceMessages, logger } );
-	assertNoRepeatedContext( { packageContexts, logger } );
+	const errors = [].concat(
+		assertNoMissingContext( { packageContexts, sourceMessages, logger } ),
+		assertAllContextUsed( { packageContexts, sourceMessages, logger } ),
+		assertNoRepeatedContext( { packageContexts, logger } )
+	);
+
+	for ( const error of errors ) {
+		logger.error( error );
+		process.exitCode = 1;
+	}
 
 	removeExistingPotFiles();
 
@@ -120,10 +127,9 @@ function collectSourceMessages( { sourceFiles, logger } ) {
  * @param {Object} options
  * @param {Map.<String, Context>} options.packageContexts A map of language contexts.
  * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
- * @param {Function} options.logger A logger.
  * @returns {Array.<String>}
  */
-function assertNoMissingContext( { packageContexts, sourceMessages, logger } ) {
+function assertNoMissingContext( { packageContexts, sourceMessages } ) {
 	const errors = [];
 	const contextIdOrigins = new Map();
 
@@ -135,9 +141,7 @@ function assertNoMissingContext( { packageContexts, sourceMessages, logger } ) {
 
 	for ( const sourceMessage of sourceMessages ) {
 		if ( !contextIdOrigins.has( sourceMessage.id ) ) {
-			logger.error(
-				`Context for the message id is missing ('${ sourceMessage.id }' from ${ sourceMessage.filePath }).`
-			);
+			errors.push( `Context for the message id is missing ('${ sourceMessage.id }' from ${ sourceMessage.filePath }).` );
 		}
 	}
 
@@ -148,10 +152,11 @@ function assertNoMissingContext( { packageContexts, sourceMessages, logger } ) {
  * @param {Object} options
  * @param {Map.<String, Context>} options.packageContexts A map of language contexts.
  * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
- * @param {Function} options.logger A logger.
+ * @returns {Array.<String>}
  */
-function assertAllContextUsed( { packageContexts, sourceMessages, logger } ) {
+function assertAllContextUsed( { packageContexts, sourceMessages } ) {
 	const usedContextMap = new Map();
+	const errors = [];
 
 	// TODO - Message id might contain the `/` character.
 
@@ -174,25 +179,26 @@ function assertAllContextUsed( { packageContexts, sourceMessages, logger } ) {
 		const contextFilePath = path.join( ...packageNameParts, langContextSuffix );
 
 		if ( !used ) {
-			logger.error( `Unused context: '${ messageId }' in ${ contextFilePath }` );
+			errors.push( `Unused context: '${ messageId }' in ${ contextFilePath }` );
 		}
 	}
+
+	return errors;
 }
 
 /**
  * @param {Object} options
  * @param {Map.<String, Context>} options.packageContexts A map of language contexts.
- * @param {Function} options.logger The error callback.
  * @returns {Array.<String>}
  */
-function assertNoRepeatedContext( { packageContexts, logger } ) {
+function assertNoRepeatedContext( { packageContexts } ) {
 	const errors = [];
 	const idOrigins = new Map();
 
 	for ( const context of packageContexts.values() ) {
 		for ( const id in context.content ) {
 			if ( idOrigins.has( id ) ) {
-				logger.error( `Context is duplicated for the id: '${ id }' in ${ context.filePath } and ${ idOrigins.get( id ) }.` );
+				errors.push( `Context is duplicated for the id: '${ id }' in ${ context.filePath } and ${ idOrigins.get( id ) }.` );
 			}
 
 			idOrigins.set( id, context.filePath );
@@ -247,12 +253,17 @@ function getSourceMessagesFromFile( { filePath, fileContent, logger } ) {
 	const packageMatch = filePath.match( /([^/\\]+)[/\\]src[/\\]/ );
 	const sourceMessages = [];
 
+	const onErrorCallback = err => {
+		logger.error( err );
+		process.exitCode = 1;
+	};
+
 	findMessages( fileContent, filePath, message => {
 		sourceMessages.push( Object.assign( {
 			filePath,
 			packageName: packageMatch[ 1 ]
 		}, message ) );
-	}, err => logger.error( err ) );
+	}, onErrorCallback );
 
 	return sourceMessages;
 }
