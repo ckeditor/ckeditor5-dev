@@ -34,11 +34,16 @@ module.exports = function createPotFiles( {
 	const packageContexts = getPackageContexts( packagePaths, corePackagePath );
 	const sourceMessages = collectSourceMessages( { sourceFiles, logger } );
 
-	const foundErrors = [
+	const errors = [].concat(
 		assertNoMissingContext( { packageContexts, sourceMessages, logger } ),
 		assertAllContextUsed( { packageContexts, sourceMessages, logger } ),
 		assertNoRepeatedContext( { packageContexts, logger } )
-	].filter( errors => errors.length ).length > 0;
+	);
+
+	for ( const error of errors ) {
+		logger.error( error );
+		process.exitCode = 1;
+	}
 
 	removeExistingPotFiles();
 
@@ -66,10 +71,6 @@ module.exports = function createPotFiles( {
 			fileContent: potFileHeader + potFileContent,
 			logger
 		} );
-	}
-
-	if ( foundErrors ) {
-		process.exitCode = 1;
 	}
 };
 
@@ -126,10 +127,9 @@ function collectSourceMessages( { sourceFiles, logger } ) {
  * @param {Object} options
  * @param {Map.<String, Context>} options.packageContexts A map of language contexts.
  * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
- * @param {Function} options.logger A logger.
  * @returns {Array.<String>}
  */
-function assertNoMissingContext( { packageContexts, sourceMessages, logger } ) {
+function assertNoMissingContext( { packageContexts, sourceMessages } ) {
 	const errors = [];
 	const contextIdOrigins = new Map();
 
@@ -145,10 +145,6 @@ function assertNoMissingContext( { packageContexts, sourceMessages, logger } ) {
 		}
 	}
 
-	for ( const error of errors ) {
-		logger.error( error );
-	}
-
 	return errors;
 }
 
@@ -156,10 +152,9 @@ function assertNoMissingContext( { packageContexts, sourceMessages, logger } ) {
  * @param {Object} options
  * @param {Map.<String, Context>} options.packageContexts A map of language contexts.
  * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
- * @param {Function} options.logger A logger.
  * @returns {Array.<String>}
  */
-function assertAllContextUsed( { packageContexts, sourceMessages, logger } ) {
+function assertAllContextUsed( { packageContexts, sourceMessages } ) {
 	const usedContextMap = new Map();
 	const errors = [];
 
@@ -188,20 +183,15 @@ function assertAllContextUsed( { packageContexts, sourceMessages, logger } ) {
 		}
 	}
 
-	for ( const error of errors ) {
-		logger.error( error );
-	}
-
 	return errors;
 }
 
 /**
  * @param {Object} options
  * @param {Map.<String, Context>} options.packageContexts A map of language contexts.
- * @param {Function} options.logger The error callback.
  * @returns {Array.<String>}
  */
-function assertNoRepeatedContext( { packageContexts, logger } ) {
+function assertNoRepeatedContext( { packageContexts } ) {
 	const errors = [];
 	const idOrigins = new Map();
 
@@ -213,10 +203,6 @@ function assertNoRepeatedContext( { packageContexts, logger } ) {
 
 			idOrigins.set( id, context.filePath );
 		}
-	}
-
-	for ( const error of errors ) {
-		logger.error( error );
 	}
 
 	return errors;
