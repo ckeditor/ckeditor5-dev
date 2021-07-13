@@ -21,7 +21,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 			rules: [
 				{
 					// test: **/ckeditor5-*/theme/icons/*.svg
-					test: /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
+					test: /\.svg$/,
 					use: [ 'raw-loader' ]
 				},
 				{
@@ -80,11 +80,14 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	}
 
 	if ( options.coverage ) {
+		// Additional coverage paths coming from command line.
+		const coveragePaths = ( options.coveragePaths || [] ).map( relativePath => path.resolve( relativePath ) );
+
 		config.module.rules.unshift(
 			{
 				test: /\.js$/,
 				loader: 'istanbul-instrumenter-loader',
-				include: getPathsToIncludeForCoverage( options.files ),
+				include: getPathsToIncludeForCoverage( options.files ).concat( coveragePaths ),
 				exclude: [
 					new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
 				],

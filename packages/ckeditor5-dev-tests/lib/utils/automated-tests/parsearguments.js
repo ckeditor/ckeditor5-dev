@@ -26,7 +26,8 @@ module.exports = function parseArguments( args ) {
 			'repositories',
 			'language',
 			'theme-path',
-			'additional-languages'
+			'additional-languages',
+			'coverage-paths'
 		],
 
 		boolean: [
@@ -58,6 +59,7 @@ module.exports = function parseArguments( args ) {
 			language: 'en',
 			watch: false,
 			coverage: false,
+			'coverage-paths': '',
 			verbose: false,
 			'source-map': false,
 			server: false,
@@ -83,13 +85,15 @@ module.exports = function parseArguments( args ) {
 		'identity-file',
 		'theme-path',
 		'karma-config-overrides',
-		'additional-languages'
+		'additional-languages',
+		'coverage-paths'
 	] );
 	splitOptionsToArray( options, [
 		'browsers',
 		'files',
 		'repositories',
-		'additionalLanguages'
+		'additionalLanguages',
+		'coveragePaths'
 	] );
 	parseDebugOption( options );
 	parseRepositoriesOption( options );
