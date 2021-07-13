@@ -428,7 +428,7 @@ function findMisplacedDependencies( dependencies, devDependencies, dependenciesT
  * @returns {Boolean}
  */
 function isDevDependency( absolutePaths ) {
-	return !absolutePaths.some( absolutePath => absolutePath.match( /src|theme/ ) );
+	return !absolutePaths.some( absolutePath => absolutePath.match( /[/\\](src|theme)[/\\]/ ) );
 }
 
 /**
