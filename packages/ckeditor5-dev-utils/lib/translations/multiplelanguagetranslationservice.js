@@ -311,7 +311,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 			const outputBody = (
 				'(function(d){' +
-				`	const l = d['${ language }'] = d['${ language }'] || {};` +
+				`	var l = d['${ language }'] = d['${ language }'] || {};` +
 				'	l.dictionary=Object.assign(' +
 				'		l.dictionary||{},' +
 				`		${ stringifiedTranslations }` +
