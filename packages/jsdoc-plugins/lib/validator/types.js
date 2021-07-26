@@ -36,6 +36,7 @@ const BASIC_TYPES = [
 	'Event',
 	'FocusEvent',
 	'ClientRect',
+	'DOMRect',
 	'Window',
 	'ErrorEvent',
 	'PromiseRejectionEvent',
