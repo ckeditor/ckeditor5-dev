@@ -130,7 +130,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		findMessages(
 			source,
 			fileName,
-			message => this._foundMessageIds.add( message.id ),
+			message => this.addIdMessage( message.id ),
 			error => this.emit( 'warning', error )
 		);
 
@@ -237,6 +237,15 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 			// Translation assets outputted to separate translation files.
 			...this._getTranslationAssets( outputDirectory, assetLanguages )
 		];
+	}
+
+	/**
+	 * Adds the specified `id` to the collection which will be translated to the specified language.
+	 *
+	 * @param {String} id
+	 */
+	addIdMessage( id ) {
+		this._foundMessageIds.add( id );
 	}
 
 	/**
