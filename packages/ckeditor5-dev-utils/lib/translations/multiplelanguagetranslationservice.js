@@ -386,11 +386,16 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * Returns a path to the translation directory depending on the path to the package.
 	 *
 	 * @protected
-	 * @param {String} pathToPackage
+	 * @param {String|null} relativePathToPackage
 	 * @returns {String}
 	 */
-	_getPathToTranslationDirectory( pathToPackage ) {
-		return path.join( pathToPackage, 'lang', 'translations' );
+	_getPathToTranslationDirectory( relativePathToPackage ) {
+		// If the `relativePathToPackage` is not specified, translations for a single package are processed.
+		if ( relativePathToPackage ) {
+			return path.join( relativePathToPackage, 'lang', 'translations' );
+		}
+
+		return path.join( 'lang', 'translations' );
 	}
 };
 
