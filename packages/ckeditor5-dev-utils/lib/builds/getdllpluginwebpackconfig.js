@@ -51,7 +51,8 @@ module.exports = function getDllPluginWebpackConfig( options ) {
 				// UI language. Language codes follow the https://en.wikipedia.org/wiki/ISO_639-1 format.
 				language: 'en',
 				additionalLanguages: 'all',
-				sourceFilesPattern: /^src[/\\].+\.js$/
+				sourceFilesPattern: /^src[/\\].+\.js$/,
+				skipPluralFormFunction: true
 			} ),
 			new webpack.BannerPlugin( {
 				banner: bundler.getLicenseBanner(),

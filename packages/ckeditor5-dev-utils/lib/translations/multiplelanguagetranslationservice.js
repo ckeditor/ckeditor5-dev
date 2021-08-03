@@ -35,7 +35,8 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		compileAllLanguages = false,
 		addMainLanguageTranslationsToAllAssets = false,
 		buildAllTranslationsToSeparateFiles = false,
-		translationsOutputFile
+		translationsOutputFile,
+		skipPluralFormFunction
 	} ) {
 		super();
 
@@ -113,6 +114,14 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		 * @type {Set.<String>}
 		 */
 		this._foundMessageIds = new Set();
+
+		/**
+		 * Whether the `getPluralForm` function should be added in the bundle file.
+		 *
+		 * @private
+		 * @type {Boolean}
+		 */
+		this._skipPluralFormFunction = skipPluralFormFunction;
 
 		this._translationsOutputFile = translationsOutputFile;
 	}
@@ -304,14 +313,17 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 			let pluralFormFunction;
 
-			if ( !pluralFormsRule ) {
-				// This could be improved in the future by using a 3-rd party library for plural forms.
-				this.emit( 'warning', `The plural form function for the '${ language }' language has not been set.` );
-			} else {
-				const pluralFormFunctionBodyMatch = pluralFormsRule.match( /(?:plural=)(.+)/ );
+			// Do not add the `getPluralForm()` function if an integrator disabled it.
+			if ( !this._skipPluralFormFunction ) {
+				if ( !pluralFormsRule ) {
+					// This could be improved in the future by using a 3-rd party library for plural forms.
+					this.emit( 'warning', `The plural form function for the '${ language }' language has not been set.` );
+				} else {
+					const pluralFormFunctionBodyMatch = pluralFormsRule.match( /(?:plural=)(.+)/ );
 
-				// Add support for ES5 - this function will not be transpiled.
-				pluralFormFunction = `function(n){return ${ pluralFormFunctionBodyMatch[ 1 ] };}`;
+					// Add support for ES5 - this function will not be transpiled.
+					pluralFormFunction = `function(n){return ${ pluralFormFunctionBodyMatch[ 1 ] };}`;
+				}
 			}
 
 			// Stringify translations and remove unnecessary `""` around property names.

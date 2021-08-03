@@ -52,7 +52,8 @@ module.exports = class CKEditorWebpackPlugin {
 			corePackageSampleResourcePath: options.corePackageSampleResourcePath || '@ckeditor/ckeditor5-core/src/editor/editor.js',
 			corePackageContextsResourcePath: options.corePackageContextsResourcePath || '@ckeditor/ckeditor5-core/lang/contexts.json',
 			translationsOutputFile: options.translationsOutputFile,
-			includeCorePackageTranslations: !!options.includeCorePackageTranslations
+			includeCorePackageTranslations: !!options.includeCorePackageTranslations,
+			skipPluralFormFunction: !!options.skipPluralFormFunction
 		};
 	}
 
@@ -94,7 +95,8 @@ module.exports = class CKEditorWebpackPlugin {
 			additionalLanguages,
 			addMainLanguageTranslationsToAllAssets,
 			buildAllTranslationsToSeparateFiles,
-			translationsOutputFile: this.options.translationsOutputFile
+			translationsOutputFile: this.options.translationsOutputFile,
+			skipPluralFormFunction: this.options.skipPluralFormFunction
 		} );
 
 		serveTranslations( compiler, this.options, translationService );
@@ -128,4 +130,5 @@ module.exports = class CKEditorWebpackPlugin {
  * @property {Boolean} [includeCorePackageTranslations=false] A flag that determines whether all translations found in the core package
  * should be added to the output bundle file. If set to true, translations from the core package will be saved even if are not
  * used in the source code (*.js files).
+ * @property {Boolean} [skipPluralFormFunction=false] Whether the `getPluralForm()` function should be added in the output bundle file.
  */
