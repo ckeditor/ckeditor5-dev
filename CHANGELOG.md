@@ -1,6 +1,42 @@
 Changelog
 =========
 
+## [25.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/v25.3.1...v25.4.0) (2021-08-12)
+
+### Features
+
+* **[webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin)**: Introduced several new options that improve the output files produced by the plugin. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/4a6ed132f60ef6b981e77a612844a0960750f632))
+
+  New options:
+    * `corePackageContextsResourcePath` - (optional) a path to the file where all translation contexts are specified for the `ckeditor5-core` package. Defaults to `'@ckeditor/ckeditor5-core/lang/contexts.json'`.
+    * `includeCorePackageTranslations` - (optional) a flag that determines whether all translations found in the core package should be added to the output bundle file. If set to `true`, translations from the core package will be saved even if they are not used in the source code (*.js files). Defaults to `false`.
+    * `skipPluralFormFunction`- (optional) a flag that determines whether the `getPluralForm()` function should not be added in the output bundle file. Defaults to `false`.
+
+### Other changes
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The webpack configuration for DLL builds now produces the translation files. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/4a6ed132f60ef6b981e77a612844a0960750f632))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v25.3.1 => v25.4.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v25.3.1 => v25.4.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v25.3.1 => v25.4.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v25.3.1 => v25.4.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v25.3.1 => v25.4.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v25.3.1 => v25.4.0
+</details>
+
+
 ## [25.3.1](https://github.com/ckeditor/ckeditor5-dev/compare/v25.3.0...v25.3.1) (2021-08-11)
 
 ### Other changes
