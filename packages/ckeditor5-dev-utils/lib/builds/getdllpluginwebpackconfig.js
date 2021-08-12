@@ -11,16 +11,17 @@ const TerserPlugin = require( 'terser-webpack-plugin' );
 const bundler = require( '../bundler' );
 const styles = require( '../styles' );
 const tools = require( '../tools' );
+const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
 
 /**
  * Returns a webpack configuration that creates a bundle file for the specified package. Thanks to that, plugins exported
- * by the package can be added to ready-to-use builds.
+ * by the package can be added to DLL builds.
  *
  * @param {Object} options
  * @param {String} options.themePath An absolute path to the theme package.
  * @param {String} options.packagePath An absolute path to the root directory of the package.
- * @param {String} options.manifestPath An absolute path to the DLL manifest file.
- * @param {Boolean} options.isDevelopmentMode Whether to build a dev mode of the package.
+ * @param {String} options.manifestPath An absolute path to the CKEditor 5 DLL manifest file.
+ * @param {Boolean} [options.isDevelopmentMode=false] Whether to build a dev mode of the package.
  * @returns {Object}
  */
 module.exports = function getDllPluginWebpackConfig( options ) {
@@ -46,6 +47,13 @@ module.exports = function getDllPluginWebpackConfig( options ) {
 		},
 
 		plugins: [
+			new CKEditorWebpackPlugin( {
+				// UI language. Language codes follow the https://en.wikipedia.org/wiki/ISO_639-1 format.
+				language: 'en',
+				additionalLanguages: 'all',
+				sourceFilesPattern: /^src[/\\].+\.js$/,
+				skipPluralFormFunction: true
+			} ),
 			new webpack.BannerPlugin( {
 				banner: bundler.getLicenseBanner(),
 				raw: true

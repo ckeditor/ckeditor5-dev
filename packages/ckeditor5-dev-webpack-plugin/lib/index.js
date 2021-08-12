@@ -50,7 +50,10 @@ module.exports = class CKEditorWebpackPlugin {
 			packageNamesPattern: options.packageNamesPattern || /[/\\]ckeditor5-[^/\\]+[/\\]/,
 			corePackagePattern: options.corePackagePattern || /[/\\]ckeditor5-core/,
 			corePackageSampleResourcePath: options.corePackageSampleResourcePath || '@ckeditor/ckeditor5-core/src/editor/editor.js',
-			translationsOutputFile: options.translationsOutputFile
+			corePackageContextsResourcePath: options.corePackageContextsResourcePath || '@ckeditor/ckeditor5-core/lang/contexts.json',
+			translationsOutputFile: options.translationsOutputFile,
+			includeCorePackageTranslations: !!options.includeCorePackageTranslations,
+			skipPluralFormFunction: !!options.skipPluralFormFunction
 		};
 	}
 
@@ -92,7 +95,8 @@ module.exports = class CKEditorWebpackPlugin {
 			additionalLanguages,
 			addMainLanguageTranslationsToAllAssets,
 			buildAllTranslationsToSeparateFiles,
-			translationsOutputFile: this.options.translationsOutputFile
+			translationsOutputFile: this.options.translationsOutputFile,
+			skipPluralFormFunction: this.options.skipPluralFormFunction
 		} );
 
 		serveTranslations( compiler, this.options, translationService );
@@ -113,11 +117,18 @@ module.exports = class CKEditorWebpackPlugin {
  * @property {Boolean} [verbose] An option that make this plugin log all warnings into the console.
  * @property {Boolean} [addMainLanguageTranslationsToAllAssets] An option that allows outputting translations to more than one
  * JS asset.
- * @property {String} [corePackageSampleResourcePath] TODO
+ * @property {String} [corePackageSampleResourcePath] A path (ES6 import) to the file that determines whether the `ckeditor5-core` package
+ * exists. The package contains common translations used by many packages. To avoid duplications, they are shared by the core package.
+ * @property {String} [corePackageContextsResourcePath] A path (ES6 import) to the file where all contexts are specified
+ * for the `ckeditor5-core` package.
  * @property {Boolean} [buildAllTranslationsToSeparateFiles] An option that makes all translations output to separate files.
  * @property {String} [sourceFilesPattern] An option that allows override the default pattern for CKEditor 5 source files.
  * @property {String} [packageNamesPattern] An option that allows override the default pattern for CKEditor 5 package names.
  * @property {String} [corePackagePattern] An option that allows override the default CKEditor 5 core package pattern.
  * @property {String|Function|RegExp} [translationsOutputFile] An option allowing outputting all translation file to the given file.
  * If a file specified by a path (string) does not exist, then it will be created. Otherwise, translations will be outputted to the file.
+ * @property {Boolean} [includeCorePackageTranslations=false] A flag that determines whether all translations found in the core package
+ * should be added to the output bundle file. If set to true, translations from the core package will be saved even if are not
+ * used in the source code (*.js files).
+ * @property {Boolean} [skipPluralFormFunction=false] Whether the `getPluralForm()` function should be added in the output bundle file.
  */

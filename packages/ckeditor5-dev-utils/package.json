@@ -5,6 +5,7 @@
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
+    "@ckeditor/ckeditor5-dev-webpack-plugin": "^25.3.0",
     "acorn": "^6.2.1",
     "acorn-walk": "^6.2.0",
     "chalk": "^3.0.0",

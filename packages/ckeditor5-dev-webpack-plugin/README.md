@@ -65,6 +65,14 @@ A pattern which is used for determining if a file may contain messages to transl
 
 An option that allows specifying the target file to which all translations will be outputted. This option supports a string, regular expression and a function. If no asset exists with the name, it will be created automatically and filled with translations.
 
+### `includeCorePackageTranslations`
+
+When set to `true`, all translations from the `ckeditor5-core` package will be added into the bundle files. Defaults to `false`.
+
+### `skipPluralFormFunction`
+
+When set to `true`, the `getPluralForm()` function (if exists for the specified language) will not be added into the bundle file. Defaults to `false`.
+
 ### `corePackagePattern`
 
 (internal)
@@ -74,6 +82,11 @@ A pattern which is used to get a path to the core translation package from `core
 
 (internal)
 A sample path to the `ckeditor5-core` package. A test import to this file shows if the `ckeditor5-core` package is available and allows to load the core package translations first.
+
+### `corePackageContextsResourcePath`
+
+(internal)
+A path the `context.json` file in the `ckeditor5-core` package. It is used if the `includeCorePackageTranslations` option is set to `true`.
 
 You can read more about localizing the editor in the [Setting the UI language](https://docs.ckeditor.com/ckeditor5/latest/features/ui-language.html) guide.
 

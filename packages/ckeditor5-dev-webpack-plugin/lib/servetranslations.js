@@ -70,6 +70,26 @@ module.exports = function serveTranslations( compiler, options, translationServi
 
 			translationService.loadPackage( corePackage );
 		} );
+
+		// Translations from the core package may not be used in the source code (in *.js files).
+		// However, in the case of the DLL integration, core translations should be inserted in the bundle file,
+		// because features that use common identifiers do not provide translation ids by themselves.
+		if ( options.includeCorePackageTranslations ) {
+			resolver.resolve( { cwd }, cwd, options.corePackageContextsResourcePath, {}, ( err, pathToResource ) => {
+				if ( err ) {
+					console.warn( 'Cannot find the CKEditor 5 core translation context (which defaults to `@ckeditor/ckeditor5-core`).' );
+
+					return;
+				}
+
+				// Add all context messages found in the core package.
+				const contexts = require( pathToResource );
+
+				for ( const item of Object.keys( contexts ) ) {
+					translationService.addIdMessage( item );
+				}
+			} );
+		}
 	} );
 
 	// Load translation files and add a loader if the package match requirements.

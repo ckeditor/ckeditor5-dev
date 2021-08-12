@@ -889,6 +889,56 @@ describe( 'translations', () => {
 				expect( warningSpy ).to.have.not.be.called;
 				expect( errorSpy ).to.have.not.be.called;
 			} );
+
+			it(
+				'should not provide `getPluralForm` function for the given language even if it exists but skipPluralFormFunction=true',
+				() => {
+					const translationService = new MultipleLanguageTranslationService( {
+						mainLanguage: 'pl',
+						skipPluralFormFunction: true
+					} );
+
+					translationService._foundMessageIds = new Set( [
+						'Add %0 button'
+					] );
+
+					translationService._translationDictionaries = {
+						pl: {
+							'Add %0 button': [ 'Dodaj przycisk', 'Dodaj %0 przyciski', 'Dodaj %0 przycisków' ]
+						}
+					};
+
+					translationService._pluralFormsRules = {
+						pl: 'nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2)'
+					};
+
+					const assets = translationService.getAssets( {
+						outputDirectory: 'lang',
+						compilationAssetNames: [ 'ckeditor.js' ]
+					} );
+
+					eval( assets[ 0 ].outputBody );
+
+					expect( window.CKEDITOR_TRANSLATIONS.pl.dictionary ).to.deep.equal( {
+						'Add %0 button': [ 'Dodaj przycisk', 'Dodaj %0 przyciski', 'Dodaj %0 przycisków' ]
+					} );
+
+					expect( window.CKEDITOR_TRANSLATIONS.pl.getPluralForm ).to.be.undefined;
+				} );
+		} );
+
+		describe( 'addIdMessage()', () => {
+			it( 'adds the specified identifier', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl',
+					additionalLanguages: [ 'en' ]
+				} );
+
+				translationService.addIdMessage( 'Foo' );
+
+				expect( translationService._foundMessageIds.size ).to.equal( 1 );
+				expect( translationService._foundMessageIds.has( 'Foo' ) ).to.equal( true );
+			} );
 		} );
 
 		describe( '_getPathToTranslationDirectory', () => {
@@ -922,6 +972,15 @@ describe( 'translations', () => {
 						'Save': [ 'Save' ]
 					}
 				} );
+			} );
+
+			it( 'should return a relative path to the translation directory when executing in a single package context (DLL)', () => {
+				const translationService = new MultipleLanguageTranslationService( {
+					mainLanguage: 'pl'
+				} );
+
+				// `null` is passed if the package name could not be obtained.
+				expect( translationService._getPathToTranslationDirectory( null ) ).to.equal( path.join( 'lang', 'translations' ) );
 			} );
 		} );
 

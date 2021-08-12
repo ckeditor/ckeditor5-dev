@@ -57,6 +57,60 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 
 			expect( ckeditorWebpackPlugin.options.outputDirectory ).to.equal( 'custom' );
 		} );
+
+		describe( 'options', () => {
+			describe( '#corePackageContextsResourcePath', () => {
+				it( 'should use the default value if not set', () => {
+					const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( {} );
+
+					expect( ckeditorWebpackPlugin.options.corePackageContextsResourcePath ).to.equal(
+						'@ckeditor/ckeditor5-core/lang/contexts.json'
+					);
+				} );
+
+				it( 'should overwrite the default value if specified in the configuration', () => {
+					const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( {
+						corePackageContextsResourcePath: '@ckeditor/ckeditor5-utils/lang/contexts.json'
+					} );
+
+					expect( ckeditorWebpackPlugin.options.corePackageContextsResourcePath ).to.equal(
+						'@ckeditor/ckeditor5-utils/lang/contexts.json'
+					);
+				} );
+			} );
+
+			describe( '#includeCorePackageTranslations', () => {
+				it( 'should use the default value if not set', () => {
+					const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( {} );
+
+					expect( ckeditorWebpackPlugin.options.includeCorePackageTranslations ).to.equal( false );
+				} );
+
+				it( 'should overwrite the default value if specified in the configuration', () => {
+					const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( {
+						includeCorePackageTranslations: true
+					} );
+
+					expect( ckeditorWebpackPlugin.options.includeCorePackageTranslations ).to.equal( true );
+				} );
+			} );
+
+			describe( '#skipPluralFormFunction', () => {
+				it( 'should use the default value if not set', () => {
+					const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( {} );
+
+					expect( ckeditorWebpackPlugin.options.skipPluralFormFunction ).to.equal( false );
+				} );
+
+				it( 'should overwrite the default value if specified in the configuration', () => {
+					const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( {
+						skipPluralFormFunction: true
+					} );
+
+					expect( ckeditorWebpackPlugin.options.skipPluralFormFunction ).to.equal( true );
+				} );
+			} );
+		} );
 	} );
 
 	describe( 'apply()', () => {
@@ -93,7 +147,8 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 						additionalLanguages: [],
 						buildAllTranslationsToSeparateFiles: false,
 						addMainLanguageTranslationsToAllAssets: false,
-						translationsOutputFile: undefined
+						translationsOutputFile: undefined,
+						skipPluralFormFunction: false
 					}
 				);
 			} );
@@ -118,7 +173,8 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 						additionalLanguages: [ 'en' ],
 						buildAllTranslationsToSeparateFiles: false,
 						addMainLanguageTranslationsToAllAssets: false,
-						translationsOutputFile: undefined
+						translationsOutputFile: undefined,
+						skipPluralFormFunction: false
 					}
 				);
 			} );
@@ -143,11 +199,38 @@ describe( 'webpack-plugin/CKEditorWebpackPlugin', () => {
 						additionalLanguages: [],
 						buildAllTranslationsToSeparateFiles: false,
 						addMainLanguageTranslationsToAllAssets: false,
-						translationsOutputFile: undefined
+						translationsOutputFile: undefined,
+						skipPluralFormFunction: false
 					}
 				);
 
 				sinon.assert.notCalled( console.warn );
+			} );
+
+			it( 'passes the skipPluralFormFunction option to the translation service', () => {
+				const options = {
+					language: 'pl',
+					skipPluralFormFunction: true
+				};
+
+				const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
+				ckeditorWebpackPlugin.apply( {} );
+
+				sinon.assert.calledOnce( stubs.serveTranslations );
+
+				sinon.assert.calledOnce( stubs.MultipleLanguageTranslationService );
+				sinon.assert.calledWithExactly(
+					stubs.MultipleLanguageTranslationService,
+					{
+						mainLanguage: 'pl',
+						compileAllLanguages: false,
+						additionalLanguages: [],
+						buildAllTranslationsToSeparateFiles: false,
+						addMainLanguageTranslationsToAllAssets: false,
+						translationsOutputFile: undefined,
+						skipPluralFormFunction: true
+					}
+				);
 			} );
 		} );
 

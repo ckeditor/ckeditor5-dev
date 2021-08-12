@@ -35,7 +35,8 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		compileAllLanguages = false,
 		addMainLanguageTranslationsToAllAssets = false,
 		buildAllTranslationsToSeparateFiles = false,
-		translationsOutputFile
+		translationsOutputFile,
+		skipPluralFormFunction
 	} ) {
 		super();
 
@@ -114,6 +115,14 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		 */
 		this._foundMessageIds = new Set();
 
+		/**
+		 * Whether the `getPluralForm` function should be added in the bundle file.
+		 *
+		 * @private
+		 * @type {Boolean}
+		 */
+		this._skipPluralFormFunction = skipPluralFormFunction;
+
 		this._translationsOutputFile = translationsOutputFile;
 	}
 
@@ -130,7 +139,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 		findMessages(
 			source,
 			fileName,
-			message => this._foundMessageIds.add( message.id ),
+			message => this.addIdMessage( message.id ),
 			error => this.emit( 'warning', error )
 		);
 
@@ -240,6 +249,15 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	}
 
 	/**
+	 * Adds the specified `id` to the collection which will be translated to the specified language.
+	 *
+	 * @param {String} id
+	 */
+	addIdMessage( id ) {
+		this._foundMessageIds.add( id );
+	}
+
+	/**
 	 * @param {Object} options
 	 * @param {String} options.outputDirectory Output directory for the translation files relative to the output.
 	 * @param {Array.<String>} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
@@ -295,14 +313,17 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 			let pluralFormFunction;
 
-			if ( !pluralFormsRule ) {
-				// This could be improved in the future by using a 3-rd party library for plural forms.
-				this.emit( 'warning', `The plural form function for the '${ language }' language has not been set.` );
-			} else {
-				const pluralFormFunctionBodyMatch = pluralFormsRule.match( /(?:plural=)(.+)/ );
+			// Do not add the `getPluralForm()` function if an integrator disabled it.
+			if ( !this._skipPluralFormFunction ) {
+				if ( !pluralFormsRule ) {
+					// This could be improved in the future by using a 3-rd party library for plural forms.
+					this.emit( 'warning', `The plural form function for the '${ language }' language has not been set.` );
+				} else {
+					const pluralFormFunctionBodyMatch = pluralFormsRule.match( /(?:plural=)(.+)/ );
 
-				// Add support for ES5 - this function will not be transpiled.
-				pluralFormFunction = `function(n){return ${ pluralFormFunctionBodyMatch[ 1 ] };}`;
+					// Add support for ES5 - this function will not be transpiled.
+					pluralFormFunction = `function(n){return ${ pluralFormFunctionBodyMatch[ 1 ] };}`;
+				}
 			}
 
 			// Stringify translations and remove unnecessary `""` around property names.
@@ -386,11 +407,16 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 	 * Returns a path to the translation directory depending on the path to the package.
 	 *
 	 * @protected
-	 * @param {String} pathToPackage
+	 * @param {String|null} relativePathToPackage
 	 * @returns {String}
 	 */
-	_getPathToTranslationDirectory( pathToPackage ) {
-		return path.join( pathToPackage, 'lang', 'translations' );
+	_getPathToTranslationDirectory( relativePathToPackage ) {
+		// If the `relativePathToPackage` is not specified, translations for a single package are processed.
+		if ( relativePathToPackage ) {
+			return path.join( relativePathToPackage, 'lang', 'translations' );
+		}
+
+		return path.join( 'lang', 'translations' );
 	}
 };
 

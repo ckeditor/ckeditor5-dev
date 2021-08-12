@@ -75,14 +75,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 		expect( webpackConfig.output.library ).to.deep.equal( [ 'CKEditor5', 'dev' ] );
 		expect( webpackConfig.output.path ).to.equal( '/package/path/build' );
 		expect( webpackConfig.output.filename ).to.equal( 'dev.js' );
-
 		expect( webpackConfig.plugins ).to.be.an( 'array' );
-		expect( webpackConfig.plugins.length ).to.equal( 2 );
-		expect( webpackConfig.plugins[ 1 ] ).to.be.an.instanceOf( webpack.DllReferencePlugin );
-
-		expect( webpackConfig.plugins[ 1 ].options.manifest ).to.deep.equal( manifest );
-		expect( webpackConfig.plugins[ 1 ].options.scope ).to.equal( 'ckeditor5/src' );
-		expect( webpackConfig.plugins[ 1 ].options.name ).to.equal( 'CKEditor5.dll' );
 
 		expect( webpackConfig.optimization.minimize ).to.equal( true );
 		expect( webpackConfig.optimization.minimizer ).to.be.an( 'array' );
@@ -131,5 +124,44 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 		} );
 
 		expect( webpackConfig.output.libraryExport ).to.be.undefined;
+	} );
+
+	describe( '#plugins', () => {
+		it( 'loads the webpack.DllReferencePlugin plugin', () => {
+			stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
+
+			const webpackConfig = getDllPluginWebpackConfig( {
+				packagePath: '/package/path',
+				themePath: '/theme/path',
+				manifestPath: '/manifest/path'
+			} );
+
+			const dllReferencePlugin = webpackConfig.plugins.find( plugin => plugin instanceof webpack.DllReferencePlugin );
+
+			expect( dllReferencePlugin ).to.be.an.instanceOf( webpack.DllReferencePlugin );
+			expect( dllReferencePlugin.options.manifest ).to.deep.equal( manifest );
+			expect( dllReferencePlugin.options.scope ).to.equal( 'ckeditor5/src' );
+			expect( dllReferencePlugin.options.name ).to.equal( 'CKEditor5.dll' );
+		} );
+
+		it( 'loads the CKEditorWebpackPlugin plugin', () => {
+			stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
+
+			const webpackConfig = getDllPluginWebpackConfig( {
+				packagePath: '/package/path',
+				themePath: '/theme/path',
+				manifestPath: '/manifest/path'
+			} );
+
+			// Due to versions mismatch, the `instanceof` check does not pass.
+			const ckeditor5TranslationsPlugin = webpackConfig.plugins.find( plugin => plugin.constructor.name === 'CKEditorWebpackPlugin' );
+
+			expect( ckeditor5TranslationsPlugin ).to.not.be.undefined;
+			expect( ckeditor5TranslationsPlugin.options.language ).to.equal( 'en' );
+			expect( ckeditor5TranslationsPlugin.options.additionalLanguages ).to.equal( 'all' );
+			expect( ckeditor5TranslationsPlugin.options.skipPluralFormFunction ).to.equal( true );
+			expect( 'src/bold.js' ).to.match( ckeditor5TranslationsPlugin.options.sourceFilesPattern );
+			expect( 'ckeditor5-basic-styles/src/bold.js' ).to.not.match( ckeditor5TranslationsPlugin.options.sourceFilesPattern );
+		} );
 	} );
 } );
