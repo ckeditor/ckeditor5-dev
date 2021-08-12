@@ -38,16 +38,17 @@ const {
  * @param {Boolean} options.quit Terminates the scan as soon as an error is found. False (off) by default.
  * @param {Boolean} [options.disableBrowserSandbox=false] Whether the browser should be created with the `--no-sandbox` flag.
  * @param {Boolean} [options.noSpinner=false] Whether to display the spinner with progress or a raw message with current progress.
+ * @param {Boolean} [options.ignoreHTTPSErrors=false] Whether the browser should ignore invalid (self-signed) certificates.
  * @returns {Promise} Promise is resolved, when the crawler has finished the whole crawling procedure.
  */
 module.exports = async function verify( options ) {
-	const { url, depth, exclusions, concurrency, quit, disableBrowserSandbox, noSpinner } = options;
+	const { url, depth, exclusions, concurrency, quit, disableBrowserSandbox, noSpinner, ignoreHTTPSErrors } = options;
 
 	console.log( chalk.bold( '\n🔎 Starting the Crawler\n' ) );
 
 	const spinner = createSpinner( { noSpinner } );
 	const errors = new Map();
-	const browser = await createBrowser( { disableBrowserSandbox } );
+	const browser = await createBrowser( { disableBrowserSandbox, ignoreHTTPSErrors } );
 
 	spinner.start( 'Checking pages…' );
 
@@ -86,6 +87,7 @@ module.exports = async function verify( options ) {
  *
  * @param {Object} options
  * @param {Boolean} [options.disableBrowserSandbox] Whether the browser should be created with the `--no-sandbox` flag.
+ * @param {Boolean} [options.ignoreHTTPSErrors] Whether the browser should ignore invalid (self-signed) certificates.
  *
  * @returns {Promise.<Object>} A promise, which resolves to the Puppeteer browser instance.
  */
@@ -97,6 +99,10 @@ async function createBrowser( options ) {
 	if ( options.disableBrowserSandbox ) {
 		browserOptions.args.push( '--no-sandbox' );
 		browserOptions.args.push( '--disable-setuid-sandbox' );
+	}
+
+	if ( options.ignoreHTTPSErrors ) {
+		browserOptions.ignoreHTTPSErrors = options.ignoreHTTPSErrors;
 	}
 
 	const browser = await puppeteer.launch( browserOptions );
