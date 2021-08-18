@@ -331,7 +331,7 @@ module.exports = {
 		const del = require( 'del' );
 
 		const joinedPath = path.join( rootDir, glob );
-		const normalizedPath = joinedPath.split( path.sep ).join( path.posix.sep );
+		const normalizedPath = joinedPath.split( '\u005C' ).join( '/' );
 
 		return del( normalizedPath )
 			.then( paths => {

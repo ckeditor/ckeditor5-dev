@@ -579,8 +579,6 @@ describe( 'utils', () => {
 			} );
 
 			it( 'works with paths that contain backslash', () => {
-				path.sep = sinon.stub();
-				path.sep.returns( '\u005C' );
 				return tools.clean( 'test\u005Cpath', '**\u005Cpackages' )
 					.then( () => {
 						expect( delArg ).to.equal( 'test/path/**/packages' );
