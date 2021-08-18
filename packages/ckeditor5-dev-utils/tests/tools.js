@@ -553,8 +553,8 @@ describe( 'utils', () => {
 
 		describe( 'clean', () => {
 			const files = [
-				path.posix.join( 'test', 'foo', 'bar' ),
-				path.posix.join( 'test', 'bar', 'foo' )
+				path.join( 'test', 'foo', 'bar' ),
+				path.join( 'test', 'bar', 'foo' )
 			];
 
 			let delArg;
@@ -570,7 +570,7 @@ describe( 'utils', () => {
 			it( 'removes files and informs about deletion using a logger', () => {
 				return tools.clean( 'test', '**' )
 					.then( () => {
-						expect( delArg ).to.equal( path.posix.join( 'test', '**' ) );
+						expect( delArg ).to.equal( path.join( 'test', '**' ) );
 						expect( loggerVerbosity ).to.equal( 'info' );
 						expect( infoSpy.calledTwice ).to.equal( true );
 						expect( infoSpy.firstCall.args[ 0 ] ).to.match( new RegExp( files[ 0 ] ) );
@@ -579,9 +579,11 @@ describe( 'utils', () => {
 			} );
 
 			it( 'works with paths that contain backslash', () => {
-				return tools.clean( 'test\\path', '**\\packages' )
+				path.sep = sinon.stub();
+				path.sep.returns( '\u005C' );
+				return tools.clean( 'test\u005Cpath', '**\u005Cpackages' )
 					.then( () => {
-						expect( delArg ).to.equal( path.posix.join( 'test/path', '**/packages' ) );
+						expect( delArg ).to.equal( path.join( 'test/path', '**/packages' ) );
 						expect( loggerVerbosity ).to.equal( 'info' );
 						expect( infoSpy.calledTwice ).to.equal( true );
 						expect( infoSpy.firstCall.args[ 0 ] ).to.match( new RegExp( files[ 0 ] ) );
