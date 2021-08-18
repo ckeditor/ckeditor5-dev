@@ -581,7 +581,7 @@ describe( 'utils', () => {
 			it( 'works with paths that contain backslash', () => {
 				return tools.clean( 'test\u005Cpath', '**\u005Cpackages' )
 					.then( () => {
-						expect( delArg ).to.equal( 'test/path/**/packages' );
+						expect( delArg ).to.equal( path.join( 'test/path', '**/packages' ) );
 						expect( loggerVerbosity ).to.equal( 'info' );
 						expect( infoSpy.calledTwice ).to.equal( true );
 						expect( infoSpy.firstCall.args[ 0 ] ).to.match( new RegExp( files[ 0 ] ) );
