@@ -579,7 +579,7 @@ describe( 'utils', () => {
 			} );
 
 			it( 'works with paths that contain backslash', () => {
-				return tools.clean( 'test\u005Cpath', '**\u005Cpackages' )
+				return tools.clean( 'test\\path', '**\\packages' )
 					.then( () => {
 						expect( delArg ).to.equal( path.join( 'test/path', '**/packages' ) );
 						expect( loggerVerbosity ).to.equal( 'info' );
