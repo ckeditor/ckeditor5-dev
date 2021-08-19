@@ -577,6 +577,13 @@ describe( 'utils', () => {
 						expect( infoSpy.secondCall.args[ 0 ] ).to.match( new RegExp( files[ 1 ] ) );
 					} );
 			} );
+
+			it( 'works with paths that contain backslash', () => {
+				return tools.clean( 'test\\path', '**\\packages' )
+					.then( () => {
+						expect( delArg ).to.equal( path.join( 'test/path', '**/packages' ) );
+					} );
+			} );
 		} );
 	} );
 } );

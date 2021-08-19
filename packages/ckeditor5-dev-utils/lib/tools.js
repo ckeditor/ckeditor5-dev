@@ -330,7 +330,10 @@ module.exports = {
 	clean( rootDir, glob, options = { verbosity: 'info' } ) {
 		const del = require( 'del' );
 
-		return del( path.join( rootDir, glob ) )
+		const joinedPath = path.join( rootDir, glob );
+		const normalizedPath = joinedPath.split( '\\' ).join( '/' );
+
+		return del( normalizedPath )
 			.then( paths => {
 				const log = require( './logger' )( options.verbosity );
 
