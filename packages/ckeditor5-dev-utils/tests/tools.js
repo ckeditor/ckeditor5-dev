@@ -582,10 +582,6 @@ describe( 'utils', () => {
 				return tools.clean( 'test\\path', '**\\packages' )
 					.then( () => {
 						expect( delArg ).to.equal( path.join( 'test/path', '**/packages' ) );
-						expect( loggerVerbosity ).to.equal( 'info' );
-						expect( infoSpy.calledTwice ).to.equal( true );
-						expect( infoSpy.firstCall.args[ 0 ] ).to.match( new RegExp( files[ 0 ] ) );
-						expect( infoSpy.secondCall.args[ 0 ] ).to.match( new RegExp( files[ 1 ] ) );
 					} );
 			} );
 		} );
