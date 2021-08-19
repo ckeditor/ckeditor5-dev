@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [25.4.1](https://github.com/ckeditor/ckeditor5-dev/compare/v25.4.0...v25.4.1) (2021-08-19)
+
+### Bug fixes
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The `tools.clean()` function will resolve paths correctly on Windows environments. Closes [ckeditor/ckeditor5#10141](https://github.com/ckeditor/ckeditor5/issues/10141). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/58d183695a2e180dcb7f00b9fcd8e62dcabc3b51))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v25.4.0 => v25.4.1
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v25.4.0 => v25.4.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v25.4.0 => v25.4.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v25.4.0 => v25.4.1
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v25.4.0 => v25.4.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v25.4.0 => v25.4.1
+</details>
+
+
 ## [25.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/v25.3.1...v25.4.0) (2021-08-12)
 
 ### Features
