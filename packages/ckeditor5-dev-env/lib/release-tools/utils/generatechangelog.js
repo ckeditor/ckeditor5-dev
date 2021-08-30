@@ -107,9 +107,14 @@ function mergeUpdateTranslationsCommits( changelog, options = {} ) {
 			return line;
 		}
 
-		const newLine = line + ' ' + removedEntries.map( entry => {
-			return entry.match( /(\(\[commit\].*)$/ )[ 1 ];
-		} ).join( ' ' );
+		const newLine = line + ' ' + removedEntries
+			.map( entry => {
+				const match = entry.match( /(\(\[commit\].*)$/ );
+
+				return match ? match[ 1 ] : null;
+			} )
+			.filter( item => !!item )
+			.join( ' ' );
 
 		return newLine.trim().replace( /\) \(/g, ', ' );
 	} ).join( '\n' );

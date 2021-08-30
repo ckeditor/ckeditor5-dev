@@ -520,6 +520,249 @@ describe( 'dev-env/release-tools/utils', () => {
 					} );
 			} );
 
+			// See: https://github.com/ckeditor/ckeditor5/issues/10445.
+			it(
+				'groups "Updated translations." commits as the single entry (merged links) even if a commit specified "skipLinks=true ' +
+				'(a private commit is in the middle of the collection)',
+				() => {
+					const commits = [
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'a'.repeat( 40 ),
+							notes: []
+						},
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'x'.repeat( 40 ),
+							notes: [],
+							skipCommitsLink: true
+						},
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'b'.repeat( 40 ),
+							notes: []
+						},
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'c'.repeat( 40 ),
+							notes: []
+						},
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'd'.repeat( 40 ),
+							notes: []
+						},
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'z'.repeat( 40 ),
+							notes: [],
+							skipCommitsLink: true
+						}
+					];
+
+					const context = {
+						version: '1.0.0',
+						repoUrl: url,
+						currentTag: 'v1.0.0',
+						commit: 'c'
+					};
+
+					const options = getWriterOptions( {
+						hash: hash => hash.slice( 0, 2 )
+					} );
+
+					return generateChangelog( commits, context, options )
+						.then( changes => {
+							changes = replaceDates( changes );
+
+							const changesAsArray = changes.split( '\n' )
+								.map( line => line.trim() )
+								.filter( line => line.length );
+
+							expect( changesAsArray[ 0 ] ).to.equal(
+								'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
+							);
+							expect( changesAsArray[ 1 ] ).to.equal(
+								'### Other changes'
+							);
+							/* eslint-disable max-len */
+							expect( changesAsArray[ 2 ] ).to.equal(
+								'* Updated translations. ([commit](https://github.com/ckeditor/ckeditor5-package/c/aa), [commit](https://github.com/ckeditor/ckeditor5-package/c/bb), [commit](https://github.com/ckeditor/ckeditor5-package/c/cc), [commit](https://github.com/ckeditor/ckeditor5-package/c/dd))'
+							);
+							/* eslint-enable max-len */
+						} );
+				} );
+
+			// See: https://github.com/ckeditor/ckeditor5/issues/10445.
+			it(
+				'groups "Updated translations." commits as the single entry (merged links) even if a commit specified "skipLinks=true ' +
+				'(a private commit is at the beginning of the collection)',
+				() => {
+					const commits = [
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'x'.repeat( 40 ),
+							notes: [],
+							skipCommitsLink: true
+						},
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'a'.repeat( 40 ),
+							notes: []
+						},
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'b'.repeat( 40 ),
+							notes: []
+						},
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'c'.repeat( 40 ),
+							notes: []
+						},
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'd'.repeat( 40 ),
+							notes: []
+						},
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'z'.repeat( 40 ),
+							notes: [],
+							skipCommitsLink: true
+						}
+					];
+
+					const context = {
+						version: '1.0.0',
+						repoUrl: url,
+						currentTag: 'v1.0.0',
+						commit: 'c'
+					};
+
+					const options = getWriterOptions( {
+						hash: hash => hash.slice( 0, 2 )
+					} );
+
+					return generateChangelog( commits, context, options )
+						.then( changes => {
+							changes = replaceDates( changes );
+
+							const changesAsArray = changes.split( '\n' )
+								.map( line => line.trim() )
+								.filter( line => line.length );
+
+							expect( changesAsArray[ 0 ] ).to.equal(
+								'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
+							);
+							expect( changesAsArray[ 1 ] ).to.equal(
+								'### Other changes'
+							);
+							/* eslint-disable max-len */
+							expect( changesAsArray[ 2 ] ).to.equal(
+								'* Updated translations. ([commit](https://github.com/ckeditor/ckeditor5-package/c/aa), [commit](https://github.com/ckeditor/ckeditor5-package/c/bb), [commit](https://github.com/ckeditor/ckeditor5-package/c/cc), [commit](https://github.com/ckeditor/ckeditor5-package/c/dd))'
+							);
+							/* eslint-enable max-len */
+						} );
+				} );
+
+			// See: https://github.com/ckeditor/ckeditor5/issues/10445.
+			it(
+				'groups "Updated translations." commits as the single entry (merged links) even if a commit specified "skipLinks=true ' +
+				'(all commits come from the private repository)',
+				() => {
+					const commits = [
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'a'.repeat( 40 ),
+							notes: [],
+							skipCommitsLink: true
+						},
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'b'.repeat( 40 ),
+							notes: [],
+							skipCommitsLink: true
+						},
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'c'.repeat( 40 ),
+							notes: [],
+							skipCommitsLink: true
+						},
+						{
+							type: 'Other changes',
+							header: 'Other: Updated translations.',
+							subject: 'Updated translations.',
+							hash: 'd'.repeat( 40 ),
+							notes: [],
+							skipCommitsLink: true
+						}
+					];
+
+					const context = {
+						version: '1.0.0',
+						repoUrl: url,
+						currentTag: 'v1.0.0',
+						commit: 'c'
+					};
+
+					const options = getWriterOptions( {
+						hash: hash => hash.slice( 0, 2 )
+					} );
+
+					return generateChangelog( commits, context, options )
+						.then( changes => {
+							changes = replaceDates( changes );
+
+							const changesAsArray = changes.split( '\n' )
+								.map( line => line.trim() )
+								.filter( line => line.length );
+
+							expect( changesAsArray[ 0 ] ).to.equal(
+								'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
+							);
+							expect( changesAsArray[ 1 ] ).to.equal(
+								'### Other changes'
+							);
+							/* eslint-disable max-len */
+							expect( changesAsArray[ 2 ] ).to.equal(
+								'* Updated translations.'
+							);
+							/* eslint-enable max-len */
+						} );
+				} );
+
 			it( 'allows removing a URL to commit per commit', () => {
 				const commits = [
 					{

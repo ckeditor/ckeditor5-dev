@@ -428,6 +428,8 @@ module.exports = function transformCommitFactory( options = {} ) {
  * @property {String|null} [footer] Footer of the commit message.
  *
  * @property {Array.<CommitNote>} [notes] Notes for the commit.
+ *
+ * @property {Boolean} [skipCommitsLink] Whether to skip generating a URL to the commit by the generator.
  */
 
 /**
