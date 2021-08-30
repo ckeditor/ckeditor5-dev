@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [25.4.2](https://github.com/ckeditor/ckeditor5-dev/compare/v25.4.1...v25.4.2) (2021-08-30)
+
+### Bug fixes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The "generateChangelog()" util will not crash when merging "Updated translations." commits found in the private repositories. Closes [ckeditor/ckeditor5#10445](https://github.com/ckeditor/ckeditor5/issues/10445). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/d3bc4954811747822990b337dd7b5bf9e231a099))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v25.4.1 => v25.4.2
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v25.4.1 => v25.4.2
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v25.4.1 => v25.4.2
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v25.4.1 => v25.4.2
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v25.4.1 => v25.4.2
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v25.4.1 => v25.4.2
+</details>
+
+
 ## [25.4.1](https://github.com/ckeditor/ckeditor5-dev/compare/v25.4.0...v25.4.1) (2021-08-19)
 
 ### Bug fixes
