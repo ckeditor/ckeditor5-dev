@@ -28,7 +28,7 @@ const IGNORE_GLOBS = [
 ];
 
 // An absolute path to the entry file that will be passed to Karma.
-const ENTRY_FILE_PATH = path.join( process.cwd(), 'build', '.automated-tests', 'entry-point.js' );
+const ENTRY_FILE_PATH = path.posix.join( process.cwd(), 'build', '.automated-tests', 'entry-point.js' );
 
 module.exports = function runAutomatedTests( options ) {
 	return Promise.resolve().then( () => {
