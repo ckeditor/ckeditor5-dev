@@ -123,7 +123,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					);
 			} );
 
-			it( 'throws an error when repository is empty', () => {
+			it( 'throws an error when there is no tag or commit with specified name in given repository', () => {
 				return getCommits( transformCommit, { from: 'foobar' } )
 					.then(
 						() => {
