@@ -23,8 +23,8 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		} );
 
 		after( () => {
-			exec( `rm -rf ${ tmpCwd }` );
 			process.chdir( cwd );
+			fs.rmdirSync( tmpCwd );
 		} );
 
 		beforeEach( () => {
@@ -39,16 +39,16 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		} );
 
 		afterEach( () => {
-			exec( `rm -rf ${ path.join( tmpCwd, '.git' ) }` );
-			exec( `rm -rf ${ path.join( tmpCwd, '*' ) }` );
+			fs.rmdirSync( path.join( tmpCwd, '.git' ), { recursive: true } );
+			fs.readdirSync( tmpCwd ).forEach( file => fs.unlinkSync( file ) );
 		} );
 
 		it( 'returns files for initial commit', () => {
-			exec( 'touch 1.txt' );
-			exec( 'touch 2.txt' );
-			exec( 'touch 3.txt' );
-			exec( 'touch 4.txt' );
-			exec( 'touch 5.txt' );
+			fs.writeFileSync( '1.txt', '' );
+			fs.writeFileSync( '2.txt', '' );
+			fs.writeFileSync( '3.txt', '' );
+			fs.writeFileSync( '4.txt', '' );
+			fs.writeFileSync( '5.txt', '' );
 			exec( 'git add *.txt' );
 			exec( 'git commit -m "Initial commit."' );
 
@@ -64,17 +64,17 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		} );
 
 		it( 'returns files for next commit after initial', () => {
-			exec( 'touch 1.txt' );
-			exec( 'touch 2.txt' );
-			exec( 'touch 3.txt' );
-			exec( 'touch 4.txt' );
-			exec( 'touch 5.txt' );
+			fs.writeFileSync( '1.txt', '' );
+			fs.writeFileSync( '2.txt', '' );
+			fs.writeFileSync( '3.txt', '' );
+			fs.writeFileSync( '4.txt', '' );
+			fs.writeFileSync( '5.txt', '' );
 			exec( 'git add *.txt' );
 			exec( 'git commit -m "Initial commit."' );
 
-			exec( 'touch 2.js' );
-			exec( 'touch 3.js' );
-			exec( 'touch 4.js' );
+			fs.writeFileSync( '2.js', '' );
+			fs.writeFileSync( '3.js', '' );
+			fs.writeFileSync( '4.js', '' );
 			exec( 'git add *.js' );
 			exec( 'git commit -m "Next commit after initial."' );
 
@@ -88,23 +88,23 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		} );
 
 		it( 'returns files for commit on new branch', () => {
-			exec( 'touch 1.txt' );
-			exec( 'touch 2.txt' );
-			exec( 'touch 3.txt' );
-			exec( 'touch 4.txt' );
-			exec( 'touch 5.txt' );
+			fs.writeFileSync( '1.txt', '' );
+			fs.writeFileSync( '2.txt', '' );
+			fs.writeFileSync( '3.txt', '' );
+			fs.writeFileSync( '4.txt', '' );
+			fs.writeFileSync( '5.txt', '' );
 			exec( 'git add *.txt' );
 			exec( 'git commit -m "Initial commit."' );
 
-			exec( 'touch 2.js' );
-			exec( 'touch 3.js' );
-			exec( 'touch 4.js' );
+			fs.writeFileSync( '2.js', '' );
+			fs.writeFileSync( '3.js', '' );
+			fs.writeFileSync( '4.js', '' );
 			exec( 'git add *.js' );
 			exec( 'git commit -m "Next commit after initial."' );
 
 			exec( 'git checkout -b develop' );
-			exec( 'touch 5.json' );
-			exec( 'touch 6.json' );
+			fs.writeFileSync( '5.json', '' );
+			fs.writeFileSync( '6.json', '' );
 			exec( 'git add *.json' );
 			exec( 'git commit -m "New commit on branch develop."' );
 
@@ -117,30 +117,30 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		} );
 
 		it( 'returns files for merge commit', () => {
-			exec( 'touch 1.txt' );
-			exec( 'touch 2.txt' );
-			exec( 'touch 3.txt' );
-			exec( 'touch 4.txt' );
-			exec( 'touch 5.txt' );
+			fs.writeFileSync( '1.txt', '' );
+			fs.writeFileSync( '2.txt', '' );
+			fs.writeFileSync( '3.txt', '' );
+			fs.writeFileSync( '4.txt', '' );
+			fs.writeFileSync( '5.txt', '' );
 			exec( 'git add *.txt' );
 			exec( 'git commit -m "Initial commit."' );
 
-			exec( 'touch 2.js' );
-			exec( 'touch 3.js' );
-			exec( 'touch 4.js' );
+			fs.writeFileSync( '2.js', '' );
+			fs.writeFileSync( '3.js', '' );
+			fs.writeFileSync( '4.js', '' );
 			exec( 'git add *.js' );
 			exec( 'git commit -m "Next commit after initial."' );
 
 			exec( 'git checkout -b develop' );
-			exec( 'touch 5.json' );
-			exec( 'touch 6.json' );
+			fs.writeFileSync( '5.json', '' );
+			fs.writeFileSync( '6.json', '' );
 			exec( 'git add *.json' );
 			exec( 'git commit -m "New commit on branch develop."' );
 
 			exec( 'git checkout master' );
-			exec( 'touch 10.sh' );
-			exec( 'touch 11.sh' );
-			exec( 'touch 12.sh' );
+			fs.writeFileSync( '10.sh', '' );
+			fs.writeFileSync( '11.sh', '' );
+			fs.writeFileSync( '12.sh', '' );
 			exec( 'git add *.sh' );
 			exec( 'git commit -m "New commit on branch master."' );
 
