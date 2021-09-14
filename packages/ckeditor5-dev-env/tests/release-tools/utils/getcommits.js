@@ -22,7 +22,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		after( () => {
-			exec( `rm -rf ${ tmpCwd }` );
+			fs.rmdirSync( tmpCwd );
 		} );
 
 		beforeEach( () => {
@@ -69,7 +69,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 		afterEach( () => {
 			process.chdir( cwd );
-			exec( `rm -rf ${ path.join( tmpCwd, '.git' ) }` );
+			fs.rmdirSync( path.join( tmpCwd, '.git' ), { recursive: true } );
 
 			sandbox.restore();
 			mockery.disable();
