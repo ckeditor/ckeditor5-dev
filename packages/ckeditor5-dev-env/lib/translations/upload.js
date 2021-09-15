@@ -19,10 +19,11 @@ const chalk = require( 'chalk' );
  * @param {String} config.token Token to the Transifex API.
  */
 module.exports = function upload( loginConfig ) {
-	const pathToPoTranslations = path.join( process.cwd(), 'build', '.transifex' );
+	const cwd = process.cwd().split( path.sep ).join( path.posix.sep );
+	const pathToPoTranslations = path.posix.join( cwd, 'build', '.transifex' );
 	const potFiles = fs.readdirSync( pathToPoTranslations ).map( packageName => ( {
 		packageName,
-		path: path.join( pathToPoTranslations, packageName, 'en.pot' )
+		path: path.posix.join( pathToPoTranslations, packageName, 'en.pot' )
 	} ) );
 	const summaryCollection = {
 		created: [],
