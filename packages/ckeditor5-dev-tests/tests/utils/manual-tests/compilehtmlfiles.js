@@ -14,10 +14,12 @@ const chokidar = require( 'chokidar' );
 const fakeDirname = path.dirname( require.resolve( '../../../lib/utils/manual-tests/compilehtmlfiles' ) );
 
 describe( 'compileHtmlFiles', () => {
-	// This test is disabled on Windows
-	// See https://github.com/ckeditor/ckeditor5/issues/10538
+	// Temporary these tests are disabled on Windows.
+	// See https://github.com/ckeditor/ckeditor5/issues/10538.
 	if ( process.platform === 'win32' ) {
-		console.log( 'This test is disabled on Windows' );
+		console.log( 'The "compileHtmlFiles()" tests do not work on Windows environments.' );
+		console.log( 'See: https://github.com/ckeditor/ckeditor5/issues/10538 for more details.' );
+
 		return;
 	}
 
