@@ -41,6 +41,20 @@ module.exports = function getKarmaConfig( options ) {
 		// Frameworks to use. Available frameworks: https://npmjs.org/browse/keyword/karma-adapter
 		frameworks: [ 'mocha', 'sinon-chai' ],
 
+		// For unknown reasons, sometimes Karma does not fill the list automatically. So, all available plugins must be specified manually.
+		plugins: [
+			require.resolve( 'karma-chai' ),
+			require.resolve( 'karma-chrome-launcher' ),
+			require.resolve( 'karma-coverage' ),
+			require.resolve( 'karma-firefox-launcher' ),
+			require.resolve( 'karma-mocha' ),
+			require.resolve( 'karma-mocha-reporter' ),
+			require.resolve( 'karma-sinon' ),
+			require.resolve( 'karma-sinon-chai' ),
+			require.resolve( 'karma-sourcemap-loader' ),
+			require.resolve( 'karma-webpack' )
+		],
+
 		// Files saved in directory `ckeditor5/packages/ckeditor5-utils/tests/_assets/` are available under: http://0.0.0.0:{port}/assets/
 		proxies: {
 			'/assets/': '/base/packages/ckeditor5-utils/tests/_assets/',

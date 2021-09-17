@@ -118,4 +118,24 @@ describe( 'getKarmaConfig()', () => {
 		expect( karmaConfig.proxies ).to.have.own.property( '/example.com/image.png' );
 		expect( karmaConfig.proxies ).to.have.own.property( '/www.example.com/image.png' );
 	} );
+
+	it( 'should contain a list of available plugins', () => {
+		const karmaConfig = getKarmaConfig( {
+			files: [ '*' ],
+			reporter: 'mocha',
+			sourceMap: false,
+			coverage: false,
+			browsers: [ 'Chrome' ],
+			watch: false,
+			verbose: false,
+			themePath: 'workspace/path/to/theme.css',
+			entryFile: 'workspace/entry-file.js',
+			globPatterns: {
+				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
+			}
+		} );
+
+		expect( karmaConfig.plugins ).to.be.an( 'array' );
+		expect( karmaConfig.plugins ).to.have.lengthOf.above( 0 );
+	} );
 } );
