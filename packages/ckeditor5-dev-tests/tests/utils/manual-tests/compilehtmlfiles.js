@@ -110,6 +110,7 @@ describe( 'compileHtmlFiles', () => {
 
 	afterEach( () => {
 		sandbox.restore();
+		mockery.deregisterAll();
 		mockery.disable();
 	} );
 
