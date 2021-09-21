@@ -121,55 +121,55 @@ describe( 'compileHtmlFiles', () => {
 
 		it( 'should compile md and html files to the output html file', () => {
 			files = {
-				[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
-				[ path.join( 'path', 'to', 'manual', 'file.md' ) ]: '## Markdown header',
-				[ path.join( 'path', 'to', 'manual', 'file.html' ) ]: '<div>html file content</div>'
+				[ `${ fakeDirname }/template.html` ]: '<div>template html content</div>',
+				'path/to/manual/file.md': '## Markdown header',
+				'path/to/manual/file.html': '<div>html file content</div>'
 			};
 
 			patternFiles = {
-				[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
-				[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ]
+				'manualTestPattern/*.js': [ 'path/to/manual/file.js' ],
+				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ]
 			};
 
 			compileHtmlFiles( {
 				buildDir: 'buildDir',
 				language: 'en',
-				patterns: [ path.join( 'manualTestPattern', '*.js' ) ]
+				patterns: [ 'manualTestPattern/*.js' ]
 			} );
 
 			expect( stubs.commonmark.parse ).to.be.calledWithExactly( '## Markdown header' );
 			expect( stubs.fs.ensureDirSync ).to.be.calledWithExactly( 'buildDir' );
 
-			// /* eslint-disable max-len */
-			// expect(	stubs.fs.outputFileSync ).to.be.calledWithExactly(
-			// 	path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
-			// 		'<div>template html content</div>',
-			// 		'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
-			// 		'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
-			// 			'<span></span><span></span><span></span>' +
-			// 		'</button>',
-			// 		'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
-			// 			'<span></span><span></span><span></span><span></span>' +
-			// 		'</button>',
-			// 		'<div>html file content</div>',
-			// 		'<body class="manual-test-container manual-test-container_no-transitions">' +
-			// 			'<script src="/assets/togglesidebar.js"></script>' +
-			// 			'<script src="/assets/inspector.js"></script>' +
-			// 			'<script src="/assets/attachinspector.js"></script>' +
-			// 			`<script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script>` +
-			// 		'</body>'
-			// 	].join( '\n' )
-			// );
-			// /* eslint-enable max-len */
+			/* eslint-disable max-len */
+			expect(	stubs.fs.outputFileSync ).to.be.calledWithExactly(
+				'buildDir/path/to/manual/file.html', [
+					'<div>template html content</div>',
+					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
+					'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
+						'<span></span><span></span><span></span>' +
+					'</button>',
+					'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
+						'<span></span><span></span><span></span><span></span>' +
+					'</button>',
+					'<div>html file content</div>',
+					'<body class="manual-test-container manual-test-container_no-transitions">' +
+						'<script src="/assets/togglesidebar.js"></script>' +
+						'<script src="/assets/inspector.js"></script>' +
+						'<script src="/assets/attachinspector.js"></script>' +
+						'<script src="/path/to/manual/file.js"></script>' +
+					'</body>'
+				].join( '\n' )
+			);
+			/* eslint-enable max-len */
 
 			expect( stubs.chokidar.watch ).to.be.calledWithExactly(
-				path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true }
+				'path/to/manual/file.md', { ignoreInitial: true }
 			);
 			expect( stubs.chokidar.watch ).to.be.calledWithExactly(
-				path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true }
+				'path/to/manual/file.html', { ignoreInitial: true }
 			);
 			expect( stubs.fs.copySync ).to.be.calledWithExactly(
-				'static-file.png', path.join( 'buildDir', 'static-file.png' )
+				'static-file.png', 'buildDir/static-file.png'
 			);
 
 			expect( stubs.logger.info.callCount ).to.equal( 2 );
@@ -182,170 +182,154 @@ describe( 'compileHtmlFiles', () => {
 				buildDir: 'buildDir',
 				language: 'en',
 				additionalLanguages: [ 'pl', 'ar' ],
-				patterns: [ path.join( 'manualTestPattern', '*.js' ) ]
+				patterns: [ 'manualTestPattern/*.js' ]
 			} );
 
 			/* eslint-disable max-len */
-			// expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
-			// 	path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
-			// 		'<div>template html content</div>',
-			// 		'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
-			// 		'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
-			// 			'<span></span><span></span><span></span>' +
-			// 		'</button>',
-			// 		'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
-			// 			'<span></span><span></span><span></span><span></span>' +
-			// 		'</button>',
-			// 		'<div>html file content</div>',
-			// 		'<body class="manual-test-container manual-test-container_no-transitions">' +
-			// 			'<script src="/assets/togglesidebar.js"></script>' +
-			// 			'<script src="/assets/inspector.js"></script>' +
-			// 			'<script src="/assets/attachinspector.js"></script>' +
-			// 			'<script src="/translations/en.js"></script>' +
-			// 			'<script src="/translations/pl.js"></script>' +
-			// 			'<script src="/translations/ar.js"></script>' +
-			// 			`<script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script>` +
-			// 		'</body>'
-			// 	].join( '\n' )
-			// );
+			expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
+				'buildDir/path/to/manual/file.html', [
+					'<div>template html content</div>',
+					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
+					'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
+						'<span></span><span></span><span></span>' +
+					'</button>',
+					'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
+						'<span></span><span></span><span></span><span></span>' +
+					'</button>',
+					'<div>html file content</div>',
+					'<body class="manual-test-container manual-test-container_no-transitions">' +
+						'<script src="/assets/togglesidebar.js"></script>' +
+						'<script src="/assets/inspector.js"></script>' +
+						'<script src="/assets/attachinspector.js"></script>' +
+						'<script src="/translations/en.js"></script>' +
+						'<script src="/translations/pl.js"></script>' +
+						'<script src="/translations/ar.js"></script>' +
+						'<script src="/path/to/manual/file.js"></script>' +
+					'</body>'
+				].join( '\n' )
+			);
 			/* eslint-enable max-len */
 		} );
 
 		it( 'should work with files containing dots in their names', () => {
 			files = {
-				[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
-				[ path.join( 'path', 'to', 'manual', 'file.abc.md' ) ]: '## Markdown header',
-				[ path.join( 'path', 'to', 'manual', 'file.abc.html' ) ]: '<div>html file content</div>'
+				[ `${ fakeDirname }/template.html` ]: '<div>template html content</div>',
+				'path/to/manual/file.abc.md': '## Markdown header',
+				'path/to/manual/file.abc.html': '<div>html file content</div>'
 			};
 
 			patternFiles = {
-				[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.abc.js' ) ],
-				[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: []
+				'manualTestPattern/*.js': [ 'path/to/manual/file.abc.js' ],
+				'path/to/manual/**/*.!(js|html|md)': []
 			};
 
 			compileHtmlFiles( {
 				buildDir: 'buildDir',
-				patterns: [ path.join( 'manualTestPattern', '*.js' ) ]
+				patterns: [ 'manualTestPattern/*.js' ]
 			} );
 
 			/* eslint-disable max-len */
-			// expect( stubs.fs.outputFileSync ).to.be.calledWith(
-			// 	path.join( 'buildDir', 'path', 'to', 'manual', 'file.abc.html' ), [
-			// 		'<div>template html content</div>',
-			// 		'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
-			// 		'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
-			// 			'<span></span><span></span><span></span>' +
-			// 		'</button>',
-			// 		'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
-			// 			'<span></span><span></span><span></span><span></span>' +
-			// 		'</button>',
-			// 		'<div>html file content</div>',
-			// 		'<body class="manual-test-container manual-test-container_no-transitions">' +
-			// 			'<script src="/assets/togglesidebar.js"></script>' +
-			// 			'<script src="/assets/inspector.js"></script>' +
-			// 			'<script src="/assets/attachinspector.js"></script>' +
-			// 			`<script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.abc.js' ) }"></script>` +
-			// 		'</body>'
-			// 	].join( '\n' )
-			// );
+			expect( stubs.fs.outputFileSync ).to.be.calledWith(
+				'buildDir/path/to/manual/file.abc.html', [
+					'<div>template html content</div>',
+					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
+					'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
+						'<span></span><span></span><span></span>' +
+					'</button>',
+					'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
+						'<span></span><span></span><span></span><span></span>' +
+					'</button>',
+					'<div>html file content</div>',
+					'<body class="manual-test-container manual-test-container_no-transitions">' +
+						'<script src="/assets/togglesidebar.js"></script>' +
+						'<script src="/assets/inspector.js"></script>' +
+						'<script src="/assets/attachinspector.js"></script>' +
+						'<script src="/path/to/manual/file.abc.js"></script>' +
+					'</body>'
+				].join( '\n' )
+			);
 			/* eslint-enable max-len */
 		} );
 
 		it( 'should work with a few entry points patterns', () => {
 			files = {
-				[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
-				[ path.join( 'path', 'to', 'manual', 'file.md' ) ]: '## Markdown header',
-				[ path.join( 'path', 'to', 'manual', 'file.html' ) ]: '<div>html file content</div>',
-				[ path.join( 'path', 'to', 'another', 'manual', 'file.md' ) ]: '## Markdown header',
-				[ path.join( 'path', 'to', 'another', 'manual', 'file.html' ) ]: '<div>html file content</div>'
+				[ `${ fakeDirname }/template.html` ]: '<div>template html content</div>',
+				'path/to/manual/file.md': '## Markdown header',
+				'path/to/manual/file.html': '<div>html file content</div>',
+				'path/to/another/manual/file.md': '## Markdown header',
+				'path/to/another/manual/file.html': '<div>html file content</div>'
 			};
 
 			patternFiles = {
-				[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
-				[ path.join( 'anotherPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'another', 'manual', 'file.js' ) ],
-				[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ],
-				[ path.join( 'path', 'to', 'another', 'manual', '**', '*.!(js|html|md)' ) ]: []
+				'manualTestPattern/*.js': [ 'path/to/manual/file.js' ],
+				'anotherPattern/*.js': [ 'path/to/another/manual/file.js' ],
+				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ],
+				'path/to/another/manual/**/*.!(js|html|md)': []
 			};
 
 			compileHtmlFiles( {
 				buildDir: 'buildDir',
 				patterns: [
-					path.join( 'manualTestPattern', '*.js' ),
-					path.join( 'anotherPattern', '*.js' )
+					'manualTestPattern/*.js',
+					'anotherPattern/*.js'
 				]
 			} );
 
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly(
-				path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true }
-			);
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly(
-				path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true }
-			);
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly(
-				path.join( 'path', 'to', 'another', 'manual', 'file.html' ), { ignoreInitial: true }
-			);
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly(
-				path.join( 'path', 'to', 'another', 'manual', 'file.html' ), { ignoreInitial: true }
-			);
+			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/manual/file.md', { ignoreInitial: true } );
+			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/manual/file.html', { ignoreInitial: true } );
+			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/another/manual/file.html', { ignoreInitial: true } );
+			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/another/manual/file.html', { ignoreInitial: true } );
 		} );
 
 		it( 'should compile only manual test files', () => {
 			files = {
-				[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
-				[ path.join( 'path', 'to', 'manual', 'file.md' ) ]: '## Markdown header',
-				[ path.join( 'path', 'to', 'manual', 'file.html' ) ]: '<div>html file content</div>',
-				[ path.join( 'path', 'to', 'another', 'file.md' ) ]: '## Markdown header',
-				[ path.join( 'path', 'to', 'another', 'file.html' ) ]: '<div>html file content</div>'
+				[ `${ fakeDirname }/template.html` ]: '<div>template html content</div>',
+				'path/to/manual/file.md': '## Markdown header',
+				'path/to/manual/file.html': '<div>html file content</div>',
+				'path/to/another/file.md': '## Markdown header',
+				'path/to/another/file.html': '<div>html file content</div>'
 			};
 
 			patternFiles = {
-				[ path.join( 'manualTestPattern', '*.js' ) ]: [
-					path.join( 'path', 'to', 'manual', 'file.js' ),
-					path.join( 'path', 'to', 'manual', '_utils', 'secretplugin.js' )
+				'manualTestPattern/*.js': [
+					'path/to/manual/file.js',
+					'path/to/manual/_utils/secretplugin.js'
 				],
-				[ path.join( 'anotherPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'another', 'file.js' ) ],
-				[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ]
+				'anotherPattern/*.js': [ 'path/to/another/file.js' ],
+				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ]
 			};
 
 			compileHtmlFiles( {
 				buildDir: 'buildDir',
 				patterns: [
-					path.join( 'manualTestPattern', '*.js' ),
-					path.join( 'anotherPattern', '*.js' )
+					'manualTestPattern/*.js',
+					'anotherPattern/*.js'
 				]
 			} );
 
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly(
-				path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true }
-			);
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly(
-				path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true }
-			);
-			expect( stubs.chokidar.watch ).not.to.be.calledWith(
-				path.join( 'path', 'to', 'another', 'file.html' ), { ignoreInitial: true }
-			);
-			expect( stubs.chokidar.watch ).not.to.be.calledWith(
-				path.join( 'path', 'to', 'another', 'file.html' ), { ignoreInitial: true }
-			);
+			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/manual/file.md', { ignoreInitial: true } );
+			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/manual/file.html', { ignoreInitial: true } );
+			expect( stubs.chokidar.watch ).not.to.be.calledWith( 'path/to/another/file.html', { ignoreInitial: true } );
+			expect( stubs.chokidar.watch ).not.to.be.calledWith( 'path/to/another/file.html', { ignoreInitial: true } );
 		} );
 
 		it( 'should not copy md files containing dots in their file names', () => {
 			files = {
-				[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
-				[ path.join( 'path', 'to', 'manual', 'file.md' ) ]: '## Markdown header',
-				[ path.join( 'path', 'to', 'manual', 'file.html' ) ]: '<div>html file content</div>'
+				[ `${ fakeDirname }/template.html` ]: '<div>template html content</div>',
+				'path/to/manual/file.md': '## Markdown header',
+				'path/to/manual/file.html': '<div>html file content</div>'
 			};
 
 			patternFiles = {
-				[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
+				'manualTestPattern/*.js': [ 'path/to/manual/file.js' ],
 				// Glob pattern has problem with file names containing dots.
-				[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'some.file.md' ]
+				'path/to/manual/**/*.!(js|html|md)': [ 'some.file.md' ]
 			};
 
 			compileHtmlFiles( {
 				buildDir: 'buildDir',
 				patterns: [
-					path.join( 'manualTestPattern', '*.js' )
+					'manualTestPattern/*.js'
 				]
 			} );
 
@@ -353,54 +337,48 @@ describe( 'compileHtmlFiles', () => {
 			expect( stubs.fs.ensureDirSync ).to.be.calledWithExactly( 'buildDir' );
 
 			/* eslint-disable max-len */
-			// expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
-			// 	path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
-			// 		'<div>template html content</div>',
-			// 		'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
-			// 		'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
-			// 			'<span></span><span></span><span></span>' +
-			// 		'</button>',
-			// 		'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
-			// 			'<span></span><span></span><span></span><span></span>' +
-			// 		'</button>',
-			// 		'<div>html file content</div>',
-			// 		'<body class="manual-test-container manual-test-container_no-transitions">' +
-			// 			'<script src="/assets/togglesidebar.js"></script>' +
-			// 			'<script src="/assets/inspector.js"></script>' +
-			// 			'<script src="/assets/attachinspector.js"></script>' +
-			// 			`<script src="${ path.sep + path.join( 'path', 'to', 'manual', 'file.js' ) }"></script>` +
-			// 		'</body>'
-			// 	].join( '\n' )
-			// );
+			expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
+				'buildDir/path/to/manual/file.html', [
+					'<div>template html content</div>',
+					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
+					'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
+						'<span></span><span></span><span></span>' +
+					'</button>',
+					'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
+						'<span></span><span></span><span></span><span></span>' +
+					'</button>',
+					'<div>html file content</div>',
+					'<body class="manual-test-container manual-test-container_no-transitions">' +
+						'<script src="/assets/togglesidebar.js"></script>' +
+						'<script src="/assets/inspector.js"></script>' +
+						'<script src="/assets/attachinspector.js"></script>' +
+						'<script src="/path/to/manual/file.js"></script>' +
+					'</body>'
+				].join( '\n' )
+			);
 			/* eslint-enable max-len */
 
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly(
-				path.join( 'path', 'to', 'manual', 'file.md' ), { ignoreInitial: true }
-			);
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly(
-				path.join( 'path', 'to', 'manual', 'file.html' ), { ignoreInitial: true }
-			);
-			expect( stubs.fs.copySync ).not.to.be.calledWith(
-				'some.file.md', path.join( 'buildDir', 'some.file.md' )
-			);
+			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/manual/file.md', { ignoreInitial: true } );
+			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/manual/file.html', { ignoreInitial: true } );
+			expect( stubs.fs.copySync ).not.to.be.calledWith( 'some.file.md', 'buildDir/some.file.md' );
 		} );
 
 		it( 'should compile the manual test and do not inform about the processed file', () => {
 			files = {
-				[ path.join( fakeDirname, 'template.html' ) ]: '<div>template html content</div>',
-				[ path.join( 'path', 'to', 'manual', 'file.md' ) ]: '## Markdown header',
-				[ path.join( 'path', 'to', 'manual', 'file.html' ) ]: '<div>html file content</div>'
+				[ `${ fakeDirname }/template.html` ]: '<div>template html content</div>',
+				'path/to/manual/file.md': '## Markdown header',
+				'path/to/manual/file.html': '<div>html file content</div>'
 			};
 
 			patternFiles = {
-				[ path.join( 'manualTestPattern', '*.js' ) ]: [ path.join( 'path', 'to', 'manual', 'file.js' ) ],
-				[ path.join( 'path', 'to', 'manual', '**', '*.!(js|html|md)' ) ]: [ 'static-file.png' ]
+				'manualTestPattern/*.js': [ 'path/to/manual/file.js' ],
+				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ]
 			};
 
 			compileHtmlFiles( {
 				buildDir: 'buildDir',
 				language: 'en',
-				patterns: [ path.join( 'manualTestPattern', '*.js' ) ],
+				patterns: [ 'manualTestPattern/*.js' ],
 				silent: true
 			} );
 
@@ -439,25 +417,25 @@ describe( 'compileHtmlFiles', () => {
 			expect( stubs.fs.ensureDirSync ).to.be.calledWithExactly( 'buildDir' );
 
 			/* eslint-disable max-len */
-			// expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
-			// 	path.join( 'buildDir', 'path', 'to', 'manual', 'file.html' ), [
-			// 		'<div>template html content</div>',
-			// 		'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
-			// 		'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
-			// 			'<span></span><span></span><span></span>' +
-			// 		'</button>',
-			// 		'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
-			// 			'<span></span><span></span><span></span><span></span>' +
-			// 		'</button>',
-			// 		'<div>html file content</div>',
-			// 		'<body class="manual-test-container manual-test-container_no-transitions">' +
-			// 			'<script src="/assets/togglesidebar.js"></script>' +
-			// 			'<script src="/assets/inspector.js"></script>' +
-			// 			'<script src="/assets/attachinspector.js"></script>' +
-			// 			`<script src="/${ path.join( 'path', 'to', 'manual', 'file.js' ) }"></script>` +
-			// 		'</body>'
-			// 	].join( '\n' )
-			// );
+			expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
+				'buildDir\\path\\to\\manual\\file.html', [
+					'<div>template html content</div>',
+					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
+					'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
+						'<span></span><span></span><span></span>' +
+					'</button>',
+					'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
+						'<span></span><span></span><span></span><span></span>' +
+					'</button>',
+					'<div>html file content</div>',
+					'<body class="manual-test-container manual-test-container_no-transitions">' +
+						'<script src="/assets/togglesidebar.js"></script>' +
+						'<script src="/assets/inspector.js"></script>' +
+						'<script src="/assets/attachinspector.js"></script>' +
+						'<script src="/path/to/manual/file.js"></script>' +
+					'</body>'
+				].join( '\n' )
+			);
 			/* eslint-enable max-len */
 
 			expect( stubs.chokidar.watch ).to.be.calledWithExactly(
