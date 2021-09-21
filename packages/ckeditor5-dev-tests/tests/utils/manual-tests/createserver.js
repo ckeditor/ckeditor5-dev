@@ -5,11 +5,12 @@
 
 'use strict';
 
+const http = require( 'http' );
 const { use, expect } = require( 'chai' );
 const sinon = require( 'sinon' );
 const sinonChai = require( 'sinon-chai' );
+
 use( sinonChai );
-const http = require( 'http' );
 
 describe( 'createManualTestServer', () => {
 	let sandbox, httpCreateServerStub, createManualTestServer, server;
@@ -28,8 +29,15 @@ describe( 'createManualTestServer', () => {
 	} );
 
 	afterEach( () => {
-		sandbox.restore();
 		server.close();
+		sandbox.restore();
+
+		// To avoid false positives and encourage better testing practices, Mocha will no longer automatically
+		// kill itself via `process.exit()` when it thinks it should be done running. Hence, we must close the stream
+		// before leaving the test. See: https://stackoverflow.com/a/52143003.
+		if ( server._readline ) {
+			server._readline.close();
+		}
 	} );
 
 	it( 'should start http server', () => {

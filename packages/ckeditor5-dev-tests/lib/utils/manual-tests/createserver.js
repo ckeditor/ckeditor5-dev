@@ -32,6 +32,9 @@ module.exports = function createManualTestServer( sourcePath, port = 8125 ) {
 				output: process.stdout
 			} );
 
+			// Save the reference of the stream to be able to close it in tests.
+			server._readline = readline;
+
 			readline.on( 'SIGINT', () => {
 				process.emit( 'SIGINT' );
 			} );
