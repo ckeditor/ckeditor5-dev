@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint node: true, strict: true */
-
 'use strict';
 
 const path = require( 'path' );
@@ -40,12 +38,13 @@ module.exports = function compileHtmlFiles( options ) {
 			...arr,
 			...globSync( manualTestPattern )
 				// Accept only files saved in the `/manual/` directory.
-				.filter( manualTestFile => manualTestFile.includes( path.sep + 'manual' + path.sep ) )
+				.filter( manualTestFile => manualTestFile.match( /[\\/]manual[\\/]/ ) )
 				// But do not parse manual tests utils saved in the `/manual/_utils/` directory.
-				.filter( manualTestFile => !manualTestFile.includes( path.sep + 'manual' + path.sep + '_utils' + path.sep ) )
+				.filter( manualTestFile => !manualTestFile.match( /[\\/]manual[\\/]_utils[\\/]/ ) )
 				.map( jsFile => setExtension( jsFile, 'md' ) )
 		];
 	}, [] );
+
 	const sourceHtmlFiles = sourceMDFiles.map( mdFile => setExtension( mdFile, 'html' ) );
 
 	const sourceDirs = _.uniq( sourceMDFiles.map( file => path.dirname( file ) ) );
@@ -114,16 +113,16 @@ function compileHtmlFile( buildDir, options ) {
 	const parsedMarkdownTree = reader.parse( fs.readFileSync( sourceMDFilePath, 'utf-8' ) );
 	const manualTestInstruction =
 		'<div class="manual-test-sidebar">' +
-			writer.render( parsedMarkdownTree ) +
+		writer.render( parsedMarkdownTree ) +
 		'</div>';
 
 	const manualTestSidebarToggleButton = '<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
-			'<span></span><span></span><span></span>' +
+		'<span></span><span></span><span></span>' +
 		'</button>';
 
 	const manualTestSidebarBackButton = '<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
 		'<span></span><span></span><span></span><span></span>' +
-	'</button>';
+		'</button>';
 
 	// Load test view (HTML file).
 	const htmlView = fs.readFileSync( sourceHtmlFilePath, 'utf-8' );
@@ -131,13 +130,13 @@ function compileHtmlFile( buildDir, options ) {
 	// Attach script file to the view.
 	const scriptTag =
 		'<body class="manual-test-container manual-test-container_no-transitions">' +
-			'<script src="/assets/togglesidebar.js"></script>' +
-			'<script src="/assets/inspector.js"></script>' +
-			'<script src="/assets/attachinspector.js"></script>' +
-			`${ languagesToLoad.map( language => {
-				return `<script src="/translations/${ language }.js"></script>`;
-			} ).join( '' ) }` +
-			`<script src="/${ absoluteJSFilePath }"></script>` +
+		'<script src="/assets/togglesidebar.js"></script>' +
+		'<script src="/assets/inspector.js"></script>' +
+		'<script src="/assets/attachinspector.js"></script>' +
+		`${ languagesToLoad.map( language => {
+			return `<script src="/translations/${ language }.js"></script>`;
+		} ).join( '' ) }` +
+		`<script src="/${ absoluteJSFilePath.replace( /[\\/]/g, '/' ) }"></script>` +
 		'</body>';
 
 	// Concat the all HTML parts to single one.

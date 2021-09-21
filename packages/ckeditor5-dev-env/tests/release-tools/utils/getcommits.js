@@ -22,7 +22,7 @@ describe( 'dev-env/release-tools/utils', () => {
 		} );
 
 		after( () => {
-			exec( `rm -rf ${ tmpCwd }` );
+			fs.rmdirSync( tmpCwd );
 		} );
 
 		beforeEach( () => {
@@ -69,7 +69,7 @@ describe( 'dev-env/release-tools/utils', () => {
 
 		afterEach( () => {
 			process.chdir( cwd );
-			exec( `rm -rf ${ path.join( tmpCwd, '.git' ) }` );
+			fs.rmdirSync( path.join( tmpCwd, '.git' ), { recursive: true } );
 
 			sandbox.restore();
 			mockery.disable();
@@ -123,7 +123,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					);
 			} );
 
-			it( 'throws an error when repository is empty', () => {
+			it( 'throws an error when there is no tag or commit with specified name in given repository', () => {
 				return getCommits( transformCommit, { from: 'foobar' } )
 					.then(
 						() => {

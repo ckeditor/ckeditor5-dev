@@ -90,7 +90,7 @@ describe( 'utils', () => {
 		describe( 'getDevDirectories', () => {
 			const packageJSONDependencies = {};
 			const workspacePath = '/workspace/path';
-			const ckeditor5Path = path.join( workspacePath, 'ckeditor5' );
+			const ckeditor5Path = path.posix.join( workspacePath, 'ckeditor5' );
 			const dependencies = {
 				'ckeditor5-plugin-image': 'ckeditor/ckeditor5-plugin-image',
 				'ckeditor5-core': 'ckeditor/ckeditor5-core'

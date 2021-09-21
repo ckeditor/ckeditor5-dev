@@ -107,7 +107,7 @@ describe( 'upload', () => {
 			.then( () => {
 				sinon.assert.calledOnce( stubs.transifexService.getResources );
 				sinon.assert.calledWithExactly(
-					stubs.fs.readdirSync, path.join( 'workspace', 'ckeditor5', 'build', '.transifex' )
+					stubs.fs.readdirSync, path.posix.join( 'workspace', 'ckeditor5', 'build', '.transifex' )
 				);
 
 				sinon.assert.calledOnce( stubs.transifexService.postResource );

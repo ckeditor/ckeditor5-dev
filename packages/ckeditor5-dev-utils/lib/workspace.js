@@ -84,7 +84,7 @@ module.exports = {
 		for ( const dependency in dependencies ) {
 			const repositoryURL = dependencies[ dependency ];
 			const urlInfo = git.parseRepositoryUrl( repositoryURL );
-			const repositoryPath = path.join( workspacePath, dependency );
+			const repositoryPath = path.posix.join( workspacePath, dependency );
 
 			// Check if repository's directory already exists.
 			if ( directories.indexOf( urlInfo.name ) > -1 ) {

@@ -56,7 +56,7 @@ module.exports = async function extractApiDocs( dirname ) {
 
 	const cmd = require.resolve( 'jsdoc/jsdoc.js' );
 
-	const rawOutput = execSync( `${ cmd } -c ${ tmpConfig.name }` ).toString();
+	const rawOutput = execSync( `node ${ cmd } -c ${ tmpConfig.name }` ).toString();
 
 	const doclets = JSON.parse( rawOutput ).doclets;
 
