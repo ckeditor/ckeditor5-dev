@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [25.4.3](https://github.com/ckeditor/ckeditor5-dev/compare/v25.4.2...v25.4.3) (2021-09-22)
+
+### Other changes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added in the Karma configuration a list of available plugins to avoid an error related to loading a non-registered plugin. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/69b1fec9378ee06d1fe89e2379d62c86507d2606))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v25.4.2 => v25.4.3
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v25.4.2 => v25.4.3
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v25.4.2 => v25.4.3
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v25.4.2 => v25.4.3
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v25.4.2 => v25.4.3
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v25.4.2 => v25.4.3
+</details>
+
+
 ## [25.4.2](https://github.com/ckeditor/ckeditor5-dev/compare/v25.4.1...v25.4.2) (2021-08-30)
 
 ### Bug fixes
