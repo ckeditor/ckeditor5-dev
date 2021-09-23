@@ -204,11 +204,11 @@ describe( 'dev-env/release-tools/utils', () => {
 				sandbox.stub( process, 'cwd' ).returns( '/cwd' );
 
 				const changes = [
-					'[ckeditor5](npm link): v1.0.0 => v2.0.0.alpha.1',
-					'[@ckeditor/ckeditor5-core](npm link): v1.0.0 => v2.0.0.alpha.1'
+					'[ckeditor5](npm link): v1.0.0 => v2.0.0-alpha.0',
+					'[@ckeditor/ckeditor5-core](npm link): v1.0.0 => v2.0.0-alpha.0'
 				].join( '\n' );
 
-				return getPackagesToRelease( packagesToCheck, { changes, version: '2.0.0.alpha.1' } )
+				return getPackagesToRelease( packagesToCheck, { changes, version: '2.0.0-alpha.0' } )
 					.then( packages => {
 						expect( packages.size ).to.equal( 2 );
 
@@ -218,10 +218,10 @@ describe( 'dev-env/release-tools/utils', () => {
 						expect( stubs.chdir.thirdCall.args[ 0 ] ).to.equal( '/cwd' );
 
 						const corePackage = packages.get( '@ckeditor/ckeditor5-core' );
-						expect( corePackage.version ).to.equal( '2.0.0.alpha.1' );
+						expect( corePackage.version ).to.equal( '2.0.0-alpha.0' );
 
 						const ckeditor5Package = packages.get( 'ckeditor5' );
-						expect( ckeditor5Package.version ).to.equal( '2.0.0.alpha.1' );
+						expect( ckeditor5Package.version ).to.equal( '2.0.0-alpha.0' );
 					} );
 			} );
 
@@ -234,23 +234,23 @@ describe( 'dev-env/release-tools/utils', () => {
 				// ckeditor5
 				stubs.getPackageJson.onFirstCall().returns( {
 					name: 'ckeditor5',
-					version: '1.0.0'
+					version: '2.0.0-alpha.0'
 				} );
 
 				// @ckeditor/ckeditor5-core
 				stubs.getPackageJson.onSecondCall().returns( {
 					name: '@ckeditor/ckeditor5-core',
-					version: '1.0.0'
+					version: '2.0.0-alpha.0'
 				} );
 
 				sandbox.stub( process, 'cwd' ).returns( '/cwd' );
 
 				const changes = [
-					'[ckeditor5](npm link): v2.0.0.alpha.1 => v2.0.0.rc.1',
-					'[@ckeditor/ckeditor5-core](npm link): v2.0.0.alpha.1 => v2.0.0.rc.1'
+					'[ckeditor5](npm link): v2.0.0-alpha.0 => v2.0.0-rc.0',
+					'[@ckeditor/ckeditor5-core](npm link): v2.0.0-alpha.0 => v2.0.0-rc.0'
 				].join( '\n' );
 
-				return getPackagesToRelease( packagesToCheck, { changes, version: '2.0.0.rc.1' } )
+				return getPackagesToRelease( packagesToCheck, { changes, version: '2.0.0-rc.0' } )
 					.then( packages => {
 						expect( packages.size ).to.equal( 2 );
 
@@ -260,10 +260,10 @@ describe( 'dev-env/release-tools/utils', () => {
 						expect( stubs.chdir.thirdCall.args[ 0 ] ).to.equal( '/cwd' );
 
 						const corePackage = packages.get( '@ckeditor/ckeditor5-core' );
-						expect( corePackage.version ).to.equal( '2.0.0.rc.1' );
+						expect( corePackage.version ).to.equal( '2.0.0-rc.0' );
 
 						const ckeditor5Package = packages.get( 'ckeditor5' );
-						expect( ckeditor5Package.version ).to.equal( '2.0.0.rc.1' );
+						expect( ckeditor5Package.version ).to.equal( '2.0.0-rc.0' );
 					} );
 			} );
 
@@ -288,11 +288,11 @@ describe( 'dev-env/release-tools/utils', () => {
 				sandbox.stub( process, 'cwd' ).returns( '/cwd' );
 
 				const changes = [
-					'[ckeditor5](npm link): v1.0.0 => v2.0.0.rc.1',
-					'[@ckeditor/ckeditor5-core](npm link): v1.0.0 => v2.0.0.rc.1'
+					'[ckeditor5](npm link): v1.0.0 => v2.0.0-rc.0',
+					'[@ckeditor/ckeditor5-core](npm link): v1.0.0 => v2.0.0-rc.0'
 				].join( '\n' );
 
-				return getPackagesToRelease( packagesToCheck, { changes, version: '2.0.0.rc.1' } )
+				return getPackagesToRelease( packagesToCheck, { changes, version: '2.0.0-rc.0' } )
 					.then( packages => {
 						expect( packages.size ).to.equal( 2 );
 
@@ -302,10 +302,10 @@ describe( 'dev-env/release-tools/utils', () => {
 						expect( stubs.chdir.thirdCall.args[ 0 ] ).to.equal( '/cwd' );
 
 						const corePackage = packages.get( '@ckeditor/ckeditor5-core' );
-						expect( corePackage.version ).to.equal( '2.0.0.rc.1' );
+						expect( corePackage.version ).to.equal( '2.0.0-rc.0' );
 
 						const ckeditor5Package = packages.get( 'ckeditor5' );
-						expect( ckeditor5Package.version ).to.equal( '2.0.0.rc.1' );
+						expect( ckeditor5Package.version ).to.equal( '2.0.0-rc.0' );
 					} );
 			} );
 
@@ -330,11 +330,11 @@ describe( 'dev-env/release-tools/utils', () => {
 				sandbox.stub( process, 'cwd' ).returns( '/cwd' );
 
 				const changes = [
-					'[ckeditor5](npm link): v1.0.0.alpha.1',
-					'[@ckeditor/ckeditor5-core](npm link): v1.0.0.alpha.1'
+					'[ckeditor5](npm link): v1.0.0-alpha.0',
+					'[@ckeditor/ckeditor5-core](npm link): v1.0.0-alpha.0'
 				].join( '\n' );
 
-				return getPackagesToRelease( packagesToCheck, { changes, version: '1.0.0.alpha.1' } )
+				return getPackagesToRelease( packagesToCheck, { changes, version: '1.0.0-alpha.0' } )
 					.then( packages => {
 						expect( packages.size ).to.equal( 2 );
 
@@ -344,10 +344,91 @@ describe( 'dev-env/release-tools/utils', () => {
 						expect( stubs.chdir.thirdCall.args[ 0 ] ).to.equal( '/cwd' );
 
 						const corePackage = packages.get( '@ckeditor/ckeditor5-core' );
-						expect( corePackage.version ).to.equal( '1.0.0.alpha.1' );
+						expect( corePackage.version ).to.equal( '1.0.0-alpha.0' );
 
 						const ckeditor5Package = packages.get( 'ckeditor5' );
-						expect( ckeditor5Package.version ).to.equal( '1.0.0.alpha.1' );
+						expect( ckeditor5Package.version ).to.equal( '1.0.0-alpha.0' );
+					} );
+			} );
+
+			it( 'does not return a package if a version misses the "dash" symbol (an existing package)', () => {
+				const packagesToCheck = new Set( [
+					'/packages/ckeditor5-core'
+				] );
+
+				// @ckeditor/ckeditor5-core
+				stubs.getPackageJson.onFirstCall().returns( {
+					name: '@ckeditor/ckeditor5-core',
+					version: '1.0.0'
+				} );
+
+				sandbox.stub( process, 'cwd' ).returns( '/cwd' );
+
+				const changes = [
+					'[@ckeditor/ckeditor5-core](npm link): v1.0.0 => v2.0.0.alpha.0'
+				].join( '\n' );
+
+				return getPackagesToRelease( packagesToCheck, { changes, version: '2.0.0-alpha.0' } )
+					.then( packages => {
+						expect( packages.size ).to.equal( 0 );
+
+						expect( stubs.chdir.calledTwice ).to.equal( true );
+						expect( stubs.chdir.firstCall.args[ 0 ] ).to.equal( '/packages/ckeditor5-core' );
+						expect( stubs.chdir.secondCall.args[ 0 ] ).to.equal( '/cwd' );
+					} );
+			} );
+
+			it( 'does not return a package if a version misses the "dash" symbol (an existing package, from alpha to rc)', () => {
+				const packagesToCheck = new Set( [
+					'/packages/ckeditor5-core'
+				] );
+
+				// @ckeditor/ckeditor5-core
+				stubs.getPackageJson.onFirstCall().returns( {
+					name: '@ckeditor/ckeditor5-core',
+					version: '2.0.0-alpha.0'
+				} );
+
+				sandbox.stub( process, 'cwd' ).returns( '/cwd' );
+
+				const changes = [
+					'[@ckeditor/ckeditor5-core](npm link): v2.0.0-alpha.0 => v2.0.0.rc.0'
+				].join( '\n' );
+
+				return getPackagesToRelease( packagesToCheck, { changes, version: '2.0.0-rc.0' } )
+					.then( packages => {
+						expect( packages.size ).to.equal( 0 );
+
+						expect( stubs.chdir.calledTwice ).to.equal( true );
+						expect( stubs.chdir.firstCall.args[ 0 ] ).to.equal( '/packages/ckeditor5-core' );
+						expect( stubs.chdir.secondCall.args[ 0 ] ).to.equal( '/cwd' );
+					} );
+			} );
+
+			it( 'does not return a package if a version misses the "dash" symbol (a new package)', () => {
+				const packagesToCheck = new Set( [
+					'/packages/ckeditor5-core'
+				] );
+
+				// @ckeditor/ckeditor5-core
+				stubs.getPackageJson.onFirstCall().returns( {
+					name: '@ckeditor/ckeditor5-core',
+					version: '1.0.0'
+				} );
+
+				sandbox.stub( process, 'cwd' ).returns( '/cwd' );
+
+				const changes = [
+					'[@ckeditor/ckeditor5-core](npm link): v1.0.0.alpha.0'
+				].join( '\n' );
+
+				return getPackagesToRelease( packagesToCheck, { changes, version: '1.0.0-alpha.0' } )
+					.then( packages => {
+						expect( packages.size ).to.equal( 0 );
+
+						expect( stubs.chdir.calledTwice ).to.equal( true );
+						expect( stubs.chdir.firstCall.args[ 0 ] ).to.equal( '/packages/ckeditor5-core' );
+						expect( stubs.chdir.secondCall.args[ 0 ] ).to.equal( '/cwd' );
 					} );
 			} );
 		} );
