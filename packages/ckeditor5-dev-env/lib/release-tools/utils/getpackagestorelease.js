@@ -72,23 +72,59 @@ module.exports = function getPackagesToRelease( pathsToPackages, options ) {
 //      [packageName](https://www.npmjs.com/package/packageName): v0.0.1
 //
 // where:
-//   `v0.0.1` is the current version (not published yet),
+//   `v0.0.1` is the current version (not published yet).
+//
+// The function handles pre-release, so, e.g. `v1.0.0.alpha.0` is also a proper input.
+//
+// Keep in mind that the dash (`-`) is a separator of the pre-release. Other characters are not allowed
+// and npm will not publish a package if its version does not contain the symbol.
 //
 // @param {String} changelog Changes.
 // @param {String} packageName Package to look.
 // @returns {String|null} `null` if the version was not found.
 function findVersionInChangelog( changelog, packageName ) {
-	const existingPackageRegExp = new RegExp( `\\[${ packageName.replace( '/', '\\/' ) }\\].*v[\\d.]+\\ => v([\\d.]+)` );
+	// Pick: `x.y.z` or `x.y.z-prerelease.n`, assumptions: `x, y, z, n = { 0, 1, 2, ... }`.
+	const semVer = '\\d+\\.\\d+\\.\\d+(.[a-z\\d.]+)?';
+
+	const existingPackageRegExp = new RegExp( `\\[${ packageName.replace( '/', '\\/' ) }\\].*v(${ semVer })+\\ (=>) v(${ semVer })` );
+	// Groups:
+	// 1. Previous version.
+	// 2. Previous version - pre-release part.
+	// 3. "=>" character that suggests that the package exists on npm.
+	// 4. New version.
+	// 5. New version - pre-release part.
+
 	let match = changelog.match( existingPackageRegExp );
 
+	// The package exists on npm.
 	if ( match ) {
-		return match[ 1 ];
+		// The version does not match to `x.y.z-prerelease.n`, npm will not allow publish it.
+		if ( match[ 5 ] && !match[ 5 ].startsWith( '-' ) ) {
+			return null;
+		}
+
+		return match[ 4 ];
 	}
 
-	const newPackageRegExp = new RegExp( `\\[${ packageName.replace( '/', '\\/' ) }\\].*v([\\d.]+)` );
+	// At this stage, we know that it will be the first release of `packageName`.
+	// If the specified version is correct, let's use it.
+	const newPackageRegExp = new RegExp( `\\[${ packageName.replace( '/', '\\/' ) }\\].*v(${ semVer })` );
+	// Groups:
+	// 1. New version.
+	// 2. New version - pre-release part.
+
 	match = changelog.match( newPackageRegExp );
 
-	return match ? match[ 1 ] : null;
+	if ( !match ) {
+		return null;
+	}
+
+	// The version does not match to `x.y.z-prerelease.n`, npm will not allow publish it.
+	if ( match[ 2 ] && !match[ 2 ].startsWith( '-' ) ) {
+		return null;
+	}
+
+	return match[ 1 ];
 }
 
 /**
