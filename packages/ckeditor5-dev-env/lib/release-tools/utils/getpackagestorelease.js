@@ -78,14 +78,14 @@ module.exports = function getPackagesToRelease( pathsToPackages, options ) {
 // @param {String} packageName Package to look.
 // @returns {String|null} `null` if the version was not found.
 function findVersionInChangelog( changelog, packageName ) {
-	const existingPackageRegExp = new RegExp( `\\[${ packageName.replace( '/', '\\/' ) }\\].*v[\\d.]+\\ => v([\\d.]+)` );
+	const existingPackageRegExp = new RegExp( `\\[${ packageName.replace( '/', '\\/' ) }\\].*v[\\d.]+\\ => v([\\d.a-z]+)` );
 	let match = changelog.match( existingPackageRegExp );
 
 	if ( match ) {
 		return match[ 1 ];
 	}
 
-	const newPackageRegExp = new RegExp( `\\[${ packageName.replace( '/', '\\/' ) }\\].*v([\\d.]+)` );
+	const newPackageRegExp = new RegExp( `\\[${ packageName.replace( '/', '\\/' ) }\\].*v([\\d.a-z]+)` );
 	match = changelog.match( newPackageRegExp );
 
 	return match ? match[ 1 ] : null;
