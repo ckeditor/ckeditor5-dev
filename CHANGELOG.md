@@ -5,7 +5,7 @@ Changelog
 
 ### Bug fixes
 
-* The `getPackagesToRelease()` function handles pre-release versions properly. Closes [ckeditor/ckeditor5#10583](https://github.com/ckeditor/ckeditor5/issues/10583). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ec16756e3de92e89bc933d706951d10b5bcb5798))
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `getPackagesToRelease()` function handles pre-release versions properly. Closes [ckeditor/ckeditor5#10583](https://github.com/ckeditor/ckeditor5/issues/10583). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ec16756e3de92e89bc933d706951d10b5bcb5798))
 
 ### Released packages
 
