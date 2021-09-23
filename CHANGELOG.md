@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [25.4.4](https://github.com/ckeditor/ckeditor5-dev/compare/v25.4.3...v25.4.4) (2021-09-23)
+
+### Bug fixes
+
+* The `getPackagesToRelease()` function handles pre-release versions properly. Closes [ckeditor/ckeditor5#10583](https://github.com/ckeditor/ckeditor5/issues/10583). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ec16756e3de92e89bc933d706951d10b5bcb5798))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v25.4.3 => v25.4.4
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v25.4.3 => v25.4.4
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v25.4.3 => v25.4.4
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v25.4.3 => v25.4.4
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v25.4.3 => v25.4.4
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v25.4.3 => v25.4.4
+</details>
+
+
 ## [25.4.3](https://github.com/ckeditor/ckeditor5-dev/compare/v25.4.2...v25.4.3) (2021-09-22)
 
 ### Other changes
