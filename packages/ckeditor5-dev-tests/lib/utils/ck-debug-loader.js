@@ -14,7 +14,13 @@
  */
 module.exports = function ckDebugLoader( source, map ) {
 	source = source.replace( /\/\/ @if (!?[\w]+) \/\/(.+)/g, ( match, flagName, body ) => {
-		// `this.query` comes from the webpack loader configuration.
+		// `this.query` comes from the webpack loader configuration specified as the loader options.
+		// {
+		//   loader: 'path-to-the-file',
+		//   options: { // <-- `this.query`
+		//     debugFlags: true
+		//   }
+		// }
 
 		// Do not uncomment the code if the flag is missing / falsy.
 		if ( !this.query.debugFlags.includes( flagName ) ) {

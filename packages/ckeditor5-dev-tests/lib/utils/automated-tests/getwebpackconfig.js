@@ -37,25 +37,28 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 								}
 							}
 						},
+						'css-loader',
 						{
 							loader: 'postcss-loader',
-							options: getPostCssConfig( {
-								themeImporter: {
-									themePath: options.themePath
-								},
-								minify: true
-							} )
+							options: {
+								postcssOptions: getPostCssConfig( {
+									themeImporter: {
+										themePath: options.themePath
+									},
+									minify: true
+								} )
+							}
 						}
 					]
 				},
 				{
-					test: /\.(txt|html|rtf)$/,
+					test: /\.(txt|html| rtf)$/,
 					use: [ 'raw-loader' ]
 				},
 				{
 					test: /\.js$/,
 					loader: require.resolve( '../ck-debug-loader' ),
-					query: {
+					options: {
 						debugFlags: options.debug
 					}
 				}
@@ -71,12 +74,9 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	};
 
 	if ( options.sourceMap ) {
-		// Note: karma-sourcemap-loader works only with inline source maps.
-		// See https://github.com/webpack/karma-webpack/pull/76.
-		// We use cheap source maps for manual tests because Safari
-		// had problems with inline source maps and ES6. This means that
-		// you can't have source maps in automated tests in Safari.
-		config.devtool = 'inline-source-map';
+		// Available list: https://webpack.js.org/configuration/devtool/.
+		// In Safari, none of them seems to work.
+		config.devtool = 'cheap-source-map';
 	}
 
 	if ( options.coverage ) {
@@ -88,7 +88,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 				exclude: [
 					new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
 				],
-				query: {
+				options: {
 					esModules: true
 				}
 			}
@@ -111,7 +111,6 @@ function getPathsToIncludeForCoverage( globs ) {
 		}, [] )
 		.map( glob => {
 			const matchCKEditor5 = glob.match( /\/(ckeditor5-[^/]+)\// );
-			const matchCKEditor = glob.match( /\/(ckeditor-[^/]+)\// );
 
 			if ( matchCKEditor5 ) {
 				const packageName = matchCKEditor5[ 1 ]
@@ -119,12 +118,6 @@ function getPathsToIncludeForCoverage( globs ) {
 					// Convert it to /ckeditor5-(?!engine)[^/]\/src\//.
 					.replace( /ckeditor5-!\(([^)]+)\)\*/, 'ckeditor5-(?!$1)[^' + escapedPathSep + ']+' )
 					.replace( 'ckeditor5-*', 'ckeditor5-[a-z]+' );
-
-				return new RegExp( packageName + escapedPathSep + 'src' + escapedPathSep );
-			} else if ( matchCKEditor ) {
-				const packageName = matchCKEditor[ 1 ]
-					.replace( /ckeditor-!\(([^)]+)\)\*/, 'ckeditor-(?!$1)[^' + escapedPathSep + ']+' )
-					.replace( 'ckeditor-*', 'ckeditor-[a-z]+' );
 
 				return new RegExp( packageName + escapedPathSep + 'src' + escapedPathSep );
 			}

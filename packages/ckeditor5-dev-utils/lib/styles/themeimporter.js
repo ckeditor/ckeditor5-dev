@@ -41,23 +41,28 @@ const getPackageName = require( './utils/getpackagename' );
  * @param {ThemeImporterOptions} pluginOptions
  * @returns {Function} A PostCSS plugin.
  */
-module.exports = postcss.plugin( 'postcss-ckeditor5-theme-importer', ( pluginOptions = {} ) => {
-	return ( root, result ) => {
-		// Clone the options, don't alter the original options object.
-		const options = Object.assign( {}, pluginOptions, {
-			debug: pluginOptions.debug || false,
-			postCssOptions: {
-				plugins: [
-					require( 'postcss-import' )(),
-					require( './themelogger' )()
-				]
-			},
-			root, result
-		} );
+module.exports = ( pluginOptions = {} ) => {
+	return {
+		postcssPlugin: 'postcss-ckeditor5-theme-importer',
+		Once( root, { result } ) {
+			// Clone the options, don't alter the original options object.
+			const options = Object.assign( {}, pluginOptions, {
+				debug: pluginOptions.debug || false,
+				postCssOptions: {
+					plugins: [
+						require( 'postcss-import' )(),
+						require( './themelogger' )()
+					]
+				},
+				root, result
+			} );
 
-		return importThemeFile( options );
+			return importThemeFile( options );
+		}
 	};
-} );
+};
+
+module.exports.postcss = true;
 
 // Imports a complementary theme file corresponding with a CSS file being processed by
 // PostCSS, if such theme file exists.

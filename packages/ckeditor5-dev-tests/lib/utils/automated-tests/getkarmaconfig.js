@@ -39,7 +39,7 @@ module.exports = function getKarmaConfig( options ) {
 		basePath,
 
 		// Frameworks to use. Available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-		frameworks: [ 'mocha', 'sinon-chai' ],
+		frameworks: [ 'mocha', 'sinon-chai', 'webpack' ],
 
 		// For unknown reasons, sometimes Karma does not fill the list automatically. So, all available plugins must be specified manually.
 		plugins: [
