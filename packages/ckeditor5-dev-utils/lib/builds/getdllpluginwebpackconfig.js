@@ -83,14 +83,17 @@ module.exports = function getDllPluginWebpackConfig( options ) {
 								}
 							}
 						},
+						'css-loader',
 						{
 							loader: 'postcss-loader',
-							options: styles.getPostCssConfig( {
-								themeImporter: {
-									themePath: options.themePath
-								},
-								minify: true
-							} )
+							options: {
+								postcssOptions: styles.getPostCssConfig( {
+									themeImporter: {
+										themePath: options.themePath
+									},
+									minify: true
+								} )
+							}
 						}
 					]
 				}
