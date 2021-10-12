@@ -295,27 +295,5 @@ describe( 'parseArguments()', () => {
 				expect( options.files ).to.deep.equal( [ 'core', 'engine', 'foo-1', 'foo-2', 'bar-1', 'bar-2' ] );
 			}
 		);
-
-		it(
-			'returns an array of packages to tests when `--repositories` is specified ' +
-			'(removes "ckeditor-" prefix)',
-			() => {
-				stubs.cwd.returns( '/home/project' );
-
-				stubs.tools.isDirectory.withArgs( '/home/project/external' ).returns( false );
-				stubs.tools.readPackageName.withArgs( '/home/project' ).returns( 'ckeditor5' );
-				stubs.tools.getDirectories.withArgs( '/home/project/packages' ).returns( [
-					'ckeditor-core',
-					'ckeditor-engine'
-				] );
-
-				const options = parseArguments( [
-					'--repositories',
-					'ckeditor5'
-				] );
-
-				expect( options.files ).to.deep.equal( [ 'core', 'engine' ] );
-			}
-		);
 	} );
 } );
