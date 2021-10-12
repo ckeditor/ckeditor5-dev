@@ -39,7 +39,7 @@ const getPackageName = require( './utils/getpackagename' );
  * [documentation](http://api.postcss.org/postcss.html#.plugin) of the project.
  *
  * @param {ThemeImporterOptions} pluginOptions
- * @returns {Function} A PostCSS plugin.
+ * @returns {Object} A PostCSS plugin.
  */
 module.exports = ( pluginOptions = {} ) => {
 	return {

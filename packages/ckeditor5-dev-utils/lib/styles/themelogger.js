@@ -11,7 +11,7 @@
  * A plugin that prepends a path to the file in the comment for each file
  * processed by PostCSS.
  *
- * @returns {Function} A PostCSS plugin.
+ * @returns {Object} A PostCSS plugin.
  */
 module.exports = () => {
 	return {
