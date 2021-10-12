@@ -51,6 +51,8 @@ module.exports = ( pluginOptions = {} ) => {
 				postCssOptions: {
 					plugins: [
 						require( 'postcss-import' )(),
+						require( 'postcss-mixins' )(),
+						require( 'postcss-nesting' )(),
 						require( './themelogger' )()
 					]
 				},
