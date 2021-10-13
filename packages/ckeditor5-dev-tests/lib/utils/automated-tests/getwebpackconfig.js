@@ -59,7 +59,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 					]
 				},
 				{
-					test: /\.(txt|html| rtf)$/,
+					test: /\.(txt|html|rtf)$/,
 					use: [ 'raw-loader' ]
 				},
 				{
