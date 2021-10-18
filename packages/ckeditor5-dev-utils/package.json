@@ -9,23 +9,22 @@
     "acorn": "^6.2.1",
     "acorn-walk": "^6.2.0",
     "chalk": "^3.0.0",
-    "cssnano": "^5.0.8",
+    "cssnano": "^4.0.0",
     "del": "^5.0.0",
     "escodegen": "^1.9.0",
     "fs-extra": "^8.1.0",
     "javascript-stringify": "^1.6.0",
     "pofile": "^1.0.9",
-    "postcss-import": "^14.0.2",
-    "postcss-loader": "^4.3.0",
-    "postcss-mixins": "^8.1.0",
-    "postcss-nesting": "^8.0.1",
-    "raw-loader": "^4.0.2",
-    "semver": "^7.3.5",
+    "postcss": "^7.0.39",
+    "postcss-import": "^12.0.0",
+    "postcss-loader": "^3.0.0",
+    "postcss-mixins": "^6.2.0",
+    "postcss-nesting": "^7.0.0",
+    "raw-loader": "^4.0.1",
     "shelljs": "^0.8.1",
     "style-loader": "^2.0.0",
-    "terser-webpack-plugin": "^5.2.4",
-    "through2": "^3.0.1",
-    "webpack": "^5.58.1"
+    "terser-webpack-plugin": "^4.2.3",
+    "through2": "^3.0.1"
   },
   "devDependencies": {
     "chai": "^4.1.2",
@@ -36,7 +35,7 @@
     "vinyl": "^2.1.0"
   },
   "peerDependencies": {
-    "postcss": "^7.0.0 || ^8.0.0"
+    "webpack": "^4.43.0 || ^5.24.0"
   },
   "engines": {
     "node": ">=12.0.0",
