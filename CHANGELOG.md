@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [25.4.5](https://github.com/ckeditor/ckeditor5-dev/compare/v25.4.4...v25.4.5) (2021-10-26)
+
+### Bug fixes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `releaseSubRepositories()` task does not check the npm version if a package will not be published anyway. Closes [ckeditor/ckeditor5#10639](https://github.com/ckeditor/ckeditor5/issues/10639). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/8efbafbdc664a59fb011472ebd8096fd7314ce82))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v25.4.4 => v25.4.5
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v25.4.4 => v25.4.5
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v25.4.4 => v25.4.5
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v25.4.4 => v25.4.5
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v25.4.4 => v25.4.5
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v25.4.4 => v25.4.5
+</details>
+
+
 ## [25.4.4](https://github.com/ckeditor/ckeditor5-dev/compare/v25.4.3...v25.4.4) (2021-09-23)
 
 ### Bug fixes
