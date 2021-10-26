@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-docs",
-  "version": "25.4.4",
+  "version": "25.4.5",
   "description": "Tasks used to build and verify the documentation for CKEditor 5.",
   "keywords": [],
   "main": "lib/index.js",
