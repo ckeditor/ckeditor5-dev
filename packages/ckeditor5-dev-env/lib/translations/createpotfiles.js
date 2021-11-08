@@ -23,21 +23,29 @@ const corePackageName = 'ckeditor5-core';
  * @param {Array.<String>} options.sourceFiles An array of source files that contain messages to translate.
  * @param {Array.<String>} options.packagePaths An array of paths to packages, which will be used to find message contexts.
  * @param {String} options.corePackagePath A relative to `process.cwd()` path to the `@ckeditor/ckeditor5-core` package.
+ * @param {Boolean} [options.ignoreUnusedCorePackageContexts=false] Whether to hide unused context errors related to
+ * the `@ckeditor/ckeditor5-core` package.
+ * @param {Boolean} [options.skipLicenseHeader=false] Whether to skip the license header in created `*.pot` files.
+ * @param {String} [options.outputDirectory] An absolute path to the directory where the results should be saved. By default it is
+ * the "build/.transifex" directory in the current work directory.
  * @param {Logger} [logger] A logger.
  */
 module.exports = function createPotFiles( {
 	sourceFiles,
 	packagePaths,
 	corePackagePath,
+	ignoreUnusedCorePackageContexts = false,
+	skipLicenseHeader = false,
+	outputDirectory = path.join( process.cwd(), 'build', '.transifex' ),
 	logger = defaultLogger
 } ) {
 	const packageContexts = getPackageContexts( packagePaths, corePackagePath );
 	const sourceMessages = collectSourceMessages( { sourceFiles, logger } );
 
 	const errors = [].concat(
-		assertNoMissingContext( { packageContexts, sourceMessages, logger } ),
-		assertAllContextUsed( { packageContexts, sourceMessages, logger } ),
-		assertNoRepeatedContext( { packageContexts, logger } )
+		assertNoMissingContext( { packageContexts, sourceMessages } ),
+		assertAllContextUsed( { packageContexts, sourceMessages, ignoreUnusedCorePackageContexts, corePackagePath } ),
+		assertNoRepeatedContext( { packageContexts } )
 	);
 
 	for ( const error of errors ) {
@@ -45,7 +53,7 @@ module.exports = function createPotFiles( {
 		process.exitCode = 1;
 	}
 
-	removeExistingPotFiles();
+	removeExistingPotFiles( outputDirectory );
 
 	for ( const { packageName, content } of packageContexts.values() ) {
 		// Skip generating packages for the core package if the core package was not
@@ -53,8 +61,6 @@ module.exports = function createPotFiles( {
 		if ( packageName === corePackageName && !packagePaths.includes( corePackagePath ) ) {
 			continue;
 		}
-
-		const potFileHeader = createPotFileHeader();
 
 		// Create message from source messages and corresponding contexts.
 		const messages = Object.keys( content ).map( messageId => {
@@ -65,11 +71,13 @@ module.exports = function createPotFiles( {
 		} );
 
 		const potFileContent = createPotFileContent( messages );
+		const fileContent = skipLicenseHeader ? potFileContent : createPotFileHeader() + potFileContent;
 
 		savePotFile( {
 			packageName,
-			fileContent: potFileHeader + potFileContent,
-			logger
+			fileContent,
+			logger,
+			outputDirectory
 		} );
 	}
 };
@@ -154,13 +162,20 @@ function assertNoMissingContext( { packageContexts, sourceMessages } ) {
  * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
  * @returns {Array.<String>}
  */
-function assertAllContextUsed( { packageContexts, sourceMessages } ) {
+function assertAllContextUsed( options ) {
+	const { packageContexts, sourceMessages, ignoreUnusedCorePackageContexts, corePackagePath } = options;
+
 	const usedContextMap = new Map();
 	const errors = [];
 
 	// TODO - Message id might contain the `/` character.
 
 	for ( const [ packageName, context ] of packageContexts ) {
+		// Ignore errors from the `@ckeditor/ckeditor5-core` package.
+		if ( ignoreUnusedCorePackageContexts && context.packagePath.includes( corePackagePath ) ) {
+			continue;
+		}
+
 		for ( const id in context.content ) {
 			usedContextMap.set( packageName + '/' + id, false );
 		}
@@ -208,10 +223,8 @@ function assertNoRepeatedContext( { packageContexts } ) {
 	return errors;
 }
 
-function removeExistingPotFiles() {
-	const pathToTransifexDirectory = path.join( process.cwd(), 'build', '.transifex' );
-
-	del.sync( pathToTransifexDirectory );
+function removeExistingPotFiles( outputDirectory ) {
+	del.sync( outputDirectory );
 }
 
 /**
@@ -221,10 +234,11 @@ function removeExistingPotFiles() {
  * @param {Object} options
  * @param {Logger} options.logger
  * @param {String} options.packageName
+ * @param {String} options.outputDirectory
  * @param {String} options.fileContent
  */
-function savePotFile( { packageName, fileContent, logger } ) {
-	const outputFilePath = path.join( process.cwd(), 'build', '.transifex', packageName, 'en.pot' );
+function savePotFile( { packageName, fileContent, outputDirectory, logger } ) {
+	const outputFilePath = path.join( outputDirectory, packageName, 'en.pot' );
 
 	fs.outputFileSync( outputFilePath, fileContent );
 
