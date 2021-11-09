@@ -13,28 +13,38 @@ const Table = require( 'cli-table' );
 const chalk = require( 'chalk' );
 
 /**
- * Uploads translations to the Transifex from collected files that are saved at 'ckeditor5/build/.transifex'.
+ * Uploads translations to the Transifex from collected files that are saved by default in the 'ckeditor5/build/.transifex' directory.
  *
- * @param {Object} loginConfig
+ * @param {Object} config
  * @param {String} config.token Token to the Transifex API.
+ * @param {String} config.url Transifex API URL where the request should be send.
+ * @param {String} config.translationsDirectory An absolute path where to look for the translation files.
+ * @returns {Promise}
  */
-module.exports = function upload( loginConfig ) {
-	const cwd = process.cwd().split( path.sep ).join( path.posix.sep );
-	const pathToPoTranslations = path.posix.join( cwd, 'build', '.transifex' );
+module.exports = function upload( config ) {
+	// TODO: Validate config.
+	// The following options are required:
+	// * token
+	// * url
+
+	// Make sure to use unix paths.
+	const pathToPoTranslations = config.translationsDirectory.split( path.sep ).join( path.posix.sep );
+
 	const potFiles = fs.readdirSync( pathToPoTranslations ).map( packageName => ( {
 		packageName,
 		path: path.posix.join( pathToPoTranslations, packageName, 'en.pot' )
 	} ) );
+
 	const summaryCollection = {
 		created: [],
 		updated: []
 	};
 
 	return Promise.resolve()
-		.then( () => transifexService.getResources( loginConfig ) )
+		.then( () => transifexService.getResources( config ) )
 		.then( resources => resources.map( resource => resource.slug ) )
 		.then( uploadedPackageNames => getUploadedPackages( potFiles, uploadedPackageNames ) )
-		.then( areUploadedResources => createOrUpdateResources( loginConfig, areUploadedResources, potFiles, summaryCollection ) )
+		.then( areUploadedResources => createOrUpdateResources( config, areUploadedResources, potFiles, summaryCollection ) )
 		.then( () => {
 			logger.info( 'All resources uploaded.\n' );
 
@@ -60,7 +70,7 @@ function createOrUpdateResources( loginConfig, areUploadedResources, potFiles, s
 
 function createOrUpdateResource( config, potFile, isUploadedResource, summaryCollection ) {
 	const { packageName, path } = potFile;
-	const resConfig = Object.assign( {}, config, {
+	const requestConfig = Object.assign( {}, config, {
 		name: packageName,
 		slug: packageName,
 		content: fs.createReadStream( path )
@@ -69,13 +79,13 @@ function createOrUpdateResource( config, potFile, isUploadedResource, summaryCol
 	logger.info( `Processing "${ packageName }"...` );
 
 	if ( isUploadedResource ) {
-		return transifexService.putResourceContent( resConfig )
+		return transifexService.putResourceContent( requestConfig )
 			.then( parsedResponse => {
 				summaryCollection.updated.push( [ packageName, parsedResponse ] );
 			} );
 	}
 
-	return transifexService.postResource( resConfig )
+	return transifexService.postResource( requestConfig )
 		.then( parsedResponse => {
 			summaryCollection.created.push( [ packageName, parsedResponse ] );
 		} );

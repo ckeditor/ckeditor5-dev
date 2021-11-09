@@ -26,7 +26,7 @@ const corePackageName = 'ckeditor5-core';
  * @param {Boolean} [options.ignoreUnusedCorePackageContexts=false] Whether to hide unused context errors related to
  * the `@ckeditor/ckeditor5-core` package.
  * @param {Boolean} [options.skipLicenseHeader=false] Whether to skip the license header in created `*.pot` files.
- * @param {String} [options.outputDirectory] An absolute path to the directory where the results should be saved. By default it is
+ * @param {String} [options.translationsDirectory] An absolute path to the directory where the results should be saved. By default it is
  * the "build/.transifex" directory in the current work directory.
  * @param {Logger} [logger] A logger.
  */
@@ -34,9 +34,9 @@ module.exports = function createPotFiles( {
 	sourceFiles,
 	packagePaths,
 	corePackagePath,
+	translationsDirectory,
 	ignoreUnusedCorePackageContexts = false,
 	skipLicenseHeader = false,
-	outputDirectory = path.join( process.cwd(), 'build', '.transifex' ),
 	logger = defaultLogger
 } ) {
 	const packageContexts = getPackageContexts( packagePaths, corePackagePath );
@@ -53,7 +53,7 @@ module.exports = function createPotFiles( {
 		process.exitCode = 1;
 	}
 
-	removeExistingPotFiles( outputDirectory );
+	removeExistingPotFiles( translationsDirectory );
 
 	for ( const { packageName, content } of packageContexts.values() ) {
 		// Skip generating packages for the core package if the core package was not
@@ -77,7 +77,7 @@ module.exports = function createPotFiles( {
 			packageName,
 			fileContent,
 			logger,
-			outputDirectory
+			translationsDirectory
 		} );
 	}
 };
@@ -101,12 +101,14 @@ function getPackageContexts( packagePaths, corePackagePath ) {
 			const pathToContext = path.join( packagePath, langContextSuffix );
 			const packageName = packagePath.split( /[\\/]/ ).pop();
 
-			return [ packageName, {
-				filePath: pathToContext,
-				content: JSON.parse( fs.readFileSync( pathToContext, 'utf-8' ) ),
-				packagePath,
-				packageName
-			} ];
+			return [
+				packageName, {
+					filePath: pathToContext,
+					content: JSON.parse( fs.readFileSync( pathToContext, 'utf-8' ) ),
+					packagePath,
+					packageName
+				}
+			];
 		} );
 
 	return new Map( mapEntries );
@@ -223,8 +225,8 @@ function assertNoRepeatedContext( { packageContexts } ) {
 	return errors;
 }
 
-function removeExistingPotFiles( outputDirectory ) {
-	del.sync( outputDirectory );
+function removeExistingPotFiles( translationsDirectory ) {
+	del.sync( translationsDirectory );
 }
 
 /**
@@ -234,11 +236,11 @@ function removeExistingPotFiles( outputDirectory ) {
  * @param {Object} options
  * @param {Logger} options.logger
  * @param {String} options.packageName
- * @param {String} options.outputDirectory
+ * @param {String} options.translationsDirectory
  * @param {String} options.fileContent
  */
-function savePotFile( { packageName, fileContent, outputDirectory, logger } ) {
-	const outputFilePath = path.join( outputDirectory, packageName, 'en.pot' );
+function savePotFile( { packageName, fileContent, translationsDirectory, logger } ) {
+	const outputFilePath = path.join( translationsDirectory, packageName, 'en.pot' );
 
 	fs.outputFileSync( outputFilePath, fileContent );
 
@@ -332,7 +334,7 @@ function containsContextFile( packageDirectory ) {
  * @property {String} packagePath
  * @property {String} context
  * @property {String} [plural]
-*/
+ */
 
 /**
  * @typedef {Object} Context

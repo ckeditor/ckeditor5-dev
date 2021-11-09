@@ -11,6 +11,11 @@ const path = require( 'path' );
 const chalk = require( 'chalk' );
 
 const task = process.argv[ 2 ];
+const cwd = process.cwd();
+
+const PROJECT_URL = 'https://www.transifex.com/api/2/project/ckeditor5';
+
+// TODO: Remove this file and create dedicated scripts in the CKEditor 5 project.
 
 const tasks = {
 	/**
@@ -29,6 +34,7 @@ const tasks = {
 			sourceFiles: getCKEditor5SourceFiles( { includeExternalDirectory } ),
 			packagePaths: getCKEditor5PackagePaths( { includeExternalDirectory } ),
 			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: path.join( cwd, 'build', '.transifex' ),
 			logger
 		} );
 	},
@@ -45,7 +51,9 @@ const tasks = {
 		const token = await getToken();
 
 		await uploadPotFiles( {
-			token
+			token,
+			url: PROJECT_URL,
+			translationsDirectory: path.posix.join( cwd, 'build', '.transifex' )
 		} );
 	},
 
@@ -65,7 +73,12 @@ const tasks = {
 			path.join( 'packages', packageName )
 		] ) );
 
-		await downloadTranslations( { token, packages } );
+		await downloadTranslations( {
+			token,
+			packages,
+			cwd,
+			url: PROJECT_URL
+		} );
 	}
 };
 
