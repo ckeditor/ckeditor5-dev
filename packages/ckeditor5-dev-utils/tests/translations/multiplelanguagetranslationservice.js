@@ -757,8 +757,8 @@ describe( 'translations', () => {
 				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
 				expect( assets[ 0 ].outputBody ).to.have.length.greaterThan( 0 );
 
-				expect( warningSpy ).to.have.not.be.called;
-				expect( errorSpy ).to.have.not.be.called;
+				expect( warningSpy.called ).to.equal( false );
+				expect( errorSpy.called ).to.equal( false );
 			} );
 
 			it( 'should emit all files to a file specified by the `translationsOutputFile` option when it is specified (as regexp)', () => {
@@ -802,8 +802,8 @@ describe( 'translations', () => {
 				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
 				expect( assets[ 0 ].outputBody ).to.have.length.greaterThan( 0 );
 
-				expect( warningSpy ).to.have.not.be.called;
-				expect( errorSpy ).to.have.not.be.called;
+				expect( warningSpy.called ).to.equal( false );
+				expect( errorSpy.called ).to.equal( false );
 			} );
 
 			it( 'should emit all files to a file specified by the `translationsOutputFile` option when it is specified (as func.)', () => {
@@ -847,8 +847,8 @@ describe( 'translations', () => {
 				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
 				expect( assets[ 0 ].outputBody ).to.have.length.greaterThan( 0 );
 
-				expect( warningSpy ).to.have.not.be.called;
-				expect( errorSpy ).to.have.not.be.called;
+				expect( warningSpy.called ).to.equal( false );
+				expect( errorSpy.called ).to.equal( false );
 			} );
 
 			it( 'should use the `outputDirectory` option for translation assets generated as new files', () => {
@@ -886,8 +886,8 @@ describe( 'translations', () => {
 				expect( assets[ 0 ].outputPath ).to.equal( 'ckeditor.js' );
 				expect( assets[ 1 ].outputPath ).to.equal( path.join( 'custom-lang-path', 'en.js' ) );
 
-				expect( warningSpy ).to.have.not.be.called;
-				expect( errorSpy ).to.have.not.be.called;
+				expect( warningSpy.called ).to.equal( false );
+				expect( errorSpy.called ).to.equal( false );
 			} );
 
 			it(

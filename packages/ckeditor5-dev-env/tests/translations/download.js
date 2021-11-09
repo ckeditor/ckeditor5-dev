@@ -6,7 +6,6 @@
 'use strict';
 
 const sinon = require( 'sinon' );
-const path = require( 'path' );
 const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 
@@ -43,8 +42,6 @@ describe( 'download', () => {
 				getTranslation: sinon.stub().callsFake( ( { lang, slug } ) => Promise.resolve( translations[ slug ][ lang ] ) )
 			}
 		};
-
-		sinon.stub( process, 'cwd' ).returns( 'workspace' );
 
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
 			translations: stubs.translationUtils,
@@ -88,6 +85,8 @@ describe( 'download', () => {
 		};
 
 		await download( {
+			cwd: '/workspace',
+			url: 'https://api.example.com',
 			token: 'secretToken',
 			packages: new Map( [
 				[ 'ckeditor5-core', 'foo/ckeditor5-core' ]
@@ -97,15 +96,8 @@ describe( 'download', () => {
 		sinon.assert.calledOnce( stubs.fs.removeSync );
 		sinon.assert.calledOnce( stubs.fs.outputFileSync );
 
-		sinon.assert.calledWithExactly(
-			stubs.fs.removeSync,
-			path.join( 'workspace', 'foo', 'ckeditor5-core', 'lang', 'translations' )
-		);
-
-		sinon.assert.callOrder(
-			stubs.fs.removeSync,
-			stubs.fs.outputFileSync
-		);
+		sinon.assert.calledWithExactly( stubs.fs.removeSync, '/workspace/foo/ckeditor5-core/lang/translations' );
+		sinon.assert.callOrder( stubs.fs.removeSync, stubs.fs.outputFileSync );
 	} );
 
 	it( 'should download translations for non-empty resources', async () => {
@@ -144,6 +136,8 @@ describe( 'download', () => {
 		};
 
 		await download( {
+			cwd: '/workspace',
+			url: 'https://api.example.com',
 			token: 'secretToken',
 			packages: new Map( [
 				[ 'ckeditor5-core', 'foo/ckeditor5-core' ],
@@ -155,45 +149,35 @@ describe( 'download', () => {
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			path.join( 'workspace', 'foo', 'ckeditor5-core', 'lang', 'translations', 'pl.po' ),
+			'/workspace/foo/ckeditor5-core/lang/translations/pl.po',
 			'ckeditor5-core-pl-content'
 		);
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			path.join( 'workspace', 'bar', 'ckeditor5-ui', 'lang', 'translations', 'de.po' ),
+			'/workspace/bar/ckeditor5-ui/lang/translations/de.po',
 			'ckeditor5-ui-de-content'
 		);
 	} );
 
-	it( 'should skip creating a resource with no translations', () => {
+	it( 'should skip creating a resource with no translations', async () => {
 		mockery.registerMock( './languagecodemap.json', {} );
 
-		resources = [
-			{ slug: 'ckeditor5-core' }
-		];
+		resources = [];
+		resourcesDetails = {};
+		translations = {};
+		fileContents = {};
 
-		resourcesDetails = {
-			'ckeditor5-core': {
-				available_languages: [ {
-					code: 'pl'
-				} ]
-			}
-		};
+		await download( {
+			cwd: '/workspace',
+			url: 'https://api.example.com',
+			token: 'secretToken',
+			packages: new Map( [
+				[ 'ckeditor5-non-existing', 'foo/ckeditor5-non-existing' ]
+			] )
+		} );
 
-		translations = {
-			'ckeditor5-core': {
-				pl: { content: 'ckeditor5-core-pl-content' }
-			}
-		};
-
-		fileContents = {
-			'ckeditor5-core-pl-content': { save: 'save_pl' }
-		};
-
-		// TODO: Should it be called? It's rather a rare case anyway.
 		sinon.assert.notCalled( stubs.fs.removeSync );
-
 		sinon.assert.notCalled( stubs.fs.outputFileSync );
 	} );
 
@@ -205,7 +189,6 @@ describe( 'download', () => {
 			{ slug: 'ckeditor5-ui' }
 		];
 
-		// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 		resourcesDetails = {
 			'ckeditor5-core': {
 				available_languages: [ {
@@ -234,6 +217,8 @@ describe( 'download', () => {
 		};
 
 		await download( {
+			cwd: '/workspace',
+			url: 'https://api.example.com',
 			token: 'secretToken',
 			packages: new Map( [
 				[ 'ckeditor5-core', 'foo/ckeditor5-core' ],
@@ -243,13 +228,13 @@ describe( 'download', () => {
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			path.join( 'workspace', 'bar', 'ckeditor5-ui', 'lang', 'translations', 'en_AU.po' ),
+			'/workspace/bar/ckeditor5-ui/lang/translations/en_AU.po',
 			'ckeditor5-ui-en-content'
 		);
 	} );
 
 	it( 'should fail with an error when the transifex service responses with an error', async () => {
-		const error = new Error();
+		const error = new Error( 'An example error.' );
 
 		stubs.transifexService.getResources.rejects( error );
 
@@ -261,10 +246,13 @@ describe( 'download', () => {
 					[ 'ckeditor5-ui', 'bar/ckeditor5-ui' ]
 				] )
 			} );
-
-			throw new Error( 'Expected method to throw an error.' );
 		} catch ( err ) {
 			expect( err ).to.equal( error );
 		}
+
+		expect( stubs.transifexService.getResources.called ).to.equal( true );
 	} );
+
+	// TODO: Create a test that validates the input object.
+	// TODO: Create a test that verifies the `config.simplifyLicenseHeader` option is passed correctly.
 } );

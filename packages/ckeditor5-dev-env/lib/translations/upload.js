@@ -26,6 +26,7 @@ module.exports = function upload( config ) {
 	// The following options are required:
 	// * token
 	// * url
+	// * translationsDirectory
 
 	// Make sure to use unix paths.
 	const pathToPoTranslations = config.translationsDirectory.split( path.sep ).join( path.posix.sep );
@@ -70,11 +71,13 @@ function createOrUpdateResources( loginConfig, areUploadedResources, potFiles, s
 
 function createOrUpdateResource( config, potFile, isUploadedResource, summaryCollection ) {
 	const { packageName, path } = potFile;
-	const requestConfig = Object.assign( {}, config, {
+	const requestConfig = {
+		url: config.url,
+		token: config.token,
 		name: packageName,
 		slug: packageName,
 		content: fs.createReadStream( path )
-	} );
+	};
 
 	logger.info( `Processing "${ packageName }"...` );
 

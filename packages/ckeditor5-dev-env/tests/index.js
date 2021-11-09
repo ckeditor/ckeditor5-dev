@@ -29,10 +29,9 @@ describe( 'dev-env/index', () => {
 				error: sandbox.spy()
 			},
 			translations: {
-				uploadPotFiles: sandbox.spy(),
-				download: sandbox.spy(),
-				createPotFiles: sandbox.spy(),
-				getToken: sandbox.stub()
+				uploadPotFiles: sandbox.stub(),
+				download: sandbox.stub(),
+				createPotFiles: sandbox.stub()
 			},
 			release: {
 				releaseSubRepositories: sandbox.stub(),
@@ -43,7 +42,6 @@ describe( 'dev-env/index', () => {
 		};
 
 		mockery.registerMock( './translations/upload', stubs.translations.uploadPotFiles );
-		mockery.registerMock( './translations/gettoken', stubs.translations.getToken );
 		mockery.registerMock( './translations/download', stubs.translations.download );
 		mockery.registerMock( './translations/createpotfiles', stubs.translations.createPotFiles );
 
@@ -122,40 +120,60 @@ describe( 'dev-env/index', () => {
 
 	describe( 'createPotFiles()', () => {
 		it( 'should create a POT file', () => {
-			tasks.createPotFiles( {
+			stubs.translations.createPotFiles.returns( 'OK.' );
+
+			const output = tasks.createPotFiles( {
 				sourceFiles: [],
 				packagePaths: [],
 				corePackagePath: 'ckeditor5-core'
 			} );
 
 			sinon.assert.calledOnce( stubs.translations.createPotFiles );
+			expect( output ).to.equal( 'OK.' );
 		} );
 	} );
 
 	describe( 'uploadPotFiles()', () => {
 		it( 'should upload translations', async () => {
-			stubs.translations.getToken.resolves( 'token' );
+			stubs.translations.uploadPotFiles.resolves( { status: true } );
 
-			await tasks.uploadPotFiles();
+			const response = await tasks.uploadPotFiles( {
+				token: 'token',
+				url: 'https://api.example.com',
+				translationsDirectory: '/workspace'
+			} );
+
+			expect( response.status ).to.equal( true );
 
 			sinon.assert.calledOnce( stubs.translations.uploadPotFiles );
 			sinon.assert.alwaysCalledWithExactly( stubs.translations.uploadPotFiles, {
-				token: 'token'
+				token: 'token',
+				url: 'https://api.example.com',
+				translationsDirectory: '/workspace'
 			} );
 		} );
 	} );
 
 	describe( 'downloadTranslations()', () => {
 		it( 'should download translations', async () => {
-			stubs.translations.getToken.resolves( 'token' );
+			stubs.translations.download.resolves( { status: true } );
+
 			const packages = [];
 
-			await tasks.downloadTranslations( { packages } );
+			const response = await tasks.downloadTranslations( {
+				packages,
+				token: 'token',
+				url: 'https://api.example.com',
+				cwd: '/workspace'
+			} );
+			expect( response.status ).to.equal( true );
 
 			sinon.assert.calledOnce( stubs.translations.download );
 			sinon.assert.alwaysCalledWithExactly( stubs.translations.download, {
+				packages,
 				token: 'token',
-				packages
+				url: 'https://api.example.com',
+				cwd: '/workspace'
 			} );
 		} );
 	} );

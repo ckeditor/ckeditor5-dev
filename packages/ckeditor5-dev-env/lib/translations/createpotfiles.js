@@ -23,12 +23,11 @@ const corePackageName = 'ckeditor5-core';
  * @param {Array.<String>} options.sourceFiles An array of source files that contain messages to translate.
  * @param {Array.<String>} options.packagePaths An array of paths to packages, which will be used to find message contexts.
  * @param {String} options.corePackagePath A relative to `process.cwd()` path to the `@ckeditor/ckeditor5-core` package.
+ * @param {String} options.translationsDirectory An absolute path to the directory where the results should be saved.
  * @param {Boolean} [options.ignoreUnusedCorePackageContexts=false] Whether to hide unused context errors related to
  * the `@ckeditor/ckeditor5-core` package.
  * @param {Boolean} [options.skipLicenseHeader=false] Whether to skip the license header in created `*.pot` files.
- * @param {String} [options.translationsDirectory] An absolute path to the directory where the results should be saved. By default it is
- * the "build/.transifex" directory in the current work directory.
- * @param {Logger} [logger] A logger.
+ * @param {Logger} [options.logger] A logger.
  */
 module.exports = function createPotFiles( {
 	sourceFiles,
@@ -39,6 +38,13 @@ module.exports = function createPotFiles( {
 	skipLicenseHeader = false,
 	logger = defaultLogger
 } ) {
+	// TODO: Validate config.
+	// The following options are required:
+	// * sourceFiles
+	// * packagePaths
+	// * corePackagePath
+	// * translationsDirectory
+
 	const packageContexts = getPackageContexts( packagePaths, corePackagePath );
 	const sourceMessages = collectSourceMessages( { sourceFiles, logger } );
 

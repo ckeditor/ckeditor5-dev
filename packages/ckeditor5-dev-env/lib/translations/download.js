@@ -28,6 +28,8 @@ module.exports = async function downloadTranslations( config ) {
 	// The following options are required:
 	// * token
 	// * url
+	// * packages
+	// * cwd
 
 	const localizablePackageNames = await getLocalizablePackages( config );
 
