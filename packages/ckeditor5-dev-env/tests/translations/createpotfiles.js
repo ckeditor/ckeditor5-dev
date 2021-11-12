@@ -384,9 +384,78 @@ msgstr "foo"
 		expect( process.exitCode ).to.equal( 1 );
 	} );
 
-	// TODO: Create a test that validates the input object.
-	// TODO: Create a test that verifies the `config.ignoreUnusedCorePackageContexts` option is handled correctly.
-	// TODO: Create a test that verifies the `config.skipLicenseHeader` option is handled correctly.
+	it( 'should fail with an error describing missing properties if the required were not passed to the function', () => {
+		try {
+			createPotFiles( {} );
+		} catch ( err ) {
+			expect( err.message ).to.equal(
+				'The specified object misses the following properties: sourceFiles, packagePaths, corePackagePath, translationsDirectory.'
+			);
+		}
+	} );
+
+	it( 'should not log an error if a context from the core package is unused when ignoreUnusedCorePackageContexts=true', () => {
+		createFakeSourceFileWithMessages( 'packages/ckeditor5-foo/src/foo.js', [
+			{ string: 'foo', id: 'foo_id' }
+		] );
+
+		createFakeContextFile( 'packages/ckeditor5-foo/lang/contexts.json', {
+			foo_id: 'foo_context',
+			bar_id: 'foo_context'
+		} );
+
+		// This context is not used anywhere and the test would fail if the `ignoreUnusedCorePackageContexts` flag is set to `false`.
+		createFakeContextFile( 'packages/ckeditor5-core/lang/contexts.json', {
+			custom_id: 'foo_context'
+		} );
+
+		createPotFiles( {
+			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js' ],
+			packagePaths: [ 'packages/ckeditor5-foo' ],
+			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
+			logger: stubs.logger,
+			ignoreUnusedCorePackageContexts: true
+		} );
+
+		sinon.assert.calledOnce( stubs.logger.error );
+
+		sinon.assert.calledWithExactly(
+			stubs.logger.error,
+			'Unused context: \'bar_id\' in ckeditor5-foo/lang/contexts.json'
+		);
+
+		// Mark the process as failed in case of the error.
+		expect( process.exitCode ).to.equal( 1 );
+	} );
+
+	it( 'should not add the license header in the created a POT file entry when skipLicenseHeader=true', () => {
+		createFakeContextFile( 'packages/ckeditor5-foo/lang/contexts.json', { foo_id: 'foo_context' } );
+
+		createFakeSourceFileWithMessages( 'packages/ckeditor5-foo/src/foo.js', [
+			{ string: 'foo', id: 'foo_id' }
+		] );
+
+		createPotFiles( {
+			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js' ],
+			packagePaths: [ 'packages/ckeditor5-foo' ],
+			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
+			logger: stubs.logger,
+			skipLicenseHeader: true
+		} );
+
+		sinon.assert.calledOnce( stubs.fs.outputFileSync );
+
+		sinon.assert.calledWithExactly(
+			stubs.fs.outputFileSync,
+			'/cwd/build/.transifex/ckeditor5-foo/en.pot',
+			`msgctxt "foo_context"
+msgid "foo_id"
+msgstr "foo"
+`
+		);
+	} );
 
 	function createFakeSourceFileWithMessages( file, messages, errors = [] ) {
 		const content = file + '_content';

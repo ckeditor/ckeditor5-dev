@@ -407,6 +407,58 @@ describe( 'dev-env/translations/upload()', () => {
 			} );
 	} );
 
-	// TODO: Create a test with path normalization (pass Windows path and verify what happens).
-	// TODO: Create a test that validates the input object.
+	it( 'should fail with an error describing missing properties if the required were not passed to the function', async () => {
+		try {
+			await upload( {} );
+		} catch ( err ) {
+			expect( err.message ).to.equal( 'The specified object misses the following properties: token, url, translationsDirectory.' );
+		}
+	} );
+
+	it( 'should create and update resources on the Transifex (Windows paths on input)', () => {
+		packageNames = [
+			'ckeditor5-core',
+			'ckeditor5-ui'
+		];
+
+		serverResources = [ {
+			slug: 'ckeditor5-core'
+		} ];
+
+		fileContents = {
+			'C:/workspace/ckeditor5/build/.transifex/ckeditor5-ui/en.pot': '# ckeditor-ui en.pot content',
+			'C:/workspace/ckeditor5/build/.transifex/ckeditor5-core/en.pot': '# ckeditor-core en.pot content'
+		};
+
+		const uploadOptions = {
+			token: 'secretToken',
+			url: 'https://api.example.com',
+			translationsDirectory: 'C:\\workspace\\ckeditor5\\build\\.transifex'
+		};
+
+		return upload( uploadOptions )
+			.then( () => {
+				sinon.assert.calledOnce( stubs.transifexService.getResources );
+				sinon.assert.calledWithExactly( stubs.fs.readdirSync, 'C:/workspace/ckeditor5/build/.transifex' );
+
+				sinon.assert.calledOnce( stubs.transifexService.postResource );
+				sinon.assert.calledWithExactly( stubs.transifexService.postResource, {
+					token: 'secretToken',
+					url: 'https://api.example.com',
+					name: 'ckeditor5-ui',
+					slug: 'ckeditor5-ui',
+					content: '# ckeditor-ui en.pot content'
+				} );
+
+				sinon.assert.calledOnce( stubs.transifexService.putResourceContent );
+
+				sinon.assert.calledWithExactly( stubs.transifexService.putResourceContent, {
+					token: 'secretToken',
+					url: 'https://api.example.com',
+					slug: 'ckeditor5-core',
+					name: 'ckeditor5-core',
+					content: '# ckeditor-core en.pot content'
+				} );
+			} );
+	} );
 } );

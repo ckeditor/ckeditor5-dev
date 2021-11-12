@@ -26,7 +26,7 @@ module.exports = function upload( config ) {
 	verifyProperties( config, [ 'token', 'url', 'translationsDirectory' ] );
 
 	// Make sure to use unix paths.
-	const pathToPoTranslations = config.translationsDirectory.split( path.sep ).join( path.posix.sep );
+	const pathToPoTranslations = config.translationsDirectory.split( /[\\/]/g ).join( '/' );
 
 	const potFiles = fs.readdirSync( pathToPoTranslations ).map( packageName => ( {
 		packageName,

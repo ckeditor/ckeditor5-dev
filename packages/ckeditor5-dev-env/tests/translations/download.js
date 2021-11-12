@@ -33,7 +33,7 @@ describe( 'dev-env/translations/download()', () => {
 
 			translationUtils: {
 				createDictionaryFromPoFileContent: sinon.stub().callsFake( poFileContent => fileContents[ poFileContent ] ),
-				cleanPoFileContent: x => x
+				cleanPoFileContent: sinon.stub().callsFake( x => x )
 			},
 
 			transifexService: {
@@ -241,6 +241,8 @@ describe( 'dev-env/translations/download()', () => {
 		try {
 			await download( {
 				token: 'secretToken',
+				cwd: '/workspace',
+				url: 'https://api.example.com',
 				packages: new Map( [
 					[ 'ckeditor5-core', 'foo/ckeditor5-core' ],
 					[ 'ckeditor5-ui', 'bar/ckeditor5-ui' ]
@@ -253,6 +255,58 @@ describe( 'dev-env/translations/download()', () => {
 		expect( stubs.transifexService.getResources.called ).to.equal( true );
 	} );
 
-	// TODO: Create a test that validates the input object.
-	// TODO: Create a test that verifies the `config.simplifyLicenseHeader` option is passed correctly.
+	it( 'should fail with an error describing missing properties if the required were not passed to the function', async () => {
+		try {
+			await download( {} );
+		} catch ( err ) {
+			expect( err.message ).to.equal( 'The specified object misses the following properties: token, url, packages, cwd.' );
+		}
+	} );
+
+	it( 'should pass the "simplifyLicenseHeader" flag to the "cleanPoFileContent()" function when set to `true`', async () => {
+		mockery.registerMock( './languagecodemap.json', {} );
+
+		resources = [
+			{ slug: 'ckeditor5-core' }
+		];
+
+		resourcesDetails = {
+			'ckeditor5-core': {
+				available_languages: [ {
+					code: 'pl'
+				} ]
+			}
+		};
+
+		translations = {
+			'ckeditor5-core': {
+				pl: { content: 'ckeditor5-core-pl-content' }
+			}
+		};
+
+		fileContents = {
+			'ckeditor5-core-pl-content': { save: 'save_pl' }
+		};
+
+		await download( {
+			cwd: '/workspace',
+			url: 'https://api.example.com',
+			token: 'secretToken',
+			packages: new Map( [
+				[ 'ckeditor5-core', 'foo/ckeditor5-core' ],
+				[ 'ckeditor5-ui', 'bar/ckeditor5-ui' ]
+			] ),
+			simplifyLicenseHeader: true
+		} );
+
+		sinon.assert.calledOnce( stubs.translationUtils.cleanPoFileContent );
+
+		sinon.assert.calledWithExactly(
+			stubs.translationUtils.cleanPoFileContent,
+			'ckeditor5-core-pl-content',
+			{
+				simplifyLicenseHeader: true
+			}
+		);
+	} );
 } );
