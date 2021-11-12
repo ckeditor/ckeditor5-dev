@@ -9,7 +9,7 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 
-describe( 'download', () => {
+describe( 'dev-env/translations/download()', () => {
 	let stubs, download, resources, resourcesDetails, translations, fileContents;
 
 	beforeEach( () => {

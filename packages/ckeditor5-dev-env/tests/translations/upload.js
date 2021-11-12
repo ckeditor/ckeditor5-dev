@@ -11,7 +11,7 @@ const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 const proxyquire = require( 'proxyquire' );
 
-describe( 'upload', () => {
+describe( 'dev-env/translations/upload()', () => {
 	let sandbox, stubs, upload, packageNames, serverResources, fileContents;
 
 	beforeEach( () => {

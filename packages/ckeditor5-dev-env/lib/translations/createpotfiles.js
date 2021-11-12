@@ -9,8 +9,8 @@ const path = require( 'path' );
 const fs = require( 'fs-extra' );
 const del = require( 'del' );
 const defaultLogger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
-
 const { findMessages } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
+const { verifyProperties } = require( './utils' );
 
 const langContextSuffix = path.join( 'lang', 'contexts.json' );
 const corePackageName = 'ckeditor5-core';
@@ -29,21 +29,18 @@ const corePackageName = 'ckeditor5-core';
  * @param {Boolean} [options.skipLicenseHeader=false] Whether to skip the license header in created `*.pot` files.
  * @param {Logger} [options.logger] A logger.
  */
-module.exports = function createPotFiles( {
-	sourceFiles,
-	packagePaths,
-	corePackagePath,
-	translationsDirectory,
-	ignoreUnusedCorePackageContexts = false,
-	skipLicenseHeader = false,
-	logger = defaultLogger
-} ) {
-	// TODO: Validate config.
-	// The following options are required:
-	// * sourceFiles
-	// * packagePaths
-	// * corePackagePath
-	// * translationsDirectory
+module.exports = function createPotFiles( options ) {
+	verifyProperties( options, [ 'sourceFiles', 'packagePaths', 'corePackagePath', 'translationsDirectory' ] );
+
+	const {
+		sourceFiles,
+		packagePaths,
+		corePackagePath,
+		translationsDirectory,
+		ignoreUnusedCorePackageContexts = false,
+		skipLicenseHeader = false,
+		logger = defaultLogger
+	} = options;
 
 	const packageContexts = getPackageContexts( packagePaths, corePackagePath );
 	const sourceMessages = collectSourceMessages( { sourceFiles, logger } );

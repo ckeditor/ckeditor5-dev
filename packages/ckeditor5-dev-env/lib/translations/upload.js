@@ -8,9 +8,10 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
-const transifexService = require( './transifex-service' );
 const Table = require( 'cli-table' );
 const chalk = require( 'chalk' );
+const transifexService = require( './transifex-service' );
+const { verifyProperties } = require( './utils' );
 
 /**
  * Uploads translations to the Transifex from collected files that are saved by default in the 'ckeditor5/build/.transifex' directory.
@@ -22,11 +23,7 @@ const chalk = require( 'chalk' );
  * @returns {Promise}
  */
 module.exports = function upload( config ) {
-	// TODO: Validate config.
-	// The following options are required:
-	// * token
-	// * url
-	// * translationsDirectory
+	verifyProperties( config, [ 'token', 'url', 'translationsDirectory' ] );
 
 	// Make sure to use unix paths.
 	const pathToPoTranslations = config.translationsDirectory.split( path.sep ).join( path.posix.sep );

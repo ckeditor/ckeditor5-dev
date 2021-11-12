@@ -10,7 +10,7 @@ const proxyquire = require( 'proxyquire' );
 const { posix } = require( 'path' );
 const { expect } = require( 'chai' );
 
-describe( 'createPotFiles()', () => {
+describe( 'dev-env/translations/createPotFiles()', () => {
 	let stubs;
 	let createPotFiles;
 

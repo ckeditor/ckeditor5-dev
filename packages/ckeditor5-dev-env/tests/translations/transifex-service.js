@@ -10,7 +10,7 @@ const sinon = require( 'sinon' );
 const expect = chai.expect;
 const mockery = require( 'mockery' );
 
-describe( 'transifex-service', () => {
+describe( 'dev-env/translations/transifex-service', () => {
 	const token = 'secretToken';
 	const url = 'https://www.transifex.com/api/2/project/ckeditor5';
 

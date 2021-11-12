@@ -11,6 +11,7 @@ const transifexService = require( './transifex-service' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 const { cleanPoFileContent, createDictionaryFromPoFileContent } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 const languageCodeMap = require( './languagecodemap.json' );
+const { verifyProperties } = require( './utils' );
 
 /**
  * Downloads translations from the Transifex for each CF localizable package.
@@ -24,12 +25,7 @@ const languageCodeMap = require( './languagecodemap.json' );
  * @param {Boolean} [config.simplifyLicenseHeader=false] Whether to skip adding the contribute guide URL in the output `*.po` files.
  */
 module.exports = async function downloadTranslations( config ) {
-	// TODO: Validate config.
-	// The following options are required:
-	// * token
-	// * url
-	// * packages
-	// * cwd
+	verifyProperties( config, [ 'token', 'url', 'packages', 'cwd' ] );
 
 	const localizablePackageNames = await getLocalizablePackages( config );
 
