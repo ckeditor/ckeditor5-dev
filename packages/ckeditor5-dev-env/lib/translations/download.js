@@ -70,11 +70,18 @@ function removeOldTranslation( packagePath ) {
  * @param {Object} config Configuration.
  * @param {String} config.token Token to the Transifex API.
  * @param {String} packageName Package name.
+ * @param {String} config.cwd Current work directory.
+ * @param {String} config.url Transifex API URL where the request should be send.
  * @returns {Promise<Map.<String, Object>>}
  */
 async function downloadPoFiles( config, packageName ) {
-	const packageOptions = Object.assign( {}, config, { slug: packageName } );
-	const resourceDetails = await transifexService.getResourceDetails( packageOptions );
+	const requestConfig = {
+		url: config.url,
+		token: config.token,
+		slug: packageName
+	};
+
+	const resourceDetails = await transifexService.getResourceDetails( requestConfig );
 
 	const languageCodes = resourceDetails.available_languages.map( languageInfo => languageInfo.code );
 	const translations = await Promise.all( languageCodes.map( lang => downloadPoFile( config, lang, packageName ) ) );
