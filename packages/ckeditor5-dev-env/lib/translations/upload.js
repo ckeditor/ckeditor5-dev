@@ -103,7 +103,7 @@ function printSummary( summaryCollection ) {
 		const items = summaryCollection.created.sort( sortByPackageName() );
 
 		for ( const [ packageName, response ] of items ) {
-			table.push( [ packageName, response[ 0 ] ] );
+			table.push( [ packageName, response[ 0 ].toString() ] );
 		}
 
 		logger.info( table.toString() + '\n' );
@@ -126,11 +126,21 @@ function printSummary( summaryCollection ) {
 			.sort( sortByPackageName() );
 
 		for ( const [ packageName, response ] of changedItems ) {
-			table.push( [ packageName, response.strings_added, response.strings_updated, response.strings_delete ] );
+			table.push( [
+				packageName,
+				response.strings_added.toString(),
+				response.strings_updated.toString(),
+				response.strings_delete.toString()
+			] );
 		}
 
 		for ( const [ packageName, response ] of nonChangedItems ) {
-			const rowData = [ packageName, response.strings_added, response.strings_updated, response.strings_delete ];
+			const rowData = [
+				packageName,
+				response.strings_added.toString(),
+				response.strings_updated.toString(),
+				response.strings_delete.toString()
+			];
 
 			table.push( rowData.map( item => chalk.gray( item ) ) );
 		}
