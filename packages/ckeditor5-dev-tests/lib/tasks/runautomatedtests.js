@@ -101,6 +101,12 @@ function createEntryFile( globPatterns, production ) {
 	allFiles.splice( 0, 0, path.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ).replace( /\\/g, '/' ) );
 	allFiles.push( path.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ).replace( /\\/g, '/' ) );
 
+	// Inject the custom chai assertions. See ckeditor/ckeditor5/issues/9668.
+	const assertionsDir = path.join( __dirname, '..', 'utils', 'automated-tests', 'assertions' ).replace( /\\/g, '/' );
+	for ( const assertion of fs.readdirSync( assertionsDir ) ) {
+		allFiles.push( `${ assertionsDir }/${ assertion }` );
+	}
+
 	const entryFileContent = allFiles
 		.map( file => 'import "' + file + '";' );
 
