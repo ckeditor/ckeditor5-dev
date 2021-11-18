@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [26.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v26.0.0...v26.0.1) (2021-11-18)
+
+### Bug fixes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: All numbers returned by the Transifex service will be cast to strings due to an error in the `cli-package`. See: [Automattic/cli-table#152](https://github.com/Automattic/cli-table/issues/152). Closes [ckeditor/ckeditor5#10861](https://github.com/ckeditor/ckeditor5/issues/10861). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/76611376ee9cefff85896fe0b116a5a654dd4a8b))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v26.0.0 => v26.0.1
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v26.0.0 => v26.0.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v26.0.0 => v26.0.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v26.0.0 => v26.0.1
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v26.0.0 => v26.0.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v26.0.0 => v26.0.1
+</details>
+
+
 ## [26.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v25.4.5...v26.0.0) (2021-11-18)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
