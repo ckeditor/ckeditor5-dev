@@ -37,12 +37,8 @@
     "npm": ">=5.7.1"
   },
   "files": [
-    "lib",
-    "bin"
+    "lib"
   ],
-  "bin": {
-    "ckeditor5-dev-env-translations": "bin/translations.js"
-  },
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-env",

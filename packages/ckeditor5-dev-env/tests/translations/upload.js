@@ -11,7 +11,7 @@ const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 const proxyquire = require( 'proxyquire' );
 
-describe( 'upload', () => {
+describe( 'dev-env/translations/upload()', () => {
 	let sandbox, stubs, upload, packageNames, serverResources, fileContents;
 
 	beforeEach( () => {
@@ -99,20 +99,25 @@ describe( 'upload', () => {
 		} ];
 
 		fileContents = {
-			'workspace/ckeditor5/build/.transifex/ckeditor5-ui/en.pot': '# ckeditor-ui en.pot content',
-			'workspace/ckeditor5/build/.transifex/ckeditor5-core/en.pot': '# ckeditor-core en.pot content'
+			'/workspace/ckeditor5/build/.transifex/ckeditor5-ui/en.pot': '# ckeditor-ui en.pot content',
+			'/workspace/ckeditor5/build/.transifex/ckeditor5-core/en.pot': '# ckeditor-core en.pot content'
 		};
 
-		return upload( { token: 'secretToken' } )
+		const uploadOptions = {
+			token: 'secretToken',
+			url: 'https://api.example.com',
+			translationsDirectory: '/workspace/ckeditor5/build/.transifex'
+		};
+
+		return upload( uploadOptions )
 			.then( () => {
 				sinon.assert.calledOnce( stubs.transifexService.getResources );
-				sinon.assert.calledWithExactly(
-					stubs.fs.readdirSync, path.posix.join( 'workspace', 'ckeditor5', 'build', '.transifex' )
-				);
+				sinon.assert.calledWithExactly( stubs.fs.readdirSync, '/workspace/ckeditor5/build/.transifex' );
 
 				sinon.assert.calledOnce( stubs.transifexService.postResource );
 				sinon.assert.calledWithExactly( stubs.transifexService.postResource, {
 					token: 'secretToken',
+					url: 'https://api.example.com',
 					name: 'ckeditor5-ui',
 					slug: 'ckeditor5-ui',
 					content: '# ckeditor-ui en.pot content'
@@ -122,6 +127,7 @@ describe( 'upload', () => {
 
 				sinon.assert.calledWithExactly( stubs.transifexService.putResourceContent, {
 					token: 'secretToken',
+					url: 'https://api.example.com',
 					slug: 'ckeditor5-core',
 					name: 'ckeditor5-core',
 					content: '# ckeditor-core en.pot content'
@@ -133,7 +139,13 @@ describe( 'upload', () => {
 		const error = new Error();
 		stubs.transifexService.getResources = sandbox.spy( () => Promise.reject( error ) );
 
-		return upload( { token: 'secretToken' } )
+		const uploadOptions = {
+			token: 'secretToken',
+			url: 'https://api.example.com',
+			translationsDirectory: '/workspace/ckeditor5/build/.transifex'
+		};
+
+		return upload( uploadOptions )
 			.then( () => {
 				throw new Error( 'It should throws an error' );
 			}, err => {
@@ -184,10 +196,16 @@ describe( 'upload', () => {
 		fileContents = {};
 
 		for ( const item of packageNames ) {
-			fileContents[ `workspace/ckeditor5/build/.transifex/${ item }/en.pot` ] = `# ${ item } en.pot content`;
+			fileContents[ `/workspace/ckeditor5/build/.transifex/${ item }/en.pot` ] = `# ${ item } en.pot content`;
 		}
 
-		return upload( { token: 'secretToken' } )
+		const uploadOptions = {
+			token: 'secretToken',
+			url: 'https://api.example.com',
+			translationsDirectory: '/workspace/ckeditor5/build/.transifex'
+		};
+
+		return upload( uploadOptions )
 			.then( () => {
 				expect( stubs.logger.info.callCount ).to.equal( 13 );
 
@@ -273,7 +291,13 @@ describe( 'upload', () => {
 			fileContents[ `workspace/ckeditor5/build/.transifex/${ item }/en.pot` ] = `# ${ item } en.pot content`;
 		}
 
-		return upload( { token: 'secretToken' } )
+		const uploadOptions = {
+			token: 'secretToken',
+			url: 'https://api.example.com',
+			translationsDirectory: '/workspace/ckeditor5/build/.transifex'
+		};
+
+		return upload( uploadOptions )
 			.then( () => {
 				expect( stubs.logger.info.callCount ).to.equal( 7 );
 
@@ -336,7 +360,13 @@ describe( 'upload', () => {
 			fileContents[ `workspace/ckeditor5/build/.transifex/${ item }/en.pot` ] = `# ${ item } en.pot content`;
 		}
 
-		return upload( { token: 'secretToken' } )
+		const uploadOptions = {
+			token: 'secretToken',
+			url: 'https://api.example.com',
+			translationsDirectory: '/workspace/ckeditor5/build/.transifex'
+		};
+
+		return upload( uploadOptions )
 			.then( () => {
 				expect( stubs.logger.info.callCount ).to.equal( 7 );
 
@@ -374,6 +404,61 @@ describe( 'upload', () => {
 				expect( stubs.chalk.gray.getCall( 5 ).args[ 0 ] ).to.equal( 0 );
 				expect( stubs.chalk.gray.getCall( 6 ).args[ 0 ] ).to.equal( 0 );
 				expect( stubs.chalk.gray.getCall( 7 ).args[ 0 ] ).to.equal( 0 );
+			} );
+	} );
+
+	it( 'should fail with an error describing missing properties if the required were not passed to the function', async () => {
+		try {
+			await upload( {} );
+		} catch ( err ) {
+			expect( err.message ).to.equal( 'The specified object misses the following properties: token, url, translationsDirectory.' );
+		}
+	} );
+
+	it( 'should create and update resources on the Transifex (Windows paths on input)', () => {
+		packageNames = [
+			'ckeditor5-core',
+			'ckeditor5-ui'
+		];
+
+		serverResources = [ {
+			slug: 'ckeditor5-core'
+		} ];
+
+		fileContents = {
+			'C:/workspace/ckeditor5/build/.transifex/ckeditor5-ui/en.pot': '# ckeditor-ui en.pot content',
+			'C:/workspace/ckeditor5/build/.transifex/ckeditor5-core/en.pot': '# ckeditor-core en.pot content'
+		};
+
+		const uploadOptions = {
+			token: 'secretToken',
+			url: 'https://api.example.com',
+			translationsDirectory: 'C:\\workspace\\ckeditor5\\build\\.transifex'
+		};
+
+		return upload( uploadOptions )
+			.then( () => {
+				sinon.assert.calledOnce( stubs.transifexService.getResources );
+				sinon.assert.calledWithExactly( stubs.fs.readdirSync, 'C:/workspace/ckeditor5/build/.transifex' );
+
+				sinon.assert.calledOnce( stubs.transifexService.postResource );
+				sinon.assert.calledWithExactly( stubs.transifexService.postResource, {
+					token: 'secretToken',
+					url: 'https://api.example.com',
+					name: 'ckeditor5-ui',
+					slug: 'ckeditor5-ui',
+					content: '# ckeditor-ui en.pot content'
+				} );
+
+				sinon.assert.calledOnce( stubs.transifexService.putResourceContent );
+
+				sinon.assert.calledWithExactly( stubs.transifexService.putResourceContent, {
+					token: 'secretToken',
+					url: 'https://api.example.com',
+					slug: 'ckeditor5-core',
+					name: 'ckeditor5-core',
+					content: '# ckeditor-core en.pot content'
+				} );
 			} );
 	} );
 } );

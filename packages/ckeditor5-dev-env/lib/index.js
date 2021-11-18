@@ -5,59 +5,32 @@
 
 'use strict';
 
-const tasks = {
-	releaseSubRepositories( ...args ) {
+module.exports = {
+	async releaseSubRepositories( ...args ) {
 		return require( './release-tools/tasks/releasesubrepositories' )( ...args );
 	},
 
-	bumpVersions( ...args ) {
+	async bumpVersions( ...args ) {
 		return require( './release-tools/tasks/bumpversions' )( ...args );
 	},
 
-	generateChangelogForSinglePackage( ...args ) {
+	async generateChangelogForSinglePackage( ...args ) {
 		return require( './release-tools/tasks/generatechangelogforsinglepackage' )( ...args );
 	},
 
-	generateChangelogForMonoRepository( ...args ) {
+	async generateChangelogForMonoRepository( ...args ) {
 		return require( './release-tools/tasks/generatechangelogformonorepository' )( ...args );
 	},
 
-	/**
-	 * Collects messages to translate (from `t()` calls) and stores them in the `ckeditor5/build/.transifex` directory.
-	 */
 	createPotFiles( ...args ) {
-		const createPotFiles = require( './translations/createpotfiles' );
-
-		createPotFiles( ...args );
+		return require( './translations/createpotfiles' )( ...args );
 	},
 
-	/**
-	 * Uploads messages to translate on the Transifex server.
-	 *
-	 * @returns {Promise}
-	 */
-	async uploadPotFiles() {
-		const uploadPotFiles = require( './translations/upload' );
-		const getToken = require( './translations/gettoken' );
-
-		const token = await getToken();
-
-		await uploadPotFiles( { token } );
+	async uploadPotFiles( ...args ) {
+		return require( './translations/upload' )( ...args );
 	},
 
-	/**
-	 * Download translations from the Transifex server.
-	 *
-	 * @returns {Promise}
-	 */
-	async downloadTranslations( { packages } ) {
-		const downloadTranslations = require( './translations/download' );
-		const getToken = require( './translations/gettoken' );
-
-		const token = await getToken();
-
-		await downloadTranslations( { token, packages } );
+	async downloadTranslations( ...args ) {
+		return require( './translations/download' )( ...args );
 	}
 };
-
-module.exports = tasks;

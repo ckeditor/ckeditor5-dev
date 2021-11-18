@@ -10,7 +10,10 @@ const sinon = require( 'sinon' );
 const expect = chai.expect;
 const mockery = require( 'mockery' );
 
-describe( 'transifex-service', () => {
+describe( 'dev-env/translations/transifex-service', () => {
+	const token = 'secretToken';
+	const url = 'https://www.transifex.com/api/2/project/ckeditor5';
+
 	let sandbox, transifexService, stubs;
 
 	beforeEach( () => {
@@ -58,27 +61,22 @@ describe( 'transifex-service', () => {
 			const spy = sandbox.spy( ( url, data, cb ) => cb( null, { statusCode: 200 }, '{"body": ""}' ) );
 			stubs.request.get.callsFake( spy );
 
-			return transifexService.getResources( {
-				token: 'token'
-			} ).then( () => {
-				sinon.assert.calledWith(
-					spy,
-					'https://www.transifex.com/api/2/project/ckeditor5/resources/',
-					{
+			return transifexService.getResources( { url, token } )
+				.then( () => {
+					sinon.assert.calledWith( spy, url + '/resources/', {
 						auth: {
 							username: 'api',
-							password: 'token'
+							password: token
 						}
-					}
-				);
-			} );
+					} );
+				} );
 		} );
 
 		it( 'should throw an error if the statusCode is above 300', () => {
 			const spy = sandbox.spy( ( url, data, cb ) => cb( null, { statusCode: 500 }, '{"body": ""}' ) );
 			stubs.request.get.callsFake( spy );
 
-			return transifexService.getResources( { token: 'token' } )
+			return transifexService.getResources( { token, url } )
 				.then(
 					() => {
 						throw new Error( 'Promise should not be resolved.' );
@@ -94,7 +92,7 @@ describe( 'transifex-service', () => {
 			const spy = sandbox.spy( ( url, data, cb ) => cb( error, { statusCode: 200 }, '{"body": ""}' ) );
 			stubs.request.get.callsFake( spy );
 
-			return transifexService.getResources( { token: 'token' } )
+			return transifexService.getResources( { token, url } )
 				.then(
 					() => {
 						throw new Error( 'Promise should not be resolved.' );
@@ -109,7 +107,7 @@ describe( 'transifex-service', () => {
 			const spy = sandbox.spy( ( url, data, cb ) => cb( null, { statusCode: 200 }, 'Invalid JSON' ) );
 			stubs.request.get.callsFake( spy );
 
-			return transifexService.getResources( { token: 'token' } )
+			return transifexService.getResources( { token, url } )
 				.then(
 					() => {
 						throw new Error( 'Promise should not be resolved.' );
@@ -128,18 +126,19 @@ describe( 'transifex-service', () => {
 			stubs.request.post.callsFake( spy );
 
 			return transifexService.postResource( {
-				token: 'token',
+				url,
+				token,
 				name: 'name',
 				slug: 'slug',
 				content: 'content'
 			} ).then( () => {
 				sinon.assert.calledWith(
 					spy,
-					'https://www.transifex.com/api/2/project/ckeditor5/resources/',
+					url + '/resources/',
 					{
 						auth: {
 							username: 'api',
-							password: 'token'
+							password: token
 						},
 						formData: {
 							slug: 'slug',
@@ -159,17 +158,18 @@ describe( 'transifex-service', () => {
 			stubs.request.put.callsFake( spy );
 
 			return transifexService.putResourceContent( {
-				token: 'token',
+				url,
+				token,
 				slug: 'slug',
 				content: 'content'
 			} ).then( () => {
 				sinon.assert.calledWith(
 					spy,
-					'https://www.transifex.com/api/2/project/ckeditor5/resource/slug/content/',
+					url + '/resource/slug/content/',
 					{
 						auth: {
 							username: 'api',
-							password: 'token'
+							password: token
 						},
 						formData: {
 							content: 'content',
@@ -187,16 +187,17 @@ describe( 'transifex-service', () => {
 			stubs.request.get.callsFake( spy );
 
 			return transifexService.getResourceDetails( {
-				token: 'token',
+				url,
+				token,
 				slug: 'slug'
 			} ).then( () => {
 				sinon.assert.calledWith(
 					spy,
-					'https://www.transifex.com/api/2/project/ckeditor5/resource/slug/?details',
+					url + '/resource/slug/?details',
 					{
 						auth: {
 							username: 'api',
-							password: 'token'
+							password: token
 						}
 					}
 				);
@@ -210,17 +211,18 @@ describe( 'transifex-service', () => {
 			stubs.request.get.callsFake( spy );
 
 			return transifexService.getTranslation( {
-				token: 'token',
+				url,
+				token,
 				slug: 'slug',
 				lang: 'lang'
 			} ).then( () => {
 				sinon.assert.calledWith(
 					spy,
-					'https://www.transifex.com/api/2/project/ckeditor5/resource/slug/translation/lang/',
+					url + '/resource/slug/translation/lang/',
 					{
 						auth: {
 							username: 'api',
-							password: 'token'
+							password: token
 						}
 					}
 				);
