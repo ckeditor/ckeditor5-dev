@@ -3,37 +3,41 @@
  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
  */
 
-/* global chai */
-
-import AssertionError from 'assertion-error';
-import { html_beautify as beautify } from 'js-beautify/js/lib/beautify-html';
+const AssertionError = require( 'assertion-error' );
+const { html_beautify: beautify } = require( 'js-beautify/js/lib/beautify-html' );
 
 /**
- * An assertion util test whether two given strings containing markup language are equal.
- * Unlike `expect().to.equal()` form Chai assertion library, this util formats the markup before showing a diff.
- *
- * This util can be used to test HTML strings and string containing serialized model.
- *
- *		// Will throw an error that is handled as assertion error by Chai.
- *		assertEqualMarkup(
- *			'<paragraph><$text foo="bar">baz</$text></paragraph>',
- *			'<paragraph><$text foo="bar">baaz</$text></paragraph>',
- *		);
- *
- * @param {String} expected Markup to compare.
+ * @param {Object} chai
  */
-chai.Assertion.addMethod( 'equalMarkup', function( expected ) {
-	const actual = this._obj;
-	const message = 'Expected markup strings to be equal';
+module.exports = chai => {
+	/**
+	 * Custom assertion that tests whether two given strings containing markup language are equal.
+	 * Unlike `expect().to.equal()` form Chai assertion library, this assertion formats the markup before showing a diff.
+	 *
+	 * This assertion can be used to test HTML strings and string containing serialized model.
+	 *
+	 *		// Will throw an assertion error.
+	 *		expect(
+	 *			'<paragraph>foo bXXX[]r baz</paragraph>'
+	 *		).to.equalMarkup(
+	 *			'<paragraph>foo bYYY[]r baz</paragraph>'
+	 *		);
+	 *
+	 * @param {String} expected Markup to compare.
+	 */
+	chai.Assertion.addMethod( 'equalMarkup', function( expected ) {
+		const actual = this._obj;
+		const message = 'Expected markup strings to be equal';
 
-	if ( actual != expected ) {
-		throw new AssertionError( message, {
-			actual: formatMarkup( actual ),
-			expected: formatMarkup( expected ),
-			showDiff: true
-		} );
-	}
-} );
+		if ( actual != expected ) {
+			throw new AssertionError( message, {
+				actual: formatMarkup( actual ),
+				expected: formatMarkup( expected ),
+				showDiff: true
+			} );
+		}
+	} );
+};
 
 // Renames the $text occurrences as it is not properly formatted by the beautifier - it is tread as a block.
 const TEXT_TAG_PLACEHOLDER = 'span data-cke="true"';

@@ -101,14 +101,20 @@ function createEntryFile( globPatterns, production ) {
 	allFiles.splice( 0, 0, path.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ).replace( /\\/g, '/' ) );
 	allFiles.push( path.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ).replace( /\\/g, '/' ) );
 
-	// Inject the custom chai assertions. See ckeditor/ckeditor5/issues/9668.
-	const assertionsDir = path.join( __dirname, '..', 'utils', 'automated-tests', 'assertions' ).replace( /\\/g, '/' );
-	for ( const assertion of fs.readdirSync( assertionsDir ) ) {
-		allFiles.push( `${ assertionsDir }/${ assertion }` );
-	}
-
 	const entryFileContent = allFiles
 		.map( file => 'import "' + file + '";' );
+
+	// Inject the custom chai assertions. See ckeditor/ckeditor5/issues/9668.
+	const assertionsDir = path.join( __dirname, '..', 'utils', 'automated-tests', 'assertions' ).replace( /\\/g, '/' );
+	const customAssertions = fs.readdirSync( assertionsDir ).map( assertion => assertion.slice( 0, -3 ) );
+
+	// Two loops are needed to achieve correct order in ckeditor5/build/.automated-tests/entry-point.js
+	for ( const customAssertion of customAssertions ) {
+		entryFileContent.push( `import ${ customAssertion }Factory from "${ assertionsDir }/${ customAssertion }.js";` );
+	}
+	for ( const customAssertion of customAssertions ) {
+		entryFileContent.push( `${ customAssertion }Factory(chai)` );
+	}
 
 	if ( production ) {
 		entryFileContent.unshift( `

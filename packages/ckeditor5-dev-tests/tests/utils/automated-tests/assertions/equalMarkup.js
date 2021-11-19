@@ -4,68 +4,48 @@
  */
 
 const chai = require( 'chai' );
-
-// require( '../../../../lib/utils/automated-tests/assertions/equalMarkup' );
-
-const markupA = '<paragraph>foo bXXX[]r baz</paragraph>';
-const markupB = '<paragraph>foo bYYY[]r baz</paragraph>';
+const expect = chai.expect;
 
 describe( 'equalMarkup chai assertion', () => {
+	before( () => {
+		const equalMarkup = require( '../../../../lib/utils/automated-tests/assertions/equalMarkup' );
+		equalMarkup( chai );
+	} );
+
 	it( 'should be added to chai assertions', () => {
 		const assertion = new chai.Assertion();
 
-		chai.expect( assertion ).to.have.property( 'equalMarkup' );
-		chai.expect( assertion.equalMarkup ).to.be.instanceof( Function );
+		expect( assertion ).to.have.property( 'equalMarkup' );
+		expect( assertion.equalMarkup ).to.be.instanceof( Function );
 	} );
 
-	it( 'should pass for equal markups', () => {
-		chai.expect( function() {
-			chai.expect( markupA ).to.equalMarkup( markupA );
-		} ).to.not.throw();
+	it( 'should not throw for equal markups', () => {
+		expect( function() {
+			expect(
+				'<paragraph>foo bXXX[]r baz</paragraph>'
+			).to.equalMarkup(
+				'<paragraph>foo bXXX[]r baz</paragraph>'
+			);
+		} ).to.not.throw;
 	} );
 
-	it( 'should not pass for unequal markups', () => {
-		chai.expect( function() {
-			chai.expect( markupA ).to.equalMarkup( markupB );
+	it( 'should throw AssertionError for unequal markups', () => {
+		expect( function() {
+			expect(
+				'<paragraph>foo bXXX[]r baz</paragraph>'
+			).to.equalMarkup(
+				'<paragraph>foo bYYY[]r baz</paragraph>'
+			);
 		} ).to.throw( 'Expected markup strings to be equal' );
 	} );
-} );
 
-/*
-import AssertionError from 'assertion-error';
-
-describe( 'assertEqualMarkup()', () => {
-	it( 'should not throw for equal strings', () => {
-		expect( assertEqualMarkup( 'foo', 'foo' ) ).to.not.throw;
-	} );
-
-	it( 'should throw AssertionError for not equal strings', () => {
+	it( 'should format the actual markup', () => {
 		try {
-			assertEqualMarkup( 'foo', 'bar' );
-		} catch ( assertionError ) {
-			expect( assertionError ).to.be.instanceOf( AssertionError );
-		}
-	} );
-
-	it( 'should throw with default (short) message', () => {
-		try {
-			assertEqualMarkup( 'foo', 'bar' );
-		} catch ( assertionError ) {
-			expect( assertionError.message ).to.equal( 'Expected markup strings to be equal' );
-		}
-	} );
-
-	it( 'should throw with passed message', () => {
-		try {
-			assertEqualMarkup( 'foo', 'bar', 'baz' );
-		} catch ( assertionError ) {
-			expect( assertionError.message ).to.equal( 'baz' );
-		}
-	} );
-
-	it( 'should format actual string', () => {
-		try {
-			assertEqualMarkup( '<div><p><span>foo</span></p></div>', 'bar' );
+			expect(
+				'<div><p><span>foo</span></p></div>'
+			).to.equalMarkup(
+				'bar'
+			);
 		} catch ( assertionError ) {
 			expect( assertionError.actual ).to.equal(
 				'<div>\n' +
@@ -75,9 +55,13 @@ describe( 'assertEqualMarkup()', () => {
 		}
 	} );
 
-	it( 'should format expected string', () => {
+	it( 'should format the expected markup', () => {
 		try {
-			assertEqualMarkup( 'foo', '<div><p><span>foo</span></p></div>' );
+			expect(
+				'foo'
+			).to.equalMarkup(
+				'<div><p><span>foo</span></p></div>'
+			);
 		} catch ( assertionError ) {
 			expect( assertionError.expected ).to.equal(
 				'<div>\n' +
@@ -89,7 +73,11 @@ describe( 'assertEqualMarkup()', () => {
 
 	it( 'should format model text node with attributes as inline', () => {
 		try {
-			assertEqualMarkup( 'foo', '<paragraph><$text bold="true">foo</$text></paragraph>' );
+			expect(
+				'foo'
+			).to.equalMarkup(
+				'<paragraph><$text bold="true">foo</$text></paragraph>'
+			);
 		} catch ( assertionError ) {
 			expect( assertionError.expected ).to.equal(
 				'<paragraph><$text bold="true">foo</$text></paragraph>'
@@ -99,7 +87,9 @@ describe( 'assertEqualMarkup()', () => {
 
 	it( 'should format nested model structure properly', () => {
 		try {
-			assertEqualMarkup( 'foo',
+			expect(
+				'foo'
+			).to.equalMarkup(
 				'<blockQuote>' +
 					'<table>' +
 						'<tableRow>' +
@@ -133,4 +123,3 @@ describe( 'assertEqualMarkup()', () => {
 		}
 	} );
 } );
-*/

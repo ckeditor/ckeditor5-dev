@@ -3,11 +3,15 @@
  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
  */
 
-/* global chai */
-
-import '../../_utils/assertions/attribute';
+const chai = require( 'chai' );
+const expect = chai.expect;
 
 describe( 'attribute chai assertion', () => {
+	before( () => {
+		const attribute = require( '../../../../lib/utils/automated-tests/assertions/attribute' );
+		attribute( chai );
+	} );
+
 	it( 'should be added to chai assertions', () => {
 		const assertion = new chai.Assertion();
 
