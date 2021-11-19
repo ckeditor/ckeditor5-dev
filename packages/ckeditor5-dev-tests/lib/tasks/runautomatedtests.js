@@ -113,7 +113,7 @@ function createEntryFile( globPatterns, production ) {
 		entryFileContent.push( `import ${ customAssertion }Factory from "${ assertionsDir }/${ customAssertion }.js";` );
 	}
 	for ( const customAssertion of customAssertions ) {
-		entryFileContent.push( `${ customAssertion }Factory(chai)` );
+		entryFileContent.push( `${ customAssertion }Factory( chai );` );
 	}
 
 	if ( production ) {
