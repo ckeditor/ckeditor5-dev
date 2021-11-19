@@ -9,8 +9,8 @@ const path = require( 'path' );
 const fs = require( 'fs-extra' );
 const del = require( 'del' );
 const defaultLogger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
-
 const { findMessages } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
+const { verifyProperties } = require( './utils' );
 
 const langContextSuffix = path.join( 'lang', 'contexts.json' );
 const corePackageName = 'ckeditor5-core';
@@ -23,21 +23,32 @@ const corePackageName = 'ckeditor5-core';
  * @param {Array.<String>} options.sourceFiles An array of source files that contain messages to translate.
  * @param {Array.<String>} options.packagePaths An array of paths to packages, which will be used to find message contexts.
  * @param {String} options.corePackagePath A relative to `process.cwd()` path to the `@ckeditor/ckeditor5-core` package.
- * @param {Logger} [logger] A logger.
+ * @param {String} options.translationsDirectory An absolute path to the directory where the results should be saved.
+ * @param {Boolean} [options.ignoreUnusedCorePackageContexts=false] Whether to hide unused context errors related to
+ * the `@ckeditor/ckeditor5-core` package.
+ * @param {Boolean} [options.skipLicenseHeader=false] Whether to skip the license header in created `*.pot` files.
+ * @param {Logger} [options.logger] A logger.
  */
-module.exports = function createPotFiles( {
-	sourceFiles,
-	packagePaths,
-	corePackagePath,
-	logger = defaultLogger
-} ) {
+module.exports = function createPotFiles( options ) {
+	verifyProperties( options, [ 'sourceFiles', 'packagePaths', 'corePackagePath', 'translationsDirectory' ] );
+
+	const {
+		sourceFiles,
+		packagePaths,
+		corePackagePath,
+		translationsDirectory,
+		ignoreUnusedCorePackageContexts = false,
+		skipLicenseHeader = false,
+		logger = defaultLogger
+	} = options;
+
 	const packageContexts = getPackageContexts( packagePaths, corePackagePath );
 	const sourceMessages = collectSourceMessages( { sourceFiles, logger } );
 
 	const errors = [].concat(
-		assertNoMissingContext( { packageContexts, sourceMessages, logger } ),
-		assertAllContextUsed( { packageContexts, sourceMessages, logger } ),
-		assertNoRepeatedContext( { packageContexts, logger } )
+		assertNoMissingContext( { packageContexts, sourceMessages } ),
+		assertAllContextUsed( { packageContexts, sourceMessages, ignoreUnusedCorePackageContexts, corePackagePath } ),
+		assertNoRepeatedContext( { packageContexts } )
 	);
 
 	for ( const error of errors ) {
@@ -45,7 +56,7 @@ module.exports = function createPotFiles( {
 		process.exitCode = 1;
 	}
 
-	removeExistingPotFiles();
+	removeExistingPotFiles( translationsDirectory );
 
 	for ( const { packageName, content } of packageContexts.values() ) {
 		// Skip generating packages for the core package if the core package was not
@@ -53,8 +64,6 @@ module.exports = function createPotFiles( {
 		if ( packageName === corePackageName && !packagePaths.includes( corePackagePath ) ) {
 			continue;
 		}
-
-		const potFileHeader = createPotFileHeader();
 
 		// Create message from source messages and corresponding contexts.
 		const messages = Object.keys( content ).map( messageId => {
@@ -65,11 +74,13 @@ module.exports = function createPotFiles( {
 		} );
 
 		const potFileContent = createPotFileContent( messages );
+		const fileContent = skipLicenseHeader ? potFileContent : createPotFileHeader() + potFileContent;
 
 		savePotFile( {
 			packageName,
-			fileContent: potFileHeader + potFileContent,
-			logger
+			fileContent,
+			logger,
+			translationsDirectory
 		} );
 	}
 };
@@ -93,12 +104,14 @@ function getPackageContexts( packagePaths, corePackagePath ) {
 			const pathToContext = path.join( packagePath, langContextSuffix );
 			const packageName = packagePath.split( /[\\/]/ ).pop();
 
-			return [ packageName, {
-				filePath: pathToContext,
-				content: JSON.parse( fs.readFileSync( pathToContext, 'utf-8' ) ),
-				packagePath,
-				packageName
-			} ];
+			return [
+				packageName, {
+					filePath: pathToContext,
+					content: JSON.parse( fs.readFileSync( pathToContext, 'utf-8' ) ),
+					packagePath,
+					packageName
+				}
+			];
 		} );
 
 	return new Map( mapEntries );
@@ -154,13 +167,20 @@ function assertNoMissingContext( { packageContexts, sourceMessages } ) {
  * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
  * @returns {Array.<String>}
  */
-function assertAllContextUsed( { packageContexts, sourceMessages } ) {
+function assertAllContextUsed( options ) {
+	const { packageContexts, sourceMessages, ignoreUnusedCorePackageContexts, corePackagePath } = options;
+
 	const usedContextMap = new Map();
 	const errors = [];
 
 	// TODO - Message id might contain the `/` character.
 
 	for ( const [ packageName, context ] of packageContexts ) {
+		// Ignore errors from the `@ckeditor/ckeditor5-core` package.
+		if ( ignoreUnusedCorePackageContexts && context.packagePath.includes( corePackagePath ) ) {
+			continue;
+		}
+
 		for ( const id in context.content ) {
 			usedContextMap.set( packageName + '/' + id, false );
 		}
@@ -208,10 +228,8 @@ function assertNoRepeatedContext( { packageContexts } ) {
 	return errors;
 }
 
-function removeExistingPotFiles() {
-	const pathToTransifexDirectory = path.join( process.cwd(), 'build', '.transifex' );
-
-	del.sync( pathToTransifexDirectory );
+function removeExistingPotFiles( translationsDirectory ) {
+	del.sync( translationsDirectory );
 }
 
 /**
@@ -221,10 +239,11 @@ function removeExistingPotFiles() {
  * @param {Object} options
  * @param {Logger} options.logger
  * @param {String} options.packageName
+ * @param {String} options.translationsDirectory
  * @param {String} options.fileContent
  */
-function savePotFile( { packageName, fileContent, logger } ) {
-	const outputFilePath = path.join( process.cwd(), 'build', '.transifex', packageName, 'en.pot' );
+function savePotFile( { packageName, fileContent, translationsDirectory, logger } ) {
+	const outputFilePath = path.join( translationsDirectory, packageName, 'en.pot' );
 
 	fs.outputFileSync( outputFilePath, fileContent );
 
@@ -318,7 +337,7 @@ function containsContextFile( packageDirectory ) {
  * @property {String} packagePath
  * @property {String} context
  * @property {String} [plural]
-*/
+ */
 
 /**
  * @typedef {Object} Context

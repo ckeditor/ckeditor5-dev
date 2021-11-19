@@ -10,7 +10,7 @@ const proxyquire = require( 'proxyquire' );
 const { posix } = require( 'path' );
 const { expect } = require( 'chai' );
 
-describe( 'createPotFiles()', () => {
+describe( 'dev-env/translations/createPotFiles()', () => {
 	let stubs;
 	let createPotFiles;
 
@@ -45,8 +45,6 @@ describe( 'createPotFiles()', () => {
 			},
 			'path': posix
 		} );
-
-		sinon.stub( process, 'cwd' ).returns( 'cwd' );
 	} );
 
 	afterEach( () => {
@@ -58,6 +56,7 @@ describe( 'createPotFiles()', () => {
 			sourceFiles: [],
 			packagePaths: [],
 			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
 			logger: stubs.logger
 		} );
 
@@ -72,20 +71,13 @@ describe( 'createPotFiles()', () => {
 			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'packages/ckeditor5-foo' ],
 			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
 			logger: stubs.logger
 		} );
 
 		sinon.assert.calledOnce( stubs.del.sync );
-
-		sinon.assert.calledWithExactly(
-			stubs.del.sync,
-			'cwd/build/.transifex'
-		);
-
-		sinon.assert.callOrder(
-			stubs.del.sync,
-			stubs.fs.outputFileSync
-		);
+		sinon.assert.calledWithExactly( stubs.del.sync, '/cwd/build/.transifex' );
+		sinon.assert.callOrder( stubs.del.sync, stubs.fs.outputFileSync );
 	} );
 
 	it( 'should create a POT file entry for one message with a corresponding context', () => {
@@ -99,6 +91,7 @@ describe( 'createPotFiles()', () => {
 			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'packages/ckeditor5-foo' ],
 			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
 			logger: stubs.logger
 		} );
 
@@ -106,7 +99,7 @@ describe( 'createPotFiles()', () => {
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			'cwd/build/.transifex/ckeditor5-foo/en.pot',
+			'/cwd/build/.transifex/ckeditor5-foo/en.pot',
 			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
 
 msgctxt "foo_context"
@@ -125,6 +118,7 @@ msgstr "foo"
 			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'packages/ckeditor5-foo' ],
 			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
 			logger: stubs.logger
 		} );
 
@@ -156,6 +150,7 @@ msgstr "foo"
 			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js', 'packages/ckeditor5-bar/src/bar.js' ],
 			packagePaths: [ 'packages/ckeditor5-foo', 'packages/ckeditor5-bar' ],
 			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
 			logger: stubs.logger
 		} );
 
@@ -163,7 +158,7 @@ msgstr "foo"
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			'cwd/build/.transifex/ckeditor5-foo/en.pot',
+			'/cwd/build/.transifex/ckeditor5-foo/en.pot',
 			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
 
 msgctxt "foo_context"
@@ -173,7 +168,7 @@ msgstr "foo"
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			'cwd/build/.transifex/ckeditor5-bar/en.pot',
+			'/cwd/build/.transifex/ckeditor5-bar/en.pot',
 			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
 
 msgctxt "bar_context"
@@ -201,6 +196,7 @@ msgstr "bar"
 			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js', 'packages/ckeditor5-foo/src/bar.js' ],
 			packagePaths: [ 'packages/ckeditor5-foo' ],
 			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
 			logger: stubs.logger
 		} );
 
@@ -208,7 +204,7 @@ msgstr "bar"
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			'cwd/build/.transifex/ckeditor5-foo/en.pot',
+			'/cwd/build/.transifex/ckeditor5-foo/en.pot',
 			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
 
 msgctxt "foo_context"
@@ -235,6 +231,7 @@ msgstr "bar"
 			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'packages/ckeditor5-foo' ],
 			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
 			logger: stubs.logger
 		} );
 
@@ -242,7 +239,7 @@ msgstr "bar"
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			'cwd/build/.transifex/ckeditor5-foo/en.pot',
+			'/cwd/build/.transifex/ckeditor5-foo/en.pot',
 			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
 
 msgctxt "foo_context"
@@ -267,6 +264,7 @@ msgstr[1] "foo_plural"
 			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'packages/ckeditor5-foo', 'packages/ckeditor5-core' ],
 			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
 			logger: stubs.logger
 		} );
 
@@ -276,7 +274,7 @@ msgstr[1] "foo_plural"
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
-			'cwd/build/.transifex/ckeditor5-core/en.pot',
+			'/cwd/build/.transifex/ckeditor5-core/en.pot',
 			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
 
 msgctxt "foo_context"
@@ -299,6 +297,7 @@ msgstr "foo"
 			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'packages/ckeditor5-foo' ],
 			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
 			logger: stubs.logger
 		} );
 
@@ -313,6 +312,7 @@ msgstr "foo"
 			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'packages/ckeditor5-foo' ],
 			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
 			logger: stubs.logger
 		} );
 
@@ -339,6 +339,7 @@ msgstr "foo"
 			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'packages/ckeditor5-foo' ],
 			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
 			logger: stubs.logger
 		} );
 
@@ -368,6 +369,7 @@ msgstr "foo"
 			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js' ],
 			packagePaths: [ 'packages/ckeditor5-foo' ],
 			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
 			logger: stubs.logger
 		} );
 
@@ -380,6 +382,79 @@ msgstr "foo"
 
 		// Mark the process as failed in case of the error.
 		expect( process.exitCode ).to.equal( 1 );
+	} );
+
+	it( 'should fail with an error describing missing properties if the required were not passed to the function', () => {
+		try {
+			createPotFiles( {} );
+		} catch ( err ) {
+			expect( err.message ).to.equal(
+				'The specified object misses the following properties: sourceFiles, packagePaths, corePackagePath, translationsDirectory.'
+			);
+		}
+	} );
+
+	it( 'should not log an error if a context from the core package is unused when ignoreUnusedCorePackageContexts=true', () => {
+		createFakeSourceFileWithMessages( 'packages/ckeditor5-foo/src/foo.js', [
+			{ string: 'foo', id: 'foo_id' }
+		] );
+
+		createFakeContextFile( 'packages/ckeditor5-foo/lang/contexts.json', {
+			foo_id: 'foo_context',
+			bar_id: 'foo_context'
+		} );
+
+		// This context is not used anywhere and the test would fail if the `ignoreUnusedCorePackageContexts` flag is set to `false`.
+		createFakeContextFile( 'packages/ckeditor5-core/lang/contexts.json', {
+			custom_id: 'foo_context'
+		} );
+
+		createPotFiles( {
+			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js' ],
+			packagePaths: [ 'packages/ckeditor5-foo' ],
+			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
+			logger: stubs.logger,
+			ignoreUnusedCorePackageContexts: true
+		} );
+
+		sinon.assert.calledOnce( stubs.logger.error );
+
+		sinon.assert.calledWithExactly(
+			stubs.logger.error,
+			'Unused context: \'bar_id\' in ckeditor5-foo/lang/contexts.json'
+		);
+
+		// Mark the process as failed in case of the error.
+		expect( process.exitCode ).to.equal( 1 );
+	} );
+
+	it( 'should not add the license header in the created a POT file entry when skipLicenseHeader=true', () => {
+		createFakeContextFile( 'packages/ckeditor5-foo/lang/contexts.json', { foo_id: 'foo_context' } );
+
+		createFakeSourceFileWithMessages( 'packages/ckeditor5-foo/src/foo.js', [
+			{ string: 'foo', id: 'foo_id' }
+		] );
+
+		createPotFiles( {
+			sourceFiles: [ 'packages/ckeditor5-foo/src/foo.js' ],
+			packagePaths: [ 'packages/ckeditor5-foo' ],
+			corePackagePath: 'packages/ckeditor5-core',
+			translationsDirectory: '/cwd/build/.transifex',
+			logger: stubs.logger,
+			skipLicenseHeader: true
+		} );
+
+		sinon.assert.calledOnce( stubs.fs.outputFileSync );
+
+		sinon.assert.calledWithExactly(
+			stubs.fs.outputFileSync,
+			'/cwd/build/.transifex/ckeditor5-foo/en.pot',
+			`msgctxt "foo_context"
+msgid "foo_id"
+msgstr "foo"
+`
+		);
 	} );
 
 	function createFakeSourceFileWithMessages( file, messages, errors = [] ) {

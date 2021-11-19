@@ -13,8 +13,6 @@ const request = require( 'request' );
 
 const { retryAsyncFunction } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 
-const PROJECT_URL = 'https://www.transifex.com/api/2/project/ckeditor5';
-
 /**
  * Promise wrappers of the Transifex API.
  *
@@ -26,12 +24,13 @@ module.exports = {
 	 *
 	 * @param {Object} config
 	 * @param {String} config.token Token to the Transifex API.
+	 * @param {String} config.url Transifex API URL where the request should be send.
 	 * @returns {Promise.<Object>}
 	 */
-	getResources( { token } ) {
+	getResources( { token, url } ) {
 		return retryAsyncFunction( () => {
 			return new Promise( ( resolve, reject ) => {
-				request.get( `${ PROJECT_URL }/resources/`, {
+				request.get( `${ url }/resources/`, {
 					auth: { username: 'api', password: token }
 				}, createJsonResponseHandler( resolve, reject, 'getResources' ) );
 			} );
@@ -46,12 +45,13 @@ module.exports = {
 	 * @param {String} config.slug Resource slug.
 	 * @param {String} config.content Resource content.
 	 * @param {String} config.name Resource name.
+	 * @param {String} config.url Transifex API URL where the request should be send.
 	 * @returns {Promise.<Object>}
 	 */
-	postResource( { token, name, slug, content } ) {
+	postResource( { token, name, slug, content, url } ) {
 		return retryAsyncFunction( () => {
 			return new Promise( ( resolve, reject ) => {
-				request.post( `${ PROJECT_URL }/resources/`, {
+				request.post( `${ url }/resources/`, {
 					auth: { username: 'api', password: token },
 					formData: { slug, name, content, 'i18n_type': 'PO' }
 				}, createJsonResponseHandler( resolve, reject, 'postResource' ) );
@@ -66,12 +66,13 @@ module.exports = {
 	 * @param {String} config.token Token to the Transifex API.
 	 * @param {String} config.slug Resource slug.
 	 * @param {String} config.content Resource content.
+	 * @param {String} config.url Transifex API URL where the request should be send.
 	 * @returns {Promise.<Object>}
 	 */
-	putResourceContent( { token, slug, content } ) {
+	putResourceContent( { token, slug, content, url } ) {
 		return retryAsyncFunction( () => {
 			return new Promise( ( resolve, reject ) => {
-				request.put( `${ PROJECT_URL }/resource/${ slug }/content/`, {
+				request.put( `${ url }/resource/${ slug }/content/`, {
 					auth: { username: 'api', password: token },
 					formData: { content, 'i18n_type': 'PO' }
 				}, createJsonResponseHandler( resolve, reject, 'putResourceContent' ) );
@@ -85,12 +86,13 @@ module.exports = {
 	 * @param {Object} config
 	 * @param {String} config.token Token to the Transifex API.
 	 * @param {String} config.slug Resource slug.
+	 * @param {String} config.url Transifex API URL where the request should be send.
 	 * @returns {Promise.<Object>}
 	 */
-	getResourceDetails( { token, slug } ) {
+	getResourceDetails( { token, slug, url } ) {
 		return retryAsyncFunction( () => {
 			return new Promise( ( resolve, reject ) => {
-				request.get( `${ PROJECT_URL }/resource/${ slug }/?details`, {
+				request.get( `${ url }/resource/${ slug }/?details`, {
 					auth: { username: 'api', password: token }
 				}, createJsonResponseHandler( resolve, reject, 'getResourceDetails' ) );
 			} );
@@ -104,12 +106,13 @@ module.exports = {
 	 * @param {String} config.token Token to the Transifex API.
 	 * @param {String} config.slug Resource slug.
 	 * @param {String} config.lang Target language.
+	 * @param {String} config.url Transifex API URL where the request should be send.
 	 * @returns {Promise.<Object>}
 	 */
-	getTranslation( { token, slug, lang } ) {
+	getTranslation( { token, slug, lang, url } ) {
 		return retryAsyncFunction( () => {
 			return new Promise( ( resolve, reject ) => {
-				request.get( `${ PROJECT_URL }/resource/${ slug }/translation/${ lang }/`, {
+				request.get( `${ url }/resource/${ slug }/translation/${ lang }/`, {
 					auth: { username: 'api', password: token }
 				}, createJsonResponseHandler( resolve, reject, 'getTranslation' ) );
 			} );

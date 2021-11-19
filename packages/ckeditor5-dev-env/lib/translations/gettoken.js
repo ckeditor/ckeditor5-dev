@@ -10,7 +10,7 @@ const inquirer = require( 'inquirer' );
 /**
  * Takes username and password from prompt and returns promise that resolves with object that contains them.
  *
- * @returns {Promise.<Object>}
+ * @returns {Promise.<String>}
  */
 module.exports = async function getToken() {
 	const { token } = await inquirer.prompt( [ {
