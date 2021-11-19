@@ -7,7 +7,9 @@ const AssertionError = require( 'assertion-error' );
 const { html_beautify: beautify } = require( 'js-beautify/js/lib/beautify-html' );
 
 /**
- * @param {Object} chai
+ * Factory function that registers the `equalMarkup` assertion.
+ *
+ * @param {Chai} chai
  */
 module.exports = chai => {
 	/**
@@ -29,7 +31,7 @@ module.exports = chai => {
 		const actual = this._obj;
 		const message = 'Expected markup strings to be equal';
 
-		if ( actual != expected ) {
+		if ( actual !== expected ) {
 			throw new AssertionError( message, {
 				actual: formatMarkup( actual ),
 				expected: formatMarkup( expected ),

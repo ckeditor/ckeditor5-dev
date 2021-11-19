@@ -5,11 +5,11 @@
 
 const chai = require( 'chai' );
 const expect = chai.expect;
+const attributeFactory = require( '../../../../lib/utils/automated-tests/assertions/attribute' );
 
 describe( 'attribute chai assertion', () => {
 	before( () => {
-		const attribute = require( '../../../../lib/utils/automated-tests/assertions/attribute' );
-		attribute( chai );
+		attributeFactory( chai );
 	} );
 
 	it( 'should be added to chai assertions', () => {

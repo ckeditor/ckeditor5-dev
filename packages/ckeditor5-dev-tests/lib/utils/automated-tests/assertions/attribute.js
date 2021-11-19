@@ -4,17 +4,17 @@
  */
 
 /**
- * @param {Object} chai
+ * Factory function that registers the `attribute` assertion.
+ *
+ * @param {Chai} chai
  */
 module.exports = chai => {
 	/**
 	 * Asserts that the target has an attribute with the given key name.
-	 * See {@link module:engine/model/documentselection~DocumentSelection#hasAttribute hasAttribute}.
 	 *
 	 *		expect( selection ).to.have.attribute( 'linkHref' );
 	 *
-	 * When `value` is provided, .attribute also asserts that the attribute's value is equal to the given `value`.
-	 * See {@link module:engine/model/documentselection~DocumentSelection#getAttribute getAttribute}.
+	 * When `value` is provided, `.attribute` also asserts that the attribute's value is equal to the given `value`.
 	 *
 	 *		expect( selection ).to.have.attribute( 'linkHref', 'example.com' );
 	 *

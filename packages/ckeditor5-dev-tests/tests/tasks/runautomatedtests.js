@@ -293,4 +293,10 @@ beforeEach( () => {
 				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.include( codeMakingConsoleUseThrowErrors );
 			} );
 	} );
+
+	it( 'should load custom assertions automatically', () => {
+		// TODO: The goal of this test is to verify whether the `ckeditor5/build/.automated-tests/entry-point.js` file
+		// TODO: contains imports and executions of the factory functions that register custom assertions.
+		// TODO: Make sure to verify whether `kebab-case` is processed correctly.
+	} );
 } );

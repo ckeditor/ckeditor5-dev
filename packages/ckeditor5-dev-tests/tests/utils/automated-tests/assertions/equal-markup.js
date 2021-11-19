@@ -5,11 +5,11 @@
 
 const chai = require( 'chai' );
 const expect = chai.expect;
+const equalMarkupFactory = require( '../../../../lib/utils/automated-tests/assertions/equal-markup' );
 
 describe( 'equalMarkup chai assertion', () => {
 	before( () => {
-		const equalMarkup = require( '../../../../lib/utils/automated-tests/assertions/equalMarkup' );
-		equalMarkup( chai );
+		equalMarkupFactory( chai );
 	} );
 
 	it( 'should be added to chai assertions', () => {
