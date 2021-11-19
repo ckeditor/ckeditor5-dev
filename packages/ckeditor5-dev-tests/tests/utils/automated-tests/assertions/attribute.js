@@ -74,10 +74,4 @@ describe( 'attribute chai assertion', () => {
 			} ).to.not.have.attribute( 'foo', 'baz' );
 		} ).to.throw( 'expected { Object (hasAttribute, getAttribute) } to not have attribute \'foo\' of \'baz\'' );
 	} );
-
-	it( 'should prefix failure message with the given one', () => {
-		expect( function() {
-			expect( {} ).to.have.attribute( 'foo', 'baz', 'Illegal salmon' );
-		} ).to.throw( /^Illegal salmon: / );
-	} );
 } );

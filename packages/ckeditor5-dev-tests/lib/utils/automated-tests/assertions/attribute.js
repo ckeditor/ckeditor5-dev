@@ -22,13 +22,8 @@ module.exports = chai => {
 	 *
 	 * @param {String} key Key of attribute to assert.
 	 * @param {String} [value] Attribute value to assert.
-	 * @param {String} [message] Additional message.
 	 */
-	chai.Assertion.addMethod( 'attribute', function attributeAssertion( key, value, message ) {
-		if ( message ) {
-			chai.util.flag( this, 'message', message );
-		}
-
+	chai.Assertion.addMethod( 'attribute', function attributeAssertion( key, value ) {
 		const obj = this._obj;
 
 		if ( arguments.length === 1 ) {
@@ -49,7 +44,7 @@ module.exports = chai => {
 		// If a value was given.
 		if ( arguments.length >= 2 ) {
 		// Check if it has the method at all.
-			new chai.Assertion( obj ).to.respondTo( 'getAttribute', message );
+			new chai.Assertion( obj ).to.respondTo( 'getAttribute' );
 
 			const attributeValue = obj.getAttribute( key );
 			this.assert(
