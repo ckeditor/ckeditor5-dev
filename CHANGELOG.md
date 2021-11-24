@@ -1,6 +1,37 @@
 Changelog
 =========
 
+## [26.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v26.0.1...v26.1.0) (2021-11-24)
+
+### Features
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Created the `equalMarkup` and `attribute` chai assertions. They are loaded automatically when running tests. Closes [ckeditor/ckeditor5#9668](https://github.com/ckeditor/ckeditor5/issues/9668). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e2196083c58d8b1a99854ff2a08ab77dfa4846c1))
+
+### Bug fixes
+
+* **[jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins)**: When detecting doclets of the same member, remove a prefix for instance/static symbols. Closes [ckeditor/ckeditor5#8691](https://github.com/ckeditor/ckeditor5/issues/8691). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b36893b18326fbeb84ba84b7dc9375f7c70c9238))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v26.0.1 => v26.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v26.0.1 => v26.1.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v26.0.1 => v26.1.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v26.0.1 => v26.1.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v26.0.1 => v26.1.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v26.0.1 => v26.1.0
+</details>
+
+
 ## [26.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v26.0.0...v26.0.1) (2021-11-18)
 
 ### Bug fixes
