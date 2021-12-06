@@ -9,16 +9,10 @@
 
 const fs = require( 'fs' );
 const path = require( 'path' );
-
+const postcss = require( 'postcss' );
 const chalk = require( 'chalk' );
-const semver = require( 'semver' );
 const log = require( '../logger' )();
 const getPackageName = require( './utils/getpackagename' );
-
-const { version: postcssVersion } = require( 'postcss/package.json' );
-const postcss = require( 'postcss' );
-
-const PLUGIN_NAME = 'postcss-ckeditor5-theme-importer';
 
 /**
  * A PostCSS plugin that loads a theme files from specified path.
@@ -45,43 +39,25 @@ const PLUGIN_NAME = 'postcss-ckeditor5-theme-importer';
  * [documentation](http://api.postcss.org/postcss.html#.plugin) of the project.
  *
  * @param {ThemeImporterOptions} pluginOptions
- * @returns {Function|Object} A PostCSS plugin.
+ * @returns {Function} A PostCSS plugin.
  */
-// PostCSS 8+.
-if ( semver.gte( postcssVersion, '8.0.0' ) ) {
-	module.exports = ( pluginOptions = {} ) => {
-		return {
-			postcssPlugin: PLUGIN_NAME,
-			Once( root, { result } ) {
-				return themeImporterPlugin( pluginOptions, root, result );
-			}
-		};
+module.exports = postcss.plugin( 'postcss-ckeditor5-theme-importer', ( pluginOptions = {} ) => {
+	return ( root, result ) => {
+		// Clone the options, don't alter the original options object.
+		const options = Object.assign( {}, pluginOptions, {
+			debug: pluginOptions.debug || false,
+			postCssOptions: {
+				plugins: [
+					require( 'postcss-import' )(),
+					require( './themelogger' )()
+				]
+			},
+			root, result
+		} );
+
+		return importThemeFile( options );
 	};
-
-	module.exports.postcss = true;
-}
-// PostCSS <8.
-else {
-	module.exports = postcss.plugin( PLUGIN_NAME, ( pluginOptions = {} ) => {
-		return ( root, result ) => themeImporterPlugin( pluginOptions, root, result );
-	} );
-}
-
-function themeImporterPlugin( pluginOptions, root, result ) {
-	// Clone the options, don't alter the original options object.
-	const options = Object.assign( {}, pluginOptions, {
-		debug: pluginOptions.debug || false,
-		postCssOptions: {
-			plugins: [
-				require( 'postcss-import' )(),
-				require( './themelogger' )()
-			]
-		},
-		root, result
-	} );
-
-	return importThemeFile( options );
-}
+} );
 
 // Imports a complementary theme file corresponding with a CSS file being processed by
 // PostCSS, if such theme file exists.

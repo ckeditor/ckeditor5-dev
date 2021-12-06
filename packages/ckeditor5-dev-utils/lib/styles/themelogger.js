@@ -7,38 +7,14 @@
 
 /* eslint-env node */
 
-const semver = require( 'semver' );
 const postcss = require( 'postcss' );
-const { version: postcssVersion } = require( 'postcss/package.json' );
-
-const PLUGIN_NAME = 'postcss-ckeditor5-theme-logger';
 
 /**
  * A plugin that prepends a path to the file in the comment for each file
  * processed by PostCSS.
  *
- * @returns {Function|Object} A PostCSS plugin.
+ * @returns {Function} A PostCSS plugin.
  */
-// PostCSS 8+.
-if ( semver.gte( postcssVersion, '8.0.0' ) ) {
-	module.exports = () => {
-		return {
-			postcssPlugin: PLUGIN_NAME,
-			Once( root ) {
-				return themeLoggerPlugin( root );
-			}
-		};
-	};
-
-	module.exports.postcss = true;
-}
-// PostCSS <8.
-else {
-	module.exports = postcss.plugin( PLUGIN_NAME, () => {
-		return root => themeLoggerPlugin( root );
-	} );
-}
-
-function themeLoggerPlugin( root ) {
-	return root.prepend( `/* ${ root.source.input.file } */\n` );
-}
+module.exports = postcss.plugin( 'postcss-ckeditor5-theme-logger', () => {
+	return root => root.prepend( `/* ${ root.source.input.file } */ \n` );
+} );
