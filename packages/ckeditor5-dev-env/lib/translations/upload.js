@@ -8,33 +8,41 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
-const transifexService = require( './transifex-service' );
 const Table = require( 'cli-table' );
 const chalk = require( 'chalk' );
+const transifexService = require( './transifex-service' );
+const { verifyProperties } = require( './utils' );
 
 /**
- * Uploads translations to the Transifex from collected files that are saved at 'ckeditor5/build/.transifex'.
+ * Uploads translations to the Transifex from collected files that are saved by default in the 'ckeditor5/build/.transifex' directory.
  *
- * @param {Object} loginConfig
+ * @param {Object} config
  * @param {String} config.token Token to the Transifex API.
+ * @param {String} config.url Transifex API URL where the request should be send.
+ * @param {String} config.translationsDirectory An absolute path where to look for the translation files.
+ * @returns {Promise}
  */
-module.exports = function upload( loginConfig ) {
-	const cwd = process.cwd().split( path.sep ).join( path.posix.sep );
-	const pathToPoTranslations = path.posix.join( cwd, 'build', '.transifex' );
+module.exports = function upload( config ) {
+	verifyProperties( config, [ 'token', 'url', 'translationsDirectory' ] );
+
+	// Make sure to use unix paths.
+	const pathToPoTranslations = config.translationsDirectory.split( /[\\/]/g ).join( '/' );
+
 	const potFiles = fs.readdirSync( pathToPoTranslations ).map( packageName => ( {
 		packageName,
 		path: path.posix.join( pathToPoTranslations, packageName, 'en.pot' )
 	} ) );
+
 	const summaryCollection = {
 		created: [],
 		updated: []
 	};
 
 	return Promise.resolve()
-		.then( () => transifexService.getResources( loginConfig ) )
+		.then( () => transifexService.getResources( config ) )
 		.then( resources => resources.map( resource => resource.slug ) )
 		.then( uploadedPackageNames => getUploadedPackages( potFiles, uploadedPackageNames ) )
-		.then( areUploadedResources => createOrUpdateResources( loginConfig, areUploadedResources, potFiles, summaryCollection ) )
+		.then( areUploadedResources => createOrUpdateResources( config, areUploadedResources, potFiles, summaryCollection ) )
 		.then( () => {
 			logger.info( 'All resources uploaded.\n' );
 
@@ -60,22 +68,24 @@ function createOrUpdateResources( loginConfig, areUploadedResources, potFiles, s
 
 function createOrUpdateResource( config, potFile, isUploadedResource, summaryCollection ) {
 	const { packageName, path } = potFile;
-	const resConfig = Object.assign( {}, config, {
+	const requestConfig = {
+		url: config.url,
+		token: config.token,
 		name: packageName,
 		slug: packageName,
 		content: fs.createReadStream( path )
-	} );
+	};
 
 	logger.info( `Processing "${ packageName }"...` );
 
 	if ( isUploadedResource ) {
-		return transifexService.putResourceContent( resConfig )
+		return transifexService.putResourceContent( requestConfig )
 			.then( parsedResponse => {
 				summaryCollection.updated.push( [ packageName, parsedResponse ] );
 			} );
 	}
 
-	return transifexService.postResource( resConfig )
+	return transifexService.postResource( requestConfig )
 		.then( parsedResponse => {
 			summaryCollection.created.push( [ packageName, parsedResponse ] );
 		} );
@@ -93,7 +103,7 @@ function printSummary( summaryCollection ) {
 		const items = summaryCollection.created.sort( sortByPackageName() );
 
 		for ( const [ packageName, response ] of items ) {
-			table.push( [ packageName, response[ 0 ] ] );
+			table.push( [ packageName, response[ 0 ].toString() ] );
 		}
 
 		logger.info( table.toString() + '\n' );
@@ -116,11 +126,21 @@ function printSummary( summaryCollection ) {
 			.sort( sortByPackageName() );
 
 		for ( const [ packageName, response ] of changedItems ) {
-			table.push( [ packageName, response.strings_added, response.strings_updated, response.strings_delete ] );
+			table.push( [
+				packageName,
+				response.strings_added.toString(),
+				response.strings_updated.toString(),
+				response.strings_delete.toString()
+			] );
 		}
 
 		for ( const [ packageName, response ] of nonChangedItems ) {
-			const rowData = [ packageName, response.strings_added, response.strings_updated, response.strings_delete ];
+			const rowData = [
+				packageName,
+				response.strings_added.toString(),
+				response.strings_updated.toString(),
+				response.strings_delete.toString()
+			];
 
 			table.push( rowData.map( item => chalk.gray( item ) ) );
 		}

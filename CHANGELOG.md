@@ -1,6 +1,129 @@
 Changelog
 =========
 
+## [26.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v26.0.1...v26.1.0) (2021-11-24)
+
+### Features
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Created the `equalMarkup` and `attribute` chai assertions. They are loaded automatically when running tests. Closes [ckeditor/ckeditor5#9668](https://github.com/ckeditor/ckeditor5/issues/9668). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e2196083c58d8b1a99854ff2a08ab77dfa4846c1))
+
+### Bug fixes
+
+* **[jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins)**: When detecting doclets of the same member, remove a prefix for instance/static symbols. Closes [ckeditor/ckeditor5#8691](https://github.com/ckeditor/ckeditor5/issues/8691). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b36893b18326fbeb84ba84b7dc9375f7c70c9238))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v26.0.1 => v26.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v26.0.1 => v26.1.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v26.0.1 => v26.1.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v26.0.1 => v26.1.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v26.0.1 => v26.1.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v26.0.1 => v26.1.0
+</details>
+
+
+## [26.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v26.0.0...v26.0.1) (2021-11-18)
+
+### Bug fixes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: All numbers returned by the Transifex service will be cast to strings due to an error in the `cli-package`. See: [Automattic/cli-table#152](https://github.com/Automattic/cli-table/issues/152). Closes [ckeditor/ckeditor5#10861](https://github.com/ckeditor/ckeditor5/issues/10861). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/76611376ee9cefff85896fe0b116a5a654dd4a8b))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v26.0.0 => v26.0.1
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v26.0.0 => v26.0.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v26.0.0 => v26.0.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v26.0.0 => v26.0.1
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v26.0.0 => v26.0.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v26.0.0 => v26.0.1
+</details>
+
+
+## [26.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v25.4.5...v26.0.0) (2021-11-18)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `createPotFiles()` function requires the `translationsDirectory` option, which points to the directory where all `*.po` files will be created.
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `downloadTranslations()` function requires the following properties:`translationsDirectory` - an absolute path used for resolving paths to packages; `url` - Transifex API URL.
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `upload()` function requires the following properties: `translationsDirectory`- points to the directory where all `*.po` files will be created; `url` - Transifex API URL.
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Removed the `ckeditor5-dev-env-translations` binary script as it worked only for the CKEditor 5 project. Use the following functions instead: `const { createPotFiles, uploadPotFiles, downloadTranslations } = require( '@ckeditor/ckeditor5-dev-env' );`.
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `uploadPotFiles()` and `downloadTranslations()` functions require the `token` value passed directly to the script. Use the `const getToken = require( '@ckeditor/ckeditor5-dev-env/lib/translations/gettoken' )` function for reading the input from the command line.
+
+### MINOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: All functions in the `transifex-service.js` util require the `url` value when calling API.
+
+### Features
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Redesigned the API for handling localization in CKEditor 5 sources. Now, the code can be shared in 3rd party plugins created by external developers. See [ckeditor/ckeditor5-package-generator#9](https://github.com/ckeditor/ckeditor5-package-generator/issues/9). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/048915a7ba24cba8ecb6280bab8dd4b87b8f7a38))
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `createPotFiles()` function accepts new flags:. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/048915a7ba24cba8ecb6280bab8dd4b87b8f7a38))
+
+  *  `ignoreUnusedCorePackageContexts` - when set to `true`, unused contexts from the `@ckeditor/ckeditor5-core` package will not be displayed as errors,
+  * `skipLicenseHeader` - when set to `true`, created `*.po` files will not contain the CKEditor 5 license header.
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `simplifyLicenseHeader()` function accepts a new flag (`simplifyLicenseHeader`) that allows skipping adding the contribute URL in generated `*.po` files. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/048915a7ba24cba8ecb6280bab8dd4b87b8f7a38))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v25.4.5 => v26.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v25.4.5 => v26.0.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v25.4.5 => v26.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v25.4.5 => v26.0.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v25.4.5 => v26.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v25.4.5 => v26.0.0
+</details>
+
+
+## [25.4.5](https://github.com/ckeditor/ckeditor5-dev/compare/v25.4.4...v25.4.5) (2021-10-26)
+
+### Bug fixes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `releaseSubRepositories()` task does not check the npm version if a package will not be published anyway. Closes [ckeditor/ckeditor5#10639](https://github.com/ckeditor/ckeditor5/issues/10639). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/8efbafbdc664a59fb011472ebd8096fd7314ce82))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v25.4.4 => v25.4.5
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v25.4.4 => v25.4.5
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v25.4.4 => v25.4.5
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v25.4.4 => v25.4.5
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v25.4.4 => v25.4.5
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v25.4.4 => v25.4.5
+</details>
+
+
 ## [25.4.4](https://github.com/ckeditor/ckeditor5-dev/compare/v25.4.3...v25.4.4) (2021-09-23)
 
 ### Bug fixes

@@ -11,6 +11,7 @@ const transifexService = require( './transifex-service' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 const { cleanPoFileContent, createDictionaryFromPoFileContent } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 const languageCodeMap = require( './languagecodemap.json' );
+const { verifyProperties } = require( './utils' );
 
 /**
  * Downloads translations from the Transifex for each CF localizable package.
@@ -19,15 +20,26 @@ const languageCodeMap = require( './languagecodemap.json' );
  * @param {Object} config
  * @param {String} config.token Token to the Transifex API.
  * @param {Map.<String,String>} config.packages A resource name -> package path map for which translations should be downloaded.
+ * @param {String} config.cwd Current work directory.
+ * @param {String} config.url Transifex API URL where the request should be send.
+ * @param {Boolean} [config.simplifyLicenseHeader=false] Whether to skip adding the contribute guide URL in the output `*.po` files.
  */
 module.exports = async function downloadTranslations( config ) {
+	verifyProperties( config, [ 'token', 'url', 'packages', 'cwd' ] );
+
 	const localizablePackageNames = await getLocalizablePackages( config );
 
 	for ( const packageName of localizablePackageNames ) {
 		const translations = await downloadPoFiles( config, packageName );
+		const packagePath = getPathToTranslations( config.cwd, config.packages.get( packageName ) );
 
-		removeOldTranslation( config.packages.get( packageName ) );
-		saveNewTranslations( packageName, config.packages.get( packageName ), translations );
+		removeOldTranslation( packagePath );
+		saveNewTranslations( {
+			packageName,
+			packagePath,
+			translations,
+			simplifyLicenseHeader: config.simplifyLicenseHeader
+		} );
 	}
 
 	logger.info( 'Saved all translations.' );
@@ -49,7 +61,7 @@ async function getLocalizablePackages( config ) {
  * @param {String} packagePath Package path.
  */
 function removeOldTranslation( packagePath ) {
-	fs.removeSync( getPathToTranslations( packagePath ) );
+	fs.removeSync( packagePath );
 }
 
 /**
@@ -58,11 +70,18 @@ function removeOldTranslation( packagePath ) {
  * @param {Object} config Configuration.
  * @param {String} config.token Token to the Transifex API.
  * @param {String} packageName Package name.
+ * @param {String} config.cwd Current work directory.
+ * @param {String} config.url Transifex API URL where the request should be send.
  * @returns {Promise<Map.<String, Object>>}
  */
 async function downloadPoFiles( config, packageName ) {
-	const packageOptions = Object.assign( {}, config, { slug: packageName } );
-	const resourceDetails = await transifexService.getResourceDetails( packageOptions );
+	const requestConfig = {
+		url: config.url,
+		token: config.token,
+		slug: packageName
+	};
+
+	const resourceDetails = await transifexService.getResourceDetails( requestConfig );
 
 	const languageCodes = resourceDetails.available_languages.map( languageInfo => languageInfo.code );
 	const translations = await Promise.all( languageCodes.map( lang => downloadPoFile( config, lang, packageName ) ) );
@@ -84,7 +103,7 @@ async function downloadPoFile( config, lang, packageName ) {
 	return data.content;
 }
 
-function saveNewTranslations( packageName, packagePath, translations ) {
+function saveNewTranslations( { packageName, packagePath, translations, simplifyLicenseHeader } ) {
 	let savedFiles = 0;
 
 	for ( let [ lang, poFileContent ] of translations ) {
@@ -96,9 +115,9 @@ function saveNewTranslations( packageName, packagePath, translations ) {
 			lang = languageCodeMap[ lang ];
 		}
 
-		poFileContent = cleanPoFileContent( poFileContent );
+		poFileContent = cleanPoFileContent( poFileContent, { simplifyLicenseHeader } );
 
-		const pathToSave = path.join( getPathToTranslations( packagePath ), lang + '.po' );
+		const pathToSave = path.join( packagePath, lang + '.po' );
 
 		fs.outputFileSync( pathToSave, poFileContent );
 		savedFiles++;
@@ -107,8 +126,13 @@ function saveNewTranslations( packageName, packagePath, translations ) {
 	logger.info( `Saved ${ savedFiles } PO files for ${ packageName } package.` );
 }
 
-function getPathToTranslations( packagePath ) {
-	return path.join( process.cwd(), packagePath, 'lang', 'translations' );
+/**
+ * @param {String} cwd Current work directory.
+ * @param {String} packagePath Package path.
+ * @return {String}
+ */
+function getPathToTranslations( cwd, packagePath ) {
+	return path.join( cwd, packagePath, 'lang', 'translations' );
 }
 
 function isPoFileContainingTranslations( poFileContent ) {

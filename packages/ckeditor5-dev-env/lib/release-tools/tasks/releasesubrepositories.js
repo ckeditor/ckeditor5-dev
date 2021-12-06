@@ -340,6 +340,15 @@ module.exports = function releaseSubRepositories( options ) {
 
 			log.info( `\nChecking "${ chalk.underline( packageJson.name ) }"...` );
 
+			if ( skipNpmPublish.has( packageJson.name ) ) {
+				log.warning( '⚠️  Skipping because the package was listed as `options.skipNpmPublish`.' );
+
+				releaseDetails.npmVersion = null;
+				releaseDetails.shouldReleaseOnNpm = false;
+
+				return Promise.resolve();
+			}
+
 			const npmVersion = getVersionFromNpm( packageJson.name );
 
 			logDryRun( `Versions: package.json: "${ releaseDetails.version }", npm: "${ npmVersion || 'initial release' }".` );
@@ -348,16 +357,9 @@ module.exports = function releaseSubRepositories( options ) {
 			releaseDetails.shouldReleaseOnNpm = npmVersion !== releaseDetails.version;
 
 			if ( releaseDetails.shouldReleaseOnNpm ) {
-				if ( skipNpmPublish.has( packageJson.name ) ) {
-					releaseDetails.shouldReleaseOnNpm = false;
-					log.warning( '⚠️  Skipping because the package was listed as `options.skipNpmPublish`.' );
+				log.info( '✅  Added to release.' );
 
-					return Promise.resolve();
-				} else {
-					log.info( '✅  Added to release.' );
-
-					releasesOnNpm.add( repositoryPath );
-				}
+				releasesOnNpm.add( repositoryPath );
 			} else {
 				log.info( '❌  Nothing to release.' );
 			}

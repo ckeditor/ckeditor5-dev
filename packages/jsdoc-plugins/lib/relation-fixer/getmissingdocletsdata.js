@@ -40,7 +40,16 @@ function getMissingDocletsData( docletMap, docletCollection, interfaceClassOrMix
 		}
 
 		const docletsOfSameMember = docletCollection.get( `memberof:${ clonedDoclet.memberof }` ).filter( d => {
-			return d.name === clonedDoclet.name && d.kind === clonedDoclet.kind;
+			// Different types, so avoid comparing their names.
+			if ( d.kind !== clonedDoclet.kind ) {
+				return false;
+			}
+
+			// Static members are separated using the dot character.
+			const docletName = d.name.replace( /^[#.]/, '' );
+			const clonedDocletName = clonedDoclet.name.replace( /^[#.]/, '' );
+
+			return docletName === clonedDocletName;
 		} );
 
 		if ( docletsOfSameMember.length === 0 ) {

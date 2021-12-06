@@ -10,6 +10,7 @@ const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 const expect = require( 'chai' ).expect;
 const chalk = require( 'chalk' );
+const path = require( 'path' );
 
 describe( 'runAutomatedTests', () => {
 	let sandbox, stubs, runAutomatedTests, karmaServerCallback;
@@ -44,7 +45,8 @@ beforeEach( () => {
 		stubs = {
 			fs: {
 				writeFileSync: sandbox.stub(),
-				utimesSync: sandbox.stub()
+				utimesSync: sandbox.stub(),
+				readdirSync: sandbox.stub()
 			},
 			log: {
 				info: sandbox.stub(),
@@ -111,6 +113,8 @@ beforeEach( () => {
 			production: true
 		};
 
+		stubs.fs.readdirSync.returns( [] );
+
 		stubs.transformFileOptionToTestGlob.returns( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
@@ -167,6 +171,8 @@ beforeEach( () => {
 			production: true
 		};
 
+		stubs.fs.readdirSync.returns( [] );
+
 		stubs.transformFileOptionToTestGlob.onFirstCall().returns( [
 			'/workspace/packages/ckeditor5-basic-foo/tests/**/*.js',
 			'/workspace/packages/ckeditor-basic-foo/tests/**/*.js'
@@ -206,6 +212,8 @@ beforeEach( () => {
 
 		const consoleWarnStub = sandbox.stub( console, 'warn' );
 
+		stubs.fs.readdirSync.returns( [] );
+
 		stubs.transformFileOptionToTestGlob.returns( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
@@ -242,6 +250,8 @@ beforeEach( () => {
 
 		sandbox.stub( console, 'warn' );
 
+		stubs.fs.readdirSync.returns( [] );
+
 		stubs.transformFileOptionToTestGlob.returns( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
@@ -272,6 +282,8 @@ beforeEach( () => {
 			production: true
 		};
 
+		stubs.fs.readdirSync.returns( [] );
+
 		stubs.transformFileOptionToTestGlob.returns( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
@@ -291,6 +303,104 @@ beforeEach( () => {
 		return runAutomatedTests( options )
 			.then( () => {
 				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.include( codeMakingConsoleUseThrowErrors );
+			} );
+	} );
+
+	it( 'should load custom assertions automatically (camelCase)', done => {
+		const options = {
+			files: [
+				'basic-styles'
+			],
+			production: true
+		};
+
+		stubs.fs.readdirSync.returns( [ 'assertionA.js', 'assertionB.js' ] );
+
+		stubs.transformFileOptionToTestGlob.returns( [
+			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
+			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
+		] );
+
+		stubs.glob.sync.onFirstCall().returns( [
+			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
+			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
+		] );
+
+		stubs.glob.sync.onSecondCall().returns( [] );
+
+		const assertionsDir = path.join( __dirname, '..', '..', 'lib', 'utils', 'automated-tests', 'assertions' ).replace( /\\/g, '/' );
+
+		const expectedEntryPointContent = [
+			`import assertionAFactory from "${ assertionsDir }/assertionA.js";`,
+			`import assertionBFactory from "${ assertionsDir }/assertionB.js";`,
+			'assertionAFactory( chai );',
+			'assertionBFactory( chai );',
+			''
+		].join( '\n' );
+
+		setTimeout( () => {
+			karmaServerCallback( 0 );
+		} );
+
+		runAutomatedTests( options )
+			.then( () => {
+				expect( stubs.mkdirp.sync.calledOnce ).to.equal( true );
+				expect( stubs.mkdirp.sync.firstCall.args[ 0 ] ).to.equal( '/workspace/build/.automated-tests' );
+
+				expect( stubs.fs.writeFileSync.calledOnce ).to.equal( true );
+				expect( stubs.fs.writeFileSync.firstCall.args[ 0 ] ).to.equal( '/workspace/build/.automated-tests/entry-point.js' );
+				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.include( expectedEntryPointContent );
+
+				done();
+			} );
+	} );
+
+	it( 'should load custom assertions automatically (kebab-case)', done => {
+		const options = {
+			files: [
+				'basic-styles'
+			],
+			production: true
+		};
+
+		stubs.fs.readdirSync.returns( [ 'assertion-a.js', 'assertion-b.js' ] );
+
+		stubs.transformFileOptionToTestGlob.returns( [
+			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
+			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
+		] );
+
+		stubs.glob.sync.onFirstCall().returns( [
+			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
+			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
+		] );
+
+		stubs.glob.sync.onSecondCall().returns( [] );
+
+		const assertionsDir = path.join( __dirname, '..', '..', 'lib', 'utils', 'automated-tests', 'assertions' ).replace( /\\/g, '/' );
+
+		const expectedEntryPointContent = [
+			`import assertionAFactory from "${ assertionsDir }/assertion-a.js";`,
+			`import assertionBFactory from "${ assertionsDir }/assertion-b.js";`,
+			'assertionAFactory( chai );',
+			'assertionBFactory( chai );',
+			''
+		].join( '\n' );
+
+		setTimeout( () => {
+			karmaServerCallback( 0 );
+		} );
+
+		runAutomatedTests( options )
+			.then( () => {
+				expect( stubs.mkdirp.sync.calledOnce ).to.equal( true );
+				expect( stubs.mkdirp.sync.firstCall.args[ 0 ] ).to.equal( '/workspace/build/.automated-tests' );
+
+				expect( stubs.fs.writeFileSync.calledOnce ).to.equal( true );
+				expect( stubs.fs.writeFileSync.firstCall.args[ 0 ] ).to.equal( '/workspace/build/.automated-tests/entry-point.js' );
+				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.include( expectedEntryPointContent );
+
+				done();
 			} );
 	} );
 } );
