@@ -48,7 +48,10 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 				additionalLanguages: options.additionalLanguages,
 				addMainLanguageTranslationsToAllAssets: true
 			} ),
-			new webpack.DefinePlugin( definitions )
+			new webpack.DefinePlugin( definitions ),
+			new webpack.ProvidePlugin( {
+				process: 'process/browser'
+			} )
 		],
 
 		module: {
