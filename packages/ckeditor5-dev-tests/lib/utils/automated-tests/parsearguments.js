@@ -181,7 +181,7 @@ module.exports = function parseArguments( args ) {
 
 		function addPackagesToCollection( collection, directoryPath ) {
 			for ( const directory of tools.getDirectories( directoryPath ) ) {
-				collection.add( directory.replace( /^ckeditor5?-/, '' ) );
+				collection.add( directory.replace( /^ckeditor5-/, '' ) );
 			}
 		}
 	}
