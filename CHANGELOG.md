@@ -1,6 +1,35 @@
 Changelog
 =========
 
+## [26.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v26.1.0...v26.2.0) (2021-12-08)
+
+### MINOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Packages starting with the `ckeditor-` prefix are not supported anymore.
+
+### Other changes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Upgraded the testing environment to webpack 5. See [ckeditor/ckeditor5#10668](https://github.com/ckeditor/ckeditor5/issues/10668). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f5c4bef1bad55f0795b86382c404f8977a8ddd58))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Dropped support for resolving packages starting with the `ckeditor-` prefix. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f5c4bef1bad55f0795b86382c404f8977a8ddd58))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v26.1.0 => v26.2.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v26.1.0 => v26.2.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v26.1.0 => v26.2.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v26.1.0 => v26.2.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v26.1.0 => v26.2.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v26.1.0 => v26.2.0
+</details>
+
+
 ## [26.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v26.0.1...v26.1.0) (2021-11-24)
 
 ### Features
