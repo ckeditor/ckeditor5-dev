@@ -30,6 +30,10 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 
 		entry: options.entries,
 
+		devtool: false,
+
+		watch: false,
+
 		output: {
 			path: options.buildDir
 		},
