@@ -26,7 +26,7 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 	const definitions = Object.assign( {}, getDefinitionsFromFile( options.identityFile ) );
 
 	const webpackConfig = {
-		mode: 'development',
+		mode: 'none',
 
 		entry: options.entries,
 
