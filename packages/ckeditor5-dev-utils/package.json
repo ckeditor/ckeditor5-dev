@@ -1,11 +1,11 @@
 {
   "name": "@ckeditor/ckeditor5-dev-utils",
-  "version": "26.1.0",
+  "version": "26.2.1",
   "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-webpack-plugin": "^26.1.0",
+    "@ckeditor/ckeditor5-dev-webpack-plugin": "^26.2.1",
     "acorn": "^6.2.1",
     "acorn-walk": "^6.2.0",
     "chalk": "^3.0.0",
@@ -15,15 +15,15 @@
     "fs-extra": "^8.1.0",
     "javascript-stringify": "^1.6.0",
     "pofile": "^1.0.9",
-    "postcss": "^7.0.36",
+    "postcss": "^7.0.39",
     "postcss-import": "^12.0.0",
     "postcss-loader": "^3.0.0",
     "postcss-mixins": "^6.2.0",
     "postcss-nesting": "^7.0.0",
     "raw-loader": "^4.0.1",
     "shelljs": "^0.8.1",
-    "style-loader": "^1.2.1",
-    "terser-webpack-plugin": "^3.0.2",
+    "style-loader": "^2.0.0",
+    "terser-webpack-plugin": "^4.2.3",
     "through2": "^3.0.1"
   },
   "devDependencies": {
@@ -33,6 +33,9 @@
     "proxyquire": "^2.1.0",
     "sinon": "^7.3.2",
     "vinyl": "^2.1.0"
+  },
+  "peerDependencies": {
+    "webpack": "^4.43.0 || ^5.24.0"
   },
   "engines": {
     "node": ">=14.0.0",

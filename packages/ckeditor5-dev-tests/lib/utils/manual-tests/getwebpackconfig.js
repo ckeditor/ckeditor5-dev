@@ -48,7 +48,10 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 				additionalLanguages: options.additionalLanguages,
 				addMainLanguageTranslationsToAllAssets: true
 			} ),
-			new webpack.DefinePlugin( definitions )
+			new webpack.DefinePlugin( definitions ),
+			new webpack.ProvidePlugin( {
+				process: 'process/browser'
+			} )
 		],
 
 		module: {
@@ -69,14 +72,17 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 								}
 							}
 						},
+						'css-loader',
 						{
 							loader: 'postcss-loader',
-							options: getPostCssConfig( {
-								themeImporter: {
-									themePath: options.themePath
-								},
-								sourceMap: true
-							} )
+							options: {
+								postcssOptions: getPostCssConfig( {
+									themeImporter: {
+										themePath: options.themePath
+									},
+									sourceMap: true
+								} )
+							}
 						}
 					]
 				},
@@ -87,7 +93,7 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 				{
 					test: /\.js$/,
 					loader: require.resolve( '../ck-debug-loader' ),
-					query: {
+					options: {
 						debugFlags: options.debug
 					}
 				}

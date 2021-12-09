@@ -59,7 +59,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			exclude: [
 				new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
 			],
-			query: {
+			options: {
 				esModules: true
 			}
 		} );
@@ -70,8 +70,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			coverage: true,
 			files: [
 				[
-					'node_modules/ckeditor5-utils/tests/**/*.js',
-					'node_modules/ckeditor-utils/tests/**/*.js'
+					'node_modules/ckeditor5-utils/tests/**/*.js'
 				]
 			]
 		} );
@@ -80,8 +79,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			.find( rule => rule.loader === 'istanbul-instrumenter-loader' );
 
 		expect( istanbulLoader.include ).to.deep.equal( [
-			new RegExp( [ 'ckeditor5-utils', 'src', '' ].join( escapedPathSep ) ),
-			new RegExp( [ 'ckeditor-utils', 'src', '' ].join( escapedPathSep ) )
+			new RegExp( [ 'ckeditor5-utils', 'src', '' ].join( escapedPathSep ) )
 		] );
 	} );
 
@@ -90,8 +88,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			coverage: true,
 			files: [
 				[
-					'node_modules/ckeditor5-!(utils)/tests/**/*.js',
-					'node_modules/ckeditor-!(utils)/tests/**/*.js'
+					'node_modules/ckeditor5-!(utils)/tests/**/*.js'
 				]
 			]
 		} );
@@ -100,8 +97,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			.find( rule => rule.loader === 'istanbul-instrumenter-loader' );
 
 		expect( istanbulLoader.include ).to.deep.equal( [
-			new RegExp( [ 'ckeditor5-!(utils)', 'src', '' ].join( escapedPathSep ) ),
-			new RegExp( [ 'ckeditor-!(utils)', 'src', '' ].join( escapedPathSep ) )
+			new RegExp( [ 'ckeditor5-!(utils)', 'src', '' ].join( escapedPathSep ) )
 		] );
 	} );
 
@@ -110,7 +106,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			sourceMap: true
 		} );
 
-		expect( webpackConfig.devtool ).to.equal( 'inline-source-map' );
+		expect( webpackConfig.devtool ).to.equal( 'cheap-source-map' );
 	} );
 
 	it( 'should contain a correct paths in resolveLoader', () => {
