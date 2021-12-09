@@ -49,8 +49,6 @@ module.exports = function compileManualTestScripts( options ) {
 		disableWatch: options.disableWatch
 	} );
 
-	console.log( webpackConfig );
-
 	return runWebpack( webpackConfig );
 };
 
