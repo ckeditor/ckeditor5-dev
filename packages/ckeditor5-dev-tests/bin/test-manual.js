@@ -14,6 +14,11 @@ const tests = require( '../lib/index' );
 const cwd = process.cwd();
 const options = tests.parseArguments( process.argv.slice( 2 ) );
 
+// By default, the watch mechanism should be enabled in manual tests.
+// However, it makes sense to disable it when a developer wants to compile these files once,
+// without rebuilding it. See: https://github.com/ckeditor/ckeditor5/issues/10982.
+options.disableWatch = process.argv.includes( '--disable-watch' );
+
 if ( options.files.length === 0 ) {
 	options.files = [ '*', 'ckeditor5' ];
 }
