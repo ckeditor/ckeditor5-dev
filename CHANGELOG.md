@@ -1,6 +1,34 @@
 Changelog
 =========
 
+## [27.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v26.2.1...v27.0.0) (2021-12-09)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* Upgraded the minimal versions of Node.js to `14.0.0` due to the end of LTS.
+
+### Other changes
+
+* Updated the required version of Node.js to 14. See [ckeditor/ckeditor5#10972](https://github.com/ckeditor/ckeditor5/issues/10972). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/6ba7fc4724f96aa5a2dd2f5dd0f19c4741a064b1))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v26.2.1 => v27.0.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v26.2.1 => v27.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v26.2.1 => v27.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v26.2.1 => v27.0.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v26.2.1 => v27.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v26.2.1 => v27.0.0
+</details>
+
+
 ## [26.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/v26.2.0...v26.2.1) (2021-12-08)
 
 ### Bug fixes
