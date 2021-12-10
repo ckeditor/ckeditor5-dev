@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint node: true, strict: true */
-
 'use strict';
 
 const path = require( 'path' );
@@ -19,6 +17,8 @@ const getRelativeFilePath = require( '../getrelativefilepath' );
  * @param {Array.<String>} options.patterns An array of patterns that resolve manual test scripts.
  * @param {String} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
  * @param {String} options.language A language passed to `CKEditorWebpackPlugin`.
+ * @param {Boolean} options.disableWatch Whether to disable the watch mechanism. If set to true, changes in source files
+ * will not trigger webpack.
  * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
  * @param {String} [options.identityFile] A file that provides secret keys used in the test scripts.
  * @returns {Promise}
@@ -43,7 +43,8 @@ module.exports = function compileManualTestScripts( options ) {
 		language: options.language,
 		additionalLanguages: options.additionalLanguages,
 		debug: options.debug,
-		identityFile: options.identityFile
+		identityFile: options.identityFile,
+		disableWatch: options.disableWatch
 	} );
 
 	return runWebpack( webpackConfig );

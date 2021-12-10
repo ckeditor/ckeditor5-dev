@@ -60,7 +60,8 @@ describe( 'compileManualTestScripts', () => {
 			themePath: 'path/to/theme',
 			language: 'en',
 			additionalLanguages: [ 'pl', 'ar' ],
-			debug: [ 'CK_DEBUG' ]
+			debug: [ 'CK_DEBUG' ],
+			disableWatch: false
 		} ).then( () => {
 			expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
 
@@ -74,6 +75,7 @@ describe( 'compileManualTestScripts', () => {
 					'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
 				},
 				debug: [ 'CK_DEBUG' ],
+				disableWatch: false,
 				identityFile: undefined
 			} );
 
@@ -203,7 +205,7 @@ describe( 'compileManualTestScripts', () => {
 		} );
 	} );
 
-	it( 'should pass identity file to Webpack configuration factory', () => {
+	it( 'should pass identity file to webpack configuration factory', () => {
 		stubs.glob.returns( [ 'ckeditor5-foo/manual/file1', 'ckeditor5-foo/manual/file2' ] );
 		const identityFile = '/foo/bar.js';
 
@@ -214,7 +216,8 @@ describe( 'compileManualTestScripts', () => {
 			language: 'en',
 			additionalLanguages: [ 'pl', 'ar' ],
 			debug: [ 'CK_DEBUG' ],
-			identityFile
+			identityFile,
+			disableWatch: false
 		} ).then( () => {
 			expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
 
@@ -228,7 +231,8 @@ describe( 'compileManualTestScripts', () => {
 					'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
 				},
 				debug: [ 'CK_DEBUG' ],
-				identityFile
+				identityFile,
+				disableWatch: false
 			} );
 
 			expect( stubs.webpack.calledOnce ).to.equal( true );
@@ -237,6 +241,46 @@ describe( 'compileManualTestScripts', () => {
 				entries: {
 					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
 					'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
+				}
+			} );
+
+			expect( stubs.glob.calledOnce ).to.equal( true );
+			expect( stubs.glob.firstCall.args[ 0 ] ).to.equal( 'manualTestPattern' );
+		} );
+	} );
+
+	it( 'should pass the "disableWatch" option to webpack configuration factory', () => {
+		stubs.glob.returns( [ 'ckeditor5-foo/manual/file1' ] );
+
+		return compileManualTestScripts( {
+			buildDir: 'buildDir',
+			patterns: [ 'manualTestPattern' ],
+			themePath: 'path/to/theme',
+			language: 'en',
+			additionalLanguages: [ 'pl', 'ar' ],
+			debug: [ 'CK_DEBUG' ],
+			disableWatch: true
+		} ).then( () => {
+			expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
+
+			expect( stubs.getWebpackConfig.firstCall.args[ 0 ] ).to.deep.equal( {
+				buildDir: 'buildDir',
+				themePath: 'path/to/theme',
+				language: 'en',
+				additionalLanguages: [ 'pl', 'ar' ],
+				entries: {
+					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1'
+				},
+				debug: [ 'CK_DEBUG' ],
+				identityFile: undefined,
+				disableWatch: true
+			} );
+
+			expect( stubs.webpack.calledOnce ).to.equal( true );
+			expect( stubs.webpack.firstCall.args[ 0 ] ).to.deep.equal( {
+				buildDir: 'buildDir',
+				entries: {
+					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1'
 				}
 			} );
 

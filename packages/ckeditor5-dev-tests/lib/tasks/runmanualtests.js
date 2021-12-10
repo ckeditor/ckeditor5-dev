@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint node: true, strict: true */
-
 'use strict';
 
 const path = require( 'path' );
@@ -21,6 +19,8 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
  * @param {Object} options
  * @param {Array.<String>} options.files Glob patterns specifying which tests to run.
  * @param {String} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
+ * @param {Boolean} [options.disableWatch=false] Whether to disable the watch mechanism. If set to true, changes in source files
+ * will not trigger webpack.
  * @param {String} [options.language] A language passed to `CKEditorWebpackPlugin`.
  * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
  * @param {Number} [options.port] A port number used by the `createManualTestServer`.
@@ -42,6 +42,7 @@ module.exports = function runManualTests( options ) {
 	const additionalLanguages = options.additionalLanguages;
 	const identityFile = normalizeIdentityFile( options.identityFile );
 	const silent = options.silent || false;
+	const disableWatch = options.disableWatch || false;
 
 	return Promise.resolve()
 		.then( () => removeDir( buildDir, { silent } ) )
@@ -53,14 +54,16 @@ module.exports = function runManualTests( options ) {
 				language,
 				additionalLanguages,
 				debug: options.debug,
-				identityFile
+				identityFile,
+				disableWatch
 			} ),
 			compileManualTestHtmlFiles( {
 				buildDir,
 				patterns,
 				language,
 				additionalLanguages,
-				silent
+				silent,
+				disableWatch
 			} ),
 			copyAssets( buildDir )
 		] ) )

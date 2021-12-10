@@ -73,6 +73,7 @@ describe( 'runManualTests', () => {
 					],
 					language: undefined,
 					additionalLanguages: undefined,
+					disableWatch: false,
 					silent: false
 				} );
 
@@ -87,6 +88,7 @@ describe( 'runManualTests', () => {
 					language: undefined,
 					additionalLanguages: undefined,
 					debug: undefined,
+					disableWatch: false,
 					identityFile: null
 				} );
 
@@ -138,6 +140,7 @@ describe( 'runManualTests', () => {
 					],
 					language: undefined,
 					additionalLanguages: undefined,
+					disableWatch: false,
 					silent: false
 				} );
 
@@ -154,6 +157,7 @@ describe( 'runManualTests', () => {
 					language: undefined,
 					additionalLanguages: undefined,
 					debug: [ 'CK_DEBUG' ],
+					disableWatch: false,
 					identityFile: null
 				} );
 
@@ -209,6 +213,7 @@ describe( 'runManualTests', () => {
 					],
 					language: 'pl',
 					additionalLanguages: [ 'ar', 'en' ],
+					disableWatch: false,
 					silent: false
 				} );
 
@@ -225,6 +230,7 @@ describe( 'runManualTests', () => {
 					language: 'pl',
 					additionalLanguages: [ 'ar', 'en' ],
 					debug: [ 'CK_DEBUG' ],
+					disableWatch: false,
 					identityFile: null
 				} );
 
@@ -294,6 +300,7 @@ describe( 'runManualTests', () => {
 					language: undefined,
 					debug: undefined,
 					additionalLanguages: undefined,
+					disableWatch: false,
 					identityFile: '/absolute/path/to/secrets.js'
 				} );
 			} );
@@ -334,6 +341,7 @@ describe( 'runManualTests', () => {
 					language: undefined,
 					debug: undefined,
 					additionalLanguages: undefined,
+					disableWatch: false,
 					identityFile: 'workspace/path/to/secrets.js'
 				} );
 			} );
@@ -364,6 +372,7 @@ describe( 'runManualTests', () => {
 					],
 					language: undefined,
 					additionalLanguages: undefined,
+					disableWatch: false,
 					silent: true
 				} );
 
@@ -378,6 +387,52 @@ describe( 'runManualTests', () => {
 					language: undefined,
 					additionalLanguages: undefined,
 					debug: undefined,
+					disableWatch: false,
+					identityFile: null
+				} );
+
+				expect( spies.server.calledOnce ).to.equal( true );
+				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+			} );
+	} );
+
+	it( 'should allow disabling listening for changes in source files', () => {
+		spies.transformFileOptionToTestGlob.returns( [
+			'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+			'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
+		] );
+
+		return runManualTests( { disableWatch: true } )
+			.then( () => {
+				expect( spies.transformFileOptionToTestGlob.calledOnce ).to.equal( true );
+				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( '*' );
+				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 1 ] ).to.equal( true );
+
+				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
+				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+					buildDir: 'workspace/build/.manual-tests',
+					patterns: [
+						'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
+					],
+					language: undefined,
+					additionalLanguages: undefined,
+					disableWatch: true,
+					silent: false
+				} );
+
+				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
+				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+					buildDir: 'workspace/build/.manual-tests',
+					patterns: [
+						'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+						'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
+					],
+					themePath: null,
+					language: undefined,
+					additionalLanguages: undefined,
+					debug: undefined,
+					disableWatch: true,
 					identityFile: null
 				} );
 

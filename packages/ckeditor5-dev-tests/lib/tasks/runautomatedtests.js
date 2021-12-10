@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint node: true, strict: true */
-
 'use strict';
 
 const fs = require( 'fs' );

@@ -24,6 +24,8 @@ const writer = new commonmark.HtmlRenderer();
  * @param {String} options.buildDir A path where compiled files will be saved.
  * @param {Array.<String>} options.patterns An array of patterns that resolve manual test scripts.
  * @param {String} options.language A language passed to `CKEditorWebpackPlugin`.
+ * @param {Boolean} options.disableWatch Whether to disable the watch mechanism. If set to true, changes in source files
+ * will not trigger webpack.
  * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
  * @param {Boolean} [options.silent=false] Whether to hide files that will be processed by the script.
  * @returns {Promise}
@@ -73,14 +75,16 @@ module.exports = function compileHtmlFiles( options ) {
 	} ) );
 
 	// Watch files and compile on change.
-	watchFiles( [ ...sourceMDFiles, ...sourceHtmlFiles ], file => {
-		compileHtmlFile( buildDir, {
-			filePath: getFilePathWithoutExtension( file ),
-			template: viewTemplate,
-			languages: languagesToLoad,
-			silent
+	if ( !options.disableWatch ) {
+		watchFiles( [ ...sourceMDFiles, ...sourceHtmlFiles ], file => {
+			compileHtmlFile( buildDir, {
+				filePath: getFilePathWithoutExtension( file ),
+				template: viewTemplate,
+				languages: languagesToLoad,
+				silent
+			} );
 		} );
-	} );
+	}
 };
 
 /**

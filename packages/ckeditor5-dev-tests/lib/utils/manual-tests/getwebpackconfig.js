@@ -16,6 +16,7 @@ const webpack = require( 'webpack' );
  * @param {Object} options.entries
  * @param {String} options.buildDir
  * @param {String} options.themePath
+ * @param {Boolean} options.disableWatch
  * @param {String} [options.language]
  * @param {Array.<String>} [options.additionalLanguages]
  * @param {String|null} [options.identityFile]
@@ -24,15 +25,8 @@ const webpack = require( 'webpack' );
 module.exports = function getWebpackConfigForManualTests( options ) {
 	const definitions = Object.assign( {}, getDefinitionsFromFile( options.identityFile ) );
 
-	return {
-		mode: 'development',
-
-		// Use cheap source maps because Safari had problem with ES6 + inline source maps.
-		// We could use cheap source maps every where but karma-webpack doesn't support it:
-		// https://github.com/webpack/karma-webpack/pull/76
-		devtool: 'cheap-source-map',
-
-		watch: true,
+	const webpackConfig = {
+		mode: 'none',
 
 		entry: options.entries,
 
@@ -107,6 +101,16 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 			]
 		}
 	};
+
+	if ( !options.disableWatch ) {
+		// Use cheap source maps because Safari had problem with ES6 + inline source maps.
+		// We could use cheap source maps every where but karma-webpack doesn't support it:
+		// https://github.com/webpack/karma-webpack/pull/76
+		webpackConfig.devtool = 'cheap-source-map';
+		webpackConfig.watch = true;
+	}
+
+	return webpackConfig;
 };
 
 /**
