@@ -1,6 +1,33 @@
 Changelog
 =========
 
+## [27.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v27.0.0...v27.1.0) (2021-12-10)
+
+### Features
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added an option for disabling watchers in the manual test server. See: [ckeditor/ckeditor5#10982](https://github.com/ckeditor/ckeditor5/issues/10982). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ff7a411326427be7aa20f61f549f1142c42e5eb2))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v27.0.0 => v27.1.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v27.0.0 => v27.1.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v27.0.0 => v27.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v27.0.0 => v27.1.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v27.0.0 => v27.1.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v27.0.0 => v27.1.0
+</details>
+
+
 ## [27.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v26.2.1...v27.0.0) (2021-12-09)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
