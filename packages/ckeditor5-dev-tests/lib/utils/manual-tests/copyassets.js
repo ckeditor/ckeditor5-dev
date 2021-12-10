@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* jshint node: true, strict: true */
-
 const path = require( 'path' );
 const fs = require( 'fs-extra' );
 
