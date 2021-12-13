@@ -22,6 +22,10 @@ module.exports = {
 		return require( './release-tools/tasks/generatechangelogformonorepository' )( ...args );
 	},
 
+	updatePackageVersions( ...args ) {
+		return require( './release-tools/tasks/update-package-versions' )( ...args );
+	},
+
 	createPotFiles( ...args ) {
 		return require( './translations/createpotfiles' )( ...args );
 	},
