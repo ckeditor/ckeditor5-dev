@@ -5,19 +5,41 @@
 
 'use strict';
 
+const chalk = require( 'chalk' );
 const fs = require( 'fs' );
 const glob = require( 'glob' );
+const path = require( 'path' );
 
-module.exports = function updatePackageVersions( pathToUpdate ) {
+module.exports = function updatePackageVersions( options ) {
+	console.log( '\n🔹 ' + chalk.blue( 'Updating package versions...' ) );
+
+	const pathToPackages = path.posix.join( options.cwd, 'packages' );
+	const pathToRelease = path.posix.join( options.cwd, 'release' );
+
+	try {
+		updateDirectory( pathToPackages );
+		updateDirectory( pathToRelease );
+
+		console.log( '\n✔️  ' + chalk.green( 'Successfully updated package versions!' ) );
+	} catch ( error ) {
+		console.log( '\n❌ ' + chalk.red( 'Updating package versions threw an error:' ) );
+		console.log( chalk.redBright( error ) );
+	}
+};
+
+function updateDirectory( pathToUpdate ) {
 	const pathToCheck = pathToUpdate + '/**/package.json';
 
-	console.log( `Looking for package.json files in ${ pathToCheck }...` );
+	console.log( `\nLooking for package.json files in ${ pathToCheck }...` );
 
-	const packageJsonArray = glob.sync( pathToCheck ).filter( path => !path.includes( '/node_modules/' ) );
+	const packageJsonArray = glob.sync( pathToCheck ).filter( path => !path.includes( 'node_modules' ) );
 
-	console.log( `Found ${ packageJsonArray.length } files.` );
+	if ( !packageJsonArray.length ) {
+		console.log( 'No files were found.' );
+		return;
+	}
 
-	console.log( 'Updating ckeditor5 dependencies...' );
+	console.log( `Found ${ packageJsonArray.length } files. Updating ckeditor5 dependencies...` );
 
 	for ( const file of packageJsonArray ) {
 		const fileData = fs.readFileSync( file, 'utf-8' );
@@ -37,4 +59,4 @@ module.exports = function updatePackageVersions( pathToUpdate ) {
 	}
 
 	console.log( `Successfully updated dependencies in ${ packageJsonArray.length } files!` );
-};
+}
