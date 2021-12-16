@@ -81,9 +81,11 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	};
 
 	if ( options.sourceMap ) {
-		// Available list: https://webpack.js.org/configuration/devtool/.
-		// In Safari, none of them seems to work.
-		config.devtool = 'cheap-source-map';
+		// After bumping the webpack to v5 and other related tools/libs/whatever, the source maps stopped working for unknown reasons.
+		// The only way to make them work again was to use the inline source maps.
+		//
+		// See https://github.com/ckeditor/ckeditor5/issues/11006.
+		config.devtool = 'inline-source-map';
 	}
 
 	if ( options.coverage ) {
