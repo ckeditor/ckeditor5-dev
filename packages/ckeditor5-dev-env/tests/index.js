@@ -37,7 +37,8 @@ describe( 'dev-env/index', () => {
 				releaseSubRepositories: sandbox.stub(),
 				generateChangelogForSinglePackage: sandbox.stub(),
 				generateChangelogForMonoRepository: sandbox.stub(),
-				bumpVersions: sandbox.stub()
+				bumpVersions: sandbox.stub(),
+				updatePackageVersions: sandbox.stub()
 			}
 		};
 
@@ -51,6 +52,7 @@ describe( 'dev-env/index', () => {
 		mockery.registerMock( './release-tools/tasks/generatechangelogforsinglepackage', releaseTools.generateChangelogForSinglePackage );
 		mockery.registerMock( './release-tools/tasks/releasesubrepositories', releaseTools.releaseSubRepositories );
 		mockery.registerMock( './release-tools/tasks/generatechangelogformonorepository', releaseTools.generateChangelogForMonoRepository );
+		mockery.registerMock( './release-tools/tasks/update-package-versions', releaseTools.updatePackageVersions );
 
 		tasks = proxyquire( '../lib/index', {
 			'@ckeditor/ckeditor5-dev-utils': {
@@ -129,6 +131,26 @@ describe( 'dev-env/index', () => {
 			} );
 
 			sinon.assert.calledOnce( stubs.translations.createPotFiles );
+			expect( output ).to.equal( 'OK.' );
+		} );
+	} );
+
+	describe( 'updatePackageVersions()', () => {
+		it( 'should update versions in package.json files', () => {
+			stubs.release.updatePackageVersions.returns( 'OK.' );
+
+			const output = tasks.updatePackageVersions( {
+				cwd: process.cwd(),
+				dryRun: process.argv.includes( '--dry-run' ),
+				diff: process.argv.includes( '--diff' )
+			} );
+
+			sinon.assert.calledOnce( stubs.release.updatePackageVersions );
+			sinon.assert.alwaysCalledWithExactly( stubs.release.updatePackageVersions, {
+				cwd: process.cwd(),
+				dryRun: process.argv.includes( '--dry-run' ),
+				diff: process.argv.includes( '--diff' )
+			} );
 			expect( output ).to.equal( 'OK.' );
 		} );
 	} );
