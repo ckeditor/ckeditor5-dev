@@ -103,10 +103,32 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 	};
 
 	if ( !options.disableWatch ) {
-		// Use cheap source maps because Safari had problem with ES6 + inline source maps.
-		// We could use cheap source maps every where but karma-webpack doesn't support it:
-		// https://github.com/webpack/karma-webpack/pull/76
-		webpackConfig.devtool = 'cheap-source-map';
+		webpackConfig.plugins = webpackConfig.plugins || [];
+		webpackConfig.plugins.push(
+			// After bumping the webpack to v5 and other related tools/libs/whatever, the source maps stopped working, because for unknown
+			// reasons the path to the generated source map was invalid. The solution for this problem is to manually configure the path to
+			// the source maps using the `append` configuration option.
+			//
+			// Example:
+			//
+			// After running `yarn run manual -f alignment` we have:
+			// - the `[base]` placeholder contains only the file name: `alignment.js`,
+			// - the `[file]` placeholder contains the relative path to the test file: `ckeditor5-alignment/tests/manual/alignment.js`.
+			//
+			// See https://github.com/ckeditor/ckeditor5/issues/11006.
+			//
+			// Previously, the 'cheap-source-map' was used, because Safari had problem with ES6 + inline source maps.
+			// We could use cheap source maps everywhere, but karma-webpack doesn't support it. The `columns` and `module` options
+			// set to `false` are equivalent to the use of `webpackConfig.devtool = 'cheap-source-map'`.
+			//
+			// See https://github.com/webpack/karma-webpack/pull/76.
+			new webpack.SourceMapDevToolPlugin( {
+				columns: false,
+				module: false,
+				filename: '[file].map',
+				append: '\n//# sourceMappingURL=[base].map'
+			} )
+		);
 		webpackConfig.watch = true;
 	}
 
