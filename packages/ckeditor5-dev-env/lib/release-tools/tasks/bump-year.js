@@ -20,12 +20,16 @@ const minimatch = require( 'minimatch' );
  *	Copyright (c) [initial year]-[current year]
  *
  * @param {Object} params
- * @param {String} params.cwd Current working directory from which all paths will be resolved
- * @param {Number} params.initialYear Year from which the licenses should begin
+ * @param {String} params.cwd Current working directory from which all paths will be resolved.
+ * @param {Number} params.initialYear Year from which the licenses should begin. Default value is 2003.
  * @param {Array} params.globPatterns array of objects, where each object has string property 'pattern',
  * and optionally 'options' property.
  */
 module.exports = function bumpYear( params ) {
+	if ( !params.initialYear ) {
+		params.initialYear = '2003';
+	}
+
 	const filesToUpdate = params.globPatterns
 		.map( globPattern => glob.sync( globPattern.pattern, globPattern.options ) )
 		.reduce( ( previous, current ) => [ ...previous, ...current ] )
