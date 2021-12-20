@@ -6,6 +6,7 @@
 'use strict';
 
 const chalk = require( 'chalk' );
+const { diffChars: diff } = require( 'diff' );
 const { execSync } = require( 'child_process' );
 const fs = require( 'fs' );
 const glob = require( 'glob' );
@@ -21,57 +22,70 @@ const glob = require( 'glob' );
  * the script is being used.
  * @param {Boolean} options.dryRun Prevents the script from committing, and
  * instead shows list of files that was changed in `packages/*` directory.
- * @param {Boolean} options.diff Instead of list of files, it displays detailed
+ * @param {Boolean} options.pathsToUpdate Instead of list of files, it displays detailed
  * list of changes from each file. Has no effect without options.dryRun.
  */
 module.exports = function updatePackageVersions( options ) {
-	const execOptions = {
-		stdio: 'inherit',
-		cwd: options.cwd
-	};
+	const totalResult = { found: 0, updated: 0, differences: [] };
+	const pathsToCommit = [];
+
+	options.pathsToUpdate.forEach( ( value, index, array ) => {
+		array[ index ].path = value.path.split( '\u005C' ).join( '\u002F' );
+	} );
 
 	console.log( '\n📍 ' + chalk.blue( 'Updating CKEditor 5 dependencies...\n' ) );
 
-	try {
-		const packagesResult = updateDirectory( 'packages', options.cwd );
-		console.log( getFeedback( packagesResult ) );
+	for ( const pathToUpdate of options.pathsToUpdate ) {
+		console.log( `Looking for package.json files in '${ pathToUpdate.path }'...` );
 
-		const releaseResult = updateDirectory( 'release', options.cwd );
-		console.log( getFeedback( releaseResult ) );
+		const result = updateDirectory( pathToUpdate.path, options.cwd, options.dryRun );
 
-		if ( packagesResult.updated ) {
-			console.log( '\n📍 ' + chalk.blue( 'Committing the changes from \'packages/*\'...\n' ) );
+		totalResult.found += result.found;
+		totalResult.updated += result.updated;
+		if ( result.differences ) {
+			totalResult.differences = [ ...totalResult.differences, ...result.differences ];
+		}
 
-			if ( options.dryRun ) {
-				console.log( chalk.yellow( 'DRY RUN mode - no changes will be committed.' ) );
+		if ( !result.found ) {
+			console.log( 'No files were found.\n' );
+		} else if ( result.found && !result.updated ) {
+			console.log( `${ chalk.bold( result.found ) } files were found, but none needed to be updated.\n` );
+		} else {
+			console.log( `Out of ${ chalk.bold( result.found ) } files found, ${ chalk.bold( result.updated ) } were updated.\n` );
 
-				if ( options.diff ) {
-					console.log( 'git diff --word-diff ./packages' );
-					execSync( 'git diff --word-diff ./packages', execOptions );
-				} else {
-					console.log( 'git status --short ./packages' );
-					execSync( 'git status --short ./packages', execOptions );
-				}
-
-				console.log( chalk.yellow( 'Reverting the changes...' ) );
-				execSync( 'git checkout ./packages', execOptions );
-			} else {
-				execSync( 'git add ./packages', execOptions );
-				execSync( 'git commit -m "Internal: Updated all CKEditor 5 dependencies ' +
-					'in `packages/*` to the latest version. [skip ci]"', execOptions );
+			if ( pathToUpdate.commit ) {
+				pathsToCommit.push( pathToUpdate.path );
 			}
 		}
+	}
 
-		const totalUpdated = packagesResult.updated + releaseResult.updated;
+	if ( options.dryRun ) {
+		console.log( chalk.yellow( 'DRY RUN mode - displaying changes instead of committing.' ) );
 
-		if ( totalUpdated ) {
-			console.log( '\n📍 ' + chalk.green( `Successfully updated package versions in ${ totalUpdated } files!\n` ) );
-		} else {
-			console.log( '\n📍 ' + chalk.green( 'No packages needed updating.\n' ) );
+		// TODO: Changes will be displayed here
+		console.log( totalResult );
+	} else if ( pathsToCommit.length ) {
+		console.log( '\n📍 ' + chalk.blue( 'Committing the changes...\n' ) );
+
+		for ( const path of pathsToCommit ) {
+			const execOptions = {
+				stdio: 'inherit',
+				cwd: path
+			};
+
+			console.log( chalk.blue( path ) );
+			execSync( `git add ${ path }`, execOptions );
+			execSync( 'git commit -m "Internal: Updated all CKEditor 5 dependencies ' +
+				'in `packages/*` to the latest version. [skip ci]"', execOptions );
 		}
-	} catch ( error ) {
-		console.log( '\n📍 ' + chalk.red( 'Updating package versions threw an error:' ) );
-		console.log( chalk.redBright( error ) );
+
+		console.log( '\n📍 ' + chalk.green( `Successfully committed ${ pathsToCommit.length } files!\n` ) );
+	}
+
+	if ( totalResult.updated ) {
+		console.log( '\n📍 ' + chalk.green( `Updated total of ${ totalResult.updated } files!\n` ) );
+	} else {
+		console.log( '\n📍 ' + chalk.green( 'No files needed an update.\n' ) );
 	}
 };
 
@@ -83,11 +97,9 @@ module.exports = function updatePackageVersions( options ) {
  * @param {String} pathToUpdate directory containing files to update
  * @param {String} cwd The root directory of the repository in which
  * the script is being used.
- * @returns {Object} True if any files were updated, false otherwise
+ * @returns {Object} Object containing numerical values counting files found and updated, as well as array of all changes made.
  */
-function updateDirectory( pathToUpdate, cwd ) {
-	console.log( `Looking for package.json files in './${ pathToUpdate }'...` );
-
+function updateDirectory( pathToUpdate, cwd, dryRun ) {
 	const globPattern = pathToUpdate + '/*/package.json';
 	const packageJsonArray = glob.sync( globPattern, { cwd } );
 
@@ -96,21 +108,22 @@ function updateDirectory( pathToUpdate, cwd ) {
 	}
 
 	let updatedFiles = 0;
+	const differences = [];
 
 	for ( const file of packageJsonArray ) {
 		const currentFileData = fs.readFileSync( file, 'utf-8' );
 		const parsedData = JSON.parse( currentFileData );
 		const version = parsedData.version;
 
-		// Update only the cke5 deps except the *-dev ones.
-		const regex = /^@ckeditor\/ckeditor5-(?!dev)|^ckeditor5$/;
+		// Update only the CKEditor 5 dependencies, except the *-dev and *-inspector.
+		const regex = /^@ckeditor\/ckeditor5-(?!dev|inspector)|^ckeditor5$/;
 
 		for ( const dependency in parsedData.dependencies ) {
 			if ( !regex.test( dependency ) ) {
 				continue;
 			}
 
-			parsedData.dependencies[ dependency ] = version;
+			parsedData.dependencies[ dependency ] = `^${ version }`;
 		}
 
 		for ( const dependency in parsedData.devDependencies ) {
@@ -118,36 +131,20 @@ function updateDirectory( pathToUpdate, cwd ) {
 				continue;
 			}
 
-			parsedData.devDependencies[ dependency ] = version;
+			parsedData.devDependencies[ dependency ] = `^${ version }`;
 		}
 
 		const newFileData = JSON.stringify( parsedData, null, 2 ) + '\n';
 
 		if ( currentFileData !== newFileData ) {
 			updatedFiles++;
-			fs.writeFileSync( file, newFileData, 'utf-8' );
+			differences.push( diff( currentFileData, newFileData ) );
+
+			if ( !dryRun ) {
+				fs.writeFileSync( file, newFileData, 'utf-8' );
+			}
 		}
 	}
 
-	return { found: packageJsonArray.length, updated: updatedFiles };
-}
-
-/**
- * Generates feedback based on received data.
- *
- * @param {Object} updateResult
- * @param {Number} updateResult.found
- * @param {Number} updateResult.updated
- * @returns {String} Description of what was found and/or updated.
- */
-function getFeedback( updateResult ) {
-	if ( !updateResult.found ) {
-		return 'No files were found.';
-	}
-
-	if ( updateResult.found && !updateResult.updated ) {
-		return `${ updateResult.found } files were found, but none needed to be updated.`;
-	}
-
-	return `Out of ${ updateResult.found } files found, ${ updateResult.updated } were updated.`;
+	return { found: packageJsonArray.length, updated: updatedFiles, differences };
 }
