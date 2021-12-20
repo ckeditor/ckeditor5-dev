@@ -8,7 +8,6 @@
 const chalk = require( 'chalk' );
 const fs = require( 'fs' );
 const glob = require( 'glob' );
-const minimatch = require( 'minimatch' );
 
 /**
  * Updates year in all licenses in the provided directory, based on provided glob patterns.
@@ -21,7 +20,7 @@ const minimatch = require( 'minimatch' );
  *
  * @param {Object} params
  * @param {String} params.cwd Current working directory from which all paths will be resolved.
- * @param {Number} params.initialYear Year from which the licenses should begin. Default value is 2003.
+ * @param {Number} [params.initialYear='2003'] Year from which the licenses should begin.
  * @param {Array} params.globPatterns array of objects, where each object has string property 'pattern',
  * and optionally 'options' property.
  */
@@ -30,55 +29,35 @@ module.exports = function bumpYear( params ) {
 		params.initialYear = '2003';
 	}
 
+	console.log( chalk.green( 'Looking for files to update...' ) );
+
 	const filesToUpdate = params.globPatterns
-		.map( globPattern => glob.sync( globPattern.pattern, globPattern.options ) )
-		.reduce( ( previous, current ) => [ ...previous, ...current ] )
-		.filter( fileName => {
-			// Filter out directories.
-			if ( fs.statSync( fileName ).isDirectory() ) {
-				return false;
-			}
+		.map( globPattern => {
+			const options = globPattern.options || {};
 
-			// Filter out nested `node_modules`.
-			if ( minimatch( fileName, '**/node_modules/**' ) ) {
-				return false;
-			}
+			const defaultIgnore = [
+				'**/node_modules/**'
+			];
 
-			// Filter out builds.
-			if ( minimatch( fileName, '**/build/**' ) ) {
-				return false;
-			}
+			options.nodir = options.nodir || true;
+			options.ignore = options.ignore ? [ ...options.ignore, ...defaultIgnore ] : defaultIgnore;
 
-			return true;
-		} );
+			return glob.sync( globPattern.pattern, options );
+		} )
+		.reduce( ( previous, current ) => [ ...previous, ...current ] );
 
+	console.log( chalk.green( 'Updating the files...' ) );
+
+	const currentYear = new Date().getFullYear();
 	const filesWithoutHeader = [];
 	const totalFiles = filesToUpdate.length;
 	let updatedFiles = 0;
 
 	filesToUpdate.forEach( fileName => {
 		const fileContent = fs.readFileSync( fileName, 'utf-8' );
-		const currentYear = new Date().getFullYear();
+		const yearRegexp = new RegExp( `(?<=Copyright \\(c\\) ${ params.initialYear }-)\\d{4}`, 'g' );
 
-		// This syntax has to be used in order to insert variable into the regex.
-		const yearRegexp = new RegExp( `(?<=Copyright \\(c\\) ${ params.initialYear }-)\\d{4}`, 'gm' );
-
-		let updatedFileContent = fileContent.replace( yearRegexp, currentYear );
-
-		// TODO: Remove this line after all repositories are updated.
-		updatedFileContent = updatedFileContent.replace( /- Frederico Knabben/, 'Holding sp. z o.o' );
-
-		// Optional replacing of second line with either longer or shorter version.
-		/* Short to long
-		updatedFileContent = updatedFileContent.replace(
-			/For licensing, see LICENSE\.md\./,
-			'For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license'
-		); */
-		/* Long to short
-		updatedFileContent = updatedFileContent.replace(
-			/For licensing, see LICENSE\.md or https:\/\/ckeditor\.com\/legal\/ckeditor-oss-license/,
-			'For licensing, see LICENSE.md.'
-		); */
+		const updatedFileContent = fileContent.replace( yearRegexp, currentYear );
 
 		if ( fileContent === updatedFileContent ) {
 			// License headers are only required in JS files.
@@ -101,13 +80,14 @@ module.exports = function bumpYear( params ) {
 			chalk.underline( trimmedFileName )
 		].join( ' ' );
 
-		process.stdout.clearLine();
+		process.stdout.clearLine( 1 );
 		process.stdout.cursorTo( 0 );
 		process.stdout.write( output );
 	} );
 
 	if ( filesWithoutHeader.length ) {
 		console.warn( chalk.red( 'Following files are missing their license headers:' ) );
+
 		for ( const file of filesWithoutHeader ) {
 			console.log( file );
 		}
