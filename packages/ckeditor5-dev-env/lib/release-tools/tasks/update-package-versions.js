@@ -26,7 +26,7 @@ const glob = require( 'glob' );
  * list of changes from each file. Has no effect without options.dryRun.
  */
 module.exports = function updatePackageVersions( options ) {
-	const totalResult = { found: 0, updated: 0, differences: [] };
+	const totalResult = { found: 0, updated: 0, toCommit: 0, differences: [] };
 	const pathsToCommit = [];
 
 	options.pathsToUpdate.forEach( ( value, index, array ) => {
@@ -42,6 +42,7 @@ module.exports = function updatePackageVersions( options ) {
 
 		totalResult.found += result.found;
 		totalResult.updated += result.updated;
+
 		if ( result.differences ) {
 			totalResult.differences = [ ...totalResult.differences, ...result.differences ];
 		}
@@ -54,6 +55,7 @@ module.exports = function updatePackageVersions( options ) {
 			console.log( `Out of ${ chalk.bold( result.found ) } files found, ${ chalk.bold( result.updated ) } were updated.\n` );
 
 			if ( pathToUpdate.commit ) {
+				totalResult.toCommit += result.updated;
 				pathsToCommit.push( pathToUpdate.path );
 			}
 		}
@@ -73,13 +75,14 @@ module.exports = function updatePackageVersions( options ) {
 				cwd: path
 			};
 
-			console.log( chalk.blue( path ) );
+			console.log( `${ chalk.green( '+' ) } ${ path }` );
+
 			execSync( `git add ${ path }`, execOptions );
 			execSync( 'git commit -m "Internal: Updated all CKEditor 5 dependencies ' +
 				'in `packages/*` to the latest version. [skip ci]"', execOptions );
 		}
 
-		console.log( '\n📍 ' + chalk.green( `Successfully committed ${ pathsToCommit.length } files!\n` ) );
+		console.log( '\n📍 ' + chalk.green( `Successfully committed ${ totalResult.toCommit } files!\n` ) );
 	}
 
 	if ( totalResult.updated ) {
