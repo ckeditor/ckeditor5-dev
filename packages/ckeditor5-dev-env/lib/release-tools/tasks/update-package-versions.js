@@ -116,26 +116,9 @@ function updateDirectory( pathToUpdate, cwd, dryRun ) {
 	for ( const file of packageJsonArray ) {
 		const currentFileData = fs.readFileSync( file, 'utf-8' );
 		const parsedData = JSON.parse( currentFileData );
-		const version = parsedData.version;
 
-		// Update only the CKEditor 5 dependencies, except the *-dev and *-inspector.
-		const regex = /^@ckeditor\/ckeditor5-(?!dev|inspector)|^ckeditor5$/;
-
-		for ( const dependency in parsedData.dependencies ) {
-			if ( !regex.test( dependency ) ) {
-				continue;
-			}
-
-			parsedData.dependencies[ dependency ] = `^${ version }`;
-		}
-
-		for ( const dependency in parsedData.devDependencies ) {
-			if ( !regex.test( dependency ) ) {
-				continue;
-			}
-
-			parsedData.devDependencies[ dependency ] = `^${ version }`;
-		}
+		updateObjectProperty( parsedData, 'dependencies' );
+		updateObjectProperty( parsedData, 'devDependencies' );
 
 		const newFileData = JSON.stringify( parsedData, null, 2 ) + '\n';
 
@@ -150,4 +133,25 @@ function updateDirectory( pathToUpdate, cwd, dryRun ) {
 	}
 
 	return { found: packageJsonArray.length, updated: updatedFiles, differences };
+}
+
+/**
+ * This function takes an object and a property name, and modifies said property in that object. If any of the properties
+ * of that property matches the regex, its value will be updated to the value of `version` property from the root of the object.
+ *
+ * @param {Object} parsedPkgJson Object to update.
+ * @param {String} propertyName Name of the property to update.
+ */
+function updateObjectProperty( parsedPkgJson, propertyName ) {
+	// Update only the CKEditor 5 dependencies, except the *-dev and *-inspector.
+	const regex = /^@ckeditor\/ckeditor5-(?!dev|inspector)|^ckeditor5$/;
+	const version = parsedPkgJson.version;
+
+	for ( const dependency in parsedPkgJson[ propertyName ] ) {
+		if ( !regex.test( dependency ) ) {
+			continue;
+		}
+
+		parsedPkgJson[ propertyName ][ dependency ] = `^${ version }`;
+	}
 }
