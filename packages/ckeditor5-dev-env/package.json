@@ -7,6 +7,7 @@
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "^27.1.0",
     "@octokit/rest": "^17.9.2",
+    "@transifex/api": "^2.1.2",
     "chalk": "^4.0.0",
     "cli-table": "^0.3.1",
     "compare-func": "^2.0.0",

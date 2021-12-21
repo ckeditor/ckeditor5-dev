@@ -7,33 +7,37 @@
 
 const fs = require( 'fs-extra' );
 const path = require( 'path' );
-const transifexService = require( './transifex-service' );
+const transifexService = require( './transifex-service-for-api-v3.0' );
 const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 const { cleanPoFileContent, createDictionaryFromPoFileContent } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
 const languageCodeMap = require( './languagecodemap.json' );
 const { verifyProperties } = require( './utils' );
 
 /**
- * Downloads translations from the Transifex for each CF localizable package.
+ * Downloads translations from the Transifex for each localizable package.
  * It creates PO files out of the translations and replaces old translations with the downloaded ones.
  *
  * @param {Object} config
  * @param {String} config.token Token to the Transifex API.
  * @param {Map.<String,String>} config.packages A resource name -> package path map for which translations should be downloaded.
  * @param {String} config.cwd Current work directory.
- * @param {String} config.url Transifex API URL where the request should be send.
  * @param {Boolean} [config.simplifyLicenseHeader=false] Whether to skip adding the contribute guide URL in the output `*.po` files.
  */
 module.exports = async function downloadTranslations( config ) {
-	verifyProperties( config, [ 'token', 'url', 'packages', 'cwd' ] );
+	verifyProperties( config, [ 'token', 'packages', 'cwd' ] );
 
-	const localizablePackageNames = await getLocalizablePackages( config );
+	transifexService.init( { token: config.token } );
 
-	for ( const packageName of localizablePackageNames ) {
-		const translations = await downloadPoFiles( config, packageName );
+	const localizablePackageNames = [ ...config.packages.keys() ];
+	const { resources, languages } = await transifexService.getProjectData( { localizablePackageNames } );
+
+	for ( const resource of resources ) {
+		const packageName = transifexService.getResourceName( resource );
 		const packagePath = getPathToTranslations( config.cwd, config.packages.get( packageName ) );
+		const translations = await transifexService.getTranslations( { resource, languages } );
 
-		removeOldTranslation( packagePath );
+		removeOldTranslations( packagePath );
+
 		saveNewTranslations( {
 			packageName,
 			packagePath,
@@ -46,61 +50,10 @@ module.exports = async function downloadTranslations( config ) {
 };
 
 /**
- * @param {Object} config
- * @param {String} config.token Token to the Transifex API.
- */
-async function getLocalizablePackages( config ) {
-	const packageNames = new Set( config.packages.keys() );
-	const resources = await transifexService.getResources( config );
-
-	return resources.map( resource => resource.slug )
-		.filter( packageName => packageNames.has( packageName ) );
-}
-
-/**
  * @param {String} packagePath Package path.
  */
-function removeOldTranslation( packagePath ) {
+function removeOldTranslations( packagePath ) {
 	fs.removeSync( packagePath );
-}
-
-/**
- * Downloads translations for the given package and returns a languageCode -> translations map.
- *
- * @param {Object} config Configuration.
- * @param {String} config.token Token to the Transifex API.
- * @param {String} packageName Package name.
- * @param {String} config.cwd Current work directory.
- * @param {String} config.url Transifex API URL where the request should be send.
- * @returns {Promise<Map.<String, Object>>}
- */
-async function downloadPoFiles( config, packageName ) {
-	const requestConfig = {
-		url: config.url,
-		token: config.token,
-		slug: packageName
-	};
-
-	const resourceDetails = await transifexService.getResourceDetails( requestConfig );
-
-	const languageCodes = resourceDetails.available_languages.map( languageInfo => languageInfo.code );
-	const translations = await Promise.all( languageCodes.map( lang => downloadPoFile( config, lang, packageName ) ) );
-
-	return new Map( translations.map( ( languageTranslations, index ) => [
-		languageCodes[ index ],
-		languageTranslations
-	] ) );
-}
-
-async function downloadPoFile( config, lang, packageName ) {
-	const packageOptions = Object.assign( {}, config, {
-		lang,
-		slug: packageName
-	} );
-
-	const data = await transifexService.getTranslation( packageOptions );
-
-	return data.content;
 }
 
 function saveNewTranslations( { packageName, packagePath, translations, simplifyLicenseHeader } ) {
