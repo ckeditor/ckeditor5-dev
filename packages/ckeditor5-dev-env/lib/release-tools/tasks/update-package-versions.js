@@ -10,35 +10,31 @@ const { diffLines: diff } = require( 'diff' );
 const { execSync } = require( 'child_process' );
 const fs = require( 'fs' );
 const glob = require( 'glob' );
+const { sep, posix } = require( 'path' );
 
 /**
- * Updates `@ckeditor/ckeditor5-*` and `ckeditor5` dependencies in `packages/*` and `release/*`
- * directories to the latest version. Changes in `packages/*` will be committed as well.
+ * For all directories passed as an argument, all `@ckeditor/ckeditor5-*` and `ckeditor5` dependencies will be updated to the latest
+ * version. If `commit: true` is added, changes will be committed as well.
  *
  * See https://github.com/cksource/ckeditor5-internal/issues/1123
  *
- * @param {Object} options
- * @param {String} options.cwd The root directory of the repository in which
- * the script is being used.
- * @param {Boolean} options.dryRun Prevents the script from committing, and
- * instead shows list of files that was changed in `packages/*` directory.
- * @param {Boolean} options.pathsToUpdate Instead of list of files, it displays detailed
- * list of changes from each file. Has no effect without options.dryRun.
+ * @param {Array<Object>} pathsToUpdate Array of objects, where each object needs to have `path` value with an absolute path to the
+ * repository that is to be updated, as well as optional `commit` flag, that when set to true, will commit the changes from that path.
+ * @param {Boolean} dryRun Prevents the script from committing or changing anything, and instead shows list of files that would be
+ * changed.
  */
-module.exports = function updatePackageVersions( options ) {
+module.exports = function updatePackageVersions( pathsToUpdate, dryRun ) {
 	const totalResult = { found: 0, updated: 0, toCommit: 0, differences: [] };
 	const pathsToCommit = [];
 
-	options.pathsToUpdate.forEach( ( value, index, array ) => {
-		array[ index ].path = value.path.split( '\u005C' ).join( '\u002F' );
-	} );
-
 	console.log( '\n📍 ' + chalk.blue( 'Updating CKEditor 5 dependencies...\n' ) );
 
-	for ( const pathToUpdate of options.pathsToUpdate ) {
-		console.log( `Looking for package.json files in '${ pathToUpdate.path }'...` );
+	for ( const pathToUpdate of pathsToUpdate ) {
+		const path = pathToUpdate.path.split( sep ).join( posix.sep );
 
-		const result = updateDirectory( pathToUpdate.path, options.cwd, options.dryRun );
+		console.log( `Looking for package.json files in '${ path }'...` );
+
+		const result = updateDirectory( path, dryRun );
 
 		totalResult.found += result.found;
 		totalResult.updated += result.updated;
@@ -56,12 +52,12 @@ module.exports = function updatePackageVersions( options ) {
 
 			if ( pathToUpdate.commit ) {
 				totalResult.toCommit += result.updated;
-				pathsToCommit.push( pathToUpdate.path );
+				pathsToCommit.push( path );
 			}
 		}
 	}
 
-	if ( options.dryRun ) {
+	if ( dryRun ) {
 		console.log( chalk.yellow( 'DRY RUN mode - displaying changes instead of committing.' ) );
 
 		for ( const fileDiff of totalResult.differences ) {
@@ -102,14 +98,15 @@ module.exports = function updatePackageVersions( options ) {
  * Latest version is taken from the `version` property from the root of the `package.json` file, since that value
  * should already have been bumped at this point of release process.
  *
- * @param {String} pathToUpdate directory containing files to update
- * @param {String} cwd The root directory of the repository in which
- * the script is being used.
- * @returns {Object} Object containing numerical values counting files found and updated, as well as array of all changes made.
+ * @param {String} pathToUpdate Directory containing files to update.
+ * @param {Boolean} dryRun If set to true, diff of changes that would be made is calculated, and included in the returned object. Without
+ * this flag, file is updated normally.
+ * @returns {Object} Object containing numerical values counting files found and updated, as well as array of all changes made. If `dryRun`
+ * is set to true, `differences` array will be empty, as there is no point in calculating that which is only used during `dryRun`.
  */
-function updateDirectory( pathToUpdate, cwd, dryRun ) {
+function updateDirectory( pathToUpdate, dryRun ) {
 	const globPattern = pathToUpdate + '/*/package.json';
-	const packageJsonArray = glob.sync( globPattern, { cwd } );
+	const packageJsonArray = glob.sync( globPattern );
 
 	if ( !packageJsonArray.length ) {
 		return { found: 0, updated: 0 };
