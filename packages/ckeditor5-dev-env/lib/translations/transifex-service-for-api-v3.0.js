@@ -7,7 +7,7 @@ const { transifexApi } = require( '@transifex/api' );
 const fetch = require( 'node-fetch' );
 
 const MAX_DOWNLOAD_ATTEMPTS = 10;
-const TIMEOUT_BETWEEN_DOWNLOAD_ATTEMPTS = 1;
+const TIMEOUT_BETWEEN_DOWNLOAD_ATTEMPTS = 2;
 
 /**
  * Promise wrappers of the Transifex API v3.0.
@@ -39,8 +39,8 @@ function init( { token } ) {
  * @param {Object} config
  * @param {Array.<String>} config.localizablePackageNames Names of all packages for which translations should be downloaded.
  * @returns {Promise.<Object>} result
- * @returns {Array.<String>} result.resources All found package names for which translations could be downloaded.
- * @returns {Array.<String>} result.languages All found languages in the project.
+ * @returns {Array.<Object>} result.resources All found resource instances for which translations could be downloaded.
+ * @returns {Array.<Object>} result.languages All found language instances in the project.
  */
 async function getProjectData( { localizablePackageNames } ) {
 	const organization = await transifexApi.Organization.get( { slug: 'ckeditor' } );
@@ -101,7 +101,9 @@ async function getTranslations( { resource, languages } ) {
 			};
 		} ) );
 
-	const translations = await Promise.all( downloadRequests.map( downloadFile ) );
+	const translations = await Promise.all(
+		downloadRequests.map( downloadRequest => downloadFile( downloadRequest ) )
+	);
 
 	return new Map( translations );
 }
@@ -168,7 +170,17 @@ async function downloadFile( downloadRequest, downloadAttempt = 1 ) {
 	}
 
 	if ( !response.ok || downloadAttempt === MAX_DOWNLOAD_ATTEMPTS ) {
-		throw new Error( `Failed to download the PO file for the ${ languageCode } language for the ${ resourceName } package.` );
+		let errorMessage = `Failed to download the PO file for the ${ languageCode } language for the ${ resourceName } package.`;
+
+		if ( !response.ok ) {
+			errorMessage += `\nReceived response: ${ response.status } ${ response.statusText }`;
+		} else {
+			errorMessage += '\nRequested file is not ready yet, but the limit of file download attempts, ' +
+				`which is ${ MAX_DOWNLOAD_ATTEMPTS } in ${ MAX_DOWNLOAD_ATTEMPTS * TIMEOUT_BETWEEN_DOWNLOAD_ATTEMPTS } seconds, ` +
+				'has been reached.';
+		}
+
+		throw new Error( errorMessage );
 	}
 
 	await wait( TIMEOUT_BETWEEN_DOWNLOAD_ATTEMPTS );

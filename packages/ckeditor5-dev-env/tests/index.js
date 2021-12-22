@@ -163,7 +163,6 @@ describe( 'dev-env/index', () => {
 			const response = await tasks.downloadTranslations( {
 				packages,
 				token: 'token',
-				url: 'https://api.example.com',
 				cwd: '/workspace'
 			} );
 			expect( response.status ).to.equal( true );
@@ -172,7 +171,6 @@ describe( 'dev-env/index', () => {
 			sinon.assert.alwaysCalledWithExactly( stubs.translations.download, {
 				packages,
 				token: 'token',
-				url: 'https://api.example.com',
 				cwd: '/workspace'
 			} );
 		} );

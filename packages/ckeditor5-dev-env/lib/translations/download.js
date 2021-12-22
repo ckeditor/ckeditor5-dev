@@ -28,8 +28,12 @@ module.exports = async function downloadTranslations( config ) {
 
 	transifexService.init( { token: config.token } );
 
+	logger.info( 'Fetching project information...' );
+
 	const localizablePackageNames = [ ...config.packages.keys() ];
 	const { resources, languages } = await transifexService.getProjectData( { localizablePackageNames } );
+
+	logger.info( 'Downloading translations...' );
 
 	for ( const resource of resources ) {
 		const packageName = transifexService.getResourceName( resource );
