@@ -42,7 +42,7 @@ describe( 'dev-env/translations/download()', () => {
 
 				getResourceName: sinon.stub().callsFake( resource => resource.attributes.slug ),
 
-				getProjectData: sinon.stub().callsFake( ( { localizablePackageNames } ) => {
+				getProjectData: sinon.stub().callsFake( localizablePackageNames => {
 					const projectData = {
 						resources: mocks.resources.filter( resource => localizablePackageNames.includes( resource.attributes.slug ) ),
 						languages: [ ...mocks.languages ]
@@ -51,7 +51,7 @@ describe( 'dev-env/translations/download()', () => {
 					return Promise.resolve( projectData );
 				} ),
 
-				getTranslations: sinon.stub().callsFake( ( { resource, languages } ) => {
+				getTranslations: sinon.stub().callsFake( ( resource, languages ) => {
 					const translations = languages.map( language => [
 						language.attributes.code,
 						mocks.translations[ resource.attributes.slug ][ language.attributes.code ]
@@ -136,7 +136,7 @@ describe( 'dev-env/translations/download()', () => {
 				'ckeditor5-core-pl-content': { save: 'save_pl' },
 				'ckeditor5-core-de-content': { save: 'save_de' },
 				'ckeditor5-ui-pl-content': { cancel: 'cancel_pl' },
-				'ckeditor5-ui-de-content': { cancel: 'cancel_de' }
+				'ckeditor5-ui-de-content': {}
 			}
 		};
 
@@ -149,7 +149,7 @@ describe( 'dev-env/translations/download()', () => {
 			] )
 		} );
 
-		sinon.assert.callCount( stubs.fs.outputFileSync, 4 );
+		sinon.assert.callCount( stubs.fs.outputFileSync, 3 );
 
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
@@ -167,12 +167,6 @@ describe( 'dev-env/translations/download()', () => {
 			stubs.fs.outputFileSync,
 			path.normalize( '/workspace/bar/ckeditor5-ui/lang/translations/pl.po' ),
 			'ckeditor5-ui-pl-content'
-		);
-
-		sinon.assert.calledWithExactly(
-			stubs.fs.outputFileSync,
-			path.normalize( '/workspace/bar/ckeditor5-ui/lang/translations/de.po' ),
-			'ckeditor5-ui-de-content'
 		);
 	} );
 
@@ -196,7 +190,7 @@ describe( 'dev-env/translations/download()', () => {
 		sinon.assert.notCalled( stubs.fs.outputFileSync );
 	} );
 
-	it( 'should use the language code from the languagecodemap.json if it exists or the default language code otherwise', async () => {
+	it( 'should use the language code from the languagecodemap.json if it exists, or the default language code otherwise', async () => {
 		mocks = {
 			resources: [
 				{ attributes: { slug: 'ckeditor5-core' } }

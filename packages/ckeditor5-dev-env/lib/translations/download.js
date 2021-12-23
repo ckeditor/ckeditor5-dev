@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 const fs = require( 'fs-extra' );
 const path = require( 'path' );
 const transifexService = require( './transifex-service-for-api-v3.0' );
@@ -26,19 +24,19 @@ const { verifyProperties } = require( './utils' );
 module.exports = async function downloadTranslations( config ) {
 	verifyProperties( config, [ 'token', 'packages', 'cwd' ] );
 
-	transifexService.init( { token: config.token } );
+	transifexService.init( config.token );
 
 	logger.info( 'Fetching project information...' );
 
 	const localizablePackageNames = [ ...config.packages.keys() ];
-	const { resources, languages } = await transifexService.getProjectData( { localizablePackageNames } );
+	const { resources, languages } = await transifexService.getProjectData( localizablePackageNames );
 
 	logger.info( 'Downloading translations...' );
 
 	for ( const resource of resources ) {
 		const packageName = transifexService.getResourceName( resource );
 		const packagePath = getPathToTranslations( config.cwd, config.packages.get( packageName ) );
-		const translations = await transifexService.getTranslations( { resource, languages } );
+		const translations = await transifexService.getTranslations( resource, languages );
 
 		removeOldTranslations( packagePath );
 
@@ -54,12 +52,27 @@ module.exports = async function downloadTranslations( config ) {
 };
 
 /**
+ * Removes all files from the provided directory.
+ *
  * @param {String} packagePath Package path.
  */
 function removeOldTranslations( packagePath ) {
 	fs.removeSync( packagePath );
 }
 
+/**
+ * Saves all valid translations on the filesystem. For each translation entry:
+ *
+ * (1) Check if the content is a translation. Skip processing current entry if it cannot be converted to a PO file.
+ * (2) Check if the langauge code should be mapped to another string on the filesystem.
+ * (3) Prepare the translation for storing on the filesystem: remove personal data and add a banner with information how to contribute.
+ *
+ * @param {Object} config
+ * @param {String} config.packageName Package name.
+ * @param {String} config.packagePath Package path.
+ * @param {Map.<String,String>} config.translations The translation map: language code -> translation content.
+ * @param {Boolean} config.simplifyLicenseHeader Whether to skip adding the contribute guide URL in the output `*.po` files.
+ */
 function saveNewTranslations( { packageName, packagePath, translations, simplifyLicenseHeader } ) {
 	let savedFiles = 0;
 
@@ -84,7 +97,9 @@ function saveNewTranslations( { packageName, packagePath, translations, simplify
 }
 
 /**
- * @param {String} cwd Current work directory.
+ * Returns a path to the translation directory for the provided package path.
+ *
+ * @param {String} cwd Current working directory.
  * @param {String} packagePath Package path.
  * @return {String}
  */
@@ -92,6 +107,12 @@ function getPathToTranslations( cwd, packagePath ) {
 	return path.join( cwd, packagePath, 'lang', 'translations' );
 }
 
+/**
+ * Checks if the received data is a translation.
+ *
+ * @param {String} poFileContent Received data.
+ * @returns {Boolean}
+ */
 function isPoFileContainingTranslations( poFileContent ) {
 	const translations = createDictionaryFromPoFileContent( poFileContent );
 

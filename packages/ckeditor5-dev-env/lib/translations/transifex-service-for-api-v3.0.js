@@ -18,16 +18,16 @@ module.exports = {
 	init,
 	getProjectData,
 	getTranslations,
-	getResourceName
+	getResourceName,
+	getLanguageCode
 };
 
 /**
  * Configures the API token for Transifex service if it has not been set yet.
  *
- * @param {Object} config
- * @param {String} config.token Token for the Transifex API.
+ * @param {String} token Token for the Transifex API.
  */
-function init( { token } ) {
+function init( token ) {
 	if ( !transifexApi.auth ) {
 		transifexApi.setup( { auth: token } );
 	}
@@ -36,13 +36,12 @@ function init( { token } ) {
 /**
  * Retrieves all the package names and languages associated with the CKEditor 5 project from the Transifex service.
  *
- * @param {Object} config
- * @param {Array.<String>} config.localizablePackageNames Names of all packages for which translations should be downloaded.
+ * @param {Array.<String>} localizablePackageNames Names of all packages for which translations should be downloaded.
  * @returns {Promise.<Object>} result
  * @returns {Array.<Object>} result.resources All found resource instances for which translations could be downloaded.
  * @returns {Array.<Object>} result.languages All found language instances in the project.
  */
-async function getProjectData( { localizablePackageNames } ) {
+async function getProjectData( localizablePackageNames ) {
 	const organization = await transifexApi.Organization.get( { slug: 'ckeditor' } );
 	const projects = await organization.fetch( 'projects' );
 	const project = await projects.get( { slug: 'ckeditor5' } );
@@ -79,12 +78,11 @@ async function getProjectData( { localizablePackageNames } ) {
  * (2) Retrieve the target URL from every download request, where the status of the file being prepared for download can be checked.
  * (3) Download the file from the target URL.
  *
- * @param {Object} config
- * @param {Object} config.resource The resource instance for which translations should be downloaded.
- * @param {Array.<Object>} config.languages An array of all the language instances found in the project.
+ * @param {Object} resource The resource instance for which translations should be downloaded.
+ * @param {Array.<Object>} languages An array of all the language instances found in the project.
  * @returns {Promise.<Map.<String,String>>} The translation map: language code -> translation content.
  */
-async function getTranslations( { resource, languages } ) {
+async function getTranslations( resource, languages ) {
 	const downloadRequests = await Promise
 		.all( [
 			createDownloadRequest( resource ),
@@ -175,9 +173,7 @@ async function downloadFile( downloadRequest, downloadAttempt = 1 ) {
 		if ( !response.ok ) {
 			errorMessage += `\nReceived response: ${ response.status } ${ response.statusText }`;
 		} else {
-			errorMessage += '\nRequested file is not ready yet, but the limit of file download attempts, ' +
-				`which is ${ MAX_DOWNLOAD_ATTEMPTS } in ${ MAX_DOWNLOAD_ATTEMPTS * TIMEOUT_BETWEEN_DOWNLOAD_ATTEMPTS } seconds, ` +
-				'has been reached.';
+			errorMessage += '\nRequested file is not ready yet, but the limit of file download attempts has been reached.';
 		}
 
 		throw new Error( errorMessage );
