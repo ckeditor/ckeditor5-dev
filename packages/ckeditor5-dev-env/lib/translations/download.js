@@ -64,7 +64,7 @@ function removeOldTranslations( packagePath ) {
  * Saves all valid translations on the filesystem. For each translation entry:
  *
  * (1) Check if the content is a translation. Skip processing current entry if it cannot be converted to a PO file.
- * (2) Check if the langauge code should be mapped to another string on the filesystem.
+ * (2) Check if the language code should be mapped to another string on the filesystem.
  * (3) Prepare the translation for storing on the filesystem: remove personal data and add a banner with information how to contribute.
  *
  * @param {Object} config
