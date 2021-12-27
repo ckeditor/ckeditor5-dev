@@ -10,6 +10,7 @@ const { diffLines: diff } = require( 'diff' );
 const { execSync } = require( 'child_process' );
 const fs = require( 'fs' );
 const glob = require( 'glob' );
+const readline = require( 'readline' );
 const { sep, posix } = require( 'path' );
 
 /**
@@ -58,15 +59,33 @@ module.exports = function updatePackageVersions( pathsToUpdate, dryRun ) {
 	}
 
 	if ( dryRun ) {
-		console.log( chalk.yellow( 'DRY RUN mode - displaying changes instead of committing.' ) );
+		console.log( chalk.yellow( 'DRY RUN mode - press any key to display next file diff, or Q to exit.' ) );
 
-		for ( const fileDiff of totalResult.differences ) {
-			const formattedFileDiff = formatDiff( fileDiff );
+		readline.emitKeypressEvents( process.stdin );
+		process.stdin.setRawMode( true );
 
-			for ( const line of formattedFileDiff ) {
+		process.stdin.on( 'keypress', ( str, key ) => {
+			if ( key.name === 'q' ) {
+				console.log( chalk.yellow( 'Manual exit.' ) );
+				process.exit();
+			}
+
+			const nextDiff = totalResult.differences.shift();
+			const formattedDiff = formatDiff( nextDiff.content );
+
+			console.log( chalk.underline( nextDiff.file ) );
+
+			for ( const line of formattedDiff ) {
 				console.log( line );
 			}
-		}
+
+			if ( !totalResult.differences.length ) {
+				console.log( chalk.yellow( 'No more files.' ) );
+				process.exit();
+			}
+
+			console.log( chalk.yellow( 'Q - Exit | Any key - Next' ) );
+		} );
 	} else if ( pathsToCommit.length ) {
 		console.log( '\n📍 ' + chalk.blue( 'Committing the changes...\n' ) );
 
@@ -84,12 +103,12 @@ module.exports = function updatePackageVersions( pathsToUpdate, dryRun ) {
 		}
 
 		console.log( '\n📍 ' + chalk.green( `Successfully committed ${ totalResult.toCommit } files!\n` ) );
-	}
 
-	if ( totalResult.updated ) {
-		console.log( '\n📍 ' + chalk.green( `Updated total of ${ totalResult.updated } files!\n` ) );
-	} else {
-		console.log( '\n📍 ' + chalk.green( 'No files needed an update.\n' ) );
+		if ( totalResult.updated ) {
+			console.log( '\n📍 ' + chalk.green( `Updated total of ${ totalResult.updated } files!\n` ) );
+		} else {
+			console.log( '\n📍 ' + chalk.green( 'No files needed an update.\n' ) );
+		}
 	}
 };
 
@@ -128,7 +147,10 @@ function updateDirectory( pathToUpdate, dryRun ) {
 			updatedFiles++;
 
 			if ( dryRun ) {
-				differences.push( diff( currentFileData, newFileData, { newlineIsToken: true } ) );
+				differences.push( {
+					file,
+					content: diff( currentFileData, newFileData, { newlineIsToken: true } )
+				} );
 			} else {
 				fs.writeFileSync( file, newFileData, 'utf-8' );
 			}
