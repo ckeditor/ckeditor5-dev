@@ -139,18 +139,22 @@ describe( 'dev-env/index', () => {
 		it( 'should update versions in package.json files', () => {
 			stubs.release.updatePackageVersions.returns( 'OK.' );
 
-			const output = tasks.updatePackageVersions( {
-				cwd: process.cwd(),
-				dryRun: process.argv.includes( '--dry-run' ),
-				diff: process.argv.includes( '--diff' )
-			} );
+			const output = tasks.updatePackageVersions(
+				[
+					{ path: 'foo/packages', commit: true },
+					{ path: 'bar/packages', commit: false }
+				],
+				process.argv.includes( '--dry-run' )
+			);
 
 			sinon.assert.calledOnce( stubs.release.updatePackageVersions );
-			sinon.assert.alwaysCalledWithExactly( stubs.release.updatePackageVersions, {
-				cwd: process.cwd(),
-				dryRun: process.argv.includes( '--dry-run' ),
-				diff: process.argv.includes( '--diff' )
-			} );
+			sinon.assert.alwaysCalledWithExactly( stubs.release.updatePackageVersions,
+				[
+					{ path: 'foo/packages', commit: true },
+					{ path: 'bar/packages', commit: false }
+				],
+				process.argv.includes( '--dry-run' )
+			);
 			expect( output ).to.equal( 'OK.' );
 		} );
 	} );
