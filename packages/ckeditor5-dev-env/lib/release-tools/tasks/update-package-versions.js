@@ -86,23 +86,25 @@ module.exports = function updatePackageVersions( pathsToUpdate, dryRun ) {
 
 			console.log( chalk.yellow( 'Q - Exit | Any key - Next' ) );
 		} );
-	} else if ( pathsToCommit.length ) {
-		console.log( '\n📍 ' + chalk.blue( 'Committing the changes...\n' ) );
+	} else {
+		if ( pathsToCommit.length ) {
+			console.log( '\n📍 ' + chalk.blue( 'Committing the changes...\n' ) );
 
-		for ( const path of pathsToCommit ) {
-			const execOptions = {
-				stdio: 'inherit',
-				cwd: path
-			};
+			for ( const path of pathsToCommit ) {
+				const execOptions = {
+					stdio: 'inherit',
+					cwd: path
+				};
 
-			console.log( `${ chalk.green( '+' ) } ${ path }` );
+				console.log( `${ chalk.green( '+' ) } ${ path }` );
 
-			execSync( `git add ${ path }`, execOptions );
-			execSync( 'git commit -m "Internal: Updated all CKEditor 5 dependencies ' +
+				execSync( `git add ${ path }`, execOptions );
+				execSync( 'git commit -m "Internal: Updated all CKEditor 5 dependencies ' +
 				'in `packages/*` to the latest version. [skip ci]"', execOptions );
-		}
+			}
 
-		console.log( '\n📍 ' + chalk.green( `Successfully committed ${ totalResult.toCommit } files!\n` ) );
+			console.log( '\n📍 ' + chalk.green( `Successfully committed ${ totalResult.toCommit } files!\n` ) );
+		}
 
 		if ( totalResult.updated ) {
 			console.log( '\n📍 ' + chalk.green( `Updated total of ${ totalResult.updated } files!\n` ) );
