@@ -33,8 +33,10 @@ describe( 'getWebpackConfigForManualTests()', () => {
 		expect( webpackConfig ).to.have.property( 'output' );
 		expect( webpackConfig.output ).to.deep.equal( { path: buildDir } );
 		expect( webpackConfig ).to.have.property( 'plugins' );
-		expect( webpackConfig ).to.have.property( 'devtool', 'cheap-source-map' );
 		expect( webpackConfig ).to.have.property( 'watch', true );
+
+		// The `devtool` property has been replaced by the `SourceMapDevToolPlugin()`.
+		expect( webpackConfig ).to.not.have.property( 'devtool' );
 	} );
 
 	it( 'should disable watcher mechanism when passing the "disableWatch" option', () => {

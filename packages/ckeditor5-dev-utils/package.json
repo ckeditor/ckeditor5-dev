@@ -1,11 +1,11 @@
 {
   "name": "@ckeditor/ckeditor5-dev-utils",
-  "version": "27.1.0",
+  "version": "27.1.1",
   "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-webpack-plugin": "^27.1.0",
+    "@ckeditor/ckeditor5-dev-webpack-plugin": "^27.1.1",
     "acorn": "^6.2.1",
     "acorn-walk": "^6.2.0",
     "chalk": "^3.0.0",

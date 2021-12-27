@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [27.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/v27.1.0...v27.1.1) (2021-12-17)
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Fixed generating source maps for manual and automated tests. Closes [ckeditor/ckeditor5#11006](https://github.com/ckeditor/ckeditor5/issues/11006). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e38ee2596e69ec5ea29591f3c0f2726408c22acd))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v27.1.0 => v27.1.1
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v27.1.0 => v27.1.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v27.1.0 => v27.1.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v27.1.0 => v27.1.1
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v27.1.0 => v27.1.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v27.1.0 => v27.1.1
+</details>
+
+
 ## [27.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v27.0.0...v27.1.0) (2021-12-10)
 
 ### Features

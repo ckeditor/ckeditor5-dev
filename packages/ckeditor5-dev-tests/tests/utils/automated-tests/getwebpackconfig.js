@@ -106,7 +106,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			sourceMap: true
 		} );
 
-		expect( webpackConfig.devtool ).to.equal( 'cheap-source-map' );
+		expect( webpackConfig.devtool ).to.equal( 'inline-source-map' );
 	} );
 
 	it( 'should contain a correct paths in resolveLoader', () => {
