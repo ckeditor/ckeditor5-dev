@@ -304,7 +304,7 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 			const languages = [ ...mocks.languages ];
 			const translationsPromise = transifexService.getTranslations( resource, languages );
 
-			await clock.tickAsync( 20000 );
+			await clock.tickAsync( 30000 );
 
 			const translations = await translationsPromise;
 
@@ -346,7 +346,7 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 			const languages = [ ...mocks.languages ];
 			const errorMessagePromise = transifexService.getTranslations( resource, languages ).catch( error => error.message );
 
-			await clock.tickAsync( 20000 );
+			await clock.tickAsync( 30000 );
 
 			const errorMessage = await errorMessagePromise;
 

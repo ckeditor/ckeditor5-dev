@@ -6,7 +6,7 @@
 const { transifexApi } = require( '@transifex/api' );
 const fetch = require( 'node-fetch' );
 
-const MAX_DOWNLOAD_ATTEMPTS = 10;
+const MAX_DOWNLOAD_ATTEMPTS = 15;
 const TIMEOUT_BETWEEN_DOWNLOAD_ATTEMPTS = 2;
 
 /**
