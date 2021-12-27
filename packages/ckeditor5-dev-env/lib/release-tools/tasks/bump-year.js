@@ -20,9 +20,9 @@ const glob = require( 'glob' );
  *
  * @param {Object} params
  * @param {String} params.cwd Current working directory from which all paths will be resolved.
- * @param {Number} [params.initialYear='2003'] Year from which the licenses should begin.
- * @param {Array} params.globPatterns array of objects, where each object has string property 'pattern',
- * and optionally 'options' property.
+ * @param {Array} params.globPatterns An array of objects, where each object has string property `pattern`,
+ * and optionally `options` property for this `glob` pattern.
+ * @param {String} [params.initialYear='2003'] Year from which the licenses should begin.
  */
 module.exports = function bumpYear( params ) {
 	if ( !params.initialYear ) {
