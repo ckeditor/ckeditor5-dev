@@ -39,10 +39,7 @@ module.exports = function updatePackageVersions( pathsToUpdate, dryRun ) {
 
 		totalResult.found += result.found;
 		totalResult.updated += result.updated;
-
-		if ( result.differences ) {
-			totalResult.differences.push( ...result.differences );
-		}
+		totalResult.differences.push( ...result.differences );
 
 		if ( !result.found ) {
 			console.log( 'No files were found.\n' );
@@ -127,7 +124,7 @@ module.exports = function updatePackageVersions( pathsToUpdate, dryRun ) {
  * @param {String} pathToUpdate Directory containing files to update.
  * @param {Boolean} dryRun If set to true, diff of changes that would be made is calculated, and included in the returned object. Without
  * this flag, file is updated normally.
- * @returns {updateResult}
+ * @returns {UpdateResult}
  */
 function updateDirectory( pathToUpdate, dryRun ) {
 	const globPattern = pathToUpdate + '/*/package.json';
@@ -173,12 +170,20 @@ function updateDirectory( pathToUpdate, dryRun ) {
  * @param {String} propertyName Name of the property to update.
  */
 function updateObjectProperty( parsedPkgJson, propertyName ) {
-	// Update only the CKEditor 5 dependencies, except the *-dev and *-inspector.
-	const regex = /^@ckeditor\/ckeditor5-(?!dev|inspector)|^ckeditor5$/;
 	const version = parsedPkgJson.version;
+	const regex = /^@ckeditor\/ckeditor5-([a-z]+)|^ckeditor5$/;
+	const exceptions = [
+		'dev',
+		'inspector',
+		'react',
+		'vue',
+		'angular'
+	];
 
 	for ( const dependency in parsedPkgJson[ propertyName ] ) {
-		if ( !regex.test( dependency ) ) {
+		const match = dependency.match( regex );
+
+		if ( !match || exceptions.includes( match[ 1 ] ) ) {
 			continue;
 		}
 
@@ -199,6 +204,7 @@ function formatDiff( diff ) {
 	const regex = /(?<=":) (?=")/;
 
 	for ( let i = 0; i < diff.length; i++ ) {
+		const previous = diff[ i - 1 ];
 		const current = diff[ i ];
 		const next = diff[ i + 1 ];
 		const currentLines = current.value.split( '\n' );
@@ -224,8 +230,14 @@ function formatDiff( diff ) {
 			].join( '\n' );
 
 			formattedDiff.push( shortenedLines );
+		} else if ( current.added ) {
+			// Other additions (trimming whitespaces in replacements)
+			formattedDiff.push( chalk.green( previous && previous.removed ? current.value.trim() : current.value ) );
+		} else if ( current.removed ) {
+			// Other removals
+			formattedDiff.push( chalk.red( current.value ) );
 		} else {
-			// Adding everything else that does not need formatting.
+			// Unchanged lines
 			formattedDiff.push( current.value );
 		}
 	}
@@ -237,9 +249,9 @@ function formatDiff( diff ) {
 /**
  * Contains information about the way in which the files were processed.
  *
- * @typedef {Object} updateResult
- * @property {Number} found amount of files found
- * @property {Number} updated amount of files updated
- * @property {Array<Object>} differences array of objects, where each object has string `file` containing path to the file, as well as
+ * @typedef {Object} UpdateResult
+ * @property {Number} found Number of files found.
+ * @property {Number} updated Number of files updated.
+ * @property {Array<Object>} differences Array of objects, where each object has string `file` containing path to the file, as well as
  * array of objects `content` returned by the `diff` library, that describes changes made to each file.
  */

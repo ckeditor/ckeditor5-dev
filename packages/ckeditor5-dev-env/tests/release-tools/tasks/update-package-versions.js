@@ -23,6 +23,12 @@ describe( 'updatePackageVersions()', () => {
 		consoleStub.restore();
 	} );
 
+	it( 'does not throw when there is no files', () => {
+		expect( () => {
+			updatePackageVersions( [ { path: process.cwd() + '/packages', commit: false } ] );
+		} ).to.not.throw();
+	} );
+
 	it( 'does not modify file without dependencies', () => {
 		const packageJson = JSON.stringify( {
 			'version': '1.0.0'
@@ -226,7 +232,7 @@ describe( 'updatePackageVersions()', () => {
 		expect( updatedPackageJson ).to.deep.equal( expectedPackageJson );
 	} );
 
-	it( 'does not update @ckeditor/ckeditor5-inspector dependencies', () => {
+	it( 'does not update @ckeditor/ckeditor5-inspector/react/vue/angular dependencies', () => {
 		const packageJson = JSON.stringify( {
 			'version': '2.0.0',
 			'dependencies': {
@@ -234,7 +240,10 @@ describe( 'updatePackageVersions()', () => {
 			},
 			'devDependencies': {
 				'@ckeditor/ckeditor5-core': '^1.0.0',
-				'@ckeditor/ckeditor5-inspector': '^1.0.0'
+				'@ckeditor/ckeditor5-inspector': '^1.0.0',
+				'@ckeditor/ckeditor5-react': '^1.0.0',
+				'@ckeditor/ckeditor5-vue': '^1.0.0',
+				'@ckeditor/ckeditor5-angular': '^1.0.0'
 			}
 		}, null, 2 ) + '\n';
 
@@ -257,7 +266,10 @@ describe( 'updatePackageVersions()', () => {
 			},
 			'devDependencies': {
 				'@ckeditor/ckeditor5-core': '^2.0.0',
-				'@ckeditor/ckeditor5-inspector': '^1.0.0'
+				'@ckeditor/ckeditor5-inspector': '^1.0.0',
+				'@ckeditor/ckeditor5-react': '^1.0.0',
+				'@ckeditor/ckeditor5-vue': '^1.0.0',
+				'@ckeditor/ckeditor5-angular': '^1.0.0'
 			}
 		}, null, 2 ) + '\n';
 
