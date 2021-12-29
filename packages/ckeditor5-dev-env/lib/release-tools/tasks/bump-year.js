@@ -39,7 +39,7 @@ module.exports = function bumpYear( params ) {
 				'**/node_modules/**'
 			];
 
-			options.nodir = options.nodir != null ? options.nodir : true;
+			options.nodir = true;
 			options.ignore = options.ignore ? [ ...options.ignore, ...defaultIgnore ] : defaultIgnore;
 
 			return glob.sync( globPattern.pattern, options );
