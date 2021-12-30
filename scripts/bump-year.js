@@ -28,7 +28,7 @@ require( '@ckeditor/ckeditor5-dev-env' )
 				}
 			},
 			{
-				pattern: '!(node_modules|coverage|.nyc_output)/**'
+				pattern: '!(coverage|.nyc_output)/**'
 			}
 		]
 	} );
