@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 const fs = require( 'fs-extra' );
 const path = require( 'path' );
 const transifexService = require( './transifex-service-for-api-v3.0' );
@@ -35,14 +37,16 @@ module.exports = async function downloadTranslations( config ) {
 
 	for ( const resource of resources ) {
 		const packageName = transifexService.getResourceName( resource );
-		const packagePath = getPathToTranslations( config.cwd, config.packages.get( packageName ) );
+		const packagePath = config.packages.get( packageName );
+		const pathToTranslations = path.join( config.cwd, packagePath, 'lang', 'translations' );
 		const translations = await transifexService.getTranslations( resource, languages );
 
-		removeOldTranslations( packagePath );
+		// Remove all old translations before saving new ones.
+		fs.removeSync( pathToTranslations );
 
 		saveNewTranslations( {
 			packageName,
-			packagePath,
+			pathToTranslations,
 			translations,
 			simplifyLicenseHeader: config.simplifyLicenseHeader
 		} );
@@ -50,15 +54,6 @@ module.exports = async function downloadTranslations( config ) {
 
 	logger.info( 'Saved all translations.' );
 };
-
-/**
- * Removes all files from the provided directory.
- *
- * @param {String} packagePath Package path.
- */
-function removeOldTranslations( packagePath ) {
-	fs.removeSync( packagePath );
-}
 
 /**
  * Saves all valid translations on the filesystem. For each translation entry:
@@ -69,11 +64,11 @@ function removeOldTranslations( packagePath ) {
  *
  * @param {Object} config
  * @param {String} config.packageName Package name.
- * @param {String} config.packagePath Package path.
+ * @param {String} config.pathToTranslations Path to translations.
  * @param {Map.<String,String>} config.translations The translation map: language code -> translation content.
  * @param {Boolean} config.simplifyLicenseHeader Whether to skip adding the contribute guide URL in the output `*.po` files.
  */
-function saveNewTranslations( { packageName, packagePath, translations, simplifyLicenseHeader } ) {
+function saveNewTranslations( { packageName, pathToTranslations, translations, simplifyLicenseHeader } ) {
 	let savedFiles = 0;
 
 	for ( let [ lang, poFileContent ] of translations ) {
@@ -87,24 +82,13 @@ function saveNewTranslations( { packageName, packagePath, translations, simplify
 
 		poFileContent = cleanPoFileContent( poFileContent, { simplifyLicenseHeader } );
 
-		const pathToSave = path.join( packagePath, lang + '.po' );
+		const pathToSave = path.join( pathToTranslations, lang + '.po' );
 
 		fs.outputFileSync( pathToSave, poFileContent );
 		savedFiles++;
 	}
 
 	logger.info( `Saved ${ savedFiles } PO files for ${ packageName } package.` );
-}
-
-/**
- * Returns a path to the translation directory for the provided package path.
- *
- * @param {String} cwd Current working directory.
- * @param {String} packagePath Package path.
- * @return {String}
- */
-function getPathToTranslations( cwd, packagePath ) {
-	return path.join( cwd, packagePath, 'lang', 'translations' );
 }
 
 /**
