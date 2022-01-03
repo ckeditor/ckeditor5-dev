@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2021, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2022, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -29,7 +29,7 @@ module.exports = function bumpYear( params ) {
 		params.initialYear = '2003';
 	}
 
-	console.log( chalk.green( 'Looking for files to update...' ) );
+	console.log( chalk.cyan( 'Looking for files to update...' ) );
 
 	const filesToUpdate = params.globPatterns
 		.map( globPattern => {
@@ -46,7 +46,7 @@ module.exports = function bumpYear( params ) {
 		} )
 		.reduce( ( previous, current ) => [ ...previous, ...current ] );
 
-	console.log( chalk.green( 'Updating the files...' ) );
+	console.log( chalk.cyan( 'Updating the files...' ) );
 
 	const currentYear = new Date().getFullYear();
 	const filesWithoutHeader = [];
@@ -75,15 +75,17 @@ module.exports = function bumpYear( params ) {
 		const trimmedFileName = fileName.length < 50 ? fileName : '...' + fileName.slice( -47 );
 
 		const output = [
-			`[ ${ updatedFiles } / ${ totalFiles } ]`,
-			chalk.green( `(${ percent }%)` ),
-			chalk.underline( trimmedFileName )
+			`[${ updatedFiles }/${ totalFiles }]`,
+			chalk.magenta( `(${ percent }%)` ),
+			`Processing: ${ chalk.underline( trimmedFileName ) }`
 		].join( ' ' );
 
 		process.stdout.clearLine( 1 );
 		process.stdout.cursorTo( 0 );
 		process.stdout.write( output );
 	} );
+
+	console.log( '\n' + chalk.green( 'Done.' ) );
 
 	if ( filesWithoutHeader.length ) {
 		console.warn( chalk.red( 'Following files are missing their license headers:' ) );
