@@ -56,7 +56,10 @@ module.exports = function updatePackageVersions( pathsToUpdate, dryRun ) {
 	}
 
 	if ( dryRun ) {
-		console.log( chalk.yellow( 'DRY RUN mode - press any key to display next file diff, or Q to exit.' ) );
+		console.log( `⚠️ ${ chalk.yellow( 'DRY RUN mode' ) } ⚠️` );
+		console.log( chalk.yellow( `${ chalk.bold( 'Any key' ) } - display next file diff` ) );
+		console.log( chalk.yellow( `      ${ chalk.bold( 'A' ) } - display diff from all files` ) );
+		console.log( chalk.yellow( `      ${ chalk.bold( 'Q' ) } - exit` ) );
 
 		if ( !totalResult.differences.length ) {
 			console.log( chalk.yellow( 'The script has not changed any files.' ) );
@@ -72,21 +75,24 @@ module.exports = function updatePackageVersions( pathsToUpdate, dryRun ) {
 				process.exit();
 			}
 
-			const nextDiff = totalResult.differences.shift();
-			const formattedDiff = formatDiff( nextDiff.content );
+			if ( key.name === 'a' ) {
+				console.log( chalk.yellow( 'Displaying all files.' ) );
 
-			console.log( chalk.underline( nextDiff.file ) );
+				while ( totalResult.differences.length ) {
+					printNextFile( totalResult.differences );
+				}
 
-			for ( const line of formattedDiff ) {
-				console.log( line );
+				process.exit();
 			}
+
+			printNextFile( totalResult.differences );
 
 			if ( !totalResult.differences.length ) {
 				console.log( chalk.yellow( 'No more files.' ) );
 				process.exit();
 			}
 
-			console.log( chalk.yellow( 'Any key - Next | Q - Exit' ) );
+			console.log( chalk.yellow( 'Any key - Next | A - All | Q - Exit' ) );
 		} );
 	} else {
 		if ( pathsToCommit.length ) {
@@ -244,6 +250,23 @@ function formatDiff( diff ) {
 
 	// This turns the array from random chunks containing newlines, to uniform set of single lines.
 	return formattedDiff.join( '' ).split( '\n' );
+}
+
+/**
+ * Displays and removes first file changelog from a given array of file changelogs.
+ *
+ * @param {Array<Object>} differences Array of objects, where each element has `content` value that is an array of strings, and `file`
+ * value that is a string with file name.
+ */
+function printNextFile( differences ) {
+	const nextDiff = differences.shift();
+	const formattedDiff = formatDiff( nextDiff.content );
+
+	console.log( chalk.underline( nextDiff.file ) );
+
+	for ( const line of formattedDiff ) {
+		console.log( line );
+	}
 }
 
 /**
