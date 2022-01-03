@@ -1,6 +1,33 @@
 Changelog
 =========
 
+## [27.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v27.1.1...v27.2.0) (2022-01-03)
+
+### Features
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Created the script for bumping a year in license headers. Closes [ckeditor/ckeditor5#10909](https://github.com/ckeditor/ckeditor5/issues/10909). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/aab607d08be7bfafb5aa6d0adbe7c8b5102d68fb))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v27.1.1 => v27.2.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v27.1.1 => v27.2.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v27.1.1 => v27.2.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v27.1.1 => v27.2.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v27.1.1 => v27.2.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v27.1.1 => v27.2.0
+</details>
+
+
 ## [27.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/v27.1.0...v27.1.1) (2021-12-17)
 
 ### Bug fixes
