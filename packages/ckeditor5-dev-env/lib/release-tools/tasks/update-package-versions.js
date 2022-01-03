@@ -227,7 +227,13 @@ function formatDiff( diff ) {
 			].join( '' ) );
 
 			i++;
-		} else if ( !current.added && !current.removed && currentLines.length > 8 ) {
+		} else if ( current.added ) {
+			// Other additions (trimming whitespaces in replacements)
+			formattedDiff.push( chalk.green( previous && previous.removed ? current.value.trim() : current.value ) );
+		} else if ( current.removed ) {
+			// Other removals
+			formattedDiff.push( chalk.red( current.value ) );
+		} else if ( currentLines.length > 8 ) {
 			// Cutting out the middle of a long streak of unchanged lines.
 			const shortenedLines = [
 				...currentLines.slice( 0, 3 ),
@@ -236,12 +242,6 @@ function formatDiff( diff ) {
 			].join( '\n' );
 
 			formattedDiff.push( shortenedLines );
-		} else if ( current.added ) {
-			// Other additions (trimming whitespaces in replacements)
-			formattedDiff.push( chalk.green( previous && previous.removed ? current.value.trim() : current.value ) );
-		} else if ( current.removed ) {
-			// Other removals
-			formattedDiff.push( chalk.red( current.value ) );
 		} else {
 			// Unchanged lines
 			formattedDiff.push( current.value );
