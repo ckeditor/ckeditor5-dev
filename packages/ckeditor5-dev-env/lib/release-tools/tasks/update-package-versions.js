@@ -14,8 +14,9 @@ const readline = require( 'readline' );
 const { sep, posix } = require( 'path' );
 
 /**
- * For all directories passed as an argument, all `@ckeditor/ckeditor5-*` and `ckeditor5` dependencies will be updated to the latest
- * version. If `commit: true` is added, changes will be committed as well.
+ * For all directories passed as an argument, all `@ckeditor/ckeditor5-*` and `ckeditor5` dependencies (with the exception of `-dev`,
+ * `-inspector`, `-react`, `-vue` and `-angular`) will be updated to the latest version. If `commit: true` is added, changes
+ * will be committed as well.
  *
  * See https://github.com/cksource/ckeditor5-internal/issues/1123
  *
@@ -107,8 +108,7 @@ module.exports = function updatePackageVersions( pathsToUpdate, dryRun ) {
 				console.log( `${ chalk.green( '+' ) } ${ path }` );
 
 				execSync( `git add ${ path }`, execOptions );
-				execSync( 'git commit -m "Internal: Updated all CKEditor 5 dependencies ' +
-				'in `packages/*` to the latest version. [skip ci]"', execOptions );
+				execSync( 'git commit -m "Internal: Updated CKEditor 5 packages to the latest version. [skip ci]"', execOptions );
 			}
 
 			console.log( '\n📍 ' + chalk.green( `Successfully committed ${ totalResult.toCommit } files!\n` ) );
@@ -123,9 +123,9 @@ module.exports = function updatePackageVersions( pathsToUpdate, dryRun ) {
 };
 
 /**
- * Updates `@ckeditor/ckeditor5-*` and `ckeditor5` dependencies in the specified directory to the latest version.
- * Latest version is taken from the `version` property from the root of the `package.json` file, since that value
- * should already have been bumped at this point of release process.
+ * Updates `@ckeditor/ckeditor5-*` and `ckeditor5` dependencies (with the exception of `-dev`, `-inspector`, `-react`, `-vue` and
+ * `-angular`) in the specified directory to the latest version. Latest version is taken from the `version` property from the root of the
+ * `package.json` file, since that value should already have been bumped at this point of release process.
  *
  * @param {String} pathToUpdate Directory containing files to update.
  * @param {Boolean} dryRun If set to true, diff of changes that would be made is calculated, and included in the returned object. Without
@@ -170,7 +170,8 @@ function updateDirectory( pathToUpdate, dryRun ) {
 }
 
 /**
- * Updates the CKEditor 5 dependencies, except the `*-dev` and `*-inspector` ones, in the provided `package.json` file.
+ * Updates the CKEditor 5 dependencies, (with the exception of `-dev`, `-inspector`, `-react`, `-vue` and `-angular`), in the provided
+ * `package.json` file.
  *
  * @param {Object} parsedPkgJson Object to update.
  * @param {String} propertyName Name of the property to update.
