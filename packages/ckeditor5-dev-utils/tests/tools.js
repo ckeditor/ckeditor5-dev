@@ -42,6 +42,10 @@ describe( 'utils', () => {
 	} );
 
 	describe( 'tools', () => {
+		describe( 'createSpinner', () => {
+			it( 'should be defined', () => expect( tools.createSpinner ).to.be.a( 'function' ) );
+		} );
+
 		describe( 'shExec', () => {
 			it( 'should be defined', () => expect( tools.shExec ).to.be.a( 'function' ) );
 

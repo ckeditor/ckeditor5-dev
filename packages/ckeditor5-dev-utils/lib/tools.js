@@ -8,8 +8,11 @@
 const chalk = require( 'chalk' );
 const path = require( 'path' );
 const fs = require( 'fs-extra' );
+const createSpinner = require( './tools/create-spinner' );
 
 module.exports = {
+	createSpinner,
+
 	/**
 	 * Executes a shell command.
 	 *

@@ -37,7 +37,8 @@ describe( 'dev-env/index', () => {
 				releaseSubRepositories: sandbox.stub(),
 				generateChangelogForSinglePackage: sandbox.stub(),
 				generateChangelogForMonoRepository: sandbox.stub(),
-				bumpVersions: sandbox.stub()
+				bumpVersions: sandbox.stub(),
+				bumpYear: sandbox.stub()
 			}
 		};
 
@@ -51,6 +52,7 @@ describe( 'dev-env/index', () => {
 		mockery.registerMock( './release-tools/tasks/generatechangelogforsinglepackage', releaseTools.generateChangelogForSinglePackage );
 		mockery.registerMock( './release-tools/tasks/releasesubrepositories', releaseTools.releaseSubRepositories );
 		mockery.registerMock( './release-tools/tasks/generatechangelogformonorepository', releaseTools.generateChangelogForMonoRepository );
+		mockery.registerMock( './release-tools/tasks/bump-year', releaseTools.bumpYear );
 
 		tasks = proxyquire( '../lib/index', {
 			'@ckeditor/ckeditor5-dev-utils': {
@@ -115,6 +117,32 @@ describe( 'dev-env/index', () => {
 					expect( stubs.release.bumpVersions.calledOnce ).to.equal( true );
 					expect( stubs.release.bumpVersions.firstCall.args[ 0 ] ).to.equal( 123 );
 				} );
+		} );
+	} );
+
+	describe( 'bumpYear()', () => {
+		it( 'updates year in the license', () => {
+			stubs.release.bumpYear.returns( 'OK.' );
+
+			const output = tasks.bumpYear( {
+				cwd: process.cwd(),
+				initialYear: '1970',
+				globPatterns: [
+					{ pattern: '*', options: { dot: true } },
+					{ pattern: '**/foo/**', options: { ignore: [ '**/bar/**' ] } }
+				]
+			} );
+
+			sinon.assert.calledOnce( stubs.release.bumpYear );
+			sinon.assert.alwaysCalledWithExactly( stubs.release.bumpYear, {
+				cwd: process.cwd(),
+				initialYear: '1970',
+				globPatterns: [
+					{ pattern: '*', options: { dot: true } },
+					{ pattern: '**/foo/**', options: { ignore: [ '**/bar/**' ] } }
+				]
+			} );
+			expect( output ).to.equal( 'OK.' );
 		} );
 	} );
 
