@@ -333,8 +333,9 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 			const errorMessage = await transifexService.getTranslations( resource, languages ).catch( error => error.message );
 
 			expect( errorMessage ).to.equal(
-				'Failed to download the PO file for the en language for the ckeditor5-core package.\n' +
-				'Received response: 500 Internal Server Error'
+				'\nFailed to download the PO file for the "en" language for the "ckeditor5-core" package.' +
+				'\nReceived response: 500 Internal Server Error' +
+				'\nRequested URL: https://example.com/ckeditor5-core/en'
 			);
 		} );
 
@@ -355,8 +356,8 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 			const errorMessage = await errorMessagePromise;
 
 			expect( errorMessage ).to.equal(
-				'Failed to download the PO file for the en language for the ckeditor5-core package.\n' +
-				'Requested file is not ready yet, but the limit of file download attempts has been reached.'
+				'\nFailed to download the PO file for the "en" language for the "ckeditor5-core" package.' +
+				'\nRequested file is not ready yet, but the limit of file download attempts has been reached.'
 			);
 		} );
 	} );

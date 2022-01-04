@@ -6,8 +6,12 @@
 const { transifexApi } = require( '@transifex/api' );
 const fetch = require( 'node-fetch' );
 
-const MAX_DOWNLOAD_ATTEMPTS = 15;
-const TIMEOUT_BETWEEN_DOWNLOAD_ATTEMPTS = 2;
+const MAX_DOWNLOAD_ATTEMPTS = 10;
+const TIMEOUT_BEFORE_NEW_DOWNLOAD_ATTEMPT = 3000; // In milliseconds.
+
+// It may happen that sending several dozen requests at the same time fails due to the limitations in the operating system on the network
+// stack. Therefore, each request is delayed by the number of milliseconds defined below.
+const TIMEOUT_BEFORE_NEW_REQUEST = 100;
 
 /**
  * Promise wrappers of the Transifex API v3.0.
@@ -88,7 +92,11 @@ async function getTranslations( resource, languages ) {
 	const downloadRequests = await Promise
 		.all( [
 			createDownloadRequest( resource ),
-			...languages.map( language => createDownloadRequest( resource, language ) )
+			...languages.map( async ( language, index ) => {
+				await wait( TIMEOUT_BEFORE_NEW_REQUEST * index );
+
+				return createDownloadRequest( resource, language );
+			} )
 		] )
 		.then( requests => requests.map( request => {
 			const url = request.links.self;
@@ -102,7 +110,11 @@ async function getTranslations( resource, languages ) {
 		} ) );
 
 	const translations = await Promise.all(
-		downloadRequests.map( downloadRequest => downloadFile( downloadRequest ) )
+		downloadRequests.map( async ( downloadRequest, index ) => {
+			await wait( TIMEOUT_BEFORE_NEW_REQUEST * index );
+
+			return downloadFile( downloadRequest );
+		} )
 	);
 
 	return new Map( translations );
@@ -137,14 +149,14 @@ function createDownloadRequest( resource, language ) {
 }
 
 /**
- * Tries to fetch the file, up to the MAX_DOWNLOAD_ATTEMPTS times, with the TIMEOUT_BETWEEN_DOWNLOAD_ATTEMPTS seconds timeout between each
- * attempt. There are three possible cases that are handled during downloading a file:
+ * Tries to fetch the file, up to the MAX_DOWNLOAD_ATTEMPTS times, with the TIMEOUT_BEFORE_NEW_DOWNLOAD_ATTEMPT milliseconds timeout between
+ * each attempt. There are three possible cases that are handled during downloading a file:
  *
  * (1) According to the Transifex API v3.0, when the requested file is ready for download, the Transifex service returns HTTP code 303,
  * which is the redirection to the new location, where the file is available. By default, `node-fetch` follows redirections so the requested
  * file is downloaded automatically.
  * (2) If the requested file is not ready yet, but the response status from the Transifex service was successful and the number of retries
- * has not reached the limit yet, the request is queued and retried after the TIMEOUT_BETWEEN_DOWNLOAD_ATTEMPTS timeout.
+ * has not reached the limit yet, the request is queued and retried after the TIMEOUT_BEFORE_NEW_DOWNLOAD_ATTEMPT timeout.
  * (3) Otherwise, there is either a problem with downloading a file (the request has failed) or the number of retries has reached the limit,
  * so an error is thrown.
  *
@@ -170,10 +182,11 @@ async function downloadFile( downloadRequest, downloadAttempt = 1 ) {
 	}
 
 	if ( !response.ok || downloadAttempt === MAX_DOWNLOAD_ATTEMPTS ) {
-		let errorMessage = `Failed to download the PO file for the ${ languageCode } language for the ${ resourceName } package.`;
+		let errorMessage = `\nFailed to download the PO file for the "${ languageCode }" language for the "${ resourceName }" package.`;
 
 		if ( !response.ok ) {
 			errorMessage += `\nReceived response: ${ response.status } ${ response.statusText }`;
+			errorMessage += `\nRequested URL: ${ url }`;
 		} else {
 			errorMessage += '\nRequested file is not ready yet, but the limit of file download attempts has been reached.';
 		}
@@ -181,7 +194,7 @@ async function downloadFile( downloadRequest, downloadAttempt = 1 ) {
 		throw new Error( errorMessage );
 	}
 
-	await wait( TIMEOUT_BETWEEN_DOWNLOAD_ATTEMPTS );
+	await wait( TIMEOUT_BEFORE_NEW_DOWNLOAD_ATTEMPT );
 
 	return downloadFile( downloadRequest, downloadAttempt + 1 );
 }
@@ -207,11 +220,11 @@ function getLanguageCode( language ) {
 }
 
 /**
- * Simple promisified timeout that resolves after defined number of seconds.
+ * Simple promisified timeout that resolves after defined number of milliseconds.
  *
- * @param {Number} numberOfSeconds Number of seconds after which the promise will be resolved.
+ * @param {Number} numberOfMilliseconds Number of milliseconds after which the promise will be resolved.
  * @returns {Promise}
  */
-function wait( numberOfSeconds ) {
-	return new Promise( resolve => setTimeout( resolve, numberOfSeconds * 1000 ) );
+function wait( numberOfMilliseconds ) {
+	return new Promise( resolve => setTimeout( resolve, numberOfMilliseconds ) );
 }
