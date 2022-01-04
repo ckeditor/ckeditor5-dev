@@ -733,62 +733,162 @@ describe( 'updateCKEditor5Dependencies()', () => {
 			consoleStub.restore();
 			processExitStub.restore();
 
-			callback = stubs.process.stdin.on.firstCall.args[ 1 ];
+			callback = stubs.process.stdin.on.lastCall.args[ 1 ];
+			callback.differences = undefined;
 		} );
 
 		it( 'is a function', () => {
 			expect( callback ).to.be.a( 'function' );
 		} );
 
-		it( 'prints next file after pressing Enter', () => {
+		it( 'prints single file after pressing Enter', () => {
+			callback.differences = [ {
+				file: 'foo.js',
+				content: [
+					{ value: '"ckeditor5": "^1.0.0"\n', removed: true },
+					{ value: '"ckeditor5": "^2.0.0"\n', added: true },
+					{ value: '"ckeditor5-core": "^2.0.0"\n' }
+				]
+			} ];
+
 			const consoleStub = sinon.stub( console, 'log' );
 			const processExitStub = sinon.stub( process, 'exit' );
 
-			try {
-				callback( null, { name: 'return' } );
-			} catch ( e ) {
-				expect( e.message ).to.equal( 'Cannot read property \'content\' of undefined' );
-			}
+			callback( null, { name: 'return' } );
 
 			consoleStub.restore();
 			processExitStub.restore();
 
-			expect( stripAnsi( consoleStub.firstCall.args[ 0 ] ) ).to.equal( 'Displaying next file.' );
-			// expect( processExitStub.called ).to.equal( true );
+			[
+				'Displaying next file.',
+				'File: \'foo.js\'',
+				'"ckeditor5": "^1.0.0"',
+				'"^2.0.0"',
+				'"ckeditor5-core": "^2.0.0"',
+				'',
+				'No more files.'
+			].forEach( ( string, index ) => {
+				expect( stripAnsi( consoleStub.getCall( index ).args[ 0 ] ) ).to.equal( string );
+			} );
+
+			expect( processExitStub.called ).to.equal( true );
 		} );
 
-		it( 'prints next file after pressing Space', () => {
+		it( 'prints single file after pressing Space', () => {
+			callback.differences = [ {
+				file: 'foo.js',
+				content: [
+					{ value: '"ckeditor5": "^1.0.0"\n', removed: true },
+					{ value: '"ckeditor5": "^2.0.0"\n', added: true },
+					{ value: '"ckeditor5-core": "^2.0.0"\n' }
+				]
+			} ];
+
 			const consoleStub = sinon.stub( console, 'log' );
 			const processExitStub = sinon.stub( process, 'exit' );
 
-			try {
-				callback( null, { name: 'space' } );
-			} catch ( e ) {
-				expect( e.message ).to.equal( 'Cannot read property \'content\' of undefined' );
-			}
+			callback( null, { name: 'space' } );
 
 			consoleStub.restore();
 			processExitStub.restore();
 
-			expect( stripAnsi( consoleStub.firstCall.args[ 0 ] ) ).to.equal( 'Displaying next file.' );
-			// expect( processExitStub.called ).to.equal( true );
+			[
+				'Displaying next file.',
+				'File: \'foo.js\'',
+				'"ckeditor5": "^1.0.0"',
+				'"^2.0.0"',
+				'"ckeditor5-core": "^2.0.0"',
+				'',
+				'No more files.'
+			].forEach( ( string, index ) => {
+				expect( stripAnsi( consoleStub.getCall( index ).args[ 0 ] ) ).to.equal( string );
+			} );
+
+			expect( processExitStub.called ).to.equal( true );
+		} );
+
+		it( 'after printing single file, shows controls if it wasn\'t the last file', () => {
+			callback.differences = [ {
+				file: 'foo.js',
+				content: [
+					{ value: '"ckeditor5": "^1.0.0"\n', removed: true },
+					{ value: '"ckeditor5": "^2.0.0"\n', added: true },
+					{ value: '"ckeditor5-core": "^2.0.0"\n' }
+				]
+			}, {
+				file: 'bar.js',
+				content: [
+					{ value: '"ckeditor5": "^1.0.0"\n', removed: true },
+					{ value: '"ckeditor5": "^2.0.0"\n', added: true },
+					{ value: '"ckeditor5-core": "^2.0.0"\n' }
+				]
+			} ];
+
+			const consoleStub = sinon.stub( console, 'log' );
+			const processExitStub = sinon.stub( process, 'exit' );
+
+			callback( null, { name: 'return' } );
+
+			consoleStub.restore();
+			processExitStub.restore();
+
+			[
+				'Displaying next file.',
+				'File: \'foo.js\'',
+				'"ckeditor5": "^1.0.0"',
+				'"^2.0.0"',
+				'"ckeditor5-core": "^2.0.0"',
+				'',
+				'Enter / Space - Next     A - All     Esc / Q - Exit'
+			].forEach( ( string, index ) => {
+				expect( stripAnsi( consoleStub.getCall( index ).args[ 0 ] ) ).to.equal( string );
+			} );
+
+			expect( processExitStub.called ).to.equal( false );
 		} );
 
 		it( 'prints all files after pressing A', () => {
+			callback.differences = [ {
+				file: 'foo.js',
+				content: [
+					{ value: '"ckeditor5": "^1.0.0"\n', removed: true },
+					{ value: '"ckeditor5": "^2.0.0"\n', added: true },
+					{ value: '"ckeditor5-core": "^2.0.0"\n' }
+				]
+			}, {
+				file: 'bar.js',
+				content: [
+					{ value: '"ckeditor5": "^1.0.0"\n', removed: true },
+					{ value: '"ckeditor5": "^2.0.0"\n', added: true },
+					{ value: '"ckeditor5-core": "^2.0.0"\n' }
+				]
+			} ];
+
 			const consoleStub = sinon.stub( console, 'log' );
 			const processExitStub = sinon.stub( process, 'exit' );
 
-			try {
-				callback( null, { name: 'a' } );
-			} catch ( e ) {
-				expect( e.message ).to.equal( 'Cannot read property \'content\' of undefined' );
-			}
+			callback( null, { name: 'a' } );
 
 			consoleStub.restore();
 			processExitStub.restore();
 
-			expect( stripAnsi( consoleStub.firstCall.args[ 0 ] ) ).to.equal( 'Displaying all files.' );
-			// expect( processExitStub.called ).to.equal( true );
+			[
+				'Displaying all files.',
+				'File: \'foo.js\'',
+				'"ckeditor5": "^1.0.0"',
+				'"^2.0.0"',
+				'"ckeditor5-core": "^2.0.0"',
+				'',
+				'File: \'bar.js\'',
+				'"ckeditor5": "^1.0.0"',
+				'"^2.0.0"',
+				'"ckeditor5-core": "^2.0.0"',
+				''
+			].forEach( ( string, index ) => {
+				expect( stripAnsi( consoleStub.getCall( index ).args[ 0 ] ) ).to.equal( string );
+			} );
+
+			expect( processExitStub.called ).to.equal( true );
 		} );
 
 		it( 'exits after pressing ESC', () => {
@@ -834,6 +934,48 @@ describe( 'updateCKEditor5Dependencies()', () => {
 
 			expect( consoleStub.called ).to.equal( false );
 			expect( processExitStub.called ).to.equal( false );
+		} );
+
+		describe( 'shouldFormatDifference()', () => {
+			it( 'merges only valid sequences (case 1)', () => {
+				callback.differences = [ {
+					file: 'foo.js',
+					content: [
+						{ value: '"ckeditor5": "^1.0.0"\n', removed: true },
+						{ value: '"ckeditor5-core": "^2.0.0"\n' }
+					]
+				} ];
+
+				const consoleStub = sinon.stub( console, 'log' );
+				const processExitStub = sinon.stub( process, 'exit' );
+
+				callback( null, { name: 'a' } );
+
+				consoleStub.restore();
+				processExitStub.restore();
+
+				[
+					'Displaying all files.',
+					'File: \'foo.js\'',
+					'"ckeditor5": "^1.0.0"',
+					'"ckeditor5-core": "^2.0.0"',
+					''
+				].forEach( ( string, index ) => {
+					expect( stripAnsi( consoleStub.getCall( index ).args[ 0 ] ) ).to.equal( string );
+				} );
+
+				expect( processExitStub.called ).to.equal( true );
+			} );
+
+			it( 'merges only valid sequences (case 2)', () => {
+				// Test to cover:
+				// if ( !regex.test( currentDiff.value ) ) {
+			} );
+
+			it( 'merges only valid sequences (case 3)', () => {
+				// Test to cover:
+				// if ( !regex.test( nextDiff.value ) ) {
+			} );
 		} );
 	} );
 } );

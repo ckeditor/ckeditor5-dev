@@ -70,47 +70,10 @@ module.exports = function updateCKEditor5Dependencies( options ) {
 		readline.emitKeypressEvents( process.stdin );
 		process.stdin.setRawMode( true );
 
-		process.stdin.on( 'keypress', ( str, key ) => {
-			const inputs = {
-				next: [ 'space', 'return' /* 'return' means enter */ ],
-				all: [ 'a' ],
-				exit: [ 'q', 'escape' ]
-			};
-
-			if ( inputs.next.includes( key.name ) ) {
-				console.log( chalk.yellow( 'Displaying next file.' ) );
-
-				printNextFile( totalResult.differences );
-
-				if ( !totalResult.differences.length ) {
-					console.log( chalk.yellow( 'No more files.' ) );
-
-					process.exit();
-				} else {
-					console.log( [
-						chalk.yellow( `${ chalk.bold( 'Enter' ) } / ${ chalk.bold( 'Space' ) } - Next` ),
-						chalk.yellow( `${ chalk.bold( 'A' ) } - All` ),
-						chalk.yellow( `${ chalk.bold( 'Esc' ) } / ${ chalk.bold( 'Q' ) } - Exit` )
-					].join( '     ' ) );
-				}
-			}
-
-			if ( inputs.all.includes( key.name ) ) {
-				console.log( chalk.yellow( 'Displaying all files.' ) );
-
-				while ( totalResult.differences.length ) {
-					printNextFile( totalResult.differences );
-				}
-
-				process.exit();
-			}
-
-			if ( inputs.exit.includes( key.name ) ) {
-				console.log( chalk.yellow( 'Manual exit.' ) );
-
-				process.exit();
-			}
-		} );
+		// Instead of a lambda function, this `process.stdin.on` has to take in a named function and have `differences` assigned to it.
+		// This is done so that it can be tested properly, as it is otherwise impossible to pass this array inside tests.
+		processInput.differences = totalResult.differences;
+		process.stdin.on( 'keypress', processInput );
 	} else {
 		if ( pathsToCommit.length ) {
 			console.log( '\n📍 ' + chalk.blue( 'Committing the changes...\n' ) );
@@ -312,6 +275,68 @@ function shouldFormatDifference( currentDiff, nextDiff, regex ) {
 	}
 
 	return true;
+}
+
+/**
+ * Takes data about the pressed key, and produces appropriate result:
+ *
+ * - "Enter" / "Space": Prints next file diff, and ends the process if it was the last file or displays controls if not.
+ * -               "A": Prints all the remaining file diffs, and ends the process.
+ * -       "Q" / "Esc": Ends the process.
+ *
+ * This function is passed as a callback in `process.stdin.on( 'keypress', processInput )`. In order for this function to be tested
+ * properly, it needs to be a named function that can have attached values, as otherwise passing the `differences` array would be impossible
+ * in the tests.
+ *
+ * @param {String} chunk Streak of keyboard inputs.
+ * @param {Object} key Contains information about what button was pressed, and whether or not modifiers
+ * such as `ctrl` were held at the same time.
+ */
+function processInput( chunk, key ) {
+	// Differences array should be attached to the function itself.
+	const differences = processInput.differences;
+
+	// console.log( differences[ 0 ] );
+
+	const inputs = {
+		next: [ 'space', 'return' /* 'return' means enter */ ],
+		all: [ 'a' ],
+		exit: [ 'q', 'escape' ]
+	};
+
+	if ( inputs.next.includes( key.name ) ) {
+		console.log( chalk.yellow( 'Displaying next file.' ) );
+
+		printNextFile( differences );
+
+		if ( !differences.length ) {
+			console.log( chalk.yellow( 'No more files.' ) );
+
+			process.exit();
+		} else {
+			console.log( [
+				chalk.yellow( `${ chalk.bold( 'Enter' ) } / ${ chalk.bold( 'Space' ) } - Next` ),
+				chalk.yellow( `${ chalk.bold( 'A' ) } - All` ),
+				chalk.yellow( `${ chalk.bold( 'Esc' ) } / ${ chalk.bold( 'Q' ) } - Exit` )
+			].join( '     ' ) );
+		}
+	}
+
+	if ( inputs.all.includes( key.name ) ) {
+		console.log( chalk.yellow( 'Displaying all files.' ) );
+
+		while ( differences.length ) {
+			printNextFile( differences );
+		}
+
+		process.exit();
+	}
+
+	if ( inputs.exit.includes( key.name ) ) {
+		console.log( chalk.yellow( 'Manual exit.' ) );
+
+		process.exit();
+	}
 }
 
 /**
