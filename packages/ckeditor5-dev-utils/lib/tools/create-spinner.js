@@ -5,6 +5,7 @@
 
 'use strict';
 
+const readline = require( 'readline' );
 const isInteractive = require( 'is-interactive' );
 const cliSpinners = require( 'cli-spinners' );
 const cliCursor = require( 'cli-cursor' );
@@ -73,8 +74,8 @@ module.exports = function createSpinner( title, options = {} ) {
 	};
 
 	function clearLastLine() {
-		process.stdout.clearLine( 1 );
-		process.stdout.cursorTo( 0 );
+		readline.clearLine( process.stdout, 1 );
+		readline.cursorTo( process.stdout, 0 );
 	}
 };
 

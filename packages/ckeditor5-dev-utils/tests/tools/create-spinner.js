@@ -32,12 +32,17 @@ describe( 'lib/utils/create-spinner', () => {
 			cliCursor: {
 				show: sinon.stub(),
 				hide: sinon.stub()
+			},
+			readline: {
+				clearLine: sinon.stub(),
+				cursorTo: sinon.stub()
 			}
 		};
 
 		mockery.registerMock( 'is-interactive', stubs.isInteractive );
 		mockery.registerMock( 'cli-spinners', stubs.cliSpinners );
 		mockery.registerMock( 'cli-cursor', stubs.cliCursor );
+		mockery.registerMock( 'readline', stubs.readline );
 
 		createSpinner = require( '../../lib/tools/create-spinner' );
 	} );
@@ -111,8 +116,6 @@ describe( 'lib/utils/create-spinner', () => {
 
 			spinner.start();
 
-			const clearLineStub = sinon.stub( process.stdout, 'clearLine' );
-			const cursorToStub = sinon.stub( process.stdout, 'cursorTo' );
 			const writeStub = sinon.stub( process.stdout, 'write' );
 
 			clock.tick( 5 );
@@ -136,14 +139,15 @@ describe( 'lib/utils/create-spinner', () => {
 			expect( writeStub.getCall( 4 ).args[ 0 ] ).to.equal( '| Foo.' );
 
 			// It does not clear the last line for an initial spin.
-			expect( clearLineStub.callCount ).to.equal( 4 );
-			expect( cursorToStub.callCount ).to.equal( 4 );
+			expect( stubs.readline.clearLine.callCount ).to.equal( 4 );
+			expect( stubs.readline.cursorTo.callCount ).to.equal( 4 );
 
-			expect( cursorToStub.firstCall.args[ 0 ] ).to.equal( 0 );
-			expect( clearLineStub.firstCall.args[ 0 ] ).to.equal( 1 );
+			expect( stubs.readline.clearLine.firstCall.args[ 0 ] ).to.equal( process.stdout );
+			expect( stubs.readline.clearLine.firstCall.args[ 1 ] ).to.equal( 1 );
 
-			clearLineStub.restore();
-			cursorToStub.restore();
+			expect( stubs.readline.cursorTo.firstCall.args[ 0 ] ).to.equal( process.stdout );
+			expect( stubs.readline.cursorTo.firstCall.args[ 1 ] ).to.equal( 0 );
+
 			writeStub.restore();
 		} );
 
@@ -160,8 +164,6 @@ describe( 'lib/utils/create-spinner', () => {
 
 			spinner.start();
 
-			const clearLineStub = sinon.stub( process.stdout, 'clearLine' );
-			const cursorToStub = sinon.stub( process.stdout, 'cursorTo' );
 			const writeStub = sinon.stub( process.stdout, 'write' );
 
 			clock.tick( 5 );
@@ -184,8 +186,6 @@ describe( 'lib/utils/create-spinner', () => {
 			expect( writeStub.callCount ).to.equal( 5 );
 			expect( writeStub.getCall( 4 ).args[ 0 ] ).to.equal( '   | Foo.' );
 
-			clearLineStub.restore();
-			cursorToStub.restore();
 			writeStub.restore();
 		} );
 	} );
