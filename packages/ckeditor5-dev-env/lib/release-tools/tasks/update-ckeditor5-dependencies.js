@@ -78,7 +78,7 @@ module.exports = function updateCKEditor5Dependencies( options ) {
 			};
 
 			if ( inputs.next.includes( key.name ) ) {
-				console.log( chalk.yellow( 'Displaying all files.' ) );
+				console.log( chalk.yellow( 'Displaying next file.' ) );
 
 				printNextFile( totalResult.differences );
 
