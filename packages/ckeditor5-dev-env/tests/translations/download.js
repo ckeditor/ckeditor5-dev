@@ -37,6 +37,12 @@ describe( 'dev-env/translations/download()', () => {
 				cleanPoFileContent: sinon.stub().callsFake( fileContent => fileContent )
 			},
 
+			tools: {
+				createSpinner: sinon.stub(),
+				spinnerStart: sinon.stub(),
+				spinnerFinish: sinon.stub()
+			},
+
 			transifexService: {
 				init: sinon.stub(),
 
@@ -62,9 +68,15 @@ describe( 'dev-env/translations/download()', () => {
 			}
 		};
 
+		stubs.tools.createSpinner.returns( {
+			start: stubs.tools.spinnerStart,
+			finish: stubs.tools.spinnerFinish
+		} );
+
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
 			translations: stubs.translationUtils,
-			logger: () => stubs.logger
+			logger: () => stubs.logger,
+			tools: stubs.tools
 		} );
 
 		mockery.registerMock( 'fs-extra', stubs.fs );
@@ -171,6 +183,109 @@ describe( 'dev-env/translations/download()', () => {
 			stubs.fs.outputFileSync,
 			path.normalize( '/workspace/bar/ckeditor5-ui/lang/translations/pl.po' ),
 			'ckeditor5-ui-pl-content'
+		);
+	} );
+
+	it( 'should download translations for non-empty resources only for specified packages', async () => {
+		mocks = {
+			resources: [
+				{ attributes: { slug: 'ckeditor5-core' } },
+				{ attributes: { slug: 'ckeditor5-ui' } }
+			],
+			languages: [
+				{ attributes: { code: 'pl' } },
+				{ attributes: { code: 'de' } }
+			],
+			translations: {
+				'ckeditor5-core': {
+					pl: 'ckeditor5-core-pl-content',
+					de: 'ckeditor5-core-de-content'
+				},
+				'ckeditor5-ui': {
+					pl: 'ckeditor5-ui-pl-content',
+					de: 'ckeditor5-ui-de-content'
+				}
+			},
+			fileContents: {
+				'ckeditor5-core-pl-content': { save: 'save_pl' },
+				'ckeditor5-core-de-content': { save: 'save_de' },
+				'ckeditor5-ui-pl-content': { cancel: 'cancel_pl' },
+				'ckeditor5-ui-de-content': {}
+			}
+		};
+
+		await download( {
+			organizationName: 'ckeditor-organization',
+			projectName: 'ckeditor5-project',
+			cwd: '/workspace',
+			token: 'secretToken',
+			packages: new Map( [
+				[ 'ckeditor5-ui', 'bar/ckeditor5-ui' ]
+			] )
+		} );
+
+		sinon.assert.callCount( stubs.fs.outputFileSync, 1 );
+
+		sinon.assert.calledWithExactly(
+			stubs.fs.outputFileSync,
+			path.normalize( '/workspace/bar/ckeditor5-ui/lang/translations/pl.po' ),
+			'ckeditor5-ui-pl-content'
+		);
+	} );
+
+	it( 'should create spinner for each processed package', async () => {
+		mocks = {
+			resources: [
+				{ attributes: { slug: 'ckeditor5-core' } },
+				{ attributes: { slug: 'ckeditor5-ui' } }
+			],
+			languages: [
+				{ attributes: { code: 'pl' } },
+				{ attributes: { code: 'de' } }
+			],
+			translations: {
+				'ckeditor5-core': {
+					pl: 'ckeditor5-core-pl-content',
+					de: 'ckeditor5-core-de-content'
+				},
+				'ckeditor5-ui': {
+					pl: 'ckeditor5-ui-pl-content',
+					de: 'ckeditor5-ui-de-content'
+				}
+			},
+			fileContents: {
+				'ckeditor5-core-pl-content': { save: 'save_pl' },
+				'ckeditor5-core-de-content': { save: 'save_de' },
+				'ckeditor5-ui-pl-content': { cancel: 'cancel_pl' },
+				'ckeditor5-ui-de-content': {}
+			}
+		};
+
+		await download( {
+			organizationName: 'ckeditor-organization',
+			projectName: 'ckeditor5-project',
+			cwd: '/workspace',
+			token: 'secretToken',
+			packages: new Map( [
+				[ 'ckeditor5-core', 'foo/ckeditor5-core' ],
+				[ 'ckeditor5-ui', 'bar/ckeditor5-ui' ]
+			] )
+		} );
+
+		sinon.assert.callCount( stubs.tools.createSpinner, 2 );
+		sinon.assert.callCount( stubs.tools.spinnerStart, 2 );
+		sinon.assert.callCount( stubs.tools.spinnerFinish, 2 );
+
+		sinon.assert.calledWithExactly(
+			stubs.tools.createSpinner,
+			'Processing "ckeditor5-core"...',
+			{ indentLevel: 1 }
+		);
+
+		sinon.assert.calledWithExactly(
+			stubs.tools.createSpinner,
+			'Processing "ckeditor5-ui"...',
+			{ indentLevel: 1 }
 		);
 	} );
 

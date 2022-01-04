@@ -5,13 +5,15 @@
 
 'use strict';
 
-const fs = require( 'fs-extra' );
 const path = require( 'path' );
+const fs = require( 'fs-extra' );
+const { tools, logger: loggerFactory, translations } = require( '@ckeditor/ckeditor5-dev-utils' );
 const transifexService = require( './transifex-service-for-api-v3.0' );
-const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
-const { cleanPoFileContent, createDictionaryFromPoFileContent } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
-const languageCodeMap = require( './languagecodemap.json' );
 const { verifyProperties } = require( './utils' );
+const languageCodeMap = require( './languagecodemap.json' );
+
+const logger = loggerFactory();
+const { cleanPoFileContent, createDictionaryFromPoFileContent } = translations;
 
 /**
  * Downloads translations from the Transifex for each localizable package.
@@ -46,19 +48,24 @@ module.exports = async function downloadTranslations( config ) {
 
 	for ( const resource of resources ) {
 		const packageName = transifexService.getResourceName( resource );
+		const spinner = tools.createSpinner( `Processing "${ packageName }"...`, { indentLevel: 1 } );
 		const packagePath = config.packages.get( packageName );
 		const pathToTranslations = path.join( config.cwd, packagePath, 'lang', 'translations' );
+
+		spinner.start();
 		const translations = await transifexService.getTranslations( resource, languages );
 
 		// Remove all old translations before saving new ones.
 		fs.removeSync( pathToTranslations );
 
-		saveNewTranslations( {
-			packageName,
+		const savedFiles = saveNewTranslations( {
 			pathToTranslations,
 			translations,
 			simplifyLicenseHeader: config.simplifyLicenseHeader
 		} );
+
+		spinner.finish();
+		logger.info( ' '.repeat( 3 ) + `✅ Saved ${ savedFiles } "*.po" files.` );
 	}
 
 	logger.info( 'Saved all translations.' );
@@ -72,12 +79,12 @@ module.exports = async function downloadTranslations( config ) {
  * (3) Prepare the translation for storing on the filesystem: remove personal data and add a banner with information how to contribute.
  *
  * @param {Object} config
- * @param {String} config.packageName Package name.
  * @param {String} config.pathToTranslations Path to translations.
  * @param {Map.<String,String>} config.translations The translation map: language code -> translation content.
  * @param {Boolean} config.simplifyLicenseHeader Whether to skip adding the contribute guide URL in the output `*.po` files.
+ * @returns {Number} Number of saved files.
  */
-function saveNewTranslations( { packageName, pathToTranslations, translations, simplifyLicenseHeader } ) {
+function saveNewTranslations( { pathToTranslations, translations, simplifyLicenseHeader } ) {
 	let savedFiles = 0;
 
 	for ( let [ lang, poFileContent ] of translations ) {
@@ -97,7 +104,7 @@ function saveNewTranslations( { packageName, pathToTranslations, translations, s
 		savedFiles++;
 	}
 
-	logger.info( `Saved ${ savedFiles } PO files for ${ packageName } package.` );
+	return savedFiles;
 }
 
 /**
