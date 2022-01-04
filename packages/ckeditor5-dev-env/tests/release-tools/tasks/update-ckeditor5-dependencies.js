@@ -11,11 +11,11 @@ const mockery = require( 'mockery' );
 const mockFs = require( 'mock-fs' );
 const sinon = require( 'sinon' );
 
-describe( 'updatePackageVersions()', () => {
-	let stubs, updatePackageVersions;
+describe( 'updateCKEditor5Dependencies()', () => {
+	let stubs, updateCKEditor5Dependencies;
 
 	beforeEach( () => {
-		updatePackageVersions = require( '../../../lib/release-tools/tasks/update-package-versions' );
+		updateCKEditor5Dependencies = require( '../../../lib/release-tools/tasks/update-ckeditor5-dependencies' );
 
 		mockery.enable( {
 			useCleanCache: true,
@@ -59,7 +59,7 @@ describe( 'updatePackageVersions()', () => {
 		} );
 
 		const consoleStub = sinon.stub( console, 'log' );
-		updatePackageVersions( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
+		updateCKEditor5Dependencies( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
 		consoleStub.restore();
 
 		const updatedPackageJson = fs.readFileSync( process.cwd() + '/packages/ckeditor5-foo/package.json', 'utf-8' );
@@ -87,7 +87,7 @@ describe( 'updatePackageVersions()', () => {
 		} );
 
 		const consoleStub = sinon.stub( console, 'log' );
-		updatePackageVersions( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
+		updateCKEditor5Dependencies( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
 		consoleStub.restore();
 
 		const updatedPackageJson = fs.readFileSync( process.cwd() + '/packages/ckeditor5-foo/package.json', 'utf-8' );
@@ -115,7 +115,7 @@ describe( 'updatePackageVersions()', () => {
 		} );
 
 		const consoleStub = sinon.stub( console, 'log' );
-		updatePackageVersions( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
+		updateCKEditor5Dependencies( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
 		consoleStub.restore();
 
 		const updatedPackageJson = fs.readFileSync( process.cwd() + '/packages/ckeditor5-foo/package.json', 'utf-8' );
@@ -156,7 +156,7 @@ describe( 'updatePackageVersions()', () => {
 		} );
 
 		const consoleStub = sinon.stub( console, 'log' );
-		updatePackageVersions( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
+		updateCKEditor5Dependencies( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
 		consoleStub.restore();
 
 		const updatedPackageJson = fs.readFileSync( process.cwd() + '/packages/ckeditor5-foo/package.json', 'utf-8' );
@@ -199,7 +199,7 @@ describe( 'updatePackageVersions()', () => {
 			}
 		} );
 		const consoleStub = sinon.stub( console, 'log' );
-		updatePackageVersions( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
+		updateCKEditor5Dependencies( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
 		consoleStub.restore();
 
 		const updatedPackageJsonFoo = fs.readFileSync( process.cwd() + '/packages/ckeditor5-foo/package.json', 'utf-8' );
@@ -241,7 +241,7 @@ describe( 'updatePackageVersions()', () => {
 			} );
 
 			const consoleStub = sinon.stub( console, 'log' );
-			updatePackageVersions( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
+			updateCKEditor5Dependencies( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
 			consoleStub.restore();
 
 			const updatedPackageJson = fs.readFileSync( process.cwd() + '/packages/ckeditor5-foo/package.json', 'utf-8' );
@@ -285,7 +285,7 @@ describe( 'updatePackageVersions()', () => {
 			} );
 
 			const consoleStub = sinon.stub( console, 'log' );
-			updatePackageVersions( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
+			updateCKEditor5Dependencies( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
 			consoleStub.restore();
 
 			const updatedPackageJson = fs.readFileSync( process.cwd() + '/packages/ckeditor5-foo/package.json', 'utf-8' );
@@ -329,7 +329,7 @@ describe( 'updatePackageVersions()', () => {
 			} );
 
 			const consoleStub = sinon.stub( console, 'log' );
-			updatePackageVersions( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
+			updateCKEditor5Dependencies( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
 			consoleStub.restore();
 
 			const updatedPackageJson = fs.readFileSync( process.cwd() + '/packages/ckeditor5-foo/package.json', 'utf-8' );
@@ -369,7 +369,7 @@ describe( 'updatePackageVersions()', () => {
 			} );
 
 			const consoleStub = sinon.stub( console, 'log' );
-			updatePackageVersions( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
+			updateCKEditor5Dependencies( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
 			consoleStub.restore();
 
 			const updatedPackageJson = fs.readFileSync( process.cwd() + '/packages/ckeditor5-foo/package.json', 'utf-8' );
@@ -409,7 +409,7 @@ describe( 'updatePackageVersions()', () => {
 			} );
 
 			const consoleStub = sinon.stub( console, 'log' );
-			updatePackageVersions( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
+			updateCKEditor5Dependencies( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
 			consoleStub.restore();
 
 			const updatedPackageJson = fs.readFileSync( process.cwd() + '/packages/ckeditor5-foo/package.json', 'utf-8' );
@@ -449,7 +449,7 @@ describe( 'updatePackageVersions()', () => {
 			} );
 
 			const consoleStub = sinon.stub( console, 'log' );
-			updatePackageVersions( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
+			updateCKEditor5Dependencies( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
 			consoleStub.restore();
 
 			const updatedPackageJson = fs.readFileSync( process.cwd() + '/packages/ckeditor5-foo/package.json', 'utf-8' );
@@ -488,7 +488,7 @@ describe( 'updatePackageVersions()', () => {
 				}
 			} );
 			const consoleStub = sinon.stub( console, 'log' );
-			updatePackageVersions( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
+			updateCKEditor5Dependencies( { version: '2.0.0', packages: [ { path: process.cwd() + '/packages', commit: false } ] } );
 			consoleStub.restore();
 
 			const updatedPackageJson = fs.readFileSync( process.cwd() + '/packages/ckeditor5-foo/package.json', 'utf-8' );
@@ -529,7 +529,7 @@ describe( 'updatePackageVersions()', () => {
 			} );
 
 			const consoleStub = sinon.stub( console, 'log' );
-			updatePackageVersions( {
+			updateCKEditor5Dependencies( {
 				version: '2.0.0',
 				packages: [ { path: process.cwd() + '/packages', commit: false } ],
 				dryRun: true
@@ -547,7 +547,7 @@ describe( 'updatePackageVersions()', () => {
 
 		beforeEach( () => {
 			const consoleStub = sinon.stub( console, 'log' );
-			updatePackageVersions( {
+			updateCKEditor5Dependencies( {
 				version: '2.0.0',
 				packages: [ { path: process.cwd() + '/packages', commit: false } ],
 				dryRun: true
