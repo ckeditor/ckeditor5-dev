@@ -18,20 +18,29 @@ const { verifyProperties } = require( './utils' );
  * It creates PO files out of the translations and replaces old translations with the downloaded ones.
  *
  * @param {Object} config
+ * @param {String} config.organizationName Name of the organization to which the project belongs.
+ * @param {String} config.projectName Name of the project for downloading the translations.
  * @param {String} config.token Token to the Transifex API.
  * @param {Map.<String,String>} config.packages A resource name -> package path map for which translations should be downloaded.
+ * The resource name must be the same as the name used in the Transifex service. The package path could be any local path fragment, where
+ * the downloaded translation will be stored. The final path for storing the translations is a combination of the `config.cwd` with the
+ * mentioned package path and the `lang/translations` subdirectory.
  * @param {String} config.cwd Current work directory.
  * @param {Boolean} [config.simplifyLicenseHeader=false] Whether to skip adding the contribute guide URL in the output `*.po` files.
  */
 module.exports = async function downloadTranslations( config ) {
-	verifyProperties( config, [ 'token', 'packages', 'cwd' ] );
+	verifyProperties( config, [ 'organizationName', 'projectName', 'token', 'packages', 'cwd' ] );
 
 	transifexService.init( config.token );
 
 	logger.info( 'Fetching project information...' );
 
 	const localizablePackageNames = [ ...config.packages.keys() ];
-	const { resources, languages } = await transifexService.getProjectData( localizablePackageNames );
+	const { resources, languages } = await transifexService.getProjectData(
+		config.organizationName,
+		config.projectName,
+		localizablePackageNames
+	);
 
 	logger.info( 'Downloading translations...' );
 

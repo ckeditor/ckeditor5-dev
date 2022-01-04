@@ -42,7 +42,7 @@ describe( 'dev-env/translations/download()', () => {
 
 				getResourceName: sinon.stub().callsFake( resource => resource.attributes.slug ),
 
-				getProjectData: sinon.stub().callsFake( localizablePackageNames => {
+				getProjectData: sinon.stub().callsFake( ( organizationName, projectName, localizablePackageNames ) => {
 					const projectData = {
 						resources: mocks.resources.filter( resource => localizablePackageNames.includes( resource.attributes.slug ) ),
 						languages: [ ...mocks.languages ]
@@ -98,6 +98,8 @@ describe( 'dev-env/translations/download()', () => {
 		};
 
 		await download( {
+			organizationName: 'ckeditor-organization',
+			projectName: 'ckeditor5-project',
 			cwd: '/workspace',
 			token: 'secretToken',
 			packages: new Map( [
@@ -141,6 +143,8 @@ describe( 'dev-env/translations/download()', () => {
 		};
 
 		await download( {
+			organizationName: 'ckeditor-organization',
+			projectName: 'ckeditor5-project',
 			cwd: '/workspace',
 			token: 'secretToken',
 			packages: new Map( [
@@ -179,6 +183,8 @@ describe( 'dev-env/translations/download()', () => {
 		};
 
 		await download( {
+			organizationName: 'ckeditor-organization',
+			projectName: 'ckeditor5-project',
 			cwd: '/workspace',
 			token: 'secretToken',
 			packages: new Map( [
@@ -215,6 +221,8 @@ describe( 'dev-env/translations/download()', () => {
 		};
 
 		await download( {
+			organizationName: 'ckeditor-organization',
+			projectName: 'ckeditor5-project',
 			cwd: '/workspace',
 			token: 'secretToken',
 			packages: new Map( [
@@ -250,6 +258,8 @@ describe( 'dev-env/translations/download()', () => {
 
 		try {
 			await download( {
+				organizationName: 'ckeditor-organization',
+				projectName: 'ckeditor5-project',
 				token: 'secretToken',
 				cwd: '/workspace',
 				packages: new Map( [
@@ -268,7 +278,9 @@ describe( 'dev-env/translations/download()', () => {
 		try {
 			await download( {} );
 		} catch ( err ) {
-			expect( err.message ).to.equal( 'The specified object misses the following properties: token, packages, cwd.' );
+			expect( err.message ).to.equal(
+				'The specified object misses the following properties: organizationName, projectName, token, packages, cwd.'
+			);
 		}
 	} );
 
@@ -291,6 +303,8 @@ describe( 'dev-env/translations/download()', () => {
 		};
 
 		await download( {
+			organizationName: 'ckeditor-organization',
+			projectName: 'ckeditor5-project',
 			cwd: '/workspace',
 			token: 'secretToken',
 			packages: new Map( [

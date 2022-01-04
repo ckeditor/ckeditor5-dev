@@ -36,15 +36,17 @@ function init( token ) {
 /**
  * Retrieves all the package names and languages associated with the CKEditor 5 project from the Transifex service.
  *
+ * @param {String} organizationName Name of the organization to which the project belongs.
+ * @param {String} projectName Name of the project for downloading the translations.
  * @param {Array.<String>} localizablePackageNames Names of all packages for which translations should be downloaded.
  * @returns {Promise.<Object>} result
  * @returns {Array.<Object>} result.resources All found resource instances for which translations could be downloaded.
  * @returns {Array.<Object>} result.languages All found language instances in the project.
  */
-async function getProjectData( localizablePackageNames ) {
-	const organization = await transifexApi.Organization.get( { slug: 'ckeditor' } );
+async function getProjectData( organizationName, projectName, localizablePackageNames ) {
+	const organization = await transifexApi.Organization.get( { slug: organizationName } );
 	const projects = await organization.fetch( 'projects' );
-	const project = await projects.get( { slug: 'ckeditor5' } );
+	const project = await projects.get( { slug: projectName } );
 	const resources = await project.fetch( 'resources' );
 	const languages = await project.fetch( 'languages' );
 

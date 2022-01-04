@@ -118,16 +118,18 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 				]
 			};
 
-			const { resources, languages } = await transifexService.getProjectData( [ 'ckeditor5-core', 'ckeditor5-ui' ] );
+			const { resources, languages } = await transifexService.getProjectData(
+				'ckeditor-organization', 'ckeditor5-project', [ 'ckeditor5-core', 'ckeditor5-ui' ]
+			);
 
 			sinon.assert.calledOnce( stubs.getOrganizations );
-			sinon.assert.calledWithExactly( stubs.getOrganizations, { slug: 'ckeditor' } );
+			sinon.assert.calledWithExactly( stubs.getOrganizations, { slug: 'ckeditor-organization' } );
 
 			sinon.assert.calledOnce( stubs.fetchOrganization );
 			sinon.assert.calledWithExactly( stubs.fetchOrganization, 'projects' );
 
 			sinon.assert.calledOnce( stubs.getProjects );
-			sinon.assert.calledWithExactly( stubs.getProjects, { slug: 'ckeditor5' } );
+			sinon.assert.calledWithExactly( stubs.getProjects, { slug: 'ckeditor5-project' } );
 
 			sinon.assert.calledTwice( stubs.fetchProject );
 			sinon.assert.calledWithExactly( stubs.fetchProject, 'resources' );
@@ -156,7 +158,9 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 				]
 			};
 
-			const { resources, languages } = await transifexService.getProjectData( [ 'ckeditor5-core', 'ckeditor5-non-existing' ] );
+			const { resources, languages } = await transifexService.getProjectData(
+				'ckeditor-organization', 'ckeditor5-project', [ 'ckeditor5-core', 'ckeditor5-non-existing' ]
+			);
 
 			expect( resources ).to.deep.equal( [
 				{ attributes: { slug: 'ckeditor5-core' } }
