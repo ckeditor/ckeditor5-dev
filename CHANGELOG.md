@@ -1,6 +1,33 @@
 Changelog
 =========
 
+## [27.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/v27.2.0...v27.3.0) (2022-01-04)
+
+### Features
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Introduced the `tools.createSpinner()` function for creating spinners in CLI. Closes [ckeditor/ckeditor5#11067](https://github.com/ckeditor/ckeditor5/issues/11067). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/5ac2485f97b538156836195b02f5f65984268dae))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v27.2.0 => v27.3.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v27.2.0 => v27.3.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v27.2.0 => v27.3.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v27.2.0 => v27.3.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v27.2.0 => v27.3.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v27.2.0 => v27.3.0
+</details>
+
+
 ## [27.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v27.1.1...v27.2.0) (2022-01-03)
 
 ### Features
