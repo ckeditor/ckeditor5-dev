@@ -25,7 +25,7 @@ const readline = require( 'readline' );
  * @param {Boolean} options.dryRun Prevents the script from committing or changing anything, and instead shows list of files that would be
  * changed.
  */
-module.exports = function updatePackageVersions( options ) {
+module.exports = function updateCKEditor5Dependencies( options ) {
 	const totalResult = { found: 0, updated: 0, toCommit: 0, differences: [] };
 	const pathsToCommit = [];
 

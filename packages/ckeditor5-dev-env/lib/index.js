@@ -22,8 +22,8 @@ module.exports = {
 		return require( './release-tools/tasks/generatechangelogformonorepository' )( ...args );
 	},
 
-	updatePackageVersions( ...args ) {
-		return require( './release-tools/tasks/update-package-versions' )( ...args );
+	updateCKEditor5Dependencies( ...args ) {
+		return require( './release-tools/tasks/update-ckeditor5-dependencies' )( ...args );
 	},
 
 	createPotFiles( ...args ) {
