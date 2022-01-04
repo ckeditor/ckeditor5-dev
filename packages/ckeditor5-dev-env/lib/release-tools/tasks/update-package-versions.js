@@ -10,33 +10,33 @@ const { diffLines: diff } = require( 'diff' );
 const { execSync } = require( 'child_process' );
 const fs = require( 'fs' );
 const glob = require( 'glob' );
+const { posix } = require( 'path' );
 const readline = require( 'readline' );
-const { sep, posix } = require( 'path' );
 
 /**
  * For all directories passed as an argument, all `@ckeditor/ckeditor5-*` and `ckeditor5` dependencies (with the exception of `-dev`,
  * `-inspector`, `-react`, `-vue` and `-angular`) will be updated to the latest version. If `commit: true` is added, changes
  * will be committed as well.
  *
- * See https://github.com/cksource/ckeditor5-internal/issues/1123
- *
- * @param {Array<Object>} pathsToUpdate Array of objects, where each object needs to have `path` value with an absolute path to the
+ * @param {Object} options
+ * @param {String} options.version Target version, to which all of the eligible dependencies will be updated to.
+ * @param {Array<Object>} options.packages Array of objects, where each object needs to have `path` value with an absolute path to the
  * repository that is to be updated, as well as optional `commit` flag, that when set to true, will commit the changes from that path.
- * @param {Boolean} dryRun Prevents the script from committing or changing anything, and instead shows list of files that would be
+ * @param {Boolean} options.dryRun Prevents the script from committing or changing anything, and instead shows list of files that would be
  * changed.
  */
-module.exports = function updatePackageVersions( pathsToUpdate, dryRun ) {
+module.exports = function updatePackageVersions( options ) {
 	const totalResult = { found: 0, updated: 0, toCommit: 0, differences: [] };
 	const pathsToCommit = [];
 
 	console.log( '\n📍 ' + chalk.blue( 'Updating CKEditor 5 dependencies...\n' ) );
 
-	for ( const pathToUpdate of pathsToUpdate ) {
-		const path = pathToUpdate.path.split( sep ).join( posix.sep );
+	for ( const pathToUpdate of options.packages ) {
+		const path = pathToUpdate.path.split( /[/\\]/ ).join( posix.sep );
 
-		console.log( `Looking for package.json files in '${ path }'...` );
+		console.log( `Looking for packages in '${ chalk.underline( path ) }'...` );
 
-		const result = updateDirectory( path, dryRun );
+		const result = updateDirectory( options.version, path, options.dryRun );
 
 		totalResult.found += result.found;
 		totalResult.updated += result.updated;
@@ -56,11 +56,11 @@ module.exports = function updatePackageVersions( pathsToUpdate, dryRun ) {
 		}
 	}
 
-	if ( dryRun ) {
+	if ( options.dryRun ) {
 		console.log( `⚠️ ${ chalk.yellow( 'DRY RUN mode' ) } ⚠️` );
-		console.log( chalk.yellow( `${ chalk.bold( 'Any key' ) } - display next file diff` ) );
-		console.log( chalk.yellow( `      ${ chalk.bold( 'A' ) } - display diff from all files` ) );
-		console.log( chalk.yellow( `      ${ chalk.bold( 'Q' ) } - exit` ) );
+		console.log( chalk.yellow( `${ chalk.bold( 'Enter' ) } / ${ chalk.bold( 'Space' ) } - Display next file diff` ) );
+		console.log( chalk.yellow( `            ${ chalk.bold( 'A' ) } - Display diff from all files` ) );
+		console.log( chalk.yellow( `      ${ chalk.bold( 'Esc' ) } / ${ chalk.bold( 'Q' ) } - Exit` ) );
 
 		if ( !totalResult.differences.length ) {
 			console.log( chalk.yellow( 'The script has not changed any files.' ) );
@@ -71,12 +71,31 @@ module.exports = function updatePackageVersions( pathsToUpdate, dryRun ) {
 		process.stdin.setRawMode( true );
 
 		process.stdin.on( 'keypress', ( str, key ) => {
-			if ( key.name === 'q' ) {
-				console.log( chalk.yellow( 'Manual exit.' ) );
-				process.exit();
+			const inputs = {
+				next: [ 'space', 'return' /* 'return' means enter */ ],
+				all: [ 'a' ],
+				exit: [ 'q', 'escape' ]
+			};
+
+			if ( inputs.next.includes( key.name ) ) {
+				console.log( chalk.yellow( 'Displaying all files.' ) );
+
+				printNextFile( totalResult.differences );
+
+				if ( !totalResult.differences.length ) {
+					console.log( chalk.yellow( 'No more files.' ) );
+
+					process.exit();
+				} else {
+					console.log( [
+						chalk.yellow( `${ chalk.bold( 'Enter' ) } / ${ chalk.bold( 'Space' ) } - Next` ),
+						chalk.yellow( `${ chalk.bold( 'A' ) } - All` ),
+						chalk.yellow( `${ chalk.bold( 'Esc' ) } / ${ chalk.bold( 'Q' ) } - Exit` )
+					].join( '     ' ) );
+				}
 			}
 
-			if ( key.name === 'a' ) {
+			if ( inputs.all.includes( key.name ) ) {
 				console.log( chalk.yellow( 'Displaying all files.' ) );
 
 				while ( totalResult.differences.length ) {
@@ -86,14 +105,11 @@ module.exports = function updatePackageVersions( pathsToUpdate, dryRun ) {
 				process.exit();
 			}
 
-			printNextFile( totalResult.differences );
+			if ( inputs.exit.includes( key.name ) ) {
+				console.log( chalk.yellow( 'Manual exit.' ) );
 
-			if ( !totalResult.differences.length ) {
-				console.log( chalk.yellow( 'No more files.' ) );
 				process.exit();
 			}
-
-			console.log( chalk.yellow( 'Any key - Next | A - All | Q - Exit' ) );
 		} );
 	} else {
 		if ( pathsToCommit.length ) {
@@ -127,12 +143,13 @@ module.exports = function updatePackageVersions( pathsToUpdate, dryRun ) {
  * `-angular`) in the specified directory to the latest version. Latest version is taken from the `version` property from the root of the
  * `package.json` file, since that value should already have been bumped at this point of release process.
  *
+ * @param {String} version Target version, to which all of the eligible dependencies will be updated to.
  * @param {String} pathToUpdate Directory containing files to update.
  * @param {Boolean} dryRun If set to true, diff of changes that would be made is calculated, and included in the returned object. Without
  * this flag, file is updated normally.
  * @returns {UpdateResult}
  */
-function updateDirectory( pathToUpdate, dryRun ) {
+function updateDirectory( version, pathToUpdate, dryRun ) {
 	const globPattern = pathToUpdate + '/*/package.json';
 	const packageJsonArray = glob.sync( globPattern );
 
@@ -147,8 +164,8 @@ function updateDirectory( pathToUpdate, dryRun ) {
 		const currentFileData = fs.readFileSync( file, 'utf-8' );
 		const parsedData = JSON.parse( currentFileData );
 
-		updateObjectProperty( parsedData, 'dependencies' );
-		updateObjectProperty( parsedData, 'devDependencies' );
+		updateObjectProperty( parsedData, 'dependencies', version );
+		updateObjectProperty( parsedData, 'devDependencies', version );
 
 		const newFileData = JSON.stringify( parsedData, null, 2 ) + '\n';
 
@@ -175,26 +192,26 @@ function updateDirectory( pathToUpdate, dryRun ) {
  *
  * @param {Object} parsedPkgJson Object to update.
  * @param {String} propertyName Name of the property to update.
+ * @param {String} version Target version, to which all of the eligible dependencies will be updated to.
  */
-function updateObjectProperty( parsedPkgJson, propertyName ) {
-	const version = parsedPkgJson.version;
-	const regex = /^@ckeditor\/ckeditor5-([a-z]+)|^ckeditor5$/;
-	const exceptions = [
-		'dev',
-		'inspector',
-		'react',
-		'vue',
-		'angular'
+function updateObjectProperty( parsedPkgJson, propertyName, version ) {
+	const CKEditor5Pattern = /^@ckeditor\/ckeditor5-(.*)|^ckeditor5$/;
+	const patternsToSkip = [
+		/^@ckeditor\/ckeditor5-dev$/,
+		/^@ckeditor\/ckeditor5-dev-.*/,
+		'@ckeditor/ckeditor5-angular',
+		'@ckeditor/ckeditor5-react',
+		'@ckeditor/ckeditor5-vue',
+		'@ckeditor/ckeditor5-inspector'
 	];
 
 	for ( const dependency in parsedPkgJson[ propertyName ] ) {
-		const match = dependency.match( regex );
+		const match = dependency.match( CKEditor5Pattern );
+		const shouldSkip = patternsToSkip.some( pattern => dependency.match( pattern ) );
 
-		if ( !match || exceptions.includes( match[ 1 ] ) ) {
-			continue;
+		if ( match && !shouldSkip ) {
+			parsedPkgJson[ propertyName ][ dependency ] = `^${ version }`;
 		}
-
-		parsedPkgJson[ propertyName ][ dependency ] = `^${ version }`;
 	}
 }
 
@@ -216,9 +233,7 @@ function formatDiff( diff ) {
 		const next = diff[ i + 1 ];
 		const currentLines = current.value.split( '\n' );
 
-		const validReplaceSequence = current.removed && next.added && regex.test( current.value ) && regex.test( next.value );
-
-		if ( validReplaceSequence ) {
+		if ( shouldFormatDifference( current, next, regex ) ) {
 			// Adding removals followed by additions (formatted).
 			formattedDiff.push( [
 				current.value.split( regex )[ 0 ],
@@ -263,11 +278,40 @@ function printNextFile( differences ) {
 	const nextDiff = differences.shift();
 	const formattedDiff = formatDiff( nextDiff.content );
 
-	console.log( chalk.underline( nextDiff.file ) );
+	console.log( `File: '${ chalk.underline( nextDiff.file ) }'` );
 
 	for ( const line of formattedDiff ) {
 		console.log( line );
 	}
+}
+
+/**
+ * The difference between passed `currentDiff` and `nextDiff` objects should be formatted only if the `currentDiff` removed a line, then
+ * `nextDiff` added a new one, and both updated a CKEditor 5 package.
+ *
+ * @param {Object} currentDiff
+ * @param {Object} nextDiff
+ * @param {String} regex
+ * @returns {Boolean}
+ */
+function shouldFormatDifference( currentDiff, nextDiff, regex ) {
+	if ( !currentDiff.removed ) {
+		return false;
+	}
+
+	if ( !nextDiff.added ) {
+		return false;
+	}
+
+	if ( !regex.test( currentDiff.value ) ) {
+		return false;
+	}
+
+	if ( !regex.test( nextDiff.value ) ) {
+		return false;
+	}
+
+	return true;
 }
 
 /**
