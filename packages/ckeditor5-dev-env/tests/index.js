@@ -38,7 +38,7 @@ describe( 'dev-env/index', () => {
 				generateChangelogForSinglePackage: sandbox.stub(),
 				generateChangelogForMonoRepository: sandbox.stub(),
 				bumpVersions: sandbox.stub(),
-				updatePackageVersions: sandbox.stub()
+				updateCKEditor5Dependencies: sandbox.stub()
 			}
 		};
 
@@ -52,7 +52,7 @@ describe( 'dev-env/index', () => {
 		mockery.registerMock( './release-tools/tasks/generatechangelogforsinglepackage', releaseTools.generateChangelogForSinglePackage );
 		mockery.registerMock( './release-tools/tasks/releasesubrepositories', releaseTools.releaseSubRepositories );
 		mockery.registerMock( './release-tools/tasks/generatechangelogformonorepository', releaseTools.generateChangelogForMonoRepository );
-		mockery.registerMock( './release-tools/tasks/update-package-versions', releaseTools.updatePackageVersions );
+		mockery.registerMock( './release-tools/tasks/update-ckeditor5-dependencies', releaseTools.updateCKEditor5Dependencies );
 
 		tasks = proxyquire( '../lib/index', {
 			'@ckeditor/ckeditor5-dev-utils': {
@@ -135,11 +135,11 @@ describe( 'dev-env/index', () => {
 		} );
 	} );
 
-	describe( 'updatePackageVersions()', () => {
+	describe( 'updateCKEditor5Dependencies()', () => {
 		it( 'should update versions in package.json files', () => {
-			stubs.release.updatePackageVersions.returns( 'OK.' );
+			stubs.release.updateCKEditor5Dependencies.returns( 'OK.' );
 
-			const output = tasks.updatePackageVersions(
+			const output = tasks.updateCKEditor5Dependencies(
 				[
 					{ path: 'foo/packages', commit: true },
 					{ path: 'bar/packages', commit: false }
@@ -147,8 +147,8 @@ describe( 'dev-env/index', () => {
 				process.argv.includes( '--dry-run' )
 			);
 
-			sinon.assert.calledOnce( stubs.release.updatePackageVersions );
-			sinon.assert.alwaysCalledWithExactly( stubs.release.updatePackageVersions,
+			sinon.assert.calledOnce( stubs.release.updateCKEditor5Dependencies );
+			sinon.assert.alwaysCalledWithExactly( stubs.release.updateCKEditor5Dependencies,
 				[
 					{ path: 'foo/packages', commit: true },
 					{ path: 'bar/packages', commit: false }
