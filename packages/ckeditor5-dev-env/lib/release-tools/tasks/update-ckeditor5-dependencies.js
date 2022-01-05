@@ -84,9 +84,9 @@ module.exports = function updateCKEditor5Dependencies( options ) {
 					cwd: path
 				};
 
-				console.log( `${ chalk.green( '+' ) } ${ path }` );
+				console.log( `${ chalk.green( '+' ) } '${ chalk.underline( path ) }'` );
 
-				execSync( `git add ${ path }`, execOptions );
+				execSync( `git add ${ path }/*/package.json`, execOptions );
 				execSync( 'git commit -m "Internal: Updated CKEditor 5 packages to the latest version. [skip ci]"', execOptions );
 			}
 
@@ -258,6 +258,10 @@ function printNextFile( differences ) {
  * @returns {Boolean}
  */
 function shouldFormatDifference( currentDiff, nextDiff, regex ) {
+	if ( !nextDiff ) {
+		return false;
+	}
+
 	if ( !currentDiff.removed ) {
 		return false;
 	}
@@ -295,8 +299,6 @@ function shouldFormatDifference( currentDiff, nextDiff, regex ) {
 function processInput( chunk, key ) {
 	// Differences array should be attached to the function itself.
 	const differences = processInput.differences;
-
-	// console.log( differences[ 0 ] );
 
 	const inputs = {
 		next: [ 'space', 'return' /* 'return' means enter */ ],

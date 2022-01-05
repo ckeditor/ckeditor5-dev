@@ -7,6 +7,7 @@
 
 const { expect } = require( 'chai' );
 const fs = require( 'fs' );
+const path = require( 'path' );
 const mockery = require( 'mockery' );
 const mockFs = require( 'mock-fs' );
 const sinon = require( 'sinon' );
@@ -16,8 +17,6 @@ describe( 'updateCKEditor5Dependencies()', () => {
 	let stubs, updateCKEditor5Dependencies;
 
 	beforeEach( () => {
-		updateCKEditor5Dependencies = require( '../../../lib/release-tools/tasks/update-ckeditor5-dependencies' );
-
 		mockery.enable( {
 			useCleanCache: true,
 			warnOnReplace: false,
@@ -41,6 +40,8 @@ describe( 'updateCKEditor5Dependencies()', () => {
 
 		mockery.registerMock( 'readline', stubs.readline );
 		mockery.registerMock( 'child_process', stubs.childProcess );
+
+		updateCKEditor5Dependencies = require( '../../../lib/release-tools/tasks/update-ckeditor5-dependencies' );
 	} );
 
 	afterEach( () => {
@@ -267,7 +268,6 @@ describe( 'updateCKEditor5Dependencies()', () => {
 		expect( updatedPackageJsonBar ).to.deep.equal( expectedPackageJson );
 	} );
 
-	/*
 	it( 'commits modified directory if it has the `commit` flag', () => {
 		const packageJson = JSON.stringify( {
 			'name': 'foo',
@@ -308,19 +308,20 @@ describe( 'updateCKEditor5Dependencies()', () => {
 			}
 		}, null, 2 ) + '\n';
 
-		const path = process.cwd() + '/packages/ckeditor5-foo';
+		const dirPath = path.join( process.cwd(), 'packages' )
+			.split( /[/\\]/ )
+			.join( path.posix.sep );
 
 		expect( updatedPackageJson ).to.deep.equal( expectedPackageJson );
 		expect( stubs.childProcess.execSync.firstCall.args ).to.deep.equal( [
-			`git add ${ path }`,
-			{ stdio: 'inherit', cwd: path }
+			`git add ${ dirPath }/*/package.json`,
+			{ stdio: 'inherit', cwd: dirPath }
 		] );
 		expect( stubs.childProcess.execSync.secondCall.args ).to.deep.equal( [
 			'git commit -m "Internal: Updated CKEditor 5 packages to the latest version. [skip ci]"',
-			{ stdio: 'inherit', cwd: path }
+			{ stdio: 'inherit', cwd: dirPath }
 		] );
 	} );
-	*/
 
 	describe( 'does not update exceptions:', () => {
 		it( '@ckeditor/ckeditor5-dev', () => {
@@ -733,8 +734,7 @@ describe( 'updateCKEditor5Dependencies()', () => {
 			consoleStub.restore();
 			processExitStub.restore();
 
-			callback = stubs.process.stdin.on.lastCall.args[ 1 ];
-			callback.differences = undefined;
+			callback = stubs.process.stdin.on.firstCall.args[ 1 ];
 		} );
 
 		it( 'is a function', () => {
@@ -936,46 +936,184 @@ describe( 'updateCKEditor5Dependencies()', () => {
 			expect( processExitStub.called ).to.equal( false );
 		} );
 
-		describe( 'shouldFormatDifference()', () => {
-			it( 'merges only valid sequences (case 1)', () => {
-				callback.differences = [ {
-					file: 'foo.js',
-					content: [
-						{ value: '"ckeditor5": "^1.0.0"\n', removed: true },
-						{ value: '"ckeditor5-core": "^2.0.0"\n' }
-					]
-				} ];
+		it( 'cuts out long streaks of unchanged lines', () => {
+			const string = '{\n' +
+			'  "keywords": [\n' +
+			'    "ckeditor 1",\n' +
+			'    "ckeditor 2",\n' +
+			'    "ckeditor 3",\n' +
+			'    "ckeditor 4",\n' +
+			'    "ckeditor 5",\n' +
+			'    "ckeditor 6",\n' +
+			'    "ckeditor 7",\n' +
+			'    "ckeditor 8",\n' +
+			'    "ckeditor 9",\n' +
+			'    "ckeditor 10",\n' +
+			'    "ckeditor 11",\n' +
+			'    "ckeditor 12"\n' +
+			'  ],\n' +
+			'}\n';
 
-				const consoleStub = sinon.stub( console, 'log' );
-				const processExitStub = sinon.stub( process, 'exit' );
+			callback.differences = [ {
+				file: 'foo.js',
+				content: [
+					{ value: string }
+				]
+			} ];
 
-				callback( null, { name: 'a' } );
+			const consoleStub = sinon.stub( console, 'log' );
+			const processExitStub = sinon.stub( process, 'exit' );
 
-				consoleStub.restore();
-				processExitStub.restore();
+			callback( null, { name: 'a' } );
 
-				[
-					'Displaying all files.',
-					'File: \'foo.js\'',
-					'"ckeditor5": "^1.0.0"',
-					'"ckeditor5-core": "^2.0.0"',
-					''
-				].forEach( ( string, index ) => {
-					expect( stripAnsi( consoleStub.getCall( index ).args[ 0 ] ) ).to.equal( string );
-				} );
+			consoleStub.restore();
+			processExitStub.restore();
 
-				expect( processExitStub.called ).to.equal( true );
+			[
+				'Displaying all files.',
+				'File: \'foo.js\'',
+				'{',
+				'  "keywords": [',
+				'    "ckeditor 1",',
+				'[...10 lines without changes...]',
+				'    "ckeditor 12"',
+				'  ],',
+				'}',
+				''
+			].forEach( ( string, index ) => {
+				expect( stripAnsi( consoleStub.getCall( index ).args[ 0 ] ) ).to.equal( string );
 			} );
 
-			it( 'merges only valid sequences (case 2)', () => {
-				// Test to cover:
-				// if ( !regex.test( currentDiff.value ) ) {
+			expect( processExitStub.called ).to.equal( true );
+		} );
+
+		it( 'does not trim single additions', () => {
+			callback.differences = [ {
+				file: 'foo.js',
+				content: [
+					{ value: '{\n  "keywords": [\n    "ckeditor",\n' },
+					{ value: '    "ckeditor5",\n', added: true },
+					{ value: '    "ckeditor 5"\n  ],\n}\n' }
+				]
+			} ];
+
+			const consoleStub = sinon.stub( console, 'log' );
+			const processExitStub = sinon.stub( process, 'exit' );
+
+			callback( null, { name: 'a' } );
+
+			consoleStub.restore();
+			processExitStub.restore();
+
+			[
+				'Displaying all files.',
+				'File: \'foo.js\'',
+				'{',
+				'  "keywords": [',
+				'    "ckeditor",',
+				'    "ckeditor5",',
+				'    "ckeditor 5"',
+				'  ],',
+				'}',
+				''
+			].forEach( ( string, index ) => {
+				expect( stripAnsi( consoleStub.getCall( index ).args[ 0 ] ) ).to.equal( string );
 			} );
 
-			it( 'merges only valid sequences (case 3)', () => {
-				// Test to cover:
-				// if ( !regex.test( nextDiff.value ) ) {
+			expect( processExitStub.called ).to.equal( true );
+		} );
+
+		it( 'merges only valid sequences (case 1)', () => {
+			callback.differences = [ {
+				file: 'foo.js',
+				content: [
+					{ value: '"ckeditor5": "^1.0.0"\n', removed: true },
+					{ value: '"ckeditor5-core": "^2.0.0"\n' }
+				]
+			} ];
+
+			const consoleStub = sinon.stub( console, 'log' );
+			const processExitStub = sinon.stub( process, 'exit' );
+
+			callback( null, { name: 'a' } );
+
+			consoleStub.restore();
+			processExitStub.restore();
+
+			[
+				'Displaying all files.',
+				'File: \'foo.js\'',
+				'"ckeditor5": "^1.0.0"',
+				'"ckeditor5-core": "^2.0.0"',
+				''
+			].forEach( ( string, index ) => {
+				expect( stripAnsi( consoleStub.getCall( index ).args[ 0 ] ) ).to.equal( string );
 			} );
+
+			expect( processExitStub.called ).to.equal( true );
+		} );
+
+		it( 'merges only valid sequences (case 2)', () => {
+			callback.differences = [ {
+				file: 'foo.js',
+				content: [
+					{ value: '"propertyFoo": [', removed: true },
+					{ value: '"propertyBar": [', added: true },
+					{ value: '\n  "string"\n]\n' }
+				]
+			} ];
+
+			const consoleStub = sinon.stub( console, 'log' );
+			const processExitStub = sinon.stub( process, 'exit' );
+
+			callback( null, { name: 'a' } );
+
+			consoleStub.restore();
+			processExitStub.restore();
+
+			[
+				'Displaying all files.',
+				'File: \'foo.js\'',
+				'"propertyFoo": ["propertyBar": [',
+				'  "string"',
+				']',
+				''
+			].forEach( ( string, index ) => {
+				expect( stripAnsi( consoleStub.getCall( index ).args[ 0 ] ) ).to.equal( string );
+			} );
+
+			expect( processExitStub.called ).to.equal( true );
+		} );
+
+		it( 'merges only valid sequences (case 3)', () => {
+			callback.differences = [ {
+				file: 'foo.js',
+				content: [
+					{ value: '"propertyFoo": "foo",', removed: true },
+					{ value: '"propertyFoo": [\n  "string"\n]', added: true }
+				]
+			} ];
+
+			const consoleStub = sinon.stub( console, 'log' );
+			const processExitStub = sinon.stub( process, 'exit' );
+
+			callback( null, { name: 'a' } );
+
+			consoleStub.restore();
+			processExitStub.restore();
+
+			[
+				'Displaying all files.',
+				'File: \'foo.js\'',
+				'"propertyFoo": "foo","propertyFoo": [',
+				'  "string"',
+				']'
+			].forEach( ( string, index ) => {
+				expect( stripAnsi( consoleStub.getCall( index ).args[ 0 ] ) ).to.equal( string );
+			} );
+
+			expect( processExitStub.called ).to.equal( true );
 		} );
 	} );
 } );
+
