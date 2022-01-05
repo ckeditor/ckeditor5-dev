@@ -45,6 +45,7 @@ describe( 'updateCKEditor5Dependencies()', () => {
 	} );
 
 	afterEach( () => {
+		mockery.deregisterAll();
 		mockery.disable();
 		mockFs.restore();
 		sinon.restore();
