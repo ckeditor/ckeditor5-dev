@@ -15,7 +15,7 @@ module.exports = {
 	},
 
 	bumpYear( ...args ) {
-		return require( './release-tools/tasks/bump-year' )( ...args );
+		return require( './tasks/bump-year' )( ...args );
 	},
 
 	async generateChangelogForSinglePackage( ...args ) {

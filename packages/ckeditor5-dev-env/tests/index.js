@@ -54,7 +54,7 @@ describe( 'dev-env/index', () => {
 		mockery.registerMock( './release-tools/tasks/releasesubrepositories', releaseTools.releaseSubRepositories );
 		mockery.registerMock( './release-tools/tasks/generatechangelogformonorepository', releaseTools.generateChangelogForMonoRepository );
 		mockery.registerMock( './release-tools/tasks/update-ckeditor5-dependencies', releaseTools.updateCKEditor5Dependencies );
-		mockery.registerMock( './release-tools/tasks/bump-year', releaseTools.bumpYear );
+		mockery.registerMock( './tasks/bump-year', releaseTools.bumpYear );
 
 		tasks = proxyquire( '../lib/index', {
 			'@ckeditor/ckeditor5-dev-utils': {
