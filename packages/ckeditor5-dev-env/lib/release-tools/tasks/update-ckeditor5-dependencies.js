@@ -1,29 +1,50 @@
 /**
- * @license Copyright (c) 2003-2021, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2022, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
 'use strict';
 
-const chalk = require( 'chalk' );
-const { diffLines: diff } = require( 'diff' );
-const { execSync } = require( 'child_process' );
 const fs = require( 'fs' );
-const glob = require( 'glob' );
-const { posix } = require( 'path' );
+const path = require( 'path' );
 const readline = require( 'readline' );
+const { execSync } = require( 'child_process' );
+const chalk = require( 'chalk' );
+const glob = require( 'glob' );
+const { diffLines: diff } = require( 'diff' );
+
+// The pattern defines CKEditor 5 dependencies.
+const CKEDITOR5_DEPENDENCY_PATTERN = /^@ckeditor\/ckeditor5-(.*)|^ckeditor5$/;
+
+// Packages that match the CKEditor 5 pattern but should not be updated because they aren't a dependency of the project.
+const PATTERNS_TO_SKIP = [
+	/^@ckeditor\/ckeditor5-dev$/,
+	/^@ckeditor\/ckeditor5-dev-.*/,
+	'@ckeditor/ckeditor5-angular',
+	'@ckeditor/ckeditor5-react',
+	'@ckeditor/ckeditor5-vue',
+	'@ckeditor/ckeditor5-inspector'
+];
 
 /**
- * For all directories passed as an argument, all `@ckeditor/ckeditor5-*` and `ckeditor5` dependencies (with the exception of `-dev`,
- * `-inspector`, `-react`, `-vue` and `-angular`) will be updated to the latest version. If `commit: true` is added, changes
- * will be committed as well.
+ * The purpose of this script is to update a version of `ckeditor5` and `@ckeditor/ckeditor5-*` dependencies to
+ * a version specified in `options.version`.
+ *
+ * The script can commit changes for all packages in specified directories. See the `CKEditor5EntryItem` interface.
+ *
+ * If you want to see what kind of changes the script does, set the `dryRun` flag to `true`. Instead of committing anything, the script
+ * will display changes on the screen.
+ *
+ * The following packages will not be touched:
+ * * Integrations (@ckeditor/ckeditor5-@(vue|angular|react)
+ * * Dev-tools (@ckeditor/ckeditor5-dev-*)
+ * * Inspector (@ckeditor/ckeditor5-inspector)
  *
  * @param {Object} options
- * @param {String} options.version Target version, to which all of the eligible dependencies will be updated to.
- * @param {Array<Object>} options.packages Array of objects, where each object needs to have `path` value with an absolute path to the
- * repository that is to be updated, as well as optional `commit` flag, that when set to true, will commit the changes from that path.
- * @param {Boolean} options.dryRun Prevents the script from committing or changing anything, and instead shows list of files that would be
- * changed.
+ * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
+ * @param {String} options.version Target version, all of the eligible dependencies will be updated to.
+ * @param {Array.<CKEditor5EntryItem>} options.packages An array containing paths where to look for packages to update.
+ * @param {Boolean} [options.dryRun=false] If set on true, all changes will be printed on the screen instead of committed.
  */
 module.exports = function updateCKEditor5Dependencies( options ) {
 	const totalResult = { found: 0, updated: 0, toCommit: 0, differences: [] };
@@ -31,33 +52,37 @@ module.exports = function updateCKEditor5Dependencies( options ) {
 
 	console.log( '\n📍 ' + chalk.blue( 'Updating CKEditor 5 dependencies...\n' ) );
 
-	for ( const pathToUpdate of options.packages ) {
-		const path = pathToUpdate.path.split( /[/\\]/ ).join( posix.sep );
+	if ( options.dryRun ) {
+		console.log( `⚠️  ${ chalk.yellow( 'DRY RUN mode' ) } ⚠️` );
+		console.log( chalk.yellow( 'The script WILL NOT modify anything but instead show differences that would be made.\n' ) );
+	}
 
-		console.log( `Looking for packages in '${ chalk.underline( path ) }'...` );
+	for ( const entryItem of options.packages ) {
+		console.log( `Looking for packages in the '${ chalk.underline( entryItem.directory ) }/' directory...` );
 
-		const result = updateDirectory( options.version, path, options.dryRun );
+		// An absolute path to a directory where to look for packages.
+		const absolutePath = path.join( options.cwd, entryItem.directory );
+		const results = updatePackagesInDirectory( options.version, absolutePath, options.dryRun );
 
-		totalResult.found += result.found;
-		totalResult.updated += result.updated;
-		totalResult.differences.push( ...result.differences );
+		totalResult.found += results.found;
+		totalResult.updated += results.updated;
+		totalResult.differences.push( ...results.differences );
 
-		if ( !result.found ) {
+		if ( !results.found ) {
 			console.log( 'No files were found.\n' );
-		} else if ( !result.updated ) {
-			console.log( `${ chalk.bold( result.found ) } files were found, but none needed to be updated.\n` );
+		} else if ( !results.updated ) {
+			console.log( `${ chalk.bold( results.found ) } files were found, but none needed to be updated.\n` );
 		} else {
-			console.log( `Out of ${ chalk.bold( result.found ) } files found, ${ chalk.bold( result.updated ) } were updated.\n` );
+			console.log( `Out of ${ chalk.bold( results.found ) } files found, ${ chalk.bold( results.updated ) } were updated.\n` );
 
-			if ( pathToUpdate.commit ) {
-				totalResult.toCommit += result.updated;
-				pathsToCommit.push( path );
+			if ( entryItem.commit ) {
+				totalResult.toCommit += results.updated;
+				pathsToCommit.push( absolutePath );
 			}
 		}
 	}
 
 	if ( options.dryRun ) {
-		console.log( `⚠️ ${ chalk.yellow( 'DRY RUN mode' ) } ⚠️` );
 		console.log( chalk.yellow( `${ chalk.bold( 'Enter' ) } / ${ chalk.bold( 'Space' ) } - Display next file diff` ) );
 		console.log( chalk.yellow( `            ${ chalk.bold( 'A' ) } - Display diff from all files` ) );
 		console.log( chalk.yellow( `      ${ chalk.bold( 'Esc' ) } / ${ chalk.bold( 'Q' ) } - Exit` ) );
@@ -78,17 +103,21 @@ module.exports = function updateCKEditor5Dependencies( options ) {
 		if ( pathsToCommit.length ) {
 			console.log( '\n📍 ' + chalk.blue( 'Committing the changes...\n' ) );
 
-			for ( const path of pathsToCommit ) {
-				const execOptions = {
+			// First, add changes from specified paths to stage...
+			for ( const absoluteDirectoryPath of pathsToCommit ) {
+				console.log( `${ chalk.green( '+' ) } '${ chalk.underline( absoluteDirectoryPath ) }'` );
+
+				execSync( 'git add "*/package.json"', {
 					stdio: 'inherit',
-					cwd: path
-				};
-
-				console.log( `${ chalk.green( '+' ) } '${ chalk.underline( path ) }'` );
-
-				execSync( `git add ${ path }/*/package.json`, execOptions );
-				execSync( 'git commit -m "Internal: Updated CKEditor 5 packages to the latest version. [skip ci]"', execOptions );
+					cwd: absoluteDirectoryPath
+				} );
 			}
+
+			// ...then, commit all changes in a single commit.
+			execSync( 'git commit -m "Internal: Updated CKEditor 5 packages to the latest version. [skip ci]"', {
+				stdio: 'inherit',
+				cwd: options.cwd
+			} );
 
 			console.log( '\n📍 ' + chalk.green( `Successfully committed ${ totalResult.toCommit } files!\n` ) );
 		}
@@ -102,78 +131,77 @@ module.exports = function updateCKEditor5Dependencies( options ) {
 };
 
 /**
- * Updates `@ckeditor/ckeditor5-*` and `ckeditor5` dependencies (with the exception of `-dev`, `-inspector`, `-react`, `-vue` and
- * `-angular`) in the specified directory to the latest version. Latest version is taken from the `version` property from the root of the
- * `package.json` file, since that value should already have been bumped at this point of release process.
+ * Updates `@ckeditor/ckeditor5-*` and `ckeditor5` dependencies. The following packages will be ignored:
+ * * Integrations (@ckeditor/ckeditor5-@(vue|angular|react)
+ * * Dev-tools (@ckeditor/ckeditor5-dev-*)
+ * * Inspector (@ckeditor/ckeditor5-inspector)
  *
- * @param {String} version Target version, to which all of the eligible dependencies will be updated to.
- * @param {String} pathToUpdate Directory containing files to update.
- * @param {Boolean} dryRun If set to true, diff of changes that would be made is calculated, and included in the returned object. Without
- * this flag, file is updated normally.
+ * @param {String} version Target version, all of the eligible dependencies will be updated to.
+ * @param {String} packagesDirectory Directory containing packages to update.
+ * @param {Boolean} dryRun If set to true, diff of changes that would be made is calculated, and included in the returned object.
  * @returns {UpdateResult}
  */
-function updateDirectory( version, pathToUpdate, dryRun ) {
-	const globPattern = pathToUpdate + '/*/package.json';
-	const packageJsonArray = glob.sync( globPattern );
-
-	if ( !packageJsonArray.length ) {
-		return { found: 0, updated: 0, differences: [] };
-	}
+function updatePackagesInDirectory( version, packagesDirectory, dryRun ) {
+	const packageJsonArray = glob.sync( '*/package.json', {
+		cwd: packagesDirectory,
+		absolute: true
+	} );
 
 	let updatedFiles = 0;
 	const differences = [];
 
-	for ( const file of packageJsonArray ) {
-		const currentFileData = fs.readFileSync( file, 'utf-8' );
-		const parsedData = JSON.parse( currentFileData );
+	for ( const packageJsonPath of packageJsonArray ) {
+		const currentContent = fs.readFileSync( packageJsonPath, 'utf-8' );
+		const contentAsJson = JSON.parse( currentContent );
 
-		updateObjectProperty( parsedData, 'dependencies', version );
-		updateObjectProperty( parsedData, 'devDependencies', version );
+		updateObjectProperty( contentAsJson, 'dependencies', version );
+		updateObjectProperty( contentAsJson, 'devDependencies', version );
 
-		const newFileData = JSON.stringify( parsedData, null, 2 ) + '\n';
+		const newContent = JSON.stringify( contentAsJson, null, 2 ) + '\n';
 
-		if ( currentFileData !== newFileData ) {
-			updatedFiles++;
-
-			if ( dryRun ) {
-				differences.push( {
-					file,
-					content: diff( currentFileData, newFileData, { newlineIsToken: true } )
-				} );
-			} else {
-				fs.writeFileSync( file, newFileData, 'utf-8' );
-			}
+		// No changes.
+		if ( currentContent === newContent ) {
+			continue;
 		}
+
+		if ( dryRun ) {
+			differences.push( {
+				file: packageJsonPath,
+				content: diff( currentContent, newContent, { newlineIsToken: true } )
+			} );
+		} else {
+			fs.writeFileSync( packageJsonPath, newContent, 'utf-8' );
+		}
+
+		updatedFiles++;
 	}
 
-	return { found: packageJsonArray.length, updated: updatedFiles, differences };
+	return {
+		found: packageJsonArray.length,
+		updated: updatedFiles,
+		differences
+	};
 }
 
 /**
- * Updates the CKEditor 5 dependencies, (with the exception of `-dev`, `-inspector`, `-react`, `-vue` and `-angular`), in the provided
- * `package.json` file.
+ * Updates the CKEditor 5 dependencies.
  *
- * @param {Object} parsedPkgJson Object to update.
- * @param {String} propertyName Name of the property to update.
- * @param {String} version Target version, to which all of the eligible dependencies will be updated to.
+ * @param {Object} packageJson `package.json` as JSON object to update.
+ * @param {'dependencies'|'devDependencies'} propertyName Name of the property to update.
+ * @param {String} version Target version, all of the eligible dependencies will be updated to.
  */
-function updateObjectProperty( parsedPkgJson, propertyName, version ) {
-	const CKEditor5Pattern = /^@ckeditor\/ckeditor5-(.*)|^ckeditor5$/;
-	const patternsToSkip = [
-		/^@ckeditor\/ckeditor5-dev$/,
-		/^@ckeditor\/ckeditor5-dev-.*/,
-		'@ckeditor/ckeditor5-angular',
-		'@ckeditor/ckeditor5-react',
-		'@ckeditor/ckeditor5-vue',
-		'@ckeditor/ckeditor5-inspector'
-	];
+function updateObjectProperty( packageJson, propertyName, version ) {
+	// "dependencies" or "devDependencies" are not specified. There is nothing to update.
+	if ( !packageJson[ propertyName ] ) {
+		return;
+	}
 
-	for ( const dependency in parsedPkgJson[ propertyName ] ) {
-		const match = dependency.match( CKEditor5Pattern );
-		const shouldSkip = patternsToSkip.some( pattern => dependency.match( pattern ) );
+	for ( const packageName of Object.keys( packageJson[ propertyName ] ) ) {
+		const match = packageName.match( CKEDITOR5_DEPENDENCY_PATTERN );
+		const shouldSkip = PATTERNS_TO_SKIP.some( pattern => packageName.match( pattern ) );
 
 		if ( match && !shouldSkip ) {
-			parsedPkgJson[ propertyName ][ dependency ] = `^${ version }`;
+			packageJson[ propertyName ][ packageName ] = `^${ version }`;
 		}
 	}
 }
@@ -183,12 +211,15 @@ function updateObjectProperty( parsedPkgJson, propertyName, version ) {
  * human-readable, line by line changelog of a file, with removals and additions colored. If the file has any longer parts without changes,
  * these will be partially hidden.
  *
- * @param {Array<Object>} diff Array of changes for a single file generated by `diff` library.
- * @returns {Array<String>} Formatted changelog split into single lines.
+ * @param {Array.<Object>} diff Array of changes for a single file generated by `diff` library.
+ * @returns {Array.<String>} Formatted changelog split into single lines.
  */
 function formatDiff( diff ) {
 	const formattedDiff = [];
-	const regex = /(?<=":) (?=")/;
+
+	// Searches for a space in the following expression: `"dependency": "version"`.
+	// It is used for displaying pretty diff.
+	const keyValueSpaceRegexp = /(?<=":) (?=")/;
 
 	for ( let i = 0; i < diff.length; i++ ) {
 		const previous = diff[ i - 1 ];
@@ -196,13 +227,13 @@ function formatDiff( diff ) {
 		const next = diff[ i + 1 ];
 		const currentLines = current.value.split( '\n' );
 
-		if ( shouldFormatDifference( current, next, regex ) ) {
+		if ( shouldFormatDifference( current, next, keyValueSpaceRegexp ) ) {
 			// Adding removals followed by additions (formatted).
 			formattedDiff.push( [
-				current.value.split( regex )[ 0 ],
+				current.value.split( keyValueSpaceRegexp )[ 0 ],
 				' ',
-				chalk.red( current.value.split( regex )[ 1 ] ),
-				chalk.green( next.value.split( regex )[ 1 ] )
+				chalk.red( current.value.split( keyValueSpaceRegexp )[ 1 ] ),
+				chalk.green( next.value.split( keyValueSpaceRegexp )[ 1 ] )
 			].join( '' ) );
 
 			i++;
@@ -234,7 +265,7 @@ function formatDiff( diff ) {
 /**
  * Displays and removes first file changelog from a given array of file changelogs.
  *
- * @param {Array<Object>} differences Array of objects, where each element has `content` value that is an array of strings, and `file`
+ * @param {Array.<Object>} differences Array of objects, where each element has `content` value that is an array of strings, and `file`
  * value that is a string with file name.
  */
 function printNextFile( differences ) {
@@ -347,6 +378,15 @@ function processInput( chunk, key ) {
  * @typedef {Object} UpdateResult
  * @property {Number} found Number of files found.
  * @property {Number} updated Number of files updated.
- * @property {Array<Object>} differences Array of objects, where each object has string `file` containing path to the file, as well as
+ * @property {Array.<Object>} differences Array of objects, where each object has string `file` containing path to the file, as well as
  * array of objects `content` returned by the `diff` library, that describes changes made to each file.
+ */
+
+/**
+ * A definition of a directory where to look for packages.
+ *
+ * @typedef {Object} CKEditor5EntryItem
+ *
+ * @property {String} directory A relative path (to root directory) where to look for packages.
+ * @property {Boolean} [commit=false] Whether changes should be committed.
  */
