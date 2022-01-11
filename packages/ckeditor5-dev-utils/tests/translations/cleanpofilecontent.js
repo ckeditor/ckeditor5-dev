@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2022, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2022, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -14,7 +14,7 @@ describe( 'translations', () => {
 		it( 'cleans po files from personal data and add the special header', () => {
 			const poFileContent =
 // eslint-disable-next-line max-len
-`# Copyright (c) 2003-2022, CKSource - Frederico Knabben. All rights reserved.
+`# Copyright (c) 2003-2022, CKSource Holding sp. z o.o. All rights reserved.
 # Translators:
 # Xuxxx Satxxx <xxxx@gmail.com>, 2017
 msgid ""
@@ -31,7 +31,7 @@ msgstr "URL del enllaz"
 
 			const expectedResult =
 // eslint-disable-next-line max-len
-`# Copyright (c) 2003-2022, CKSource - Frederico Knabben. All rights reserved.
+`# Copyright (c) 2003-2022, CKSource Holding sp. z o.o. All rights reserved.
 #
 #                                     !!! IMPORTANT !!!
 #

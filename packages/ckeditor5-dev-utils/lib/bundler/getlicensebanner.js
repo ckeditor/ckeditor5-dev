@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2022, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2022, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -15,7 +15,7 @@ module.exports = function getLicenseBanner() {
 	/* eslint-disable indent */
 	return (
 `/*!
- * @license Copyright (c) 2003-${ date.getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-${ date.getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */`
 	);
