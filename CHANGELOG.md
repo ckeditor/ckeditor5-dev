@@ -1,9 +1,9 @@
 Changelog
 =========
 
-## [27.4.1](https://github.com/ckeditor/ckeditor5-dev/compare/v27.4.0...v27.4.1) (2022-01-12)
+## [28.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v27.4.0...v28.0.0) (2022-01-12)
 
-Internal changes only (updated dependencies, documentation, etc.).
+This version contains updated copyrights in a license in all source files.
 
 ### Released packages
 
@@ -14,12 +14,12 @@ Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/fra
 
 Other releases:
 
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v27.4.0 => v27.4.1
-* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v27.4.0 => v27.4.1
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v27.4.0 => v27.4.1
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v27.4.0 => v27.4.1
-* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v27.4.0 => v27.4.1
-* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v27.4.0 => v27.4.1
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v27.4.0 => v28.0.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v27.4.0 => v28.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v27.4.0 => v28.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v27.4.0 => v28.0.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v27.4.0 => v28.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v27.4.0 => v28.0.0
 </details>
 
 
