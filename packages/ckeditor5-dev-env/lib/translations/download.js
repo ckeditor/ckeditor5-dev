@@ -82,7 +82,7 @@ module.exports = async function downloadTranslations( config ) {
 		spinner.finish();
 
 		const statusMessage = failedDownloadsForPackage.length ?
-			`❌ Saved ${ savedFiles } "*.po" files. Some requests failed.` :
+			`❌ Saved ${ savedFiles } "*.po" files. ${ failedDownloadsForPackage.length } requests failed.` :
 			`✅ Saved all ${ savedFiles } "*.po" files.`;
 
 		logger.info( ' '.repeat( 3 ) + statusMessage );
@@ -90,11 +90,14 @@ module.exports = async function downloadTranslations( config ) {
 
 	updateFailedDownloads( { cwd: config.cwd, failedDownloads } );
 
-	logger.info( failedDownloads.length ?
-		'Not all translations are saved. See `.transifex-failed-downloads.json` for details.\n' +
-		'Run the script again to fetch only those translations that have failed to download.' :
-		'Saved all translations.'
-	);
+	if ( failedDownloads.length ) {
+		logger.info(
+			'Not all translations are saved. See `.transifex-failed-downloads.json` for details.\n' +
+			'Run the script again to fetch only those translations that have failed to download.'
+		);
+	} else {
+		logger.info( 'Saved all translations.' );
+	}
 };
 
 /**
