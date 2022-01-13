@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2021, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2022, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -100,7 +100,7 @@ describe( 'dev-env/translations/createPotFiles()', () => {
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
 			'/cwd/build/.transifex/ckeditor5-foo/en.pot',
-			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
+			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.
 
 msgctxt "foo_context"
 msgid "foo_id"
@@ -159,7 +159,7 @@ msgstr "foo"
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
 			'/cwd/build/.transifex/ckeditor5-foo/en.pot',
-			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
+			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.
 
 msgctxt "foo_context"
 msgid "foo_id"
@@ -169,7 +169,7 @@ msgstr "foo"
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
 			'/cwd/build/.transifex/ckeditor5-bar/en.pot',
-			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
+			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.
 
 msgctxt "bar_context"
 msgid "bar_id"
@@ -205,7 +205,7 @@ msgstr "bar"
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
 			'/cwd/build/.transifex/ckeditor5-foo/en.pot',
-			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
+			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.
 
 msgctxt "foo_context"
 msgid "foo_id"
@@ -240,7 +240,7 @@ msgstr "bar"
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
 			'/cwd/build/.transifex/ckeditor5-foo/en.pot',
-			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
+			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.
 
 msgctxt "foo_context"
 msgid "foo_id"
@@ -275,7 +275,7 @@ msgstr[1] "foo_plural"
 		sinon.assert.calledWithExactly(
 			stubs.fs.outputFileSync,
 			'/cwd/build/.transifex/ckeditor5-core/en.pot',
-			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
+			`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.
 
 msgctxt "foo_context"
 msgid "foo_id"

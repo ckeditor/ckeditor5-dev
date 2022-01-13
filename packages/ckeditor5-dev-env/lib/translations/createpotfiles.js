@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2021, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2022, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -258,7 +258,7 @@ function savePotFile( { packageName, fileContent, translationsDirectory, logger 
 function createPotFileHeader() {
 	const year = new Date().getFullYear();
 
-	return `# Copyright (c) 2003-${ year }, CKSource - Frederico Knabben. All rights reserved.\n\n`;
+	return `# Copyright (c) 2003-${ year }, CKSource Holding sp. z o.o. All rights reserved.\n\n`;
 }
 
 /**

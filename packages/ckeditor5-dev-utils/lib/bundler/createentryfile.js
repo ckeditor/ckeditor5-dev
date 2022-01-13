@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2021, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2022, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -30,7 +30,7 @@ function renderEntryFile( options ) {
 	const date = new Date();
 
 	let content = `/**
- * @license Copyright (c) 2003-${ date.getFullYear() }, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-${ date.getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 

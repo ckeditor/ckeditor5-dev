@@ -1,5 +1,5 @@
 /**
- * @license Copyright (c) 2003-2021, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2022, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -15,7 +15,7 @@ module.exports = {
 	},
 
 	bumpYear( ...args ) {
-		return require( './release-tools/tasks/bump-year' )( ...args );
+		return require( './tasks/bump-year' )( ...args );
 	},
 
 	async generateChangelogForSinglePackage( ...args ) {
@@ -24,6 +24,10 @@ module.exports = {
 
 	async generateChangelogForMonoRepository( ...args ) {
 		return require( './release-tools/tasks/generatechangelogformonorepository' )( ...args );
+	},
+
+	updateCKEditor5Dependencies( ...args ) {
+		return require( './release-tools/tasks/update-ckeditor5-dependencies' )( ...args );
 	},
 
 	createPotFiles( ...args ) {
