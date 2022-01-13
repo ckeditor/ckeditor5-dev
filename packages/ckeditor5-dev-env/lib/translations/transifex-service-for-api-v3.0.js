@@ -84,8 +84,8 @@ async function getProjectData( organizationName, projectName, localizablePackage
  * (2) Retrieve the target URL from every download request, where the status of the file being prepared for download can be checked.
  * (3) Download the file from the target URL received in step (2).
  *
- * The download procedure is not interrupted when any request has failed for any reason, but continues until the end for each language in
- * each package. Failed requests and all fetched translations are collected and returned to the caller for further processing.
+ * The download procedure is not interrupted when any request has failed for any reason, but continues until the end for each language.
+ * Failed requests and all fetched translations are collected and returned to the caller for further processing.
  *
  * @param {Object} resource The resource instance for which translations should be downloaded.
  * @param {Array.<Object>} languages An array of all the language instances found in the project.

@@ -106,7 +106,7 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 	} );
 
 	describe( 'getProjectData()', () => {
-		it( 'should return resources and languages', async () => {
+		it( 'should return resources and languages, with English language as the source one', async () => {
 			mocks = {
 				resources: [
 					{ attributes: { slug: 'ckeditor5-core' } },
@@ -132,8 +132,8 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 			sinon.assert.calledWithExactly( stubs.getProjects, { slug: 'ckeditor5-project' } );
 
 			sinon.assert.calledTwice( stubs.fetchProject );
-			sinon.assert.calledWithExactly( stubs.fetchProject, 'resources' );
-			sinon.assert.calledWithExactly( stubs.fetchProject, 'languages' );
+			sinon.assert.calledWithExactly( stubs.fetchProject.firstCall, 'resources' );
+			sinon.assert.calledWithExactly( stubs.fetchProject.secondCall, 'languages' );
 
 			expect( resources ).to.deep.equal( [
 				{ attributes: { slug: 'ckeditor5-core' } },
@@ -141,6 +141,7 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 			] );
 
 			expect( languages ).to.deep.equal( [
+				{ attributes: { code: 'en' } },
 				{ attributes: { code: 'pl' } },
 				{ attributes: { code: 'de' } }
 			] );
@@ -167,6 +168,7 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 			] );
 
 			expect( languages ).to.deep.equal( [
+				{ attributes: { code: 'en' } },
 				{ attributes: { code: 'pl' } },
 				{ attributes: { code: 'de' } }
 			] );
@@ -181,6 +183,7 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 					{ attributes: { slug: 'ckeditor5-ui' } }
 				],
 				languages: [
+					{ attributes: { code: 'en' } },
 					{ attributes: { code: 'pl' } },
 					{ attributes: { code: 'de' } }
 				],
@@ -206,7 +209,7 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 
 			const resource = mocks.resources[ 0 ];
 			const languages = [ ...mocks.languages ];
-			const translations = await transifexService.getTranslations( resource, languages );
+			const { translations, failedDownloads } = await transifexService.getTranslations( resource, languages );
 
 			const attributes = {
 				callback_url: null,
@@ -227,16 +230,7 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 
 			sinon.assert.calledTwice( stubs.transifexApi.ResourceTranslationAsyncDownload.create );
 
-			sinon.assert.calledWithExactly( stubs.transifexApi.ResourceTranslationAsyncDownload.create, {
-				attributes,
-				relationships: {
-					resource,
-					language: languages[ 0 ]
-				},
-				type: 'resource_translations_async_downloads'
-			} );
-
-			sinon.assert.calledWithExactly( stubs.transifexApi.ResourceTranslationAsyncDownload.create, {
+			sinon.assert.calledWithExactly( stubs.transifexApi.ResourceTranslationAsyncDownload.create.firstCall, {
 				attributes,
 				relationships: {
 					resource,
@@ -245,21 +239,30 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 				type: 'resource_translations_async_downloads'
 			} );
 
+			sinon.assert.calledWithExactly( stubs.transifexApi.ResourceTranslationAsyncDownload.create.secondCall, {
+				attributes,
+				relationships: {
+					resource,
+					language: languages[ 2 ]
+				},
+				type: 'resource_translations_async_downloads'
+			} );
+
 			sinon.assert.calledThrice( stubs.fetch );
 
-			sinon.assert.calledWithExactly( stubs.fetch, 'https://example.com/ckeditor5-core/en', {
+			sinon.assert.calledWithExactly( stubs.fetch.firstCall, 'https://example.com/ckeditor5-core/en', {
 				headers: {
 					Authorization: 'Bearer secretToken'
 				}
 			} );
 
-			sinon.assert.calledWithExactly( stubs.fetch, 'https://example.com/ckeditor5-core/pl', {
+			sinon.assert.calledWithExactly( stubs.fetch.secondCall, 'https://example.com/ckeditor5-core/pl', {
 				headers: {
 					Authorization: 'Bearer secretToken'
 				}
 			} );
 
-			sinon.assert.calledWithExactly( stubs.fetch, 'https://example.com/ckeditor5-core/de', {
+			sinon.assert.calledWithExactly( stubs.fetch.thirdCall, 'https://example.com/ckeditor5-core/de', {
 				headers: {
 					Authorization: 'Bearer secretToken'
 				}
@@ -270,6 +273,8 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 				[ 'pl', 'ckeditor5-core-pl-content' ],
 				[ 'de', 'ckeditor5-core-de-content' ]
 			] );
+
+			expect( failedDownloads ).to.deep.equal( [] );
 		} );
 
 		it( 'should return requested translations after multiple different download retries', async () => {
@@ -310,7 +315,7 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 
 			await clock.tickAsync( 30000 );
 
-			const translations = await translationsPromise;
+			const { translations, failedDownloads } = await translationsPromise;
 
 			sinon.assert.callCount( stubs.fetch, 23 );
 
@@ -319,46 +324,150 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 				[ 'pl', 'ckeditor5-core-pl-content' ],
 				[ 'de', 'ckeditor5-core-de-content' ]
 			] );
+
+			expect( failedDownloads ).to.deep.equal( [] );
 		} );
 
-		it( 'should fail with an error if a response from the download attempt was not successful', async () => {
-			stubs.fetch.callsFake( () => Promise.resolve( {
+		it( 'should return failed requests if all file downloads failed', async () => {
+			stubs.fetch.resolves( {
 				ok: false,
 				status: 500,
 				statusText: 'Internal Server Error'
-			} ) );
+			} );
 
 			const resource = mocks.resources[ 0 ];
 			const languages = [ ...mocks.languages ];
-			const errorMessage = await transifexService.getTranslations( resource, languages ).catch( error => error.message );
+			const { translations, failedDownloads } = await transifexService.getTranslations( resource, languages );
 
-			expect( errorMessage ).to.equal(
-				'\nFailed to download the PO file for the "en" language for the "ckeditor5-core" package.' +
-				'\nReceived response: 500 Internal Server Error' +
-				'\nRequested URL: https://example.com/ckeditor5-core/en'
-			);
+			const expectedFailedDownloads = [ 'en', 'pl', 'de' ].map( languageCode => ( {
+				resourceName: 'ckeditor5-core',
+				languageCode,
+				errorMessage: 'Failed to download the translation file. Received response: 500 Internal Server Error'
+			} ) );
+
+			expect( failedDownloads ).to.deep.equal( expectedFailedDownloads );
+			expect( [ ...translations.entries() ] ).to.deep.equal( [] );
 		} );
 
-		it( 'should fail with an error if the download limit has been reached', async () => {
+		it( 'should return failed requests if the retry limit has been reached for all requests', async () => {
 			const clock = sinon.useFakeTimers();
 
-			stubs.fetch.callsFake( () => Promise.resolve( {
+			stubs.fetch.resolves( {
 				ok: true,
 				redirected: false
-			} ) );
+			} );
 
 			const resource = mocks.resources[ 0 ];
 			const languages = [ ...mocks.languages ];
-			const errorMessagePromise = transifexService.getTranslations( resource, languages ).catch( error => error.message );
+			const translationsPromise = transifexService.getTranslations( resource, languages );
 
 			await clock.tickAsync( 30000 );
 
-			const errorMessage = await errorMessagePromise;
+			const { translations, failedDownloads } = await translationsPromise;
 
-			expect( errorMessage ).to.equal(
-				'\nFailed to download the PO file for the "en" language for the "ckeditor5-core" package.' +
-				'\nRequested file is not ready yet, but the limit of file download attempts has been reached.'
-			);
+			const expectedFailedDownloads = [ 'en', 'pl', 'de' ].map( languageCode => ( {
+				resourceName: 'ckeditor5-core',
+				languageCode,
+				errorMessage: 'Failed to download the translation file. ' +
+					'Requested file is not ready yet, but the limit of file download attempts has been reached.'
+			} ) );
+
+			expect( failedDownloads ).to.deep.equal( expectedFailedDownloads );
+			expect( [ ...translations.entries() ] ).to.deep.equal( [] );
+		} );
+
+		it( 'should return failed requests if it is not possible to create all initial download requests', async () => {
+			const clock = sinon.useFakeTimers();
+
+			stubs.transifexApi.ResourceStringAsyncDownload.create.rejects();
+			stubs.transifexApi.ResourceTranslationAsyncDownload.create.rejects();
+
+			const resource = mocks.resources[ 0 ];
+			const languages = [ ...mocks.languages ];
+			const translationsPromise = transifexService.getTranslations( resource, languages );
+
+			await clock.tickAsync( 30000 );
+
+			const { translations, failedDownloads } = await translationsPromise;
+
+			const expectedFailedDownloads = [ 'en', 'pl', 'de' ].map( languageCode => ( {
+				resourceName: 'ckeditor5-core',
+				languageCode,
+				errorMessage: 'Failed to create download request.'
+			} ) );
+
+			expect( failedDownloads ).to.deep.equal( expectedFailedDownloads );
+			expect( [ ...translations.entries() ] ).to.deep.equal( [] );
+		} );
+
+		it( 'should return requested translations and failed downloads in multiple different download scenarios', async () => {
+			const clock = sinon.useFakeTimers();
+
+			const redirectFetch = () => Promise.resolve( {
+				ok: true,
+				redirected: false
+			} );
+
+			const resolveFetch = url => Promise.resolve( {
+				ok: true,
+				redirected: true,
+				text: () => Promise.resolve( mocks.translations[ url ] )
+			} );
+
+			const rejectFetch = () => Promise.resolve( {
+				ok: false,
+				status: 500,
+				statusText: 'Internal Server Error'
+			} );
+
+			stubs.transifexApi.ResourceStringAsyncDownload.create.rejects();
+
+			stubs.transifexApi.ResourceTranslationAsyncDownload.create
+				.onCall( 0 )
+				.rejects()
+				.onCall( 1 )
+				.rejects()
+				.onCall( 2 )
+				.rejects();
+
+			stubs.fetch
+				.withArgs( 'https://example.com/ckeditor5-core/pl' )
+				.callsFake( redirectFetch )
+				.onCall( 4 )
+				.callsFake( resolveFetch );
+
+			stubs.fetch
+				.withArgs( 'https://example.com/ckeditor5-core/de' )
+				.callsFake( redirectFetch )
+				.onCall( 8 )
+				.callsFake( rejectFetch );
+
+			const resource = mocks.resources[ 0 ];
+			const languages = [ ...mocks.languages ];
+			const translationsPromise = transifexService.getTranslations( resource, languages );
+
+			await clock.tickAsync( 60000 );
+
+			const { translations, failedDownloads } = await translationsPromise;
+
+			sinon.assert.callCount( stubs.fetch, 14 );
+
+			expect( [ ...translations.entries() ] ).to.deep.equal( [
+				[ 'pl', 'ckeditor5-core-pl-content' ]
+			] );
+
+			expect( failedDownloads ).to.deep.equal( [
+				{
+					resourceName: 'ckeditor5-core',
+					languageCode: 'en',
+					errorMessage: 'Failed to create download request.'
+				},
+				{
+					resourceName: 'ckeditor5-core',
+					languageCode: 'de',
+					errorMessage: 'Failed to download the translation file. Received response: 500 Internal Server Error'
+				}
+			] );
 		} );
 	} );
 

@@ -195,6 +195,7 @@ describe( 'dev-env/index', () => {
 				token: 'token',
 				cwd: '/workspace'
 			} );
+
 			expect( response.status ).to.equal( true );
 
 			sinon.assert.calledOnce( stubs.translations.download );

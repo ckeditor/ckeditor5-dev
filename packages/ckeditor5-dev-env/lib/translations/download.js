@@ -92,7 +92,7 @@ module.exports = async function downloadTranslations( config ) {
 
 	logger.info( failedDownloads.length ?
 		'Not all translations are saved. See `.transifex-failed-downloads.json` for details.\n' +
-		'Run the script again to fetch again only those translations that have failed to download.' :
+		'Run the script again to fetch only those translations that have failed to download.' :
 		'Saved all translations.'
 	);
 };

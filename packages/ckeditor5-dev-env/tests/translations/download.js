@@ -29,7 +29,18 @@ describe( 'dev-env/translations/download()', () => {
 
 			fs: {
 				outputFileSync: sinon.stub(),
-				removeSync: sinon.stub()
+
+				removeSync: sinon.stub(),
+
+				existsSync: sinon.stub()
+					.withArgs( path.normalize( '/workspace/.transifex-failed-downloads.json' ) )
+					.callsFake( () => Boolean( mocks.oldFailedDownloads ) ),
+
+				readJsonSync: sinon.stub()
+					.withArgs( path.normalize( '/workspace/.transifex-failed-downloads.json' ) )
+					.callsFake( () => mocks.oldFailedDownloads ),
+
+				writeJsonSync: sinon.stub()
 			},
 
 			translationUtils: {
@@ -48,22 +59,36 @@ describe( 'dev-env/translations/download()', () => {
 
 				getResourceName: sinon.stub().callsFake( resource => resource.attributes.slug ),
 
+				getLanguageCode: sinon.stub().callsFake( language => language.attributes.code ),
+
 				getProjectData: sinon.stub().callsFake( ( organizationName, projectName, localizablePackageNames ) => {
 					const projectData = {
 						resources: mocks.resources.filter( resource => localizablePackageNames.includes( resource.attributes.slug ) ),
-						languages: [ ...mocks.languages ]
+						languages: mocks.languages
 					};
 
 					return Promise.resolve( projectData );
 				} ),
 
 				getTranslations: sinon.stub().callsFake( ( resource, languages ) => {
-					const translations = languages.map( language => [
-						language.attributes.code,
-						mocks.translations[ resource.attributes.slug ][ language.attributes.code ]
-					] );
+					const translationData = {
+						translations: new Map(
+							languages.map( language => [
+								language.attributes.code,
+								mocks.translations[ resource.attributes.slug ][ language.attributes.code ]
+							] )
+						),
+						failedDownloads: mocks.newFailedDownloads ?
+							mocks.newFailedDownloads.filter( item => {
+								const isResourceNameMatched = item.resourceName === resource.attributes.slug;
+								const isLanguageCodeMatched = languages.find( language => item.languageCode === language.attributes.code );
 
-					return Promise.resolve( new Map( translations ) );
+								return isResourceNameMatched && isLanguageCodeMatched;
+							} ) :
+							[]
+					};
+
+					return Promise.resolve( translationData );
 				} )
 			}
 		};
@@ -119,11 +144,21 @@ describe( 'dev-env/translations/download()', () => {
 			] )
 		} );
 
-		sinon.assert.calledOnce( stubs.fs.removeSync );
+		sinon.assert.calledTwice( stubs.fs.removeSync );
 		sinon.assert.calledOnce( stubs.fs.outputFileSync );
 
-		sinon.assert.calledWithExactly( stubs.fs.removeSync, path.normalize( '/workspace/foo/ckeditor5-core/lang/translations' ) );
-		sinon.assert.callOrder( stubs.fs.removeSync, stubs.fs.outputFileSync );
+		sinon.assert.calledWithExactly(
+			stubs.fs.removeSync.firstCall,
+			path.normalize( '/workspace/foo/ckeditor5-core/lang/translations' )
+		);
+
+		sinon.assert.calledWithExactly(
+			stubs.fs.removeSync.secondCall,
+			path.normalize( '/workspace/.transifex-failed-downloads.json' )
+		);
+
+		expect( stubs.fs.removeSync.firstCall.calledBefore( stubs.fs.outputFileSync.firstCall ) ).to.be.true;
+		expect( stubs.fs.removeSync.secondCall.calledAfter( stubs.fs.outputFileSync.firstCall ) ).to.be.true;
 	} );
 
 	it( 'should download translations for non-empty resources', async () => {
@@ -168,19 +203,19 @@ describe( 'dev-env/translations/download()', () => {
 		sinon.assert.callCount( stubs.fs.outputFileSync, 3 );
 
 		sinon.assert.calledWithExactly(
-			stubs.fs.outputFileSync,
+			stubs.fs.outputFileSync.firstCall,
 			path.normalize( '/workspace/foo/ckeditor5-core/lang/translations/pl.po' ),
 			'ckeditor5-core-pl-content'
 		);
 
 		sinon.assert.calledWithExactly(
-			stubs.fs.outputFileSync,
+			stubs.fs.outputFileSync.secondCall,
 			path.normalize( '/workspace/foo/ckeditor5-core/lang/translations/de.po' ),
 			'ckeditor5-core-de-content'
 		);
 
 		sinon.assert.calledWithExactly(
-			stubs.fs.outputFileSync,
+			stubs.fs.outputFileSync.thirdCall,
 			path.normalize( '/workspace/bar/ckeditor5-ui/lang/translations/pl.po' ),
 			'ckeditor5-ui-pl-content'
 		);
@@ -277,19 +312,19 @@ describe( 'dev-env/translations/download()', () => {
 		sinon.assert.callCount( stubs.tools.spinnerFinish, 2 );
 
 		sinon.assert.calledWithExactly(
-			stubs.tools.createSpinner,
+			stubs.tools.createSpinner.firstCall,
 			'Processing "ckeditor5-core"...',
 			{ indentLevel: 1 }
 		);
 
 		sinon.assert.calledWithExactly(
-			stubs.tools.createSpinner,
+			stubs.tools.createSpinner.secondCall,
 			'Processing "ckeditor5-ui"...',
 			{ indentLevel: 1 }
 		);
 	} );
 
-	it( 'should skip creating a resource with no translations', async () => {
+	it( 'should skip creating a translation file if there are no resources', async () => {
 		mocks = {
 			resources: [],
 			languages: [],
@@ -307,11 +342,62 @@ describe( 'dev-env/translations/download()', () => {
 			] )
 		} );
 
-		sinon.assert.notCalled( stubs.fs.removeSync );
 		sinon.assert.notCalled( stubs.fs.outputFileSync );
 	} );
 
-	it( 'should use the language code from the languagecodemap.json if it exists, or the default language code otherwise', async () => {
+	it( 'should save failed downloads', async () => {
+		mocks = {
+			resources: [
+				{ attributes: { slug: 'ckeditor5-core' } },
+				{ attributes: { slug: 'ckeditor5-ui' } }
+			],
+			languages: [
+				{ attributes: { code: 'pl' } },
+				{ attributes: { code: 'de' } }
+			],
+			translations: {
+				'ckeditor5-core': {
+					pl: 'ckeditor5-core-pl-content',
+					de: 'ckeditor5-core-de-content'
+				},
+				'ckeditor5-ui': {
+					pl: 'ckeditor5-ui-pl-content',
+					de: 'ckeditor5-ui-de-content'
+				}
+			},
+			fileContents: {
+				'ckeditor5-core-pl-content': { save: 'save_pl' },
+				'ckeditor5-core-de-content': { save: 'save_de' },
+				'ckeditor5-ui-pl-content': { cancel: 'cancel_pl' },
+				'ckeditor5-ui-de-content': { cancel: 'cancel_de' }
+			},
+			newFailedDownloads: [
+				{ resourceName: 'ckeditor5-ui', languageCode: 'de', errorMessage: 'An example error.' }
+			]
+		};
+
+		await download( {
+			organizationName: 'ckeditor-organization',
+			projectName: 'ckeditor5-project',
+			cwd: '/workspace',
+			token: 'secretToken',
+			packages: new Map( [
+				[ 'ckeditor5-core', 'foo/ckeditor5-core' ],
+				[ 'ckeditor5-ui', 'bar/ckeditor5-ui' ]
+			] )
+		} );
+
+		sinon.assert.calledOnce( stubs.fs.writeJsonSync );
+
+		sinon.assert.calledWithExactly(
+			stubs.fs.writeJsonSync,
+			path.normalize( '/workspace/.transifex-failed-downloads.json' ),
+			[ { resourceName: 'ckeditor5-ui', languages: [ { code: 'de', errorMessage: 'An example error.' } ] } ],
+			{ spaces: 2 }
+		);
+	} );
+
+	it( 'should use the language code from the "languagecodemap.json" if it exists, or the default language code otherwise', async () => {
 		mocks = {
 			resources: [
 				{ attributes: { slug: 'ckeditor5-core' } }
@@ -348,19 +434,19 @@ describe( 'dev-env/translations/download()', () => {
 		sinon.assert.callCount( stubs.fs.outputFileSync, 3 );
 
 		sinon.assert.calledWithExactly(
-			stubs.fs.outputFileSync,
+			stubs.fs.outputFileSync.firstCall,
 			path.normalize( '/workspace/foo/ckeditor5-core/lang/translations/pl.po' ),
 			'ckeditor5-core-pl-content'
 		);
 
 		sinon.assert.calledWithExactly(
-			stubs.fs.outputFileSync,
+			stubs.fs.outputFileSync.secondCall,
 			path.normalize( '/workspace/foo/ckeditor5-core/lang/translations/en_AU.po' ),
 			'ckeditor5-core-en_AU-content'
 		);
 
 		sinon.assert.calledWithExactly(
-			stubs.fs.outputFileSync,
+			stubs.fs.outputFileSync.thirdCall,
 			path.normalize( '/workspace/foo/ckeditor5-core/lang/translations/ne.po' ),
 			'ckeditor5-core-ne_NP-content'
 		);
@@ -438,5 +524,157 @@ describe( 'dev-env/translations/download()', () => {
 				simplifyLicenseHeader: true
 			}
 		);
+	} );
+
+	describe( 'recovery mode with existing ".transifex-failed-downloads.json" file', () => {
+		it( 'should not remove any translations beforehand', async () => {
+			mocks = {
+				resources: [
+					{ attributes: { slug: 'ckeditor5-core' } }
+				],
+				languages: [
+					{ attributes: { code: 'pl' } }
+				],
+				translations: {
+					'ckeditor5-core': {
+						pl: 'ckeditor5-core-pl-content'
+					}
+				},
+				fileContents: {
+					'ckeditor5-core-pl-content': { save: 'save_pl' }
+				},
+				oldFailedDownloads: [
+					{ resourceName: 'ckeditor5-core', languages: [ { code: 'pl' } ] }
+				]
+			};
+
+			await download( {
+				organizationName: 'ckeditor-organization',
+				projectName: 'ckeditor5-project',
+				cwd: '/workspace',
+				token: 'secretToken',
+				packages: new Map( [
+					[ 'ckeditor5-core', 'foo/ckeditor5-core' ]
+				] )
+			} );
+
+			sinon.assert.calledOnce( stubs.fs.outputFileSync );
+			sinon.assert.calledOnce( stubs.fs.removeSync );
+
+			sinon.assert.calledWithExactly(
+				stubs.fs.removeSync,
+				path.normalize( '/workspace/.transifex-failed-downloads.json' )
+			);
+
+			expect( stubs.fs.removeSync.calledAfter( stubs.fs.outputFileSync ) ).to.be.true;
+		} );
+
+		it( 'should download translations for existing resources but only for previously failed ones', async () => {
+			mocks = {
+				resources: [
+					{ attributes: { slug: 'ckeditor5-core' } },
+					{ attributes: { slug: 'ckeditor5-ui' } }
+				],
+				languages: [
+					{ attributes: { code: 'pl' } },
+					{ attributes: { code: 'de' } }
+				],
+				translations: {
+					'ckeditor5-core': {
+						pl: 'ckeditor5-core-pl-content',
+						de: 'ckeditor5-core-de-content'
+					},
+					'ckeditor5-ui': {
+						pl: 'ckeditor5-ui-pl-content',
+						de: 'ckeditor5-ui-de-content'
+					}
+				},
+				fileContents: {
+					'ckeditor5-core-pl-content': { save: 'save_pl' },
+					'ckeditor5-core-de-content': { save: 'save_de' },
+					'ckeditor5-ui-pl-content': { cancel: 'cancel_pl' },
+					'ckeditor5-ui-de-content': { cancel: 'cancel_de' }
+				},
+				oldFailedDownloads: [
+					{ resourceName: 'ckeditor5-core', languages: [ { code: 'pl' } ] },
+					{ resourceName: 'ckeditor5-non-existing', languages: [ { code: 'de' } ] }
+				]
+			};
+
+			await download( {
+				organizationName: 'ckeditor-organization',
+				projectName: 'ckeditor5-project',
+				cwd: '/workspace',
+				token: 'secretToken',
+				packages: new Map( [
+					[ 'ckeditor5-core', 'foo/ckeditor5-core' ],
+					[ 'ckeditor5-ui', 'bar/ckeditor5-ui' ]
+				] )
+			} );
+
+			sinon.assert.callCount( stubs.fs.outputFileSync, 1 );
+
+			sinon.assert.calledWithExactly(
+				stubs.fs.outputFileSync,
+				path.normalize( '/workspace/foo/ckeditor5-core/lang/translations/pl.po' ),
+				'ckeditor5-core-pl-content'
+			);
+		} );
+
+		it( 'should update ".transifex-failed-downloads.json" file if there are still some failed downloads', async () => {
+			mocks = {
+				resources: [
+					{ attributes: { slug: 'ckeditor5-core' } },
+					{ attributes: { slug: 'ckeditor5-ui' } }
+				],
+				languages: [
+					{ attributes: { code: 'pl' } },
+					{ attributes: { code: 'de' } }
+				],
+				translations: {
+					'ckeditor5-core': {
+						pl: 'ckeditor5-core-pl-content',
+						de: 'ckeditor5-core-de-content'
+					},
+					'ckeditor5-ui': {
+						pl: 'ckeditor5-ui-pl-content',
+						de: 'ckeditor5-ui-de-content'
+					}
+				},
+				fileContents: {
+					'ckeditor5-core-pl-content': { save: 'save_pl' },
+					'ckeditor5-core-de-content': { save: 'save_de' },
+					'ckeditor5-ui-pl-content': { cancel: 'cancel_pl' },
+					'ckeditor5-ui-de-content': {}
+				},
+				oldFailedDownloads: [
+					{ resourceName: 'ckeditor5-core', languages: [ { code: 'pl' }, { code: 'de' } ] },
+					{ resourceName: 'ckeditor5-non-existing', languages: [ { code: 'de' } ] }
+				],
+				newFailedDownloads: [
+					{ resourceName: 'ckeditor5-core', languageCode: 'de', errorMessage: 'An example error.' }
+				]
+			};
+
+			await download( {
+				organizationName: 'ckeditor-organization',
+				projectName: 'ckeditor5-project',
+				cwd: '/workspace',
+				token: 'secretToken',
+				packages: new Map( [
+					[ 'ckeditor5-core', 'foo/ckeditor5-core' ],
+					[ 'ckeditor5-ui', 'bar/ckeditor5-ui' ]
+				] )
+			} );
+
+			sinon.assert.calledOnce( stubs.fs.writeJsonSync );
+
+			sinon.assert.calledWithExactly(
+				stubs.fs.writeJsonSync,
+				path.normalize( '/workspace/.transifex-failed-downloads.json' ),
+				[ { resourceName: 'ckeditor5-core', languages: [ { code: 'de', errorMessage: 'An example error.' } ] } ],
+				{ spaces: 2 }
+			);
+		} );
 	} );
 } );
