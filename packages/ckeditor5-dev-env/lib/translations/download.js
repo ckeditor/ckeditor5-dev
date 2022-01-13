@@ -5,105 +5,115 @@
 
 'use strict';
 
-const fs = require( 'fs-extra' );
 const path = require( 'path' );
-const transifexService = require( './transifex-service' );
-const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
-const { cleanPoFileContent, createDictionaryFromPoFileContent } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
-const languageCodeMap = require( './languagecodemap.json' );
+const fs = require( 'fs-extra' );
+const { tools, logger: loggerFactory, translations } = require( '@ckeditor/ckeditor5-dev-utils' );
+const transifexService = require( './transifex-service-for-api-v3.0' );
 const { verifyProperties } = require( './utils' );
+const languageCodeMap = require( './languagecodemap.json' );
+
+const logger = loggerFactory();
+const { cleanPoFileContent, createDictionaryFromPoFileContent } = translations;
 
 /**
- * Downloads translations from the Transifex for each CF localizable package.
- * It creates PO files out of the translations and replaces old translations with the downloaded ones.
+ * Downloads translations from the Transifex for each localizable package. It creates `*.po` files out of the translations and replaces old
+ * translations with the downloaded ones. If not all translations have been downloaded successfully, the `.transifex-failed-downloads.json`
+ * file is created, containing information about the packages and languages for which the translations could not be downloaded. This file is
+ * then used next time this script is run: it will try to download translations only for packages and languages that failed previously.
  *
  * @param {Object} config
+ * @param {String} config.organizationName Name of the organization to which the project belongs.
+ * @param {String} config.projectName Name of the project for downloading the translations.
  * @param {String} config.token Token to the Transifex API.
  * @param {Map.<String,String>} config.packages A resource name -> package path map for which translations should be downloaded.
+ * The resource name must be the same as the name used in the Transifex service. The package path could be any local path fragment, where
+ * the downloaded translation will be stored. The final path for storing the translations is a combination of the `config.cwd` with the
+ * mentioned package path and the `lang/translations` subdirectory.
  * @param {String} config.cwd Current work directory.
- * @param {String} config.url Transifex API URL where the request should be send.
  * @param {Boolean} [config.simplifyLicenseHeader=false] Whether to skip adding the contribute guide URL in the output `*.po` files.
  */
 module.exports = async function downloadTranslations( config ) {
-	verifyProperties( config, [ 'token', 'url', 'packages', 'cwd' ] );
+	verifyProperties( config, [ 'organizationName', 'projectName', 'token', 'packages', 'cwd' ] );
 
-	const localizablePackageNames = await getLocalizablePackages( config );
+	transifexService.init( config.token );
 
-	for ( const packageName of localizablePackageNames ) {
-		const translations = await downloadPoFiles( config, packageName );
-		const packagePath = getPathToTranslations( config.cwd, config.packages.get( packageName ) );
+	logger.info( 'Fetching project information...' );
 
-		removeOldTranslation( packagePath );
-		saveNewTranslations( {
-			packageName,
-			packagePath,
+	const localizablePackageNames = [ ...config.packages.keys() ];
+	const { resources, languages } = await transifexService.getProjectData(
+		config.organizationName,
+		config.projectName,
+		localizablePackageNames
+	);
+
+	const failedDownloads = [];
+	const { resourcesToProcess, hasAnyFailedDownload } = getResourcesToProcess( { cwd: config.cwd, resources, languages } );
+
+	logger.info( hasAnyFailedDownload ?
+		'Downloading only translations that failed previously...' :
+		'Downloading all translations...'
+	);
+
+	for ( const { resource, languages } of resourcesToProcess ) {
+		const packageName = transifexService.getResourceName( resource );
+		const packagePath = config.packages.get( packageName );
+		const pathToTranslations = path.join( config.cwd, packagePath, 'lang', 'translations' );
+		const spinner = tools.createSpinner( `Processing "${ packageName }"...`, { indentLevel: 1 } );
+
+		spinner.start();
+
+		// Remove all old translations before saving new ones, but only if previously the download procedure has been finished without any
+		// failures. Otherwise, the current download procedure only tries to fetch the previously failed translations, so no existing files
+		// are removed beforehand.
+		if ( !hasAnyFailedDownload ) {
+			fs.removeSync( pathToTranslations );
+		}
+
+		const { translations, failedDownloads: failedDownloadsForPackage } = await transifexService.getTranslations( resource, languages );
+
+		failedDownloads.push( ...failedDownloadsForPackage );
+
+		const savedFiles = saveNewTranslations( {
+			pathToTranslations,
 			translations,
 			simplifyLicenseHeader: config.simplifyLicenseHeader
 		} );
+
+		spinner.finish();
+
+		const statusMessage = failedDownloadsForPackage.length ?
+			`❌ Saved ${ savedFiles } "*.po" files. ${ failedDownloadsForPackage.length } requests failed.` :
+			`✅ Saved all ${ savedFiles } "*.po" files.`;
+
+		logger.info( ' '.repeat( 3 ) + statusMessage );
 	}
 
-	logger.info( 'Saved all translations.' );
+	updateFailedDownloads( { cwd: config.cwd, failedDownloads } );
+
+	if ( failedDownloads.length ) {
+		logger.info(
+			'Not all translations are saved. See `.transifex-failed-downloads.json` for details.\n' +
+			'Run the script again to fetch only those translations that have failed to download.'
+		);
+	} else {
+		logger.info( 'Saved all translations.' );
+	}
 };
 
 /**
- * @param {Object} config
- * @param {String} config.token Token to the Transifex API.
- */
-async function getLocalizablePackages( config ) {
-	const packageNames = new Set( config.packages.keys() );
-	const resources = await transifexService.getResources( config );
-
-	return resources.map( resource => resource.slug )
-		.filter( packageName => packageNames.has( packageName ) );
-}
-
-/**
- * @param {String} packagePath Package path.
- */
-function removeOldTranslation( packagePath ) {
-	fs.removeSync( packagePath );
-}
-
-/**
- * Downloads translations for the given package and returns a languageCode -> translations map.
+ * Saves all valid translations on the filesystem. For each translation entry:
  *
- * @param {Object} config Configuration.
- * @param {String} config.token Token to the Transifex API.
- * @param {String} packageName Package name.
- * @param {String} config.cwd Current work directory.
- * @param {String} config.url Transifex API URL where the request should be send.
- * @returns {Promise<Map.<String, Object>>}
+ * (1) Check if the content is a translation. Skip processing current entry if it cannot be converted to a PO file.
+ * (2) Check if the language code should be mapped to another string on the filesystem.
+ * (3) Prepare the translation for storing on the filesystem: remove personal data and add a banner with information how to contribute.
+ *
+ * @param {Object} config
+ * @param {String} config.pathToTranslations Path to translations.
+ * @param {Map.<String,String>} config.translations The translation map: language code -> translation content.
+ * @param {Boolean} config.simplifyLicenseHeader Whether to skip adding the contribute guide URL in the output `*.po` files.
+ * @returns {Number} Number of saved files.
  */
-async function downloadPoFiles( config, packageName ) {
-	const requestConfig = {
-		url: config.url,
-		token: config.token,
-		slug: packageName
-	};
-
-	const resourceDetails = await transifexService.getResourceDetails( requestConfig );
-
-	const languageCodes = resourceDetails.available_languages.map( languageInfo => languageInfo.code );
-	const translations = await Promise.all( languageCodes.map( lang => downloadPoFile( config, lang, packageName ) ) );
-
-	return new Map( translations.map( ( languageTranslations, index ) => [
-		languageCodes[ index ],
-		languageTranslations
-	] ) );
-}
-
-async function downloadPoFile( config, lang, packageName ) {
-	const packageOptions = Object.assign( {}, config, {
-		lang,
-		slug: packageName
-	} );
-
-	const data = await transifexService.getTranslation( packageOptions );
-
-	return data.content;
-}
-
-function saveNewTranslations( { packageName, packagePath, translations, simplifyLicenseHeader } ) {
+function saveNewTranslations( { pathToTranslations, translations, simplifyLicenseHeader } ) {
 	let savedFiles = 0;
 
 	for ( let [ lang, poFileContent ] of translations ) {
@@ -117,24 +127,100 @@ function saveNewTranslations( { packageName, packagePath, translations, simplify
 
 		poFileContent = cleanPoFileContent( poFileContent, { simplifyLicenseHeader } );
 
-		const pathToSave = path.join( packagePath, lang + '.po' );
+		const pathToSave = path.join( pathToTranslations, lang + '.po' );
 
 		fs.outputFileSync( pathToSave, poFileContent );
 		savedFiles++;
 	}
 
-	logger.info( `Saved ${ savedFiles } PO files for ${ packageName } package.` );
+	return savedFiles;
 }
 
 /**
- * @param {String} cwd Current work directory.
- * @param {String} packagePath Package path.
- * @return {String}
+ * Based on whether previous download procedure has been finished without any failures, returns a collection of package names and language
+ * codes, for which translations will be downloaded:
+ *
+ * (1) If previous download procedure ended successfully, all translations for all resources will be downloaded.
+ * (2) Otherwise, only packages and their failed translation downloads defined in `.transifex-failed-downloads.json` are taken into account.
+ *
+ * @param {Object} config
+ * @param {String} config.cwd Current work directory.
+ * @param {Array.<Object>} config.resources All found resource instances for which translations could be downloaded.
+ * @param {Array.<Object>} config.languages All found language instances in the project.
+ * @returns {Object} result
+ * @returns {Boolean} result.hasAnyFailedDownload Indicates whether previous download procedure did not fetch all translations.
+ * @returns {Array.<Object>} result.resourcesToProcess Resource instances and their associated language instances to use during downloading
+ * the translations.
  */
-function getPathToTranslations( cwd, packagePath ) {
-	return path.join( cwd, packagePath, 'lang', 'translations' );
+function getResourcesToProcess( { cwd, resources, languages } ) {
+	const pathToFailedDownloads = path.join( cwd, '.transifex-failed-downloads.json' );
+	const hasAnyFailedDownload = fs.existsSync( pathToFailedDownloads );
+
+	if ( !hasAnyFailedDownload ) {
+		return {
+			hasAnyFailedDownload,
+			resourcesToProcess: resources.map( resource => ( { resource, languages } ) )
+		};
+	}
+
+	const resourcesMap = new Map( [
+		...resources.map( resource => [ transifexService.getResourceName( resource ), resource ] )
+	] );
+
+	const languagesMap = new Map( [
+		...languages.map( language => [ transifexService.getLanguageCode( language ), language ] )
+	] );
+
+	return {
+		hasAnyFailedDownload,
+		resourcesToProcess: fs.readJsonSync( pathToFailedDownloads )
+			.map( item => ( {
+				resource: resourcesMap.get( item.resourceName ),
+				languages: item.languages
+					.filter( language => languagesMap.has( language.code ) )
+					.map( language => languagesMap.get( language.code ) )
+			} ) )
+			.filter( item => item.resource && item.languages.length )
+	};
 }
 
+/**
+ * Saves all the failed downloads to `.transifex-failed-downloads.json` file. If there are no failures, the file is removed.
+ *
+ * @param {Object} config
+ * @param {String} config.cwd Current work directory.
+ * @param {Array.<Object>} config.failedDownloads Collection of all the failed downloads.
+ */
+function updateFailedDownloads( { cwd, failedDownloads } ) {
+	const pathToFailedDownloads = path.join( cwd, '.transifex-failed-downloads.json' );
+
+	if ( failedDownloads.length ) {
+		const groupedFailedDownloads = failedDownloads.reduce( ( result, failedDownload ) => {
+			const failedPackage = result.get( failedDownload.resourceName ) || {
+				resourceName: failedDownload.resourceName,
+				languages: []
+			};
+
+			failedPackage.languages.push( {
+				code: failedDownload.languageCode,
+				errorMessage: failedDownload.errorMessage
+			} );
+
+			return result.set( failedDownload.resourceName, failedPackage );
+		}, new Map() );
+
+		fs.writeJsonSync( pathToFailedDownloads, [ ...groupedFailedDownloads.values() ], { spaces: 2 } );
+	} else {
+		fs.removeSync( pathToFailedDownloads );
+	}
+}
+
+/**
+ * Checks if the received data is a translation.
+ *
+ * @param {String} poFileContent Received data.
+ * @returns {Boolean}
+ */
 function isPoFileContainingTranslations( poFileContent ) {
 	const translations = createDictionaryFromPoFileContent( poFileContent );
 
