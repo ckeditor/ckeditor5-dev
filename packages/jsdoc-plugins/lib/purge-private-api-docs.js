@@ -55,7 +55,15 @@ module.exports = {
 					return true;
 				}
 
-				return doclet.access !== 'private';
+				if ( doclet.access === 'private' ) {
+					return false;
+				}
+
+				if ( doclet.access === 'protected' ) {
+					return false;
+				}
+
+				return true;
 			} );
 		}
 	},
