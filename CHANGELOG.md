@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [28.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/v28.0.1...v28.0.2) (2022-02-03)
+
+### Other changes
+
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: Upgraded a version of the Puppeteer package to `13.1.3`. Closes [ckeditor/ckeditor5#11014](https://github.com/ckeditor/ckeditor5/issues/11014). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/8e82c65a6140c675488ac4305ead61012eb0253c))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v28.0.1 => v28.0.2
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v28.0.1 => v28.0.2
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v28.0.1 => v28.0.2
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v28.0.1 => v28.0.2
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v28.0.1 => v28.0.2
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v28.0.1 => v28.0.2
+</details>
+
+
 ## [28.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v28.0.0...v28.0.1) (2022-01-20)
 
 ### Bug fixes
