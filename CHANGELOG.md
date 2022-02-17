@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [28.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/v28.0.2...v28.0.3) (2022-02-17)
+
+### Other changes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Added handling for the `©` character when updating licenses. Closes [ckeditor/ckeditor5#11119](https://github.com/ckeditor/ckeditor5/issues/11119). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/5e71a3085109cc6126b3272362946c0f5aaba37f))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v28.0.2 => v28.0.3
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v28.0.2 => v28.0.3
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v28.0.2 => v28.0.3
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v28.0.2 => v28.0.3
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v28.0.2 => v28.0.3
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v28.0.2 => v28.0.3
+</details>
+
+
 ## [28.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/v28.0.1...v28.0.2) (2022-02-03)
 
 ### Other changes
