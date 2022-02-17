@@ -197,10 +197,10 @@
     "@babel/helper-validator-identifier" "^7.16.7"
     to-fast-properties "^2.0.0"
 
-"@ckeditor/ckeditor5-inspector@^2.2.2":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@ckeditor/ckeditor5-inspector/-/ckeditor5-inspector-2.3.0.tgz#bb1bb7ac4756d540e8df7acbd3578c22c2c389af"
-  integrity sha512-wVkZWgQ0Qk0iWYW9ifLtqgaSyOyHlXB55T9v/VYqH/KzPdpdR5TtT4NQbDoOxCaWtB7mMckEKVpBJghzw62M3Q==
+"@ckeditor/ckeditor5-inspector@^3.0.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@ckeditor/ckeditor5-inspector/-/ckeditor5-inspector-3.1.0.tgz#c1c4f4b593d44fbae63f6031f916f031d702b6c1"
+  integrity sha512-kguNnlKcRZmws1M39tliKJoNk55bIpBq8EM+NVfOIEfeTMtK8KuRANRn9Mvg/4Gqbn2Y/YdXROp6bYWNTBlCVg==
 
 "@eslint/eslintrc@^0.4.3":
   version "0.4.3"
