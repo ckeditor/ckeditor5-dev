@@ -40,7 +40,6 @@ module.exports = function runManualTests( options ) {
 	const themePath = options.themePath || null;
 	const language = options.language;
 	const additionalLanguages = options.additionalLanguages;
-	const identityFile = normalizeIdentityFile( options.identityFile );
 	const silent = options.silent || false;
 	const disableWatch = options.disableWatch || false;
 
@@ -54,7 +53,7 @@ module.exports = function runManualTests( options ) {
 				language,
 				additionalLanguages,
 				debug: options.debug,
-				identityFile,
+				identityFile: options.identityFile,
 				disableWatch
 			} ),
 			compileManualTestHtmlFiles( {
@@ -69,21 +68,3 @@ module.exports = function runManualTests( options ) {
 		] ) )
 		.then( () => createManualTestServer( buildDir, options.port ) );
 };
-
-/**
- * @param {String|null} identityFile
- * @returns {String|null}
- */
-function normalizeIdentityFile( identityFile ) {
-	if ( !identityFile ) {
-		return null;
-	}
-
-	// Passed an absolute path.
-	if ( path.isAbsolute( identityFile ) ) {
-		return identityFile;
-	}
-
-	// Passed a relative path. Merge it with the current working directory.
-	return path.join( process.cwd(), identityFile );
-}

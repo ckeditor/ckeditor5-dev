@@ -26,7 +26,8 @@ module.exports = function parseArguments( args ) {
 			'repositories',
 			'language',
 			'theme-path',
-			'additional-languages'
+			'additional-languages',
+			'identity-file'
 		],
 
 		boolean: [

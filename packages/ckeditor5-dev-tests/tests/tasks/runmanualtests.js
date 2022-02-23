@@ -89,7 +89,7 @@ describe( 'runManualTests', () => {
 					additionalLanguages: undefined,
 					debug: undefined,
 					disableWatch: false,
-					identityFile: null
+					identityFile: undefined
 				} );
 
 				expect( spies.server.calledOnce ).to.equal( true );
@@ -158,7 +158,7 @@ describe( 'runManualTests', () => {
 					additionalLanguages: undefined,
 					debug: [ 'CK_DEBUG' ],
 					disableWatch: false,
-					identityFile: null
+					identityFile: undefined
 				} );
 
 				expect( spies.server.calledOnce ).to.equal( true );
@@ -231,7 +231,7 @@ describe( 'runManualTests', () => {
 					additionalLanguages: [ 'ar', 'en' ],
 					debug: [ 'CK_DEBUG' ],
 					disableWatch: false,
-					identityFile: null
+					identityFile: undefined
 				} );
 
 				expect( spies.server.calledOnce ).to.equal( true );
@@ -342,7 +342,7 @@ describe( 'runManualTests', () => {
 					debug: undefined,
 					additionalLanguages: undefined,
 					disableWatch: false,
-					identityFile: 'workspace/path/to/secrets.js'
+					identityFile: 'path/to/secrets.js'
 				} );
 			} );
 	} );
@@ -388,7 +388,7 @@ describe( 'runManualTests', () => {
 					additionalLanguages: undefined,
 					debug: undefined,
 					disableWatch: false,
-					identityFile: null
+					identityFile: undefined
 				} );
 
 				expect( spies.server.calledOnce ).to.equal( true );
@@ -433,7 +433,7 @@ describe( 'runManualTests', () => {
 					additionalLanguages: undefined,
 					debug: undefined,
 					disableWatch: true,
-					identityFile: null
+					identityFile: undefined
 				} );
 
 				expect( spies.server.calledOnce ).to.equal( true );
