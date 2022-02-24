@@ -70,28 +70,29 @@ describe( 'getDefinitionsFromFile()', () => {
 		expect( definitions ).to.deep.equal( {} );
 	} );
 
-	it( 'should not throw an error if stringifying the identity file has failed', () => {
-		sinon.stub( JSON, 'stringify' ).throws( new Error( 'Example error.' ) );
+	it( 'should not throw an error and return empty object if path to identity file is not valid', () => {
+		let definitions;
 
 		expect( () => {
-			getDefinitionsFromFile( '/workspace/path/to/secret.js' );
+			definitions = getDefinitionsFromFile( 'foo.js' );
+		} ).to.not.throw();
+
+		expect( consoleStub.callCount ).to.equal( 1 );
+		expect( consoleStub.firstCall.args[ 0 ] ).to.satisfy( msg => msg.startsWith( 'Cannot find module \'/workspace/foo.js\'' ) );
+		expect( definitions ).to.deep.equal( {} );
+	} );
+
+	it( 'should not throw an error and return empty object if stringifying the identity file has failed', () => {
+		sinon.stub( JSON, 'stringify' ).throws( new Error( 'Example error.' ) );
+
+		let definitions;
+
+		expect( () => {
+			definitions = getDefinitionsFromFile( '/workspace/path/to/secret.js' );
 		} ).to.not.throw();
 
 		expect( consoleStub.callCount ).to.equal( 1 );
 		expect( consoleStub.firstCall.args[ 0 ] ).to.equal( 'Example error.' );
-	} );
-
-	it( 'should return empty object if stringifying the identity file has failed', () => {
-		sinon.stub( JSON, 'stringify' ).throws( new Error( 'Example error.' ) );
-
-		const definitions = getDefinitionsFromFile( '/workspace/path/to/secret.js' );
-
-		expect( definitions ).to.deep.equal( {} );
-	} );
-
-	it( 'should return empty object if path to identity file is not valid', () => {
-		const definitions = getDefinitionsFromFile( 'foo' );
-
 		expect( definitions ).to.deep.equal( {} );
 	} );
 } );
