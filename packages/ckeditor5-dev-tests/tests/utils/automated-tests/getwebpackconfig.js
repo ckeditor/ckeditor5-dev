@@ -6,14 +6,16 @@
 'use strict';
 
 const mockery = require( 'mockery' );
+const sinon = require( 'sinon' );
 const { expect } = require( 'chai' );
 
 describe( 'getWebpackConfigForAutomatedTests()', () => {
 	const escapedPathSep = require( 'path' ).sep == '/' ? '/' : '\\\\';
-	let getWebpackConfigForAutomatedTests, postCssOptions;
+	let getWebpackConfigForAutomatedTests, getDefinitionsFromFile, postCssOptions;
 
 	beforeEach( () => {
 		mockery.enable( {
+			useCleanCache: true,
 			warnOnReplace: false,
 			warnOnUnregistered: false
 		} );
@@ -26,15 +28,20 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			}
 		} );
 
+		getDefinitionsFromFile = sinon.stub().returns( {} );
+
+		mockery.registerMock( '../getdefinitionsfromfile', getDefinitionsFromFile );
+
 		getWebpackConfigForAutomatedTests = require( '../../../lib/utils/automated-tests/getwebpackconfig' );
 	} );
 
 	afterEach( () => {
+		sinon.restore();
 		mockery.disable();
 		mockery.deregisterAll();
 	} );
 
-	it( 'should return basic webpack configutation object', () => {
+	it( 'should return basic webpack configuration object', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {} );
 
 		expect( webpackConfig.module.rules.length ).to.equal( 4 );
@@ -43,7 +50,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		expect( webpackConfig.devtool ).to.equal( undefined );
 	} );
 
-	it( 'should return webpack configutation with istanbul loader', () => {
+	it( 'should return webpack configuration with istanbul loader', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
 			coverage: true,
 			files: [ '**/*.js' ]
@@ -65,7 +72,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		} );
 	} );
 
-	it( 'should return webpack configutation with istanbul loader containing include regexp', () => {
+	it( 'should return webpack configuration with istanbul loader containing include regexp', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
 			coverage: true,
 			files: [
@@ -83,7 +90,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		] );
 	} );
 
-	it( 'should return webpack configutation with istanbul loader containing include regexp (exclude pattern)', () => {
+	it( 'should return webpack configuration with istanbul loader containing include regexp (exclude pattern)', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
 			coverage: true,
 			files: [
@@ -101,7 +108,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		] );
 	} );
 
-	it( 'should return webpack configutation with correct devtool', () => {
+	it( 'should return webpack configuration with correct devtool', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
 			sourceMap: true
 		} );
@@ -121,7 +128,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		expect( require( 'fs' ).existsSync( secondPath ) ).to.equal( true );
 	} );
 
-	it( 'should return webpack configutation with the correct setup of the postcss-loader', () => {
+	it( 'should return webpack configuration with the correct setup of the postcss-loader', () => {
 		getWebpackConfigForAutomatedTests( {
 			themePath: 'path/to/theme'
 		} );
@@ -148,5 +155,18 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 
 		expect( 'C:\\Program Files\\ckeditor\\ckeditor5-basic-styles\\theme\\icons\\italic.svg' ).to.match( svgRegExp, 'Windows' );
 		expect( '/home/ckeditor/ckeditor5-basic-styles/theme/icons/italic.svg' ).to.match( svgRegExp, 'Linux' );
+	} );
+
+	it( 'should return webpack configuration with loaded identity file', () => {
+		getDefinitionsFromFile.returns( { LICENSE_KEY: 'secret' } );
+
+		const webpackConfig = getWebpackConfigForAutomatedTests( {
+			identityFile: 'path/to/secrets.js'
+		} );
+
+		const plugin = webpackConfig.plugins[ 0 ];
+
+		expect( getDefinitionsFromFile.firstCall.args[ 0 ] ).to.equal( 'path/to/secrets.js' );
+		expect( plugin.definitions.LICENSE_KEY ).to.equal( 'secret' );
 	} );
 } );

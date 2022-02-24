@@ -16,6 +16,7 @@ describe( 'removeDir', () => {
 
 	before( () => {
 		mockery.enable( {
+			useCleanCache: true,
 			warnOnReplace: false,
 			warnOnUnregistered: false
 		} );

@@ -20,6 +20,7 @@ describe( 'utils', () => {
 		sandbox = sinon.createSandbox();
 
 		mockery.enable( {
+			useCleanCache: true,
 			warnOnReplace: false,
 			warnOnUnregistered: false
 		} );

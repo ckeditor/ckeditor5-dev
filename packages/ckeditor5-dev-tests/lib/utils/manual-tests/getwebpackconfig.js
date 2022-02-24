@@ -10,6 +10,7 @@ const WebpackNotifierPlugin = require( './webpacknotifierplugin' );
 const { getPostCssConfig } = require( '@ckeditor/ckeditor5-dev-utils' ).styles;
 const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
 const webpack = require( 'webpack' );
+const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
 
 /**
  * @param {Object} options
@@ -135,28 +136,3 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 	return webpackConfig;
 };
 
-/**
- * @param {String|null} definitionSource
- * @returns {Object}
- */
-function getDefinitionsFromFile( definitionSource ) {
-	if ( !definitionSource ) {
-		return {};
-	}
-
-	try {
-		const definitions = require( definitionSource );
-
-		const stringifiedDefinitions = {};
-
-		for ( const definitionName in definitions ) {
-			stringifiedDefinitions[ definitionName ] = JSON.stringify( definitions[ definitionName ] );
-		}
-
-		return stringifiedDefinitions;
-	} catch ( err ) {
-		console.error( err.message );
-
-		return {};
-	}
-}

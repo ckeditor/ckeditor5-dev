@@ -9,16 +9,20 @@ const path = require( 'path' );
 const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
 const webpack = require( 'webpack' );
 const { getPostCssConfig } = require( '@ckeditor/ckeditor5-dev-utils' ).styles;
+const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
 
 /**
  * @param {Object} options
  * @returns {Object}
  */
 module.exports = function getWebpackConfigForAutomatedTests( options ) {
+	const definitions = Object.assign( {}, getDefinitionsFromFile( options.identityFile ) );
+
 	const config = {
 		mode: 'development',
 
 		plugins: [
+			new webpack.DefinePlugin( definitions ),
 			new webpack.ProvidePlugin( {
 				process: 'process/browser'
 			} )

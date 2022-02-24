@@ -24,6 +24,7 @@ describe( 'getKarmaConfig()', () => {
 		process.env = Object.assign( {}, originalEnv, { TRAVIS: false } );
 
 		mockery.enable( {
+			useCleanCache: true,
 			warnOnReplace: false,
 			warnOnUnregistered: false
 		} );
@@ -72,31 +73,6 @@ describe( 'getKarmaConfig()', () => {
 		expect( karmaConfig ).to.have.own.property( 'singleRun', true );
 	} );
 
-	it( 'should define proxies to static assets resources', () => {
-		const karmaConfig = getKarmaConfig( {
-			files: [ '*' ],
-			reporter: 'mocha',
-			sourceMap: false,
-			coverage: false,
-			browsers: [ 'Chrome' ],
-			watch: false,
-			verbose: false,
-			themePath: 'workspace/path/to/theme.css',
-			entryFile: 'workspace/entry-file.js',
-			globPatterns: {
-				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
-			}
-		} );
-
-		expect( karmaConfig ).to.have.own.property( 'proxies' );
-		expect( karmaConfig.proxies ).to.have.own.property( '/assets/' );
-
-		expect( karmaConfig.files ).to.be.an( 'array' );
-		expect( karmaConfig.files.length ).to.equal( 2 );
-		expect( karmaConfig.files[ 0 ] ).to.equal( 'workspace/entry-file.js' );
-		expect( karmaConfig.files[ 1 ].pattern ).to.equal( 'packages/ckeditor5-utils/tests/_assets/**/*' );
-	} );
-
 	// See: https://github.com/ckeditor/ckeditor5/issues/8823
 	it( 'should define proxies to static assets resources', () => {
 		const karmaConfig = getKarmaConfig( {
@@ -115,8 +91,14 @@ describe( 'getKarmaConfig()', () => {
 		} );
 
 		expect( karmaConfig ).to.have.own.property( 'proxies' );
+		expect( karmaConfig.proxies ).to.have.own.property( '/assets/' );
 		expect( karmaConfig.proxies ).to.have.own.property( '/example.com/image.png' );
 		expect( karmaConfig.proxies ).to.have.own.property( '/www.example.com/image.png' );
+
+		expect( karmaConfig.files ).to.be.an( 'array' );
+		expect( karmaConfig.files.length ).to.equal( 2 );
+		expect( karmaConfig.files[ 0 ] ).to.equal( 'workspace/entry-file.js' );
+		expect( karmaConfig.files[ 1 ].pattern ).to.equal( 'packages/ckeditor5-utils/tests/_assets/**/*' );
 	} );
 
 	it( 'should contain a list of available plugins', () => {
