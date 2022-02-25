@@ -1,6 +1,33 @@
 Changelog
 =========
 
+## [28.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v28.0.4...v28.1.0) (2022-02-25)
+
+### Features
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added `--identity-file` (`-i`) option for automated tests. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/68d079c34c8f57bd617116af7e1e531c602ce630))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v28.0.4 => v28.1.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v28.0.4 => v28.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v28.0.4 => v28.1.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v28.0.4 => v28.1.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v28.0.4 => v28.1.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v28.0.4 => v28.1.0
+</details>
+
+
 ## [28.0.4](https://github.com/ckeditor/ckeditor5-dev/compare/v28.0.3...v28.0.4) (2022-02-17)
 
 ### Bug fixes
