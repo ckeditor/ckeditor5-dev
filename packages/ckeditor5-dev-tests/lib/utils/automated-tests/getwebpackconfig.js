@@ -81,6 +81,23 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 				'node_modules',
 				path.resolve( __dirname, '..', '..', '..', 'node_modules' )
 			]
+		},
+
+		output: {
+			// Get rid of the "webpack://" protocol to make the paths clickable in the terminal.
+			devtoolModuleFilenameTemplate: info => {
+				if ( process.platform === 'win32' ) {
+					return info.resourcePath;
+				}
+
+				return '/' + info.resourcePath;
+			}
+		},
+
+		// Since webpack v5 it looks like splitting out the source code into the commons and runtime chunks broke the source map support.
+		optimization: {
+			runtimeChunk: false,
+			splitChunks: false
 		}
 	};
 
