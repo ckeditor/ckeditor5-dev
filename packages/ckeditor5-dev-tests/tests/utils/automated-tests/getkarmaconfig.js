@@ -11,12 +11,14 @@ const sinon = require( 'sinon' );
 const path = require( 'path' );
 
 describe( 'getKarmaConfig()', () => {
-	let getKarmaConfig, sandbox;
+	let getKarmaConfig, sandbox, karmaConfigOverrides;
+
 	const originalEnv = process.env;
 
 	beforeEach( () => {
 		sandbox = sinon.createSandbox();
 
+		karmaConfigOverrides = sandbox.spy();
 		sandbox.stub( process, 'cwd' ).returns( 'workspace' );
 		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
 
@@ -30,6 +32,7 @@ describe( 'getKarmaConfig()', () => {
 		} );
 
 		mockery.registerMock( './getwebpackconfig', options => options );
+		mockery.registerMock( 'karma-config-overrides', karmaConfigOverrides );
 
 		getKarmaConfig = require( '../../../lib/utils/automated-tests/getkarmaconfig' );
 	} );
@@ -119,5 +122,18 @@ describe( 'getKarmaConfig()', () => {
 
 		expect( karmaConfig.plugins ).to.be.an( 'array' );
 		expect( karmaConfig.plugins ).to.have.lengthOf.above( 0 );
+	} );
+
+	it( 'should enable webpack watcher when passed the "karmaConfigOverrides" option (execute in Intellij)', () => {
+		const karmaConfig = getKarmaConfig( {
+			files: [ '*' ],
+			reporter: 'mocha',
+			karmaConfigOverrides: 'karma-config-overrides',
+			globPatterns: {
+				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
+			}
+		} );
+
+		expect( karmaConfig.webpack ).to.contain.property( 'watch', true );
 	} );
 } );
