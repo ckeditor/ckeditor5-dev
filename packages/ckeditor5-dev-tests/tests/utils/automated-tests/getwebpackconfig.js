@@ -10,7 +10,7 @@ const sinon = require( 'sinon' );
 const { expect } = require( 'chai' );
 
 describe( 'getWebpackConfigForAutomatedTests()', () => {
-	const escapedPathSep = require( 'path' ).sep == '/' ? '/' : '\\\\';
+	const escapedPathSep = require( 'path' ).sep === '/' ? '/' : '\\\\';
 	let getWebpackConfigForAutomatedTests, getDefinitionsFromFile, postCssOptions;
 
 	beforeEach( () => {
@@ -49,6 +49,8 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 
 		expect( webpackConfig.devtool ).to.equal( undefined );
 		expect( webpackConfig.output ).to.have.property( 'devtoolModuleFilenameTemplate' );
+		expect( webpackConfig ).to.have.property( 'watchOptions' );
+		expect( webpackConfig.watchOptions ).to.have.property( 'aggregateTimeout', 500 );
 	} );
 
 	it( 'should return webpack configuration with istanbul loader', () => {

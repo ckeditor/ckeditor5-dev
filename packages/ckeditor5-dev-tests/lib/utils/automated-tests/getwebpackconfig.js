@@ -21,6 +21,10 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	const config = {
 		mode: 'development',
 
+		watchOptions: {
+			aggregateTimeout: 500
+		},
+
 		plugins: [
 			new webpack.DefinePlugin( definitions ),
 			new webpack.ProvidePlugin( {
