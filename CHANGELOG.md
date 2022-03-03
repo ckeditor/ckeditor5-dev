@@ -1,6 +1,32 @@
 Changelog
 =========
 
+## [28.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/v28.1.0...v28.1.1) (2022-03-03)
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Karma integrated with the IntelliJ IDE rebuilds the test bundle when detecting a change. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/6279bcddded9aed8a6bdeb3ccf3e766bd3b6e1aa))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Paths to files are clickable from a console if a test fails. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/6279bcddded9aed8a6bdeb3ccf3e766bd3b6e1aa))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Karma should not execute the test bundle twice when detecting a change (a macOS case). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/6279bcddded9aed8a6bdeb3ccf3e766bd3b6e1aa))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v28.1.0 => v28.1.1
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v28.1.0 => v28.1.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v28.1.0 => v28.1.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v28.1.0 => v28.1.1
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v28.1.0 => v28.1.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v28.1.0 => v28.1.1
+</details>
+
+
 ## [28.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v28.0.4...v28.1.0) (2022-02-25)
 
 ### Features
