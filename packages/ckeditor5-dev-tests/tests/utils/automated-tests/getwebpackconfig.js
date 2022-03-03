@@ -10,7 +10,7 @@ const sinon = require( 'sinon' );
 const { expect } = require( 'chai' );
 
 describe( 'getWebpackConfigForAutomatedTests()', () => {
-	const escapedPathSep = require( 'path' ).sep == '/' ? '/' : '\\\\';
+	const escapedPathSep = require( 'path' ).sep === '/' ? '/' : '\\\\';
 	let getWebpackConfigForAutomatedTests, getDefinitionsFromFile, postCssOptions;
 
 	beforeEach( () => {
@@ -48,6 +48,9 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		expect( webpackConfig.resolveLoader.modules[ 0 ] ).to.equal( 'node_modules' );
 
 		expect( webpackConfig.devtool ).to.equal( undefined );
+		expect( webpackConfig.output ).to.have.property( 'devtoolModuleFilenameTemplate' );
+		expect( webpackConfig ).to.have.property( 'watchOptions' );
+		expect( webpackConfig.watchOptions ).to.have.property( 'aggregateTimeout', 500 );
 	} );
 
 	it( 'should return webpack configuration with istanbul loader', () => {
@@ -108,12 +111,16 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		] );
 	} );
 
-	it( 'should return webpack configuration with correct devtool', () => {
+	it( 'should return webpack configuration with source map support', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
 			sourceMap: true
 		} );
 
 		expect( webpackConfig.devtool ).to.equal( 'inline-source-map' );
+		expect( webpackConfig.optimization ).to.deep.equal( {
+			runtimeChunk: false,
+			splitChunks: false
+		} );
 	} );
 
 	it( 'should contain a correct paths in resolveLoader', () => {

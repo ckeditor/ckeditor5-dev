@@ -21,6 +21,10 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	const config = {
 		mode: 'development',
 
+		watchOptions: {
+			aggregateTimeout: 500
+		},
+
 		plugins: [
 			new webpack.DefinePlugin( definitions ),
 			new webpack.ProvidePlugin( {
@@ -81,6 +85,11 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 				'node_modules',
 				path.resolve( __dirname, '..', '..', '..', 'node_modules' )
 			]
+		},
+
+		output: {
+			// Get rid of the "webpack://" protocol to make the paths clickable in the terminal.
+			devtoolModuleFilenameTemplate: info => info.resourcePath
 		}
 	};
 
@@ -90,6 +99,12 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 		//
 		// See https://github.com/ckeditor/ckeditor5/issues/11006.
 		config.devtool = 'inline-source-map';
+
+		// Since webpack v5 it looks like splitting out the source code into the commons and runtime chunks broke the source map support.
+		config.optimization = {
+			runtimeChunk: false,
+			splitChunks: false
+		};
 	}
 
 	if ( options.coverage ) {
