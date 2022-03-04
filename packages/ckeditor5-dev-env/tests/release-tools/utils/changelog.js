@@ -154,6 +154,101 @@ Foo`;
 				expect( utils.getChangesForVersion( 'v0.3.0' ) )
 					.to.equal( 'Foo' );
 			} );
+
+			it( 'does not leak to other releases (case 1)', () => {
+				const changelog = [
+					'Changelog',
+					'=========',
+					'',
+					'## 1.0.2 (2022-02-22)',
+					'',
+					'### Other changes',
+					'',
+					'* Other change for `1.0.2`.',
+					'',
+					'',
+					'## 1.0.1 (2022-02-22)',
+					'',
+					'### Other changes',
+					'',
+					'* Other change for `1.0.1`.',
+					'',
+					'',
+					'## 1.0.0 (2022-02-22)',
+					'',
+					'This is the initial release.'
+				].join( '\n' );
+
+				sandbox.stub( utils, 'getChangelog' ).returns( utils.changelogHeader + changelog );
+
+				expect( utils.getChangesForVersion( '1.0.0' ) ).to.equal( 'This is the initial release.' );
+			} );
+
+			it( 'does not leak to other releases (case 2)', () => {
+				const changelog = [
+					'Changelog',
+					'=========',
+					'',
+					'## 1.0.2 (2022-02-22)',
+					'',
+					'### Other changes',
+					'',
+					'* Other change for `1.0.2`.',
+					'',
+					'',
+					'## 1.0.1 (2022-02-22)',
+					'',
+					'### Other changes',
+					'',
+					'* Other change for `1.0.1`.',
+					'',
+					'',
+					'## 1.0.0 (2022-02-22)',
+					'',
+					'This is the initial release.'
+				].join( '\n' );
+
+				sandbox.stub( utils, 'getChangelog' ).returns( utils.changelogHeader + changelog );
+
+				expect( utils.getChangesForVersion( '1.0.1' ) ).to.equal( [
+					'### Other changes',
+					'',
+					'* Other change for `1.0.1`.'
+				].join( '\n' ) );
+			} );
+
+			it( 'does not leak to other releases (case 3)', () => {
+				const changelog = [
+					'Changelog',
+					'=========',
+					'',
+					'## 1.0.2 (2022-02-22)',
+					'',
+					'### Other changes',
+					'',
+					'* Other change for `1.0.2`.',
+					'',
+					'',
+					'## 1.0.1 (2022-02-22)',
+					'',
+					'### Other changes',
+					'',
+					'* Other change for `1.0.1`.',
+					'',
+					'',
+					'## 1.0.0 (2022-02-22)',
+					'',
+					'This is the initial release.'
+				].join( '\n' );
+
+				sandbox.stub( utils, 'getChangelog' ).returns( utils.changelogHeader + changelog );
+
+				expect( utils.getChangesForVersion( '1.0.2' ) ).to.equal( [
+					'### Other changes',
+					'',
+					'* Other change for `1.0.2`.'
+				].join( '\n' ) );
+			} );
 		} );
 
 		describe( 'getChangelog()', () => {
