@@ -135,7 +135,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					.to.equal( 'Foo' );
 			} );
 
-			it( 'captures correct range of changes (case 1)', () => {
+			it( 'captures correct range of changes (headers are URLs)', () => {
 				const changelog = [
 					'## [0.3.0](https://github.com) (2017-01-13)',
 					'',
@@ -162,7 +162,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					.to.equal( '2' );
 			} );
 
-			it( 'captures correct range of changes (case 2)', () => {
+			it( 'captures correct range of changes (headers are plain text, "the initial" release check)', () => {
 				const changelog = [
 					'Changelog',
 					'=========',
@@ -191,7 +191,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				expect( utils.getChangesForVersion( '1.0.0' ) ).to.equal( 'This is the initial release.' );
 			} );
 
-			it( 'captures correct range of changes (case 3)', () => {
+			it( 'captures correct range of changes (headers are plain text, "middle" version check)', () => {
 				const changelog = [
 					'Changelog',
 					'=========',
@@ -224,7 +224,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				].join( '\n' ) );
 			} );
 
-			it( 'captures correct range of changes (case 4)', () => {
+			it( 'captures correct range of changes (headers are plain text, "the latest" check)', () => {
 				const changelog = [
 					'Changelog',
 					'=========',
