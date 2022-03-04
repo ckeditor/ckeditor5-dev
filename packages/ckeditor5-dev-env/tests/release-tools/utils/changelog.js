@@ -121,7 +121,21 @@ describe( 'dev-env/release-tools/utils', () => {
 				expect( utils.getChangesForVersion( 'v1.0.0' ) ).to.equal( null );
 			} );
 
-			it( 'does not leak or stop too early', () => {
+			it( 'works when date is not specified', () => {
+				const changelog = [
+					'## 0.3.0',
+					'',
+					'Foo'
+				].join( '\n' );
+
+				sandbox.stub( utils, 'getChangelog' )
+					.returns( utils.changelogHeader + changelog );
+
+				expect( utils.getChangesForVersion( 'v0.3.0' ) )
+					.to.equal( 'Foo' );
+			} );
+
+			it( 'captures correct range of changes (case 1)', () => {
 				const changelog = [
 					'## [0.3.0](https://github.com) (2017-01-13)',
 					'',
@@ -148,21 +162,7 @@ describe( 'dev-env/release-tools/utils', () => {
 					.to.equal( '2' );
 			} );
 
-			it( 'works when date is not specified', () => {
-				const changelog = [
-					'## 0.3.0',
-					'',
-					'Foo'
-				].join( '\n' );
-
-				sandbox.stub( utils, 'getChangelog' )
-					.returns( utils.changelogHeader + changelog );
-
-				expect( utils.getChangesForVersion( 'v0.3.0' ) )
-					.to.equal( 'Foo' );
-			} );
-
-			it( 'does not leak to other releases (case 1)', () => {
+			it( 'captures correct range of changes (case 2)', () => {
 				const changelog = [
 					'Changelog',
 					'=========',
@@ -191,7 +191,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				expect( utils.getChangesForVersion( '1.0.0' ) ).to.equal( 'This is the initial release.' );
 			} );
 
-			it( 'does not leak to other releases (case 2)', () => {
+			it( 'captures correct range of changes (case 3)', () => {
 				const changelog = [
 					'Changelog',
 					'=========',
@@ -224,7 +224,7 @@ describe( 'dev-env/release-tools/utils', () => {
 				].join( '\n' ) );
 			} );
 
-			it( 'does not leak to other releases (case 3)', () => {
+			it( 'captures correct range of changes (case 4)', () => {
 				const changelog = [
 					'Changelog',
 					'=========',
