@@ -37,10 +37,11 @@ describe( 'dev-env/release-tools/utils', () => {
 					'* Cloned the main module. ([abcd123](https://github.com))'
 				].join( '\n' );
 
-				const changelog =
-					`## [0.1.0](https://github.com) (2017-01-13)
-
-${ expectedChangelog }`;
+				const changelog = [
+					'## [0.1.0](https://github.com) (2017-01-13)',
+					'',
+					expectedChangelog
+				].join( '\n' );
 
 				const currentChangelogStub = sandbox.stub( utils, 'getChangelog' )
 					.returns( utils.changelogHeader + changelog );
@@ -58,10 +59,11 @@ ${ expectedChangelog }`;
 					'* Cloned the main module. ([abcd123](https://github.com))'
 				].join( '\n' );
 
-				const changelog =
-					`## 0.1.0 (2017-01-13)
-
-${ expectedChangelog }`;
+				const changelog = [
+					'## 0.1.0 (2017-01-13)',
+					'',
+					expectedChangelog
+				].join( '\n' );
 
 				const currentChangelogStub = sandbox.stub( utils, 'getChangelog' )
 					.returns( utils.changelogHeader + changelog );
@@ -73,25 +75,27 @@ ${ expectedChangelog }`;
 			} );
 
 			it( 'returns changes between tags', () => {
-				const expectedChangelog =
-`### Features
+				const expectedChangelog = [
+					'### Features',
+					'',
+					'* Cloned the main module. ([abcd123](https://github.com))',
+					'',
+					'### BREAKING CHANGE',
+					'',
+					'* Bump the major!'
+				].join( '\n' );
 
-* Cloned the main module. ([abcd123](https://github.com))
-
-### BREAKING CHANGE
-
-* Bump the major!`;
-
-				const changelog =
-`## [1.0.0](https://github.com/) (2017-01-13)
-
-${ expectedChangelog }
-
-## [0.1.0](https://github.com) (2017-01-13)
-
-### Features
-
-* Cloned the main module. ([abcd123](https://github.com))`;
+				const changelog = [
+					'## [1.0.0](https://github.com/) (2017-01-13)',
+					'',
+					expectedChangelog,
+					'',
+					'## [0.1.0](https://github.com) (2017-01-13)',
+					'',
+					'### Features',
+					'',
+					'* Cloned the main module. ([abcd123](https://github.com))'
+				].join( '\n' );
 
 				const currentChangelogStub = sandbox.stub( utils, 'getChangelog' )
 					.returns( utils.changelogHeader + changelog );
@@ -103,12 +107,13 @@ ${ expectedChangelog }
 			} );
 
 			it( 'returns null if cannot find changes for the specified version', () => {
-				const changelog =
-`## [0.1.0](https://github.com) (2017-01-13)
-
-### Features
-
-* Cloned the main module. ([abcd123](https://github.com))`;
+				const changelog = [
+					'## [0.1.0](https://github.com) (2017-01-13)',
+					'',
+					'### Features',
+					'',
+					'* Cloned the main module. ([abcd123](https://github.com))'
+				].join( '\n' );
 
 				sandbox.stub( utils, 'getChangelog' )
 					.returns( utils.changelogHeader + changelog );
@@ -117,20 +122,21 @@ ${ expectedChangelog }
 			} );
 
 			it( 'does not leak or stop too early', () => {
-				const changelog =
-`## [0.3.0](https://github.com) (2017-01-13)
-
-3
-
-Some text ## [like a release header]
-
-## [0.2.0](https://github.com) (2017-01-13)
-
-2
-
-## [0.1.0](https://github.com) (2017-01-13)
-
-1`;
+				const changelog = [
+					'## [0.3.0](https://github.com) (2017-01-13)',
+					'',
+					'3',
+					'',
+					'Some text ## [like a release header]',
+					'',
+					'## [0.2.0](https://github.com) (2017-01-13)',
+					'',
+					'2',
+					'',
+					'## [0.1.0](https://github.com) (2017-01-13)',
+					'',
+					'1'
+				].join( '\n' );
 
 				sandbox.stub( utils, 'getChangelog' )
 					.returns( utils.changelogHeader + changelog );
@@ -143,10 +149,11 @@ Some text ## [like a release header]
 			} );
 
 			it( 'works when date is not specified', () => {
-				const changelog =
-`## 0.3.0
-
-Foo`;
+				const changelog = [
+					'## 0.3.0',
+					'',
+					'Foo'
+				].join( '\n' );
 
 				sandbox.stub( utils, 'getChangelog' )
 					.returns( utils.changelogHeader + changelog );
