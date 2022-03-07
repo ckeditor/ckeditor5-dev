@@ -1,5 +1,7 @@
 # JSDoc plugins overview
 
+[![npm version](https://badge.fury.io/js/%40ckeditor%2Fjsdoc-plugins.svg)](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins)
+
 ## Overview
 
 This repository consists of few plugins which extend the capabilities of [JSDoc](https://github.com/jsdoc3/jsdoc).

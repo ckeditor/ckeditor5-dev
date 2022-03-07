@@ -1,6 +1,8 @@
 CKEditor 5 development utilities library
 ========================================
 
+[![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-utils.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)
+
 Utils for [CKEditor 5](https://ckeditor.com) development tools packages.
 
 More information about development tools packages can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev>.
