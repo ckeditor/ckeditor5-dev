@@ -26,7 +26,7 @@ describe( 'equalMarkup chai assertion', () => {
 			).to.equalMarkup(
 				'<paragraph>foo bXXX[]r baz</paragraph>'
 			);
-		} ).to.not.throw;
+		} ).to.not.throw();
 	} );
 
 	it( 'should throw AssertionError for unequal markups', () => {

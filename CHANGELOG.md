@@ -1,6 +1,155 @@
 Changelog
 =========
 
+## [28.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/v28.1.0...v28.1.1) (2022-03-03)
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Karma integrated with the IntelliJ IDE rebuilds the test bundle when detecting a change. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/6279bcddded9aed8a6bdeb3ccf3e766bd3b6e1aa))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Paths to files are clickable from a console if a test fails. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/6279bcddded9aed8a6bdeb3ccf3e766bd3b6e1aa))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Karma should not execute the test bundle twice when detecting a change (a macOS case). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/6279bcddded9aed8a6bdeb3ccf3e766bd3b6e1aa))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v28.1.0 => v28.1.1
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v28.1.0 => v28.1.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v28.1.0 => v28.1.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v28.1.0 => v28.1.1
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v28.1.0 => v28.1.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v28.1.0 => v28.1.1
+</details>
+
+
+## [28.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v28.0.4...v28.1.0) (2022-02-25)
+
+### Features
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added `--identity-file` (`-i`) option for automated tests. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/68d079c34c8f57bd617116af7e1e531c602ce630))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v28.0.4 => v28.1.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v28.0.4 => v28.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v28.0.4 => v28.1.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v28.0.4 => v28.1.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v28.0.4 => v28.1.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v28.0.4 => v28.1.0
+</details>
+
+
+## [28.0.4](https://github.com/ckeditor/ckeditor5-dev/compare/v28.0.3...v28.0.4) (2022-02-17)
+
+### Bug fixes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Added the missing "webpack" dependency in "package.json" which is a peer dependency of the `@ckeditor/ckeditor5-dev-utils` package. Closes [ckeditor/ckeditor5#11300](https://github.com/ckeditor/ckeditor5/issues/11300). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/43ef619beaeda725165af871227ffca023c962a4))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v28.0.3 => v28.0.4
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v28.0.3 => v28.0.4
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v28.0.3 => v28.0.4
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v28.0.3 => v28.0.4
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v28.0.3 => v28.0.4
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v28.0.3 => v28.0.4
+</details>
+
+
+## [28.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/v28.0.2...v28.0.3) (2022-02-17)
+
+### Other changes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Added handling for the `©` character when updating licenses. Closes [ckeditor/ckeditor5#11119](https://github.com/ckeditor/ckeditor5/issues/11119). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/5e71a3085109cc6126b3272362946c0f5aaba37f))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v28.0.2 => v28.0.3
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v28.0.2 => v28.0.3
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v28.0.2 => v28.0.3
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v28.0.2 => v28.0.3
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v28.0.2 => v28.0.3
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v28.0.2 => v28.0.3
+</details>
+
+
+## [28.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/v28.0.1...v28.0.2) (2022-02-03)
+
+### Other changes
+
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: Upgraded a version of the Puppeteer package to `13.1.3`. Closes [ckeditor/ckeditor5#11014](https://github.com/ckeditor/ckeditor5/issues/11014). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/8e82c65a6140c675488ac4305ead61012eb0253c))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v28.0.1 => v28.0.2
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v28.0.1 => v28.0.2
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v28.0.1 => v28.0.2
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v28.0.1 => v28.0.2
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v28.0.1 => v28.0.2
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v28.0.1 => v28.0.2
+</details>
+
+
+## [28.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v28.0.0...v28.0.1) (2022-01-20)
+
+### Bug fixes
+
+* **[jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins)**: Protected members should not be rendered in API docs. Closes [ckeditor/ckeditor5#11143](https://github.com/ckeditor/ckeditor5/issues/11143). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/d85e2f95ac10d931cbadc6d15291b05b2d23ff7b))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v28.0.0 => v28.0.1
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v28.0.0 => v28.0.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v28.0.0 => v28.0.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v28.0.0 => v28.0.1
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v28.0.0 => v28.0.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v28.0.0 => v28.0.1
+</details>
+
+
 ## [28.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v27.4.0...v28.0.0) (2022-01-12)
 
 This version contains updated copyrights in a license in all source files.

@@ -11,12 +11,14 @@ const sinon = require( 'sinon' );
 const path = require( 'path' );
 
 describe( 'getKarmaConfig()', () => {
-	let getKarmaConfig, sandbox;
+	let getKarmaConfig, sandbox, karmaConfigOverrides;
+
 	const originalEnv = process.env;
 
 	beforeEach( () => {
 		sandbox = sinon.createSandbox();
 
+		karmaConfigOverrides = sandbox.spy();
 		sandbox.stub( process, 'cwd' ).returns( 'workspace' );
 		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
 
@@ -24,11 +26,13 @@ describe( 'getKarmaConfig()', () => {
 		process.env = Object.assign( {}, originalEnv, { TRAVIS: false } );
 
 		mockery.enable( {
+			useCleanCache: true,
 			warnOnReplace: false,
 			warnOnUnregistered: false
 		} );
 
 		mockery.registerMock( './getwebpackconfig', options => options );
+		mockery.registerMock( 'karma-config-overrides', karmaConfigOverrides );
 
 		getKarmaConfig = require( '../../../lib/utils/automated-tests/getkarmaconfig' );
 	} );
@@ -72,31 +76,6 @@ describe( 'getKarmaConfig()', () => {
 		expect( karmaConfig ).to.have.own.property( 'singleRun', true );
 	} );
 
-	it( 'should define proxies to static assets resources', () => {
-		const karmaConfig = getKarmaConfig( {
-			files: [ '*' ],
-			reporter: 'mocha',
-			sourceMap: false,
-			coverage: false,
-			browsers: [ 'Chrome' ],
-			watch: false,
-			verbose: false,
-			themePath: 'workspace/path/to/theme.css',
-			entryFile: 'workspace/entry-file.js',
-			globPatterns: {
-				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
-			}
-		} );
-
-		expect( karmaConfig ).to.have.own.property( 'proxies' );
-		expect( karmaConfig.proxies ).to.have.own.property( '/assets/' );
-
-		expect( karmaConfig.files ).to.be.an( 'array' );
-		expect( karmaConfig.files.length ).to.equal( 2 );
-		expect( karmaConfig.files[ 0 ] ).to.equal( 'workspace/entry-file.js' );
-		expect( karmaConfig.files[ 1 ].pattern ).to.equal( 'packages/ckeditor5-utils/tests/_assets/**/*' );
-	} );
-
 	// See: https://github.com/ckeditor/ckeditor5/issues/8823
 	it( 'should define proxies to static assets resources', () => {
 		const karmaConfig = getKarmaConfig( {
@@ -115,8 +94,14 @@ describe( 'getKarmaConfig()', () => {
 		} );
 
 		expect( karmaConfig ).to.have.own.property( 'proxies' );
+		expect( karmaConfig.proxies ).to.have.own.property( '/assets/' );
 		expect( karmaConfig.proxies ).to.have.own.property( '/example.com/image.png' );
 		expect( karmaConfig.proxies ).to.have.own.property( '/www.example.com/image.png' );
+
+		expect( karmaConfig.files ).to.be.an( 'array' );
+		expect( karmaConfig.files.length ).to.equal( 2 );
+		expect( karmaConfig.files[ 0 ] ).to.equal( 'workspace/entry-file.js' );
+		expect( karmaConfig.files[ 1 ].pattern ).to.equal( 'packages/ckeditor5-utils/tests/_assets/**/*' );
 	} );
 
 	it( 'should contain a list of available plugins', () => {
@@ -137,5 +122,18 @@ describe( 'getKarmaConfig()', () => {
 
 		expect( karmaConfig.plugins ).to.be.an( 'array' );
 		expect( karmaConfig.plugins ).to.have.lengthOf.above( 0 );
+	} );
+
+	it( 'should enable webpack watcher when passed the "karmaConfigOverrides" option (execute in Intellij)', () => {
+		const karmaConfig = getKarmaConfig( {
+			files: [ '*' ],
+			reporter: 'mocha',
+			karmaConfigOverrides: 'karma-config-overrides',
+			globPatterns: {
+				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
+			}
+		} );
+
+		expect( karmaConfig.webpack ).to.contain.property( 'watch', true );
 	} );
 } );

@@ -30,7 +30,7 @@ const utils = {
 		version = version.replace( /^v/, '' );
 
 		const changelog = utils.getChangelog( cwd ).replace( utils.changelogHeader, '\n' );
-		const match = changelog.match( new RegExp( `\\n(## \\[?${ version }\\]?[\\s\\S]+?)(?:\\n## \\[|$)` ) );
+		const match = changelog.match( new RegExp( `\\n(## \\[?${ version }\\]?[\\s\\S]+?)(?:\\n## \\[?|$)` ) );
 
 		if ( !match || !match[ 1 ] ) {
 			return null;

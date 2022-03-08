@@ -55,7 +55,7 @@ module.exports = function bumpYear( params ) {
 
 	filesToUpdate.forEach( fileName => {
 		const fileContent = fs.readFileSync( fileName, 'utf-8' );
-		const yearRegexp = new RegExp( `(?<=Copyright \\(c\\) ${ params.initialYear }-)\\d{4}`, 'g' );
+		const yearRegexp = new RegExp( `(?<=Copyright (?:\\(c\\)|©) ${ params.initialYear }-)\\d{4}`, 'g' );
 
 		const updatedFileContent = fileContent.replace( yearRegexp, currentYear );
 

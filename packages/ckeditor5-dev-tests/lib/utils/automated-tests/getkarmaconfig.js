@@ -76,6 +76,7 @@ module.exports = function getKarmaConfig( options ) {
 		webpack: getWebpackConfigForAutomatedTests( {
 			files: Object.keys( options.globPatterns ).map( key => options.globPatterns[ key ] ),
 			sourceMap: options.sourceMap,
+			identityFile: options.identityFile,
 			coverage: options.coverage,
 			themePath: options.themePath,
 			debug: options.debug
@@ -175,12 +176,13 @@ module.exports = function getKarmaConfig( options ) {
 	}
 
 	if ( options.karmaConfigOverrides ) {
-		// Add the plugins config with its default value, because if it'll be added by
-		// the override, "karma-*" plugins will not be loaded and things will break.
-		karmaConfig.plugins = [ 'karma-*' ];
-
 		const overrides = require( options.karmaConfigOverrides );
 		overrides( karmaConfig );
+
+		// Watch for source files when running in Intellij IDE, for instance, WebStorm.
+		// Otherwise, Karma compiles sources once, and the test bundle uses old code.
+		// For the future reference: https://youtrack.jetbrains.com/issue/WEB-12496.
+		karmaConfig.webpack.watch = true;
 	}
 
 	return karmaConfig;

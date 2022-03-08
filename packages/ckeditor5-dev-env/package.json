@@ -1,11 +1,11 @@
 {
   "name": "@ckeditor/ckeditor5-dev-env",
-  "version": "28.0.0",
+  "version": "28.1.1",
   "description": "Tasks used during development of CKEditor 5.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^28.0.0",
+    "@ckeditor/ckeditor5-dev-utils": "^28.1.1",
     "@octokit/rest": "^17.9.2",
     "@transifex/api": "^2.1.2",
     "chalk": "^4.0.0",
@@ -25,7 +25,8 @@
     "mkdirp": "^1.0.4",
     "parse-github-url": "^1.0.2",
     "request": "^2.88.2",
-    "semver": "^7.3.2"
+    "semver": "^7.3.2",
+    "webpack": "^5.58.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",

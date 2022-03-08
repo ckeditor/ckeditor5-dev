@@ -12,7 +12,7 @@ require( '../packages/ckeditor5-dev-env' )
 		cwd: process.cwd(),
 		packages: 'packages',
 		transformScope: name => {
-			if ( name === 'jsdoc' ) {
+			if ( name === 'jsdoc-plugins' ) {
 				return 'https://www.npmjs.com/package/@ckeditor/jsdoc-plugins';
 			}
 
