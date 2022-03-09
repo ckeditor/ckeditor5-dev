@@ -23,7 +23,10 @@ module.exports = {
 	getProjectData,
 	getTranslations,
 	getResourceName,
-	getLanguageCode
+	getLanguageCode,
+	createResource,
+	createSourceFile,
+	getResourceUploadDetails
 };
 
 /**
@@ -35,6 +38,82 @@ function init( token ) {
 	if ( !transifexApi.auth ) {
 		transifexApi.setup( { auth: token } );
 	}
+}
+
+/**
+ * @param options
+ * @returns {Promise}
+ */
+async function createResource( options ) {
+	const { organizationName, projectName, resourceName } = options;
+
+	return transifexApi.Resource.create( {
+		name: resourceName,
+		slug: resourceName,
+		relationships: {
+			i18n_format: {
+				data: {
+					id: 'PO',
+					type: 'i18n_formats'
+				}
+			},
+			project: {
+				data: {
+					id: `o:${ organizationName }:p:${ projectName }`,
+					type: 'projects'
+				}
+			}
+		}
+	} );
+}
+
+/**
+ * @param options
+ * @param {String} options.organizationName
+ * @param {String} options.projectName
+ * @param {String} options.resourceName
+ * @param {String} options.content
+ * @returns {Promise}
+ */
+async function createSourceFile( options ) {
+	const { organizationName, projectName, resourceName, content } = options;
+	const requestData = {
+		attributes: {
+			content,
+			content_encoding: 'text'
+		},
+		relationships: {
+			resource: {
+				data: {
+					id: `o:${ organizationName }:p:${ projectName }:r:${ resourceName }`,
+					type: 'resources'
+				}
+			}
+		},
+		type: 'resource_strings_async_uploads'
+	};
+
+	return transifexApi.ResourceStringAsyncUpload.create( requestData )
+		.then( response => response.id );
+}
+
+/**
+ *
+ * @param {String} uploadId
+ * @returns {Promise}
+ */
+async function getResourceUploadDetails( uploadId ) {
+	return new Promise( resolve => {
+		setTimeout( async function checkUploadStatus() {
+			const statusResponse = await transifexApi.ResourceStringAsyncUpload.get( uploadId );
+
+			if ( statusResponse.attributes.status === 'pending' || statusResponse.attributes.status === 'processing' ) {
+				return setTimeout( checkUploadStatus, 500 );
+			}
+
+			return resolve( statusResponse.attributes );
+		}, 250 );
+	} );
 }
 
 /**
