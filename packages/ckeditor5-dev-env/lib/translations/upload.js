@@ -7,13 +7,13 @@
 
 const fs = require( 'fs/promises' );
 const path = require( 'path' );
-const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
 const Table = require( 'cli-table' );
 const chalk = require( 'chalk' );
-// const transifexService = require( './transifex-service' );
 const transifexService = require( './transifex-service-for-api-v3.0' );
 const { verifyProperties } = require( './utils' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { tools, logger: loggerFactory } = require( '@ckeditor/ckeditor5-dev-utils' );
+
+const RESOURCE_REGEXP = /r:(?<resourceName>[a-z0-9_-]+)$/i;
 
 /**
  * Uploads translations to the Transifex from collected files that are saved by default in the 'ckeditor5/build/.transifex' directory.
@@ -27,46 +27,41 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @returns {Promise}
  */
 module.exports = async function upload( config ) {
-	// verifyProperties( config, [ 'token' ] );
+	const logger = loggerFactory();
 
+	verifyProperties( config, [ 'token', 'organizationName', 'projectName', 'cwd', 'packages' ] );
 	transifexService.init( config.token );
 
-	logger.info( 'Fetching project information...' );
+	logProcess( 'Fetching project information...' );
 
 	const localizablePackageNames = [ ...config.packages.keys() ];
-
 	const { organizationName, projectName } = config;
 
 	// Find existing resources on Transifex.
-	const { resources } = await transifexService.getProjectData(
-		organizationName,
-		projectName,
-		localizablePackageNames
-	);
-
-	const resourcesToUpload = new Map();
+	const { resources } = await transifexService.getProjectData( organizationName, projectName, localizablePackageNames );
 
 	// Then, prepare a map containing all resources to upload.
 	// The map defines a path to the translation file for each package.
 	// Also, it knows whether the resource exists on Tx. If don't, a new one should be created.
-	for ( const [ resourceName, relativePath ] of config.packages ) {
-		resourcesToUpload.set( resourceName, {
-			potFile: path.join( config.cwd, relativePath, 'en.pot' ),
-			isNew: !resources.find( item => item.attributes.name === resourceName )
-		} );
-	}
+	const resourcesToUpload = new Map(
+		[ ...config.packages ].map( ( [ resourceName, relativePath ] ) => ( [
+			resourceName,
+			{
+				potFile: path.join( config.cwd, relativePath, 'en.pot' ),
+				isNew: !resources.find( item => item.attributes.name === resourceName )
+			}
+		] ) )
+	);
 
-	const summaryCollection = {
-		created: [],
-		updated: []
-	};
-
-	logger.info( 'Uploading new translations...' );
+	// An empty line for making a space between list of resources and the new process info.
+	logProcess();
+	logProcess( 'Uploading new translations...' );
 
 	const uploadIds = [];
 
+	// For each package, create a new resource if needed, then upload the new source file with translations.
 	for ( const [ resourceName, { potFile, isNew } ] of resourcesToUpload ) {
-		const spinner = tools.createSpinner( `Processing "${ resourceName }"...`, { indentLevel: 1 } );
+		const spinner = tools.createSpinner( `Processing "${ resourceName }"`, { indentLevel: 1, emoji: '👉' } );
 		spinner.start();
 
 		// For new packages, before uploading their translations, we need to create a dedicated resource.
@@ -75,158 +70,135 @@ module.exports = async function upload( config ) {
 		}
 
 		const content = await fs.readFile( potFile, 'utf-8' );
+		const taskId = await transifexService.createSourceFile( { organizationName, projectName, resourceName, content } );
 
-		const jobId = await transifexService.createSourceFile( { organizationName, projectName, resourceName, content } );
-
-		uploadIds.push( jobId );
+		uploadIds.push( taskId );
 		spinner.finish();
 	}
 
-	logger.info( 'Collecting responses...' );
+	// Chalk supports chaining which is hard to mock in tests. Let's simplify it.
+	const takeWhileText = chalk.gray( 'It takes a while.' );
+	const spinner = tools.createSpinner( 'Collecting responses... ' + chalk.italic( takeWhileText ) );
+
+	spinner.start();
 
 	const uploadDetails = await Promise.all(
 		uploadIds.map( async uuid => transifexService.getResourceUploadDetails( uuid ) )
 	);
 
-	for ( const details of uploadDetails ) {
-		
+	spinner.finish();
+
+	const summary = uploadDetails
+		.map( extractResourceDetailsFromTx( resourcesToUpload ) )
+		.sort( sortResources() )
+		.map( formatTableRow() );
+
+	logProcess( 'Done.' );
+
+	const table = new Table( {
+		head: [ 'Package name', 'Is new?', 'Added', 'Updated', 'Removed' ],
+		style: { compact: true }
+	} );
+
+	table.push( ...summary );
+	logger.info( table.toString() );
+
+	/**
+	 * @param {String} [message]
+	 */
+	function logProcess( message ) {
+		if ( !message ) {
+			logger.info( '' );
+		} else {
+			logger.info( '\n📍 ' + chalk.cyan( message ) );
+		}
 	}
-
-	logger.info( 'Done.' );
-
-	printSummary( summaryCollection );
-
-	// // Make sure to use unix paths.
-	// const pathToPoTranslations = config.translationsDirectory.split( /[\\/]/g ).join( '/' );
-	//
-	// const potFiles = fs.readdirSync( pathToPoTranslations ).map( packageName => ( {
-	// 	packageName,
-	// 	path: path.posix.join( pathToPoTranslations, packageName, 'en.pot' )
-	// } ) );
-	//
-
-	//
-	// return Promise.resolve()
-	// 	.then( () => transifexService.getResources( config ) )
-	// 	.then( resources => resources.map( resource => resource.slug ) )
-	// 	.then( uploadedPackageNames => getUploadedPackages( potFiles, uploadedPackageNames ) )
-	// 	.then( areUploadedResources => createOrUpdateResources( config, areUploadedResources, potFiles, summaryCollection ) )
-	// 	.then( () => {
-	// 		logger.info( 'All resources uploaded.\n' );
-	//
-	// 		printSummary( summaryCollection );
-	// 	} )
-	// 	.catch( err => {
-	// 		logger.error( err );
-	// 		throw err;
-	// 	} );
 };
 
-function getUploadedPackages( potFiles, uploadedPackageNames ) {
-	return potFiles.map( potFile => uploadedPackageNames.includes( potFile.packageName ) );
-}
+/**
+ * Returns a factory function that process a response from Transifex and prepares a single resource
+ * to be displayed in the summary table.
+ *
+ * @param {Map} resourcesToUpload
+ * @returns {Function}
+ */
+function extractResourceDetailsFromTx( resourcesToUpload ) {
+	return response => {
+		const { resourceName } = response.related.resource.id.match( RESOURCE_REGEXP ).groups;
 
-function createOrUpdateResources( loginConfig, areUploadedResources, potFiles, summaryCollection ) {
-	return Promise.all(
-		areUploadedResources.map( ( isUploadedResource, index ) => {
-			return createOrUpdateResource( loginConfig, potFiles[ index ], isUploadedResource, summaryCollection );
-		} )
-	);
-}
+		const { isNew } = resourcesToUpload.get( resourceName );
+		const created = response.attributes.details.strings_created;
+		const updated = response.attributes.details.strings_updated;
+		const deleted = response.attributes.details.strings_deleted;
 
-function createOrUpdateResource( config, potFile, isUploadedResource, summaryCollection ) {
-	const { packageName, path } = potFile;
-	const requestConfig = {
-		url: config.url,
-		token: config.token,
-		name: packageName,
-		slug: packageName,
-		content: fs.createReadStream( path )
-	};
-
-	logger.info( `Processing "${ packageName }"...` );
-
-	if ( isUploadedResource ) {
-		return transifexService.putResourceContent( requestConfig )
-			.then( parsedResponse => {
-				summaryCollection.updated.push( [ packageName, parsedResponse ] );
-			} );
-	}
-
-	return transifexService.postResource( requestConfig )
-		.then( parsedResponse => {
-			summaryCollection.created.push( [ packageName, parsedResponse ] );
-		} );
-}
-
-function printSummary( summaryCollection ) {
-	if ( summaryCollection.created.length ) {
-		logger.info( chalk.underline( 'Created resources:' ) + '\n' );
-
-		const table = new Table( {
-			head: [ 'Package name', 'Added' ],
-			style: { compact: true }
-		} );
-
-		const items = summaryCollection.created.sort( sortByPackageName() );
-
-		for ( const [ packageName, response ] of items ) {
-			table.push( [ packageName, response[ 0 ].toString() ] );
-		}
-
-		logger.info( table.toString() + '\n' );
-	}
-
-	if ( summaryCollection.updated.length ) {
-		logger.info( chalk.underline( 'Updated resources:' ) + '\n' );
-
-		const table = new Table( {
-			head: [ 'Package name', 'Added', 'Updated', 'Removed' ],
-			style: { compact: true }
-		} );
-
-		const changedItems = summaryCollection.updated
-			.filter( item => ( item[ 1 ].strings_added + item[ 1 ].strings_updated + item[ 1 ].strings_delete ) > 0 )
-			.sort( sortByPackageName() );
-
-		const nonChangedItems = summaryCollection.updated
-			.filter( item => !changedItems.includes( item ) )
-			.sort( sortByPackageName() );
-
-		for ( const [ packageName, response ] of changedItems ) {
-			table.push( [
-				packageName,
-				response.strings_added.toString(),
-				response.strings_updated.toString(),
-				response.strings_delete.toString()
-			] );
-		}
-
-		for ( const [ packageName, response ] of nonChangedItems ) {
-			const rowData = [
-				packageName,
-				response.strings_added.toString(),
-				response.strings_updated.toString(),
-				response.strings_delete.toString()
-			];
-
-			table.push( rowData.map( item => chalk.gray( item ) ) );
-		}
-
-		logger.info( table.toString() );
-	}
-
-	function sortByPackageName() {
-		return ( a, b ) => {
-			/* istanbul ignore else */
-			if ( a[ 0 ] < b[ 0 ] ) {
-				return -1;
-			} else if ( a[ 0 ] > b[ 0 ] ) {
-				return 1;
-			}
-
-			/* istanbul ignore next */
-			return 0;
+		return {
+			resourceName,
+			isNew,
+			created,
+			updated,
+			deleted,
+			changes: created + updated + deleted
 		};
-	}
+	};
+}
+
+/**
+ * Returns a function that sorts a list of resources with the following criteria:
+ *
+ *  * New packages should be on top.
+ *  * Then, packages containing changes.
+ *  * Then, the rest of the packages (not ned and not containing changes).
+ *
+ * When all packages are grouped, they are sorted alphabetically.
+ *
+ * @returns {Function}
+ */
+function sortResources() {
+	return ( first, second ) => {
+		// Sort by "isNew".
+		if ( first.isNew && !second.isNew ) {
+			return -1;
+		} else if ( !first.isNew && second.isNew ) {
+			return 1;
+		}
+
+		// Then, sort by "has changes".
+		if ( first.changes && !second.changes ) {
+			return -1;
+		} else if ( !first.changes && second.changes ) {
+			return 1;
+		}
+
+		// Then, sort packages by their names.
+		return first.resourceName.localeCompare( second.resourceName );
+	};
+}
+
+/**
+ * Returns a function that formats a row before displaying it. Each row contains five columns that
+ * represent the following data:
+ *
+ *  (1) A resource name.
+ *  (2) If the resource is new, the 🆕 emoji is displayed.
+ *  (3) A number of added translations.
+ *  (4) A number of modified translations (including removed).
+ *  (5) A number of removed translations.
+ *
+ * Resources without changes are grayed out.
+ *
+ * @returns {Function}
+ */
+function formatTableRow() {
+	return ( { resourceName, isNew, created, updated, deleted, changes } ) => {
+		// Format a single row.
+		const data = [ resourceName, isNew ? '🆕' : '', created.toString(), updated.toString(), deleted.toString() ];
+
+		// For new resources or if it contains changes, use the default terminal color to print details.
+		if ( changes || isNew ) {
+			return data;
+		}
+
+		// But if it doesn't, gray out.
+		return data.map( row => chalk.gray( row ) );
+	};
 }

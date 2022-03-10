@@ -111,7 +111,7 @@ async function getResourceUploadDetails( uploadId ) {
 				return setTimeout( checkUploadStatus, 500 );
 			}
 
-			return resolve( statusResponse.attributes );
+			return resolve( statusResponse );
 		}, 250 );
 	} );
 }
