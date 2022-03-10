@@ -22,6 +22,7 @@ const INDENT_SIZE = 3;
  * @param {String} title Description of the current processed task.
  * @param {Object} [options={}]
  * @param {Boolean} [options.isDisabled] Whether the spinner should be disabled.
+ * @param {String} [options.emoji='📍'] An emoji that will replace the spinner when it finishes.
  * @param {Number} [options.indentLevel=1] The indent level.
  * @return {CKEditor5Spinner}
  */
@@ -29,6 +30,7 @@ module.exports = function createSpinner( title, options = {} ) {
 	const isEnabled = !options.isDisabled && isInteractive();
 	const indentLevel = options.indentLevel || 0;
 	const indent = ' '.repeat( indentLevel * INDENT_SIZE );
+	const emoji = options.emoji || '📍';
 
 	let timerId;
 
@@ -69,7 +71,7 @@ module.exports = function createSpinner( title, options = {} ) {
 			clearLastLine();
 
 			cliCursor.show();
-			console.log( `${ indent }📍 ${ title }` );
+			console.log( `${ indent }${ emoji } ${ title }` );
 		}
 	};
 

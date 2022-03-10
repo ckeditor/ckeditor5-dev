@@ -274,5 +274,18 @@ describe( 'lib/utils/create-spinner', () => {
 			expect( consoleStub.calledOnce ).to.equal( true );
 			expect( consoleStub.firstCall.args[ 0 ] ).to.equal( '   📍 Foo.' );
 		} );
+
+		it( 'prints the specified emoji when finished', () => {
+			const spinner = createSpinner( 'Foo.', { emoji: '👉' } );
+			const consoleStub = sinon.stub( console, 'log' );
+
+			spinner.start();
+			spinner.finish();
+
+			consoleStub.restore();
+
+			expect( consoleStub.calledOnce ).to.equal( true );
+			expect( consoleStub.firstCall.args[ 0 ] ).to.equal( '👉 Foo.' );
+		} );
 	} );
 } );
