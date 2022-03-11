@@ -41,13 +41,17 @@ function init( token ) {
 }
 
 /**
- * @param options
+ * Creates a new resource on Transifex.
+ *
+ * @param {Object} options
+ * @param {String} options.organizationName The name of the organization to which the project belongs.
+ * @param {String} options.projectName The name of the project for creating the resource.
+ * @param {String} options.resourceName The name of the resource to create.
  * @returns {Promise}
  */
 async function createResource( options ) {
 	const { organizationName, projectName, resourceName } = options;
-
-	return transifexApi.Resource.create( {
+	const requestParams = {
 		name: resourceName,
 		slug: resourceName,
 		relationships: {
@@ -64,16 +68,20 @@ async function createResource( options ) {
 				}
 			}
 		}
-	} );
+	};
+
+	return transifexApi.Resource.create( requestParams );
 }
 
 /**
- * @param options
- * @param {String} options.organizationName
- * @param {String} options.projectName
- * @param {String} options.resourceName
- * @param {String} options.content
- * @returns {Promise}
+ * Uploads a new translations source for the specified resource (package).
+ *
+ * @param {Object} options
+ * @param {String} options.organizationName The name of the organization to which the project belongs.
+ * @param {String} options.projectName The name of the project for uploading the translations entries.
+ * @param {String} options.resourceName The The name of resource.
+ * @param {String} options.content A content of the `*.po` file containing source for translations.
+ * @returns {Promise.<String>}
  */
 async function createSourceFile( options ) {
 	const { organizationName, projectName, resourceName, content } = options;
@@ -98,20 +106,24 @@ async function createSourceFile( options ) {
 }
 
 /**
+ * Resolves a promise containing an object with a summary of processing the uploaded source
+ * file created by the Transifex service if the upload task is completed.
  *
  * @param {String} uploadId
  * @returns {Promise}
  */
 async function getResourceUploadDetails( uploadId ) {
-	return new Promise( resolve => {
+	return new Promise( ( resolve, reject ) => {
 		setTimeout( async function checkUploadStatus() {
-			const statusResponse = await transifexApi.ResourceStringAsyncUpload.get( uploadId );
+			transifexApi.ResourceStringAsyncUpload.get( uploadId )
+				.then( statusResponse => {
+					if ( statusResponse.attributes.status === 'pending' || statusResponse.attributes.status === 'processing' ) {
+						return setTimeout( checkUploadStatus, 500 );
+					}
 
-			if ( statusResponse.attributes.status === 'pending' || statusResponse.attributes.status === 'processing' ) {
-				return setTimeout( checkUploadStatus, 500 );
-			}
-
-			return resolve( statusResponse );
+					return resolve( statusResponse );
+				} )
+				.catch( reject );
 		}, 250 );
 	} );
 }
@@ -155,8 +167,8 @@ async function getProjectData( organizationName, projectName, localizablePackage
 }
 
 /**
- * Fetches all the translations and the language source file in the PO format for the given resource. The download procedure consists of the
- * following steps:
+ * Fetches all the translations and the language source file in the PO format for the given resource.
+ * The download procedure consists of the following steps:
  *
  * (1) Create the download requests for the language source file and all the translations. This download request triggers the Transifex
  * service to start preparing the PO file.
