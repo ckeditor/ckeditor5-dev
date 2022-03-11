@@ -37,7 +37,7 @@ module.exports = function createSpinner( title, options = {} ) {
 	return {
 		start() {
 			if ( !isEnabled ) {
-				console.log( `📍 ${ title }` );
+				console.log( `${ emoji } ${ title }` );
 				return;
 			}
 
@@ -62,7 +62,9 @@ module.exports = function createSpinner( title, options = {} ) {
 			}, cliSpinners.dots12.interval );
 		},
 
-		finish() {
+		finish( options = {} ) {
+			const finishEmoji = options.emoji || emoji;
+
 			if ( !isEnabled ) {
 				return;
 			}
@@ -71,7 +73,7 @@ module.exports = function createSpinner( title, options = {} ) {
 			clearLastLine();
 
 			cliCursor.show();
-			console.log( `${ indent }${ emoji } ${ title }` );
+			console.log( `${ indent }${ finishEmoji } ${ title }` );
 		}
 	};
 
