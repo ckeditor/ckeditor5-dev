@@ -15,8 +15,20 @@ const { tools, logger: loggerFactory } = require( '@ckeditor/ckeditor5-dev-utils
 
 const RESOURCE_REGEXP = /r:(?<resourceName>[a-z0-9_-]+)$/i;
 
+const TRANSIFEX_RESOURCE_ERRORS = {};
+
 /**
- * Uploads translations to the Transifex from collected files that are saved by default in the 'ckeditor5/build/.transifex' directory.
+ * Uploads translations to the Transifex.
+ *
+ * The process for each package looks like the following:
+ *  * If a package does not exist on Tx - create it.
+ *  * Upload a new source file for the given package (resource).
+ *  * Verify Tx response.
+ *
+ * At the end, the script displays a summary table.
+ *
+ * The Transifex API may end with an error at any stage. In such a case, the resource is not processed anymore.
+ * It is saved to a file (`.transifex-failed-uploads.json`). Rerunning the script will process only packages specified in the file.
  *
  * @param {Object} config
  * @param {String} config.token Token to the Transifex API.
@@ -27,18 +39,40 @@ const RESOURCE_REGEXP = /r:(?<resourceName>[a-z0-9_-]+)$/i;
  * @returns {Promise}
  */
 module.exports = async function upload( config ) {
-	const logger = loggerFactory();
-
 	verifyProperties( config, [ 'token', 'organizationName', 'projectName', 'cwd', 'packages' ] );
-	transifexService.init( config.token );
+
+	const logger = loggerFactory();
+	const TRANSIFEX_FAILED_UPLOAD_FILE = path.join( config.cwd, '.transifex-failed-uploads.json' );
+	const isFailedUploadFileAvailable = await isFile( TRANSIFEX_FAILED_UPLOAD_FILE );
+
+	// When rerunning the task, it is an array containing names of packages that failed.
+	let failedPackages = null;
+
+	// Check if rerunning the same task again.
+	if ( isFailedUploadFileAvailable ) {
+		logger.warning( 'Found the file containing a list of packages that failed during the last script execution.' );
+		logger.warning( 'The script will process only packages listed in the file instead of all passed as "config.packages".' );
+
+		failedPackages = Object.keys( require( TRANSIFEX_FAILED_UPLOAD_FILE ) );
+	}
 
 	logProcess( 'Fetching project information...' );
+
+	transifexService.init( config.token );
 
 	const localizablePackageNames = [ ...config.packages.keys() ];
 	const { organizationName, projectName } = config;
 
 	// Find existing resources on Transifex.
-	const { resources } = await transifexService.getProjectData( organizationName, projectName, localizablePackageNames );
+	const projectData = await transifexService.getProjectData( organizationName, projectName, localizablePackageNames )
+		.catch( () => {
+			logger.error( `Cannot find project details for "${ organizationName }/${ projectName }".` );
+			logger.error( 'Make sure you specified a valid auth token or an organization/project names.' );
+		} );
+
+	if ( !projectData ) {
+		return Promise.resolve();
+	}
 
 	// Then, prepare a map containing all resources to upload.
 	// The map defines a path to the translation file for each package.
@@ -48,60 +82,95 @@ module.exports = async function upload( config ) {
 			resourceName,
 			{
 				potFile: path.join( config.cwd, relativePath, 'en.pot' ),
-				isNew: !resources.find( item => item.attributes.name === resourceName )
+				isNew: !projectData.resources.find( item => item.attributes.name === resourceName )
 			}
 		] ) )
 	);
 
-	// An empty line for making a space between list of resources and the new process info.
-	logProcess();
 	logProcess( 'Uploading new translations...' );
 
 	const uploadIds = [];
 
 	// For each package, create a new resource if needed, then upload the new source file with translations.
 	for ( const [ resourceName, { potFile, isNew } ] of resourcesToUpload ) {
+		// The package should be processed unless the previous run failed and isn't specified in the failed packages collection.
+		if ( failedPackages && !failedPackages.includes( resourceName ) ) {
+			continue;
+		}
+
 		const spinner = tools.createSpinner( `Processing "${ resourceName }"`, { indentLevel: 1, emoji: '👉' } );
 		spinner.start();
 
 		// For new packages, before uploading their translations, we need to create a dedicated resource.
 		if ( isNew ) {
-			await transifexService.createResource( { organizationName, projectName, resourceName } );
+			await transifexService.createResource( { organizationName, projectName, resourceName } )
+				.catch( errorHandlerFactory( resourceName, spinner ) );
+		}
+
+		// Abort if creating the resource ended with an error.
+		if ( hasError( resourceName ) ) {
+			continue;
 		}
 
 		const content = await fs.readFile( potFile, 'utf-8' );
-		const taskId = await transifexService.createSourceFile( { organizationName, projectName, resourceName, content } );
 
-		uploadIds.push( taskId );
-		spinner.finish();
+		await transifexService.createSourceFile( { organizationName, projectName, resourceName, content } )
+			.then( uuid => {
+				uploadIds.push( { resourceName, uuid } );
+				spinner.finish();
+			} )
+			.catch( errorHandlerFactory( resourceName, spinner ) );
 	}
+
+	// An empty line for making a space between list of resources and the new process info.
+	logProcess();
 
 	// Chalk supports chaining which is hard to mock in tests. Let's simplify it.
 	const takeWhileText = chalk.gray( 'It takes a while.' );
-	const spinner = tools.createSpinner( 'Collecting responses... ' + chalk.italic( takeWhileText ) );
+	const spinner = tools.createSpinner( chalk.cyan( 'Collecting responses...' ) + ' ' + chalk.italic( takeWhileText ) );
 
 	spinner.start();
 
-	const uploadDetails = await Promise.all(
-		uploadIds.map( async uuid => transifexService.getResourceUploadDetails( uuid ) )
-	);
+	const uploadDetails = uploadIds.map( async ( { resourceName, uuid } ) => {
+		return transifexService.getResourceUploadDetails( uuid )
+			.catch( errorHandlerFactory( resourceName ) );
+	} );
 
-	spinner.finish();
-
-	const summary = uploadDetails
+	const summary = ( await Promise.all( uploadDetails ) )
+		.filter( Boolean )
 		.map( extractResourceDetailsFromTx( resourcesToUpload ) )
 		.sort( sortResources() )
 		.map( formatTableRow() );
 
+	spinner.finish();
+
 	logProcess( 'Done.' );
 
-	const table = new Table( {
-		head: [ 'Package name', 'Is new?', 'Added', 'Updated', 'Removed' ],
-		style: { compact: true }
-	} );
+	if ( summary.length ) {
+		const table = new Table( {
+			head: [ 'Package name', 'Is new?', 'Added', 'Updated', 'Removed' ],
+			style: { compact: true }
+		} );
 
-	table.push( ...summary );
-	logger.info( table.toString() );
+		table.push( ...summary );
+
+		logger.info( table.toString() );
+	}
+
+	if ( hasError() ) {
+		// An empty line for making a space between steps and the warning message.
+		logger.info( '' );
+		logger.warning( 'Not all translations were uploaded due to errors in Transifex API.' );
+		logger.warning( `Review the "${ chalk.underline( TRANSIFEX_FAILED_UPLOAD_FILE ) }" file for more details.` );
+		logger.warning( 'Rerunning the script will process only packages specified in the file.' );
+
+		await fs.writeFile( TRANSIFEX_FAILED_UPLOAD_FILE, JSON.stringify( TRANSIFEX_RESOURCE_ERRORS, null, 2 ) + '\n', 'utf-8' );
+	}
+	// If the `.transifex-failed-uploads.json` file exists but the run has finished with no errors,
+	// remove the file as it is not required anymore.
+	else if ( isFailedUploadFileAvailable ) {
+		await fs.unlink( TRANSIFEX_FAILED_UPLOAD_FILE );
+	}
 
 	/**
 	 * @param {String} [message]
@@ -201,4 +270,49 @@ function formatTableRow() {
 		// But if it doesn't, gray out.
 		return data.map( row => chalk.gray( row ) );
 	};
+}
+
+/**
+ * Returns `true` if the database containing error for the specified `packageName`.
+ *
+ * If the `packageName` is not specified, returns `true` if any error occurs.
+ *
+ * @param {String|null} [packageName=null]
+ * @returns {Boolean}
+ */
+function hasError( packageName = null ) {
+	if ( !packageName ) {
+		return Boolean( Object.keys( TRANSIFEX_RESOURCE_ERRORS ).length );
+	}
+
+	return Boolean( TRANSIFEX_RESOURCE_ERRORS[ packageName ] );
+}
+
+/**
+ * Creates a callback that stores errors from Transifex for the given `packageName`.
+ *
+ * @param {String} packageName
+ * @param {CKEditor5Spinner|null} [spinner=null]
+ * @return {Function}
+ */
+function errorHandlerFactory( packageName, spinner ) {
+	return errorResponse => {
+		if ( spinner ) {
+			spinner.finish( { emoji: '❌' } );
+		}
+
+		// The script does not continue to process a package if it fails.
+		// Hence, we don't have to check do we override existing errors.
+		TRANSIFEX_RESOURCE_ERRORS[ packageName ] = errorResponse.errors.map( e => e.detail );
+	};
+}
+
+/**
+ * @param {String} pathToFile
+ * @return {Promise.<Boolean>}
+ */
+function isFile( pathToFile ) {
+	return fs.lstat( pathToFile )
+		.then( () => true )
+		.catch( () => false );
 }
