@@ -648,7 +648,7 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 			clock.restore();
 		} );
 
-		it( 'should return a promise that resolves after 250ms (Transifex processed the upload)', async () => {
+		it( 'should return a promise with resolved upload details (Transifex processed the upload)', async () => {
 			const apiResponse = {
 				id: '4abfc726-6a27-4c33-9d99-e5254c8df748',
 				attributes: {
@@ -662,9 +662,6 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
 			expect( promise ).to.be.a( 'promise' );
-			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 0 );
-
-			await clock.tickAsync( 250 );
 			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 1 );
 			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
@@ -673,7 +670,7 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 			expect( result ).to.equal( apiResponse );
 		} );
 
-		it( 'should return a promise that resolves after 1250ms (Transifex processed the upload 1s, status=pending)', async () => {
+		it( 'should return a promise that resolves after 3000ms (Transifex processed the upload 1s, status=pending)', async () => {
 			const apiResponse = {
 				id: '4abfc726-6a27-4c33-9d99-e5254c8df748',
 				attributes: {
@@ -685,32 +682,22 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 			stubs.getResourceStringAsyncUpload.onFirstCall().resolves( {
 				attributes: { status: 'pending' }
 			} );
-			stubs.getResourceStringAsyncUpload.onSecondCall().resolves( {
-				attributes: { status: 'pending' }
-			} );
-			stubs.getResourceStringAsyncUpload.onThirdCall().resolves( apiResponse );
+			stubs.getResourceStringAsyncUpload.onSecondCall().resolves( apiResponse );
 
 			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
 			expect( promise ).to.be.a( 'promise' );
-			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 0 );
-
-			await clock.tickAsync( 250 );
 			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 1 );
 			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
-			await clock.tickAsync( 500 );
+			await clock.tickAsync( 3000 );
 			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 2 );
-			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
-
-			await clock.tickAsync( 500 );
-			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 3 );
-			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+			expect( stubs.getResourceStringAsyncUpload.secondCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
 			expect( await promise ).to.equal( apiResponse );
 		} );
 
-		it( 'should return a promise that resolves after 1250ms (Transifex processed the upload 1s, status=processing)', async () => {
+		it( 'should return a promise that resolves after 3000ms (Transifex processed the upload 1s, status=processing)', async () => {
 			const apiResponse = {
 				id: '4abfc726-6a27-4c33-9d99-e5254c8df748',
 				attributes: {
@@ -722,27 +709,17 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 			stubs.getResourceStringAsyncUpload.onFirstCall().resolves( {
 				attributes: { status: 'processing' }
 			} );
-			stubs.getResourceStringAsyncUpload.onSecondCall().resolves( {
-				attributes: { status: 'processing' }
-			} );
-			stubs.getResourceStringAsyncUpload.onThirdCall().resolves( apiResponse );
+			stubs.getResourceStringAsyncUpload.onSecondCall().resolves( apiResponse );
 
 			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
 			expect( promise ).to.be.a( 'promise' );
-			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 0 );
-
-			await clock.tickAsync( 250 );
 			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 1 );
 			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
-			await clock.tickAsync( 500 );
+			await clock.tickAsync( 3000 );
 			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 2 );
-			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
-
-			await clock.tickAsync( 500 );
-			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 3 );
-			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+			expect( stubs.getResourceStringAsyncUpload.secondCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
 			expect( await promise ).to.equal( apiResponse );
 		} );
@@ -752,7 +729,7 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 
 			stubs.getResourceStringAsyncUpload.rejects( apiResponse );
 
-			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' )
+			return transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' )
 				.then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
@@ -761,15 +738,6 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 						expect( err ).to.equal( apiResponse );
 					}
 				);
-
-			expect( promise ).to.be.a( 'promise' );
-			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 0 );
-
-			await clock.tickAsync( 250 );
-			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 1 );
-			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
-
-			return promise;
 		} );
 
 		it( 'should return a promise that rejects if Transifex returned an error (delay)', async () => {
@@ -791,15 +759,42 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 				);
 
 			expect( promise ).to.be.a( 'promise' );
-			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 0 );
 
-			await clock.tickAsync( 250 );
-			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 1 );
-			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+			await clock.tickAsync( 3000 );
 
-			await clock.tickAsync( 500 );
-			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 2 );
-			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+			return promise;
+		} );
+
+		it( 'should return a promise that rejects if reached the maximum number of requests to Transifex', async () => {
+			// 10 is equal to the `MAX_REQUEST_ATTEMPTS` constant.
+			for ( let i = 0; i < 10; ++i ) {
+				stubs.getResourceStringAsyncUpload.onCall( i ).resolves( {
+					attributes: { status: 'processing' }
+				} );
+			}
+
+			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' )
+				.then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					err => {
+						expect( err ).to.deep.equal( {
+							errors: [
+								{
+									detail: 'Failed to retrieve the upload details.'
+								}
+							]
+						} );
+					}
+				);
+
+			expect( promise ).to.be.a( 'promise' );
+
+			for ( let i = 0; i < 9; ++i ) {
+				expect( stubs.getResourceStringAsyncUpload.callCount, `getResourceStringAsyncUpload, call: ${ i + 1 }` ).to.equal( i + 1 );
+				await clock.tickAsync( 3000 );
+			}
 
 			return promise;
 		} );

@@ -6,7 +6,7 @@
 const { transifexApi } = require( '@transifex/api' );
 const fetch = require( 'node-fetch' );
 
-const MAX_DOWNLOAD_ATTEMPTS = 10;
+const MAX_REQUEST_ATTEMPTS = 10;
 const REQUEST_RETRY_TIMEOUT = 3000; // In milliseconds.
 
 // It may happen that sending several dozen requests at the same time fails due to the limitations in the operating system on the network
@@ -110,22 +110,30 @@ async function createSourceFile( options ) {
  * file created by the Transifex service if the upload task is completed.
  *
  * @param {String} uploadId
+ * @param {Number} [numberOfAttempts=1] A number containing a current attempt.
  * @returns {Promise}
  */
-async function getResourceUploadDetails( uploadId ) {
-	return new Promise( ( resolve, reject ) => {
-		setTimeout( async function checkUploadStatus() {
-			transifexApi.ResourceStringAsyncUpload.get( uploadId )
-				.then( statusResponse => {
-					if ( statusResponse.attributes.status === 'pending' || statusResponse.attributes.status === 'processing' ) {
-						return setTimeout( checkUploadStatus, 500 );
-					}
+async function getResourceUploadDetails( uploadId, numberOfAttempts = 1 ) {
+	return transifexApi.ResourceStringAsyncUpload.get( uploadId )
+		.then( statusResponse => {
+			const status = statusResponse.attributes.status;
+			const isPending = status === 'pending' || status === 'processing';
 
-					return resolve( statusResponse );
-				} )
-				.catch( reject );
-		}, 250 );
-	} );
+			if ( !isPending ) {
+				return statusResponse;
+			}
+
+			if ( numberOfAttempts === MAX_REQUEST_ATTEMPTS ) {
+				// Rejects with an object that looks like the `JsonApi` error produced by the Transifex API.
+				return Promise.reject( {
+					errors: [
+						{ detail: 'Failed to retrieve the upload details.' }
+					]
+				} );
+			}
+			return wait( REQUEST_RETRY_TIMEOUT )
+				.then( () => getResourceUploadDetails( uploadId, numberOfAttempts + 1 ) );
+		} );
 }
 
 /**
@@ -255,7 +263,7 @@ function createDownloadRequest( resource, language, numberOfAttempts = 1 ) {
 			type: requestType
 		} )
 		.catch( async () => {
-			if ( numberOfAttempts === MAX_DOWNLOAD_ATTEMPTS ) {
+			if ( numberOfAttempts === MAX_REQUEST_ATTEMPTS ) {
 				const resourceName = getResourceName( resource );
 				const languageCode = getLanguageCode( language );
 
@@ -273,7 +281,7 @@ function createDownloadRequest( resource, language, numberOfAttempts = 1 ) {
 }
 
 /**
- * Tries to fetch the file, up to the MAX_DOWNLOAD_ATTEMPTS times, with the REQUEST_RETRY_TIMEOUT milliseconds timeout between each
+ * Tries to fetch the file, up to the MAX_REQUEST_ATTEMPTS times, with the REQUEST_RETRY_TIMEOUT milliseconds timeout between each
  * attempt. There are three possible cases that are handled during downloading a file:
  *
  * (1) According to the Transifex API v3.0, when the requested file is ready for download, the Transifex service returns HTTP code 303,
@@ -306,7 +314,7 @@ async function downloadFile( downloadRequest, numberOfAttempts = 1 ) {
 		return [ languageCode, translation ];
 	}
 
-	if ( !response.ok || numberOfAttempts === MAX_DOWNLOAD_ATTEMPTS ) {
+	if ( !response.ok || numberOfAttempts === MAX_REQUEST_ATTEMPTS ) {
 		let errorMessage = 'Failed to download the translation file. ';
 
 		if ( !response.ok ) {
