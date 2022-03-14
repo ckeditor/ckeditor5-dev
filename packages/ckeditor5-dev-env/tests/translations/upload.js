@@ -5,18 +5,15 @@
 
 'use strict';
 
-const path = require( 'path' );
 const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 const proxyquire = require( 'proxyquire' );
+const mockery = require( 'mockery' );
 
 describe( 'dev-env/translations/upload()', () => {
-	let sandbox, stubs, upload, packageNames, serverResources, fileContents;
+	let stubs, upload;
 
 	beforeEach( () => {
-		sandbox = sinon.createSandbox();
-
 		mockery.enable( {
 			useCleanCache: true,
 			warnOnReplace: false,
@@ -24,21 +21,29 @@ describe( 'dev-env/translations/upload()', () => {
 		} );
 
 		stubs = {
+			fs: {
+				readFile: sinon.stub(),
+				writeFile: sinon.stub(),
+				lstat: sinon.stub(),
+				unlink: sinon.stub()
+			},
+
+			path: {
+				join: sinon.stub().callsFake( ( ...chunks ) => chunks.join( '/' ) )
+			},
+
 			logger: {
-				info: sandbox.stub(),
-				warning: sandbox.stub(),
-				error: sandbox.stub()
+				info: sinon.stub(),
+				warning: sinon.stub(),
+				error: sinon.stub()
 			},
 
 			transifexService: {
-				getResources: sandbox.spy( () => Promise.resolve( serverResources ) ),
-				postResource: sandbox.stub().resolves( [] ),
-				putResourceContent: sandbox.stub().resolves( {} )
-			},
-
-			fs: {
-				readdirSync: sandbox.spy( () => packageNames ),
-				createReadStream: sandbox.spy( fileName => fileContents[ fileName ] )
+				init: sinon.stub(),
+				getProjectData: sinon.stub(),
+				createResource: sinon.stub(),
+				createSourceFile: sinon.stub(),
+				getResourceUploadDetails: sinon.stub()
 			},
 
 			table: {
@@ -47,424 +52,686 @@ describe( 'dev-env/translations/upload()', () => {
 				toString: sinon.stub()
 			},
 
+			tools: {
+				createSpinner: sinon.stub()
+			},
+
 			chalk: {
-				gray: sinon.stub(),
-				underline: sinon.stub()
+				gray: sinon.stub().callsFake( msg => msg ),
+				cyan: sinon.stub().callsFake( msg => msg ),
+				italic: sinon.stub().callsFake( msg => msg ),
+				underline: sinon.stub().callsFake( msg => msg )
+			},
+
+			utils: {
+				verifyProperties: sinon.stub()
 			}
 		};
 
-		mockery.registerMock( './transifex-service', stubs.transifexService );
-
-		mockery.registerMock( 'cli-table', class Table {
-			constructor( ...args ) {
-				stubs.table.constructor( ...args );
-			}
-
-			push( ...args ) {
-				return stubs.table.push( ...args );
-			}
-
-			toString( ...args ) {
-				return stubs.table.toString( ...args );
-			}
+		// `proxyquire` does not understand dynamic imports.
+		mockery.registerMock( '/home/ckeditor5-with-errors/.transifex-failed-uploads.json', {
+			'ckeditor5-non-existing-01': [
+				'Resource with this Slug and Project already exists.'
+			],
+			'ckeditor5-non-existing-02': [
+				'Object not found. It may have been deleted or not been created yet.'
+			]
 		} );
-
-		sandbox.stub( process, 'cwd' ).returns( path.join( 'workspace', 'ckeditor5' ) );
 
 		upload = proxyquire( '../../lib/translations/upload', {
 			'@ckeditor/ckeditor5-dev-utils': {
-				logger: () => stubs.logger
+				logger: () => stubs.logger,
+				tools: stubs.tools
 			},
-			'fs': stubs.fs,
-			'chalk': {
-				gray: stubs.chalk.gray.callsFake( msg => msg ),
-				underline: stubs.chalk.underline.callsFake( msg => msg )
-			}
+			'path': stubs.path,
+			'fs/promises': stubs.fs,
+			'chalk': stubs.chalk,
+			'cli-table': class Table {
+				constructor( ...args ) {
+					stubs.table.constructor( ...args );
+				}
+
+				push( ...args ) {
+					return stubs.table.push( ...args );
+				}
+
+				toString( ...args ) {
+					return stubs.table.toString( ...args );
+				}
+			},
+			'./transifex-service-for-api-v3.0': stubs.transifexService,
+			'./utils': stubs.utils
 		} );
+
+		stubs.fs.lstat.withArgs( '/home/ckeditor5/.transifex-failed-uploads.json' ).rejects();
 	} );
 
 	afterEach( () => {
+		sinon.restore();
 		mockery.disable();
-		sandbox.restore();
 	} );
 
-	it( 'should create and update resources on the Transifex', () => {
-		packageNames = [
-			'ckeditor5-core',
-			'ckeditor5-ui'
-		];
-
-		serverResources = [ {
-			slug: 'ckeditor5-core'
-		} ];
-
-		fileContents = {
-			'/workspace/ckeditor5/build/.transifex/ckeditor5-ui/en.pot': '# ckeditor-ui en.pot content',
-			'/workspace/ckeditor5/build/.transifex/ckeditor5-core/en.pot': '# ckeditor-core en.pot content'
+	it( 'should reject a promise if required properties are not specified', () => {
+		const error = new Error( 'The specified object misses the following properties: packages.' );
+		const config = {
+			cwd: '/home/ckeditor5',
+			token: 'token',
+			organizationName: 'ckeditor',
+			projectName: 'ckeditor5'
 		};
 
-		stubs.transifexService.postResource.onCall( 0 ).resolves( [ 4 ] );
-		stubs.transifexService.putResourceContent.onCall( 0 ).resolves( { strings_added: 1, strings_updated: 0, strings_delete: 3 } );
+		stubs.utils.verifyProperties.throws( error );
 
-		const uploadOptions = {
-			token: 'secretToken',
-			url: 'https://api.example.com',
-			translationsDirectory: '/workspace/ckeditor5/build/.transifex'
+		return upload( config )
+			.then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				err => {
+					expect( err ).to.equal( error );
+
+					expect( stubs.utils.verifyProperties.callCount ).to.equal( 1 );
+					expect( stubs.utils.verifyProperties.firstCall.args[ 0 ] ).to.deep.equal( config );
+					expect( stubs.utils.verifyProperties.firstCall.args[ 1 ] ).to.deep.equal( [
+						'token',
+						'organizationName',
+						'projectName',
+						'cwd',
+						'packages'
+					] );
+				}
+			);
+	} );
+
+	it( 'should store an error log if cannot find the project details', () => {
+		const packages = new Map( [
+			[ 'ckeditor5-existing-11', 'build/.transifex/ckeditor5-existing-11' ]
+		] );
+
+		stubs.transifexService.getProjectData.rejects( new Error( 'Invalid auth' ) );
+
+		const config = {
+			packages,
+			cwd: '/home/ckeditor5',
+			token: 'token',
+			organizationName: 'ckeditor',
+			projectName: 'ckeditor5'
 		};
 
-		return upload( uploadOptions )
+		return upload( config )
 			.then( () => {
-				sinon.assert.calledOnce( stubs.transifexService.getResources );
-				sinon.assert.calledWithExactly( stubs.fs.readdirSync, '/workspace/ckeditor5/build/.transifex' );
+				expect( stubs.logger.error.callCount ).to.equal( 2 );
+				expect( stubs.logger.error.firstCall.args[ 0 ] ).to.equal( 'Cannot find project details for "ckeditor/ckeditor5".' );
+				expect( stubs.logger.error.secondCall.args[ 0 ] ).to.equal(
+					'Make sure you specified a valid auth token or an organization/project names.'
+				);
 
-				sinon.assert.calledOnce( stubs.transifexService.postResource );
-				sinon.assert.calledWithExactly( stubs.transifexService.postResource, {
-					token: 'secretToken',
-					url: 'https://api.example.com',
-					name: 'ckeditor5-ui',
-					slug: 'ckeditor5-ui',
-					content: '# ckeditor-ui en.pot content'
-				} );
+				expect( stubs.transifexService.getProjectData.callCount ).to.equal( 1 );
+				expect( stubs.transifexService.getProjectData.firstCall.args[ 0 ] ).to.equal( 'ckeditor' );
+				expect( stubs.transifexService.getProjectData.firstCall.args[ 1 ] ).to.equal( 'ckeditor5' );
+				expect( stubs.transifexService.getProjectData.firstCall.args[ 2 ] ).to.deep.equal( [ ...packages.keys() ] );
 
-				sinon.assert.calledOnce( stubs.transifexService.putResourceContent );
-
-				sinon.assert.calledWithExactly( stubs.transifexService.putResourceContent, {
-					token: 'secretToken',
-					url: 'https://api.example.com',
-					slug: 'ckeditor5-core',
-					name: 'ckeditor5-core',
-					content: '# ckeditor-core en.pot content'
-				} );
+				expect( stubs.transifexService.createResource.callCount ).to.equal( 0 );
 			} );
 	} );
 
-	it( 'should report an error and throw it when something goes wrong', () => {
-		const error = new Error();
-		stubs.transifexService.getResources = sandbox.spy( () => Promise.reject( error ) );
+	it( 'should create a new resource if the package is processed for the first time', () => {
+		const packages = new Map( [
+			[ 'ckeditor5-non-existing-01', 'build/.transifex/ckeditor5-non-existing-01' ]
+		] );
 
-		const uploadOptions = {
-			token: 'secretToken',
-			url: 'https://api.example.com',
-			translationsDirectory: '/workspace/ckeditor5/build/.transifex'
+		const config = {
+			packages,
+			cwd: '/home/ckeditor5',
+			token: 'token',
+			organizationName: 'ckeditor',
+			projectName: 'ckeditor5'
 		};
 
-		return upload( uploadOptions )
+		stubs.transifexService.getProjectData.resolves( {
+			resources: []
+		} );
+
+		stubs.transifexService.createResource.resolves();
+		stubs.transifexService.createSourceFile.resolves( 'uuid-01' );
+		stubs.transifexService.getResourceUploadDetails.resolves(
+			createResourceUploadDetailsResponse( 'ckeditor5-non-existing-01', 0, 0, 0 )
+		);
+
+		stubs.tools.createSpinner.returns( {
+			start: sinon.stub(),
+			finish: sinon.stub()
+		} );
+
+		return upload( config )
 			.then( () => {
-				throw new Error( 'It should throws an error' );
-			}, err => {
-				expect( err ).to.equal( error );
-				sinon.assert.calledOnce( stubs.logger.error );
-				sinon.assert.calledWithExactly( stubs.logger.error, error );
-			} );
-	} );
-
-	it( 'should print a table with summary (created and updated items)', () => {
-		stubs.table.toString.onFirstCall().returns( '┻━┻' );
-		stubs.table.toString.onSecondCall().returns( '┳━┳' );
-
-		// Random order by design.
-		packageNames = [
-			'ckeditor5-widget',
-			'ckeditor5-ui',
-			'ckeditor5-utils',
-			'ckeditor5-engine',
-			'ckeditor5-basic-styles',
-			'ckeditor5-link',
-			'ckeditor5-core',
-			'ckeditor5-autoformat'
-		];
-
-		// Existing resources.
-		serverResources = [
-			{ slug: 'ckeditor5-core' },
-			{ slug: 'ckeditor5-basic-styles' },
-			{ slug: 'ckeditor5-engine' },
-			{ slug: 'ckeditor5-autoformat' }
-		];
-
-		stubs.transifexService.postResource.reset();
-
-		stubs.transifexService.postResource.onCall( 0 ).resolves( [ 4 ] );
-		stubs.transifexService.postResource.onCall( 1 ).resolves( [ 2 ] );
-		stubs.transifexService.postResource.onCall( 2 ).resolves( [ 1 ] );
-		stubs.transifexService.postResource.onCall( 3 ).resolves( [ 5 ] );
-
-		stubs.transifexService.putResourceContent.reset();
-
-		stubs.transifexService.putResourceContent.onCall( 0 ).resolves( { strings_added: 1, strings_updated: 0, strings_delete: 3 } );
-		stubs.transifexService.putResourceContent.onCall( 1 ).resolves( { strings_added: 1, strings_updated: 2, strings_delete: 0 } );
-		stubs.transifexService.putResourceContent.onCall( 2 ).resolves( { strings_added: 0, strings_updated: 0, strings_delete: 0 } );
-		stubs.transifexService.putResourceContent.onCall( 3 ).resolves( { strings_added: 0, strings_updated: 0, strings_delete: 0 } );
-
-		fileContents = {};
-
-		for ( const item of packageNames ) {
-			fileContents[ `/workspace/ckeditor5/build/.transifex/${ item }/en.pot` ] = `# ${ item } en.pot content`;
-		}
-
-		const uploadOptions = {
-			token: 'secretToken',
-			url: 'https://api.example.com',
-			translationsDirectory: '/workspace/ckeditor5/build/.transifex'
-		};
-
-		return upload( uploadOptions )
-			.then( () => {
-				expect( stubs.logger.info.callCount ).to.equal( 13 );
-
-				// Parsed packages. Info log about processing.
-				expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-widget"...' );
-				expect( stubs.logger.info.getCall( 1 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-ui"...' );
-				expect( stubs.logger.info.getCall( 2 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-utils"...' );
-				expect( stubs.logger.info.getCall( 3 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-engine"...' );
-				expect( stubs.logger.info.getCall( 4 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-basic-styles"...' );
-				expect( stubs.logger.info.getCall( 5 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-link"...' );
-				expect( stubs.logger.info.getCall( 6 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-core"...' );
-				expect( stubs.logger.info.getCall( 7 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-autoformat"...' );
-
-				// Finished parsing packages.
-				expect( stubs.logger.info.getCall( 8 ).args[ 0 ] ).to.equal( 'All resources uploaded.\n' );
-
-				// Drawing the tables.
-				expect( stubs.logger.info.getCall( 9 ).args[ 0 ] ).to.equal( 'Created resources:\n' );
-				expect( stubs.logger.info.getCall( 10 ).args[ 0 ] ).to.equal( '┻━┻\n' );
-				expect( stubs.logger.info.getCall( 11 ).args[ 0 ] ).to.equal( 'Updated resources:\n' );
-				expect( stubs.logger.info.getCall( 12 ).args[ 0 ] ).to.equal( '┳━┳' );
-
-				// Each package should be added into a table.
-				expect( stubs.table.push.callCount ).to.equal( 8 );
-
-				// Packages should be sorted by their names.
-				// Calls 1-4 are for new (created) resources.
-				expect( stubs.table.push.getCall( 0 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-link', '5' ] );
-				expect( stubs.table.push.getCall( 1 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-ui', '2' ] );
-				expect( stubs.table.push.getCall( 2 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-utils', '1' ] );
-				expect( stubs.table.push.getCall( 3 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-widget', '4' ] );
-
-				// Calls 5-8 are for updated resources.
-				// First should be displayed packages with changes, then no changes items.
-				expect( stubs.table.push.getCall( 4 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-basic-styles', '1', '2', '0' ] );
-				expect( stubs.table.push.getCall( 5 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-engine', '1', '0', '3' ] );
-				expect( stubs.table.push.getCall( 6 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-autoformat', '0', '0', '0' ] );
-				expect( stubs.table.push.getCall( 7 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-core', '0', '0', '0' ] );
-
-				// Both table headers should be underlined.
-				expect( stubs.chalk.underline.callCount ).to.equal( 2 );
-				expect( stubs.chalk.underline.getCall( 0 ).args[ 0 ] ).to.equal( 'Created resources:' );
-				expect( stubs.chalk.underline.getCall( 1 ).args[ 0 ] ).to.equal( 'Updated resources:' );
-
-				// Updated packages with no changes should be grayed out.
-				// Each package calls the function 4 times.
-				expect( stubs.chalk.gray.callCount ).to.equal( 8 );
-				expect( stubs.chalk.gray.getCall( 0 ).args[ 0 ] ).to.equal( 'ckeditor5-autoformat' );
-				expect( stubs.chalk.gray.getCall( 1 ).args[ 0 ] ).to.equal( '0' );
-				expect( stubs.chalk.gray.getCall( 2 ).args[ 0 ] ).to.equal( '0' );
-				expect( stubs.chalk.gray.getCall( 3 ).args[ 0 ] ).to.equal( '0' );
-				expect( stubs.chalk.gray.getCall( 4 ).args[ 0 ] ).to.equal( 'ckeditor5-core' );
-				expect( stubs.chalk.gray.getCall( 5 ).args[ 0 ] ).to.equal( '0' );
-				expect( stubs.chalk.gray.getCall( 6 ).args[ 0 ] ).to.equal( '0' );
-				expect( stubs.chalk.gray.getCall( 7 ).args[ 0 ] ).to.equal( '0' );
-			} );
-	} );
-
-	it( 'should print a table with summary (created items only)', () => {
-		stubs.table.toString.onFirstCall().returns( '┻━┻' );
-
-		// Random order by design.
-		packageNames = [
-			'ckeditor5-widget',
-			'ckeditor5-ui',
-			'ckeditor5-utils',
-			'ckeditor5-link'
-		];
-
-		// Existing resources.
-		serverResources = [];
-
-		stubs.transifexService.postResource.reset();
-
-		stubs.transifexService.postResource.onCall( 0 ).resolves( [ 4 ] );
-		stubs.transifexService.postResource.onCall( 1 ).resolves( [ 2 ] );
-		stubs.transifexService.postResource.onCall( 2 ).resolves( [ 1 ] );
-		stubs.transifexService.postResource.onCall( 3 ).resolves( [ 5 ] );
-
-		fileContents = {};
-
-		for ( const item of packageNames ) {
-			fileContents[ `workspace/ckeditor5/build/.transifex/${ item }/en.pot` ] = `# ${ item } en.pot content`;
-		}
-
-		const uploadOptions = {
-			token: 'secretToken',
-			url: 'https://api.example.com',
-			translationsDirectory: '/workspace/ckeditor5/build/.transifex'
-		};
-
-		return upload( uploadOptions )
-			.then( () => {
-				expect( stubs.logger.info.callCount ).to.equal( 7 );
-
-				// Parsed packages. Info log about processing.
-				expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-widget"...' );
-				expect( stubs.logger.info.getCall( 1 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-ui"...' );
-				expect( stubs.logger.info.getCall( 2 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-utils"...' );
-				expect( stubs.logger.info.getCall( 3 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-link"...' );
-
-				// Finished parsing packages.
-				expect( stubs.logger.info.getCall( 4 ).args[ 0 ] ).to.equal( 'All resources uploaded.\n' );
-
-				// Drawing the tables.
-				expect( stubs.logger.info.getCall( 5 ).args[ 0 ] ).to.equal( 'Created resources:\n' );
-				expect( stubs.logger.info.getCall( 6 ).args[ 0 ] ).to.equal( '┻━┻\n' );
-
-				// Each package should be added into a table.
-				expect( stubs.table.push.callCount ).to.equal( 4 );
-
-				expect( stubs.table.push.getCall( 0 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-link', '5' ] );
-				expect( stubs.table.push.getCall( 1 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-ui', '2' ] );
-				expect( stubs.table.push.getCall( 2 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-utils', '1' ] );
-				expect( stubs.table.push.getCall( 3 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-widget', '4' ] );
-
-				// A table header should be underlined.
-				expect( stubs.chalk.underline.callCount ).to.equal( 1 );
-				expect( stubs.chalk.underline.getCall( 0 ).args[ 0 ] ).to.equal( 'Created resources:' );
-			} );
-	} );
-
-	it( 'should print a table with summary (updated items only)', () => {
-		stubs.table.toString.onFirstCall().returns( '┳━┳' );
-
-		// Random order by design.
-		packageNames = [
-			'ckeditor5-engine',
-			'ckeditor5-basic-styles',
-			'ckeditor5-core',
-			'ckeditor5-autoformat'
-		];
-
-		// Existing resources.
-		serverResources = [
-			{ slug: 'ckeditor5-core' },
-			{ slug: 'ckeditor5-basic-styles' },
-			{ slug: 'ckeditor5-engine' },
-			{ slug: 'ckeditor5-autoformat' }
-		];
-
-		stubs.transifexService.putResourceContent.reset();
-
-		stubs.transifexService.putResourceContent.onCall( 0 ).resolves( { strings_added: 1, strings_updated: 0, strings_delete: 3 } );
-		stubs.transifexService.putResourceContent.onCall( 1 ).resolves( { strings_added: 1, strings_updated: 2, strings_delete: 0 } );
-		stubs.transifexService.putResourceContent.onCall( 2 ).resolves( { strings_added: 0, strings_updated: 0, strings_delete: 0 } );
-		stubs.transifexService.putResourceContent.onCall( 3 ).resolves( { strings_added: 0, strings_updated: 0, strings_delete: 0 } );
-
-		fileContents = {};
-
-		for ( const item of packageNames ) {
-			fileContents[ `workspace/ckeditor5/build/.transifex/${ item }/en.pot` ] = `# ${ item } en.pot content`;
-		}
-
-		const uploadOptions = {
-			token: 'secretToken',
-			url: 'https://api.example.com',
-			translationsDirectory: '/workspace/ckeditor5/build/.transifex'
-		};
-
-		return upload( uploadOptions )
-			.then( () => {
-				expect( stubs.logger.info.callCount ).to.equal( 7 );
-
-				// Parsed packages. Info log about processing.
-				expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-engine"...' );
-				expect( stubs.logger.info.getCall( 1 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-basic-styles"...' );
-				expect( stubs.logger.info.getCall( 2 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-core"...' );
-				expect( stubs.logger.info.getCall( 3 ).args[ 0 ] ).to.equal( 'Processing "ckeditor5-autoformat"...' );
-
-				// Finished parsing packages.
-				expect( stubs.logger.info.getCall( 4 ).args[ 0 ] ).to.equal( 'All resources uploaded.\n' );
-
-				// Drawing the tables.
-				expect( stubs.logger.info.getCall( 5 ).args[ 0 ] ).to.equal( 'Updated resources:\n' );
-				expect( stubs.logger.info.getCall( 6 ).args[ 0 ] ).to.equal( '┳━┳' );
-
-				// Each package should be added into a table.
-				expect( stubs.table.push.callCount ).to.equal( 4 );
-
-				expect( stubs.table.push.getCall( 0 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-basic-styles', '1', '2', '0' ] );
-				expect( stubs.table.push.getCall( 1 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-engine', '1', '0', '3' ] );
-				expect( stubs.table.push.getCall( 2 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-autoformat', '0', '0', '0' ] );
-				expect( stubs.table.push.getCall( 3 ).args[ 0 ] ).to.deep.equal( [ 'ckeditor5-core', '0', '0', '0' ] );
-
-				// A table header should be underlined.
-				expect( stubs.chalk.underline.callCount ).to.equal( 1 );
-				expect( stubs.chalk.underline.getCall( 0 ).args[ 0 ] ).to.equal( 'Updated resources:' );
-
-				expect( stubs.chalk.gray.callCount ).to.equal( 8 );
-				expect( stubs.chalk.gray.getCall( 0 ).args[ 0 ] ).to.equal( 'ckeditor5-autoformat' );
-				expect( stubs.chalk.gray.getCall( 1 ).args[ 0 ] ).to.equal( '0' );
-				expect( stubs.chalk.gray.getCall( 2 ).args[ 0 ] ).to.equal( '0' );
-				expect( stubs.chalk.gray.getCall( 3 ).args[ 0 ] ).to.equal( '0' );
-				expect( stubs.chalk.gray.getCall( 4 ).args[ 0 ] ).to.equal( 'ckeditor5-core' );
-				expect( stubs.chalk.gray.getCall( 5 ).args[ 0 ] ).to.equal( '0' );
-				expect( stubs.chalk.gray.getCall( 6 ).args[ 0 ] ).to.equal( '0' );
-				expect( stubs.chalk.gray.getCall( 7 ).args[ 0 ] ).to.equal( '0' );
-			} );
-	} );
-
-	it( 'should fail with an error describing missing properties if the required were not passed to the function', async () => {
-		try {
-			await upload( {} );
-		} catch ( err ) {
-			expect( err.message ).to.equal( 'The specified object misses the following properties: token, url, translationsDirectory.' );
-		}
-	} );
-
-	it( 'should create and update resources on the Transifex (Windows paths on input)', () => {
-		packageNames = [
-			'ckeditor5-core',
-			'ckeditor5-ui'
-		];
-
-		serverResources = [ {
-			slug: 'ckeditor5-core'
-		} ];
-
-		fileContents = {
-			'C:/workspace/ckeditor5/build/.transifex/ckeditor5-ui/en.pot': '# ckeditor-ui en.pot content',
-			'C:/workspace/ckeditor5/build/.transifex/ckeditor5-core/en.pot': '# ckeditor-core en.pot content'
-		};
-
-		stubs.transifexService.postResource.onCall( 0 ).resolves( [ 4 ] );
-		stubs.transifexService.putResourceContent.onCall( 0 ).resolves( { strings_added: 1, strings_updated: 0, strings_delete: 3 } );
-
-		const uploadOptions = {
-			token: 'secretToken',
-			url: 'https://api.example.com',
-			translationsDirectory: 'C:\\workspace\\ckeditor5\\build\\.transifex'
-		};
-
-		return upload( uploadOptions )
-			.then( () => {
-				sinon.assert.calledOnce( stubs.transifexService.getResources );
-				sinon.assert.calledWithExactly( stubs.fs.readdirSync, 'C:/workspace/ckeditor5/build/.transifex' );
-
-				sinon.assert.calledOnce( stubs.transifexService.postResource );
-				sinon.assert.calledWithExactly( stubs.transifexService.postResource, {
-					token: 'secretToken',
-					url: 'https://api.example.com',
-					name: 'ckeditor5-ui',
-					slug: 'ckeditor5-ui',
-					content: '# ckeditor-ui en.pot content'
-				} );
-
-				sinon.assert.calledOnce( stubs.transifexService.putResourceContent );
-
-				sinon.assert.calledWithExactly( stubs.transifexService.putResourceContent, {
-					token: 'secretToken',
-					url: 'https://api.example.com',
-					slug: 'ckeditor5-core',
-					name: 'ckeditor5-core',
-					content: '# ckeditor-core en.pot content'
+				expect( stubs.transifexService.createResource.callCount ).to.equal( 1 );
+				expect( stubs.transifexService.createResource.firstCall.args[ 0 ] ).to.deep.equal( {
+					organizationName: 'ckeditor',
+					projectName: 'ckeditor5',
+					resourceName: 'ckeditor5-non-existing-01'
 				} );
 			} );
+	} );
+
+	it( 'should not create a new resource if the package exists on Transifex', () => {
+		const packages = new Map( [
+			[ 'ckeditor5-existing-11', 'build/.transifex/ckeditor5-existing-11' ]
+		] );
+
+		const config = {
+			packages,
+			cwd: '/home/ckeditor5',
+			token: 'token',
+			organizationName: 'ckeditor',
+			projectName: 'ckeditor5'
+		};
+
+		stubs.transifexService.getProjectData.resolves( {
+			resources: [
+				{ attributes: { name: 'ckeditor5-existing-11' } }
+			]
+		} );
+
+		stubs.transifexService.createSourceFile.resolves( 'uuid-11' );
+
+		stubs.transifexService.getResourceUploadDetails.resolves(
+			createResourceUploadDetailsResponse( 'ckeditor5-existing-11', 0, 0, 0 )
+		);
+
+		stubs.tools.createSpinner.returns( {
+			start: sinon.stub(),
+			finish: sinon.stub()
+		} );
+
+		return upload( config )
+			.then( () => {
+				expect( stubs.transifexService.createResource.callCount ).to.equal( 0 );
+			} );
+	} );
+
+	it( 'should send a new translation source to Transifex', () => {
+		const packages = new Map( [
+			[ 'ckeditor5-existing-11', 'build/.transifex/ckeditor5-existing-11' ]
+		] );
+
+		const config = {
+			packages,
+			cwd: '/home/ckeditor5',
+			token: 'token',
+			organizationName: 'ckeditor',
+			projectName: 'ckeditor5'
+		};
+
+		stubs.transifexService.getProjectData.resolves( {
+			resources: [
+				{ attributes: { name: 'ckeditor5-existing-11' } }
+			]
+		} );
+
+		stubs.transifexService.createSourceFile.resolves( 'uuid-11' );
+
+		stubs.transifexService.getResourceUploadDetails.resolves(
+			createResourceUploadDetailsResponse( 'ckeditor5-existing-11', 0, 0, 0 )
+		);
+
+		stubs.fs.readFile.resolves( '# Example file.' );
+
+		stubs.tools.createSpinner.returns( {
+			start: sinon.stub(),
+			finish: sinon.stub()
+		} );
+
+		return upload( config )
+			.then( () => {
+				expect( stubs.fs.readFile.callCount ).to.equal( 1 );
+				expect( stubs.fs.readFile.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor5/build/.transifex/ckeditor5-existing-11/en.pot' );
+				expect( stubs.fs.readFile.firstCall.args[ 1 ] ).to.equal( 'utf-8' );
+				expect( stubs.transifexService.createSourceFile.callCount ).to.equal( 1 );
+				expect( stubs.transifexService.createSourceFile.firstCall.args[ 0 ] ).to.deep.equal( {
+					organizationName: 'ckeditor',
+					projectName: 'ckeditor5',
+					resourceName: 'ckeditor5-existing-11',
+					content: '# Example file.'
+				} );
+				expect( stubs.transifexService.getResourceUploadDetails.callCount ).to.equal( 1 );
+				expect( stubs.transifexService.getResourceUploadDetails.firstCall.args[ 0 ] ).to.equal( 'uuid-11' );
+			} );
+	} );
+
+	it( 'should keep informed a developer what the script does', () => {
+		const packages = new Map( [
+			[ 'ckeditor5-non-existing-01', 'build/.transifex/ckeditor5-non-existing-01' ]
+		] );
+
+		const config = {
+			packages,
+			cwd: '/home/ckeditor5',
+			token: 'token',
+			organizationName: 'ckeditor',
+			projectName: 'ckeditor5'
+		};
+
+		stubs.transifexService.getProjectData.resolves( {
+			resources: []
+		} );
+
+		stubs.transifexService.createResource.resolves();
+		stubs.transifexService.createSourceFile.resolves( 'uuid-01' );
+		stubs.transifexService.getResourceUploadDetails.resolves(
+			createResourceUploadDetailsResponse( 'ckeditor5-non-existing-01', 0, 0, 0 )
+		);
+
+		const packageSpinner = {
+			start: sinon.stub(),
+			finish: sinon.stub()
+		};
+		const processSpinner = {
+			start: sinon.stub(),
+			finish: sinon.stub()
+		};
+
+		stubs.tools.createSpinner.onFirstCall().returns( packageSpinner );
+		stubs.tools.createSpinner.onSecondCall().returns( processSpinner );
+
+		stubs.table.toString.returns( '┻━┻' );
+
+		return upload( config )
+			.then( () => {
+				expect( stubs.logger.info.callCount ).to.equal( 5 );
+				expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.equal( '\n📍 Fetching project information...' );
+				expect( stubs.logger.info.getCall( 1 ).args[ 0 ] ).to.equal( '\n📍 Uploading new translations...' );
+				expect( stubs.logger.info.getCall( 2 ).args[ 0 ] ).to.equal( '' );
+				expect( stubs.logger.info.getCall( 3 ).args[ 0 ] ).to.equal( '\n📍 Done.' );
+				expect( stubs.logger.info.getCall( 4 ).args[ 0 ] ).to.equal( '┻━┻' );
+
+				expect( stubs.tools.createSpinner.callCount ).to.equal( 2 );
+
+				expect( stubs.tools.createSpinner.firstCall.args[ 0 ] ).to.equal( 'Processing "ckeditor5-non-existing-01"' );
+				expect( stubs.tools.createSpinner.firstCall.args[ 1 ] ).to.deep.equal( {
+					emoji: '👉',
+					indentLevel: 1
+				} );
+				expect( stubs.tools.createSpinner.secondCall.args[ 0 ] ).to.equal( 'Collecting responses... It takes a while.' );
+
+				expect( packageSpinner.start.called ).to.equal( true );
+				expect( packageSpinner.finish.called ).to.equal( true );
+				expect( processSpinner.start.called ).to.equal( true );
+				expect( processSpinner.finish.called ).to.equal( true );
+				expect( stubs.chalk.gray.callCount ).to.equal( 1 );
+				expect( stubs.chalk.italic.callCount ).to.equal( 1 );
+			} );
+	} );
+
+	describe( 'error handling', () => {
+		let packages, config;
+
+		beforeEach( () => {
+			packages = new Map( [
+				[ 'ckeditor5-non-existing-03', 'build/.transifex/ckeditor5-non-existing-03' ],
+				[ 'ckeditor5-non-existing-04', 'build/.transifex/ckeditor5-non-existing-04' ],
+				[ 'ckeditor5-non-existing-01', 'build/.transifex/ckeditor5-non-existing-01' ],
+				[ 'ckeditor5-non-existing-02', 'build/.transifex/ckeditor5-non-existing-02' ]
+			] );
+
+			config = {
+				packages,
+				cwd: '/home/ckeditor5-with-errors',
+				token: 'token',
+				organizationName: 'ckeditor',
+				projectName: 'ckeditor5'
+			};
+
+			stubs.fs.lstat.withArgs( '/home/ckeditor5-with-errors/.transifex-failed-uploads.json' ).resolves();
+
+			stubs.transifexService.getProjectData.resolves( {
+				resources: []
+			} );
+
+			stubs.transifexService.createResource.resolves();
+
+			// Mock Tx response when uploading a new translation content.
+			stubs.transifexService.createSourceFile.withArgs( {
+				organizationName: 'ckeditor',
+				projectName: 'ckeditor5',
+				resourceName: 'ckeditor5-non-existing-01',
+				content: '# ckeditor5-non-existing-01'
+			} ).resolves( 'uuid-01' );
+			stubs.transifexService.createSourceFile.withArgs( {
+				organizationName: 'ckeditor',
+				projectName: 'ckeditor5',
+				resourceName: 'ckeditor5-non-existing-02',
+				content: '# ckeditor5-non-existing-02'
+			} ).resolves( 'uuid-02' );
+
+			// Mock translation sources.
+			stubs.fs.readFile.withArgs( config.cwd + '/build/.transifex/ckeditor5-non-existing-01/en.pot' )
+				.resolves( '# ckeditor5-non-existing-01' );
+			stubs.fs.readFile.withArgs( config.cwd + '/build/.transifex/ckeditor5-non-existing-02/en.pot' )
+				.resolves( '# ckeditor5-non-existing-02' );
+
+			// Mock upload results.
+			stubs.transifexService.getResourceUploadDetails.withArgs( 'uuid-01' ).resolves(
+				createResourceUploadDetailsResponse( 'ckeditor5-non-existing-01', 3, 0, 0 )
+			);
+			stubs.transifexService.getResourceUploadDetails.withArgs( 'uuid-02' ).resolves(
+				createResourceUploadDetailsResponse( 'ckeditor5-non-existing-02', 0, 0, 0 )
+			);
+
+			stubs.tools.createSpinner.returns( {
+				start: sinon.stub(),
+				finish: sinon.stub()
+			} );
+		} );
+
+		it( 'should process packages specified in the ".transifex-failed-uploads.json" file', () => {
+			return upload( config )
+				.then( () => {
+					expect( stubs.logger.warning.callCount ).to.equal( 2 );
+					expect( stubs.logger.warning.firstCall.args[ 0 ] ).to.equal(
+						'Found the file containing a list of packages that failed during the last script execution.'
+					);
+					expect( stubs.logger.warning.secondCall.args[ 0 ] ).to.equal(
+						'The script will process only packages listed in the file instead of all passed as "config.packages".'
+					);
+
+					expect( stubs.fs.readFile.callCount ).to.equal( 2 );
+					expect( stubs.transifexService.createResource.callCount ).to.equal( 2 );
+					expect( stubs.transifexService.createSourceFile.callCount ).to.equal( 2 );
+					expect( stubs.transifexService.getResourceUploadDetails.callCount ).to.equal( 2 );
+				} );
+		} );
+
+		it( 'should remove the ".transifex-failed-uploads.json" file if finished with no errors', () => {
+			return upload( config )
+				.then( () => {
+					expect( stubs.fs.unlink.callCount ).to.equal( 1 );
+					expect( stubs.fs.unlink.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor5-with-errors/.transifex-failed-uploads.json' );
+				} );
+		} );
+
+		it( 'should store an error in the ".transifex-failed-uploads.json" file (cannot create a resource)', () => {
+			const firstSpinner = {
+				start: sinon.stub(),
+				finish: sinon.stub()
+			};
+
+			stubs.tools.createSpinner.onFirstCall().returns( firstSpinner );
+
+			const error = {
+				message: 'JsonApiError: 409',
+				errors: [
+					{
+						detail: 'Resource with this Slug and Project already exists.'
+					}
+				]
+			};
+
+			stubs.transifexService.createResource.onFirstCall().rejects( error );
+			stubs.transifexService.createResource.onSecondCall().resolves();
+
+			return upload( config )
+				.then( () => {
+					expect( stubs.logger.warning.callCount ).to.equal( 5 );
+					expect( stubs.logger.warning.getCall( 2 ).args[ 0 ] ).to.equal(
+						'Not all translations were uploaded due to errors in Transifex API.'
+					);
+					expect( stubs.logger.warning.getCall( 3 ).args[ 0 ] ).to.equal(
+						'Review the "/home/ckeditor5-with-errors/.transifex-failed-uploads.json" file for more details.'
+					);
+					expect( stubs.logger.warning.getCall( 4 ).args[ 0 ] ).to.equal(
+						'Rerunning the script will process only packages specified in the file.'
+					);
+
+					expect( firstSpinner.finish.callCount ).to.equal( 1 );
+					expect( firstSpinner.finish.firstCall.args[ 0 ] ).to.deep.equal( { emoji: '❌' } );
+
+					expect( stubs.fs.writeFile.callCount ).to.equal( 1 );
+					expect( stubs.fs.writeFile.firstCall.args[ 0 ] ).to.equal(
+						'/home/ckeditor5-with-errors/.transifex-failed-uploads.json'
+					);
+
+					const storedErrors = JSON.parse( stubs.fs.writeFile.firstCall.args[ 1 ] );
+					expect( storedErrors ).to.deep.equal( {
+						'ckeditor5-non-existing-01': [ 'Resource with this Slug and Project already exists.' ]
+					} );
+				} );
+		} );
+
+		it( 'should store an error in the ".transifex-failed-uploads.json" file (cannot upload a translation)', () => {
+			const firstSpinner = {
+				start: sinon.stub(),
+				finish: sinon.stub()
+			};
+
+			stubs.tools.createSpinner.onFirstCall().returns( firstSpinner );
+
+			const error = {
+				message: 'JsonApiError: 409',
+				errors: [
+					{
+						detail: 'Object not found. It may have been deleted or not been created yet.'
+					}
+				]
+			};
+
+			stubs.transifexService.createSourceFile.withArgs( {
+				organizationName: 'ckeditor',
+				projectName: 'ckeditor5',
+				resourceName: 'ckeditor5-non-existing-01',
+				content: '# ckeditor5-non-existing-01'
+			} ).rejects( error );
+
+			return upload( config )
+				.then( () => {
+					expect( stubs.logger.warning.callCount ).to.equal( 5 );
+					expect( stubs.logger.warning.getCall( 2 ).args[ 0 ] ).to.equal(
+						'Not all translations were uploaded due to errors in Transifex API.'
+					);
+					expect( stubs.logger.warning.getCall( 3 ).args[ 0 ] ).to.equal(
+						'Review the "/home/ckeditor5-with-errors/.transifex-failed-uploads.json" file for more details.'
+					);
+					expect( stubs.logger.warning.getCall( 4 ).args[ 0 ] ).to.equal(
+						'Rerunning the script will process only packages specified in the file.'
+					);
+
+					expect( firstSpinner.finish.callCount ).to.equal( 1 );
+					expect( firstSpinner.finish.firstCall.args[ 0 ] ).to.deep.equal( { emoji: '❌' } );
+
+					expect( stubs.fs.writeFile.callCount ).to.equal( 1 );
+					expect( stubs.fs.writeFile.firstCall.args[ 0 ] ).to.equal(
+						'/home/ckeditor5-with-errors/.transifex-failed-uploads.json'
+					);
+
+					const storedErrors = JSON.parse( stubs.fs.writeFile.firstCall.args[ 1 ] );
+					expect( storedErrors ).to.deep.equal( {
+						'ckeditor5-non-existing-01': [ 'Object not found. It may have been deleted or not been created yet.' ]
+					} );
+				} );
+		} );
+
+		it( 'should store an error in the ".transifex-failed-uploads.json" file (cannot get a status of upload)', () => {
+			const error = {
+				message: 'JsonApiError: 409',
+				errors: [
+					{
+						detail: 'Object not found. It may have been deleted or not been created yet.'
+					}
+				]
+			};
+
+			stubs.transifexService.getResourceUploadDetails.withArgs( 'uuid-01' ).rejects( error );
+
+			return upload( config )
+				.then( () => {
+					expect( stubs.logger.warning.callCount ).to.equal( 5 );
+					expect( stubs.logger.warning.getCall( 2 ).args[ 0 ] ).to.equal(
+						'Not all translations were uploaded due to errors in Transifex API.'
+					);
+					expect( stubs.logger.warning.getCall( 3 ).args[ 0 ] ).to.equal(
+						'Review the "/home/ckeditor5-with-errors/.transifex-failed-uploads.json" file for more details.'
+					);
+					expect( stubs.logger.warning.getCall( 4 ).args[ 0 ] ).to.equal(
+						'Rerunning the script will process only packages specified in the file.'
+					);
+
+					expect( stubs.fs.writeFile.callCount ).to.equal( 1 );
+					expect( stubs.fs.writeFile.firstCall.args[ 0 ] ).to.equal(
+						'/home/ckeditor5-with-errors/.transifex-failed-uploads.json'
+					);
+
+					const storedErrors = JSON.parse( stubs.fs.writeFile.firstCall.args[ 1 ] );
+					expect( storedErrors ).to.deep.equal( {
+						'ckeditor5-non-existing-01': [ 'Object not found. It may have been deleted or not been created yet.' ]
+					} );
+				} );
+		} );
+	} );
+
+	describe( 'processing multiple packages', () => {
+		let packages, config;
+
+		beforeEach( () => {
+			packages = new Map( [
+				[ 'ckeditor5-existing-11', 'build/.transifex/ckeditor5-existing-11' ],
+				[ 'ckeditor5-existing-14', 'build/.transifex/ckeditor5-existing-14' ],
+				[ 'ckeditor5-non-existing-03', 'build/.transifex/ckeditor5-non-existing-03' ],
+				[ 'ckeditor5-non-existing-01', 'build/.transifex/ckeditor5-non-existing-01' ],
+				[ 'ckeditor5-existing-13', 'build/.transifex/ckeditor5-existing-13' ],
+				[ 'ckeditor5-non-existing-02', 'build/.transifex/ckeditor5-non-existing-02' ],
+				[ 'ckeditor5-existing-12', 'build/.transifex/ckeditor5-existing-12' ]
+			] );
+
+			config = {
+				packages,
+				cwd: '/home/ckeditor5',
+				token: 'token',
+				organizationName: 'ckeditor',
+				projectName: 'ckeditor5'
+			};
+
+			for ( const [ packageName, packagePath ] of packages ) {
+				// Mock translation files.
+				stubs.fs.readFile.withArgs( config.cwd + '/' + packagePath + '/en.pot' ).resolves( '# ' + packageName );
+
+				// Mock Tx response when uploading a new translation content.
+				const uuid = 'uuid-' + packageName.match( /(\d+)$/ )[ 1 ];
+				const withArgs = {
+					organizationName: 'ckeditor',
+					projectName: 'ckeditor5',
+					resourceName: packageName,
+					content: '# ' + packageName
+				};
+				stubs.transifexService.createSourceFile.withArgs( withArgs ).resolves( uuid );
+			}
+
+			// Mock resources on Transifex.
+			stubs.transifexService.getProjectData.resolves( {
+				resources: [
+					{ attributes: { name: 'ckeditor5-existing-11' } },
+					{ attributes: { name: 'ckeditor5-existing-12' } },
+					{ attributes: { name: 'ckeditor5-existing-13' } },
+					{ attributes: { name: 'ckeditor5-existing-14' } }
+				]
+			} );
+
+			stubs.transifexService.createResource.resolves();
+
+			stubs.transifexService.getResourceUploadDetails.withArgs( 'uuid-01' ).resolves(
+				createResourceUploadDetailsResponse( 'ckeditor5-non-existing-01', 3, 0, 0 )
+			);
+			stubs.transifexService.getResourceUploadDetails.withArgs( 'uuid-02' ).resolves(
+				createResourceUploadDetailsResponse( 'ckeditor5-non-existing-02', 0, 0, 0 )
+			);
+			stubs.transifexService.getResourceUploadDetails.withArgs( 'uuid-03' ).resolves(
+				createResourceUploadDetailsResponse( 'ckeditor5-non-existing-03', 1, 0, 0 )
+			);
+			stubs.transifexService.getResourceUploadDetails.withArgs( 'uuid-11' ).resolves(
+				createResourceUploadDetailsResponse( 'ckeditor5-existing-11', 0, 0, 0 )
+			);
+			stubs.transifexService.getResourceUploadDetails.withArgs( 'uuid-12' ).resolves(
+				createResourceUploadDetailsResponse( 'ckeditor5-existing-12', 0, 1, 1 )
+			);
+			stubs.transifexService.getResourceUploadDetails.withArgs( 'uuid-13' ).resolves(
+				createResourceUploadDetailsResponse( 'ckeditor5-existing-13', 2, 0, 0 )
+			);
+			stubs.transifexService.getResourceUploadDetails.withArgs( 'uuid-14' ).resolves(
+				createResourceUploadDetailsResponse( 'ckeditor5-existing-14', 0, 0, 0 )
+			);
+
+			stubs.tools.createSpinner.returns( {
+				start: sinon.stub(),
+				finish: sinon.stub()
+			} );
+		} );
+
+		it( 'should handle all packages', () => {
+			return upload( config )
+				.then( () => {
+					expect( stubs.transifexService.getProjectData.callCount ).to.equal( 1 );
+					expect( stubs.transifexService.createResource.callCount ).to.equal( 3 );
+					expect( stubs.transifexService.createSourceFile.callCount ).to.equal( 7 );
+					expect( stubs.transifexService.getResourceUploadDetails.callCount ).to.equal( 7 );
+					expect( stubs.tools.createSpinner.callCount ).to.equal( 8 );
+				} );
+		} );
+
+		it( 'should display a summary table with sorted packages (new, has changes, A-Z)', () => {
+			return upload( config )
+				.then( () => {
+					expect( stubs.table.push.callCount ).to.equal( 1 );
+					expect( stubs.table.push.firstCall.args ).to.be.an( 'array' );
+					expect( stubs.table.push.firstCall.args ).to.lengthOf( 7 );
+
+					// 1x for printing "It takes a while",
+					// 5x for each column, x2 for each resource.
+					expect( stubs.chalk.gray.callCount ).to.equal( 11 );
+
+					expect( stubs.table.push.firstCall.args ).to.deep.equal( [
+						[ 'ckeditor5-non-existing-01', '🆕', '3', '0', '0' ],
+						[ 'ckeditor5-non-existing-03', '🆕', '1', '0', '0' ],
+						[ 'ckeditor5-non-existing-02', '🆕', '0', '0', '0' ],
+						[ 'ckeditor5-existing-12', '', '0', '1', '1' ],
+						[ 'ckeditor5-existing-13', '', '2', '0', '0' ],
+						[ 'ckeditor5-existing-11', '', '0', '0', '0' ],
+						[ 'ckeditor5-existing-14', '', '0', '0', '0' ]
+					] );
+				} );
+		} );
+
+		it( 'should not display a summary table if none of the packages were processed', () => {
+			config.packages = new Map();
+
+			return upload( config )
+				.then( () => {
+					expect( stubs.table.push.callCount ).to.equal( 0 );
+				} );
+		} );
 	} );
 } );
+
+/**
+ * Returns an object that looks like a response from Transifex API.
+ *
+ * @param {String} packageName
+ * @param {Number} created
+ * @param {Number} updated
+ * @param {Number} deleted
+ * @returns {Object}
+ */
+function createResourceUploadDetailsResponse( packageName, created, updated, deleted ) {
+	return {
+		related: {
+			resource: {
+				id: `o:ckeditor:p:ckeditor5:r:${ packageName }`
+			}
+		},
+		attributes: {
+			details: {
+				strings_created: created,
+				strings_updated: updated,
+				strings_deleted: deleted
+			}
+		}
+	};
+}

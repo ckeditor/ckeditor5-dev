@@ -46,7 +46,7 @@
     "postcss-loader": "^4.3.0",
     "process": "^0.11.10",
     "raw-loader": "^4.0.1",
-    "sinon": "^9.0.2",
+    "sinon": "^13.0.1",
     "sinon-chai": "^3.5.0",
     "slack-notify": "^0.1.7",
     "style-loader": "^2.0.0",

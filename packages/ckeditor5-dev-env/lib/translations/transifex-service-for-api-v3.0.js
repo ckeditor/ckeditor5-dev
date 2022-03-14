@@ -6,7 +6,7 @@
 const { transifexApi } = require( '@transifex/api' );
 const fetch = require( 'node-fetch' );
 
-const MAX_DOWNLOAD_ATTEMPTS = 10;
+const MAX_REQUEST_ATTEMPTS = 10;
 const REQUEST_RETRY_TIMEOUT = 3000; // In milliseconds.
 
 // It may happen that sending several dozen requests at the same time fails due to the limitations in the operating system on the network
@@ -23,7 +23,10 @@ module.exports = {
 	getProjectData,
 	getTranslations,
 	getResourceName,
-	getLanguageCode
+	getLanguageCode,
+	createResource,
+	createSourceFile,
+	getResourceUploadDetails
 };
 
 /**
@@ -35,6 +38,102 @@ function init( token ) {
 	if ( !transifexApi.auth ) {
 		transifexApi.setup( { auth: token } );
 	}
+}
+
+/**
+ * Creates a new resource on Transifex.
+ *
+ * @param {Object} options
+ * @param {String} options.organizationName The name of the organization to which the project belongs.
+ * @param {String} options.projectName The name of the project for creating the resource.
+ * @param {String} options.resourceName The name of the resource to create.
+ * @returns {Promise}
+ */
+async function createResource( options ) {
+	const { organizationName, projectName, resourceName } = options;
+	const requestParams = {
+		name: resourceName,
+		slug: resourceName,
+		relationships: {
+			i18n_format: {
+				data: {
+					id: 'PO',
+					type: 'i18n_formats'
+				}
+			},
+			project: {
+				data: {
+					id: `o:${ organizationName }:p:${ projectName }`,
+					type: 'projects'
+				}
+			}
+		}
+	};
+
+	return transifexApi.Resource.create( requestParams );
+}
+
+/**
+ * Uploads a new translations source for the specified resource (package).
+ *
+ * @param {Object} options
+ * @param {String} options.organizationName The name of the organization to which the project belongs.
+ * @param {String} options.projectName The name of the project for uploading the translations entries.
+ * @param {String} options.resourceName The The name of resource.
+ * @param {String} options.content A content of the `*.po` file containing source for translations.
+ * @returns {Promise.<String>}
+ */
+async function createSourceFile( options ) {
+	const { organizationName, projectName, resourceName, content } = options;
+	const requestData = {
+		attributes: {
+			content,
+			content_encoding: 'text'
+		},
+		relationships: {
+			resource: {
+				data: {
+					id: `o:${ organizationName }:p:${ projectName }:r:${ resourceName }`,
+					type: 'resources'
+				}
+			}
+		},
+		type: 'resource_strings_async_uploads'
+	};
+
+	return transifexApi.ResourceStringAsyncUpload.create( requestData )
+		.then( response => response.id );
+}
+
+/**
+ * Resolves a promise containing an object with a summary of processing the uploaded source
+ * file created by the Transifex service if the upload task is completed.
+ *
+ * @param {String} uploadId
+ * @param {Number} [numberOfAttempts=1] A number containing a current attempt.
+ * @returns {Promise}
+ */
+async function getResourceUploadDetails( uploadId, numberOfAttempts = 1 ) {
+	return transifexApi.ResourceStringAsyncUpload.get( uploadId )
+		.then( statusResponse => {
+			const status = statusResponse.attributes.status;
+			const isPending = status === 'pending' || status === 'processing';
+
+			if ( !isPending ) {
+				return statusResponse;
+			}
+
+			if ( numberOfAttempts === MAX_REQUEST_ATTEMPTS ) {
+				// Rejects with an object that looks like the `JsonApi` error produced by the Transifex API.
+				return Promise.reject( {
+					errors: [
+						{ detail: 'Failed to retrieve the upload details.' }
+					]
+				} );
+			}
+			return wait( REQUEST_RETRY_TIMEOUT )
+				.then( () => getResourceUploadDetails( uploadId, numberOfAttempts + 1 ) );
+		} );
 }
 
 /**
@@ -76,8 +175,8 @@ async function getProjectData( organizationName, projectName, localizablePackage
 }
 
 /**
- * Fetches all the translations and the language source file in the PO format for the given resource. The download procedure consists of the
- * following steps:
+ * Fetches all the translations and the language source file in the PO format for the given resource.
+ * The download procedure consists of the following steps:
  *
  * (1) Create the download requests for the language source file and all the translations. This download request triggers the Transifex
  * service to start preparing the PO file.
@@ -164,7 +263,7 @@ function createDownloadRequest( resource, language, numberOfAttempts = 1 ) {
 			type: requestType
 		} )
 		.catch( async () => {
-			if ( numberOfAttempts === MAX_DOWNLOAD_ATTEMPTS ) {
+			if ( numberOfAttempts === MAX_REQUEST_ATTEMPTS ) {
 				const resourceName = getResourceName( resource );
 				const languageCode = getLanguageCode( language );
 
@@ -182,7 +281,7 @@ function createDownloadRequest( resource, language, numberOfAttempts = 1 ) {
 }
 
 /**
- * Tries to fetch the file, up to the MAX_DOWNLOAD_ATTEMPTS times, with the REQUEST_RETRY_TIMEOUT milliseconds timeout between each
+ * Tries to fetch the file, up to the MAX_REQUEST_ATTEMPTS times, with the REQUEST_RETRY_TIMEOUT milliseconds timeout between each
  * attempt. There are three possible cases that are handled during downloading a file:
  *
  * (1) According to the Transifex API v3.0, when the requested file is ready for download, the Transifex service returns HTTP code 303,
@@ -215,7 +314,7 @@ async function downloadFile( downloadRequest, numberOfAttempts = 1 ) {
 		return [ languageCode, translation ];
 	}
 
-	if ( !response.ok || numberOfAttempts === MAX_DOWNLOAD_ATTEMPTS ) {
+	if ( !response.ok || numberOfAttempts === MAX_REQUEST_ATTEMPTS ) {
 		let errorMessage = 'Failed to download the translation file. ';
 
 		if ( !response.ok ) {

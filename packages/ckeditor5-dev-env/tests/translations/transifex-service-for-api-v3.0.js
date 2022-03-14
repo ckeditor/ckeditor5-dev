@@ -41,6 +41,10 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 				}
 			} ) ),
 
+			createResource: sinon.stub(),
+			createResourceStringAsyncUpload: sinon.stub(),
+			getResourceStringAsyncUpload: sinon.stub(),
+
 			transifexApi: {
 				setup: sinon.stub().callsFake( ( { auth } ) => {
 					stubs.transifexApi.auth = sinon.stub().returns( { Authorization: `Bearer ${ auth }` } );
@@ -48,6 +52,15 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 
 				Organization: {
 					get: ( ...args ) => stubs.getOrganizations( ...args )
+				},
+
+				Resource: {
+					create: ( ...args ) => stubs.createResource( ...args )
+				},
+
+				ResourceStringAsyncUpload: {
+					create: ( ...args ) => stubs.createResourceStringAsyncUpload( ...args ),
+					get: ( ...args ) => stubs.getResourceStringAsyncUpload( ...args )
 				},
 
 				...[ 'ResourceStringAsyncDownload', 'ResourceTranslationAsyncDownload' ].reduce( ( result, methodName ) => {
@@ -484,6 +497,306 @@ describe( 'dev-env/translations/transifex-service-for-api-v3.0', () => {
 			const language = { attributes: { code: 'pl' } };
 
 			expect( transifexService.getLanguageCode( language ) ).to.equal( 'pl' );
+		} );
+	} );
+
+	describe( 'createResource', () => {
+		it( 'should create a new resource and return its attributes', () => {
+			const organizationName = 'ckeditor';
+			const projectName = 'ckeditor5';
+			const resourceName = 'ckeditor5-foo';
+
+			const apiResponse = {
+				data: {
+					attributes: {},
+					id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo',
+					links: {},
+					relationships: {
+						i18n_format: {
+							data: {
+								id: 'PO',
+								type: 'i18n_formats'
+							}
+						},
+						project: {
+							data: {
+								id: 'o:ckeditor:p:ckeditor5',
+								type: 'projects'
+							}
+						}
+					},
+					type: 'resources'
+				}
+			};
+
+			stubs.createResource.resolves( apiResponse );
+
+			return transifexService.createResource( { organizationName, projectName, resourceName } )
+				.then( response => {
+					expect( stubs.createResource.callCount ).to.equal( 1 );
+					expect( stubs.createResource.firstCall.args[ 0 ] ).to.deep.equal( {
+						name: 'ckeditor5-foo',
+						relationships: {
+							i18n_format: {
+								data: {
+									id: 'PO',
+									type: 'i18n_formats'
+								}
+							},
+							project: {
+								data: {
+									id: 'o:ckeditor:p:ckeditor5',
+									type: 'projects'
+								}
+							}
+						},
+						slug: 'ckeditor5-foo'
+					} );
+
+					expect( response ).to.equal( apiResponse );
+				} );
+		} );
+
+		it( 'should reject a promise if Transifex API rejected', () => {
+			const organizationName = 'ckeditor';
+			const projectName = 'ckeditor5';
+			const resourceName = 'ckeditor5-foo';
+
+			const apiError = new Error( 'JsonApiError: 418, I\'m a teapot' );
+
+			stubs.createResource.rejects( apiError );
+
+			return transifexService.createResource( { organizationName, projectName, resourceName } )
+				.then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					err => {
+						expect( apiError ).to.equal( err );
+					}
+				);
+		} );
+	} );
+
+	describe( 'createSourceFile', () => {
+		it( 'should create a new resource and return its attributes', () => {
+			const organizationName = 'ckeditor';
+			const projectName = 'ckeditor5';
+			const resourceName = 'ckeditor5-foo';
+			const content = '# ckeditor5-foo';
+
+			const apiResponse = {
+				id: '4abfc726-6a27-4c33-9d99-e5254c8df748',
+				type: 'resource_strings_async_uploads'
+			};
+
+			stubs.createResourceStringAsyncUpload.resolves( apiResponse );
+
+			return transifexService.createSourceFile( { organizationName, projectName, resourceName, content } )
+				.then( response => {
+					expect( stubs.createResourceStringAsyncUpload.callCount ).to.equal( 1 );
+					expect( stubs.createResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.deep.equal( {
+						attributes: {
+							content: '# ckeditor5-foo',
+							content_encoding: 'text'
+						},
+						relationships: {
+							resource: {
+								data: {
+									id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo',
+									type: 'resources'
+								}
+							}
+						},
+						type: 'resource_strings_async_uploads'
+					} );
+
+					expect( response ).to.equal( apiResponse.id );
+				} );
+		} );
+
+		it( 'should reject a promise if Transifex API rejected', () => {
+			const organizationName = 'ckeditor';
+			const projectName = 'ckeditor5';
+			const resourceName = 'ckeditor5-foo';
+			const content = '# ckeditor5-foo';
+
+			const apiError = new Error( 'JsonApiError: 418, I\'m a teapot' );
+
+			stubs.createResourceStringAsyncUpload.rejects( apiError );
+
+			return transifexService.createSourceFile( { organizationName, projectName, resourceName, content } )
+				.then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					err => {
+						expect( apiError ).to.equal( err );
+					}
+				);
+		} );
+	} );
+
+	describe( 'getResourceUploadDetails', () => {
+		let clock;
+
+		beforeEach( () => {
+			clock = sinon.useFakeTimers();
+		} );
+
+		afterEach( () => {
+			clock.restore();
+		} );
+
+		it( 'should return a promise with resolved upload details (Transifex processed the upload)', async () => {
+			const apiResponse = {
+				id: '4abfc726-6a27-4c33-9d99-e5254c8df748',
+				attributes: {
+					status: 'succeeded'
+				},
+				type: 'resource_strings_async_uploads'
+			};
+
+			stubs.getResourceStringAsyncUpload.resolves( apiResponse );
+
+			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+
+			expect( promise ).to.be.a( 'promise' );
+			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 1 );
+			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+
+			const result = await promise;
+
+			expect( result ).to.equal( apiResponse );
+		} );
+
+		it( 'should return a promise that resolves after 3000ms (Transifex processed the upload 1s, status=pending)', async () => {
+			const apiResponse = {
+				id: '4abfc726-6a27-4c33-9d99-e5254c8df748',
+				attributes: {
+					status: 'succeeded'
+				},
+				type: 'resource_strings_async_uploads'
+			};
+
+			stubs.getResourceStringAsyncUpload.onFirstCall().resolves( {
+				attributes: { status: 'pending' }
+			} );
+			stubs.getResourceStringAsyncUpload.onSecondCall().resolves( apiResponse );
+
+			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+
+			expect( promise ).to.be.a( 'promise' );
+			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 1 );
+			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+
+			await clock.tickAsync( 3000 );
+			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 2 );
+			expect( stubs.getResourceStringAsyncUpload.secondCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+
+			expect( await promise ).to.equal( apiResponse );
+		} );
+
+		it( 'should return a promise that resolves after 3000ms (Transifex processed the upload 1s, status=processing)', async () => {
+			const apiResponse = {
+				id: '4abfc726-6a27-4c33-9d99-e5254c8df748',
+				attributes: {
+					status: 'succeeded'
+				},
+				type: 'resource_strings_async_uploads'
+			};
+
+			stubs.getResourceStringAsyncUpload.onFirstCall().resolves( {
+				attributes: { status: 'processing' }
+			} );
+			stubs.getResourceStringAsyncUpload.onSecondCall().resolves( apiResponse );
+
+			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+
+			expect( promise ).to.be.a( 'promise' );
+			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 1 );
+			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+
+			await clock.tickAsync( 3000 );
+			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 2 );
+			expect( stubs.getResourceStringAsyncUpload.secondCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+
+			expect( await promise ).to.equal( apiResponse );
+		} );
+
+		it( 'should return a promise that rejects if Transifex returned an error (no-delay)', async () => {
+			const apiResponse = new Error( 'JsonApiError' );
+
+			stubs.getResourceStringAsyncUpload.rejects( apiResponse );
+
+			return transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' )
+				.then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					err => {
+						expect( err ).to.equal( apiResponse );
+					}
+				);
+		} );
+
+		it( 'should return a promise that rejects if Transifex returned an error (delay)', async () => {
+			const apiResponse = new Error( 'JsonApiError' );
+
+			stubs.getResourceStringAsyncUpload.onFirstCall().resolves( {
+				attributes: { status: 'processing' }
+			} );
+			stubs.getResourceStringAsyncUpload.onSecondCall().rejects( apiResponse );
+
+			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' )
+				.then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					err => {
+						expect( err ).to.equal( apiResponse );
+					}
+				);
+
+			expect( promise ).to.be.a( 'promise' );
+
+			await clock.tickAsync( 3000 );
+
+			return promise;
+		} );
+
+		it( 'should return a promise that rejects if reached the maximum number of requests to Transifex', async () => {
+			// 10 is equal to the `MAX_REQUEST_ATTEMPTS` constant.
+			for ( let i = 0; i < 10; ++i ) {
+				stubs.getResourceStringAsyncUpload.onCall( i ).resolves( {
+					attributes: { status: 'processing' }
+				} );
+			}
+
+			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' )
+				.then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					err => {
+						expect( err ).to.deep.equal( {
+							errors: [
+								{
+									detail: 'Failed to retrieve the upload details.'
+								}
+							]
+						} );
+					}
+				);
+
+			expect( promise ).to.be.a( 'promise' );
+
+			for ( let i = 0; i < 9; ++i ) {
+				expect( stubs.getResourceStringAsyncUpload.callCount, `getResourceStringAsyncUpload, call: ${ i + 1 }` ).to.equal( i + 1 );
+				await clock.tickAsync( 3000 );
+			}
+
+			return promise;
 		} );
 	} );
 } );

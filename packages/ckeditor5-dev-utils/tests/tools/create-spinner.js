@@ -274,5 +274,58 @@ describe( 'lib/utils/create-spinner', () => {
 			expect( consoleStub.calledOnce ).to.equal( true );
 			expect( consoleStub.firstCall.args[ 0 ] ).to.equal( '   📍 Foo.' );
 		} );
+
+		it( 'prints the specified emoji when created a spinner if it finished', () => {
+			const spinner = createSpinner( 'Foo.', { emoji: '👉' } );
+			const consoleStub = sinon.stub( console, 'log' );
+
+			spinner.start();
+			spinner.finish();
+
+			consoleStub.restore();
+
+			expect( consoleStub.calledOnce ).to.equal( true );
+			expect( consoleStub.firstCall.args[ 0 ] ).to.equal( '👉 Foo.' );
+		} );
+
+		it( 'prints the specified title if spinner cannot be created if CLI is not interactive', () => {
+			stubs.isInteractive.returns( false );
+
+			const spinner = createSpinner( 'Foo.', { emoji: '👉' } );
+			const consoleStub = sinon.stub( console, 'log' );
+
+			spinner.start();
+
+			consoleStub.restore();
+
+			expect( consoleStub.calledOnce ).to.equal( true );
+			expect( consoleStub.firstCall.args[ 0 ] ).to.equal( '👉 Foo.' );
+		} );
+
+		it( 'allows overriding the emoji (use default emoji when creating a spinner)', () => {
+			const spinner = createSpinner( 'Foo.' );
+			const consoleStub = sinon.stub( console, 'log' );
+
+			spinner.start();
+			spinner.finish( { emoji: '❌' } );
+
+			consoleStub.restore();
+
+			expect( consoleStub.calledOnce ).to.equal( true );
+			expect( consoleStub.firstCall.args[ 0 ] ).to.equal( '❌ Foo.' );
+		} );
+
+		it( 'allows overriding the emoji (passed an emoji when creating a spinner)', () => {
+			const spinner = createSpinner( 'Foo.', { emoji: '👉' } );
+			const consoleStub = sinon.stub( console, 'log' );
+
+			spinner.start();
+			spinner.finish( { emoji: '❌' } );
+
+			consoleStub.restore();
+
+			expect( consoleStub.calledOnce ).to.equal( true );
+			expect( consoleStub.firstCall.args[ 0 ] ).to.equal( '❌ Foo.' );
+		} );
 	} );
 } );
