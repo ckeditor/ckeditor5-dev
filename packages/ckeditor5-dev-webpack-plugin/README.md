@@ -1,6 +1,10 @@
 CKEditor 5 webpack plugin
 =========================
 
+[![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-webpack-plugin.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin)
+[![Build Status](https://travis-ci.com/ckeditor/ckeditor5-dev.svg?branch=master)](https://app.travis-ci.com/github/ckeditor/ckeditor5-dev)
+![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-webpack-plugin)
+
 Intergrate [CKEditor 5](https://ckeditor.com)'s build process with your [webpack](https://webpack.js.org) setup.
 
 Requires webpack `^4.0.0` or `^5.0.0`.
