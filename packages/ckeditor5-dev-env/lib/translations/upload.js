@@ -9,9 +9,9 @@ const fs = require( 'fs/promises' );
 const path = require( 'path' );
 const Table = require( 'cli-table' );
 const chalk = require( 'chalk' );
-const transifexService = require( './transifex-service-for-api-v3.0' );
-const { verifyProperties } = require( './utils' );
-const { tools, logger: loggerFactory } = require( '@ckeditor/ckeditor5-dev-utils' );
+const transifexService = require( './transifex-service' );
+const { verifyProperties, createLogger } = require( './utils' );
+const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 const RESOURCE_REGEXP = /r:(?<resourceName>[a-z0-9_-]+)$/i;
 
@@ -41,9 +41,9 @@ const TRANSIFEX_RESOURCE_ERRORS = {};
 module.exports = async function upload( config ) {
 	verifyProperties( config, [ 'token', 'organizationName', 'projectName', 'cwd', 'packages' ] );
 
-	const logger = loggerFactory();
-	const TRANSIFEX_FAILED_UPLOAD_FILE = path.join( config.cwd, '.transifex-failed-uploads.json' );
-	const isFailedUploadFileAvailable = await isFile( TRANSIFEX_FAILED_UPLOAD_FILE );
+	const logger = createLogger();
+	const pathToFailedUploads = path.join( config.cwd, '.transifex-failed-uploads.json' );
+	const isFailedUploadFileAvailable = fs.existsSync( pathToFailedUploads );
 
 	// When rerunning the task, it is an array containing names of packages that failed.
 	let failedPackages = null;
@@ -53,10 +53,10 @@ module.exports = async function upload( config ) {
 		logger.warning( 'Found the file containing a list of packages that failed during the last script execution.' );
 		logger.warning( 'The script will process only packages listed in the file instead of all passed as "config.packages".' );
 
-		failedPackages = Object.keys( require( TRANSIFEX_FAILED_UPLOAD_FILE ) );
+		failedPackages = Object.keys( require( pathToFailedUploads ) );
 	}
 
-	logProcess( 'Fetching project information...' );
+	logger.progress( 'Fetching project information...' );
 
 	transifexService.init( config.token );
 
@@ -87,7 +87,7 @@ module.exports = async function upload( config ) {
 		] ) )
 	);
 
-	logProcess( 'Uploading new translations...' );
+	logger.progress( 'Uploading new translations...' );
 
 	const uploadIds = [];
 
@@ -123,7 +123,7 @@ module.exports = async function upload( config ) {
 	}
 
 	// An empty line for making a space between list of resources and the new process info.
-	logProcess();
+	logger.progress();
 
 	// Chalk supports chaining which is hard to mock in tests. Let's simplify it.
 	const takeWhileText = chalk.gray( 'It takes a while.' );
@@ -144,7 +144,7 @@ module.exports = async function upload( config ) {
 
 	spinner.finish();
 
-	logProcess( 'Done.' );
+	logger.progress( 'Done.' );
 
 	if ( summary.length ) {
 		const table = new Table( {
@@ -161,26 +161,15 @@ module.exports = async function upload( config ) {
 		// An empty line for making a space between steps and the warning message.
 		logger.info( '' );
 		logger.warning( 'Not all translations were uploaded due to errors in Transifex API.' );
-		logger.warning( `Review the "${ chalk.underline( TRANSIFEX_FAILED_UPLOAD_FILE ) }" file for more details.` );
-		logger.warning( 'Rerunning the script will process only packages specified in the file.' );
+		logger.warning( `Review the "${ chalk.underline( pathToFailedUploads ) }" file for more details.` );
+		logger.warning( 'Re-running the script will process only packages specified in the file.' );
 
-		await fs.writeFile( TRANSIFEX_FAILED_UPLOAD_FILE, JSON.stringify( TRANSIFEX_RESOURCE_ERRORS, null, 2 ) + '\n', 'utf-8' );
+		await fs.writeFile( pathToFailedUploads, JSON.stringify( TRANSIFEX_RESOURCE_ERRORS, null, 2 ) + '\n', 'utf-8' );
 	}
 	// If the `.transifex-failed-uploads.json` file exists but the run has finished with no errors,
 	// remove the file as it is not required anymore.
 	else if ( isFailedUploadFileAvailable ) {
-		await fs.unlink( TRANSIFEX_FAILED_UPLOAD_FILE );
-	}
-
-	/**
-	 * @param {String} [message]
-	 */
-	function logProcess( message ) {
-		if ( !message ) {
-			logger.info( '' );
-		} else {
-			logger.info( '\n📍 ' + chalk.cyan( message ) );
-		}
+		await fs.unlink( pathToFailedUploads );
 	}
 };
 
@@ -305,14 +294,4 @@ function errorHandlerFactory( packageName, spinner ) {
 		// Hence, we don't have to check do we override existing errors.
 		TRANSIFEX_RESOURCE_ERRORS[ packageName ] = errorResponse.errors.map( e => e.detail );
 	};
-}
-
-/**
- * @param {String} pathToFile
- * @return {Promise.<Boolean>}
- */
-function isFile( pathToFile ) {
-	return fs.lstat( pathToFile )
-		.then( () => true )
-		.catch( () => false );
 }
