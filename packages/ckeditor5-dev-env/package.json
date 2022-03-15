@@ -24,7 +24,6 @@
     "minimatch": "^3.0.4",
     "mkdirp": "^1.0.4",
     "parse-github-url": "^1.0.2",
-    "request": "^2.88.2",
     "semver": "^7.3.2",
     "webpack": "^5.58.1"
   },

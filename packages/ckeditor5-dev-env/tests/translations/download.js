@@ -22,9 +22,11 @@ describe( 'dev-env/translations/download()', () => {
 
 		stubs = {
 			logger: {
+				progress: sinon.stub(),
 				info: sinon.stub(),
 				warning: sinon.stub(),
-				error: sinon.stub()
+				error: sinon.stub(),
+				_log: sinon.stub()
 			},
 
 			fs: {
@@ -46,6 +48,11 @@ describe( 'dev-env/translations/download()', () => {
 			translationUtils: {
 				createDictionaryFromPoFileContent: sinon.stub().callsFake( fileContent => mocks.fileContents[ fileContent ] ),
 				cleanPoFileContent: sinon.stub().callsFake( fileContent => fileContent )
+			},
+
+			chalk: {
+				underline: sinon.stub().callsFake( msg => msg ),
+				gray: sinon.stub().callsFake( msg => msg )
 			},
 
 			tools: {
@@ -90,6 +97,11 @@ describe( 'dev-env/translations/download()', () => {
 
 					return Promise.resolve( translationData );
 				} )
+			},
+
+			utils: {
+				verifyProperties: sinon.stub(),
+				createLogger: sinon.stub()
 			}
 		};
 
@@ -98,14 +110,23 @@ describe( 'dev-env/translations/download()', () => {
 			finish: stubs.tools.spinnerFinish
 		} );
 
+		stubs.utils.createLogger.returns( {
+			progress: stubs.logger.progress,
+			info: stubs.logger.info,
+			warning: stubs.logger.warning,
+			error: stubs.logger.error,
+			_log: sinon.stub()
+		} );
+
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
 			translations: stubs.translationUtils,
-			logger: () => stubs.logger,
 			tools: stubs.tools
 		} );
 
 		mockery.registerMock( 'fs-extra', stubs.fs );
-		mockery.registerMock( './transifex-service-for-api-v3.0', stubs.transifexService );
+		mockery.registerMock( 'chalk', stubs.chalk );
+		mockery.registerMock( './transifex-service', stubs.transifexService );
+		mockery.registerMock( './utils', stubs.utils );
 		mockery.registerMock( './languagecodemap.json', { ne_NP: 'ne' } );
 
 		download = require( '../../lib/translations/download' );
@@ -113,7 +134,40 @@ describe( 'dev-env/translations/download()', () => {
 
 	afterEach( () => {
 		sinon.restore();
+		mockery.deregisterAll();
 		mockery.disable();
+	} );
+
+	it( 'should fail if properties verification failed', () => {
+		const error = new Error( 'The specified object misses the following properties: packages.' );
+		const config = {
+			organizationName: 'ckeditor-organization',
+			projectName: 'ckeditor5-project',
+			cwd: '/workspace',
+			token: 'secretToken'
+		};
+
+		stubs.utils.verifyProperties.throws( error );
+
+		return download( config )
+			.then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				err => {
+					expect( err ).to.equal( error );
+
+					expect( stubs.utils.verifyProperties.callCount ).to.equal( 1 );
+					expect( stubs.utils.verifyProperties.firstCall.args[ 0 ] ).to.deep.equal( config );
+					expect( stubs.utils.verifyProperties.firstCall.args[ 1 ] ).to.deep.equal( [
+						'organizationName',
+						'projectName',
+						'token',
+						'packages',
+						'cwd'
+					] );
+				}
+			);
 	} );
 
 	it( 'should remove translations before downloading', async () => {
@@ -219,6 +273,15 @@ describe( 'dev-env/translations/download()', () => {
 			path.normalize( '/workspace/bar/ckeditor5-ui/lang/translations/pl.po' ),
 			'ckeditor5-ui-pl-content'
 		);
+
+		sinon.assert.callCount( stubs.logger.progress, 3 );
+		sinon.assert.calledWithExactly( stubs.logger.progress.firstCall, 'Fetching project information...' );
+		sinon.assert.calledWithExactly( stubs.logger.progress.secondCall, 'Downloading all translations...' );
+		sinon.assert.calledWithExactly( stubs.logger.progress.thirdCall, 'Saved all translations.' );
+
+		sinon.assert.callCount( stubs.logger.info, 2 );
+		sinon.assert.calledWithExactly( stubs.logger.info.firstCall, '      Saved 2 "*.po" file(s).' );
+		sinon.assert.calledWithExactly( stubs.logger.info.secondCall, '      Saved 1 "*.po" file(s).' );
 	} );
 
 	it( 'should download translations for non-empty resources only for specified packages', async () => {
@@ -314,13 +377,13 @@ describe( 'dev-env/translations/download()', () => {
 		sinon.assert.calledWithExactly(
 			stubs.tools.createSpinner.firstCall,
 			'Processing "ckeditor5-core"...',
-			{ indentLevel: 1 }
+			{ indentLevel: 1, emoji: '👉' }
 		);
 
 		sinon.assert.calledWithExactly(
 			stubs.tools.createSpinner.secondCall,
 			'Processing "ckeditor5-ui"...',
-			{ indentLevel: 1 }
+			{ indentLevel: 1, emoji: '👉' }
 		);
 	} );
 
@@ -395,6 +458,29 @@ describe( 'dev-env/translations/download()', () => {
 			[ { resourceName: 'ckeditor5-ui', languages: [ { code: 'de', errorMessage: 'An example error.' } ] } ],
 			{ spaces: 2 }
 		);
+
+		sinon.assert.callCount( stubs.logger.info, 2 );
+		sinon.assert.calledWithExactly( stubs.logger.info.firstCall, '      Saved 2 "*.po" file(s).' );
+		sinon.assert.calledWithExactly( stubs.logger.info.secondCall, '      Saved 2 "*.po" file(s). 1 requests failed.' );
+
+		sinon.assert.callCount( stubs.logger.warning, 3 );
+		sinon.assert.calledWithExactly(
+			stubs.logger.warning.firstCall,
+			'Not all translations were downloaded due to errors in Transifex API.'
+		);
+		sinon.assert.calledWithExactly(
+			stubs.logger.warning.secondCall,
+			`Review the "${ path.normalize( '/workspace/.transifex-failed-downloads.json' ) }" file for more details.`
+		);
+		sinon.assert.calledWithExactly(
+			stubs.logger.warning.thirdCall,
+			'Re-running the script will process only packages specified in the file.'
+		);
+
+		sinon.assert.callCount( stubs.tools.spinnerFinish, 2 );
+		// First call: OK. Second call: error.
+		sinon.assert.calledWithExactly( stubs.tools.spinnerFinish );
+		sinon.assert.calledWithExactly( stubs.tools.spinnerFinish, { emoji: '❌' } );
 	} );
 
 	it( 'should use the language code from the "languagecodemap.json" if it exists, or the default language code otherwise', async () => {
@@ -473,16 +559,6 @@ describe( 'dev-env/translations/download()', () => {
 		}
 
 		expect( stubs.transifexService.getProjectData.called ).to.equal( true );
-	} );
-
-	it( 'should fail with an error describing missing properties if the required were not passed to the function', async () => {
-		try {
-			await download( {} );
-		} catch ( err ) {
-			expect( err.message ).to.equal(
-				'The specified object misses the following properties: organizationName, projectName, token, packages, cwd.'
-			);
-		}
 	} );
 
 	it( 'should pass the "simplifyLicenseHeader" flag to the "cleanPoFileContent()" function when set to `true`', async () => {
@@ -619,6 +695,21 @@ describe( 'dev-env/translations/download()', () => {
 				path.normalize( '/workspace/foo/ckeditor5-core/lang/translations/pl.po' ),
 				'ckeditor5-core-pl-content'
 			);
+
+			sinon.assert.callCount( stubs.logger.warning, 2 );
+			sinon.assert.calledWithExactly(
+				stubs.logger.warning.firstCall,
+				'Found the file containing a list of packages that failed during the last script execution.'
+			);
+			sinon.assert.calledWithExactly(
+				stubs.logger.warning.secondCall,
+				'The script will process only packages listed in the file instead of all passed as "config.packages".'
+			);
+
+			sinon.assert.callCount( stubs.logger.progress, 3 );
+			sinon.assert.calledWithExactly( stubs.logger.progress.firstCall, 'Fetching project information...' );
+			sinon.assert.calledWithExactly( stubs.logger.progress.secondCall, 'Downloading only translations that failed previously...' );
+			sinon.assert.calledWithExactly( stubs.logger.progress.thirdCall, 'Saved all translations.' );
 		} );
 
 		it( 'should update ".transifex-failed-downloads.json" file if there are still some failed downloads', async () => {

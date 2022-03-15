@@ -24,7 +24,7 @@ describe( 'dev-env/translations/upload()', () => {
 			fs: {
 				readFile: sinon.stub(),
 				writeFile: sinon.stub(),
-				lstat: sinon.stub(),
+				existsSync: sinon.stub(),
 				unlink: sinon.stub()
 			},
 
@@ -33,9 +33,11 @@ describe( 'dev-env/translations/upload()', () => {
 			},
 
 			logger: {
+				progress: sinon.stub(),
 				info: sinon.stub(),
 				warning: sinon.stub(),
-				error: sinon.stub()
+				error: sinon.stub(),
+				_log: sinon.stub()
 			},
 
 			transifexService: {
@@ -64,9 +66,18 @@ describe( 'dev-env/translations/upload()', () => {
 			},
 
 			utils: {
-				verifyProperties: sinon.stub()
+				verifyProperties: sinon.stub(),
+				createLogger: sinon.stub()
 			}
 		};
+
+		stubs.utils.createLogger.returns( {
+			progress: stubs.logger.progress,
+			info: stubs.logger.info,
+			warning: stubs.logger.warning,
+			error: stubs.logger.error,
+			_log: stubs.logger._log
+		} );
 
 		// `proxyquire` does not understand dynamic imports.
 		mockery.registerMock( '/home/ckeditor5-with-errors/.transifex-failed-uploads.json', {
@@ -80,7 +91,6 @@ describe( 'dev-env/translations/upload()', () => {
 
 		upload = proxyquire( '../../lib/translations/upload', {
 			'@ckeditor/ckeditor5-dev-utils': {
-				logger: () => stubs.logger,
 				tools: stubs.tools
 			},
 			'path': stubs.path,
@@ -99,15 +109,16 @@ describe( 'dev-env/translations/upload()', () => {
 					return stubs.table.toString( ...args );
 				}
 			},
-			'./transifex-service-for-api-v3.0': stubs.transifexService,
+			'./transifex-service': stubs.transifexService,
 			'./utils': stubs.utils
 		} );
 
-		stubs.fs.lstat.withArgs( '/home/ckeditor5/.transifex-failed-uploads.json' ).rejects();
+		stubs.fs.existsSync.withArgs( '/home/ckeditor5/.transifex-failed-uploads.json' ).returns( false );
 	} );
 
 	afterEach( () => {
 		sinon.restore();
+		mockery.deregisterAll();
 		mockery.disable();
 	} );
 
@@ -338,12 +349,14 @@ describe( 'dev-env/translations/upload()', () => {
 
 		return upload( config )
 			.then( () => {
-				expect( stubs.logger.info.callCount ).to.equal( 5 );
-				expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.equal( '\n📍 Fetching project information...' );
-				expect( stubs.logger.info.getCall( 1 ).args[ 0 ] ).to.equal( '\n📍 Uploading new translations...' );
-				expect( stubs.logger.info.getCall( 2 ).args[ 0 ] ).to.equal( '' );
-				expect( stubs.logger.info.getCall( 3 ).args[ 0 ] ).to.equal( '\n📍 Done.' );
-				expect( stubs.logger.info.getCall( 4 ).args[ 0 ] ).to.equal( '┻━┻' );
+				expect( stubs.logger.info.callCount ).to.equal( 1 );
+				expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.equal( '┻━┻' );
+
+				expect( stubs.logger.progress.callCount ).to.equal( 4 );
+				expect( stubs.logger.progress.getCall( 0 ).args[ 0 ] ).to.equal( 'Fetching project information...' );
+				expect( stubs.logger.progress.getCall( 1 ).args[ 0 ] ).to.equal( 'Uploading new translations...' );
+				expect( stubs.logger.progress.getCall( 2 ).args[ 0 ] ).to.be.undefined;
+				expect( stubs.logger.progress.getCall( 3 ).args[ 0 ] ).to.equal( 'Done.' );
 
 				expect( stubs.tools.createSpinner.callCount ).to.equal( 2 );
 
@@ -382,7 +395,7 @@ describe( 'dev-env/translations/upload()', () => {
 				projectName: 'ckeditor5'
 			};
 
-			stubs.fs.lstat.withArgs( '/home/ckeditor5-with-errors/.transifex-failed-uploads.json' ).resolves();
+			stubs.fs.existsSync.withArgs( '/home/ckeditor5-with-errors/.transifex-failed-uploads.json' ).returns( true );
 
 			stubs.transifexService.getProjectData.resolves( {
 				resources: []
@@ -480,7 +493,7 @@ describe( 'dev-env/translations/upload()', () => {
 						'Review the "/home/ckeditor5-with-errors/.transifex-failed-uploads.json" file for more details.'
 					);
 					expect( stubs.logger.warning.getCall( 4 ).args[ 0 ] ).to.equal(
-						'Rerunning the script will process only packages specified in the file.'
+						'Re-running the script will process only packages specified in the file.'
 					);
 
 					expect( firstSpinner.finish.callCount ).to.equal( 1 );
@@ -532,7 +545,7 @@ describe( 'dev-env/translations/upload()', () => {
 						'Review the "/home/ckeditor5-with-errors/.transifex-failed-uploads.json" file for more details.'
 					);
 					expect( stubs.logger.warning.getCall( 4 ).args[ 0 ] ).to.equal(
-						'Rerunning the script will process only packages specified in the file.'
+						'Re-running the script will process only packages specified in the file.'
 					);
 
 					expect( firstSpinner.finish.callCount ).to.equal( 1 );
@@ -572,7 +585,7 @@ describe( 'dev-env/translations/upload()', () => {
 						'Review the "/home/ckeditor5-with-errors/.transifex-failed-uploads.json" file for more details.'
 					);
 					expect( stubs.logger.warning.getCall( 4 ).args[ 0 ] ).to.equal(
-						'Rerunning the script will process only packages specified in the file.'
+						'Re-running the script will process only packages specified in the file.'
 					);
 
 					expect( stubs.fs.writeFile.callCount ).to.equal( 1 );

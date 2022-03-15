@@ -7,12 +7,13 @@
 
 const path = require( 'path' );
 const fs = require( 'fs-extra' );
-const { tools, logger: loggerFactory, translations } = require( '@ckeditor/ckeditor5-dev-utils' );
-const transifexService = require( './transifex-service-for-api-v3.0' );
-const { verifyProperties } = require( './utils' );
+const chalk = require( 'chalk' );
+const { tools, translations } = require( '@ckeditor/ckeditor5-dev-utils' );
+const transifexService = require( './transifex-service' );
+const { verifyProperties, createLogger } = require( './utils' );
 const languageCodeMap = require( './languagecodemap.json' );
 
-const logger = loggerFactory();
+const logger = createLogger();
 const { cleanPoFileContent, createDictionaryFromPoFileContent } = translations;
 
 /**
@@ -37,7 +38,7 @@ module.exports = async function downloadTranslations( config ) {
 
 	transifexService.init( config.token );
 
-	logger.info( 'Fetching project information...' );
+	logger.progress( 'Fetching project information...' );
 
 	const localizablePackageNames = [ ...config.packages.keys() ];
 	const { resources, languages } = await transifexService.getProjectData(
@@ -47,25 +48,29 @@ module.exports = async function downloadTranslations( config ) {
 	);
 
 	const failedDownloads = [];
-	const { resourcesToProcess, hasAnyFailedDownload } = getResourcesToProcess( { cwd: config.cwd, resources, languages } );
+	const { resourcesToProcess, isFailedDownloadFileAvailable } = getResourcesToProcess( { cwd: config.cwd, resources, languages } );
 
-	logger.info( hasAnyFailedDownload ?
-		'Downloading only translations that failed previously...' :
-		'Downloading all translations...'
-	);
+	if ( isFailedDownloadFileAvailable ) {
+		logger.warning( 'Found the file containing a list of packages that failed during the last script execution.' );
+		logger.warning( 'The script will process only packages listed in the file instead of all passed as "config.packages".' );
+
+		logger.progress( 'Downloading only translations that failed previously...' );
+	} else {
+		logger.progress( 'Downloading all translations...' );
+	}
 
 	for ( const { resource, languages } of resourcesToProcess ) {
 		const packageName = transifexService.getResourceName( resource );
 		const packagePath = config.packages.get( packageName );
 		const pathToTranslations = path.join( config.cwd, packagePath, 'lang', 'translations' );
-		const spinner = tools.createSpinner( `Processing "${ packageName }"...`, { indentLevel: 1 } );
+		const spinner = tools.createSpinner( `Processing "${ packageName }"...`, { indentLevel: 1, emoji: '👉' } );
 
 		spinner.start();
 
 		// Remove all old translations before saving new ones, but only if previously the download procedure has been finished without any
 		// failures. Otherwise, the current download procedure only tries to fetch the previously failed translations, so no existing files
 		// are removed beforehand.
-		if ( !hasAnyFailedDownload ) {
+		if ( !isFailedDownloadFileAvailable ) {
 			fs.removeSync( pathToTranslations );
 		}
 
@@ -79,24 +84,27 @@ module.exports = async function downloadTranslations( config ) {
 			simplifyLicenseHeader: config.simplifyLicenseHeader
 		} );
 
-		spinner.finish();
+		let statusMessage;
 
-		const statusMessage = failedDownloadsForPackage.length ?
-			`❌ Saved ${ savedFiles } "*.po" files. ${ failedDownloadsForPackage.length } requests failed.` :
-			`✅ Saved all ${ savedFiles } "*.po" files.`;
+		if ( failedDownloadsForPackage.length ) {
+			statusMessage = `Saved ${ savedFiles } "*.po" file(s). ${ failedDownloadsForPackage.length } requests failed.`;
+			spinner.finish( { emoji: '❌' } );
+		} else {
+			statusMessage = `Saved ${ savedFiles } "*.po" file(s).`;
+			spinner.finish();
+		}
 
-		logger.info( ' '.repeat( 3 ) + statusMessage );
+		logger.info( ' '.repeat( 6 ) + chalk.gray( statusMessage ) );
 	}
 
 	updateFailedDownloads( { cwd: config.cwd, failedDownloads } );
 
 	if ( failedDownloads.length ) {
-		logger.info(
-			'Not all translations are saved. See `.transifex-failed-downloads.json` for details.\n' +
-			'Run the script again to fetch only those translations that have failed to download.'
-		);
+		logger.warning( 'Not all translations were downloaded due to errors in Transifex API.' );
+		logger.warning( `Review the "${ chalk.underline( getPathToFailedDownloads( config.cwd ) ) }" file for more details.` );
+		logger.warning( 'Re-running the script will process only packages specified in the file.' );
 	} else {
-		logger.info( 'Saved all translations.' );
+		logger.progress( 'Saved all translations.' );
 	}
 };
 
@@ -148,17 +156,17 @@ function saveNewTranslations( { pathToTranslations, translations, simplifyLicens
  * @param {Array.<Object>} config.resources All found resource instances for which translations could be downloaded.
  * @param {Array.<Object>} config.languages All found language instances in the project.
  * @returns {Object} result
- * @returns {Boolean} result.hasAnyFailedDownload Indicates whether previous download procedure did not fetch all translations.
+ * @returns {Boolean} result.isFailedDownloadFileAvailable Indicates whether previous download procedure did not fetch all translations.
  * @returns {Array.<Object>} result.resourcesToProcess Resource instances and their associated language instances to use during downloading
  * the translations.
  */
 function getResourcesToProcess( { cwd, resources, languages } ) {
-	const pathToFailedDownloads = path.join( cwd, '.transifex-failed-downloads.json' );
-	const hasAnyFailedDownload = fs.existsSync( pathToFailedDownloads );
+	const pathToFailedDownloads = getPathToFailedDownloads( cwd );
+	const isFailedDownloadFileAvailable = fs.existsSync( pathToFailedDownloads );
 
-	if ( !hasAnyFailedDownload ) {
+	if ( !isFailedDownloadFileAvailable ) {
 		return {
-			hasAnyFailedDownload,
+			isFailedDownloadFileAvailable,
 			resourcesToProcess: resources.map( resource => ( { resource, languages } ) )
 		};
 	}
@@ -172,7 +180,7 @@ function getResourcesToProcess( { cwd, resources, languages } ) {
 	] );
 
 	return {
-		hasAnyFailedDownload,
+		isFailedDownloadFileAvailable,
 		resourcesToProcess: fs.readJsonSync( pathToFailedDownloads )
 			.map( item => ( {
 				resource: resourcesMap.get( item.resourceName ),
@@ -192,7 +200,7 @@ function getResourcesToProcess( { cwd, resources, languages } ) {
  * @param {Array.<Object>} config.failedDownloads Collection of all the failed downloads.
  */
 function updateFailedDownloads( { cwd, failedDownloads } ) {
-	const pathToFailedDownloads = path.join( cwd, '.transifex-failed-downloads.json' );
+	const pathToFailedDownloads = getPathToFailedDownloads( cwd );
 
 	if ( failedDownloads.length ) {
 		const groupedFailedDownloads = failedDownloads.reduce( ( result, failedDownload ) => {
@@ -226,4 +234,14 @@ function isPoFileContainingTranslations( poFileContent ) {
 
 	return Object.keys( translations )
 		.some( msgId => translations[ msgId ] !== '' );
+}
+
+/**
+ * Returns an absolute path to the file containing failed downloads.
+ *
+ * @param {String} cwd Current working directory.
+ * @returns {String}
+ */
+function getPathToFailedDownloads( cwd ) {
+	return path.join( cwd, '.transifex-failed-downloads.json' );
 }
