@@ -51,7 +51,8 @@ describe( 'dev-env/translations/download()', () => {
 			},
 
 			chalk: {
-				underline: sinon.stub().callsFake( msg => msg )
+				underline: sinon.stub().callsFake( msg => msg ),
+				gray: sinon.stub().callsFake( msg => msg )
 			},
 
 			tools: {
@@ -279,8 +280,8 @@ describe( 'dev-env/translations/download()', () => {
 		sinon.assert.calledWithExactly( stubs.logger.progress.thirdCall, 'Saved all translations.' );
 
 		sinon.assert.callCount( stubs.logger.info, 2 );
-		sinon.assert.calledWithExactly( stubs.logger.info.firstCall, '   ✅ Saved all 2 "*.po" files.' );
-		sinon.assert.calledWithExactly( stubs.logger.info.secondCall, '   ✅ Saved all 1 "*.po" files.' );
+		sinon.assert.calledWithExactly( stubs.logger.info.firstCall, '      Saved 2 "*.po" file(s).' );
+		sinon.assert.calledWithExactly( stubs.logger.info.secondCall, '      Saved 1 "*.po" file(s).' );
 	} );
 
 	it( 'should download translations for non-empty resources only for specified packages', async () => {
@@ -459,8 +460,8 @@ describe( 'dev-env/translations/download()', () => {
 		);
 
 		sinon.assert.callCount( stubs.logger.info, 2 );
-		sinon.assert.calledWithExactly( stubs.logger.info.firstCall, '   ✅ Saved all 2 "*.po" files.' );
-		sinon.assert.calledWithExactly( stubs.logger.info.secondCall, '   ❌ Saved 2 "*.po" files. 1 requests failed.' );
+		sinon.assert.calledWithExactly( stubs.logger.info.firstCall, '      Saved 2 "*.po" file(s).' );
+		sinon.assert.calledWithExactly( stubs.logger.info.secondCall, '      Saved 2 "*.po" file(s). 1 requests failed.' );
 
 		sinon.assert.callCount( stubs.logger.warning, 3 );
 		sinon.assert.calledWithExactly(
@@ -475,6 +476,11 @@ describe( 'dev-env/translations/download()', () => {
 			stubs.logger.warning.thirdCall,
 			'Re-running the script will process only packages specified in the file.'
 		);
+
+		sinon.assert.callCount( stubs.tools.spinnerFinish, 2 );
+		// First call: OK. Second call: error.
+		sinon.assert.calledWithExactly( stubs.tools.spinnerFinish );
+		sinon.assert.calledWithExactly( stubs.tools.spinnerFinish, { emoji: '❌' } );
 	} );
 
 	it( 'should use the language code from the "languagecodemap.json" if it exists, or the default language code otherwise', async () => {

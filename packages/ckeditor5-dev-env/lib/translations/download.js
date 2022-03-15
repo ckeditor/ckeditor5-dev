@@ -84,13 +84,17 @@ module.exports = async function downloadTranslations( config ) {
 			simplifyLicenseHeader: config.simplifyLicenseHeader
 		} );
 
-		spinner.finish();
+		let statusMessage;
 
-		const statusMessage = failedDownloadsForPackage.length ?
-			`❌ Saved ${ savedFiles } "*.po" files. ${ failedDownloadsForPackage.length } requests failed.` :
-			`✅ Saved all ${ savedFiles } "*.po" files.`;
+		if ( failedDownloadsForPackage.length ) {
+			statusMessage = `Saved ${ savedFiles } "*.po" file(s). ${ failedDownloadsForPackage.length } requests failed.`;
+			spinner.finish( { emoji: '❌' } );
+		} else {
+			statusMessage = `Saved ${ savedFiles } "*.po" file(s).`;
+			spinner.finish();
+		}
 
-		logger.info( ' '.repeat( 3 ) + statusMessage );
+		logger.info( ' '.repeat( 6 ) + chalk.gray( statusMessage ) );
 	}
 
 	updateFailedDownloads( { cwd: config.cwd, failedDownloads } );
