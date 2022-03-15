@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "eslint": "^7.0.0",
-    "eslint-config-ckeditor5": "^3.1.0",
+    "eslint-config-ckeditor5": "^4.0.0",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.4",
     "mocha": "^7.1.2",
@@ -32,7 +32,7 @@
     "changelog": "node ./scripts/changelog.js",
     "release:bump-version": "node ./scripts/bump-versions.js",
     "release:publish": "node ./scripts/publish.js",
-    "lint": "eslint --quiet '**/*.js'",
+    "lint": "eslint --quiet \"**/*.js\"",
     "precommit": "lint-staged"
   },
   "lint-staged": {
