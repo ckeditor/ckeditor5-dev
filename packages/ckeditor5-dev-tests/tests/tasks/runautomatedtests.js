@@ -291,9 +291,7 @@ describe( 'runAutomatedTests', () => {
 
 		return runAutomatedTests( options )
 			.then( () => {
-				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.not.include(
-					'throw new Error( \'Detected `console.\' + method + \'()`:\' )'
-				);
+				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.not.include( '// Make using any method from the console to fail.' );
 			} );
 	} );
 
@@ -325,9 +323,7 @@ describe( 'runAutomatedTests', () => {
 
 		return runAutomatedTests( options )
 			.then( () => {
-				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.include(
-					'throw new Error( \'Detected `console.\' + method + \'()`:\' )'
-				);
+				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.include( '// Make using any method from the console to fail.' );
 			} );
 	} );
 

@@ -155,6 +155,9 @@ function makeConsoleUsageToThrowErrors() {
 
 	window.production = true;
 
+	// Important: Do not remove the comment below. It is used to assert this function insertion in tests.
+	//
+	// Make using any method from the console to fail.
 	beforeEach( () => {
 		Object.keys( console )
 			.filter( methodOrProperty => typeof console[ methodOrProperty ] === 'function' )
