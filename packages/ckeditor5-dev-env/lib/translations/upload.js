@@ -43,7 +43,7 @@ module.exports = async function upload( config ) {
 
 	const logger = createLogger();
 	const pathToFailedUploads = path.join( config.cwd, '.transifex-failed-uploads.json' );
-	const isFailedUploadFileAvailable = fs.existsSync( pathToFailedUploads );
+	const isFailedUploadFileAvailable = await isFile( pathToFailedUploads );
 
 	// When rerunning the task, it is an array containing names of packages that failed.
 	let failedPackages = null;
@@ -282,7 +282,7 @@ function hasError( packageName = null ) {
  *
  * @param {String} packageName
  * @param {CKEditor5Spinner|null} [spinner=null]
- * @return {Function}
+ * @returns {Function}
  */
 function errorHandlerFactory( packageName, spinner ) {
 	return errorResponse => {
@@ -294,4 +294,14 @@ function errorHandlerFactory( packageName, spinner ) {
 		// Hence, we don't have to check do we override existing errors.
 		TRANSIFEX_RESOURCE_ERRORS[ packageName ] = errorResponse.errors.map( e => e.detail );
 	};
+}
+
+/**
+ * @param {String} pathToFile
+ * @returns {Promise.<Boolean>}
+ */
+function isFile( pathToFile ) {
+	return fs.lstat( pathToFile )
+		.then( () => true )
+		.catch( () => false );
 }

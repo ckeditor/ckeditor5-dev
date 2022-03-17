@@ -24,7 +24,7 @@ describe( 'dev-env/translations/upload()', () => {
 			fs: {
 				readFile: sinon.stub(),
 				writeFile: sinon.stub(),
-				existsSync: sinon.stub(),
+				lstat: sinon.stub(),
 				unlink: sinon.stub()
 			},
 
@@ -113,7 +113,7 @@ describe( 'dev-env/translations/upload()', () => {
 			'./utils': stubs.utils
 		} );
 
-		stubs.fs.existsSync.withArgs( '/home/ckeditor5/.transifex-failed-uploads.json' ).returns( false );
+		stubs.fs.lstat.withArgs( '/home/ckeditor5/.transifex-failed-uploads.json' ).rejects();
 	} );
 
 	afterEach( () => {
@@ -395,7 +395,7 @@ describe( 'dev-env/translations/upload()', () => {
 				projectName: 'ckeditor5'
 			};
 
-			stubs.fs.existsSync.withArgs( '/home/ckeditor5-with-errors/.transifex-failed-uploads.json' ).returns( true );
+			stubs.fs.lstat.withArgs( '/home/ckeditor5-with-errors/.transifex-failed-uploads.json' ).resolves();
 
 			stubs.transifexService.getProjectData.resolves( {
 				resources: []
