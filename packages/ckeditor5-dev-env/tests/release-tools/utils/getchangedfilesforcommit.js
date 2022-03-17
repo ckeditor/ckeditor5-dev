@@ -39,7 +39,7 @@ describe( 'dev-env/release-tools/utils/transform-commit', () => {
 		} );
 
 		afterEach( () => {
-			fs.rmdirSync( path.join( tmpCwd, '.git' ), { recursive: true } );
+			fs.rmSync( path.join( tmpCwd, '.git' ), { recursive: true } );
 			fs.readdirSync( tmpCwd ).forEach( file => fs.unlinkSync( file ) );
 		} );
 
