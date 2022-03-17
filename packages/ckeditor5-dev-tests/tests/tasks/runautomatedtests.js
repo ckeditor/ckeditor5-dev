@@ -15,23 +15,6 @@ const path = require( 'path' );
 describe( 'runAutomatedTests', () => {
 	let sandbox, stubs, runAutomatedTests, karmaServerCallback;
 
-	const codeMakingConsoleUseThrowErrors = `
-const originalWarn = console.warn;
-
-window.production = true;
-
-beforeEach( () => {
-	Object.keys( console )
-		.filter( methodOrProperty => typeof console[ methodOrProperty ] === 'function' )
-		.forEach( method => {
-			console[ method ] = ( ...data ) => {
-				originalWarn( 'Detected \`console.' + method + '()\`:', ...data );
-				throw new Error( 'Detected \`console.' + method + '()\`:' );
-			}
-		} );
-} );
-	`;
-
 	beforeEach( () => {
 		karmaServerCallback = null;
 		sandbox = sinon.createSandbox();
@@ -74,7 +57,10 @@ beforeEach( () => {
 					}
 				},
 				karmaServerOn: sandbox.stub(),
-				karmaServerStart: sandbox.stub()
+				karmaServerStart: sandbox.stub(),
+				config: {
+					parseConfig: sandbox.stub()
+				}
 			},
 			getKarmaConfig: sandbox.stub(),
 			transformFileOptionToTestGlob: sandbox.stub()
@@ -202,6 +188,41 @@ beforeEach( () => {
 			);
 	} );
 
+	it( 'throws when Karma config parser throws', () => {
+		const options = {
+			files: [
+				'basic-styles'
+			],
+			production: true
+		};
+
+		stubs.fs.readdirSync.returns( [] );
+
+		stubs.transformFileOptionToTestGlob.returns( [
+			'/workspace/packages/ckeditor5-basic-styles/tests/**/*.js',
+			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
+		] );
+
+		stubs.glob.sync.onFirstCall().returns( [
+			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
+			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
+		] );
+
+		stubs.glob.sync.onSecondCall().returns( [] );
+
+		stubs.karma.config.parseConfig.throws( new Error( 'Example error from Karma config parser.' ) );
+
+		return runAutomatedTests( options )
+			.then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				err => {
+					expect( err.message ).to.equal( 'Example error from Karma config parser.' );
+				}
+			);
+	} );
+
 	it( 'should warn when the `production` option is set to `false`', () => {
 		const options = {
 			files: [
@@ -270,7 +291,9 @@ beforeEach( () => {
 
 		return runAutomatedTests( options )
 			.then( () => {
-				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.not.include( codeMakingConsoleUseThrowErrors );
+				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.not.include(
+					'throw new Error( \'Detected `console.\' + method + \'()`:\' )'
+				);
 			} );
 	} );
 
@@ -302,7 +325,9 @@ beforeEach( () => {
 
 		return runAutomatedTests( options )
 			.then( () => {
-				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.include( codeMakingConsoleUseThrowErrors );
+				expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.include(
+					'throw new Error( \'Detected `console.\' + method + \'()`:\' )'
+				);
 			} );
 	} );
 
