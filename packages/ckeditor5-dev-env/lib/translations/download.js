@@ -117,7 +117,8 @@ function saveNewTranslations( { packageName, packagePath, translations, simplify
 
 		poFileContent = cleanPoFileContent( poFileContent, { simplifyLicenseHeader } );
 
-		const pathToSave = path.join( packagePath, lang + '.po' );
+		const pathToSave = path.join( packagePath, lang + '.po' )
+			.split( path.sep ).join( path.posix.sep );
 
 		fs.outputFileSync( pathToSave, poFileContent );
 		savedFiles++;
@@ -132,7 +133,8 @@ function saveNewTranslations( { packageName, packagePath, translations, simplify
  * @return {String}
  */
 function getPathToTranslations( cwd, packagePath ) {
-	return path.join( cwd, packagePath, 'lang', 'translations' );
+	return path.join( cwd, packagePath, 'lang', 'translations' )
+		.split( path.sep ).join( path.posix.sep );
 }
 
 function isPoFileContainingTranslations( poFileContent ) {
