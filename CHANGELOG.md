@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [29.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/v29.0.1...v29.0.2) (2022-03-18)
+
+### Other changes
+
+* Downgraded the previous version of the `sinon` dependency due to errors while executing tests in CKEditor 5. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ef5e3e86840e710c991cf0b9d211f37ef8012019))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v29.0.1 => v29.0.2
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v29.0.1 => v29.0.2
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v29.0.1 => v29.0.2
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v29.0.1 => v29.0.2
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v29.0.1 => v29.0.2
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v29.0.1 => v29.0.2
+</details>
+
+
 ## [29.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v29.0.0...v29.0.1) (2022-03-18)
 
 ### Other changes
