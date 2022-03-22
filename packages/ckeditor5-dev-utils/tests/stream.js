@@ -97,7 +97,7 @@ describe( 'stream', () => {
 				const file = new Vinyl( {
 					cwd: './',
 					path,
-					contents: new Buffer( '' )
+					contents: Buffer.from( '' )
 				} );
 
 				expect( utils.isTestFile( file ) ).to.equal( expected );
