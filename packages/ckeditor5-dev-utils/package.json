@@ -18,7 +18,6 @@
     "is-interactive": "^1.0.0",
     "javascript-stringify": "^1.6.0",
     "pofile": "^1.0.9",
-    "postcss": "^8.4.12",
     "postcss-import": "^14.0.2",
     "postcss-loader": "^4.3.0",
     "postcss-mixins": "^6.2.3",
