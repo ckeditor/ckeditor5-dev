@@ -59,6 +59,8 @@ module.exports = ( pluginOptions = {} ) => {
 	};
 };
 
+module.exports.postcss = true;
+
 /**
  * Imports a complementary theme file corresponding with a CSS file being processed by
  * PostCSS, if such theme file exists.
