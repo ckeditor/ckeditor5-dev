@@ -5,6 +5,9 @@
 
 'use strict';
 
+const chalk = require( 'chalk' );
+const { logger: loggerFactory } = require( '@ckeditor/ckeditor5-dev-utils' );
+
 const utils = {
 	/**
 	 * Checks whether specified `properties` are specified in the `objectToCheck` object.
@@ -20,6 +23,30 @@ const utils = {
 		if ( nonExistingProperties.length ) {
 			throw new Error( `The specified object misses the following properties: ${ nonExistingProperties.join( ', ' ) }.` );
 		}
+	},
+
+	/**
+	 * Creates logger instance.
+	 *
+	 * @returns {Object} logger
+	 * @returns {Function} logger.progress
+	 * @returns {Function} logger.info
+	 * @returns {Function} logger.warning
+	 * @returns {Function} logger.error
+	 */
+	createLogger() {
+		const logger = loggerFactory();
+
+		return {
+			progress( message ) {
+				if ( !message ) {
+					this.info( '' );
+				} else {
+					this.info( '\n📍 ' + chalk.cyan( message ) );
+				}
+			},
+			...logger
+		};
 	}
 };
 

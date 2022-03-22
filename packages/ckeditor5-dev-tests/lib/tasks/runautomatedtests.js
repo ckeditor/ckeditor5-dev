@@ -13,7 +13,7 @@ const glob = require( 'glob' );
 const minimatch = require( 'minimatch' );
 const mkdirp = require( 'mkdirp' );
 const karmaLogger = require( 'karma/lib/logger.js' );
-const { Server: KarmaServer } = require( 'karma' );
+const karma = require( 'karma' );
 const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontotestglob' );
 
 // Glob patterns that should be ignored. It means if a specified test file is located under path
@@ -120,22 +120,7 @@ function createEntryFile( globPatterns, production ) {
 	}
 
 	if ( production ) {
-		entryFileContent.unshift( `
-const originalWarn = console.warn;
-
-window.production = true;
-
-beforeEach( () => {
-	Object.keys( console )
-		.filter( methodOrProperty => typeof console[ methodOrProperty ] === 'function' )
-		.forEach( method => {
-			console[ method ] = ( ...data ) => {
-				originalWarn( 'Detected \`console.' + method + '()\`:', ...data );
-				throw new Error( 'Detected \`console.' + method + '()\`:' );
-			}
-		} );
-} );
-		` );
+		entryFileContent.unshift( assertConsoleUsageToThrowErrors() );
 	}
 
 	fs.writeFileSync( ENTRY_FILE_PATH, entryFileContent.join( '\n' ) + '\n' );
@@ -149,11 +134,52 @@ beforeEach( () => {
 	fs.utimesSync( ENTRY_FILE_PATH, then, then );
 }
 
+function assertConsoleUsageToThrowErrors() {
+	const functionString = makeConsoleUsageToThrowErrors.toString();
+
+	return functionString
+		// Extract the body of the function from between the opening and closing braces.
+		.substring(
+			functionString.indexOf( '{' ) + 1,
+			functionString.lastIndexOf( '}' )
+		)
+		// Remove the leading and trailing new lines.
+		.trim()
+		// Decrease indent for the extracted function body by one tab.
+		.replace( /^\t/gm, '' );
+}
+
+/* eslint-disable no-undef,mocha/no-top-level-hooks */
+function makeConsoleUsageToThrowErrors() {
+	const originalWarn = console.warn;
+
+	window.production = true;
+
+	// Important: Do not remove the comment below. It is used to assert this function insertion in tests.
+	//
+	// Make using any method from the console to fail.
+	beforeEach( () => {
+		Object.keys( console )
+			.filter( methodOrProperty => typeof console[ methodOrProperty ] === 'function' )
+			.forEach( method => {
+				console[ method ] = ( ...data ) => {
+					originalWarn( 'Detected `console.' + method + '()`:', ...data );
+					throw new Error( 'Detected `console.' + method + '()`:' );
+				};
+			} );
+	} );
+}
+/* eslint-enable no-undef,mocha/no-top-level-hooks */
+
 function runKarma( options ) {
 	return new Promise( ( resolve, reject ) => {
-		const config = getKarmaConfig( options );
+		const KarmaServer = karma.Server;
+		const parseConfig = karma.config.parseConfig;
 
-		const server = new KarmaServer( config, exitCode => {
+		const config = getKarmaConfig( options );
+		const parsedConfig = parseConfig( null, config, { throwErrors: true } );
+
+		const server = new KarmaServer( parsedConfig, exitCode => {
 			if ( exitCode === 0 ) {
 				resolve();
 			} else {

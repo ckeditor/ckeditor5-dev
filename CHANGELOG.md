@@ -1,6 +1,91 @@
 Changelog
 =========
 
+## [29.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/v29.0.1...v29.0.2) (2022-03-18)
+
+### Other changes
+
+* Downgraded the previous version of the `sinon` dependency due to errors while executing tests in CKEditor 5. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ef5e3e86840e710c991cf0b9d211f37ef8012019))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v29.0.1 => v29.0.2
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v29.0.1 => v29.0.2
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v29.0.1 => v29.0.2
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v29.0.1 => v29.0.2
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v29.0.1 => v29.0.2
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v29.0.1 => v29.0.2
+</details>
+
+
+## [29.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v29.0.0...v29.0.1) (2022-03-18)
+
+### Other changes
+
+* Bumped Karma test runner to `v6.x`. Closes [ckeditor/ckeditor5#11337](https://github.com/ckeditor/ckeditor5/issues/11337). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/bd5e23c73705e61ac261afb536124b0f066174a1))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v29.0.0 => v29.0.1
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v29.0.0 => v29.0.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v29.0.0 => v29.0.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v29.0.0 => v29.0.1
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v29.0.0 => v29.0.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v29.0.0 => v29.0.1
+</details>
+
+
+## [29.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v28.1.1...v29.0.0) (2022-03-18)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `url` option for `uploadPotFiles()` and `downloadTranslations()` is not supported anymore. Instead, use `organizationName` and `projectName` that represent organization and project names.
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `uploadPotFiles()` task does not read anything from the file system automatically (removed the `translationsDirectory` option). A developer must pass the `cwd` option, which points to the project's root directory. Also, the `packages` map is required, which defines which packages should be processed. Keys in the map represent package names, while their values point to directories where to look for translation sources.
+
+### Features
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Tools for translations use the latest version of the Transifex API (3.0). Improved the UI - these scripts print updates whenever a new step of the process starts. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/a34b57755ad0822b6a1365d4b015ddd41b3c6491))
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: The `upload()` and `download()` scripts stores resources that could not be processed (e.g., due to network issues). Only packages that failed during the previous run will be processed when re-running. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/a34b57755ad0822b6a1365d4b015ddd41b3c6491))
+
+### Bug fixes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Fixed `changelog.getChangesForVersion()` util leaking to other releases. Closes [ckeditor/ckeditor5#11322](https://github.com/ckeditor/ckeditor5/issues/11322). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/bca6938240a793ceafb0d5c69708d5fa4d66fa9b))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v28.1.1 => v29.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v28.1.1 => v29.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v28.1.1 => v29.0.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v28.1.1 => v29.0.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v28.1.1 => v29.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v28.1.1 => v29.0.0
+</details>
+
+
 ## [28.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/v28.1.0...v28.1.1) (2022-03-03)
 
 ### Bug fixes

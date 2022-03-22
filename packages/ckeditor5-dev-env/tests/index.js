@@ -215,18 +215,21 @@ describe( 'dev-env/index', () => {
 			const packages = [];
 
 			const response = await tasks.downloadTranslations( {
+				organizationName: 'ckeditor-organization',
+				projectName: 'ckeditor5-project',
 				packages,
 				token: 'token',
-				url: 'https://api.example.com',
 				cwd: '/workspace'
 			} );
+
 			expect( response.status ).to.equal( true );
 
 			sinon.assert.calledOnce( stubs.translations.download );
 			sinon.assert.alwaysCalledWithExactly( stubs.translations.download, {
+				organizationName: 'ckeditor-organization',
+				projectName: 'ckeditor5-project',
 				packages,
 				token: 'token',
-				url: 'https://api.example.com',
 				cwd: '/workspace'
 			} );
 		} );
