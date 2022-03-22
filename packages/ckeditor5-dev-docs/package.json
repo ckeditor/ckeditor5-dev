@@ -5,8 +5,8 @@
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^30.0.0",
-    "@ckeditor/jsdoc-plugins": "^30.0.0",
+    "@ckeditor/ckeditor5-dev-utils": "^30.0.1",
+    "@ckeditor/jsdoc-plugins": "^30.0.1",
     "fast-glob": "^3.2.4",
     "fs-extra": "^9.0.0",
     "puppeteer": "^13.1.3",
