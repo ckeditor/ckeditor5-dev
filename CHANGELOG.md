@@ -7,15 +7,9 @@ Changelog
 
 * **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Upgraded the `postcss` version to 8 and marked the package as peer dependency instead of dependency. Starting from this version, when using the `@ckeditor/ckeditor5-dev-utils`, you need to manually install the `postcss` dependency.
 
-Tests (env): Fixed broken tests on Windows.
-
-Tests (env): Fixed deprecation warnings.
-
 ### Features
 
 * **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The `styles.getPostCssConfig()` function returns a configuration compatible with `postcss@8`. See [ckeditor/ckeditor5#11460](https://github.com/ckeditor/ckeditor5/issues/11460). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/bda2a8ec1f0a6e48504be2fd14f577a34a346180))
-
-  MAJOR BREAKING CHANGE (utils): Upgraded the `postcss` version to 8 and marked the package as peer dependency instead of dependency. Starting from this version, when using the `@ckeditor/ckeditor5-dev-utils`, you need to manually install the `postcss` dependency.
 
 ### Released packages
 
