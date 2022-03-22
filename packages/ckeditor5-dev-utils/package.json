@@ -37,7 +37,6 @@
     "vinyl": "^2.1.0"
   },
   "peerDependencies": {
-    "postcss": "^8.4.12",
     "webpack": "^4.43.0 || ^5.24.0"
   },
   "engines": {
