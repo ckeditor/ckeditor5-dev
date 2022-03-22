@@ -97,7 +97,7 @@ describe( 'stream', () => {
 				const file = new Vinyl( {
 					cwd: './',
 					path,
-					contents: new Buffer.from( '' ) // eslint-disable-line new-cap
+					contents: Buffer.from( '' )
 				} );
 
 				expect( utils.isTestFile( file ) ).to.equal( expected );
