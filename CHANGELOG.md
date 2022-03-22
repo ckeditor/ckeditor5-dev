@@ -1,6 +1,43 @@
 Changelog
 =========
 
+## [30.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v29.0.2...v30.0.0) (2022-03-22)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Upgraded the `postcss` version to 8 and marked the package as peer dependency instead of dependency. Starting from this version, when using the `@ckeditor/ckeditor5-dev-utils`, you need to manually install the `postcss` dependency.
+
+Tests (env): Fixed broken tests on Windows.
+
+Tests (env): Fixed deprecation warnings.
+
+### Features
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The `styles.getPostCssConfig()` function returns a configuration compatible with `postcss@8`. See [ckeditor/ckeditor5#11460](https://github.com/ckeditor/ckeditor5/issues/11460). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/bda2a8ec1f0a6e48504be2fd14f577a34a346180))
+
+  MAJOR BREAKING CHANGE (utils): Upgraded the `postcss` version to 8 and marked the package as peer dependency instead of dependency. Starting from this version, when using the `@ckeditor/ckeditor5-dev-utils`, you need to manually install the `postcss` dependency.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v29.0.2 => v30.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v29.0.2 => v30.0.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v29.0.2 => v30.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v29.0.2 => v30.0.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v29.0.2 => v30.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v29.0.2 => v30.0.0
+</details>
+
+
 ## [29.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/v29.0.1...v29.0.2) (2022-03-18)
 
 ### Other changes
