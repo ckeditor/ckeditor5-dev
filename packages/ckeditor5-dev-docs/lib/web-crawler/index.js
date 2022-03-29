@@ -9,8 +9,9 @@
 
 const puppeteer = require( 'puppeteer' );
 const chalk = require( 'chalk' );
+const util = require( 'util' );
 const stripAnsiEscapeCodes = require( 'strip-ansi' );
-const { getBaseUrl, getFirstLineFromErrorMessage, toArray } = require( './utils' );
+const { getBaseUrl, toArray } = require( './utils' );
 const { createSpinner, getProgressHandler } = require( './spinner' );
 
 const {
@@ -32,19 +33,34 @@ const {
  *
  * @param {Object} options Parsed CLI arguments.
  * @param {String} options.url The URL to start crawling. This argument is required.
- * @param {Number} options.depth Defines how many nested page levels should be examined. Infinity by default.
- * @param {Array.<String>} options.exclusions An array of patterns to exclude links. Empty array by default to not exclude anything.
- * @param {Number} options.concurrency Number of concurrent pages (browser tabs) to be used during crawling. One by default.
- * @param {Boolean} options.quit Terminates the scan as soon as an error is found. False (off) by default.
+ * @param {Number} [options.depth=Infinity] Defines how many nested page levels should be examined. Infinity by default.
+ * @param {Array.<String>} [options.exclusions=[]] An array of patterns to exclude links. Empty array by default to not exclude anything.
+ * @param {Number} [options.concurrency=1] Number of concurrent pages (browser tabs) to be used during crawling. One by default.
+ * @param {Boolean} [options.quit=false] Terminates the scan as soon as an error is found. False (off) by default.
  * @param {Boolean} [options.disableBrowserSandbox=false] Whether the browser should be created with the `--no-sandbox` flag.
  * @param {Boolean} [options.noSpinner=false] Whether to display the spinner with progress or a raw message with current progress.
  * @param {Boolean} [options.ignoreHTTPSErrors=false] Whether the browser should ignore invalid (self-signed) certificates.
  * @returns {Promise} Promise is resolved, when the crawler has finished the whole crawling procedure.
  */
 module.exports = async function verify( options ) {
-	const { url, depth, exclusions, concurrency, quit, disableBrowserSandbox, noSpinner, ignoreHTTPSErrors } = options;
+	const {
+		url,
+		depth = Infinity,
+		exclusions = [],
+		concurrency = 1,
+		quit = false,
+		disableBrowserSandbox = false,
+		noSpinner = false,
+		ignoreHTTPSErrors = false
+	} = options;
 
 	console.log( chalk.bold( '\n🔎 Starting the Crawler\n' ) );
+
+	process.on( 'unhandledRejection', reason => {
+		console.log( chalk.red.bold( `\n🔥 Caught the \`unhandledRejection\` error: ${ reason }\n` ) );
+
+		process.exit( 1 );
+	} );
 
 	const spinner = createSpinner( { noSpinner } );
 	const errors = new Map();
@@ -128,18 +144,26 @@ function getErrorHandler( errors ) {
 			errors.set( error.type, new Map() );
 		}
 
-		const message = getFirstLineFromErrorMessage( error.message );
+		const messageLines = error.message.split( '\n' );
+		const firstMessageLine = messageLines.shift();
+		const nextMessageLines = messageLines.join( '\n' );
 
 		const errorCollection = errors.get( error.type );
 
-		if ( !errorCollection.has( message ) ) {
-			errorCollection.set( message, {
+		// Group each error by its first line.
+		if ( !errorCollection.has( firstMessageLine ) ) {
+			errorCollection.set( firstMessageLine, {
 				// Store only unique pages, because given error can occur multiple times on the same page.
-				pages: new Set()
+				pages: new Set(),
+				// Store all the following lines after the first one (if any) in a dedicated property.
+				// We group all errors together only by the first message line (without the error call stack and other details, that could
+				// possibly exist after the first line), because there is a good chance that the same error can be triggered in a different
+				// contexts (so in a different call stacks).
+				details: nextMessageLines
 			} );
 		}
 
-		errorCollection.get( message ).pages.add( error.pageUrl );
+		errorCollection.get( firstMessageLine ).pages.add( error.pageUrl );
 	};
 }
 
@@ -240,7 +264,7 @@ async function openLink( browser, { baseUrl, link, foundLinks, exclusions } ) {
 		// Consider navigation to be finished when the `load` event is fired and there are no network connections for at least 500 ms.
 		await page.goto( link.url, { waitUntil: [ 'load', 'networkidle0' ] } );
 	} catch ( error ) {
-		const errorMessage = error.message || 'Unknown navigation error';
+		const errorMessage = error.message || '(empty message)';
 
 		// All navigation errors starting with the `net::` prefix are already covered by the "request" error handler, so it should
 		// not be also reported as the "navigation error".
@@ -261,6 +285,8 @@ async function openLink( browser, { baseUrl, link, foundLinks, exclusions } ) {
 		// the page yet, because the page may contain error exclusions, that should be taken into account. Such a case can happen when,
 		// for example, the `load` event was not fired because the external resource was not loaded yet.
 		if ( !isResponding || page.url() !== link.url ) {
+			page.removeAllListeners();
+
 			await page.close();
 
 			return {
@@ -280,6 +306,8 @@ async function openLink( browser, { baseUrl, link, foundLinks, exclusions } ) {
 	const links = link.remainingNestedLevels === 0 ?
 		[] :
 		await getLinksFromPage( page, { baseUrl, foundLinks, exclusions } );
+
+	page.removeAllListeners();
 
 	await page.close();
 
@@ -424,9 +452,9 @@ function markErrorsAsIgnored( errors, errorIgnorePatterns ) {
 async function createPage( browser, { link, onError } ) {
 	const page = await browser.newPage();
 
-	page.setDefaultTimeout( DEFAULT_TIMEOUT );
+	await page.setDefaultTimeout( DEFAULT_TIMEOUT );
 
-	page.setCacheEnabled( false );
+	await page.setCacheEnabled( false );
 
 	dismissDialogs( page );
 
@@ -460,13 +488,13 @@ function registerErrorHandlers( page, { link, onError } ) {
 	page.on( ERROR_TYPES.PAGE_CRASH.event, error => onError( {
 		pageUrl: page.url(),
 		type: ERROR_TYPES.PAGE_CRASH,
-		message: error.message
+		message: error.message || '(empty message)'
 	} ) );
 
 	page.on( ERROR_TYPES.UNCAUGHT_EXCEPTION.event, error => onError( {
 		pageUrl: page.url(),
 		type: ERROR_TYPES.UNCAUGHT_EXCEPTION,
-		message: error.message
+		message: error.message || '(empty message)'
 	} ) );
 
 	page.on( ERROR_TYPES.REQUEST_FAILURE.event, request => {
@@ -524,9 +552,14 @@ function registerErrorHandlers( page, { link, onError } ) {
 		}
 
 		const serializeArgumentInPageContext = argument => {
-			// Since errors are not serializable, return message from this error as the output text.
+			// Since errors are not serializable, return the message with the call stack as the output text.
 			if ( argument instanceof Error ) {
-				return argument.message;
+				return argument.stack;
+			}
+
+			// Cast non-string iterable argument to an array.
+			if ( typeof argument !== 'string' && argument[ Symbol.iterator ] ) {
+				return [ ...argument ];
 			}
 
 			// Return argument right away. Since we use `executionContext().evaluate()`, it'll return JSON value of the
@@ -540,10 +573,24 @@ function registerErrorHandlers( page, { link, onError } ) {
 
 		const serializedArguments = await Promise.all( message.args().map( serializeArguments ) );
 
+		const serializedMessage = serializedArguments
+			.map( argument => {
+				// Do not wrap the string in additional quotes and just return it as is.
+				if ( typeof argument === 'string' ) {
+					return argument;
+				}
+
+				return util.inspect( argument, {
+					breakLength: Infinity,
+					compact: true
+				} );
+			} )
+			.join( ' ' );
+
 		onError( {
 			pageUrl: page.url(),
 			type: ERROR_TYPES.CONSOLE_ERROR,
-			message: serializedArguments.length ? serializedArguments.join( '. ' ) : message.text()
+			message: serializedMessage || message.text() || '(empty message)'
 		} );
 	} );
 }
@@ -617,6 +664,10 @@ function logErrors( errors ) {
 		errorCollection.forEach( ( error, message ) => {
 			console.group( `\n❌ ${ message }` );
 
+			if ( error.details ) {
+				console.log( error.details );
+			}
+
 			console.log( chalk.red( `\n…found on the following ${ error.pages.size > 1 ? 'pages' : 'page' }:` ) );
 
 			error.pages.forEach( pageUrl => console.log( chalk.gray( `➥  ${ pageUrl }` ) ) );
@@ -658,6 +709,7 @@ function logErrors( errors ) {
 /**
  * @typedef {Object.<String, Set.<String>>} ErrorOccurrence
  * @property {Set.<String>} pages A set of unique pages, where error has been found.
+ * @property {Set.<String>} [details] Additional error details (i.e. an error stack).
  */
 
 /**

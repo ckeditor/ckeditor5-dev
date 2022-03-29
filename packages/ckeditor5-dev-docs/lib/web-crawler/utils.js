@@ -21,16 +21,6 @@ function getBaseUrl( url ) {
 }
 
 /**
- * Extracts first line from error message.
- *
- * @param {String} message Error message.
- * @returns {String}
- */
-function getFirstLineFromErrorMessage( message ) {
-	return message.split( '\n' ).shift();
-}
-
-/**
  * Checks, if provided string is a valid URL utilizing the HTTP or HTTPS protocols.
  *
  * @param {String} url The URL to validate.
@@ -56,7 +46,6 @@ function toArray( data ) {
 
 module.exports = {
 	getBaseUrl,
-	getFirstLineFromErrorMessage,
 	isUrlValid,
 	toArray
 };
