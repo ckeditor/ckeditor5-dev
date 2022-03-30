@@ -57,7 +57,9 @@ module.exports = async function verify( options ) {
 	console.log( chalk.bold( '\n🔎 Starting the Crawler\n' ) );
 
 	process.on( 'unhandledRejection', reason => {
-		console.log( chalk.red.bold( `\n🔥 Caught the \`unhandledRejection\` error: ${ reason }\n` ) );
+		const error = reason instanceof Error ? reason.stack : reason;
+
+		console.log( chalk.red.bold( `\n🔥 Caught the \`unhandledRejection\` error: ${ error }\n` ) );
 
 		process.exit( 1 );
 	} );
@@ -144,21 +146,21 @@ function getErrorHandler( errors ) {
 			errors.set( error.type, new Map() );
 		}
 
+		// Split the message into the first line and all the rest. The first line is the key by which the errors are grouped together.
+		// All errors are grouped together only by the first message line (without the error call stack and other details, that could
+		// possibly exist after the first line), because there is a good chance that the same error can be triggered in a different
+		// contexts (so in a different call stacks). In order not to duplicate almost the same errors, we need to determine their common
+		// part.
 		const messageLines = error.message.split( '\n' );
 		const firstMessageLine = messageLines.shift();
 		const nextMessageLines = messageLines.join( '\n' );
 
 		const errorCollection = errors.get( error.type );
 
-		// Group each error by its first line.
 		if ( !errorCollection.has( firstMessageLine ) ) {
 			errorCollection.set( firstMessageLine, {
 				// Store only unique pages, because given error can occur multiple times on the same page.
 				pages: new Set(),
-				// Store all the following lines after the first one (if any) in a dedicated property.
-				// We group all errors together only by the first message line (without the error call stack and other details, that could
-				// possibly exist after the first line), because there is a good chance that the same error can be triggered in a different
-				// contexts (so in a different call stacks).
 				details: nextMessageLines
 			} );
 		}
