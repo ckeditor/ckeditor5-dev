@@ -57,7 +57,10 @@ module.exports = async function verify( options ) {
 	console.log( chalk.bold( '\n🔎 Starting the Crawler\n' ) );
 
 	process.on( 'unhandledRejection', reason => {
-		const error = reason instanceof Error ? reason.stack : reason;
+		const error = util.inspect( reason, {
+			breakLength: Infinity,
+			compact: true
+		} );
 
 		console.log( chalk.red.bold( `\n🔥 Caught the \`unhandledRejection\` error: ${ error }\n` ) );
 
