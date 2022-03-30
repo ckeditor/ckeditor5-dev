@@ -1,6 +1,38 @@
 Changelog
 =========
 
+## [30.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v30.0.1...v30.1.0) (2022-03-30)
+
+### Features
+
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: Web crawler shows the full console error that has been captured. Closes [ckeditor/ckeditor5#11505](https://github.com/ckeditor/ckeditor5/issues/11505). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/0e095f70e0484aa0e7d86cebc84226a302e5b060))
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: Web crawler listens to the `unhandledRejection` errors and marks the script execution as failed. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/0e095f70e0484aa0e7d86cebc84226a302e5b060))
+
+### Other changes
+
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: Web crawler can now properly serialize objects and iterables that are passed to the console. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/0e095f70e0484aa0e7d86cebc84226a302e5b060))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.0.1 => v30.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.0.1 => v30.1.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.0.1 => v30.1.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.0.1 => v30.1.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.0.1 => v30.1.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.0.1 => v30.1.0
+</details>
+
+
 ## [30.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v30.0.0...v30.0.1) (2022-03-22)
 
 ### Other changes
