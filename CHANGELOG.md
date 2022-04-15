@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [30.1.3](https://github.com/ckeditor/ckeditor5-dev/compare/v30.1.2...v30.1.3) (2022-04-15)
+
+### Other changes
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Upgraded the PostCSS plugins to their latest versions due to producing the invalid CSS content. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/138d1510d8c16fe828bf224b3609f6577d66fed3))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.1.2 => v30.1.3
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.1.2 => v30.1.3
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.1.2 => v30.1.3
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.1.2 => v30.1.3
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.1.2 => v30.1.3
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.1.2 => v30.1.3
+</details>
+
+
 ## [30.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/v30.1.1...v30.1.2) (2022-04-14)
 
 ### Other changes
