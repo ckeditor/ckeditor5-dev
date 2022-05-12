@@ -44,7 +44,9 @@ const BASIC_TYPES = [
 
 	// Web APIs
 	'File',
-	'DataTransfer'
+	'DataTransfer',
+	'FormData',
+	'URL'
 ];
 
 const GENERIC_TYPES = [
