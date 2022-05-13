@@ -3,9 +3,9 @@ Changelog
 
 ## [30.1.4](https://github.com/ckeditor/ckeditor5-dev/compare/v30.1.3...v30.1.4) (2022-05-13)
 
-### Features
+### Other changes
 
-* **[jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins)**: Allowed FormData and URL as a valid type in API docs. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/fec0d72022bd4408c16d61ea460dcd86683ec256))
+* **[jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins)**: Allowed `FormData` and `URL` as a valid type in API docs. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/fec0d72022bd4408c16d61ea460dcd86683ec256))
 
 ### Released packages
 
