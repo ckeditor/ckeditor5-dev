@@ -399,7 +399,7 @@ function findMisplacedDependencies( dependencies, devDependencies, dependenciesT
 	};
 
 	for ( const [ packageName, absolutePaths ] of Object.entries( dependenciesToCheck ) ) {
-		const isDevDep = isDevDependency( absolutePaths );
+		const isDevDep = isDevDependency( packageName, absolutePaths );
 		const isMissingInDependencies = !isDevDep && !deps.includes( packageName ) && devDeps.includes( packageName );
 		const isMissingInDevDependencies = isDevDep && deps.includes( packageName ) && !devDeps.includes( packageName );
 
@@ -427,7 +427,11 @@ function findMisplacedDependencies( dependencies, devDependencies, dependenciesT
  * @param {Array.<String>} absolutePaths Files where a given package has been imported.
  * @returns {Boolean}
  */
-function isDevDependency( absolutePaths ) {
+function isDevDependency( packageName, absolutePaths ) {
+	if ( packageName.startsWith( '@types/' ) ) {
+		return true;
+	}
+
 	return !absolutePaths.some( absolutePath => absolutePath.match( /[/\\](src|theme)[/\\]/ ) );
 }
 

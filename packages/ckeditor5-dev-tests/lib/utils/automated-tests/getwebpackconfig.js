@@ -32,6 +32,10 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 			} )
 		],
 
+		resolve: {
+			extensions: [ '.ts', '.js', '.json' ]
+		},
+
 		module: {
 			rules: [
 				{
@@ -76,6 +80,19 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 					options: {
 						debugFlags: options.debug
 					}
+				},
+				{
+					test: /\.ts$/,
+					use: [
+						{
+							loader: require.resolve( '../ck-debug-loader' ),
+							options: {
+								debugFlags: options.debug
+							}
+						},
+						'ts-loader'
+					],
+					exclude: /node_modules/
 				}
 			]
 		},
@@ -110,7 +127,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	if ( options.coverage ) {
 		config.module.rules.unshift(
 			{
-				test: /\.js$/,
+				test: /\.[jt]s$/,
 				loader: 'istanbul-instrumenter-loader',
 				include: getPathsToIncludeForCoverage( options.files ),
 				exclude: [
