@@ -70,7 +70,7 @@ function transformSingleGlobPattern( globPattern, options ) {
 		globSuffix.push( 'manual', '**' );
 	}
 
-	globSuffix.push( '*.[jt]s' );
+	globSuffix.push( '*.js' );
 
 	// 0.
 	if ( globPattern === 'ckeditor5' ) {
