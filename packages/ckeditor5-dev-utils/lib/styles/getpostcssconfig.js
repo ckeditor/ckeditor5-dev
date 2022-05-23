@@ -23,7 +23,10 @@ module.exports = function getPostCssConfig( options = {} ) {
 			require( 'postcss-import' )(),
 			require( './themeimporter' )( options.themeImporter ),
 			require( 'postcss-mixins' )(),
-			require( 'postcss-nesting' )(),
+			require( 'postcss-nesting' )( {
+				// https://github.com/ckeditor/ckeditor5/issues/11730
+				noIsPseudoSelector: true
+			} ),
 			require( './themelogger' )()
 		]
 	};
