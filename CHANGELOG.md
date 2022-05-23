@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [30.1.5](https://github.com/ckeditor/ckeditor5-dev/compare/v30.1.4...v30.1.5) (2022-05-23)
+
+### Other changes
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Passed the `noIsPseudoSelector` option to `postcss-nesting` for backward compatibility in browsers that do not support CSS `:is()`. Closes #[ckeditor/ckeditor5#11730](https://github.com/ckeditor/ckeditor5/issues/11730). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/34c16173e12baf9c88d492930dc6bfb52b6c01dc))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.1.4 => v30.1.5
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.1.4 => v30.1.5
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.1.4 => v30.1.5
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.1.4 => v30.1.5
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.1.4 => v30.1.5
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.1.4 => v30.1.5
+</details>
+
+
 ## [30.1.4](https://github.com/ckeditor/ckeditor5-dev/compare/v30.1.3...v30.1.4) (2022-05-13)
 
 ### Other changes
