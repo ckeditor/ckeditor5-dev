@@ -66,6 +66,15 @@ describe( 'styles', () => {
 			} );
 		} );
 
+		// https://github.com/ckeditor/ckeditor5/issues/11730
+		it( 'passes options to postcss-nesting', () => {
+			getPostCssConfig();
+
+			sinon.assert.calledWithExactly( stubs[ 'postcss-nesting' ], {
+				noIsPseudoSelector: true
+			} );
+		} );
+
 		it( 'supports #sourceMap option', () => {
 			expect( getPostCssConfig( { sourceMap: true } ).sourceMap )
 				.to.equal( 'inline' );
