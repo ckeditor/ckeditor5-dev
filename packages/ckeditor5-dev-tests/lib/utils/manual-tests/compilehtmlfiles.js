@@ -135,6 +135,8 @@ function compileHtmlFile( buildDir, options ) {
 	const scriptTag =
 		'<body class="manual-test-container manual-test-container_no-transitions">' +
 		'<script src="/assets/togglesidebar.js"></script>' +
+		'<script src="/socket.io/socket.io.js"></script>' +
+		'<script src="/assets/websocket.js"></script>' +
 		'<script src="/assets/inspector.js"></script>' +
 		'<script src="/assets/attachinspector.js"></script>' +
 		`${ languagesToLoad.map( language => {

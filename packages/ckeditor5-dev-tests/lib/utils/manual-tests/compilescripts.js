@@ -44,7 +44,8 @@ module.exports = function compileManualTestScripts( options ) {
 		additionalLanguages: options.additionalLanguages,
 		debug: options.debug,
 		identityFile: options.identityFile,
-		disableWatch: options.disableWatch
+		disableWatch: options.disableWatch,
+		onScriptsCompilation: options.onScriptsCompilation
 	} );
 
 	return runWebpack( webpackConfig );

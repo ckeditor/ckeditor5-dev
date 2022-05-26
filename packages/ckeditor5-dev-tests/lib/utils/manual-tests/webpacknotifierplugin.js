@@ -11,8 +11,9 @@ const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
  * Plugin for Webpack which helps to inform the developer about processes.
  */
 module.exports = class WebpackNotifierPlugin {
-	constructor() {
+	constructor( onScriptsCompilation ) {
 		this.log = logger();
+		this.onScriptsCompilation = onScriptsCompilation;
 	}
 
 	/**
@@ -24,6 +25,7 @@ module.exports = class WebpackNotifierPlugin {
 	apply( compiler ) {
 		compiler.hooks.compile.tap( this.constructor.name, () => {
 			this.log.info( '[Webpack] Starting scripts compilation...' );
+			this.onScriptsCompilation( 'start' );
 		} );
 
 		compiler.hooks.done.tap( this.constructor.name, stats => {
@@ -40,6 +42,8 @@ module.exports = class WebpackNotifierPlugin {
 			}
 
 			this.log.info( '[Webpack] Finished the compilation.' );
+
+			this.onScriptsCompilation( 'finished' );
 		} );
 	}
 };
