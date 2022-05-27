@@ -72,10 +72,17 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 				},
 				{
 					test: /\.js$/,
-					loader: require.resolve( '../ck-debug-loader' ),
-					options: {
-						debugFlags: options.debug
-					}
+					use: [
+						{
+							loader: 'esbuild-loader'
+						},
+						{
+							loader: require.resolve( '../ck-debug-loader' ),
+							options: {
+								debugFlags: options.debug
+							}
+						}
+					]
 				}
 			]
 		},
