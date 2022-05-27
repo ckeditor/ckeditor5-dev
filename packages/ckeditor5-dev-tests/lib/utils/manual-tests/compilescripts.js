@@ -45,7 +45,7 @@ module.exports = function compileManualTestScripts( options ) {
 		debug: options.debug,
 		identityFile: options.identityFile,
 		disableWatch: options.disableWatch,
-		onScriptsCompilation: options.onScriptsCompilation
+		onTestCompilationStatus: options.onTestCompilationStatus
 	} );
 
 	return runWebpack( webpackConfig );

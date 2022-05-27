@@ -10,7 +10,7 @@
 	let currentToastElement;
 	let wasDisconnected = false;
 
-	socket.on( 'scriptsCompilation', status => {
+	socket.on( 'testCompilationStatus', status => {
 		if ( status === 'start' ) {
 			showToast( 'info', toastElement => {
 				const text = document.createTextNode( 'Compiling tests…' );
@@ -40,12 +40,14 @@
 
 	function showUpdateAvailableToast() {
 		showToast( 'info', toastElement => {
-			const text = document.createTextNode( 'New version available: ' );
+			const text = document.createTextNode( 'Compilation finished, ' );
+			const dot = document.createTextNode( '.' );
 			const reloadLink = document.createElement( 'a' );
 			reloadLink.setAttribute( 'href', '#' );
-			reloadLink.innerText = 'reload';
+			reloadLink.innerText = 'reload page';
 
-			toastElement.insertBefore( reloadLink, toastElement.firstChild );
+			toastElement.insertBefore( dot, toastElement.firstChild );
+			toastElement.insertBefore( reloadLink, dot );
 			toastElement.insertBefore( text, reloadLink );
 
 			reloadLink.addEventListener( 'click', evt => {

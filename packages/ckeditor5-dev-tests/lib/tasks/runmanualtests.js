@@ -45,9 +45,9 @@ module.exports = function runManualTests( options ) {
 	const disableWatch = options.disableWatch || false;
 	let socketServer;
 
-	function onScriptsCompilation( status ) {
+	function onTestCompilationStatus( status ) {
 		if ( socketServer ) {
-			socketServer.emit( 'scriptsCompilation', status );
+			socketServer.emit( 'testCompilationStatus', status );
 		}
 	}
 
@@ -62,7 +62,7 @@ module.exports = function runManualTests( options ) {
 				additionalLanguages,
 				debug: options.debug,
 				identityFile: options.identityFile,
-				onScriptsCompilation,
+				onTestCompilationStatus,
 				disableWatch
 			} ),
 			compileManualTestHtmlFiles( {
@@ -71,6 +71,7 @@ module.exports = function runManualTests( options ) {
 				language,
 				additionalLanguages,
 				silent,
+				onTestCompilationStatus,
 				disableWatch
 			} ),
 			copyAssets( buildDir )
