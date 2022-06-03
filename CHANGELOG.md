@@ -1,6 +1,37 @@
 Changelog
 =========
 
+## [30.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v30.1.5...v30.2.0) (2022-06-03)
+
+### Features
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added support for running automated tests for the TypeScript code. Closes [ckeditor/ckeditor5#11716](https://github.com/ckeditor/ckeditor5/issues/11716). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ada18752a8c79a4253235d81ac40fbc15273aca9))
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Properly detect console method usage in the asynchronous code and stop the whole test run if the `--production` flag is set. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/be2a38e9271e11a7cfb89abcf6ae5586b3fb9f72))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.1.5 => v30.2.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.1.5 => v30.2.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.1.5 => v30.2.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.1.5 => v30.2.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.1.5 => v30.2.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.1.5 => v30.2.0
+</details>
+
+
 ## [30.1.5](https://github.com/ckeditor/ckeditor5-dev/compare/v30.1.4...v30.1.5) (2022-05-23)
 
 ### Other changes
