@@ -91,8 +91,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 							}
 						},
 						'ts-loader'
-					],
-					exclude: /node_modules/
+					]
 				}
 			]
 		},
