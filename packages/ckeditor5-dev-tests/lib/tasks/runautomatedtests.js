@@ -158,13 +158,28 @@ function makeConsoleUsageToThrowErrors() {
 	// Important: Do not remove the comment below. It is used to assert this function insertion in tests.
 	//
 	// Make using any method from the console to fail.
-	beforeEach( () => {
+	before( () => {
 		Object.keys( console )
 			.filter( methodOrProperty => typeof console[ methodOrProperty ] === 'function' )
 			.forEach( method => {
 				console[ method ] = ( ...data ) => {
 					originalWarn( 'Detected `console.' + method + '()`:', ...data );
-					throw new Error( 'Detected `console.' + method + '()`:' );
+
+					// Previously, the error was thrown at this point. Unfortunately, it may happen that some asynchronous piece of code
+					// will call a console method after Mocha has finished the test. In that case:
+					// * Mocha will not be able to catch such a thrown error, even though it has registered the "uncaughtException" and the
+					//   "unhandledRejection" error handlers.
+					// * Mocha will not be able to mark the test as failed.
+					// * Karma will finish the whole test run, and in the console, you will see something like "Executed 42 of 191 SUCCESS".
+					//
+					// Probably the test that causes such problems is incorrectly written:
+					// * The "done()" function is not called at the right moment, or the test does not return a promise.
+					// * Not all dependencies used in the source code under test are mocked, and they cause side effects, i.e., asynchronous
+					//   console method calls after the test is over.
+					//
+					// To ensure that the console methods usage still fail the whole test run, we are calling the error handler from Karma
+					// to stop the Karma server.
+					__karma__.error( 'Detected `console.' + method + '()`: ' + data[ 0 ] );
 				};
 			} );
 	} );
