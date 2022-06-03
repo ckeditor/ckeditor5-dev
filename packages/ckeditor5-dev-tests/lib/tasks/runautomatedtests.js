@@ -170,11 +170,11 @@ function makeConsoleUsageToThrowErrors() {
 					// * Mocha will not be able to catch such a thrown error, even though it has registered the "uncaughtException" and the
 					//   "unhandledRejection" error handlers.
 					// * Mocha will not be able to mark the test as failed.
-					// * Karma will finish the whole test run and in the console you will see something like "Executed 113 of 191 SUCCESS".
+					// * Karma will finish the whole test run, and in the console, you will see something like "Executed 42 of 191 SUCCESS".
 					//
 					// Probably the test that causes such problems is incorrectly written:
-					// * The "done()" function is not called at the right moment or test does not return a promise.
-					// * Not all dependencies used in the source code under test are mocked and they cause side effects i.e. asynchronous
+					// * The "done()" function is not called at the right moment, or the test does not return a promise.
+					// * Not all dependencies used in the source code under test are mocked, and they cause side effects, i.e., asynchronous
 					//   console method calls after the test is over.
 					//
 					// To ensure that the console methods usage still fail the whole test run, we are calling the error handler from Karma
