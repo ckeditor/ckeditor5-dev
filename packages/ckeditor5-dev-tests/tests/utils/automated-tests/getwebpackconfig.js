@@ -44,7 +44,11 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 	it( 'should return basic webpack configuration object', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {} );
 
-		expect( webpackConfig.module.rules.length ).to.equal( 4 );
+		expect( webpackConfig.resolve ).to.deep.equal( {
+			extensions: [ '.ts', '.js', '.json' ]
+		} );
+
+		expect( webpackConfig.module.rules.length ).to.equal( 5 );
 		expect( webpackConfig.resolveLoader.modules[ 0 ] ).to.equal( 'node_modules' );
 
 		expect( webpackConfig.devtool ).to.equal( undefined );
@@ -63,7 +67,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			.find( rule => rule.loader === 'istanbul-instrumenter-loader' );
 
 		expect( istanbulLoader ).to.deep.equal( {
-			test: /\.js$/,
+			test: /\.[jt]s$/,
 			loader: 'istanbul-instrumenter-loader',
 			include: [],
 			exclude: [
