@@ -58,7 +58,7 @@ describe( 'getWebpackConfigForManualTests()', () => {
 		} );
 
 		if ( !tsRule ) {
-			throw new Error( 'Not found loader for ".ts" files.' );
+			throw new Error( 'A loader for ".ts" files was not found.' );
 		}
 
 		expect( tsRule.use[ 0 ].loader.endsWith( 'ck-debug-loader.js' ) ).to.be.true;
