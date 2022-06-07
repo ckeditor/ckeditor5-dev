@@ -288,4 +288,38 @@ describe( 'compileManualTestScripts', () => {
 			expect( stubs.glob.firstCall.args[ 0 ] ).to.equal( 'manualTestPattern' );
 		} );
 	} );
+
+	it( 'should pass correct entries object to the webpack for both JS and TS files', () => {
+		stubs.glob.returns( [
+			'ckeditor5-foo/manual/file1.js',
+			'ckeditor5-foo/manual/file2.ts'
+		] );
+
+		return compileManualTestScripts( {
+			buildDir: 'buildDir',
+			patterns: [ 'manualTestPattern' ],
+			themePath: 'path/to/theme',
+			language: 'en',
+			additionalLanguages: [ 'pl', 'ar' ],
+			debug: [ 'CK_DEBUG' ],
+			disableWatch: false
+		} ).then( () => {
+			expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
+
+			expect( stubs.getWebpackConfig.firstCall.args[ 0 ] ).to.deep.include( {
+				entries: {
+					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1.js',
+					'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2.ts'
+				}
+			} );
+
+			expect( stubs.webpack.calledOnce ).to.equal( true );
+			expect( stubs.webpack.firstCall.args[ 0 ] ).to.deep.include( {
+				entries: {
+					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1.js',
+					'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2.ts'
+				}
+			} );
+		} );
+	} );
 } );

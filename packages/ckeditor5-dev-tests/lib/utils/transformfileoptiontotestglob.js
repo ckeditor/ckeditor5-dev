@@ -13,8 +13,11 @@
  * 1. all packages' files – '*'
  * 2. given package files – 'engine'
  * 3. everything except the given package – '!engine'
- * 4. path – 'engine/view' -> 'ckeditor5-engine/tests/view/**\/*.js'
- * 5. simplified glob – 'engine/view/**\/*.js' -> 'ckeditor5-engine/tests/view/**\/*.js'
+ * 4. path – 'engine/view' -> 'ckeditor5-engine/tests/view/**\/*.{js,ts}'
+ * 5. simplified glob:
+ *		'engine/view/**\/*.js' -> 'ckeditor5-engine/tests/view/**\/*.js'
+ *		'engine/view/**\/*.ts' -> 'ckeditor5-engine/tests/view/**\/*.ts'
+ *		'engine/view/**\/*.{js,ts}' -> 'ckeditor5-engine/tests/view/**\/*.{js,ts}'
  *
  * @param {String} globPattern A path or pattern to determine the tests to execute.
  * @param {Boolean} [isManualTest=false] Whether the tests are manual or automated.
@@ -70,7 +73,7 @@ function transformSingleGlobPattern( globPattern, options ) {
 		globSuffix.push( 'manual', '**' );
 	}
 
-	globSuffix.push( '*.js' );
+	globSuffix.push( '*.{js,ts}' );
 
 	// 0.
 	if ( globPattern === 'ckeditor5' ) {
@@ -90,9 +93,11 @@ function transformSingleGlobPattern( globPattern, options ) {
 		// 5.
 		returnChunks.push( prefix + '-' + packageName, 'tests', ...chunks );
 
-		if ( !chunks[ chunks.length - 1 ].endsWith( '.js' ) ) {
+		const lastChunk = chunks[ chunks.length - 1 ];
+
+		if ( !lastChunk.endsWith( '.js' ) && !lastChunk.endsWith( '.ts' ) && !lastChunk.match( /\.\{.+\}$/ ) ) {
 			// 4.
-			returnChunks.push( '**', '*.js' );
+			returnChunks.push( '**', '*.{js,ts}' );
 		}
 	}
 
