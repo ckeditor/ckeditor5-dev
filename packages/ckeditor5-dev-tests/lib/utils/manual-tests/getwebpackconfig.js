@@ -49,6 +49,10 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 			} )
 		],
 
+		resolve: {
+			extensions: [ '.ts', '.js', '.json' ]
+		},
+
 		module: {
 			rules: [
 				{
@@ -91,6 +95,18 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 					options: {
 						debugFlags: options.debug
 					}
+				},
+				{
+					test: /\.ts$/,
+					use: [
+						{
+							loader: require.resolve( '../ck-debug-loader' ),
+							options: {
+								debugFlags: options.debug
+							}
+						},
+						'ts-loader'
+					]
 				}
 			]
 		},
