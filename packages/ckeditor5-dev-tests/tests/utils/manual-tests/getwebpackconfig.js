@@ -27,6 +27,10 @@ describe( 'getWebpackConfigForManualTests()', () => {
 
 		expect( webpackConfig ).to.be.an( 'object' );
 
+		expect( webpackConfig.resolve ).to.deep.equal( {
+			extensions: [ '.ts', '.js', '.json' ]
+		} );
+
 		// To avoid "eval()" in files.
 		expect( webpackConfig ).to.have.property( 'mode', 'none' );
 		expect( webpackConfig ).to.have.property( 'entry', entries );
@@ -45,5 +49,19 @@ describe( 'getWebpackConfigForManualTests()', () => {
 		expect( webpackConfig ).to.be.an( 'object' );
 		expect( webpackConfig ).to.not.have.property( 'devtool' );
 		expect( webpackConfig ).to.not.have.property( 'watch' );
+	} );
+
+	it( 'should process TypeScript files properly', () => {
+		const webpackConfig = getWebpackConfigForManualTests( {} );
+		const tsRule = webpackConfig.module.rules.find( rule => {
+			return rule.test.toString().endsWith( '/\\.ts$/' );
+		} );
+
+		if ( !tsRule ) {
+			throw new Error( 'A loader for ".ts" files was not found.' );
+		}
+
+		expect( tsRule.use[ 0 ].loader.endsWith( 'ck-debug-loader.js' ) ).to.be.true;
+		expect( tsRule.use[ 1 ] ).to.equal( 'ts-loader' );
 	} );
 } );
