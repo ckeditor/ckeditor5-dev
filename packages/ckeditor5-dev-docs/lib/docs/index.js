@@ -5,10 +5,9 @@
 
 'use strict';
 
-const fs = require( 'fs-extra' );
-const tmp = require( 'tmp' );
+const path = require( 'path' );
 const glob = require( 'fast-glob' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+const TypeDoc = require( 'typedoc' );
 
 /**
  * Builds CKEditor 5 documentation.
@@ -31,72 +30,95 @@ module.exports = async function build( config ) {
 		...config.sourceFiles
 	];
 
-	const extraPlugins = config.extraPlugins || [];
+	// const extraPlugins = config.extraPlugins || [];
 	const outputPath = config.outputPath || 'docs/api/output.json';
-	const validateOnly = config.validateOnly || false;
-	const strictCheck = config.strict || false;
+	// const validateOnly = config.validateOnly || false;
+	// const strictCheck = config.strict || false;
 
 	// Pass options to plugins via env variables.
 	// Since plugins are added using `require` calls other forms are currently impossible.
-	process.env.JSDOC_OUTPUT_PATH = outputPath;
+	// process.env.JSDOC_OUTPUT_PATH = outputPath;
 
-	if ( validateOnly ) {
-		process.env.JSDOC_VALIDATE_ONLY = 'true';
-	}
+	// if ( validateOnly ) {
+	// 	process.env.JSDOC_VALIDATE_ONLY = 'true';
+	// }
 
-	if ( strictCheck ) {
-		process.env.JSDOC_STRICT_CHECK = 'true';
-	}
+	// if ( strictCheck ) {
+	// 	process.env.JSDOC_STRICT_CHECK = 'true';
+	// }
 
 	const files = await glob( sourceFilePatterns );
+	const typeDoc = new TypeDoc.Application();
 
-	const jsDocConfig = {
-		plugins: [
-			require.resolve( 'jsdoc/plugins/markdown' ),
-			require.resolve( '@ckeditor/jsdoc-plugins/lib/purge-private-api-docs' ),
-			require.resolve( '@ckeditor/jsdoc-plugins/lib/export-fixer/export-fixer' ),
-			require.resolve( '@ckeditor/jsdoc-plugins/lib/custom-tags/error' ),
-			require.resolve( '@ckeditor/jsdoc-plugins/lib/custom-tags/observable' ),
-			require.resolve( '@ckeditor/jsdoc-plugins/lib/observable-event-provider' ),
-			require.resolve( '@ckeditor/jsdoc-plugins/lib/longname-fixer/longname-fixer' ),
-			require.resolve( '@ckeditor/jsdoc-plugins/lib/fix-code-snippets' ),
-			require.resolve( '@ckeditor/jsdoc-plugins/lib/relation-fixer' ),
-			require.resolve( '@ckeditor/jsdoc-plugins/lib/event-extender/event-extender' ),
-			require.resolve( '@ckeditor/jsdoc-plugins/lib/cleanup' ),
-			require.resolve( '@ckeditor/jsdoc-plugins/lib/validator/validator' ),
-			require.resolve( '@ckeditor/jsdoc-plugins/lib/utils/doclet-logger' ),
-			...extraPlugins
-		],
-		source: {
-			include: files
-		},
-		opts: {
-			encoding: 'utf8',
-			recurse: true,
-			access: 'all',
-			template: 'templates/silent'
-		}
-	};
+	console.log( 'Source files', files );
 
-	const tmpConfig = tmp.fileSync();
+	typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
+	typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
 
-	await fs.writeFile( tmpConfig.name, JSON.stringify( jsDocConfig ) );
+	typeDoc.bootstrap( {
+		entryPoints: files,
 
-	console.log( 'JSDoc started...' );
+		// TODO: Move tsconfig.json to main repo. Also: how to share it across repos? Also: Do we need to share it?
+		tsconfig: path.join( process.cwd(), 'packages', 'ckeditor5-utils', 'tsconfig.json' )
+	} );
 
-	try {
-		// Not so beautiful API as for 2020...
-		// See more in https://github.com/jsdoc/jsdoc/issues/938.
-		const cmd = require.resolve( 'jsdoc/jsdoc.js' );
+	const conversionResult = typeDoc.convert();
 
-		// The `node` command is used for explicitly needed for Windows.
-		// See https://github.com/ckeditor/ckeditor5/issues/7212.
-		tools.shExec( `node ${ cmd } -c ${ tmpConfig.name }`, { verbosity: 'info' } );
-	} catch ( error ) {
-		console.error( 'An error was thrown by JSDoc:' );
-
-		throw error;
+	if ( conversionResult ) {
+		await typeDoc.generateJson( conversionResult, outputPath );
+		// Uncomment this to generate TypeDoc documentation (build-in HTML template).
+		// await typeDoc.generateDocs( conversionResult, 'docs/api/typedoc' );
+	} else {
+		throw 'Something went wrong with TypeDoc.';
 	}
+
+	// const jsDocConfig = {
+	// 	plugins: [
+	// 		require.resolve( 'jsdoc/plugins/markdown' ),
+	// 		require.resolve( '@ckeditor/jsdoc-plugins/lib/purge-private-api-docs' ),
+	// 		require.resolve( '@ckeditor/jsdoc-plugins/lib/export-fixer/export-fixer' ),
+	// 		require.resolve( '@ckeditor/jsdoc-plugins/lib/custom-tags/error' ),
+	// 		require.resolve( '@ckeditor/jsdoc-plugins/lib/custom-tags/observable' ),
+	// 		require.resolve( '@ckeditor/jsdoc-plugins/lib/observable-event-provider' ),
+	// 		require.resolve( '@ckeditor/jsdoc-plugins/lib/longname-fixer/longname-fixer' ),
+	// 		require.resolve( '@ckeditor/jsdoc-plugins/lib/fix-code-snippets' ),
+	// 		require.resolve( '@ckeditor/jsdoc-plugins/lib/relation-fixer' ),
+	// 		require.resolve( '@ckeditor/jsdoc-plugins/lib/event-extender/event-extender' ),
+	// 		require.resolve( '@ckeditor/jsdoc-plugins/lib/cleanup' ),
+	// 		require.resolve( '@ckeditor/jsdoc-plugins/lib/validator/validator' ),
+	// 		require.resolve( '@ckeditor/jsdoc-plugins/lib/utils/doclet-logger' ),
+	// 		...extraPlugins
+	// 	],
+	// 	source: {
+	// 		include: files
+	// 	},
+	// 	opts: {
+	// 		encoding: 'utf8',
+	// 		recurse: true,
+	// 		access: 'all',
+	// 		template: 'templates/silent'
+	// 	}
+	// };
+
+	// const tmpConfig = tmp.fileSync();
+
+	// await fs.writeFile( tmpConfig.name, JSON.stringify( jsDocConfig ) );
+
+	// console.log( 'JSDoc started...' );
+
+	// try {
+	// 	// Not so beautiful API as for 2020...
+	// 	// See more in https://github.com/jsdoc/jsdoc/issues/938.
+	// 	const cmd = require.resolve( 'jsdoc/jsdoc.js' );
+
+	// 	// The `node` command is used for explicitly needed for Windows.
+	// 	// See https://github.com/ckeditor/ckeditor5/issues/7212.
+	// 	tools.shExec( `node ${ cmd } -c ${ tmpConfig.name }`, { verbosity: 'info' } );
+	// } catch ( error ) {
+	// 	console.error( 'An error was thrown by JSDoc:' );
+
+	// 	throw error;
+	// }
 
 	console.log( `Documented ${ files.length } files!` );
 };
