@@ -24,9 +24,11 @@ module.exports = {
 	getTranslations,
 	getResourceName,
 	getLanguageCode,
+	isSourceLanguage,
 	createResource,
 	createSourceFile,
-	getResourceUploadDetails
+	getResourceUploadDetails,
+	getResourceTranslations
 };
 
 /**
@@ -234,6 +236,24 @@ async function getTranslations( resource, languages ) {
 			...translationRequests.failed
 		]
 	};
+}
+
+/**
+ * Fetches all the translations for the specified resource and language. The returned array contains translation items (objects) with
+ * attributes and relationships to other Transifex entities.
+ *
+ * @param {String} resourceId The resource id for which translation should be downloaded.
+ * @param {String} languageId The language id for which translation should be downloaded.
+ * @returns {Promise.<Array.<Object>>}
+ */
+async function getResourceTranslations( resourceId, languageId ) {
+	const translations = transifexApi.ResourceTranslation
+		.filter( { resource: resourceId, language: languageId } )
+		.include( 'resource_string' );
+
+	await translations.fetch();
+
+	return translations.data;
 }
 
 /**
