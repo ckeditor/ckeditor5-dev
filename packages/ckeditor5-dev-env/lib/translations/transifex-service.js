@@ -103,7 +103,7 @@ async function createSourceFile( options ) {
 		type: 'resource_strings_async_uploads'
 	};
 
-	return transifexApi.ResourceStringAsyncUpload.create( requestData )
+	return transifexApi.ResourceStringsAsyncUpload.create( requestData )
 		.then( response => response.id );
 }
 
@@ -116,7 +116,7 @@ async function createSourceFile( options ) {
  * @returns {Promise}
  */
 async function getResourceUploadDetails( uploadId, numberOfAttempts = 1 ) {
-	return transifexApi.ResourceStringAsyncUpload.get( uploadId )
+	return transifexApi.ResourceStringsAsyncUpload.get( uploadId )
 		.then( statusResponse => {
 			const status = statusResponse.attributes.status;
 			const isPending = status === 'pending' || status === 'processing';
@@ -247,7 +247,7 @@ async function getTranslations( resource, languages ) {
  * @returns {Promise.<Array.<Object>>}
  */
 async function getResourceTranslations( resourceId, languageId ) {
-	const translations = transifexApi.ResourceTranslation
+	const translations = transifexApi.ResourceTranslations
 		.filter( { resource: resourceId, language: languageId } )
 		.include( 'resource_string' );
 
@@ -273,7 +273,7 @@ function createDownloadRequest( resource, language, numberOfAttempts = 1 ) {
 	};
 
 	const relationships = isSourceLanguage( language ) ? { resource } : { resource, language };
-	const requestName = isSourceLanguage( language ) ? 'ResourceStringAsyncDownload' : 'ResourceTranslationAsyncDownload';
+	const requestName = isSourceLanguage( language ) ? 'ResourceStringsAsyncDownload' : 'ResourceTranslationsAsyncDownload';
 	const requestType = isSourceLanguage( language ) ? 'resource_strings_async_downloads' : 'resource_translations_async_downloads';
 
 	return transifexApi[ requestName ]
