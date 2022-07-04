@@ -247,13 +247,12 @@ async function getTranslations( resource, languages ) {
  * @returns {Promise.<Array.<Object>>}
  */
 async function getResourceTranslations( resourceId, languageId ) {
-	const translations = transifexApi.ResourceTranslations
+	const translations = transifexApi.ResourceTranslation
 		.filter( { resource: resourceId, language: languageId } )
 		.include( 'resource_string' );
 
-	await translations.fetch();
-
-	return translations.data;
+	return translations.fetch()
+		.then( () => translations.data );
 }
 
 /**

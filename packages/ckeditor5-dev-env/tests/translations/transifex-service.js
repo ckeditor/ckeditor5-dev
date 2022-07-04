@@ -42,8 +42,13 @@ describe( 'dev-env/translations/transifex-service', () => {
 			} ) ),
 
 			createResource: sinon.stub(),
-			createResourceStringAsyncUpload: sinon.stub(),
-			getResourceStringAsyncUpload: sinon.stub(),
+			createResourceStringsAsyncUpload: sinon.stub(),
+			getResourceStringsAsyncUpload: sinon.stub(),
+
+			filterResourceTranslations: sinon.stub(),
+			includeResourceTranslations: sinon.stub(),
+			fetchResourceTranslations: sinon.stub(),
+			dataResourceTranslations: [],
 
 			transifexApi: {
 				setup: sinon.stub().callsFake( ( { auth } ) => {
@@ -58,12 +63,12 @@ describe( 'dev-env/translations/transifex-service', () => {
 					create: ( ...args ) => stubs.createResource( ...args )
 				},
 
-				ResourceStringAsyncUpload: {
-					create: ( ...args ) => stubs.createResourceStringAsyncUpload( ...args ),
-					get: ( ...args ) => stubs.getResourceStringAsyncUpload( ...args )
+				ResourceStringsAsyncUpload: {
+					create: ( ...args ) => stubs.createResourceStringsAsyncUpload( ...args ),
+					get: ( ...args ) => stubs.getResourceStringsAsyncUpload( ...args )
 				},
 
-				...[ 'ResourceStringAsyncDownload', 'ResourceTranslationAsyncDownload' ].reduce( ( result, methodName ) => {
+				...[ 'ResourceStringsAsyncDownload', 'ResourceTranslationsAsyncDownload' ].reduce( ( result, methodName ) => {
 					result[ methodName ] = {
 						create: sinon.stub().callsFake( ( { attributes, relationships, type } ) => {
 							const resourceName = relationships.resource.attributes.slug;
@@ -81,7 +86,26 @@ describe( 'dev-env/translations/transifex-service', () => {
 					};
 
 					return result;
-				}, {} )
+				}, {} ),
+
+				ResourceTranslation: {
+					filter: ( ...args ) => {
+						stubs.filterResourceTranslations( ...args );
+
+						return {
+							include: ( ...args ) => {
+								stubs.includeResourceTranslations( ...args );
+
+								return {
+									fetch: ( ...args ) => stubs.fetchResourceTranslations( ...args ),
+									get data() {
+										return stubs.dataResourceTranslations;
+									}
+								};
+							}
+						};
+					}
+				}
 			},
 
 			fetch: sinon.stub()
@@ -232,9 +256,9 @@ describe( 'dev-env/translations/transifex-service', () => {
 				pseudo: false
 			};
 
-			sinon.assert.calledOnce( stubs.transifexApi.ResourceStringAsyncDownload.create );
+			sinon.assert.calledOnce( stubs.transifexApi.ResourceStringsAsyncDownload.create );
 
-			sinon.assert.calledWithExactly( stubs.transifexApi.ResourceStringAsyncDownload.create, {
+			sinon.assert.calledWithExactly( stubs.transifexApi.ResourceStringsAsyncDownload.create, {
 				attributes,
 				relationships: {
 					resource
@@ -242,9 +266,9 @@ describe( 'dev-env/translations/transifex-service', () => {
 				type: 'resource_strings_async_downloads'
 			} );
 
-			sinon.assert.calledTwice( stubs.transifexApi.ResourceTranslationAsyncDownload.create );
+			sinon.assert.calledTwice( stubs.transifexApi.ResourceTranslationsAsyncDownload.create );
 
-			sinon.assert.calledWithExactly( stubs.transifexApi.ResourceTranslationAsyncDownload.create.firstCall, {
+			sinon.assert.calledWithExactly( stubs.transifexApi.ResourceTranslationsAsyncDownload.create.firstCall, {
 				attributes,
 				relationships: {
 					resource,
@@ -253,7 +277,7 @@ describe( 'dev-env/translations/transifex-service', () => {
 				type: 'resource_translations_async_downloads'
 			} );
 
-			sinon.assert.calledWithExactly( stubs.transifexApi.ResourceTranslationAsyncDownload.create.secondCall, {
+			sinon.assert.calledWithExactly( stubs.transifexApi.ResourceTranslationsAsyncDownload.create.secondCall, {
 				attributes,
 				relationships: {
 					resource,
@@ -393,8 +417,8 @@ describe( 'dev-env/translations/transifex-service', () => {
 		it( 'should return failed requests if it is not possible to create all initial download requests', async () => {
 			const clock = sinon.useFakeTimers();
 
-			stubs.transifexApi.ResourceStringAsyncDownload.create.rejects();
-			stubs.transifexApi.ResourceTranslationAsyncDownload.create.rejects();
+			stubs.transifexApi.ResourceStringsAsyncDownload.create.rejects();
+			stubs.transifexApi.ResourceTranslationsAsyncDownload.create.rejects();
 
 			const resource = mocks.resources[ 0 ];
 			const languages = [ ...mocks.languages ];
@@ -434,9 +458,9 @@ describe( 'dev-env/translations/transifex-service', () => {
 				statusText: 'Internal Server Error'
 			} );
 
-			stubs.transifexApi.ResourceStringAsyncDownload.create.rejects();
+			stubs.transifexApi.ResourceStringsAsyncDownload.create.rejects();
 
-			stubs.transifexApi.ResourceTranslationAsyncDownload.create
+			stubs.transifexApi.ResourceTranslationsAsyncDownload.create
 				.onCall( 0 )
 				.rejects()
 				.onCall( 1 )
@@ -485,6 +509,56 @@ describe( 'dev-env/translations/transifex-service', () => {
 		} );
 	} );
 
+	describe( 'getResourceTranslations', () => {
+		it( 'should return all found translations', () => {
+			stubs.fetchResourceTranslations.callsFake( () => {
+				stubs.dataResourceTranslations = [
+					{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:680k83DmCPu9AkGVwDvVQqCvsJkg93AC:l:en' },
+					{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:MbFEbBcsOk43LryccpBHPyeMYBW6G5FV:l:en' },
+					{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:tQ8xmNQ706zjL3hiqEsttqUoneZJtV4Q:l:en' }
+				];
+
+				return Promise.resolve();
+			} );
+
+			return transifexService.getResourceTranslations( 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo', 'l:en' )
+				.then( result => {
+					expect( result ).to.deep.equal( [
+						{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:680k83DmCPu9AkGVwDvVQqCvsJkg93AC:l:en' },
+						{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:MbFEbBcsOk43LryccpBHPyeMYBW6G5FV:l:en' },
+						{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:tQ8xmNQ706zjL3hiqEsttqUoneZJtV4Q:l:en' }
+					] );
+
+					expect( stubs.filterResourceTranslations.callCount ).to.equal( 1 );
+					expect( stubs.filterResourceTranslations.firstCall.args[ 0 ] ).to.deep.equal( {
+						resource: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo',
+						language: 'l:en'
+					} );
+
+					expect( stubs.includeResourceTranslations.callCount ).to.equal( 1 );
+					expect( stubs.includeResourceTranslations.firstCall.args[ 0 ] ).to.equal( 'resource_string' );
+
+					expect( stubs.fetchResourceTranslations.callCount ).to.equal( 1 );
+				} );
+		} );
+
+		it( 'should reject a promise if Transifex API rejected', async () => {
+			const apiError = new Error( 'JsonApiError: 418, I\'m a teapot' );
+
+			stubs.fetchResourceTranslations.rejects( apiError );
+
+			return transifexService.getResourceTranslations( 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo', 'l:en' )
+				.then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					error => {
+						expect( apiError ).to.equal( error );
+					}
+				);
+		} );
+	} );
+
 	describe( 'getResourceName()', () => {
 		it( 'should extract the resource name from the resource instance', () => {
 			const resource = { attributes: { slug: 'ckeditor5-core' } };
@@ -498,6 +572,20 @@ describe( 'dev-env/translations/transifex-service', () => {
 			const language = { attributes: { code: 'pl' } };
 
 			expect( transifexService.getLanguageCode( language ) ).to.equal( 'pl' );
+		} );
+	} );
+
+	describe( 'isSourceLanguage()', () => {
+		it( 'should return false if the language instance is not the source language', () => {
+			const language = { attributes: { code: 'pl' } };
+
+			expect( transifexService.isSourceLanguage( language ) ).to.be.false;
+		} );
+
+		it( 'should return true if the language instance is the source language', () => {
+			const language = { attributes: { code: 'en' } };
+
+			expect( transifexService.isSourceLanguage( language ) ).to.be.true;
 		} );
 	} );
 
@@ -591,12 +679,12 @@ describe( 'dev-env/translations/transifex-service', () => {
 				type: 'resource_strings_async_uploads'
 			};
 
-			stubs.createResourceStringAsyncUpload.resolves( apiResponse );
+			stubs.createResourceStringsAsyncUpload.resolves( apiResponse );
 
 			return transifexService.createSourceFile( { organizationName, projectName, resourceName, content } )
 				.then( response => {
-					expect( stubs.createResourceStringAsyncUpload.callCount ).to.equal( 1 );
-					expect( stubs.createResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.deep.equal( {
+					expect( stubs.createResourceStringsAsyncUpload.callCount ).to.equal( 1 );
+					expect( stubs.createResourceStringsAsyncUpload.firstCall.args[ 0 ] ).to.deep.equal( {
 						attributes: {
 							content: '# ckeditor5-foo',
 							content_encoding: 'text'
@@ -624,7 +712,7 @@ describe( 'dev-env/translations/transifex-service', () => {
 
 			const apiError = new Error( 'JsonApiError: 418, I\'m a teapot' );
 
-			stubs.createResourceStringAsyncUpload.rejects( apiError );
+			stubs.createResourceStringsAsyncUpload.rejects( apiError );
 
 			return transifexService.createSourceFile( { organizationName, projectName, resourceName, content } )
 				.then(
@@ -658,13 +746,13 @@ describe( 'dev-env/translations/transifex-service', () => {
 				type: 'resource_strings_async_uploads'
 			};
 
-			stubs.getResourceStringAsyncUpload.resolves( apiResponse );
+			stubs.getResourceStringsAsyncUpload.resolves( apiResponse );
 
 			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
 			expect( promise ).to.be.a( 'promise' );
-			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 1 );
-			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+			expect( stubs.getResourceStringsAsyncUpload.callCount ).to.equal( 1 );
+			expect( stubs.getResourceStringsAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
 			const result = await promise;
 
@@ -680,20 +768,20 @@ describe( 'dev-env/translations/transifex-service', () => {
 				type: 'resource_strings_async_uploads'
 			};
 
-			stubs.getResourceStringAsyncUpload.onFirstCall().resolves( {
+			stubs.getResourceStringsAsyncUpload.onFirstCall().resolves( {
 				attributes: { status: 'pending' }
 			} );
-			stubs.getResourceStringAsyncUpload.onSecondCall().resolves( apiResponse );
+			stubs.getResourceStringsAsyncUpload.onSecondCall().resolves( apiResponse );
 
 			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
 			expect( promise ).to.be.a( 'promise' );
-			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 1 );
-			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+			expect( stubs.getResourceStringsAsyncUpload.callCount ).to.equal( 1 );
+			expect( stubs.getResourceStringsAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
 			await clock.tickAsync( 3000 );
-			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 2 );
-			expect( stubs.getResourceStringAsyncUpload.secondCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+			expect( stubs.getResourceStringsAsyncUpload.callCount ).to.equal( 2 );
+			expect( stubs.getResourceStringsAsyncUpload.secondCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
 			expect( await promise ).to.equal( apiResponse );
 		} );
@@ -707,20 +795,20 @@ describe( 'dev-env/translations/transifex-service', () => {
 				type: 'resource_strings_async_uploads'
 			};
 
-			stubs.getResourceStringAsyncUpload.onFirstCall().resolves( {
+			stubs.getResourceStringsAsyncUpload.onFirstCall().resolves( {
 				attributes: { status: 'processing' }
 			} );
-			stubs.getResourceStringAsyncUpload.onSecondCall().resolves( apiResponse );
+			stubs.getResourceStringsAsyncUpload.onSecondCall().resolves( apiResponse );
 
 			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
 			expect( promise ).to.be.a( 'promise' );
-			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 1 );
-			expect( stubs.getResourceStringAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+			expect( stubs.getResourceStringsAsyncUpload.callCount ).to.equal( 1 );
+			expect( stubs.getResourceStringsAsyncUpload.firstCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
 			await clock.tickAsync( 3000 );
-			expect( stubs.getResourceStringAsyncUpload.callCount ).to.equal( 2 );
-			expect( stubs.getResourceStringAsyncUpload.secondCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
+			expect( stubs.getResourceStringsAsyncUpload.callCount ).to.equal( 2 );
+			expect( stubs.getResourceStringsAsyncUpload.secondCall.args[ 0 ] ).to.equal( '4abfc726-6a27-4c33-9d99-e5254c8df748' );
 
 			expect( await promise ).to.equal( apiResponse );
 		} );
@@ -728,7 +816,7 @@ describe( 'dev-env/translations/transifex-service', () => {
 		it( 'should return a promise that rejects if Transifex returned an error (no-delay)', async () => {
 			const apiResponse = new Error( 'JsonApiError' );
 
-			stubs.getResourceStringAsyncUpload.rejects( apiResponse );
+			stubs.getResourceStringsAsyncUpload.rejects( apiResponse );
 
 			return transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' )
 				.then(
@@ -744,10 +832,10 @@ describe( 'dev-env/translations/transifex-service', () => {
 		it( 'should return a promise that rejects if Transifex returned an error (delay)', async () => {
 			const apiResponse = new Error( 'JsonApiError' );
 
-			stubs.getResourceStringAsyncUpload.onFirstCall().resolves( {
+			stubs.getResourceStringsAsyncUpload.onFirstCall().resolves( {
 				attributes: { status: 'processing' }
 			} );
-			stubs.getResourceStringAsyncUpload.onSecondCall().rejects( apiResponse );
+			stubs.getResourceStringsAsyncUpload.onSecondCall().rejects( apiResponse );
 
 			const promise = transifexService.getResourceUploadDetails( '4abfc726-6a27-4c33-9d99-e5254c8df748' )
 				.then(
@@ -769,7 +857,7 @@ describe( 'dev-env/translations/transifex-service', () => {
 		it( 'should return a promise that rejects if reached the maximum number of requests to Transifex', async () => {
 			// 10 is equal to the `MAX_REQUEST_ATTEMPTS` constant.
 			for ( let i = 0; i < 10; ++i ) {
-				stubs.getResourceStringAsyncUpload.onCall( i ).resolves( {
+				stubs.getResourceStringsAsyncUpload.onCall( i ).resolves( {
 					attributes: { status: 'processing' }
 				} );
 			}
@@ -793,7 +881,10 @@ describe( 'dev-env/translations/transifex-service', () => {
 			expect( promise ).to.be.a( 'promise' );
 
 			for ( let i = 0; i < 9; ++i ) {
-				expect( stubs.getResourceStringAsyncUpload.callCount, `getResourceStringAsyncUpload, call: ${ i + 1 }` ).to.equal( i + 1 );
+				expect(
+					stubs.getResourceStringsAsyncUpload.callCount, `getResourceStringsAsyncUpload, call: ${ i + 1 }`
+				).to.equal( i + 1 );
+
 				await clock.tickAsync( 3000 );
 			}
 
