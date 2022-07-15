@@ -65,6 +65,10 @@ module.exports = function getDllPluginWebpackConfig( options ) {
 			} )
 		],
 
+		resolve: {
+			extensions: [ '.ts', '.js', '.json' ]
+		},
+
 		module: {
 			rules: [
 				{
@@ -96,6 +100,10 @@ module.exports = function getDllPluginWebpackConfig( options ) {
 							}
 						}
 					]
+				},
+				{
+					test: /\.ts$/,
+					use: [ 'ts-loader' ]
 				}
 			]
 		}

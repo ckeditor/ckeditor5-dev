@@ -1,6 +1,82 @@
 Changelog
 =========
 
+## [30.3.2](https://github.com/ckeditor/ckeditor5-dev/compare/v30.3.1...v30.3.2) (2022-07-06)
+
+### Other changes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Added new method `getResourceTranslations()` in `lib/translations/transifex-service.js` for fetching all current translations from Transifex for specified resource and language. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/d3a542b4754630d9c75c70c5c60e5c21d153b7a1))
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Exposed new method `isSourceLanguage()` in `lib/translations/transifex-service.js` that checks if the specified language is the source language (English). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/d3a542b4754630d9c75c70c5c60e5c21d153b7a1))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.3.1 => v30.3.2
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.3.1 => v30.3.2
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.3.1 => v30.3.2
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.3.1 => v30.3.2
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.3.1 => v30.3.2
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.3.1 => v30.3.2
+</details>
+
+
+## [30.3.1](https://github.com/ckeditor/ckeditor5-dev/compare/v30.3.0...v30.3.1) (2022-06-22)
+
+### Other changes
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Adds support for TypeScript when building DLLs. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/db5ec2c28a3b77e31deff1ca926923cbdca4c2c4))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.3.0 => v30.3.1
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.3.0 => v30.3.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.3.0 => v30.3.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.3.0 => v30.3.1
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.3.0 => v30.3.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.3.0 => v30.3.1
+</details>
+
+
+## [30.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/v30.2.0...v30.3.0) (2022-06-08)
+
+### Features
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Made it possible to run manual tests for features written in TS. Closes [ckeditor/ckeditor5#11717](https://github.com/ckeditor/ckeditor5/issues/11717). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/0393dcc7fd8cd4bb7943146fb55be7f3ded4391d))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.2.0 => v30.3.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.2.0 => v30.3.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.2.0 => v30.3.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.2.0 => v30.3.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.2.0 => v30.3.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.2.0 => v30.3.0
+</details>
+
+
 ## [30.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v30.1.5...v30.2.0) (2022-06-03)
 
 ### Features
