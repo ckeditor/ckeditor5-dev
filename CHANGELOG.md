@@ -1,6 +1,35 @@
 Changelog
 =========
 
+## [30.3.3](https://github.com/ckeditor/ckeditor5-dev/compare/v30.3.2...v30.3.3) (2022-07-20)
+
+### Bug fixes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Added support for paginated resource translations results from Transifex. Closes [ckeditor/ckeditor5#12098](https://github.com/ckeditor/ckeditor5/issues/12098). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/c29b9fe11acb37d8a8fc2dcf83c27464af062d19))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Fixed usage of `isDevDependency()`. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/7d97224eea25a1e153159516ddcd60ae78632014))
+
+### Other changes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Renaming the entry point extension from ".ts" to ".js" in the `main` field in the `package.json` files for each package written in TypeScript before the package is published to npm. After publishing, the original extension is restored. Closes [ckeditor/ckeditor5#12038](https://github.com/ckeditor/ckeditor5/issues/12038). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/12fc545bdeab33f3b53adcc6dc971cedaa91d3e4))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.3.2 => v30.3.3
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.3.2 => v30.3.3
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.3.2 => v30.3.3
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.3.2 => v30.3.3
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.3.2 => v30.3.3
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.3.2 => v30.3.3
+</details>
+
+
 ## [30.3.2](https://github.com/ckeditor/ckeditor5-dev/compare/v30.3.1...v30.3.2) (2022-07-06)
 
 ### Other changes
