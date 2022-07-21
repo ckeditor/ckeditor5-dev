@@ -62,6 +62,13 @@ describe( 'getWebpackConfigForManualTests()', () => {
 		}
 
 		expect( tsRule.use[ 0 ].loader.endsWith( 'ck-debug-loader.js' ) ).to.be.true;
-		expect( tsRule.use[ 1 ] ).to.equal( 'ts-loader' );
+		expect( tsRule.use[ 1 ] ).to.be.an( 'object' );
+		expect( tsRule.use[ 1 ] ).to.have.property( 'loader', 'ts-loader' );
+		expect( tsRule.use[ 1 ] ).to.have.property( 'options' );
+		expect( tsRule.use[ 1 ].options ).to.have.property( 'compilerOptions' );
+		expect( tsRule.use[ 1 ].options.compilerOptions ).to.deep.equal( {
+			noEmit: false,
+			noEmitOnError: false
+		} );
 	} );
 } );
