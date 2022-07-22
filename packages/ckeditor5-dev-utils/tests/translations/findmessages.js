@@ -33,6 +33,23 @@ describe( 'findMessages', () => {
 		expect( messages ).to.deep.equal( [ { id: 'Image', string: 'Image' }, { id: 'CKEditor', string: 'CKEditor' } ] );
 	} );
 
+	it( 'should parse provided TypeScript code and find messages from `t()` function calls on string literals', () => {
+		const messages = [];
+
+		findMessages(
+			`function x( param: string ): void {
+                const t = this.t;
+                t( 'Image' );
+                t( 'CKEditor' );
+                g( 'Some other function' );
+			}`,
+			'foo.ts',
+			message => messages.push( message )
+		);
+
+		expect( messages ).to.deep.equal( [ { id: 'Image', string: 'Image' }, { id: 'CKEditor', string: 'CKEditor' } ] );
+	} );
+
 	it( 'should parse provided code and find messages inside the `t()` function calls on object literals', () => {
 		const messages = [];
 
