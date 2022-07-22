@@ -180,4 +180,26 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		expect( getDefinitionsFromFile.firstCall.args[ 0 ] ).to.equal( 'path/to/secrets.js' );
 		expect( plugin.definitions.LICENSE_KEY ).to.equal( 'secret' );
 	} );
+
+	it( 'should process TypeScript files properly', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {} );
+
+		const tsRule = webpackConfig.module.rules.find( rule => {
+			return rule.test.toString().endsWith( '/\\.ts$/' );
+		} );
+
+		if ( !tsRule ) {
+			throw new Error( 'A loader for ".ts" files was not found.' );
+		}
+
+		expect( tsRule.use[ 0 ].loader.endsWith( 'ck-debug-loader.js' ) ).to.be.true;
+		expect( tsRule.use[ 1 ] ).to.be.an( 'object' );
+		expect( tsRule.use[ 1 ] ).to.have.property( 'loader', 'ts-loader' );
+		expect( tsRule.use[ 1 ] ).to.have.property( 'options' );
+		expect( tsRule.use[ 1 ].options ).to.have.property( 'compilerOptions' );
+		expect( tsRule.use[ 1 ].options.compilerOptions ).to.deep.equal( {
+			noEmit: false,
+			noEmitOnError: true
+		} );
+	} );
 } );
