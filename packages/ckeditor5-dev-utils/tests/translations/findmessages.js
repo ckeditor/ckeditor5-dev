@@ -57,6 +57,29 @@ describe( 'findMessages', () => {
 		] );
 	} );
 
+	it( 'should not throw an error when defining a type after an instantiation expression', () => {
+		const errors = [];
+		const messages = [];
+
+		findMessages(
+			`function addEventListener<TEvent extends BaseEvent>(
+				listener: Emitter,
+				emitter: Emitter,
+				event: TEvent[ 'name' ],
+				callback: GetCallback<TEvent>,
+				options: CallbackOptions
+			) {
+				( listener._addEventListener<TEvent> ) .call( emitter, event, callback, options );
+			}`,
+			'emitter.ts',
+			message => messages.push( message ),
+			error => errors.push( error )
+		);
+
+		expect( messages.length ).to.equal( 0 );
+		expect( errors.length ).to.equal( 0 );
+	} );
+
 	it( 'should parse provided code and find messages inside the `t()` function calls on object literals', () => {
 		const messages = [];
 
