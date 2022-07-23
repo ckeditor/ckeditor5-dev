@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [30.3.5](https://github.com/ckeditor/ckeditor5-dev/compare/v30.3.4...v30.3.5) (2022-07-23)
+
+### Other changes
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Support for TypeScript when collecting translation entries. Closes [ckeditor/ckeditor5#12029](https://github.com/ckeditor/ckeditor5/issues/12029). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ad5d50ebe9f389ddcda35362655c3f469c40d269))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.3.4 => v30.3.5
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.3.4 => v30.3.5
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.3.4 => v30.3.5
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.3.4 => v30.3.5
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.3.4 => v30.3.5
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.3.4 => v30.3.5
+</details>
+
+
 ## [30.3.4](https://github.com/ckeditor/ckeditor5-dev/compare/v30.3.3...v30.3.4) (2022-07-21)
 
 ### Bug fixes
