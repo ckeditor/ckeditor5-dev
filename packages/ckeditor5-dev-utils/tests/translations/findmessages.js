@@ -40,14 +40,21 @@ describe( 'findMessages', () => {
 			`function x( param: string ): void {
                 const t = this.t;
                 t( 'Image' );
-                t( 'CKEditor' );
+                t( { string: 'CKEditor', ID: 'CKEDITOR' } );
+                t( { string: 'Image', plural: 'Images' } );
+                t( { string: 'Image', plural: 'Images', id: 'AN_IMAGE' } );
                 g( 'Some other function' );
 			}`,
 			'foo.ts',
 			message => messages.push( message )
 		);
 
-		expect( messages ).to.deep.equal( [ { id: 'Image', string: 'Image' }, { id: 'CKEditor', string: 'CKEditor' } ] );
+		expect( messages ).to.deep.equal( [
+			{ id: 'Image', string: 'Image' },
+			{ id: 'CKEditor', string: 'CKEditor' },
+			{ id: 'Image', plural: 'Images', string: 'Image' },
+			{ id: 'AN_IMAGE', plural: 'Images', string: 'Image' }
+		] );
 	} );
 
 	it( 'should parse provided code and find messages inside the `t()` function calls on object literals', () => {
