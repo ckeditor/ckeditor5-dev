@@ -251,8 +251,25 @@ async function getResourceTranslations( resourceId, languageId ) {
 		.filter( { resource: resourceId, language: languageId } )
 		.include( 'resource_string' );
 
-	return translations.fetch()
-		.then( () => translations.data );
+	// Returned translations might be paginated, so return the whole collection.
+	let page = translations;
+	const results = [];
+
+	await page.fetch();
+
+	while ( true ) {
+		for ( const item of page.data ) {
+			results.push( item );
+		}
+
+		if ( !page.next ) {
+			break;
+		}
+
+		page = await page.getNext();
+	}
+
+	return results;
 }
 
 /**

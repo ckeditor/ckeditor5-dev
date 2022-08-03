@@ -1,6 +1,83 @@
 Changelog
 =========
 
+## [30.3.5](https://github.com/ckeditor/ckeditor5-dev/compare/v30.3.4...v30.3.5) (2022-07-23)
+
+### Other changes
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Support for TypeScript when collecting translation entries. Closes [ckeditor/ckeditor5#12029](https://github.com/ckeditor/ckeditor5/issues/12029). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ad5d50ebe9f389ddcda35362655c3f469c40d269))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.3.4 => v30.3.5
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.3.4 => v30.3.5
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.3.4 => v30.3.5
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.3.4 => v30.3.5
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.3.4 => v30.3.5
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.3.4 => v30.3.5
+</details>
+
+
+## [30.3.4](https://github.com/ckeditor/ckeditor5-dev/compare/v30.3.3...v30.3.4) (2022-07-21)
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Override compiler options when processing test files to avoid errors when modifying source files when the watcher mode is enabled. Both tasks use `noEmit=false`. Additionally, for manual tests use `noEmitOnError=false`. For automated tests, use `noEmitOnError=true` to avoid running tests when the TypeScript compilator ends with an error Closes [ckeditor/ckeditor5#12111](https://github.com/ckeditor/ckeditor5/issues/12111). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/bcc9f7660e7c9831404d4ba3c25fa1bb377cbaa7))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.3.3 => v30.3.4
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.3.3 => v30.3.4
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.3.3 => v30.3.4
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.3.3 => v30.3.4
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.3.3 => v30.3.4
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.3.3 => v30.3.4
+</details>
+
+
+## [30.3.3](https://github.com/ckeditor/ckeditor5-dev/compare/v30.3.2...v30.3.3) (2022-07-20)
+
+### Bug fixes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Added support for paginated resource translations results from Transifex. Closes [ckeditor/ckeditor5#12098](https://github.com/ckeditor/ckeditor5/issues/12098). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/c29b9fe11acb37d8a8fc2dcf83c27464af062d19))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Fixed usage of `isDevDependency()`. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/7d97224eea25a1e153159516ddcd60ae78632014))
+
+### Other changes
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Renaming the entry point extension from ".ts" to ".js" in the `main` field in the `package.json` files for each package written in TypeScript before the package is published to npm. After publishing, the original extension is restored. Closes [ckeditor/ckeditor5#12038](https://github.com/ckeditor/ckeditor5/issues/12038). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/12fc545bdeab33f3b53adcc6dc971cedaa91d3e4))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.3.2 => v30.3.3
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.3.2 => v30.3.3
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.3.2 => v30.3.3
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.3.2 => v30.3.3
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.3.2 => v30.3.3
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.3.2 => v30.3.3
+</details>
+
+
 ## [30.3.2](https://github.com/ckeditor/ckeditor5-dev/compare/v30.3.1...v30.3.2) (2022-07-06)
 
 ### Other changes

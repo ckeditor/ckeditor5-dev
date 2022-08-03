@@ -48,6 +48,7 @@ describe( 'dev-env/translations/transifex-service', () => {
 			filterResourceTranslations: sinon.stub(),
 			includeResourceTranslations: sinon.stub(),
 			fetchResourceTranslations: sinon.stub(),
+			getNextResourceTranslations: sinon.stub(),
 			dataResourceTranslations: [],
 
 			transifexApi: {
@@ -100,7 +101,11 @@ describe( 'dev-env/translations/transifex-service', () => {
 									fetch: ( ...args ) => stubs.fetchResourceTranslations( ...args ),
 									get data() {
 										return stubs.dataResourceTranslations;
-									}
+									},
+									get next() {
+										return !!stubs.getNextResourceTranslations;
+									},
+									getNext: () => stubs.getNextResourceTranslations()
 								};
 							}
 						};
@@ -511,12 +516,57 @@ describe( 'dev-env/translations/transifex-service', () => {
 
 	describe( 'getResourceTranslations', () => {
 		it( 'should return all found translations', () => {
+			stubs.getNextResourceTranslations = null;
 			stubs.fetchResourceTranslations.callsFake( () => {
 				stubs.dataResourceTranslations = [
 					{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:680k83DmCPu9AkGVwDvVQqCvsJkg93AC:l:en' },
 					{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:MbFEbBcsOk43LryccpBHPyeMYBW6G5FV:l:en' },
 					{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:tQ8xmNQ706zjL3hiqEsttqUoneZJtV4Q:l:en' }
 				];
+
+				return Promise.resolve();
+			} );
+
+			return transifexService.getResourceTranslations( 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo', 'l:en' )
+				.then( result => {
+					expect( result ).to.deep.equal( [
+						{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:680k83DmCPu9AkGVwDvVQqCvsJkg93AC:l:en' },
+						{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:MbFEbBcsOk43LryccpBHPyeMYBW6G5FV:l:en' },
+						{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:tQ8xmNQ706zjL3hiqEsttqUoneZJtV4Q:l:en' }
+					] );
+
+					expect( stubs.filterResourceTranslations.callCount ).to.equal( 1 );
+					expect( stubs.filterResourceTranslations.firstCall.args[ 0 ] ).to.deep.equal( {
+						resource: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo',
+						language: 'l:en'
+					} );
+
+					expect( stubs.includeResourceTranslations.callCount ).to.equal( 1 );
+					expect( stubs.includeResourceTranslations.firstCall.args[ 0 ] ).to.equal( 'resource_string' );
+
+					expect( stubs.fetchResourceTranslations.callCount ).to.equal( 1 );
+				} );
+		} );
+
+		it( 'should return all found translations if results are paginated', () => {
+			const availableTranslations = [
+				{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:680k83DmCPu9AkGVwDvVQqCvsJkg93AC:l:en' },
+				{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:MbFEbBcsOk43LryccpBHPyeMYBW6G5FV:l:en' },
+				{ id: 'o:ckeditor:p:ckeditor5:r:ckeditor5-foo:s:tQ8xmNQ706zjL3hiqEsttqUoneZJtV4Q:l:en' }
+			];
+
+			stubs.getNextResourceTranslations.callsFake( () => {
+				stubs.dataResourceTranslations = [ availableTranslations.shift() ];
+
+				return Promise.resolve( {
+					data: stubs.dataResourceTranslations,
+					next: availableTranslations.length > 0,
+					getNext: stubs.getNextResourceTranslations
+				} );
+			} );
+
+			stubs.fetchResourceTranslations.callsFake( () => {
+				stubs.dataResourceTranslations = [ availableTranslations.shift() ];
 
 				return Promise.resolve();
 			} );
