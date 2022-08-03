@@ -23,7 +23,10 @@ describe( 'runManualTests', () => {
 		} );
 
 		spies = {
-			server: sandbox.spy( () => Promise.resolve() ),
+			socketIO: {
+				Server: sinon.stub().returns( new ( class {} )() )
+			},
+			server: sandbox.stub(),
 			htmlFileCompiler: sandbox.spy( () => Promise.resolve() ),
 			scriptCompiler: sandbox.spy( () => Promise.resolve() ),
 			removeDir: sandbox.spy( () => Promise.resolve() ),
@@ -31,6 +34,7 @@ describe( 'runManualTests', () => {
 			transformFileOptionToTestGlob: sandbox.stub()
 		};
 
+		mockery.registerMock( 'socket.io', spies.socketIO );
 		mockery.registerMock( '../utils/manual-tests/createserver', spies.server );
 		mockery.registerMock( '../utils/manual-tests/compilehtmlfiles', spies.htmlFileCompiler );
 		mockery.registerMock( '../utils/manual-tests/compilescripts', spies.scriptCompiler );
@@ -65,20 +69,21 @@ describe( 'runManualTests', () => {
 				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 1 ] ).to.equal( true );
 
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
-				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+				sinon.assert.calledWith( spies.htmlFileCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: [
 						'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
 						'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
 					],
 					language: undefined,
+					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
 					disableWatch: false,
 					silent: false
 				} );
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
-				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+				sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: [
 						'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
@@ -86,6 +91,7 @@ describe( 'runManualTests', () => {
 					],
 					themePath: null,
 					language: undefined,
+					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
 					debug: undefined,
 					disableWatch: false,
@@ -130,7 +136,7 @@ describe( 'runManualTests', () => {
 				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 1 ] ).to.equal( true );
 
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
-				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+				sinon.assert.calledWith( spies.htmlFileCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: [
 						'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
@@ -139,13 +145,14 @@ describe( 'runManualTests', () => {
 						'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
 					],
 					language: undefined,
+					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
 					disableWatch: false,
 					silent: false
 				} );
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
-				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+				sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: [
 						'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
@@ -155,6 +162,7 @@ describe( 'runManualTests', () => {
 					],
 					themePath: 'path/to/theme',
 					language: undefined,
+					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
 					debug: [ 'CK_DEBUG' ],
 					disableWatch: false,
@@ -203,7 +211,7 @@ describe( 'runManualTests', () => {
 				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 1 ] ).to.equal( true );
 
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
-				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+				sinon.assert.calledWith( spies.htmlFileCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: [
 						'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
@@ -212,13 +220,14 @@ describe( 'runManualTests', () => {
 						'workspace/packages/ckeditor-editor-classic/tests/manual/**/*.js'
 					],
 					language: 'pl',
+					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: [ 'ar', 'en' ],
 					disableWatch: false,
 					silent: false
 				} );
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
-				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+				sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: [
 						'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
@@ -228,6 +237,7 @@ describe( 'runManualTests', () => {
 					],
 					themePath: 'path/to/theme',
 					language: 'pl',
+					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: [ 'ar', 'en' ],
 					debug: [ 'CK_DEBUG' ],
 					disableWatch: false,
@@ -288,7 +298,7 @@ describe( 'runManualTests', () => {
 				expect( spies.server.calledOnce ).to.equal( true );
 				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
 
-				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+				sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: [
 						'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
@@ -298,6 +308,7 @@ describe( 'runManualTests', () => {
 					],
 					themePath: null,
 					language: undefined,
+					onTestCompilationStatus: sinon.match.func,
 					debug: undefined,
 					additionalLanguages: undefined,
 					disableWatch: false,
@@ -329,7 +340,7 @@ describe( 'runManualTests', () => {
 				expect( spies.server.calledOnce ).to.equal( true );
 				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
 
-				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+				sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: [
 						'workspace/packages/ckeditor5-build-classic/tests/**/manual/**/*.js',
@@ -339,6 +350,7 @@ describe( 'runManualTests', () => {
 					],
 					themePath: null,
 					language: undefined,
+					onTestCompilationStatus: sinon.match.func,
 					debug: undefined,
 					additionalLanguages: undefined,
 					disableWatch: false,
@@ -364,20 +376,21 @@ describe( 'runManualTests', () => {
 				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 1 ] ).to.equal( true );
 
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
-				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+				sinon.assert.calledWith( spies.htmlFileCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: [
 						'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
 						'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
 					],
 					language: undefined,
+					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
 					disableWatch: false,
 					silent: true
 				} );
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
-				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+				sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: [
 						'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
@@ -385,6 +398,7 @@ describe( 'runManualTests', () => {
 					],
 					themePath: null,
 					language: undefined,
+					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
 					debug: undefined,
 					disableWatch: false,
@@ -409,20 +423,21 @@ describe( 'runManualTests', () => {
 				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 1 ] ).to.equal( true );
 
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
-				expect( spies.htmlFileCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+				sinon.assert.calledWith( spies.htmlFileCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: [
 						'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
 						'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
 					],
 					language: undefined,
+					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
 					disableWatch: true,
 					silent: false
 				} );
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
-				expect( spies.scriptCompiler.firstCall.args[ 0 ] ).to.deep.equal( {
+				sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
 					patterns: [
 						'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
@@ -430,6 +445,7 @@ describe( 'runManualTests', () => {
 					],
 					themePath: null,
 					language: undefined,
+					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
 					debug: undefined,
 					disableWatch: true,
@@ -438,6 +454,23 @@ describe( 'runManualTests', () => {
 
 				expect( spies.server.calledOnce ).to.equal( true );
 				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+			} );
+	} );
+
+	it( 'should start a socket.io server as soon as the http server is up and running', () => {
+		spies.transformFileOptionToTestGlob.returns( [
+			'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+			'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
+		] );
+
+		const httpServerMock = sinon.spy();
+
+		spies.server.callsFake( ( buildDire, port, onCreate ) => onCreate( httpServerMock ) );
+
+		return runManualTests( {} )
+			.then( () => {
+				sinon.assert.calledOnce( spies.socketIO.Server );
+				sinon.assert.calledWithExactly( spies.socketIO.Server, httpServerMock );
 			} );
 	} );
 } );

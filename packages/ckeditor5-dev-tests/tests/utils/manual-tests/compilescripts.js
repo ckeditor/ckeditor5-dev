@@ -35,7 +35,8 @@ describe( 'compileManualTestScripts', () => {
 			} ) ),
 			getRelativeFilePath: sandbox.spy( x => x ),
 			pathJoin: sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) ),
-			pathSep: sandbox.stub( path, 'sep' ).value( '/' )
+			pathSep: sandbox.stub( path, 'sep' ).value( '/' ),
+			onTestCompilationStatus: sinon.stub()
 		};
 
 		mockery.registerMock( '../glob', stubs.glob );
@@ -59,16 +60,18 @@ describe( 'compileManualTestScripts', () => {
 			patterns: [ 'manualTestPattern' ],
 			themePath: 'path/to/theme',
 			language: 'en',
+			onTestCompilationStatus: stubs.onTestCompilationStatus,
 			additionalLanguages: [ 'pl', 'ar' ],
 			debug: [ 'CK_DEBUG' ],
 			disableWatch: false
 		} ).then( () => {
 			expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
 
-			expect( stubs.getWebpackConfig.firstCall.args[ 0 ] ).to.deep.equal( {
+			sinon.assert.calledWith( stubs.getWebpackConfig.firstCall, {
 				buildDir: 'buildDir',
 				themePath: 'path/to/theme',
 				language: 'en',
+				onTestCompilationStatus: stubs.onTestCompilationStatus,
 				additionalLanguages: [ 'pl', 'ar' ],
 				entries: {
 					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
@@ -113,6 +116,7 @@ describe( 'compileManualTestScripts', () => {
 			patterns: manualTestScriptsPatterns,
 			themePath: 'path/to/theme',
 			language: null,
+			onTestCompilationStatus: stubs.onTestCompilationStatus,
 			additionalLanguages: null
 		} ).then( () => {
 			expect( stubs.glob.calledTwice ).to.equal( true );
@@ -141,6 +145,7 @@ describe( 'compileManualTestScripts', () => {
 			patterns: [ 'manualTestPattern' ],
 			themePath: 'path/to/theme',
 			language: null,
+			onTestCompilationStatus: stubs.onTestCompilationStatus,
 			additionalLanguages: null
 		} ).then(
 			() => {
@@ -168,6 +173,7 @@ describe( 'compileManualTestScripts', () => {
 			patterns: manualTestScriptsPatterns,
 			themePath: 'path/to/theme',
 			language: null,
+			onTestCompilationStatus: stubs.onTestCompilationStatus,
 			additionalLanguages: null
 		} ).then( () => {
 			expect( stubs.getRelativeFilePath.calledOnce ).to.equal( true );
@@ -197,6 +203,7 @@ describe( 'compileManualTestScripts', () => {
 			patterns: manualTestScriptsPatterns,
 			themePath: 'path/to/theme',
 			language: null,
+			onTestCompilationStatus: stubs.onTestCompilationStatus,
 			additionalLanguages: null
 		} ).then( () => {
 			expect( stubs.getRelativeFilePath.calledOnce ).to.equal( true );
@@ -214,6 +221,7 @@ describe( 'compileManualTestScripts', () => {
 			patterns: [ 'manualTestPattern' ],
 			themePath: 'path/to/theme',
 			language: 'en',
+			onTestCompilationStatus: stubs.onTestCompilationStatus,
 			additionalLanguages: [ 'pl', 'ar' ],
 			debug: [ 'CK_DEBUG' ],
 			identityFile,
@@ -221,10 +229,11 @@ describe( 'compileManualTestScripts', () => {
 		} ).then( () => {
 			expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
 
-			expect( stubs.getWebpackConfig.firstCall.args[ 0 ] ).to.deep.equal( {
+			sinon.assert.calledWith( stubs.getWebpackConfig.firstCall, {
 				buildDir: 'buildDir',
 				themePath: 'path/to/theme',
 				language: 'en',
+				onTestCompilationStatus: stubs.onTestCompilationStatus,
 				additionalLanguages: [ 'pl', 'ar' ],
 				entries: {
 					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
@@ -257,16 +266,18 @@ describe( 'compileManualTestScripts', () => {
 			patterns: [ 'manualTestPattern' ],
 			themePath: 'path/to/theme',
 			language: 'en',
+			onTestCompilationStatus: stubs.onTestCompilationStatus,
 			additionalLanguages: [ 'pl', 'ar' ],
 			debug: [ 'CK_DEBUG' ],
 			disableWatch: true
 		} ).then( () => {
 			expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
 
-			expect( stubs.getWebpackConfig.firstCall.args[ 0 ] ).to.deep.equal( {
+			sinon.assert.calledWith( stubs.getWebpackConfig.firstCall, {
 				buildDir: 'buildDir',
 				themePath: 'path/to/theme',
 				language: 'en',
+				onTestCompilationStatus: stubs.onTestCompilationStatus,
 				additionalLanguages: [ 'pl', 'ar' ],
 				entries: {
 					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1'

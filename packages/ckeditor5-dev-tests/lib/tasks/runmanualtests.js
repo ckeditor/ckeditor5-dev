@@ -6,6 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
+const { Server: SocketServer } = require( 'socket.io' );
 const createManualTestServer = require( '../utils/manual-tests/createserver' );
 const compileManualTestScripts = require( '../utils/manual-tests/compilescripts' );
 const compileManualTestHtmlFiles = require( '../utils/manual-tests/compilehtmlfiles' );
@@ -42,6 +43,13 @@ module.exports = function runManualTests( options ) {
 	const additionalLanguages = options.additionalLanguages;
 	const silent = options.silent || false;
 	const disableWatch = options.disableWatch || false;
+	let socketServer;
+
+	function onTestCompilationStatus( status ) {
+		if ( socketServer ) {
+			socketServer.emit( 'testCompilationStatus', status );
+		}
+	}
 
 	return Promise.resolve()
 		.then( () => removeDir( buildDir, { silent } ) )
@@ -54,6 +62,7 @@ module.exports = function runManualTests( options ) {
 				additionalLanguages,
 				debug: options.debug,
 				identityFile: options.identityFile,
+				onTestCompilationStatus,
 				disableWatch
 			} ),
 			compileManualTestHtmlFiles( {
@@ -62,9 +71,12 @@ module.exports = function runManualTests( options ) {
 				language,
 				additionalLanguages,
 				silent,
+				onTestCompilationStatus,
 				disableWatch
 			} ),
 			copyAssets( buildDir )
 		] ) )
-		.then( () => createManualTestServer( buildDir, options.port ) );
+		.then( () => createManualTestServer( buildDir, options.port, httpServer => {
+			socketServer = new SocketServer( httpServer );
+		} ) );
 };

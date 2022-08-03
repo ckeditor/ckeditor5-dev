@@ -17,8 +17,9 @@ const globSync = require( '../glob' );
  *
  * @param {String} sourcePath Base path where the compiler saved the files.
  * @param {Number} [port=8125] Port to listen at.
+ * @param {Function} [onCreate] A callback called with the reference to the HTTP server when it is up and running.
  */
-module.exports = function createManualTestServer( sourcePath, port = 8125 ) {
+module.exports = function createManualTestServer( sourcePath, port = 8125, onCreate ) {
 	return new Promise( resolve => {
 		const server = http.createServer( ( request, response ) => {
 			onRequest( sourcePath, request, response );
@@ -50,6 +51,10 @@ module.exports = function createManualTestServer( sourcePath, port = 8125 ) {
 		} );
 
 		logger().info( `[Server] Server running at http://localhost:${ port }/` );
+
+		if ( onCreate ) {
+			onCreate( server );
+		}
 	} );
 };
 

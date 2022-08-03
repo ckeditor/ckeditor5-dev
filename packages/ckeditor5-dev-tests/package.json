@@ -48,6 +48,7 @@
     "sinon": "^9.2.4",
     "sinon-chai": "^3.5.0",
     "slack-notify": "^0.1.7",
+    "socket.io": "^4.0.0",
     "style-loader": "^2.0.0",
     "typescript": "^4.6.4",
     "ts-loader": "^9.3.0",
