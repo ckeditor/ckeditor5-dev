@@ -1,6 +1,33 @@
 Changelog
 =========
 
+## [30.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/v30.3.5...v30.4.0) (2022-08-04)
+
+### Features
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Display toast messages while manual tests are being compiled. Closes [ckeditor/ckeditor5#11831](https://github.com/ckeditor/ckeditor5/issues/11831). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b5a4d3f1f5621e6d1ba0265246bce66e0fe04ba0))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.3.5 => v30.4.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.3.5 => v30.4.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.3.5 => v30.4.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.3.5 => v30.4.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.3.5 => v30.4.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.3.5 => v30.4.0
+</details>
+
+
 ## [30.3.5](https://github.com/ckeditor/ckeditor5-dev/compare/v30.3.4...v30.3.5) (2022-07-23)
 
 ### Other changes
