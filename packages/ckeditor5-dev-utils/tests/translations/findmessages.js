@@ -33,6 +33,53 @@ describe( 'findMessages', () => {
 		expect( messages ).to.deep.equal( [ { id: 'Image', string: 'Image' }, { id: 'CKEditor', string: 'CKEditor' } ] );
 	} );
 
+	it( 'should parse provided TypeScript code and find messages from `t()` function calls on string literals', () => {
+		const messages = [];
+
+		findMessages(
+			`function x( param: string ): void {
+                const t = this.t;
+                t( 'Image' );
+                t( { string: 'CKEditor', ID: 'CKEDITOR' } );
+                t( { string: 'Image', plural: 'Images' } );
+                t( { string: 'Image', plural: 'Images', id: 'AN_IMAGE' } );
+                g( 'Some other function' );
+			}`,
+			'foo.ts',
+			message => messages.push( message )
+		);
+
+		expect( messages ).to.deep.equal( [
+			{ id: 'Image', string: 'Image' },
+			{ id: 'CKEditor', string: 'CKEditor' },
+			{ id: 'Image', plural: 'Images', string: 'Image' },
+			{ id: 'AN_IMAGE', plural: 'Images', string: 'Image' }
+		] );
+	} );
+
+	it( 'should not throw an error when defining a type after an instantiation expression', () => {
+		const errors = [];
+		const messages = [];
+
+		findMessages(
+			`function addEventListener<TEvent extends BaseEvent>(
+				listener: Emitter,
+				emitter: Emitter,
+				event: TEvent[ 'name' ],
+				callback: GetCallback<TEvent>,
+				options: CallbackOptions
+			) {
+				( listener._addEventListener<TEvent> ) .call( emitter, event, callback, options );
+			}`,
+			'emitter.ts',
+			message => messages.push( message ),
+			error => errors.push( error )
+		);
+
+		expect( messages.length ).to.equal( 0 );
+		expect( errors.length ).to.equal( 0 );
+	} );
+
 	it( 'should parse provided code and find messages inside the `t()` function calls on object literals', () => {
 		const messages = [];
 

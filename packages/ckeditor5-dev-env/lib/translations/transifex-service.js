@@ -24,9 +24,11 @@ module.exports = {
 	getTranslations,
 	getResourceName,
 	getLanguageCode,
+	isSourceLanguage,
 	createResource,
 	createSourceFile,
-	getResourceUploadDetails
+	getResourceUploadDetails,
+	getResourceTranslations
 };
 
 /**
@@ -101,7 +103,7 @@ async function createSourceFile( options ) {
 		type: 'resource_strings_async_uploads'
 	};
 
-	return transifexApi.ResourceStringAsyncUpload.create( requestData )
+	return transifexApi.ResourceStringsAsyncUpload.create( requestData )
 		.then( response => response.id );
 }
 
@@ -114,7 +116,7 @@ async function createSourceFile( options ) {
  * @returns {Promise}
  */
 async function getResourceUploadDetails( uploadId, numberOfAttempts = 1 ) {
-	return transifexApi.ResourceStringAsyncUpload.get( uploadId )
+	return transifexApi.ResourceStringsAsyncUpload.get( uploadId )
 		.then( statusResponse => {
 			const status = statusResponse.attributes.status;
 			const isPending = status === 'pending' || status === 'processing';
@@ -237,6 +239,40 @@ async function getTranslations( resource, languages ) {
 }
 
 /**
+ * Fetches all the translations for the specified resource and language. The returned array contains translation items (objects) with
+ * attributes and relationships to other Transifex entities.
+ *
+ * @param {String} resourceId The resource id for which translation should be downloaded.
+ * @param {String} languageId The language id for which translation should be downloaded.
+ * @returns {Promise.<Array.<Object>>}
+ */
+async function getResourceTranslations( resourceId, languageId ) {
+	const translations = transifexApi.ResourceTranslation
+		.filter( { resource: resourceId, language: languageId } )
+		.include( 'resource_string' );
+
+	// Returned translations might be paginated, so return the whole collection.
+	let page = translations;
+	const results = [];
+
+	await page.fetch();
+
+	while ( true ) {
+		for ( const item of page.data ) {
+			results.push( item );
+		}
+
+		if ( !page.next ) {
+			break;
+		}
+
+		page = await page.getNext();
+	}
+
+	return results;
+}
+
+/**
  * Creates the download request for the given resource and the language.
  *
  * @param {Object} resource The resource instance for which translation should be downloaded.
@@ -253,7 +289,7 @@ function createDownloadRequest( resource, language, numberOfAttempts = 1 ) {
 	};
 
 	const relationships = isSourceLanguage( language ) ? { resource } : { resource, language };
-	const requestName = isSourceLanguage( language ) ? 'ResourceStringAsyncDownload' : 'ResourceTranslationAsyncDownload';
+	const requestName = isSourceLanguage( language ) ? 'ResourceStringsAsyncDownload' : 'ResourceTranslationsAsyncDownload';
 	const requestType = isSourceLanguage( language ) ? 'resource_strings_async_downloads' : 'resource_translations_async_downloads';
 
 	return transifexApi[ requestName ]

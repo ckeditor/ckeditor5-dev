@@ -5,8 +5,8 @@
 
 'use strict';
 
-const acorn = require( 'acorn' );
-const walk = require( 'acorn-walk' );
+const parser = require( '@babel/parser' );
+const traverse = require( '@babel/traverse' ).default;
 
 /**
  * Parses source and finds messages from the first argument of `t()` calls.
@@ -18,14 +18,16 @@ const walk = require( 'acorn-walk' );
  * @returns {String} Transformed source.
  */
 module.exports = function findMessages( source, sourceFile, onMessageFound, onErrorFound ) {
-	const ast = acorn.parse( source, {
+	const ast = parser.parse( source, {
 		sourceType: 'module',
 		ranges: true,
-		ecmaVersion: 10
+		plugins: [
+			'typescript'
+		]
 	} );
 
-	walk.simple( ast, {
-		CallExpression: node => {
+	traverse( ast, {
+		CallExpression: ( { node } ) => {
 			try {
 				findMessagesInNode( node );
 			} catch ( err ) {
@@ -88,7 +90,7 @@ module.exports = function findMessages( source, sourceFile, onMessageFound, onEr
 		}
 
 		// Matches t( 'foo' )
-		if ( node.type === 'Literal' ) {
+		if ( node.type === 'StringLiteral' ) {
 			onMessageFound( {
 				string: node.value,
 				id: node.value
@@ -119,7 +121,7 @@ function getProperty( properties, propertyName ) {
 			return property.key.name === propertyName;
 		}
 
-		if ( property.key.type === 'Literal' ) {
+		if ( property.key.type === 'StringLiteral' ) {
 			return property.key.value === propertyName;
 		}
 	} );

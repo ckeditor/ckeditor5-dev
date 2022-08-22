@@ -244,6 +244,77 @@
 			top: 10px;
 			left: 15px;
 		}
+
+		/* ------------ Toasts displayed when tests are compiled ----------------------------------------------------------------- */
+
+		.manual-test-toast {
+			position: fixed;
+			top: 10px;
+			left: 50%;
+			background-color: white;
+			color: #616161;
+			padding: 3px;
+			transform: translateX(-50%);
+			font-size: 12px;
+			font-family: sans-serif;
+			border-radius: 100px;
+			font-weight: bold;
+			box-shadow: 0 1px 3px #00000021;
+			z-index: 9999;
+			white-space: nowrap;
+		}
+
+		.manual-test-toast::before {
+			color: #fff;
+			font-family: serif;
+			display: inline-block;
+			border-radius: 100px;
+			width: 17px;
+			height: 17px;
+			text-align: center;
+			line-height: 17px;
+			border: 5px solid #ffffffeb;
+			margin-right: 10px;
+		}
+
+		.manual-test-toast_info::before {
+			content: "i";
+			background: #3f51b5;
+		}
+
+		.manual-test-toast_error::before {
+			content: "!";
+			background: #f44336;
+		}
+
+		.manual-test-toast a {
+			color: #3e51b5;
+			display: inline-block;
+			text-decoration: none;
+
+			/* For mobiles */
+			padding: 5px 0;
+		}
+
+		.manual-test-toast a:hover {
+			text-decoration: underline;
+		}
+
+		.manual-test-toast button {
+			background: none;
+			border: 0;
+			margin-left: 9px;
+			margin-right: 6px;
+			color: #969696;
+			vertical-align: middle;
+
+			/* For mobiles */
+			padding: 5px 3px;
+		}
+
+		.manual-test-toast button:hover {
+			color: #000;
+		}
 	</style>
 </head>
 <body>

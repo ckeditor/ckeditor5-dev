@@ -155,6 +155,8 @@ describe( 'compileHtmlFiles', () => {
 					'<div>html file content</div>',
 					'<body class="manual-test-container manual-test-container_no-transitions">' +
 						'<script src="/assets/togglesidebar.js"></script>' +
+						'<script src="/socket.io/socket.io.js"></script>' +
+						'<script src="/assets/websocket.js"></script>' +
 						'<script src="/assets/inspector.js"></script>' +
 						'<script src="/assets/attachinspector.js"></script>' +
 						'<script src="/path/to/manual/file.js"></script>' +
@@ -200,6 +202,8 @@ describe( 'compileHtmlFiles', () => {
 					'<div>html file content</div>',
 					'<body class="manual-test-container manual-test-container_no-transitions">' +
 						'<script src="/assets/togglesidebar.js"></script>' +
+						'<script src="/socket.io/socket.io.js"></script>' +
+						'<script src="/assets/websocket.js"></script>' +
 						'<script src="/assets/inspector.js"></script>' +
 						'<script src="/assets/attachinspector.js"></script>' +
 						'<script src="/translations/en.js"></script>' +
@@ -243,6 +247,8 @@ describe( 'compileHtmlFiles', () => {
 					'<div>html file content</div>',
 					'<body class="manual-test-container manual-test-container_no-transitions">' +
 						'<script src="/assets/togglesidebar.js"></script>' +
+						'<script src="/socket.io/socket.io.js"></script>' +
+						'<script src="/assets/websocket.js"></script>' +
 						'<script src="/assets/inspector.js"></script>' +
 						'<script src="/assets/attachinspector.js"></script>' +
 						'<script src="/path/to/manual/file.abc.js"></script>' +
@@ -351,6 +357,8 @@ describe( 'compileHtmlFiles', () => {
 					'<div>html file content</div>',
 					'<body class="manual-test-container manual-test-container_no-transitions">' +
 						'<script src="/assets/togglesidebar.js"></script>' +
+						'<script src="/socket.io/socket.io.js"></script>' +
+						'<script src="/assets/websocket.js"></script>' +
 						'<script src="/assets/inspector.js"></script>' +
 						'<script src="/assets/attachinspector.js"></script>' +
 						'<script src="/path/to/manual/file.js"></script>' +
@@ -431,6 +439,8 @@ describe( 'compileHtmlFiles', () => {
 					'<div>html file content</div>',
 					'<body class="manual-test-container manual-test-container_no-transitions">' +
 						'<script src="/assets/togglesidebar.js"></script>' +
+						'<script src="/socket.io/socket.io.js"></script>' +
+						'<script src="/assets/websocket.js"></script>' +
 						'<script src="/assets/inspector.js"></script>' +
 						'<script src="/assets/attachinspector.js"></script>' +
 						'<script src="/path/to/manual/file.js"></script>' +
