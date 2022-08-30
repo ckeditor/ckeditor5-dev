@@ -1,9 +1,9 @@
 {
   "name": "ckeditor5-dev",
-  "version": "30.3.0",
+  "version": "30.4.0",
   "private": true,
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-env": "^30.3.0"
+    "@ckeditor/ckeditor5-dev-env": "^30.4.0"
   },
   "devDependencies": {
     "eslint": "^7.0.0",
@@ -32,7 +32,9 @@
     "release:bump-version": "node ./scripts/bump-versions.js",
     "release:publish": "node ./scripts/publish.js",
     "lint": "eslint --quiet \"**/*.js\"",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "clean": "npx rimraf package-lock.json yarn.lock ./**/node_modules",
+    "reinstall": "yarn run clean && yarn install"
   },
   "lint-staged": {
     "**/*.js": [

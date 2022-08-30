@@ -19,6 +19,7 @@ const getRelativeFilePath = require( '../getrelativefilepath' );
  * @param {String} options.language A language passed to `CKEditorWebpackPlugin`.
  * @param {Boolean} options.disableWatch Whether to disable the watch mechanism. If set to true, changes in source files
  * will not trigger webpack.
+ * @param {Function} options.onTestCompilationStatus A callback called whenever the script compilation occurrs.
  * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
  * @param {String} [options.identityFile] A file that provides secret keys used in the test scripts.
  * @returns {Promise}
@@ -44,7 +45,8 @@ module.exports = function compileManualTestScripts( options ) {
 		additionalLanguages: options.additionalLanguages,
 		debug: options.debug,
 		identityFile: options.identityFile,
-		disableWatch: options.disableWatch
+		disableWatch: options.disableWatch,
+		onTestCompilationStatus: options.onTestCompilationStatus
 	} );
 
 	return runWebpack( webpackConfig );

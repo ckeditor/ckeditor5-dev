@@ -265,7 +265,7 @@ function groupMissingPackages( missingPackages, currentPackage ) {
 	for ( const packageName of Object.keys( missingPackages ) ) {
 		const absolutePaths = missingPackages[ packageName ];
 
-		if ( isDevDependency( absolutePaths ) ) {
+		if ( isDevDependency( packageName, absolutePaths ) ) {
 			devDependencies.push( packageName );
 		} else {
 			dependencies.push( packageName );
@@ -424,6 +424,7 @@ function findMisplacedDependencies( dependencies, devDependencies, dependenciesT
 /**
  * Checks if a package is a development dependency: a package not used in the source and theme.
  *
+ * @param {String} packageName
  * @param {Array.<String>} absolutePaths Files where a given package has been imported.
  * @returns {Boolean}
  */

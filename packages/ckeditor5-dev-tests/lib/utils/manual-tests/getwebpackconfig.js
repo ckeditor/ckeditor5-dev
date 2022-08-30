@@ -36,7 +36,7 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 		},
 
 		plugins: [
-			new WebpackNotifierPlugin(),
+			new WebpackNotifierPlugin( options.onTestCompilationStatus ),
 			new CKEditorWebpackPlugin( {
 				// See https://ckeditor.com/docs/ckeditor5/latest/features/ui-language.html
 				language: options.language,
@@ -105,7 +105,22 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 								debugFlags: options.debug
 							}
 						},
-						'ts-loader'
+						{
+							loader: 'ts-loader',
+							options: {
+								// Override default settings specified in `tsconfig.json`.
+								compilerOptions: {
+									// Do not emit any JS file as these TypeScript files are just passed through webpack.
+									// Manual tests have their entry point. Only these files should be stored on a file system.
+									// See: https://github.com/ckeditor/ckeditor5/issues/12111.
+									noEmit: false,
+									// When both (JS and TS) files are imported by a manual test while updating the JS files,
+									// the `ts-loader` emits the "TypeScript emitted no output" error.
+									// Disabling the `noEmitOnError` option fixes the problem.
+									noEmitOnError: false
+								}
+							}
+						}
 					]
 				}
 			]

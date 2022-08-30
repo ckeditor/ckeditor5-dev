@@ -83,7 +83,7 @@ module.exports = function compileHtmlFiles( options ) {
 				languages: languagesToLoad,
 				silent
 			} );
-		} );
+		}, options.onTestCompilationStatus );
 	}
 };
 
@@ -135,6 +135,8 @@ function compileHtmlFile( buildDir, options ) {
 	const scriptTag =
 		'<body class="manual-test-container manual-test-container_no-transitions">' +
 		'<script src="/assets/togglesidebar.js"></script>' +
+		'<script src="/socket.io/socket.io.js"></script>' +
+		'<script src="/assets/websocket.js"></script>' +
 		'<script src="/assets/inspector.js"></script>' +
 		'<script src="/assets/attachinspector.js"></script>' +
 		`${ languagesToLoad.map( language => {
@@ -181,9 +183,16 @@ function getFilePathWithoutExtension( file ) {
 	return path.join( dir, name );
 }
 
-function watchFiles( filePaths, onChange ) {
+function watchFiles( filePaths, onChange, onTestCompilationStatus ) {
 	for ( const filePath of filePaths ) {
-		const debouncedOnChange = _.debounce( () => onChange( filePath ), 500 );
-		chokidar.watch( filePath, { ignoreInitial: true } ).on( 'all', debouncedOnChange );
+		const debouncedOnChange = _.debounce( () => {
+			onChange( filePath );
+			onTestCompilationStatus( 'finished' );
+		}, 500 );
+
+		chokidar.watch( filePath, { ignoreInitial: true } ).on( 'all', () => {
+			onTestCompilationStatus( 'start' );
+			debouncedOnChange();
+		} );
 	}
 }

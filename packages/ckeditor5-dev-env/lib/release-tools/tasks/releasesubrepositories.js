@@ -573,12 +573,27 @@ module.exports = function releaseSubRepositories( options ) {
 		return executeOnPackages( paths, repositoryPath => {
 			process.chdir( repositoryPath );
 
+			const packageJsonPath = path.join( repositoryPath, 'package.json' );
 			const packageJson = getPackageJson( repositoryPath );
 
 			log.info( `\nPublishing "${ chalk.underline( packageJson.name ) }" as "v${ packageJson.version }"...` );
 			logDryRun( 'Do not panic. DRY RUN mode is active. An archive with the release will be created instead.' );
 
 			const repositoryRealPath = customReleasesOnNpm.get( repositoryPath ) || repositoryPath;
+
+			// If a package is written in TypeScript, the `main` field in the `package.json` file contains the path to the `index.ts` file.
+			// However, on npm we want this field to point to the `index.js` file instead, because we publish only JavaScript files on npm.
+			// For this reason we have to temporarily replace the extension in the `main` field while the package is being published to npm.
+			// This change is then reverted.
+			const hasTypeScriptEntryPoint = packageJson.main && packageJson.main.endsWith( '.ts' );
+
+			if ( hasTypeScriptEntryPoint ) {
+				tools.updateJSONFile( packageJsonPath, jsonFile => {
+					jsonFile.main = jsonFile.main.replace( '.ts', '.js' );
+
+					return jsonFile;
+				} );
+			}
 
 			if ( dryRun ) {
 				const archiveName = packageJson.name.replace( '@', '' ).replace( '/', '-' ) + `-${ packageJson.version }.tgz`;
@@ -594,6 +609,16 @@ module.exports = function releaseSubRepositories( options ) {
 				filesToRemove.add( path.join( repositoryRealPath, archiveName ) );
 			} else {
 				exec( 'npm publish --access=public' );
+			}
+
+			// Revert the previous temporary change in the `main` field, if a package is written in TypeScript, so its `main` field points
+			// again to the `index.ts` file.
+			if ( hasTypeScriptEntryPoint ) {
+				tools.updateJSONFile( packageJsonPath, jsonFile => {
+					jsonFile.main = jsonFile.main.replace( '.js', '.ts' );
+
+					return jsonFile;
+				} );
 			}
 
 			releasedPackages.add( repositoryRealPath );

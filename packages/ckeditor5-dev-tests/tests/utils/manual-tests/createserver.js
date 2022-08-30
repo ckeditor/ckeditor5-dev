@@ -82,4 +82,13 @@ describe( 'createManualTestServer', () => {
 		expect( loggerStub.calledOnce ).to.equal( true );
 		expect( loggerStub.firstCall.firstArg ).to.equal( '[Server] Server running at http://localhost:8125/' );
 	} );
+
+	it( 'should call the specificed callback when the server is running (e.g. to allow running web sockets)', () => {
+		const spy = sinon.spy();
+
+		createManualTestServer( 'workspace/build/.manual-tests', 1234, spy );
+
+		sinon.assert.calledOnce( spy );
+		sinon.assert.calledWithExactly( spy, server );
+	} );
 } );

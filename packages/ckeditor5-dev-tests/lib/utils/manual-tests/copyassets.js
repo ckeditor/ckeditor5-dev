@@ -9,6 +9,7 @@ const fs = require( 'fs-extra' );
 const assets = [
 	path.join( __dirname, 'togglesidebar.js' ),
 	path.join( __dirname, 'attachinspector.js' ),
+	path.join( __dirname, 'websocket.js' ),
 	require.resolve( '@ckeditor/ckeditor5-inspector' )
 ];
 
