@@ -37,7 +37,9 @@ module.exports = function parseArguments( args ) {
 			'source-map',
 			'verbose',
 			'watch',
-			'silent'
+			'silent',
+			'js-first',
+			'cache'
 		],
 
 		alias: {
@@ -67,7 +69,9 @@ module.exports = function parseArguments( args ) {
 			repositories: [],
 			'theme-path': null,
 			'additional-languages': null,
-			silent: false
+			silent: false,
+			'js-first': false,
+			cache: false
 		}
 	};
 
@@ -84,7 +88,8 @@ module.exports = function parseArguments( args ) {
 		'identity-file',
 		'theme-path',
 		'karma-config-overrides',
-		'additional-languages'
+		'additional-languages',
+		'js-first'
 	] );
 	splitOptionsToArray( options, [
 		'browsers',

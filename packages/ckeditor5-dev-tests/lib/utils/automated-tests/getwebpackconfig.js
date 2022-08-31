@@ -33,7 +33,9 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 		],
 
 		resolve: {
-			extensions: [ '.ts', '.js', '.json' ]
+			extensions: options.jsFirst ?
+				[ '.js', '.ts', '.json' ] :
+				[ '.ts', '.js', '.json' ]
 		},
 
 		module: {
@@ -153,6 +155,12 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 				}
 			}
 		);
+	}
+
+	if ( options.cache ) {
+		config.cache = {
+			type: 'filesystem'
+		};
 	}
 
 	return config;

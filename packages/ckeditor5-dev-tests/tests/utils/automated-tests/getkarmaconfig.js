@@ -46,7 +46,7 @@ describe( 'getKarmaConfig()', () => {
 	} );
 
 	it( 'should return basic karma config for all tested files', () => {
-		const karmaConfig = getKarmaConfig( {
+		const options = {
 			files: [ '*' ],
 			reporter: 'mocha',
 			sourceMap: false,
@@ -59,17 +59,16 @@ describe( 'getKarmaConfig()', () => {
 			globPatterns: {
 				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
 			}
-		} );
+		};
+
+		const karmaConfig = getKarmaConfig( options );
 
 		expect( karmaConfig ).to.have.own.property( 'basePath', 'workspace' );
 		expect( karmaConfig ).to.have.own.property( 'frameworks' );
 		expect( karmaConfig ).to.have.own.property( 'files' );
 		expect( karmaConfig ).to.have.own.property( 'preprocessors' );
 		expect( karmaConfig ).to.have.own.property( 'webpack' );
-		expect( karmaConfig.webpack.files ).to.deep.equal( [ 'workspace/packages/ckeditor5-*/tests/**/*.js' ] );
-		expect( karmaConfig.webpack.sourceMap ).to.equal( false );
-		expect( karmaConfig.webpack.coverage ).to.equal( false );
-		expect( karmaConfig.webpack.themePath ).to.equal( 'workspace/path/to/theme.css' );
+		expect( karmaConfig.webpack ).to.deep.equal( { ...options, files: [ 'workspace/packages/ckeditor5-*/tests/**/*.js' ] } );
 		expect( karmaConfig ).to.have.own.property( 'webpackMiddleware' );
 		expect( karmaConfig ).to.have.own.property( 'reporters' );
 		expect( karmaConfig ).to.have.own.property( 'browsers' );

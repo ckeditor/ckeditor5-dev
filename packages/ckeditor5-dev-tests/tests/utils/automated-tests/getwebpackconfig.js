@@ -202,4 +202,24 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			noEmitOnError: true
 		} );
 	} );
+
+	it( 'should return webpack configuration with correct extension resolve order', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {
+			jsFirst: true
+		} );
+
+		expect( webpackConfig.resolve ).to.deep.equal( {
+			extensions: [ '.js', '.ts', '.json' ]
+		} );
+	} );
+
+	it( 'should return webpack configuration with cache enabled', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {
+			cache: true
+		} );
+
+		expect( webpackConfig.cache ).to.deep.equal( {
+			type: 'filesystem'
+		} );
+	} );
 } );
