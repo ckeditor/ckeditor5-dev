@@ -33,16 +33,6 @@ const additionalFiles = [
 	'README.md'
 ];
 
-// When preparing packages for release, it is checked whether there are files in the directory structure of the package, which are defined
-// in the `files` property in the `package.json`. It suffices that at least one file exists for each entry from the `files` property. Some
-// files and directories, although defined in `files`, are optional, so their absence in the package directory should not be treated as an
-// error. The list below defines this optional files and directories in the package.
-const optionalFilesAndDirectories = [
-	'lang',
-	'theme',
-	'ckeditor5-metadata.json'
-];
-
 /**
  * Releases all sub-repositories (packages) found in specified path.
  *
@@ -125,6 +115,11 @@ const optionalFilesAndDirectories = [
  *
  * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
  *
+ * @param {Array.<String>} [options.optionalFilesAndDirectories=[]] By default, for each package that we want to publish,
+ * the tool checks whether all files specified in the `#files` key (in `package.json`) exist. The option allows defining
+ * items that does not have to exist, e.g., the `theme/` directory is optional because CKEditor 5 features do not have to define styles.
+ * The `lang/` directory also a good example, as only some of packages can be localized.
+ *
  * @returns {Promise}
  */
 module.exports = function releaseSubRepositories( options ) {
@@ -134,6 +129,12 @@ module.exports = function releaseSubRepositories( options ) {
 	const dryRun = Boolean( options.dryRun );
 	const releaseBranch = options.releaseBranch || 'master';
 	const customReleases = Array.isArray( options.customReleases ) ? options.customReleases : [ options.customReleases ].filter( Boolean );
+
+	// When preparing packages for release, we check whether there are files in the directory structure of the package, which are
+	// defined in the `files` property in the `package.json`. It suffices that at least one file exists for each entry from the `files`
+	// property. Some files and directories, although defined in `files`, are optional, so their absence in the package directory
+	// should not be treated as an error. The list below defines this optional files and directories in the package.
+	const optionalFilesAndDirectories = options.optionalFilesAndDirectories || [];
 
 	const pathsCollection = getPackagesPaths( {
 		cwd: options.cwd,
