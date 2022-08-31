@@ -120,6 +120,23 @@ const cli = {
 	},
 
 	/**
+	 * Asks a user for a confirmation for including a package that does not contain all required files.
+	 *
+	 * @returns {Promise.<Boolean>}
+	 */
+	confirmIncludingPackage() {
+		const confirmQuestion = {
+			message: 'Package does not contain all required files to publish. Include this package in the release and continue?',
+			type: 'confirm',
+			name: 'confirm',
+			default: true
+		};
+
+		return inquirer.prompt( [ confirmQuestion ] )
+			.then( answers => answers.confirm );
+	},
+
+	/**
 	 * Asks a user for providing the new version.
 	 *
 	 * @param {String} packageVersion

@@ -33,6 +33,16 @@ const additionalFiles = [
 	'README.md'
 ];
 
+// When preparing packages for release, it is checked whether there are files in the directory structure of the package, which are defined
+// in the `files` property in the `package.json`. It suffices that at least one file exists for each entry from the `files` property. Some
+// files and directories, although defined in `files`, are optional, so their absence in the package directory should not be treated as an
+// error. The list below defines this optional files and directories in the package.
+const optionalFilesAndDirectories = [
+	'lang',
+	'theme',
+	'ckeditor5-metadata.json'
+];
+
 /**
  * Releases all sub-repositories (packages) found in specified path.
  *
@@ -349,23 +359,80 @@ module.exports = function releaseSubRepositories( options ) {
 				return Promise.resolve();
 			}
 
-			const npmVersion = getVersionFromNpm( packageJson.name );
+			const hasAllFilesToPublish = checkFilesToPublish( packageJson.files, repositoryPath );
 
-			logDryRun( `Versions: package.json: "${ releaseDetails.version }", npm: "${ npmVersion || 'initial release' }".` );
+			let promise;
 
-			releaseDetails.npmVersion = npmVersion;
-			releaseDetails.shouldReleaseOnNpm = npmVersion !== releaseDetails.version;
-
-			if ( releaseDetails.shouldReleaseOnNpm ) {
-				log.info( '✅  Added to release.' );
-
-				releasesOnNpm.add( repositoryPath );
+			if ( dryRun ) {
+				promise = Promise.resolve( true );
+			} else if ( hasAllFilesToPublish ) {
+				promise = Promise.resolve( true );
 			} else {
-				log.info( '❌  Nothing to release.' );
+				promise = cli.confirmIncludingPackage();
 			}
 
-			return Promise.resolve();
+			return promise.then( shouldIncludePackage => {
+				if ( !shouldIncludePackage ) {
+					throw new Error( BREAK_RELEASE_MESSAGE );
+				}
+
+				const npmVersion = getVersionFromNpm( packageJson.name );
+
+				logDryRun( `Versions: package.json: "${ releaseDetails.version }", npm: "${ npmVersion || 'initial release' }".` );
+
+				releaseDetails.npmVersion = npmVersion;
+				releaseDetails.shouldReleaseOnNpm = npmVersion !== releaseDetails.version;
+
+				if ( releaseDetails.shouldReleaseOnNpm ) {
+					log.info( '✅  Added to release.' );
+
+					releasesOnNpm.add( repositoryPath );
+				} else {
+					log.info( '❌  Nothing to release.' );
+				}
+			} );
 		} );
+
+		// Checks whether all the required files exist in the package directory. Returns `true` if all required files exist
+		// and `false` otherwise. In the DRY RUN mode it also logs the names of entries from the `files` property, for which
+		// no files are found.
+		function checkFilesToPublish( files, repositoryPath ) {
+			// If no `files` property exist in the `package.json`, assume that the package directory structure is valid.
+			if ( !files ) {
+				return true;
+			}
+
+			// Otherwise, check if every entry in the `files` property matches at least one file.
+			return files.every( entry => {
+				const globOptions = {
+					cwd: repositoryPath,
+					dot: true,
+					nodir: true
+				};
+
+				// Some files and directories are optional, so their absence in the package directory structure should not be an error.
+				if ( optionalFilesAndDirectories.includes( entry ) ) {
+					return true;
+				}
+
+				// An entry in the `files` property can point either to a file...
+				if ( glob.sync( entry, globOptions ).length > 0 ) {
+					return true;
+				}
+
+				// ...or to a directory.
+				if ( glob.sync( `${ entry }/**`, globOptions ).length > 0 ) {
+					return true;
+				}
+
+				// No matching files can be found for the current entry.
+				if ( dryRun ) {
+					log.warning( `⚠️  The ${ entry } does not match any files.` );
+				}
+
+				return false;
+			} );
+		}
 
 		// Checks whether specified `packageName` has been published on npm.
 		// If so, returns its version. Otherwise returns `null` which means that
