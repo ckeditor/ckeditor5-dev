@@ -222,4 +222,14 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			type: 'filesystem'
 		} );
 	} );
+
+	it( 'should get rid of the "webpack://" protocol to make the paths clickable in the terminal', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {} );
+
+		const { devtoolModuleFilenameTemplate } = webpackConfig.output;
+
+		const info = { resourcePath: 'foo/bar/baz' };
+
+		expect( devtoolModuleFilenameTemplate( info ) ).to.equal( info.resourcePath );
+	} );
 } );
