@@ -10,6 +10,7 @@ const path = require( 'path' );
 const chalk = require( 'chalk' );
 const glob = require( 'glob' );
 const mkdirp = require( 'mkdirp' );
+const Table = require( 'cli-table/lib' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const parseGithubUrl = require( 'parse-github-url' );
 const cli = require( '../utils/cli' );
@@ -25,6 +26,15 @@ const PACKAGE_JSON_TEMPLATE_PATH = require.resolve( '../templates/release-packag
 const BREAK_RELEASE_MESSAGE = 'You aborted publishing the release. Why? Oh why?!';
 const NO_RELEASE_MESSAGE = 'No changes for publishing. Why? Oh why?!';
 const AUTH_REQUIRED = 'You must be logged to execute this command.';
+const MISSING_FILES_MESSAGE =
+	'Publishing the release is terminated. ' +
+	'Some files were expected to exist, but they were not found in the directory structure of the package.\n' +
+	'👉 Next step: Take a deep breath and think why the package does not have the necessary files.\n' +
+	'👉 Quick workarounds:\n' +
+	'  (1) In the previous question you can accept the package with missing files, so the release process will be continued. ' +
+	'BE CAREFUL HERE: the package will be published "as is".\n' +
+	'  (2) You may also add the package with missing files to exceptions in `options.skipNpmPublish`, ' +
+	'so it will not be published on npm.\n';
 
 // That files will be copied from source to the temporary directory and will be released too.
 const additionalFiles = [
@@ -360,7 +370,12 @@ module.exports = function releaseSubRepositories( options ) {
 				return Promise.resolve();
 			}
 
-			const hasAllFilesToPublish = checkFilesToPublish( packageJson.files, repositoryPath );
+			const matchedFiles = getMatchedFilesToPublish( packageJson.files, repositoryPath );
+			const hasAllFilesToPublish = hasAllRequiredFilesToPublish( matchedFiles );
+
+			if ( dryRun || !hasAllFilesToPublish ) {
+				showMatchedFiles( matchedFiles );
+			}
 
 			let promise;
 
@@ -374,7 +389,7 @@ module.exports = function releaseSubRepositories( options ) {
 
 			return promise.then( shouldIncludePackage => {
 				if ( !shouldIncludePackage ) {
-					throw new Error( BREAK_RELEASE_MESSAGE );
+					throw new Error( MISSING_FILES_MESSAGE );
 				}
 
 				const npmVersion = getVersionFromNpm( packageJson.name );
@@ -394,45 +409,89 @@ module.exports = function releaseSubRepositories( options ) {
 			} );
 		} );
 
-		// Checks whether all the required files exist in the package directory. Returns `true` if all required files exist
-		// and `false` otherwise. In the DRY RUN mode it also logs the names of entries from the `files` property, for which
-		// no files are found.
-		function checkFilesToPublish( files, repositoryPath ) {
-			// If no `files` property exist in the `package.json`, assume that the package directory structure is valid.
-			if ( !files ) {
-				return true;
+		// Scans the patterns provided in the `files` property from `package.json` and collects number of matched files for each entry.
+		// The keys in returned map are file patterns, and their values represent number of matched files. If there is no `files` property
+		// in `package.json`, then empty map is returned.
+		function getMatchedFilesToPublish( filesPatterns, repositoryPath ) {
+			if ( !filesPatterns ) {
+				return new Map();
 			}
 
-			// Otherwise, check if every entry in the `files` property matches at least one file.
-			return files.every( entry => {
+			return filesPatterns.reduce( ( result, entry ) => {
 				const globOptions = {
 					cwd: repositoryPath,
 					dot: true,
 					nodir: true
 				};
 
+				// An entry in the `files` property can point either to a file, or to a directory. To test both cases in one `glob` call,
+				// we use a braced section in the `glob` syntax. A braced section starts with { and ends with } and they are expanded
+				// into a set of patterns. A braced section may contain any number of comma-delimited sections (path fragments) within.
+				//
+				// Example: for entry 'src', the following braced section would expand into 'src' and 'src/**' patterns, both evaluated in
+				// one `glob` call.
+				const numberOfMatches = glob.sync( entry + '{,/**}', globOptions ).length;
+
+				return result.set( entry, numberOfMatches );
+			}, new Map() );
+		}
+
+		// Checks whether all the required files exist in the package directory. Returns `true` if all required files exist
+		// and `false` otherwise. It takes into account optional files and directories.
+		function hasAllRequiredFilesToPublish( matchedFiles ) {
+			// If no `files` property exist in the `package.json`, assume that the package directory structure is valid.
+			if ( matchedFiles.size === 0 ) {
+				return true;
+			}
+
+			// Otherwise, check if every entry in the `files` property matches at least one file.
+			for ( const [ entry, numberOfMatches ] of matchedFiles ) {
 				// Some files and directories are optional, so their absence in the package directory structure should not be an error.
 				if ( optionalFilesAndDirectories.includes( entry ) ) {
-					return true;
+					continue;
 				}
 
-				// An entry in the `files` property can point either to a file...
-				if ( glob.sync( entry, globOptions ).length > 0 ) {
-					return true;
+				if ( numberOfMatches === 0 ) {
+					return false;
 				}
+			}
 
-				// ...or to a directory.
-				if ( glob.sync( `${ entry }/**`, globOptions ).length > 0 ) {
-					return true;
-				}
+			return true;
+		}
 
-				// No matching files can be found for the current entry.
-				if ( dryRun ) {
-					log.warning( `⚠️  The ${ entry } does not match any files.` );
-				}
+		// Displays all entries from the `files` property from `package.json` with number of matched files.
+		function showMatchedFiles( matchedFiles ) {
+			if ( matchedFiles.size === 0 ) {
+				log.info( 'ℹ️  ' + chalk.yellow(
+					'No `files` property in package.json. ' +
+					'The package directory has not been checked for the required files for the release.'
+				) );
 
-				return false;
+				return;
+			}
+
+			const rows = [ ...matchedFiles ].map( row => {
+				const [ entry, numberOfMatches ] = row;
+				const isRequired = !optionalFilesAndDirectories.includes( entry );
+				const color = isRequired && numberOfMatches === 0 ? chalk.red.bold : chalk.green;
+
+				return [
+					entry,
+					color( numberOfMatches ),
+					isRequired ? 'Yes' : 'No'
+				];
 			} );
+
+			const table = new Table( {
+				head: [ 'Files pattern', 'Number of matches', 'Is required?' ],
+				rows,
+				style: {
+					compact: true,
+					head: [ 'white' ]
+				}
+			} );
+
+			log.info( table.toString() );
 		}
 
 		// Checks whether specified `packageName` has been published on npm.
