@@ -33,7 +33,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 		],
 
 		resolve: {
-			extensions: options.jsFirst ?
+			extensions: options.resolveJsFirst ?
 				[ '.js', '.ts', '.json' ] :
 				[ '.ts', '.js', '.json' ]
 		},

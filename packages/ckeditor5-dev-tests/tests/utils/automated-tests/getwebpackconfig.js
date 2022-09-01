@@ -205,7 +205,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 
 	it( 'should return webpack configuration with correct extension resolve order', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
-			jsFirst: true
+			resolveJsFirst: true
 		} );
 
 		expect( webpackConfig.resolve ).to.deep.equal( {

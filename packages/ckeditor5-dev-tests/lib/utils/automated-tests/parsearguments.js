@@ -38,7 +38,7 @@ module.exports = function parseArguments( args ) {
 			'verbose',
 			'watch',
 			'silent',
-			'js-first',
+			'resolve-js-first',
 			'cache'
 		],
 
@@ -70,7 +70,7 @@ module.exports = function parseArguments( args ) {
 			'theme-path': null,
 			'additional-languages': null,
 			silent: false,
-			'js-first': false,
+			'resolve-js-first': false,
 			cache: false
 		}
 	};
@@ -89,7 +89,7 @@ module.exports = function parseArguments( args ) {
 		'theme-path',
 		'karma-config-overrides',
 		'additional-languages',
-		'js-first'
+		'resolve-js-first'
 	] );
 	splitOptionsToArray( options, [
 		'browsers',
