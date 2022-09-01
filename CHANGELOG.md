@@ -1,6 +1,35 @@
 Changelog
 =========
 
+## [30.5.0](https://github.com/ckeditor/ckeditor5-dev/compare/v30.4.0...v30.5.0) (2022-09-01)
+
+### Features
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Added a new check during the release process that verifies if all required files exist in a package directory before releasing a package on npm. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/90022266836dd9ed246981218f1fa602b9a7627f))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added the `--resolve-js-first` option that prioritizes loading `*.js` over `*.ts` files for automated tests. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/78f69bce02a2232684f6ac2490c90ab6fec7568e))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added the `--cache` option that enables webpack cache for automated tests. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/78f69bce02a2232684f6ac2490c90ab6fec7568e))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.4.0 => v30.5.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.4.0 => v30.5.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.4.0 => v30.5.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.4.0 => v30.5.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.4.0 => v30.5.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.4.0 => v30.5.0
+</details>
+
+
 ## [30.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/v30.3.5...v30.4.0) (2022-08-04)
 
 ### Features
