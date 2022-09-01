@@ -74,12 +74,8 @@ module.exports = function getKarmaConfig( options ) {
 		preprocessors: preprocessorMap,
 
 		webpack: getWebpackConfigForAutomatedTests( {
-			files: Object.keys( options.globPatterns ).map( key => options.globPatterns[ key ] ),
-			sourceMap: options.sourceMap,
-			identityFile: options.identityFile,
-			coverage: options.coverage,
-			themePath: options.themePath,
-			debug: options.debug
+			...options,
+			files: Object.keys( options.globPatterns ).map( key => options.globPatterns[ key ] )
 		} ),
 
 		webpackMiddleware: {
