@@ -5,6 +5,17 @@
 
 'use strict';
 
+const path = require( 'path' );
+
+// Matches pattern of a single package name, e.g. "engine", "special-characters".
+const SINGLE_PACKAGE_REGEXP = /^[a-z][a-z-]+[a-z]$/;
+// Matches pattern of a single test path, e.g. "ckeditor5/article", "alignment/alignment".
+const SINGLE_TEST_REGEXP = /^[a-z1-9-]+\/[a-z-]+$/;
+// Matches pattern of a single excluded package name, e.g. "!engine", "!special-characters".
+const EXCLUSION_REGEXP = /^![a-z-]+[a-z]$/;
+// Matches pattern of a directory, e.g. "engine/view/", "alignment/alignment/".
+const DIRECTORY_REGEXP = /^[a-z]+\/[/a-z-]+\/$/;
+
 /**
  * Converts values of --files argument to proper globs.
  * There are 5 supported types of values now:
@@ -13,8 +24,8 @@
  * 1. all packages' files – '*'
  * 2. given package files – 'engine'
  * 3. everything except the given package – '!engine'
- * 4. path – 'engine/view' -> 'ckeditor5-engine/tests/view/**\/*.js'
- * 5. simplified glob – 'engine/view/**\/*.js' -> 'ckeditor5-engine/tests/view/**\/*.js'
+ * 4. path – 'engine/view/' -> 'ckeditor5-engine/tests/view/**\/*.js'
+ * 5. specific test - 'ckeditor5/article'
  *
  * @param {String} globPattern A path or pattern to determine the tests to execute.
  * @param {Boolean} [isManualTest=false] Whether the tests are manual or automated.
@@ -55,46 +66,59 @@ module.exports = function transformFileOptionToTestGlob( globPattern, isManualTe
  * @returns {String}
  */
 function transformSingleGlobPattern( globPattern, options ) {
-	const isManualTest = options.isManualTest || false;
-	const useCKEditorPrefix = options.useCKEditorPrefix || false;
-	const prefix = useCKEditorPrefix ? 'ckeditor' : 'ckeditor5';
+	const rootTests = globPattern === 'ckeditor5' || globPattern.startsWith( 'ckeditor5/' );
+	const prefix = options.useCKEditorPrefix ? 'ckeditor' : 'ckeditor5';
+	const packagesDirectory = options.externalPackages ? [ 'external', '*', 'packages' ] : [ 'packages' ];
 
-	const globSep = '/';
-	const cwdChunks = process.cwd().split( require( 'path' ).sep );
-	const chunks = globPattern.split( globSep );
-	const packageName = chunks.shift();
-	const globSuffix = [ 'tests', '**' ];
-	let returnChunks = cwdChunks.concat( options.externalPackages ? [ 'external', '*', 'packages' ] : [ 'packages' ] );
+	const chunks = globPattern.match( /[a-z1-9*-]+/g );
+	const returnChunks = [];
 
-	if ( isManualTest ) {
-		globSuffix.push( 'manual', '**' );
+	// Every path starts with workspace.
+	returnChunks.push( ...process.cwd().split( path.sep ) );
+
+	// We add path to packages directory, unless we operate in CKE5 root.
+	if ( !rootTests ) {
+		let packageName;
+		let testDirectories;
+
+		// 1, 2 & 5
+		if ( globPattern === '*' || SINGLE_PACKAGE_REGEXP.test( globPattern ) || SINGLE_TEST_REGEXP.test( globPattern ) ) {
+			packageName = prefix + '-' + chunks[ 0 ];
+			testDirectories = [ '**' ];
+		}
+
+		// 3
+		if ( EXCLUSION_REGEXP.test( globPattern ) ) {
+			packageName = prefix + '-!(' + chunks[ 0 ] + ')*';
+			testDirectories = [ '**' ];
+		}
+
+		// 4
+		if ( DIRECTORY_REGEXP.test( globPattern ) ) {
+			packageName = prefix + '-' + chunks.shift();
+			testDirectories = [ ...chunks, '**' ];
+		}
+
+		returnChunks.push( ...packagesDirectory, packageName, 'tests', ...testDirectories );
+	}
+	// In case of CKE5 root, we simply append tests directory.
+	else {
+		returnChunks.push( 'tests', '**' );
 	}
 
-	globSuffix.push( '*.js' );
-
-	// 0.
-	if ( globPattern === 'ckeditor5' ) {
-		returnChunks = cwdChunks.concat( globSuffix );
-	} else if ( chunks.length === 0 ) {
-		// 1.
-		if ( packageName == '*' ) {
-			returnChunks.push( prefix + '-*', ...globSuffix );
-		} else if ( packageName.startsWith( '!' ) ) {
-			// 3.
-			returnChunks.push( prefix + '-!(' + packageName.slice( 1 ) + ')*', ...globSuffix );
-		} else {
-			// 2.
-			returnChunks.push( prefix + '-' + packageName, ...globSuffix );
-		}
-	} else {
-		// 5.
-		returnChunks.push( prefix + '-' + packageName, 'tests', ...chunks );
-
-		if ( !chunks[ chunks.length - 1 ].endsWith( '.js' ) ) {
-			// 4.
-			returnChunks.push( '**', '*.js' );
-		}
+	// Subdirectory for manual tests.
+	if ( options.isManualTest ) {
+		returnChunks.push( 'manual', '**' );
 	}
 
-	return returnChunks.join( globSep );
+	// If we're looking for a single test, use specific filename.
+	if ( SINGLE_TEST_REGEXP.test( globPattern ) ) {
+		returnChunks.push( chunks[ 1 ] + '.js' );
+	}
+	// Otherwise, any filename.
+	else {
+		returnChunks.push( '*.js' );
+	}
+
+	return returnChunks.join( path.posix.sep );
 }

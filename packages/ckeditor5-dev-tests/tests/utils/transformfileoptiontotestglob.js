@@ -97,7 +97,7 @@ describe( 'dev-tests/utils', () => {
 
 	describe( 'converts path to files', () => {
 		it( 'for automated tests', () => {
-			expect( transformFileOptionToTestGlob( 'engine/view' ) ).to.deep.equal( [
+			expect( transformFileOptionToTestGlob( 'engine/view/' ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-engine/tests/view/**/*.js',
 				'/workspace/packages/ckeditor-engine/tests/view/**/*.js',
 				'/workspace/external/*/packages/ckeditor5-engine/tests/view/**/*.js',
@@ -106,31 +106,43 @@ describe( 'dev-tests/utils', () => {
 		} );
 
 		it( 'for manual tests', () => {
-			expect( transformFileOptionToTestGlob( 'engine/view/manual', true ) ).to.deep.equal( [
-				'/workspace/packages/ckeditor5-engine/tests/view/manual/**/*.js',
-				'/workspace/packages/ckeditor-engine/tests/view/manual/**/*.js',
-				'/workspace/external/*/packages/ckeditor5-engine/tests/view/manual/**/*.js',
-				'/workspace/external/*/packages/ckeditor-engine/tests/view/manual/**/*.js'
+			expect( transformFileOptionToTestGlob( 'engine/view/', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-engine/tests/view/**/manual/**/*.js',
+				'/workspace/packages/ckeditor-engine/tests/view/**/manual/**/*.js',
+				'/workspace/external/*/packages/ckeditor5-engine/tests/view/**/manual/**/*.js',
+				'/workspace/external/*/packages/ckeditor-engine/tests/view/**/manual/**/*.js'
 			] );
 		} );
 	} );
 
-	describe( 'converts simplified glob to all files', () => {
-		it( 'for automated tests', () => {
-			expect( transformFileOptionToTestGlob( 'engine/view/*' ) ).to.deep.equal( [
-				'/workspace/packages/ckeditor5-engine/tests/view/*/**/*.js',
-				'/workspace/packages/ckeditor-engine/tests/view/*/**/*.js',
-				'/workspace/external/*/packages/ckeditor5-engine/tests/view/*/**/*.js',
-				'/workspace/external/*/packages/ckeditor-engine/tests/view/*/**/*.js'
+	describe( 'converts path to file to a single test', () => {
+		it( 'for automated tests (package)', () => {
+			expect( transformFileOptionToTestGlob( 'alignment/utils' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-alignment/tests/**/utils.js',
+				'/workspace/packages/ckeditor-alignment/tests/**/utils.js',
+				'/workspace/external/*/packages/ckeditor5-alignment/tests/**/utils.js',
+				'/workspace/external/*/packages/ckeditor-alignment/tests/**/utils.js'
 			] );
 		} );
 
-		it( 'for manual tests', () => {
-			expect( transformFileOptionToTestGlob( 'engine/view/manual/*.js', true ) ).to.deep.equal( [
-				'/workspace/packages/ckeditor5-engine/tests/view/manual/*.js',
-				'/workspace/packages/ckeditor-engine/tests/view/manual/*.js',
-				'/workspace/external/*/packages/ckeditor5-engine/tests/view/manual/*.js',
-				'/workspace/external/*/packages/ckeditor-engine/tests/view/manual/*.js'
+		it( 'for automated tests (root)', () => {
+			expect( transformFileOptionToTestGlob( 'ckeditor5/utils' ) ).to.deep.equal( [
+				'/workspace/tests/**/utils.js'
+			] );
+		} );
+
+		it( 'for manual tests (package)', () => {
+			expect( transformFileOptionToTestGlob( 'alignment/utils', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-alignment/tests/**/manual/**/utils.js',
+				'/workspace/packages/ckeditor-alignment/tests/**/manual/**/utils.js',
+				'/workspace/external/*/packages/ckeditor5-alignment/tests/**/manual/**/utils.js',
+				'/workspace/external/*/packages/ckeditor-alignment/tests/**/manual/**/utils.js'
+			] );
+		} );
+
+		it( 'for manual tests (root)', () => {
+			expect( transformFileOptionToTestGlob( 'ckeditor5/utils', true ) ).to.deep.equal( [
+				'/workspace/tests/**/manual/**/utils.js'
 			] );
 		} );
 	} );
