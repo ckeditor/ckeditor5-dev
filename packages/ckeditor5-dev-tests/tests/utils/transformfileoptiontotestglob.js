@@ -25,7 +25,7 @@ describe( 'dev-tests/utils', () => {
 		sandbox.restore();
 	} );
 
-	describe( 'converts "ckeditor5" to the root package tests', () => {
+	describe( 'converts "ckeditor5" to pattern matching all root package tests', () => {
 		it( 'for automated tests', () => {
 			expect( transformFileOptionToTestGlob( 'ckeditor5' ) ).to.deep.equal( [ '/workspace/tests/**/*.js' ] );
 		} );
@@ -35,7 +35,7 @@ describe( 'dev-tests/utils', () => {
 		} );
 	} );
 
-	describe( 'converts "*" to all packages\' files', () => {
+	describe( 'converts "*" to pattern matching all packages\' files', () => {
 		it( 'for automated tests', () => {
 			expect( transformFileOptionToTestGlob( '*' ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-*/tests/**/*.js',
@@ -55,7 +55,7 @@ describe( 'dev-tests/utils', () => {
 		} );
 	} );
 
-	describe( 'converts package name to its files', () => {
+	describe( 'converts "foo" to pattern matching all tests from a package', () => {
 		it( 'for automated tests', () => {
 			expect( transformFileOptionToTestGlob( 'engine' ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-engine/tests/**/*.js',
@@ -75,7 +75,7 @@ describe( 'dev-tests/utils', () => {
 		} );
 	} );
 
-	describe( 'ignores package starting with "!"', () => {
+	describe( 'converts "!foo" to pattern matching all tests except from a package', () => {
 		it( 'for automated tests', () => {
 			expect( transformFileOptionToTestGlob( '!engine' ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-!(engine)*/tests/**/*.js',
@@ -95,7 +95,7 @@ describe( 'dev-tests/utils', () => {
 		} );
 	} );
 
-	describe( 'converts path to files', () => {
+	describe( 'converts "foo/bar/" to pattern matching all tests from a package and a subdirectory', () => {
 		it( 'for automated tests', () => {
 			expect( transformFileOptionToTestGlob( 'engine/view/' ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-engine/tests/view/**/*.js',
@@ -115,7 +115,13 @@ describe( 'dev-tests/utils', () => {
 		} );
 	} );
 
-	describe( 'converts path to file to a single test', () => {
+	describe( 'converts "foo/bar" to pattern matching all tests from a package (or root) with specific filename', () => {
+		it( 'for automated tests (root)', () => {
+			expect( transformFileOptionToTestGlob( 'ckeditor5/utils' ) ).to.deep.equal( [
+				'/workspace/tests/**/utils.js'
+			] );
+		} );
+
 		it( 'for automated tests (package)', () => {
 			expect( transformFileOptionToTestGlob( 'alignment/utils' ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-alignment/tests/**/utils.js',
@@ -125,9 +131,18 @@ describe( 'dev-tests/utils', () => {
 			] );
 		} );
 
-		it( 'for automated tests (root)', () => {
-			expect( transformFileOptionToTestGlob( 'ckeditor5/utils' ) ).to.deep.equal( [
-				'/workspace/tests/**/utils.js'
+		it( 'for automated tests (wildcard filename)', () => {
+			expect( transformFileOptionToTestGlob( 'basic-styles/bold*' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-basic-styles/tests/**/bold*.js',
+				'/workspace/packages/ckeditor-basic-styles/tests/**/bold*.js',
+				'/workspace/external/*/packages/ckeditor5-basic-styles/tests/**/bold*.js',
+				'/workspace/external/*/packages/ckeditor-basic-styles/tests/**/bold*.js'
+			] );
+		} );
+
+		it( 'for manual tests (root)', () => {
+			expect( transformFileOptionToTestGlob( 'ckeditor5/utils', true ) ).to.deep.equal( [
+				'/workspace/tests/**/manual/**/utils.js'
 			] );
 		} );
 
@@ -140,9 +155,12 @@ describe( 'dev-tests/utils', () => {
 			] );
 		} );
 
-		it( 'for manual tests (root)', () => {
-			expect( transformFileOptionToTestGlob( 'ckeditor5/utils', true ) ).to.deep.equal( [
-				'/workspace/tests/**/manual/**/utils.js'
+		it( 'for manual tests (wildcard filename)', () => {
+			expect( transformFileOptionToTestGlob( 'basic-styles/bold*', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-basic-styles/tests/**/manual/**/bold*.js',
+				'/workspace/packages/ckeditor-basic-styles/tests/**/manual/**/bold*.js',
+				'/workspace/external/*/packages/ckeditor5-basic-styles/tests/**/manual/**/bold*.js',
+				'/workspace/external/*/packages/ckeditor-basic-styles/tests/**/manual/**/bold*.js'
 			] );
 		} );
 	} );

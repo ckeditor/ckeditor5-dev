@@ -9,23 +9,23 @@ const path = require( 'path' );
 
 // Matches pattern of a single package name, e.g. "engine", "special-characters".
 const SINGLE_PACKAGE_REGEXP = /^[a-z][a-z-]+[a-z]$/;
-// Matches pattern of a single test path, e.g. "ckeditor5/article", "alignment/alignment".
-const SINGLE_TEST_REGEXP = /^[a-z1-9-]+\/[a-z-]+$/;
+// Matches pattern of a specific filename test path, e.g. "ckeditor5/article", "basic-styles/bold*".
+const NAMED_TEST_REGEXP = /^[a-z1-9-]+\/[*a-z-]+$/;
 // Matches pattern of a single excluded package name, e.g. "!engine", "!special-characters".
 const EXCLUSION_REGEXP = /^![a-z-]+[a-z]$/;
-// Matches pattern of a directory, e.g. "engine/view/", "alignment/alignment/".
+// Matches pattern of a single package name and subdirectory, e.g. "engine/view/", "alignment/alignment/".
 const DIRECTORY_REGEXP = /^[a-z]+\/[/a-z-]+\/$/;
 
 /**
  * Converts values of --files argument to proper globs.
- * There are 5 supported types of values now:
+ * There are 5 supported types of values:
  *
- * 0. the main repository - 'ckeditor5'
- * 1. all packages' files – '*'
- * 2. given package files – 'engine'
- * 3. everything except the given package – '!engine'
- * 4. path – 'engine/view/' -> 'ckeditor5-engine/tests/view/**\/*.js'
- * 5. specific test - 'ckeditor5/article'
+ * 0. "ckeditor5" - matches all root package tests
+ * 1. "*"         - matches all packages' files
+ * 2. "foo"       - matches all tests from a package
+ * 3. "!foo"      - matches all tests except from a package
+ * 4. "foo/bar/"  - matches all tests from a package and a subdirectory
+ * 5. "foo/bar"   - matches all tests from a package (or root) with specific filename
  *
  * @param {String} globPattern A path or pattern to determine the tests to execute.
  * @param {Boolean} [isManualTest=false] Whether the tests are manual or automated.
@@ -82,7 +82,7 @@ function transformSingleGlobPattern( globPattern, options ) {
 		let testDirectories;
 
 		// 1, 2 & 5
-		if ( globPattern === '*' || SINGLE_PACKAGE_REGEXP.test( globPattern ) || SINGLE_TEST_REGEXP.test( globPattern ) ) {
+		if ( globPattern === '*' || SINGLE_PACKAGE_REGEXP.test( globPattern ) || NAMED_TEST_REGEXP.test( globPattern ) ) {
 			packageName = prefix + '-' + chunks[ 0 ];
 			testDirectories = [ '**' ];
 		}
@@ -112,7 +112,7 @@ function transformSingleGlobPattern( globPattern, options ) {
 	}
 
 	// If we're looking for a single test, use specific filename.
-	if ( SINGLE_TEST_REGEXP.test( globPattern ) ) {
+	if ( NAMED_TEST_REGEXP.test( globPattern ) ) {
 		returnChunks.push( chunks[ 1 ] + '.js' );
 	}
 	// Otherwise, any filename.
