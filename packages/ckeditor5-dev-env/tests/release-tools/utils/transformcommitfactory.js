@@ -672,6 +672,34 @@ describe( 'dev-env/release-tools/utils', () => {
 					expect( commit[ 1 ].rawType ).to.equal( 'Feature' );
 				} );
 
+				it( 'works with multi-scoped merge commit', () => {
+					const rawCommit = {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Feature (foo, bar): Simple fix.',
+						type: 'Feature (foo, bar)',
+						subject: 'Simple fix.',
+						merge: 'Merge pull request #7355 from ckeditor/i/6757',
+						body: null,
+						footer: null,
+						notes: []
+					};
+
+					const commit = transformCommit( rawCommit );
+
+					expect( commit ).to.be.an( 'Array' );
+					expect( commit.length ).to.equal( 2 );
+
+					expect( commit[ 0 ].scope ).to.be.an( 'Array' );
+					expect( commit[ 0 ].scope.length ).to.equal( 1 );
+					expect( commit[ 0 ].scope[ 0 ] ).to.equal( 'bar' );
+					expect( commit[ 0 ].rawType ).to.equal( 'Feature' );
+
+					expect( commit[ 1 ].scope ).to.be.an( 'Array' );
+					expect( commit[ 1 ].scope.length ).to.equal( 1 );
+					expect( commit[ 1 ].scope[ 0 ] ).to.equal( 'foo' );
+					expect( commit[ 1 ].rawType ).to.equal( 'Feature' );
+				} );
+
 				it( 'clones the commit properties for multi-scoped changes', () => {
 					const rawCommit = {
 						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
