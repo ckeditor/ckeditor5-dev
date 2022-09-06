@@ -658,11 +658,56 @@ describe( 'dev-env/release-tools/utils', () => {
 
 					const commit = transformCommit( rawCommit );
 
-					expect( commit.scope ).to.be.an( 'Array' );
-					expect( commit.scope.length ).to.equal( 2 );
-					expect( commit.scope[ 0 ] ).to.equal( 'bar' );
-					expect( commit.scope[ 1 ] ).to.equal( 'foo' );
-					expect( commit.rawType ).to.equal( 'Feature' );
+					expect( commit ).to.be.an( 'Array' );
+					expect( commit.length ).to.equal( 2 );
+
+					expect( commit[ 0 ].scope ).to.be.an( 'Array' );
+					expect( commit[ 0 ].scope.length ).to.equal( 1 );
+					expect( commit[ 0 ].scope[ 0 ] ).to.equal( 'bar' );
+					expect( commit[ 0 ].rawType ).to.equal( 'Feature' );
+
+					expect( commit[ 1 ].scope ).to.be.an( 'Array' );
+					expect( commit[ 1 ].scope.length ).to.equal( 1 );
+					expect( commit[ 1 ].scope[ 0 ] ).to.equal( 'foo' );
+					expect( commit[ 1 ].rawType ).to.equal( 'Feature' );
+				} );
+
+				it( 'clones the commit properties for multi-scoped changes', () => {
+					const rawCommit = {
+						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
+						header: 'Feature (foo, bar): Simple fix.',
+						type: 'Feature (foo, bar)',
+						subject: 'Simple fix.',
+						body: null,
+						footer: null,
+						notes: [
+							{
+								title: 'BREAKING CHANGES',
+								text: '(package): Foo.'
+							}
+						]
+					};
+
+					const commit = transformCommit( rawCommit );
+
+					expect( commit ).to.be.an( 'Array' );
+					expect( commit.length ).to.equal( 2 );
+
+					expect( commit[ 0 ].scope ).to.be.an( 'Array' );
+					expect( commit[ 1 ].scope ).to.be.an( 'Array' );
+					expect( commit[ 0 ].scope ).to.not.equal( commit[ 1 ].scope );
+
+					expect( commit[ 0 ].files ).to.be.an( 'Array' );
+					expect( commit[ 1 ].files ).to.be.an( 'Array' );
+					expect( commit[ 0 ].files ).to.not.equal( commit[ 1 ].files );
+
+					expect( commit[ 0 ].notes ).to.be.an( 'Array' );
+					expect( commit[ 1 ].notes ).to.be.an( 'Array' );
+					expect( commit[ 0 ].notes ).to.not.equal( commit[ 1 ].notes );
+
+					expect( commit[ 0 ].notes[ 0 ].scope ).to.be.an( 'Array' );
+					expect( commit[ 1 ].notes[ 0 ].scope ).to.be.an( 'Array' );
+					expect( commit[ 0 ].notes[ 0 ].scope ).to.not.equal( commit[ 1 ].notes[ 0 ].scope );
 				} );
 
 				it( 'extracts the scope from notes', () => {
@@ -964,12 +1009,13 @@ describe( 'dev-env/release-tools/utils', () => {
 					const commits = transformCommit( rawCommit );
 
 					expect( commits ).to.be.an( 'Array' );
-					expect( commits.length ).to.equal( 4 );
+					expect( commits.length ).to.equal( 5 );
 
 					expect( commits[ 0 ].scope ).to.equal( null );
 					expect( commits[ 1 ].scope ).to.deep.equal( [ 'foo' ] );
 					expect( commits[ 2 ].scope ).to.equal( null );
-					expect( commits[ 3 ].scope ).to.deep.equal( [ 'bar', 'foo' ] );
+					expect( commits[ 3 ].scope ).to.deep.equal( [ 'bar' ] );
+					expect( commits[ 4 ].scope ).to.deep.equal( [ 'foo' ] );
 				} );
 
 				it( 'merges "Closes" references in multi-entries commit', () => {

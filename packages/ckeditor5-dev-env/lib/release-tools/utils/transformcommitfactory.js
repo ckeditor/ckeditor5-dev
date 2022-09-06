@@ -5,6 +5,7 @@
 
 'use strict';
 
+const { cloneDeepWith } = require( 'lodash' );
 const utils = require( './transformcommitutils' );
 const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
 
@@ -14,6 +15,7 @@ const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
  * It returns a function that parses a single commit:
  *   - makes links to issues and organizations on GitHub,
  *   - if the commit contains multi changelog entries, the function will return an array of the commits,
+ *   - if the commit touches multiple scopes, the commit is cloned as many times as the number of packages in its scope,
  *   - normalizes notes (e.g. "MAJOR BREAKING CHANGE" will be replaced with "MAJOR BREAKING CHANGES"),
  *   - the commit is always being returned. Even, if it should not be added to the changelog.
  *
@@ -27,6 +29,20 @@ const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
  * @returns {Function}
  */
 module.exports = function transformCommitFactory( options = {} ) {
+	return rawCommit => {
+		const commit = transformCommit( rawCommit );
+
+		if ( !commit ) {
+			return commit;
+		}
+
+		if ( Array.isArray( commit ) ) {
+			return commit.flatMap( splitMultiScopeCommit );
+		}
+
+		return splitMultiScopeCommit( commit );
+	};
+
 	/**
 	 * If returned an instance of the Array, it means that single commit contains more than one entry for the changelog.
 	 *
@@ -47,7 +63,7 @@ module.exports = function transformCommitFactory( options = {} ) {
 	 * @param {Commit} rawCommit
 	 * @returns {Commit|Array.<Commit>|undefined}
 	 */
-	return function transformCommit( rawCommit ) {
+	function transformCommit( rawCommit ) {
 		// Let's clone the commit. We don't want to modify the reference.
 		const commit = Object.assign( {}, rawCommit, {
 			// Copy the original `type` of the commit.
@@ -222,7 +238,7 @@ module.exports = function transformCommitFactory( options = {} ) {
 		}
 
 		return separatedCommits;
-	};
+	}
 
 	/**
 	 * Merges multiple "Closes #x" references as "Closes #x, #y.".
@@ -399,6 +415,33 @@ module.exports = function transformCommitFactory( options = {} ) {
 		}
 
 		return false;
+	}
+
+	/**
+	 * If the commit touches multiple scopes (packages), clone this commit as many times as the number of packages in the scope.
+	 * Then, for each cloned commit, set the scope value to be a single package. Other commit properties remain unchanged.
+	 *
+	 * This correction is needed, because otherwise a changelog entry would be generated only for the first found scope.
+	 *
+	 * @param {Commit} commit
+	 * @returns {Commit|Array.<Commit>}
+	 */
+	function splitMultiScopeCommit( commit ) {
+		if ( !commit.scope ) {
+			return commit;
+		}
+
+		if ( commit.scope.length === 1 ) {
+			return commit;
+		}
+
+		// Clone the commit as many times as there are scopes.
+		return commit.scope.map( scope => cloneDeepWith( commit, ( value, key ) => {
+			// The cloned commit should always have a single scope.
+			if ( key === 'scope' ) {
+				return [ scope ];
+			}
+		} ) );
 	}
 };
 
