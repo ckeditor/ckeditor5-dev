@@ -436,10 +436,16 @@ module.exports = function transformCommitFactory( options = {} ) {
 		}
 
 		// Clone the commit as many times as there are scopes.
-		return commit.scope.map( scope => cloneDeepWith( commit, ( value, key ) => {
-			// The cloned commit should always have a single scope.
-			if ( key === 'scope' ) {
+		return commit.scope.map( ( scope, index ) => cloneDeepWith( commit, ( value, key, parent ) => {
+			// The cloned commit should always have a single scope from a commit.
+			// Do not copy scopes from commit notes.
+			if ( key === 'scope' && !parent.title ) {
 				return [ scope ];
+			}
+
+			// Do not copy breaking changes notes. It's enough to keep them in the first commit.
+			if ( index && key === 'notes' ) {
+				return [];
 			}
 		} ) );
 	}
