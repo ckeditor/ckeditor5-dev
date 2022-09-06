@@ -11,9 +11,9 @@ const path = require( 'path' );
 const SINGLE_PACKAGE_REGEXP = /^[a-z][a-z-]+[a-z]$/;
 // Matches pattern of a specific filename test path, e.g. "ckeditor5/article", "basic-styles/bold*".
 const NAMED_TEST_REGEXP = /^[a-z1-9-]+\/[*a-z-]+$/;
-// Matches pattern of a single excluded package name, e.g. "!engine", "!special-characters".
-const EXCLUSION_REGEXP = /^![a-z-]+[a-z]$/;
-// Matches pattern of a single package name and subdirectory, e.g. "engine/view/", "alignment/alignment/".
+// Matches pattern of excluded package names, e.g. "!engine", "!special-characters", "!(ui|core)".
+const EXCLUSION_REGEXP = /^!(?:\([a-z-|]+\)|[a-z-]+)$/;
+// Matches pattern of a single package name and a subdirectory, e.g. "engine/view/", "alignment/alignment/".
 const DIRECTORY_REGEXP = /^[a-z]+\/[/a-z-]+\/$/;
 
 /**
@@ -70,7 +70,7 @@ function transformSingleGlobPattern( globPattern, options ) {
 	const prefix = options.useCKEditorPrefix ? 'ckeditor' : 'ckeditor5';
 	const packagesDirectory = options.externalPackages ? [ 'external', '*', 'packages' ] : [ 'packages' ];
 
-	const chunks = globPattern.match( /[a-z1-9*-]+/g );
+	const chunks = globPattern.match( /[a-z1-9|*-]+/g );
 	const returnChunks = [];
 
 	// Every path starts with workspace.

@@ -76,7 +76,7 @@ describe( 'dev-tests/utils', () => {
 	} );
 
 	describe( 'converts "!foo" to pattern matching all tests except from a package', () => {
-		it( 'for automated tests', () => {
+		it( 'for automated tests (single exclusion)', () => {
 			expect( transformFileOptionToTestGlob( '!engine' ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-!(engine)*/tests/**/*.js',
 				'/workspace/packages/ckeditor-!(engine)*/tests/**/*.js',
@@ -85,12 +85,30 @@ describe( 'dev-tests/utils', () => {
 			] );
 		} );
 
-		it( 'for manual tests', () => {
+		it( 'for automated tests (multiple exclusions)', () => {
+			expect( transformFileOptionToTestGlob( '!(engine|core|basic-styles)' ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-!(engine|core|basic-styles)*/tests/**/*.js',
+				'/workspace/packages/ckeditor-!(engine|core|basic-styles)*/tests/**/*.js',
+				'/workspace/external/*/packages/ckeditor5-!(engine|core|basic-styles)*/tests/**/*.js',
+				'/workspace/external/*/packages/ckeditor-!(engine|core|basic-styles)*/tests/**/*.js'
+			] );
+		} );
+
+		it( 'for manual tests (single exclusion)', () => {
 			expect( transformFileOptionToTestGlob( '!engine', true ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-!(engine)*/tests/**/manual/**/*.js',
 				'/workspace/packages/ckeditor-!(engine)*/tests/**/manual/**/*.js',
 				'/workspace/external/*/packages/ckeditor5-!(engine)*/tests/**/manual/**/*.js',
 				'/workspace/external/*/packages/ckeditor-!(engine)*/tests/**/manual/**/*.js'
+			] );
+		} );
+
+		it( 'for manual tests (multiple exclusions)', () => {
+			expect( transformFileOptionToTestGlob( '!(engine|core|basic-styles)', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-!(engine|core|basic-styles)*/tests/**/manual/**/*.js',
+				'/workspace/packages/ckeditor-!(engine|core|basic-styles)*/tests/**/manual/**/*.js',
+				'/workspace/external/*/packages/ckeditor5-!(engine|core|basic-styles)*/tests/**/manual/**/*.js',
+				'/workspace/external/*/packages/ckeditor-!(engine|core|basic-styles)*/tests/**/manual/**/*.js'
 			] );
 		} );
 	} );
