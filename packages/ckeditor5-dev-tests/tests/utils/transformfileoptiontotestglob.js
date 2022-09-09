@@ -55,7 +55,7 @@ describe( 'dev-tests/utils', () => {
 		} );
 	} );
 
-	describe( 'converts "foo" to pattern matching all tests from a package', () => {
+	describe( 'converts "package-name" to pattern matching all tests from this package', () => {
 		it( 'for automated tests (single package)', () => {
 			expect( transformFileOptionToTestGlob( 'engine' ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-engine/tests/**/*.js',
@@ -93,7 +93,7 @@ describe( 'dev-tests/utils', () => {
 		} );
 	} );
 
-	describe( 'converts "!foo" to pattern matching all tests except from a package', () => {
+	describe( 'converts "!package-name" to pattern matching all tests except from this package', () => {
 		it( 'for automated tests (single exclusion)', () => {
 			expect( transformFileOptionToTestGlob( '!engine' ) ).to.deep.equal( [
 				'/workspace/packages/ckeditor5-!(engine)*/tests/**/*.js',
@@ -131,7 +131,7 @@ describe( 'dev-tests/utils', () => {
 		} );
 	} );
 
-	describe( 'converts "foo/bar/" to pattern matching all tests from a package (or root) and a subdirectory', () => {
+	describe( 'converts "package-name/directory/" to pattern matching all tests from a package (or root) and a subdirectory', () => {
 		it( 'for automated tests (root)', () => {
 			expect( transformFileOptionToTestGlob( 'ckeditor5/memory/' ) ).to.deep.equal( [
 				'/workspace/tests/memory/**/*.js'
@@ -199,7 +199,7 @@ describe( 'dev-tests/utils', () => {
 		} );
 	} );
 
-	describe( 'converts "foo/bar" to pattern matching all tests from a package (or root) with specific filename', () => {
+	describe( 'converts "package-name/filename" to pattern matching all tests from a package (or root) with specific filename', () => {
 		it( 'for automated tests (root)', () => {
 			expect( transformFileOptionToTestGlob( 'ckeditor5/utils' ) ).to.deep.equal( [
 				'/workspace/tests/**/utils.js'
