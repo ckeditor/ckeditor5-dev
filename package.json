@@ -3,7 +3,7 @@
   "version": "30.5.0",
   "private": true,
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-env": "^30.5.0"
+    "@ckeditor/ckeditor5-dev-env": "^31.0.0"
   },
   "devDependencies": {
     "eslint": "^7.0.0",
