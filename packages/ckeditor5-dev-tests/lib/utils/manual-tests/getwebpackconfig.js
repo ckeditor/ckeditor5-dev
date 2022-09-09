@@ -29,6 +29,10 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 	const webpackConfig = {
 		mode: 'none',
 
+		watchOptions: {
+			aggregateTimeout: 500
+		},
+
 		entry: options.entries,
 
 		output: {
