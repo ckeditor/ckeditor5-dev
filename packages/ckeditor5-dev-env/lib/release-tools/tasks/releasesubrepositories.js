@@ -10,6 +10,7 @@ const path = require( 'path' );
 const chalk = require( 'chalk' );
 const glob = require( 'glob' );
 const mkdirp = require( 'mkdirp' );
+const Table = require( 'cli-table' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const parseGithubUrl = require( 'parse-github-url' );
 const cli = require( '../utils/cli' );
@@ -25,6 +26,14 @@ const PACKAGE_JSON_TEMPLATE_PATH = require.resolve( '../templates/release-packag
 const BREAK_RELEASE_MESSAGE = 'You aborted publishing the release. Why? Oh why?!';
 const NO_RELEASE_MESSAGE = 'No changes for publishing. Why? Oh why?!';
 const AUTH_REQUIRED = 'You must be logged to execute this command.';
+const MISSING_FILES_MESSAGE =
+	'Publishing the release is terminated by you.\n' +
+	'Some files were expected to exist, but they were not found in the directory structure of the package.\n\n' +
+	'👉 Next step: Take a deep breath and think why the package does not have the necessary files.\n\n' +
+	'👉 Workarounds:\n' +
+	'   (1) Run the script once again and accept the package with missing files.\n' +
+	'       BE CAREFUL: the package will be published as it is now.\n' +
+	'   (2) Consider adding the package to exceptions in `options.skipNpmPublish`.\n';
 
 // That files will be copied from source to the temporary directory and will be released too.
 const additionalFiles = [
@@ -115,6 +124,14 @@ const additionalFiles = [
  *
  * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
  *
+ * @param {Object} [options.optionalFilesAndDirectories=null] By default, for each package that we want to publish,
+ * the tool checks whether all files specified in the `#files` key (in `package.json`) exist. The option allows defining
+ * items that does not have to exist, e.g., the `theme/` directory is optional because CKEditor 5 features do not have to define styles.
+ * The `lang/` directory also a good example, as only some of packages can be localized.
+ *
+ * The `options.optionalFilesAndDirectories` object may contain keys that are package names. The `#default` key is used for all packages
+ * that do not have own key.
+ *
  * @returns {Promise}
  */
 module.exports = function releaseSubRepositories( options ) {
@@ -124,6 +141,12 @@ module.exports = function releaseSubRepositories( options ) {
 	const dryRun = Boolean( options.dryRun );
 	const releaseBranch = options.releaseBranch || 'master';
 	const customReleases = Array.isArray( options.customReleases ) ? options.customReleases : [ options.customReleases ].filter( Boolean );
+
+	// When preparing packages for release, we check whether there are files in the directory structure of the package, which are
+	// defined in the `#files` key in the `package.json`. It suffices that at least one file exists for each entry from the `#files`
+	// key. Some files and directories, although defined in `#files`, are optional, so their absence in the package directory
+	// should not be treated as an error. The list below defines this optional files and directories in the package.
+	const optionalFilesAndDirectories = options.optionalFilesAndDirectories || null;
 
 	const pathsCollection = getPackagesPaths( {
 		cwd: options.cwd,
@@ -349,23 +372,141 @@ module.exports = function releaseSubRepositories( options ) {
 				return Promise.resolve();
 			}
 
-			const npmVersion = getVersionFromNpm( packageJson.name );
+			const matchedFiles = getMatchedFilesToPublish( packageJson, repositoryPath );
+			const hasAllFilesToPublish = hasAllRequiredFilesToPublish( packageJson, matchedFiles );
 
-			logDryRun( `Versions: package.json: "${ releaseDetails.version }", npm: "${ npmVersion || 'initial release' }".` );
-
-			releaseDetails.npmVersion = npmVersion;
-			releaseDetails.shouldReleaseOnNpm = npmVersion !== releaseDetails.version;
-
-			if ( releaseDetails.shouldReleaseOnNpm ) {
-				log.info( '✅  Added to release.' );
-
-				releasesOnNpm.add( repositoryPath );
-			} else {
-				log.info( '❌  Nothing to release.' );
+			if ( dryRun || !hasAllFilesToPublish ) {
+				showMatchedFiles( packageJson, matchedFiles );
 			}
 
-			return Promise.resolve();
+			let promise;
+
+			if ( dryRun ) {
+				promise = Promise.resolve( true );
+			} else if ( hasAllFilesToPublish ) {
+				promise = Promise.resolve( true );
+			} else {
+				promise = cli.confirmIncludingPackage();
+			}
+
+			return promise.then( shouldIncludePackage => {
+				if ( !shouldIncludePackage ) {
+					throw new Error( MISSING_FILES_MESSAGE );
+				}
+
+				const npmVersion = getVersionFromNpm( packageJson.name );
+
+				logDryRun( `Versions: package.json: "${ releaseDetails.version }", npm: "${ npmVersion || 'initial release' }".` );
+
+				releaseDetails.npmVersion = npmVersion;
+				releaseDetails.shouldReleaseOnNpm = npmVersion !== releaseDetails.version;
+
+				if ( releaseDetails.shouldReleaseOnNpm ) {
+					log.info( '✅  Added to release.' );
+
+					releasesOnNpm.add( repositoryPath );
+				} else {
+					log.info( '❌  Nothing to release.' );
+				}
+			} );
 		} );
+
+		// Scans the patterns provided in the `#files` key from `package.json` and collects number of matched files for each entry.
+		// The keys in returned map are file patterns, and their values represent number of matched files. If there is no `#files` key
+		// in `package.json`, then empty map is returned.
+		function getMatchedFilesToPublish( packageJson, repositoryPath ) {
+			if ( !packageJson.files ) {
+				return new Map();
+			}
+
+			return packageJson.files.reduce( ( result, entry ) => {
+				const globOptions = {
+					cwd: repositoryPath,
+					dot: true,
+					nodir: true
+				};
+
+				// An entry in the `#files` key can point either to a file, or to a directory. To test both cases in one `glob` call,
+				// we use a braced section in the `glob` syntax. A braced section starts with { and ends with } and they are expanded
+				// into a set of patterns. A braced section may contain any number of comma-delimited sections (path fragments) within.
+				//
+				// Example: for entry 'src', the following braced section would expand into 'src' and 'src/**' patterns, both evaluated in
+				// one `glob` call.
+				const numberOfMatches = glob.sync( entry + '{,/**}', globOptions ).length;
+
+				return result.set( entry, numberOfMatches );
+			}, new Map() );
+		}
+
+		// Checks whether all the required files exist in the package directory. Returns `true` if all required files exist
+		// and `false` otherwise. It takes into account optional files and directories.
+		function hasAllRequiredFilesToPublish( packageJson, matchedFiles ) {
+			// If no `#files` key exist in the `package.json`, assume that the package directory structure is valid.
+			if ( !packageJson.files ) {
+				return true;
+			}
+
+			// Otherwise, check if every entry in the `#files` key matches at least one file.
+			for ( const [ entry, numberOfMatches ] of matchedFiles ) {
+				// Some files and directories are optional, so their absence in the package directory structure should not be an error.
+				if ( isEntryOptional( packageJson.name, entry ) ) {
+					continue;
+				}
+
+				if ( numberOfMatches === 0 ) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		// Displays all entries from the `#files` key from `package.json` with number of matched files.
+		function showMatchedFiles( packageJson, matchedFiles ) {
+			if ( !packageJson.files ) {
+				log.info( 'ℹ️  ' + chalk.yellow(
+					'No `#files` key in package.json. The package directory has not been checked for the required files for release.'
+				) );
+
+				return;
+			}
+
+			const rows = [ ...matchedFiles ].map( row => {
+				const [ entry, numberOfMatches ] = row;
+				const isRequired = !isEntryOptional( packageJson.name, entry );
+				const color = isRequired && numberOfMatches === 0 ? chalk.red.bold : chalk.white;
+
+				return [
+					color( entry ),
+					color( numberOfMatches ),
+					color( isRequired ? 'Yes' : 'No' )
+				];
+			} );
+
+			const table = new Table( {
+				head: [ 'Files pattern', 'Number of matches', 'Is required?' ],
+				rows,
+				style: {
+					compact: true,
+					head: [ 'white' ]
+				}
+			} );
+
+			log.info( table.toString() );
+		}
+
+		// Checks whether the entry from the `#files` key is defined as optional for the package.
+		function isEntryOptional( packageName, entry ) {
+			if ( !optionalFilesAndDirectories ) {
+				return false;
+			}
+
+			if ( optionalFilesAndDirectories[ packageName ] ) {
+				return optionalFilesAndDirectories[ packageName ].includes( entry );
+			}
+
+			return optionalFilesAndDirectories.default.includes( entry );
+		}
 
 		// Checks whether specified `packageName` has been published on npm.
 		// If so, returns its version. Otherwise returns `null` which means that

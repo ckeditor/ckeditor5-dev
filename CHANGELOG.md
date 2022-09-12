@@ -1,6 +1,77 @@
 Changelog
 =========
 
+## [31.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v30.5.0...v31.0.0) (2022-09-09)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Changed syntax in the `--files` option for tests used to compile tests from a specific directory. Now, it requires a slash at the end.
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Removed option of using simplified glob in filename option for tests.
+
+### Features
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Split multi-scoped commit into multiple single-scoped commits, so the changelog generator can produce entries for all touched scopes. Closes [ckeditor/ckeditor5#10605](https://github.com/ckeditor/ckeditor5/issues/10605). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/2faea249a20f4bca55ff86020cadf5fefa6a6c5a))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added support for the testing environment to compile a single test. It touches both automated and manual tests. Read more about possible patterns in the [Rules for using the `--files` option](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/contributing/testing-environment.html#rules-for-using-the-files-option) section in CKEditor 5 documentation. Closes [ckeditor/ckeditor5#12251](https://github.com/ckeditor/ckeditor5/issues/12251). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/50ee152f23c59c5f87726b098e3e739b22e75c8c))
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Fixed manual tests reloading twice on every save. Closes [ckeditor/ckeditor5#12216](https://github.com/ckeditor/ckeditor5/issues/12216). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/010c5baaf5140ac2ecc27274a28841ab0baab06e))
+
+### Other changes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Manual tests should not load zoomed out on iOS. Closes [ckeditor/ckeditor5#12438](https://github.com/ckeditor/ckeditor5/issues/12438). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/42e36ae4369e29e3c1c2b7b0ec9c1bd512b70e89))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: When compiling manual tests, it is no longer necessary to specify the `manual/` directory in the `--files` option. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/50ee152f23c59c5f87726b098e3e739b22e75c8c))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.5.0 => v31.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.5.0 => v31.0.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.5.0 => v31.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.5.0 => v31.0.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.5.0 => v31.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.5.0 => v31.0.0
+</details>
+
+
+## [30.5.0](https://github.com/ckeditor/ckeditor5-dev/compare/v30.4.0...v30.5.0) (2022-09-01)
+
+### Features
+
+* **[env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)**: Added a new check during the release process that verifies if all required files exist in a package directory before releasing a package on npm. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/90022266836dd9ed246981218f1fa602b9a7627f))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added the `--resolve-js-first` option that prioritizes loading `*.js` over `*.ts` files for automated tests. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/78f69bce02a2232684f6ac2490c90ab6fec7568e))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added the `--cache` option that enables webpack cache for automated tests. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/78f69bce02a2232684f6ac2490c90ab6fec7568e))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v30.4.0 => v30.5.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v30.4.0 => v30.5.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v30.4.0 => v30.5.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v30.4.0 => v30.5.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v30.4.0 => v30.5.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v30.4.0 => v30.5.0
+</details>
+
+
 ## [30.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/v30.3.5...v30.4.0) (2022-08-04)
 
 ### Features

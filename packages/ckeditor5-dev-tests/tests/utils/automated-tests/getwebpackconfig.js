@@ -202,4 +202,34 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			noEmitOnError: true
 		} );
 	} );
+
+	it( 'should return webpack configuration with correct extension resolve order', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {
+			resolveJsFirst: true
+		} );
+
+		expect( webpackConfig.resolve ).to.deep.equal( {
+			extensions: [ '.js', '.ts', '.json' ]
+		} );
+	} );
+
+	it( 'should return webpack configuration with cache enabled', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {
+			cache: true
+		} );
+
+		expect( webpackConfig.cache ).to.deep.equal( {
+			type: 'filesystem'
+		} );
+	} );
+
+	it( 'should get rid of the "webpack://" protocol to make the paths clickable in the terminal', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {} );
+
+		const { devtoolModuleFilenameTemplate } = webpackConfig.output;
+
+		const info = { resourcePath: 'foo/bar/baz' };
+
+		expect( devtoolModuleFilenameTemplate( info ) ).to.equal( info.resourcePath );
+	} );
 } );

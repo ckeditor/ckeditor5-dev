@@ -161,6 +161,20 @@ describe( 'dev-env/release-tools/utils', () => {
 			} );
 		} );
 
+		describe( 'confirmIncludingPackage()', () => {
+			it( 'user can disagree with the proposed value', () => {
+				return cli.confirmIncludingPackage()
+					.then( () => {
+						const question = questionItems[ 0 ];
+
+						expect( question.message ).to.match(
+							/^Package does not contain all required files to publish. Include this package in the release and continue\?/
+						);
+						expect( question.type ).to.equal( 'confirm' );
+					} );
+			} );
+		} );
+
 		describe( 'provideVersion()', () => {
 			it( 'suggests specified version', () => {
 				return cli.provideVersion( '1.0.0', '1.1.0' )

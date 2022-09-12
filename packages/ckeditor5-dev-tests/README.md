@@ -53,7 +53,7 @@ You can also use the bin script for testing a package:
 * `browsers` - Browsers which will be used to run the tests. Also available as an alias: `-b`.
 * `coverage` - Whether to generate code coverage. Also available as an alias: `-c`.
 * `debug` - Allows specifying custom debug flags. For example, the `--debug engine` option uncomments the `// @if CK_DEBUG_ENGINE //` lines in the code. By default `--debug` is set to true even if you did not specify it. This enables the base set of debug logs (`// @if CK_DEBUG //`) which should always be enabled in the testing environment. You can completely turn off the debug mode by setting the `--debug false` option or `--no-debug`.
-* `files` - Package names, directories or files to tests. Also available as an alias: `-f`.
+* `files` - Package names, directories or files to tests. Also available as an alias: `-f`. Read more about this option in the [Rules for using the `--files` option](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/contributing/testing-environment.html#rules-for-using-the-files-option) section.
 * `language` – Specifies a language that will be used while building tests. By default it is `en`.
 * `production` - Run strictest set of checks. E.g. it fails test run when there are [console calls](https://github.com/ckeditor/ckeditor5/issues/1996) or [DOM leaks](https://github.com/ckeditor/ckeditor5/issues/6002).
 * `repositories` (`-r`) - Specifies names of repositories containing packages that should be tested. Those repositories should be cloned into the `external/` directory in the root directory of the project. It's a shortcut of the `--files` option as these repository packages' names will be read by the tool automatically.
@@ -74,14 +74,13 @@ $ npm t -- -c --files=enter,paragraph
 Run `tests/view/**/*.js` tests from `ckeditor5-engine` and rerun them once any file change (the watch mode):
 
 ```bash
-$ npm t -- -w --files=engine/view
+$ npm t -- -w --files=engine/view/
 ```
 
-Test specified files in `ckeditor5-basic-styles` on two browsers (Chrome and Firefox) you can use:
+Test specified files in `ckeditor5-basic-styles` on two browsers (Chrome and Firefox):
 
 ```bash
-$ npm t -- --browsers=Chrome,Firefox --files=basic-styles/boldengine.js,basic
--styles/italicengine.js
+$ npm t -- --browsers=Chrome,Firefox --files=basic-styles/bold,basic-styles/italic
 ```
 
 Test all installed packages:
@@ -96,17 +95,6 @@ Test all installed packages except one (or more):
 $ npm t -- --files='!(engine)'
 $ npm t -- --files='!(engine|ui)'
 ```
-
-### Rules for converting `--files` option to glob pattern:
-
-| `--file` | Glob | Description |
-|----------|------|-------------|
-| `engine` | `node_modules/ckeditor5-engine/tests/**/*.js` | |
-| `engine/view` | `node_modules/ckeditor5-engine/tests/view/**/*.js` | |
-| `engine/view/so/**/me/glob.js` | `node_modules/ckeditor5-engine/tests/view/so/**/me/*glob.js` | |
-| `!(engine)` | `node_modules/ckeditor5-!(engine)*/tests/**/*.js` | all tests except of given package(s) – works with multiple names `!(engine|ui|utils)` |
-| `*` | `node_modules/ckeditor5-*/tests/**/*.js` | all installed package's tests |
-| `ckeditor5` | `tests/**/*.js` | tests from the main repository |
 
 ## IDE integrations
 
