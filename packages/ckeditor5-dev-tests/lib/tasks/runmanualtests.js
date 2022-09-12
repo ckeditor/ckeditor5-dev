@@ -5,13 +5,20 @@
 
 'use strict';
 
+const fs = require( 'fs' );
 const path = require( 'path' );
+const chalk = require( 'chalk' );
+const { spawn } = require( 'child_process' );
+const inquirer = require( 'inquirer' );
+const isInteractive = require( 'is-interactive' );
 const { Server: SocketServer } = require( 'socket.io' );
+const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 const createManualTestServer = require( '../utils/manual-tests/createserver' );
 const compileManualTestScripts = require( '../utils/manual-tests/compilescripts' );
 const compileManualTestHtmlFiles = require( '../utils/manual-tests/compilehtmlfiles' );
 const copyAssets = require( '../utils/manual-tests/copyassets' );
 const removeDir = require( '../utils/manual-tests/removedir' );
+const globSync = require( '../utils/glob' );
 const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontotestglob' );
 
 /**
@@ -32,12 +39,19 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
 module.exports = function runManualTests( options ) {
 	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
 	const files = ( options.files && options.files.length ) ? options.files : [ '*' ];
-	const patterns = files.map( file => transformFileOptionToTestGlob( file, true ) )
-		.reduce( ( returnedPatterns, globPatterns ) => {
-			returnedPatterns.push( ...globPatterns );
-
-			return returnedPatterns;
+	const sourceFiles = files
+		.flatMap( file => transformFileOptionToTestGlob( file, true ) )
+		.reduce( ( result, manualTestPattern ) => {
+			return [
+				...result,
+				...globSync( manualTestPattern )
+					// Accept only files saved in the `/manual/` directory.
+					.filter( manualTestFile => manualTestFile.match( /[\\/]manual[\\/]/ ) )
+					// But do not parse manual tests utils saved in the `/manual/_utils/` directory.
+					.filter( manualTestFile => !manualTestFile.match( /[\\/]manual[\\/]_utils[\\/]/ ) )
+			];
 		}, [] );
+
 	const themePath = options.themePath || null;
 	const language = options.language;
 	const additionalLanguages = options.additionalLanguages;
@@ -51,12 +65,110 @@ module.exports = function runManualTests( options ) {
 		}
 	}
 
+	/**
+	 * Checks if building DLLs is needed, i.e. if all of the following conditions are met:
+	 *  * At least one filename of the requested manual tests ends with the `-dll` suffix.
+	 *  * The terminal, in which the manual tests are started, is interactive.
+	 *  * User confirmed building the DLLs.
+	 *
+	 * @param {Array.<String>} sourceFiles
+	 * @returns {Promise}
+	 */
+	function isDllBuildRequired( sourceFiles ) {
+		const hasDllManualTest = sourceFiles.some( filePath => filePath.endsWith( '-dll.js' ) );
+
+		if ( !hasDllManualTest ) {
+			return Promise.resolve( false );
+		}
+		if ( !isInteractive() ) {
+			// For non-interactive environments, like CI, return the default answer.
+			return Promise.resolve( false );
+		}
+
+		const confirmQuestion = {
+			message: 'Some tests require DLLs to be built. Build them now?',
+			type: 'confirm',
+			name: 'confirm',
+			default: false
+		};
+
+		return inquirer.prompt( [ confirmQuestion ] )
+			.then( answers => answers.confirm );
+	}
+
+	/**
+	 * Checks the `package.json` in each repository whether it has a script for building the DLLs and calls it if so.
+	 * It builds DLLs sequentially, one after the other.
+	 *
+	 * @returns {Promise}
+	 */
+	async function buildDll() {
+		// A braced section in the `glob` syntax starts with { and ends with } and they are expanded into a set of patterns.
+		// A braced section may contain any number of comma-delimited sections (path fragments) within.
+		//
+		// The following braced section finds all `package.json` in all repositories in one `glob` call and it returns absolute paths:
+		//  * /absolute/path/to/ckeditor5/package.json
+		//  * /absolute/path/to/ckeditor5/external/ckeditor5-internal/package.json
+		//  * /absolute/path/to/ckeditor5/external/collaboration-features/package.json
+		const pkgJsonPaths = globSync( '{,external/*/}package.json' )
+			.map( relativePath => path.resolve( relativePath ) );
+
+		for ( const pkgJsonPath of pkgJsonPaths ) {
+			const pkgJson = JSON.parse( fs.readFileSync( pkgJsonPath, 'utf-8' ) );
+
+			if ( pkgJson.scripts && pkgJson.scripts[ 'dll:build' ] ) {
+				await buildDllInRepository( path.dirname( pkgJsonPath ) );
+			}
+		}
+	}
+
+	/**
+	 * Executes the script for building DLLs in the specified repository.
+	 *
+	 * @param {String} repositoryPath
+	 * @returns {Promise}
+	 */
+	function buildDllInRepository( repositoryPath ) {
+		const repositoryName = path.basename( repositoryPath );
+		const spinnerTitle = `Building DLLs in ${ chalk.bold( repositoryName ) }... ${ chalk.gray( '(It may take a while)' ) }`;
+		const spinner = tools.createSpinner( spinnerTitle );
+
+		return new Promise( ( resolve, reject ) => {
+			const spawnOptions = {
+				encoding: 'utf8',
+				shell: true,
+				cwd: repositoryPath,
+				stderr: 'inherit'
+			};
+
+			spawn( 'yarnpkg', [ 'run', 'dll:build' ], spawnOptions )
+				.on( 'spawn', () => {
+					spinner.start();
+				} )
+				.on( 'close', exitCode => {
+					spinner.finish();
+
+					if ( exitCode ) {
+						return reject( new Error( `Building DLLs in ${ repositoryName } finished with an error.` ) );
+					}
+
+					return resolve();
+				} );
+		} );
+	}
+
 	return Promise.resolve()
+		.then( () => isDllBuildRequired( sourceFiles ) )
+		.then( shouldBuildDll => {
+			if ( shouldBuildDll ) {
+				return buildDll();
+			}
+		} )
 		.then( () => removeDir( buildDir, { silent } ) )
 		.then( () => Promise.all( [
 			compileManualTestScripts( {
 				buildDir,
-				patterns,
+				sourceFiles,
 				themePath,
 				language,
 				additionalLanguages,
@@ -67,7 +179,7 @@ module.exports = function runManualTests( options ) {
 			} ),
 			compileManualTestHtmlFiles( {
 				buildDir,
-				patterns,
+				sourceFiles,
 				language,
 				additionalLanguages,
 				silent,

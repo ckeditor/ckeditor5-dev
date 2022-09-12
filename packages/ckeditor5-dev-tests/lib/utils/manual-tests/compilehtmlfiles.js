@@ -22,7 +22,7 @@ const writer = new commonmark.HtmlRenderer();
 /**
  * @param {Object} options
  * @param {String} options.buildDir A path where compiled files will be saved.
- * @param {Array.<String>} options.patterns An array of patterns that resolve manual test scripts.
+ * @param {Array.<String>} options.sourceFiles An array of paths to JavaScript files from manual tests to be compiled.
  * @param {String} options.language A language passed to `CKEditorWebpackPlugin`.
  * @param {Boolean} options.disableWatch Whether to disable the watch mechanism. If set to true, changes in source files
  * will not trigger webpack.
@@ -35,18 +35,7 @@ module.exports = function compileHtmlFiles( options ) {
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 	const silent = options.silent || false;
 
-	const sourceMDFiles = options.patterns.reduce( ( arr, manualTestPattern ) => {
-		return [
-			...arr,
-			...globSync( manualTestPattern )
-				// Accept only files saved in the `/manual/` directory.
-				.filter( manualTestFile => manualTestFile.match( /[\\/]manual[\\/]/ ) )
-				// But do not parse manual tests utils saved in the `/manual/_utils/` directory.
-				.filter( manualTestFile => !manualTestFile.match( /[\\/]manual[\\/]_utils[\\/]/ ) )
-				.map( jsFile => setExtension( jsFile, 'md' ) )
-		];
-	}, [] );
-
+	const sourceMDFiles = options.sourceFiles.map( jsFile => setExtension( jsFile, 'md' ) );
 	const sourceHtmlFiles = sourceMDFiles.map( mdFile => setExtension( mdFile, 'html' ) );
 
 	const sourceDirs = _.uniq( sourceMDFiles.map( file => path.dirname( file ) ) );
