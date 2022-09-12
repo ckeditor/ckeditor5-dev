@@ -57,6 +57,9 @@ module.exports = async function build( config ) {
 
 	typeDoc.bootstrap( {
 		entryPoints: files,
+		plugin: [
+			'typedoc-plugin-rename-defaults'
+		],
 
 		// TODO: Move tsconfig.json to main repo. Also: how to share it across repos? Also: Do we need to share it?
 		tsconfig: path.join( process.cwd(), 'packages', 'ckeditor5-utils', 'tsconfig.json' )
