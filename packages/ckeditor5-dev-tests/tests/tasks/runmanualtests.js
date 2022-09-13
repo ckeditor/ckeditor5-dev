@@ -44,7 +44,7 @@ describe( 'runManualTests', () => {
 
 						spies.childProcess.spawnEvents[ event ].push( callback );
 
-						// Returns the same object with `on()` method to allow method chaining.
+						// Return the same object containing the `on()` method to allow method chaining: `.on( ... ).on( ... )`.
 						return spies.childProcess.spawnReturnValue;
 					}
 				},
@@ -952,7 +952,7 @@ describe( 'runManualTests', () => {
 				);
 		} );
 
-		it( 'should build the DLLs in each repository for Windows', () => {
+		it( 'should build the DLLs in each repository for Windows environment', () => {
 			sandbox.stub( process, 'platform' ).value( 'win32' );
 
 			spies.isInteractive.returns( true );

@@ -106,10 +106,8 @@ module.exports = function runManualTests( options ) {
 		// A braced section in the `glob` syntax starts with { and ends with } and they are expanded into a set of patterns.
 		// A braced section may contain any number of comma-delimited sections (path fragments) within.
 		//
-		// The following braced section finds all `package.json` in all repositories in one `glob` call and it returns absolute paths:
-		//  * /absolute/path/to/ckeditor5/package.json
-		//  * /absolute/path/to/ckeditor5/external/ckeditor5-internal/package.json
-		//  * /absolute/path/to/ckeditor5/external/collaboration-features/package.json
+		// The following braced section finds all `package.json` in all repositories in one `glob` call and it returns absolute paths to
+		// them for the CKEditor 5 repository and all external repositories.
 		const pkgJsonPaths = globSync( '{,external/*/}package.json' )
 			.map( relativePath => path.resolve( relativePath ) );
 
