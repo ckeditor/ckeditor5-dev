@@ -959,7 +959,7 @@ describe( 'runManualTests', () => {
 					error => {
 						expect( error.message ).to.equal(
 							'Building DLLs in ckeditor5 finished with an error.\n' +
-							'Execute "yarn run dll:build" to get more details.'
+							'Execute "yarn run dll:build" to see the detailed error log.'
 						);
 
 						sinon.assert.calledOnce( spies.childProcess.spawn );

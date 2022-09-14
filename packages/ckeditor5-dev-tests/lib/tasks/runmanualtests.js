@@ -174,7 +174,7 @@ module.exports = function runManualTests( options ) {
 
 					if ( exitCode ) {
 						const errorMessage = `Building DLLs in ${ repositoryName } finished with an error.\n` +
-							'Execute "yarn run dll:build" to get more details.';
+							'Execute "yarn run dll:build" to see the detailed error log.';
 
 						return reject( new Error( errorMessage ) );
 					}
