@@ -957,7 +957,10 @@ describe( 'runManualTests', () => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					error => {
-						expect( error.message ).to.equal( 'Building DLLs in ckeditor5 finished with an error.' );
+						expect( error.message ).to.equal(
+							'Building DLLs in ckeditor5 finished with an error.\n' +
+							'Execute "yarn run dll:build" to get more details.'
+						);
 
 						sinon.assert.calledOnce( spies.childProcess.spawn );
 						sinon.assert.calledWith( spies.childProcess.spawn.firstCall,

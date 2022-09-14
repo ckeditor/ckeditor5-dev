@@ -173,7 +173,10 @@ module.exports = function runManualTests( options ) {
 					spinner.finish();
 
 					if ( exitCode ) {
-						return reject( new Error( `Building DLLs in ${ repositoryName } finished with an error.` ) );
+						const errorMessage = `Building DLLs in ${ repositoryName } finished with an error.\n` +
+							'Execute "yarn run dll:build" to get more details.';
+
+						return reject( new Error( errorMessage ) );
 					}
 
 					return resolve();
