@@ -10,7 +10,7 @@ const sinon = require( 'sinon' );
 const expect = require( 'chai' ).expect;
 
 describe( 'runManualTests', () => {
-	let sandbox, spies, runManualTests;
+	let sandbox, spies, runManualTests, defaultOptions;
 
 	beforeEach( () => {
 		sandbox = sinon.createSandbox();
@@ -92,10 +92,11 @@ describe( 'runManualTests', () => {
 							'workspace/packages/ckeditor5-bar/tests/manual/dll/feature-j-dll.js'
 						],
 						// Pattern for finding `package.json` in all repositories.
+						// External repositories are first, then the root repository.
 						'{,external/*/}package.json': [
-							'workspace/ckeditor5/package.json',
 							'workspace/ckeditor5/external/ckeditor5-internal/package.json',
-							'workspace/ckeditor5/external/collaboration-features/package.json'
+							'workspace/ckeditor5/external/collaboration-features/package.json',
+							'workspace/ckeditor5/package.json'
 						]
 					};
 
@@ -129,7 +130,11 @@ describe( 'runManualTests', () => {
 					} ) ),
 					startSpinner: sandbox.stub(),
 					finishSpinner: sandbox.stub()
-				}
+				},
+				logger: sandbox.stub().callsFake( () => ( {
+					info: spies.devUtils.logInfo
+				} ) ),
+				logInfo: sandbox.stub()
 			},
 			isInteractive: sandbox.stub(),
 			server: sandbox.stub(),
@@ -161,6 +166,10 @@ describe( 'runManualTests', () => {
 		// There is some platform-specific logic in the `lib/utils/glob.js`.
 		sandbox.stub( process, 'platform' ).value( 'linux' );
 
+		defaultOptions = {
+			dll: null
+		};
+
 		runManualTests = require( '../../lib/tasks/runmanualtests' );
 	} );
 
@@ -175,7 +184,7 @@ describe( 'runManualTests', () => {
 			'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
 		] );
 
-		return runManualTests( {} )
+		return runManualTests( defaultOptions )
 			.then( () => {
 				expect( spies.removeDir.calledOnce ).to.equal( true );
 				expect( spies.removeDir.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
@@ -236,7 +245,7 @@ describe( 'runManualTests', () => {
 			debug: [ 'CK_DEBUG' ]
 		};
 
-		return runManualTests( options )
+		return runManualTests( { ...defaultOptions, ...options } )
 			.then( () => {
 				expect( spies.removeDir.calledOnce ).to.equal( true );
 				expect( spies.removeDir.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
@@ -304,7 +313,7 @@ describe( 'runManualTests', () => {
 			debug: [ 'CK_DEBUG' ]
 		};
 
-		return runManualTests( options )
+		return runManualTests( { ...defaultOptions, ...options } )
 			.then( () => {
 				expect( spies.removeDir.calledOnce ).to.equal( true );
 				expect( spies.removeDir.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
@@ -366,7 +375,7 @@ describe( 'runManualTests', () => {
 			port: 8888
 		};
 
-		return runManualTests( options )
+		return runManualTests( { ...defaultOptions, ...options } )
 			.then( () => {
 				expect( spies.server.calledOnce ).to.equal( true );
 				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
@@ -386,7 +395,7 @@ describe( 'runManualTests', () => {
 			identityFile: '/absolute/path/to/secrets.js'
 		};
 
-		return runManualTests( options )
+		return runManualTests( { ...defaultOptions, ...options } )
 			.then( () => {
 				expect( spies.server.calledOnce ).to.equal( true );
 				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
@@ -422,7 +431,7 @@ describe( 'runManualTests', () => {
 			identityFile: 'path/to/secrets.js'
 		};
 
-		return runManualTests( options )
+		return runManualTests( { ...defaultOptions, ...options } )
 			.then( () => {
 				expect( spies.server.calledOnce ).to.equal( true );
 				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
@@ -452,7 +461,11 @@ describe( 'runManualTests', () => {
 			'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
 		] );
 
-		return runManualTests( { silent: true } )
+		const options = {
+			silent: true
+		};
+
+		return runManualTests( { ...defaultOptions, ...options } )
 			.then( () => {
 				expect( spies.removeDir.calledOnce ).to.equal( true );
 				expect( spies.removeDir.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
@@ -507,7 +520,11 @@ describe( 'runManualTests', () => {
 			'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
 		] );
 
-		return runManualTests( { disableWatch: true } )
+		const options = {
+			disableWatch: true
+		};
+
+		return runManualTests( { ...defaultOptions, ...options } )
 			.then( () => {
 				expect( spies.transformFileOptionToTestGlob.calledOnce ).to.equal( true );
 				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( '*' );
@@ -559,7 +576,11 @@ describe( 'runManualTests', () => {
 			'workspace/packages/ckeditor-*/tests/**/outside/**/*.js'
 		] );
 
-		return runManualTests( { disableWatch: true } )
+		const options = {
+			disableWatch: true
+		};
+
+		return runManualTests( { ...defaultOptions, ...options } )
 			.then( () => {
 				expect( spies.transformFileOptionToTestGlob.calledOnce ).to.equal( true );
 				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( '*' );
@@ -610,7 +631,7 @@ describe( 'runManualTests', () => {
 
 		spies.server.callsFake( ( buildDire, port, onCreate ) => onCreate( httpServerMock ) );
 
-		return runManualTests( {} )
+		return runManualTests( defaultOptions )
 			.then( () => {
 				sinon.assert.calledOnce( spies.socketIO.Server );
 				sinon.assert.calledWithExactly( spies.socketIO.Server, httpServerMock );
@@ -624,7 +645,7 @@ describe( 'runManualTests', () => {
 				'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
 			] );
 
-			return runManualTests( {} )
+			return runManualTests( defaultOptions )
 				.then( () => {
 					sinon.assert.notCalled( spies.childProcess.spawn );
 					sinon.assert.notCalled( spies.inquirer.prompt );
@@ -641,9 +662,31 @@ describe( 'runManualTests', () => {
 				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
 			] );
 
-			return runManualTests( {} )
+			return runManualTests( defaultOptions )
 				.then( () => {
 					sinon.assert.notCalled( spies.childProcess.spawn );
+					sinon.assert.notCalled( spies.inquirer.prompt );
+					sinon.assert.notCalled( spies.path.resolve );
+					sinon.assert.notCalled( spies.fs.readFileSync );
+				} );
+		} );
+
+		it( 'should not build the DLLs and not ask user if `--dll` flag is `false`, even if console is interactive', () => {
+			spies.isInteractive.returns( true );
+			spies.transformFileOptionToTestGlob.returns( [
+				'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+				'workspace/packages/ckeditor-*/tests/**/manual/**/*.js',
+				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
+			] );
+
+			const options = {
+				dll: false
+			};
+
+			return runManualTests( { ...defaultOptions, ...options } )
+				.then( () => {
+					sinon.assert.notCalled( spies.childProcess.spawn );
+					sinon.assert.notCalled( spies.devUtils.logInfo );
 					sinon.assert.notCalled( spies.inquirer.prompt );
 					sinon.assert.notCalled( spies.path.resolve );
 					sinon.assert.notCalled( spies.fs.readFileSync );
@@ -659,13 +702,24 @@ describe( 'runManualTests', () => {
 				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
 			] );
 
-			return runManualTests( {} )
+			return runManualTests( defaultOptions )
 				.then( () => {
 					sinon.assert.notCalled( spies.childProcess.spawn );
 
+					sinon.assert.calledTwice( spies.devUtils.logInfo );
+					sinon.assert.calledWith( spies.devUtils.logInfo.firstCall,
+						'\nSome tests require DLL builds to be created.'
+					);
+					sinon.assert.calledWith( spies.devUtils.logInfo.secondCall,
+						'You do not have to build DLLs each time, but only when you want to check your changes in DLL tests.\n' +
+						'If you do not want to be bothered anymore, use "--dll" or "--no-dll" flag:\n' +
+						' • "--dll" - creates the DLL builds automatically, if needed.\n' +
+						' • "--no-dll" - skips creating the DLL builds.\n'
+					);
+
 					sinon.assert.calledOnce( spies.inquirer.prompt );
 					sinon.assert.calledWith( spies.inquirer.prompt.firstCall, [ {
-						message: 'Some tests require DLLs to be built. Build them now?',
+						message: 'Create the DLL builds now?',
 						type: 'confirm',
 						name: 'confirm',
 						default: false
@@ -676,7 +730,7 @@ describe( 'runManualTests', () => {
 				} );
 		} );
 
-		it( 'should open the package.json in each repository', () => {
+		it( 'should open the package.json in each repository in proper order (root repository first, then external ones)', () => {
 			spies.isInteractive.returns( true );
 			spies.inquirer.prompt.resolves( { confirm: true } );
 			spies.fs.readFileSync.returns( JSON.stringify( {
@@ -688,29 +742,42 @@ describe( 'runManualTests', () => {
 				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
 			] );
 
-			return runManualTests( {} )
+			return runManualTests( defaultOptions )
 				.then( () => {
 					sinon.assert.notCalled( spies.childProcess.spawn );
 
+					sinon.assert.calledTwice( spies.devUtils.logInfo );
+					sinon.assert.calledWith( spies.devUtils.logInfo.firstCall,
+						'\nSome tests require DLL builds to be created.'
+					);
+					sinon.assert.calledWith( spies.devUtils.logInfo.secondCall,
+						'You do not have to build DLLs each time, but only when you want to check your changes in DLL tests.\n' +
+						'If you do not want to be bothered anymore, use "--dll" or "--no-dll" flag:\n' +
+						' • "--dll" - creates the DLL builds automatically, if needed.\n' +
+						' • "--no-dll" - skips creating the DLL builds.\n'
+					);
+
 					sinon.assert.calledOnce( spies.inquirer.prompt );
 					sinon.assert.calledWith( spies.inquirer.prompt.firstCall, [ {
-						message: 'Some tests require DLLs to be built. Build them now?',
+						message: 'Create the DLL builds now?',
 						type: 'confirm',
 						name: 'confirm',
 						default: false
 					} ] );
 
+					// The `path.resolve()` calls are not sorted, so it is called in the same order as data returned from `glob`.
 					sinon.assert.calledThrice( spies.path.resolve );
 					sinon.assert.calledWith( spies.path.resolve.firstCall,
-						'workspace/ckeditor5/package.json'
-					);
-					sinon.assert.calledWith( spies.path.resolve.secondCall,
 						'workspace/ckeditor5/external/ckeditor5-internal/package.json'
 					);
-					sinon.assert.calledWith( spies.path.resolve.thirdCall,
+					sinon.assert.calledWith( spies.path.resolve.secondCall,
 						'workspace/ckeditor5/external/collaboration-features/package.json'
 					);
+					sinon.assert.calledWith( spies.path.resolve.thirdCall,
+						'workspace/ckeditor5/package.json'
+					);
 
+					// The `fs.readFileSync()` calls are sorted: root repository first, then external ones.
 					sinon.assert.calledThrice( spies.fs.readFileSync );
 					sinon.assert.calledWith( spies.fs.readFileSync.firstCall,
 						'/absolute/path/to/workspace/ckeditor5/package.json'
@@ -736,7 +803,7 @@ describe( 'runManualTests', () => {
 				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
 			] );
 
-			return runManualTests( {} )
+			return runManualTests( defaultOptions )
 				.then( () => {
 					sinon.assert.notCalled( spies.childProcess.spawn );
 				} );
@@ -757,7 +824,7 @@ describe( 'runManualTests', () => {
 				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
 			] );
 
-			return runManualTests( {} )
+			return runManualTests( defaultOptions )
 				.then( () => {
 					sinon.assert.notCalled( spies.childProcess.spawn );
 				} );
@@ -786,10 +853,65 @@ describe( 'runManualTests', () => {
 				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
 			] );
 
-			return runManualTests( {} )
+			return runManualTests( defaultOptions )
 				.then( () => {
 					sinon.assert.calledTwice( spies.childProcess.spawn );
 
+					sinon.assert.calledWith( spies.childProcess.spawn.firstCall,
+						'yarnpkg',
+						[ 'run', 'dll:build' ],
+						{
+							encoding: 'utf8',
+							shell: true,
+							cwd: '/absolute/path/to/workspace/ckeditor5',
+							stderr: 'inherit'
+						}
+					);
+					sinon.assert.calledWith( spies.childProcess.spawn.secondCall,
+						'yarnpkg',
+						[ 'run', 'dll:build' ],
+						{
+							encoding: 'utf8',
+							shell: true,
+							cwd: '/absolute/path/to/workspace/ckeditor5/external/ckeditor5-internal',
+							stderr: 'inherit'
+						}
+					);
+				} );
+		} );
+
+		it( 'should build the DLLs automatically and not ask user if `--dll` flag is `true`, even if console is interactive', () => {
+			spies.isInteractive.returns( true );
+			spies.fs.readFileSync
+				.returns( JSON.stringify( {
+					name: 'ckeditor5-example-package',
+					scripts: {
+						'dll:build': 'node ./scripts/build-dll'
+					}
+				} ) )
+				.withArgs( '/absolute/path/to/workspace/ckeditor5/external/collaboration-features/package.json' )
+				.returns( JSON.stringify( {
+					name: 'ckeditor5-example-package',
+					scripts: {
+						'build': 'node ./scripts/build'
+					}
+				} ) );
+			spies.transformFileOptionToTestGlob.returns( [
+				'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+				'workspace/packages/ckeditor-*/tests/**/manual/**/*.js',
+				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
+			] );
+
+			const options = {
+				dll: true
+			};
+
+			return runManualTests( { ...defaultOptions, ...options } )
+				.then( () => {
+					sinon.assert.notCalled( spies.devUtils.logInfo );
+					sinon.assert.notCalled( spies.inquirer.prompt );
+
+					sinon.assert.calledTwice( spies.childProcess.spawn );
 					sinon.assert.calledWith( spies.childProcess.spawn.firstCall,
 						'yarnpkg',
 						[ 'run', 'dll:build' ],
@@ -829,7 +951,7 @@ describe( 'runManualTests', () => {
 			] );
 			spies.childProcess.spawnExitCode = 1;
 
-			return runManualTests( {} )
+			return runManualTests( defaultOptions )
 				.then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
@@ -867,7 +989,7 @@ describe( 'runManualTests', () => {
 				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
 			] );
 
-			return runManualTests( {} )
+			return runManualTests( defaultOptions )
 				.then( () => {
 					sinon.assert.calledThrice( spies.childProcess.spawn );
 					sinon.assert.calledWith( spies.childProcess.spawn.firstCall,
@@ -934,7 +1056,7 @@ describe( 'runManualTests', () => {
 			] );
 			spies.childProcess.spawnExitCode = 1;
 
-			return runManualTests( {} )
+			return runManualTests( defaultOptions )
 				.then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
@@ -969,7 +1091,7 @@ describe( 'runManualTests', () => {
 				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
 			] );
 
-			return runManualTests( {} )
+			return runManualTests( defaultOptions )
 				.then( () => {
 					sinon.assert.calledOnce( spies.scriptCompiler );
 					sinon.assert.calledWith( spies.scriptCompiler.firstCall, {

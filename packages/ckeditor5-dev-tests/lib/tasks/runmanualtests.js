@@ -12,7 +12,7 @@ const { spawn } = require( 'child_process' );
 const inquirer = require( 'inquirer' );
 const isInteractive = require( 'is-interactive' );
 const { Server: SocketServer } = require( 'socket.io' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const createManualTestServer = require( '../utils/manual-tests/createserver' );
 const compileManualTestScripts = require( '../utils/manual-tests/compilescripts' );
 const compileManualTestHtmlFiles = require( '../utils/manual-tests/compilehtmlfiles' );
@@ -33,10 +33,14 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
  * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
  * @param {Number} [options.port] A port number used by the `createManualTestServer`.
  * @param {String} [options.identityFile] A file that provides secret keys used in the test scripts.
+ * @param {Boolean|null} [options.dll=null] If `null`, user is asked to create DLL builds, if they are required by test files.
+ * If `true`, DLL builds are created automatically, if required by test files. User is not asked.
+ * If `false`, DLL builds are not created. User is not asked.
  * @param {Boolean} [options.silent=false] Whether to hide files that will be processed by the script.
  * @returns {Promise}
  */
 module.exports = function runManualTests( options ) {
+	const log = logger();
 	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
 	const files = ( options.files && options.files.length ) ? options.files : [ '*' ];
 	const sourceFiles = files
@@ -66,10 +70,7 @@ module.exports = function runManualTests( options ) {
 	}
 
 	/**
-	 * Checks if building DLLs is needed, i.e. if all of the following conditions are met:
-	 *  * At least one filename of the requested manual tests ends with the `-dll` suffix.
-	 *  * The terminal, in which the manual tests are started, is interactive.
-	 *  * User confirmed building the DLLs.
+	 * Checks if building the DLLs is needed.
 	 *
 	 * @param {Array.<String>} sourceFiles
 	 * @returns {Promise}
@@ -77,20 +78,36 @@ module.exports = function runManualTests( options ) {
 	function isDllBuildRequired( sourceFiles ) {
 		const hasDllManualTest = sourceFiles.some( filePath => filePath.endsWith( '-dll.js' ) );
 
+		// Skip building DLLs if there are no DLL-related manual tests.
 		if ( !hasDllManualTest ) {
 			return Promise.resolve( false );
 		}
+
+		// If flag for auto-building the DLLs without user interaction is set, take it into account.
+		if ( options.dll !== null ) {
+			return Promise.resolve( options.dll );
+		}
+
+		// Otherwise, for non-interactive environments like CI, do not build the DLLs.
 		if ( !isInteractive() ) {
-			// For non-interactive environments, like CI, return the default answer.
 			return Promise.resolve( false );
 		}
 
+		// Finally, ask the user.
 		const confirmQuestion = {
-			message: 'Some tests require DLLs to be built. Build them now?',
+			message: 'Create the DLL builds now?',
 			type: 'confirm',
 			name: 'confirm',
 			default: false
 		};
+
+		log.info( chalk.bold( '\nSome tests require DLL builds to be created.' ) );
+		log.info( chalk.gray(
+			'You do not have to build DLLs each time, but only when you want to check your changes in DLL tests.\n' +
+			'If you do not want to be bothered anymore, use "--dll" or "--no-dll" flag:\n' +
+			' • "--dll" - creates the DLL builds automatically, if needed.\n' +
+			' • "--no-dll" - skips creating the DLL builds.\n'
+		) );
 
 		return inquirer.prompt( [ confirmQuestion ] )
 			.then( answers => answers.confirm );
@@ -109,7 +126,16 @@ module.exports = function runManualTests( options ) {
 		// The following braced section finds all `package.json` in all repositories in one `glob` call and it returns absolute paths to
 		// them for the CKEditor 5 repository and all external repositories.
 		const pkgJsonPaths = globSync( '{,external/*/}package.json' )
-			.map( relativePath => path.resolve( relativePath ) );
+			.map( relativePath => path.resolve( relativePath ) )
+			.sort( absolutePath => {
+				// The CKEditor 5 repository must be built first, before the other external repositories.
+				if ( !/[\\/]external[\\/]/.test( absolutePath ) ) {
+					return -1;
+				}
+
+				// The build order of external repositories does not matter.
+				return 0;
+			} );
 
 		for ( const pkgJsonPath of pkgJsonPaths ) {
 			const pkgJson = JSON.parse( fs.readFileSync( pkgJsonPath, 'utf-8' ) );

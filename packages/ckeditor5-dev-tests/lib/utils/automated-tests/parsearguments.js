@@ -39,7 +39,8 @@ module.exports = function parseArguments( args ) {
 			'watch',
 			'silent',
 			'resolve-js-first',
-			'cache'
+			'cache',
+			'dll'
 		],
 
 		alias: {
@@ -71,7 +72,8 @@ module.exports = function parseArguments( args ) {
 			'additional-languages': null,
 			silent: false,
 			'resolve-js-first': false,
-			cache: false
+			cache: false,
+			dll: null
 		}
 	};
 
