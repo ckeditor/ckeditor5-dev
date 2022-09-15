@@ -58,6 +58,7 @@ module.exports = async function build( config ) {
 	typeDoc.bootstrap( {
 		entryPoints: files,
 		plugin: [
+			require.resolve( './plugins/typedoc-plugin-module-fixer' ),
 			'typedoc-plugin-rename-defaults'
 		],
 
