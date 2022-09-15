@@ -5,16 +5,14 @@
 
 'use strict';
 
-const path = require( 'path' );
 const webpack = require( 'webpack' );
-const globSync = require( '../glob' );
 const getWebpackConfigForManualTests = require( './getwebpackconfig' );
 const getRelativeFilePath = require( '../getrelativefilepath' );
 
 /**
  * @param {Object} options
  * @param {String} options.buildDir A path where compiled files will be saved.
- * @param {Array.<String>} options.patterns An array of patterns that resolve manual test scripts.
+ * @param {Array.<String>} options.sourceFiles An array of paths to JavaScript files from manual tests to be compiled.
  * @param {String} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
  * @param {String} options.language A language passed to `CKEditorWebpackPlugin`.
  * @param {Boolean} options.disableWatch Whether to disable the watch mechanism. If set to true, changes in source files
@@ -25,17 +23,7 @@ const getRelativeFilePath = require( '../getrelativefilepath' );
  * @returns {Promise}
  */
 module.exports = function compileManualTestScripts( options ) {
-	const entryFiles = options.patterns.reduce( ( arr, manualTestPattern ) => {
-		return [
-			...arr,
-			...globSync( manualTestPattern )
-				// Accept only files saved in the `/manual/` directory.
-				.filter( manualTestFile => manualTestFile.includes( path.sep + 'manual' + path.sep ) )
-				// But do not parse manual tests utils saved in the `/manual/_utils/` directory.
-				.filter( manualTestFile => !manualTestFile.includes( path.sep + 'manual' + path.sep + '_utils' + path.sep ) )
-		];
-	}, [] );
-
+	const entryFiles = options.sourceFiles;
 	const entries = getWebpackEntryPoints( entryFiles );
 	const webpackConfig = getWebpackConfigForManualTests( {
 		entries,
