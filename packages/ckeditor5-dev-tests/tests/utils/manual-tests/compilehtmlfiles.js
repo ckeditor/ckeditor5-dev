@@ -128,21 +128,20 @@ describe( 'compileHtmlFiles', () => {
 			};
 
 			patternFiles = {
-				'manualTestPattern/*.js': [ 'path/to/manual/file.js' ],
 				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ]
 			};
 
 			compileHtmlFiles( {
 				buildDir: 'buildDir',
 				language: 'en',
-				patterns: [ 'manualTestPattern/*.js' ]
+				sourceFiles: [ 'path/to/manual/file.js' ]
 			} );
 
 			expect( stubs.commonmark.parse ).to.be.calledWithExactly( '## Markdown header' );
 			expect( stubs.fs.ensureDirSync ).to.be.calledWithExactly( 'buildDir' );
 
 			/* eslint-disable max-len */
-			expect(	stubs.fs.outputFileSync ).to.be.calledWithExactly(
+			expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
 				'buildDir/path/to/manual/file.html', [
 					'<div>template html content</div>',
 					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
@@ -185,7 +184,7 @@ describe( 'compileHtmlFiles', () => {
 				buildDir: 'buildDir',
 				language: 'en',
 				additionalLanguages: [ 'pl', 'ar' ],
-				patterns: [ 'manualTestPattern/*.js' ]
+				sourceFiles: [ 'path/to/manual/file.js' ]
 			} );
 
 			/* eslint-disable max-len */
@@ -224,13 +223,12 @@ describe( 'compileHtmlFiles', () => {
 			};
 
 			patternFiles = {
-				'manualTestPattern/*.js': [ 'path/to/manual/file.abc.js' ],
 				'path/to/manual/**/*.!(js|html|md)': []
 			};
 
 			compileHtmlFiles( {
 				buildDir: 'buildDir',
-				patterns: [ 'manualTestPattern/*.js' ]
+				sourceFiles: [ 'path/to/manual/file.abc.js' ]
 			} );
 
 			/* eslint-disable max-len */
@@ -268,56 +266,22 @@ describe( 'compileHtmlFiles', () => {
 			};
 
 			patternFiles = {
-				'manualTestPattern/*.js': [ 'path/to/manual/file.js' ],
-				'anotherPattern/*.js': [ 'path/to/another/manual/file.js' ],
 				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ],
 				'path/to/another/manual/**/*.!(js|html|md)': []
 			};
 
 			compileHtmlFiles( {
 				buildDir: 'buildDir',
-				patterns: [
-					'manualTestPattern/*.js',
-					'anotherPattern/*.js'
-				]
-			} );
-
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/manual/file.md', { ignoreInitial: true } );
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/manual/file.html', { ignoreInitial: true } );
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/another/manual/file.html', { ignoreInitial: true } );
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/another/manual/file.html', { ignoreInitial: true } );
-		} );
-
-		it( 'should compile only manual test files', () => {
-			files = {
-				[ `${ fakeDirname }/template.html` ]: '<div>template html content</div>',
-				'path/to/manual/file.md': '## Markdown header',
-				'path/to/manual/file.html': '<div>html file content</div>',
-				'path/to/another/file.md': '## Markdown header',
-				'path/to/another/file.html': '<div>html file content</div>'
-			};
-
-			patternFiles = {
-				'manualTestPattern/*.js': [
+				sourceFiles: [
 					'path/to/manual/file.js',
-					'path/to/manual/_utils/secretplugin.js'
-				],
-				'anotherPattern/*.js': [ 'path/to/another/file.js' ],
-				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ]
-			};
-
-			compileHtmlFiles( {
-				buildDir: 'buildDir',
-				patterns: [
-					'manualTestPattern/*.js',
-					'anotherPattern/*.js'
+					'path/to/another/manual/file.js'
 				]
 			} );
 
 			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/manual/file.md', { ignoreInitial: true } );
 			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/manual/file.html', { ignoreInitial: true } );
-			expect( stubs.chokidar.watch ).not.to.be.calledWith( 'path/to/another/file.html', { ignoreInitial: true } );
-			expect( stubs.chokidar.watch ).not.to.be.calledWith( 'path/to/another/file.html', { ignoreInitial: true } );
+			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/another/manual/file.html', { ignoreInitial: true } );
+			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/another/manual/file.html', { ignoreInitial: true } );
 		} );
 
 		it( 'should not copy md files containing dots in their file names', () => {
@@ -328,16 +292,13 @@ describe( 'compileHtmlFiles', () => {
 			};
 
 			patternFiles = {
-				'manualTestPattern/*.js': [ 'path/to/manual/file.js' ],
 				// Glob pattern has problem with file names containing dots.
 				'path/to/manual/**/*.!(js|html|md)': [ 'some.file.md' ]
 			};
 
 			compileHtmlFiles( {
 				buildDir: 'buildDir',
-				patterns: [
-					'manualTestPattern/*.js'
-				]
+				sourceFiles: [ 'path/to/manual/file.js' ]
 			} );
 
 			expect( stubs.commonmark.parse ).to.be.calledWithExactly( '## Markdown header' );
@@ -380,14 +341,13 @@ describe( 'compileHtmlFiles', () => {
 			};
 
 			patternFiles = {
-				'manualTestPattern/*.js': [ 'path/to/manual/file.js' ],
 				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ]
 			};
 
 			compileHtmlFiles( {
 				buildDir: 'buildDir',
 				language: 'en',
-				patterns: [ 'manualTestPattern/*.js' ],
+				sourceFiles: [ 'path/to/manual/file.js' ],
 				silent: true
 			} );
 
@@ -407,7 +367,6 @@ describe( 'compileHtmlFiles', () => {
 		it( 'should work on Windows environments', () => {
 			// Our wrapper on Glob returns proper paths for Unix and Windows.
 			patternFiles = {
-				'manualTestPattern/*.js': [ 'path\\to\\manual\\file.js' ],
 				'path\\to\\manual\\**\\*.!(js|html|md)': [ 'static-file.png' ]
 			};
 
@@ -419,7 +378,7 @@ describe( 'compileHtmlFiles', () => {
 
 			compileHtmlFiles( {
 				buildDir: 'buildDir',
-				patterns: [ 'manualTestPattern/*.js' ]
+				sourceFiles: [ 'path\\to\\manual\\file.js' ]
 			} );
 
 			expect( stubs.commonmark.parse ).to.be.calledWithExactly( '## Markdown header' );

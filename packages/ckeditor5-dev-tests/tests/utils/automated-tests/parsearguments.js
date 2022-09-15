@@ -299,4 +299,24 @@ describe( 'parseArguments()', () => {
 			}
 		);
 	} );
+
+	describe( 'DLLs', () => {
+		it( 'should set default value if no `--dll` flag is set', () => {
+			const options = parseArguments( [] );
+
+			expect( options.dll ).to.equal( null );
+		} );
+
+		it( 'should detect if `--dll` is set', () => {
+			const options = parseArguments( [ '--dll' ] );
+
+			expect( options.dll ).to.be.true;
+		} );
+
+		it( 'should detect if negation of the `--dll` is set (`--no-dll`)', () => {
+			const options = parseArguments( [ '--no-dll' ] );
+
+			expect( options.dll ).to.be.false;
+		} );
+	} );
 } );
