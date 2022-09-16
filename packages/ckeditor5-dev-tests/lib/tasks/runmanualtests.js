@@ -12,7 +12,7 @@ const { spawn } = require( 'child_process' );
 const inquirer = require( 'inquirer' );
 const isInteractive = require( 'is-interactive' );
 const { Server: SocketServer } = require( 'socket.io' );
-const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const createManualTestServer = require( '../utils/manual-tests/createserver' );
 const compileManualTestScripts = require( '../utils/manual-tests/compilescripts' );
 const compileManualTestHtmlFiles = require( '../utils/manual-tests/compilehtmlfiles' );
@@ -101,13 +101,12 @@ module.exports = function runManualTests( options ) {
 			default: false
 		};
 
-		log.info( chalk.bold( '\nSome tests require DLL builds to be created.' ) );
-		log.info( chalk.gray(
-			'You do not have to build DLLs each time, but only when you want to check your changes in DLL tests.\n' +
-			'If you do not want to be bothered anymore, use "--dll" or "--no-dll" flag:\n' +
-			' • "--dll" - creates the DLL builds automatically, if needed.\n' +
-			' • "--no-dll" - skips creating the DLL builds.\n'
-		) );
+		log.warning( chalk.bold( '\n⚠ Some tests require DLL builds.\n' ) );
+		log.info( 'You don\'t have to update these builds every time unless you want to check changes in DLL tests.' );
+		log.info(
+			'You can use the following flags to skip this prompt in the future: ' +
+			`${ chalk.bold( '--dll' ) } / ${ chalk.bold( '--no-dll' ) }.\n`
+		);
 
 		return inquirer.prompt( [ confirmQuestion ] )
 			.then( answers => answers.confirm );
@@ -154,29 +153,21 @@ module.exports = function runManualTests( options ) {
 	 */
 	function buildDllInRepository( repositoryPath ) {
 		const repositoryName = path.basename( repositoryPath );
-		const spinnerTitle = `Building DLLs in ${ chalk.bold( repositoryName ) }... ${ chalk.gray( '(It may take a while)' ) }`;
-		const spinner = tools.createSpinner( spinnerTitle );
+
+		log.info( `\n📍 Building DLLs in ${ chalk.bold( repositoryName ) }...\n` );
 
 		return new Promise( ( resolve, reject ) => {
 			const spawnOptions = {
 				encoding: 'utf8',
 				shell: true,
 				cwd: repositoryPath,
-				stderr: 'inherit'
+				stdio: 'inherit'
 			};
 
 			spawn( 'yarnpkg', [ 'run', 'dll:build' ], spawnOptions )
-				.on( 'spawn', () => {
-					spinner.start();
-				} )
 				.on( 'close', exitCode => {
-					spinner.finish();
-
 					if ( exitCode ) {
-						const errorMessage = `Building DLLs in ${ repositoryName } finished with an error.\n` +
-							'Execute "yarn run dll:build" to see the detailed error log.';
-
-						return reject( new Error( errorMessage ) );
+						return reject( new Error( `Building DLLs in ${ repositoryName } finished with an error.` ) );
 					}
 
 					return resolve();
