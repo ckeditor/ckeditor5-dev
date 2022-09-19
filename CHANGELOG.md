@@ -1,6 +1,35 @@
 Changelog
 =========
 
+## [31.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v31.0.0...v31.1.0) (2022-09-19)
+
+### Features
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: The manual test server will detect whether DLL builds are required when compiling manual tests. If so, it asks a user whether to build them before starting to compile tests. Closes [ckeditor/ckeditor5#12190](https://github.com/ckeditor/ckeditor5/issues/12190). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/71a7f9a4296e671149e4e981c7066ca131923278))
+
+  Feature (tests) Added the `--dll` and `--no-dll` flags to the manual test server. Both are optional and allow avoiding asking whether to build DLL files. When passing `--dll`, the script will build them automatically. When passing `--no-dll`, the process of building DLLs will not be triggered.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v31.0.0 => v31.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v31.0.0 => v31.1.0
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v31.0.0 => v31.1.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v31.0.0 => v31.1.0
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v31.0.0 => v31.1.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v31.0.0 => v31.1.0
+</details>
+
+
 ## [31.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v30.5.0...v31.0.0) (2022-09-09)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
