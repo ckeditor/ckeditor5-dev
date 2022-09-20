@@ -1,0 +1,26 @@
+{
+  "name": "@ckeditor/typedoc-plugins",
+  "version": "0.0.1",
+  "description": "Various TypeDoc plugins developed by the CKEditor 5 team.",
+  "keywords": [],
+  "dependencies": {
+  },
+  "devDependencies": {
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=5.7.1"
+  },
+  "files": [
+    "lib"
+  ],
+  "author": "CKSource (http://cksource.com/)",
+  "license": "MIT",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/typedoc-plugins",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ckeditor/ckeditor5-dev.git",
+    "directory": "packages/typedoc-plugins"
+  }
+}
