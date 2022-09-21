@@ -12,7 +12,9 @@ const paths = require( '../utils' );
 
 const FIXTURES_PATH = path.join( paths.ROOT_TEST_DIRECTORY, 'module-fixer', 'fixtures' );
 
-describe( 'module-fixer', () => {
+describe( 'module-fixer', function() {
+	this.timeout( 10 * 1000 );
+
 	let conversionResult;
 
 	before( async () => {
