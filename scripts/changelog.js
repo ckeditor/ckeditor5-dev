@@ -16,6 +16,10 @@ require( '../packages/ckeditor5-dev-env' )
 				return 'https://www.npmjs.com/package/@ckeditor/jsdoc-plugins';
 			}
 
+			if ( name === 'typedoc-plugins' ) {
+				return 'https://www.npmjs.com/package/@ckeditor/typedoc-plugins';
+			}
+
 			return 'https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-' + name;
 		}
 	} );
