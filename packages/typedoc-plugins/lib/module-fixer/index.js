@@ -14,7 +14,7 @@ const { Converter, ReflectionKind } = require( 'typedoc' );
  *
  * For the example specified above, a name of the parsed module should be equal to "package/file".
  *
- * It may happen that imports statement are specified above the "@module" block code.
+ * It may happen that import statements are specified above the "@module" block code.
  * In such a case, built-in plugin in `typedoc` does not read its value properly.
  */
 module.exports = {

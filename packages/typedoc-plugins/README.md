@@ -30,7 +30,7 @@ import type { TypeDefinition } from '...';
 
 For the example specified above, a name of the parsed module should be equal to `package/file`.
 
-Imports statement may be specified above the "@module" block code. In such a case, the default module parser from `typedoc` defines the module name based on a relative to a root path in the project.
+The `import` statements may be specified above the "@module" block code. In such a case, the default module parser from `typedoc` returns the module name based on a path relative to the project root.
 
 To enable the plugin, add the following path to available plugins:
 
