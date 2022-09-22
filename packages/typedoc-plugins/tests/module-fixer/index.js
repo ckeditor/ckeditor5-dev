@@ -3,23 +3,22 @@
  * For licensing, see LICENSE.md.
  */
 
-const path = require( 'path' );
 const { expect } = require( 'chai' );
 const glob = require( 'fast-glob' );
 const TypeDoc = require( 'typedoc' );
 
-const paths = require( '../utils' );
-
-const FIXTURES_PATH = path.join( paths.ROOT_TEST_DIRECTORY, 'module-fixer', 'fixtures' );
+const utils = require( '../utils' );
 
 describe( 'module-fixer', function() {
 	this.timeout( 10 * 1000 );
 
 	let conversionResult;
 
+	const FIXTURES_PATH = utils.normalizePath( utils.ROOT_TEST_DIRECTORY, 'module-fixer', 'fixtures' );
+
 	before( async () => {
 		const sourceFilePatterns = [
-			path.join( FIXTURES_PATH, '**', '*.ts' )
+			utils.normalizePath( FIXTURES_PATH, '**', '*.ts' )
 		];
 
 		const files = await glob( sourceFilePatterns );
@@ -37,7 +36,7 @@ describe( 'module-fixer', function() {
 				require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' )
 			],
 			// TODO: To resolve once the same problem is fixed in the `@ckeditor/ckeditor5-dev-docs` package.
-			tsconfig: path.join( FIXTURES_PATH, 'tsconfig.json' )
+			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );
 
 		conversionResult = typeDoc.convert();
