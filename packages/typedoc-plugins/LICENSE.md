@@ -1,7 +1,7 @@
 Software License Agreement
 ==========================
 
-@ckeditor/jsdoc-plugins – Various JSDoc plugins developed by the CKEditor 5 team.
+@ckeditor/typedoc-plugins – Various TypeDoc plugins developed by the CKEditor 5 team.
 Copyright (c) 2003-2022, CKSource Holding sp. z o.o. All rights reserved.
 
 Licensed under the terms of the MIT License (see Appendix A):
@@ -11,7 +11,7 @@ Licensed under the terms of the MIT License (see Appendix A):
 Sources of Intellectual Property Included in CKEditor
 -----------------------------------------------------
 
-Where not otherwise indicated, all @ckeditor/jsdoc-plugins content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, @ckeditor/jsdoc-plugins will incorporate work done by developers outside of CKSource with their express permission.
+Where not otherwise indicated, all @ckeditor/typedoc-plugins content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, @ckeditor/typedoc-plugins will incorporate work done by developers outside of CKSource with their express permission.
 
 Appendix A: The MIT License
 ---------------------------
