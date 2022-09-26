@@ -19,40 +19,44 @@ const { Converter, ReflectionKind } = require( 'typedoc' );
  */
 module.exports = {
 	load( app ) {
-		app.converter.on(
-			Converter.EVENT_CREATE_DECLARATION,
-			function( _context, reflection, node ) {
-				if ( reflection.kind !== ReflectionKind.Module ) {
-					return;
-				}
-
-				// Iterate over statements...
-				for ( const statement of node.statements ) {
-					if ( !Array.isArray( statement.jsDoc ) ) {
-						continue;
-					}
-
-					// ...to find a JSDoc block code...
-					for ( const jsDoc of statement.jsDoc ) {
-						// ...that represents a module definition.
-						const [ moduleTag ] = ( jsDoc.tags || [] ).filter( tag => {
-							return tag.tagName.originalKeywordKind === 141;
-						} );
-
-						if ( !moduleTag ) {
-							continue;
-						}
-
-						// When found, use its value as a module name.
-						if ( reflection.name !== moduleTag.comment ) {
-							reflection.originalName = reflection.name;
-							reflection.name = moduleTag.comment;
-
-							return;
-						}
-					}
-				}
-			}
-		);
+		app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
 	}
 };
+
+function onEventCreateDeclaration() {
+	return ( context, reflection ) => {
+		if ( reflection.kind !== ReflectionKind.Module ) {
+			return;
+		}
+
+		const symbol = context.project.getSymbolFromReflection( reflection );
+		const node = symbol.declarations[ 0 ];
+
+		// Iterate over statements...
+		for ( const statement of node.statements ) {
+			if ( !Array.isArray( statement.jsDoc ) ) {
+				continue;
+			}
+
+			// ...to find a JSDoc block code...
+			for ( const jsDoc of statement.jsDoc ) {
+				// ...that represents a module definition.
+				const [ moduleTag ] = ( jsDoc.tags || [] ).filter( tag => {
+					return tag.tagName.originalKeywordKind === 141;
+				} );
+
+				if ( !moduleTag ) {
+					continue;
+				}
+
+				// When found, use its value as a module name.
+				if ( reflection.name !== moduleTag.comment ) {
+					reflection.originalName = reflection.name;
+					reflection.name = moduleTag.comment;
+
+					return;
+				}
+			}
+		}
+	};
+}

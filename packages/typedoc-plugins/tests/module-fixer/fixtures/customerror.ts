@@ -3,11 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-import Error from './error';
-
 /**
  * @module fixtures/customerror
  */
+
+import Error from './error';
 
 export default class CustomError extends Error {
 }
