@@ -57,6 +57,7 @@ module.exports = async function build( config ) {
 
 	typeDoc.bootstrap( {
 		entryPoints: files,
+		logLevel: 'Error',
 		plugin: [
 			'typedoc-plugin-rename-defaults',
 			require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' ),

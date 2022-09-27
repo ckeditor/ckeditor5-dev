@@ -70,56 +70,101 @@ function onEventCreateDeclaration( processedModules ) {
 					const errorDeclaration = new DeclarationReflection( errorName, ReflectionKind.ObjectLiteral, reflection );
 					context.addChild( errorDeclaration );
 
-					const comment = new Comment( [
-						{
-							kind: 'text',
-							text: parentNode.parent.comment.toString()
-						}
-					] );
+					let commentSummary;
+					const commentSummaryNodes = [];
+
+					if ( typeof parentNode.parent.comment === 'string' ) {
+						commentSummaryNodes.push( parentNode.parent );
+						commentSummary = [
+							{
+								kind: 'text',
+								text: parentNode.parent.comment
+							}
+						];
+					} else {
+						commentSummaryNodes.push( ...parentNode.parent.comment );
+						commentSummary = parentNode.parent.comment.map( item => {
+							let { text } = item;
+
+							if ( item.kind === 324 ) {
+								if ( item.name ) {
+									text = item.name.escapedText + text;
+								}
+
+								return {
+									kind: 'inline-tag',
+									tag: '@link',
+									text
+								};
+							}
+
+							return {
+								kind: 'text',
+								text
+							};
+						} );
+					}
+
+					const comment = new Comment( commentSummary );
 
 					errorDeclaration.originalName = 'EventDeclaration';
 					errorDeclaration.kindString = 'Object literal';
 					errorDeclaration.comment = comment;
 
 					for ( const childTag of parentNode.parent.getChildren() ) {
+						// Do not process the `@error` tag again.
 						if ( childTag === parentNode ) {
 							continue;
 						}
 
-						const commentTag = new CommentTag(
-							`@${ childTag.tagName.escapedText }`,
-							[
-								{
-									kind: 'text',
-									text: childTag.comment
-								}
-							]
-						);
+						// Do not process the error description.
+						if ( commentSummaryNodes.includes( childTag ) ) {
+							continue;
+						}
 
-						commentTag.name = childTag.name.escapedText;
-						comment.blockTags.push( commentTag );
+						if ( !childTag.comment ) {
+							continue;
+						}
+
+						const errorParamTag = [];
+						let commentTag;
+
+						if ( typeof childTag.comment === 'string' ) {
+							commentTag = new CommentTag(
+								`@${ childTag.tagName.escapedText }`,
+								[
+									{
+										kind: 'text',
+										text: childTag.comment
+									}
+								]
+							);
+						} else {
+							commentTag = new CommentTag(
+								`@${ childTag.tagName.escapedText }`,
+								childTag.comment.map( item => {
+									let { text } = item;
+
+									if ( item.kind === 324 ) {
+										if ( item.name ) {
+											text = item.name.escapedText + text;
+										}
+
+										return {
+											kind: 'inline-tag',
+											tag: '@link',
+											text
+										};
+									}
+
+									return {
+										kind: 'text',
+										text
+									};
+								} )
+							);
+						}
 					}
-
-					// console.log( comment );
-
-					// const declaration = context.createDeclarationReflection(
-					// 	ReflectionKind.ObjectLiteral,
-					// 	undefined,
-					// 	// {
-					// 	// 	flags: 123,
-					// 	// 	escapedName: errorName,
-					// 	// 	declarations: [ errorNode ]
-					// 	//
-					// 	// },
-					// 	undefined
-					// );
-
-					// console.log( require( 'util' ).inspect( reflection, { showHidden: false, depth: 1, colors: true } ) );
-
-					// declaration.name = errorName;
-					// declaration.originalName = 'EventDeclaration';
-
-					// context.addChild( declaration );
 				} catch ( err ) {
 					console.log( err );
 				}

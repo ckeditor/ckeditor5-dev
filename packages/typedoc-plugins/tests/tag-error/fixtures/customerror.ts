@@ -4,9 +4,15 @@
  */
 
 /**
- * An error statement occurring before the "@module" definition.
+ * An error statement occurring before the `@module` definition. See {@link ~CustomError} or
+ * {@link module:fixtures/customerror~CustomError Custom label}. A text after.
  *
  * @error customerror-before-module
+ *
+ * @param {Number} exampleNumber Number description.
+ * @param {String|module:~CustomError} exampleString String `description`. Please, see {@link ~CustomError} or
+ * @param exampleObject {@link module:utils/object~Object} `description`. Please, see {@link ~CustomError} or
+ * {@link module:fixtures/customerror~CustomError Custom label}. A text after.
  */
 
 /**
