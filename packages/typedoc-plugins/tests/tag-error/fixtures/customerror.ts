@@ -40,6 +40,10 @@ import Error from './error';
 export default class CustomError extends Error {
 	public static create( errorName: string ): CustomError {
 		/**
+		 * @error customerror-inside-method-no-text
+		 */
+
+		/**
 		 * An error statement occurring inside a method.
 		 *
 		 * It contains a parameter.

@@ -60,6 +60,15 @@ describe( 'typedoc-plugins/tag-error', function() {
 		expect( errorDefinition.comment.blockTags ).to.lengthOf( 0 );
 	} );
 
+	it( 'should find an error tag without descriptions and parameters', () => {
+		const errorDefinition = conversionResult.children.find( doclet => doclet.name === 'customerror-inside-method-no-text' );
+
+		expect( errorDefinition ).to.not.be.undefined;
+		expect( errorDefinition.name ).to.equal( 'customerror-inside-method-no-text' );
+		expect( errorDefinition.originalName ).to.equal( 'EventDeclaration' );
+		expect( errorDefinition.comment ).to.have.property( 'summary', null );
+	} );
+
 	it( 'should find an error tag before the module definition (with {@link})', () => {
 		const errorDefinition = conversionResult.children.find( doclet => doclet.name === 'customerror-before-module-with-links' );
 

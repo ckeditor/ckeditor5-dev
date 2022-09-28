@@ -22,8 +22,6 @@ module.exports = {
 };
 
 function onEventCreateDeclaration() {
-	const processedModules = new Set();
-
 	return ( context, reflection ) => {
 		// Run only when processing a module.
 		if ( reflection.kind !== ReflectionKind.Module ) {
@@ -33,13 +31,6 @@ function onEventCreateDeclaration() {
 		const symbol = context.project.getSymbolFromReflection( reflection );
 		const node = symbol.declarations[ 0 ];
 		const sourceFile = node.getSourceFile();
-
-		// As we iterate over all its nodes, it is enough to process the same file only once.
-		if ( processedModules.has( sourceFile.resolvedPath ) ) {
-			return;
-		}
-
-		processedModules.add( sourceFile.resolvedPath );
 
 		// Find all `@error` occurrences.
 		const nodes = findDescendant( sourceFile, node => {
@@ -70,13 +61,7 @@ function onEventCreateDeclaration() {
 
 			for ( const childTag of parentNode.parent.getChildren() ) {
 				// No comments to process.
-				if ( !childTag.comment ) {
-					continue;
-				}
-
-				// Do not process the error description.
-				if ( parentNode.parent === childTag || parentNode.parent.comment.includes( childTag ) ) {
-					// TODO: Perhaps first if is not needed.
+				if ( !childTag.comment || !parentNode.parent.comment ) {
 					continue;
 				}
 
