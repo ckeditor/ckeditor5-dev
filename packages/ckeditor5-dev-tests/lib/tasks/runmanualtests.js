@@ -144,6 +144,8 @@ module.exports = function runManualTests( options ) {
 				await buildDllInRepository( path.dirname( pkgJsonPath ) );
 			}
 		}
+
+		console.log( '\n📍 DLL building complete!\n' );
 	}
 
 	/**
