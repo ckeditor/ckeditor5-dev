@@ -30,10 +30,18 @@ function onEventCreateDeclaration() {
 		}
 
 		const symbol = context.project.getSymbolFromReflection( reflection );
+
+		// When processing an empty file.
+		if ( !symbol ) {
+			return;
+		}
+
 		const node = symbol.declarations[ 0 ];
 
 		// Iterate over statements...
 		for ( const statement of node.statements ) {
+			// TODO: No idea how to cover this line.
+			// CKEditor 5 enters the if. However, the same code created as a fixture doesn't.
 			if ( !Array.isArray( statement.jsDoc ) ) {
 				continue;
 			}
@@ -50,12 +58,11 @@ function onEventCreateDeclaration() {
 				}
 
 				// When found, use its value as a module name.
-				if ( reflection.name !== moduleTag.comment ) {
-					reflection.originalName = reflection.name;
-					reflection.name = moduleTag.comment;
+				reflection.originalName = reflection.name;
+				reflection.name = moduleTag.comment;
 
-					return;
-				}
+				// Escape from the function. We achieved the goal.
+				return;
 			}
 		}
 	};
