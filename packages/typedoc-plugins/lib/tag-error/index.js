@@ -5,7 +5,7 @@
 
 'use strict';
 
-const { Converter, ReflectionKind, DeclarationReflection, Comment, CommentTag, TypeParameterReflection } = require( 'typedoc' );
+const { Converter, ReflectionKind, Comment, TypeParameterReflection } = require( 'typedoc' );
 const ts = require( 'typescript' );
 
 const ERROR_TAG_NAME = 'error';
@@ -49,59 +49,44 @@ function onEventCreateDeclaration() {
 			return true;
 		} );
 
-		// Map all definitions to typedoc declarations.
-		const errorDeclarations = nodes.map( errorNode => {
+		// Create error definitions from typedoc declarations.
+		for ( const errorNode of nodes ) {
 			const parentNode = errorNode.parent;
 			const errorName = parentNode.comment;
 
-			const errorDeclaration = new DeclarationReflection( errorName, ReflectionKind.ObjectLiteral, reflection );
-			const comment = new Comment( getCommentDisplayPart( parentNode.parent.comment ) );
-
-			errorDeclaration.typeParameters = [];
-
-			for ( const childTag of parentNode.parent.getChildren() ) {
-				// No comments to process.
-				if ( !childTag.comment || !parentNode.parent.comment ) {
-					continue;
-				}
-
-				// Do not process the `@error` tag again.
-				if ( childTag === parentNode ) {
-					continue;
-				}
-
-				const commentTag = getCommentDisplayPart( childTag.comment );
-
-				comment.blockTags.push(
-					new CommentTag( `@${ childTag.tagName.escapedText }`, commentTag )
+			const errorDeclaration = context
+				.withScope( reflection )
+				.createDeclarationReflection(
+					ReflectionKind.ObjectLiteral,
+					undefined,
+					undefined,
+					errorName
 				);
 
-				const paramName = childTag.name.escapedText;
-
-				// The assumptions here is that a parameter has a single type.
-				// let type = '*';
-				//
-				// if ( childTag.typeExpression && childTag.typeExpression.type.typeName ) {
-				// 	type = childTag.typeExpression.type.typeName.escapedText;
-				// }
-
-				const param = new TypeParameterReflection( paramName, undefined, undefined, errorDeclaration, undefined );
-
-				// TODO: This line below throws. Perhaps using TypeScript would help.
-				// param.type = new ParameterReflection( type, ReflectionKind.TypeLiteral, param );
-
-				errorDeclaration.typeParameters.push( param );
-			}
-
-			errorDeclaration.comment = comment;
+			errorDeclaration.comment = new Comment( getCommentDisplayPart( parentNode.parent.comment ) );
 			errorDeclaration.originalName = 'EventDeclaration';
 			errorDeclaration.kindString = 'Object literal';
+			errorDeclaration.typeParameters = parentNode.parent.getChildren()
+				.filter( childTag => {
+					if ( !childTag.comment || !parentNode.parent.comment ) {
+						return false;
+					}
 
-			return errorDeclaration;
-		} );
+					// Do not process the `@error` tag again.
+					if ( childTag === parentNode ) {
+						return false;
+					}
 
-		for ( const declaration of errorDeclarations ) {
-			context.addChild( declaration );
+					return true;
+				} )
+				.map( childTag => {
+					const typeParameter = new TypeParameterReflection( childTag.name.escapedText, undefined, undefined, errorDeclaration );
+
+					typeParameter.type = context.converter.convertType( context.withScope( typeParameter ) );
+					typeParameter.comment = new Comment( getCommentDisplayPart( childTag.comment ) );
+
+					return typeParameter;
+				} );
 		}
 	};
 }
@@ -130,11 +115,11 @@ function findDescendant( sourceFileOrNode, callback ) {
 /**
  * Transforms a node or array of node to an array of objects that follow
  * @param {String|Object|null} commentChildrenOrValue
- * @returns {null|Array.<require('typedoc').CommentDisplayPart> }
+ * @returns {Array.<require('typedoc').CommentDisplayPart> }
  */
 function getCommentDisplayPart( commentChildrenOrValue ) {
 	if ( !commentChildrenOrValue ) {
-		return null;
+		return [];
 	}
 
 	if ( typeof commentChildrenOrValue === 'string' ) {

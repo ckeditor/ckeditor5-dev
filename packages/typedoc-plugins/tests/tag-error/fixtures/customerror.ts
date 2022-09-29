@@ -50,7 +50,7 @@ export default class CustomError extends Error {
 		 *
 		 * @error customerror-inside-method
 		 *
-		 * @param {String} errorName Description of the error. Please, see {@link ~CustomError} or
+		 * @param {String} errorName Description of the error. Please, see {@link ~CustomError}.
 		 * @param {module:utils/object~Object} exampleModule Just a module.
 		 * @param exampleObject A name {@link module:utils/object~Object} `description`.
 		 */
