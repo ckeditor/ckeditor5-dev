@@ -45,11 +45,10 @@ function onEventEnd( context ) {
 
 			if ( !classReflection ) {
 				const [ source ] = reflection.sources;
-				const location = source.fullFileName + '#' + source.line;
 
 				context.logger.error(
-					`Unable to find a class for the "${ eventName }" event, defined in ${ location }\n` +
-					'Make sure that the module, in which this event is defined, has either the class that fires this event using ' +
+					`Unable to find a class for the "${ eventName }" event, defined in ${ source.fileName } (line: ${ source.line }).\n` +
+					'Make sure that the module, in which this event is defined, contains either the class that fires this event using\n' +
 					`the "@fires ${ eventName }" tag, or the module contains at least one default class.`
 				);
 
@@ -121,6 +120,10 @@ function findClassForEvent( eventName, reflection ) {
 function findReflection( reflection, callback ) {
 	if ( !reflection.parent ) {
 		return null;
+	}
+
+	if ( !reflection.parent.children ) {
+		return findReflection( reflection.parent.parent, callback );
 	}
 
 	const found = reflection.parent.children.find( callback );
