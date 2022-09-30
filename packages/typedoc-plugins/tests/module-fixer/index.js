@@ -9,7 +9,7 @@ const TypeDoc = require( 'typedoc' );
 
 const utils = require( '../utils' );
 
-describe( 'module-fixer', function() {
+describe( 'typedoc-plugins/module-fixer', function() {
 	this.timeout( 10 * 1000 );
 
 	let conversionResult;

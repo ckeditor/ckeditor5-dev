@@ -3,11 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-/**
- * @module fixtures/customerror
- */
-
-import Error from './error';
-
-export default class CustomError extends Error {
+export default class FooBar {
+	constructor( param: string ) {
+	}
 }
