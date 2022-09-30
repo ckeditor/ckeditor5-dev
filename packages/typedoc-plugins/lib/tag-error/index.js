@@ -5,176 +5,88 @@
 
 'use strict';
 
-const { Converter, ReflectionKind, DeclarationReflection, Comment, CommentTag } = require( 'typedoc' );
+const { Converter, ReflectionKind, Comment, TypeParameterReflection } = require( 'typedoc' );
 const ts = require( 'typescript' );
 
 const ERROR_TAG_NAME = 'error';
 
 /**
- * The `typedoc-plugin-module-fixer` reads the module name specified in the `@module` tag name.
+ * The `typedoc-plugin-tag-error` collects error definitions from the `@error` tag.
  *
- *      @module package/file
- *
- * For the example specified above, a name of the parsed module should be equal to "package/file".
- *
- * It may happen that imports statement are specified above the "@module" block code.
- * In such a case, built-in plugin in `typedoc` does not read its value properly.
+ * TODO: We do not support collecting types of `@param`.
  */
 module.exports = {
 	load( app ) {
-		const processedModules = new Set();
-
-		app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration( processedModules ) );
+		app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
 	}
 };
 
-function onEventCreateDeclaration( processedModules ) {
+function onEventCreateDeclaration() {
 	return ( context, reflection ) => {
-		try {
-			if ( reflection.kind !== ReflectionKind.Module ) {
-				return;
+		// Run only when processing a module.
+		if ( reflection.kind !== ReflectionKind.Module ) {
+			return;
+		}
+
+		const symbol = context.project.getSymbolFromReflection( reflection );
+		const node = symbol.declarations[ 0 ];
+		const sourceFile = node.getSourceFile();
+
+		// Find all `@error` occurrences.
+		const nodes = findDescendant( sourceFile, node => {
+			if ( node.kind !== ts.SyntaxKind.Identifier ) {
+				return false;
 			}
 
-			const symbol = context.project.getSymbolFromReflection( reflection );
-			const node = symbol.declarations[ 0 ];
-			const sourceFile = node.getSourceFile();
-
-			// Process the same file only once.
-			if ( processedModules.has( sourceFile.resolvedPath ) ) {
-				return;
+			if ( node.escapedText !== ERROR_TAG_NAME ) {
+				return false;
 			}
 
-			processedModules.add( sourceFile.resolvedPath );
+			if ( !node.parent.comment ) {
+				return false;
+			}
 
-			const nodes = findDescendant( sourceFile, node => {
-				if ( node.kind !== ts.SyntaxKind.Identifier ) {
-					return false;
-				}
+			return true;
+		} );
 
-				if ( node.escapedText !== ERROR_TAG_NAME ) {
-					return false;
-				}
+		// Create error definitions from typedoc declarations.
+		for ( const errorNode of nodes ) {
+			const parentNode = errorNode.parent;
+			const errorName = parentNode.comment;
 
-				if ( !node.parent.comment ) {
-					return false;
-				}
+			const errorDeclaration = context
+				.withScope( reflection )
+				.createDeclarationReflection(
+					ReflectionKind.ObjectLiteral,
+					undefined,
+					undefined,
+					errorName
+				);
 
-				return true;
-			} );
-
-			for ( const errorNode of nodes ) {
-				const parentNode = errorNode.parent;
-				const errorName = parentNode.comment;
-
-				try {
-					const errorDeclaration = new DeclarationReflection( errorName, ReflectionKind.ObjectLiteral, reflection );
-					context.addChild( errorDeclaration );
-
-					let commentSummary;
-					const commentSummaryNodes = [];
-
-					if ( typeof parentNode.parent.comment === 'string' ) {
-						commentSummaryNodes.push( parentNode.parent );
-						commentSummary = [
-							{
-								kind: 'text',
-								text: parentNode.parent.comment
-							}
-						];
-					} else {
-						commentSummaryNodes.push( ...parentNode.parent.comment );
-						commentSummary = parentNode.parent.comment.map( item => {
-							let { text } = item;
-
-							if ( item.kind === 324 ) {
-								if ( item.name ) {
-									text = item.name.escapedText + text;
-								}
-
-								return {
-									kind: 'inline-tag',
-									tag: '@link',
-									text
-								};
-							}
-
-							return {
-								kind: 'text',
-								text
-							};
-						} );
+			errorDeclaration.comment = new Comment( getCommentDisplayPart( parentNode.parent.comment ) );
+			errorDeclaration.originalName = 'EventDeclaration';
+			errorDeclaration.kindString = 'Object literal';
+			errorDeclaration.typeParameters = parentNode.parent.getChildren()
+				.filter( childTag => {
+					if ( !childTag.comment || !parentNode.parent.comment ) {
+						return false;
 					}
 
-					const comment = new Comment( commentSummary );
-
-					errorDeclaration.originalName = 'EventDeclaration';
-					errorDeclaration.kindString = 'Object literal';
-					errorDeclaration.comment = comment;
-
-					for ( const childTag of parentNode.parent.getChildren() ) {
-						// Do not process the `@error` tag again.
-						if ( childTag === parentNode ) {
-							continue;
-						}
-
-						// Do not process the error description.
-						if ( commentSummaryNodes.includes( childTag ) ) {
-							continue;
-						}
-
-						if ( !childTag.comment ) {
-							continue;
-						}
-
-						const errorParamTag = [];
-						let commentTag;
-
-						if ( typeof childTag.comment === 'string' ) {
-							commentTag = new CommentTag(
-								`@${ childTag.tagName.escapedText }`,
-								[
-									{
-										kind: 'text',
-										text: childTag.comment
-									}
-								]
-							);
-						} else {
-							commentTag = new CommentTag(
-								`@${ childTag.tagName.escapedText }`,
-								childTag.comment.map( item => {
-									let { text } = item;
-
-									if ( item.kind === 324 ) {
-										if ( item.name ) {
-											text = item.name.escapedText + text;
-										}
-
-										return {
-											kind: 'inline-tag',
-											tag: '@link',
-											text
-										};
-									}
-
-									return {
-										kind: 'text',
-										text
-									};
-								} )
-							);
-						}
+					// Do not process the `@error` tag again.
+					if ( childTag === parentNode ) {
+						return false;
 					}
-				} catch ( err ) {
-					console.log( err );
-				}
-			}
 
-			// if ( processedModules.size === 1 ) {
-			// 	console.log( require( 'util' ).inspect( context, { showHidden: false, depth: 1, colors: true } ) );
-			// }
-		} catch ( err ) {
-			console.log( err );
+					return true;
+				} )
+				.map( childTag => {
+					const typeParameter = new TypeParameterReflection( childTag.name.escapedText, undefined, undefined, errorDeclaration );
+
+					typeParameter.type = context.converter.convertType( context.withScope( typeParameter ) );
+					typeParameter.comment = new Comment( getCommentDisplayPart( childTag.comment ) );
+
+					return typeParameter;
+				} );
 		}
 	};
 }
@@ -198,4 +110,49 @@ function findDescendant( sourceFileOrNode, callback ) {
 	}
 
 	return output;
+}
+
+/**
+ * Transforms a node or array of node to an array of objects that follow
+ * @param {String|Object|null} commentChildrenOrValue
+ * @returns {Array.<require('typedoc').CommentDisplayPart> }
+ */
+function getCommentDisplayPart( commentChildrenOrValue ) {
+	if ( !commentChildrenOrValue ) {
+		return [];
+	}
+
+	if ( typeof commentChildrenOrValue === 'string' ) {
+		return [
+			{
+				kind: 'text',
+				text: commentChildrenOrValue
+			}
+		];
+	}
+
+	return commentChildrenOrValue
+		.map( item => {
+			let { text } = item;
+
+			// An inline tag inside a description.
+			if ( item.kind === 324 ) {
+				// A reference, e.g. "module:".
+				if ( item.name ) {
+					text = item.name.escapedText + text;
+				}
+
+				return {
+					text,
+					kind: 'inline-tag',
+					tag: '@link'
+				};
+			}
+
+			return {
+				text,
+				kind: 'text'
+			};
+		} )
+		.filter( ( { text } ) => text.length );
 }
