@@ -40,13 +40,26 @@ function onEventEnd( context ) {
 			// tag name. Example: for the `@eventName foo`, the event name would be `foo`.
 			const eventName = reflection.comment.getTag( '@eventName' ).content[ 0 ].text;
 
-			// Then, try to find a parent reflection to properly associate the event in the hierarchy.
-			const parent = findParentForEvent( eventName, reflection );
+			// Then, try to find a parent class to properly associate the event in the hierarchy.
+			const classReflection = findClassForEvent( eventName, reflection );
 
-			// Create the new reflection object for the event, but take into account the new scope. It will cause the newly created event
-			// reflection to be automatically associated as a child of its parent.
+			if ( !classReflection ) {
+				const [ source ] = reflection.sources;
+				const location = source.fullFileName + '#' + source.line;
+
+				context.logger.error(
+					`Unable to find a class for the "${ eventName }" event, defined in ${ location }\n` +
+					'Make sure that the module, in which this event is defined, has either the class that fires this event using ' +
+					`the "@fires ${ eventName }" tag, or the module contains at least one default class.`
+				);
+
+				continue;
+			}
+
+			// Create a new reflection object for the event, but take into account the found class as the new scope. It will cause the newly
+			// created event reflection to be automatically associated as a child of this class.
 			const eventReflection = context
-				.withScope( parent )
+				.withScope( classReflection )
 				.createDeclarationReflection(
 					ReflectionKind.ObjectLiteral,
 					undefined,
@@ -72,64 +85,89 @@ function onEventEnd( context ) {
 				eventReflection.comment = new Comment( Comment.cloneDisplayParts( reflection.comment.summary ) );
 			}
 
-			console.log( require( 'util' ).inspect( eventReflection, { showHidden: false, depth: 2, colors: true } ) );
+			// Copy the source location as it is the same as the location of the reflection containing the event.
+			eventReflection.sources = [ ...reflection.sources ];
 		}
 	} catch ( err ) {
-		console.log( err );
+		context.logger.error( err );
 	}
 }
 
 /**
- * Tries to find the best parent for the event.
+ * Tries to find the best parent class for the event. The algorithm is as follows:
  *
- * The algorithm is as follows:
+ * (1) First, it traverses the ancestors of the reflection containing the specified event and searches for a class that fires this event.
+ * (2) Otherwise, it tries to find the first default class within the same module.
  *
- * (1) First, it searches for a reflection on the same nest level as the reflection containing the event. The searched reflection must
- * contain the `@fires` tag with the same name as the event.
- * (2) If no such reflection is found, it tries to find the default class.
- * (3) Otherwise, it simply returns the parent of the reflection containing the event.
+ * It returns `null` if no matching class is found.
  *
- * @param {String} eventName The event name to be searched in the refelction parent.
+ * @param {String} eventName The event name to be searched in the reflection parent.
  * @param {require('typedoc').Reflection} reflection The reflection that contains the event name.
- * @returns {require('typedoc').Reflection}
+ * @returns {require('typedoc').Reflection|null}
  */
-function findParentForEvent( eventName, reflection ) {
-	// todo: probbly it needs a better algorithm
-	// 1. collect all children from parent.parent.parent... hierarchy
-	// 2. find the first one that fires the event
-	// 3. otherwise, find the first default class
-	// 4. otherwise, return just the reflection.parent
-	if ( reflection.parent.children ) {
-		let parentForEvent = reflection.parent.children.find( child => {
-			if ( !child.comment ) {
-				return false;
-			}
+function findClassForEvent( eventName, reflection ) {
+	return findReflection( reflection, isClassThatFiresEvent( eventName ) ) ||
+		findReflection( reflection, isDefaultClass );
+}
 
-			return child.comment
-				.getTags( '@fires' )
-				.some( tag => tag.content[ 0 ].text === eventName );
-		} );
-
-		if ( parentForEvent ) {
-			return parentForEvent;
-		}
-
-		parentForEvent = reflection.parent.children.find( child => {
-			if ( child.kindString !== 'Class' ) {
-				return false;
-			}
-
-			if ( child.originalName !== 'default' ) {
-				return false;
-			}
-
-			return true;
-		} );
-
-		if ( parentForEvent ) {
-			return parentForEvent;
-		}
+/**
+ * Recursively looks for a matching reflection from its ancestors. It not only checks the ancestors, but also all their siblings (children
+ * belonging to the same parent).
+ *
+ * @param {require('typedoc').Reflection} reflection The reflection that is the search starting point.
+ * @param {Function} callback The function that gets each reflection and decides if it meets the conditions.
+ * @returns {require('typedoc').Reflection|null}
+ */
+function findReflection( reflection, callback ) {
+	if ( !reflection.parent ) {
+		return null;
 	}
 
-	return reflection.parent;
+	const found = reflection.parent.children.find( callback );
+
+	if ( found ) {
+		return found;
+	}
+
+	return findReflection( reflection.parent, callback );
+}
+
+/**
+ * Returns a function that checks if the reflection is a class that fires the specified event.
+ *
+ * @param {String} eventName The event name to be searched in the reflection parent.
+ * @returns {Function}
+ */
+function isClassThatFiresEvent( eventName ) {
+	return reflection => {
+		if ( reflection.kindString !== 'Class' ) {
+			return false;
+		}
+
+		if ( !reflection.comment ) {
+			return false;
+		}
+
+		return reflection.comment
+			.getTags( '@fires' )
+			.some( tag => tag.content[ 0 ].text === eventName );
+	};
+}
+
+/**
+ * Checks if the reflection is a default class.
+ *
+ * @param {require('typedoc').Reflection} reflection The reflection to be checked.
+ * @returns {Boolean}
+ */
+function isDefaultClass( reflection ) {
+	if ( reflection.kindString !== 'Class' ) {
+		return false;
+	}
+
+	if ( reflection.originalName !== 'default' ) {
+		return false;
+	}
+
+	return true;
 }
