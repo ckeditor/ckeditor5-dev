@@ -8,11 +8,34 @@
 const { Converter, ReflectionKind, TypeParameterReflection, Comment } = require( 'typedoc' );
 
 /**
- * The `typedoc-plugin-tag-event` collects event definitions from the `@eventName` tag.
+ * The `typedoc-plugin-tag-event` collects event definitions from the `@eventName` tag and assigns them as the class children.
  *
- * The `@event` tag, known from the JSDoc, has a special meaning in the TypeDoc, and it was difficult to get it to work as we expect. Even
- * setting it to be treated as a block tag (instead of a modifier, by default) didn't work. This is why we introduced support for the
- * `@eventName` tag, which now replaces the old `@event`.
+ * We are not using the `@event` tag, known from the JSDoc specification, because it has a special meaning in the TypeDoc, and it would be
+ * difficult to get it to work as we expect. This is why we have introduced a support for the custom `@eventName` tag, which now replaces
+ * the old `@event` tag.
+ *
+ * To correctly define an event, it must be associated with the exported type that describes that event.
+ *
+ * Example:
+ *
+ * ```ts
+ * 		/**
+ * 		 * An event associated with exported type.
+ * 		 *
+ * 		 * @eventName foo-event
+ * 		 * @param {String} p1 Description for first param.
+ * 		 * @param {Number} p2 Description for second param.
+ * 		 * @param {Boolean} p3 Description for third param.
+ * 		 * /
+ * 		export type FooEvent = {
+ * 			name: string;
+ * 			args: [ {
+ * 				p1: string;
+ * 				p2: number;
+ * 				p3: boolean;
+ * 			} ];
+ * 		};
+ * ```
  *
  * TODO: We do not support collecting types of `@param` tags associated with the `@eventName`.
  */
@@ -25,51 +48,53 @@ module.exports = {
 };
 
 function onEventEnd( context ) {
-	try {
-		// Get all resolved reflections when the project has been converted.
-		const reflections = context.project.getReflectionsByKind( ReflectionKind.All );
+	// Get all resolved object literal reflections when the project has been converted.
+	const reflections = context.project.getReflectionsByKind( ReflectionKind.All );
 
-		// Then, for each reflection...
-		for ( const reflection of reflections ) {
-			// ...skip it, if it does not contain the `@eventName` tag.
-			if ( !reflection.comment || !reflection.comment.getTag( '@eventName' ) ) {
-				continue;
-			}
+	// Then, for each reflection...
+	for ( const reflection of reflections ) {
+		// ...skip it, if it does not contain the `@eventName` tag.
+		if ( !reflection.comment || !reflection.comment.getTag( '@eventName' ) ) {
+			continue;
+		}
 
-			// Otherwise, if there is the `@eventName` tag found in a comment, extract the event name, which is the string just after the
-			// tag name. Example: for the `@eventName foo`, the event name would be `foo`.
-			const eventName = reflection.comment.getTag( '@eventName' ).content[ 0 ].text;
+		// Otherwise, if there is the `@eventName` tag found in a comment, extract the event name, which is the string just after the
+		// tag name. Example: for the `@eventName foo`, the event name would be `foo`.
+		const eventName = reflection.comment.getTag( '@eventName' ).content[ 0 ].text;
 
-			// Then, try to find a parent class to properly associate the event in the hierarchy.
-			const classReflection = findClassForEvent( eventName, reflection );
+		// Then, try to find a parent class to properly associate the event in the hierarchy.
+		const classReflection = findClassForEvent( eventName, reflection );
 
-			if ( !classReflection ) {
-				const [ source ] = reflection.sources;
+		if ( !classReflection ) {
+			const [ source ] = reflection.sources;
 
-				context.logger.error(
-					`Unable to find a class for the "${ eventName }" event, defined in ${ source.fileName } (line: ${ source.line }).\n` +
+			context.logger.error(
+				`Unable to find a class for the "${ eventName }" event, defined in ${ source.fileName } (line: ${ source.line }).\n` +
 					'Make sure that the module, in which this event is defined, contains either the class that fires this event using\n' +
 					`the "@fires ${ eventName }" tag, or the module contains at least one default class.`
-				);
+			);
 
-				continue;
-			}
+			continue;
+		}
 
-			// Create a new reflection object for the event, but take into account the found class as the new scope. It will cause the newly
-			// created event reflection to be automatically associated as a child of this class.
-			const eventReflection = context
-				.withScope( classReflection )
-				.createDeclarationReflection(
-					ReflectionKind.ObjectLiteral,
-					undefined,
-					undefined,
-					`event:${ eventName }`
-				);
+		// Create a new reflection object for the event, but take into account the found class as the new scope. It will cause the newly
+		// created event reflection to be automatically associated as a child of this class.
+		const eventReflection = context
+			.withScope( classReflection )
+			.createDeclarationReflection(
+				ReflectionKind.ObjectLiteral,
+				undefined,
+				undefined,
+				`event:${ eventName }`
+			);
 
-			eventReflection.kindString = 'Event';
+		eventReflection.kindString = 'Event';
 
+		const paramTags = reflection.comment.getTags( '@param' );
+
+		if ( paramTags.length ) {
 			// Map each found `@param` tag to the type parameter reflection.
-			eventReflection.typeParameters = reflection.comment.getTags( '@param' ).map( tag => {
+			eventReflection.typeParameters = paramTags.map( tag => {
 				const param = new TypeParameterReflection( tag.name, undefined, undefined, eventReflection );
 
 				param.type = context.converter.convertType( context.withScope( param ) );
@@ -77,18 +102,14 @@ function onEventEnd( context ) {
 
 				return param;
 			} );
-
-			// Copy comment summary, if it exists. The `blockTags` property from the comment is not needed, as they have been already mapped
-			// to the type parameters.
-			if ( reflection.comment.summary ) {
-				eventReflection.comment = new Comment( Comment.cloneDisplayParts( reflection.comment.summary ) );
-			}
-
-			// Copy the source location as it is the same as the location of the reflection containing the event.
-			eventReflection.sources = [ ...reflection.sources ];
 		}
-	} catch ( err ) {
-		context.logger.error( err );
+
+		// Copy comment summary. The `blockTags` property from the comment is not needed, as it has been already mapped to the type
+		// parameters.
+		eventReflection.comment = new Comment( Comment.cloneDisplayParts( reflection.comment.summary ) );
+
+		// Copy the source location as it is the same as the location of the reflection containing the event.
+		eventReflection.sources = [ ...reflection.sources ];
 	}
 }
 

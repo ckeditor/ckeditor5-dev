@@ -18,13 +18,9 @@ export default class CustomExampleClass extends ExampleClass {
 		 */
 
 		/**
-		 * An event occurring inside a method.
+		 * An event not related to a type in the source code. This kind of event is silently ignored by TypeDoc.
 		 *
-		 * @eventName event-foo-with-params-inside-method
-		 *
-		 * @param {String} p1 A description for first param.
-		 * @param {Number} p2 A description for second param.
-		 * @param {Boolean} p3 A description for third param.
+		 * @eventName event-foo-not-associated-to-type-inside-method
 		 */
 		return new ExampleClass( value );
 	}
@@ -32,16 +28,19 @@ export default class CustomExampleClass extends ExampleClass {
 
 export function create( value: string ): ExampleClass {
 	/**
-	 * An event occurring inside a function.
+	 * An event not related to a type in the source code. This kind of event is silently ignored by TypeDoc.
 	 *
-	 * @eventName event-foo-with-params-inside-function
-	 *
-	 * @param {String} p1 A description for first param.
-	 * @param {Number} p2 A description for second param.
-	 * @param {Boolean} p3 A description for third param.
+	 * @eventName event-foo-not-associated-to-type-inside-function
 	 */
 	return new ExampleClass( value );
 }
+
+/**
+ * @eventName event-foo-associated-with-type-no-text
+ */
+export type FooEventNoText = {
+	name: string;
+};
 
 /**
  * An event associated with the type.
@@ -49,22 +48,22 @@ export function create( value: string ): ExampleClass {
  * @eventName event-foo-associated-with-type
  */
 export type FooEvent = {
-	name: 'foo';
+	name: string;
 };
 
 /**
- * An event associated with the type.
+ * An event associated with the type. Event with three params.
  *
- * Event with three params.
+ * See {@link ~CustomExampleClass} or {@link module:fixtures/customexampleclass~CustomExampleClass Custom label}. A text after.
  *
- * @eventName event-foo-with-params-associated-with-type
+ * @eventName event-foo-associated-with-type-with-params
  *
- * @param {String} p1 A description for first param.
- * @param {Number} p2 A description for second param.
- * @param {Boolean} p3 A description for third param.
+ * @param {String} p1 Description for first param.
+ * @param {module:utils/object~Object} p2 Description for second param.
+ * @param p3 Complex {@link module:utils/object~Object description} for `third param`.
  */
 export type FooEventWithParams = {
-	name: 'foo';
+	name: string;
 	args: [ {
 		p1: string;
 		p2: number;
