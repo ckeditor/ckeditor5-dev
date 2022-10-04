@@ -145,7 +145,7 @@ module.exports = function runManualTests( options ) {
 			}
 		}
 
-		console.log( '\n📍 DLL building complete!\n' );
+		console.log( '\n📍 DLL building complete.\n' );
 	}
 
 	/**
