@@ -12,13 +12,13 @@ import ExampleClass from './exampleclass';
 export default class CustomExampleClass extends ExampleClass {
 	public static create( value: string ): ExampleClass {
 		/**
-		 * An event not related to anything in the source code. This kind of event is silently ignored by TypeDoc.
+		 * An event not associated to anything in the source code.
 		 *
 		 * @eventName event-foo-not-associated-inside-method
 		 */
 
 		/**
-		 * An event not related to a type in the source code. This kind of event is silently ignored by TypeDoc.
+		 * An event not associated to a type in the source code.
 		 *
 		 * @eventName event-foo-not-associated-to-type-inside-method
 		 */
@@ -26,9 +26,11 @@ export default class CustomExampleClass extends ExampleClass {
 	}
 }
 
+export class CustomExampleNonDefaultClass extends ExampleClass {}
+
 export function create( value: string ): ExampleClass {
 	/**
-	 * An event not related to a type in the source code. This kind of event is silently ignored by TypeDoc.
+	 * An event not associated to a type in the source code.
 	 *
 	 * @eventName event-foo-not-associated-to-type-inside-function
 	 */
@@ -36,18 +38,25 @@ export function create( value: string ): ExampleClass {
 }
 
 /**
- * @eventName event-foo-associated-with-type-no-text
+ * Normal type export.
  */
-export type FooEventNoText = {
+export type ExampleType = {
+	name: string;
+};
+
+/**
+ * @eventName event-foo-no-text
+ */
+export type EventFooNoText = {
 	name: string;
 };
 
 /**
  * An event associated with the type.
  *
- * @eventName event-foo-associated-with-type
+ * @eventName event-foo
  */
-export type FooEvent = {
+export type EventFoo = {
 	name: string;
 };
 
@@ -56,13 +65,13 @@ export type FooEvent = {
  *
  * See {@link ~CustomExampleClass} or {@link module:fixtures/customexampleclass~CustomExampleClass Custom label}. A text after.
  *
- * @eventName event-foo-associated-with-type-with-params
+ * @eventName event-foo-with-params
  *
  * @param {String} p1 Description for first param.
  * @param {module:utils/object~Object} p2 Description for second param.
  * @param p3 Complex {@link module:utils/object~Object description} for `third param`.
  */
-export type FooEventWithParams = {
+export type EventFooWithParams = {
 	name: string;
 	args: [ {
 		p1: string;
@@ -72,7 +81,7 @@ export type FooEventWithParams = {
 };
 
 /**
- * An event not related to anything in the source code. This kind of event is silently ignored by TypeDoc.
+ * An event not associated to anything in the source code.
  *
  * @eventName event-foo-not-associated-outside
  */

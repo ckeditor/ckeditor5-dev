@@ -57,9 +57,9 @@ describe( 'typedoc-plugins/tag-event', function() {
 			.filter( children => children.name.startsWith( 'event:' ) );
 
 		// There should be 3 correctly defined events:
-		// 1. event-foo-associated-with-type-no-text
-		// 2. event-foo-associated-with-type
-		// 3. event-foo-associated-with-type-with-params
+		// 1. event-foo
+		// 2. event-foo-no-text
+		// 3. event-foo-with-params
 		// 4. event-foo-in-class-with-fires
 		expect( eventDefinitions ).to.lengthOf( 4 );
 	} );
@@ -69,10 +69,10 @@ describe( 'typedoc-plugins/tag-event', function() {
 		expect( typeDoc.logger.error.firstCall.args[ 0 ] ).includes( 'Unable to find a class for the "event-foo-no-class" event' );
 	} );
 
-	it( 'should find event that is fired by a non-default class', () => {
+	it( 'should first take into account the class that fires the event instead of the default class, if both exist in the module', () => {
 		const classDefinition = conversionResult.children
 			.find( entry => entry.name === 'customexampleclassfires' ).children
-			.find( entry => entry.kindString === 'Class' );
+			.find( entry => entry.kindString === 'Class' && entry.name === 'CustomExampleClassFires' );
 
 		const eventDefinition = classDefinition.children
 			.find( doclet => doclet.name === 'event:event-foo-in-class-with-fires' );
@@ -86,7 +86,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 		before( () => {
 			classDefinition = conversionResult.children
 				.find( entry => entry.name === 'customexampleclass' ).children
-				.find( entry => entry.kindString === 'Class' );
+				.find( entry => entry.kindString === 'Class' && entry.name === 'default' );
 		} );
 
 		it( 'should find all event tags within the class', () => {
@@ -97,12 +97,11 @@ describe( 'typedoc-plugins/tag-event', function() {
 		} );
 
 		it( 'should find an event tag without description and parameters', () => {
-			const eventDefinition = classDefinition.children
-				.find( doclet => doclet.name === 'event:event-foo-associated-with-type-no-text' );
+			const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-no-text' );
 
 			expect( eventDefinition ).to.not.be.undefined;
-			expect( eventDefinition.name ).to.equal( 'event:event-foo-associated-with-type-no-text' );
-			expect( eventDefinition.originalName ).to.equal( 'event:event-foo-associated-with-type-no-text' );
+			expect( eventDefinition.name ).to.equal( 'event:event-foo-no-text' );
+			expect( eventDefinition.originalName ).to.equal( 'event:event-foo-no-text' );
 			expect( eventDefinition.kindString ).to.equal( 'Event' );
 
 			expect( eventDefinition.comment ).to.have.property( 'summary' );
@@ -128,12 +127,11 @@ describe( 'typedoc-plugins/tag-event', function() {
 		} );
 
 		it( 'should find an event tag with description and without parameters', () => {
-			const eventDefinition = classDefinition.children
-				.find( doclet => doclet.name === 'event:event-foo-associated-with-type' );
+			const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo' );
 
 			expect( eventDefinition ).to.not.be.undefined;
-			expect( eventDefinition.name ).to.equal( 'event:event-foo-associated-with-type' );
-			expect( eventDefinition.originalName ).to.equal( 'event:event-foo-associated-with-type' );
+			expect( eventDefinition.name ).to.equal( 'event:event-foo' );
+			expect( eventDefinition.originalName ).to.equal( 'event:event-foo' );
 			expect( eventDefinition.kindString ).to.equal( 'Event' );
 
 			expect( eventDefinition.comment ).to.have.property( 'summary' );
@@ -153,12 +151,11 @@ describe( 'typedoc-plugins/tag-event', function() {
 		} );
 
 		it( 'should find an event tag with description and parameters', () => {
-			const eventDefinition = classDefinition.children
-				.find( doclet => doclet.name === 'event:event-foo-associated-with-type-with-params' );
+			const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-with-params' );
 
 			expect( eventDefinition ).to.not.be.undefined;
-			expect( eventDefinition.name ).to.equal( 'event:event-foo-associated-with-type-with-params' );
-			expect( eventDefinition.originalName ).to.equal( 'event:event-foo-associated-with-type-with-params' );
+			expect( eventDefinition.name ).to.equal( 'event:event-foo-with-params' );
+			expect( eventDefinition.originalName ).to.equal( 'event:event-foo-with-params' );
 			expect( eventDefinition.kindString ).to.equal( 'Event' );
 
 			expect( eventDefinition.comment ).to.have.property( 'summary' );

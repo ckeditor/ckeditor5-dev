@@ -10,6 +10,6 @@
 /**
  * @eventName event-foo-no-class
  */
-export type FooEventNoText = {
+export type EventFooNoText = {
 	name: string;
 };

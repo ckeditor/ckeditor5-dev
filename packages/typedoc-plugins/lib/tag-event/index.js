@@ -48,10 +48,11 @@ module.exports = {
 };
 
 function onEventEnd( context ) {
-	// Get all resolved object literal reflections when the project has been converted.
-	const reflections = context.project.getReflectionsByKind( ReflectionKind.All );
+	// Get all resolved reflections that could be an event.
+	const eventKind = ReflectionKind.ObjectLiteral | ReflectionKind.TypeAlias;
+	const reflections = context.project.getReflectionsByKind( eventKind );
 
-	// Then, for each reflection...
+	// Then, for each potential event reflection...
 	for ( const reflection of reflections ) {
 		// ...skip it, if it does not contain the `@eventName` tag.
 		if ( !reflection.comment || !reflection.comment.getTag( '@eventName' ) ) {
@@ -70,8 +71,8 @@ function onEventEnd( context ) {
 
 			context.logger.error(
 				`Unable to find a class for the "${ eventName }" event, defined in ${ source.fileName } (line: ${ source.line }).\n` +
-					'Make sure that the module, in which this event is defined, contains either the class that fires this event using\n' +
-					`the "@fires ${ eventName }" tag, or the module contains at least one default class.`
+				'Make sure that the module, in which this event is defined, contains either the class that fires this event using\n' +
+				`the "@fires ${ eventName }" tag, or the module contains at least one default class.`
 			);
 
 			continue;
@@ -141,10 +142,6 @@ function findClassForEvent( eventName, reflection ) {
 function findReflection( reflection, callback ) {
 	if ( !reflection.parent ) {
 		return null;
-	}
-
-	if ( !reflection.parent.children ) {
-		return findReflection( reflection.parent.parent, callback );
 	}
 
 	const found = reflection.parent.children.find( callback );

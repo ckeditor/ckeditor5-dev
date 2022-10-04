@@ -10,13 +10,20 @@
 import ExampleClass from './exampleclass';
 
 /**
+ * Default class not related to an event.
+ */
+export default class CustomDefaultExampleClass extends ExampleClass {}
+
+/**
+ * Non-default class that fires an event.
+ *
  * @fires event-foo-in-class-with-fires
  */
-export class CustomExampleClass extends ExampleClass {}
+export class CustomExampleClassFires extends ExampleClass {}
 
 /**
  * @eventName event-foo-in-class-with-fires
  */
-export type FooEventNoText = {
+export type EventFooNoText = {
 	name: string;
 };
