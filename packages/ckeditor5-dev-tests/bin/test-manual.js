@@ -19,10 +19,6 @@ const options = tests.parseArguments( process.argv.slice( 2 ) );
 // without rebuilding it. See: https://github.com/ckeditor/ckeditor5/issues/10982.
 options.disableWatch = process.argv.includes( '--disable-watch' );
 
-if ( options.files.length === 0 ) {
-	options.files = [ '*', 'ckeditor5' ];
-}
-
 // "Lark" is the default theme for tests.
 options.themePath = path.resolve( cwd, 'packages', 'ckeditor5-theme-lark', 'theme', 'theme.css' );
 
