@@ -42,7 +42,8 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
 module.exports = function runManualTests( options ) {
 	const log = logger();
 	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
-	const files = ( options.files && options.files.length ) ? options.files : [ '*' ];
+	const isFilesFlagProvided = ( options.files && options.files.length );
+	const files = isFilesFlagProvided ? options.files : [ '*', 'ckeditor5' ];
 	const sourceFiles = files
 		.flatMap( file => transformFileOptionToTestGlob( file, true ) )
 		.reduce( ( result, manualTestPattern ) => {
@@ -60,7 +61,7 @@ module.exports = function runManualTests( options ) {
 	const language = options.language;
 	const additionalLanguages = options.additionalLanguages;
 	const silent = options.silent || false;
-	const disableWatch = options.disableWatch || false;
+	const disableWatch = options.disableWatch || !isFilesFlagProvided;
 	let socketServer;
 
 	function onTestCompilationStatus( status ) {

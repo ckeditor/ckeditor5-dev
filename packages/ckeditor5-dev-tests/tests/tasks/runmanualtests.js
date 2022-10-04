@@ -1093,5 +1093,80 @@ describe( 'runManualTests', () => {
 					);
 				} );
 		} );
+
+		it( 'should set disableWatch to true if files flag is not provided', () => {
+			spies.inquirer.prompt.resolves( { confirm: true } );
+			spies.fs.readFileSync.returns( JSON.stringify( {
+				name: 'ckeditor5-example-package',
+				scripts: {
+					'dll:build': 'node ./scripts/build-dll'
+				}
+			} ) );
+			spies.transformFileOptionToTestGlob.returns( [
+				'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+				'workspace/packages/ckeditor-*/tests/**/manual/**/*.js',
+				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
+			] );
+
+			return runManualTests( defaultOptions )
+				.then( () => {
+					sinon.assert.calledWith( spies.scriptCompiler.firstCall, sinon.match.has( "disableWatch", true ) );
+				} );
+		} );
+
+		it( 'should set disableWatch to false if files flag is provided', () => {
+			spies.inquirer.prompt.resolves( { confirm: true } );
+			spies.fs.readFileSync.returns( JSON.stringify( {
+				name: 'ckeditor5-example-package',
+				scripts: {
+					'dll:build': 'node ./scripts/build-dll'
+				}
+			} ) );
+			spies.transformFileOptionToTestGlob.returns( [
+				'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+				'workspace/packages/ckeditor-*/tests/**/manual/**/*.js',
+				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
+			] );
+
+			const options = {
+				files: [
+					'ckeditor5-classic',
+					'ckeditor-classic/manual/classic.js'
+				]
+			};
+
+			return runManualTests( { ...defaultOptions, ...options } )
+				.then( () => {
+					sinon.assert.calledWith( spies.scriptCompiler.firstCall, sinon.match.has( "disableWatch", false ) );
+				} );
+		} );
+
+		it( 'should read disableWatch flag value even if files flag is provided', () => {
+			spies.inquirer.prompt.resolves( { confirm: true } );
+			spies.fs.readFileSync.returns( JSON.stringify( {
+				name: 'ckeditor5-example-package',
+				scripts: {
+					'dll:build': 'node ./scripts/build-dll'
+				}
+			} ) );
+			spies.transformFileOptionToTestGlob.returns( [
+				'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js',
+				'workspace/packages/ckeditor-*/tests/**/manual/**/*.js',
+				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
+			] );
+
+			const options = {
+				files: [
+					'ckeditor5-classic',
+					'ckeditor-classic/manual/classic.js'
+				],
+				disableWatch: true
+			};
+
+			return runManualTests( { ...defaultOptions, ...options } )
+				.then( () => {
+					sinon.assert.calledWith( spies.scriptCompiler.firstCall, sinon.match.has( "disableWatch", true ) );
+				} );
+		} );
 	} );
 } );
