@@ -91,19 +91,30 @@ function onEventEnd( context ) {
 
 		eventReflection.kindString = 'Event';
 
-		const paramTags = reflection.comment.getTags( '@param' );
+		const defaultParameter = new TypeParameterReflection( 'eventInfo', undefined, undefined, eventReflection );
 
-		if ( paramTags.length ) {
+		// TODO: The `eventInfo` parameter should have the `module:utils/eventinfo~EventInfo` type.
+		defaultParameter.type = context.converter.convertType( context.withScope( defaultParameter ) );
+		defaultParameter.comment = new Comment( [
+			{
+				kind: 'text',
+				text: 'An object containing information about the fired event.'
+			}
+		] );
+
+		eventReflection.typeParameters = [
+			// Insert the default `eventInfo` parameters as the first one.
+			defaultParameter,
 			// Map each found `@param` tag to the type parameter reflection.
-			eventReflection.typeParameters = paramTags.map( tag => {
+			...reflection.comment.getTags( '@param' ).map( tag => {
 				const param = new TypeParameterReflection( tag.name, undefined, undefined, eventReflection );
 
 				param.type = context.converter.convertType( context.withScope( param ) );
 				param.comment = new Comment( tag.content );
 
 				return param;
-			} );
-		}
+			} )
+		];
 
 		// Copy comment summary. The `blockTags` property from the comment is not needed, as it has been already mapped to the type
 		// parameters.

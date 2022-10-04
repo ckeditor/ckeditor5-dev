@@ -123,7 +123,17 @@ describe( 'typedoc-plugins/tag-event', function() {
 			expect( eventDefinition.sources[ 0 ] ).to.have.property( 'character' );
 			expect( eventDefinition.sources[ 0 ] ).to.have.property( 'url' );
 
-			expect( eventDefinition ).to.not.have.property( 'typeParameters' );
+			expect( eventDefinition.typeParameters ).to.be.an( 'array' );
+			expect( eventDefinition.typeParameters ).to.lengthOf( 1 );
+
+			expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'name', 'eventInfo' );
+			expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'comment' );
+			expect( eventDefinition.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
+			expect( eventDefinition.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
+			expect( eventDefinition.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
+			expect( eventDefinition.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'text',
+				'An object containing information about the fired event.'
+			);
 		} );
 
 		it( 'should find an event tag with description and without parameters', () => {
@@ -147,7 +157,17 @@ describe( 'typedoc-plugins/tag-event', function() {
 			expect( eventDefinition.comment.modifierTags ).to.be.a( 'Set' );
 			expect( eventDefinition.comment.modifierTags.size ).to.equal( 0 );
 
-			expect( eventDefinition ).to.not.have.property( 'typeParameters' );
+			expect( eventDefinition.typeParameters ).to.be.an( 'array' );
+			expect( eventDefinition.typeParameters ).to.lengthOf( 1 );
+
+			expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'name', 'eventInfo' );
+			expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'comment' );
+			expect( eventDefinition.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
+			expect( eventDefinition.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
+			expect( eventDefinition.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
+			expect( eventDefinition.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'text',
+				'An object containing information about the fired event.'
+			);
 		} );
 
 		it( 'should find an event tag with description and parameters', () => {
@@ -192,45 +212,54 @@ describe( 'typedoc-plugins/tag-event', function() {
 			expect( eventDefinition.comment.modifierTags.size ).to.equal( 0 );
 
 			expect( eventDefinition.typeParameters ).to.be.an( 'array' );
-			expect( eventDefinition.typeParameters ).to.lengthOf( 3 );
+			expect( eventDefinition.typeParameters ).to.lengthOf( 4 );
 
-			expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'name', 'p1' );
+			expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'name', 'eventInfo' );
 			expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'comment' );
 			expect( eventDefinition.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
 			expect( eventDefinition.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
 			expect( eventDefinition.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
-			expect( eventDefinition.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'text', 'Description for first param.' );
+			expect( eventDefinition.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'text',
+				'An object containing information about the fired event.'
+			);
 
-			expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'name', 'p2' );
+			expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'name', 'p1' );
 			expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'comment' );
 			expect( eventDefinition.typeParameters[ 1 ].comment ).to.have.property( 'summary' );
 			expect( eventDefinition.typeParameters[ 1 ].comment.summary ).to.be.an( 'array' );
 			expect( eventDefinition.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
-			expect( eventDefinition.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'text', 'Description for second param.' );
+			expect( eventDefinition.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'text', 'Description for first param.' );
 
-			expect( eventDefinition.typeParameters[ 2 ] ).to.have.property( 'name', 'p3' );
+			expect( eventDefinition.typeParameters[ 2 ] ).to.have.property( 'name', 'p2' );
 			expect( eventDefinition.typeParameters[ 2 ] ).to.have.property( 'comment' );
 			expect( eventDefinition.typeParameters[ 2 ].comment ).to.have.property( 'summary' );
 			expect( eventDefinition.typeParameters[ 2 ].comment.summary ).to.be.an( 'array' );
-			expect( eventDefinition.typeParameters[ 2 ].comment.summary ).to.lengthOf( 5 );
-
 			expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
-			expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 0 ] ).to.have.property( 'text', 'Complex ' );
+			expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 0 ] ).to.have.property( 'text', 'Description for second param.' );
 
-			expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 1 ] ).to.have.property( 'kind', 'inline-tag' );
-			expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 1 ] ).to.have.property( 'tag', '@link' );
-			expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 1 ] ).to.have.property( 'text',
+			expect( eventDefinition.typeParameters[ 3 ] ).to.have.property( 'name', 'p3' );
+			expect( eventDefinition.typeParameters[ 3 ] ).to.have.property( 'comment' );
+			expect( eventDefinition.typeParameters[ 3 ].comment ).to.have.property( 'summary' );
+			expect( eventDefinition.typeParameters[ 3 ].comment.summary ).to.be.an( 'array' );
+			expect( eventDefinition.typeParameters[ 3 ].comment.summary ).to.lengthOf( 5 );
+
+			expect( eventDefinition.typeParameters[ 3 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
+			expect( eventDefinition.typeParameters[ 3 ].comment.summary[ 0 ] ).to.have.property( 'text', 'Complex ' );
+
+			expect( eventDefinition.typeParameters[ 3 ].comment.summary[ 1 ] ).to.have.property( 'kind', 'inline-tag' );
+			expect( eventDefinition.typeParameters[ 3 ].comment.summary[ 1 ] ).to.have.property( 'tag', '@link' );
+			expect( eventDefinition.typeParameters[ 3 ].comment.summary[ 1 ] ).to.have.property( 'text',
 				'module:utils/object~Object description'
 			);
 
-			expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 2 ] ).to.have.property( 'kind', 'text' );
-			expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 2 ] ).to.have.property( 'text', ' for ' );
+			expect( eventDefinition.typeParameters[ 3 ].comment.summary[ 2 ] ).to.have.property( 'kind', 'text' );
+			expect( eventDefinition.typeParameters[ 3 ].comment.summary[ 2 ] ).to.have.property( 'text', ' for ' );
 
-			expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 3 ] ).to.have.property( 'kind', 'code' );
-			expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 3 ] ).to.have.property( 'text', '`third param`' );
+			expect( eventDefinition.typeParameters[ 3 ].comment.summary[ 3 ] ).to.have.property( 'kind', 'code' );
+			expect( eventDefinition.typeParameters[ 3 ].comment.summary[ 3 ] ).to.have.property( 'text', '`third param`' );
 
-			expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 4 ] ).to.have.property( 'kind', 'text' );
-			expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 4 ] ).to.have.property( 'text', '.' );
+			expect( eventDefinition.typeParameters[ 3 ].comment.summary[ 4 ] ).to.have.property( 'kind', 'text' );
+			expect( eventDefinition.typeParameters[ 3 ].comment.summary[ 4 ] ).to.have.property( 'text', '.' );
 		} );
 	} );
 } );
