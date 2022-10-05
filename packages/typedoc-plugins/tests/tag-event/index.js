@@ -26,7 +26,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 
 		typeDoc = new TypeDoc.Application();
 
-		sinon.stub( typeDoc.logger, 'error' );
+		sinon.stub( typeDoc.logger, 'warn' );
 
 		expect( files ).to.not.lengthOf( 0 );
 
@@ -34,7 +34,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 		typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
 
 		typeDoc.bootstrap( {
-			logLevel: 'Error',
+			logLevel: 'Warn',
 			entryPoints: files,
 			plugin: [
 				require.resolve( '@ckeditor/typedoc-plugins/lib/tag-event' )
@@ -65,8 +65,10 @@ describe( 'typedoc-plugins/tag-event', function() {
 	} );
 
 	it( 'should inform if the class for an event has not been found', () => {
-		expect( typeDoc.logger.error.calledOnce ).to.equal( true );
-		expect( typeDoc.logger.error.firstCall.args[ 0 ] ).includes( 'Unable to find a class for the "event-foo-no-class" event' );
+		expect( typeDoc.logger.warn.calledOnce ).to.equal( true );
+		expect( typeDoc.logger.warn.firstCall.args[ 0 ] ).to.equal( 'Skipping unsupported "event-foo-no-class" event.' );
+		expect( typeDoc.logger.warn.firstCall.args[ 1 ] ).to.have.property( 'name' );
+		expect( typeDoc.logger.warn.firstCall.args[ 1 ].name ).to.have.property( 'escapedText', 'EventFooNoText' );
 	} );
 
 	it( 'should first take into account the class that fires the event instead of the default class, if both exist in the module', () => {

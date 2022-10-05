@@ -67,13 +67,10 @@ function onEventEnd( context ) {
 		const classReflection = findClassForEvent( eventName, reflection );
 
 		if ( !classReflection ) {
-			const [ source ] = reflection.sources;
+			const symbol = context.project.getSymbolFromReflection( reflection );
+			const node = symbol.declarations[ 0 ];
 
-			context.logger.error(
-				`Unable to find a class for the "${ eventName }" event, defined in ${ source.fileName } (line: ${ source.line }).\n` +
-				'Make sure that the module, in which this event is defined, contains either the class that fires this event using\n' +
-				`the "@fires ${ eventName }" tag, or the module contains at least one default class.`
-			);
+			context.logger.warn( `Skipping unsupported "${ eventName }" event.`, node );
 
 			continue;
 		}
