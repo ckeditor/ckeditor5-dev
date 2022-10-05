@@ -160,7 +160,7 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 			// See https://github.com/webpack/karma-webpack/pull/76.
 			new webpack.SourceMapDevToolPlugin( {
 				columns: false,
-				module: false,
+				module: true,
 				filename: '[file].map',
 				append: '\n//# sourceMappingURL=[base].map'
 			} )
