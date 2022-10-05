@@ -22,26 +22,31 @@ module.exports = {
 
 function onEventCreateDeclaration() {
 	return ( context, reflection ) => {
-		const patternMatch = reflection.name.match( /(?<=^\[).+(?=\]$)/ );
-
-		if ( !patternMatch ) {
+		if ( !isWrappedInSquareBrackets( reflection.name ) ) {
 			return;
 		}
 
-		const type = patternMatch[ 0 ];
-		const isValidSymbol = Symbol[ type ];
+		const symbolName = reflection.name.slice( 1, -1 );
+		const isKnownSymbol = Symbol[ symbolName ];
 
-		if ( !isValidSymbol ) {
-			console.log( chalk.yellow( `Non-symbol wrapped in square brackets: ${ chalk.bold( reflection.name ) }` ) );
-			console.log( chalk.yellow( `Source: ${ chalk.underline( reflection.sources[ 0 ].fullFileName ) }` ) );
+		if ( !isKnownSymbol ) {
+			const symbol = context.project.getSymbolFromReflection( reflection );
+			const node = symbol.declarations[ 0 ];
+
+			context.logger.warn( `Non-symbol wrapped in square brackets: ${ chalk.bold( reflection.name ) }`, node );
 
 			return;
 		}
 
-		reflection.name = `Symbol.${ type }`;
-		// Should these values also be updated?
-		// reflection.originalName
-		// reflection.escapedName
+		reflection.name = `Symbol.${ symbolName }`;
 	};
+}
+
+/**
+ * @param {String} value
+ * @returns {Boolean}
+ */
+function isWrappedInSquareBrackets( value ) {
+	return value.startsWith( '[' ) && value.endsWith( ']' );
 }
 

@@ -4,89 +4,68 @@
  */
 
 const { expect } = require( 'chai' );
-const sinon = require( 'sinon' );
 const TypeDoc = require( 'typedoc' );
-const mockery = require( 'mockery' );
 
 const utils = require( '../utils' );
+const glob = require( 'fast-glob' );
 
-describe( 'typedoc-plugins/symbol-fixer', () => {
-	let typeDoc, stubs;
+describe( 'typedoc-plugins/symbol-fixer', function() {
+	this.timeout( 10 * 1000 );
 
-	beforeEach( () => {
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
-		} );
+	let typeDoc, conversionResult;
 
-		stubs = {
-			chalk: {
-				yellow: sinon.stub().callsFake( str => str ),
-				bold: sinon.stub().callsFake( str => str ),
-				underline: sinon.stub().callsFake( str => str )
-			}
-		};
+	const FIXTURES_PATH = utils.normalizePath( utils.ROOT_TEST_DIRECTORY, 'symbol-fixer', 'fixtures' );
 
-		mockery.registerMock( 'chalk', stubs.chalk );
+	before( async () => {
+		const sourceFilePatterns = [
+			utils.normalizePath( FIXTURES_PATH, '**', '*.ts' )
+		];
 
+		const files = await glob( sourceFilePatterns );
 		typeDoc = new TypeDoc.Application();
+
+		expect( files ).to.not.lengthOf( 0 );
 
 		typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
 		typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
-	} );
-
-	afterEach( () => {
-		mockery.deregisterAll();
-		mockery.disable();
-	} );
-
-	it( 'converts symbols enclosed in square brackets', () => {
-		const conversionResult = runTypedoc( 'iterator' );
-
-		const module = Object.values( conversionResult.reflections ).find( item => item.originalName === '[iterator]' );
-
-		expect( module.name ).to.equal( 'Symbol.iterator' );
-	} );
-
-	it( 'prints warning when square brackets contain invalid symbol', () => {
-		const consoleStub = sinon.stub( console, 'log' );
-		const conversionResult = runTypedoc( 'fake' );
-		consoleStub.restore();
-
-		const module = Object.values( conversionResult.reflections ).find( item => item.originalName === '[fake]' );
-
-		expect( module.name ).to.equal( '[fake]' );
-		expect( consoleStub.callCount ).to.equal( 2 );
-		expect( consoleStub.firstCall.args[ 0 ] ).to.equal( 'Non-symbol wrapped in square brackets: [fake]' );
-		expect( consoleStub.secondCall.args[ 0 ] ).to.equal( `Source: ${ module.sources[ 0 ].fullFileName }` );
-	} );
-
-	/**
-	 * Allows executing Typedoc for a specific fixture.
-	 *
-	 * @param {String} filename
-	 * @returns {Object} typeDoc.convert() result.
-	 */
-	function runTypedoc( filename ) {
-		const fixturesPath = utils.normalizePath( utils.ROOT_TEST_DIRECTORY, 'symbol-fixer', 'fixtures' );
-		const testFilePath = utils.normalizePath( fixturesPath, `${ filename }.ts` );
 
 		typeDoc.bootstrap( {
 			logLevel: 'Error',
-			entryPoints: [ testFilePath ],
+			entryPoints: files,
 			plugin: [
 				require.resolve( '@ckeditor/typedoc-plugins/lib/symbol-fixer' )
 			],
 			// TODO: To resolve once the same problem is fixed in the `@ckeditor/ckeditor5-dev-docs` package.
-			tsconfig: utils.normalizePath( fixturesPath, 'tsconfig.json' )
+			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );
 
-		const conversionResult = typeDoc.convert();
+		conversionResult = typeDoc.convert();
 
 		expect( conversionResult ).to.be.an( 'object' );
+	} );
 
-		return conversionResult;
-	}
+	it( 'converts symbols enclosed in square brackets', () => {
+		const iteratorReflection = Object.values( conversionResult.reflections ).find( item => item.originalName === '[iterator]' );
+
+		expect( iteratorReflection.name ).to.equal( 'Symbol.iterator' );
+	} );
+
+	it( 'prints warning when square brackets contain invalid symbol', () => {
+		const fakeReflection = Object.values( conversionResult.reflections ).find( item => item.originalName === '[fake]' );
+
+		expect( fakeReflection.name ).to.equal( '[fake]' );
+		expect( typeDoc.logger.warningCount ).to.equal( 1 );
+
+		// `typeDoc.logger.seenWarnings` is an instance of Set.
+		const [ warning ] = [ ...typeDoc.logger.seenWarnings ];
+
+		expect( warning ).to.be.a( 'string' );
+
+		// Verify a message reported once find an invalid symbol.
+		expect( warning ).to.contain( 'Non-symbol wrapped in square brackets:' );
+
+		// Verify whether logger shows an invalid piece of the code.
+		expect( warning ).to.contain( 'public [ Symbol.fake ](): Iterable<any> {' );
+	} );
 } );
 
