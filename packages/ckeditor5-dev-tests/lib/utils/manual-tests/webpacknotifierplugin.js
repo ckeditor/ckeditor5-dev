@@ -43,6 +43,10 @@ module.exports = class WebpackNotifierPlugin {
 
 			this.log.info( '[Webpack] Finished the compilation.' );
 
+			if ( !stats.compilation.options.watch ) {
+				this.log.info( '[Webpack] File watcher is disabled.' );
+			}
+
 			this.onTestCompilationStatus( 'finished' );
 		} );
 	}

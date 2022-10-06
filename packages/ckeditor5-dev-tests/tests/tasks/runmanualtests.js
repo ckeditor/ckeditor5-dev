@@ -616,8 +616,6 @@ describe( 'runManualTests', () => {
 	} );
 
 	it( 'should set disableWatch to false if files flag is provided', () => {
-		spies.transformFileOptionToTestGlob.returns( [] );
-
 		const options = {
 			files: [
 				'ckeditor5-classic',
@@ -652,6 +650,37 @@ describe( 'runManualTests', () => {
 				expect( spies.transformFileOptionToTestGlob.calledTwice ).to.equal( true );
 				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( '*' );
 				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 0 ] ).to.equal( 'ckeditor5' );
+			} );
+	} );
+
+	it( 'should transform provided files to glob', () => {
+		const options = {
+			files: [
+				'ckeditor5-classic',
+				'ckeditor-classic/manual/classic.js'
+			]
+		};
+
+		return runManualTests( { ...defaultOptions, ...options } )
+			.then( () => {
+				expect( spies.transformFileOptionToTestGlob.calledTwice ).to.equal( true );
+				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( 'ckeditor5-classic' );
+				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 0 ] ).to.equal( 'ckeditor-classic/manual/classic.js' );
+			} );
+	} );
+
+	it( 'should not duplicate glob files in the final sourceFiles array', () => {
+		spies.transformFileOptionToTestGlob.returns( [
+			'workspace/packages/ckeditor-*/tests/**/manual/**/*.js',
+			'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
+		] );
+
+		return runManualTests( defaultOptions )
+			.then( () => {
+				expect( spies.scriptCompiler.firstCall.args[ 0 ].sourceFiles ).to.deep.equal( [
+					'workspace/packages/ckeditor-foo/tests/manual/feature-c.js',
+					'workspace/packages/ckeditor-bar/tests/manual/feature-d.js'
+				] );
 			} );
 	} );
 
