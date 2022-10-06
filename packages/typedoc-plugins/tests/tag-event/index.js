@@ -56,7 +56,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 		const eventDefinitions = conversionResult.getReflectionsByKind( TypeDoc.ReflectionKind.All )
 			.filter( children => children.name.startsWith( 'event:' ) );
 
-		// There should be 3 correctly defined events:
+		// There should be 4 correctly defined events:
 		// 1. event-foo
 		// 2. event-foo-no-text
 		// 3. event-foo-with-params
