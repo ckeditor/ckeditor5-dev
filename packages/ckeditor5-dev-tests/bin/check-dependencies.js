@@ -81,7 +81,7 @@ async function checkDependenciesInPackage( packagePath ) {
 
 	const result = await depCheck( packageAbsolutePath, depCheckOptions );
 
-	const missingPackages = groupMissingPackages( result.missing, packageJson.name );
+	const missingPackages = await groupMissingPackages( result.missing, packageJson.name );
 
 	const errors = [
 		// Invalid itself imports.
@@ -124,7 +124,7 @@ async function checkDependenciesInPackage( packagePath ) {
 		// Misplaced `dependencies` or `devDependencies`.
 		// Checks whether any package, which is already listed in the `dependencies` or `devDependencies`,
 		// should belong to that list.
-		findMisplacedDependencies( packageJson.dependencies, packageJson.devDependencies, result.using )
+		( await findMisplacedDependencies( packageJson.dependencies, packageJson.devDependencies, result.using ) )
 			.reduce( ( result, group ) => {
 				return result + '\n' +
 					group.description + '\n' +
@@ -254,9 +254,9 @@ function getInvalidItselfImports( repositoryPath ) {
  *
  * @param {Object} missingPackages The `missing` value from object returned by `depcheck`.
  * @param {String} currentPackage Name of current package.
- * @returns {Object.<String, Array.<String>>}
+ * @returns {Promise.<Object.<String, Array.<String>>>}
  */
-function groupMissingPackages( missingPackages, currentPackage ) {
+async function groupMissingPackages( missingPackages, currentPackage ) {
 	delete missingPackages[ currentPackage ];
 
 	const dependencies = [];
@@ -265,7 +265,7 @@ function groupMissingPackages( missingPackages, currentPackage ) {
 	for ( const packageName of Object.keys( missingPackages ) ) {
 		const absolutePaths = missingPackages[ packageName ];
 
-		if ( isDevDependency( packageName, absolutePaths ) ) {
+		if ( await isDevDependency( packageName, absolutePaths ) ) {
 			devDependencies.push( packageName );
 		} else {
 			dependencies.push( packageName );
@@ -380,10 +380,10 @@ function findDuplicatedDependencies( dependencies, devDependencies ) {
  * @param {Object|undefined} dependencies Defined dependencies from package.json.
  * @param {Object|undefined} devDependencies Defined development dependencies from package.json.
  * @param {Object} dependenciesToCheck All dependencies that have been found and files where they are used.
- * @returns {Array.<Object>} Misplaced packages. Each array item is an object containing
+ * @returns {Promise.<Array.<Object>>} Misplaced packages. Each array item is an object containing
  * the `description` string and `packageNames` array of strings.
  */
-function findMisplacedDependencies( dependencies, devDependencies, dependenciesToCheck ) {
+async function findMisplacedDependencies( dependencies, devDependencies, dependenciesToCheck ) {
 	const deps = Object.keys( dependencies || {} );
 	const devDeps = Object.keys( devDependencies || {} );
 
@@ -399,7 +399,7 @@ function findMisplacedDependencies( dependencies, devDependencies, dependenciesT
 	};
 
 	for ( const [ packageName, absolutePaths ] of Object.entries( dependenciesToCheck ) ) {
-		const isDevDep = isDevDependency( packageName, absolutePaths );
+		const isDevDep = await isDevDependency( packageName, absolutePaths );
 		const isMissingInDependencies = !isDevDep && !deps.includes( packageName ) && devDeps.includes( packageName );
 		const isMissingInDevDependencies = isDevDep && deps.includes( packageName ) && !devDeps.includes( packageName );
 
@@ -426,14 +426,58 @@ function findMisplacedDependencies( dependencies, devDependencies, dependenciesT
  *
  * @param {String} packageName
  * @param {Array.<String>} absolutePaths Files where a given package has been imported.
- * @returns {Boolean}
+ * @returns {Promise.<Boolean>}
  */
-function isDevDependency( packageName, absolutePaths ) {
+async function isDevDependency( packageName, absolutePaths ) {
 	if ( packageName.startsWith( '@types/' ) ) {
 		return true;
 	}
 
-	return !absolutePaths.some( absolutePath => absolutePath.match( /[/\\](src|theme)[/\\]/ ) );
+	for ( const absolutePath of absolutePaths ) {
+		// Only imports in files in src/ or theme/ could be non dev dependency.
+		if ( !absolutePath.match( /[/\\](src|theme)[/\\]/ ) ) {
+			continue;
+		}
+
+		if ( absolutePath.endsWith( '.ts' ) ) {
+			// Verify kind of imports in TypeScript file.
+			const importKinds = await getImportKinds( packageName, absolutePath );
+
+			// There is any non type kind of import from that package so not a dev dependency.
+			if ( importKinds.some( importKind => importKind != 'type' ) ) {
+				return false;
+			}
+		} else {
+			// Import from some other file from src/ or theme/ - package is not dev dependency.
+			return false;
+		}
+	}
+
+	// There were no value imports, so it is a dev dependency.
+	return true;
+}
+
+/**
+ * Parses TS file from `absolutePath` and returns a list of import types from `packageName`.
+ *
+ * @param {String} packageName
+ * @param {String} absolutePath File where a given package has been imported.
+ * @returns {Promise.<Array.<String>>} Array of import kinds.
+ */
+async function getImportKinds( packageName, absolutePath ) {
+	const astContent = await depCheck.parser.typescript( absolutePath );
+
+	if ( !astContent || !astContent.program || !astContent.program.body ) {
+		return [];
+	}
+
+	return astContent.program.body
+		.filter( astNode => (
+			astNode.type == 'ImportDeclaration' &&
+			astNode.source && astNode.source.value &&
+			astNode.source.value.startsWith( packageName )
+		) )
+		.map( astNode => astNode.importKind );
 }
 
 /**
