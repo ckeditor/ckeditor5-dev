@@ -135,4 +135,51 @@ describe( 'getKarmaConfig()', () => {
 
 		expect( karmaConfig.webpack ).to.contain.property( 'watch', true );
 	} );
+
+	it( 'should configure coverage reporter', () => {
+		const karmaConfig = getKarmaConfig( {
+			files: [ '*' ],
+			reporter: 'mocha',
+			karmaConfigOverrides: 'karma-config-overrides',
+			globPatterns: {
+				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
+			},
+			coverage: true
+		} );
+
+		expect( karmaConfig.reporters ).to.contain( 'coverage' );
+		expect( karmaConfig.coverageReporter ).to.contain.property( 'reporters' );
+	} );
+
+	it( 'should remove webpack istanbul-instrumenter-loader if coverage reporter is removed by overrides', () => {
+		mockery.registerMock( 'karma-config-overrides-remove-coverage', config => {
+			config.reporters.splice( config.reporters.indexOf( 'coverage' ), 1 );
+		} );
+
+		const karmaConfig = getKarmaConfig( {
+			files: [ '*' ],
+			reporter: 'mocha',
+			karmaConfigOverrides: 'karma-config-overrides-remove-coverage',
+			globPatterns: {
+				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
+			},
+			module: {
+				rules: [
+					{
+						loader: 'istanbul-instrumenter-loader'
+					},
+					{
+						loader: 'other-loader'
+					}
+				]
+			},
+			coverage: true
+		} );
+
+		const loaders = karmaConfig.webpack.module.rules.map( rule => rule.loader );
+
+		expect( karmaConfig.reporters ).to.not.contain( 'coverage' );
+		expect( loaders ).to.not.contain( 'istanbul-instrumenter-loader' );
+		expect( loaders ).to.contain( 'other-loader' );
+	} );
 } );
