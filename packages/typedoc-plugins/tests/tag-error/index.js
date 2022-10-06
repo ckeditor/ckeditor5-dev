@@ -47,7 +47,7 @@ describe( 'typedoc-plugins/tag-error', function() {
 	it( 'should not collect variable called "error', () => {
 		const errorModule = conversionResult.children.find( module => module.name === 'error' );
 
-		const errorDefinitions = errorModule.children.filter( children => children.originalName === 'EventDeclaration' );
+		const errorDefinitions = errorModule.children.filter( children => children.originalName === 'ErrorDeclaration' );
 
 		expect( errorDefinitions ).to.lengthOf( 0 );
 	} );
@@ -55,7 +55,7 @@ describe( 'typedoc-plugins/tag-error', function() {
 	it( 'should collect the `@error` annotations from block comment codes', () => {
 		const errorModule = conversionResult.children.find( module => module.name === 'customerror' );
 
-		const errorDefinitions = errorModule.children.filter( children => children.originalName === 'EventDeclaration' );
+		const errorDefinitions = errorModule.children.filter( children => children.originalName === 'ErrorDeclaration' );
 
 		expect( errorDefinitions ).to.not.lengthOf( 0 );
 	} );
@@ -72,7 +72,7 @@ describe( 'typedoc-plugins/tag-error', function() {
 
 			expect( errorDefinition ).to.not.be.undefined;
 			expect( errorDefinition.name ).to.equal( 'customerror-inside-method-no-text' );
-			expect( errorDefinition.originalName ).to.equal( 'EventDeclaration' );
+			expect( errorDefinition.originalName ).to.equal( 'ErrorDeclaration' );
 
 			expect( errorDefinition.comment ).to.have.property( 'summary' );
 			expect( errorDefinition.comment ).to.have.property( 'blockTags' );
@@ -91,7 +91,7 @@ describe( 'typedoc-plugins/tag-error', function() {
 
 			expect( errorDefinition ).to.not.be.undefined;
 			expect( errorDefinition.name ).to.equal( 'customerror-before-module' );
-			expect( errorDefinition.originalName ).to.equal( 'EventDeclaration' );
+			expect( errorDefinition.originalName ).to.equal( 'ErrorDeclaration' );
 			expect( errorDefinition.comment.summary ).to.lengthOf( 1 );
 			expect( errorDefinition.comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
 			expect( errorDefinition.comment.summary[ 0 ] ).to.have.property( 'text',
@@ -104,7 +104,7 @@ describe( 'typedoc-plugins/tag-error', function() {
 
 			expect( errorDefinition ).to.not.be.undefined;
 			expect( errorDefinition.name ).to.equal( 'customerror-before-module-with-links' );
-			expect( errorDefinition.originalName ).to.equal( 'EventDeclaration' );
+			expect( errorDefinition.originalName ).to.equal( 'ErrorDeclaration' );
 			expect( errorDefinition.comment ).to.have.property( 'summary' );
 			expect( errorDefinition.comment.summary ).to.lengthOf( 5 );
 			expect( errorDefinition.comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
@@ -133,7 +133,7 @@ describe( 'typedoc-plugins/tag-error', function() {
 			const errorDefinition = errorModule.children.find( doclet => doclet.name === 'customerror-after-module' );
 
 			expect( errorDefinition ).to.not.be.undefined;
-			expect( errorDefinition.originalName ).to.equal( 'EventDeclaration' );
+			expect( errorDefinition.originalName ).to.equal( 'ErrorDeclaration' );
 			expect( errorDefinition.comment.summary ).to.lengthOf( 1 );
 			expect( errorDefinition.comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
 			expect( errorDefinition.comment.summary[ 0 ] ).to.have.property( 'text',
@@ -159,7 +159,7 @@ describe( 'typedoc-plugins/tag-error', function() {
 			const errorDefinition = errorModule.children.find( doclet => doclet.name === 'customerror-before-export' );
 
 			expect( errorDefinition ).to.not.be.undefined;
-			expect( errorDefinition.originalName ).to.equal( 'EventDeclaration' );
+			expect( errorDefinition.originalName ).to.equal( 'ErrorDeclaration' );
 			expect( errorDefinition.comment.summary ).to.lengthOf( 1 );
 			expect( errorDefinition.comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
 			expect( errorDefinition.comment.summary[ 0 ] ).to.have.property( 'text',
@@ -171,7 +171,7 @@ describe( 'typedoc-plugins/tag-error', function() {
 			const errorDefinition = errorModule.children.find( doclet => doclet.name === 'customerror-after-export' );
 
 			expect( errorDefinition ).to.not.be.undefined;
-			expect( errorDefinition.originalName ).to.equal( 'EventDeclaration' );
+			expect( errorDefinition.originalName ).to.equal( 'ErrorDeclaration' );
 			expect( errorDefinition.comment.summary ).to.lengthOf( 1 );
 			expect( errorDefinition.comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
 			expect( errorDefinition.comment.summary[ 0 ] ).to.have.property( 'text',
@@ -184,7 +184,7 @@ describe( 'typedoc-plugins/tag-error', function() {
 
 			expect( errorDefinition ).to.not.be.undefined;
 			expect( errorDefinition.name ).to.equal( 'customerror-inside-method' );
-			expect( errorDefinition.originalName ).to.equal( 'EventDeclaration' );
+			expect( errorDefinition.originalName ).to.equal( 'ErrorDeclaration' );
 			expect( errorDefinition.comment ).to.have.property( 'summary' );
 			expect( errorDefinition.comment.summary ).to.be.an( 'array' );
 			expect( errorDefinition.comment.summary ).to.lengthOf( 1 );
@@ -237,7 +237,7 @@ describe( 'typedoc-plugins/tag-error', function() {
 
 			expect( errorDefinition ).to.not.be.undefined;
 			expect( errorDefinition.name ).to.equal( 'customerror-inside-function' );
-			expect( errorDefinition.originalName ).to.equal( 'EventDeclaration' );
+			expect( errorDefinition.originalName ).to.equal( 'ErrorDeclaration' );
 			expect( errorDefinition.comment.summary ).to.lengthOf( 1 );
 			expect( errorDefinition.comment.summary[ 0 ] ).to.deep.equal( {
 				kind: 'text',

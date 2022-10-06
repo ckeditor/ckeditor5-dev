@@ -64,7 +64,7 @@ function onEventCreateDeclaration() {
 				);
 
 			errorDeclaration.comment = new Comment( getCommentDisplayPart( parentNode.parent.comment ) );
-			errorDeclaration.originalName = 'EventDeclaration';
+			errorDeclaration.originalName = 'ErrorDeclaration';
 			errorDeclaration.kindString = 'Object literal';
 			errorDeclaration.typeParameters = parentNode.parent.getChildren()
 				.filter( childTag => {
