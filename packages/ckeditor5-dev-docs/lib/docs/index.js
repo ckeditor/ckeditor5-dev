@@ -61,6 +61,7 @@ module.exports = async function build( config ) {
 		plugin: [
 			'typedoc-plugin-rename-defaults',
 			require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' ),
+			require.resolve( '@ckeditor/typedoc-plugins/lib/symbol-fixer' ),
 			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-error' ),
 			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-event' )
 		],
