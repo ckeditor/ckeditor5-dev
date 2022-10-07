@@ -14,21 +14,21 @@ export class ExampleClass {
 	public name: string;
 
 	/**
-	 * Observable tag associated to a class property.
+	 * Observable public property.
 	 *
 	 * @observable
 	 */
 	public key: number;
 
 	/**
-	 * Observable tag associated to a class property.
+	 * Observable protected property.
 	 *
 	 * @observable
 	 */
 	protected value: string;
 
 	/**
-	 * Observable tag associated to a class property.
+	 * Observable private property.
 	 *
 	 * @observable
 	 */

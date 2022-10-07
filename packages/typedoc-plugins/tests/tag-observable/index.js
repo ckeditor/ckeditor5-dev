@@ -49,40 +49,24 @@ describe( 'typedoc-plugins/tag-observable', function() {
 		const reflections = conversionResult.getReflectionsByKind( TypeDoc.ReflectionKind.Property )
 			.filter( item => item.comment && item.comment.getTag( '@observable' ) );
 
-		// There should be the following observable properties:
-		// - ExampleClass#key
-		// - ExampleClass#value
-		// - ExampleClass#secret
-		// - CustomExampleClass#key (inherited from ExampleClass)
-		// - CustomExampleClass#value (inherited from ExampleClass)
-		// - CustomExampleClass#property
-		// - CustomExampleClass.staticProperty
+		// There should be found the following observable properties:
+		// * ExampleClass#key
+		// * ExampleClass#value
+		// * ExampleClass#secret
+		// * CustomExampleClass#key (inherited from ExampleClass)
+		// * CustomExampleClass#value (inherited from ExampleClass)
+		// * CustomExampleClass#property
+		// * CustomExampleClass.staticProperty
 		expect( reflections ).to.lengthOf( 7 );
 
 		// The order of found reflections does not matter, so just check if all expected observable properties are found.
-		expect( reflections ).to.satisfy( reflections => {
-			const expected = [
-				{ parent: 'ExampleClass', property: 'key' },
-				{ parent: 'ExampleClass', property: 'value' },
-				{ parent: 'ExampleClass', property: 'secret' },
-				{ parent: 'CustomExampleClass', property: 'key' },
-				{ parent: 'CustomExampleClass', property: 'value' },
-				{ parent: 'CustomExampleClass', property: 'property' },
-				{ parent: 'CustomExampleClass', property: 'staticProperty' }
-			];
-
-			return expected.every( entry => {
-				const found = reflections.some( reflection => {
-					return reflection.name === entry.property && reflection.parent.name === entry.parent;
-				} );
-
-				if ( !found ) {
-					throw new Error( `The "${ entry.parent }#${ entry.property }" property is not detected as observable.` );
-				}
-
-				return found;
-			} );
-		} );
+		expect( reflections.find( ref => ref.parent.name === 'ExampleClass' && ref.name === 'key' ) ).to.not.be.undefined;
+		expect( reflections.find( ref => ref.parent.name === 'ExampleClass' && ref.name === 'value' ) ).to.not.be.undefined;
+		expect( reflections.find( ref => ref.parent.name === 'ExampleClass' && ref.name === 'secret' ) ).to.not.be.undefined;
+		expect( reflections.find( ref => ref.parent.name === 'CustomExampleClass' && ref.name === 'key' ) ).to.not.be.undefined;
+		expect( reflections.find( ref => ref.parent.name === 'CustomExampleClass' && ref.name === 'value' ) ).to.not.be.undefined;
+		expect( reflections.find( ref => ref.parent.name === 'CustomExampleClass' && ref.name === 'property' ) ).to.not.be.undefined;
+		expect( reflections.find( ref => ref.parent.name === 'CustomExampleClass' && ref.name === 'staticProperty' ) ).to.not.be.undefined;
 	} );
 
 	describe( 'events', () => {

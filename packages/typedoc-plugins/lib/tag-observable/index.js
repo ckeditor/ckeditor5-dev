@@ -96,7 +96,7 @@ function onEventEnd( context ) {
 }
 
 /**
- * Creates new type parameter reflection.
+ * Creates and returns new type parameter reflection.
  *
  * @param {require('typedoc').Context} context Current state of the converter.
  * @param {Object} options

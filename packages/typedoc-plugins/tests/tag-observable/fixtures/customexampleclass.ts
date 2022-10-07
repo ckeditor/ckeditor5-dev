@@ -10,17 +10,17 @@
 import { ExampleClass } from './exampleclass';
 
 export class CustomExampleClass extends ExampleClass {
-	// This class has also all inherited observable properties from ExampleClass.
+	// In the generated TypeDoc output this class will also contain all inherited observable properties from ExampleClass.
 
 	/**
-	 * Observable tag associated to a static property in a class.
+	 * Observable public property.
 	 *
 	 * @observable
 	 */
 	public property: number;
 
 	/**
-	 * Observable tag associated to a static property in a class.
+	 * Observable static property.
 	 *
 	 * @observable
 	 */
