@@ -1,6 +1,35 @@
 Changelog
 =========
 
+## [31.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.0...v31.1.1) (2022-10-07)
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Disabled watch mode for building manual tests when no files are provided. Closes [ckeditor/ckeditor5#12189](https://github.com/ckeditor/ckeditor5/issues/12189). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b6402f4d97f77d9bb0ea9acda473469b267d4214))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Debugging of manual tests should properly display TypeScript files. Debugging of automatic tests should remove the 'istanbul-instrumenter-loader' if the 'coverage' reporter was disabled by 'karma-config-overrides'. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/05fb508dca70b6c2a5dc8f4f37da161079ebc940))
+
+### Other changes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: The dependency checker should recognize `import type` as dev dependencies. Closes [ckeditor/ckeditor5#12480](https://github.com/ckeditor/ckeditor5/issues/12480). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/68f333383788d6cb2d0c8eeacc4a2495097e0869))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v31.1.0 => v31.1.1
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v31.1.0 => v31.1.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v31.1.0 => v31.1.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v31.1.0 => v31.1.1
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v31.1.0 => v31.1.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v31.1.0 => v31.1.1
+</details>
+
+
 ## [31.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v31.0.0...v31.1.0) (2022-09-19)
 
 ### Features
