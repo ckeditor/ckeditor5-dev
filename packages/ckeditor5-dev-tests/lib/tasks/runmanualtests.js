@@ -42,9 +42,10 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
 module.exports = function runManualTests( options ) {
 	const log = logger();
 	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
-	const files = ( options.files && options.files.length ) ? options.files : [ '*' ];
-	const sourceFiles = files
-		.flatMap( file => transformFileOptionToTestGlob( file, true ) )
+	const isFilesFlagProvided = ( options.files && options.files.length );
+	const files = isFilesFlagProvided ? options.files : [ '*', 'ckeditor5' ];
+	const dedupedFileTestGlobs = [ ...new Set( files.flatMap( file => transformFileOptionToTestGlob( file, true ) ) ) ];
+	const sourceFiles = dedupedFileTestGlobs
 		.reduce( ( result, manualTestPattern ) => {
 			return [
 				...result,
@@ -60,7 +61,7 @@ module.exports = function runManualTests( options ) {
 	const language = options.language;
 	const additionalLanguages = options.additionalLanguages;
 	const silent = options.silent || false;
-	const disableWatch = options.disableWatch || false;
+	const disableWatch = options.disableWatch || !isFilesFlagProvided;
 	let socketServer;
 
 	function onTestCompilationStatus( status ) {
@@ -143,6 +144,8 @@ module.exports = function runManualTests( options ) {
 				await buildDllInRepository( path.dirname( pkgJsonPath ) );
 			}
 		}
+
+		console.log( '\n📍 DLL building complete.\n' );
 	}
 
 	/**

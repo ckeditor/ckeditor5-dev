@@ -134,7 +134,7 @@ describe( 'runManualTests', () => {
 			scriptCompiler: sandbox.spy( () => Promise.resolve() ),
 			removeDir: sandbox.spy( () => Promise.resolve() ),
 			copyAssets: sandbox.spy(),
-			transformFileOptionToTestGlob: sandbox.stub()
+			transformFileOptionToTestGlob: sandbox.stub().returns( [] )
 		};
 
 		mockery.registerMock( 'socket.io', spies.socketIO );
@@ -181,10 +181,6 @@ describe( 'runManualTests', () => {
 				expect( spies.removeDir.calledOnce ).to.equal( true );
 				expect( spies.removeDir.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
 
-				expect( spies.transformFileOptionToTestGlob.calledOnce ).to.equal( true );
-				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( '*' );
-				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 1 ] ).to.equal( true );
-
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
 				sinon.assert.calledWith( spies.htmlFileCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
@@ -197,7 +193,7 @@ describe( 'runManualTests', () => {
 					language: undefined,
 					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
-					disableWatch: false,
+					disableWatch: true,
 					silent: false
 				} );
 
@@ -215,7 +211,7 @@ describe( 'runManualTests', () => {
 					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
 					debug: undefined,
-					disableWatch: false,
+					disableWatch: true,
 					identityFile: undefined
 				} );
 
@@ -309,12 +305,6 @@ describe( 'runManualTests', () => {
 			.then( () => {
 				expect( spies.removeDir.calledOnce ).to.equal( true );
 				expect( spies.removeDir.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
-
-				expect( spies.transformFileOptionToTestGlob.calledTwice ).to.equal( true );
-				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( 'ckeditor5-classic' );
-				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 1 ] ).to.equal( true );
-				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 0 ] ).to.equal( 'ckeditor-classic/manual/classic.js' );
-				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 1 ] ).to.equal( true );
 
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
 				sinon.assert.calledWith( spies.htmlFileCompiler.firstCall, {
@@ -463,10 +453,6 @@ describe( 'runManualTests', () => {
 				expect( spies.removeDir.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
 				expect( spies.removeDir.firstCall.args[ 1 ] ).to.deep.equal( { silent: true } );
 
-				expect( spies.transformFileOptionToTestGlob.calledOnce ).to.equal( true );
-				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( '*' );
-				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 1 ] ).to.equal( true );
-
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
 				sinon.assert.calledWith( spies.htmlFileCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
@@ -479,7 +465,7 @@ describe( 'runManualTests', () => {
 					language: undefined,
 					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
-					disableWatch: false,
+					disableWatch: true,
 					silent: true
 				} );
 
@@ -497,7 +483,7 @@ describe( 'runManualTests', () => {
 					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
 					debug: undefined,
-					disableWatch: false,
+					disableWatch: true,
 					identityFile: undefined
 				} );
 
@@ -518,10 +504,6 @@ describe( 'runManualTests', () => {
 
 		return runManualTests( { ...defaultOptions, ...options } )
 			.then( () => {
-				expect( spies.transformFileOptionToTestGlob.calledOnce ).to.equal( true );
-				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( '*' );
-				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 1 ] ).to.equal( true );
-
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
 				sinon.assert.calledWith( spies.htmlFileCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
@@ -574,10 +556,6 @@ describe( 'runManualTests', () => {
 
 		return runManualTests( { ...defaultOptions, ...options } )
 			.then( () => {
-				expect( spies.transformFileOptionToTestGlob.calledOnce ).to.equal( true );
-				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( '*' );
-				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 1 ] ).to.equal( true );
-
 				expect( spies.htmlFileCompiler.calledOnce ).to.equal( true );
 				sinon.assert.calledWith( spies.htmlFileCompiler.firstCall, {
 					buildDir: 'workspace/build/.manual-tests',
@@ -627,6 +605,82 @@ describe( 'runManualTests', () => {
 			.then( () => {
 				sinon.assert.calledOnce( spies.socketIO.Server );
 				sinon.assert.calledWithExactly( spies.socketIO.Server, httpServerMock );
+			} );
+	} );
+
+	it( 'should set disableWatch to true if files flag is not provided', () => {
+		return runManualTests( defaultOptions )
+			.then( () => {
+				sinon.assert.calledWith( spies.scriptCompiler.firstCall, sinon.match.has( 'disableWatch', true ) );
+			} );
+	} );
+
+	it( 'should set disableWatch to false if files flag is provided', () => {
+		const options = {
+			files: [
+				'ckeditor5-classic',
+				'ckeditor-classic/manual/classic.js'
+			]
+		};
+
+		return runManualTests( { ...defaultOptions, ...options } )
+			.then( () => {
+				sinon.assert.calledWith( spies.scriptCompiler.firstCall, sinon.match.has( 'disableWatch', false ) );
+			} );
+	} );
+
+	it( 'should read disableWatch flag value even if files flag is provided', () => {
+		const options = {
+			files: [
+				'ckeditor5-classic',
+				'ckeditor-classic/manual/classic.js'
+			],
+			disableWatch: true
+		};
+
+		return runManualTests( { ...defaultOptions, ...options } )
+			.then( () => {
+				sinon.assert.calledWith( spies.scriptCompiler.firstCall, sinon.match.has( 'disableWatch', true ) );
+			} );
+	} );
+
+	it( 'should set default values for files', () => {
+		return runManualTests( defaultOptions )
+			.then( () => {
+				expect( spies.transformFileOptionToTestGlob.calledTwice ).to.equal( true );
+				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( '*' );
+				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 0 ] ).to.equal( 'ckeditor5' );
+			} );
+	} );
+
+	it( 'should transform provided files to glob', () => {
+		const options = {
+			files: [
+				'ckeditor5-classic',
+				'ckeditor-classic/manual/classic.js'
+			]
+		};
+
+		return runManualTests( { ...defaultOptions, ...options } )
+			.then( () => {
+				expect( spies.transformFileOptionToTestGlob.calledTwice ).to.equal( true );
+				expect( spies.transformFileOptionToTestGlob.firstCall.args[ 0 ] ).to.equal( 'ckeditor5-classic' );
+				expect( spies.transformFileOptionToTestGlob.secondCall.args[ 0 ] ).to.equal( 'ckeditor-classic/manual/classic.js' );
+			} );
+	} );
+
+	it( 'should not duplicate glob files in the final sourceFiles array', () => {
+		spies.transformFileOptionToTestGlob.returns( [
+			'workspace/packages/ckeditor-*/tests/**/manual/**/*.js',
+			'workspace/packages/ckeditor-*/tests/**/manual/**/*.js'
+		] );
+
+		return runManualTests( defaultOptions )
+			.then( () => {
+				expect( spies.scriptCompiler.firstCall.args[ 0 ].sourceFiles ).to.deep.equal( [
+					'workspace/packages/ckeditor-foo/tests/manual/feature-c.js',
+					'workspace/packages/ckeditor-bar/tests/manual/feature-d.js'
+				] );
 			} );
 	} );
 
@@ -1038,7 +1092,7 @@ describe( 'runManualTests', () => {
 						onTestCompilationStatus: sinon.match.func,
 						additionalLanguages: undefined,
 						debug: undefined,
-						disableWatch: false,
+						disableWatch: true,
 						identityFile: undefined
 					} );
 
@@ -1056,7 +1110,7 @@ describe( 'runManualTests', () => {
 						language: undefined,
 						onTestCompilationStatus: sinon.match.func,
 						additionalLanguages: undefined,
-						disableWatch: false,
+						disableWatch: true,
 						silent: false
 					} );
 
