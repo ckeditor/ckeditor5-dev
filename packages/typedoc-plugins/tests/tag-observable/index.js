@@ -56,8 +56,9 @@ describe( 'typedoc-plugins/tag-observable', function() {
 		// * CustomExampleClass#key (inherited from ExampleClass)
 		// * CustomExampleClass#value (inherited from ExampleClass)
 		// * CustomExampleClass#property
+		// * CustomExampleClass#anotherProperty
 		// * CustomExampleClass.staticProperty
-		expect( reflections ).to.lengthOf( 7 );
+		expect( reflections ).to.lengthOf( 8 );
 
 		// The order of found reflections does not matter, so just check if all expected observable properties are found.
 		expect( reflections.find( ref => ref.parent.name === 'ExampleClass' && ref.name === 'key' ) ).to.not.be.undefined;
@@ -66,6 +67,7 @@ describe( 'typedoc-plugins/tag-observable', function() {
 		expect( reflections.find( ref => ref.parent.name === 'CustomExampleClass' && ref.name === 'key' ) ).to.not.be.undefined;
 		expect( reflections.find( ref => ref.parent.name === 'CustomExampleClass' && ref.name === 'value' ) ).to.not.be.undefined;
 		expect( reflections.find( ref => ref.parent.name === 'CustomExampleClass' && ref.name === 'property' ) ).to.not.be.undefined;
+		expect( reflections.find( ref => ref.parent.name === 'CustomExampleClass' && ref.name === 'anotherProperty' ) ).to.not.be.undefined;
 		expect( reflections.find( ref => ref.parent.name === 'CustomExampleClass' && ref.name === 'staticProperty' ) ).to.not.be.undefined;
 	} );
 
@@ -99,15 +101,17 @@ describe( 'typedoc-plugins/tag-observable', function() {
 			const eventDefinitions = derivedClassDefinition.children
 				.filter( children => children.name.startsWith( 'event:' ) );
 
-			expect( eventDefinitions ).to.lengthOf( 8 );
+			expect( eventDefinitions ).to.lengthOf( 10 );
 			expect( eventDefinitions.find( event => event.name === 'event:change:key' ) ).to.not.be.undefined;
 			expect( eventDefinitions.find( event => event.name === 'event:change:value' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:change:property' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:change:anotherProperty' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:change:staticProperty' ) ).to.not.be.undefined;
 			expect( eventDefinitions.find( event => event.name === 'event:set:key' ) ).to.not.be.undefined;
 			expect( eventDefinitions.find( event => event.name === 'event:set:value' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:change:property' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:change:staticProperty' ) ).to.not.be.undefined;
 			expect( eventDefinitions.find( event => event.name === 'event:set:property' ) ).to.not.be.undefined;
 			expect( eventDefinitions.find( event => event.name === 'event:set:staticProperty' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:set:anotherProperty' ) ).to.not.be.undefined;
 		} );
 
 		for ( const eventName of [ 'change', 'set' ] ) {

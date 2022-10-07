@@ -20,6 +20,15 @@ export class CustomExampleClass extends ExampleClass {
 	public property: number;
 
 	/**
+	 * Observable public property defined in another way, with other JSDoc tags.
+	 *
+	 * @readonly
+	 * @observable
+	 * @member {Boolean}
+	 */
+	declare public anotherProperty: boolean;
+
+	/**
 	 * Observable static property.
 	 *
 	 * @observable
