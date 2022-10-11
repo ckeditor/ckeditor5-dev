@@ -51,12 +51,6 @@ function onEventEnd( context ) {
 
 			eventReflection.kindString = 'Event';
 
-			const eventInfoParameter = typeParameterFactory( context, {
-				name: 'eventInfo',
-				parent: eventReflection,
-				comment: 'An object containing information about the fired event.'
-			} );
-
 			const nameParameter = typeParameterFactory( context, {
 				name: 'name',
 				parent: eventReflection,
@@ -76,8 +70,7 @@ function onEventEnd( context ) {
 				comment: `Old value of the \`${ propertyName }\` property with given key or \`null\`, if property was not set before.`
 			} );
 
-			// An event fired from an observable property always has 4 parameters.
-			eventReflection.typeParameters = [ eventInfoParameter, nameParameter, valueParameter, oldValueParameter ];
+			eventReflection.typeParameters = [ nameParameter, valueParameter, oldValueParameter ];
 
 			eventReflection.comment = new Comment( [
 				{
