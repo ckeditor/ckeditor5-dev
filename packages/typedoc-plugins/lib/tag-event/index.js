@@ -89,7 +89,7 @@ function onEventEnd( context ) {
 		eventReflection.kindString = 'Event';
 
 		// Map each found `@param` tag to the type parameter reflection.
-		eventReflection.typeParameters = reflection.comment.getTags( '@param' ).map( tag => {
+		const typeParameters = reflection.comment.getTags( '@param' ).map( tag => {
 			const param = new TypeParameterReflection( tag.name, undefined, undefined, eventReflection );
 
 			param.type = context.converter.convertType( context.withScope( param ) );
@@ -97,6 +97,10 @@ function onEventEnd( context ) {
 
 			return param;
 		} );
+
+		if ( typeParameters.length ) {
+			eventReflection.typeParameters = typeParameters;
+		}
 
 		// Copy comment summary. The `blockTags` property from the comment is not needed, as it has been already mapped to the type
 		// parameters.

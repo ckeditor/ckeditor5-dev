@@ -10,19 +10,19 @@ const TypeDoc = require( 'typedoc' );
 
 const utils = require( '../utils' );
 
-describe( 'typedoc-plugins/event-fixer', function() {
+describe( 'typedoc-plugins/event-param-fixer', function() {
 	this.timeout( 10 * 1000 );
 
 	let typeDoc, conversionResult, files;
 
-	const FIXTURES_PATH = utils.normalizePath( utils.ROOT_TEST_DIRECTORY, 'event-fixer', 'fixtures' );
+	const FIXTURES_PATH = utils.normalizePath( utils.ROOT_TEST_DIRECTORY, 'event-param-fixer', 'fixtures' );
 	const TSCONFIG_PATH = utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' );
 	const PLUGINS = [
 		'typedoc-plugin-rename-defaults',
 		require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' ),
 		require.resolve( '@ckeditor/typedoc-plugins/lib/tag-event' ),
 		require.resolve( '@ckeditor/typedoc-plugins/lib/tag-observable' ),
-		require.resolve( '@ckeditor/typedoc-plugins/lib/event-fixer' )
+		require.resolve( '@ckeditor/typedoc-plugins/lib/event-param-fixer' )
 	];
 
 	before( async () => {
@@ -76,7 +76,7 @@ describe( 'typedoc-plugins/event-fixer', function() {
 	} );
 
 	describe( 'eventInfo parameter definition', () => {
-		let eventFoo, eventFooNoText, eventFooWithParams, eventObservableChange, eventObservableSet;
+		let eventFoo, eventFooNoText, eventFooWithParams, eventObservableChange, eventObservableSet, eventInfoClassId;
 
 		before( () => {
 			eventFoo = conversionResult.getChildByName( [ 'fixtures/example', 'CustomExampleNonDefaultClass', 'event:event-foo' ] );
@@ -85,6 +85,8 @@ describe( 'typedoc-plugins/event-fixer', function() {
 			eventObservableChange = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'event:change:key' ] );
 			eventObservableSet = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'event:set:key' ] );
 
+			eventInfoClassId = conversionResult.getChildByName( [ 'utils/eventinfo', 'EventInfo' ] ).id;
+
 			expect( eventFoo ).to.not.be.undefined;
 			expect( eventFooNoText ).to.not.be.undefined;
 			expect( eventFooWithParams ).to.not.be.undefined;
@@ -92,7 +94,7 @@ describe( 'typedoc-plugins/event-fixer', function() {
 			expect( eventObservableSet ).to.not.be.undefined;
 		} );
 
-		it( 'should add the "eventInfo" parameter for event without params and comment', () => {
+		it( 'should add the "eventInfo" parameter for event without params and without comment', () => {
 			expect( eventFooNoText.name ).to.equal( 'event:event-foo-no-text' );
 			expect( eventFooNoText.originalName ).to.equal( 'event:event-foo-no-text' );
 			expect( eventFooNoText.kindString ).to.equal( 'Event' );
@@ -105,6 +107,7 @@ describe( 'typedoc-plugins/event-fixer', function() {
 			expect( eventFooNoText.typeParameters[ 0 ] ).to.have.property( 'type' );
 			expect( eventFooNoText.typeParameters[ 0 ].type ).to.have.property( 'type', 'reference' );
 			expect( eventFooNoText.typeParameters[ 0 ].type ).to.have.property( 'name', 'EventInfo' );
+			expect( eventFooNoText.typeParameters[ 0 ].type ).to.have.property( '_target', eventInfoClassId );
 			expect( eventFooNoText.typeParameters[ 0 ] ).to.have.property( 'comment' );
 			expect( eventFooNoText.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
 			expect( eventFooNoText.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
@@ -127,6 +130,7 @@ describe( 'typedoc-plugins/event-fixer', function() {
 			expect( eventFoo.typeParameters[ 0 ] ).to.have.property( 'type' );
 			expect( eventFoo.typeParameters[ 0 ].type ).to.have.property( 'type', 'reference' );
 			expect( eventFoo.typeParameters[ 0 ].type ).to.have.property( 'name', 'EventInfo' );
+			expect( eventFoo.typeParameters[ 0 ].type ).to.have.property( '_target', eventInfoClassId );
 			expect( eventFoo.typeParameters[ 0 ] ).to.have.property( 'comment' );
 			expect( eventFoo.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
 			expect( eventFoo.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
@@ -149,6 +153,7 @@ describe( 'typedoc-plugins/event-fixer', function() {
 			expect( eventFooWithParams.typeParameters[ 0 ] ).to.have.property( 'type' );
 			expect( eventFooWithParams.typeParameters[ 0 ].type ).to.have.property( 'type', 'reference' );
 			expect( eventFooWithParams.typeParameters[ 0 ].type ).to.have.property( 'name', 'EventInfo' );
+			expect( eventFooWithParams.typeParameters[ 0 ].type ).to.have.property( '_target', eventInfoClassId );
 			expect( eventFooWithParams.typeParameters[ 0 ] ).to.have.property( 'comment' );
 			expect( eventFooWithParams.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
 			expect( eventFooWithParams.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
@@ -158,7 +163,7 @@ describe( 'typedoc-plugins/event-fixer', function() {
 			);
 		} );
 
-		it( 'should add the "eventInfo" parameter for "change" event for observable property', () => {
+		it( 'should add the "eventInfo" parameter for the "change" event for observable property', () => {
 			expect( eventObservableChange.name ).to.equal( 'event:change:key' );
 			expect( eventObservableChange.originalName ).to.equal( 'event:change:key' );
 			expect( eventObservableChange.kindString ).to.equal( 'Event' );
@@ -171,6 +176,7 @@ describe( 'typedoc-plugins/event-fixer', function() {
 			expect( eventObservableChange.typeParameters[ 0 ] ).to.have.property( 'type' );
 			expect( eventObservableChange.typeParameters[ 0 ].type ).to.have.property( 'type', 'reference' );
 			expect( eventObservableChange.typeParameters[ 0 ].type ).to.have.property( 'name', 'EventInfo' );
+			expect( eventObservableChange.typeParameters[ 0 ].type ).to.have.property( '_target', eventInfoClassId );
 			expect( eventObservableChange.typeParameters[ 0 ] ).to.have.property( 'comment' );
 			expect( eventObservableChange.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
 			expect( eventObservableChange.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
@@ -180,7 +186,7 @@ describe( 'typedoc-plugins/event-fixer', function() {
 			);
 		} );
 
-		it( 'should add the "eventInfo" parameter for "set" event for observable property', () => {
+		it( 'should add the "eventInfo" parameter for the "set" event for observable property', () => {
 			expect( eventObservableSet.name ).to.equal( 'event:set:key' );
 			expect( eventObservableSet.originalName ).to.equal( 'event:set:key' );
 			expect( eventObservableSet.kindString ).to.equal( 'Event' );
@@ -193,6 +199,7 @@ describe( 'typedoc-plugins/event-fixer', function() {
 			expect( eventObservableSet.typeParameters[ 0 ] ).to.have.property( 'type' );
 			expect( eventObservableSet.typeParameters[ 0 ].type ).to.have.property( 'type', 'reference' );
 			expect( eventObservableSet.typeParameters[ 0 ].type ).to.have.property( 'name', 'EventInfo' );
+			expect( eventObservableSet.typeParameters[ 0 ].type ).to.have.property( '_target', eventInfoClassId );
 			expect( eventObservableSet.typeParameters[ 0 ] ).to.have.property( 'comment' );
 			expect( eventObservableSet.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
 			expect( eventObservableSet.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );

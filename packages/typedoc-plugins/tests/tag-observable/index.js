@@ -142,43 +142,34 @@ describe( 'typedoc-plugins/tag-observable', function() {
 				);
 
 				expect( eventDefinition.typeParameters ).to.be.an( 'array' );
-				expect( eventDefinition.typeParameters ).to.lengthOf( 4 );
+				expect( eventDefinition.typeParameters ).to.lengthOf( 3 );
 
-				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'name', 'eventInfo' );
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'name', 'name' );
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'type' );
+				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'name', 'string' );
 				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'comment' );
 				expect( eventDefinition.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
 				expect( eventDefinition.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
 				expect( eventDefinition.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
 				expect( eventDefinition.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'text',
-					'An object containing information about the fired event.'
+					'Name of the changed property (`key`).'
 				);
 
-				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'name', 'name' );
-				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'type' );
-				expect( eventDefinition.typeParameters[ 1 ].type ).to.have.property( 'name', 'string' );
+				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'name', 'value' );
 				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'comment' );
 				expect( eventDefinition.typeParameters[ 1 ].comment ).to.have.property( 'summary' );
 				expect( eventDefinition.typeParameters[ 1 ].comment.summary ).to.be.an( 'array' );
 				expect( eventDefinition.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
 				expect( eventDefinition.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'text',
-					'Name of the changed property (`key`).'
+					'New value of the `key` property with given key or `null`, if operation should remove property.'
 				);
 
-				expect( eventDefinition.typeParameters[ 2 ] ).to.have.property( 'name', 'value' );
+				expect( eventDefinition.typeParameters[ 2 ] ).to.have.property( 'name', 'oldValue' );
 				expect( eventDefinition.typeParameters[ 2 ] ).to.have.property( 'comment' );
 				expect( eventDefinition.typeParameters[ 2 ].comment ).to.have.property( 'summary' );
 				expect( eventDefinition.typeParameters[ 2 ].comment.summary ).to.be.an( 'array' );
 				expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
 				expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 0 ] ).to.have.property( 'text',
-					'New value of the `key` property with given key or `null`, if operation should remove property.'
-				);
-
-				expect( eventDefinition.typeParameters[ 3 ] ).to.have.property( 'name', 'oldValue' );
-				expect( eventDefinition.typeParameters[ 3 ] ).to.have.property( 'comment' );
-				expect( eventDefinition.typeParameters[ 3 ].comment ).to.have.property( 'summary' );
-				expect( eventDefinition.typeParameters[ 3 ].comment.summary ).to.be.an( 'array' );
-				expect( eventDefinition.typeParameters[ 3 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
-				expect( eventDefinition.typeParameters[ 3 ].comment.summary[ 0 ] ).to.have.property( 'text',
 					'Old value of the `key` property with given key or `null`, if property was not set before.'
 				);
 
