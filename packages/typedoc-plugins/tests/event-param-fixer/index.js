@@ -76,7 +76,7 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 	} );
 
 	describe( 'eventInfo parameter definition', () => {
-		let eventFoo, eventFooNoText, eventFooWithParams, eventObservableChange, eventObservableSet, eventInfoClassId;
+		let eventFoo, eventFooNoText, eventFooWithParams, eventObservableChange, eventObservableSet, eventInfoClass;
 
 		before( () => {
 			eventFoo = conversionResult.getChildByName( [ 'fixtures/example', 'CustomExampleNonDefaultClass', 'event:event-foo' ] );
@@ -84,14 +84,14 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 			eventFooWithParams = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'event:event-foo-with-params' ] );
 			eventObservableChange = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'event:change:key' ] );
 			eventObservableSet = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'event:set:key' ] );
-
-			eventInfoClassId = conversionResult.getChildByName( [ 'utils/eventinfo', 'EventInfo' ] ).id;
+			eventInfoClass = conversionResult.getChildByName( [ 'utils/eventinfo', 'EventInfo' ] );
 
 			expect( eventFoo ).to.not.be.undefined;
 			expect( eventFooNoText ).to.not.be.undefined;
 			expect( eventFooWithParams ).to.not.be.undefined;
 			expect( eventObservableChange ).to.not.be.undefined;
 			expect( eventObservableSet ).to.not.be.undefined;
+			expect( eventInfoClass ).to.not.be.undefined;
 		} );
 
 		it( 'should add the "eventInfo" parameter for event without params and without comment', () => {
@@ -107,7 +107,7 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 			expect( eventFooNoText.typeParameters[ 0 ] ).to.have.property( 'type' );
 			expect( eventFooNoText.typeParameters[ 0 ].type ).to.have.property( 'type', 'reference' );
 			expect( eventFooNoText.typeParameters[ 0 ].type ).to.have.property( 'name', 'EventInfo' );
-			expect( eventFooNoText.typeParameters[ 0 ].type ).to.have.property( '_target', eventInfoClassId );
+			expect( eventFooNoText.typeParameters[ 0 ].type ).to.have.property( 'reflection', eventInfoClass );
 			expect( eventFooNoText.typeParameters[ 0 ] ).to.have.property( 'comment' );
 			expect( eventFooNoText.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
 			expect( eventFooNoText.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
@@ -130,7 +130,7 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 			expect( eventFoo.typeParameters[ 0 ] ).to.have.property( 'type' );
 			expect( eventFoo.typeParameters[ 0 ].type ).to.have.property( 'type', 'reference' );
 			expect( eventFoo.typeParameters[ 0 ].type ).to.have.property( 'name', 'EventInfo' );
-			expect( eventFoo.typeParameters[ 0 ].type ).to.have.property( '_target', eventInfoClassId );
+			expect( eventFoo.typeParameters[ 0 ].type ).to.have.property( 'reflection', eventInfoClass );
 			expect( eventFoo.typeParameters[ 0 ] ).to.have.property( 'comment' );
 			expect( eventFoo.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
 			expect( eventFoo.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
@@ -153,7 +153,7 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 			expect( eventFooWithParams.typeParameters[ 0 ] ).to.have.property( 'type' );
 			expect( eventFooWithParams.typeParameters[ 0 ].type ).to.have.property( 'type', 'reference' );
 			expect( eventFooWithParams.typeParameters[ 0 ].type ).to.have.property( 'name', 'EventInfo' );
-			expect( eventFooWithParams.typeParameters[ 0 ].type ).to.have.property( '_target', eventInfoClassId );
+			expect( eventFooWithParams.typeParameters[ 0 ].type ).to.have.property( 'reflection', eventInfoClass );
 			expect( eventFooWithParams.typeParameters[ 0 ] ).to.have.property( 'comment' );
 			expect( eventFooWithParams.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
 			expect( eventFooWithParams.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
@@ -176,7 +176,7 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 			expect( eventObservableChange.typeParameters[ 0 ] ).to.have.property( 'type' );
 			expect( eventObservableChange.typeParameters[ 0 ].type ).to.have.property( 'type', 'reference' );
 			expect( eventObservableChange.typeParameters[ 0 ].type ).to.have.property( 'name', 'EventInfo' );
-			expect( eventObservableChange.typeParameters[ 0 ].type ).to.have.property( '_target', eventInfoClassId );
+			expect( eventObservableChange.typeParameters[ 0 ].type ).to.have.property( 'reflection', eventInfoClass );
 			expect( eventObservableChange.typeParameters[ 0 ] ).to.have.property( 'comment' );
 			expect( eventObservableChange.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
 			expect( eventObservableChange.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
@@ -199,7 +199,7 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 			expect( eventObservableSet.typeParameters[ 0 ] ).to.have.property( 'type' );
 			expect( eventObservableSet.typeParameters[ 0 ].type ).to.have.property( 'type', 'reference' );
 			expect( eventObservableSet.typeParameters[ 0 ].type ).to.have.property( 'name', 'EventInfo' );
-			expect( eventObservableSet.typeParameters[ 0 ].type ).to.have.property( '_target', eventInfoClassId );
+			expect( eventObservableSet.typeParameters[ 0 ].type ).to.have.property( 'reflection', eventInfoClass );
 			expect( eventObservableSet.typeParameters[ 0 ] ).to.have.property( 'comment' );
 			expect( eventObservableSet.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
 			expect( eventObservableSet.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
