@@ -69,7 +69,7 @@ module.exports = async function build( config ) {
 			require.resolve( '@ckeditor/typedoc-plugins/lib/event-param-fixer' )
 		],
 		// TODO: Move tsconfig.json to main repo. Also: how to share it across repos? Also: Do we need to share it?
-		tsconfig: path.join( process.cwd(), 'tsconfig.json' )
+		tsconfig: path.join( process.cwd(), 'tsconfig.docs.json' )
 	} );
 
 	const conversionResult = typeDoc.convert();
