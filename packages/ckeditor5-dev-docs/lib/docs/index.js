@@ -65,6 +65,10 @@ module.exports = async function build( config ) {
 			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-error' ),
 			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-event' ),
 			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-observable' ),
+
+			// The `event-inheritance-fixer` plugin must be loaded after `tag-event` plugin, as it depends on its output.
+			require.resolve( '@ckeditor/typedoc-plugins/lib/event-inheritance-fixer' ),
+
 			// The `event-param-fixer` plugin must be loaded after `tag-event` and `tag-observable` plugins, as it depends on their output.
 			require.resolve( '@ckeditor/typedoc-plugins/lib/event-param-fixer' )
 		],
