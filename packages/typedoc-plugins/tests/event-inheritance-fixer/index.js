@@ -153,57 +153,48 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 
 		for ( const event of [ baseEventClassA, inheritedEventClassB, inheritedEventClassC ] ) {
 			expect( event.typeParameters ).to.be.an( 'array' );
-			expect( event.typeParameters ).to.lengthOf( 4 );
+			expect( event.typeParameters ).to.lengthOf( 3 );
 
-			expect( event.typeParameters[ 0 ] ).to.have.property( 'name', 'eventInfo' );
+			expect( event.typeParameters[ 0 ] ).to.have.property( 'name', 'p1' );
 			expect( event.typeParameters[ 0 ] ).to.have.property( 'comment' );
 			expect( event.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
 			expect( event.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
 			expect( event.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
-			expect( event.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'text',
-				'An object containing information about the fired event.'
-			);
+			expect( event.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'text', 'Description for first param.' );
 
-			expect( event.typeParameters[ 1 ] ).to.have.property( 'name', 'p1' );
+			expect( event.typeParameters[ 1 ] ).to.have.property( 'name', 'p2' );
 			expect( event.typeParameters[ 1 ] ).to.have.property( 'comment' );
 			expect( event.typeParameters[ 1 ].comment ).to.have.property( 'summary' );
 			expect( event.typeParameters[ 1 ].comment.summary ).to.be.an( 'array' );
 			expect( event.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
-			expect( event.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'text', 'Description for first param.' );
+			expect( event.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'text', 'Description for second param.' );
 
-			expect( event.typeParameters[ 2 ] ).to.have.property( 'name', 'p2' );
+			expect( event.typeParameters[ 2 ] ).to.have.property( 'name', 'p3' );
 			expect( event.typeParameters[ 2 ] ).to.have.property( 'comment' );
 			expect( event.typeParameters[ 2 ].comment ).to.have.property( 'summary' );
 			expect( event.typeParameters[ 2 ].comment.summary ).to.be.an( 'array' );
+			expect( event.typeParameters[ 2 ].comment.summary ).to.lengthOf( 5 );
+
 			expect( event.typeParameters[ 2 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
-			expect( event.typeParameters[ 2 ].comment.summary[ 0 ] ).to.have.property( 'text', 'Description for second param.' );
+			expect( event.typeParameters[ 2 ].comment.summary[ 0 ] ).to.have.property( 'text', 'Complex ' );
 
-			expect( event.typeParameters[ 3 ] ).to.have.property( 'name', 'p3' );
-			expect( event.typeParameters[ 3 ] ).to.have.property( 'comment' );
-			expect( event.typeParameters[ 3 ].comment ).to.have.property( 'summary' );
-			expect( event.typeParameters[ 3 ].comment.summary ).to.be.an( 'array' );
-			expect( event.typeParameters[ 3 ].comment.summary ).to.lengthOf( 5 );
-
-			expect( event.typeParameters[ 3 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
-			expect( event.typeParameters[ 3 ].comment.summary[ 0 ] ).to.have.property( 'text', 'Complex ' );
-
-			expect( event.typeParameters[ 3 ].comment.summary[ 1 ] ).to.have.property( 'kind', 'inline-tag' );
-			expect( event.typeParameters[ 3 ].comment.summary[ 1 ] ).to.have.property( 'tag', '@link' );
-			expect( event.typeParameters[ 3 ].comment.summary[ 1 ] ).to.have.property( 'text',
+			expect( event.typeParameters[ 2 ].comment.summary[ 1 ] ).to.have.property( 'kind', 'inline-tag' );
+			expect( event.typeParameters[ 2 ].comment.summary[ 1 ] ).to.have.property( 'tag', '@link' );
+			expect( event.typeParameters[ 2 ].comment.summary[ 1 ] ).to.have.property( 'text',
 				'module:utils/object~Object description'
 			);
 
-			expect( event.typeParameters[ 3 ].comment.summary[ 2 ] ).to.have.property( 'kind', 'text' );
-			expect( event.typeParameters[ 3 ].comment.summary[ 2 ] ).to.have.property( 'text', ' for ' );
+			expect( event.typeParameters[ 2 ].comment.summary[ 2 ] ).to.have.property( 'kind', 'text' );
+			expect( event.typeParameters[ 2 ].comment.summary[ 2 ] ).to.have.property( 'text', ' for ' );
 
-			expect( event.typeParameters[ 3 ].comment.summary[ 3 ] ).to.have.property( 'kind', 'code' );
-			expect( event.typeParameters[ 3 ].comment.summary[ 3 ] ).to.have.property( 'text', '`third param`' );
+			expect( event.typeParameters[ 2 ].comment.summary[ 3 ] ).to.have.property( 'kind', 'code' );
+			expect( event.typeParameters[ 2 ].comment.summary[ 3 ] ).to.have.property( 'text', '`third param`' );
 
-			expect( event.typeParameters[ 3 ].comment.summary[ 4 ] ).to.have.property( 'kind', 'text' );
-			expect( event.typeParameters[ 3 ].comment.summary[ 4 ] ).to.have.property( 'text', '.' );
+			expect( event.typeParameters[ 2 ].comment.summary[ 4 ] ).to.have.property( 'kind', 'text' );
+			expect( event.typeParameters[ 2 ].comment.summary[ 4 ] ).to.have.property( 'text', '.' );
 		}
 
-		for ( const index of [ 0, 1, 2, 3 ] ) {
+		for ( const index of [ 0, 1, 2 ] ) {
 			const baseEventClassAParam = baseEventClassA.typeParameters[ index ];
 			const inheritedEventClassBParam = inheritedEventClassB.typeParameters[ index ];
 			const inheritedEventClassCParam = inheritedEventClassC.typeParameters[ index ];
