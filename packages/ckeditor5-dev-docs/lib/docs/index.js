@@ -64,7 +64,9 @@ module.exports = async function build( config ) {
 			require.resolve( '@ckeditor/typedoc-plugins/lib/symbol-fixer' ),
 			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-error' ),
 			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-event' ),
-			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-observable' )
+			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-observable' ),
+			// The `event-param-fixer` plugin must be loaded after `tag-event` and `tag-observable` plugins, as it depends on their output.
+			require.resolve( '@ckeditor/typedoc-plugins/lib/event-param-fixer' )
 		],
 		// TODO: Move tsconfig.json to main repo. Also: how to share it across repos? Also: Do we need to share it?
 		tsconfig: path.join( process.cwd(), 'tsconfig.docs.json' )
