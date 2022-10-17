@@ -79,11 +79,11 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 		let eventFoo, eventFooNoText, eventFooWithParams, eventObservableChange, eventObservableSet, eventInfoClass;
 
 		before( () => {
-			eventFoo = conversionResult.getChildByName( [ 'fixtures/example', 'CustomExampleNonDefaultClass', 'event:event-foo' ] );
-			eventFooNoText = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'event:event-foo-no-text' ] );
-			eventFooWithParams = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'event:event-foo-with-params' ] );
-			eventObservableChange = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'event:change:key' ] );
-			eventObservableSet = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'event:set:key' ] );
+			eventFoo = conversionResult.getChildByName( [ 'fixtures/example', 'CustomExampleNonDefaultClass', 'event-foo' ] );
+			eventFooNoText = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'event-foo-no-text' ] );
+			eventFooWithParams = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'event-foo-with-params' ] );
+			eventObservableChange = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'change:key' ] );
+			eventObservableSet = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'set:key' ] );
 			eventInfoClass = conversionResult.getChildByName( [ 'utils/eventinfo', 'EventInfo' ] );
 
 			expect( eventFoo ).to.not.be.undefined;
@@ -95,8 +95,8 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 		} );
 
 		it( 'should add the "eventInfo" parameter for event without params and without comment', () => {
-			expect( eventFooNoText.name ).to.equal( 'event:event-foo-no-text' );
-			expect( eventFooNoText.originalName ).to.equal( 'event:event-foo-no-text' );
+			expect( eventFooNoText.name ).to.equal( 'event-foo-no-text' );
+			expect( eventFooNoText.originalName ).to.equal( 'event-foo-no-text' );
 			expect( eventFooNoText.kindString ).to.equal( 'Event' );
 
 			expect( eventFooNoText.typeParameters ).to.be.an( 'array' );
@@ -118,8 +118,8 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 		} );
 
 		it( 'should add the "eventInfo" parameter for event without params, but with comment', () => {
-			expect( eventFoo.name ).to.equal( 'event:event-foo' );
-			expect( eventFoo.originalName ).to.equal( 'event:event-foo' );
+			expect( eventFoo.name ).to.equal( 'event-foo' );
+			expect( eventFoo.originalName ).to.equal( 'event-foo' );
 			expect( eventFoo.kindString ).to.equal( 'Event' );
 
 			expect( eventFoo.typeParameters ).to.be.an( 'array' );
@@ -141,8 +141,8 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 		} );
 
 		it( 'should add the "eventInfo" parameter for event with params and comment', () => {
-			expect( eventFooWithParams.name ).to.equal( 'event:event-foo-with-params' );
-			expect( eventFooWithParams.originalName ).to.equal( 'event:event-foo-with-params' );
+			expect( eventFooWithParams.name ).to.equal( 'event-foo-with-params' );
+			expect( eventFooWithParams.originalName ).to.equal( 'event-foo-with-params' );
 			expect( eventFooWithParams.kindString ).to.equal( 'Event' );
 
 			expect( eventFooWithParams.typeParameters ).to.be.an( 'array' );
@@ -164,8 +164,8 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 		} );
 
 		it( 'should add the "eventInfo" parameter for the "change" event for observable property', () => {
-			expect( eventObservableChange.name ).to.equal( 'event:change:key' );
-			expect( eventObservableChange.originalName ).to.equal( 'event:change:key' );
+			expect( eventObservableChange.name ).to.equal( 'change:key' );
+			expect( eventObservableChange.originalName ).to.equal( 'change:key' );
 			expect( eventObservableChange.kindString ).to.equal( 'Event' );
 
 			expect( eventObservableChange.typeParameters ).to.be.an( 'array' );
@@ -187,8 +187,8 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 		} );
 
 		it( 'should add the "eventInfo" parameter for the "set" event for observable property', () => {
-			expect( eventObservableSet.name ).to.equal( 'event:set:key' );
-			expect( eventObservableSet.originalName ).to.equal( 'event:set:key' );
+			expect( eventObservableSet.name ).to.equal( 'set:key' );
+			expect( eventObservableSet.originalName ).to.equal( 'set:key' );
 			expect( eventObservableSet.kindString ).to.equal( 'Event' );
 
 			expect( eventObservableSet.typeParameters ).to.be.an( 'array' );
