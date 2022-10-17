@@ -70,14 +70,14 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 		expect( events ).to.lengthOf( 8 );
 
 		// The order of found events does not matter, so just check if all of them are found.
-		expect( events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-3-class-b' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassC' && event.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassC' && event.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassC' && event.name === 'event:event-3-class-b' ) ).to.not.be.undefined;
+		expect( events.find( event => event.parent.name === 'ClassA' && event.name === 'event-1-class-a' ) ).to.not.be.undefined;
+		expect( events.find( event => event.parent.name === 'ClassA' && event.name === 'event-2-class-a' ) ).to.not.be.undefined;
+		expect( events.find( event => event.parent.name === 'ClassB' && event.name === 'event-1-class-a' ) ).to.not.be.undefined;
+		expect( events.find( event => event.parent.name === 'ClassB' && event.name === 'event-2-class-a' ) ).to.not.be.undefined;
+		expect( events.find( event => event.parent.name === 'ClassB' && event.name === 'event-3-class-b' ) ).to.not.be.undefined;
+		expect( events.find( event => event.parent.name === 'ClassC' && event.name === 'event-1-class-a' ) ).to.not.be.undefined;
+		expect( events.find( event => event.parent.name === 'ClassC' && event.name === 'event-2-class-a' ) ).to.not.be.undefined;
+		expect( events.find( event => event.parent.name === 'ClassC' && event.name === 'event-3-class-b' ) ).to.not.be.undefined;
 	} );
 
 	it( 'should create new events with own ids in the inherited classes', () => {
@@ -88,9 +88,9 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 	} );
 
 	it( 'should clone event comment in the inherited classes', () => {
-		const baseEventClassA = events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-1-class-a' );
-		const inheritedEventClassB = events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-1-class-a' );
-		const inheritedEventClassC = events.find( event => event.parent.name === 'ClassC' && event.name === 'event:event-1-class-a' );
+		const baseEventClassA = events.find( event => event.parent.name === 'ClassA' && event.name === 'event-1-class-a' );
+		const inheritedEventClassB = events.find( event => event.parent.name === 'ClassB' && event.name === 'event-1-class-a' );
+		const inheritedEventClassC = events.find( event => event.parent.name === 'ClassC' && event.name === 'event-1-class-a' );
 
 		expect( baseEventClassA.comment ).to.not.equal( inheritedEventClassB.comment );
 		expect( baseEventClassA.comment ).to.not.equal( inheritedEventClassC.comment );
@@ -113,9 +113,9 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 	} );
 
 	it( 'should clone event source in the inherited classes but keep the original source properties', () => {
-		const baseEventClassA = events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-1-class-a' );
-		const inheritedEventClassB = events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-1-class-a' );
-		const inheritedEventClassC = events.find( event => event.parent.name === 'ClassC' && event.name === 'event:event-1-class-a' );
+		const baseEventClassA = events.find( event => event.parent.name === 'ClassA' && event.name === 'event-1-class-a' );
+		const inheritedEventClassB = events.find( event => event.parent.name === 'ClassB' && event.name === 'event-1-class-a' );
+		const inheritedEventClassC = events.find( event => event.parent.name === 'ClassC' && event.name === 'event-1-class-a' );
 
 		expect( baseEventClassA.sources ).to.not.equal( inheritedEventClassB.sources );
 		expect( baseEventClassA.sources ).to.not.equal( inheritedEventClassC.sources );
@@ -143,9 +143,9 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 	} );
 
 	it( 'should clone event parameters and all their properties in the inherited classes', () => {
-		const baseEventClassA = events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-1-class-a' );
-		const inheritedEventClassB = events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-1-class-a' );
-		const inheritedEventClassC = events.find( event => event.parent.name === 'ClassC' && event.name === 'event:event-1-class-a' );
+		const baseEventClassA = events.find( event => event.parent.name === 'ClassA' && event.name === 'event-1-class-a' );
+		const inheritedEventClassB = events.find( event => event.parent.name === 'ClassB' && event.name === 'event-1-class-a' );
+		const inheritedEventClassC = events.find( event => event.parent.name === 'ClassC' && event.name === 'event-1-class-a' );
 
 		expect( baseEventClassA.typeParameters ).to.not.equal( inheritedEventClassB.typeParameters );
 		expect( baseEventClassA.typeParameters ).to.not.equal( inheritedEventClassC.typeParameters );
@@ -214,8 +214,8 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 	} );
 
 	it( 'should not create a new event in derived class if derived class already contains the overwritten event', () => {
-		const baseEventClassA = events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-2-class-a' );
-		const overwrittenEventClassC = events.find( event => event.parent.name === 'ClassC' && event.name === 'event:event-2-class-a' );
+		const baseEventClassA = events.find( event => event.parent.name === 'ClassA' && event.name === 'event-2-class-a' );
+		const overwrittenEventClassC = events.find( event => event.parent.name === 'ClassC' && event.name === 'event-2-class-a' );
 
 		expect( baseEventClassA.comment ).to.have.property( 'summary' );
 		expect( baseEventClassA.comment.summary ).to.be.an( 'array' );

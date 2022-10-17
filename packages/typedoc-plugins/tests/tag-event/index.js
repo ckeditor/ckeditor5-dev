@@ -54,7 +54,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 
 	it( 'should find all event tags within the project', () => {
 		const eventDefinitions = conversionResult.getReflectionsByKind( TypeDoc.ReflectionKind.All )
-			.filter( children => children.name.startsWith( 'event:' ) );
+			.filter( children => children.kindString === 'Event' );
 
 		// There should be 4 correctly defined events:
 		// 1. event-foo
@@ -77,7 +77,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 			.find( entry => entry.kindString === 'Class' && entry.name === 'CustomExampleClassFires' );
 
 		const eventDefinition = classDefinition.children
-			.find( doclet => doclet.name === 'event:event-foo-in-class-with-fires' );
+			.find( doclet => doclet.name === 'event-foo-in-class-with-fires' );
 
 		expect( eventDefinition ).to.not.be.undefined;
 	} );
@@ -93,17 +93,17 @@ describe( 'typedoc-plugins/tag-event', function() {
 
 		it( 'should find all event tags within the class', () => {
 			const eventDefinitions = classDefinition.children
-				.filter( children => children.name.startsWith( 'event:' ) );
+				.filter( children => children.kindString === 'Event' );
 
 			expect( eventDefinitions ).to.lengthOf( 3 );
 		} );
 
 		it( 'should find an event tag without description and parameters', () => {
-			const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-no-text' );
+			const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event-foo-no-text' );
 
 			expect( eventDefinition ).to.not.be.undefined;
-			expect( eventDefinition.name ).to.equal( 'event:event-foo-no-text' );
-			expect( eventDefinition.originalName ).to.equal( 'event:event-foo-no-text' );
+			expect( eventDefinition.name ).to.equal( 'event-foo-no-text' );
+			expect( eventDefinition.originalName ).to.equal( 'event-foo-no-text' );
 			expect( eventDefinition.kindString ).to.equal( 'Event' );
 
 			expect( eventDefinition.comment ).to.have.property( 'summary' );
@@ -129,11 +129,11 @@ describe( 'typedoc-plugins/tag-event', function() {
 		} );
 
 		it( 'should find an event tag with description and without parameters', () => {
-			const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo' );
+			const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event-foo' );
 
 			expect( eventDefinition ).to.not.be.undefined;
-			expect( eventDefinition.name ).to.equal( 'event:event-foo' );
-			expect( eventDefinition.originalName ).to.equal( 'event:event-foo' );
+			expect( eventDefinition.name ).to.equal( 'event-foo' );
+			expect( eventDefinition.originalName ).to.equal( 'event-foo' );
 			expect( eventDefinition.kindString ).to.equal( 'Event' );
 
 			expect( eventDefinition.comment ).to.have.property( 'summary' );
@@ -153,11 +153,11 @@ describe( 'typedoc-plugins/tag-event', function() {
 		} );
 
 		it( 'should find an event tag with description and parameters', () => {
-			const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-with-params' );
+			const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event-foo-with-params' );
 
 			expect( eventDefinition ).to.not.be.undefined;
-			expect( eventDefinition.name ).to.equal( 'event:event-foo-with-params' );
-			expect( eventDefinition.originalName ).to.equal( 'event:event-foo-with-params' );
+			expect( eventDefinition.name ).to.equal( 'event-foo-with-params' );
+			expect( eventDefinition.originalName ).to.equal( 'event-foo-with-params' );
 			expect( eventDefinition.kindString ).to.equal( 'Event' );
 
 			expect( eventDefinition.comment ).to.have.property( 'summary' );
