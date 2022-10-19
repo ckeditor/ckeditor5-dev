@@ -6,6 +6,7 @@
 'use strict';
 
 const path = require( 'path' );
+const fs = require( 'fs-extra' );
 const webpack = require( 'webpack' );
 const TerserPlugin = require( 'terser-webpack-plugin' );
 const bundler = require( '../bundler' );
@@ -26,6 +27,7 @@ const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' 
  */
 module.exports = function getDllPluginWebpackConfig( options ) {
 	const packageName = tools.readPackageName( options.packagePath );
+	const langDirExists = fs.existsSync( path.join( options.packagePath, 'lang' ) );
 
 	const webpackConfig = {
 		mode: options.isDevelopmentMode ? 'development' : 'production',
@@ -47,13 +49,6 @@ module.exports = function getDllPluginWebpackConfig( options ) {
 		},
 
 		plugins: [
-			new CKEditorWebpackPlugin( {
-				// UI language. Language codes follow the https://en.wikipedia.org/wiki/ISO_639-1 format.
-				language: 'en',
-				additionalLanguages: 'all',
-				sourceFilesPattern: /^src[/\\].+\.js$/,
-				skipPluralFormFunction: true
-			} ),
 			new webpack.BannerPlugin( {
 				banner: bundler.getLicenseBanner(),
 				raw: true
@@ -108,6 +103,16 @@ module.exports = function getDllPluginWebpackConfig( options ) {
 			]
 		}
 	};
+
+	if ( langDirExists ) {
+		webpackConfig.plugins.push( new CKEditorWebpackPlugin( {
+			// UI language. Language codes follow the https://en.wikipedia.org/wiki/ISO_639-1 format.
+			language: 'en',
+			additionalLanguages: 'all',
+			sourceFilesPattern: /^src[/\\].+\.js$/,
+			skipPluralFormFunction: true
+		} ) );
+	}
 
 	if ( options.isDevelopmentMode ) {
 		webpackConfig.devtool = 'source-map';
