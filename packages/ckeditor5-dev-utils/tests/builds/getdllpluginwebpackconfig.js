@@ -58,7 +58,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 	} );
 
 	afterEach( () => {
-		mockery.deregisterMock( 'fs-extra' );
+		mockery.deregisterAll();
 		mockery.disable();
 		sandbox.restore();
 	} );
