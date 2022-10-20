@@ -46,7 +46,7 @@ module.exports = class CKEditorWebpackPlugin {
 			verbose: !!options.verbose,
 			addMainLanguageTranslationsToAllAssets: !!options.addMainLanguageTranslationsToAllAssets,
 			buildAllTranslationsToSeparateFiles: !!options.buildAllTranslationsToSeparateFiles,
-			sourceFilesPattern: options.sourceFilesPattern || /[/\\]ckeditor5-[^/\\]+[/\\]src[/\\].+\.js|ts$/,
+			sourceFilesPattern: options.sourceFilesPattern || /[/\\]ckeditor5-[^/\\]+[/\\]src[/\\].+\.[jt]s$/,
 			packageNamesPattern: options.packageNamesPattern || /[/\\]ckeditor5-[^/\\]+[/\\]/,
 			corePackagePattern: options.corePackagePattern || /[/\\]ckeditor5-core/,
 			corePackageSampleResourcePath: options.corePackageSampleResourcePath || '@ckeditor/ckeditor5-core/src/editor/editor',
