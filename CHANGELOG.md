@@ -1,6 +1,34 @@
 Changelog
 =========
 
+## [31.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.1...v31.1.2) (2022-10-20)
+
+### Bug fixes
+
+* **[webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin)**: Fixed translations are not loaded from TypeScript source files. Closes [ckeditor/ckeditor5#12671](https://github.com/ckeditor/ckeditor5/issues/12671). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/3325333ef83dad16b859b55bf7586cf24004efea))
+
+### Other changes
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The `CKEditorWebpackPlugin` is added to the webpack configuration for DLL builds only when the `lang/` directory is present in the package directory. Closes [ckeditor/ckeditor5#12584](https://github.com/ckeditor/ckeditor5/issues/12584). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/05b99f5890f751733fdc9e87d115a537860ac8b4))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v31.1.1 => v31.1.2
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v31.1.1 => v31.1.2
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v31.1.1 => v31.1.2
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v31.1.1 => v31.1.2
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v31.1.1 => v31.1.2
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v31.1.1 => v31.1.2
+</details>
+
+
 ## [31.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.0...v31.1.1) (2022-10-07)
 
 ### Bug fixes
