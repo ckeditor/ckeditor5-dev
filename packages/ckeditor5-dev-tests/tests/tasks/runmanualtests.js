@@ -795,8 +795,15 @@ describe( 'runManualTests', () => {
 				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
 			] );
 
+			const consoleStub = sinon.stub( console, 'log' );
+
 			return runManualTests( defaultOptions )
 				.then( () => {
+					consoleStub.restore();
+
+					expect( consoleStub.callCount ).to.equal( 1 );
+					expect( consoleStub.firstCall.firstArg ).to.equal( '\n📍 DLL building complete.\n' );
+
 					sinon.assert.notCalled( spies.childProcess.spawn );
 
 					sinon.assert.calledOnce( spies.devUtils.logWarning );
@@ -858,8 +865,15 @@ describe( 'runManualTests', () => {
 				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
 			] );
 
+			const consoleStub = sinon.stub( console, 'log' );
+
 			return runManualTests( defaultOptions )
 				.then( () => {
+					consoleStub.restore();
+
+					expect( consoleStub.callCount ).to.equal( 1 );
+					expect( consoleStub.firstCall.firstArg ).to.equal( '\n📍 DLL building complete.\n' );
+
 					sinon.assert.notCalled( spies.childProcess.spawn );
 				} );
 		} );
@@ -879,8 +893,15 @@ describe( 'runManualTests', () => {
 				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
 			] );
 
+			const consoleStub = sinon.stub( console, 'log' );
+
 			return runManualTests( defaultOptions )
 				.then( () => {
+					consoleStub.restore();
+
+					expect( consoleStub.callCount ).to.equal( 1 );
+					expect( consoleStub.firstCall.firstArg ).to.equal( '\n📍 DLL building complete.\n' );
+
 					sinon.assert.notCalled( spies.childProcess.spawn );
 				} );
 		} );
@@ -908,8 +929,15 @@ describe( 'runManualTests', () => {
 				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
 			] );
 
+			const consoleStub = sinon.stub( console, 'log' );
+
 			return runManualTests( defaultOptions )
 				.then( () => {
+					consoleStub.restore();
+
+					expect( consoleStub.callCount ).to.equal( 1 );
+					expect( consoleStub.firstCall.firstArg ).to.equal( '\n📍 DLL building complete.\n' );
+
 					sinon.assert.calledTwice( spies.childProcess.spawn );
 
 					sinon.assert.calledWith( spies.childProcess.spawn.firstCall,
@@ -980,8 +1008,15 @@ describe( 'runManualTests', () => {
 				dll: true
 			};
 
+			const consoleStub = sinon.stub( console, 'log' );
+
 			return runManualTests( { ...defaultOptions, ...options } )
 				.then( () => {
+					consoleStub.restore();
+
+					expect( consoleStub.callCount ).to.equal( 1 );
+					expect( consoleStub.firstCall.firstArg ).to.equal( '\n📍 DLL building complete.\n' );
+
 					sinon.assert.notCalled( spies.inquirer.prompt );
 
 					sinon.assert.calledTwice( spies.childProcess.spawn );
@@ -1074,8 +1109,15 @@ describe( 'runManualTests', () => {
 				'workspace/packages/ckeditor5-*/tests/**/manual/dll/**/*.js'
 			] );
 
+			const consoleStub = sinon.stub( console, 'log' );
+
 			return runManualTests( defaultOptions )
 				.then( () => {
+					consoleStub.restore();
+
+					expect( consoleStub.callCount ).to.equal( 1 );
+					expect( consoleStub.firstCall.firstArg ).to.equal( '\n📍 DLL building complete.\n' );
+
 					sinon.assert.calledOnce( spies.scriptCompiler );
 					sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
 						buildDir: 'workspace/build/.manual-tests',
