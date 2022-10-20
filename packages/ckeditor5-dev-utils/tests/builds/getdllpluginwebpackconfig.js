@@ -36,6 +36,9 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 		stubs = {
 			tools: {
 				readPackageName: sandbox.stub()
+			},
+			fs: {
+				existsSync: sandbox.stub()
 			}
 		};
 
@@ -48,12 +51,14 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 		} );
 
 		mockery.registerMock( '../tools', stubs.tools );
+		mockery.registerMock( 'fs-extra', stubs.fs );
 		mockery.registerMock( '/manifest/path', manifest );
 
 		getDllPluginWebpackConfig = require( '../../lib/builds/getdllpluginwebpackconfig' );
 	} );
 
 	afterEach( () => {
+		mockery.deregisterAll();
 		mockery.disable();
 		sandbox.restore();
 	} );
@@ -144,8 +149,9 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			expect( dllReferencePlugin.options.name ).to.equal( 'CKEditor5.dll' );
 		} );
 
-		it( 'loads the CKEditorWebpackPlugin plugin', () => {
+		it( 'loads the CKEditorWebpackPlugin plugin when lang dir exists', () => {
 			stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
+			stubs.fs.existsSync.returns( true );
 
 			const webpackConfig = getDllPluginWebpackConfig( {
 				packagePath: '/package/path',
@@ -162,6 +168,22 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			expect( ckeditor5TranslationsPlugin.options.skipPluralFormFunction ).to.equal( true );
 			expect( 'src/bold.js' ).to.match( ckeditor5TranslationsPlugin.options.sourceFilesPattern );
 			expect( 'ckeditor5-basic-styles/src/bold.js' ).to.not.match( ckeditor5TranslationsPlugin.options.sourceFilesPattern );
+		} );
+
+		it( 'does not load the CKEditorWebpackPlugin plugin when lang dir does not exist', () => {
+			stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
+			stubs.fs.existsSync.returns( false );
+
+			const webpackConfig = getDllPluginWebpackConfig( {
+				packagePath: '/package/path',
+				themePath: '/theme/path',
+				manifestPath: '/manifest/path'
+			} );
+
+			// Due to versions mismatch, the `instanceof` check does not pass.
+			const ckeditor5TranslationsPlugin = webpackConfig.plugins.find( plugin => plugin.constructor.name === 'CKEditorWebpackPlugin' );
+
+			expect( ckeditor5TranslationsPlugin ).to.be.undefined;
 		} );
 	} );
 } );
