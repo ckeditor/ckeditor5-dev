@@ -56,19 +56,18 @@ describe( 'typedoc-plugins/tag-event', function() {
 		const eventDefinitions = conversionResult.getReflectionsByKind( TypeDoc.ReflectionKind.All )
 			.filter( children => children.kindString === 'Event' );
 
-		// There should be 4 correctly defined events:
+		// There should be 6 correctly defined events:
 		// 1. event-foo
 		// 2. event-foo-no-text
 		// 3. event-foo-with-params
 		// 4. event-foo-in-class-with-fires
-		expect( eventDefinitions ).to.lengthOf( 4 );
+		// 5. change:{property}
+		// 6. set:{property}
+		expect( eventDefinitions ).to.lengthOf( 6 );
 	} );
 
 	it( 'should inform if the class for an event has not been found', () => {
-		expect( typeDoc.logger.warn.calledOnce ).to.equal( true );
-		expect( typeDoc.logger.warn.firstCall.args[ 0 ] ).to.equal( 'Skipping unsupported "event-foo-no-class" event.' );
-		expect( typeDoc.logger.warn.firstCall.args[ 1 ] ).to.have.property( 'name' );
-		expect( typeDoc.logger.warn.firstCall.args[ 1 ].name ).to.have.property( 'escapedText', 'EventFooNoText' );
+		expect( typeDoc.logger.warn.calledWith( 'Skipping unsupported "event-foo-no-class" event.' ) ).to.be.true;
 	} );
 
 	it( 'should first take into account the class that fires the event instead of the default class, if both exist in the module', () => {
@@ -80,6 +79,18 @@ describe( 'typedoc-plugins/tag-event', function() {
 			.find( doclet => doclet.name === 'event-foo-in-class-with-fires' );
 
 		expect( eventDefinition ).to.not.be.undefined;
+	} );
+
+	it( 'should associate events to the `Observable` interface if it exists in the module, even if module has default class', () => {
+		const interfaceDefinition = conversionResult.children
+			.find( entry => entry.name === 'observableinterface' ).children
+			.find( entry => entry.kindString === 'Interface' && entry.name === 'Observable' );
+
+		const eventChange = interfaceDefinition.children.find( doclet => doclet.name === 'change:{property}' );
+		const eventSet = interfaceDefinition.children.find( doclet => doclet.name === 'set:{property}' );
+
+		expect( eventChange ).to.not.be.undefined;
+		expect( eventSet ).to.not.be.undefined;
 	} );
 
 	describe( 'event definitions', () => {
