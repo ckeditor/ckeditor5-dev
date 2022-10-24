@@ -131,6 +131,32 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 		expect( webpackConfig.output.libraryExport ).to.be.undefined;
 	} );
 
+	it( 'uses index.ts entry file if exists', () => {
+		stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
+		stubs.fs.existsSync.callsFake( file => file == '/package/path/src/index.ts' );
+
+		const webpackConfig = getDllPluginWebpackConfig( {
+			packagePath: '/package/path',
+			themePath: '/theme/path',
+			manifestPath: '/manifest/path'
+		} );
+
+		expect( webpackConfig.entry ).to.equal( '/package/path/src/index.ts' );
+	} );
+
+	it( 'uses index.js entry file if ts file does not exists', () => {
+		stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
+		stubs.fs.existsSync.callsFake( file => file != '/package/path/src/index.ts' );
+
+		const webpackConfig = getDllPluginWebpackConfig( {
+			packagePath: '/package/path',
+			themePath: '/theme/path',
+			manifestPath: '/manifest/path'
+		} );
+
+		expect( webpackConfig.entry ).to.equal( '/package/path/src/index.js' );
+	} );
+
 	describe( '#plugins', () => {
 		it( 'loads the webpack.DllReferencePlugin plugin', () => {
 			stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
@@ -147,6 +173,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			expect( dllReferencePlugin.options.manifest ).to.deep.equal( manifest );
 			expect( dllReferencePlugin.options.scope ).to.equal( 'ckeditor5/src' );
 			expect( dllReferencePlugin.options.name ).to.equal( 'CKEditor5.dll' );
+			expect( dllReferencePlugin.options.extensions ).to.deep.equal( [ '.ts' ] );
 		} );
 
 		it( 'loads the CKEditorWebpackPlugin plugin when lang dir exists', () => {
@@ -167,7 +194,9 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			expect( ckeditor5TranslationsPlugin.options.additionalLanguages ).to.equal( 'all' );
 			expect( ckeditor5TranslationsPlugin.options.skipPluralFormFunction ).to.equal( true );
 			expect( 'src/bold.js' ).to.match( ckeditor5TranslationsPlugin.options.sourceFilesPattern );
+			expect( 'src/bold.ts' ).to.match( ckeditor5TranslationsPlugin.options.sourceFilesPattern );
 			expect( 'ckeditor5-basic-styles/src/bold.js' ).to.not.match( ckeditor5TranslationsPlugin.options.sourceFilesPattern );
+			expect( 'ckeditor5-basic-styles/src/bold.ts' ).to.not.match( ckeditor5TranslationsPlugin.options.sourceFilesPattern );
 		} );
 
 		it( 'does not load the CKEditorWebpackPlugin plugin when lang dir does not exist', () => {
