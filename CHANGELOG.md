@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [31.1.4](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.3...v31.1.4) (2022-10-25)
+
+### Other changes
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Support for referencing DLLs built from TypeScript. Closes [ckeditor/ckeditor5#12694](https://github.com/ckeditor/ckeditor5/issues/12694). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/9688378ac7b894e70e62debb6a7ec5c39325f913))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v31.1.3 => v31.1.4
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v31.1.3 => v31.1.4
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v31.1.3 => v31.1.4
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v31.1.3 => v31.1.4
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v31.1.3 => v31.1.4
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v31.1.3 => v31.1.4
+</details>
+
+
 ## [31.1.3](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.2...v31.1.3) (2022-10-20)
 
 ### Bug fixes
