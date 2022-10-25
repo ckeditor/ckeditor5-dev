@@ -28,13 +28,14 @@ const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' 
 module.exports = function getDllPluginWebpackConfig( options ) {
 	const packageName = tools.readPackageName( options.packagePath );
 	const langDirExists = fs.existsSync( path.join( options.packagePath, 'lang' ) );
+	const indexTsExists = fs.existsSync( path.join( options.packagePath, 'src', 'index.ts' ) );
 
 	const webpackConfig = {
 		mode: options.isDevelopmentMode ? 'development' : 'production',
 
 		performance: { hints: false },
 
-		entry: path.join( options.packagePath, 'src', 'index.js' ),
+		entry: path.join( options.packagePath, 'src', indexTsExists ? 'index.ts' : 'index.js' ),
 
 		output: {
 			library: [ 'CKEditor5', getGlobalKeyForPackage( packageName ) ],
@@ -56,6 +57,7 @@ module.exports = function getDllPluginWebpackConfig( options ) {
 			new webpack.DllReferencePlugin( {
 				manifest: require( options.manifestPath ),
 				scope: 'ckeditor5/src',
+				extensions: [ '.ts' ],
 				name: 'CKEditor5.dll'
 			} )
 		],
@@ -109,7 +111,7 @@ module.exports = function getDllPluginWebpackConfig( options ) {
 			// UI language. Language codes follow the https://en.wikipedia.org/wiki/ISO_639-1 format.
 			language: 'en',
 			additionalLanguages: 'all',
-			sourceFilesPattern: /^src[/\\].+\.js$/,
+			sourceFilesPattern: /^src[/\\].+\.[jt]s$/,
 			skipPluralFormFunction: true
 		} ) );
 	}
