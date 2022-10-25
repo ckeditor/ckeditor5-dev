@@ -8,7 +8,8 @@
 const { Converter, ReflectionKind, TypeParameterReflection, Comment } = require( 'typedoc' );
 
 /**
- * The `typedoc-plugin-tag-event` collects event definitions from the `@eventName` tag and assigns them as the class children.
+ * The `typedoc-plugin-tag-event` collects event definitions from the `@eventName` tag and assigns them as the children of the class or
+ * the `Observable` interface.
  *
  * We are not using the `@event` tag, known from the JSDoc specification, because it has a special meaning in the TypeDoc, and it would be
  * difficult to get it to work as we expect. This is why we have introduced a support for the custom `@eventName` tag, which now replaces
@@ -63,10 +64,11 @@ function onEventEnd( context ) {
 		// tag name. Example: for the `@eventName foo`, the event name would be `foo`.
 		const eventName = reflection.comment.getTag( '@eventName' ).content[ 0 ].text;
 
-		// Then, try to find a parent class to properly associate the event in the hierarchy.
-		const classReflection = findClassForEvent( eventName, reflection );
+		// Then, try to find a parent reflection to properly associate the event in the hierarchy. The parent can be either the `Observable`
+		// interface, or a class.
+		const parentReflection = findParentForEvent( eventName, reflection );
 
-		if ( !classReflection ) {
+		if ( !parentReflection ) {
 			const symbol = context.project.getSymbolFromReflection( reflection );
 			const node = symbol.declarations[ 0 ];
 
@@ -75,10 +77,10 @@ function onEventEnd( context ) {
 			continue;
 		}
 
-		// Create a new reflection object for the event, but take into account the found class as the new scope. It will cause the newly
-		// created event reflection to be automatically associated as a child of this class.
+		// Create a new reflection object for the event, but take into account the found parent reflection as the new scope. It will cause
+		// the newly created event reflection to be automatically associated as a child of this parent.
 		const eventReflection = context
-			.withScope( classReflection )
+			.withScope( parentReflection )
 			.createDeclarationReflection(
 				ReflectionKind.ObjectLiteral,
 				undefined,
@@ -112,19 +114,22 @@ function onEventEnd( context ) {
 }
 
 /**
- * Tries to find the best parent class for the event. The algorithm is as follows:
+ * Tries to find the best parent reflection for the event. The algorithm is as follows:
  *
- * (1) First, it traverses the ancestors of the reflection containing the specified event and searches for a class that fires this event.
- * (2) Otherwise, it tries to find the first default class within the same module.
+ * (1) First, it tries to find the `Observable` interface.
+ * (2) Then, if `Observable` interface is not found within the module, it traverses the ancestors of the reflection containing the specified
+ *     event and searches for a class that fires this event.
+ * (3) Otherwise, it tries to find the first default class within the same module.
  *
- * It returns `null` if no matching class is found.
+ * It returns `null` if no matching parent is found.
  *
  * @param {String} eventName The event name to be searched in the reflection parent.
  * @param {require('typedoc').Reflection} reflection The reflection that contains the event name.
  * @returns {require('typedoc').Reflection|null}
  */
-function findClassForEvent( eventName, reflection ) {
-	return findReflection( reflection, isClassThatFiresEvent( eventName ) ) ||
+function findParentForEvent( eventName, reflection ) {
+	return findReflection( reflection, isObservableInterface ) ||
+		findReflection( reflection, isClassThatFiresEvent( eventName ) ) ||
 		findReflection( reflection, isDefaultClass );
 }
 
@@ -148,6 +153,16 @@ function findReflection( reflection, callback ) {
 	}
 
 	return findReflection( reflection.parent, callback );
+}
+
+/**
+ * Checks if the reflection is the `Observable` interface.
+ *
+ * @param {require('typedoc').Reflection} reflection The reflection to be checked.
+ * @returns {Boolean}
+ */
+function isObservableInterface( reflection ) {
+	return reflection.kindString === 'Interface' && reflection.name === 'Observable';
 }
 
 /**
