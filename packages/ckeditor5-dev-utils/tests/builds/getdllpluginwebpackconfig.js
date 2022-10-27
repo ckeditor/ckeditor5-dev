@@ -173,7 +173,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			expect( dllReferencePlugin.options.manifest ).to.deep.equal( manifest );
 			expect( dllReferencePlugin.options.scope ).to.equal( 'ckeditor5/src' );
 			expect( dllReferencePlugin.options.name ).to.equal( 'CKEditor5.dll' );
-			expect( dllReferencePlugin.options.extensions ).to.deep.equal( [ '.ts' ] );
+			expect( dllReferencePlugin.options.extensions ).to.be.undefined;
 		} );
 
 		it( 'loads the CKEditorWebpackPlugin plugin when lang dir exists', () => {
