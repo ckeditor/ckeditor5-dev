@@ -14,6 +14,8 @@ const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
 
 /**
  * @param {Object} options
+ * @param {String} options.cwd Current working directory. Usually it points to the CKEditor 5 root directory.
+ * @param {Boolean} options.requireDll A flag describing whether DLL builds are required for starting the manual test server.
  * @param {Object} options.entries
  * @param {String} options.buildDir
  * @param {String} options.themePath
@@ -166,6 +168,24 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 			} )
 		);
 		webpackConfig.watch = true;
+	}
+
+	if ( options.requireDll ) {
+		// When processing DLL manual tests, extra imports might appear in the code due to
+		// usage of `CK_DEBUG_*` flags. In such a case, webpack requires the `DllReferencePlugin` plugin.
+		//
+		// Otherwise, it tries to import a file from a file system instead of the DLL build.
+		// It leads to the CKEditor 5 duplicated modules error.
+		//
+		// See: https://github.com/ckeditor/ckeditor5/issues/12791.
+		const manifestPath = path.join( options.cwd, 'build', 'ckeditor5-dll.manifest.json' );
+		const dllReferencePlugin = new webpack.DllReferencePlugin( {
+			manifest: require( manifestPath ),
+			scope: 'ckeditor5/src',
+			name: 'CKEditor5.dll'
+		} );
+
+		webpackConfig.plugins.push( dllReferencePlugin );
 	}
 
 	return webpackConfig;
