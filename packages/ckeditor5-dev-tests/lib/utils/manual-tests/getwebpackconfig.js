@@ -171,10 +171,10 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 	}
 
 	if ( options.requireDll ) {
-		// When processing DLL manual tests, extra imports might appear in the code due to
-		// usage of `CK_DEBUG_*` flags. In such a case, webpack requires the `DllReferencePlugin` plugin.
+		// When processing manual tests, if any of them require a DLL build, the manual test server adds the `DllReferencePlugin` plugin
+		// to the configuration to avoid the duplicated modules error when using an import statement behind the `CK_DEBUG_*` flags.
 		//
-		// Otherwise, it tries to import a file from a file system instead of the DLL build.
+		// Otherwise, webpack tries to import a file from a file system instead of the DLL build.
 		// It leads to the CKEditor 5 duplicated modules error.
 		//
 		// See: https://github.com/ckeditor/ckeditor5/issues/12791.
