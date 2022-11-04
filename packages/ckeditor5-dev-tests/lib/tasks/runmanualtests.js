@@ -20,6 +20,7 @@ const copyAssets = require( '../utils/manual-tests/copyassets' );
 const removeDir = require( '../utils/manual-tests/removedir' );
 const globSync = require( '../utils/glob' );
 const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontotestglob' );
+const requireDll = require( '../utils/requiredll' );
 
 /**
  * Main function that runs manual tests.
@@ -41,7 +42,8 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
  */
 module.exports = function runManualTests( options ) {
 	const log = logger();
-	const buildDir = path.join( process.cwd(), 'build', '.manual-tests' );
+	const cwd = process.cwd();
+	const buildDir = path.join( cwd, 'build', '.manual-tests' );
 	const isFilesFlagProvided = ( options.files && options.files.length );
 	const files = isFilesFlagProvided ? options.files : [ '*', 'ckeditor5' ];
 	const dedupedFileTestGlobs = [ ...new Set( files.flatMap( file => transformFileOptionToTestGlob( file, true ) ) ) ];
@@ -64,6 +66,42 @@ module.exports = function runManualTests( options ) {
 	const disableWatch = options.disableWatch || !isFilesFlagProvided;
 	let socketServer;
 
+	return Promise.resolve()
+		.then( () => isDllBuildRequired( sourceFiles ) )
+		.then( shouldBuildDll => {
+			if ( shouldBuildDll ) {
+				return buildDll();
+			}
+		} )
+		.then( () => removeDir( buildDir, { silent } ) )
+		.then( () => Promise.all( [
+			compileManualTestScripts( {
+				cwd,
+				buildDir,
+				sourceFiles,
+				themePath,
+				language,
+				additionalLanguages,
+				debug: options.debug,
+				identityFile: options.identityFile,
+				onTestCompilationStatus,
+				disableWatch
+			} ),
+			compileManualTestHtmlFiles( {
+				buildDir,
+				sourceFiles,
+				language,
+				additionalLanguages,
+				silent,
+				onTestCompilationStatus,
+				disableWatch
+			} ),
+			copyAssets( buildDir )
+		] ) )
+		.then( () => createManualTestServer( buildDir, options.port, httpServer => {
+			socketServer = new SocketServer( httpServer );
+		} ) );
+
 	function onTestCompilationStatus( status ) {
 		if ( socketServer ) {
 			socketServer.emit( 'testCompilationStatus', status );
@@ -77,7 +115,7 @@ module.exports = function runManualTests( options ) {
 	 * @returns {Promise}
 	 */
 	function isDllBuildRequired( sourceFiles ) {
-		const hasDllManualTest = sourceFiles.some( filePath => filePath.endsWith( '-dll.js' ) );
+		const hasDllManualTest = requireDll( sourceFiles );
 
 		// Skip building DLLs if there are no DLL-related manual tests.
 		if ( !hasDllManualTest ) {
@@ -177,39 +215,4 @@ module.exports = function runManualTests( options ) {
 				} );
 		} );
 	}
-
-	return Promise.resolve()
-		.then( () => isDllBuildRequired( sourceFiles ) )
-		.then( shouldBuildDll => {
-			if ( shouldBuildDll ) {
-				return buildDll();
-			}
-		} )
-		.then( () => removeDir( buildDir, { silent } ) )
-		.then( () => Promise.all( [
-			compileManualTestScripts( {
-				buildDir,
-				sourceFiles,
-				themePath,
-				language,
-				additionalLanguages,
-				debug: options.debug,
-				identityFile: options.identityFile,
-				onTestCompilationStatus,
-				disableWatch
-			} ),
-			compileManualTestHtmlFiles( {
-				buildDir,
-				sourceFiles,
-				language,
-				additionalLanguages,
-				silent,
-				onTestCompilationStatus,
-				disableWatch
-			} ),
-			copyAssets( buildDir )
-		] ) )
-		.then( () => createManualTestServer( buildDir, options.port, httpServer => {
-			socketServer = new SocketServer( httpServer );
-		} ) );
 };

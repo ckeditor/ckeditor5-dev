@@ -8,9 +8,11 @@
 const webpack = require( 'webpack' );
 const getWebpackConfigForManualTests = require( './getwebpackconfig' );
 const getRelativeFilePath = require( '../getrelativefilepath' );
+const requireDll = require( '../requiredll' );
 
 /**
  * @param {Object} options
+ * @param {String} options.cwd Current working directory. Usually it points to the CKEditor 5 root directory.
  * @param {String} options.buildDir A path where compiled files will be saved.
  * @param {Array.<String>} options.sourceFiles An array of paths to JavaScript files from manual tests to be compiled.
  * @param {String} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
@@ -24,9 +26,11 @@ const getRelativeFilePath = require( '../getrelativefilepath' );
  */
 module.exports = function compileManualTestScripts( options ) {
 	const entryFiles = options.sourceFiles;
-	const entries = getWebpackEntryPoints( entryFiles );
-	const webpackConfig = getWebpackConfigForManualTests( {
-		entries,
+	const entryFilesDLL = entryFiles.filter( entryFile => requireDll( entryFile ) );
+	const entryFilesNonDll = entryFiles.filter( entryFile => !requireDll( entryFile ) );
+
+	const webpackConfigCommon = {
+		cwd: options.cwd,
 		buildDir: options.buildDir,
 		themePath: options.themePath,
 		language: options.language,
@@ -35,9 +39,36 @@ module.exports = function compileManualTestScripts( options ) {
 		identityFile: options.identityFile,
 		disableWatch: options.disableWatch,
 		onTestCompilationStatus: options.onTestCompilationStatus
-	} );
+	};
 
-	return runWebpack( webpackConfig );
+	const webpackConfigs = [];
+
+	// DLL and non-DLL manual tests needs to be compiled separately, because DLL tests require `DllReferencePlugin` and non-DLL ones
+	// must not have it. Because of that, one or two separate webpack configs are produced and one or two separate webpack processes
+	// are executed.
+	if ( entryFilesDLL.length ) {
+		const webpackConfigDll = getWebpackConfigForManualTests( {
+			...webpackConfigCommon,
+			requireDll: true,
+			entries: getWebpackEntryPoints( entryFilesDLL )
+		} );
+
+		webpackConfigs.push( webpackConfigDll );
+	}
+
+	if ( entryFilesNonDll.length ) {
+		const webpackConfigNonDll = getWebpackConfigForManualTests( {
+			...webpackConfigCommon,
+			requireDll: false,
+			entries: getWebpackEntryPoints( entryFilesNonDll )
+		} );
+
+		webpackConfigs.push( webpackConfigNonDll );
+	}
+
+	const webpackPromises = webpackConfigs.map( config => runWebpack( config ) );
+
+	return Promise.all( webpackPromises );
 };
 
 /**
