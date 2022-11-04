@@ -11,12 +11,20 @@
 	let wasDisconnected = false;
 
 	socket.on( 'testCompilationStatus', status => {
-		if ( status === 'start' ) {
+		const isOnDll = window.location.href.toString().includes( '-dll.html' );
+		const [ eventName, processName ] = status.split( ':' );
+		const isDllStatus = processName === 'DLL';
+
+		if ( isOnDll !== isDllStatus ) {
+			return;
+		}
+
+		if ( eventName === 'start' ) {
 			showToast( 'info', toastElement => {
 				const text = document.createTextNode( 'Compiling tests…' );
 				toastElement.insertBefore( text, toastElement.firstChild );
 			} );
-		} else if ( status === 'finished' ) {
+		} else if ( eventName === 'finished' ) {
 			showUpdateAvailableToast();
 		}
 	} );
