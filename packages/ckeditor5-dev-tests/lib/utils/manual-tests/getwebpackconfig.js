@@ -42,7 +42,10 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 		},
 
 		plugins: [
-			new WebpackNotifierPlugin( options.onTestCompilationStatus ),
+			new WebpackNotifierPlugin( {
+				onTestCompilationStatus: options.onTestCompilationStatus,
+				processName: options.requireDll ? 'DLL' : 'non-DLL'
+			} ),
 			new CKEditorWebpackPlugin( {
 				// See https://ckeditor.com/docs/ckeditor5/latest/features/ui-language.html
 				language: options.language,
