@@ -1,6 +1,86 @@
 Changelog
 =========
 
+## [31.1.8](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.7...v31.1.8) (2022-11-04)
+
+The `v31.1.8` release restores changes introduced in the [`v31.1.6`](https://github.com/ckeditor/ckeditor5-dev/releases/tag/v31.1.6) version.
+
+We found a different approach to add `DllReferencePlugin` to the webpack configuration for DLL and non-DLL manual tests. Now, they are compiled in separate processes, and the `CKEditor5 is not defined` error should not occur anymore.
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: When processing manual tests, if any of them require a DLL build, the manual test server adds the `DllReferencePlugin` plugin to the webpack configuration to avoid the duplicated modules error when using an import statement behind the `CK_DEBUG_*` flags. See [ckeditor/ckeditor5#12791](https://github.com/ckeditor/ckeditor5/issues/12791). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/01e454ec2f6251b5731abd0a88bbf63059c6516d))
+
+### Other changes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Split DLL and non-DLL manual tests to run separate webpack processes for both groups. They need to be compiled separately because DLL tests require `DllReferencePlugin`, and non-DLL ones must not have it. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/01e454ec2f6251b5731abd0a88bbf63059c6516d))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v31.1.7 => v31.1.8
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v31.1.7 => v31.1.8
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v31.1.7 => v31.1.8
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v31.1.7 => v31.1.8
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v31.1.7 => v31.1.8
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v31.1.7 => v31.1.8
+</details>
+
+
+## [31.1.7](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.6...v31.1.7) (2022-11-04)
+
+### Bug fixes
+
+* Reverts [#809](https://github.com/ckeditor/ckeditor5-dev/issues/809) due to the `CKEditor5 is not defined` error when processing mixed tests (DLL and non-DLL). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f95f7ee8ebf4e46d8aa56d6abbb615c805c05859))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v31.1.6 => v31.1.7
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v31.1.6 => v31.1.7
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v31.1.6 => v31.1.7
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v31.1.6 => v31.1.7
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v31.1.6 => v31.1.7
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v31.1.6 => v31.1.7
+</details>
+
+
+## [31.1.6](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.5...v31.1.6) (2022-11-04)
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: When processing manual tests, if any of them require a DLL build, the manual test server adds the `DllReferencePlugin` plugin to the webpack configuration to avoid the duplicated modules error when using an import statement behind the `CK_DEBUG_*` flags. Closes [ckeditor/ckeditor5#12791](https://github.com/ckeditor/ckeditor5/issues/12791). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/044841f3e421da8e1fde201a334968bcbc037fcb))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v31.1.5 => v31.1.6
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v31.1.5 => v31.1.6
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v31.1.5 => v31.1.6
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v31.1.5 => v31.1.6
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v31.1.5 => v31.1.6
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v31.1.5 => v31.1.6
+</details>
+
+
 ## [31.1.5](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.4...v31.1.5) (2022-10-27)
 
 ### Bug fixes

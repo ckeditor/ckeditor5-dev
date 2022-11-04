@@ -11,9 +11,15 @@ const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
  * Plugin for Webpack which helps to inform the developer about processes.
  */
 module.exports = class WebpackNotifierPlugin {
-	constructor( onTestCompilationStatus ) {
+	/**
+	 * @param {Object} options
+	 * @param {Function} options.onTestCompilationStatus
+	 * @param {String} options.processName
+	 */
+	constructor( options ) {
 		this.log = logger();
-		this.onTestCompilationStatus = onTestCompilationStatus;
+		this.onTestCompilationStatus = options.onTestCompilationStatus;
+		this.processName = options.processName;
 	}
 
 	/**
@@ -24,8 +30,8 @@ module.exports = class WebpackNotifierPlugin {
 	 */
 	apply( compiler ) {
 		compiler.hooks.compile.tap( this.constructor.name, () => {
-			this.log.info( '[Webpack] Starting scripts compilation...' );
-			this.onTestCompilationStatus( 'start' );
+			this.log.info( `[Webpack] Starting scripts compilation (${ this.processName })...` );
+			this.onTestCompilationStatus( `start:${ this.processName }` );
 		} );
 
 		compiler.hooks.done.tap( this.constructor.name, stats => {
@@ -41,13 +47,13 @@ module.exports = class WebpackNotifierPlugin {
 				}
 			}
 
-			this.log.info( '[Webpack] Finished the compilation.' );
+			this.log.info( `[Webpack] Finished the compilation (${ this.processName }).` );
 
 			if ( !stats.compilation.options.watch ) {
-				this.log.info( '[Webpack] File watcher is disabled.' );
+				this.log.info( `[Webpack] File watcher is disabled (${ this.processName }).` );
 			}
 
-			this.onTestCompilationStatus( 'finished' );
+			this.onTestCompilationStatus( `finished:${ this.processName }` );
 		} );
 	}
 };
