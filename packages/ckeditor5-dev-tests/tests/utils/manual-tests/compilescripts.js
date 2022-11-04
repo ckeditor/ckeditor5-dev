@@ -32,13 +32,11 @@ describe( 'compileManualTestScripts', () => {
 				buildDir
 			} ) ),
 			getRelativeFilePath: sandbox.spy( x => x ),
-			onTestCompilationStatus: sinon.stub(),
-			requireDll: sandbox.stub().returns( false )
+			onTestCompilationStatus: sinon.stub()
 		};
 
 		mockery.registerMock( './getwebpackconfig', stubs.getWebpackConfig );
 		mockery.registerMock( '../getrelativefilepath', stubs.getRelativeFilePath );
-		mockery.registerMock( '../requiredll', stubs.requireDll );
 		mockery.registerMock( 'webpack', stubs.webpack );
 
 		compileManualTestScripts = require( '../../../lib/utils/manual-tests/compilescripts' );
@@ -49,11 +47,8 @@ describe( 'compileManualTestScripts', () => {
 		mockery.disable();
 	} );
 
-	it( 'should compile manual test scripts', async () => {
-		stubs.requireDll.returns( true );
-
-		await compileManualTestScripts( {
-			cwd: 'workspace',
+	it( 'should compile manual test scripts', () => {
+		return compileManualTestScripts( {
 			buildDir: 'buildDir',
 			sourceFiles: [
 				'ckeditor5-foo/manual/file1',
@@ -65,40 +60,37 @@ describe( 'compileManualTestScripts', () => {
 			additionalLanguages: [ 'pl', 'ar' ],
 			debug: [ 'CK_DEBUG' ],
 			disableWatch: false
-		} );
+		} ).then( () => {
+			expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
 
-		expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
+			sinon.assert.calledWith( stubs.getWebpackConfig.firstCall, {
+				buildDir: 'buildDir',
+				themePath: 'path/to/theme',
+				language: 'en',
+				onTestCompilationStatus: stubs.onTestCompilationStatus,
+				additionalLanguages: [ 'pl', 'ar' ],
+				entries: {
+					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
+					'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
+				},
+				debug: [ 'CK_DEBUG' ],
+				disableWatch: false,
+				identityFile: undefined
+			} );
 
-		sinon.assert.calledWith( stubs.getWebpackConfig.firstCall, {
-			cwd: 'workspace',
-			requireDll: true,
-			buildDir: 'buildDir',
-			themePath: 'path/to/theme',
-			language: 'en',
-			onTestCompilationStatus: stubs.onTestCompilationStatus,
-			additionalLanguages: [ 'pl', 'ar' ],
-			entries: {
-				'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
-				'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
-			},
-			debug: [ 'CK_DEBUG' ],
-			disableWatch: false,
-			identityFile: undefined
-		} );
-
-		expect( stubs.webpack.calledOnce ).to.equal( true );
-		expect( stubs.webpack.firstCall.args[ 0 ] ).to.deep.equal( {
-			buildDir: 'buildDir',
-			entries: {
-				'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
-				'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
-			}
+			expect( stubs.webpack.calledOnce ).to.equal( true );
+			expect( stubs.webpack.firstCall.args[ 0 ] ).to.deep.equal( {
+				buildDir: 'buildDir',
+				entries: {
+					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
+					'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
+				}
+			} );
 		} );
 	} );
 
-	it( 'should compile multiple manual test scripts', async () => {
-		await compileManualTestScripts( {
-			cwd: 'workspace',
+	it( 'should compile multiple manual test scripts', () => {
+		return compileManualTestScripts( {
 			buildDir: 'buildDir',
 			sourceFiles: [
 				'ckeditor5-build-classic/tests/manual/ckeditor.js',
@@ -109,20 +101,20 @@ describe( 'compileManualTestScripts', () => {
 			language: null,
 			onTestCompilationStatus: stubs.onTestCompilationStatus,
 			additionalLanguages: null
+		} ).then( () => {
+			expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
+
+			expect( stubs.getRelativeFilePath.calledThrice ).to.equal( true );
+			expect( stubs.getRelativeFilePath.firstCall.args[ 0 ] )
+				.to.equal( 'ckeditor5-build-classic/tests/manual/ckeditor.js' );
+			expect( stubs.getRelativeFilePath.secondCall.args[ 0 ] )
+				.to.equal( 'ckeditor5-build-classic/tests/manual/ckeditor.compcat.js' );
+			expect( stubs.getRelativeFilePath.thirdCall.args[ 0 ] )
+				.to.equal( 'ckeditor5-editor-classic/tests/manual/classic.js' );
 		} );
-
-		expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
-
-		expect( stubs.getRelativeFilePath.calledThrice ).to.equal( true );
-		expect( stubs.getRelativeFilePath.firstCall.args[ 0 ] )
-			.to.equal( 'ckeditor5-build-classic/tests/manual/ckeditor.js' );
-		expect( stubs.getRelativeFilePath.secondCall.args[ 0 ] )
-			.to.equal( 'ckeditor5-build-classic/tests/manual/ckeditor.compcat.js' );
-		expect( stubs.getRelativeFilePath.thirdCall.args[ 0 ] )
-			.to.equal( 'ckeditor5-editor-classic/tests/manual/classic.js' );
 	} );
 
-	it( 'rejects if webpack threw an error', () => {
+	it( 'rejects if Webpack threw an error', () => {
 		webpackError = new Error( 'Unexpected error.' );
 
 		return compileManualTestScripts( {
@@ -145,8 +137,8 @@ describe( 'compileManualTestScripts', () => {
 		);
 	} );
 
-	it( 'works on Windows environments', async () => {
-		await compileManualTestScripts( {
+	it( 'works on Windows environments', () => {
+		return compileManualTestScripts( {
 			buildDir: 'buildDir',
 			sourceFiles: [
 				'ckeditor5-build-classic\\tests\\manual\\ckeditor.js'
@@ -155,17 +147,17 @@ describe( 'compileManualTestScripts', () => {
 			language: null,
 			onTestCompilationStatus: stubs.onTestCompilationStatus,
 			additionalLanguages: null
+		} ).then( () => {
+			expect( stubs.getRelativeFilePath.calledOnce ).to.equal( true );
+			expect( stubs.getRelativeFilePath.firstCall.args[ 0 ] )
+				.to.equal( 'ckeditor5-build-classic\\tests\\manual\\ckeditor.js' );
 		} );
-
-		expect( stubs.getRelativeFilePath.calledOnce ).to.equal( true );
-		expect( stubs.getRelativeFilePath.firstCall.args[ 0 ] ).to.equal( 'ckeditor5-build-classic\\tests\\manual\\ckeditor.js' );
 	} );
 
-	it( 'should pass identity file to webpack configuration factory', async () => {
+	it( 'should pass identity file to webpack configuration factory', () => {
 		const identityFile = '/foo/bar.js';
 
-		await compileManualTestScripts( {
-			cwd: 'workspace',
+		return compileManualTestScripts( {
 			buildDir: 'buildDir',
 			sourceFiles: [
 				'ckeditor5-foo/manual/file1',
@@ -178,40 +170,37 @@ describe( 'compileManualTestScripts', () => {
 			debug: [ 'CK_DEBUG' ],
 			identityFile,
 			disableWatch: false
-		} );
+		} ).then( () => {
+			expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
 
-		expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
+			sinon.assert.calledWith( stubs.getWebpackConfig.firstCall, {
+				buildDir: 'buildDir',
+				themePath: 'path/to/theme',
+				language: 'en',
+				onTestCompilationStatus: stubs.onTestCompilationStatus,
+				additionalLanguages: [ 'pl', 'ar' ],
+				entries: {
+					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
+					'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
+				},
+				debug: [ 'CK_DEBUG' ],
+				identityFile,
+				disableWatch: false
+			} );
 
-		sinon.assert.calledWith( stubs.getWebpackConfig.firstCall, {
-			cwd: 'workspace',
-			requireDll: false,
-			buildDir: 'buildDir',
-			themePath: 'path/to/theme',
-			language: 'en',
-			onTestCompilationStatus: stubs.onTestCompilationStatus,
-			additionalLanguages: [ 'pl', 'ar' ],
-			entries: {
-				'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
-				'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
-			},
-			debug: [ 'CK_DEBUG' ],
-			identityFile,
-			disableWatch: false
-		} );
-
-		expect( stubs.webpack.calledOnce ).to.equal( true );
-		expect( stubs.webpack.firstCall.args[ 0 ] ).to.deep.equal( {
-			buildDir: 'buildDir',
-			entries: {
-				'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
-				'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
-			}
+			expect( stubs.webpack.calledOnce ).to.equal( true );
+			expect( stubs.webpack.firstCall.args[ 0 ] ).to.deep.equal( {
+				buildDir: 'buildDir',
+				entries: {
+					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1',
+					'ckeditor5-foo/manual/file2': 'ckeditor5-foo/manual/file2'
+				}
+			} );
 		} );
 	} );
 
-	it( 'should pass the "disableWatch" option to webpack configuration factory', async () => {
-		await compileManualTestScripts( {
-			cwd: 'workspace',
+	it( 'should pass the "disableWatch" option to webpack configuration factory', () => {
+		return compileManualTestScripts( {
 			buildDir: 'buildDir',
 			sourceFiles: [
 				'ckeditor5-foo/manual/file1'
@@ -222,32 +211,30 @@ describe( 'compileManualTestScripts', () => {
 			additionalLanguages: [ 'pl', 'ar' ],
 			debug: [ 'CK_DEBUG' ],
 			disableWatch: true
-		} );
+		} ).then( () => {
+			expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
 
-		expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
+			sinon.assert.calledWith( stubs.getWebpackConfig.firstCall, {
+				buildDir: 'buildDir',
+				themePath: 'path/to/theme',
+				language: 'en',
+				onTestCompilationStatus: stubs.onTestCompilationStatus,
+				additionalLanguages: [ 'pl', 'ar' ],
+				entries: {
+					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1'
+				},
+				debug: [ 'CK_DEBUG' ],
+				identityFile: undefined,
+				disableWatch: true
+			} );
 
-		sinon.assert.calledWith( stubs.getWebpackConfig.firstCall, {
-			cwd: 'workspace',
-			requireDll: false,
-			buildDir: 'buildDir',
-			themePath: 'path/to/theme',
-			language: 'en',
-			onTestCompilationStatus: stubs.onTestCompilationStatus,
-			additionalLanguages: [ 'pl', 'ar' ],
-			entries: {
-				'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1'
-			},
-			debug: [ 'CK_DEBUG' ],
-			identityFile: undefined,
-			disableWatch: true
-		} );
-
-		expect( stubs.webpack.calledOnce ).to.equal( true );
-		expect( stubs.webpack.firstCall.args[ 0 ] ).to.deep.equal( {
-			buildDir: 'buildDir',
-			entries: {
-				'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1'
-			}
+			expect( stubs.webpack.calledOnce ).to.equal( true );
+			expect( stubs.webpack.firstCall.args[ 0 ] ).to.deep.equal( {
+				buildDir: 'buildDir',
+				entries: {
+					'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1'
+				}
+			} );
 		} );
 	} );
 } );

@@ -129,9 +129,6 @@ describe( 'runManualTests', () => {
 				logInfo: sandbox.stub()
 			},
 			isInteractive: sandbox.stub(),
-			requireDll: sandbox.stub().callsFake( sourceFiles => {
-				return sourceFiles.some( filePath => /-dll.[jt]s$/.test( filePath ) );
-			} ),
 			server: sandbox.stub(),
 			htmlFileCompiler: sandbox.spy( () => Promise.resolve() ),
 			scriptCompiler: sandbox.spy( () => Promise.resolve() ),
@@ -155,7 +152,6 @@ describe( 'runManualTests', () => {
 		mockery.registerMock( '../utils/manual-tests/removedir', spies.removeDir );
 		mockery.registerMock( '../utils/manual-tests/copyassets', spies.copyAssets );
 		mockery.registerMock( '../utils/transformfileoptiontotestglob', spies.transformFileOptionToTestGlob );
-		mockery.registerMock( '../utils/requiredll', spies.requireDll );
 
 		sandbox.stub( process, 'cwd' ).returns( 'workspace' );
 
@@ -203,7 +199,6 @@ describe( 'runManualTests', () => {
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
 				sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
-					cwd: 'workspace',
 					buildDir: 'workspace/build/.manual-tests',
 					sourceFiles: [
 						'workspace/packages/ckeditor5-foo/tests/manual/feature-a.js',
@@ -267,7 +262,6 @@ describe( 'runManualTests', () => {
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
 				sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
-					cwd: 'workspace',
 					buildDir: 'workspace/build/.manual-tests',
 					sourceFiles: [
 						'workspace/packages/ckeditor5-foo/tests/manual/feature-a.js',
@@ -330,7 +324,6 @@ describe( 'runManualTests', () => {
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
 				sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
-					cwd: 'workspace',
 					buildDir: 'workspace/build/.manual-tests',
 					sourceFiles: [
 						'workspace/packages/ckeditor5-foo/tests/manual/feature-a.js',
@@ -390,7 +383,6 @@ describe( 'runManualTests', () => {
 				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
 
 				sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
-					cwd: 'workspace',
 					buildDir: 'workspace/build/.manual-tests',
 					sourceFiles: [
 						'workspace/packages/ckeditor5-foo/tests/manual/feature-a.js',
@@ -427,7 +419,6 @@ describe( 'runManualTests', () => {
 				expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
 
 				sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
-					cwd: 'workspace',
 					buildDir: 'workspace/build/.manual-tests',
 					sourceFiles: [
 						'workspace/packages/ckeditor5-foo/tests/manual/feature-a.js',
@@ -480,7 +471,6 @@ describe( 'runManualTests', () => {
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
 				sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
-					cwd: 'workspace',
 					buildDir: 'workspace/build/.manual-tests',
 					sourceFiles: [
 						'workspace/packages/ckeditor5-foo/tests/manual/feature-a.js',
@@ -532,7 +522,6 @@ describe( 'runManualTests', () => {
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
 				sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
-					cwd: 'workspace',
 					buildDir: 'workspace/build/.manual-tests',
 					sourceFiles: [
 						'workspace/packages/ckeditor5-foo/tests/manual/feature-a.js',
@@ -583,7 +572,6 @@ describe( 'runManualTests', () => {
 
 				expect( spies.scriptCompiler.calledOnce ).to.equal( true );
 				sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
-					cwd: 'workspace',
 					buildDir: 'workspace/build/.manual-tests',
 					sourceFiles: [
 						'workspace/packages/ckeditor-foo/tests/manual/feature-c.js',
@@ -1132,7 +1120,6 @@ describe( 'runManualTests', () => {
 
 					sinon.assert.calledOnce( spies.scriptCompiler );
 					sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
-						cwd: 'workspace',
 						buildDir: 'workspace/build/.manual-tests',
 						sourceFiles: [
 							'workspace\\packages\\ckeditor5-foo\\tests\\manual\\feature-a.js',
