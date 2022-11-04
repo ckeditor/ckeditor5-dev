@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [31.1.7](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.6...v31.1.7) (2022-11-04)
+
+### Bug fixes
+
+* Reverts [#809](https://github.com/ckeditor/ckeditor5-dev/issues/809) due to the `CKEditor5 is not defined` error when processing mixed tests (DLL and non-DLL). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f95f7ee8ebf4e46d8aa56d6abbb615c805c05859))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v31.1.6 => v31.1.7
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v31.1.6 => v31.1.7
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v31.1.6 => v31.1.7
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v31.1.6 => v31.1.7
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v31.1.6 => v31.1.7
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v31.1.6 => v31.1.7
+</details>
+
+
 ## [31.1.6](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.5...v31.1.6) (2022-11-04)
 
 ### Bug fixes
