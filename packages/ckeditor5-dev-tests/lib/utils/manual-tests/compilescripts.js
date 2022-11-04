@@ -8,9 +8,11 @@
 const webpack = require( 'webpack' );
 const getWebpackConfigForManualTests = require( './getwebpackconfig' );
 const getRelativeFilePath = require( '../getrelativefilepath' );
+const requireDll = require( '../requiredll' );
 
 /**
  * @param {Object} options
+ * @param {String} options.cwd Current working directory. Usually it points to the CKEditor 5 root directory.
  * @param {String} options.buildDir A path where compiled files will be saved.
  * @param {Array.<String>} options.sourceFiles An array of paths to JavaScript files from manual tests to be compiled.
  * @param {String} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
@@ -26,6 +28,8 @@ module.exports = function compileManualTestScripts( options ) {
 	const entryFiles = options.sourceFiles;
 	const entries = getWebpackEntryPoints( entryFiles );
 	const webpackConfig = getWebpackConfigForManualTests( {
+		cwd: options.cwd,
+		requireDll: requireDll( entryFiles ),
 		entries,
 		buildDir: options.buildDir,
 		themePath: options.themePath,
