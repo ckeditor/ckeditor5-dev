@@ -3,6 +3,10 @@ Changelog
 
 ## [31.1.8](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.7...v31.1.8) (2022-11-04)
 
+The `v31.1.8` release restores changes introduced in the [`v31.1.6`](https://github.com/ckeditor/ckeditor5-dev/releases/tag/v31.1.6) version.
+
+We found a different approach to add `DllReferencePlugin` to the webpack configuration for DLL and non-DLL manual tests. Now, they are compiled in separate processes, and the `CKEditor5 is not defined` error should not occur anymore.
+
 ### Bug fixes
 
 * **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: When processing manual tests, if any of them require a DLL build, the manual test server adds the `DllReferencePlugin` plugin to the webpack configuration to avoid the duplicated modules error when using an import statement behind the `CK_DEBUG_*` flags. See [ckeditor/ckeditor5#12791](https://github.com/ckeditor/ckeditor5/issues/12791). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/01e454ec2f6251b5731abd0a88bbf63059c6516d))
