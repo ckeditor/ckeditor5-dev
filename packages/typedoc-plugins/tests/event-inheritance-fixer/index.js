@@ -106,7 +106,11 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 			expect( event.comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
 			expect( event.comment.summary[ 0 ] ).to.have.property( 'text', 'Event 1 from class A.' );
 			expect( event.comment.blockTags ).to.be.an( 'array' );
-			expect( event.comment.blockTags ).to.lengthOf( 0 );
+			expect( event.comment.blockTags ).to.lengthOf( 4 );
+			expect( event.comment.blockTags[ 0 ] ).to.have.property( 'tag', '@eventName' );
+			expect( event.comment.blockTags[ 1 ] ).to.have.property( 'tag', '@param' );
+			expect( event.comment.blockTags[ 2 ] ).to.have.property( 'tag', '@param' );
+			expect( event.comment.blockTags[ 3 ] ).to.have.property( 'tag', '@param' );
 			expect( event.comment.modifierTags ).to.be.a( 'Set' );
 			expect( event.comment.modifierTags.size ).to.equal( 0 );
 		}
