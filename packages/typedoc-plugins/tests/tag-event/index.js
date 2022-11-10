@@ -124,7 +124,8 @@ describe( 'typedoc-plugins/tag-event', function() {
 			expect( eventDefinition.comment.summary ).to.be.an( 'array' );
 			expect( eventDefinition.comment.summary ).to.lengthOf( 0 );
 			expect( eventDefinition.comment.blockTags ).to.be.an( 'array' );
-			expect( eventDefinition.comment.blockTags ).to.lengthOf( 0 );
+			expect( eventDefinition.comment.blockTags ).to.lengthOf( 1 );
+			expect( eventDefinition.comment.blockTags[ 0 ] ).to.have.property( 'tag', '@eventName' );
 			expect( eventDefinition.comment.modifierTags ).to.be.a( 'Set' );
 			expect( eventDefinition.comment.modifierTags.size ).to.equal( 0 );
 
@@ -156,7 +157,8 @@ describe( 'typedoc-plugins/tag-event', function() {
 			expect( eventDefinition.comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
 			expect( eventDefinition.comment.summary[ 0 ] ).to.have.property( 'text', 'An event associated with the type.' );
 			expect( eventDefinition.comment.blockTags ).to.be.an( 'array' );
-			expect( eventDefinition.comment.blockTags ).to.lengthOf( 0 );
+			expect( eventDefinition.comment.blockTags ).to.lengthOf( 1 );
+			expect( eventDefinition.comment.blockTags[ 0 ] ).to.have.property( 'tag', '@eventName' );
 			expect( eventDefinition.comment.modifierTags ).to.be.a( 'Set' );
 			expect( eventDefinition.comment.modifierTags.size ).to.equal( 0 );
 
@@ -200,7 +202,13 @@ describe( 'typedoc-plugins/tag-event', function() {
 			expect( eventDefinition.comment.summary[ 4 ] ).to.have.property( 'text', '. A text after.' );
 
 			expect( eventDefinition.comment.blockTags ).to.be.an( 'array' );
-			expect( eventDefinition.comment.blockTags ).to.lengthOf( 0 );
+			expect( eventDefinition.comment.blockTags ).to.lengthOf( 5 );
+			expect( eventDefinition.comment.blockTags[ 0 ] ).to.have.property( 'tag', '@eventName' );
+			expect( eventDefinition.comment.blockTags[ 1 ] ).to.have.property( 'tag', '@param' );
+			expect( eventDefinition.comment.blockTags[ 2 ] ).to.have.property( 'tag', '@param' );
+			expect( eventDefinition.comment.blockTags[ 3 ] ).to.have.property( 'tag', '@param' );
+			expect( eventDefinition.comment.blockTags[ 4 ] ).to.have.property( 'tag', '@deprecated' );
+
 			expect( eventDefinition.comment.modifierTags ).to.be.a( 'Set' );
 			expect( eventDefinition.comment.modifierTags.size ).to.equal( 0 );
 
