@@ -104,9 +104,8 @@ function onEventEnd( context ) {
 			eventReflection.typeParameters = typeParameters;
 		}
 
-		// Copy comment summary. The `blockTags` property from the comment is not needed, as it has been already mapped to the type
-		// parameters.
-		eventReflection.comment = new Comment( Comment.cloneDisplayParts( reflection.comment.summary ) );
+		// Copy the whole comment. In addition to the comment summary, it can contain other useful data (i.e. block tags, modifier tags).
+		eventReflection.comment = reflection.comment.clone();
 
 		// Copy the source location as it is the same as the location of the reflection containing the event.
 		eventReflection.sources = [ ...reflection.sources ];

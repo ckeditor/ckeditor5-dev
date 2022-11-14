@@ -70,6 +70,7 @@ export type EventFoo = {
  * @param {String} p1 Description for first param.
  * @param {module:utils/object~Object} p2 Description for second param.
  * @param p3 Complex {@link module:utils/object~Object description} for `third param`.
+ * @deprecated
  */
 export type EventFooWithParams = {
 	name: string;
