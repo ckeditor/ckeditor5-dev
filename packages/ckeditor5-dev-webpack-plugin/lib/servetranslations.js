@@ -98,7 +98,9 @@ module.exports = function serveTranslations( compiler, options, translationServi
 			const relativePathToResource = path.relative( cwd, module.resource );
 
 			if ( relativePathToResource.match( options.sourceFilesPattern ) ) {
-				module.loaders.push( {
+				// The `TranslateSource` loader must be added as the last one in the loader's chain,
+				// after any potential TypeScript file has already been compiled.
+				module.loaders.unshift( {
 					loader: path.join( __dirname, 'translatesourceloader.js' ),
 					options: { translateSource }
 				} );
