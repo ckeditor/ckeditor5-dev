@@ -1,6 +1,30 @@
 Changelog
 =========
 
+## [31.1.9](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.8...v31.1.9) (2022-11-17)
+
+### Bug fixes
+
+* **[webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin)**: The `TranslateSource` loader is added as the last one in the loader's chain after any potential TypeScript file has already been compiled. Closes [ckeditor/ckeditor5#12735](https://github.com/ckeditor/ckeditor5/issues/12735). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/6c972102d1576ce241c3e2aa5b785a2d37f6ea4e))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v31.1.8 => v31.1.9
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v31.1.8 => v31.1.9
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v31.1.8 => v31.1.9
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v31.1.8 => v31.1.9
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v31.1.8 => v31.1.9
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v31.1.8 => v31.1.9
+</details>
+
+
 ## [31.1.8](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.7...v31.1.8) (2022-11-04)
 
 The `v31.1.8` release restores changes introduced in the [`v31.1.6`](https://github.com/ckeditor/ckeditor5-dev/releases/tag/v31.1.6) version.
