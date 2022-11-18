@@ -50,6 +50,8 @@ function onEventCreateDeclaration() {
 			for ( const jsDoc of statement.jsDoc ) {
 				// ...that represents a module definition.
 				const [ moduleTag ] = ( jsDoc.tags || [] ).filter( tag => {
+					// TODO: We need to find a safer solution to check if the JSDoc block code represents a module definition,
+					// because the numerical value may change between TypeDoc releases.
 					return tag.tagName.originalKeywordKind === 142;
 				} );
 
