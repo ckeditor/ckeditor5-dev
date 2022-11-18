@@ -50,7 +50,7 @@ function onEventCreateDeclaration() {
 			for ( const jsDoc of statement.jsDoc ) {
 				// ...that represents a module definition.
 				const [ moduleTag ] = ( jsDoc.tags || [] ).filter( tag => {
-					return tag.tagName.originalKeywordKind === 141;
+					return tag.tagName.originalKeywordKind === 142;
 				} );
 
 				if ( !moduleTag ) {
