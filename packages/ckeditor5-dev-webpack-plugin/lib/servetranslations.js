@@ -9,9 +9,6 @@ const chalk = require( 'chalk' );
 const rimraf = require( 'rimraf' );
 const fs = require( 'fs' );
 const path = require( 'path' );
-const semver = require( 'semver' );
-const { NormalModule } = require( 'webpack' );
-const { version: webpackVersion } = require( 'webpack/package.json' );
 const { RawSource, ConcatSource } = require( 'webpack-sources' );
 
 /**
@@ -94,7 +91,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 
 	// Load translation files and add a loader if the package match requirements.
 	compiler.hooks.compilation.tap( 'CKEditor5Plugin', compilation => {
-		getCompilationHooks( compilation ).tap( 'CKEditor5Plugin', ( context, module ) => {
+		compilation.hooks.normalModuleLoader.tap( 'CKEditor5Plugin', ( context, module ) => {
 			const relativePathToResource = path.relative( cwd, module.resource );
 
 			if ( relativePathToResource.match( options.sourceFilesPattern ) ) {
@@ -193,20 +190,6 @@ function getPathToPackage( cwd, resource, packageNamePattern ) {
 	const index = relativePathToResource.search( packageNamePattern ) + match[ 0 ].length;
 
 	return relativePathToResource.slice( 0, index );
-}
-
-/**
- * Returns an object with the compilation hooks depending on the Webpack version.
- *
- * @param {Object} compilation
- * @returns {Object}
- */
-function getCompilationHooks( compilation ) {
-	if ( semver.major( webpackVersion ) === 4 ) {
-		return compilation.hooks.normalModuleLoader;
-	}
-
-	return NormalModule.getCompilationHooks( compilation ).loader;
 }
 
 /**
