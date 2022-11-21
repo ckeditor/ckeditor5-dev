@@ -91,53 +91,55 @@ module.exports = function serveTranslations( compiler, options, translationServi
 
 	// Load translation files and add a loader if the package match requirements.
 	compiler.hooks.compilation.tap( 'CKEditor5Plugin', compilation => {
-		compilation.hooks.normalModuleLoader.tap( 'CKEditor5Plugin', ( context, module ) => {
-			const relativePathToResource = path.relative( cwd, module.resource );
+		compiler.hooks.normalModuleFactory.tap( 'CKEditor5Plugin', normalModuleFactory => {
+			normalModuleFactory.tap( 'CKEditor5Plugin', ( context, module ) => {
+				const relativePathToResource = path.relative( cwd, module.resource );
 
-			if ( relativePathToResource.match( options.sourceFilesPattern ) ) {
-				// The `TranslateSource` loader must be added as the last one in the loader's chain,
-				// after any potential TypeScript file has already been compiled.
-				module.loaders.unshift( {
-					loader: path.join( __dirname, 'translatesourceloader.js' ),
-					options: { translateSource }
-				} );
+				if ( relativePathToResource.match( options.sourceFilesPattern ) ) {
+					// The `TranslateSource` loader must be added as the last one in the loader's chain,
+					// after any potential TypeScript file has already been compiled.
+					module.loaders.unshift( {
+						loader: path.join( __dirname, 'translatesourceloader.js' ),
+						options: { translateSource }
+					} );
 
-				const pathToPackage = getPathToPackage( cwd, module.resource, options.packageNamesPattern );
+					const pathToPackage = getPathToPackage( cwd, module.resource, options.packageNamesPattern );
 
-				translationService.loadPackage( pathToPackage );
-			}
-		} );
-
-		// At the end of the compilation add assets generated from the PO files.
-		// Use `optimize-chunk-assets` instead of `emit` to emit assets before the `webpack.BannerPlugin`.
-		getChunkAssets( compilation ).tap( 'CKEditor5Plugin', chunks => {
-			const generatedAssets = translationService.getAssets( {
-				outputDirectory: options.outputDirectory,
-				compilationAssetNames: Object.keys( compilation.assets )
-					.filter( name => name.endsWith( '.js' ) )
+					translationService.loadPackage( pathToPackage );
+				}
 			} );
 
-			const allFiles = getFilesFromChunks( chunks );
+			// At the end of the compilation add assets generated from the PO files.
+			// Use `optimize-chunk-assets` instead of `emit` to emit assets before the `webpack.BannerPlugin`.
+			getChunkAssets( compilation ).tap( 'CKEditor5Plugin', chunks => {
+				const generatedAssets = translationService.getAssets( {
+					outputDirectory: options.outputDirectory,
+					compilationAssetNames: Object.keys( compilation.assets )
+						.filter( name => name.endsWith( '.js' ) )
+				} );
 
-			for ( const asset of generatedAssets ) {
-				if ( asset.shouldConcat ) {
-					// Concatenate sources to not break the file's sourcemap.
-					const originalAsset = compilation.assets[ asset.outputPath ];
+				const allFiles = getFilesFromChunks( chunks );
 
-					compilation.assets[ asset.outputPath ] = new ConcatSource( asset.outputBody, '\n', originalAsset );
-				} else {
-					const chunkExists = allFiles.includes( asset.outputPath );
+				for ( const asset of generatedAssets ) {
+					if ( asset.shouldConcat ) {
+						// Concatenate sources to not break the file's sourcemap.
+						const originalAsset = compilation.assets[ asset.outputPath ];
 
-					if ( !chunkExists ) {
-						// Assign `RawSource` when the corresponding chunk does not exist.
-						compilation.assets[ asset.outputPath ] = new RawSource( asset.outputBody );
+						compilation.assets[ asset.outputPath ] = new ConcatSource( asset.outputBody, '\n', originalAsset );
 					} else {
-						// Assign a string when the corresponding chunk exists and maintains the proper sourcemap.
-						// Changing it to RawSource would break sourcemaps.
-						compilation.assets[ asset.outputPath ] = asset.outputBody;
+						const chunkExists = allFiles.includes( asset.outputPath );
+
+						if ( !chunkExists ) {
+							// Assign `RawSource` when the corresponding chunk does not exist.
+							compilation.assets[ asset.outputPath ] = new RawSource( asset.outputBody );
+						} else {
+							// Assign a string when the corresponding chunk exists and maintains the proper sourcemap.
+							// Changing it to RawSource would break sourcemaps.
+							compilation.assets[ asset.outputPath ] = asset.outputBody;
+						}
 					}
 				}
-			}
+			} );
 		} );
 	} );
 
