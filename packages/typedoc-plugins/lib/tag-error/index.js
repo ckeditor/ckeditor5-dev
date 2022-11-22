@@ -17,17 +17,15 @@ const ERROR_TAG_NAME = 'error';
  */
 module.exports = {
 	load( app ) {
-		app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
+		app.converter.on( Converter.EVENT_END, onEventEnd );
 	}
 };
 
-function onEventCreateDeclaration() {
-	return ( context, reflection ) => {
-		// Run only when processing a module.
-		if ( reflection.kind !== ReflectionKind.Module ) {
-			return;
-		}
+function onEventEnd( context ) {
+	const moduleReflections = context.project.getReflectionsByKind( ReflectionKind.Module );
 
+	// Errors are children of a module.
+	for ( const reflection of moduleReflections ) {
 		const symbol = context.project.getSymbolFromReflection( reflection );
 		const node = symbol.declarations[ 0 ];
 		const sourceFile = node.getSourceFile();
@@ -64,8 +62,7 @@ function onEventCreateDeclaration() {
 				);
 
 			errorDeclaration.comment = new Comment( getCommentDisplayPart( parentNode.parent.comment ) );
-			errorDeclaration.originalName = 'ErrorDeclaration';
-			errorDeclaration.kindString = 'Object literal';
+			errorDeclaration.kindString = 'Error';
 			errorDeclaration.typeParameters = parentNode.parent.getChildren()
 				.filter( childTag => {
 					if ( !childTag.comment || !parentNode.parent.comment ) {
@@ -88,7 +85,7 @@ function onEventCreateDeclaration() {
 					return typeParameter;
 				} );
 		}
-	};
+	}
 }
 
 /**
@@ -136,7 +133,10 @@ function getCommentDisplayPart( commentChildrenOrValue ) {
 			let { text } = item;
 
 			// An inline tag inside a description.
-			if ( item.kind === 324 ) {
+			//
+			// TODO: We need to find a safer solution to check if the description is an inline-tag,
+			// because the numerical value may change between TypeDoc releases.
+			if ( item.kind === 327 ) {
 				// A reference, e.g. "module:".
 				if ( item.name ) {
 					text = item.name.escapedText + text;
