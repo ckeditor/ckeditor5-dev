@@ -5,7 +5,7 @@ Changelog
 
 ### Bug fixes
 
-* **[webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin)**: Restored building translation files introduced in [`v31.1.10`](https://github.com/ckeditor/ckeditor5-dev/releases/tag/v31.1.10). See [ckeditor/ckeditor5#12887](https://github.com/ckeditor/ckeditor5/issues/12887). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/631769ee39ad8eafee9b619158d695f86a9a6029))
+* **[webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin)**: Restored building translation files. A regression was introduced in [`v31.1.10`](https://github.com/ckeditor/ckeditor5-dev/releases/tag/v31.1.10). See [ckeditor/ckeditor5#12887](https://github.com/ckeditor/ckeditor5/issues/12887). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/631769ee39ad8eafee9b619158d695f86a9a6029))
 
 ### Released packages
 
