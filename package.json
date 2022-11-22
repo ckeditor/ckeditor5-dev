@@ -1,9 +1,9 @@
 {
   "name": "ckeditor5-dev",
-  "version": "31.1.8",
+  "version": "31.1.11",
   "private": true,
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-env": "^31.1.8"
+    "@ckeditor/ckeditor5-dev-env": "^31.1.11"
   },
   "devDependencies": {
     "eslint": "^7.0.0",
@@ -27,7 +27,7 @@
   "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme",
   "scripts": {
     "test": "mocha 'packages/*/tests/**/*.js' --timeout 5000",
-    "coverage": "nyc --reporter=lcov --reporter=text-summary mocha packages/*/tests -- --recursive --timeout 5000",
+    "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test",
     "changelog": "node ./scripts/changelog.js",
     "release:bump-version": "node ./scripts/bump-versions.js",
     "release:publish": "node ./scripts/publish.js",
