@@ -9,6 +9,7 @@ const chalk = require( 'chalk' );
 const rimraf = require( 'rimraf' );
 const fs = require( 'fs' );
 const path = require( 'path' );
+const semver = require( 'semver' );
 const { RawSource, ConcatSource } = require( 'webpack-sources' );
 
 /**
@@ -91,55 +92,53 @@ module.exports = function serveTranslations( compiler, options, translationServi
 
 	// Load translation files and add a loader if the package match requirements.
 	compiler.hooks.compilation.tap( 'CKEditor5Plugin', compilation => {
-		compiler.hooks.normalModuleFactory.tap( 'CKEditor5Plugin', normalModuleFactory => {
-			normalModuleFactory.tap( 'CKEditor5Plugin', ( context, module ) => {
-				const relativePathToResource = path.relative( cwd, module.resource );
+		getCompilationHooks( compiler, compilation ).tap( 'CKEditor5Plugin', ( context, module ) => {
+			const relativePathToResource = path.relative( cwd, module.resource );
 
-				if ( relativePathToResource.match( options.sourceFilesPattern ) ) {
-					// The `TranslateSource` loader must be added as the last one in the loader's chain,
-					// after any potential TypeScript file has already been compiled.
-					module.loaders.unshift( {
-						loader: path.join( __dirname, 'translatesourceloader.js' ),
-						options: { translateSource }
-					} );
-
-					const pathToPackage = getPathToPackage( cwd, module.resource, options.packageNamesPattern );
-
-					translationService.loadPackage( pathToPackage );
-				}
-			} );
-
-			// At the end of the compilation add assets generated from the PO files.
-			// Use `optimize-chunk-assets` instead of `emit` to emit assets before the `webpack.BannerPlugin`.
-			getChunkAssets( compilation ).tap( 'CKEditor5Plugin', chunks => {
-				const generatedAssets = translationService.getAssets( {
-					outputDirectory: options.outputDirectory,
-					compilationAssetNames: Object.keys( compilation.assets )
-						.filter( name => name.endsWith( '.js' ) )
+			if ( relativePathToResource.match( options.sourceFilesPattern ) ) {
+				// The `TranslateSource` loader must be added as the last one in the loader's chain,
+				// after any potential TypeScript file has already been compiled.
+				module.loaders.unshift( {
+					loader: path.join( __dirname, 'translatesourceloader.js' ),
+					options: { translateSource }
 				} );
 
-				const allFiles = getFilesFromChunks( chunks );
+				const pathToPackage = getPathToPackage( cwd, module.resource, options.packageNamesPattern );
 
-				for ( const asset of generatedAssets ) {
-					if ( asset.shouldConcat ) {
-						// Concatenate sources to not break the file's sourcemap.
-						const originalAsset = compilation.assets[ asset.outputPath ];
+				translationService.loadPackage( pathToPackage );
+			}
+		} );
 
-						compilation.assets[ asset.outputPath ] = new ConcatSource( asset.outputBody, '\n', originalAsset );
+		// At the end of the compilation add assets generated from the PO files.
+		// Use `optimize-chunk-assets` instead of `emit` to emit assets before the `webpack.BannerPlugin`.
+		getChunkAssets( compilation ).tap( 'CKEditor5Plugin', chunks => {
+			const generatedAssets = translationService.getAssets( {
+				outputDirectory: options.outputDirectory,
+				compilationAssetNames: Object.keys( compilation.assets )
+					.filter( name => name.endsWith( '.js' ) )
+			} );
+
+			const allFiles = getFilesFromChunks( chunks );
+
+			for ( const asset of generatedAssets ) {
+				if ( asset.shouldConcat ) {
+					// Concatenate sources to not break the file's sourcemap.
+					const originalAsset = compilation.assets[ asset.outputPath ];
+
+					compilation.assets[ asset.outputPath ] = new ConcatSource( asset.outputBody, '\n', originalAsset );
+				} else {
+					const chunkExists = allFiles.includes( asset.outputPath );
+
+					if ( !chunkExists ) {
+						// Assign `RawSource` when the corresponding chunk does not exist.
+						compilation.assets[ asset.outputPath ] = new RawSource( asset.outputBody );
 					} else {
-						const chunkExists = allFiles.includes( asset.outputPath );
-
-						if ( !chunkExists ) {
-							// Assign `RawSource` when the corresponding chunk does not exist.
-							compilation.assets[ asset.outputPath ] = new RawSource( asset.outputBody );
-						} else {
-							// Assign a string when the corresponding chunk exists and maintains the proper sourcemap.
-							// Changing it to RawSource would break sourcemaps.
-							compilation.assets[ asset.outputPath ] = asset.outputBody;
-						}
+						// Assign a string when the corresponding chunk exists and maintains the proper sourcemap.
+						// Changing it to RawSource would break sourcemaps.
+						compilation.assets[ asset.outputPath ] = asset.outputBody;
 					}
 				}
-			} );
+			}
 		} );
 	} );
 
@@ -192,6 +191,25 @@ function getPathToPackage( cwd, resource, packageNamePattern ) {
 	const index = relativePathToResource.search( packageNamePattern ) + match[ 0 ].length;
 
 	return relativePathToResource.slice( 0, index );
+}
+
+/**
+ * Returns an object with the compilation hooks depending on the Webpack version.
+ *
+ * @param {webpack.Compiler} compiler
+ * @param {webpack.Compilation} compilation
+ * @returns {Object}
+ */
+function getCompilationHooks( compiler, compilation ) {
+	const { webpack } = compiler;
+
+	if ( semver.major( webpack.version ) === 4 ) {
+		return compilation.hooks.normalModuleLoader;
+	}
+
+	// Do not import the `NormalModule` class directly. Find it in the current instance of webpack process.
+	// See: https://github.com/ckeditor/ckeditor5/issues/12887.
+	return webpack.NormalModule.getCompilationHooks( compilation ).loader;
 }
 
 /**
