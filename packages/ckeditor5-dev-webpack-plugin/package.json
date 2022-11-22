@@ -5,7 +5,7 @@
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^31.1.9",
+    "@ckeditor/ckeditor5-dev-utils": "^31.1.10",
     "chalk": "^4.0.0",
     "rimraf": "^3.0.2",
     "semver": "^7.3.4",
