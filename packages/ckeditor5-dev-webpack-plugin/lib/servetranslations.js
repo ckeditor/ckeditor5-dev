@@ -9,7 +9,6 @@ const chalk = require( 'chalk' );
 const rimraf = require( 'rimraf' );
 const fs = require( 'fs' );
 const path = require( 'path' );
-const semver = require( 'semver' );
 const { RawSource, ConcatSource } = require( 'webpack-sources' );
 
 /**
