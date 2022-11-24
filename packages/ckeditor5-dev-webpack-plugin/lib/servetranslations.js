@@ -203,13 +203,8 @@ function getPathToPackage( cwd, resource, packageNamePattern ) {
 function getCompilationHooks( compiler, compilation ) {
 	const { webpack } = compiler;
 
-	// Webpack 4 may not expose its version.
-	if ( !webpack.version ) {
-		return compilation.hooks.normalModuleLoader;
-	}
-
-	// But if specified, ensure we return a good loader.
-	if ( semver.major( webpack.version ) === 4 ) {
+	// Webpack is not available in a compiler instance (webpack 4).
+	if ( !webpack ) {
 		return compilation.hooks.normalModuleLoader;
 	}
 
