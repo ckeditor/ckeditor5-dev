@@ -133,10 +133,7 @@ function getCommentDisplayPart( commentChildrenOrValue ) {
 			let { text } = item;
 
 			// An inline tag inside a description.
-			//
-			// TODO: We need to find a safer solution to check if the description is an inline-tag,
-			// because the numerical value may change between TypeDoc releases.
-			if ( item.kind === 327 ) {
+			if ( item.kind === ts.SyntaxKind.JSDocLink ) {
 				// A reference, e.g. "module:".
 				if ( item.name ) {
 					text = item.name.escapedText + text;
