@@ -9,9 +9,11 @@
  * Very simple loader that runs the translateSource function only on the source.
  * translateSource is provided by the CKEditorWebpackPlugin.
  *
- * @param {String} source Source which will be translated.
- * @returns {String}
+ * @param {String} source Content of the resource file
+ * @param {Object} map A source map consumed by the `source-map` package.
  */
-module.exports = function translateSourceLoader( source ) {
-	return this.query.translateSource( source, this.resourcePath );
+module.exports = function translateSourceLoader( source, map ) {
+	const output = this.query.translateSource( source, this.resourcePath );
+
+	this.callback( null, output, map );
 };

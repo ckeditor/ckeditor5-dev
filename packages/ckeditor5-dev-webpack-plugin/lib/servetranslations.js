@@ -9,7 +9,6 @@ const chalk = require( 'chalk' );
 const rimraf = require( 'rimraf' );
 const fs = require( 'fs' );
 const path = require( 'path' );
-const semver = require( 'semver' );
 const { RawSource, ConcatSource } = require( 'webpack-sources' );
 
 /**
@@ -194,7 +193,7 @@ function getPathToPackage( cwd, resource, packageNamePattern ) {
 }
 
 /**
- * Returns an object with the compilation hooks depending on the Webpack version.
+ * Returns an object with the compilation hooks depending on the webpack version.
  *
  * @param {webpack.Compiler} compiler
  * @param {webpack.Compilation} compilation
@@ -203,7 +202,8 @@ function getPathToPackage( cwd, resource, packageNamePattern ) {
 function getCompilationHooks( compiler, compilation ) {
 	const { webpack } = compiler;
 
-	if ( semver.major( webpack.version ) === 4 ) {
+	// Webpack is not available in a compiler instance (webpack 4).
+	if ( !webpack ) {
 		return compilation.hooks.normalModuleLoader;
 	}
 

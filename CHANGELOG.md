@@ -1,6 +1,54 @@
 Changelog
 =========
 
+## [31.1.13](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.12...v31.1.13) (2022-11-25)
+
+### Bug fixes
+
+* **[webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin)**: Fixed generating source maps after switching the order of loaders in the CKEditor 5 translations webpack plugin. The source loader should pass through the source map object to avoid generating a new one. Closes [ckeditor/ckeditor5#12928](https://github.com/ckeditor/ckeditor5/issues/12928). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/3ca5eeddda995bb4257afbe5dca88a7d8860fc9a))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v31.1.12 => v31.1.13
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v31.1.12 => v31.1.13
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v31.1.12 => v31.1.13
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v31.1.12 => v31.1.13
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v31.1.12 => v31.1.13
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v31.1.12 => v31.1.13
+</details>
+
+
+## [31.1.12](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.11...v31.1.12) (2022-11-24)
+
+### Bug fixes
+
+* **[webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin)**: Proper detection of webpack 4. Closes [ckeditor/ckeditor5#12887](https://github.com/ckeditor/ckeditor5/issues/12887). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/2f8b91bc5087eff9a2a703c984f4458fe8a939b0))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v31.1.11 => v31.1.12
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env): v31.1.11 => v31.1.12
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v31.1.11 => v31.1.12
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v31.1.11 => v31.1.12
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin): v31.1.11 => v31.1.12
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v31.1.11 => v31.1.12
+</details>
+
+
 ## [31.1.11](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.10...v31.1.11) (2022-11-22)
 
 ### Bug fixes
