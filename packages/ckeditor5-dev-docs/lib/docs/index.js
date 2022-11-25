@@ -57,7 +57,18 @@ module.exports = async function build( config ) {
 
 	typeDoc.bootstrap( {
 		entryPoints: files,
-		logLevel: 'Error',
+		// logLevel: 'Error',
+		blockTags: [
+			'@eventName'
+		],
+		inlineTags: [
+			'@link',
+			'@glink'
+		],
+		modifierTags: [
+			'@publicApi',
+			'@skipSource'
+		],
 		plugin: [
 			'typedoc-plugin-rename-defaults',
 			require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' ),
