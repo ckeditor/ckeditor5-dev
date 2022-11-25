@@ -21,14 +21,19 @@ describe( 'webpack-plugin/translateSourceLoader()', () => {
 			query: {
 				translateSource: sandbox.spy( () => 'output' )
 			},
-			resourcePath: 'file.js'
+			resourcePath: 'file.js',
+			callback: sinon.stub()
 		};
 
-		const result = translateSourceLoader.call( ctx, 'Source' );
+		const map = {};
+		translateSourceLoader.call( ctx, 'Source', map );
 
 		sinon.assert.calledOnce( ctx.query.translateSource );
 		sinon.assert.calledWithExactly( ctx.query.translateSource, 'Source', 'file.js' );
 
-		expect( result ).to.equal( 'output' );
+		expect( ctx.callback.calledOnce ).to.equal( true );
+		expect( ctx.callback.firstCall.args[ 0 ] ).to.equal( null );
+		expect( ctx.callback.firstCall.args[ 1 ] ).to.equal( 'output' );
+		expect( ctx.callback.firstCall.args[ 2 ] ).to.equal( map );
 	} );
 } );
