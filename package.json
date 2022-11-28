@@ -8,7 +8,7 @@
   "devDependencies": {
     "eslint": "^7.0.0",
     "eslint-config-ckeditor5": "^4.0.0",
-    "husky": "^4.2.5",
+    "husky": "^8.0.2",
     "lint-staged": "^10.2.4",
     "mocha": "^7.1.2",
     "nyc": "^15.1.0"
@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme",
   "scripts": {
+    "postinstall": "node ./scripts/postinstall.js",
     "test": "mocha 'packages/*/tests/**/*.js' --timeout 5000",
     "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test",
     "changelog": "node ./scripts/changelog.js",
@@ -49,14 +50,6 @@
     "packages": [
       "packages/*",
       "."
-    ],
-    "nohoist": [
-      "**/husky"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   }
 }
