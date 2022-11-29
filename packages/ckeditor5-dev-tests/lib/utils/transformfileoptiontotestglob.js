@@ -26,7 +26,7 @@ const EXTERNAL_DIR_PATH = path.join( process.cwd(), 'external' );
  */
 module.exports = function transformFileOptionToTestGlob( pattern, isManualTest = false ) {
 	if ( doesPatternMatchExternalRepositoryName( pattern ) ) {
-		return getExternalReposityGlob( pattern, { isManualTest } );
+		return getExternalRepositoryGlob( pattern, { isManualTest } );
 	}
 
 	// Directory to look: `packages/ckeditor5-*/...`.
@@ -60,12 +60,16 @@ module.exports = function transformFileOptionToTestGlob( pattern, isManualTest =
  * @param {String} pattern
  * @param {Object} [options]
  * @param {Boolean} [options.isManualTest] Controlls the path for manual and automated tests.
- * @returns {String}
+ * @returns {Array.<String>}
  */
-function getExternalReposityGlob( pattern, { isManualTest } ) {
-	return isManualTest ?
-		[ path.join( EXTERNAL_DIR_PATH, pattern, 'tests', 'manual', '**', '*' ) + '.js' ] :
-		[ path.join( EXTERNAL_DIR_PATH, pattern, 'tests', '**', '*' ) + '.js' ];
+function getExternalRepositoryGlob( pattern, { isManualTest } ) {
+	const repositoryGlob = isManualTest ?
+		path.join( EXTERNAL_DIR_PATH, pattern, 'tests', 'manual', '**', '*' ) + '.js' :
+		path.join( EXTERNAL_DIR_PATH, pattern, 'tests', '**', '*' ) + '.js';
+
+	return [
+		repositoryGlob.split( path.sep ).join( path.posix.sep )
+	];
 }
 
 /**
