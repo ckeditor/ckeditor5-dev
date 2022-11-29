@@ -8,17 +8,20 @@
 const path = require( 'path' );
 const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
+const fs = require( 'fs' );
 
 describe( 'dev-tests/utils', () => {
-	let transformFileOptionToTestGlob, sandbox;
+	let transformFileOptionToTestGlob, sandbox, readdirSyncStub, statSyncStub;
 
 	beforeEach( () => {
 		sandbox = sinon.createSandbox();
 
-		transformFileOptionToTestGlob = require( '../../lib/utils/transformfileoptiontotestglob' );
-
 		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
 		sandbox.stub( process, 'cwd' ).returns( '/workspace' );
+		statSyncStub = sandbox.stub( fs, 'statSync' ).returns( { isDirectory: () => true } );
+		readdirSyncStub = sandbox.stub( fs, 'readdirSync' ).returns( [ 'external-directory' ] );
+
+		transformFileOptionToTestGlob = require( '../../lib/utils/transformfileoptiontotestglob' );
 	} );
 
 	afterEach( () => {
@@ -245,6 +248,36 @@ describe( 'dev-tests/utils', () => {
 				'/workspace/packages/ckeditor-basic-styles/tests/manual/**/bold*.js',
 				'/workspace/external/*/packages/ckeditor5-basic-styles/tests/manual/**/bold*.js',
 				'/workspace/external/*/packages/ckeditor-basic-styles/tests/manual/**/bold*.js'
+			] );
+		} );
+	} );
+
+	describe( 'should return correct glob for external dirs when external dir name passed', () => {
+		it( 'for automated tests', () => {
+			readdirSyncStub.returns( [ 'test-external-directory' ] );
+
+			expect( transformFileOptionToTestGlob( 'test-external-directory' ) ).to.deep.equal( [
+				'/workspace/external/test-external-directory/tests/**/*.js'
+			] );
+		} );
+
+		it( 'for manual tests', () => {
+			readdirSyncStub.returns( [ 'test-external-directory' ] );
+
+			expect( transformFileOptionToTestGlob( 'test-external-directory', true ) ).to.deep.equal( [
+				'/workspace/external/test-external-directory/tests/manual/**/*.js'
+			] );
+		} );
+
+		it( 'should not match external directory when isDirectory returns false', () => {
+			statSyncStub.returns( { isDirectory: () => false } );
+			readdirSyncStub.returns( [ 'test-external-file' ] );
+
+			expect( transformFileOptionToTestGlob( 'test-external-directory', true ) ).to.deep.equal( [
+				'/workspace/packages/ckeditor5-test-external-directory/tests/manual/**/*.js',
+				'/workspace/packages/ckeditor-test-external-directory/tests/manual/**/*.js',
+				'/workspace/external/*/packages/ckeditor5-test-external-directory/tests/manual/**/*.js',
+				'/workspace/external/*/packages/ckeditor-test-external-directory/tests/manual/**/*.js'
 			] );
 		} );
 	} );
