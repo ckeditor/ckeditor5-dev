@@ -5,11 +5,15 @@
 
 'use strict';
 
+const fs = require( 'fs' );
 const path = require( 'path' );
+
+const EXTERNAL_DIR_PATH = path.join( process.cwd(), 'external' );
 
 /**
  * Converts values of `--files` argument to proper globs. These are the supported types of values:
  *  * "ckeditor5" - matches all root package tests.
+ *  * "<external-package-name>" - matches tests in root of external package.
  *  * "*" - matches all packages' files.
  *  * "foo"  - matches all tests from a package.
  *  * "!foo" - matches all tests except from a package.
@@ -21,6 +25,10 @@ const path = require( 'path' );
  * @returns {Array.<String>}
  */
 module.exports = function transformFileOptionToTestGlob( pattern, isManualTest = false ) {
+	if ( doesPatternMatchExternalRepositoryName( pattern ) ) {
+		return getExternalRepositoryGlob( pattern, { isManualTest } );
+	}
+
 	// Directory to look: `packages/ckeditor5-*/...`.
 	const transformedPath = transformSinglePattern( pattern, { isManualTest } );
 
@@ -47,6 +55,32 @@ module.exports = function transformFileOptionToTestGlob( pattern, isManualTest =
 		] )
 	];
 };
+
+/**
+ * @param {String} pattern
+ * @param {Object} [options]
+ * @param {Boolean} [options.isManualTest] Controlls the path for manual and automated tests.
+ * @returns {Array.<String>}
+ */
+function getExternalRepositoryGlob( pattern, { isManualTest } ) {
+	const repositoryGlob = isManualTest ?
+		path.join( EXTERNAL_DIR_PATH, pattern, 'tests', 'manual', '**', '*' ) + '.js' :
+		path.join( EXTERNAL_DIR_PATH, pattern, 'tests', '**', '*' ) + '.js';
+
+	return [
+		repositoryGlob.split( path.sep ).join( path.posix.sep )
+	];
+}
+
+/**
+ * @param {String} pattern
+ * @returns {Boolean}
+ */
+function doesPatternMatchExternalRepositoryName( pattern ) {
+	return fs.readdirSync( EXTERNAL_DIR_PATH )
+		.filter( externalDir => fs.statSync( path.join( EXTERNAL_DIR_PATH, externalDir ) ).isDirectory() )
+		.includes( pattern );
+}
 
 /**
  * @param {String} pattern
