@@ -76,6 +76,7 @@ module.exports = async function build( config ) {
 			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-error' ),
 			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-event' ),
 			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-observable' ),
+			require.resolve( '@ckeditor/typedoc-plugins/lib/purge-private-api-docs' ),
 
 			// The `event-inheritance-fixer` plugin must be loaded after `tag-event` plugin, as it depends on its output.
 			require.resolve( '@ckeditor/typedoc-plugins/lib/event-inheritance-fixer' ),
