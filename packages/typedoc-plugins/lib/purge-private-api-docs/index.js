@@ -15,91 +15,63 @@ const fs = require( 'fs' );
  */
 module.exports = {
 	load( app ) {
-		const modules = new Set();
-		app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration( modules ) );
-		app.converter.on( Converter.EVENT_END, onEnd( modules ) );
+		app.converter.on( Converter.EVENT_END, onEventEnd() );
 	}
 };
 
-function onEnd( modules ) {
+function onEventEnd() {
 	return context => {
-		for ( const modulePath of modules ) {
-			const module = context.project.getChildByName( [ modulePath ] );
+		const moduleReflections = context.project.getReflectionsByKind( ReflectionKind.Module )
+			.filter( reflection => {
+				// TODO: Replace `process.cwd()` with options.
+				const fileName = path.join( process.cwd(), reflection.originalName + '.ts' );
 
-			removeSourcesFromReflection( module );
+				return isPrivatePackageFile( fileName );
+			} );
+
+		for ( const reflection of moduleReflections ) {
+			const symbol = context.project.getSymbolFromReflection( reflection );
+
+			// When processing an empty file.
+			if ( !symbol ) {
+				return;
+			}
+
+			const node = symbol.declarations[ 0 ];
+
+			const publicApi = node.statements.some( statement => {
+				if ( !Array.isArray( statement.jsDoc ) ) {
+					return false;
+				}
+
+				return statement.jsDoc.some( jsDoc => {
+					return ( jsDoc.tags || [] )
+						.filter( tag => {
+							return tag.tagName.kind === ts.SyntaxKind.Identifier && tag.tagName.text === 'publicApi';
+						} )
+						.shift();
+				} );
+			} );
+
+			if ( !publicApi ) {
+				context.project.removeReflection( reflection );
+			} else {
+				removeSourcesFromReflection( reflection );
+			}
 		}
 	};
-
-	function removeSourcesFromReflection( reflection ) {
-		delete reflection.sources;
-
-		if ( !reflection.children ) {
-			return;
-		}
-
-		for ( const child of reflection.children ) {
-			removeSourcesFromReflection( child );
-		}
-	}
 }
 
-function onEventCreateDeclaration( modules ) {
-	return ( context, reflection ) => {
-		// So far, we purge the entire module when processing a private package.
-		if ( reflection.kind !== ReflectionKind.Module ) {
-			return;
-		}
+function removeSourcesFromReflection( reflection ) {
+	delete reflection.sources;
 
-		// TODO: Replace `process.cwd()` with options.
-		const fileName = path.join( process.cwd(), reflection.originalName + '.ts' );
+	if ( !reflection.children ) {
+		return;
+	}
 
-		// When processing a non-private package, just leave the plugin.
-		if ( !isPrivatePackageFile( fileName ) ) {
-			return;
-		}
-
-		const symbol = context.project.getSymbolFromReflection( reflection );
-
-		// When processing an empty file.
-		if ( !symbol ) {
-			return;
-		}
-
-		const node = symbol.declarations[ 0 ];
-
-		let publicApi;
-
-		// Iterate over statements...
-		for ( const statement of node.statements ) {
-			// TODO: No idea how to cover this line.
-			// CKEditor 5 enters the if. However, the same code created as a fixture doesn't.
-			if ( !Array.isArray( statement.jsDoc ) ) {
-				continue;
-			}
-
-			// ...to find a JSDoc block code...
-			for ( const jsDoc of statement.jsDoc ) {
-				// ...that represents a module definition.
-				[ publicApi ] = ( jsDoc.tags || [] ).filter( tag => {
-					return tag.tagName.kind === ts.SyntaxKind.Identifier && tag.tagName.text === 'publicApi';
-				} );
-
-				if ( publicApi ) {
-					break;
-				}
-			}
-
-			if ( publicApi ) {
-				break;
-			}
-		}
-
-		if ( !publicApi ) {
-			context.project.removeReflection( reflection );
-		} else {
-			modules.add( reflection.name );
-		}
-	};
+	for ( const child of reflection.children ) {
+		removeSourcesFromReflection( child );
+	}
 }
 
 function isPrivatePackageFile( fileName ) {
