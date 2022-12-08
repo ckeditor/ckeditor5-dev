@@ -15,11 +15,35 @@ const fs = require( 'fs' );
  */
 module.exports = {
 	load( app ) {
-		app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration() );
+		const modules = new Set();
+		app.converter.on( Converter.EVENT_CREATE_DECLARATION, onEventCreateDeclaration( modules ) );
+		app.converter.on( Converter.EVENT_END, onEnd( modules ) );
 	}
 };
 
-function onEventCreateDeclaration() {
+function onEnd( modules ) {
+	return context => {
+		for ( const modulePath of modules ) {
+			const module = context.project.getChildByName( [ modulePath ] );
+
+			removeSourcesFromReflection( module );
+		}
+	};
+
+	function removeSourcesFromReflection( reflection ) {
+		delete reflection.sources;
+
+		if ( !reflection.children ) {
+			return;
+		}
+
+		for ( const child of reflection.children ) {
+			removeSourcesFromReflection( child );
+		}
+	}
+}
+
+function onEventCreateDeclaration( modules ) {
 	return ( context, reflection ) => {
 		// So far, we purge the entire module when processing a private package.
 		if ( reflection.kind !== ReflectionKind.Module ) {
@@ -72,6 +96,8 @@ function onEventCreateDeclaration() {
 
 		if ( !publicApi ) {
 			context.project.removeReflection( reflection );
+		} else {
+			modules.add( reflection.name );
 		}
 	};
 }
