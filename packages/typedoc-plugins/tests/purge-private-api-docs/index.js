@@ -30,11 +30,9 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 		typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
 
 		typeDoc.bootstrap( {
-			cwd: FIXTURES_PATH,
 			logLevel: 'Error',
 			entryPoints: files,
 			plugin: [
-				require.resolve( '@ckeditor/typedoc-plugins/lib/config-provider' ),
 				require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' ),
 				require.resolve( '@ckeditor/typedoc-plugins/lib/purge-private-api-docs' )
 			],
