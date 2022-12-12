@@ -22,23 +22,17 @@ const fs = require( 'fs' );
  */
 module.exports = {
 	load( app ) {
-		app.converter.on( Converter.EVENT_END, onEventEnd( app ) );
+		app.converter.on( Converter.EVENT_END, onEventEnd() );
 	}
 };
 
 /**
  * @returns {Function}
  */
-function onEventEnd( app ) {
+function onEventEnd() {
 	return context => {
-		const cwd = app.options.getValue( 'cwd' );
-
 		const moduleReflections = context.project.getReflectionsByKind( ReflectionKind.Module )
-			.filter( reflection => {
-				const fileName = path.join( cwd, reflection.originalName + '.ts' );
-
-				return isPrivatePackageFile( fileName );
-			} );
+			.filter( reflection => isPrivatePackageFile( reflection.sources[ 0 ].fullFileName ) );
 
 		for ( const reflection of moduleReflections ) {
 			const symbol = context.project.getSymbolFromReflection( reflection );
@@ -76,18 +70,15 @@ function onEventEnd( app ) {
 /**
  * @param {Object} reflection
  * @param {Array} reflection.sources
+ * @param {Function} reflection.traverse
  * @param {Array} [reflection.children]
  */
 function removeSourcesFromReflection( reflection ) {
 	delete reflection.sources;
 
-	if ( !reflection.children ) {
-		return;
-	}
-
-	for ( const child of reflection.children ) {
-		removeSourcesFromReflection( child );
-	}
+	reflection.traverse( childReflection => {
+		removeSourcesFromReflection( childReflection );
+	} );
 }
 
 /**
