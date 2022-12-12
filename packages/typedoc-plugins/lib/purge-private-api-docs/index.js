@@ -11,20 +11,31 @@ const path = require( 'path' );
 const fs = require( 'fs' );
 
 /**
+ * The `typedoc-plugin-purge-private-api-docs` removes reflections collected from private packages.
  *
+ * Private packages are marked with the `private: true` property in their `package.json` files.
+ *
+ * We do not want to expose private APIs in the documentation, but the paid features may extend the configuration reflection.
+ * Add the `@publicApi` annotation to publish a private reflection within the block comment defining a module name.
+ *
+ * The plugin requires the `cwd` option provided when bootstrapping a new application (`TypeDoc.Application().bootstrap()`).
  */
 module.exports = {
 	load( app ) {
-		app.converter.on( Converter.EVENT_END, onEventEnd() );
+		app.converter.on( Converter.EVENT_END, onEventEnd( app ) );
 	}
 };
 
-function onEventEnd() {
+/**
+ * @returns {Function}
+ */
+function onEventEnd( app ) {
 	return context => {
+		const cwd = app.options.getValue( 'cwd' );
+
 		const moduleReflections = context.project.getReflectionsByKind( ReflectionKind.Module )
 			.filter( reflection => {
-				// TODO: Replace `process.cwd()` with options.
-				const fileName = path.join( process.cwd(), reflection.originalName + '.ts' );
+				const fileName = path.join( cwd, reflection.originalName + '.ts' );
 
 				return isPrivatePackageFile( fileName );
 			} );
@@ -62,6 +73,11 @@ function onEventEnd() {
 	};
 }
 
+/**
+ * @param {Object} reflection
+ * @param {Array} reflection.sources
+ * @param {Array} [reflection.children]
+ */
 function removeSourcesFromReflection( reflection ) {
 	delete reflection.sources;
 
@@ -74,6 +90,10 @@ function removeSourcesFromReflection( reflection ) {
 	}
 }
 
+/**
+ * @param {String} fileName
+ * @returns {Boolean}
+ */
 function isPrivatePackageFile( fileName ) {
 	// Normalize the input path.
 	let dirName = path.posix.dirname( normalizePath( fileName ) );
@@ -95,6 +115,10 @@ function isPrivatePackageFile( fileName ) {
 	}
 }
 
+/**
+ * @param {String} value
+ * @returns {String}
+ */
 function normalizePath( value ) {
 	return value.replace( /\\/g, '/' );
 }

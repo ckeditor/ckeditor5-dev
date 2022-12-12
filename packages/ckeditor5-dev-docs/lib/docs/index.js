@@ -5,7 +5,6 @@
 
 'use strict';
 
-const path = require( 'path' );
 const glob = require( 'fast-glob' );
 const TypeDoc = require( 'typedoc' );
 
@@ -13,6 +12,9 @@ const TypeDoc = require( 'typedoc' );
  * Builds CKEditor 5 documentation.
  *
  * @param {Object} config
+ * @param {String} config.cwd
+ * @param {String} config.tsconfig
+ * @param {String} config.outputPath
  * @param {Array.<String>} config.sourceFiles Glob pattern with source files.
  * @param {String} config.readmePath Path to `README.md`.
  * @param {Boolean} [config.validateOnly=false] Whether JSDoc should only validate the documentation and finish
@@ -30,8 +32,6 @@ module.exports = async function build( config ) {
 		...config.sourceFiles
 	];
 
-	// const extraPlugins = config.extraPlugins || [];
-	const outputPath = config.outputPath || 'docs/api/output.json';
 	// const validateOnly = config.validateOnly || false;
 	// const strictCheck = config.strict || false;
 
@@ -56,6 +56,8 @@ module.exports = async function build( config ) {
 	typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
 
 	typeDoc.bootstrap( {
+		cwd: config.cwd,
+		tsconfig: config.tsconfig,
 		entryPoints: files,
 		// logLevel: 'Error',
 		blockTags: [
@@ -71,6 +73,7 @@ module.exports = async function build( config ) {
 		],
 		plugin: [
 			'typedoc-plugin-rename-defaults',
+			require.resolve( '@ckeditor/typedoc-plugins/lib/config-provider' ),
 			require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' ),
 			require.resolve( '@ckeditor/typedoc-plugins/lib/symbol-fixer' ),
 			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-error' ),
@@ -83,15 +86,13 @@ module.exports = async function build( config ) {
 
 			// The `event-param-fixer` plugin must be loaded after `tag-event` and `tag-observable` plugins, as it depends on their output.
 			require.resolve( '@ckeditor/typedoc-plugins/lib/event-param-fixer' )
-		],
-		// TODO: Move tsconfig.json to main repo. Also: how to share it across repos? Also: Do we need to share it?
-		tsconfig: path.join( process.cwd(), 'tsconfig.docs.json' )
+		]
 	} );
 
 	const conversionResult = typeDoc.convert();
 
 	if ( conversionResult ) {
-		await typeDoc.generateJson( conversionResult, outputPath );
+		await typeDoc.generateJson( conversionResult, config.outputPath );
 		// Uncomment this to generate TypeDoc documentation (build-in HTML template).
 		// await typeDoc.generateDocs( conversionResult, 'docs/api/typedoc' );
 	} else {
