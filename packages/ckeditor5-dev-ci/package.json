@@ -1,0 +1,29 @@
+{
+  "name": "@ckeditor/ckeditor5-dev-ci",
+  "version": "31.1.13",
+  "description": "Used to send notifications on slack triggered by travis.",
+  "keywords": [],
+  "dependencies": {
+    "node-fetch": "^2.6.7",
+    "slack-notify": "^0.1.7"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=5.7.1"
+  },
+  "files": [
+    "bin"
+  ],
+  "bin": {
+    "ckeditor5-dev-ci-notify-travis-status": "bin/notify-travis-status.js"
+  },
+  "author": "CKSource (http://cksource.com/)",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-ci",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ckeditor/ckeditor5-dev.git",
+    "directory": "packages/ckeditor5-dev-ci"
+  }
+}

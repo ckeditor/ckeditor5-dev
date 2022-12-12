@@ -17,7 +17,7 @@ git commit -am "Internal: Bumped the year." && git push
 
 */
 
-require( '@ckeditor/ckeditor5-dev-env' )
+require( '../packages/ckeditor5-dev-bump-year' )
 	.bumpYear( {
 		cwd: process.cwd(),
 		globPatterns: [

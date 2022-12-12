@@ -8,7 +8,7 @@
 const path = require( 'path' );
 const WebpackNotifierPlugin = require( './webpacknotifierplugin' );
 const { getPostCssConfig } = require( '@ckeditor/ckeditor5-dev-utils' ).styles;
-const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
+const { CKEditorWebpackPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
 const webpack = require( 'webpack' );
 const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
 

@@ -12,7 +12,7 @@ const TerserPlugin = require( 'terser-webpack-plugin' );
 const bundler = require( '../bundler' );
 const styles = require( '../styles' );
 const tools = require( '../tools' );
-const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
+const { CKEditorWebpackPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
 
 /**
  * Returns a webpack configuration that creates a bundle file for the specified package. Thanks to that, plugins exported
