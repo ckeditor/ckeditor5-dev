@@ -35,7 +35,6 @@ describe( 'typedoc-plugins/module-fixer', function() {
 			plugin: [
 				require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' )
 			],
-			// TODO: To resolve once the same problem is fixed in the `@ckeditor/ckeditor5-dev-docs` package.
 			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );
 
