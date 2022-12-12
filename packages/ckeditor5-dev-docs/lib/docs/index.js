@@ -56,7 +56,6 @@ module.exports = async function build( config ) {
 	typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
 
 	typeDoc.bootstrap( {
-		cwd: config.cwd,
 		tsconfig: config.tsconfig,
 		entryPoints: files,
 		// logLevel: 'Error',
