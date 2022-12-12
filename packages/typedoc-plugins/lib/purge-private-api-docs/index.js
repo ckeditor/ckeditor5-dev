@@ -100,6 +100,7 @@ function isPrivatePackageFile( fileName ) {
 
 		// Root's dirname is equal to the root,
 		// So if this check passes, then we should break this endless loop.
+		/* istanbul ignore if : an edge case to process a file outside a project */
 		if ( dirName === path.posix.dirname( dirName ) ) {
 			throw new Error( `${ fileName } is not placed inside a npm package.` );
 		}
