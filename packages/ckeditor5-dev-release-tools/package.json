@@ -1,7 +1,7 @@
 {
   "name": "@ckeditor/ckeditor5-dev-release-tools",
   "version": "31.1.13",
-  "description": "Tools used when releasing CKEditor 5 packages.",
+  "description": "Tools used for releasing CKEditor 5 and related packages.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {

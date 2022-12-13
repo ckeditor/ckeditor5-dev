@@ -9,7 +9,7 @@ const releaseSubRepositories = require( './tasks/releasesubrepositories' );
 const bumpVersions = require( './tasks/bumpversions' );
 const generateChangelogForSinglePackage = require( './tasks/generatechangelogforsinglepackage' );
 const generateChangelogForMonoRepository = require( './tasks/generatechangelogformonorepository' );
-const updateCKEditor5Dependencies = require( './tasks/update-ckeditor5-dependencies' );
+const updateCKEditor5Dependencies = require( './tasks/updateckeditor5dependencies' );
 
 module.exports = {
 	releaseSubRepositories,

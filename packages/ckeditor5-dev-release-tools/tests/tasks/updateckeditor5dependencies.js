@@ -41,7 +41,7 @@ describe( 'updateCKEditor5Dependencies()', () => {
 		mockery.registerMock( 'readline', stubs.readline );
 		mockery.registerMock( 'child_process', stubs.childProcess );
 
-		updateCKEditor5Dependencies = require( '../../lib/tasks/update-ckeditor5-dependencies' );
+		updateCKEditor5Dependencies = require( '../../lib/tasks/updateckeditor5dependencies' );
 	} );
 
 	afterEach( () => {
