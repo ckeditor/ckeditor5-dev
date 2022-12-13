@@ -44,7 +44,7 @@ describe( 'lib/utils/create-spinner', () => {
 		mockery.registerMock( 'cli-cursor', stubs.cliCursor );
 		mockery.registerMock( 'readline', stubs.readline );
 
-		createSpinner = require( '../../lib/tools/create-spinner' );
+		createSpinner = require( '../../lib/tools/createspinner' );
 	} );
 
 	afterEach( () => {
