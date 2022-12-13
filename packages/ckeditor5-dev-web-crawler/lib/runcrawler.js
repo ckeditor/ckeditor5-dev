@@ -42,7 +42,7 @@ const {
  * @param {Boolean} [options.ignoreHTTPSErrors=false] Whether the browser should ignore invalid (self-signed) certificates.
  * @returns {Promise} Promise is resolved, when the crawler has finished the whole crawling procedure.
  */
-module.exports = async function checkPagesForErrors( options ) {
+module.exports = async function runCrawler( options ) {
 	const {
 		url,
 		depth = Infinity,

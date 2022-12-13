@@ -7,8 +7,8 @@
 
 /* eslint-env node */
 
-const checkPagesForErrors = require( './check-pages-for-errors' );
+const runCrawler = require( './runcrawler' );
 
 module.exports = {
-	checkPagesForErrors
+	runCrawler
 };
