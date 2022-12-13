@@ -1,7 +1,7 @@
 {
   "name": "@ckeditor/ckeditor5-dev-ci",
   "version": "31.1.13",
-  "description": "Used to send notifications on slack triggered by travis.",
+  "description": "Utils for CKEditor5 CI builds.",
   "keywords": [],
   "dependencies": {
     "node-fetch": "^2.6.7",
@@ -19,7 +19,7 @@
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
-  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-ci",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-ci",
   "bugs": "https://github.com/ckeditor/ckeditor5/issues",
   "repository": {
     "type": "git",

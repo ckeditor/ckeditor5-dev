@@ -42,7 +42,7 @@
   ],
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
-  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-release-tools",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-release-tools",
   "bugs": "https://github.com/ckeditor/ckeditor5/issues",
   "repository": {
     "type": "git",

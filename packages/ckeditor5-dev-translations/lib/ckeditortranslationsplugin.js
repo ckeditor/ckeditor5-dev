@@ -10,7 +10,7 @@ const serveTranslations = require( './servetranslations' );
 const MultipleLanguageTranslationService = require( './multiplelanguagetranslationservice' );
 
 /**
- * CKEditorWebpackPlugin, for now, consists only of the translation mechanism (@ckeditor/ckeditor5#624, @ckeditor/ckeditor5#387,
+ * CKEditorTranslationsPlugin, for now, consists only of the translation mechanism (@ckeditor/ckeditor5#624, @ckeditor/ckeditor5#387,
  * @ckeditor/ckeditor5#6526).
  *
  * The main language specified in `language` option will be statically added to the bundle. Translations for all languages from
@@ -29,13 +29,13 @@ const MultipleLanguageTranslationService = require( './multiplelanguagetranslati
  * This plugin tries to clean the output translation directory before each build to make sure, that all translations are correct.
  * See https://github.com/ckeditor/ckeditor5/issues/700 for more information.
  */
-module.exports = class CKEditorWebpackPlugin {
+module.exports = class CKEditorTranslationsPlugin {
 	/**
-	 * @param {CKEditorWebpackPluginOptions} options Plugin options.
+	 * @param {CKEditorTranslationsPluginOptions} options Plugin options.
 	 */
 	constructor( options ) {
 		if ( !options ) {
-			throw new Error( 'The `CKEditorWebpackPlugin` plugin requires an object.' );
+			throw new Error( 'The `CKEditorTranslationsPlugin` plugin requires an object.' );
 		}
 
 		this.options = {
@@ -60,7 +60,7 @@ module.exports = class CKEditorWebpackPlugin {
 	apply( compiler ) {
 		if ( !this.options.language ) {
 			console.warn( chalk.yellow(
-				'The `language` option is required by the `CKEditorWebpackPlugin` plugin.' +
+				'The `language` option is required by the `CKEditorTranslationsPlugin` plugin.' +
 				'If you do not want to localize the CKEditor 5 code do not add this plugin to your webpack configuration.'
 			) );
 
@@ -104,7 +104,7 @@ module.exports = class CKEditorWebpackPlugin {
 };
 
 /**
- * @typedef {Object} CKEditorWebpackPluginOptions CKEditorWebpackPluginOptions options.
+ * @typedef {Object} CKEditorTranslationsPluginOptions CKEditorTranslationsPluginOptions options.
  *
  * @property {String} language The main language for internationalization - translations for that language
  * will be added to the bundle(s).

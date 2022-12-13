@@ -1,17 +1,17 @@
-CKEditor 5 travis status notifier
-================================
+CKEditor 5 web crawler
+======================
 
-[![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-travis-status-notifier.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-travis-status-notifier)
+[![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-web-crawler.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler)
 [![Build Status](https://travis-ci.com/ckeditor/ckeditor5-dev.svg?branch=master)](https://app.travis-ci.com/github/ckeditor/ckeditor5-dev)
-![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-travis-status-notifier)
+![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-web-crawler)
 
-Tasks used to build and verify the documentation for [CKEditor 5](https://ckeditor.com).
+Used to run a web crawler that checks for errors on specified pages.
 
 More information about development tools packages can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev>.
 
 ## Changelog
 
-See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-travis-status-notifier/CHANGELOG.md) file.
+See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-web-crawler/CHANGELOG.md) file.
 
 ## License
 

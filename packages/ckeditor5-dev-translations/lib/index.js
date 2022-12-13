@@ -9,12 +9,12 @@ const findMessages = require( './findmessages' );
 const cleanPoFileContent = require( './cleanpofilecontent' );
 const MultipleLanguageTranslationService = require( './multiplelanguagetranslationservice' );
 const createDictionaryFromPoFileContent = require( './createdictionaryfrompofilecontent' );
-const CKEditorWebpackPlugin = require( './ckeditorwebpackplugin' );
+const CKEditorTranslationsPlugin = require( './ckeditortranslationsplugin' );
 
 module.exports = {
 	findMessages,
 	cleanPoFileContent,
 	MultipleLanguageTranslationService,
 	createDictionaryFromPoFileContent,
-	CKEditorWebpackPlugin
+	CKEditorTranslationsPlugin
 };

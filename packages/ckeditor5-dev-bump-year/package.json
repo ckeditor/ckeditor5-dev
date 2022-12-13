@@ -1,7 +1,7 @@
 {
   "name": "@ckeditor/ckeditor5-dev-bump-year",
   "version": "31.1.13",
-  "description": "Used to bump year for licence at the top of the file in specified path.",
+  "description": "Used to bump year in the licence text specified at the top of the file.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
@@ -17,7 +17,7 @@
   ],
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
-  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dependency-checker",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-bump-year",
   "bugs": "https://github.com/ckeditor/ckeditor5/issues",
   "repository": {
     "type": "git",

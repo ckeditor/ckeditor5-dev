@@ -21,23 +21,18 @@ Then create a script that run tasks:
 
 ```js
 // scripts/changelog-self.js: Generate changelog for the current package.
-require( '@ckeditor/ckeditor5-dev-release-tools' ).generateChangelogForSinglePackage();
+require( '@ckeditor/ckeditor5-dev-release-tools' ).generateChangelogForSinglePackage( /* options */ );
+
+// See the `options` argument:
+// https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-release-tools/lib/tasks/generatechangelogforsinglepackage.js#L25-L43
 ```
 
 ```js
 // scripts/changelog-repos.js: Generate changelog for all dependencies (repository using multiple repositories).
-require( '@ckeditor/ckeditor5-dev-release-tools' ).generateChangelogForSubRepositories( /* options */ );
+require( '@ckeditor/ckeditor5-dev-release-tools' ).generateChangelogForMonoRepository( /* options */ );
 
 // See the `options` argument:
-// https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-release-tools/lib/tasks/generatechangelogforsubrepositories.js#L20-L27
-```
-
-```js
-// scripts/changelog-packages.js: Generate changelog for all packages (repository contains multiple packages).
-require( '@ckeditor/ckeditor5-dev-release-tools' ).generateChangelogForSubPackages( /* options */ );
-
-// See the `options` argument:
-// https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-release-tools/lib/tasks/generatechangelogforsubpackages.js#L20-L27
+// https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-release-tools/lib/tasks/generatechangelogformonorepository.js#L30-L62
 ```
 
 ```js

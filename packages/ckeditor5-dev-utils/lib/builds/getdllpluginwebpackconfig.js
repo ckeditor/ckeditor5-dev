@@ -12,7 +12,7 @@ const TerserPlugin = require( 'terser-webpack-plugin' );
 const bundler = require( '../bundler' );
 const styles = require( '../styles' );
 const tools = require( '../tools' );
-const { CKEditorWebpackPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
+const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
 
 /**
  * Returns a webpack configuration that creates a bundle file for the specified package. Thanks to that, plugins exported
@@ -106,7 +106,7 @@ module.exports = function getDllPluginWebpackConfig( options ) {
 	};
 
 	if ( langDirExists ) {
-		webpackConfig.plugins.push( new CKEditorWebpackPlugin( {
+		webpackConfig.plugins.push( new CKEditorTranslationsPlugin( {
 			// UI language. Language codes follow the https://en.wikipedia.org/wiki/ISO_639-1 format.
 			language: 'en',
 			additionalLanguages: 'all',

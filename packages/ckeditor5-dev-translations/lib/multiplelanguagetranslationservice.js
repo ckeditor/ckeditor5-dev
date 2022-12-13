@@ -439,7 +439,7 @@ function match( predicate, options ) {
 	}
 
 	throw new Error(
-		'The CKEditorWebpackPlugin matching function got an unsupported type of a predicate.' +
+		'The CKEditorTranslationsPlugin matching function got an unsupported type of a predicate.' +
 		`Got '${ predicate }' (${ typeof predicate } ) where supported values are only 'string', 'regexp' and 'function'.`
 	);
 }

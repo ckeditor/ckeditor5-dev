@@ -1,5 +1,5 @@
-CKEditor 5 webpack plugin
-=========================
+CKEditor 5 translation tools
+============================
 
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-translations.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations)
 [![Build Status](https://travis-ci.com/ckeditor/ckeditor5-dev.svg?branch=master)](https://app.travis-ci.com/github/ckeditor/ckeditor5-dev)
@@ -16,11 +16,11 @@ More information about development tools packages can be found at the following 
 The current functionality of this plugin is limited to localizing the editor builds. Add this plugin to your webpack configuration to change the language of the editor's interface or build the editor with support for multiple languages (by extracting multiple language files):
 
 ```js
-const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-translations' );
+const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
 
 // Define webpack plugins ...
 	plugins: [
-		new CKEditorWebpackPlugin( options ),
+		new CKEditorTranslationsPlugin( options ),
 
 		// Other webpack plugins...
 	]

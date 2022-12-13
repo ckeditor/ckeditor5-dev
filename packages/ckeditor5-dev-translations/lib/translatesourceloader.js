@@ -7,7 +7,7 @@
 
 /**
  * Very simple loader that runs the translateSource function only on the source.
- * translateSource is provided by the CKEditorWebpackPlugin.
+ * translateSource is provided by the CKEditorTranslationsPlugin.
  *
  * @param {String} source Content of the resource file
  * @param {Object} map A source map consumed by the `source-map` package.

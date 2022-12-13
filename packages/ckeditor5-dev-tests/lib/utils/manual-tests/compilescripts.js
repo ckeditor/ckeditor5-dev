@@ -16,11 +16,11 @@ const requireDll = require( '../requiredll' );
  * @param {String} options.buildDir A path where compiled files will be saved.
  * @param {Array.<String>} options.sourceFiles An array of paths to JavaScript files from manual tests to be compiled.
  * @param {String} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
- * @param {String} options.language A language passed to `CKEditorWebpackPlugin`.
+ * @param {String} options.language A language passed to `CKEditorTranslationsPlugin`.
  * @param {Boolean} options.disableWatch Whether to disable the watch mechanism. If set to true, changes in source files
  * will not trigger webpack.
  * @param {Function} options.onTestCompilationStatus A callback called whenever the script compilation occurrs.
- * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorWebpackPlugin`.
+ * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorTranslationsPlugin`.
  * @param {String} [options.identityFile] A file that provides secret keys used in the test scripts.
  * @returns {Promise}
  */

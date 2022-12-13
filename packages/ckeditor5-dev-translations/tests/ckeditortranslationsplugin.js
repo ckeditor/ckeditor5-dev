@@ -9,8 +9,8 @@ const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 
-describe( 'dev-translations/CKEditorWebpackPlugin', () => {
-	let sandbox, CKEditorWebpackPlugin, stubs;
+describe( 'dev-translations/CKEditorTranslationsPlugin', () => {
+	let sandbox, CKEditorTranslationsPlugin, stubs;
 
 	beforeEach( () => {
 		sandbox = sinon.createSandbox();
@@ -20,7 +20,7 @@ describe( 'dev-translations/CKEditorWebpackPlugin', () => {
 			MultipleLanguageTranslationService: sandbox.stub().returns( {} )
 		};
 
-		CKEditorWebpackPlugin = proxyquire( '../lib/ckeditorwebpackplugin', {
+		CKEditorTranslationsPlugin = proxyquire( '../lib/ckeditortranslationsplugin', {
 			'./servetranslations': stubs.serveTranslations,
 			'./multiplelanguagetranslationservice': stubs.MultipleLanguageTranslationService
 		} );
@@ -36,44 +36,44 @@ describe( 'dev-translations/CKEditorWebpackPlugin', () => {
 		it( 'should initialize with passed options', () => {
 			const options = { language: 'pl' };
 
-			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
+			const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( options );
 
-			expect( ckeditorWebpackPlugin.options ).to.be.an( 'object' );
-			expect( ckeditorWebpackPlugin.options.language ).to.equal( 'pl' );
+			expect( ckEditorTranslationsPlugin.options ).to.be.an( 'object' );
+			expect( ckEditorTranslationsPlugin.options.language ).to.equal( 'pl' );
 		} );
 
 		it( 'should initialize default value for `outputDirectory` option', () => {
 			const options = {};
 
-			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
+			const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( options );
 
-			expect( ckeditorWebpackPlugin.options.outputDirectory ).to.equal( 'translations' );
+			expect( ckEditorTranslationsPlugin.options.outputDirectory ).to.equal( 'translations' );
 		} );
 
 		it( 'should use `outputDirectory` if passed', () => {
 			const options = { outputDirectory: 'custom' };
 
-			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
+			const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( options );
 
-			expect( ckeditorWebpackPlugin.options.outputDirectory ).to.equal( 'custom' );
+			expect( ckEditorTranslationsPlugin.options.outputDirectory ).to.equal( 'custom' );
 		} );
 
 		describe( 'options', () => {
 			describe( '#corePackageContextsResourcePath', () => {
 				it( 'should use the default value if not set', () => {
-					const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( {} );
+					const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( {} );
 
-					expect( ckeditorWebpackPlugin.options.corePackageContextsResourcePath ).to.equal(
+					expect( ckEditorTranslationsPlugin.options.corePackageContextsResourcePath ).to.equal(
 						'@ckeditor/ckeditor5-core/lang/contexts.json'
 					);
 				} );
 
 				it( 'should overwrite the default value if specified in the configuration', () => {
-					const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( {
+					const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( {
 						corePackageContextsResourcePath: '@ckeditor/ckeditor5-utils/lang/contexts.json'
 					} );
 
-					expect( ckeditorWebpackPlugin.options.corePackageContextsResourcePath ).to.equal(
+					expect( ckEditorTranslationsPlugin.options.corePackageContextsResourcePath ).to.equal(
 						'@ckeditor/ckeditor5-utils/lang/contexts.json'
 					);
 				} );
@@ -81,33 +81,33 @@ describe( 'dev-translations/CKEditorWebpackPlugin', () => {
 
 			describe( '#includeCorePackageTranslations', () => {
 				it( 'should use the default value if not set', () => {
-					const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( {} );
+					const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( {} );
 
-					expect( ckeditorWebpackPlugin.options.includeCorePackageTranslations ).to.equal( false );
+					expect( ckEditorTranslationsPlugin.options.includeCorePackageTranslations ).to.equal( false );
 				} );
 
 				it( 'should overwrite the default value if specified in the configuration', () => {
-					const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( {
+					const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( {
 						includeCorePackageTranslations: true
 					} );
 
-					expect( ckeditorWebpackPlugin.options.includeCorePackageTranslations ).to.equal( true );
+					expect( ckEditorTranslationsPlugin.options.includeCorePackageTranslations ).to.equal( true );
 				} );
 			} );
 
 			describe( '#skipPluralFormFunction', () => {
 				it( 'should use the default value if not set', () => {
-					const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( {} );
+					const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( {} );
 
-					expect( ckeditorWebpackPlugin.options.skipPluralFormFunction ).to.equal( false );
+					expect( ckEditorTranslationsPlugin.options.skipPluralFormFunction ).to.equal( false );
 				} );
 
 				it( 'should overwrite the default value if specified in the configuration', () => {
-					const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( {
+					const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( {
 						skipPluralFormFunction: true
 					} );
 
-					expect( ckeditorWebpackPlugin.options.skipPluralFormFunction ).to.equal( true );
+					expect( ckEditorTranslationsPlugin.options.skipPluralFormFunction ).to.equal( true );
 				} );
 			} );
 		} );
@@ -125,8 +125,8 @@ describe( 'dev-translations/CKEditorWebpackPlugin', () => {
 				}
 			};
 
-			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
-			ckeditorWebpackPlugin.apply( compiler );
+			const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( options );
+			ckEditorTranslationsPlugin.apply( compiler );
 
 			sinon.assert.calledOnce( stubs.serveTranslations );
 		} );
@@ -137,8 +137,8 @@ describe( 'dev-translations/CKEditorWebpackPlugin', () => {
 					language: 'pl'
 				};
 
-				const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
-				ckeditorWebpackPlugin.apply( {} );
+				const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( options );
+				ckEditorTranslationsPlugin.apply( {} );
 
 				sinon.assert.calledOnce( stubs.serveTranslations );
 
@@ -163,8 +163,8 @@ describe( 'dev-translations/CKEditorWebpackPlugin', () => {
 					additionalLanguages: [ 'en' ]
 				};
 
-				const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
-				ckeditorWebpackPlugin.apply( {} );
+				const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( options );
+				ckEditorTranslationsPlugin.apply( {} );
 
 				sinon.assert.calledOnce( stubs.serveTranslations );
 
@@ -189,8 +189,8 @@ describe( 'dev-translations/CKEditorWebpackPlugin', () => {
 					additionalLanguages: 'all'
 				};
 
-				const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
-				ckeditorWebpackPlugin.apply( {} );
+				const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( options );
+				ckEditorTranslationsPlugin.apply( {} );
 
 				sinon.assert.calledOnce( stubs.serveTranslations );
 
@@ -217,8 +217,8 @@ describe( 'dev-translations/CKEditorWebpackPlugin', () => {
 					skipPluralFormFunction: true
 				};
 
-				const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
-				ckeditorWebpackPlugin.apply( {} );
+				const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( options );
+				ckEditorTranslationsPlugin.apply( {} );
 
 				sinon.assert.calledOnce( stubs.serveTranslations );
 
@@ -244,9 +244,9 @@ describe( 'dev-translations/CKEditorWebpackPlugin', () => {
 				additionalLanguages: 'abc'
 			};
 
-			const ckeditorWebpackPlugin = new CKEditorWebpackPlugin( options );
+			const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( options );
 
-			expect( () => ckeditorWebpackPlugin.apply( {} ) ).to.throw(
+			expect( () => ckEditorTranslationsPlugin.apply( {} ) ).to.throw(
 				/Error: The `additionalLanguages` option should be an array of language codes or `all`\./
 			);
 		} );

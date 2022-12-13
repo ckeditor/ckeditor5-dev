@@ -1,7 +1,7 @@
 {
   "name": "@ckeditor/ckeditor5-dev-dependency-checker",
   "version": "31.1.13",
-  "description": "Used to validate dependencies specified in package.json.",
+  "description": "Contains tools for validating dependencies specified in package.json.",
   "keywords": [],
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "^31.1.13",
@@ -22,7 +22,7 @@
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
-  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dependency-checker",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-dependency-checker",
   "bugs": "https://github.com/ckeditor/ckeditor5/issues",
   "repository": {
     "type": "git",
