@@ -109,7 +109,7 @@ describe( 'dev-transifex/upload()', () => {
 					return stubs.table.toString( ...args );
 				}
 			},
-			'./transifex-service': stubs.transifexService,
+			'./transifexservice': stubs.transifexService,
 			'./utils': stubs.utils
 		} );
 

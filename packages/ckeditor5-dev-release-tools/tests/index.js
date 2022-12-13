@@ -43,7 +43,7 @@ describe( 'dev-release-tools/index', () => {
 		mockery.registerMock( './tasks/generatechangelogforsinglepackage', releaseTools.generateChangelogForSinglePackage );
 		mockery.registerMock( './tasks/releasesubrepositories', releaseTools.releaseSubRepositories );
 		mockery.registerMock( './tasks/generatechangelogformonorepository', releaseTools.generateChangelogForMonoRepository );
-		mockery.registerMock( './tasks/update-ckeditor5-dependencies', releaseTools.updateCKEditor5Dependencies );
+		mockery.registerMock( './tasks/updateckeditor5dependencies', releaseTools.updateCKEditor5Dependencies );
 
 		tasks = proxyquire( '../lib/index', {
 			'@ckeditor/ckeditor5-dev-utils': {

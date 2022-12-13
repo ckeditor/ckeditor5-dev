@@ -129,7 +129,7 @@ describe( 'dev-transifex/download()', () => {
 
 		mockery.registerMock( 'fs-extra', stubs.fs );
 		mockery.registerMock( 'chalk', stubs.chalk );
-		mockery.registerMock( './transifex-service', stubs.transifexService );
+		mockery.registerMock( './transifexservice', stubs.transifexService );
 		mockery.registerMock( './utils', stubs.utils );
 		mockery.registerMock( './languagecodemap.json', { ne_NP: 'ne' } );
 
