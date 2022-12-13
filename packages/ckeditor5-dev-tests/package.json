@@ -66,8 +66,8 @@
     "bin"
   ],
   "bin": {
-    "ckeditor5-dev-tests-run-automated": "bin/test.js",
-    "ckeditor5-dev-tests-run-manual": "bin/test-manual.js"
+    "ckeditor5-dev-tests-run-automated": "bin/testautomated.js",
+    "ckeditor5-dev-tests-run-manual": "bin/testmanual.js"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
