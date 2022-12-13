@@ -5,7 +5,7 @@
 
 'use strict';
 
-const bumpYear = require( './bump-year' );
+const bumpYear = require( './bumpyear' );
 
 module.exports = {
 	bumpYear
