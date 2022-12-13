@@ -9,12 +9,12 @@ const TypeDoc = require( 'typedoc' );
 
 const utils = require( '../utils' );
 
-describe( 'typedoc-plugins/module-fixer', function() {
+describe( 'typedoc-plugins/purge-private-api-docs', function() {
 	this.timeout( 10 * 1000 );
 
 	let conversionResult;
 
-	const FIXTURES_PATH = utils.normalizePath( utils.ROOT_TEST_DIRECTORY, 'module-fixer', 'fixtures' );
+	const FIXTURES_PATH = utils.normalizePath( utils.ROOT_TEST_DIRECTORY, 'purge-private-api-docs', 'fixtures' );
 
 	before( async () => {
 		const sourceFilePatterns = [
@@ -33,7 +33,8 @@ describe( 'typedoc-plugins/module-fixer', function() {
 			logLevel: 'Error',
 			entryPoints: files,
 			plugin: [
-				require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' )
+				require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' ),
+				require.resolve( '@ckeditor/typedoc-plugins/lib/purge-private-api-docs' )
 			],
 			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );
@@ -43,21 +44,16 @@ describe( 'typedoc-plugins/module-fixer', function() {
 		expect( conversionResult ).to.be.an( 'object' );
 	} );
 
-	it( 'should parse the module definition from a file without import statements', () => {
-		const errorModule = conversionResult.children.find( doclet => doclet.name === 'fixtures/error' );
-
-		expect( errorModule ).to.not.be.undefined;
+	it( 'should remove reflections from a private package', () => {
+		expect( conversionResult.getChildByName( [ 'private-package/model/model' ] ) ).to.equal( undefined );
+		expect( conversionResult.getChildByName( [ 'private-package/view/node/node' ] ) ).to.equal( undefined );
 	} );
 
-	it( 'should parse the module definition from a file with import type statements', () => {
-		const errorModule = conversionResult.children.find( doclet => doclet.name === 'fixtures/logger' );
-
-		expect( errorModule ).to.not.be.undefined;
+	it( 'should keep private reflections marked with the `@publicApi` annotation', () => {
+		expect( conversionResult.getChildByName( [ 'private-public-api-package/error' ] ) ).to.not.equal( undefined );
 	} );
 
-	it( 'should parse the module definition from a file with import statements', () => {
-		const errorModule = conversionResult.children.find( doclet => doclet.name === 'fixtures/customerror' );
-
-		expect( errorModule ).to.not.be.undefined;
+	it( 'should not touch reflections from a public package', () => {
+		expect( conversionResult.getChildByName( [ 'public-package/awesomeerror' ] ) ).to.not.equal( undefined );
 	} );
 } );

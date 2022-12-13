@@ -36,7 +36,6 @@ describe( 'typedoc-plugins/tag-observable', function() {
 			plugin: [
 				require.resolve( '@ckeditor/typedoc-plugins/lib/tag-observable' )
 			],
-			// TODO: To resolve once the same problem is fixed in the `@ckeditor/ckeditor5-dev-docs` package.
 			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );
 
