@@ -9,7 +9,7 @@ const fs = require( 'fs/promises' );
 const path = require( 'path' );
 const Table = require( 'cli-table' );
 const chalk = require( 'chalk' );
-const transifexService = require( './transifex-service' );
+const transifexService = require( './transifexservice' );
 const { verifyProperties, createLogger } = require( './utils' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 

@@ -10,7 +10,7 @@ const fs = require( 'fs-extra' );
 const chalk = require( 'chalk' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 const { cleanPoFileContent, createDictionaryFromPoFileContent } = require( '@ckeditor/ckeditor5-dev-translations' );
-const transifexService = require( './transifex-service' );
+const transifexService = require( './transifexservice' );
 const { verifyProperties, createLogger } = require( './utils' );
 const languageCodeMap = require( './languagecodemap.json' );
 

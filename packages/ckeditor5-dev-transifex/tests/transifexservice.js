@@ -119,7 +119,7 @@ describe( 'dev-transifex/transifex-service', () => {
 		mockery.registerMock( '@transifex/api', { transifexApi: stubs.transifexApi } );
 		mockery.registerMock( 'node-fetch', stubs.fetch );
 
-		transifexService = require( '../lib/transifex-service' );
+		transifexService = require( '../lib/transifexservice' );
 	} );
 
 	afterEach( () => {
