@@ -1,99 +1,61 @@
-#!/usr/bin/env node
-
 /**
  * @license Copyright (c) 2003-2022, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
+'use strict';
 
-// This script assumes that is being executed on Travis CI. It requires following environment variables:
-// - SLACK_WEBHOOK_URL - a URL where the notification should be sent
-// - START_TIME - POSIX time (when the script has begun the job)
-// - END_TIME - POSIX time (when the script has finished the job)
-// - GITHUB_TOKEN - token to a Github account with the scope: "repos". It is requires for obtaining an author of
-//   the commit if the build failed. The repository can be private and we can't use the public API.
-//
-// If the `SLACK_NOTIFY_COMMIT_URL` environment variable is defined, the script use the URL as the commit URL.
-// Otherwise, a marge of variables `TRAVIS_REPO_SLUG` and `TRAVIS_COMMIT` will be used.
-//
-// Pinging an author of the commit can be disabled by defining the `SLACK_NOTIFY_HIDE_AUTHOR` environment variable
-// to `"true"` (`SLACK_NOTIFY_HIDE_AUTHOR="true"`). See: https://github.com/ckeditor/ckeditor5/issues/9252.
-//
-// In order to enable the debug mode, set the `DEBUG=true` as the environment variable.
+// A map that translates GitHub accounts to Slack ids.
+const members = require( './members.json' );
 
 const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
 
-const buildBranch = process.env.TRAVIS_BRANCH;
-
-const ALLOWED_BRANCHES = [
-	'stable',
-	'master',
-	'master-revisions'
-];
-
-const ALLOWED_EVENTS = [
-	'push',
-	'cron',
-	'api'
-];
-
-printDebugLog( 'Starting script: ' + __filename );
-
-// Send a notification only for main branches...
-if ( !ALLOWED_BRANCHES.includes( buildBranch ) ) {
-	printDebugLog( `Aborting due to an invalid branch (${ buildBranch }).` );
-
-	process.exit();
-}
-
-// ...and an event that triggered the build is correct...
-if ( !ALLOWED_EVENTS.includes( process.env.TRAVIS_EVENT_TYPE ) ) {
-	printDebugLog( `Aborting due to an invalid event type (${ process.env.TRAVIS_EVENT_TYPE }).` );
-
-	process.exit();
-}
-
-// ...and for builds that failed.
-if ( process.env.TRAVIS_TEST_RESULT == 0 ) {
-	printDebugLog( 'The build did not fail. The notification will not be sent.' );
-
-	process.exit();
-}
-
 const fetch = require( 'node-fetch' );
-const slack = require( 'slack-notify' )( process.env.SLACK_WEBHOOK_URL );
-
-// A map that translates GitHub accounts to Slack ids.
-const members = require( '../lib/members.json' );
-
-slack.onError = err => {
-	console.log( 'API error occurred:', err );
-};
-
-main();
+const slackNotify = require( 'slack-notify' );
 
 /**
- * The main function.
- *
- * @async
+ * @param {Object} options
+ * @param {String} options.repositorySlug
+ * @param {Number} options.startTime
+ * @param {Number} options.endTime
+ * @param {String} options.githubToken
+ * @param {String} options.slackWebhookUrl
+ * @param {String} options.branch
+ * @param {String} options.commit
+ * @param {String} options.notifyCommitUrl
+ * @param {Boolean} options.shouldHideAuthor
+ * @param {String} options.jobUrl
+ * @param {String} options.jobId
+ * @returns {Promise}
  */
-async function main() {
-	const commitUrl = getCommitUrl();
-	const commitDetails = await getCommitDetails( commitUrl );
+module.exports = async function notifyTravisStatus( options ) {
+	const commitUrl = getCommitUrl( {
+		commit: options.commit,
+		notifyCommitUrl: options.notifyCommitUrl,
+		repositorySlug: options.repositorySlug
+	} );
+	const commitDetails = await getCommitDetails( commitUrl, options.githubToken );
 
-	const [ buildRepoOwner, buildRepoName ] = process.env.TRAVIS_REPO_SLUG.split( '/' );
-	const execTime = getExecutionTime( parseInt( process.env.END_TIME ), parseInt( process.env.START_TIME ) );
+	const [ buildRepoOwner, buildRepoName ] = options.repositorySlug.split( '/' );
+	const execTime = getExecutionTime( options.endTime, options.startTime );
 
 	const slackAccount = members[ commitDetails.author ];
 	const shortCommit = commitUrl.split( '/' ).pop().substring( 0, 7 );
 	const repoMatch = commitUrl.match( REPOSITORY_REGEXP );
 
-	printDebugLog( 'Sending a message.' );
+	const slack = slackNotify( options.slackWebhookUrl );
 
-	slack.send( {
+	slack.onError = err => {
+		console.log( 'API error occurred:', err );
+	};
+
+	return slack.send( {
 		username: 'Travis CI',
-		text: getNotifierMessage( slackAccount, commitDetails.author ),
+		text: getNotifierMessage( {
+			slackAccount,
+			githubAccount: commitDetails.author,
+			shouldHideAuthor: options.shouldHideAuthor
+		} ),
 		icon_url: 'https://a.slack-edge.com/66f9/img/services/travis_36.png',
 		unfurl_links: 1,
 		attachments: [
@@ -104,7 +66,7 @@ async function main() {
 						title: 'Repository (branch)',
 						value: [
 							`<https://github.com/${ buildRepoOwner }/${ buildRepoName }|${ buildRepoName }>`,
-							`(<https://github.com/${ buildRepoOwner }/${ buildRepoName }/tree/${ buildBranch }|${ buildBranch }>)`
+							`(<https://github.com/${ buildRepoOwner }/${ buildRepoName }/tree/${ options.branch }|${ options.branch }>)`
 						].join( ' ' ),
 						short: true
 					},
@@ -115,7 +77,7 @@ async function main() {
 					},
 					{
 						title: 'Build number',
-						value: `<${ process.env.TRAVIS_JOB_WEB_URL }|#${ process.env.TRAVIS_JOB_NUMBER }>`,
+						value: `<${ options.jobUrl }|#${ options.jobId }>`,
 						short: true
 					},
 					{
@@ -132,9 +94,7 @@ async function main() {
 			}
 		]
 	} );
-
-	printDebugLog( 'Sent.' );
-}
+};
 
 /**
  * Returns an object that compares two dates.
@@ -177,16 +137,18 @@ function getFormattedMessage( message, repoOwner, repoName ) {
 /**
  * Returns a URL to the commit details on GitHub.
  *
+ * @param {Object} options
+ * @param {String} options.notifyCommitUrl
+ * @param {String} options.repositorySlug
+ * @param {String} options.commit
  * @returns {String}
  */
-function getCommitUrl() {
-	const { SLACK_NOTIFY_COMMIT_URL, TRAVIS_REPO_SLUG, TRAVIS_COMMIT } = process.env;
-
-	if ( SLACK_NOTIFY_COMMIT_URL ) {
-		return SLACK_NOTIFY_COMMIT_URL;
+function getCommitUrl( options ) {
+	if ( options.notifyCommitUrl ) {
+		return options.notifyCommitUrl;
 	}
 
-	return `https://github.com/${ TRAVIS_REPO_SLUG }/commit/${ TRAVIS_COMMIT }`;
+	return `https://github.com/${ options.repositorySlug }/commit/${ options.commit }`;
 }
 
 /**
@@ -203,15 +165,16 @@ function getGithubApiUrl( commitUrl ) {
  * Returns a promise that resolves the commit details (author and message) based on the specified GitHub URL.
  *
  * @param {String} commitUrl The URL to the commit on GitHub.
+ * @param {String} githubToken Github token used for authorization a request,
  * @returns {Promise.<Object>}
  */
-function getCommitDetails( commitUrl ) {
+function getCommitDetails( commitUrl, githubToken ) {
 	const apiGithubUrlCommit = getGithubApiUrl( commitUrl );
 	const options = {
 		method: 'GET',
 		credentials: 'include',
 		headers: {
-			authorization: `token ${ process.env.GITHUB_TOKEN }`
+			authorization: `token ${ githubToken }`
 		}
 	};
 
@@ -226,32 +189,25 @@ function getCommitDetails( commitUrl ) {
 /**
  * Returns the additional message that will be added to the notifier post.
  *
- * @param {String} slackAccount
- * @param {String} githubAccount
+ * @param {Object} options
+ * @param {Boolean} options.shouldHideAuthor
+ * @param {String} options.slackAccount
+ * @param {String} options.githubAccount
  * @returns {String}
  */
-function getNotifierMessage( slackAccount, githubAccount ) {
-	if ( process.env.SLACK_NOTIFY_HIDE_AUTHOR == 'true' ) {
+function getNotifierMessage( options ) {
+	if ( options.shouldHideAuthor ) {
 		return '_The author of the commit was hidden. <https://github.com/ckeditor/ckeditor5/issues/9252|Read more about why.>_';
 	}
 
-	if ( !slackAccount ) {
+	if ( !options.slackAccount ) {
 		return '_The author of the commit could not be obtained._';
 	}
 
 	// Slack and GitHub names for bots are equal.
-	if ( slackAccount === githubAccount ) {
+	if ( options.slackAccount === options.githubAccount ) {
 		return '_This commit is a result of merging a branch into another branch._';
 	}
 
-	return `<@${ slackAccount }>, could you take a look?`;
-}
-
-/**
- * @param {String} message
- */
-function printDebugLog( message ) {
-	if ( process.env.DEBUG == 'true' ) {
-		console.log( '[Slack Notification]', message );
-	}
+	return `<@${ options.slackAccount }>, could you take a look?`;
 }

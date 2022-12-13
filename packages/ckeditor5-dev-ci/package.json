@@ -12,10 +12,11 @@
     "npm": ">=5.7.1"
   },
   "files": [
-    "bin"
+    "bin",
+    "lib"
   ],
   "bin": {
-    "ckeditor5-dev-ci-notify-travis-status": "bin/notify-travis-status.js"
+    "ckeditor5-dev-ci-notify-travis-status": "bin/notifytravisstatus.js"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
