@@ -15,10 +15,11 @@
     "npm": ">=5.7.1"
   },
   "files": [
-    "bin"
+    "bin",
+    "lib"
   ],
   "bin": {
-    "ckeditor5-dev-check-dependencies": "bin/check-dependencies.js"
+    "ckeditor5-dev-check-dependencies": "bin/checkdependencies.js"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",

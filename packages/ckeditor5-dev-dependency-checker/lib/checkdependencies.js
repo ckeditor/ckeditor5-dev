@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /**
  * @license Copyright (c) 2003-2022, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
@@ -12,38 +10,41 @@ const path = require( 'path' );
 const glob = require( 'glob' );
 const depCheck = require( 'depcheck' );
 const chalk = require( 'chalk' );
-const minimist = require( 'minimist' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-
-const { packagePaths, options } = parseArguments( process.argv.slice( 2 ) );
-
-const QUIET_MODE = options.quiet;
-
-checkDependencies( packagePaths );
 
 /**
  * Checks dependencies sequentially in all provided packages.
  *
  * @param {Set.<String>} packagePaths Relative paths to packages.
+ * @param {Object} options Options.
+ * @param {Boolean} [options.quiet=false] Whether to inform about the progress.
+ * @returns {Promise.<Boolean>} Resolves a promise with a flag informing whether detected an error.
  */
-async function checkDependencies( packagePaths ) {
+module.exports = async function checkDependencies( packagePaths, options ) {
+	let foundError = false;
+
 	for ( const packagePath of packagePaths ) {
-		const isSuccess = await checkDependenciesInPackage( packagePath );
+		const isSuccess = await checkDependenciesInPackage( packagePath, {
+			quiet: options.quiet
+		} );
 
 		// Mark result of this script execution as invalid.
 		if ( !isSuccess ) {
-			process.exitCode = 1;
+			foundError = true;
 		}
 	}
-}
+
+	return Promise.resolve( foundError );
+};
 
 /**
  * Checks dependencies in provided package. If the folder does not contain a package.json file the function quits with success.
  *
  * @param {String} packagePath Relative path to package.
+ * @param {Object} options Options.
+ * @param {Boolean} [options.quiet=false] Whether to inform about the progress.
  * @returns {Boolean} The result of checking the dependencies in the package: true = no errors found.
  */
-async function checkDependenciesInPackage( packagePath ) {
+async function checkDependenciesInPackage( packagePath, options ) {
 	const packageAbsolutePath = path.resolve( packagePath );
 	const packageJsonPath = path.join( packageAbsolutePath, 'package.json' );
 
@@ -75,7 +76,7 @@ async function checkDependenciesInPackage( packagePath ) {
 		depCheckOptions.ignoreMatches.push( ...packageJson.depcheckIgnore );
 	}
 
-	if ( !QUIET_MODE ) {
+	if ( !options.quiet ) {
 		console.log( `🔎 Checking dependencies in ${ chalk.bold( packageJson.name ) }...` );
 	}
 
@@ -135,7 +136,7 @@ async function checkDependenciesInPackage( packagePath ) {
 	const hasErrors = errors.some( error => !!error );
 
 	if ( !hasErrors ) {
-		if ( !QUIET_MODE ) {
+		if ( !options.quiet ) {
 			console.log( chalk.green.bold( '✨ All dependencies are defined correctly.\n' ) );
 		}
 
@@ -147,73 +148,6 @@ async function checkDependenciesInPackage( packagePath ) {
 	showErrors( errors );
 
 	return false;
-}
-
-/**
- * Parses CLI arguments and options.
- *
- * @param {Array.<String>} args CLI arguments containing package paths and options.
- * @returns {Object} result
- * @returns {Set.<String>} result.packagePaths Relative package paths.
- * @returns {Object.<String, Boolean>} result.options Configuration options.
- */
-function parseArguments( args ) {
-	const config = {
-		boolean: [
-			'quiet'
-		],
-
-		default: {
-			quiet: false
-		}
-	};
-
-	const parsedArgs = minimist( args, config );
-
-	const options = Object.assign( {}, parsedArgs );
-
-	// Delete arguments that didn't have an explicit option associated with them.
-	// In our case this is all package paths.
-	delete options._;
-
-	return {
-		packagePaths: getPackagePaths( parsedArgs._ ),
-		options
-	};
-}
-
-/**
- * Returns relative (to the current work directory) paths to packages. If the provided `args` array is empty,
- * the packages will be read from the `packages/` directory.
- *
- * @param {Array.<String>} args CLI arguments with relative or absolute package paths.
- * @returns {Set.<String>} Relative package paths.
- */
-function getPackagePaths( args ) {
-	if ( !args.length ) {
-		return tools.getDirectories( path.join( process.cwd(), 'packages' ) )
-			.map( packageName => `packages/${ packageName }` );
-	}
-
-	const PACKAGE_RELATIVE_PATH_REGEXP = /packages\/ckeditor5?-[^/]+/;
-
-	const getPackageRelativePathFromAbsolutePath = path => {
-		const found = path.match( PACKAGE_RELATIVE_PATH_REGEXP );
-
-		return found ? found[ 0 ] : '';
-	};
-
-	const isPackageRelativePath = path => !!path && PACKAGE_RELATIVE_PATH_REGEXP.test( path );
-
-	return args.reduce( ( paths, arg ) => {
-		const relativePath = path.isAbsolute( arg ) ? getPackageRelativePathFromAbsolutePath( arg ) : arg;
-
-		if ( isPackageRelativePath( relativePath ) ) {
-			paths.add( relativePath );
-		}
-
-		return paths;
-	}, new Set() );
 }
 
 /**
