@@ -176,7 +176,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			expect( dllReferencePlugin.options.extensions ).to.be.undefined;
 		} );
 
-		it( 'loads the CKEditorWebpackPlugin plugin when lang dir exists', () => {
+		it( 'loads the CKEditorTranslationsPlugin plugin when lang dir exists', () => {
 			stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
 			stubs.fs.existsSync.returns( true );
 
@@ -187,7 +187,8 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			} );
 
 			// Due to versions mismatch, the `instanceof` check does not pass.
-			const ckeditor5TranslationsPlugin = webpackConfig.plugins.find( plugin => plugin.constructor.name === 'CKEditorWebpackPlugin' );
+			const ckeditor5TranslationsPlugin = webpackConfig.plugins
+				.find( plugin => plugin.constructor.name === 'CKEditorTranslationsPlugin' );
 
 			expect( ckeditor5TranslationsPlugin ).to.not.be.undefined;
 			expect( ckeditor5TranslationsPlugin.options.language ).to.equal( 'en' );
@@ -199,7 +200,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			expect( 'ckeditor5-basic-styles/src/bold.ts' ).to.not.match( ckeditor5TranslationsPlugin.options.sourceFilesPattern );
 		} );
 
-		it( 'does not load the CKEditorWebpackPlugin plugin when lang dir does not exist', () => {
+		it( 'does not load the CKEditorTranslationsPlugin plugin when lang dir does not exist', () => {
 			stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
 			stubs.fs.existsSync.returns( false );
 
@@ -210,7 +211,8 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			} );
 
 			// Due to versions mismatch, the `instanceof` check does not pass.
-			const ckeditor5TranslationsPlugin = webpackConfig.plugins.find( plugin => plugin.constructor.name === 'CKEditorWebpackPlugin' );
+			const ckeditor5TranslationsPlugin = webpackConfig.plugins
+				.find( plugin => plugin.constructor.name === 'CKEditorTranslationsPlugin' );
 
 			expect( ckeditor5TranslationsPlugin ).to.be.undefined;
 		} );
