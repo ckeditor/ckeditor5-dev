@@ -19,7 +19,7 @@
     "lib"
   ],
   "bin": {
-    "ckeditor5-dev-check-dependencies": "bin/checkdependencies.js"
+    "ckeditor5-dev-dependency-checker": "bin/dependencychecker.js"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
