@@ -8,7 +8,13 @@
 /* eslint-env node */
 
 const runCrawler = require( './runcrawler' );
+const { getBaseUrl, isUrlValid, toArray } = require( './utils' );
+const { DEFAULT_CONCURRENCY } = require( './constants' );
 
 module.exports = {
-	runCrawler
+	DEFAULT_CONCURRENCY,
+	runCrawler,
+	getBaseUrl,
+	isUrlValid,
+	toArray
 };
