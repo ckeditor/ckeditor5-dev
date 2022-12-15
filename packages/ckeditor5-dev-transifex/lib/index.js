@@ -8,9 +8,11 @@
 const createPotFiles = require( './createpotfiles' );
 const uploadPotFiles = require( './upload' );
 const downloadTranslations = require( './download' );
+const getToken = require( './gettoken' );
 
 module.exports = {
 	createPotFiles,
 	uploadPotFiles,
-	downloadTranslations
+	downloadTranslations,
+	getToken
 };
