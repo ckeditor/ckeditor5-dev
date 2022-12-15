@@ -64,7 +64,7 @@ const additionalFiles = [
  *
  * Example usage:
  *
- *     require( '@ckeditor/ckeditor5-dev-env' )
+ *     require( '@ckeditor/ckeditor5-release-tools' )
  *         .releaseSubRepositories( {
  *		        cwd: process.cwd(),
  *		        packages: 'packages',
