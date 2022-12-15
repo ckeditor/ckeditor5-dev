@@ -90,11 +90,20 @@ function onEventEnd( context ) {
 
 		eventReflection.kindString = 'Event';
 
+		const argsReflection = reflection.type.declaration.children.find( ref => ref.name === 'args' ).type;
+
 		// Map each found `@param` tag to the type parameter reflection.
 		const typeParameters = reflection.comment.getTags( '@param' ).map( tag => {
 			const param = new TypeParameterReflection( tag.name, undefined, undefined, eventReflection );
 
-			param.type = context.converter.convertType( context.withScope( param ) );
+			// TODO: Tests.
+			param.type = argsReflection.elements.find( ref => ref.name === tag.name );
+
+			// TODO: What if it returns `null`?
+			if ( !param.type ) {
+				param.type = context.converter.convertType( context.withScope( param ) );
+			}
+
 			param.comment = new Comment( tag.content );
 
 			return param;
