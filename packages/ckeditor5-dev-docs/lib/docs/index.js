@@ -60,7 +60,8 @@ module.exports = async function build( config ) {
 		entryPoints: files,
 		// logLevel: 'Error',
 		blockTags: [
-			'@eventName'
+			'@eventName',
+			'@memberOf'
 		],
 		inlineTags: [
 			'@link',
@@ -76,6 +77,7 @@ module.exports = async function build( config ) {
 			require.resolve( '@ckeditor/typedoc-plugins/lib/symbol-fixer' ),
 			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-error' ),
 			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-event' ),
+			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-memberof' ),
 			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-observable' ),
 			require.resolve( '@ckeditor/typedoc-plugins/lib/purge-private-api-docs' ),
 
