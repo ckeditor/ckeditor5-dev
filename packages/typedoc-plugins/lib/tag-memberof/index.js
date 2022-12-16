@@ -5,9 +5,7 @@
 
 'use strict';
 
-const { Converter, ReflectionKind, ReflectionFlag, ReferenceType } = require( 'typedoc' );
-
-const AT_MEMBER_TAG = '@memberOf';
+const { Converter, ReflectionKind, ReferenceReflection } = require( 'typedoc' );
 
 /**
  * TODO.
@@ -25,49 +23,39 @@ function onEventEnd( context ) {
 
 	// Then, for each potential interface reflection...
 	for ( const reflection of reflections ) {
-		// ...skip it, if it does not contain the `@memberOf` tag.
-		if ( !reflection.comment || !reflection.comment.getTag( AT_MEMBER_TAG ) ) {
+		// E.g. "core"
+		const packageIndexName = reflection.parent.name.split( '/' ).shift();
+
+		// E.g "core" + "CommandsMap"
+		const packageIndexModule = context.project.getChildByName( [ packageIndexName, reflection.name ] );
+
+		if ( !packageIndexModule ) {
 			continue;
 		}
 
-		const atMember = reflection.comment.getTag( AT_MEMBER_TAG );
-
-		// TODO: It cannot be empty.
-		if ( !atMember ) {
-			// throw.
+		if ( !packageIndexModule.children ) {
+			continue;
 		}
 
-		// TODO: Make sure it is not equal to `undefined` at some point.
-		const [ modulePath, propertyName ] = reflection.comment.getTag( AT_MEMBER_TAG ).content[ 0 ].text.split( ' ' );
+		reflection.children = packageIndexModule.children.slice();
+		reflection.groups = packageIndexModule.groups.slice();
 
-		if ( !modulePath || !propertyName ) {
-			// throw.
-		}
+		// The goal is to add a new reference as a child in the re-export main module.
+		const newRef = new ReferenceReflection( packageIndexModule.name, reflection, packageIndexModule.parent );
 
-		const [ moduleName, interfaceName ] = modulePath.replace( 'module:', '' ).split( '~' );
+		// context.postReflectionCreation( newRef );
+		// context.project.removeReflection( packageIndexModule );
 
-		const interfaceReflection = context.project.getChildByName( [ moduleName, interfaceName ] );
+		// const propertyReflection = context
+		// 	.withScope( packageIndexModule.parent )
+		// 	.createDeclarationReflection(
+		// 		ReflectionKind.Reference,
+		// 		undefined,
+		// 		undefined,
+		// 		packageIndexModule.name
+		// 	);
+		// propertyReflection._target = reflection;
 
-		// TODO: Is `interfaceReflection` interface?
-
-		const propertyReflection = context
-			.withScope( interfaceReflection )
-			.createDeclarationReflection(
-				ReflectionKind.Property,
-				undefined,
-				undefined,
-				propertyName
-			);
-
-		// Each property in the configuration is optional.
-		propertyReflection.setFlag( ReflectionFlag.Optional, true );
-
-		// Copy the `sources` object to generate URLs to Github.
-		propertyReflection.sources = reflection.sources;
-
-		// Create a reference reflection.
-		propertyReflection.type = ReferenceType.createResolvedReference( reflection.name, reflection, context.project );
-
-		propertyReflection.kindString = 'Property';
+		// context.addChild( newRef );
 	}
 }
