@@ -23,39 +23,35 @@ function onEventEnd( context ) {
 
 	// Then, for each potential interface reflection...
 	for ( const reflection of reflections ) {
-		// E.g. "core"
-		const packageIndexName = reflection.parent.name.split( '/' ).shift();
+		// A name of the main module exported by package.
+		const moduleName = reflection.parent.name.split( '/' ).shift();
 
-		// E.g "core" + "CommandsMap"
-		const packageIndexModule = context.project.getChildByName( [ packageIndexName, reflection.name ] );
+		// An interface reflection from which we want to copy children.
+		const interfaceToCopy = context.project.getChildByName( [ moduleName, reflection.name ] );
 
-		if ( !packageIndexModule ) {
+		// A reflection does not exist.
+		if ( !interfaceToCopy ) {
 			continue;
 		}
 
-		if ( !packageIndexModule.children ) {
+		// An interface does not contain children. Hence, there is nothing to copy.
+		if ( !interfaceToCopy.children ) {
 			continue;
 		}
 
-		reflection.children = packageIndexModule.children.slice();
-		reflection.groups = packageIndexModule.groups.slice();
+		// Copy properties from an extended interface exported via the main package `index.ts` (module augmentation).
+		reflection.children = interfaceToCopy.children.slice();
+		reflection.groups = interfaceToCopy.groups.slice();
 
-		// The goal is to add a new reference as a child in the re-export main module.
-		const newRef = new ReferenceReflection( packageIndexModule.name, reflection, packageIndexModule.parent );
+		// We do not want to have the same interface defined twice.
+		// The goal is to have a reference as a child in the main module.
+		// `ReferenceReflection#constructor()` is an internal API. We should find a proper way to create such objects.
+		const newRef = new ReferenceReflection( interfaceToCopy.name, reflection, interfaceToCopy.parent );
 
-		// context.postReflectionCreation( newRef );
-		// context.project.removeReflection( packageIndexModule );
+		newRef.kindString = 'Reference';
+		newRef.sources = interfaceToCopy.sources;
 
-		// const propertyReflection = context
-		// 	.withScope( packageIndexModule.parent )
-		// 	.createDeclarationReflection(
-		// 		ReflectionKind.Reference,
-		// 		undefined,
-		// 		undefined,
-		// 		packageIndexModule.name
-		// 	);
-		// propertyReflection._target = reflection;
-
-		// context.addChild( newRef );
+		context.project.removeReflection( interfaceToCopy );
+		context.withScope( newRef.parent ).addChild( newRef );
 	}
 }
