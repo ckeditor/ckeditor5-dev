@@ -77,6 +77,10 @@ function getExternalRepositoryGlob( pattern, { isManualTest } ) {
  * @returns {Boolean}
  */
 function doesPatternMatchExternalRepositoryName( pattern ) {
+	if ( !fs.existsSync( EXTERNAL_DIR_PATH ) ) {
+		return false;
+	}
+
 	return fs.readdirSync( EXTERNAL_DIR_PATH )
 		.filter( externalDir => fs.statSync( path.join( EXTERNAL_DIR_PATH, externalDir ) ).isDirectory() )
 		.includes( pattern );
