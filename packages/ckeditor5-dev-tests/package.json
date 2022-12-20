@@ -5,8 +5,8 @@
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^32.0.0",
-    "@ckeditor/ckeditor5-dev-translations": "^32.0.0",
+    "@ckeditor/ckeditor5-dev-utils": "^32.0.1",
+    "@ckeditor/ckeditor5-dev-translations": "^32.0.1",
     "@ckeditor/ckeditor5-inspector": "^4.0.0",
     "assertion-error": "^1.1.0",
     "chai": "^4.2.0",
