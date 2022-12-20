@@ -3,22 +3,22 @@ Changelog
 
 ## [32.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.13...v32.0.0) (2022-12-20)
 
-## Release highlights
+### Release highlights
 
 This release contains several changes across the entire `ckeditor5-dev` repository. Our goal was to clean up all packages and split them semantically based on their meaning and tasks.
 
-## Migration guide
+#### Migration guide
 
 While we didn't remove any line of the code, many import paths have changed due to moving scripts between packages. Please, follow the migration guide when updating to the latest version of packages.
 
-### Removed packages
+#### Removed packages
 
 The following packages are no longer available in this release.
 
 * [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)
 * [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin)
 
-### New packages
+#### New packages
 
 * [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year) – contains a script for bumping year in license headers (extracted from [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env))
 * [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci) – contains scripts related to continuous integration (extracted from [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests))
@@ -28,7 +28,7 @@ The following packages are no longer available in this release.
 * [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations) – contains a webpack plugin for integrating translations in CKEditor 5 (renamed from [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-webpack-plugin))
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler) – contains the web-crawler for validating websites (extracted from [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs))
 
-### Binary scripts
+#### Binary scripts
 
 The following binary scripts were available in the [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests) package:
 
@@ -37,7 +37,7 @@ The following binary scripts were available in the [@ckeditor/ckeditor5-dev-test
 * `ckeditor5-dev-tests-check-dependencies` – renamed to `ckeditor5-dev-dependency-checker` (imported from `@ckeditor/ckeditor5-dev-ckeck-dependencies`)
 * `ckeditor5-dev-tests-notify-travis-status` – `ckeditor5-dev-ci-notify-travis-status` (imported from `@ckeditor/ckeditor5-dev-ci`)
 
-### Interfaces
+#### Interfaces
 
 * The `CKEditorWebpackPlugin` class was renamed to `CKEditorTranslationsPlugin` and it is available in the `@ckeditor/ckeditor5-dev-translations` package.
 
