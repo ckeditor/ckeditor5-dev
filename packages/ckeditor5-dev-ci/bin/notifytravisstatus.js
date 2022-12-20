@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-
 /**
  * @license Copyright (c) 2003-2022, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
@@ -28,8 +27,7 @@ const buildBranch = process.env.TRAVIS_BRANCH;
 
 const ALLOWED_BRANCHES = [
 	'stable',
-	'master',
-	'ci/2269'
+	'master'
 ];
 
 const ALLOWED_EVENTS = [
