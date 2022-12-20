@@ -10,13 +10,13 @@ const { Converter, ReflectionKind, ReferenceReflection } = require( 'typedoc' );
 /**
  * The `typedoc-plugin-interface-augmentation-fixer` tries to fix an interface, that has been extended (augmented) from the outside (from
  * another module) in the re-exported "index.ts" file. When the extending "declare module ..." declaration contains the full package name,
- * it points to the "index.ts" file instead of the actual source file. In such case Typedoc adds new properties to the interface not where
- * it has been defined, but in the "index.ts" file, where it is re-exported. Then, the generated output contains duplicated interface
- * definitions, but only one of it contains all properties.
+ * it points to the "index.ts" file instead of the actual source file. In such case Typedoc adds new properties to the interface, but not
+ * in place where it has been defined, but in the "index.ts" file, where it is re-exported. Then, the generated output contains duplicated
+ * interface definitions, with only one containing all properties.
  *
  * This plugin works as follows:
- * - Copy the externally added properties to the source definition.
- * - Replace the duplicated interface with a reference to the source definition.
+ * - Copies the externally added properties to the source definition.
+ * - Replaces the duplicated interface with a reference to the source definition.
  */
 module.exports = {
 	load( app ) {
@@ -32,7 +32,7 @@ function onEventEnd( context ) {
 		const moduleName = reflection.parent.name.split( '/' ).shift();
 
 		// An interface reflection from which we want to copy children.
-		// This reflection is located at the module's root level.
+		// This reflection is located at the module's root level in the re-exported "index.ts" file.
 		const interfaceToCopy = context.project.getChildByName( [ moduleName, reflection.name ] );
 
 		// A reflection does not exist.
@@ -74,7 +74,7 @@ function onEventEnd( context ) {
 		context.project.removeReflection( interfaceToCopy );
 
 		// ...just to register the new reference reflection with this old symbol.
-		// This trick is needed to make sure that all type references still points to the correct reflection.
+		// This trick is needed to make sure that all type references still point to the correct reflection.
 		context.project.registerReflection( newRef, oldSymbol );
 	}
 }
