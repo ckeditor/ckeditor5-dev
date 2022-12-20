@@ -8,7 +8,7 @@
 const path = require( 'path' );
 const WebpackNotifierPlugin = require( './webpacknotifierplugin' );
 const { getPostCssConfig } = require( '@ckeditor/ckeditor5-dev-utils' ).styles;
-const CKEditorWebpackPlugin = require( '@ckeditor/ckeditor5-dev-webpack-plugin' );
+const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
 const webpack = require( 'webpack' );
 const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
 
@@ -46,7 +46,7 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 				onTestCompilationStatus: options.onTestCompilationStatus,
 				processName: options.requireDll ? 'DLL' : 'non-DLL'
 			} ),
-			new CKEditorWebpackPlugin( {
+			new CKEditorTranslationsPlugin( {
 				// See https://ckeditor.com/docs/ckeditor5/latest/features/ui-language.html
 				language: options.language,
 				additionalLanguages: options.additionalLanguages,

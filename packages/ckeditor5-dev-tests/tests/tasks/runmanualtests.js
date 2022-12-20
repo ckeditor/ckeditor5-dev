@@ -289,7 +289,7 @@ describe( 'runManualTests', () => {
 			} );
 	} );
 
-	it( 'allows specifying language and additionalLanguages (to CKEditorWebpackPlugin)', () => {
+	it( 'allows specifying language and additionalLanguages (to CKEditorTranslationsPlugin)', () => {
 		spies.transformFileOptionToTestGlob.onFirstCall().returns( [ 'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js' ] );
 		spies.transformFileOptionToTestGlob.onSecondCall().returns( [ 'workspace/packages/ckeditor-*/tests/**/manual/**/*.js' ] );
 

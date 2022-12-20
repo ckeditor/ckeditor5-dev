@@ -8,14 +8,19 @@ CKEditor 5 development tools packages
 
 This repository is a monorepo. It contains multiple npm packages.
 
-| Package | Version | Dependencies |
-|---------|---------|--------------|
-| [`@ckeditor/ckeditor5-dev-docs`](/packages/ckeditor5-dev-docs) | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-docs.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs) | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-docs) |
-| [`@ckeditor/ckeditor5-dev-env`](/packages/ckeditor5-dev-env) | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-env.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env) | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-env) |
-| [`@ckeditor/ckeditor5-dev-tests`](/packages/ckeditor5-dev-tests) | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-tests.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests) | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-tests) |
-| [`@ckeditor/ckeditor5-dev-utils`](/packages/ckeditor5-dev-utils) | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-utils.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils) | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-utils) |
-| [`@ckeditor/ckeditor5-dev-webpack-plugin`](/packages/ckeditor5-dev-webpack-plugin) | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-webpack-plugin.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin) | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-webpack-plugin) |
-| [`@ckeditor/jsdoc-plugins`](/packages/jsdoc-plugins) | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fjsdoc-plugins.svg)](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins) | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/jsdoc-plugins) |
+| Package                                                                                    | Version                                                                                                                                                             | Dependencies                                                                                                |
+|--------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| [`@ckeditor/ckeditor5-dev-bump-year`](/packages/ckeditor5-dev-bump-year)                   | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-bump-year.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year)                   | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-bump-year)          |
+| [`@ckeditor/ckeditor5-dev-ci`](/packages/ckeditor5-dev-ci)                                 | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-ci.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)                                 | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-ci)                 |
+| [`@ckeditor/ckeditor5-dev-dependency-checker`](/packages/ckeditor5-dev-dependency-checker) | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dependency-checker.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker) | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dependency-checker) |
+| [`@ckeditor/ckeditor5-dev-docs`](/packages/ckeditor5-dev-docs)                             | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-docs.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)                         | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-docs)           |
+| [`@ckeditor/ckeditor5-dev-release-tools`](/packages/ckeditor5-dev-release-tools)           | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-release-tools.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)       | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-release-tools)  |
+| [`@ckeditor/ckeditor5-dev-tests`](/packages/ckeditor5-dev-tests)                           | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-tests.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)                       | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-tests)          |
+| [`@ckeditor/ckeditor5-dev-transifex`](/packages/ckeditor5-dev-transifex)                   | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-transifex.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex)               | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-transifex)      |
+| [`@ckeditor/ckeditor5-dev-utils`](/packages/ckeditor5-dev-utils)                           | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-utils.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)                       | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-utils)          |
+| [`@ckeditor/ckeditor5-dev-translations`](/packages/ckeditor5-dev-translations)             | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-translations.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations)         | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-translations)   |
+| [`@ckeditor/ckeditor5-dev-web-crawler`](/packages/ckeditor5-dev-web-crawler)               | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-web-crawler.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler)           | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-web-crawler)    |
+| [`@ckeditor/jsdoc-plugins`](/packages/jsdoc-plugins)                                       | [![npm version](https://badge.fury.io/js/%40ckeditor%2Fjsdoc-plugins.svg)](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins)                                   | ![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/jsdoc-plugins)                |
 
 ## Cloning
 
@@ -40,7 +45,7 @@ DEBUG=true yarn run test
 Test a single package:
 
 ```bash
-./node_modules/.bin/mocha packages/ckeditor5-dev-env/tests/* --recursive
+./node_modules/.bin/mocha packages/ckeditor5-dev-release-tools/tests/* --recursive
 ```
 
 Code coverage:

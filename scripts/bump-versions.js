@@ -23,7 +23,7 @@
 // Use:
 // yarn run release:bump-version --dry-run
 
-require( '../packages/ckeditor5-dev-env' )
+require( '../packages/ckeditor5-dev-release-tools' )
 	.bumpVersions( {
 		cwd: process.cwd(),
 		packages: 'packages',

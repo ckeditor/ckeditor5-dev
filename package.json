@@ -1,10 +1,7 @@
 {
   "name": "ckeditor5-dev",
-  "version": "31.1.13",
+  "version": "32.0.1",
   "private": true,
-  "dependencies": {
-    "@ckeditor/ckeditor5-dev-env": "^31.1.13"
-  },
   "devDependencies": {
     "eslint": "^7.0.0",
     "eslint-config-ckeditor5": "^4.0.0",

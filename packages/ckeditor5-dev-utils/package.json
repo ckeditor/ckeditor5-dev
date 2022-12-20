@@ -1,23 +1,19 @@
 {
   "name": "@ckeditor/ckeditor5-dev-utils",
-  "version": "31.1.13",
+  "version": "32.0.1",
   "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@babel/parser": "^7.18.9",
-    "@babel/traverse": "^7.18.9",
-    "@ckeditor/ckeditor5-dev-webpack-plugin": "^31.1.13",
+    "@ckeditor/ckeditor5-dev-translations": "^32.0.1",
     "chalk": "^3.0.0",
     "cli-cursor": "^3.1.0",
     "cli-spinners": "^2.6.1",
     "cssnano": "^5.0.0",
     "del": "^5.0.0",
-    "escodegen": "^1.9.0",
     "fs-extra": "^8.1.0",
     "is-interactive": "^1.0.0",
     "javascript-stringify": "^1.6.0",
-    "pofile": "^1.0.9",
     "postcss": "^8.4.12",
     "postcss-import": "^14.1.0",
     "postcss-loader": "^4.3.0",
@@ -33,7 +29,6 @@
   "devDependencies": {
     "chai": "^4.1.2",
     "mockery": "^2.1.0",
-    "proxyquire": "^2.1.0",
     "sinon": "^9.2.4",
     "vinyl": "^2.1.0"
   },
