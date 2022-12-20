@@ -1,0 +1,29 @@
+{
+  "name": "@ckeditor/ckeditor5-dev-web-crawler",
+  "version": "32.0.0",
+  "description": "Used to run a web crawler that checks for errors on specified pages.",
+  "keywords": [],
+  "main": "lib/index.js",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "ora": "^5.2.0",
+    "puppeteer": "^13.1.3",
+    "strip-ansi": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=5.7.1"
+  },
+  "files": [
+    "lib"
+  ],
+  "author": "CKSource (http://cksource.com/)",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-web-crawler",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ckeditor/ckeditor5-dev.git",
+    "directory": "packages/ckeditor5-dev-web-crawler"
+  }
+}

@@ -2,6 +2,7 @@
 #
 # Be sure to append /** to folders to have everything inside them ignored.
 
+.idea
 **/node_modules/**
 .nyc_output/**
 coverage/**
