@@ -10,11 +10,19 @@ const bumpVersions = require( './tasks/bumpversions' );
 const generateChangelogForSinglePackage = require( './tasks/generatechangelogforsinglepackage' );
 const generateChangelogForMonoRepository = require( './tasks/generatechangelogformonorepository' );
 const updateCKEditor5Dependencies = require( './tasks/updateckeditor5dependencies' );
+const { getLastFromChangelog, getCurrent, getLastTagFromGit } = require( './utils/versions' );
+const { getChangesForVersion, getChangelog, saveChangelog } = require( './utils/changelog' );
 
 module.exports = {
 	releaseSubRepositories,
 	bumpVersions,
 	generateChangelogForSinglePackage,
 	generateChangelogForMonoRepository,
-	updateCKEditor5Dependencies
+	updateCKEditor5Dependencies,
+	getLastFromChangelog,
+	getCurrent,
+	getLastTagFromGit,
+	getChangesForVersion,
+	getChangelog,
+	saveChangelog
 };
