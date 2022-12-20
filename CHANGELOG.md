@@ -3,6 +3,151 @@ Changelog
 
 ## [32.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.13...v32.0.0) (2022-12-20)
 
+## Release highlights
+
+This release contains several changes across the entire `ckeditor5-dev` repository. Our goal was to clean up all packages and split them semantically based on their meaning and tasks.
+
+## Migration guide
+
+While we didn't remove any line of the code, many import paths have changed due to moving scripts between packages. Please, follow the migration guide when updating to the latest version of packages.
+
+### Removed packages
+
+The following packages are no longer available in this release.
+
+* [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env)
+* [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-webpack-plugin)
+
+### New packages
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year) – contains a script for bumping year in license headers (extracted from [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env))
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci) – contains scripts related to continuous integration (extracted from [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests))
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker) – contains the dependency checker (extracted from [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests))
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools) – contains scripts for releasing packages (extracted from [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env))
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex) – contains scripts for integrating CKEditor 5 with the Transifex service (extracted from [@ckeditor/ckeditor5-dev-env](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-env))
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations) – contains a webpack plugin for integrating translations in CKEditor 5 (renamed from [@ckeditor/ckeditor5-dev-webpack-plugin](https://www.npmjs.com/package/@ckeditor/ckeditor5-webpack-plugin))
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler) – contains the web-crawler for validating websites (extracted from [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs))
+
+### Binary scripts
+
+The following binary scripts were available in the [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests) package:
+
+* `ckeditor5-dev-tests` – renamed to `ckeditor5-dev-tests-run-automated` (imported from `@ckeditor/ckeditor5-dev-tests`)
+* `ckeditor5-dev-tests-manual` – renamed to `ckeditor5-dev-tests-run-manual` (imported from `ckeditor5-dev-tests`)
+* `ckeditor5-dev-tests-check-dependencies` – renamed to `ckeditor5-dev-dependency-checker` (imported from `@ckeditor/ckeditor5-dev-ckeck-dependencies`)
+* `ckeditor5-dev-tests-notify-travis-status` – `ckeditor5-dev-ci-notify-travis-status` (imported from `@ckeditor/ckeditor5-dev-ci`)
+
+### Interfaces
+
+* The `CKEditorWebpackPlugin` class was renamed to `CKEditorTranslationsPlugin` and it is available in the `@ckeditor/ckeditor5-dev-translations` package.
+
+    Old:
+    ```js
+    const CKEditorWebpackPlugin = require( '@ckeditor5/ckeditor5-dev-webpack-plugin' );
+    ```
+
+    New:
+    ```js
+    const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
+    ```
+
+* The `verify()` function exposed by the `@ckeditor/ckeditor5-dev-docs` package was moved to the `@ckeditor/ckeditor5-dev-web-crawler` and renamed to `runCrawler`.
+
+    Old:
+    ```js
+    const { verify } = require( '@ckeditor/ckeditor5-dev-docs' );
+    const { DEFAULT_CONCURRENCY } = require( '@ckeditor/ckeditor5-dev-docs/lib/web-crawler/constants' );
+    const { toArray, isUrlValid } = require( '@ckeditor/ckeditor5-dev-docs/lib/web-crawler/utils' );
+    ```
+
+    New:
+    ```js
+    const { runCrawler, toArray, isUrlValid } = require( '@ckeditor/ckeditor5-web-crawler' );
+    ```
+
+* The `bumpYear()` function should be imported from the `@ckeditor/ckeditor5-dev-bump-year` package.
+
+    Old:
+    ```js
+    const { bumpYear } = require( '@ckeditor/ckeditor5-dev-env' );
+    ```
+
+    New:
+    ```js
+    const { bumpYear } = require( '@ckeditor/ckeditor5-bump-year' );
+    ```
+
+* Release tools were moved to the `@ckeditor/ckeditor5-dev-release-tools`. If you used any of the following function, make sure to align the import path.
+
+    Old:
+    ```js
+    const {
+        releaseSubRepositories,
+        bumpVersions,
+        generateChangelogForSinglePackage,
+        generateChangelogForMonoRepository,
+        updateCKEditor5Dependencies
+    } = require( '@ckeditor/ckeditor5-dev-env' );
+    const { getLastFromChangelog } = require( '@ckeditor/ckeditor5-dev-env/lib/release-tools/utils/versions' );
+    ```
+
+    New:
+    ```js
+    const {
+        releaseSubRepositories,
+        bumpVersions,
+        generateChangelogForSinglePackage,
+        generateChangelogForMonoRepository,
+        updateCKEditor5Dependencies,
+        getLastFromChangelog
+    } = require( '@ckeditor/ckeditor5-dev-release-tools' );
+    ```
+
+* The Transifex integration was moved. If you used any of the following function, make sure to align the import path.
+
+    Old:
+    ```js
+    const {
+        createPotFiles,
+        uploadPotFiles,
+        downloadTranslations
+    } = require( '@ckeditor/ckeditor5-dev-env' );
+    const {
+        getChangesForVersion,
+        getChangelog
+    } = require( '@ckeditor/ckeditor5-dev-env/lib/release-tools/utils/changelog' );
+    const getToken = require( '@ckeditor/ckeditor5-dev-env/lib/translations/gettoken' );
+    ```
+
+    New:
+    ```js
+    const {
+        createPotFiles,
+        uploadPotFiles,
+        downloadTranslations,
+        getToken,
+        getChangesForVersion,
+        getChangelog
+    } = require( '@ckeditor/ckeditor5-dev-transifex' );
+    ```
+
+* Translations utils were moved from `ckeditor5-dev-utils` to the `@ckeditor/ckeditor5-dev-translations` package.
+
+    Old:
+    ```js
+    const findMessages = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/findmessages.js' );
+    const ... = require( '@ckeditor/ckeditor5-dev-utils/lib/translations/...' );
+    // or
+    const { findMessages } = require( '@ckeditor/ckeditor5-dev-utils' ).translations;
+    const { translations } = require( '@ckeditor/ckeditor5-dev-utils' );
+    ```
+
+    New:
+    ```js
+    const { findMessages } = require( '@ckeditor/ckeditor5-dev-translations' );
+    const translations = require( '@ckeditor/ckeditor5-dev-translations' );
+    ```
+
 ### Other changes
 
 * **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added support for executing automated and manual tests from a root directory of an external repository. Closes [ckeditor/ckeditor5#12757](https://github.com/ckeditor/ckeditor5/issues/12757). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/58544ca35dfdc4b9ce54cb096ca98d7e6c0af8f4))
