@@ -23,4 +23,5 @@ declare module '../' {
 	}
 }
 
-export let foobar: FooConfig;
+export interface FoobarConfig {}
+export let foobarVariable: FooConfig;

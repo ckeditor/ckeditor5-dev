@@ -8,4 +8,4 @@
  */
 
 export type { FooConfig } from './foo/fooconfig';
-export type { foobar } from './foobar/foobarconfig';
+export type { foobarVariable } from './foobar/foobarconfig';

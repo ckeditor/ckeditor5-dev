@@ -81,7 +81,7 @@ describe( 'typedoc-plugins/interface-augmentation-fixer', function() {
 
 	it( 'should keep the reference to the type after fixing the interface', () => {
 		const fooConfigInterface = conversionResult.getChildByName( [ 'interface-augmentation/foo', 'FooConfig' ] );
-		const foobarVariable = conversionResult.getChildByName( [ 'interface-augmentation/foobar', 'foobar' ] );
+		const foobarVariable = conversionResult.getChildByName( [ 'interface-augmentation/foobar', 'foobarVariable' ] );
 
 		expect( foobarVariable ).to.not.be.undefined;
 		expect( foobarVariable ).to.have.property( 'type' );
