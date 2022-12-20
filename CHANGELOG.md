@@ -3,7 +3,9 @@ Changelog
 
 ## [32.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v32.0.0...v32.0.1) (2022-12-20)
 
-Internal changes only (updated dependencies, documentation, etc.).
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: The `transformFileOptionToTestGlob()` function should not throw an error if the `external/` directory does not exist. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/540f39f43633f011f234220d60658566e84f837a))
 
 ### Released packages
 
