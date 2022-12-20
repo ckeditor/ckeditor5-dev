@@ -5,7 +5,8 @@
 
 'use strict';
 
+const build = require( './build' );
+
 module.exports = {
-	build: require( './docs/index' ),
-	verify: require( './web-crawler/index' )
+	build
 };

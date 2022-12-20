@@ -11,7 +11,7 @@ const sinon = require( 'sinon' );
 const fs = require( 'fs' );
 
 describe( 'dev-tests/utils', () => {
-	let transformFileOptionToTestGlob, sandbox, readdirSyncStub, statSyncStub;
+	let transformFileOptionToTestGlob, sandbox, readdirSyncStub, existsSyncStub, statSyncStub;
 
 	beforeEach( () => {
 		sandbox = sinon.createSandbox();
@@ -20,6 +20,7 @@ describe( 'dev-tests/utils', () => {
 		sandbox.stub( process, 'cwd' ).returns( '/workspace' );
 		statSyncStub = sandbox.stub( fs, 'statSync' ).returns( { isDirectory: () => true } );
 		readdirSyncStub = sandbox.stub( fs, 'readdirSync' ).returns( [ 'external-directory' ] );
+		existsSyncStub = sandbox.stub( fs, 'existsSync' ).returns( true );
 
 		transformFileOptionToTestGlob = require( '../../lib/utils/transformfileoptiontotestglob' );
 	} );
@@ -280,5 +281,13 @@ describe( 'dev-tests/utils', () => {
 				'/workspace/external/*/packages/ckeditor-test-external-directory/tests/manual/**/*.js'
 			] );
 		} );
+	} );
+
+	it( 'should not call readdirSync if directory does not exist', () => {
+		existsSyncStub.returns( false );
+
+		transformFileOptionToTestGlob( 'test-random-directory' );
+
+		expect( readdirSyncStub.called ).to.equal( false );
 	} );
 } );

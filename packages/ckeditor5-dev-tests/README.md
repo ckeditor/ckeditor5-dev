@@ -22,8 +22,8 @@ An example npm task to test CKEditor 5 packages (used e.g. in https://github.com
 ```json
 {
   "scripts": {
-      "test": "node ./node_modules/.bin/ckeditor5-dev-tests",
-      "manual": "node ./node_modules/.bin/ckeditor5-dev-tests-manual"
+      "test": "node ./node_modules/.bin/ckeditor5-dev-tests-run-automated",
+      "manual": "node ./node_modules/.bin/ckeditor5-dev-tests-run-manual"
   }
 }
 ```
@@ -33,7 +33,7 @@ If you encounter problems with big test folders pass `--max_old_space_size=4096`
 ```json
 {
   "scripts": {
-      "test": "node --max_old_space_size=4096 ./node_modules/.bin/ckeditor5-dev-tests"
+      "test": "node --max_old_space_size=4096 ./node_modules/.bin/ckeditor5-dev-tests-run-automated"
   }
 }
 ```

@@ -1,0 +1,40 @@
+{
+  "name": "@ckeditor/ckeditor5-dev-transifex",
+  "version": "32.0.1",
+  "description": "Used to download and upload translations using the Transifex service.",
+  "keywords": [],
+  "main": "lib/index.js",
+  "dependencies": {
+    "fs-extra": "^9.0.0",
+    "del": "^5.1.0",
+    "@ckeditor/ckeditor5-dev-utils": "^32.0.1",
+    "@ckeditor/ckeditor5-dev-translations": "^32.0.1",
+    "chalk": "^4.0.0",
+    "inquirer": "^7.1.0",
+    "@transifex/api": "^4.2.1",
+    "node-fetch": "^2.6.7",
+    "cli-table": "^0.3.1"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mockery": "^2.1.0",
+    "proxyquire": "^2.1.3",
+    "sinon": "^9.2.4"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=5.7.1"
+  },
+  "files": [
+    "lib"
+  ],
+  "author": "CKSource (http://cksource.com/)",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-transifex",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ckeditor/ckeditor5-dev.git",
+    "directory": "packages/ckeditor5-dev-transifex"
+  }
+}
