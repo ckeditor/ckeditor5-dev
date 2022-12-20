@@ -78,4 +78,17 @@ describe( 'typedoc-plugins/interface-augmentation-fixer', function() {
 		expect( foobazConfigInterface.children ).to.lengthOf( 1 );
 		expect( foobazConfigInterface.children ).to.satisfy( items => items.some( item => item.name === 'propertyFoobazingaSource' ) );
 	} );
+
+	it( 'should keep the reference to the type after fixing the interface', () => {
+		const fooConfigInterface = conversionResult.getChildByName( [ 'interface-augmentation/foo', 'FooConfig' ] );
+		const foobarVariable = conversionResult.getChildByName( [ 'interface-augmentation/foobar', 'foobar' ] );
+
+		expect( foobarVariable ).to.not.be.undefined;
+		expect( foobarVariable ).to.have.property( 'type' );
+		expect( foobarVariable.type ).to.have.property( 'type', 'reference' );
+
+		const target = foobarVariable.type.reflection.tryGetTargetReflectionDeep();
+
+		expect( target ).to.equal( fooConfigInterface );
+	} );
 } );

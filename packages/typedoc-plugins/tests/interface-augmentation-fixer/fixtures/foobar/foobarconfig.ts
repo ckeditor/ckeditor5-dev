@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+import type { FooConfig } from '..';
+
 /**
  * @module interface-augmentation/foobar
  */
@@ -21,4 +23,4 @@ declare module '../' {
 	}
 }
 
-export interface FoobarConfig {}
+export let foobar: FooConfig;
