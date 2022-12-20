@@ -1,6 +1,36 @@
 Changelog
 =========
 
+## [32.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.13...v32.0.0) (2022-12-20)
+
+### Other changes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added support for executing automated and manual tests from a root directory of an external repository. Closes [ckeditor/ckeditor5#12757](https://github.com/ckeditor/ckeditor5/issues/12757). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/58544ca35dfdc4b9ce54cb096ca98d7e6c0af8f4))
+* Redesigned packages in the repository. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/fd379d62cb0582874c1966fb6ad30c8ca7e350b0))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v31.1.13 => v32.0.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v31.1.13 => v32.0.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v31.1.13 => v32.0.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v31.1.13 => v32.0.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v31.1.13 => v32.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v31.1.13 => v32.0.0
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v31.1.13 => v32.0.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v31.1.13 => v32.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v31.1.13 => v32.0.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v31.1.13 => v32.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v31.1.13 => v32.0.0
+</details>
+
+
 ## [31.1.13](https://github.com/ckeditor/ckeditor5-dev/compare/v31.1.12...v31.1.13) (2022-11-25)
 
 ### Bug fixes
