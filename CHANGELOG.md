@@ -3,7 +3,9 @@ Changelog
 
 ## [32.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/v32.0.1...v32.0.2) (2022-12-21)
 
-Internal changes only (updated dependencies, documentation, etc.).
+### Other changes
+
+* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Always show logs for the `ckeditor5-dev-ci-notify-travis-status` script regardless of the `DEBUG` flag. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/0dcac575143b6496b033c447b99ad805c8720db0))
 
 ### Released packages
 
