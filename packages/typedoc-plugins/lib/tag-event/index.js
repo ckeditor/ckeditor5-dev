@@ -90,14 +90,14 @@ function onEventEnd( context ) {
 
 		eventReflection.kindString = 'Event';
 
-		const argsReflection = reflection.type.declaration.children.find( ref => ref.name === 'args' ).type;
+		const argsReflection = getArgsTupple( reflection );
 
 		// Map each found `@param` tag to the type parameter reflection.
 		const typeParameters = reflection.comment.getTags( '@param' ).map( tag => {
 			const param = new TypeParameterReflection( tag.name, undefined, undefined, eventReflection );
 
 			// TODO: Tests.
-			param.type = argsReflection.elements.find( ref => ref.name === tag.name );
+			param.type = argsReflection.find( ref => ref.name === tag.name );
 
 			// TODO: What if it returns `null`?
 			if ( !param.type ) {
@@ -119,6 +119,24 @@ function onEventEnd( context ) {
 		// Copy the source location as it is the same as the location of the reflection containing the event.
 		eventReflection.sources = [ ...reflection.sources ];
 	}
+}
+
+function getArgsTupple( reflection ) {
+	if ( !reflection.type.declaration ) {
+		return [];
+	}
+
+	if ( !reflection.type.declaration.children ) {
+		return [];
+	}
+
+	const x = reflection.type.declaration.children.find( ref => ref.name === 'args' );
+
+	if ( !x ) {
+		return [];
+	}
+
+	return x.type.elements;
 }
 
 /**
