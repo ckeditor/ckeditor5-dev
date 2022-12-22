@@ -67,19 +67,64 @@ export type EventFoo = {
  *
  * @eventName event-foo-with-params
  *
- * @param {String} p1 Description for first param.
- * @param {module:utils/object~Object} p2 Description for second param.
+ * @param p1 Description for first param.
+ * @param p2 Description for second param.
  * @param p3 Complex {@link module:utils/object~Object description} for `third param`.
  * @deprecated
  */
 export type EventFooWithParams = {
 	name: string;
-	args: [ {
-		p1: string;
-		p2: number;
-		p3: boolean;
-	} ];
+	args: [
+		p1: string,
+		p2: number,
+		p3: ExampleType
+	];
 };
+
+/**
+ * @eventName event-foo-no-content
+ */
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type EventFooNoContent = {};
+
+/**
+ * @eventName event-foo-empty-args
+ */
+export type EventFooEmptyArgs = {
+	args: [];
+};
+
+/**
+ * @eventName event-foo-unsupported-args
+ *
+ * @param p1 Description for first param.
+ */
+export type EventFooUnsupportedArgs = {
+	args: [
+		{
+			p1: number;
+		}
+	];
+};
+
+export type TypeWithParams = {
+	name: string;
+	args: [
+		p1: string,
+		p2: ExampleType
+	];
+};
+
+export type TypeReferenceLvl1 = TypeWithParams;
+export type TypeReferenceLvl2 = TypeReferenceLvl1;
+
+/**
+ * @eventName event-foo-reference
+ *
+ * @param p1 Description for first param.
+ * @param p2 Description for second param.
+ */
+export type EventFooReference = TypeReferenceLvl2;
 
 /**
  * An event not associated to anything in the source code.

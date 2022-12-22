@@ -15,30 +15,36 @@ const { Converter, ReflectionKind, TypeParameterReflection, Comment } = require(
  * difficult to get it to work as we expect. This is why we have introduced a support for the custom `@eventName` tag, which now replaces
  * the old `@event` tag.
  *
- * To correctly define an event, it must be associated with the exported type that describes that event.
+ * To correctly define an event, it must be associated with the exported type that describes that event, with the `name` and `args`
+ * properties.
+ *
+ * To correctly define the event parameters, they must be defined in the `args` property. The `args` property is an array, where each item
+ * describes a parameter that event emits. Item can be either of a primitive type, or a custom type that has own definition.
  *
  * Example:
  *
  * ```ts
+ * 		export type ExampleType = {
+ * 			name: string;
+ * 		};
+ *
  * 		/**
  * 		 * An event associated with exported type.
  * 		 *
  * 		 * @eventName foo-event
- * 		 * @param {String} p1 Description for first param.
- * 		 * @param {Number} p2 Description for second param.
- * 		 * @param {Boolean} p3 Description for third param.
+ * 		 * @param p1 Description for first param.
+ * 		 * @param p2 Description for second param.
+ * 		 * @param p3 Description for third param.
  * 		 * /
  * 		export type FooEvent = {
  * 			name: string;
- * 			args: [ {
+ * 			args: [
  * 				p1: string;
  * 				p2: number;
- * 				p3: boolean;
- * 			} ];
+ * 				p3: ExampleType;
+ * 			];
  * 		};
  * ```
- *
- * TODO: We do not support collecting types of `@param` tags associated with the `@eventName`.
  */
 module.exports = {
 	load( app ) {
@@ -90,16 +96,15 @@ function onEventEnd( context ) {
 
 		eventReflection.kindString = 'Event';
 
-		const argsReflection = getArgsTupple( reflection );
+		// Try to find parameters for the event, which are defined in the `args` tuple.
+		const argsReflection = getArgsTuple( reflection );
 
 		// Map each found `@param` tag to the type parameter reflection.
 		const typeParameters = reflection.comment.getTags( '@param' ).map( tag => {
 			const param = new TypeParameterReflection( tag.name, undefined, undefined, eventReflection );
 
-			// TODO: Tests.
 			param.type = argsReflection.find( ref => ref.name === tag.name );
 
-			// TODO: What if it returns `null`?
 			if ( !param.type ) {
 				param.type = context.converter.convertType( context.withScope( param ) );
 			}
@@ -121,22 +126,39 @@ function onEventEnd( context ) {
 	}
 }
 
-function getArgsTupple( reflection ) {
-	if ( !reflection.type.declaration ) {
+/**
+ * Tries to find the `args` tuple, that is associated with the event and it contains all event parameters.
+ *
+ * @param {require('typedoc').Reflection} reflection The reflection that contains the event name.
+ * @returns {Array.<require('typedoc').Reflection>}
+ */
+function getArgsTuple( reflection ) {
+	const typeReflection = getTargetTypeReflection( reflection.type );
+
+	if ( !typeReflection.declaration.children ) {
 		return [];
 	}
 
-	if ( !reflection.type.declaration.children ) {
+	const argsTuple = typeReflection.declaration.children.find( ref => ref.name === 'args' );
+
+	if ( !argsTuple ) {
 		return [];
 	}
 
-	const x = reflection.type.declaration.children.find( ref => ref.name === 'args' );
+	return argsTuple.type.elements;
+}
 
-	if ( !x ) {
-		return [];
-	}
-
-	return x.type.elements;
+/**
+ * Returns the type reflection for the specified reflection. If the type reflection is a reference to another one,
+ * it recursively walks deep until the final declaration is reached.
+ *
+ * @param {require('typedoc').Reflection} reflectionType
+ * @returns {require('typedoc').Reflection}
+ */
+function getTargetTypeReflection( reflectionType ) {
+	return reflectionType.type === 'reference' ?
+		getTargetTypeReflection( reflectionType.reflection.type ) :
+		reflectionType;
 }
 
 /**
