@@ -95,16 +95,40 @@ export type EventFooEmptyArgs = {
 };
 
 /**
- * @eventName event-foo-unsupported-args
+ * @eventName event-foo-optional-args
+ */
+export type EventFooOptionalArgs = {
+	args: [
+		p1: string,
+		p2?: number
+	];
+};
+
+/**
+ * @eventName event-foo-inline-args
  *
  * @param p1 Description for first param.
  */
-export type EventFooUnsupportedArgs = {
+export type EventFooInlineArgs = {
 	args: [
 		{
 			p1: number;
 		}
 	];
+};
+
+/**
+ * @eventName event-foo-anonymous-args
+ */
+export type EventFooAnonymousArgs = {
+	args: [ number, { foo: boolean } ];
+};
+
+/**
+ * @eventName event-foo-anonymous-optional-args
+ */
+export type EventFooAnonymousOptionalArgs = {
+	args: [ number?, { foo: boolean }? ];
 };
 
 export type TypeWithParams = {

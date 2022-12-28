@@ -5,7 +5,7 @@
 
 'use strict';
 
-const { Converter, ReflectionKind, TypeParameterReflection, Comment } = require( 'typedoc' );
+const { Converter, ReflectionKind, TypeParameterReflection, Comment, ReflectionFlag } = require( 'typedoc' );
 
 /**
  * The `typedoc-plugin-tag-event` collects event definitions from the `@eventName` tag and assigns them as the children of the class or
@@ -96,20 +96,42 @@ function onEventEnd( context ) {
 
 		eventReflection.kindString = 'Event';
 
+		const paramTags = reflection.comment.getTags( '@param' );
+
 		// Try to find parameters for the event, which are defined in the `args` tuple.
 		const argsReflection = getArgsTuple( reflection );
 
-		// Map each found `@param` tag to the type parameter reflection.
-		const typeParameters = reflection.comment.getTags( '@param' ).map( tag => {
-			const param = new TypeParameterReflection( tag.name, undefined, undefined, eventReflection );
+		// Then, for each found parameter, get its type and try to find the description from the `@param` tag.
+		const typeParameters = argsReflection.map( ( arg, index ) => {
+			let argName;
 
-			param.type = argsReflection.find( ref => ref.name === tag.name );
-
-			if ( !param.type ) {
-				param.type = context.converter.convertType( context.withScope( param ) );
+			// If the parameter is not anonymous, take its name.
+			if ( arg.element ) {
+				argName = arg.name;
+			}
+			// Otherwise, take the name from the `@param` tag at the current index (if it exists).
+			else if ( paramTags[ index ] ) {
+				argName = paramTags[ index ].name;
+			}
+			// Otherwise, just set the fallback name to show something.
+			else {
+				argName = '<anonymous>';
 			}
 
-			param.comment = new Comment( tag.content );
+			const param = new TypeParameterReflection( argName, undefined, undefined, eventReflection );
+
+			param.type = arg;
+
+			// TypeDoc does not mark an optional parameter, so let's do it manually.
+			if ( param.type.isOptional || param.type.type === 'optional' ) {
+				param.setFlag( ReflectionFlag.Optional );
+			}
+
+			const comment = paramTags.find( tag => tag.name === argName );
+
+			if ( comment ) {
+				param.comment = new Comment( comment.content );
+			}
 
 			return param;
 		} );
