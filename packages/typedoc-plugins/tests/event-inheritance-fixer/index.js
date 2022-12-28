@@ -162,7 +162,7 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 		}
 	} );
 
-	it( 'should clone event parameters and all their properties in the inherited classes', () => {
+	it( 'should copy event parameters and all their properties in the inherited classes', () => {
 		const baseEventClassA = events.find( event => event.parent.name === 'ClassA' && event.name === 'event-1-class-a' );
 		const inheritedEventClassB = events.find( event => event.parent.name === 'ClassB' && event.name === 'event-1-class-a' );
 		const inheritedEventClassC = events.find( event => event.parent.name === 'ClassC' && event.name === 'event-1-class-a' );
@@ -182,12 +182,22 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 			expect( event.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
 			expect( event.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'text', 'Description for first param.' );
 
+			expect( event.typeParameters[ 0 ] ).to.have.property( 'type' );
+			expect( event.typeParameters[ 0 ].type ).to.have.property( 'element' );
+			expect( event.typeParameters[ 0 ].type.element ).to.have.property( 'type', 'intrinsic' );
+			expect( event.typeParameters[ 0 ].type.element ).to.have.property( 'name', 'string' );
+
 			expect( event.typeParameters[ 1 ] ).to.have.property( 'name', 'p2' );
 			expect( event.typeParameters[ 1 ] ).to.have.property( 'comment' );
 			expect( event.typeParameters[ 1 ].comment ).to.have.property( 'summary' );
 			expect( event.typeParameters[ 1 ].comment.summary ).to.be.an( 'array' );
 			expect( event.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
 			expect( event.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'text', 'Description for second param.' );
+
+			expect( event.typeParameters[ 1 ] ).to.have.property( 'type' );
+			expect( event.typeParameters[ 1 ].type ).to.have.property( 'element' );
+			expect( event.typeParameters[ 1 ].type.element ).to.have.property( 'type', 'intrinsic' );
+			expect( event.typeParameters[ 1 ].type.element ).to.have.property( 'name', 'number' );
 
 			expect( event.typeParameters[ 2 ] ).to.have.property( 'name', 'p3' );
 			expect( event.typeParameters[ 2 ] ).to.have.property( 'comment' );
@@ -212,24 +222,11 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 
 			expect( event.typeParameters[ 2 ].comment.summary[ 4 ] ).to.have.property( 'kind', 'text' );
 			expect( event.typeParameters[ 2 ].comment.summary[ 4 ] ).to.have.property( 'text', '.' );
-		}
 
-		for ( const index of [ 0, 1, 2 ] ) {
-			const baseEventClassAParam = baseEventClassA.typeParameters[ index ];
-			const inheritedEventClassBParam = inheritedEventClassB.typeParameters[ index ];
-			const inheritedEventClassCParam = inheritedEventClassC.typeParameters[ index ];
-
-			expect( baseEventClassAParam ).to.not.equal( inheritedEventClassBParam );
-			expect( baseEventClassAParam ).to.not.equal( inheritedEventClassCParam );
-			expect( inheritedEventClassBParam ).to.not.equal( inheritedEventClassCParam );
-
-			expect( baseEventClassAParam.comment ).to.not.equal( inheritedEventClassBParam.comment );
-			expect( baseEventClassAParam.comment ).to.not.equal( inheritedEventClassCParam.comment );
-			expect( inheritedEventClassBParam.comment ).to.not.equal( inheritedEventClassCParam.comment );
-
-			expect( baseEventClassAParam.type ).to.not.equal( inheritedEventClassBParam.type );
-			expect( baseEventClassAParam.type ).to.not.equal( inheritedEventClassCParam.type );
-			expect( inheritedEventClassBParam.type ).to.not.equal( inheritedEventClassCParam.type );
+			expect( event.typeParameters[ 2 ] ).to.have.property( 'type' );
+			expect( event.typeParameters[ 2 ].type ).to.have.property( 'element' );
+			expect( event.typeParameters[ 2 ].type.element ).to.have.property( 'type', 'intrinsic' );
+			expect( event.typeParameters[ 2 ].type.element ).to.have.property( 'name', 'boolean' );
 		}
 	} );
 
