@@ -146,6 +146,22 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 		}
 	} );
 
+	it( 'should set the `inheritedFrom` property in the inherited events', () => {
+		const baseEventClassA = events.find( event => event.parent.name === 'ClassA' && event.name === 'event-1-class-a' );
+		const inheritedEventClassB = events.find( event => event.parent.name === 'ClassB' && event.name === 'event-1-class-a' );
+		const inheritedEventClassC = events.find( event => event.parent.name === 'ClassC' && event.name === 'event-1-class-a' );
+
+		expect( baseEventClassA ).to.not.have.property( 'inheritedFrom' );
+		expect( inheritedEventClassB ).to.have.property( 'inheritedFrom' );
+		expect( inheritedEventClassC ).to.have.property( 'inheritedFrom' );
+
+		for ( const event of [ inheritedEventClassB, inheritedEventClassC ] ) {
+			expect( event.inheritedFrom ).to.have.property( 'type', 'reference' );
+			expect( event.inheritedFrom ).to.have.property( 'name', 'ClassA.event-1-class-a' );
+			expect( event.inheritedFrom.reflection ).to.equal( baseEventClassA );
+		}
+	} );
+
 	it( 'should clone event parameters and all their properties in the inherited classes', () => {
 		const baseEventClassA = events.find( event => event.parent.name === 'ClassA' && event.name === 'event-1-class-a' );
 		const inheritedEventClassB = events.find( event => event.parent.name === 'ClassB' && event.name === 'event-1-class-a' );
