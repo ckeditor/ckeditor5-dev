@@ -7,6 +7,7 @@
 
 const glob = require( 'fast-glob' );
 const TypeDoc = require( 'typedoc' );
+const validators = require( './validators' );
 
 /**
  * Builds CKEditor 5 documentation.
@@ -90,13 +91,20 @@ module.exports = async function build( config ) {
 
 	const conversionResult = typeDoc.convert();
 
-	if ( conversionResult ) {
-		await typeDoc.generateJson( conversionResult, config.outputPath );
-		// Uncomment this to generate TypeDoc documentation (build-in HTML template).
-		// await typeDoc.generateDocs( conversionResult, 'docs/api/typedoc' );
-	} else {
+	if ( !conversionResult ) {
 		throw 'Something went wrong with TypeDoc.';
 	}
+
+	const validationResult = validators.validate( conversionResult );
+
+	if ( !validationResult ) {
+		throw 'Something went wrong with TypeDoc.';
+	}
+
+	await typeDoc.generateJson( conversionResult, config.outputPath );
+
+	// Uncomment this to generate TypeDoc documentation (build-in HTML template).
+	// await typeDoc.generateDocs( conversionResult, 'docs/api/typedoc' );
 
 	// const jsDocConfig = {
 	// 	plugins: [
