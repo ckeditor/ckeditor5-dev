@@ -12,139 +12,49 @@ const { ReflectionKind } = require( 'typedoc' );
  *
  * @param {Object} project Generated output from TypeDoc to validate.
  * @param {Function} onError Called if validation error is detected.
- *
- * @returns {Boolean}
  */
 module.exports = function validate( project, onError ) {
-	const reflections = project.getReflectionsByKind( ReflectionKind.All ).filter( hasSeeTag );
+	const reflections = project.getReflectionsByKind( ReflectionKind.All )
+		.filter( isValidReflection )
+		.filter( hasSeeTag );
 
 	for ( const reflection of reflections ) {
 		const links = reflection.comment.getTags( '@see' )
-			.flatMap( tag => {
-				return tag.content
-					.map( item => item.text.trim() )
-					// To remove list markers.
-					.filter( text => text.length > 1 );
-			} );
+			.flatMap( tag => tag.content.map( item => item.text.trim() ) )
+			.filter( isLink );
 
 		for ( const link of links ) {
-			if ( isAbsoluteLink( link ) ) {
-				const parts = link
-					// Remove leading "module:" prefix from the doclet longname.
-					.substring( 'module:'.length )
-					// Then, split the rest of the longname into separate parts.
-					.split( /#event:|#|~|\./ );
+			const result = isAbsoluteLink( link ) ?
+				isAbsoluteLinkValid( project, link ) :
+				isRelativeLinkValid( reflection, link );
 
-				let targetReflection = project.getChildByName( parts );
-
-				if ( targetReflection ) {
-					const isTargetReflectionStatic = Boolean( targetReflection.flags && targetReflection.flags.isStatic );
-					const isSeparatorStatic = link.includes( '.' );
-
-					if ( isTargetReflectionStatic !== isSeparatorStatic ) {
-						targetReflection = null;
-					}
-				}
-
-				if ( !targetReflection ) {
-					// Call `onError()`, because the relative link is invalid.
-				}
-			} else {
-				const separator = link[ 0 ];
-				const targetName = link.substring( 1 );
-
-				let targetReflection = null;
-
-				switch ( separator ) {
-					case '~':
-						targetReflection = findTargetReflection( reflection, targetName, [ 'Module' ] );
-
-						break;
-
-					case '#':
-					case '.':
-						targetReflection = findTargetReflection( reflection, targetName, [ 'Class', 'Function', 'Interface', 'Type alias' ] );
-
-						if ( targetReflection ) {
-							const isTargetReflectionStatic = Boolean( targetReflection.flags && targetReflection.flags.isStatic );
-							const isSeparatorStatic = separator === '.';
-
-							if ( isTargetReflectionStatic !== isSeparatorStatic ) {
-								targetReflection = null;
-							}
-						}
-
-						break;
-				}
-
-				if ( !targetReflection ) {
-					// Call `onError()`, because the relative link is invalid.
-				}
+			if ( !result ) {
+				onError( 'Target doclet for "@see" tag is not found', reflection.sources[ 0 ] );
 			}
 		}
 	}
 };
 
-// function getSeeLinks( reflection ) {
-// 	const absoluteLinks = [];
-// 	const relativeLinks = [];
-
-// 	const tags = reflection.comment.getTags( '@see' );
-
-// 	for ( const tag of tags ) {
-// 		absoluteLinks.push( tag.content.filter( item => item.kind === 'text' && item.startsWith( 'module:' ) ) );
-// 	}
-// }
+function isValidReflection( reflection ) {
+	return reflection.name !== '__type';
+}
 
 function hasSeeTag( reflection ) {
 	return Boolean( reflection.comment && reflection.comment.getTag( '@see' ) );
 }
 
-function getLongName( reflection ) {
-	let longName = '';
-
-	while ( reflection ) {
-		const longNamePart = getLongNamePart( reflection );
-
-		if ( !longName.startsWith( longNamePart ) ) {
-			longName = longNamePart + longName;
-		}
-
-		reflection = reflection.kindString === 'Module' ? null : reflection.parent;
+function isLink( text ) {
+	// Remove list markers (e.g. "-").
+	if ( text.length <= 1 ) {
+		return false;
 	}
 
-	return longName;
-}
-
-function getLongNamePart( reflection ) {
-	let separator;
-
-	switch ( reflection.kindString ) {
-		case 'Module':
-			separator = 'module:';
-			break;
-
-		case 'Class':
-		case 'Function':
-		case 'Interface':
-		case 'Type alias':
-			separator = '~';
-			break;
-
-		case 'Event':
-			separator = '#event:';
-			break;
-
-		default:
-			separator = reflection.flags && reflection.flags.isStatic ? '.' : '#';
-			break;
+	// Remove external links.
+	if ( /^https?:\/\//.test( text ) ) {
+		return false;
 	}
 
-	return `${ separator }${ reflection.name }`;
-}
-
-function isAbsoluteLink( link ) {
-	return link.startsWith( 'module:' );
+	return true;
 }
 
 function findTargetReflection( reflection, childName, kindStrings ) {
@@ -161,4 +71,60 @@ function findTargetReflection( reflection, childName, kindStrings ) {
 	}
 
 	return found;
+}
+
+function isAbsoluteLink( link ) {
+	return link.startsWith( 'module:' );
+}
+
+function isAbsoluteLinkValid( project, link ) {
+	const parts = link
+		// Remove leading "module:" prefix from the doclet longname.
+		.substring( 'module:'.length )
+		// Then, split the rest of the longname into separate parts.
+		.split( /#event:|#|~|\./ );
+
+	let targetReflection = project.getChildByName( parts );
+
+	if ( targetReflection ) {
+		const isTargetReflectionStatic = Boolean( targetReflection.flags && targetReflection.flags.isStatic );
+		const isSeparatorStatic = link.includes( '.' );
+
+		if ( isTargetReflectionStatic !== isSeparatorStatic ) {
+			targetReflection = null;
+		}
+	}
+
+	return Boolean( targetReflection );
+}
+
+function isRelativeLinkValid( reflection, link ) {
+	const separator = link[ 0 ];
+	const targetName = link.substring( 1 );
+
+	let targetReflection = null;
+
+	switch ( separator ) {
+		case '~':
+			targetReflection = findTargetReflection( reflection, targetName, [ 'Module' ] );
+
+			break;
+
+		case '#':
+		case '.':
+			targetReflection = findTargetReflection( reflection, targetName, [ 'Class', 'Function', 'Interface', 'Type alias' ] );
+
+			if ( targetReflection ) {
+				const isTargetReflectionStatic = Boolean( targetReflection.flags && targetReflection.flags.isStatic );
+				const isSeparatorStatic = separator === '.';
+
+				if ( isTargetReflectionStatic !== isSeparatorStatic ) {
+					targetReflection = null;
+				}
+			}
+
+			break;
+	}
+
+	return Boolean( targetReflection );
 }

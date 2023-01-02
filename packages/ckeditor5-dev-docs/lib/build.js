@@ -34,7 +34,8 @@ module.exports = async function build( config ) {
 	];
 
 	// const validateOnly = config.validateOnly || false;
-	// const strictCheck = config.strict || false;
+
+	const strictMode = config.strict || false;
 
 	// Pass options to plugins via env variables.
 	// Since plugins are added using `require` calls other forms are currently impossible.
@@ -95,9 +96,9 @@ module.exports = async function build( config ) {
 		throw 'Something went wrong with TypeDoc.';
 	}
 
-	const validationResult = validators.validate( conversionResult );
+	const validationResult = validators.validate( conversionResult, { strictMode } );
 
-	if ( !validationResult ) {
+	if ( !validationResult && strictMode ) {
 		throw 'Something went wrong with TypeDoc.';
 	}
 

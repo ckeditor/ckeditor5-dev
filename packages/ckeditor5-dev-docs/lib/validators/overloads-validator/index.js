@@ -5,7 +5,6 @@
 
 'use strict';
 
-const path = require( 'path' );
 const { ReflectionKind } = require( 'typedoc' );
 
 /**
@@ -13,8 +12,6 @@ const { ReflectionKind } = require( 'typedoc' );
  *
  * @param {Object} project Generated output from TypeDoc to validate.
  * @param {Function} onError Called if validation error is detected.
- *
- * @returns {Boolean}
  */
 module.exports = function validate( project, onError ) {
 	const methodReflections = project.getReflectionsByKind( ReflectionKind.Method )
@@ -35,12 +32,7 @@ module.exports = function validate( project, onError ) {
 				continue;
 			}
 
-			const sourceIndex = reflection.signatures.indexOf( signature );
-			const source = reflection.sources[ sourceIndex ];
-			const filePath = path.relative( project.name, source.fileName ) + ':' + source.line;
-			const message = `Missing "@label" tag for overloaded signature (${ filePath }).`;
-
-			onError( message );
+			onError( 'Missing "@label" tag for overloaded signature', signature.sources[ 0 ] );
 		}
 	}
 };

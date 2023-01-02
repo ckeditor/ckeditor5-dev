@@ -5,7 +5,9 @@
 
 'use strict';
 
+const path = require( 'path' );
 const seeValidator = require( './see-validator' );
+const firesValidator = require( './fires-validator' );
 const overloadsValidator = require( './overloads-validator' );
 
 /**
@@ -16,9 +18,10 @@ const overloadsValidator = require( './overloads-validator' );
  * @returns {Boolean}
  */
 module.exports = {
-	validate( project, options = {} ) {
+	validate( project ) {
 		const validators = [
 			seeValidator,
+			firesValidator,
 			overloadsValidator
 		];
 
@@ -27,15 +30,17 @@ module.exports = {
 		console.log( 'Starting validation...' );
 
 		for ( const validator of validators ) {
-			validator( project, error => {
+			const errors = new Set();
+
+			validator( project, ( error, source ) => {
 				result = false;
 
-				console.warn( error );
+				const filePath = path.relative( project.name, source.fileName ) + ':' + source.line;
 
-				if ( options.strictMode ) {
-					return result;
-				}
+				errors.add( `${ error } (${ filePath }).` );
 			} );
+
+			errors.forEach( error => console.warn( error ) );
 		}
 
 		console.log( 'Validation completed.' );
