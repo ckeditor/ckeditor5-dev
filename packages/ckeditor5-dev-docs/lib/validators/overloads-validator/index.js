@@ -6,6 +6,7 @@
 'use strict';
 
 const { ReflectionKind } = require( 'typedoc' );
+const { getSource, isReflectionValid } = require( '../utils' );
 
 /**
  * Validates the CKEditor 5 documentation.
@@ -14,13 +15,7 @@ const { ReflectionKind } = require( 'typedoc' );
  * @param {Function} onError Called if validation error is detected.
  */
 module.exports = function validate( project, onError ) {
-	const methodReflections = project.getReflectionsByKind( ReflectionKind.Method )
-		.filter( reflection => reflection.parent.kindString === 'Class' );
-
-	const functionReflections = project.getReflectionsByKind( ReflectionKind.Function )
-		.filter( reflection => reflection.parent.kindString === 'Module' );
-
-	const reflections = [ ...methodReflections, ...functionReflections ];
+	const reflections = project.getReflectionsByKind( ReflectionKind.Method | ReflectionKind.Function ).filter( isReflectionValid );
 
 	for ( const reflection of reflections ) {
 		if ( reflection.signatures.length === 1 ) {
@@ -32,7 +27,7 @@ module.exports = function validate( project, onError ) {
 				continue;
 			}
 
-			onError( 'Missing "@label" tag for overloaded signature', signature.sources[ 0 ] );
+			onError( 'Missing "@label" tag for overloaded signature', getSource( signature ) );
 		}
 	}
 };

@@ -6,6 +6,7 @@
 'use strict';
 
 const { ReflectionKind } = require( 'typedoc' );
+const { getSource, isReflectionValid, isLinkValid, isAbsoluteLink } = require( '../utils' );
 
 /**
  * Validates the CKEditor 5 documentation.
@@ -14,59 +15,31 @@ const { ReflectionKind } = require( 'typedoc' );
  * @param {Function} onError Called if validation error is detected.
  */
 module.exports = function validate( project, onError ) {
-	const reflections = project.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.Method ).filter( hasFiresTag );
+	const reflections = project.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.Method ).filter( isReflectionValid );
 
 	for ( const reflection of reflections ) {
-		const events = reflection.comment
-			.getTags( '@fires' )
-			.map( tag => tag.content[ 0 ].text );
+		const events = getFiredEvents( reflection );
+
+		if ( !events.length ) {
+			continue;
+		}
 
 		for ( const event of events ) {
-			const result = isAbsoluteEvent( event ) ?
-				isAbsoluteEventValid( project, event ) :
-				isRelativeEventValid( reflection, event );
+			const isValid = isLinkValid( project, reflection, event );
 
-			if ( !result ) {
-				onError( `Event "${ event }" is not found`, reflection.sources[ 0 ] );
+			if ( !isValid ) {
+				onError( `Event "${ event }" is not found`, getSource( reflection ) );
 			}
 		}
 	}
 };
 
-function hasFiresTag( reflection ) {
-	return Boolean( reflection.comment && reflection.comment.getTag( '@fires' ) );
-}
-
-function isAbsoluteEvent( event ) {
-	return event.startsWith( 'module:' );
-}
-
-function isAbsoluteEventValid( project, event ) {
-	const parts = event
-		// Remove leading "module:" prefix from the doclet longname.
-		.substring( 'module:'.length )
-		// Then, split the rest of the longname into separate parts.
-		.split( /#event:|#|~|\./ );
-
-	let targetReflection = project.getChildByName( parts );
-
-	if ( targetReflection && targetReflection.kindString !== 'Event' ) {
-		targetReflection = null;
+function getFiredEvents( reflection ) {
+	if ( !reflection.comment ) {
+		return [];
 	}
 
-	return Boolean( targetReflection );
-}
-
-function isRelativeEventValid( reflection, event ) {
-	const classReflection = findClassReflection( reflection );
-
-	return classReflection.children.some( child => child.kindString === 'Event' && child.name === event );
-}
-
-function findClassReflection( reflection ) {
-	if ( reflection.kindString === 'Class' ) {
-		return reflection;
-	}
-
-	return findClassReflection( reflection.parent );
+	return reflection.comment.getTags( '@fires' )
+		.flatMap( tag => tag.content.map( item => item.text.trim() ) )
+		.map( event => isAbsoluteLink( event ) ? event : '#event:' + event );
 }

@@ -15,10 +15,10 @@ const { getSource, isReflectionValid, isLinkValid } = require( '../utils' );
  * @param {Function} onError Called if validation error is detected.
  */
 module.exports = function validate( project, onError ) {
-	const reflections = project.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.Method ).filter( isReflectionValid );
+	const reflections = project.getReflectionsByKind( ReflectionKind.All ).filter( isReflectionValid );
 
 	for ( const reflection of reflections ) {
-		const links = getRelatedLinks( reflection );
+		const links = getLinks( reflection );
 
 		if ( !links.length ) {
 			continue;
@@ -34,24 +34,21 @@ module.exports = function validate( project, onError ) {
 	}
 };
 
-function getRelatedLinks( reflection ) {
+function getLinks( reflection ) {
 	if ( !reflection.comment ) {
 		return [];
 	}
 
-	return reflection.comment.getTags( '@see' )
-		.flatMap( tag => tag.content.map( item => item.text.trim() ) )
-		.filter( text => {
-			// Remove list markers (e.g. "-").
-			if ( text.length <= 1 ) {
-				return false;
-			}
+	const parts = [
+		...reflection.comment.summary,
+		...reflection.comment.blockTags.flatMap( tag => tag.content )
+	];
 
-			// Remove external links.
-			if ( /^https?:\/\//.test( text ) ) {
-				return false;
-			}
+	return parts
+		.filter( part => part.kind === 'inline-tag' && part.tag === '@link' )
+		.map( part => {
+			const [ link ] = part.text.split( ' ' );
 
-			return true;
+			return link;
 		} );
 }

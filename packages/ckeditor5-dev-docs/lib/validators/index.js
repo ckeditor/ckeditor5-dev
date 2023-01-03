@@ -7,6 +7,7 @@
 
 const path = require( 'path' );
 const seeValidator = require( './see-validator' );
+const linkValidator = require( './link-validator' );
 const firesValidator = require( './fires-validator' );
 const overloadsValidator = require( './overloads-validator' );
 
@@ -21,6 +22,7 @@ module.exports = {
 	validate( project ) {
 		const validators = [
 			seeValidator,
+			linkValidator,
 			firesValidator,
 			overloadsValidator
 		];
