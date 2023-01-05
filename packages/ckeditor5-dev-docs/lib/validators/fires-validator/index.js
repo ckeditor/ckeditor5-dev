@@ -6,40 +6,48 @@
 'use strict';
 
 const { ReflectionKind } = require( 'typedoc' );
-const { getSource, isReflectionValid, isLinkValid, isAbsoluteLink } = require( '../utils' );
+const { getSource, isReflectionValid, isIdentifierValid, isAbsoluteIdentifier } = require( '../utils' );
 
 /**
- * Validates the CKEditor 5 documentation.
+ * Validates the output produced by TypeDoc.
+ *
+ * It checks if the event in the "@fires" tag exists.
  *
  * @param {Object} project Generated output from TypeDoc to validate.
- * @param {Function} onError Called if validation error is detected.
+ * @param {Function} onError A callback that is executed when a validation error is detected.
  */
 module.exports = function validate( project, onError ) {
 	const reflections = project.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.Method ).filter( isReflectionValid );
 
 	for ( const reflection of reflections ) {
-		const events = getFiredEvents( reflection );
+		const identifiers = getIdentifiersFromFiresTag( reflection );
 
-		if ( !events.length ) {
+		if ( !identifiers.length ) {
 			continue;
 		}
 
-		for ( const event of events ) {
-			const isValid = isLinkValid( project, reflection, event );
+		for ( const identifier of identifiers ) {
+			const isValid = isIdentifierValid( reflection, identifier );
 
 			if ( !isValid ) {
-				onError( `Event "${ event }" is not found`, getSource( reflection ) );
+				onError( `Event "${ identifier }" is not found (${ getSource( reflection ) }).` );
 			}
 		}
 	}
 };
 
-function getFiredEvents( reflection ) {
+function getIdentifiersFromFiresTag( reflection ) {
 	if ( !reflection.comment ) {
 		return [];
 	}
 
 	return reflection.comment.getTags( '@fires' )
 		.flatMap( tag => tag.content.map( item => item.text.trim() ) )
-		.map( event => isAbsoluteLink( event ) ? event : '#event:' + event );
+		.map( identifier => {
+			if ( isAbsoluteIdentifier( identifier ) ) {
+				return identifier;
+			}
+
+			return '#event:' + identifier;
+		} );
 }

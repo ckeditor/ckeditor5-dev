@@ -5,7 +5,6 @@
 
 'use strict';
 
-const path = require( 'path' );
 const seeValidator = require( './see-validator' );
 const linkValidator = require( './link-validator' );
 const firesValidator = require( './fires-validator' );
@@ -15,7 +14,6 @@ const overloadsValidator = require( './overloads-validator' );
  * Validates the CKEditor 5 documentation.
  *
  * @param {Object} project Generated output from TypeDoc to validate.
- *
  * @returns {Boolean}
  */
 module.exports = {
@@ -34,12 +32,10 @@ module.exports = {
 		for ( const validator of validators ) {
 			const errors = new Set();
 
-			validator( project, ( error, source ) => {
+			validator( project, error => {
 				result = false;
 
-				const filePath = path.relative( project.name, source.fileName ) + ':' + source.line;
-
-				errors.add( `${ error } (${ filePath }).` );
+				errors.add( error );
 			} );
 
 			errors.forEach( error => console.warn( error ) );

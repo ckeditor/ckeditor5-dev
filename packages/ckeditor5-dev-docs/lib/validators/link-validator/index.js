@@ -6,39 +6,42 @@
 'use strict';
 
 const { ReflectionKind } = require( 'typedoc' );
-const { getSource, isReflectionValid, isLinkValid } = require( '../utils' );
+const { getSource, isReflectionValid, isIdentifierValid } = require( '../utils' );
 
 /**
- * Validates the CKEditor 5 documentation.
+ * Validates the output produced by TypeDoc.
+ *
+ * It checks if the identifier in the "@link" tag points to an existing doclet.
  *
  * @param {Object} project Generated output from TypeDoc to validate.
- * @param {Function} onError Called if validation error is detected.
+ * @param {Function} onError A callback that is executed when a validation error is detected.
  */
 module.exports = function validate( project, onError ) {
 	const reflections = project.getReflectionsByKind( ReflectionKind.All ).filter( isReflectionValid );
 
 	for ( const reflection of reflections ) {
-		const links = getLinks( reflection );
+		const identifiers = getIdentifiersFromLinkTag( reflection );
 
-		if ( !links.length ) {
+		if ( !identifiers.length ) {
 			continue;
 		}
 
-		for ( const link of links ) {
-			const isValid = isLinkValid( project, reflection, link );
+		for ( const identifier of identifiers ) {
+			const isValid = isIdentifierValid( reflection, identifier );
 
 			if ( !isValid ) {
-				onError( `Target doclet for "${ link }" link is not found`, getSource( reflection ) );
+				onError( `Target doclet for "${ identifier }" identifier is not found (${ getSource( reflection ) }).` );
 			}
 		}
 	}
 };
 
-function getLinks( reflection ) {
+function getIdentifiersFromLinkTag( reflection ) {
 	if ( !reflection.comment ) {
 		return [];
 	}
 
+	// The "@link" tag can be located in the comment summary or it can be nested in other block tags.
 	const parts = [
 		...reflection.comment.summary,
 		...reflection.comment.blockTags.flatMap( tag => tag.content )
@@ -47,8 +50,10 @@ function getLinks( reflection ) {
 	return parts
 		.filter( part => part.kind === 'inline-tag' && part.tag === '@link' )
 		.map( part => {
-			const [ link ] = part.text.split( ' ' );
+			// The "@link" tag may contain the actual identifier and the display name after a space.
+			// Split by space to extract only the identifier from the whole tag.
+			const [ identifier ] = part.text.split( ' ' );
 
-			return link;
+			return identifier;
 		} );
 }

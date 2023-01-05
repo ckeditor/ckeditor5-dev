@@ -6,35 +6,37 @@
 'use strict';
 
 const { ReflectionKind } = require( 'typedoc' );
-const { getSource, isReflectionValid, isLinkValid } = require( '../utils' );
+const { getSource, isReflectionValid, isIdentifierValid } = require( '../utils' );
 
 /**
- * Validates the CKEditor 5 documentation.
+ * Validates the output produced by TypeDoc.
+ *
+ * It checks if the identifier in the "@see" tag points to an existing doclet.
  *
  * @param {Object} project Generated output from TypeDoc to validate.
- * @param {Function} onError Called if validation error is detected.
+ * @param {Function} onError A callback that is executed when a validation error is detected.
  */
 module.exports = function validate( project, onError ) {
-	const reflections = project.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.Method ).filter( isReflectionValid );
+	const reflections = project.getReflectionsByKind( ReflectionKind.All ).filter( isReflectionValid );
 
 	for ( const reflection of reflections ) {
-		const links = getRelatedLinks( reflection );
+		const identifiers = getIdentifiersFromSeeTag( reflection );
 
-		if ( !links.length ) {
+		if ( !identifiers.length ) {
 			continue;
 		}
 
-		for ( const link of links ) {
-			const isValid = isLinkValid( project, reflection, link );
+		for ( const identifier of identifiers ) {
+			const isValid = isIdentifierValid( reflection, identifier );
 
 			if ( !isValid ) {
-				onError( `Target doclet for "${ link }" link is not found`, getSource( reflection ) );
+				onError( `Target doclet for "${ identifier }" identifier is not found (${ getSource( reflection ) }).` );
 			}
 		}
 	}
 };
 
-function getRelatedLinks( reflection ) {
+function getIdentifiersFromSeeTag( reflection ) {
 	if ( !reflection.comment ) {
 		return [];
 	}

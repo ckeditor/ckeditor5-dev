@@ -9,10 +9,12 @@ const { ReflectionKind } = require( 'typedoc' );
 const { getSource, isReflectionValid } = require( '../utils' );
 
 /**
- * Validates the CKEditor 5 documentation.
+ * Validates the output produced by TypeDoc.
+ *
+ * It checks if overloaded methods and functions are described with the mandatory "@label" tag.
  *
  * @param {Object} project Generated output from TypeDoc to validate.
- * @param {Function} onError Called if validation error is detected.
+ * @param {Function} onError A callback that is executed when a validation error is detected.
  */
 module.exports = function validate( project, onError ) {
 	const reflections = project.getReflectionsByKind( ReflectionKind.Method | ReflectionKind.Function ).filter( isReflectionValid );
@@ -27,7 +29,7 @@ module.exports = function validate( project, onError ) {
 				continue;
 			}
 
-			onError( 'Missing "@label" tag for overloaded signature', getSource( signature ) );
+			onError( `Missing "@label" tag for overloaded signature (${ getSource( reflection ) }).` );
 		}
 	}
 };
