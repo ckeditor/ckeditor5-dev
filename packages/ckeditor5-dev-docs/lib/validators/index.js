@@ -5,6 +5,7 @@
 
 'use strict';
 
+const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const seeValidator = require( './see-validator' );
 const linkValidator = require( './link-validator' );
 const firesValidator = require( './fires-validator' );
@@ -18,6 +19,8 @@ const overloadsValidator = require( './overloads-validator' );
  */
 module.exports = {
 	validate( project ) {
+		const log = logger();
+
 		const validators = [
 			seeValidator,
 			linkValidator,
@@ -27,7 +30,7 @@ module.exports = {
 
 		let result = true;
 
-		console.log( 'Starting validation...' );
+		log.info( 'Starting validation...' );
 
 		for ( const validator of validators ) {
 			const errors = new Set();
@@ -38,10 +41,10 @@ module.exports = {
 				errors.add( error );
 			} );
 
-			errors.forEach( error => console.warn( error ) );
+			errors.forEach( error => log.warning( error ) );
 		}
 
-		console.log( 'Validation completed.' );
+		log.info( 'Validation completed.' );
 
 		return result;
 	}

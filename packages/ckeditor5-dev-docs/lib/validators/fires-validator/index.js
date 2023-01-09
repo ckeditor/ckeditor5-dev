@@ -17,7 +17,7 @@ const { getSource, isReflectionValid, isIdentifierValid, isAbsoluteIdentifier } 
  * @param {Function} onError A callback that is executed when a validation error is detected.
  */
 module.exports = function validate( project, onError ) {
-	const reflections = project.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.Method ).filter( isReflectionValid );
+	const reflections = project.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.CallSignature ).filter( isReflectionValid );
 
 	for ( const reflection of reflections ) {
 		const identifiers = getIdentifiersFromFiresTag( reflection );

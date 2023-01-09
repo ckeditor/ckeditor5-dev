@@ -5,8 +5,6 @@
 
 'use strict';
 
-const path = require( 'path' );
-
 /**
  * Common utils for TypeDoc validators.
  */
@@ -48,7 +46,7 @@ function isIdentifierValid( reflection, identifier ) {
 		identifier :
 		toAbsoluteIdentifier( reflection, identifier );
 
-	return Boolean( getTarget( reflection.project, absoluteIdentifier ) );
+	return hasTarget( reflection.project, absoluteIdentifier );
 }
 
 /**
@@ -142,45 +140,75 @@ function getSource( reflection ) {
 	if ( reflection.sources ) {
 		const source = reflection.sources[ 0 ];
 
-		return path.relative( reflection.project.name, source.fileName ) + ':' + source.line;
+		return source.fileName + ':' + source.line;
 	}
 
 	return getSource( reflection.parent );
 }
 
 /**
- * Returns the target reflection located by the identifier. Returns `null` if target is not found.
+ * Checks if the provided identifier targets an existing reflection within the whole project.
  *
- * @param {require('typedoc').ProjectReflection} project The project refletion.
+ * @param {require('typedoc').ProjectReflection} project The project reflection.
  * @param {String} identifier The absolute identifier to locate the target reflection.
- * @returns {require('typedoc').Reflection|null}
+ * @returns {Boolean}
  */
-function getTarget( project, identifier ) {
+function hasTarget( project, identifier ) {
 	const parts = identifier
 		// Remove leading "module:" prefix from the doclet longname.
 		.substring( 'module:'.length )
 		// Then, split the rest of the longname into separate parts.
 		.split( /#event:|#|~|\./ );
 
-	const targetReflection = project.getChildByName( parts ) || null;
+	// The last part of the longname may contain a colon, which indicates that the name targets a labeled signature.
+	// Replace our custom name with a label with the original name. The labeled signature will be checked later.
+	const [ lastPart, lastPartLabel ] = parts.pop().split( ':' );
 
-	if ( targetReflection ) {
-		const isIdentifierStatic = identifier.includes( '.' );
-		const isTargetReflectionStatic = Boolean( targetReflection.flags && targetReflection.flags.isStatic );
+	parts.push( lastPart );
 
-		// The static/non-static reflection flag does not match the separator used in the identifier.
-		if ( isIdentifierStatic !== isTargetReflectionStatic ) {
-			return null;
-		}
+	// TODO: This will return FIRST CHILD only.
+	const targetReflection = project.getChildByName( parts );
 
-		const isIdentifierEvent = identifier.includes( '#event:' );
-		const isTargetReflectionEvent = targetReflection.kindString === 'Event';
-
-		// Identifier targets an event but the found target reflection is not an event.
-		if ( isIdentifierEvent && !isTargetReflectionEvent ) {
-			return null;
-		}
+	if ( !targetReflection ) {
+		return false;
 	}
 
-	return targetReflection;
+	// Check if the labeled longname targets an existing signature with the provided label.
+	if ( lastPartLabel ) {
+		if ( !targetReflection.signatures ) {
+			return false;
+		}
+
+		return targetReflection.signatures.some( signature => {
+			if ( !signature.comment ) {
+				return false;
+			}
+
+			const labelTag = signature.comment.getTag( '@label' );
+
+			if ( !labelTag ) {
+				return false;
+			}
+
+			return labelTag.content[ 0 ].text === lastPartLabel;
+		} );
+	}
+
+	const isIdentifierStatic = identifier.includes( '.' );
+	const isTargetReflectionStatic = Boolean( targetReflection.flags && targetReflection.flags.isStatic );
+
+	// Check if the static/non-static reflection flag matches the separator used in the identifier.
+	if ( isIdentifierStatic !== isTargetReflectionStatic ) {
+		return false;
+	}
+
+	const isIdentifierEvent = identifier.includes( '#event:' );
+	const isTargetReflectionEvent = targetReflection.kindString === 'Event';
+
+	// Check if the identifier targets an event and the found target reflection is really an event.
+	if ( isIdentifierEvent && !isTargetReflectionEvent ) {
+		return false;
+	}
+
+	return true;
 }

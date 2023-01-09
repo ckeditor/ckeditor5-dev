@@ -31,7 +31,7 @@ module.exports = async function build( config ) {
 	const sourceFilePatterns = [
 		config.readmePath,
 		...config.sourceFiles
-	];
+	].filter( Boolean );
 
 	// const validateOnly = config.validateOnly || false;
 
@@ -61,6 +61,7 @@ module.exports = async function build( config ) {
 		tsconfig: config.tsconfig,
 		entryPoints: files,
 		// logLevel: 'Error',
+		basePath: config.cwd,
 		blockTags: [
 			'@eventName'
 		],
