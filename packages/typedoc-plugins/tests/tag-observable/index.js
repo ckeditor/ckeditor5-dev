@@ -88,12 +88,12 @@ describe( 'typedoc-plugins/tag-observable', function() {
 				.filter( children => children.kindString === 'Event' );
 
 			expect( eventDefinitions ).to.lengthOf( 6 );
-			expect( eventDefinitions.find( event => event.name === 'change:key' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'change:value' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'change:secret' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'set:key' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'set:value' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'set:secret' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:change:key' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:change:value' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:change:secret' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:set:key' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:set:value' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:set:secret' ) ).to.not.be.undefined;
 		} );
 
 		it( 'should find all events in the derived class', () => {
@@ -101,19 +101,19 @@ describe( 'typedoc-plugins/tag-observable', function() {
 				.filter( children => children.kindString === 'Event' );
 
 			expect( eventDefinitions ).to.lengthOf( 10 );
-			expect( eventDefinitions.find( event => event.name === 'change:key' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'change:value' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'change:property' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'change:anotherProperty' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'change:staticProperty' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'set:key' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'set:value' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'set:property' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'set:staticProperty' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'set:anotherProperty' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:change:key' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:change:value' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:change:property' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:change:anotherProperty' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:change:staticProperty' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:set:key' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:set:value' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:set:property' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:set:staticProperty' ) ).to.not.be.undefined;
+			expect( eventDefinitions.find( event => event.name === 'event:set:anotherProperty' ) ).to.not.be.undefined;
 		} );
 
-		for ( const eventName of [ 'change', 'set' ] ) {
+		for ( const eventName of [ 'event:change', 'event:set' ] ) {
 			it( `should properly define the ${ eventName } event`, () => {
 				const eventDefinition = baseClassDefinition.children
 					.find( doclet => doclet.name === `${ eventName }:key` );
@@ -135,7 +135,7 @@ describe( 'typedoc-plugins/tag-observable', function() {
 				expect( eventDefinition.comment.summary ).to.lengthOf( 1 );
 				expect( eventDefinition.comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
 				expect( eventDefinition.comment.summary[ 0 ] ).to.have.property( 'text',
-					eventName === 'change' ?
+					eventName === 'event:change' ?
 						'Fired when the `key` property changed value.' :
 						'Fired when the `key` property is going to be set but is not set yet (before the `change` event is fired).'
 				);

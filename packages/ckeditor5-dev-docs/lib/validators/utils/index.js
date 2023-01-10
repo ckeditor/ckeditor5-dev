@@ -68,63 +68,45 @@ function isAbsoluteIdentifier( identifier ) {
  */
 function toAbsoluteIdentifier( reflection, identifier ) {
 	const separator = identifier[ 0 ];
-	const longName = getLongName( reflection );
-	const [ part ] = longName.split( separator );
+	const parts = getLongNameParts( reflection );
 
-	return part + identifier;
+	return separator === '~' ?
+		'module:' + parts[ 0 ] + identifier :
+		'module:' + parts[ 0 ] + '~' + parts[ 1 ] + identifier;
 }
 
 /**
- * Returns a longname for given reflection by traversing up the hierarchy until the module is reached.
+ * Returns a longname for a reflection, divided into separate parts.
  *
  * @param {require('typedoc').Reflection} reflection A reflection for which we want to get its longname.
- * @returns {String}
+ * @returns {Array.<String>}
  */
-function getLongName( reflection ) {
-	let longName = '';
+function getLongNameParts( reflection ) {
+	// Kinds of reflection that affect the longname format.
+	const kinds = [
+		'Module',
+		'Class',
+		'Function',
+		'Interface',
+		'Type alias',
+		'Accessor',
+		'Variable',
+		'Method',
+		'Property',
+		'Event'
+	];
+
+	const parts = [];
 
 	while ( reflection ) {
-		longName = getLongNamePart( reflection ) + longName;
+		if ( kinds.includes( reflection.kindString ) ) {
+			parts.unshift( reflection.name );
+		}
 
-		reflection = reflection.kindString === 'Module' ?
-			null :
-			reflection.parent;
+		reflection = reflection.parent;
 	}
 
-	return longName;
-}
-
-/**
- * Returns a longname fragment: the separator based on the reflection's kind followed by the reflection name.
- *
- * @param {require('typedoc').Reflection} reflection A reflection for which we want to get its longname.
- * @returns {String}
- */
-function getLongNamePart( reflection ) {
-	let separator;
-
-	switch ( reflection.kindString ) {
-		case 'Module':
-			separator = 'module:';
-			break;
-
-		case 'Class':
-		case 'Function':
-		case 'Interface':
-		case 'Type alias':
-			separator = '~';
-			break;
-
-		case 'Event':
-			separator = '#event:';
-			break;
-
-		default:
-			separator = reflection.flags && reflection.flags.isStatic ? '.' : '#';
-			break;
-	}
-
-	return separator + reflection.name;
+	return parts;
 }
 
 /**
@@ -158,23 +140,33 @@ function hasTarget( project, identifier ) {
 		// Remove leading "module:" prefix from the doclet longname.
 		.substring( 'module:'.length )
 		// Then, split the rest of the longname into separate parts.
-		.split( /#event:|#|~|\./ );
+		.split( /#|~|\./ );
 
-	// The last part of the longname may contain a colon, which indicates that the name targets a labeled signature.
-	// Replace our custom name with a label with the original name. The labeled signature will be checked later.
-	const [ lastPart, lastPartLabel ] = parts.pop().split( ':' );
+	// The last part of the longname may contain a colon, which can be either a part of the event name, or it indicates that the name
+	// targets a labeled signature.
+	const lastPart = parts.pop();
+	const [ lastPartName, lastPartLabel ] = lastPart.split( ':' );
 
-	parts.push( lastPart );
+	const isIdentifierEvent = lastPart.startsWith( 'event:' );
+	const isIdentifierLabeledSignature = !isIdentifierEvent && lastPart.includes( ':' );
 
-	// TODO: This will return FIRST CHILD only.
+	if ( isIdentifierLabeledSignature ) {
+		// If the identifier is a labeled signature, just use the method/function name and the labeled signature will be searched later.
+		parts.push( lastPartName );
+	} else {
+		// Otherwise, restore the original identifier part.
+		parts.push( lastPart );
+	}
+
 	const targetReflection = project.getChildByName( parts );
 
 	if ( !targetReflection ) {
 		return false;
 	}
 
-	// Check if the labeled longname targets an existing signature with the provided label.
-	if ( lastPartLabel ) {
+	// Now, when the target reflection is found, do some checks whether it matches the identifier.
+	// (1) Check if the labeled signature targets an existing signature.
+	if ( isIdentifierLabeledSignature ) {
 		if ( !targetReflection.signatures ) {
 			return false;
 		}
@@ -197,16 +189,8 @@ function hasTarget( project, identifier ) {
 	const isIdentifierStatic = identifier.includes( '.' );
 	const isTargetReflectionStatic = Boolean( targetReflection.flags && targetReflection.flags.isStatic );
 
-	// Check if the static/non-static reflection flag matches the separator used in the identifier.
+	// (2) Check if the static/non-static reflection flag matches the separator used in the identifier.
 	if ( isIdentifierStatic !== isTargetReflectionStatic ) {
-		return false;
-	}
-
-	const isIdentifierEvent = identifier.includes( '#event:' );
-	const isTargetReflectionEvent = targetReflection.kindString === 'Event';
-
-	// Check if the identifier targets an event and the found target reflection is really an event.
-	if ( isIdentifierEvent && !isTargetReflectionEvent ) {
 		return false;
 	}
 

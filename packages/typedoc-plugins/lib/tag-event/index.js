@@ -85,7 +85,7 @@ function onEventEnd( context ) {
 				ReflectionKind.ObjectLiteral,
 				undefined,
 				undefined,
-				eventName
+				`event:${ eventName }`
 			);
 
 		eventReflection.kindString = 'Event';

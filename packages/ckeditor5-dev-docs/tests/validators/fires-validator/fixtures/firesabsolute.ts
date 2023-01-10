@@ -8,13 +8,13 @@
  */
 
 /**
- * @fires module:fixtures/fires~ClassWithFires#event:event
+ * @fires module:fixtures/fires~ClassWithFires#event:event-example
  * @fires module:fixtures/fires~ClassWithFires#event:event-non-existing
  * @fires module:fixtures/fires~ClassWithFires#event:property
  */
 export class ClassWithFiresAbsolute {
 	/**
-	 * @fires module:fixtures/fires~ClassWithFires#event:event
+	 * @fires module:fixtures/fires~ClassWithFires#event:event-example
 	 * @fires module:fixtures/fires~ClassWithFires#event:event-non-existing
 	 * @fires module:fixtures/fires~ClassWithFires#event:property
 	 */

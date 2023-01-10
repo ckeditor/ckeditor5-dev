@@ -8,7 +8,7 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 const utils = require( '../../utils' );
 
-describe( 'dev-docs/validators/fires-validator', function() {
+describe( 'dev-docs/validators/link-validator', function() {
 	this.timeout( 10 * 1000 );
 
 	const FIXTURES_PATH = utils.normalizePath( __dirname, 'fixtures' );
@@ -56,46 +56,64 @@ describe( 'dev-docs/validators/fires-validator', function() {
 		mockery.disable();
 	} );
 
-	it( 'should warn if fired event does not exist', () => {
+	it( 'should warn if link is not valid', () => {
 		const expectedErrors = [
 			{
-				identifier: '#event:event-non-existing',
-				source: 'fires.ts:15'
+				identifier: '.property',
+				source: 'links.ts:49'
+			},
+			{
+				identifier: '#staticProperty',
+				source: 'links.ts:49'
+			},
+			{
+				identifier: '#property-non-existing',
+				source: 'links.ts:49'
+			},
+			{
+				identifier: '#property:LABEL-NON-EXISTING',
+				source: 'links.ts:49'
+			},
+			{
+				identifier: '#method:LABEL-NON-EXISTING',
+				source: 'links.ts:49'
+			},
+			{
+				identifier: '#methodWithoutComment:LABEL-NON-EXISTING',
+				source: 'links.ts:49'
+			},
+			{
+				identifier: '#methodWithoutLabel:LABEL-NON-EXISTING',
+				source: 'links.ts:49'
+			},
+			{
+				identifier: '#event-example',
+				source: 'links.ts:49'
 			},
 			{
 				identifier: '#event:property',
-				source: 'fires.ts:15'
+				source: 'links.ts:49'
 			},
 			{
-				identifier: '#event:event-non-existing',
-				source: 'fires.ts:27'
+				identifier: '~ClassNonExisting#property',
+				source: 'links.ts:49'
 			},
 			{
-				identifier: '#event:property',
-				source: 'fires.ts:27'
+				identifier: 'module:non-existing/module~ClassWithLinks#property',
+				source: 'links.ts:49'
 			},
 			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:event-non-existing',
-				source: 'firesabsolute.ts:15'
-			},
-			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:property',
-				source: 'firesabsolute.ts:15'
-			},
-			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:event-non-existing',
-				source: 'firesabsolute.ts:21'
-			},
-			{
-				identifier: 'module:fixtures/fires~ClassWithFires#event:property',
-				source: 'firesabsolute.ts:21'
+				identifier: 'module:non-existing/module~Foo#bar',
+				source: 'links.ts:13'
 			}
 		];
 
 		expect( stubs.logger.warning.callCount ).to.equal( expectedErrors.length );
 
 		for ( const error of expectedErrors ) {
-			expect( stubs.logger.warning ).to.be.calledWith( `Event "${ error.identifier }" is not found (${ error.source }).` );
+			expect( stubs.logger.warning ).to.be.calledWith(
+				`Target doclet for "${ error.identifier }" identifier is not found (${ error.source }).`
+			);
 		}
 	} );
 } );

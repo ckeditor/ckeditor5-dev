@@ -97,7 +97,7 @@ module.exports = async function build( config ) {
 		throw 'Something went wrong with TypeDoc.';
 	}
 
-	const validationResult = validators.validate( conversionResult, { strictMode } );
+	const validationResult = validators.validate( conversionResult );
 
 	if ( !validationResult && strictMode ) {
 		throw 'Something went wrong with TypeDoc.';

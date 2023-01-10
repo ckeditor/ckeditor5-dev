@@ -8,7 +8,7 @@
  */
 
 /**
- * @fires event
+ * @fires event-example
  * @fires event-non-existing
  * @fires property
  */
@@ -20,7 +20,7 @@ export class ClassWithFires {
 	}
 
 	/**
-	 * @fires event
+	 * @fires event-example
 	 * @fires event-non-existing
 	 * @fires property
 	 */
@@ -28,8 +28,8 @@ export class ClassWithFires {
 }
 
 /**
- * @eventName event
+ * @eventName event-example
  */
-export type Event = {
+export type EventExample = {
 	name: string;
 };
