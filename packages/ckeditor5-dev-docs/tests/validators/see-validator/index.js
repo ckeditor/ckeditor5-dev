@@ -8,7 +8,7 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 const utils = require( '../../utils' );
 
-describe( 'dev-docs/validators/link-validator', function() {
+describe( 'dev-docs/validators/see-validator', function() {
 	this.timeout( 10 * 1000 );
 
 	const FIXTURES_PATH = utils.normalizePath( __dirname, 'fixtures' );
@@ -60,59 +60,51 @@ describe( 'dev-docs/validators/link-validator', function() {
 		const expectedErrors = [
 			{
 				identifier: '.property',
-				source: 'links.ts:49'
+				source: 'see.ts:58'
 			},
 			{
 				identifier: '#staticProperty',
-				source: 'links.ts:49'
+				source: 'see.ts:58'
 			},
 			{
 				identifier: '#property-non-existing',
-				source: 'links.ts:49'
+				source: 'see.ts:58'
 			},
 			{
 				identifier: '#property:LABEL-NON-EXISTING',
-				source: 'links.ts:49'
+				source: 'see.ts:58'
 			},
 			{
 				identifier: '#method:LABEL-NON-EXISTING',
-				source: 'links.ts:49'
+				source: 'see.ts:58'
 			},
 			{
 				identifier: '#methodWithoutComment:LABEL-NON-EXISTING',
-				source: 'links.ts:49'
+				source: 'see.ts:58'
 			},
 			{
 				identifier: '#methodWithoutLabel:LABEL-NON-EXISTING',
-				source: 'links.ts:49'
+				source: 'see.ts:58'
 			},
 			{
 				identifier: '#event-example',
-				source: 'links.ts:49'
+				source: 'see.ts:58'
 			},
 			{
 				identifier: '#event:property',
-				source: 'links.ts:49'
+				source: 'see.ts:58'
 			},
 			{
 				identifier: '~ClassNonExisting#property',
-				source: 'links.ts:49'
+				source: 'see.ts:58'
 			},
 			{
-				identifier: 'module:non-existing/module~ClassWithLinks#property',
-				source: 'links.ts:49'
-			},
-			{
-				identifier: 'module:non-existing/module~Foo#bar',
-				source: 'links.ts:13'
+				identifier: 'module:non-existing/module~ClassWithSeeTags#property',
+				source: 'see.ts:58'
 			},
 			{
 				identifier: 'module:non-existing/module~Foo#bar',
-				source: 'links.ts:62'
-			},
-			{
-				identifier: 'module:non-existing/module~Foo#bar',
-				source: 'links.ts:99'
+				source: 'see.ts:95'
 			}
 		];
 

@@ -8,7 +8,7 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 const utils = require( '../../utils' );
 
-describe( 'dev-docs/validators/link-validator', function() {
+describe( 'dev-docs/validators/overloads-validator', function() {
 	this.timeout( 10 * 1000 );
 
 	const FIXTURES_PATH = utils.normalizePath( __dirname, 'fixtures' );
@@ -56,72 +56,18 @@ describe( 'dev-docs/validators/link-validator', function() {
 		mockery.disable();
 	} );
 
-	it( 'should warn if link is not valid', () => {
+	it( 'should warn if overloaded signature does not have "@label" tag', () => {
 		const expectedErrors = [
-			{
-				identifier: '.property',
-				source: 'links.ts:49'
-			},
-			{
-				identifier: '#staticProperty',
-				source: 'links.ts:49'
-			},
-			{
-				identifier: '#property-non-existing',
-				source: 'links.ts:49'
-			},
-			{
-				identifier: '#property:LABEL-NON-EXISTING',
-				source: 'links.ts:49'
-			},
-			{
-				identifier: '#method:LABEL-NON-EXISTING',
-				source: 'links.ts:49'
-			},
-			{
-				identifier: '#methodWithoutComment:LABEL-NON-EXISTING',
-				source: 'links.ts:49'
-			},
-			{
-				identifier: '#methodWithoutLabel:LABEL-NON-EXISTING',
-				source: 'links.ts:49'
-			},
-			{
-				identifier: '#event-example',
-				source: 'links.ts:49'
-			},
-			{
-				identifier: '#event:property',
-				source: 'links.ts:49'
-			},
-			{
-				identifier: '~ClassNonExisting#property',
-				source: 'links.ts:49'
-			},
-			{
-				identifier: 'module:non-existing/module~ClassWithLinks#property',
-				source: 'links.ts:49'
-			},
-			{
-				identifier: 'module:non-existing/module~Foo#bar',
-				source: 'links.ts:13'
-			},
-			{
-				identifier: 'module:non-existing/module~Foo#bar',
-				source: 'links.ts:62'
-			},
-			{
-				identifier: 'module:non-existing/module~Foo#bar',
-				source: 'links.ts:99'
-			}
+			{ source: 'overloadsinvalid.ts:18' },
+			{ source: 'overloadsinvalid.ts:24' },
+			{ source: 'overloadsinvalid.ts:34' },
+			{ source: 'overloadsinvalid.ts:36' }
 		];
 
 		expect( stubs.logger.warning.callCount ).to.equal( expectedErrors.length );
 
 		for ( const error of expectedErrors ) {
-			expect( stubs.logger.warning ).to.be.calledWith(
-				`Target doclet for "${ error.identifier }" identifier is not found (${ error.source }).`
-			);
+			expect( stubs.logger.warning ).to.be.calledWith( `Missing "@label" tag for overloaded signature (${ error.source }).` );
 		}
 	} );
 } );

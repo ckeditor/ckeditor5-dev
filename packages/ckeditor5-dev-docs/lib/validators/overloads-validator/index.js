@@ -17,7 +17,8 @@ const { getSource, isReflectionValid } = require( '../utils' );
  * @param {Function} onError A callback that is executed when a validation error is detected.
  */
 module.exports = function validate( project, onError ) {
-	const reflections = project.getReflectionsByKind( ReflectionKind.Method | ReflectionKind.Function ).filter( isReflectionValid );
+	const kinds = ReflectionKind.Method | ReflectionKind.Constructor | ReflectionKind.Function;
+	const reflections = project.getReflectionsByKind( kinds ).filter( isReflectionValid );
 
 	for ( const reflection of reflections ) {
 		if ( reflection.signatures.length === 1 ) {
@@ -29,7 +30,7 @@ module.exports = function validate( project, onError ) {
 				continue;
 			}
 
-			onError( `Missing "@label" tag for overloaded signature (${ getSource( reflection ) }).` );
+			onError( `Missing "@label" tag for overloaded signature (${ getSource( signature ) }).` );
 		}
 	}
 };

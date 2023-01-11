@@ -55,7 +55,9 @@ export class ClassWithLinks {
 	 *
 	 * @label LABEL1
 	 *
-	 * @returns Contains link in the block tag: {@link #property}
+	 * @returns Contains links in the block tag:
+	 * - valid one: {@link module:fixtures/links~ClassWithLinks#property link to a doclet},
+	 * - invalid one: {@link module:non-existing/module~Foo#bar link to a doclet}.
 	 */
 	public method(): void;
 
@@ -70,9 +72,9 @@ export class ClassWithLinks {
 
 	public method(): void {
 		/**
-		 * An example error with:
-		 * - valid {@link module:fixtures/links~ClassWithLinks#property link to a doclet},
-		 * - invalid {@link module:non-existing/module~Foo#bar link to a doclet}.
+		 * An example error with links:
+		 * - valid one: {@link module:fixtures/links~ClassWithLinks#property link to a doclet},
+		 * - invalid one: {@link module:non-existing/module~Foo#bar link to a doclet}.
 		 *
 		 * @error example-error
 		 */
@@ -88,6 +90,10 @@ export class ClassWithLinks {
 }
 
 /**
+ * An example event with links:
+ * - valid one: {@link module:fixtures/links~ClassWithLinks#property link to a doclet},
+ * - invalid one: {@link module:non-existing/module~Foo#bar link to a doclet}.
+ *
  * @eventName event-example
  */
 export type EventExample = {
