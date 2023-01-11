@@ -5,7 +5,7 @@
 
 'use strict';
 
-const { Converter, ReflectionKind, TypeParameterReflection, Comment } = require( 'typedoc' );
+const { Converter, ReflectionKind, TypeParameterReflection, Comment, ReflectionFlag } = require( 'typedoc' );
 
 /**
  * The `typedoc-plugin-tag-event` collects event definitions from the `@eventName` tag and assigns them as the children of the class or
@@ -15,30 +15,36 @@ const { Converter, ReflectionKind, TypeParameterReflection, Comment } = require(
  * difficult to get it to work as we expect. This is why we have introduced a support for the custom `@eventName` tag, which now replaces
  * the old `@event` tag.
  *
- * To correctly define an event, it must be associated with the exported type that describes that event.
+ * To correctly define an event, it must be associated with the exported type that describes that event, with the `name` and `args`
+ * properties.
+ *
+ * To correctly define the event parameters, they must be defined in the `args` property. The `args` property is an array, where each item
+ * describes a parameter that event emits. Item can be either of a primitive type, or a custom type that has own definition.
  *
  * Example:
  *
  * ```ts
+ * 		export type ExampleType = {
+ * 			name: string;
+ * 		};
+ *
  * 		/**
  * 		 * An event associated with exported type.
  * 		 *
  * 		 * @eventName foo-event
- * 		 * @param {String} p1 Description for first param.
- * 		 * @param {Number} p2 Description for second param.
- * 		 * @param {Boolean} p3 Description for third param.
+ * 		 * @param p1 Description for first param.
+ * 		 * @param p2 Description for second param.
+ * 		 * @param p3 Description for third param.
  * 		 * /
  * 		export type FooEvent = {
  * 			name: string;
- * 			args: [ {
+ * 			args: [
  * 				p1: string;
  * 				p2: number;
- * 				p3: boolean;
- * 			} ];
+ * 				p3: ExampleType;
+ * 			];
  * 		};
  * ```
- *
- * TODO: We do not support collecting types of `@param` tags associated with the `@eventName`.
  */
 module.exports = {
 	load( app ) {
@@ -90,12 +96,42 @@ function onEventEnd( context ) {
 
 		eventReflection.kindString = 'Event';
 
-		// Map each found `@param` tag to the type parameter reflection.
-		const typeParameters = reflection.comment.getTags( '@param' ).map( tag => {
-			const param = new TypeParameterReflection( tag.name, undefined, undefined, eventReflection );
+		const paramTags = reflection.comment.getTags( '@param' );
 
-			param.type = context.converter.convertType( context.withScope( param ) );
-			param.comment = new Comment( tag.content );
+		// Try to find parameters for the event, which are defined in the `args` tuple.
+		const argsReflection = getArgsTuple( reflection );
+
+		// Then, for each found parameter, get its type and try to find the description from the `@param` tag.
+		const typeParameters = argsReflection.map( ( arg, index ) => {
+			let argName;
+
+			// If the parameter is not anonymous, take its name.
+			if ( arg.element ) {
+				argName = arg.name;
+			}
+			// Otherwise, take the name from the `@param` tag at the current index (if it exists).
+			else if ( paramTags[ index ] ) {
+				argName = paramTags[ index ].name;
+			}
+			// Otherwise, just set the fallback name to show something.
+			else {
+				argName = '<anonymous>';
+			}
+
+			const param = new TypeParameterReflection( argName, undefined, undefined, eventReflection );
+
+			param.type = arg;
+
+			// TypeDoc does not mark an optional parameter, so let's do it manually.
+			if ( param.type.isOptional || param.type.type === 'optional' ) {
+				param.setFlag( ReflectionFlag.Optional );
+			}
+
+			const comment = paramTags.find( tag => tag.name === argName );
+
+			if ( comment ) {
+				param.comment = new Comment( comment.content );
+			}
 
 			return param;
 		} );
@@ -110,6 +146,41 @@ function onEventEnd( context ) {
 		// Copy the source location as it is the same as the location of the reflection containing the event.
 		eventReflection.sources = [ ...reflection.sources ];
 	}
+}
+
+/**
+ * Tries to find the `args` tuple, that is associated with the event and it contains all event parameters.
+ *
+ * @param {require('typedoc').Reflection} reflection The reflection that contains the event name.
+ * @returns {Array.<require('typedoc').Reflection>}
+ */
+function getArgsTuple( reflection ) {
+	const typeReflection = getTargetTypeReflection( reflection.type );
+
+	if ( !typeReflection.declaration.children ) {
+		return [];
+	}
+
+	const argsTuple = typeReflection.declaration.children.find( ref => ref.name === 'args' );
+
+	if ( !argsTuple ) {
+		return [];
+	}
+
+	return argsTuple.type.elements;
+}
+
+/**
+ * Returns the type reflection for the specified reflection. If the type reflection is a reference to another one,
+ * it recursively walks deep until the final declaration is reached.
+ *
+ * @param {require('typedoc').Reflection} reflectionType
+ * @returns {require('typedoc').Reflection}
+ */
+function getTargetTypeReflection( reflectionType ) {
+	return reflectionType.type === 'reference' ?
+		getTargetTypeReflection( reflectionType.reflection.type ) :
+		reflectionType;
 }
 
 /**

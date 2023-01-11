@@ -5,7 +5,7 @@
 
 'use strict';
 
-const { Converter, ReflectionKind, TypeParameterReflection } = require( 'typedoc' );
+const { Converter, ReflectionKind, ReferenceType } = require( 'typedoc' );
 
 /**
  * The `typedoc-plugin-event-inheritance-fixer` takes care of inheriting events, which are not handled by TypeDoc by default.
@@ -67,15 +67,14 @@ function onEventEnd( context ) {
 
 				clonedEventReflection.sources = [ ...eventReflection.sources ];
 
+				clonedEventReflection.inheritedFrom = ReferenceType.createResolvedReference(
+					`${ classReflection.name }.${ eventReflection.name }`,
+					eventReflection,
+					context.project
+				);
+
 				if ( eventReflection.typeParameters ) {
-					clonedEventReflection.typeParameters = eventReflection.typeParameters.map( typeParameter => {
-						const parameter = new TypeParameterReflection( typeParameter.name, undefined, undefined, clonedEventReflection );
-
-						parameter.type = context.converter.convertType( context.withScope( parameter ) );
-						parameter.comment = typeParameter.comment.clone();
-
-						return parameter;
-					} );
+					clonedEventReflection.typeParameters = [ ...eventReflection.typeParameters ];
 				}
 			}
 		}
