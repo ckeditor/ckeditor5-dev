@@ -5,7 +5,6 @@
 
 'use strict';
 
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const seeValidator = require( './see-validator' );
 const linkValidator = require( './link-validator' );
 const firesValidator = require( './fires-validator' );
@@ -15,12 +14,11 @@ const overloadsValidator = require( './overloads-validator' );
  * Validates the CKEditor 5 documentation.
  *
  * @param {Object} project Generated output from TypeDoc to validate.
+ * @param {Object} typeDoc A TypeDoc application instance.
  * @returns {Boolean}
  */
 module.exports = {
-	validate( project ) {
-		const log = logger();
-
+	validate( project, typeDoc ) {
 		const validators = [
 			seeValidator,
 			linkValidator,
@@ -30,7 +28,7 @@ module.exports = {
 
 		let result = true;
 
-		log.info( 'Starting validation...' );
+		typeDoc.logger.info( 'Starting validation...' );
 
 		for ( const validator of validators ) {
 			const errors = new Set();
@@ -41,10 +39,10 @@ module.exports = {
 				errors.add( error );
 			} );
 
-			errors.forEach( error => log.warning( error ) );
+			errors.forEach( error => typeDoc.logger.warn( error ) );
 		}
 
-		log.info( 'Validation completed.' );
+		typeDoc.logger.info( 'Validation completed.' );
 
 		return result;
 	}

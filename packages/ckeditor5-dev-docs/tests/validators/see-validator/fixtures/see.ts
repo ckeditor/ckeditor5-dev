@@ -38,6 +38,7 @@ export class ClassWithSeeTags {
 	 * @see module:fixtures/see~ClassWithSeeTags#property
 	 * @see http://github.com/ckeditor/ckeditor5
 	 * @see https://github.com/ckeditor/ckeditor5
+	 * @label LABEL1
 	 */
 	constructor( property: number );
 
@@ -54,6 +55,7 @@ export class ClassWithSeeTags {
 	 * @see #event:property
 	 * @see ~ClassNonExisting#property
 	 * @see module:non-existing/module~ClassWithSeeTags#property
+	 * @label LABEL2
 	 */
 	constructor( property: number );
 

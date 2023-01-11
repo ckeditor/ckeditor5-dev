@@ -97,13 +97,15 @@ module.exports = async function build( config ) {
 		throw 'Something went wrong with TypeDoc.';
 	}
 
-	const validationResult = validators.validate( conversionResult );
+	const validationResult = validators.validate( conversionResult, typeDoc );
 
 	if ( !validationResult && strictMode ) {
 		throw 'Something went wrong with TypeDoc.';
 	}
 
-	await typeDoc.generateJson( conversionResult, config.outputPath );
+	if ( config.outputPath ) {
+		await typeDoc.generateJson( conversionResult, config.outputPath );
+	}
 
 	// Uncomment this to generate TypeDoc documentation (build-in HTML template).
 	// await typeDoc.generateDocs( conversionResult, 'docs/api/typedoc' );

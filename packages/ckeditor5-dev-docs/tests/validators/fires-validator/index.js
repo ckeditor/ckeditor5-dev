@@ -5,7 +5,7 @@
 
 const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
+const proxyquire = require( 'proxyquire' );
 const utils = require( '../../utils' );
 
 describe( 'dev-docs/validators/fires-validator', function() {
@@ -14,46 +14,31 @@ describe( 'dev-docs/validators/fires-validator', function() {
 	const FIXTURES_PATH = utils.normalizePath( __dirname, 'fixtures' );
 	const SOURCE_FILES = utils.normalizePath( FIXTURES_PATH, '**', '*.ts' );
 	const TSCONFIG_PATH = utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' );
-	const OUTPUT_PATH = utils.normalizePath( FIXTURES_PATH, 'output.json' );
 
-	let sandbox, stubs;
+	let typeDocInstance;
 
 	before( async () => {
-		sandbox = sinon.createSandbox();
+		const build = proxyquire( '../../../lib/build', {
+			'./validators': {
+				validate( project, typeDoc ) {
+					typeDocInstance = typeDoc;
 
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
-		} );
+					sinon.stub( typeDoc.logger, 'info' ).callsFake();
+					sinon.stub( typeDoc.logger, 'warn' ).callsFake();
+					sinon.stub( typeDoc.logger, 'error' ).callsFake();
 
-		stubs = {
-			logger: {
-				info: sandbox.stub(),
-				warning: sandbox.stub(),
-				error: sandbox.stub()
+					return require( '../../../lib/validators' ).validate( project, typeDoc );
+				}
 			}
-		};
-
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-			logger: sandbox.stub().callsFake( () => stubs.logger )
 		} );
-
-		const { build } = require( '../../../lib' );
 
 		await build( {
 			cwd: FIXTURES_PATH,
 			tsconfig: TSCONFIG_PATH,
 			sourceFiles: [ SOURCE_FILES ],
-			outputPath: OUTPUT_PATH,
 			validateOnly: false,
 			strict: false
 		} );
-	} );
-
-	after( () => {
-		sandbox.restore();
-		mockery.disable();
 	} );
 
 	it( 'should warn if fired event does not exist', () => {
@@ -92,10 +77,14 @@ describe( 'dev-docs/validators/fires-validator', function() {
 			}
 		];
 
-		expect( stubs.logger.warning.callCount ).to.equal( expectedErrors.length );
+		const calls = typeDocInstance.logger.warn.getCalls().filter( call => call.firstArg.startsWith( '[@fires validator]' ) );
+
+		expect( calls ).to.lengthOf( expectedErrors.length );
 
 		for ( const error of expectedErrors ) {
-			expect( stubs.logger.warning ).to.be.calledWith( `Event "${ error.identifier }" is not found (${ error.source }).` );
+			expect( typeDocInstance.logger.warn ).to.be.calledWith(
+				`[@fires validator] Event "${ error.identifier }" is not found (${ error.source }).`
+			);
 		}
 	} );
 } );

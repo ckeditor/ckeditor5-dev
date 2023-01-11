@@ -5,7 +5,7 @@
 
 const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
+const proxyquire = require( 'proxyquire' );
 const utils = require( '../../utils' );
 
 describe( 'dev-docs/validators/see-validator', function() {
@@ -14,105 +14,92 @@ describe( 'dev-docs/validators/see-validator', function() {
 	const FIXTURES_PATH = utils.normalizePath( __dirname, 'fixtures' );
 	const SOURCE_FILES = utils.normalizePath( FIXTURES_PATH, '**', '*.ts' );
 	const TSCONFIG_PATH = utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' );
-	const OUTPUT_PATH = utils.normalizePath( FIXTURES_PATH, 'output.json' );
 
-	let sandbox, stubs;
+	let typeDocInstance;
 
 	before( async () => {
-		sandbox = sinon.createSandbox();
+		const build = proxyquire( '../../../lib/build', {
+			'./validators': {
+				validate( project, typeDoc ) {
+					typeDocInstance = typeDoc;
 
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
-		} );
+					sinon.stub( typeDoc.logger, 'info' ).callsFake();
+					sinon.stub( typeDoc.logger, 'warn' ).callsFake();
+					sinon.stub( typeDoc.logger, 'error' ).callsFake();
 
-		stubs = {
-			logger: {
-				info: sandbox.stub(),
-				warning: sandbox.stub(),
-				error: sandbox.stub()
+					return require( '../../../lib/validators' ).validate( project, typeDoc );
+				}
 			}
-		};
-
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-			logger: sandbox.stub().callsFake( () => stubs.logger )
 		} );
-
-		const { build } = require( '../../../lib' );
 
 		await build( {
 			cwd: FIXTURES_PATH,
 			tsconfig: TSCONFIG_PATH,
 			sourceFiles: [ SOURCE_FILES ],
-			outputPath: OUTPUT_PATH,
 			validateOnly: false,
 			strict: false
 		} );
-	} );
-
-	after( () => {
-		sandbox.restore();
-		mockery.disable();
 	} );
 
 	it( 'should warn if link is not valid', () => {
 		const expectedErrors = [
 			{
 				identifier: '.property',
-				source: 'see.ts:58'
+				source: 'see.ts:60'
 			},
 			{
 				identifier: '#staticProperty',
-				source: 'see.ts:58'
+				source: 'see.ts:60'
 			},
 			{
 				identifier: '#property-non-existing',
-				source: 'see.ts:58'
+				source: 'see.ts:60'
 			},
 			{
 				identifier: '#property:LABEL-NON-EXISTING',
-				source: 'see.ts:58'
+				source: 'see.ts:60'
 			},
 			{
 				identifier: '#method:LABEL-NON-EXISTING',
-				source: 'see.ts:58'
+				source: 'see.ts:60'
 			},
 			{
 				identifier: '#methodWithoutComment:LABEL-NON-EXISTING',
-				source: 'see.ts:58'
+				source: 'see.ts:60'
 			},
 			{
 				identifier: '#methodWithoutLabel:LABEL-NON-EXISTING',
-				source: 'see.ts:58'
+				source: 'see.ts:60'
 			},
 			{
 				identifier: '#event-example',
-				source: 'see.ts:58'
+				source: 'see.ts:60'
 			},
 			{
 				identifier: '#event:property',
-				source: 'see.ts:58'
+				source: 'see.ts:60'
 			},
 			{
 				identifier: '~ClassNonExisting#property',
-				source: 'see.ts:58'
+				source: 'see.ts:60'
 			},
 			{
 				identifier: 'module:non-existing/module~ClassWithSeeTags#property',
-				source: 'see.ts:58'
+				source: 'see.ts:60'
 			},
 			{
 				identifier: 'module:non-existing/module~Foo#bar',
-				source: 'see.ts:95'
+				source: 'see.ts:97'
 			}
 		];
 
-		expect( stubs.logger.warning.callCount ).to.equal( expectedErrors.length );
+		const calls = typeDocInstance.logger.warn.getCalls().filter( call => call.firstArg.startsWith( '[@see validator]' ) );
+
+		expect( calls ).to.lengthOf( expectedErrors.length );
 
 		for ( const error of expectedErrors ) {
-			expect( stubs.logger.warning ).to.be.calledWith(
-				`Target doclet for "${ error.identifier }" identifier is not found (${ error.source }).`
+			expect( typeDocInstance.logger.warn ).to.be.calledWith(
+				`[@see validator] Target doclet for "${ error.identifier }" identifier is not found (${ error.source }).`
 			);
 		}
 	} );

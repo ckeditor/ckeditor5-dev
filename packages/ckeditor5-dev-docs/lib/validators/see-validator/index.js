@@ -30,7 +30,7 @@ module.exports = function validate( project, onError ) {
 			const isValid = isIdentifierValid( reflection, identifier );
 
 			if ( !isValid ) {
-				onError( `Target doclet for "${ identifier }" identifier is not found (${ getSource( reflection ) }).` );
+				onError( `[@see validator] Target doclet for "${ identifier }" identifier is not found (${ getSource( reflection ) }).` );
 			}
 		}
 	}
