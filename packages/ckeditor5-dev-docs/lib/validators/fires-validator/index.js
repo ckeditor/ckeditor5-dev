@@ -30,7 +30,7 @@ module.exports = function validate( project, onError ) {
 			const isValid = isIdentifierValid( reflection, identifier );
 
 			if ( !isValid ) {
-				onError( `[@fires validator] Event "${ identifier }" is not found.`, reflection );
+				onError( `Event "${ identifier }" is not found.`, reflection );
 			}
 		}
 	}

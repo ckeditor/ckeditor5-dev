@@ -30,7 +30,7 @@ module.exports = function validate( project, onError ) {
 				continue;
 			}
 
-			onError( '[overloads validator] Missing "@label" tag for overloaded signature.', signature );
+			onError( 'Missing "@label" tag for overloaded signature.', signature );
 		}
 	}
 };

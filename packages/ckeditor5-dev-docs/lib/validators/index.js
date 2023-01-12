@@ -67,7 +67,7 @@ module.exports = {
 				if ( !entry.symbol ) {
 					const pathToSource = `${ chalk.cyan( './' + entry.source.fileName ) }:${ chalk.yellow( entry.source.line ) }`;
 
-					typeDoc.logger.warn( `${ pathToSource } - ${ entry.error }` );
+					typeDoc.logger.warn( `${ pathToSource } - ${ entry.error }\n` );
 				} else {
 					typeDoc.logger.warn( entry.error, entry.symbol.declarations[ 0 ] );
 				}
