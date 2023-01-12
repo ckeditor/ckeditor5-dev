@@ -38,33 +38,40 @@ module.exports = {
 
 		for ( const validator of validators ) {
 			validator( project, ( error, reflection ) => {
+				const symbol = project.getSymbolFromReflection( reflection );
 				const source = getSource( reflection );
 
-				errors.set( `${ error } ${ source }`, {
+				errors.set( `${ error } ${ source.fileName }:${ source.line }`, {
 					error,
-					reflection,
+					symbol,
 					source
 				} );
 			} );
 		}
 
-		const errorsNoSource = new Set();
+		[ ...errors.values() ]
+			// Sort the errors so that the ones with the found symbol are listed first, followed by the rest.
+			.sort( ( entryA, entryB ) => {
+				if ( entryA.symbol && !entryB.symbol ) {
+					return -1;
+				}
 
-		errors.forEach( ( { error, reflection, source } ) => {
-			const symbol = project.getSymbolFromReflection( reflection );
+				if ( !entryA.symbol && entryB.symbol ) {
+					return 1;
+				}
 
-			if ( !symbol ) {
-				errorsNoSource.add( `${ error } ${ chalk.grey( '(./' + source + ')' ) }` );
-			} else {
-				const node = symbol.declarations[ 0 ];
+				return 0;
+			} )
+			// Print each error in the console.
+			.forEach( entry => {
+				if ( !entry.symbol ) {
+					const pathToSource = `${ chalk.cyan( './' + entry.source.fileName ) }:${ chalk.yellow( entry.source.line ) }`;
 
-				typeDoc.logger.warn( error, node );
-			}
-		} );
-
-		errorsNoSource.forEach( error => {
-			typeDoc.logger.warn( error );
-		} );
+					typeDoc.logger.warn( `${ pathToSource } - ${ entry.error }` );
+				} else {
+					typeDoc.logger.warn( entry.error, entry.symbol.declarations[ 0 ] );
+				}
+			} );
 
 		typeDoc.logger.info( 'Validation completed.' );
 

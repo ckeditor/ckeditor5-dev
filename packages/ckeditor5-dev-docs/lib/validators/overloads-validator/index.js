@@ -6,7 +6,7 @@
 'use strict';
 
 const { ReflectionKind } = require( 'typedoc' );
-const { getSource, isReflectionValid } = require( '../utils' );
+const { isReflectionValid } = require( '../utils' );
 
 /**
  * Validates the output produced by TypeDoc.
@@ -30,7 +30,7 @@ module.exports = function validate( project, onError ) {
 				continue;
 			}
 
-			onError( `[overloads validator] Missing "@label" tag for overloaded signature.`, signature );
+			onError( '[overloads validator] Missing "@label" tag for overloaded signature.', signature );
 		}
 	}
 };

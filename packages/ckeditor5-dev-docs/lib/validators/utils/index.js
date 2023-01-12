@@ -116,13 +116,18 @@ function getLongNameParts( reflection ) {
  * Not all reflections have the `sources` property, so this function takes this into account as well and gets the source from its parent.
  *
  * @param {require('typedoc').Reflection} reflection A reflection for which we want to get its longname.
- * @returns {String}
+ * @returns {Object} data
+ * @returns {String} data.fileName
+ * @returns {Number} data.line
  */
 function getSource( reflection ) {
 	if ( reflection.sources ) {
-		const source = reflection.sources[ 0 ];
+		const { fileName, line } = reflection.sources[ 0 ];
 
-		return source.fileName + ':' + source.line;
+		return {
+			fileName,
+			line
+		};
 	}
 
 	return getSource( reflection.parent );

@@ -6,7 +6,7 @@
 'use strict';
 
 const { ReflectionKind } = require( 'typedoc' );
-const { getSource, isReflectionValid, isIdentifierValid } = require( '../utils' );
+const { isReflectionValid, isIdentifierValid } = require( '../utils' );
 
 /**
  * Validates the output produced by TypeDoc.
