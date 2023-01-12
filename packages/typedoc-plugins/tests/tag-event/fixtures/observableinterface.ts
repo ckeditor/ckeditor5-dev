@@ -21,9 +21,9 @@ export interface Observable {
  * Fired when a property changed value.
  *
  * @eventName change:{property}
- * @param {String} name The property name.
- * @param {*} value The new property value.
- * @param {*} oldValue The previous property value.
+ * @param name The property name.
+ * @param value The new property value.
+ * @param oldValue The previous property value.
  */
 export type ObservableChangeEvent = {
 	name: 'change' | `change:${ string }`;
@@ -38,9 +38,9 @@ export type ObservableChangeEvent = {
  * Fired when a property value is going to be set but is not set yet (before the `change` event is fired).
  *
  * @eventName set:{property}
- * @param {String} name The property name.
- * @param {*} value The new property value.
- * @param {*} oldValue The previous property value.
+ * @param name The property name.
+ * @param value The new property value.
+ * @param oldValue The previous property value.
  */
 export type ObservableSetEvent = {
 	name: 'set' | `set:${ string }`;

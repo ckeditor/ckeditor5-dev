@@ -62,7 +62,14 @@ describe( 'typedoc-plugins/tag-event', function() {
 		// 4. event:event-foo-in-class-with-fires
 		// 5. event:change:{property}
 		// 6. event:set:{property}
-		expect( eventDefinitions ).to.lengthOf( 6 );
+		// 7. event:event-foo-no-content
+		// 8. event:event-foo-empty-args
+		// 9. event:event-foo-optional-args
+		// 10. event:event-foo-inline-args
+		// 11. event:event-foo-anonymous-args
+		// 12. event:event-foo-anonymous-optional-args
+		// 13. event:event-foo-reference
+		expect( eventDefinitions ).to.lengthOf( 13 );
 	} );
 
 	it( 'should inform if the class for an event has not been found', () => {
@@ -105,7 +112,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 			const eventDefinitions = classDefinition.children
 				.filter( children => children.kindString === 'Event' );
 
-			expect( eventDefinitions ).to.lengthOf( 3 );
+			expect( eventDefinitions ).to.lengthOf( 10 );
 		} );
 
 		it( 'should find an event tag without description and parameters', () => {
@@ -251,6 +258,160 @@ describe( 'typedoc-plugins/tag-event', function() {
 
 			expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 4 ] ).to.have.property( 'kind', 'text' );
 			expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 4 ] ).to.have.property( 'text', '.' );
+		} );
+
+		describe( 'event parameters', () => {
+			it( 'should convert event parameters from the "args" property', () => {
+				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-with-params' );
+
+				expect( eventDefinition ).to.not.be.undefined;
+				expect( eventDefinition.typeParameters ).to.be.an( 'array' );
+				expect( eventDefinition.typeParameters ).to.lengthOf( 3 );
+
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'name', 'p1' );
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'type' );
+				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'type', 'named-tuple-member' );
+				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'element' );
+				expect( eventDefinition.typeParameters[ 0 ].type.element ).to.have.property( 'type', 'intrinsic' );
+				expect( eventDefinition.typeParameters[ 0 ].type.element ).to.have.property( 'name', 'string' );
+
+				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'name', 'p2' );
+				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'type' );
+				expect( eventDefinition.typeParameters[ 1 ].type ).to.have.property( 'type', 'named-tuple-member' );
+				expect( eventDefinition.typeParameters[ 1 ].type ).to.have.property( 'element' );
+				expect( eventDefinition.typeParameters[ 1 ].type.element ).to.have.property( 'type', 'intrinsic' );
+				expect( eventDefinition.typeParameters[ 1 ].type.element ).to.have.property( 'name', 'number' );
+
+				expect( eventDefinition.typeParameters[ 2 ] ).to.have.property( 'name', 'p3' );
+				expect( eventDefinition.typeParameters[ 2 ] ).to.have.property( 'type' );
+				expect( eventDefinition.typeParameters[ 2 ].type ).to.have.property( 'type', 'named-tuple-member' );
+				expect( eventDefinition.typeParameters[ 2 ].type ).to.have.property( 'element' );
+				expect( eventDefinition.typeParameters[ 2 ].type.element ).to.have.property( 'type', 'reference' );
+				expect( eventDefinition.typeParameters[ 2 ].type.element ).to.have.property( 'name', 'ExampleType' );
+			} );
+
+			it( 'should not add type parameters for event without content', () => {
+				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-no-content' );
+
+				expect( eventDefinition ).to.not.be.undefined;
+				expect( eventDefinition.typeParameters ).to.be.undefined;
+			} );
+
+			it( 'should not add type parameters for event with empty args', () => {
+				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-empty-args' );
+
+				expect( eventDefinition ).to.not.be.undefined;
+				expect( eventDefinition.typeParameters ).to.be.undefined;
+			} );
+
+			it( 'should convert optional event parameter', () => {
+				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-optional-args' );
+
+				expect( eventDefinition ).to.not.be.undefined;
+				expect( eventDefinition.typeParameters ).to.be.an( 'array' );
+				expect( eventDefinition.typeParameters ).to.lengthOf( 2 );
+
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'name', 'p1' );
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'flags' );
+				expect( eventDefinition.typeParameters[ 0 ].flags ).to.have.property( 'isOptional', false );
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'type' );
+				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'type', 'named-tuple-member' );
+				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'element' );
+				expect( eventDefinition.typeParameters[ 0 ].type.element ).to.have.property( 'type', 'intrinsic' );
+				expect( eventDefinition.typeParameters[ 0 ].type.element ).to.have.property( 'name', 'string' );
+
+				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'name', 'p2' );
+				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'flags' );
+				expect( eventDefinition.typeParameters[ 1 ].flags ).to.have.property( 'isOptional', true );
+				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'type' );
+				expect( eventDefinition.typeParameters[ 1 ].type ).to.have.property( 'type', 'named-tuple-member' );
+				expect( eventDefinition.typeParameters[ 1 ].type ).to.have.property( 'element' );
+				expect( eventDefinition.typeParameters[ 1 ].type.element ).to.have.property( 'type', 'intrinsic' );
+				expect( eventDefinition.typeParameters[ 1 ].type.element ).to.have.property( 'name', 'number' );
+			} );
+
+			it( 'should convert event parameter with name taken from @param tag', () => {
+				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-inline-args' );
+
+				expect( eventDefinition ).to.not.be.undefined;
+				expect( eventDefinition.typeParameters ).to.be.an( 'array' );
+				expect( eventDefinition.typeParameters ).to.lengthOf( 1 );
+
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'name', 'p1' );
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'type' );
+				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'type', 'reflection' );
+				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'declaration' );
+				expect( eventDefinition.typeParameters[ 0 ].type.declaration ).to.have.property( 'kindString', 'Type literal' );
+			} );
+
+			it( 'should convert event parameter without a name', () => {
+				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-anonymous-args' );
+
+				expect( eventDefinition ).to.not.be.undefined;
+				expect( eventDefinition.typeParameters ).to.be.an( 'array' );
+				expect( eventDefinition.typeParameters ).to.lengthOf( 2 );
+
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'name', '<anonymous>' );
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'type' );
+				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'type', 'intrinsic' );
+				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'name', 'number' );
+
+				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'name', '<anonymous>' );
+				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'type' );
+				expect( eventDefinition.typeParameters[ 1 ].type ).to.have.property( 'type', 'reflection' );
+				expect( eventDefinition.typeParameters[ 1 ].type ).to.have.property( 'declaration' );
+				expect( eventDefinition.typeParameters[ 1 ].type.declaration ).to.have.property( 'kindString', 'Type literal' );
+			} );
+
+			it( 'should convert optional event parameter without a name', () => {
+				const eventDefinition = classDefinition.children
+					.find( doclet => doclet.name === 'event:event-foo-anonymous-optional-args' );
+
+				expect( eventDefinition ).to.not.be.undefined;
+				expect( eventDefinition.typeParameters ).to.be.an( 'array' );
+				expect( eventDefinition.typeParameters ).to.lengthOf( 2 );
+
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'name', '<anonymous>' );
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'flags' );
+				expect( eventDefinition.typeParameters[ 0 ].flags ).to.have.property( 'isOptional', true );
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'type' );
+				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'type', 'optional' );
+				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'elementType' );
+				expect( eventDefinition.typeParameters[ 0 ].type.elementType ).to.have.property( 'type', 'intrinsic' );
+				expect( eventDefinition.typeParameters[ 0 ].type.elementType ).to.have.property( 'name', 'number' );
+
+				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'name', '<anonymous>' );
+				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'flags' );
+				expect( eventDefinition.typeParameters[ 1 ].flags ).to.have.property( 'isOptional', true );
+				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'type' );
+				expect( eventDefinition.typeParameters[ 1 ].type ).to.have.property( 'type', 'optional' );
+				expect( eventDefinition.typeParameters[ 1 ].type ).to.have.property( 'elementType' );
+				expect( eventDefinition.typeParameters[ 1 ].type.elementType ).to.have.property( 'type', 'reflection' );
+				expect( eventDefinition.typeParameters[ 1 ].type.elementType ).to.have.property( 'declaration' );
+				expect( eventDefinition.typeParameters[ 1 ].type.elementType.declaration ).to.have.property( 'kindString', 'Type literal' );
+			} );
+
+			it( 'should convert event parameter that is a reference to another type', () => {
+				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-reference' );
+
+				expect( eventDefinition ).to.not.be.undefined;
+				expect( eventDefinition.typeParameters ).to.be.an( 'array' );
+				expect( eventDefinition.typeParameters ).to.lengthOf( 2 );
+
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'name', 'p1' );
+				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'type' );
+				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'type', 'named-tuple-member' );
+				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'element' );
+				expect( eventDefinition.typeParameters[ 0 ].type.element ).to.have.property( 'type', 'intrinsic' );
+				expect( eventDefinition.typeParameters[ 0 ].type.element ).to.have.property( 'name', 'string' );
+
+				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'name', 'p2' );
+				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'type' );
+				expect( eventDefinition.typeParameters[ 1 ].type ).to.have.property( 'type', 'named-tuple-member' );
+				expect( eventDefinition.typeParameters[ 1 ].type ).to.have.property( 'element' );
+				expect( eventDefinition.typeParameters[ 1 ].type.element ).to.have.property( 'type', 'reference' );
+				expect( eventDefinition.typeParameters[ 1 ].type.element ).to.have.property( 'name', 'ExampleType' );
+			} );
 		} );
 	} );
 } );

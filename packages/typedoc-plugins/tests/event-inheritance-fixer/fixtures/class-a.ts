@@ -24,11 +24,11 @@ export class ClassA {}
  */
 export type Event1ClassA = {
 	name: string;
-	args: [ {
-		p1: string;
-		p2: number;
-		p3: boolean;
-	} ];
+	args: [
+		p1: string,
+		p2: number,
+		p3: boolean
+	];
 };
 
 /**

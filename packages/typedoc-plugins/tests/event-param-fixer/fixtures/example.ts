@@ -52,9 +52,9 @@ export type EventFoo = {
  */
 export type EventFooWithParams = {
 	name: string;
-	args: [ {
-		p1: string;
-		p2: number;
-		p3: boolean;
-	} ];
+	args: [
+		p1: string,
+		p2: number,
+		p3: boolean
+	];
 };
