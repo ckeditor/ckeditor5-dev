@@ -26,24 +26,18 @@ module.exports = {
 			overloadsValidator
 		];
 
-		let result = true;
-
 		typeDoc.logger.info( 'Starting validation...' );
 
+		const errors = new Set();
+
 		for ( const validator of validators ) {
-			const errors = new Set();
-
-			validator( project, error => {
-				result = false;
-
-				errors.add( error );
-			} );
-
-			errors.forEach( error => typeDoc.logger.warn( error ) );
+			validator( project, error => errors.add( error ) );
 		}
+
+		errors.forEach( error => typeDoc.logger.warn( error ) );
 
 		typeDoc.logger.info( 'Validation completed.' );
 
-		return result;
+		return !errors.size;
 	}
 };
