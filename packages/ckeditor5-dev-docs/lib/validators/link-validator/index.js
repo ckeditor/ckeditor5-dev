@@ -6,7 +6,7 @@
 'use strict';
 
 const { ReflectionKind } = require( 'typedoc' );
-const { getSource, isReflectionValid, isIdentifierValid } = require( '../utils' );
+const { isReflectionValid, isIdentifierValid } = require( '../utils' );
 
 /**
  * Validates the output produced by TypeDoc.
@@ -30,7 +30,7 @@ module.exports = function validate( project, onError ) {
 			const isValid = isIdentifierValid( reflection, identifier );
 
 			if ( !isValid ) {
-				onError( `[@link validator] Target doclet for "${ identifier }" identifier is not found (${ getSource( reflection ) }).` );
+				onError( `[@link validator] Target doclet for "${ identifier }" identifier is not found.`, reflection );
 			}
 		}
 	}

@@ -52,7 +52,7 @@ module.exports = async function build( config ) {
 	const files = await glob( sourceFilePatterns );
 	const typeDoc = new TypeDoc.Application();
 
-	console.log( 'Source files', files );
+	// console.log( 'Source files', files );
 
 	typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
 	typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
@@ -60,7 +60,7 @@ module.exports = async function build( config ) {
 	typeDoc.bootstrap( {
 		tsconfig: config.tsconfig,
 		entryPoints: files,
-		// logLevel: 'Error',
+		logLevel: 'Warn',
 		basePath: config.cwd,
 		blockTags: [
 			'@eventName'
