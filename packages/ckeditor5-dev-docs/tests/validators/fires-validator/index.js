@@ -21,7 +21,8 @@ describe( 'dev-docs/validators/fires-validator', function() {
 		const validators = proxyquire( '../../../lib/validators', {
 			'./fires-validator': project => {
 				return require( '../../../lib/validators/fires-validator' )( project, onErrorCallback );
-			}
+			},
+			'./module-validator': sinon.spy()
 		} );
 
 		const build = proxyquire( '../../../lib/build', {
@@ -40,19 +41,19 @@ describe( 'dev-docs/validators/fires-validator', function() {
 	it( 'should warn if fired event does not exist', () => {
 		const expectedErrors = [
 			{
-				identifier: '#event:event-non-existing',
+				identifier: 'event-non-existing',
 				source: 'fires.ts:15'
 			},
 			{
-				identifier: '#event:property',
+				identifier: 'property',
 				source: 'fires.ts:15'
 			},
 			{
-				identifier: '#event:event-non-existing',
+				identifier: 'event-non-existing',
 				source: 'fires.ts:27'
 			},
 			{
-				identifier: '#event:property',
+				identifier: 'property',
 				source: 'fires.ts:27'
 			},
 			{
@@ -77,7 +78,7 @@ describe( 'dev-docs/validators/fires-validator', function() {
 
 		for ( const error of expectedErrors ) {
 			expect( onErrorCallback ).to.be.calledWith(
-				`Event "${ error.identifier }" is not found.`,
+				`Incorrect event name: "${ error.identifier }" in the @fires tag`,
 				sinon.match( reflection => error.source === testUtils.getSource( reflection ) )
 			);
 		}

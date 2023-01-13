@@ -21,7 +21,8 @@ describe( 'dev-docs/validators/see-validator', function() {
 		const validators = proxyquire( '../../../lib/validators', {
 			'./see-validator': project => {
 				return require( '../../../lib/validators/see-validator' )( project, onErrorCallback );
-			}
+			},
+			'./module-validator': sinon.spy()
 		} );
 
 		const build = proxyquire( '../../../lib/build', {
@@ -97,7 +98,7 @@ describe( 'dev-docs/validators/see-validator', function() {
 
 		for ( const error of expectedErrors ) {
 			expect( onErrorCallback ).to.be.calledWith(
-				`Target doclet for "${ error.identifier }" identifier is not found.`,
+				`Incorrect link: "${ error.identifier }"`,
 				sinon.match( reflection => error.source === testUtils.getSource( reflection ) )
 			);
 		}

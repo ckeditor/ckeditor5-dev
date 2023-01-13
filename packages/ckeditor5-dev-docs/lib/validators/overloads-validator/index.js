@@ -37,12 +37,12 @@ module.exports = function validate( project, onError ) {
 
 				// ...and whether it is a unique value.
 				if ( uniqueValues.has( label ) ) {
-					onError( 'Duplicated identifier for the "@label" tag.', signature );
+					onError( `Duplicated name: "${ label }" in the @label tag`, signature );
 				} else {
 					uniqueValues.add( label );
 				}
 			} else {
-				onError( 'Missing "@label" tag for overloaded signature.', signature );
+				onError( 'Overloaded signature misses the @label tag', signature );
 			}
 		}
 	}

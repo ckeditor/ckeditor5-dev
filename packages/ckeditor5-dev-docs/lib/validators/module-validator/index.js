@@ -31,7 +31,7 @@ module.exports = function validate( project, onError ) {
 		const expectedFilePath = `ckeditor5-${ packageName }/src/${ moduleName.join( '/' ) }.ts`;
 
 		if ( !filePath.endsWith( expectedFilePath ) ) {
-			onError( 'Invalid module name.', reflection );
+			onError( `Invalid module name: "${ reflection.name }"`, reflection );
 		}
 	}
 };

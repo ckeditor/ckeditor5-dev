@@ -30,7 +30,9 @@ module.exports = function validate( project, onError ) {
 			const isValid = isIdentifierValid( reflection, identifier );
 
 			if ( !isValid ) {
-				onError( `Event "${ identifier }" is not found.`, reflection );
+				const eventName = identifier.replace( /^#event:/, '' );
+
+				onError( `Incorrect event name: "${ eventName }" in the @fires tag`, reflection );
 			}
 		}
 	}

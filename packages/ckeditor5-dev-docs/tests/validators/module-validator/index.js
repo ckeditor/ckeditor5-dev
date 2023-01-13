@@ -39,19 +39,37 @@ describe( 'dev-docs/validators/module-validator', function() {
 
 	it( 'should warn if module name is not valid', () => {
 		const expectedErrors = [
-			{ source: 'ckeditor5-example/src/modulerootinvalid1.ts:10' },
-			{ source: 'ckeditor5-example/src/modulerootinvalid2.ts:10' },
-			{ source: 'ckeditor5-example/src/feature/modulefeatureinvalid1.ts:10' },
-			{ source: 'ckeditor5-example/src/feature/modulefeatureinvalid2.ts:10' },
-			{ source: 'ckeditor5-example/src/feature/nested-feature/modulenestedfeatureinvalid1.ts:10' },
-			{ source: 'ckeditor5-example/src/feature/nested-feature/modulenestedfeatureinvalid2.ts:10' }
+			{
+				source: 'ckeditor5-example/src/modulerootinvalid1.ts:10',
+				name: 'example/'
+			},
+			{
+				source: 'ckeditor5-example/src/modulerootinvalid2.ts:10',
+				name: 'example/foo'
+			},
+			{
+				source: 'ckeditor5-example/src/feature/modulefeatureinvalid1.ts:10',
+				name: 'example/feature'
+			},
+			{
+				source: 'ckeditor5-example/src/feature/modulefeatureinvalid2.ts:10',
+				name: 'example/feature/foo'
+			},
+			{
+				source: 'ckeditor5-example/src/feature/nested-feature/modulenestedfeatureinvalid1.ts:10',
+				name: 'example/feature/nested-feature'
+			},
+			{
+				source: 'ckeditor5-example/src/feature/nested-feature/modulenestedfeatureinvalid2.ts:10',
+				name: 'example/feature/nested-feature/foo'
+			}
 		];
 
 		expect( onErrorCallback.callCount ).to.equal( expectedErrors.length );
 
 		for ( const error of expectedErrors ) {
 			expect( onErrorCallback ).to.be.calledWith(
-				'Invalid module name.',
+				`Invalid module name: "${ error.name }"`,
 				sinon.match( reflection => error.source === testUtils.getSource( reflection ) )
 			);
 		}

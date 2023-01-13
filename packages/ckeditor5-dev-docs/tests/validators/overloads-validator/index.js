@@ -21,7 +21,8 @@ describe( 'dev-docs/validators/overloads-validator', function() {
 		const validators = proxyquire( '../../../lib/validators', {
 			'./overloads-validator': project => {
 				return require( '../../../lib/validators/overloads-validator' )( project, onErrorCallback );
-			}
+			},
+			'./module-validator': sinon.spy()
 		} );
 
 		const build = proxyquire( '../../../lib/build', {
@@ -46,7 +47,7 @@ describe( 'dev-docs/validators/overloads-validator', function() {
 		];
 
 		const errorCalls = onErrorCallback.getCalls().filter( call => {
-			return call.args[ 0 ] === 'Missing "@label" tag for overloaded signature.';
+			return call.args[ 0 ] === 'Overloaded signature misses the @label tag';
 		} );
 
 		expect( errorCalls.length ).to.equal( expectedErrors.length );
@@ -60,18 +61,20 @@ describe( 'dev-docs/validators/overloads-validator', function() {
 
 	it( 'should warn if overloaded signatures use the same identifier', () => {
 		const expectedErrors = [
-			{ source: 'overloadsinvalid.ts:51' }
+			{ source: 'overloadsinvalid.ts:51', error: 'Duplicated name: "NOT_SO_UNIQUE" in the @label tag' }
 		];
 
 		const errorCalls = onErrorCallback.getCalls().filter( call => {
-			return call.args[ 0 ] === 'Duplicated identifier for the "@label" tag.';
+			return call.args[ 0 ].startsWith( 'Duplicated name' );
 		} );
 
 		expect( errorCalls.length ).to.equal( expectedErrors.length );
 
-		expectedErrors.forEach( ( { source }, index ) => {
-			const currentValue = testUtils.getSource( errorCalls[ index ].args[ 1 ] );
+		expectedErrors.forEach( ( { source, error }, index ) => {
+			const [ message, reflection ] = errorCalls[ index ].args;
+			const currentValue = testUtils.getSource( reflection );
 
+			expect( message ).to.equal( error );
 			expect( currentValue ).to.equal( source );
 		} );
 	} );
