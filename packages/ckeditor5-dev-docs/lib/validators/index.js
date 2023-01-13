@@ -9,6 +9,7 @@ const seeValidator = require( './see-validator' );
 const linkValidator = require( './link-validator' );
 const firesValidator = require( './fires-validator' );
 const overloadsValidator = require( './overloads-validator' );
+const moduleValidator = require( './module-validator' );
 const { getNode } = require( './utils' );
 
 /**
@@ -24,7 +25,8 @@ module.exports = {
 			seeValidator,
 			linkValidator,
 			firesValidator,
-			overloadsValidator
+			overloadsValidator,
+			moduleValidator
 		];
 
 		typeDoc.logger.info( 'Starting validation...' );
