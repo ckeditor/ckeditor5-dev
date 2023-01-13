@@ -13,6 +13,8 @@ const { isReflectionValid } = require( '../utils' );
  *
  * It checks if overloaded methods and functions are described with the mandatory "@label" tag.
  *
+ * Also, it prevents using the same name twice for overloaded structures.
+ *
  * @param {Object} project Generated output from TypeDoc to validate.
  * @param {Function} onError A callback that is executed when a validation error is detected.
  */
@@ -21,16 +23,27 @@ module.exports = function validate( project, onError ) {
 	const reflections = project.getReflectionsByKind( kinds ).filter( isReflectionValid );
 
 	for ( const reflection of reflections ) {
+		// Omit non-overloaded structures.
 		if ( reflection.signatures.length === 1 ) {
 			continue;
 		}
 
-		for ( const signature of reflection.signatures ) {
-			if ( signature.comment && signature.comment.getTag( '@label' ) ) {
-				continue;
-			}
+		const uniqueValues = new Set();
 
-			onError( 'Missing "@label" tag for overloaded signature.', signature );
+		for ( const signature of reflection.signatures ) {
+			// Check if a signature has a label...
+			if ( signature.comment && signature.comment.getTag( '@label' ) ) {
+				const [ { text: label } ] = signature.comment.getTag( '@label' ).content;
+
+				// ...and whether it is a unique value.
+				if ( uniqueValues.has( label ) ) {
+					onError( 'Duplicated identifier for the "@label" tag.', signature );
+				} else {
+					uniqueValues.add( label );
+				}
+			} else {
+				onError( 'Missing "@label" tag for overloaded signature.', signature );
+			}
 		}
 	}
 };

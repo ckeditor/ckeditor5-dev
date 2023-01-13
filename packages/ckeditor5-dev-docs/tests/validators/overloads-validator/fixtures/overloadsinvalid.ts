@@ -39,3 +39,18 @@ export function foo( input: string | boolean, step?: number ): void {
 	input;
 	step;
 }
+
+/**
+ * @label NOT_SO_UNIQUE
+ */
+export function bar( input: string ): void;
+
+/**
+ * @label NOT_SO_UNIQUE
+ */
+export function bar( input: boolean, step: number ): void;
+
+export function bar( input: string | boolean, step?: number ): void {
+	input;
+	step;
+}
