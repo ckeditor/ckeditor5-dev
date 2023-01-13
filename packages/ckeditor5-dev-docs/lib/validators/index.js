@@ -5,12 +5,11 @@
 
 'use strict';
 
-const chalk = require( 'chalk' );
 const seeValidator = require( './see-validator' );
 const linkValidator = require( './link-validator' );
 const firesValidator = require( './fires-validator' );
 const overloadsValidator = require( './overloads-validator' );
-const { getSource } = require( './utils' );
+const { getNode } = require( './utils' );
 
 /**
  * Validates the CKEditor 5 documentation.
@@ -38,40 +37,13 @@ module.exports = {
 
 		for ( const validator of validators ) {
 			validator( project, ( error, reflection ) => {
-				const symbol = project.getSymbolFromReflection( reflection );
-				const source = getSource( reflection );
+				const node = getNode( reflection );
 
-				errors.set( `${ error } ${ source.fileName }:${ source.line }`, {
-					error,
-					symbol,
-					source
-				} );
+				errors.set( node, { error, node } );
 			} );
 		}
 
-		[ ...errors.values() ]
-			// Sort the errors so that the ones with the found symbol are listed first, followed by the rest.
-			.sort( ( entryA, entryB ) => {
-				if ( entryA.symbol && !entryB.symbol ) {
-					return -1;
-				}
-
-				if ( !entryA.symbol && entryB.symbol ) {
-					return 1;
-				}
-
-				return 0;
-			} )
-			// Print each error in the console.
-			.forEach( entry => {
-				if ( !entry.symbol ) {
-					const pathToSource = `${ chalk.cyan( './' + entry.source.fileName ) }:${ chalk.yellow( entry.source.line ) }`;
-
-					typeDoc.logger.warn( `${ pathToSource } - ${ entry.error }\n` );
-				} else {
-					typeDoc.logger.warn( entry.error, entry.symbol.declarations[ 0 ] );
-				}
-			} );
+		errors.forEach( ( { error, node } ) => typeDoc.logger.warn( error, node ) );
 
 		typeDoc.logger.info( 'Validation completed.' );
 

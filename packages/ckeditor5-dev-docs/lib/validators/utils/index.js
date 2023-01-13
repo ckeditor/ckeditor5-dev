@@ -12,7 +12,7 @@ module.exports = {
 	isReflectionValid,
 	isIdentifierValid,
 	isAbsoluteIdentifier,
-	getSource
+	getNode
 };
 
 /**
@@ -110,27 +110,23 @@ function getLongNameParts( reflection ) {
 }
 
 /**
- * Returns the path to the reflection source, where it is located. Returned path contains the line number. The path is relative to the
- * project root.
+ * Returns the TypeScript node from the reflection.
  *
- * Not all reflections have the `sources` property, so this function takes this into account as well and gets the source from its parent.
- *
- * @param {require('typedoc').Reflection} reflection A reflection for which we want to get its longname.
- * @returns {Object} data
- * @returns {String} data.fileName
- * @returns {Number} data.line
+ * @param {require('typedoc').Reflection} reflection A reflection for which we want to get its TypeScript node.
+ * @returns {Object}
  */
-function getSource( reflection ) {
-	if ( reflection.sources ) {
-		const { fileName, line } = reflection.sources[ 0 ];
+function getNode( reflection ) {
+	let symbol = reflection.project.getSymbolFromReflection( reflection );
+	let declarationIndex = 0;
 
-		return {
-			fileName,
-			line
-		};
+	if ( !symbol ) {
+		// The TypeDoc project does not store symbols for signatures. To get the TypeScript node from a signature, we need to get the
+		// symbol from its parent, which contains all nodes for each signature.
+		symbol = reflection.project.getSymbolFromReflection( reflection.parent );
+		declarationIndex = reflection.parent.signatures ? reflection.parent.signatures.indexOf( reflection ) : 0;
 	}
 
-	return getSource( reflection.parent );
+	return symbol.declarations[ declarationIndex ];
 }
 
 /**

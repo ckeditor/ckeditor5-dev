@@ -6,7 +6,6 @@
 const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
-const utils = require( '../../../lib/validators/utils' );
 const testUtils = require( '../../utils' );
 
 describe( 'dev-docs/validators/overloads-validator', function() {
@@ -51,11 +50,7 @@ describe( 'dev-docs/validators/overloads-validator', function() {
 		for ( const error of expectedErrors ) {
 			expect( onErrorCallback ).to.be.calledWith(
 				'Missing "@label" tag for overloaded signature.',
-				sinon.match( reflection => {
-					const source = utils.getSource( reflection );
-
-					return error.source === `${ source.fileName }:${ source.line }`;
-				} )
+				sinon.match( reflection => error.source === testUtils.getSource( reflection ) )
 			);
 		}
 	} );
