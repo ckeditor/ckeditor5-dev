@@ -30,6 +30,9 @@ module.exports = function validate( project, onError ) {
 
 		const uniqueValues = new Set();
 
+		const isInherited = !!reflection.inheritedFrom;
+		const errorMessageSuffix = isInherited ? ' due the inherited structure' : '';
+
 		for ( const signature of reflection.signatures ) {
 			// Check if a signature has a label...
 			if ( signature.comment && signature.comment.getTag( '@label' ) ) {
@@ -37,12 +40,12 @@ module.exports = function validate( project, onError ) {
 
 				// ...and whether it is a unique value.
 				if ( uniqueValues.has( label ) ) {
-					onError( `Duplicated name: "${ label }" in the @label tag`, signature );
+					onError( `Duplicated name: "${ label }" in the @label tag` + errorMessageSuffix, signature );
 				} else {
 					uniqueValues.add( label );
 				}
 			} else {
-				onError( 'Overloaded signature misses the @label tag', signature );
+				onError( 'Overloaded signature misses the @label tag' + errorMessageSuffix, signature );
 			}
 		}
 	}
