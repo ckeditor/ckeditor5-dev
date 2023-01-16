@@ -40,8 +40,8 @@ describe( 'dev-docs/validators/overloads-validator', function() {
 
 	it( 'should warn if overloaded signature does not have "@label" tag', () => {
 		const expectedErrors = [
-			{ source: 'overloadsinvalid.ts:46' },
-			{ source: 'overloadsinvalid.ts:48' },
+			{ source: 'overloadsinvalid.ts:34' },
+			{ source: 'overloadsinvalid.ts:36' },
 			{ source: 'overloadsinvalid.ts:18' },
 			{ source: 'overloadsinvalid.ts:24' }
 		];
@@ -59,28 +59,9 @@ describe( 'dev-docs/validators/overloads-validator', function() {
 		} );
 	} );
 
-	it( 'should warn if overloaded signature does not have "@label" tag due to inherited structure', () => {
-		const expectedErrors = [
-			{ source: 'overloadsinvalid.ts:36' },
-			{ source: 'overloadsinvalid.ts:37' }
-		];
-
-		const errorCalls = onErrorCallback.getCalls().filter( call => {
-			return call.args[ 0 ] === 'Overloaded signature misses the @label tag due the inherited structure';
-		} );
-
-		expect( errorCalls.length ).to.equal( expectedErrors.length );
-
-		expectedErrors.forEach( ( { source }, index ) => {
-			const currentValue = testUtils.getSource( errorCalls[ index ].args[ 1 ] );
-
-			expect( currentValue ).to.equal( source );
-		} );
-	} );
-
 	it( 'should warn if overloaded signatures use the same identifier', () => {
 		const expectedErrors = [
-			{ source: 'overloadsinvalid.ts:63', error: 'Duplicated name: "NOT_SO_UNIQUE" in the @label tag' }
+			{ source: 'overloadsinvalid.ts:51', error: 'Duplicated name: "NOT_SO_UNIQUE" in the @label tag' }
 		];
 
 		const errorCalls = onErrorCallback.getCalls().filter( call => {
