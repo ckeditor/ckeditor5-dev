@@ -31,6 +31,18 @@ export class ClassWithOverloads {
 	public method(): void {}
 }
 
+function getAbstractClass() {
+	abstract class ClassWithOverloadsExtended {
+		public method(): void;
+		public method(): void;
+		public method(): void {}
+	}
+
+	return ClassWithOverloadsExtended;
+}
+
+export class ClassWithOverloadsExtended extends getAbstractClass() {}
+
 export function foo( input: string ): void;
 
 export function foo( input: boolean, step: number ): void;
