@@ -18,7 +18,7 @@ Below you can find the detailed overview of available plugins.
 
 ### Module fixer
 
-The plugin reads the module name specified in the `@module` tag name.
+The plugin reads the module name specified in the `@module` annotation.
 
 ```ts
 import type { TypeDefinition } from '...';
@@ -42,6 +42,132 @@ To enable the plugin, add the following path to available plugins:
     ]
 }
 ```
+
+### Symbol fixer
+
+The plugin renames `Symbol.*` definitions with the JSDoc style.
+
+* Typedoc: `[iterator]() → Iterator`
+* JSDoc: `Symbol.iterator() → Iterator`
+
+To enable the plugin, add the following path to available plugins:
+
+```js
+{
+    plugin: [
+        // ...
+        require.resolve( '@ckeditor/typedoc-plugins/lib/symbol-fixer' )
+    ]
+}
+```
+
+### Interface augmentation fixer
+
+The plugin tries to fix an interface, that has been extended (augmented) from the outside (from
+another module) in the re-exported `index.ts` file. When the extending "declare module ..." declaration contains the full package name, it points to the `index.ts` file instead of the actual source file. The goal is to add missing properties from interfaces to their source locations.
+
+To enable the plugin, add the following path to available plugins:
+
+```js
+{
+    plugin: [
+        // ...
+        require.resolve( '@ckeditor/typedoc-plugins/lib/interface-augmentation-fixer' )
+    ]
+}
+```
+
+### Event parameter fixer
+
+The plugin injects the `eventInfo` parameter (an instance of the `EventInfo` class) as the first parameter for each event reflection.
+
+To enable the plugin, add the following path to available plugins:
+
+```js
+{
+    plugin: [
+        // ...
+        require.resolve( '@ckeditor/typedoc-plugins/lib/event-param-fixer' )
+    ]
+}
+```
+
+### Events inheritance fixer
+
+The plugin takes care of inheriting events, which are created manually via the [`@eventName`](#tag-eventname) annotation.
+
+To enable the plugin, add the following path to available plugins:
+
+```js
+{
+    plugin: [
+        // ...
+        require.resolve( '@ckeditor/typedoc-plugins/lib/event-inheritance-fixer' )
+    ]
+}
+```
+
+### Purge private API
+
+The plugin removes reflections collected from private packages (marked as `"private": true` in their `package.json`). To disable the mechanism, add the `@publicApi` annotation at the beginning of a file.
+
+To enable the plugin, add the following path to available plugins:
+
+```js
+{
+    plugin: [
+        // ...
+        require.resolve( '@ckeditor/typedoc-plugins/lib/purge-private-api-docs' )
+    ]
+}
+```
+
+### Tag `@error`
+
+The plugin collects error definitions from the `@error` annotation.
+
+To enable the plugin, add the following path to available plugins:
+
+```js
+{
+    plugin: [
+        // ...
+        require.resolve( '@ckeditor/typedoc-plugins/lib/tag-error' )
+    ]
+}
+```
+
+### Tag `@eventName`
+
+The plugin collects event definitions from the `@eventName` annotation and assigns them as the children of the class or the `Observable` interface.
+
+We are not using the [`@event`](https://typedoc.org/tags/event/) annotation, known from the JSDoc specification, because it has a special meaning in the TypeDoc, and it would be difficult to get it to work as we expect.
+
+To enable the plugin, add the following path to available plugins:
+
+```js
+{
+    plugin: [
+        // ...
+        require.resolve( '@ckeditor/typedoc-plugins/lib/tag-event' )
+    ]
+}
+```
+
+### Tag `@observable`
+
+To enable the plugin, add the following path to available plugins:
+
+```js
+{
+    plugin: [
+        // ...
+        require.resolve( '@ckeditor/typedoc-plugins/lib/tag-observable' )
+    ]
+}
+```
+
+------------------------------------------------------------------------------------
 
 ## Changelog
 

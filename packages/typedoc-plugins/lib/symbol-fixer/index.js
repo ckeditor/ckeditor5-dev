@@ -9,10 +9,10 @@ const chalk = require( 'chalk' );
 const { Converter } = require( 'typedoc' );
 
 /**
- * The `typedoc-plugin-symbol-fixer` aligns "Symbol.*" definitions with JSDoc style.
+ * The `typedoc-plugin-symbol-fixer` plugin renames `Symbol.*` definitions with the JSDoc style.
  *
- * Typedoc: [iterator]() → Iterator
- * JSDoc:   Symbol.iterator() → Iterator
+ *   * Typedoc: `[iterator]() → Iterator`
+ *   * JSDoc: `Symbol.iterator() → Iterator`
  */
 module.exports = {
 	load( app ) {

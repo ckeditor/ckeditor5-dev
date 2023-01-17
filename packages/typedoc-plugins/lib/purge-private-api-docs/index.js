@@ -17,8 +17,6 @@ const fs = require( 'fs' );
  *
  * We do not want to expose private APIs in the documentation, but the paid features may extend the configuration reflection.
  * Add the `@publicApi` annotation to publish a private reflection within the block comment defining a module name.
- *
- * The plugin requires the `cwd` option provided when bootstrapping a new application (`TypeDoc.Application().bootstrap()`).
  */
 module.exports = {
 	load( app ) {

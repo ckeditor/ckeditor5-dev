@@ -59,6 +59,7 @@ module.exports = async function build( config ) {
 
 	typeDoc.bootstrap( {
 		tsconfig: config.tsconfig,
+		excludeExternals: true,
 		entryPoints: files,
 		logLevel: 'Warn',
 		basePath: config.cwd,

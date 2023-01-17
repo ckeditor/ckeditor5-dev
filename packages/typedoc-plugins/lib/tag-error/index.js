@@ -13,7 +13,7 @@ const ERROR_TAG_NAME = 'error';
 /**
  * The `typedoc-plugin-tag-error` collects error definitions from the `@error` tag.
  *
- * TODO: We do not support collecting types of `@param`.
+ * So far, we do not support collecting types of `@param`.
  */
 module.exports = {
 	load( app ) {
