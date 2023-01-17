@@ -24,17 +24,21 @@ describe( 'dev-docs/validators/module-validator', function() {
 			}
 		} );
 
-		const build = proxyquire( '../../../lib/build', {
+		const build = proxyquire( '../../../lib/buildtypedoc', {
 			'./validators': validators
 		} );
 
+		const logStub = sinon.stub( console, 'log' );
+
 		await build( {
+			type: 'typedoc',
 			cwd: FIXTURES_PATH,
 			tsconfig: TSCONFIG_PATH,
 			sourceFiles: [ SOURCE_FILES ],
-			validateOnly: false,
 			strict: false
 		} );
+
+		logStub.restore();
 	} );
 
 	it( 'should warn if module name is not valid', () => {
