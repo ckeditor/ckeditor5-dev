@@ -7,6 +7,7 @@
 
 const glob = require( 'fast-glob' );
 const TypeDoc = require( 'typedoc' );
+const validators = require( './validators' );
 
 /**
  * Builds CKEditor 5 documentation.
@@ -30,10 +31,11 @@ module.exports = async function build( config ) {
 	const sourceFilePatterns = [
 		config.readmePath,
 		...config.sourceFiles
-	];
+	].filter( Boolean );
 
 	// const validateOnly = config.validateOnly || false;
-	// const strictCheck = config.strict || false;
+
+	const strictMode = config.strict || false;
 
 	// Pass options to plugins via env variables.
 	// Since plugins are added using `require` calls other forms are currently impossible.
@@ -50,7 +52,7 @@ module.exports = async function build( config ) {
 	const files = await glob( sourceFilePatterns );
 	const typeDoc = new TypeDoc.Application();
 
-	console.log( 'Source files', files );
+	// console.log( 'Source files', files );
 
 	typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
 	typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
@@ -58,7 +60,8 @@ module.exports = async function build( config ) {
 	typeDoc.bootstrap( {
 		tsconfig: config.tsconfig,
 		entryPoints: files,
-		// logLevel: 'Error',
+		logLevel: 'Warn',
+		basePath: config.cwd,
 		blockTags: [
 			'@eventName'
 		],
@@ -90,13 +93,22 @@ module.exports = async function build( config ) {
 
 	const conversionResult = typeDoc.convert();
 
-	if ( conversionResult ) {
-		await typeDoc.generateJson( conversionResult, config.outputPath );
-		// Uncomment this to generate TypeDoc documentation (build-in HTML template).
-		// await typeDoc.generateDocs( conversionResult, 'docs/api/typedoc' );
-	} else {
+	if ( !conversionResult ) {
 		throw 'Something went wrong with TypeDoc.';
 	}
+
+	const validationResult = validators.validate( conversionResult, typeDoc );
+
+	if ( !validationResult && strictMode ) {
+		throw 'Something went wrong with TypeDoc.';
+	}
+
+	if ( config.outputPath ) {
+		await typeDoc.generateJson( conversionResult, config.outputPath );
+	}
+
+	// Uncomment this to generate TypeDoc documentation (build-in HTML template).
+	// await typeDoc.generateDocs( conversionResult, 'docs/api/typedoc' );
 
 	// const jsDocConfig = {
 	// 	plugins: [

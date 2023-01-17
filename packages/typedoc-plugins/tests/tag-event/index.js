@@ -56,19 +56,19 @@ describe( 'typedoc-plugins/tag-event', function() {
 			.filter( children => children.kindString === 'Event' );
 
 		// There should be 6 correctly defined events:
-		// 1. event-foo
-		// 2. event-foo-no-text
-		// 3. event-foo-with-params
-		// 4. event-foo-in-class-with-fires
-		// 5. change:{property}
-		// 6. set:{property}
-		// 7. event-foo-no-content
-		// 8. event-foo-empty-args
-		// 9. event-foo-optional-args
-		// 10. event-foo-inline-args
-		// 11. event-foo-anonymous-args
-		// 12. event-foo-anonymous-optional-args
-		// 13. event-foo-reference
+		// 1. event:event-foo
+		// 2. event:event-foo-no-text
+		// 3. event:event-foo-with-params
+		// 4. event:event-foo-in-class-with-fires
+		// 5. event:change:{property}
+		// 6. event:set:{property}
+		// 7. event:event-foo-no-content
+		// 8. event:event-foo-empty-args
+		// 9. event:event-foo-optional-args
+		// 10. event:event-foo-inline-args
+		// 11. event:event-foo-anonymous-args
+		// 12. event:event-foo-anonymous-optional-args
+		// 13. event:event-foo-reference
 		expect( eventDefinitions ).to.lengthOf( 13 );
 	} );
 
@@ -82,7 +82,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 			.find( entry => entry.kindString === 'Class' && entry.name === 'CustomExampleClassFires' );
 
 		const eventDefinition = classDefinition.children
-			.find( doclet => doclet.name === 'event-foo-in-class-with-fires' );
+			.find( doclet => doclet.name === 'event:event-foo-in-class-with-fires' );
 
 		expect( eventDefinition ).to.not.be.undefined;
 	} );
@@ -92,8 +92,8 @@ describe( 'typedoc-plugins/tag-event', function() {
 			.find( entry => entry.name === 'observableinterface' ).children
 			.find( entry => entry.kindString === 'Interface' && entry.name === 'Observable' );
 
-		const eventChange = interfaceDefinition.children.find( doclet => doclet.name === 'change:{property}' );
-		const eventSet = interfaceDefinition.children.find( doclet => doclet.name === 'set:{property}' );
+		const eventChange = interfaceDefinition.children.find( doclet => doclet.name === 'event:change:{property}' );
+		const eventSet = interfaceDefinition.children.find( doclet => doclet.name === 'event:set:{property}' );
 
 		expect( eventChange ).to.not.be.undefined;
 		expect( eventSet ).to.not.be.undefined;
@@ -116,11 +116,11 @@ describe( 'typedoc-plugins/tag-event', function() {
 		} );
 
 		it( 'should find an event tag without description and parameters', () => {
-			const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event-foo-no-text' );
+			const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-no-text' );
 
 			expect( eventDefinition ).to.not.be.undefined;
-			expect( eventDefinition.name ).to.equal( 'event-foo-no-text' );
-			expect( eventDefinition.originalName ).to.equal( 'event-foo-no-text' );
+			expect( eventDefinition.name ).to.equal( 'event:event-foo-no-text' );
+			expect( eventDefinition.originalName ).to.equal( 'event:event-foo-no-text' );
 			expect( eventDefinition.kindString ).to.equal( 'Event' );
 
 			expect( eventDefinition.comment ).to.have.property( 'summary' );
@@ -147,11 +147,11 @@ describe( 'typedoc-plugins/tag-event', function() {
 		} );
 
 		it( 'should find an event tag with description and without parameters', () => {
-			const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event-foo' );
+			const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo' );
 
 			expect( eventDefinition ).to.not.be.undefined;
-			expect( eventDefinition.name ).to.equal( 'event-foo' );
-			expect( eventDefinition.originalName ).to.equal( 'event-foo' );
+			expect( eventDefinition.name ).to.equal( 'event:event-foo' );
+			expect( eventDefinition.originalName ).to.equal( 'event:event-foo' );
 			expect( eventDefinition.kindString ).to.equal( 'Event' );
 
 			expect( eventDefinition.comment ).to.have.property( 'summary' );
@@ -172,11 +172,11 @@ describe( 'typedoc-plugins/tag-event', function() {
 		} );
 
 		it( 'should find an event tag with description and parameters', () => {
-			const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event-foo-with-params' );
+			const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-with-params' );
 
 			expect( eventDefinition ).to.not.be.undefined;
-			expect( eventDefinition.name ).to.equal( 'event-foo-with-params' );
-			expect( eventDefinition.originalName ).to.equal( 'event-foo-with-params' );
+			expect( eventDefinition.name ).to.equal( 'event:event-foo-with-params' );
+			expect( eventDefinition.originalName ).to.equal( 'event:event-foo-with-params' );
 			expect( eventDefinition.kindString ).to.equal( 'Event' );
 
 			expect( eventDefinition.comment ).to.have.property( 'summary' );
@@ -262,7 +262,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 
 		describe( 'event parameters', () => {
 			it( 'should convert event parameters from the "args" property', () => {
-				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event-foo-with-params' );
+				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-with-params' );
 
 				expect( eventDefinition ).to.not.be.undefined;
 				expect( eventDefinition.typeParameters ).to.be.an( 'array' );
@@ -291,21 +291,21 @@ describe( 'typedoc-plugins/tag-event', function() {
 			} );
 
 			it( 'should not add type parameters for event without content', () => {
-				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event-foo-no-content' );
+				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-no-content' );
 
 				expect( eventDefinition ).to.not.be.undefined;
 				expect( eventDefinition.typeParameters ).to.be.undefined;
 			} );
 
 			it( 'should not add type parameters for event with empty args', () => {
-				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event-foo-empty-args' );
+				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-empty-args' );
 
 				expect( eventDefinition ).to.not.be.undefined;
 				expect( eventDefinition.typeParameters ).to.be.undefined;
 			} );
 
 			it( 'should convert optional event parameter', () => {
-				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event-foo-optional-args' );
+				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-optional-args' );
 
 				expect( eventDefinition ).to.not.be.undefined;
 				expect( eventDefinition.typeParameters ).to.be.an( 'array' );
@@ -331,7 +331,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 			} );
 
 			it( 'should convert event parameter with name taken from @param tag', () => {
-				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event-foo-inline-args' );
+				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-inline-args' );
 
 				expect( eventDefinition ).to.not.be.undefined;
 				expect( eventDefinition.typeParameters ).to.be.an( 'array' );
@@ -345,7 +345,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 			} );
 
 			it( 'should convert event parameter without a name', () => {
-				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event-foo-anonymous-args' );
+				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-anonymous-args' );
 
 				expect( eventDefinition ).to.not.be.undefined;
 				expect( eventDefinition.typeParameters ).to.be.an( 'array' );
@@ -364,7 +364,8 @@ describe( 'typedoc-plugins/tag-event', function() {
 			} );
 
 			it( 'should convert optional event parameter without a name', () => {
-				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event-foo-anonymous-optional-args' );
+				const eventDefinition = classDefinition.children
+					.find( doclet => doclet.name === 'event:event-foo-anonymous-optional-args' );
 
 				expect( eventDefinition ).to.not.be.undefined;
 				expect( eventDefinition.typeParameters ).to.be.an( 'array' );
@@ -391,7 +392,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 			} );
 
 			it( 'should convert event parameter that is a reference to another type', () => {
-				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event-foo-reference' );
+				const eventDefinition = classDefinition.children.find( doclet => doclet.name === 'event:event-foo-reference' );
 
 				expect( eventDefinition ).to.not.be.undefined;
 				expect( eventDefinition.typeParameters ).to.be.an( 'array' );
