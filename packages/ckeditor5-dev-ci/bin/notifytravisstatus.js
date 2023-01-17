@@ -38,21 +38,21 @@ const ALLOWED_EVENTS = [
 
 // Send a notification only for main branches...
 if ( !ALLOWED_BRANCHES.includes( buildBranch ) ) {
-	printDebugLog( `Aborting due to an invalid branch (${ buildBranch }).` );
+	printLog( `Aborting due to an invalid branch (${ buildBranch }).` );
 
 	process.exit();
 }
 
 // ...and an event that triggered the build is correct...
 if ( !ALLOWED_EVENTS.includes( process.env.TRAVIS_EVENT_TYPE ) ) {
-	printDebugLog( `Aborting due to an invalid event type (${ process.env.TRAVIS_EVENT_TYPE }).` );
+	printLog( `Aborting due to an invalid event type (${ process.env.TRAVIS_EVENT_TYPE }).` );
 
 	process.exit();
 }
 
 // ...and for builds that failed.
 if ( process.env.TRAVIS_TEST_RESULT == 0 ) {
-	printDebugLog( 'The build did not fail. The notification will not be sent.' );
+	printLog( 'The build did not fail. The notification will not be sent.' );
 
 	process.exit();
 }
@@ -83,8 +83,6 @@ notifyTravisStatus( options )
 /**
  * @param {String} message
  */
-function printDebugLog( message ) {
-	if ( process.env.DEBUG == 'true' ) {
-		console.log( '[Slack Notification]', message );
-	}
+function printLog( message ) {
+	console.log( '[Slack Notification]', message );
 }

@@ -1,6 +1,35 @@
 Changelog
 =========
 
+## [32.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/v32.0.1...v32.0.2) (2022-12-21)
+
+### Other changes
+
+* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Always show logs for the `ckeditor5-dev-ci-notify-travis-status` script regardless of the `DEBUG` flag. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/0dcac575143b6496b033c447b99ad805c8720db0))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v32.0.1 => v32.0.2
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v32.0.1 => v32.0.2
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v32.0.1 => v32.0.2
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v32.0.1 => v32.0.2
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v32.0.1 => v32.0.2
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v32.0.1 => v32.0.2
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v32.0.1 => v32.0.2
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v32.0.1 => v32.0.2
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v32.0.1 => v32.0.2
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v32.0.1 => v32.0.2
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v32.0.1 => v32.0.2
+</details>
+
+
 ## [32.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v32.0.0...v32.0.1) (2022-12-20)
 
 ### Bug fixes
