@@ -8,12 +8,9 @@
     "@ckeditor/ckeditor5-dev-utils": "^32.0.2",
     "@ckeditor/jsdoc-plugins": "^32.0.2",
     "@ckeditor/typedoc-plugins": "^0.0.2",
-    "chalk": "^4.1.0",
     "fast-glob": "^3.2.4",
     "fs-extra": "^9.0.0",
     "jsdoc": "ckeditor/jsdoc#fixed-trailing-comment-doclets",
-    "ora": "^5.2.0",
-    "strip-ansi": "^6.0.0",
     "tmp": "^0.2.1",
     "typedoc": "^0.23.15",
     "typedoc-plugin-rename-defaults": "^0.6.4"
