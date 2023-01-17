@@ -61,13 +61,15 @@ function onEventEnd( context ) {
 			const valueParameter = typeParameterFactory( context, {
 				name: 'value',
 				parent: eventReflection,
-				comment: `New value of the \`${ propertyName }\` property with given key or \`null\`, if operation should remove property.`
+				comment: `New value of the \`${ propertyName }\` property with given key or \`null\`, if operation should remove property.`,
+				type: reflection.type
 			} );
 
 			const oldValueParameter = typeParameterFactory( context, {
 				name: 'oldValue',
 				parent: eventReflection,
-				comment: `Old value of the \`${ propertyName }\` property with given key or \`null\`, if property was not set before.`
+				comment: `Old value of the \`${ propertyName }\` property with given key or \`null\`, if property was not set before.`,
+				type: reflection.type
 			} );
 
 			eventReflection.typeParameters = [ nameParameter, valueParameter, oldValueParameter ];
@@ -97,17 +99,23 @@ function onEventEnd( context ) {
  * @param {require('typedoc').Reflection} options.parent Parent reflection where the parameter should belong.
  * @param {require('ts').SyntaxKind} options.kind Kind of the parameter.
  * @param {String} options.comment Parameter comment.
+ * @param {Object} options.type
  * @returns {require('typedoc').Reflection}
  */
 function typeParameterFactory( context, options ) {
 	const typeParameter = new TypeParameterReflection( options.name, undefined, undefined, options.parent );
 
-	const scope = context.withScope( typeParameter );
-	const type = {
-		kind: options.kind || ts.SyntaxKind.AnyKeyword
-	};
+	if ( options.type ) {
+		typeParameter.type = options.type;
+	} else {
+		const scope = context.withScope( typeParameter );
+		const type = {
+			kind: options.kind
+		};
 
-	typeParameter.type = context.converter.convertType( scope, type );
+		typeParameter.type = context.converter.convertType( scope, type );
+	}
+
 	typeParameter.comment = new Comment( [
 		{
 			kind: 'text',
