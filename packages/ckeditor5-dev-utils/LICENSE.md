@@ -1,7 +1,7 @@
 Software License Agreement
 ==========================
 
-Copyright (c) 2003-2022, [CKSource](http://cksource.com) Holding sp. z o.o. All rights reserved.
+Copyright (c) 2003-2023, [CKSource](http://cksource.com) Holding sp. z o.o. All rights reserved.
 
 Licensed under the terms of [GNU General Public License Version 2 or later](http://www.gnu.org/licenses/gpl.html).
 
