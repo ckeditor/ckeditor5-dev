@@ -164,12 +164,15 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 		it( 'loads the webpack.DllReferencePlugin plugin', () => {
 			stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
 
-			getDllPluginWebpackConfig( {
+			const webpackConfig = getDllPluginWebpackConfig( {
 				packagePath: '/package/path',
 				themePath: '/theme/path',
 				manifestPath: '/manifest/path'
 			}, stubs.webpack );
 
+			const dllReferencePlugin = webpackConfig.plugins.find( plugin => plugin instanceof stubs.webpack.DllReferencePlugin );
+
+			expect( dllReferencePlugin ).to.be.an.instanceOf( stubs.webpack.DllReferencePlugin );
 			expect( stubs.webpack.DllReferencePlugin.firstCall.args[ 0 ].manifest ).to.deep.equal( manifest );
 			expect( stubs.webpack.DllReferencePlugin.firstCall.args[ 0 ].scope ).to.equal( 'ckeditor5/src' );
 			expect( stubs.webpack.DllReferencePlugin.firstCall.args[ 0 ].name ).to.equal( 'CKEditor5.dll' );
