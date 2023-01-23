@@ -151,7 +151,7 @@ describe( 'getKarmaConfig()', () => {
 		expect( karmaConfig.coverageReporter ).to.contain.property( 'reporters' );
 	} );
 
-	it( 'should remove webpack istanbul-instrumenter-loader if coverage reporter is removed by overrides', () => {
+	it( 'should remove webpack babel-loader if coverage reporter is removed by overrides', () => {
 		mockery.registerMock( 'karma-config-overrides-remove-coverage', config => {
 			config.reporters.splice( config.reporters.indexOf( 'coverage' ), 1 );
 		} );
@@ -166,7 +166,7 @@ describe( 'getKarmaConfig()', () => {
 			module: {
 				rules: [
 					{
-						loader: 'istanbul-instrumenter-loader'
+						loader: 'babel-loader'
 					},
 					{
 						loader: 'other-loader'
@@ -179,7 +179,7 @@ describe( 'getKarmaConfig()', () => {
 		const loaders = karmaConfig.webpack.module.rules.map( rule => rule.loader );
 
 		expect( karmaConfig.reporters ).to.not.contain( 'coverage' );
-		expect( loaders ).to.not.contain( 'istanbul-instrumenter-loader' );
+		expect( loaders ).to.not.contain( 'babel-loader' );
 		expect( loaders ).to.contain( 'other-loader' );
 	} );
 } );
