@@ -57,29 +57,31 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		expect( webpackConfig.watchOptions ).to.have.property( 'aggregateTimeout', 500 );
 	} );
 
-	it( 'should return webpack configuration with istanbul loader', () => {
+	it( 'should return webpack configuration containing a loader for measuring the coverage', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
 			coverage: true,
 			files: [ '**/*.js' ]
 		} );
 
-		const istanbulLoader = webpackConfig.module.rules
-			.find( rule => rule.loader === 'istanbul-instrumenter-loader' );
+		const coverageLoader = webpackConfig.module.rules
+			.find( rule => rule.loader === 'babel-loader' );
 
-		expect( istanbulLoader ).to.deep.equal( {
+		expect( coverageLoader ).to.deep.equal( {
 			test: /\.[jt]s$/,
-			loader: 'istanbul-instrumenter-loader',
+			loader: 'babel-loader',
 			include: [],
 			exclude: [
 				new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
 			],
 			options: {
-				esModules: true
+				plugins: [
+					'babel-plugin-istanbul'
+				]
 			}
 		} );
 	} );
 
-	it( 'should return webpack configuration with istanbul loader containing include regexp', () => {
+	it( 'should return webpack configuration containing a loader for measuring the coverage (include check)', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
 			coverage: true,
 			files: [
@@ -89,15 +91,15 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			]
 		} );
 
-		const istanbulLoader = webpackConfig.module.rules
-			.find( rule => rule.loader === 'istanbul-instrumenter-loader' );
+		const coverageLoader = webpackConfig.module.rules
+			.find( rule => rule.loader === 'babel-loader' );
 
-		expect( istanbulLoader.include ).to.deep.equal( [
+		expect( coverageLoader.include ).to.deep.equal( [
 			new RegExp( [ 'ckeditor5-utils', 'src', '' ].join( escapedPathSep ) )
 		] );
 	} );
 
-	it( 'should return webpack configuration with istanbul loader containing include regexp (exclude pattern)', () => {
+	it( 'should return webpack configuration containing a loader for measuring the coverage (exclude check)', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
 			coverage: true,
 			files: [
@@ -107,10 +109,10 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			]
 		} );
 
-		const istanbulLoader = webpackConfig.module.rules
-			.find( rule => rule.loader === 'istanbul-instrumenter-loader' );
+		const coverageLoader = webpackConfig.module.rules
+			.find( rule => rule.loader === 'babel-loader' );
 
-		expect( istanbulLoader.include ).to.deep.equal( [
+		expect( coverageLoader.include ).to.deep.equal( [
 			new RegExp( [ 'ckeditor5-!(utils)', 'src', '' ].join( escapedPathSep ) )
 		] );
 	} );
