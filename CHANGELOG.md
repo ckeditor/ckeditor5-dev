@@ -1,6 +1,36 @@
 Changelog
 =========
 
+## [32.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/v32.1.1...v32.1.2) (2023-01-23)
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Remove "babel-loader" if the coverage reporter was removed by overrides. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/5b967048ec8769fcfd7de752a6f3e26870d282e6))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v32.1.1 => v32.1.2
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v32.1.1 => v32.1.2
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v32.1.1 => v32.1.2
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v32.1.1 => v32.1.2
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v32.1.1 => v32.1.2
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v32.1.1 => v32.1.2
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v32.1.1 => v32.1.2
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v32.1.1 => v32.1.2
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v32.1.1 => v32.1.2
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v32.1.1 => v32.1.2
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v32.1.1 => v32.1.2
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v32.1.1 => v32.1.2
+</details>
+
+
 ## [32.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/v32.1.0...v32.1.1) (2023-01-23)
 
 ### Bug fixes
