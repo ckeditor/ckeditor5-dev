@@ -17,17 +17,17 @@ const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-transla
  * Returns a webpack configuration that creates a bundle file for the specified package. Thanks to that, plugins exported
  * by the package can be added to DLL builds.
  *
+ * @param {Object} webpack
+ * @param {Function} webpack.BannerPlugin Plugin used to add text to the top of the file.
+ * @param {Function} webpack.DllReferencePlugin Plugin used to import DLLs with webpack.
  * @param {Object} options
  * @param {String} options.themePath An absolute path to the theme package.
  * @param {String} options.packagePath An absolute path to the root directory of the package.
  * @param {String} options.manifestPath An absolute path to the CKEditor 5 DLL manifest file.
  * @param {Boolean} [options.isDevelopmentMode=false] Whether to build a dev mode of the package.
- * @param {Object} webpack
- * @param {Function} webpack.BannerPlugin Plugin used to add text to the top of the file.
- * @param {Function} webpack.DllReferencePlugin Plugin used to import DLLs with webpack.
  * @returns {Object}
  */
-module.exports = function getDllPluginWebpackConfig( options, webpack ) {
+module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 	const packageName = tools.readPackageName( options.packagePath );
 	const langDirExists = fs.existsSync( path.join( options.packagePath, 'lang' ) );
 	const indexTsExists = fs.existsSync( path.join( options.packagePath, 'src', 'index.ts' ) );
