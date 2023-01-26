@@ -32,9 +32,6 @@
     "sinon": "^9.2.4",
     "vinyl": "^2.1.0"
   },
-  "peerDependencies": {
-    "webpack": "^4.43.0 || ^5.24.0"
-  },
   "engines": {
     "node": ">=14.0.0",
     "npm": ">=5.7.1"

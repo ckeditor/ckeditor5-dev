@@ -9,7 +9,6 @@ const path = require( 'path' );
 const chai = require( 'chai' );
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
-const webpack = require( 'webpack' );
 const TerserPlugin = require( 'terser-webpack-plugin' );
 const expect = chai.expect;
 
@@ -39,6 +38,10 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			},
 			fs: {
 				existsSync: sandbox.stub()
+			},
+			webpack: {
+				BannerPlugin: sandbox.stub(),
+				DllReferencePlugin: sandbox.stub()
 			}
 		};
 
@@ -66,7 +69,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 	it( 'returns the webpack configuration in production mode by default', () => {
 		stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
 
-		const webpackConfig = getDllPluginWebpackConfig( {
+		const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
 			themePath: '/theme/path',
 			manifestPath: '/manifest/path'
@@ -93,7 +96,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 	it( 'transforms package with many dashes in its name', () => {
 		stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-html-embed' );
 
-		const webpackConfig = getDllPluginWebpackConfig( {
+		const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
 			themePath: '/theme/path',
 			manifestPath: '/manifest/path'
@@ -107,7 +110,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 	it( 'does not minify the destination file when in dev mode', () => {
 		stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
 
-		const webpackConfig = getDllPluginWebpackConfig( {
+		const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
 			themePath: '/theme/path',
 			manifestPath: '/manifest/path',
@@ -122,7 +125,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 	it( 'should not export any library by default', () => {
 		stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
 
-		const webpackConfig = getDllPluginWebpackConfig( {
+		const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
 			themePath: '/theme/path',
 			manifestPath: '/manifest/path'
@@ -135,7 +138,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 		stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
 		stubs.fs.existsSync.callsFake( file => file == '/package/path/src/index.ts' );
 
-		const webpackConfig = getDllPluginWebpackConfig( {
+		const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
 			themePath: '/theme/path',
 			manifestPath: '/manifest/path'
@@ -148,7 +151,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 		stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
 		stubs.fs.existsSync.callsFake( file => file != '/package/path/src/index.ts' );
 
-		const webpackConfig = getDllPluginWebpackConfig( {
+		const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
 			themePath: '/theme/path',
 			manifestPath: '/manifest/path'
@@ -161,26 +164,26 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 		it( 'loads the webpack.DllReferencePlugin plugin', () => {
 			stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
 
-			const webpackConfig = getDllPluginWebpackConfig( {
+			const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
 				packagePath: '/package/path',
 				themePath: '/theme/path',
 				manifestPath: '/manifest/path'
 			} );
 
-			const dllReferencePlugin = webpackConfig.plugins.find( plugin => plugin instanceof webpack.DllReferencePlugin );
+			const dllReferencePlugin = webpackConfig.plugins.find( plugin => plugin instanceof stubs.webpack.DllReferencePlugin );
 
-			expect( dllReferencePlugin ).to.be.an.instanceOf( webpack.DllReferencePlugin );
-			expect( dllReferencePlugin.options.manifest ).to.deep.equal( manifest );
-			expect( dllReferencePlugin.options.scope ).to.equal( 'ckeditor5/src' );
-			expect( dllReferencePlugin.options.name ).to.equal( 'CKEditor5.dll' );
-			expect( dllReferencePlugin.options.extensions ).to.be.undefined;
+			expect( dllReferencePlugin ).to.be.an.instanceOf( stubs.webpack.DllReferencePlugin );
+			expect( stubs.webpack.DllReferencePlugin.firstCall.args[ 0 ].manifest ).to.deep.equal( manifest );
+			expect( stubs.webpack.DllReferencePlugin.firstCall.args[ 0 ].scope ).to.equal( 'ckeditor5/src' );
+			expect( stubs.webpack.DllReferencePlugin.firstCall.args[ 0 ].name ).to.equal( 'CKEditor5.dll' );
+			expect( stubs.webpack.DllReferencePlugin.firstCall.args[ 0 ].extensions ).to.be.undefined;
 		} );
 
 		it( 'loads the CKEditorTranslationsPlugin plugin when lang dir exists', () => {
 			stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
 			stubs.fs.existsSync.returns( true );
 
-			const webpackConfig = getDllPluginWebpackConfig( {
+			const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
 				packagePath: '/package/path',
 				themePath: '/theme/path',
 				manifestPath: '/manifest/path'
@@ -204,7 +207,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
 			stubs.fs.existsSync.returns( false );
 
-			const webpackConfig = getDllPluginWebpackConfig( {
+			const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
 				packagePath: '/package/path',
 				themePath: '/theme/path',
 				manifestPath: '/manifest/path'
