@@ -1,6 +1,58 @@
 Changelog
 =========
 
+## [33.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v32.1.2...v33.0.0) (2023-01-26)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The `getDLLPluginWebpackConfig()` does not load webpack manually. Now it must be specified in arguments. 
+
+Before:
+
+```js
+const { builds } = require( '@ckeditor/ckeditor5-dev-utils' );
+
+builds.getDllPluginWebpackConfig( { /* options */ } );
+```
+
+After:
+
+```js
+const { builds } = require( '@ckeditor/ckeditor5-dev-utils' );
+const webpack = require( 'webpack' );
+
+builds.getDllPluginWebpackConfig( webpack, { /* options */ } );
+```
+
+### Other changes
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The `getDLLPluginWebpackConfig()` function requires webpack as its first argument. Closes [ckeditor/ckeditor5#13136](https://github.com/ckeditor/ckeditor5/issues/13136). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/82e7b47500f40ef754ca439d7753e4c3915248ac))
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Removed `webpack` from peer dependencies. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/82e7b47500f40ef754ca439d7753e4c3915248ac))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v32.1.2 => v33.0.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v32.1.2 => v33.0.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v32.1.2 => v33.0.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v32.1.2 => v33.0.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v32.1.2 => v33.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v32.1.2 => v33.0.0
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v32.1.2 => v33.0.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v32.1.2 => v33.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v32.1.2 => v33.0.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v32.1.2 => v33.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v32.1.2 => v33.0.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v32.1.2 => v33.0.0
+</details>
+
+
 ## [32.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/v32.1.1...v32.1.2) (2023-01-23)
 
 ### Bug fixes
