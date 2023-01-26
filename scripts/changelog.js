@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * @license Copyright (c) 2003-2022, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2023, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -14,6 +14,10 @@ require( '../packages/ckeditor5-dev-release-tools' )
 		transformScope: name => {
 			if ( name === 'jsdoc-plugins' ) {
 				return 'https://www.npmjs.com/package/@ckeditor/jsdoc-plugins';
+			}
+
+			if ( name === 'typedoc-plugins' ) {
+				return 'https://www.npmjs.com/package/@ckeditor/typedoc-plugins';
 			}
 
 			return 'https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-' + name;
