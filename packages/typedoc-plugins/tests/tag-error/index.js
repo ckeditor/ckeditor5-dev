@@ -268,5 +268,13 @@ describe( 'typedoc-plugins/tag-error', function() {
 			expect( errorDefinition.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
 			expect( errorDefinition.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'text', 'The priority of this error.' );
 		} );
+
+		it( 'should not crash when processing the "error" word in annotations', () => {
+			const errorModule = conversionResult.children.find( module => module.name === 'events' );
+
+			expect( errorModule.children.find( doclet => doclet.name === 'ErrorEvent' ) ).to.not.equal( undefined );
+			expect( errorModule.children.find( doclet => doclet.name === 'PrefixErrorEvent' ) ).to.not.equal( undefined );
+			expect( errorModule.children.find( doclet => doclet.name === 'ErrorSuffixEvent' ) ).to.not.equal( undefined );
+		} );
 	} );
 } );
