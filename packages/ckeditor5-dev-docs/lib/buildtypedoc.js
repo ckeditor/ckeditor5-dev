@@ -41,7 +41,8 @@ module.exports = async function build( config ) {
 		],
 		modifierTags: [
 			'@publicApi',
-			'@skipSource'
+			'@skipSource',
+			'@internal'
 		],
 		plugin: [
 			// Fixes `"name": 'default" in the output project.
