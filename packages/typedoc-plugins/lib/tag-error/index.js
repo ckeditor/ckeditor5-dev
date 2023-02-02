@@ -32,14 +32,22 @@ function onEventEnd( context ) {
 
 		// Find all `@error` occurrences.
 		const nodes = findDescendant( sourceFile, node => {
+			// Remove non-block comment codes.
 			if ( node.kind !== ts.SyntaxKind.Identifier ) {
 				return false;
 			}
 
+			// Filter out non "error" nodes.
 			if ( node.escapedText !== ERROR_TAG_NAME ) {
 				return false;
 			}
 
+			// Remove error-like nodes, e.g. "@eventName error".
+			if ( node.parent.tagName && node.parent.tagName.escapedText !== ERROR_TAG_NAME ) {
+				return false;
+			}
+
+			// Filter out empty definitions.
 			if ( !node.parent.comment ) {
 				return false;
 			}
