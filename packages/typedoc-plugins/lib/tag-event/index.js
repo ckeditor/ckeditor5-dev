@@ -5,7 +5,7 @@
 
 'use strict';
 
-const { Converter, ReflectionKind, TypeParameterReflection, Comment, ReflectionFlag } = require( 'typedoc' );
+const { Converter, ReflectionKind, TypeParameterReflection, Comment, ReflectionFlag, IntrinsicType } = require( 'typedoc' );
 
 /**
  * The `typedoc-plugin-tag-event` collects event definitions from the `@eventName` tag and assigns them as the children of the class or
@@ -155,32 +155,67 @@ function onEventEnd( context ) {
  * @returns {Array.<require('typedoc').Reflection>}
  */
 function getArgsTuple( reflection ) {
-	const typeReflection = getTargetTypeReflection( reflection.type );
+	const typeArguments = reflection.type.typeArguments || [];
 
-	if ( !typeReflection.declaration.children ) {
-		return [];
-	}
+	// The target reflection, that defines the `args` tuple, might be located in one of two (or both) places:
+	// - in the type arguments,
+	// - in the type of the reflection.
+	//
+	// Let's take the type arguments first, if they exist, because if the `args` tuple is defined there, this seems more desirable.
+	const targetTypeReflections = [
+		...typeArguments.flatMap( type => getTargetTypeReflections( type ) ),
+		...getTargetTypeReflections( reflection.type )
+	];
 
-	const argsTuple = typeReflection.declaration.children.find( ref => ref.name === 'args' );
+	// Then, try to find the `args` tuple.
+	const argsTuple = targetTypeReflections
+		.filter( type => {
+			// The `args` tuple is one of the reflection child. Filter out those that don't contain any children.
+			if ( !type.declaration || !type.declaration.children ) {
+				return false;
+			}
+
+			return true;
+		} )
+		.flatMap( type => type.declaration.children )
+		.find( property => property.name === 'args' );
 
 	if ( !argsTuple ) {
 		return [];
+	}
+
+	// If the `args` tuple is of a "complex" type (e.g. a conditional type) without ready-to-process elements,
+	// just consider it as any type for now.
+	if ( !argsTuple.type.elements ) {
+		return [ new IntrinsicType( 'any' ) ];
 	}
 
 	return argsTuple.type.elements;
 }
 
 /**
- * Returns the type reflection for the specified reflection. If the type reflection is a reference to another one,
- * it recursively walks deep until the final declaration is reached.
+ * Returns all type reflections for the specified reflection.
+ *
+ * If the type reflection is a reference to another one, it recursively walks deep until the final declaration is reached.
+ * If the type reflection is an intersection, all member reflections are recursively checked.
  *
  * @param {require('typedoc').Reflection} reflectionType
- * @returns {require('typedoc').Reflection}
+ * @returns {Array.<require('typedoc').Reflection>}
  */
-function getTargetTypeReflection( reflectionType ) {
-	return reflectionType.type === 'reference' ?
-		getTargetTypeReflection( reflectionType.reflection.type ) :
-		reflectionType;
+function getTargetTypeReflections( reflectionType ) {
+	if ( !reflectionType ) {
+		return [];
+	}
+
+	if ( reflectionType.type === 'reference' ) {
+		return getTargetTypeReflections( reflectionType.reflection.type );
+	}
+
+	if ( reflectionType.type === 'intersection' ) {
+		return reflectionType.types.flatMap( type => getTargetTypeReflections( type ) );
+	}
+
+	return [ reflectionType ];
 }
 
 /**
