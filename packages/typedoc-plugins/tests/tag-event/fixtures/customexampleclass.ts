@@ -150,6 +150,58 @@ export type TypeReferenceLvl2 = TypeReferenceLvl1;
  */
 export type EventFooReference = TypeReferenceLvl2;
 
+export type TypeGenericLvl1<T> = T & {
+	name: 'Level 1';
+};
+
+export type TypeGenericLvl2<T> = TypeGenericLvl1<T> & {
+	name: 'Level 2';
+};
+
+export type TypeGenericLvl3<T> = TypeGenericLvl2<T> & {
+	name: 'Level 3';
+};
+
+/**
+ * @eventName event-foo-generic-from-type-arg
+ */
+export type EventFooGeneric = TypeGenericLvl3<{
+	args: [
+		p1: string,
+		p2: ExampleType
+	];
+}>;
+
+export type OtherTypeGenericLvl1<T> = T & {
+	name: 'Level 1';
+	args: [
+		p1: string,
+		p2: ExampleType
+	];
+};
+
+export type OtherTypeGenericLvl2<T> = OtherTypeGenericLvl1<T> & {
+	name: 'Level 2';
+};
+
+export type OtherTypeGenericLvl3<T = object> = OtherTypeGenericLvl2<T> & {
+	name: 'Level 3';
+};
+
+/**
+ * @eventName event-foo-generic-from-base-type
+ */
+export type OtherEventFooGeneric = OtherTypeGenericLvl3;
+
+/**
+ * @eventName event-foo-complex
+ */
+export type EventFooComplex<Param extends 'a' | 'b' | 'c' = 'a'> = {
+	args: Param extends 'c' ?
+		[ p1: string, p2: ExampleType ] :
+		[];
+};
+
 /**
  * An event not associated to anything in the source code.
  *

@@ -159,7 +159,7 @@ function getArgsTuple( reflection ) {
 
 	// The target reflection, that defines the `args` tuple, might be located in one of two (or both) places:
 	// - in the type arguments,
-	// - in the type reflection.
+	// - in the type of the reflection.
 	//
 	// Let's take the type arguments first, if they exist, because if the `args` tuple is defined there, this seems more desirable.
 	const targetTypeReflections = [
@@ -172,11 +172,6 @@ function getArgsTuple( reflection ) {
 		.filter( type => {
 			// The `args` tuple is one of the reflection child. Filter out those that don't contain any children.
 			if ( !type.declaration || !type.declaration.children ) {
-				return false;
-			}
-
-			// The reflection that contains the `args` tuple should be a type literal.
-			if ( type.declaration.kind !== ReflectionKind.TypeLiteral ) {
 				return false;
 			}
 
