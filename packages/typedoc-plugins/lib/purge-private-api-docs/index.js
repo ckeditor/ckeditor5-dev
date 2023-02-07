@@ -42,25 +42,62 @@ function onEventEnd() {
 
 			const node = symbol.declarations[ 0 ];
 
-			const publicApi = node.statements.some( statement => {
-				if ( !Array.isArray( statement.jsDoc ) ) {
+			if ( !isPublicApi( node ) ) {
+				context.project.removeReflection( reflection );
+
+				continue;
+			}
+
+			removeUrlSourcesFromReflection( reflection );
+
+			const moduleFileName = reflection.sources[ 0 ].fileName;
+
+			const localReflections = Object.values( context.project.reflections ).filter( reflection => {
+				if ( !reflection.sources ) {
 					return false;
 				}
 
-				return statement.jsDoc.some( jsDoc => {
-					return ( jsDoc.tags || [] )
-						.filter( tag => {
-							return tag.tagName.kind === ts.SyntaxKind.Identifier && tag.tagName.text === 'publicApi';
-						} )
-						.shift();
-				} );
+				if ( reflection.sources[ 0 ].fileName !== moduleFileName ) {
+					return false;
+				}
+
+				return true;
 			} );
 
-			if ( !publicApi ) {
-				context.project.removeReflection( reflection );
-			} else {
-				removeSourcesFromReflection( reflection );
-			}
+			const inheritedReflections = Object.values( context.project.reflections ).filter( reflection => {
+				if ( !reflection.inheritedFrom ) {
+					return false;
+				}
+
+				if ( !reflection.parent || !reflection.parent.sources ) {
+					return false;
+				}
+
+				if ( reflection.parent.sources[ 0 ].fileName !== moduleFileName ) {
+					return false;
+				}
+
+				// If the reflection is inherited from a public package, it should not be removed.
+				if ( !isPrivatePackageFile( reflection.sources[ 0 ].fullFileName ) ) {
+					return false;
+				}
+
+				return true;
+			} );
+
+			const reflectionsToRemove = [ ...localReflections, ...inheritedReflections ].filter( reflection => {
+				if ( reflection.flags.includes( 'Private' ) ) {
+					return true;
+				}
+
+				if ( reflection.flags.includes( 'Protected' ) ) {
+					return true;
+				}
+
+				return false;
+			} );
+
+			reflectionsToRemove.forEach( reflection => context.project.removeReflection( reflection ) );
 		}
 	};
 }
@@ -71,11 +108,13 @@ function onEventEnd() {
  * @param {Function} reflection.traverse
  * @param {Array} [reflection.children]
  */
-function removeSourcesFromReflection( reflection ) {
-	delete reflection.sources;
+function removeUrlSourcesFromReflection( reflection ) {
+	if ( reflection.sources ) {
+		reflection.sources.forEach( source => delete source.url );
+	}
 
 	reflection.traverse( childReflection => {
-		removeSourcesFromReflection( childReflection );
+		removeUrlSourcesFromReflection( childReflection );
 	} );
 }
 
@@ -103,6 +142,36 @@ function isPrivatePackageFile( fileName ) {
 			throw new Error( `${ fileName } is not placed inside a npm package.` );
 		}
 	}
+}
+
+/**
+ * @param {Object} node
+ * @returns {Boolean}
+ */
+function isPublicApi( node ) {
+	return node.statements.some( statement => {
+		if ( !Array.isArray( statement.jsDoc ) ) {
+			return false;
+		}
+
+		return statement.jsDoc.some( jsDoc => {
+			if ( !jsDoc.tags ) {
+				return false;
+			}
+
+			return jsDoc.tags.some( tag => {
+				if ( tag.tagName.kind !== ts.SyntaxKind.Identifier ) {
+					return false;
+				}
+
+				if ( tag.tagName.text !== 'publicApi' ) {
+					return false;
+				}
+
+				return true;
+			} );
+		} );
+	} );
 }
 
 /**
