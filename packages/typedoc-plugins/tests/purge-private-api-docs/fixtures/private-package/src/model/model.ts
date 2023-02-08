@@ -16,7 +16,7 @@ export class Model {
 		this.isBar = isFoo;
 	}
 
-	protected throwError( message: string ) {
+	protected throwError( message: string ): Error {
 		throw new Error( message );
 	}
 }
