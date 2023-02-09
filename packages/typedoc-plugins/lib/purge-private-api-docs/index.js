@@ -52,45 +52,44 @@ function onEventEnd() {
 
 			const moduleFileName = reflection.sources[ 0 ].fileName;
 
-			const localReflections = Object.values( context.project.reflections ).filter( reflection => {
-				if ( !reflection.sources ) {
+			const localReflections = Object.values( context.project.reflections ).filter( refl => {
+				if ( !refl.sources ) {
 					return false;
 				}
 
-				if ( reflection.sources[ 0 ].fileName !== moduleFileName ) {
-					return false;
-				}
-
-				return true;
-			} );
-
-			const inheritedReflections = Object.values( context.project.reflections ).filter( reflection => {
-				if ( !reflection.inheritedFrom ) {
-					return false;
-				}
-
-				if ( !reflection.parent || !reflection.parent.sources ) {
-					return false;
-				}
-
-				if ( reflection.parent.sources[ 0 ].fileName !== moduleFileName ) {
-					return false;
-				}
-
-				// If the reflection is inherited from a public package, it should not be removed.
-				if ( !isPrivatePackageFile( reflection.sources[ 0 ].fullFileName ) ) {
+				if ( refl.sources[ 0 ].fileName !== moduleFileName ) {
 					return false;
 				}
 
 				return true;
 			} );
 
-			const reflectionsToRemove = [ ...localReflections, ...inheritedReflections ].filter( reflection => {
-				if ( reflection.flags.includes( 'Private' ) ) {
+			const inheritedReflections = Object.values( context.project.reflections ).filter( refl => {
+				if ( !refl.inheritedFrom ) {
+					return false;
+				}
+
+				if ( !refl.parent || !refl.parent.sources ) {
+					return false;
+				}
+
+				if ( refl.parent.sources[ 0 ].fileName !== moduleFileName ) {
+					return false;
+				}
+
+				return true;
+			} );
+
+			const inheritedReflectionsFromPrivatePackages = inheritedReflections.filter( refl => {
+				return isPrivatePackageFile( refl.sources[ 0 ].fullFileName );
+			} );
+
+			const reflectionsToRemove = [ ...localReflections, ...inheritedReflectionsFromPrivatePackages ].filter( refl => {
+				if ( refl.flags.includes( 'Private' ) ) {
 					return true;
 				}
 
-				if ( reflection.flags.includes( 'Protected' ) ) {
+				if ( refl.flags.includes( 'Protected' ) ) {
 					return true;
 				}
 
