@@ -4,11 +4,11 @@
  */
 
 /**
- * @module public-package/genericpublicclass
+ * @module private-public-api-package/classinprivatepublicapipackage
  * @publicApi
  */
 
-export class GenericPublicClass {
+export class ClassInPrivatePublicApiPackage {
 	public publicValue: string;
 	private privateValue: number;
 

@@ -8,14 +8,14 @@
  * @publicApi
  */
 
-import { PublicClass } from '../../public-package/src/publicclass';
+import { ClassInPublicPackage } from '../../public-package/src/classinpublicpackage';
 
-export class PublicInheritor extends PublicClass {
-	public value: string;
+export class PublicInheritor extends ClassInPublicPackage {
+	public ownValue: string;
 
-	constructor( id: number, value: string ) {
-		super( id );
+	constructor( ownValue: string, publicValue: string, protectedValue: string ) {
+		super( publicValue, protectedValue );
 
-		this.value = value;
+		this.ownValue = ownValue;
 	}
 }

@@ -8,14 +8,14 @@
  * @publicApi
  */
 
-import { PrivateClass } from '../../private-package/src/privateclass';
+import { ClassInPrivatePackage } from '../../private-package/src/classinprivatepackage';
 
-export class PrivateInheritor extends PrivateClass {
-	public value: string;
+export class PrivateInheritor extends ClassInPrivatePackage {
+	public ownValue: string;
 
-	constructor( id: number, value: string ) {
-		super( id );
+	constructor( ownValue: string, publicValue: string, protectedValue: string ) {
+		super( publicValue, protectedValue );
 
-		this.value = value;
+		this.ownValue = ownValue;
 	}
 }
