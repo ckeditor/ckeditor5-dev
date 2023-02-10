@@ -49,60 +49,37 @@ function onEventEnd() {
 			}
 
 			removeUrlSourcesFromReflection( reflection );
-			removeNonPublicMembersFromReflection( reflection, context );
+			removeNonPublicMembers( reflection, context );
 		}
 	};
 }
 
-function removeNonPublicMembersFromReflection( moduleReflection, context ) {
-	Object.values( context.project.reflections )
-		.filter( reflection => {
-			const isLocal = isLocalReflection( reflection, moduleReflection );
-			const isInheritedFromPrivate = isInheritedReflectionFromPrivatePackage( reflection, moduleReflection );
-
-			if ( !isLocal && !isInheritedFromPrivate ) {
-				return false;
-			}
-
-			if ( !reflection.flags.includes( 'Private' ) && !reflection.flags.includes( 'Protected' ) ) {
-				return false;
-			}
-
-			return true;
-		} )
-		.forEach( reflection => context.project.removeReflection( reflection ) );
+function removeNonPublicMembers( reflection, context ) {
+	if ( isNonPublicMember( reflection ) ) {
+		context.project.removeReflection( reflection );
+	} else if ( reflection.children ) {
+		reflection.children.forEach( refl => removeNonPublicMembers( refl, context ) );
+	}
 }
 
-function isLocalReflection( reflection, moduleReflection ) {
-	if ( !reflection.sources ) {
+function isNonPublicMember( reflection ) {
+	if ( isInheritedFromPublicPackage( reflection ) ) {
 		return false;
 	}
 
-	if ( reflection.sources[ 0 ].fileName !== moduleReflection.sources[ 0 ].fileName ) {
-		return false;
+	if ( reflection.flags.isPrivate || reflection.flags.isProtected ) {
+		return true;
 	}
 
-	return true;
+	return false;
 }
 
-function isInheritedReflectionFromPrivatePackage( reflection, moduleReflection ) {
+function isInheritedFromPublicPackage( reflection ) {
 	if ( !reflection.inheritedFrom ) {
 		return false;
 	}
 
-	if ( !reflection.parent || !reflection.parent.sources ) {
-		return false;
-	}
-
-	if ( reflection.parent.sources[ 0 ].fileName !== moduleReflection.sources[ 0 ].fileName ) {
-		return false;
-	}
-
-	if ( !isPrivatePackageFile( reflection.sources[ 0 ].fullFileName ) ) {
-		return false;
-	}
-
-	return true;
+	return !isPrivatePackageFile( reflection.sources[ 0 ].fullFileName );
 }
 
 /**
