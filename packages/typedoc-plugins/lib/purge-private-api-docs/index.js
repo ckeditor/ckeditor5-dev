@@ -49,56 +49,60 @@ function onEventEnd() {
 			}
 
 			removeUrlSourcesFromReflection( reflection );
-
-			const moduleFileName = reflection.sources[ 0 ].fileName;
-
-			const localReflections = Object.values( context.project.reflections ).filter( refl => {
-				if ( !refl.sources ) {
-					return false;
-				}
-
-				if ( refl.sources[ 0 ].fileName !== moduleFileName ) {
-					return false;
-				}
-
-				return true;
-			} );
-
-			const inheritedReflections = Object.values( context.project.reflections ).filter( refl => {
-				if ( !refl.inheritedFrom ) {
-					return false;
-				}
-
-				if ( !refl.parent || !refl.parent.sources ) {
-					return false;
-				}
-
-				if ( refl.parent.sources[ 0 ].fileName !== moduleFileName ) {
-					return false;
-				}
-
-				return true;
-			} );
-
-			const inheritedReflectionsFromPrivatePackages = inheritedReflections.filter( refl => {
-				return isPrivatePackageFile( refl.sources[ 0 ].fullFileName );
-			} );
-
-			const reflectionsToRemove = [ ...localReflections, ...inheritedReflectionsFromPrivatePackages ].filter( refl => {
-				if ( refl.flags.includes( 'Private' ) ) {
-					return true;
-				}
-
-				if ( refl.flags.includes( 'Protected' ) ) {
-					return true;
-				}
-
-				return false;
-			} );
-
-			reflectionsToRemove.forEach( reflection => context.project.removeReflection( reflection ) );
+			removeNonPublicMembersFromReflection( reflection, context );
 		}
 	};
+}
+
+function removeNonPublicMembersFromReflection( moduleReflection, context ) {
+	Object.values( context.project.reflections )
+		.filter( reflection => {
+			const isLocal = isLocalReflection( reflection, moduleReflection );
+			const isInheritedFromPrivate = isInheritedReflectionFromPrivatePackage( reflection, moduleReflection );
+
+			if ( !isLocal && !isInheritedFromPrivate ) {
+				return false;
+			}
+
+			if ( !reflection.flags.includes( 'Private' ) && !reflection.flags.includes( 'Protected' ) ) {
+				return false;
+			}
+
+			return true;
+		} )
+		.forEach( reflection => context.project.removeReflection( reflection ) );
+}
+
+function isLocalReflection( reflection, moduleReflection ) {
+	if ( !reflection.sources ) {
+		return false;
+	}
+
+	if ( reflection.sources[ 0 ].fileName !== moduleReflection.sources[ 0 ].fileName ) {
+		return false;
+	}
+
+	return true;
+}
+
+function isInheritedReflectionFromPrivatePackage( reflection, moduleReflection ) {
+	if ( !reflection.inheritedFrom ) {
+		return false;
+	}
+
+	if ( !reflection.parent || !reflection.parent.sources ) {
+		return false;
+	}
+
+	if ( reflection.parent.sources[ 0 ].fileName !== moduleReflection.sources[ 0 ].fileName ) {
+		return false;
+	}
+
+	if ( !isPrivatePackageFile( reflection.sources[ 0 ].fullFileName ) ) {
+		return false;
+	}
+
+	return true;
 }
 
 /**
