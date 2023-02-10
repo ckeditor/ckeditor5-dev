@@ -11,8 +11,14 @@ export class ClassInPublicPackage {
 	public publicValue: string;
 	protected protectedValue: string;
 
-	constructor( publicValue: string, protectedValue: string ) {
+	/**
+	 * @internal
+	 */
+	public _internalValue: string;
+
+	constructor( publicValue: string, protectedValue: string, _internalValue: string ) {
 		this.publicValue = publicValue;
 		this.protectedValue = protectedValue;
+		this._internalValue = _internalValue;
 	}
 }

@@ -65,45 +65,68 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 		} );
 
 		it( 'should keep public reflections', () => {
-			const publicValue = Object.values( conversionResult.reflections )
-				.find( reflection => reflection.name === 'publicValue' && reflection.parent.name === 'ClassInPrivatePublicApiPackage' );
+			const publicValue = getReflection( 'publicValue', 'ClassInPrivatePublicApiPackage' );
 
 			expect( publicValue ).to.not.equal( undefined );
 		} );
 
 		it( 'should remove private reflections', () => {
-			const privateValue = Object.values( conversionResult.reflections )
-				.find( reflection => reflection.name === 'privateValue' && reflection.parent.name === 'ClassInPrivatePublicApiPackage' );
+			const privateValue = getReflection( 'privateValue', 'ClassInPrivatePublicApiPackage' );
 
 			expect( privateValue ).to.equal( undefined );
 		} );
 
-		it( 'should keep public reflections inherited from public packages', () => {
-			const inheritedProtectedValueReflection = Object.values( conversionResult.reflections )
-				.find( reflection => reflection.name === 'publicValue' && reflection.parent.name === 'PublicInheritor' );
+		it( 'should remove protected reflections', () => {
+			const protectedValue = getReflection( 'protectedValue', 'ClassInPrivatePublicApiPackage' );
 
-			expect( inheritedProtectedValueReflection ).to.not.equal( undefined );
+			expect( protectedValue ).to.equal( undefined );
 		} );
 
-		it( 'should keep public reflections inherited from private packages', () => {
-			const inheritedProtectedValueReflection = Object.values( conversionResult.reflections )
-				.find( reflection => reflection.name === 'publicValue' && reflection.parent.name === 'PrivateInheritor' );
+		it( 'should remove internal reflections', () => {
+			const _internalValue = getReflection( '_internalValue', 'ClassInPrivatePublicApiPackage' );
 
-			expect( inheritedProtectedValueReflection ).to.not.equal( undefined );
+			expect( _internalValue ).to.equal( undefined );
+		} );
+
+		it( 'should keep public reflections inherited from public packages', () => {
+			const publicValue = getReflection( 'publicValue', 'PublicInheritor' );
+
+			expect( publicValue ).to.not.equal( undefined );
 		} );
 
 		it( 'should keep protected reflections inherited from public packages', () => {
-			const inheritedProtectedValueReflection = Object.values( conversionResult.reflections )
-				.find( reflection => reflection.name === 'protectedValue' && reflection.parent.name === 'PublicInheritor' );
+			const protectedValue = getReflection( 'protectedValue', 'PublicInheritor' );
 
-			expect( inheritedProtectedValueReflection ).to.not.equal( undefined );
+			expect( protectedValue ).to.not.equal( undefined );
+		} );
+
+		it( 'should keep internal reflections inherited from public packages', () => {
+			const _internalValue = getReflection( '_internalValue', 'PublicInheritor' );
+
+			expect( _internalValue ).to.not.equal( undefined );
+		} );
+
+		it( 'should keep public reflections inherited from private packages', () => {
+			const publicValue = getReflection( 'publicValue', 'PrivateInheritor' );
+
+			expect( publicValue ).to.not.equal( undefined );
 		} );
 
 		it( 'should remove protected reflections inherited from private packages', () => {
-			const inheritedProtectedValueReflection = Object.values( conversionResult.reflections )
-				.find( reflection => reflection.name === 'protectedValue' && reflection.parent.name === 'PrivateInheritor' );
+			const protectedValue = getReflection( 'protectedValue', 'PrivateInheritor' );
 
-			expect( inheritedProtectedValueReflection ).to.equal( undefined );
+			expect( protectedValue ).to.equal( undefined );
+		} );
+
+		it( 'should remove internal reflections inherited from private packages', () => {
+			const _internalValue = getReflection( '_internalValue', 'PrivateInheritor' );
+
+			expect( _internalValue ).to.equal( undefined );
 		} );
 	} );
+
+	function getReflection( reflectionName, parentName ) {
+		return Object.values( conversionResult.reflections )
+			.find( reflection => reflection.name === reflectionName && reflection.parent.name === parentName );
+	}
 } );

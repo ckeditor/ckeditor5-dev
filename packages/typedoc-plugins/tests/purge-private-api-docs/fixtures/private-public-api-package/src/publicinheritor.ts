@@ -13,8 +13,8 @@ import { ClassInPublicPackage } from '../../public-package/src/classinpublicpack
 export class PublicInheritor extends ClassInPublicPackage {
 	public ownValue: string;
 
-	constructor( ownValue: string, publicValue: string, protectedValue: string ) {
-		super( publicValue, protectedValue );
+	constructor( ownValue: string, publicValue: string, protectedValue: string, _internalValue: string ) {
+		super( publicValue, protectedValue, _internalValue );
 
 		this.ownValue = ownValue;
 	}

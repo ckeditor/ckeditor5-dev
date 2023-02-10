@@ -71,6 +71,10 @@ function isNonPublicMember( reflection ) {
 		return true;
 	}
 
+	if ( reflection.comment && reflection.comment.modifierTags && reflection.comment.modifierTags.has( '@internal' ) ) {
+		return true;
+	}
+
 	return false;
 }
 

@@ -10,10 +10,18 @@
 
 export class ClassInPrivatePublicApiPackage {
 	public publicValue: string;
-	private privateValue: number;
+	protected protectedValue: string;
+	private privateValue: string;
 
-	constructor( publicValue: string, privateValue: number ) {
+	/**
+	 * @internal
+	 */
+	public _internalValue: string;
+
+	constructor( publicValue: string, protectedValue: string, privateValue: string, _internalValue: string ) {
 		this.publicValue = publicValue;
+		this.protectedValue = protectedValue;
 		this.privateValue = privateValue;
+		this._internalValue = _internalValue;
 	}
 }

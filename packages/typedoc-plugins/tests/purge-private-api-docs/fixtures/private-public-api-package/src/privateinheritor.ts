@@ -13,8 +13,8 @@ import { ClassInPrivatePackage } from '../../private-package/src/classinprivatep
 export class PrivateInheritor extends ClassInPrivatePackage {
 	public ownValue: string;
 
-	constructor( ownValue: string, publicValue: string, protectedValue: string ) {
-		super( publicValue, protectedValue );
+	constructor( ownValue: string, publicValue: string, protectedValue: string, _internalValue: string ) {
+		super( publicValue, protectedValue, _internalValue );
 
 		this.ownValue = ownValue;
 	}
