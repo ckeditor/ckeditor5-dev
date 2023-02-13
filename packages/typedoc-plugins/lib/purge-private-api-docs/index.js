@@ -49,41 +49,76 @@ function onEventEnd() {
 			}
 
 			removeUrlSourcesFromReflection( reflection );
-			removeNonPublicMembers( reflection, context );
+			removeNonPublicMembersFromReflection( reflection, context );
 		}
 	};
 }
 
-function removeNonPublicMembers( reflection, context ) {
-	if ( isNonPublicMember( reflection ) ) {
-		context.project.removeReflection( reflection );
-	} else if ( reflection.children ) {
-		reflection.children.forEach( refl => removeNonPublicMembers( refl, context ) );
-	}
+function removeNonPublicMembersFromReflection( moduleReflection, context ) {
+	Object.values( context.project.reflections )
+		.filter( reflection => {
+			const isLocal = isLocalReflection( reflection, moduleReflection );
+			const isInheritedFromPrivate = isInheritedReflectionFromPrivatePackage( reflection, moduleReflection );
+
+			if ( !isLocal && !isInheritedFromPrivate ) {
+				return false;
+			}
+
+			if ( reflection.flags.isPrivate || reflection.flags.isProtected || hasInternalTag( reflection ) ) {
+				return true;
+			}
+
+			return false;
+		} )
+		.forEach( reflection => context.project.removeReflection( reflection ) );
 }
 
-function isNonPublicMember( reflection ) {
-	if ( isInheritedFromPublicPackage( reflection ) ) {
+function hasInternalTag( reflection ) {
+	if ( !reflection ) {
 		return false;
 	}
 
-	if ( reflection.flags.isPrivate || reflection.flags.isProtected ) {
-		return true;
+	if ( !reflection.comment ) {
+		return false;
 	}
 
-	if ( reflection.comment && reflection.comment.modifierTags && reflection.comment.modifierTags.has( '@internal' ) ) {
-		return true;
+	if ( !reflection.comment.modifierTags ) {
+		return false;
 	}
 
-	return false;
+	return reflection.comment.modifierTags.has( '@internal' );
 }
 
-function isInheritedFromPublicPackage( reflection ) {
+function isLocalReflection( reflection, moduleReflection ) {
+	if ( !reflection.sources ) {
+		return false;
+	}
+
+	if ( reflection.sources[ 0 ].fileName !== moduleReflection.sources[ 0 ].fileName ) {
+		return false;
+	}
+
+	return true;
+}
+
+function isInheritedReflectionFromPrivatePackage( reflection, moduleReflection ) {
 	if ( !reflection.inheritedFrom ) {
 		return false;
 	}
 
-	return !isPrivatePackageFile( reflection.sources[ 0 ].fullFileName );
+	if ( !reflection.parent || !reflection.parent.sources ) {
+		return false;
+	}
+
+	if ( reflection.parent.sources[ 0 ].fileName !== moduleReflection.sources[ 0 ].fileName ) {
+		return false;
+	}
+
+	if ( !isPrivatePackageFile( reflection.sources[ 0 ].fullFileName ) ) {
+		return false;
+	}
+
+	return true;
 }
 
 /**
