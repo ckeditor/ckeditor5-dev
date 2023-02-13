@@ -44,16 +44,89 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 		expect( conversionResult ).to.be.an( 'object' );
 	} );
 
-	it( 'should remove reflections from a private package', () => {
-		expect( conversionResult.getChildByName( [ 'private-package/model/model' ] ) ).to.equal( undefined );
-		expect( conversionResult.getChildByName( [ 'private-package/view/node/node' ] ) ).to.equal( undefined );
+	describe( 'public packages', () => {
+		it( 'should keep reflections', () => {
+			expect( conversionResult.getChildByName( 'public-package/classinpublicpackage' ) ).to.not.equal( undefined );
+		} );
 	} );
 
-	it( 'should keep private reflections marked with the `@publicApi` annotation', () => {
-		expect( conversionResult.getChildByName( [ 'private-public-api-package/error' ] ) ).to.not.equal( undefined );
+	describe( 'private packages without the `@publicApi` annotation', () => {
+		it( 'should remove reflections', () => {
+			expect( conversionResult.getChildByName( 'private-package/model/model' ) ).to.equal( undefined );
+			expect( conversionResult.getChildByName( 'private-package/view/node/node' ) ).to.equal( undefined );
+		} );
 	} );
 
-	it( 'should not touch reflections from a public package', () => {
-		expect( conversionResult.getChildByName( [ 'public-package/awesomeerror' ] ) ).to.not.equal( undefined );
+	describe( 'private packages with the `@publicApi` annotation', () => {
+		beforeEach( () => {
+			expect(
+				conversionResult.getChildByName( 'private-public-api-package/classinprivatepublicapipackage' )
+			).to.not.equal( undefined );
+		} );
+
+		it( 'should keep public reflections', () => {
+			const publicValue = getReflection( 'publicValue', 'ClassInPrivatePublicApiPackage' );
+
+			expect( publicValue ).to.not.equal( undefined );
+		} );
+
+		it( 'should remove private reflections', () => {
+			const privateValue = getReflection( 'privateValue', 'ClassInPrivatePublicApiPackage' );
+
+			expect( privateValue ).to.equal( undefined );
+		} );
+
+		it( 'should remove protected reflections', () => {
+			const protectedValue = getReflection( 'protectedValue', 'ClassInPrivatePublicApiPackage' );
+
+			expect( protectedValue ).to.equal( undefined );
+		} );
+
+		it( 'should remove internal reflections', () => {
+			const _internalValue = getReflection( '_internalValue', 'ClassInPrivatePublicApiPackage' );
+
+			expect( _internalValue ).to.equal( undefined );
+		} );
+
+		it( 'should keep public reflections inherited from public packages', () => {
+			const publicValue = getReflection( 'publicValue', 'PublicInheritor' );
+
+			expect( publicValue ).to.not.equal( undefined );
+		} );
+
+		it( 'should keep protected reflections inherited from public packages', () => {
+			const protectedValue = getReflection( 'protectedValue', 'PublicInheritor' );
+
+			expect( protectedValue ).to.not.equal( undefined );
+		} );
+
+		it( 'should keep internal reflections inherited from public packages', () => {
+			const _internalValue = getReflection( '_internalValue', 'PublicInheritor' );
+
+			expect( _internalValue ).to.not.equal( undefined );
+		} );
+
+		it( 'should keep public reflections inherited from private packages', () => {
+			const publicValue = getReflection( 'publicValue', 'PrivateInheritor' );
+
+			expect( publicValue ).to.not.equal( undefined );
+		} );
+
+		it( 'should remove protected reflections inherited from private packages', () => {
+			const protectedValue = getReflection( 'protectedValue', 'PrivateInheritor' );
+
+			expect( protectedValue ).to.equal( undefined );
+		} );
+
+		it( 'should remove internal reflections inherited from private packages', () => {
+			const _internalValue = getReflection( '_internalValue', 'PrivateInheritor' );
+
+			expect( _internalValue ).to.equal( undefined );
+		} );
 	} );
+
+	function getReflection( reflectionName, parentName ) {
+		return Object.values( conversionResult.reflections )
+			.find( reflection => reflection.name === reflectionName && reflection.parent.name === parentName );
+	}
 } );

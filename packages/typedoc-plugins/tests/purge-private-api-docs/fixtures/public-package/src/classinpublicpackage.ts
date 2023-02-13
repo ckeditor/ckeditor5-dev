@@ -1,0 +1,24 @@
+/**
+ * @license Copyright (c) 2003-2023, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+/**
+ * @module public-package/classinpublicpackage
+ */
+
+export class ClassInPublicPackage {
+	public publicValue: string;
+	protected protectedValue: string;
+
+	/**
+	 * @internal
+	 */
+	public _internalValue: string;
+
+	constructor( publicValue: string, protectedValue: string, _internalValue: string ) {
+		this.publicValue = publicValue;
+		this.protectedValue = protectedValue;
+		this._internalValue = _internalValue;
+	}
+}

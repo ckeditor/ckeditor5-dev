@@ -42,27 +42,83 @@ function onEventEnd() {
 
 			const node = symbol.declarations[ 0 ];
 
-			const publicApi = node.statements.some( statement => {
-				if ( !Array.isArray( statement.jsDoc ) ) {
-					return false;
-				}
-
-				return statement.jsDoc.some( jsDoc => {
-					return ( jsDoc.tags || [] )
-						.filter( tag => {
-							return tag.tagName.kind === ts.SyntaxKind.Identifier && tag.tagName.text === 'publicApi';
-						} )
-						.shift();
-				} );
-			} );
-
-			if ( !publicApi ) {
+			if ( !isPublicApi( node ) ) {
 				context.project.removeReflection( reflection );
-			} else {
-				removeSourcesFromReflection( reflection );
+
+				continue;
 			}
+
+			removeUrlSourcesFromReflection( reflection );
+			removeNonPublicMembersFromReflection( reflection, context );
 		}
 	};
+}
+
+function removeNonPublicMembersFromReflection( moduleReflection, context ) {
+	Object.values( context.project.reflections )
+		.filter( reflection => {
+			const isLocal = isLocalReflection( reflection, moduleReflection );
+			const isInheritedFromPrivate = isInheritedReflectionFromPrivatePackage( reflection, moduleReflection );
+
+			if ( !isLocal && !isInheritedFromPrivate ) {
+				return false;
+			}
+
+			if ( reflection.flags.isPrivate || reflection.flags.isProtected || hasInternalTag( reflection ) ) {
+				return true;
+			}
+
+			return false;
+		} )
+		.forEach( reflection => context.project.removeReflection( reflection ) );
+}
+
+function hasInternalTag( reflection ) {
+	if ( !reflection ) {
+		return false;
+	}
+
+	if ( !reflection.comment ) {
+		return false;
+	}
+
+	if ( !reflection.comment.modifierTags ) {
+		return false;
+	}
+
+	return reflection.comment.modifierTags.has( '@internal' );
+}
+
+function isLocalReflection( reflection, moduleReflection ) {
+	if ( !reflection.sources ) {
+		return false;
+	}
+
+	if ( reflection.sources[ 0 ].fileName !== moduleReflection.sources[ 0 ].fileName ) {
+		return false;
+	}
+
+	return true;
+}
+
+function isInheritedReflectionFromPrivatePackage( reflection, moduleReflection ) {
+	if ( !reflection.inheritedFrom ) {
+		return false;
+	}
+
+	if ( !reflection.parent || !reflection.parent.sources ) {
+		return false;
+	}
+
+	if ( reflection.parent.sources[ 0 ].fileName !== moduleReflection.sources[ 0 ].fileName ) {
+		return false;
+	}
+
+	if ( !isPrivatePackageFile( reflection.sources[ 0 ].fullFileName ) ) {
+		return false;
+	}
+
+	return true;
 }
 
 /**
@@ -71,11 +127,13 @@ function onEventEnd() {
  * @param {Function} reflection.traverse
  * @param {Array} [reflection.children]
  */
-function removeSourcesFromReflection( reflection ) {
-	delete reflection.sources;
+function removeUrlSourcesFromReflection( reflection ) {
+	if ( reflection.sources ) {
+		reflection.sources.forEach( source => delete source.url );
+	}
 
 	reflection.traverse( childReflection => {
-		removeSourcesFromReflection( childReflection );
+		removeUrlSourcesFromReflection( childReflection );
 	} );
 }
 
@@ -103,6 +161,36 @@ function isPrivatePackageFile( fileName ) {
 			throw new Error( `${ fileName } is not placed inside a npm package.` );
 		}
 	}
+}
+
+/**
+ * @param {Object} node
+ * @returns {Boolean}
+ */
+function isPublicApi( node ) {
+	return node.statements.some( statement => {
+		if ( !Array.isArray( statement.jsDoc ) ) {
+			return false;
+		}
+
+		return statement.jsDoc.some( jsDoc => {
+			if ( !jsDoc.tags ) {
+				return false;
+			}
+
+			return jsDoc.tags.some( tag => {
+				if ( tag.tagName.kind !== ts.SyntaxKind.Identifier ) {
+					return false;
+				}
+
+				if ( tag.tagName.text !== 'publicApi' ) {
+					return false;
+				}
+
+				return true;
+			} );
+		} );
+	} );
 }
 
 /**
