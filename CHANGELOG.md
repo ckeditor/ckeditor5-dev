@@ -1,6 +1,43 @@
 Changelog
 =========
 
+## [33.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v33.0.0...v33.0.1) (2023-02-14)
+
+### Bug fixes
+
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: Specified the "@internal" annotation as "modifierTags" to allow Umberto to identify a member as internal when building docs from TypeScript. Closes [ckeditor/ckeditor5#13375](https://github.com/ckeditor/ckeditor5/issues/13375). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/cadfa3bd3443bb6faef48fcb6e7b52b26fe48904))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Disabled Chrome backgrounding optimizations in the karma configuration for automated tests to make the tests run in a stable environment that does not depend on the state of the browser window (focus vs. blur). Closes [ckeditor/ckeditor5#13407](https://github.com/ckeditor/ckeditor5/issues/13407). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/c6f6c2bf7312af029f15b03f2cf69ea13372abb5))
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Fixed the `tag-event` plugin that crashed when trying to parse event parameters, which are passed as type arguments. Closes [ckeditor/ckeditor5#13376](https://github.com/ckeditor/ckeditor5/issues/13376). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/caa9431fbce93b485c34be376f26125c8fe6ca75))
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: The `typedoc-plugin-tag-error` should not crash when processing error-like nodes, e.g., `@eventName error`. Closes [ckeditor/ckeditor5#13362](https://github.com/ckeditor/ckeditor5/issues/13362). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/d07f2de3922f9779dec25079afa171a23bc38e14))
+
+### Other changes
+
+* Excluded non-public structures from API docs. Closes [ckeditor/ckeditor5#13302](https://github.com/ckeditor/ckeditor5/issues/13302). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/8123fa4cacb667a7d6cb71c334ddcd019151a3fc))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v33.0.0 => v33.0.1
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v33.0.0 => v33.0.1
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v33.0.0 => v33.0.1
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v33.0.0 => v33.0.1
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v33.0.0 => v33.0.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v33.0.0 => v33.0.1
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v33.0.0 => v33.0.1
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v33.0.0 => v33.0.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v33.0.0 => v33.0.1
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v33.0.0 => v33.0.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v33.0.0 => v33.0.1
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v33.0.0 => v33.0.1
+</details>
+
+
 ## [33.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v32.1.2...v33.0.0) (2023-01-26)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
