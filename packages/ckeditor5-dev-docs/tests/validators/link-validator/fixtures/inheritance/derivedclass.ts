@@ -3,10 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-import A from './A';
+import BaseCLass from './baseclass';
 
 /**
- * @module fixtures/inheritance/B
+ * @module fixtures/inheritance/derivedclass
  */
 
-export default class B extends A {}
+export default class DerivedClass extends BaseCLass {}

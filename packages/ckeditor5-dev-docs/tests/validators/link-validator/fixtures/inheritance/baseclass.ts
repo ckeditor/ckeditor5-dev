@@ -4,12 +4,12 @@
  */
 
 /**
- * @module fixtures/inheritance/A
+ * @module fixtures/inheritance/baseclass
  */
 
-export default class A {
+export default class BaseClass {
 	/**
-	 * {@link ~C} This is a link to non-existing class that throws an error.
+	 * {@link ~NonExistentClass} This is a link to non-existent class that throws an error.
 	 */
 	public inherited: string = 'test';
 }

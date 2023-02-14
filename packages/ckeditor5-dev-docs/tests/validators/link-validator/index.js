@@ -13,7 +13,7 @@ describe( 'dev-docs/validators/link-validator', function() {
 
 	const FIXTURES_PATH = testUtils.normalizePath( __dirname, 'fixtures' );
 	const SOURCE_FILES = testUtils.normalizePath( FIXTURES_PATH, '*.ts' );
-	const DERIVED_FILE = testUtils.normalizePath( FIXTURES_PATH, 'inheritance', 'B.ts' );
+	const DERIVED_FILE = testUtils.normalizePath( FIXTURES_PATH, 'inheritance', 'derivedclass.ts' );
 	const TSCONFIG_PATH = testUtils.normalizePath( FIXTURES_PATH, 'tsconfig.json' );
 
 	let build, logStub, onErrorCallback;
