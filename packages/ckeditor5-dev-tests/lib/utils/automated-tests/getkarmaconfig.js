@@ -104,11 +104,11 @@ module.exports = function getKarmaConfig( options ) {
 		customLaunchers: {
 			CHROME_TRAVIS_CI: {
 				base: 'Chrome',
-				flags: [ '--no-sandbox', '--disable-background-timer-throttling', '--js-flags="--expose-gc"' ]
+				flags: getFlagsForBrowser( 'CHROME_TRAVIS_CI' )
 			},
 			CHROME_LOCAL: {
 				base: 'Chrome',
-				flags: [ '--disable-background-timer-throttling', '--js-flags="--expose-gc"', '--remote-debugging-port=9222' ]
+				flags: getFlagsForBrowser( 'CHROME_LOCAL' )
 			}
 		},
 
@@ -209,4 +209,29 @@ function getBrowsers( options ) {
 
 		return process.env.TRAVIS ? 'CHROME_TRAVIS_CI' : 'CHROME_LOCAL';
 	} );
+}
+
+// Returns the array of configuration flags for given browser.
+//
+// @param {String} browser
+// @returns {Array.<String>}
+function getFlagsForBrowser( browser ) {
+	const commonFlags = [
+		'--disable-background-timer-throttling',
+		'--js-flags="--expose-gc"',
+		'--disable-renderer-backgrounding',
+		'--disable-backgrounding-occluded-windows'
+	];
+
+	if ( browser === 'CHROME_TRAVIS_CI' ) {
+		return [
+			...commonFlags,
+			'--no-sandbox'
+		];
+	}
+
+	return [
+		...commonFlags,
+		'--remote-debugging-port=9222'
+	];
 }

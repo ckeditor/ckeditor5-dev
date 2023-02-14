@@ -182,4 +182,39 @@ describe( 'getKarmaConfig()', () => {
 		expect( loaders ).to.not.contain( 'babel-loader' );
 		expect( loaders ).to.contain( 'other-loader' );
 	} );
+
+	it( 'should return custom launchers with flags', () => {
+		const options = {
+			reporter: 'mocha',
+			globPatterns: {
+				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
+			}
+		};
+
+		const karmaConfig = getKarmaConfig( options );
+
+		expect( karmaConfig ).to.have.own.property( 'customLaunchers' );
+		expect( karmaConfig.customLaunchers ).to.have.own.property( 'CHROME_TRAVIS_CI' );
+		expect( karmaConfig.customLaunchers ).to.have.own.property( 'CHROME_LOCAL' );
+
+		expect( karmaConfig.customLaunchers.CHROME_TRAVIS_CI ).to.have.own.property( 'base', 'Chrome' );
+		expect( karmaConfig.customLaunchers.CHROME_TRAVIS_CI ).to.have.own.property( 'flags' );
+		expect( karmaConfig.customLaunchers.CHROME_TRAVIS_CI.flags ).to.deep.equal( [
+			'--disable-background-timer-throttling',
+			'--js-flags="--expose-gc"',
+			'--disable-renderer-backgrounding',
+			'--disable-backgrounding-occluded-windows',
+			'--no-sandbox'
+		] );
+
+		expect( karmaConfig.customLaunchers.CHROME_LOCAL ).to.have.own.property( 'base', 'Chrome' );
+		expect( karmaConfig.customLaunchers.CHROME_LOCAL ).to.have.own.property( 'flags' );
+		expect( karmaConfig.customLaunchers.CHROME_LOCAL.flags ).to.deep.equal( [
+			'--disable-background-timer-throttling',
+			'--js-flags="--expose-gc"',
+			'--disable-renderer-backgrounding',
+			'--disable-backgrounding-occluded-windows',
+			'--remote-debugging-port=9222'
+		] );
+	} );
 } );
