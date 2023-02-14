@@ -12,7 +12,7 @@ Changelog
 
 ### Other changes
 
-* Excluded non-public structures from API docs. Closes [ckeditor/ckeditor5#13302](https://github.com/ckeditor/ckeditor5/issues/13302). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/8123fa4cacb667a7d6cb71c334ddcd019151a3fc))
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Excluded non-public structures from the generated Typedoc output when processing private packages. Closes [ckeditor/ckeditor5#13302](https://github.com/ckeditor/ckeditor5/issues/13302). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/8123fa4cacb667a7d6cb71c334ddcd019151a3fc))
 
 ### Released packages
 
@@ -42,7 +42,7 @@ Other releases:
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
 
-* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The `getDLLPluginWebpackConfig()` does not load webpack manually. Now it must be specified in arguments. 
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The `getDLLPluginWebpackConfig()` does not load webpack manually. Now it must be specified in arguments.
 
 Before:
 
