@@ -42,6 +42,12 @@ function isReflectionValid( reflection ) {
  * @returns {Boolean}
  */
 function isIdentifierValid( reflection, identifier ) {
+	// We don't want to validate inherited identifiers, because they should be checked only once in the base class.
+	// Inherited reflections could contain identifiers (links) that are valid only in the base class and not in the derived class.
+	if ( reflection.inheritedFrom ) {
+		return true;
+	}
+
 	const absoluteIdentifier = isAbsoluteIdentifier( identifier ) ?
 		identifier :
 		toAbsoluteIdentifier( reflection, identifier );

@@ -12,12 +12,13 @@ describe( 'dev-docs/validators/link-validator', function() {
 	this.timeout( 10 * 1000 );
 
 	const FIXTURES_PATH = testUtils.normalizePath( __dirname, 'fixtures' );
-	const SOURCE_FILES = testUtils.normalizePath( FIXTURES_PATH, '**', '*.ts' );
+	const SOURCE_FILES = testUtils.normalizePath( FIXTURES_PATH, '*.ts' );
+	const DERIVED_FILE = testUtils.normalizePath( FIXTURES_PATH, 'inheritance', 'derivedclass.ts' );
 	const TSCONFIG_PATH = testUtils.normalizePath( FIXTURES_PATH, 'tsconfig.json' );
 
-	const onErrorCallback = sinon.stub();
+	let build, logStub, warnStub, onErrorCallback;
 
-	before( async () => {
+	beforeEach( async () => {
 		const validators = proxyquire( '../../../lib/validators', {
 			'./link-validator': project => {
 				return require( '../../../lib/validators/link-validator' )( project, onErrorCallback );
@@ -25,12 +26,21 @@ describe( 'dev-docs/validators/link-validator', function() {
 			'./module-validator': sinon.spy()
 		} );
 
-		const build = proxyquire( '../../../lib/buildtypedoc', {
+		build = proxyquire( '../../../lib/buildtypedoc', {
 			'./validators': validators
 		} );
 
-		const logStub = sinon.stub( console, 'log' );
+		logStub = sinon.stub( console, 'log' );
+		warnStub = sinon.stub( console, 'warn' );
+		onErrorCallback = sinon.stub();
+	} );
 
+	afterEach( () => {
+		logStub.restore();
+		warnStub.restore();
+	} );
+
+	it( 'should warn if link is not valid', async () => {
 		await build( {
 			type: 'typedoc',
 			cwd: FIXTURES_PATH,
@@ -39,10 +49,6 @@ describe( 'dev-docs/validators/link-validator', function() {
 			strict: false
 		} );
 
-		logStub.restore();
-	} );
-
-	it( 'should warn if link is not valid', () => {
 		const expectedErrors = [
 			{
 				identifier: '.property',
@@ -114,5 +120,17 @@ describe( 'dev-docs/validators/link-validator', function() {
 				sinon.match( reflection => error.source === testUtils.getSource( reflection ) )
 			);
 		}
+	} );
+
+	it( 'should not call error callback for derived class when there are errors in inherited class', async () => {
+		await build( {
+			type: 'typedoc',
+			cwd: FIXTURES_PATH,
+			tsconfig: TSCONFIG_PATH,
+			sourceFiles: [ DERIVED_FILE ],
+			strict: false
+		} );
+
+		expect( onErrorCallback.callCount ).to.equal( 0 );
 	} );
 } );
