@@ -87,12 +87,6 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 					test: /\.ts$/,
 					use: [
 						{
-							loader: require.resolve( '../ck-debug-loader' ),
-							options: {
-								debugFlags: options.debug
-							}
-						},
-						{
 							loader: 'ts-loader',
 							options: {
 								// Override default settings specified in `tsconfig.json`.
@@ -107,6 +101,12 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 									// In such a case we would like to throw an error.
 									noEmitOnError: true
 								}
+							}
+						},
+						{
+							loader: require.resolve( '../ck-debug-loader' ),
+							options: {
+								debugFlags: options.debug
 							}
 						}
 					]
