@@ -16,7 +16,7 @@ describe( 'dev-docs/validators/link-validator', function() {
 	const DERIVED_FILE = testUtils.normalizePath( FIXTURES_PATH, 'inheritance', 'derivedclass.ts' );
 	const TSCONFIG_PATH = testUtils.normalizePath( FIXTURES_PATH, 'tsconfig.json' );
 
-	let build, logStub, onErrorCallback;
+	let build, logStub, warnStub, onErrorCallback;
 
 	beforeEach( async () => {
 		const validators = proxyquire( '../../../lib/validators', {
@@ -31,11 +31,13 @@ describe( 'dev-docs/validators/link-validator', function() {
 		} );
 
 		logStub = sinon.stub( console, 'log' );
+		warnStub = sinon.stub( console, 'warn' );
 		onErrorCallback = sinon.stub();
 	} );
 
 	afterEach( () => {
 		logStub.restore();
+		warnStub.restore();
 	} );
 
 	it( 'should warn if link is not valid', async () => {
