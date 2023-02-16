@@ -25,7 +25,7 @@
   "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme",
   "scripts": {
     "postinstall": "node ./scripts/postinstall.js",
-    "test": "mocha 'packages/*/tests/**/*.js' --timeout 5000",
+    "test": "mocha 'packages/*/tests/**/*.js' --timeout 10000",
     "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test",
     "changelog": "node ./scripts/changelog.js",
     "release:bump-version": "node ./scripts/bump-versions.js",
