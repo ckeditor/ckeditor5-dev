@@ -194,15 +194,50 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			throw new Error( 'A loader for ".ts" files was not found.' );
 		}
 
-		expect( tsRule.use[ 0 ].loader.endsWith( 'ck-debug-loader.js' ) ).to.be.true;
-		expect( tsRule.use[ 1 ] ).to.be.an( 'object' );
-		expect( tsRule.use[ 1 ] ).to.have.property( 'loader', 'ts-loader' );
-		expect( tsRule.use[ 1 ] ).to.have.property( 'options' );
-		expect( tsRule.use[ 1 ].options ).to.have.property( 'compilerOptions' );
-		expect( tsRule.use[ 1 ].options.compilerOptions ).to.deep.equal( {
+		const ckDebugLoader = tsRule.use.find( item => item.loader.endsWith( 'ck-debug-loader.js' ) );
+		const tsLoader = tsRule.use.find( item => item.loader === 'ts-loader' );
+
+		if ( !ckDebugLoader ) {
+			throw new Error( '"ck-debug-loader" missing' );
+		}
+
+		if ( !tsLoader ) {
+			throw new Error( '"ts-loader" missing' );
+		}
+
+		expect( tsLoader ).to.have.property( 'options' );
+		expect( tsLoader.options ).to.have.property( 'compilerOptions' );
+		expect( tsLoader.options.compilerOptions ).to.deep.equal( {
 			noEmit: false,
 			noEmitOnError: true
 		} );
+	} );
+
+	it( 'should use "ck-debug-loader" before "ts-loader" while loading TS files', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {} );
+
+		const tsRule = webpackConfig.module.rules.find( rule => {
+			return rule.test.toString().endsWith( '/\\.ts$/' );
+		} );
+
+		if ( !tsRule ) {
+			throw new Error( 'A loader for ".ts" files was not found.' );
+		}
+
+		const ckDebugLoaderIndex = tsRule.use.findIndex( item => item.loader.endsWith( 'ck-debug-loader.js' ) );
+		const tsLoaderIndex = tsRule.use.findIndex( item => item.loader === 'ts-loader' );
+
+		if ( ckDebugLoaderIndex === undefined ) {
+			throw new Error( '"ck-debug-loader" missing' );
+		}
+
+		if ( tsLoaderIndex === undefined ) {
+			throw new Error( '"ts-loader" missing' );
+		}
+
+		// Webpack reads the "use" array from back to the front.
+		expect( ckDebugLoaderIndex ).to.equal( 1 );
+		expect( tsLoaderIndex ).to.equal( 0 );
 	} );
 
 	it( 'should return webpack configuration with correct extension resolve order', () => {

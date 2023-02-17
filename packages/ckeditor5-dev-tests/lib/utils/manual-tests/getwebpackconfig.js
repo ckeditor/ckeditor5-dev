@@ -109,12 +109,6 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 					test: /\.ts$/,
 					use: [
 						{
-							loader: require.resolve( '../ck-debug-loader' ),
-							options: {
-								debugFlags: options.debug
-							}
-						},
-						{
 							loader: 'ts-loader',
 							options: {
 								// Override default settings specified in `tsconfig.json`.
@@ -128,6 +122,12 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 									// Disabling the `noEmitOnError` option fixes the problem.
 									noEmitOnError: false
 								}
+							}
+						},
+						{
+							loader: require.resolve( '../ck-debug-loader' ),
+							options: {
+								debugFlags: options.debug
 							}
 						}
 					]
