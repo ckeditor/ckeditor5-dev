@@ -33,7 +33,8 @@ module.exports = async function build( config ) {
 		logLevel: 'Warn',
 		basePath: config.cwd,
 		blockTags: [
-			'@eventName'
+			'@eventName',
+			'@default'
 		],
 		inlineTags: [
 			'@link',
