@@ -208,6 +208,10 @@ function getTargetTypeReflections( reflectionType ) {
 	}
 
 	if ( reflectionType.type === 'reference' ) {
+		if ( !reflectionType.reflection ) {
+			return [];
+		}
+
 		return getTargetTypeReflections( reflectionType.reflection.type );
 	}
 
