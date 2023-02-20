@@ -3,7 +3,7 @@
   "version": "33.0.1",
   "private": true,
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-ci": "^33.0.1",
+    "@ckeditor/ckeditor5-dev-ci": "^34.0.0",
     "eslint": "^7.0.0",
     "eslint-config-ckeditor5": "^4.0.0",
     "husky": "^8.0.2",

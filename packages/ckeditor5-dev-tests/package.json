@@ -6,8 +6,8 @@
   "main": "lib/index.js",
   "dependencies": {
     "@babel/core": "^7.10.5",
-    "@ckeditor/ckeditor5-dev-utils": "^33.0.1",
-    "@ckeditor/ckeditor5-dev-translations": "^33.0.1",
+    "@ckeditor/ckeditor5-dev-utils": "^34.0.0",
+    "@ckeditor/ckeditor5-dev-translations": "^34.0.0",
     "@ckeditor/ckeditor5-inspector": "^4.0.0",
     "assertion-error": "^1.1.0",
     "babel-plugin-istanbul": "^6.1.0",
