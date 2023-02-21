@@ -44,35 +44,57 @@ function onEventEnd() {
 
 			if ( !isPublicApi( node ) ) {
 				context.project.removeReflection( reflection );
-
-				continue;
+			} else {
+				removeUrlSourcesFromReflection( reflection );
+				removeNonPublicMembersFromReflection( reflection, context );
 			}
-
-			removeUrlSourcesFromReflection( reflection );
-			removeNonPublicMembersFromReflection( reflection, context );
 		}
 	};
 }
 
-function removeNonPublicMembersFromReflection( moduleReflection, context ) {
-	Object.values( context.project.reflections )
-		.filter( reflection => {
-			const isLocal = isLocalReflection( reflection, moduleReflection );
-			const isInheritedFromPrivate = isInheritedReflectionFromPrivatePackage( reflection, moduleReflection );
+function removeNonPublicMembersFromReflection( reflection, context ) {
+	reflection.traverse( child => {
+		// Take care of all children before modifying the parent.
+		removeNonPublicMembersFromReflection( child, context );
 
-			if ( !isLocal && !isInheritedFromPrivate ) {
-				return false;
+		// Check if a child is non-public reflection.
+		if ( isNonPublicReflection( child ) ) {
+			// Remove it when it is not inherited.
+			if ( !child.inheritedFrom ) {
+				context.project.removeReflection( child );
 			}
-
-			if ( reflection.flags.isPrivate || reflection.flags.isProtected || hasInternalTag( reflection ) ) {
-				return true;
+			// Otherwise, check if it comes from a private package. If so, remove it.
+			else if ( isInheritedReflectionFromPrivatePackage( child ) ) {
+				context.project.removeReflection( child );
 			}
+		}
 
-			return false;
-		} )
-		.forEach( reflection => context.project.removeReflection( reflection ) );
+		let signatures = null;
+
+		if ( child.kind === ReflectionKind.Method ) {
+			signatures = child.signatures;
+		} else if ( child.kind === ReflectionKind.Accessor ) {
+			signatures = [ child.getSignature, child.setSignature ].filter( Boolean );
+		}
+
+		if ( signatures && !signatures.length ) {
+			context.project.removeReflection( child );
+		}
+	} );
 }
 
+/**
+ * @param {Object} reflection
+ * @returns {Boolean}
+ */
+function isNonPublicReflection( reflection ) {
+	return reflection.flags.isPrivate || reflection.flags.isProtected || hasInternalTag( reflection );
+}
+
+/**
+ * @param {Object} reflection
+ * @returns {Boolean}
+ */
 function hasInternalTag( reflection ) {
 	if ( !reflection ) {
 		return false;
@@ -89,36 +111,12 @@ function hasInternalTag( reflection ) {
 	return reflection.comment.modifierTags.has( '@internal' );
 }
 
-function isLocalReflection( reflection, moduleReflection ) {
-	if ( !reflection.sources ) {
-		return false;
-	}
-
-	if ( reflection.sources[ 0 ].fileName !== moduleReflection.sources[ 0 ].fileName ) {
-		return false;
-	}
-
-	return true;
-}
-
-function isInheritedReflectionFromPrivatePackage( reflection, moduleReflection ) {
-	if ( !reflection.inheritedFrom ) {
-		return false;
-	}
-
-	if ( !reflection.parent || !reflection.parent.sources ) {
-		return false;
-	}
-
-	if ( reflection.parent.sources[ 0 ].fileName !== moduleReflection.sources[ 0 ].fileName ) {
-		return false;
-	}
-
-	if ( !isPrivatePackageFile( reflection.sources[ 0 ].fullFileName ) ) {
-		return false;
-	}
-
-	return true;
+/**
+ * @param {Object} reflection
+ * @returns {Boolean}
+ */
+function isInheritedReflectionFromPrivatePackage( reflection ) {
+	return isPrivatePackageFile( reflection.sources[ 0 ].fullFileName );
 }
 
 /**
@@ -129,7 +127,9 @@ function isInheritedReflectionFromPrivatePackage( reflection, moduleReflection )
  */
 function removeUrlSourcesFromReflection( reflection ) {
 	if ( reflection.sources ) {
-		reflection.sources.forEach( source => delete source.url );
+		reflection.sources.forEach( source => {
+			delete source.url;
+		} );
 	}
 
 	reflection.traverse( childReflection => {

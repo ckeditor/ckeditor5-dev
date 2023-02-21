@@ -1,0 +1,4 @@
+{
+  "name": "private-package-public-api",
+  "private": true
+}
