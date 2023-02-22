@@ -246,4 +246,37 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 		expect( overwrittenEventClassC.comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
 		expect( overwrittenEventClassC.comment.summary[ 0 ] ).to.have.property( 'text', 'Overwritten event 2 from class A.' );
 	} );
+
+	it( 'should not create a new event in derived class if derived class does not already exist in the project', () => {
+		const typeDoc = new TypeDoc.Application();
+
+		typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
+		typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
+
+		typeDoc.bootstrap( {
+			logLevel: 'Error',
+			entryPoints: files,
+			plugin: [
+				// The "typedoc-plugin-remove-class-c" plugin removes the "ClassC" class from the project.
+				utils.normalizePath( utils.ROOT_TEST_DIRECTORY, 'event-inheritance-fixer', 'typedoc-plugin-remove-class-c' ),
+				...PLUGINS
+			],
+			tsconfig: TSCONFIG_PATH
+		} );
+
+		const conversionResult = typeDoc.convert();
+
+		const events = conversionResult
+			.getReflectionsByKind( TypeDoc.ReflectionKind.All )
+			.filter( child => child.kindString === 'Event' );
+
+		expect( events ).to.lengthOf( 5 );
+
+		// The order of found events does not matter, so just check if all of them are found.
+		expect( events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
+		expect( events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
+		expect( events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
+		expect( events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
+		expect( events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-3-class-b' ) ).to.not.be.undefined;
+	} );
 } );

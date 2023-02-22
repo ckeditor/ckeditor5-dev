@@ -93,12 +93,14 @@ function getDerivedClasses( classReflection ) {
 		return [];
 	}
 
-	return classReflection.extendedBy.flatMap( entry => {
-		const derivedClass = entry.reflection;
+	return classReflection.extendedBy
+		.filter( entry => entry.reflection )
+		.flatMap( entry => {
+			const derivedClass = entry.reflection;
 
-		return [
-			derivedClass,
-			...getDerivedClasses( derivedClass )
-		];
-	} );
+			return [
+				derivedClass,
+				...getDerivedClasses( derivedClass )
+			];
+		} );
 }
