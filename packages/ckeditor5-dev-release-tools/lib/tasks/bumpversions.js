@@ -329,7 +329,7 @@ module.exports = async function bumpVersions( options ) {
 
 			log.info( `\nBumping version for "${ chalk.underline( packageJson.name ) }"...` );
 
-			exec( `npm version ${ releaseDetails.version } --no-git-tag-version` );
+			exec( `npm version ${ releaseDetails.version } --no-git-tag-version --no-workspaces-update` );
 			exec( 'git add .' );
 		}
 	}
