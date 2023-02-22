@@ -7,8 +7,8 @@
   "dependencies": {
     "fs-extra": "^9.0.0",
     "del": "^5.1.0",
-    "@ckeditor/ckeditor5-dev-utils": "^34.0.1",
-    "@ckeditor/ckeditor5-dev-translations": "^34.0.1",
+    "@ckeditor/ckeditor5-dev-utils": "^34.0.2",
+    "@ckeditor/ckeditor5-dev-translations": "^34.0.2",
     "chalk": "^4.0.0",
     "inquirer": "^7.1.0",
     "@transifex/api": "^4.2.1",
