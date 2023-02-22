@@ -32,6 +32,9 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 		typeDoc.bootstrap( {
 			logLevel: 'Error',
 			entryPoints: files,
+			modifierTags: [
+				'@internal'
+			],
 			plugin: [
 				require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' ),
 				require.resolve( '@ckeditor/typedoc-plugins/lib/purge-private-api-docs' )
@@ -46,87 +49,250 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 
 	describe( 'public packages', () => {
 		it( 'should keep reflections', () => {
-			expect( conversionResult.getChildByName( 'public-package/classinpublicpackage' ) ).to.not.equal( undefined );
+			const publicCollection = conversionResult.getChildByName( 'public-package/publiccollection' );
+
+			expect( publicCollection ).to.not.equal( undefined );
+			expect( publicCollection.children.length ).to.equal( 1 );
 		} );
 	} );
 
 	describe( 'private packages without the `@publicApi` annotation', () => {
 		it( 'should remove reflections', () => {
-			expect( conversionResult.getChildByName( 'private-package/model/model' ) ).to.equal( undefined );
-			expect( conversionResult.getChildByName( 'private-package/view/node/node' ) ).to.equal( undefined );
+			const privateCollection = conversionResult.getChildByName( 'private-package/privatecollection' );
+
+			expect( privateCollection ).to.equal( undefined );
 		} );
 	} );
 
-	describe( 'private packages with the `@publicApi` annotation', () => {
-		beforeEach( () => {
-			expect(
-				conversionResult.getChildByName( 'private-public-api-package/classinprivatepublicapipackage' )
-			).to.not.equal( undefined );
+	describe( 'private packages with the `@publicApi` annotation - extending a public package', () => {
+		it( 'should keep inherited public reflections', () => {
+			const extendPublicCollection = conversionResult.getChildByName( [
+				'private-package-public-api/extendpubliccollection',
+				'ExtendPublicCollection'
+			] );
+
+			const publicCollection = conversionResult.getChildByName( [
+				'public-package/publiccollection',
+				'PublicCollection'
+			] );
+
+			expect( publicCollection ).to.not.equal( undefined );
+			expect( extendPublicCollection ).to.not.equal( undefined );
+
+			const publicFields = [
+				'publicValue',
+				'declarePublicValue',
+				'getPublicFunction'
+			];
+
+			for ( const field of publicFields ) {
+				const parentClass = publicCollection.children.find( c => c.name === field );
+				const inheritedClass = extendPublicCollection.children.find( c => c.name === field );
+
+				expect( parentClass, `checking "${ field }" in parent class` ).to.not.equal( undefined );
+				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.not.equal( undefined );
+			}
 		} );
 
-		it( 'should keep public reflections', () => {
-			const publicValue = getReflection( 'publicValue', 'ClassInPrivatePublicApiPackage' );
+		it( 'should keep inherited protected reflections', () => {
+			const extendPublicCollection = conversionResult.getChildByName( [
+				'private-package-public-api/extendpubliccollection',
+				'ExtendPublicCollection'
+			] );
 
-			expect( publicValue ).to.not.equal( undefined );
+			const publicCollection = conversionResult.getChildByName( [
+				'public-package/publiccollection',
+				'PublicCollection'
+			] );
+
+			expect( publicCollection ).to.not.equal( undefined );
+			expect( extendPublicCollection ).to.not.equal( undefined );
+
+			const protectedFields = [
+				'protectedValue',
+				'declareProtectedValue',
+				'getProtectedFunction'
+			];
+
+			for ( const field of protectedFields ) {
+				const parentClass = publicCollection.children.find( c => c.name === field );
+				const inheritedClass = extendPublicCollection.children.find( c => c.name === field );
+
+				expect( parentClass, `checking "${ field }" in parent class` ).to.not.equal( undefined );
+				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.not.equal( undefined );
+			}
+
+			expect( extendPublicCollection.children.find( c => c.name === 'constructor' ) ).to.equal( undefined );
 		} );
 
-		it( 'should remove private reflections', () => {
-			const privateValue = getReflection( 'privateValue', 'ClassInPrivatePublicApiPackage' );
+		it( 'should keep inherited internal reflections (`@internal`)', () => {
+			const extendPublicCollection = conversionResult.getChildByName( [
+				'private-package-public-api/extendpubliccollection',
+				'ExtendPublicCollection'
+			] );
 
-			expect( privateValue ).to.equal( undefined );
+			const publicCollection = conversionResult.getChildByName( [
+				'public-package/publiccollection',
+				'PublicCollection'
+			] );
+
+			expect( publicCollection ).to.not.equal( undefined );
+			expect( extendPublicCollection ).to.not.equal( undefined );
+
+			const internalFields = [
+				'_internalValue',
+				'_declareInternalValue',
+				'_getInternalFunction'
+			];
+
+			for ( const field of internalFields ) {
+				const parentClass = publicCollection.children.find( c => c.name === field );
+				const inheritedClass = extendPublicCollection.children.find( c => c.name === field );
+
+				expect( parentClass, `checking "${ field }" in parent class` ).to.not.equal( undefined );
+				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.not.equal( undefined );
+			}
 		} );
 
-		it( 'should remove protected reflections', () => {
-			const protectedValue = getReflection( 'protectedValue', 'ClassInPrivatePublicApiPackage' );
+		it( 'should not keep inherited private reflections (cannot inherit private fields)', () => {
+			const extendPublicCollection = conversionResult.getChildByName( [
+				'private-package-public-api/extendpubliccollection',
+				'ExtendPublicCollection'
+			] );
 
-			expect( protectedValue ).to.equal( undefined );
+			const publicCollection = conversionResult.getChildByName( [
+				'public-package/publiccollection',
+				'PublicCollection'
+			] );
+
+			expect( publicCollection ).to.not.equal( undefined );
+			expect( extendPublicCollection ).to.not.equal( undefined );
+
+			const privateFields = [
+				'privateValue',
+				'declarePrivateValue',
+				'getPrivateFunction'
+			];
+
+			for ( const field of privateFields ) {
+				const parentClass = publicCollection.children.find( c => c.name === field );
+				const inheritedClass = extendPublicCollection.children.find( c => c.name === field );
+
+				expect( parentClass, `checking "${ field }" in parent class` ).to.not.equal( undefined );
+				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.equal( undefined );
+			}
 		} );
 
-		it( 'should remove internal reflections', () => {
-			const _internalValue = getReflection( '_internalValue', 'ClassInPrivatePublicApiPackage' );
+		it( 'should remove non-public (direct) fields', () => {
+			const extendPublicCollection = conversionResult.getChildByName( [
+				'private-package-public-api/extendpubliccollection',
+				'ExtendPublicCollection'
+			] );
 
-			expect( _internalValue ).to.equal( undefined );
-		} );
-
-		it( 'should keep public reflections inherited from public packages', () => {
-			const publicValue = getReflection( 'publicValue', 'PublicInheritor' );
-
-			expect( publicValue ).to.not.equal( undefined );
-		} );
-
-		it( 'should keep protected reflections inherited from public packages', () => {
-			const protectedValue = getReflection( 'protectedValue', 'PublicInheritor' );
-
-			expect( protectedValue ).to.not.equal( undefined );
-		} );
-
-		it( 'should keep internal reflections inherited from public packages', () => {
-			const _internalValue = getReflection( '_internalValue', 'PublicInheritor' );
-
-			expect( _internalValue ).to.not.equal( undefined );
-		} );
-
-		it( 'should keep public reflections inherited from private packages', () => {
-			const publicValue = getReflection( 'publicValue', 'PrivateInheritor' );
-
-			expect( publicValue ).to.not.equal( undefined );
-		} );
-
-		it( 'should remove protected reflections inherited from private packages', () => {
-			const protectedValue = getReflection( 'protectedValue', 'PrivateInheritor' );
-
-			expect( protectedValue ).to.equal( undefined );
-		} );
-
-		it( 'should remove internal reflections inherited from private packages', () => {
-			const _internalValue = getReflection( '_internalValue', 'PrivateInheritor' );
-
-			expect( _internalValue ).to.equal( undefined );
+			expect( extendPublicCollection.children.find( c => c.name === 'parent' ) ).to.equal( undefined );
+			expect( extendPublicCollection.children.find( c => c.name === 'awesomeProtectedNumber' ) ).to.equal( undefined );
+			expect( extendPublicCollection.children.find( c => c.name === 'awesomePrivateNumber' ) ).to.equal( undefined );
+			expect( extendPublicCollection.children.find( c => c.name === '_awesomeInternalNumber' ) ).to.equal( undefined );
 		} );
 	} );
 
-	function getReflection( reflectionName, parentName ) {
-		return Object.values( conversionResult.reflections )
-			.find( reflection => reflection.name === reflectionName && reflection.parent.name === parentName );
-	}
+	describe( 'private packages with the `@publicApi` annotation - extending a private package', () => {
+		it( 'should keep inherited public reflections', () => {
+			const extendPrivateCollection = conversionResult.getChildByName( [
+				'private-package-public-api/extendprivatecollection',
+				'ExtendPrivateCollection'
+			] );
+
+			expect( extendPrivateCollection ).to.not.equal( undefined );
+
+			const publicFields = [
+				'publicValue',
+				'declarePublicValue',
+				'getPublicFunction'
+			];
+
+			for ( const field of publicFields ) {
+				const inheritedClass = extendPrivateCollection.children.find( c => c.name === field );
+
+				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.not.equal( undefined );
+			}
+		} );
+
+		it( 'should not keep inherited protected reflections', () => {
+			const extendPrivateCollection = conversionResult.getChildByName( [
+				'private-package-public-api/extendprivatecollection',
+				'ExtendPrivateCollection'
+			] );
+
+			expect( extendPrivateCollection ).to.not.equal( undefined );
+
+			const protectedFields = [
+				'protectedValue',
+				'declareProtectedValue',
+				'getProtectedFunction'
+			];
+
+			for ( const field of protectedFields ) {
+				const inheritedClass = extendPrivateCollection.children.find( c => c.name === field );
+
+				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.equal( undefined );
+			}
+
+			expect( extendPrivateCollection.children.find( c => c.name === 'constructor' ) ).to.equal( undefined );
+		} );
+
+		it( 'should not keep inherited internal reflections (`@internal`)', () => {
+			const extendPrivateCollection = conversionResult.getChildByName( [
+				'private-package-public-api/extendprivatecollection',
+				'ExtendPrivateCollection'
+			] );
+
+			expect( extendPrivateCollection ).to.not.equal( undefined );
+
+			const internalFields = [
+				'_internalValue',
+				'_declareInternalValue',
+				'_getInternalFunction'
+			];
+
+			for ( const field of internalFields ) {
+				const inheritedClass = extendPrivateCollection.children.find( c => c.name === field );
+
+				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.equal( undefined );
+			}
+		} );
+
+		it( 'should not keep inherited private reflections (cannot inherit private fields)', () => {
+			const extendPrivateCollection = conversionResult.getChildByName( [
+				'private-package-public-api/extendprivatecollection',
+				'ExtendPrivateCollection'
+			] );
+
+			expect( extendPrivateCollection ).to.not.equal( undefined );
+
+			const privateFields = [
+				'privateValue',
+				'declarePrivateValue',
+				'getPrivateFunction'
+			];
+
+			for ( const field of privateFields ) {
+				const inheritedClass = extendPrivateCollection.children.find( c => c.name === field );
+
+				expect( inheritedClass, `checking "${ field }" in inherited class` ).to.equal( undefined );
+			}
+		} );
+
+		it( 'should remove non-public (direct) fields', () => {
+			const extendPrivateCollection = conversionResult.getChildByName( [
+				'private-package-public-api/extendprivatecollection',
+				'ExtendPrivateCollection'
+			] );
+
+			expect( extendPrivateCollection.children.find( c => c.name === 'parent' ) ).to.equal( undefined );
+			expect( extendPrivateCollection.children.find( c => c.name === 'awesomeProtectedNumber' ) ).to.equal( undefined );
+			expect( extendPrivateCollection.children.find( c => c.name === 'awesomePrivateNumber' ) ).to.equal( undefined );
+			expect( extendPrivateCollection.children.find( c => c.name === '_awesomeInternalNumber' ) ).to.equal( undefined );
+		} );
+	} );
 } );
