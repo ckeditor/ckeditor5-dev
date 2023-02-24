@@ -52,8 +52,9 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		afterEach( () => {
-			sandbox.restore();
+			mockery.deregisterAll();
 			mockery.disable();
+			sandbox.restore();
 		} );
 
 		describe( 'INDENT_SIZE', () => {
