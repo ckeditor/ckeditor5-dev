@@ -18,6 +18,13 @@ const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
 module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	const definitions = Object.assign( {}, getDefinitionsFromFile( options.identityFile ) );
 
+	const ckDebugLoader = {
+		loader: require.resolve( '../ck-debug-loader' ),
+		options: {
+			debugFlags: options.debug
+		}
+	};
+
 	const config = {
 		mode: 'development',
 
@@ -78,10 +85,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 				},
 				{
 					test: /\.js$/,
-					loader: require.resolve( '../ck-debug-loader' ),
-					options: {
-						debugFlags: options.debug
-					}
+					...ckDebugLoader
 				},
 				{
 					test: /\.ts$/,
@@ -101,12 +105,6 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 									// In such a case we would like to throw an error.
 									noEmitOnError: true
 								}
-							}
-						},
-						{
-							loader: require.resolve( '../ck-debug-loader' ),
-							options: {
-								debugFlags: options.debug
 							}
 						}
 					]
@@ -145,18 +143,30 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 		config.module.rules.unshift(
 			{
 				test: /\.[jt]s$/,
-				loader: 'babel-loader',
-				options: {
-					plugins: [
-						'babel-plugin-istanbul'
-					]
-				},
+				use: [
+					{
+						loader: 'babel-loader',
+						options: {
+							plugins: [
+								'babel-plugin-istanbul'
+							]
+						}
+					},
+					{
+						...ckDebugLoader
+					}
+				],
 				include: getPathsToIncludeForCoverage( options.files ),
 				exclude: [
 					new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
 				]
 			}
 		);
+	} else {
+		const tsRules = config.module.rules.find( loader => 'typescript.ts'.match( loader.test ) );
+		tsRules.use.push( {
+			...ckDebugLoader
+		} );
 	}
 
 	if ( options.cache ) {
