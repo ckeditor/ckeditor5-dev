@@ -727,10 +727,17 @@ module.exports = async function releaseSubRepositories( options ) {
 			// For this reason we have to temporarily replace the extension in the `main` field while the package is being published to npm.
 			// This change is then reverted.
 			const hasTypeScriptEntryPoint = packageJson.main && packageJson.main.endsWith( '.ts' );
+			const hasTypesProperty = !!packageJson.types;
 
 			if ( hasTypeScriptEntryPoint ) {
 				tools.updateJSONFile( packageJsonPath, jsonFile => {
-					jsonFile.main = jsonFile.main.replace( '.ts', '.js' );
+					const { main } = jsonFile;
+
+					jsonFile.main = main.replace( /\.ts$/, '.js' );
+
+					if ( !hasTypesProperty ) {
+						jsonFile.types = main.replace( /\.ts$/, '.d.ts' );
+					}
 
 					return jsonFile;
 				} );
@@ -756,7 +763,11 @@ module.exports = async function releaseSubRepositories( options ) {
 			// again to the `index.ts` file.
 			if ( hasTypeScriptEntryPoint ) {
 				tools.updateJSONFile( packageJsonPath, jsonFile => {
-					jsonFile.main = jsonFile.main.replace( '.js', '.ts' );
+					jsonFile.main = jsonFile.main.replace( /\.js$/, '.ts' );
+
+					if ( !hasTypesProperty ) {
+						delete jsonFile.types;
+					}
 
 					return jsonFile;
 				} );
