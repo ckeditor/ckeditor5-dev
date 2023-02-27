@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-ci",
-  "version": "34.1.0",
+  "version": "34.1.1",
   "description": "Utils for CKEditor5 CI builds.",
   "keywords": [],
   "dependencies": {
