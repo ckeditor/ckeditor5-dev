@@ -745,7 +745,7 @@ module.exports = async function releaseSubRepositories( options ) {
 						if ( fs.existsSync( absoluteTypesPath ) ) {
 							jsonFile.types = typesPath;
 						} else {
-							log.warning( `The "${ typesPath }" file does not exist and cannot be a source of typings.` );
+							log.warning( `⚠️  The "${ typesPath }" file does not exist and cannot be a source of typings.` );
 						}
 					}
 
