@@ -415,6 +415,7 @@ module.exports = async function releaseSubRepositories( options ) {
 		// The keys in returned map are file patterns, and their values represent number of matched files. If there is no `#files` key
 		// in `package.json`, then empty map is returned.
 		function getMatchedFilesToPublish( packageJson, repositoryPath ) {
+			// TODO: Include the `main` and `types` properties if they are specified.
 			if ( !packageJson.files ) {
 				return new Map();
 			}
@@ -729,6 +730,8 @@ module.exports = async function releaseSubRepositories( options ) {
 			const hasTypeScriptEntryPoint = packageJson.main && packageJson.main.endsWith( '.ts' );
 			const hasTypesProperty = !!packageJson.types;
 
+			// TODO: The entire update phase should be done before collecting packages
+			// TODO: to publish on npm (the `filterPackagesToReleaseOnNpm()` task).
 			if ( hasTypeScriptEntryPoint ) {
 				tools.updateJSONFile( packageJsonPath, jsonFile => {
 					const { main } = jsonFile;
@@ -736,7 +739,14 @@ module.exports = async function releaseSubRepositories( options ) {
 					jsonFile.main = main.replace( /\.ts$/, '.js' );
 
 					if ( !hasTypesProperty ) {
-						jsonFile.types = main.replace( /\.ts$/, '.d.ts' );
+						const typesPath = main.replace( /\.ts$/, '.d.ts' );
+						const absoluteTypesPath = path.join( repositoryPath, typesPath );
+
+						if ( fs.existsSync( absoluteTypesPath ) ) {
+							jsonFile.types = typesPath;
+						} else {
+							log.warning( `The "${ typesPath }" file does not exist and cannot be a source of typings.` );
+						}
 					}
 
 					return jsonFile;
