@@ -1,6 +1,44 @@
 Changelog
 =========
 
+## [34.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v34.0.2...v34.1.0) (2023-02-27)
+
+### Features
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `releaseSubrepositories()` task adds the `types` field (if not specified) to `package.json` while publishing packages based on the `main` field if a package is written in TypeScript. Closes [ckeditor/ckeditor5#13518](https://github.com/ckeditor/ckeditor5/issues/13518). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e7a7cdeb0fc0e743b6e8eccf34ba59951144639f))
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Added a new option for the `releaseSubRepositories()` task that specifies the npm tag used when publishing packages to npm. Closes [ckeditor/ckeditor5#13533](https://github.com/ckeditor/ckeditor5/issues/13533). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/bcc5a59aa7b8389fb15cb8cf599fb3dd75bef4c9))
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: The `ck-debug-loader` should not be included in TypeScript files to avoid the "Unable to lookup source" error when checking the coverage. Instead, `babel-loader` should handle the `CK_DEBUG` flags. Closes [ckeditor/ckeditor5#13529](https://github.com/ckeditor/ckeditor5/issues/13529). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f6ee82e9abc1aaabca8163e367b7c3fb3e03b56b))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v34.0.2 => v34.1.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v34.0.2 => v34.1.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v34.0.2 => v34.1.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v34.0.2 => v34.1.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v34.0.2 => v34.1.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v34.0.2 => v34.1.0
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v34.0.2 => v34.1.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v34.0.2 => v34.1.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v34.0.2 => v34.1.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v34.0.2 => v34.1.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v34.0.2 => v34.1.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v34.0.2 => v34.1.0
+</details>
+
+
 ## [34.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/v34.0.1...v34.0.2) (2023-02-22)
 
 ### Bug fixes
