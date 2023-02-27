@@ -10,13 +10,23 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 
 describe( 'dev-release-tools/utils', () => {
-	let cli, sandbox, questionItems, userAnswer;
+	let cli, sandbox, questionItems, userAnswer, stub;
 
 	describe( 'cli', () => {
 		beforeEach( () => {
 			userAnswer = undefined;
 			sandbox = sinon.createSandbox();
 			questionItems = [];
+
+			stub = {
+				chalk: {
+					red: sandbox.stub().callsFake( str => str ),
+					magenta: sandbox.stub().callsFake( str => str ),
+					cyan: sandbox.stub().callsFake( str => str ),
+					underline: sandbox.stub().callsFake( str => str ),
+					gray: sandbox.stub().callsFake( str => str )
+				}
+			};
 
 			mockery.enable( {
 				useCleanCache: true,
@@ -36,12 +46,15 @@ describe( 'dev-release-tools/utils', () => {
 				}
 			} );
 
+			mockery.registerMock( 'chalk', stub.chalk );
+
 			cli = require( '../../lib/utils/cli' );
 		} );
 
 		afterEach( () => {
-			sandbox.restore();
+			mockery.deregisterAll();
 			mockery.disable();
+			sandbox.restore();
 		} );
 
 		describe( 'INDENT_SIZE', () => {
@@ -426,6 +439,36 @@ describe( 'dev-release-tools/utils', () => {
 							npm: true,
 							github: false
 						} );
+					} );
+			} );
+		} );
+
+		describe( 'confirmNpmTag()', () => {
+			it( 'should ask user if continue the release process when passing the same versions', () => {
+				return cli.confirmNpmTag( 'latest', 'latest' )
+					.then( () => {
+						const question = questionItems[ 0 ];
+
+						expect( question.message ).to.equal(
+							'The next release bumps the "latest" version. Should it be published to npm as "latest"?'
+						);
+						expect( question.type ).to.equal( 'confirm' );
+						expect( question.default ).to.equal( true );
+						expect( stub.chalk.magenta.callCount ).to.equal( 2 );
+					} );
+			} );
+
+			it( 'should ask user if continue the release process when passing different versions', () => {
+				return cli.confirmNpmTag( 'latest', 'alpha' )
+					.then( () => {
+						const question = questionItems[ 0 ];
+
+						expect( question.message ).to.equal(
+							'The next release bumps the "latest" version. Should it be published to npm as "alpha"?'
+						);
+						expect( question.type ).to.equal( 'confirm' );
+						expect( question.default ).to.equal( false );
+						expect( stub.chalk.red.callCount ).to.equal( 2 );
 					} );
 			} );
 		} );

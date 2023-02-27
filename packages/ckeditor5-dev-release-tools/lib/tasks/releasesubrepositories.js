@@ -10,6 +10,7 @@ const path = require( 'path' );
 const chalk = require( 'chalk' );
 const glob = require( 'glob' );
 const mkdirp = require( 'mkdirp' );
+const semver = require( 'semver' );
 const Table = require( 'cli-table' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const parseGithubUrl = require( 'parse-github-url' );
@@ -98,6 +99,9 @@ const additionalFiles = [
  * @param {String|null} options.packages Where to look for other packages (dependencies). If `null`, only repository specified under
  * `options.cwd` will be used in the task.
  *
+ * @param {String} [options.npmTag='latest'] Defines an npm tag which the package manager will use when installing the package.
+ * Read more: https://docs.npmjs.com/cli/v8/commands/npm-publish#tag.
+ *
  * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be released.
  *
  * @param {Boolean} [options.dryRun=false] If set on true, nothing will be published:
@@ -140,6 +144,7 @@ module.exports = async function releaseSubRepositories( options ) {
 
 	const dryRun = Boolean( options.dryRun );
 	const releaseBranch = options.releaseBranch || 'master';
+	const npmTag = options.npmTag || 'latest';
 	const customReleases = Array.isArray( options.customReleases ) ? options.customReleases : [ options.customReleases ].filter( Boolean );
 
 	// When preparing packages for release, we check whether there are files in the directory structure of the package, which are
@@ -188,6 +193,7 @@ module.exports = async function releaseSubRepositories( options ) {
 	return configureRelease()
 		.then( _releaseOptions => saveReleaseOptions( _releaseOptions ) )
 		.then( () => authCheck() )
+		.then( () => confirmNpmTag() )
 		.then( () => preparePackagesToRelease() )
 		.then( () => filterPackagesToReleaseOnNpm() )
 		.then( () => filterPackagesToReleaseOnGitHub() )
@@ -265,6 +271,33 @@ module.exports = async function releaseSubRepositories( options ) {
 				auth: `token ${ releaseOptions.token }`
 			} );
 		}
+	}
+
+	// Verifies if the provided by the user npm tag should be used to release new packages to npm.
+	//
+	// @returns {Promise}
+	function confirmNpmTag() {
+		if ( !releaseOptions.npm ) {
+			return Promise.resolve();
+		}
+
+		const packageJson = getPackageJson( options.cwd );
+		logProcess( 'Verifying the npm tag...' );
+
+		const [ versionTag ] = semver.prerelease( packageJson.version ) || [ 'latest' ];
+
+		if ( versionTag !== npmTag ) {
+			log.warning( '⚠️  The version tag is different from the npm tag.' );
+		} else {
+			log.info( '✅  Release tags are defined correctly.' );
+		}
+
+		return cli.confirmNpmTag( versionTag, npmTag )
+			.then( isConfirmed => {
+				if ( !isConfirmed ) {
+					throw new Error( BREAK_RELEASE_MESSAGE );
+				}
+			} );
 	}
 
 	// Checks whether to a user is logged to npm.
