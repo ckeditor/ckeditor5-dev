@@ -3,7 +3,11 @@ Changelog
 
 ## [34.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/v34.1.1...v34.1.2) (2023-02-28)
 
-Internal changes only (updated dependencies, documentation, etc.).
+This release reverts the following changes:
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: The `ck-debug-loader` should not be included in TypeScript files to avoid the "Unable to lookup source" error when checking the coverage. Instead, `babel-loader` should handle the `CK_DEBUG` flags. Closes [ckeditor/ckeditor5#13529](https://github.com/ckeditor/ckeditor5/issues/13529). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f6ee82e9abc1aaabca8163e367b7c3fb3e03b56b))
+
+As the original issue seems to be fixed, it changes the behavior of the testing environment and results in failing unit tests. For more details, please follow [ckeditor/ckeditor5#13569](https://github.com/ckeditor/ckeditor5/issues/13569).
 
 ### Released packages
 
