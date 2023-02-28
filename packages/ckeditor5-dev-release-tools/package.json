@@ -5,7 +5,7 @@
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^34.1.1",
+    "@ckeditor/ckeditor5-dev-utils": "^34.1.2",
     "@octokit/rest": "^17.9.2",
     "chalk": "^4.0.0",
     "cli-table": "^0.3.1",
