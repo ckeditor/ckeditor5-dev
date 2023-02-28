@@ -63,41 +63,22 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			files: [ '**/*.js' ]
 		} );
 
-		const coverageLoader = webpackConfig.module.rules[ 0 ];
+		const coverageLoader = webpackConfig.module.rules
+			.find( rule => rule.loader === 'babel-loader' );
 
-		expect( coverageLoader ).to.not.equal( undefined );
-		expect( '/path/to/javascript.js' ).to.match( coverageLoader.test );
-		expect( '/path/to/typescript.ts' ).to.match( coverageLoader.test );
-
-		expect( coverageLoader.include ).to.be.an( 'array' );
-		expect( coverageLoader.include ).to.lengthOf( 0 );
-		expect( coverageLoader.exclude ).to.be.an( 'array' );
-		expect( coverageLoader.exclude ).to.lengthOf( 1 );
-
-		expect( coverageLoader.use ).to.be.an( 'array' );
-		expect( coverageLoader.use ).to.lengthOf.above( 1 );
-
-		const babelLoader = coverageLoader.use[ 0 ];
-
-		expect( babelLoader.loader ).to.equal( 'babel-loader' );
-	} );
-
-	it( 'should include the ck-debug-loader when checking the coverage', () => {
-		const webpackConfig = getWebpackConfigForAutomatedTests( {
-			coverage: true,
-			files: [ '**/*.js' ]
+		expect( coverageLoader ).to.deep.equal( {
+			test: /\.[jt]s$/,
+			loader: 'babel-loader',
+			include: [],
+			exclude: [
+				new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
+			],
+			options: {
+				plugins: [
+					'babel-plugin-istanbul'
+				]
+			}
 		} );
-
-		const coverageLoader = webpackConfig.module.rules[ 0 ];
-
-		expect( coverageLoader ).to.not.equal( undefined );
-
-		expect( coverageLoader.use ).to.be.an( 'array' );
-		expect( coverageLoader.use ).to.lengthOf( 2 );
-
-		const ckDebugLoader = coverageLoader.use[ 1 ];
-
-		expect( ckDebugLoader.loader ).to.contain( 'ck-debug-loader' );
 	} );
 
 	it( 'should return webpack configuration containing a loader for measuring the coverage (include check)', () => {
@@ -110,11 +91,9 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			]
 		} );
 
-		const coverageLoader = webpackConfig.module.rules[ 0 ];
+		const coverageLoader = webpackConfig.module.rules
+			.find( rule => rule.loader === 'babel-loader' );
 
-		expect( coverageLoader ).to.not.equal( undefined );
-
-		expect( coverageLoader.include ).to.be.an( 'array' );
 		expect( coverageLoader.include ).to.deep.equal( [
 			new RegExp( [ 'ckeditor5-utils', 'src', '' ].join( escapedPathSep ) )
 		] );
@@ -130,11 +109,9 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			]
 		} );
 
-		const coverageLoader = webpackConfig.module.rules[ 0 ];
+		const coverageLoader = webpackConfig.module.rules
+			.find( rule => rule.loader === 'babel-loader' );
 
-		expect( coverageLoader ).to.not.equal( undefined );
-
-		expect( coverageLoader.include ).to.be.an( 'array' );
 		expect( coverageLoader.include ).to.deep.equal( [
 			new RegExp( [ 'ckeditor5-!(utils)', 'src', '' ].join( escapedPathSep ) )
 		] );
