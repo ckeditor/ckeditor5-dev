@@ -1,6 +1,6 @@
 {
   "name": "ckeditor5-dev",
-  "version": "34.1.1",
+  "version": "34.1.2",
   "private": true,
   "devDependencies": {
     "@ckeditor/ckeditor5-dev-ci": "^34.1.2",
