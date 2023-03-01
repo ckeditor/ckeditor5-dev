@@ -27,7 +27,8 @@ module.exports = function parseArguments( args ) {
 			'language',
 			'theme-path',
 			'additional-languages',
-			'identity-file'
+			'identity-file',
+			'tsconfig'
 		],
 
 		boolean: [
@@ -67,6 +68,7 @@ module.exports = function parseArguments( args ) {
 			server: false,
 			production: false,
 			'identity-file': null,
+			tsconfig: null,
 			repositories: [],
 			'theme-path': null,
 			'additional-languages': null,
@@ -101,6 +103,7 @@ module.exports = function parseArguments( args ) {
 	] );
 	parseDebugOption( options );
 	parseRepositoriesOption( options );
+	parseTsconfigPath( options );
 
 	return options;
 
@@ -192,6 +195,19 @@ module.exports = function parseArguments( args ) {
 				collection.add( directory.replace( /^ckeditor5-/, '' ) );
 			}
 		}
+	}
+
+	/**
+	 * Parses the `--tsconfig` options to be an absolute path.
+	 *
+	 * @param {Object} options
+	 */
+	function parseTsconfigPath( options ) {
+		if ( !options.tsconfig ) {
+			return;
+		}
+
+		options.tsconfig = path.resolve( process.cwd(), options.tsconfig );
 	}
 
 	/**
