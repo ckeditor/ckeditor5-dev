@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-bump-year",
-  "version": "34.1.2",
+  "version": "34.1.3",
   "description": "Used to bump year in the licence text specified at the top of the file.",
   "keywords": [],
   "main": "lib/index.js",
