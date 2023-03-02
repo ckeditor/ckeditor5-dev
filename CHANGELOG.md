@@ -1,6 +1,41 @@
 Changelog
 =========
 
+## [34.1.3](https://github.com/ckeditor/ckeditor5-dev/compare/v34.1.2...v34.1.3) (2023-03-02)
+
+### Bug fixes
+
+* **[dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker)**: The misplaced check should respect the `depcheckIgnore` option if specified when processing packages. Closes [ckeditor/ckeditor5#13590](https://github.com/ckeditor/ckeditor5/issues/13590). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f88bb9606c9c50530b6c17b7833dbb710309f0b3))
+* **[translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations)**: The `serveTranslations()` function should not throw an instance of `ReferenceError` due to missing access to a collection when emitting an error when processing translations. Closes [ckeditor/ckeditor5#8450](https://github.com/ckeditor/ckeditor5/issues/8450). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/311b1fe03bce523337ac2e8acb8779f66757af95))
+
+### Other changes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Allow specifying the `tsconfig` option in automated and manual tests. The path is resolved using the current working directory). If not specified, it will be resolved to default values that the `ts-config` resolves. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/aa903179ef5a3abe171300c903fc29cf1762163a))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v34.1.2 => v34.1.3
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v34.1.2 => v34.1.3
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v34.1.2 => v34.1.3
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v34.1.2 => v34.1.3
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v34.1.2 => v34.1.3
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v34.1.2 => v34.1.3
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v34.1.2 => v34.1.3
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v34.1.2 => v34.1.3
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v34.1.2 => v34.1.3
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v34.1.2 => v34.1.3
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v34.1.2 => v34.1.3
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v34.1.2 => v34.1.3
+</details>
+
+
 ## [34.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/v34.1.1...v34.1.2) (2023-02-28)
 
 This release reverts the following changes:
