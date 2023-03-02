@@ -84,10 +84,6 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 					use: [ 'raw-loader' ]
 				},
 				{
-					test: /\.js$/,
-					...ckDebugLoader
-				},
-				{
 					test: /\.ts$/,
 					use: [
 						{
@@ -154,9 +150,6 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 								'babel-plugin-istanbul'
 							]
 						}
-					},
-					{
-						...ckDebugLoader
 					}
 				],
 				include: getPathsToIncludeForCoverage( options.files ),
