@@ -31,6 +31,9 @@ const { RawSource, ConcatSource } = require( 'webpack-sources' );
 module.exports = function serveTranslations( compiler, options, translationService ) {
 	const cwd = process.cwd();
 
+	// A set of unique messages that prevents message duplications.
+	const uniqueMessages = new Set();
+
 	// Provides translateSource function for the `translatesourceloader` loader.
 	const translateSource = ( source, sourceFile ) => translationService.translateSource( source, sourceFile );
 
@@ -140,9 +143,6 @@ module.exports = function serveTranslations( compiler, options, translationServi
 			}
 		} );
 	} );
-
-	// A set of unique messages that prevents message duplications.
-	const uniqueMessages = new Set();
 
 	function emitError( error ) {
 		if ( uniqueMessages.has( error ) ) {
