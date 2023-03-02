@@ -213,6 +213,7 @@ describe( 'runManualTests', () => {
 					],
 					themePath: null,
 					language: undefined,
+					tsconfig: undefined,
 					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
 					debug: undefined,
@@ -277,6 +278,7 @@ describe( 'runManualTests', () => {
 					],
 					themePath: 'path/to/theme',
 					language: undefined,
+					tsconfig: undefined,
 					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
 					debug: [ 'CK_DEBUG' ],
@@ -344,6 +346,7 @@ describe( 'runManualTests', () => {
 					additionalLanguages: [ 'ar', 'en' ],
 					debug: [ 'CK_DEBUG' ],
 					disableWatch: false,
+					tsconfig: undefined,
 					identityFile: undefined
 				} );
 
@@ -400,6 +403,7 @@ describe( 'runManualTests', () => {
 					],
 					themePath: null,
 					language: undefined,
+					tsconfig: undefined,
 					onTestCompilationStatus: sinon.match.func,
 					debug: undefined,
 					additionalLanguages: undefined,
@@ -437,6 +441,7 @@ describe( 'runManualTests', () => {
 					],
 					themePath: null,
 					language: undefined,
+					tsconfig: undefined,
 					onTestCompilationStatus: sinon.match.func,
 					debug: undefined,
 					additionalLanguages: undefined,
@@ -490,6 +495,7 @@ describe( 'runManualTests', () => {
 					],
 					themePath: null,
 					language: undefined,
+					tsconfig: undefined,
 					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
 					debug: undefined,
@@ -542,6 +548,7 @@ describe( 'runManualTests', () => {
 					],
 					themePath: null,
 					language: undefined,
+					tsconfig: undefined,
 					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
 					debug: undefined,
@@ -591,6 +598,7 @@ describe( 'runManualTests', () => {
 					],
 					themePath: null,
 					language: undefined,
+					tsconfig: undefined,
 					onTestCompilationStatus: sinon.match.func,
 					additionalLanguages: undefined,
 					debug: undefined,
@@ -1144,6 +1152,7 @@ describe( 'runManualTests', () => {
 						],
 						themePath: null,
 						language: undefined,
+						tsconfig: undefined,
 						onTestCompilationStatus: sinon.match.func,
 						additionalLanguages: undefined,
 						debug: undefined,
@@ -1200,6 +1209,44 @@ describe( 'runManualTests', () => {
 							stdio: 'inherit'
 						}
 					);
+				} );
+		} );
+
+		it( 'allows specifying tsconfig file', () => {
+			spies.transformFileOptionToTestGlob.onFirstCall().returns( [ 'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js' ] );
+			spies.transformFileOptionToTestGlob.onSecondCall().returns( [ 'workspace/packages/ckeditor-*/tests/**/manual/**/*.js' ] );
+
+			const options = {
+				files: [
+					'ckeditor5-classic',
+					'ckeditor-classic/manual/classic.js'
+				],
+				tsconfig: '/absolute/path/to/tsconfig.json'
+			};
+
+			return runManualTests( { ...defaultOptions, ...options } )
+				.then( () => {
+					expect( spies.server.calledOnce ).to.equal( true );
+					expect( spies.server.firstCall.args[ 0 ] ).to.equal( 'workspace/build/.manual-tests' );
+
+					sinon.assert.calledWith( spies.scriptCompiler.firstCall, {
+						cwd: 'workspace',
+						buildDir: 'workspace/build/.manual-tests',
+						sourceFiles: [
+							'workspace/packages/ckeditor5-foo/tests/manual/feature-a.js',
+							'workspace/packages/ckeditor5-bar/tests/manual/feature-b.js',
+							'workspace/packages/ckeditor-foo/tests/manual/feature-c.js',
+							'workspace/packages/ckeditor-bar/tests/manual/feature-d.js'
+						],
+						themePath: null,
+						language: undefined,
+						onTestCompilationStatus: sinon.match.func,
+						debug: undefined,
+						additionalLanguages: undefined,
+						disableWatch: false,
+						tsconfig: '/absolute/path/to/tsconfig.json',
+						identityFile: undefined
+					} );
 				} );
 		} );
 	} );

@@ -20,6 +20,7 @@ const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
  * @param {String} options.buildDir
  * @param {String} options.themePath
  * @param {Boolean} options.disableWatch
+ * @param {String} [options.tsconfig]
  * @param {String} [options.language]
  * @param {Array.<String>} [options.additionalLanguages]
  * @param {String|null} [options.identityFile]

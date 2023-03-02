@@ -79,7 +79,8 @@ describe( 'compileManualTestScripts', () => {
 			},
 			debug: [ 'CK_DEBUG' ],
 			disableWatch: false,
-			identityFile: undefined
+			identityFile: undefined,
+			tsconfig: undefined
 		} );
 
 		expect( stubs.webpack.calledOnce ).to.equal( true );
@@ -124,7 +125,8 @@ describe( 'compileManualTestScripts', () => {
 			},
 			debug: [ 'CK_DEBUG' ],
 			disableWatch: false,
-			identityFile: undefined
+			identityFile: undefined,
+			tsconfig: undefined
 		} );
 
 		expect( stubs.webpack.calledOnce ).to.equal( true );
@@ -168,7 +170,8 @@ describe( 'compileManualTestScripts', () => {
 			},
 			debug: [ 'CK_DEBUG' ],
 			disableWatch: false,
-			identityFile: undefined
+			identityFile: undefined,
+			tsconfig: undefined
 		} );
 
 		sinon.assert.calledWith( stubs.getWebpackConfig.secondCall, {
@@ -184,7 +187,8 @@ describe( 'compileManualTestScripts', () => {
 			},
 			debug: [ 'CK_DEBUG' ],
 			disableWatch: false,
-			identityFile: undefined
+			identityFile: undefined,
+			tsconfig: undefined
 		} );
 
 		expect( stubs.webpack.calledTwice ).to.equal( true );
@@ -216,7 +220,8 @@ describe( 'compileManualTestScripts', () => {
 			themePath: 'path/to/theme',
 			language: null,
 			onTestCompilationStatus: stubs.onTestCompilationStatus,
-			additionalLanguages: null
+			additionalLanguages: null,
+			tsconfig: undefined
 		} );
 
 		expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
@@ -304,7 +309,8 @@ describe( 'compileManualTestScripts', () => {
 			},
 			debug: [ 'CK_DEBUG' ],
 			identityFile,
-			disableWatch: false
+			disableWatch: false,
+			tsconfig: undefined
 		} );
 
 		expect( stubs.webpack.calledOnce ).to.equal( true );
@@ -347,7 +353,51 @@ describe( 'compileManualTestScripts', () => {
 			},
 			debug: [ 'CK_DEBUG' ],
 			identityFile: undefined,
-			disableWatch: true
+			disableWatch: true,
+			tsconfig: undefined
+		} );
+
+		expect( stubs.webpack.calledOnce ).to.equal( true );
+		expect( stubs.webpack.firstCall.args[ 0 ] ).to.deep.equal( {
+			buildDir: 'buildDir',
+			entries: {
+				'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1.js'
+			}
+		} );
+	} );
+
+	it( 'should pass the "tsconfig" option to webpack configuration factory', async () => {
+		await compileManualTestScripts( {
+			cwd: 'workspace',
+			buildDir: 'buildDir',
+			sourceFiles: [
+				'ckeditor5-foo/manual/file1.js'
+			],
+			themePath: 'path/to/theme',
+			language: 'en',
+			onTestCompilationStatus: stubs.onTestCompilationStatus,
+			additionalLanguages: [ 'pl', 'ar' ],
+			debug: [ 'CK_DEBUG' ],
+			tsconfig: '/absolute/path/to/tsconfig.json'
+		} );
+
+		expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
+
+		sinon.assert.calledWith( stubs.getWebpackConfig.firstCall, {
+			cwd: 'workspace',
+			requireDll: false,
+			buildDir: 'buildDir',
+			themePath: 'path/to/theme',
+			language: 'en',
+			onTestCompilationStatus: stubs.onTestCompilationStatus,
+			additionalLanguages: [ 'pl', 'ar' ],
+			entries: {
+				'ckeditor5-foo/manual/file1': 'ckeditor5-foo/manual/file1.js'
+			},
+			debug: [ 'CK_DEBUG' ],
+			identityFile: undefined,
+			disableWatch: undefined,
+			tsconfig: '/absolute/path/to/tsconfig.json'
 		} );
 
 		expect( stubs.webpack.calledOnce ).to.equal( true );

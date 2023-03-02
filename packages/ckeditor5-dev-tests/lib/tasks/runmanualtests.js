@@ -34,6 +34,7 @@ const requireDll = require( '../utils/requiredll' );
  * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorTranslationsPlugin`.
  * @param {Number} [options.port] A port number used by the `createManualTestServer`.
  * @param {String} [options.identityFile] A file that provides secret keys used in the test scripts.
+ * @param {String} [options.tsconfig] Path the TypeScript configuration file.
  * @param {Boolean|null} [options.dll=null] If `null`, user is asked to create DLL builds, if they are required by test files.
  * If `true`, DLL builds are created automatically, if required by test files. User is not asked.
  * If `false`, DLL builds are not created. User is not asked.
@@ -83,6 +84,7 @@ module.exports = function runManualTests( options ) {
 				language,
 				additionalLanguages,
 				debug: options.debug,
+				tsconfig: options.tsconfig,
 				identityFile: options.identityFile,
 				onTestCompilationStatus,
 				disableWatch
