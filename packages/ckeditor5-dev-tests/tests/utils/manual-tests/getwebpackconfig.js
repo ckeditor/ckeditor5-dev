@@ -52,7 +52,9 @@ describe( 'getWebpackConfigForManualTests()', () => {
 	} );
 
 	it( 'should process TypeScript files properly', () => {
-		const webpackConfig = getWebpackConfigForManualTests( {} );
+		const webpackConfig = getWebpackConfigForManualTests( {
+			tsconfig: '/home/project/configs/tsconfig.json'
+		} );
 
 		const tsRule = webpackConfig.module.rules.find( rule => {
 			return rule.test.toString().endsWith( '/\\.ts$/' );
@@ -79,6 +81,8 @@ describe( 'getWebpackConfigForManualTests()', () => {
 			noEmit: false,
 			noEmitOnError: false
 		} );
+		expect( tsLoader.options ).to.have.property( 'configFile' );
+		expect( tsLoader.options.configFile ).to.equal( '/home/project/configs/tsconfig.json' );
 	} );
 
 	it( 'should use "ck-debug-loader" before "ts-loader" while loading TS files', () => {
