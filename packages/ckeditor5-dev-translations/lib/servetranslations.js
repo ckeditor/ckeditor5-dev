@@ -144,8 +144,6 @@ module.exports = function serveTranslations( compiler, options, translationServi
 		} );
 	} );
 
-
-
 	function emitError( error ) {
 		if ( uniqueMessages.has( error ) ) {
 			return;
