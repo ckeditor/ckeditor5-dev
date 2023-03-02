@@ -6,6 +6,7 @@
 'use strict';
 
 const releaseSubRepositories = require( './tasks/releasesubrepositories' );
+const preparePackages = require( './tasks/preparepackages' );
 const bumpVersions = require( './tasks/bumpversions' );
 const generateChangelogForSinglePackage = require( './tasks/generatechangelogforsinglepackage' );
 const generateChangelogForMonoRepository = require( './tasks/generatechangelogformonorepository' );
@@ -16,6 +17,7 @@ const { getChangesForVersion, getChangelog, saveChangelog } = require( './utils/
 
 module.exports = {
 	releaseSubRepositories,
+	preparePackages,
 	bumpVersions,
 	generateChangelogForSinglePackage,
 	generateChangelogForMonoRepository,
