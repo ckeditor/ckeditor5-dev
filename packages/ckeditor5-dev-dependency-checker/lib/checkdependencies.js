@@ -72,9 +72,9 @@ async function checkDependenciesInPackage( packagePath, options ) {
 		ignoreMatches: [ 'eslint*', 'webpack*', 'husky', 'lint-staged' ]
 	};
 
-	if ( Array.isArray( packageJson.depcheckIgnore ) ) {
-		depCheckOptions.ignoreMatches.push( ...packageJson.depcheckIgnore );
-	}
+	const depcheckIgnore = Array.isArray( packageJson.depcheckIgnore ) ? packageJson.depcheckIgnore : [];
+
+	depCheckOptions.ignoreMatches.push( ...depcheckIgnore );
 
 	if ( !options.quiet ) {
 		console.log( `🔎 Checking dependencies in ${ chalk.bold( packageJson.name ) }...` );
@@ -83,6 +83,13 @@ async function checkDependenciesInPackage( packagePath, options ) {
 	const result = await depCheck( packageAbsolutePath, depCheckOptions );
 
 	const missingPackages = await groupMissingPackages( result.missing, packageJson.name );
+
+	const misplacedOptions = {
+		dependencies: packageJson.dependencies,
+		devDependencies: packageJson.devDependencies,
+		dependenciesToCheck: result.using,
+		dependenciesToIgnore: depcheckIgnore
+	};
 
 	const errors = [
 		// Invalid itself imports.
@@ -125,7 +132,7 @@ async function checkDependenciesInPackage( packagePath, options ) {
 		// Misplaced `dependencies` or `devDependencies`.
 		// Checks whether any package, which is already listed in the `dependencies` or `devDependencies`,
 		// should belong to that list.
-		( await findMisplacedDependencies( packageJson.dependencies, packageJson.devDependencies, result.using ) )
+		( await findMisplacedDependencies( misplacedOptions ) )
 			.reduce( ( result, group ) => {
 				return result + '\n' +
 					group.description + '\n' +
@@ -311,13 +318,15 @@ function findDuplicatedDependencies( dependencies, devDependencies ) {
  * verifies wrongly placed ones.
  *
  * @see https://github.com/ckeditor/ckeditor5/issues/8817#issuecomment-759353134
- * @param {Object|undefined} dependencies Defined dependencies from package.json.
- * @param {Object|undefined} devDependencies Defined development dependencies from package.json.
- * @param {Object} dependenciesToCheck All dependencies that have been found and files where they are used.
+ * @param {Object|undefined} options.dependencies Defined dependencies from package.json.
+ * @param {Object|undefined} options.devDependencies Defined development dependencies from package.json.
+ * @param {Object} options.dependenciesToCheck All dependencies that have been found and files where they are used.
+ * @param {Array} options.dependenciesToIgnore An array of package names that should not be checked.
  * @returns {Promise.<Array.<Object>>} Misplaced packages. Each array item is an object containing
  * the `description` string and `packageNames` array of strings.
  */
-async function findMisplacedDependencies( dependencies, devDependencies, dependenciesToCheck ) {
+async function findMisplacedDependencies( options ) {
+	const { dependencies, devDependencies, dependenciesToCheck, dependenciesToIgnore } = options;
 	const deps = Object.keys( dependencies || {} );
 	const devDeps = Object.keys( devDependencies || {} );
 
@@ -333,6 +342,10 @@ async function findMisplacedDependencies( dependencies, devDependencies, depende
 	};
 
 	for ( const [ packageName, absolutePaths ] of Object.entries( dependenciesToCheck ) ) {
+		if ( dependenciesToIgnore.includes( packageName ) ) {
+			continue;
+		}
+
 		const isDevDep = await isDevDependency( packageName, absolutePaths );
 		const isMissingInDependencies = !isDevDep && !deps.includes( packageName ) && devDeps.includes( packageName );
 		const isMissingInDevDependencies = isDevDep && deps.includes( packageName ) && !devDeps.includes( packageName );
