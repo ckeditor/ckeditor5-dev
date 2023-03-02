@@ -20,6 +20,7 @@ const requireDll = require( '../requiredll' );
  * @param {Boolean} options.disableWatch Whether to disable the watch mechanism. If set to true, changes in source files
  * will not trigger webpack.
  * @param {Function} options.onTestCompilationStatus A callback called whenever the script compilation occurrs.
+ * @param {String} [options.tsconfig] Path the TypeScript configuration file.
  * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorTranslationsPlugin`.
  * @param {String} [options.identityFile] A file that provides secret keys used in the test scripts.
  * @returns {Promise}
@@ -36,6 +37,7 @@ module.exports = function compileManualTestScripts( options ) {
 		language: options.language,
 		additionalLanguages: options.additionalLanguages,
 		debug: options.debug,
+		tsconfig: options.tsconfig,
 		identityFile: options.identityFile,
 		disableWatch: options.disableWatch,
 		onTestCompilationStatus: options.onTestCompilationStatus

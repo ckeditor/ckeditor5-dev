@@ -319,4 +319,19 @@ describe( 'parseArguments()', () => {
 			expect( options.dll ).to.be.false;
 		} );
 	} );
+
+	describe( 'tsconfig', () => {
+		it( 'should set default value if no `--tsconfig` flag is set', () => {
+			const options = parseArguments( [] );
+
+			expect( options.tsconfig ).to.equal( null );
+		} );
+
+		it( 'should parse `--tsconfig` to absolute path if it is set', () => {
+			stubs.cwd.returns( '/home/project' );
+			const options = parseArguments( [ '--tsconfig', './configs/tsconfig.json' ] );
+
+			expect( options.tsconfig ).to.be.equal( '/home/project/configs/tsconfig.json' );
+		} );
+	} );
 } );

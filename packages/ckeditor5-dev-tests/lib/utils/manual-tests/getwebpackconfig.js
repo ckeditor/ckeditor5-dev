@@ -20,6 +20,7 @@ const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
  * @param {String} options.buildDir
  * @param {String} options.themePath
  * @param {Boolean} options.disableWatch
+ * @param {String} [options.tsconfig]
  * @param {String} [options.language]
  * @param {Array.<String>} [options.additionalLanguages]
  * @param {String|null} [options.identityFile]
@@ -111,6 +112,9 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 						{
 							loader: 'ts-loader',
 							options: {
+								// Use tsconfig path specified in CLI arguments. If not present, fallback to 'tsconfig.json' which
+								// is the default value https://github.com/TypeStrong/ts-loader#configfile.
+								configFile: options.tsconfig || 'tsconfig.json',
 								// Override default settings specified in `tsconfig.json`.
 								compilerOptions: {
 									// Do not emit any JS file as these TypeScript files are just passed through webpack.
