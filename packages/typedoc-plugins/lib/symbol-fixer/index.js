@@ -5,7 +5,6 @@
 
 'use strict';
 
-const chalk = require( 'chalk' );
 const { Converter } = require( 'typedoc' );
 
 /**
@@ -27,18 +26,15 @@ function onEventCreateDeclaration() {
 		}
 
 		const symbolName = reflection.name.slice( 1, -1 );
-		const isKnownSymbol = Symbol[ symbolName ];
 
-		if ( !isKnownSymbol ) {
+		if ( Symbol[ symbolName ] ) {
+			reflection.name = `Symbol.${ symbolName }`;
+		} else {
 			const symbol = context.project.getSymbolFromReflection( reflection );
 			const node = symbol.declarations[ 0 ];
 
-			context.logger.warn( `Non-symbol wrapped in square brackets: ${ chalk.bold( reflection.name ) }`, node );
-
-			return;
+			context.logger.warn( 'Non-symbol wrapped in square brackets', node );
 		}
-
-		reflection.name = `Symbol.${ symbolName }`;
 	};
 }
 

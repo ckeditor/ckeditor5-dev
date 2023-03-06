@@ -4,7 +4,6 @@
   "description": "Various TypeDoc plugins developed by the CKEditor 5 team.",
   "keywords": [],
   "dependencies": {
-    "chalk": "^4.0.0",
     "typedoc": "^0.23.15",
     "typescript": "^4.6.4"
   },

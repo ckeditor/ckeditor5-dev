@@ -61,7 +61,7 @@ describe( 'typedoc-plugins/symbol-fixer', function() {
 		expect( warning ).to.be.a( 'string' );
 
 		// Verify a message reported once find an invalid symbol.
-		expect( warning ).to.contain( 'Non-symbol wrapped in square brackets:' );
+		expect( warning ).to.contain( 'Non-symbol wrapped in square brackets' );
 
 		// Verify whether logger shows an invalid piece of the code.
 		expect( warning ).to.contain( 'public [ Symbol.fake ](): Iterable<any> {' );
