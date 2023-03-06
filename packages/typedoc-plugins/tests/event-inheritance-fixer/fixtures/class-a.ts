@@ -7,16 +7,12 @@
  * @module fixtures/class-a
  */
 
-/**
- * @fires event-1-class-a
- * @fires event-2-class-a
- */
 export class ClassA {}
 
 /**
  * Event 1 from class A.
  *
- * @eventName event-1-class-a
+ * @eventName ~ClassA#event-1-class-a
  *
  * @param {String} p1 Description for first param.
  * @param {module:utils/object~Object} p2 Description for second param.
@@ -34,7 +30,7 @@ export type Event1ClassA = {
 /**
  * Event 2 from class A.
  *
- * @eventName event-2-class-a
+ * @eventName ~ClassA#event-2-class-a
  */
 export type Event2ClassA = {
 	name: string;

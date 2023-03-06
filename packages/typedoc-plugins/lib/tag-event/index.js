@@ -6,6 +6,7 @@
 'use strict';
 
 const { Converter, ReflectionKind, TypeParameterReflection, Comment, ReflectionFlag, IntrinsicType } = require( 'typedoc' );
+const { getTarget } = require( '../utils' );
 
 /**
  * The `typedoc-plugin-tag-event` collects event definitions from the `@eventName` tag and assigns them as the children of the class or
@@ -16,7 +17,8 @@ const { Converter, ReflectionKind, TypeParameterReflection, Comment, ReflectionF
  * the old `@event` tag.
  *
  * To correctly define an event, it must be associated with the exported type that describes that event, with the `name` and `args`
- * properties.
+ * properties. The value for the `@eventName` tag must be a valid link to a class or to the `Observable` interface, either a relative or
+ * an absolute one.
  *
  * To correctly define the event parameters, they must be defined in the `args` property. The `args` property is an array, where each item
  * describes a parameter that event emits. Item can be either of a primitive type, or a custom type that has own definition.
@@ -24,6 +26,8 @@ const { Converter, ReflectionKind, TypeParameterReflection, Comment, ReflectionF
  * Example:
  *
  * ```ts
+ * 		export class ExampleClass {}
+ *
  * 		export type ExampleType = {
  * 			name: string;
  * 		};
@@ -31,7 +35,7 @@ const { Converter, ReflectionKind, TypeParameterReflection, Comment, ReflectionF
  * 		/**
  * 		 * An event associated with exported type.
  * 		 *
- * 		 * @eventName foo-event
+ * 		 * @eventName ~ExampleClass#foo-event
  * 		 * @param p1 Description for first param.
  * 		 * @param p2 Description for second param.
  * 		 * @param p3 Description for third param.
@@ -66,19 +70,20 @@ function onEventEnd( context ) {
 			continue;
 		}
 
-		// Otherwise, if there is the `@eventName` tag found in a comment, extract the event name, which is the string just after the
-		// tag name. Example: for the `@eventName foo`, the event name would be `foo`.
-		const eventName = reflection.comment.getTag( '@eventName' ).content[ 0 ].text;
+		// Otherwise, if there is the `@eventName` tag found in a comment, extract the event link, which is the string just after the
+		// tag name. Example: for the `@eventName ~ExampleClass#foo-event`, the event link would be `~ExampleClass#foo-event`.
+		const eventTag = reflection.comment.getTag( '@eventName' ).content[ 0 ].text;
 
-		// Then, try to find a parent reflection to properly associate the event in the hierarchy. The parent can be either the `Observable`
-		// interface, or a class.
-		const parentReflection = findParentForEvent( eventName, reflection );
+		// Then, try to find the parent reflection to properly associate the event in the hierarchy.
+		const [ eventParent, eventName ] = eventTag.split( '#' );
+		const parentReflection = getTarget( reflection, eventParent );
 
-		if ( !parentReflection ) {
+		// The parent for an event can be either an interface or a class.
+		if ( !isClassOrInterface( parentReflection ) ) {
 			const symbol = context.project.getSymbolFromReflection( reflection );
 			const node = symbol.declarations[ 0 ];
 
-			context.logger.warn( `Skipping unsupported "${ eventName }" event.`, node );
+			context.logger.warn( `Skipping unsupported "${ eventTag }" event.`, node );
 
 			continue;
 		}
@@ -146,6 +151,24 @@ function onEventEnd( context ) {
 		// Copy the source location as it is the same as the location of the reflection containing the event.
 		eventReflection.sources = [ ...reflection.sources ];
 	}
+}
+
+/**
+ * Checks if the found parent reflection for an event is either an interface or a class.
+ *
+ * @param {require('typedoc').Reflection} reflection The found parent reflection for an event.
+ * @returns {Boolean}
+ */
+function isClassOrInterface( reflection ) {
+	if ( !reflection ) {
+		return false;
+	}
+
+	if ( reflection.kindString !== 'Class' && reflection.kindString !== 'Interface' ) {
+		return false;
+	}
+
+	return true;
 }
 
 /**
@@ -220,96 +243,4 @@ function getTargetTypeReflections( reflectionType ) {
 	}
 
 	return [ reflectionType ];
-}
-
-/**
- * Tries to find the best parent reflection for the event. The algorithm is as follows:
- *
- * (1) First, it tries to find the `Observable` interface.
- * (2) Then, if `Observable` interface is not found within the module, it traverses the ancestors of the reflection containing the specified
- *     event and searches for a class that fires this event.
- * (3) Otherwise, it tries to find the first default class within the same module.
- *
- * It returns `null` if no matching parent is found.
- *
- * @param {String} eventName The event name to be searched in the reflection parent.
- * @param {require('typedoc').Reflection} reflection The reflection that contains the event name.
- * @returns {require('typedoc').Reflection|null}
- */
-function findParentForEvent( eventName, reflection ) {
-	return findReflection( reflection, isObservableInterface ) ||
-		findReflection( reflection, isClassThatFiresEvent( eventName ) ) ||
-		findReflection( reflection, isDefaultClass );
-}
-
-/**
- * Recursively looks for a matching reflection from its ancestors. It not only checks the ancestors, but also all their siblings (children
- * belonging to the same parent).
- *
- * @param {require('typedoc').Reflection} reflection The reflection that is the search starting point.
- * @param {Function} callback The function that gets each reflection and decides if it meets the conditions.
- * @returns {require('typedoc').Reflection|null}
- */
-function findReflection( reflection, callback ) {
-	if ( !reflection.parent ) {
-		return null;
-	}
-
-	const found = reflection.parent.children.find( callback );
-
-	if ( found ) {
-		return found;
-	}
-
-	return findReflection( reflection.parent, callback );
-}
-
-/**
- * Checks if the reflection is the `Observable` interface.
- *
- * @param {require('typedoc').Reflection} reflection The reflection to be checked.
- * @returns {Boolean}
- */
-function isObservableInterface( reflection ) {
-	return reflection.kindString === 'Interface' && reflection.name === 'Observable';
-}
-
-/**
- * Returns a function that checks if the reflection is a class that fires the specified event.
- *
- * @param {String} eventName The event name to be searched in the reflection parent.
- * @returns {Function}
- */
-function isClassThatFiresEvent( eventName ) {
-	return reflection => {
-		if ( reflection.kindString !== 'Class' ) {
-			return false;
-		}
-
-		if ( !reflection.comment ) {
-			return false;
-		}
-
-		return reflection.comment
-			.getTags( '@fires' )
-			.some( tag => tag.content[ 0 ].text === eventName );
-	};
-}
-
-/**
- * Checks if the reflection is a default class.
- *
- * @param {require('typedoc').Reflection} reflection The reflection to be checked.
- * @returns {Boolean}
- */
-function isDefaultClass( reflection ) {
-	if ( reflection.kindString !== 'Class' ) {
-		return false;
-	}
-
-	if ( reflection.originalName !== 'default' ) {
-		return false;
-	}
-
-	return true;
 }

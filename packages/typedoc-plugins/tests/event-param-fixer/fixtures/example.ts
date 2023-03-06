@@ -21,12 +21,7 @@ export default class ExampleClass {
 }
 
 /**
- * @fires event-foo
- */
-export class CustomExampleNonDefaultClass extends ExampleClass {}
-
-/**
- * @eventName event-foo-no-text
+ * @eventName ~ExampleClass#event-foo-no-text
  */
 export type EventFooNoText = {
 	name: string;
@@ -35,7 +30,7 @@ export type EventFooNoText = {
 /**
  * An event associated with the type.
  *
- * @eventName event-foo
+ * @eventName ~ExampleClass#event-foo
  */
 export type EventFoo = {
 	name: string;
@@ -44,7 +39,7 @@ export type EventFoo = {
 /**
  * An event associated with the type. Event with three params.
  *
- * @eventName event-foo-with-params
+ * @eventName ~ExampleClass#event-foo-with-params
  *
  * @param {String} p1 Description for first param.
  * @param {module:utils/object~Object} p2 Description for second param.

@@ -9,13 +9,10 @@
 
 import { ClassA } from './class-a';
 
-/**
- * @fires event-3-class-b
- */
 export class ClassB extends ClassA {}
 
 /**
- * @eventName event-3-class-b
+ * @eventName ~ClassB#event-3-class-b
  */
 export type Event3ClassB = {
 	name: string;

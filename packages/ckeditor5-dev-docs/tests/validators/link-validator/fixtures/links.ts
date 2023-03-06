@@ -94,7 +94,7 @@ export class ClassWithLinks {
  * - valid one: {@link module:fixtures/links~ClassWithLinks#property link to a doclet},
  * - invalid one: {@link module:non-existing/module~Foo#bar link to a doclet}.
  *
- * @eventName event-example
+ * @eventName ~ClassWithLinks#event-example
  */
 export type EventExample = {
 	name: string;

@@ -5,12 +5,12 @@
 
 'use strict';
 
+const { utils } = require( '@ckeditor/typedoc-plugins' );
 const seeValidator = require( './see-validator' );
 const linkValidator = require( './link-validator' );
 const firesValidator = require( './fires-validator' );
 const overloadsValidator = require( './overloads-validator' );
 const moduleValidator = require( './module-validator' );
-const { getNode } = require( './utils' );
 
 /**
  * Validates the CKEditor 5 documentation.
@@ -39,7 +39,7 @@ module.exports = {
 
 		for ( const validator of validators ) {
 			validator( project, ( error, reflection ) => {
-				const node = getNode( reflection );
+				const node = utils.getNode( reflection );
 
 				errors.set( node, { error, node } );
 			} );

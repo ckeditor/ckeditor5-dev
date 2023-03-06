@@ -12,6 +12,7 @@ module.exports = {
 	isReflectionValid,
 	isIdentifierValid,
 	isAbsoluteIdentifier,
+	getTarget,
 	getNode
 };
 
@@ -48,11 +49,7 @@ function isIdentifierValid( reflection, identifier ) {
 		return true;
 	}
 
-	const absoluteIdentifier = isAbsoluteIdentifier( identifier ) ?
-		identifier :
-		toAbsoluteIdentifier( reflection, identifier );
-
-	return hasTarget( reflection.project, absoluteIdentifier );
+	return !!getTarget( reflection, identifier );
 }
 
 /**
@@ -136,14 +133,23 @@ function getNode( reflection ) {
 }
 
 /**
- * Checks if the provided identifier targets an existing reflection within the whole project.
+ * Checks if the provided identifier targets an existing reflection within the whole project and returns found reflection.
+ * If the target is not found, returns null.
  *
- * @param {require('typedoc').ProjectReflection} project The project reflection.
- * @param {String} identifier The absolute identifier to locate the target reflection.
- * @returns {Boolean}
+ * @param {require('typedoc').Reflection} reflection The reflection that contain given identifier.
+ * @param {String} identifier The identifier to locate the target reflection.
+ * @returns {require('typedoc').Reflection|null}
  */
-function hasTarget( project, identifier ) {
-	const parts = identifier
+function getTarget( reflection, identifier ) {
+	if ( !identifier ) {
+		return null;
+	}
+
+	const absoluteIdentifier = isAbsoluteIdentifier( identifier ) ?
+		identifier :
+		toAbsoluteIdentifier( reflection, identifier );
+
+	const parts = absoluteIdentifier
 		// Remove leading "module:" prefix from the doclet longname.
 		.substring( 'module:'.length )
 		// Then, split the rest of the longname into separate parts.
@@ -165,20 +171,20 @@ function hasTarget( project, identifier ) {
 		parts.push( lastPart );
 	}
 
-	const targetReflection = project.getChildByName( parts );
+	const targetReflection = reflection.project.getChildByName( parts );
 
 	if ( !targetReflection ) {
-		return false;
+		return null;
 	}
 
 	// Now, when the target reflection is found, do some checks whether it matches the identifier.
 	// (1) Check if the labeled signature targets an existing signature.
 	if ( isIdentifierLabeledSignature ) {
 		if ( !targetReflection.signatures ) {
-			return false;
+			return null;
 		}
 
-		return targetReflection.signatures.some( signature => {
+		const targetSignature = targetReflection.signatures.find( signature => {
 			if ( !signature.comment ) {
 				return false;
 			}
@@ -191,15 +197,17 @@ function hasTarget( project, identifier ) {
 
 			return labelTag.content[ 0 ].text === lastPartLabel;
 		} );
+
+		return targetSignature || null;
 	}
 
-	const isIdentifierStatic = identifier.includes( '.' );
+	const isIdentifierStatic = absoluteIdentifier.includes( '.' );
 	const isTargetReflectionStatic = Boolean( targetReflection.flags && targetReflection.flags.isStatic );
 
 	// (2) Check if the static/non-static reflection flag matches the separator used in the identifier.
 	if ( isIdentifierStatic !== isTargetReflectionStatic ) {
-		return false;
+		return null;
 	}
 
-	return true;
+	return targetReflection;
 }

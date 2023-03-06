@@ -4,12 +4,9 @@
  */
 
 /**
- * @module fixtures/custommodule
+ * @module fixtures/exampleinterface
  */
 
-/**
- * @eventName event-foo-no-class
- */
-export type EventFooNoText = {
-	name: string;
-};
+export interface ExampleInterface {
+	set( name: any ): void;
+}

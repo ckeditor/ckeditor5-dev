@@ -8,6 +8,7 @@ const glob = require( 'fast-glob' );
 const TypeDoc = require( 'typedoc' );
 
 const utils = require( '../utils' );
+const { pluginTagEvent, pluginEventInheritanceFixer } = require( '../../lib' );
 
 describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 	this.timeout( 10 * 1000 );
@@ -17,8 +18,8 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 	const FIXTURES_PATH = utils.normalizePath( utils.ROOT_TEST_DIRECTORY, 'event-inheritance-fixer', 'fixtures' );
 	const TSCONFIG_PATH = utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' );
 	const PLUGINS = [
-		require.resolve( '@ckeditor/typedoc-plugins/lib/tag-event' ),
-		require.resolve( '@ckeditor/typedoc-plugins/lib/event-inheritance-fixer' )
+		pluginTagEvent,
+		pluginEventInheritanceFixer
 	];
 
 	before( async () => {

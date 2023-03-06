@@ -5,9 +5,10 @@
 
 const { expect } = require( 'chai' );
 const TypeDoc = require( 'typedoc' );
+const glob = require( 'fast-glob' );
 
 const utils = require( '../utils' );
-const glob = require( 'fast-glob' );
+const { pluginSymbolFixer } = require( '../../lib' );
 
 describe( 'typedoc-plugins/symbol-fixer', function() {
 	this.timeout( 10 * 1000 );
@@ -33,7 +34,7 @@ describe( 'typedoc-plugins/symbol-fixer', function() {
 			logLevel: 'Error',
 			entryPoints: files,
 			plugin: [
-				require.resolve( '@ckeditor/typedoc-plugins/lib/symbol-fixer' )
+				pluginSymbolFixer
 			],
 			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );
@@ -61,7 +62,7 @@ describe( 'typedoc-plugins/symbol-fixer', function() {
 		expect( warning ).to.be.a( 'string' );
 
 		// Verify a message reported once find an invalid symbol.
-		expect( warning ).to.contain( 'Non-symbol wrapped in square brackets:' );
+		expect( warning ).to.contain( 'Non-symbol wrapped in square brackets: "[fake]"' );
 
 		// Verify whether logger shows an invalid piece of the code.
 		expect( warning ).to.contain( 'public [ Symbol.fake ](): Iterable<any> {' );

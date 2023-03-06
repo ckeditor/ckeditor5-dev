@@ -8,6 +8,7 @@ const glob = require( 'fast-glob' );
 const TypeDoc = require( 'typedoc' );
 
 const utils = require( '../utils' );
+const { pluginTagError } = require( '../../lib' );
 
 describe( 'typedoc-plugins/tag-error', function() {
 	this.timeout( 10 * 1000 );
@@ -33,7 +34,7 @@ describe( 'typedoc-plugins/tag-error', function() {
 			logLevel: 'Error',
 			entryPoints: files,
 			plugin: [
-				require.resolve( '@ckeditor/typedoc-plugins/lib/tag-error' )
+				pluginTagError
 			],
 			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );
