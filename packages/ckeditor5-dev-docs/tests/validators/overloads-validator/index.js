@@ -36,7 +36,10 @@ describe( 'dev-docs/validators/overloads-validator', function() {
 			cwd: FIXTURES_PATH,
 			tsconfig: TSCONFIG_PATH,
 			sourceFiles: [ SOURCE_FILES ],
-			strict: false
+			strict: false,
+			validatorOptions: {
+				enableOverloadValidator: true
+			}
 		} );
 
 		logStub.restore();

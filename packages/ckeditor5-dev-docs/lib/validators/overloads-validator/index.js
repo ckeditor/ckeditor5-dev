@@ -8,6 +8,9 @@
 const { ReflectionKind } = require( 'typedoc' );
 const { isReflectionValid } = require( '../utils' );
 
+// The `@label` validator is currently not used.
+// See: https://github.com/ckeditor/ckeditor5/issues/13591.
+
 /**
  * Validates the output produced by TypeDoc.
  *
