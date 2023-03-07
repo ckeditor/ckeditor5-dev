@@ -89,18 +89,19 @@ function onEventEnd( context ) {
 
 /**
  * Finds all derived classes and interfaces from the specified base reflection. It traverses the whole inheritance chain.
- * If the base reflection is not extended, empty array is returned.
+ * If the base reflection is not extended or implemented by any other reflection, empty array is returned.
  *
  * @param {require('typedoc').Reflection} reflection The base reflection from which the derived ones will be searched.
  * @returns {Array.<require('typedoc').Reflection>}
  */
 function getDerivedReflections( reflection ) {
-	if ( !reflection.extendedBy ) {
-		return [];
-	}
+	const extendedBy = reflection.extendedBy || [];
+	const implementedBy = reflection.implementedBy || [];
 
-	return reflection.extendedBy
-		.filter( entry => entry.reflection )
+	return [
+		...extendedBy,
+		...implementedBy
+	].filter( entry => entry.reflection )
 		.flatMap( entry => {
 			const derivedReflection = entry.reflection;
 
