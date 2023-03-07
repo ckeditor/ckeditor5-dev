@@ -98,10 +98,8 @@ function getDerivedReflections( reflection ) {
 	const extendedBy = reflection.extendedBy || [];
 	const implementedBy = reflection.implementedBy || [];
 
-	return [
-		...extendedBy,
-		...implementedBy
-	].filter( entry => entry.reflection )
+	return [ ...extendedBy, ...implementedBy ]
+		.filter( entry => entry.reflection )
 		.flatMap( entry => {
 			const derivedReflection = entry.reflection;
 
