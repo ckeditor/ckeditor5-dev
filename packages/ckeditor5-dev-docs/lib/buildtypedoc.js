@@ -31,6 +31,7 @@ module.exports = async function build( config ) {
 	const sourceFilePatterns = config.sourceFiles.filter( Boolean );
 	const strictMode = config.strict || false;
 	const extraPlugins = config.extraPlugins || [];
+	const validatorOptions = config.validatorOptions || {};
 
 	const files = await glob( sourceFilePatterns );
 	const typeDoc = new TypeDoc.Application();
@@ -87,7 +88,7 @@ module.exports = async function build( config ) {
 		throw 'Something went wrong with TypeDoc.';
 	}
 
-	const validationResult = validators.validate( conversionResult, typeDoc );
+	const validationResult = validators.validate( conversionResult, typeDoc, validatorOptions );
 
 	if ( !validationResult && strictMode ) {
 		throw 'Something went wrong with TypeDoc.';

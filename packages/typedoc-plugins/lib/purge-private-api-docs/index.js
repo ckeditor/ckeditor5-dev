@@ -5,8 +5,7 @@
 
 'use strict';
 
-const { Converter, ReflectionKind } = require( 'typedoc' );
-const ts = require( 'typescript' );
+const { Converter, ReflectionKind, TypeScript } = require( 'typedoc' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 
@@ -179,7 +178,7 @@ function isPublicApi( node ) {
 			}
 
 			return jsDoc.tags.some( tag => {
-				if ( tag.tagName.kind !== ts.SyntaxKind.Identifier ) {
+				if ( tag.tagName.kind !== TypeScript.SyntaxKind.Identifier ) {
 					return false;
 				}
 
