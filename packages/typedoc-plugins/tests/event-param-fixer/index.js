@@ -9,12 +9,7 @@ const glob = require( 'fast-glob' );
 const TypeDoc = require( 'typedoc' );
 
 const utils = require( '../utils' );
-const {
-	pluginModuleFixer,
-	pluginTagEvent,
-	pluginTagObservable,
-	pluginEventParamFixer
-} = require( '../../lib' );
+const { plugins } = require( '../../lib' );
 
 describe( 'typedoc-plugins/event-param-fixer', function() {
 	this.timeout( 10 * 1000 );
@@ -25,10 +20,10 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 	const TSCONFIG_PATH = utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' );
 	const PLUGINS = [
 		'typedoc-plugin-rename-defaults',
-		pluginModuleFixer,
-		pluginTagEvent,
-		pluginTagObservable,
-		pluginEventParamFixer
+		plugins[ 'typedoc-plugin-module-fixer' ],
+		plugins[ 'typedoc-plugin-tag-event' ],
+		plugins[ 'typedoc-plugin-tag-observable' ],
+		plugins[ 'typedoc-plugin-event-param-fixer' ]
 	];
 
 	before( async () => {

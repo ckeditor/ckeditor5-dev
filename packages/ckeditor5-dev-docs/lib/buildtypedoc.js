@@ -7,17 +7,7 @@
 
 const glob = require( 'fast-glob' );
 const TypeDoc = require( 'typedoc' );
-const {
-	pluginEventInheritanceFixer,
-	pluginEventParamFixer,
-	pluginInterfaceAugmentationFixer,
-	pluginModuleFixer,
-	pluginPurgePrivateApiDocs,
-	pluginSymbolFixer,
-	pluginTagError,
-	pluginTagEvent,
-	pluginTagObservable
-} = require( '@ckeditor/typedoc-plugins' );
+const { plugins } = require( '@ckeditor/typedoc-plugins' );
 
 const validators = require( './validators' );
 
@@ -62,19 +52,19 @@ module.exports = async function build( config ) {
 			// Fixes `"name": 'default" in the output project.
 			'typedoc-plugin-rename-defaults',
 
-			pluginModuleFixer,
-			pluginSymbolFixer,
-			pluginInterfaceAugmentationFixer,
-			pluginTagError,
-			pluginTagEvent,
-			pluginTagObservable,
-			pluginPurgePrivateApiDocs,
+			plugins[ 'typedoc-plugin-module-fixer' ],
+			plugins[ 'typedoc-plugin-symbol-fixer' ],
+			plugins[ 'typedoc-plugin-interface-augmentation-fixer' ],
+			plugins[ 'typedoc-plugin-tag-error' ],
+			plugins[ 'typedoc-plugin-tag-event' ],
+			plugins[ 'typedoc-plugin-tag-observable' ],
+			plugins[ 'typedoc-plugin-purge-private-api-docs' ],
 
 			// The `event-inheritance-fixer` plugin must be loaded after `tag-event` plugin, as it depends on its output.
-			pluginEventInheritanceFixer,
+			plugins[ 'typedoc-plugin-event-inheritance-fixer' ],
 
 			// The `event-param-fixer` plugin must be loaded after `tag-event` and `tag-observable` plugins, as it depends on their output.
-			pluginEventParamFixer,
+			plugins[ 'typedoc-plugin-event-param-fixer' ],
 
 			...extraPlugins
 		]

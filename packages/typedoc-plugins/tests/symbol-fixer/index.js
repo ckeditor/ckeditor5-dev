@@ -8,7 +8,7 @@ const TypeDoc = require( 'typedoc' );
 const glob = require( 'fast-glob' );
 
 const utils = require( '../utils' );
-const { pluginSymbolFixer } = require( '../../lib' );
+const { plugins } = require( '../../lib' );
 
 describe( 'typedoc-plugins/symbol-fixer', function() {
 	this.timeout( 10 * 1000 );
@@ -34,7 +34,7 @@ describe( 'typedoc-plugins/symbol-fixer', function() {
 			logLevel: 'Error',
 			entryPoints: files,
 			plugin: [
-				pluginSymbolFixer
+				plugins[ 'typedoc-plugin-symbol-fixer' ]
 			],
 			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );

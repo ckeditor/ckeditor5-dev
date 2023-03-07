@@ -8,7 +8,7 @@ const glob = require( 'fast-glob' );
 const TypeDoc = require( 'typedoc' );
 
 const utils = require( '../utils' );
-const { pluginModuleFixer, pluginInterfaceAugmentationFixer } = require( '../../lib' );
+const { plugins } = require( '../../lib' );
 
 describe( 'typedoc-plugins/interface-augmentation-fixer', function() {
 	this.timeout( 10 * 1000 );
@@ -34,8 +34,8 @@ describe( 'typedoc-plugins/interface-augmentation-fixer', function() {
 			logLevel: 'Error',
 			entryPoints: files,
 			plugin: [
-				pluginModuleFixer,
-				pluginInterfaceAugmentationFixer
+				plugins[ 'typedoc-plugin-module-fixer' ],
+				plugins[ 'typedoc-plugin-interface-augmentation-fixer' ]
 			],
 			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );

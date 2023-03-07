@@ -8,7 +8,7 @@ const glob = require( 'fast-glob' );
 const TypeDoc = require( 'typedoc' );
 
 const utils = require( '../utils' );
-const { pluginModuleFixer, pluginPurgePrivateApiDocs } = require( '../../lib' );
+const { plugins } = require( '../../lib' );
 
 describe( 'typedoc-plugins/purge-private-api-docs', function() {
 	this.timeout( 10 * 1000 );
@@ -37,8 +37,8 @@ describe( 'typedoc-plugins/purge-private-api-docs', function() {
 				'@internal'
 			],
 			plugin: [
-				pluginModuleFixer,
-				pluginPurgePrivateApiDocs
+				plugins[ 'typedoc-plugin-module-fixer' ],
+				plugins[ 'typedoc-plugin-purge-private-api-docs' ]
 			],
 			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );

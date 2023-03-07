@@ -9,7 +9,7 @@ const glob = require( 'fast-glob' );
 const TypeDoc = require( 'typedoc' );
 
 const utils = require( '../utils' );
-const { pluginTagEvent } = require( '../../lib' );
+const { plugins } = require( '../../lib' );
 
 describe( 'typedoc-plugins/tag-event', function() {
 	this.timeout( 10 * 1000 );
@@ -39,7 +39,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 			entryPoints: files,
 			plugin: [
 				'typedoc-plugin-rename-defaults',
-				pluginTagEvent
+				plugins[ 'typedoc-plugin-tag-event' ]
 			],
 			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );

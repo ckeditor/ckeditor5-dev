@@ -69,18 +69,18 @@ function onEventEnd( context ) {
 			continue;
 		}
 
-		// Otherwise, if there is the `@eventName` tag found in a comment, extract the link to its parent, which is the string just after
+		// Otherwise, if there is the `@eventName` tag found in a comment, extract the link to its owner, which is the string just after
 		// the tag name.
 		//
 		// Example: for the `@eventName ~ExampleClass#foo-event`, the event link would be `~ExampleClass#foo-event`.
 		const eventTag = reflection.comment.getTag( '@eventName' ).content[ 0 ].text;
 
-		// Then, try to find the parent reflection to properly associate the event in the hierarchy.
-		const [ eventParent, eventName ] = eventTag.split( '#' );
-		const parentReflection = getTarget( reflection, eventParent );
+		// Then, try to find the owner reflection to properly associate the event in the hierarchy.
+		const [ eventOwner, eventName ] = eventTag.split( '#' );
+		const ownerReflection = getTarget( reflection, eventOwner );
 
-		// The parent for an event can be either a class or an interface.
-		if ( !isClassOrInterface( parentReflection ) ) {
+		// The owner for an event can be either a class or an interface.
+		if ( !isClassOrInterface( ownerReflection ) ) {
 			const symbol = context.project.getSymbolFromReflection( reflection );
 			const node = symbol.declarations[ 0 ];
 
@@ -89,10 +89,10 @@ function onEventEnd( context ) {
 			continue;
 		}
 
-		// Create a new reflection object for the event, but take into account the found parent reflection as the new scope. It will cause
-		// the newly created event reflection to be automatically associated as a child of this parent.
+		// Create a new reflection object for the event, but take into account the found owner reflection as the new scope. It will cause
+		// the newly created event reflection to be automatically associated as a child of this owner.
 		const eventReflection = context
-			.withScope( parentReflection )
+			.withScope( ownerReflection )
 			.createDeclarationReflection(
 				ReflectionKind.ObjectLiteral,
 				undefined,
@@ -155,9 +155,9 @@ function onEventEnd( context ) {
 }
 
 /**
- * Checks if the found parent reflection for an event is either an interface or a class.
+ * Checks if the found owner reflection for an event is either an interface or a class.
  *
- * @param {require('typedoc').Reflection} reflection The found parent reflection for an event.
+ * @param {require('typedoc').Reflection} reflection The found owner reflection for an event.
  * @returns {Boolean}
  */
 function isClassOrInterface( reflection ) {
