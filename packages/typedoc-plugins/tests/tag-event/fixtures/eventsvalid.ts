@@ -184,6 +184,13 @@ export type EventFooAbsolute = {
 };
 
 /**
+ * @eventName module:eventsvalid~EventsValidClass#event:event-foo-absolute-with-prefix
+ */
+export type EventFooAbsoluteWithPrefix = {
+	name: string;
+};
+
+/**
  * @eventName module:exampleinterface~ExampleInterface#event-change:{property}
  */
 export type InterfaceChangeEvent = {

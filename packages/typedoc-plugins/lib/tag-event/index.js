@@ -17,8 +17,7 @@ const { getTarget } = require( '../utils' );
  * the old `@event` tag.
  *
  * To correctly define an event, it must be associated with the exported type that describes that event, with the `name` and `args`
- * properties. The value for the `@eventName` tag must be a valid link to a class or to the `Observable` interface, either a relative or
- * an absolute one.
+ * properties. The value for the `@eventName` tag must be a valid link to a class or to an interface, either a relative or an absolute one.
  *
  * To correctly define the event parameters, they must be defined in the `args` property. The `args` property is an array, where each item
  * describes a parameter that event emits. Item can be either of a primitive type, or a custom type that has own definition.
@@ -70,15 +69,17 @@ function onEventEnd( context ) {
 			continue;
 		}
 
-		// Otherwise, if there is the `@eventName` tag found in a comment, extract the event link, which is the string just after the
-		// tag name. Example: for the `@eventName ~ExampleClass#foo-event`, the event link would be `~ExampleClass#foo-event`.
+		// Otherwise, if there is the `@eventName` tag found in a comment, extract the link to its parent, which is the string just after
+		// the tag name.
+		//
+		// Example: for the `@eventName ~ExampleClass#foo-event`, the event link would be `~ExampleClass#foo-event`.
 		const eventTag = reflection.comment.getTag( '@eventName' ).content[ 0 ].text;
 
 		// Then, try to find the parent reflection to properly associate the event in the hierarchy.
 		const [ eventParent, eventName ] = eventTag.split( '#' );
 		const parentReflection = getTarget( reflection, eventParent );
 
-		// The parent for an event can be either an interface or a class.
+		// The parent for an event can be either a class or an interface.
 		if ( !isClassOrInterface( parentReflection ) ) {
 			const symbol = context.project.getSymbolFromReflection( reflection );
 			const node = symbol.declarations[ 0 ];
@@ -96,7 +97,7 @@ function onEventEnd( context ) {
 				ReflectionKind.ObjectLiteral,
 				undefined,
 				undefined,
-				`event:${ eventName }`
+				normalizeEventName( eventName )
 			);
 
 		eventReflection.kindString = 'Event';
@@ -243,4 +244,18 @@ function getTargetTypeReflections( reflectionType ) {
 	}
 
 	return [ reflectionType ];
+}
+
+/**
+ * Returns the normalized event name to make sure that it always starts with the "event:" prefix.
+ *
+ * @param {String} eventName
+ * @returns {String}
+ */
+function normalizeEventName( eventName ) {
+	if ( eventName.startsWith( 'event:' ) ) {
+		return eventName;
+	}
+
+	return `event:${ eventName }`;
 }

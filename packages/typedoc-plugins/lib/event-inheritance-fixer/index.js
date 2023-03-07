@@ -10,8 +10,8 @@ const { Converter, ReflectionKind, ReferenceType } = require( 'typedoc' );
 /**
  * The `typedoc-plugin-event-inheritance-fixer` takes care of inheriting events, which are not handled by TypeDoc by default.
  *
- * If a class fires an event and this class is a base class for another class, then all events from the base class are copied and inserted
- * into each derived class.
+ * Event can be inherited from a class or from an interface. If a class or an interface fires an event and it is a base for another class or
+ * interface, then all events from the base reflection are copied and inserted into each derived reflection.
  */
 module.exports = {
 	load( app ) {
@@ -20,40 +20,46 @@ module.exports = {
 };
 
 function onEventEnd( context ) {
-	const classReflections = context.project.getReflectionsByKind( ReflectionKind.Class );
+	// Event can be assigned as a child to a class or to an interface.
+	const reflections = context.project.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.Interface );
 
-	for ( const classReflection of classReflections ) {
-		const eventReflections = classReflection.children.filter( reflection => reflection.kindString === 'Event' );
+	for ( const reflection of reflections ) {
+		// If an interface does not contain any children, skip it.
+		if ( !reflection.children ) {
+			continue;
+		}
 
-		// If class does not fire events, skip it.
+		const eventReflections = reflection.children.filter( reflection => reflection.kindString === 'Event' );
+
+		// If class or interface does not fire events, skip it.
 		if ( !eventReflections.length ) {
 			continue;
 		}
 
-		// Otherwise, find all derived classes in the whole inheritance chain.
-		const derivedClassReflections = getDerivedClasses( classReflection );
+		// Otherwise, find all derived classes and interfaces in the whole inheritance chain.
+		const derivedReflections = getDerivedReflections( reflection );
 
-		// If class is not extended by another class, skip it.
-		if ( !derivedClassReflections.length ) {
+		// If current reflection is not extended by another class, skip it.
+		if ( !derivedReflections.length ) {
 			continue;
 		}
 
-		// For each derived class...
-		for ( const derivedClass of derivedClassReflections ) {
-			// ...and for each event from the base class...
+		// For each derived reflection...
+		for ( const derivedReflection of derivedReflections ) {
+			// ...and for each event from the base reflection...
 			for ( const eventReflection of eventReflections ) {
-				// ...skip processing the event if derived class already has it.
-				const hasEvent = derivedClass.children
+				// ...skip processing the event if derived reflection already has it.
+				const hasEvent = derivedReflection.children
 					.some( child => child.kindString === 'Event' && child.name === eventReflection.name );
 
 				if ( hasEvent ) {
 					continue;
 				}
 
-				// Otherwise, create and insert new event reflection (with cloned event properties from the base class) as the child of the
-				// derived class.
+				// Otherwise, create and insert new event reflection (with cloned event properties from the base reflection) as the child
+				// of the derived reflection.
 				const clonedEventReflection = context
-					.withScope( derivedClass )
+					.withScope( derivedReflection )
 					.createDeclarationReflection(
 						ReflectionKind.ObjectLiteral,
 						undefined,
@@ -68,7 +74,7 @@ function onEventEnd( context ) {
 				clonedEventReflection.sources = [ ...eventReflection.sources ];
 
 				clonedEventReflection.inheritedFrom = ReferenceType.createResolvedReference(
-					`${ classReflection.name }.${ eventReflection.name }`,
+					`${ reflection.name }.${ eventReflection.name }`,
 					eventReflection,
 					context.project
 				);
@@ -82,25 +88,25 @@ function onEventEnd( context ) {
 }
 
 /**
- * Finds all derived classes from the specified base class. It traverses the whole inheritance chain, up to the last derived class. If the
- * base class is not extended, empty array is returned.
+ * Finds all derived classes and interfaces from the specified base reflection. It traverses the whole inheritance chain.
+ * If the base reflection is not extended, empty array is returned.
  *
- * @param {require('typedoc').Reflection} classReflection The base class from which the derived classes will be searched.
+ * @param {require('typedoc').Reflection} reflection The base reflection from which the derived ones will be searched.
  * @returns {Array.<require('typedoc').Reflection>}
  */
-function getDerivedClasses( classReflection ) {
-	if ( !classReflection.extendedBy ) {
+function getDerivedReflections( reflection ) {
+	if ( !reflection.extendedBy ) {
 		return [];
 	}
 
-	return classReflection.extendedBy
+	return reflection.extendedBy
 		.filter( entry => entry.reflection )
 		.flatMap( entry => {
-			const derivedClass = entry.reflection;
+			const derivedReflection = entry.reflection;
 
 			return [
-				derivedClass,
-				...getDerivedClasses( derivedClass )
+				derivedReflection,
+				...getDerivedReflections( derivedReflection )
 			];
 		} );
 }

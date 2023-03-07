@@ -57,24 +57,44 @@ describe( 'typedoc-plugins/tag-event', function() {
 		const eventDefinitions = conversionResult.getReflectionsByKind( TypeDoc.ReflectionKind.All )
 			.filter( children => children.kindString === 'Event' );
 
-		// There should be the following correctly defined events:
-		// * `event:event-foo`
-		// * `event:event-foo-no-text`
-		// * `event:event-foo-with-params`
-		// * `event:event-foo-no-content`
-		// * `event:event-foo-empty-args`
-		// * `event:event-foo-optional-args`
-		// * `event:event-foo-inline-args`
-		// * `event:event-foo-anonymous-args`
-		// * `event:event-foo-anonymous-optional-args`
-		// * `event:event-foo-reference`
-		// * `event:event-foo-generic-from-type-arg`
-		// * `event:event-foo-generic-from-base-type`
-		// * `event:event-foo-complex`
-		// * `event:event-foo-absolute`
-		// * `event:event-change:{property}`
-		// * `event:event-set:{property}`
-		expect( eventDefinitions ).to.lengthOf( 16 );
+		expect( eventDefinitions ).to.lengthOf( 17 );
+
+		// The order of found events does not matter, so just check if all of them are found.
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-no-text' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-with-params' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-no-content' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-empty-args' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-optional-args' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-inline-args' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-anonymous-args' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-anonymous-optional-args' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-reference' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-generic-from-type-arg' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-generic-from-base-type' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-complex' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-absolute' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-absolute-with-prefix' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-change:{property}' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-set:{property}' ) ).to.not.be.undefined;
+	} );
+
+	it( 'should find all event tags within the class', () => {
+		const eventDefinitions = conversionResult.children
+			.find( entry => entry.name === 'eventsvalid' ).children
+			.find( entry => entry.kindString === 'Class' && entry.name === 'EventsValidClass' ).children
+			.filter( children => children.kindString === 'Event' );
+
+		expect( eventDefinitions ).to.lengthOf( 15 );
+	} );
+
+	it( 'should find all event tags within the interface', () => {
+		const eventDefinitions = conversionResult.children
+			.find( entry => entry.name === 'exampleinterface' ).children
+			.find( entry => entry.kindString === 'Interface' && entry.name === 'ExampleInterface' ).children
+			.filter( children => children.kindString === 'Event' );
+
+		expect( eventDefinitions ).to.lengthOf( 2 );
 	} );
 
 	it( 'should inform if the class for an event has not been found', () => {
@@ -91,24 +111,6 @@ describe( 'typedoc-plugins/tag-event', function() {
 		for ( const eventName of invalidEventNameTags ) {
 			expect( typeDoc.logger.warn.calledWith( `Skipping unsupported "${ eventName }" event.` ) ).to.be.true;
 		}
-	} );
-
-	it( 'should find all event tags within the class', () => {
-		const eventDefinitions = conversionResult.children
-			.find( entry => entry.name === 'eventsvalid' ).children
-			.find( entry => entry.kindString === 'Class' && entry.name === 'EventsValidClass' ).children
-			.filter( children => children.kindString === 'Event' );
-
-		expect( eventDefinitions ).to.lengthOf( 14 );
-	} );
-
-	it( 'should find all event tags within the interface', () => {
-		const eventDefinitions = conversionResult.children
-			.find( entry => entry.name === 'exampleinterface' ).children
-			.find( entry => entry.kindString === 'Interface' && entry.name === 'ExampleInterface' ).children
-			.filter( children => children.kindString === 'Event' );
-
-		expect( eventDefinitions ).to.lengthOf( 2 );
 	} );
 
 	describe( 'event definitions', () => {

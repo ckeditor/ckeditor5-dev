@@ -54,6 +54,15 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 	//     ⤷ ClassC
 	// ClassD
 
+	// -------------------
+	// INTERFACE HIERARCHY
+	// -------------------
+	//
+	// InterfaceA
+	//  ⤷ InterfaceB
+	//     ⤷ InterfaceC
+	// InterfaceD
+
 	// ------
 	// EVENTS
 	// ------
@@ -67,37 +76,74 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 	//     ⤷ ClassC ⟶ "event:event-2-class-a" (overwritten in ClassC)
 	//     ⤷ ClassC ⟶ "event:event-3-class-b" (inherited from ClassB)
 
+	// InterfaceA ⟶ "event:event-1-interface-a"
+	// InterfaceA ⟶ "event:event-2-interface-a"
+	//  ⤷ InterfaceB ⟶ "event:event-1-interface-a" (inherited from InterfaceA)
+	//  ⤷ InterfaceB ⟶ "event:event-2-interface-a" (inherited from InterfaceA)
+	//  ⤷ InterfaceB ⟶ "event:event-3-interface-b"
+	//     ⤷ InterfaceC ⟶ "event:event-1-interface-a" (inherited from InterfaceA)
+	//     ⤷ InterfaceC ⟶ "event:event-2-interface-a" (overwritten in InterfaceC)
+	//     ⤷ InterfaceC ⟶ "event:event-3-interface-b" (inherited from InterfaceB)
+
 	it( 'should find all events within the project', () => {
-		expect( events ).to.lengthOf( 8 );
+		// There are 8 events from classes and 8 events from interfaces.
+		expect( events ).to.lengthOf( 16 );
 
 		// The order of found events does not matter, so just check if all of them are found.
-		expect( events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-3-class-b' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassC' && event.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassC' && event.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassC' && event.name === 'event:event-3-class-b' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'ClassA' && evt.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'ClassA' && evt.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'ClassB' && evt.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'ClassB' && evt.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'ClassB' && evt.name === 'event:event-3-class-b' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'ClassC' && evt.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'ClassC' && evt.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'ClassC' && evt.name === 'event:event-3-class-b' ) ).to.not.be.undefined;
+
+		expect( events.find( evt => evt.parent.name === 'InterfaceA' && evt.name === 'event:event-1-interface-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'InterfaceA' && evt.name === 'event:event-2-interface-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'InterfaceB' && evt.name === 'event:event-1-interface-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'InterfaceB' && evt.name === 'event:event-2-interface-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'InterfaceB' && evt.name === 'event:event-3-interface-b' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'InterfaceC' && evt.name === 'event:event-1-interface-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'InterfaceC' && evt.name === 'event:event-2-interface-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'InterfaceC' && evt.name === 'event:event-3-interface-b' ) ).to.not.be.undefined;
 	} );
 
-	it( 'should create new events with own ids in the inherited classes', () => {
+	it( 'should create new events with own ids in the inherited classes and interfaces', () => {
 		const numberOfUniqueEvents = new Set( events.map( event => event.id ) ).size;
 		const numberOfExpectedEvents = events.length;
 
 		expect( numberOfUniqueEvents ).to.equal( numberOfExpectedEvents );
 	} );
 
-	it( 'should clone event comment in the inherited classes', () => {
-		const baseEventClassA = events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-1-class-a' );
-		const inheritedEventClassB = events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-1-class-a' );
-		const inheritedEventClassC = events.find( event => event.parent.name === 'ClassC' && event.name === 'event:event-1-class-a' );
+	it( 'should clone event comment in the inherited classes and interfaces', () => {
+		const baseEventClassA = events.find( evt => evt.parent.name === 'ClassA' && evt.name === 'event:event-1-class-a' );
+		const inheritedEventClassB = events.find( evt => evt.parent.name === 'ClassB' && evt.name === 'event:event-1-class-a' );
+		const inheritedEventClassC = events.find( evt => evt.parent.name === 'ClassC' && evt.name === 'event:event-1-class-a' );
+
+		const baseEventInterfaceA = events.find( evt => evt.parent.name === 'InterfaceA' && evt.name === 'event:event-1-interface-a' );
+		const inheritedEventInterfaceB = events.find( evt => evt.parent.name === 'InterfaceB' && evt.name === 'event:event-1-interface-a' );
+		const inheritedEventInterfaceC = events.find( evt => evt.parent.name === 'InterfaceC' && evt.name === 'event:event-1-interface-a' );
 
 		expect( baseEventClassA.comment ).to.not.equal( inheritedEventClassB.comment );
 		expect( baseEventClassA.comment ).to.not.equal( inheritedEventClassC.comment );
 		expect( inheritedEventClassB.comment ).to.not.equal( inheritedEventClassC.comment );
 
-		for ( const event of [ baseEventClassA, inheritedEventClassB, inheritedEventClassC ] ) {
+		expect( baseEventInterfaceA.comment ).to.not.equal( inheritedEventInterfaceB.comment );
+		expect( baseEventInterfaceA.comment ).to.not.equal( inheritedEventInterfaceC.comment );
+		expect( inheritedEventInterfaceB.comment ).to.not.equal( inheritedEventInterfaceC.comment );
+
+		const eventsToCheck = [
+			baseEventClassA,
+			inheritedEventClassB,
+			inheritedEventClassC,
+
+			baseEventInterfaceA,
+			inheritedEventInterfaceB,
+			inheritedEventInterfaceC
+		];
+
+		for ( const event of eventsToCheck ) {
 			expect( event.comment ).to.have.property( 'summary' );
 			expect( event.comment ).to.have.property( 'blockTags' );
 			expect( event.comment ).to.have.property( 'modifierTags' );
@@ -105,7 +151,7 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 			expect( event.comment.summary ).to.be.an( 'array' );
 			expect( event.comment.summary ).to.lengthOf( 1 );
 			expect( event.comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
-			expect( event.comment.summary[ 0 ] ).to.have.property( 'text', 'Event 1 from class A.' );
+			expect( event.comment.summary[ 0 ] ).to.have.property( 'text' ).to.match( /Event 1 from (class|interface) A./ );
 			expect( event.comment.blockTags ).to.be.an( 'array' );
 			expect( event.comment.blockTags ).to.lengthOf( 4 );
 			expect( event.comment.blockTags[ 0 ] ).to.have.property( 'tag', '@eventName' );
@@ -117,7 +163,7 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 		}
 	} );
 
-	it( 'should clone event source in the inherited classes but keep the original source properties', () => {
+	it( 'should clone event source in the inherited classes and interfaces, but keep the original source properties', () => {
 		const baseEventClassA = events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-1-class-a' );
 		const inheritedEventClassB = events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-1-class-a' );
 		const inheritedEventClassC = events.find( event => event.parent.name === 'ClassC' && event.name === 'event:event-1-class-a' );
@@ -163,7 +209,7 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 		}
 	} );
 
-	it( 'should copy event parameters and all their properties in the inherited classes', () => {
+	it( 'should copy event parameters and all their properties in the inherited classes and interfaces', () => {
 		const baseEventClassA = events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-1-class-a' );
 		const inheritedEventClassB = events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-1-class-a' );
 		const inheritedEventClassC = events.find( event => event.parent.name === 'ClassC' && event.name === 'event:event-1-class-a' );
@@ -231,7 +277,7 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 		}
 	} );
 
-	it( 'should not create a new event in derived class if derived class already contains the overwritten event', () => {
+	it( 'should not create a new event in derived class and interface if derived one already contains the overwritten event', () => {
 		const baseEventClassA = events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-2-class-a' );
 		const overwrittenEventClassC = events.find( event => event.parent.name === 'ClassC' && event.name === 'event:event-2-class-a' );
 
@@ -248,7 +294,7 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 		expect( overwrittenEventClassC.comment.summary[ 0 ] ).to.have.property( 'text', 'Overwritten event 2 from class A.' );
 	} );
 
-	it( 'should not create a new event in derived class if derived class does not already exist in the project', () => {
+	it( 'should not create a new event in derived class and interface if derived one does not already exist in the project', () => {
 		const typeDoc = new TypeDoc.Application();
 
 		typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
@@ -271,13 +317,22 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 			.getReflectionsByKind( TypeDoc.ReflectionKind.All )
 			.filter( child => child.kindString === 'Event' );
 
-		expect( events ).to.lengthOf( 5 );
+		expect( events ).to.lengthOf( 13 );
 
 		// The order of found events does not matter, so just check if all of them are found.
-		expect( events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassA' && event.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
-		expect( events.find( event => event.parent.name === 'ClassB' && event.name === 'event:event-3-class-b' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'ClassA' && evt.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'ClassA' && evt.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'ClassB' && evt.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'ClassB' && evt.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'ClassB' && evt.name === 'event:event-3-class-b' ) ).to.not.be.undefined;
+
+		expect( events.find( evt => evt.parent.name === 'InterfaceA' && evt.name === 'event:event-1-interface-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'InterfaceA' && evt.name === 'event:event-2-interface-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'InterfaceB' && evt.name === 'event:event-1-interface-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'InterfaceB' && evt.name === 'event:event-2-interface-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'InterfaceB' && evt.name === 'event:event-3-interface-b' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'InterfaceC' && evt.name === 'event:event-1-interface-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'InterfaceC' && evt.name === 'event:event-2-interface-a' ) ).to.not.be.undefined;
+		expect( events.find( evt => evt.parent.name === 'InterfaceC' && evt.name === 'event:event-3-interface-b' ) ).to.not.be.undefined;
 	} );
 } );
