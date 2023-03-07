@@ -48,6 +48,8 @@ const { getTarget } = require( '../utils' );
  * 			];
  * 		};
  * ```
+ *
+ * Exported type may contain multiple `@eventName` tags to re-use the same type to create many different events.
  */
 module.exports = {
 	load( app ) {
@@ -69,88 +71,33 @@ function onEventEnd( context ) {
 			continue;
 		}
 
-		// Otherwise, if there is the `@eventName` tag found in a comment, extract the link to its owner, which is the string just after
-		// the tag name.
+		// Otherwise, if there is at least one `@eventName` tag found in a comment, extract the link to the event owner for each found tag.
+		// The link to the event owner is the string just after the tag name.
 		//
 		// Example: for the `@eventName ~ExampleClass#foo-event`, the event link would be `~ExampleClass#foo-event`.
-		const eventTag = reflection.comment.getTag( '@eventName' ).content[ 0 ].text;
+		const eventTags = reflection.comment.getTags( '@eventName' ).map( tag => tag.content[ 0 ].text );
 
-		// Then, try to find the owner reflection to properly associate the event in the hierarchy.
-		const [ eventOwner, eventName ] = eventTag.split( '#' );
-		const ownerReflection = getTarget( reflection, eventOwner );
+		// Then, try to find the owner reflection for each found tag to properly associate the event in the hierarchy.
+		for ( const eventTag of eventTags ) {
+			const [ eventOwner, eventName ] = eventTag.split( '#' );
+			const ownerReflection = getTarget( reflection, eventOwner );
 
-		// The owner for an event can be either a class or an interface.
-		if ( !isClassOrInterface( ownerReflection ) ) {
-			const symbol = context.project.getSymbolFromReflection( reflection );
-			const node = symbol.declarations[ 0 ];
+			// The owner for an event can be either a class or an interface.
+			if ( !isClassOrInterface( ownerReflection ) ) {
+				const symbol = context.project.getSymbolFromReflection( reflection );
+				const node = symbol.declarations[ 0 ];
 
-			context.logger.warn( `Skipping unsupported "${ eventTag }" event.`, node );
+				context.logger.warn( `Skipping unsupported "${ eventTag }" event.`, node );
 
-			continue;
+				continue;
+			}
+
+			// Create a new context for the event by taking into account the found owner reflection as the new scope. It will cause
+			// the newly created event reflection to be automatically associated as a child of this owner.
+			const ownerContext = context.withScope( ownerReflection );
+
+			createNewEventReflection( ownerContext, reflection, eventName );
 		}
-
-		// Create a new reflection object for the event, but take into account the found owner reflection as the new scope. It will cause
-		// the newly created event reflection to be automatically associated as a child of this owner.
-		const eventReflection = context
-			.withScope( ownerReflection )
-			.createDeclarationReflection(
-				ReflectionKind.ObjectLiteral,
-				undefined,
-				undefined,
-				normalizeEventName( eventName )
-			);
-
-		eventReflection.kindString = 'Event';
-
-		const paramTags = reflection.comment.getTags( '@param' );
-
-		// Try to find parameters for the event, which are defined in the `args` tuple.
-		const argsReflection = getArgsTuple( reflection );
-
-		// Then, for each found parameter, get its type and try to find the description from the `@param` tag.
-		const typeParameters = argsReflection.map( ( arg, index ) => {
-			let argName;
-
-			// If the parameter is not anonymous, take its name.
-			if ( arg.element ) {
-				argName = arg.name;
-			}
-			// Otherwise, take the name from the `@param` tag at the current index (if it exists).
-			else if ( paramTags[ index ] ) {
-				argName = paramTags[ index ].name;
-			}
-			// Otherwise, just set the fallback name to show something.
-			else {
-				argName = '<anonymous>';
-			}
-
-			const param = new TypeParameterReflection( argName, undefined, undefined, eventReflection );
-
-			param.type = arg;
-
-			// TypeDoc does not mark an optional parameter, so let's do it manually.
-			if ( param.type.isOptional || param.type.type === 'optional' ) {
-				param.setFlag( ReflectionFlag.Optional );
-			}
-
-			const comment = paramTags.find( tag => tag.name === argName );
-
-			if ( comment ) {
-				param.comment = new Comment( comment.content );
-			}
-
-			return param;
-		} );
-
-		if ( typeParameters.length ) {
-			eventReflection.typeParameters = typeParameters;
-		}
-
-		// Copy the whole comment. In addition to the comment summary, it can contain other useful data (i.e. block tags, modifier tags).
-		eventReflection.comment = reflection.comment.clone();
-
-		// Copy the source location as it is the same as the location of the reflection containing the event.
-		eventReflection.sources = [ ...reflection.sources ];
 	}
 }
 
@@ -170,6 +117,75 @@ function isClassOrInterface( reflection ) {
 	}
 
 	return true;
+}
+
+/**
+ * Creates new reflection for the provided event name, in the event owner's scope.
+ *
+ * @param {require('typedoc').Context} ownerContext
+ * @param {require('typedoc').Reflection} reflection
+ * @param {String} eventName
+ */
+function createNewEventReflection( ownerContext, reflection, eventName ) {
+	// Create a new reflection object for the event from the provided scope.
+	const eventReflection = ownerContext.createDeclarationReflection(
+		ReflectionKind.ObjectLiteral,
+		undefined,
+		undefined,
+		normalizeEventName( eventName )
+	);
+
+	eventReflection.kindString = 'Event';
+
+	const paramTags = reflection.comment.getTags( '@param' );
+
+	// Try to find parameters for the event, which are defined in the `args` tuple.
+	const argsReflection = getArgsTuple( reflection );
+
+	// Then, for each found parameter, get its type and try to find the description from the `@param` tag.
+	const typeParameters = argsReflection.map( ( arg, index ) => {
+		let argName;
+
+		// If the parameter is not anonymous, take its name.
+		if ( arg.element ) {
+			argName = arg.name;
+		}
+		// Otherwise, take the name from the `@param` tag at the current index (if it exists).
+		else if ( paramTags[ index ] ) {
+			argName = paramTags[ index ].name;
+		}
+		// Otherwise, just set the fallback name to show something.
+		else {
+			argName = '<anonymous>';
+		}
+
+		const param = new TypeParameterReflection( argName, undefined, undefined, eventReflection );
+
+		param.type = arg;
+
+		// TypeDoc does not mark an optional parameter, so let's do it manually.
+		if ( param.type.isOptional || param.type.type === 'optional' ) {
+			param.setFlag( ReflectionFlag.Optional );
+		}
+
+		const comment = paramTags.find( tag => tag.name === argName );
+
+		if ( comment ) {
+			param.comment = new Comment( comment.content );
+		}
+
+		return param;
+	} );
+
+	if ( typeParameters.length ) {
+		eventReflection.typeParameters = typeParameters;
+	}
+
+	// Copy the whole comment. In addition to the comment summary, it can contain other useful data (i.e. block tags, modifier tags).
+	eventReflection.comment = reflection.comment.clone();
+
+	// Copy the source location as it is the same as the location of the reflection containing the event.
+	eventReflection.sources = [ ...reflection.sources ];
 }
 
 /**

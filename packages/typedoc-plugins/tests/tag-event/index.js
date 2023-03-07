@@ -57,7 +57,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 		const eventDefinitions = conversionResult.getReflectionsByKind( TypeDoc.ReflectionKind.All )
 			.filter( children => children.kindString === 'Event' );
 
-		expect( eventDefinitions ).to.lengthOf( 17 );
+		expect( eventDefinitions ).to.lengthOf( 20 );
 
 		// The order of found events does not matter, so just check if all of them are found.
 		expect( eventDefinitions.find( event => event.name === 'event:event-foo' ) ).to.not.be.undefined;
@@ -77,15 +77,9 @@ describe( 'typedoc-plugins/tag-event', function() {
 		expect( eventDefinitions.find( event => event.name === 'event:event-foo-absolute-with-prefix' ) ).to.not.be.undefined;
 		expect( eventDefinitions.find( event => event.name === 'event:event-change:{property}' ) ).to.not.be.undefined;
 		expect( eventDefinitions.find( event => event.name === 'event:event-set:{property}' ) ).to.not.be.undefined;
-	} );
-
-	it( 'should find all event tags within the class', () => {
-		const eventDefinitions = conversionResult.children
-			.find( entry => entry.name === 'eventsvalid' ).children
-			.find( entry => entry.kindString === 'Class' && entry.name === 'EventsValidClass' ).children
-			.filter( children => children.kindString === 'Event' );
-
-		expect( eventDefinitions ).to.lengthOf( 15 );
+		expect( eventDefinitions.find( event => event.name === 'event:multiple-names' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:multiple-names:variant' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:multiple-names:variant:subvariant' ) ).to.not.be.undefined;
 	} );
 
 	it( 'should find all event tags within the interface', () => {
@@ -476,6 +470,32 @@ describe( 'typedoc-plugins/tag-event', function() {
 				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'type', 'intrinsic' );
 				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'name', 'any' );
 			} );
+		} );
+	} );
+
+	describe( 'multiple event definitions', () => {
+		it( 'should properly assign all events', () => {
+			const event1 = conversionResult.getChildByName( [
+				'eventsvalid',
+				'EventsValidClass',
+				'event:event-foo-multiple-names'
+			] );
+
+			const event2 = conversionResult.getChildByName( [
+				'eventsvalid',
+				'EventsValidClass',
+				'event:event-foo-multiple-names:variant'
+			] );
+
+			const event3 = conversionResult.getChildByName( [
+				'eventsvalid',
+				'EventsValidAnotherClass',
+				'event:event-foo-multiple-names:variant:subvariant'
+			] );
+
+			expect( event1 ).to.not.be.undefined;
+			expect( event2 ).to.not.be.undefined;
+			expect( event3 ).to.not.be.undefined;
 		} );
 	} );
 } );

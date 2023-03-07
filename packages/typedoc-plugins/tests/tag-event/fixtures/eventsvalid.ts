@@ -10,6 +10,7 @@
 import ExampleClass from './exampleclass';
 
 export default class EventsValidClass extends ExampleClass {}
+export class EventsValidAnotherClass extends ExampleClass {}
 
 /**
  * Normal type export.
@@ -213,4 +214,13 @@ export type InterfaceSetEvent = {
 		oldValue: any
 	];
 	return: any;
+};
+
+/**
+ * @eventName ~EventsValidClass#event-foo-multiple-names
+ * @eventName ~EventsValidClass#event-foo-multiple-names:variant
+ * @eventName ~EventsValidAnotherClass#event-foo-multiple-names:variant:subvariant
+ */
+export type EventFooMultipleNames = {
+	name: string;
 };
