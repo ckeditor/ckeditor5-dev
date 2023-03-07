@@ -77,9 +77,9 @@ describe( 'typedoc-plugins/tag-event', function() {
 		expect( eventDefinitions.find( event => event.name === 'event:event-foo-absolute-with-prefix' ) ).to.not.be.undefined;
 		expect( eventDefinitions.find( event => event.name === 'event:event-change:{property}' ) ).to.not.be.undefined;
 		expect( eventDefinitions.find( event => event.name === 'event:event-set:{property}' ) ).to.not.be.undefined;
-		expect( eventDefinitions.find( event => event.name === 'event:multiple-names' ) ).to.not.be.undefined;
-		expect( eventDefinitions.find( event => event.name === 'event:multiple-names:variant' ) ).to.not.be.undefined;
-		expect( eventDefinitions.find( event => event.name === 'event:multiple-names:variant:subvariant' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-multiple-names' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-multiple-names:variant' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-multiple-names:variant:subvariant' ) ).to.not.be.undefined;
 	} );
 
 	it( 'should find all event tags within the interface', () => {
