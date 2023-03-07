@@ -5,8 +5,7 @@
 
 'use strict';
 
-const { Converter, ReflectionKind } = require( 'typedoc' );
-const ts = require( 'typescript' );
+const { Converter, ReflectionKind, TypeScript } = require( 'typedoc' );
 
 /**
  * The `typedoc-plugin-module-fixer` reads the module name specified in the `@module` tag name.
@@ -51,7 +50,7 @@ function onEventCreateDeclaration() {
 			for ( const jsDoc of statement.jsDoc ) {
 				// ...that represents a module definition.
 				const [ moduleTag ] = ( jsDoc.tags || [] ).filter( tag => {
-					return tag.tagName.originalKeywordKind === ts.SyntaxKind.ModuleKeyword;
+					return tag.tagName.originalKeywordKind === TypeScript.SyntaxKind.ModuleKeyword;
 				} );
 
 				if ( !moduleTag ) {
