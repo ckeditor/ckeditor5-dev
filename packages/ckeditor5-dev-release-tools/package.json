@@ -14,6 +14,7 @@
     "conventional-changelog-writer": "^4.0.16",
     "conventional-commits-filter": "^2.0.6",
     "conventional-commits-parser": "^3.1.0",
+    "fs-extra": "^9.1.0",
     "diff": "^5.0.0",
     "git-raw-commits": "^2.0.7",
     "glob": "^7.1.6",
