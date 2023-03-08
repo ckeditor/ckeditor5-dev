@@ -220,4 +220,51 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			expect( ckeditor5TranslationsPlugin ).to.be.undefined;
 		} );
 	} );
+
+	describe( '#loaders', () => {
+		describe( 'ts-loader', () => {
+			it( 'it should use the default tsconfig.json if the "options.tsconfigPath" option is not specified', () => {
+				stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-html-embed' );
+
+				const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
+					packagePath: '/package/path',
+					themePath: '/theme/path',
+					manifestPath: '/manifest/path'
+				} );
+
+				const tsRule = webpackConfig.module.rules.find( rule => {
+					return rule.test.toString().endsWith( '/\\.ts$/' );
+				} );
+
+				expect( tsRule ).to.not.equal( undefined );
+
+				const { options } = tsRule.use[ 0 ];
+
+				expect( options ).to.be.an( 'object' );
+				expect( options ).to.have.property( 'configFile', 'tsconfig.json' );
+			} );
+
+			it( 'it should thr specified "options.tsconfigPath" value', () => {
+				stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-html-embed' );
+
+				const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
+					packagePath: '/package/path',
+					themePath: '/theme/path',
+					manifestPath: '/manifest/path',
+					tsconfigPath: '/config/tsconfig.json'
+				} );
+
+				const tsRule = webpackConfig.module.rules.find( rule => {
+					return rule.test.toString().endsWith( '/\\.ts$/' );
+				} );
+
+				expect( tsRule ).to.not.equal( undefined );
+
+				const { options } = tsRule.use[ 0 ];
+
+				expect( options ).to.be.an( 'object' );
+				expect( options ).to.have.property( 'configFile', '/config/tsconfig.json' );
+			} );
+		} );
+	} );
 } );
