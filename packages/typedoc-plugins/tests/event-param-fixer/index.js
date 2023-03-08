@@ -9,6 +9,7 @@ const glob = require( 'fast-glob' );
 const TypeDoc = require( 'typedoc' );
 
 const utils = require( '../utils' );
+const { plugins } = require( '../../lib' );
 
 describe( 'typedoc-plugins/event-param-fixer', function() {
 	this.timeout( 10 * 1000 );
@@ -19,10 +20,10 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 	const TSCONFIG_PATH = utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' );
 	const PLUGINS = [
 		'typedoc-plugin-rename-defaults',
-		require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' ),
-		require.resolve( '@ckeditor/typedoc-plugins/lib/tag-event' ),
-		require.resolve( '@ckeditor/typedoc-plugins/lib/tag-observable' ),
-		require.resolve( '@ckeditor/typedoc-plugins/lib/event-param-fixer' )
+		plugins[ 'typedoc-plugin-module-fixer' ],
+		plugins[ 'typedoc-plugin-tag-event' ],
+		plugins[ 'typedoc-plugin-tag-observable' ],
+		plugins[ 'typedoc-plugin-event-param-fixer' ]
 	];
 
 	before( async () => {
@@ -79,7 +80,7 @@ describe( 'typedoc-plugins/event-param-fixer', function() {
 		let eventFoo, eventFooNoText, eventFooWithParams, eventObservableChange, eventObservableSet, eventInfoClass;
 
 		before( () => {
-			eventFoo = conversionResult.getChildByName( [ 'fixtures/example', 'CustomExampleNonDefaultClass', 'event:event-foo' ] );
+			eventFoo = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'event:event-foo' ] );
 			eventFooNoText = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'event:event-foo-no-text' ] );
 			eventFooWithParams = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'event:event-foo-with-params' ] );
 			eventObservableChange = conversionResult.getChildByName( [ 'fixtures/example', 'ExampleClass', 'event:change:key' ] );

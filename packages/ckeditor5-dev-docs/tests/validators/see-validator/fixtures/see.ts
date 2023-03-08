@@ -90,7 +90,7 @@ export class ClassWithSeeTags {
 /**
  * An example event with valid and invalid "@see" tags.
  *
- * @eventName event-example
+ * @eventName ~ClassWithSeeTags#event-example
  * @see module:fixtures/see~ClassWithSeeTags#property
  * @see module:non-existing/module~Foo#bar
  */

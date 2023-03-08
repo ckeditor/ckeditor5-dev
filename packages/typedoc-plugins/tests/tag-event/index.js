@@ -9,6 +9,7 @@ const glob = require( 'fast-glob' );
 const TypeDoc = require( 'typedoc' );
 
 const utils = require( '../utils' );
+const { plugins } = require( '../../lib' );
 
 describe( 'typedoc-plugins/tag-event', function() {
 	this.timeout( 10 * 1000 );
@@ -37,7 +38,8 @@ describe( 'typedoc-plugins/tag-event', function() {
 			logLevel: 'Warn',
 			entryPoints: files,
 			plugin: [
-				require.resolve( '@ckeditor/typedoc-plugins/lib/tag-event' )
+				'typedoc-plugin-rename-defaults',
+				plugins[ 'typedoc-plugin-tag-event' ]
 			],
 			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );
@@ -55,51 +57,54 @@ describe( 'typedoc-plugins/tag-event', function() {
 		const eventDefinitions = conversionResult.getReflectionsByKind( TypeDoc.ReflectionKind.All )
 			.filter( children => children.kindString === 'Event' );
 
-		// There should be the following correctly defined events:
-		// 1. event:event-foo
-		// 2. event:event-foo-no-text
-		// 3. event:event-foo-with-params
-		// 4. event:event-foo-in-class-with-fires
-		// 5. event:change:{property}
-		// 6. event:set:{property}
-		// 7. event:event-foo-no-content
-		// 8. event:event-foo-empty-args
-		// 9. event:event-foo-optional-args
-		// 10. event:event-foo-inline-args
-		// 11. event:event-foo-anonymous-args
-		// 12. event:event-foo-anonymous-optional-args
-		// 13. event:event-foo-reference
-		// 14. event:event-foo-generic-from-type-arg
-		// 15. event:event-foo-generic-from-base-type
-		// 16. event:event-foo-complex
-		expect( eventDefinitions ).to.lengthOf( 16 );
+		expect( eventDefinitions ).to.lengthOf( 20 );
+
+		// The order of found events does not matter, so just check if all of them are found.
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-no-text' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-with-params' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-no-content' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-empty-args' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-optional-args' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-inline-args' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-anonymous-args' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-anonymous-optional-args' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-reference' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-generic-from-type-arg' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-generic-from-base-type' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-complex' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-absolute' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-absolute-with-prefix' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-change:{property}' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-set:{property}' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-multiple-names' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-multiple-names:variant' ) ).to.not.be.undefined;
+		expect( eventDefinitions.find( event => event.name === 'event:event-foo-multiple-names:variant:subvariant' ) ).to.not.be.undefined;
+	} );
+
+	it( 'should find all event tags within the interface', () => {
+		const eventDefinitions = conversionResult.children
+			.find( entry => entry.name === 'exampleinterface' ).children
+			.find( entry => entry.kindString === 'Interface' && entry.name === 'ExampleInterface' ).children
+			.filter( children => children.kindString === 'Event' );
+
+		expect( eventDefinitions ).to.lengthOf( 2 );
 	} );
 
 	it( 'should inform if the class for an event has not been found', () => {
-		expect( typeDoc.logger.warn.calledWith( 'Skipping unsupported "event-foo-no-class" event.' ) ).to.be.true;
-	} );
+		const invalidEventNameTags = [
+			'~InvalidClass#event-foo-relative-invalid-class',
+			'~ExampleType#event-foo-relative-invalid-parent',
+			'#event-foo-relative-invalid-name-with-separator',
+			'event-foo-relative-invalid-name-without-separator',
+			'module:invalidmodule~EventsInvalidClass#event-foo-absolute-invalid-module',
+			'module:eventsvalid~InvalidClass#event-foo-absolute-invalid-class',
+			'module:eventsvalid~ExampleType#event-foo-absolute-invalid-parent'
+		];
 
-	it( 'should first take into account the class that fires the event instead of the default class, if both exist in the module', () => {
-		const classDefinition = conversionResult.children
-			.find( entry => entry.name === 'customexampleclassfires' ).children
-			.find( entry => entry.kindString === 'Class' && entry.name === 'CustomExampleClassFires' );
-
-		const eventDefinition = classDefinition.children
-			.find( doclet => doclet.name === 'event:event-foo-in-class-with-fires' );
-
-		expect( eventDefinition ).to.not.be.undefined;
-	} );
-
-	it( 'should associate events to the `Observable` interface if it exists in the module, even if module has default class', () => {
-		const interfaceDefinition = conversionResult.children
-			.find( entry => entry.name === 'observableinterface' ).children
-			.find( entry => entry.kindString === 'Interface' && entry.name === 'Observable' );
-
-		const eventChange = interfaceDefinition.children.find( doclet => doclet.name === 'event:change:{property}' );
-		const eventSet = interfaceDefinition.children.find( doclet => doclet.name === 'event:set:{property}' );
-
-		expect( eventChange ).to.not.be.undefined;
-		expect( eventSet ).to.not.be.undefined;
+		for ( const eventName of invalidEventNameTags ) {
+			expect( typeDoc.logger.warn.calledWith( `Skipping unsupported "${ eventName }" event.` ) ).to.be.true;
+		}
 	} );
 
 	describe( 'event definitions', () => {
@@ -107,15 +112,8 @@ describe( 'typedoc-plugins/tag-event', function() {
 
 		before( () => {
 			classDefinition = conversionResult.children
-				.find( entry => entry.name === 'customexampleclass' ).children
-				.find( entry => entry.kindString === 'Class' && entry.name === 'default' );
-		} );
-
-		it( 'should find all event tags within the class', () => {
-			const eventDefinitions = classDefinition.children
-				.filter( children => children.kindString === 'Event' );
-
-			expect( eventDefinitions ).to.lengthOf( 13 );
+				.find( entry => entry.name === 'eventsvalid' ).children
+				.find( entry => entry.kindString === 'Class' && entry.name === 'EventsValidClass' );
 		} );
 
 		it( 'should find an event tag without description and parameters', () => {
@@ -140,7 +138,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 
 			expect( eventDefinition.sources ).to.be.an( 'array' );
 			expect( eventDefinition.sources ).to.lengthOf( 1 );
-			expect( eventDefinition.sources[ 0 ] ).to.have.property( 'fileName', 'customexampleclass.ts' );
+			expect( eventDefinition.sources[ 0 ] ).to.have.property( 'fileName', 'eventsvalid.ts' );
 			expect( eventDefinition.sources[ 0 ] ).to.have.property( 'fullFileName' );
 			expect( eventDefinition.sources[ 0 ] ).to.have.property( 'line' );
 			expect( eventDefinition.sources[ 0 ] ).to.have.property( 'character' );
@@ -196,7 +194,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 
 			expect( eventDefinition.comment.summary[ 1 ] ).to.have.property( 'kind', 'inline-tag' );
 			expect( eventDefinition.comment.summary[ 1 ] ).to.have.property( 'tag', '@link' );
-			expect( eventDefinition.comment.summary[ 1 ] ).to.have.property( 'text', '~CustomExampleClass' );
+			expect( eventDefinition.comment.summary[ 1 ] ).to.have.property( 'text', '~EventsValidClass' );
 
 			expect( eventDefinition.comment.summary[ 2 ] ).to.have.property( 'kind', 'text' );
 			expect( eventDefinition.comment.summary[ 2 ] ).to.have.property( 'text', ' or ' );
@@ -204,7 +202,7 @@ describe( 'typedoc-plugins/tag-event', function() {
 			expect( eventDefinition.comment.summary[ 3 ] ).to.have.property( 'kind', 'inline-tag' );
 			expect( eventDefinition.comment.summary[ 3 ] ).to.have.property( 'tag', '@link' );
 			expect( eventDefinition.comment.summary[ 3 ] ).to.have.property( 'text',
-				'module:fixtures/customexampleclass~CustomExampleClass Custom label'
+				'module:fixtures/eventsvalid~EventsValidClass Custom label'
 			);
 
 			expect( eventDefinition.comment.summary[ 4 ] ).to.have.property( 'kind', 'text' );
@@ -472,6 +470,32 @@ describe( 'typedoc-plugins/tag-event', function() {
 				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'type', 'intrinsic' );
 				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'name', 'any' );
 			} );
+		} );
+	} );
+
+	describe( 'multiple event definitions', () => {
+		it( 'should properly assign all events', () => {
+			const event1 = conversionResult.getChildByName( [
+				'eventsvalid',
+				'EventsValidClass',
+				'event:event-foo-multiple-names'
+			] );
+
+			const event2 = conversionResult.getChildByName( [
+				'eventsvalid',
+				'EventsValidClass',
+				'event:event-foo-multiple-names:variant'
+			] );
+
+			const event3 = conversionResult.getChildByName( [
+				'eventsvalid',
+				'EventsValidAnotherClass',
+				'event:event-foo-multiple-names:variant:subvariant'
+			] );
+
+			expect( event1 ).to.not.be.undefined;
+			expect( event2 ).to.not.be.undefined;
+			expect( event3 ).to.not.be.undefined;
 		} );
 	} );
 } );

@@ -6,7 +6,7 @@
 'use strict';
 
 const { ReflectionKind } = require( 'typedoc' );
-const { isReflectionValid, isIdentifierValid, isAbsoluteIdentifier } = require( '../utils' );
+const { utils } = require( '@ckeditor/typedoc-plugins' );
 
 /**
  * Validates the output produced by TypeDoc.
@@ -17,7 +17,9 @@ const { isReflectionValid, isIdentifierValid, isAbsoluteIdentifier } = require( 
  * @param {Function} onError A callback that is executed when a validation error is detected.
  */
 module.exports = function validate( project, onError ) {
-	const reflections = project.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.CallSignature ).filter( isReflectionValid );
+	const reflections = project
+		.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.CallSignature )
+		.filter( utils.isReflectionValid );
 
 	for ( const reflection of reflections ) {
 		const identifiers = getIdentifiersFromFiresTag( reflection );
@@ -27,7 +29,7 @@ module.exports = function validate( project, onError ) {
 		}
 
 		for ( const identifier of identifiers ) {
-			const isValid = isIdentifierValid( reflection, identifier );
+			const isValid = utils.isIdentifierValid( reflection, identifier );
 
 			if ( !isValid ) {
 				const eventName = identifier.replace( /^#event:/, '' );
@@ -46,7 +48,7 @@ function getIdentifiersFromFiresTag( reflection ) {
 	return reflection.comment.getTags( '@fires' )
 		.flatMap( tag => tag.content.map( item => item.text.trim() ) )
 		.map( identifier => {
-			if ( isAbsoluteIdentifier( identifier ) ) {
+			if ( utils.isAbsoluteIdentifier( identifier ) ) {
 				return identifier;
 			}
 

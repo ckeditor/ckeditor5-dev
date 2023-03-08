@@ -9,15 +9,12 @@
 
 import { ClassB } from './class-b';
 
-/**
- * @fires event-2-class-a
- */
 export class ClassC extends ClassB {}
 
 /**
  * Overwritten event 2 from class A.
  *
- * @eventName event-2-class-a
+ * @eventName ~ClassC#event-2-class-a
  */
 export type Event2ClassA = {
 	name: string;

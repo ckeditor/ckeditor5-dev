@@ -4,21 +4,21 @@
  */
 
 /**
- * @module fixtures/class-a
+ * @module fixtures/interface-a
  */
 
-export class ClassA {}
+export interface InterfaceA {}
 
 /**
- * Event 1 from class A.
+ * Event 1 from interface A.
  *
- * @eventName ~ClassA#event-1-class-a
+ * @eventName ~InterfaceA#event-1-interface-a
  *
  * @param {String} p1 Description for first param.
  * @param {module:utils/object~Object} p2 Description for second param.
  * @param p3 Complex {@link module:utils/object~Object description} for `third param`.
  */
-export type Event1ClassA = {
+export type Event1InterfaceA = {
 	name: string;
 	args: [
 		p1: string,
@@ -28,10 +28,10 @@ export type Event1ClassA = {
 };
 
 /**
- * Event 2 from class A.
+ * Event 2 from interface A.
  *
- * @eventName ~ClassA#event-2-class-a
+ * @eventName ~InterfaceA#event-2-interface-a
  */
-export type Event2ClassA = {
+export type Event2InterfaceA = {
 	name: string;
 };

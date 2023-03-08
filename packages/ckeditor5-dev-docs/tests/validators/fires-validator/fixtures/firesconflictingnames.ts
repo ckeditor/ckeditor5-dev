@@ -24,7 +24,7 @@ export class ClassWithFiresConflictingNames {
 }
 
 /**
- * @eventName event
+ * @eventName ~ClassWithFiresConflictingNames#event
  */
 export type Event = {
 	name: string;

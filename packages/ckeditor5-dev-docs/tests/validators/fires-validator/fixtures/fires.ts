@@ -28,7 +28,7 @@ export class ClassWithFires {
 }
 
 /**
- * @eventName event-example
+ * @eventName ~ClassWithFires#event-example
  */
 export type EventExample = {
 	name: string;

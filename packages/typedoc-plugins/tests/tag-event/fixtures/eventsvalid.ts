@@ -4,38 +4,13 @@
  */
 
 /**
- * @module fixtures/customexampleclass
+ * @module fixtures/eventsvalid
  */
 
 import ExampleClass from './exampleclass';
 
-export default class CustomExampleClass extends ExampleClass {
-	public static create( value: string ): ExampleClass {
-		/**
-		 * An event not associated to anything in the source code.
-		 *
-		 * @eventName event-foo-not-associated-inside-method
-		 */
-
-		/**
-		 * An event not associated to a type in the source code.
-		 *
-		 * @eventName event-foo-not-associated-to-type-inside-method
-		 */
-		return new ExampleClass( value );
-	}
-}
-
-export class CustomExampleNonDefaultClass extends ExampleClass {}
-
-export function create( value: string ): ExampleClass {
-	/**
-	 * An event not associated to a type in the source code.
-	 *
-	 * @eventName event-foo-not-associated-to-type-inside-function
-	 */
-	return new ExampleClass( value );
-}
+export default class EventsValidClass extends ExampleClass {}
+export class EventsValidAnotherClass extends ExampleClass {}
 
 /**
  * Normal type export.
@@ -45,7 +20,7 @@ export type ExampleType = {
 };
 
 /**
- * @eventName event-foo-no-text
+ * @eventName ~EventsValidClass#event-foo-no-text
  */
 export type EventFooNoText = {
 	name: string;
@@ -54,7 +29,7 @@ export type EventFooNoText = {
 /**
  * An event associated with the type.
  *
- * @eventName event-foo
+ * @eventName ~EventsValidClass#event-foo
  */
 export type EventFoo = {
 	name: string;
@@ -63,9 +38,9 @@ export type EventFoo = {
 /**
  * An event associated with the type. Event with three params.
  *
- * See {@link ~CustomExampleClass} or {@link module:fixtures/customexampleclass~CustomExampleClass Custom label}. A text after.
+ * See {@link ~EventsValidClass} or {@link module:fixtures/eventsvalid~EventsValidClass Custom label}. A text after.
  *
- * @eventName event-foo-with-params
+ * @eventName ~EventsValidClass#event-foo-with-params
  *
  * @param p1 Description for first param.
  * @param p2 Description for second param.
@@ -82,20 +57,20 @@ export type EventFooWithParams = {
 };
 
 /**
- * @eventName event-foo-no-content
+ * @eventName ~EventsValidClass#event-foo-no-content
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type EventFooNoContent = {};
 
 /**
- * @eventName event-foo-empty-args
+ * @eventName ~EventsValidClass#event-foo-empty-args
  */
 export type EventFooEmptyArgs = {
 	args: [];
 };
 
 /**
- * @eventName event-foo-optional-args
+ * @eventName ~EventsValidClass#event-foo-optional-args
  */
 export type EventFooOptionalArgs = {
 	args: [
@@ -105,7 +80,7 @@ export type EventFooOptionalArgs = {
 };
 
 /**
- * @eventName event-foo-inline-args
+ * @eventName ~EventsValidClass#event-foo-inline-args
  *
  * @param p1 Description for first param.
  */
@@ -118,14 +93,14 @@ export type EventFooInlineArgs = {
 };
 
 /**
- * @eventName event-foo-anonymous-args
+ * @eventName ~EventsValidClass#event-foo-anonymous-args
  */
 export type EventFooAnonymousArgs = {
 	args: [ number, { foo: boolean } ];
 };
 
 /**
- * @eventName event-foo-anonymous-optional-args
+ * @eventName ~EventsValidClass#event-foo-anonymous-optional-args
  */
 export type EventFooAnonymousOptionalArgs = {
 	args: [ number?, { foo: boolean }? ];
@@ -143,7 +118,7 @@ export type TypeReferenceLvl1 = TypeWithParams;
 export type TypeReferenceLvl2 = TypeReferenceLvl1;
 
 /**
- * @eventName event-foo-reference
+ * @eventName ~EventsValidClass#event-foo-reference
  *
  * @param p1 Description for first param.
  * @param p2 Description for second param.
@@ -163,7 +138,7 @@ export type TypeGenericLvl3<T> = TypeGenericLvl2<T> & {
 };
 
 /**
- * @eventName event-foo-generic-from-type-arg
+ * @eventName ~EventsValidClass#event-foo-generic-from-type-arg
  */
 export type EventFooGeneric = TypeGenericLvl3<{
 	args: [
@@ -189,12 +164,12 @@ export type OtherTypeGenericLvl3<T = object> = OtherTypeGenericLvl2<T> & {
 };
 
 /**
- * @eventName event-foo-generic-from-base-type
+ * @eventName ~EventsValidClass#event-foo-generic-from-base-type
  */
 export type OtherEventFooGeneric = OtherTypeGenericLvl3;
 
 /**
- * @eventName event-foo-complex
+ * @eventName ~EventsValidClass#event-foo-complex
  */
 export type EventFooComplex<Param extends 'a' | 'b' | 'c' = 'a'> = {
 	args: Param extends 'c' ?
@@ -203,7 +178,49 @@ export type EventFooComplex<Param extends 'a' | 'b' | 'c' = 'a'> = {
 };
 
 /**
- * An event not associated to anything in the source code.
- *
- * @eventName event-foo-not-associated-outside
+ * @eventName module:eventsvalid~EventsValidClass#event-foo-absolute
  */
+export type EventFooAbsolute = {
+	name: string;
+};
+
+/**
+ * @eventName module:eventsvalid~EventsValidClass#event:event-foo-absolute-with-prefix
+ */
+export type EventFooAbsoluteWithPrefix = {
+	name: string;
+};
+
+/**
+ * @eventName module:exampleinterface~ExampleInterface#event-change:{property}
+ */
+export type InterfaceChangeEvent = {
+	name: 'change' | `change:${ string }`;
+	args: [
+		name: string,
+		value: any,
+		oldValue: any
+	];
+};
+
+/**
+ * @eventName module:exampleinterface~ExampleInterface#event-set:{property}
+ */
+export type InterfaceSetEvent = {
+	name: 'set' | `set:${ string }`;
+	args: [
+		name: string,
+		value: any,
+		oldValue: any
+	];
+	return: any;
+};
+
+/**
+ * @eventName ~EventsValidClass#event-foo-multiple-names
+ * @eventName ~EventsValidClass#event-foo-multiple-names:variant
+ * @eventName ~EventsValidAnotherClass#event-foo-multiple-names:variant:subvariant
+ */
+export type EventFooMultipleNames = {
+	name: string;
+};

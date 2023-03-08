@@ -5,9 +5,10 @@
 
 const { expect } = require( 'chai' );
 const TypeDoc = require( 'typedoc' );
+const glob = require( 'fast-glob' );
 
 const utils = require( '../utils' );
-const glob = require( 'fast-glob' );
+const { plugins } = require( '../../lib' );
 
 describe( 'typedoc-plugins/symbol-fixer', function() {
 	this.timeout( 10 * 1000 );
@@ -33,7 +34,7 @@ describe( 'typedoc-plugins/symbol-fixer', function() {
 			logLevel: 'Error',
 			entryPoints: files,
 			plugin: [
-				require.resolve( '@ckeditor/typedoc-plugins/lib/symbol-fixer' )
+				plugins[ 'typedoc-plugin-symbol-fixer' ]
 			],
 			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );
