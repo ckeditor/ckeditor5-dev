@@ -28,6 +28,11 @@ module.exports = function validate( project, onError ) {
 		}
 
 		const filePath = utils.getNode( reflection ).fileName;
+
+		if ( filePath.endsWith( 'src/augmentation.ts' ) ) {
+			continue;
+		}
+
 		const expectedFilePath = `ckeditor5-${ packageName }/src/${ moduleName.join( '/' ) }.ts`;
 
 		if ( !filePath.endsWith( expectedFilePath ) ) {
