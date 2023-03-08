@@ -1,6 +1,36 @@
 Changelog
 =========
 
+## [35.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v35.0.0...v35.0.1) (2023-03-08)
+
+### Other changes
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The "getDllPluginWebpackConfig()" function accepts a new option (`options.tsconfigPath`) that allow defining a configuration file for "ts-loader". ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/30df3cc84d25a6118ea4260f148ae0cc39384d6d))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v35.0.0 => v35.0.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v35.0.0 => v35.0.1
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v35.0.0 => v35.0.1
+</details>
+
+
 ## [35.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v34.1.3...v35.0.0) (2023-03-08)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
