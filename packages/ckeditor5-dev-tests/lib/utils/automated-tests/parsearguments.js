@@ -5,6 +5,7 @@
 
 'use strict';
 
+const fs = require( 'fs' );
 const path = require( 'path' );
 const minimist = require( 'minimist' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
@@ -198,16 +199,22 @@ module.exports = function parseArguments( args ) {
 	}
 
 	/**
-	 * Parses the `--tsconfig` options to be an absolute path.
+	 * Parses the `--tsconfig` options to be an absolute path. If argument is not provided,
+	 * it will check if `tsconfig.test.json` file exists and use it if it does.
 	 *
 	 * @param {Object} options
 	 */
 	function parseTsconfigPath( options ) {
-		if ( !options.tsconfig ) {
+		if ( options.tsconfig ) {
+			options.tsconfig = path.resolve( process.cwd(), options.tsconfig );
 			return;
 		}
 
-		options.tsconfig = path.resolve( process.cwd(), options.tsconfig );
+		const fallbackPath = path.resolve( process.cwd(), './tsconfig.test.json' );
+
+		if ( fs.existsSync( fallbackPath ) ) {
+			options.tsconfig = fallbackPath;
+		}
 	}
 
 	/**
