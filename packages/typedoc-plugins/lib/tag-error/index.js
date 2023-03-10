@@ -5,8 +5,7 @@
 
 'use strict';
 
-const { Converter, ReflectionKind, Comment, TypeParameterReflection } = require( 'typedoc' );
-const ts = require( 'typescript' );
+const { Converter, ReflectionKind, Comment, TypeParameterReflection, TypeScript } = require( 'typedoc' );
 
 const ERROR_TAG_NAME = 'error';
 
@@ -33,7 +32,7 @@ function onEventEnd( context ) {
 		// Find all `@error` occurrences.
 		const nodes = findDescendant( sourceFile, node => {
 			// Remove non-block comment codes.
-			if ( node.kind !== ts.SyntaxKind.Identifier ) {
+			if ( node.kind !== TypeScript.SyntaxKind.Identifier ) {
 				return false;
 			}
 
@@ -97,9 +96,9 @@ function onEventEnd( context ) {
 }
 
 /**
- * @param {ts.Node} sourceFileOrNode
- * @param { ( node: ts.Node) : boolean} callback
- * @returns {Array.<ts.Node>}
+ * @param {TypeScript.Node} sourceFileOrNode
+ * @param { ( node: TypeScript.Node ) : boolean} callback
+ * @returns {Array.<TypeScript.Node>}
  */
 function findDescendant( sourceFileOrNode, callback ) {
 	const output = [];
@@ -141,7 +140,7 @@ function getCommentDisplayPart( commentChildrenOrValue ) {
 			let { text } = item;
 
 			// An inline tag inside a description.
-			if ( item.kind === ts.SyntaxKind.JSDocLink ) {
+			if ( item.kind === TypeScript.SyntaxKind.JSDocLink ) {
 				// A reference, e.g. "module:".
 				if ( item.name ) {
 					text = item.name.escapedText + text;

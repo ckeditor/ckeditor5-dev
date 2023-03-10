@@ -61,4 +61,12 @@ module.exports = async function build( config ) {
  * @property {String} [outputPath] A path to the place where extracted doclets will be saved. Is an optional value due to tests.
  *
  * @property {String} [extraPlugins=[]] An array of path to extra plugins that will be added to Typedoc.
+ *
+ * @property {TypedocValidator} [validatorOptions={}] An optional configuration object for validator.
+ */
+
+/**
+ * @typedef {Object} TypedocValidator
+ *
+ * @property {Boolean} [enableOverloadValidator=false] If set to `true`, the overloads validator will be enabled.
  */

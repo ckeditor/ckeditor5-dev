@@ -6,7 +6,7 @@
 'use strict';
 
 const { ReflectionKind } = require( 'typedoc' );
-const { getNode } = require( '../utils' );
+const { utils } = require( '@ckeditor/typedoc-plugins' );
 
 /**
  * Validates the output produced by TypeDoc.
@@ -27,7 +27,12 @@ module.exports = function validate( project, onError ) {
 			continue;
 		}
 
-		const filePath = getNode( reflection ).fileName;
+		const filePath = utils.getNode( reflection ).fileName;
+
+		if ( filePath.endsWith( 'src/augmentation.ts' ) ) {
+			continue;
+		}
+
 		const expectedFilePath = `ckeditor5-${ packageName }/src/${ moduleName.join( '/' ) }.ts`;
 
 		if ( !filePath.endsWith( expectedFilePath ) ) {

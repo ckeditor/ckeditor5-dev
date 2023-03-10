@@ -6,6 +6,7 @@
 'use strict';
 
 const { Converter, ReflectionKind, TypeParameterReflection, Comment, ReflectionFlag, IntrinsicType } = require( 'typedoc' );
+const { getTarget } = require( '../utils' );
 
 /**
  * The `typedoc-plugin-tag-event` collects event definitions from the `@eventName` tag and assigns them as the children of the class or
@@ -16,7 +17,7 @@ const { Converter, ReflectionKind, TypeParameterReflection, Comment, ReflectionF
  * the old `@event` tag.
  *
  * To correctly define an event, it must be associated with the exported type that describes that event, with the `name` and `args`
- * properties.
+ * properties. The value for the `@eventName` tag must be a valid link to a class or to an interface, either a relative or an absolute one.
  *
  * To correctly define the event parameters, they must be defined in the `args` property. The `args` property is an array, where each item
  * describes a parameter that event emits. Item can be either of a primitive type, or a custom type that has own definition.
@@ -24,6 +25,8 @@ const { Converter, ReflectionKind, TypeParameterReflection, Comment, ReflectionF
  * Example:
  *
  * ```ts
+ * 		export class ExampleClass {}
+ *
  * 		export type ExampleType = {
  * 			name: string;
  * 		};
@@ -31,7 +34,7 @@ const { Converter, ReflectionKind, TypeParameterReflection, Comment, ReflectionF
  * 		/**
  * 		 * An event associated with exported type.
  * 		 *
- * 		 * @eventName foo-event
+ * 		 * @eventName ~ExampleClass#foo-event
  * 		 * @param p1 Description for first param.
  * 		 * @param p2 Description for second param.
  * 		 * @param p3 Description for third param.
@@ -45,6 +48,8 @@ const { Converter, ReflectionKind, TypeParameterReflection, Comment, ReflectionF
  * 			];
  * 		};
  * ```
+ *
+ * Exported type may contain multiple `@eventName` tags to re-use the same type to create many different events.
  */
 module.exports = {
 	load( app ) {
@@ -66,86 +71,121 @@ function onEventEnd( context ) {
 			continue;
 		}
 
-		// Otherwise, if there is the `@eventName` tag found in a comment, extract the event name, which is the string just after the
-		// tag name. Example: for the `@eventName foo`, the event name would be `foo`.
-		const eventName = reflection.comment.getTag( '@eventName' ).content[ 0 ].text;
+		// Otherwise, if there is at least one `@eventName` tag found in a comment, extract the link to the event owner for each found tag.
+		// The link to the event owner is the string just after the tag name.
+		//
+		// Example: for the `@eventName ~ExampleClass#foo-event`, the event link would be `~ExampleClass#foo-event`.
+		const eventTags = reflection.comment.getTags( '@eventName' ).map( tag => tag.content[ 0 ].text );
 
-		// Then, try to find a parent reflection to properly associate the event in the hierarchy. The parent can be either the `Observable`
-		// interface, or a class.
-		const parentReflection = findParentForEvent( eventName, reflection );
+		// Then, try to find the owner reflection for each found tag to properly associate the event in the hierarchy.
+		for ( const eventTag of eventTags ) {
+			const [ eventOwner, eventName ] = eventTag.split( '#' );
+			const ownerReflection = getTarget( reflection, eventOwner );
 
-		if ( !parentReflection ) {
-			const symbol = context.project.getSymbolFromReflection( reflection );
-			const node = symbol.declarations[ 0 ];
+			// The owner for an event can be either a class or an interface.
+			if ( !isClassOrInterface( ownerReflection ) ) {
+				const symbol = context.project.getSymbolFromReflection( reflection );
+				const node = symbol.declarations[ 0 ];
 
-			context.logger.warn( `Skipping unsupported "${ eventName }" event.`, node );
+				context.logger.warn( `Skipping unsupported "${ eventTag }" event.`, node );
 
-			continue;
+				continue;
+			}
+
+			// Create a new context for the event by taking into account the found owner reflection as the new scope. It will cause
+			// the newly created event reflection to be automatically associated as a child of this owner.
+			const ownerContext = context.withScope( ownerReflection );
+
+			createNewEventReflection( ownerContext, reflection, eventName );
 		}
-
-		// Create a new reflection object for the event, but take into account the found parent reflection as the new scope. It will cause
-		// the newly created event reflection to be automatically associated as a child of this parent.
-		const eventReflection = context
-			.withScope( parentReflection )
-			.createDeclarationReflection(
-				ReflectionKind.ObjectLiteral,
-				undefined,
-				undefined,
-				`event:${ eventName }`
-			);
-
-		eventReflection.kindString = 'Event';
-
-		const paramTags = reflection.comment.getTags( '@param' );
-
-		// Try to find parameters for the event, which are defined in the `args` tuple.
-		const argsReflection = getArgsTuple( reflection );
-
-		// Then, for each found parameter, get its type and try to find the description from the `@param` tag.
-		const typeParameters = argsReflection.map( ( arg, index ) => {
-			let argName;
-
-			// If the parameter is not anonymous, take its name.
-			if ( arg.element ) {
-				argName = arg.name;
-			}
-			// Otherwise, take the name from the `@param` tag at the current index (if it exists).
-			else if ( paramTags[ index ] ) {
-				argName = paramTags[ index ].name;
-			}
-			// Otherwise, just set the fallback name to show something.
-			else {
-				argName = '<anonymous>';
-			}
-
-			const param = new TypeParameterReflection( argName, undefined, undefined, eventReflection );
-
-			param.type = arg;
-
-			// TypeDoc does not mark an optional parameter, so let's do it manually.
-			if ( param.type.isOptional || param.type.type === 'optional' ) {
-				param.setFlag( ReflectionFlag.Optional );
-			}
-
-			const comment = paramTags.find( tag => tag.name === argName );
-
-			if ( comment ) {
-				param.comment = new Comment( comment.content );
-			}
-
-			return param;
-		} );
-
-		if ( typeParameters.length ) {
-			eventReflection.typeParameters = typeParameters;
-		}
-
-		// Copy the whole comment. In addition to the comment summary, it can contain other useful data (i.e. block tags, modifier tags).
-		eventReflection.comment = reflection.comment.clone();
-
-		// Copy the source location as it is the same as the location of the reflection containing the event.
-		eventReflection.sources = [ ...reflection.sources ];
 	}
+}
+
+/**
+ * Checks if the found owner reflection for an event is either an interface or a class.
+ *
+ * @param {require('typedoc').Reflection} reflection The found owner reflection for an event.
+ * @returns {Boolean}
+ */
+function isClassOrInterface( reflection ) {
+	if ( !reflection ) {
+		return false;
+	}
+
+	if ( reflection.kindString !== 'Class' && reflection.kindString !== 'Interface' ) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Creates new reflection for the provided event name, in the event owner's scope.
+ *
+ * @param {require('typedoc').Context} ownerContext
+ * @param {require('typedoc').Reflection} reflection
+ * @param {String} eventName
+ */
+function createNewEventReflection( ownerContext, reflection, eventName ) {
+	// Create a new reflection object for the event from the provided scope.
+	const eventReflection = ownerContext.createDeclarationReflection(
+		ReflectionKind.ObjectLiteral,
+		undefined,
+		undefined,
+		normalizeEventName( eventName )
+	);
+
+	eventReflection.kindString = 'Event';
+
+	const paramTags = reflection.comment.getTags( '@param' );
+
+	// Try to find parameters for the event, which are defined in the `args` tuple.
+	const argsReflection = getArgsTuple( reflection );
+
+	// Then, for each found parameter, get its type and try to find the description from the `@param` tag.
+	const typeParameters = argsReflection.map( ( arg, index ) => {
+		let argName;
+
+		// If the parameter is not anonymous, take its name.
+		if ( arg.element ) {
+			argName = arg.name;
+		}
+		// Otherwise, take the name from the `@param` tag at the current index (if it exists).
+		else if ( paramTags[ index ] ) {
+			argName = paramTags[ index ].name;
+		}
+		// Otherwise, just set the fallback name to show something.
+		else {
+			argName = '<anonymous>';
+		}
+
+		const param = new TypeParameterReflection( argName, undefined, undefined, eventReflection );
+
+		param.type = arg;
+
+		// TypeDoc does not mark an optional parameter, so let's do it manually.
+		if ( param.type.isOptional || param.type.type === 'optional' ) {
+			param.setFlag( ReflectionFlag.Optional );
+		}
+
+		const comment = paramTags.find( tag => tag.name === argName );
+
+		if ( comment ) {
+			param.comment = new Comment( comment.content );
+		}
+
+		return param;
+	} );
+
+	if ( typeParameters.length ) {
+		eventReflection.typeParameters = typeParameters;
+	}
+
+	// Copy the whole comment. In addition to the comment summary, it can contain other useful data (i.e. block tags, modifier tags).
+	eventReflection.comment = reflection.comment.clone();
+
+	// Copy the source location as it is the same as the location of the reflection containing the event.
+	eventReflection.sources = [ ...reflection.sources ];
 }
 
 /**
@@ -223,93 +263,15 @@ function getTargetTypeReflections( reflectionType ) {
 }
 
 /**
- * Tries to find the best parent reflection for the event. The algorithm is as follows:
+ * Returns the normalized event name to make sure that it always starts with the "event:" prefix.
  *
- * (1) First, it tries to find the `Observable` interface.
- * (2) Then, if `Observable` interface is not found within the module, it traverses the ancestors of the reflection containing the specified
- *     event and searches for a class that fires this event.
- * (3) Otherwise, it tries to find the first default class within the same module.
- *
- * It returns `null` if no matching parent is found.
- *
- * @param {String} eventName The event name to be searched in the reflection parent.
- * @param {require('typedoc').Reflection} reflection The reflection that contains the event name.
- * @returns {require('typedoc').Reflection|null}
+ * @param {String} eventName
+ * @returns {String}
  */
-function findParentForEvent( eventName, reflection ) {
-	return findReflection( reflection, isObservableInterface ) ||
-		findReflection( reflection, isClassThatFiresEvent( eventName ) ) ||
-		findReflection( reflection, isDefaultClass );
-}
-
-/**
- * Recursively looks for a matching reflection from its ancestors. It not only checks the ancestors, but also all their siblings (children
- * belonging to the same parent).
- *
- * @param {require('typedoc').Reflection} reflection The reflection that is the search starting point.
- * @param {Function} callback The function that gets each reflection and decides if it meets the conditions.
- * @returns {require('typedoc').Reflection|null}
- */
-function findReflection( reflection, callback ) {
-	if ( !reflection.parent ) {
-		return null;
+function normalizeEventName( eventName ) {
+	if ( eventName.startsWith( 'event:' ) ) {
+		return eventName;
 	}
 
-	const found = reflection.parent.children.find( callback );
-
-	if ( found ) {
-		return found;
-	}
-
-	return findReflection( reflection.parent, callback );
-}
-
-/**
- * Checks if the reflection is the `Observable` interface.
- *
- * @param {require('typedoc').Reflection} reflection The reflection to be checked.
- * @returns {Boolean}
- */
-function isObservableInterface( reflection ) {
-	return reflection.kindString === 'Interface' && reflection.name === 'Observable';
-}
-
-/**
- * Returns a function that checks if the reflection is a class that fires the specified event.
- *
- * @param {String} eventName The event name to be searched in the reflection parent.
- * @returns {Function}
- */
-function isClassThatFiresEvent( eventName ) {
-	return reflection => {
-		if ( reflection.kindString !== 'Class' ) {
-			return false;
-		}
-
-		if ( !reflection.comment ) {
-			return false;
-		}
-
-		return reflection.comment
-			.getTags( '@fires' )
-			.some( tag => tag.content[ 0 ].text === eventName );
-	};
-}
-
-/**
- * Checks if the reflection is a default class.
- *
- * @param {require('typedoc').Reflection} reflection The reflection to be checked.
- * @returns {Boolean}
- */
-function isDefaultClass( reflection ) {
-	if ( reflection.kindString !== 'Class' ) {
-		return false;
-	}
-
-	if ( reflection.originalName !== 'default' ) {
-		return false;
-	}
-
-	return true;
+	return `event:${ eventName }`;
 }

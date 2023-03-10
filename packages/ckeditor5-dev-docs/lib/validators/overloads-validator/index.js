@@ -6,7 +6,10 @@
 'use strict';
 
 const { ReflectionKind } = require( 'typedoc' );
-const { isReflectionValid } = require( '../utils' );
+const { utils } = require( '@ckeditor/typedoc-plugins' );
+
+// The `@label` validator is currently not used.
+// See: https://github.com/ckeditor/ckeditor5/issues/13591.
 
 /**
  * Validates the output produced by TypeDoc.
@@ -20,7 +23,7 @@ const { isReflectionValid } = require( '../utils' );
  */
 module.exports = function validate( project, onError ) {
 	const kinds = ReflectionKind.Method | ReflectionKind.Constructor | ReflectionKind.Function;
-	const reflections = project.getReflectionsByKind( kinds ).filter( isReflectionValid );
+	const reflections = project.getReflectionsByKind( kinds ).filter( utils.isReflectionValid );
 
 	for ( const reflection of reflections ) {
 		// Omit non-overloaded structures.

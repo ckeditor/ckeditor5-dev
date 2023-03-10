@@ -1,6 +1,82 @@
 Changelog
 =========
 
+## [35.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v35.0.0...v35.0.1) (2023-03-08)
+
+### Other changes
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The "getDllPluginWebpackConfig()" function accepts a new option (`options.tsconfigPath`) that allow defining a configuration file for "ts-loader". ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/30df3cc84d25a6118ea4260f148ae0cc39384d6d))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v35.0.0 => v35.0.1
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v35.0.0 => v35.0.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v35.0.0 => v35.0.1
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v35.0.0 => v35.0.1
+</details>
+
+
+## [35.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v34.1.3...v35.0.0) (2023-03-08)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Changed the way events are defined. Previously, the value from the `@eventName` tag was simply the event's name, and the `typedoc-plugin-tag-event` plugin was trying to guess which reflection should be the owner of this event. The `@eventName` value must be a valid identifier (link) to the event owner, which can be a class or an interface to which a given event will be attached. The owner of every event must be explicitly defined. The identifier can be relative or absolute.
+
+### Features
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Created a new task called `preparePackages()` that copies packages from the given directory to a temporary one that can be used as a source for publishing packages using the `releaseSubRepositories`() task. The primary goal of the new task is to prepare a TypeScript package to release as JavaScript. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/d1b7ba8736270f18b9438411e09f65ea9f5edc99))
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Added support for multiple `@eventName` tags defined for one exported type. One exported type can now be used to create multiple events, even in different (not related to each other) classes or interfaces. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/de7523a020f152f5c97416db9838b835a2ff3709))
+
+### Other changes
+
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: The module validator ignores the "src/augmentation.ts" files in CKEditor 5 packages. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/98bb6e1cdf2b3364de490a9c3deb3115cdfd1fba))
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: By default, the `@label` (overloads) validator is disabled when building docs from TypeScript. It can be enabled by passing the `validatorOptions: { enableOverloadValidator: true }` object as the configuration for the build task. Closes [ckeditor/ckeditor5#13591](https://github.com/ckeditor/ckeditor5/issues/13591). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/529e12b815c30f8320ce7f6f9c1c89a1a90ed734))
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Changed the way events are defined. The value of the `@eventName` tag must be a valid identifier (link) to a class or an interface to which a given event should be attached. Closes [ckeditor/ckeditor5#13553](https://github.com/ckeditor/ckeditor5/issues/13553). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/de7523a020f152f5c97416db9838b835a2ff3709))
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Extended the scope of the `typedoc-plugin-event-inheritance-fixer` plugin. So far, only inherited events in classes and the `Observable` interface have been checked. Now, support for inherited events has been added to all interfaces, so all derived classes and interfaces will contain all inherited events. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/de7523a020f152f5c97416db9838b835a2ff3709))
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: The package does not require any dependencies to prevent an integrator from using a specific version of `typedoc`. Instead, the integrator must install the `typedoc` package when using the `@ckeditor/typedoc-plugins` package. Closes [ckeditor/ckeditor5#13511](https://github.com/ckeditor/ckeditor5/issues/13511). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/2c124be40466fb5ccc81521ed02fa1d7f1ff5f5b))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v34.1.3 => v35.0.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v34.1.3 => v35.0.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v34.1.3 => v35.0.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v34.1.3 => v35.0.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v34.1.3 => v35.0.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v34.1.3 => v35.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v34.1.3 => v35.0.0
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v34.1.3 => v35.0.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v34.1.3 => v35.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v34.1.3 => v35.0.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v34.1.3 => v35.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v34.1.3 => v35.0.0
+</details>
+
+
 ## [34.1.3](https://github.com/ckeditor/ckeditor5-dev/compare/v34.1.2...v34.1.3) (2023-03-02)
 
 ### Bug fixes

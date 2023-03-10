@@ -7,6 +7,8 @@
 
 const glob = require( 'fast-glob' );
 const TypeDoc = require( 'typedoc' );
+const { plugins } = require( '@ckeditor/typedoc-plugins' );
+
 const validators = require( './validators' );
 
 /**
@@ -19,6 +21,7 @@ module.exports = async function build( config ) {
 	const sourceFilePatterns = config.sourceFiles.filter( Boolean );
 	const strictMode = config.strict || false;
 	const extraPlugins = config.extraPlugins || [];
+	const validatorOptions = config.validatorOptions || {};
 
 	const files = await glob( sourceFilePatterns );
 	const typeDoc = new TypeDoc.Application();
@@ -49,19 +52,19 @@ module.exports = async function build( config ) {
 			// Fixes `"name": 'default" in the output project.
 			'typedoc-plugin-rename-defaults',
 
-			require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' ),
-			require.resolve( '@ckeditor/typedoc-plugins/lib/symbol-fixer' ),
-			require.resolve( '@ckeditor/typedoc-plugins/lib/interface-augmentation-fixer' ),
-			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-error' ),
-			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-event' ),
-			require.resolve( '@ckeditor/typedoc-plugins/lib/tag-observable' ),
-			require.resolve( '@ckeditor/typedoc-plugins/lib/purge-private-api-docs' ),
+			plugins[ 'typedoc-plugin-module-fixer' ],
+			plugins[ 'typedoc-plugin-symbol-fixer' ],
+			plugins[ 'typedoc-plugin-interface-augmentation-fixer' ],
+			plugins[ 'typedoc-plugin-tag-error' ],
+			plugins[ 'typedoc-plugin-tag-event' ],
+			plugins[ 'typedoc-plugin-tag-observable' ],
+			plugins[ 'typedoc-plugin-purge-private-api-docs' ],
 
 			// The `event-inheritance-fixer` plugin must be loaded after `tag-event` plugin, as it depends on its output.
-			require.resolve( '@ckeditor/typedoc-plugins/lib/event-inheritance-fixer' ),
+			plugins[ 'typedoc-plugin-event-inheritance-fixer' ],
 
 			// The `event-param-fixer` plugin must be loaded after `tag-event` and `tag-observable` plugins, as it depends on their output.
-			require.resolve( '@ckeditor/typedoc-plugins/lib/event-param-fixer' ),
+			plugins[ 'typedoc-plugin-event-param-fixer' ],
 
 			...extraPlugins
 		]
@@ -75,7 +78,7 @@ module.exports = async function build( config ) {
 		throw 'Something went wrong with TypeDoc.';
 	}
 
-	const validationResult = validators.validate( conversionResult, typeDoc );
+	const validationResult = validators.validate( conversionResult, typeDoc, validatorOptions );
 
 	if ( !validationResult && strictMode ) {
 		throw 'Something went wrong with TypeDoc.';

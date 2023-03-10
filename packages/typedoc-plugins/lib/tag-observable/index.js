@@ -5,8 +5,7 @@
 
 'use strict';
 
-const { Converter, ReflectionKind, TypeParameterReflection, Comment } = require( 'typedoc' );
-const ts = require( 'typescript' );
+const { Converter, ReflectionKind, TypeParameterReflection, Comment, TypeScript } = require( 'typedoc' );
 
 /**
  * The `typedoc-plugin-tag-observable` handles the `@observable` tag that is assigned to the class property. If found, two new events are
@@ -54,7 +53,7 @@ function onEventEnd( context ) {
 			const nameParameter = typeParameterFactory( context, {
 				name: 'name',
 				parent: eventReflection,
-				kind: ts.SyntaxKind.StringKeyword,
+				kind: TypeScript.SyntaxKind.StringKeyword,
 				comment: `Name of the changed property (\`${ propertyName }\`).`
 			} );
 

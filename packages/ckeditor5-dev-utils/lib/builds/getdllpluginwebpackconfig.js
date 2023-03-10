@@ -24,6 +24,7 @@ const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-transla
  * @param {String} options.themePath An absolute path to the theme package.
  * @param {String} options.packagePath An absolute path to the root directory of the package.
  * @param {String} options.manifestPath An absolute path to the CKEditor 5 DLL manifest file.
+ * @param {String} [options.tsconfigPath] An absolute path to the TypeScript configuration file.
  * @param {Boolean} [options.isDevelopmentMode=false] Whether to build a dev mode of the package.
  * @returns {Object}
  */
@@ -101,7 +102,14 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 				},
 				{
 					test: /\.ts$/,
-					use: [ 'ts-loader' ]
+					use: [
+						{
+							loader: 'ts-loader',
+							options: {
+								configFile: options.tsconfigPath || 'tsconfig.json'
+							}
+						}
+					]
 				}
 			]
 		}

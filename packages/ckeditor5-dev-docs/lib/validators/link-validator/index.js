@@ -6,7 +6,7 @@
 'use strict';
 
 const { ReflectionKind } = require( 'typedoc' );
-const { isReflectionValid, isIdentifierValid } = require( '../utils' );
+const { utils } = require( '@ckeditor/typedoc-plugins' );
 
 /**
  * Validates the output produced by TypeDoc.
@@ -17,7 +17,7 @@ const { isReflectionValid, isIdentifierValid } = require( '../utils' );
  * @param {Function} onError A callback that is executed when a validation error is detected.
  */
 module.exports = function validate( project, onError ) {
-	const reflections = project.getReflectionsByKind( ReflectionKind.All ).filter( isReflectionValid );
+	const reflections = project.getReflectionsByKind( ReflectionKind.All ).filter( utils.isReflectionValid );
 
 	for ( const reflection of reflections ) {
 		const identifiers = getIdentifiersFromLinkTag( reflection );
@@ -27,7 +27,7 @@ module.exports = function validate( project, onError ) {
 		}
 
 		for ( const identifier of identifiers ) {
-			const isValid = isIdentifierValid( reflection, identifier );
+			const isValid = utils.isIdentifierValid( reflection, identifier );
 
 			if ( !isValid ) {
 				onError( `Incorrect link: "${ identifier }"`, reflection );

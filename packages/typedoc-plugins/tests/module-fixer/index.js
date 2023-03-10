@@ -8,6 +8,7 @@ const glob = require( 'fast-glob' );
 const TypeDoc = require( 'typedoc' );
 
 const utils = require( '../utils' );
+const { plugins } = require( '../../lib' );
 
 describe( 'typedoc-plugins/module-fixer', function() {
 	this.timeout( 10 * 1000 );
@@ -33,7 +34,7 @@ describe( 'typedoc-plugins/module-fixer', function() {
 			logLevel: 'Error',
 			entryPoints: files,
 			plugin: [
-				require.resolve( '@ckeditor/typedoc-plugins/lib/module-fixer' )
+				plugins[ 'typedoc-plugin-module-fixer' ]
 			],
 			tsconfig: utils.normalizePath( FIXTURES_PATH, 'tsconfig.json' )
 		} );
