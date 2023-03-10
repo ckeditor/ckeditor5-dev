@@ -18,13 +18,6 @@ const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
 module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	const definitions = Object.assign( {}, getDefinitionsFromFile( options.identityFile ) );
 
-	const ckDebugLoader = {
-		loader: require.resolve( '../ck-debug-loader' ),
-		options: {
-			debugFlags: options.debug
-		}
-	};
-
 	const config = {
 		mode: 'development',
 
@@ -158,11 +151,6 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 				]
 			}
 		);
-	} else {
-		const tsRules = config.module.rules.find( loader => 'typescript.ts'.match( loader.test ) );
-		tsRules.use.push( {
-			...ckDebugLoader
-		} );
 	}
 
 	if ( options.cache ) {
