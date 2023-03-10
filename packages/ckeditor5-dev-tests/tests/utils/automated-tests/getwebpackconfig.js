@@ -48,7 +48,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			extensions: [ '.ts', '.js', '.json' ]
 		} );
 
-		expect( webpackConfig.module.rules.length ).to.equal( 5 );
+		expect( webpackConfig.module.rules.length ).to.equal( 4 );
 		expect( webpackConfig.resolveLoader.modules[ 0 ] ).to.equal( 'node_modules' );
 
 		expect( webpackConfig.devtool ).to.equal( undefined );
@@ -57,28 +57,65 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		expect( webpackConfig.watchOptions ).to.have.property( 'aggregateTimeout', 500 );
 	} );
 
+	it( 'should not include the ck-debug-loader', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {
+			files: [ '**/*.js' ]
+		} );
+
+		const debugLoaderRules = webpackConfig.module.rules.filter( rule => {
+			return rule.use.find( use => {
+				if ( typeof use === 'string' ) {
+					return use.includes( 'ck-debug-loader' );
+				}
+
+				return use.loader.includes( 'ck-debug-loader' );
+			} );
+		} );
+
+		expect( debugLoaderRules.length ).to.equal( 0 );
+	} );
+
 	it( 'should return webpack configuration containing a loader for measuring the coverage', () => {
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
 			coverage: true,
 			files: [ '**/*.js' ]
 		} );
 
-		const coverageLoader = webpackConfig.module.rules
-			.find( rule => rule.loader === 'babel-loader' );
+		const coverageLoader = webpackConfig.module.rules[ 0 ];
 
-		expect( coverageLoader ).to.deep.equal( {
-			test: /\.[jt]s$/,
-			loader: 'babel-loader',
-			include: [],
-			exclude: [
-				new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
-			],
-			options: {
-				plugins: [
-					'babel-plugin-istanbul'
-				]
-			}
+		expect( coverageLoader ).to.not.equal( undefined );
+		expect( '/path/to/javascript.js' ).to.match( coverageLoader.test );
+		expect( '/path/to/typescript.ts' ).to.match( coverageLoader.test );
+
+		expect( coverageLoader.include ).to.be.an( 'array' );
+		expect( coverageLoader.include ).to.lengthOf( 0 );
+		expect( coverageLoader.exclude ).to.be.an( 'array' );
+		expect( coverageLoader.exclude ).to.lengthOf( 1 );
+
+		expect( coverageLoader.use ).to.be.an( 'array' );
+		expect( coverageLoader.use ).to.lengthOf( 1 );
+
+		const babelLoader = coverageLoader.use[ 0 ];
+
+		expect( babelLoader.loader ).to.equal( 'babel-loader' );
+	} );
+
+	it( 'should not include the ck-debug-loader when checking the coverage', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {
+			coverage: true,
+			files: [ '**/*.js' ]
 		} );
+
+		const coverageLoader = webpackConfig.module.rules[ 0 ];
+
+		expect( coverageLoader ).to.not.equal( undefined );
+
+		expect( coverageLoader.use ).to.be.an( 'array' );
+		expect( coverageLoader.use ).to.lengthOf( 1 );
+
+		const ckDebugLoader = coverageLoader.use.find( use => use.loader.includes( 'ck-debug-loader' ) );
+
+		expect( ckDebugLoader ).to.equal( undefined );
 	} );
 
 	it( 'should return webpack configuration containing a loader for measuring the coverage (include check)', () => {
@@ -91,9 +128,11 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			]
 		} );
 
-		const coverageLoader = webpackConfig.module.rules
-			.find( rule => rule.loader === 'babel-loader' );
+		const coverageLoader = webpackConfig.module.rules[ 0 ];
 
+		expect( coverageLoader ).to.not.equal( undefined );
+
+		expect( coverageLoader.include ).to.be.an( 'array' );
 		expect( coverageLoader.include ).to.deep.equal( [
 			new RegExp( [ 'ckeditor5-utils', 'src', '' ].join( escapedPathSep ) )
 		] );
@@ -109,9 +148,11 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			]
 		} );
 
-		const coverageLoader = webpackConfig.module.rules
-			.find( rule => rule.loader === 'babel-loader' );
+		const coverageLoader = webpackConfig.module.rules[ 0 ];
 
+		expect( coverageLoader ).to.not.equal( undefined );
+
+		expect( coverageLoader.include ).to.be.an( 'array' );
 		expect( coverageLoader.include ).to.deep.equal( [
 			new RegExp( [ 'ckeditor5-!(utils)', 'src', '' ].join( escapedPathSep ) )
 		] );
@@ -196,12 +237,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			throw new Error( 'A loader for ".ts" files was not found.' );
 		}
 
-		const ckDebugLoader = tsRule.use.find( item => item.loader.endsWith( 'ck-debug-loader.js' ) );
 		const tsLoader = tsRule.use.find( item => item.loader === 'ts-loader' );
-
-		if ( !ckDebugLoader ) {
-			throw new Error( '"ck-debug-loader" missing' );
-		}
 
 		if ( !tsLoader ) {
 			throw new Error( '"ts-loader" missing' );
@@ -215,33 +251,6 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		} );
 		expect( tsLoader.options ).to.have.property( 'configFile' );
 		expect( tsLoader.options.configFile ).to.equal( '/home/project/configs/tsconfig.json' );
-	} );
-
-	it( 'should use "ck-debug-loader" before "ts-loader" while loading TS files', () => {
-		const webpackConfig = getWebpackConfigForAutomatedTests( {} );
-
-		const tsRule = webpackConfig.module.rules.find( rule => {
-			return rule.test.toString().endsWith( '/\\.ts$/' );
-		} );
-
-		if ( !tsRule ) {
-			throw new Error( 'A loader for ".ts" files was not found.' );
-		}
-
-		const ckDebugLoaderIndex = tsRule.use.findIndex( item => item.loader.endsWith( 'ck-debug-loader.js' ) );
-		const tsLoaderIndex = tsRule.use.findIndex( item => item.loader === 'ts-loader' );
-
-		if ( ckDebugLoaderIndex === undefined ) {
-			throw new Error( '"ck-debug-loader" missing' );
-		}
-
-		if ( tsLoaderIndex === undefined ) {
-			throw new Error( '"ts-loader" missing' );
-		}
-
-		// Webpack reads the "use" array from back to the front.
-		expect( ckDebugLoaderIndex ).to.equal( 1 );
-		expect( tsLoaderIndex ).to.equal( 0 );
 	} );
 
 	it( 'should return webpack configuration with correct extension resolve order', () => {
