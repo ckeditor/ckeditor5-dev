@@ -27,7 +27,14 @@ module.exports = function validate( project, onError ) {
 			continue;
 		}
 
-		const filePath = utils.getNode( reflection ).fileName;
+		const node = utils.getNode( reflection );
+
+		// Not a ES6 module.
+		if ( !node ) {
+			continue;
+		}
+
+		const filePath = node.fileName;
 
 		if ( filePath.endsWith( 'src/augmentation.ts' ) ) {
 			continue;

@@ -116,7 +116,7 @@ function getLongNameParts( reflection ) {
  * Returns the TypeScript node from the reflection.
  *
  * @param {require('typedoc').Reflection} reflection A reflection for which we want to get its TypeScript node.
- * @returns {Object}
+ * @returns {Object|null}
  */
 function getNode( reflection ) {
 	let symbol = reflection.project.getSymbolFromReflection( reflection );
@@ -127,6 +127,11 @@ function getNode( reflection ) {
 		// symbol from its parent, which contains all nodes for each signature.
 		symbol = reflection.project.getSymbolFromReflection( reflection.parent );
 		declarationIndex = reflection.parent.signatures ? reflection.parent.signatures.indexOf( reflection ) : 0;
+	}
+
+	// Not a ES6 module.
+	if ( !symbol ) {
+		return null;
 	}
 
 	return symbol.declarations[ declarationIndex ];
