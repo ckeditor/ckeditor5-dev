@@ -8,6 +8,8 @@
 const { ReflectionKind } = require( 'typedoc' );
 const { utils } = require( '@ckeditor/typedoc-plugins' );
 
+const AUGMENTATION_MODULE_REGEXP = /[^\\/]+[\\/]src[\\/]augmentation/;
+
 /**
  * Validates the output produced by TypeDoc.
  *
@@ -20,6 +22,11 @@ module.exports = function validate( project, onError ) {
 	const reflections = project.getReflectionsByKind( ReflectionKind.Module );
 
 	for ( const reflection of reflections ) {
+		// The augmentation module does not contain the `@module` annotation. We need to skip it.
+		if ( reflection.name.match( AUGMENTATION_MODULE_REGEXP ) ) {
+			continue;
+		}
+
 		const [ packageName, ...moduleName ] = reflection.name.split( '/' );
 
 		// If there is no module name after the package name, skip it.
