@@ -80,22 +80,13 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 					test: /\.ts$/,
 					use: [
 						{
-							loader: 'ts-loader',
+							loader: 'swc-loader',
 							options: {
-								// Use tsconfig path specified in CLI arguments. If not present, fallback to 'tsconfig.json' which
-								// is the default value https://github.com/TypeStrong/ts-loader#configfile.
-								configFile: options.tsconfig || 'tsconfig.json',
-								// Override default settings specified in `tsconfig.json`.
-								compilerOptions: {
-									// Do not emit any JS file as these TypeScript files are just passed through webpack.
-									// Automated tests have a single entry point.
-									// See: https://github.com/ckeditor/ckeditor5/issues/12111.
-									noEmit: false,
-									// Do not emit any file when couldn't compile a TS file.
-									// Otherwise, karma prints an error on the top of the output log and then, execute tests.
-									// It might give a false positive results. Tests are OK while something could not be compiled.
-									// In such a case we would like to throw an error.
-									noEmitOnError: true
+								jsc: {
+									target: 'es2020',
+									parser: {
+										syntax: 'typescript'
+									}
 								}
 							}
 						}

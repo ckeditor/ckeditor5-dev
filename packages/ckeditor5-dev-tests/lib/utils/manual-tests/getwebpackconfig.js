@@ -110,21 +110,13 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 					test: /\.ts$/,
 					use: [
 						{
-							loader: 'ts-loader',
+							loader: 'swc-loader',
 							options: {
-								// Use tsconfig path specified in CLI arguments. If not present, fallback to 'tsconfig.json' which
-								// is the default value https://github.com/TypeStrong/ts-loader#configfile.
-								configFile: options.tsconfig || 'tsconfig.json',
-								// Override default settings specified in `tsconfig.json`.
-								compilerOptions: {
-									// Do not emit any JS file as these TypeScript files are just passed through webpack.
-									// Manual tests have their entry point. Only these files should be stored on a file system.
-									// See: https://github.com/ckeditor/ckeditor5/issues/12111.
-									noEmit: false,
-									// When both (JS and TS) files are imported by a manual test while updating the JS files,
-									// the `ts-loader` emits the "TypeScript emitted no output" error.
-									// Disabling the `noEmitOnError` option fixes the problem.
-									noEmitOnError: false
+								jsc: {
+									target: 'es2020',
+									parser: {
+										syntax: 'typescript'
+									}
 								}
 							}
 						},
