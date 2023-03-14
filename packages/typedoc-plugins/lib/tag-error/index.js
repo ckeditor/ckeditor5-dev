@@ -26,6 +26,12 @@ function onEventEnd( context ) {
 	// Errors are children of a module.
 	for ( const reflection of moduleReflections ) {
 		const symbol = context.project.getSymbolFromReflection( reflection );
+
+		// Not ES6 module.
+		if ( !symbol ) {
+			continue;
+		}
+
 		const node = symbol.declarations[ 0 ];
 		const sourceFile = node.getSourceFile();
 

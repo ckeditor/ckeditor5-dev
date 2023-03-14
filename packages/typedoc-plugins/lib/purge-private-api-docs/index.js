@@ -29,15 +29,18 @@ module.exports = {
 function onEventEnd() {
 	return context => {
 		const moduleReflections = context.project.getReflectionsByKind( ReflectionKind.Module )
-			.filter( reflection => isPrivatePackageFile( reflection.sources[ 0 ].fullFileName ) );
+			.filter( reflection => {
+				// Not a module.
+				if ( !reflection.sources ) {
+					return false;
+				}
+
+				const [ { fullFileName } ] = reflection.sources;
+				return isPrivatePackageFile( fullFileName );
+			} );
 
 		for ( const reflection of moduleReflections ) {
 			const symbol = context.project.getSymbolFromReflection( reflection );
-
-			// When processing an empty file.
-			if ( !symbol ) {
-				return;
-			}
 
 			const node = symbol.declarations[ 0 ];
 
