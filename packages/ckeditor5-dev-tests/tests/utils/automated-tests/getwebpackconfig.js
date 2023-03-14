@@ -237,20 +237,15 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			throw new Error( 'A loader for ".ts" files was not found.' );
 		}
 
-		const tsLoader = tsRule.use.find( item => item.loader === 'ts-loader' );
+		const tsLoader = tsRule.use.find( item => item.loader === 'esbuild-loader' );
 
 		if ( !tsLoader ) {
-			throw new Error( '"ts-loader" missing' );
+			throw new Error( '"esbuild-loader" missing' );
 		}
 
 		expect( tsLoader ).to.have.property( 'options' );
-		expect( tsLoader.options ).to.have.property( 'compilerOptions' );
-		expect( tsLoader.options.compilerOptions ).to.deep.equal( {
-			noEmit: false,
-			noEmitOnError: true
-		} );
-		expect( tsLoader.options ).to.have.property( 'configFile' );
-		expect( tsLoader.options.configFile ).to.equal( '/home/project/configs/tsconfig.json' );
+		expect( tsLoader.options ).to.have.property( 'target', 'es2019' );
+		expect( tsLoader.options ).to.have.property( 'tsconfig', '/home/project/configs/tsconfig.json' );
 	} );
 
 	it( 'should return webpack configuration with correct extension resolve order', () => {

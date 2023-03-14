@@ -65,27 +65,22 @@ describe( 'getWebpackConfigForManualTests()', () => {
 		}
 
 		const ckDebugLoader = tsRule.use.find( item => item.loader.endsWith( 'ck-debug-loader.js' ) );
-		const tsLoader = tsRule.use.find( item => item.loader === 'ts-loader' );
+		const tsLoader = tsRule.use.find( item => item.loader === 'esbuild-loader' );
 
 		if ( !ckDebugLoader ) {
 			throw new Error( '"ck-debug-loader" missing' );
 		}
 
 		if ( !tsLoader ) {
-			throw new Error( '"ts-loader" missing' );
+			throw new Error( '"esbuild-loader" missing' );
 		}
 
 		expect( tsLoader ).to.have.property( 'options' );
-		expect( tsLoader.options ).to.have.property( 'compilerOptions' );
-		expect( tsLoader.options.compilerOptions ).to.deep.equal( {
-			noEmit: false,
-			noEmitOnError: false
-		} );
-		expect( tsLoader.options ).to.have.property( 'configFile' );
-		expect( tsLoader.options.configFile ).to.equal( '/home/project/configs/tsconfig.json' );
+		expect( tsLoader.options ).to.have.property( 'target', 'es2019' );
+		expect( tsLoader.options ).to.have.property( 'tsconfig', '/home/project/configs/tsconfig.json' );
 	} );
 
-	it( 'should use "ck-debug-loader" before "ts-loader" while loading TS files', () => {
+	it( 'should use "ck-debug-loader" before "esbuild-loader" while loading TS files', () => {
 		const webpackConfig = getWebpackConfigForManualTests( {} );
 
 		const tsRule = webpackConfig.module.rules.find( rule => {
@@ -97,14 +92,14 @@ describe( 'getWebpackConfigForManualTests()', () => {
 		}
 
 		const ckDebugLoaderIndex = tsRule.use.findIndex( item => item.loader.endsWith( 'ck-debug-loader.js' ) );
-		const tsLoaderIndex = tsRule.use.findIndex( item => item.loader === 'ts-loader' );
+		const tsLoaderIndex = tsRule.use.findIndex( item => item.loader === 'esbuild-loader' );
 
 		if ( ckDebugLoaderIndex === undefined ) {
 			throw new Error( '"ck-debug-loader" missing' );
 		}
 
 		if ( tsLoaderIndex === undefined ) {
-			throw new Error( '"ts-loader" missing' );
+			throw new Error( '"esbuild-loader" missing' );
 		}
 
 		// Webpack reads the "use" array from back to the front.

@@ -207,7 +207,7 @@ module.exports = function parseArguments( args ) {
 			return;
 		}
 
-		options.tsconfig = path.resolve( process.cwd(), options.tsconfig );
+		options.tsconfig = normalizePath( path.resolve( process.cwd(), options.tsconfig ) );
 	}
 
 	/**
@@ -240,5 +240,15 @@ module.exports = function parseArguments( args ) {
 				return item.charAt( 0 ).toUpperCase() + item.slice( 1 ).toLowerCase();
 			} )
 			.join( '' );
+	}
+
+	/**
+	 * Normalizes path between Unix and Windows systems.
+	 *
+	 * @param {String} pathToNormalize
+	 * @returns {String}
+	 */
+	function normalizePath( pathToNormalize ) {
+		return pathToNormalize.split( path.sep ).join( path.posix.sep );
 	}
 };
