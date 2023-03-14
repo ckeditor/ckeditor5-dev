@@ -9,7 +9,6 @@
     "@ckeditor/ckeditor5-dev-translations": "^35.0.3",
     "@ckeditor/ckeditor5-dev-utils": "^35.0.3",
     "@ckeditor/ckeditor5-inspector": "^4.0.0",
-    "@swc/core": "^1.3.40",
     "assertion-error": "^1.1.0",
     "babel-plugin-istanbul": "^6.1.0",
     "chai": "^4.2.0",
@@ -19,6 +18,7 @@
     "css-loader": "^5.2.7",
     "del": "^5.1.0",
     "dom-combiner": "^0.1.3",
+    "esbuild-loader": "^3.0.1",
     "fs-extra": "^9.0.0",
     "glob": "^7.1.6",
     "inquirer": "^7.1.0",
@@ -47,7 +47,6 @@
     "sinon-chai": "^3.5.0",
     "socket.io": "^4.0.0",
     "style-loader": "^2.0.0",
-    "swc-loader": "^0.2.3",
     "typescript": "^4.6.4",
     "webpack": "^5.58.1"
   },

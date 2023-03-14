@@ -80,14 +80,10 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 					test: /\.ts$/,
 					use: [
 						{
-							loader: 'swc-loader',
+							loader: 'esbuild-loader',
 							options: {
-								jsc: {
-									target: 'es2020',
-									parser: {
-										syntax: 'typescript'
-									}
-								}
+								target: 'es2019',
+								tsconfig: options.tsconfig || 'tsconfig.json'
 							}
 						}
 					]
