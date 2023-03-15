@@ -122,20 +122,14 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 		config.module.rules.unshift(
 			{
 				test: /\.[jt]s$/,
-				use: [
-					{
-						loader: 'babel-loader',
-						options: {
-							plugins: [
-								'babel-plugin-istanbul'
-							]
-						}
-					}
-				],
+				loader: 'istanbul-instrumenter-loader',
 				include: getPathsToIncludeForCoverage( options.files ),
 				exclude: [
 					new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
-				]
+				],
+				options: {
+					esModules: true
+				}
 			}
 		);
 	}
@@ -154,7 +148,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 // This loose way of matching packages for CC works with packages under various paths.
 // E.g. workspace/ckeditor5-utils and ckeditor5/node_modules/ckeditor5-utils and every other path.
 function getPathsToIncludeForCoverage( globs ) {
-	const values = globs
+	return globs
 		.reduce( ( returnedPatterns, globPatterns ) => {
 			returnedPatterns.push( ...globPatterns );
 
@@ -175,6 +169,4 @@ function getPathsToIncludeForCoverage( globs ) {
 		} )
 		// Filter undefined ones.
 		.filter( path => path );
-
-	return [ ...new Set( values ) ];
 }
