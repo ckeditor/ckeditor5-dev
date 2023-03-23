@@ -182,5 +182,27 @@ describe( 'typedoc-plugins/tag-observable', function() {
 				expect( eventDefinition.sources[ 0 ] ).to.have.property( 'url' );
 			} );
 		}
+
+		it( 'should define the `inheritedFrom` property for an inherited observable property (change:${ property })', () => {
+			const eventDefinitions = derivedClassDefinition.children.filter( children => children.kindString === 'Event' );
+
+			const changeKeyEvent = eventDefinitions.find( event => event.name === 'event:change:key' );
+
+			expect( changeKeyEvent ).to.not.be.undefined;
+			expect( changeKeyEvent ).to.have.property( 'inheritedFrom' );
+
+			expect( changeKeyEvent.inheritedFrom.reflection.parent ).to.equal( baseClassDefinition );
+		} );
+
+		it( 'should define the `inheritedFrom` property for an inherited observable property (set:${ property })', () => {
+			const eventDefinitions = derivedClassDefinition.children.filter( children => children.kindString === 'Event' );
+
+			const setKeyEvent = eventDefinitions.find( event => event.name === 'event:set:key' );
+
+			expect( setKeyEvent ).to.not.be.undefined;
+			expect( setKeyEvent ).to.have.property( 'inheritedFrom' );
+
+			expect( setKeyEvent.inheritedFrom.reflection.parent ).to.equal( baseClassDefinition );
+		} );
 	} );
 } );

@@ -12,6 +12,8 @@ const { Converter, ReflectionKind, ReferenceType } = require( 'typedoc' );
  *
  * Event can be inherited from a class or from an interface. If a class or an interface fires an event and it is a base for another class or
  * interface, then all events from the base reflection are copied and inserted into each derived reflection.
+ *
+ * The plugin takes care of events that are specified in parent classes too.
  */
 module.exports = {
 	load( app ) {
@@ -24,12 +26,21 @@ function onEventEnd( context ) {
 	const reflections = context.project.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.Interface );
 
 	for ( const reflection of reflections ) {
-		// If an interface does not contain any children, skip it.
+		// If a reflection does not contain any children, skip it.
 		if ( !reflection.children ) {
 			continue;
 		}
 
-		const eventReflections = reflection.children.filter( reflection => reflection.kindString === 'Event' );
+		// Find all parents of given reflection.
+		// Filter function is required in case if the purge plugin removed a reflection.
+		const parentReflections = getParentClasses( reflection ).filter( Boolean );
+
+		// Collect all events from. The goal is to insert them into a reflection.
+		// When using the mixins concept, Typedoc loses the inheritance tree.
+		// Hence, we need to look for parent classes manually to determine their events.
+		const eventReflections = parentReflections.flatMap( parentRef => {
+			return parentRef.children.filter( reflection => reflection.kindString === 'Event' );
+		} );
 
 		// If class or interface does not fire events, skip it.
 		if ( !eventReflections.length ) {
@@ -37,18 +48,24 @@ function onEventEnd( context ) {
 		}
 
 		// Otherwise, find all derived classes and interfaces in the whole inheritance chain.
-		const derivedReflections = getDerivedReflections( reflection );
-
-		// If current reflection is not extended by another class, skip it.
-		if ( !derivedReflections.length ) {
-			continue;
-		}
+		// Including the current processed reflection allow detecting a class that extends a mixin.
+		//
+		// ClassA
+		//  ⤷ ClassB extends Mixin( ClassA )
+		//     ⤷ ClassC extends ClassB
+		//
+		// The goal is to copy events from `ClassA` when processing `ClassB` to both descendant classes.
+		const derivedReflections = [
+			reflection,
+			...getDerivedReflections( reflection )
+		];
 
 		// For each derived reflection...
 		for ( const derivedReflection of derivedReflections ) {
-			// ...and for each event from the base reflection...
+			// ...and for each event from the parent reflections...
 			for ( const eventReflection of eventReflections ) {
 				// ...skip processing the event if derived reflection already has it.
+				// It may happen when processing the `@observable` annotation.
 				const hasEvent = derivedReflection.children
 					.some( child => child.kindString === 'Event' && child.name === eventReflection.name );
 
@@ -74,7 +91,7 @@ function onEventEnd( context ) {
 				clonedEventReflection.sources = [ ...eventReflection.sources ];
 
 				clonedEventReflection.inheritedFrom = ReferenceType.createResolvedReference(
-					`${ reflection.name }.${ eventReflection.name }`,
+					`${ eventReflection.parent.name }.${ eventReflection.name }`,
 					eventReflection,
 					context.project
 				);
@@ -109,3 +126,44 @@ function getDerivedReflections( reflection ) {
 			];
 		} );
 }
+
+/**
+ * Finds all parent classes from the specified base reflection. It traverses the whole inheritance chain.
+ * If the base reflection is not extending, an empty array is returned.
+ *
+ * @param {require('typedoc').Reflection} reflection The base reflection from which the parent classes will be searched.
+ * @returns {Array.<require('typedoc').Reflection>}
+ */
+function getParentClasses( reflection ) {
+	const extendedTypes = reflection.extendedTypes || [];
+
+	return extendedTypes
+		.filter( entry => {
+			// Cover: `class extends Mixin( BaseClass )`.
+			if ( entry.type === 'intersection' ) {
+				return entry.types.filter( e => e.reflection ).length;
+			}
+
+			return entry.reflection;
+		} )
+		.flatMap( entry => {
+			if ( entry.type === 'intersection' ) {
+				const parents = entry.types
+					.filter( e => e.reflection )
+					.map( e => e.reflection );
+
+				return [
+					...parents.flatMap( item => getParentClasses( item ) ),
+					...parents
+				];
+			}
+
+			const parentReflection = entry.reflection;
+
+			return [
+				...getParentClasses( parentReflection ),
+				parentReflection
+			];
+		} );
+}
+

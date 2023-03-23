@@ -11,7 +11,7 @@ const utils = require( '../utils' );
 const { plugins } = require( '../../lib' );
 
 describe( 'typedoc-plugins/event-inheritance-fixer', function() {
-	this.timeout( 10 * 1000 );
+	this.timeout( 20 * 1000 );
 
 	let typeDoc, conversionResult, files, events;
 
@@ -43,6 +43,11 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 		events = conversionResult
 			.getReflectionsByKind( TypeDoc.ReflectionKind.All )
 			.filter( child => child.kindString === 'Event' );
+
+		// There are 8 events from classes and 8 events from interfaces.
+		// There are also 3 events from "MixedClass", which implements the "InterfaceC".
+		// Also, 3 events come from the `ClassFoo` and its descendant classes.
+		expect( events ).to.lengthOf( 22 );
 	} );
 
 	// ---------------
@@ -53,6 +58,10 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 	//  ⤷ ClassB
 	//     ⤷ ClassC
 	// ClassD
+	//
+	// ClassFoo
+	//  ⤷ ClassMixinFoo extends Mixin( ClassFoo )
+	//     ⤷ ClassMixinFooBar
 
 	// -------------------
 	// INTERFACE HIERARCHY
@@ -77,6 +86,10 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 	//     ⤷ ClassC ⟶ "event:event-2-class-a" (overwritten in ClassC)
 	//     ⤷ ClassC ⟶ "event:event-3-class-b" (inherited from ClassB)
 
+	// ClassFoo ⟶ "event:property"
+	//  ⤷ ClassMixinFoo ⟶ "event:property" (inherited from ClassFoo)
+	//     ⤷ ClassMixinFooBar ⟶ "event:property" (inherited from ClassFoo)
+
 	// InterfaceA ⟶ "event:event-1-interface-a"
 	// InterfaceA ⟶ "event:event-2-interface-a"
 	//  ⤷ InterfaceB ⟶ "event:event-1-interface-a" (inherited from InterfaceA)
@@ -91,33 +104,38 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 
 	// The "MixedClass" implements the "InterfaceC", so all events from the "InterfaceC" will be cloned.
 
-	it( 'should find all events within the project', () => {
-		// There are 8 events from classes and 8 events from interfaces.
-		// There are also 3 events from "MixedClass", which implements the "InterfaceC".
-		expect( events ).to.lengthOf( 19 );
+	it( 'should find all events within the project (verifying classes A-C)', () => {
+		expect( findEvent( 'ClassA', 'event:event-1-class-a' ) ).to.not.be.undefined;
+		expect( findEvent( 'ClassA', 'event:event-2-class-a' ) ).to.not.be.undefined;
+		expect( findEvent( 'ClassB', 'event:event-1-class-a' ) ).to.not.be.undefined;
+		expect( findEvent( 'ClassB', 'event:event-2-class-a' ) ).to.not.be.undefined;
+		expect( findEvent( 'ClassB', 'event:event-3-class-b' ) ).to.not.be.undefined;
+		expect( findEvent( 'ClassC', 'event:event-1-class-a' ) ).to.not.be.undefined;
+		expect( findEvent( 'ClassC', 'event:event-2-class-a' ) ).to.not.be.undefined;
+		expect( findEvent( 'ClassC', 'event:event-3-class-b' ) ).to.not.be.undefined;
+	} );
 
-		// The order of found events does not matter, so just check if all of them are found.
-		expect( events.find( evt => evt.parent.name === 'ClassA' && evt.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'ClassA' && evt.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'ClassB' && evt.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'ClassB' && evt.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'ClassB' && evt.name === 'event:event-3-class-b' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'ClassC' && evt.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'ClassC' && evt.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'ClassC' && evt.name === 'event:event-3-class-b' ) ).to.not.be.undefined;
+	it( 'should find all events within the project (verifying interfaces A-C)', () => {
+		expect( findEvent( 'InterfaceA', 'event:event-1-interface-a' ) ).to.not.be.undefined;
+		expect( findEvent( 'InterfaceA', 'event:event-2-interface-a' ) ).to.not.be.undefined;
+		expect( findEvent( 'InterfaceB', 'event:event-1-interface-a' ) ).to.not.be.undefined;
+		expect( findEvent( 'InterfaceB', 'event:event-2-interface-a' ) ).to.not.be.undefined;
+		expect( findEvent( 'InterfaceB', 'event:event-3-interface-b' ) ).to.not.be.undefined;
+		expect( findEvent( 'InterfaceC', 'event:event-1-interface-a' ) ).to.not.be.undefined;
+		expect( findEvent( 'InterfaceC', 'event:event-2-interface-a' ) ).to.not.be.undefined;
+		expect( findEvent( 'InterfaceC', 'event:event-3-interface-b' ) ).to.not.be.undefined;
+	} );
 
-		expect( events.find( evt => evt.parent.name === 'InterfaceA' && evt.name === 'event:event-1-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'InterfaceA' && evt.name === 'event:event-2-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'InterfaceB' && evt.name === 'event:event-1-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'InterfaceB' && evt.name === 'event:event-2-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'InterfaceB' && evt.name === 'event:event-3-interface-b' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'InterfaceC' && evt.name === 'event:event-1-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'InterfaceC' && evt.name === 'event:event-2-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'InterfaceC' && evt.name === 'event:event-3-interface-b' ) ).to.not.be.undefined;
+	it( 'should find all events within the project (verifying a class that implements all interfaces)', () => {
+		expect( findEvent( 'MixedClass', 'event:event-1-interface-a' ) ).to.not.be.undefined;
+		expect( findEvent( 'MixedClass', 'event:event-2-interface-a' ) ).to.not.be.undefined;
+		expect( findEvent( 'MixedClass', 'event:event-3-interface-b' ) ).to.not.be.undefined;
+	} );
 
-		expect( events.find( evt => evt.parent.name === 'MixedClass' && evt.name === 'event:event-1-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'MixedClass' && evt.name === 'event:event-2-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'MixedClass' && evt.name === 'event:event-3-interface-b' ) ).to.not.be.undefined;
+	it( 'should find all events within the project (verifying inheriting via mixin pattern)', () => {
+		expect( findEvent( 'ClassFoo', 'event:property' ) ).to.not.be.undefined;
+		expect( findEvent( 'ClassMixinFoo', 'event:property' ) ).to.not.be.undefined;
+		expect( findEvent( 'ClassMixinFooBar', 'event:property' ) ).to.not.be.undefined;
 	} );
 
 	it( 'should create new events with own ids in the inherited classes and interfaces', () => {
@@ -128,13 +146,13 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 	} );
 
 	it( 'should clone event comment in the inherited classes and interfaces', () => {
-		const baseEventClassA = events.find( evt => evt.parent.name === 'ClassA' && evt.name === 'event:event-1-class-a' );
-		const inheritedEventClassB = events.find( evt => evt.parent.name === 'ClassB' && evt.name === 'event:event-1-class-a' );
-		const inheritedEventClassC = events.find( evt => evt.parent.name === 'ClassC' && evt.name === 'event:event-1-class-a' );
+		const baseEventClassA = findEvent( 'ClassA', 'event:event-1-class-a' );
+		const inheritedEventClassB = findEvent( 'ClassB', 'event:event-1-class-a' );
+		const inheritedEventClassC = findEvent( 'ClassC', 'event:event-1-class-a' );
 
-		const baseEventInterfaceA = events.find( evt => evt.parent.name === 'InterfaceA' && evt.name === 'event:event-1-interface-a' );
-		const inheritedEventInterfaceB = events.find( evt => evt.parent.name === 'InterfaceB' && evt.name === 'event:event-1-interface-a' );
-		const inheritedEventInterfaceC = events.find( evt => evt.parent.name === 'InterfaceC' && evt.name === 'event:event-1-interface-a' );
+		const baseEventInterfaceA = findEvent( 'InterfaceA', 'event:event-1-interface-a' );
+		const inheritedEventInterfaceB = findEvent( 'InterfaceB', 'event:event-1-interface-a' );
+		const inheritedEventInterfaceC = findEvent( 'InterfaceC', 'event:event-1-interface-a' );
 
 		expect( baseEventClassA.comment ).to.not.equal( inheritedEventClassB.comment );
 		expect( baseEventClassA.comment ).to.not.equal( inheritedEventClassC.comment );
@@ -305,49 +323,66 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 		expect( overwrittenEventClassC.comment.summary[ 0 ] ).to.have.property( 'text', 'Overwritten event 2 from class A.' );
 	} );
 
-	it( 'should not create a new event in derived class and interface if derived one does not already exist in the project', () => {
-		const typeDoc = new TypeDoc.Application();
+	describe( 'processing a reflection that has been removed (purge-plugin)', () => {
+		before( () => {
+			const typeDoc = new TypeDoc.Application();
 
-		typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
-		typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
+			typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
+			typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
 
-		typeDoc.bootstrap( {
-			logLevel: 'Error',
-			entryPoints: files,
-			plugin: [
-				// The "typedoc-plugin-remove-class-c" plugin removes the "ClassC" class from the project.
-				utils.normalizePath( utils.ROOT_TEST_DIRECTORY, 'event-inheritance-fixer', 'typedoc-plugin-remove-class-c' ),
-				...PLUGINS
-			],
-			tsconfig: TSCONFIG_PATH
+			typeDoc.bootstrap( {
+				logLevel: 'Error',
+				entryPoints: files,
+				plugin: [
+					// The "typedoc-plugin-remove-class-c" plugin removes the "ClassC" class from the project.
+					utils.normalizePath( utils.ROOT_TEST_DIRECTORY, 'event-inheritance-fixer', 'typedoc-plugin-remove-class-c' ),
+					...PLUGINS
+				],
+				tsconfig: TSCONFIG_PATH
+			} );
+
+			const conversionResult = typeDoc.convert();
+
+			events = conversionResult
+				.getReflectionsByKind( TypeDoc.ReflectionKind.All )
+				.filter( child => child.kindString === 'Event' );
+
+			expect( events ).to.lengthOf( 19 );
 		} );
 
-		const conversionResult = typeDoc.convert();
+		it( 'should find all events within the project (verifying classes A-C)', () => {
+			expect( findEvent( 'ClassA', 'event:event-1-class-a' ) ).to.not.be.undefined;
+			expect( findEvent( 'ClassA', 'event:event-2-class-a' ) ).to.not.be.undefined;
+			expect( findEvent( 'ClassB', 'event:event-1-class-a' ) ).to.not.be.undefined;
+			expect( findEvent( 'ClassB', 'event:event-2-class-a' ) ).to.not.be.undefined;
+			expect( findEvent( 'ClassB', 'event:event-3-class-b' ) ).to.not.be.undefined;
+		} );
 
-		const events = conversionResult
-			.getReflectionsByKind( TypeDoc.ReflectionKind.All )
-			.filter( child => child.kindString === 'Event' );
+		it( 'should find all events within the project (verifying interfaces A-C)', () => {
+			expect( findEvent( 'InterfaceA', 'event:event-1-interface-a' ) ).to.not.be.undefined;
+			expect( findEvent( 'InterfaceA', 'event:event-2-interface-a' ) ).to.not.be.undefined;
+			expect( findEvent( 'InterfaceB', 'event:event-1-interface-a' ) ).to.not.be.undefined;
+			expect( findEvent( 'InterfaceB', 'event:event-2-interface-a' ) ).to.not.be.undefined;
+			expect( findEvent( 'InterfaceB', 'event:event-3-interface-b' ) ).to.not.be.undefined;
+			expect( findEvent( 'InterfaceC', 'event:event-1-interface-a' ) ).to.not.be.undefined;
+			expect( findEvent( 'InterfaceC', 'event:event-2-interface-a' ) ).to.not.be.undefined;
+			expect( findEvent( 'InterfaceC', 'event:event-3-interface-b' ) ).to.not.be.undefined;
+		} );
 
-		expect( events ).to.lengthOf( 16 );
+		it( 'should find all events within the project (verifying a class that implements all interfaces)', () => {
+			expect( findEvent( 'MixedClass', 'event:event-1-interface-a' ) ).to.not.be.undefined;
+			expect( findEvent( 'MixedClass', 'event:event-2-interface-a' ) ).to.not.be.undefined;
+			expect( findEvent( 'MixedClass', 'event:event-3-interface-b' ) ).to.not.be.undefined;
+		} );
 
-		// The order of found events does not matter, so just check if all of them are found.
-		expect( events.find( evt => evt.parent.name === 'ClassA' && evt.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'ClassA' && evt.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'ClassB' && evt.name === 'event:event-1-class-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'ClassB' && evt.name === 'event:event-2-class-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'ClassB' && evt.name === 'event:event-3-class-b' ) ).to.not.be.undefined;
-
-		expect( events.find( evt => evt.parent.name === 'InterfaceA' && evt.name === 'event:event-1-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'InterfaceA' && evt.name === 'event:event-2-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'InterfaceB' && evt.name === 'event:event-1-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'InterfaceB' && evt.name === 'event:event-2-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'InterfaceB' && evt.name === 'event:event-3-interface-b' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'InterfaceC' && evt.name === 'event:event-1-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'InterfaceC' && evt.name === 'event:event-2-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'InterfaceC' && evt.name === 'event:event-3-interface-b' ) ).to.not.be.undefined;
-
-		expect( events.find( evt => evt.parent.name === 'MixedClass' && evt.name === 'event:event-1-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'MixedClass' && evt.name === 'event:event-2-interface-a' ) ).to.not.be.undefined;
-		expect( events.find( evt => evt.parent.name === 'MixedClass' && evt.name === 'event:event-3-interface-b' ) ).to.not.be.undefined;
+		it( 'should find all events within the project (verifying inheriting via mixin pattern)', () => {
+			expect( findEvent( 'ClassFoo', 'event:property' ) ).to.not.be.undefined;
+			expect( findEvent( 'ClassMixinFoo', 'event:property' ) ).to.not.be.undefined;
+			expect( findEvent( 'ClassMixinFooBar', 'event:property' ) ).to.not.be.undefined;
+		} );
 	} );
+
+	function findEvent( className, eventName ) {
+		return events.find( evt => evt.parent.name === className && evt.name === eventName );
+	}
 } );
