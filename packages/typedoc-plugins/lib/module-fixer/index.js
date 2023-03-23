@@ -38,6 +38,11 @@ function onEventCreateDeclaration() {
 
 		const node = symbol.declarations[ 0 ];
 
+		// Not a module.
+		if ( !node.statements ) {
+			return;
+		}
+
 		// Iterate over statements...
 		for ( const statement of node.statements ) {
 			// TODO: No idea how to cover this line.

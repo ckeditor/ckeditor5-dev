@@ -799,7 +799,7 @@ module.exports = async function releaseSubRepositories( options ) {
 				// Mark created archive as a file to remove.
 				filesToRemove.add( path.join( repositoryRealPath, archiveName ) );
 			} else {
-				exec( `npm publish --access=public --npm-tag ${ npmTag }` );
+				exec( `npm publish --access=public --tag ${ npmTag }` );
 			}
 
 			// Revert the previous temporary change in the `main` field, if a package is written in TypeScript, so its `main` field points

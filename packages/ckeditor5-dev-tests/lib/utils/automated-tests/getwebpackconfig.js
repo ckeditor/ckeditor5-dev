@@ -77,13 +77,6 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 					use: [ 'raw-loader' ]
 				},
 				{
-					test: /\.js$/,
-					loader: require.resolve( '../ck-debug-loader' ),
-					options: {
-						debugFlags: options.debug
-					}
-				},
-				{
 					test: /\.ts$/,
 					use: [
 						{
@@ -104,12 +97,6 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 									// In such a case we would like to throw an error.
 									noEmitOnError: true
 								}
-							}
-						},
-						{
-							loader: require.resolve( '../ck-debug-loader' ),
-							options: {
-								debugFlags: options.debug
 							}
 						}
 					]
@@ -148,12 +135,16 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 		config.module.rules.unshift(
 			{
 				test: /\.[jt]s$/,
-				loader: 'babel-loader',
-				options: {
-					plugins: [
-						'babel-plugin-istanbul'
-					]
-				},
+				use: [
+					{
+						loader: 'babel-loader',
+						options: {
+							plugins: [
+								'babel-plugin-istanbul'
+							]
+						}
+					}
+				],
 				include: getPathsToIncludeForCoverage( options.files ),
 				exclude: [
 					new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
