@@ -5,6 +5,7 @@
 
 'use strict';
 
+const fs = require( 'fs' );
 const path = require( 'path' );
 const minimist = require( 'minimist' );
 const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
@@ -18,30 +19,31 @@ module.exports = function parseArguments( args ) {
 
 	const minimistConfig = {
 		string: [
-			'browsers',
-			'files',
-			'reporter',
-			'debug',
-			'karma-config-overrides',
-			'repositories',
-			'language',
-			'theme-path',
 			'additional-languages',
+			'browsers',
+			'cwd',
+			'debug',
+			'files',
+			'karma-config-overrides',
+			'language',
 			'identity-file',
+			'reporter',
+			'repositories',
+			'theme-path',
 			'tsconfig'
 		],
 
 		boolean: [
+			'cache',
 			'coverage',
+			'dll',
 			'production',
+			'resolve-js-first',
 			'server',
+			'silent',
 			'source-map',
 			'verbose',
-			'watch',
-			'silent',
-			'resolve-js-first',
-			'cache',
-			'dll'
+			'watch'
 		],
 
 		alias: {
@@ -57,25 +59,26 @@ module.exports = function parseArguments( args ) {
 		},
 
 		default: {
-			files: [],
-			browsers: 'Chrome',
-			reporter: 'mocha',
-			language: 'en',
-			watch: false,
-			coverage: false,
-			verbose: false,
-			'source-map': false,
-			server: false,
-			production: false,
-			'identity-file': null,
-			tsconfig: null,
-			repositories: [],
-			'theme-path': null,
 			'additional-languages': null,
-			silent: false,
-			'resolve-js-first': false,
+			browsers: 'Chrome',
 			cache: false,
-			dll: null
+			coverage: false,
+			cwd: process.cwd(),
+			dll: null,
+			files: [],
+			'identity-file': null,
+			language: 'en',
+			production: false,
+			repositories: [],
+			reporter: 'mocha',
+			'resolve-js-first': false,
+			server: false,
+			silent: false,
+			'source-map': false,
+			'theme-path': null,
+			tsconfig: null,
+			verbose: false,
+			watch: false
 		}
 	};
 
@@ -198,16 +201,21 @@ module.exports = function parseArguments( args ) {
 	}
 
 	/**
-	 * Parses the `--tsconfig` options to be an absolute path.
+	 * Parses the `--tsconfig` options to be an absolute path. If argument is not provided,
+	 * it will check if `tsconfig.test.json` file exists and use it if it does.
 	 *
 	 * @param {Object} options
 	 */
 	function parseTsconfigPath( options ) {
-		if ( !options.tsconfig ) {
-			return;
+		if ( options.tsconfig ) {
+			options.tsconfig = path.join( options.cwd, options.tsconfig );
+		} else {
+			options.tsconfig = path.join( options.cwd, 'tsconfig.test.json' );
 		}
 
-		options.tsconfig = path.resolve( process.cwd(), options.tsconfig );
+		if ( !fs.existsSync( options.tsconfig ) ) {
+			options.tsconfig = null;
+		}
 	}
 
 	/**
