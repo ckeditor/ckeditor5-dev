@@ -11,6 +11,8 @@ const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 
+const originalPosixJoin = path.posix.join;
+
 describe( 'parseArguments()', () => {
 	let parseArguments, sandbox, stubs;
 
@@ -28,7 +30,8 @@ describe( 'parseArguments()', () => {
 			logger: {
 				warning: sandbox.stub()
 			},
-			pathJoin: sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) )
+			// To force unix paths in tests.
+			pathJoin: sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => originalPosixJoin( ...chunks ) )
 		};
 
 		parseArguments = proxyquire( '../../../lib/utils/automated-tests/parsearguments', {
@@ -331,7 +334,7 @@ describe( 'parseArguments()', () => {
 			expect( options.tsconfig ).to.equal( null );
 		} );
 
-		it( 'should use `tsconfig.test.json` by default, if it is available', () => {
+		it( 'should use `tsconfig.test.json` from `cwd` if it is available by default', () => {
 			stubs.cwd.returns( '/home/project' );
 			stubs.existsSync.returns( true );
 
@@ -340,11 +343,20 @@ describe( 'parseArguments()', () => {
 			expect( options.tsconfig ).to.equal( '/home/project/tsconfig.test.json' );
 		} );
 
-		it( 'should parse `--tsconfig` to absolute path if it is set', () => {
+		it( 'should parse `--tsconfig` to absolute path if it is set and it exists', () => {
 			stubs.cwd.returns( '/home/project' );
+			stubs.existsSync.returns( true );
 			const options = parseArguments( [ '--tsconfig', './configs/tsconfig.json' ] );
 
 			expect( options.tsconfig ).to.be.equal( '/home/project/configs/tsconfig.json' );
+		} );
+
+		it( 'should be null if `--tsconfig` points to non-existing file', () => {
+			stubs.cwd.returns( '/home/project' );
+			stubs.existsSync.returns( false );
+			const options = parseArguments( [ '--tsconfig', './configs/tsconfig.json' ] );
+
+			expect( options.tsconfig ).to.equal( null );
 		} );
 	} );
 } );
