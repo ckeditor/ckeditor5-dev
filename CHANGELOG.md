@@ -1,6 +1,38 @@
 Changelog
 =========
 
+## [35.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/v35.0.4...v35.0.5) (2023-03-24)
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Fixed the reference error `Buffer is not defined`. Read more: [webpack/changelog-v5#10](https://github.com/webpack/changelog-v5/issues/10). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/13578f66916beaaf7f88c8e180e6da7eec176b15))
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Improved inheriting (`typedoc-plugin-event-inheritance-fixer`) events from classes extending other classes using the mixin pattern. Closes [ckeditor/ckeditor5#13739](https://github.com/ckeditor/ckeditor5/issues/13739). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/9fb2daa3ded6db18544f05378e084a148d415cdf))
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Inherited observable properties (`typedoc-plugin-tag-observable`) will define the `inheritedFrom` property when an observable property is inherited. See [ckeditor/ckeditor5#13739](https://github.com/ckeditor/ckeditor5/issues/13739). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/9fb2daa3ded6db18544f05378e084a148d415cdf))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v35.0.4 => v35.0.5
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v35.0.4 => v35.0.5
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v35.0.4 => v35.0.5
+</details>
+
+
 ## [35.0.4](https://github.com/ckeditor/ckeditor5-dev/compare/v35.0.3...v35.0.4) (2023-03-23)
 
 ### Bug fixes
