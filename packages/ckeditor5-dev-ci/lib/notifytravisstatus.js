@@ -37,7 +37,6 @@ module.exports = async function notifyTravisStatus( options ) {
 	const commitDetails = await getCommitDetails( commitUrl, options.githubToken );
 
 	const [ buildRepoOwner, buildRepoName ] = options.repositorySlug.split( '/' );
-	const execTime = getExecutionTime( options.endTime, options.startTime );
 
 	const slackAccount = members[ commitDetails.author ];
 	const shortCommit = commitUrl.split( '/' ).pop().substring( 0, 7 );
@@ -82,7 +81,7 @@ module.exports = async function notifyTravisStatus( options ) {
 					},
 					{
 						title: 'Build time',
-						value: `${ execTime.mins } min ${ execTime.secs } sec`,
+						value: getExecutionTime( options.endTime, options.startTime ),
 						short: true
 					},
 					{
@@ -97,23 +96,34 @@ module.exports = async function notifyTravisStatus( options ) {
 };
 
 /**
- * Returns an object that compares two dates.
+ * Returns string representing amount of time passed between two timestamps.
  *
  * @param {Number} endTime
  * @param {Number} startTime
- * @returns {Object}
+ * @returns {String}
  */
 function getExecutionTime( endTime, startTime ) {
-	const execTime = {
-		ms: endTime - startTime
-	};
+	const totalMs = ( endTime - startTime ) * 1000;
+	const date = new Date( totalMs );
+	const hours = date.getUTCHours();
+	const minutes = date.getUTCMinutes();
+	const seconds = date.getUTCSeconds();
 
-	execTime.days = Math.floor( execTime.ms / 86400 );
-	execTime.hours = Math.floor( ( execTime.ms - 86400 * execTime.days ) / 3600 );
-	execTime.mins = Math.floor( ( ( execTime.ms - 86400 * execTime.days ) - 3600 * execTime.hours ) / 60 );
-	execTime.secs = ( ( execTime.ms - 86400 * execTime.days ) - 3600 * execTime.hours ) - 60 * execTime.mins;
+	const stringParts = [];
 
-	return execTime;
+	if ( hours ) {
+		stringParts.push( `${ hours } hr.` );
+	}
+
+	if ( minutes ) {
+		stringParts.push( `${ minutes } min.` );
+	}
+
+	if ( seconds ) {
+		stringParts.push( `${ seconds } sec.` );
+	}
+
+	return stringParts.join( ' ' );
 }
 
 /**
