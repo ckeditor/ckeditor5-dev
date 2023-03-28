@@ -5,7 +5,7 @@
   "keywords": [],
   "dependencies": {
     "node-fetch": "^2.6.7",
-    "slack-notify": "^0.1.7"
+    "slack-notify": "^2.0.6"
   },
   "engines": {
     "node": ">=14.0.0",
