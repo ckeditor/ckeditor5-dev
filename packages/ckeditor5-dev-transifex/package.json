@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-transifex",
-  "version": "35.0.5",
+  "version": "35.0.6",
   "description": "Used to download and upload translations using the Transifex service.",
   "keywords": [],
   "main": "lib/index.js",
