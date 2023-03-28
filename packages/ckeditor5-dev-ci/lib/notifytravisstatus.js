@@ -42,13 +42,7 @@ module.exports = async function notifyTravisStatus( options ) {
 	const shortCommit = commitUrl.split( '/' ).pop().substring( 0, 7 );
 	const repoMatch = commitUrl.match( REPOSITORY_REGEXP );
 
-	const slack = slackNotify( options.slackWebhookUrl );
-
-	slack.onError = err => {
-		console.log( 'API error occurred:', err );
-	};
-
-	return slack.send( {
+	const messageData = {
 		username: 'Travis CI',
 		text: getNotifierMessage( {
 			slackAccount,
@@ -92,7 +86,11 @@ module.exports = async function notifyTravisStatus( options ) {
 				]
 			}
 		]
-	} );
+	};
+
+	return slackNotify( options.slackWebhookUrl )
+		.send( messageData )
+		.catch( err => console.log( 'API error occurred:', err ) );
 };
 
 /**
