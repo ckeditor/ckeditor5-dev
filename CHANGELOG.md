@@ -1,6 +1,40 @@
 Changelog
 =========
 
+## [35.0.6](https://github.com/ckeditor/ckeditor5-dev/compare/v35.0.5...v35.0.6) (2023-03-28)
+
+### Bug fixes
+
+* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Fixed the `notifyTravisStatus()` function providing incorrect values for build times lasting 1 hour or longer. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b0ff2e5c66b9fbc6e8c0de706585c774525cdda9))
+
+### Other changes
+
+* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Bumped a version of the `slack-notify` library. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b0ff2e5c66b9fbc6e8c0de706585c774525cdda9))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v35.0.5 => v35.0.6
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v35.0.5 => v35.0.6
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v35.0.5 => v35.0.6
+</details>
+
+
 ## [35.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/v35.0.4...v35.0.5) (2023-03-24)
 
 ### Bug fixes
