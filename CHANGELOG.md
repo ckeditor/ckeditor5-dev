@@ -1,6 +1,40 @@
 Changelog
 =========
 
+## [36.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v35.0.6...v36.0.0) (2023-03-29)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* Upgraded the minimal versions of Node.js to `16.0.0` due to the end of LTS.
+
+### Other changes
+
+* Updated the required version of Node.js to 16. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/9c857708b8befc06f0406a2fbf7e2c43857fea6f))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v35.0.6 => v36.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v35.0.6 => v36.0.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v35.0.6 => v36.0.0
+</details>
+
+
 ## [35.0.6](https://github.com/ckeditor/ckeditor5-dev/compare/v35.0.5...v35.0.6) (2023-03-28)
 
 ### Bug fixes
