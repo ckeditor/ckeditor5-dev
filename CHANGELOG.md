@@ -1,6 +1,36 @@
 Changelog
 =========
 
+## [36.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v36.0.0...v36.0.1) (2023-04-03)
+
+### Other changes
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `preparePackages()` task accepts a new option (`npmScriptsToRemove`) that allows defining scripts to remove from a package.json file when preparing packages. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e60a121c38db01a288a4b06cafbf2feacb4770c8))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v36.0.0 => v36.0.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v36.0.0 => v36.0.1
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v36.0.0 => v36.0.1
+</details>
+
+
 ## [36.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v35.0.6...v36.0.0) (2023-03-29)
 
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
