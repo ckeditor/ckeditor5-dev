@@ -1,6 +1,171 @@
 Changelog
 =========
 
+## [36.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v36.0.0...v36.0.1) (2023-04-03)
+
+### Other changes
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `preparePackages()` task accepts a new option (`npmScriptsToRemove`) that allows defining scripts to remove from a package.json file when preparing packages. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e60a121c38db01a288a4b06cafbf2feacb4770c8))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v36.0.0 => v36.0.1
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v36.0.0 => v36.0.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v36.0.0 => v36.0.1
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v36.0.0 => v36.0.1
+</details>
+
+
+## [36.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v35.0.6...v36.0.0) (2023-03-29)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* Upgraded the minimal versions of Node.js to `16.0.0` due to the end of LTS.
+
+### Other changes
+
+* Updated the required version of Node.js to 16. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/9c857708b8befc06f0406a2fbf7e2c43857fea6f))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v35.0.6 => v36.0.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v35.0.6 => v36.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v35.0.6 => v36.0.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v35.0.6 => v36.0.0
+</details>
+
+
+## [35.0.6](https://github.com/ckeditor/ckeditor5-dev/compare/v35.0.5...v35.0.6) (2023-03-28)
+
+### Bug fixes
+
+* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Fixed the `notifyTravisStatus()` function providing incorrect values for build times lasting 1 hour or longer. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b0ff2e5c66b9fbc6e8c0de706585c774525cdda9))
+
+### Other changes
+
+* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Bumped a version of the `slack-notify` library. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b0ff2e5c66b9fbc6e8c0de706585c774525cdda9))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v35.0.5 => v35.0.6
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v35.0.5 => v35.0.6
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v35.0.5 => v35.0.6
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v35.0.5 => v35.0.6
+</details>
+
+
+## [35.0.5](https://github.com/ckeditor/ckeditor5-dev/compare/v35.0.4...v35.0.5) (2023-03-24)
+
+### Bug fixes
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Fixed the reference error `Buffer is not defined`. Read more: [webpack/changelog-v5#10](https://github.com/webpack/changelog-v5/issues/10). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/13578f66916beaaf7f88c8e180e6da7eec176b15))
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Improved inheriting (`typedoc-plugin-event-inheritance-fixer`) events from classes extending other classes using the mixin pattern. Closes [ckeditor/ckeditor5#13739](https://github.com/ckeditor/ckeditor5/issues/13739). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/9fb2daa3ded6db18544f05378e084a148d415cdf))
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Inherited observable properties (`typedoc-plugin-tag-observable`) will define the `inheritedFrom` property when an observable property is inherited. See [ckeditor/ckeditor5#13739](https://github.com/ckeditor/ckeditor5/issues/13739). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/9fb2daa3ded6db18544f05378e084a148d415cdf))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v35.0.4 => v35.0.5
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v35.0.4 => v35.0.5
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v35.0.4 => v35.0.5
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v35.0.4 => v35.0.5
+</details>
+
+
+## [35.0.4](https://github.com/ckeditor/ckeditor5-dev/compare/v35.0.3...v35.0.4) (2023-03-23)
+
+### Bug fixes
+
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: The validator should not crash when processing a non-es6 module file while building from the TypeScript sources. Closes [ckeditor/ckeditor5#13662](https://github.com/ckeditor/ckeditor5/issues/13662). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b50ea99b1bc08f53907fb8a10b3c28faa00d7a83))
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: The building documentation process should not crash when processing a non-es6 module file while building from the TypeScript sources. Closes [ckeditor/ckeditor5#13662](https://github.com/ckeditor/ckeditor5/issues/13662). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b50ea99b1bc08f53907fb8a10b3c28faa00d7a83))
+
+### Other changes
+
+* **[web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler)**: Upgraded Puppeteer to the latest version to avoid the deprecation warning when using the `@ckeditor/ckeditor5-dev-web-crawler` package. Closes [ckeditor/ckeditor5#13631](https://github.com/ckeditor/ckeditor5/issues/13631). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/c4771f43fd9c8a15b57219622926182872ec3c9f))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v35.0.3 => v35.0.4
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v35.0.3 => v35.0.4
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v35.0.3 => v35.0.4
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v35.0.3 => v35.0.4
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v35.0.3 => v35.0.4
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v35.0.3 => v35.0.4
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v35.0.3 => v35.0.4
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v35.0.3 => v35.0.4
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v35.0.3 => v35.0.4
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v35.0.3 => v35.0.4
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v35.0.3 => v35.0.4
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v35.0.3 => v35.0.4
+</details>
+
+
 ## [35.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/v35.0.2...v35.0.3) (2023-03-13)
 
 ### Bug fixes

@@ -51,6 +51,7 @@ const PACKAGE_JSON_FIELDS = [
  * @param {String} options.changelogDirectory An absolute path to the directory where the `CHANGELOG.md` file is saved.
  * @param {String} options.buildScript A name of npm script that builds the package. It is executed per package.
  * @param {String} options.secureScript A name of npm script that secures the code in the entire repository.
+ * @param {Array.<String>} [options.npmScriptsToRemove=[]] An array of npm scripts that should be removed when processing a package.
  * @returns {Promise}
  */
 module.exports = async function preparePackages( options ) {
@@ -58,6 +59,7 @@ module.exports = async function preparePackages( options ) {
 	const packagesDirectory = path.join( options.cwd, options.packages );
 	const releaseDirectory = path.join( options.cwd, options.releaseDirectory );
 	const ckeditor5Version = getLastFromChangelog( options.changelogDirectory );
+	const npmScriptsToRemove = options.npmScriptsToRemove || [];
 
 	// Clean the release directory before doing anything.
 	logProcess( 'Removing the release directory...' );
@@ -91,7 +93,7 @@ module.exports = async function preparePackages( options ) {
 	}
 
 	logProcess( 'Preparing packages...' );
-	await preparePackagesToBeReleased( packages );
+	await preparePackagesToBeReleased( packages, npmScriptsToRemove );
 
 	// Secure the entire release directory.
 	logProcess( 'Securing the code...' );
@@ -139,9 +141,10 @@ function filterOutPackagesWithoutChanges( packages, ckeditor5Version ) {
  *   * Remove the `build/` directory. The build script will re-create it from the JavaScript code.
  *
  * @param {Map.<String, PackageJson>} packages
+ * @param {Array.<String>} npmScriptsToRemove An array of npm scripts that should be removed when processing a package.
  * @returns {Promise}
  */
-function preparePackagesToBeReleased( packages ) {
+function preparePackagesToBeReleased( packages, npmScriptsToRemove ) {
 	return executeOnPackages( packages.keys(), async packagePath => {
 		const { name: packageName } = packages.get( packagePath );
 
@@ -164,6 +167,12 @@ function preparePackagesToBeReleased( packages ) {
 			for ( const property of Object.keys( packageJson ) ) {
 				if ( !PACKAGE_JSON_FIELDS.includes( property ) ) {
 					delete packageJson[ property ];
+				}
+			}
+
+			if ( 'scripts' in packageJson ) {
+				for ( const npmScript of npmScriptsToRemove ) {
+					delete packageJson.scripts[ npmScript ];
 				}
 			}
 

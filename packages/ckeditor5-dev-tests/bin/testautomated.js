@@ -11,11 +11,10 @@ const chalk = require( 'chalk' );
 const path = require( 'path' );
 const tests = require( '../lib/index' );
 
-const cwd = process.cwd();
 const options = tests.parseArguments( process.argv.slice( 2 ) );
 
 if ( options.files.length === 0 ) {
-	if ( cwd.endsWith( 'ckeditor5' ) ) {
+	if ( options.cwd.endsWith( 'ckeditor5' ) ) {
 		options.files = [ '*' ];
 	} else {
 		options.files = [ '/' ];
@@ -23,7 +22,7 @@ if ( options.files.length === 0 ) {
 }
 
 // "Lark" is the default theme for tests.
-options.themePath = path.resolve( cwd, 'packages', 'ckeditor5-theme-lark', 'theme', 'theme.css' );
+options.themePath = path.resolve( options.cwd, 'packages', 'ckeditor5-theme-lark', 'theme', 'theme.css' );
 
 tests.runAutomatedTests( options )
 	.then( () => {

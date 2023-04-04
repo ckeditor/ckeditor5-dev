@@ -28,6 +28,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 		plugins: [
 			new webpack.DefinePlugin( definitions ),
 			new webpack.ProvidePlugin( {
+				Buffer: [ 'buffer', 'Buffer' ],
 				process: 'process/browser'
 			} )
 		],

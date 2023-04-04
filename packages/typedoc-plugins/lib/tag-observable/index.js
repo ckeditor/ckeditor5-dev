@@ -11,8 +11,6 @@ const { Converter, ReflectionKind, TypeParameterReflection, Comment, TypeScript 
  * The `typedoc-plugin-tag-observable` handles the `@observable` tag that is assigned to the class property. If found, two new events are
  * created and inserted as a class children: `change:{property}` and `set:{property}`, where `{property}` is the name of the observable
  * class property.
- *
- * TODO: We do not support collecting types of `@param` tags associated with the `@observable`.
  */
 module.exports = {
 	load( app ) {
@@ -82,6 +80,10 @@ function onEventEnd( context ) {
 						'(before the `change` event is fired).'
 				}
 			] );
+
+			if ( reflection.inheritedFrom ) {
+				eventReflection.inheritedFrom = reflection.inheritedFrom;
+			}
 
 			// Copy the source location as it is the same as the location of the reflection containing the event.
 			eventReflection.sources = [ ...reflection.sources ];

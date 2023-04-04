@@ -11,7 +11,6 @@ const chalk = require( 'chalk' );
 const path = require( 'path' );
 const tests = require( '../lib/index' );
 
-const cwd = process.cwd();
 const options = tests.parseArguments( process.argv.slice( 2 ) );
 
 // By default, the watch mechanism should be enabled in manual tests.
@@ -20,7 +19,7 @@ const options = tests.parseArguments( process.argv.slice( 2 ) );
 options.disableWatch = process.argv.includes( '--disable-watch' );
 
 // "Lark" is the default theme for tests.
-options.themePath = path.resolve( cwd, 'packages', 'ckeditor5-theme-lark', 'theme', 'theme.css' );
+options.themePath = path.resolve( options.cwd, 'packages', 'ckeditor5-theme-lark', 'theme', 'theme.css' );
 
 tests.runManualTests( options )
 	.catch( error => {
