@@ -13,7 +13,7 @@
  * @param {any} map
  */
 module.exports = function ckDebugLoader( source, map ) {
-	source = source.replace( /\/\/ @if (-- @preserve )?(!?[\w]+) \/\/(.+)/g, ( match, preserve, flagName, body ) => {
+	source = source.replace( /\/\/ @if (!?[\w]+) (-- @preserve )?\/\/(.+)/g, ( match, flagName, preserve, body ) => {
 		// `this.query` comes from the webpack loader configuration specified as the loader options.
 		// {
 		//   loader: 'path-to-the-file',
@@ -29,7 +29,7 @@ module.exports = function ckDebugLoader( source, map ) {
 
 		// Uncomment the code with a same length string to not break the source maps.
 		return preserve ?
-			`/* @if ${ preserve }${ flagName } */ ${ body }` :
+			`/* @if ${ flagName } ${ preserve }*/ ${ body }` :
 			`/* @if ${ flagName } */ ${ body }`;
 	} );
 
