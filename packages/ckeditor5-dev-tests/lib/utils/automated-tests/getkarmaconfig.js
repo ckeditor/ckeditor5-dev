@@ -180,11 +180,11 @@ module.exports = function getKarmaConfig( options ) {
 		// For the future reference: https://youtrack.jetbrains.com/issue/WEB-12496.
 		karmaConfig.webpack.watch = true;
 
-		// Remove istanbul-instrumenter if coverage reporter was removed by overrides
+		// Remove "instrumenter" if coverage reporter was removed by overrides
 		// (especially when debugging in Intellij IDE).
 		if ( !karmaConfig.reporters.includes( 'coverage' ) && karmaConfig.webpack.module ) {
 			const moduleRules = karmaConfig.webpack.module.rules;
-			const ruleIdx = moduleRules.findIndex( rule => rule.loader === 'istanbul-instrumenter-loader' );
+			const ruleIdx = moduleRules.findIndex( rule => rule.loader === 'babel-loader' );
 
 			if ( ruleIdx != -1 ) {
 				moduleRules.splice( ruleIdx, 1 );
