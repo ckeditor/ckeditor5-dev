@@ -427,7 +427,7 @@ module.exports = async function releaseSubRepositories( options ) {
 					throw new Error( MISSING_FILES_MESSAGE );
 				}
 
-				const npmVersion = getVersionFromNpm( packageJson.name );
+				const npmVersion = getVersionFromNpm( packageJson.name, npmTag );
 
 				logDryRun( `Versions: package.json: "${ releaseDetails.version }", npm: "${ npmVersion || 'initial release' }".` );
 
@@ -545,9 +545,9 @@ module.exports = async function releaseSubRepositories( options ) {
 		// Checks whether specified `packageName` has been published on npm.
 		// If so, returns its version. Otherwise returns `null` which means that
 		// this package will be published for the first time.
-		function getVersionFromNpm( packageName ) {
+		function getVersionFromNpm( packageName, npmTag ) {
 			try {
-				return exec( `npm show ${ packageName } version` ).trim();
+				return exec( `npm show ${ packageName }@${ npmTag } version` ).trim();
 			} catch ( err ) {
 				if ( err.message.match( /npm ERR! 404/ ) ) {
 					return null;
