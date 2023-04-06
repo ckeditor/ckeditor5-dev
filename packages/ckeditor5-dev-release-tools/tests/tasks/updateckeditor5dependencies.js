@@ -169,7 +169,7 @@ describe( 'updateCKEditor5Dependencies()', () => {
 		expect( updatedPackageJson ).to.deep.equal( packageJson );
 	} );
 
-	it( 'modifies a package with outdated dependencies', () => {
+	it( 'modifies a package with outdated dependencies (ckeditor5 check)', () => {
 		const packageJson = JSON.stringify( {
 			'name': '@ckeditor/ckeditor5-foo',
 			'dependencies': {
@@ -209,6 +209,94 @@ describe( 'updateCKEditor5Dependencies()', () => {
 			},
 			'devDependencies': {
 				'@ckeditor/ckeditor5-core': '^2.0.0'
+			}
+		}, null, 2 ) + '\n';
+
+		expect( updatedPackageJson ).to.deep.equal( expectedPackageJson );
+	} );
+
+	it( 'modifies a package with outdated dependencies (ckeditor5-collaboration check)', () => {
+		const packageJson = JSON.stringify( {
+			'name': '@ckeditor/ckeditor5-foo',
+			'dependencies': {
+				'ckeditor5-collaboration': '^1.0.0'
+			},
+			'devDependencies': {
+				'@ckeditor/ckeditor5-core': '^1.0.0'
+			}
+		}, null, 2 ) + '\n';
+
+		mockFs( {
+			'packages': {
+				'ckeditor5-foo': {
+					'package.json': packageJson
+				}
+			}
+		} );
+
+		const consoleStub = sinon.stub( console, 'log' );
+
+		updateCKEditor5Dependencies( {
+			cwd: process.cwd(),
+			version: '2.0.0',
+			packages: [
+				{ directory: 'packages' }
+			]
+		} );
+
+		consoleStub.restore();
+
+		const updatedPackageJson = fs.readFileSync( process.cwd() + '/packages/ckeditor5-foo/package.json', 'utf-8' );
+
+		const expectedPackageJson = JSON.stringify( {
+			'name': '@ckeditor/ckeditor5-foo',
+			'dependencies': {
+				'ckeditor5-collaboration': '^2.0.0'
+			},
+			'devDependencies': {
+				'@ckeditor/ckeditor5-core': '^2.0.0'
+			}
+		}, null, 2 ) + '\n';
+
+		expect( updatedPackageJson ).to.deep.equal( expectedPackageJson );
+	} );
+
+	it( 'modifies a package with outdated dependencies (ckeditor5 & ckeditor5-collaboration check)', () => {
+		const packageJson = JSON.stringify( {
+			'name': '@ckeditor/ckeditor5-foo',
+			'dependencies': {
+				'ckeditor5': '^1.0.0',
+				'ckeditor5-collaboration': '^1.0.0'
+			}
+		}, null, 2 ) + '\n';
+
+		mockFs( {
+			'packages': {
+				'ckeditor5-foo': {
+					'package.json': packageJson
+				}
+			}
+		} );
+
+		const consoleStub = sinon.stub( console, 'log' );
+
+		updateCKEditor5Dependencies( {
+			cwd: process.cwd(),
+			version: '2.0.0',
+			packages: [
+				{ directory: 'packages' }
+			]
+		} );
+
+		consoleStub.restore();
+
+		const updatedPackageJson = fs.readFileSync( process.cwd() + '/packages/ckeditor5-foo/package.json', 'utf-8' );
+
+		const expectedPackageJson = JSON.stringify( {
+			'name': '@ckeditor/ckeditor5-foo',
+			'dependencies': {
+				'ckeditor5': '^2.0.0',
+				'ckeditor5-collaboration': '^2.0.0'
 			}
 		}, null, 2 ) + '\n';
 
