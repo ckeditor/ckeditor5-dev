@@ -16,6 +16,7 @@ const { Octokit } = require( '@octokit/rest' );
  * @param {String} options.repositoryName Repository name.
  * @param {String} options.version Name of tag connected with the release.
  * @param {String} options.description Description of the release.
+ * @param {Boolean} options.isPrerelease Indicates whether the release is a pre-release.
  * @returns {Promise}
  */
 module.exports = function createGithubRelease( token, options ) {
@@ -28,7 +29,8 @@ module.exports = function createGithubRelease( token, options ) {
 		owner: options.repositoryOwner,
 		repo: options.repositoryName,
 		tag_name: options.version,
-		body: options.description
+		body: options.description,
+		prerelease: options.isPrerelease
 	};
 
 	return github.repos.createRelease( releaseParams );

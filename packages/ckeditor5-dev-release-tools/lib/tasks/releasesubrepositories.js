@@ -873,7 +873,8 @@ module.exports = async function releaseSubRepositories( options ) {
 			repositoryOwner: releaseDetails.repositoryOwner,
 			repositoryName: releaseDetails.repositoryName,
 			version: `v${ releaseDetails.version }`,
-			description: releaseDetails.changes
+			description: releaseDetails.changes,
+			isPrerelease: npmTag !== 'latest'
 		};
 
 		return createGithubRelease( releaseOptions.token, githubReleaseOptions )
