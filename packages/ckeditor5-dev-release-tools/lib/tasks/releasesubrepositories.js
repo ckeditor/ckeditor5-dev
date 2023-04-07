@@ -284,7 +284,7 @@ module.exports = async function releaseSubRepositories( options ) {
 		const packageJson = getPackageJson( options.cwd );
 		logProcess( 'Verifying the npm tag...' );
 
-		const [ versionTag ] = semver.prerelease( packageJson.version ) || [ 'latest' ];
+		const versionTag = getVersionTag( packageJson.version );
 
 		if ( versionTag !== npmTag ) {
 			log.warning( '⚠️  The version tag is different from the npm tag.' );
@@ -869,12 +869,14 @@ module.exports = async function releaseSubRepositories( options ) {
 			return Promise.resolve();
 		}
 
+		const versionTag = getVersionTag( releaseDetails.version );
+
 		const githubReleaseOptions = {
 			repositoryOwner: releaseDetails.repositoryOwner,
 			repositoryName: releaseDetails.repositoryName,
 			version: `v${ releaseDetails.version }`,
 			description: releaseDetails.changes,
-			isPrerelease: npmTag !== 'latest'
+			isPrerelease: versionTag !== 'latest'
 		};
 
 		return createGithubRelease( releaseOptions.token, githubReleaseOptions )
@@ -893,6 +895,21 @@ module.exports = async function releaseSubRepositories( options ) {
 					return Promise.resolve();
 				}
 			);
+	}
+
+	/**
+	 * Returns the version tag for the package.
+	 *
+	 * For the official release, returns the "latest" tag. For a non-official release (pre-release), returns the version tag extracted from
+	 * the package version.
+	 *
+	 * @param {String} version Version of the package to be released.
+	 * @returns {String}
+	 */
+	function getVersionTag( version ) {
+		const [ versionTag ] = semver.prerelease( version ) || [ 'latest' ];
+
+		return versionTag;
 	}
 
 	// Removes all temporary directories that were created for publishing the custom repository.
