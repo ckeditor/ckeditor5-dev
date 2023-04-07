@@ -54,7 +54,8 @@ describe( 'dev-release-tools/tasks', () => {
 				repositoryOwner: 'organization',
 				repositoryName: 'repository',
 				version: 'v1.0.0',
-				description: 'Changes.'
+				description: 'Changes.',
+				isPrerelease: false
 			};
 
 			return createGithubRelease( 'token-123', options )
@@ -74,7 +75,8 @@ describe( 'dev-release-tools/tasks', () => {
 				repositoryOwner: 'organization',
 				repositoryName: 'repository',
 				version: 'v1.0.0',
-				description: 'Changes.'
+				description: 'Changes.',
+				isPrerelease: true
 			};
 
 			return createGithubRelease( 'token-123', options )
@@ -86,7 +88,8 @@ describe( 'dev-release-tools/tasks', () => {
 						owner: 'organization',
 						repo: 'repository',
 						tag_name: 'v1.0.0',
-						body: 'Changes.'
+						body: 'Changes.',
+						prerelease: true
 					} );
 				} );
 		} );
