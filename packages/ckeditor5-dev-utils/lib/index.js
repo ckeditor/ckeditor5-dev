@@ -9,6 +9,7 @@ module.exports = {
 	git: require( './git' ),
 	logger: require( './logger' ),
 	tools: require( './tools' ),
+	loaders: require( './loaders' ),
 	stream: require( './stream' ),
 	workspace: require( './workspace' ),
 	bundler: require( './bundler/index' ),

@@ -6,10 +6,10 @@
 'use strict';
 
 const path = require( 'path' );
-const WebpackNotifierPlugin = require( './webpacknotifierplugin' );
-const { getPostCssConfig } = require( '@ckeditor/ckeditor5-dev-utils' ).styles;
-const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
 const webpack = require( 'webpack' );
+const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
+const { loaders } = require( '@ckeditor/ckeditor5-dev-utils' );
+const WebpackNotifierPlugin = require( './webpacknotifierplugin' );
 const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
 
 /**
@@ -66,65 +66,22 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 
 		module: {
 			rules: [
-				{
-					test: /\.svg$/,
-					use: [ 'raw-loader' ]
-				},
-				{
-					test: /\.css$/,
-					use: [
-						{
-							loader: 'style-loader',
-							options: {
-								injectType: 'singletonStyleTag',
-								attributes: {
-									'data-cke': true
-								}
-							}
-						},
-						'css-loader',
-						{
-							loader: 'postcss-loader',
-							options: {
-								postcssOptions: getPostCssConfig( {
-									themeImporter: {
-										themePath: options.themePath
-									},
-									sourceMap: true
-								} )
-							}
-						}
-					]
-				},
-				{
-					test: /\.(txt|html)$/,
-					use: [ 'raw-loader' ]
-				},
-				{
-					test: /\.js$/,
-					loader: require.resolve( '../ck-debug-loader' ),
-					options: {
-						debugFlags: options.debug
-					}
-				},
-				{
-					test: /\.ts$/,
-					use: [
-						{
-							loader: 'esbuild-loader',
-							options: {
-								target: 'es2019',
-								tsconfig: options.tsconfig || 'tsconfig.json'
-							}
-						},
-						{
-							loader: require.resolve( '../ck-debug-loader' ),
-							options: {
-								debugFlags: options.debug
-							}
-						}
-					]
-				}
+				loaders.getIconsLoader( { useShortPattern: true } ),
+
+				loaders.getStylesLoader( {
+					themePath: options.themePath,
+					sourceMap: true
+				} ),
+
+				loaders.getFormattedTextLoader(),
+
+				loaders.getTypeScriptLoader( {
+					configFile: options.tsconfig,
+					includeDebugLoader: true,
+					debugFlags: options.debug
+				} ),
+
+				loaders.getJavaScriptLoader( { debugFlags: options.debug } )
 			]
 		},
 

@@ -8,10 +8,10 @@
 const path = require( 'path' );
 const fs = require( 'fs-extra' );
 const TerserPlugin = require( 'terser-webpack-plugin' );
-const bundler = require( '../bundler' );
-const styles = require( '../styles' );
-const tools = require( '../tools' );
 const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
+const bundler = require( '../bundler' );
+const tools = require( '../tools' );
+const loaders = require( '../loaders' );
 
 /**
  * Returns a webpack configuration that creates a bundle file for the specified package. Thanks to that, plugins exported
@@ -70,47 +70,14 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 
 		module: {
 			rules: [
-				{
-					test: /\.svg$/,
-					use: [ 'raw-loader' ]
-				},
-				{
-					test: /\.css$/,
-					use: [
-						{
-							loader: 'style-loader',
-							options: {
-								injectType: 'singletonStyleTag',
-								attributes: {
-									'data-cke': true
-								}
-							}
-						},
-						'css-loader',
-						{
-							loader: 'postcss-loader',
-							options: {
-								postcssOptions: styles.getPostCssConfig( {
-									themeImporter: {
-										themePath: options.themePath
-									},
-									minify: true
-								} )
-							}
-						}
-					]
-				},
-				{
-					test: /\.ts$/,
-					use: [
-						{
-							loader: 'ts-loader',
-							options: {
-								configFile: options.tsconfigPath || 'tsconfig.json'
-							}
-						}
-					]
-				}
+				loaders.getIconsLoader( { useShortPattern: true } ),
+				loaders.getStylesLoader( {
+					themePath: options.themePath,
+					minify: true
+				} ),
+				loaders.getTypeScriptLoader( {
+					configFile: options.tsconfigPath || 'tsconfig.json'
+				} )
 			]
 		}
 	};
