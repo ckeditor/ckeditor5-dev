@@ -284,7 +284,7 @@ module.exports = async function releaseSubRepositories( options ) {
 		const packageJson = getPackageJson( options.cwd );
 		logProcess( 'Verifying the npm tag...' );
 
-		const [ versionTag ] = semver.prerelease( packageJson.version ) || [ 'latest' ];
+		const versionTag = getVersionTag( packageJson.version );
 
 		if ( versionTag !== npmTag ) {
 			log.warning( '⚠️  The version tag is different from the npm tag.' );
@@ -427,7 +427,7 @@ module.exports = async function releaseSubRepositories( options ) {
 					throw new Error( MISSING_FILES_MESSAGE );
 				}
 
-				const npmVersion = getVersionFromNpm( packageJson.name );
+				const npmVersion = getVersionFromNpm( packageJson.name, npmTag );
 
 				logDryRun( `Versions: package.json: "${ releaseDetails.version }", npm: "${ npmVersion || 'initial release' }".` );
 
@@ -545,9 +545,9 @@ module.exports = async function releaseSubRepositories( options ) {
 		// Checks whether specified `packageName` has been published on npm.
 		// If so, returns its version. Otherwise returns `null` which means that
 		// this package will be published for the first time.
-		function getVersionFromNpm( packageName ) {
+		function getVersionFromNpm( packageName, npmTag ) {
 			try {
-				return exec( `npm show ${ packageName } version` ).trim();
+				return exec( `npm show ${ packageName }@${ npmTag } version` ).trim();
 			} catch ( err ) {
 				if ( err.message.match( /npm ERR! 404/ ) ) {
 					return null;
@@ -869,11 +869,14 @@ module.exports = async function releaseSubRepositories( options ) {
 			return Promise.resolve();
 		}
 
+		const versionTag = getVersionTag( releaseDetails.version );
+
 		const githubReleaseOptions = {
 			repositoryOwner: releaseDetails.repositoryOwner,
 			repositoryName: releaseDetails.repositoryName,
 			version: `v${ releaseDetails.version }`,
-			description: releaseDetails.changes
+			description: releaseDetails.changes,
+			isPrerelease: versionTag !== 'latest'
 		};
 
 		return createGithubRelease( releaseOptions.token, githubReleaseOptions )
@@ -892,6 +895,21 @@ module.exports = async function releaseSubRepositories( options ) {
 					return Promise.resolve();
 				}
 			);
+	}
+
+	/**
+	 * Returns the version tag for the package.
+	 *
+	 * For the official release, returns the "latest" tag. For a non-official release (pre-release), returns the version tag extracted from
+	 * the package version.
+	 *
+	 * @param {String} version Version of the package to be released.
+	 * @returns {String}
+	 */
+	function getVersionTag( version ) {
+		const [ versionTag ] = semver.prerelease( version ) || [ 'latest' ];
+
+		return versionTag;
 	}
 
 	// Removes all temporary directories that were created for publishing the custom repository.

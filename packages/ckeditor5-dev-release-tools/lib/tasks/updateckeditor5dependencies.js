@@ -14,7 +14,7 @@ const glob = require( 'glob' );
 const { diffLines: diff } = require( 'diff' );
 
 // The pattern defines CKEditor 5 dependencies.
-const CKEDITOR5_DEPENDENCY_PATTERN = /^@ckeditor\/ckeditor5-(.*)|^ckeditor5$/;
+const CKEDITOR5_DEPENDENCY_PATTERN = /^@ckeditor\/ckeditor5-(.*)|^ckeditor5(-collaboration)?$/;
 
 // Packages that match the CKEditor 5 pattern but should not be updated because they aren't a dependency of the project.
 const PATTERNS_TO_SKIP = [
