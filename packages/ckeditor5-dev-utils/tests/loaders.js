@@ -242,7 +242,7 @@ describe( 'loaders', () => {
 		} );
 
 		it( 'should return a definition loading the svg files properly (accept any svg file)', () => {
-			const svgLoader = loaders.getIconsLoader( { useShortPattern: true } );
+			const svgLoader = loaders.getIconsLoader( { matchExtensionOnly: true } );
 
 			expect( svgLoader ).to.be.an( 'object' );
 			expect( svgLoader ).to.have.property( 'use' );

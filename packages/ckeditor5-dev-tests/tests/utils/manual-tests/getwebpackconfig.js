@@ -71,7 +71,7 @@ describe( 'getWebpackConfigForManualTests()', () => {
 		} );
 
 		expect( stubs.loaders.getIconsLoader.calledOnce ).to.equal( true );
-		expect( stubs.loaders.getIconsLoader.firstCall.args[ 0 ] ).to.have.property( 'useShortPattern', true );
+		expect( stubs.loaders.getIconsLoader.firstCall.args[ 0 ] ).to.have.property( 'matchExtensionOnly', true );
 
 		expect( stubs.loaders.getStylesLoader.calledOnce ).to.equal( true );
 		expect( stubs.loaders.getStylesLoader.firstCall.args[ 0 ] ).to.have.property( 'themePath', '/theme/path' );

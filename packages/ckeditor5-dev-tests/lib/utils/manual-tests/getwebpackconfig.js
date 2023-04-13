@@ -66,7 +66,7 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 
 		module: {
 			rules: [
-				loaders.getIconsLoader( { useShortPattern: true } ),
+				loaders.getIconsLoader( { matchExtensionOnly: true } ),
 
 				loaders.getStylesLoader( {
 					themePath: options.themePath,

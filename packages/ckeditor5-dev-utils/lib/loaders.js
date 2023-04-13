@@ -103,12 +103,12 @@ module.exports = {
 
 	/**
 	 * @param {Object} [options]
-	 * @param {Boolean} [options.useShortPattern]
+	 * @param {Boolean} [options.matchExtensionOnly]
 	 * @returns {Object}
 	 */
-	getIconsLoader( { useShortPattern = false } = {} ) {
+	getIconsLoader( { matchExtensionOnly = false } = {} ) {
 		return {
-			test: useShortPattern ? /\.svg$/ : /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
+			test: matchExtensionOnly ? /\.svg$/ : /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
 			use: [ 'raw-loader' ]
 		};
 	},

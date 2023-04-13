@@ -70,7 +70,7 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 
 		module: {
 			rules: [
-				loaders.getIconsLoader( { useShortPattern: true } ),
+				loaders.getIconsLoader( { matchExtensionOnly: true } ),
 				loaders.getStylesLoader( {
 					themePath: options.themePath,
 					minify: true

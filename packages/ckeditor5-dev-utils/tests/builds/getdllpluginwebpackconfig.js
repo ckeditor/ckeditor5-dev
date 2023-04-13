@@ -274,7 +274,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 				expect( stubs.loaders.getIconsLoader.calledOnce ).to.equal( true );
 
 				const options = stubs.loaders.getIconsLoader.firstCall.args[ 0 ];
-				expect( options ).to.have.property( 'useShortPattern', true );
+				expect( options ).to.have.property( 'matchExtensionOnly', true );
 			} );
 		} );
 
