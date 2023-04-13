@@ -7,7 +7,7 @@
 
 const path = require( 'path' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
-const { getPostCssConfig } = require( './styles' );
+const { getPostCssConfig } = require( '../styles' );
 
 const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
 

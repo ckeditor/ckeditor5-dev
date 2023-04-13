@@ -25,7 +25,7 @@ describe( 'loaders', () => {
 			loader: '/path/to/mini-css-extract-plugin/loader'
 		} );
 
-		mockery.registerMock( './styles', {
+		mockery.registerMock( '../styles', {
 			getPostCssConfig: options => {
 				postCssOptions = options;
 
@@ -33,7 +33,7 @@ describe( 'loaders', () => {
 			}
 		} );
 
-		loaders = require( '../lib/loaders' );
+		loaders = require( '../../lib/loaders/index' );
 	} );
 
 	afterEach( () => {
