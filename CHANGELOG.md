@@ -1,6 +1,61 @@
 Changelog
 =========
 
+## [37.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v36.0.1...v37.0.0) (2023-04-13)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Replaced `ts-loader` with `esbuild-loader` in manual and automated tests to improve the build time. See [ckeditor/ckeditor5#13643](https://github.com/ckeditor/ckeditor5/issues/13643).
+
+### Features
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Exports a new object called `loaders` containing several methods for configuring webpack. Available helpers present as follow:. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/17642b06c34a0fb0750fb34f42263511a782181b))
+
+    * `getTypeScriptLoader()` – returns a configuration for processing TypeScript files using esbuild,
+    * `getJavaScriptLoader()` – returns a configuration for enabling `CK_DEBUG` flags in JavaScript files,
+    * `getStylesLoader()` – returns a configuration for processing CSS files using PostCSS,
+    * `getIconsLoader()` – returns a configuration for loading SVG icons using `raw-loader`,
+    * `getFormattedTextLoader()` – returns a configuration for loading rich text files using `raw-loader`,
+    * `getCoverageLoader()` – returns a configuration that installs instruments for measuring the code coverage.
+
+### Bug fixes
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `updateCKEditor5Dependencies()` task should take care of the `ckeditor5-collaboration` package too. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/ef85d0dafc421c76fc399f71c6318784a074804e))
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The `releaseSubRepositories()` task will now check the correct tag when checking what version is currently published on npm. Closes [ckeditor/ckeditor5#13737](https://github.com/ckeditor/ckeditor5/issues/13737). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/fa29daa1ca5e4c15478e9255bfb056aa18ec4bb9))
+
+### Other changes
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Mark GitHub release as a pre-release when publishing a non-latest version. Closes [ckeditor/ckeditor5#13664](https://github.com/ckeditor/ckeditor5/issues/13664). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/3e522c739482789ddaf2a767dc72bb45469159c7))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Use loader helpers exported by the `@ckeditor/ckeditor5-dev-utils` package to create webpack configurations for automated and manual tests. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/17642b06c34a0fb0750fb34f42263511a782181b))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: The `source-map` option is enabled by default due to converting TypeScript into JavaScript. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/17642b06c34a0fb0750fb34f42263511a782181b))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v36.0.1 => v37.0.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v36.0.1 => v37.0.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v36.0.1 => v37.0.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v36.0.1 => v37.0.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v36.0.1 => v37.0.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v36.0.1 => v37.0.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v36.0.1 => v37.0.0
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v36.0.1 => v37.0.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v36.0.1 => v37.0.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v36.0.1 => v37.0.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v36.0.1 => v37.0.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v36.0.1 => v37.0.0
+</details>
+
+
 ## [36.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v36.0.0...v36.0.1) (2023-04-03)
 
 ### Other changes
