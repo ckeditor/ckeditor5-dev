@@ -74,7 +74,7 @@ module.exports = function parseArguments( args ) {
 			'resolve-js-first': false,
 			server: false,
 			silent: false,
-			'source-map': false,
+			'source-map': true,
 			'theme-path': null,
 			tsconfig: null,
 			verbose: false,

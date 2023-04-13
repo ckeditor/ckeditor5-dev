@@ -6,10 +6,10 @@
 'use strict';
 
 const path = require( 'path' );
-const WebpackNotifierPlugin = require( './webpacknotifierplugin' );
-const { getPostCssConfig } = require( '@ckeditor/ckeditor5-dev-utils' ).styles;
-const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
 const webpack = require( 'webpack' );
+const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
+const { loaders } = require( '@ckeditor/ckeditor5-dev-utils' );
+const WebpackNotifierPlugin = require( './webpacknotifierplugin' );
 const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
 
 /**
@@ -66,77 +66,22 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 
 		module: {
 			rules: [
-				{
-					test: /\.svg$/,
-					use: [ 'raw-loader' ]
-				},
-				{
-					test: /\.css$/,
-					use: [
-						{
-							loader: 'style-loader',
-							options: {
-								injectType: 'singletonStyleTag',
-								attributes: {
-									'data-cke': true
-								}
-							}
-						},
-						'css-loader',
-						{
-							loader: 'postcss-loader',
-							options: {
-								postcssOptions: getPostCssConfig( {
-									themeImporter: {
-										themePath: options.themePath
-									},
-									sourceMap: true
-								} )
-							}
-						}
-					]
-				},
-				{
-					test: /\.(txt|html)$/,
-					use: [ 'raw-loader' ]
-				},
-				{
-					test: /\.js$/,
-					loader: require.resolve( '../ck-debug-loader' ),
-					options: {
-						debugFlags: options.debug
-					}
-				},
-				{
-					test: /\.ts$/,
-					use: [
-						{
-							loader: 'ts-loader',
-							options: {
-								// Use tsconfig path specified in CLI arguments. If not present, fallback to 'tsconfig.json' which
-								// is the default value https://github.com/TypeStrong/ts-loader#configfile.
-								configFile: options.tsconfig || 'tsconfig.json',
-								// Override default settings specified in `tsconfig.json`.
-								compilerOptions: {
-									// Do not emit any JS file as these TypeScript files are just passed through webpack.
-									// Manual tests have their entry point. Only these files should be stored on a file system.
-									// See: https://github.com/ckeditor/ckeditor5/issues/12111.
-									noEmit: false,
-									// When both (JS and TS) files are imported by a manual test while updating the JS files,
-									// the `ts-loader` emits the "TypeScript emitted no output" error.
-									// Disabling the `noEmitOnError` option fixes the problem.
-									noEmitOnError: false
-								}
-							}
-						},
-						{
-							loader: require.resolve( '../ck-debug-loader' ),
-							options: {
-								debugFlags: options.debug
-							}
-						}
-					]
-				}
+				loaders.getIconsLoader( { matchExtensionOnly: true } ),
+
+				loaders.getStylesLoader( {
+					themePath: options.themePath,
+					sourceMap: true
+				} ),
+
+				loaders.getFormattedTextLoader(),
+
+				loaders.getTypeScriptLoader( {
+					configFile: options.tsconfig,
+					includeDebugLoader: true,
+					debugFlags: options.debug
+				} ),
+
+				loaders.getJavaScriptLoader( { debugFlags: options.debug } )
 			]
 		},
 

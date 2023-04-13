@@ -6,10 +6,9 @@
 'use strict';
 
 const path = require( 'path' );
-const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
 const webpack = require( 'webpack' );
-const { getPostCssConfig } = require( '@ckeditor/ckeditor5-dev-utils' ).styles;
 const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
+const { loaders } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * @param {Object} options
@@ -41,68 +40,19 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 
 		module: {
 			rules: [
-				{
-					// test: **/ckeditor5-*/theme/icons/*.svg
-					test: /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
-					use: [ 'raw-loader' ]
-				},
-				{
-					// test: **/ckeditor5-*/theme/**/*.css
-					test: /\.css$/,
-					use: [
-						{
-							loader: 'style-loader',
-							options: {
-								injectType: 'singletonStyleTag',
-								attributes: {
-									'data-cke': true
-								}
-							}
-						},
-						'css-loader',
-						{
-							loader: 'postcss-loader',
-							options: {
-								postcssOptions: getPostCssConfig( {
-									themeImporter: {
-										themePath: options.themePath
-									},
-									minify: true
-								} )
-							}
-						}
-					]
-				},
-				{
-					test: /\.(txt|html|rtf)$/,
-					use: [ 'raw-loader' ]
-				},
-				{
-					test: /\.ts$/,
-					use: [
-						{
-							loader: 'ts-loader',
-							options: {
-								// Use tsconfig path specified in CLI arguments. If not present, fallback to 'tsconfig.json' which
-								// is the default value https://github.com/TypeStrong/ts-loader#configfile.
-								configFile: options.tsconfig || 'tsconfig.json',
-								// Override default settings specified in `tsconfig.json`.
-								compilerOptions: {
-									// Do not emit any JS file as these TypeScript files are just passed through webpack.
-									// Automated tests have a single entry point.
-									// See: https://github.com/ckeditor/ckeditor5/issues/12111.
-									noEmit: false,
-									// Do not emit any file when couldn't compile a TS file.
-									// Otherwise, karma prints an error on the top of the output log and then, execute tests.
-									// It might give a false positive results. Tests are OK while something could not be compiled.
-									// In such a case we would like to throw an error.
-									noEmitOnError: true
-								}
-							}
-						}
-					]
-				}
-			]
+				options.coverage ? loaders.getCoverageLoader( { files: options.files } ) : null,
+
+				loaders.getIconsLoader(),
+
+				loaders.getStylesLoader( {
+					themePath: options.themePath,
+					minify: true
+				} ),
+
+				loaders.getTypeScriptLoader( { configFile: options.tsconfig } ),
+
+				loaders.getFormattedTextLoader()
+			].filter( Boolean )
 		},
 
 		resolveLoader: {
@@ -132,28 +82,6 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 		};
 	}
 
-	if ( options.coverage ) {
-		config.module.rules.unshift(
-			{
-				test: /\.[jt]s$/,
-				use: [
-					{
-						loader: 'babel-loader',
-						options: {
-							plugins: [
-								'babel-plugin-istanbul'
-							]
-						}
-					}
-				],
-				include: getPathsToIncludeForCoverage( options.files ),
-				exclude: [
-					new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
-				]
-			}
-		);
-	}
-
 	if ( options.cache ) {
 		config.cache = {
 			type: 'filesystem'
@@ -163,32 +91,3 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	return config;
 };
 
-// Returns an array of `/ckeditor5-name\/src\//` regexps based on passed globs.
-// e.g. 'ckeditor5-utils/**/*.js' will be converted to /ckeditor5-utils\/src/.
-// This loose way of matching packages for CC works with packages under various paths.
-// E.g. workspace/ckeditor5-utils and ckeditor5/node_modules/ckeditor5-utils and every other path.
-function getPathsToIncludeForCoverage( globs ) {
-	const values = globs
-		.reduce( ( returnedPatterns, globPatterns ) => {
-			returnedPatterns.push( ...globPatterns );
-
-			return returnedPatterns;
-		}, [] )
-		.map( glob => {
-			const matchCKEditor5 = glob.match( /\/(ckeditor5-[^/]+)\// );
-
-			if ( matchCKEditor5 ) {
-				const packageName = matchCKEditor5[ 1 ]
-					// A special case when --files='!engine' or --files='!engine|ui' was passed.
-					// Convert it to /ckeditor5-(?!engine)[^/]\/src\//.
-					.replace( /ckeditor5-!\(([^)]+)\)\*/, 'ckeditor5-(?!$1)[^' + escapedPathSep + ']+' )
-					.replace( 'ckeditor5-*', 'ckeditor5-[a-z]+' );
-
-				return new RegExp( packageName + escapedPathSep + 'src' + escapedPathSep );
-			}
-		} )
-		// Filter undefined ones.
-		.filter( path => path );
-
-	return [ ...new Set( values ) ];
-}

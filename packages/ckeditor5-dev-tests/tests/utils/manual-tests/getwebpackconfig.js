@@ -5,13 +5,52 @@
 
 'use strict';
 
+const mockery = require( 'mockery' );
+const sinon = require( 'sinon' );
 const { expect } = require( 'chai' );
 
 describe( 'getWebpackConfigForManualTests()', () => {
-	let getWebpackConfigForManualTests;
+	let getWebpackConfigForManualTests, stubs;
 
 	beforeEach( () => {
+		mockery.enable( {
+			useCleanCache: true,
+			warnOnReplace: false,
+			warnOnUnregistered: false
+		} );
+
+		stubs = {
+			getDefinitionsFromFile: sinon.stub().returns( {} ),
+			loaders: {
+				getIconsLoader: sinon.stub().returns( {} ),
+				getStylesLoader: sinon.stub().returns( {} ),
+				getTypeScriptLoader: sinon.stub().returns( {} ),
+				getFormattedTextLoader: sinon.stub().returns( {} ),
+				getCoverageLoader: sinon.stub().returns( {} ),
+				getJavaScriptLoader: sinon.stub().returns( {} )
+			},
+			logger: {},
+			webpack: {
+				DefinePlugin: sinon.stub(),
+				ProvidePlugin: sinon.stub(),
+				SourceMapDevToolPlugin: sinon.stub()
+			}
+		};
+
+		mockery.registerMock( 'webpack', stubs.webpack );
+
+		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
+			loaders: stubs.loaders,
+			logger: () => stubs.logger
+		} );
+
 		getWebpackConfigForManualTests = require( '../../../lib/utils/manual-tests/getwebpackconfig' );
+	} );
+
+	afterEach( () => {
+		sinon.restore();
+		mockery.disable();
+		mockery.deregisterAll();
 	} );
 
 	it( 'should return webpack configuration object', () => {
@@ -21,9 +60,35 @@ describe( 'getWebpackConfigForManualTests()', () => {
 
 		const buildDir = '/home/ckeditor/ckeditor5/build/.manual-tests';
 
+		const debug = [];
+
 		const webpackConfig = getWebpackConfigForManualTests( {
-			entries, buildDir
+			entries,
+			buildDir,
+			debug,
+			themePath: '/theme/path',
+			tsconfig: '/tsconfig/path'
 		} );
+
+		expect( stubs.loaders.getIconsLoader.calledOnce ).to.equal( true );
+		expect( stubs.loaders.getIconsLoader.firstCall.args[ 0 ] ).to.have.property( 'matchExtensionOnly', true );
+
+		expect( stubs.loaders.getStylesLoader.calledOnce ).to.equal( true );
+		expect( stubs.loaders.getStylesLoader.firstCall.args[ 0 ] ).to.have.property( 'themePath', '/theme/path' );
+		expect( stubs.loaders.getStylesLoader.firstCall.args[ 0 ] ).to.have.property( 'sourceMap', true );
+
+		expect( stubs.loaders.getTypeScriptLoader.calledOnce ).to.equal( true );
+
+		expect( stubs.loaders.getTypeScriptLoader.firstCall.args[ 0 ] ).to.have.property( 'debugFlags', debug );
+		expect( stubs.loaders.getTypeScriptLoader.firstCall.args[ 0 ] ).to.have.property( 'configFile', '/tsconfig/path' );
+		expect( stubs.loaders.getTypeScriptLoader.firstCall.args[ 0 ] ).to.have.property( 'includeDebugLoader', true );
+
+		expect( stubs.loaders.getFormattedTextLoader.calledOnce ).to.equal( true );
+
+		expect( stubs.loaders.getJavaScriptLoader.calledOnce ).to.equal( true );
+		expect( stubs.loaders.getJavaScriptLoader.firstCall.args[ 0 ] ).to.have.property( 'debugFlags', debug );
+
+		expect( stubs.loaders.getCoverageLoader.called ).to.equal( false );
 
 		expect( webpackConfig ).to.be.an( 'object' );
 
@@ -49,66 +114,5 @@ describe( 'getWebpackConfigForManualTests()', () => {
 		expect( webpackConfig ).to.be.an( 'object' );
 		expect( webpackConfig ).to.not.have.property( 'devtool' );
 		expect( webpackConfig ).to.not.have.property( 'watch' );
-	} );
-
-	it( 'should process TypeScript files properly', () => {
-		const webpackConfig = getWebpackConfigForManualTests( {
-			tsconfig: '/home/project/configs/tsconfig.json'
-		} );
-
-		const tsRule = webpackConfig.module.rules.find( rule => {
-			return rule.test.toString().endsWith( '/\\.ts$/' );
-		} );
-
-		if ( !tsRule ) {
-			throw new Error( 'A loader for ".ts" files was not found.' );
-		}
-
-		const ckDebugLoader = tsRule.use.find( item => item.loader.endsWith( 'ck-debug-loader.js' ) );
-		const tsLoader = tsRule.use.find( item => item.loader === 'ts-loader' );
-
-		if ( !ckDebugLoader ) {
-			throw new Error( '"ck-debug-loader" missing' );
-		}
-
-		if ( !tsLoader ) {
-			throw new Error( '"ts-loader" missing' );
-		}
-
-		expect( tsLoader ).to.have.property( 'options' );
-		expect( tsLoader.options ).to.have.property( 'compilerOptions' );
-		expect( tsLoader.options.compilerOptions ).to.deep.equal( {
-			noEmit: false,
-			noEmitOnError: false
-		} );
-		expect( tsLoader.options ).to.have.property( 'configFile' );
-		expect( tsLoader.options.configFile ).to.equal( '/home/project/configs/tsconfig.json' );
-	} );
-
-	it( 'should use "ck-debug-loader" before "ts-loader" while loading TS files', () => {
-		const webpackConfig = getWebpackConfigForManualTests( {} );
-
-		const tsRule = webpackConfig.module.rules.find( rule => {
-			return rule.test.toString().endsWith( '/\\.ts$/' );
-		} );
-
-		if ( !tsRule ) {
-			throw new Error( 'A loader for ".ts" files was not found.' );
-		}
-
-		const ckDebugLoaderIndex = tsRule.use.findIndex( item => item.loader.endsWith( 'ck-debug-loader.js' ) );
-		const tsLoaderIndex = tsRule.use.findIndex( item => item.loader === 'ts-loader' );
-
-		if ( ckDebugLoaderIndex === undefined ) {
-			throw new Error( '"ck-debug-loader" missing' );
-		}
-
-		if ( tsLoaderIndex === undefined ) {
-			throw new Error( '"ts-loader" missing' );
-		}
-
-		// Webpack reads the "use" array from back to the front.
-		expect( ckDebugLoaderIndex ).to.equal( 1 );
-		expect( tsLoaderIndex ).to.equal( 0 );
 	} );
 } );

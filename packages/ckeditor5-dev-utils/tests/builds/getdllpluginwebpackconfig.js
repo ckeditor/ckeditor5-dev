@@ -42,6 +42,11 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			webpack: {
 				BannerPlugin: sandbox.stub(),
 				DllReferencePlugin: sandbox.stub()
+			},
+			loaders: {
+				getIconsLoader: sinon.stub(),
+				getStylesLoader: sinon.stub(),
+				getTypeScriptLoader: sinon.stub()
 			}
 		};
 
@@ -53,8 +58,9 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			warnOnUnregistered: false
 		} );
 
-		mockery.registerMock( '../tools', stubs.tools );
 		mockery.registerMock( 'fs-extra', stubs.fs );
+		mockery.registerMock( '../tools', stubs.tools );
+		mockery.registerMock( '../loaders', stubs.loaders );
 		mockery.registerMock( '/manifest/path', manifest );
 
 		getDllPluginWebpackConfig = require( '../../lib/builds/getdllpluginwebpackconfig' );
@@ -222,48 +228,71 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 	} );
 
 	describe( '#loaders', () => {
-		describe( 'ts-loader', () => {
+		describe( 'getTypeScriptLoader()', () => {
 			it( 'it should use the default tsconfig.json if the "options.tsconfigPath" option is not specified', () => {
 				stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-html-embed' );
 
-				const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
+				getDllPluginWebpackConfig( stubs.webpack, {
 					packagePath: '/package/path',
 					themePath: '/theme/path',
 					manifestPath: '/manifest/path'
 				} );
 
-				const tsRule = webpackConfig.module.rules.find( rule => {
-					return rule.test.toString().endsWith( '/\\.ts$/' );
-				} );
+				expect( stubs.loaders.getTypeScriptLoader.calledOnce ).to.equal( true );
 
-				expect( tsRule ).to.not.equal( undefined );
-
-				const { options } = tsRule.use[ 0 ];
-
-				expect( options ).to.be.an( 'object' );
+				const options = stubs.loaders.getTypeScriptLoader.firstCall.args[ 0 ];
 				expect( options ).to.have.property( 'configFile', 'tsconfig.json' );
 			} );
 
-			it( 'it should thr specified "options.tsconfigPath" value', () => {
+			it( 'it should the specified "options.tsconfigPath" value', () => {
 				stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-html-embed' );
 
-				const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
+				getDllPluginWebpackConfig( stubs.webpack, {
 					packagePath: '/package/path',
 					themePath: '/theme/path',
 					manifestPath: '/manifest/path',
 					tsconfigPath: '/config/tsconfig.json'
 				} );
 
-				const tsRule = webpackConfig.module.rules.find( rule => {
-					return rule.test.toString().endsWith( '/\\.ts$/' );
+				expect( stubs.loaders.getTypeScriptLoader.calledOnce ).to.equal( true );
+
+				const options = stubs.loaders.getTypeScriptLoader.firstCall.args[ 0 ];
+				expect( options ).to.have.property( 'configFile', '/config/tsconfig.json' );
+			} );
+		} );
+
+		describe( 'getIconsLoader()', () => {
+			it( 'it should get the loader', () => {
+				stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-html-embed' );
+
+				getDllPluginWebpackConfig( stubs.webpack, {
+					packagePath: '/package/path',
+					themePath: '/theme/path',
+					manifestPath: '/manifest/path'
 				} );
 
-				expect( tsRule ).to.not.equal( undefined );
+				expect( stubs.loaders.getIconsLoader.calledOnce ).to.equal( true );
 
-				const { options } = tsRule.use[ 0 ];
+				const options = stubs.loaders.getIconsLoader.firstCall.args[ 0 ];
+				expect( options ).to.have.property( 'matchExtensionOnly', true );
+			} );
+		} );
 
-				expect( options ).to.be.an( 'object' );
-				expect( options ).to.have.property( 'configFile', '/config/tsconfig.json' );
+		describe( 'getStylesLoader()', () => {
+			it( 'it should get the loader', () => {
+				stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-html-embed' );
+
+				getDllPluginWebpackConfig( stubs.webpack, {
+					packagePath: '/package/path',
+					themePath: '/theme/path',
+					manifestPath: '/manifest/path'
+				} );
+
+				expect( stubs.loaders.getStylesLoader.calledOnce ).to.equal( true );
+
+				const options = stubs.loaders.getStylesLoader.firstCall.args[ 0 ];
+				expect( options ).to.have.property( 'minify', true );
+				expect( options ).to.have.property( 'themePath', '/theme/path' );
 			} );
 		} );
 	} );
