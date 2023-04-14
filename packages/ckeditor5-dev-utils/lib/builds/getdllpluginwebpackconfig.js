@@ -12,6 +12,16 @@ const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-transla
 const bundler = require( '../bundler' );
 const tools = require( '../tools' );
 const loaders = require( '../loaders' );
+const WrapperPlugin = require( 'wrapper-webpack-plugin' );
+
+function loadCKEditor5modules( window, packageName ) {
+	window.CKEditor5 = window.CKEditor5 || {};
+
+	const shortName = packageName.replace( /^@ckeditor\/ckeditor5?-/, '' );
+	const windowScope = shortName.replace( /-([a-z])/g, ( match, p1 ) => p1.toUpperCase() );
+
+	window.CKEditor5[ windowScope ] = window[ `CKEditor5_${ windowScope }` ]( `./ckeditor5-${ shortName }/src/index.ts` );
+}
 
 /**
  * Returns a webpack configuration that creates a bundle file for the specified package. Thanks to that, plugins exported
@@ -32,6 +42,7 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 	const packageName = tools.readPackageName( options.packagePath );
 	const langDirExists = fs.existsSync( path.join( options.packagePath, 'lang' ) );
 	const indexTsExists = fs.existsSync( path.join( options.packagePath, 'src', 'index.ts' ) );
+	const dependencies = Array.isArray( options.dependencies || [] ) ? options.dependencies || [] : [ options.dependencies ];
 
 	const webpackConfig = {
 		mode: options.isDevelopmentMode ? 'development' : 'production',
@@ -41,7 +52,8 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 		entry: path.join( options.packagePath, 'src', indexTsExists ? 'index.ts' : 'index.js' ),
 
 		output: {
-			library: [ 'CKEditor5', getGlobalKeyForPackage( packageName ) ],
+			// library: [ 'CKEditor5', getGlobalKeyForPackage( packageName ) ],
+			library: [ 'CKEditor5_' + getGlobalKeyForPackage( packageName ) ],
 
 			path: path.join( options.packagePath, 'build' ),
 			filename: getIndexFileName( packageName ),
@@ -49,18 +61,39 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 		},
 
 		optimization: {
-			minimize: false
+			minimize: false,
+			// moduleIds: 'named'
+			moduleIds: false
 		},
 
 		plugins: [
+			new webpack.ids.NamedModuleIdsPlugin({
+				context: path.join( options.packagePath, '..' )
+			} ),
 			new webpack.BannerPlugin( {
 				banner: bundler.getLicenseBanner(),
 				raw: true
 			} ),
-			new webpack.DllReferencePlugin( {
-				manifest: require( options.manifestPath ),
-				scope: 'ckeditor5/src',
-				name: 'CKEditor5.dll'
+			...dependencies.map( dependency => (
+				// TODO make sure that manifest file can be resolved (should resolve on the webpack.config for a specific package).
+				new webpack.DllReferencePlugin( {
+					// context: require.resolve( dependency ).replace( /\/src\/index\.ts$/, '' ),
+					context: path.join( options.packagePath, '..' ),
+					manifest: require( path.join( dependency, 'build', getManifestFileName( dependency + '-dll' ) ) ),
+					scope: '@ckeditor',
+					extensions: [ '.ts', '.js', '.json', '/src/index.ts' ]
+				} )
+			) ),
+			new webpack.DllPlugin( {
+				// name: `CKEditor5.${ getGlobalKeyForPackage( packageName ) }`,
+				name: `CKEditor5_${ getGlobalKeyForPackage( packageName ) }`,
+				context: path.join( options.packagePath, '..' ),
+				path: path.join( options.packagePath, 'build', getManifestFileName( packageName + '-dll' ) ),
+				format: true,
+				entryOnly: true
+			} ),
+			new WrapperPlugin( {
+				footer: `( ( fn, root ) => fn( root, ${ JSON.stringify( packageName ) } ) )( ${ loadCKEditor5modules.toString() }, window );`
 			} )
 		],
 
@@ -134,4 +167,8 @@ function getGlobalKeyForPackage( packageName ) {
  */
 function getIndexFileName( packageName ) {
 	return packageName.replace( /^@ckeditor\/ckeditor5?-/, '' ) + '.js';
+}
+
+function getManifestFileName( packageName ) {
+	return packageName.replace( /^@ckeditor\/ckeditor5?-/, '' ) + '.manifest.json';
 }
