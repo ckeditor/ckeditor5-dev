@@ -123,23 +123,24 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 		webpackConfig.watch = true;
 	}
 
-	if ( options.requireDll ) {
-		// When processing manual tests, if any of them require a DLL build, the manual test server adds the `DllReferencePlugin` plugin
-		// to the configuration to avoid the duplicated modules error when using an import statement behind the `CK_DEBUG_*` flags.
-		//
-		// Otherwise, webpack tries to import a file from a file system instead of the DLL build.
-		// It leads to the CKEditor 5 duplicated modules error.
-		//
-		// See: https://github.com/ckeditor/ckeditor5/issues/12791.
-		const manifestPath = path.join( options.cwd, 'build', 'ckeditor5-dll.manifest.json' );
-		const dllReferencePlugin = new webpack.DllReferencePlugin( {
-			manifest: require( manifestPath ),
-			scope: 'ckeditor5/src',
-			name: 'CKEditor5.dll'
-		} );
-
-		webpackConfig.plugins.push( dllReferencePlugin );
-	}
+	// TODO disabled because main DLL is only concatenated from separate DLL files
+	// if ( options.requireDll ) {
+	// 	// When processing manual tests, if any of them require a DLL build, the manual test server adds the `DllReferencePlugin` plugin
+	// 	// to the configuration to avoid the duplicated modules error when using an import statement behind the `CK_DEBUG_*` flags.
+	// 	//
+	// 	// Otherwise, webpack tries to import a file from a file system instead of the DLL build.
+	// 	// It leads to the CKEditor 5 duplicated modules error.
+	// 	//
+	// 	// See: https://github.com/ckeditor/ckeditor5/issues/12791.
+	// 	const manifestPath = path.join( options.cwd, 'build', 'ckeditor5-dll.manifest.json' );
+	// 	const dllReferencePlugin = new webpack.DllReferencePlugin( {
+	// 		manifest: require( manifestPath ),
+	// 		scope: 'ckeditor5/src',
+	// 		name: 'CKEditor5.dll'
+	// 	} );
+	//
+	// 	webpackConfig.plugins.push( dllReferencePlugin );
+	// }
 
 	return webpackConfig;
 };
