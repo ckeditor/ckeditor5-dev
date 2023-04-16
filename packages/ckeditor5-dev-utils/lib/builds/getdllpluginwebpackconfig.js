@@ -66,6 +66,13 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 				banner: bundler.getLicenseBanner(),
 				raw: true
 			} ),
+			new webpack.DllReferencePlugin( {
+				// Context in 'packages' directory so module IDs use 'ckeditor5-*' prefix.
+				context: path.join( options.packagePath, '..' ),
+				manifest: require.resolve( 'ckeditor5/build/ckeditor5-dll.manifest.json' ),
+				scope: '@ckeditor',
+				extensions: [ '.ts', '.js', '.json', '/src/index.ts' ]
+			} ),
 			...dependencies.map( dependency => (
 				// TODO make sure that manifest file can be resolved (should resolve on the webpack.config for a specific package).
 				new webpack.DllReferencePlugin( {
