@@ -33,9 +33,12 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 	const packageName = tools.readPackageName( options.packagePath );
 	const langDirExists = fs.existsSync( path.join( options.packagePath, 'lang' ) );
 	const indexTsExists = fs.existsSync( path.join( options.packagePath, 'src', 'index.ts' ) );
-	const dependencies = Array.isArray( options.dependencies || [] ) ? options.dependencies || [] : [ options.dependencies ];
+	// const dependencies = Array.isArray( options.dependencies || [] ) ? options.dependencies || [] : [ options.dependencies ];
 	const globalPackageKey = getGlobalKeyForPackage( packageName );
 	const shortPackageName = packageName.replace( /^@ckeditor\//, '' );
+
+	const packageJson = require( path.join( options.packagePath, 'package.json' ) );
+	const dependencies = Object.keys( packageJson.dependencies ).filter( dependency => dependency.startsWith( '@ckeditor/' ) );
 
 	const webpackConfig = {
 		mode: options.isDevelopmentMode ? 'development' : 'production',
