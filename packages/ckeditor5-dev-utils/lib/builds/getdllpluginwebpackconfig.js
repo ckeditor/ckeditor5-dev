@@ -24,7 +24,6 @@ const WrapperPlugin = require( 'wrapper-webpack-plugin' );
  * @param {Object} options
  * @param {String} options.themePath An absolute path to the theme package.
  * @param {String} options.packagePath An absolute path to the root directory of the package.
- * @param {String} options.manifestPath An absolute path to the CKEditor 5 DLL manifest file.
  * @param {String} [options.tsconfigPath] An absolute path to the TypeScript configuration file.
  * @param {Boolean} [options.isDevelopmentMode=false] Whether to build a dev mode of the package.
  * @returns {Object}
@@ -33,12 +32,13 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 	const packageName = tools.readPackageName( options.packagePath );
 	const langDirExists = fs.existsSync( path.join( options.packagePath, 'lang' ) );
 	const indexTsExists = fs.existsSync( path.join( options.packagePath, 'src', 'index.ts' ) );
-	// const dependencies = Array.isArray( options.dependencies || [] ) ? options.dependencies || [] : [ options.dependencies ];
 	const globalPackageKey = getGlobalKeyForPackage( packageName );
 	const shortPackageName = packageName.replace( /^@ckeditor\//, '' );
 
 	const packageJson = require( path.join( options.packagePath, 'package.json' ) );
-	const dependencies = Object.keys( packageJson.dependencies ).filter( dependency => dependency.startsWith( '@ckeditor/' ) );
+	const dependencies = Object.keys( packageJson.dependencies )
+		.filter( dependency => dependency.startsWith( '@ckeditor/' ) || dependency == 'ckeditor5' )
+		.filter( dependency => hasDLLBuildScript( dependency ) );
 
 	const webpackConfig = {
 		mode: options.isDevelopmentMode ? 'development' : 'production',
@@ -68,13 +68,6 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 			new webpack.BannerPlugin( {
 				banner: bundler.getLicenseBanner(),
 				raw: true
-			} ),
-			new webpack.DllReferencePlugin( {
-				// Context in 'packages' directory so module IDs use 'ckeditor5-*' prefix.
-				context: path.join( options.packagePath, '..' ),
-				manifest: require.resolve( 'ckeditor5/build/ckeditor5-dll.manifest.json' ),
-				scope: '@ckeditor',
-				extensions: [ '.ts', '.js', '.json', '/src/index.ts' ]
 			} ),
 			...dependencies.map( dependency => (
 				// TODO make sure that manifest file can be resolved (should resolve on the webpack.config for a specific package).
@@ -175,4 +168,16 @@ function getIndexFileName( packageName ) {
 
 function getManifestFileName( packageName ) {
 	return packageName.replace( /^@ckeditor\/ckeditor5?-/, '' ) + '.manifest.json';
+}
+
+function hasDLLBuildScript( packageName ) {
+	const packageJsonPath = require.resolve( path.join( packageName, 'package.json' ) );
+
+	if ( !fs.existsSync( packageJsonPath ) ) {
+		return false;
+	}
+
+	const scripts = require( packageJsonPath ).scripts;
+
+	return Boolean( scripts && scripts[ 'dll:build' ] );
 }
