@@ -34,6 +34,16 @@ export class ExampleClass {
 	 */
 	private secret: string;
 
+	/**
+	 * Observable getter.
+	 *
+	 * @readonly
+	 * @observable
+	 */
+	public get hasSecret(): boolean {
+		return Boolean( this.secret );
+	}
+
 	constructor() {
 		this.name = 'Example';
 		this.key = 1;

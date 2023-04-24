@@ -22,7 +22,31 @@ module.exports = {
 
 function onEventEnd( context ) {
 	// Get all resolved reflections that could potentially have the `@observable` tag.
-	const reflections = context.project.getReflectionsByKind( ReflectionKind.Property );
+	const propertyReflections = context.project.getReflectionsByKind( ReflectionKind.Property );
+	let accessorReflections = [
+		...context.project.getReflectionsByKind( ReflectionKind.GetSignature ),
+		...context.project.getReflectionsByKind( ReflectionKind.SetSignature )
+	];
+
+	/**
+	 * Accessor reflections need to have their parent reassigned, otherwise it will be:
+	 *
+	 *   `module:core/editor/editor~Editor#isReadOnly`
+	 *
+	 * instead of:
+	 *
+	 *   `module:core/editor/editor~Editor`
+	 */
+	accessorReflections = accessorReflections.map( accessorReflection => {
+		accessorReflection.parent = accessorReflection.parent.parent;
+
+		return accessorReflection;
+	} );
+
+	const reflections = [
+		...propertyReflections,
+		...accessorReflections
+	];
 
 	// Then, for each potential observable reflection...
 	for ( const reflection of reflections ) {
