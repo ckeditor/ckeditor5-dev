@@ -32,7 +32,7 @@ export class ExampleClass {
 	 *
 	 * @observable
 	 */
-	private secret: string;
+	private secret: string | undefined;
 
 	/**
 	 * Observable getter.
@@ -42,6 +42,16 @@ export class ExampleClass {
 	 */
 	public get hasSecret(): boolean {
 		return Boolean( this.secret );
+	}
+
+	/**
+	 * Observable setter.
+	 *
+	 * @readonly
+	 * @observable
+	 */
+	public set setSecret( string: string | undefined ) {
+		this.secret = string;
 	}
 
 	constructor() {

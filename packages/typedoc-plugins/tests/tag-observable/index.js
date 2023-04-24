@@ -88,30 +88,46 @@ describe( 'typedoc-plugins/tag-observable', function() {
 			const eventDefinitions = baseClassDefinition.children
 				.filter( children => children.kindString === 'Event' );
 
-			expect( eventDefinitions ).to.lengthOf( 8 );
-			expect( eventDefinitions.find( event => event.name === 'event:change:key' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:change:value' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:change:secret' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:key' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:value' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:secret' ) ).to.not.be.undefined;
+			expect( eventDefinitions ).to.lengthOf( 10 );
+
+			expect( eventDefinitions.map( event => event.name ) ).to.have.members( [
+				'event:change:key',
+				'event:change:value',
+				'event:change:secret',
+				'event:change:setSecret',
+				'event:change:hasSecret',
+
+				'event:set:key',
+				'event:set:value',
+				'event:set:secret',
+				'event:set:setSecret',
+				'event:set:hasSecret'
+			] );
 		} );
 
 		it( 'should find all events in the derived class', () => {
 			const eventDefinitions = derivedClassDefinition.children
 				.filter( children => children.kindString === 'Event' );
 
-			expect( eventDefinitions ).to.lengthOf( 12 );
-			expect( eventDefinitions.find( event => event.name === 'event:change:key' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:change:value' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:change:property' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:change:anotherProperty' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:change:staticProperty' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:key' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:value' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:property' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:staticProperty' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:anotherProperty' ) ).to.not.be.undefined;
+			expect( eventDefinitions ).to.lengthOf( 14 );
+
+			expect( eventDefinitions.map( event => event.name ) ).to.have.members( [
+				'event:change:key',
+				'event:change:value',
+				'event:change:property',
+				'event:change:staticProperty',
+				'event:change:anotherProperty',
+				'event:change:setSecret',
+				'event:change:hasSecret',
+
+				'event:set:key',
+				'event:set:value',
+				'event:set:property',
+				'event:set:staticProperty',
+				'event:set:anotherProperty',
+				'event:set:setSecret',
+				'event:set:hasSecret'
+			] );
 		} );
 
 		for ( const eventName of [ 'key', 'hasSecret' ] ) {
