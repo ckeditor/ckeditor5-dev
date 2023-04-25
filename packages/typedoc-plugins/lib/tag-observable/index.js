@@ -22,11 +22,8 @@ module.exports = {
 
 function onEventEnd( context ) {
 	// Get all resolved reflections that could potentially have the `@observable` tag.
-	const reflections = [
-		...context.project.getReflectionsByKind( ReflectionKind.Property ),
-		...context.project.getReflectionsByKind( ReflectionKind.GetSignature ),
-		...context.project.getReflectionsByKind( ReflectionKind.SetSignature )
-	];
+	const kinds = ReflectionKind.Property | ReflectionKind.GetSignature | ReflectionKind.SetSignature;
+	const reflections = context.project.getReflectionsByKind( kinds );
 
 	// Then, for each potential observable reflection...
 	for ( const reflection of reflections ) {
