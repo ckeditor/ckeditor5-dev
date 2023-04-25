@@ -22,7 +22,8 @@ module.exports = {
 
 function onEventEnd( context ) {
 	// Get all resolved reflections that could potentially have the `@observable` tag.
-	const reflections = context.project.getReflectionsByKind( ReflectionKind.Property );
+	const kinds = ReflectionKind.Property | ReflectionKind.GetSignature | ReflectionKind.SetSignature;
+	const reflections = context.project.getReflectionsByKind( kinds );
 
 	// Then, for each potential observable reflection...
 	for ( const reflection of reflections ) {
@@ -31,9 +32,18 @@ function onEventEnd( context ) {
 			continue;
 		}
 
-		// Otherwise, if the property has the `@observable` tag, get its name and its parent class.
+		/**
+		 * Otherwise, if the property has the `@observable` tag, get its name and its parent class.
+		 * Accessor reflections need to use their grandparent instead, otherwise it will be:
+		 *
+		 *   `module:core/editor/editor~Editor#isReadOnly`
+		 *
+		 * instead of:
+		 *
+		 *   `module:core/editor/editor~Editor`
+		 */
 		const propertyName = reflection.name;
-		const classReflection = reflection.parent;
+		const classReflection = reflection.kindString === 'Property' ? reflection.parent : reflection.parent.parent;
 
 		// An observable property fires two events - `change` and `set` - so two event reflections have to be inserted as a class child.
 		for ( const eventName of [ 'change', 'set' ] ) {

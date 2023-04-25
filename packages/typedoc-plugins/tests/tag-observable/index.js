@@ -88,99 +88,119 @@ describe( 'typedoc-plugins/tag-observable', function() {
 			const eventDefinitions = baseClassDefinition.children
 				.filter( children => children.kindString === 'Event' );
 
-			expect( eventDefinitions ).to.lengthOf( 6 );
-			expect( eventDefinitions.find( event => event.name === 'event:change:key' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:change:value' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:change:secret' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:key' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:value' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:secret' ) ).to.not.be.undefined;
+			expect( eventDefinitions ).to.lengthOf( 10 );
+
+			expect( eventDefinitions.map( event => event.name ) ).to.have.members( [
+				'event:change:key',
+				'event:change:value',
+				'event:change:secret',
+				'event:change:setSecret',
+				'event:change:hasSecret',
+
+				'event:set:key',
+				'event:set:value',
+				'event:set:secret',
+				'event:set:setSecret',
+				'event:set:hasSecret'
+			] );
 		} );
 
 		it( 'should find all events in the derived class', () => {
 			const eventDefinitions = derivedClassDefinition.children
 				.filter( children => children.kindString === 'Event' );
 
-			expect( eventDefinitions ).to.lengthOf( 10 );
-			expect( eventDefinitions.find( event => event.name === 'event:change:key' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:change:value' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:change:property' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:change:anotherProperty' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:change:staticProperty' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:key' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:value' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:property' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:staticProperty' ) ).to.not.be.undefined;
-			expect( eventDefinitions.find( event => event.name === 'event:set:anotherProperty' ) ).to.not.be.undefined;
+			expect( eventDefinitions ).to.lengthOf( 14 );
+
+			expect( eventDefinitions.map( event => event.name ) ).to.have.members( [
+				'event:change:key',
+				'event:change:value',
+				'event:change:property',
+				'event:change:staticProperty',
+				'event:change:anotherProperty',
+				'event:change:setSecret',
+				'event:change:hasSecret',
+
+				'event:set:key',
+				'event:set:value',
+				'event:set:property',
+				'event:set:staticProperty',
+				'event:set:anotherProperty',
+				'event:set:setSecret',
+				'event:set:hasSecret'
+			] );
 		} );
 
-		for ( const eventName of [ 'event:change', 'event:set' ] ) {
-			it( `should properly define the ${ eventName } event`, () => {
-				const eventDefinition = baseClassDefinition.children
-					.find( doclet => doclet.name === `${ eventName }:key` );
+		for ( const eventName of [ 'key', 'hasSecret' ] ) {
+			for ( const eventType of [ 'change', 'set' ] ) {
+				it( `should properly define the "event:${ eventType }:${ eventName }" event`, () => {
+					const eventDefinition = baseClassDefinition.children
+						.find( doclet => doclet.name === `event:${ eventType }:${ eventName }` );
 
-				expect( eventDefinition ).to.not.be.undefined;
-				expect( eventDefinition.name ).to.equal( `${ eventName }:key` );
-				expect( eventDefinition.originalName ).to.equal( `${ eventName }:key` );
-				expect( eventDefinition.kindString ).to.equal( 'Event' );
+					const expectedCommentSummary = `Fired when the \`${ eventName }\` property ` + (
+						eventType === 'change' ?
+							'changed value.' :
+							'is going to be set but is not set yet (before the `change` event is fired).'
+					);
 
-				expect( eventDefinition.comment ).to.have.property( 'summary' );
-				expect( eventDefinition.comment ).to.have.property( 'blockTags' );
-				expect( eventDefinition.comment ).to.have.property( 'modifierTags' );
+					expect( eventDefinition ).to.not.be.undefined;
+					expect( eventDefinition.name ).to.equal( `event:${ eventType }:${ eventName }` );
+					expect( eventDefinition.originalName ).to.equal( `event:${ eventType }:${ eventName }` );
+					expect( eventDefinition.kindString ).to.equal( 'Event' );
 
-				expect( eventDefinition.comment.blockTags ).to.be.an( 'array' );
-				expect( eventDefinition.comment.blockTags ).to.lengthOf( 0 );
-				expect( eventDefinition.comment.modifierTags ).to.be.a( 'Set' );
-				expect( eventDefinition.comment.modifierTags.size ).to.equal( 0 );
-				expect( eventDefinition.comment.summary ).to.be.an( 'array' );
-				expect( eventDefinition.comment.summary ).to.lengthOf( 1 );
-				expect( eventDefinition.comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
-				expect( eventDefinition.comment.summary[ 0 ] ).to.have.property( 'text',
-					eventName === 'event:change' ?
-						'Fired when the `key` property changed value.' :
-						'Fired when the `key` property is going to be set but is not set yet (before the `change` event is fired).'
-				);
+					expect( eventDefinition.comment ).to.have.property( 'summary' );
+					expect( eventDefinition.comment ).to.have.property( 'blockTags' );
+					expect( eventDefinition.comment ).to.have.property( 'modifierTags' );
 
-				expect( eventDefinition.typeParameters ).to.be.an( 'array' );
-				expect( eventDefinition.typeParameters ).to.lengthOf( 3 );
+					expect( eventDefinition.comment.blockTags ).to.be.an( 'array' );
+					expect( eventDefinition.comment.blockTags ).to.lengthOf( 0 );
+					expect( eventDefinition.comment.modifierTags ).to.be.a( 'Set' );
+					expect( eventDefinition.comment.modifierTags.size ).to.equal( 0 );
+					expect( eventDefinition.comment.summary ).to.be.an( 'array' );
+					expect( eventDefinition.comment.summary ).to.lengthOf( 1 );
+					expect( eventDefinition.comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
+					expect( eventDefinition.comment.summary[ 0 ] ).to.have.property( 'text', expectedCommentSummary );
 
-				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'name', 'name' );
-				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'type' );
-				expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'name', 'string' );
-				expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'comment' );
-				expect( eventDefinition.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
-				expect( eventDefinition.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
-				expect( eventDefinition.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
-				expect( eventDefinition.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'text',
-					'Name of the changed property (`key`).'
-				);
+					expect( eventDefinition.typeParameters ).to.be.an( 'array' );
+					expect( eventDefinition.typeParameters ).to.lengthOf( 3 );
 
-				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'name', 'value' );
-				expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'comment' );
-				expect( eventDefinition.typeParameters[ 1 ].comment ).to.have.property( 'summary' );
-				expect( eventDefinition.typeParameters[ 1 ].comment.summary ).to.be.an( 'array' );
-				expect( eventDefinition.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
-				expect( eventDefinition.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'text',
-					'New value of the `key` property with given key or `null`, if operation should remove property.'
-				);
+					expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'name', 'name' );
+					expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'type' );
+					expect( eventDefinition.typeParameters[ 0 ].type ).to.have.property( 'name', 'string' );
+					expect( eventDefinition.typeParameters[ 0 ] ).to.have.property( 'comment' );
+					expect( eventDefinition.typeParameters[ 0 ].comment ).to.have.property( 'summary' );
+					expect( eventDefinition.typeParameters[ 0 ].comment.summary ).to.be.an( 'array' );
+					expect( eventDefinition.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
+					expect( eventDefinition.typeParameters[ 0 ].comment.summary[ 0 ] ).to.have.property( 'text',
+						`Name of the changed property (\`${ eventName }\`).`
+					);
 
-				expect( eventDefinition.typeParameters[ 2 ] ).to.have.property( 'name', 'oldValue' );
-				expect( eventDefinition.typeParameters[ 2 ] ).to.have.property( 'comment' );
-				expect( eventDefinition.typeParameters[ 2 ].comment ).to.have.property( 'summary' );
-				expect( eventDefinition.typeParameters[ 2 ].comment.summary ).to.be.an( 'array' );
-				expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
-				expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 0 ] ).to.have.property( 'text',
-					'Old value of the `key` property with given key or `null`, if property was not set before.'
-				);
+					expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'name', 'value' );
+					expect( eventDefinition.typeParameters[ 1 ] ).to.have.property( 'comment' );
+					expect( eventDefinition.typeParameters[ 1 ].comment ).to.have.property( 'summary' );
+					expect( eventDefinition.typeParameters[ 1 ].comment.summary ).to.be.an( 'array' );
+					expect( eventDefinition.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
+					expect( eventDefinition.typeParameters[ 1 ].comment.summary[ 0 ] ).to.have.property( 'text',
+						`New value of the \`${ eventName }\` property with given key or \`null\`, if operation should remove property.`
+					);
 
-				expect( eventDefinition.sources ).to.be.an( 'array' );
-				expect( eventDefinition.sources ).to.lengthOf( 1 );
-				expect( eventDefinition.sources[ 0 ] ).to.have.property( 'fileName', 'exampleclass.ts' );
-				expect( eventDefinition.sources[ 0 ] ).to.have.property( 'fullFileName' );
-				expect( eventDefinition.sources[ 0 ] ).to.have.property( 'line' );
-				expect( eventDefinition.sources[ 0 ] ).to.have.property( 'character' );
-				expect( eventDefinition.sources[ 0 ] ).to.have.property( 'url' );
-			} );
+					expect( eventDefinition.typeParameters[ 2 ] ).to.have.property( 'name', 'oldValue' );
+					expect( eventDefinition.typeParameters[ 2 ] ).to.have.property( 'comment' );
+					expect( eventDefinition.typeParameters[ 2 ].comment ).to.have.property( 'summary' );
+					expect( eventDefinition.typeParameters[ 2 ].comment.summary ).to.be.an( 'array' );
+					expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 0 ] ).to.have.property( 'kind', 'text' );
+					expect( eventDefinition.typeParameters[ 2 ].comment.summary[ 0 ] ).to.have.property( 'text',
+						`Old value of the \`${ eventName }\` property with given key or \`null\`, if property was not set before.`
+					);
+
+					expect( eventDefinition.sources ).to.be.an( 'array' );
+					expect( eventDefinition.sources ).to.lengthOf( 1 );
+					expect( eventDefinition.sources[ 0 ] ).to.have.property( 'fileName', 'exampleclass.ts' );
+					expect( eventDefinition.sources[ 0 ] ).to.have.property( 'fullFileName' );
+					expect( eventDefinition.sources[ 0 ] ).to.have.property( 'line' );
+					expect( eventDefinition.sources[ 0 ] ).to.have.property( 'character' );
+					expect( eventDefinition.sources[ 0 ] ).to.have.property( 'url' );
+				} );
+			}
 		}
 
 		it( 'should define the `inheritedFrom` property for an inherited observable property (change:${ property })', () => {
