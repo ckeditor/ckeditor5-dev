@@ -34,11 +34,10 @@ module.exports = async function notifyTravisStatus( options ) {
 		notifyCommitUrl: options.notifyCommitUrl,
 		repositorySlug: options.repositorySlug
 	} );
-	const commitDetails = await getCommitDetails( commitUrl, options.githubToken );
+	const { githubAccount, commitAuthor, commitMessage } = await getCommitDetails( commitUrl, options.githubToken );
 
 	const [ buildRepoOwner, buildRepoName ] = options.repositorySlug.split( '/' );
-
-	const slackAccount = members[ commitDetails.author ];
+	const slackAccount = members[ githubAccount ] || null;
 	const shortCommit = commitUrl.split( '/' ).pop().substring( 0, 7 );
 	const repoMatch = commitUrl.match( REPOSITORY_REGEXP );
 
@@ -46,7 +45,8 @@ module.exports = async function notifyTravisStatus( options ) {
 		username: 'Travis CI',
 		text: getNotifierMessage( {
 			slackAccount,
-			githubAccount: commitDetails.author,
+			githubAccount,
+			commitAuthor,
 			shouldHideAuthor: options.shouldHideAuthor
 		} ),
 		icon_url: 'https://a.slack-edge.com/66f9/img/services/travis_36.png',
@@ -80,7 +80,7 @@ module.exports = async function notifyTravisStatus( options ) {
 					},
 					{
 						title: 'Commit message',
-						value: getFormattedMessage( commitDetails.message, repoMatch[ 1 ], repoMatch[ 2 ] ),
+						value: getFormattedMessage( commitMessage, repoMatch[ 1 ], repoMatch[ 2 ] ),
 						short: false
 					}
 				]
@@ -189,8 +189,9 @@ function getCommitDetails( commitUrl, githubToken ) {
 	return fetch( apiGithubUrlCommit, options )
 		.then( response => response.json() )
 		.then( json => ( {
-			author: json.author.login,
-			message: json.commit.message
+			githubAccount: json.author ? json.author.login : null,
+			commitAuthor: json.commit.author.name,
+			commitMessage: json.commit.message
 		} ) );
 }
 
@@ -199,8 +200,9 @@ function getCommitDetails( commitUrl, githubToken ) {
  *
  * @param {Object} options
  * @param {Boolean} options.shouldHideAuthor
- * @param {String} options.slackAccount
- * @param {String} options.githubAccount
+ * @param {String|null} options.slackAccount
+ * @param {String|null} options.githubAccount
+ * @param {String} options.commitAuthor
  * @returns {String}
  */
 function getNotifierMessage( options ) {
@@ -208,8 +210,9 @@ function getNotifierMessage( options ) {
 		return '_The author of the commit was hidden. <https://github.com/ckeditor/ckeditor5/issues/9252|Read more about why.>_';
 	}
 
+	// If the author of the commit could not be obtained, let's ping the entire team.
 	if ( !options.slackAccount ) {
-		return '_The author of the commit could not be obtained._';
+		return `@channel (${ options.commitAuthor }), could you take a look?`;
 	}
 
 	// Slack and GitHub names for bots are equal.
