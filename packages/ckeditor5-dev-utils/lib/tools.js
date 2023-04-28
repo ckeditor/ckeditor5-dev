@@ -22,14 +22,14 @@ module.exports = {
 	 * stderr) will be logged. If set as 'error', only stderr output will be logged.
 	 * @returns {String} The command output.
 	 */
-	shExec( command, options = { verbosity: 'info' } ) {
+	shExec( command, options = { verbosity: 'info', cwd: process.cwd() } ) {
 		const logger = require( './logger' );
 		const log = logger( options.verbosity );
 		const sh = require( 'shelljs' );
 
 		sh.config.silent = true;
 
-		const ret = sh.exec( command );
+		const ret = sh.exec( command, { cwd: options.cwd } );
 
 		const grey = chalk.grey;
 
