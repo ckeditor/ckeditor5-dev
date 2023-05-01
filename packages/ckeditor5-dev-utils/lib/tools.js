@@ -18,8 +18,9 @@ module.exports = {
 	 *
 	 * @param {String} command The command to be executed.
 	 * @param {Object} options
-	 * @param {String} [options.verbosity='info'] Level of the verbosity. If set as 'info' both outputs (stdout and
+	 * @param {'info'|'warning'|'error'} [options.verbosity='info'] Level of the verbosity. If set as 'info' both outputs (stdout and
 	 * stderr) will be logged. If set as 'error', only stderr output will be logged.
+	 * @param {String} [options.cwd=process.cwd()]
 	 * @returns {String} The command output.
 	 */
 	shExec( command, options = { verbosity: 'info', cwd: process.cwd() } ) {
