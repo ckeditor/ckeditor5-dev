@@ -10,24 +10,24 @@ const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-release-tools/release', () => {
-	let updateVersions, sandbox, outputJsonSyncStub, getPackageJsonStub, syncStub, shExecStub, semverStub;
+	let updateVersions, sandbox, outputJsonSyncStub, getPackageJsonStub, syncStub, shExecStub, gtStub;
 
 	describe( 'updateVersions()', () => {
 		beforeEach( () => {
 			sandbox = sinon.createSandbox();
 
 			outputJsonSyncStub = sandbox.stub();
-			getPackageJsonStub = sandbox.stub();
-			syncStub = sandbox.stub();
-			shExecStub = sandbox.stub();
-			semverStub = sandbox.stub();
+			getPackageJsonStub = sandbox.stub().returns( { version: '1.0.0' } );
+			syncStub = sandbox.stub().returns( [ '/ckeditor5-dev' ] );
+			shExecStub = sandbox.stub().throws( new Error( 'is not in this registry' ) );
+			gtStub = sandbox.stub().returns( true );
 
 			updateVersions = proxyquire( '../../lib/release/updateversions.js', {
 				'fs-extra': { outputJsonSync: outputJsonSyncStub },
 				'../utils/getpackagejson': getPackageJsonStub,
 				'glob': { globSync: syncStub },
 				'@ckeditor/ckeditor5-dev-utils': { tools: { shExec: shExecStub } },
-				'semver': semverStub
+				'semver': { gt: gtStub }
 			} );
 		} );
 
@@ -36,8 +36,6 @@ describe( 'dev-release-tools/release', () => {
 		} );
 
 		it( 'should call outputJsonSyncStub 4 times when the version is correct and there are 3 packages and 1 root', () => {
-			shExecStub.throws( new Error( 'is not in this registry' ) );
-			getPackageJsonStub.returns( { version: '1.0.0' } );
 			syncStub.returns( [
 				'/ckeditor5-dev/packages/package1',
 				'/ckeditor5-dev/packages/package2',
@@ -53,9 +51,7 @@ describe( 'dev-release-tools/release', () => {
 			expect( outputJsonSyncStub.firstCall.args[ 1 ] ).to.deep.equal( { version: '1.0.1' } );
 		} );
 
-		it( 'should call outputJsonSyncStub 1 times when the version is correct packages are undefined and 1 root', () => {
-			shExecStub.throws( new Error( 'is not in this registry' ) );
-			getPackageJsonStub.returns( { version: '1.0.0' } );
+		it( 'should call outputJsonSyncStub 1 time when the version is correct packages are undefined and 1 root', () => {
 			syncStub.returns( [ '/ckeditor5-dev' ] );
 
 			updateVersions( { version: '1.0.1' } );
@@ -66,56 +62,57 @@ describe( 'dev-release-tools/release', () => {
 			expect( outputJsonSyncStub.firstCall.args[ 1 ] ).to.deep.equal( { version: '1.0.1' } );
 		} );
 
-		it( 'should throw when shExec returns correct value', () => {
+		it( 'should throw when npm show returns that version is already in use', () => {
 			getPackageJsonStub.returns( { version: '1.0.0', name: 'stub-package' } );
-			syncStub.returns( [ '/ckeditor5-dev' ] );
 			shExecStub.returns( '' );
 
 			expect( () => updateVersions( { version: '1.0.1' } ) )
 				.to.throw( Error, 'Version 1.0.1 is already used in npm by stub-package' );
 		} );
 
-		it( 'should not throw when shExec throws is not in the registry error', () => {
+		it( 'should not throw when npm show returns that version is not in use', () => {
 			shExecStub.throws( new Error( 'is not in this registry' ) );
 			getPackageJsonStub.returns( { version: '1.0.0', name: 'stub-package' } );
-			syncStub.returns( [ '/ckeditor5-dev' ] );
 
 			expect( () => updateVersions( { version: '1.0.1' } ) ).to.not.throw( Error );
 		} );
 
-		it( 'should throw when shExec throws different error', () => {
+		it( 'should throw when npm show throws another error', () => {
 			shExecStub.throws( new Error( 'custom error' ) );
 			getPackageJsonStub.returns( { version: '1.0.0', name: 'stub-package' } );
-			syncStub.returns( [ '/ckeditor5-dev' ] );
 
 			expect( () => updateVersions( { version: '1.0.1' } ) ).to.throw( Error );
 		} );
 
-		it( 'should throw error when the version is invalid', () => {
-			getPackageJsonStub.returns( { version: '1.0.0' } );
-			syncStub.returns( [ '/ckeditor5-dev' ] );
-
-			expect( () => updateVersions( { version: '123' } ) ).to.throw( Error );
-		} );
-
 		it( 'should call outputJsonSyncStub when version is 0.0.0-', () => {
-			shExecStub.throws( new Error( 'is not in this registry' ) );
-			getPackageJsonStub.returns( { version: '1.0.0' } );
-			syncStub.returns( [ '/ckeditor5-dev' ] );
-
 			updateVersions( { version: '0.0.0-nightly-123.0' } );
 
 			expect( outputJsonSyncStub ).to.be.called;
 		} );
 
-		it( 'should pass cwd to globSync', () => {
-			shExecStub.throws( new Error( 'is not in this registry' ) );
-			getPackageJsonStub.returns( { version: '1.0.0' } );
-			syncStub.returns( [ '/ckeditor5-dev' ] );
+		it( 'should throw when new version is not greater than old version', () => {
+			gtStub.returns( false );
 
+			expect( () => updateVersions( { version: '1.0.1' } ) )
+				.to.throw( Error, 'Version 1.0.1 must be greater than 1.0.0 or match 0.0.0-<...>' );
+		} );
+
+		it( 'should pass cwd to globSync', () => {
 			updateVersions( { version: '1.0.1', cwd: 'Users/username/ckeditor5-dev/custom-dir' } );
 
 			expect( syncStub.firstCall.args[ 1 ] ).to.deep.equal( { cwd: 'Users/username/ckeditor5-dev/custom-dir', absolute: true } );
+		} );
+
+		it( 'should pass "packages/*" to globSync to search for random packages when packagesDirectory not undefined', () => {
+			updateVersions( { version: '1.0.1', packagesDirectory: 'custom-packages-dir' } );
+
+			expect( syncStub.secondCall.args[ 0 ] ).to.equal( 'custom-packages-dir/*' );
+		} );
+
+		it( 'should pass "./" to globSync to search for random packages when packagesDirectory is undefined', () => {
+			updateVersions( { version: '1.0.1' } );
+
+			expect( syncStub.secondCall.args[ 0 ] ).to.equal( './' );
 		} );
 	} );
 } );

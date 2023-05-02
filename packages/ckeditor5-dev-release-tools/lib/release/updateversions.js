@@ -21,27 +21,26 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 module.exports = function updateVersions( { packagesDirectory, version, cwd = process.cwd() } ) {
 	const packagesGlobs = packagesDirectory ? [ packagesDirectory + '/*', './' ] : './';
 	const packagesPaths = globSync( packagesGlobs, { cwd, absolute: true } );
-	const randomPackageName = getRandomPackageName( packagesDirectory, cwd );
 
-	checkVersionGtOldVersion( version, getPackageJson( cwd ).version );
-	checkVersionIsAvailableInNpm( version, randomPackageName );
+	checkVersionGreatherThanOldVersion( version, getPackageJson( cwd ).version );
+	checkVersionIsAvailableInNpm( version, getRandomPackageJson( packagesDirectory, cwd ).name );
 
 	for ( const packagePath of packagesPaths ) {
-		const pgkJsonPath = path.join( packagePath, 'package.json' );
-		const pkgJson = getPackageJson( packagePath );
+		const packageJsonPath = path.join( packagePath, 'package.json' );
+		const packageJson = getPackageJson( packagePath );
 
-		fs.outputJsonSync( pgkJsonPath, { ...pkgJson, version }, { replacer: null, spaces: 2 } );
+		fs.outputJsonSync( packageJsonPath, { ...packageJson, version }, { replacer: null, spaces: 2 } );
 	}
 };
 
-function getRandomPackageName( packagesDirectory, cwd ) {
+function getRandomPackageJson( packagesDirectory, cwd ) {
 	const globs = packagesDirectory ? packagesDirectory + '/*' : './';
 	const packagesPaths = globSync( globs, { cwd, absolute: true } );
 	const randomPackagePath = packagesPaths[ Math.floor( Math.random() * packagesPaths.length ) ];
-	return getPackageJson( randomPackagePath ).name;
+	return getPackageJson( randomPackagePath );
 }
 
-function checkVersionGtOldVersion( newVersion, oldVersion ) {
+function checkVersionGreatherThanOldVersion( newVersion, oldVersion ) {
 	if ( newVersion.match( /^0\.0\.0-.*$/ ) ) {
 		return;
 	}
