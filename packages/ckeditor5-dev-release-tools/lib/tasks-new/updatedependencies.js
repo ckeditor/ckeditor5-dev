@@ -7,6 +7,7 @@
 
 const fs = require( 'fs-extra' );
 const { globSync } = require( 'glob' );
+const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * The purpose of this script is to update all eligible dependencies to a version specified in the `options.version`. The following packages
@@ -25,7 +26,9 @@ const { globSync } = require( 'glob' );
  * @param {String} [options.cwd] Current working directory from which all paths will be resolved.
  */
 module.exports = function updateDependencies( options ) {
-	console.log( 'Task: updateDependencies()' );
+	const log = logger();
+
+	log.info( 'Task: updateDependencies()' );
 
 	const {
 		version,
@@ -51,7 +54,7 @@ module.exports = function updateDependencies( options ) {
 	const pkgJsonPaths = globSync( globPatterns, globOptions );
 
 	for ( const pkgJsonPath of pkgJsonPaths ) {
-		console.log( `Updating dependencies in "${ pkgJsonPath }".` );
+		log.info( `Updating dependencies in "${ pkgJsonPath }".` );
 
 		const pkgJson = fs.readJsonSync( pkgJsonPath );
 

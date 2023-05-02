@@ -8,7 +8,7 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const chalk = require( 'chalk' );
-const glob = require( 'glob' );
+const { globSync } = require( 'glob' );
 const mkdirp = require( 'mkdirp' );
 const semver = require( 'semver' );
 const Table = require( 'cli-table' );
@@ -466,7 +466,7 @@ module.exports = async function releaseSubRepositories( options ) {
 				//
 				// Example: for entry 'src', the following braced section would expand into 'src' and 'src/**' patterns, both evaluated in
 				// one `glob` call.
-				const numberOfMatches = glob.sync( entry + '{,/**}', globOptions ).length;
+				const numberOfMatches = globSync( entry + '{,/**}', globOptions ).length;
 
 				return result.set( entry, numberOfMatches );
 			}, new Map() );
@@ -695,7 +695,7 @@ module.exports = async function releaseSubRepositories( options ) {
 			};
 
 			for ( const globPattern of customReleasesFilesForPackage ) {
-				for ( const file of glob.sync( globPattern, globOptions ) ) {
+				for ( const file of globSync( globPattern, globOptions ) ) {
 					promise = promise.then( () => copyFile( path.join( repositoryPath, file ), path.join( tmpDir, file ) ) );
 				}
 			}
