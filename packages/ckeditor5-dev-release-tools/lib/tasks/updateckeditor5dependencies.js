@@ -10,7 +10,7 @@ const path = require( 'path' );
 const readline = require( 'readline' );
 const { execSync } = require( 'child_process' );
 const chalk = require( 'chalk' );
-const { globSync } = require( 'glob' );
+const glob = require( 'glob' );
 const { diffLines: diff } = require( 'diff' );
 
 // The pattern defines CKEditor 5 dependencies.
@@ -142,7 +142,7 @@ module.exports = function updateCKEditor5Dependencies( options ) {
  * @returns {UpdateResult}
  */
 function updatePackagesInDirectory( version, packagesDirectory, dryRun ) {
-	const packageJsonArray = globSync( '*/package.json', {
+	const packageJsonArray = glob.sync( '*/package.json', {
 		cwd: packagesDirectory,
 		absolute: true
 	} );

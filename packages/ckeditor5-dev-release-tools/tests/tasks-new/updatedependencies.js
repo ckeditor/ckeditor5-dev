@@ -50,8 +50,9 @@ describe( 'dev-release-tools/tasks', () => {
 		} );
 
 		afterEach( () => {
-			sandbox.restore();
+			mockery.deregisterAll();
 			mockery.disable();
+			sandbox.restore();
 		} );
 
 		describe( 'preparing options', () => {

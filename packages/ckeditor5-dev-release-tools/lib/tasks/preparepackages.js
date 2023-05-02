@@ -10,7 +10,7 @@
 const path = require( 'path' );
 const fs = require( 'fs-extra' );
 const chalk = require( 'chalk' );
-const { glob } = require( 'glob' );
+const glob = require( 'glob' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 const { getLastFromChangelog } = require( '../utils/versions' );
 const executeOnPackages = require( '../utils/executeonpackages' );
@@ -187,7 +187,11 @@ function preparePackagesToBeReleased( packages, npmScriptsToRemove ) {
 		} );
 
 		// Find all TypeScript sources...
-		const typescriptFiles = await glob( '**/*.ts', { cwd: packagePath } );
+		const typescriptFiles = await new Promise( ( resolve, reject ) => {
+			glob( '**/*.ts', { cwd: packagePath }, ( err, files ) => {
+				return err ? reject( err ) : resolve( files );
+			} );
+		} );
 
 		logInfo( chalk.grey( 'Removing TypeScript sources...' ), { indent: 2 } );
 
