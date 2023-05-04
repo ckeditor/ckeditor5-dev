@@ -61,6 +61,11 @@ module.exports = function executeInParallel( options ) {
 		.catch( err => {
 			counter.finish( { emoji: '❌' } );
 
+			// `err` can be `undefined` if a process was aborted.
+			if ( !err ) {
+				return Promise.resolve();
+			}
+
 			return Promise.reject( err );
 		} )
 		.finally( () => {

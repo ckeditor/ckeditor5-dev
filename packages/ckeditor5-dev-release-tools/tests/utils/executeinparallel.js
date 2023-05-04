@@ -170,42 +170,24 @@ describe( 'dev-release-tools/utils', () => {
 			await promise;
 		} );
 
-		it( 'should reject the promise if a worker finished with a non-zero exit code (first worker)', async () => {
+		it( 'should resolve the promise if a worker finished (aborted) with a non-zero exit code (first worker)', async () => {
 			const promise = executeInParallel( defaultOptions );
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
 			getExitCallback( firstWorker )( 1 );
 			getExitCallback( secondWorker )( 0 );
 
-			return promise
-				.then(
-					() => {
-						throw new Error( 'Expected to be rejected.' );
-					},
-					err => {
-						// Due to non-zero exit code.
-						expect( err ).to.equal( undefined );
-					}
-				);
+			await promise;
 		} );
 
-		it( 'should reject the promise if a worker finished with a non-zero exit code (second worker)', async () => {
+		it( 'should resolve the promise if a worker finished (aborted) with a non-zero exit code (second worker)', async () => {
 			const promise = executeInParallel( defaultOptions );
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
 			getExitCallback( firstWorker )( 0 );
 			getExitCallback( secondWorker )( 1 );
 
-			return promise
-				.then(
-					() => {
-						throw new Error( 'Expected to be rejected.' );
-					},
-					err => {
-						// Due to non-zero exit code.
-						expect( err ).to.equal( undefined );
-					}
-				);
+			await promise;
 		} );
 
 		it( 'should reject the promise if a worker emitted an error (first worker)', () => {
@@ -307,18 +289,16 @@ describe( 'dev-release-tools/utils', () => {
 		it( 'should remove the temporary module if the promise rejected', () => {
 			const promise = executeInParallel( defaultOptions );
 			const [ firstWorker ] = WorkerMock.instances;
+			const error = new Error( 'Example error from a worker.' );
 
-			getExitCallback( firstWorker )( 1 );
+			getErrorCallback( firstWorker )( error );
 
 			return promise
 				.then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
-					err => {
-						// Due to non-zero exit code.
-						expect( err ).to.equal( undefined );
-
+					() => {
 						expect( stubs.fs.unlinkSync.callCount ).to.equal( 1 );
 						expect( stubs.fs.unlinkSync.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.js' );
 					}
@@ -446,16 +426,7 @@ describe( 'dev-release-tools/utils', () => {
 
 			getExitCallback( firstWorker )( 1 );
 
-			await promise
-				.then(
-					() => {
-						throw new Error( 'Expected to be rejected.' );
-					},
-					err => {
-						// Due to non-zero exit code.
-						expect( err ).to.equal( undefined );
-					}
-				);
+			await promise;
 
 			expect( stubs.spinnerStub.finish.callCount ).to.equal( 1 );
 			expect( stubs.spinnerStub.finish.firstCall.args[ 0 ] ).to.be.an( 'object' );
