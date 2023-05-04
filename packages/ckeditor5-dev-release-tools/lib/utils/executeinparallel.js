@@ -25,12 +25,12 @@ const WORKER_SCRIPT = path.join( __dirname, 'parallelworker.js' );
  *
  * @see https://nodejs.org/api/worker_threads.html
  * @param {Object} options
- * @param {String} options.packagesDirectory
- * @param {String} options.processDescription
- * @param {Function} options.callback
- * @param {AbortSignal} options.signal
- * @param {String} [options.cwd=process.cwd()]
- * @param {Number} [options.concurrency=require( 'os' ).cpus().length / 2]
+ * @param {String} options.packagesDirectory Relative path to a location of packages to execute a task.
+ * @param {String} options.processDescription Description of the task displayed on a screen.
+ * @param {Function} options.taskToExecute A callback that is executed on all found packages. It receives an absolute path to a package as an argument. It can be synchronous or may return a promise.
+ * @param {AbortSignal} options.signal Signal to abort the asynchronous process.
+ * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
+ * @param {Number} [options.concurrency=require( 'os' ).cpus().length / 2] Number of CPUs that will execute the task.
  * @returns {Promise}
  */
 module.exports = function executeInParallel( options ) {
