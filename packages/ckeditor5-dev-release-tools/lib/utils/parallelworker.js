@@ -5,6 +5,8 @@
 
 'use strict';
 
+// This file is covered by the "executeInParallel() - integration" test cases.
+
 // Required due to top-level await.
 ( async () => {
 	/**
