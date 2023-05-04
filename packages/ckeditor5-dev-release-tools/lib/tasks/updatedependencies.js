@@ -21,10 +21,13 @@ const normalizePath = require( '../utils/normalizepath' );
  * callback returns a truthy value for a given dependency, its version will be updated.
  *
  * @param {Object} options
- * @param {String} options.version Target version to which all of the eligible dependencies will be updated.
- * @param {String} options.shouldUpdateVersionCallback Callback function that decides whether to update a version for a dependency.
- * @param {String} [options.packagesDirectory] Relative path to a location of packages to update their dependencies.
- * @param {String} [options.cwd] Current working directory from which all paths will be resolved.
+ * @param {String} options.version Target version or a range version to which all eligible dependencies will be updated.
+ * Examples: `1.0.0`, `^1.0.0`, etc.
+ * @param {Function} options.shouldUpdateVersionCallback Callback function that decides whether to update a version for a dependency.
+ * It receives a package name as an argument and should return a boolean value.
+ * @param {String} [options.packagesDirectory] Relative path to a location of packages to update their dependencies. If not specified,
+ * only the root package is checked.
+ * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  */
 module.exports = function updateDependencies( options ) {
 	const log = logger();
@@ -59,9 +62,9 @@ module.exports = function updateDependencies( options ) {
 
 		const pkgJson = fs.readJsonSync( pkgJsonPath );
 
-		updateVersion( pkgJson.dependencies, version, shouldUpdateVersionCallback );
-		updateVersion( pkgJson.devDependencies, version, shouldUpdateVersionCallback );
-		updateVersion( pkgJson.peerDependencies, version, shouldUpdateVersionCallback );
+		updateVersion( version, shouldUpdateVersionCallback, pkgJson.dependencies );
+		updateVersion( version, shouldUpdateVersionCallback, pkgJson.devDependencies );
+		updateVersion( version, shouldUpdateVersionCallback, pkgJson.peerDependencies );
 
 		fs.writeJsonSync( pkgJsonPath, pkgJson, { spaces: 2 } );
 	}
@@ -70,18 +73,18 @@ module.exports = function updateDependencies( options ) {
 /**
  * Updates the version for each eligible dependency.
  *
- * @param {Object} object Object containing dependencies to update, where the key is a package name and the value is its version.
- * @param {String} version Target version to which all of the eligible dependencies will be updated.
- * @param {Function} callback Callback function that decides whether to update a version for a dependency.
+ * @param {String} version
+ * @param {Function} callback
+ * @param {Object} [dependencies]
  */
-function updateVersion( object, version, callback ) {
-	if ( !object ) {
+function updateVersion( version, callback, dependencies ) {
+	if ( !dependencies ) {
 		return;
 	}
 
-	for ( const packageName of Object.keys( object ) ) {
+	for ( const packageName of Object.keys( dependencies ) ) {
 		if ( callback( packageName ) ) {
-			object[ packageName ] = version;
+			dependencies[ packageName ] = version;
 		}
 	}
 }
