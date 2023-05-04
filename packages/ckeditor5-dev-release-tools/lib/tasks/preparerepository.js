@@ -8,7 +8,7 @@
 const upath = require( 'upath' );
 const fs = require( 'fs-extra' );
 
-const pkgJsonTemplatePath = upath.join( __dirname, 'templates', 'release-package.json' );
+const pkgJsonTemplatePath = upath.join( __dirname, '..', 'templates', 'release-package.json' );
 
 /**
  * @param {Object} options
