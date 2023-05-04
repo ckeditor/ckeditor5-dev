@@ -46,7 +46,7 @@ describe( 'dev-release-tools/tasks', () => {
 			mockery.registerMock( 'glob', stubs.glob );
 			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', stubs.devUtils );
 
-			updateDependencies = require( '../../lib/tasks-new/updatedependencies' );
+			updateDependencies = require( '../../lib/tasks/updatedependencies' );
 		} );
 
 		afterEach( () => {
