@@ -18,9 +18,6 @@
 		await callback( packagePath );
 
 		// To increase the status log.
-		parentPort.postMessage( 'done:package:' + packagePath );
+		parentPort.postMessage( 'done:package' );
 	}
-
-	// Need to figure out if needed.
-	parentPort.postMessage( 'done' );
 } )();
