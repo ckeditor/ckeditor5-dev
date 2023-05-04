@@ -13,42 +13,51 @@ const pkgJsonTemplatePath = upath.join( __dirname, '..', 'templates', 'release-p
 /**
  * @param {Object} options
  * @param {String} [options.cwd] Root of the repository to prepare. `process.cwd()` by default.
- * @param {String} options.packagesDir Path to directory containing packages.
- * @param {String} options.outputDir Path to the output directory of this script.
- * @param {Array<String>} options.rootFilesToCopy Array containing list of files or directories to copy.
+ * @param {String} [options.packagesDir] Path to directory containing packages. `packages` by default.
+ * @param {String} [options.outputDir] Path to the output directory of this script. `release` by default.
  * @param {Object} options.pkgJsonContent Object containing values to use in the created package json file.
+ * @param {Array<String>} options.rootFilesToCopy Array containing list of files or directories to copy.
+ * @param {Array<String>} [options.packagesToCopy] Optional argument specifying packages to copy from the `packagesDir`.
+ * This can contain nested package paths. If left empty, all non-nested packages from the `packagesDir` will be processed.
  */
-module.exports = async function prepareRepository( options = {} ) {
-	const cwd = upath.toUnix( options.cwd || process.cwd() );
+module.exports = async function prepareRepository( options ) {
+	const {
+		cwd = process.cwd(),
+		packagesDir = 'packages',
+		outputDir = 'release',
+		pkgJsonContent,
+		rootFilesToCopy,
+		packagesToCopy
+	} = options;
 
-	const outputDir = upath.join( cwd, options.outputDir );
-	const packagesDir = upath.join( cwd, options.packagesDir );
-	const packagesOutputDir = upath.join( outputDir, options.packagesDir );
+	const outputDirPath = upath.join( cwd, outputDir );
+	const packagesDirPath = upath.join( cwd, packagesDir );
+	const packagesOutputDir = upath.join( outputDirPath, packagesDir );
 
 	await fs.ensureDir( packagesOutputDir );
 
 	// Creating root package.json file.
-	const pkgJsonOutputPath = upath.join( outputDir, 'package.json' );
+	const pkgJsonOutputPath = upath.join( outputDirPath, 'package.json' );
 	const pkgJsonTemplate = await fs.readJson( pkgJsonTemplatePath );
-	const pkgJsonContent = { ...pkgJsonTemplate, ...options.pkgJsonContent };
-	await fs.writeJSON( pkgJsonOutputPath, pkgJsonContent );
+	const pkgJsonNewContent = { ...pkgJsonTemplate, ...pkgJsonContent };
+	await fs.writeJson( pkgJsonOutputPath, pkgJsonNewContent, { spaces: 2, EOL: '\n' } );
 
 	// Copying root package files.
-	const copyRootItemsPromises = options.rootFilesToCopy.map( item => {
+	const copyRootItemsPromises = rootFilesToCopy.map( item => {
 		const itemPath = upath.join( cwd, item );
-		const itemOutputPath = upath.join( outputDir, item );
+		const itemOutputPath = upath.join( outputDirPath, item );
 
 		return fs.copy( itemPath, itemOutputPath );
 	} );
 
 	// Copying packages.
-	const packageNames = await fs.readdir( packagesDir );
+	const packageDirs = packagesToCopy || await fs.readdir( packagesDirPath );
 
-	const copyPackagesPromises = packageNames.map( packageName => {
-		const packageDir = upath.join( packagesDir, packageName );
-		const packageOutputDir = upath.join( packagesOutputDir, packageName );
-
-		return fs.copy( packageDir, packageOutputDir );
+	const copyPackagesPromises = packageDirs.map( packageDir => {
+		return fs.copy(
+			upath.join( packagesDirPath, packageDir ),
+			upath.join( packagesOutputDir, packageDir )
+		);
 	} );
 
 	// Waiting for all copy processes to end.
