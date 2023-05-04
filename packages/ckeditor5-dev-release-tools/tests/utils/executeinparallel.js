@@ -78,7 +78,7 @@ describe( 'dev-release-tools/utils', () => {
 		defaultOptions = {
 			packagesDirectory: 'my-packages',
 			processDescription: 'Just a test.',
-			callback: packagePath => console.log( 'pwd', packagePath ),
+			taskToExecute: packagePath => console.log( 'pwd', packagePath ),
 			signal: abortController.signal
 		};
 
@@ -98,7 +98,7 @@ describe( 'dev-release-tools/utils', () => {
 	} );
 
 	describe( 'executeInParallel()', () => {
-		it( 'should execute the specified `callback` on all packages found in the `packagesDirectory`', async () => {
+		it( 'should execute the specified `taskToExecute` on all packages found in the `packagesDirectory`', async () => {
 			const promise = executeInParallel( defaultOptions );
 
 			expect( stubs.glob.sync.callCount ).to.equal( 1 );

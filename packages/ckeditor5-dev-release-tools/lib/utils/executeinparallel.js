@@ -38,7 +38,7 @@ module.exports = function executeInParallel( options ) {
 		packagesDirectory,
 		processDescription,
 		signal,
-		callback,
+		taskToExecute,
 		cwd = process.cwd(),
 		concurrency = require( 'os' ).cpus().length / 2
 	} = options;
@@ -47,7 +47,7 @@ module.exports = function executeInParallel( options ) {
 	const packagesInThreads = getPackagesGroupedByThreads( packages, concurrency );
 
 	const callbackModule = path.posix.join( cwd, crypto.randomUUID() + '.js' );
-	fs.writeFileSync( callbackModule, `'use strict';\nmodule.exports = ${ callback };`, 'utf-8' );
+	fs.writeFileSync( callbackModule, `'use strict';\nmodule.exports = ${ taskToExecute };`, 'utf-8' );
 
 	const counter = tools.createSpinner( processDescription, { total: packages.length } );
 	counter.start();

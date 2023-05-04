@@ -54,7 +54,7 @@ describe( 'dev-release-tools/utils', () => {
 				packagesDirectory: 'packages',
 				processDescription: 'Checking ckeditor5-dev paths.',
 				signal: abortController.signal,
-				callback: async packagePath => {
+				taskToExecute: async packagePath => {
 					const fs = require( 'fs/promises' );
 					const path = require( 'path' );
 					const filePath = path.join( packagePath, 'executeinparallel-integration.log' );
@@ -91,7 +91,7 @@ describe( 'dev-release-tools/utils', () => {
 				packagesDirectory: 'packages',
 				processDescription: 'Checking ckeditor5-dev paths.',
 				signal: abortController.signal,
-				callback: packagePath => {
+				taskToExecute: packagePath => {
 					const fs = require( 'fs' );
 					const path = require( 'path' );
 					const filePath = path.join( packagePath, 'executeinparallel-integration.log' );
