@@ -8,6 +8,7 @@
 const fs = require( 'fs-extra' );
 const { globSync } = require( 'glob' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const normalizePath = require( '../utils/normalizepath' );
 
 /**
  * The purpose of this script is to update all eligible dependencies to a version specified in the `options.version`. The following packages
@@ -83,17 +84,4 @@ function updateVersion( object, version, callback ) {
 			object[ packageName ] = version;
 		}
 	}
-}
-
-/**
- * Normalizes the provided path by removing leading and trailing path separators and converting all backslashes to slashes.
- *
- * @param {String} path Path to normalize.
- * @returns {String}
- */
-function normalizePath( path ) {
-	return path
-		.split( /[/\\]/ )
-		.filter( Boolean )
-		.join( '/' );
 }
