@@ -25,7 +25,7 @@ module.exports = function updateVersions( { packagesDirectory, version, cwd = pr
 	const packagesGlobs = normalizedPackagesDir ? [ normalizedPackagesDir + '/*/package.json', 'package.json' ] : 'package.json';
 	const packagesPaths = globSync( packagesGlobs, { cwd, absolute: true } );
 
-	checkVersionGreatherThanOldVersion( version, getPackageJson( cwd ).version );
+	checkVersionGreaterThanOldVersion( version, getPackageJson( cwd ).version );
 	checkVersionIsAvailableInNpm( version, getRandomPackageJson( normalizedPackagesDir, cwd ).name );
 
 	for ( const packageJsonPath of packagesPaths ) {
@@ -51,7 +51,7 @@ function getRandomPackageJson( packagesDirectory, cwd ) {
  * @param {String} newVersion
  * @param {String} oldVersion
  */
-function checkVersionGreatherThanOldVersion( newVersion, oldVersion ) {
+function checkVersionGreaterThanOldVersion( newVersion, oldVersion ) {
 	if ( newVersion.match( /^0\.0\.0-.*$/ ) ) {
 		return;
 	}
