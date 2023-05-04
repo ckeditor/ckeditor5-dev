@@ -23,14 +23,19 @@ module.exports = {
 	 * @param {String} [options.cwd=process.cwd()]
 	 * @returns {String} The command output.
 	 */
-	shExec( command, options = { verbosity: 'info', cwd: process.cwd() } ) {
+	shExec( command, options = {} ) {
+		const {
+			verbosity = 'info',
+			cwd = process.cwd()
+		} = options;
+
 		const logger = require( './logger' );
-		const log = logger( options.verbosity );
+		const log = logger( verbosity );
 		const sh = require( 'shelljs' );
 
 		sh.config.silent = true;
 
-		const ret = sh.exec( command, { cwd: options.cwd } );
+		const ret = sh.exec( command, { cwd } );
 
 		const grey = chalk.grey;
 
