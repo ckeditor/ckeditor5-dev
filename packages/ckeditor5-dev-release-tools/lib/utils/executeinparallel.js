@@ -3,46 +3,114 @@
  * For licensing, see LICENSE.md.
  */
 
+/* eslint-env node */
+
 'use strict';
 
-const path = require( 'path' );
-const { Worker } = require( 'worker_threads' );
 const crypto = require( 'crypto' );
-const fs = require( 'fs-extra' );
+const path = require( 'path' );
+const fs = require( 'fs' );
+const { Worker } = require( 'worker_threads' );
 const glob = require( 'glob' );
+const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 const WORKER_SCRIPT = path.join( __dirname, 'parallelworker.js' );
 
 /**
+ * This util allows executing a specified task in parallel using Workers. It can be helpful when executing a not resource-consuming
+ * task in all packages specified in a path.
+ *
+ * If the callback loads dependencies, they must be specified directly in the function due to the worker's limitations.
+ * Functions cannot be passed to workers. Hence, we store the callback as a Node.js file loaded by workers.
+ *
+ * @see https://nodejs.org/api/worker_threads.html
  * @param {Object} options
  * @param {String} options.packagesDirectory
- * @param {Function} options.callback
  * @param {String} options.processDescription
+ * @param {Function} options.callback
+ * @param {AbortSignal} options.signal
  * @param {String} [options.cwd=process.cwd()]
  * @param {Number} [options.concurrency=require( 'os' ).cpus().length / 2]
+ * @returns {Promise}
  */
-module.exports = async function executeInParallel( options ) {
+module.exports = function executeInParallel( options ) {
 	const {
-		cwd = process.cwd(),
 		packagesDirectory,
+		processDescription,
+		signal,
 		callback,
-		concurrency = require( 'os' ).cpus().length / 2,
-		processDescription
+		cwd = process.cwd(),
+		concurrency = require( 'os' ).cpus().length / 2
 	} = options;
 
-	// TODO: Create a fancy counter/spinner.
-	console.log( processDescription );
-
 	const packages = glob.sync( `${ packagesDirectory }/*/`, { cwd, absolute: true } );
+	const packagesInThreads = getPackagesGroupedByThreads( packages, concurrency );
 
-	const callbackModule = path.join( __dirname, crypto.randomUUID() + '.js' );
-	fs.writeFileSync( callbackModule, `'use-strict';\nmodule.exports = ${ callback };`, 'utf-8' );
+	const callbackModule = path.posix.join( cwd, crypto.randomUUID() + '.js' );
+	fs.writeFileSync( callbackModule, `'use strict';\nmodule.exports = ${ callback };`, 'utf-8' );
 
-	// TODO: Detect CTRL+C to remove the created file.
+	const counter = tools.createSpinner( processDescription, { total: packages.length } );
+	counter.start();
 
-	// To avoid having packages with a common prefix in a single thread, let's use a loop for assigning/
-	// packages to threads.
-	const packagesInThreads = packages.reduce( ( collection, packageItem, index ) => {
+	const workers = packagesInThreads.map( packages => createWorker( signal, counter, { packages, callbackModule } ) );
+
+	return Promise.all( workers )
+		.then( () => {
+			counter.finish( { emoji: '✔️ ' } );
+		} )
+		.catch( err => {
+			counter.finish( { emoji: '❌' } );
+
+			return Promise.reject( err );
+		} )
+		.finally( () => {
+			fs.unlinkSync( callbackModule );
+		} );
+};
+
+/**
+ * @param {AbortSignal} signal
+ * @param {CKEditor5Spinner} counter
+ * @param {Object} workerData
+ * @returns {Promise}
+ */
+function createWorker( signal, counter, workerData ) {
+	return new Promise( ( resolve, reject ) => {
+		const worker = new Worker( WORKER_SCRIPT, { workerData } );
+
+		signal.addEventListener( 'abort', () => {
+			worker.terminate();
+		}, { once: true } );
+
+		worker.on( 'error', err => {
+			reject( err );
+		} );
+
+		worker.on( 'message', msg => {
+			if ( msg === 'done:package' ) {
+				counter.increase();
+			}
+		} );
+
+		worker.on( 'exit', code => {
+			return code ? reject() : resolve();
+		} );
+
+		return worker;
+	} );
+}
+
+/**
+ * Split the collection of packages into smaller chunks to process a task using threads.
+ *
+ * To avoid having packages with a common prefix in a single thread, use a loop for attaching packages to threads.
+ *
+ * @param {Array.<String>} packages An array of absolute paths to packages.
+ * @param {Number} concurrency A number of threads.
+ * @returns {Array.<Array.<String>>}
+ */
+function getPackagesGroupedByThreads( packages, concurrency ) {
+	return packages.reduce( ( collection, packageItem, index ) => {
 		const arrayIndex = index % concurrency;
 
 		if ( !collection[ arrayIndex ] ) {
@@ -53,34 +121,4 @@ module.exports = async function executeInParallel( options ) {
 
 		return collection;
 	}, [] );
-
-	const workers = packagesInThreads.map( packages => createWorker( { packages, callbackModule } ) );
-
-	return Promise.all( workers )
-		.then( () => {
-			console.log( 'Done' );
-		} )
-		.finally( () => {
-			fs.removeSync( callbackModule );
-		} );
-};
-
-function createWorker( workerData ) {
-	return new Promise( ( resolve, reject ) => {
-		const worker = new Worker( WORKER_SCRIPT, { workerData } );
-
-		worker.on( 'error', err => {
-			console.log( err );
-			reject( err );
-		} );
-		worker.on( 'message', msg => {
-			console.log( msg );
-		} );
-		worker.on( 'exit', code => {
-			console.log( 'exit', { code } );
-			resolve();
-		} );
-
-		return worker;
-	} );
 }
