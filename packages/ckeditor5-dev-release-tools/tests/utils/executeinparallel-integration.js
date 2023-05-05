@@ -82,7 +82,7 @@ describe( 'dev-release-tools/utils', () => {
 			}
 		} );
 
-		it( 'should store current time in all found packages (callback returns a promise)', async () => {
+		it( 'should store current time in all found packages (callback is a synchronous function)', async () => {
 			const timeBefore = new Date().getTime();
 
 			await executeInParallel( {
