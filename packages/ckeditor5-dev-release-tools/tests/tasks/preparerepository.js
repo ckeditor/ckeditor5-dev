@@ -100,9 +100,19 @@ describe( 'dev-release-tools/tasks', () => {
 			expect( stubs.fs.ensureDir.getCall( 0 ).args[ 0 ] ).to.equal( 'current/working/dir/release/packages' );
 		} );
 
+		it( 'should normalize Windows slashes `\\` from "process.cwd()"', async () => {
+			stubs.fs.readdir.withArgs( 'windows/working/dir/packages' ).resolves( packages );
+			stubs.process.cwd.returns( 'windows\\working\\dir' );
+
+			await prepareRepository( options );
+
+			expect( stubs.fs.ensureDir.callCount ).to.equal( 1 );
+			expect( stubs.fs.ensureDir.getCall( 0 ).args.length ).to.equal( 1 );
+			expect( stubs.fs.ensureDir.getCall( 0 ).args[ 0 ] ).to.equal( 'windows/working/dir/release/packages' );
+		} );
+
 		it( 'should use the "cwd" option if provided instead of the default "process.cwd()" value', async () => {
 			stubs.fs.readdir.withArgs( 'custom/working/dir/packages' ).resolves( packages );
-
 			options.cwd = 'custom/working/dir';
 
 			await prepareRepository( options );
@@ -114,7 +124,6 @@ describe( 'dev-release-tools/tasks', () => {
 
 		it( 'should use the "packagesDir" option if provided instead of the default "packages" value', async () => {
 			stubs.fs.readdir.withArgs( 'current/working/dir/custom/packages/dir' ).resolves( packages );
-
 			options.packagesDir = 'custom/packages/dir';
 
 			await prepareRepository( options );
