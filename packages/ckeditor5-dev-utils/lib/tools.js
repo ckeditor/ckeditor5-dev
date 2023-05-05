@@ -18,18 +18,24 @@ module.exports = {
 	 *
 	 * @param {String} command The command to be executed.
 	 * @param {Object} options
-	 * @param {String} [options.verbosity='info'] Level of the verbosity. If set as 'info' both outputs (stdout and
+	 * @param {'info'|'warning'|'error'} [options.verbosity='info'] Level of the verbosity. If set as 'info' both outputs (stdout and
 	 * stderr) will be logged. If set as 'error', only stderr output will be logged.
+	 * @param {String} [options.cwd=process.cwd()]
 	 * @returns {String} The command output.
 	 */
-	shExec( command, options = { verbosity: 'info' } ) {
+	shExec( command, options = {} ) {
+		const {
+			verbosity = 'info',
+			cwd = process.cwd()
+		} = options;
+
 		const logger = require( './logger' );
-		const log = logger( options.verbosity );
+		const log = logger( verbosity );
 		const sh = require( 'shelljs' );
 
 		sh.config.silent = true;
 
-		const ret = sh.exec( command );
+		const ret = sh.exec( command, { cwd } );
 
 		const grey = chalk.grey;
 

@@ -16,7 +16,10 @@ const updateDependenciesVersions = require( './utils/updatedependenciesversions'
 const { getLastFromChangelog, getCurrent, getLastTagFromGit } = require( './utils/versions' );
 const { getChangesForVersion, getChangelog, saveChangelog } = require( './utils/changelog' );
 
+const executeInParallel = require( './utils/executeinparallel' );
+
 module.exports = {
+	executeInParallel,
 	releaseSubRepositories,
 	preparePackages,
 	bumpVersions,

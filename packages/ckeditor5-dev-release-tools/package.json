@@ -23,7 +23,8 @@
     "minimatch": "^3.0.4",
     "mkdirp": "^1.0.4",
     "parse-github-url": "^1.0.2",
-    "semver": "^7.3.2"
+    "semver": "^7.3.2",
+    "upath": "^2.0.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",
