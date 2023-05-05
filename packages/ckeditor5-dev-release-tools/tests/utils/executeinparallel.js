@@ -40,12 +40,6 @@ describe( 'dev-release-tools/utils', () => {
 			crypto: {
 				randomUUID: sinon.stub().returns( 'uuid-4' )
 			},
-			path: {
-				posix: {
-					join: sinon.stub().callsFake( ( ...chunks ) => chunks.join( '/' ) )
-				},
-				join: sinon.stub().callsFake( ( ...chunks ) => stubs.path.posix.join( ...chunks ) )
-			},
 			fs: {
 				writeFileSync: sinon.stub(),
 				unlinkSync: sinon.stub()
@@ -54,7 +48,7 @@ describe( 'dev-release-tools/utils', () => {
 				Worker: WorkerMock
 			},
 			glob: {
-				sync: sinon.stub().returns( [
+				globSync: sinon.stub().returns( [
 					'/home/ckeditor/my-packages/package-01',
 					'/home/ckeditor/my-packages/package-02',
 					'/home/ckeditor/my-packages/package-03',
@@ -86,7 +80,6 @@ describe( 'dev-release-tools/utils', () => {
 			'@ckeditor/ckeditor5-dev-utils': stubs.devUtils,
 			os: stubs.os,
 			crypto: stubs.crypto,
-			path: stubs.path,
 			fs: stubs.fs,
 			worker_threads: stubs.worker_threads,
 			glob: stubs.glob
@@ -101,11 +94,11 @@ describe( 'dev-release-tools/utils', () => {
 		it( 'should execute the specified `taskToExecute` on all packages found in the `packagesDirectory`', async () => {
 			const promise = executeInParallel( defaultOptions );
 
-			expect( stubs.glob.sync.callCount ).to.equal( 1 );
-			expect( stubs.glob.sync.firstCall.args[ 0 ] ).to.equal( 'my-packages/*/' );
-			expect( stubs.glob.sync.firstCall.args[ 1 ] ).to.be.an( 'object' );
-			expect( stubs.glob.sync.firstCall.args[ 1 ] ).to.have.property( 'cwd', '/home/ckeditor' );
-			expect( stubs.glob.sync.firstCall.args[ 1 ] ).to.have.property( 'absolute', true );
+			expect( stubs.glob.globSync.callCount ).to.equal( 1 );
+			expect( stubs.glob.globSync.firstCall.args[ 0 ] ).to.equal( 'my-packages/*/' );
+			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.be.an( 'object' );
+			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.have.property( 'cwd', '/home/ckeditor' );
+			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.have.property( 'absolute', true );
 
 			expect( stubs.fs.writeFileSync.callCount ).to.equal( 1 );
 			expect( stubs.fs.writeFileSync.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.js' );
@@ -140,12 +133,81 @@ describe( 'dev-release-tools/utils', () => {
 
 			const promise = executeInParallel( options );
 
-			expect( stubs.glob.sync.callCount ).to.equal( 1 );
-			expect( stubs.glob.sync.firstCall.args[ 0 ] ).to.equal( 'my-packages/*/' );
-			expect( stubs.glob.sync.firstCall.args[ 1 ] ).to.be.an( 'object' );
-			expect( stubs.glob.sync.firstCall.args[ 1 ] ).to.have.property( 'cwd', '/custom/cwd' );
+			expect( stubs.glob.globSync.callCount ).to.equal( 1 );
+			expect( stubs.glob.globSync.firstCall.args[ 0 ] ).to.equal( 'my-packages/*/' );
+			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.be.an( 'object' );
+			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.have.property( 'cwd', '/custom/cwd' );
 
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
+
+			// Workers did not emit an error.
+			getExitCallback( firstWorker )( 0 );
+			getExitCallback( secondWorker )( 0 );
+
+			await promise;
+		} );
+
+		it( 'should normalize the current working directory to unix-style (default value, Windows path)', async () => {
+			stubs.process.cwd.returns( 'C:\\Users\\ckeditor' );
+			const promise = executeInParallel( defaultOptions );
+
+			expect( stubs.glob.globSync.callCount ).to.equal( 1 );
+			expect( stubs.glob.globSync.firstCall.args[ 0 ] ).to.equal( 'my-packages/*/' );
+			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.be.an( 'object' );
+			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.have.property( 'cwd', 'C:/Users/ckeditor' );
+
+			const [ firstWorker, secondWorker ] = WorkerMock.instances;
+
+			// Workers did not emit an error.
+			getExitCallback( firstWorker )( 0 );
+			getExitCallback( secondWorker )( 0 );
+
+			await promise;
+		} );
+
+		it( 'should normalize the current working directory to unix-style (`options.cwd`, Windows path)', async () => {
+			const options = Object.assign( {}, defaultOptions, {
+				cwd: 'C:\\Users\\ckeditor'
+			} );
+
+			const promise = executeInParallel( options );
+
+			expect( stubs.glob.globSync.callCount ).to.equal( 1 );
+			expect( stubs.glob.globSync.firstCall.args[ 0 ] ).to.equal( 'my-packages/*/' );
+			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.be.an( 'object' );
+			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.have.property( 'cwd', 'C:/Users/ckeditor' );
+
+			const [ firstWorker, secondWorker ] = WorkerMock.instances;
+
+			// Workers did not emit an error.
+			getExitCallback( firstWorker )( 0 );
+			getExitCallback( secondWorker )( 0 );
+
+			await promise;
+		} );
+
+		it( 'should create the temporary module properly when using Windows-style paths', async () => {
+			stubs.process.cwd.returns( 'C:\\Users\\ckeditor' );
+			const promise = executeInParallel( defaultOptions );
+
+			expect( stubs.fs.writeFileSync.callCount ).to.equal( 1 );
+			expect( stubs.fs.writeFileSync.firstCall.args[ 0 ] ).to.equal( 'C:/Users/ckeditor/uuid-4.js' );
+			expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.equal(
+				'\'use strict\';\nmodule.exports = packagePath => console.log( \'pwd\', packagePath );'
+			);
+
+			// By default the helper uses a half of available CPUs.
+			expect( WorkerMock.instances ).to.lengthOf( 2 );
+
+			const [ firstWorker, secondWorker ] = WorkerMock.instances;
+
+			expect( firstWorker.workerData ).to.be.an( 'object' );
+			expect( firstWorker.workerData ).to.have.property( 'callbackModule', 'C:/Users/ckeditor/uuid-4.js' );
+			expect( firstWorker.workerData ).to.have.property( 'packages' );
+
+			expect( secondWorker.workerData ).to.be.an( 'object' );
+			expect( secondWorker.workerData ).to.have.property( 'callbackModule', 'C:/Users/ckeditor/uuid-4.js' );
+			expect( secondWorker.workerData ).to.have.property( 'packages' );
 
 			// Workers did not emit an error.
 			getExitCallback( firstWorker )( 0 );

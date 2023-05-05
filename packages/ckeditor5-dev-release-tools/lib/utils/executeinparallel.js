@@ -8,13 +8,13 @@
 'use strict';
 
 const crypto = require( 'crypto' );
-const path = require( 'path' );
+const upath = require( 'upath' );
 const fs = require( 'fs' );
 const { Worker } = require( 'worker_threads' );
-const glob = require( 'glob' );
+const { globSync } = require( 'glob' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
-const WORKER_SCRIPT = path.join( __dirname, 'parallelworker.js' );
+const WORKER_SCRIPT = upath.join( __dirname, 'parallelworker.js' );
 
 /**
  * This util allows executing a specified task in parallel using Workers. It can be helpful when executing a not resource-consuming
@@ -44,10 +44,14 @@ module.exports = function executeInParallel( options ) {
 		concurrency = require( 'os' ).cpus().length / 2
 	} = options;
 
-	const packages = glob.sync( `${ packagesDirectory }/*/`, { cwd, absolute: true } );
+	const normalizedCwd = upath.toUnix( cwd );
+	const packages = globSync( `${ packagesDirectory }/*/`, {
+		cwd: normalizedCwd,
+		absolute: true
+	} );
 	const packagesInThreads = getPackagesGroupedByThreads( packages, concurrency );
 
-	const callbackModule = path.posix.join( cwd, crypto.randomUUID() + '.js' );
+	const callbackModule = upath.join( cwd, crypto.randomUUID() + '.js' );
 	fs.writeFileSync( callbackModule, `'use strict';\nmodule.exports = ${ taskToExecute };`, 'utf-8' );
 
 	const counter = tools.createSpinner( processDescription, { total: packages.length } );
