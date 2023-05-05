@@ -8,9 +8,9 @@
 const { globSync } = require( 'glob' );
 const fs = require( 'fs-extra' );
 const semver = require( 'semver' );
+const { normalizeTrim, join, toUnix } = require( 'upath' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 const getPackageJson = require( '../utils/getpackagejson' );
-const normalizePath = require( '../utils/normalizepath' );
 
 /**
  * Updates version of root package and subpackages if `packagesDirectory` path is provided.
@@ -21,15 +21,17 @@ const normalizePath = require( '../utils/normalizepath' );
  * @param {String} [options.cwd]
  */
 module.exports = function updateVersions( { packagesDirectory, version, cwd = process.cwd() } ) {
-	const normalizedPackagesDir = normalizePath( packagesDirectory );
-	const packagesGlobs = normalizedPackagesDir ? [ normalizedPackagesDir + '/*/package.json', 'package.json' ] : 'package.json';
-	const packagesPaths = globSync( packagesGlobs, { cwd, absolute: true } );
+	const normCwd = toUnix( cwd );
+	const normPackagesDir = packagesDirectory ? normalizeTrim( packagesDirectory ) : packagesDirectory;
+	const packagesGlobs = normPackagesDir ? [ normPackagesDir + '/*', './' ] : './';
+	const packagesPaths = globSync( packagesGlobs, { cwd: normCwd, absolute: true } );
 
-	checkVersionGreaterThanOldVersion( version, getPackageJson( cwd ).version );
-	checkVersionIsAvailableInNpm( version, getRandomPackageJson( normalizedPackagesDir, cwd ).name );
+	checkVersionGreaterThanOldVersion( version, getPackageJson( normCwd ).version );
+	checkVersionIsAvailableInNpm( version, getRandomPackageJson( normPackagesDir, normCwd ).name );
 
-	for ( const packageJsonPath of packagesPaths ) {
-		const packageJson = fs.readJsonSync( packageJsonPath );
+	for ( const packagePath of packagesPaths ) {
+		const packageJsonPath = join( packagePath, 'package.json' );
+		const packageJson = getPackageJson( packagePath );
 
 		fs.outputJsonSync( packageJsonPath, { ...packageJson, version }, { spaces: 2 } );
 	}
@@ -52,12 +54,12 @@ function getRandomPackageJson( packagesDirectory, cwd ) {
  * @param {String} oldVersion
  */
 function checkVersionGreaterThanOldVersion( newVersion, oldVersion ) {
-	if ( newVersion.match( /^0\.0\.0-.*$/ ) ) {
-		return;
+	if ( !semver.valid( newVersion ) ) {
+		throw new Error( `Provided version ${ newVersion } must be a valid semver version.` );
 	}
 
 	if ( !semver.gt( newVersion, oldVersion ) ) {
-		throw new Error( `Provided version ${ newVersion } must be greater than ${ oldVersion } or match 0.0.0-<...>.` );
+		throw new Error( `Provided version ${ newVersion } must be greater than ${ oldVersion }.` );
 	}
 }
 

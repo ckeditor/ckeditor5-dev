@@ -10,7 +10,7 @@ const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-release-tools/release', () => {
-	let updateVersions, sandbox, outputJsonSyncStub, getPackageJsonStub, syncStub, shExecStub, gtStub, normalizePathStub;
+	let updateVersions, sandbox, outputJsonSyncStub, getPackageJsonStub, syncStub, shExecStub, gtStub, validStub;
 
 	describe( 'updateVersions()', () => {
 		beforeEach( () => {
@@ -18,18 +18,17 @@ describe( 'dev-release-tools/release', () => {
 
 			outputJsonSyncStub = sandbox.stub();
 			getPackageJsonStub = sandbox.stub().returns( { version: '1.0.0' } );
-			normalizePathStub = sandbox.stub().callsFake( value => value );
 			syncStub = sandbox.stub().returns( [ '/ckeditor5-dev' ] );
 			shExecStub = sandbox.stub().throws( new Error( 'is not in this registry' ) );
 			gtStub = sandbox.stub().returns( true );
+			validStub = sandbox.stub().returns( true );
 
 			updateVersions = proxyquire( '../../lib/release/updateversions.js', {
 				'fs-extra': { outputJsonSync: outputJsonSyncStub, readJsonSync: getPackageJsonStub },
 				'../utils/getpackagejson': getPackageJsonStub,
-				'../utils/normalizepath': normalizePathStub,
 				'glob': { globSync: syncStub },
 				'@ckeditor/ckeditor5-dev-utils': { tools: { shExec: shExecStub } },
-				'semver': { gt: gtStub }
+				'semver': { gt: gtStub, valid: validStub }
 			} );
 		} );
 
@@ -47,7 +46,7 @@ describe( 'dev-release-tools/release', () => {
 
 			updateVersions( { version: '1.0.1', packagesDirectory: 'packages' } );
 
-			expect( syncStub.firstCall.args[ 0 ] ).to.deep.equal( [ 'packages/*/package.json', 'package.json' ] );
+			expect( syncStub.firstCall.args[ 0 ] ).to.deep.equal( [ 'packages/*', './' ] );
 			expect( outputJsonSyncStub.callCount ).to.equal( 4 );
 			expect( outputJsonSyncStub.firstCall.args[ 0 ] ).to.contain( 'package1' );
 			expect( outputJsonSyncStub.firstCall.args[ 1 ] ).to.deep.equal( { version: '1.0.1' } );
@@ -58,7 +57,7 @@ describe( 'dev-release-tools/release', () => {
 
 			updateVersions( { version: '1.0.1' } );
 
-			expect( syncStub.firstCall.args[ 0 ] ).to.equal( 'package.json' );
+			expect( syncStub.firstCall.args[ 0 ] ).to.equal( './' );
 			expect( outputJsonSyncStub.callCount ).to.equal( 1 );
 			expect( outputJsonSyncStub.firstCall.args[ 0 ] ).to.contain( 'ckeditor5-dev' );
 			expect( outputJsonSyncStub.firstCall.args[ 1 ] ).to.deep.equal( { version: '1.0.1' } );
@@ -96,7 +95,14 @@ describe( 'dev-release-tools/release', () => {
 			gtStub.returns( false );
 
 			expect( () => updateVersions( { version: '1.0.0' } ) )
-				.to.throw( Error, 'Provided version 1.0.0 must be greater than 1.0.0 or match 0.0.0-<...>' );
+				.to.throw( Error, 'Provided version 1.0.0 must be greater than 1.0.0.' );
+		} );
+
+		it( 'should throw when new version is not a valid semver version', () => {
+			validStub.returns( false );
+
+			expect( () => updateVersions( { version: '1.0.0' } ) )
+				.to.throw( Error, 'Provided version 1.0.0 must be a valid semver version.' );
 		} );
 
 		it( 'should pass cwd to globSync', () => {
@@ -115,14 +121,6 @@ describe( 'dev-release-tools/release', () => {
 			updateVersions( { version: '1.0.1' } );
 
 			expect( syncStub.secondCall.args[ 0 ] ).to.equal( './' );
-		} );
-
-		it( 'should call normalizePath on packagesDirectory and pass to globSync', () => {
-			normalizePathStub.returns( 'normalized-path' );
-
-			updateVersions( { version: '1.0.1' } );
-
-			expect( syncStub.firstCall.args[ 0 ][ 0 ] ).to.equal( 'normalized-path/*/package.json' );
 		} );
 	} );
 } );
