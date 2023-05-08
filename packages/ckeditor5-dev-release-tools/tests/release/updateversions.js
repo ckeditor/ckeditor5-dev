@@ -10,7 +10,7 @@ const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-release-tools/release', () => {
-	let updateVersions, sandbox, outputJsonSyncStub, getPackageJsonStub, syncStub, shExecStub, gtStub, validStub;
+	let updateVersions, sandbox, outputJsonSyncStub, getPackageJsonStub, syncStub, shExecStub, gtStub, validStub, readJsonSyncStub;
 
 	describe( 'updateVersions()', () => {
 		beforeEach( () => {
@@ -18,13 +18,14 @@ describe( 'dev-release-tools/release', () => {
 
 			outputJsonSyncStub = sandbox.stub();
 			getPackageJsonStub = sandbox.stub().returns( { version: '1.0.0' } );
+			readJsonSyncStub = sandbox.stub().returns( { version: '1.0.0' } );
 			syncStub = sandbox.stub().returns( [ '/ckeditor5-dev' ] );
 			shExecStub = sandbox.stub().throws( new Error( 'is not in this registry' ) );
 			gtStub = sandbox.stub().returns( true );
 			validStub = sandbox.stub().returns( true );
 
 			updateVersions = proxyquire( '../../lib/release/updateversions.js', {
-				'fs-extra': { outputJsonSync: outputJsonSyncStub, readJsonSync: getPackageJsonStub },
+				'fs-extra': { writeJsonSync: outputJsonSyncStub, readJsonSync: readJsonSyncStub },
 				'../utils/getpackagejson': getPackageJsonStub,
 				'glob': { globSync: syncStub },
 				'@ckeditor/ckeditor5-dev-utils': { tools: { shExec: shExecStub } },
@@ -46,7 +47,7 @@ describe( 'dev-release-tools/release', () => {
 
 			updateVersions( { version: '1.0.1', packagesDirectory: 'packages' } );
 
-			expect( syncStub.firstCall.args[ 0 ] ).to.deep.equal( [ 'packages/*', './' ] );
+			expect( syncStub.firstCall.args[ 0 ] ).to.deep.equal( [ 'package.json', 'packages/*/package.json' ] );
 			expect( outputJsonSyncStub.callCount ).to.equal( 4 );
 			expect( outputJsonSyncStub.firstCall.args[ 0 ] ).to.contain( 'package1' );
 			expect( outputJsonSyncStub.firstCall.args[ 1 ] ).to.deep.equal( { version: '1.0.1' } );
@@ -57,7 +58,7 @@ describe( 'dev-release-tools/release', () => {
 
 			updateVersions( { version: '1.0.1' } );
 
-			expect( syncStub.firstCall.args[ 0 ] ).to.equal( './' );
+			expect( syncStub.firstCall.args[ 0 ] ).to.deep.equal( [ 'package.json' ] );
 			expect( outputJsonSyncStub.callCount ).to.equal( 1 );
 			expect( outputJsonSyncStub.firstCall.args[ 0 ] ).to.contain( 'ckeditor5-dev' );
 			expect( outputJsonSyncStub.firstCall.args[ 1 ] ).to.deep.equal( { version: '1.0.1' } );
@@ -108,19 +109,30 @@ describe( 'dev-release-tools/release', () => {
 		it( 'should pass cwd to globSync', () => {
 			updateVersions( { version: '1.0.1', cwd: 'Users/username/ckeditor5-dev/custom-dir' } );
 
-			expect( syncStub.firstCall.args[ 1 ] ).to.deep.equal( { cwd: 'Users/username/ckeditor5-dev/custom-dir', absolute: true } );
+			expect( syncStub.firstCall.args[ 1 ] ).to.deep.equal( {
+				cwd: 'Users/username/ckeditor5-dev/custom-dir',
+				absolute: true,
+				nodir: true
+			} );
 		} );
 
-		it( 'should pass "packages/*" to globSync to search for random packages when packagesDirectory not undefined', () => {
-			updateVersions( { version: '1.0.1', packagesDirectory: 'custom-packages-dir' } );
+		it( 'should pass path with "package1" to readJsonSync to search for random packages when packagesDirectory is defined', () => {
+			syncStub.returns( [
+				'/ckeditor5-dev/packages/package1',
+				'/ckeditor5-dev'
+			] );
 
-			expect( syncStub.secondCall.args[ 0 ] ).to.equal( 'custom-packages-dir/*' );
+			updateVersions( { version: '1.0.1', packagesDirectory: 'packages' } );
+
+			expect( readJsonSyncStub.firstCall.args[ 0 ] ).to.contain( 'package1' );
 		} );
 
-		it( 'should pass "./" to globSync to search for random packages when packagesDirectory is undefined', () => {
+		it( 'should pass "/ckeditor5-dev" to readJsonSync to search for random packages when packagesDirectory is undefined', () => {
+			syncStub.returns( [ '/ckeditor5-dev' ] );
+
 			updateVersions( { version: '1.0.1' } );
 
-			expect( syncStub.secondCall.args[ 0 ] ).to.equal( './' );
+			expect( readJsonSyncStub.firstCall.args[ 0 ] ).to.equal( '/ckeditor5-dev' );
 		} );
 	} );
 } );

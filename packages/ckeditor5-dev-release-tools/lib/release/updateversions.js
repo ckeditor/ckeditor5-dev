@@ -8,7 +8,7 @@
 const { globSync } = require( 'glob' );
 const fs = require( 'fs-extra' );
 const semver = require( 'semver' );
-const { normalizeTrim, join, toUnix } = require( 'upath' );
+const { normalizeTrim, toUnix, dirname } = require( 'upath' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 const getPackageJson = require( '../utils/getpackagejson' );
 
@@ -25,32 +25,38 @@ const getPackageJson = require( '../utils/getpackagejson' );
 module.exports = function updateVersions( { packagesDirectory, version, cwd = process.cwd() } ) {
 	const normalizedCwd = toUnix( cwd );
 	const normalizedPackagesDir = packagesDirectory ? normalizeTrim( packagesDirectory ) : null;
-	const packagesGlobs = normalizedPackagesDir ? [ normalizedPackagesDir + '/*', './' ] : './';
-	const packagesPaths = globSync( packagesGlobs, { cwd: normalizedCwd, absolute: true } );
+	const globPatterns = [ 'package.json' ];
+
+	if ( packagesDirectory ) {
+		globPatterns.push( normalizedPackagesDir + '/*/package.json' );
+	}
+
+	const pkgJsonPaths = globSync( globPatterns, { cwd: normalizedCwd, absolute: true, nodir: true } );
+	const randomPackagePath = getRandomPackagePath( pkgJsonPaths, normalizedPackagesDir );
 
 	checkVersionGreaterThanOldVersion( version, getPackageJson( normalizedCwd ).version );
-	checkVersionIsAvailableInNpm( version, getRandomPackageJson( normalizedPackagesDir, normalizedCwd ).name );
+	checkVersionIsAvailableInNpm( version, getPackageJson( randomPackagePath ).name );
 
-	for ( const packagePath of packagesPaths ) {
-		const packageJsonPath = join( packagePath, 'package.json' );
-		const packageJson = getPackageJson( packagePath );
+	for ( const pkgJsonPath of pkgJsonPaths ) {
+		const pkgJson = fs.readJsonSync( pkgJsonPath );
 
-		packageJson.version = version;
-		fs.outputJsonSync( packageJsonPath, packageJson, { spaces: 2 } );
+		pkgJson.version = version;
+		fs.writeJsonSync( pkgJsonPath, pkgJson, { spaces: 2 } );
 	}
 };
 
 /**
- * @param {String} packagesDirectory
- * @param {String } cwd
+ * @param {Array<String>} pkgJsonPaths
+ * @param {String|null} packagesDirectory
  * @returns {Object}
  */
-function getRandomPackageJson( packagesDirectory, cwd ) {
-	const globs = packagesDirectory ? packagesDirectory + '/*' : './';
-	const packagesPaths = globSync( globs, { cwd, absolute: true } );
-	const randomPackagePath = packagesPaths[ Math.floor( Math.random() * packagesPaths.length ) ];
+function getRandomPackagePath( pkgJsonPaths, packagesDirectory ) {
+	const randomPkgJsonPaths = packagesDirectory ?
+		pkgJsonPaths.filter( packagePath => packagePath.includes( packagesDirectory ) ) :
+		pkgJsonPaths;
+	const randomPkgJsonPath = randomPkgJsonPaths[ Math.floor( Math.random() * randomPkgJsonPaths.length ) ];
 
-	return getPackageJson( randomPackagePath );
+	return dirname( randomPkgJsonPath );
 }
 
 /**
