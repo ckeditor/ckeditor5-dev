@@ -34,14 +34,13 @@ describe( 'dev-release-tools/tasks', () => {
 			stubs = {
 				fs: {
 					copy: sinon.stub().resolves(),
-					emptyDir: sinon.stub().resolves(),
 					ensureDir: sinon.stub().resolves(),
 					writeJson: sinon.stub().resolves(),
 
 					// These stubs will reject calls without predefined arguments.
-					existsSync: sinon.stub().callsFake( ( ...args ) => stubReject( 'fs.existsSync', args ) ),
 					lstat: sinon.stub().callsFake( ( ...args ) => stubReject( 'fs.lstat', args ) ),
-					readdir: sinon.stub().callsFake( ( ...args ) => stubReject( 'fs.readdir', args ) )
+					readdir: sinon.stub().callsFake( ( ...args ) => stubReject( 'fs.readdir', args ) ),
+					existsSync: sinon.stub().callsFake( ( ...args ) => stubReject( 'fs.existsSync', args ) )
 				},
 				lstat: {
 					isDir: {
@@ -56,6 +55,7 @@ describe( 'dev-release-tools/tasks', () => {
 				}
 			};
 
+			stubs.fs.readdir.withArgs( 'current/working/dir/release' ).resolves( [] );
 			stubs.fs.readdir.withArgs( 'current/working/dir/packages' ).resolves( packages );
 
 			mockery.enable( {
@@ -83,84 +83,93 @@ describe( 'dev-release-tools/tasks', () => {
 			await prepareRepository( options );
 
 			expect( stubs.fs.copy.callCount ).to.equal( 0 );
-			expect( stubs.fs.emptyDir.callCount ).to.equal( 0 );
 			expect( stubs.fs.ensureDir.callCount ).to.equal( 0 );
 			expect( stubs.fs.writeJson.callCount ).to.equal( 0 );
 		} );
 
-		it( 'should ensure the existence of an empty output directory', async () => {
+		it( 'should ensure the existence of the output directory', async () => {
 			stubs.fs.readdir.withArgs( 'current/working/dir/packages' ).resolves( [] );
 			options.packagesDirectory = 'packages';
 
 			await prepareRepository( options );
 
-			expect( stubs.fs.emptyDir.callCount ).to.equal( 1 );
-			expect( stubs.fs.emptyDir.getCall( 0 ).args.length ).to.equal( 1 );
-			expect( stubs.fs.emptyDir.getCall( 0 ).args[ 0 ] ).to.equal( 'current/working/dir/release' );
+			expect( stubs.fs.ensureDir.callCount ).to.equal( 1 );
+			expect( stubs.fs.ensureDir.getCall( 0 ).args.length ).to.equal( 1 );
+			expect( stubs.fs.ensureDir.getCall( 0 ).args[ 0 ] ).to.equal( 'current/working/dir/release' );
+		} );
+
+		it( 'should throw if the output directory is not empty', async () => {
+			stubs.fs.readdir.withArgs( 'current/working/dir/release' ).resolves( [ 'someFile.txt' ] );
+			stubs.fs.readdir.withArgs( 'current/working/dir/packages' ).resolves( [] );
+			options.packagesDirectory = 'packages';
+
+			try {
+				await prepareRepository( options );
+				throw new Error( 'Expected to throw.' );
+			} catch ( err ) {
+				expect( err.message ).to.equal( 'Output directory is not empty: "current/working/dir/release"' );
+			}
+
+			expect( stubs.fs.ensureDir.callCount ).to.equal( 1 );
+			expect( stubs.fs.readdir.callCount ).to.equal( 1 );
+			expect( stubs.fs.copy.callCount ).to.equal( 0 );
 		} );
 
 		it( 'should use the "cwd" option if provided instead of the default "process.cwd()" value', async () => {
+			stubs.fs.readdir.withArgs( 'custom/working/dir/release' ).resolves( [] );
 			stubs.fs.readdir.withArgs( 'custom/working/dir/packages' ).resolves( [] );
 			options.cwd = 'custom/working/dir';
 			options.packagesDirectory = 'packages';
 
 			await prepareRepository( options );
 
-			expect( stubs.fs.emptyDir.callCount ).to.equal( 1 );
-			expect( stubs.fs.emptyDir.getCall( 0 ).args.length ).to.equal( 1 );
-			expect( stubs.fs.emptyDir.getCall( 0 ).args[ 0 ] ).to.equal( 'custom/working/dir/release' );
+			expect( stubs.fs.ensureDir.callCount ).to.equal( 1 );
+			expect( stubs.fs.ensureDir.getCall( 0 ).args.length ).to.equal( 1 );
+			expect( stubs.fs.ensureDir.getCall( 0 ).args[ 0 ] ).to.equal( 'custom/working/dir/release' );
 		} );
 
 		it( 'should normalize Windows slashes "\\" from "process.cwd()"', async () => {
+			stubs.fs.readdir.withArgs( 'windows/working/dir/release' ).resolves( [] );
 			stubs.fs.readdir.withArgs( 'windows/working/dir/packages' ).resolves( [] );
 			stubs.process.cwd.returns( 'windows\\working\\dir' );
 			options.packagesDirectory = 'packages';
 
 			await prepareRepository( options );
 
-			expect( stubs.fs.emptyDir.callCount ).to.equal( 1 );
-			expect( stubs.fs.emptyDir.getCall( 0 ).args.length ).to.equal( 1 );
-			expect( stubs.fs.emptyDir.getCall( 0 ).args[ 0 ] ).to.equal( 'windows/working/dir/release' );
+			expect( stubs.fs.ensureDir.callCount ).to.equal( 1 );
+			expect( stubs.fs.ensureDir.getCall( 0 ).args.length ).to.equal( 1 );
+			expect( stubs.fs.ensureDir.getCall( 0 ).args[ 0 ] ).to.equal( 'windows/working/dir/release' );
 		} );
 
 		describe( 'root package processing', () => {
 			it( 'should create "package.json" file in the root package with provided values', async () => {
-				options.rootPackage = {
-					files: [],
-					packageJson: {
-						name: 'CKEditor5',
-						description: 'Foo bar baz.',
-						keywords: [ 'foo', 'bar', 'baz' ]
-					}
+				options.rootPackageJson = {
+					name: 'CKEditor5',
+					description: 'Foo bar baz.',
+					keywords: [ 'foo', 'bar', 'baz' ],
+					files: [ 'src', 'CHANGELOG.md' ]
 				};
 
 				await prepareRepository( options );
 
 				expect( stubs.fs.writeJson.callCount ).to.equal( 1 );
 				expect( stubs.fs.writeJson.getCall( 0 ).args.length ).to.equal( 3 );
-				expect( stubs.fs.writeJson.getCall( 0 ).args[ 0 ] ).to.equal( 'current/working/dir/release/package.json' );
+				expect( stubs.fs.writeJson.getCall( 0 ).args[ 0 ] ).to.equal( 'current/working/dir/release/CKEditor5/package.json' );
 				expect( stubs.fs.writeJson.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
 					name: 'CKEditor5',
 					description: 'Foo bar baz.',
-					keywords: [ 'foo', 'bar', 'baz' ]
+					keywords: [ 'foo', 'bar', 'baz' ],
+					files: [ 'src', 'CHANGELOG.md' ]
 				} );
-				expect( stubs.fs.writeJson.getCall( 0 ).args[ 2 ] ).to.deep.equal( {
-					spaces: 2,
-					EOL: '\n'
-				} );
+				expect( stubs.fs.writeJson.getCall( 0 ).args[ 2 ] ).to.deep.equal( { spaces: 2, EOL: '\n' } );
 			} );
 
 			it( 'should copy specified files of the root package', async () => {
-				options.rootPackage = {
-					files: [
-						'src',
-						'CHANGELOG.md'
-					],
-					packageJson: {
-						name: 'CKEditor5',
-						description: 'Foo bar baz.',
-						keywords: [ 'foo', 'bar', 'baz' ]
-					}
+				options.rootPackageJson = {
+					name: 'CKEditor5',
+					description: 'Foo bar baz.',
+					keywords: [ 'foo', 'bar', 'baz' ],
+					files: [ 'src', 'CHANGELOG.md' ]
 				};
 
 				await prepareRepository( options );
@@ -169,11 +178,47 @@ describe( 'dev-release-tools/tasks', () => {
 
 				expect( stubs.fs.copy.getCall( 0 ).args.length ).to.equal( 2 );
 				expect( stubs.fs.copy.getCall( 0 ).args[ 0 ] ).to.equal( 'current/working/dir/src' );
-				expect( stubs.fs.copy.getCall( 0 ).args[ 1 ] ).to.equal( 'current/working/dir/release/src' );
+				expect( stubs.fs.copy.getCall( 0 ).args[ 1 ] ).to.equal( 'current/working/dir/release/CKEditor5/src' );
 
 				expect( stubs.fs.copy.getCall( 1 ).args.length ).to.equal( 2 );
 				expect( stubs.fs.copy.getCall( 1 ).args[ 0 ] ).to.equal( 'current/working/dir/CHANGELOG.md' );
-				expect( stubs.fs.copy.getCall( 1 ).args[ 1 ] ).to.equal( 'current/working/dir/release/CHANGELOG.md' );
+				expect( stubs.fs.copy.getCall( 1 ).args[ 1 ] ).to.equal( 'current/working/dir/release/CKEditor5/CHANGELOG.md' );
+			} );
+
+			it( 'should throw if "rootPackageJson" is missing the "name" field', async () => {
+				options.rootPackageJson = {
+					description: 'Foo bar baz.',
+					keywords: [ 'foo', 'bar', 'baz' ],
+					files: [ 'src', 'CHANGELOG.md' ]
+				};
+
+				try {
+					await prepareRepository( options );
+					throw new Error( 'Expected to throw.' );
+				} catch ( err ) {
+					expect( err.message ).to.equal( '"rootPackageJson" option object must have a "name" field.' );
+				}
+
+				expect( stubs.fs.writeJson.callCount ).to.equal( 0 );
+				expect( stubs.fs.copy.callCount ).to.equal( 0 );
+			} );
+
+			it( 'should throw if "rootPackageJson" is missing the "files" field', async () => {
+				options.rootPackageJson = {
+					name: 'CKEditor5',
+					description: 'Foo bar baz.',
+					keywords: [ 'foo', 'bar', 'baz' ]
+				};
+
+				try {
+					await prepareRepository( options );
+					throw new Error( 'Expected to throw.' );
+				} catch ( err ) {
+					expect( err.message ).to.equal( '"rootPackageJson" option object must have a "files" field.' );
+				}
+
+				expect( stubs.fs.writeJson.callCount ).to.equal( 0 );
+				expect( stubs.fs.copy.callCount ).to.equal( 0 );
 			} );
 		} );
 
@@ -192,11 +237,11 @@ describe( 'dev-release-tools/tasks', () => {
 
 				expect( stubs.fs.copy.getCall( 0 ).args.length ).to.equal( 2 );
 				expect( stubs.fs.copy.getCall( 0 ).args[ 0 ] ).to.equal( 'current/working/dir/packages/ckeditor5-core' );
-				expect( stubs.fs.copy.getCall( 0 ).args[ 1 ] ).to.equal( 'current/working/dir/release/packages/ckeditor5-core' );
+				expect( stubs.fs.copy.getCall( 0 ).args[ 1 ] ).to.equal( 'current/working/dir/release/ckeditor5-core' );
 
 				expect( stubs.fs.copy.getCall( 1 ).args.length ).to.equal( 2 );
 				expect( stubs.fs.copy.getCall( 1 ).args[ 0 ] ).to.equal( 'current/working/dir/packages/ckeditor5-utils' );
-				expect( stubs.fs.copy.getCall( 1 ).args[ 1 ] ).to.equal( 'current/working/dir/release/packages/ckeditor5-utils' );
+				expect( stubs.fs.copy.getCall( 1 ).args[ 1 ] ).to.equal( 'current/working/dir/release/ckeditor5-utils' );
 			} );
 
 			it( 'should not copy non-directories', async () => {
@@ -216,11 +261,11 @@ describe( 'dev-release-tools/tasks', () => {
 
 				expect( stubs.fs.copy.getCall( 0 ).args.length ).to.equal( 2 );
 				expect( stubs.fs.copy.getCall( 0 ).args[ 0 ] ).to.equal( 'current/working/dir/packages/ckeditor5-core' );
-				expect( stubs.fs.copy.getCall( 0 ).args[ 1 ] ).to.equal( 'current/working/dir/release/packages/ckeditor5-core' );
+				expect( stubs.fs.copy.getCall( 0 ).args[ 1 ] ).to.equal( 'current/working/dir/release/ckeditor5-core' );
 
 				expect( stubs.fs.copy.getCall( 1 ).args.length ).to.equal( 2 );
 				expect( stubs.fs.copy.getCall( 1 ).args[ 0 ] ).to.equal( 'current/working/dir/packages/ckeditor5-utils' );
-				expect( stubs.fs.copy.getCall( 1 ).args[ 1 ] ).to.equal( 'current/working/dir/release/packages/ckeditor5-utils' );
+				expect( stubs.fs.copy.getCall( 1 ).args[ 1 ] ).to.equal( 'current/working/dir/release/ckeditor5-utils' );
 			} );
 
 			it( 'should not copy directories that do not have the "package.json" file', async () => {
@@ -237,7 +282,7 @@ describe( 'dev-release-tools/tasks', () => {
 
 				expect( stubs.fs.copy.getCall( 0 ).args.length ).to.equal( 2 );
 				expect( stubs.fs.copy.getCall( 0 ).args[ 0 ] ).to.equal( 'current/working/dir/packages/ckeditor5-core' );
-				expect( stubs.fs.copy.getCall( 0 ).args[ 1 ] ).to.equal( 'current/working/dir/release/packages/ckeditor5-core' );
+				expect( stubs.fs.copy.getCall( 0 ).args[ 1 ] ).to.equal( 'current/working/dir/release/ckeditor5-core' );
 			} );
 
 			it( 'should copy only the specified packages if the "packagesToCopy" option is provided', async () => {
@@ -253,7 +298,7 @@ describe( 'dev-release-tools/tasks', () => {
 
 				expect( stubs.fs.copy.getCall( 0 ).args.length ).to.equal( 2 );
 				expect( stubs.fs.copy.getCall( 0 ).args[ 0 ] ).to.equal( 'current/working/dir/packages/ckeditor5-core' );
-				expect( stubs.fs.copy.getCall( 0 ).args[ 1 ] ).to.equal( 'current/working/dir/release/packages/ckeditor5-core' );
+				expect( stubs.fs.copy.getCall( 0 ).args[ 1 ] ).to.equal( 'current/working/dir/release/ckeditor5-core' );
 			} );
 
 			it( 'should allow copying nested packages via the "packagesToCopy" option', async () => {
@@ -269,7 +314,7 @@ describe( 'dev-release-tools/tasks', () => {
 
 				expect( stubs.fs.copy.getCall( 0 ).args.length ).to.equal( 2 );
 				expect( stubs.fs.copy.getCall( 0 ).args[ 0 ] ).to.equal( 'current/working/dir/packages/nested/ckeditor5-nested' );
-				expect( stubs.fs.copy.getCall( 0 ).args[ 1 ] ).to.equal( 'current/working/dir/release/packages/nested/ckeditor5-nested' );
+				expect( stubs.fs.copy.getCall( 0 ).args[ 1 ] ).to.equal( 'current/working/dir/release/nested/ckeditor5-nested' );
 			} );
 		} );
 	} );

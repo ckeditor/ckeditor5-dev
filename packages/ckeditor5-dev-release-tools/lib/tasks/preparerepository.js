@@ -16,10 +16,10 @@ const upath = require( 'upath' );
  * If specified, all of the found packages will be copied.
  * @param {Array.<String>} [options.packagesToCopy] List of packages that should be processed.
  * If not specified, all packages found in `packagesDirectory` are considered.
- * @param {Object} [options.rootPackage] Definition of a root package (found in the `cwd` directory).
+ * @param {Object} [options.rootPackageJson] Object containing values to use in the created the `package.json` file.
  * If not specified, the root package will not be created.
- * @param {Object} options.rootPackage.packageJson Object containing values to use in the created the `package.json` file.
- * @param {Array.<String>} options.rootPackage.files Array containing a list of files or directories to copy.
+ * @param {String} options.rootPackageJson.name Name of the package. Required value.
+ * @param {Array.<String>} options.rootPackageJson.files Array containing a list of files or directories to copy. Required value.
  */
 module.exports = async function prepareRepository( options ) {
 	const {
@@ -27,23 +27,28 @@ module.exports = async function prepareRepository( options ) {
 		cwd = process.cwd(),
 		packagesDirectory,
 		packagesToCopy,
-		rootPackage
+		rootPackageJson
 	} = options;
 
-	if ( !rootPackage && !packagesDirectory ) {
+	if ( !rootPackageJson && !packagesDirectory ) {
 		return;
 	}
 
-	const outputDirectoryPath = upath.join( cwd, outputDirectory );
-	await fs.emptyDir( outputDirectoryPath );
+	const outputDirPath = upath.join( cwd, outputDirectory );
+	await fs.ensureDir( outputDirPath );
+	const outputDirContent = await fs.readdir( outputDirPath );
+
+	if ( outputDirContent.length ) {
+		throw new Error( `Output directory is not empty: "${ outputDirPath }"` );
+	}
 
 	const copyPromises = [];
 
-	if ( rootPackage ) {
+	if ( rootPackageJson ) {
 		const copyRootItemsPromises = await processRootPackage( {
 			cwd,
-			rootPackage,
-			outputDirectoryPath
+			rootPackageJson,
+			outputDirPath
 		} );
 
 		copyPromises.push( ...copyRootItemsPromises );
@@ -54,7 +59,7 @@ module.exports = async function prepareRepository( options ) {
 			cwd,
 			packagesDirectory,
 			packagesToCopy,
-			outputDirectoryPath
+			outputDirPath
 		} );
 
 		copyPromises.push( ...copyPackagesPromises );
@@ -63,24 +68,32 @@ module.exports = async function prepareRepository( options ) {
 	return Promise.all( copyPromises );
 };
 
-async function processRootPackage( { cwd, rootPackage, outputDirectoryPath } ) {
-	const pkgJsonOutputPath = upath.join( outputDirectoryPath, 'package.json' );
-	await fs.writeJson( pkgJsonOutputPath, rootPackage.packageJson, { spaces: 2, EOL: '\n' } );
+async function processRootPackage( { cwd, rootPackageJson, outputDirPath } ) {
+	if ( !rootPackageJson.name ) {
+		throw new Error( '"rootPackageJson" option object must have a "name" field.' );
+	}
 
-	return rootPackage.files.map( item => {
+	if ( !rootPackageJson.files ) {
+		throw new Error( '"rootPackageJson" option object must have a "files" field.' );
+	}
+
+	const rootPackageOutputPath = upath.join( outputDirPath, rootPackageJson.name );
+	const pkgJsonOutputPath = upath.join( rootPackageOutputPath, 'package.json' );
+
+	await fs.ensureDir( rootPackageOutputPath );
+	await fs.writeJson( pkgJsonOutputPath, rootPackageJson, { spaces: 2, EOL: '\n' } );
+
+	return rootPackageJson.files.map( item => {
 		const itemPath = upath.join( cwd, item );
-		const itemOutputPath = upath.join( outputDirectoryPath, item );
+		const itemOutputPath = upath.join( rootPackageOutputPath, item );
 
 		return fs.copy( itemPath, itemOutputPath );
 	} );
 }
 
-async function processMonorepoPackages( { cwd, packagesDirectory, packagesToCopy, outputDirectoryPath } ) {
+async function processMonorepoPackages( { cwd, packagesDirectory, packagesToCopy, outputDirPath } ) {
 	const packagesDirectoryPath = upath.join( cwd, packagesDirectory );
-	const packagesOutputDirectoryPath = upath.join( outputDirectoryPath, packagesDirectory );
 	const packageDirs = packagesToCopy || await fs.readdir( packagesDirectoryPath );
-
-	await fs.ensureDir( packagesOutputDirectoryPath );
 
 	return packageDirs.map( async packageDir => {
 		const packagePath = upath.join( packagesDirectoryPath, packageDir );
@@ -97,6 +110,6 @@ async function processMonorepoPackages( { cwd, packagesDirectory, packagesToCopy
 			return;
 		}
 
-		return fs.copy( packagePath, upath.join( packagesOutputDirectoryPath, packageDir ) );
+		return fs.copy( packagePath, upath.join( outputDirPath, packageDir ) );
 	} );
 }
