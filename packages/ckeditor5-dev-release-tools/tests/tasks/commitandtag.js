@@ -22,10 +22,14 @@ describe( 'commitAndTag()', () => {
 		stubs = {
 			tools: {
 				shExec: sinon.stub()
+			},
+			glob: {
+				globSync: sinon.stub().returns( [] )
 			}
 		};
 
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils/lib/tools', stubs.tools );
+		mockery.registerMock( 'glob', stubs.glob );
 
 		commitAndTag = require( '../../lib/tasks/commitandtag' );
 	} );
@@ -44,16 +48,13 @@ describe( 'commitAndTag()', () => {
 		expect( stubs.tools.shExec.thirdCall.args[ 1 ] ).to.deep.equal( { cwd: 'my-cwd' } );
 	} );
 
-	it( 'should call git add with root package.json when packagesDirectory is undefined', () => {
-		commitAndTag( { version: '1.0.0' } );
-
-		expect( stubs.tools.shExec.firstCall.args[ 0 ] ).to.equal( 'git add package.json ' );
-	} );
-
 	it( 'should call git add with root package.json and packages when packagesDirectory is defined', () => {
+		stubs.glob.globSync.returns( [ 'packages/first-package/package.json', 'packages/second-package/package.json' ] );
+
 		commitAndTag( { version: '1.0.0', packagesDirectory: 'packages' } );
 
-		expect( stubs.tools.shExec.firstCall.args[ 0 ] ).to.equal( 'git add package.json packages/*/package.json' );
+		expect( stubs.tools.shExec.firstCall.args[ 0 ] )
+			.to.equal( 'git add package.json packages/first-package/package.json packages/second-package/package.json' );
 	} );
 
 	it( 'should call git commit with correct message', () => {
