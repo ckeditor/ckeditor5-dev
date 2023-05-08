@@ -12,7 +12,7 @@ const { toUnix, normalizeTrim } = require( 'upath' );
  * Creates a commit and a tag for specified version.
  *
  * @param {Object} options
- * @param {String} [options.packagesDirectory]
+ * @param {String} [options.packagesDirectory] Relative path to a location of packages to be added to git.
  * @param {String} options.version The commit will contain this param in its message and the tag will have a `v` prefix.
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  */
