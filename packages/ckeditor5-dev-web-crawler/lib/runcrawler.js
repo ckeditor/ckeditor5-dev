@@ -114,7 +114,8 @@ module.exports = async function runCrawler( options ) {
  */
 async function createBrowser( options ) {
 	const browserOptions = {
-		args: []
+		args: [],
+		headless: 'old'
 	};
 
 	if ( options.disableBrowserSandbox ) {
