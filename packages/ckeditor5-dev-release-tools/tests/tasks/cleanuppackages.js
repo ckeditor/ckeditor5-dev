@@ -314,6 +314,29 @@ describe( 'dev-release-tools/tasks', () => {
 				for ( const expectedRemovedPath of expectedRemovedPaths ) {
 					expect( actualRemovedPaths ).to.include( expectedRemovedPath );
 				}
+
+				const actualExistingPaths = globSync( '**', { absolute: true } ).map( upath.normalize );
+				const expectedExistingPaths = [
+					getPathTo( '.' ),
+					getPathTo( 'release' ),
+					getPathTo( 'release/ckeditor5-foo' ),
+					getPathTo( 'release/ckeditor5-foo/src' ),
+					getPathTo( 'release/ckeditor5-foo/package.json' ),
+					getPathTo( 'release/ckeditor5-foo/ckeditor5-metadata.json' ),
+					getPathTo( 'release/ckeditor5-foo/README.md' ),
+					getPathTo( 'release/ckeditor5-foo/LICENSE.md' ),
+					getPathTo( 'release/ckeditor5-foo/src/ui' ),
+					getPathTo( 'release/ckeditor5-foo/src/index.js' ),
+					getPathTo( 'release/ckeditor5-foo/src/commands' ),
+					getPathTo( 'release/ckeditor5-foo/src/ui/view-foo.js' ),
+					getPathTo( 'release/ckeditor5-foo/src/ui/view-bar.js' ),
+					getPathTo( 'release/ckeditor5-foo/src/commands/command-foo.js' ),
+					getPathTo( 'release/ckeditor5-foo/src/commands/command-bar.js' )
+				];
+
+				for ( const expectedExistingPath of expectedExistingPaths ) {
+					expect( actualExistingPaths ).to.include( expectedExistingPath );
+				}
 			} );
 
 			it( 'should remove not matched files and empty directories - pattern with globs', () => {
@@ -405,6 +428,29 @@ describe( 'dev-release-tools/tasks', () => {
 
 				for ( const expectedRemovedPath of expectedRemovedPaths ) {
 					expect( actualRemovedPaths ).to.include( expectedRemovedPath );
+				}
+
+				const actualExistingPaths = globSync( '**', { absolute: true } ).map( upath.normalize );
+				const expectedExistingPaths = [
+					getPathTo( '.' ),
+					getPathTo( 'release' ),
+					getPathTo( 'release/ckeditor5-foo' ),
+					getPathTo( 'release/ckeditor5-foo/src' ),
+					getPathTo( 'release/ckeditor5-foo/package.json' ),
+					getPathTo( 'release/ckeditor5-foo/ckeditor5-metadata.json' ),
+					getPathTo( 'release/ckeditor5-foo/README.md' ),
+					getPathTo( 'release/ckeditor5-foo/LICENSE.md' ),
+					getPathTo( 'release/ckeditor5-foo/src/ui' ),
+					getPathTo( 'release/ckeditor5-foo/src/index.js' ),
+					getPathTo( 'release/ckeditor5-foo/src/commands' ),
+					getPathTo( 'release/ckeditor5-foo/src/ui/view-foo.js' ),
+					getPathTo( 'release/ckeditor5-foo/src/ui/view-bar.js' ),
+					getPathTo( 'release/ckeditor5-foo/src/commands/command-foo.js' ),
+					getPathTo( 'release/ckeditor5-foo/src/commands/command-bar.js' )
+				];
+
+				for ( const expectedExistingPath of expectedExistingPaths ) {
+					expect( actualExistingPaths ).to.include( expectedExistingPath );
 				}
 			} );
 		} );
