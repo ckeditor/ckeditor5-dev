@@ -103,12 +103,15 @@ describe( 'dev-release-tools/tasks', () => {
 			stubs.fs.readdir.withArgs( 'current/working/dir/packages' ).resolves( [] );
 			options.packagesDirectory = 'packages';
 
-			try {
-				await prepareRepository( options );
-				throw new Error( 'Expected to throw.' );
-			} catch ( err ) {
-				expect( err.message ).to.equal( 'Output directory is not empty: "current/working/dir/release"' );
-			}
+			await prepareRepository( options )
+				.then(
+					() => {
+						throw new Error( 'Expected to throw.' );
+					},
+					err => {
+						expect( err.message ).to.equal( 'Output directory is not empty: "current/working/dir/release".' );
+					}
+				);
 
 			expect( stubs.fs.ensureDir.callCount ).to.equal( 1 );
 			expect( stubs.fs.readdir.callCount ).to.equal( 1 );
@@ -192,12 +195,15 @@ describe( 'dev-release-tools/tasks', () => {
 					files: [ 'src', 'CHANGELOG.md' ]
 				};
 
-				try {
-					await prepareRepository( options );
-					throw new Error( 'Expected to throw.' );
-				} catch ( err ) {
-					expect( err.message ).to.equal( '"rootPackageJson" option object must have a "name" field.' );
-				}
+				await prepareRepository( options )
+					.then(
+						() => {
+							throw new Error( 'Expected to throw.' );
+						},
+						err => {
+							expect( err.message ).to.equal( '"rootPackageJson" option object must have a "name" field.' );
+						}
+					);
 
 				expect( stubs.fs.writeJson.callCount ).to.equal( 0 );
 				expect( stubs.fs.copy.callCount ).to.equal( 0 );
@@ -210,12 +216,15 @@ describe( 'dev-release-tools/tasks', () => {
 					keywords: [ 'foo', 'bar', 'baz' ]
 				};
 
-				try {
-					await prepareRepository( options );
-					throw new Error( 'Expected to throw.' );
-				} catch ( err ) {
-					expect( err.message ).to.equal( '"rootPackageJson" option object must have a "files" field.' );
-				}
+				await prepareRepository( options )
+					.then(
+						() => {
+							throw new Error( 'Expected to throw.' );
+						},
+						err => {
+							expect( err.message ).to.equal( '"rootPackageJson" option object must have a "files" field.' );
+						}
+					);
 
 				expect( stubs.fs.writeJson.callCount ).to.equal( 0 );
 				expect( stubs.fs.copy.callCount ).to.equal( 0 );
