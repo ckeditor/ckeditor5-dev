@@ -14,14 +14,15 @@ const { globSync } = require( 'glob' );
  *
  * @param {Object} options
  * @param {String} options.version The commit will contain this param in its message and the tag will have a `v` prefix.
+ * @param {Array.<String>} options.files Array of glob patterns for files to be added to the release commit.
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  */
-module.exports = function commitAndTag( { version, cwd = process.cwd() } ) {
+module.exports = function commitAndTag( { version, files, cwd = process.cwd() } ) {
 	const normalizedCwd = toUnix( cwd );
-	const packagesPkgJsonPaths = globSync( '[!node_modules]*/*/package.json', { cwd: normalizedCwd, absolute: true, nodir: true } );
-	const packagesPkgJsonPathsStr = packagesPkgJsonPaths.join( ' ' );
+	const filePathsToAdd = globSync( files, { cwd: normalizedCwd, absolute: true, nodir: true } );
+	const filePathsToAddStr = filePathsToAdd.join( ' ' );
 
-	shExec( `git add package.json ${ packagesPkgJsonPathsStr }`, { cwd: normalizedCwd } );
+	shExec( `git add ${ filePathsToAddStr }`, { cwd: normalizedCwd } );
 	shExec( `git commit --message "Release: v${ version }."`, { cwd: normalizedCwd } );
 	shExec( `git tag v${ version }`, { cwd: normalizedCwd } );
 };

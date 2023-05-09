@@ -40,7 +40,7 @@ describe( 'commitAndTag()', () => {
 		sinon.restore();
 	} );
 
-	it( 'should pass cwd to shExec', () => {
+	it( 'should allow to specify custom cwd', () => {
 		commitAndTag( { version: '1.0.0', cwd: 'my-cwd' } );
 
 		expect( stubs.tools.shExec.firstCall.args[ 1 ] ).to.deep.equal( { cwd: 'my-cwd' } );
@@ -48,22 +48,27 @@ describe( 'commitAndTag()', () => {
 		expect( stubs.tools.shExec.thirdCall.args[ 1 ] ).to.deep.equal( { cwd: 'my-cwd' } );
 	} );
 
-	it( 'should call git add with root package.json and packages when packagesDirectory is defined', () => {
-		stubs.glob.globSync.returns( [ 'packages/first-package/package.json', 'packages/second-package/package.json' ] );
+	it( 'should add provided files to git', () => {
+		stubs.glob.globSync.returns( [
+			'package.json',
+			'README.md',
+			'packages/custom-package/package.json',
+			'packages/custom-package/README.md'
+		] );
 
-		commitAndTag( { version: '1.0.0', packagesDirectory: 'packages' } );
+		commitAndTag( { version: '1.0.0', files: [ 'package.json', 'README.md', 'packages/*/package.json', 'packages/*/README.md' ] } );
 
 		expect( stubs.tools.shExec.firstCall.args[ 0 ] )
-			.to.equal( 'git add package.json packages/first-package/package.json packages/second-package/package.json' );
+			.to.equal( 'git add package.json README.md packages/custom-package/package.json packages/custom-package/README.md' );
 	} );
 
-	it( 'should call git commit with correct message', () => {
+	it( 'should set correct commit message', () => {
 		commitAndTag( { version: '1.0.0', packagesDirectory: 'packages' } );
 
 		expect( stubs.tools.shExec.secondCall.args[ 0 ] ).to.equal( 'git commit --message "Release: v1.0.0."' );
 	} );
 
-	it( 'should call git tag with correct version', () => {
+	it( 'should set correct tag', () => {
 		commitAndTag( { version: '1.0.0', packagesDirectory: 'packages' } );
 
 		expect( stubs.tools.shExec.thirdCall.args[ 0 ] ).to.equal( 'git tag v1.0.0' );
