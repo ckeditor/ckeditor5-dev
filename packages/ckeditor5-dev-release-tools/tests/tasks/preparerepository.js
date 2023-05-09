@@ -61,12 +61,10 @@ describe( 'dev-release-tools/tasks', () => {
 			stubs.fs.readdir.withArgs( 'current/working/dir/release' ).resolves( [] );
 			stubs.fs.readdir.withArgs( 'current/working/dir/packages' ).resolves( packages );
 
-			stubs.glob.sync.withArgs( 'current/working/dir/CHANGELOG.md' ).returns( [
-				'current/working/dir/CHANGELOG.md'
-			] );
-			stubs.glob.sync.withArgs( 'current/working/dir/src/*.js' ).returns( [
+			stubs.glob.sync.withArgs( [ 'src/*.js', 'CHANGELOG.md' ] ).returns( [
 				'current/working/dir/src/core.js',
-				'current/working/dir/src/utils.js'
+				'current/working/dir/src/utils.js',
+				'current/working/dir/CHANGELOG.md'
 			] );
 
 			mockery.enable( {
