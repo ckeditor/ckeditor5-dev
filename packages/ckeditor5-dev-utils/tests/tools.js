@@ -50,13 +50,29 @@ describe( 'utils', () => {
 		describe( 'shExec', () => {
 			it( 'should be defined', () => expect( tools.shExec ).to.be.a( 'function' ) );
 
-			it( 'should execute command', () => {
+			it( 'should execute command (default cwd)', () => {
 				const sh = require( 'shelljs' );
 				const execStub = sandbox.stub( sh, 'exec' ).returns( { code: 0 } );
+				const processStub = sandbox.stub( process, 'cwd' ).returns( '/default' );
 
 				tools.shExec( 'command' );
 
+				sinon.assert.calledOnce( processStub );
 				sinon.assert.calledOnce( execStub );
+				expect( execStub.firstCall.args[ 1 ] ).to.be.an( 'object' );
+				expect( execStub.firstCall.args[ 1 ] ).to.contain.property( 'cwd', '/default' );
+			} );
+
+			it( 'should execute command with specified cwd', () => {
+				const cwd = '/home/user';
+				const sh = require( 'shelljs' );
+				const execStub = sandbox.stub( sh, 'exec' ).returns( { code: 0 } );
+
+				tools.shExec( 'command', { cwd } );
+
+				sinon.assert.calledOnce( execStub );
+				expect( execStub.firstCall.args[ 1 ] ).to.be.an( 'object' );
+				expect( execStub.firstCall.args[ 1 ] ).to.contain.property( 'cwd', cwd );
 			} );
 
 			it( 'should throw error on unsuccessful call', () => {
