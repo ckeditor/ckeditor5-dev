@@ -46,7 +46,7 @@ module.exports = function updateVersions( { packagesDirectory, version, cwd = pr
 };
 
 /**
- * @param {Array<String>} pkgJsonPaths
+ * @param {Array.<String>} pkgJsonPaths
  * @param {String|null} packagesDirectory
  * @returns {Object}
  */
@@ -74,6 +74,8 @@ function checkVersionGreaterThanOldVersion( newVersion, currentVersion ) {
 }
 
 /**
+ * Checks if the provided version is not used in npm and there will be no errors when calling publish.
+ *
  * @param {String} version
  * @param {String} packageName
  */
