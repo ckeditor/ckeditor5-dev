@@ -26,7 +26,7 @@ describe( 'dev-release-tools/release', () => {
 				valid: sandbox.stub().returns( true )
 			};
 
-			updateVersions = proxyquire( '../../lib/release/updateversions.js', {
+			updateVersions = proxyquire( '../../lib/tasks/updateversions.js', {
 				'fs-extra': { writeJsonSync: stubs.outputJsonSync, readJsonSync: stubs.readJsonSync },
 				'../utils/getpackagejson': stubs.getPackageJson,
 				'glob': { globSync: stubs.sync },
