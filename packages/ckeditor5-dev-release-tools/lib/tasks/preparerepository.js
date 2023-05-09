@@ -6,6 +6,7 @@
 'use strict';
 
 const fs = require( 'fs-extra' );
+const glob = require( 'glob' );
 const upath = require( 'upath' );
 
 /**
@@ -20,7 +21,6 @@ const upath = require( 'upath' );
  * If not specified, all packages found in `packagesDirectory` are considered.
  * @param {RootPackageJson} [options.rootPackageJson] Object containing values to use in the created the `package.json` file.
  * If not specified, the root package will not be created.
-
  * @returns {Promise}
  */
 module.exports = async function prepareRepository( options ) {
@@ -101,12 +101,14 @@ async function processRootPackage( { cwd, rootPackageJson, outputDirectoryPath }
 	await fs.ensureDir( rootPackageOutputPath );
 	await fs.writeJson( pkgJsonOutputPath, rootPackageJson, { spaces: 2, EOL: '\n' } );
 
-	return rootPackageJson.files.map( item => {
-		const itemPath = upath.join( cwd, item );
-		const itemOutputPath = upath.join( rootPackageOutputPath, item );
+	return rootPackageJson.files
+		.flatMap( item => glob.sync( upath.join( cwd, item ) ) )
+		.map( absoluteFilePath => {
+			const relativeFilePath = upath.relative( cwd, absoluteFilePath );
+			const absoluteFileOutputPath = upath.join( rootPackageOutputPath, relativeFilePath );
 
-		return fs.copy( itemPath, itemOutputPath );
-	} );
+			return fs.copy( absoluteFilePath, absoluteFileOutputPath );
+		} );
 }
 
 /**
@@ -130,7 +132,7 @@ async function processMonorepoPackages( { cwd, packagesDirectory, packagesToCopy
 		}
 
 		const pkgJsonPath = upath.join( packagePath, 'package.json' );
-		const hasPkgJson = await fs.existsSync( pkgJsonPath );
+		const hasPkgJson = await fs.exists( pkgJsonPath );
 
 		if ( !hasPkgJson ) {
 			return;

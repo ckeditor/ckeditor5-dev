@@ -39,8 +39,11 @@ describe( 'dev-release-tools/tasks', () => {
 
 					// These stubs will reject calls without predefined arguments.
 					lstat: sinon.stub().callsFake( ( ...args ) => stubReject( 'fs.lstat', args ) ),
-					readdir: sinon.stub().callsFake( ( ...args ) => stubReject( 'fs.readdir', args ) ),
-					existsSync: sinon.stub().callsFake( ( ...args ) => stubReject( 'fs.existsSync', args ) )
+					exists: sinon.stub().callsFake( ( ...args ) => stubReject( 'fs.exists', args ) ),
+					readdir: sinon.stub().callsFake( ( ...args ) => stubReject( 'fs.readdir', args ) )
+				},
+				glob: {
+					sync: sinon.stub().callsFake( ( ...args ) => stubReject( 'glob.sync', args ) )
 				},
 				lstat: {
 					isDir: {
@@ -58,6 +61,14 @@ describe( 'dev-release-tools/tasks', () => {
 			stubs.fs.readdir.withArgs( 'current/working/dir/release' ).resolves( [] );
 			stubs.fs.readdir.withArgs( 'current/working/dir/packages' ).resolves( packages );
 
+			stubs.glob.sync.withArgs( 'current/working/dir/CHANGELOG.md' ).returns( [
+				'current/working/dir/CHANGELOG.md'
+			] );
+			stubs.glob.sync.withArgs( 'current/working/dir/src/*.js' ).returns( [
+				'current/working/dir/src/core.js',
+				'current/working/dir/src/utils.js'
+			] );
+
 			mockery.enable( {
 				useCleanCache: true,
 				warnOnReplace: false,
@@ -65,6 +76,7 @@ describe( 'dev-release-tools/tasks', () => {
 			} );
 
 			mockery.registerMock( 'fs-extra', stubs.fs );
+			mockery.registerMock( 'glob', stubs.glob );
 
 			prepareRepository = require( '../../lib/tasks/preparerepository' );
 		} );
@@ -150,7 +162,7 @@ describe( 'dev-release-tools/tasks', () => {
 					name: 'CKEditor5',
 					description: 'Foo bar baz.',
 					keywords: [ 'foo', 'bar', 'baz' ],
-					files: [ 'src', 'CHANGELOG.md' ]
+					files: [ 'src/*.js', 'CHANGELOG.md' ]
 				};
 
 				await prepareRepository( options );
@@ -162,7 +174,7 @@ describe( 'dev-release-tools/tasks', () => {
 					name: 'CKEditor5',
 					description: 'Foo bar baz.',
 					keywords: [ 'foo', 'bar', 'baz' ],
-					files: [ 'src', 'CHANGELOG.md' ]
+					files: [ 'src/*.js', 'CHANGELOG.md' ]
 				} );
 				expect( stubs.fs.writeJson.getCall( 0 ).args[ 2 ] ).to.deep.equal( { spaces: 2, EOL: '\n' } );
 			} );
@@ -172,27 +184,31 @@ describe( 'dev-release-tools/tasks', () => {
 					name: 'CKEditor5',
 					description: 'Foo bar baz.',
 					keywords: [ 'foo', 'bar', 'baz' ],
-					files: [ 'src', 'CHANGELOG.md' ]
+					files: [ 'src/*.js', 'CHANGELOG.md' ]
 				};
 
 				await prepareRepository( options );
 
-				expect( stubs.fs.copy.callCount ).to.equal( 2 );
+				expect( stubs.fs.copy.callCount ).to.equal( 3 );
 
 				expect( stubs.fs.copy.getCall( 0 ).args.length ).to.equal( 2 );
-				expect( stubs.fs.copy.getCall( 0 ).args[ 0 ] ).to.equal( 'current/working/dir/src' );
-				expect( stubs.fs.copy.getCall( 0 ).args[ 1 ] ).to.equal( 'current/working/dir/release/CKEditor5/src' );
+				expect( stubs.fs.copy.getCall( 0 ).args[ 0 ] ).to.equal( 'current/working/dir/src/core.js' );
+				expect( stubs.fs.copy.getCall( 0 ).args[ 1 ] ).to.equal( 'current/working/dir/release/CKEditor5/src/core.js' );
 
 				expect( stubs.fs.copy.getCall( 1 ).args.length ).to.equal( 2 );
-				expect( stubs.fs.copy.getCall( 1 ).args[ 0 ] ).to.equal( 'current/working/dir/CHANGELOG.md' );
-				expect( stubs.fs.copy.getCall( 1 ).args[ 1 ] ).to.equal( 'current/working/dir/release/CKEditor5/CHANGELOG.md' );
+				expect( stubs.fs.copy.getCall( 1 ).args[ 0 ] ).to.equal( 'current/working/dir/src/utils.js' );
+				expect( stubs.fs.copy.getCall( 1 ).args[ 1 ] ).to.equal( 'current/working/dir/release/CKEditor5/src/utils.js' );
+
+				expect( stubs.fs.copy.getCall( 2 ).args.length ).to.equal( 2 );
+				expect( stubs.fs.copy.getCall( 2 ).args[ 0 ] ).to.equal( 'current/working/dir/CHANGELOG.md' );
+				expect( stubs.fs.copy.getCall( 2 ).args[ 1 ] ).to.equal( 'current/working/dir/release/CKEditor5/CHANGELOG.md' );
 			} );
 
 			it( 'should throw if "rootPackageJson" is missing the "name" field', async () => {
 				options.rootPackageJson = {
 					description: 'Foo bar baz.',
 					keywords: [ 'foo', 'bar', 'baz' ],
-					files: [ 'src', 'CHANGELOG.md' ]
+					files: [ 'src/*.js', 'CHANGELOG.md' ]
 				};
 
 				await prepareRepository( options )
@@ -237,8 +253,8 @@ describe( 'dev-release-tools/tasks', () => {
 
 				stubs.fs.lstat.withArgs( 'current/working/dir/packages/ckeditor5-core' ).resolves( stubs.lstat.isDir );
 				stubs.fs.lstat.withArgs( 'current/working/dir/packages/ckeditor5-utils' ).resolves( stubs.lstat.isDir );
-				stubs.fs.existsSync.withArgs( 'current/working/dir/packages/ckeditor5-core/package.json' ).resolves( true );
-				stubs.fs.existsSync.withArgs( 'current/working/dir/packages/ckeditor5-utils/package.json' ).resolves( true );
+				stubs.fs.exists.withArgs( 'current/working/dir/packages/ckeditor5-core/package.json' ).resolves( true );
+				stubs.fs.exists.withArgs( 'current/working/dir/packages/ckeditor5-utils/package.json' ).resolves( true );
 
 				await prepareRepository( options );
 
@@ -261,8 +277,8 @@ describe( 'dev-release-tools/tasks', () => {
 				stubs.fs.lstat.withArgs( 'current/working/dir/packages/ckeditor5-core' ).resolves( stubs.lstat.isDir );
 				stubs.fs.lstat.withArgs( 'current/working/dir/packages/ckeditor5-utils' ).resolves( stubs.lstat.isDir );
 				stubs.fs.lstat.withArgs( 'current/working/dir/packages/textFile.txt' ).resolves( stubs.lstat.isNotDir );
-				stubs.fs.existsSync.withArgs( 'current/working/dir/packages/ckeditor5-core/package.json' ).resolves( true );
-				stubs.fs.existsSync.withArgs( 'current/working/dir/packages/ckeditor5-utils/package.json' ).resolves( true );
+				stubs.fs.exists.withArgs( 'current/working/dir/packages/ckeditor5-core/package.json' ).resolves( true );
+				stubs.fs.exists.withArgs( 'current/working/dir/packages/ckeditor5-utils/package.json' ).resolves( true );
 
 				await prepareRepository( options );
 
@@ -282,8 +298,8 @@ describe( 'dev-release-tools/tasks', () => {
 
 				stubs.fs.lstat.withArgs( 'current/working/dir/packages/ckeditor5-core' ).resolves( stubs.lstat.isDir );
 				stubs.fs.lstat.withArgs( 'current/working/dir/packages/ckeditor5-utils' ).resolves( stubs.lstat.isDir );
-				stubs.fs.existsSync.withArgs( 'current/working/dir/packages/ckeditor5-core/package.json' ).resolves( true );
-				stubs.fs.existsSync.withArgs( 'current/working/dir/packages/ckeditor5-utils/package.json' ).resolves( false );
+				stubs.fs.exists.withArgs( 'current/working/dir/packages/ckeditor5-core/package.json' ).resolves( true );
+				stubs.fs.exists.withArgs( 'current/working/dir/packages/ckeditor5-utils/package.json' ).resolves( false );
 
 				await prepareRepository( options );
 
@@ -299,7 +315,7 @@ describe( 'dev-release-tools/tasks', () => {
 				options.packagesToCopy = [ 'ckeditor5-core' ];
 
 				stubs.fs.lstat.withArgs( 'current/working/dir/packages/ckeditor5-core' ).resolves( stubs.lstat.isDir );
-				stubs.fs.existsSync.withArgs( 'current/working/dir/packages/ckeditor5-core/package.json' ).resolves( true );
+				stubs.fs.exists.withArgs( 'current/working/dir/packages/ckeditor5-core/package.json' ).resolves( true );
 
 				await prepareRepository( options );
 
@@ -315,7 +331,7 @@ describe( 'dev-release-tools/tasks', () => {
 				options.packagesToCopy = [ 'nested/ckeditor5-nested' ];
 
 				stubs.fs.lstat.withArgs( 'current/working/dir/packages/nested/ckeditor5-nested' ).resolves( stubs.lstat.isDir );
-				stubs.fs.existsSync.withArgs( 'current/working/dir/packages/nested/ckeditor5-nested/package.json' ).resolves( true );
+				stubs.fs.exists.withArgs( 'current/working/dir/packages/nested/ckeditor5-nested/package.json' ).resolves( true );
 
 				await prepareRepository( options );
 
