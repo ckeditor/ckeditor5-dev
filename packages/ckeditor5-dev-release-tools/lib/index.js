@@ -14,6 +14,7 @@ const updateCKEditor5Dependencies = require( './tasks/updateckeditor5dependencie
 const updateDependencies = require( './tasks/updatedependencies' );
 const commitAndTag = require( './tasks/commitandtag' );
 const updateDependenciesVersions = require( './utils/updatedependenciesversions' );
+const prepareRepository = require( './tasks/preparerepository' );
 const { getLastFromChangelog, getCurrent, getLastTagFromGit } = require( './utils/versions' );
 const { getChangesForVersion, getChangelog, saveChangelog } = require( './utils/changelog' );
 
@@ -35,5 +36,6 @@ module.exports = {
 	getChangelog,
 	saveChangelog,
 	updateDependenciesVersions,
+	prepareRepository,
 	commitAndTag
 };
