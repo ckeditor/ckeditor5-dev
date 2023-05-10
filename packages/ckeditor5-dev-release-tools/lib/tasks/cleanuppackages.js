@@ -11,7 +11,7 @@ const { globSync } = require( 'glob' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
- * The purpose of the script is to clean the package prepared for the release. The cleaning consists of two stages:
+ * The purpose of the script is to clean all packages prepared for the release. The cleaning consists of two stages:
  *
  * - Remove unnecessary files and directories from the package directory.
  * - Remove unnecessary fields from the `package.json` file.
@@ -19,7 +19,7 @@ const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {Object} options
  * @param {String} options.packagesDirectory Relative path to a location of packages to be cleaned up.
  * @param {Array.<String>} [options.packageJsonFieldsToRemove] Fields to remove from `package.json`. If not set, a predefined list is used.
- * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
+ * @param {String} [options.cwd] Current working directory from which all paths will be resolved.
  */
 module.exports = function cleanUpPackages( options ) {
 	const log = logger();
