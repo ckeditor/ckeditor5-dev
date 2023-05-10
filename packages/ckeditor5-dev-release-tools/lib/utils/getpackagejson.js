@@ -6,7 +6,7 @@
 'use strict';
 
 const fs = require( 'fs' );
-const path = require( 'path' );
+const upath = require( 'upath' );
 
 /**
  * Returns object from `package.json`.
@@ -18,7 +18,11 @@ const path = require( 'path' );
  * @returns {Object}
  */
 module.exports = function getPackageJson( cwd = process.cwd() ) {
-	return JSON.parse(
-		fs.readFileSync( path.join( cwd, 'package.json' ), 'utf-8' )
-	);
+	let pkgJsonPath = cwd;
+
+	if ( !pkgJsonPath.endsWith( 'package.json' ) ) {
+		pkgJsonPath = upath.join( cwd, 'package.json' );
+	}
+
+	return JSON.parse( fs.readFileSync( pkgJsonPath, 'utf-8' ) );
 };
