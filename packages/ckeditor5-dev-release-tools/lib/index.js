@@ -12,8 +12,12 @@ const generateChangelogForSinglePackage = require( './tasks/generatechangelogfor
 const generateChangelogForMonoRepository = require( './tasks/generatechangelogformonorepository' );
 const updateCKEditor5Dependencies = require( './tasks/updateckeditor5dependencies' );
 const updateDependencies = require( './tasks/updatedependencies' );
+const commitAndTag = require( './tasks/commitandtag' );
+const createGithubRelease = require( './tasks/creategithubrelease' );
 const updateDependenciesVersions = require( './utils/updatedependenciesversions' );
 const prepareRepository = require( './tasks/preparerepository' );
+const push = require( './tasks/push' );
+const updateVersions = require( './tasks/updateversions' );
 const cleanUpPackages = require( './tasks/cleanuppackages' );
 const { getLastFromChangelog, getCurrent, getLastTagFromGit } = require( './utils/versions' );
 const { getChangesForVersion, getChangelog, saveChangelog } = require( './utils/changelog' );
@@ -36,6 +40,10 @@ module.exports = {
 	getChangelog,
 	saveChangelog,
 	updateDependenciesVersions,
+	updateVersions,
 	prepareRepository,
+	commitAndTag,
+	createGithubRelease,
+	push,
 	cleanUpPackages
 };
