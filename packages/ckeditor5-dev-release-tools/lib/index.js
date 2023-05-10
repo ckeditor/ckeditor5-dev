@@ -13,6 +13,7 @@ const generateChangelogForMonoRepository = require( './tasks/generatechangelogfo
 const updateCKEditor5Dependencies = require( './tasks/updateckeditor5dependencies' );
 const updateDependencies = require( './tasks/updatedependencies' );
 const commitAndTag = require( './tasks/commitandtag' );
+const createGithubRelease = require( './tasks/creategithubrelease' );
 const updateDependenciesVersions = require( './utils/updatedependenciesversions' );
 const prepareRepository = require( './tasks/preparerepository' );
 const { getLastFromChangelog, getCurrent, getLastTagFromGit } = require( './utils/versions' );
@@ -37,5 +38,6 @@ module.exports = {
 	saveChangelog,
 	updateDependenciesVersions,
 	prepareRepository,
-	commitAndTag
+	commitAndTag,
+	createGithubRelease
 };
