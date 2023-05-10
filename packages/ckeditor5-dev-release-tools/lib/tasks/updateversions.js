@@ -34,7 +34,7 @@ module.exports = function updateVersions( { packagesDirectory, version, cwd = pr
 	const pkgJsonPaths = globSync( globPatterns, { cwd: normalizedCwd, absolute: true, nodir: true } );
 	const randomPackagePath = getRandomPackagePath( pkgJsonPaths, normalizedPackagesDir );
 
-	checkVersionGreaterThanOldVersion( version, getPackageJson( normalizedCwd ).version );
+	checkVersionIsNightlyOrGreaterThanOldVersion( version, getPackageJson( normalizedCwd ).version );
 	checkVersionIsAvailableInNpm( version, getPackageJson( randomPackagePath ).name );
 
 	for ( const pkgJsonPath of pkgJsonPaths ) {
@@ -63,13 +63,13 @@ function getRandomPackagePath( pkgJsonPaths, packagesDirectory ) {
  * @param {String} newVersion
  * @param {String} currentVersion
  */
-function checkVersionGreaterThanOldVersion( newVersion, currentVersion ) {
-	if ( !semver.valid( newVersion ) ) {
-		throw new Error( `Provided version ${ newVersion } must be a valid semver version.` );
+function checkVersionIsNightlyOrGreaterThanOldVersion( newVersion, currentVersion ) {
+	if ( newVersion.match( /^0\.0\.0-nightly/ ) ) {
+		return;
 	}
 
 	if ( !semver.gt( newVersion, currentVersion ) ) {
-		throw new Error( `Provided version ${ newVersion } must be greater than ${ currentVersion }.` );
+		throw new Error( `Provided version ${ newVersion } must be greater than ${ currentVersion } or match pattern 0.0.0-nightly.` );
 	}
 }
 

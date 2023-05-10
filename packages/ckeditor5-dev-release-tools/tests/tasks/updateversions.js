@@ -21,17 +21,14 @@ describe( 'dev-release-tools/release', () => {
 				getPackageJson: sandbox.stub().returns( { version: '1.0.0' } ),
 				readJsonSync: sandbox.stub().returns( { version: '1.0.0' } ),
 				sync: sandbox.stub().returns( [ '/ckeditor5-dev' ] ),
-				shExec: sandbox.stub().throws( new Error( 'is not in this registry' ) ),
-				gt: sandbox.stub().returns( true ),
-				valid: sandbox.stub().returns( true )
+				shExec: sandbox.stub().throws( new Error( 'is not in this registry' ) )
 			};
 
 			updateVersions = proxyquire( '../../lib/tasks/updateversions.js', {
 				'fs-extra': { writeJsonSync: stubs.outputJsonSync, readJsonSync: stubs.readJsonSync },
 				'../utils/getpackagejson': stubs.getPackageJson,
 				'glob': { globSync: stubs.sync },
-				'@ckeditor/ckeditor5-dev-utils': { tools: { shExec: stubs.shExec } },
-				'semver': { gt: stubs.gt, valid: stubs.valid }
+				'@ckeditor/ckeditor5-dev-utils': { tools: { shExec: stubs.shExec } }
 			} );
 		} );
 
@@ -89,26 +86,19 @@ describe( 'dev-release-tools/release', () => {
 			expect( () => updateVersions( { version: '1.0.1' } ) ).to.throw( Error, 'custom error' );
 		} );
 
-		it( 'should accept a "0.0.0-nightly-123*" version for nightly releases', () => {
-			updateVersions( { version: '0.0.0-nightly-123.0' } );
-
-			expect( stubs.outputJsonSync ).to.be.called;
+		it( 'should accept 0.0.0 version for nightly releases', () => {
+			expect( () => updateVersions( { version: '0.0.0-nightly-20230510.0' } ) ).not.to.throw( Error );
 		} );
 
 		it( 'should throw when new version is not greater than old version', () => {
 			stubs.getPackageJson.returns( { version: '1.0.1' } );
-			stubs.gt.reset();
 
 			expect( () => updateVersions( { version: '1.0.0' } ) )
-				.to.throw( Error, 'Provided version 1.0.0 must be greater than 1.0.1.' );
-			expect( stubs.gt ).to.be.calledWith( '1.0.0', '1.0.1' );
+				.to.throw( Error, 'Provided version 1.0.0 must be greater than 1.0.1 or match pattern 0.0.0-nightly.' );
 		} );
 
 		it( 'should throw an error when new version is not a valid semver version', () => {
-			stubs.valid.reset();
-
-			expect( () => updateVersions( { version: 'x.y.z' } ) )
-				.to.throw( Error, 'Provided version x.y.z must be a valid semver version.' );
+			expect( () => updateVersions( { version: 'x.y.z' } ) ).to.throw( Error );
 		} );
 
 		it( 'should be able to provide custom cwd', () => {
@@ -121,7 +111,7 @@ describe( 'dev-release-tools/release', () => {
 			} );
 		} );
 
-		it( 'should choose package path and not root path to npm version check when packagesDirectory is provided', () => {
+		it( 'should provide the package path and not root package path for npm version check when packagesDirectory is provided', () => {
 			stubs.sync.returns( [
 				'/ckeditor5-dev/packages/package1/package.json',
 				'/ckeditor5-dev/package.json'
@@ -132,7 +122,7 @@ describe( 'dev-release-tools/release', () => {
 			expect( stubs.getPackageJson.secondCall.args[ 0 ] ).to.contain( '/ckeditor5-dev/packages/package1' );
 		} );
 
-		it( 'should choose the root package to npm version check when packagesDirectory is not provided', () => {
+		it( 'should provide the root package for npm version check when packagesDirectory is not provided', () => {
 			stubs.sync.returns( [ '/ckeditor5-dev/package.json' ] );
 
 			updateVersions( { version: '1.0.1' } );
