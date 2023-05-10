@@ -16,6 +16,13 @@ const getPackageJson = require( '../utils/getpackagejson' );
  * The purpose of the script is to update the version of a root package found in the current working
  * directory and packages if the `options.packagesDirectory` path is provided.
  *
+ * Before updating phase, the specified version must meet the following conditions:
+ *
+ * * It must not be in use in the npm registry.
+ * * It must be higher than the version specified in the root package (found in the `cwd` directory).
+ *   Exception: passing a version starting with the `0.0.0-nightly` string. It is used for publishing
+ *   a nightly release.
+ *
  * @param {Object} options
  * @param {String} options.version Version to store in a `package.json` file under the `version` key.
  * @param {String} [options.packagesDirectory] Relative path to a location of packages to update. If not specified,
@@ -34,11 +41,11 @@ module.exports = function updateVersions( { packagesDirectory, version, cwd = pr
 	const pkgJsonPaths = globSync( globPatterns, { cwd: normalizedCwd, absolute: true, nodir: true } );
 	const randomPackagePath = getRandomPackagePath( pkgJsonPaths, normalizedPackagesDir );
 
-	checkVersionIsNightlyOrGreaterThanOldVersion( version, getPackageJson( normalizedCwd ).version );
-	checkVersionIsAvailableInNpm( version, getPackageJson( randomPackagePath ).name );
+	checkIfVersionIsValid( version, getPackageJson( normalizedCwd ).version );
+	checkVersionAvailability( version, getPackageJson( randomPackagePath ).name );
 
 	for ( const pkgJsonPath of pkgJsonPaths ) {
-		const pkgJson = fs.readJsonSync( pkgJsonPath );
+		const pkgJson = getPackageJson( pkgJsonPath );
 
 		pkgJson.version = version;
 		fs.writeJsonSync( pkgJsonPath, pkgJson, { spaces: 2 } );
@@ -60,11 +67,15 @@ function getRandomPackagePath( pkgJsonPaths, packagesDirectory ) {
 }
 
 /**
+ * Checks if the specified version is greater than the current one.
+ *
+ * A nightly version is always considered as valid.
+ *
  * @param {String} newVersion
  * @param {String} currentVersion
  */
-function checkVersionIsNightlyOrGreaterThanOldVersion( newVersion, currentVersion ) {
-	if ( newVersion.match( /^0\.0\.0-nightly/ ) ) {
+function checkIfVersionIsValid( newVersion, currentVersion ) {
+	if ( newVersion.startsWith( '0.0.0-nightly' ) ) {
 		return;
 	}
 
@@ -79,7 +90,7 @@ function checkVersionIsNightlyOrGreaterThanOldVersion( newVersion, currentVersio
  * @param {String} version
  * @param {String} packageName
  */
-function checkVersionIsAvailableInNpm( version, packageName ) {
+function checkVersionAvailability( version, packageName ) {
 	try {
 		tools.shExec( `npm show ${ packageName }@${ version } version`, { verbosity: 'silent' } );
 
