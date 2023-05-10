@@ -16,6 +16,7 @@ const commitAndTag = require( './tasks/commitandtag' );
 const createGithubRelease = require( './tasks/creategithubrelease' );
 const updateDependenciesVersions = require( './utils/updatedependenciesversions' );
 const prepareRepository = require( './tasks/preparerepository' );
+const push = require( './tasks/push' );
 const { getLastFromChangelog, getCurrent, getLastTagFromGit } = require( './utils/versions' );
 const { getChangesForVersion, getChangelog, saveChangelog } = require( './utils/changelog' );
 
@@ -39,5 +40,6 @@ module.exports = {
 	updateDependenciesVersions,
 	prepareRepository,
 	commitAndTag,
-	createGithubRelease
+	createGithubRelease,
+	push
 };
