@@ -275,9 +275,11 @@ describe( 'dev-release-tools/tasks', () => {
 								'template.md': ''
 							},
 							'.eslintrc.js': '',
+							'.IMPORTANT.md': '',
 							'package.json': JSON.stringify( {
 								name: 'ckeditor5-foo',
 								files: [
+									'.IMPORTANT.md',
 									'src'
 								]
 							} ),
@@ -301,6 +303,7 @@ describe( 'dev-release-tools/tasks', () => {
 					getPathTo( '.' ),
 					getPathTo( 'release' ),
 					getPathTo( 'release/ckeditor5-foo' ),
+					getPathTo( 'release/ckeditor5-foo/.IMPORTANT.md' ),
 					getPathTo( 'release/ckeditor5-foo/package.json' ),
 					getPathTo( 'release/ckeditor5-foo/README.md' ),
 					getPathTo( 'release/ckeditor5-foo/LICENSE.md' ),
