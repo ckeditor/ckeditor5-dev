@@ -153,7 +153,10 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				expectDirectoryStructure( [
+				const actualPaths = globSync( '**', { absolute: true } ).map( upath.normalize );
+
+				expect( actualPaths ).to.have.members( [
+					getPathTo( '.' ),
 					getPathTo( 'release' ),
 					getPathTo( 'release/ckeditor5-foo' ),
 					getPathTo( 'release/ckeditor5-foo/package.json' ),
@@ -185,7 +188,10 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				expectDirectoryStructure( [
+				const actualPaths = globSync( '**', { absolute: true } ).map( upath.normalize );
+
+				expect( actualPaths ).to.have.members( [
+					getPathTo( '.' ),
 					getPathTo( 'release' ),
 					getPathTo( 'release/ckeditor5-foo' ),
 					getPathTo( 'release/ckeditor5-foo/package.json' ),
@@ -209,7 +215,10 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				expectDirectoryStructure( [
+				const actualPaths = globSync( '**', { absolute: true } ).map( upath.normalize );
+
+				expect( actualPaths ).to.have.members( [
+					getPathTo( '.' ),
 					getPathTo( 'release' ),
 					getPathTo( 'release/ckeditor5-foo' ),
 					getPathTo( 'release/ckeditor5-foo/package.json' ),
@@ -223,7 +232,8 @@ describe( 'dev-release-tools/tasks', () => {
 						'ckeditor5-foo': {
 							'package.json': JSON.stringify( {
 								name: 'ckeditor5-foo',
-								main: 'src/index.ts',
+								main: 'src/index.js',
+								types: 'src/index.d.ts',
 								files: [
 									'foo'
 								]
@@ -231,7 +241,8 @@ describe( 'dev-release-tools/tasks', () => {
 							'README.md': '',
 							'LICENSE.md': '',
 							'src': {
-								'index.ts': ''
+								'index.js': '',
+								'index.d.ts': ''
 							}
 						}
 					}
@@ -241,14 +252,18 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				expectDirectoryStructure( [
+				const actualPaths = globSync( '**', { absolute: true } ).map( upath.normalize );
+
+				expect( actualPaths ).to.have.members( [
+					getPathTo( '.' ),
 					getPathTo( 'release' ),
 					getPathTo( 'release/ckeditor5-foo' ),
 					getPathTo( 'release/ckeditor5-foo/package.json' ),
 					getPathTo( 'release/ckeditor5-foo/README.md' ),
 					getPathTo( 'release/ckeditor5-foo/LICENSE.md' ),
 					getPathTo( 'release/ckeditor5-foo/src' ),
-					getPathTo( 'release/ckeditor5-foo/src/index.ts' )
+					getPathTo( 'release/ckeditor5-foo/src/index.js' ),
+					getPathTo( 'release/ckeditor5-foo/src/index.d.ts' )
 				] );
 			} );
 
@@ -310,7 +325,10 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				expectDirectoryStructure( [
+				const actualPaths = globSync( '**', { absolute: true } ).map( upath.normalize );
+
+				expect( actualPaths ).to.have.members( [
+					getPathTo( '.' ),
 					getPathTo( 'release' ),
 					getPathTo( 'release/ckeditor5-foo' ),
 					getPathTo( 'release/ckeditor5-foo/package.json' ),
@@ -396,7 +414,10 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				expectDirectoryStructure( [
+				const actualPaths = globSync( '**', { absolute: true } ).map( upath.normalize );
+
+				expect( actualPaths ).to.have.members( [
+					getPathTo( '.' ),
 					getPathTo( 'release' ),
 					getPathTo( 'release/ckeditor5-foo' ),
 					getPathTo( 'release/ckeditor5-foo/package.json' ),
@@ -609,12 +630,4 @@ describe( 'dev-release-tools/tasks', () => {
 
 function getPathTo( path ) {
 	return upath.join( process.cwd(), path );
-}
-
-function expectDirectoryStructure( expectedPaths ) {
-	const actualPaths = globSync( '**', { absolute: true } ).map( upath.normalize );
-
-	for ( const expectedPath of expectedPaths ) {
-		expect( actualPaths ).to.include( expectedPath );
-	}
 }

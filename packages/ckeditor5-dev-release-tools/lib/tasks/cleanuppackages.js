@@ -135,6 +135,10 @@ function getIgnoredFilePatterns( packageJson ) {
 		patterns.push( packageJson.main );
 	}
 
+	if ( packageJson.types ) {
+		patterns.push( packageJson.types );
+	}
+
 	return patterns;
 }
 
@@ -163,13 +167,5 @@ function sortPathsFromDeepestFirst( firstPath, secondPath ) {
 	const firstPathSegments = firstPath.split( '/' ).length;
 	const secondPathSegments = secondPath.split( '/' ).length;
 
-	if ( firstPathSegments > secondPathSegments ) {
-		return -1;
-	}
-
-	if ( firstPathSegments < secondPathSegments ) {
-		return 1;
-	}
-
-	return 0;
+	return secondPathSegments - firstPathSegments;
 }
