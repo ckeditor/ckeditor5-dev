@@ -13,8 +13,14 @@ const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 /**
  * The purpose of the script is to clean all packages prepared for the release. The cleaning consists of two stages:
  *
- * - Remove unnecessary files and directories from the package directory.
- * - Remove unnecessary fields from the `package.json` file.
+ * - Removes unnecessary files and empty directories from the package directory. Unnecessary files are those not matched by any entry from
+ *   the `files` field in `package.json`. Some files are never removed, even if they are not matched by the `files` patterns:
+ *   - `package.json`,
+ *   - `LICENSE.md`
+ *   - `README.md`
+ *   - file pointed by the `main` field from `package.json`
+ *   - file pointed by the `types` field from `package.json`
+ * - Removes unnecessary fields from the `package.json` file.
  *
  * @param {Object} options
  * @param {String} options.packagesDirectory Relative path to a location of packages to be cleaned up.
@@ -28,8 +34,8 @@ module.exports = function cleanUpPackages( options ) {
 
 	const { packagesDirectory, packageJsonFieldsToRemove, cwd } = parseOptions( options );
 
-	const packageJsonPaths = globSync( packagesDirectory + '/*/package.json', {
-		cwd,
+	const packageJsonPaths = globSync( '*/package.json', {
+		cwd: upath.join( cwd, packagesDirectory ),
 		nodir: true,
 		absolute: true
 	} );

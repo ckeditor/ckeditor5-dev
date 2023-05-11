@@ -75,7 +75,7 @@ describe( 'dev-release-tools/tasks', () => {
 				} );
 
 				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/another/project' );
+				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/another/project/release' );
 			} );
 
 			it( 'should use `process.cwd()` to search for packages if `cwd` option is not provided', () => {
@@ -86,7 +86,7 @@ describe( 'dev-release-tools/tasks', () => {
 				} );
 
 				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/project' );
+				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/project/release' );
 			} );
 
 			it( 'should match only files', () => {
@@ -107,31 +107,13 @@ describe( 'dev-release-tools/tasks', () => {
 				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'absolute', true );
 			} );
 
-			it( 'should search for `package.json` in `packagesDirectory`', () => {
+			it( 'should search for `package.json` in `cwd`', () => {
 				cleanUpPackages( {
 					packagesDirectory: 'release'
 				} );
 
 				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 0 ] ).to.equal( 'release/*/package.json' );
-			} );
-
-			it( 'should remove trailing path separators from the `packagesDirectory`', () => {
-				cleanUpPackages( {
-					packagesDirectory: 'path/to/packages/'
-				} );
-
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 0 ] ).to.equal( 'path/to/packages/*/package.json' );
-			} );
-
-			it( 'should convert backslashes to slashes from the `packagesDirectory`', () => {
-				cleanUpPackages( {
-					packagesDirectory: 'path\\to\\packages\\'
-				} );
-
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 0 ] ).to.equal( 'path/to/packages/*/package.json' );
+				expect( stubs.glob.globSync.getCall( 0 ).args[ 0 ] ).to.equal( '*/package.json' );
 			} );
 		} );
 
