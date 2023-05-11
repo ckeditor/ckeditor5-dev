@@ -153,7 +153,7 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = globSync( '**', { absolute: true } ).map( upath.normalize );
+				const actualPaths = getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -188,7 +188,7 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = globSync( '**', { absolute: true } ).map( upath.normalize );
+				const actualPaths = getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -215,7 +215,7 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = globSync( '**', { absolute: true } ).map( upath.normalize );
+				const actualPaths = getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -252,7 +252,50 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = globSync( '**', { absolute: true } ).map( upath.normalize );
+				const actualPaths = getAllPaths();
+
+				expect( actualPaths ).to.have.members( [
+					getPathTo( '.' ),
+					getPathTo( 'release' ),
+					getPathTo( 'release/ckeditor5-foo' ),
+					getPathTo( 'release/ckeditor5-foo/package.json' ),
+					getPathTo( 'release/ckeditor5-foo/README.md' ),
+					getPathTo( 'release/ckeditor5-foo/LICENSE.md' ),
+					getPathTo( 'release/ckeditor5-foo/src' ),
+					getPathTo( 'release/ckeditor5-foo/src/index.js' ),
+					getPathTo( 'release/ckeditor5-foo/src/index.d.ts' )
+				] );
+			} );
+
+			it( 'should remove not matched dot files and dot directories', () => {
+				mockFs( {
+					'release': {
+						'ckeditor5-foo': {
+							'.github': {
+								'template.md': ''
+							},
+							'.eslintrc.js': '',
+							'package.json': JSON.stringify( {
+								name: 'ckeditor5-foo',
+								files: [
+									'src'
+								]
+							} ),
+							'README.md': '',
+							'LICENSE.md': '',
+							'src': {
+								'index.js': '',
+								'index.d.ts': ''
+							}
+						}
+					}
+				} );
+
+				cleanUpPackages( {
+					packagesDirectory: 'release'
+				} );
+
+				const actualPaths = getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -325,7 +368,7 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = globSync( '**', { absolute: true } ).map( upath.normalize );
+				const actualPaths = getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -414,7 +457,7 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = globSync( '**', { absolute: true } ).map( upath.normalize );
+				const actualPaths = getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -630,4 +673,11 @@ describe( 'dev-release-tools/tasks', () => {
 
 function getPathTo( path ) {
 	return upath.join( process.cwd(), path );
+}
+
+function getAllPaths() {
+	return globSync( '**', {
+		absolute: true,
+		dot: true
+	} ).map( upath.normalize );
 }

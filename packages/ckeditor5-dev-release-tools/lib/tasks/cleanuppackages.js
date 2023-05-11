@@ -71,7 +71,7 @@ function parseOptions( options ) {
 }
 
 /**
- * Remove unnecessary files and directories from the package directory.
+ * Removes unnecessary files and directories from the package directory.
  *
  * @param {Object} packageJson
  * @param {String} packagePath
@@ -83,6 +83,7 @@ function cleanUpPackageDirectory( packageJson, packagePath ) {
 			cwd: packagePath,
 			absolute: true,
 			nodir: true,
+			dot: true,
 			ignore: [
 				'README.md',
 				'LICENSE.md',
@@ -99,7 +100,8 @@ function cleanUpPackageDirectory( packageJson, packagePath ) {
 	// Find and remove empty directories in the package directory.
 	const directories = globSync( '**/', {
 		cwd: packagePath,
-		absolute: true
+		absolute: true,
+		dot: true
 	} )
 		.map( path => upath.normalize( path ) )
 		.sort( sortPathsFromDeepestFirst );
