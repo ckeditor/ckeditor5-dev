@@ -26,8 +26,8 @@ describe( 'reassignNpmTags()', () => {
 		};
 
 		sinon.stub( console, 'log' );
-		stubs.tools.shExec.withArgs( 'npm whoami' ).returns( 'authorized-user' );
-		stubs.tools.shExec.withArgs( sinon.match( 'npm show' ) ).returns( '1.0.0' );
+		stubs.tools.shExec.withArgs( 'npm whoami' ).resolves( 'authorized-user' );
+		stubs.tools.shExec.withArgs( sinon.match( 'npm show' ) ).resolves( '1.0.0' );
 
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', { tools: stubs.tools } );
 
@@ -40,39 +40,42 @@ describe( 'reassignNpmTags()', () => {
 		sinon.restore();
 	} );
 
-	it( 'should throw an error when `authorizedUser` does not match user logged in to npm', () => {
-		stubs.tools.shExec.withArgs( 'npm whoami' ).returns( 'incorrect-npm-user' );
+	it( 'should throw an error when `authorizedUser` does not match user logged in to npm', async () => {
+		stubs.tools.shExec.withArgs( 'npm whoami' ).resolves( 'incorrect-npm-user' );
 
-		expect( () => reassignNpmTags( { authorizedUser: 'correct-npm-user' } ) )
-			.to.throw( 'User: incorrect-npm-user is not matching authorized user: correct-npm-user.' );
+		try {
+			await reassignNpmTags( { authorizedUser: 'correct-npm-user' } );
+		} catch ( e ) {
+			expect( e.message ).to.equal( 'User: incorrect-npm-user is not matching authorized user: correct-npm-user.' );
+		}
 	} );
 
-	it( 'should not update tags when user is not logged in', () => {
+	it( 'should not update tags when user is not logged in', async () => {
 		stubs.tools.shExec.withArgs( sinon.match( 'npm show' ) ).throws( 'User is not logged in error.' );
 		const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
 		const npmDistTagRm = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag rm' ) );
 
-		reassignNpmTags( { authorizedUser: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
+		await reassignNpmTags( { authorizedUser: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
 
 		expect( npmDistTagAdd ).not.to.be.called;
 		expect( npmDistTagRm ).not.to.be.called;
 	} );
 
-	it( 'should skip updating tags when provided version matches existing version for tag latest', () => {
+	it( 'should skip updating tags when provided version matches existing version for tag latest', async () => {
 		const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
 		const npmDistTagRm = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag rm' ) );
 
-		reassignNpmTags( { authorizedUser: 'authorized-user', version: '1.0.0', packages: [ 'package1', 'package2' ] } );
+		await reassignNpmTags( { authorizedUser: 'authorized-user', version: '1.0.0', packages: [ 'package1', 'package2' ] } );
 
 		expect( npmDistTagAdd ).not.to.be.called;
 		expect( npmDistTagRm ).not.to.be.called;
 	} );
 
-	it( 'should update tags when tag latest for provided version does not yet exist', () => {
+	it( 'should update tags when tag latest for provided version does not yet exist', async () => {
 		const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
 		const npmDistTagRm = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag rm' ) );
 
-		reassignNpmTags( { authorizedUser: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
+		await reassignNpmTags( { authorizedUser: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
 
 		expect( npmDistTagAdd.firstCall.args[ 0 ] ).to.equal( 'npm dist-tag add package1@1.0.1 latest' );
 		expect( npmDistTagAdd.secondCall.args[ 0 ] ).to.equal( 'npm dist-tag add package2@1.0.1 latest' );
@@ -80,12 +83,12 @@ describe( 'reassignNpmTags()', () => {
 		expect( npmDistTagRm.secondCall.args[ 0 ] ).to.equal( 'npm dist-tag rm package2@1.0.1 staging' );
 	} );
 
-	it( 'should continue updating packages even if first package update fails', () => {
+	it( 'should continue updating packages even if first package update fails', async () => {
 		const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
 		const npmDistTagRm = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag rm' ) );
 		npmDistTagAdd.onFirstCall().throws( 'Npm error while updating tag.' );
 
-		reassignNpmTags( { authorizedUser: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
+		await reassignNpmTags( { authorizedUser: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
 
 		expect( npmDistTagAdd.firstCall.args[ 0 ] ).to.equal( 'npm dist-tag add package1@1.0.1 latest' );
 		expect( npmDistTagAdd.secondCall.args[ 0 ] ).to.equal( 'npm dist-tag add package2@1.0.1 latest' );

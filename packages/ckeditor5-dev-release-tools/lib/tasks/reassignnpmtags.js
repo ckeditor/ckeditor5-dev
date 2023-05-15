@@ -17,17 +17,18 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {String} authorizedUser User that is authorized to release ckeditor5 packages.
  * @param {String} version Specifies the version of packages to reassign the tags for.
  * @param {Array.<String>} packages Array of packages' names to reassign tags for.
+ * @returns {Promise}
  */
-module.exports = function reassignNpmTags( { authorizedUser, version, packages } ) {
+module.exports = async function reassignNpmTags( { authorizedUser, version, packages } ) {
 	const errors = [];
 	const packagesSkipped = [];
 	const packagesUpdated = [];
 
-	verifyLoggedInUserIsAuthorizedToPublish( authorizedUser );
+	await verifyLoggedInUserIsAuthorizedToPublish( authorizedUser );
 
 	for ( const packageName of packages ) {
 		try {
-			const latestVersion = exec( `npm show ${ packageName }@latest version` );
+			const latestVersion = await exec( `npm show ${ packageName }@latest version` );
 
 			if ( latestVersion === version ) {
 				packagesSkipped.push( `${ packageName }@${ version }` );
@@ -35,9 +36,9 @@ module.exports = function reassignNpmTags( { authorizedUser, version, packages }
 				continue;
 			}
 
-			exec( `npm dist-tag add ${ packageName }@${ version } latest` );
+			await exec( `npm dist-tag add ${ packageName }@${ version } latest` );
 			packagesUpdated.push( `${ packageName }@${ version }` );
-			exec( `npm dist-tag rm ${ packageName }@${ version } staging` );
+			await exec( `npm dist-tag rm ${ packageName }@${ version } staging` );
 		} catch ( e ) {
 			errors.push( trimErrorMessage( e.message ) );
 		}
@@ -58,9 +59,10 @@ module.exports = function reassignNpmTags( { authorizedUser, version, packages }
 
 /**
  * @param {String} authorizedUser
+ * @returns {Promise}
  */
-function verifyLoggedInUserIsAuthorizedToPublish( authorizedUser ) {
-	const loggedInUser = exec( 'npm whoami' ).trim();
+async function verifyLoggedInUserIsAuthorizedToPublish( authorizedUser ) {
+	const loggedInUser = ( await exec( 'npm whoami' ) ).trim();
 
 	if ( loggedInUser !== authorizedUser ) {
 		throw new Error( `User: ${ loggedInUser } is not matching authorized user: ${ authorizedUser }.` );
@@ -77,8 +79,8 @@ function trimErrorMessage( message ) {
 
 /**
  * @param {String} command
- * @returns {String}
+ * @returns {Promise.<String>}
  */
-function exec( command ) {
-	return tools.shExec( command, { verbosity: 'error' } );
+async function exec( command ) {
+	return tools.shExec( command, { verbosity: 'error', async: true } );
 }
