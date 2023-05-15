@@ -26,8 +26,9 @@ const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {String} options.packagesDirectory Relative path to a location of packages to be cleaned up.
  * @param {Array.<String>} [options.packageJsonFieldsToRemove] Fields to remove from `package.json`. If not set, a predefined list is used.
  * @param {String} [options.cwd] Current working directory from which all paths will be resolved.
+ * @returns {Promise<Void>}
  */
-module.exports = function cleanUpPackages( options ) {
+module.exports = async function cleanUpPackages( options ) {
 	const log = logger();
 
 	log.info( 'Task: cleanUpPackages()' );
@@ -42,14 +43,14 @@ module.exports = function cleanUpPackages( options ) {
 
 	for ( const packageJsonPath of packageJsonPaths ) {
 		const packagePath = upath.dirname( packageJsonPath );
-		const packageJson = fs.readJsonSync( packageJsonPath );
+		const packageJson = await fs.readJson( packageJsonPath );
 
 		log.info( `Cleaning up: "${ packagePath }".` );
 
-		cleanUpPackageDirectory( packageJson, packagePath );
+		await cleanUpPackageDirectory( packageJson, packagePath );
 		cleanUpPackageJson( packageJson, packageJsonFieldsToRemove );
 
-		fs.writeJsonSync( packageJsonPath, packageJson, { spaces: 2 } );
+		await fs.writeJson( packageJsonPath, packageJson, { spaces: 2 } );
 	}
 };
 
@@ -81,8 +82,9 @@ function parseOptions( options ) {
  *
  * @param {Object} packageJson
  * @param {String} packagePath
+ * @returns {Promise<Void>}
  */
-function cleanUpPackageDirectory( packageJson, packagePath ) {
+async function cleanUpPackageDirectory( packageJson, packagePath ) {
 	if ( packageJson.files ) {
 		// Find and remove files that don't match the `files` field in the `package.json`.
 		const files = globSync( '**', {
@@ -99,7 +101,7 @@ function cleanUpPackageDirectory( packageJson, packagePath ) {
 		} );
 
 		for ( const file of files ) {
-			fs.removeSync( file );
+			await fs.remove( file );
 		}
 	}
 
@@ -113,15 +115,15 @@ function cleanUpPackageDirectory( packageJson, packagePath ) {
 		.sort( sortPathsFromDeepestFirst );
 
 	for ( const directory of directories ) {
-		const isEmpty = fs.readdirSync( directory ).length === 0;
+		const isEmpty = ( await fs.readdir( directory ) ).length === 0;
 
 		if ( isEmpty ) {
-			fs.removeSync( directory );
+			await fs.remove( directory );
 		}
 	}
 
 	// Remove `node_modules`.
-	fs.removeSync( upath.join( packagePath, 'node_modules' ) );
+	await fs.remove( upath.join( packagePath, 'node_modules' ) );
 }
 
 /**
