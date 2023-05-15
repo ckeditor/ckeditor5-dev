@@ -5,12 +5,11 @@
 
 'use strict';
 
-const { globSync } = require( 'glob' );
+const { glob } = require( 'glob' );
 const fs = require( 'fs-extra' );
 const semver = require( 'semver' );
-const { normalizeTrim, toUnix, dirname } = require( 'upath' );
+const { normalizeTrim, toUnix, dirname, join } = require( 'upath' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const getPackageJson = require( '../utils/getpackagejson' );
 
 /**
  * The purpose of the script is to update the version of a root package found in the current working
@@ -28,30 +27,43 @@ const getPackageJson = require( '../utils/getpackagejson' );
  * @param {String} [options.packagesDirectory] Relative path to a location of packages to update. If not specified,
  * only the root package is checked.
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
- * @returns {Promise<Void>}
+ * @returns {Promise}
  */
 module.exports = async function updateVersions( { packagesDirectory, version, cwd = process.cwd() } ) {
 	const normalizedCwd = toUnix( cwd );
 	const normalizedPackagesDir = packagesDirectory ? normalizeTrim( packagesDirectory ) : null;
-	const globPatterns = [ 'package.json' ];
 
-	if ( packagesDirectory ) {
-		globPatterns.push( normalizedPackagesDir + '/*/package.json' );
-	}
-
-	const pkgJsonPaths = globSync( globPatterns, { cwd: normalizedCwd, absolute: true, nodir: true } );
+	const globPatterns = getGlobPatterns( normalizedPackagesDir );
+	const pkgJsonPaths = await glob( globPatterns, { cwd: normalizedCwd, absolute: true, nodir: true } );
 	const randomPackagePath = getRandomPackagePath( pkgJsonPaths, normalizedPackagesDir );
 
-	checkIfVersionIsValid( version, getPackageJson( normalizedCwd ).version );
-	checkVersionAvailability( version, getPackageJson( randomPackagePath ).name );
+	const rootPackageJson = join( normalizedCwd, 'package.json' );
+	const randomPackageJson = join( randomPackagePath, 'package.json' );
+
+	checkIfVersionIsValid( version, ( await fs.readJson( rootPackageJson ) ).version );
+	await checkVersionAvailability( version, ( await fs.readJson( randomPackageJson ) ).name );
 
 	for ( const pkgJsonPath of pkgJsonPaths ) {
-		const pkgJson = getPackageJson( pkgJsonPath );
+		const pkgJson = await fs.readJson( pkgJsonPath );
 
 		pkgJson.version = version;
 		await fs.writeJson( pkgJsonPath, pkgJson, { spaces: 2 } );
 	}
 };
+
+/**
+ * @param {String|null} packagesDirectory
+ * @returns {Array.<String>}
+ */
+function getGlobPatterns( packagesDirectory ) {
+	const patterns = [ 'package.json' ];
+
+	if ( packagesDirectory ) {
+		patterns.push( packagesDirectory + '/*/package.json' );
+	}
+
+	return patterns;
+}
 
 /**
  * @param {Array.<String>} pkgJsonPaths
@@ -90,15 +102,16 @@ function checkIfVersionIsValid( newVersion, currentVersion ) {
  *
  * @param {String} version
  * @param {String} packageName
+ * @returns {Promise}
  */
-function checkVersionAvailability( version, packageName ) {
-	try {
-		tools.shExec( `npm show ${ packageName }@${ version } version`, { verbosity: 'silent' } );
-
-		throw new Error( `Provided version ${ version } is already used in npm by ${ packageName }.` );
-	} catch ( e ) {
-		if ( !e.toString().includes( 'is not in this registry' ) ) {
-			throw e;
-		}
-	}
+async function checkVersionAvailability( version, packageName ) {
+	return tools.shExec( `npm show ${ packageName }@${ version } version`, { verbosity: 'silent', async: true } )
+		.then( () => {
+			throw new Error( `Provided version ${ version } is already used in npm by ${ packageName }.` );
+		} )
+		.catch( err => {
+			if ( !err.toString().includes( 'is not in this registry' ) ) {
+				throw err;
+			}
+		} );
 }

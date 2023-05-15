@@ -18,17 +18,17 @@ describe( 'dev-release-tools/release', () => {
 
 			stubs = {
 				outputJson: sandbox.stub(),
-				getPackageJson: sandbox.stub().returns( { version: '1.0.0' } ),
-				globSync: sandbox.stub().returns( [ '/ckeditor5-dev' ] ),
-				shExec: sandbox.stub().throws( new Error( 'is not in this registry' ) )
+				readJson: sandbox.stub().resolves( { version: '1.0.0' } ),
+				glob: sandbox.stub().resolves( [ '/ckeditor5-dev' ] ),
+				shExec: sandbox.stub().rejects( new Error( 'is not in this registry' ) )
 			};
 
 			updateVersions = proxyquire( '../../lib/tasks/updateversions.js', {
 				'fs-extra': {
-					writeJson: stubs.outputJson
+					writeJson: stubs.outputJson,
+					readJson: stubs.readJson
 				},
-				'../utils/getpackagejson': stubs.getPackageJson,
-				'glob': { globSync: stubs.globSync },
+				'glob': { glob: stubs.glob },
 				'@ckeditor/ckeditor5-dev-utils': {
 					tools: {
 						shExec: stubs.shExec
@@ -42,7 +42,7 @@ describe( 'dev-release-tools/release', () => {
 		} );
 
 		it( 'should update the version field in all found packages including the root package', async () => {
-			stubs.globSync.returns( [
+			stubs.glob.resolves( [
 				'/ckeditor5-dev/packages/package1/package.json',
 				'/ckeditor5-dev/packages/package2/package.json',
 				'/ckeditor5-dev/packages/package3/package.json',
@@ -51,8 +51,8 @@ describe( 'dev-release-tools/release', () => {
 
 			await updateVersions( { version: '1.0.1', packagesDirectory: 'packages' } );
 
-			expect( stubs.globSync.callCount ).to.equal( 1 );
-			expect( stubs.globSync.firstCall.args[ 0 ] ).to.deep.equal( [ 'package.json', 'packages/*/package.json' ] );
+			expect( stubs.glob.callCount ).to.equal( 1 );
+			expect( stubs.glob.firstCall.args[ 0 ] ).to.deep.equal( [ 'package.json', 'packages/*/package.json' ] );
 
 			expect( stubs.outputJson.callCount ).to.equal( 4 );
 			expect( stubs.outputJson.getCall( 0 ).args[ 0 ] ).to.contain( '/ckeditor5-dev/packages/package1/package.json' );
@@ -62,12 +62,12 @@ describe( 'dev-release-tools/release', () => {
 		} );
 
 		it( 'should update the version field in the root package when packagesDirectory is not provided', async () => {
-			stubs.globSync.returns( [ '/ckeditor5-dev' ] );
+			stubs.glob.resolves( [ '/ckeditor5-dev' ] );
 
 			await updateVersions( { version: '1.0.1' } );
 
-			expect( stubs.globSync.callCount ).to.equal( 1 );
-			expect( stubs.globSync.firstCall.args[ 0 ] ).to.deep.equal( [ 'package.json' ] );
+			expect( stubs.glob.callCount ).to.equal( 1 );
+			expect( stubs.glob.firstCall.args[ 0 ] ).to.deep.equal( [ 'package.json' ] );
 
 			expect( stubs.outputJson.callCount ).to.equal( 1 );
 			expect( stubs.outputJson.firstCall.args[ 0 ] ).to.contain( '/ckeditor5-dev' );
@@ -75,8 +75,8 @@ describe( 'dev-release-tools/release', () => {
 		} );
 
 		it( 'should throw an error when the version is already in use', async () => {
-			stubs.getPackageJson.returns( { version: '1.0.0', name: 'stub-package' } );
-			stubs.shExec.returns( '' );
+			stubs.readJson.resolves( { version: '1.0.0', name: 'stub-package' } );
+			stubs.shExec.resolves( '' );
 
 			try {
 				await updateVersions( { version: '1.0.1' } );
@@ -87,8 +87,8 @@ describe( 'dev-release-tools/release', () => {
 		} );
 
 		it( 'should not throw an error when version is not in use', async () => {
-			stubs.shExec.throws( new Error( 'is not in this registry' ) );
-			stubs.getPackageJson.returns( { version: '1.0.0', name: 'stub-package' } );
+			stubs.shExec.rejects( new Error( 'is not in this registry' ) );
+			stubs.readJson.resolves( { version: '1.0.0', name: 'stub-package' } );
 
 			try {
 				await updateVersions( { version: '1.0.1' } );
@@ -97,9 +97,9 @@ describe( 'dev-release-tools/release', () => {
 			}
 		} );
 
-		it( 'should throw an error when checking the version availability check throws error', async () => {
-			stubs.shExec.throws( new Error( 'custom error' ) );
-			stubs.getPackageJson.returns( { version: '1.0.0', name: 'stub-package' } );
+		it( 'should throw an error when checking the version availability check rejects error', async () => {
+			stubs.shExec.rejects( new Error( 'custom error' ) );
+			stubs.readJson.resolves( { version: '1.0.0', name: 'stub-package' } );
 
 			try {
 				await updateVersions( { version: '1.0.1' } );
@@ -110,14 +110,14 @@ describe( 'dev-release-tools/release', () => {
 		} );
 
 		it( 'should not provide the root package name when checking version availability if packagesDirectory is provided', async () => {
-			stubs.globSync.returns( [
+			stubs.glob.resolves( [
 				'/ckeditor5-dev/packages/package1/package.json',
 				'/ckeditor5-dev/packages/package2/package.json',
 				'/ckeditor5-dev/package.json'
 			] );
-			stubs.getPackageJson.withArgs( '/ckeditor5-dev/packages/package1' ).returns( { name: 'package1' } );
-			stubs.getPackageJson.withArgs( '/ckeditor5-dev/packages/package2' ).returns( { name: 'package2' } );
-			stubs.getPackageJson.withArgs( '/ckeditor5-dev' ).returns( { name: 'root-package' } );
+			stubs.readJson.withArgs( '/ckeditor5-dev/packages/package1/package.json' ).resolves( { name: 'package1' } );
+			stubs.readJson.withArgs( '/ckeditor5-dev/packages/package2/package.json' ).resolves( { name: 'package2' } );
+			stubs.readJson.withArgs( '/ckeditor5-dev/package.json' ).resolves( { name: 'root-package' } );
 
 			await updateVersions( { version: '1.0.1', packagesDirectory: 'packages' } );
 
@@ -126,8 +126,8 @@ describe( 'dev-release-tools/release', () => {
 		} );
 
 		it( 'should provide the root package name when checking version availability if packagesDirectory is not provided', async () => {
-			stubs.globSync.returns( [ '/ckeditor5-dev/package.json' ] );
-			stubs.getPackageJson.withArgs( '/ckeditor5-dev' ).returns( { name: 'root-package' } );
+			stubs.glob.resolves( [ '/ckeditor5-dev/package.json' ] );
+			stubs.readJson.withArgs( '/ckeditor5-dev/package.json' ).resolves( { name: 'root-package' } );
 
 			await updateVersions( { version: '1.0.1' } );
 
@@ -136,7 +136,7 @@ describe( 'dev-release-tools/release', () => {
 		} );
 
 		it( 'should accept `0.0.0-nightly*` version for nightly releases', async () => {
-			stubs.getPackageJson.returns( { version: '1.0.0', name: 'stub-package' } );
+			stubs.readJson.resolves( { version: '1.0.0', name: 'stub-package' } );
 
 			try {
 				await updateVersions( { version: '0.0.0-nightly-20230510.0' } );
@@ -146,7 +146,7 @@ describe( 'dev-release-tools/release', () => {
 		} );
 
 		it( 'should throw when new version is not greater than the current one', async () => {
-			stubs.getPackageJson.returns( { version: '1.0.1' } );
+			stubs.readJson.resolves( { version: '1.0.1' } );
 
 			try {
 				await updateVersions( { version: '1.0.0' } );
@@ -168,7 +168,7 @@ describe( 'dev-release-tools/release', () => {
 		it( 'should be able to provide custom cwd', async () => {
 			await updateVersions( { version: '1.0.1', cwd: 'Users/username/ckeditor5-dev/custom-dir' } );
 
-			expect( stubs.globSync.firstCall.args[ 1 ] ).to.deep.equal( {
+			expect( stubs.glob.firstCall.args[ 1 ] ).to.deep.equal( {
 				cwd: 'Users/username/ckeditor5-dev/custom-dir',
 				absolute: true,
 				nodir: true
