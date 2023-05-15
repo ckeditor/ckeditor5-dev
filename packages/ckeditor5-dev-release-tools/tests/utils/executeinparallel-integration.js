@@ -10,34 +10,17 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 const sinon = require( 'sinon' );
 const glob = require( 'glob' );
-const proxyquire = require( 'proxyquire' );
 
 const REPOSITORY_ROOT = path.join( __dirname, '..', '..', '..', '..' );
 
 // This file covers the "parallelworker.js" file.
 
 describe( 'dev-release-tools/utils', () => {
-	let executeInParallel, stubs, abortController;
+	let executeInParallel, abortController;
 
 	beforeEach( () => {
-		stubs = {
-			devUtils: {
-				tools: {
-					createSpinner: sinon.stub().callsFake( () => stubs.spinnerStub )
-				}
-			},
-			spinnerStub: {
-				start: sinon.stub(),
-				finish: sinon.stub(),
-				increase: sinon.stub()
-			}
-		};
-
 		abortController = new AbortController();
-		executeInParallel = proxyquire( '../../lib/utils/executeinparallel', {
-			// To hide the spinner/counter in tests.
-			'@ckeditor/ckeditor5-dev-utils': stubs.devUtils
-		} );
+		executeInParallel = require( '../../lib/utils/executeinparallel' );
 	} );
 
 	afterEach( () => {
@@ -52,7 +35,6 @@ describe( 'dev-release-tools/utils', () => {
 				cwd: REPOSITORY_ROOT,
 				concurrency: 2,
 				packagesDirectory: 'packages',
-				processDescription: 'Checking ckeditor5-dev paths.',
 				signal: abortController.signal,
 				taskToExecute: async packagePath => {
 					const fs = require( 'fs/promises' );
@@ -60,6 +42,9 @@ describe( 'dev-release-tools/utils', () => {
 					const filePath = path.join( packagePath, 'executeinparallel-integration.log' );
 
 					await fs.writeFile( filePath, new Date().getTime().toString() );
+				},
+				listrTask: {
+					output: ''
 				}
 			} );
 
@@ -89,7 +74,6 @@ describe( 'dev-release-tools/utils', () => {
 				cwd: REPOSITORY_ROOT,
 				concurrency: 2,
 				packagesDirectory: 'packages',
-				processDescription: 'Checking ckeditor5-dev paths.',
 				signal: abortController.signal,
 				taskToExecute: packagePath => {
 					const fs = require( 'fs' );
@@ -97,6 +81,9 @@ describe( 'dev-release-tools/utils', () => {
 					const filePath = path.join( packagePath, 'executeinparallel-integration.log' );
 
 					fs.writeFileSync( filePath, new Date().getTime().toString() );
+				},
+				listrTask: {
+					output: ''
 				}
 			} );
 
