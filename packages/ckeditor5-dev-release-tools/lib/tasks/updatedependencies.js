@@ -6,7 +6,7 @@
 'use strict';
 
 const fs = require( 'fs-extra' );
-const { globSync } = require( 'glob' );
+const { glob } = require( 'glob' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const normalizePath = require( '../utils/normalizepath' );
 
@@ -56,7 +56,7 @@ module.exports = async function updateDependencies( options ) {
 		globPatterns.push( packagesDirectoryPattern );
 	}
 
-	const pkgJsonPaths = globSync( globPatterns, globOptions );
+	const pkgJsonPaths = await glob( globPatterns, globOptions );
 
 	for ( const pkgJsonPath of pkgJsonPaths ) {
 		log.info( `Updating dependencies in "${ pkgJsonPath }".` );

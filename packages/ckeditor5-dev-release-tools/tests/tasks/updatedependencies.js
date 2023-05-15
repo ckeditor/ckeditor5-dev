@@ -22,7 +22,7 @@ describe( 'dev-release-tools/tasks', () => {
 					writeJson: sandbox.stub()
 				},
 				glob: {
-					globSync: sandbox.stub()
+					glob: sandbox.stub()
 				},
 				process: {
 					cwd: sandbox.stub( process, 'cwd' ).returns( '/work/project' )
@@ -57,7 +57,7 @@ describe( 'dev-release-tools/tasks', () => {
 
 		describe( 'preparing options', () => {
 			beforeEach( () => {
-				stubs.glob.globSync.returns( [] );
+				stubs.glob.glob.resolves( [] );
 			} );
 
 			it( 'should use provided `cwd` to search for packages', async () => {
@@ -67,29 +67,29 @@ describe( 'dev-release-tools/tasks', () => {
 
 				await updateDependencies( options );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/another/project' );
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/another/project' );
 			} );
 
 			it( 'should use `process.cwd()` to search for packages if `cwd` option is not provided', async () => {
 				await updateDependencies( {} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/project' );
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/project' );
 			} );
 
 			it( 'should match only files', async () => {
 				await updateDependencies( {} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'nodir', true );
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 1 ] ).to.have.property( 'nodir', true );
 			} );
 
 			it( 'should always receive absolute paths for matched files', async () => {
 				await updateDependencies( {} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'absolute', true );
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 1 ] ).to.have.property( 'absolute', true );
 			} );
 
 			it( 'should search for packages in `cwd` and `packagesDirectory`', () => {
@@ -97,8 +97,8 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'packages'
 				} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 0 ] ).to.deep.equal( [
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 0 ] ).to.deep.equal( [
 					'package.json',
 					'packages/*/package.json'
 				] );
@@ -107,8 +107,8 @@ describe( 'dev-release-tools/tasks', () => {
 			it( 'should search for packages only in `cwd` if `packagesDirectory` option is not provided', async () => {
 				await updateDependencies( {} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 0 ] ).to.deep.equal( [
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 0 ] ).to.deep.equal( [
 					'package.json'
 				] );
 			} );
@@ -118,8 +118,8 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: '/path/to/packages/'
 				} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 0 ] ).to.deep.equal( [
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 0 ] ).to.deep.equal( [
 					'package.json',
 					'path/to/packages/*/package.json'
 				] );
@@ -130,8 +130,8 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: '\\path\\to\\packages\\'
 				} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 0 ] ).to.deep.equal( [
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 0 ] ).to.deep.equal( [
 					'package.json',
 					'path/to/packages/*/package.json'
 				] );
@@ -146,7 +146,7 @@ describe( 'dev-release-tools/tasks', () => {
 			} );
 
 			it( 'should read and write `package.json` for each found package', async () => {
-				stubs.glob.globSync.callsFake( patterns => {
+				stubs.glob.glob.callsFake( patterns => {
 					const paths = {
 						'package.json': [
 							'/work/project/package.json'
@@ -157,7 +157,9 @@ describe( 'dev-release-tools/tasks', () => {
 						]
 					};
 
-					return patterns.flatMap( pattern => paths[ pattern ] || [] );
+					return Promise.resolve(
+						patterns.flatMap( pattern => paths[ pattern ] || [] )
+					);
 				} );
 
 				stubs.fs.readJson.returns( {} );
@@ -178,7 +180,7 @@ describe( 'dev-release-tools/tasks', () => {
 			} );
 
 			it( 'should update eligible dependencies from the `dependencies` key', async () => {
-				stubs.glob.globSync.returns( [ '/work/project/package.json' ] );
+				stubs.glob.glob.resolves( [ '/work/project/package.json' ] );
 
 				stubs.fs.readJson.returns( {
 					dependencies: {
@@ -213,7 +215,7 @@ describe( 'dev-release-tools/tasks', () => {
 			} );
 
 			it( 'should update eligible dependencies from the `devDependencies` key', async () => {
-				stubs.glob.globSync.returns( [ '/work/project/package.json' ] );
+				stubs.glob.glob.resolves( [ '/work/project/package.json' ] );
 
 				stubs.fs.readJson.returns( {
 					devDependencies: {
@@ -248,7 +250,7 @@ describe( 'dev-release-tools/tasks', () => {
 			} );
 
 			it( 'should update eligible dependencies from the `peerDependencies` key', async () => {
-				stubs.glob.globSync.returns( [ '/work/project/package.json' ] );
+				stubs.glob.glob.resolves( [ '/work/project/package.json' ] );
 
 				stubs.fs.readJson.returns( {
 					peerDependencies: {
@@ -283,7 +285,7 @@ describe( 'dev-release-tools/tasks', () => {
 			} );
 
 			it( 'should not update any package if `shouldUpdateVersionCallback` callback returns falsy value', async () => {
-				stubs.glob.globSync.returns( [ '/work/project/package.json' ] );
+				stubs.glob.glob.resolves( [ '/work/project/package.json' ] );
 
 				stubs.fs.readJson.returns( {
 					dependencies: {
