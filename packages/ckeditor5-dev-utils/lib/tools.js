@@ -21,12 +21,14 @@ module.exports = {
 	 * @param {'info'|'warning'|'error'} [options.verbosity='info'] Level of the verbosity. If set as 'info' both outputs (stdout and
 	 * stderr) will be logged. If set as 'error', only stderr output will be logged.
 	 * @param {String} [options.cwd=process.cwd()]
-	 * @returns {String} The command output.
+	 * @param {String} [options.async=false] If set, the command execution is asynchronous. The execution is synchronous by default.
+	 * @returns {String|Promise.<String>} The command output.
 	 */
 	shExec( command, options = {} ) {
 		const {
 			verbosity = 'info',
-			cwd = process.cwd()
+			cwd = process.cwd(),
+			async = false
 		} = options;
 
 		const logger = require( './logger' );
@@ -35,31 +37,47 @@ module.exports = {
 
 		sh.config.silent = true;
 
-		const ret = sh.exec( command, { cwd } );
+		const execOptions = { cwd };
 
-		const grey = chalk.grey;
+		if ( async ) {
+			return new Promise( resolve => {
+				sh.exec( command, execOptions, ( code, stdout, stderr ) => {
+					const result = execHandler( code, stdout, stderr );
 
-		if ( ret.code ) {
-			if ( ret.stdout ) {
-				log.error( grey( ret.stdout ) );
+					resolve( result );
+				} );
+			} );
+		}
+
+		const { code, stdout, stderr } = sh.exec( command, execOptions );
+
+		return execHandler( code, stdout, stderr );
+
+		function execHandler( code, stdout, stderr ) {
+			const grey = chalk.grey;
+
+			if ( code ) {
+				if ( stdout ) {
+					log.error( grey( stdout ) );
+				}
+
+				if ( stderr ) {
+					log.error( grey( stderr ) );
+				}
+
+				throw new Error( `Error while executing ${ command }: ${ stderr }` );
 			}
 
-			if ( ret.stderr ) {
-				log.error( grey( ret.stderr ) );
+			if ( stdout ) {
+				log.info( grey( stdout ) );
 			}
 
-			throw new Error( `Error while executing ${ command }: ${ ret.stderr }` );
-		}
+			if ( stderr ) {
+				log.info( grey( stderr ) );
+			}
 
-		if ( ret.stdout ) {
-			log.info( grey( ret.stdout ) );
+			return stdout;
 		}
-
-		if ( ret.stderr ) {
-			log.info( grey( ret.stderr ) );
-		}
-
-		return ret.stdout;
 	},
 
 	/**
