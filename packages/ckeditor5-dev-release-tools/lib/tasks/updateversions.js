@@ -28,8 +28,9 @@ const getPackageJson = require( '../utils/getpackagejson' );
  * @param {String} [options.packagesDirectory] Relative path to a location of packages to update. If not specified,
  * only the root package is checked.
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
+ * @returns {Promise<Void>}
  */
-module.exports = function updateVersions( { packagesDirectory, version, cwd = process.cwd() } ) {
+module.exports = async function updateVersions( { packagesDirectory, version, cwd = process.cwd() } ) {
 	const normalizedCwd = toUnix( cwd );
 	const normalizedPackagesDir = packagesDirectory ? normalizeTrim( packagesDirectory ) : null;
 	const globPatterns = [ 'package.json' ];
@@ -48,7 +49,7 @@ module.exports = function updateVersions( { packagesDirectory, version, cwd = pr
 		const pkgJson = getPackageJson( pkgJsonPath );
 
 		pkgJson.version = version;
-		fs.writeJsonSync( pkgJsonPath, pkgJson, { spaces: 2 } );
+		await fs.writeJson( pkgJsonPath, pkgJson, { spaces: 2 } );
 	}
 };
 
