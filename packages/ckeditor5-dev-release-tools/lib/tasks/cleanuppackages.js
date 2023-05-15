@@ -7,7 +7,7 @@
 
 const fs = require( 'fs-extra' );
 const upath = require( 'upath' );
-const { globSync } = require( 'glob' );
+const { glob } = require( 'glob' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
@@ -26,7 +26,7 @@ const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {String} options.packagesDirectory Relative path to a location of packages to be cleaned up.
  * @param {Array.<String>} [options.packageJsonFieldsToRemove] Fields to remove from `package.json`. If not set, a predefined list is used.
  * @param {String} [options.cwd] Current working directory from which all paths will be resolved.
- * @returns {Promise<Void>}
+ * @returns {Promise}
  */
 module.exports = async function cleanUpPackages( options ) {
 	const log = logger();
@@ -35,7 +35,7 @@ module.exports = async function cleanUpPackages( options ) {
 
 	const { packagesDirectory, packageJsonFieldsToRemove, cwd } = parseOptions( options );
 
-	const packageJsonPaths = globSync( '*/package.json', {
+	const packageJsonPaths = await glob( '*/package.json', {
 		cwd: upath.join( cwd, packagesDirectory ),
 		nodir: true,
 		absolute: true
@@ -82,12 +82,12 @@ function parseOptions( options ) {
  *
  * @param {Object} packageJson
  * @param {String} packagePath
- * @returns {Promise<Void>}
+ * @returns {Promise}
  */
 async function cleanUpPackageDirectory( packageJson, packagePath ) {
 	if ( packageJson.files ) {
 		// Find and remove files that don't match the `files` field in the `package.json`.
-		const files = globSync( '**', {
+		const files = await glob( '**', {
 			cwd: packagePath,
 			absolute: true,
 			nodir: true,
@@ -106,11 +106,12 @@ async function cleanUpPackageDirectory( packageJson, packagePath ) {
 	}
 
 	// Find and remove empty directories in the package directory.
-	const directories = globSync( '**/', {
+	const globResults = await glob( '**/', {
 		cwd: packagePath,
 		absolute: true,
 		dot: true
-	} )
+	} );
+	const directories = globResults
 		.map( path => upath.normalize( path ) )
 		.sort( sortPathsFromDeepestFirst );
 

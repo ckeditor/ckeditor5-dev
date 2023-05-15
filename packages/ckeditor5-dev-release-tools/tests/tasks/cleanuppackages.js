@@ -10,7 +10,7 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 const fs = require( 'fs-extra' );
 const upath = require( 'upath' );
-const { globSync } = require( 'glob' );
+const { glob } = require( 'glob' );
 
 const mockFs = require( 'mock-fs' );
 
@@ -32,7 +32,7 @@ describe( 'dev-release-tools/tasks', () => {
 					readdir: sandbox.stub().callsFake( ( ...args ) => fs.readdir( ...args ) )
 				},
 				glob: {
-					globSync: sandbox.stub().callsFake( ( ...args ) => globSync( ...args ) )
+					glob: sandbox.stub().callsFake( ( ...args ) => glob( ...args ) )
 				},
 				devUtils: {
 					logger: sandbox.stub().returns( {
@@ -74,8 +74,8 @@ describe( 'dev-release-tools/tasks', () => {
 					cwd: '/work/another/project'
 				} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/another/project/release' );
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/another/project/release' );
 			} );
 
 			it( 'should use `process.cwd()` to search for packages if `cwd` option is not provided', async () => {
@@ -85,8 +85,8 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/project/release' );
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/project/release' );
 			} );
 
 			it( 'should match only files', async () => {
@@ -94,8 +94,8 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'nodir', true );
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 1 ] ).to.have.property( 'nodir', true );
 			} );
 
 			it( 'should always receive absolute paths for matched files', async () => {
@@ -103,8 +103,8 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'absolute', true );
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 1 ] ).to.have.property( 'absolute', true );
 			} );
 
 			it( 'should search for `package.json` in `cwd`', async () => {
@@ -112,8 +112,8 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 0 ] ).to.equal( '*/package.json' );
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 0 ] ).to.equal( '*/package.json' );
 			} );
 		} );
 
@@ -135,7 +135,7 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = getAllPaths();
+				const actualPaths = await getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -170,7 +170,7 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = getAllPaths();
+				const actualPaths = await getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -197,7 +197,7 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = getAllPaths();
+				const actualPaths = await getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -234,7 +234,7 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = getAllPaths();
+				const actualPaths = await getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -279,7 +279,7 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = getAllPaths();
+				const actualPaths = await getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -353,7 +353,7 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = getAllPaths();
+				const actualPaths = await getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -442,7 +442,7 @@ describe( 'dev-release-tools/tasks', () => {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = getAllPaths();
+				const actualPaths = await getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -660,9 +660,9 @@ function getPathTo( path ) {
 	return upath.join( process.cwd(), path );
 }
 
-function getAllPaths() {
-	return globSync( '**', {
+async function getAllPaths() {
+	return ( await glob( '**', {
 		absolute: true,
 		dot: true
-	} ).map( upath.normalize );
+	} ) ).map( upath.normalize );
 }
