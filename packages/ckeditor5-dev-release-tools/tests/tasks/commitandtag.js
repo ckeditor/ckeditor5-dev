@@ -24,11 +24,13 @@ describe( 'commitAndTag()', () => {
 				shExec: sinon.stub().resolves()
 			},
 			glob: {
-				globSync: sinon.stub().returns( [] )
+				glob: sinon.stub().returns( [] )
 			}
 		};
 
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils/lib/tools', stubs.tools );
+		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
+			tools: stubs.tools
+		} );
 		mockery.registerMock( 'glob', stubs.glob );
 
 		commitAndTag = require( '../../lib/tasks/commitandtag' );
@@ -49,7 +51,7 @@ describe( 'commitAndTag()', () => {
 	} );
 
 	it( 'should add provided files to git', async () => {
-		stubs.glob.globSync.returns( [
+		stubs.glob.glob.resolves( [
 			'package.json',
 			'README.md',
 			'packages/custom-package/package.json',
