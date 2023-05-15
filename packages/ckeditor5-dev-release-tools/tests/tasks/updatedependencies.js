@@ -18,8 +18,8 @@ describe( 'dev-release-tools/tasks', () => {
 
 			stubs = {
 				fs: {
-					readJsonSync: sandbox.stub(),
-					writeJsonSync: sandbox.stub()
+					readJson: sandbox.stub(),
+					writeJson: sandbox.stub()
 				},
 				glob: {
 					globSync: sandbox.stub()
@@ -60,33 +60,33 @@ describe( 'dev-release-tools/tasks', () => {
 				stubs.glob.globSync.returns( [] );
 			} );
 
-			it( 'should use provided `cwd` to search for packages', () => {
+			it( 'should use provided `cwd` to search for packages', async () => {
 				const options = {
 					cwd: '/work/another/project'
 				};
 
-				updateDependencies( options );
+				await updateDependencies( options );
 
 				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
 				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/another/project' );
 			} );
 
-			it( 'should use `process.cwd()` to search for packages if `cwd` option is not provided', () => {
-				updateDependencies( {} );
+			it( 'should use `process.cwd()` to search for packages if `cwd` option is not provided', async () => {
+				await updateDependencies( {} );
 
 				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
 				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/project' );
 			} );
 
-			it( 'should match only files', () => {
-				updateDependencies( {} );
+			it( 'should match only files', async () => {
+				await updateDependencies( {} );
 
 				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
 				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'nodir', true );
 			} );
 
-			it( 'should always receive absolute paths for matched files', () => {
-				updateDependencies( {} );
+			it( 'should always receive absolute paths for matched files', async () => {
+				await updateDependencies( {} );
 
 				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
 				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'absolute', true );
@@ -104,8 +104,8 @@ describe( 'dev-release-tools/tasks', () => {
 				] );
 			} );
 
-			it( 'should search for packages only in `cwd` if `packagesDirectory` option is not provided', () => {
-				updateDependencies( {} );
+			it( 'should search for packages only in `cwd` if `packagesDirectory` option is not provided', async () => {
+				await updateDependencies( {} );
 
 				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
 				expect( stubs.glob.globSync.getCall( 0 ).args[ 0 ] ).to.deep.equal( [
@@ -113,8 +113,8 @@ describe( 'dev-release-tools/tasks', () => {
 				] );
 			} );
 
-			it( 'should remove leading and trailing path separators from the `packagesDirectory`', () => {
-				updateDependencies( {
+			it( 'should remove leading and trailing path separators from the `packagesDirectory`', async () => {
+				await updateDependencies( {
 					packagesDirectory: '/path/to/packages/'
 				} );
 
@@ -125,8 +125,8 @@ describe( 'dev-release-tools/tasks', () => {
 				] );
 			} );
 
-			it( 'should convert backslashes to slashes from the `packagesDirectory`', () => {
-				updateDependencies( {
+			it( 'should convert backslashes to slashes from the `packagesDirectory`', async () => {
+				await updateDependencies( {
 					packagesDirectory: '\\path\\to\\packages\\'
 				} );
 
@@ -145,7 +145,7 @@ describe( 'dev-release-tools/tasks', () => {
 				shouldUpdateVersionCallback = sandbox.stub().callsFake( packageName => packageName.startsWith( '@ckeditor' ) );
 			} );
 
-			it( 'should read and write `package.json` for each found package', () => {
+			it( 'should read and write `package.json` for each found package', async () => {
 				stubs.glob.globSync.callsFake( patterns => {
 					const paths = {
 						'package.json': [
@@ -160,27 +160,27 @@ describe( 'dev-release-tools/tasks', () => {
 					return patterns.flatMap( pattern => paths[ pattern ] || [] );
 				} );
 
-				stubs.fs.readJsonSync.returns( {} );
+				stubs.fs.readJson.returns( {} );
 
-				updateDependencies( {
+				await updateDependencies( {
 					packagesDirectory: 'packages'
 				} );
 
-				expect( stubs.fs.readJsonSync.callCount ).to.equal( 3 );
-				expect( stubs.fs.readJsonSync.getCall( 0 ).args[ 0 ] ).to.equal( '/work/project/package.json' );
-				expect( stubs.fs.readJsonSync.getCall( 1 ).args[ 0 ] ).to.equal( '/work/project/packages/ckeditor5-foo/package.json' );
-				expect( stubs.fs.readJsonSync.getCall( 2 ).args[ 0 ] ).to.equal( '/work/project/packages/ckeditor5-bar/package.json' );
+				expect( stubs.fs.readJson.callCount ).to.equal( 3 );
+				expect( stubs.fs.readJson.getCall( 0 ).args[ 0 ] ).to.equal( '/work/project/package.json' );
+				expect( stubs.fs.readJson.getCall( 1 ).args[ 0 ] ).to.equal( '/work/project/packages/ckeditor5-foo/package.json' );
+				expect( stubs.fs.readJson.getCall( 2 ).args[ 0 ] ).to.equal( '/work/project/packages/ckeditor5-bar/package.json' );
 
-				expect( stubs.fs.writeJsonSync.callCount ).to.equal( 3 );
-				expect( stubs.fs.writeJsonSync.getCall( 0 ).args[ 0 ] ).to.equal( '/work/project/package.json' );
-				expect( stubs.fs.writeJsonSync.getCall( 1 ).args[ 0 ] ).to.equal( '/work/project/packages/ckeditor5-foo/package.json' );
-				expect( stubs.fs.writeJsonSync.getCall( 2 ).args[ 0 ] ).to.equal( '/work/project/packages/ckeditor5-bar/package.json' );
+				expect( stubs.fs.writeJson.callCount ).to.equal( 3 );
+				expect( stubs.fs.writeJson.getCall( 0 ).args[ 0 ] ).to.equal( '/work/project/package.json' );
+				expect( stubs.fs.writeJson.getCall( 1 ).args[ 0 ] ).to.equal( '/work/project/packages/ckeditor5-foo/package.json' );
+				expect( stubs.fs.writeJson.getCall( 2 ).args[ 0 ] ).to.equal( '/work/project/packages/ckeditor5-bar/package.json' );
 			} );
 
-			it( 'should update eligible dependencies from the `dependencies` key', () => {
+			it( 'should update eligible dependencies from the `dependencies` key', async () => {
 				stubs.glob.globSync.returns( [ '/work/project/package.json' ] );
 
-				stubs.fs.readJsonSync.returns( {
+				stubs.fs.readJson.returns( {
 					dependencies: {
 						'@ckeditor/ckeditor5-engine': '^37.0.0',
 						'@ckeditor/ckeditor5-enter': '^37.0.0',
@@ -189,7 +189,7 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 
-				updateDependencies( {
+				await updateDependencies( {
 					version: '^38.0.0',
 					shouldUpdateVersionCallback
 				} );
@@ -200,9 +200,9 @@ describe( 'dev-release-tools/tasks', () => {
 				expect( shouldUpdateVersionCallback.getCall( 2 ).args[ 0 ] ).to.equal( '@ckeditor/ckeditor5-essentials' );
 				expect( shouldUpdateVersionCallback.getCall( 3 ).args[ 0 ] ).to.equal( 'lodash-es' );
 
-				expect( stubs.fs.writeJsonSync.callCount ).to.equal( 1 );
-				expect( stubs.fs.writeJsonSync.getCall( 0 ).args[ 0 ] ).to.equal( '/work/project/package.json' );
-				expect( stubs.fs.writeJsonSync.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
+				expect( stubs.fs.writeJson.callCount ).to.equal( 1 );
+				expect( stubs.fs.writeJson.getCall( 0 ).args[ 0 ] ).to.equal( '/work/project/package.json' );
+				expect( stubs.fs.writeJson.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
 					dependencies: {
 						'@ckeditor/ckeditor5-engine': '^38.0.0',
 						'@ckeditor/ckeditor5-enter': '^38.0.0',
@@ -212,10 +212,10 @@ describe( 'dev-release-tools/tasks', () => {
 				} );
 			} );
 
-			it( 'should update eligible dependencies from the `devDependencies` key', () => {
+			it( 'should update eligible dependencies from the `devDependencies` key', async () => {
 				stubs.glob.globSync.returns( [ '/work/project/package.json' ] );
 
-				stubs.fs.readJsonSync.returns( {
+				stubs.fs.readJson.returns( {
 					devDependencies: {
 						'@ckeditor/ckeditor5-engine': '^37.0.0',
 						'@ckeditor/ckeditor5-enter': '^37.0.0',
@@ -224,7 +224,7 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 
-				updateDependencies( {
+				await updateDependencies( {
 					version: '^38.0.0',
 					shouldUpdateVersionCallback
 				} );
@@ -235,9 +235,9 @@ describe( 'dev-release-tools/tasks', () => {
 				expect( shouldUpdateVersionCallback.getCall( 2 ).args[ 0 ] ).to.equal( '@ckeditor/ckeditor5-essentials' );
 				expect( shouldUpdateVersionCallback.getCall( 3 ).args[ 0 ] ).to.equal( 'lodash-es' );
 
-				expect( stubs.fs.writeJsonSync.callCount ).to.equal( 1 );
-				expect( stubs.fs.writeJsonSync.getCall( 0 ).args[ 0 ] ).to.equal( '/work/project/package.json' );
-				expect( stubs.fs.writeJsonSync.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
+				expect( stubs.fs.writeJson.callCount ).to.equal( 1 );
+				expect( stubs.fs.writeJson.getCall( 0 ).args[ 0 ] ).to.equal( '/work/project/package.json' );
+				expect( stubs.fs.writeJson.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
 					devDependencies: {
 						'@ckeditor/ckeditor5-engine': '^38.0.0',
 						'@ckeditor/ckeditor5-enter': '^38.0.0',
@@ -247,10 +247,10 @@ describe( 'dev-release-tools/tasks', () => {
 				} );
 			} );
 
-			it( 'should update eligible dependencies from the `peerDependencies` key', () => {
+			it( 'should update eligible dependencies from the `peerDependencies` key', async () => {
 				stubs.glob.globSync.returns( [ '/work/project/package.json' ] );
 
-				stubs.fs.readJsonSync.returns( {
+				stubs.fs.readJson.returns( {
 					peerDependencies: {
 						'@ckeditor/ckeditor5-engine': '^37.0.0',
 						'@ckeditor/ckeditor5-enter': '^37.0.0',
@@ -259,7 +259,7 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 
-				updateDependencies( {
+				await updateDependencies( {
 					version: '^38.0.0',
 					shouldUpdateVersionCallback
 				} );
@@ -270,9 +270,9 @@ describe( 'dev-release-tools/tasks', () => {
 				expect( shouldUpdateVersionCallback.getCall( 2 ).args[ 0 ] ).to.equal( '@ckeditor/ckeditor5-essentials' );
 				expect( shouldUpdateVersionCallback.getCall( 3 ).args[ 0 ] ).to.equal( 'lodash-es' );
 
-				expect( stubs.fs.writeJsonSync.callCount ).to.equal( 1 );
-				expect( stubs.fs.writeJsonSync.getCall( 0 ).args[ 0 ] ).to.equal( '/work/project/package.json' );
-				expect( stubs.fs.writeJsonSync.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
+				expect( stubs.fs.writeJson.callCount ).to.equal( 1 );
+				expect( stubs.fs.writeJson.getCall( 0 ).args[ 0 ] ).to.equal( '/work/project/package.json' );
+				expect( stubs.fs.writeJson.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
 					peerDependencies: {
 						'@ckeditor/ckeditor5-engine': '^38.0.0',
 						'@ckeditor/ckeditor5-enter': '^38.0.0',
@@ -282,10 +282,10 @@ describe( 'dev-release-tools/tasks', () => {
 				} );
 			} );
 
-			it( 'should not update any package if `shouldUpdateVersionCallback` callback returns falsy value', () => {
+			it( 'should not update any package if `shouldUpdateVersionCallback` callback returns falsy value', async () => {
 				stubs.glob.globSync.returns( [ '/work/project/package.json' ] );
 
-				stubs.fs.readJsonSync.returns( {
+				stubs.fs.readJson.returns( {
 					dependencies: {
 						'@ckeditor/ckeditor5-engine': '^37.0.0',
 						'@ckeditor/ckeditor5-enter': '^37.0.0',
@@ -294,14 +294,14 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 
-				updateDependencies( {
+				await updateDependencies( {
 					version: '^38.0.0',
 					shouldUpdateVersionCallback: () => false
 				} );
 
-				expect( stubs.fs.writeJsonSync.callCount ).to.equal( 1 );
-				expect( stubs.fs.writeJsonSync.getCall( 0 ).args[ 0 ] ).to.equal( '/work/project/package.json' );
-				expect( stubs.fs.writeJsonSync.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
+				expect( stubs.fs.writeJson.callCount ).to.equal( 1 );
+				expect( stubs.fs.writeJson.getCall( 0 ).args[ 0 ] ).to.equal( '/work/project/package.json' );
+				expect( stubs.fs.writeJson.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
 					dependencies: {
 						'@ckeditor/ckeditor5-engine': '^37.0.0',
 						'@ckeditor/ckeditor5-enter': '^37.0.0',
