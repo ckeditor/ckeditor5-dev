@@ -26,6 +26,8 @@ describe( 'reassignNpmTags()', () => {
 		};
 
 		sinon.stub( console, 'log' );
+		stubs.tools.shExec.withArgs( 'npm whoami' ).returns( 'authorized-user' );
+		stubs.tools.shExec.withArgs( sinon.match( 'npm show' ) ).returns( '1.0.0' );
 
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', { tools: stubs.tools } );
 
@@ -46,7 +48,6 @@ describe( 'reassignNpmTags()', () => {
 	} );
 
 	it( 'should not update tags when user is not logged in', () => {
-		stubs.tools.shExec.withArgs( 'npm whoami' ).returns( 'authorized-user' );
 		stubs.tools.shExec.withArgs( sinon.match( 'npm show' ) ).throws( 'User is not logged in error.' );
 		const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
 		const npmDistTagRm = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag rm' ) );
@@ -58,8 +59,6 @@ describe( 'reassignNpmTags()', () => {
 	} );
 
 	it( 'should skip updating tags when provided version matches existing version for tag latest', () => {
-		stubs.tools.shExec.withArgs( 'npm whoami' ).returns( 'authorized-user' );
-		stubs.tools.shExec.withArgs( sinon.match( 'npm show' ) ).returns( '1.0.0' );
 		const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
 		const npmDistTagRm = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag rm' ) );
 
@@ -69,9 +68,7 @@ describe( 'reassignNpmTags()', () => {
 		expect( npmDistTagRm ).not.to.be.called;
 	} );
 
-	it( 'should update tags when version when latest tag for provided version does not yet exist', () => {
-		stubs.tools.shExec.withArgs( 'npm whoami' ).returns( 'authorized-user' );
-		stubs.tools.shExec.withArgs( sinon.match( 'npm show' ) ).returns( '1.0.0' );
+	it( 'should update tags when tag latest for provided version does not yet exist', () => {
 		const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
 		const npmDistTagRm = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag rm' ) );
 
@@ -84,8 +81,6 @@ describe( 'reassignNpmTags()', () => {
 	} );
 
 	it( 'should continue updating packages even if first package update fails', () => {
-		stubs.tools.shExec.withArgs( 'npm whoami' ).returns( 'authorized-user' );
-		stubs.tools.shExec.withArgs( sinon.match( 'npm show' ) ).returns( '1.0.0' );
 		const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
 		const npmDistTagRm = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag rm' ) );
 		npmDistTagAdd.onFirstCall().throws( 'Npm error while updating tag.' );
