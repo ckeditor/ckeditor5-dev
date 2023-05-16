@@ -10,7 +10,7 @@ const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 
 describe( 'dev-release-tools/utils', () => {
-	let executeInParallel, stubs, abortController, WorkerMock, defaultOptions;
+	let executeInParallel, stubs, abortController, WorkerMock, defaultOptions, outputHistory;
 
 	beforeEach( () => {
 		WorkerMock = class {
@@ -30,6 +30,8 @@ describe( 'dev-release-tools/utils', () => {
 			}
 		};
 
+		outputHistory = [];
+
 		stubs = {
 			process: {
 				cwd: sinon.stub( process, 'cwd' ).returns( '/home/ckeditor' )
@@ -41,24 +43,19 @@ describe( 'dev-release-tools/utils', () => {
 				randomUUID: sinon.stub().returns( 'uuid-4' )
 			},
 			fs: {
-				writeFileSync: sinon.stub(),
-				unlinkSync: sinon.stub()
+				writeFile: sinon.stub().resolves(),
+				unlink: sinon.stub().resolves()
 			},
 			worker_threads: {
 				Worker: WorkerMock
 			},
 			glob: {
-				globSync: sinon.stub().returns( [
+				glob: sinon.stub().resolves( [
 					'/home/ckeditor/my-packages/package-01',
 					'/home/ckeditor/my-packages/package-02',
 					'/home/ckeditor/my-packages/package-03',
 					'/home/ckeditor/my-packages/package-04'
 				] )
-			},
-			devUtils: {
-				tools: {
-					createSpinner: sinon.stub().callsFake( () => stubs.spinnerStub )
-				}
 			},
 			spinnerStub: {
 				start: sinon.stub(),
@@ -71,16 +68,19 @@ describe( 'dev-release-tools/utils', () => {
 
 		defaultOptions = {
 			packagesDirectory: 'my-packages',
-			processDescription: 'Just a test.',
 			taskToExecute: packagePath => console.log( 'pwd', packagePath ),
-			signal: abortController.signal
+			signal: abortController.signal,
+			listrTask: {
+				set output( value ) {
+					outputHistory.push( value );
+				}
+			}
 		};
 
 		executeInParallel = proxyquire( '../../lib/utils/executeinparallel', {
-			'@ckeditor/ckeditor5-dev-utils': stubs.devUtils,
 			os: stubs.os,
 			crypto: stubs.crypto,
-			fs: stubs.fs,
+			'fs/promises': stubs.fs,
 			worker_threads: stubs.worker_threads,
 			glob: stubs.glob
 		} );
@@ -93,24 +93,24 @@ describe( 'dev-release-tools/utils', () => {
 	describe( 'executeInParallel()', () => {
 		it( 'should execute the specified `taskToExecute` on all packages found in the `packagesDirectory`', async () => {
 			const promise = executeInParallel( defaultOptions );
-
-			expect( stubs.glob.globSync.callCount ).to.equal( 1 );
-			expect( stubs.glob.globSync.firstCall.args[ 0 ] ).to.equal( 'my-packages/*/' );
-			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.be.an( 'object' );
-			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.have.property( 'cwd', '/home/ckeditor' );
-			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.have.property( 'absolute', true );
-
-			expect( stubs.fs.writeFileSync.callCount ).to.equal( 1 );
-			expect( stubs.fs.writeFileSync.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.js' );
-			expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.equal(
-				'\'use strict\';\nmodule.exports = packagePath => console.log( \'pwd\', packagePath );'
-			);
+			await delay( 0 );
 
 			// By default the helper uses a half of available CPUs.
 			expect( WorkerMock.instances ).to.lengthOf( 2 );
 
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
+			expect( stubs.glob.glob.callCount ).to.equal( 1 );
+			expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.equal( 'my-packages/*/' );
+			expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.be.an( 'object' );
+			expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.have.property( 'cwd', '/home/ckeditor' );
+			expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.have.property( 'absolute', true );
+
+			expect( stubs.fs.writeFile.callCount ).to.equal( 1 );
+			expect( stubs.fs.writeFile.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.js' );
+			expect( stubs.fs.writeFile.firstCall.args[ 1 ] ).to.equal(
+				'\'use strict\';\nmodule.exports = packagePath => console.log( \'pwd\', packagePath );'
+			);
 			expect( firstWorker.workerData ).to.be.an( 'object' );
 			expect( firstWorker.workerData ).to.have.property( 'callbackModule', '/home/ckeditor/uuid-4.js' );
 			expect( firstWorker.workerData ).to.have.property( 'packages' );
@@ -132,11 +132,12 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			const promise = executeInParallel( options );
+			await delay( 0 );
 
-			expect( stubs.glob.globSync.callCount ).to.equal( 1 );
-			expect( stubs.glob.globSync.firstCall.args[ 0 ] ).to.equal( 'my-packages/*/' );
-			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.be.an( 'object' );
-			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.have.property( 'cwd', '/custom/cwd' );
+			expect( stubs.glob.glob.callCount ).to.equal( 1 );
+			expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.equal( 'my-packages/*/' );
+			expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.be.an( 'object' );
+			expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.have.property( 'cwd', '/custom/cwd' );
 
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
@@ -149,12 +150,14 @@ describe( 'dev-release-tools/utils', () => {
 
 		it( 'should normalize the current working directory to unix-style (default value, Windows path)', async () => {
 			stubs.process.cwd.returns( 'C:\\Users\\ckeditor' );
-			const promise = executeInParallel( defaultOptions );
 
-			expect( stubs.glob.globSync.callCount ).to.equal( 1 );
-			expect( stubs.glob.globSync.firstCall.args[ 0 ] ).to.equal( 'my-packages/*/' );
-			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.be.an( 'object' );
-			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.have.property( 'cwd', 'C:/Users/ckeditor' );
+			const promise = executeInParallel( defaultOptions );
+			await delay( 0 );
+
+			expect( stubs.glob.glob.callCount ).to.equal( 1 );
+			expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.equal( 'my-packages/*/' );
+			expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.be.an( 'object' );
+			expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.have.property( 'cwd', 'C:/Users/ckeditor' );
 
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
@@ -171,11 +174,12 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			const promise = executeInParallel( options );
+			await delay( 0 );
 
-			expect( stubs.glob.globSync.callCount ).to.equal( 1 );
-			expect( stubs.glob.globSync.firstCall.args[ 0 ] ).to.equal( 'my-packages/*/' );
-			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.be.an( 'object' );
-			expect( stubs.glob.globSync.firstCall.args[ 1 ] ).to.have.property( 'cwd', 'C:/Users/ckeditor' );
+			expect( stubs.glob.glob.callCount ).to.equal( 1 );
+			expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.equal( 'my-packages/*/' );
+			expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.be.an( 'object' );
+			expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.have.property( 'cwd', 'C:/Users/ckeditor' );
 
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
@@ -188,11 +192,13 @@ describe( 'dev-release-tools/utils', () => {
 
 		it( 'should create the temporary module properly when using Windows-style paths', async () => {
 			stubs.process.cwd.returns( 'C:\\Users\\ckeditor' );
-			const promise = executeInParallel( defaultOptions );
 
-			expect( stubs.fs.writeFileSync.callCount ).to.equal( 1 );
-			expect( stubs.fs.writeFileSync.firstCall.args[ 0 ] ).to.equal( 'C:/Users/ckeditor/uuid-4.js' );
-			expect( stubs.fs.writeFileSync.firstCall.args[ 1 ] ).to.equal(
+			const promise = executeInParallel( defaultOptions );
+			await delay( 0 );
+
+			expect( stubs.fs.writeFile.callCount ).to.equal( 1 );
+			expect( stubs.fs.writeFile.firstCall.args[ 0 ] ).to.equal( 'C:/Users/ckeditor/uuid-4.js' );
+			expect( stubs.fs.writeFile.firstCall.args[ 1 ] ).to.equal(
 				'\'use strict\';\nmodule.exports = packagePath => console.log( \'pwd\', packagePath );'
 			);
 
@@ -220,7 +226,9 @@ describe( 'dev-release-tools/utils', () => {
 			const options = Object.assign( {}, defaultOptions, {
 				concurrency: 4
 			} );
+
 			const promise = executeInParallel( options );
+			await delay( 0 );
 
 			expect( WorkerMock.instances ).to.lengthOf( 4 );
 
@@ -234,6 +242,8 @@ describe( 'dev-release-tools/utils', () => {
 
 		it( 'should resolve the promise if a worker finished (aborted) with a non-zero exit code (first worker)', async () => {
 			const promise = executeInParallel( defaultOptions );
+			await delay( 0 );
+
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
 			getExitCallback( firstWorker )( 1 );
@@ -244,6 +254,8 @@ describe( 'dev-release-tools/utils', () => {
 
 		it( 'should resolve the promise if a worker finished (aborted) with a non-zero exit code (second worker)', async () => {
 			const promise = executeInParallel( defaultOptions );
+			await delay( 0 );
+
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
 			getExitCallback( firstWorker )( 0 );
@@ -252,8 +264,10 @@ describe( 'dev-release-tools/utils', () => {
 			await promise;
 		} );
 
-		it( 'should reject the promise if a worker emitted an error (first worker)', () => {
+		it( 'should reject the promise if a worker emitted an error (first worker)', async () => {
 			const promise = executeInParallel( defaultOptions );
+			await delay( 0 );
+
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 			const error = new Error( 'Example error from a worker.' );
 
@@ -271,8 +285,10 @@ describe( 'dev-release-tools/utils', () => {
 				);
 		} );
 
-		it( 'should reject the promise if a worker emitted an error (second worker)', () => {
+		it( 'should reject the promise if a worker emitted an error (second worker)', async () => {
 			const promise = executeInParallel( defaultOptions );
+			await delay( 0 );
+
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 			const error = new Error( 'Example error from a worker.' );
 
@@ -292,6 +308,7 @@ describe( 'dev-release-tools/utils', () => {
 
 		it( 'should split packages into threads one by one', async () => {
 			const promise = executeInParallel( defaultOptions );
+			await delay( 0 );
 
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
@@ -320,6 +337,8 @@ describe( 'dev-release-tools/utils', () => {
 
 		it( 'should remove the temporary module after execution', async () => {
 			const promise = executeInParallel( defaultOptions );
+			await delay( 0 );
+
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
 			// Workers did not emit an error.
@@ -328,12 +347,14 @@ describe( 'dev-release-tools/utils', () => {
 
 			await promise;
 
-			expect( stubs.fs.unlinkSync.callCount ).to.equal( 1 );
-			expect( stubs.fs.unlinkSync.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.js' );
+			expect( stubs.fs.unlink.callCount ).to.equal( 1 );
+			expect( stubs.fs.unlink.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.js' );
 		} );
 
 		it( 'should remove the temporary module if the process is aborted', async () => {
 			const promise = executeInParallel( defaultOptions );
+			await delay( 0 );
+
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
 			abortController.abort( 'SIGINT' );
@@ -344,12 +365,14 @@ describe( 'dev-release-tools/utils', () => {
 
 			await promise;
 
-			expect( stubs.fs.unlinkSync.callCount ).to.equal( 1 );
-			expect( stubs.fs.unlinkSync.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.js' );
+			expect( stubs.fs.unlink.callCount ).to.equal( 1 );
+			expect( stubs.fs.unlink.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.js' );
 		} );
 
-		it( 'should remove the temporary module if the promise rejected', () => {
+		it( 'should remove the temporary module if the promise rejected', async () => {
 			const promise = executeInParallel( defaultOptions );
+			await delay( 0 );
+
 			const [ firstWorker ] = WorkerMock.instances;
 			const error = new Error( 'Example error from a worker.' );
 
@@ -361,14 +384,16 @@ describe( 'dev-release-tools/utils', () => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					() => {
-						expect( stubs.fs.unlinkSync.callCount ).to.equal( 1 );
-						expect( stubs.fs.unlinkSync.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.js' );
+						expect( stubs.fs.unlink.callCount ).to.equal( 1 );
+						expect( stubs.fs.unlink.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.js' );
 					}
 				);
 		} );
 
 		it( 'should terminate threads if the process is aborted', async () => {
 			const promise = executeInParallel( defaultOptions );
+			await delay( 0 );
+
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
 			abortController.abort( 'SIGINT' );
@@ -386,6 +411,8 @@ describe( 'dev-release-tools/utils', () => {
 		it( 'should attach listener to a worker that executes a callback once per worker', async () => {
 			const signalEvent = sinon.stub( abortController.signal, 'addEventListener' );
 			const promise = executeInParallel( defaultOptions );
+			await delay( 0 );
+
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
 			abortController.abort( 'SIGINT' );
@@ -409,40 +436,28 @@ describe( 'dev-release-tools/utils', () => {
 			expect( signalEvent.secondCall.args[ 2 ] ).to.have.property( 'once', true );
 		} );
 
-		it( 'should create a spinner that informs a user about the progress', async () => {
+		it( 'should update the progress when a package finished executing the callback', async () => {
 			const promise = executeInParallel( defaultOptions );
+			await delay( 0 );
 
-			expect( stubs.devUtils.tools.createSpinner.callCount ).to.equal( 1 );
-			expect( stubs.devUtils.tools.createSpinner.firstCall.args[ 0 ] ).to.equal( 'Just a test.' );
-			expect( stubs.devUtils.tools.createSpinner.firstCall.args[ 1 ] ).to.be.an( 'object' );
-			expect( stubs.devUtils.tools.createSpinner.firstCall.args[ 1 ] ).to.have.property( 'total', 4 );
-			expect( stubs.spinnerStub.start.callCount ).to.equal( 1 );
-
-			const [ firstWorker, secondWorker ] = WorkerMock.instances;
-
-			// Workers did not emit an error.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
-
-			await promise;
-		} );
-
-		it( 'should increase the counter when a package finished executing the callback', async () => {
-			const promise = executeInParallel( defaultOptions );
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
 			const firstWorkerPackageDone = getMessageCallback( firstWorker );
 			const secondWorkerPackageDone = getMessageCallback( secondWorker );
 
-			expect( stubs.spinnerStub.increase.callCount ).to.equal( 0 ); // 0/4.
+			expect( outputHistory ).to.lengthOf( 0 );
 			firstWorkerPackageDone( 'done:package' );
-			expect( stubs.spinnerStub.increase.callCount ).to.equal( 1 ); // 1/4.
+			expect( outputHistory ).to.include( 'Status: 1/4.' );
+			expect( outputHistory ).to.lengthOf( 1 );
 			secondWorkerPackageDone( 'done:package' );
-			expect( stubs.spinnerStub.increase.callCount ).to.equal( 2 ); // 2/4.
+			expect( outputHistory ).to.include( 'Status: 2/4.' );
+			expect( outputHistory ).to.lengthOf( 2 );
 			secondWorkerPackageDone( 'done:package' );
-			expect( stubs.spinnerStub.increase.callCount ).to.equal( 3 ); // 3/4.
+			expect( outputHistory ).to.lengthOf( 3 );
+			expect( outputHistory ).to.include( 'Status: 3/4.' );
 			firstWorkerPackageDone( 'done:package' );
-			expect( stubs.spinnerStub.increase.callCount ).to.equal( 4 ); // 4/4.
+			expect( outputHistory ).to.lengthOf( 4 );
+			expect( outputHistory ).to.include( 'Status: 4/4.' );
 
 			// Workers did not emit an error.
 			getExitCallback( firstWorker )( 0 );
@@ -451,73 +466,29 @@ describe( 'dev-release-tools/utils', () => {
 			await promise;
 		} );
 
-		it( 'should ignore messages from threads unrelated to the spinner', async () => {
+		it( 'should ignore messages from threads unrelated to the progress', async () => {
 			const promise = executeInParallel( defaultOptions );
+			await delay( 0 );
+
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 			const firstWorkerPackageDone = getMessageCallback( firstWorker );
 
-			expect( stubs.spinnerStub.increase.callCount ).to.equal( 0 );
+			expect( outputHistory ).to.lengthOf( 0 );
 			firstWorkerPackageDone( 'foo' );
-			expect( stubs.spinnerStub.increase.callCount ).to.equal( 0 );
+			expect( outputHistory ).to.lengthOf( 0 );
 
 			// Workers did not emit an error.
 			getExitCallback( firstWorker )( 0 );
 			getExitCallback( secondWorker )( 0 );
 
 			await promise;
-		} );
-
-		it( 'should mark the process as completed if workers did not emit an error', async () => {
-			const promise = executeInParallel( defaultOptions );
-			const [ firstWorker, secondWorker ] = WorkerMock.instances;
-
-			// Workers did not emit an error.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
-
-			await promise;
-
-			expect( stubs.spinnerStub.finish.callCount ).to.equal( 1 );
-			expect( stubs.spinnerStub.finish.firstCall.args[ 0 ] ).to.be.an( 'object' );
-			expect( stubs.spinnerStub.finish.firstCall.args[ 0 ] ).to.have.property( 'emoji', '✔️ ' );
-		} );
-
-		it( 'should mark the process as errored if a worker finished with a non-zero exit code', async () => {
-			const promise = executeInParallel( defaultOptions );
-			const [ firstWorker ] = WorkerMock.instances;
-
-			getExitCallback( firstWorker )( 1 );
-
-			await promise;
-
-			expect( stubs.spinnerStub.finish.callCount ).to.equal( 1 );
-			expect( stubs.spinnerStub.finish.firstCall.args[ 0 ] ).to.be.an( 'object' );
-			expect( stubs.spinnerStub.finish.firstCall.args[ 0 ] ).to.have.property( 'emoji', '❌' );
-		} );
-
-		it( 'should mark the process as errored if a worker emitted an error', async () => {
-			const promise = executeInParallel( defaultOptions );
-			const [ firstWorker ] = WorkerMock.instances;
-			const error = new Error( 'Example error from a worker.' );
-
-			getErrorCallback( firstWorker )( error );
-
-			await promise
-				.then(
-					() => {
-						throw new Error( 'Expected to be rejected.' );
-					},
-					err => {
-						expect( err ).to.equal( error );
-					}
-				);
-
-			expect( stubs.spinnerStub.finish.callCount ).to.equal( 1 );
-			expect( stubs.spinnerStub.finish.firstCall.args[ 0 ] ).to.be.an( 'object' );
-			expect( stubs.spinnerStub.finish.firstCall.args[ 0 ] ).to.have.property( 'emoji', '❌' );
 		} );
 	} );
 } );
+
+function delay( time ) {
+	return new Promise( resolve => setTimeout( resolve, time ) );
+}
 
 function getExitCallback( fakeWorker ) {
 	for ( const call of fakeWorker.on.getCalls() ) {
