@@ -45,6 +45,7 @@ describe( 'reassignNpmTags()', () => {
 
 		try {
 			await reassignNpmTags( { authorizedUser: 'correct-npm-user' } );
+			throw new Error( 'Expected to throw' );
 		} catch ( e ) {
 			expect( e.message ).to.equal( 'User: incorrect-npm-user is not matching authorized user: correct-npm-user.' );
 		}
