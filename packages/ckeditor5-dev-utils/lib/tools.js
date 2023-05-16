@@ -40,11 +40,15 @@ module.exports = {
 		const execOptions = { cwd };
 
 		if ( async ) {
-			return new Promise( resolve => {
+			return new Promise( ( resolve, reject ) => {
 				sh.exec( command, execOptions, ( code, stdout, stderr ) => {
-					const result = execHandler( code, stdout, stderr );
+					try {
+						const result = execHandler( code, stdout, stderr );
 
-					resolve( result );
+						resolve( result );
+					} catch ( err ) {
+						reject( err );
+					}
 				} );
 			} );
 		}

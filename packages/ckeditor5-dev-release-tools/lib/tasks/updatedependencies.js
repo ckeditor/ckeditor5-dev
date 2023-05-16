@@ -28,7 +28,7 @@ const normalizePath = require( '../utils/normalizepath' );
  * @param {String} [options.packagesDirectory] Relative path to a location of packages to update their dependencies. If not specified,
  * only the root package is checked.
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
- * @returns {Promise<Void>}
+ * @returns {Promise}
  */
 module.exports = async function updateDependencies( options ) {
 	const log = logger();

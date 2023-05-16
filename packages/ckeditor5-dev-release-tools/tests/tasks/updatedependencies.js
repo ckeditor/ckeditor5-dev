@@ -162,7 +162,7 @@ describe( 'dev-release-tools/tasks', () => {
 					);
 				} );
 
-				stubs.fs.readJson.returns( {} );
+				stubs.fs.readJson.resolves( {} );
 
 				await updateDependencies( {
 					packagesDirectory: 'packages'
@@ -182,7 +182,7 @@ describe( 'dev-release-tools/tasks', () => {
 			it( 'should update eligible dependencies from the `dependencies` key', async () => {
 				stubs.glob.glob.resolves( [ '/work/project/package.json' ] );
 
-				stubs.fs.readJson.returns( {
+				stubs.fs.readJson.resolves( {
 					dependencies: {
 						'@ckeditor/ckeditor5-engine': '^37.0.0',
 						'@ckeditor/ckeditor5-enter': '^37.0.0',
@@ -217,7 +217,7 @@ describe( 'dev-release-tools/tasks', () => {
 			it( 'should update eligible dependencies from the `devDependencies` key', async () => {
 				stubs.glob.glob.resolves( [ '/work/project/package.json' ] );
 
-				stubs.fs.readJson.returns( {
+				stubs.fs.readJson.resolves( {
 					devDependencies: {
 						'@ckeditor/ckeditor5-engine': '^37.0.0',
 						'@ckeditor/ckeditor5-enter': '^37.0.0',
@@ -252,7 +252,7 @@ describe( 'dev-release-tools/tasks', () => {
 			it( 'should update eligible dependencies from the `peerDependencies` key', async () => {
 				stubs.glob.glob.resolves( [ '/work/project/package.json' ] );
 
-				stubs.fs.readJson.returns( {
+				stubs.fs.readJson.resolves( {
 					peerDependencies: {
 						'@ckeditor/ckeditor5-engine': '^37.0.0',
 						'@ckeditor/ckeditor5-enter': '^37.0.0',
@@ -284,10 +284,10 @@ describe( 'dev-release-tools/tasks', () => {
 				} );
 			} );
 
-			it( 'should not update any package if `shouldUpdateVersionCallback` callback returns falsy value', async () => {
+			it( 'should not update any package if `shouldUpdateVersionCallback` callback resolves falsy value', async () => {
 				stubs.glob.glob.resolves( [ '/work/project/package.json' ] );
 
-				stubs.fs.readJson.returns( {
+				stubs.fs.readJson.resolves( {
 					dependencies: {
 						'@ckeditor/ckeditor5-engine': '^37.0.0',
 						'@ckeditor/ckeditor5-enter': '^37.0.0',
