@@ -127,6 +127,19 @@ module.exports = function getKarmaConfig( options ) {
 		}
 	};
 
+	// Notification is enabled by default when executing all tests.
+	if ( options.notify || !options.files ) {
+		karmaConfig.reporters.push( 'notify' );
+
+		karmaConfig.plugins.push(
+			require.resolve( 'karma-notify-reporter' )
+		);
+
+		karmaConfig.notifyReporter = {
+			reportEachFailure: false
+		};
+	}
+
 	if ( options.watch || options.server ) {
 		// Enable/Disable watching file and executing tests whenever any file changes.
 		karmaConfig.autoWatch = true;
