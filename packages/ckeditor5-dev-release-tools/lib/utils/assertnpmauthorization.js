@@ -21,6 +21,6 @@ module.exports = async function assertNpmAuthorization( npmOwner ) {
 			}
 		} )
 		.catch( () => {
-			return Promise.reject( `You must be logged to npm as "${ npmOwner }" to execute this release step.` );
+			throw new Error( `You must be logged to npm as "${ npmOwner }" to execute this release step.` );
 		} );
 };

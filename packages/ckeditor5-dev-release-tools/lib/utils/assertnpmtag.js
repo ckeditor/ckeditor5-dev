@@ -36,7 +36,7 @@ module.exports = async function assertNpmTag( packagePaths, npmTag ) {
 	}
 
 	if ( errors.length ) {
-		return Promise.reject( errors.join( '\n' ) );
+		throw new Error( errors.join( '\n' ) );
 	}
 };
 

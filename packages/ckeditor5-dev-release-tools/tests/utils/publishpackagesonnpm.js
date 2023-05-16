@@ -18,11 +18,11 @@ describe( 'dev-release-tools/utils', () => {
 
 			stubs = {
 				fs: {
-					remove: sandbox.stub()
+					remove: sandbox.stub().resolves()
 				},
 				devUtils: {
 					tools: {
-						shExec: sandbox.stub()
+						shExec: sandbox.stub().resolves()
 					}
 				}
 			};
@@ -45,42 +45,122 @@ describe( 'dev-release-tools/utils', () => {
 			sandbox.restore();
 		} );
 
-		it( 'should do nothing if list of packages is empty', async () => {
-			await publishPackagesOnNpm( [] );
-
-			expect( stubs.devUtils.tools.shExec.called ).to.equal( false );
-			expect( stubs.fs.remove.called ).to.equal( false );
+		it( 'should do nothing if list of packages is empty', () => {
+			return publishPackagesOnNpm( [] )
+				.then( () => {
+					expect( stubs.devUtils.tools.shExec.called ).to.equal( false );
+					expect( stubs.fs.remove.called ).to.equal( false );
+				} );
 		} );
 
-		it( 'should publish packages on npm with provided npm tag', async () => {
-			await publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' );
-
-			expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 2 );
-			expect( stubs.devUtils.tools.shExec.firstCall.args[ 0 ] ).to.equal( 'npm publish --access=public --tag staging' );
-			expect( stubs.devUtils.tools.shExec.firstCall.args[ 1 ] ).to.have.property( 'cwd', 'ckeditor5-foo' );
-			expect( stubs.devUtils.tools.shExec.secondCall.args[ 0 ] ).to.equal( 'npm publish --access=public --tag staging' );
-			expect( stubs.devUtils.tools.shExec.secondCall.args[ 1 ] ).to.have.property( 'cwd', 'ckeditor5-bar' );
+		it( 'should publish packages on npm with provided npm tag', () => {
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' )
+				.then( () => {
+					expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 2 );
+					expect( stubs.devUtils.tools.shExec.firstCall.args[ 0 ] ).to.equal( 'npm publish --access=public --tag staging' );
+					expect( stubs.devUtils.tools.shExec.firstCall.args[ 1 ] ).to.have.property( 'cwd', 'ckeditor5-foo' );
+					expect( stubs.devUtils.tools.shExec.secondCall.args[ 0 ] ).to.equal( 'npm publish --access=public --tag staging' );
+					expect( stubs.devUtils.tools.shExec.secondCall.args[ 1 ] ).to.have.property( 'cwd', 'ckeditor5-bar' );
+				} );
 		} );
 
-		it( 'should publish packages on npm asynchronously', async () => {
-			await publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' );
-
-			expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 2 );
-			expect( stubs.devUtils.tools.shExec.firstCall.args[ 1 ] ).to.have.property( 'async', true );
-			expect( stubs.devUtils.tools.shExec.secondCall.args[ 1 ] ).to.have.property( 'async', true );
+		it( 'should publish packages on npm asynchronously', () => {
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' )
+				.then( () => {
+					expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 2 );
+					expect( stubs.devUtils.tools.shExec.firstCall.args[ 1 ] ).to.have.property( 'async', true );
+					expect( stubs.devUtils.tools.shExec.secondCall.args[ 1 ] ).to.have.property( 'async', true );
+				} );
 		} );
 
-		it( 'should publish packages on npm one after the other', async () => {
+		it( 'should publish packages on npm one after the other', () => {
+			const clock = sinon.useFakeTimers();
+
 			publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' );
 
 			expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 1 );
 			expect( stubs.devUtils.tools.shExec.firstCall.args[ 1 ] ).to.have.property( 'cwd', 'ckeditor5-foo' );
 
-			await stubs.devUtils.tools.shExec.resolves();
-			await stubs.fs.remove.resolves();
+			// Break the event loop to allow any scheduled promise callbacks to execute.
+			return clock.tickAsync()
+				.then( () => {
+					expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 2 );
+					expect( stubs.devUtils.tools.shExec.secondCall.args[ 1 ] ).to.have.property( 'cwd', 'ckeditor5-bar' );
+				} )
+				.finally( () => {
+					clock.restore();
+				} );
+		} );
 
-			expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 2 );
-			expect( stubs.devUtils.tools.shExec.secondCall.args[ 1 ] ).to.have.property( 'cwd', 'ckeditor5-bar' );
+		it( 'should remove package directory after publishing on npm', () => {
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' )
+				.then( () => {
+					expect( stubs.fs.remove.callCount ).to.equal( 2 );
+					expect( stubs.fs.remove.firstCall.args[ 0 ] ).to.equal( 'ckeditor5-foo' );
+					expect( stubs.fs.remove.secondCall.args[ 0 ] ).to.equal( 'ckeditor5-bar' );
+				} );
+		} );
+
+		it( 'should throw an error when publishing on npm failed', () => {
+			stubs.devUtils.tools.shExec.rejects();
+
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' )
+				.then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					error => {
+						expect( error ).to.be.an( 'Error' );
+						expect( error.message ).to.equal( 'Unable to publish "ckeditor5-foo" package.' );
+					}
+				);
+		} );
+
+		it( 'should not remove a package directory when publishing on npm failed', () => {
+			stubs.devUtils.tools.shExec.rejects();
+
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' )
+				.then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					() => {
+						expect( stubs.fs.remove.callCount ).to.equal( 0 );
+					}
+				);
+		} );
+
+		it( 'should stop processing next packages when publishing on npm failed', () => {
+			stubs.devUtils.tools.shExec.rejects();
+
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' )
+				.then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					() => {
+						expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 1 );
+						expect( stubs.devUtils.tools.shExec.firstCall.args[ 1 ] ).to.have.property( 'cwd', 'ckeditor5-foo' );
+					}
+				);
+		} );
+
+		it( 'should stop processing next packages when removing package directory failed', () => {
+			stubs.fs.remove.rejects();
+
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' )
+				.then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					() => {
+						expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 1 );
+						expect( stubs.devUtils.tools.shExec.firstCall.args[ 1 ] ).to.have.property( 'cwd', 'ckeditor5-foo' );
+
+						expect( stubs.fs.remove.callCount ).to.equal( 1 );
+						expect( stubs.fs.remove.firstCall.args[ 0 ] ).to.equal( 'ckeditor5-foo' );
+					}
+				);
 		} );
 	} );
 } );

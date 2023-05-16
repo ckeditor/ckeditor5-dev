@@ -29,6 +29,6 @@ module.exports = async function assertPackages( packagePaths ) {
 	}
 
 	if ( errors.length ) {
-		return Promise.reject( errors.join( '\n' ) );
+		throw new Error( errors.join( '\n' ) );
 	}
 };

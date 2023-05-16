@@ -6,6 +6,7 @@
 'use strict';
 
 const fs = require( 'fs-extra' );
+const upath = require( 'upath' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
@@ -17,7 +18,12 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  */
 module.exports = async function publishPackagesOnNpm( packagePaths, npmTag ) {
 	for ( const packagePath of packagePaths ) {
-		await tools.shExec( `npm publish --access=public --tag ${ npmTag }`, { cwd: packagePath, async: true } );
+		await tools.shExec( `npm publish --access=public --tag ${ npmTag }`, { cwd: packagePath, async: true } )
+			.catch( () => {
+				const packageName = upath.basename( packagePath );
+
+				throw new Error( `Unable to publish "${ packageName }" package.` );
+			} );
 
 		await fs.remove( packagePath );
 	}

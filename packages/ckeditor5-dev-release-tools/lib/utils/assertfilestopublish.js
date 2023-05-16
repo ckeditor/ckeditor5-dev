@@ -56,7 +56,7 @@ module.exports = async function assertFilesToPublish( packagePaths, optionalEntr
 	}
 
 	if ( errors.length ) {
-		return Promise.reject( errors.join( '\n' ) );
+		throw new Error( errors.join( '\n' ) );
 	}
 };
 
