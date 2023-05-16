@@ -5,22 +5,25 @@
 
 'use strict';
 
-const fs = require( 'fs-extra' );
 const upath = require( 'upath' );
 const { glob } = require( 'glob' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 const assertNpmAuthorization = require( '../utils/assertnpmauthorization' );
 const assertPackages = require( '../utils/assertpackages' );
 const assertNpmTag = require( '../utils/assertnpmtag' );
 const assertFilesToPublish = require( '../utils/assertfilestopublish' );
+const publishPackagesOnNpm = require( '../utils/publishpackagesonnpm' );
 
 /**
  * The purpose of the script is to validate the packages prepared for the release and then release them on npm.
  *
- * The validation conatins the following steps in each package:
+ * The validation contains the following steps in each package:
+ * - User must be logged into npm as to the specified account.
  * - The package directory mmust contain `package.json` file.
  * - All other files expected to be released must exist in the package directory.
  * - The npm tag must match the tag calculated from the package version.
+ *
+ * When the validation for each package passes, packages are published on npm. Optional callback is called for confirmation whether to
+ * continue.
  *
  * @param {Object} options
  * @param {String} options.packagesDirectory Relative path to a location of packages to release.
@@ -62,18 +65,3 @@ module.exports = async function publishPackages( options ) {
 		await publishPackagesOnNpm( packagePaths, npmTag );
 	}
 };
-
-/**
- * Calls the npm command to publish all packages. When a package is successfully published, it is removed from the filesystem.
- *
- * @param {Array.<String>} packagePaths
- * @param {String} npmTag
- * @returns {Promise}
- */
-async function publishPackagesOnNpm( packagePaths, npmTag ) {
-	for ( const packagePath of packagePaths ) {
-		await tools.shExec( `npm publish --access=public --tag ${ npmTag }`, { cwd: packagePath, async: true } );
-
-		await fs.remove( packagePath );
-	}
-}
