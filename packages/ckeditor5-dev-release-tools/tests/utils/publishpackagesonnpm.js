@@ -101,7 +101,7 @@ describe( 'dev-release-tools/utils', () => {
 				} );
 		} );
 
-		it( 'should throw an error when publishing on npm failed', () => {
+		it( 'should throw when publishing on npm failed', () => {
 			stubs.devUtils.tools.shExec.rejects();
 
 			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' )
