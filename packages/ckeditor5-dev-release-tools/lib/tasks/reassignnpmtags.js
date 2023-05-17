@@ -14,9 +14,10 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 /**
  * Used to switch the tags from `staging` to `latest` for specified array of packages.
  *
- * @param {String} authorizedUser User that is authorized to release ckeditor5 packages.
- * @param {String} version Specifies the version of packages to reassign the tags for.
- * @param {Array.<String>} packages Array of packages' names to reassign tags for.
+ * @param {Object} options
+ * @param {String} options.authorizedUser User that is authorized to release packages.
+ * @param {String} options.version Specifies the version of packages to reassign the tags for.
+ * @param {Array.<String>} options.packages Array of packages' names to reassign tags for.
  * @returns {Promise}
  */
 module.exports = async function reassignNpmTags( { authorizedUser, version, packages } ) {
@@ -38,7 +39,6 @@ module.exports = async function reassignNpmTags( { authorizedUser, version, pack
 
 			await exec( `npm dist-tag add ${ packageName }@${ version } latest` );
 			packagesUpdated.push( `${ packageName }@${ version }` );
-			await exec( `npm dist-tag rm ${ packageName }@${ version } staging` );
 		} catch ( e ) {
 			errors.push( trimErrorMessage( e.message ) );
 		}
