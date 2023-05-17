@@ -16,8 +16,7 @@ const { Octokit } = require( '@octokit/rest' );
  * @param {String} options.repositoryOwner Owner of the repository.
  * @param {String} options.repositoryName Repository name.
  * @param {String} options.description Description of the release.
- * @param {Boolean} options.isPrerelease Indicates whether the release is a pre-release.
- * @returns {Promise}
+ * @returns {Promise.<String>}
  */
 module.exports = function createGithubRelease( options ) {
 	const {
@@ -25,9 +24,10 @@ module.exports = function createGithubRelease( options ) {
 		version,
 		repositoryOwner,
 		repositoryName,
-		description,
-		isPrerelease
+		description
 	} = options;
+
+	const isPrerelease = false; // TODO: Detect it from a version.
 
 	const github = new Octokit( {
 		version: '3.0.0',
@@ -42,14 +42,10 @@ module.exports = function createGithubRelease( options ) {
 		prerelease: isPrerelease
 	};
 
+	// TODO: Tests.
+
 	return github.repos.createRelease( releaseParams )
 		.then( () => {
-			const url = `https://github.com/${ repositoryOwner }/${ repositoryName }/releases/tag/v${ version }`;
-
-			console.log( `Created the release on GitHub: ${ url }` );
-		} )
-		.catch( err => {
-			console.log( 'An error occurred while creating the release on GitHub:' );
-			console.log( err.message );
+			return `https://github.com/${ repositoryOwner }/${ repositoryName }/releases/tag/v${ version }`;
 		} );
 };

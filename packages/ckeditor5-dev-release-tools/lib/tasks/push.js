@@ -14,8 +14,9 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {String} options.releaseBranch A name of the branch that should be used for releasing packages.
  * @param {String} options.version Name of tag connected with the release.
  * @param {String} [options.cwd] Root of the repository to prepare. `process.cwd()` by default.
+ * @returns {Promise}
  */
-module.exports = function push( options ) {
+module.exports = async function push( options ) {
 	const {
 		releaseBranch,
 		version,
@@ -24,5 +25,6 @@ module.exports = function push( options ) {
 
 	const command = `git push origin ${ releaseBranch } v${ version }`;
 
-	tools.shExec( command, { cwd, verbosity: 'error' } );
+	// TODO: Test.
+	return tools.shExec( command, { cwd, verbosity: 'error' }, { async: true } );
 };

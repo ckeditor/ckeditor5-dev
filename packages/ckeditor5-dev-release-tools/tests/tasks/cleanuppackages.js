@@ -33,13 +33,6 @@ describe( 'dev-release-tools/tasks', () => {
 				},
 				glob: {
 					glob: sandbox.stub().callsFake( ( ...args ) => glob( ...args ) )
-				},
-				devUtils: {
-					logger: sandbox.stub().returns( {
-						error: sandbox.stub(),
-						warning: sandbox.stub(),
-						info: sandbox.stub()
-					} )
 				}
 			};
 
@@ -51,7 +44,6 @@ describe( 'dev-release-tools/tasks', () => {
 
 			mockery.registerMock( 'fs-extra', stubs.fs );
 			mockery.registerMock( 'glob', stubs.glob );
-			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', stubs.devUtils );
 
 			cleanUpPackages = require( '../../lib/tasks/cleanuppackages' );
 		} );

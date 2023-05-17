@@ -8,7 +8,6 @@
 const fs = require( 'fs-extra' );
 const upath = require( 'upath' );
 const { glob } = require( 'glob' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * The purpose of the script is to clean all packages prepared for the release. The cleaning consists of two stages:
@@ -29,10 +28,6 @@ const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @returns {Promise}
  */
 module.exports = async function cleanUpPackages( options ) {
-	const log = logger();
-
-	log.info( 'Task: cleanUpPackages()' );
-
 	const { packagesDirectory, packageJsonFieldsToRemove, cwd } = parseOptions( options );
 
 	const packageJsonPaths = await glob( '*/package.json', {
@@ -44,8 +39,6 @@ module.exports = async function cleanUpPackages( options ) {
 	for ( const packageJsonPath of packageJsonPaths ) {
 		const packagePath = upath.dirname( packageJsonPath );
 		const packageJson = await fs.readJson( packageJsonPath );
-
-		log.info( `Cleaning up: "${ packagePath }".` );
 
 		await cleanUpPackageDirectory( packageJson, packagePath );
 		cleanUpPackageJson( packageJson, packageJsonFieldsToRemove );

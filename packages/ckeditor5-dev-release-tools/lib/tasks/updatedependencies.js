@@ -7,7 +7,6 @@
 
 const fs = require( 'fs-extra' );
 const { glob } = require( 'glob' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const normalizePath = require( '../utils/normalizepath' );
 
 /**
@@ -31,10 +30,6 @@ const normalizePath = require( '../utils/normalizepath' );
  * @returns {Promise}
  */
 module.exports = async function updateDependencies( options ) {
-	const log = logger();
-
-	log.info( 'Task: updateDependencies()' );
-
 	const {
 		version,
 		packagesDirectory,
@@ -59,8 +54,6 @@ module.exports = async function updateDependencies( options ) {
 	const pkgJsonPaths = await glob( globPatterns, globOptions );
 
 	for ( const pkgJsonPath of pkgJsonPaths ) {
-		log.info( `Updating dependencies in "${ pkgJsonPath }".` );
-
 		const pkgJson = await fs.readJson( pkgJsonPath );
 
 		updateVersion( version, shouldUpdateVersionCallback, pkgJson.dependencies );
