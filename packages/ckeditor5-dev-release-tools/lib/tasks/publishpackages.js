@@ -17,7 +17,7 @@ const publishPackagesOnNpm = require( '../utils/publishpackagesonnpm' );
  * The purpose of the script is to validate the packages prepared for the release and then release them on npm.
  *
  * The validation contains the following steps in each package:
- * - User must be logged into npm as to the specified account.
+ * - User must be logged to npm on the specified account.
  * - The package directory mmust contain `package.json` file.
  * - All other files expected to be released must exist in the package directory.
  * - The npm tag must match the tag calculated from the package version.

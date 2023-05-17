@@ -39,11 +39,11 @@ describe( 'dev-release-tools/utils', () => {
 			sandbox.restore();
 		} );
 
-		it( 'should resolve if list of packages is empty', () => {
+		it( 'should resolve the promise if list of packages is empty', () => {
 			return assertPackages( [] );
 		} );
 
-		it( 'should check if `package.json` exists for each package', () => {
+		it( 'should check if `package.json` exists in each package', () => {
 			stubs.fs.pathExists.resolves( true );
 
 			return assertPackages( [ 'ckeditor5-foo', 'ckeditor5-bar', 'ckeditor5-baz' ] )

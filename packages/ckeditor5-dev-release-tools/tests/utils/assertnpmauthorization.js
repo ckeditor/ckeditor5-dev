@@ -41,7 +41,7 @@ describe( 'dev-release-tools/utils', () => {
 			sandbox.restore();
 		} );
 
-		it( 'should resolve if user is logged to npm as the provided account name', () => {
+		it( 'should not throw if user is logged to npm as the provided account name', () => {
 			stubs.devUtils.tools.shExec.resolves( 'pepe' );
 
 			return assertNpmAuthorization( 'pepe' )
