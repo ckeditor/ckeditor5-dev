@@ -18,6 +18,7 @@ const reassignNpmTags = require( './tasks/reassignnpmtags' );
 const updateDependenciesVersions = require( './utils/updatedependenciesversions' );
 const prepareRepository = require( './tasks/preparerepository' );
 const push = require( './tasks/push' );
+const publishPackages = require( './tasks/publishpackages' );
 const updateVersions = require( './tasks/updateversions' );
 const cleanUpPackages = require( './tasks/cleanuppackages' );
 const { getLastFromChangelog, getCurrent, getLastTagFromGit } = require( './utils/versions' );
@@ -40,6 +41,7 @@ module.exports = {
 	push,
 	cleanUpPackages,
 	updateDependenciesVersions,
+	publishPackages,
 	reassignNpmTags,
 	executeInParallel,
 	getLastFromChangelog,
