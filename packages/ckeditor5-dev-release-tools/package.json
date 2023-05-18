@@ -9,6 +9,7 @@
     "@octokit/rest": "^17.9.2",
     "chalk": "^4.0.0",
     "cli-table": "^0.3.1",
+    "cli-columns": "^4.0.0",
     "compare-func": "^2.0.0",
     "concat-stream": "^2.0.0",
     "conventional-changelog-writer": "^4.0.16",

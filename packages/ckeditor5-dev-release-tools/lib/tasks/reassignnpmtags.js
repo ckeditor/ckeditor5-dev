@@ -9,6 +9,8 @@
 
 'use strict';
 
+const chalk = require( 'chalk' );
+const columns = require( 'cli-columns' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
@@ -27,33 +29,44 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
 
 	await verifyLoggedInUserIsAuthorizedToPublish( npmOwner );
 
+	const counter = tools.createSpinner( 'Reassigning npm tags...', { total: packages.length } );
+	counter.start();
+
 	for ( const packageName of packages ) {
 		try {
-			const latestVersion = await exec( `npm show ${ packageName }@latest version` );
+			// TODO: Handle NPMERR 404.
+			const latestVersion = ( await exec( `npm show ${ packageName }@latest version` ) ).trim();
 
 			if ( latestVersion === version ) {
-				packagesSkipped.push( `${ packageName }@${ version }` );
+				packagesSkipped.push( packageName );
 
 				continue;
 			}
 
 			await exec( `npm dist-tag add ${ packageName }@${ version } latest` );
-			packagesUpdated.push( `${ packageName }@${ version }` );
+			packagesUpdated.push( packageName );
 		} catch ( e ) {
 			errors.push( trimErrorMessage( e.message ) );
+		} finally {
+			counter.increase();
 		}
 	}
 
+	counter.finish();
+
 	if ( packagesUpdated.length ) {
-		console.log( 'Tags updated for:\n' + packagesUpdated.join( '\n' ) );
+		console.log( chalk.bold.green( '✨ Tags updated:' ) );
+		console.log( columns( packagesUpdated ) );
 	}
 
 	if ( packagesSkipped.length ) {
-		console.log( 'Packages skipped:\n' + packagesSkipped.join( '\n' ) );
+		console.log( chalk.bold.yellow( '⬇️ Packages skipped:' ) );
+		console.log( columns( packagesSkipped ) );
 	}
 
 	if ( errors.length ) {
-		console.log( 'Errors found:\n' + errors.join( '\n' ) );
+		console.log( chalk.bold.red( '🐛 Errors found:' ) );
+		errors.forEach( msg => console.log( `* ${ msg }` ) );
 	}
 };
 
