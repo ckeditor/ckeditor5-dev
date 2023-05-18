@@ -6,7 +6,7 @@
   "main": "lib/index.js",
   "dependencies": {
     "chalk": "^4.1.0",
-    "glob": "^7.1.6"
+    "glob": "^10.2.5"
   },
   "engines": {
     "node": ">=16.0.0",
