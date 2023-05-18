@@ -17,7 +17,7 @@ const getPackageJson = require( '../utils/getpackagejson' );
 const getPackagesToRelease = require( '../utils/getpackagestorelease' );
 const getPackagesPaths = require( '../utils/getpackagespaths' );
 const updateDependenciesVersions = require( '../utils/updatedependenciesversions' );
-const validatePackageToRelease = require( '../utils/validatepackagetorelease' );
+const validateRepositoryToRelease = require( '../utils/validaterepositorytorelease' );
 
 const BREAK_RELEASE_MESSAGE = 'You aborted updating versions. Why? Oh why?!';
 
@@ -257,14 +257,14 @@ module.exports = async function bumpVersions( options ) {
 	// Validate the main repository.
 	//
 	// @params {Map.<String, ReleaseDetails>} packages
-	// @returns {Map.<String, ReleaseDetails>}
-	function validateRepository( packages ) {
+	// @returns {Promise.<Map.<String, ReleaseDetails>>}
+	async function validateRepository( packages ) {
 		logProcess( 'Validating the main repository...' );
 
 		const mainPackageJson = getPackageJson( options.cwd );
 		const releaseDetails = packages.get( mainPackageJson.name );
 
-		const errors = validatePackageToRelease( {
+		const errors = await validateRepositoryToRelease( {
 			branch: releaseBranch,
 			changes: releaseDetails.changes,
 			version: releaseDetails.version

@@ -22,11 +22,10 @@ const updateVersions = require( './tasks/updateversions' );
 const cleanUpPackages = require( './tasks/cleanuppackages' );
 const { getLastFromChangelog, getCurrent, getLastTagFromGit } = require( './utils/versions' );
 const { getChangesForVersion, getChangelog, saveChangelog } = require( './utils/changelog' );
-
 const executeInParallel = require( './utils/executeinparallel' );
+const validateRepositoryToRelease = require( './utils/validaterepositorytorelease' );
 
 module.exports = {
-	executeInParallel,
 	releaseSubRepositories,
 	preparePackages,
 	bumpVersions,
@@ -34,18 +33,20 @@ module.exports = {
 	generateChangelogForMonoRepository,
 	updateCKEditor5Dependencies,
 	updateDependencies,
+	updateVersions,
+	prepareRepository,
+	commitAndTag,
+	createGithubRelease,
+	push,
+	cleanUpPackages,
+	updateDependenciesVersions,
+	publishPackages,
+	executeInParallel,
 	getLastFromChangelog,
 	getCurrent,
 	getLastTagFromGit,
 	getChangesForVersion,
 	getChangelog,
 	saveChangelog,
-	updateDependenciesVersions,
-	updateVersions,
-	prepareRepository,
-	commitAndTag,
-	createGithubRelease,
-	push,
-	publishPackages,
-	cleanUpPackages
+	validateRepositoryToRelease
 };

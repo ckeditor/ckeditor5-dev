@@ -10,7 +10,7 @@ const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 const fs = require( 'fs-extra' );
 const upath = require( 'upath' );
-const { globSync } = require( 'glob' );
+const { glob } = require( 'glob' );
 
 const mockFs = require( 'mock-fs' );
 
@@ -26,20 +26,13 @@ describe( 'dev-release-tools/tasks', () => {
 			// prepared in tests on this mocked filesystem.
 			stubs = {
 				fs: {
-					readJsonSync: sandbox.stub().callsFake( ( ...args ) => fs.readJsonSync( ...args ) ),
-					writeJsonSync: sandbox.stub().callsFake( ( ...args ) => fs.writeJsonSync( ...args ) ),
-					removeSync: sandbox.stub().callsFake( ( ...args ) => fs.removeSync( ...args ) ),
-					readdirSync: sandbox.stub().callsFake( ( ...args ) => fs.readdirSync( ...args ) )
+					readJson: sandbox.stub().callsFake( ( ...args ) => fs.readJson( ...args ) ),
+					writeJson: sandbox.stub().callsFake( ( ...args ) => fs.writeJson( ...args ) ),
+					remove: sandbox.stub().callsFake( ( ...args ) => fs.remove( ...args ) ),
+					readdir: sandbox.stub().callsFake( ( ...args ) => fs.readdir( ...args ) )
 				},
 				glob: {
-					globSync: sandbox.stub().callsFake( ( ...args ) => globSync( ...args ) )
-				},
-				devUtils: {
-					logger: sandbox.stub().returns( {
-						error: sandbox.stub(),
-						warning: sandbox.stub(),
-						info: sandbox.stub()
-					} )
+					glob: sandbox.stub().callsFake( ( ...args ) => glob( ...args ) )
 				}
 			};
 
@@ -51,7 +44,6 @@ describe( 'dev-release-tools/tasks', () => {
 
 			mockery.registerMock( 'fs-extra', stubs.fs );
 			mockery.registerMock( 'glob', stubs.glob );
-			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', stubs.devUtils );
 
 			cleanUpPackages = require( '../../lib/tasks/cleanuppackages' );
 		} );
@@ -68,57 +60,57 @@ describe( 'dev-release-tools/tasks', () => {
 				mockFs( {} );
 			} );
 
-			it( 'should use provided `cwd` to search for packages', () => {
-				cleanUpPackages( {
+			it( 'should use provided `cwd` to search for packages', async () => {
+				await cleanUpPackages( {
 					packagesDirectory: 'release',
 					cwd: '/work/another/project'
 				} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/another/project/release' );
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/another/project/release' );
 			} );
 
-			it( 'should use `process.cwd()` to search for packages if `cwd` option is not provided', () => {
+			it( 'should use `process.cwd()` to search for packages if `cwd` option is not provided', async () => {
 				sandbox.stub( process, 'cwd' ).returns( '/work/project' );
 
-				cleanUpPackages( {
+				await cleanUpPackages( {
 					packagesDirectory: 'release'
 				} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/project/release' );
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 1 ] ).to.have.property( 'cwd', '/work/project/release' );
 			} );
 
-			it( 'should match only files', () => {
-				cleanUpPackages( {
+			it( 'should match only files', async () => {
+				await cleanUpPackages( {
 					packagesDirectory: 'release'
 				} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'nodir', true );
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 1 ] ).to.have.property( 'nodir', true );
 			} );
 
-			it( 'should always receive absolute paths for matched files', () => {
-				cleanUpPackages( {
+			it( 'should always receive absolute paths for matched files', async () => {
+				await cleanUpPackages( {
 					packagesDirectory: 'release'
 				} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 1 ] ).to.have.property( 'absolute', true );
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 1 ] ).to.have.property( 'absolute', true );
 			} );
 
-			it( 'should search for `package.json` in `cwd`', () => {
-				cleanUpPackages( {
+			it( 'should search for `package.json` in `cwd`', async () => {
+				await cleanUpPackages( {
 					packagesDirectory: 'release'
 				} );
 
-				expect( stubs.glob.globSync.calledOnce ).to.equal( true );
-				expect( stubs.glob.globSync.getCall( 0 ).args[ 0 ] ).to.equal( '*/package.json' );
+				expect( stubs.glob.glob.calledOnce ).to.equal( true );
+				expect( stubs.glob.glob.getCall( 0 ).args[ 0 ] ).to.equal( '*/package.json' );
 			} );
 		} );
 
 		describe( 'cleaning package directory', () => {
-			it( 'should remove empty directories', () => {
+			it( 'should remove empty directories', async () => {
 				mockFs( {
 					'release': {
 						'ckeditor5-foo': {
@@ -131,11 +123,11 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 
-				cleanUpPackages( {
+				await cleanUpPackages( {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = getAllPaths();
+				const actualPaths = await getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -146,7 +138,7 @@ describe( 'dev-release-tools/tasks', () => {
 				] );
 			} );
 
-			it( 'should remove `node_modules`', () => {
+			it( 'should remove `node_modules`', async () => {
 				mockFs( {
 					'release': {
 						'ckeditor5-foo': {
@@ -166,11 +158,11 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 
-				cleanUpPackages( {
+				await cleanUpPackages( {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = getAllPaths();
+				const actualPaths = await getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -181,7 +173,7 @@ describe( 'dev-release-tools/tasks', () => {
 				] );
 			} );
 
-			it( 'should not remove any file if `files` field is not set', () => {
+			it( 'should not remove any file if `files` field is not set', async () => {
 				mockFs( {
 					'release': {
 						'ckeditor5-foo': {
@@ -193,11 +185,11 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 
-				cleanUpPackages( {
+				await cleanUpPackages( {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = getAllPaths();
+				const actualPaths = await getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -208,7 +200,7 @@ describe( 'dev-release-tools/tasks', () => {
 				] );
 			} );
 
-			it( 'should not remove mandatory files', () => {
+			it( 'should not remove mandatory files', async () => {
 				mockFs( {
 					'release': {
 						'ckeditor5-foo': {
@@ -230,11 +222,11 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 
-				cleanUpPackages( {
+				await cleanUpPackages( {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = getAllPaths();
+				const actualPaths = await getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -249,7 +241,7 @@ describe( 'dev-release-tools/tasks', () => {
 				] );
 			} );
 
-			it( 'should remove not matched dot files and dot directories', () => {
+			it( 'should remove not matched dot files and dot directories', async () => {
 				mockFs( {
 					'release': {
 						'ckeditor5-foo': {
@@ -275,11 +267,11 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 
-				cleanUpPackages( {
+				await cleanUpPackages( {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = getAllPaths();
+				const actualPaths = await getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -295,7 +287,7 @@ describe( 'dev-release-tools/tasks', () => {
 				] );
 			} );
 
-			it( 'should remove not matched files, empty directories and `node_modules` - pattern without globs', () => {
+			it( 'should remove not matched files, empty directories and `node_modules` - pattern without globs', async () => {
 				mockFs( {
 					'release': {
 						'ckeditor5-foo': {
@@ -349,11 +341,11 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 
-				cleanUpPackages( {
+				await cleanUpPackages( {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = getAllPaths();
+				const actualPaths = await getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -374,7 +366,7 @@ describe( 'dev-release-tools/tasks', () => {
 				] );
 			} );
 
-			it( 'should remove not matched files, empty directories and `node_modules` - pattern with globs', () => {
+			it( 'should remove not matched files, empty directories and `node_modules` - pattern with globs', async () => {
 				mockFs( {
 					'release': {
 						'ckeditor5-foo': {
@@ -438,11 +430,11 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 
-				cleanUpPackages( {
+				await cleanUpPackages( {
 					packagesDirectory: 'release'
 				} );
 
-				const actualPaths = getAllPaths();
+				const actualPaths = await getAllPaths();
 
 				expect( actualPaths ).to.have.members( [
 					getPathTo( '.' ),
@@ -465,7 +457,7 @@ describe( 'dev-release-tools/tasks', () => {
 		} );
 
 		describe( 'cleaning `package.json`', () => {
-			it( 'should read and write `package.json` from each found package', () => {
+			it( 'should read and write `package.json` from each found package', async () => {
 				mockFs( {
 					'release': {
 						'ckeditor5-foo': {
@@ -481,36 +473,36 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 
-				cleanUpPackages( {
+				await cleanUpPackages( {
 					packagesDirectory: 'release'
 				} );
 
 				// Reading `package.json`.
-				expect( stubs.fs.readJsonSync.callCount ).to.equal( 2 );
+				expect( stubs.fs.readJson.callCount ).to.equal( 2 );
 
-				let call = stubs.fs.readJsonSync.getCall( 0 );
+				let call = stubs.fs.readJson.getCall( 0 );
 
-				expect( call.returnValue ).to.have.property( 'name', 'ckeditor5-foo' );
+				expect( await call.returnValue ).to.have.property( 'name', 'ckeditor5-foo' );
 				expect( upath.normalize( call.args[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
 
-				call = stubs.fs.readJsonSync.getCall( 1 );
+				call = stubs.fs.readJson.getCall( 1 );
 
-				expect( call.returnValue ).to.have.property( 'name', 'ckeditor5-bar' );
+				expect( await call.returnValue ).to.have.property( 'name', 'ckeditor5-bar' );
 				expect( upath.normalize( call.args[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-bar/package.json' ) );
 
 				// Writing `package.json`.
-				expect( stubs.fs.writeJsonSync.callCount ).to.equal( 2 );
+				expect( stubs.fs.writeJson.callCount ).to.equal( 2 );
 
-				call = stubs.fs.writeJsonSync.getCall( 0 );
+				call = stubs.fs.writeJson.getCall( 0 );
 
 				expect( upath.normalize( call.args[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
 
-				call = stubs.fs.writeJsonSync.getCall( 1 );
+				call = stubs.fs.writeJson.getCall( 1 );
 
 				expect( upath.normalize( call.args[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-bar/package.json' ) );
 			} );
 
-			it( 'should not remove any field from `package.json` if all of them are mandatory', () => {
+			it( 'should not remove any field from `package.json` if all of them are mandatory', async () => {
 				mockFs( {
 					'release': {
 						'ckeditor5-foo': {
@@ -527,13 +519,13 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 
-				cleanUpPackages( {
+				await cleanUpPackages( {
 					packagesDirectory: 'release'
 				} );
 
-				expect( stubs.fs.writeJsonSync.callCount ).to.equal( 1 );
+				expect( stubs.fs.writeJson.callCount ).to.equal( 1 );
 
-				const call = stubs.fs.writeJsonSync.getCall( 0 );
+				const call = stubs.fs.writeJson.getCall( 0 );
 
 				expect( upath.normalize( call.args[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
 				expect( call.args[ 1 ] ).to.deep.equal( {
@@ -547,7 +539,7 @@ describe( 'dev-release-tools/tasks', () => {
 				} );
 			} );
 
-			it( 'should remove default unnecessary fields from `package.json`', () => {
+			it( 'should remove default unnecessary fields from `package.json`', async () => {
 				mockFs( {
 					'release': {
 						'ckeditor5-foo': {
@@ -574,13 +566,13 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 
-				cleanUpPackages( {
+				await cleanUpPackages( {
 					packagesDirectory: 'release'
 				} );
 
-				expect( stubs.fs.writeJsonSync.callCount ).to.equal( 1 );
+				expect( stubs.fs.writeJson.callCount ).to.equal( 1 );
 
-				const call = stubs.fs.writeJsonSync.getCall( 0 );
+				const call = stubs.fs.writeJson.getCall( 0 );
 
 				expect( upath.normalize( call.args[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
 				expect( call.args[ 1 ] ).to.deep.equal( {
@@ -594,7 +586,7 @@ describe( 'dev-release-tools/tasks', () => {
 				} );
 			} );
 
-			it( 'should remove provided unnecessary fields from `package.json`', () => {
+			it( 'should remove provided unnecessary fields from `package.json`', async () => {
 				mockFs( {
 					'release': {
 						'ckeditor5-foo': {
@@ -622,14 +614,14 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 
-				cleanUpPackages( {
+				await cleanUpPackages( {
 					packagesDirectory: 'release',
 					packageJsonFieldsToRemove: [ 'author' ]
 				} );
 
-				expect( stubs.fs.writeJsonSync.callCount ).to.equal( 1 );
+				expect( stubs.fs.writeJson.callCount ).to.equal( 1 );
 
-				const call = stubs.fs.writeJsonSync.getCall( 0 );
+				const call = stubs.fs.writeJson.getCall( 0 );
 
 				expect( upath.normalize( call.args[ 0 ] ) ).to.equal( getPathTo( 'release/ckeditor5-foo/package.json' ) );
 				expect( call.args[ 1 ] ).to.deep.equal( {
@@ -660,9 +652,9 @@ function getPathTo( path ) {
 	return upath.join( process.cwd(), path );
 }
 
-function getAllPaths() {
-	return globSync( '**', {
+async function getAllPaths() {
+	return ( await glob( '**', {
 		absolute: true,
 		dot: true
-	} ).map( upath.normalize );
+	} ) ).map( upath.normalize );
 }

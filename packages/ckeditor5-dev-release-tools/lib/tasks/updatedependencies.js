@@ -6,8 +6,7 @@
 'use strict';
 
 const fs = require( 'fs-extra' );
-const { globSync } = require( 'glob' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { glob } = require( 'glob' );
 const normalizePath = require( '../utils/normalizepath' );
 
 /**
@@ -28,12 +27,9 @@ const normalizePath = require( '../utils/normalizepath' );
  * @param {String} [options.packagesDirectory] Relative path to a location of packages to update their dependencies. If not specified,
  * only the root package is checked.
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
+ * @returns {Promise}
  */
-module.exports = function updateDependencies( options ) {
-	const log = logger();
-
-	log.info( 'Task: updateDependencies()' );
-
+module.exports = async function updateDependencies( options ) {
 	const {
 		version,
 		packagesDirectory,
@@ -55,18 +51,16 @@ module.exports = function updateDependencies( options ) {
 		globPatterns.push( packagesDirectoryPattern );
 	}
 
-	const pkgJsonPaths = globSync( globPatterns, globOptions );
+	const pkgJsonPaths = await glob( globPatterns, globOptions );
 
 	for ( const pkgJsonPath of pkgJsonPaths ) {
-		log.info( `Updating dependencies in "${ pkgJsonPath }".` );
-
-		const pkgJson = fs.readJsonSync( pkgJsonPath );
+		const pkgJson = await fs.readJson( pkgJsonPath );
 
 		updateVersion( version, shouldUpdateVersionCallback, pkgJson.dependencies );
 		updateVersion( version, shouldUpdateVersionCallback, pkgJson.devDependencies );
 		updateVersion( version, shouldUpdateVersionCallback, pkgJson.peerDependencies );
 
-		fs.writeJsonSync( pkgJsonPath, pkgJson, { spaces: 2 } );
+		await fs.writeJson( pkgJsonPath, pkgJson, { spaces: 2 } );
 	}
 };
 
