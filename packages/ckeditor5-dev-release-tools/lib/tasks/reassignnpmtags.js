@@ -12,6 +12,7 @@
 const chalk = require( 'chalk' );
 const columns = require( 'cli-columns' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+const assertNpmAuthorization = require( '../utils/assertnpmauthorization' );
 
 /**
  * Used to switch the tags from `staging` to `latest` for specified array of packages.
@@ -27,22 +28,27 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
 	const packagesSkipped = [];
 	const packagesUpdated = [];
 
-	await verifyLoggedInUserIsAuthorizedToPublish( npmOwner );
+	await assertNpmAuthorization( npmOwner );
 
 	const counter = tools.createSpinner( 'Reassigning npm tags...', { total: packages.length } );
 	counter.start();
 
 	for ( const packageName of packages ) {
+		let latestVersion;
+
 		try {
-			// TODO: Handle NPMERR 404.
-			const latestVersion = ( await exec( `npm show ${ packageName }@latest version` ) ).trim();
+			latestVersion = ( await exec( `npm show ${ packageName }@latest version` ) ).trim();
+		} catch ( e ) {
+			errors.push( trimErrorMessage( e.message ) );
+		}
 
-			if ( latestVersion === version ) {
-				packagesSkipped.push( packageName );
+		if ( latestVersion === version ) {
+			packagesSkipped.push( packageName );
 
-				continue;
-			}
+			continue;
+		}
 
+		try {
 			await exec( `npm dist-tag add ${ packageName }@${ version } latest` );
 			packagesUpdated.push( packageName );
 		} catch ( e ) {
@@ -71,18 +77,6 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
 };
 
 /**
- * @param {String} npmOwner
- * @returns {Promise}
- */
-async function verifyLoggedInUserIsAuthorizedToPublish( npmOwner ) {
-	const loggedInUser = ( await exec( 'npm whoami' ) ).trim();
-
-	if ( loggedInUser !== npmOwner ) {
-		throw new Error( `User: ${ loggedInUser } is not matching authorized user: ${ npmOwner }.` );
-	}
-}
-
-/**
  * @param {String} message
  * @returns {String}
  */
@@ -95,5 +89,5 @@ function trimErrorMessage( message ) {
  * @returns {Promise.<String>}
  */
 async function exec( command ) {
-	return tools.shExec( command, { verbosity: 'error', async: true } );
+	return tools.shExec( command, { verbosity: 'silent', async: true } );
 }

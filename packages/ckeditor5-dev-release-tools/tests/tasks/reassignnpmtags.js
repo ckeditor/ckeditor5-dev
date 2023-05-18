@@ -26,6 +26,7 @@ describe( 'reassignNpmTags()', () => {
 					return stubs.spinner;
 				} )
 			},
+			assertNpmAuthorization: sinon.stub().resolves( true ),
 			spinner: {
 				start: sinon.stub(),
 				increase: sinon.stub(),
@@ -45,10 +46,10 @@ describe( 'reassignNpmTags()', () => {
 			}
 		};
 
-		stubs.tools.shExec.withArgs( 'npm whoami' ).resolves( 'authorized-user' );
 		stubs.tools.shExec.withArgs( sinon.match( 'npm show' ) ).resolves( '1.0.0' );
 
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', { tools: stubs.tools } );
+		mockery.registerMock( '../utils/assertnpmauthorization', stubs.assertNpmAuthorization );
 		mockery.registerMock( 'cli-columns', stubs.columns );
 		mockery.registerMock( 'chalk', stubs.chalk );
 
@@ -61,35 +62,27 @@ describe( 'reassignNpmTags()', () => {
 		sinon.restore();
 	} );
 
-	it( 'should throw an error when provided user does not match user logged in to npm', async () => {
-		stubs.tools.shExec.withArgs( 'npm whoami' ).resolves( 'incorrect-npm-user' );
+	it( 'should throw an error when assertNpmAuthorization throws error', async () => {
+		stubs.assertNpmAuthorization.throws( new Error( 'User not logged in error' ) );
+		const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
 
 		try {
-			await reassignNpmTags( { npmOwner: 'correct-npm-user' } );
+			await reassignNpmTags( { npmOwner: 'correct-npm-user', version: '1.0.1', packages: [ 'package1' ] } );
 			throw new Error( 'Expected to throw' );
 		} catch ( e ) {
-			expect( e.message ).to.equal( 'User: incorrect-npm-user is not matching authorized user: correct-npm-user.' );
+			expect( e.message ).to.equal( 'User not logged in error' );
 		}
+
+		expect( npmDistTagAdd ).not.to.be.called;
 	} );
 
-	it( 'should throw an error when user is not logged in', async () => {
-		stubs.tools.shExec.withArgs( 'npm whoami' ).throws( new Error( 'User is not logged in error.' ) );
-
-		try {
-			await reassignNpmTags( { npmOwner: 'authorized-user' } );
-			throw new Error( 'Expected to throw' );
-		} catch ( e ) {
-			expect( e.message ).to.equal( 'User is not logged in error.' );
-		}
-	} );
-
-	it( 'should not update tags when can not obtain package version from npm', async () => {
+	it( 'should still try to update tags when can not obtain package version from npm', async () => {
 		stubs.tools.shExec.withArgs( sinon.match( 'npm show' ) ).throws( new Error( 'Can not obtain package version.' ) );
 		const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
 
 		await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
 
-		expect( npmDistTagAdd.callCount ).to.equal( 0 );
+		expect( npmDistTagAdd.callCount ).to.equal( 2 );
 	} );
 
 	it( 'should skip updating tags when provided version matches existing version for tag latest', async () => {
