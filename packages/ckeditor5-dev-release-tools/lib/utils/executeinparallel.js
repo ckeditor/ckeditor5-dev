@@ -29,6 +29,9 @@ const WORKER_SCRIPT = upath.join( __dirname, 'parallelworker.js' );
  * It receives an absolute path to a package as an argument. It can be synchronous or may return a promise.
  * @param {AbortSignal} options.signal Signal to abort the asynchronous process.
  * @param {ListrTaskObject} options.listrTask An instance of `ListrTask`.
+ * @param {Function} [options.packagesDirectoryFilter] A function that is executed for each found package directory to filter out those
+ * that do not require executing a task. It should return a truthy value to keep the package and a falsy value to skip the package from
+ * processing.
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @param {Number} [options.concurrency=require( 'os' ).cpus().length / 2] Number of CPUs that will execute the task.
  * @returns {Promise}
@@ -39,6 +42,7 @@ module.exports = async function executeInParallel( options ) {
 		signal,
 		taskToExecute,
 		listrTask,
+		packagesDirectoryFilter = null,
 		cwd = process.cwd(),
 		concurrency = require( 'os' ).cpus().length / 2
 	} = options;
@@ -48,12 +52,17 @@ module.exports = async function executeInParallel( options ) {
 		cwd: normalizedCwd,
 		absolute: true
 	} );
-	const packagesInThreads = getPackagesGroupedByThreads( packages, concurrency );
+
+	const packagesToProcess = packagesDirectoryFilter ?
+		packages.filter( packagesDirectoryFilter ) :
+		packages;
+
+	const packagesInThreads = getPackagesGroupedByThreads( packagesToProcess, concurrency );
 
 	const callbackModule = upath.join( cwd, crypto.randomUUID() + '.js' );
 	await fs.writeFile( callbackModule, `'use strict';\nmodule.exports = ${ taskToExecute };`, 'utf-8' );
 
-	const onPackageDone = progressFactory( listrTask, packages.length );
+	const onPackageDone = progressFactory( listrTask, packagesToProcess.length );
 
 	const workers = packagesInThreads.map( packages => {
 		return createWorker( {

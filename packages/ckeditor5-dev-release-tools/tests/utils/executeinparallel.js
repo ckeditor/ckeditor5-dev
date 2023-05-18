@@ -126,6 +126,36 @@ describe( 'dev-release-tools/utils', () => {
 			await promise;
 		} );
 
+		it( 'should execute the specified `taskToExecute` on packages found in the `packagesDirectory` that are not filtered', async () => {
+			const options = Object.assign( {}, defaultOptions, {
+				// Skip "package-02".
+				packagesDirectoryFilter: packageDirectory => !packageDirectory.endsWith( 'package-02' )
+			} );
+
+			const promise = executeInParallel( options );
+			await delay( 0 );
+
+			// By default the helper uses a half of available CPUs.
+			expect( WorkerMock.instances ).to.lengthOf( 2 );
+
+			const [ firstWorker, secondWorker ] = WorkerMock.instances;
+
+			expect( firstWorker.workerData.packages ).to.deep.equal( [
+				'/home/ckeditor/my-packages/package-01',
+				'/home/ckeditor/my-packages/package-04'
+			] );
+
+			expect( secondWorker.workerData.packages ).to.deep.equal( [
+				'/home/ckeditor/my-packages/package-03'
+			] );
+
+			// Workers did not emit an error.
+			getExitCallback( firstWorker )( 0 );
+			getExitCallback( secondWorker )( 0 );
+
+			await promise;
+		} );
+
 		it( 'should use the specified `cwd` when looking for packages', async () => {
 			const options = Object.assign( {}, defaultOptions, {
 				cwd: '/custom/cwd'
