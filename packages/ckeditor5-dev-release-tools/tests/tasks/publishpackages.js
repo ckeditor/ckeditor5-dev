@@ -273,9 +273,12 @@ describe( 'dev-release-tools/tasks', () => {
 				'/work/project/packages/ckeditor5-bar'
 			] );
 
+			const listrTask = {};
+
 			return publishPackages( {
 				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
+				npmOwner: 'pepe',
+				listrTask
 			} ).then( () => {
 				expect( stubs.publishPackagesOnNpm.callCount ).to.equal( 1 );
 				expect( stubs.publishPackagesOnNpm.firstCall.args[ 0 ] ).to.deep.equal( [
@@ -283,6 +286,7 @@ describe( 'dev-release-tools/tasks', () => {
 					'/work/project/packages/ckeditor5-bar'
 				] );
 				expect( stubs.publishPackagesOnNpm.firstCall.args[ 1 ] ).to.equal( 'staging' );
+				expect( stubs.publishPackagesOnNpm.firstCall.args[ 2 ] ).to.equal( listrTask );
 			} );
 		} );
 
@@ -292,10 +296,13 @@ describe( 'dev-release-tools/tasks', () => {
 				'/work/project/packages/ckeditor5-bar'
 			] );
 
+			const listrTask = {};
+
 			return publishPackages( {
 				packagesDirectory: 'packages',
 				npmOwner: 'pepe',
-				npmTag: 'nightly'
+				npmTag: 'nightly',
+				listrTask
 			} ).then( () => {
 				expect( stubs.publishPackagesOnNpm.callCount ).to.equal( 1 );
 				expect( stubs.publishPackagesOnNpm.firstCall.args[ 0 ] ).to.deep.equal( [
@@ -303,6 +310,7 @@ describe( 'dev-release-tools/tasks', () => {
 					'/work/project/packages/ckeditor5-bar'
 				] );
 				expect( stubs.publishPackagesOnNpm.firstCall.args[ 1 ] ).to.equal( 'nightly' );
+				expect( stubs.publishPackagesOnNpm.firstCall.args[ 2 ] ).to.equal( listrTask );
 			} );
 		} );
 
@@ -313,11 +321,13 @@ describe( 'dev-release-tools/tasks', () => {
 			] );
 
 			const confirmationCallback = sandbox.stub().returns( true );
+			const listrTask = {};
 
 			return publishPackages( {
 				packagesDirectory: 'packages',
 				npmOwner: 'pepe',
-				confirmationCallback
+				confirmationCallback,
+				listrTask
 			} ).then( () => {
 				expect( stubs.publishPackagesOnNpm.callCount ).to.equal( 1 );
 				expect( stubs.publishPackagesOnNpm.firstCall.args[ 0 ] ).to.deep.equal( [
@@ -325,6 +335,7 @@ describe( 'dev-release-tools/tasks', () => {
 					'/work/project/packages/ckeditor5-bar'
 				] );
 				expect( stubs.publishPackagesOnNpm.firstCall.args[ 1 ] ).to.equal( 'staging' );
+				expect( stubs.publishPackagesOnNpm.firstCall.args[ 2 ] ).to.equal( listrTask );
 
 				expect( confirmationCallback.callCount ).to.equal( 1 );
 			} );
@@ -337,11 +348,13 @@ describe( 'dev-release-tools/tasks', () => {
 			] );
 
 			const confirmationCallback = sandbox.stub().resolves( true );
+			const listrTask = {};
 
 			return publishPackages( {
 				packagesDirectory: 'packages',
 				npmOwner: 'pepe',
-				confirmationCallback
+				confirmationCallback,
+				listrTask
 			} ).then( () => {
 				expect( stubs.publishPackagesOnNpm.callCount ).to.equal( 1 );
 				expect( stubs.publishPackagesOnNpm.firstCall.args[ 0 ] ).to.deep.equal( [
@@ -349,6 +362,7 @@ describe( 'dev-release-tools/tasks', () => {
 					'/work/project/packages/ckeditor5-bar'
 				] );
 				expect( stubs.publishPackagesOnNpm.firstCall.args[ 1 ] ).to.equal( 'staging' );
+				expect( stubs.publishPackagesOnNpm.firstCall.args[ 2 ] ).to.equal( listrTask );
 
 				expect( confirmationCallback.callCount ).to.equal( 1 );
 			} );

@@ -40,7 +40,7 @@ module.exports = async function assertFilesToPublish( packagePaths, optionalEntr
 
 		for ( const requiredEntry of requiredEntries ) {
 			// To match a directory or a file using a single `requiredEntry` pattern.
-			const foundFiles = await glob( [ requiredEntry + '/**', requiredEntry ], {
+			const foundFiles = await glob( [ requiredEntry, requiredEntry + '/**' ], {
 				cwd: packagePath,
 				dot: true,
 				nodir: true

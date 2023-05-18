@@ -83,17 +83,17 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			stubs.glob.glob
-				.withArgs( 'src/**' ).resolves( [ 'src/index.ts' ] )
-				.withArgs( 'README.md/**' ).resolves( [ 'README.md' ] );
+				.withArgs( [ 'src', 'src/**' ] ).resolves( [ 'src/index.ts' ] )
+				.withArgs( [ 'README.md', 'README.md/**' ] ).resolves( [ 'README.md' ] );
 
 			return assertFilesToPublish( [ 'ckeditor5-foo' ] )
 				.then( () => {
 					expect( stubs.glob.glob.callCount ).to.equal( 2 );
-					expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.equal( 'src/**' );
+					expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.deep.equal( [ 'src', 'src/**' ] );
 					expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.have.property( 'cwd', 'ckeditor5-foo' );
 					expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.have.property( 'dot', true );
 					expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.have.property( 'nodir', true );
-					expect( stubs.glob.glob.secondCall.args[ 0 ] ).to.equal( 'README.md/**' );
+					expect( stubs.glob.glob.secondCall.args[ 0 ] ).to.deep.equal( [ 'README.md', 'README.md/**' ] );
 					expect( stubs.glob.glob.secondCall.args[ 1 ] ).to.have.property( 'cwd', 'ckeditor5-foo' );
 					expect( stubs.glob.glob.secondCall.args[ 1 ] ).to.have.property( 'dot', true );
 					expect( stubs.glob.glob.secondCall.args[ 1 ] ).to.have.property( 'nodir', true );
@@ -110,8 +110,8 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			stubs.glob.glob
-				.withArgs( 'src/**' ).resolves( [ 'src/index.ts' ] )
-				.withArgs( 'README.md/**' ).resolves( [] );
+				.withArgs( [ 'src', 'src/**' ] ).resolves( [ 'src/index.ts' ] )
+				.withArgs( [ 'README.md', 'README.md/**' ] ).resolves( [ 'README.md' ] );
 
 			const optionalEntries = {
 				'ckeditor5-foo': [
@@ -122,7 +122,7 @@ describe( 'dev-release-tools/utils', () => {
 			return assertFilesToPublish( [ 'ckeditor5-foo' ], optionalEntries )
 				.then( () => {
 					expect( stubs.glob.glob.callCount ).to.equal( 1 );
-					expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.equal( 'src/**' );
+					expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.deep.equal( [ 'src', 'src/**' ] );
 				} );
 		} );
 
@@ -136,8 +136,8 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			stubs.glob.glob
-				.withArgs( 'src/**' ).resolves( [ 'src/index.ts' ] )
-				.withArgs( 'README.md/**' ).resolves( [] );
+				.withArgs( [ 'src', 'src/**' ] ).resolves( [ 'src/index.ts' ] )
+				.withArgs( [ 'README.md', 'README.md/**' ] ).resolves( [] );
 
 			const optionalEntries = {
 				'default': [
@@ -148,7 +148,7 @@ describe( 'dev-release-tools/utils', () => {
 			return assertFilesToPublish( [ 'ckeditor5-foo' ], optionalEntries )
 				.then( () => {
 					expect( stubs.glob.glob.callCount ).to.equal( 1 );
-					expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.equal( 'src/**' );
+					expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.deep.equal( [ 'src', 'src/**' ] );
 				} );
 		} );
 
@@ -162,8 +162,8 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			stubs.glob.glob
-				.withArgs( 'src/**' ).resolves( [ 'src/index.ts' ] )
-				.withArgs( 'README.md/**' ).resolves( [ 'README.md' ] );
+				.withArgs( [ 'src', 'src/**' ] ).resolves( [ 'src/index.ts' ] )
+				.withArgs( [ 'README.md', 'README.md/**' ] ).resolves( [ 'README.md' ] );
 
 			const optionalEntries = {
 				// Make all entries as required for the "ckeditor5-foo" package.
@@ -176,8 +176,8 @@ describe( 'dev-release-tools/utils', () => {
 			return assertFilesToPublish( [ 'ckeditor5-foo' ], optionalEntries )
 				.then( () => {
 					expect( stubs.glob.glob.callCount ).to.equal( 2 );
-					expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.equal( 'src/**' );
-					expect( stubs.glob.glob.secondCall.args[ 0 ] ).to.equal( 'README.md/**' );
+					expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.deep.equal( [ 'src', 'src/**' ] );
+					expect( stubs.glob.glob.secondCall.args[ 0 ] ).to.deep.equal( [ 'README.md', 'README.md/**' ] );
 				} );
 		} );
 
@@ -191,8 +191,8 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			stubs.glob.glob
-				.withArgs( 'src/**' ).resolves( [ 'src/index.ts' ] )
-				.withArgs( 'README.md/**' ).resolves( [ 'README.md' ] );
+				.withArgs( [ 'src', 'src/**' ] ).resolves( [ 'src/index.ts' ] )
+				.withArgs( [ 'README.md', 'README.md/**' ] ).resolves( [ 'README.md' ] );
 
 			const optionalEntries = {
 				'ckeditor5-bar': [
@@ -204,8 +204,8 @@ describe( 'dev-release-tools/utils', () => {
 			return assertFilesToPublish( [ 'ckeditor5-foo' ], optionalEntries )
 				.then( () => {
 					expect( stubs.glob.glob.callCount ).to.equal( 2 );
-					expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.equal( 'src/**' );
-					expect( stubs.glob.glob.secondCall.args[ 0 ] ).to.equal( 'README.md/**' );
+					expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.deep.equal( [ 'src', 'src/**' ] );
+					expect( stubs.glob.glob.secondCall.args[ 0 ] ).to.deep.equal( [ 'README.md', 'README.md/**' ] );
 				} );
 		} );
 
@@ -220,16 +220,16 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			stubs.glob.glob
-				.withArgs( 'src/**' ).resolves( [ 'src/index.ts' ] )
-				.withArgs( 'src/index.ts/**' ).resolves( [ 'src/index.ts' ] )
-				.withArgs( 'README.md/**' ).resolves( [ 'README.md' ] );
+				.withArgs( [ 'src', 'src/**' ] ).resolves( [ 'src/index.ts' ] )
+				.withArgs( [ 'src/index.ts', 'src/index.ts/**' ] ).resolves( [ 'src/index.ts' ] )
+				.withArgs( [ 'README.md', 'README.md/**' ] ).resolves( [ 'README.md' ] );
 
 			return assertFilesToPublish( [ 'ckeditor5-foo' ] )
 				.then( () => {
 					expect( stubs.glob.glob.callCount ).to.equal( 3 );
-					expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.equal( 'src/index.ts/**' );
-					expect( stubs.glob.glob.secondCall.args[ 0 ] ).to.equal( 'src/**' );
-					expect( stubs.glob.glob.thirdCall.args[ 0 ] ).to.equal( 'README.md/**' );
+					expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.deep.equal( [ 'src/index.ts', 'src/index.ts/**' ] );
+					expect( stubs.glob.glob.secondCall.args[ 0 ] ).to.deep.equal( [ 'src', 'src/**' ] );
+					expect( stubs.glob.glob.thirdCall.args[ 0 ] ).to.deep.equal( [ 'README.md', 'README.md/**' ] );
 				} );
 		} );
 
@@ -244,16 +244,16 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			stubs.glob.glob
-				.withArgs( 'src/**' ).resolves( [ 'src/index.ts' ] )
-				.withArgs( 'src/index.d.ts/**' ).resolves( [ 'src/index.d.ts' ] )
-				.withArgs( 'README.md/**' ).resolves( [ 'README.md' ] );
+				.withArgs( [ 'src', 'src/**' ] ).resolves( [ 'src/index.ts' ] )
+				.withArgs( [ 'src/index.d.ts', 'src/index.d.ts/**' ] ).resolves( [ 'src/index.d.ts' ] )
+				.withArgs( [ 'README.md', 'README.md/**' ] ).resolves( [ 'README.md' ] );
 
 			return assertFilesToPublish( [ 'ckeditor5-foo' ] )
 				.then( () => {
 					expect( stubs.glob.glob.callCount ).to.equal( 3 );
-					expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.equal( 'src/index.d.ts/**' );
-					expect( stubs.glob.glob.secondCall.args[ 0 ] ).to.equal( 'src/**' );
-					expect( stubs.glob.glob.thirdCall.args[ 0 ] ).to.equal( 'README.md/**' );
+					expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.deep.equal( [ 'src/index.d.ts', 'src/index.d.ts/**' ] );
+					expect( stubs.glob.glob.secondCall.args[ 0 ] ).to.deep.equal( [ 'src', 'src/**' ] );
+					expect( stubs.glob.glob.thirdCall.args[ 0 ] ).to.deep.equal( [ 'README.md', 'README.md/**' ] );
 				} );
 		} );
 

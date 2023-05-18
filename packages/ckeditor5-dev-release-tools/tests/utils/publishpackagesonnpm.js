@@ -54,7 +54,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'should publish packages on npm with provided npm tag', () => {
-			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' )
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging', {} )
 				.then( () => {
 					expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 2 );
 					expect( stubs.devUtils.tools.shExec.firstCall.args[ 0 ] ).to.equal( 'npm publish --access=public --tag staging' );
@@ -65,7 +65,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'should publish packages on npm asynchronously', () => {
-			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' )
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging', {} )
 				.then( () => {
 					expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 2 );
 					expect( stubs.devUtils.tools.shExec.firstCall.args[ 1 ] ).to.have.property( 'async', true );
@@ -73,10 +73,34 @@ describe( 'dev-release-tools/utils', () => {
 				} );
 		} );
 
+		it( 'should set the verbosity level to "error" during publishing packages', () => {
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging', {} )
+				.then( () => {
+					expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 2 );
+					expect( stubs.devUtils.tools.shExec.firstCall.args[ 1 ] ).to.have.property( 'verbosity', 'error' );
+					expect( stubs.devUtils.tools.shExec.secondCall.args[ 1 ] ).to.have.property( 'verbosity', 'error' );
+				} );
+		} );
+
+		it( 'should output the progress status during publishing packages', () => {
+			const outputHistory = [];
+			const listrTask = {
+				set output( status ) {
+					outputHistory.push( status );
+				}
+			};
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging', listrTask )
+				.then( () => {
+					expect( outputHistory ).to.have.length( 2 );
+					expect( outputHistory[ 0 ] ).to.equal( 'Status: 1/2. Processing the "ckeditor5-foo" directory.' );
+					expect( outputHistory[ 1 ] ).to.equal( 'Status: 2/2. Processing the "ckeditor5-bar" directory.' );
+				} );
+		} );
+
 		it( 'should publish packages on npm one after the other', () => {
 			const clock = sinon.useFakeTimers();
 
-			publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' );
+			publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging', {} );
 
 			expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 1 );
 			expect( stubs.devUtils.tools.shExec.firstCall.args[ 1 ] ).to.have.property( 'cwd', 'ckeditor5-foo' );
@@ -93,7 +117,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'should remove package directory after publishing on npm', () => {
-			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' )
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging', {} )
 				.then( () => {
 					expect( stubs.fs.remove.callCount ).to.equal( 2 );
 					expect( stubs.fs.remove.firstCall.args[ 0 ] ).to.equal( 'ckeditor5-foo' );
@@ -104,7 +128,7 @@ describe( 'dev-release-tools/utils', () => {
 		it( 'should throw when publishing on npm failed', () => {
 			stubs.devUtils.tools.shExec.rejects();
 
-			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' )
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging', {} )
 				.then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
@@ -119,7 +143,7 @@ describe( 'dev-release-tools/utils', () => {
 		it( 'should not remove a package directory when publishing on npm failed', () => {
 			stubs.devUtils.tools.shExec.rejects();
 
-			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' )
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging', {} )
 				.then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
@@ -133,7 +157,7 @@ describe( 'dev-release-tools/utils', () => {
 		it( 'should stop processing next packages when publishing on npm failed', () => {
 			stubs.devUtils.tools.shExec.rejects();
 
-			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' )
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging', {} )
 				.then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
@@ -148,7 +172,7 @@ describe( 'dev-release-tools/utils', () => {
 		it( 'should stop processing next packages when removing package directory failed', () => {
 			stubs.fs.remove.rejects();
 
-			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging' )
+			return publishPackagesOnNpm( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'staging', {} )
 				.then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
