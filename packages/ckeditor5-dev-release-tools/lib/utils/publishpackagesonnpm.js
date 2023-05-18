@@ -14,11 +14,16 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  *
  * @param {Array.<String>} packagePaths
  * @param {String} npmTag
+ * @param {ListrTaskObject} listrTask
  * @returns {Promise}
  */
-module.exports = async function publishPackagesOnNpm( packagePaths, npmTag ) {
+module.exports = async function publishPackagesOnNpm( packagePaths, npmTag, listrTask ) {
+	let index = 0;
+
 	for ( const packagePath of packagePaths ) {
-		await tools.shExec( `npm publish --access=public --tag ${ npmTag }`, { cwd: packagePath, async: true } )
+		listrTask.output = `Status: ${ ++index }/${ packagePaths.length }. Processing the "${ upath.basename( packagePath ) }" directory.`;
+
+		await tools.shExec( `npm publish --access=public --tag ${ npmTag }`, { cwd: packagePath, async: true, verbosity: 'error' } )
 			.catch( () => {
 				const packageName = upath.basename( packagePath );
 
