@@ -7,8 +7,7 @@
 
 const fs = require( 'fs-extra' );
 const upath = require( 'upath' );
-const { globSync } = require( 'glob' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const { glob } = require( 'glob' );
 
 /**
  * The purpose of the script is to clean all packages prepared for the release. The cleaning consists of two stages:
@@ -26,15 +25,12 @@ const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {String} options.packagesDirectory Relative path to a location of packages to be cleaned up.
  * @param {Array.<String>} [options.packageJsonFieldsToRemove] Fields to remove from `package.json`. If not set, a predefined list is used.
  * @param {String} [options.cwd] Current working directory from which all paths will be resolved.
+ * @returns {Promise}
  */
-module.exports = function cleanUpPackages( options ) {
-	const log = logger();
-
-	log.info( 'Task: cleanUpPackages()' );
-
+module.exports = async function cleanUpPackages( options ) {
 	const { packagesDirectory, packageJsonFieldsToRemove, cwd } = parseOptions( options );
 
-	const packageJsonPaths = globSync( '*/package.json', {
+	const packageJsonPaths = await glob( '*/package.json', {
 		cwd: upath.join( cwd, packagesDirectory ),
 		nodir: true,
 		absolute: true
@@ -42,14 +38,12 @@ module.exports = function cleanUpPackages( options ) {
 
 	for ( const packageJsonPath of packageJsonPaths ) {
 		const packagePath = upath.dirname( packageJsonPath );
-		const packageJson = fs.readJsonSync( packageJsonPath );
+		const packageJson = await fs.readJson( packageJsonPath );
 
-		log.info( `Cleaning up: "${ packagePath }".` );
-
-		cleanUpPackageDirectory( packageJson, packagePath );
+		await cleanUpPackageDirectory( packageJson, packagePath );
 		cleanUpPackageJson( packageJson, packageJsonFieldsToRemove );
 
-		fs.writeJsonSync( packageJsonPath, packageJson, { spaces: 2 } );
+		await fs.writeJson( packageJsonPath, packageJson, { spaces: 2 } );
 	}
 };
 
@@ -81,11 +75,12 @@ function parseOptions( options ) {
  *
  * @param {Object} packageJson
  * @param {String} packagePath
+ * @returns {Promise}
  */
-function cleanUpPackageDirectory( packageJson, packagePath ) {
+async function cleanUpPackageDirectory( packageJson, packagePath ) {
 	if ( packageJson.files ) {
 		// Find and remove files that don't match the `files` field in the `package.json`.
-		const files = globSync( '**', {
+		const files = await glob( '**', {
 			cwd: packagePath,
 			absolute: true,
 			nodir: true,
@@ -99,29 +94,30 @@ function cleanUpPackageDirectory( packageJson, packagePath ) {
 		} );
 
 		for ( const file of files ) {
-			fs.removeSync( file );
+			await fs.remove( file );
 		}
 	}
 
 	// Find and remove empty directories in the package directory.
-	const directories = globSync( '**/', {
+	const globResults = await glob( '**/', {
 		cwd: packagePath,
 		absolute: true,
 		dot: true
-	} )
+	} );
+	const directories = globResults
 		.map( path => upath.normalize( path ) )
 		.sort( sortPathsFromDeepestFirst );
 
 	for ( const directory of directories ) {
-		const isEmpty = fs.readdirSync( directory ).length === 0;
+		const isEmpty = ( await fs.readdir( directory ) ).length === 0;
 
 		if ( isEmpty ) {
-			fs.removeSync( directory );
+			await fs.remove( directory );
 		}
 	}
 
 	// Remove `node_modules`.
-	fs.removeSync( upath.join( packagePath, 'node_modules' ) );
+	await fs.remove( upath.join( packagePath, 'node_modules' ) );
 }
 
 /**

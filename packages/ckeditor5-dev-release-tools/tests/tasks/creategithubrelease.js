@@ -17,20 +17,19 @@ describe( 'dev-release-tools/tasks', () => {
 			options = {
 				token: 'abc123',
 				version: '1.3.5',
-				repositoryOwner: 'mrSmith',
-				repositoryName: 'epic-project',
-				description: 'Very important release.',
-				isPrerelease: false
+				repositoryOwner: 'ckeditor',
+				repositoryName: 'ckeditor5-example',
+				description: 'Very important release.'
 			};
 
 			stubs = {
 				octokit: {
 					repos: {
-						createRelease: sinon.stub().resolves()
+						createRelease: sinon.stub().resolves(),
+						getLatestRelease: sinon.stub().rejects( {
+							status: 404
+						} )
 					}
-				},
-				console: {
-					log: sinon.stub( console, 'log' )
 				}
 			};
 
@@ -72,40 +71,64 @@ describe( 'dev-release-tools/tasks', () => {
 			} );
 		} );
 
-		it( 'creates the release with correct arguments', async () => {
+		it( 'resolves a url to the created page', async () => {
+			const url = await createGithubRelease( options );
+
+			expect( url ).to.equal( 'https://github.com/ckeditor/ckeditor5-example/releases/tag/v1.3.5' );
+		} );
+
+		it( 'creates a non-prerelease page when passing a major.minor.patch version', async () => {
 			await createGithubRelease( options );
 
 			expect( stubs.octokit.repos.createRelease.callCount ).to.equal( 1 );
 			expect( stubs.octokit.repos.createRelease.getCall( 0 ).args.length ).to.equal( 1 );
 			expect( stubs.octokit.repos.createRelease.getCall( 0 ).args[ 0 ] ).to.deep.equal( {
 				tag_name: 'v1.3.5',
-				owner: 'mrSmith',
-				repo: 'epic-project',
+				owner: 'ckeditor',
+				repo: 'ckeditor5-example',
 				body: 'Very important release.',
 				prerelease: false
 			} );
 		} );
 
-		it( 'logs the information about success', async () => {
+		it( 'creates a prerelease page when passing a major.minor.patch-prerelease version', async () => {
+			options.version = '1.3.5-alpha.0';
 			await createGithubRelease( options );
 
-			expect( stubs.console.log.callCount ).to.equal( 1 );
-			expect( stubs.console.log.getCall( 0 ).args.length ).to.equal( 1 );
-			expect( stubs.console.log.getCall( 0 ).args[ 0 ] ).to.equal(
-				'Created the release on GitHub: https://github.com/mrSmith/epic-project/releases/tag/v1.3.5'
-			);
+			expect( stubs.octokit.repos.createRelease.callCount ).to.equal( 1 );
+			expect( stubs.octokit.repos.createRelease.getCall( 0 ).args.length ).to.equal( 1 );
+			expect( stubs.octokit.repos.createRelease.getCall( 0 ).args[ 0 ] ).to.deep.equal( {
+				tag_name: 'v1.3.5-alpha.0',
+				owner: 'ckeditor',
+				repo: 'ckeditor5-example',
+				body: 'Very important release.',
+				prerelease: true
+			} );
 		} );
 
-		it( 'logs the information about failure', async () => {
-			stubs.octokit.repos.createRelease.rejects( { message: 'Release error.' } );
+		it( 'creates a new release if the previous release version are different', async () => {
+			stubs.octokit.repos.getLatestRelease.resolves( {
+				data: {
+					tag_name: 'v1.3.4'
+				}
+			} );
 
 			await createGithubRelease( options );
 
-			expect( stubs.console.log.callCount ).to.equal( 2 );
-			expect( stubs.console.log.getCall( 0 ).args.length ).to.equal( 1 );
-			expect( stubs.console.log.getCall( 0 ).args[ 0 ] ).to.equal( 'An error occurred while creating the release on GitHub:' );
-			expect( stubs.console.log.getCall( 1 ).args.length ).to.equal( 1 );
-			expect( stubs.console.log.getCall( 1 ).args[ 0 ] ).to.equal( 'Release error.' );
+			expect( stubs.octokit.repos.createRelease.callCount ).to.equal( 1 );
+		} );
+
+		it( 'does not create a new release if the previous release version are the same', async () => {
+			stubs.octokit.repos.getLatestRelease.resolves( {
+				data: {
+					tag_name: 'v1.3.5'
+				}
+			} );
+
+			const url = await createGithubRelease( options );
+
+			expect( url ).to.equal( 'https://github.com/ckeditor/ckeditor5-example/releases/tag/v1.3.5' );
+			expect( stubs.octokit.repos.createRelease.callCount ).to.equal( 0 );
 		} );
 	} );
 } );
