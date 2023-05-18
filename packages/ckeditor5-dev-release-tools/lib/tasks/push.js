@@ -25,6 +25,5 @@ module.exports = async function push( options ) {
 
 	const command = `git push origin ${ releaseBranch } v${ version }`;
 
-	// TODO: Test.
-	return tools.shExec( command, { cwd, verbosity: 'error' }, { async: true } );
+	return tools.shExec( command, { cwd, verbosity: 'error', async: true } );
 };
