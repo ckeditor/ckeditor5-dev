@@ -15,17 +15,17 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  * Used to switch the tags from `staging` to `latest` for specified array of packages.
  *
  * @param {Object} options
- * @param {String} options.authorizedUser User that is authorized to release packages.
+ * @param {String} options.npmOwner User that is authorized to release packages.
  * @param {String} options.version Specifies the version of packages to reassign the tags for.
  * @param {Array.<String>} options.packages Array of packages' names to reassign tags for.
  * @returns {Promise}
  */
-module.exports = async function reassignNpmTags( { authorizedUser, version, packages } ) {
+module.exports = async function reassignNpmTags( { npmOwner, version, packages } ) {
 	const errors = [];
 	const packagesSkipped = [];
 	const packagesUpdated = [];
 
-	await verifyLoggedInUserIsAuthorizedToPublish( authorizedUser );
+	await verifyLoggedInUserIsAuthorizedToPublish( npmOwner );
 
 	for ( const packageName of packages ) {
 		try {
@@ -58,14 +58,14 @@ module.exports = async function reassignNpmTags( { authorizedUser, version, pack
 };
 
 /**
- * @param {String} authorizedUser
+ * @param {String} npmOwner
  * @returns {Promise}
  */
-async function verifyLoggedInUserIsAuthorizedToPublish( authorizedUser ) {
+async function verifyLoggedInUserIsAuthorizedToPublish( npmOwner ) {
 	const loggedInUser = ( await exec( 'npm whoami' ) ).trim();
 
-	if ( loggedInUser !== authorizedUser ) {
-		throw new Error( `User: ${ loggedInUser } is not matching authorized user: ${ authorizedUser }.` );
+	if ( loggedInUser !== npmOwner ) {
+		throw new Error( `User: ${ loggedInUser } is not matching authorized user: ${ npmOwner }.` );
 	}
 }
 
