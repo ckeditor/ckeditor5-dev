@@ -26,13 +26,6 @@ describe( 'dev-release-tools/tasks', () => {
 				},
 				process: {
 					cwd: sandbox.stub( process, 'cwd' ).returns( '/work/project' )
-				},
-				devUtils: {
-					logger: sandbox.stub().returns( {
-						error: sandbox.stub(),
-						warning: sandbox.stub(),
-						info: sandbox.stub()
-					} )
 				}
 			};
 
@@ -44,7 +37,6 @@ describe( 'dev-release-tools/tasks', () => {
 
 			mockery.registerMock( 'fs-extra', stubs.fs );
 			mockery.registerMock( 'glob', stubs.glob );
-			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', stubs.devUtils );
 
 			updateDependencies = require( '../../lib/tasks/updatedependencies' );
 		} );

@@ -53,28 +53,32 @@ describe( 'dev-release-tools/tasks', () => {
 		} );
 
 		it( 'should execute command with correct arguments', async () => {
-			push( options );
+			stubs.devUtils.tools.shExec.resolves();
+			await push( options );
 
 			expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 1 );
 			expect( stubs.devUtils.tools.shExec.getCall( 0 ).args.length ).to.equal( 2 );
 			expect( stubs.devUtils.tools.shExec.getCall( 0 ).args[ 0 ] ).to.equal( 'git push origin release v1.3.5' );
 			expect( stubs.devUtils.tools.shExec.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
 				cwd: 'custom/working/dir',
-				verbosity: 'error'
+				verbosity: 'error',
+				async: true
 			} );
 		} );
 
 		it( 'should use "process.cwd()" if the "cwd" option was not used', async () => {
 			delete options.cwd;
 
-			push( options );
+			stubs.devUtils.tools.shExec.resolves();
+			await push( options );
 
 			expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 1 );
 			expect( stubs.devUtils.tools.shExec.getCall( 0 ).args.length ).to.equal( 2 );
 			expect( stubs.devUtils.tools.shExec.getCall( 0 ).args[ 0 ] ).to.equal( 'git push origin release v1.3.5' );
 			expect( stubs.devUtils.tools.shExec.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
 				cwd: 'current/working/dir',
-				verbosity: 'error'
+				verbosity: 'error',
+				async: true
 			} );
 		} );
 	} );

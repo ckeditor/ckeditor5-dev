@@ -6,9 +6,10 @@
 'use strict';
 
 const { Octokit } = require( '@octokit/rest' );
+const semver = require( 'semver' );
 
 /**
- * Create a Github release.
+ * Create a GitHub release.
  *
  * @param {Object} options
  * @param {String} options.token Token used to authenticate with GitHub.
@@ -16,17 +17,15 @@ const { Octokit } = require( '@octokit/rest' );
  * @param {String} options.repositoryOwner Owner of the repository.
  * @param {String} options.repositoryName Repository name.
  * @param {String} options.description Description of the release.
- * @param {Boolean} options.isPrerelease Indicates whether the release is a pre-release.
- * @returns {Promise}
+ * @returns {Promise.<String>}
  */
-module.exports = function createGithubRelease( options ) {
+module.exports = async function createGithubRelease( options ) {
 	const {
 		token,
 		version,
 		repositoryOwner,
 		repositoryName,
-		description,
-		isPrerelease
+		description
 	} = options;
 
 	const github = new Octokit( {
@@ -34,22 +33,72 @@ module.exports = function createGithubRelease( options ) {
 		auth: `token ${ token }`
 	} );
 
-	const releaseParams = {
-		tag_name: `v${ version }`,
+	if ( await shouldCreateRelease( github, repositoryOwner, repositoryName, version ) ) {
+		await github.repos.createRelease( {
+			tag_name: `v${ version }`,
+			owner: repositoryOwner,
+			repo: repositoryName,
+			body: description,
+			prerelease: getVersionTag( version ) !== 'latest'
+		} );
+	}
+
+	return `https://github.com/${ repositoryOwner }/${ repositoryName }/releases/tag/v${ version }`;
+};
+
+/**
+ * Returns an npm tag based on the specified release version.
+ *
+ * @param {String} version
+ * @returns {String}
+ */
+function getVersionTag( version ) {
+	const [ versionTag ] = semver.prerelease( version ) || [ 'latest' ];
+
+	return versionTag;
+}
+
+/**
+ * Resolves a promise containing a flag if the GitHub contains the release page for given version.
+ *
+ * @param {Octokit} github
+ * @param {String} repositoryOwner
+ * @param {String} repositoryName
+ * @param {String} version
+ * @returns {Promise.<boolean>}
+ */
+async function shouldCreateRelease( github, repositoryOwner, repositoryName, version ) {
+	const releaseDetails = await getLastRelease( github, repositoryOwner, repositoryName );
+
+	// It can be `null` if there is no releases on GitHub.
+	let githubVersion = releaseDetails.data.tag_name;
+
+	if ( githubVersion ) {
+		githubVersion = releaseDetails.data.tag_name.replace( /^v/, '' );
+	}
+
+	// If versions are different, we are ready to create a new release.
+	return githubVersion !== version;
+}
+
+function getLastRelease( github, repositoryOwner, repositoryName ) {
+	const requestParams = {
 		owner: repositoryOwner,
-		repo: repositoryName,
-		body: description,
-		prerelease: isPrerelease
+		repo: repositoryName
 	};
 
-	return github.repos.createRelease( releaseParams )
-		.then( () => {
-			const url = `https://github.com/${ repositoryOwner }/${ repositoryName }/releases/tag/v${ version }`;
-
-			console.log( `Created the release on GitHub: ${ url }` );
-		} )
+	return github.repos.getLatestRelease( requestParams )
 		.catch( err => {
-			console.log( 'An error occurred while creating the release on GitHub:' );
-			console.log( err.message );
+			// If the "last release" returned the 404 error page, it means that this release
+			// will be the first one for specified `repositoryOwner/repositoryName` package.
+			if ( err.status == 404 ) {
+				return Promise.resolve( {
+					data: {
+						tag_name: null
+					}
+				} );
+			}
+
+			return Promise.reject( err );
 		} );
-};
+}

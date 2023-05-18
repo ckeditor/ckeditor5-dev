@@ -18,8 +18,8 @@ module.exports = {
 	 *
 	 * @param {String} command The command to be executed.
 	 * @param {Object} options
-	 * @param {'info'|'warning'|'error'} [options.verbosity='info'] Level of the verbosity. If set as 'info' both outputs (stdout and
-	 * stderr) will be logged. If set as 'error', only stderr output will be logged.
+	 * @param {'info'|'warning'|'error'|'silent'} [options.verbosity='info'] Level of the verbosity. If set as 'info'
+	 * both outputs (stdout and stderr) will be logged. If set as 'error', only stderr output will be logged.
 	 * @param {String} [options.cwd=process.cwd()]
 	 * @param {Boolean} [options.async=false] If set, the command execution is asynchronous. The execution is synchronous by default.
 	 * @returns {String|Promise.<String>} The command output.
