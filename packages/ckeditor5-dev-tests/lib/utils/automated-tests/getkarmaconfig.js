@@ -129,15 +129,8 @@ module.exports = function getKarmaConfig( options ) {
 
 	// Notification is enabled by default when executing all tests.
 	if ( options.notify || !options.files ) {
-		karmaConfig.reporters.push( 'notify' );
-
-		karmaConfig.plugins.push(
-			require.resolve( 'karma-notify-reporter' )
-		);
-
-		karmaConfig.notifyReporter = {
-			reportEachFailure: false
-		};
+		karmaConfig.reporters.push( 'karmanotifier' );
+		karmaConfig.plugins.push( require( path.join( __dirname, 'karmanotifier.js' ) ) );
 	}
 
 	if ( options.watch || options.server ) {
