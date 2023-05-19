@@ -114,7 +114,8 @@ module.exports = async function runCrawler( options ) {
  */
 async function createBrowser( options ) {
 	const browserOptions = {
-		args: []
+		args: [],
+		headless: 'old'
 	};
 
 	if ( options.disableBrowserSandbox ) {
@@ -323,7 +324,7 @@ async function openLink( browser, { baseUrl, link, foundLinks, exclusions } ) {
 }
 
 /**
- * Finds all links in opened page and filters out external, already discovered and exlicitly excluded ones.
+ * Finds all links in opened page and filters out external, already discovered and explicitly excluded ones.
  *
  * @param {Object} page The page instance from Puppeteer.
  * @param {Object} data All data needed for crawling the link.
@@ -408,7 +409,7 @@ async function getErrorIgnorePatternsFromPage( page ) {
 }
 
 /**
- * Iterates over all found errors from given link and marks errors as ingored, if their message match the ignore pattern.
+ * Iterates over all found errors from given link and marks errors as ignored, if their message match the ignore pattern.
  *
  * @param {Array.<Error>} errors An array of errors to check.
  * @param {Map.<ErrorType, Set.<String>>} errorIgnorePatterns A map between an error type and a set of patterns.
