@@ -35,12 +35,10 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
 
 	for ( const packageName of packages ) {
 		const latestVersion = await exec( `npm show ${ packageName }@latest version` )
-			.then(
-				version => version.trim(),
-				error => {
-					errors.push( trimErrorMessage( error.message ) );
-				}
-			);
+			.then( version => version.trim() )
+			.catch( error => {
+				errors.push( trimErrorMessage( error.message ) );
+			} );
 
 		if ( latestVersion === version ) {
 			packagesSkipped.push( packageName );
@@ -49,14 +47,12 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
 		}
 
 		await exec( `npm dist-tag add ${ packageName }@${ version } latest` )
-			.then(
-				() => {
-					packagesUpdated.push( packageName );
-				},
-				error => {
-					errors.push( trimErrorMessage( error.message ) );
-				}
-			)
+			.then( () => {
+				packagesUpdated.push( packageName );
+			} )
+			.catch( error => {
+				errors.push( trimErrorMessage( error.message ) );
+			} )
 			.finally( () => {
 				counter.increase();
 			} );
