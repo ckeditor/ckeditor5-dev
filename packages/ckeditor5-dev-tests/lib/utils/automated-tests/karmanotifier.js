@@ -3,10 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
+const path = require( 'path' );
 const notifier = require( 'node-notifier' );
 
+const ckeditor5icon = path.join( __dirname, '..', 'icons', 'ckeditor5.png' );
+
+console.log( ckeditor5icon );
+
 const defaultNotifyOptions = {
-	appID: 'karmaNotifier'
+	appID: 'karmaNotifier',
+	icon: ckeditor5icon
 };
 
 module.exports = { 'reporter:karmanotifier': [ 'type', karmaNotifier ] };
@@ -21,7 +27,7 @@ function karmaNotifier( helper ) {
 
 		if ( result.disconnected ) {
 			notifier.notify( {
-				title: 'CKEditor5 tests: Browser Disconnected',
+				title: 'CKEditor 5 tests: Disconnected.',
 				message: 'Browser was disconnected before all tests finished.' + footer,
 				...defaultNotifyOptions
 			} );
@@ -31,7 +37,7 @@ function karmaNotifier( helper ) {
 
 		if ( result.error ) {
 			notifier.notify( {
-				title: 'CKEditor5 tests: Error',
+				title: 'CKEditor 5 tests: Error.',
 				message: 'An unexpected error occurred.' + footer,
 				...defaultNotifyOptions
 			} );
@@ -41,7 +47,7 @@ function karmaNotifier( helper ) {
 
 		if ( result.failed ) {
 			notifier.notify( {
-				title: 'CKEditor5 tests: Failure',
+				title: 'CKEditor 5 tests: Failure.',
 				message: `Out of ${ result.total } tests, ${ result.failed } failed.` + footer,
 				...defaultNotifyOptions
 			} );
@@ -50,7 +56,7 @@ function karmaNotifier( helper ) {
 		}
 
 		notifier.notify( {
-			title: 'CKEditor5 tests: Success',
+			title: 'CKEditor 5 tests: Success.',
 			message: `All ${ result.success } tests passed.` + footer,
 			...defaultNotifyOptions
 		} );
