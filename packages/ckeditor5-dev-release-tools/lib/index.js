@@ -14,6 +14,7 @@ const updateCKEditor5Dependencies = require( './tasks/updateckeditor5dependencie
 const updateDependencies = require( './tasks/updatedependencies' );
 const commitAndTag = require( './tasks/commitandtag' );
 const createGithubRelease = require( './tasks/creategithubrelease' );
+const reassignNpmTags = require( './tasks/reassignnpmtags' );
 const updateDependenciesVersions = require( './utils/updatedependenciesversions' );
 const prepareRepository = require( './tasks/preparerepository' );
 const push = require( './tasks/push' );
@@ -41,6 +42,7 @@ module.exports = {
 	cleanUpPackages,
 	updateDependenciesVersions,
 	publishPackages,
+	reassignNpmTags,
 	executeInParallel,
 	getLastFromChangelog,
 	getCurrent,
