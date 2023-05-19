@@ -8,10 +8,9 @@ const notifier = require( 'node-notifier' );
 
 const ckeditor5icon = path.join( __dirname, '..', 'icons', 'ckeditor5.png' );
 
-console.log( ckeditor5icon );
-
 const defaultNotifyOptions = {
-	appID: 'karmaNotifier',
+	appID: 'CKEditor 5 Tests',
+	sound: false,
 	icon: ckeditor5icon
 };
 
