@@ -22,6 +22,7 @@
     "glob": "^7.1.6",
     "inquirer": "^7.1.0",
     "is-interactive": "^1.0.0",
+    "is-wsl": "^2.2.0",
     "js-beautify": "^1.11.0",
     "karma": "^6.3.17",
     "karma-chai": "^0.1.0",
@@ -39,6 +40,7 @@
     "minimist": "^1.2.5",
     "mkdirp": "^1.0.4",
     "mocha": "^7.1.2",
+    "node-notifier": "^10.0.1",
     "process": "^0.11.10",
     "sinon": "^9.2.4",
     "sinon-chai": "^3.5.0",
@@ -58,6 +60,9 @@
     "lib",
     "bin"
   ],
+  "scripts": {
+    "postinstall": "node bin/postinstall.js"
+  },
   "bin": {
     "ckeditor5-dev-tests-run-automated": "bin/testautomated.js",
     "ckeditor5-dev-tests-run-manual": "bin/testmanual.js"
