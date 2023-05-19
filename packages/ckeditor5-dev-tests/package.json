@@ -61,7 +61,7 @@
     "bin"
   ],
   "scripts": {
-    "postinstall": "bin/postinstall.js"
+    "postinstall": "node bin/postinstall.js"
   },
   "bin": {
     "ckeditor5-dev-tests-run-automated": "bin/testautomated.js",
