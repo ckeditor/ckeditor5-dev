@@ -73,7 +73,7 @@ describe( 'reassignNpmTags()', () => {
 			expect( e.message ).to.equal( 'User not logged in error' );
 		}
 
-		expect( npmDistTagAdd ).not.to.be.called;
+		expect( npmDistTagAdd.callCount ).to.equal( 0 );
 	} );
 
 	it( 'should still try to update tags when can not obtain package version from npm', async () => {
