@@ -72,10 +72,8 @@ After generating the changelog, you are able to release the package.
 First, you need to bump the version:
 
 ```bash
-npm run release:bump-version
+npm run release:prepare-packages
 ```
-
-You can also use the `--dry-run` option in order to see what this task does.
 
 After bumping the version, you can publish the changes:
 
@@ -83,9 +81,7 @@ After bumping the version, you can publish the changes:
 npm run release:publish
 ```
 
-As in the previous task, the `--dry-run` option is also available.
-
-Your job's done. You can go now to `ckeditor5`, remove `yarn.lock`, potentially update something in `package.json`, run `yarn install` and commit that as `"Internal: Updated dependencies."`.
+Your job's done. You can go now to `ckeditor5`, remove `yarn.lock`, potentially update entries in `package.json`, run `yarn install` and commit that as `"Internal: Updated dependencies."`.
 
 ## License
 
