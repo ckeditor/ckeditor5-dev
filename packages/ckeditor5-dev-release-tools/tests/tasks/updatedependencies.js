@@ -105,21 +105,9 @@ describe( 'dev-release-tools/tasks', () => {
 				] );
 			} );
 
-			it( 'should remove leading and trailing path separators from the `packagesDirectory`', async () => {
-				await updateDependencies( {
-					packagesDirectory: '/path/to/packages/'
-				} );
-
-				expect( stubs.glob.glob.calledOnce ).to.equal( true );
-				expect( stubs.glob.glob.getCall( 0 ).args[ 0 ] ).to.deep.equal( [
-					'package.json',
-					'path/to/packages/*/package.json'
-				] );
-			} );
-
 			it( 'should convert backslashes to slashes from the `packagesDirectory`', async () => {
 				await updateDependencies( {
-					packagesDirectory: '\\path\\to\\packages\\'
+					packagesDirectory: 'path\\to\\packages\\'
 				} );
 
 				expect( stubs.glob.glob.calledOnce ).to.equal( true );

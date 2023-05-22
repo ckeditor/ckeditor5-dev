@@ -7,7 +7,7 @@
 
 const fs = require( 'fs-extra' );
 const { glob } = require( 'glob' );
-const normalizePath = require( '../utils/normalizepath' );
+const upath = require( 'upath' );
 
 /**
  * The purpose of this script is to update all eligible dependencies to a version specified in the `options.version`. The following packages
@@ -46,7 +46,7 @@ module.exports = async function updateDependencies( options ) {
 	const globPatterns = [ 'package.json' ];
 
 	if ( packagesDirectory ) {
-		const packagesDirectoryPattern = normalizePath( packagesDirectory ) + '/*/package.json';
+		const packagesDirectoryPattern = upath.join( packagesDirectory, '*', 'package.json' );
 
 		globPatterns.push( packagesDirectoryPattern );
 	}
