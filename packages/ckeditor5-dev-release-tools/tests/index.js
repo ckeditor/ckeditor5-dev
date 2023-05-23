@@ -11,7 +11,7 @@ const proxyquire = require( 'proxyquire' );
 const mockery = require( 'mockery' );
 
 describe( 'dev-release-tools/index', () => {
-	let tasks, sandbox, stubs;
+	let index, sandbox, stubs;
 
 	beforeEach( () => {
 		sandbox = sinon.createSandbox();
@@ -29,23 +29,49 @@ describe( 'dev-release-tools/index', () => {
 				error: sandbox.spy()
 			},
 			release: {
-				releaseSubRepositories: sandbox.stub(),
 				generateChangelogForSinglePackage: sandbox.stub(),
 				generateChangelogForMonoRepository: sandbox.stub(),
-				bumpVersions: sandbox.stub(),
-				updateCKEditor5Dependencies: sandbox.stub()
+				updateDependencies: sandbox.stub(),
+				commitAndTag: sandbox.stub(),
+				createGithubRelease: sandbox.stub(),
+				reassignNpmTags: sandbox.stub(),
+				prepareRepository: sandbox.stub(),
+				push: sandbox.stub(),
+				publishPackages: sandbox.stub(),
+				updateVersions: sandbox.stub(),
+				cleanUpPackages: sandbox.stub(),
+				version: {
+					getLastFromChangelog: sandbox.stub(),
+					getCurrent: sandbox.stub(),
+					getLastTagFromGit: sandbox.stub()
+				},
+				changelog: {
+					getChangesForVersion: sandbox.stub(),
+					getChangelog: sandbox.stub(),
+					saveChangelog: sandbox.stub()
+				},
+				executeInParallel: sandbox.stub(),
+				validateRepositoryToRelease: sandbox.stub()
 			}
 		};
 
-		const releaseTools = stubs.release;
+		mockery.registerMock( './tasks/generatechangelogforsinglepackage', stubs.release.generateChangelogForSinglePackage );
+		mockery.registerMock( './tasks/generatechangelogformonorepository', stubs.release.generateChangelogForMonoRepository );
+		mockery.registerMock( './tasks/updatedependencies', stubs.release.updateDependencies );
+		mockery.registerMock( './tasks/commitandtag', stubs.release.commitAndTag );
+		mockery.registerMock( './tasks/creategithubrelease', stubs.release.createGithubRelease );
+		mockery.registerMock( './tasks/reassignnpmtags', stubs.release.reassignNpmTags );
+		mockery.registerMock( './tasks/preparerepository', stubs.release.prepareRepository );
+		mockery.registerMock( './tasks/push', stubs.release.push );
+		mockery.registerMock( './tasks/publishpackages', stubs.release.publishPackages );
+		mockery.registerMock( './tasks/updateversions', stubs.release.updateVersions );
+		mockery.registerMock( './tasks/cleanuppackages', stubs.release.cleanUpPackages );
+		mockery.registerMock( './utils/versions', stubs.release.version );
+		mockery.registerMock( './utils/changelog', stubs.release.changelog );
+		mockery.registerMock( './utils/executeinparallel', stubs.release.executeInParallel );
+		mockery.registerMock( './utils/validaterepositorytorelease', stubs.release.validateRepositoryToRelease );
 
-		mockery.registerMock( './tasks/bumpversions', releaseTools.bumpVersions );
-		mockery.registerMock( './tasks/generatechangelogforsinglepackage', releaseTools.generateChangelogForSinglePackage );
-		mockery.registerMock( './tasks/releasesubrepositories', releaseTools.releaseSubRepositories );
-		mockery.registerMock( './tasks/generatechangelogformonorepository', releaseTools.generateChangelogForMonoRepository );
-		mockery.registerMock( './tasks/updateckeditor5dependencies', releaseTools.updateCKEditor5Dependencies );
-
-		tasks = proxyquire( '../lib/index', {
+		index = proxyquire( '../lib/index', {
 			'@ckeditor/ckeditor5-dev-utils': {
 				logger() {
 					return stubs.logger;
@@ -59,79 +85,117 @@ describe( 'dev-release-tools/index', () => {
 		mockery.disable();
 	} );
 
-	describe( 'releaseSubRepositories()', () => {
-		it( 'creates release for sub repositories', () => {
-			stubs.release.releaseSubRepositories.resolves( { result: true } );
-
-			return tasks.releaseSubRepositories( 'arg' )
-				.then( response => {
-					expect( response.result ).to.equal( true );
-					expect( stubs.release.releaseSubRepositories.calledOnce ).to.equal( true );
-					expect( stubs.release.releaseSubRepositories.firstCall.args[ 0 ] ).to.equal( 'arg' );
-				} );
-		} );
-	} );
-
 	describe( 'generateChangelogForSinglePackage()', () => {
-		it( 'generates a changelog for package', () => {
-			stubs.release.generateChangelogForSinglePackage.resolves( { result: true } );
-
-			return tasks.generateChangelogForSinglePackage( 'arg' )
-				.then( response => {
-					expect( response.result ).to.equal( true );
-					expect( stubs.release.generateChangelogForSinglePackage.calledOnce ).to.equal( true );
-					expect( stubs.release.generateChangelogForSinglePackage.firstCall.args[ 0 ] ).to.equal( 'arg' );
-				} );
+		it( 'should be a function', () => {
+			expect( index.generateChangelogForSinglePackage ).to.be.a( 'function' );
 		} );
 	} );
 
 	describe( 'generateChangelogForMonoRepository()', () => {
-		it( 'generates a changelog for sub repositories', () => {
-			stubs.release.generateChangelogForMonoRepository.resolves( { result: true } );
-
-			return tasks.generateChangelogForMonoRepository( 123 )
-				.then( response => {
-					expect( response.result ).to.equal( true );
-					expect( stubs.release.generateChangelogForMonoRepository.calledOnce ).to.equal( true );
-					expect( stubs.release.generateChangelogForMonoRepository.firstCall.args[ 0 ] ).to.equal( 123 );
-				} );
+		it( 'should be a function', () => {
+			expect( index.generateChangelogForMonoRepository ).to.be.a( 'function' );
 		} );
 	} );
 
-	describe( 'bumpVersions()', () => {
-		it( 'updates version of dependencies', () => {
-			stubs.release.bumpVersions.resolves( { result: true } );
-
-			return tasks.bumpVersions( 123 )
-				.then( response => {
-					expect( response.result ).to.equal( true );
-					expect( stubs.release.bumpVersions.calledOnce ).to.equal( true );
-					expect( stubs.release.bumpVersions.firstCall.args[ 0 ] ).to.equal( 123 );
-				} );
+	describe( 'updateDependencies()', () => {
+		it( 'should be a function', () => {
+			expect( index.updateDependencies ).to.be.a( 'function' );
 		} );
 	} );
 
-	describe( 'updateCKEditor5Dependencies()', () => {
-		it( 'should update versions in package.json files', () => {
-			stubs.release.updateCKEditor5Dependencies.returns( 'OK.' );
+	describe( 'commitAndTag()', () => {
+		it( 'should be a function', () => {
+			expect( index.commitAndTag ).to.be.a( 'function' );
+		} );
+	} );
 
-			const output = tasks.updateCKEditor5Dependencies(
-				[
-					{ path: 'foo/packages', commit: true },
-					{ path: 'bar/packages', commit: false }
-				],
-				process.argv.includes( '--dry-run' )
-			);
+	describe( 'createGithubRelease()', () => {
+		it( 'should be a function', () => {
+			expect( index.createGithubRelease ).to.be.a( 'function' );
+		} );
+	} );
 
-			sinon.assert.calledOnce( stubs.release.updateCKEditor5Dependencies );
-			sinon.assert.alwaysCalledWithExactly( stubs.release.updateCKEditor5Dependencies,
-				[
-					{ path: 'foo/packages', commit: true },
-					{ path: 'bar/packages', commit: false }
-				],
-				process.argv.includes( '--dry-run' )
-			);
-			expect( output ).to.equal( 'OK.' );
+	describe( 'reassignNpmTags()', () => {
+		it( 'should be a function', () => {
+			expect( index.reassignNpmTags ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'prepareRepository()', () => {
+		it( 'should be a function', () => {
+			expect( index.prepareRepository ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'push()', () => {
+		it( 'should be a function', () => {
+			expect( index.push ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'publishPackages()', () => {
+		it( 'should be a function', () => {
+			expect( index.publishPackages ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'updateVersions()', () => {
+		it( 'should be a function', () => {
+			expect( index.updateVersions ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'cleanUpPackages()', () => {
+		it( 'should be a function', () => {
+			expect( index.cleanUpPackages ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'getLastFromChangelog()', () => {
+		it( 'should be a function', () => {
+			expect( index.getLastFromChangelog ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'getCurrent()', () => {
+		it( 'should be a function', () => {
+			expect( index.getCurrent ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'getLastTagFromGit()', () => {
+		it( 'should be a function', () => {
+			expect( index.getLastTagFromGit ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'getChangesForVersion()', () => {
+		it( 'should be a function', () => {
+			expect( index.getChangesForVersion ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'getChangelog()', () => {
+		it( 'should be a function', () => {
+			expect( index.getChangelog ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'saveChangelog()', () => {
+		it( 'should be a function', () => {
+			expect( index.saveChangelog ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'executeInParallel()', () => {
+		it( 'should be a function', () => {
+			expect( index.executeInParallel ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'validateRepositoryToRelease()', () => {
+		it( 'should be a function', () => {
+			expect( index.validateRepositoryToRelease ).to.be.a( 'function' );
 		} );
 	} );
 } );
