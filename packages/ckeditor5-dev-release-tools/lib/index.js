@@ -11,7 +11,6 @@ const updateDependencies = require( './tasks/updatedependencies' );
 const commitAndTag = require( './tasks/commitandtag' );
 const createGithubRelease = require( './tasks/creategithubrelease' );
 const reassignNpmTags = require( './tasks/reassignnpmtags' );
-const updateDependenciesVersions = require( './utils/updatedependenciesversions' );
 const prepareRepository = require( './tasks/preparerepository' );
 const push = require( './tasks/push' );
 const publishPackages = require( './tasks/publishpackages' );
@@ -32,7 +31,6 @@ module.exports = {
 	createGithubRelease,
 	push,
 	cleanUpPackages,
-	updateDependenciesVersions,
 	publishPackages,
 	reassignNpmTags,
 	executeInParallel,
