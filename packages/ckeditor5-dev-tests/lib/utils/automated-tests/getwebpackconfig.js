@@ -40,6 +40,13 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 
 		module: {
 			rules: [
+				{
+					test: /\.m?js$/,
+					resolve: {
+						fullySpecified: false
+					}
+				},
+
 				options.coverage ? loaders.getCoverageLoader( { files: options.files } ) : null,
 
 				loaders.getIconsLoader(),
