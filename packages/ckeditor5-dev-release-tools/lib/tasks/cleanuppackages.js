@@ -52,14 +52,14 @@ module.exports = async function cleanUpPackages( options ) {
  *
  * @param {Object} options
  * @param {String} options.packagesDirectory
- * @param {Array.<String>} [options.packageJsonFieldsToRemove=['devDependencies','depcheckIgnore','scripts']]
+ * @param {Array.<String>} [options.packageJsonFieldsToRemove=['devDependencies','depcheckIgnore','scripts','private']]
  * @param {String} [options.cwd=process.cwd()]
  * @returns {Object}
  */
 function parseOptions( options ) {
 	const {
 		packagesDirectory,
-		packageJsonFieldsToRemove = [ 'devDependencies', 'depcheckIgnore', 'scripts' ],
+		packageJsonFieldsToRemove = [ 'devDependencies', 'depcheckIgnore', 'scripts', 'private' ],
 		cwd = process.cwd()
 	} = options;
 

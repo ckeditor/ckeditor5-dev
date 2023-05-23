@@ -560,7 +560,8 @@ describe( 'dev-release-tools/tasks', () => {
 								scripts: {
 									'build': 'tsc -p ./tsconfig.json',
 									'dll:build': 'webpack'
-								}
+								},
+								private: true
 							} )
 						}
 					}
