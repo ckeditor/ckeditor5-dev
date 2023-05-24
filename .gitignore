@@ -8,3 +8,7 @@
 coverage/**
 npm-debug.log
 yarn.lock
+executeinparallel-integration.log
+
+# Prepared files to publish to npm.
+/release/
