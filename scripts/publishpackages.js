@@ -44,7 +44,7 @@ const tasks = new Listr( [
 				token: githubToken,
 				version: latestVersion,
 				repositoryOwner: 'ckeditor',
-				repositoryName: 'ckeditor5',
+				repositoryName: 'ckeditor5-dev',
 				description: versionChangelog
 			} );
 
