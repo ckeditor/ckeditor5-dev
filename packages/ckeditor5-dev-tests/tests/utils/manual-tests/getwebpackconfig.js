@@ -22,6 +22,7 @@ describe( 'getWebpackConfigForManualTests()', () => {
 		stubs = {
 			getDefinitionsFromFile: sinon.stub().returns( {} ),
 			loaders: {
+				getJavaScriptWithoutImportExtensions: sinon.stub().returns( {} ),
 				getIconsLoader: sinon.stub().returns( {} ),
 				getStylesLoader: sinon.stub().returns( {} ),
 				getTypeScriptLoader: sinon.stub().returns( {} ),
@@ -69,6 +70,8 @@ describe( 'getWebpackConfigForManualTests()', () => {
 			themePath: '/theme/path',
 			tsconfig: '/tsconfig/path'
 		} );
+
+		expect( stubs.loaders.getJavaScriptWithoutImportExtensions.calledOnce ).to.equal( true );
 
 		expect( stubs.loaders.getIconsLoader.calledOnce ).to.equal( true );
 		expect( stubs.loaders.getIconsLoader.firstCall.args[ 0 ] ).to.have.property( 'matchExtensionOnly', true );
