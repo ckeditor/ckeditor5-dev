@@ -1,6 +1,74 @@
 Changelog
 =========
 
+## [38.0.0-alpha.0](https://github.com/ckeditor/ckeditor5-dev/compare/v37.0.1...v38.0.0-alpha.0) (2023-05-24)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The following tasks and utils are no longer available: `preparePackages()`, `bumpVersions()`, `updateCKEditor5Dependencies()`, `updateDependenciesVersions()`, `releaseSubRepositories()`. Check out the release highlights to learn how to use the new utils to manage the release process in a repository.
+
+### Features
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Redesigned the release tools available in the repository to meet the following criteria. Closes [ckeditor/ckeditor5#14192](https://github.com/ckeditor/ckeditor5/issues/14192). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b573b07f86dce1dbac8fefb74a70b0ba5e46eeae))
+
+    * Automate the process so it can be done with as little interaction from the Releaser as possible.
+    * Make the process bulletproof so more people can trigger it.
+    * To enable publishing nightly versions of the packages.
+    * To enable extending the release process by defining a new step easily.
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Introduced several new tasks and utils for preparing the packages to release:. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b573b07f86dce1dbac8fefb74a70b0ba5e46eeae))
+
+    * `updateDependencies()` – updates dependencies (dev and peer too) to the specified version,
+    * `updateVersions()` – bumps the `#version` key in a `package.json` file,
+    * `prepareRepository()` – copies packages from a source directory to a destination that can be used as a source when publishing packages to npm,
+    * `commitAndTag()` – creates a commit and connects a release tag with it,
+    * `createGithubRelease()` – creates a GitHub release page for the given version,
+    * `push()` – executes the `git push` command,
+    * `cleanUpPackages()` – removes unnecessary files and entries in a package.json for each package to publish,
+    * `publishPackages()` – validates if packages are ready to publish, then deploy them to npm,
+    * `reassignNpmTags()` – switches npm tags for the specified packages,
+    * `executeInParallel()` – util allowing executing a given task in parallel for all packages.
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: Added karma notification for when the tests are completed. Notification can be enabled with `-n`/`--notify` CLI option. Its enabled by default when running all tests, without the `-f`/`--files` option. Closes [ckeditor/ckeditor5#13736](https://github.com/ckeditor/ckeditor5/issues/13736). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/d1a5898c4520f8f7a7208152c7d82b27c761b403))
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: `tools.shExec()` can resolve a promise if the `async: true` is specified in the `options` argument. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b573b07f86dce1dbac8fefb74a70b0ba5e46eeae))
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: `tools.shExec()` allows defining the working directory as `options.cwd`. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b573b07f86dce1dbac8fefb74a70b0ba5e46eeae))
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: `tools.createSpinner()` allows creating a spinner with a counter by defining the `options.total` value. To increase the displayed number, use the `#increase()` method on the returned object. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b573b07f86dce1dbac8fefb74a70b0ba5e46eeae))
+
+### Bug fixes
+
+* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Fixed crash in the Travis notifier script if an author of a commit could not be obtained. Instead, ping the entire channel and mention an author from its name instead of a login that can be `null`. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f32f08f4e9aeef99b49063d191d115f33a9f2370))
+* **[typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins)**: Properties with the `@observable` annotation hooked into accessor reflections were not processed when creating the `change:*` and `set:*` events. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/91f5443eb0a0672dd671df604ffe216d3f2d0f2b))
+
+### Other changes
+
+* **[web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler)**: Puppeteer no longer prints a warning regarding the Chrome Headless browser. See [ckeditor/ckeditor5#14063](https://github.com/ckeditor/ckeditor5/issues/14063). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/a641d0fe4ea91f788ea180a489470df9d19a839b))
+* Updated the `glob` dependency to use the latest version in all packages. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b573b07f86dce1dbac8fefb74a70b0ba5e46eeae))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v37.0.1 => v38.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v37.0.1 => v38.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v37.0.1 => v38.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v37.0.1 => v38.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v37.0.1 => v38.0.0-alpha.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v37.0.1 => v38.0.0-alpha.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v37.0.1 => v38.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v37.0.1 => v38.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v37.0.1 => v38.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v37.0.1 => v38.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v37.0.1 => v38.0.0-alpha.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v37.0.1 => v38.0.0-alpha.0
+</details>
+
+
 ## [37.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v37.0.0...v37.0.1) (2023-04-13)
 
 ### Bug fixes
