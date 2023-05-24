@@ -31,7 +31,7 @@
     "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test",
     "changelog": "node ./scripts/changelog.js",
     "release:prepare-packages": "node ./scripts/preparepackages.js",
-    "release:publish": "node ./scripts/publishpackages.js.js",
+    "release:publish-packages": "node ./scripts/publishpackages.js",
     "lint": "eslint --quiet \"**/*.js\"",
     "precommit": "lint-staged",
     "clean": "npx rimraf package-lock.json yarn.lock ./**/node_modules",

@@ -78,7 +78,7 @@ npm run release:prepare-packages
 After bumping the version, you can publish the changes:
 
 ```bash
-npm run release:publish
+npm run release:publish-packages
 ```
 
 Your job's done. You can go now to `ckeditor5`, remove `yarn.lock`, potentially update entries in `package.json`, run `yarn install` and commit that as `"Internal: Updated dependencies."`.
