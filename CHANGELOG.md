@@ -3,18 +3,46 @@ Changelog
 
 ## [38.0.0-alpha.0](https://github.com/ckeditor/ckeditor5-dev/compare/v37.0.1...v38.0.0-alpha.0) (2023-05-24)
 
+### Release highlights
+
+This release brings the redesigned tools and utils for releasing packages to npm. They have been designed with the following criteria:
+
+* Automate the process so it can be done with as little interaction from the releaser as possible.
+* Make the process bulletproof so more people can trigger it.
+* To enable publishing nightly versions of the packages.
+* To enable extending the release process by defining a new step easily.
+
 ### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
 
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The following tasks and utils are no longer available: `preparePackages()`, `bumpVersions()`, `updateCKEditor5Dependencies()`, `updateDependenciesVersions()`, `releaseSubRepositories()`. Check out the release highlights to learn how to use the new utils to manage the release process in a repository.
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The following tasks and utils are no longer available: `preparePackages()`, `bumpVersions()`, `updateCKEditor5Dependencies()`, `updateDependenciesVersions()`, `releaseSubRepositories()`.
+
+  The `releaseTools.bumpVersions()` and `releaseTools.preparePackages()` tasks should be replaced with the following code snippet: 
+
+  ```js
+  const releaseTools = require( '@ckeditor/ckeditor5-dev-release-tools' );
+
+  await releaseTools.validateRepositoryToRelease( /* options */ )
+  await releaseTools.updateVersions( /* options */ )
+  await releaseTools.updateDependencies( /* options */ )
+  await releaseTools.prepareRepository( /* options */ )
+  await releaseTools.cleanUpPackages( /* options */ )
+  await releaseTools.commitAndTag( /* options */ )
+  ```
+
+  The `releaseTools.releaseSubRepositories( /* options */ )` task should be replaced with the following code snippet:
+
+  ```js
+  const releaseTools = require( '@ckeditor/ckeditor5-dev-release-tools' );
+
+  await releaseTools.publishPackages( /* options */ )
+  await releaseTools.createGithubRelease( /* options */ )
+  await releaseTools.push( /* options */ )
+  ```
+
+  By default, the `releaseTools.publishPackages()` uses the `@staging` [npm tag](https://docs.npmjs.com/cli/v9/commands/npm-dist-tag). To make it public (available as `@latest`), use the `releaseTools.reassignNpmTags()`.
 
 ### Features
 
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Redesigned the release tools available in the repository to meet the following criteria. Closes [ckeditor/ckeditor5#14192](https://github.com/ckeditor/ckeditor5/issues/14192). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b573b07f86dce1dbac8fefb74a70b0ba5e46eeae))
-
-    * Automate the process so it can be done with as little interaction from the Releaser as possible.
-    * Make the process bulletproof so more people can trigger it.
-    * To enable publishing nightly versions of the packages.
-    * To enable extending the release process by defining a new step easily.
 * **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Introduced several new tasks and utils for preparing the packages to release:. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/b573b07f86dce1dbac8fefb74a70b0ba5e46eeae))
 
     * `updateDependencies()` – updates dependencies (dev and peer too) to the specified version,
