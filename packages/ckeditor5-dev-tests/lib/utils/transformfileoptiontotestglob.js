@@ -11,7 +11,7 @@ const path = require( 'path' );
 const EXTERNAL_DIR_PATH = path.join( process.cwd(), 'external' );
 
 /**
- * Converts values of `--files` argument to proper globs. These are the supported types of values:
+ * Converts values of `--files` argument to proper globs. Handles both JS and TS files. These are the supported types of values:
  *  * "ckeditor5" - matches all root package tests.
  *  * "<external-package-name>" - matches tests in root of external package.
  *  * "*" - matches all packages' files.
@@ -64,8 +64,8 @@ module.exports = function transformFileOptionToTestGlob( pattern, isManualTest =
  */
 function getExternalRepositoryGlob( pattern, { isManualTest } ) {
 	const repositoryGlob = isManualTest ?
-		path.join( EXTERNAL_DIR_PATH, pattern, 'tests', 'manual', '**', '*' ) + '.js' :
-		path.join( EXTERNAL_DIR_PATH, pattern, 'tests', '**', '*' ) + '.js';
+		path.join( EXTERNAL_DIR_PATH, pattern, 'tests', 'manual', '**', '*' ) + '.{js,ts}' :
+		path.join( EXTERNAL_DIR_PATH, pattern, 'tests', '**', '*' ) + '.{js,ts}';
 
 	return [
 		repositoryGlob.split( path.sep ).join( path.posix.sep )
@@ -118,7 +118,7 @@ function transformSinglePattern( pattern, options ) {
 		output.push( 'manual' );
 	}
 
-	output.push( ...chunks, '**', `${ filename }.js` );
+	output.push( ...chunks, '**', `${ filename }.{js,ts}` );
 
 	return output.join( path.posix.sep );
 }
