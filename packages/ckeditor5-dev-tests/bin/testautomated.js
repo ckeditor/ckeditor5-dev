@@ -13,6 +13,14 @@ const tests = require( '../lib/index' );
 
 const options = tests.parseArguments( process.argv.slice( 2 ) );
 
+// We want to mark tests as failed if any warnings are logged. See https://github.com/cksource/ckeditor5-internal/issues/3299
+if ( options.production ) {
+	console.warn = errors => {
+		console.log( errors );
+		throw new Error( 'Warnings detected - terminating tests.' );
+	};
+}
+
 if ( options.files.length === 0 ) {
 	if ( options.cwd.endsWith( 'ckeditor5' ) ) {
 		options.files = [ '*' ];

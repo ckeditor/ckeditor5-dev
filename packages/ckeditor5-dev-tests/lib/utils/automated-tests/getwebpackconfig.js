@@ -33,6 +33,9 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 		],
 
 		resolve: {
+			fallback: {
+				'timers': require.resolve( 'timers-browserify' )
+			},
 			extensions: options.resolveJsFirst ?
 				[ '.js', '.ts', '.json' ] :
 				[ '.ts', '.js', '.json' ]
