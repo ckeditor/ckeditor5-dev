@@ -52,9 +52,8 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			tsconfig: '/tsconfig/path'
 		} );
 
-		expect( webpackConfig.resolve ).to.deep.equal( {
-			extensions: [ '.ts', '.js', '.json' ]
-		} );
+		expect( webpackConfig.resolve.extensions ).to.deep.equal( [ '.ts', '.js', '.json' ] );
+		expect( webpackConfig.resolve.fallback.timers ).to.be.a( 'String' );
 
 		expect( stubs.loaders.getIconsLoader.calledOnce ).to.equal( true );
 
@@ -139,9 +138,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			resolveJsFirst: true
 		} );
 
-		expect( webpackConfig.resolve ).to.deep.equal( {
-			extensions: [ '.js', '.ts', '.json' ]
-		} );
+		expect( webpackConfig.resolve.extensions ).to.deep.equal( [ '.js', '.ts', '.json' ] );
 	} );
 
 	it( 'should return webpack configuration with cache enabled', () => {
