@@ -477,6 +477,9 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 		// Save the changelog.
 		changelogUtils.saveChangelog( newChangelog );
 
+		// Truncate the changelog to keep the latest five release entries.
+		changelogUtils.truncateChangelog( 5 );
+
 		logInfo( 'Saved.', { indentLevel: 1 } );
 	}
 
