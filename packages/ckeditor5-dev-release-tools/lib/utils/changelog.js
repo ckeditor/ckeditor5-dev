@@ -7,6 +7,7 @@
 
 const fs = require( 'fs' );
 const path = require( 'path' );
+const { getRepositoryUrl } = require( './transformcommitutils' );
 
 const utils = {
 	/**
@@ -61,6 +62,39 @@ const utils = {
 		const changelogFile = path.join( cwd, utils.changelogFile );
 
 		fs.writeFileSync( changelogFile, content, 'utf-8' );
+	},
+
+	/**
+	 * @param {Number} length
+	 * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
+	 */
+	truncateChangelog( length, cwd = process.cwd() ) {
+		const changelog = utils.getChangelog( cwd );
+
+		if ( !changelog ) {
+			return;
+		}
+
+		const entryHeader = '## [\\s\\S]+?';
+		const entryHeaderRegexp = new RegExp( `\\n(${ entryHeader })(?=\\n${ entryHeader }|$)`, 'g' );
+
+		const entries = [ ...changelog.matchAll( entryHeaderRegexp ) ]
+			.filter( match => match && match[ 1 ] )
+			.map( match => match[ 1 ] );
+
+		if ( !entries.length ) {
+			return;
+		}
+
+		const truncatedEntries = entries.slice( 0, length );
+
+		const changelogFooter = entries.length > truncatedEntries.length ?
+			`\n\n---\n\nTo see all releases, visit the [release page](${ getRepositoryUrl( cwd ) }/releases).\n` :
+			'\n';
+
+		const truncatedChangelog = utils.changelogHeader + truncatedEntries.join( '\n' ).trim() + changelogFooter;
+
+		utils.saveChangelog( truncatedChangelog, cwd );
 	}
 };
 
