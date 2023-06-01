@@ -16,7 +16,7 @@ describe( 'TreatWarningsAsErrorsWebpackPlugin()', () => {
 		TreatWarningsAsErrorsWebpackPlugin = require( '../../../lib/utils/automated-tests/treatwarningsaserrorswebpackplugin' );
 	} );
 
-	it( 'should reassign warnings to errors', done => {
+	it( 'should reassign warnings to errors and not emit the code when errors are present', done => {
 		runCompiler( {
 			mode: 'development',
 			entry: './file',
@@ -33,13 +33,16 @@ describe( 'TreatWarningsAsErrorsWebpackPlugin()', () => {
 				},
 				new TreatWarningsAsErrorsWebpackPlugin()
 			]
-		}, ( errors, warnings ) => {
-			expect( errors.length ).to.equal( 4 );
-			expect( warnings.length ).to.equal( 0 );
-			expect( errors[ 0 ].message ).to.equal( 'Compilation error 1' );
-			expect( errors[ 1 ].message ).to.equal( 'Compilation error 2' );
-			expect( errors[ 2 ].message ).to.equal( 'Compilation warning 1' );
-			expect( errors[ 3 ].message ).to.equal( 'Compilation warning 2' );
+		}, stats => {
+			const statsJson = stats.toJson( { errorDetails: false } );
+
+			expect( statsJson.errors.length ).to.equal( 4 );
+			expect( statsJson.warnings.length ).to.equal( 0 );
+			expect( statsJson.errors[ 0 ].message ).to.equal( 'Compilation error 1' );
+			expect( statsJson.errors[ 1 ].message ).to.equal( 'Compilation error 2' );
+			expect( statsJson.errors[ 2 ].message ).to.equal( 'Compilation warning 1' );
+			expect( statsJson.errors[ 3 ].message ).to.equal( 'Compilation warning 2' );
+			expect( statsJson.assets[ 0 ].emitted ).to.equal( false );
 			done();
 		} );
 	} );
@@ -53,6 +56,6 @@ function runCompiler( options, callback ) {
 	compiler.outputFileSystem = {};
 
 	compiler.run( ( err, stats ) => {
-		callback( stats.compilation.errors, stats.compilation.warnings );
+		callback( stats );
 	} );
 }

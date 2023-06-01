@@ -3,6 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
+/**
+ * Webpack plugin that reassigns warnings as errors and stops the process if any errors or warnings detected.
+ */
 module.exports = class TreatWarningsAsErrorsWebpackPlugin {
 	apply( compiler ) {
 		compiler.hooks.shouldEmit.tap( 'TreatWarningsAsErrorsWebpackPlugin', compilation => {
