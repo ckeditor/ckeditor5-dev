@@ -7,8 +7,9 @@
 
 const path = require( 'path' );
 const webpack = require( 'webpack' );
-const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
 const { loaders } = require( '@ckeditor/ckeditor5-dev-utils' );
+const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
+const TreatWarningsAsErrorsWebpackPlugin = require( './treatwarningsaserrorswebpackplugin' );
 
 /**
  * @param {Object} options
@@ -91,6 +92,9 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 		};
 	}
 
+	if ( options.production ) {
+		config.plugins.push( new TreatWarningsAsErrorsWebpackPlugin() );
+	}
+
 	return config;
 };
-
