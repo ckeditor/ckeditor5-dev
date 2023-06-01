@@ -28,12 +28,15 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 				getFormattedTextLoader: sinon.stub().returns( {} ),
 				getCoverageLoader: sinon.stub().returns( {} ),
 				getJavaScriptLoader: sinon.stub().returns( {} )
-			}
+			},
+			TreatWarningsAsErrorsWebpackPlugin: class TreatWarningsAsErrorsWebpackPlugin {}
 		};
 
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', { loaders: stubs.loaders } );
 
 		mockery.registerMock( '../getdefinitionsfromfile', stubs.getDefinitionsFromFile );
+
+		mockery.registerMock( './treatwarningsaserrorswebpackplugin', stubs.TreatWarningsAsErrorsWebpackPlugin );
 
 		getWebpackConfigForAutomatedTests = require( '../../../lib/utils/automated-tests/getwebpackconfig' );
 	} );
@@ -159,5 +162,14 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		const info = { resourcePath: 'foo/bar/baz' };
 
 		expect( devtoolModuleFilenameTemplate( info ) ).to.equal( info.resourcePath );
+	} );
+
+	it( 'should add TreatWarningsAsErrorsWebpackPlugin to plugins if options.production is true', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {
+			production: true
+		} );
+
+		expect( webpackConfig.plugins.filter( plugin => plugin instanceof stubs.TreatWarningsAsErrorsWebpackPlugin ) )
+			.to.have.lengthOf( 1 );
 	} );
 } );
