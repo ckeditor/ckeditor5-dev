@@ -7,7 +7,7 @@
 
 const chalk = require( 'chalk' );
 const fs = require( 'fs' );
-const glob = require( 'glob' );
+const { globSync } = require( 'glob' );
 
 /**
  * Updates year in all licenses in the provided directory, based on provided glob patterns.
@@ -42,7 +42,7 @@ module.exports = function bumpYear( params ) {
 			options.nodir = true;
 			options.ignore = options.ignore ? [ ...options.ignore, ...defaultIgnore ] : defaultIgnore;
 
-			return glob.sync( globPattern.pattern, options );
+			return globSync( globPattern.pattern, options );
 		} )
 		.reduce( ( previous, current ) => [ ...previous, ...current ] );
 
@@ -60,9 +60,7 @@ module.exports = function bumpYear( params ) {
 		const updatedFileContent = fileContent.replace( yearRegexp, currentYear );
 
 		if ( fileContent === updatedFileContent ) {
-			// License headers are only required in JS files.
-			// Also, the file might have already been updated.
-			if ( fileName.endsWith( '.js' ) && !fileContent.match( yearRegexp ) ) {
+			if ( isLicenseHeaderRequired( fileName ) && !fileContent.match( yearRegexp ) ) {
 				filesWithoutHeader.push( `${ params.cwd }/${ fileName }` );
 			}
 		} else {
@@ -95,3 +93,21 @@ module.exports = function bumpYear( params ) {
 		}
 	}
 };
+
+/**
+ * License headers are only required in JS and TS files.
+ *
+ * @param {String} fileName
+ * @returns {Boolean}
+ */
+function isLicenseHeaderRequired( fileName ) {
+	if ( fileName.endsWith( '.js' ) ) {
+		return true;
+	}
+
+	if ( fileName.endsWith( '.ts' ) ) {
+		return true;
+	}
+
+	return false;
+}
