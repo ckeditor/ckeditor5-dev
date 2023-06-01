@@ -42,7 +42,7 @@ module.exports = function compileHtmlFiles( options ) {
 	const sourceFilePathBases = sourceMDFiles.map( mdFile => getFilePathWithoutExtension( mdFile ) );
 	const staticFiles = _.flatten( sourceDirs.map( sourceDir => {
 		return globSync( path.join( sourceDir, '**', '*.!(js|html|md)' ) );
-	} ) ).filter( file => !file.match( /\.(js|html|md)$/ ) );
+	} ) ).filter( file => !file.match( /\.(js|ts|html|md)$/ ) );
 	const languagesToLoad = [];
 
 	if ( options.additionalLanguages ) {
