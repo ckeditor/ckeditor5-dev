@@ -22,7 +22,7 @@ module.exports = async function commitAndTag( { version, files, cwd = process.cw
 	const normalizedCwd = toUnix( cwd );
 	const filePathsToAdd = await glob( files, { cwd: normalizedCwd, absolute: true, nodir: true } );
 
-	await tools.shExec( `git add ${ filePathsToAdd.join( ' ' ) }`, { cwd: normalizedCwd, async: true } );
-	await tools.shExec( `git commit --message "Release: v${ version }."`, { cwd: normalizedCwd, async: true } );
-	await tools.shExec( `git tag v${ version }`, { cwd: normalizedCwd, async: true } );
+	await tools.shExec( `git add ${ filePathsToAdd.join( ' ' ) }`, { cwd: normalizedCwd, async: true, verbosity: 'silent' } );
+	await tools.shExec( `git commit --message "Release: v${ version }."`, { cwd: normalizedCwd, async: true, verbosity: 'silent' } );
+	await tools.shExec( `git tag v${ version }`, { cwd: normalizedCwd, async: true, verbosity: 'silent' } );
 };
