@@ -62,7 +62,7 @@ const tasks = new Listr( [
 		}
 	},
 	{
-		title: 'Copying `ckeditor5-dev-*` packages.',
+		title: 'Copying `ckeditor5-dev-*` packages to the release directory.',
 		task: () => {
 			return releaseTools.prepareRepository( {
 				outputDirectory: RELEASE_DIRECTORY,
