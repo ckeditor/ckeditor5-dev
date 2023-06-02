@@ -77,7 +77,8 @@ const tasks = new Listr( [
 			return releaseTools.cleanUpPackages( {
 				packagesDirectory: RELEASE_DIRECTORY,
 				packageJsonFieldsToRemove: [
-					// TODO: Report an issue to preserve `scripts.postinstall`.
+					// TODO: Preserve `scripts.postinstall`.
+					// See: https://github.com/ckeditor/ckeditor5/issues/14318.
 					'devDependencies',
 					'depcheckIgnore'
 				]

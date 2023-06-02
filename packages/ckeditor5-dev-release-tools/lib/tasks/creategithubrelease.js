@@ -7,6 +7,7 @@
 
 const { Octokit } = require( '@octokit/rest' );
 const semver = require( 'semver' );
+const { getRepositoryUrl } = require( '../utils/transformcommitutils' );
 
 /**
  * Create a GitHub release.
@@ -14,24 +15,25 @@ const semver = require( 'semver' );
  * @param {Object} options
  * @param {String} options.token Token used to authenticate with GitHub.
  * @param {String} options.version Name of tag connected with the release.
- * @param {String} options.repositoryOwner Owner of the repository.
- * @param {String} options.repositoryName Repository name.
  * @param {String} options.description Description of the release.
+ * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @returns {Promise.<String>}
  */
 module.exports = async function createGithubRelease( options ) {
 	const {
 		token,
 		version,
-		repositoryOwner,
-		repositoryName,
-		description
+		description,
+		cwd = process.cwd()
 	} = options;
 
 	const github = new Octokit( {
 		version: '3.0.0',
 		auth: `token ${ token }`
 	} );
+
+	const repositoryUrl = getRepositoryUrl( cwd );
+	const [ repositoryName, repositoryOwner ] = repositoryUrl.split( '/' ).reverse();
 
 	if ( await shouldCreateRelease( github, repositoryOwner, repositoryName, version ) ) {
 		await github.repos.createRelease( {

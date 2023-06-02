@@ -43,8 +43,6 @@ const tasks = new Listr( [
 			const releaseUrl = await releaseTools.createGithubRelease( {
 				token: githubToken,
 				version: latestVersion,
-				repositoryOwner: 'ckeditor',
-				repositoryName: 'ckeditor5-dev',
 				description: versionChangelog
 			} );
 

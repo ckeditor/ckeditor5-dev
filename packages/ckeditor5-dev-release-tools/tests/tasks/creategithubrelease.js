@@ -18,7 +18,7 @@ describe( 'dev-release-tools/tasks', () => {
 				token: 'abc123',
 				version: '1.3.5',
 				repositoryOwner: 'ckeditor',
-				repositoryName: 'ckeditor5-example',
+				repositoryName: 'ckeditor5-dev',
 				description: 'Very important release.'
 			};
 
@@ -74,7 +74,7 @@ describe( 'dev-release-tools/tasks', () => {
 		it( 'resolves a url to the created page', async () => {
 			const url = await createGithubRelease( options );
 
-			expect( url ).to.equal( 'https://github.com/ckeditor/ckeditor5-example/releases/tag/v1.3.5' );
+			expect( url ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev/releases/tag/v1.3.5' );
 		} );
 
 		it( 'creates a non-prerelease page when passing a major.minor.patch version', async () => {
@@ -85,7 +85,7 @@ describe( 'dev-release-tools/tasks', () => {
 			expect( stubs.octokit.repos.createRelease.getCall( 0 ).args[ 0 ] ).to.deep.equal( {
 				tag_name: 'v1.3.5',
 				owner: 'ckeditor',
-				repo: 'ckeditor5-example',
+				repo: 'ckeditor5-dev',
 				body: 'Very important release.',
 				prerelease: false
 			} );
@@ -100,7 +100,7 @@ describe( 'dev-release-tools/tasks', () => {
 			expect( stubs.octokit.repos.createRelease.getCall( 0 ).args[ 0 ] ).to.deep.equal( {
 				tag_name: 'v1.3.5-alpha.0',
 				owner: 'ckeditor',
-				repo: 'ckeditor5-example',
+				repo: 'ckeditor5-dev',
 				body: 'Very important release.',
 				prerelease: true
 			} );
@@ -127,7 +127,7 @@ describe( 'dev-release-tools/tasks', () => {
 
 			const url = await createGithubRelease( options );
 
-			expect( url ).to.equal( 'https://github.com/ckeditor/ckeditor5-example/releases/tag/v1.3.5' );
+			expect( url ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev/releases/tag/v1.3.5' );
 			expect( stubs.octokit.repos.createRelease.callCount ).to.equal( 0 );
 		} );
 	} );
