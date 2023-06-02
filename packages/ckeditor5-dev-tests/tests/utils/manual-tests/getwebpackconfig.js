@@ -91,10 +91,7 @@ describe( 'getWebpackConfigForManualTests()', () => {
 		expect( stubs.loaders.getCoverageLoader.called ).to.equal( false );
 
 		expect( webpackConfig ).to.be.an( 'object' );
-
-		expect( webpackConfig.resolve ).to.deep.equal( {
-			extensions: [ '.ts', '.js', '.json' ]
-		} );
+		expect( webpackConfig.resolve.fallback.timers ).to.equal( false );
 
 		// To avoid "eval()" in files.
 		expect( webpackConfig ).to.have.property( 'mode', 'none' );
