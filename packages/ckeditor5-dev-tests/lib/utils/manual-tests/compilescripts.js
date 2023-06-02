@@ -92,7 +92,7 @@ function getWebpackEntryPoints( entryFiles ) {
 	const entryObject = {};
 
 	entryFiles.forEach( file => {
-		entryObject[ getRelativeFilePath( file ).replace( /\.js$/, '' ) ] = file;
+		entryObject[ getRelativeFilePath( file ).replace( /\.[jt]s$/, '' ) ] = file;
 	} );
 
 	return entryObject;

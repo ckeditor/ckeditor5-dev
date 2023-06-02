@@ -6,8 +6,8 @@
 'use strict';
 
 const fs = require( 'fs' );
-const path = require( 'path' );
-const glob = require( 'glob' );
+const upath = require( 'path' );
+const { globSync } = require( 'glob' );
 const depCheck = require( 'depcheck' );
 const chalk = require( 'chalk' );
 
@@ -42,11 +42,11 @@ module.exports = async function checkDependencies( packagePaths, options ) {
  * @param {String} packagePath Relative path to package.
  * @param {Object} options Options.
  * @param {Boolean} [options.quiet=false] Whether to inform about the progress.
- * @returns {Boolean} The result of checking the dependencies in the package: true = no errors found.
+ * @returns {Promise.<Boolean>} The result of checking the dependencies in the package: true = no errors found.
  */
 async function checkDependenciesInPackage( packagePath, options ) {
-	const packageAbsolutePath = path.resolve( packagePath );
-	const packageJsonPath = path.join( packageAbsolutePath, 'package.json' );
+	const packageAbsolutePath = upath.resolve( packagePath );
+	const packageJsonPath = upath.join( packageAbsolutePath, 'package.json' );
 
 	if ( !fs.existsSync( packageJsonPath ) ) {
 		console.log( `⚠️  Missing package.json file in ${ chalk.bold( packagePath ) }, skipping...\n` );
@@ -164,11 +164,11 @@ async function checkDependenciesInPackage( packagePath, options ) {
  * @returns {Array.<String>}
  */
 function getInvalidItselfImports( repositoryPath ) {
-	const packageJson = require( path.join( repositoryPath, 'package.json' ) );
-	const globPattern = path.join( repositoryPath, '@(src|tests)/**/*.js' );
+	const packageJson = require( upath.join( repositoryPath, 'package.json' ) );
+	const globPattern = upath.join( repositoryPath, '@(src|tests)/**/*.js' );
 	const invalidImportsItself = new Set();
 
-	for ( const filePath of glob.sync( globPattern ) ) {
+	for ( const filePath of globSync( globPattern ) ) {
 		const fileContent = fs.readFileSync( filePath, 'utf-8' );
 		const matchedImports = fileContent.match( /^import[^;]+from '(@ckeditor\/[^/]+)[^']+';/mg );
 
@@ -266,7 +266,7 @@ function parsePostCSS( filePath, onMissingCSSFile ) {
 		.forEach( importDetails => {
 			// If checked file imports another file, checks whether imported file exists.
 			if ( importDetails.type == 'file' ) {
-				const fileToImport = path.resolve( filePath, '..', importDetails.path );
+				const fileToImport = upath.resolve( filePath, '..', importDetails.path );
 
 				if ( !fs.existsSync( fileToImport ) ) {
 					onMissingCSSFile( {

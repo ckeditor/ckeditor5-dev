@@ -20,9 +20,9 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
 // that matches to these patterns, the file will be skipped.
 const IGNORE_GLOBS = [
 	// Ignore files which are saved in `manual/` directory. There are manual tests.
-	path.join( '**', 'tests', '**', 'manual', '**', '*.js' ),
+	path.join( '**', 'tests', '**', 'manual', '**', '*.{js,ts}' ),
 	// Ignore `_utils` directory as well because there are saved utils for tests.
-	path.join( '**', 'tests', '**', '_utils', '**', '*.js' )
+	path.join( '**', 'tests', '**', '_utils', '**', '*.{js,ts}' )
 ];
 
 // An absolute path to the entry file that will be passed to Karma.

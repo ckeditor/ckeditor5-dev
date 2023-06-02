@@ -122,4 +122,17 @@ describe( 'equalMarkup chai assertion', () => {
 			);
 		}
 	} );
+
+	it( 'should not format strings if beautifier returns equal markups after formatting', () => {
+		try {
+			expect(
+				'<div><p><span>foo</span></p></div>'
+			).to.equalMarkup(
+				'<div><p><span>foo</span></p></div >'
+			);
+		} catch ( assertionError ) {
+			expect( assertionError.actual ).to.equal( '<div><p><span>foo</span></p></div>' );
+			expect( assertionError.expected ).to.equal( '<div><p><span>foo</span></p></div >' );
+		}
+	} );
 } );
