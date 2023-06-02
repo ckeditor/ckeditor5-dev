@@ -56,7 +56,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		} );
 
 		expect( webpackConfig.resolve.extensions ).to.deep.equal( [ '.ts', '.js', '.json' ] );
-		expect( webpackConfig.resolve.fallback.timers ).to.be.a( 'String' );
+		expect( webpackConfig.resolve.fallback.timers ).to.equal( false );
 
 		expect( stubs.loaders.getIconsLoader.calledOnce ).to.equal( true );
 

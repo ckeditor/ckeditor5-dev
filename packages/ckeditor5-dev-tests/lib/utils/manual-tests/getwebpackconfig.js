@@ -61,6 +61,9 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 		],
 
 		resolve: {
+			fallback: {
+				'timers': false
+			},
 			extensions: [ '.ts', '.js', '.json' ]
 		},
 
