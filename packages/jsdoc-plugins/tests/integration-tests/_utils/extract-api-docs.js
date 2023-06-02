@@ -6,16 +6,16 @@
 const tmp = require( 'tmp' );
 const fs = require( 'fs' );
 const { execSync } = require( 'child_process' );
-const glob = require( 'glob' );
-const path = require( 'path' );
+const { globSync } = require( 'glob' );
+const upath = require( 'upath' );
 
 module.exports = async function extractApiDocs( dirname ) {
-	const filePattern1 = path.join( dirname, '/input/**/*.jsdoc' );
-	const filePattern2 = path.join( dirname, '/input.jsdoc' );
+	const filePattern1 = upath.join( dirname, '/input/**/*.jsdoc' );
+	const filePattern2 = upath.join( dirname, '/input.jsdoc' );
 
 	const files = [
-		...glob.sync( filePattern1 ),
-		...glob.sync( filePattern2 )
+		...globSync( filePattern1 ),
+		...globSync( filePattern2 )
 	];
 
 	if ( files.length === 0 ) {

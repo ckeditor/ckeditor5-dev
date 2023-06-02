@@ -78,7 +78,9 @@ describe( 'compileHtmlFiles', () => {
 			},
 
 			getRelativeFilePath: sandbox.spy( pathToFile => pathToFile ),
-			glob: sandbox.spy( pattern => patternFiles[ pattern ] ),
+			glob: {
+				globSync: sandbox.spy( pattern => patternFiles[ pattern ] )
+			},
 			domCombiner: sandbox.spy( ( ...args ) => args.join( '\n' ) )
 		};
 
@@ -96,6 +98,7 @@ describe( 'compileHtmlFiles', () => {
 				}
 			}
 		} );
+		mockery.registerMock( 'glob', stubs.glob );
 		mockery.registerMock( 'fs-extra', stubs.fs );
 		mockery.registerMock( 'chokidar', stubs.chokidar );
 		mockery.registerMock( 'dom-combiner', stubs.domCombiner );
@@ -105,7 +108,6 @@ describe( 'compileHtmlFiles', () => {
 			}
 		} );
 		mockery.registerMock( '../getrelativefilepath', stubs.getRelativeFilePath );
-		mockery.registerMock( '../glob', stubs.glob );
 	} );
 
 	afterEach( () => {

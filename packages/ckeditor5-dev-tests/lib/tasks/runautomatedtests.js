@@ -9,7 +9,7 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 const getKarmaConfig = require( '../utils/automated-tests/getkarmaconfig' );
 const chalk = require( 'chalk' );
-const glob = require( 'glob' );
+const { globSync } = require( 'glob' );
 const minimatch = require( 'minimatch' );
 const mkdirp = require( 'mkdirp' );
 const karmaLogger = require( 'karma/lib/logger.js' );
@@ -75,7 +75,7 @@ function createEntryFile( globPatterns, production ) {
 		let hasFiles = false;
 
 		for ( const resolvedPattern of globPatterns[ singlePattern ] ) {
-			const files = glob.sync( resolvedPattern );
+			const files = globSync( resolvedPattern ).map( file => file.replace( /\\/g, '/' ) );
 
 			if ( files.length ) {
 				hasFiles = true;

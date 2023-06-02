@@ -7,6 +7,7 @@
 
 const path = require( 'path' );
 const fs = require( 'fs-extra' );
+const { globSync } = require( 'glob' );
 const _ = require( 'lodash' );
 const chalk = require( 'chalk' );
 const commonmark = require( 'commonmark' );
@@ -14,7 +15,6 @@ const combine = require( 'dom-combiner' );
 const chokidar = require( 'chokidar' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const getRelativeFilePath = require( '../getrelativefilepath' );
-const globSync = require( '../glob' );
 
 const reader = new commonmark.Parser();
 const writer = new commonmark.HtmlRenderer();
@@ -40,9 +40,15 @@ module.exports = function compileHtmlFiles( options ) {
 
 	const sourceDirs = _.uniq( sourceMDFiles.map( file => path.dirname( file ) ) );
 	const sourceFilePathBases = sourceMDFiles.map( mdFile => getFilePathWithoutExtension( mdFile ) );
-	const staticFiles = _.flatten( sourceDirs.map( sourceDir => {
-		return globSync( path.join( sourceDir, '**', '*.!(js|html|md)' ) );
-	} ) ).filter( file => !file.match( /\.(js|ts|html|md)$/ ) );
+
+	const staticFiles = sourceDirs
+		.flatMap( sourceDir => {
+			const globPattern = path.join( sourceDir, '**', '*.!(js|html|md)' ).split( path.sep ).join( '/' );
+
+			return globSync( globPattern );
+		} )
+		.filter( file => !file.match( /\.(js|ts|html|md)$/ ) );
+
 	const languagesToLoad = [];
 
 	if ( options.additionalLanguages ) {
