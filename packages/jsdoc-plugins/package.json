@@ -15,7 +15,8 @@
   "dependencies": {
     "fs-extra": "^8.1.0",
     "lodash": "^4.17.15",
-    "jsdoc": "ckeditor/jsdoc#fixed-trailing-comment-doclets"
+    "jsdoc": "ckeditor/jsdoc#fixed-trailing-comment-doclets",
+    "upath": "^2.0.1"
   },
   "devDependencies": {
     "chai": "^4.1.2",

@@ -40,7 +40,7 @@ describe( 'runAutomatedTests', () => {
 				sync: sandbox.stub()
 			},
 			glob: {
-				sync: sandbox.stub()
+				globSync: sandbox.stub()
 			},
 			karma: {
 				Server: class KarmaServer {
@@ -106,12 +106,12 @@ describe( 'runAutomatedTests', () => {
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
 		] );
 
-		stubs.glob.sync.onFirstCall().returns( [
+		stubs.glob.globSync.onFirstCall().returns( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
 			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
 		] );
 
-		stubs.glob.sync.onSecondCall().returns( [] );
+		stubs.glob.globSync.onSecondCall().returns( [] );
 
 		const expectedEntryPointContent = [
 			'import "/workspace/packages/ckeditor5-basic-styles/tests/bold.js";',
@@ -169,7 +169,7 @@ describe( 'runAutomatedTests', () => {
 			'/workspace/packages/ckeditor-bar-core/tests/**/*.js'
 		] );
 
-		stubs.glob.sync.returns( [] );
+		stubs.glob.globSync.returns( [] );
 
 		return runAutomatedTests( options )
 			.then(
@@ -203,12 +203,12 @@ describe( 'runAutomatedTests', () => {
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
 		] );
 
-		stubs.glob.sync.onFirstCall().returns( [
+		stubs.glob.globSync.onFirstCall().returns( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
 			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
 		] );
 
-		stubs.glob.sync.onSecondCall().returns( [] );
+		stubs.glob.globSync.onSecondCall().returns( [] );
 
 		stubs.karma.config.parseConfig.throws( new Error( 'Example error from Karma config parser.' ) );
 
@@ -240,12 +240,12 @@ describe( 'runAutomatedTests', () => {
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
 		] );
 
-		stubs.glob.sync.onFirstCall().returns( [
+		stubs.glob.globSync.onFirstCall().returns( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
 			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
 		] );
 
-		stubs.glob.sync.onSecondCall().returns( [] );
+		stubs.glob.globSync.onSecondCall().returns( [] );
 
 		setTimeout( () => {
 			karmaServerCallback( 0 );
@@ -278,12 +278,12 @@ describe( 'runAutomatedTests', () => {
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
 		] );
 
-		stubs.glob.sync.onFirstCall().returns( [
+		stubs.glob.globSync.onFirstCall().returns( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
 			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
 		] );
 
-		stubs.glob.sync.onSecondCall().returns( [] );
+		stubs.glob.globSync.onSecondCall().returns( [] );
 
 		setTimeout( () => {
 			karmaServerCallback( 0 );
@@ -310,12 +310,12 @@ describe( 'runAutomatedTests', () => {
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
 		] );
 
-		stubs.glob.sync.onFirstCall().returns( [
+		stubs.glob.globSync.onFirstCall().returns( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
 			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
 		] );
 
-		stubs.glob.sync.onSecondCall().returns( [] );
+		stubs.glob.globSync.onSecondCall().returns( [] );
 
 		setTimeout( () => {
 			karmaServerCallback( 0 );
@@ -342,12 +342,12 @@ describe( 'runAutomatedTests', () => {
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
 		] );
 
-		stubs.glob.sync.onFirstCall().returns( [
+		stubs.glob.globSync.onFirstCall().returns( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
 			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
 		] );
 
-		stubs.glob.sync.onSecondCall().returns( [] );
+		stubs.glob.globSync.onSecondCall().returns( [] );
 
 		const assertionsDir = path.join( __dirname, '..', '..', 'lib', 'utils', 'automated-tests', 'assertions' ).replace( /\\/g, '/' );
 
@@ -391,12 +391,12 @@ describe( 'runAutomatedTests', () => {
 			'/workspace/packages/ckeditor-basic-styles/tests/**/*.js'
 		] );
 
-		stubs.glob.sync.onFirstCall().returns( [
+		stubs.glob.globSync.onFirstCall().returns( [
 			'/workspace/packages/ckeditor5-basic-styles/tests/bold.js',
 			'/workspace/packages/ckeditor5-basic-styles/tests/italic.js'
 		] );
 
-		stubs.glob.sync.onSecondCall().returns( [] );
+		stubs.glob.globSync.onSecondCall().returns( [] );
 
 		const assertionsDir = path.join( __dirname, '..', '..', 'lib', 'utils', 'automated-tests', 'assertions' ).replace( /\\/g, '/' );
 
