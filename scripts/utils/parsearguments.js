@@ -27,7 +27,7 @@ module.exports = function parseArguments( cliArguments ) {
 		default: {
 			concurrency: require( 'os' ).cpus().length / 2,
 			packages: null,
-			'npm-tag': 'staging'
+			'npm-tag': 'latest'
 		}
 	};
 
