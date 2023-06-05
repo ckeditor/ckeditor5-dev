@@ -85,7 +85,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 
 		expect( webpackConfig.mode ).to.equal( 'production' );
 
-		expect( webpackConfig.entry ).to.equal( '/package/path/src/index.js' );
+		expect( webpackConfig.entry ).to.equal( '/package/path/src/index.ts' );
 		expect( webpackConfig.output.library ).to.deep.equal( [ 'CKEditor5', 'dev' ] );
 		expect( webpackConfig.output.path ).to.equal( '/package/path/build' );
 		expect( webpackConfig.output.filename ).to.equal( 'dev.js' );
@@ -140,7 +140,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 		expect( webpackConfig.output.libraryExport ).to.be.undefined;
 	} );
 
-	it( 'uses index.ts entry file if exists', () => {
+	it( 'uses index.ts entry file by default', () => {
 		stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
 		stubs.fs.existsSync.callsFake( file => file == '/package/path/src/index.ts' );
 
@@ -153,9 +153,9 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 		expect( webpackConfig.entry ).to.equal( '/package/path/src/index.ts' );
 	} );
 
-	it( 'uses index.js entry file if ts file does not exists', () => {
+	it( 'uses index.js entry file if exists (over its TS version)', () => {
 		stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
-		stubs.fs.existsSync.callsFake( file => file != '/package/path/src/index.ts' );
+		stubs.fs.existsSync.callsFake( file => file == '/package/path/src/index.js' );
 
 		const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
@@ -164,6 +164,19 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 		} );
 
 		expect( webpackConfig.entry ).to.equal( '/package/path/src/index.js' );
+	} );
+
+	it( 'loads JavaScript files over TypeScript when building for a JavaScript package', () => {
+		stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-dev' );
+		stubs.fs.existsSync.callsFake( file => file == '/package/path/src/index.js' );
+
+		const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
+			packagePath: '/package/path',
+			themePath: '/theme/path',
+			manifestPath: '/manifest/path'
+		} );
+
+		expect( webpackConfig.resolve.extensions[ 0 ] ).to.equal( '.js' );
 	} );
 
 	describe( '#plugins', () => {
