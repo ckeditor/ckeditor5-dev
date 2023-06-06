@@ -95,7 +95,8 @@ function validateRootPackage( packageJson ) {
  * @returns {Promise}
  */
 async function processRootPackage( { cwd, rootPackageJson, outputDirectoryPath } ) {
-	const rootPackageOutputPath = upath.join( outputDirectoryPath, rootPackageJson.name );
+	const rootPackageDirName = rootPackageJson.name.replace( /^@.*\//, '' );
+	const rootPackageOutputPath = upath.join( outputDirectoryPath, rootPackageDirName );
 	const pkgJsonOutputPath = upath.join( rootPackageOutputPath, 'package.json' );
 
 	await fs.ensureDir( rootPackageOutputPath );
