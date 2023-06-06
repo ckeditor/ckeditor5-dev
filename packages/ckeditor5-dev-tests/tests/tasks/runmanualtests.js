@@ -63,7 +63,7 @@ describe( 'runManualTests', () => {
 				prompt: sandbox.stub()
 			},
 			glob: {
-				sync: sandbox.stub().callsFake( pattern => {
+				globSync: sandbox.stub().callsFake( pattern => {
 					const patterns = {
 						// Valid pattern for manual tests.
 						'workspace/packages/ckeditor5-*/tests/**/manual/**/*.js': [
@@ -99,7 +99,10 @@ describe( 'runManualTests', () => {
 						]
 					};
 
-					return patterns[ pattern ] || [];
+					const separator = process.platform === 'win32' ? '\\' : '/';
+					const result = patterns[ pattern ] || [];
+
+					return result.map( p => p.split( '/' ).join( separator ) );
 				} )
 			},
 			chalk: {
@@ -159,7 +162,7 @@ describe( 'runManualTests', () => {
 
 		sandbox.stub( process, 'cwd' ).returns( 'workspace' );
 
-		// There is some platform-specific logic in the `lib/utils/glob.js`.
+		// The `glob` util returns paths in format depending on the platform.
 		sandbox.stub( process, 'platform' ).value( 'linux' );
 
 		defaultOptions = {

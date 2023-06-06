@@ -29,12 +29,15 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 				getFormattedTextLoader: sinon.stub().returns( {} ),
 				getCoverageLoader: sinon.stub().returns( {} ),
 				getJavaScriptLoader: sinon.stub().returns( {} )
-			}
+			},
+			TreatWarningsAsErrorsWebpackPlugin: class TreatWarningsAsErrorsWebpackPlugin {}
 		};
 
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', { loaders: stubs.loaders } );
 
 		mockery.registerMock( '../getdefinitionsfromfile', stubs.getDefinitionsFromFile );
+
+		mockery.registerMock( './treatwarningsaserrorswebpackplugin', stubs.TreatWarningsAsErrorsWebpackPlugin );
 
 		getWebpackConfigForAutomatedTests = require( '../../../lib/utils/automated-tests/getwebpackconfig' );
 	} );
@@ -53,9 +56,8 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			tsconfig: '/tsconfig/path'
 		} );
 
-		expect( webpackConfig.resolve ).to.deep.equal( {
-			extensions: [ '.ts', '.js', '.json' ]
-		} );
+		expect( webpackConfig.resolve.extensions ).to.deep.equal( [ '.ts', '.js', '.json' ] );
+		expect( webpackConfig.resolve.fallback.timers ).to.equal( false );
 
 		expect( stubs.loaders.getJavaScriptWithoutImportExtensions.calledOnce ).to.equal( true );
 
@@ -142,9 +144,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			resolveJsFirst: true
 		} );
 
-		expect( webpackConfig.resolve ).to.deep.equal( {
-			extensions: [ '.js', '.ts', '.json' ]
-		} );
+		expect( webpackConfig.resolve.extensions ).to.deep.equal( [ '.js', '.ts', '.json' ] );
 	} );
 
 	it( 'should return webpack configuration with cache enabled', () => {
@@ -165,5 +165,14 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		const info = { resourcePath: 'foo/bar/baz' };
 
 		expect( devtoolModuleFilenameTemplate( info ) ).to.equal( info.resourcePath );
+	} );
+
+	it( 'should add TreatWarningsAsErrorsWebpackPlugin to plugins if options.production is true', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {
+			production: true
+		} );
+
+		expect( webpackConfig.plugins.filter( plugin => plugin instanceof stubs.TreatWarningsAsErrorsWebpackPlugin ) )
+			.to.have.lengthOf( 1 );
 	} );
 } );

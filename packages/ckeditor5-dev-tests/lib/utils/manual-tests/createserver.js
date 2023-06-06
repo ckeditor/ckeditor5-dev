@@ -7,10 +7,10 @@
 
 const http = require( 'http' );
 const path = require( 'path' );
+const { globSync } = require( 'glob' );
 const fs = require( 'fs' );
 const combine = require( 'dom-combiner' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const globSync = require( '../glob' );
 
 /**
  * Basic HTTP server.
@@ -123,7 +123,8 @@ function getContentType( fileExtension ) {
 // @returns {String}
 function generateIndex( sourcePath ) {
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
-	const testFiles = globSync( path.join( sourcePath, '**', '*.html' ) );
+	const globPattern = path.join( sourcePath, '**', '*.html' ).replace( /\\/g, '/' );
+	const testFiles = globSync( globPattern ).sort( ( pathA, pathB ) => pathA.localeCompare( pathB ) );
 	const testTree = {};
 
 	let testList = '<ul>';

@@ -25,6 +25,16 @@ module.exports = chai => {
 	 *			'<paragraph>foo bYYY[]r baz</paragraph>'
 	 *		);
 	 *
+	 * Please note that if the difference in the markup concerns only whitespace characters inside tags (e.g. between attributes),
+	 * a diff between unformatted (rather than formatted) strings is displayed.
+	 *
+	 *		// Will throw an assertion error, but without formatting the markup.
+	 *		expect(
+	 *			'<paragraph>[]foo</paragraph><paragraph>bar</paragraph>'
+	 *		).to.equalMarkup(
+	 *			'<paragraph>[]foo</paragraph><paragraph>bar</paragraph >'
+	 *		);
+	 *
 	 * @param {String} expected Markup to compare.
 	 */
 	chai.Assertion.addMethod( 'equalMarkup', function( expected ) {
@@ -32,11 +42,20 @@ module.exports = chai => {
 		const message = 'Expected markup strings to be equal';
 
 		if ( actual !== expected ) {
-			throw new AssertionError( message, {
-				actual: formatMarkup( actual ),
-				expected: formatMarkup( expected ),
+			const actualFormatted = formatMarkup( actual );
+			const expectedFormatted = formatMarkup( expected );
+			const areFormattedStringsEqual = actualFormatted === expectedFormatted;
+
+			// HTML beautification tool removes all redundant whitespace characters inside tags and this behavior cannot be configured.
+			// Therefore, if there is no difference between formatted strings, but we know they are different, display raw (unformatted)
+			// strings instead.
+			const data = {
+				actual: areFormattedStringsEqual ? actual : actualFormatted,
+				expected: areFormattedStringsEqual ? expected : expectedFormatted,
 				showDiff: true
-			} );
+			};
+
+			throw new AssertionError( message, data );
 		}
 	} );
 };

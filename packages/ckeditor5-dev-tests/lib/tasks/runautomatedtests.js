@@ -9,7 +9,7 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 const getKarmaConfig = require( '../utils/automated-tests/getkarmaconfig' );
 const chalk = require( 'chalk' );
-const glob = require( 'glob' );
+const { globSync } = require( 'glob' );
 const minimatch = require( 'minimatch' );
 const mkdirp = require( 'mkdirp' );
 const karmaLogger = require( 'karma/lib/logger.js' );
@@ -20,9 +20,9 @@ const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontote
 // that matches to these patterns, the file will be skipped.
 const IGNORE_GLOBS = [
 	// Ignore files which are saved in `manual/` directory. There are manual tests.
-	path.join( '**', 'tests', '**', 'manual', '**', '*.js' ),
+	path.join( '**', 'tests', '**', 'manual', '**', '*.{js,ts}' ),
 	// Ignore `_utils` directory as well because there are saved utils for tests.
-	path.join( '**', 'tests', '**', '_utils', '**', '*.js' )
+	path.join( '**', 'tests', '**', '_utils', '**', '*.{js,ts}' )
 ];
 
 // An absolute path to the entry file that will be passed to Karma.
@@ -75,7 +75,7 @@ function createEntryFile( globPatterns, production ) {
 		let hasFiles = false;
 
 		for ( const resolvedPattern of globPatterns[ singlePattern ] ) {
-			const files = glob.sync( resolvedPattern );
+			const files = globSync( resolvedPattern ).map( file => file.replace( /\\/g, '/' ) );
 
 			if ( files.length ) {
 				hasFiles = true;

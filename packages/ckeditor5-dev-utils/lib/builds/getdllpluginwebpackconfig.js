@@ -7,7 +7,6 @@
 
 const path = require( 'path' );
 const fs = require( 'fs-extra' );
-const TerserPlugin = require( 'terser-webpack-plugin' );
 const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
 const bundler = require( '../bundler' );
 const tools = require( '../tools' );
@@ -29,16 +28,22 @@ const loaders = require( '../loaders' );
  * @returns {Object}
  */
 module.exports = function getDllPluginWebpackConfig( webpack, options ) {
+	// Terser requires webpack. However, it's needed in runtime. To avoid the "Cannot find module 'webpack'" error,
+	// let's load the Terser dependency when `getDllPluginWebpackConfig()` is executed.
+	// See: https://github.com/ckeditor/ckeditor5/issues/13136.
+	const TerserPlugin = require( 'terser-webpack-plugin' );
+
 	const packageName = tools.readPackageName( options.packagePath );
 	const langDirExists = fs.existsSync( path.join( options.packagePath, 'lang' ) );
-	const indexTsExists = fs.existsSync( path.join( options.packagePath, 'src', 'index.ts' ) );
+	const indexJsExists = fs.existsSync( path.join( options.packagePath, 'src', 'index.js' ) );
 
 	const webpackConfig = {
 		mode: options.isDevelopmentMode ? 'development' : 'production',
 
 		performance: { hints: false },
 
-		entry: path.join( options.packagePath, 'src', indexTsExists ? 'index.ts' : 'index.js' ),
+		// Use the `index.js` file to prepare the build to avoid potential issues if a source code differs from the published one.
+		entry: path.join( options.packagePath, 'src', indexJsExists ? 'index.js' : 'index.ts' ),
 
 		output: {
 			library: [ 'CKEditor5', getGlobalKeyForPackage( packageName ) ],
@@ -81,6 +86,15 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 			]
 		}
 	};
+
+	// Force loading JS files first if the `index.js` file exists.
+	if ( indexJsExists ) {
+		webpackConfig.resolve.extensions = moveArrayItem(
+			webpackConfig.resolve.extensions,
+			webpackConfig.resolve.extensions.indexOf( '.js' ),
+			0
+		);
+	}
 
 	if ( langDirExists ) {
 		webpackConfig.plugins.push( new CKEditorTranslationsPlugin( {
@@ -134,4 +148,11 @@ function getGlobalKeyForPackage( packageName ) {
  */
 function getIndexFileName( packageName ) {
 	return packageName.replace( /^@ckeditor\/ckeditor5?-/, '' ) + '.js';
+}
+
+function moveArrayItem( source, indexFrom, indexTo ) {
+	const tmp = source.slice();
+	tmp.splice( indexTo, 0, ...tmp.splice( indexFrom, 1 ) );
+
+	return tmp;
 }

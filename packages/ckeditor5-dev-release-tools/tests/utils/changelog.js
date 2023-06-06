@@ -15,9 +15,14 @@ describe( 'dev-release-tools/utils', () => {
 
 	describe( 'changelog', () => {
 		beforeEach( () => {
-			utils = require( '../../lib/utils/changelog' );
-
 			sandbox = sinon.createSandbox();
+
+			sandbox.stub(
+				require( '../../lib/utils/transformcommitutils' ),
+				'getRepositoryUrl'
+			).returns( 'https://github.com/ckeditor/ckeditor5-dev' );
+
+			utils = require( '../../lib/utils/changelog' );
 		} );
 
 		afterEach( () => {
@@ -311,6 +316,103 @@ describe( 'dev-release-tools/utils', () => {
 				expect( writeFileStub.calledOnce ).to.equal( true );
 				expect( writeFileStub.firstCall.args[ 0 ] ).to.equal( '/new-cwd/CHANGELOG.md' );
 				expect( writeFileStub.firstCall.args[ 1 ] ).to.equal( 'New content.' );
+			} );
+		} );
+
+		describe( 'truncateChangelog()', () => {
+			it( 'does nothing if there is no changelog', () => {
+				const saveChangelogStub = sandbox.stub( utils, 'saveChangelog' );
+
+				sandbox.stub( utils, 'getChangelog' ).returns( null );
+
+				utils.truncateChangelog( 5 );
+
+				expect( saveChangelogStub.called ).to.equal( false );
+			} );
+
+			it( 'does nothing if changelog does not contain entries', () => {
+				const saveChangelogStub = sandbox.stub( utils, 'saveChangelog' );
+
+				sandbox.stub( utils, 'getChangelog' ).returns( utils.changelogHeader + '\n\n' );
+
+				utils.truncateChangelog( 5 );
+
+				expect( saveChangelogStub.called ).to.equal( false );
+			} );
+
+			it( 'truncates the changelog and adds the link to the release page', () => {
+				const expectedChangelogEntries = [
+					'## [0.3.0](https://github.com) (2017-01-13)',
+					'',
+					'3',
+					'',
+					'Some text ## [like a release header]',
+					'',
+					'## [0.2.0](https://github.com) (2017-01-13)',
+					'',
+					'2'
+				].join( '\n' );
+
+				const expectedChangelogFooter = [
+					'',
+					'',
+					'---',
+					'',
+					'To see all releases, visit the [release page](https://github.com/ckeditor/ckeditor5-dev/releases).',
+					''
+				].join( '\n' );
+
+				const changelogEntries = [
+					expectedChangelogEntries,
+					'',
+					'## [0.1.0](https://github.com) (2017-01-13)',
+					'',
+					'1'
+				].join( '\n' );
+
+				const saveChangelogStub = sandbox.stub( utils, 'saveChangelog' );
+
+				sandbox.stub( utils, 'getChangelog' ).returns( utils.changelogHeader + changelogEntries );
+
+				utils.truncateChangelog( 2 );
+
+				expect( saveChangelogStub.calledOnce ).to.equal( true );
+				expect( saveChangelogStub.firstCall.args[ 0 ] ).to.equal(
+					utils.changelogHeader +
+					expectedChangelogEntries +
+					expectedChangelogFooter
+				);
+			} );
+
+			it( 'does not add the link to the release page if changelog is not truncated', () => {
+				const expectedChangelogEntries = [
+					'## [0.3.0](https://github.com) (2017-01-13)',
+					'',
+					'3',
+					'',
+					'Some text ## [like a release header]',
+					'',
+					'## [0.2.0](https://github.com) (2017-01-13)',
+					'',
+					'2'
+				].join( '\n' );
+
+				const expectedChangelogFooter = '\n';
+
+				const changelogEntries = expectedChangelogEntries;
+
+				const saveChangelogStub = sandbox.stub( utils, 'saveChangelog' );
+
+				sandbox.stub( utils, 'getChangelog' ).returns( utils.changelogHeader + changelogEntries );
+
+				utils.truncateChangelog( 2 );
+
+				expect( saveChangelogStub.calledOnce ).to.equal( true );
+				expect( saveChangelogStub.firstCall.args[ 0 ] ).to.equal(
+					utils.changelogHeader +
+					expectedChangelogEntries +
+					expectedChangelogFooter
+				);
 			} );
 		} );
 	} );

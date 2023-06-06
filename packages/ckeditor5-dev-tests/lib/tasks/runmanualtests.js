@@ -8,6 +8,7 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const chalk = require( 'chalk' );
+const { globSync } = require( 'glob' );
 const { spawn } = require( 'child_process' );
 const inquirer = require( 'inquirer' );
 const isInteractive = require( 'is-interactive' );
@@ -18,7 +19,6 @@ const compileManualTestScripts = require( '../utils/manual-tests/compilescripts'
 const compileManualTestHtmlFiles = require( '../utils/manual-tests/compilehtmlfiles' );
 const copyAssets = require( '../utils/manual-tests/copyassets' );
 const removeDir = require( '../utils/manual-tests/removedir' );
-const globSync = require( '../utils/glob' );
 const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontotestglob' );
 const requireDll = require( '../utils/requiredll' );
 

@@ -366,6 +366,38 @@ describe( 'compileManualTestScripts', () => {
 		} );
 	} );
 
+	it( 'should pass correct entries object to the webpack for both JS and TS files', async () => {
+		await compileManualTestScripts( {
+			buildDir: 'buildDir',
+			patterns: [ 'manualTestPattern' ],
+			sourceFiles: [
+				'ckeditor5-foo\\manual\\file1.js',
+				'ckeditor5-foo\\manual\\file2.ts'
+			],
+			themePath: 'path/to/theme',
+			language: 'en',
+			additionalLanguages: [ 'pl', 'ar' ],
+			debug: [ 'CK_DEBUG' ],
+			disableWatch: false
+		} );
+
+		expect( stubs.getWebpackConfig.calledOnce ).to.equal( true );
+		expect( stubs.getWebpackConfig.firstCall.args[ 0 ] ).to.deep.include( {
+			entries: {
+				'ckeditor5-foo\\manual\\file1': 'ckeditor5-foo\\manual\\file1.js',
+				'ckeditor5-foo\\manual\\file2': 'ckeditor5-foo\\manual\\file2.ts'
+			}
+		} );
+
+		expect( stubs.webpack.calledOnce ).to.equal( true );
+		expect( stubs.webpack.firstCall.args[ 0 ] ).to.deep.include( {
+			entries: {
+				'ckeditor5-foo\\manual\\file1': 'ckeditor5-foo\\manual\\file1.js',
+				'ckeditor5-foo\\manual\\file2': 'ckeditor5-foo\\manual\\file2.ts'
+			}
+		} );
+	} );
+
 	it( 'should pass the "tsconfig" option to webpack configuration factory', async () => {
 		await compileManualTestScripts( {
 			cwd: 'workspace',

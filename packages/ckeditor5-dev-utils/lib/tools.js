@@ -18,42 +18,70 @@ module.exports = {
 	 *
 	 * @param {String} command The command to be executed.
 	 * @param {Object} options
-	 * @param {String} [options.verbosity='info'] Level of the verbosity. If set as 'info' both outputs (stdout and
-	 * stderr) will be logged. If set as 'error', only stderr output will be logged.
-	 * @returns {String} The command output.
+	 * @param {'info'|'warning'|'error'|'silent'} [options.verbosity='info'] Level of the verbosity. If set as 'info'
+	 * both outputs (stdout and stderr) will be logged. If set as 'error', only stderr output will be logged.
+	 * @param {String} [options.cwd=process.cwd()]
+	 * @param {Boolean} [options.async=false] If set, the command execution is asynchronous. The execution is synchronous by default.
+	 * @returns {String|Promise.<String>} The command output.
 	 */
-	shExec( command, options = { verbosity: 'info' } ) {
+	shExec( command, options = {} ) {
+		const {
+			verbosity = 'info',
+			cwd = process.cwd(),
+			async = false
+		} = options;
+
 		const logger = require( './logger' );
-		const log = logger( options.verbosity );
+		const log = logger( verbosity );
 		const sh = require( 'shelljs' );
 
 		sh.config.silent = true;
 
-		const ret = sh.exec( command );
+		const execOptions = { cwd };
 
-		const grey = chalk.grey;
+		if ( async ) {
+			return new Promise( ( resolve, reject ) => {
+				sh.exec( command, execOptions, ( code, stdout, stderr ) => {
+					try {
+						const result = execHandler( code, stdout, stderr );
 
-		if ( ret.code ) {
-			if ( ret.stdout ) {
-				log.error( grey( ret.stdout ) );
+						resolve( result );
+					} catch ( err ) {
+						reject( err );
+					}
+				} );
+			} );
+		}
+
+		const { code, stdout, stderr } = sh.exec( command, execOptions );
+
+		return execHandler( code, stdout, stderr );
+
+		function execHandler( code, stdout, stderr ) {
+			const grey = chalk.grey;
+
+			if ( code ) {
+				if ( stdout ) {
+					log.error( grey( stdout ) );
+				}
+
+				if ( stderr ) {
+					log.error( grey( stderr ) );
+				}
+
+				throw new Error( `Error while executing ${ command }: ${ stderr }` );
 			}
 
-			if ( ret.stderr ) {
-				log.error( grey( ret.stderr ) );
+			if ( stdout ) {
+				log.info( grey( stdout ) );
 			}
 
-			throw new Error( `Error while executing ${ command }: ${ ret.stderr }` );
-		}
+			if ( stderr ) {
+				log.info( grey( stderr ) );
+			}
 
-		if ( ret.stdout ) {
-			log.info( grey( ret.stdout ) );
+			return stdout;
 		}
-
-		if ( ret.stderr ) {
-			log.info( grey( ret.stderr ) );
-		}
-
-		return ret.stdout;
 	},
 
 	/**

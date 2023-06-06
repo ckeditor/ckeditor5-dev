@@ -9,23 +9,28 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
  * @param {Object} options
- * @param {String} options.version Version of the current release.
+ * @param {String|null} options.version Version of the current release.
  * @param {String} options.changes Changelog entries for the current release.
  * @param {Boolean} [options.ignoreBranchCheck=false] If set on true, branch checking will be skipped.
  * @param {String} [options.branch='master'] A name of the branch that should be used for releasing packages.
- * @returns {Array.<String>}
+ * @returns {Promise.<Array.<String>>}
  */
-module.exports = function validatePackageToRelease( options ) {
+module.exports = async function validateRepositoryToRelease( options ) {
+	const {
+		version,
+		changes,
+		ignoreBranchCheck = false,
+		branch = 'master'
+	} = options;
 	const errors = [];
-	const branch = options.branch || 'master';
 
 	// Check whether the repository is ready for the release.
-	const status = exec( 'git status -sb', { verbosity: 'error' } ).trim();
+	const status = ( await exec( 'git status -sb' ) ).trim();
 
-	if ( !options.ignoreBranchCheck ) {
+	if ( !ignoreBranchCheck ) {
 		// Check whether current branch is "master".
-		if ( !status.startsWith( `## ${ branch }...origin/${ branch }` ) ) {
-			errors.push( `Not on ${ branch } branch.` );
+		if ( !status.startsWith( `## ${ branch }` ) ) {
+			errors.push( `Not on the "#${ branch }" branch.` );
 		}
 	}
 
@@ -42,13 +47,13 @@ module.exports = function validatePackageToRelease( options ) {
 	}
 
 	// Check whether the changelog entries are correct.
-	if ( !options.changes ) {
-		errors.push( `Cannot find changelog entries for version "${ options.version }".` );
+	if ( !changes ) {
+		errors.push( `Cannot find changelog entries for version "${ version }".` );
 	}
 
 	return errors;
 
-	function exec( command ) {
-		return tools.shExec( command, { verbosity: 'error' } );
+	async function exec( command ) {
+		return tools.shExec( command, { verbosity: 'error', async: true } );
 	}
 };
