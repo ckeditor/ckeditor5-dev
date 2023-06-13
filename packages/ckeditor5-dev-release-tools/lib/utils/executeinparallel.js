@@ -12,6 +12,7 @@ const upath = require( 'upath' );
 const fs = require( 'fs/promises' );
 const { Worker } = require( 'worker_threads' );
 const { glob } = require( 'glob' );
+const { registerAbortController, deregisterAbortController } = require( './abortcontroller' );
 
 const WORKER_SCRIPT = upath.join( __dirname, 'parallelworker.js' );
 
@@ -27,8 +28,9 @@ const WORKER_SCRIPT = upath.join( __dirname, 'parallelworker.js' );
  * @param {String} options.packagesDirectory Relative path to a location of packages to execute a task.
  * @param {Function} options.taskToExecute A callback that is executed on all found packages.
  * It receives an absolute path to a package as an argument. It can be synchronous or may return a promise.
- * @param {AbortSignal} options.signal Signal to abort the asynchronous process.
  * @param {ListrTaskObject} options.listrTask An instance of `ListrTask`.
+ * @param {AbortSignal|null} [options.signal=null] Signal to abort the asynchronous process. If not set, default AbortController is created.
+ * @param {Object} [options.taskOptions=null] Optional data required by the task.
  * @param {Function} [options.packagesDirectoryFilter] A function that is executed for each found package directory to filter out those
  * that do not require executing a task. It should return a truthy value to keep the package and a falsy value to skip the package from
  * processing.
@@ -39,19 +41,20 @@ const WORKER_SCRIPT = upath.join( __dirname, 'parallelworker.js' );
 module.exports = async function executeInParallel( options ) {
 	const {
 		packagesDirectory,
-		signal,
 		taskToExecute,
 		listrTask,
+		signal = null,
+		taskOptions = null,
 		packagesDirectoryFilter = null,
 		cwd = process.cwd(),
 		concurrency = require( 'os' ).cpus().length / 2
 	} = options;
 
 	const normalizedCwd = upath.toUnix( cwd );
-	const packages = await glob( `${ packagesDirectory }/*/`, {
+	const packages = ( await glob( `${ packagesDirectory }/*/`, {
 		cwd: normalizedCwd,
 		absolute: true
-	} );
+	} ) ).map( upath.normalize );
 
 	const packagesToProcess = packagesDirectoryFilter ?
 		packages.filter( packagesDirectoryFilter ) :
@@ -64,11 +67,17 @@ module.exports = async function executeInParallel( options ) {
 
 	const onPackageDone = progressFactory( listrTask, packagesToProcess.length );
 
+	let defaultAbortController;
+
+	if ( !signal ) {
+		defaultAbortController = registerAbortController();
+	}
+
 	const workers = packagesInThreads.map( packages => {
 		return createWorker( {
-			signal,
+			signal: signal || defaultAbortController.signal,
 			onPackageDone,
-			workerData: { packages, callbackModule }
+			workerData: { packages, callbackModule, taskOptions }
 		} );
 	} );
 
@@ -83,6 +92,10 @@ module.exports = async function executeInParallel( options ) {
 		} )
 		.finally( async () => {
 			await fs.unlink( callbackModule );
+
+			if ( defaultAbortController ) {
+				deregisterAbortController( defaultAbortController );
+			}
 		} );
 };
 

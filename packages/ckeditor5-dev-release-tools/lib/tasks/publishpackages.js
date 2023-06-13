@@ -11,7 +11,8 @@ const assertNpmAuthorization = require( '../utils/assertnpmauthorization' );
 const assertPackages = require( '../utils/assertpackages' );
 const assertNpmTag = require( '../utils/assertnpmtag' );
 const assertFilesToPublish = require( '../utils/assertfilestopublish' );
-const publishPackagesOnNpm = require( '../utils/publishpackagesonnpm' );
+const executeInParallel = require( '../utils/executeinparallel' );
+const publishPackageOnNpmCallback = require( '../utils/publishpackageonnpmcallback' );
 
 /**
  * The purpose of the script is to validate the packages prepared for the release and then release them on npm.
@@ -29,6 +30,7 @@ const publishPackagesOnNpm = require( '../utils/publishpackagesonnpm' );
  * @param {String} options.packagesDirectory Relative path to a location of packages to release.
  * @param {String} options.npmOwner The account name on npm, which should be used to publish the packages.
  * @param {ListrTaskObject} options.listrTask An instance of `ListrTask`.
+ * @param {AbortSignal|null} [options.signal=null] Signal to abort the asynchronous process. If not set, default AbortController is created.
  * @param {String} [options.npmTag='staging'] The npm distribution tag.
  * @param {Object.<String, Array.<String>>|null} [options.optionalEntries=null] Specifies which entries from the `files` field in the
  * `package.json` are optional. The key is a package name, and its value is an array of optional entries from the `files` field, for which
@@ -44,6 +46,7 @@ module.exports = async function publishPackages( options ) {
 		packagesDirectory,
 		npmOwner,
 		listrTask,
+		signal = null,
 		npmTag = 'staging',
 		optionalEntries = null,
 		confirmationCallback = null,
@@ -64,6 +67,15 @@ module.exports = async function publishPackages( options ) {
 	const shouldPublishPackages = confirmationCallback ? await confirmationCallback() : true;
 
 	if ( shouldPublishPackages ) {
-		await publishPackagesOnNpm( packagePaths, npmTag, listrTask );
+		await executeInParallel( {
+			packagesDirectory,
+			listrTask,
+			taskToExecute: publishPackageOnNpmCallback,
+			taskOptions: {
+				npmTag
+			},
+			signal,
+			concurrency: 4
+		} );
 	}
 };

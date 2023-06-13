@@ -25,7 +25,8 @@ describe( 'dev-release-tools/tasks', () => {
 				assertPackages: sandbox.stub().resolves(),
 				assertNpmTag: sandbox.stub().resolves(),
 				assertFilesToPublish: sandbox.stub().resolves(),
-				publishPackagesOnNpm: sandbox.stub().resolves()
+				executeInParallel: sandbox.stub().resolves(),
+				publishPackageOnNpmCallback: sandbox.stub().resolves()
 			};
 
 			mockery.enable( {
@@ -39,7 +40,8 @@ describe( 'dev-release-tools/tasks', () => {
 			mockery.registerMock( '../utils/assertpackages', stubs.assertPackages );
 			mockery.registerMock( '../utils/assertnpmtag', stubs.assertNpmTag );
 			mockery.registerMock( '../utils/assertfilestopublish', stubs.assertFilesToPublish );
-			mockery.registerMock( '../utils/publishpackagesonnpm', stubs.publishPackagesOnNpm );
+			mockery.registerMock( '../utils/executeinparallel', stubs.executeInParallel );
+			mockery.registerMock( '../utils/publishpackageonnpmcallback', stubs.publishPackageOnNpmCallback );
 
 			publishPackages = require( '../../lib/tasks/publishpackages' );
 		} );
@@ -267,59 +269,41 @@ describe( 'dev-release-tools/tasks', () => {
 				} );
 		} );
 
-		it( 'should publish packages on npm if confirmation callback is not set (default npm tag)', () => {
-			stubs.glob.glob.resolves( [
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			] );
-
+		it( 'should pass parameters for publishing packages', () => {
 			const listrTask = {};
-
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe',
-				listrTask
-			} ).then( () => {
-				expect( stubs.publishPackagesOnNpm.callCount ).to.equal( 1 );
-				expect( stubs.publishPackagesOnNpm.firstCall.args[ 0 ] ).to.deep.equal( [
-					'/work/project/packages/ckeditor5-foo',
-					'/work/project/packages/ckeditor5-bar'
-				] );
-				expect( stubs.publishPackagesOnNpm.firstCall.args[ 1 ] ).to.equal( 'staging' );
-				expect( stubs.publishPackagesOnNpm.firstCall.args[ 2 ] ).to.equal( listrTask );
-			} );
-		} );
-
-		it( 'should publish packages on npm if confirmation callback is not set (custom npm tag)', () => {
-			stubs.glob.glob.resolves( [
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			] );
-
-			const listrTask = {};
+			const abortController = new AbortController();
+			const taskToExecute = stubs.publishPackageOnNpmCallback;
 
 			return publishPackages( {
 				packagesDirectory: 'packages',
 				npmOwner: 'pepe',
 				npmTag: 'nightly',
+				listrTask,
+				signal: abortController.signal
+			} ).then( () => {
+				expect( stubs.executeInParallel.callCount ).to.equal( 1 );
+				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'packagesDirectory', 'packages' );
+				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'listrTask', listrTask );
+				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'taskToExecute', taskToExecute );
+				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.deep.property( 'taskOptions', { npmTag: 'nightly' } );
+				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'signal', abortController.signal );
+				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'concurrency', 4 );
+			} );
+		} );
+
+		it( 'should publish packages on npm if confirmation callback is not set', () => {
+			const listrTask = {};
+
+			return publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
 				listrTask
 			} ).then( () => {
-				expect( stubs.publishPackagesOnNpm.callCount ).to.equal( 1 );
-				expect( stubs.publishPackagesOnNpm.firstCall.args[ 0 ] ).to.deep.equal( [
-					'/work/project/packages/ckeditor5-foo',
-					'/work/project/packages/ckeditor5-bar'
-				] );
-				expect( stubs.publishPackagesOnNpm.firstCall.args[ 1 ] ).to.equal( 'nightly' );
-				expect( stubs.publishPackagesOnNpm.firstCall.args[ 2 ] ).to.equal( listrTask );
+				expect( stubs.executeInParallel.callCount ).to.equal( 1 );
 			} );
 		} );
 
 		it( 'should publish packages on npm if synchronous confirmation callback returns truthy value', () => {
-			stubs.glob.glob.resolves( [
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			] );
-
 			const confirmationCallback = sandbox.stub().returns( true );
 			const listrTask = {};
 
@@ -329,24 +313,12 @@ describe( 'dev-release-tools/tasks', () => {
 				confirmationCallback,
 				listrTask
 			} ).then( () => {
-				expect( stubs.publishPackagesOnNpm.callCount ).to.equal( 1 );
-				expect( stubs.publishPackagesOnNpm.firstCall.args[ 0 ] ).to.deep.equal( [
-					'/work/project/packages/ckeditor5-foo',
-					'/work/project/packages/ckeditor5-bar'
-				] );
-				expect( stubs.publishPackagesOnNpm.firstCall.args[ 1 ] ).to.equal( 'staging' );
-				expect( stubs.publishPackagesOnNpm.firstCall.args[ 2 ] ).to.equal( listrTask );
-
+				expect( stubs.executeInParallel.callCount ).to.equal( 1 );
 				expect( confirmationCallback.callCount ).to.equal( 1 );
 			} );
 		} );
 
 		it( 'should publish packages on npm if asynchronous confirmation callback returns truthy value', () => {
-			stubs.glob.glob.resolves( [
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			] );
-
 			const confirmationCallback = sandbox.stub().resolves( true );
 			const listrTask = {};
 
@@ -356,24 +328,12 @@ describe( 'dev-release-tools/tasks', () => {
 				confirmationCallback,
 				listrTask
 			} ).then( () => {
-				expect( stubs.publishPackagesOnNpm.callCount ).to.equal( 1 );
-				expect( stubs.publishPackagesOnNpm.firstCall.args[ 0 ] ).to.deep.equal( [
-					'/work/project/packages/ckeditor5-foo',
-					'/work/project/packages/ckeditor5-bar'
-				] );
-				expect( stubs.publishPackagesOnNpm.firstCall.args[ 1 ] ).to.equal( 'staging' );
-				expect( stubs.publishPackagesOnNpm.firstCall.args[ 2 ] ).to.equal( listrTask );
-
+				expect( stubs.executeInParallel.callCount ).to.equal( 1 );
 				expect( confirmationCallback.callCount ).to.equal( 1 );
 			} );
 		} );
 
 		it( 'should not publish packages on npm if synchronous confirmation callback returns falsy value', () => {
-			stubs.glob.glob.resolves( [
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			] );
-
 			const confirmationCallback = sandbox.stub().returns( false );
 
 			return publishPackages( {
@@ -381,17 +341,12 @@ describe( 'dev-release-tools/tasks', () => {
 				npmOwner: 'pepe',
 				confirmationCallback
 			} ).then( () => {
-				expect( stubs.publishPackagesOnNpm.callCount ).to.equal( 0 );
+				expect( stubs.executeInParallel.callCount ).to.equal( 0 );
 				expect( confirmationCallback.callCount ).to.equal( 1 );
 			} );
 		} );
 
 		it( 'should not publish packages on npm if asynchronous confirmation callback returns falsy value', () => {
-			stubs.glob.glob.resolves( [
-				'/work/project/packages/ckeditor5-foo',
-				'/work/project/packages/ckeditor5-bar'
-			] );
-
 			const confirmationCallback = sandbox.stub().resolves( false );
 
 			return publishPackages( {
@@ -399,13 +354,13 @@ describe( 'dev-release-tools/tasks', () => {
 				npmOwner: 'pepe',
 				confirmationCallback
 			} ).then( () => {
-				expect( stubs.publishPackagesOnNpm.callCount ).to.equal( 0 );
+				expect( stubs.executeInParallel.callCount ).to.equal( 0 );
 				expect( confirmationCallback.callCount ).to.equal( 1 );
 			} );
 		} );
 
 		it( 'should throw if publishing packages on npm failed', () => {
-			stubs.publishPackagesOnNpm.throws( new Error( 'Unable to publish "ckeditor5-foo" package.' ) );
+			stubs.executeInParallel.throws( new Error( 'Unable to publish "ckeditor5-foo" package.' ) );
 
 			return publishPackages( {
 				packagesDirectory: 'packages',
