@@ -8,35 +8,37 @@
 'use strict';
 
 /**
- * Creates an AbortController instance and register the callback on SIGINT event that aborts the asynchronous process.
+ * Creates an AbortController instance and registers the listener function on SIGINT event that aborts the asynchronous process.
  *
  * @returns {AbortController}
  */
 function registerAbortController() {
 	const abortController = new AbortController();
 
-	const callback = () => {
+	const listener = () => {
 		abortController.abort( 'SIGINT' );
 	};
 
-	abortController._callback = callback;
+	abortController._listener = listener;
 
-	process.on( 'SIGINT', abortController._callback );
+	// Add the listener function to the beginning of the listeners array for the SIGINT event. Listr2 has own SIGINT listener that
+	// terminates the process, so in order to abort our asynchronous workers, our listener must be executed first.
+	process.prependOnceListener( 'SIGINT', abortController._listener );
 
 	return abortController;
 }
 
 /**
- * Deregisters the previously registered callback on SIGINT event from the given AbortController.
+ * Deregisters the previously registered listener function on SIGINT event from the given AbortController instance.
  *
  * @param {AbortController} abortController
  */
 function deregisterAbortController( abortController ) {
-	if ( !abortController || !abortController._callback ) {
+	if ( !abortController || !abortController._listener ) {
 		return;
 	}
 
-	process.off( 'SIGINT', abortController._callback );
+	process.removeListener( 'SIGINT', abortController._listener );
 }
 
 module.exports = {

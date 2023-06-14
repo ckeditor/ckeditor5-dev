@@ -31,7 +31,7 @@ const WORKER_SCRIPT = upath.join( __dirname, 'parallelworker.js' );
  * @param {ListrTaskObject} options.listrTask An instance of `ListrTask`.
  * @param {AbortSignal|null} [options.signal=null] Signal to abort the asynchronous process. If not set, default AbortController is created.
  * @param {Object} [options.taskOptions=null] Optional data required by the task.
- * @param {Function} [options.packagesDirectoryFilter] A function that is executed for each found package directory to filter out those
+ * @param {Function} [options.packagesDirectoryFilter=null] A function that is executed for each found package directory to filter out those
  * that do not require executing a task. It should return a truthy value to keep the package and a falsy value to skip the package from
  * processing.
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.

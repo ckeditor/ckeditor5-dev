@@ -30,7 +30,7 @@ const publishPackageOnNpmCallback = require( '../utils/publishpackageonnpmcallba
  * @param {String} options.packagesDirectory Relative path to a location of packages to release.
  * @param {String} options.npmOwner The account name on npm, which should be used to publish the packages.
  * @param {ListrTaskObject} options.listrTask An instance of `ListrTask`.
- * @param {AbortSignal|null} [options.signal=null] Signal to abort the asynchronous process. If not set, default AbortController is created.
+ * @param {AbortSignal|null} [options.signal=null] Signal to abort the asynchronous process.
  * @param {String} [options.npmTag='staging'] The npm distribution tag.
  * @param {Object.<String, Array.<String>>|null} [options.optionalEntries=null] Specifies which entries from the `files` field in the
  * `package.json` are optional. The key is a package name, and its value is an array of optional entries from the `files` field, for which
