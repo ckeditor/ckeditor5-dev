@@ -674,6 +674,41 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 			} );
+
+			it( 'should not remove scripts unless it is explicitly specified in packageJsonFieldsToRemove', async () => {
+				mockFs( {
+					'release': {
+						'ckeditor5-foo': {
+							'package.json': JSON.stringify( {
+								author: 'author',
+								scripts: {
+									'postinstall': 'node my-node-script.js',
+									'build': 'tsc -p ./tsconfig.json',
+									'dll:build': 'webpack'
+								}
+							} )
+						}
+					}
+				} );
+
+				await cleanUpPackages( {
+					packagesDirectory: 'release',
+					preservePostInstallHook: true,
+					packageJsonFieldsToRemove: [
+						'author'
+					]
+				} );
+
+				const call = stubs.fs.writeJson.getCall( 0 );
+
+				expect( call.args[ 1 ] ).to.deep.equal( {
+					scripts: {
+						'postinstall': 'node my-node-script.js',
+						'build': 'tsc -p ./tsconfig.json',
+						'dll:build': 'webpack'
+					}
+				} );
+			} );
 		} );
 	} );
 } );

@@ -159,9 +159,13 @@ function getIgnoredFilePatterns( packageJson ) {
  */
 function cleanUpPackageJson( packageJson, packageJsonFieldsToRemove, preservePostInstallHook ) {
 	for ( const key of Object.keys( packageJson ) ) {
+		if ( !packageJsonFieldsToRemove.includes( key ) ) {
+			continue;
+		}
+
 		if ( key === 'scripts' && preservePostInstallHook && packageJson.scripts.postinstall ) {
 			packageJson.scripts = { 'postinstall': packageJson.scripts.postinstall };
-		} else if ( packageJsonFieldsToRemove.includes( key ) ) {
+		} else {
 			delete packageJson[ key ];
 		}
 	}
