@@ -279,7 +279,8 @@ describe( 'dev-release-tools/tasks', () => {
 				npmOwner: 'pepe',
 				npmTag: 'nightly',
 				listrTask,
-				signal: abortController.signal
+				signal: abortController.signal,
+				concurrency: 3
 			} ).then( () => {
 				expect( stubs.executeInParallel.callCount ).to.equal( 1 );
 				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'packagesDirectory', 'packages' );
@@ -287,7 +288,7 @@ describe( 'dev-release-tools/tasks', () => {
 				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'taskToExecute', taskToExecute );
 				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.deep.property( 'taskOptions', { npmTag: 'nightly' } );
 				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'signal', abortController.signal );
-				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'concurrency', 4 );
+				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'concurrency', 3 );
 			} );
 		} );
 

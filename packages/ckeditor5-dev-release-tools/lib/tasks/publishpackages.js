@@ -39,6 +39,7 @@ const publishPackageOnNpmCallback = require( '../utils/publishpackageonnpmcallba
  * @param {String} [options.confirmationCallback=null] An callback whose response decides to continue the publishing packages. Synchronous
  * and asynchronous callbacks are supported.
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
+ * @param {Number} [options.concurrency=4] Number of CPUs that will execute the task.
  * @returns {Promise}
  */
 module.exports = async function publishPackages( options ) {
@@ -50,7 +51,8 @@ module.exports = async function publishPackages( options ) {
 		npmTag = 'staging',
 		optionalEntries = null,
 		confirmationCallback = null,
-		cwd = process.cwd()
+		cwd = process.cwd(),
+		concurrency = 4
 	} = options;
 
 	await assertNpmAuthorization( npmOwner );
@@ -75,7 +77,7 @@ module.exports = async function publishPackages( options ) {
 				npmTag
 			},
 			signal,
-			concurrency: 4
+			concurrency
 		} );
 	}
 };
