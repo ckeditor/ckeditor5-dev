@@ -645,6 +645,70 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 			} );
+
+			it( 'should keep postinstall hook in `package.json` when preservePostInstallHook is set to true', async () => {
+				mockFs( {
+					'release': {
+						'ckeditor5-foo': {
+							'package.json': JSON.stringify( {
+								scripts: {
+									'postinstall': 'node my-node-script.js',
+									'build': 'tsc -p ./tsconfig.json',
+									'dll:build': 'webpack'
+								}
+							} )
+						}
+					}
+				} );
+
+				await cleanUpPackages( {
+					packagesDirectory: 'release',
+					preservePostInstallHook: true
+				} );
+
+				const call = stubs.fs.writeJson.getCall( 0 );
+
+				expect( call.args[ 1 ] ).to.deep.equal( {
+					scripts: {
+						'postinstall': 'node my-node-script.js'
+					}
+				} );
+			} );
+
+			it( 'should not remove scripts unless it is explicitly specified in packageJsonFieldsToRemove', async () => {
+				mockFs( {
+					'release': {
+						'ckeditor5-foo': {
+							'package.json': JSON.stringify( {
+								author: 'author',
+								scripts: {
+									'postinstall': 'node my-node-script.js',
+									'build': 'tsc -p ./tsconfig.json',
+									'dll:build': 'webpack'
+								}
+							} )
+						}
+					}
+				} );
+
+				await cleanUpPackages( {
+					packagesDirectory: 'release',
+					preservePostInstallHook: true,
+					packageJsonFieldsToRemove: [
+						'author'
+					]
+				} );
+
+				const call = stubs.fs.writeJson.getCall( 0 );
+
+				expect( call.args[ 1 ] ).to.deep.equal( {
+					scripts: {
+						'postinstall': 'node my-node-script.js',
+						'build': 'tsc -p ./tsconfig.json',
+						'dll:build': 'webpack'
+					}
+				} );
+			} );
 		} );
 	} );
 } );
