@@ -24,11 +24,12 @@ const { glob } = require( 'glob' );
  * @param {Object} options
  * @param {String} options.packagesDirectory Relative path to a location of packages to be cleaned up.
  * @param {Array.<String>} [options.packageJsonFieldsToRemove] Fields to remove from `package.json`. If not set, a predefined list is used.
+ * @param {Boolean} [options.preservePostInstallHook] Whether to preserve the postinstall hook in `package.json`.
  * @param {String} [options.cwd] Current working directory from which all paths will be resolved.
  * @returns {Promise}
  */
 module.exports = async function cleanUpPackages( options ) {
-	const { packagesDirectory, packageJsonFieldsToRemove, cwd } = parseOptions( options );
+	const { packagesDirectory, packageJsonFieldsToRemove, preservePostInstallHook, cwd } = parseOptions( options );
 
 	const packageJsonPaths = await glob( '*/package.json', {
 		cwd: upath.join( cwd, packagesDirectory ),
@@ -41,7 +42,7 @@ module.exports = async function cleanUpPackages( options ) {
 		const packageJson = await fs.readJson( packageJsonPath );
 
 		await cleanUpPackageDirectory( packageJson, packagePath );
-		cleanUpPackageJson( packageJson, packageJsonFieldsToRemove );
+		cleanUpPackageJson( packageJson, packageJsonFieldsToRemove, preservePostInstallHook );
 
 		await fs.writeJson( packageJsonPath, packageJson, { spaces: 2 } );
 	}
@@ -53,6 +54,7 @@ module.exports = async function cleanUpPackages( options ) {
  * @param {Object} options
  * @param {String} options.packagesDirectory
  * @param {Array.<String>} [options.packageJsonFieldsToRemove=['devDependencies','depcheckIgnore','scripts','private']]
+ * @param {Boolean} [options.preservePostInstallHook]
  * @param {String} [options.cwd=process.cwd()]
  * @returns {Object}
  */
@@ -60,12 +62,14 @@ function parseOptions( options ) {
 	const {
 		packagesDirectory,
 		packageJsonFieldsToRemove = [ 'devDependencies', 'depcheckIgnore', 'scripts', 'private' ],
+		preservePostInstallHook = false,
 		cwd = process.cwd()
 	} = options;
 
 	return {
 		packagesDirectory: upath.normalizeTrim( packagesDirectory ),
 		packageJsonFieldsToRemove,
+		preservePostInstallHook,
 		cwd: upath.normalizeTrim( cwd )
 	};
 }
@@ -151,10 +155,17 @@ function getIgnoredFilePatterns( packageJson ) {
  *
  * @param {Object} packageJson
  * @param {Array.<String>} packageJsonFieldsToRemove
+ * @param {Boolean} preservePostInstallHook
  */
-function cleanUpPackageJson( packageJson, packageJsonFieldsToRemove ) {
+function cleanUpPackageJson( packageJson, packageJsonFieldsToRemove, preservePostInstallHook ) {
 	for ( const key of Object.keys( packageJson ) ) {
-		if ( packageJsonFieldsToRemove.includes( key ) ) {
+		if ( !packageJsonFieldsToRemove.includes( key ) ) {
+			continue;
+		}
+
+		if ( key === 'scripts' && preservePostInstallHook && packageJson.scripts.postinstall ) {
+			packageJson.scripts = { 'postinstall': packageJson.scripts.postinstall };
+		} else {
 			delete packageJson[ key ];
 		}
 	}
