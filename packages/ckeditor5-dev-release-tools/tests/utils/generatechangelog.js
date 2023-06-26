@@ -946,15 +946,12 @@ describe( 'dev-release-tools/utils', () => {
 							'### Release highlights'
 						);
 						expect( changesAsArray[ 2 ] ).to.equal(
-							'<!-- TODO: Add a link to the blog post. -->'
-						);
-						expect( changesAsArray[ 3 ] ).to.equal(
 							'### Features'
 						);
-						expect( changesAsArray[ 4 ] ).to.equal(
+						expect( changesAsArray[ 3 ] ).to.equal(
 							'* The first an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/xxxxxxx))'
 						);
-						expect( changesAsArray[ 5 ] ).to.equal(
+						expect( changesAsArray[ 4 ] ).to.equal(
 							'* The second an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
 						);
 					} );
@@ -1007,15 +1004,12 @@ describe( 'dev-release-tools/utils', () => {
 							'### Collaboration features'
 						);
 						expect( changesAsArray[ 2 ] ).to.equal(
-							`The CKEditor 5 Collaboration features changelog can be found here: ${ changelog }.`
-						);
-						expect( changesAsArray[ 3 ] ).to.equal(
 							'### Features'
 						);
-						expect( changesAsArray[ 4 ] ).to.equal(
+						expect( changesAsArray[ 3 ] ).to.equal(
 							'* The first an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/xxxxxxx))'
 						);
-						expect( changesAsArray[ 5 ] ).to.equal(
+						expect( changesAsArray[ 4 ] ).to.equal(
 							'* The second an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
 						);
 					} );
@@ -1127,51 +1121,45 @@ describe( 'dev-release-tools/utils', () => {
 							'### Release highlights'
 						);
 						expect( changesAsArray[ 2 ] ).to.equal(
-							'<!-- TODO: Add a link to the blog post. -->'
-						);
-						expect( changesAsArray[ 3 ] ).to.equal(
 							'### Collaboration features'
 						);
-						expect( changesAsArray[ 4 ] ).to.equal(
-							`The CKEditor 5 Collaboration features changelog can be found here: ${ changelog }.`
-						);
-						expect( changesAsArray[ 5 ] ).to.equal(
+						expect( changesAsArray[ 3 ] ).to.equal(
 							'### MAJOR BREAKING CHANGES'
 						);
-						expect( changesAsArray[ 6 ] ).to.equal(
+						expect( changesAsArray[ 4 ] ).to.equal(
 							'* This change should be scoped too but the script should work if the scope is being missed.'
 						);
-						expect( changesAsArray[ 7 ] ).to.equal(
+						expect( changesAsArray[ 5 ] ).to.equal(
 							'### MINOR BREAKING CHANGES'
 						);
-						expect( changesAsArray[ 8 ] ).to.equal(
+						expect( changesAsArray[ 6 ] ).to.equal(
 							'* **engine**: Nothing but I would like to use the note - engine.'
 						);
-						expect( changesAsArray[ 9 ] ).to.equal(
+						expect( changesAsArray[ 7 ] ).to.equal(
 							'* **ui**: Nothing but I would like to use the note - ui.'
 						);
-						expect( changesAsArray[ 10 ] ).to.equal(
+						expect( changesAsArray[ 8 ] ).to.equal(
 							'### Features'
 						);
-						expect( changesAsArray[ 11 ] ).to.equal(
+						expect( changesAsArray[ 9 ] ).to.equal(
 							'* **autoformat**: It just works. ([commit](https://github.com/ckeditor/ckeditor5-package/c/bb))'
 						);
-						expect( changesAsArray[ 12 ] ).to.equal(
+						expect( changesAsArray[ 10 ] ).to.equal(
 							'* **engine**: The first an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/c/xx))'
 						);
-						expect( changesAsArray[ 13 ] ).to.equal(
+						expect( changesAsArray[ 11 ] ).to.equal(
 							'* The second an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/c/zz))'
 						);
-						expect( changesAsArray[ 14 ] ).to.equal(
+						expect( changesAsArray[ 12 ] ).to.equal(
 							'### Bug fixes'
 						);
-						expect( changesAsArray[ 15 ] ).to.equal(
+						expect( changesAsArray[ 13 ] ).to.equal(
 							'* **ui**: The first amazing bug fix. ([commit](https://github.com/ckeditor/ckeditor5-package/c/yy))'
 						);
-						expect( changesAsArray[ 16 ] ).to.equal(
+						expect( changesAsArray[ 14 ] ).to.equal(
 							'### Other changes'
 						);
-						expect( changesAsArray[ 17 ] ).to.equal(
+						expect( changesAsArray[ 15 ] ).to.equal(
 							'* Use the newest version of Node.js on CI. ([commit](https://github.com/ckeditor/ckeditor5-package/c/aa))'
 						);
 					} );
