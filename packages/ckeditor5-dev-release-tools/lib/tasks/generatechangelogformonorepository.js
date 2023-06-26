@@ -49,10 +49,6 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
  *
  * @param {String} [options.from] A commit or tag name that will be the first param of the range of commits to collect.
  *
- * @param {Boolean} [options.highlightsPlaceholder=false] Whether to add a note about release highlights.
- *
- * @param {Boolean} [options.collaborationFeatures=false] Whether to add a note about collaboration features.
- *
  * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
  *
  * @param {Array.<ExternalRepository>} [options.externalRepositories=[]] An array of object with additional repositories
@@ -388,8 +384,6 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 			currentTag: 'v' + version,
 			previousTag: 'v' + pkgJson.version,
 			isPatch: semver.diff( version, pkgJson.version ) === 'patch',
-			highlightsPlaceholder: options.highlightsPlaceholder || false,
-			collaborationFeatures: options.collaborationFeatures || false,
 			skipCommitsLink: Boolean( options.skipLinks ),
 			skipCompareLink: Boolean( options.skipLinks )
 		};
