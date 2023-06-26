@@ -17,7 +17,7 @@
 	const callback = require( workerData.callbackModule );
 
 	for ( const packagePath of workerData.packages ) {
-		await callback( packagePath );
+		await callback( packagePath, workerData.taskOptions );
 
 		// To increase the status log.
 		parentPort.postMessage( 'done:package' );

@@ -105,6 +105,59 @@ describe( 'dev-release-tools/utils', () => {
 				fs.unlinkSync( source );
 			}
 		} );
+
+		it( 'should pass task options to the worker', async () => {
+			await executeInParallel( {
+				cwd: REPOSITORY_ROOT,
+				concurrency: 2,
+				packagesDirectory: 'packages',
+				signal: abortController.signal,
+				taskToExecute: async ( packagePath, taskOptions ) => {
+					const fs = require( 'fs/promises' );
+					const path = require( 'path' );
+					const filePath = path.join( packagePath, 'executeinparallel-integration.log' );
+
+					await fs.writeFile( filePath, JSON.stringify( taskOptions ) );
+				},
+				taskOptions: {
+					property: 'Example of the property.',
+					some: {
+						deeply: {
+							nested: {
+								property: 'Example the deeply nested property.'
+							}
+						}
+					}
+				},
+				listrTask: {
+					output: ''
+				}
+			} );
+
+			const data = glob.sync( 'packages/*/executeinparallel-integration.log', { cwd: REPOSITORY_ROOT, absolute: true } )
+				.map( logFile => {
+					return {
+						source: logFile,
+						value: JSON.parse( fs.readFileSync( logFile, 'utf-8' ) ),
+						packageName: logFile.split( '/' ).reverse().slice( 1, 2 ).pop()
+					};
+				} );
+
+			for ( const { value, packageName, source } of data ) {
+				expect( value, `comparing taskOptions (${ packageName })` ).to.deep.equal( {
+					property: 'Example of the property.',
+					some: {
+						deeply: {
+							nested: {
+								property: 'Example the deeply nested property.'
+							}
+						}
+					}
+				} );
+
+				fs.unlinkSync( source );
+			}
+		} );
 	} );
 } );
 
