@@ -73,7 +73,7 @@ async function notifyCircleStatus() {
 	checkIfShouldNotify( {
 		branch: 'master',
 		event: 'push',
-		exitCode: 0
+		exitCode: 1
 	} );
 
 	const message = formatMessage( {
