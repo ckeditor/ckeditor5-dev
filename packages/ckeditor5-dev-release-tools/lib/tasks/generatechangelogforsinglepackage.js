@@ -93,14 +93,12 @@ module.exports = async function generateChangelogForSinglePackage( options = {} 
 
 			logProcess( 'Generating the changelog...' );
 
-			const previousTag = commitOptions.from ? 'v' + pkgJson.version : null;
-
 			const writerContext = {
 				version,
 				commit: 'commit',
 				repoUrl: getRepositoryUrl(),
 				currentTag: 'v' + version,
-				previousTag,
+				previousTag: options.from ? options.from : 'v' + pkgJson.version,
 				isPatch: semver.diff( version, pkgJson.version ) === 'patch',
 				isInternalRelease,
 				skipCommitsLink: Boolean( options.skipLinks ),
