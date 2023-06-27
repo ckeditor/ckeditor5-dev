@@ -7,82 +7,91 @@
 
 /* eslint-env node */
 
-// This script assumes that is being executed on Travis CI. It requires following environment variables:
-//
-// - SLACK_WEBHOOK_URL - a URL where the notification should be sent
-// - START_TIME - POSIX time (when the script has begun the job)
-// - END_TIME - POSIX time (when the script has finished the job)
-// - GITHUB_TOKEN - token to a Github account with the scope: "repos". It is requires for obtaining an author of
-//   the commit if the build failed. The repository can be private and we can't use the public API.
-//
-// If the `SLACK_NOTIFY_COMMIT_URL` environment variable is defined, the script use the URL as the commit URL.
-// Otherwise, a marge of variables `TRAVIS_REPO_SLUG` and `TRAVIS_COMMIT` will be used.
-//
-// Pinging an author of the commit can be disabled by defining the `SLACK_NOTIFY_HIDE_AUTHOR` environment variable
-// to `"true"` (`SLACK_NOTIFY_HIDE_AUTHOR="true"`). See: https://github.com/ckeditor/ckeditor5/issues/9252.
-//
-// In order to enable the debug mode, set the `DEBUG=true` as the environment variable.
+const slackNotify = require( 'slack-notify' );
 
-const buildBranch = process.env.TRAVIS_BRANCH;
+const checkIfShouldNotify = require( '../lib/checkIfShouldNotify' );
+const formatMessage = require( '../lib/formatMessage' );
+const getCommitDetails = require( '../lib/getCommitDetails' );
 
-const ALLOWED_BRANCHES = [
-	'stable',
-	'master'
-];
+// This script assumes that is being executed on Travis CI.
+// Described environment variables should be added by the integrator.
 
-const ALLOWED_EVENTS = [
-	'push',
-	'cron',
-	'api'
-];
+const {
+	/**
+	 * @enum {Number} POSIX timestamp created when the script has begun the job.
+	 */
+	START_TIME,
 
-// Send a notification only for main branches...
-if ( !ALLOWED_BRANCHES.includes( buildBranch ) ) {
-	printLog( `Aborting due to an invalid branch (${ buildBranch }).` );
+	/**
+	 * @enum {Number} POSIX timestamp created when the script has finished the job.
+	 */
+	END_TIME,
 
-	process.exit();
-}
+	/**
+	 * @enum {String} Token to a Github account with the scope: "repos". It is required for obtaining an author of
+	 * the commit if the build failed. The repository can be private and we can't use the public API.
+	 */
+	GITHUB_TOKEN,
 
-// ...and an event that triggered the build is correct...
-if ( !ALLOWED_EVENTS.includes( process.env.TRAVIS_EVENT_TYPE ) ) {
-	printLog( `Aborting due to an invalid event type (${ process.env.TRAVIS_EVENT_TYPE }).` );
+	/**
+	 * @enum {String} URL where the notification should be sent.
+	 */
+	SLACK_WEBHOOK_URL,
 
-	process.exit();
-}
+	/**
+	 * @enum {String} Optional. If defined, the script will use the URL as the commit URL.
+	 * Otherwise, URL will be constructed using commit repository data and its hash.
+	 */
+	SLACK_NOTIFY_COMMIT_URL,
 
-// ...and for builds that failed.
-if ( process.env.TRAVIS_TEST_RESULT == 0 ) {
-	printLog( 'The build did not fail. The notification will not be sent.' );
+	/**
+	 * @enum {String} Optional. If set to "true", commit author will be hidden.
+	 * See: https://github.com/ckeditor/ckeditor5/issues/9252.
+	 */
+	SLACK_NOTIFY_HIDE_AUTHOR,
 
-	process.exit();
-}
+	// Variables that are available by default in Travis environment.
+	TRAVIS_BRANCH,
+	TRAVIS_COMMIT,
+	TRAVIS_EVENT_TYPE,
+	TRAVIS_JOB_NUMBER,
+	TRAVIS_JOB_WEB_URL,
+	TRAVIS_REPO_SLUG,
+	TRAVIS_TEST_RESULT
+} = process.env;
 
-const notifyTravisStatus = require( '../lib/notifytravisstatus' );
+notifyTravisStatus();
 
-const options = {
-	repositorySlug: process.env.TRAVIS_REPO_SLUG,
-	startTime: parseInt( process.env.START_TIME ),
-	endTime: parseInt( process.env.END_TIME ),
-	githubToken: process.env.GITHUB_TOKEN,
-	slackWebhookUrl: process.env.SLACK_WEBHOOK_URL,
-	branch: buildBranch,
-	commit: process.env.TRAVIS_COMMIT,
-	notifyCommitUrl: process.env.SLACK_NOTIFY_COMMIT_URL,
-	shouldHideAuthor: process.env.SLACK_NOTIFY_HIDE_AUTHOR === 'true',
-	jobUrl: process.env.TRAVIS_JOB_WEB_URL,
-	jobId: process.env.TRAVIS_JOB_NUMBER
-};
-
-notifyTravisStatus( options )
-	.catch( error => {
-		console.error( error );
-
-		throw error;
+async function notifyTravisStatus() {
+	checkIfShouldNotify( {
+		branch: TRAVIS_BRANCH,
+		event: TRAVIS_EVENT_TYPE,
+		exitCode: TRAVIS_TEST_RESULT
 	} );
 
-/**
- * @param {String} message
- */
-function printLog( message ) {
-	console.log( '[Slack Notification]', message );
+	const commitUrl = SLACK_NOTIFY_COMMIT_URL || `https://github.com/${ TRAVIS_REPO_SLUG }/commit/${ TRAVIS_COMMIT }`;
+	const { githubAccount, commitAuthor, commitMessage } = await getCommitDetails( commitUrl, GITHUB_TOKEN );
+	const [ repositoryOwner, repositoryName ] = TRAVIS_REPO_SLUG.split( '/' );
+
+	const message = formatMessage( {
+		slackMessageUsername: 'Travis CI',
+		githubAccount,
+		commitAuthor,
+		shouldHideAuthor: SLACK_NOTIFY_HIDE_AUTHOR === 'true',
+		iconUrl: 'https://a.slack-edge.com/66f9/img/services/travis_36.png',
+		repositoryOwner,
+		repositoryName,
+		commitBranch: TRAVIS_BRANCH,
+		commitUrl,
+		commitHash: TRAVIS_COMMIT,
+		jobUrl: TRAVIS_JOB_WEB_URL,
+		jobId: TRAVIS_JOB_NUMBER,
+		endTime: END_TIME,
+		startTime: START_TIME,
+		commitMessage
+	} );
+
+	return slackNotify( SLACK_WEBHOOK_URL )
+		.send( message )
+		.catch( err => console.log( 'API error occurred:', err ) );
 }
