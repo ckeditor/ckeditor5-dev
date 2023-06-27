@@ -69,10 +69,11 @@ async function notifyCircleStatus() {
 	const commitUrl = response.all_commit_details[ 0 ].commit_url;
 	const commitAuthor = response.all_commit_details[ 0 ].author_login;
 
+	// TODO
 	checkIfShouldNotify( {
-		branch: commitBranch,
-		event: 'master', // TODO
-		exitCode: 0 // TODO
+		branch: 'master',
+		event: 'push',
+		exitCode: 0
 	} );
 
 	const message = formatMessage( {
