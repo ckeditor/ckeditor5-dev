@@ -22,8 +22,6 @@ const UPDATED_TRANSLATION_COMMIT = '* Updated translations.';
  * @param {String} context.currentTag A tag for the current version.
  * @param {String} context.commit Commit keyword in the URL.
  * @param {String} [context.previousTag] A tag for the previous version.
- * @param {Boolean} [options.highlightsPlaceholder=false] Whether to add a note about release highlights.
- * @param {Boolean} [options.collaborationFeatures=false] Whether to add a note about collaboration features.
  * @param {Boolean} [context.skipCommitsLink=false] Whether to skip adding links to commit.
  * @param {Boolean} [context.skipCompareLink=false] Whether to remove the compare URL in the header.
  *

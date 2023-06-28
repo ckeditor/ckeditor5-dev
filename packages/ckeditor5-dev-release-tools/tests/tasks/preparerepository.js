@@ -177,6 +177,17 @@ describe( 'dev-release-tools/tasks', () => {
 				expect( stubs.fs.writeJson.getCall( 0 ).args[ 2 ] ).to.deep.equal( { spaces: 2, EOL: '\n' } );
 			} );
 
+			it( 'should create a flat output file structure for a scoped package', async () => {
+				options.rootPackageJson = {
+					name: '@ckeditor/CKEditor5',
+					files: [ 'src/*.js', 'CHANGELOG.md' ]
+				};
+
+				await prepareRepository( options );
+
+				expect( stubs.fs.writeJson.getCall( 0 ).args[ 0 ] ).to.equal( 'current/working/dir/release/CKEditor5/package.json' );
+			} );
+
 			it( 'should copy specified files of the root package', async () => {
 				options.rootPackageJson = {
 					name: 'CKEditor5',
