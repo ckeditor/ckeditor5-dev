@@ -87,11 +87,7 @@ function getNotifierMessage( options ) {
  * @returns {String}
  */
 function getExecutionTime( endTime, startTime ) {
-	if ( !endTime && !startTime ) {
-		return 'TODO';
-	}
-
-	const totalMs = ( endTime - startTime ) * 1000;
+	const totalMs = ( Number( endTime ) - Number( startTime ) ) * 1000;
 	const date = new Date( totalMs );
 	const hours = date.getUTCHours();
 	const minutes = date.getUTCMinutes();
