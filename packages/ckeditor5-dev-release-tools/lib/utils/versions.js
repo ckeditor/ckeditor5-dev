@@ -34,7 +34,8 @@ const versions = {
 	 * last nightly release and the "X" is the sequential number starting from 0. If the package does not have any nightly releases yet,
 	 * `null` is returned.
 	 *
-	 * @returns {Promise<String|null>}
+	 * @params {String} [cwd=process.cwd()]
+	 * @returns {Promise.<String|null>}
 	 */
 	getLastNightly( cwd = process.cwd() ) {
 		const packageName = getPackageJson( cwd ).name;
@@ -44,9 +45,11 @@ const versions = {
 	},
 
 	/**
-	 * Returns the next free nightly version in the format of "0.0.0-nightly-YYYYMMDD.X", where the "YYYYMMDD" is the current date and the
-	 * "X" is the next available sequential number starting from 0.
+	 * Returns the next available nightly version matching the following format: "0.0.0-nightly-YYYYMMDD.X",
+	 * where "YYYYMMDD" is the date of the latest nightly release,
+	 * and "X" is the following available sequential number starting from 0.
 	 *
+	 * @params {String} [cwd=process.cwd()]
 	 * @returns {Promise<String>}
 	 */
 	async getNextNightly( cwd = process.cwd() ) {
