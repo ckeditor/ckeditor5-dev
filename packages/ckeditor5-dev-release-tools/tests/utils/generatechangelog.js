@@ -900,127 +900,6 @@ describe( 'dev-release-tools/utils', () => {
 					} );
 			} );
 
-			it( 'attaches the release highlights placeholder', () => {
-				const commits = [
-					{
-						type: 'Features',
-						header: 'Feature: The first an amazing feature.',
-						subject: 'The first an amazing feature.',
-						hash: 'x'.repeat( 40 ),
-						notes: []
-					},
-					{
-						type: 'Features',
-						header: 'Feature: The second an amazing feature.',
-						subject: 'The second an amazing feature.',
-						hash: 'z'.repeat( 40 ),
-						notes: []
-					}
-				];
-
-				const context = {
-					version: '1.1.0',
-					repoUrl: url,
-					currentTag: 'v1.1.0',
-					previousTag: 'v1.0.0',
-					commit: 'commit',
-					highlightsPlaceholder: true
-				};
-
-				const options = getWriterOptions( {
-					hash: hash => hash.slice( 0, 7 )
-				} );
-
-				return generateChangelog( commits, context, options )
-					.then( changes => {
-						changes = replaceDates( changes );
-
-						const changesAsArray = changes.split( '\n' )
-							.map( line => line.trim() )
-							.filter( line => line.length );
-
-						expect( changesAsArray[ 0 ] ).to.equal(
-							'## [1.1.0](https://github.com/ckeditor/ckeditor5-package/compare/v1.0.0...v1.1.0) (0000-00-00)'
-						);
-						expect( changesAsArray[ 1 ] ).to.equal(
-							'### Release highlights'
-						);
-						expect( changesAsArray[ 2 ] ).to.equal(
-							'<!-- TODO: Add a link to the blog post. -->'
-						);
-						expect( changesAsArray[ 3 ] ).to.equal(
-							'### Features'
-						);
-						expect( changesAsArray[ 4 ] ).to.equal(
-							'* The first an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/xxxxxxx))'
-						);
-						expect( changesAsArray[ 5 ] ).to.equal(
-							'* The second an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
-						);
-					} );
-			} );
-
-			it( 'attaches the collaboration features changelog', () => {
-				const commits = [
-					{
-						type: 'Features',
-						header: 'Feature: The first an amazing feature.',
-						subject: 'The first an amazing feature.',
-						hash: 'x'.repeat( 40 ),
-						notes: []
-					},
-					{
-						type: 'Features',
-						header: 'Feature: The second an amazing feature.',
-						subject: 'The second an amazing feature.',
-						hash: 'z'.repeat( 40 ),
-						notes: []
-					}
-				];
-
-				const context = {
-					version: '1.1.0',
-					repoUrl: url,
-					currentTag: 'v1.1.0',
-					previousTag: 'v1.0.0',
-					commit: 'commit',
-					collaborationFeatures: true
-				};
-
-				const options = getWriterOptions( {
-					hash: hash => hash.slice( 0, 7 )
-				} );
-
-				return generateChangelog( commits, context, options )
-					.then( changes => {
-						changes = replaceDates( changes );
-						const changelog = 'https://ckeditor.com/collaboration/changelog';
-
-						const changesAsArray = changes.split( '\n' )
-							.map( line => line.trim() )
-							.filter( line => line.length );
-
-						expect( changesAsArray[ 0 ] ).to.equal(
-							'## [1.1.0](https://github.com/ckeditor/ckeditor5-package/compare/v1.0.0...v1.1.0) (0000-00-00)'
-						);
-						expect( changesAsArray[ 1 ] ).to.equal(
-							'### Collaboration features'
-						);
-						expect( changesAsArray[ 2 ] ).to.equal(
-							`The CKEditor 5 Collaboration features changelog can be found here: ${ changelog }.`
-						);
-						expect( changesAsArray[ 3 ] ).to.equal(
-							'### Features'
-						);
-						expect( changesAsArray[ 4 ] ).to.equal(
-							'* The first an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/xxxxxxx))'
-						);
-						expect( changesAsArray[ 5 ] ).to.equal(
-							'* The second an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
-						);
-					} );
-			} );
-
 			it( 'generates complex changelog', () => {
 				const commits = [
 					{
@@ -1090,9 +969,7 @@ describe( 'dev-release-tools/utils', () => {
 					repoUrl: url,
 					currentTag: 'v1.1.0',
 					previousTag: 'v1.0.0',
-					commit: 'c',
-					highlightsPlaceholder: true,
-					collaborationFeatures: true
+					commit: 'c'
 				};
 
 				const options = getWriterOptions( {
@@ -1114,7 +991,6 @@ describe( 'dev-release-tools/utils', () => {
 				return generateChangelog( commits, context, options )
 					.then( changes => {
 						changes = replaceDates( changes );
-						const changelog = 'https://ckeditor.com/collaboration/changelog';
 
 						const changesAsArray = changes.split( '\n' )
 							.map( line => line.trim() )
@@ -1124,54 +1000,42 @@ describe( 'dev-release-tools/utils', () => {
 							'## [1.1.0](https://github.com/ckeditor/ckeditor5-package/compare/v1.0.0...v1.1.0) (0000-00-00)'
 						);
 						expect( changesAsArray[ 1 ] ).to.equal(
-							'### Release highlights'
-						);
-						expect( changesAsArray[ 2 ] ).to.equal(
-							'<!-- TODO: Add a link to the blog post. -->'
-						);
-						expect( changesAsArray[ 3 ] ).to.equal(
-							'### Collaboration features'
-						);
-						expect( changesAsArray[ 4 ] ).to.equal(
-							`The CKEditor 5 Collaboration features changelog can be found here: ${ changelog }.`
-						);
-						expect( changesAsArray[ 5 ] ).to.equal(
 							'### MAJOR BREAKING CHANGES'
 						);
-						expect( changesAsArray[ 6 ] ).to.equal(
+						expect( changesAsArray[ 2 ] ).to.equal(
 							'* This change should be scoped too but the script should work if the scope is being missed.'
 						);
-						expect( changesAsArray[ 7 ] ).to.equal(
+						expect( changesAsArray[ 3 ] ).to.equal(
 							'### MINOR BREAKING CHANGES'
 						);
-						expect( changesAsArray[ 8 ] ).to.equal(
+						expect( changesAsArray[ 4 ] ).to.equal(
 							'* **engine**: Nothing but I would like to use the note - engine.'
 						);
-						expect( changesAsArray[ 9 ] ).to.equal(
+						expect( changesAsArray[ 5 ] ).to.equal(
 							'* **ui**: Nothing but I would like to use the note - ui.'
 						);
-						expect( changesAsArray[ 10 ] ).to.equal(
+						expect( changesAsArray[ 6 ] ).to.equal(
 							'### Features'
 						);
-						expect( changesAsArray[ 11 ] ).to.equal(
+						expect( changesAsArray[ 7 ] ).to.equal(
 							'* **autoformat**: It just works. ([commit](https://github.com/ckeditor/ckeditor5-package/c/bb))'
 						);
-						expect( changesAsArray[ 12 ] ).to.equal(
+						expect( changesAsArray[ 8 ] ).to.equal(
 							'* **engine**: The first an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/c/xx))'
 						);
-						expect( changesAsArray[ 13 ] ).to.equal(
+						expect( changesAsArray[ 9 ] ).to.equal(
 							'* The second an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/c/zz))'
 						);
-						expect( changesAsArray[ 14 ] ).to.equal(
+						expect( changesAsArray[ 10 ] ).to.equal(
 							'### Bug fixes'
 						);
-						expect( changesAsArray[ 15 ] ).to.equal(
+						expect( changesAsArray[ 11 ] ).to.equal(
 							'* **ui**: The first amazing bug fix. ([commit](https://github.com/ckeditor/ckeditor5-package/c/yy))'
 						);
-						expect( changesAsArray[ 16 ] ).to.equal(
+						expect( changesAsArray[ 12 ] ).to.equal(
 							'### Other changes'
 						);
-						expect( changesAsArray[ 17 ] ).to.equal(
+						expect( changesAsArray[ 13 ] ).to.equal(
 							'* Use the newest version of Node.js on CI. ([commit](https://github.com/ckeditor/ckeditor5-package/c/aa))'
 						);
 					} );

@@ -69,6 +69,8 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 
 		module: {
 			rules: [
+				loaders.getJavaScriptWithoutImportExtensions(),
+
 				loaders.getIconsLoader( { matchExtensionOnly: true } ),
 
 				loaders.getStylesLoader( {

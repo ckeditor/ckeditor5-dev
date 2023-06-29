@@ -75,6 +75,7 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 
 		module: {
 			rules: [
+				loaders.getJavaScriptWithoutImportExtensions(),
 				loaders.getIconsLoader( { matchExtensionOnly: true } ),
 				loaders.getStylesLoader( {
 					themePath: options.themePath,

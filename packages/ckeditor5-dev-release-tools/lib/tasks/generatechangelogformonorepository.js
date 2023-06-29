@@ -49,10 +49,6 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
  *
  * @param {String} [options.from] A commit or tag name that will be the first param of the range of commits to collect.
  *
- * @param {Boolean} [options.highlightsPlaceholder=false] Whether to add a note about release highlights.
- *
- * @param {Boolean} [options.collaborationFeatures=false] Whether to add a note about collaboration features.
- *
  * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
  *
  * @param {Array.<ExternalRepository>} [options.externalRepositories=[]] An array of object with additional repositories
@@ -386,10 +382,8 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 			commit: 'commit',
 			repoUrl: getRepositoryUrl( options.cwd ),
 			currentTag: 'v' + version,
-			previousTag: 'v' + pkgJson.version,
+			previousTag: options.from ? options.from : 'v' + pkgJson.version,
 			isPatch: semver.diff( version, pkgJson.version ) === 'patch',
-			highlightsPlaceholder: options.highlightsPlaceholder || false,
-			collaborationFeatures: options.collaborationFeatures || false,
 			skipCommitsLink: Boolean( options.skipLinks ),
 			skipCompareLink: Boolean( options.skipLinks )
 		};
@@ -503,6 +497,8 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 			} );
 		}
 
+		// When the `--from` flag is specified, we want to use its value as the "current version".
+		const currentVersion = options.from ? options.from.replace( /^v/, '' ) : null;
 		const newPackages = getNewPackages( dependencies );
 		const majorBreakingChangesPackages = getPackagesMatchedToScopesFromNotes( dependencies, 'MAJOR BREAKING CHANGES' );
 		const minorBreakingChangesPackages = getPackagesMatchedToScopesFromNotes( dependencies, 'MINOR BREAKING CHANGES' );
@@ -527,7 +523,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 			entries.push( '\nMajor releases (contain major breaking changes):\n' );
 
 			for ( const [ packageName, version ] of [ ...majorBreakingChangesPackages ].sort( sortByPackageName ) ) {
-				entries.push( formatChangelogEntry( packageName, version.next, version.current ) );
+				entries.push( formatChangelogEntry( packageName, version.next, currentVersion || version.current ) );
 			}
 		}
 
@@ -535,7 +531,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 			entries.push( '\nMinor releases (contain minor breaking changes):\n' );
 
 			for ( const [ packageName, version ] of [ ...minorBreakingChangesPackages ].sort( sortByPackageName ) ) {
-				entries.push( formatChangelogEntry( packageName, version.next, version.current ) );
+				entries.push( formatChangelogEntry( packageName, version.next, currentVersion || version.current ) );
 			}
 		}
 
@@ -543,7 +539,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 			entries.push( '\nReleases containing new features:\n' );
 
 			for ( const [ packageName, version ] of [ ...newFeaturesPackages ].sort( sortByPackageName ) ) {
-				entries.push( formatChangelogEntry( packageName, version.next, version.current ) );
+				entries.push( formatChangelogEntry( packageName, version.next, currentVersion || version.current ) );
 			}
 		}
 
@@ -551,7 +547,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 			entries.push( '\nOther releases:\n' );
 
 			for ( const [ packageName, version ] of [ ...dependencies ].sort( sortByPackageName ) ) {
-				entries.push( formatChangelogEntry( packageName, version.next, version.current ) );
+				entries.push( formatChangelogEntry( packageName, version.next, currentVersion || version.current ) );
 			}
 		}
 

@@ -44,6 +44,8 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 
 		module: {
 			rules: [
+				loaders.getJavaScriptWithoutImportExtensions(),
+
 				options.coverage ? loaders.getCoverageLoader( { files: options.files } ) : null,
 
 				loaders.getIconsLoader(),

@@ -63,6 +63,7 @@ async function checkDependenciesInPackage( packagePath, options ) {
 		// We need to add all values manually because if we modify it, the rest is being lost.
 		parsers: {
 			'**/*.css': filePath => parsePostCSS( filePath, onMissingCSSFile ),
+			'**/*.cjs': depCheck.parser.es6,
 			'**/*.js': depCheck.parser.es6,
 			'**/*.jsx': depCheck.parser.jsx,
 			'**/*.ts': depCheck.parser.typescript,

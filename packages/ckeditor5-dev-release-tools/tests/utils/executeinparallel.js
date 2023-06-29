@@ -61,6 +61,10 @@ describe( 'dev-release-tools/utils', () => {
 				start: sinon.stub(),
 				finish: sinon.stub(),
 				increase: sinon.stub()
+			},
+			abortController: {
+				registerAbortController: sinon.stub(),
+				deregisterAbortController: sinon.stub()
 			}
 		};
 
@@ -82,7 +86,8 @@ describe( 'dev-release-tools/utils', () => {
 			crypto: stubs.crypto,
 			'fs/promises': stubs.fs,
 			worker_threads: stubs.worker_threads,
-			glob: stubs.glob
+			glob: stubs.glob,
+			'./abortcontroller': stubs.abortController
 		} );
 	} );
 
@@ -212,6 +217,74 @@ describe( 'dev-release-tools/utils', () => {
 			expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.have.property( 'cwd', 'C:/Users/ckeditor' );
 
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
+
+			// Workers did not emit an error.
+			getExitCallback( firstWorker )( 0 );
+			getExitCallback( secondWorker )( 0 );
+
+			await promise;
+		} );
+
+		it( 'should work on normalized paths to packages', async () => {
+			stubs.glob.glob.resolves( [
+				'C:/Users/workspace/ckeditor/my-packages/package-01',
+				'C:/Users/workspace/ckeditor/my-packages/package-02',
+				'C:/Users/workspace/ckeditor/my-packages/package-03',
+				'C:/Users/workspace/ckeditor/my-packages/package-04'
+			] );
+
+			const promise = executeInParallel( defaultOptions );
+			await delay( 0 );
+
+			// By default the helper uses a half of available CPUs.
+			expect( WorkerMock.instances ).to.lengthOf( 2 );
+
+			const [ firstWorker, secondWorker ] = WorkerMock.instances;
+
+			expect( firstWorker.workerData.packages ).to.deep.equal( [
+				'C:/Users/workspace/ckeditor/my-packages/package-01',
+				'C:/Users/workspace/ckeditor/my-packages/package-03'
+			] );
+
+			expect( secondWorker.workerData.packages ).to.deep.equal( [
+				'C:/Users/workspace/ckeditor/my-packages/package-02',
+				'C:/Users/workspace/ckeditor/my-packages/package-04'
+			] );
+
+			// Workers did not emit an error.
+			getExitCallback( firstWorker )( 0 );
+			getExitCallback( secondWorker )( 0 );
+
+			await promise;
+		} );
+
+		it( 'should pass task options to all workers', async () => {
+			const taskOptions = {
+				property: 'Example of the property.',
+				some: {
+					deeply: {
+						nested: {
+							property: 'Example the deeply nested property.'
+						}
+					}
+				}
+			};
+
+			const options = Object.assign( {}, defaultOptions, { taskOptions } );
+
+			const promise = executeInParallel( options );
+			await delay( 0 );
+
+			// By default the helper uses a half of available CPUs.
+			expect( WorkerMock.instances ).to.lengthOf( 2 );
+
+			const [ firstWorker, secondWorker ] = WorkerMock.instances;
+
+			expect( firstWorker.workerData ).to.be.an( 'object' );
+			expect( firstWorker.workerData ).to.have.deep.property( 'taskOptions', taskOptions );
+
+			expect( secondWorker.workerData ).to.be.an( 'object' );
+			expect( secondWorker.workerData ).to.have.property( 'taskOptions', taskOptions );
 
 			// Workers did not emit an error.
 			getExitCallback( firstWorker )( 0 );
@@ -443,6 +516,8 @@ describe( 'dev-release-tools/utils', () => {
 			const promise = executeInParallel( defaultOptions );
 			await delay( 0 );
 
+			expect( stubs.abortController.registerAbortController.callCount ).to.equal( 0 );
+
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
 			abortController.abort( 'SIGINT' );
@@ -464,6 +539,47 @@ describe( 'dev-release-tools/utils', () => {
 			expect( signalEvent.secondCall.args[ 1 ] ).to.be.a( 'function' );
 			expect( signalEvent.secondCall.args[ 2 ] ).to.be.an( 'object' );
 			expect( signalEvent.secondCall.args[ 2 ] ).to.have.property( 'once', true );
+
+			expect( stubs.abortController.deregisterAbortController.callCount ).to.equal( 0 );
+		} );
+
+		it( 'should register and deregister default abort controller if signal is not provided', async () => {
+			const abortController = new AbortController();
+			const signalEvent = sinon.stub( abortController.signal, 'addEventListener' );
+
+			stubs.abortController.registerAbortController.returns( abortController );
+
+			const options = Object.assign( {}, defaultOptions );
+			delete options.signal;
+
+			const promise = executeInParallel( options );
+			await delay( 0 );
+
+			expect( stubs.abortController.registerAbortController.callCount ).to.equal( 1 );
+
+			const [ firstWorker, secondWorker ] = WorkerMock.instances;
+
+			abortController.abort( 'SIGINT' );
+
+			// Simulate the "Worker#terminate()" behavior.
+			getExitCallback( firstWorker )( 0 );
+			getExitCallback( secondWorker )( 0 );
+
+			await promise;
+
+			expect( signalEvent.callCount ).to.equal( 2 );
+
+			expect( signalEvent.firstCall.args[ 0 ] ).to.equal( 'abort' );
+			expect( signalEvent.firstCall.args[ 1 ] ).to.be.a( 'function' );
+			expect( signalEvent.firstCall.args[ 2 ] ).to.be.an( 'object' );
+			expect( signalEvent.firstCall.args[ 2 ] ).to.have.property( 'once', true );
+
+			expect( signalEvent.secondCall.args[ 0 ] ).to.equal( 'abort' );
+			expect( signalEvent.secondCall.args[ 1 ] ).to.be.a( 'function' );
+			expect( signalEvent.secondCall.args[ 2 ] ).to.be.an( 'object' );
+			expect( signalEvent.secondCall.args[ 2 ] ).to.have.property( 'once', true );
+
+			expect( stubs.abortController.deregisterAbortController.callCount ).to.equal( 1 );
 		} );
 
 		it( 'should update the progress when a package finished executing the callback', async () => {

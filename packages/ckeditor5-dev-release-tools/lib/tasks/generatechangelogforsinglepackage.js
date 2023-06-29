@@ -33,10 +33,6 @@ const SKIP_GENERATE_CHANGELOG = 'Typed "skip" as a new version. Aborting.';
  *
  * @param {String} [options.from] A commit or tag name that will be the first param of the range of commits to collect.
  *
- * @param {Boolean} [options.highlightsPlaceholder=false] Whether to add a note about release highlights.
- *
- * @param {Boolean} [options.collaborationFeatures=false] Whether to add a note about collaboration features.
- *
  * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
  *
  * @returns {Promise}
@@ -97,18 +93,14 @@ module.exports = async function generateChangelogForSinglePackage( options = {} 
 
 			logProcess( 'Generating the changelog...' );
 
-			const previousTag = commitOptions.from ? 'v' + pkgJson.version : null;
-
 			const writerContext = {
 				version,
 				commit: 'commit',
 				repoUrl: getRepositoryUrl(),
 				currentTag: 'v' + version,
-				previousTag,
+				previousTag: options.from ? options.from : 'v' + pkgJson.version,
 				isPatch: semver.diff( version, pkgJson.version ) === 'patch',
 				isInternalRelease,
-				highlightsPlaceholder: Boolean( options.highlightsPlaceholder ),
-				collaborationFeatures: Boolean( options.collaborationFeatures ),
 				skipCommitsLink: Boolean( options.skipLinks ),
 				skipCompareLink: Boolean( options.skipLinks )
 			};

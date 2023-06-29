@@ -22,6 +22,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		stubs = {
 			getDefinitionsFromFile: sinon.stub().returns( {} ),
 			loaders: {
+				getJavaScriptWithoutImportExtensions: sinon.stub().returns( {} ),
 				getIconsLoader: sinon.stub().returns( {} ),
 				getStylesLoader: sinon.stub().returns( {} ),
 				getTypeScriptLoader: sinon.stub().returns( {} ),
@@ -57,6 +58,8 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 
 		expect( webpackConfig.resolve.extensions ).to.deep.equal( [ '.ts', '.js', '.json' ] );
 		expect( webpackConfig.resolve.fallback.timers ).to.equal( false );
+
+		expect( stubs.loaders.getJavaScriptWithoutImportExtensions.calledOnce ).to.equal( true );
 
 		expect( stubs.loaders.getIconsLoader.calledOnce ).to.equal( true );
 
