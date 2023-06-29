@@ -16,7 +16,7 @@ const push = require( './tasks/push' );
 const publishPackages = require( './tasks/publishpackages' );
 const updateVersions = require( './tasks/updateversions' );
 const cleanUpPackages = require( './tasks/cleanuppackages' );
-const { getLastFromChangelog, getCurrent, getLastTagFromGit } = require( './utils/versions' );
+const { getLastFromChangelog, getLastNightly, getNextNightly, getCurrent, getLastTagFromGit } = require( './utils/versions' );
 const { getChangesForVersion, getChangelog, saveChangelog } = require( './utils/changelog' );
 const executeInParallel = require( './utils/executeinparallel' );
 const validateRepositoryToRelease = require( './utils/validaterepositorytorelease' );
@@ -35,6 +35,8 @@ module.exports = {
 	reassignNpmTags,
 	executeInParallel,
 	getLastFromChangelog,
+	getLastNightly,
+	getNextNightly,
 	getCurrent,
 	getLastTagFromGit,
 	getChangesForVersion,

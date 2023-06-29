@@ -109,6 +109,77 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 		} );
 
+		describe( 'getLastNightly()', () => {
+			let shExecStub;
+
+			beforeEach( () => {
+				shExecStub = sandbox.stub( tools, 'shExec' );
+				getPackageJsonStub.returns( { name: 'ckeditor5' } );
+			} );
+
+			it( 'asks npm for the last nightly version', () => {
+				shExecStub.resolves( '0.0.0-nightly-20230615.0' );
+
+				return version.getLastNightly()
+					.then( result => {
+						expect( shExecStub.callCount ).to.equal( 1 );
+						expect( shExecStub.firstCall.args[ 0 ] ).to.equal( 'npm view ckeditor5@nightly version' );
+
+						expect( result ).to.equal( '0.0.0-nightly-20230615.0' );
+					} );
+			} );
+
+			it( 'returns null if there is no nightly version for a package', () => {
+				shExecStub.rejects();
+
+				return version.getLastNightly()
+					.then( result => {
+						expect( result ).to.equal( null );
+					} );
+			} );
+		} );
+
+		describe( 'getNextNightly()', () => {
+			let clock;
+
+			beforeEach( () => {
+				clock = sinon.useFakeTimers( {
+					now: new Date( '2023-06-15 12:00:00' )
+				} );
+			} );
+
+			afterEach( () => {
+				clock.restore();
+			} );
+
+			it( 'return nightly version with id = 0 if nightly version was never published for the package yet', () => {
+				sandbox.stub( version, 'getLastNightly' ).resolves( null );
+
+				return version.getNextNightly()
+					.then( result => {
+						expect( result ).to.equal( '0.0.0-nightly-20230615.0' );
+					} );
+			} );
+
+			it( 'return nightly version with id = 0 if today no nightly version was published', () => {
+				sandbox.stub( version, 'getLastNightly' ).resolves( '0.0.0-nightly-20230614.7' );
+
+				return version.getNextNightly()
+					.then( result => {
+						expect( result ).to.equal( '0.0.0-nightly-20230615.0' );
+					} );
+			} );
+
+			it( 'return incremented nightly version id if today another nightly was published', () => {
+				sandbox.stub( version, 'getLastNightly' ).resolves( '0.0.0-nightly-20230615.10' );
+
+				return version.getNextNightly()
+					.then( result => {
+						expect( result ).to.equal( '0.0.0-nightly-20230615.11' );
+					} );
+			} );
+		} );
+
 		describe( 'getLastTagFromGit()', () => {
 			it( 'returns last tag if exists', () => {
 				sandbox.stub( tools, 'shExec' ).returns( 'v1.0.0' );

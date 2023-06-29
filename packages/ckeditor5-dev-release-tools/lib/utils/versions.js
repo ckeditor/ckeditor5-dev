@@ -30,6 +30,52 @@ const versions = {
 	},
 
 	/**
+	 * Returns the current (latest) nightly version in the format of "0.0.0-nightly-YYYYMMDD.X", where the "YYYYMMDD" is the date of the
+	 * last nightly release and the "X" is the sequential number starting from 0. If the package does not have any nightly releases yet,
+	 * `null` is returned.
+	 *
+	 * @params {String} [cwd=process.cwd()]
+	 * @returns {Promise.<String|null>}
+	 */
+	getLastNightly( cwd = process.cwd() ) {
+		const packageName = getPackageJson( cwd ).name;
+
+		return tools.shExec( `npm view ${ packageName }@nightly version`, { verbosity: 'silent', async: true } )
+			.catch( () => null );
+	},
+
+	/**
+	 * Returns the next available nightly version matching the following format: "0.0.0-nightly-YYYYMMDD.X",
+	 * where "YYYYMMDD" is the date of the latest nightly release,
+	 * and "X" is the following available sequential number starting from 0.
+	 *
+	 * @params {String} [cwd=process.cwd()]
+	 * @returns {Promise<String>}
+	 */
+	async getNextNightly( cwd = process.cwd() ) {
+		const today = new Date();
+		const year = today.getFullYear().toString();
+		const month = ( today.getMonth() + 1 ).toString().padStart( 2, '0' );
+		const day = today.getDate().toString().padStart( 2, '0' );
+
+		const nextNightlyVersion = `0.0.0-nightly-${ year }${ month }${ day }`;
+		const currentNightlyVersion = await versions.getLastNightly( cwd );
+
+		if ( !currentNightlyVersion ) {
+			return `${ nextNightlyVersion }.0`;
+		}
+
+		if ( !currentNightlyVersion.startsWith( nextNightlyVersion ) ) {
+			return `${ nextNightlyVersion }.0`;
+		}
+
+		const currentNightlyVersionId = currentNightlyVersion.split( '.' ).pop();
+		const nextNightlyVersionId = Number( currentNightlyVersionId ) + 1;
+
+		return `${ nextNightlyVersion }.${ nextNightlyVersionId }`;
+	},
+
+	/**
 	 * Returns a name of the last created tag.
 	 *
 	 * @returns {String|null}
