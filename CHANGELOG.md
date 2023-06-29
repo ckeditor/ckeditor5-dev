@@ -1,6 +1,37 @@
 Changelog
 =========
 
+## [38.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/v38.0.2...v38.0.3) (2023-06-29)
+
+### Other changes
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Added utils for fetching the last nightly version from npm (`getLastNightly()`) and generating the next nightly version (`getNextNightly()`). See [ckeditor/ckeditor5#14179](https://github.com/ckeditor/ckeditor5/issues/14179). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/771d6dc1fc1f6aaa0d4977a1709be5b8ff83b658))
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: A file extension is not required when resolving modules within a package marked as `type: module`. See [ckeditor/ckeditor5#13673](https://github.com/ckeditor/ckeditor5/issues/13673). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/efcf0094a16a2665eef9bdad63a2d1c2833c71d5))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v38.0.2 => v38.0.3
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v38.0.2 => v38.0.3
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v38.0.2 => v38.0.3
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v38.0.2 => v38.0.3
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v38.0.2 => v38.0.3
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v38.0.2 => v38.0.3
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v38.0.2 => v38.0.3
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v38.0.2 => v38.0.3
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v38.0.2 => v38.0.3
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v38.0.2 => v38.0.3
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v38.0.2 => v38.0.3
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v38.0.2 => v38.0.3
+</details>
+
+
 ## [38.0.2](https://github.com/ckeditor/ckeditor5-dev/compare/v38.0.1...v38.0.2) (2023-06-28)
 
 ### Bug fixes
@@ -264,36 +295,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v37.0.1 => v38.0.0-alpha.0
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v37.0.1 => v38.0.0-alpha.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v37.0.1 => v38.0.0-alpha.0
-</details>
-
-
-## [37.0.1](https://github.com/ckeditor/ckeditor5-dev/compare/v37.0.0...v37.0.1) (2023-04-13)
-
-### Bug fixes
-
-* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Moved the ck-debug-loader from the ckeditor5-dev-tests package to ckeditor5-dev-utils. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/befd2fb53b1b5eefed168b81d880f5e30141fc8a))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v37.0.0 => v37.0.1
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v37.0.0 => v37.0.1
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v37.0.0 => v37.0.1
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v37.0.0 => v37.0.1
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v37.0.0 => v37.0.1
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v37.0.0 => v37.0.1
-* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v37.0.0 => v37.0.1
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v37.0.0 => v37.0.1
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v37.0.0 => v37.0.1
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v37.0.0 => v37.0.1
-* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v37.0.0 => v37.0.1
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v37.0.0 => v37.0.1
 </details>
 
 ---
