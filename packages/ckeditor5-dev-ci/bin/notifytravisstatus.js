@@ -7,24 +7,26 @@
 
 /* eslint-env node */
 
+const allowedBranches = require( '../lib/data/allowedBranches.json' );
+const formatMessage = require( '../lib/formatMessage' );
+const printLog = require( '../lib/printLog' );
 const slackNotify = require( 'slack-notify' );
 
-const checkIfShouldNotify = require( '../lib/checkIfShouldNotify' );
-const formatMessage = require( '../lib/formatMessage' );
-const getCommitDetails = require( '../lib/getCommitDetails' );
+const ALLOWED_EVENTS = [
+	'push',
+	'cron',
+	'api'
+];
 
 // This script assumes that is being executed on Travis CI.
 // Described environment variables should be added by the integrator.
 
 const {
 	/**
-	 * @enum {Number} POSIX timestamp created when the script has begun the job.
+	 * @enum {Number|String} POSIX timestamps created when the script has begun and ended the job.
+	 * Timestamps should be in seconds instead of milliseconds.
 	 */
 	START_TIME,
-
-	/**
-	 * @enum {Number} POSIX timestamp created when the script has finished the job.
-	 */
 	END_TIME,
 
 	/**
@@ -34,13 +36,13 @@ const {
 	GITHUB_TOKEN,
 
 	/**
-	 * @enum {String} URL where the notification should be sent.
+	 * @enum {String} Required. Webhook URL of the Slack channel where the notification should be sent.
 	 */
 	SLACK_WEBHOOK_URL,
 
 	/**
 	 * @enum {String} Optional. If defined, the script will use the URL as the commit URL.
-	 * Otherwise, URL will be constructed using commit repository data and its hash.
+	 * Otherwise, URL will be constructed using current repository data.
 	 */
 	SLACK_NOTIFY_COMMIT_URL,
 
@@ -63,33 +65,45 @@ const {
 notifyTravisStatus();
 
 async function notifyTravisStatus() {
-	checkIfShouldNotify( {
-		branch: TRAVIS_BRANCH,
-		event: TRAVIS_EVENT_TYPE,
-		exitCode: TRAVIS_TEST_RESULT
-	} );
+	// Send a notification only for main branches...
+	if ( !allowedBranches.includes( TRAVIS_BRANCH ) ) {
+		printLog( `Aborting due to an invalid branch (${ TRAVIS_BRANCH }).` );
 
-	const commitUrl = SLACK_NOTIFY_COMMIT_URL || `https://github.com/${ TRAVIS_REPO_SLUG }/commit/${ TRAVIS_COMMIT }`;
-	const { githubAccount, commitAuthor, commitMessage } = await getCommitDetails( commitUrl, GITHUB_TOKEN );
+		process.exit();
+	}
+
+	// ...and an event that triggered the build is correct...
+	if ( !ALLOWED_EVENTS.includes( TRAVIS_EVENT_TYPE ) ) {
+		printLog( `Aborting due to an invalid event type (${ TRAVIS_EVENT_TYPE }).` );
+
+		process.exit();
+	}
+
+	// ...and for builds that failed.
+	if ( TRAVIS_TEST_RESULT == 0 ) {
+		printLog( 'The build did not fail. The notification will not be sent.' );
+
+		process.exit();
+	}
+
 	const [ repositoryOwner, repositoryName ] = TRAVIS_REPO_SLUG.split( '/' );
 
-	const message = formatMessage( {
+	const message = await formatMessage( {
 		slackMessageUsername: 'Travis CI',
-		githubAccount,
-		commitAuthor,
-		shouldHideAuthor: SLACK_NOTIFY_HIDE_AUTHOR === 'true',
 		iconUrl: 'https://a.slack-edge.com/66f9/img/services/travis_36.png',
 		repositoryOwner,
 		repositoryName,
-		commitBranch: TRAVIS_BRANCH,
-		commitUrl,
-		commitHash: TRAVIS_COMMIT,
+		branch: TRAVIS_BRANCH,
 		jobUrl: TRAVIS_JOB_WEB_URL,
 		jobId: TRAVIS_JOB_NUMBER,
-		endTime: END_TIME,
-		startTime: START_TIME,
-		commitMessage
+		githubToken: GITHUB_TOKEN,
+		triggeringCommitUrl: SLACK_NOTIFY_COMMIT_URL || `https://github.com/${ TRAVIS_REPO_SLUG }/commit/${ TRAVIS_COMMIT }`,
+		startTime: Number( START_TIME ),
+		endTime: Number( END_TIME ),
+		shouldHideAuthor: SLACK_NOTIFY_HIDE_AUTHOR === 'true'
 	} );
+
+	console.log( JSON.stringify( message ) );
 
 	return slackNotify( SLACK_WEBHOOK_URL )
 		.send( message )

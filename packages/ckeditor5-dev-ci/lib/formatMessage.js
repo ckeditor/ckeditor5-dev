@@ -7,44 +7,57 @@
 
 'use strict';
 
-const members = require( './members.json' );
-const bots = require( './bots.json' );
+const fetch = require( 'node-fetch' );
+
+const bots = require( './data/bots.json' );
+const members = require( './data/members.json' );
 
 const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
 
-module.exports = function formatMessage( options ) {
-	const repoMatch = options.commitUrl.match( REPOSITORY_REGEXP );
+/**
+ * @param {String} slackMessageUsername
+ * @param {String} iconUrl
+ * @param {String} repositoryOwner
+ * @param {String} repositoryName
+ * @param {String} branch
+ * @param {String} jobUrl
+ * @param {String} jobId
+ * @param {String} githubToken
+ * @param {String} triggeringCommitUrl
+ * @param {Number} startTime
+ * @param {Number} endTime
+ * @param {Boolean} shouldHideAuthor
+ */
+module.exports = async function formatMessage( options ) {
+	const commitDetails = await getCommitDetails( options.triggeringCommitUrl, options.githubToken );
 	const repoUrl = `https://github.com/${ options.repositoryOwner }/${ options.repositoryName }`;
 
 	return {
 		username: options.slackMessageUsername,
-		text: getNotifierMessage( options ),
 		icon_url: options.iconUrl,
 		unfurl_links: 1,
+		text: getNotifierMessage( { ...options, ...commitDetails } ),
 		attachments: [ {
 			color: 'danger',
 			fields: [ {
 				title: 'Repository (branch)',
-				value: [
-					`<${ repoUrl }|${ options.repositoryName }>`,
-					`(<${ repoUrl }/tree/${ options.commitBranch }|${ options.commitBranch }>)`
-				].join( ' ' ),
-				short: true
-			}, {
-				title: 'Commit',
-				value: `<${ options.commitUrl }|${ options.commitHash.substring( 0, 7 ) }>`,
+				value: `<${ repoUrl }|${ options.repositoryName }> (<${ repoUrl }/tree/${ options.branch }|${ options.branch }>)`,
 				short: true
 			}, {
 				title: 'Build number',
 				value: `<${ options.jobUrl }|#${ options.jobId }>`,
 				short: true
 			}, {
+				title: 'Commit',
+				value: `<${ options.triggeringCommitUrl }|${ commitDetails.hash.substring( 0, 7 ) }>`,
+				short: true
+			}, {
 				title: 'Build time',
-				value: getExecutionTime( options.endTime, options.startTime ),
+				value: getExecutionTime( options.startTime, options.endTime ),
 				short: true
 			}, {
 				title: 'Commit message',
-				value: getFormattedMessage( options.commitMessage, repoMatch[ 1 ], repoMatch[ 2 ] ),
+				value: getFormattedMessage( commitDetails.commitMessage, options.triggeringCommitUrl ),
 				short: false
 			} ]
 		} ]
@@ -81,13 +94,18 @@ function getNotifierMessage( options ) {
 
 /**
  * Returns string representing amount of time passed between two timestamps.
+ * Timestamps should be in seconds instead of milliseconds.
  *
- * @param {Number} endTime
  * @param {Number} startTime
+ * @param {Number} endTime
  * @returns {String}
  */
-function getExecutionTime( endTime, startTime ) {
-	const totalMs = ( Number( endTime ) - Number( startTime ) ) * 1000;
+function getExecutionTime( startTime, endTime ) {
+	if ( !startTime || !endTime ) {
+		return 'Unavailable.';
+	}
+
+	const totalMs = ( endTime - startTime ) * 1000;
 	const date = new Date( totalMs );
 	const hours = date.getUTCHours();
 	const minutes = date.getUTCMinutes();
@@ -107,23 +125,69 @@ function getExecutionTime( endTime, startTime ) {
 		stringParts.push( `${ seconds } sec.` );
 	}
 
+	if ( !stringParts.length ) {
+		return '0 sec.';
+	}
+
 	return stringParts.join( ' ' );
 }
 
 /**
  * Replaces `#Id` and `Repo/Owner#Id` with URls to Github Issues.
  *
- * @param {String} message
- * @param {String} repoOwner
- * @param {String} repoName
+ * @param {String} commitMessage
+ * @param {String} triggeringCommitUrl
  * @returns {string}
  */
-function getFormattedMessage( message, repoOwner, repoName ) {
-	return message
+function getFormattedMessage( commitMessage, triggeringCommitUrl ) {
+	if ( !commitMessage ) {
+		return 'Unavailable';
+	}
+
+	const [ , repoOwner, repoName ] = triggeringCommitUrl.match( REPOSITORY_REGEXP );
+
+	return commitMessage
 		.replace( / #(\d+)/g, ( _, issueId ) => {
 			return ` <https://github.com/${ repoOwner }/${ repoName }/issues/${ issueId }|#${ issueId }>`;
 		} )
 		.replace( /([\w-]+\/[\w-]+)#(\d+)/g, ( _, repoSlug, issueId ) => {
 			return `<https://github.com/${ repoSlug }/issues/${ issueId }|${ repoSlug }#${ issueId }>`;
 		} );
+}
+
+/**
+ * Returns a promise that resolves the commit details (author and message) based on the specified GitHub URL.
+ *
+ * @param {String} triggeringCommitUrl The URL to the commit on GitHub.
+ * @param {String} githubToken Github token used for authorization a request,
+ * @returns {Promise.<Object>}
+ */
+function getCommitDetails( triggeringCommitUrl, githubToken ) {
+	const apiGithubUrlCommit = getGithubApiUrl( triggeringCommitUrl );
+	const options = {
+		method: 'GET',
+		credentials: 'include',
+		headers: {
+			authorization: `token ${ githubToken }`
+		}
+	};
+
+	return fetch( apiGithubUrlCommit, options )
+		.then( response => response.json() )
+		.then( json => ( {
+			githubAccount: json.author ? json.author.login : null,
+			commitAuthor: json.commit.author.name,
+			commitMessage: json.commit.message,
+			hash: json.sha
+		} ) );
+}
+
+/**
+ * Returns a URL to GitHub API which returns details of the commit that caused the CI to fail its job.
+ *
+ * @param {String} triggeringCommitUrl The URL to the commit on GitHub.
+ * @returns {String}
+ */
+function getGithubApiUrl( triggeringCommitUrl ) {
+	return triggeringCommitUrl.replace( 'github.com/', 'api.github.com/repos/' ).replace( '/commit/', '/commits/' );
 }

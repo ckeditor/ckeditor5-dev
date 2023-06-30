@@ -3,10 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const notifyTravisStatus = require( './notifytravisstatus' );
-
-module.exports = {
-	notifyTravisStatus
+/**
+ * @param {String} message
+ */
+module.exports = function printLog( message ) {
+	console.log( '[Slack Notification]', message );
 };
