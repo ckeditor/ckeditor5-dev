@@ -22,7 +22,21 @@ module.exports = async function commitAndTag( { version, files, cwd = process.cw
 	const normalizedCwd = toUnix( cwd );
 	const filePathsToAdd = await glob( files, { cwd: normalizedCwd, absolute: true, nodir: true } );
 
-	await tools.shExec( `git add ${ filePathsToAdd.join( ' ' ) }`, { cwd: normalizedCwd, async: true, verbosity: 'silent' } );
-	await tools.shExec( `git commit --message "Release: v${ version }."`, { cwd: normalizedCwd, async: true, verbosity: 'silent' } );
-	await tools.shExec( `git tag v${ version }`, { cwd: normalizedCwd, async: true, verbosity: 'silent' } );
+	if ( !filePathsToAdd.length ) {
+		return;
+	}
+
+	const shExecOptions = {
+		cwd: normalizedCwd,
+		async: true,
+		verbosity: 'silent'
+	};
+
+	// Run the command separately for each file to avoid exceeding the maximum command length on Windows, which is 32767 characters.
+	for ( const filePath of filePathsToAdd ) {
+		await tools.shExec( `git add ${ filePath }`, shExecOptions );
+	}
+
+	await tools.shExec( `git commit --message "Release: v${ version }." --no-verify`, shExecOptions );
+	await tools.shExec( `git tag v${ version }`, shExecOptions );
 };
