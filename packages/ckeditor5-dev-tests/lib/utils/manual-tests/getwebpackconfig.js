@@ -64,13 +64,14 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 			fallback: {
 				'timers': false
 			},
-			extensions: [ '.ts', '.js', '.json' ]
+			extensions: [ '.ts', '.js', '.json' ],
+			extensionAlias: {
+				'.js': [ '.js', '.ts' ]
+			}
 		},
 
 		module: {
 			rules: [
-				loaders.getJavaScriptWithoutImportExtensions(),
-
 				loaders.getIconsLoader( { matchExtensionOnly: true } ),
 
 				loaders.getStylesLoader( {
