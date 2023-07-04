@@ -56,7 +56,7 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 			new webpack.DefinePlugin( definitions ),
 			new webpack.ProvidePlugin( {
 				Buffer: [ 'buffer', 'Buffer' ],
-				process: 'process/browser'
+				process: 'process/browser.js'
 			} )
 		],
 
