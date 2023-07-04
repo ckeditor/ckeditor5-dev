@@ -13,7 +13,7 @@
     "inheritance"
   ],
   "dependencies": {
-    "fs-extra": "^8.1.0",
+    "fs-extra": "^9.1.0",
     "lodash": "^4.17.15",
     "jsdoc": "ckeditor/jsdoc#fixed-trailing-comment-doclets",
     "upath": "^2.0.1"
