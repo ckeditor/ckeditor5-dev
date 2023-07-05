@@ -7,10 +7,13 @@
 
 /* eslint-env node */
 
-const allowedBranches = require( '../lib/data/allowedBranches.json' );
-const formatMessage = require( '../lib/formatMessage' );
-const printLog = require( '../lib/printLog' );
+const formatMessage = require( '../lib/format-message' );
 const slackNotify = require( 'slack-notify' );
+
+const ALLOWED_BRANCHES = [
+	'stable',
+	'master'
+];
 
 const ALLOWED_EVENTS = [
 	'push',
@@ -23,31 +26,31 @@ const ALLOWED_EVENTS = [
 
 const {
 	/**
-	 * @enum {Number|String} POSIX timestamps created when the script has begun and ended the job.
+	 * POSIX timestamps created when the script has begun and ended the job.
 	 * Timestamps should be in seconds instead of milliseconds.
 	 */
 	START_TIME,
 	END_TIME,
 
 	/**
-	 * @enum {String} Token to a Github account with the scope: "repos". It is required for obtaining an author of
+	 * Token to a Github account with the scope: "repos". It is required for obtaining an author of
 	 * the commit if the build failed. The repository can be private and we can't use the public API.
 	 */
 	GITHUB_TOKEN,
 
 	/**
-	 * @enum {String} Required. Webhook URL of the Slack channel where the notification should be sent.
+	 * Required. Webhook URL of the Slack channel where the notification should be sent.
 	 */
 	SLACK_WEBHOOK_URL,
 
 	/**
-	 * @enum {String} Optional. If defined, the script will use the URL as the commit URL.
+	 * Optional. If defined, the script will use the URL as the commit URL.
 	 * Otherwise, URL will be constructed using current repository data.
 	 */
 	SLACK_NOTIFY_COMMIT_URL,
 
 	/**
-	 * @enum {String} Optional. If set to "true", commit author will be hidden.
+	 * Optional. If set to "true", commit author will be hidden.
 	 * See: https://github.com/ckeditor/ckeditor5/issues/9252.
 	 */
 	SLACK_NOTIFY_HIDE_AUTHOR,
@@ -66,22 +69,22 @@ notifyTravisStatus();
 
 async function notifyTravisStatus() {
 	// Send a notification only for main branches...
-	if ( !allowedBranches.includes( TRAVIS_BRANCH ) ) {
-		printLog( `Aborting due to an invalid branch (${ TRAVIS_BRANCH }).` );
+	if ( !ALLOWED_BRANCHES.includes( TRAVIS_BRANCH ) ) {
+		console.log( `Aborting slack notification due to an invalid branch (${ TRAVIS_BRANCH }).` );
 
 		process.exit();
 	}
 
 	// ...and an event that triggered the build is correct...
 	if ( !ALLOWED_EVENTS.includes( TRAVIS_EVENT_TYPE ) ) {
-		printLog( `Aborting due to an invalid event type (${ TRAVIS_EVENT_TYPE }).` );
+		console.log( `Aborting slack notification due to an invalid event type (${ TRAVIS_EVENT_TYPE }).` );
 
 		process.exit();
 	}
 
 	// ...and for builds that failed.
 	if ( TRAVIS_TEST_RESULT == 0 ) {
-		printLog( 'The build did not fail. The notification will not be sent.' );
+		console.log( 'The build did not fail. The notification will not be sent.' );
 
 		process.exit();
 	}

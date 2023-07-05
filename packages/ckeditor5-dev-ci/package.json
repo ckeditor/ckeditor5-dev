@@ -16,8 +16,8 @@
     "lib"
   ],
   "bin": {
-    "ckeditor5-dev-ci-notify-travis-status": "bin/notifytravisstatus.js",
-    "ckeditor5-dev-ci-notify-circle-status": "bin/notifycirclestatus.js"
+    "ckeditor5-dev-ci-notify-travis-status": "bin/notify-travis-status.js",
+    "ckeditor5-dev-ci-notify-circle-status": "bin/notify-circle-status.js"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",

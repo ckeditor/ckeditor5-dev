@@ -7,15 +7,8 @@
 
 /* eslint-env node */
 
-const allowedBranches = require( '../lib/data/allowedBranches.json' );
-const formatMessage = require( '../lib/formatMessage' );
-const printLog = require( '../lib/printLog' );
+const formatMessage = require( '../lib/format-message' );
 const slackNotify = require( 'slack-notify' );
-
-const ALLOWED_EVENTS = [
-	'api',
-	'webhook'
-];
 
 // This script assumes that is being executed on Circle CI.
 // Step it is used on should have set value: `when: on_fail`, since it does not
@@ -24,36 +17,30 @@ const ALLOWED_EVENTS = [
 
 const {
 	/**
-	 * @enum {String} Token to a Github account with the scope: "repos". It is required for obtaining an author of
+	 * Required. Token to a Github account with the scope: "repos". It is required for obtaining an author of
 	 * the commit if the build failed. The repository can be private and we can't use the public API.
 	 */
 	CKE5_GITHUB_TOKEN,
 
 	/**
-	 * @enum {String} Required.
+	 * Required. CircleCI API token used for obtaining data about the build from API.
 	 */
 	CKE5_CIRCLE_TOKEN,
 
 	/**
-	 * @enum {String} Required. Webhook URL of the Slack channel where the notification should be sent.
+	 * Required. Webhook URL of the Slack channel where the notification should be sent.
 	 */
 	CKE5_SLACK_WEBHOOK_URL,
 
 	/**
-	 * @enum {String} Required. Value of `pipeline.trigger_source`.
-	 * See: https://circleci.com/docs/variables/#pipeline-values.
-	 */
-	CKE5_TRIGGER_SOURCE,
-
-	/**
-	 * @enum {String} Optional. If both are defined, the script will use the URL as the commit URL.
+	 * Optional. If both are defined, the script will use the URL as the commit URL.
 	 * Otherwise, URL will be constructed using current repository data.
 	 */
 	CKE5_TRIGGERING_REPOSITORY_SLUG,
 	CKE5_TRIGGERING_COMMIT_HASH,
 
 	/**
-	 * @enum {String} Optional. If set to "true", commit author will be hidden.
+	 * Optional. If set to "true", commit author will be hidden.
 	 * See: https://github.com/ckeditor/ckeditor5/issues/9252.
 	 */
 	CKE5_SLACK_NOTIFY_HIDE_AUTHOR,
@@ -70,18 +57,6 @@ const {
 notifyCircleStatus();
 
 async function notifyCircleStatus() {
-	if ( !allowedBranches.includes( CIRCLE_BRANCH ) ) {
-		printLog( `Aborting due to an invalid branch (${ CIRCLE_BRANCH }).` );
-
-		process.exit();
-	}
-
-	if ( !ALLOWED_EVENTS.includes( CKE5_TRIGGER_SOURCE ) ) {
-		printLog( `Aborting due to an invalid event type (${ CKE5_TRIGGER_SOURCE }).` );
-
-		process.exit();
-	}
-
 	if ( !CKE5_GITHUB_TOKEN ) {
 		throw new Error( 'Missing environment variable: CKE5_GITHUB_TOKEN' );
 	}
