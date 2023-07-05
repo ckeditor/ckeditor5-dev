@@ -106,8 +106,6 @@ async function notifyTravisStatus() {
 		shouldHideAuthor: SLACK_NOTIFY_HIDE_AUTHOR === 'true'
 	} );
 
-	console.log( JSON.stringify( message ) );
-
 	return slackNotify( SLACK_WEBHOOK_URL )
 		.send( message )
 		.catch( err => console.log( 'API error occurred:', err ) );
