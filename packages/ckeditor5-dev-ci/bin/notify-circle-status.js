@@ -36,8 +36,8 @@ const {
 	 * Optional. If both are defined, the script will use the URL as the commit URL.
 	 * Otherwise, URL will be constructed using current repository data.
 	 */
-	CKE5_TRIGGERING_REPOSITORY_SLUG,
-	CKE5_TRIGGERING_COMMIT_HASH,
+	CKE5_TRIGGER_REPOSITORY_SLUG,
+	CKE5_TRIGGER_COMMIT_HASH,
 
 	/**
 	 * Optional. If set to "true", commit author will be hidden.
@@ -108,9 +108,9 @@ async function getJobData() {
 function getTriggeringCommitUrl() {
 	let repoSlug, hash;
 
-	if ( CKE5_TRIGGERING_REPOSITORY_SLUG && CKE5_TRIGGERING_COMMIT_HASH ) {
-		repoSlug = CKE5_TRIGGERING_REPOSITORY_SLUG;
-		hash = CKE5_TRIGGERING_COMMIT_HASH;
+	if ( CKE5_TRIGGER_REPOSITORY_SLUG && CKE5_TRIGGER_COMMIT_HASH ) {
+		repoSlug = CKE5_TRIGGER_REPOSITORY_SLUG;
+		hash = CKE5_TRIGGER_COMMIT_HASH;
 	} else {
 		repoSlug = [ CIRCLE_PROJECT_USERNAME, CIRCLE_PROJECT_REPONAME ].join( '/' );
 		hash = CIRCLE_SHA1;
