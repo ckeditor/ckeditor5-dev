@@ -17,6 +17,11 @@ const slackNotify = require( 'slack-notify' );
 
 const {
 	/**
+	 * Required. Value of Circle's `pipeline.number` variable.
+	 */
+	CKE5_PIPELINE_NUMBER,
+
+	/**
 	 * Required. Token to a Github account with the scope: "repos". It is required for obtaining an author of
 	 * the commit if the build failed. The repository can be private and we can't use the public API.
 	 */
@@ -48,10 +53,10 @@ const {
 	// Variables that are available by default in Circle environment.
 	CIRCLE_BRANCH,
 	CIRCLE_BUILD_NUM,
-	CIRCLE_BUILD_URL,
 	CIRCLE_PROJECT_REPONAME,
 	CIRCLE_PROJECT_USERNAME,
-	CIRCLE_SHA1
+	CIRCLE_SHA1,
+	CIRCLE_WORKFLOW_ID
 } = process.env;
 
 notifyCircleStatus();
@@ -66,6 +71,14 @@ async function notifyCircleStatus() {
 	}
 
 	const jobData = await getJobData();
+	const buildUrl = [
+		'https://app.circleci.com/pipelines/github',
+		CIRCLE_PROJECT_USERNAME,
+		CIRCLE_PROJECT_REPONAME,
+		CKE5_PIPELINE_NUMBER,
+		'workflows',
+		CIRCLE_WORKFLOW_ID
+	].join( '/' );
 
 	const message = await formatMessage( {
 		slackMessageUsername: 'Circle CI',
@@ -73,8 +86,9 @@ async function notifyCircleStatus() {
 		repositoryOwner: CIRCLE_PROJECT_USERNAME,
 		repositoryName: CIRCLE_PROJECT_REPONAME,
 		branch: CIRCLE_BRANCH,
-		jobUrl: CIRCLE_BUILD_URL,
-		jobId: CIRCLE_BUILD_NUM,
+		buildTitle: 'Workflow ID',
+		buildUrl,
+		buildId: CIRCLE_WORKFLOW_ID.split( '-' )[ 0 ] + '-...',
 		githubToken: CKE5_GITHUB_TOKEN,
 		triggeringCommitUrl: getTriggeringCommitUrl(),
 		startTime: Math.ceil( ( new Date( jobData.started_at ) ).getTime() / 1000 ),
