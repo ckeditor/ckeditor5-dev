@@ -20,8 +20,9 @@ const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
  * @param {String} repositoryOwner
  * @param {String} repositoryName
  * @param {String} branch
- * @param {String} jobUrl
- * @param {String} jobId
+ * @param {String} buildTitle
+ * @param {String} buildUrl
+ * @param {String} buildId
  * @param {String} githubToken
  * @param {String} triggeringCommitUrl
  * @param {Number} startTime
@@ -44,8 +45,8 @@ module.exports = async function formatMessage( options ) {
 				value: `<${ repoUrl }|${ options.repositoryName }> (<${ repoUrl }/tree/${ options.branch }|${ options.branch }>)`,
 				short: true
 			}, {
-				title: 'Build number',
-				value: `<${ options.jobUrl }|#${ options.jobId }>`,
+				title: options.buildTitle,
+				value: `<${ options.buildUrl }|${ options.buildId }>`,
 				short: true
 			}, {
 				title: 'Commit',
