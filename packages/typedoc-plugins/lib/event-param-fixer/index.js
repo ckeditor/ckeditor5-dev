@@ -42,6 +42,8 @@ function onEventEnd( context ) {
 		// its children) as a type for the parameter, but it is enough to set just the references to this class.
 		const eventInfoParameter = new TypeParameterReflection( 'eventInfo', reflection, undefined );
 
+		eventInfoParameter.type = context.converter.convertType( context.withScope( eventInfoParameter ) );
+
 		eventInfoParameter.comment = new Comment( [
 			{
 				kind: 'text',
