@@ -29,8 +29,9 @@ module.exports = async function build( config ) {
 	typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
 	typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
 
-	typeDoc.bootstrap( {
+	await typeDoc.bootstrapWithPlugins( {
 		tsconfig: config.tsconfig,
+		useTsLinkResolution: false,
 		excludeExternals: true,
 		entryPoints: files,
 		logLevel: 'Warn',

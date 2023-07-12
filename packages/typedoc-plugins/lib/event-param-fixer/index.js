@@ -5,7 +5,7 @@
 
 'use strict';
 
-const { Converter, ReflectionKind, TypeParameterReflection, ReferenceType, Comment } = require( 'typedoc' );
+const { Converter, ReflectionKind, TypeParameterReflection, Comment } = require( 'typedoc' );
 
 /**
  * The `typedoc-plugin-event-param-fixer` creates the `eventInfo` parameter that is of type `EventInfo` class, and then inserts it as the
@@ -27,9 +27,6 @@ function onEventEnd( context ) {
 		return;
 	}
 
-	// Get the reference to the `EventInfo` class. The reference is constant, it is the same in the whole project, so let's create it once.
-	const eventInfoClassReference = ReferenceType.createResolvedReference( 'EventInfo', eventInfoClass, context.project );
-
 	// Get all resolved reflections that could be an event.
 	const eventKind = ReflectionKind.ObjectLiteral | ReflectionKind.TypeAlias;
 	const reflections = context.project.getReflectionsByKind( eventKind );
@@ -43,7 +40,7 @@ function onEventEnd( context ) {
 
 		// Set the `EventInfo` class reference as the type of the `eventInfo` parameter. It is not needed to set the whole class (including
 		// its children) as a type for the parameter, but it is enough to set just the references to this class.
-		const eventInfoParameter = new TypeParameterReflection( 'eventInfo', eventInfoClassReference, undefined, reflection );
+		const eventInfoParameter = new TypeParameterReflection( 'eventInfo', reflection, undefined );
 
 		eventInfoParameter.comment = new Comment( [
 			{

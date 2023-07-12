@@ -90,7 +90,7 @@ function onEventEnd( context ) {
 					return true;
 				} )
 				.map( childTag => {
-					const typeParameter = new TypeParameterReflection( childTag.name.escapedText, undefined, undefined, errorDeclaration );
+					const typeParameter = new TypeParameterReflection( childTag.name.escapedText, errorDeclaration, undefined );
 
 					typeParameter.type = context.converter.convertType( context.withScope( typeParameter ) );
 					typeParameter.comment = new Comment( getCommentDisplayPart( childTag.comment ) );

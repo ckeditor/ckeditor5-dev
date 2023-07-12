@@ -5,6 +5,8 @@
 
 'use strict';
 
+const { ReflectionKind } = require( 'typedoc' );
+
 /**
  * Common utils for TypeDoc validators.
  */
@@ -87,22 +89,23 @@ function toAbsoluteIdentifier( reflection, identifier ) {
 function getLongNameParts( reflection ) {
 	// Kinds of reflection that affect the longname format.
 	const kinds = [
-		'Module',
-		'Class',
-		'Function',
-		'Interface',
-		'Type alias',
-		'Accessor',
-		'Variable',
-		'Method',
-		'Property',
-		'Event'
+		ReflectionKind.Module,
+		ReflectionKind.Class,
+		ReflectionKind.Function,
+		ReflectionKind.Interface,
+		ReflectionKind.TypeAlias,
+		ReflectionKind.Accessor,
+		ReflectionKind.Variable,
+		ReflectionKind.Method,
+		ReflectionKind.Property
+		// TODO: Our custom Event reflection.
+		// 'Event'
 	];
 
 	const parts = [];
 
 	while ( reflection ) {
-		if ( kinds.includes( reflection.kindString ) ) {
+		if ( kinds.includes( reflection.kind ) ) {
 			parts.unshift( reflection.name );
 		}
 

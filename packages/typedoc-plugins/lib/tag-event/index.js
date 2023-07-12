@@ -112,7 +112,7 @@ function isClassOrInterface( reflection ) {
 		return false;
 	}
 
-	if ( reflection.kindString !== 'Class' && reflection.kindString !== 'Interface' ) {
+	if ( reflection.kind !== ReflectionKind.Class && reflection.kind !== ReflectionKind.Interface ) {
 		return false;
 	}
 
@@ -159,7 +159,7 @@ function createNewEventReflection( ownerContext, reflection, eventName ) {
 			argName = '<anonymous>';
 		}
 
-		const param = new TypeParameterReflection( argName, undefined, undefined, eventReflection );
+		const param = new TypeParameterReflection( argName, eventReflection, undefined );
 
 		param.type = arg;
 

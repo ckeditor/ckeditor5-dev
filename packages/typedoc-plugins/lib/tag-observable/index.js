@@ -43,7 +43,7 @@ function onEventEnd( context ) {
 		 *   `module:core/editor/editor~Editor`
 		 */
 		const propertyName = reflection.name;
-		const classReflection = reflection.kindString === 'Property' ? reflection.parent : reflection.parent.parent;
+		const classReflection = reflection.kind === ReflectionKind.Property ? reflection.parent : reflection.parent.parent;
 
 		// An observable property fires two events - `change` and `set` - so two event reflections have to be inserted as a class child.
 		for ( const eventName of [ 'change', 'set' ] ) {
@@ -114,7 +114,7 @@ function onEventEnd( context ) {
  * @returns {require('typedoc').Reflection}
  */
 function typeParameterFactory( context, options ) {
-	const typeParameter = new TypeParameterReflection( options.name, undefined, undefined, options.parent );
+	const typeParameter = new TypeParameterReflection( options.name, options.parent, undefined );
 
 	if ( options.type ) {
 		typeParameter.type = options.type;
