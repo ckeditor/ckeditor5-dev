@@ -1,10 +1,10 @@
 {
   "name": "ckeditor5-dev",
-  "version": "38.1.1",
+  "version": "38.1.2",
   "private": true,
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-ci": "^38.1.1",
-    "@ckeditor/ckeditor5-dev-release-tools": "^38.1.1",
+    "@ckeditor/ckeditor5-dev-ci": "^38.1.2",
+    "@ckeditor/ckeditor5-dev-release-tools": "^38.1.2",
     "eslint": "^7.0.0",
     "eslint-config-ckeditor5": "^5.0.1",
     "glob": "^10.2.5",
