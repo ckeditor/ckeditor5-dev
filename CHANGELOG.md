@@ -1,6 +1,36 @@
 Changelog
 =========
 
+## [38.1.2](https://github.com/ckeditor/ckeditor5-dev/compare/v38.1.1...v38.1.2) (2023-07-13)
+
+### Bug fixes
+
+* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Remove whitespaces from environment variables to create a proper link on the Slack message. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/bfe51f0e9f3fe024cab77627700e98790b25da31))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v38.1.1 => v38.1.2
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v38.1.1 => v38.1.2
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v38.1.1 => v38.1.2
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v38.1.1 => v38.1.2
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v38.1.1 => v38.1.2
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v38.1.1 => v38.1.2
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v38.1.1 => v38.1.2
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v38.1.1 => v38.1.2
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v38.1.1 => v38.1.2
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v38.1.1 => v38.1.2
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v38.1.1 => v38.1.2
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v38.1.1 => v38.1.2
+</details>
+
+
 ## [38.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/v38.1.0...v38.1.1) (2023-07-10)
 
 ### Other changes
@@ -119,37 +149,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v38.0.3 => v38.0.4
 * [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v38.0.3 => v38.0.4
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v38.0.3 => v38.0.4
-</details>
-
-
-## [38.0.3](https://github.com/ckeditor/ckeditor5-dev/compare/v38.0.2...v38.0.3) (2023-06-29)
-
-### Other changes
-
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Added utils for fetching the last nightly version from npm (`getLastNightly()`) and generating the next nightly version (`getNextNightly()`). See [ckeditor/ckeditor5#14179](https://github.com/ckeditor/ckeditor5/issues/14179). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/771d6dc1fc1f6aaa0d4977a1709be5b8ff83b658))
-* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: A file extension is not required when resolving modules within a package marked as `type: module`. See [ckeditor/ckeditor5#13673](https://github.com/ckeditor/ckeditor5/issues/13673). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/efcf0094a16a2665eef9bdad63a2d1c2833c71d5))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v38.0.2 => v38.0.3
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v38.0.2 => v38.0.3
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v38.0.2 => v38.0.3
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v38.0.2 => v38.0.3
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v38.0.2 => v38.0.3
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v38.0.2 => v38.0.3
-* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v38.0.2 => v38.0.3
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v38.0.2 => v38.0.3
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v38.0.2 => v38.0.3
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v38.0.2 => v38.0.3
-* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v38.0.2 => v38.0.3
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v38.0.2 => v38.0.3
 </details>
 
 ---
