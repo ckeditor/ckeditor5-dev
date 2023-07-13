@@ -123,8 +123,8 @@ function getTriggeringCommitUrl() {
 	let repoSlug, hash;
 
 	if ( CKE5_TRIGGER_REPOSITORY_SLUG && CKE5_TRIGGER_COMMIT_HASH ) {
-		repoSlug = CKE5_TRIGGER_REPOSITORY_SLUG;
-		hash = CKE5_TRIGGER_COMMIT_HASH;
+		repoSlug = CKE5_TRIGGER_REPOSITORY_SLUG.trim();
+		hash = CKE5_TRIGGER_COMMIT_HASH.trim();
 	} else {
 		repoSlug = [ CIRCLE_PROJECT_USERNAME, CIRCLE_PROJECT_REPONAME ].join( '/' );
 		hash = CIRCLE_SHA1;
