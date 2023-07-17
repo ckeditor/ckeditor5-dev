@@ -1,11 +1,11 @@
 {
   "name": "@ckeditor/ckeditor5-dev-utils",
-  "version": "38.0.4",
+  "version": "38.1.2",
   "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-translations": "^38.0.4",
+    "@ckeditor/ckeditor5-dev-translations": "^38.1.2",
     "chalk": "^3.0.0",
     "cli-cursor": "^3.1.0",
     "cli-spinners": "^2.6.1",
@@ -13,7 +13,7 @@
     "cssnano": "^5.0.0",
     "del": "^5.0.0",
     "esbuild-loader": "^3.0.1",
-    "fs-extra": "^8.1.0",
+    "fs-extra": "^9.1.0",
     "is-interactive": "^1.0.0",
     "javascript-stringify": "^1.6.0",
     "mini-css-extract-plugin": "^2.4.2",
