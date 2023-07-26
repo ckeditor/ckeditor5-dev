@@ -81,13 +81,13 @@ function getNotifierMessage( options ) {
 		return '_The author of the commit was hidden. <https://github.com/ckeditor/ckeditor5/issues/9252|Read more about why.>_';
 	}
 
-	// If the author of the commit could not be obtained, let's ping the entire team.
-	if ( !slackAccount ) {
-		return `@channel (${ options.commitAuthor }), could you take a look?`;
-	}
-
 	if ( bots.includes( options.githubAccount ) ) {
 		return '_This commit is a result of merging a branch into another branch._';
+	}
+
+	// If the author of the commit could not be obtained, let's ping the entire team.
+	if ( !slackAccount ) {
+		return `<!channel> (${ options.commitAuthor }), could you take a look?`;
 	}
 
 	return `<@${ slackAccount }>, could you take a look?`;
