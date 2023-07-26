@@ -87,7 +87,7 @@ function getNotifierMessage( options ) {
 
 	// If the author of the commit could not be obtained, let's ping the entire team.
 	if ( !slackAccount ) {
-		return `@channel (${ options.commitAuthor }), could you take a look?`;
+		return `<!channel> (${ options.commitAuthor }), could you take a look?`;
 	}
 
 	return `<@${ slackAccount }>, could you take a look?`;
