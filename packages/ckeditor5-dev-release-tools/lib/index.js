@@ -20,6 +20,7 @@ const { getLastFromChangelog, getLastNightly, getNextNightly, getCurrent, getLas
 const { getChangesForVersion, getChangelog, saveChangelog } = require( './utils/changelog' );
 const executeInParallel = require( './utils/executeinparallel' );
 const validateRepositoryToRelease = require( './utils/validaterepositorytorelease' );
+const checkVersionAvailability = require( './utils/checkversionavailability' );
 
 module.exports = {
 	generateChangelogForSinglePackage,
@@ -42,5 +43,6 @@ module.exports = {
 	getChangesForVersion,
 	getChangelog,
 	saveChangelog,
-	validateRepositoryToRelease
+	validateRepositoryToRelease,
+	checkVersionAvailability
 };

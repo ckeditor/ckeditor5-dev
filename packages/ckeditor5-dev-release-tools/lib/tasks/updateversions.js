@@ -9,7 +9,7 @@ const { glob } = require( 'glob' );
 const fs = require( 'fs-extra' );
 const semver = require( 'semver' );
 const { normalizeTrim, toUnix, dirname, join } = require( 'upath' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+const checkVersionAvailability = require( '../utils/checkversionavailability' );
 
 /**
  * The purpose of the script is to update the version of a root package found in the current working
@@ -95,23 +95,4 @@ function checkIfVersionIsValid( newVersion, currentVersion ) {
 	if ( !semver.gt( newVersion, currentVersion ) ) {
 		throw new Error( `Provided version ${ newVersion } must be greater than ${ currentVersion } or match pattern 0.0.0-nightly.` );
 	}
-}
-
-/**
- * Checks if the provided version is not used in npm and there will be no errors when calling publish.
- *
- * @param {String} version
- * @param {String} packageName
- * @returns {Promise}
- */
-async function checkVersionAvailability( version, packageName ) {
-	return tools.shExec( `npm show ${ packageName }@${ version } version`, { verbosity: 'silent', async: true } )
-		.then( () => {
-			throw new Error( `Provided version ${ version } is already used in npm by ${ packageName }.` );
-		} )
-		.catch( err => {
-			if ( !err.toString().includes( 'is not in this registry' ) ) {
-				throw err;
-			}
-		} );
 }
