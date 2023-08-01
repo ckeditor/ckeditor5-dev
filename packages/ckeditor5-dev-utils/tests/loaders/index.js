@@ -340,6 +340,21 @@ describe( 'loaders', () => {
 				new RegExp( [ 'ckeditor5-!(utils)', 'src', '' ].join( escapedPathSep ) )
 			] );
 		} );
+
+		it( 'should return a definition containing a loader for measuring the coverage (for root named ckeditor5-*)', () => {
+			const coverageLoader = loaders.getCoverageLoader( {
+				files: [
+					[ '/ckeditor5-collab/packages/ckeditor5-alignment/tests/**/*.{js,ts}' ]
+				]
+			} );
+
+			expect( coverageLoader ).to.be.an( 'object' );
+			expect( coverageLoader ).to.have.property( 'include' );
+			expect( coverageLoader.include ).to.be.an( 'array' );
+			expect( coverageLoader.include ).to.deep.equal( [
+				new RegExp( [ 'ckeditor5-alignment', 'src', '' ].join( escapedPathSep ) )
+			] );
+		} );
 	} );
 } );
 
