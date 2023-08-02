@@ -19,8 +19,8 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 module.exports = async function checkVersionAvailability( version, packageName ) {
 	return tools.shExec( `npm show ${ packageName }@${ version } version`, { verbosity: 'silent', async: true } )
 		.then( result => {
-			// Explicit check for npm < 8.13.0, which does not return anything exits with zero status code when the version for provided
-			// package does not exist in the npm registry.
+			// Explicit check for npm < 8.13.0, which does not return anything and it exits with a zero status code when the version for the
+			// provided package does not exist in the npm registry.
 			if ( !result ) {
 				return;
 			}
