@@ -53,7 +53,7 @@ module.exports = async function cleanUpPackages( options ) {
  *
  * @param {Object} options
  * @param {String} options.packagesDirectory
- * @param {Array.<String>} [options.packageJsonFieldsToRemove=['devDependencies','depcheckIgnore','scripts','private']]
+ * @param {Array.<String>} [options.packageJsonFieldsToRemove=['devDependencies','depcheckIgnore','scripts','private','engines']]
  * @param {Boolean} [options.preservePostInstallHook]
  * @param {String} [options.cwd=process.cwd()]
  * @returns {Object}
@@ -61,7 +61,7 @@ module.exports = async function cleanUpPackages( options ) {
 function parseOptions( options ) {
 	const {
 		packagesDirectory,
-		packageJsonFieldsToRemove = [ 'devDependencies', 'depcheckIgnore', 'scripts', 'private' ],
+		packageJsonFieldsToRemove = [ 'devDependencies', 'depcheckIgnore', 'scripts', 'private', 'engines' ],
 		preservePostInstallHook = false,
 		cwd = process.cwd()
 	} = options;

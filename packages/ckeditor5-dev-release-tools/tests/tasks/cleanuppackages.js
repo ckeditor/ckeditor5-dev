@@ -210,7 +210,11 @@ describe( 'dev-release-tools/tasks', () => {
 								types: 'src/index.d.ts',
 								files: [
 									'foo'
-								]
+								],
+								engines: {
+									'node': '>=16.0.0',
+									'npm': '>=5.7.1'
+								}
 							} ),
 							'README.md': '',
 							'LICENSE.md': '',
