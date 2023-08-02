@@ -54,16 +54,17 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
  * @param {Array.<ExternalRepository>} [options.externalRepositories=[]] An array of object with additional repositories
  * that the function takes into consideration while gathering commits. It assumes that those directories are also mono repositories.
  *
- * @param {Boolean} [export] Whether the function should return content of the changelog instead of saving it to a file.
+ * @param {Boolean} [options.skipFileSave=false] Whether to resolve the changes instead of saving it to a file.
  *
- * @param {String} [nextVersion] Next version to use. If not provided, user input will be needed.
+ * @param {String|null} [options.nextVersion=null] Next version to use. If not provided, a user needs to provide via CLI.
  *
- * @returns {Promise<undefined|String>}
+ * @returns {Promise.<undefined|String>}
  */
 module.exports = async function generateChangelogForMonoRepository( options ) {
 	const log = logger();
 	const cwd = process.cwd();
 	const rootPkgJson = getPackageJson( options.cwd );
+	const skipFileSave = options.skipFileSave || false;
 
 	logProcess( 'Collecting paths to packages...' );
 
@@ -90,7 +91,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	// Collection of public entries that will be inserted in the changelog.
 	let publicCommits;
 
-	// The next version for the upcoming release.
+	// The next version for the upcoming release. If not specified, a user has to provide via CLI.
 	let nextVersion = options.nextVersion || null;
 
 	// A map contains packages and their new versions.
@@ -102,6 +103,10 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	// A map contains packages and their paths (where they are located)
 	const packagesPaths = new Map();
 
+	logInfo( `Found ${ allCommits.length } entries to parse.`, { indentLevel: 1, startWithNewLine: true } );
+
+	// If the next version is specified by the integrator, setup internal values used when preparing
+	// the "Releases packages" section.
 	if ( nextVersion ) {
 		packagesVersion.set( rootPkgJson.name, nextVersion );
 
@@ -112,17 +117,21 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 			packagesPaths.set( packageJson.name, packagePath );
 			packagesVersion.set( packageJson.name, nextVersion );
 		}
-	}
-
-	logInfo( `Found ${ allCommits.length } entries to parse.`, { indentLevel: 1, startWithNewLine: true } );
-
-	if ( !nextVersion ) {
+	} else {
 		await typeNewVersionForAllPackages();
 	}
 
-	if ( !options.export ) {
+	if ( !skipFileSave ) {
 		await saveChangelog();
+
+		// Make a commit from the repository where we started.
+		process.chdir( options.cwd );
+		tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
+		tools.shExec( 'git commit -m "Docs: Changelog. [skip ci]"', { verbosity: 'error' } );
+		logInfo( 'Committed.', { indentLevel: 1 } );
 	}
+
+	process.chdir( cwd );
 
 	logProcess( 'Summary' );
 
@@ -130,22 +139,13 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 		...pathsCollection.skipped
 	].sort() ) );
 
-	// Make a commit from the repository where we started.
-	if ( !options.export ) {
-		process.chdir( options.cwd );
-		tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
-		tools.shExec( 'git commit -m "Docs: Changelog. [skip ci]"', { verbosity: 'error' } );
-	}
-
 	logInfo(
 		`Changelog for "${ chalk.underline( rootPkgJson.name ) }" (v${ packagesVersion.get( rootPkgJson.name ) }) has been generated.`,
 		{ indentLevel: 1 }
 	);
 
-	process.chdir( cwd );
-
-	if ( options.export ) {
-		return await getChangelogForNextVersion();
+	if ( skipFileSave ) {
+		return getChangelogForNextVersion();
 	}
 
 	return Promise.resolve();
