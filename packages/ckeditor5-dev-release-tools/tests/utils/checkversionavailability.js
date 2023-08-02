@@ -33,45 +33,50 @@ describe( 'dev-release-tools/utils', () => {
 			sandbox.restore();
 		} );
 
-		it( 'should ask npm if provided version for a package already exists', async () => {
-			stubs.shExec.rejects( new Error( 'is not in this registry' ) );
+		it( 'should resolve if version does not exist (npm >= 8.13.0)', () => {
+			stubs.shExec.rejects( new Error( 'npm ERR! code E404' ) );
 
-			await checkVersionAvailability( '1.0.1', 'stub-package' );
-
-			expect( stubs.shExec.callCount ).to.equal( 1 );
-			expect( stubs.shExec.firstCall.args[ 0 ] ).to.equal( 'npm show stub-package@1.0.1 version' );
+			return checkVersionAvailability( '1.0.1', 'stub-package' )
+				.then( () => {
+					expect( stubs.shExec.callCount ).to.equal( 1 );
+					expect( stubs.shExec.firstCall.args[ 0 ] ).to.equal( 'npm show stub-package@1.0.1 version' );
+				} )
+				.catch( () => {
+					throw new Error( 'Expected to be resolved.' );
+				} );
 		} );
 
-		it( 'should throw an error when the version is already in use', async () => {
-			stubs.shExec.resolves( '' );
+		it( 'should resolve if version does not exist (npm < 8.13.0)', () => {
+			stubs.shExec.resolves();
 
-			try {
-				await checkVersionAvailability( '1.0.1', 'stub-package' );
-				throw new Error( 'Expected to throw.' );
-			} catch ( err ) {
-				expect( err.message ).to.equal( 'Provided version 1.0.1 is already used in npm by stub-package.' );
-			}
+			return checkVersionAvailability( '1.0.1', 'stub-package' )
+				.catch( () => {
+					throw new Error( 'Expected to be resolved.' );
+				} );
 		} );
 
-		it( 'should not throw an error when version is not in use', async () => {
-			stubs.shExec.rejects( new Error( 'is not in this registry' ) );
+		it( 'should throw an error if version exists', () => {
+			stubs.shExec.resolves( '1.0.1' );
 
-			try {
-				await checkVersionAvailability( '1.0.1', 'stub-package' );
-			} catch ( err ) {
-				throw new Error( 'Expected not to throw.' );
-			}
+			return checkVersionAvailability( '1.0.1', 'stub-package' )
+				.then( () => {
+					throw new Error( 'Expected to be rejected.' );
+				} )
+				.catch( error => {
+					expect( error.message ).to.equal( 'The "stub-package@1.0.1" already exists in npm.' );
+				} );
 		} );
 
-		it( 'should throw an error when checking the version availability check rejects error', async () => {
-			stubs.shExec.rejects( new Error( 'custom error' ) );
+		it( 'should throw an error if unknown error occured', () => {
+			stubs.shExec.rejects( new Error( 'Unknown error.' ) );
 
-			try {
-				await checkVersionAvailability( '1.0.1', 'stub-package' );
-				throw new Error( 'Expected to throw.' );
-			} catch ( err ) {
-				expect( err.message ).to.equal( 'custom error' );
-			}
+			return checkVersionAvailability( '1.0.1', 'stub-package' )
+				.then( () => {
+					throw new Error( 'Expected to be rejected.' );
+				} )
+				.catch( error => {
+					expect( error.message ).to.equal( 'Unknown error.' );
+				} );
 		} );
 	} );
 } );

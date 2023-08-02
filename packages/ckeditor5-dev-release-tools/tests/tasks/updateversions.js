@@ -72,13 +72,13 @@ describe( 'dev-release-tools/release', () => {
 
 		it( 'should throw an error when the version is already in use', async () => {
 			stubs.readJson.resolves( { version: '1.0.0', name: 'stub-package' } );
-			stubs.checkVersionAvailability.rejects( new Error( 'Provided version 1.0.1 is already used in npm by stub-package.' ) );
+			stubs.checkVersionAvailability.rejects( new Error( 'The "stub-package@1.0.1" already exists in npm.' ) );
 
 			try {
 				await updateVersions( { version: '1.0.1' } );
 				throw new Error( 'Expected to throw.' );
 			} catch ( err ) {
-				expect( err.message ).to.equal( 'Provided version 1.0.1 is already used in npm by stub-package.' );
+				expect( err.message ).to.equal( 'The "stub-package@1.0.1" already exists in npm.' );
 			}
 		} );
 

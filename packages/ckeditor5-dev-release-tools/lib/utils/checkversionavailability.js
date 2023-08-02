@@ -8,7 +8,9 @@
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 
 /**
- * Checks if the provided version is not used in npm and there will be no errors when calling publish.
+ * Checks if the provided version for the package exists in the npm registry.
+ *
+ * Returns a promise that resolves if version does not exist or rejects the promise otherwise.
  *
  * @param {String} version
  * @param {String} packageName
@@ -16,12 +18,18 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  */
 module.exports = async function checkVersionAvailability( version, packageName ) {
 	return tools.shExec( `npm show ${ packageName }@${ version } version`, { verbosity: 'silent', async: true } )
-		.then( () => {
-			throw new Error( `Provided version ${ version } is already used in npm by ${ packageName }.` );
+		.then( result => {
+			// Explicit check for npm < 8.13.0, which does not return anything exits with zero status code when the version for provided
+			// package does not exist in the npm registry.
+			if ( !result ) {
+				return;
+			}
+
+			throw new Error( `The "${ packageName }@${ version }" already exists in npm.` );
 		} )
-		.catch( err => {
-			if ( !err.toString().includes( 'is not in this registry' ) ) {
-				throw err;
+		.catch( error => {
+			if ( !error.toString().includes( 'npm ERR! code E404' ) ) {
+				throw error;
 			}
 		} );
 };
