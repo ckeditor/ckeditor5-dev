@@ -54,12 +54,16 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
  * @param {Array.<ExternalRepository>} [options.externalRepositories=[]] An array of object with additional repositories
  * that the function takes into consideration while gathering commits. It assumes that those directories are also mono repositories.
  *
- * @returns {Promise}
+ * @param {Boolean} [export] Whether the function should return content of the changelog instead of saving it to a file.
+ *
+ * @param {String} [nextVersion] Next version to use. If not provided, user input will be needed.
+ *
+ * @returns {Promise<undefined|String>}
  */
 module.exports = async function generateChangelogForMonoRepository( options ) {
 	const log = logger();
 	const cwd = process.cwd();
-	const pkgJson = getPackageJson( options.cwd );
+	const rootPkgJson = getPackageJson( options.cwd );
 
 	logProcess( 'Collecting paths to packages...' );
 
@@ -71,16 +75,23 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 		externalRepositories: options.externalRepositories || []
 	} );
 
+	const commitOptions = {
+		cwd: options.cwd,
+		from: options.from ? options.from : 'v' + rootPkgJson.version,
+		releaseBranch: options.releaseBranch || 'master',
+		externalRepositories: options.externalRepositories || []
+	};
+
 	logProcess( 'Collecting all commits since the last release...' );
 
 	// Collection of all entries (real commits + additional "fake" commits extracted from descriptions).
-	let allCommits;
+	const allCommits = await gatherAllCommits( commitOptions );
 
 	// Collection of public entries that will be inserted in the changelog.
 	let publicCommits;
 
 	// The next version for the upcoming release.
-	let nextVersion = null;
+	let nextVersion = options.nextVersion || null;
 
 	// A map contains packages and their new versions.
 	const packagesVersion = new Map();
@@ -91,44 +102,53 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	// A map contains packages and their paths (where they are located)
 	const packagesPaths = new Map();
 
-	const commitOptions = {
-		cwd: options.cwd,
-		from: options.from ? options.from : 'v' + pkgJson.version,
-		releaseBranch: options.releaseBranch || 'master',
-		externalRepositories: options.externalRepositories || []
-	};
+	if ( nextVersion ) {
+		packagesVersion.set( rootPkgJson.name, nextVersion );
 
-	return gatherAllCommits( commitOptions )
-		.then( commits => {
-			allCommits = commits;
+		for ( const packagePath of pathsCollection.matched ) {
+			const packageJson = getPackageJson( packagePath );
 
-			logInfo( `Found ${ commits.length } entries to parse.`, { indentLevel: 1, startWithNewLine: true } );
-		} )
-		.then( () => typeNewVersionForAllPackages() )
-		.then( () => generateChangelogFromCommits() )
-		.then( changesFromCommits => saveChangelog( changesFromCommits ) )
-		.then( () => {
-			logProcess( 'Summary' );
+			currentPackagesVersion.set( packageJson.name, packageJson.version );
+			packagesPaths.set( packageJson.name, packagePath );
+			packagesVersion.set( packageJson.name, nextVersion );
+		}
+	}
 
-			displaySkippedPackages( new Set( [
-				...pathsCollection.skipped
-			].sort() ) );
+	logInfo( `Found ${ allCommits.length } entries to parse.`, { indentLevel: 1, startWithNewLine: true } );
 
-			// Make a commit from the repository where we started.
-			process.chdir( options.cwd );
-			tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
-			tools.shExec( 'git commit -m "Docs: Changelog. [skip ci]"', { verbosity: 'error' } );
+	if ( !nextVersion ) {
+		await typeNewVersionForAllPackages();
+	}
 
-			logInfo(
-				`Changelog for "${ chalk.underline( pkgJson.name ) }" (v${ packagesVersion.get( pkgJson.name ) }) has been generated.`,
-				{ indentLevel: 1 }
-			);
+	if ( !options.export ) {
+		await saveChangelog();
+	}
 
-			process.chdir( cwd );
-		} )
-		.catch( err => {
-			console.log( err );
-		} );
+	logProcess( 'Summary' );
+
+	displaySkippedPackages( new Set( [
+		...pathsCollection.skipped
+	].sort() ) );
+
+	// Make a commit from the repository where we started.
+	if ( !options.export ) {
+		process.chdir( options.cwd );
+		tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
+		tools.shExec( 'git commit -m "Docs: Changelog. [skip ci]"', { verbosity: 'error' } );
+	}
+
+	logInfo(
+		`Changelog for "${ chalk.underline( rootPkgJson.name ) }" (v${ packagesVersion.get( rootPkgJson.name ) }) has been generated.`,
+		{ indentLevel: 1 }
+	);
+
+	process.chdir( cwd );
+
+	if ( options.export ) {
+		return await getChangelogForNextVersion();
+	}
+
+	return Promise.resolve();
 
 	/**
 	 * Returns collections with packages found in the `options.cwd` directory and the external repositories.
@@ -375,15 +395,15 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	function generateChangelogFromCommits() {
 		logProcess( 'Generating the changelog...' );
 
-		const version = packagesVersion.get( pkgJson.name );
+		const version = packagesVersion.get( rootPkgJson.name );
 
 		const writerContext = {
 			version,
 			commit: 'commit',
 			repoUrl: getRepositoryUrl( options.cwd ),
 			currentTag: 'v' + version,
-			previousTag: options.from ? options.from : 'v' + pkgJson.version,
-			isPatch: semver.diff( version, pkgJson.version ) === 'patch',
+			previousTag: options.from ? options.from : 'v' + rootPkgJson.version,
+			isPatch: semver.diff( version, rootPkgJson.version ) === 'patch',
 			skipCommitsLink: Boolean( options.skipLinks ),
 			skipCompareLink: Boolean( options.skipLinks )
 		};
@@ -434,13 +454,25 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 		}
 	}
 
+	async function getChangelogForNextVersion() {
+		const changesFromCommits = await generateChangelogFromCommits();
+		const dependenciesSummary = generateSummaryOfChangesInPackages();
+
+		return [
+			changelogUtils.changelogHeader,
+			changesFromCommits.trim(),
+			'\n\n',
+			dependenciesSummary
+		].join( '' );
+	}
+
 	/**
 	 * Combines the generated changes based on commits and summary of version changes in packages.
 	 * Appends those changes at the beginning of the changelog file.
 	 *
 	 * @param {String} changesFromCommits Generated entries based on commits.
 	 */
-	function saveChangelog( changesFromCommits ) {
+	async function saveChangelog() {
 		logProcess( 'Saving changelog...' );
 
 		if ( !fs.existsSync( changelogUtils.changelogFile ) ) {
@@ -451,20 +483,15 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 
 		logInfo( 'Preparing a summary of version changes in packages.', { indentLevel: 1 } );
 
-		const dependenciesSummary = generateSummaryOfChangesInPackages();
-
 		let currentChangelog = changelogUtils.getChangelog();
+
+		const nextVersionChangelog = await getChangelogForNextVersion();
 
 		// Remove header from current changelog.
 		currentChangelog = currentChangelog.replace( changelogUtils.changelogHeader, '' ).trim();
 
 		// Concat header, new entries and old changelog to single string.
-		let newChangelog = changelogUtils.changelogHeader +
-			changesFromCommits.trim() +
-			'\n\n' +
-			dependenciesSummary +
-			'\n\n\n' +
-			currentChangelog;
+		let newChangelog = nextVersionChangelog + '\n\n\n' + currentChangelog;
 
 		newChangelog = newChangelog.trim() + '\n';
 
@@ -487,7 +514,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 
 		for ( const [ packageName, nextVersion ] of packagesVersion ) {
 			// Skip the package hosted in the main repository.
-			if ( packageName === pkgJson.name ) {
+			if ( packageName === rootPkgJson.name ) {
 				continue;
 			}
 
@@ -642,7 +669,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	 * @returns {String}
 	 */
 	function formatChangelogEntry( packageName, nextVersion, currentVersion = null ) {
-		const npmUrl = `https://www.npmjs.com/package/${ packageName }`;
+		const npmUrl = `https://www.npmjs.com/package/${ packageName }/v/${ nextVersion }`;
 
 		if ( currentVersion ) {
 			return `* [${ packageName }](${ npmUrl }): v${ currentVersion } => v${ nextVersion }`;
@@ -661,7 +688,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 		return compareFunc( item => {
 			if ( Array.isArray( item[ scopeField ] ) ) {
 				// A hack that allows moving all scoped commits from the main repository/package at the beginning of the list.
-				if ( item[ scopeField ][ 0 ] === pkgJson.name ) {
+				if ( item[ scopeField ][ 0 ] === rootPkgJson.name ) {
 					return 'a'.repeat( 15 );
 				}
 
