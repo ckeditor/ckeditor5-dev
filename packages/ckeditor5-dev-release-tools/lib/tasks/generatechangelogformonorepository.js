@@ -211,6 +211,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 	 * @returns {Promise.<Array.<Commit>>}
 	 */
 	function gatherAllCommits( options ) {
+		process.chdir( options.cwd );
 		logInfo( `Processing "${ options.cwd }"...`, { indentLevel: 1 } );
 
 		const transformCommit = transformCommitFactory( {
