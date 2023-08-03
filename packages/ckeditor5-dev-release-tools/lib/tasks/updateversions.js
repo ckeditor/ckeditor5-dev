@@ -38,10 +38,18 @@ module.exports = async function updateVersions( { packagesDirectory, version, cw
 	const randomPackagePath = getRandomPackagePath( pkgJsonPaths, normalizedPackagesDir );
 
 	const rootPackageJson = join( normalizedCwd, 'package.json' );
-	const randomPackageJson = join( randomPackagePath, 'package.json' );
+	const rootPackageVersion = ( await fs.readJson( rootPackageJson ) ).version;
 
-	checkIfVersionIsValid( version, ( await fs.readJson( rootPackageJson ) ).version );
-	await checkVersionAvailability( version, ( await fs.readJson( randomPackageJson ) ).name );
+	const randomPackageJson = join( randomPackagePath, 'package.json' );
+	const randomPackageName = ( await fs.readJson( randomPackageJson ) ).name;
+
+	checkIfVersionIsValid( version, rootPackageVersion );
+
+	const isVersionAvailable = await checkVersionAvailability( version, randomPackageName );
+
+	if ( !isVersionAvailable ) {
+		throw new Error( `The "${ randomPackageName }@${ version }" already exists in the npm registry.` );
+	}
 
 	for ( const pkgJsonPath of pkgJsonPaths ) {
 		const pkgJson = await fs.readJson( pkgJsonPath );

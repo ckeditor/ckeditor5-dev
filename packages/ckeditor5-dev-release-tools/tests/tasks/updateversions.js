@@ -20,7 +20,7 @@ describe( 'dev-release-tools/release', () => {
 				outputJson: sandbox.stub(),
 				readJson: sandbox.stub().resolves( { version: '1.0.0' } ),
 				glob: sandbox.stub().resolves( [ '/ckeditor5-dev' ] ),
-				checkVersionAvailability: sandbox.stub().resolves()
+				checkVersionAvailability: sandbox.stub().resolves( true )
 			};
 
 			updateVersions = proxyquire( '../../lib/tasks/updateversions.js', {
@@ -72,24 +72,36 @@ describe( 'dev-release-tools/release', () => {
 
 		it( 'should throw an error when the version is already in use', async () => {
 			stubs.readJson.resolves( { version: '1.0.0', name: 'stub-package' } );
-			stubs.checkVersionAvailability.rejects( new Error( 'The "stub-package@1.0.1" already exists in npm.' ) );
+			stubs.checkVersionAvailability.resolves( false );
 
 			try {
 				await updateVersions( { version: '1.0.1' } );
 				throw new Error( 'Expected to throw.' );
 			} catch ( err ) {
-				expect( err.message ).to.equal( 'The "stub-package@1.0.1" already exists in npm.' );
+				expect( err.message ).to.equal( 'The "stub-package@1.0.1" already exists in the npm registry.' );
 			}
 		} );
 
 		it( 'should not throw an error when version is not in use', async () => {
-			stubs.checkVersionAvailability.resolves();
 			stubs.readJson.resolves( { version: '1.0.0', name: 'stub-package' } );
+			stubs.checkVersionAvailability.resolves( true );
 
 			try {
 				await updateVersions( { version: '1.0.1' } );
 			} catch ( err ) {
 				throw new Error( 'Expected not to throw.' );
+			}
+		} );
+
+		it( 'should throw an error when it was not possible to check the version availability', async () => {
+			stubs.readJson.resolves( { version: '1.0.0', name: 'stub-package' } );
+			stubs.checkVersionAvailability.rejects( new Error( 'Custom error.' ) );
+
+			try {
+				await updateVersions( { version: '1.0.1' } );
+				throw new Error( 'Expected to throw.' );
+			} catch ( err ) {
+				expect( err.message ).to.equal( 'Custom error.' );
 			}
 		} );
 
