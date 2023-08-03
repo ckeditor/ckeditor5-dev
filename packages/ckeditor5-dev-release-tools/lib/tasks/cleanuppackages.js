@@ -23,7 +23,8 @@ const { glob } = require( 'glob' );
  *
  * @param {Object} options
  * @param {String} options.packagesDirectory Relative path to a location of packages to be cleaned up.
- * @param {Array.<String>} [options.packageJsonFieldsToRemove] Fields to remove from `package.json`. If not set, a predefined list is used.
+ * @param {Array.<String>|PackageJsonFieldsToRemoveCallback} [options.packageJsonFieldsToRemove] Fields to remove from `package.json`.
+ * If not set, a predefined list is used. If the callback is used, the first argument is the list with defaults.
  * @param {Boolean} [options.preservePostInstallHook] Whether to preserve the postinstall hook in `package.json`.
  * @param {String} [options.cwd] Current working directory from which all paths will be resolved.
  * @returns {Promise}
@@ -53,15 +54,18 @@ module.exports = async function cleanUpPackages( options ) {
  *
  * @param {Object} options
  * @param {String} options.packagesDirectory
- * @param {Array.<String>} [options.packageJsonFieldsToRemove=['devDependencies','depcheckIgnore','scripts','private','engines']]
+ * @param {Array.<String>|PackageJsonFieldsToRemoveCallback} [options.packageJsonFieldsToRemove=DefaultFieldsToRemove]
  * @param {Boolean} [options.preservePostInstallHook]
  * @param {String} [options.cwd=process.cwd()]
  * @returns {Object}
  */
 function parseOptions( options ) {
+	const defaultPackageJsonFieldsToRemove = [ 'devDependencies', 'depcheckIgnore', 'scripts', 'private' ];
+	const packageJsonFieldsToRemove = typeof options.packageJsonFieldsToRemove === 'function' ?
+		options.packageJsonFieldsToRemove( defaultPackageJsonFieldsToRemove ) :
+		options.packageJsonFieldsToRemove || defaultPackageJsonFieldsToRemove;
 	const {
 		packagesDirectory,
-		packageJsonFieldsToRemove = [ 'devDependencies', 'depcheckIgnore', 'scripts', 'private', 'engines' ],
 		preservePostInstallHook = false,
 		cwd = process.cwd()
 	} = options;
@@ -184,3 +188,13 @@ function sortPathsFromDeepestFirst( firstPath, secondPath ) {
 
 	return secondPathSegments - firstPathSegments;
 }
+
+/**
+ * @typedef {['devDependencies','depcheckIgnore','scripts','private']} DefaultFieldsToRemove
+ */
+
+/**
+ * @callback PackageJsonFieldsToRemoveCallback
+ * @param {DefaultFieldsToRemove} defaults
+ * @returns {Array.<String>}
+ */
