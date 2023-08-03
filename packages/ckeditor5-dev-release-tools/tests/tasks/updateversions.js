@@ -20,7 +20,7 @@ describe( 'dev-release-tools/release', () => {
 				outputJson: sandbox.stub(),
 				readJson: sandbox.stub().resolves( { version: '1.0.0' } ),
 				glob: sandbox.stub().resolves( [ '/ckeditor5-dev' ] ),
-				shExec: sandbox.stub().rejects( new Error( 'is not in this registry' ) )
+				checkVersionAvailability: sandbox.stub().resolves( true )
 			};
 
 			updateVersions = proxyquire( '../../lib/tasks/updateversions.js', {
@@ -29,11 +29,7 @@ describe( 'dev-release-tools/release', () => {
 					readJson: stubs.readJson
 				},
 				'glob': { glob: stubs.glob },
-				'@ckeditor/ckeditor5-dev-utils': {
-					tools: {
-						shExec: stubs.shExec
-					}
-				}
+				'../utils/checkversionavailability': stubs.checkVersionAvailability
 			} );
 		} );
 
@@ -76,19 +72,19 @@ describe( 'dev-release-tools/release', () => {
 
 		it( 'should throw an error when the version is already in use', async () => {
 			stubs.readJson.resolves( { version: '1.0.0', name: 'stub-package' } );
-			stubs.shExec.resolves( '' );
+			stubs.checkVersionAvailability.resolves( false );
 
 			try {
 				await updateVersions( { version: '1.0.1' } );
 				throw new Error( 'Expected to throw.' );
 			} catch ( err ) {
-				expect( err.message ).to.equal( 'Provided version 1.0.1 is already used in npm by stub-package.' );
+				expect( err.message ).to.equal( 'The "stub-package@1.0.1" already exists in the npm registry.' );
 			}
 		} );
 
 		it( 'should not throw an error when version is not in use', async () => {
-			stubs.shExec.rejects( new Error( 'is not in this registry' ) );
 			stubs.readJson.resolves( { version: '1.0.0', name: 'stub-package' } );
+			stubs.checkVersionAvailability.resolves( true );
 
 			try {
 				await updateVersions( { version: '1.0.1' } );
@@ -97,15 +93,15 @@ describe( 'dev-release-tools/release', () => {
 			}
 		} );
 
-		it( 'should throw an error when checking the version availability check rejects error', async () => {
-			stubs.shExec.rejects( new Error( 'custom error' ) );
+		it( 'should throw an error when it was not possible to check the version availability', async () => {
 			stubs.readJson.resolves( { version: '1.0.0', name: 'stub-package' } );
+			stubs.checkVersionAvailability.rejects( new Error( 'Custom error.' ) );
 
 			try {
 				await updateVersions( { version: '1.0.1' } );
 				throw new Error( 'Expected to throw.' );
 			} catch ( err ) {
-				expect( err.message ).to.equal( 'custom error' );
+				expect( err.message ).to.equal( 'Custom error.' );
 			}
 		} );
 
@@ -121,8 +117,8 @@ describe( 'dev-release-tools/release', () => {
 
 			await updateVersions( { version: '1.0.1', packagesDirectory: 'packages' } );
 
-			expect( stubs.shExec.callCount ).to.equal( 1 );
-			expect( stubs.shExec.firstCall.args[ 0 ] ).to.not.equal( 'npm show root-package@1.0.1 version' );
+			expect( stubs.checkVersionAvailability.callCount ).to.equal( 1 );
+			expect( stubs.checkVersionAvailability.firstCall.args[ 1 ] ).to.not.equal( 'root-package' );
 		} );
 
 		it( 'should provide the root package name when checking version availability if packagesDirectory is not provided', async () => {
@@ -131,8 +127,8 @@ describe( 'dev-release-tools/release', () => {
 
 			await updateVersions( { version: '1.0.1' } );
 
-			expect( stubs.shExec.callCount ).to.equal( 1 );
-			expect( stubs.shExec.firstCall.args[ 0 ] ).to.equal( 'npm show root-package@1.0.1 version' );
+			expect( stubs.checkVersionAvailability.callCount ).to.equal( 1 );
+			expect( stubs.checkVersionAvailability.firstCall.args[ 1 ] ).to.equal( 'root-package' );
 		} );
 
 		it( 'should accept `0.0.0-nightly*` version for nightly releases', async () => {
