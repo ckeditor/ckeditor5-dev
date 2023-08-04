@@ -709,6 +709,56 @@ describe( 'dev-release-tools/tasks', () => {
 					}
 				} );
 			} );
+
+			it( 'should accept a callback for packageJsonFieldsToRemove', async () => {
+				mockFs( {
+					'release': {
+						'ckeditor5-foo': {
+							'package.json': JSON.stringify( {
+								name: 'ckeditor5-foo',
+								author: 'CKEditor 5 Devops Team',
+								version: '1.0.0',
+								description: 'Example package.',
+								dependencies: {
+									'ckeditor5': '^37.1.0'
+								},
+								devDependencies: {
+									'typescript': '^4.8.4'
+								},
+								main: 'src/index.ts',
+								depcheckIgnore: [
+									'eslint-plugin-ckeditor5-rules'
+								],
+								scripts: {
+									'postinstall': 'node my-node-script.js',
+									'build': 'tsc -p ./tsconfig.json',
+									'dll:build': 'webpack'
+								}
+							} )
+						}
+					}
+				} );
+
+				await cleanUpPackages( {
+					packagesDirectory: 'release',
+					packageJsonFieldsToRemove: defaults => [
+						...defaults,
+						'author'
+					]
+				} );
+
+				const call = stubs.fs.writeJson.getCall( 0 );
+
+				expect( call.args[ 1 ] ).to.deep.equal( {
+					description: 'Example package.',
+					main: 'src/index.ts',
+					name: 'ckeditor5-foo',
+					version: '1.0.0',
+					dependencies: {
+						'ckeditor5': '^37.1.0'
+					}
+				} );
+			} );
 		} );
 	} );
 } );
