@@ -1,11 +1,11 @@
 {
   "name": "@ckeditor/ckeditor5-dev-release-tools",
-  "version": "38.2.0",
+  "version": "38.2.1",
   "description": "Tools used for releasing CKEditor 5 and related packages.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^38.2.0",
+    "@ckeditor/ckeditor5-dev-utils": "^38.2.1",
     "@octokit/rest": "^19.0.0",
     "chalk": "^4.0.0",
     "cli-table": "^0.3.1",
