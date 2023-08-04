@@ -1,6 +1,36 @@
 Changelog
 =========
 
+## [38.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/v38.2.0...v38.2.1) (2023-08-04)
+
+### Other changes
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Added support in the `cleanUpPackages()` task to provide a callback in the optional `packageJsonFieldsToRemove` option that allows specifying which fields to remove from the `package.json`. Closes [ckeditor/ckeditor5#14586](https://github.com/ckeditor/ckeditor5/issues/14586). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/aaeda4151aab9d037e55ffbf74e038fbe2416c9f))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/38.2.1): v38.2.0 => v38.2.1
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/38.2.1): v38.2.0 => v38.2.1
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/38.2.1): v38.2.0 => v38.2.1
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/38.2.1): v38.2.0 => v38.2.1
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/38.2.1): v38.2.0 => v38.2.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/38.2.1): v38.2.0 => v38.2.1
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/38.2.1): v38.2.0 => v38.2.1
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/38.2.1): v38.2.0 => v38.2.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/38.2.1): v38.2.0 => v38.2.1
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/38.2.1): v38.2.0 => v38.2.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/38.2.1): v38.2.0 => v38.2.1
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/38.2.1): v38.2.0 => v38.2.1
+</details>
+
+
 ## [38.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v38.1.4...v38.2.0) (2023-08-03)
 
 ### Features
@@ -128,36 +158,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v38.1.1 => v38.1.2
 * [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v38.1.1 => v38.1.2
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v38.1.1 => v38.1.2
-</details>
-
-
-## [38.1.1](https://github.com/ckeditor/ckeditor5-dev/compare/v38.1.0...v38.1.1) (2023-07-10)
-
-### Other changes
-
-* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: The CircleCI notifier message will now point to the workflow instead of a job. Closes [ckeditor/ckeditor5#14543](https://github.com/ckeditor/ckeditor5/issues/14543). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/7ce09eafebcdcd4cbd169e2d9ffb1a1ab9a0140a))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year): v38.1.0 => v38.1.1
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci): v38.1.0 => v38.1.1
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker): v38.1.0 => v38.1.1
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs): v38.1.0 => v38.1.1
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools): v38.1.0 => v38.1.1
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests): v38.1.0 => v38.1.1
-* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex): v38.1.0 => v38.1.1
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations): v38.1.0 => v38.1.1
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils): v38.1.0 => v38.1.1
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler): v38.1.0 => v38.1.1
-* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins): v38.1.0 => v38.1.1
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins): v38.1.0 => v38.1.1
 </details>
 
 ---
