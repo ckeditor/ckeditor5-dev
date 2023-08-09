@@ -82,7 +82,7 @@ function getNotifierMessage( options ) {
 	}
 
 	if ( bots.includes( options.githubAccount ) ) {
-		return '_This commit is a result of merging a branch into another branch._';
+		return '_Automated stuff happened on one of the branches. Got time to have a look at it, anyone?_';
 	}
 
 	// If the author of the commit could not be obtained, let's ping the entire team.
