@@ -1,11 +1,15 @@
 {
   "name": "@ckeditor/ckeditor5-dev-ci",
   "version": "38.2.2",
-  "description": "Utils for CKEditor5 CI builds.",
+  "description": "Utils used on various Continuous Integration services.",
   "keywords": [],
   "dependencies": {
+    "minimist": "^1.2.5",
     "node-fetch": "^2.6.7",
     "slack-notify": "^2.0.6"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0"
   },
   "engines": {
     "node": ">=16.0.0",
@@ -17,7 +21,8 @@
   ],
   "bin": {
     "ckeditor5-dev-ci-notify-travis-status": "bin/notify-travis-status.js",
-    "ckeditor5-dev-ci-notify-circle-status": "bin/notify-circle-status.js"
+    "ckeditor5-dev-ci-notify-circle-status": "bin/notify-circle-status.js",
+    "ckeditor5-dev-ci-circle-workflow-notifier": "bin/circle-workflow-notifier.js"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
