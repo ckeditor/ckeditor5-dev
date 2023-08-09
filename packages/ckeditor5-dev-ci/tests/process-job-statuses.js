@@ -10,11 +10,9 @@
 const expect = require( 'chai' ).expect;
 
 describe( 'lib/process-job-statuses', () => {
-	let processJobStatuses, failingParentFlag;
+	let processJobStatuses;
 
 	beforeEach( () => {
-		failingParentFlag = 'failing_parent';
-
 		processJobStatuses = require( '../lib/process-job-statuses' );
 	} );
 
@@ -40,7 +38,7 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: []
 			} ];
 
-			expect( processJobStatuses( jobs, failingParentFlag ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
 		} );
 
 		// Workflow:
@@ -71,7 +69,7 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: [ 'id1' ]
 			} ];
 
-			expect( processJobStatuses( jobs, failingParentFlag ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
 		} );
 
 		// Workflow:
@@ -99,14 +97,14 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: [ 'id1' ]
 			} ];
 
-			expect( processJobStatuses( jobs, failingParentFlag ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
 		} );
 
 		// Workflow:
 		// ┌────┐     ┌────┐
 		// │Id 1├────►│Id 2│
 		// └────┘     └────┘
-		it( 'should set status to "failingParentFlag" for a job whose parent has status "failed"', () => {
+		it( 'should set status to "failed_parent" for a job whose parent has status "failed"', () => {
 			const jobs = [ {
 				id: 'id1',
 				status: 'failed',
@@ -123,18 +121,18 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: []
 			}, {
 				id: 'id2',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id1' ]
 			} ];
 
-			expect( processJobStatuses( jobs, failingParentFlag ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
 		} );
 
 		// Workflow:
 		// ┌────┐     ┌────┐     ┌────┐     ┌────┐
 		// │Id 1├────►│Id 2│────►│Id 3│────►│Id 4│
 		// └────┘     └────┘     └────┘     └────┘
-		it( 'should set status to "failingParentFlag" for all jobs following parent with status "failed"', () => {
+		it( 'should set status to "failed_parent" for all jobs following parent with status "failed"', () => {
 			const jobs = [ {
 				id: 'id1',
 				status: 'failed',
@@ -159,19 +157,19 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: []
 			}, {
 				id: 'id2',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id1' ]
 			}, {
 				id: 'id3',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id2' ]
 			}, {
 				id: 'id4',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id3' ]
 			} ];
 
-			expect( processJobStatuses( jobs, failingParentFlag ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
 		} );
 
 		// Workflow:
@@ -221,11 +219,11 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: [ 'id_1' ]
 			}, {
 				id: 'id_4',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id_2', 'id_3' ]
 			} ];
 
-			expect( processJobStatuses( jobs, failingParentFlag ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
 		} );
 
 		// Workflow:
@@ -267,19 +265,19 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: []
 			}, {
 				id: 'id_2',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id_1' ]
 			}, {
 				id: 'id_3',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id_1' ]
 			}, {
 				id: 'id_4',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id_2', 'id_3' ]
 			} ];
 
-			expect( processJobStatuses( jobs, failingParentFlag ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
 		} );
 
 		// Workflow:
@@ -333,27 +331,27 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: []
 			}, {
 				id: 'id_2',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id_1' ]
 			}, {
 				id: 'id_3',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id_1' ]
 			}, {
 				id: 'id_4',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id_3' ]
 			}, {
 				id: 'id_5',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id_3' ]
 			}, {
 				id: 'id_6',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id_2', 'id_3', 'id_4', 'id_5' ]
 			} ];
 
-			expect( processJobStatuses( jobs, failingParentFlag ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
 		} );
 
 		// Workflow:
@@ -415,19 +413,19 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: [ 'id_1' ]
 			}, {
 				id: 'id_4',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id_3' ]
 			}, {
 				id: 'id_5',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id_3' ]
 			}, {
 				id: 'id_6',
-				status: 'failing_parent',
+				status: 'failed_parent',
 				dependencies: [ 'id_2', 'id_3', 'id_4', 'id_5' ]
 			} ];
 
-			expect( processJobStatuses( jobs, failingParentFlag ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
 		} );
 	} );
 } );

@@ -47,7 +47,6 @@ const {
 } = process.env;
 
 const { task } = parseArguments( process.argv.slice( 2 ) );
-const FAILING_PARENT_FLAG = 'failing_parent';
 
 waitForOtherJobsAndSendNotification()
 	.catch( err => {
@@ -59,9 +58,9 @@ waitForOtherJobsAndSendNotification()
 async function waitForOtherJobsAndSendNotification() {
 	const jobs = await getOtherJobsData();
 
-	processJobStatuses( jobs, FAILING_PARENT_FLAG );
+	processJobStatuses( jobs );
 
-	const workflowFinished = jobs.every( job => [ 'success', 'failed', FAILING_PARENT_FLAG ].includes( job.status ) );
+	const workflowFinished = jobs.every( job => [ 'success', 'failed', 'failed_parent' ].includes( job.status ) );
 	const anyJobsFailed = jobs.some( job => job.status === 'failed' );
 
 	if ( !workflowFinished ) {
