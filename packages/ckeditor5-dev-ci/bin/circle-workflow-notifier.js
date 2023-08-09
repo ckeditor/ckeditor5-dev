@@ -56,9 +56,9 @@ waitForOtherJobsAndSendNotification()
 	} );
 
 async function waitForOtherJobsAndSendNotification() {
-	const jobs = await getOtherJobsData();
-
-	processJobStatuses( jobs );
+	const jobs = processJobStatuses(
+		await getOtherJobsData()
+	);
 
 	const workflowFinished = jobs.every( job => [ 'success', 'failed', 'failed_parent' ].includes( job.status ) );
 	const anyJobsFailed = jobs.some( job => job.status === 'failed' );
