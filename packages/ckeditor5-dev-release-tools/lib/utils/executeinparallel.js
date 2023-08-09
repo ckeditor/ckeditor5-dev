@@ -28,7 +28,7 @@ const WORKER_SCRIPT = upath.join( __dirname, 'parallelworker.js' );
  * @param {String} options.packagesDirectory Relative path to a location of packages to execute a task.
  * @param {Function} options.taskToExecute A callback that is executed on all found packages.
  * It receives an absolute path to a package as an argument. It can be synchronous or may return a promise.
- * @param {ListrTaskObject} options.listrTask An instance of `ListrTask`.
+ * @param {ListrTaskObject} [options.listrTask={}] An instance of `ListrTask`.
  * @param {AbortSignal|null} [options.signal=null] Signal to abort the asynchronous process. If not set, default AbortController is created.
  * @param {Object} [options.taskOptions=null] Optional data required by the task.
  * @param {Function} [options.packagesDirectoryFilter=null] A function that is executed for each found package directory to filter out those
@@ -42,7 +42,7 @@ module.exports = async function executeInParallel( options ) {
 	const {
 		packagesDirectory,
 		taskToExecute,
-		listrTask,
+		listrTask = {},
 		signal = null,
 		taskOptions = null,
 		packagesDirectoryFilter = null,
