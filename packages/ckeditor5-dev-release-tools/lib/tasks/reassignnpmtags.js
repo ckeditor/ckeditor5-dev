@@ -16,6 +16,7 @@ const assertNpmAuthorization = require( '../utils/assertnpmauthorization' );
 
 /**
  * Used to switch the tags from `staging` to `latest` for specified array of packages.
+ * Each operation will be retried up to 3 times in case of failure.
  *
  * @param {Object} options
  * @param {String} options.npmOwner User that is authorized to release packages.
@@ -33,8 +34,9 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
 	const counter = tools.createSpinner( 'Reassigning npm tags...', { total: packages.length } );
 	counter.start();
 
-	for ( const packageName of packages ) {
-		const latestVersion = await exec( `npm show ${ packageName }@latest version` )
+	const updateTagPromises = packages.map( async packageName => {
+		const showLatestVersionRetryable = retry( () => exec( `npm show ${ packageName }@latest version` ) );
+		const latestVersion = await showLatestVersionRetryable()
 			.then( version => version.trim() )
 			.catch( error => {
 				errors.push( trimErrorMessage( error.message ) );
@@ -43,10 +45,11 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
 		if ( latestVersion === version ) {
 			packagesSkipped.push( packageName );
 
-			continue;
+			return null;
 		}
 
-		await exec( `npm dist-tag add ${ packageName }@${ version } latest` )
+		const updateLatestTagRetryable = retry( () => exec( `npm dist-tag add ${ packageName }@${ version } latest` ) );
+		await updateLatestTagRetryable()
 			.then( () => {
 				packagesUpdated.push( packageName );
 			} )
@@ -56,7 +59,9 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
 			.finally( () => {
 				counter.increase();
 			} );
-	}
+	} );
+
+	await Promise.allSettled( updateTagPromises );
 
 	counter.finish();
 
@@ -91,3 +96,26 @@ function trimErrorMessage( message ) {
 async function exec( command ) {
 	return tools.shExec( command, { verbosity: 'silent', async: true } );
 }
+
+/**
+ * @param {Function} callback
+ * @param {Number} times
+ * @returns {RetryCallback}
+ */
+function retry( callback, times = 3 ) {
+	return ( ...args ) => Promise.resolve()
+		.then( () => callback( ...args ) )
+		.catch( err => {
+			if ( times > 0 ) {
+				return retry( callback, times - 1 )( ...args );
+			}
+
+			throw err;
+		} );
+}
+
+/**
+ * @callback RetryCallback
+ * @param {...*} args
+ * @returns {Promise}
+ */

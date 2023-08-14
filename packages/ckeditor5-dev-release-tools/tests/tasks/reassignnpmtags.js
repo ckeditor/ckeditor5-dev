@@ -183,7 +183,7 @@ describe( 'reassignNpmTags()', () => {
 
 		it( 'should display errors found during processing a package', async () => {
 			const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
-			npmDistTagAdd.onFirstCall().throws( new Error( 'Npm error while updating tag.' ) );
+			npmDistTagAdd.throws( new Error( 'Npm error while updating tag.' ) );
 
 			await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1' ] } );
 
