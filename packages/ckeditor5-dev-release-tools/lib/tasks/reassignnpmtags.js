@@ -12,6 +12,8 @@
 const chalk = require( 'chalk' );
 const columns = require( 'cli-columns' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+const util = require( 'util' );
+const exec = util.promisify( require( 'child_process' ).exec );
 const assertNpmAuthorization = require( '../utils/assertnpmauthorization' );
 
 /**
@@ -35,26 +37,21 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
 	counter.start();
 
 	const updateTagPromises = packages.map( async packageName => {
-		const showLatestVersionRetryable = retry( () => exec( `npm show ${ packageName }@latest version` ) );
-		const latestVersion = await showLatestVersionRetryable()
-			.then( version => version.trim() )
-			.catch( error => {
-				errors.push( trimErrorMessage( error.message ) );
-			} );
-
-		if ( latestVersion === version ) {
-			packagesSkipped.push( packageName );
-
-			return null;
-		}
-
 		const updateLatestTagRetryable = retry( () => exec( `npm dist-tag add ${ packageName }@${ version } latest` ) );
 		await updateLatestTagRetryable()
-			.then( () => {
-				packagesUpdated.push( packageName );
+			.then( response => {
+				if ( response.stdout ) {
+					packagesUpdated.push( packageName );
+				} else if ( response.stderr ) {
+					throw new Error( response.stderr );
+				}
 			} )
 			.catch( error => {
-				errors.push( trimErrorMessage( error.message ) );
+				if ( error.message.includes( 'is already set to version' ) ) {
+					packagesSkipped.push( packageName );
+				} else {
+					errors.push( trimErrorMessage( error.message ) );
+				}
 			} )
 			.finally( () => {
 				counter.increase();
@@ -87,14 +84,6 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
  */
 function trimErrorMessage( message ) {
 	return message.replace( /npm ERR!.*\n/g, '' ).trim();
-}
-
-/**
- * @param {String} command
- * @returns {Promise.<String>}
- */
-async function exec( command ) {
-	return tools.shExec( command, { verbosity: 'silent', async: true } );
 }
 
 /**
