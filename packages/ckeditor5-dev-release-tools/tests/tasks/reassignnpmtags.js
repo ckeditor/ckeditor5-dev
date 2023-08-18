@@ -21,7 +21,6 @@ describe( 'reassignNpmTags()', () => {
 
 		stubs = {
 			tools: {
-				shExec: sinon.stub(),
 				createSpinner: sinon.stub().callsFake( () => {
 					return stubs.spinner;
 				} )
@@ -43,15 +42,18 @@ describe( 'reassignNpmTags()', () => {
 			columns: sinon.stub(),
 			console: {
 				log: sinon.stub( console, 'log' )
-			}
+			},
+			util: {
+				promisify: sinon.stub().callsFake( () => stubs.exec )
+			},
+			exec: sinon.stub()
 		};
-
-		stubs.tools.shExec.withArgs( sinon.match( 'npm show' ) ).resolves( '1.0.0' );
 
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', { tools: stubs.tools } );
 		mockery.registerMock( '../utils/assertnpmauthorization', stubs.assertNpmAuthorization );
 		mockery.registerMock( 'cli-columns', stubs.columns );
 		mockery.registerMock( 'chalk', stubs.chalk );
+		mockery.registerMock( 'util', stubs.util );
 
 		reassignNpmTags = require( '../../lib/tasks/reassignnpmtags' );
 	} );
@@ -64,7 +66,7 @@ describe( 'reassignNpmTags()', () => {
 
 	it( 'should throw an error when assertNpmAuthorization throws error', async () => {
 		stubs.assertNpmAuthorization.throws( new Error( 'User not logged in error' ) );
-		const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
+		const npmDistTagAdd = stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) );
 
 		try {
 			await reassignNpmTags( { npmOwner: 'correct-npm-user', version: '1.0.1', packages: [ 'package1' ] } );
@@ -76,25 +78,18 @@ describe( 'reassignNpmTags()', () => {
 		expect( npmDistTagAdd.callCount ).to.equal( 0 );
 	} );
 
-	it( 'should still try to update tags when can not obtain package version from npm', async () => {
-		stubs.tools.shExec.withArgs( sinon.match( 'npm show' ) ).throws( new Error( 'Can not obtain package version.' ) );
-		const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
-
-		await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
-
-		expect( npmDistTagAdd.callCount ).to.equal( 2 );
-	} );
-
 	it( 'should skip updating tags when provided version matches existing version for tag latest', async () => {
-		const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
+		stubs.columns.returns( 'package1 | package2' );
+		stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) ).throws( new Error( 'is already set to version' ) );
 
 		await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.0', packages: [ 'package1', 'package2' ] } );
 
-		expect( npmDistTagAdd.callCount ).to.equal( 0 );
+		expect( stubs.console.log.firstCall.args[ 0 ] ).to.equal( '⬇️ Packages skipped:' );
+		expect( stubs.console.log.secondCall.args[ 0 ] ).to.deep.equal( 'package1 | package2' );
 	} );
 
 	it( 'should update tags when tag latest for provided version does not yet exist', async () => {
-		const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
+		const npmDistTagAdd = stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) ).resolves( { stdout: '+latest' } );
 
 		await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
 
@@ -103,7 +98,7 @@ describe( 'reassignNpmTags()', () => {
 	} );
 
 	it( 'should continue updating packages even if first package update fails', async () => {
-		const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
+		const npmDistTagAdd = stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) );
 		npmDistTagAdd.onFirstCall().throws( new Error( 'Npm error while updating tag.' ) );
 
 		await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
@@ -131,7 +126,7 @@ describe( 'reassignNpmTags()', () => {
 		} );
 
 		it( 'should increase the spinner counter after failure processing a package', async () => {
-			const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
+			const npmDistTagAdd = stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) );
 			npmDistTagAdd.onFirstCall().throws( new Error( 'Npm error while updating tag.' ) );
 
 			await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1' ] } );
@@ -140,7 +135,7 @@ describe( 'reassignNpmTags()', () => {
 		} );
 
 		it( 'should finish the spinner once all packages have been processed', async () => {
-			const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
+			const npmDistTagAdd = stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) );
 			npmDistTagAdd.onFirstCall().throws( new Error( 'Npm error while updating tag.' ) );
 
 			await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
@@ -154,6 +149,7 @@ describe( 'reassignNpmTags()', () => {
 		} );
 
 		it( 'should display skipped packages in a column', async () => {
+			stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) ).throws( new Error( 'is already set to version' ) );
 			stubs.columns.returns( '1 | 2 | 3' );
 
 			await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.0', packages: [ 'package1', 'package2' ] } );
@@ -168,6 +164,7 @@ describe( 'reassignNpmTags()', () => {
 		} );
 
 		it( 'should display processed packages in a column', async () => {
+			stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) ).resolves( { stdout: '+latest' } );
 			stubs.columns.returns( '1 | 2 | 3' );
 
 			await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
@@ -182,8 +179,8 @@ describe( 'reassignNpmTags()', () => {
 		} );
 
 		it( 'should display errors found during processing a package', async () => {
-			const npmDistTagAdd = stubs.tools.shExec.withArgs( sinon.match( 'npm dist-tag add' ) );
-			npmDistTagAdd.onFirstCall().throws( new Error( 'Npm error while updating tag.' ) );
+			const npmDistTagAdd = stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) );
+			npmDistTagAdd.throws( new Error( 'Npm error while updating tag.' ) );
 
 			await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1' ] } );
 

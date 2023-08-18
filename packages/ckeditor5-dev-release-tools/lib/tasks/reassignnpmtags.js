@@ -12,10 +12,13 @@
 const chalk = require( 'chalk' );
 const columns = require( 'cli-columns' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+const util = require( 'util' );
+const exec = util.promisify( require( 'child_process' ).exec );
 const assertNpmAuthorization = require( '../utils/assertnpmauthorization' );
 
 /**
  * Used to switch the tags from `staging` to `latest` for specified array of packages.
+ * Each operation will be retried up to 3 times in case of failure.
  *
  * @param {Object} options
  * @param {String} options.npmOwner User that is authorized to release packages.
@@ -33,30 +36,29 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
 	const counter = tools.createSpinner( 'Reassigning npm tags...', { total: packages.length } );
 	counter.start();
 
-	for ( const packageName of packages ) {
-		const latestVersion = await exec( `npm show ${ packageName }@latest version` )
-			.then( version => version.trim() )
-			.catch( error => {
-				errors.push( trimErrorMessage( error.message ) );
-			} );
-
-		if ( latestVersion === version ) {
-			packagesSkipped.push( packageName );
-
-			continue;
-		}
-
-		await exec( `npm dist-tag add ${ packageName }@${ version } latest` )
-			.then( () => {
-				packagesUpdated.push( packageName );
+	const updateTagPromises = packages.map( async packageName => {
+		const updateLatestTagRetryable = retry( () => exec( `npm dist-tag add ${ packageName }@${ version } latest` ) );
+		await updateLatestTagRetryable()
+			.then( response => {
+				if ( response.stdout ) {
+					packagesUpdated.push( packageName );
+				} else if ( response.stderr ) {
+					throw new Error( response.stderr );
+				}
 			} )
 			.catch( error => {
-				errors.push( trimErrorMessage( error.message ) );
+				if ( error.message.includes( 'is already set to version' ) ) {
+					packagesSkipped.push( packageName );
+				} else {
+					errors.push( trimErrorMessage( error.message ) );
+				}
 			} )
 			.finally( () => {
 				counter.increase();
 			} );
-	}
+	} );
+
+	await Promise.allSettled( updateTagPromises );
 
 	counter.finish();
 
@@ -85,9 +87,24 @@ function trimErrorMessage( message ) {
 }
 
 /**
- * @param {String} command
- * @returns {Promise.<String>}
+ * @param {Function} callback
+ * @param {Number} times
+ * @returns {RetryCallback}
  */
-async function exec( command ) {
-	return tools.shExec( command, { verbosity: 'silent', async: true } );
+function retry( callback, times = 3 ) {
+	return ( ...args ) => Promise.resolve()
+		.then( () => callback( ...args ) )
+		.catch( err => {
+			if ( times > 0 ) {
+				return retry( callback, times - 1 )( ...args );
+			}
+
+			throw err;
+		} );
 }
+
+/**
+ * @callback RetryCallback
+ * @param {...*} args
+ * @returns {Promise}
+ */
