@@ -23,7 +23,8 @@ module.exports = function cleanPoFileContent( poFileContent, options = {} ) {
 	po.headers = {
 		Language: po.headers.Language,
 		'Language-Team': po.headers[ 'Language-Team' ],
-		'Plural-Forms': po.headers[ 'Plural-Forms' ]
+		'Plural-Forms': po.headers[ 'Plural-Forms' ],
+		'Content-Type': 'text/plain; charset=UTF-8'
 	};
 
 	const copyright = po.comments.find( comment => comment.includes( 'Copyright' ) );
