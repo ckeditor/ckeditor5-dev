@@ -75,12 +75,12 @@ module.exports = async function formatMessage( options ) {
  * @returns {String}
  */
 function getNotifierMessage( options ) {
-	const slackAccount = members[ options.githubAccount ] || null;
-	const botActionMessage = '_Automated stuff happened on one of the branches. Got time to have a look at it, anyone?_';
-
 	if ( options.shouldHideAuthor ) {
 		return '_The author of the commit was hidden. <https://github.com/ckeditor/ckeditor5/issues/9252|Read more about why.>_';
 	}
+
+	const slackAccount = findSlackAccount( options.githubAccount );
+	const botActionMessage = '_Automated stuff happened on one of the branches. Got time to have a look at it, anyone?_';
 
 	if ( bots.includes( options.githubAccount ) ) {
 		return botActionMessage;
@@ -96,6 +96,24 @@ function getNotifierMessage( options ) {
 	}
 
 	return `<@${ slackAccount }>, could you take a look?`;
+}
+
+/**
+ * @param {String|null} githubAccount
+ * @returns {String|null}
+ */
+function findSlackAccount( githubAccount ) {
+	if ( !githubAccount ) {
+		return null;
+	}
+
+	for ( const [ key, value ] of Object.entries( members ) ) {
+		if ( key.toLowerCase() === githubAccount.toLowerCase() ) {
+			return value;
+		}
+	}
+
+	return null;
 }
 
 /**
