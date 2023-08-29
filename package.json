@@ -5,6 +5,7 @@
   "devDependencies": {
     "@ckeditor/ckeditor5-dev-ci": "^38.4.0",
     "@ckeditor/ckeditor5-dev-release-tools": "^38.4.0",
+    "coveralls": "^3.1.1",
     "eslint": "^7.0.0",
     "eslint-config-ckeditor5": "^5.0.1",
     "glob": "^10.2.5",
@@ -15,8 +16,7 @@
     "nyc": "^15.1.0"
   },
   "engines": {
-    "node": ">=16.0.0",
-    "npm": ">=5.7.1"
+    "node": ">=16.0.0"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
