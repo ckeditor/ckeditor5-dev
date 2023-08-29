@@ -102,9 +102,9 @@ module.exports = function getKarmaConfig( options ) {
 		browsers: getBrowsers( options ),
 
 		customLaunchers: {
-			CHROME_TRAVIS_CI: {
+			CHROME_CI: {
 				base: 'Chrome',
-				flags: getFlagsForBrowser( 'CHROME_TRAVIS_CI' )
+				flags: getFlagsForBrowser( 'CHROME_CI' )
 			},
 			CHROME_LOCAL: {
 				base: 'Chrome',
@@ -213,7 +213,7 @@ function getBrowsers( options ) {
 			return browser;
 		}
 
-		return process.env.TRAVIS ? 'CHROME_TRAVIS_CI' : 'CHROME_LOCAL';
+		return process.env.CI ? 'CHROME_CI' : 'CHROME_LOCAL';
 	} );
 }
 
@@ -229,7 +229,7 @@ function getFlagsForBrowser( browser ) {
 		'--disable-backgrounding-occluded-windows'
 	];
 
-	if ( browser === 'CHROME_TRAVIS_CI' ) {
+	if ( browser === 'CHROME_CI' ) {
 		return [
 			...commonFlags,
 			'--no-sandbox'
