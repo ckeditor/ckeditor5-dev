@@ -46,7 +46,7 @@ DEBUG=true yarn run test
 Test a single package:
 
 ```bash
-./node_modules/.bin/mocha packages/ckeditor5-dev-release-tools/tests/* --recursive
+yarn mocha packages/ckeditor5-dev-release-tools/tests/* --recursive
 ```
 
 Code coverage:
