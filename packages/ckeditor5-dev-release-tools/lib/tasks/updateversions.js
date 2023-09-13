@@ -87,7 +87,7 @@ async function getPackageJsonPaths( cwd, globPatterns, packagesDirectoryFilter )
 
 /**
  * @param {String} packagesDirectory
- * @returns {Object}
+ * @returns {Promise.<Object>}
  */
 function readPackageJson( packagesDirectory ) {
 	const packageJsonPath = join( packagesDirectory, 'package.json' );
