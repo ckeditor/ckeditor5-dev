@@ -4,7 +4,6 @@
  */
 
 const { transifexApi } = require( '@transifex/api' );
-const fetch = require( 'node-fetch' );
 
 const MAX_REQUEST_ATTEMPTS = 10;
 const REQUEST_RETRY_TIMEOUT = 3000; // In milliseconds.
@@ -321,7 +320,7 @@ function createDownloadRequest( resource, language, numberOfAttempts = 1 ) {
  * attempt. There are three possible cases that are handled during downloading a file:
  *
  * (1) According to the Transifex API v3.0, when the requested file is ready for download, the Transifex service returns HTTP code 303,
- * which is the redirection to the new location, where the file is available. By default, `node-fetch` follows redirections so the requested
+ * which is the redirection to the new location, where the file is available. By default, `fetch` follows redirections so the requested
  * file is downloaded automatically.
  * (2) If the requested file is not ready yet, but the response status from the Transifex service was successful and the number of retries
  * has not reached the limit yet, the request is queued and retried after the REQUEST_RETRY_TIMEOUT timeout.

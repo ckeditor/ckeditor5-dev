@@ -10,7 +10,6 @@
 'use strict';
 
 const { execSync } = require( 'child_process' );
-const fetch = require( 'node-fetch' );
 const minimist = require( 'minimist' );
 const processJobStatuses = require( '../lib/process-job-statuses' );
 

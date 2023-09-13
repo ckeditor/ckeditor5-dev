@@ -7,7 +7,6 @@
 
 'use strict';
 
-const fetch = require( 'node-fetch' );
 const bots = require( './data/bots.json' );
 const members = require( './data/members.json' );
 

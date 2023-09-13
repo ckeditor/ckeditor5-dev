@@ -12,7 +12,6 @@
     "chalk": "^4.0.0",
     "inquirer": "^7.1.0",
     "@transifex/api": "^4.2.1",
-    "node-fetch": "^2.6.7",
     "cli-table": "^0.3.1"
   },
   "devDependencies": {
@@ -22,7 +21,7 @@
     "sinon": "^9.2.4"
   },
   "engines": {
-    "node": ">=16.0.0",
+    "node": ">=18.0.0",
     "npm": ">=5.7.1"
   },
   "files": [

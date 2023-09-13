@@ -5,7 +5,6 @@
   "keywords": [],
   "dependencies": {
     "minimist": "^1.2.5",
-    "node-fetch": "^2.6.7",
     "slack-notify": "^2.0.6"
   },
   "devDependencies": {
@@ -14,7 +13,7 @@
     "sinon": "^9.2.4"
   },
   "engines": {
-    "node": ">=16.0.0",
+    "node": ">=18.0.0",
     "npm": ">=5.7.1"
   },
   "files": [

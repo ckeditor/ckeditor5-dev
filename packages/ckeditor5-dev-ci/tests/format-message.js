@@ -16,15 +16,18 @@ describe( 'lib/format-message', () => {
 
 	beforeEach( () => {
 		stubs = {
-			nodeFetch: sinon.stub()
+			fetch: sinon.stub( global, 'fetch' )
 		};
 
 		formatMessage = proxyquire( '../lib/format-message', {
-			'node-fetch': stubs.nodeFetch,
 			'./data/members.json': {
 				ExampleNick: 'slackId'
 			}
 		} );
+	} );
+
+	afterEach( () => {
+		sinon.restore();
 	} );
 
 	describe( 'formatMessage()', () => {
@@ -33,7 +36,7 @@ describe( 'lib/format-message', () => {
 		} );
 
 		it( 'should display a message for bot if a login is included in the "bots" array', async () => {
-			stubs.nodeFetch.resolves( {
+			stubs.fetch.resolves( {
 				json() {
 					return Promise.resolve( {
 						author: {
@@ -72,7 +75,7 @@ describe( 'lib/format-message', () => {
 		} );
 
 		it( 'should display a message for bot if a login is unavailable but author name is included in the "bots" array', async () => {
-			stubs.nodeFetch.resolves( {
+			stubs.fetch.resolves( {
 				json() {
 					return Promise.resolve( {
 						author: null,
@@ -109,7 +112,7 @@ describe( 'lib/format-message', () => {
 		} );
 
 		it( 'should mention the channel if a login is unavailable and author name is not included in the "bots" array', async () => {
-			stubs.nodeFetch.resolves( {
+			stubs.fetch.resolves( {
 				json() {
 					return Promise.resolve( {
 						author: null,
@@ -146,7 +149,7 @@ describe( 'lib/format-message', () => {
 		} );
 
 		it( 'should find a Slack account based on a GitHub account case-insensitive', async () => {
-			stubs.nodeFetch.resolves( {
+			stubs.fetch.resolves( {
 				json() {
 					return Promise.resolve( {
 						author: {
