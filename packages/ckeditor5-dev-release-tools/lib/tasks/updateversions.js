@@ -24,24 +24,30 @@ const checkVersionAvailability = require( '../utils/checkversionavailability' );
  *
  * @param {Object} options
  * @param {String} options.version Version to store in a `package.json` file under the `version` key.
+ * @param {UpdateVersionsPackagesDirectoryFilter|null} [options.packagesDirectoryFilter=null] An optional callback allowing filtering out
+ * directories/packages that should not be touched by the task.
  * @param {String} [options.packagesDirectory] Relative path to a location of packages to update. If not specified,
  * only the root package is checked.
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @returns {Promise}
  */
-module.exports = async function updateVersions( { packagesDirectory, version, cwd = process.cwd() } ) {
+module.exports = async function updateVersions( options ) {
+	const {
+		packagesDirectory,
+		version,
+		packagesDirectoryFilter = null,
+		cwd = process.cwd()
+	} = options;
 	const normalizedCwd = toUnix( cwd );
 	const normalizedPackagesDir = packagesDirectory ? normalizeTrim( packagesDirectory ) : null;
 
 	const globPatterns = getGlobPatterns( normalizedPackagesDir );
-	const pkgJsonPaths = await glob( globPatterns, { cwd: normalizedCwd, absolute: true, nodir: true } );
+	const pkgJsonPaths = await getPackageJsonPaths( cwd, globPatterns, packagesDirectoryFilter );
+
 	const randomPackagePath = getRandomPackagePath( pkgJsonPaths, normalizedPackagesDir );
 
-	const rootPackageJson = join( normalizedCwd, 'package.json' );
-	const rootPackageVersion = ( await fs.readJson( rootPackageJson ) ).version;
-
-	const randomPackageJson = join( randomPackagePath, 'package.json' );
-	const randomPackageName = ( await fs.readJson( randomPackageJson ) ).name;
+	const { version: rootPackageVersion } = await readPackageJson( normalizedCwd );
+	const { name: randomPackageName } = await readPackageJson( randomPackagePath );
 
 	checkIfVersionIsValid( version, rootPackageVersion );
 
@@ -58,6 +64,36 @@ module.exports = async function updateVersions( { packagesDirectory, version, cw
 		await fs.writeJson( pkgJsonPath, pkgJson, { spaces: 2 } );
 	}
 };
+
+/**
+ * @param {String} cwd
+ * @param {Array.<String>} globPatterns
+ * @param {UpdateVersionsPackagesDirectoryFilter|null} packagesDirectoryFilter
+ * @returns {Promise.<Array.<String>>}
+ */
+async function getPackageJsonPaths( cwd, globPatterns, packagesDirectoryFilter ) {
+	const pkgJsonPaths = await glob( globPatterns, {
+		cwd,
+		absolute: true,
+		nodir: true
+	} );
+
+	if ( !packagesDirectoryFilter ) {
+		return pkgJsonPaths;
+	}
+
+	return pkgJsonPaths.filter( packagesDirectoryFilter );
+}
+
+/**
+ * @param {String} packagesDirectory
+ * @returns {Object}
+ */
+function readPackageJson( packagesDirectory ) {
+	const packageJsonPath = join( packagesDirectory, 'package.json' );
+
+	return fs.readJson( packageJsonPath );
+}
 
 /**
  * @param {String|null} packagesDirectory
@@ -104,3 +140,11 @@ function checkIfVersionIsValid( newVersion, currentVersion ) {
 		throw new Error( `Provided version ${ newVersion } must be greater than ${ currentVersion } or match pattern 0.0.0-nightly.` );
 	}
 }
+
+/**
+ * @callback UpdateVersionsPackagesDirectoryFilter
+ *
+ * @param {String} packageJsonPath An absolute path to a `package.json` file.
+ *
+ * @returns {Boolean} Whether to include (`true`) or skip (`false`) processing the given directory/package.
+ */
