@@ -12,6 +12,7 @@
     "chalk": "^4.0.0",
     "inquirer": "^7.1.0",
     "@transifex/api": "^4.2.1",
+    "node-fetch": "^2.6.7",
     "cli-table": "^0.3.1"
   },
   "devDependencies": {

@@ -113,10 +113,11 @@ describe( 'dev-transifex/transifex-service', () => {
 				}
 			},
 
-			fetch: sinon.stub( global, 'fetch' )
+			fetch: sinon.stub()
 		};
 
 		mockery.registerMock( '@transifex/api', { transifexApi: stubs.transifexApi } );
+		mockery.registerMock( 'node-fetch', stubs.fetch );
 
 		transifexService = require( '../lib/transifexservice' );
 	} );

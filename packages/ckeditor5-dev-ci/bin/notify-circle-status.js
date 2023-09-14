@@ -7,6 +7,7 @@
 
 /* eslint-env node */
 
+const fetch = require( 'node-fetch' );
 const slackNotify = require( 'slack-notify' );
 const formatMessage = require( '../lib/format-message' );
 
