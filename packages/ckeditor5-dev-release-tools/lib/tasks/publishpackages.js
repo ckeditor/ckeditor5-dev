@@ -70,6 +70,7 @@ module.exports = async function publishPackages( options ) {
 
 	if ( shouldPublishPackages ) {
 		await executeInParallel( {
+			cwd,
 			packagesDirectory,
 			listrTask,
 			taskToExecute: publishPackageOnNpmCallback,

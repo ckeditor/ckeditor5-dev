@@ -280,7 +280,8 @@ describe( 'dev-release-tools/tasks', () => {
 				npmTag: 'nightly',
 				listrTask,
 				signal: abortController.signal,
-				concurrency: 3
+				concurrency: 3,
+				cwd: '/home/cwd'
 			} ).then( () => {
 				expect( stubs.executeInParallel.callCount ).to.equal( 1 );
 				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'packagesDirectory', 'packages' );
@@ -289,6 +290,7 @@ describe( 'dev-release-tools/tasks', () => {
 				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.deep.property( 'taskOptions', { npmTag: 'nightly' } );
 				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'signal', abortController.signal );
 				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'concurrency', 3 );
+				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'cwd', '/home/cwd' );
 			} );
 		} );
 
