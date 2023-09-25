@@ -9,6 +9,9 @@ const { cloneDeepWith } = require( 'lodash' );
 const utils = require( './transformcommitutils' );
 const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
 
+// Squash commit follows the pattern: "A pull request title (#{number})".
+const SQUASH_COMMIT_REGEXP = /[\W\w]+ \(#\d+\)/;
+
 /**
  * Factory function.
  *
@@ -26,7 +29,7 @@ const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
  * @param {Boolean} [options.useExplicitBreakingChangeGroups] If set on `true`, notes from parsed commits will be grouped as
  * "MINOR BREAKING CHANGES" and "MAJOR BREAKING CHANGES'. If set on `false` (by default), all breaking changes notes will be treated
  * as "BREAKING CHANGES".
- * @returns {Function}
+ * @returns {TransformCommit}
  */
 module.exports = function transformCommitFactory( options = {} ) {
 	return rawCommit => {
@@ -36,11 +39,25 @@ module.exports = function transformCommitFactory( options = {} ) {
 			return commit;
 		}
 
-		if ( Array.isArray( commit ) ) {
-			return commit.flatMap( splitMultiScopeCommit );
+		// Single commit.
+		if ( !Array.isArray( commit ) ) {
+			return splitMultiScopeCommit( commit );
 		}
 
-		return splitMultiScopeCommit( commit );
+		// For a squash merge commit, the `commit` array contains an additional, invalid entry for the squash itself.
+		// It contains all notes that were not processed. Hence, let's remove it and copy its notes to a first valid commit.
+		// Also, let's update the "merge" field to display a merge commit on the screen,
+		// when passing the commits array through the `displayCommits()` function.
+		if ( isSquashMergeCommit( commit ) ) {
+			const squashCommit = commit.shift();
+			const [ firstCommit ] = commit;
+			firstCommit.notes = squashCommit.notes;
+			firstCommit.merge = squashCommit.header;
+
+			normalizeNotes( firstCommit );
+		}
+
+		return commit.flatMap( splitMultiScopeCommit );
 	};
 
 	/**
@@ -449,7 +466,23 @@ module.exports = function transformCommitFactory( options = {} ) {
 			}
 		} ) );
 	}
+
+	/**
+	 * @param {Array.<Commit>} commits
+	 * @returns {Boolean}
+	 */
+	function isSquashMergeCommit( commits ) {
+		const [ squashCommit ] = commits;
+
+		return !!squashCommit.header.match( SQUASH_COMMIT_REGEXP );
+	}
 };
+
+/**
+ * @callback TransformCommit
+ * @param {Commit} rawCommit
+ * @returns {Commit|Array.<Commit>|undefined}
+ */
 
 /**
  * @typedef {Object} Commit
