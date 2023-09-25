@@ -1205,6 +1205,65 @@ describe( 'dev-release-tools/utils', () => {
 					} );
 				} );
 			} );
+
+			describe( 'squash merge commit', () => {
+				// TODO: Verify results.
+				it( 'removes the squash commit part from results', () => {
+					const commit = {
+						type: null,
+						subject: null,
+						merge: null,
+						header: 'A squash pull request change (#111)',
+						body: 'Fix (scope-1): Description 1.\n' +
+							'\n' +
+							'Other (scope-2): Description 2.\n' +
+							'\n' +
+							'Internal (scope-3): Description 3.',
+						footer: '',
+						notes: [],
+						references: [],
+						mentions: [],
+						revert: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee'
+					};
+
+					/* const rawCommit = */transformCommit( commit );
+				} );
+
+				// TODO: Verify results.
+				it( 'processes breaking change notes from the removed squash commit', () => {
+					const commit = {
+						type: null,
+						subject: null,
+						merge: null,
+						header: 'A squash pull request change (#111)',
+						body: 'Fix (scope-1): Description 1.\n' +
+							'\n' +
+							'Other (scope-2): Description 2.\n' +
+							'\n' +
+							'Internal (scope-3): Description 3.',
+						footer: 'MINOR BREAKING CHANGE (scope-1): BC 1.\n' +
+							'\n' +
+							'MINOR BREAKING CHANGE (scope-2): BC 2.',
+						notes: [
+							{
+								title: 'MINOR BREAKING CHANGE',
+								text: '(scope-1): BC 1.'
+							},
+							{
+								title: 'MINOR BREAKING CHANGE',
+								text: '(scope-2): BC 2.'
+							}
+						],
+						references: [],
+						mentions: [],
+						revert: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee'
+					};
+
+					/* const rawCommit = */transformCommit( commit );
+				} );
+			} );
 		} );
 	} );
 } );
