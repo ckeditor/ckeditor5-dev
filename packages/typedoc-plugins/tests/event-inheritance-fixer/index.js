@@ -44,10 +44,10 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 			.getReflectionsByKind( TypeDoc.ReflectionKind.All )
 			.filter( child => child.kindString === 'Event' );
 
-		// There are 8 events from classes and 8 events from interfaces.
-		// There are also 3 events from "MixedClass", which implements the "InterfaceC".
+		// There are 8 events from classes and 9 events from interfaces.
+		// There are also 3 events from `MixedClass`, which implements the `InterfaceC`.
 		// Also, 3 events come from the `ClassFoo` and its descendant classes.
-		expect( events ).to.lengthOf( 22 );
+		expect( events ).to.lengthOf( 23 );
 	} );
 
 	// ---------------
@@ -72,6 +72,7 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 	//     ⤷ InterfaceC
 	//        ⤷ MixedClass
 	// InterfaceD
+	// InterfaceE
 
 	// ------
 	// EVENTS
@@ -101,6 +102,7 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 	//        ⤷ MixedClass ⟶ "event:event-1-interface-a" (inherited from InterfaceC)
 	//        ⤷ MixedClass ⟶ "event:event-2-interface-a" (inherited from InterfaceC)
 	//        ⤷ MixedClass ⟶ "event:event-3-interface-b" (inherited from InterfaceC)
+	// InterfaceE ⟶ "event:event-1-interface-e"
 
 	// The "MixedClass" implements the "InterfaceC", so all events from the "InterfaceC" will be cloned.
 
@@ -124,6 +126,7 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 		expect( findEvent( 'InterfaceC', 'event:event-1-interface-a' ) ).to.not.be.undefined;
 		expect( findEvent( 'InterfaceC', 'event:event-2-interface-a' ) ).to.not.be.undefined;
 		expect( findEvent( 'InterfaceC', 'event:event-3-interface-b' ) ).to.not.be.undefined;
+		expect( findEvent( 'InterfaceE', 'event:event-1-interface-e' ) ).to.not.be.undefined;
 	} );
 
 	it( 'should find all events within the project (verifying a class that implements all interfaces)', () => {
@@ -347,7 +350,7 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 				.getReflectionsByKind( TypeDoc.ReflectionKind.All )
 				.filter( child => child.kindString === 'Event' );
 
-			expect( events ).to.lengthOf( 19 );
+			expect( events ).to.lengthOf( 20 );
 		} );
 
 		it( 'should find all events within the project (verifying classes A-C)', () => {
@@ -367,6 +370,7 @@ describe( 'typedoc-plugins/event-inheritance-fixer', function() {
 			expect( findEvent( 'InterfaceC', 'event:event-1-interface-a' ) ).to.not.be.undefined;
 			expect( findEvent( 'InterfaceC', 'event:event-2-interface-a' ) ).to.not.be.undefined;
 			expect( findEvent( 'InterfaceC', 'event:event-3-interface-b' ) ).to.not.be.undefined;
+			expect( findEvent( 'InterfaceE', 'event:event-1-interface-e' ) ).to.not.be.undefined;
 		} );
 
 		it( 'should find all events within the project (verifying a class that implements all interfaces)', () => {
