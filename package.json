@@ -15,6 +15,9 @@
     "mocha": "^7.1.2",
     "nyc": "^15.1.0"
   },
+  "resolutions": {
+    "get-func-name": "2.0.0"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
