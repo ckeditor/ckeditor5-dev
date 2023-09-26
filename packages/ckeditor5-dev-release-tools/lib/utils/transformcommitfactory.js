@@ -49,10 +49,11 @@ module.exports = function transformCommitFactory( options = {} ) {
 		// Also, let's update the "merge" field to display a merge commit on the screen,
 		// when passing the commits array through the `displayCommits()` function.
 		if ( isSquashMergeCommit( commit ) ) {
-			const squashCommit = commit.shift();
 			const firstCommit = commit.find( c => c.isPublicCommit );
 
 			if ( firstCommit ) {
+				const squashCommit = commit.shift();
+
 				firstCommit.notes = squashCommit.notes;
 				firstCommit.merge = squashCommit.header;
 
