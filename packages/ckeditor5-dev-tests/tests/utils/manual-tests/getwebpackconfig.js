@@ -35,10 +35,19 @@ describe( 'getWebpackConfigForManualTests()', () => {
 				DefinePlugin: sinon.stub(),
 				ProvidePlugin: sinon.stub(),
 				SourceMapDevToolPlugin: sinon.stub()
+			},
+			devTranslations: {
+				CKEditorTranslationsPlugin: class {
+					constructor( args ) {
+						this.args = args;
+					}
+				}
 			}
 		};
 
 		mockery.registerMock( 'webpack', stubs.webpack );
+
+		mockery.registerMock( '@ckeditor/ckeditor5-dev-translations', stubs.devTranslations );
 
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
 			loaders: stubs.loaders,
@@ -114,5 +123,26 @@ describe( 'getWebpackConfigForManualTests()', () => {
 		expect( webpackConfig ).to.be.an( 'object' );
 		expect( webpackConfig ).to.not.have.property( 'devtool' );
 		expect( webpackConfig ).to.not.have.property( 'watch' );
+	} );
+
+	it( 'should pass correct options to CKEditorTranslationsPlugin', () => {
+		const webpackConfig = getWebpackConfigForManualTests( {
+			disableWatch: true,
+			language: 'pl',
+			additionalLanguages: [ 'fr', 'de' ]
+		} );
+
+		expect( webpackConfig ).to.have.property( 'plugins' );
+		expect( webpackConfig.plugins ).to.be.an( 'Array' );
+
+		const CKEditorTranslationsPlugin = webpackConfig.plugins.find( plugin => plugin.constructor.name === 'CKEditorTranslationsPlugin' );
+
+		expect( CKEditorTranslationsPlugin ).to.have.property( 'args' );
+		expect( CKEditorTranslationsPlugin.args ).to.deep.equal( {
+			language: 'pl',
+			additionalLanguages: [ 'fr', 'de' ],
+			addMainLanguageTranslationsToAllAssets: true,
+			packageNamesPattern: /packages[/\\]ckeditor5-[^/\\]+[/\\]/
+		} );
 	} );
 } );
