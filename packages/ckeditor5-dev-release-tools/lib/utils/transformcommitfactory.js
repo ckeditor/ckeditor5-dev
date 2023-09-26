@@ -10,7 +10,7 @@ const utils = require( './transformcommitutils' );
 const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
 
 // Squash commit follows the pattern: "A pull request title (#{number})".
-const SQUASH_COMMIT_REGEXP = /[\W\w]+ \(#\d+\)/;
+const SQUASH_COMMIT_REGEXP = /^[\W\w]+ \(#\d+\)$/;
 
 /**
  * Factory function.

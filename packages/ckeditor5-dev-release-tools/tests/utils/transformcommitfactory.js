@@ -1469,6 +1469,46 @@ describe( 'dev-release-tools/utils', () => {
 						body: ''
 					} );
 				} );
+
+				it( 'processes a title including various non-letter symbols', () => {
+					const rawCommit = {
+						type: null,
+						subject: null,
+						merge: null,
+						header: 'A squash pull (#12) request change! (#111)',
+						body: 'Just details.',
+						footer: '',
+						notes: [],
+						references: [],
+						mentions: [],
+						revert: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee'
+					};
+
+					const commits = transformCommit( rawCommit );
+
+					expect( commits ).to.be.an( 'Array' );
+					expect( commits ).to.lengthOf( 4 );
+
+					expect( commits[ 0 ] ).to.deep.equal( {
+						type: null,
+						subject: null,
+						merge: null,
+						header: 'A squash pull (#12) request change! (#111)',
+						body: '',
+						footer: '',
+						notes: [],
+						references: [],
+						mentions: [],
+						revert: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee',
+						rawType: undefined,
+						files: [],
+						scope: undefined,
+						isPublicCommit: false,
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev'
+					} );
+				} );
 			} );
 		} );
 	} );
