@@ -1470,6 +1470,61 @@ describe( 'dev-release-tools/utils', () => {
 					} );
 				} );
 
+				it( 'does not remove the squash commit if it is a valid message', () => {
+					const rawCommit = {
+						type: 'Fix',
+						subject: 'A squash pull request change (#111)',
+						merge: null,
+						header: 'Fix: A squash pull request change (#111)',
+						body: 'Internal (scope-1): Description 1.',
+						footer: '',
+						notes: [],
+						references: [],
+						mentions: [],
+						revert: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee'
+					};
+
+					const commits = transformCommit( rawCommit );
+
+					expect( commits ).to.be.an( 'Array' );
+					expect( commits ).to.lengthOf( 2 );
+
+					expect( commits[ 0 ] ).to.deep.equal( {
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'A squash pull request change ([#111](https://github.com/ckeditor/ckeditor5-dev/issues/111)).',
+						merge: null,
+						header: 'Fix: A squash pull request change (#111)',
+						body: '',
+						footer: '',
+						notes: [],
+						mentions: [],
+						revert: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee',
+						files: [],
+						scope: null,
+						isPublicCommit: true,
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev'
+					} );
+					expect( commits[ 1 ] ).to.deep.equal( {
+						revert: null,
+						merge: null,
+						footer: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee',
+						files: [],
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev',
+						notes: [],
+						mentions: [],
+						rawType: 'Internal',
+						scope: [ 'scope-1' ],
+						isPublicCommit: false,
+						header: 'Internal (scope-1): Description 1.',
+						subject: 'Description 1.',
+						body: ''
+					} );
+				} );
+
 				it( 'processes a title including various non-letter symbols', () => {
 					const rawCommit = {
 						type: null,

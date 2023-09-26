@@ -478,6 +478,10 @@ module.exports = function transformCommitFactory( options = {} ) {
 	function isSquashMergeCommit( commits ) {
 		const [ squashCommit ] = commits;
 
+		if ( squashCommit.type ) {
+			return false;
+		}
+
 		return !!squashCommit.header.match( SQUASH_COMMIT_REGEXP );
 	}
 };
@@ -495,7 +499,7 @@ module.exports = function transformCommitFactory( options = {} ) {
  *
  * @property {String} rawType Type of the commit without any modifications.
  *
- * @property {String} type Type of the commit (it can be modified).
+ * @property {String|null} type Type of the commit (it can be modified).
  *
  * @property {String} header First line of the commit message.
  *
