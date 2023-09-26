@@ -35,10 +35,19 @@ describe( 'getWebpackConfigForManualTests()', () => {
 				DefinePlugin: sinon.stub(),
 				ProvidePlugin: sinon.stub(),
 				SourceMapDevToolPlugin: sinon.stub()
+			},
+			devTranslations: {
+				CKEditorTranslationsPlugin: class {
+					constructor( args ) {
+						this.args = args;
+					}
+				}
 			}
 		};
 
 		mockery.registerMock( 'webpack', stubs.webpack );
+
+		mockery.registerMock( '@ckeditor/ckeditor5-dev-translations', stubs.devTranslations );
 
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
 			loaders: stubs.loaders,
@@ -114,5 +123,31 @@ describe( 'getWebpackConfigForManualTests()', () => {
 		expect( webpackConfig ).to.be.an( 'object' );
 		expect( webpackConfig ).to.not.have.property( 'devtool' );
 		expect( webpackConfig ).to.not.have.property( 'watch' );
+	} );
+
+	it( 'pattern passed to CKEditorTranslationsPlugin should match paths to ckeditor5 packages', () => {
+		const webpackConfig = getWebpackConfigForManualTests( { disableWatch: true } );
+
+		expect( webpackConfig ).to.have.property( 'plugins' );
+		expect( webpackConfig.plugins ).to.be.an( 'Array' );
+
+		const CKEditorTranslationsPlugin = webpackConfig.plugins.find( plugin => plugin.constructor.name === 'CKEditorTranslationsPlugin' );
+
+		const pattern = CKEditorTranslationsPlugin.args.packageNamesPattern;
+
+		expect( 'packages/ckeditor5-foo/bar'.match( pattern )[ 0 ] ).to.equal( 'packages/ckeditor5-foo/' );
+	} );
+
+	it( 'pattern passed to CKEditorTranslationsPlugin should match paths to external repositories named like ckeditor5 package', () => {
+		const webpackConfig = getWebpackConfigForManualTests( { disableWatch: true } );
+
+		expect( webpackConfig ).to.have.property( 'plugins' );
+		expect( webpackConfig.plugins ).to.be.an( 'Array' );
+
+		const CKEditorTranslationsPlugin = webpackConfig.plugins.find( plugin => plugin.constructor.name === 'CKEditorTranslationsPlugin' );
+
+		const pattern = CKEditorTranslationsPlugin.args.packageNamesPattern;
+
+		expect( 'external/ckeditor5-foo/packages/ckeditor5-bar/baz'.match( pattern )[ 0 ] ).to.equal( 'packages/ckeditor5-bar/' );
 	} );
 } );
