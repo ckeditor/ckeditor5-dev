@@ -50,11 +50,14 @@ module.exports = function transformCommitFactory( options = {} ) {
 		// when passing the commits array through the `displayCommits()` function.
 		if ( isSquashMergeCommit( commit ) ) {
 			const squashCommit = commit.shift();
-			const [ firstCommit ] = commit;
-			firstCommit.notes = squashCommit.notes;
-			firstCommit.merge = squashCommit.header;
+			const firstCommit = commit.find( c => c.isPublicCommit );
 
-			normalizeNotes( firstCommit );
+			if ( firstCommit ) {
+				firstCommit.notes = squashCommit.notes;
+				firstCommit.merge = squashCommit.header;
+
+				normalizeNotes( firstCommit );
+			}
 		}
 
 		return commit.flatMap( splitMultiScopeCommit );
