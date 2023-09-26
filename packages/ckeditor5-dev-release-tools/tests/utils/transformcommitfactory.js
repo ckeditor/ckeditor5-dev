@@ -1540,17 +1540,15 @@ describe( 'dev-release-tools/utils', () => {
 						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee'
 					};
 
-					const commits = transformCommit( rawCommit );
+					const commit = transformCommit( rawCommit );
 
-					expect( commits ).to.be.an( 'Array' );
-					expect( commits ).to.lengthOf( 4 );
-
-					expect( commits[ 0 ] ).to.deep.equal( {
+					expect( commit ).to.be.an( 'Object' );
+					expect( commit ).to.deep.equal( {
 						type: null,
 						subject: null,
 						merge: null,
 						header: 'A squash pull (#12) request change! (#111)',
-						body: '',
+						body: 'Just details.',
 						footer: '',
 						notes: [],
 						references: [],
