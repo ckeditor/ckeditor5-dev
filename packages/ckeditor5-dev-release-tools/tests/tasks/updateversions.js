@@ -5,6 +5,7 @@
 
 'use strict';
 
+const upath = require( 'upath' );
 const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
@@ -53,11 +54,52 @@ describe( 'dev-release-tools/release', () => {
 			expect( stubs.outputJson.callCount ).to.equal( 4 );
 			expect( stubs.outputJson.getCall( 0 ).args[ 0 ] ).to.contain( '/ckeditor5-dev/packages/package1/package.json' );
 			expect( stubs.outputJson.getCall( 0 ).args[ 1 ] ).to.deep.equal( { version: '1.0.1' } );
+			expect( stubs.outputJson.getCall( 1 ).args[ 0 ] ).to.contain( '/ckeditor5-dev/packages/package2/package.json' );
+			expect( stubs.outputJson.getCall( 1 ).args[ 1 ] ).to.deep.equal( { version: '1.0.1' } );
+			expect( stubs.outputJson.getCall( 2 ).args[ 0 ] ).to.contain( '/ckeditor5-dev/packages/package3/package.json' );
+			expect( stubs.outputJson.getCall( 2 ).args[ 1 ] ).to.deep.equal( { version: '1.0.1' } );
 			expect( stubs.outputJson.getCall( 3 ).args[ 0 ] ).to.equal( '/ckeditor5-dev/package.json' );
 			expect( stubs.outputJson.getCall( 3 ).args[ 1 ] ).to.deep.equal( { version: '1.0.1' } );
 		} );
 
-		it( 'should update the version field in the root package when packagesDirectory is not provided', async () => {
+		it( 'should allow filtering out packages that do not pass the `packagesDirectoryFilter` callback', async () => {
+			stubs.glob.resolves( [
+				'/ckeditor5-dev/packages/package1/package.json',
+				'/ckeditor5-dev/packages/package-bar/package.json',
+				'/ckeditor5-dev/packages/package-foo/package.json',
+				'/ckeditor5-dev/packages/package-number/package.json',
+				'/ckeditor5-dev/package.json'
+			] );
+
+			const directoriesToSkip = [
+				'package-number'
+			];
+
+			await updateVersions( {
+				version: '1.0.1',
+				packagesDirectory: 'packages',
+				packagesDirectoryFilter: packageJsonPath => {
+					return !directoriesToSkip.some( item => {
+						return upath.dirname( packageJsonPath ).endsWith( item );
+					} );
+				}
+			} );
+
+			expect( stubs.glob.callCount ).to.equal( 1 );
+			expect( stubs.glob.firstCall.args[ 0 ] ).to.deep.equal( [ 'package.json', 'packages/*/package.json' ] );
+
+			expect( stubs.outputJson.callCount ).to.equal( 4 );
+			expect( stubs.outputJson.getCall( 0 ).args[ 0 ] ).to.contain( '/ckeditor5-dev/packages/package1/package.json' );
+			expect( stubs.outputJson.getCall( 0 ).args[ 1 ] ).to.deep.equal( { version: '1.0.1' } );
+			expect( stubs.outputJson.getCall( 1 ).args[ 0 ] ).to.contain( '/ckeditor5-dev/packages/package-bar/package.json' );
+			expect( stubs.outputJson.getCall( 1 ).args[ 1 ] ).to.deep.equal( { version: '1.0.1' } );
+			expect( stubs.outputJson.getCall( 2 ).args[ 0 ] ).to.contain( '/ckeditor5-dev/packages/package-foo/package.json' );
+			expect( stubs.outputJson.getCall( 2 ).args[ 1 ] ).to.deep.equal( { version: '1.0.1' } );
+			expect( stubs.outputJson.getCall( 3 ).args[ 0 ] ).to.equal( '/ckeditor5-dev/package.json' );
+			expect( stubs.outputJson.getCall( 3 ).args[ 1 ] ).to.deep.equal( { version: '1.0.1' } );
+		} );
+
+		it( 'should update the version field in the root package when `packagesDirectory` is not provided', async () => {
 			stubs.glob.resolves( [ '/ckeditor5-dev' ] );
 
 			await updateVersions( { version: '1.0.1' } );
@@ -105,7 +147,7 @@ describe( 'dev-release-tools/release', () => {
 			}
 		} );
 
-		it( 'should not provide the root package name when checking version availability if packagesDirectory is provided', async () => {
+		it( 'should not use the root package name when checking version availability if `packagesDirectory` is provided', async () => {
 			stubs.glob.resolves( [
 				'/ckeditor5-dev/packages/package1/package.json',
 				'/ckeditor5-dev/packages/package2/package.json',
@@ -121,7 +163,7 @@ describe( 'dev-release-tools/release', () => {
 			expect( stubs.checkVersionAvailability.firstCall.args[ 1 ] ).to.not.equal( 'root-package' );
 		} );
 
-		it( 'should provide the root package name when checking version availability if packagesDirectory is not provided', async () => {
+		it( 'should use the root package name when checking version availability if `packagesDirectory` is not provided', async () => {
 			stubs.glob.resolves( [ '/ckeditor5-dev/package.json' ] );
 			stubs.readJson.withArgs( '/ckeditor5-dev/package.json' ).resolves( { name: 'root-package' } );
 

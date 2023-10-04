@@ -22,8 +22,10 @@ const upath = require( 'upath' );
  * @param {Object} options
  * @param {String} options.version Target version or a range version to which all eligible dependencies will be updated.
  * Examples: `1.0.0`, `^1.0.0`, etc.
- * @param {Function} options.shouldUpdateVersionCallback Callback function that decides whether to update a version for a dependency.
- * It receives a package name as an argument and should return a boolean value.
+ * @param {UpdateVersionCallback} options.shouldUpdateVersionCallback Callback function that decides whether to update a version
+ * for a dependency. It receives a package name as an argument and should return a boolean value.
+ * @param {UpdateDependenciesPackagesDirectoryFilter|null} [options.packagesDirectoryFilter=null] An optional callback allowing
+ * filtering out directories/packages that should not be touched by the task.
  * @param {String} [options.packagesDirectory] Relative path to a location of packages to update their dependencies. If not specified,
  * only the root package is checked.
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
@@ -34,14 +36,9 @@ module.exports = async function updateDependencies( options ) {
 		version,
 		packagesDirectory,
 		shouldUpdateVersionCallback,
+		packagesDirectoryFilter = null,
 		cwd = process.cwd()
 	} = options;
-
-	const globOptions = {
-		cwd,
-		nodir: true,
-		absolute: true
-	};
 
 	const globPatterns = [ 'package.json' ];
 
@@ -51,7 +48,7 @@ module.exports = async function updateDependencies( options ) {
 		globPatterns.push( packagesDirectoryPattern );
 	}
 
-	const pkgJsonPaths = await glob( globPatterns, globOptions );
+	const pkgJsonPaths = await getPackageJsonPaths( cwd, globPatterns, packagesDirectoryFilter );
 
 	for ( const pkgJsonPath of pkgJsonPaths ) {
 		const pkgJson = await fs.readJson( pkgJsonPath );
@@ -82,3 +79,41 @@ function updateVersion( version, callback, dependencies ) {
 		}
 	}
 }
+
+/**
+ * @param {String} cwd
+ * @param {Array.<String>} globPatterns
+ * @param {UpdateDependenciesPackagesDirectoryFilter|null} packagesDirectoryFilter
+ * @returns {Promise.<Array.<String>>}
+ */
+async function getPackageJsonPaths( cwd, globPatterns, packagesDirectoryFilter ) {
+	const globOptions = {
+		cwd,
+		nodir: true,
+		absolute: true
+	};
+
+	const pkgJsonPaths = await glob( globPatterns, globOptions );
+
+	if ( !packagesDirectoryFilter ) {
+		return pkgJsonPaths;
+	}
+
+	return pkgJsonPaths.filter( packagesDirectoryFilter );
+}
+
+/**
+ * @callback UpdateVersionCallback
+ *
+ * @param {String} packageName A package name.
+ *
+ * @returns {Boolean} Whether to update (`true`) or ignore (`false`) bumping the package version.
+ */
+
+/**
+ * @callback UpdateDependenciesPackagesDirectoryFilter
+ *
+ * @param {String} packageJsonPath An absolute path to a `package.json` file.
+ *
+ * @returns {Boolean} Whether to include (`true`) or skip (`false`) processing the given directory/package.
+ */

@@ -51,7 +51,8 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 				// See https://ckeditor.com/docs/ckeditor5/latest/features/ui-language.html
 				language: options.language,
 				additionalLanguages: options.additionalLanguages,
-				addMainLanguageTranslationsToAllAssets: true
+				addMainLanguageTranslationsToAllAssets: true,
+				packageNamesPattern: /packages[/\\]ckeditor5-[^/\\]+[/\\]/
 			} ),
 			new webpack.DefinePlugin( definitions ),
 			new webpack.ProvidePlugin( {

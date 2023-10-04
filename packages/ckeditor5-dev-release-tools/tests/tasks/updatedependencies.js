@@ -6,6 +6,7 @@
 'use strict';
 
 const expect = require( 'chai' ).expect;
+const upath = require( 'upath' );
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 
@@ -157,6 +158,48 @@ describe( 'dev-release-tools/tasks', () => {
 				expect( stubs.fs.writeJson.getCall( 0 ).args[ 0 ] ).to.equal( '/work/project/package.json' );
 				expect( stubs.fs.writeJson.getCall( 1 ).args[ 0 ] ).to.equal( '/work/project/packages/ckeditor5-foo/package.json' );
 				expect( stubs.fs.writeJson.getCall( 2 ).args[ 0 ] ).to.equal( '/work/project/packages/ckeditor5-bar/package.json' );
+			} );
+
+			it( 'should allow filtering out packages that do not pass the `packagesDirectoryFilter` callback', async () => {
+				stubs.glob.glob.callsFake( patterns => {
+					const paths = {
+						'package.json': [
+							'/work/project/package.json'
+						],
+						'packages/*/package.json': [
+							'/work/project/packages/ckeditor5-ignore-me/package.json',
+							'/work/project/packages/ckeditor5-bar/package.json'
+						]
+					};
+
+					return Promise.resolve(
+						patterns.flatMap( pattern => paths[ pattern ] || [] )
+					);
+				} );
+
+				stubs.fs.readJson.resolves( {} );
+
+				const directoriesToSkip = [
+					'ckeditor5-ignore-me'
+				];
+
+				await updateDependencies( {
+					version: '^38.0.0',
+					packagesDirectory: 'packages',
+					packagesDirectoryFilter: packageJsonPath => {
+						return !directoriesToSkip.some( item => {
+							return upath.dirname( packageJsonPath ).endsWith( item );
+						} );
+					}
+				} );
+
+				expect( stubs.fs.readJson.callCount ).to.equal( 2 );
+				expect( stubs.fs.readJson.getCall( 0 ).args[ 0 ] ).to.equal( '/work/project/package.json' );
+				expect( stubs.fs.readJson.getCall( 1 ).args[ 0 ] ).to.equal( '/work/project/packages/ckeditor5-bar/package.json' );
+
+				expect( stubs.fs.writeJson.callCount ).to.equal( 2 );
+				expect( stubs.fs.writeJson.getCall( 0 ).args[ 0 ] ).to.equal( '/work/project/package.json' );
+				expect( stubs.fs.writeJson.getCall( 1 ).args[ 0 ] ).to.equal( '/work/project/packages/ckeditor5-bar/package.json' );
 			} );
 
 			it( 'should update eligible dependencies from the `dependencies` key', async () => {

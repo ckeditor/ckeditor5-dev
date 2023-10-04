@@ -38,9 +38,13 @@ function onEventEnd( context ) {
 		// Collect all events from. The goal is to insert them into a reflection.
 		// When using the mixins concept, Typedoc loses the inheritance tree.
 		// Hence, we need to look for parent classes manually to determine their events.
-		const eventReflections = parentReflections.flatMap( parentRef => {
-			return parentRef.children.filter( reflection => reflection.kindString === 'Event' );
-		} );
+		const eventReflections = parentReflections
+			// Filter out parents without children which can happen when an interface extends a type.
+			// The extended type (parent) does not have any children.
+			.filter( parentRef => parentRef.children )
+			.flatMap( parentRef => {
+				return parentRef.children.filter( reflection => reflection.kindString === 'Event' );
+			} );
 
 		// If class or interface does not fire events, skip it.
 		if ( !eventReflections.length ) {

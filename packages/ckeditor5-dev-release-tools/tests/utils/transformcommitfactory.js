@@ -1205,6 +1205,364 @@ describe( 'dev-release-tools/utils', () => {
 					} );
 				} );
 			} );
+
+			describe( 'squash merge commit', () => {
+				it( 'removes the squash commit part from results', () => {
+					const rawCommit = {
+						type: null,
+						subject: null,
+						merge: null,
+						header: 'A squash pull request change (#111)',
+						body: 'Fix (scope-1): Description 1.\n' +
+							'\n' +
+							'Other (scope-2): Description 2.\n' +
+							'\n' +
+							'Internal (scope-3): Description 3.',
+						footer: '',
+						notes: [],
+						references: [],
+						mentions: [],
+						revert: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee'
+					};
+
+					const commits = transformCommit( rawCommit );
+
+					expect( commits ).to.be.an( 'Array' );
+					expect( commits ).to.lengthOf( 3 );
+
+					expect( commits[ 0 ] ).to.deep.equal( {
+						revert: null,
+						merge: 'A squash pull request change (#111)',
+						footer: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee',
+						files: [],
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev',
+						notes: [],
+						mentions: [],
+						rawType: 'Fix',
+						scope: [ 'scope-1' ],
+						isPublicCommit: true,
+						type: 'Bug fixes',
+						header: 'Fix (scope-1): Description 1.',
+						subject: 'Description 1.',
+						body: ''
+					} );
+
+					expect( commits[ 1 ] ).to.deep.equal( {
+						revert: null,
+						merge: null,
+						footer: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee',
+						files: [],
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev',
+						notes: [],
+						mentions: [],
+						rawType: 'Other',
+						scope: [ 'scope-2' ],
+						isPublicCommit: true,
+						type: 'Other changes',
+						header: 'Other (scope-2): Description 2.',
+						subject: 'Description 2.',
+						body: ''
+					} );
+
+					expect( commits[ 2 ] ).to.deep.equal( {
+						revert: null,
+						merge: null,
+						footer: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee',
+						files: [],
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev',
+						notes: [],
+						mentions: [],
+						rawType: 'Internal',
+						scope: [ 'scope-3' ],
+						isPublicCommit: false,
+						header: 'Internal (scope-3): Description 3.',
+						subject: 'Description 3.',
+						body: ''
+					} );
+				} );
+
+				it( 'processes breaking change notes from the removed squash commit', () => {
+					const rawCommit = {
+						type: null,
+						subject: null,
+						merge: null,
+						header: 'A squash pull request change (#111)',
+						body: 'Fix (scope-1): Description 1.\n' +
+							'\n' +
+							'Other (scope-2): Description 2.\n' +
+							'\n' +
+							'Internal (scope-3): Description 3.',
+						footer: 'MINOR BREAKING CHANGE (scope-1): BC 1.\n' +
+							'\n' +
+							'MINOR BREAKING CHANGE (scope-2): BC 2.',
+						notes: [
+							{
+								title: 'MINOR BREAKING CHANGE',
+								text: '(scope-1): BC 1.'
+							},
+							{
+								title: 'MINOR BREAKING CHANGE',
+								text: '(scope-2): BC 2.'
+							}
+						],
+						references: [],
+						mentions: [],
+						revert: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee'
+					};
+
+					const commits = transformCommit( rawCommit );
+
+					expect( commits ).to.be.an( 'Array' );
+					expect( commits ).to.lengthOf( 3 );
+
+					expect( commits[ 0 ] ).to.deep.equal( {
+						revert: null,
+						merge: 'A squash pull request change (#111)',
+						footer: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee',
+						files: [],
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev',
+						notes: [
+							{
+								scope: [
+									'scope-1'
+								],
+								text: 'BC 1.',
+								title: 'BREAKING CHANGES'
+							},
+							{
+								scope: [
+									'scope-2'
+								],
+								text: 'BC 2.',
+								title: 'BREAKING CHANGES'
+							}
+						],
+						mentions: [],
+						rawType: 'Fix',
+						scope: [ 'scope-1' ],
+						isPublicCommit: true,
+						type: 'Bug fixes',
+						header: 'Fix (scope-1): Description 1.',
+						subject: 'Description 1.',
+						body: ''
+					} );
+					expect( commits[ 1 ].notes ).to.deep.equal( [] );
+					expect( commits[ 2 ].notes ).to.deep.equal( [] );
+				} );
+
+				it( 'does not remove the squash commit if all changes are marked as internal', () => {
+					const rawCommit = {
+						type: null,
+						subject: null,
+						merge: null,
+						header: 'A squash pull request change (#111)',
+						body: 'Internal (scope-1): Description 1.\n' +
+							'\n' +
+							'Internal (scope-2): Description 2.\n' +
+							'\n' +
+							'Internal (scope-3): Description 3.',
+						footer: 'MINOR BREAKING CHANGE (scope-1): BC 1.\n' +
+							'\n' +
+							'MINOR BREAKING CHANGE (scope-2): BC 2.',
+						notes: [
+							{
+								title: 'MINOR BREAKING CHANGE',
+								text: '(scope-1): BC 1.'
+							},
+							{
+								title: 'MINOR BREAKING CHANGE',
+								text: '(scope-2): BC 2.'
+							}
+						],
+						references: [],
+						mentions: [],
+						revert: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee'
+					};
+
+					const commits = transformCommit( rawCommit );
+
+					expect( commits ).to.be.an( 'Array' );
+					expect( commits ).to.lengthOf( 4 );
+
+					expect( commits[ 0 ] ).to.deep.equal( {
+						type: null,
+						subject: null,
+						merge: null,
+						header: 'A squash pull request change (#111)',
+						body: '',
+						footer: 'MINOR BREAKING CHANGE (scope-1): BC 1.\n' +
+							'\n' +
+							'MINOR BREAKING CHANGE (scope-2): BC 2.',
+						notes: [
+							{
+								text: '(scope-1): BC 1.',
+								title: 'MINOR BREAKING CHANGE'
+							},
+							{
+								text: '(scope-2): BC 2.',
+								title: 'MINOR BREAKING CHANGE'
+							}
+						],
+						references: [],
+						mentions: [],
+						revert: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee',
+						rawType: undefined,
+						files: [],
+						scope: undefined,
+						isPublicCommit: false,
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev'
+					} );
+					expect( commits[ 1 ] ).to.deep.equal( {
+						revert: null,
+						merge: null,
+						footer: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee',
+						files: [],
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev',
+						notes: [],
+						mentions: [],
+						rawType: 'Internal',
+						scope: [ 'scope-1' ],
+						isPublicCommit: false,
+						header: 'Internal (scope-1): Description 1.',
+						subject: 'Description 1.',
+						body: ''
+					} );
+					expect( commits[ 2 ] ).to.deep.equal( {
+						revert: null,
+						merge: null,
+						footer: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee',
+						files: [],
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev',
+						notes: [],
+						mentions: [],
+						rawType: 'Internal',
+						scope: [ 'scope-2' ],
+						isPublicCommit: false,
+						header: 'Internal (scope-2): Description 2.',
+						subject: 'Description 2.',
+						body: ''
+					} );
+					expect( commits[ 3 ] ).to.deep.equal( {
+						revert: null,
+						merge: null,
+						footer: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee',
+						files: [],
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev',
+						notes: [],
+						mentions: [],
+						rawType: 'Internal',
+						scope: [ 'scope-3' ],
+						isPublicCommit: false,
+						header: 'Internal (scope-3): Description 3.',
+						subject: 'Description 3.',
+						body: ''
+					} );
+				} );
+
+				it( 'does not remove the squash commit if it is a valid message', () => {
+					const rawCommit = {
+						type: 'Fix',
+						subject: 'A squash pull request change (#111)',
+						merge: null,
+						header: 'Fix: A squash pull request change (#111)',
+						body: 'Internal (scope-1): Description 1.',
+						footer: '',
+						notes: [],
+						references: [],
+						mentions: [],
+						revert: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee'
+					};
+
+					const commits = transformCommit( rawCommit );
+
+					expect( commits ).to.be.an( 'Array' );
+					expect( commits ).to.lengthOf( 2 );
+
+					expect( commits[ 0 ] ).to.deep.equal( {
+						type: 'Bug fixes',
+						rawType: 'Fix',
+						subject: 'A squash pull request change ([#111](https://github.com/ckeditor/ckeditor5-dev/issues/111)).',
+						merge: null,
+						header: 'Fix: A squash pull request change (#111)',
+						body: '',
+						footer: '',
+						notes: [],
+						mentions: [],
+						revert: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee',
+						files: [],
+						scope: null,
+						isPublicCommit: true,
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev'
+					} );
+					expect( commits[ 1 ] ).to.deep.equal( {
+						revert: null,
+						merge: null,
+						footer: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee',
+						files: [],
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev',
+						notes: [],
+						mentions: [],
+						rawType: 'Internal',
+						scope: [ 'scope-1' ],
+						isPublicCommit: false,
+						header: 'Internal (scope-1): Description 1.',
+						subject: 'Description 1.',
+						body: ''
+					} );
+				} );
+
+				it( 'processes a title including various non-letter symbols', () => {
+					const rawCommit = {
+						type: null,
+						subject: null,
+						merge: null,
+						header: 'A squash pull (#12) request change! (#111)',
+						body: 'Just details.',
+						footer: '',
+						notes: [],
+						references: [],
+						mentions: [],
+						revert: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee'
+					};
+
+					const commit = transformCommit( rawCommit );
+
+					expect( commit ).to.be.an( 'Object' );
+					expect( commit ).to.deep.equal( {
+						type: null,
+						subject: null,
+						merge: null,
+						header: 'A squash pull (#12) request change! (#111)',
+						body: 'Just details.',
+						footer: '',
+						notes: [],
+						references: [],
+						mentions: [],
+						revert: null,
+						hash: 'bb24d87e46a9f4675eabfa97e247ee7f58debeee',
+						rawType: undefined,
+						files: [],
+						scope: undefined,
+						isPublicCommit: false,
+						repositoryUrl: 'https://github.com/ckeditor/ckeditor5-dev'
+					} );
+				} );
+			} );
 		} );
 	} );
 } );
