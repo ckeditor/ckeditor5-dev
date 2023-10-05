@@ -89,7 +89,9 @@ module.exports = async function runCrawler( options ) {
 		quit,
 		onError: getErrorHandler( errors ),
 		onProgress: getProgressHandler( spinner, { verbose: noSpinner } )
-	} ).catch( () => {
+	} ).catch( error => {
+		console.log( 'Received error for openLinks() = ', error );
+
 		status = 'Terminated on first error';
 	} );
 
