@@ -7,7 +7,7 @@
   "dependencies": {
     "chalk": "^4.1.0",
     "ora": "^5.2.0",
-    "puppeteer": "^21.2.0",
+    "puppeteer": "^21.3.6",
     "strip-ansi": "^6.0.0"
   },
   "engines": {

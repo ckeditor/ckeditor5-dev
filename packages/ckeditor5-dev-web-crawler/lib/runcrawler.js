@@ -89,9 +89,7 @@ module.exports = async function runCrawler( options ) {
 		quit,
 		onError: getErrorHandler( errors ),
 		onProgress: getProgressHandler( spinner, { verbose: noSpinner } )
-	} ).catch( error => {
-		console.log( 'Received error for openLinks() = ', error );
-
+	} ).catch( () => {
 		status = 'Terminated on first error';
 	} );
 
@@ -117,7 +115,7 @@ module.exports = async function runCrawler( options ) {
 async function createBrowser( options ) {
 	const browserOptions = {
 		args: [],
-		headless: true
+		headless: 'old'
 	};
 
 	if ( options.disableBrowserSandbox ) {
@@ -130,9 +128,6 @@ async function createBrowser( options ) {
 	}
 
 	const browser = await puppeteer.launch( browserOptions );
-
-	console.log( 'browser.version() = ', await browser.version() );
-	console.log( 'browser.pages() = ', await browser.pages() );
 
 	// For unknown reasons, in order to be able to visit pages in Puppeteer on CI, we must close the default page that is opened when the
 	// browser starts.
@@ -272,8 +267,6 @@ async function openLink( browser, { baseUrl, link, foundLinks, exclusions } ) {
 
 	const onError = error => errors.push( error );
 
-	console.log( 'Opening ', link );
-
 	// Create dedicated page for current link.
 	const page = await createPage( browser, { link, onError } );
 
@@ -281,8 +274,6 @@ async function openLink( browser, { baseUrl, link, foundLinks, exclusions } ) {
 		// Consider navigation to be finished when the `load` event is fired and there are no network connections for at least 500 ms.
 		await page.goto( link.url, { waitUntil: [ 'load', 'networkidle0' ] } );
 	} catch ( error ) {
-		console.log( error );
-
 		const errorMessage = error.message || '(empty message)';
 
 		// All navigation errors starting with the `net::` prefix are already covered by the "request" error handler, so it should
