@@ -114,7 +114,7 @@ module.exports = async function runCrawler( options ) {
  */
 async function createBrowser( options ) {
 	const browserOptions = {
-		args: [],
+		args: [ '--single-process' ],
 		headless: 'new'
 	};
 
@@ -134,13 +134,13 @@ async function createBrowser( options ) {
 
 	// For unknown reasons, in order to be able to visit pages in Puppeteer on CI, we must close the default page that is opened when the
 	// browser starts.
-	// if ( process.env.CI ) {
-	// 	const [ defaultBlankPage ] = await browser.pages();
+	if ( process.env.CI ) {
+		const [ defaultBlankPage ] = await browser.pages();
 
-	// 	if ( defaultBlankPage ) {
-	// 		await defaultBlankPage.close();
-	// 	}
-	// }
+		if ( defaultBlankPage ) {
+			await defaultBlankPage.close();
+		}
+	}
 
 	return browser;
 }
