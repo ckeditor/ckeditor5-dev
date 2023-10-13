@@ -79,7 +79,7 @@ const transformCommitUtils = {
 	 * @returns {String}
 	 */
 	linkToGithubIssue( comment ) {
-		return comment.replace( /(\/?[\w-]+\/[\w-]+)?#([\d]+)/ig, ( matchedText, maybeRepository, issueId ) => {
+		return comment.replace( /(\/?[\w-]+\/[\w-]+)?#([\d]+)(?=$|[\s,.)\]])/igm, ( matchedText, maybeRepository, issueId ) => {
 			if ( maybeRepository ) {
 				if ( maybeRepository.startsWith( '/' ) ) {
 					return matchedText;
