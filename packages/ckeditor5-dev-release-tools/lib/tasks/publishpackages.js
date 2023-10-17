@@ -38,6 +38,10 @@ const publishPackageOnNpmCallback = require( '../utils/publishpackageonnpmcallba
  * packages that do not have own definition.
  * @param {String} [options.confirmationCallback=null] An callback whose response decides to continue the publishing packages. Synchronous
  * and asynchronous callbacks are supported.
+ * @param {Boolean} [options.requireEntryPoint=false] Whether to verify if packages to publish define an entry point. In other words,
+ * whether their `package.json` define the `main` field.
+ * @param {Array.<String>} [options.optionalEntryPointPackages=[]] If the entry point validator is enabled (`requireEntryPoint=true`),
+ * this array contains a list of packages that will not be checked. In other words, they do not have to define the entry point.
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @param {Number} [options.concurrency=4] Number of CPUs that will execute the task.
  * @returns {Promise}
@@ -51,6 +55,8 @@ module.exports = async function publishPackages( options ) {
 		npmTag = 'staging',
 		optionalEntries = null,
 		confirmationCallback = null,
+		requireEntryPoint = false,
+		optionalEntryPointPackages = [],
 		cwd = process.cwd(),
 		concurrency = 4
 	} = options;
@@ -62,7 +68,7 @@ module.exports = async function publishPackages( options ) {
 		absolute: true
 	} );
 
-	await assertPackages( packagePaths );
+	await assertPackages( packagePaths, { requireEntryPoint, optionalEntryPointPackages } );
 	await assertFilesToPublish( packagePaths, optionalEntries );
 	await assertNpmTag( packagePaths, npmTag );
 
