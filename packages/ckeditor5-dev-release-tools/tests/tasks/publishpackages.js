@@ -128,6 +128,39 @@ describe( 'dev-release-tools/tasks', () => {
 					'/work/project/packages/ckeditor5-foo',
 					'/work/project/packages/ckeditor5-bar'
 				] );
+				expect( stubs.assertPackages.firstCall.args[ 1 ] ).to.deep.equal( {
+					requireEntryPoint: false,
+					optionalEntryPointPackages: []
+				} );
+			} );
+		} );
+
+		// See: https://github.com/ckeditor/ckeditor5/issues/15127.
+		it( 'should allow enabling the "package entry point" validator', () => {
+			stubs.glob.glob.resolves( [
+				'/work/project/packages/ckeditor5-foo',
+				'/work/project/packages/ckeditor5-bar'
+			] );
+
+			return publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				requireEntryPoint: true,
+				optionalEntryPointPackages: [
+					'ckeditor5-foo'
+				]
+			} ).then( () => {
+				expect( stubs.assertPackages.callCount ).to.equal( 1 );
+				expect( stubs.assertPackages.firstCall.args[ 0 ] ).to.deep.equal( [
+					'/work/project/packages/ckeditor5-foo',
+					'/work/project/packages/ckeditor5-bar'
+				] );
+				expect( stubs.assertPackages.firstCall.args[ 1 ] ).to.deep.equal( {
+					requireEntryPoint: true,
+					optionalEntryPointPackages: [
+						'ckeditor5-foo'
+					]
+				} );
 			} );
 		} );
 
