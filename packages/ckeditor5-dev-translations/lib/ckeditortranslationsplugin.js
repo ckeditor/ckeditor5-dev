@@ -53,7 +53,8 @@ module.exports = class CKEditorTranslationsPlugin {
 			corePackageContextsResourcePath: options.corePackageContextsResourcePath || '@ckeditor/ckeditor5-core/lang/contexts.json',
 			translationsOutputFile: options.translationsOutputFile,
 			includeCorePackageTranslations: !!options.includeCorePackageTranslations,
-			skipPluralFormFunction: !!options.skipPluralFormFunction
+			skipPluralFormFunction: !!options.skipPluralFormFunction,
+			assetNamesFilter: options.assetNamesFilter || ( name => name.endsWith( '.js' ) )
 		};
 	}
 

@@ -25,6 +25,7 @@ const { RawSource, ConcatSource } = require( 'webpack-sources' );
  * @param {String} [options.sourceFilesPattern] The source files pattern
  * @param {String} [options.packageNamesPattern] The package names pattern.
  * @param {String} [options.corePackagePattern] The core package pattern.
+ * @param {Function} [options.assetNamesFilter] A function to filter assets probably importing ckeditor modules.
  * @param {TranslationService} translationService Translation service that will load PO files, replace translation keys and generate assets.
  * ckeditor5 - independent without hard-to-test logic.
  */
@@ -114,10 +115,16 @@ module.exports = function serveTranslations( compiler, options, translationServi
 		// At the end of the compilation add assets generated from the PO files.
 		// Use `optimize-chunk-assets` instead of `emit` to emit assets before the `webpack.BannerPlugin`.
 		getChunkAssets( compilation ).tap( 'CKEditor5Plugin', chunks => {
+			const compilationAssetNamesFiltered = Object.keys( compilation.assets )
+				.filter( options.assetNamesFilter );
+
+			if ( !compilationAssetNamesFiltered.length ) {
+				return;
+			}
+
 			const generatedAssets = translationService.getAssets( {
 				outputDirectory: options.outputDirectory,
-				compilationAssetNames: Object.keys( compilation.assets )
-					.filter( name => name.endsWith( '.js' ) )
+				compilationAssetNames: compilationAssetNamesFiltered
 			} );
 
 			const allFiles = getFilesFromChunks( chunks );
