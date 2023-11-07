@@ -5,6 +5,8 @@
 
 'use strict';
 
+const { ReflectionKind } = require( 'typedoc' );
+
 /**
  * Common utils for TypeDoc validators.
  */
@@ -178,8 +180,21 @@ function getTarget( reflection, identifier ) {
 
 	const targetReflection = reflection.project.getChildByName( parts );
 
+	// If couldn't find a reflection, perhaps we should look for properties defined in the `type` doclet.
 	if ( !targetReflection ) {
-		return null;
+		// Strip the property name...
+		const partsWithoutIdentifier = parts.slice( 0, -1 );
+		// ...and try to find the type declaration.
+		const typeReflection = reflection.project.getChildByName( partsWithoutIdentifier );
+
+		if ( !typeReflection || typeReflection.kind !== ReflectionKind.TypeAlias ) {
+			return null;
+		}
+
+		// If found, verify if the property is available as a children of the type.
+		const [ identifierName ] = parts.slice( -1 );
+
+		return typeReflection.type.declaration.children.find( childrenReflection => childrenReflection.name === identifierName );
 	}
 
 	// Now, when the target reflection is found, do some checks whether it matches the identifier.
