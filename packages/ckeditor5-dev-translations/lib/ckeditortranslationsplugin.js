@@ -106,7 +106,7 @@ module.exports = class CKEditorTranslationsPlugin {
 
 /**
  * @callback assetNamesFilter
- * @param {String} name Webpack asset name/path 
+ * @param {String} name Webpack asset name/path
  * @returns {Boolean}
  */
 
