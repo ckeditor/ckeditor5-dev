@@ -1,0 +1,96 @@
+query SearchStaleIssues($query: String!, $cursor: String) {
+	search(type: ISSUE, query: $query, first: 100, after: $cursor) {
+		nodes {
+			... on Issue {
+				id
+				number
+				createdAt
+				lastEditedAt
+				reactions(last: 1) {
+					nodes {
+						createdAt
+					}
+				}
+				timelineItems(first: 100, itemTypes: [LABELED_EVENT, UNLABELED_EVENT, ISSUE_COMMENT]) {
+					nodes {
+						... on LabeledEvent {
+							createdAt
+							actor {
+								login
+							}
+							label {
+								name
+							}
+						}
+						... on UnlabeledEvent {
+							createdAt
+							actor {
+								login
+							}
+							label {
+								name
+							}
+						}
+						... on IssueComment {
+							updatedAt
+							author {
+								login
+							}
+						}
+					}
+					pageInfo {
+						cursor: endCursor
+						hasNextPage
+					}
+				}
+			}
+			... on PullRequest {
+				id
+				number
+				createdAt
+				lastEditedAt
+				reactions(last: 1) {
+					nodes {
+						createdAt
+					}
+				}
+				timelineItems(first: 100, itemTypes: [LABELED_EVENT, UNLABELED_EVENT, ISSUE_COMMENT]) {
+					nodes {
+						... on LabeledEvent {
+							createdAt
+							actor {
+								login
+							}
+							label {
+								name
+							}
+						}
+						... on UnlabeledEvent {
+							createdAt
+							actor {
+								login
+							}
+							label {
+								name
+							}
+						}
+						... on IssueComment {
+							updatedAt
+							author {
+								login
+							}
+						}
+					}
+					pageInfo {
+						cursor: endCursor
+						hasNextPage
+					}
+				}
+			}
+		}
+		pageInfo {
+			cursor: endCursor
+			hasNextPage
+		}
+	}
+}

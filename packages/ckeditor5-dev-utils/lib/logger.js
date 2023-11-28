@@ -74,22 +74,28 @@ module.exports = ( moduleVerbosity = 'info' ) => {
 		 * Displays an error message.
 		 *
 		 * @param {String} message Message to log.
+		 * @param {Error} [error] An error instance to log in the console.
 		 */
-		error( message ) {
-			this._log( 'error', chalk.red( message ) );
+		error( message, error ) {
+			this._log( 'error', chalk.red( message ), error );
 		},
 
 		/**
 		 * @private
 		 * @param {String} messageVerbosity Verbosity of particular message.
 		 * @param {String} message Message to log.
+		 * @param {Error} [error] An error instance to log in the console.
 		 */
-		_log( messageVerbosity, message ) {
+		_log( messageVerbosity, message, error ) {
 			if ( !levels.get( messageVerbosity ).has( moduleVerbosity ) ) {
 				return;
 			}
 
 			console.log( message );
+
+			if ( error ) {
+				console.dir( error, { depth: null } );
+			}
 		}
 	};
 };
