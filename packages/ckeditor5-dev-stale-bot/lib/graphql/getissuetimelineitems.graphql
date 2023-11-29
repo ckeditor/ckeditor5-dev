@@ -1,35 +1,71 @@
 query GetIssueTimelineItems($nodeId: ID!, $cursor: String) {
 	node(id: $nodeId) {
-		timelineItems(first: 100, itemTypes: [LABELED_EVENT, UNLABELED_EVENT, ISSUE_COMMENT], after: $cursor) {
-			nodes {
-				... on LabeledEvent {
-					createdAt
-					actor {
-						login
+		...on Issue {
+			timelineItems(first: 100, itemTypes: [LABELED_EVENT, UNLABELED_EVENT, ISSUE_COMMENT], after: $cursor) {
+				nodes {
+					... on LabeledEvent {
+						createdAt
+						actor {
+							login
+						}
+						label {
+							name
+						}
 					}
-					label {
-						name
+					... on UnlabeledEvent {
+						createdAt
+						actor {
+							login
+						}
+						label {
+							name
+						}
+					}
+					... on IssueComment {
+						updatedAt
+						author {
+							login
+						}
 					}
 				}
-				... on UnlabeledEvent {
-					createdAt
-					actor {
-						login
-					}
-					label {
-						name
-					}
-				}
-				... on IssueComment {
-					updatedAt
-					author {
-						login
-					}
+				pageInfo {
+					cursor: endCursor
+					hasNextPage
 				}
 			}
-			pageInfo {
-				cursor: endCursor
-				hasNextPage
+		}
+		...on PullRequest {
+			timelineItems(first: 100, itemTypes: [LABELED_EVENT, UNLABELED_EVENT, ISSUE_COMMENT], after: $cursor) {
+				nodes {
+					... on LabeledEvent {
+						createdAt
+						actor {
+							login
+						}
+						label {
+							name
+						}
+					}
+					... on UnlabeledEvent {
+						createdAt
+						actor {
+							login
+						}
+						label {
+							name
+						}
+					}
+					... on IssueComment {
+						updatedAt
+						author {
+							login
+						}
+					}
+				}
+				pageInfo {
+					cursor: endCursor
+					hasNextPage
+				}
 			}
 		}
 	}

@@ -39,7 +39,8 @@ module.exports = class GitHubRepository {
 		this.graphql = new GraphQLClient( 'https://api.github.com/graphql', {
 			headers: {
 				Accept: 'application/vnd.github.bane-preview+json',
-				Authorization: `Bearer ${ authToken }`
+				Authorization: `Bearer ${ authToken }`,
+				'X-Github-Next-Global-ID': 1
 			},
 			cache: 'no-store'
 		} );
@@ -75,14 +76,40 @@ module.exports = class GitHubRepository {
 	 * @param {PageInfo} [pageInfo] Describes the current page of the returned result.
 	 * @returns {Promise.<Array.<SearchResult>>} Array of all found stale issues.
 	 */
-	async searchStaleIssues( options, pageInfo = null ) {
+	async searchStaleIssues( options, onProgress, pageInfo = { done: 0, total: 0 } ) {
 		const variables = {
 			query: prepareSearchQuery( options ),
-			cursor: pageInfo?.cursor || null
+			cursor: pageInfo.cursor || null
 		};
 
 		return this.sendRequest( await queries.searchStaleIssues, variables )
-			.then( data => this.parseStaleIssues( options, data.search ) )
+			.then( async data => {
+				pageInfo = {
+					...data.search.pageInfo,
+					done: pageInfo.done + data.search.nodes.length,
+					total: pageInfo.total || data.search.issueCount
+				};
+
+				onProgress( {
+					done: pageInfo.done,
+					total: pageInfo.total
+				} );
+
+				const staleIssues = await this.parseStaleIssues( options, data.search );
+
+				if ( !pageInfo.hasNextPage && pageInfo.done !== pageInfo.total ) {
+					options.dateBeforeStale = data.search.nodes.at( -1 ).createdAt;
+
+					pageInfo.hasNextPage = true;
+					pageInfo.cursor = null;
+				}
+
+				const staleIssuesNextPage = pageInfo.hasNextPage ?
+					await this.searchStaleIssues( options, onProgress, pageInfo ) :
+					[];
+
+				return [ ...staleIssues, ...staleIssuesNextPage ];
+			} )
 			.catch( error => {
 				if ( error ) {
 					this.logger.error( 'Unexpected error when executing "#searchStaleIssues()".', error );
@@ -92,14 +119,24 @@ module.exports = class GitHubRepository {
 			} );
 	}
 
-	async getIssueTimelineItems( issueId, pageInfo = null ) {
+	async getIssueTimelineItems( issueId, pageInfo = {} ) {
 		const variables = {
 			nodeId: issueId,
-			cursor: pageInfo?.cursor || null
+			cursor: pageInfo.cursor || null
 		};
 
 		return this.sendRequest( await queries.getIssueTimelineItems, variables )
-			.then( data => this.parseIssueTimelineItems( issueId, data.node.timelineItems ) )
+			.then( async data => {
+				pageInfo = data.node.timelineItems.pageInfo;
+
+				const timelineItems = this.parseIssueTimelineItems( data.node.timelineItems );
+
+				const timelineItemsNextPage = pageInfo.hasNextPage ?
+					await this.getIssueTimelineItems( issueId, pageInfo ) :
+					[];
+
+				return [ ...timelineItems, ...timelineItemsNextPage ];
+			} )
 			.catch( error => {
 				if ( error ) {
 					this.logger.error( 'Unexpected error when executing "#getIssueTimelineItems()".', error );
@@ -109,37 +146,35 @@ module.exports = class GitHubRepository {
 			} );
 	}
 
-	async parseStaleIssues( options, response ) {
-		const pageInfo = response.pageInfo;
+	async parseStaleIssues( options, data ) {
+		const issuesPromises = data.nodes.map( async issue => {
+			const pageInfo = issue.timelineItems.pageInfo;
 
-		const foundIssuesPromises = response.nodes.map( async issue => {
+			const timelineItems = this.parseIssueTimelineItems( issue.timelineItems );
+
+			const timelineItemsNextPage = pageInfo.hasNextPage ?
+				await this.getIssueTimelineItems( issue.id, pageInfo ) :
+				[];
+
 			return {
 				...issue,
 				lastReactedAt: issue.reactions.nodes[ 0 ]?.createdAt || null,
-				timelineItems: await this.parseIssueTimelineItems( issue.id, issue.timelineItems )
+				timelineItems: [ ...timelineItems, ...timelineItemsNextPage ]
 			};
 		} );
 
-		const foundIssues = await Promise.all( foundIssuesPromises );
+		const issues = await Promise.all( issuesPromises );
 
-		const staleIssues = foundIssues
+		return issues
 			.filter( issue => isIssueStale( issue, options ) )
 			.map( issue => ( {
 				id: issue.id,
 				slug: `${ options.repositorySlug }#${ issue.number }`
 			} ) );
-
-		const staleIssuesNextPage = pageInfo.hasNextPage ?
-			await this.searchStaleIssues( options, pageInfo ) :
-			[];
-
-		return [ ...staleIssues, ...staleIssuesNextPage ];
 	}
 
-	async parseIssueTimelineItems( issueId, result ) {
-		const pageInfo = result.pageInfo;
-
-		const timelineItems = result.nodes.map( entry => {
+	parseIssueTimelineItems( data ) {
+		return data.nodes.map( entry => {
 			const timelineItem = {
 				eventDate: entry.createdAt || entry.updatedAt
 			};
@@ -154,12 +189,6 @@ module.exports = class GitHubRepository {
 
 			return timelineItem;
 		} );
-
-		const timelineItemsNextPage = pageInfo.hasNextPage ?
-			await this.getIssueTimelineItems( issueId, pageInfo ) :
-			[];
-
-		return [ ...timelineItems, ...timelineItemsNextPage ];
 	}
 
 	/**
@@ -222,6 +251,7 @@ function prepareSearchQuery( options ) {
 		`created:<${ dateBeforeStale }`,
 		`type:${ type }`,
 		'state:open',
+		'sort:created-desc',
 		...ignoredLabels.map( label => `-label:${ label }` )
 	].join( ' ' );
 }
@@ -344,7 +374,7 @@ function checkApiRateLimit( error ) {
  * @property {String} id
  * @property {Number} number
  * @property {String} createdAt
- * @property {String} lastEditedAt
+ * @property {String|null} lastEditedAt
  * @property {String|null} lastReactedAt
  * @property {TimelineItems} timelineItems
  */
@@ -357,15 +387,17 @@ function checkApiRateLimit( error ) {
 
 /**
  * @typedef {Object} PageInfo
- * @property {Boolean} hasNextPage
- * @property {String} cursor
+ * @property {Boolean} [hasNextPage]
+ * @property {String} [cursor]
+ * @property {Number} [done]
+ * @property {Number} [total]
  */
 
 /**
  * @typedef {Object} Logger
- * @property {Function} logger.info
- * @property {Function} logger.warning
- * @property {Function} logger.error
+ * @property {Function} info
+ * @property {Function} warning
+ * @property {Function} error
  */
 
 /**
