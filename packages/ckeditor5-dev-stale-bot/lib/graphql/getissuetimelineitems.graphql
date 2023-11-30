@@ -1,32 +1,38 @@
+fragment labeledEvent on LabeledEvent {
+	createdAt
+	actor {
+		login
+	}
+	label {
+		name
+	}
+}
+
+fragment unlabeledEvent on UnlabeledEvent {
+	createdAt
+	actor {
+		login
+	}
+	label {
+		name
+	}
+}
+
+fragment issueComment on IssueComment {
+	updatedAt
+	author {
+		login
+	}
+}
+
 query GetIssueTimelineItems($nodeId: ID!, $cursor: String) {
 	node(id: $nodeId) {
 		...on Issue {
 			timelineItems(first: 100, itemTypes: [LABELED_EVENT, UNLABELED_EVENT, ISSUE_COMMENT], after: $cursor) {
 				nodes {
-					... on LabeledEvent {
-						createdAt
-						actor {
-							login
-						}
-						label {
-							name
-						}
-					}
-					... on UnlabeledEvent {
-						createdAt
-						actor {
-							login
-						}
-						label {
-							name
-						}
-					}
-					... on IssueComment {
-						updatedAt
-						author {
-							login
-						}
-					}
+					...labeledEvent
+					...unlabeledEvent
+					...issueComment
 				}
 				pageInfo {
 					cursor: endCursor
@@ -37,30 +43,9 @@ query GetIssueTimelineItems($nodeId: ID!, $cursor: String) {
 		...on PullRequest {
 			timelineItems(first: 100, itemTypes: [LABELED_EVENT, UNLABELED_EVENT, ISSUE_COMMENT], after: $cursor) {
 				nodes {
-					... on LabeledEvent {
-						createdAt
-						actor {
-							login
-						}
-						label {
-							name
-						}
-					}
-					... on UnlabeledEvent {
-						createdAt
-						actor {
-							login
-						}
-						label {
-							name
-						}
-					}
-					... on IssueComment {
-						updatedAt
-						author {
-							login
-						}
-					}
+					...labeledEvent
+					...unlabeledEvent
+					...issueComment
 				}
 				pageInfo {
 					cursor: endCursor

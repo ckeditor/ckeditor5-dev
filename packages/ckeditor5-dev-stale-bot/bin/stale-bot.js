@@ -6,11 +6,11 @@
  */
 
 const ora = require( 'ora' );
-const chalk = require( 'chalk' );
 const fs = require( 'fs-extra' );
-const minimist = require( 'minimist' );
+const chalk = require( 'chalk' );
+const parseArguments = require( './utils/parsearguments' );
+const prepareOptions = require( './utils/prepareoptions' );
 const GitHubRepository = require( '../lib/githubrepository' );
-const prepareOptions = require( '../lib/utils/prepareoptions' );
 
 main().catch( error => {
 	console.error( '\n🔥 Unable to process stale issues and pull requests.\n', error );
@@ -45,17 +45,17 @@ async function main() {
 
 	printStatus( spinner, '🔎 Searching for issues to stale...' );
 
-	const issueOptions = prepareOptions( viewerLogin, 'issue', config );
-	const staleIssues = await githubRepository.searchIssuesToStale( issueOptions, onProgress( spinner ) );
+	const issuesToStaleOptions = prepareOptions( viewerLogin, 'issue', config );
+	const issuesToStale = await githubRepository.searchIssuesToStale( issuesToStaleOptions, onProgress( spinner ) );
 
 	printStatus( spinner, '🔎 Searching for pull requests to stale...' );
 
-	const pullRequestOptions = prepareOptions( viewerLogin, 'pr', config );
-	const stalePullRequests = await githubRepository.searchIssuesToStale( pullRequestOptions, onProgress( spinner ) );
+	const pullRequestsToStaleOptions = prepareOptions( viewerLogin, 'pr', config );
+	const pullRequestsToStale = await githubRepository.searchIssuesToStale( pullRequestsToStaleOptions, onProgress( spinner ) );
 
 	spinner.stop();
 
-	if ( !staleIssues.length && !stalePullRequests.length ) {
+	if ( !issuesToStale.length && !pullRequestsToStale.length ) {
 		console.log( chalk.green.bold( '✨ No issues or pull requests found that should be marked as stale.' ) );
 
 		return;
@@ -63,31 +63,7 @@ async function main() {
 
 	console.log( chalk.blue.bold( '🔖 The following issues or pull requests should be marked as stale:\n' ) );
 
-	[ ...staleIssues, ...stalePullRequests ].forEach( entry => console.log( entry.slug ) );
-}
-
-function parseArguments( args ) {
-	const config = {
-		boolean: [
-			'dry-run'
-		],
-
-		string: [
-			'config-path'
-		],
-
-		default: {
-			'dry-run': false,
-			'config-path': ''
-		}
-	};
-
-	const options = minimist( args, config );
-
-	return {
-		dryRun: options[ 'dry-run' ],
-		configPath: options[ 'config-path' ]
-	};
+	[ ...issuesToStale, ...pullRequestsToStale ].forEach( entry => console.log( entry.slug ) );
 }
 
 function printWelcomeMessage( dryRun ) {
