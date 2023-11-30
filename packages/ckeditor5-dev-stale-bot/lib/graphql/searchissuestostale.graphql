@@ -1,4 +1,4 @@
-query SearchStaleIssues($query: String!, $cursor: String) {
+query SearchIssuesToStale($query: String!, $cursor: String) {
 	search(type: ISSUE, query: $query, first: 100, after: $cursor) {
 		issueCount
 		nodes {

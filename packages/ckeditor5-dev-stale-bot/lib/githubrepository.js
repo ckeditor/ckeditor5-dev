@@ -21,13 +21,13 @@ const GRAPHQL_PATH = upath.join( __dirname, 'graphql' );
 const queries = {
 	getIssueTimelineItems: readGraphQL( 'getissuetimelineitems' ),
 	getViewerLogin: readGraphQL( 'getviewerlogin' ),
-	searchStaleIssues: readGraphQL( 'searchstaleissues' )
+	searchIssuesToStale: readGraphQL( 'searchissuestostale' )
 };
 
 /**
- * A GitHub client containing methods used to fetch data from GitHub using GraphQL API.
+ * A GitHub client containing methods used to interact with GitHub using its GraphQL API.
  *
- * It handles paginated data and it supports a case when a request has exceeded the GitHub API rate limit.
+ * All methods handles paginated data and it supports a case when a request has exceeded the GitHub API rate limit.
  * In such a case, the request waits until the limit is reset and it is automatically sent again.
  */
 module.exports = class GitHubRepository {
@@ -73,20 +73,27 @@ module.exports = class GitHubRepository {
 	 * Searches for all issues that matches the critieria of a stale issue.
 	 *
 	 * @param {Options} options Configuration options.
+	 * @param {Function} onProgress Callback function called each time a response is received.
 	 * @param {PageInfo} [pageInfo] Describes the current page of the returned result.
 	 * @returns {Promise.<Array.<SearchResult>>} Array of all found stale issues.
 	 */
-	async searchStaleIssues( options, onProgress, pageInfo = { done: 0, total: 0 } ) {
+	async searchIssuesToStale( options, onProgress, pageInfo = { done: 0, total: 0 } ) {
 		const variables = {
 			query: prepareSearchQuery( options ),
 			cursor: pageInfo.cursor || null
 		};
 
-		return this.sendRequest( await queries.searchStaleIssues, variables )
+		return this.sendRequest( await queries.searchIssuesToStale, variables )
 			.then( async data => {
+				// Prepare a page info object that is shared between subsequent recursive calls to track the progress and offset.
 				pageInfo = {
 					...data.search.pageInfo,
+
+					// Count next portion of the received data.
 					done: pageInfo.done + data.search.nodes.length,
+
+					// Set the total number of hits only once, when the response from the first (initial) search request was received.
+					// Subsequent calls use a modified search start date, so the number of hits is no longer valid.
 					total: pageInfo.total || data.search.issueCount
 				};
 
@@ -95,30 +102,45 @@ module.exports = class GitHubRepository {
 					total: pageInfo.total
 				} );
 
-				const staleIssues = await this.parseStaleIssues( options, data.search );
+				const staleIssues = await this.parseIssuesToStale( options, data.search );
 
+				// The GitHub "search" query returns maximum of 1000 results, even if the number of hits is higher.
+				// So, in case GitHub does not allow going to the next paginated chunk of data, but we know that we have not received all
+				// the data yet...
 				if ( !pageInfo.hasNextPage && pageInfo.done !== pageInfo.total ) {
-					options.dateBeforeStale = data.search.nodes.at( -1 ).createdAt;
+					// ...let's take the creation date of the last received issue and treat it as the new moment to start the search.
+					// All received issues are sorted in descending order by the date of creation, so the last issue is the oldest one
+					// we know so far. This is the date that defines the moment to continue the search.
+					options.searchDate = data.search.nodes.at( -1 ).createdAt;
 
+					// Reset the page info object, because we are going to sent a slightly modified request with different offset, indicated
+					// by the creation date of the last received issue.
 					pageInfo.hasNextPage = true;
 					pageInfo.cursor = null;
 				}
 
 				const staleIssuesNextPage = pageInfo.hasNextPage ?
-					await this.searchStaleIssues( options, onProgress, pageInfo ) :
+					await this.searchIssuesToStale( options, onProgress, pageInfo ) :
 					[];
 
 				return [ ...staleIssues, ...staleIssuesNextPage ];
 			} )
 			.catch( error => {
 				if ( error ) {
-					this.logger.error( 'Unexpected error when executing "#searchStaleIssues()".', error );
+					this.logger.error( 'Unexpected error when executing "#searchIssuesToStale()".', error );
 				}
 
 				return Promise.reject();
 			} );
 	}
 
+	/**
+	 * Fetches all timeline items for provided issue.
+	 *
+	 * @param {String} issueId Issue identifier for which we want to fetch timeline items.
+	 * @param {PageInfo} [pageInfo] Describes the current page of the returned result.
+	 * @returns {Promise.<Array.<TimelineItem>>} Array of all timeline items for provided issue.
+	 */
 	async getIssueTimelineItems( issueId, pageInfo = {} ) {
 		const variables = {
 			nodeId: issueId,
@@ -146,7 +168,15 @@ module.exports = class GitHubRepository {
 			} );
 	}
 
-	async parseStaleIssues( options, data ) {
+	/**
+	 * Parses the received array of issues and fetches the remaining timeline items for any issue, if not everything was received in the
+	 * initial request. Finally, filters issues based on whether they match the critieria of a stale issue.
+	 *
+	 * @param {Options} options Configuration options.
+	 * @param {Object} data Received response to parse.
+	 * @returns {Promise.<Array.<SearchResult>>} Array of all found stale issues.
+	 */
+	async parseIssuesToStale( options, data ) {
 		const issuesPromises = data.nodes.map( async issue => {
 			const pageInfo = issue.timelineItems.pageInfo;
 
@@ -173,18 +203,28 @@ module.exports = class GitHubRepository {
 			} ) );
 	}
 
+	/**
+	 * Parses the received array of timeline items for an issue.
+	 *
+	 * @param {Object} data Received response to parse.
+	 * @returns {<Array.<TimelineItem>>} Array of all timeline items.
+	 */
 	parseIssueTimelineItems( data ) {
 		return data.nodes.map( entry => {
 			const timelineItem = {
 				eventDate: entry.createdAt || entry.updatedAt
 			};
 
-			if ( entry.author || entry.actor ) {
-				timelineItem.author = entry.author?.login || entry.actor?.login || null;
+			const author = entry.author?.login || entry.actor?.login;
+
+			if ( author ) {
+				timelineItem.author = author;
 			}
 
-			if ( entry.label ) {
-				timelineItem.label = entry.label.name;
+			const label = entry.label?.name;
+
+			if ( label ) {
+				timelineItem.label = label;
 			}
 
 			return timelineItem;
@@ -198,7 +238,7 @@ module.exports = class GitHubRepository {
 	 *
 	 * @param {String} query The GraphQL query to send.
 	 * @param {Object} variables Variables required by the GraphQL query.
-	 * @returns {Promise} Data returned from the GitHub API.
+	 * @returns {Promise.<Object>} Data returned from the GitHub API.
 	 */
 	async sendRequest( query, variables ) {
 		return this.graphql.request( query, variables )
@@ -243,12 +283,12 @@ function prepareSearchQuery( options ) {
 		type,
 		ignoredLabels,
 		repositorySlug,
-		dateBeforeStale
+		searchDate
 	} = options;
 
 	return [
 		`repo:${ repositorySlug }`,
-		`created:<${ dateBeforeStale }`,
+		`created:<${ searchDate }`,
 		`type:${ type }`,
 		'state:open',
 		'sort:created-desc',
@@ -257,7 +297,16 @@ function prepareSearchQuery( options ) {
 }
 
 /**
- * Checks if the provided issue is considered as stale.
+ * Verifies the last activity dates from an issue to check if they all have occured before the moment defining the stale issue.
+ *
+ * The activity dates are:
+ * - the moment of issue creation,
+ * - the moment of the last edition of issue,
+ * - the moment of adding or editing a comment,
+ * - the moment of adding last reaction to issue,
+ * - the moment of changing a label.
+ *
+ * Some activity entries may be ignored and not taken into account in the calculation, if so specified in the configuration.
  *
  * @param {Issue} issue Issue to check.
  * @param {Options} options Configuration options.
@@ -265,7 +314,7 @@ function prepareSearchQuery( options ) {
  */
 function isIssueStale( issue, options ) {
 	const {
-		dateBeforeStale,
+		staleDate,
 		ignoredActivityLogins,
 		ignoredActivityLabels
 	} = options;
@@ -293,7 +342,7 @@ function isIssueStale( issue, options ) {
 
 	return dates
 		.filter( Boolean )
-		.every( date => isBefore( parseISO( date ), parseISO( dateBeforeStale ) ) );
+		.every( date => isBefore( parseISO( date ), parseISO( staleDate ) ) );
 }
 
 /**
@@ -339,34 +388,10 @@ function checkApiRateLimit( error ) {
 }
 
 /**
- * @typedef {Object} ReactionEvent
- * @property {String} createdAt
- */
-
-/**
- * @typedef {Object} Reactions
- * @property {Array.<ReactionEvent>} nodes
- */
-
-/**
- * @typedef {Object} LabelEvent
- * @property {String} createdAt
- * @property {Object} actor
- * @property {String|null} actor.login
- * @property {Object} label
- * @property {String} label.name
- */
-
-/**
- * @typedef {Object} CommentEvent
- * @property {String} updatedAt
- * @property {Object} author
- * @property {String|null} author.login
- */
-
-/**
- * @typedef {Object} TimelineItems
- * @property {Array.<LabelEvent|CommentEvent>} nodes
+ * @typedef {Object} TimelineItem
+ * @property {String} eventDate
+ * @property {String} [author]
+ * @property {String} [label]
  */
 
 /**
@@ -376,7 +401,7 @@ function checkApiRateLimit( error ) {
  * @property {String} createdAt
  * @property {String|null} lastEditedAt
  * @property {String|null} lastReactedAt
- * @property {TimelineItems} timelineItems
+ * @property {Array.<TimelineItem>} timelineItems
  */
 
 /**

@@ -41,37 +41,29 @@ async function main() {
 
 	const viewerLogin = await githubRepository.getViewerLogin();
 
-	const spinner = ora( '🔎 Searching for stale issues...' ).start();
+	const spinner = ora( '🔎 Searching for issues to stale...' ).start();
 
 	const issueOptions = prepareOptions( viewerLogin, 'issue', config );
-	const staleIssues = await githubRepository.searchStaleIssues( issueOptions, onProgress( spinner ) );
+	const staleIssues = await githubRepository.searchIssuesToStale( issueOptions, onProgress( spinner ) );
 
-	spinner.text = '🔎 Searching for stale pull requests...';
+	spinner.text = '🔎 Searching for pull requests to stale...';
 
 	const pullRequestOptions = prepareOptions( viewerLogin, 'pr', config );
-	const stalePullRequests = await githubRepository.searchStaleIssues( pullRequestOptions, onProgress( spinner ) );
+	const stalePullRequests = await githubRepository.searchIssuesToStale( pullRequestOptions, onProgress( spinner ) );
 
 	spinner.stop();
 
 	if ( !staleIssues.length && !stalePullRequests.length ) {
-		console.log( chalk.green.bold( '✨ No stale issues or pull requests have been found.' ) );
+		console.log( chalk.green.bold( '✨ No issues or pull requests found that should be marked as stale.' ) );
 
 		return;
 	}
 
-	console.log( chalk.blue.bold( '🔖 The following stale issues or pull requests have been found:\n' ) );
+	console.log( chalk.blue.bold( '🔖 The following issues or pull requests should be marked as stale:\n' ) );
 
 	[ ...staleIssues, ...stalePullRequests ].forEach( entry => console.log( entry.slug ) );
 }
 
-/**
- * Parses CLI arguments.
- *
- * @param {Array.<String>} args CLI arguments.
- * @returns {Object} result
- * @returns {String} result.configPath Path to stale bot configuration.
- * @returns {Boolean} [result.dryRun=false] If set, nothing will be changed in real, production data on GitHub.
- */
 function parseArguments( args ) {
 	const config = {
 		boolean: [
