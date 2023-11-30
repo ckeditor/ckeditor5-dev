@@ -41,12 +41,14 @@ async function main() {
 
 	const viewerLogin = await githubRepository.getViewerLogin();
 
-	const spinner = ora( '🔎 Searching for issues to stale...' ).start();
+	const spinner = ora().start();
+
+	printStatus( spinner, '🔎 Searching for issues to stale...' );
 
 	const issueOptions = prepareOptions( viewerLogin, 'issue', config );
 	const staleIssues = await githubRepository.searchIssuesToStale( issueOptions, onProgress( spinner ) );
 
-	spinner.text = '🔎 Searching for pull requests to stale...';
+	printStatus( spinner, '🔎 Searching for pull requests to stale...' );
 
 	const pullRequestOptions = prepareOptions( viewerLogin, 'pr', config );
 	const stalePullRequests = await githubRepository.searchIssuesToStale( pullRequestOptions, onProgress( spinner ) );
@@ -88,16 +90,6 @@ function parseArguments( args ) {
 	};
 }
 
-function onProgress( spinner ) {
-	const title = spinner.text;
-
-	return ( { done, total } ) => {
-		const progress = total ? Math.round( ( done / total ) * 100 ) : 0;
-
-		spinner.text = `${ title } ${ chalk.bold( `${ progress }%` ) }`;
-	};
-}
-
 function printWelcomeMessage( dryRun ) {
 	const message = [
 		'',
@@ -110,4 +102,23 @@ function printWelcomeMessage( dryRun ) {
 	];
 
 	console.log( message.join( '\n' ) );
+}
+
+function printStatus( spinner, text ) {
+	spinner.text = text;
+
+	if ( !spinner.isSpinning ) {
+		console.log( text );
+	}
+}
+
+function onProgress( spinner ) {
+	const title = spinner.text;
+
+	return ( { done, total } ) => {
+		const progress = total ? Math.round( ( done / total ) * 100 ) : 0;
+		const text = `${ title } ${ chalk.bold( `${ progress }%` ) }`;
+
+		printStatus( spinner, text );
+	};
 }
