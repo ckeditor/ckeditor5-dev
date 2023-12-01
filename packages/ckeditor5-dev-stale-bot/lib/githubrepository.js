@@ -33,7 +33,7 @@ const queries = {
 module.exports = class GitHubRepository {
 	constructor( authToken ) {
 		/**
-		 * @protected
+		 * @private
 		 * @property {GraphQLClient}
 		 */
 		this.graphql = new GraphQLClient( 'https://api.github.com/graphql', {
@@ -46,7 +46,7 @@ module.exports = class GitHubRepository {
 		} );
 
 		/**
-		 * @protected
+		 * @private
 		 * @property {Logger}
 		 */
 		this.logger = logger();
@@ -92,7 +92,7 @@ module.exports = class GitHubRepository {
 					// Count next portion of the received data.
 					done: pageInfo.done + data.search.nodes.length,
 
-					// Set the total number of hits only once, when the response from the first (initial) search request was received.
+					// Set the total number of hits only once: when the response from the first (initial) search request was received.
 					// Subsequent calls use a modified search start date, so the number of hits is no longer valid.
 					total: pageInfo.total || data.search.issueCount
 				};
@@ -104,16 +104,15 @@ module.exports = class GitHubRepository {
 
 				const staleIssues = await this.parseIssuesToStale( options, data.search );
 
-				// The GitHub "search" query returns maximum of 1000 results, even if the number of hits is higher.
-				// So, in case GitHub does not allow going to the next paginated chunk of data, but we know that we have not received all
-				// the data yet...
-				if ( !pageInfo.hasNextPage && pageInfo.done !== pageInfo.total ) {
-					// ...let's take the creation date of the last received issue and treat it as the new moment to start the search.
-					// All received issues are sorted in descending order by the date of creation, so the last issue is the oldest one
-					// we know so far. This is the date that defines the moment to continue the search.
+				// The GitHub "search" query returns maximum of 1000 results, even if the total number of hits is higher.
+				// So, in case GitHub does not allow going to the next paginated chunk of data, but we have not received all the data yet...
+				if ( !pageInfo.hasNextPage && pageInfo.done < pageInfo.total ) {
+					// ...let's take the creation date of the last received issue and use it as the new moment to start the new search.
+					// All received issues are sorted in a descending order by the date of creation, so the last issue is the oldest one
+					// we fetched so far. This is the date that defines the moment to continue the search.
 					options.searchDate = data.search.nodes.at( -1 ).createdAt;
 
-					// Reset the page info object, because we are going to sent a slightly modified request with different offset, indicated
+					// Set the pagination flag, because we are going to sent a slightly modified request with different offset, indicated
 					// by the creation date of the last received issue.
 					pageInfo.hasNextPage = true;
 					pageInfo.cursor = null;
@@ -172,6 +171,7 @@ module.exports = class GitHubRepository {
 	 * Parses the received array of issues and fetches the remaining timeline items for any issue, if not everything was received in the
 	 * initial request. Finally, filters issues based on whether they match the critieria of a stale issue.
 	 *
+	 * @private
 	 * @param {Options} options Configuration options.
 	 * @param {Object} data Received response to parse.
 	 * @returns {Promise.<Array.<SearchResult>>} Array of all found stale issues.
@@ -206,6 +206,7 @@ module.exports = class GitHubRepository {
 	/**
 	 * Parses the received array of timeline items for an issue.
 	 *
+	 * @private
 	 * @param {Object} data Received response to parse.
 	 * @returns {<Array.<TimelineItem>>} Array of all timeline items.
 	 */
@@ -236,11 +237,12 @@ module.exports = class GitHubRepository {
 	 *
 	 * If the API rate limit is exceeded, the request is paused until the limit is reset. Then, the request is sent again.
 	 *
+	 * @private
 	 * @param {String} query The GraphQL query to send.
-	 * @param {Object} variables Variables required by the GraphQL query.
+	 * @param {Object} [variables={}] Variables required by the GraphQL query.
 	 * @returns {Promise.<Object>} Data returned from the GitHub API.
 	 */
-	async sendRequest( query, variables ) {
+	async sendRequest( query, variables = {} ) {
 		return this.graphql.request( query, variables )
 			.catch( async error => {
 				const rateLimit = checkApiRateLimit( error );
