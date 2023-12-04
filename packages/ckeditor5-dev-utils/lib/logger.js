@@ -44,6 +44,8 @@ levels.set( 'error', new Set( [ 'info', 'warning', 'error' ] ) );
  *      errorLog.warning( 'Message.' ); // This message won't be displayed.
  *      errorLog.error( 'Message.' ); // This message will be always displayed.
  *
+ * Additionally, the `logger#error()` method prints the error instance if provided as the second argument.
+ *
  * @param {String} moduleVerbosity='info' Level of the verbosity for all log methods.
  * @returns {Object} logger
  * @returns {Function} logger.info

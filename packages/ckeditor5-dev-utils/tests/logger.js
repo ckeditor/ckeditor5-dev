@@ -176,4 +176,26 @@ describe( 'logger', () => {
 			} );
 		} );
 	} );
+
+	describe( 'printing error', () => {
+		beforeEach( () => {
+			log = logger();
+		} );
+
+		it( 'should log a message', () => {
+			const consoleLog = sandbox.stub( console, 'log' );
+			const consoleDir = sandbox.stub( console, 'dir' );
+
+			const error = new Error();
+
+			log.error( logMessage, error );
+
+			expect( consoleDir.calledOnce ).to.equal( true );
+			expect( consoleDir.firstCall.args[ 0 ] ).to.equal( error );
+			expect( consoleDir.firstCall.args[ 1 ] ).to.deep.equal( { depth: null } );
+
+			consoleLog.restore();
+			consoleDir.restore();
+		} );
+	} );
 } );

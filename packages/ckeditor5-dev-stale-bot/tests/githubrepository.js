@@ -36,7 +36,9 @@ describe( 'lib/githubrepository', () => {
 				},
 				constructor: sinon.stub(),
 				request: sinon.stub()
-			}
+			},
+			prepareSearchQuery: sinon.stub().returns( 'search query' ),
+			isIssueStale: sinon.stub().returns( true )
 		};
 
 		pageInfoWithNextPage = {
@@ -70,7 +72,9 @@ describe( 'lib/githubrepository', () => {
 				logger() {
 					return stubs.logger;
 				}
-			}
+			},
+			'./utils/preparesearchquery': stubs.prepareSearchQuery,
+			'./utils/isissuestale': stubs.isIssueStale
 		} );
 
 		githubRepository = new GitHubRepository( 'authorization-token' );
@@ -170,9 +174,7 @@ describe( 'lib/githubrepository', () => {
 				},
 				() => {
 					expect( stubs.logger.error.callCount ).to.equal( 1 );
-					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal(
-						'Unexpected error when executing "#getViewerLogin()".'
-					);
+					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal( 'Unexpected error when executing "#getViewerLogin()".' );
 					expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
 				}
 			);
@@ -184,7 +186,7 @@ describe( 'lib/githubrepository', () => {
 			expect( githubRepository.getIssueTimelineItems ).to.be.a( 'function' );
 		} );
 
-		it( 'should return all timeline items if they are not paginated', () => {
+		it( 'should return all timeline events if they are not paginated', () => {
 			const timelineItems = [
 				{ createdAt: '2022-12-01T09:00:00Z' },
 				{ createdAt: '2022-12-02T09:00:00Z' },
@@ -200,7 +202,7 @@ describe( 'lib/githubrepository', () => {
 				}
 			} );
 
-			return githubRepository.getIssueTimelineItems( 'GitHubNodeId' ).then( result => {
+			return githubRepository.getIssueTimelineItems( 'IssueId' ).then( result => {
 				expect( result ).to.be.an( 'array' );
 				expect( result ).to.have.length( 3 );
 				expect( result[ 0 ] ).to.deep.equal( { eventDate: '2022-12-01T09:00:00Z' } );
@@ -209,7 +211,7 @@ describe( 'lib/githubrepository', () => {
 			} );
 		} );
 
-		it( 'should return all timeline items if they are paginated', () => {
+		it( 'should return all timeline events if they are paginated', () => {
 			const timelineItems = [
 				{ createdAt: '2022-12-01T09:00:00Z' },
 				{ createdAt: '2022-12-02T09:00:00Z' },
@@ -227,7 +229,7 @@ describe( 'lib/githubrepository', () => {
 				};
 			} );
 
-			return githubRepository.getIssueTimelineItems( 'GitHubNodeId' ).then( result => {
+			return githubRepository.getIssueTimelineItems( 'IssueId' ).then( result => {
 				expect( result ).to.be.an( 'array' );
 				expect( result ).to.have.length( 3 );
 				expect( result[ 0 ] ).to.deep.equal( { eventDate: '2022-12-01T09:00:00Z' } );
@@ -236,7 +238,7 @@ describe( 'lib/githubrepository', () => {
 			} );
 		} );
 
-		it( 'should send one request for all timeline items if they are not paginated', () => {
+		it( 'should send one request for all timeline events if they are not paginated', () => {
 			const timelineItems = [
 				{ createdAt: '2022-12-01T09:00:00Z' },
 				{ createdAt: '2022-12-02T09:00:00Z' },
@@ -252,17 +254,14 @@ describe( 'lib/githubrepository', () => {
 				}
 			} );
 
-			return githubRepository.getIssueTimelineItems( 'GitHubNodeId' ).then( () => {
+			return githubRepository.getIssueTimelineItems( 'IssueId' ).then( () => {
 				expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
 				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query GetIssueTimelineItems' );
-				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
-					nodeId: 'GitHubNodeId',
-					cursor: null
-				} );
+				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( { nodeId: 'IssueId', cursor: null } );
 			} );
 		} );
 
-		it( 'should send multiple requests for all timeline items if they are paginated', () => {
+		it( 'should send multiple requests for all timeline events if they are paginated', () => {
 			const timelineItems = [
 				{ createdAt: '2022-12-01T09:00:00Z' },
 				{ createdAt: '2022-12-02T09:00:00Z' },
@@ -280,26 +279,17 @@ describe( 'lib/githubrepository', () => {
 				};
 			} );
 
-			return githubRepository.getIssueTimelineItems( 'GitHubNodeId' ).then( () => {
+			return githubRepository.getIssueTimelineItems( 'IssueId' ).then( () => {
 				expect( stubs.GraphQLClient.request.callCount ).to.equal( 3 );
 
 				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query GetIssueTimelineItems' );
-				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
-					nodeId: 'GitHubNodeId',
-					cursor: null
-				} );
+				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( { nodeId: 'IssueId', cursor: null } );
 
 				expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 0 ] ).to.equal( 'query GetIssueTimelineItems' );
-				expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 1 ] ).to.deep.equal( {
-					nodeId: 'GitHubNodeId',
-					cursor: 'cursor'
-				} );
+				expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 1 ] ).to.deep.equal( { nodeId: 'IssueId', cursor: 'cursor' } );
 
 				expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 0 ] ).to.equal( 'query GetIssueTimelineItems' );
-				expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 1 ] ).to.deep.equal( {
-					nodeId: 'GitHubNodeId',
-					cursor: 'cursor'
-				} );
+				expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 1 ] ).to.deep.equal( { nodeId: 'IssueId', cursor: 'cursor' } );
 			} );
 		} );
 
@@ -321,7 +311,7 @@ describe( 'lib/githubrepository', () => {
 				}
 			} );
 
-			return githubRepository.getIssueTimelineItems( 'GitHubNodeId' ).then( result => {
+			return githubRepository.getIssueTimelineItems( 'IssueId' ).then( result => {
 				expect( result ).to.be.an( 'array' );
 				expect( result ).to.have.length( 5 );
 				expect( result[ 0 ] ).to.deep.equal( { eventDate: '2022-12-01T09:00:00Z' } );
@@ -335,7 +325,7 @@ describe( 'lib/githubrepository', () => {
 		it( 'should reject if request failed', () => {
 			stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
 
-			return githubRepository.getIssueTimelineItems( 'GitHubNodeId' ).then(
+			return githubRepository.getIssueTimelineItems( 'IssueId' ).then(
 				() => {
 					throw new Error( 'Expected to be rejected.' );
 				},
@@ -365,7 +355,7 @@ describe( 'lib/githubrepository', () => {
 
 			stubs.GraphQLClient.request.onCall( 2 ).rejects( new Error( '500 Internal Server Error' ) );
 
-			return githubRepository.getIssueTimelineItems( 'GitHubNodeId' ).then(
+			return githubRepository.getIssueTimelineItems( 'IssueId' ).then(
 				() => {
 					throw new Error( 'Expected to be rejected.' );
 				},
@@ -380,7 +370,7 @@ describe( 'lib/githubrepository', () => {
 
 			stubs.GraphQLClient.request.rejects( error );
 
-			return githubRepository.getIssueTimelineItems( 'GitHubNodeId' ).then(
+			return githubRepository.getIssueTimelineItems( 'IssueId' ).then(
 				() => {
 					throw new Error( 'Expected to be rejected.' );
 				},
@@ -396,10 +386,12 @@ describe( 'lib/githubrepository', () => {
 	} );
 
 	describe( '#searchIssuesToStale()', () => {
-		let options, onProgress, issueBase;
+		let onProgress, optionsBase, issueBase;
 
 		beforeEach( () => {
-			options = {
+			onProgress = sinon.stub();
+
+			optionsBase = {
 				type: 'issue',
 				repositorySlug: 'ckeditor/ckeditor5',
 				searchDate: '2022-12-01',
@@ -409,12 +401,10 @@ describe( 'lib/githubrepository', () => {
 				ignoredActivityLabels: []
 			};
 
-			onProgress = sinon.stub();
-
 			issueBase = {
 				id: 'IssueId',
 				number: 1,
-				createdAt: '2022-12-01T09:00:00Z',
+				createdAt: '2022-11-30T23:59:59Z',
 				lastEditedAt: null,
 				reactions: {
 					nodes: [],
@@ -429,6 +419,27 @@ describe( 'lib/githubrepository', () => {
 
 		it( 'should be a function', () => {
 			expect( githubRepository.searchIssuesToStale ).to.be.a( 'function' );
+		} );
+
+		it( 'should ask for a search query', () => {
+			const issues = [
+				{ ...issueBase, number: 1 },
+				{ ...issueBase, number: 2 },
+				{ ...issueBase, number: 3 }
+			];
+
+			stubs.GraphQLClient.request.resolves( {
+				search: {
+					issueCount: issues.length,
+					nodes: issues,
+					pageInfo: pageInfoNoNextPage
+				}
+			} );
+
+			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
+				expect( stubs.prepareSearchQuery.calledOnce ).to.equal( true );
+				expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.deep.equal( optionsBase );
+			} );
 		} );
 
 		it( 'should return all issues to stale if they are not paginated', () => {
@@ -446,7 +457,7 @@ describe( 'lib/githubrepository', () => {
 				}
 			} );
 
-			return githubRepository.searchIssuesToStale( options, onProgress ).then( result => {
+			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( result => {
 				expect( result ).to.be.an( 'array' );
 				expect( result ).to.have.length( 3 );
 				expect( result[ 0 ] ).to.deep.equal( { id: 'IssueId', slug: 'ckeditor/ckeditor5#1' } );
@@ -472,7 +483,7 @@ describe( 'lib/githubrepository', () => {
 				};
 			} );
 
-			return githubRepository.searchIssuesToStale( options, onProgress ).then( result => {
+			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( result => {
 				expect( result ).to.be.an( 'array' );
 				expect( result ).to.have.length( 3 );
 				expect( result[ 0 ] ).to.deep.equal( { id: 'IssueId', slug: 'ckeditor/ckeditor5#1' } );
@@ -496,13 +507,10 @@ describe( 'lib/githubrepository', () => {
 				}
 			} );
 
-			return githubRepository.searchIssuesToStale( options, onProgress ).then( () => {
+			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
 				expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
 				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query SearchIssuesToStale' );
-				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
-					query: 'repo:ckeditor/ckeditor5 created:<2022-12-01 type:issue state:open sort:created-desc',
-					cursor: null
-				} );
+				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( { query: 'search query', cursor: null } );
 			} );
 		} );
 
@@ -523,30 +531,50 @@ describe( 'lib/githubrepository', () => {
 				};
 			} );
 
-			return githubRepository.searchIssuesToStale( options, onProgress ).then( () => {
+			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
 				expect( stubs.GraphQLClient.request.callCount ).to.equal( 3 );
 
 				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query SearchIssuesToStale' );
-				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
-					query: 'repo:ckeditor/ckeditor5 created:<2022-12-01 type:issue state:open sort:created-desc',
-					cursor: null
-				} );
+				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( { query: 'search query', cursor: null } );
 
 				expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 0 ] ).to.equal( 'query SearchIssuesToStale' );
-				expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 1 ] ).to.deep.equal( {
-					query: 'repo:ckeditor/ckeditor5 created:<2022-12-01 type:issue state:open sort:created-desc',
-					cursor: 'cursor'
-				} );
+				expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 1 ] ).to.deep.equal( { query: 'search query', cursor: 'cursor' } );
 
 				expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 0 ] ).to.equal( 'query SearchIssuesToStale' );
-				expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 1 ] ).to.deep.equal( {
-					query: 'repo:ckeditor/ckeditor5 created:<2022-12-01 type:issue state:open sort:created-desc',
+				expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 1 ] ).to.deep.equal( { query: 'search query', cursor: 'cursor' } );
+			} );
+		} );
+
+		it( 'should fetch all timeline events for any issue if they are paginated', () => {
+			const issues = [
+				{ ...issueBase, number: 1, timelineItems: {
+					nodes: [],
+					pageInfo: pageInfoWithNextPage
+				} }
+			];
+
+			sinon.stub( githubRepository, 'getIssueTimelineItems' ).resolves( [] );
+
+			stubs.GraphQLClient.request.resolves( {
+				search: {
+					issueCount: issues.length,
+					nodes: issues,
+					pageInfo: pageInfoNoNextPage
+				}
+			} );
+
+			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
+				expect( githubRepository.getIssueTimelineItems.callCount ).to.equal( 1 );
+
+				expect( githubRepository.getIssueTimelineItems.getCall( 0 ).args[ 0 ] ).to.equal( 'IssueId' );
+				expect( githubRepository.getIssueTimelineItems.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
+					hasNextPage: true,
 					cursor: 'cursor'
 				} );
 			} );
 		} );
 
-		it( 'should prepare search query with new offset if GitHub prevents going to the next page', () => {
+		it( 'should ask for a new search query with new offset if GitHub prevents going to the next page', () => {
 			const issues = [
 				{ ...issueBase, number: 1, createdAt: '2022-11-01T09:00:00Z' },
 				{ ...issueBase, number: 2, createdAt: '2022-10-01T09:00:00Z' },
@@ -563,34 +591,19 @@ describe( 'lib/githubrepository', () => {
 				};
 			} );
 
-			return githubRepository.searchIssuesToStale( options, onProgress ).then( () => {
-				expect( stubs.GraphQLClient.request.callCount ).to.equal( 3 );
-
-				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query SearchIssuesToStale' );
-				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
-					query: 'repo:ckeditor/ckeditor5 created:<2022-12-01 type:issue state:open sort:created-desc',
-					cursor: null
-				} );
-
-				expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 0 ] ).to.equal( 'query SearchIssuesToStale' );
-				expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 1 ] ).to.deep.equal( {
-					query: 'repo:ckeditor/ckeditor5 created:<2022-11-01T09:00:00Z type:issue state:open sort:created-desc',
-					cursor: null
-				} );
-
-				expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 0 ] ).to.equal( 'query SearchIssuesToStale' );
-				expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 1 ] ).to.deep.equal( {
-					query: 'repo:ckeditor/ckeditor5 created:<2022-10-01T09:00:00Z type:issue state:open sort:created-desc',
-					cursor: null
-				} );
+			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
+				expect( stubs.prepareSearchQuery.callCount ).to.equal( 3 );
+				expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-12-01' );
+				expect( stubs.prepareSearchQuery.getCall( 1 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-11-01T09:00:00Z' );
+				expect( stubs.prepareSearchQuery.getCall( 2 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-10-01T09:00:00Z' );
 			} );
 		} );
 
 		it( 'should return all issues to stale if GitHub prevents going to the next page', () => {
 			const issues = [
-				{ ...issueBase, number: 1, createdAt: '2022-11-01T09:00:00Z' },
-				{ ...issueBase, number: 2, createdAt: '2022-10-01T09:00:00Z' },
-				{ ...issueBase, number: 3, createdAt: '2022-09-01T09:00:00Z' }
+				{ ...issueBase, number: 1 },
+				{ ...issueBase, number: 2 },
+				{ ...issueBase, number: 3 }
 			];
 
 			paginateRequest( issues, ( { nodes } ) => {
@@ -603,12 +616,47 @@ describe( 'lib/githubrepository', () => {
 				};
 			} );
 
-			return githubRepository.searchIssuesToStale( options, onProgress ).then( result => {
+			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( result => {
 				expect( result ).to.be.an( 'array' );
 				expect( result ).to.have.length( 3 );
 				expect( result[ 0 ] ).to.deep.equal( { id: 'IssueId', slug: 'ckeditor/ckeditor5#1' } );
 				expect( result[ 1 ] ).to.deep.equal( { id: 'IssueId', slug: 'ckeditor/ckeditor5#2' } );
 				expect( result[ 2 ] ).to.deep.equal( { id: 'IssueId', slug: 'ckeditor/ckeditor5#3' } );
+			} );
+		} );
+
+		it( 'should check each issue if it is stale', () => {
+			const issues = [
+				{ ...issueBase, number: 1 },
+				{ ...issueBase, number: 2 },
+				{ ...issueBase, number: 3 }
+			];
+
+			stubs.GraphQLClient.request.resolves( {
+				search: {
+					issueCount: issues.length,
+					nodes: issues,
+					pageInfo: pageInfoNoNextPage
+				}
+			} );
+
+			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
+				const expectedIssue = {
+					...issueBase,
+					lastReactedAt: null,
+					timelineItems: []
+				};
+
+				expect( stubs.isIssueStale.callCount ).to.equal( 3 );
+
+				expect( stubs.isIssueStale.getCall( 0 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 1 } );
+				expect( stubs.isIssueStale.getCall( 0 ).args[ 1 ] ).to.deep.equal( optionsBase );
+
+				expect( stubs.isIssueStale.getCall( 1 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 2 } );
+				expect( stubs.isIssueStale.getCall( 1 ).args[ 1 ] ).to.deep.equal( optionsBase );
+
+				expect( stubs.isIssueStale.getCall( 2 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 3 } );
+				expect( stubs.isIssueStale.getCall( 2 ).args[ 1 ] ).to.deep.equal( optionsBase );
 			} );
 		} );
 
@@ -629,7 +677,7 @@ describe( 'lib/githubrepository', () => {
 				};
 			} );
 
-			return githubRepository.searchIssuesToStale( options, onProgress ).then( () => {
+			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
 				expect( onProgress.callCount ).to.equal( 3 );
 
 				expect( onProgress.getCall( 0 ).args[ 0 ] ).to.deep.equal( { done: 1, total: 3 } );
@@ -655,7 +703,7 @@ describe( 'lib/githubrepository', () => {
 				};
 			} );
 
-			return githubRepository.searchIssuesToStale( options, onProgress ).then( () => {
+			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
 				expect( onProgress.callCount ).to.equal( 3 );
 
 				expect( onProgress.getCall( 0 ).args[ 0 ] ).to.deep.equal( { done: 1, total: 3 } );
@@ -667,7 +715,7 @@ describe( 'lib/githubrepository', () => {
 		it( 'should reject if request failed', () => {
 			stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
 
-			return githubRepository.searchIssuesToStale( options, onProgress ).then(
+			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then(
 				() => {
 					throw new Error( 'Expected to be rejected.' );
 				},
@@ -696,7 +744,7 @@ describe( 'lib/githubrepository', () => {
 
 			stubs.GraphQLClient.request.onCall( 2 ).rejects( new Error( '500 Internal Server Error' ) );
 
-			return githubRepository.searchIssuesToStale( options, onProgress ).then(
+			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then(
 				() => {
 					throw new Error( 'Expected to be rejected.' );
 				},
@@ -711,7 +759,7 @@ describe( 'lib/githubrepository', () => {
 
 			stubs.GraphQLClient.request.rejects( error );
 
-			return githubRepository.searchIssuesToStale( options, onProgress ).then(
+			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then(
 				() => {
 					throw new Error( 'Expected to be rejected.' );
 				},
@@ -723,6 +771,184 @@ describe( 'lib/githubrepository', () => {
 					expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
 				}
 			);
+		} );
+	} );
+
+	describe( '#sendRequest()', () => {
+		const payload = {
+			data: {
+				key: 'foo'
+			}
+		};
+
+		let clock;
+
+		beforeEach( () => {
+			clock = sinon.useFakeTimers();
+		} );
+
+		afterEach( () => {
+			clock.restore();
+		} );
+
+		it( 'should be a function', () => {
+			expect( githubRepository.sendRequest ).to.be.a( 'function' );
+		} );
+
+		it( 'should resolve with the payload if no error occured', () => {
+			stubs.GraphQLClient.request.resolves( payload );
+
+			return githubRepository.sendRequest( 'query' ).then( result => {
+				expect( result ).to.equal( payload );
+			} );
+		} );
+
+		it( 'should reject with the error - no custom properties', () => {
+			const error = new Error();
+
+			stubs.GraphQLClient.request.rejects( error );
+
+			return githubRepository.sendRequest( 'query' ).then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				err => {
+					expect( err ).to.equal( error );
+				}
+			);
+		} );
+
+		it( 'should reject with the error - custom "response" property', () => {
+			const error = new Error();
+			error.response = {};
+
+			stubs.GraphQLClient.request.rejects( error );
+
+			return githubRepository.sendRequest( 'query' ).then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				err => {
+					expect( err ).to.equal( error );
+				}
+			);
+		} );
+
+		it( 'should reject with the error - custom "response.errors" property', () => {
+			const error = new Error();
+			error.response = {
+				errors: []
+			};
+
+			stubs.GraphQLClient.request.rejects( error );
+
+			return githubRepository.sendRequest( 'query' ).then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				err => {
+					expect( err ).to.equal( error );
+				}
+			);
+		} );
+
+		it( 'should reject with the error - custom "response.errors" property with no API rate limit error', () => {
+			const error = new Error();
+			error.response = {
+				errors: [
+					{ type: 'INTERNAL_SERVER_ERROR' }
+				]
+			};
+
+			stubs.GraphQLClient.request.rejects( error );
+
+			return githubRepository.sendRequest( 'query' ).then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				err => {
+					expect( err ).to.equal( error );
+				}
+			);
+		} );
+
+		it( 'should re-send the request after API rate is reset - primary rate limit', async () => {
+			const timeToWait = 28 * 60;
+			const nowTimestamp = Math.floor( Date.now() / 1000 );
+			const resetTimestamp = nowTimestamp + timeToWait;
+
+			const error = new Error();
+			error.response = {
+				errors: [
+					{ type: 'RATE_LIMITED' }
+				],
+				headers: new Map( [ [ 'x-ratelimit-reset', resetTimestamp ] ] )
+			};
+
+			stubs.GraphQLClient.request.onCall( 0 ).rejects( error ).onCall( 1 ).resolves( payload );
+
+			const sendPromise = githubRepository.sendRequest( 'query' );
+
+			expect( stubs.GraphQLClient.request.callCount ).to.equal( 1 );
+
+			await clock.tickAsync( timeToWait * 1000 );
+
+			expect( stubs.GraphQLClient.request.callCount ).to.equal( 2 );
+
+			return sendPromise;
+		} );
+
+		it( 'should re-send the request after API rate is reset - secondary rate limit', async () => {
+			const timeToWait = 28 * 60;
+
+			const error = new Error();
+			error.response = {
+				headers: new Map( [ [ 'retry-after', timeToWait ] ] )
+			};
+
+			stubs.GraphQLClient.request.onCall( 0 ).rejects( error ).onCall( 1 ).resolves( payload );
+
+			const sendPromise = githubRepository.sendRequest( 'query' );
+
+			expect( stubs.GraphQLClient.request.callCount ).to.equal( 1 );
+
+			await clock.tickAsync( timeToWait * 1000 );
+
+			expect( stubs.GraphQLClient.request.callCount ).to.equal( 2 );
+
+			return sendPromise;
+		} );
+
+		it( 'should log the progress and resolve with the payload after API rate is reset', async () => {
+			const timeToWait = 28 * 60;
+			const nowTimestamp = Math.floor( Date.now() / 1000 );
+			const resetTimestamp = nowTimestamp + timeToWait;
+
+			const error = new Error();
+			error.response = {
+				errors: [
+					{ type: 'RATE_LIMITED' }
+				],
+				headers: new Map( [ [ 'x-ratelimit-reset', resetTimestamp ] ] )
+			};
+
+			stubs.GraphQLClient.request.onCall( 0 ).rejects( error ).onCall( 1 ).resolves( payload );
+
+			const sendPromise = githubRepository.sendRequest( 'query' );
+
+			await clock.tickAsync( 0 );
+
+			expect( stubs.logger.info.callCount ).to.equal( 1 );
+			expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.equal( '⛔ The API limit is exceeded. Request is paused for 28 minutes.' );
+
+			await clock.tickAsync( timeToWait * 1000 );
+
+			expect( stubs.logger.info.callCount ).to.equal( 2 );
+			expect( stubs.logger.info.getCall( 1 ).args[ 0 ] ).to.equal( '📍 Re-sending postponed request.' );
+
+			return sendPromise.then( result => {
+				expect( result ).to.equal( payload );
+			} );
 		} );
 	} );
 

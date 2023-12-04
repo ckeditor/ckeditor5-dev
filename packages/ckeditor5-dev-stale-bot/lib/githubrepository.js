@@ -8,13 +8,13 @@ const fs = require( 'fs-extra' );
 const { GraphQLClient } = require( 'graphql-request' );
 const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
 const {
-	isBefore,
-	parseISO,
 	addSeconds,
 	fromUnixTime,
 	formatDistanceToNow,
 	differenceInSeconds
 } = require( 'date-fns' );
+const prepareSearchQuery = require( './utils/preparesearchquery' );
+const isIssueStale = require( './utils/isissuestale' );
 
 const GRAPHQL_PATH = upath.join( __dirname, 'graphql' );
 
@@ -61,9 +61,7 @@ module.exports = class GitHubRepository {
 		return this.sendRequest( await queries.getViewerLogin )
 			.then( data => data.viewer.login )
 			.catch( error => {
-				if ( error ) {
-					this.logger.error( 'Unexpected error when executing "#getViewerLogin()".', error );
-				}
+				this.logger.error( 'Unexpected error when executing "#getViewerLogin()".', error );
 
 				return Promise.reject();
 			} );
@@ -110,7 +108,10 @@ module.exports = class GitHubRepository {
 					// ...let's take the creation date of the last received issue and use it as the new moment to start the new search.
 					// All received issues are sorted in a descending order by the date of creation, so the last issue is the oldest one
 					// we fetched so far. This is the date that defines the moment to continue the search.
-					options.searchDate = data.search.nodes.at( -1 ).createdAt;
+					options = {
+						...options,
+						searchDate: data.search.nodes.at( -1 ).createdAt
+					};
 
 					// Set the pagination flag, because we are going to sent a slightly modified request with different offset, indicated
 					// by the creation date of the last received issue.
@@ -125,9 +126,7 @@ module.exports = class GitHubRepository {
 				return [ ...staleIssues, ...staleIssuesNextPage ];
 			} )
 			.catch( error => {
-				if ( error ) {
-					this.logger.error( 'Unexpected error when executing "#searchIssuesToStale()".', error );
-				}
+				this.logger.error( 'Unexpected error when executing "#searchIssuesToStale()".', error );
 
 				return Promise.reject();
 			} );
@@ -159,9 +158,7 @@ module.exports = class GitHubRepository {
 				return [ ...timelineItems, ...timelineItemsNextPage ];
 			} )
 			.catch( error => {
-				if ( error ) {
-					this.logger.error( 'Unexpected error when executing "#getIssueTimelineItems()".', error );
-				}
+				this.logger.error( 'Unexpected error when executing "#getIssueTimelineItems()".', error );
 
 				return Promise.reject();
 			} );
@@ -272,79 +269,6 @@ module.exports = class GitHubRepository {
  */
 function readGraphQL( queryName ) {
 	return fs.readFile( upath.join( GRAPHQL_PATH, `${ queryName }.graphql` ), 'utf-8' );
-}
-
-/**
- * Creates a query to search for issues or pull requests that potentially could be considered as stale ones.
- *
- * @param {Options} options Configuration options.
- * @returns {String} Search query to sent to GitHub.
- */
-function prepareSearchQuery( options ) {
-	const {
-		type,
-		ignoredLabels,
-		repositorySlug,
-		searchDate
-	} = options;
-
-	return [
-		`repo:${ repositorySlug }`,
-		`created:<${ searchDate }`,
-		`type:${ type }`,
-		'state:open',
-		'sort:created-desc',
-		...ignoredLabels.map( label => `-label:${ label }` )
-	].join( ' ' );
-}
-
-/**
- * Verifies the last activity dates from an issue to check if they all have occured before the moment defining the stale issue.
- *
- * The activity dates are:
- * - the moment of issue creation,
- * - the moment of the last edition of issue,
- * - the moment of adding or editing a comment,
- * - the moment of adding last reaction to issue,
- * - the moment of changing a label.
- *
- * Some activity entries may be ignored and not taken into account in the calculation, if so specified in the configuration.
- *
- * @param {Issue} issue Issue to check.
- * @param {Options} options Configuration options.
- * @returns {Boolean} Returns `true` if issue is considered as stale, or `false` otherwise.
- */
-function isIssueStale( issue, options ) {
-	const {
-		staleDate,
-		ignoredActivityLogins,
-		ignoredActivityLabels
-	} = options;
-
-	const dates = [
-		issue.lastEditedAt,
-		issue.lastReactedAt,
-		...issue.timelineItems
-			.filter( entry => {
-				if ( !entry.author ) {
-					return true;
-				}
-
-				return !ignoredActivityLogins.includes( entry.author );
-			} )
-			.filter( entry => {
-				if ( !entry.label ) {
-					return true;
-				}
-
-				return !ignoredActivityLabels.includes( entry.label );
-			} )
-			.map( entry => entry.eventDate )
-	];
-
-	return dates
-		.filter( Boolean )
-		.every( date => isBefore( parseISO( date ), parseISO( staleDate ) ) );
 }
 
 /**
