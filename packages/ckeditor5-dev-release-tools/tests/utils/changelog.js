@@ -415,5 +415,23 @@ describe( 'dev-release-tools/utils', () => {
 				);
 			} );
 		} );
+
+		describe( 'getFormattedDate()', () => {
+			let clock;
+
+			beforeEach( () => {
+				clock = sinon.useFakeTimers( {
+					now: new Date( '2023-06-15 12:00:00' )
+				} );
+			} );
+
+			afterEach( () => {
+				clock.restore();
+			} );
+
+			it( 'returns a date following the format "year-month-day" with the leading zeros', () => {
+				expect( utils.getFormattedDate() ).to.equal( '2023-06-15' );
+			} );
+		} );
 	} );
 } );

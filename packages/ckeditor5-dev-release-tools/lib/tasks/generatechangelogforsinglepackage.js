@@ -35,6 +35,9 @@ const SKIP_GENERATE_CHANGELOG = 'Typed "skip" as a new version. Aborting.';
  *
  * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
  *
+ * @param {FormatDateCallback} [options.formatDate] A callback allowing defining a custom format of the date inserted into the changelog.
+ * If not specified, the default date matches the `YYYY-MM-DD` pattern.
+ *
  * @returns {Promise}
  */
 module.exports = async function generateChangelogForSinglePackage( options = {} ) {
@@ -102,7 +105,8 @@ module.exports = async function generateChangelogForSinglePackage( options = {} 
 				isPatch: semver.diff( version, pkgJson.version ) === 'patch',
 				isInternalRelease,
 				skipCommitsLink: Boolean( options.skipLinks ),
-				skipCompareLink: Boolean( options.skipLinks )
+				skipCompareLink: Boolean( options.skipLinks ),
+				date: options.formatDate ? options.formatDate( new Date() ) : changelogUtils.getFormattedDate()
 			};
 
 			const writerOptions = getWriterOptions( {
@@ -192,3 +196,11 @@ module.exports = async function generateChangelogForSinglePackage( options = {} 
 		log[ method ]( `${ startWithNewLine ? '\n' : '' }${ ' '.repeat( indentLevel * cli.INDENT_SIZE ) }` + message );
 	}
 };
+
+/**
+ * @callback FormatDateCallback
+ *
+ * @param {Date} now The current date.
+ *
+ * @returns {String} The formatted date inserted into the changelog.
+ */
