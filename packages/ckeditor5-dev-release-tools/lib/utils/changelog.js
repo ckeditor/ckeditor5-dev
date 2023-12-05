@@ -7,6 +7,7 @@
 
 const fs = require( 'fs' );
 const path = require( 'path' );
+const { format } = require( 'date-fns' );
 const { getRepositoryUrl } = require( './transformcommitutils' );
 
 const utils = {
@@ -95,6 +96,13 @@ const utils = {
 		const truncatedChangelog = utils.changelogHeader + truncatedEntries.join( '\n' ).trim() + changelogFooter;
 
 		utils.saveChangelog( truncatedChangelog, cwd );
+	},
+
+	/**
+	 * @returns {String}
+	 */
+	getFormattedDate() {
+		return format( new Date(), 'yyyy-MM-dd' );
 	}
 };
 

@@ -58,6 +58,9 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
  *
  * @param {String|null} [options.nextVersion=null] Next version to use. If not provided, a user needs to provide via CLI.
  *
+ * @param {FormatDateCallback} [options.formatDate] A callback allowing defining a custom format of the date inserted into the changelog.
+ * If not specified, the default date matches the `YYYY-MM-DD` pattern.
+ *
  * @returns {Promise.<undefined|String>}
  */
 module.exports = async function generateChangelogForMonoRepository( options ) {
@@ -406,7 +409,8 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 			previousTag: options.from ? options.from : 'v' + rootPkgJson.version,
 			isPatch: semver.diff( version, rootPkgJson.version ) === 'patch',
 			skipCommitsLink: Boolean( options.skipLinks ),
-			skipCompareLink: Boolean( options.skipLinks )
+			skipCompareLink: Boolean( options.skipLinks ),
+			date: options.formatDate ? options.formatDate( new Date() ) : changelogUtils.getFormattedDate()
 		};
 
 		const writerOptions = getWriterOptions( {
@@ -747,4 +751,12 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
  *
  * @param {String} [releaseBranch] A name of the branch that should be used for releasing packages. If not specified, the branch
  * used for the main repository will be used.
+ */
+
+/**
+ * @callback FormatDateCallback
+ *
+ * @param {Date} now The current date.
+ *
+ * @returns {String} The formatted date inserted into the changelog.
  */
