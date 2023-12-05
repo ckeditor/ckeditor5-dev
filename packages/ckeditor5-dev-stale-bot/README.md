@@ -18,7 +18,7 @@ yarn run ckeditor5-dev-stale-bot [<args>...]
 
 This script accepts the following arguments:
 
-* `--config-path` &ndash; Required. Path to a JSON file containing (stale bot configuration)[#configuration].
+* `--config-path` &ndash; Required. Path to a JSON file containing [stale bot configuration](#configuration).
 * `--dry-run` &ndash; Optional, `false` by default. Allows disabling any changes to GitHub if set to `true`. By default stale bot makes use of your **real, live, production data**.
 
 Also, the `CKE5_GITHUB_TOKEN` environment variable is required to run the script.
