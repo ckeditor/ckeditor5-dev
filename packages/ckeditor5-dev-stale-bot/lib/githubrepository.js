@@ -19,9 +19,13 @@ const isIssueStale = require( './utils/isissuestale' );
 const GRAPHQL_PATH = upath.join( __dirname, 'graphql' );
 
 const queries = {
-	getIssueTimelineItems: readGraphQL( 'getissuetimelineitems' ),
 	getViewerLogin: readGraphQL( 'getviewerlogin' ),
-	searchIssuesToStale: readGraphQL( 'searchissuestostale' )
+	searchIssuesToStale: readGraphQL( 'searchissuestostale' ),
+	getIssueTimelineItems: readGraphQL( 'getissuetimelineitems' ),
+	addComment: readGraphQL( 'addcomment' ),
+	getLabels: readGraphQL( 'getlabels' ),
+	addLabels: readGraphQL( 'addlabels' ),
+	removeLabels: readGraphQL( 'removelabels' )
 };
 
 /**
@@ -70,7 +74,7 @@ module.exports = class GitHubRepository {
 	/**
 	 * Searches for all issues that matches the critieria of a stale issue.
 	 *
-	 * @param {Options} options Configuration options.
+	 * @param {SearchOptions} options Configuration options.
 	 * @param {Function} onProgress Callback function called each time a response is received.
 	 * @param {PageInfo} [pageInfo] Describes the current page of the returned result.
 	 * @returns {Promise.<Array.<SearchResult>>} Array of all found stale issues.
@@ -165,11 +169,98 @@ module.exports = class GitHubRepository {
 	}
 
 	/**
+	 * Adds new comment to the specified issue on GitHub.
+	 *
+	 * @param {String} issueId Issue identifier for which we want to add new comment.
+	 * @param {String} comment Comment to add.
+	 * @returns {Promise}
+	 */
+	async addComment( issueId, comment ) {
+		const variables = {
+			nodeId: issueId,
+			comment
+		};
+
+		return this.sendRequest( await queries.addComment, variables )
+			.catch( error => {
+				this.logger.error( 'Unexpected error when executing "#addComment()".', error );
+
+				return Promise.reject();
+			} );
+	}
+
+	/**
+	 * Fetches the specified label names from GitHub.
+	 *
+	 * @param {String} repositorySlug Identifies the repository, where the provided label exists.
+	 * @param {Array.<String>} labelNames Label names to fetch.
+	 * @returns {Promise.<Label>}
+	 */
+	async getLabels( repositorySlug, labelNames ) {
+		const [ repositoryOwner, repositoryName ] = repositorySlug.split( '/' );
+		const variables = {
+			repositoryOwner,
+			repositoryName,
+			labelNames: labelNames.join( ' ' )
+		};
+
+		return this.sendRequest( await queries.getLabels, variables )
+			.then( data => data.repository.labels.nodes )
+			.catch( error => {
+				this.logger.error( 'Unexpected error when executing "#getLabels()".', error );
+
+				return Promise.reject();
+			} );
+	}
+
+	/**
+	 * Adds new labels to the specified issue on GitHub.
+	 *
+	 * @param {String} issueId Issue identifier for which we want to add labels.
+	 * @param {Array.<String>} labelIds Labels to add.
+	 * @returns {Promise}
+	 */
+	async addLabels( issueId, labelIds ) {
+		const variables = {
+			nodeId: issueId,
+			labelIds
+		};
+
+		return this.sendRequest( await queries.addLabels, variables )
+			.catch( error => {
+				this.logger.error( 'Unexpected error when executing "#addLabels()".', error );
+
+				return Promise.reject();
+			} );
+	}
+
+	/**
+	 * Removes labels from the specified issue on GitHub.
+	 *
+	 * @param {String} issueId Issue identifier for which we want to remove labels.
+	 * @param {Array.<String>} labelIds Labels to remove.
+	 * @returns {Promise}
+	 */
+	async removeLabels( issueId, labelIds ) {
+		const variables = {
+			nodeId: issueId,
+			labelIds
+		};
+
+		return this.sendRequest( await queries.removeLabels, variables )
+			.catch( error => {
+				this.logger.error( 'Unexpected error when executing "#removeLabels()".', error );
+
+				return Promise.reject();
+			} );
+	}
+
+	/**
 	 * Parses the received array of issues and fetches the remaining timeline items for any issue, if not everything was received in the
 	 * initial request. Finally, filters issues based on whether they match the critieria of a stale issue.
 	 *
 	 * @private
-	 * @param {Options} options Configuration options.
+	 * @param {SearchOptions} options Configuration options.
 	 * @param {Object} data Received response to parse.
 	 * @returns {Promise.<Array.<SearchResult>>} Array of all found stale issues.
 	 */
@@ -194,10 +285,16 @@ module.exports = class GitHubRepository {
 
 		return issues
 			.filter( issue => isIssueStale( issue, options ) )
-			.map( issue => ( {
-				id: issue.id,
-				slug: `${ options.repositorySlug }#${ issue.number }`
-			} ) );
+			.map( issue => {
+				const issueType = issue.__typename === 'Issue' ? 'issues' : 'pull';
+				const url = `https://github.com/${ options.repositorySlug }/${ issueType }/${ issue.number }`;
+
+				return {
+					id: issue.id,
+					type: issue.__typename,
+					url
+				};
+			} );
 	}
 
 	/**
@@ -333,7 +430,14 @@ function checkApiRateLimit( error ) {
 /**
  * @typedef {Object} SearchResult
  * @property {String} id
- * @property {String} slug
+ * @property {'Issue'|'PullRequest'} type
+ * @property {String} url
+ */
+
+/**
+ * @typedef {Object} Label
+ * @property {String} id
+ * @property {String} name
  */
 
 /**

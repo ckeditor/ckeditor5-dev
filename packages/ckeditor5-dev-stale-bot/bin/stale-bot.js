@@ -5,11 +5,12 @@
  * For licensing, see LICENSE.md.
  */
 
-const ora = require( 'ora' );
 const fs = require( 'fs-extra' );
 const chalk = require( 'chalk' );
+const createSpinner = require( './utils/createspinner' );
 const parseArguments = require( './utils/parsearguments' );
-const prepareOptions = require( './utils/prepareoptions' );
+const validateConfig = require( './utils/validateconfig' );
+const prepareSearchOptions = require( './utils/preparesearchoptions' );
 const GitHubRepository = require( '../lib/githubrepository' );
 
 main().catch( error => {
@@ -31,70 +32,89 @@ async function main() {
 
 	const config = await fs.readJson( configPath );
 
-	if ( !config.REPOSITORY_SLUG ) {
-		throw new Error( 'Missing configuration option: REPOSITORY_SLUG' );
-	}
-
+	validateConfig( config );
 	printWelcomeMessage( dryRun );
 
 	const githubRepository = new GitHubRepository( process.env.CKE5_GITHUB_TOKEN );
 
-	const viewerLogin = await githubRepository.getViewerLogin();
+	const spinner = createSpinner();
 
-	const spinner = ora().start();
-
-	printStatus( spinner, '🔎 Searching for issues to stale...' );
-
-	const issuesToStaleOptions = prepareOptions( viewerLogin, 'issue', config );
-	const issuesToStale = await githubRepository.searchIssuesToStale( issuesToStaleOptions, onProgress( spinner ) );
-
-	printStatus( spinner, '🔎 Searching for pull requests to stale...' );
-
-	const pullRequestsToStaleOptions = prepareOptions( viewerLogin, 'pr', config );
-	const pullRequestsToStale = await githubRepository.searchIssuesToStale( pullRequestsToStaleOptions, onProgress( spinner ) );
-
-	spinner.stop();
+	const { issuesToStale, pullRequestsToStale } = await searchToStale( githubRepository, config, spinner );
 
 	if ( !issuesToStale.length && !pullRequestsToStale.length ) {
+		spinner.instance.stop();
+
 		console.log( chalk.green.bold( '✨ No issues or pull requests found that should be marked as stale.' ) );
 
 		return;
 	}
 
-	console.log( chalk.blue.bold( '🔖 The following issues or pull requests should be marked as stale:\n' ) );
+	const entries = [ ...issuesToStale, ...pullRequestsToStale ];
 
-	[ ...issuesToStale, ...pullRequestsToStale ].forEach( entry => console.log( entry.slug ) );
+	if ( !dryRun ) {
+		await markAsStale( githubRepository, entries, config, spinner );
+	}
+
+	spinner.instance.stop();
+
+	const statusMessage = dryRun ?
+		'🔖 The following issues or pull requests should be marked as stale:\n' :
+		'🔖 The following issues or pull requests were marked as stale:\n';
+
+	console.log( chalk.blue.bold( statusMessage ) );
+
+	entries.forEach( entry => console.log( entry.url ) );
 }
 
 function printWelcomeMessage( dryRun ) {
 	const message = [
 		'',
-		`🦾 ${ chalk.bold( 'STALE BOT' ) }`,
-		'',
 		dryRun ?
 			chalk.italic( `The --dry-run flag is ${ chalk.green.bold( 'ON' ) }, so bot does not perform any changes.` ) :
-			chalk.italic( `The --dry-run flag is ${ chalk.red.bold( 'OFF' ) }, so bot makes use of your real, live, production data.` ),
+			chalk.italic( `The --dry-run flag is ${ chalk.red.bold( 'OFF' ) }, so bot makes use of real, live, production data.` ),
 		''
 	];
 
 	console.log( message.join( '\n' ) );
 }
 
-function printStatus( spinner, text ) {
-	spinner.text = text;
+async function searchToStale( githubRepository, config, spinner ) {
+	const viewerLogin = await githubRepository.getViewerLogin();
 
-	if ( !spinner.isSpinning ) {
-		console.log( text );
-	}
+	spinner.printStatus( '🔎 Searching for issues to stale...' );
+
+	const issuesToStaleOptions = prepareSearchOptions( viewerLogin, 'issue', config );
+	const issuesToStale = await githubRepository.searchIssuesToStale( issuesToStaleOptions, spinner.onProgressFactory() );
+
+	spinner.printStatus( '🔎 Searching for pull requests to stale...' );
+
+	const pullRequestsToStaleOptions = prepareSearchOptions( viewerLogin, 'pr', config );
+	const pullRequestsToStale = await githubRepository.searchIssuesToStale( pullRequestsToStaleOptions, spinner.onProgressFactory() );
+
+	return {
+		issuesToStale,
+		pullRequestsToStale
+	};
 }
 
-function onProgress( spinner ) {
-	const title = spinner.text;
+async function markAsStale( githubRepository, entries, config, spinner ) {
+	spinner.printStatus( '🔎 Fetching stale labels...' );
 
-	return ( { done, total } ) => {
-		const progress = total ? Math.round( ( done / total ) * 100 ) : 0;
-		const text = `${ title } ${ chalk.bold( `${ progress }%` ) }`;
+	const staleLabels = await githubRepository.getLabels( config.REPOSITORY_SLUG, config.STALE_LABELS );
 
-		printStatus( spinner, text );
-	};
+	spinner.printStatus( '🔎 Marking found issues and pull requests as stale...' );
+
+	const onProgress = spinner.onProgressFactory();
+
+	for ( const entry of entries ) {
+		onProgress( {
+			done: entries.indexOf( entry ),
+			total: entries.length
+		} );
+
+		const staleMessage = entry.type === 'Issue' ? config.STALE_ISSUE_MESSAGE : config.STALE_PR_MESSAGE;
+
+		await githubRepository.addLabels( entry.id, staleLabels.map( label => label.id ) );
+		await githubRepository.addComment( entry.id, staleMessage );
+	}
 }

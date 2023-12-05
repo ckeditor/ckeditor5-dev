@@ -18,7 +18,7 @@ const { isBefore, parseISO } = require( 'date-fns' );
  * Some activity entries may be ignored and not used in the calculation, if so specified in the configuration (e.g. the author of an event).
  *
  * @param {Issue} issue Issue to check.
- * @param {Options} options Configuration options.
+ * @param {SearchOptions} options Configuration options.
  * @returns {Boolean} Returns `true` if issue is considered as stale, or `false` otherwise.
  */
 module.exports = function isIssueStale( issue, options ) {

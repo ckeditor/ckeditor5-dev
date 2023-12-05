@@ -11,9 +11,9 @@ const { subDays, formatISO } = require( 'date-fns' );
  * @param {String} viewerLogin The GitHub login of the currently authenticated user.
  * @param {'issue'|'pr'} type Type of GitHub resource.
  * @param {Config} config Configuration options.
- * @returns {Options} Converted options.
+ * @returns {SearchOptions} Converted options.
  */
-module.exports = function prepareOptions( viewerLogin, type, config ) {
+module.exports = function prepareSearchOptions( viewerLogin, type, config ) {
 	const {
 		REPOSITORY_SLUG,
 		DAYS_BEFORE_STALE = 365,
@@ -56,7 +56,7 @@ module.exports = function prepareOptions( viewerLogin, type, config ) {
  */
 
 /**
- * @typedef {Object} Options
+ * @typedef {Object} SearchOptions
  * @property {String} type
  * @property {String} repositorySlug
  * @property {String} staleDate

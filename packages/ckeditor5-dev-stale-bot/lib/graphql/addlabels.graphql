@@ -1,0 +1,5 @@
+mutation AddLabels( $nodeId: ID!, $labelIds: [ ID! ]! ) {
+	addLabelsToLabelable( input: { labelableId: $nodeId, labelIds: $labelIds } ) {
+		__typename
+	}
+}

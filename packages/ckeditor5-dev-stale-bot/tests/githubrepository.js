@@ -52,9 +52,13 @@ describe( 'lib/githubrepository', () => {
 		};
 
 		const queries = {
-			getissuetimelineitems: 'query GetIssueTimelineItems',
 			getviewerlogin: 'query GetViewerLogin',
-			searchissuestostale: 'query SearchIssuesToStale'
+			searchissuestostale: 'query SearchIssuesToStale',
+			getissuetimelineitems: 'query GetIssueTimelineItems',
+			addcomment: 'mutation AddComment',
+			getlabels: 'query GetLabels',
+			addlabels: 'mutation AddLabels',
+			removelabels: 'mutation RemoveLabels'
 		};
 
 		for ( const [ file, query ] of Object.entries( queries ) ) {
@@ -402,6 +406,7 @@ describe( 'lib/githubrepository', () => {
 			};
 
 			issueBase = {
+				__typename: 'Issue',
 				id: 'IssueId',
 				number: 1,
 				createdAt: '2022-11-30T23:59:59Z',
@@ -446,7 +451,7 @@ describe( 'lib/githubrepository', () => {
 			const issues = [
 				{ ...issueBase, number: 1 },
 				{ ...issueBase, number: 2 },
-				{ ...issueBase, number: 3 }
+				{ ...issueBase, number: 3, __typename: 'PullRequest' }
 			];
 
 			stubs.GraphQLClient.request.resolves( {
@@ -460,9 +465,15 @@ describe( 'lib/githubrepository', () => {
 			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( result => {
 				expect( result ).to.be.an( 'array' );
 				expect( result ).to.have.length( 3 );
-				expect( result[ 0 ] ).to.deep.equal( { id: 'IssueId', slug: 'ckeditor/ckeditor5#1' } );
-				expect( result[ 1 ] ).to.deep.equal( { id: 'IssueId', slug: 'ckeditor/ckeditor5#2' } );
-				expect( result[ 2 ] ).to.deep.equal( { id: 'IssueId', slug: 'ckeditor/ckeditor5#3' } );
+				expect( result[ 0 ] ).to.deep.equal(
+					{ id: 'IssueId', type: 'Issue', url: 'https://github.com/ckeditor/ckeditor5/issues/1' }
+				);
+				expect( result[ 1 ] ).to.deep.equal(
+					{ id: 'IssueId', type: 'Issue', url: 'https://github.com/ckeditor/ckeditor5/issues/2' }
+				);
+				expect( result[ 2 ] ).to.deep.equal(
+					{ id: 'IssueId', type: 'PullRequest', url: 'https://github.com/ckeditor/ckeditor5/pull/3' }
+				);
 			} );
 		} );
 
@@ -470,7 +481,7 @@ describe( 'lib/githubrepository', () => {
 			const issues = [
 				{ ...issueBase, number: 1 },
 				{ ...issueBase, number: 2 },
-				{ ...issueBase, number: 3 }
+				{ ...issueBase, number: 3, __typename: 'PullRequest' }
 			];
 
 			paginateRequest( issues, ( { nodes, pageInfo } ) => {
@@ -486,9 +497,15 @@ describe( 'lib/githubrepository', () => {
 			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( result => {
 				expect( result ).to.be.an( 'array' );
 				expect( result ).to.have.length( 3 );
-				expect( result[ 0 ] ).to.deep.equal( { id: 'IssueId', slug: 'ckeditor/ckeditor5#1' } );
-				expect( result[ 1 ] ).to.deep.equal( { id: 'IssueId', slug: 'ckeditor/ckeditor5#2' } );
-				expect( result[ 2 ] ).to.deep.equal( { id: 'IssueId', slug: 'ckeditor/ckeditor5#3' } );
+				expect( result[ 0 ] ).to.deep.equal(
+					{ id: 'IssueId', type: 'Issue', url: 'https://github.com/ckeditor/ckeditor5/issues/1' }
+				);
+				expect( result[ 1 ] ).to.deep.equal(
+					{ id: 'IssueId', type: 'Issue', url: 'https://github.com/ckeditor/ckeditor5/issues/2' }
+				);
+				expect( result[ 2 ] ).to.deep.equal(
+					{ id: 'IssueId', type: 'PullRequest', url: 'https://github.com/ckeditor/ckeditor5/pull/3' }
+				);
 			} );
 		} );
 
@@ -603,7 +620,7 @@ describe( 'lib/githubrepository', () => {
 			const issues = [
 				{ ...issueBase, number: 1 },
 				{ ...issueBase, number: 2 },
-				{ ...issueBase, number: 3 }
+				{ ...issueBase, number: 3, __typename: 'PullRequest' }
 			];
 
 			paginateRequest( issues, ( { nodes } ) => {
@@ -619,9 +636,15 @@ describe( 'lib/githubrepository', () => {
 			return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( result => {
 				expect( result ).to.be.an( 'array' );
 				expect( result ).to.have.length( 3 );
-				expect( result[ 0 ] ).to.deep.equal( { id: 'IssueId', slug: 'ckeditor/ckeditor5#1' } );
-				expect( result[ 1 ] ).to.deep.equal( { id: 'IssueId', slug: 'ckeditor/ckeditor5#2' } );
-				expect( result[ 2 ] ).to.deep.equal( { id: 'IssueId', slug: 'ckeditor/ckeditor5#3' } );
+				expect( result[ 0 ] ).to.deep.equal(
+					{ id: 'IssueId', type: 'Issue', url: 'https://github.com/ckeditor/ckeditor5/issues/1' }
+				);
+				expect( result[ 1 ] ).to.deep.equal(
+					{ id: 'IssueId', type: 'Issue', url: 'https://github.com/ckeditor/ckeditor5/issues/2' }
+				);
+				expect( result[ 2 ] ).to.deep.equal(
+					{ id: 'IssueId', type: 'PullRequest', url: 'https://github.com/ckeditor/ckeditor5/pull/3' }
+				);
 			} );
 		} );
 
@@ -768,6 +791,236 @@ describe( 'lib/githubrepository', () => {
 					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal(
 						'Unexpected error when executing "#searchIssuesToStale()".'
 					);
+					expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
+				}
+			);
+		} );
+	} );
+
+	describe( '#addComment()', () => {
+		it( 'should be a function', () => {
+			expect( githubRepository.addComment ).to.be.a( 'function' );
+		} );
+
+		it( 'should add a comment', () => {
+			stubs.GraphQLClient.request.resolves();
+
+			return githubRepository.addComment( 'IssueId', 'A comment.' ).then( () => {
+				expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
+				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'mutation AddComment' );
+				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( { nodeId: 'IssueId', comment: 'A comment.' } );
+			} );
+		} );
+
+		it( 'should reject if request failed', () => {
+			stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+
+			return githubRepository.addComment( 'IssueId', 'A comment.' ).then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				() => {
+					return Promise.resolve();
+				}
+			);
+		} );
+
+		it( 'should log an error if request failed', () => {
+			const error = new Error( '500 Internal Server Error' );
+
+			stubs.GraphQLClient.request.rejects( error );
+
+			return githubRepository.addComment( 'IssueId', 'A comment.' ).then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				() => {
+					expect( stubs.logger.error.callCount ).to.equal( 1 );
+					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal( 'Unexpected error when executing "#addComment()".' );
+					expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
+				}
+			);
+		} );
+	} );
+
+	describe( '#getLabels()', () => {
+		it( 'should be a function', () => {
+			expect( githubRepository.getLabels ).to.be.a( 'function' );
+		} );
+
+		it( 'should return labels', () => {
+			const labels = [
+				{ id: 'LabelId1', name: 'type:bug' },
+				{ id: 'LabelId2', name: 'type:task' },
+				{ id: 'LabelId3', name: 'type:feature' }
+			];
+
+			stubs.GraphQLClient.request.resolves( {
+				repository: {
+					labels: {
+						nodes: labels
+					}
+				}
+			} );
+
+			return githubRepository.getLabels( 'ckeditor/ckeditor5', [ 'type:bug', 'type:task', 'type:feature' ] ).then( result => {
+				expect( result ).to.be.an( 'array' );
+				expect( result ).to.have.length( 3 );
+				expect( result[ 0 ] ).to.deep.equal( { id: 'LabelId1', name: 'type:bug' } );
+				expect( result[ 1 ] ).to.deep.equal( { id: 'LabelId2', name: 'type:task' } );
+				expect( result[ 2 ] ).to.deep.equal( { id: 'LabelId3', name: 'type:feature' } );
+			} );
+		} );
+
+		it( 'should send one request for labels', () => {
+			const labels = [
+				{ id: 'LabelId1', name: 'type:bug' },
+				{ id: 'LabelId2', name: 'type:task' },
+				{ id: 'LabelId3', name: 'type:feature' }
+			];
+
+			stubs.GraphQLClient.request.resolves( {
+				repository: {
+					labels: {
+						nodes: labels
+					}
+				}
+			} );
+
+			return githubRepository.getLabels( 'ckeditor/ckeditor5', [ 'type:bug', 'type:task', 'type:feature' ] ).then( () => {
+				expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
+				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query GetLabels' );
+				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
+					repositoryOwner: 'ckeditor',
+					repositoryName: 'ckeditor5',
+					labelNames: 'type:bug type:task type:feature'
+				} );
+			} );
+		} );
+
+		it( 'should reject if request failed', () => {
+			stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+
+			return githubRepository.getLabels( 'ckeditor/ckeditor5', [ 'type:bug', 'type:task', 'type:feature' ] ).then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				() => {
+					return Promise.resolve();
+				}
+			);
+		} );
+
+		it( 'should log an error if request failed', () => {
+			const error = new Error( '500 Internal Server Error' );
+
+			stubs.GraphQLClient.request.rejects( error );
+
+			return githubRepository.getLabels( 'ckeditor/ckeditor5', [ 'type:bug', 'type:task', 'type:feature' ] ).then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				() => {
+					expect( stubs.logger.error.callCount ).to.equal( 1 );
+					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal( 'Unexpected error when executing "#getLabels()".' );
+					expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
+				}
+			);
+		} );
+	} );
+
+	describe( '#addLabels()', () => {
+		it( 'should be a function', () => {
+			expect( githubRepository.addLabels ).to.be.a( 'function' );
+		} );
+
+		it( 'should add a comment', () => {
+			stubs.GraphQLClient.request.resolves();
+
+			return githubRepository.addLabels( 'IssueId', [ 'LabelId' ] ).then( () => {
+				expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
+				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'mutation AddLabels' );
+				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
+					nodeId: 'IssueId',
+					labelIds: [ 'LabelId' ]
+				} );
+			} );
+		} );
+
+		it( 'should reject if request failed', () => {
+			stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+
+			return githubRepository.addLabels( 'IssueId', [ 'LabelId' ] ).then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				() => {
+					return Promise.resolve();
+				}
+			);
+		} );
+
+		it( 'should log an error if request failed', () => {
+			const error = new Error( '500 Internal Server Error' );
+
+			stubs.GraphQLClient.request.rejects( error );
+
+			return githubRepository.addLabels( 'IssueId', [ 'LabelId' ] ).then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				() => {
+					expect( stubs.logger.error.callCount ).to.equal( 1 );
+					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal( 'Unexpected error when executing "#addLabels()".' );
+					expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
+				}
+			);
+		} );
+	} );
+
+	describe( '#removeLabels()', () => {
+		it( 'should be a function', () => {
+			expect( githubRepository.removeLabels ).to.be.a( 'function' );
+		} );
+
+		it( 'should add a comment', () => {
+			stubs.GraphQLClient.request.resolves();
+
+			return githubRepository.removeLabels( 'IssueId', [ 'LabelId' ] ).then( () => {
+				expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
+				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'mutation RemoveLabels' );
+				expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
+					nodeId: 'IssueId',
+					labelIds: [ 'LabelId' ]
+				} );
+			} );
+		} );
+
+		it( 'should reject if request failed', () => {
+			stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+
+			return githubRepository.removeLabels( 'IssueId', [ 'LabelId' ] ).then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				() => {
+					return Promise.resolve();
+				}
+			);
+		} );
+
+		it( 'should log an error if request failed', () => {
+			const error = new Error( '500 Internal Server Error' );
+
+			stubs.GraphQLClient.request.rejects( error );
+
+			return githubRepository.removeLabels( 'IssueId', [ 'LabelId' ] ).then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				() => {
+					expect( stubs.logger.error.callCount ).to.equal( 1 );
+					expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal( 'Unexpected error when executing "#removeLabels()".' );
 					expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
 				}
 			);

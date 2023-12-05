@@ -25,21 +25,22 @@ fragment issueComment on IssueComment {
 	}
 }
 
-query SearchIssuesToStale($query: String!, $cursor: String) {
-	search(type: ISSUE, query: $query, first: 100, after: $cursor) {
+query SearchIssuesToStale( $query: String!, $cursor: String ) {
+	search( type: ISSUE, query: $query, first: 100, after: $cursor ) {
 		issueCount
 		nodes {
 			... on Issue {
+				__typename
 				id
 				number
 				createdAt
 				lastEditedAt
-				reactions(last: 1) {
+				reactions( last: 1 ) {
 					nodes {
 						createdAt
 					}
 				}
-				timelineItems(first: 100, itemTypes: [LABELED_EVENT, UNLABELED_EVENT, ISSUE_COMMENT]) {
+				timelineItems( first: 100, itemTypes: [ LABELED_EVENT, UNLABELED_EVENT, ISSUE_COMMENT ] ) {
 					nodes {
 						...labeledEvent
 						...unlabeledEvent
@@ -52,16 +53,17 @@ query SearchIssuesToStale($query: String!, $cursor: String) {
 				}
 			}
 			... on PullRequest {
+				__typename
 				id
 				number
 				createdAt
 				lastEditedAt
-				reactions(last: 1) {
+				reactions( last: 1 ) {
 					nodes {
 						createdAt
 					}
 				}
-				timelineItems(first: 100, itemTypes: [LABELED_EVENT, UNLABELED_EVENT, ISSUE_COMMENT]) {
+				timelineItems( first: 100, itemTypes: [ LABELED_EVENT, UNLABELED_EVENT, ISSUE_COMMENT ] ) {
 					nodes {
 						...labeledEvent
 						...unlabeledEvent

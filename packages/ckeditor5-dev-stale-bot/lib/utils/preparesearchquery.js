@@ -6,7 +6,7 @@
 /**
  * Creates a query to search for issues or pull requests that potentially could be considered as stale ones.
  *
- * @param {Options} options Configuration options.
+ * @param {SearchOptions} options Configuration options.
  * @returns {String} Search query to sent to GitHub.
  */
 module.exports = function prepareSearchQuery( options ) {
