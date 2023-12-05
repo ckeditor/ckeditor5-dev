@@ -33,6 +33,7 @@ query SearchIssuesToStale( $query: String!, $cursor: String ) {
 				__typename
 				id
 				number
+				url
 				createdAt
 				lastEditedAt
 				reactions( last: 1 ) {
@@ -56,6 +57,7 @@ query SearchIssuesToStale( $query: String!, $cursor: String ) {
 				__typename
 				id
 				number
+				url
 				createdAt
 				lastEditedAt
 				reactions( last: 1 ) {

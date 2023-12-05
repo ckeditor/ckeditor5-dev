@@ -286,13 +286,10 @@ module.exports = class GitHubRepository {
 		return issues
 			.filter( issue => isIssueStale( issue, options ) )
 			.map( issue => {
-				const issueType = issue.__typename === 'Issue' ? 'issues' : 'pull';
-				const url = `https://github.com/${ options.repositorySlug }/${ issueType }/${ issue.number }`;
-
 				return {
 					id: issue.id,
 					type: issue.__typename,
-					url
+					url: issue.url
 				};
 			} );
 	}
@@ -421,6 +418,7 @@ function checkApiRateLimit( error ) {
  * @typedef {Object} Issue
  * @property {String} id
  * @property {Number} number
+ * @property {String} url
  * @property {String} createdAt
  * @property {String|null} lastEditedAt
  * @property {String|null} lastReactedAt
