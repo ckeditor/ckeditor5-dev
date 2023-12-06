@@ -1,6 +1,42 @@
 Changelog
 =========
 
+## [39.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/v39.2.1...v39.3.0) (2023-12-06)
+
+### Features
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Allow defining the date format while preparing the changelog file. See [ckeditor/ckeditor5#15429](https://github.com/ckeditor/ckeditor5/issues/15429). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/c556c7035c9a88204c908458da8260908ec75d2f))
+* **[translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations)**: Compilation asset callback is now an optional field called `assetNamesFilter` in the object passed to the `CKEditorTranslationsPlugin` class. Thanks to that, it improves webpack compilation performance by filtering unrelated assets to reduce `TranslationService.getAssets()` calls. It only affects apps with many webpack entries and/or chunks. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/4b4a22b4a3a1a4b518404773f228b492c660645c))
+
+  Thanks to [@BreyndotEchse](https://github.com/BreyndotEchse).
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/39.3.0): v39.2.1 => v39.3.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/39.3.0): v39.2.1 => v39.3.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/39.3.0): v39.2.1 => v39.3.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/39.3.0): v39.2.1 => v39.3.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/39.3.0): v39.2.1 => v39.3.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/39.3.0): v39.2.1 => v39.3.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/39.3.0): v39.2.1 => v39.3.0
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/39.3.0): v39.2.1 => v39.3.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/39.3.0): v39.2.1 => v39.3.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/39.3.0): v39.2.1 => v39.3.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/39.3.0): v39.2.1 => v39.3.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/39.3.0): v39.2.1 => v39.3.0
+</details>
+
+
 ## [39.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/v39.2.0...v39.2.1) (2023-11-08)
 
 ### Bug fixes
@@ -149,36 +185,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/39.0.0): v38.4.1 => v39.0.0
 * [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/39.0.0): v38.4.1 => v39.0.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/39.0.0): v38.4.1 => v39.0.0
-</details>
-
-
-## [38.4.1](https://github.com/ckeditor/ckeditor5-dev/compare/v38.4.0...v38.4.1) (2023-08-31)
-
-### Other changes
-
-* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: The `formatMessage()` function should find a Slack account based on a GitHub name case-insensitive. Closes [ckeditor/ckeditor5#14876](https://github.com/ckeditor/ckeditor5/issues/14876). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/5596b463aeeacbba49cb2910ed34ac709f5c7473))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/38.4.1): v38.4.0 => v38.4.1
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/38.4.1): v38.4.0 => v38.4.1
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/38.4.1): v38.4.0 => v38.4.1
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/38.4.1): v38.4.0 => v38.4.1
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/38.4.1): v38.4.0 => v38.4.1
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/38.4.1): v38.4.0 => v38.4.1
-* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/38.4.1): v38.4.0 => v38.4.1
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/38.4.1): v38.4.0 => v38.4.1
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/38.4.1): v38.4.0 => v38.4.1
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/38.4.1): v38.4.0 => v38.4.1
-* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/38.4.1): v38.4.0 => v38.4.1
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/38.4.1): v38.4.0 => v38.4.1
 </details>
 
 ---
