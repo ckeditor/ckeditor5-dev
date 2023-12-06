@@ -76,6 +76,10 @@ When set to `true`, all translations from the `ckeditor5-core` package will be a
 
 When set to `true`, the `getPluralForm()` function (if exists for the specified language) will not be added into the bundle file. Defaults to `false`.
 
+### `assetNamesFilter`
+
+A function to filter assets importing CKEditor 5 modules. Potential performance boost for applications with many webpack entry points. It allows disabling the `CKEditorTranslationsPlugin` plugin for an entry point not containing imports CKEditor 5 modules. Defaults to `name => name.endsWith( '.js' )`.
+
 ### `corePackagePattern`
 
 (internal)
