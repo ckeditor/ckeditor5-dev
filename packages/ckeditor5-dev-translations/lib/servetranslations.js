@@ -25,7 +25,7 @@ const { RawSource, ConcatSource } = require( 'webpack-sources' );
  * @param {String} [options.sourceFilesPattern] The source files pattern
  * @param {String} [options.packageNamesPattern] The package names pattern.
  * @param {String} [options.corePackagePattern] The core package pattern.
- * @param {Function} [options.assetNamesFilter] A function to filter assets probably importing ckeditor modules.
+ * @param {AssetNamesFilter} [options.assetNamesFilter] A function to filter assets probably importing CKEditor 5 modules.
  * @param {TranslationService} translationService Translation service that will load PO files, replace translation keys and generate assets.
  * ckeditor5 - independent without hard-to-test logic.
  */

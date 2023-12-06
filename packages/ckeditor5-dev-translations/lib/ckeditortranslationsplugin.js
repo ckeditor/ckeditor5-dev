@@ -105,7 +105,7 @@ module.exports = class CKEditorTranslationsPlugin {
 };
 
 /**
- * @callback assetNamesFilter
+ * @callback AssetNamesFilter
  * @param {String} name Webpack asset name/path
  * @returns {Boolean}
  */
@@ -138,5 +138,5 @@ module.exports = class CKEditorTranslationsPlugin {
  * should be added to the output bundle file. If set to true, translations from the core package will be saved even if are not
  * used in the source code (*.js files).
  * @property {Boolean} [skipPluralFormFunction=false] Whether the `getPluralForm()` function should be added in the output bundle file.
- * @property {assetNamesFilter} [assetNamesFilter] A function to filter assets probably importing CKEditor modules.
+ * @property {AssetNamesFilter} [assetNamesFilter] A function to filter assets probably importing CKEditor 5 modules.
  */

@@ -78,7 +78,7 @@ When set to `true`, the `getPluralForm()` function (if exists for the specified 
 
 ### `assetNamesFilter`
 
-A function to filter assets probably importing CKEditor modules. Potential performance boost for applications with many webpack entrypoints. Defaults to `name => name.endsWith( '.js' )`.
+A function to filter assets importing CKEditor 5 modules. Potential performance boost for applications with many webpack entry points. It allows disabling the `CKEditorTranslationsPlugin` plugin for an entry point not containing imports CKEditor 5 modules. Defaults to `name => name.endsWith( '.js' )`.
 
 ### `corePackagePattern`
 
