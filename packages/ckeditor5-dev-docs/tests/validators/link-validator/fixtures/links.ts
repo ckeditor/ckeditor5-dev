@@ -94,6 +94,9 @@ export class ClassWithLinks {
  * - valid one: {@link module:fixtures/links~ClassWithLinks#property link to a doclet},
  * - invalid one: {@link module:non-existing/module~Foo#bar link to a doclet}.
  *
+ * Valid link added at the end fo avoid modifying indexes.
+ * - {@link module:fixtures/types~MentionFeedObjectItem#id}
+ *
  * @eventName ~ClassWithLinks#event-example
  */
 export type EventExample = {

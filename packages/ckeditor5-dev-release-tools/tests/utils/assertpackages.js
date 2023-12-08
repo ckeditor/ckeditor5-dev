@@ -13,12 +13,18 @@ describe( 'dev-release-tools/utils', () => {
 	describe( 'assertPackages()', () => {
 		let assertPackages, sandbox, stubs;
 
+		const disableMainValidatorOptions = {
+			requireEntryPoint: false,
+			optionalEntryPointPackages: []
+		};
+
 		beforeEach( () => {
 			sandbox = sinon.createSandbox();
 
 			stubs = {
 				fs: {
-					pathExists: sandbox.stub()
+					pathExists: sandbox.stub(),
+					readJson: sandbox.stub()
 				}
 			};
 
@@ -40,13 +46,13 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'should resolve the promise if list of packages is empty', () => {
-			return assertPackages( [] );
+			return assertPackages( [], { ...disableMainValidatorOptions } );
 		} );
 
 		it( 'should check if `package.json` exists in each package', () => {
 			stubs.fs.pathExists.resolves( true );
 
-			return assertPackages( [ 'ckeditor5-foo', 'ckeditor5-bar', 'ckeditor5-baz' ] )
+			return assertPackages( [ 'ckeditor5-foo', 'ckeditor5-bar', 'ckeditor5-baz' ], { ...disableMainValidatorOptions } )
 				.then( () => {
 					expect( stubs.fs.pathExists.callCount ).to.equal( 3 );
 					expect( stubs.fs.pathExists.firstCall.args[ 0 ] ).to.equal( 'ckeditor5-foo/package.json' );
@@ -60,7 +66,7 @@ describe( 'dev-release-tools/utils', () => {
 				.resolves( false )
 				.withArgs( 'ckeditor5-bar/package.json' ).resolves( true );
 
-			return assertPackages( [ 'ckeditor5-foo', 'ckeditor5-bar', 'ckeditor5-baz' ] )
+			return assertPackages( [ 'ckeditor5-foo', 'ckeditor5-bar', 'ckeditor5-baz' ], { ...disableMainValidatorOptions } )
 				.then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
@@ -72,6 +78,51 @@ describe( 'dev-release-tools/utils', () => {
 							'The "package.json" file is missing in the "ckeditor5-baz" package.'
 						);
 					} );
+		} );
+
+		// See: https://github.com/ckeditor/ckeditor5/issues/15127.
+		describe( 'the entry package point validator', () => {
+			const enableMainValidatorOptions = {
+				requireEntryPoint: true,
+				optionalEntryPointPackages: [
+					'@ckeditor/ckeditor5-bar'
+				]
+			};
+
+			it( 'should throw if a package misses its entry point', () => {
+				stubs.fs.pathExists.resolves( true );
+				stubs.fs.readJson.withArgs( 'ckeditor5-foo/package.json' ).resolves( {
+					name: '@ckeditor/ckeditor5-foo',
+					main: 'src/index.ts'
+				} );
+				stubs.fs.readJson.withArgs( 'ckeditor5-bar/package.json' ).resolves( {
+					name: '@ckeditor/ckeditor5-bar'
+				} );
+				stubs.fs.readJson.withArgs( 'ckeditor5-baz/package.json' ).resolves( {
+					name: '@ckeditor/ckeditor5-baz'
+				} );
+
+				return assertPackages( [ 'ckeditor5-foo', 'ckeditor5-bar', 'ckeditor5-baz' ], { ...enableMainValidatorOptions } )
+					.then(
+						() => {
+							throw new Error( 'Expected to be rejected.' );
+						},
+						error => {
+							expect( error ).to.be.an( 'Error' );
+							expect( error.message ).to.equal(
+								'The "@ckeditor/ckeditor5-baz" package misses the entry point ("main") definition in its "package.json".'
+							);
+						} );
+			} );
+
+			it( 'should pass the validator if specified package does not have to define the entry point', () => {
+				stubs.fs.pathExists.resolves( true );
+				stubs.fs.readJson.withArgs( 'ckeditor5-bar/package.json' ).resolves( {
+					name: '@ckeditor/ckeditor5-bar'
+				} );
+
+				return assertPackages( [ 'ckeditor5-bar' ], { ...enableMainValidatorOptions } );
+			} );
 		} );
 	} );
 } );

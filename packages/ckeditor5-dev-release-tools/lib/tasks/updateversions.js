@@ -9,7 +9,7 @@ const { glob } = require( 'glob' );
 const fs = require( 'fs-extra' );
 const semver = require( 'semver' );
 const { normalizeTrim, toUnix, dirname, join } = require( 'upath' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+const checkVersionAvailability = require( '../utils/checkversionavailability' );
 
 /**
  * The purpose of the script is to update the version of a root package found in the current working
@@ -24,24 +24,38 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  *
  * @param {Object} options
  * @param {String} options.version Version to store in a `package.json` file under the `version` key.
+ * @param {UpdateVersionsPackagesDirectoryFilter|null} [options.packagesDirectoryFilter=null] An optional callback allowing filtering out
+ * directories/packages that should not be touched by the task.
  * @param {String} [options.packagesDirectory] Relative path to a location of packages to update. If not specified,
  * only the root package is checked.
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @returns {Promise}
  */
-module.exports = async function updateVersions( { packagesDirectory, version, cwd = process.cwd() } ) {
+module.exports = async function updateVersions( options ) {
+	const {
+		packagesDirectory,
+		version,
+		packagesDirectoryFilter = null,
+		cwd = process.cwd()
+	} = options;
 	const normalizedCwd = toUnix( cwd );
 	const normalizedPackagesDir = packagesDirectory ? normalizeTrim( packagesDirectory ) : null;
 
 	const globPatterns = getGlobPatterns( normalizedPackagesDir );
-	const pkgJsonPaths = await glob( globPatterns, { cwd: normalizedCwd, absolute: true, nodir: true } );
+	const pkgJsonPaths = await getPackageJsonPaths( cwd, globPatterns, packagesDirectoryFilter );
+
 	const randomPackagePath = getRandomPackagePath( pkgJsonPaths, normalizedPackagesDir );
 
-	const rootPackageJson = join( normalizedCwd, 'package.json' );
-	const randomPackageJson = join( randomPackagePath, 'package.json' );
+	const { version: rootPackageVersion } = await readPackageJson( normalizedCwd );
+	const { name: randomPackageName } = await readPackageJson( randomPackagePath );
 
-	checkIfVersionIsValid( version, ( await fs.readJson( rootPackageJson ) ).version );
-	await checkVersionAvailability( version, ( await fs.readJson( randomPackageJson ) ).name );
+	checkIfVersionIsValid( version, rootPackageVersion );
+
+	const isVersionAvailable = await checkVersionAvailability( version, randomPackageName );
+
+	if ( !isVersionAvailable ) {
+		throw new Error( `The "${ randomPackageName }@${ version }" already exists in the npm registry.` );
+	}
 
 	for ( const pkgJsonPath of pkgJsonPaths ) {
 		const pkgJson = await fs.readJson( pkgJsonPath );
@@ -50,6 +64,36 @@ module.exports = async function updateVersions( { packagesDirectory, version, cw
 		await fs.writeJson( pkgJsonPath, pkgJson, { spaces: 2 } );
 	}
 };
+
+/**
+ * @param {String} cwd
+ * @param {Array.<String>} globPatterns
+ * @param {UpdateVersionsPackagesDirectoryFilter|null} packagesDirectoryFilter
+ * @returns {Promise.<Array.<String>>}
+ */
+async function getPackageJsonPaths( cwd, globPatterns, packagesDirectoryFilter ) {
+	const pkgJsonPaths = await glob( globPatterns, {
+		cwd,
+		absolute: true,
+		nodir: true
+	} );
+
+	if ( !packagesDirectoryFilter ) {
+		return pkgJsonPaths;
+	}
+
+	return pkgJsonPaths.filter( packagesDirectoryFilter );
+}
+
+/**
+ * @param {String} packagesDirectory
+ * @returns {Promise.<Object>}
+ */
+function readPackageJson( packagesDirectory ) {
+	const packageJsonPath = join( packagesDirectory, 'package.json' );
+
+	return fs.readJson( packageJsonPath );
+}
 
 /**
  * @param {String|null} packagesDirectory
@@ -98,20 +142,9 @@ function checkIfVersionIsValid( newVersion, currentVersion ) {
 }
 
 /**
- * Checks if the provided version is not used in npm and there will be no errors when calling publish.
+ * @callback UpdateVersionsPackagesDirectoryFilter
  *
- * @param {String} version
- * @param {String} packageName
- * @returns {Promise}
+ * @param {String} packageJsonPath An absolute path to a `package.json` file.
+ *
+ * @returns {Boolean} Whether to include (`true`) or skip (`false`) processing the given directory/package.
  */
-async function checkVersionAvailability( version, packageName ) {
-	return tools.shExec( `npm show ${ packageName }@${ version } version`, { verbosity: 'silent', async: true } )
-		.then( () => {
-			throw new Error( `Provided version ${ version } is already used in npm by ${ packageName }.` );
-		} )
-		.catch( err => {
-			if ( !err.toString().includes( 'is not in this registry' ) ) {
-				throw err;
-			}
-		} );
-}

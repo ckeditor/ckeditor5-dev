@@ -1,11 +1,11 @@
 {
   "name": "@ckeditor/ckeditor5-dev-release-tools",
-  "version": "38.1.2",
+  "version": "39.3.0",
   "description": "Tools used for releasing CKEditor 5 and related packages.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^38.1.2",
+    "@ckeditor/ckeditor5-dev-utils": "^39.3.0",
     "@octokit/rest": "^19.0.0",
     "chalk": "^4.0.0",
     "cli-table": "^0.3.1",
@@ -15,6 +15,7 @@
     "conventional-changelog-writer": "^6.0.0",
     "conventional-commits-filter": "^3.0.0",
     "conventional-commits-parser": "^4.0.0",
+    "date-fns": "^2.30.0",
     "diff": "^5.0.0",
     "fs-extra": "^9.1.0",
     "git-raw-commits": "^3.0.0",
@@ -37,7 +38,7 @@
     "strip-ansi": "^6.0.0"
   },
   "engines": {
-    "node": ">=16.0.0",
+    "node": ">=18.0.0",
     "npm": ">=5.7.1"
   },
   "files": [

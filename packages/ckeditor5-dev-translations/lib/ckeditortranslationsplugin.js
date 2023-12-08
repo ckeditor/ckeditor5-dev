@@ -53,7 +53,8 @@ module.exports = class CKEditorTranslationsPlugin {
 			corePackageContextsResourcePath: options.corePackageContextsResourcePath || '@ckeditor/ckeditor5-core/lang/contexts.json',
 			translationsOutputFile: options.translationsOutputFile,
 			includeCorePackageTranslations: !!options.includeCorePackageTranslations,
-			skipPluralFormFunction: !!options.skipPluralFormFunction
+			skipPluralFormFunction: !!options.skipPluralFormFunction,
+			assetNamesFilter: options.assetNamesFilter || ( name => name.endsWith( '.js' ) )
 		};
 	}
 
@@ -104,6 +105,12 @@ module.exports = class CKEditorTranslationsPlugin {
 };
 
 /**
+ * @callback AssetNamesFilter
+ * @param {String} name Webpack asset name/path
+ * @returns {Boolean}
+ */
+
+/**
  * @typedef {Object} CKEditorTranslationsPluginOptions CKEditorTranslationsPluginOptions options.
  *
  * @property {String} language The main language for internationalization - translations for that language
@@ -131,4 +138,5 @@ module.exports = class CKEditorTranslationsPlugin {
  * should be added to the output bundle file. If set to true, translations from the core package will be saved even if are not
  * used in the source code (*.js files).
  * @property {Boolean} [skipPluralFormFunction=false] Whether the `getPluralForm()` function should be added in the output bundle file.
+ * @property {AssetNamesFilter} [assetNamesFilter] A function to filter assets probably importing CKEditor 5 modules.
  */

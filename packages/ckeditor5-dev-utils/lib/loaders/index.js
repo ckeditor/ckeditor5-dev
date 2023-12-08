@@ -178,7 +178,7 @@ function getPathsToIncludeForCoverage( globs ) {
 			return returnedPatterns;
 		}, [] )
 		.map( glob => {
-			const matchCKEditor5 = glob.match( /\/(ckeditor5-[^/]+)\// );
+			const matchCKEditor5 = glob.match( /\/(ckeditor5-[^/]+)\/(?!.*ckeditor5-)/ );
 
 			if ( matchCKEditor5 ) {
 				const packageName = matchCKEditor5[ 1 ]

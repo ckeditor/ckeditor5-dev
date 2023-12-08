@@ -2,8 +2,7 @@ CKEditor 5 translation tools
 ============================
 
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-translations.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations)
-[![Build Status](https://travis-ci.com/ckeditor/ckeditor5-dev.svg?branch=master)](https://app.travis-ci.com/github/ckeditor/ckeditor5-dev)
-![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-translations)
+[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master)
 
 Integrate [CKEditor 5](https://ckeditor.com)'s build process with your [webpack](https://webpack.js.org) setup.
 
@@ -76,6 +75,10 @@ When set to `true`, all translations from the `ckeditor5-core` package will be a
 ### `skipPluralFormFunction`
 
 When set to `true`, the `getPluralForm()` function (if exists for the specified language) will not be added into the bundle file. Defaults to `false`.
+
+### `assetNamesFilter`
+
+A function to filter assets importing CKEditor 5 modules. Potential performance boost for applications with many webpack entry points. It allows disabling the `CKEditorTranslationsPlugin` plugin for an entry point not containing imports CKEditor 5 modules. Defaults to `name => name.endsWith( '.js' )`.
 
 ### `corePackagePattern`
 

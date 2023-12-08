@@ -153,6 +153,26 @@ describe( 'dev-release-tools/utils', () => {
 				expect( transformCommitUtils.linkToGithubIssue( 'ckeditor/ckeditor5-dev#' ) )
 					.to.equal( 'ckeditor/ckeditor5-dev#' );
 			} );
+
+			it( 'does not make a link from a comment which contains color hex code with letters and numbers', () => {
+				stubs.getPackageJson.returns( {
+					name: 'test-package',
+					repository: 'https://github.com/ckeditor/ckeditor5-dev'
+				} );
+
+				expect( transformCommitUtils.linkToGithubIssue( 'Colors: first: `#8da47e`, second: `#f7ce76`.' ) )
+					.to.equal( 'Colors: first: `#8da47e`, second: `#f7ce76`.' );
+			} );
+
+			it( 'does not make a link from a comment which contains color hex code with letters or numbers only', () => {
+				stubs.getPackageJson.returns( {
+					name: 'test-package',
+					repository: 'https://github.com/ckeditor/ckeditor5-dev'
+				} );
+
+				expect( transformCommitUtils.linkToGithubIssue( 'Colors: first: `#000000`, second: `#ffffff`.' ) )
+					.to.equal( 'Colors: first: `#000000`, second: `#ffffff`.' );
+			} );
 		} );
 
 		describe( 'getCommitType()', () => {

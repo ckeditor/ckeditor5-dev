@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-translations",
-  "version": "38.1.2",
+  "version": "39.3.0",
   "description": "CKEditor 5 translations plugin for webpack.",
   "keywords": [],
   "main": "lib/index.js",
@@ -18,7 +18,7 @@
     "sinon": "^9.2.4"
   },
   "engines": {
-    "node": ">=16.0.0",
+    "node": ">=18.0.0",
     "npm": ">=5.7.1"
   },
   "files": [

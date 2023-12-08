@@ -128,6 +128,39 @@ describe( 'dev-release-tools/tasks', () => {
 					'/work/project/packages/ckeditor5-foo',
 					'/work/project/packages/ckeditor5-bar'
 				] );
+				expect( stubs.assertPackages.firstCall.args[ 1 ] ).to.deep.equal( {
+					requireEntryPoint: false,
+					optionalEntryPointPackages: []
+				} );
+			} );
+		} );
+
+		// See: https://github.com/ckeditor/ckeditor5/issues/15127.
+		it( 'should allow enabling the "package entry point" validator', () => {
+			stubs.glob.glob.resolves( [
+				'/work/project/packages/ckeditor5-foo',
+				'/work/project/packages/ckeditor5-bar'
+			] );
+
+			return publishPackages( {
+				packagesDirectory: 'packages',
+				npmOwner: 'pepe',
+				requireEntryPoint: true,
+				optionalEntryPointPackages: [
+					'ckeditor5-foo'
+				]
+			} ).then( () => {
+				expect( stubs.assertPackages.callCount ).to.equal( 1 );
+				expect( stubs.assertPackages.firstCall.args[ 0 ] ).to.deep.equal( [
+					'/work/project/packages/ckeditor5-foo',
+					'/work/project/packages/ckeditor5-bar'
+				] );
+				expect( stubs.assertPackages.firstCall.args[ 1 ] ).to.deep.equal( {
+					requireEntryPoint: true,
+					optionalEntryPointPackages: [
+						'ckeditor5-foo'
+					]
+				} );
 			} );
 		} );
 
@@ -280,7 +313,8 @@ describe( 'dev-release-tools/tasks', () => {
 				npmTag: 'nightly',
 				listrTask,
 				signal: abortController.signal,
-				concurrency: 3
+				concurrency: 3,
+				cwd: '/home/cwd'
 			} ).then( () => {
 				expect( stubs.executeInParallel.callCount ).to.equal( 1 );
 				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'packagesDirectory', 'packages' );
@@ -289,6 +323,7 @@ describe( 'dev-release-tools/tasks', () => {
 				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.deep.property( 'taskOptions', { npmTag: 'nightly' } );
 				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'signal', abortController.signal );
 				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'concurrency', 3 );
+				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'cwd', '/home/cwd' );
 			} );
 		} );
 

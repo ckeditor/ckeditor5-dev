@@ -2,8 +2,7 @@ CKEditor 5 documentation builder
 ================================
 
 [![npm version](https://badge.fury.io/js/%40ckeditor%2Fckeditor5-dev-docs.svg)](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)
-[![Build Status](https://travis-ci.com/ckeditor/ckeditor5-dev.svg?branch=master)](https://app.travis-ci.com/github/ckeditor/ckeditor5-dev)
-![Dependency Status](https://img.shields.io/librariesio/release/npm/@ckeditor/ckeditor5-dev-docs)
+[![CircleCI](https://circleci.com/gh/ckeditor/ckeditor5-dev.svg?style=shield)](https://app.circleci.com/pipelines/github/ckeditor/ckeditor5-dev?branch=master)
 
 Tasks used to build and verify the documentation for [CKEditor 5](https://ckeditor.com).
 

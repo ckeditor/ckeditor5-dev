@@ -28,12 +28,11 @@ const WORKER_SCRIPT = upath.join( __dirname, 'parallelworker.js' );
  * @param {String} options.packagesDirectory Relative path to a location of packages to execute a task.
  * @param {Function} options.taskToExecute A callback that is executed on all found packages.
  * It receives an absolute path to a package as an argument. It can be synchronous or may return a promise.
- * @param {ListrTaskObject} options.listrTask An instance of `ListrTask`.
+ * @param {ListrTaskObject} [options.listrTask={}] An instance of `ListrTask`.
  * @param {AbortSignal|null} [options.signal=null] Signal to abort the asynchronous process. If not set, default AbortController is created.
  * @param {Object} [options.taskOptions=null] Optional data required by the task.
- * @param {Function} [options.packagesDirectoryFilter=null] A function that is executed for each found package directory to filter out those
- * that do not require executing a task. It should return a truthy value to keep the package and a falsy value to skip the package from
- * processing.
+ * @param {ExecuteInParallelPackagesDirectoryFilter|null} [options.packagesDirectoryFilter=null] An optional callback allowing filtering out
+ * directories/packages that should not be touched by the task.
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @param {Number} [options.concurrency=require( 'os' ).cpus().length / 2] Number of CPUs that will execute the task.
  * @returns {Promise}
@@ -42,7 +41,7 @@ module.exports = async function executeInParallel( options ) {
 	const {
 		packagesDirectory,
 		taskToExecute,
-		listrTask,
+		listrTask = {},
 		signal = null,
 		taskOptions = null,
 		packagesDirectoryFilter = null,
@@ -177,4 +176,12 @@ function getPackagesGroupedByThreads( packages, concurrency ) {
  * @property {String} title Title of the task.
  *
  * @property {String} output Update the current output of the task.
+ */
+
+/**
+ * @callback ExecuteInParallelPackagesDirectoryFilter
+ *
+ * @param {String} directoryPath An absolute path to a directory.
+ *
+ * @returns {Boolean} Whether to include (`true`) or skip (`false`) processing the given directory.
  */

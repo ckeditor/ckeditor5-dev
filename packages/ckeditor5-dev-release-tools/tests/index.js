@@ -198,4 +198,10 @@ describe( 'dev-release-tools/index', () => {
 			expect( index.validateRepositoryToRelease ).to.be.a( 'function' );
 		} );
 	} );
+
+	describe( 'checkVersionAvailability()', () => {
+		it( 'should be a function', () => {
+			expect( index.checkVersionAvailability ).to.be.a( 'function' );
+		} );
+	} );
 } );

@@ -23,7 +23,7 @@ describe( 'getKarmaConfig()', () => {
 		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
 
 		// Sinon cannot stub non-existing props.
-		process.env = Object.assign( {}, originalEnv, { TRAVIS: false } );
+		process.env = Object.assign( {}, originalEnv, { CI: false } );
 
 		mockery.enable( {
 			useCleanCache: true,
@@ -194,12 +194,12 @@ describe( 'getKarmaConfig()', () => {
 		const karmaConfig = getKarmaConfig( options );
 
 		expect( karmaConfig ).to.have.own.property( 'customLaunchers' );
-		expect( karmaConfig.customLaunchers ).to.have.own.property( 'CHROME_TRAVIS_CI' );
+		expect( karmaConfig.customLaunchers ).to.have.own.property( 'CHROME_CI' );
 		expect( karmaConfig.customLaunchers ).to.have.own.property( 'CHROME_LOCAL' );
 
-		expect( karmaConfig.customLaunchers.CHROME_TRAVIS_CI ).to.have.own.property( 'base', 'Chrome' );
-		expect( karmaConfig.customLaunchers.CHROME_TRAVIS_CI ).to.have.own.property( 'flags' );
-		expect( karmaConfig.customLaunchers.CHROME_TRAVIS_CI.flags ).to.deep.equal( [
+		expect( karmaConfig.customLaunchers.CHROME_CI ).to.have.own.property( 'base', 'Chrome' );
+		expect( karmaConfig.customLaunchers.CHROME_CI ).to.have.own.property( 'flags' );
+		expect( karmaConfig.customLaunchers.CHROME_CI.flags ).to.deep.equal( [
 			'--disable-background-timer-throttling',
 			'--js-flags="--expose-gc"',
 			'--disable-renderer-backgrounding',

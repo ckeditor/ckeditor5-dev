@@ -104,11 +104,11 @@ describe( 'dev-docs/validators/link-validator', function() {
 			},
 			{
 				identifier: 'module:non-existing/module~Foo#bar',
-				source: 'links.ts:99'
+				source: 'links.ts:102'
 			},
 			{
 				identifier: 'module:non-existing/module~Foo#bar',
-				source: 'links.ts:99'
+				source: 'links.ts:102'
 			}
 		];
 

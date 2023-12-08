@@ -8,26 +8,26 @@
 'use strict';
 
 const fetch = require( 'node-fetch' );
-
 const bots = require( './data/bots.json' );
 const members = require( './data/members.json' );
 
 const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
 
 /**
- * @param {String} slackMessageUsername
- * @param {String} iconUrl
- * @param {String} repositoryOwner
- * @param {String} repositoryName
- * @param {String} branch
- * @param {String} buildTitle
- * @param {String} buildUrl
- * @param {String} buildId
- * @param {String} githubToken
- * @param {String} triggeringCommitUrl
- * @param {Number} startTime
- * @param {Number} endTime
- * @param {Boolean} shouldHideAuthor
+ * @param {Object} options
+ * @param {String} options.slackMessageUsername
+ * @param {String} options.iconUrl
+ * @param {String} options.repositoryOwner
+ * @param {String} options.repositoryName
+ * @param {String} options.branch
+ * @param {String} options.buildTitle
+ * @param {String} options.buildUrl
+ * @param {String} options.buildId
+ * @param {String} options.githubToken
+ * @param {String} options.triggeringCommitUrl
+ * @param {Number} options.startTime
+ * @param {Number} options.endTime
+ * @param {Boolean} options.shouldHideAuthor
  */
 module.exports = async function formatMessage( options ) {
 	const commitDetails = await getCommitDetails( options.triggeringCommitUrl, options.githubToken );
@@ -75,22 +75,45 @@ module.exports = async function formatMessage( options ) {
  * @returns {String}
  */
 function getNotifierMessage( options ) {
-	const slackAccount = members[ options.githubAccount ] || null;
-
 	if ( options.shouldHideAuthor ) {
 		return '_The author of the commit was hidden. <https://github.com/ckeditor/ckeditor5/issues/9252|Read more about why.>_';
 	}
 
-	// If the author of the commit could not be obtained, let's ping the entire team.
-	if ( !slackAccount ) {
-		return `@channel (${ options.commitAuthor }), could you take a look?`;
-	}
+	const slackAccount = findSlackAccount( options.githubAccount );
+	const botActionMessage = '_Automated stuff happened on one of the branches. Got time to have a look at it, anyone?_';
 
 	if ( bots.includes( options.githubAccount ) ) {
-		return '_This commit is a result of merging a branch into another branch._';
+		return botActionMessage;
+	}
+
+	// If the author of the commit could not be obtained, let's ping the entire team.
+	if ( !slackAccount ) {
+		if ( bots.includes( options.commitAuthor ) ) {
+			return botActionMessage;
+		}
+
+		return `<!channel> (${ options.commitAuthor }), could you take a look?`;
 	}
 
 	return `<@${ slackAccount }>, could you take a look?`;
+}
+
+/**
+ * @param {String|null} githubAccount
+ * @returns {String|null}
+ */
+function findSlackAccount( githubAccount ) {
+	if ( !githubAccount ) {
+		return null;
+	}
+
+	for ( const [ key, value ] of Object.entries( members ) ) {
+		if ( key.toLowerCase() === githubAccount.toLowerCase() ) {
+			return value;
+		}
+	}
+
+	return null;
 }
 
 /**
@@ -142,7 +165,7 @@ function getExecutionTime( startTime, endTime ) {
  */
 function getFormattedMessage( commitMessage, triggeringCommitUrl ) {
 	if ( !commitMessage ) {
-		return 'Unavailable';
+		return '_Unavailable._';
 	}
 
 	const [ , repoOwner, repoName ] = triggeringCommitUrl.match( REPOSITORY_REGEXP );
