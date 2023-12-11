@@ -39,7 +39,9 @@ describe( 'dev-stale-bot/lib', () => {
 					request: sinon.stub()
 				},
 				prepareSearchQuery: sinon.stub().returns( 'search query' ),
-				isIssueStale: sinon.stub().returns( true )
+				isIssueOrPullRequestToStale: sinon.stub().returns( true ),
+				isIssueOrPullRequestToUnstale: sinon.stub().returns( true ),
+				isIssueOrPullRequestToClose: sinon.stub().returns( true )
 			};
 
 			pageInfoWithNextPage = {
@@ -54,12 +56,14 @@ describe( 'dev-stale-bot/lib', () => {
 
 			const queries = {
 				getviewerlogin: 'query GetViewerLogin',
-				searchissuestostale: 'query SearchIssuesToStale',
-				getissuetimelineitems: 'query GetIssueTimelineItems',
+				searchissuesorpullrequests: 'query SearchIssuesOrPullRequests',
+				getissueorpullrequesttimelineitems: 'query GetIssueOrPullRequestTimelineItems',
 				addcomment: 'mutation AddComment',
 				getlabels: 'query GetLabels',
 				addlabels: 'mutation AddLabels',
-				removelabels: 'mutation RemoveLabels'
+				removelabels: 'mutation RemoveLabels',
+				closeissue: 'mutation CloseIssue',
+				closepullrequest: 'mutation ClosePullRequest'
 			};
 
 			for ( const [ file, query ] of Object.entries( queries ) ) {
@@ -79,7 +83,9 @@ describe( 'dev-stale-bot/lib', () => {
 					}
 				},
 				'./utils/preparesearchquery': stubs.prepareSearchQuery,
-				'./utils/isissuestale': stubs.isIssueStale
+				'./utils/isissueorpullrequesttostale': stubs.isIssueOrPullRequestToStale,
+				'./utils/isissueorpullrequesttounstale': stubs.isIssueOrPullRequestToUnstale,
+				'./utils/isissueorpullrequesttoclose': stubs.isIssueOrPullRequestToClose
 			} );
 
 			githubRepository = new GitHubRepository( 'authorization-token' );
@@ -188,9 +194,9 @@ describe( 'dev-stale-bot/lib', () => {
 			} );
 		} );
 
-		describe( '#getIssueTimelineItems()', () => {
+		describe( '#getIssueOrPullRequestTimelineItems()', () => {
 			it( 'should be a function', () => {
-				expect( githubRepository.getIssueTimelineItems ).to.be.a( 'function' );
+				expect( githubRepository.getIssueOrPullRequestTimelineItems ).to.be.a( 'function' );
 			} );
 
 			it( 'should return all timeline events if they are not paginated', () => {
@@ -209,7 +215,7 @@ describe( 'dev-stale-bot/lib', () => {
 					}
 				} );
 
-				return githubRepository.getIssueTimelineItems( 'IssueId' ).then( result => {
+				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then( result => {
 					expect( result ).to.be.an( 'array' );
 					expect( result ).to.have.length( 3 );
 					expect( result[ 0 ] ).to.deep.equal( { eventDate: '2022-12-01T09:00:00Z' } );
@@ -236,7 +242,7 @@ describe( 'dev-stale-bot/lib', () => {
 					};
 				} );
 
-				return githubRepository.getIssueTimelineItems( 'IssueId' ).then( result => {
+				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then( result => {
 					expect( result ).to.be.an( 'array' );
 					expect( result ).to.have.length( 3 );
 					expect( result[ 0 ] ).to.deep.equal( { eventDate: '2022-12-01T09:00:00Z' } );
@@ -261,9 +267,9 @@ describe( 'dev-stale-bot/lib', () => {
 					}
 				} );
 
-				return githubRepository.getIssueTimelineItems( 'IssueId' ).then( () => {
+				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then( () => {
 					expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query GetIssueTimelineItems' );
+					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query GetIssueOrPullRequestTimelineItems' );
 					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( { nodeId: 'IssueId', cursor: null } );
 				} );
 			} );
@@ -286,16 +292,16 @@ describe( 'dev-stale-bot/lib', () => {
 					};
 				} );
 
-				return githubRepository.getIssueTimelineItems( 'IssueId' ).then( () => {
+				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then( () => {
 					expect( stubs.GraphQLClient.request.callCount ).to.equal( 3 );
 
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query GetIssueTimelineItems' );
+					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query GetIssueOrPullRequestTimelineItems' );
 					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( { nodeId: 'IssueId', cursor: null } );
 
-					expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 0 ] ).to.equal( 'query GetIssueTimelineItems' );
+					expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 0 ] ).to.equal( 'query GetIssueOrPullRequestTimelineItems' );
 					expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 1 ] ).to.deep.equal( { nodeId: 'IssueId', cursor: 'cursor' } );
 
-					expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 0 ] ).to.equal( 'query GetIssueTimelineItems' );
+					expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 0 ] ).to.equal( 'query GetIssueOrPullRequestTimelineItems' );
 					expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 1 ] ).to.deep.equal( { nodeId: 'IssueId', cursor: 'cursor' } );
 				} );
 			} );
@@ -318,7 +324,7 @@ describe( 'dev-stale-bot/lib', () => {
 					}
 				} );
 
-				return githubRepository.getIssueTimelineItems( 'IssueId' ).then( result => {
+				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then( result => {
 					expect( result ).to.be.an( 'array' );
 					expect( result ).to.have.length( 5 );
 					expect( result[ 0 ] ).to.deep.equal( { eventDate: '2022-12-01T09:00:00Z' } );
@@ -332,7 +338,7 @@ describe( 'dev-stale-bot/lib', () => {
 			it( 'should reject if request failed', () => {
 				stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
 
-				return githubRepository.getIssueTimelineItems( 'IssueId' ).then(
+				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
@@ -362,7 +368,7 @@ describe( 'dev-stale-bot/lib', () => {
 
 				stubs.GraphQLClient.request.onCall( 2 ).rejects( new Error( '500 Internal Server Error' ) );
 
-				return githubRepository.getIssueTimelineItems( 'IssueId' ).then(
+				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
@@ -377,14 +383,14 @@ describe( 'dev-stale-bot/lib', () => {
 
 				stubs.GraphQLClient.request.rejects( error );
 
-				return githubRepository.getIssueTimelineItems( 'IssueId' ).then(
+				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					() => {
 						expect( stubs.logger.error.callCount ).to.equal( 1 );
 						expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal(
-							'Unexpected error when executing "#getIssueTimelineItems()".'
+							'Unexpected error when executing "#getIssueOrPullRequestTimelineItems()".'
 						);
 						expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
 					}
@@ -392,24 +398,24 @@ describe( 'dev-stale-bot/lib', () => {
 			} );
 		} );
 
-		describe( '#searchIssuesToStale()', () => {
+		describe( '#searchIssuesOrPullRequestsToStale()', () => {
 			let onProgress, optionsBase, issueBase;
 
 			beforeEach( () => {
 				onProgress = sinon.stub();
 
 				optionsBase = {
-					type: 'issue',
 					repositorySlug: 'ckeditor/ckeditor5',
 					searchDate: '2022-12-01',
 					staleDate: '2022-12-01',
-					ignoredLabels: [],
+					ignoredIssueLabels: [],
+					ignoredPullRequestLabels: [],
 					ignoredActivityLogins: [],
 					ignoredActivityLabels: []
 				};
 
 				issueBase = {
-					__typename: 'Issue',
+					type: 'Issue',
 					id: 'IssueId',
 					url: 'https://github.com/',
 					number: 1,
@@ -427,10 +433,72 @@ describe( 'dev-stale-bot/lib', () => {
 			} );
 
 			it( 'should be a function', () => {
-				expect( githubRepository.searchIssuesToStale ).to.be.a( 'function' );
+				expect( githubRepository.searchIssuesOrPullRequestsToStale ).to.be.a( 'function' );
 			} );
 
-			it( 'should ask for a search query', () => {
+			it( 'should ask for issue search query', () => {
+				const issues = [
+					{ ...issueBase, number: 1 },
+					{ ...issueBase, number: 2 },
+					{ ...issueBase, number: 3 }
+				];
+
+				const options = {
+					...optionsBase,
+					ignoredIssueLabels: [ 'support:1', 'support:2', 'support:3' ]
+				};
+
+				stubs.GraphQLClient.request.resolves( {
+					search: {
+						issueCount: issues.length,
+						nodes: issues,
+						pageInfo: pageInfoNoNextPage
+					}
+				} );
+
+				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', options, onProgress ).then( () => {
+					expect( stubs.prepareSearchQuery.calledOnce ).to.equal( true );
+					expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.deep.equal( {
+						type: 'Issue',
+						searchDate: '2022-12-01',
+						repositorySlug: 'ckeditor/ckeditor5',
+						ignoredLabels: [ 'support:1', 'support:2', 'support:3' ]
+					} );
+				} );
+			} );
+
+			it( 'should ask for pull request search query', () => {
+				const issues = [
+					{ ...issueBase, number: 1 },
+					{ ...issueBase, number: 2 },
+					{ ...issueBase, number: 3 }
+				];
+
+				const options = {
+					...optionsBase,
+					ignoredPullRequestLabels: [ 'support:1', 'support:2', 'support:3' ]
+				};
+
+				stubs.GraphQLClient.request.resolves( {
+					search: {
+						issueCount: issues.length,
+						nodes: issues,
+						pageInfo: pageInfoNoNextPage
+					}
+				} );
+
+				return githubRepository.searchIssuesOrPullRequestsToStale( 'PullRequest', options, onProgress ).then( () => {
+					expect( stubs.prepareSearchQuery.calledOnce ).to.equal( true );
+					expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.deep.equal( {
+						type: 'PullRequest',
+						searchDate: '2022-12-01',
+						repositorySlug: 'ckeditor/ckeditor5',
+						ignoredLabels: [ 'support:1', 'support:2', 'support:3' ]
+					} );
+				} );
+			} );
+
+			it( 'should return all issues to stale if they are not paginated', () => {
 				const issues = [
 					{ ...issueBase, number: 1 },
 					{ ...issueBase, number: 2 },
@@ -445,33 +513,12 @@ describe( 'dev-stale-bot/lib', () => {
 					}
 				} );
 
-				return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
-					expect( stubs.prepareSearchQuery.calledOnce ).to.equal( true );
-					expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.deep.equal( optionsBase );
-				} );
-			} );
-
-			it( 'should return all issues to stale if they are not paginated', () => {
-				const issues = [
-					{ ...issueBase, number: 1 },
-					{ ...issueBase, number: 2 },
-					{ ...issueBase, number: 3, __typename: 'PullRequest' }
-				];
-
-				stubs.GraphQLClient.request.resolves( {
-					search: {
-						issueCount: issues.length,
-						nodes: issues,
-						pageInfo: pageInfoNoNextPage
-					}
-				} );
-
-				return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( result => {
+				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( result => {
 					expect( result ).to.be.an( 'array' );
 					expect( result ).to.have.length( 3 );
 					expect( result[ 0 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
 					expect( result[ 1 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
-					expect( result[ 2 ] ).to.deep.equal( { id: 'IssueId', type: 'PullRequest', url: 'https://github.com/' } );
+					expect( result[ 2 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
 				} );
 			} );
 
@@ -479,7 +526,7 @@ describe( 'dev-stale-bot/lib', () => {
 				const issues = [
 					{ ...issueBase, number: 1 },
 					{ ...issueBase, number: 2 },
-					{ ...issueBase, number: 3, __typename: 'PullRequest' }
+					{ ...issueBase, number: 3 }
 				];
 
 				paginateRequest( issues, ( { nodes, pageInfo } ) => {
@@ -492,12 +539,12 @@ describe( 'dev-stale-bot/lib', () => {
 					};
 				} );
 
-				return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( result => {
+				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( result => {
 					expect( result ).to.be.an( 'array' );
 					expect( result ).to.have.length( 3 );
 					expect( result[ 0 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
 					expect( result[ 1 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
-					expect( result[ 2 ] ).to.deep.equal( { id: 'IssueId', type: 'PullRequest', url: 'https://github.com/' } );
+					expect( result[ 2 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
 				} );
 			} );
 
@@ -516,9 +563,9 @@ describe( 'dev-stale-bot/lib', () => {
 					}
 				} );
 
-				return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
+				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( () => {
 					expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query SearchIssuesToStale' );
+					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
 					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( { query: 'search query', cursor: null } );
 				} );
 			} );
@@ -540,20 +587,20 @@ describe( 'dev-stale-bot/lib', () => {
 					};
 				} );
 
-				return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
+				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( () => {
 					expect( stubs.GraphQLClient.request.callCount ).to.equal( 3 );
 
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query SearchIssuesToStale' );
+					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
 					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal(
 						{ query: 'search query', cursor: null }
 					);
 
-					expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 0 ] ).to.equal( 'query SearchIssuesToStale' );
+					expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
 					expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 1 ] ).to.deep.equal(
 						{ query: 'search query', cursor: 'cursor' }
 					);
 
-					expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 0 ] ).to.equal( 'query SearchIssuesToStale' );
+					expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
 					expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 1 ] ).to.deep.equal(
 						{ query: 'search query', cursor: 'cursor' }
 					);
@@ -568,7 +615,7 @@ describe( 'dev-stale-bot/lib', () => {
 					} }
 				];
 
-				sinon.stub( githubRepository, 'getIssueTimelineItems' ).resolves( [] );
+				sinon.stub( githubRepository, 'getIssueOrPullRequestTimelineItems' ).resolves( [] );
 
 				stubs.GraphQLClient.request.resolves( {
 					search: {
@@ -578,11 +625,11 @@ describe( 'dev-stale-bot/lib', () => {
 					}
 				} );
 
-				return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
-					expect( githubRepository.getIssueTimelineItems.callCount ).to.equal( 1 );
+				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( () => {
+					expect( githubRepository.getIssueOrPullRequestTimelineItems.callCount ).to.equal( 1 );
 
-					expect( githubRepository.getIssueTimelineItems.getCall( 0 ).args[ 0 ] ).to.equal( 'IssueId' );
-					expect( githubRepository.getIssueTimelineItems.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
+					expect( githubRepository.getIssueOrPullRequestTimelineItems.getCall( 0 ).args[ 0 ] ).to.equal( 'IssueId' );
+					expect( githubRepository.getIssueOrPullRequestTimelineItems.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
 						hasNextPage: true,
 						cursor: 'cursor'
 					} );
@@ -606,7 +653,7 @@ describe( 'dev-stale-bot/lib', () => {
 					};
 				} );
 
-				return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
+				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( () => {
 					expect( stubs.prepareSearchQuery.callCount ).to.equal( 3 );
 					expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-12-01' );
 					expect( stubs.prepareSearchQuery.getCall( 1 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-11-01T09:00:00Z' );
@@ -618,7 +665,7 @@ describe( 'dev-stale-bot/lib', () => {
 				const issues = [
 					{ ...issueBase, number: 1 },
 					{ ...issueBase, number: 2 },
-					{ ...issueBase, number: 3, __typename: 'PullRequest' }
+					{ ...issueBase, number: 3 }
 				];
 
 				paginateRequest( issues, ( { nodes } ) => {
@@ -631,12 +678,12 @@ describe( 'dev-stale-bot/lib', () => {
 					};
 				} );
 
-				return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( result => {
+				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( result => {
 					expect( result ).to.be.an( 'array' );
 					expect( result ).to.have.length( 3 );
 					expect( result[ 0 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
 					expect( result[ 1 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
-					expect( result[ 2 ] ).to.deep.equal( { id: 'IssueId', type: 'PullRequest', url: 'https://github.com/' } );
+					expect( result[ 2 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
 				} );
 			} );
 
@@ -655,23 +702,28 @@ describe( 'dev-stale-bot/lib', () => {
 					}
 				} );
 
-				return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
+				stubs.isIssueOrPullRequestToStale.onCall( 1 ).returns( false );
+
+				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( result => {
 					const expectedIssue = {
 						...issueBase,
 						lastReactedAt: null,
 						timelineItems: []
 					};
 
-					expect( stubs.isIssueStale.callCount ).to.equal( 3 );
+					expect( stubs.isIssueOrPullRequestToStale.callCount ).to.equal( 3 );
 
-					expect( stubs.isIssueStale.getCall( 0 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 1 } );
-					expect( stubs.isIssueStale.getCall( 0 ).args[ 1 ] ).to.deep.equal( optionsBase );
+					expect( stubs.isIssueOrPullRequestToStale.getCall( 0 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 1 } );
+					expect( stubs.isIssueOrPullRequestToStale.getCall( 0 ).args[ 1 ] ).to.deep.equal( optionsBase );
 
-					expect( stubs.isIssueStale.getCall( 1 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 2 } );
-					expect( stubs.isIssueStale.getCall( 1 ).args[ 1 ] ).to.deep.equal( optionsBase );
+					expect( stubs.isIssueOrPullRequestToStale.getCall( 1 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 2 } );
+					expect( stubs.isIssueOrPullRequestToStale.getCall( 1 ).args[ 1 ] ).to.deep.equal( optionsBase );
 
-					expect( stubs.isIssueStale.getCall( 2 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 3 } );
-					expect( stubs.isIssueStale.getCall( 2 ).args[ 1 ] ).to.deep.equal( optionsBase );
+					expect( stubs.isIssueOrPullRequestToStale.getCall( 2 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 3 } );
+					expect( stubs.isIssueOrPullRequestToStale.getCall( 2 ).args[ 1 ] ).to.deep.equal( optionsBase );
+
+					expect( result ).to.be.an( 'array' );
+					expect( result ).to.have.length( 2 );
 				} );
 			} );
 
@@ -692,7 +744,7 @@ describe( 'dev-stale-bot/lib', () => {
 					};
 				} );
 
-				return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
+				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( () => {
 					expect( onProgress.callCount ).to.equal( 3 );
 
 					expect( onProgress.getCall( 0 ).args[ 0 ] ).to.deep.equal( { done: 1, total: 3 } );
@@ -718,7 +770,7 @@ describe( 'dev-stale-bot/lib', () => {
 					};
 				} );
 
-				return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then( () => {
+				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( () => {
 					expect( onProgress.callCount ).to.equal( 3 );
 
 					expect( onProgress.getCall( 0 ).args[ 0 ] ).to.deep.equal( { done: 1, total: 3 } );
@@ -730,7 +782,7 @@ describe( 'dev-stale-bot/lib', () => {
 			it( 'should reject if request failed', () => {
 				stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
 
-				return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then(
+				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
@@ -759,7 +811,7 @@ describe( 'dev-stale-bot/lib', () => {
 
 				stubs.GraphQLClient.request.onCall( 2 ).rejects( new Error( '500 Internal Server Error' ) );
 
-				return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then(
+				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
@@ -774,14 +826,496 @@ describe( 'dev-stale-bot/lib', () => {
 
 				stubs.GraphQLClient.request.rejects( error );
 
-				return githubRepository.searchIssuesToStale( optionsBase, onProgress ).then(
+				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					() => {
 						expect( stubs.logger.error.callCount ).to.equal( 1 );
 						expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal(
-							'Unexpected error when executing "#searchIssuesToStale()".'
+							'Unexpected error when executing "#searchIssuesOrPullRequestsToStale()".'
+						);
+						expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
+					}
+				);
+			} );
+		} );
+
+		describe( '#searchStaleIssuesOrPullRequests()', () => {
+			let onProgress, optionsBase, issueBase;
+
+			beforeEach( () => {
+				onProgress = sinon.stub();
+
+				optionsBase = {
+					repositorySlug: 'ckeditor/ckeditor5',
+					searchDate: '2022-12-01',
+					staleDate: '2022-12-01',
+					staleLabels: [ 'status:stale' ],
+					ignoredActivityLogins: [],
+					ignoredActivityLabels: []
+				};
+
+				issueBase = {
+					type: 'Issue',
+					id: 'IssueId',
+					url: 'https://github.com/',
+					number: 1,
+					createdAt: '2022-11-30T23:59:59Z',
+					lastEditedAt: null,
+					reactions: {
+						nodes: [],
+						pageInfo: pageInfoNoNextPage
+					},
+					timelineItems: {
+						nodes: [],
+						pageInfo: pageInfoNoNextPage
+					}
+				};
+			} );
+
+			it( 'should be a function', () => {
+				expect( githubRepository.searchStaleIssuesOrPullRequests ).to.be.a( 'function' );
+			} );
+
+			it( 'should ask for search query', () => {
+				const issues = [
+					{ ...issueBase, number: 1 },
+					{ ...issueBase, number: 2 },
+					{ ...issueBase, number: 3 }
+				];
+
+				stubs.GraphQLClient.request.resolves( {
+					search: {
+						issueCount: issues.length,
+						nodes: issues,
+						pageInfo: pageInfoNoNextPage
+					}
+				} );
+
+				return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
+					expect( stubs.prepareSearchQuery.calledOnce ).to.equal( true );
+					expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.deep.equal( {
+						searchDate: '2022-12-01',
+						repositorySlug: 'ckeditor/ckeditor5',
+						labels: [ 'status:stale' ]
+					} );
+				} );
+			} );
+
+			it( 'should return all stale issues if they are not paginated', () => {
+				const issues = [
+					{ ...issueBase, number: 1 },
+					{ ...issueBase, number: 2 },
+					{ ...issueBase, number: 3 }
+				];
+
+				stubs.GraphQLClient.request.resolves( {
+					search: {
+						issueCount: issues.length,
+						nodes: issues,
+						pageInfo: pageInfoNoNextPage
+					}
+				} );
+
+				return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( result => {
+					expect( result ).to.have.property( 'issuesOrPullRequestsToClose' );
+					expect( result ).to.have.property( 'issuesOrPullRequestsToUnstale' );
+
+					expect( result.issuesOrPullRequestsToClose ).to.be.an( 'array' );
+					expect( result.issuesOrPullRequestsToClose ).to.have.length( 3 );
+					expect( result.issuesOrPullRequestsToClose[ 0 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result.issuesOrPullRequestsToClose[ 1 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result.issuesOrPullRequestsToClose[ 2 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+
+					expect( result.issuesOrPullRequestsToUnstale ).to.be.an( 'array' );
+					expect( result.issuesOrPullRequestsToUnstale ).to.have.length( 3 );
+					expect( result.issuesOrPullRequestsToUnstale[ 0 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result.issuesOrPullRequestsToUnstale[ 1 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result.issuesOrPullRequestsToUnstale[ 2 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+				} );
+			} );
+
+			it( 'should return all stale issues if they are paginated', () => {
+				const issues = [
+					{ ...issueBase, number: 1 },
+					{ ...issueBase, number: 2 },
+					{ ...issueBase, number: 3 }
+				];
+
+				paginateRequest( issues, ( { nodes, pageInfo } ) => {
+					return {
+						search: {
+							issueCount: issues.length,
+							nodes,
+							pageInfo
+						}
+					};
+				} );
+
+				return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( result => {
+					expect( result ).to.have.property( 'issuesOrPullRequestsToClose' );
+					expect( result ).to.have.property( 'issuesOrPullRequestsToUnstale' );
+
+					expect( result.issuesOrPullRequestsToClose ).to.be.an( 'array' );
+					expect( result.issuesOrPullRequestsToClose ).to.have.length( 3 );
+					expect( result.issuesOrPullRequestsToClose[ 0 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result.issuesOrPullRequestsToClose[ 1 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result.issuesOrPullRequestsToClose[ 2 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+
+					expect( result.issuesOrPullRequestsToUnstale ).to.be.an( 'array' );
+					expect( result.issuesOrPullRequestsToUnstale ).to.have.length( 3 );
+					expect( result.issuesOrPullRequestsToUnstale[ 0 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result.issuesOrPullRequestsToUnstale[ 1 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result.issuesOrPullRequestsToUnstale[ 2 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+				} );
+			} );
+
+			it( 'should send one request for all stale issues if they are not paginated', () => {
+				const issues = [
+					{ ...issueBase, number: 1 },
+					{ ...issueBase, number: 2 },
+					{ ...issueBase, number: 3 }
+				];
+
+				stubs.GraphQLClient.request.resolves( {
+					search: {
+						issueCount: issues.length,
+						nodes: issues,
+						pageInfo: pageInfoNoNextPage
+					}
+				} );
+
+				return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
+					expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
+					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
+					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( { query: 'search query', cursor: null } );
+				} );
+			} );
+
+			it( 'should send multiple requests for all stale issues if they are paginated', () => {
+				const issues = [
+					{ ...issueBase, number: 1 },
+					{ ...issueBase, number: 2 },
+					{ ...issueBase, number: 3 }
+				];
+
+				paginateRequest( issues, ( { nodes, pageInfo } ) => {
+					return {
+						search: {
+							issueCount: issues.length,
+							nodes,
+							pageInfo
+						}
+					};
+				} );
+
+				return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
+					expect( stubs.GraphQLClient.request.callCount ).to.equal( 3 );
+
+					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
+					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal(
+						{ query: 'search query', cursor: null }
+					);
+
+					expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
+					expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 1 ] ).to.deep.equal(
+						{ query: 'search query', cursor: 'cursor' }
+					);
+
+					expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
+					expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 1 ] ).to.deep.equal(
+						{ query: 'search query', cursor: 'cursor' }
+					);
+				} );
+			} );
+
+			it( 'should fetch all timeline events for any issue if they are paginated', () => {
+				const issues = [
+					{ ...issueBase, number: 1, timelineItems: {
+						nodes: [],
+						pageInfo: pageInfoWithNextPage
+					} }
+				];
+
+				sinon.stub( githubRepository, 'getIssueOrPullRequestTimelineItems' ).resolves( [] );
+
+				stubs.GraphQLClient.request.resolves( {
+					search: {
+						issueCount: issues.length,
+						nodes: issues,
+						pageInfo: pageInfoNoNextPage
+					}
+				} );
+
+				return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
+					expect( githubRepository.getIssueOrPullRequestTimelineItems.callCount ).to.equal( 1 );
+
+					expect( githubRepository.getIssueOrPullRequestTimelineItems.getCall( 0 ).args[ 0 ] ).to.equal( 'IssueId' );
+					expect( githubRepository.getIssueOrPullRequestTimelineItems.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
+						hasNextPage: true,
+						cursor: 'cursor'
+					} );
+				} );
+			} );
+
+			it( 'should ask for a new search query with new offset if GitHub prevents going to the next page', () => {
+				const issues = [
+					{ ...issueBase, number: 1, createdAt: '2022-11-01T09:00:00Z' },
+					{ ...issueBase, number: 2, createdAt: '2022-10-01T09:00:00Z' },
+					{ ...issueBase, number: 3, createdAt: '2022-09-01T09:00:00Z' }
+				];
+
+				paginateRequest( issues, ( { nodes } ) => {
+					return {
+						search: {
+							issueCount: issues.length,
+							nodes,
+							pageInfo: pageInfoNoNextPage
+						}
+					};
+				} );
+
+				return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
+					expect( stubs.prepareSearchQuery.callCount ).to.equal( 3 );
+					expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-12-01' );
+					expect( stubs.prepareSearchQuery.getCall( 1 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-11-01T09:00:00Z' );
+					expect( stubs.prepareSearchQuery.getCall( 2 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-10-01T09:00:00Z' );
+				} );
+			} );
+
+			it( 'should return all stale issues if GitHub prevents going to the next page', () => {
+				const issues = [
+					{ ...issueBase, number: 1 },
+					{ ...issueBase, number: 2 },
+					{ ...issueBase, number: 3 }
+				];
+
+				paginateRequest( issues, ( { nodes } ) => {
+					return {
+						search: {
+							issueCount: issues.length,
+							nodes,
+							pageInfo: pageInfoNoNextPage
+						}
+					};
+				} );
+
+				return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( result => {
+					expect( result ).to.have.property( 'issuesOrPullRequestsToClose' );
+					expect( result ).to.have.property( 'issuesOrPullRequestsToUnstale' );
+
+					expect( result.issuesOrPullRequestsToClose ).to.be.an( 'array' );
+					expect( result.issuesOrPullRequestsToClose ).to.have.length( 3 );
+					expect( result.issuesOrPullRequestsToClose[ 0 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result.issuesOrPullRequestsToClose[ 1 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result.issuesOrPullRequestsToClose[ 2 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+
+					expect( result.issuesOrPullRequestsToUnstale ).to.be.an( 'array' );
+					expect( result.issuesOrPullRequestsToUnstale ).to.have.length( 3 );
+					expect( result.issuesOrPullRequestsToUnstale[ 0 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result.issuesOrPullRequestsToUnstale[ 1 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result.issuesOrPullRequestsToUnstale[ 2 ] ).to.deep.equal(
+						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+					);
+				} );
+			} );
+
+			it( 'should check each issue if it should be unstaled or closed', () => {
+				const issues = [
+					{ ...issueBase, number: 1 },
+					{ ...issueBase, number: 2 },
+					{ ...issueBase, number: 3 }
+				];
+
+				stubs.GraphQLClient.request.resolves( {
+					search: {
+						issueCount: issues.length,
+						nodes: issues,
+						pageInfo: pageInfoNoNextPage
+					}
+				} );
+
+				stubs.isIssueOrPullRequestToUnstale.onCall( 1 ).returns( false );
+				stubs.isIssueOrPullRequestToClose.onCall( 1 ).returns( false );
+
+				return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( result => {
+					const expectedIssue = {
+						...issueBase,
+						lastReactedAt: null,
+						timelineItems: []
+					};
+
+					expect( stubs.isIssueOrPullRequestToUnstale.callCount ).to.equal( 3 );
+
+					expect( stubs.isIssueOrPullRequestToUnstale.getCall( 0 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 1 } );
+					expect( stubs.isIssueOrPullRequestToUnstale.getCall( 0 ).args[ 1 ] ).to.deep.equal( optionsBase );
+
+					expect( stubs.isIssueOrPullRequestToUnstale.getCall( 1 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 2 } );
+					expect( stubs.isIssueOrPullRequestToUnstale.getCall( 1 ).args[ 1 ] ).to.deep.equal( optionsBase );
+
+					expect( stubs.isIssueOrPullRequestToUnstale.getCall( 2 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 3 } );
+					expect( stubs.isIssueOrPullRequestToUnstale.getCall( 2 ).args[ 1 ] ).to.deep.equal( optionsBase );
+
+					expect( stubs.isIssueOrPullRequestToClose.callCount ).to.equal( 3 );
+
+					expect( stubs.isIssueOrPullRequestToClose.getCall( 0 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 1 } );
+					expect( stubs.isIssueOrPullRequestToClose.getCall( 0 ).args[ 1 ] ).to.deep.equal( optionsBase );
+
+					expect( stubs.isIssueOrPullRequestToClose.getCall( 1 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 2 } );
+					expect( stubs.isIssueOrPullRequestToClose.getCall( 1 ).args[ 1 ] ).to.deep.equal( optionsBase );
+
+					expect( stubs.isIssueOrPullRequestToClose.getCall( 2 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 3 } );
+					expect( stubs.isIssueOrPullRequestToClose.getCall( 2 ).args[ 1 ] ).to.deep.equal( optionsBase );
+
+					expect( result.issuesOrPullRequestsToUnstale ).to.be.an( 'array' );
+					expect( result.issuesOrPullRequestsToUnstale ).to.have.length( 2 );
+					expect( result.issuesOrPullRequestsToClose ).to.be.an( 'array' );
+					expect( result.issuesOrPullRequestsToClose ).to.have.length( 2 );
+				} );
+			} );
+
+			it( 'should call on progress callback', () => {
+				const issues = [
+					{ ...issueBase, number: 1 },
+					{ ...issueBase, number: 2 },
+					{ ...issueBase, number: 3 }
+				];
+
+				paginateRequest( issues, ( { nodes, pageInfo } ) => {
+					return {
+						search: {
+							issueCount: issues.length,
+							nodes,
+							pageInfo
+						}
+					};
+				} );
+
+				return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
+					expect( onProgress.callCount ).to.equal( 3 );
+
+					expect( onProgress.getCall( 0 ).args[ 0 ] ).to.deep.equal( { done: 1, total: 3 } );
+					expect( onProgress.getCall( 1 ).args[ 0 ] ).to.deep.equal( { done: 2, total: 3 } );
+					expect( onProgress.getCall( 2 ).args[ 0 ] ).to.deep.equal( { done: 3, total: 3 } );
+				} );
+			} );
+
+			it( 'should count total hits only once using the value from first response', () => {
+				const issues = [
+					{ ...issueBase, number: 1 },
+					{ ...issueBase, number: 2 },
+					{ ...issueBase, number: 3 }
+				];
+
+				paginateRequest( issues, ( { nodes, pageInfo, entryIndex } ) => {
+					return {
+						search: {
+							issueCount: issues.length - entryIndex,
+							nodes,
+							pageInfo
+						}
+					};
+				} );
+
+				return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
+					expect( onProgress.callCount ).to.equal( 3 );
+
+					expect( onProgress.getCall( 0 ).args[ 0 ] ).to.deep.equal( { done: 1, total: 3 } );
+					expect( onProgress.getCall( 1 ).args[ 0 ] ).to.deep.equal( { done: 2, total: 3 } );
+					expect( onProgress.getCall( 2 ).args[ 0 ] ).to.deep.equal( { done: 3, total: 3 } );
+				} );
+			} );
+
+			it( 'should reject if request failed', () => {
+				stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+
+				return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					() => {
+						return Promise.resolve();
+					}
+				);
+			} );
+
+			it( 'should reject if subsequent request failed', () => {
+				const issues = [
+					{ ...issueBase, number: 1 },
+					{ ...issueBase, number: 2 },
+					{ ...issueBase, number: 3 }
+				];
+
+				paginateRequest( issues, ( { nodes, pageInfo } ) => {
+					return {
+						search: {
+							issueCount: issues.length,
+							nodes,
+							pageInfo
+						}
+					};
+				} );
+
+				stubs.GraphQLClient.request.onCall( 2 ).rejects( new Error( '500 Internal Server Error' ) );
+
+				return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					() => {
+						return Promise.resolve();
+					}
+				);
+			} );
+
+			it( 'should log an error if request failed', () => {
+				const error = new Error( '500 Internal Server Error' );
+
+				stubs.GraphQLClient.request.rejects( error );
+
+				return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					() => {
+						expect( stubs.logger.error.callCount ).to.equal( 1 );
+						expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal(
+							'Unexpected error when executing "#searchStaleIssuesOrPullRequests()".'
 						);
 						expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
 					}
@@ -844,9 +1378,9 @@ describe( 'dev-stale-bot/lib', () => {
 
 			it( 'should return labels', () => {
 				const labels = [
-					{ id: 'LabelId1', name: 'type:bug' },
-					{ id: 'LabelId2', name: 'type:task' },
-					{ id: 'LabelId3', name: 'type:feature' }
+					{ id: 'LabelId1' },
+					{ id: 'LabelId2' },
+					{ id: 'LabelId3' }
 				];
 
 				stubs.GraphQLClient.request.resolves( {
@@ -860,17 +1394,17 @@ describe( 'dev-stale-bot/lib', () => {
 				return githubRepository.getLabels( 'ckeditor/ckeditor5', [ 'type:bug', 'type:task', 'type:feature' ] ).then( result => {
 					expect( result ).to.be.an( 'array' );
 					expect( result ).to.have.length( 3 );
-					expect( result[ 0 ] ).to.deep.equal( { id: 'LabelId1', name: 'type:bug' } );
-					expect( result[ 1 ] ).to.deep.equal( { id: 'LabelId2', name: 'type:task' } );
-					expect( result[ 2 ] ).to.deep.equal( { id: 'LabelId3', name: 'type:feature' } );
+					expect( result[ 0 ] ).to.equal( 'LabelId1' );
+					expect( result[ 1 ] ).to.equal( 'LabelId2' );
+					expect( result[ 2 ] ).to.equal( 'LabelId3' );
 				} );
 			} );
 
 			it( 'should send one request for labels', () => {
 				const labels = [
-					{ id: 'LabelId1', name: 'type:bug' },
-					{ id: 'LabelId2', name: 'type:task' },
-					{ id: 'LabelId3', name: 'type:feature' }
+					{ id: 'LabelId1' },
+					{ id: 'LabelId2' },
+					{ id: 'LabelId3' }
 				];
 
 				stubs.GraphQLClient.request.resolves( {
@@ -1016,6 +1550,64 @@ describe( 'dev-stale-bot/lib', () => {
 						expect( stubs.logger.error.callCount ).to.equal( 1 );
 						expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal(
 							'Unexpected error when executing "#removeLabels()".'
+						);
+						expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
+					}
+				);
+			} );
+		} );
+
+		describe( '#closeIssueOrPullRequest()', () => {
+			it( 'should be a function', () => {
+				expect( githubRepository.closeIssueOrPullRequest ).to.be.a( 'function' );
+			} );
+
+			it( 'should close issue', () => {
+				stubs.GraphQLClient.request.resolves();
+
+				return githubRepository.closeIssueOrPullRequest( 'Issue', 'IssueId' ).then( () => {
+					expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
+					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'mutation CloseIssue' );
+					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( { nodeId: 'IssueId' } );
+				} );
+			} );
+
+			it( 'should close pull request', () => {
+				stubs.GraphQLClient.request.resolves();
+
+				return githubRepository.closeIssueOrPullRequest( 'PullRequest', 'PullRequestId' ).then( () => {
+					expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
+					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'mutation ClosePullRequest' );
+					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( { nodeId: 'PullRequestId' } );
+				} );
+			} );
+
+			it( 'should reject if request failed', () => {
+				stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+
+				return githubRepository.closeIssueOrPullRequest( 'Issue', 'IssueId' ).then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					() => {
+						return Promise.resolve();
+					}
+				);
+			} );
+
+			it( 'should log an error if request failed', () => {
+				const error = new Error( '500 Internal Server Error' );
+
+				stubs.GraphQLClient.request.rejects( error );
+
+				return githubRepository.closeIssueOrPullRequest( 'Issue', 'IssueId' ).then(
+					() => {
+						throw new Error( 'Expected to be rejected.' );
+					},
+					() => {
+						expect( stubs.logger.error.callCount ).to.equal( 1 );
+						expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal(
+							'Unexpected error when executing "#closeIssueOrPullRequest()".'
 						);
 						expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
 					}

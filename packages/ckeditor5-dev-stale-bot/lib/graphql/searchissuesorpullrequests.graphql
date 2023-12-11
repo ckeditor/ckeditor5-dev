@@ -25,13 +25,13 @@ fragment issueComment on IssueComment {
 	}
 }
 
-query SearchIssuesToStale( $query: String!, $cursor: String ) {
+query SearchIssuesOrPullRequests( $query: String!, $cursor: String ) {
 	search( type: ISSUE, query: $query, first: 100, after: $cursor ) {
 		issueCount
 		nodes {
 			... on Issue {
-				__typename
 				id
+				type: __typename
 				number
 				url
 				createdAt
@@ -54,8 +54,8 @@ query SearchIssuesToStale( $query: String!, $cursor: String ) {
 				}
 			}
 			... on PullRequest {
-				__typename
 				id
+				type: __typename
 				number
 				url
 				createdAt

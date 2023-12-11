@@ -10,7 +10,7 @@ const chalk = require( 'chalk' );
 const createSpinner = require( './utils/createspinner' );
 const parseArguments = require( './utils/parsearguments' );
 const validateConfig = require( './utils/validateconfig' );
-const prepareSearchOptions = require( './utils/preparesearchoptions' );
+const parseConfig = require( './utils/parseconfig' );
 const GitHubRepository = require( '../lib/githubrepository' );
 
 main().catch( error => {
@@ -19,6 +19,11 @@ main().catch( error => {
 	process.exit( 1 );
 } );
 
+/**
+ * Launches the stale bot that searches the issues and pull requests to stale, unstale or close.
+ *
+ * @returns {Promise}
+ */
 async function main() {
 	if ( !process.env.CKE5_GITHUB_TOKEN ) {
 		throw new Error( 'Missing environment variable: CKE5_GITHUB_TOKEN' );
@@ -33,39 +38,142 @@ async function main() {
 	const config = await fs.readJson( configPath );
 
 	validateConfig( config );
+
 	printWelcomeMessage( dryRun );
 
 	const githubRepository = new GitHubRepository( process.env.CKE5_GITHUB_TOKEN );
 
+	const viewerLogin = await githubRepository.getViewerLogin();
+
+	const options = parseConfig( viewerLogin, config );
+
 	const spinner = createSpinner();
+	spinner.instance.start();
 
-	const { issuesToStale, pullRequestsToStale } = await searchToStale( githubRepository, config, spinner );
-
-	if ( !issuesToStale.length && !pullRequestsToStale.length ) {
-		spinner.instance.stop();
-
-		console.log( chalk.green.bold( '✨ No issues or pull requests found that should be marked as stale.' ) );
-
-		return;
-	}
-
-	const entries = [ ...issuesToStale, ...pullRequestsToStale ];
+	const searchResult = await search( githubRepository, options, spinner );
+	const {
+		issuesOrPullRequestsToStale,
+		issuesOrPullRequestsToClose,
+		issuesOrPullRequestsToUnstale
+	} = searchResult;
 
 	if ( !dryRun ) {
-		await markAsStale( githubRepository, entries, config, spinner );
+		const staleLabels = await githubRepository.getLabels( options.repositorySlug, options.staleLabels );
+
+		if ( issuesOrPullRequestsToStale.length ) {
+			const actions = {
+				title: 'Staling issues and pull requests...',
+				labelsToAdd: staleLabels,
+				commentToAdd( entry ) {
+					return entry.type === 'Issue' ? options.staleIssueMessage : options.stalePullRequestMessage;
+				}
+			};
+
+			await handleActions( githubRepository, issuesOrPullRequestsToStale, actions, spinner );
+		}
+
+		if ( issuesOrPullRequestsToUnstale.length ) {
+			const actions = {
+				title: 'Unstaling issues and pull requests...',
+				labelsToRemove: staleLabels
+			};
+
+			await handleActions( githubRepository, issuesOrPullRequestsToUnstale, actions, spinner );
+		}
+
+		if ( issuesOrPullRequestsToClose.length ) {
+			const actions = {
+				title: 'Closing issues and pull requests...',
+				labelsToRemove: staleLabels,
+				commentToAdd( entry ) {
+					return entry.type === 'Issue' ? options.closeIssueMessage : options.closePullRequestMessage;
+				},
+				close: true
+			};
+
+			await handleActions( githubRepository, issuesOrPullRequestsToClose, actions, spinner );
+		}
 	}
 
 	spinner.instance.stop();
 
-	const statusMessage = dryRun ?
-		'🔖 The following issues or pull requests should be marked as stale:\n' :
-		'🔖 The following issues or pull requests were marked as stale:\n';
-
-	console.log( chalk.blue.bold( statusMessage ) );
-
-	entries.forEach( entry => console.log( entry.url ) );
+	printStatus( dryRun, searchResult );
 }
 
+/**
+ * Searches for new issues or pull requests to stale and already staled ones that should be unstaled or closed.
+ *
+ * @param {GitHubRepository} githubRepository GitHubRepository instance.
+ * @param {Options} options Configuration options.
+ * @param {Spinner} spinner Spinner.
+ * @returns {Promise.<SearchResult>}
+ */
+async function search( githubRepository, options, spinner ) {
+	spinner.printStatus( 'Searching for new issues to stale...' );
+
+	const issuesToStale = await githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', options, spinner.onProgress() );
+
+	spinner.printStatus( 'Searching for new pull requests to stale...' );
+
+	const pullRequestsToStale = await githubRepository.searchIssuesOrPullRequestsToStale( 'PullRequest', options, spinner.onProgress() );
+
+	spinner.printStatus( 'Searching for current stale issues and pull requests...' );
+
+	const {
+		issuesOrPullRequestsToClose,
+		issuesOrPullRequestsToUnstale
+	} = await githubRepository.searchStaleIssuesOrPullRequests( options, spinner.onProgress() );
+
+	return {
+		issuesOrPullRequestsToStale: [ ...issuesToStale, ...pullRequestsToStale ],
+		issuesOrPullRequestsToUnstale,
+		issuesOrPullRequestsToClose
+	};
+}
+
+/**
+ * Executes provided actions on each issue or pull request.
+ *
+ * @param {GitHubRepository} githubRepository GitHubRepository instance.
+ * @param {Array.<IssueOrPullRequest>} entries An array of issues or pull requests to process.
+ * @param {Actions} actions Actions to execute on each issue or pull request.
+ * @param {Spinner} spinner Spinner.
+ * @returns {Promise}
+ */
+async function handleActions( githubRepository, entries, actions, spinner ) {
+	spinner.printStatus( actions.title );
+
+	const onProgress = spinner.onProgress();
+
+	for ( const entry of entries ) {
+		onProgress( {
+			done: entries.indexOf( entry ),
+			total: entries.length
+		} );
+
+		if ( actions.commentToAdd ) {
+			await githubRepository.addComment( entry.id, actions.commentToAdd( entry ) );
+		}
+
+		if ( actions.labelsToAdd ) {
+			await githubRepository.addLabels( entry.id, actions.labelsToAdd );
+		}
+
+		if ( actions.labelsToRemove ) {
+			await githubRepository.removeLabels( entry.id, actions.labelsToRemove );
+		}
+
+		if ( actions.close ) {
+			await githubRepository.closeIssueOrPullRequest( entry.type, entry.id );
+		}
+	}
+}
+
+/**
+ * Prints in the console a welcome message.
+ *
+ * @param {Boolean} dryRun Indicates if dry run mode is enabled.
+ */
 function printWelcomeMessage( dryRun ) {
 	const message = [
 		'',
@@ -78,43 +186,67 @@ function printWelcomeMessage( dryRun ) {
 	console.log( message.join( '\n' ) );
 }
 
-async function searchToStale( githubRepository, config, spinner ) {
-	const viewerLogin = await githubRepository.getViewerLogin();
+/**
+ * Prints in the console status messages about actions required to be executed on found issues and pull requests.
+ *
+ * @param {Boolean} dryRun Indicates if dry run mode is enabled.
+ * @param {SearchResult} searchResult Found issues and pull requests that require an action.
+ */
+function printStatus( dryRun, searchResult ) {
+	const {
+		issuesOrPullRequestsToStale,
+		issuesOrPullRequestsToClose,
+		issuesOrPullRequestsToUnstale
+	} = searchResult;
 
-	spinner.printStatus( '🔎 Searching for issues to stale...' );
+	if ( !issuesOrPullRequestsToStale.length ) {
+		console.log( chalk.green.bold( '\n💡 No new issues or pull requests found that should be staled.' ) );
+	} else {
+		const statusMessage = dryRun ?
+			'\n🔖 The following issues or pull requests should be staled:\n' :
+			'\n🔖 The following issues or pull requests were staled:\n';
 
-	const issuesToStaleOptions = prepareSearchOptions( viewerLogin, 'issue', config );
-	const issuesToStale = await githubRepository.searchIssuesToStale( issuesToStaleOptions, spinner.onProgressFactory() );
+		console.log( chalk.blue.bold( statusMessage ) );
 
-	spinner.printStatus( '🔎 Searching for pull requests to stale...' );
+		issuesOrPullRequestsToStale.forEach( entry => console.log( entry.url ) );
+	}
 
-	const pullRequestsToStaleOptions = prepareSearchOptions( viewerLogin, 'pr', config );
-	const pullRequestsToStale = await githubRepository.searchIssuesToStale( pullRequestsToStaleOptions, spinner.onProgressFactory() );
+	if ( !issuesOrPullRequestsToUnstale.length ) {
+		console.log( chalk.green.bold( '\n💡 No stale issues or pull requests can be unstaled now.' ) );
+	} else {
+		const statusMessage = dryRun ?
+			'\n🔖 The following issues or pull requests should be unstaled:\n' :
+			'\n🔖 The following issues or pull requests were unstaled:\n';
 
-	return {
-		issuesToStale,
-		pullRequestsToStale
-	};
-}
+		console.log( chalk.blue.bold( statusMessage ) );
 
-async function markAsStale( githubRepository, entries, config, spinner ) {
-	spinner.printStatus( '🔎 Fetching stale labels...' );
+		issuesOrPullRequestsToUnstale.forEach( entry => console.log( entry.url ) );
+	}
 
-	const staleLabels = await githubRepository.getLabels( config.REPOSITORY_SLUG, config.STALE_LABELS );
+	if ( !issuesOrPullRequestsToClose.length ) {
+		console.log( chalk.green.bold( '\n💡 No stale issues or pull requests can be closed now.' ) );
+	} else {
+		const statusMessage = dryRun ?
+			'\n🔖 The following issues or pull requests should be closed:\n' :
+			'\n🔖 The following issues or pull requests were closed:\n';
 
-	spinner.printStatus( '🔎 Marking found issues and pull requests as stale...' );
+		console.log( chalk.blue.bold( statusMessage ) );
 
-	const onProgress = spinner.onProgressFactory();
-
-	for ( const entry of entries ) {
-		onProgress( {
-			done: entries.indexOf( entry ),
-			total: entries.length
-		} );
-
-		const staleMessage = entry.type === 'Issue' ? config.STALE_ISSUE_MESSAGE : config.STALE_PR_MESSAGE;
-
-		await githubRepository.addLabels( entry.id, staleLabels.map( label => label.id ) );
-		await githubRepository.addComment( entry.id, staleMessage );
+		issuesOrPullRequestsToClose.forEach( entry => console.log( entry.url ) );
 	}
 }
+
+/**
+ * @typedef {Object} SearchResult
+ * @property {Array.<IssueOrPullRequest>} issuesOrPullRequestsToClose
+ * @property {Array.<IssueOrPullRequest>} issuesOrPullRequestsToStale
+ * @property {Array.<IssueOrPullRequest>} issuesOrPullRequestsToUnstale
+ */
+
+/**
+ * @typedef {Object} Actions
+ * @property {Function} [commentToAdd]
+ * @property {Array.<String>} [labelsToAdd]
+ * @property {Array.<String>} [labelsToRemove]
+ * @property {Boolean} [close]
+ */

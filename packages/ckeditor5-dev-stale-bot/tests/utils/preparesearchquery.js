@@ -17,11 +17,15 @@ describe( 'dev-stale-bot/lib/utils', () => {
 		} );
 
 		it( 'should prepare a query for issue', () => {
-			expect( prepareSearchQuery( { type: 'issue' } ) ).to.include( 'type:issue' );
+			expect( prepareSearchQuery( { type: 'Issue' } ) ).to.include( 'type:issue' );
 		} );
 
 		it( 'should prepare a query for pull request', () => {
-			expect( prepareSearchQuery( { type: 'pr' } ) ).to.include( 'type:pr' );
+			expect( prepareSearchQuery( { type: 'PullRequest' } ) ).to.include( 'type:pr' );
+		} );
+
+		it( 'should prepare a query for issue or pull request', () => {
+			expect( prepareSearchQuery( {} ) ).to.not.include( 'type:' );
 		} );
 
 		it( 'should prepare a query from specified date', () => {
@@ -50,16 +54,26 @@ describe( 'dev-stale-bot/lib/utils', () => {
 			);
 		} );
 
+		it( 'should prepare a query with searched labels', () => {
+			const labels = [
+				'status:stale',
+				'type:bug'
+			];
+
+			expect( prepareSearchQuery( { labels } ) ).to.include( 'label:status:stale label:type:bug' );
+		} );
+
 		it( 'should prepare a query with all fields separated by space', () => {
 			const options = {
-				type: 'issue',
+				type: 'Issue',
 				repositorySlug: 'ckeditor/ckeditor5',
 				searchDate: '2022-12-01',
+				labels: [ 'type:bug' ],
 				ignoredLabels: [ 'status:stale' ]
 			};
 
 			expect( prepareSearchQuery( options ) ).to.include(
-				'repo:ckeditor/ckeditor5 created:<2022-12-01 type:issue state:open sort:created-desc -label:status:stale'
+				'repo:ckeditor/ckeditor5 created:<2022-12-01 type:issue state:open sort:created-desc label:type:bug -label:status:stale'
 			);
 		} );
 	} );

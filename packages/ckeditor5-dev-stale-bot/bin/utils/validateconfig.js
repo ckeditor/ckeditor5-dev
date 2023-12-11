@@ -25,4 +25,12 @@ module.exports = function validateConfig( config ) {
 	if ( !config.STALE_PR_MESSAGE ) {
 		throw new Error( 'Missing configuration option: STALE_PR_MESSAGE' );
 	}
+
+	if ( !config.CLOSE_ISSUE_MESSAGE ) {
+		throw new Error( 'Missing configuration option: CLOSE_ISSUE_MESSAGE' );
+	}
+
+	if ( !config.CLOSE_PR_MESSAGE ) {
+		throw new Error( 'Missing configuration option: CLOSE_PR_MESSAGE' );
+	}
 };

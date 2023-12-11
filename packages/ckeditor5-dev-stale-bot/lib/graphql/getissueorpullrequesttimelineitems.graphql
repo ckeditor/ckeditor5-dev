@@ -25,7 +25,7 @@ fragment issueComment on IssueComment {
 	}
 }
 
-query GetIssueTimelineItems( $nodeId: ID!, $cursor: String ) {
+query GetIssueOrPullRequestTimelineItems( $nodeId: ID!, $cursor: String ) {
 	node( id: $nodeId ) {
 		...on Issue {
 			timelineItems( first: 100, itemTypes: [ LABELED_EVENT, UNLABELED_EVENT, ISSUE_COMMENT ], after: $cursor ) {

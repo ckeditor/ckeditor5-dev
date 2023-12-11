@@ -9,13 +9,10 @@ const chalk = require( 'chalk' );
 /**
  * Creates the spinner instance with methods to update spinner text.
  *
- * @returns {Object} data
- * @returns {ora.Ora} data.instance
- * @returns {Function} data.printStatus
- * @returns {Function} data.onProgressFactory
+ * @returns {Spinner}
  */
 module.exports = function createSpinner() {
-	const instance = ora().start();
+	const instance = ora();
 
 	const printStatus = text => {
 		instance.text = text;
@@ -25,7 +22,7 @@ module.exports = function createSpinner() {
 		}
 	};
 
-	const onProgressFactory = () => {
+	const onProgress = () => {
 		const title = instance.text;
 
 		return ( { done, total } ) => {
@@ -39,6 +36,13 @@ module.exports = function createSpinner() {
 	return {
 		instance,
 		printStatus,
-		onProgressFactory
+		onProgress
 	};
 };
+
+/**
+ * @typedef {Object} Spinner
+ * @property {ora.Ora} instance
+ * @property {Function} printStatus
+ * @property {Function} onProgress
+ */

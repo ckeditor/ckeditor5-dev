@@ -9,14 +9,19 @@ const { subDays, formatISO } = require( 'date-fns' );
  * Converts configuration options into format required by the GitHubRepository.
  *
  * @param {String} viewerLogin The GitHub login of the currently authenticated user.
- * @param {'issue'|'pr'} type Type of GitHub resource.
  * @param {Config} config Configuration options.
- * @returns {SearchOptions} Converted options.
+ * @returns {Options}
  */
-module.exports = function prepareSearchOptions( viewerLogin, type, config ) {
+module.exports = function parseConfig( viewerLogin, config ) {
 	const {
 		REPOSITORY_SLUG,
+		STALE_LABELS,
+		STALE_ISSUE_MESSAGE,
+		STALE_PR_MESSAGE,
+		CLOSE_ISSUE_MESSAGE,
+		CLOSE_PR_MESSAGE,
 		DAYS_BEFORE_STALE = 365,
+		DAYS_BEFORE_CLOSE = 30,
 		IGNORE_VIEWER_ACTIVITY = true,
 		IGNORED_ISSUE_LABELS = [],
 		IGNORED_PR_LABELS = [],
@@ -24,19 +29,30 @@ module.exports = function prepareSearchOptions( viewerLogin, type, config ) {
 		IGNORED_ACTIVITY_LOGINS = []
 	} = config;
 
+	const now = new Date();
+
 	const staleDate = formatISO(
-		subDays( new Date(), DAYS_BEFORE_STALE ),
+		subDays( now, DAYS_BEFORE_STALE ),
+		{ representation: 'date' }
+	);
+
+	const closeDate = formatISO(
+		subDays( now, DAYS_BEFORE_CLOSE ),
 		{ representation: 'date' }
 	);
 
 	return {
-		type,
 		repositorySlug: REPOSITORY_SLUG,
 		staleDate,
+		closeDate,
 		searchDate: staleDate,
-		ignoredLabels: type === 'issue' ?
-			IGNORED_ISSUE_LABELS :
-			IGNORED_PR_LABELS,
+		staleLabels: STALE_LABELS,
+		staleIssueMessage: STALE_ISSUE_MESSAGE,
+		stalePullRequestMessage: STALE_PR_MESSAGE,
+		closeIssueMessage: CLOSE_ISSUE_MESSAGE,
+		closePullRequestMessage: CLOSE_PR_MESSAGE,
+		ignoredIssueLabels: IGNORED_ISSUE_LABELS,
+		ignoredPullRequestLabels: IGNORED_PR_LABELS,
 		ignoredActivityLabels: IGNORED_ACTIVITY_LABELS,
 		ignoredActivityLogins: IGNORE_VIEWER_ACTIVITY ?
 			[ ...IGNORED_ACTIVITY_LOGINS, viewerLogin ] :
@@ -47,7 +63,13 @@ module.exports = function prepareSearchOptions( viewerLogin, type, config ) {
 /**
  * @typedef {Object} Config
  * @property {String} REPOSITORY_SLUG
+ * @property {Array.<String>} STALE_LABELS
+ * @property {String} STALE_ISSUE_MESSAGE
+ * @property {String} STALE_PR_MESSAGE
+ * @property {String} CLOSE_ISSUE_MESSAGE
+ * @property {String} CLOSE_PR_MESSAGE
  * @property {Number} [DAYS_BEFORE_STALE=365]
+ * @property {Number} [DAYS_BEFORE_CLOSE=30]
  * @property {Boolean} [IGNORE_VIEWER_ACTIVITY=true]
  * @property {Array.<String>} [IGNORED_ISSUE_LABELS=[]]
  * @property {Array.<String>} [IGNORED_PR_LABELS=[]]
@@ -56,12 +78,18 @@ module.exports = function prepareSearchOptions( viewerLogin, type, config ) {
  */
 
 /**
- * @typedef {Object} SearchOptions
- * @property {String} type
+ * @typedef {Object} Options
  * @property {String} repositorySlug
  * @property {String} staleDate
+ * @property {String} closeDate
  * @property {String} searchDate
- * @property {Array.<String>} ignoredLabels
+ * @property {Array.<String>} staleLabels
+ * @property {String} staleIssueMessage
+ * @property {String} stalePullRequestMessage
+ * @property {String} closeIssueMessage
+ * @property {String} closePullRequestMessage
+ * @property {Array.<String>} ignoredIssueLabels
+ * @property {Array.<String>} ignoredPullRequestLabels
  * @property {Array.<String>} ignoredActivityLabels
  * @property {Array.<String>} ignoredActivityLogins
  */
