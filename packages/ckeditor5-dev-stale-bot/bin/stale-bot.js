@@ -198,40 +198,48 @@ function printStatus( dryRun, searchResult ) {
 	} = searchResult;
 
 	if ( !issuesOrPullRequestsToStale.length ) {
-		console.log( chalk.green.bold( '\n💡 No new issues or pull requests found that should be staled.' ) );
+		console.log( chalk.green.bold( '💡 No new issues or pull requests found that should be staled.\n' ) );
 	} else {
 		const statusMessage = dryRun ?
-			'\n🔖 The following issues or pull requests should be staled:\n' :
-			'\n🔖 The following issues or pull requests were staled:\n';
+			'🔖 The following issues or pull requests should be staled:\n' :
+			'🔖 The following issues or pull requests were staled:\n';
 
-		console.log( chalk.blue.bold( statusMessage ) );
-
-		issuesOrPullRequestsToStale.forEach( entry => console.log( `${ entry.url } - ${ entry.title }` ) );
+		printStatusSection( statusMessage, issuesOrPullRequestsToStale );
 	}
 
 	if ( !issuesOrPullRequestsToUnstale.length ) {
-		console.log( chalk.green.bold( '\n💡 No stale issues or pull requests can be unstaled now.' ) );
+		console.log( chalk.green.bold( '💡 No stale issues or pull requests can be unstaled now.\n' ) );
 	} else {
 		const statusMessage = dryRun ?
-			'\n🔖 The following issues or pull requests should be unstaled:\n' :
-			'\n🔖 The following issues or pull requests were unstaled:\n';
+			'🔖 The following issues or pull requests should be unstaled:\n' :
+			'🔖 The following issues or pull requests were unstaled:\n';
 
-		console.log( chalk.blue.bold( statusMessage ) );
-
-		issuesOrPullRequestsToUnstale.forEach( entry => console.log( entry.url ) );
+		printStatusSection( statusMessage, issuesOrPullRequestsToUnstale );
 	}
 
 	if ( !issuesOrPullRequestsToClose.length ) {
-		console.log( chalk.green.bold( '\n💡 No stale issues or pull requests can be closed now.' ) );
+		console.log( chalk.green.bold( '💡 No stale issues or pull requests can be closed now.\n' ) );
 	} else {
 		const statusMessage = dryRun ?
-			'\n🔖 The following issues or pull requests should be closed:\n' :
-			'\n🔖 The following issues or pull requests were closed:\n';
+			'🔖 The following issues or pull requests should be closed:\n' :
+			'🔖 The following issues or pull requests were closed:\n';
 
-		console.log( chalk.blue.bold( statusMessage ) );
-
-		issuesOrPullRequestsToClose.forEach( entry => console.log( entry.url ) );
+		printStatusSection( statusMessage, issuesOrPullRequestsToClose );
 	}
+}
+
+/**
+ * Prints in the console issues and pull requests from a single section.
+ *
+ * @param {String} statusMessage Seaction header.
+ * @param {Array.<IssueOrPullRequest>} entries Found issues and pull requests.
+ */
+function printStatusSection( statusMessage, entries ) {
+	console.log( chalk.blue.bold( statusMessage ) );
+
+	entries.forEach( entry => console.log( `${ entry.url } - ${ entry.title }` ) );
+
+	console.log();
 }
 
 /**

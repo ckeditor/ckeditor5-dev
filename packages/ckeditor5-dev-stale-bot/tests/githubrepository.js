@@ -882,6 +882,7 @@ describe( 'dev-stale-bot/lib', () => {
 					type: 'Issue',
 					id: 'IssueId',
 					url: 'https://github.com/',
+					title: 'IssueTitle',
 					number: 1,
 					createdAt: '2022-11-30T23:59:59Z',
 					lastEditedAt: null,
@@ -947,25 +948,25 @@ describe( 'dev-stale-bot/lib', () => {
 					expect( result.issuesOrPullRequestsToClose ).to.be.an( 'array' );
 					expect( result.issuesOrPullRequestsToClose ).to.have.length( 3 );
 					expect( result.issuesOrPullRequestsToClose[ 0 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 					expect( result.issuesOrPullRequestsToClose[ 1 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 					expect( result.issuesOrPullRequestsToClose[ 2 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 
 					expect( result.issuesOrPullRequestsToUnstale ).to.be.an( 'array' );
 					expect( result.issuesOrPullRequestsToUnstale ).to.have.length( 3 );
 					expect( result.issuesOrPullRequestsToUnstale[ 0 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 					expect( result.issuesOrPullRequestsToUnstale[ 1 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 					expect( result.issuesOrPullRequestsToUnstale[ 2 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 				} );
 			} );
@@ -994,25 +995,25 @@ describe( 'dev-stale-bot/lib', () => {
 					expect( result.issuesOrPullRequestsToClose ).to.be.an( 'array' );
 					expect( result.issuesOrPullRequestsToClose ).to.have.length( 3 );
 					expect( result.issuesOrPullRequestsToClose[ 0 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 					expect( result.issuesOrPullRequestsToClose[ 1 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 					expect( result.issuesOrPullRequestsToClose[ 2 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 
 					expect( result.issuesOrPullRequestsToUnstale ).to.be.an( 'array' );
 					expect( result.issuesOrPullRequestsToUnstale ).to.have.length( 3 );
 					expect( result.issuesOrPullRequestsToUnstale[ 0 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 					expect( result.issuesOrPullRequestsToUnstale[ 1 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 					expect( result.issuesOrPullRequestsToUnstale[ 2 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 				} );
 			} );
@@ -1154,25 +1155,25 @@ describe( 'dev-stale-bot/lib', () => {
 					expect( result.issuesOrPullRequestsToClose ).to.be.an( 'array' );
 					expect( result.issuesOrPullRequestsToClose ).to.have.length( 3 );
 					expect( result.issuesOrPullRequestsToClose[ 0 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 					expect( result.issuesOrPullRequestsToClose[ 1 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 					expect( result.issuesOrPullRequestsToClose[ 2 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 
 					expect( result.issuesOrPullRequestsToUnstale ).to.be.an( 'array' );
 					expect( result.issuesOrPullRequestsToUnstale ).to.have.length( 3 );
 					expect( result.issuesOrPullRequestsToUnstale[ 0 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 					expect( result.issuesOrPullRequestsToUnstale[ 1 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 					expect( result.issuesOrPullRequestsToUnstale[ 2 ] ).to.deep.equal(
-						{ id: 'IssueId', type: 'Issue', url: 'https://github.com/' }
+						{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
 					);
 				} );
 			} );

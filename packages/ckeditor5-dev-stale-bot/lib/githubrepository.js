@@ -182,12 +182,14 @@ module.exports = class GitHubRepository {
 						.map( entry => ( {
 							id: entry.id,
 							type: entry.type,
+							title: entry.title,
 							url: entry.url
 						} ) ),
 					issuesOrPullRequestsToUnstale: [ ...issuesOrPullRequestsToUnstale, ...issuesOrPullRequestsToUnstaleNextPage ]
 						.map( entry => ( {
 							id: entry.id,
 							type: entry.type,
+							title: entry.title,
 							url: entry.url
 						} ) )
 				};
