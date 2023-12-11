@@ -1,0 +1,88 @@
+fragment labeledEvent on LabeledEvent {
+	createdAt
+	actor {
+		login
+	}
+	label {
+		name
+	}
+}
+
+fragment unlabeledEvent on UnlabeledEvent {
+	createdAt
+	actor {
+		login
+	}
+	label {
+		name
+	}
+}
+
+fragment issueComment on IssueComment {
+	updatedAt
+	author {
+		login
+	}
+}
+
+query SearchIssuesToStale( $query: String!, $cursor: String ) {
+	search( type: ISSUE, query: $query, first: 100, after: $cursor ) {
+		issueCount
+		nodes {
+			... on Issue {
+				__typename
+				id
+				number
+				title
+				url
+				createdAt
+				lastEditedAt
+				reactions( last: 1 ) {
+					nodes {
+						createdAt
+					}
+				}
+				timelineItems( first: 100, itemTypes: [ LABELED_EVENT, UNLABELED_EVENT, ISSUE_COMMENT ] ) {
+					nodes {
+						...labeledEvent
+						...unlabeledEvent
+						...issueComment
+					}
+					pageInfo {
+						cursor: endCursor
+						hasNextPage
+					}
+				}
+			}
+			... on PullRequest {
+				__typename
+				id
+				number
+				title
+				url
+				createdAt
+				lastEditedAt
+				reactions( last: 1 ) {
+					nodes {
+						createdAt
+					}
+				}
+				timelineItems( first: 100, itemTypes: [ LABELED_EVENT, UNLABELED_EVENT, ISSUE_COMMENT ] ) {
+					nodes {
+						...labeledEvent
+						...unlabeledEvent
+						...issueComment
+					}
+					pageInfo {
+						cursor: endCursor
+						hasNextPage
+					}
+				}
+			}
+		}
+		pageInfo {
+			cursor: endCursor
+			hasNextPage
+		}
+	}
+}

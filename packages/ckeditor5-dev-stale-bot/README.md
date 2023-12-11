@@ -8,6 +8,41 @@ A stale bot is used to mark issues and pull requests that have not recently been
 
 More information about development tools packages can be found at the following URL: <https://github.com/ckeditor/ckeditor5-dev>.
 
+## Usage
+
+To execute the stale bot, run the following command:
+
+```bash
+yarn run ckeditor5-dev-stale-bot [<args>...]
+```
+
+This script accepts the following arguments:
+
+* `--config-path` &ndash; Required. Path to a JSON file containing [stale bot configuration](#configuration).
+* `--dry-run` &ndash; Optional, `false` by default. Allows disabling any changes to GitHub if set to `true`. By default stale bot makes use of your **real, live, production data**.
+
+Also, the `CKE5_GITHUB_TOKEN` environment variable is required to run the script.
+
+### Configuration
+
+The following configuration options are supported by the stale bot:
+
+* `REPOSITORY_SLUG` &ndash; Required. The repository name in the format of `owner/name`, where stale bot will check for stale issues and pull requests.
+* `STALE_LABELS` &ndash; Required. List of label names to apply on staled issues and pull requests.
+* `STALE_ISSUE_MESSAGE` &ndash; Required. A comment that is added on the staled issues.
+* `STALE_PR_MESSAGE` &ndash; Required. A comment that is added on the staled pull requests.
+* `DAYS_BEFORE_STALE` &ndash; Optional, 365 by default. The number of days without the required activity that qualifies an issue or pull request to be marked as stale. The dates taken into account are:
+  * the creation date,
+  * the last edit of an issue or pull request,
+  * the last date of adding a reaction to the body of issue or pull request,
+  * the dates of adding or deleting comments,
+  * the dates of changing a label.
+* `IGNORE_VIEWER_ACTIVITY` &ndash; Optional, `true` by default. If set, the activity from the currently authenticated user is ignored.
+* `IGNORED_ISSUE_LABELS` &ndash; Optional, an empty array by default. A list of labels, whose assignment to an issue causes the issue to be ignored, even if it fits the stale criteria.
+* `IGNORED_PR_LABELS` &ndash; Optional, an empty array by default. A list of labels, whose assignment to a pull request causes the pull request to be ignored, even if it fits the stale criteria.
+* `IGNORED_ACTIVITY_LABELS` &ndash; Optional, an empty array by default. A list of labels, whose assignment to an issue or pull request is not counted as an activity event.
+* `IGNORED_ACTIVITY_LOGINS` &ndash; Optional, an empty array by default. A list of GitHub logins, whose activities are not counted.
+
 ## Changelog
 
 See the [`CHANGELOG.md`](https://github.com/ckeditor/ckeditor5-dev/blob/master/packages/ckeditor5-dev-stale-bot/CHANGELOG.md) file.
