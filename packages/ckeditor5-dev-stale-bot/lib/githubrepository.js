@@ -289,7 +289,8 @@ module.exports = class GitHubRepository {
 				return {
 					id: issue.id,
 					type: issue.__typename,
-					url: issue.url
+					url: issue.url,
+					title: issue.title
 				};
 			} );
 	}
@@ -430,6 +431,7 @@ function checkApiRateLimit( error ) {
  * @property {String} id
  * @property {'Issue'|'PullRequest'} type
  * @property {String} url
+ * @property {String} title
  */
 
 /**

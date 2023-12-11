@@ -46,7 +46,11 @@ module.exports = function prepareSearchOptions( viewerLogin, type, config ) {
 
 /**
  * @typedef {Object} Config
+ * @property {String} CKE5_GITHUB_TOKEN
  * @property {String} REPOSITORY_SLUG
+ * @property {String} STALE_ISSUE_MESSAGE
+ * @property {String} STALE_PR_MESSAGE
+ * @property {Array.<String>} STALE_LABELS
  * @property {Number} [DAYS_BEFORE_STALE=365]
  * @property {Boolean} [IGNORE_VIEWER_ACTIVITY=true]
  * @property {Array.<String>} [IGNORED_ISSUE_LABELS=[]]
