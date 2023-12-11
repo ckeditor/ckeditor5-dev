@@ -32,16 +32,8 @@ module.exports = function parseConfig( viewerLogin, config ) {
 	} = config;
 
 	const now = new Date();
-
-	const staleDate = formatISO(
-		subDays( now, DAYS_BEFORE_STALE ),
-		{ representation: 'date' }
-	);
-
-	const closeDate = formatISO(
-		subDays( now, DAYS_BEFORE_CLOSE ),
-		{ representation: 'date' }
-	);
+	const staleDate = formatISO( subDays( now, DAYS_BEFORE_STALE ) );
+	const closeDate = formatISO( subDays( now, DAYS_BEFORE_CLOSE ) );
 
 	return {
 		repositorySlug: REPOSITORY_SLUG,
