@@ -5,6 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 const fs = require( 'fs-extra' );
 const chalk = require( 'chalk' );
 const createSpinner = require( './utils/createspinner' );

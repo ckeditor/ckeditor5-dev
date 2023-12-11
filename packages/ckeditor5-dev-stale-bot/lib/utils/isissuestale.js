@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 const { isBefore, parseISO } = require( 'date-fns' );
 
 /**

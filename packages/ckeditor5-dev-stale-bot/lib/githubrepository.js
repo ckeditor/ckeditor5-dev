@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 const upath = require( 'upath' );
 const fs = require( 'fs-extra' );
 const { GraphQLClient } = require( 'graphql-request' );

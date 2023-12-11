@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 const minimist = require( 'minimist' );
 const upath = require( 'upath' );
 

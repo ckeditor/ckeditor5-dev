@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 /**
  * Checks if all required fields in the configuration exist.
  *

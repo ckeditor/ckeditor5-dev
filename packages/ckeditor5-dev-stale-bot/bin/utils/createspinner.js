@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 const ora = require( 'ora' );
 const chalk = require( 'chalk' );
 
