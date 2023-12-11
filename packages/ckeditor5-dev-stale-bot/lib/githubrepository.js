@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 const upath = require( 'upath' );
 const fs = require( 'fs-extra' );
 const { GraphQLClient } = require( 'graphql-request' );
@@ -119,6 +121,7 @@ module.exports = class GitHubRepository {
 				return [ ...issuesOrPullRequestsToStale, ...issuesOrPullRequestsToStaleNextPage ].map( entry => ( {
 					id: entry.id,
 					type: entry.type,
+					title: entry.title,
 					url: entry.url
 				} ) );
 			} )
@@ -548,6 +551,7 @@ function checkApiRateLimit( error ) {
  * @property {String} id
  * @property {'Issue'|'PullRequest'} type
  * @property {String} url
+ * @property {String} title
  */
 
 /**

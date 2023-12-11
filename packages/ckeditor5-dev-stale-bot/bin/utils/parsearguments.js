@@ -3,7 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 const minimist = require( 'minimist' );
+const upath = require( 'upath' );
 
 /**
  * Parses CLI arguments.
@@ -33,6 +36,6 @@ module.exports = function parseArguments( args ) {
 
 	return {
 		dryRun: options[ 'dry-run' ],
-		configPath: options[ 'config-path' ]
+		configPath: upath.join( process.cwd(), options[ 'config-path' ] )
 	};
 };

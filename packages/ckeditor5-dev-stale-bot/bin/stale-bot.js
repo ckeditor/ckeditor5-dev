@@ -5,6 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 const fs = require( 'fs-extra' );
 const chalk = require( 'chalk' );
 const createSpinner = require( './utils/createspinner' );
@@ -25,23 +27,19 @@ main().catch( error => {
  * @returns {Promise}
  */
 async function main() {
-	if ( !process.env.CKE5_GITHUB_TOKEN ) {
-		throw new Error( 'Missing environment variable: CKE5_GITHUB_TOKEN' );
-	}
-
 	const { configPath, dryRun } = parseArguments( process.argv.slice( 2 ) );
 
 	if ( !configPath || !await fs.exists( configPath ) ) {
 		throw new Error( 'Missing or invalid CLI argument: --config-path' );
 	}
 
-	const config = await fs.readJson( configPath );
+	const config = require( configPath );
 
 	validateConfig( config );
 
 	printWelcomeMessage( dryRun );
 
-	const githubRepository = new GitHubRepository( process.env.CKE5_GITHUB_TOKEN );
+	const githubRepository = new GitHubRepository( config.CKE5_GITHUB_TOKEN );
 
 	const viewerLogin = await githubRepository.getViewerLogin();
 
@@ -208,7 +206,7 @@ function printStatus( dryRun, searchResult ) {
 
 		console.log( chalk.blue.bold( statusMessage ) );
 
-		issuesOrPullRequestsToStale.forEach( entry => console.log( entry.url ) );
+		issuesOrPullRequestsToStale.forEach( entry => console.log( `${ entry.url } - ${ entry.title }` ) );
 	}
 
 	if ( !issuesOrPullRequestsToUnstale.length ) {

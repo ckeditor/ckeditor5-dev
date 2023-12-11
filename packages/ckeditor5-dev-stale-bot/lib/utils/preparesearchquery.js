@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 /**
  * Creates a query to search for issues or pull requests.
  *

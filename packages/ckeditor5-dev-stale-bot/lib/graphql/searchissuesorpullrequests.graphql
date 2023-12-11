@@ -33,6 +33,7 @@ query SearchIssuesOrPullRequests( $query: String!, $cursor: String ) {
 				id
 				type: __typename
 				number
+				title
 				url
 				createdAt
 				lastEditedAt
@@ -57,6 +58,7 @@ query SearchIssuesOrPullRequests( $query: String!, $cursor: String ) {
 				id
 				type: __typename
 				number
+				title
 				url
 				createdAt
 				lastEditedAt

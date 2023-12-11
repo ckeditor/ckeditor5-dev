@@ -417,6 +417,7 @@ describe( 'dev-stale-bot/lib', () => {
 				issueBase = {
 					type: 'Issue',
 					id: 'IssueId',
+					title: 'IssueTitle',
 					url: 'https://github.com/',
 					number: 1,
 					createdAt: '2022-11-30T23:59:59Z',
@@ -516,9 +517,15 @@ describe( 'dev-stale-bot/lib', () => {
 				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( result => {
 					expect( result ).to.be.an( 'array' );
 					expect( result ).to.have.length( 3 );
-					expect( result[ 0 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
-					expect( result[ 1 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
-					expect( result[ 2 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
+					expect( result[ 0 ] ).to.deep.equal(
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result[ 1 ] ).to.deep.equal(
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result[ 2 ] ).to.deep.equal(
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
+					);
 				} );
 			} );
 
@@ -542,9 +549,15 @@ describe( 'dev-stale-bot/lib', () => {
 				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( result => {
 					expect( result ).to.be.an( 'array' );
 					expect( result ).to.have.length( 3 );
-					expect( result[ 0 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
-					expect( result[ 1 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
-					expect( result[ 2 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
+					expect( result[ 0 ] ).to.deep.equal(
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result[ 1 ] ).to.deep.equal(
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result[ 2 ] ).to.deep.equal(
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
+					);
 				} );
 			} );
 
@@ -681,9 +694,15 @@ describe( 'dev-stale-bot/lib', () => {
 				return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( result => {
 					expect( result ).to.be.an( 'array' );
 					expect( result ).to.have.length( 3 );
-					expect( result[ 0 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
-					expect( result[ 1 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
-					expect( result[ 2 ] ).to.deep.equal( { id: 'IssueId', type: 'Issue', url: 'https://github.com/' } );
+					expect( result[ 0 ] ).to.deep.equal(
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result[ 1 ] ).to.deep.equal(
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
+					);
+					expect( result[ 2 ] ).to.deep.equal(
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
+					);
 				} );
 			} );
 

@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 const { subDays, formatISO } = require( 'date-fns' );
 
 /**
@@ -62,6 +64,7 @@ module.exports = function parseConfig( viewerLogin, config ) {
 
 /**
  * @typedef {Object} Config
+ * @property {String} CKE5_GITHUB_TOKEN
  * @property {String} REPOSITORY_SLUG
  * @property {Array.<String>} STALE_LABELS
  * @property {String} STALE_ISSUE_MESSAGE

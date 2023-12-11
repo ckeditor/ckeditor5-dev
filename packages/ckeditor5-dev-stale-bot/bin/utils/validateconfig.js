@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 /**
  * Checks if all required fields in the configuration exist.
  *
@@ -10,6 +12,10 @@
  * @returns {Boolean}
  */
 module.exports = function validateConfig( config ) {
+	if ( !config.CKE5_GITHUB_TOKEN ) {
+		throw new Error( 'Missing configuration option: CKE5_GITHUB_TOKEN' );
+	}
+
 	if ( !config.REPOSITORY_SLUG ) {
 		throw new Error( 'Missing configuration option: REPOSITORY_SLUG' );
 	}
