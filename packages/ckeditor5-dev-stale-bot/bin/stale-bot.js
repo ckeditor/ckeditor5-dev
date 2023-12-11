@@ -39,7 +39,7 @@ async function main() {
 
 	printWelcomeMessage( dryRun );
 
-	const githubRepository = new GitHubRepository( config.CKE5_GITHUB_TOKEN );
+	const githubRepository = new GitHubRepository( config.GITHUB_TOKEN );
 
 	const viewerLogin = await githubRepository.getViewerLogin();
 

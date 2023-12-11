@@ -408,6 +408,7 @@ describe( 'dev-stale-bot/lib', () => {
 					repositorySlug: 'ckeditor/ckeditor5',
 					searchDate: '2022-12-01',
 					staleDate: '2022-12-01',
+					staleLabels: [],
 					ignoredIssueLabels: [],
 					ignoredPullRequestLabels: [],
 					ignoredActivityLogins: [],
@@ -446,6 +447,7 @@ describe( 'dev-stale-bot/lib', () => {
 
 				const options = {
 					...optionsBase,
+					staleLabels: [ 'status:stale' ],
 					ignoredIssueLabels: [ 'support:1', 'support:2', 'support:3' ]
 				};
 
@@ -463,7 +465,7 @@ describe( 'dev-stale-bot/lib', () => {
 						type: 'Issue',
 						searchDate: '2022-12-01',
 						repositorySlug: 'ckeditor/ckeditor5',
-						ignoredLabels: [ 'support:1', 'support:2', 'support:3' ]
+						ignoredLabels: [ 'status:stale', 'support:1', 'support:2', 'support:3' ]
 					} );
 				} );
 			} );
@@ -477,6 +479,7 @@ describe( 'dev-stale-bot/lib', () => {
 
 				const options = {
 					...optionsBase,
+					staleLabels: [ 'status:stale' ],
 					ignoredPullRequestLabels: [ 'support:1', 'support:2', 'support:3' ]
 				};
 
@@ -494,7 +497,7 @@ describe( 'dev-stale-bot/lib', () => {
 						type: 'PullRequest',
 						searchDate: '2022-12-01',
 						repositorySlug: 'ckeditor/ckeditor5',
-						ignoredLabels: [ 'support:1', 'support:2', 'support:3' ]
+						ignoredLabels: [ 'status:stale', 'support:1', 'support:2', 'support:3' ]
 					} );
 				} );
 			} );
@@ -1655,7 +1658,7 @@ describe( 'dev-stale-bot/lib', () => {
 				expect( githubRepository.sendRequest ).to.be.a( 'function' );
 			} );
 
-			it( 'should resolve with the payload if no error occured', () => {
+			it( 'should resolve with the payload if no error occurred', () => {
 				stubs.GraphQLClient.request.resolves( payload );
 
 				return githubRepository.sendRequest( 'query' ).then( result => {

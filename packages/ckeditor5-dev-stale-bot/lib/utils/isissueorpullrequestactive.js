@@ -3,10 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 const { isAfter, parseISO } = require( 'date-fns' );
 
 /**
- * Verifies dates from an issue or pull request to check if some of them occured after the provided moment, meaning that the issue or pull
+ * Verifies dates from an issue or pull request to check if some of them occurred after the provided moment, meaning that the issue or pull
  * request is active.
  *
  * The dates taken into account are:

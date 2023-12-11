@@ -12,8 +12,8 @@
  * @returns {Boolean}
  */
 module.exports = function validateConfig( config ) {
-	if ( !config.CKE5_GITHUB_TOKEN ) {
-		throw new Error( 'Missing configuration option: CKE5_GITHUB_TOKEN' );
+	if ( !config.GITHUB_TOKEN ) {
+		throw new Error( 'Missing configuration option: GITHUB_TOKEN' );
 	}
 
 	if ( !config.REPOSITORY_SLUG ) {

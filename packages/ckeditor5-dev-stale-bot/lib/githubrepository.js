@@ -78,7 +78,7 @@ module.exports = class GitHubRepository {
 	}
 
 	/**
-	 * Searches for all issues and pull requests that matches the critieria of a stale issue.
+	 * Searches for all issues and pull requests that matches the criteria of a stale issue.
 	 *
 	 * @param {'Issue'|'PullRequest'} type Type of resource to search.
 	 * @param {Options} options Configuration options.
@@ -91,9 +91,10 @@ module.exports = class GitHubRepository {
 			type,
 			searchDate: options.searchDate,
 			repositorySlug: options.repositorySlug,
-			ignoredLabels: type === 'Issue' ?
-				options.ignoredIssueLabels :
-				options.ignoredPullRequestLabels
+			ignoredLabels: [
+				...options.staleLabels,
+				...type === 'Issue' ? options.ignoredIssueLabels : options.ignoredPullRequestLabels
+			]
 		} );
 
 		const variables = {

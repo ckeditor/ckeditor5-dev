@@ -3,10 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 const { isAfter, parseISO } = require( 'date-fns' );
 
 /**
- * Finds the most recent event date, when any of the stale labels was assigned to the stale issue or pull request.
+ * Finds the most recent event date of the stale label assignment to issue or pull request.
  *
  * @param {IssueOrPullRequest} issueOrPullRequest Issue or pull request to check.
  * @param {Options} options Configuration options.

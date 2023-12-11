@@ -3,6 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
+'use strict';
+
 const isIssueOrPullRequestActive = require( './isissueorpullrequestactive' );
 const findStaleDate = require( './findstaledate' );
 
