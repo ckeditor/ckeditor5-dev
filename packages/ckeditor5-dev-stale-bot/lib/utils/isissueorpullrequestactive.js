@@ -12,11 +12,11 @@ const { isAfter, parseISO } = require( 'date-fns' );
  * request is active.
  *
  * The dates taken into account are:
- * - the moment of creation,
- * - the moment of the last edit of the issue or pull request,
- * - the moment of adding or editing a comment,
- * - the moment of adding last reaction to the issue or pull request,
- * - the moment of changing a label.
+ * * the creation date,
+ * * the last date of editing an issue or pull request,
+ * * the last date of adding a reaction to the body of issue or pull request,
+ * * the last date of adding or editing a comment,
+ * * the last date of changing a label.
  *
  * Some activity entries may be ignored and not used in the calculation, if so specified in the configuration (e.g. the author of an event).
  *
