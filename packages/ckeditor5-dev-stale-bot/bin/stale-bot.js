@@ -57,11 +57,15 @@ async function main() {
 
 	if ( !dryRun ) {
 		const staleLabels = await githubRepository.getLabels( options.repositorySlug, options.staleLabels );
+		const closeIssueLabels = await githubRepository.getLabels( options.repositorySlug, options.closeIssueLabels );
+		const closePullRequestLabels = await githubRepository.getLabels( options.repositorySlug, options.closePullRequestLabels );
 
 		if ( issuesOrPullRequestsToStale.length ) {
 			const actions = {
 				title: 'Staling issues and pull requests...',
-				labelsToAdd: staleLabels,
+				labelsToAdd() {
+					return staleLabels;
+				},
 				commentToAdd( entry ) {
 					return entry.type === 'Issue' ? options.staleIssueMessage : options.stalePullRequestMessage;
 				}
@@ -83,6 +87,9 @@ async function main() {
 			const actions = {
 				title: 'Closing issues and pull requests...',
 				labelsToRemove: staleLabels,
+				labelsToAdd( entry ) {
+					return entry.type === 'Issue' ? closeIssueLabels : closePullRequestLabels;
+				},
 				commentToAdd( entry ) {
 					return entry.type === 'Issue' ? options.closeIssueMessage : options.closePullRequestMessage;
 				},
@@ -133,7 +140,7 @@ async function search( githubRepository, options, spinner ) {
  * Executes provided actions on each issue or pull request.
  *
  * @param {GitHubRepository} githubRepository GitHubRepository instance.
- * @param {Array.<IssueOrPullRequest>} entries An array of issues or pull requests to process.
+ * @param {Array.<IssueOrPullRequestResult>} entries An array of issues or pull requests to process.
  * @param {Actions} actions Actions to execute on each issue or pull request.
  * @param {Spinner} spinner Spinner.
  * @returns {Promise}
@@ -154,7 +161,7 @@ async function handleActions( githubRepository, entries, actions, spinner ) {
 		}
 
 		if ( actions.labelsToAdd ) {
-			await githubRepository.addLabels( entry.id, actions.labelsToAdd );
+			await githubRepository.addLabels( entry.id, actions.labelsToAdd( entry ) );
 		}
 
 		if ( actions.labelsToRemove ) {
@@ -232,7 +239,7 @@ function printStatus( dryRun, searchResult ) {
  * Prints in the console issues and pull requests from a single section.
  *
  * @param {String} statusMessage Seaction header.
- * @param {Array.<IssueOrPullRequest>} entries Found issues and pull requests.
+ * @param {Array.<IssueOrPullRequestResult>} entries Found issues and pull requests.
  */
 function printStatusSection( statusMessage, entries ) {
 	console.log( chalk.blue.bold( statusMessage ) );
@@ -244,15 +251,27 @@ function printStatusSection( statusMessage, entries ) {
 
 /**
  * @typedef {Object} SearchResult
- * @property {Array.<IssueOrPullRequest>} issuesOrPullRequestsToClose
- * @property {Array.<IssueOrPullRequest>} issuesOrPullRequestsToStale
- * @property {Array.<IssueOrPullRequest>} issuesOrPullRequestsToUnstale
+ * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToClose
+ * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToStale
+ * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToUnstale
  */
 
 /**
  * @typedef {Object} Actions
- * @property {Function} [commentToAdd]
- * @property {Array.<String>} [labelsToAdd]
+ * @property {HandleActionsCommentToAdd} [commentToAdd]
+ * @property {HandleActionsLabelsToAdd} [labelsToAdd]
  * @property {Array.<String>} [labelsToRemove]
  * @property {Boolean} [close]
+ */
+
+/**
+ * @callback HandleActionsLabelsToAdd
+ * @param {IssueOrPullRequestResult} entry
+ * @returns {Array.<String>}
+ */
+
+/**
+ * @callback HandleActionsCommentToAdd
+ * @param {IssueOrPullRequestResult} entry
+ * @returns {String}
  */

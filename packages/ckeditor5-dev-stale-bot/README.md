@@ -29,8 +29,10 @@ The following configuration options are supported by the stale bot:
 * `REPOSITORY_SLUG` &ndash; Required. The repository name in the format of `owner/name`, where stale bot will check for stale issues and pull requests.
 * `STALE_LABELS` &ndash; Required. List of label names to apply on staled issues and pull requests.
 * `STALE_ISSUE_MESSAGE` &ndash; Required. A comment that is added on the staled issues.
+* `CLOSE_ISSUE_LABELS` &ndash; Required. List of labels to add after closing a stale issue.
 * `STALE_PR_MESSAGE` &ndash; Required. A comment that is added on the staled pull requests.
 * `CLOSE_ISSUE_MESSAGE` &ndash; Required. A comment that is added on the closed issues.
+* `CLOSE_PR_LABELS` &ndash; Required. List of labels to add after closing a stale pull request.
 * `CLOSE_PR_MESSAGE` &ndash; Required. A comment that is added on the closed pull requests.
 * `DAYS_BEFORE_STALE` &ndash; Optional, 365 by default. The number of days without the required activity that qualifies an issue or pull request to be marked as stale. The dates taken into account are:
   * the creation date,

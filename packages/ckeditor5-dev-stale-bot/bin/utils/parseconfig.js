@@ -20,7 +20,9 @@ module.exports = function parseConfig( viewerLogin, config ) {
 		STALE_LABELS,
 		STALE_ISSUE_MESSAGE,
 		STALE_PR_MESSAGE,
+		CLOSE_ISSUE_LABELS,
 		CLOSE_ISSUE_MESSAGE,
+		CLOSE_PR_LABELS,
 		CLOSE_PR_MESSAGE,
 		DAYS_BEFORE_STALE = 365,
 		DAYS_BEFORE_CLOSE = 30,
@@ -43,7 +45,9 @@ module.exports = function parseConfig( viewerLogin, config ) {
 		staleLabels: STALE_LABELS,
 		staleIssueMessage: STALE_ISSUE_MESSAGE,
 		stalePullRequestMessage: STALE_PR_MESSAGE,
+		closeIssueLabels: CLOSE_ISSUE_LABELS,
 		closeIssueMessage: CLOSE_ISSUE_MESSAGE,
+		closePullRequestLabels: CLOSE_PR_LABELS,
 		closePullRequestMessage: CLOSE_PR_MESSAGE,
 		ignoredIssueLabels: IGNORED_ISSUE_LABELS,
 		ignoredPullRequestLabels: IGNORED_PR_LABELS,
@@ -61,7 +65,9 @@ module.exports = function parseConfig( viewerLogin, config ) {
  * @property {Array.<String>} STALE_LABELS
  * @property {String} STALE_ISSUE_MESSAGE
  * @property {String} STALE_PR_MESSAGE
+ * @property {Array.<String>} CLOSE_ISSUE_LABELS
  * @property {String} CLOSE_ISSUE_MESSAGE
+ * @property {Array.<String>} CLOSE_PR_LABELS
  * @property {String} CLOSE_PR_MESSAGE
  * @property {Number} [DAYS_BEFORE_STALE=365]
  * @property {Number} [DAYS_BEFORE_CLOSE=30]
@@ -81,7 +87,9 @@ module.exports = function parseConfig( viewerLogin, config ) {
  * @property {Array.<String>} staleLabels
  * @property {String} staleIssueMessage
  * @property {String} stalePullRequestMessage
+ * @property {Array.<String>} closeIssueLabels
  * @property {String} closeIssueMessage
+ * @property {Array.<String>} closePullRequestLabels
  * @property {String} closePullRequestMessage
  * @property {Array.<String>} ignoredIssueLabels
  * @property {Array.<String>} ignoredPullRequestLabels

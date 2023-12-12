@@ -5,38 +5,31 @@
 
 'use strict';
 
+const requiredFields = [
+	'GITHUB_TOKEN',
+	'REPOSITORY_SLUG',
+	'STALE_LABELS',
+	'CLOSE_ISSUE_LABELS',
+	'CLOSE_PR_LABELS',
+	'STALE_ISSUE_MESSAGE',
+	'STALE_PR_MESSAGE',
+	'CLOSE_ISSUE_MESSAGE',
+	'CLOSE_PR_MESSAGE'
+];
+
 /**
  * Checks if all required fields in the configuration exist.
  *
  * @param {Config} config Configuration options.
- * @returns {Boolean}
+ * @returns {void}
  */
 module.exports = function validateConfig( config ) {
-	if ( !config.GITHUB_TOKEN ) {
-		throw new Error( 'Missing configuration option: GITHUB_TOKEN' );
+	const missingFields = requiredFields.filter( fieldName => !config[ fieldName ] );
+
+	if ( !missingFields.length ) {
+		return;
 	}
 
-	if ( !config.REPOSITORY_SLUG ) {
-		throw new Error( 'Missing configuration option: REPOSITORY_SLUG' );
-	}
-
-	if ( !config.STALE_LABELS ) {
-		throw new Error( 'Missing configuration option: STALE_LABELS' );
-	}
-
-	if ( !config.STALE_ISSUE_MESSAGE ) {
-		throw new Error( 'Missing configuration option: STALE_ISSUE_MESSAGE' );
-	}
-
-	if ( !config.STALE_PR_MESSAGE ) {
-		throw new Error( 'Missing configuration option: STALE_PR_MESSAGE' );
-	}
-
-	if ( !config.CLOSE_ISSUE_MESSAGE ) {
-		throw new Error( 'Missing configuration option: CLOSE_ISSUE_MESSAGE' );
-	}
-
-	if ( !config.CLOSE_PR_MESSAGE ) {
-		throw new Error( 'Missing configuration option: CLOSE_PR_MESSAGE' );
-	}
+	throw new Error( `Missing configuration options: ${ missingFields.join( ', ' ) }.` );
 };
+
