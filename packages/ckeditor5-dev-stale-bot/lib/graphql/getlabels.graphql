@@ -3,7 +3,6 @@ query GetLabels( $repositoryOwner: String!, $repositoryName: String!, $labelName
 		labels( query: $labelNames, first: 100 ) {
 			nodes {
 				id
-				name
 			}
 		}
 	}

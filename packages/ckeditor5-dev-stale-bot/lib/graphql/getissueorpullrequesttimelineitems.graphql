@@ -1,3 +1,5 @@
+# Currently, reusing fragments between different queries is not supported.
+# Therefore, all fragments from this file should be synchronized with the "searchissuesorpullrequests.graphql" file.
 fragment labeledEvent on LabeledEvent {
 	createdAt
 	actor {
@@ -25,8 +27,9 @@ fragment issueComment on IssueComment {
 	}
 }
 
-query GetIssueTimelineItems( $nodeId: ID!, $cursor: String ) {
+query GetIssueOrPullRequestTimelineItems( $nodeId: ID!, $cursor: String ) {
 	node( id: $nodeId ) {
+		# All fields in issue and pull request must be synchronized with each other.
 		...on Issue {
 			timelineItems( first: 100, itemTypes: [ LABELED_EVENT, UNLABELED_EVENT, ISSUE_COMMENT ], after: $cursor ) {
 				nodes {

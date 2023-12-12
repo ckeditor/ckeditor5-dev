@@ -6,25 +6,43 @@
 'use strict';
 
 /**
- * Creates a query to search for issues or pull requests that potentially could be considered as stale ones.
+ * Creates a query to search for issues or pull requests.
  *
- * @param {SearchOptions} options Configuration options.
- * @returns {String} Search query to sent to GitHub.
+ * @param {Object} options
+ * @param {String} options.repositorySlug
+ * @param {String} options.searchDate
+ * @param {'Issue'|'PullRequest'} [options.type]
+ * @param {Array.<String>} [options.labels=[]]
+ * @param {Array.<String>} [options.ignoredLabels=[]]
+ * @returns {String}
  */
 module.exports = function prepareSearchQuery( options ) {
 	const {
-		type,
-		searchDate,
 		repositorySlug,
+		searchDate,
+		type,
+		labels = [],
 		ignoredLabels = []
 	} = options;
+
+	const resourceType = mapGitHubResourceType( type );
 
 	return [
 		`repo:${ repositorySlug }`,
 		`created:<${ searchDate }`,
-		`type:${ type }`,
+		resourceType ? `type:${ resourceType }` : '',
 		'state:open',
 		'sort:created-desc',
+		...labels.map( label => `label:${ label }` ),
 		...ignoredLabels.map( label => `-label:${ label }` )
-	].join( ' ' );
+	].filter( Boolean ).join( ' ' );
 };
+
+function mapGitHubResourceType( type ) {
+	const resourceMap = {
+		'Issue': 'issue',
+		'PullRequest': 'pr'
+	};
+
+	return resourceMap[ type ];
+}
