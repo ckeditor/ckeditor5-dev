@@ -70,12 +70,14 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 		],
 
 		resolve: {
-			extensions: [ '.ts', '.js', '.json' ]
+			extensions: [ '.ts', '.js', '.json' ],
+			extensionAlias: {
+				'.js': [ '.js', '.ts' ]
+			}
 		},
 
 		module: {
 			rules: [
-				loaders.getJavaScriptWithoutImportExtensions(),
 				loaders.getIconsLoader( { matchExtensionOnly: true } ),
 				loaders.getStylesLoader( {
 					themePath: options.themePath,

@@ -57,7 +57,7 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 			new webpack.DefinePlugin( definitions ),
 			new webpack.ProvidePlugin( {
 				Buffer: [ 'buffer', 'Buffer' ],
-				process: 'process/browser'
+				process: 'process/browser.js'
 			} )
 		],
 
@@ -65,13 +65,14 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 			fallback: {
 				'timers': false
 			},
-			extensions: [ '.ts', '.js', '.json' ]
+			extensions: [ '.ts', '.js', '.json' ],
+			extensionAlias: {
+				'.js': [ '.js', '.ts' ]
+			}
 		},
 
 		module: {
 			rules: [
-				loaders.getJavaScriptWithoutImportExtensions(),
-
 				loaders.getIconsLoader( { matchExtensionOnly: true } ),
 
 				loaders.getStylesLoader( {

@@ -13,20 +13,6 @@ const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
 
 module.exports = {
 	/**
-	 * This loader causes webpack to not require file
-	 * extensions in imports when the `type:module`
-	 * option is added to the `package.json`.
-	 */
-	getJavaScriptWithoutImportExtensions() {
-		return {
-			test: /\.m?js$/,
-			resolve: {
-				fullySpecified: false
-			}
-		};
-	},
-
-	/**
 	 * @param {Object} [options]
 	 * @param {String} [options.configFile]
 	 * @param {Array.<String>} [options.debugFlags]

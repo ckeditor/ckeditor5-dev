@@ -44,7 +44,6 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 				DllReferencePlugin: sandbox.stub()
 			},
 			loaders: {
-				getJavaScriptWithoutImportExtensions: sinon.stub(),
 				getIconsLoader: sinon.stub(),
 				getStylesLoader: sinon.stub(),
 				getTypeScriptLoader: sinon.stub()
@@ -272,20 +271,6 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 
 				const options = stubs.loaders.getTypeScriptLoader.firstCall.args[ 0 ];
 				expect( options ).to.have.property( 'configFile', '/config/tsconfig.json' );
-			} );
-		} );
-
-		describe( 'getJavaScriptWithoutImportExtensions()', () => {
-			it( 'it should get the loader', () => {
-				stubs.tools.readPackageName.returns( '@ckeditor/ckeditor5-html-embed' );
-
-				getDllPluginWebpackConfig( stubs.webpack, {
-					packagePath: '/package/path',
-					themePath: '/theme/path',
-					manifestPath: '/manifest/path'
-				} );
-
-				expect( stubs.loaders.getJavaScriptWithoutImportExtensions.calledOnce ).to.equal( true );
 			} );
 		} );
 

@@ -29,7 +29,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 			new webpack.DefinePlugin( definitions ),
 			new webpack.ProvidePlugin( {
 				Buffer: [ 'buffer', 'Buffer' ],
-				process: 'process/browser'
+				process: 'process/browser.js'
 			} )
 		],
 
@@ -37,15 +37,18 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 			fallback: {
 				'timers': false
 			},
+
 			extensions: options.resolveJsFirst ?
 				[ '.js', '.ts', '.json' ] :
-				[ '.ts', '.js', '.json' ]
+				[ '.ts', '.js', '.json' ],
+
+			extensionAlias: {
+				'.js': [ '.js', '.ts' ]
+			}
 		},
 
 		module: {
 			rules: [
-				loaders.getJavaScriptWithoutImportExtensions(),
-
 				options.coverage ? loaders.getCoverageLoader( { files: options.files } ) : null,
 
 				loaders.getIconsLoader(),
