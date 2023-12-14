@@ -1,0 +1,5 @@
+mutation RemoveLabels( $nodeId: ID!, $labelIds: [ ID! ]! ) {
+	removeLabelsFromLabelable( input: { labelableId: $nodeId, labelIds: $labelIds } ) {
+		__typename
+	}
+}

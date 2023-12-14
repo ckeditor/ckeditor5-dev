@@ -1,0 +1,5 @@
+mutation CloseIssue( $nodeId: ID! ) {
+	closeIssue( input: { issueId: $nodeId, stateReason: NOT_PLANNED } ) {
+		__typename
+	}
+}

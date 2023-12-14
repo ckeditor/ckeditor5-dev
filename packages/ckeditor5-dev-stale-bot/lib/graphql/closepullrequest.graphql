@@ -1,0 +1,5 @@
+mutation ClosePullRequest( $nodeId: ID! ) {
+	closePullRequest( input: { pullRequestId: $nodeId } ) {
+		__typename
+	}
+}

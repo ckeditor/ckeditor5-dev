@@ -1,0 +1,5 @@
+mutation AddComment( $nodeId: ID!, $comment: String! ) {
+	addComment( input: { subjectId: $nodeId, body: $comment } ) {
+		__typename
+	}
+}
