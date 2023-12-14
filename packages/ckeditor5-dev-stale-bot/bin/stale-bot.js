@@ -40,9 +40,7 @@ async function main() {
 	printWelcomeMessage( dryRun );
 
 	const githubRepository = new GitHubRepository( config.GITHUB_TOKEN );
-
 	const viewerLogin = await githubRepository.getViewerLogin();
-
 	const options = parseConfig( viewerLogin, config );
 
 	const spinner = createSpinner();
