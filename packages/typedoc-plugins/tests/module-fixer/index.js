@@ -30,7 +30,7 @@ describe( 'typedoc-plugins/module-fixer', function() {
 		typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
 		typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
 
-		typeDoc.bootstrap( {
+		await typeDoc.bootstrapWithPlugins( {
 			logLevel: 'Error',
 			entryPoints: files,
 			plugin: [

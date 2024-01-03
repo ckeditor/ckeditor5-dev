@@ -29,7 +29,7 @@ module.exports = async function build( config ) {
 	typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
 	typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
 
-	typeDoc.bootstrap( {
+	await typeDoc.bootstrapWithPlugins( {
 		tsconfig: config.tsconfig,
 		excludeExternals: true,
 		entryPoints: files,
@@ -55,16 +55,16 @@ module.exports = async function build( config ) {
 			plugins[ 'typedoc-plugin-module-fixer' ],
 			plugins[ 'typedoc-plugin-symbol-fixer' ],
 			plugins[ 'typedoc-plugin-interface-augmentation-fixer' ],
-			plugins[ 'typedoc-plugin-tag-error' ],
-			plugins[ 'typedoc-plugin-tag-event' ],
-			plugins[ 'typedoc-plugin-tag-observable' ],
-			plugins[ 'typedoc-plugin-purge-private-api-docs' ],
+			// plugins[ 'typedoc-plugin-tag-error' ],
+			// plugins[ 'typedoc-plugin-tag-event' ],
+			// plugins[ 'typedoc-plugin-tag-observable' ],
+			// plugins[ 'typedoc-plugin-purge-private-api-docs' ],
 
 			// The `event-inheritance-fixer` plugin must be loaded after `tag-event` plugin, as it depends on its output.
-			plugins[ 'typedoc-plugin-event-inheritance-fixer' ],
+			// plugins[ 'typedoc-plugin-event-inheritance-fixer' ],
 
 			// The `event-param-fixer` plugin must be loaded after `tag-event` and `tag-observable` plugins, as it depends on their output.
-			plugins[ 'typedoc-plugin-event-param-fixer' ],
+			// plugins[ 'typedoc-plugin-event-param-fixer' ],
 
 			...extraPlugins
 		]

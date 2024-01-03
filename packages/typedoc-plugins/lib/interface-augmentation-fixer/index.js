@@ -60,7 +60,7 @@ function onEventEnd( context ) {
 		// `ReferenceReflection#constructor()` is an internal API. We should find a proper way to create such objects.
 		const newRef = new ReferenceReflection( interfaceToCopy.name, reflection, interfaceToCopy.parent );
 
-		newRef.kindString = 'Reference';
+		newRef.kind = ReflectionKind.Reference;
 		newRef.sources = interfaceToCopy.sources;
 
 		// Re-use the identifier from the extended interface.
