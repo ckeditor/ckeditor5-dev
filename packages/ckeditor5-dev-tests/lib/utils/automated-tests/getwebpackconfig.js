@@ -43,7 +43,7 @@ module.exports = function getWebpackConfigForAutomatedTests( options ) {
 				[ '.ts', '.js', '.json' ],
 
 			extensionAlias: {
-				'.js': [ '.js', '.ts' ]
+				'.js': [ '.ts', '.js' ]
 			}
 		},
 

@@ -67,7 +67,7 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 			},
 			extensions: [ '.ts', '.js', '.json' ],
 			extensionAlias: {
-				'.js': [ '.js', '.ts' ]
+				'.js': [ '.ts', '.js' ]
 			}
 		},
 

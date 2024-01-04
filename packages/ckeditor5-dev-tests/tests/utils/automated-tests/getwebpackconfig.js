@@ -172,4 +172,17 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		expect( webpackConfig.plugins.filter( plugin => plugin instanceof stubs.TreatWarningsAsErrorsWebpackPlugin ) )
 			.to.have.lengthOf( 1 );
 	} );
+
+	it( 'should load TypeScript files first when importing JS files', () => {
+		const webpackConfig = getWebpackConfigForAutomatedTests( {
+			production: true
+		} );
+
+		expect( webpackConfig.resolve.extensionAlias ).to.be.an( 'object' );
+		expect( webpackConfig.resolve.extensionAlias[ '.js' ] ).to.be.an( 'array' );
+		expect( webpackConfig.resolve.extensionAlias[ '.js' ] ).to.deep.equal( [
+			'.ts',
+			'.js'
+		] );
+	} );
 } );

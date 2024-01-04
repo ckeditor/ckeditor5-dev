@@ -147,4 +147,29 @@ describe( 'getWebpackConfigForManualTests()', () => {
 
 		expect( 'external/ckeditor5-foo/packages/ckeditor5-bar/baz'.match( pattern )[ 0 ] ).to.equal( 'packages/ckeditor5-bar/' );
 	} );
+
+	it( 'should load TypeScript files first when importing JS files', () => {
+		const entries = {
+			'ckeditor5/tests/manual/all-features': '/home/ckeditor/ckeditor5/tests/manual/all-features.js'
+		};
+
+		const buildDir = '/home/ckeditor/ckeditor5/build/.manual-tests';
+
+		const debug = [];
+
+		const webpackConfig = getWebpackConfigForManualTests( {
+			entries,
+			buildDir,
+			debug,
+			themePath: '/theme/path',
+			tsconfig: '/tsconfig/path'
+		} );
+
+		expect( webpackConfig.resolve.extensionAlias ).to.be.an( 'object' );
+		expect( webpackConfig.resolve.extensionAlias[ '.js' ] ).to.be.an( 'array' );
+		expect( webpackConfig.resolve.extensionAlias[ '.js' ] ).to.deep.equal( [
+			'.ts',
+			'.js'
+		] );
+	} );
 } );
