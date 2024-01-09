@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * @license Copyright (c) 2003-2023, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md.
  */
 
@@ -31,7 +31,12 @@ require( '../packages/ckeditor5-dev-bump-year' )
 				pattern: '.husky/*'
 			},
 			{
-				pattern: '!(coverage|.nyc_output)/**'
+				pattern: '!(coverage|.nyc_output)/**',
+				options: {
+					ignore: [
+						'**/typedoc-plugins/tests/module-fixer/fixtures/emptyfile.ts'
+					]
+				}
 			}
 		]
 	} );
