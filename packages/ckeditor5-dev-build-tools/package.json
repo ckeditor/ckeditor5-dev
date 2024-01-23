@@ -1,0 +1,46 @@
+{
+  "name": "@ckeditor/ckeditor5-dev-build-tools",
+  "version": "0.1.0",
+  "description": "Rollup-based tools used to build CKEditor packages",
+  "keywords": [],
+  "author": "CKSource (http://cksource.com/)",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-build-tools",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ckeditor/ckeditor5-dev.git",
+    "directory": "packages/ckeditor5-dev-build-tools"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=5.7.1"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "dependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "glob": "^10.3.10",
+    "pofile": "^1.1.4",
+    "rollup": "^4.9.5",
+    "upath": "^2.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "@vitest/coverage-v8": "^1.2.1",
+    "lodash-es": "^4.17.21",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.1"
+  },
+  "peerDependencies": {
+    "typescript": "^4.8.2|^5.0.0"
+  },
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "dev": "rollup -c rollup.config.js --watch",
+    "test": "vitest run --coverage",
+    "test:dev": "vitest dev"
+  }
+}
