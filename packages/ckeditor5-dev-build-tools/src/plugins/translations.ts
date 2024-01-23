@@ -13,7 +13,18 @@ import { glob } from 'glob';
 import type { Plugin, NormalizedOutputOptions, OutputBundle, OutputChunk } from 'rollup';
 
 export interface RollupTranslationsOptions {
+	/**
+	 * The [glob](https://github.com/isaacs/node-glob) compatible path to the `.po` files.
+	 *
+	 * @default '**\/*.po'
+	 */
 	source?: string;
+
+	/**
+	 * The name of the directory to output all translations to.
+	 * 
+	 * @default 'translations'
+	 */
 	destination?: string;
 }
 
@@ -64,10 +75,6 @@ function getCode(
 
 /**
  * Generates translation files from the `.po` files.
- *
- * @param pluginOptions 
- * @param pluginOptions.source - The [glob](https://github.com/isaacs/node-glob) compatible path to the `.po` files. Defaults to `**\/*.po`.
- * @param pluginOptions.destination - The name of the directory to output all translations to. Defaults to `translations`.
  */
 export function translations(pluginOptions?: RollupTranslationsOptions): Plugin {
 	const options: Required<RollupTranslationsOptions> = Object.assign( {
