@@ -1,0 +1,70 @@
+/**
+ * @license Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+const expect = require( 'chai' ).expect;
+const isPendingIssueStale = require( '../../lib/utils/ispendingissuestale' );
+
+describe( 'dev-stale-bot/lib/utils', () => {
+	describe( 'isPendingIssueStale', () => {
+		it( 'should be a function', () => {
+			expect( isPendingIssueStale ).to.be.a( 'function' );
+		} );
+
+		it( 'should return false if issue does not have any label', () => {
+			const issue = {
+				labels: []
+			};
+			const options = {
+				staleLabels: [ 'pending:feedback' ]
+			};
+
+			expect( isPendingIssueStale( issue, options ) ).to.be.false;
+		} );
+
+		it( 'should return false if issue does not have a pending label', () => {
+			const issue = {
+				labels: [ 'type:bug' ]
+			};
+			const options = {
+				staleLabels: [ 'pending:feedback' ]
+			};
+
+			expect( isPendingIssueStale( issue, options ) ).to.be.false;
+		} );
+
+		it( 'should return false if issue does not have all pending labels', () => {
+			const issue = {
+				labels: [ 'type:bug', 'pending:feedback' ]
+			};
+			const options = {
+				staleLabels: [ 'pending:feedback', 'pending:even-more-feedback' ]
+			};
+
+			expect( isPendingIssueStale( issue, options ) ).to.be.false;
+		} );
+
+		it( 'should return true if issue have all pending labels - single label', () => {
+			const issue = {
+				labels: [ 'type:bug', 'pending:feedback' ]
+			};
+			const options = {
+				staleLabels: [ 'pending:feedback' ]
+			};
+
+			expect( isPendingIssueStale( issue, options ) ).to.be.true;
+		} );
+
+		it( 'should return true if issue have all pending labels - multiple labels', () => {
+			const issue = {
+				labels: [ 'type:bug', 'pending:feedback', 'pending:even-more-feedback' ]
+			};
+			const options = {
+				staleLabels: [ 'pending:feedback', 'pending:even-more-feedback' ]
+			};
+
+			expect( isPendingIssueStale( issue, options ) ).to.be.true;
+		} );
+	} );
+} );

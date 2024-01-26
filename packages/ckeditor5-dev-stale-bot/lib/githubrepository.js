@@ -19,12 +19,15 @@ const prepareSearchQuery = require( './utils/preparesearchquery' );
 const isIssueOrPullRequestToStale = require( './utils/isissueorpullrequesttostale' );
 const isIssueOrPullRequestToUnstale = require( './utils/isissueorpullrequesttounstale' );
 const isIssueOrPullRequestToClose = require( './utils/isissueorpullrequesttoclose' );
+const isPendingIssueToStale = require( './utils/ispendingissuetostale' );
+const isPendingIssueToUnlabel = require( './utils/ispendingissuetounlabel' );
 
 const GRAPHQL_PATH = upath.join( __dirname, 'graphql' );
 
 const queries = {
 	getViewerLogin: readGraphQL( 'getviewerlogin' ),
 	searchIssuesOrPullRequests: readGraphQL( 'searchissuesorpullrequests' ),
+	searchPendingIssues: readGraphQL( 'searchpendingissues' ),
 	getIssueOrPullRequestTimelineItems: readGraphQL( 'getissueorpullrequesttimelineitems' ),
 	addComment: readGraphQL( 'addcomment' ),
 	getLabels: readGraphQL( 'getlabels' ),
@@ -89,7 +92,7 @@ module.exports = class GitHubRepository {
 	async searchIssuesOrPullRequestsToStale( type, options, onProgress, pageInfo = { done: 0, total: 0 } ) {
 		const query = prepareSearchQuery( {
 			type,
-			searchDate: options.searchDate,
+			searchDate: options.searchDate || options.staleDate,
 			repositorySlug: options.repositorySlug,
 			ignoredLabels: [
 				...options.staleLabels,
@@ -119,12 +122,7 @@ module.exports = class GitHubRepository {
 					await this.searchIssuesOrPullRequestsToStale( type, nextOptions, onProgress, nextPageInfo ) :
 					[];
 
-				return [ ...issuesOrPullRequestsToStale, ...issuesOrPullRequestsToStaleNextPage ].map( entry => ( {
-					id: entry.id,
-					type: entry.type,
-					title: entry.title,
-					url: entry.url
-				} ) );
+				return [ ...issuesOrPullRequestsToStale, ...issuesOrPullRequestsToStaleNextPage ].map( mapNodeToResult );
 			} )
 			.catch( error => {
 				this.logger.error( 'Unexpected error when executing "#searchIssuesOrPullRequestsToStale()".', error );
@@ -143,7 +141,7 @@ module.exports = class GitHubRepository {
 	 */
 	async searchStaleIssuesOrPullRequests( options, onProgress, pageInfo = { done: 0, total: 0 } ) {
 		const query = prepareSearchQuery( {
-			searchDate: options.searchDate,
+			searchDate: options.searchDate || options.staleDate,
 			repositorySlug: options.repositorySlug,
 			labels: options.staleLabels
 		} );
@@ -178,24 +176,75 @@ module.exports = class GitHubRepository {
 					{};
 
 				return {
-					issuesOrPullRequestsToClose: [ ...issuesOrPullRequestsToClose, ...issuesOrPullRequestsToCloseNextPage ]
-						.map( entry => ( {
-							id: entry.id,
-							type: entry.type,
-							title: entry.title,
-							url: entry.url
-						} ) ),
-					issuesOrPullRequestsToUnstale: [ ...issuesOrPullRequestsToUnstale, ...issuesOrPullRequestsToUnstaleNextPage ]
-						.map( entry => ( {
-							id: entry.id,
-							type: entry.type,
-							title: entry.title,
-							url: entry.url
-						} ) )
+					issuesOrPullRequestsToClose: [
+						...issuesOrPullRequestsToClose,
+						...issuesOrPullRequestsToCloseNextPage
+					].map( mapNodeToResult ),
+					issuesOrPullRequestsToUnstale: [
+						...issuesOrPullRequestsToUnstale,
+						...issuesOrPullRequestsToUnstaleNextPage
+					].map( mapNodeToResult )
 				};
 			} )
 			.catch( error => {
 				this.logger.error( 'Unexpected error when executing "#searchStaleIssuesOrPullRequests()".', error );
+
+				return Promise.reject();
+			} );
+	}
+
+	/**
+	 * Searches for all pending issues that should be staled or unlabeled.
+	 *
+	 * @param {Options} options Configuration options.
+	 * @param {Function} onProgress Callback function called each time a response is received.
+	 * @param {PageInfo} [pageInfo] Describes the current page of the returned result.
+	 * @returns {Promise.<SearchIssuesOrPullRequestsToStaleResult>}
+	 */
+	async searchPendingIssues( options, onProgress, pageInfo = { done: 0, total: 0 } ) {
+		const query = prepareSearchQuery( {
+			type: 'Issue',
+			searchDate: options.searchDate,
+			repositorySlug: options.repositorySlug,
+			labels: options.pendingIssueLabels,
+			ignoredLabels: [
+				...options.ignoredIssueLabels
+			]
+		} );
+
+		const variables = {
+			query,
+			cursor: pageInfo.cursor || null
+		};
+
+		return this.sendRequest( await queries.searchPendingIssues, variables )
+			.then( async data => {
+				const pendingIssues = this.parsePendingIssues( data.search );
+
+				const pendingIssuesToStale = pendingIssues.filter( entry => isPendingIssueToStale( entry, options ) );
+				const pendingIssuesToUnlabel = pendingIssues.filter( entry => isPendingIssueToUnlabel( entry ) );
+
+				const { nextPageInfo, nextOptions } = this.calculateNextSearchOffset( data.search, options, pageInfo );
+
+				onProgress( {
+					done: nextPageInfo.done,
+					total: nextPageInfo.total
+				} );
+
+				const {
+					pendingIssuesToStale: pendingIssuesToStaleNextPage = [],
+					pendingIssuesToUnlabel: pendingIssuesToUnlabelNextPage = []
+				} = nextPageInfo.hasNextPage ?
+					await this.searchPendingIssues( nextOptions, onProgress, nextPageInfo ) :
+					{};
+
+				return {
+					pendingIssuesToStale: [ ...pendingIssuesToStale, ...pendingIssuesToStaleNextPage ].map( mapNodeToResult ),
+					pendingIssuesToUnlabel: [ ...pendingIssuesToUnlabel, ...pendingIssuesToUnlabelNextPage ].map( mapNodeToResult )
+				};
+			} )
+			.catch( error => {
+				this.logger.error( 'Unexpected error when executing "#searchPendingIssues()".', error );
 
 				return Promise.reject();
 			} );
@@ -262,6 +311,10 @@ module.exports = class GitHubRepository {
 	 * @returns {Promise.<Array.<String>>}
 	 */
 	async getLabels( repositorySlug, labelNames ) {
+		if ( !labelNames.length ) {
+			return Promise.resolve( [] );
+		}
+
 		const [ repositoryOwner, repositoryName ] = repositorySlug.split( '/' );
 		const variables = {
 			repositoryOwner,
@@ -447,6 +500,29 @@ module.exports = class GitHubRepository {
 	}
 
 	/**
+	 * Parses the received array of issues or pull requests and fetches the remaining timeline items, if not everything was received in the
+	 * initial request.
+	 *
+	 * @private
+	 * @param {Object} data Received response to parse.
+	 * @returns {Array.<PendingIssue>}
+	 */
+	parsePendingIssues( data ) {
+		return data.nodes.map( node => {
+			const lastComment = node.comments.nodes[ 0 ];
+
+			return {
+				...node,
+				labels: node.labels.nodes.map( label => label.name ),
+				lastComment: lastComment ? {
+					createdAt: lastComment.createdAt,
+					isExternal: lastComment.authorAssociation !== 'MEMBER'
+				} : null
+			};
+		} );
+	}
+
+	/**
 	 * Sends the GraphQL query to GitHub API. If the API rate limit is exceeded, the request is paused until the limit is reset.
 	 * Then, the request is sent again.
 	 *
@@ -531,6 +607,21 @@ function checkApiRateLimit( error ) {
 }
 
 /**
+ * Maps the issue or pull request to the result object.
+ *
+ * @param {IssueOrPullRequest|PendingIssue} node
+ * @returns {IssueOrPullRequestResult}
+ */
+function mapNodeToResult( node ) {
+	return {
+		id: node.id,
+		type: node.type,
+		title: node.title,
+		url: node.url
+	};
+}
+
+/**
  * @typedef {Object} TimelineItem
  * @property {String} eventDate
  * @property {String} [author]
@@ -538,15 +629,32 @@ function checkApiRateLimit( error ) {
  */
 
 /**
+ * @typedef {Object} Comment
+ * @property {String} createdAt
+ * @property {Boolean} isExternal
+ */
+
+/**
  * @typedef {Object} IssueOrPullRequest
  * @property {String} id
  * @property {'Issue'|'PullRequest'} type
  * @property {Number} number
+ * @property {String} title
  * @property {String} url
  * @property {String} createdAt
  * @property {String|null} lastEditedAt
  * @property {String|null} lastReactedAt
  * @property {Array.<TimelineItem>} timelineItems
+ */
+
+/**
+ * @typedef {Object} PendingIssue
+ * @property {String} id
+ * @property {'Issue'} type
+ * @property {String} title
+ * @property {String} url
+ * @property {Array.<String>} labels
+ * @property {Comment|null} lastComment
  */
 
 /**
