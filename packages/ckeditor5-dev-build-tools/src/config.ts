@@ -1,3 +1,8 @@
+/**
+ * @license Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 // TODO: When it's close to being production ready, remove the comment below.
 /* v8 ignore start */
 
@@ -11,7 +16,7 @@ import typescriptPlugin from '@rollup/plugin-typescript';
 import { translations } from './plugins/translations.js';
 
 const cwd = process.cwd();
-const tsConfigPath = path.join( cwd, 'tsconfig.release-ckeditor5.json');
+const tsConfigPath = path.join( cwd, 'tsconfig.release-ckeditor5.json' );
 
 const banner =
 `/*!
@@ -38,7 +43,7 @@ export const buildConfig = defineConfig( {
 				rootDir: path.join( cwd, 'src' ),
 				declaration: true,
 				declarationDir: path.join( cwd, 'dist', 'types' ),
-				declarationMap: false, // TODO
+				declarationMap: false // TODO
 			},
 			sourceMap: false // TODO
 		} ),

@@ -33,7 +33,7 @@
     "changelog": "node ./scripts/changelog.js",
     "release:prepare-packages": "node ./scripts/preparepackages.js",
     "release:publish-packages": "node ./scripts/publishpackages.js",
-    "lint": "eslint --quiet \"**/*.js\"",
+    "lint": "eslint --quiet \"**/*.{js,ts}\"",
     "precommit": "lint-staged",
     "clean": "npx rimraf package-lock.json yarn.lock ./**/node_modules",
     "reinstall": "yarn run clean && yarn install"
@@ -43,10 +43,6 @@
       "eslint --quiet"
     ]
   },
-  "eslintIgnore": [
-    "coverage/**",
-    "packages/*/node_modules/**"
-  ],
   "workspaces": {
     "packages": [
       "packages/*",
