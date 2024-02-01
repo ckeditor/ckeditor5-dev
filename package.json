@@ -28,7 +28,9 @@
   "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme",
   "scripts": {
     "postinstall": "node ./scripts/postinstall.js",
-    "test": "mocha 'packages/*/tests/**/*.js' --timeout 10000",
+    "test": "yarn run test:build-tools && yarn run test:js",
+    "test:build-tools": "yarn workspace @ckeditor/ckeditor5-dev-build-tools run test",
+    "test:js": "mocha 'packages/*/tests/**/*.js' --timeout 10000",
     "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test",
     "changelog": "node ./scripts/changelog.js",
     "release:prepare-packages": "node ./scripts/preparepackages.js",
