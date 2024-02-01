@@ -71,7 +71,7 @@ function getCode(
 		'getPluralForm(n){return $1}'
 	);
 
-	return banner + '\nexport default' + translations;
+	return banner + '\nexport default ' + translations;
 }
 
 /**
