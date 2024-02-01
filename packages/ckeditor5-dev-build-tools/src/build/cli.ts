@@ -27,7 +27,7 @@ function camelizeObjectKeys<const T extends Record<string, any>>( obj: T ): Came
  * Banner added to the top of output JavaScript files.
  */
 const banner: string = `
-/**
+/*!
  * @license Copyright (c) 2003-${ new Date().getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
  */`;
@@ -47,6 +47,10 @@ export async function buildProject(): Promise<void> {
 			type: 'boolean',
 			default: false
 		},
+		'translations': {
+			type: 'boolean',
+			default: false
+		},
 		'source-map': {
 			type: 'boolean',
 			default: false
@@ -55,7 +59,7 @@ export async function buildProject(): Promise<void> {
 			type: 'boolean',
 			default: false
 		},
-		'mangle': {
+		'minify': {
 			type: 'boolean',
 			default: false
 		},

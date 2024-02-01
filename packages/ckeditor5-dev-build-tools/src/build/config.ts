@@ -17,7 +17,7 @@ import postcssMixins from 'postcss-mixins';
 import postcssNesting from 'postcss-nesting';
 
 import { getPath } from '../utils.js';
-import { translations } from '../plugins/translations.js';
+import { translations as translationsPlugin } from '../plugins/translations.js';
 
 /**
  * In the future, we could try using `rollup-plugin-esbuild` to greatly improve
@@ -51,9 +51,10 @@ export interface Options {
 	input: string;
 	tsconfig: string;
 	browser: boolean;
+	translations: boolean;
 	sourceMap: boolean;
 	bundle: boolean;
-	mangle: boolean;
+	minify: boolean;
 }
 /**
  * Generates Rollup configurations.
@@ -75,9 +76,10 @@ async function getConfiguration( {
 	input,
 	tsconfig,
 	browser,
+	translations,
 	sourceMap,
 	bundle,
-	mangle
+	minify
 }: Options ): Promise<RollupOptions> {
 	const require = createRequire( import.meta.url );
 	const typescriptPath = require.resolve(
@@ -113,7 +115,7 @@ async function getConfiguration( {
 				stringify: true
 			} ),
 
-			translations(),
+			translations && translationsPlugin(),
 
 			// @ts-ignore
 			styles( {
@@ -144,13 +146,12 @@ async function getConfiguration( {
 			} ),
 
 			// @ts-ignore
-			browser && terser( {
+			minify && terser( {
 				sourceMap,
 				format: {
 					// TODO
 					comments: ( node: any, comment: any ) => /@license/.test( comment.value ) && ( /^!/.test( comment.value ) || !/CKSource/.test( comment.value ) )
-				},
-				mangle
+				}
 			} )
 		]
 	} );
