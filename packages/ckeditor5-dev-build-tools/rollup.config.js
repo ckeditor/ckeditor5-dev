@@ -3,8 +3,7 @@
  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
  */
 
-import { readFile } from 'fs/promises';
-
+import { readFileSync } from 'fs';
 import path from 'upath';
 import { defineConfig } from 'rollup';
 import commonjs from '@rollup/plugin-commonjs';
@@ -15,7 +14,9 @@ import typescript from '@rollup/plugin-typescript';
 const cwd = process.cwd();
 
 // Content of the `package.json`
-const pkg = JSON.parse( await readFile( path.join( cwd, 'package.json' ) ) );
+const pkg = JSON.parse(
+	readFileSync( path.join( cwd, 'package.json' ) )
+);
 
 // List of external dependencies
 const externals = [

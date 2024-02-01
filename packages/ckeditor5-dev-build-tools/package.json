@@ -18,19 +18,40 @@
   },
   "type": "module",
   "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "bin": {
+    "ckeditor5-dev-build-project": "bin/build-project.js"
+  },
   "dependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
+    "esbuild": "^0.20.0",
     "glob": "^10.3.10",
+    "lodash-es": "^4.17.21",
     "pofile": "^1.1.4",
+    "postcss-import": "^16.0.0",
+    "postcss-mixins": "^9.0.4",
+    "postcss-nesting": "^12.0.2",
     "rollup": "^4.9.5",
+    "rollup-plugin-esbuild": "^6.1.1",
+    "rollup-plugin-modify": "^3.0.0",
+    "rollup-plugin-styles": "^4.0.0",
+    "rollup-plugin-svg-import": "^3.0.0",
     "upath": "^2.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.11.5",
+    "@types/postcss-import": "^14.0.3",
+    "@types/postcss-mixins": "^9.0.5",
     "@vitest/coverage-v8": "^1.2.1",
-    "lodash-es": "^4.17.21",
+    "type-fest": "^4.10.2",
     "typescript": "^5.3.3",
     "vitest": "^1.2.1"
   },

@@ -3,7 +3,7 @@
 
 import path from 'upath';
 import typescript from 'typescript';
-import { defineConfig } from 'rollup';
+import type { RollupOptions } from 'rollup';
 import commonjs from '@rollup/plugin-commonjs';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import typescriptPlugin from '@rollup/plugin-typescript';
@@ -15,11 +15,11 @@ const tsConfigPath = path.join( cwd, 'tsconfig.release-ckeditor5.json');
 
 const banner =
 `/*!
- * @license Copyright (c) 2003-2023, CKSource Holding sp. z o.o. All rights reserved.
+ * @license Copyright (c) 2003-${ new Date().getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
  */`;
 
-export const buildConfig = defineConfig( {
+export const buildConfig = {
 	input: 'src/index.ts',
 	output: {
 		format: 'esm',
@@ -29,8 +29,12 @@ export const buildConfig = defineConfig( {
 		banner
 	},
 	plugins: [
+		// @ts-ignore
 		commonjs(),
+
 		nodeResolve(),
+
+		// @ts-ignore
 		typescriptPlugin( {
 			tsconfig: tsConfigPath,
 			typescript,
@@ -42,6 +46,7 @@ export const buildConfig = defineConfig( {
 			},
 			sourceMap: false // TODO
 		} ),
+
 		translations()
 	]
-} );
+} satisfies RollupOptions;
