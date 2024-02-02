@@ -9,6 +9,7 @@
 
 'use strict';
 
+import chalk from 'chalk';
 import { buildProject } from '../dist/index.js';
 
 try {
@@ -16,8 +17,14 @@ try {
 
 	process.exit( 0 );
 } catch( error ) {
-	console.log( 'The build process failed with the following error:' );
-	console.log( error );
+	if ( error.name === 'RollupError' ) {
+		console.log( chalk.red( chalk.bold( 'ERROR:' ) + `Error occured when processing the file "${ error.id }".` ) );
+		console.log( error.message );
+		console.log( error.frame );
+	} else {
+		console.log( chalk.red( chalk.bold( 'ERROR:' ) + 'The build process failed with the following error:' ) );
+		console.log( error.message );
+	}
 
 	process.exit( 1 );
 }
