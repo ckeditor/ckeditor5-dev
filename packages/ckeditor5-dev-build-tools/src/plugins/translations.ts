@@ -1,6 +1,6 @@
 /**
- * @license Copyright (c) 2003-2023, CKSource Holding sp. z o.o. All rights reserved.
- * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
+ * @license Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
  */
 
 import { parse } from 'path';
@@ -13,6 +13,7 @@ import { glob } from 'glob';
 import type { Plugin, NormalizedOutputOptions, OutputBundle, OutputChunk } from 'rollup';
 
 export interface RollupTranslationsOptions {
+
 	/**
 	 * The [glob](https://github.com/isaacs/node-glob) compatible path to the `.po` files.
 	 *
@@ -22,14 +23,14 @@ export interface RollupTranslationsOptions {
 
 	/**
 	 * The name of the directory to output all translations to.
-	 * 
+	 *
 	 * @default 'translations'
 	 */
 	destination?: string;
 }
 
 interface Translation {
-	dictionary: Record<string, string | string[]>;
+	dictionary: Record<string, string | Array<string>>;
 	getPluralForm: string | null;
 }
 
@@ -61,24 +62,24 @@ function getCode(
 	translation: Translation,
 	banner: string
 ): string {
-	let translations = JSON.stringify({
+	let translations = JSON.stringify( {
 		[ language ]: translation
 	} );
 
 	translations = translations.replace(
 		/"getPluralForm":"(.*)"/,
-		"getPluralForm(n){return $1}"
+		'getPluralForm(n){return $1}'
 	);
 
-	return banner + '\n' + 'export default ' + translations;
+	return banner + '\nexport default ' + translations;
 }
 
 /**
  * Generates translation files from the `.po` files.
  */
-export function translations(pluginOptions?: RollupTranslationsOptions): Plugin {
+export function translations( pluginOptions?: RollupTranslationsOptions ): Plugin {
 	const options: Required<RollupTranslationsOptions> = Object.assign( {
-		source: '**\/*.po',
+		source: '**/*.po',
 		destination: 'translations'
 	}, pluginOptions || {} );
 
@@ -102,14 +103,14 @@ export function translations(pluginOptions?: RollupTranslationsOptions): Plugin 
 
 			for ( const [ language, paths ] of Object.entries( grouped ) ) {
 				// Gather all translations for the given language.
-				const translations: Translation[] = paths
+				const translations: Array<Translation> = paths
 					.map( path => readFileSync( path, 'utf-8' ) )
 					.map( PO.parse )
 					.filter( Boolean )
-					.map( content => ({
+					.map( content => ( {
 						dictionary: getDictionary( content ),
 						getPluralForm: getPluralFunction( content )
-					}) );
+					} ) );
 
 				// Merge all translations into a single object.
 				const translation = merge( {}, ...translations );
@@ -120,8 +121,8 @@ export function translations(pluginOptions?: RollupTranslationsOptions): Plugin 
 					fileName: path.join( options.destination, `${ language }.js` ),
 					code: getCode( language, translation, banner ),
 					exports: [ 'default' ]
-				} )
+				} );
 			}
 		}
-	}
+	};
 }

@@ -3,7 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-export default class FooBar {
-	constructor( param: string ) {
-	}
-}
+export default class FooBar {}

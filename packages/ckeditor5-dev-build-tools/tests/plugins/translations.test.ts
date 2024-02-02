@@ -1,11 +1,23 @@
+/**
+ * @license Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 import { test, expect } from 'vitest';
 import { rollup, type OutputChunk, type RollupOutput } from 'rollup';
 
 import { translations, type RollupTranslationsOptions } from '../../src/index.js';
 
-const ALL_POLISH_TRANSLATIONS = '\nexport default {"pl":{"dictionary":{"Hello world":"Witaj świecie","%0 files":["%0 plik","%0 pliki","%0 plików","%0 plików"]},getPluralForm(n){return (n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);}}}'
+// eslint-disable-next-line max-len
+const ALL_POLISH_TRANSLATIONS = '\nexport default {"pl":{"dictionary":{"Hello world":"Witaj świecie","%0 files":["%0 plik","%0 pliki","%0 plików","%0 plików"]},getPluralForm(n){return (n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);}}}';
+
+// eslint-disable-next-line max-len
 const POLISH_TRANSLATIONS_FROM_ROOT = '\nexport default {"pl":{"dictionary":{"Hello world":"Witaj świecie"},getPluralForm(n){return (n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);}}}';
+
+// eslint-disable-next-line max-len
 const GERMAN_TRANSLATIONS_FROM_ROOT = '\nexport default {"de":{"dictionary":{"Hello world":"Hallo Welt"},getPluralForm(n){return (n != 1);}}}';
+
+// eslint-disable-next-line max-len
 const ENGLISH_TRANSLATIONS_FROM_ROOT = '\nexport default {"en":{"dictionary":{"Hello world":"Hello world"},"getPluralForm":null}}';
 
 /**
@@ -19,7 +31,7 @@ async function generateBundle( options?: RollupTranslationsOptions, banner?: str
 		]
 	} );
 
-	const { output } = await bundle.generate({ format: 'esm', banner });
+	const { output } = await bundle.generate( { format: 'esm', banner } );
 
 	return output;
 }
