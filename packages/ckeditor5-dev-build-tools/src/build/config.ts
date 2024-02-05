@@ -1,20 +1,22 @@
 import { createRequire } from 'module';
 import { readFileSync, accessSync, constants } from 'fs';
 import chalk from 'chalk';
-import { defineConfig, Plugin, type RollupOptions } from 'rollup';
 import type { PackageJson } from 'type-fest';
+import { defineConfig, Plugin, type RollupOptions } from 'rollup';
+import { getPath } from '../utils.js';
 
 /**
  * Rollup plugins
  */
 import json from '@rollup/plugin-json';
 import styles from 'rollup-plugin-styles';
-// import modify from 'rollup-plugin-modify';
 import terser from '@rollup/plugin-terser';
 import svg from 'rollup-plugin-svg-import';
 import commonjs from '@rollup/plugin-commonjs';
 import typescriptPlugin from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+import { replace } from '../plugins/replace.js';
+import { translations as translationsPlugin } from '../plugins/translations.js';
 
 /**
  * PostCSS plugins
@@ -22,9 +24,6 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import postcssImport from 'postcss-import';
 import postcssMixins from 'postcss-mixins';
 import postcssNesting from 'postcss-nesting';
-
-import { getPath } from '../utils.js';
-import { translations as translationsPlugin } from '../plugins/translations.js';
 
 /**
  * In the future, we could try using `rollup-plugin-esbuild` to greatly improve
@@ -48,10 +47,16 @@ const pkg: PackageJson = JSON.parse(
 );
 
 /**
- * List of all `dependencies` and `peerDependencies` in the package.
+ * When the `--bundle` and `--external` arguments are not provided, then all
+ * packages defined in `dependencies` and `peerDependencies` of the package
+ * and all packages starting with `@ckeditor` will be treated as externals.
  */
 const externals: string[] = Object.keys(
-	Object.assign( {}, pkg.dependencies, pkg.peerDependencies )
+	Object.assign(
+		{ '@ckeditor': true },
+		pkg.dependencies,
+		pkg.peerDependencies
+	)
 );
 
 export interface Options {
@@ -61,6 +66,7 @@ export interface Options {
 	translations: boolean;
 	sourceMap: boolean;
 	bundle: boolean;
+	external: string[];
 	minify: boolean;
 }
 /**
@@ -69,6 +75,7 @@ export interface Options {
 export async function getRollupOutputs( options: Options ): Promise<RollupOptions> {
 	const data: Options = {
 		...options,
+		external: options.external.length ? options.external : externals,
 		input: getPath( options.input ),
 		tsconfig: getPath( options.tsconfig ),
 	};
@@ -157,6 +164,17 @@ async function getConfiguration( {
 			getTypeScriptPlugin( { tsconfig, sourceMap, browser } ),
 
 			/**
+			 * Replaces parts of the source code with the provided values.
+			 */
+			replace( {
+				replace: [
+					// Replaces 'ckeditor5/src/core.js' with '@ckeditor/ckeditor5-core'
+					[ /ckeditor5\/src\/([a-z\-]+)(?:\.(js|ts))?/g, '@ckeditor/ckeditor5-$1' ]
+				],
+				sourceMap
+			} ),
+
+			/**
 			 * Minifies and mangles the output. It also removes all code comments except for license comments.
 			 */
 			// @ts-ignore
@@ -204,7 +222,7 @@ function getTypeScriptPlugin( {
 			declarationDir: !browser ? getPath( 'dist', 'types' ) : undefined,
 			declarationMap: false, // TODO: Do we need this?
 			compilerOptions: {
-				rootDir: !browser ? getPath( 'src' ) : undefined,
+				rootDir: !browser ? getPath( 'src' ) : undefined
 			}
 		} );
 	} catch {
