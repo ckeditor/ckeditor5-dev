@@ -32,6 +32,10 @@ describe( 'dev-stale-bot/lib/utils', () => {
 			expect( prepareSearchQuery( { searchDate: '2022-12-01' } ) ).to.include( 'created:<2022-12-01' );
 		} );
 
+		it( 'should prepare a query without specifying a start date', () => {
+			expect( prepareSearchQuery( {} ) ).to.not.include( 'created:' );
+		} );
+
 		it( 'should prepare a query for open items', () => {
 			expect( prepareSearchQuery( {} ) ).to.include( 'state:open' );
 		} );
