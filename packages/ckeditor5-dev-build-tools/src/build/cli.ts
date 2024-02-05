@@ -59,6 +59,11 @@ export async function buildProject(): Promise<void> {
 			type: 'boolean',
 			default: false
 		},
+		'external': {
+			type: 'string',
+			multiple: true,
+			default: []
+		},
 		'minify': {
 			type: 'boolean',
 			default: false

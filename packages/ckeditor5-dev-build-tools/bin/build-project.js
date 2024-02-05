@@ -20,7 +20,7 @@ try {
 	if ( error.name === 'RollupError' ) {
 		console.log( chalk.red( chalk.bold( 'ERROR:' ) + `Error occured when processing the file "${ error.id }".` ) );
 		console.log( error.message );
-		console.log( error.frame );
+		error.frame && console.log( error.frame );
 	} else {
 		console.log( chalk.red( chalk.bold( 'ERROR:' ) + 'The build process failed with the following error:' ) );
 		console.log( error.message );

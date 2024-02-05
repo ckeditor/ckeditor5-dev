@@ -4,4 +4,5 @@
  */
 
 export { buildProject } from './build/cli.js';
+export { replace, type RollupReplaceOptions } from './plugins/replace.js';
 export { translations, type RollupTranslationsOptions } from './plugins/translations.js';
