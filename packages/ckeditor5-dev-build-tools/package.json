@@ -1,7 +1,7 @@
 {
   "name": "@ckeditor/ckeditor5-dev-build-tools",
-  "version": "0.1.0",
-  "description": "Rollup-based tools used to build CKEditor packages",
+  "version": "0.0.1",
+  "description": "Rollup-based tools used to build CKEditor 5 packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
