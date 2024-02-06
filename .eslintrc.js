@@ -10,8 +10,14 @@ module.exports = {
 	env: {
 		node: true
 	},
+	ignorePatterns: [
+		'**/dist/*',
+		'**/coverage/**',
+		'**/node_modules/**'
+	],
 	rules: {
 		'no-console': 'off',
+		'ckeditor5-rules/require-file-extensions-in-imports': 'off',
 		'ckeditor5-rules/license-header': [ 'error', {
 			headerLines: [
 				'/**',
@@ -20,5 +26,13 @@ module.exports = {
 				' */'
 			]
 		} ]
-	}
+	},
+	overrides: [
+		{
+			files: [ './packages/ckeditor5-dev-build-tools/tests/**/*' ],
+			rules: {
+				'mocha/no-global-tests': 'off'
+			}
+		}
+	]
 };
