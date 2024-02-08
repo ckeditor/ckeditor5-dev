@@ -52,6 +52,7 @@ async function main() {
 		issuesOrPullRequestsToStale,
 		issuesOrPullRequestsToClose,
 		issuesOrPullRequestsToUnstale,
+		pendingIssuesToStale,
 		pendingIssuesToUnlabel
 	} = searchResult;
 
@@ -61,18 +62,26 @@ async function main() {
 		const closePullRequestLabels = await githubRepository.getLabels( options.repositorySlug, options.closePullRequestLabels );
 		const pendingIssueLabels = await githubRepository.getLabels( options.repositorySlug, options.pendingIssueLabels );
 
-		if ( issuesOrPullRequestsToStale.length ) {
+		if ( issuesOrPullRequestsToStale.length || pendingIssuesToStale.length ) {
 			const actions = {
 				title: 'Staling issues and pull requests...',
 				labelsToAdd() {
 					return staleLabels;
 				},
 				commentToAdd( entry ) {
+					const isPendingIssueToStale = pendingIssuesToStale.includes( entry );
+
+					if ( isPendingIssueToStale ) {
+						return options.stalePendingIssueMessage;
+					}
+
 					return entry.type === 'Issue' ? options.staleIssueMessage : options.stalePullRequestMessage;
 				}
 			};
 
-			await handleActions( githubRepository, issuesOrPullRequestsToStale, actions, spinner );
+			const entries = [ ...issuesOrPullRequestsToStale, ...pendingIssuesToStale ];
+
+			await handleActions( githubRepository, entries, actions, spinner );
 		}
 
 		if ( issuesOrPullRequestsToUnstale.length ) {
@@ -152,9 +161,10 @@ async function search( githubRepository, options, spinner ) {
 	}
 
 	return {
-		issuesOrPullRequestsToStale: [ ...issuesToStale, ...pullRequestsToStale, ...pendingIssuesToStale ],
+		issuesOrPullRequestsToStale: [ ...issuesToStale, ...pullRequestsToStale ],
 		issuesOrPullRequestsToUnstale,
 		issuesOrPullRequestsToClose,
+		pendingIssuesToStale,
 		pendingIssuesToUnlabel
 	};
 }
@@ -226,17 +236,18 @@ function printStatus( dryRun, searchResult, options ) {
 		issuesOrPullRequestsToStale,
 		issuesOrPullRequestsToClose,
 		issuesOrPullRequestsToUnstale,
+		pendingIssuesToStale,
 		pendingIssuesToUnlabel
 	} = searchResult;
 
-	if ( !issuesOrPullRequestsToStale.length ) {
+	if ( !issuesOrPullRequestsToStale.length && !pendingIssuesToStale.length ) {
 		console.log( chalk.green.bold( '💡 No new issues or pull requests found that should be staled.\n' ) );
 	} else {
 		const statusMessage = dryRun ?
 			'🔖 The following issues or pull requests should be staled:\n' :
 			'🔖 The following issues or pull requests were staled:\n';
 
-		printStatusSection( statusMessage, issuesOrPullRequestsToStale );
+		printStatusSection( statusMessage, [ ...issuesOrPullRequestsToStale, ...pendingIssuesToStale ] );
 	}
 
 	if ( !issuesOrPullRequestsToUnstale.length ) {
@@ -291,6 +302,7 @@ function printStatusSection( statusMessage, entries ) {
  * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToClose
  * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToStale
  * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToUnstale
+ * @property {Array.<IssueOrPullRequestResult>} pendingIssuesToStale
  * @property {Array.<IssueOrPullRequestResult>} pendingIssuesToUnlabel
  */
 
