@@ -919,14 +919,14 @@ describe( 'dev-stale-bot/lib', () => {
 					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
 						expect( stubs.prepareSearchQuery.calledOnce ).to.equal( true );
 						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.deep.equal( {
-							searchDate: '2022-12-01',
+							searchDate: undefined,
 							repositorySlug: 'ckeditor/ckeditor5',
 							labels: [ 'status:stale' ]
 						} );
 					} );
 				} );
 
-				it( 'should start the search from stale date if search date is not set', () => {
+				it( 'should not set the initial start date', () => {
 					const options = {
 						...optionsBase,
 						searchDate: undefined,
@@ -943,7 +943,7 @@ describe( 'dev-stale-bot/lib', () => {
 
 					return githubRepository.searchStaleIssuesOrPullRequests( options, onProgress ).then( () => {
 						expect( stubs.prepareSearchQuery.calledOnce ).to.equal( true );
-						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.have.property( 'searchDate', '2023-01-01' );
+						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.have.property( 'searchDate', undefined );
 					} );
 				} );
 
@@ -1148,7 +1148,7 @@ describe( 'dev-stale-bot/lib', () => {
 
 					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
 						expect( stubs.prepareSearchQuery.callCount ).to.equal( 3 );
-						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-12-01' );
+						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.have.property( 'searchDate', undefined );
 						expect( stubs.prepareSearchQuery.getCall( 1 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-11-01T09:00:00Z' );
 						expect( stubs.prepareSearchQuery.getCall( 2 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-10-01T09:00:00Z' );
 					} );
@@ -1415,6 +1415,27 @@ describe( 'dev-stale-bot/lib', () => {
 							labels: [ 'pending:feedback' ],
 							ignoredLabels: [ 'support:1', 'support:2', 'support:3' ]
 						} );
+					} );
+				} );
+
+				it( 'should not set the initial start date', () => {
+					const options = {
+						...optionsBase,
+						searchDate: undefined,
+						staleDate: '2023-01-01'
+					};
+
+					stubs.GraphQLClient.request.resolves( {
+						search: {
+							issueCount: 0,
+							nodes: [],
+							pageInfo: pageInfoNoNextPage
+						}
+					} );
+
+					return githubRepository.searchPendingIssues( options, onProgress ).then( () => {
+						expect( stubs.prepareSearchQuery.calledOnce ).to.equal( true );
+						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.have.property( 'searchDate', undefined );
 					} );
 				} );
 

@@ -141,7 +141,7 @@ module.exports = class GitHubRepository {
 	 */
 	async searchStaleIssuesOrPullRequests( options, onProgress, pageInfo = { done: 0, total: 0 } ) {
 		const query = prepareSearchQuery( {
-			searchDate: options.searchDate || options.staleDate,
+			searchDate: options.searchDate,
 			repositorySlug: options.repositorySlug,
 			labels: options.staleLabels
 		} );
