@@ -168,8 +168,16 @@ async function getConfiguration( {
 			 */
 			replace( {
 				replace: [
-					// Replaces 'ckeditor5/src/core.js' with '@ckeditor/ckeditor5-core'
-					[ /ckeditor5\/src\/([a-z\-]+)(?:\.(js|ts))?/g, '@ckeditor/ckeditor5-$1' ]
+					/**
+					 * Replaces the following imports with '@ckeditor/ckeditor5-core':
+					 * 
+					 * - 'ckeditor5/src/core';
+					 * - 'ckeditor5/src/core.js';
+					 * - '@ckeditor/ckeditor5-core';
+					 * - '@ckeditor/ckeditor5-core/src/index';
+					 * - '@ckeditor/ckeditor5-core/src/index.js';
+					 */
+					[ /(@ckeditor\/ckeditor5-|ckeditor5\/src\/)([a-z\-]+)(?:[a-z\-\/\.]+)?/g, '@ckeditor/ckeditor5-$2/dist/index.js' ]
 				],
 				sourceMap
 			} ),
