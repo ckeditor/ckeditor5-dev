@@ -24,6 +24,7 @@ module.exports = function parseConfig( viewerLogin, config ) {
 		CLOSE_ISSUE_MESSAGE,
 		CLOSE_PR_LABELS,
 		CLOSE_PR_MESSAGE,
+		STALE_PENDING_ISSUE_MESSAGE = STALE_ISSUE_MESSAGE,
 		PENDING_ISSUE_LABELS = [],
 		DAYS_BEFORE_STALE = 365,
 		DAYS_BEFORE_STALE_PENDING_ISSUE = 14,
@@ -49,6 +50,7 @@ module.exports = function parseConfig( viewerLogin, config ) {
 		shouldProcessPendingIssues: PENDING_ISSUE_LABELS.length > 0,
 		pendingIssueLabels: PENDING_ISSUE_LABELS,
 		staleIssueMessage: STALE_ISSUE_MESSAGE,
+		stalePendingIssueMessage: STALE_PENDING_ISSUE_MESSAGE,
 		stalePullRequestMessage: STALE_PR_MESSAGE,
 		closeIssueLabels: CLOSE_ISSUE_LABELS,
 		closeIssueMessage: CLOSE_ISSUE_MESSAGE,
@@ -74,6 +76,7 @@ module.exports = function parseConfig( viewerLogin, config ) {
  * @property {String} CLOSE_ISSUE_MESSAGE
  * @property {Array.<String>} CLOSE_PR_LABELS
  * @property {String} CLOSE_PR_MESSAGE
+ * @property {String} [STALE_PENDING_ISSUE_MESSAGE=STALE_ISSUE_MESSAGE]
  * @property {Array.<String>} [PENDING_ISSUE_LABELS=[]]
  * @property {Number} [DAYS_BEFORE_STALE=365]
  * @property {Number} [DAYS_BEFORE_STALE_PENDING_ISSUE=14]
@@ -95,6 +98,7 @@ module.exports = function parseConfig( viewerLogin, config ) {
  * @property {Boolean} shouldProcessPendingIssues
  * @property {Array.<String>} pendingIssueLabels
  * @property {String} staleIssueMessage
+ * @property {String} stalePendingIssueMessage
  * @property {String} stalePullRequestMessage
  * @property {Array.<String>} closeIssueLabels
  * @property {String} closeIssueMessage

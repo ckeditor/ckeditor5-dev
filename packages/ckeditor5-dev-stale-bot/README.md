@@ -42,6 +42,7 @@ The following configuration options are supported by the stale bot:
   * the last date of changing a label.
 * `DAYS_BEFORE_STALE_PENDING_ISSUE` &ndash; Optional, 14 by default. The number of days without a comment on pending issue from a non-team member that qualifies the issue to be marked as stale.
 * `PENDING_ISSUE_LABELS` &ndash; Optional, an empty array by default. A list of labels that identify a pending issue. If empty, then pending issues are not processed.
+* `STALE_PENDING_ISSUE_MESSAGE` &ndash; Optional, set to the value from `STALE_ISSUE_MESSAGE` by default. A comment that is added on the staled pending issues.
 * `DAYS_BEFORE_CLOSE` &ndash; Optional, 30 by default. The number of days before closing the stale issues or the stale pull requests.
 * `IGNORE_VIEWER_ACTIVITY` &ndash; Optional, `true` by default. If set, the activity from the currently authenticated user is ignored.
 * `IGNORED_ISSUE_LABELS` &ndash; Optional, an empty array by default. A list of labels, whose assignment to an issue causes the issue to be ignored, even if it fits the stale criteria.
