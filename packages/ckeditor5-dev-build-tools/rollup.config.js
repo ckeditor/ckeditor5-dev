@@ -37,6 +37,8 @@ export default defineConfig( {
 		nodeResolve( {
 			preferBuiltins: true
 		} ),
-		typescript()
+		typescript( {
+			rootDir: './src'
+		} )
 	]
 } );
