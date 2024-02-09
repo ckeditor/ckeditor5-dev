@@ -7,7 +7,7 @@ import { join } from 'path';
 import { test } from 'vitest';
 import terser from '@rollup/plugin-terser';
 import { rollup, type RollupOutput } from 'rollup';
-import { verifyAsset, verifyChunk } from '../../utils/utils.js';
+import { verifyAsset, verifyChunk } from '../../_test-utils/utils.js';
 
 import { replace, type RollupReplaceOptions } from '../../../src/index.js';
 

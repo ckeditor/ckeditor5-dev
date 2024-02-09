@@ -4,8 +4,9 @@
  */
 
 import { join } from 'path';
-import { test, expect } from 'vitest';
-import { rollup, type OutputChunk, type RollupOutput } from 'rollup';
+import { test } from 'vitest';
+import { rollup, type RollupOutput } from 'rollup';
+import { verifyChunk } from '../../_test-utils/utils.js';
 
 import { translations, type RollupTranslationsOptions } from '../../../src/index.js';
 
@@ -41,29 +42,14 @@ async function generateBundle(
 }
 
 /**
- * Helper function for validating a translation file.
- */
-function verifyOutput(
-	output: RollupOutput['output'],
-	filename: string,
-	code: string
-): void {
-	const chunk = output.find( output => output.name === filename );
-
-	expect( chunk ).toBeDefined();
-	expect( chunk!.type ).toBe( 'chunk' );
-	expect( ( chunk as OutputChunk ).code ).toBe( code );
-}
-
-/**
  * Test how the plugin behaves when no custom options are passed.
  */
 test( 'default options', async () => {
 	const output = await generateBundle();
 
-	verifyOutput( output, 'translations/pl.js', ALL_POLISH_TRANSLATIONS );
-	verifyOutput( output, 'translations/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
-	verifyOutput( output, 'translations/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
+	verifyChunk( output, 'translations/pl.js', ALL_POLISH_TRANSLATIONS );
+	verifyChunk( output, 'translations/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
+	verifyChunk( output, 'translations/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
 } );
 
 /**
@@ -73,9 +59,9 @@ test( 'banner', async () => {
 	const banner = 'BANNER';
 	const output = await generateBundle( undefined, banner );
 
-	verifyOutput( output, 'translations/pl.js', banner + ALL_POLISH_TRANSLATIONS );
-	verifyOutput( output, 'translations/de.js', banner + GERMAN_TRANSLATIONS_FROM_ROOT );
-	verifyOutput( output, 'translations/en.js', banner + ENGLISH_TRANSLATIONS_FROM_ROOT );
+	verifyChunk( output, 'translations/pl.js', banner + ALL_POLISH_TRANSLATIONS );
+	verifyChunk( output, 'translations/de.js', banner + GERMAN_TRANSLATIONS_FROM_ROOT );
+	verifyChunk( output, 'translations/en.js', banner + ENGLISH_TRANSLATIONS_FROM_ROOT );
 } );
 
 /**
@@ -86,9 +72,9 @@ test( 'source', async () => {
 		source: join( import.meta.dirname, './fixtures/*.po' )
 	} );
 
-	verifyOutput( output, 'translations/pl.js', POLISH_TRANSLATIONS_FROM_ROOT );
-	verifyOutput( output, 'translations/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
-	verifyOutput( output, 'translations/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
+	verifyChunk( output, 'translations/pl.js', POLISH_TRANSLATIONS_FROM_ROOT );
+	verifyChunk( output, 'translations/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
+	verifyChunk( output, 'translations/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
 } );
 
 /**
@@ -99,7 +85,7 @@ test( 'destination', async () => {
 		destination: 'languages'
 	} );
 
-	verifyOutput( output, 'languages/pl.js', ALL_POLISH_TRANSLATIONS );
-	verifyOutput( output, 'languages/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
-	verifyOutput( output, 'languages/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
+	verifyChunk( output, 'languages/pl.js', ALL_POLISH_TRANSLATIONS );
+	verifyChunk( output, 'languages/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
+	verifyChunk( output, 'languages/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
 } );

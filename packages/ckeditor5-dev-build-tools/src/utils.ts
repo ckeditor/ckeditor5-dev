@@ -21,7 +21,7 @@ export function camelize<const T extends string>( s: T ): CamelCase<T> {
 }
 
 /**
- * Transforms all object keys from `kebab-case` to `camelCase`.
+ * Transforms first-level object keys from `kebab-case` to `camelCase`.
  */
 export function camelizeObjectKeys<const T extends Record<string, any>>( obj: T ): CamelCasedProperties<T> {
 	return Object.fromEntries(
