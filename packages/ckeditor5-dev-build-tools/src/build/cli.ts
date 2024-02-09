@@ -1,3 +1,8 @@
+/**
+ * @license Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 import { rmSync } from 'fs';
 import { parseArgs } from 'util';
 import { rollup } from 'rollup';
@@ -55,11 +60,15 @@ export async function buildProject(): Promise<void> {
 			'clean': {
 				type: 'boolean',
 				default: false
+			},
+			'banner': {
+				type: 'boolean',
+				default: false
 			}
 		},
 
 		// Skip `node` and the name of the command.
-		args: process.argv.slice(2),
+		args: process.argv.slice( 2 ),
 
 		// Fail when unknown argument is used.
 		strict: true
@@ -78,7 +87,9 @@ export async function buildProject(): Promise<void> {
 	/**
 	 * Remove old build directory.
 	 */
-	args.clean && rmSync( getPath( 'dist' ), { recursive: true, force: true } );
+	if ( args.clean ) {
+		rmSync( getPath( 'dist' ), { recursive: true, force: true } );
+	}
 
 	/**
 	 * Run Rollup to generate bundles.
@@ -93,6 +104,6 @@ export async function buildProject(): Promise<void> {
 		file: getPath( 'dist', args.browser ? 'index.min.js' : 'index.js' ),
 		assetFileNames: '[name][extname]',
 		sourcemap: args.sourceMap,
-		banner
+		banner: args.banner ? banner : undefined
 	} );
 }

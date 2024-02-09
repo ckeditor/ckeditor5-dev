@@ -1,8 +1,13 @@
+/**
+ * @license Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 import { createRequire } from 'module';
 import { readFileSync, accessSync, constants } from 'fs';
 import chalk from 'chalk';
 import type { PackageJson } from 'type-fest';
-import { defineConfig, Plugin, type RollupOptions } from 'rollup';
+import { defineConfig, type Plugin, type RollupOptions } from 'rollup';
 import { getPath } from '../utils.js';
 
 /**
@@ -29,13 +34,12 @@ import postcssNesting from 'postcss-nesting';
  * In the future, we could try using `rollup-plugin-esbuild` to greatly improve
  * the build speed, but this would require running `tsc --emitDeclarationOnly`
  * separately to generate TypeScript declaration files.
- * 
+ *
  * Besides improved build speed, it'd allow us to remove the following plugins:
  * - `@rollup/plugin-json`,
  * - `@rollup/plugin-typescript`,
  * - `rollup-plugin-modify`,
  * - `@rollup/plugin-commonjs`,
- * - `@rollup/plugin-terser` (use it only for mangling),
  * - `rollup-plugin-svg-import` (probably, with `loader: text`).
  */
 
@@ -51,7 +55,7 @@ const pkg: PackageJson = JSON.parse(
  * packages defined in `dependencies` and `peerDependencies` of the package
  * and all packages starting with `@ckeditor` will be treated as externals.
  */
-const externals: string[] = Object.keys(
+const externals: Array<string> = Object.keys(
 	Object.assign(
 		{ '@ckeditor': true },
 		pkg.dependencies,
@@ -66,9 +70,10 @@ export interface Options {
 	translations: boolean;
 	sourceMap: boolean;
 	bundle: boolean;
-	external: string[];
+	external: Array<string>;
 	minify: boolean;
 }
+
 /**
  * Generates Rollup configurations.
  */
@@ -77,7 +82,7 @@ export async function getRollupOutputs( options: Options ): Promise<RollupOption
 		...options,
 		external: options.external.length ? options.external : externals,
 		input: getPath( options.input ),
-		tsconfig: getPath( options.tsconfig ),
+		tsconfig: getPath( options.tsconfig )
 	};
 
 	return getConfiguration( data );
@@ -108,6 +113,7 @@ async function getConfiguration( {
 			/**
 			 * Converts CommonJS modules to ES6.
 			 */
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			commonjs( {
 				sourceMap,
@@ -125,6 +131,7 @@ async function getConfiguration( {
 			/**
 			 * Allows importing JSON files.
 			 */
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			json(),
 
@@ -143,6 +150,7 @@ async function getConfiguration( {
 			/**
 			 * Allows using imports, mixins and nesting in CSS and exctacts output CSS to a separate file.
 			 */
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			styles( {
 				mode: [
@@ -169,15 +177,15 @@ async function getConfiguration( {
 			replace( {
 				replace: [
 					/**
-					 * Replaces the following imports with '@ckeditor/ckeditor5-core':
-					 * 
+					 * Replaces the following imports with '@ckeditor/ckeditor5-core/dist/index.js':
+					 *
 					 * - 'ckeditor5/src/core';
 					 * - 'ckeditor5/src/core.js';
 					 * - '@ckeditor/ckeditor5-core';
 					 * - '@ckeditor/ckeditor5-core/src/index';
 					 * - '@ckeditor/ckeditor5-core/src/index.js';
 					 */
-					[ /(@ckeditor\/ckeditor5-|ckeditor5\/src\/)([a-z\-]+)(?:[a-z\-\/\.]+)?/g, '@ckeditor/ckeditor5-$2/dist/index.js' ]
+					[ /(@ckeditor\/ckeditor5-|ckeditor5\/src\/)([a-z-]+)(?:[a-z\-/.]+)?/g, '@ckeditor/ckeditor5-$2/dist/index.js' ]
 				],
 				sourceMap
 			} ),
@@ -185,12 +193,15 @@ async function getConfiguration( {
 			/**
 			 * Minifies and mangles the output. It also removes all code comments except for license comments.
 			 */
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			minify && terser( {
 				sourceMap,
 				format: {
 					// TODO
-					comments: ( node: any, comment: any ) => /@license/.test( comment.value ) && ( /^!/.test( comment.value ) || !/CKSource/.test( comment.value ) )
+					comments( node: any, comment: any ) {
+						return /@license/.test( comment.value ) && ( /^!/.test( comment.value ) || !/CKSource/.test( comment.value ) );
+					}
 				}
 			} )
 		]
@@ -204,7 +215,7 @@ function getTypeScriptPlugin( {
 	tsconfig,
 	sourceMap,
 	browser
-}: Pick<Options, 'tsconfig' | 'sourceMap' | 'browser'> ): Plugin | void {
+}: Pick<Options, 'tsconfig' | 'sourceMap' | 'browser'> ): Plugin | undefined {
 	try {
 		/**
 		 * Check if tsconfig file exists.
@@ -221,6 +232,7 @@ function getTypeScriptPlugin( {
 			{ paths: [ process.cwd() ] }
 		);
 
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		return typescriptPlugin( {
 			tsconfig,
@@ -235,6 +247,5 @@ function getTypeScriptPlugin( {
 		} );
 	} catch {
 		console.log( chalk.yellow( 'Could not find the TypeScript configuration file. Skipping TypeScript processing.\n' ) );
-		return;
 	}
 }

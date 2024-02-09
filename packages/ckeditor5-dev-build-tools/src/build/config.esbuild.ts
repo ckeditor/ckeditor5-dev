@@ -1,7 +1,12 @@
+/**
+ * @license Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 import { readFileSync } from 'fs';
 import { createRequire } from 'module';
 import { defineConfig, type RollupOptions } from 'rollup';
-import { PackageJson } from 'type-fest';
+import type { PackageJson } from 'type-fest';
 
 import styles from 'rollup-plugin-styles';
 import svg from 'rollup-plugin-svg-import';
@@ -20,7 +25,7 @@ import { translations } from '../plugins/translations.js';
  * In the future, we could try using `rollup-plugin-esbuild` to greatly improve
  * the build speed, but this would require running `tsc --emitDeclarationOnly`
  * separately to generate TypeScript declaration files.
- * 
+ *
  * Besides improved build speed, it'd allow us to remove the following plugins:
  * - `@rollup/plugin-json`,
  * - `@rollup/plugin-typescript`,
@@ -40,7 +45,7 @@ const pkg: PackageJson = JSON.parse(
 /**
  * List of all `dependencies` and `peerDependencies` in the package.
  */
-const externals: string[] = Object.keys(
+const externals: Array<string> = Object.keys(
 	Object.assign( {}, pkg.dependencies, pkg.peerDependencies )
 );
 
@@ -66,7 +71,7 @@ type ConfigOptions = Omit<Options, 'browser'>;
 /**
  * Generates Rollup configurations.
  */
-export async function getRollupOutputs( options: Options ): Promise<RollupOptions[]> {
+export async function getRollupOutputs( options: Options ): Promise<Array<RollupOptions>> {
 	const data: ConfigOptions = {
 		input: options.input && getPath( options.input ),
 		tsconfig: options.tsconfig && getPath( options.tsconfig ),
@@ -74,7 +79,7 @@ export async function getRollupOutputs( options: Options ): Promise<RollupOption
 		mangle: options.mangle
 	};
 
-	const configs: RollupOptions[] = [
+	const configs: Array<RollupOptions> = [
 		await getConfiguration( data, false )
 	];
 
@@ -114,6 +119,7 @@ async function getConfiguration(
 		external: ( id: string ) => !forBrowser && externals.some( name => id.startsWith( name ) ),
 
 		plugins: [
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			commonjs( {
 				defaultIsModuleExports: true
@@ -125,7 +131,7 @@ async function getConfiguration(
 			} ),
 
 			esbuild( {
-				exclude: [/node_modules/, ...externals],
+				exclude: [ /node_modules/, ...externals ],
 				format: 'esm',
 				treeShaking: true,
 				sourceMap: shouldGenerateSourceMap,
@@ -145,6 +151,7 @@ async function getConfiguration(
 
 			translations(),
 
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			styles( {
 				mode: [
@@ -158,7 +165,7 @@ async function getConfiguration(
 				],
 				minimize: forBrowser,
 				sourceMap: shouldGenerateSourceMap
-			} ),
+			} )
 		]
 	} );
 }

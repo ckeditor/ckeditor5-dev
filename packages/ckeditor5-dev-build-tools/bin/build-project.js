@@ -12,19 +12,20 @@
 import chalk from 'chalk';
 import { buildProject } from '../dist/index.js';
 
-try {
-	await buildProject();
+buildProject()
+	.then( () => process.exit( 0 ) )
+	.catch( error => {
+		if ( error.name === 'RollupError' ) {
+			console.log( chalk.red( chalk.bold( 'ERROR:' ) + `Error occured when processing the file "${ error.id }".` ) );
+			console.log( error.message );
 
-	process.exit( 0 );
-} catch( error ) {
-	if ( error.name === 'RollupError' ) {
-		console.log( chalk.red( chalk.bold( 'ERROR:' ) + `Error occured when processing the file "${ error.id }".` ) );
-		console.log( error.message );
-		error.frame && console.log( error.frame );
-	} else {
-		console.log( chalk.red( chalk.bold( 'ERROR:' ) + 'The build process failed with the following error:' ) );
-		console.log( error.message );
-	}
+			if ( error.frame ) {
+				console.log( error.frame );
+			}
+		} else {
+			console.log( chalk.red( chalk.bold( 'ERROR:' ) + 'The build process failed with the following error:' ) );
+			console.log( error.message );
+		}
 
-	process.exit( 1 );
-}
+		process.exit( 1 );
+	} );
