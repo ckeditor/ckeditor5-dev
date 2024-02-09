@@ -24,14 +24,21 @@
   ],
   "dependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
+    "@rollup/pluginutils": "^5.1.0",
+    "css": "^3.0.0",
+    "css-tree": "^2.3.1",
     "glob": "^10.3.10",
     "pofile": "^1.1.4",
     "rollup": "^4.9.5",
+    "rollup-plugin-delete": "^2.0.0",
+    "rollup-plugin-styles": "^4.0.0",
     "upath": "^2.0.1"
   },
   "devDependencies": {
+    "@types/css": "^0.0.37",
     "@types/node": "^20.11.5",
     "@vitest/coverage-v8": "^1.2.1",
     "lodash-es": "^4.17.21",

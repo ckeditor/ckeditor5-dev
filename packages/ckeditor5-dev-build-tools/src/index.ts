@@ -4,3 +4,4 @@
  */
 
 export { translations, type RollupTranslationsOptions } from './plugins/translations.js';
+export { cssStyles } from './plugins/cssStyles.js';
