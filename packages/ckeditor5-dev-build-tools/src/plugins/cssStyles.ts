@@ -3,9 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-import { createFilter } from '@rollup/pluginutils'
-import { parse, type Rule, type Declaration, type StyleRules, type Stylesheet } from 'css';
-import type { Plugin, GetModuleInfo, OutputBundle } from 'rollup';
+import { createFilter } from '@rollup/pluginutils';
+import { parse, type Rule, type Declaration, type Stylesheet } from 'css';
+import type { Plugin, GetModuleInfo, OutputBundle, OutputChunk } from 'rollup';
+
+/**
+ * Filter files only with `css` extension.
+ */
+const filter = createFilter( [ '**/*.css' ] );
 
 export function cssStyles(): Plugin {
 	const styles: Record<string, string> = {};
@@ -14,7 +19,7 @@ export function cssStyles(): Plugin {
 		name: 'ck5-styles',
 		transform( code, id ) {
 			if ( !filter( id ) ) {
-				return
+				return;
 			}
 
 			styles[ id ] = code;
@@ -32,7 +37,8 @@ export function cssStyles(): Plugin {
 
 			// Determine import order of files
 			for ( const file in bundle ) {
-				const root = bundle[ file ]!.facadeModuleId;
+				const outputChunk = bundle[ file ]! as OutputChunk;
+				const root = outputChunk.facadeModuleId!;
 				const modules = getCSSModules( root, this.getModuleInfo );
 
 				modules.forEach( id => ids.add( id as string ) );
@@ -47,13 +53,8 @@ export function cssStyles(): Plugin {
 			this.emitFile( { type: 'asset', fileName: 'editor-styles.css', source: editorStylesContent + '\n' } );
 			this.emitFile( { type: 'asset', fileName: 'content-styles.css', source: editingViewStylesContent + '\n' } );
 		}
-	}
+	};
 }
-
-/**
- * Filter files only with `css` extension.
- */
-const filter = createFilter( ['**/*.css'] );
 
 /**
  * Get all CSS modules in the order that they were imported
@@ -93,7 +94,7 @@ function getCSSModules( id: string, getModuleInfo: GetModuleInfo, modules = new 
 	return modules;
 }
 
-function combineStylesheetsIntoOne( ids: Set<string>, styles:Record<string, string> ): string {
+function combineStylesheetsIntoOne( ids: Set<string>, styles: Record<string, string> ): string {
 	return Array.from( ids ).map( id => styles[ id ] ).join( '\n' );
 }
 
@@ -103,9 +104,9 @@ function combineStylesheetsIntoOne( ids: Set<string>, styles:Record<string, stri
  */
 
 function divideStylesheetDependingOnItsPurpose( parsedCss: Stylesheet ): Record< string, string> {
-	const rules = parsedCss.stylesheet!.rules;
+	const rules: Array<Rule> = parsedCss.stylesheet!.rules;
+	const rootDefinitionsList: Array<string> = [];
 
-	let rootDefinitionsList:Array<string> = [];
 	let editorStylesContent = '';
 	let editingViewStylesContent = '';
 	let allStylesContent = '';
@@ -128,7 +129,6 @@ function divideStylesheetDependingOnItsPurpose( parsedCss: Stylesheet ): Record<
 	const rootDefinitionsText = rootDefinitionsList.join( '' );
 
 	if ( rootDefinitionsText.length ) {
-
 		const dividedRootCssVariables = filterCssVariablesBasedOnUsage(
 			rootDefinitionsText,
 			{
@@ -143,7 +143,7 @@ function divideStylesheetDependingOnItsPurpose( parsedCss: Stylesheet ): Record<
 		allStylesContent = ruleDeclarationsWithSelector + allStylesContent;
 	}
 
-	return { editorStylesContent, editingViewStylesContent, allStylesContent }
+	return { editorStylesContent, editingViewStylesContent, allStylesContent };
 }
 
 /**
@@ -151,28 +151,35 @@ function divideStylesheetDependingOnItsPurpose( parsedCss: Stylesheet ): Record<
  * @returns
  */
 
-function filterCssVariablesBasedOnUsage( rootDefinitionsText: string, dividedStylesheets: { [key: string]: string; } ): Record<string, string> {
+function filterCssVariablesBasedOnUsage(
+	rootDefinitionsText: string,
+	dividedStylesheets: { [key: string]: string }
+): Record<string, string> {
 	const VARIABLE_DEFINITION_REGEXP = /--([\w-]+)/gm;
 
 	if ( rootDefinitionsText.length === 0 ) {
 		return {
 			rootDeclarationForEditorStyles: '',
 			rootDeclarationForEditingViewStyles: ''
-		}
+		};
 	}
 
-	const variablesUsedInEditorStylesContent: Set<string> = new Set( dividedStylesheets.editorStylesContent!.match( VARIABLE_DEFINITION_REGEXP ) );
-	const variablesUsedInEditingViewStylesContent: Set<string> = new Set( dividedStylesheets.editingViewStylesContent!.match( VARIABLE_DEFINITION_REGEXP ) );
+	const variablesUsedInEditorStylesContent: Set<string> = new Set(
+		dividedStylesheets.editorStylesContent!.match( VARIABLE_DEFINITION_REGEXP ) );
+	const variablesUsedInEditingViewStylesContent: Set<string> = new Set(
+		dividedStylesheets.editingViewStylesContent!.match( VARIABLE_DEFINITION_REGEXP ) );
 
 	const rootDeclarationWithSelector = wrapDefinitionsIntoSelector( ':root', rootDefinitionsText );
 
-	const rootDeclarationForEditorStyles = createRootDeclarationOfUsedVariables( rootDeclarationWithSelector, variablesUsedInEditorStylesContent );
-	const rootDeclarationForEditingViewStyles = createRootDeclarationOfUsedVariables( rootDeclarationWithSelector, variablesUsedInEditingViewStylesContent );
+	const rootDeclarationForEditorStyles = createRootDeclarationOfUsedVariables(
+		rootDeclarationWithSelector, variablesUsedInEditorStylesContent );
+	const rootDeclarationForEditingViewStyles = createRootDeclarationOfUsedVariables(
+		rootDeclarationWithSelector, variablesUsedInEditingViewStylesContent );
 
 	return {
 		rootDeclarationForEditorStyles,
 		rootDeclarationForEditingViewStyles
-	}
+	};
 }
 
 /**
@@ -191,7 +198,7 @@ function createRootDeclarationOfUsedVariables( rootDeclaration: string, listUsed
 			return acc;
 		}
 
-		const property = `${ currentDeclaration.property }: ${ currentDeclaration.value };\n`
+		const property = `${ currentDeclaration.property }: ${ currentDeclaration.value };\n`;
 		return acc + property;
 	}, '' );
 
@@ -214,7 +221,7 @@ function getRuleDeclarations( declarations: Array<Declaration> ): string {
 			return acc;
 		}
 
-		const property = `${ currentDeclaration.property }: ${ currentDeclaration.value };\n`
+		const property = `${ currentDeclaration.property }: ${ currentDeclaration.value };\n`;
 		return acc + property;
 	}, '' );
 }
@@ -225,8 +232,8 @@ function getRuleDeclarations( declarations: Array<Declaration> ): string {
  */
 function divideRuleStylesBetweenStylesheets( rule: Rule ) {
 	const selector = rule.selectors![ 0 ] || '';
+	const rootDefinitions = [];
 
-	let rootDefinitions = [];
 	let editorStyles = '';
 	let editingViewStyles = '';
 	let allStyles = '';
@@ -243,7 +250,7 @@ function divideRuleStylesBetweenStylesheets( rule: Rule ) {
 
 	// all styles
 	if ( !isRootSelector ) {
-		allStyles += ruleDeclarationsWithSelector
+		allStyles += ruleDeclarationsWithSelector;
 	}
 
 	if ( isStartingWithContentSelector ) {
