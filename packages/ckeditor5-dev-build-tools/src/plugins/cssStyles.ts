@@ -28,12 +28,6 @@ export function cssStyles(): Plugin {
 
 			return '';
 		},
-		// ////
-		// `moduleParsed` is just for debugging.
-		// ////
-		moduleParsed( moduleInfo ) {
-			console.log( `Module ${ moduleInfo.id } has been parsed.` );
-		},
 		async generateBundle( output: NormalizedOutputOptions, bundle: OutputBundle ) {
 			const banner = await getBanner( output, bundle );
 			const ids: Set<string> = new Set();
