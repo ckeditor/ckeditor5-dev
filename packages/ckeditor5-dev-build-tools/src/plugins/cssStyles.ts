@@ -7,6 +7,8 @@ import { createFilter } from '@rollup/pluginutils';
 import { parse, type Rule, type Declaration, type Stylesheet } from 'css';
 import type { Plugin, GetModuleInfo, OutputBundle, OutputChunk, NormalizedOutputOptions } from 'rollup';
 
+import { getBanner } from './utils.js';
+
 /**
  * Filter files only with `css` extension.
  */
@@ -75,18 +77,6 @@ export function cssStyles(): Plugin {
  */
 function unifyFileContentOutput( content: string | undefined, banner: string ): string {
 	return `${ banner }\n${ content ? content : '' }\n`;
-}
-
-/**
- * Get `banner` from the `Rollup` configuration object.
- */
-function getBanner( output: NormalizedOutputOptions, bundle: OutputBundle ): Promise<string> | string {
-	const mainChunk = Object
-		.values( bundle )
-		.filter( ( output ): output is OutputChunk => output.type === 'chunk' )
-		.find( chunk => chunk.isEntry )!;
-
-	return output.banner( mainChunk );
 }
 
 /**
