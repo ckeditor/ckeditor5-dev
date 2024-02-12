@@ -242,20 +242,20 @@ function divideRuleStylesBetweenStylesheets( rule: Rule ) {
 	const isRootSelector = selector.includes( ':root' );
 	const isStartingWithContentSelector = selector.startsWith( '.ck-content' );
 
-	// :root need to be in both places at the top
+	// `:root` selector need to be in each file at the top.
 	if ( isRootSelector ) {
 		rootDefinitions.push( ruleDeclarations );
 	}
 
-	// all styles
+	// Dividing styles depending on purpose
 	if ( !isRootSelector ) {
 		allStyles += ruleDeclarationsWithSelector;
-	}
 
-	if ( isStartingWithContentSelector ) {
-		editingViewStyles += ruleDeclarationsWithSelector;
-	} else {
-		editorStyles += ruleDeclarationsWithSelector;
+		if ( isStartingWithContentSelector ) {
+			editingViewStyles += ruleDeclarationsWithSelector;
+		} else {
+			editorStyles += ruleDeclarationsWithSelector;
+		}
 	}
 
 	return {
