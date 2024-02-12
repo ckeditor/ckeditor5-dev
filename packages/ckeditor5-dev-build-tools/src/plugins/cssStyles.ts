@@ -159,17 +159,17 @@ function divideStylesheetDependingOnItsPurpose( parsedCss: Stylesheet ): Record<
 		}
 	} );
 
-	const rootDefinitionsText = rootDefinitionsList.join( '' );
+	const rootDefinitions = rootDefinitionsList.join( '' );
 
-	if ( rootDefinitionsText.length ) {
+	if ( rootDefinitions.length ) {
 		const dividedRootCssVariables = filterCssVariablesBasedOnUsage(
-			rootDefinitionsText,
+			rootDefinitions,
 			{
 				editorStylesContent,
 				editingViewStylesContent
 			} );
 
-		const ruleDeclarationsWithSelector = wrapDefinitionsIntoSelector( ':root', rootDefinitionsText );
+		const ruleDeclarationsWithSelector = wrapDefinitionsIntoSelector( ':root', rootDefinitions );
 
 		editorStylesContent = dividedRootCssVariables.rootDeclarationForEditorStyles + editorStylesContent;
 		editingViewStylesContent = dividedRootCssVariables.rootDeclarationForEditingViewStyles + editingViewStylesContent;
@@ -185,12 +185,12 @@ function divideStylesheetDependingOnItsPurpose( parsedCss: Stylesheet ): Record<
  */
 
 function filterCssVariablesBasedOnUsage(
-	rootDefinitionsText: string,
+	rootDefinitions: string,
 	dividedStylesheets: { [key: string]: string }
 ): Record<string, string> {
 	const VARIABLE_DEFINITION_REGEXP = /--([\w-]+)/gm;
 
-	if ( rootDefinitionsText.length === 0 ) {
+	if ( rootDefinitions.length === 0 ) {
 		return {
 			rootDeclarationForEditorStyles: '',
 			rootDeclarationForEditingViewStyles: ''
@@ -202,12 +202,10 @@ function filterCssVariablesBasedOnUsage(
 	const variablesUsedInEditingViewStylesContent: Set<string> = new Set(
 		dividedStylesheets.editingViewStylesContent!.match( VARIABLE_DEFINITION_REGEXP ) );
 
-	const rootDeclarationWithSelector = wrapDefinitionsIntoSelector( ':root', rootDefinitionsText );
-
 	const rootDeclarationForEditorStyles = createRootDeclarationOfUsedVariables(
-		rootDeclarationWithSelector, variablesUsedInEditorStylesContent );
+		rootDefinitions, variablesUsedInEditorStylesContent );
 	const rootDeclarationForEditingViewStyles = createRootDeclarationOfUsedVariables(
-		rootDeclarationWithSelector, variablesUsedInEditingViewStylesContent );
+		rootDefinitions, variablesUsedInEditingViewStylesContent );
 
 	return {
 		rootDeclarationForEditorStyles,
@@ -221,8 +219,13 @@ function filterCssVariablesBasedOnUsage(
  * @param listUsedVariables
  * @returns
  */
-function createRootDeclarationOfUsedVariables( rootDeclaration: string, listUsedVariables: Set<string> ): string {
-	const parsedRootDeclaration = parse( rootDeclaration );
+function createRootDeclarationOfUsedVariables( rootDefinitions: string, listUsedVariables: Set<string> ): string {
+	if ( rootDefinitions.length === 0 || listUsedVariables.size === 0 ) {
+		return '';
+	}
+
+	const rootDeclarationWithSelector = wrapDefinitionsIntoSelector( ':root', rootDefinitions );
+	const parsedRootDeclaration = parse( rootDeclarationWithSelector );
 	const firstRule = parsedRootDeclaration.stylesheet!.rules[ 0 ] as Rule;
 	const listOfDeclarations = firstRule.declarations as Array<Declaration>;
 
@@ -235,28 +238,7 @@ function createRootDeclarationOfUsedVariables( rootDeclaration: string, listUsed
 		return acc + property;
 	}, '' );
 
-	if ( variablesDefinitions.length === 0 ) {
-		return '';
-	}
-
-	const rootDeclarationWithSelector = wrapDefinitionsIntoSelector( ':root', variablesDefinitions );
-
-	return rootDeclarationWithSelector;
-}
-
-/**
- * TODO
- * @returns
- */
-function getRuleDeclarations( declarations: Array<Declaration> ): string {
-	return declarations.reduce( ( acc, currentDeclaration ) => {
-		if ( currentDeclaration.type !== 'declaration' ) {
-			return acc;
-		}
-
-		const property = `${ currentDeclaration.property }: ${ currentDeclaration.value };\n`;
-		return acc + property;
-	}, '' );
+	return wrapDefinitionsIntoSelector( ':root', variablesDefinitions );
 }
 
 /**
@@ -298,6 +280,21 @@ function divideRuleStylesBetweenStylesheets( rule: Rule ) {
 		editingViewStyles,
 		allStyles
 	};
+}
+
+/**
+ * TODO
+ * @returns
+ */
+function getRuleDeclarations( declarations: Array<Declaration> ): string {
+	return declarations.reduce( ( acc, currentDeclaration ) => {
+		if ( currentDeclaration.type !== 'declaration' ) {
+			return acc;
+		}
+
+		const property = `${ currentDeclaration.property }: ${ currentDeclaration.value };\n`;
+		return acc + property;
+	}, '' );
 }
 
 /**
