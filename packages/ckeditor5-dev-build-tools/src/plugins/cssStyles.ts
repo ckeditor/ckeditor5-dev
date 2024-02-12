@@ -5,7 +5,7 @@
 
 import { createFilter } from '@rollup/pluginutils';
 import { parse, type Rule, type Declaration, type Stylesheet } from 'css';
-import type { Plugin, GetModuleInfo, OutputBundle, OutputChunk } from 'rollup';
+import type { Plugin, GetModuleInfo, OutputBundle, OutputChunk, NormalizedOutputOptions } from 'rollup';
 
 /**
  * Filter files only with `css` extension.
@@ -32,7 +32,8 @@ export function cssStyles(): Plugin {
 		moduleParsed( moduleInfo ) {
 			console.log( `Module ${ moduleInfo.id } has been parsed.` );
 		},
-		generateBundle( opts, bundle: OutputBundle ) {
+		async generateBundle( output: NormalizedOutputOptions, bundle: OutputBundle ) {
+			const banner = await getBanner( output, bundle );
 			const ids: Set<string> = new Set();
 
 			// Determine import order of files
@@ -49,11 +50,43 @@ export function cssStyles(): Plugin {
 			const { editorStylesContent, editingViewStylesContent, allStylesContent } = divideStylesheetDependingOnItsPurpose( parsedCss );
 
 			// Emit styles to files
-			this.emitFile( { type: 'asset', fileName: 'styles.css', source: allStylesContent + '\n' } );
-			this.emitFile( { type: 'asset', fileName: 'editor-styles.css', source: editorStylesContent + '\n' } );
-			this.emitFile( { type: 'asset', fileName: 'content-styles.css', source: editingViewStylesContent + '\n' } );
+			this.emitFile( {
+				type: 'asset',
+				fileName: 'styles.css',
+				source: unifyFileContentOutput( allStylesContent, banner )
+			} );
+			this.emitFile( {
+				type: 'asset',
+				fileName: 'editor-styles.css',
+				source: unifyFileContentOutput( editorStylesContent, banner )
+			} );
+			this.emitFile( {
+				type: 'asset',
+				fileName: 'content-styles.css',
+				source: unifyFileContentOutput( editingViewStylesContent, banner )
+			} );
 		}
 	};
+}
+
+/**
+ * @param content is a CSS file content.
+ * @param banner
+ */
+function unifyFileContentOutput( content: string | undefined, banner: string ): string {
+	return `${ banner }\n${ content ? content : '' }\n`;
+}
+
+/**
+ * Get `banner` from the `Rollup` configuration object.
+ */
+function getBanner( output: NormalizedOutputOptions, bundle: OutputBundle ): Promise<string> | string {
+	const mainChunk = Object
+		.values( bundle )
+		.filter( ( output ): output is OutputChunk => output.type === 'chunk' )
+		.find( chunk => chunk.isEntry )!;
+
+	return output.banner( mainChunk );
 }
 
 /**
