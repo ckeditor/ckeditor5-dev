@@ -14,11 +14,11 @@ import { getBanner } from './utils.js';
  */
 const filter = createFilter( [ '**/*.css' ] );
 
-export function cssStyles(): Plugin {
+export function splitCss(): Plugin {
 	const styles: Record<string, string> = {};
 
 	return {
-		name: 'ck5-styles',
+		name: 'cke5-styles',
 		transform( code, id ) {
 			if ( !filter( id ) ) {
 				return;
