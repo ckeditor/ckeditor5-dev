@@ -30,6 +30,7 @@
     "@rollup/pluginutils": "^5.1.0",
     "css": "^3.0.0",
     "glob": "^10.3.10",
+    "magic-string": "^0.30.7",
     "pofile": "^1.1.4",
     "rollup": "^4.9.5",
     "rollup-plugin-delete": "^2.0.0",

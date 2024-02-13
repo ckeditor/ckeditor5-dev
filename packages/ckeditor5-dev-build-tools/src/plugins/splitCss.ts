@@ -6,6 +6,7 @@
 import { createFilter } from '@rollup/pluginutils';
 import { parse, type Rule, type Declaration, type Stylesheet } from 'css';
 import type { Plugin, GetModuleInfo, OutputBundle, OutputChunk, NormalizedOutputOptions } from 'rollup';
+import MagicString, { Bundle } from 'magic-string';
 
 import { getBanner } from './utils.js';
 
@@ -70,7 +71,15 @@ export function splitCss(): Plugin {
  * @param banner
  */
 function unifyFileContentOutput( content: string | undefined, banner: string ): string {
-	return `${ banner }\n${ content ? content : '' }\n`;
+	const bundle = new Bundle();
+
+	bundle.addSource( {
+		content: new MagicString( content ? content : '' );
+	} );
+
+	bundle.prepend( `${ banner }\n` ).append( '\n' );
+
+	return bundle.toString();
 }
 
 /**
