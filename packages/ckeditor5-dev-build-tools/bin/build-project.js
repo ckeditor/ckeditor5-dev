@@ -10,9 +10,9 @@
 'use strict';
 
 import chalk from 'chalk';
-import { buildProject } from '../dist/index.js';
+import { build } from '../dist/index.js';
 
-buildProject()
+build()
 	.then( () => process.exit( 0 ) )
 	.catch( error => {
 		if ( error.name === 'RollupError' ) {

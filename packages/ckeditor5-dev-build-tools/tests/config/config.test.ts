@@ -1,6 +1,7 @@
 import { test, expect } from 'vitest';
-import { getRollupOutputs, type Options } from '../../src/config.js';
-import { join, relative } from 'path';
+import { getRollupOutputs } from '../../src/config.js';
+
+type Options = Parameters<typeof getRollupOutputs>[0];
 
 const defaults: Options = {
 	input: '',
@@ -17,27 +18,19 @@ function getConfig( config: Partial<Options> = {} ) {
 	return getRollupOutputs( Object.assign( {}, defaults, config ) );
 }
 
-function fixturePath( path: string ) {
-	return relative(
-		process.cwd(),
-		join( import.meta.dirname, 'fixtures', path )
-	);
-}
-
 test( '--input', async () => {
-	const config = await getConfig( {
-		input: './src/index.ts'
-	} );
+	const input = process.cwd() + '/src/main.ts';
+	const config = await getConfig( { input } );
 
-	expect( config.input ).toBe( process.cwd() + '/src/index.ts' );
+	expect( config.input ).toBe( input );
 } );
 
 test( '--tsconfig', async () => {
 	const fileExists = await getConfig( {
-		tsconfig: fixturePath( 'tsconfig.fixture.json' )
+		tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json'
 	} );
 	const fileDoesntExist = await getConfig( {
-		tsconfig: fixturePath( 'tsconfig.non-existing.json' )
+		tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.non-existing.json'
 	} );
 
 	expect( fileDoesntExist.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( false );

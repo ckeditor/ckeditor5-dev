@@ -6,7 +6,7 @@
 import { join } from 'path';
 import { test } from 'vitest';
 import { rollup, type RollupOutput } from 'rollup';
-import { verifyChunk } from '../../_test-utils/utils.js';
+import { verifyChunk } from '../../_utils/utils.js';
 
 import { translations, type RollupTranslationsOptions } from '../../../src/index.js';
 

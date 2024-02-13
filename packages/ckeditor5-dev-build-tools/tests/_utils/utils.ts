@@ -35,4 +35,3 @@ export function verifyChunk(
 	expect( chunk!.type ).toBe( 'chunk' );
 	expect( ( chunk as OutputChunk ).code ).includes( code );
 }
-

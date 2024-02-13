@@ -3,11 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
+import { existsSync, readFileSync } from 'fs';
 import { createRequire } from 'module';
-import { readFileSync, accessSync, constants } from 'fs';
 import type { PackageJson } from 'type-fest';
 import { type Plugin, type RollupOptions } from 'rollup';
 import { getPath } from './utils.js';
+import type { BuildOptions } from './build.js';
 
 /**
  * Rollup plugins
@@ -62,21 +63,10 @@ const defaultExternals: Array<string> = Object.keys(
 	)
 );
 
-export interface Options {
-	input: string;
-	tsconfig: string;
-	external: Array<string>;
-	browser: boolean;
-	translations: boolean;
-	sourceMap: boolean;
-	bundle: boolean;
-	minify: boolean;
-}
-
 /**
  * Generates Rollup configurations.
  */
-export async function getRollupOutputs( options: Options ) {
+export async function getRollupOutputs( options: Omit<BuildOptions, 'clean' | 'banner'> ) {
 	const {
 		input,
 		tsconfig,
@@ -88,9 +78,7 @@ export async function getRollupOutputs( options: Options ) {
 		minify
 	} = {
 		...options,
-		input: getPath( options.input ),
-		tsconfig: getPath( options.tsconfig ),
-		external: options.external.length ? options.external : defaultExternals
+		external: options.external || defaultExternals
 	};
 
 	return {
@@ -192,10 +180,15 @@ export async function getRollupOutputs( options: Options ) {
 				sourceMap,
 				format: {
 					// TODO
-					comments( node: any, comment: any ) {
-						return /@license/.test( comment.value )
-							&& /@copyright/.test( comment.value )
-							&& ( /^!/.test( comment.value ) || !/CKSource/.test( comment.value ) );
+					comments( _: any, { value }: any ) {
+						/**
+						 * Keep comments including @license and @copyright, but only do so for
+						 * CKSource comments when they starts with '!'. This is to prevent hundreds
+						 * of our legal comments (which every source file contains) from being
+						 * added to the final bundle.
+						 */
+						return ( value.includes( 'license' ) || value.includes( 'copyright' ) )
+							&& ( value.startsWith( '!' ) || !value.includes( 'CKSource' ) );
 					}
 				}
 			} )
@@ -210,35 +203,32 @@ function getTypeScriptPlugin( {
 	tsconfig,
 	sourceMap,
 	browser
-}: Pick<Options, 'tsconfig' | 'sourceMap' | 'browser'> ): Plugin | undefined {
-	try {
-		/**
-		 * Check if tsconfig file exists.
-		 */
-		accessSync( tsconfig, constants.R_OK );
+}: Pick<BuildOptions, 'tsconfig' | 'sourceMap' | 'browser'> ): Plugin | undefined {
+	if ( !existsSync( tsconfig ) ) {
+		return;
+	}
 
-		/**
-		 * Get the path to TypeScript relative to the current working directory. This is needed,
-		 * because this plugin might use different TypeScript version than the project using it.
-		 */
-		const require = createRequire( import.meta.url );
-		const typescriptPath = require.resolve(
-			'typescript',
-			{ paths: [ process.cwd() ] }
-		);
+	/**
+	 * Get the path to TypeScript relative to the current working directory. This is needed,
+	 * because this plugin might use different TypeScript version than the project using it.
+	 */
+	const require = createRequire( import.meta.url );
+	const typescriptPath = require.resolve(
+		'typescript',
+		{ paths: [ process.cwd() ] }
+	);
 
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		return typescriptPlugin( {
-			tsconfig,
-			sourceMap,
-			typescript: require( typescriptPath ),
-			declaration: !browser,
-			declarationDir: !browser ? getPath( 'dist', 'types' ) : undefined,
-			declarationMap: false, // TODO: Do we need this?
-			compilerOptions: {
-				rootDir: !browser ? getPath( 'src' ) : undefined
-			}
-		} );
-	} catch {}
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore
+	return typescriptPlugin( {
+		tsconfig,
+		sourceMap,
+		typescript: require( typescriptPath ),
+		declaration: !browser,
+		declarationDir: !browser ? getPath( 'dist', 'types' ) : undefined,
+		declarationMap: false, // TODO: Do we need this?
+		compilerOptions: {
+			rootDir: !browser ? getPath( 'src' ) : undefined
+		}
+	} );
 }

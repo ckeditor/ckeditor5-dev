@@ -48,6 +48,7 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
+    "@ckeditor/ckeditor5-utils": "^41.1.0",
     "@types/node": "^20.11.5",
     "@types/postcss-import": "^14.0.3",
     "@types/postcss-mixins": "^9.0.5",
@@ -62,7 +63,7 @@
   "scripts": {
     "build": "rollup -c rollup.config.js",
     "dev": "rollup -c rollup.config.js --watch",
-    "test": "vitest run --coverage",
+    "test": "vitest run --config vitest.config.ts",
     "test:dev": "vitest dev"
   }
 }

@@ -1,0 +1,10 @@
+msgid ""
+msgstr ""
+"Language: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgctxt "Translation used for testing purposes"
+msgid "Hello world"
+msgstr "Hello world"
