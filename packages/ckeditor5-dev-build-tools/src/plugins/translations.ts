@@ -84,7 +84,7 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 	}, pluginOptions || {} );
 
 	return {
-		name: 'cke5-po2js',
+		name: 'cke5-translations',
 
 		async generateBundle( output: NormalizedOutputOptions, bundle: OutputBundle ) {
 			// Get `banner` from the Rollup configuration object.

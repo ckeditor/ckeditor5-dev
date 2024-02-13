@@ -6,13 +6,13 @@
 import { rmSync } from 'fs';
 import { parseArgs } from 'util';
 import { rollup } from 'rollup';
-import { getPath, camelizeObjectKeys } from '../utils.js';
+import { getPath, camelizeObjectKeys } from './utils.js';
 import { getRollupOutputs, type Options } from './config.js';
 
 /**
  * Banner added to the top of output JavaScript files.
  */
-const banner: string = `
+export const banner: string = `
 /*!
  * @license Copyright (c) 2003-${ new Date().getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.
  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
@@ -32,6 +32,11 @@ export async function buildProject(): Promise<void> {
 				type: 'string',
 				default: 'tsconfig.json'
 			},
+			'external': {
+				type: 'string',
+				multiple: true,
+				default: []
+			},
 			'browser': {
 				type: 'boolean',
 				default: false
@@ -47,11 +52,6 @@ export async function buildProject(): Promise<void> {
 			'bundle': {
 				type: 'boolean',
 				default: false
-			},
-			'external': {
-				type: 'string',
-				multiple: true,
-				default: []
 			},
 			'minify': {
 				type: 'boolean',

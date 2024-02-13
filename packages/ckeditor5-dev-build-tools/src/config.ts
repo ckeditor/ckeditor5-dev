@@ -5,10 +5,9 @@
 
 import { createRequire } from 'module';
 import { readFileSync, accessSync, constants } from 'fs';
-import chalk from 'chalk';
 import type { PackageJson } from 'type-fest';
-import { defineConfig, type Plugin, type RollupOptions } from 'rollup';
-import { getPath } from '../utils.js';
+import { type Plugin, type RollupOptions } from 'rollup';
+import { getPath } from './utils.js';
 
 /**
  * Rollup plugins
@@ -20,8 +19,8 @@ import svg from 'rollup-plugin-svg-import';
 import commonjs from '@rollup/plugin-commonjs';
 import typescriptPlugin from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
-import { replace } from '../plugins/replace.js';
-import { translations as translationsPlugin } from '../plugins/translations.js';
+import { replace } from './plugins/replace.js';
+import { translations as translationsPlugin } from './plugins/translations.js';
 
 /**
  * PostCSS plugins
@@ -55,7 +54,7 @@ const pkg: PackageJson = JSON.parse(
  * packages defined in `dependencies` and `peerDependencies` of the package
  * and all packages starting with `@ckeditor` will be treated as externals.
  */
-const externals: Array<string> = Object.keys(
+const defaultExternals: Array<string> = Object.keys(
 	Object.assign(
 		{ '@ckeditor': true },
 		pkg.dependencies,
@@ -66,48 +65,42 @@ const externals: Array<string> = Object.keys(
 export interface Options {
 	input: string;
 	tsconfig: string;
+	external: Array<string>;
 	browser: boolean;
 	translations: boolean;
 	sourceMap: boolean;
 	bundle: boolean;
-	external: Array<string>;
 	minify: boolean;
 }
 
 /**
  * Generates Rollup configurations.
  */
-export async function getRollupOutputs( options: Options ): Promise<RollupOptions> {
-	const data: Options = {
+export async function getRollupOutputs( options: Options ) {
+	const {
+		input,
+		tsconfig,
+		external,
+		browser,
+		translations,
+		sourceMap,
+		bundle,
+		minify
+	} = {
 		...options,
-		external: options.external.length ? options.external : externals,
 		input: getPath( options.input ),
-		tsconfig: getPath( options.tsconfig )
+		tsconfig: getPath( options.tsconfig ),
+		external: options.external.length ? options.external : defaultExternals
 	};
 
-	return getConfiguration( data );
-}
-
-/**
- * Generates Rollup configuration for NPM or browser build.
- */
-async function getConfiguration( {
-	input,
-	tsconfig,
-	browser,
-	translations,
-	sourceMap,
-	bundle,
-	minify
-}: Options ): Promise<RollupOptions> {
-	return defineConfig( {
+	return {
 		input,
 
 		/**
 		 * Browser build should bundle all dependencies, but the NPM build should leave
 		 * imports to `dependencies` and `peerDependencies` as-is.
 		 */
-		external: ( id: string ) => !bundle && externals.some( name => id.startsWith( name ) ),
+		external: ( id: string ) => !bundle && external.some( name => id.startsWith( name ) ),
 
 		plugins: [
 			/**
@@ -200,12 +193,14 @@ async function getConfiguration( {
 				format: {
 					// TODO
 					comments( node: any, comment: any ) {
-						return /@license/.test( comment.value ) && ( /^!/.test( comment.value ) || !/CKSource/.test( comment.value ) );
+						return /@license/.test( comment.value )
+							&& /@copyright/.test( comment.value )
+							&& ( /^!/.test( comment.value ) || !/CKSource/.test( comment.value ) );
 					}
 				}
 			} )
 		]
-	} );
+	} as const satisfies RollupOptions;
 }
 
 /**
@@ -245,7 +240,5 @@ function getTypeScriptPlugin( {
 				rootDir: !browser ? getPath( 'src' ) : undefined
 			}
 		} );
-	} catch {
-		console.log( chalk.yellow( 'Could not find the TypeScript configuration file. Skipping TypeScript processing.\n' ) );
-	}
+	} catch {}
 }
