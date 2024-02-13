@@ -74,7 +74,7 @@ function unifyFileContentOutput( content: string | undefined, banner: string ): 
 	const bundle = new Bundle();
 
 	bundle.addSource( {
-		content: new MagicString( content ? content : '' );
+		content: new MagicString( content ? content : '' )
 	} );
 
 	bundle.prepend( `${ banner }\n` ).append( '\n' );
