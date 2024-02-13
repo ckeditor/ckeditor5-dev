@@ -30,23 +30,22 @@ export function splitCss(): Plugin {
 			return '';
 		},
 		async generateBundle( output: NormalizedOutputOptions, bundle: OutputBundle ) {
+			// Get license banner.
 			const banner = await getBanner( output, bundle );
-			const ids: Set<string> = new Set();
 
-			// Determine import order of files
-			for ( const file in bundle ) {
-				const outputChunk = bundle[ file ]! as OutputChunk;
-				const root = outputChunk.facadeModuleId!;
-				const modules = getCSSModules( root, this.getModuleInfo );
+			// Import `CSS` files in same order as they were imported.
+			const filesIdsInImportOrder = getFilesIdsInImportOrder( bundle, this.getModuleInfo );
 
-				modules.forEach( id => ids.add( id as string ) );
-			}
+			// Combine all preprocessed `CSS` files into one.
+			const cssStylesheet = getAllStylesAsSingleStyleSheet( filesIdsInImportOrder, styles );
 
-			const cssStylesheet = combineStylesheetsIntoOne( ids, styles );
+			// Parse `CSS` string and returns an `AST` object.
 			const parsedCss = parse( cssStylesheet );
-			const { editorStylesContent, editingViewStylesContent, allStylesContent } = divideStylesheetDependingOnItsPurpose( parsedCss );
 
-			// Emit styles to files
+			// Generate split stylesheets for editor, content, and one that contains them all.
+			const { editorStylesContent, editingViewStylesContent, allStylesContent } = getSplittedStyleSheets( parsedCss );
+
+			// Emit those styles ito files.
 			this.emitFile( {
 				type: 'asset',
 				fileName: 'styles.css',
@@ -67,28 +66,31 @@ export function splitCss(): Plugin {
 }
 
 /**
- * @param content is a CSS file content.
- * @param banner
+ * Get files Ids in orders files in order as they were imported.
+ * @param bundle provides the full list of files being written or generated along with their details.
+ * @param getModuleInfo Function that returns additional information about the module in question.
  */
-function unifyFileContentOutput( content: string | undefined, banner: string ): string {
-	const bundle = new Bundle();
+function getFilesIdsInImportOrder( bundle: OutputBundle, getModuleInfo: GetModuleInfo ) {
+	const ids: Set<string> = new Set();
 
-	bundle.addSource( {
-		content: new MagicString( content ? content : '' )
-	} );
+	for ( const file in bundle ) {
+		const outputChunk = bundle[ file ]! as OutputChunk;
+		const root = outputChunk.facadeModuleId!;
+		const modules = getCSSModules( root, getModuleInfo );
 
-	bundle.prepend( `${ banner }\n` ).append( '\n' );
+		modules.forEach( id => ids.add( id as string ) );
+	}
 
-	return bundle.toString();
+	return ids;
 }
 
 /**
  * Get all CSS modules in the order that they were imported
  *
- * @param id
- * @param getModuleInfo
- * @param modules
- * @param visitedModules
+ * @param id module Id.
+ * @param getModuleInfo Function that returns additional information about the module in question.
+ * @param modules Set of modules.
+ * @param visitedModules Set of visited modules.
  * @returns
  */
 function getCSSModules( id: string, getModuleInfo: GetModuleInfo, modules = new Set(), visitedModules = new Set() ): Set<unknown> {
@@ -120,17 +122,40 @@ function getCSSModules( id: string, getModuleInfo: GetModuleInfo, modules = new 
 	return modules;
 }
 
-function combineStylesheetsIntoOne( ids: Set<string>, styles: Record<string, string> ): string {
+function getAllStylesAsSingleStyleSheet( ids: Set<string>, styles: Record<string, string> ): string {
 	return Array.from( ids ).map( id => styles[ id ] ).join( '\n' );
 }
 
 /**
- * TODO
- * @returns
+ * Returns split stylesheets for editor, content, and one that contains all styles.
  */
 
-function divideStylesheetDependingOnItsPurpose( parsedCss: Stylesheet ): Record< string, string> {
+function getSplittedStyleSheets( parsedCss: Stylesheet ): Record< string, string> {
 	const rules: Array<Rule> = parsedCss.stylesheet!.rules;
+
+	const { rootDefinitions, dividedStylesheets } = getDividedStyleSheetsDependingOnItsPurpose( rules );
+
+	if ( rootDefinitions.length ) {
+		const {
+			rootDeclarationForEditorStyles,
+			rootDeclarationForEditingViewStyles
+		} = filterCssVariablesBasedOnUsage( rootDefinitions, dividedStylesheets );
+
+		const ruleDeclarationsWithSelector = wrapDefinitionsIntoSelector( ':root', rootDefinitions );
+
+		dividedStylesheets.editorStylesContent = rootDeclarationForEditorStyles + dividedStylesheets.editorStylesContent;
+		dividedStylesheets.editingViewStylesContent = rootDeclarationForEditingViewStyles + dividedStylesheets.editingViewStylesContent;
+		dividedStylesheets.allStylesContent = ruleDeclarationsWithSelector + dividedStylesheets.allStylesContent;
+	}
+
+	return dividedStylesheets;
+}
+
+/**
+ * Returns `:root` definitions and divided Stylesheets.
+ * @param rules List of `CSS` StyleSheet rules.
+ */
+function getDividedStyleSheetsDependingOnItsPurpose( rules: Array<Rule> ) {
 	const rootDefinitionsList: Array<string> = [];
 
 	let editorStylesContent = '';
@@ -154,27 +179,18 @@ function divideStylesheetDependingOnItsPurpose( parsedCss: Stylesheet ): Record<
 
 	const rootDefinitions = rootDefinitionsList.join( '' );
 
-	if ( rootDefinitions.length ) {
-		const dividedRootCssVariables = filterCssVariablesBasedOnUsage(
-			rootDefinitions,
-			{
-				editorStylesContent,
-				editingViewStylesContent
-			} );
-
-		const ruleDeclarationsWithSelector = wrapDefinitionsIntoSelector( ':root', rootDefinitions );
-
-		editorStylesContent = dividedRootCssVariables.rootDeclarationForEditorStyles + editorStylesContent;
-		editingViewStylesContent = dividedRootCssVariables.rootDeclarationForEditingViewStyles + editingViewStylesContent;
-		allStylesContent = ruleDeclarationsWithSelector + allStylesContent;
-	}
-
-	return { editorStylesContent, editingViewStylesContent, allStylesContent };
+	return {
+		rootDefinitions,
+		dividedStylesheets: {
+			editorStylesContent,
+			editingViewStylesContent,
+			allStylesContent
+		}
+	};
 }
 
 /**
- * TODO
- * @returns
+ * Returns `:root` declarations for editor and content stylesheets.
  */
 
 function filterCssVariablesBasedOnUsage(
@@ -207,23 +223,22 @@ function filterCssVariablesBasedOnUsage(
 }
 
 /**
- * TODO
+ * Returns filtered `:root` declaration based on list of used `CSS` variables in stylesheet content.
  * @param rootDeclaration
- * @param listUsedVariables
- * @returns
+ * @param listOfUsedVariables
  */
-function createRootDeclarationOfUsedVariables( rootDefinitions: string, listUsedVariables: Set<string> ): string {
-	if ( rootDefinitions.length === 0 || listUsedVariables.size === 0 ) {
+function createRootDeclarationOfUsedVariables( rootDefinition: string, listOfUsedVariables: Set<string> ): string {
+	if ( rootDefinition.length === 0 || listOfUsedVariables.size === 0 ) {
 		return '';
 	}
 
-	const rootDeclarationWithSelector = wrapDefinitionsIntoSelector( ':root', rootDefinitions );
+	const rootDeclarationWithSelector = wrapDefinitionsIntoSelector( ':root', rootDefinition );
 	const parsedRootDeclaration = parse( rootDeclarationWithSelector );
 	const firstRule = parsedRootDeclaration.stylesheet!.rules[ 0 ] as Rule;
 	const listOfDeclarations = firstRule.declarations as Array<Declaration>;
 
 	const variablesDefinitions = listOfDeclarations.reduce( ( acc: string, currentDeclaration ) => {
-		if ( !listUsedVariables.has( currentDeclaration.property! ) ) {
+		if ( !listOfUsedVariables.has( currentDeclaration.property! ) ) {
 			return acc;
 		}
 
@@ -235,8 +250,7 @@ function createRootDeclarationOfUsedVariables( rootDefinitions: string, listUsed
 }
 
 /**
- * TODO
- * @returns
+ * Decides to which stylesheet should passed `rule` be placed or it should be in `:root` definition.
  */
 function divideRuleStylesBetweenStylesheets( rule: Rule ) {
 	const selector = rule.selectors![ 0 ] || '';
@@ -276,8 +290,7 @@ function divideRuleStylesBetweenStylesheets( rule: Rule ) {
 }
 
 /**
- * TODO
- * @returns
+ * Returns all `rule` declarations as a concatenated string.
  */
 function getRuleDeclarations( declarations: Array<Declaration> ): string {
 	return declarations.reduce( ( acc, currentDeclaration ) => {
@@ -291,7 +304,23 @@ function getRuleDeclarations( declarations: Array<Declaration> ): string {
 }
 
 /**
- * TODO
+ * @param content is a `CSS` content.
+ * @param banner license header.
+ */
+function unifyFileContentOutput( content: string | undefined, banner: string ): string {
+	const bundle = new Bundle();
+
+	bundle.addSource( {
+		content: new MagicString( content ? content : '' )
+	} );
+
+	bundle.prepend( `${ banner }\n` ).append( '\n' );
+
+	return bundle.toString();
+}
+
+/**
+ * Wraps `declarations` list into passed `selector`;
  */
 function wrapDefinitionsIntoSelector( selector: string, definitions: string ): string {
 	return `${ selector } {\n${ definitions }}\n`;
