@@ -25,7 +25,7 @@ const ENGLISH_TRANSLATIONS_FROM_ROOT = '\nexport default {"en":{"dictionary":{"H
  */
 async function generateBundle( options?: RollupTranslationsOptions, banner?: string ): Promise<RollupOutput['output']> {
 	const bundle = await rollup( {
-		input: './tests/plugins/fixtures/input.js',
+		input: './tests/plugins/fixtures/translations/input.js',
 		plugins: [
 			translations( options )
 		]
@@ -79,7 +79,7 @@ test( 'banner', async () => {
  */
 test( 'source', async () => {
 	const output = await generateBundle( {
-		source: './tests/plugins/fixtures/*.po'
+		source: './tests/plugins/fixtures/translations/*.po'
 	} );
 
 	verifyOutputTranslations( output, 'translations/pl.js', POLISH_TRANSLATIONS_FROM_ROOT );

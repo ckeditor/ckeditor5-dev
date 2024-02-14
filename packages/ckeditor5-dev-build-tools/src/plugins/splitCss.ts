@@ -314,7 +314,7 @@ function unifyFileContentOutput( content: string | undefined, banner: string ): 
 		content: new MagicString( content ? content : '' )
 	} );
 
-	bundle.prepend( `${ banner }\n` ).append( '\n' );
+	bundle.prepend( `${ banner }\n` );
 
 	return bundle.toString();
 }
