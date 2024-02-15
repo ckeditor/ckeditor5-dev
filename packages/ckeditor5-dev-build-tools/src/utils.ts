@@ -16,14 +16,14 @@ export function getPath( ...paths: Array<string> ): string {
 /**
  * Transforms `kebab-case` strings to `camelCase`.
  */
-export function camelize<const T extends string>( s: T ): CamelCase<T> {
+export function camelize<T extends string>( s: T ): CamelCase<T> {
 	return s.replace( /-./g, x => x[ 1 ]!.toUpperCase() ) as CamelCase<T>;
 }
 
 /**
  * Transforms first-level object keys from `kebab-case` to `camelCase`.
  */
-export function camelizeObjectKeys<const T extends Record<string, any>>( obj: T ): CamelCasedProperties<T> {
+export function camelizeObjectKeys<T extends Record<string, any>>( obj: T ): CamelCasedProperties<T> {
 	return Object.fromEntries(
 		Object
 			.entries( obj )
