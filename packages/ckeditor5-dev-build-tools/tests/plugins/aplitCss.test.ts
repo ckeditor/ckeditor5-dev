@@ -49,7 +49,7 @@ function verifyDividedStyleSheets(
 }
 
 test( 'Import of single `CSS` file', async () => {
-	const output = await generateBundle( './tests/plugins/fixtures/splitCss/single-import/input.js' );
+	const output = await generateBundle( './tests/plugins/fixtures/splitCss/single-import/input.ts' );
 	const expectedResult = `
 body {
 color: '#000';
@@ -62,7 +62,7 @@ color: '#000';
 } );
 
 test( 'Import of single `CSS` file with a banner', async () => {
-	const output = await generateBundle( './tests/plugins/fixtures/splitCss/single-import/input.js', undefined, TEST_BANNER );
+	const output = await generateBundle( './tests/plugins/fixtures/splitCss/single-import/input.ts', undefined, TEST_BANNER );
 	const expectedResult = `${ TEST_BANNER }
 body {
 color: '#000';
@@ -77,7 +77,7 @@ color: '#000';
 } );
 
 test( 'Import multiple `CSS` files', async () => {
-	const output = await generateBundle( './tests/plugins/fixtures/splitCss/multiple-import/input.js' );
+	const output = await generateBundle( './tests/plugins/fixtures/splitCss/multiple-import/input.ts' );
 
 	const expectedResult = `
 body {
@@ -94,7 +94,7 @@ display: grid;
 } );
 
 test( 'Import `CSS` file only once (without duplication)', async () => {
-	const output = await generateBundle( './tests/plugins/fixtures/splitCss/import-only-once/input.js' );
+	const output = await generateBundle( './tests/plugins/fixtures/splitCss/import-only-once/input.ts' );
 
 	const expectedFullResult = `
 .ck-content.ck-feature {
@@ -123,7 +123,7 @@ display: block;
 } );
 
 test( 'Ignore `CSS` comments', async () => {
-	const output = await generateBundle( './tests/plugins/fixtures/splitCss/ignore-comments/input.js' );
+	const output = await generateBundle( './tests/plugins/fixtures/splitCss/ignore-comments/input.ts' );
 	const expectedResult = `
 body {
 color: '#000';
@@ -136,7 +136,7 @@ color: '#000';
 } );
 
 test( 'Combine `:root` declarations from multiple entries into one', async () => {
-	const output = await generateBundle( './tests/plugins/fixtures/splitCss/combine-root-definitions/input.js' );
+	const output = await generateBundle( './tests/plugins/fixtures/splitCss/combine-root-definitions/input.ts' );
 
 	const expectedResult = `
 :root {
@@ -157,7 +157,7 @@ color: var(--variable2);
 } );
 
 test( 'Filter `:root` declaration based on `CSS` variables usage', async () => {
-	const output = await generateBundle( './tests/plugins/fixtures/splitCss/filter-root-definitions/input.js' );
+	const output = await generateBundle( './tests/plugins/fixtures/splitCss/filter-root-definitions/input.ts' );
 
 	const expectedFullResult = `
 :root {
@@ -204,7 +204,7 @@ background-color: var(--variable4);
 } );
 
 test( 'Omit `:root` declaration when it\'s not exist', async () => {
-	const output = await generateBundle( './tests/plugins/fixtures/splitCss/omit-root-definitions/input.js' );
+	const output = await generateBundle( './tests/plugins/fixtures/splitCss/omit-root-definitions/input.ts' );
 
 	const expectedFullResult = `
 :root {
@@ -247,7 +247,7 @@ background-color: blue;
 } );
 
 test( 'Divide classes into files based on its purpose', async () => {
-	const output = await generateBundle( './tests/plugins/fixtures/splitCss/divide-classes/input.js' );
+	const output = await generateBundle( './tests/plugins/fixtures/splitCss/divide-classes/input.ts' );
 
 	const expectedFullResult = `
 .ck-feature {

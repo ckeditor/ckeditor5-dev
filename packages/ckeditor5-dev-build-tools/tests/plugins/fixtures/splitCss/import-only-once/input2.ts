@@ -3,9 +3,5 @@
  * For licensing, see LICENSE.md.
  */
 
-import './input2.js';
-
-import './file1.css';
 import './file2.css';
-
-export const test = 123;
+import './file1.css';
