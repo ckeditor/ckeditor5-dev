@@ -94,7 +94,6 @@ function getFilesIdsInImportOrder( bundle: OutputBundle, getModuleInfo: GetModul
  * @returns
  */
 function getCSSModules( id: string, getModuleInfo: GetModuleInfo, modules = new Set(), visitedModules = new Set() ): Set<unknown> {
-	console.log( ' ID ', id );
 	if ( modules.has( id ) || visitedModules.has( id ) ) {
 		return new Set();
 	}
