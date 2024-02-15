@@ -94,6 +94,7 @@ function getFilesIdsInImportOrder( bundle: OutputBundle, getModuleInfo: GetModul
  * @returns
  */
 function getCSSModules( id: string, getModuleInfo: GetModuleInfo, modules = new Set(), visitedModules = new Set() ): Set<unknown> {
+	console.log( ' ID ', id );
 	if ( modules.has( id ) || visitedModules.has( id ) ) {
 		return new Set();
 	}
@@ -244,7 +245,7 @@ function createRootDeclarationOfUsedVariables( rootDefinition: string, listOfUse
  * Decides to which stylesheet should passed `rule` be placed or it should be in `:root` definition.
  */
 function divideRuleStylesBetweenStylesheets( rule: Rule ) {
-	const selector = rule.selectors![ 0 ] || '';
+	const selector = rule.selectors![ 0 ]!;
 	const rootDefinitions = [];
 
 	let editorStyles = '';

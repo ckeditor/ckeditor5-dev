@@ -73,6 +73,35 @@ display: grid;
 	verifyDividedStyleSheets( output, 'content-styles.css', '\n' );
 } );
 
+test( 'Import `CSS` file only once (without duplication)', async () => {
+	const output = await generateBundle( './tests/plugins/fixtures/splitCss/import-only-once/input.js' );
+
+	const expectedFullResult = `
+.ck-content.ck-feature {
+display: block;
+}
+.ck-feature {
+display: grid;
+}
+`;
+
+	const expectedEditorResult = `
+.ck-feature {
+display: grid;
+}
+`;
+
+	const expectedContentResult = `
+.ck-content.ck-feature {
+display: block;
+}
+`;
+
+	verifyDividedStyleSheets( output, 'styles.css', expectedFullResult );
+	verifyDividedStyleSheets( output, 'editor-styles.css', expectedEditorResult );
+	verifyDividedStyleSheets( output, 'content-styles.css', expectedContentResult );
+} );
+
 test( 'Ignore `CSS` comments', async () => {
 	const output = await generateBundle( './tests/plugins/fixtures/splitCss/ignore-comments/input.js' );
 	const expectedResult = `
