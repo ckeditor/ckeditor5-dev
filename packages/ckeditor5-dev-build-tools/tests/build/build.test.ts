@@ -118,10 +118,7 @@ test( 'No translations', async () => {
 		input: 'src/input.js'
 	} );
 
-	expect( output.map( o => o.fileName ) ).toMatchObject( [
-		'index.js',
-		'styles.css'
-	] );
+	expect( output.map( o => o.fileName ) ).toMatchObject( [ 'index.js' ] );
 } );
 
 test( 'Translations', async () => {
