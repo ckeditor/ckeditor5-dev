@@ -1,0 +1,16 @@
+:root {
+	--variable1: blue;
+	--variable2: red;
+	--variable3: red;
+	--variable4: pink;
+}
+
+.ck-feature {
+	color: var(--variable1);
+	background-color: var(--variable2);
+}
+
+.ck-content.ck-feature {
+	color: var(--variable3);
+	background-color: var(--variable4);
+}

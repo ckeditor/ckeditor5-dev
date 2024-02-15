@@ -47,7 +47,7 @@ test( 'Import of single `CSS` file', async () => {
 	const output = await generateBundle( './tests/plugins/fixtures/splitCss/single-import/input.js' );
 	const expectedResult = `
 body {
-color: 'badass';
+color: '#000';
 }
 `;
 
@@ -61,10 +61,23 @@ test( 'Import multiple `CSS` files', async () => {
 
 	const expectedResult = `
 body {
-color: 'badass';
+color: '#000';
 }
 div {
 display: grid;
+}
+`;
+
+	verifyDividedStyleSheets( output, 'styles.css', expectedResult );
+	verifyDividedStyleSheets( output, 'editor-styles.css', expectedResult );
+	verifyDividedStyleSheets( output, 'content-styles.css', '\n' );
+} );
+
+test( 'Ignore `CSS` comments', async () => {
+	const output = await generateBundle( './tests/plugins/fixtures/splitCss/ignore-comments/input.js' );
+	const expectedResult = `
+body {
+color: '#000';
 }
 `;
 
@@ -92,6 +105,53 @@ color: var(--variable2);
 	verifyDividedStyleSheets( output, 'styles.css', expectedResult );
 	verifyDividedStyleSheets( output, 'editor-styles.css', expectedResult );
 	verifyDividedStyleSheets( output, 'content-styles.css', '\n' );
+} );
+
+test( 'Filter `:root` declaration based on `CSS` variables usage', async () => {
+	const output = await generateBundle( './tests/plugins/fixtures/splitCss/filter-root-definitions/input.js' );
+
+	const expectedFullResult = `
+:root {
+--variable1: blue;
+--variable2: red;
+--variable3: red;
+--variable4: pink;
+}
+.ck-feature {
+color: var(--variable1);
+background-color: var(--variable2);
+}
+.ck-content.ck-feature {
+color: var(--variable3);
+background-color: var(--variable4);
+}
+`;
+
+	const expectedEditorResult = `
+:root {
+--variable1: blue;
+--variable2: red;
+}
+.ck-feature {
+color: var(--variable1);
+background-color: var(--variable2);
+}
+`;
+
+	const expectedContentResult = `
+:root {
+--variable3: red;
+--variable4: pink;
+}
+.ck-content.ck-feature {
+color: var(--variable3);
+background-color: var(--variable4);
+}
+`;
+
+	verifyDividedStyleSheets( output, 'styles.css', expectedFullResult );
+	verifyDividedStyleSheets( output, 'editor-styles.css', expectedEditorResult );
+	verifyDividedStyleSheets( output, 'content-styles.css', expectedContentResult );
 } );
 
 test( 'Divide classes into files based on its purpose', async () => {
