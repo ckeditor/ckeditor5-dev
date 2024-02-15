@@ -108,16 +108,14 @@ function getCSSModules( id: string, getModuleInfo: GetModuleInfo, modules = new 
 	// Recursively retrieve all of imported CSS modules
 	const info = getModuleInfo( id );
 
-	if ( !info ) {
-		return modules;
+	if ( info ) {
+		info.importedIds.forEach( importId => {
+			modules = new Set( [
+				...Array.from( modules ),
+				...Array.from( getCSSModules( importId, getModuleInfo, modules, visitedModules ) )
+			] );
+		} );
 	}
-
-	info.importedIds.forEach( importId => {
-		modules = new Set( [
-			...Array.from( modules ),
-			...Array.from( getCSSModules( importId, getModuleInfo, modules, visitedModules ) )
-		] );
-	} );
 
 	return modules;
 }
@@ -198,13 +196,6 @@ function filterCssVariablesBasedOnUsage(
 	dividedStylesheets: { [key: string]: string }
 ): Record<string, string> {
 	const VARIABLE_DEFINITION_REGEXP = /--([\w-]+)/gm;
-
-	if ( rootDefinitions.length === 0 ) {
-		return {
-			rootDeclarationForEditorStyles: '',
-			rootDeclarationForEditingViewStyles: ''
-		};
-	}
 
 	const variablesUsedInEditorStylesContent: Set<string> = new Set(
 		dividedStylesheets.editorStylesContent!.match( VARIABLE_DEFINITION_REGEXP ) );

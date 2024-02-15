@@ -154,6 +154,49 @@ background-color: var(--variable4);
 	verifyDividedStyleSheets( output, 'content-styles.css', expectedContentResult );
 } );
 
+test( 'Omit `:root` declaration when it\'s not exist', async () => {
+	const output = await generateBundle( './tests/plugins/fixtures/splitCss/omit-root-definitions/input.js' );
+
+	const expectedFullResult = `
+:root {
+--variable1: blue;
+--variable2: red;
+--variable3: red;
+--variable4: pink;
+}
+.ck-feature {
+color: var(--variable1);
+background-color: var(--variable2);
+}
+.ck-content.ck-feature {
+color: red;
+background-color: blue;
+}
+`;
+
+	const expectedEditorResult = `
+:root {
+--variable1: blue;
+--variable2: red;
+}
+.ck-feature {
+color: var(--variable1);
+background-color: var(--variable2);
+}
+`;
+
+	const expectedContentResult = `
+.ck-content.ck-feature {
+color: red;
+background-color: blue;
+}
+`;
+
+	verifyDividedStyleSheets( output, 'styles.css', expectedFullResult );
+	verifyDividedStyleSheets( output, 'editor-styles.css', expectedEditorResult );
+	verifyDividedStyleSheets( output, 'content-styles.css', expectedContentResult );
+} );
+
 test( 'Divide classes into files based on its purpose', async () => {
 	const output = await generateBundle( './tests/plugins/fixtures/splitCss/divide-classes/input.js' );
 
