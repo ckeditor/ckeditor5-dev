@@ -1,3 +1,8 @@
+/**
+ * @license Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 import { test, expect } from 'vitest';
 import { getRollupOutputs } from '../../src/config.js';
 
@@ -7,7 +12,7 @@ const defaults: Options = {
 	input: '',
 	tsconfig: '',
 	external: [],
-	browser: false,
+	declarations: false,
 	translations: false,
 	sourceMap: false,
 	bundle: false,

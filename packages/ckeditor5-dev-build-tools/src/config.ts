@@ -31,16 +31,36 @@ import postcssMixins from 'postcss-mixins';
 import postcssNesting from 'postcss-nesting';
 
 /**
- * In the future, we could try using `rollup-plugin-esbuild` to greatly improve
- * the build speed, but this would require running `tsc --emitDeclarationOnly`
- * separately to generate TypeScript declaration files.
+ * If build speed becomes an issue, we can replace typescript with swc. However, this
+ * would put the responsibility of checking the types and generating `.d.ts` files on
+ * the package author.
  *
- * Besides improved build speed, it'd allow us to remove the following plugins:
- * - `@rollup/plugin-json`,
- * - `@rollup/plugin-typescript`,
- * - `rollup-plugin-modify`,
- * - `@rollup/plugin-commonjs`,
- * - `rollup-plugin-svg-import` (probably, with `loader: text`).
+ * In the below configuration, swc is also used for minification and mangling, but it
+ * doesn't do as well as terser. Both options should be checked before deciding to use
+ * one or the other.
+ *
+ * swc( {
+ * 	include: [
+ * 		'**\/*.[ jt ]s',
+ * 		'**\/*.json'
+ * 	],
+ * 	swc: {
+ * 		minify,
+ * 		jsc: {
+ * 			minify: {
+ * 				compress: true,
+ * 				mangle: true,
+ * 				format: {
+ * 					comments: 'some'
+ * 				}
+ * 			},
+ * 			target: 'es2019'
+ * 		},
+ * 		module: {
+ * 			type: 'es6'
+ * 		}
+ * 	}
+ * } )
  */
 
 /**
@@ -66,12 +86,13 @@ const defaultExternals: Array<string> = Object.keys(
 /**
  * Generates Rollup configurations.
  */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export async function getRollupOutputs( options: Omit<BuildOptions, 'clean' | 'banner'> ) {
 	const {
 		input,
 		tsconfig,
 		external,
-		browser,
+		declarations,
 		translations,
 		sourceMap,
 		bundle,
@@ -85,8 +106,7 @@ export async function getRollupOutputs( options: Omit<BuildOptions, 'clean' | 'b
 		input,
 
 		/**
-		 * Browser build should bundle all dependencies, but the NPM build should leave
-		 * imports to `dependencies` and `peerDependencies` as-is.
+		 * Determines whether to bundle all dependencies or leave imports to `dependencies` and `peerDependencies` as-is.
 		 */
 		external: ( id: string ) => !bundle && external.some( name => id.startsWith( name ) ),
 
@@ -105,6 +125,7 @@ export async function getRollupOutputs( options: Omit<BuildOptions, 'clean' | 'b
 			 * Resolves imports using the Node resolution algorithm.
 			 */
 			nodeResolve( {
+				extensions: [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ],
 				browser: true,
 				preferBuiltins: false
 			} ),
@@ -150,7 +171,7 @@ export async function getRollupOutputs( options: Omit<BuildOptions, 'clean' | 'b
 			/**
 			 * Adds support for TypeScript syntax if tsconfig file exists.
 			 */
-			getTypeScriptPlugin( { tsconfig, sourceMap, browser } ),
+			getTypeScriptPlugin( { tsconfig, sourceMap, declarations } ),
 
 			/**
 			 * Replaces parts of the source code with the provided values.
@@ -177,20 +198,7 @@ export async function getRollupOutputs( options: Omit<BuildOptions, 'clean' | 'b
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			minify && terser( {
-				sourceMap,
-				format: {
-					// TODO
-					comments( _: any, { value }: any ) {
-						/**
-						 * Keep comments including @license and @copyright, but only do so for
-						 * CKSource comments when they starts with '!'. This is to prevent hundreds
-						 * of our legal comments (which every source file contains) from being
-						 * added to the final bundle.
-						 */
-						return ( value.includes( 'license' ) || value.includes( 'copyright' ) )
-							&& ( value.startsWith( '!' ) || !value.includes( 'CKSource' ) );
-					}
-				}
+				sourceMap
 			} )
 		]
 	} as const satisfies RollupOptions;
@@ -202,8 +210,8 @@ export async function getRollupOutputs( options: Omit<BuildOptions, 'clean' | 'b
 function getTypeScriptPlugin( {
 	tsconfig,
 	sourceMap,
-	browser
-}: Pick<BuildOptions, 'tsconfig' | 'sourceMap' | 'browser'> ): Plugin | undefined {
+	declarations
+}: Pick<BuildOptions, 'tsconfig' | 'sourceMap' | 'declarations'> ): Plugin | undefined {
 	if ( !existsSync( tsconfig ) ) {
 		return;
 	}
@@ -224,11 +232,11 @@ function getTypeScriptPlugin( {
 		tsconfig,
 		sourceMap,
 		typescript: require( typescriptPath ),
-		declaration: !browser,
-		declarationDir: !browser ? getPath( 'dist', 'types' ) : undefined,
+		declaration: declarations,
+		declarationDir: declarations ? getPath( 'dist', 'types' ) : undefined,
 		declarationMap: false, // TODO: Do we need this?
 		compilerOptions: {
-			rootDir: !browser ? getPath( 'src' ) : undefined
+			rootDir: declarations ? getPath( 'src' ) : undefined
 		}
 	} );
 }

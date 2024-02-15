@@ -1,8 +1,13 @@
-import { defineConfig } from 'vitest/config'
+/**
+ * @license Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
 
-export default defineConfig({
-  test: {
-    coverage: {
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig( {
+	test: {
+		coverage: {
 			enabled: true,
 			provider: 'v8',
 			exclude: [
@@ -10,5 +15,5 @@ export default defineConfig({
 				'tests/**'
 			]
 		}
-  },
-})
+	}
+} );

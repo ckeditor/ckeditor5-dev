@@ -14,7 +14,7 @@ export interface BuildOptions {
 	tsconfig: string;
 	banner: string | false;
 	external: Array<string> | false;
-	browser: boolean;
+	declarations: boolean;
 	translations: boolean;
 	sourceMap: boolean;
 	bundle: boolean;
@@ -27,13 +27,13 @@ export const defaultOptions: BuildOptions = {
 	tsconfig: 'tsconfig.json',
 	banner: false,
 	external: false,
-	browser: false,
+	declarations: false,
 	translations: false,
 	sourceMap: false,
 	bundle: false,
 	minify: false,
-	clean: false,
-}
+	clean: false
+};
 
 /**
  * Reads CLI arguments and turn the keys into camelcase.
@@ -41,19 +41,19 @@ export const defaultOptions: BuildOptions = {
 function getCliArguments(): Partial<BuildOptions> {
 	const { values } = util.parseArgs( {
 		options: {
-			'input': 					{ type: 'string' },
-			'tsconfig': 			{ type: 'string' },
-			'banner': 				{ type: 'string' },
-			'external': 			{ type: 'string', multiple: true },
-			'browser': 				{ type: 'boolean' },
-			'translations': 	{ type: 'boolean' },
-			'source-map': 		{ type: 'boolean' },
-			'bundle': 				{ type: 'boolean' },
-			'minify': 				{ type: 'boolean' },
-			'clean': 					{ type: 'boolean' }
+			'input': { type: 'string' },
+			'tsconfig': { type: 'string' },
+			'banner': { type: 'string' },
+			'external': { type: 'string', multiple: true },
+			'declarations': { type: 'boolean' },
+			'translations': { type: 'boolean' },
+			'source-map': { type: 'boolean' },
+			'bundle': { type: 'boolean' },
+			'minify': { type: 'boolean' },
+			'clean': { type: 'boolean' }
 		},
 
-		// Skip `node` and the name of the command.
+		// Skip `node ckeditor5-build-package`.
 		args: process.argv.slice( 2 ),
 
 		// Fail when unknown argument is used.
@@ -85,7 +85,7 @@ export async function build(
 ): Promise<RollupOutput> {
 	const {
 		clean,
-		banner, 
+		banner,
 		...args
 	}: BuildOptions = normalizeOptions( options );
 
@@ -111,9 +111,9 @@ export async function build(
 	 */
 	return build.write( {
 		format: 'esm',
-		file: getPath( 'dist', args.browser ? 'index.min.js' : 'index.js' ),
+		file: getPath( 'dist', args.minify ? 'index.min.js' : 'index.js' ),
 		assetFileNames: '[name][extname]',
 		sourcemap: args.sourceMap,
-		banner: banner && (await import( banner )).default
+		banner: banner && ( await import( banner ) ).default
 	} );
 }

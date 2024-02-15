@@ -13,7 +13,7 @@ export function verifyAsset(
 	output: RollupOutput['output'],
 	filename: string,
 	source: string
-) {
+): void {
 	const chunk = output.find( output => output.fileName === filename );
 
 	expect( chunk ).toBeDefined();

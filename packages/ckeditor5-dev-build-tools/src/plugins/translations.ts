@@ -108,7 +108,7 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 				// Gather all translations for the given language.
 				const translations: Array<Translation> = paths
 					// Resolve relative paths to absolute paths.
-					.map( filePath =>  path.isAbsolute( filePath ) ? filePath : path.join( process.cwd(), filePath ))
+					.map( filePath => path.isAbsolute( filePath ) ? filePath : path.join( process.cwd(), filePath ) )
 					// Load files by path.
 					.map( filePath => readFileSync( filePath, 'utf-8' ) )
 					// Process `.po` files.

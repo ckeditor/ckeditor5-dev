@@ -35,6 +35,7 @@ export default defineConfig( {
 	plugins: [
 		commonjs(),
 		nodeResolve( {
+			extensions: [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ],
 			preferBuiltins: true
 		} ),
 		typescript( {

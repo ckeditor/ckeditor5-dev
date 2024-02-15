@@ -4,10 +4,9 @@
  */
 
 import { join } from 'path';
-import { test } from 'vitest';
-import terser from '@rollup/plugin-terser';
-import { rollup, type RollupOutput } from 'rollup';
-import { verifyAsset, verifyChunk } from '../../_utils/utils.js';
+import { expect, test } from 'vitest';
+import { rollup, type RollupOutput, type OutputAsset } from 'rollup';
+import { verifyChunk } from '../../_utils/utils.js';
 
 import { replace, type RollupReplaceOptions } from '../../../src/index.js';
 
@@ -18,14 +17,7 @@ async function generateBundle(
 	const bundle = await rollup( {
 		input: join( import.meta.dirname, './fixtures/input.js' ),
 		plugins: [
-			replace( options ),
-
-			// Terser is used to minify the output, so it's easier to compare.
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			terser( {
-				mangle: false
-			} )
+			replace( options )
 		]
 	} );
 
@@ -37,7 +29,7 @@ async function generateBundle(
 test( 'Doesnt replace anything by default', async () => {
 	const output = await generateBundle( { replace: [] } );
 
-	verifyChunk( output, 'input.js', 'const test=123;export{test};\n' );
+	verifyChunk( output, 'input.js', 'const test = 123;' );
 } );
 
 test( 'Accepts string', async () => {
@@ -47,7 +39,7 @@ test( 'Accepts string', async () => {
 		]
 	} );
 
-	verifyChunk( output, 'input.js', 'const temp=123;export{temp};\n' );
+	verifyChunk( output, 'input.js', 'const temp = 123;' );
 } );
 
 test( 'Accepts RegExp', async () => {
@@ -57,7 +49,7 @@ test( 'Accepts RegExp', async () => {
 		]
 	} );
 
-	verifyChunk( output, 'input.js', 'const temp=123;export{temp};\n' );
+	verifyChunk( output, 'input.js', 'const temp = 123;' );
 } );
 
 test( 'Accepts string and RegExp', async () => {
@@ -68,10 +60,15 @@ test( 'Accepts string and RegExp', async () => {
 		]
 	} );
 
-	verifyChunk( output, 'input.js', 'const temp=456;export{temp};\n' );
+	verifyChunk( output, 'input.js', 'const temp = 456;' );
 } );
 
-test( 'Plugin generates a source map', async () => {
+test( 'Updates the source map', async () => {
+	const unmodifiedOutput = await generateBundle( {
+		replace: [],
+		sourceMap: true
+	}, true );
+
 	const output = await generateBundle( {
 		replace: [
 			[ 'test', 'temp' ],
@@ -80,8 +77,8 @@ test( 'Plugin generates a source map', async () => {
 		sourceMap: true
 	}, true );
 
-	verifyAsset( output, 'input.js.map', '"names":["temp"]' );
-	verifyChunk( output, 'input.js', 'const temp=456;export{temp};\n' );
+	expect( ( unmodifiedOutput[ 1 ] as OutputAsset ).source ).not.toBe( ( output[ 1 ] as OutputAsset ).source );
+	verifyChunk( output, 'input.js', 'const temp = 456;' );
 } );
 
 test( 'Replacing happens after the code is parsed and tree-shaken', async () => {
@@ -91,5 +88,5 @@ test( 'Replacing happens after the code is parsed and tree-shaken', async () => 
 		]
 	} );
 
-	verifyChunk( output, 'input.js', 'const test=123;export{test};\n' );
+	verifyChunk( output, 'input.js', 'const test = 123;' );
 } );

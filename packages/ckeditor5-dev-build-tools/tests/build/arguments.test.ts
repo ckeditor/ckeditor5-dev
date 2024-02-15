@@ -1,3 +1,8 @@
+/**
+ * @license Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 import { test, expect, beforeEach, vi } from 'vitest';
 import fs from 'fs';
 import * as rollup from 'rollup';
@@ -30,7 +35,7 @@ const spyRmSync = vi
 /**
  * Mocks arguments passed via the CLI.
  */
-function mockCliArgs( ...args: string[] ) {
+function mockCliArgs( ...args: Array<string> ) {
 	vi.stubGlobal( 'process', {
 		...process,
 		argv: [ 'node', 'cli-command-name', ...args ]
@@ -44,6 +49,7 @@ function path( fileName: string ) {
 	return process.cwd() + fileName;
 }
 
+// eslint-disable-next-line mocha/no-top-level-hooks
 beforeEach( () => {
 	vi.clearAllMocks();
 } );
@@ -55,7 +61,7 @@ test( 'paths are normalized', async () => {
 		input: process.cwd() + '/src/index.ts',
 		tsconfig: process.cwd() + '/tsconfig.json'
 	} ) );
-} )
+} );
 
 /**
  * CLI arguments
@@ -82,11 +88,11 @@ test( '--external', async () => {
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { external: [ 'foo', 'bar' ] } ) );
 } );
 
-test( '--browser', async () => {
-	mockCliArgs( '--browser' );
+test( '--declarations', async () => {
+	mockCliArgs( '--declarations' );
 	await build();
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { browser: true } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { declarations: true } ) );
 } );
 
 test( '--translations', async () => {
@@ -130,7 +136,7 @@ test( '--banner', async () => {
 	mockCliArgs( '--banner=tests/build/fixtures/src/banner.js' );
 	await build();
 
-	expect( spyWrite ).toHaveBeenCalledWith( expect.objectContaining( { banner: '// TEST BANNER' } ) );
+	expect( spyWrite ).toHaveBeenCalledWith( expect.objectContaining( { banner: '/*! TEST BANNER */' } ) );
 } );
 
 /**
@@ -155,10 +161,10 @@ test( '.external', async () => {
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { external: [ 'foo', 'bar' ] } ) );
 } );
 
-test( '.browser', async () => {
-	await build( { browser: true } );
+test( '.declarations', async () => {
+	await build( { declarations: true } );
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { browser: true } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { declarations: true } ) );
 } );
 
 test( '.translations', async () => {
@@ -194,5 +200,5 @@ test( '.clean', async () => {
 test( '.banner', async () => {
 	await build( { banner: 'tests/build/fixtures/src/banner.js' } );
 
-	expect( spyWrite ).toHaveBeenCalledWith( expect.objectContaining( { banner: '// TEST BANNER' } ) );
+	expect( spyWrite ).toHaveBeenCalledWith( expect.objectContaining( { banner: '/*! TEST BANNER */' } ) );
 } );

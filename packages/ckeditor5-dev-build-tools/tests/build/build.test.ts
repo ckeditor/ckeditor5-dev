@@ -1,3 +1,8 @@
+/**
+ * @license Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
 import { test, expect, beforeEach, vi } from 'vitest';
 import * as rollup from 'rollup';
 import { build } from '../../src/build.js';
@@ -17,7 +22,7 @@ vi
  */
 vi
 	.spyOn( rollup, 'rollup' )
-	.mockImplementation( async ( options ) => {
+	.mockImplementation( async options => {
 		const bundle = await rp( options );
 
 		return {
@@ -25,7 +30,7 @@ vi
 		} as any;
 	} );
 
-// TODO: Is this needed?
+// eslint-disable-next-line mocha/no-top-level-hooks
 beforeEach( () => {
 	vi.clearAllMocks();
 } );
@@ -38,7 +43,7 @@ test( 'JavaScript input', async () => {
 		input: 'src/input.js'
 	} );
 
-	expect( output[0].code ).exist;
+	expect( output[ 0 ].code ).exist;
 } );
 
 test( 'TypeScript input', async () => {
@@ -47,7 +52,28 @@ test( 'TypeScript input', async () => {
 		tsconfig: 'tsconfig.json'
 	} );
 
-	expect( output[0].code ).not.contain( 'TestType' );
+	expect( output[ 0 ].code ).not.contain( 'TestType' );
+
+	expect( output.map( o => o.fileName ) ).toMatchObject( [
+		'index.js',
+		'styles.css'
+	] );
+} );
+
+test( 'TypeScript declarations', async () => {
+	const { output } = await build( {
+		input: 'src/input.ts',
+		tsconfig: 'tsconfig.json',
+		declarations: true
+	} );
+
+	expect( output[ 0 ].code ).not.contain( 'TestType' );
+
+	expect( output.map( o => o.fileName ) ).toMatchObject( [
+		'index.js',
+		'styles.css',
+		'types/input.d.ts'
+	] );
 } );
 
 /**
@@ -60,7 +86,7 @@ test( 'Banner', async () => {
 		banner: 'src/banner.js'
 	} );
 
-	expect( output[0].code ).toMatch( /^\/\/ TEST BANNER/ );
+	expect( output[ 0 ].code ).toMatch( /^\/\*! TEST BANNER \*\// );
 } );
 
 /**
@@ -72,7 +98,7 @@ test( 'No externals', async () => {
 		external: []
 	} );
 
-	expect( output[0].code ).not.toContain( 'chalk' );
+	expect( output[ 0 ].code ).not.toContain( 'chalk' );
 } );
 
 test( 'Externals', async () => {
@@ -81,21 +107,21 @@ test( 'Externals', async () => {
 		external: [ 'chalk' ]
 	} );
 
-	expect( output[0].code ).toContain( 'chalk' );
+	expect( output[ 0 ].code ).toContain( 'chalk' );
 } );
-
-// TODO: Browser?
 
 /**
  * Translations
  */
 test( 'No translations', async () => {
 	const { output } = await build( {
-		input: 'src/input.js',
+		input: 'src/input.js'
 	} );
 
-	// `index.js`,`types/index.d.ts`, and `styles.css`.
-	expect( output ).lengthOf( 3 );
+	expect( output.map( o => o.fileName ) ).toMatchObject( [
+		'index.js',
+		'styles.css'
+	] );
 } );
 
 test( 'Translations', async () => {
@@ -104,9 +130,13 @@ test( 'Translations', async () => {
 		translations: true
 	} );
 
-	// `index.js`, `types/index.d.ts`, `styles.css`, and `translations/en.js`
-	expect( output ).lengthOf( 4 );
-	expect( ( output[1] as rollup.OutputChunk).code ).toContain( 'Hello world' );
+	expect( ( output[ 1 ] as rollup.OutputChunk ).code ).toContain( 'Hello world' );
+
+	expect( output.map( o => o.fileName ) ).toMatchObject( [
+		'index.js',
+		'translations/en.js',
+		'styles.css'
+	] );
 } );
 
 /**
@@ -118,8 +148,12 @@ test( 'Source map', async () => {
 		sourceMap: true
 	} );
 
-	// `index.js`, `types/index.d.ts`, `styles.css`, `index.js.map` and `styles.css.map`.
-	expect( output ).lengthOf( 5 );
+	expect( output.map( o => o.fileName ) ).toMatchObject( [
+		'index.js',
+		'index.js.map',
+		'styles.css',
+		'styles.css.map'
+	] );
 } );
 
 /**
@@ -131,7 +165,7 @@ test( 'Bundle', async () => {
 		bundle: true
 	} );
 
-	expect( output[0].code ).not.toContain( 'chalk' );
+	expect( output[ 0 ].code ).not.toContain( 'chalk' );
 } );
 
 /**
@@ -143,19 +177,17 @@ test( 'Minify', async () => {
 		minify: true
 	} );
 
-	expect( output[0].code ).toContain( 'export{colors}from"chalk"' );
+	expect( output[ 0 ].code ).toContain( 'export{colors}from"chalk";' );
 } );
 
-test.only( 'Minify doesnt remove comments starting with !', async () => {
+test( 'Minify doesnt remove comments starting with !', async () => {
 	const { output } = await build( {
 		input: 'src/input.js',
 		minify: true,
 		banner: 'src/banner.js'
 	} );
 
-	console.log( output[0].code );
-
-	expect( output[0].code ).toContain( 'TEST BANNER' );
+	expect( output[ 0 ].code ).toContain( 'TEST BANNER' );
 } );
 
 /**
@@ -166,5 +198,5 @@ test( 'Overriding', async () => {
 		input: 'src/overriding.js'
 	} );
 
-	expect( output[0].code ).toContain( '@ckeditor/ckeditor5-utils/dist/index.js' );
+	expect( output[ 0 ].code ).toContain( '@ckeditor/ckeditor5-utils/dist/index.js' );
 } );

@@ -3,7 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-export default `
-/*!
- * TEST BANNER
- */`;
+export default '/*! TEST BANNER */';
