@@ -8,6 +8,11 @@ import { rollup, type OutputAsset, type RollupOutput, type NormalizedOutputOptio
 
 import { splitCss } from '../../src/index.js';
 
+const TEST_BANNER = `/**
+ * License banner.
+ */
+`;
+
 /**
  * Helper function for creating a bundle that won't be written to the file system.
  */
@@ -54,6 +59,21 @@ color: '#000';
 	verifyDividedStyleSheets( output, 'styles.css', expectedResult );
 	verifyDividedStyleSheets( output, 'editor-styles.css', expectedResult );
 	verifyDividedStyleSheets( output, 'content-styles.css', '\n' );
+} );
+
+test( 'Import of single `CSS` file with a banner', async () => {
+	const output = await generateBundle( './tests/plugins/fixtures/splitCss/single-import/input.js', undefined, TEST_BANNER );
+	const expectedResult = `${ TEST_BANNER }
+body {
+color: '#000';
+}
+`;
+
+	const expectedEmptyResult = `${ TEST_BANNER }\n`;
+
+	verifyDividedStyleSheets( output, 'styles.css', expectedResult );
+	verifyDividedStyleSheets( output, 'editor-styles.css', expectedResult );
+	verifyDividedStyleSheets( output, 'content-styles.css', expectedEmptyResult );
 } );
 
 test( 'Import multiple `CSS` files', async () => {
