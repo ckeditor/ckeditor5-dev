@@ -91,7 +91,6 @@ function getFilesIdsInImportOrder( bundle: OutputBundle, getModuleInfo: GetModul
  * @param getModuleInfo Function that returns additional information about the module in question.
  * @param modules Set of modules.
  * @param visitedModules Set of visited modules.
- * @returns
  */
 function getCSSModules( id: string, getModuleInfo: GetModuleInfo, modules = new Set(), visitedModules = new Set() ): Set<unknown> {
 	if ( modules.has( id ) || visitedModules.has( id ) ) {
@@ -196,14 +195,22 @@ function filterCssVariablesBasedOnUsage(
 	const VARIABLE_DEFINITION_REGEXP = /--([\w-]+)/gm;
 
 	const variablesUsedInEditorStylesContent: Set<string> = new Set(
-		dividedStylesheets.editorStylesContent!.match( VARIABLE_DEFINITION_REGEXP ) );
+		dividedStylesheets.editorStylesContent!.match( VARIABLE_DEFINITION_REGEXP )
+	);
+
 	const variablesUsedInEditingViewStylesContent: Set<string> = new Set(
-		dividedStylesheets.editingViewStylesContent!.match( VARIABLE_DEFINITION_REGEXP ) );
+		dividedStylesheets.editingViewStylesContent!.match( VARIABLE_DEFINITION_REGEXP )
+	);
 
 	const rootDeclarationForEditorStyles = createRootDeclarationOfUsedVariables(
-		rootDefinitions, variablesUsedInEditorStylesContent );
+		rootDefinitions,
+		variablesUsedInEditorStylesContent
+	);
+
 	const rootDeclarationForEditingViewStyles = createRootDeclarationOfUsedVariables(
-		rootDefinitions, variablesUsedInEditingViewStylesContent );
+		rootDefinitions,
+		variablesUsedInEditingViewStylesContent
+	);
 
 	return {
 		rootDeclarationForEditorStyles,
