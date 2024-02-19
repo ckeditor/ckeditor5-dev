@@ -16,7 +16,7 @@ import { getBanner } from './utils.js';
 const filter = createFilter( [ '**/*.css' ] );
 
 export function splitCss(): Plugin {
-	const styles: Record<string, string> = {};
+	const stylesheetsFiles: Record<string, string> = {};
 
 	return {
 		name: 'cke5-styles',
@@ -25,7 +25,7 @@ export function splitCss(): Plugin {
 				return;
 			}
 
-			styles[ id ] = code;
+			stylesheetsFiles[ id ] = code;
 
 			return '';
 		},
@@ -37,7 +37,7 @@ export function splitCss(): Plugin {
 			const filesIdsInImportOrder = getFilesIdsInImportOrder( bundle, this.getModuleInfo );
 
 			// Combine all preprocessed `CSS` files into one.
-			const cssStylesheet = getAllStylesAsSingleStyleSheet( filesIdsInImportOrder, styles );
+			const cssStylesheet = getAllStylesAsSingleStyleSheet( filesIdsInImportOrder, stylesheetsFiles );
 
 			// Parse `CSS` string and returns an `AST` object.
 			const parsedCss = parse( cssStylesheet );
@@ -120,14 +120,13 @@ function getCSSModules( id: string, getModuleInfo: GetModuleInfo, modules = new 
 	return modules;
 }
 
-function getAllStylesAsSingleStyleSheet( ids: Set<string>, styles: Record<string, string> ): string {
-	return Array.from( ids ).map( id => styles[ id ] ).join( '\n' );
+function getAllStylesAsSingleStyleSheet( ids: Set<string>, stylesheetsFiles: Record<string, string> ): string {
+	return Array.from( ids ).map( id => stylesheetsFiles[ id ] ).join( '\n' );
 }
 
 /**
  * Returns split stylesheets for editor, content, and one that contains all styles.
  */
-
 function getSplittedStyleSheets( parsedCss: Stylesheet ): Record< string, string> {
 	const rules: Array<Rule> = parsedCss.stylesheet!.rules;
 
@@ -190,7 +189,6 @@ function getDividedStyleSheetsDependingOnItsPurpose( rules: Array<Rule> ) {
 /**
  * Returns `:root` declarations for editor and content stylesheets.
  */
-
 function filterCssVariablesBasedOnUsage(
 	rootDefinitions: string,
 	dividedStylesheets: { [key: string]: string }

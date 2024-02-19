@@ -4,7 +4,7 @@
  */
 
 import { join } from 'path';
-import { test } from 'vitest';
+import { describe, test } from 'vitest';
 import { rollup, type RollupOutput, type NormalizedOutputOptions } from 'rollup';
 import { verifyDividedStyleSheet } from '../../_utils/utils.js';
 
@@ -24,7 +24,7 @@ async function generateBundle(
 	banner?: string
 ): Promise<RollupOutput['output']> {
 	const bundle = await rollup( {
-		input,
+		input: join( import.meta.dirname, input ),
 		plugins: [
 			splitCss()
 		]
@@ -35,38 +35,39 @@ async function generateBundle(
 	return output;
 }
 
-test( 'Import of single `CSS` file', async () => {
-	const output = await generateBundle( join( import.meta.dirname, './fixtures/single-import/input.ts' ) );
-	const expectedResult = `
+describe( 'splitCss', () => {
+	test( 'should import a single `CSS` file', async () => {
+		const output = await generateBundle( './fixtures/single-import/input.ts' );
+		const expectedResult = `
 body {
 color: '#000';
 }
 `;
 
-	verifyDividedStyleSheet( output, 'styles.css', expectedResult );
-	verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
-	verifyDividedStyleSheet( output, 'content-styles.css', '\n' );
-} );
+		verifyDividedStyleSheet( output, 'styles.css', expectedResult );
+		verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
+		verifyDividedStyleSheet( output, 'content-styles.css', '\n' );
+	} );
 
-test( 'Import of single `CSS` file with a banner', async () => {
-	const output = await generateBundle( join( import.meta.dirname, './fixtures/single-import/input.ts' ), undefined, TEST_BANNER );
-	const expectedResult = `${ TEST_BANNER }
+	test( 'should import a single `CSS` file with a banner', async () => {
+		const output = await generateBundle( './fixtures/single-import/input.ts', undefined, TEST_BANNER );
+		const expectedResult = `${ TEST_BANNER }
 body {
 color: '#000';
 }
 `;
 
-	const expectedEmptyResult = `${ TEST_BANNER }\n`;
+		const expectedEmptyResult = `${ TEST_BANNER }\n`;
 
-	verifyDividedStyleSheet( output, 'styles.css', expectedResult );
-	verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
-	verifyDividedStyleSheet( output, 'content-styles.css', expectedEmptyResult );
-} );
+		verifyDividedStyleSheet( output, 'styles.css', expectedResult );
+		verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
+		verifyDividedStyleSheet( output, 'content-styles.css', expectedEmptyResult );
+	} );
 
-test( 'Import multiple `CSS` files', async () => {
-	const output = await generateBundle( join( import.meta.dirname, './fixtures/multiple-import/input.ts' ) );
+	test( 'should import multiple `CSS` files', async () => {
+		const output = await generateBundle( './fixtures/multiple-import/input.ts' );
 
-	const expectedResult = `
+		const expectedResult = `
 body {
 color: '#000';
 }
@@ -75,15 +76,15 @@ display: grid;
 }
 `;
 
-	verifyDividedStyleSheet( output, 'styles.css', expectedResult );
-	verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
-	verifyDividedStyleSheet( output, 'content-styles.css', '\n' );
-} );
+		verifyDividedStyleSheet( output, 'styles.css', expectedResult );
+		verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
+		verifyDividedStyleSheet( output, 'content-styles.css', '\n' );
+	} );
 
-test( 'Import `CSS` file only once (without duplication)', async () => {
-	const output = await generateBundle( join( import.meta.dirname, './fixtures/import-only-once/input.ts' ) );
+	test( 'should import `CSS` file only once (without duplication)', async () => {
+		const output = await generateBundle( './fixtures/import-only-once/input.ts' );
 
-	const expectedFullResult = `
+		const expectedFullResult = `
 .ck-content.ck-feature {
 display: block;
 }
@@ -92,40 +93,40 @@ display: grid;
 }
 `;
 
-	const expectedEditorResult = `
+		const expectedEditorResult = `
 .ck-feature {
 display: grid;
 }
 `;
 
-	const expectedContentResult = `
+		const expectedContentResult = `
 .ck-content.ck-feature {
 display: block;
 }
 `;
 
-	verifyDividedStyleSheet( output, 'styles.css', expectedFullResult );
-	verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
-	verifyDividedStyleSheet( output, 'content-styles.css', expectedContentResult );
-} );
+		verifyDividedStyleSheet( output, 'styles.css', expectedFullResult );
+		verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
+		verifyDividedStyleSheet( output, 'content-styles.css', expectedContentResult );
+	} );
 
-test( 'Ignore `CSS` comments', async () => {
-	const output = await generateBundle( join( import.meta.dirname, './fixtures/ignore-comments/input.ts' ) );
-	const expectedResult = `
+	test( 'should ignore `CSS` comments', async () => {
+		const output = await generateBundle( './fixtures/ignore-comments/input.ts' );
+		const expectedResult = `
 body {
 color: '#000';
 }
 `;
 
-	verifyDividedStyleSheet( output, 'styles.css', expectedResult );
-	verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
-	verifyDividedStyleSheet( output, 'content-styles.css', '\n' );
-} );
+		verifyDividedStyleSheet( output, 'styles.css', expectedResult );
+		verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
+		verifyDividedStyleSheet( output, 'content-styles.css', '\n' );
+	} );
 
-test( 'Combine `:root` declarations from multiple entries into one', async () => {
-	const output = await generateBundle( join( import.meta.dirname, './fixtures/combine-root-definitions/input.ts' ) );
+	test( 'should combine `:root` declarations from multiple entries into one', async () => {
+		const output = await generateBundle( './fixtures/combine-root-definitions/input.ts' );
 
-	const expectedResult = `
+		const expectedResult = `
 :root {
 --variable1: blue;
 --variable2: red;
@@ -138,15 +139,15 @@ color: var(--variable2);
 }
 `;
 
-	verifyDividedStyleSheet( output, 'styles.css', expectedResult );
-	verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
-	verifyDividedStyleSheet( output, 'content-styles.css', '\n' );
-} );
+		verifyDividedStyleSheet( output, 'styles.css', expectedResult );
+		verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
+		verifyDividedStyleSheet( output, 'content-styles.css', '\n' );
+	} );
 
-test( 'Filter `:root` declaration based on `CSS` variables usage', async () => {
-	const output = await generateBundle( join( import.meta.dirname, './fixtures/filter-root-definitions/input.ts' ) );
+	test( 'should filter `:root` declaration based on `CSS` variables usage', async () => {
+		const output = await generateBundle( './fixtures/filter-root-definitions/input.ts' );
 
-	const expectedFullResult = `
+		const expectedFullResult = `
 :root {
 --variable1: blue;
 --variable2: red;
@@ -163,7 +164,7 @@ background-color: var(--variable4);
 }
 `;
 
-	const expectedEditorResult = `
+		const expectedEditorResult = `
 :root {
 --variable1: blue;
 --variable2: red;
@@ -174,7 +175,7 @@ background-color: var(--variable2);
 }
 `;
 
-	const expectedContentResult = `
+		const expectedContentResult = `
 :root {
 --variable3: red;
 --variable4: pink;
@@ -185,15 +186,15 @@ background-color: var(--variable4);
 }
 `;
 
-	verifyDividedStyleSheet( output, 'styles.css', expectedFullResult );
-	verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
-	verifyDividedStyleSheet( output, 'content-styles.css', expectedContentResult );
-} );
+		verifyDividedStyleSheet( output, 'styles.css', expectedFullResult );
+		verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
+		verifyDividedStyleSheet( output, 'content-styles.css', expectedContentResult );
+	} );
 
-test( 'Omit `:root` declaration when it\'s not exist', async () => {
-	const output = await generateBundle( join( import.meta.dirname, './fixtures/omit-root-definitions/input.ts' ) );
+	test( 'should omit `:root` declaration when it\'s not exist', async () => {
+		const output = await generateBundle( './fixtures/omit-root-definitions/input.ts' );
 
-	const expectedFullResult = `
+		const expectedFullResult = `
 :root {
 --variable1: blue;
 --variable2: red;
@@ -210,7 +211,7 @@ background-color: blue;
 }
 `;
 
-	const expectedEditorResult = `
+		const expectedEditorResult = `
 :root {
 --variable1: blue;
 --variable2: red;
@@ -221,22 +222,22 @@ background-color: var(--variable2);
 }
 `;
 
-	const expectedContentResult = `
+		const expectedContentResult = `
 .ck-content.ck-feature {
 color: red;
 background-color: blue;
 }
 `;
 
-	verifyDividedStyleSheet( output, 'styles.css', expectedFullResult );
-	verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
-	verifyDividedStyleSheet( output, 'content-styles.css', expectedContentResult );
-} );
+		verifyDividedStyleSheet( output, 'styles.css', expectedFullResult );
+		verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
+		verifyDividedStyleSheet( output, 'content-styles.css', expectedContentResult );
+	} );
 
-test( 'Divide classes into files based on its purpose', async () => {
-	const output = await generateBundle( join( import.meta.dirname, './fixtures/divide-classes/input.ts' ) );
+	test( 'should divide classes into files based on its purpose', async () => {
+		const output = await generateBundle( './fixtures/divide-classes/input.ts' );
 
-	const expectedFullResult = `
+		const expectedFullResult = `
 .ck-feature {
 display: grid;
 }
@@ -245,19 +246,20 @@ display: block;
 }
 `;
 
-	const expectedEditorResult = `
+		const expectedEditorResult = `
 .ck-feature {
 display: grid;
 }
 `;
 
-	const expectedContentResult = `
+		const expectedContentResult = `
 .ck-content.ck-feature {
 display: block;
 }
 `;
 
-	verifyDividedStyleSheet( output, 'styles.css', expectedFullResult );
-	verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
-	verifyDividedStyleSheet( output, 'content-styles.css', expectedContentResult );
+		verifyDividedStyleSheet( output, 'styles.css', expectedFullResult );
+		verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
+		verifyDividedStyleSheet( output, 'content-styles.css', expectedContentResult );
+	} );
 } );
