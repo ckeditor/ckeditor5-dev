@@ -51,6 +51,6 @@
     "build": "rollup -c rollup.config.js",
     "dev": "rollup -c rollup.config.js --watch",
     "test": "vitest run --coverage",
-    "test:dev": "vitest dev --coverage"
+    "test:dev": "vitest dev"
   }
 }

@@ -6,7 +6,7 @@
 import { join } from 'path';
 import { describe, test } from 'vitest';
 import { rollup, type RollupOutput, type NormalizedOutputOptions } from 'rollup';
-import { verifyDividedStyleSheet } from '../../_utils/utils.js';
+import { verifyDividedStyleSheet, removeWhitespace } from '../../_utils/utils.js';
 
 import { splitCss } from '../../../src/index.js';
 
@@ -38,11 +38,11 @@ async function generateBundle(
 describe( 'splitCss', () => {
 	test( 'should import a single `CSS` file', async () => {
 		const output = await generateBundle( './fixtures/single-import/input.ts' );
-		const expectedResult = `
-body {
-color: '#000';
-}
-`;
+		const expectedResult = removeWhitespace( `
+			body {
+				color: '#000';
+			}
+		` );
 
 		verifyDividedStyleSheet( output, 'styles.css', expectedResult );
 		verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
@@ -51,11 +51,11 @@ color: '#000';
 
 	test( 'should import a single `CSS` file with a banner', async () => {
 		const output = await generateBundle( './fixtures/single-import/input.ts', undefined, TEST_BANNER );
-		const expectedResult = `${ TEST_BANNER }
-body {
-color: '#000';
-}
-`;
+		const expectedResult = TEST_BANNER + removeWhitespace( `
+			body {
+				color: '#000';
+			}
+		` );
 
 		const expectedEmptyResult = `${ TEST_BANNER }\n`;
 
@@ -67,14 +67,14 @@ color: '#000';
 	test( 'should import multiple `CSS` files', async () => {
 		const output = await generateBundle( './fixtures/multiple-import/input.ts' );
 
-		const expectedResult = `
-body {
-color: '#000';
-}
-div {
-display: grid;
-}
-`;
+		const expectedResult = removeWhitespace( `
+			body {
+				color: '#000';
+			}
+			div {
+				display: grid;
+			}
+		` );
 
 		verifyDividedStyleSheet( output, 'styles.css', expectedResult );
 		verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
@@ -84,26 +84,26 @@ display: grid;
 	test( 'should import `CSS` file only once (without duplication)', async () => {
 		const output = await generateBundle( './fixtures/import-only-once/input.ts' );
 
-		const expectedFullResult = `
-.ck-content.ck-feature {
-display: block;
-}
-.ck-feature {
-display: grid;
-}
-`;
+		const expectedFullResult = removeWhitespace( `
+			.ck-content.ck-feature {
+				display: block;
+			}
+			.ck-feature {
+				display: grid;
+			}
+		` );
 
-		const expectedEditorResult = `
-.ck-feature {
-display: grid;
-}
-`;
+		const expectedEditorResult = removeWhitespace( `
+			.ck-feature {
+				display: grid;
+			}
+		` );
 
-		const expectedContentResult = `
-.ck-content.ck-feature {
-display: block;
-}
-`;
+		const expectedContentResult = removeWhitespace( `
+			.ck-content.ck-feature {
+				display: block;
+			}
+		` );
 
 		verifyDividedStyleSheet( output, 'styles.css', expectedFullResult );
 		verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
@@ -112,11 +112,11 @@ display: block;
 
 	test( 'should ignore `CSS` comments', async () => {
 		const output = await generateBundle( './fixtures/ignore-comments/input.ts' );
-		const expectedResult = `
-body {
-color: '#000';
-}
-`;
+		const expectedResult = removeWhitespace( `
+			body {
+				color: '#000';
+			}
+		` );
 
 		verifyDividedStyleSheet( output, 'styles.css', expectedResult );
 		verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
@@ -126,18 +126,18 @@ color: '#000';
 	test( 'should combine `:root` declarations from multiple entries into one', async () => {
 		const output = await generateBundle( './fixtures/combine-root-definitions/input.ts' );
 
-		const expectedResult = `
-:root {
---variable1: blue;
---variable2: red;
-}
-h1 {
-color: var(--variable1);
-}
-p {
-color: var(--variable2);
-}
-`;
+		const expectedResult = removeWhitespace( `
+			:root {
+				--variable1: blue;
+				--variable2: red;
+			}
+			h1 {
+				color: var(--variable1);
+			}
+			p {
+				color: var(--variable2);
+			}
+		` );
 
 		verifyDividedStyleSheet( output, 'styles.css', expectedResult );
 		verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
@@ -147,44 +147,44 @@ color: var(--variable2);
 	test( 'should filter `:root` declaration based on `CSS` variables usage', async () => {
 		const output = await generateBundle( './fixtures/filter-root-definitions/input.ts' );
 
-		const expectedFullResult = `
-:root {
---variable1: blue;
---variable2: red;
---variable3: red;
---variable4: pink;
-}
-.ck-feature {
-color: var(--variable1);
-background-color: var(--variable2);
-}
-.ck-content.ck-feature {
-color: var(--variable3);
-background-color: var(--variable4);
-}
-`;
+		const expectedFullResult = removeWhitespace( `
+			:root {
+				--variable1: blue;
+				--variable2: red;
+				--variable3: red;
+				--variable4: pink;
+			}
+			.ck-feature {
+				color: var(--variable1);
+				background-color: var(--variable2);
+			}
+			.ck-content.ck-feature {
+				color: var(--variable3);
+				background-color: var(--variable4);
+			}
+		` );
 
-		const expectedEditorResult = `
-:root {
---variable1: blue;
---variable2: red;
-}
-.ck-feature {
-color: var(--variable1);
-background-color: var(--variable2);
-}
-`;
+		const expectedEditorResult = removeWhitespace( `
+			:root {
+				--variable1: blue;
+				--variable2: red;
+			}
+			.ck-feature {
+				color: var(--variable1);
+				background-color: var(--variable2);
+			}
+		` );
 
-		const expectedContentResult = `
-:root {
---variable3: red;
---variable4: pink;
-}
-.ck-content.ck-feature {
-color: var(--variable3);
-background-color: var(--variable4);
-}
-`;
+		const expectedContentResult = removeWhitespace( `
+			:root {
+				--variable3: red;
+				--variable4: pink;
+			}
+			.ck-content.ck-feature {
+				color: var(--variable3);
+				background-color: var(--variable4);
+			}
+		` );
 
 		verifyDividedStyleSheet( output, 'styles.css', expectedFullResult );
 		verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
@@ -194,40 +194,40 @@ background-color: var(--variable4);
 	test( 'should omit `:root` declaration when it\'s not exist', async () => {
 		const output = await generateBundle( './fixtures/omit-root-definitions/input.ts' );
 
-		const expectedFullResult = `
-:root {
---variable1: blue;
---variable2: red;
---variable3: red;
---variable4: pink;
-}
-.ck-feature {
-color: var(--variable1);
-background-color: var(--variable2);
-}
-.ck-content.ck-feature {
-color: red;
-background-color: blue;
-}
-`;
+		const expectedFullResult = removeWhitespace( `
+			:root {
+				--variable1: blue;
+				--variable2: red;
+				--variable3: red;
+				--variable4: pink;
+			}
+			.ck-feature {
+				color: var(--variable1);
+				background-color: var(--variable2);
+			}
+			.ck-content.ck-feature {
+				color: red;
+				background-color: blue;
+			}
+		` );
 
-		const expectedEditorResult = `
-:root {
---variable1: blue;
---variable2: red;
-}
-.ck-feature {
-color: var(--variable1);
-background-color: var(--variable2);
-}
-`;
+		const expectedEditorResult = removeWhitespace( `
+			:root {
+				--variable1: blue;
+				--variable2: red;
+			}
+			.ck-feature {
+				color: var(--variable1);
+				background-color: var(--variable2);
+			}
+		` );
 
-		const expectedContentResult = `
-.ck-content.ck-feature {
-color: red;
-background-color: blue;
-}
-`;
+		const expectedContentResult = removeWhitespace( `
+			.ck-content.ck-feature {
+				color: red;
+				background-color: blue;
+			}
+		` );
 
 		verifyDividedStyleSheet( output, 'styles.css', expectedFullResult );
 		verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
@@ -237,26 +237,26 @@ background-color: blue;
 	test( 'should divide classes into files based on its purpose', async () => {
 		const output = await generateBundle( './fixtures/divide-classes/input.ts' );
 
-		const expectedFullResult = `
-.ck-feature {
-display: grid;
-}
-.ck-content.ck-feature {
-display: block;
-}
-`;
+		const expectedFullResult = removeWhitespace( `
+			.ck-feature {
+				display: grid;
+			}
+			.ck-content.ck-feature {
+				display: block;
+			}
+		` );
 
-		const expectedEditorResult = `
-.ck-feature {
-display: grid;
-}
-`;
+		const expectedEditorResult = removeWhitespace( `
+			.ck-feature {
+				display: grid;
+			}
+		` );
 
-		const expectedContentResult = `
-.ck-content.ck-feature {
-display: block;
-}
-`;
+		const expectedContentResult = removeWhitespace( `
+			.ck-content.ck-feature {
+				display: block;
+			}
+		` );
 
 		verifyDividedStyleSheet( output, 'styles.css', expectedFullResult );
 		verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );

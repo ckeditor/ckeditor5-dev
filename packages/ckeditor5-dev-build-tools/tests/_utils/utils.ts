@@ -50,3 +50,10 @@ export function verifyDividedStyleSheet(
 	expect( styles!.type ).toBe( 'asset' );
 	expect( ( styles as OutputAsset )!.source ).toEqual( expectedResult );
 }
+
+/**
+ * Returns string without whitespace.
+ */
+export function removeWhitespace( text: string ): string {
+	return text.replaceAll( /\n\s+/gm, '\n' );
+}
