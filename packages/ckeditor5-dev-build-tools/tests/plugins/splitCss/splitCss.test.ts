@@ -262,4 +262,12 @@ describe( 'splitCss', () => {
 		verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
 		verifyDividedStyleSheet( output, 'content-styles.css', expectedContentResult );
 	} );
+
+	test( 'should prepare empty `CSS` files when no styles imported', async () => {
+		const output = await generateBundle( './fixtures/no-styles/input.ts' );
+
+		verifyDividedStyleSheet( output, 'styles.css', '\n' );
+		verifyDividedStyleSheet( output, 'editor-styles.css', '\n' );
+		verifyDividedStyleSheet( output, 'content-styles.css', '\n' );
+	} );
 } );
