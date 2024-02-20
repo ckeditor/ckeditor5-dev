@@ -206,7 +206,7 @@ describe( 'splitCss', () => {
 		verifyDividedStyleSheet( output, 'content-styles.css', '' );
 	} );
 
-	test( 'should minify the content', async () => {
+	test( 'should minify the content output', async () => {
 		const output = await generateBundle( './fixtures/single-import/input.ts', { minimize: true } );
 		const expectedResult = 'body{color:"#000"}';
 
