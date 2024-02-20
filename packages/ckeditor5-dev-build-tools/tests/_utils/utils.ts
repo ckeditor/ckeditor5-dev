@@ -41,14 +41,17 @@ export function verifyChunk(
  */
 export function verifyDividedStyleSheet(
 	output: RollupOutput['output'],
-	outputFileName: 'styles.css' | 'editor-styles.css' | 'content-styles.css',
+	outputFileName: cssOutputFileName,
 	expectedResult: string
 ): void {
 	const styles = output.find( output => output.fileName === outputFileName );
 
 	expect( styles ).toBeDefined();
 	expect( styles!.type ).toBe( 'asset' );
-	expect( ( styles as OutputAsset )!.source ).toEqual( expectedResult );
+
+	const source = ( styles as OutputAsset )!.source as string;
+
+	expect( removeWhitespace( source ) ).toEqual( expectedResult );
 }
 
 /**
@@ -57,3 +60,9 @@ export function verifyDividedStyleSheet(
 export function removeWhitespace( text: string ): string {
 	return text.replaceAll( /\n\s+/gm, '\n' );
 }
+
+/**
+ * Possible `CSS` file name for output.
+ */
+export type cssOutputFileName = 'styles.css' | 'editor-styles.css' | 'content-styles.css' |
+	'styles.min.css' | 'editor-styles.min.css' | 'content-styles.min.css';

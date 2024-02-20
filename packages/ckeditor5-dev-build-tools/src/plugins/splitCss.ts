@@ -5,18 +5,19 @@
 
 import { createFilter } from '@rollup/pluginutils';
 import { parse, type Rule, type Declaration, type Stylesheet } from 'css';
-import type { Plugin, GetModuleInfo, OutputBundle, OutputChunk, NormalizedOutputOptions } from 'rollup';
-import MagicString, { Bundle } from 'magic-string';
-
-import { getBanner } from './utils.js';
+import type { Plugin, OutputBundle, NormalizedOutputOptions, EmittedAsset } from 'rollup';
+import type { Processor } from 'postcss';
+import cssnano from 'cssnano';
 
 /**
  * Filter files only with `css` extension.
  */
 const filter = createFilter( [ '**/*.css' ] );
 
-export function splitCss(): Plugin {
-	const stylesheetsFiles: Record<string, string> = {};
+export function splitCss( pluginOptions?: RollupSplitCssOptions ): Plugin {
+	const options: Required<RollupSplitCssOptions> = Object.assign( {
+		minimize: false
+	}, pluginOptions || {} );
 
 	return {
 		name: 'cke5-styles',
@@ -25,102 +26,48 @@ export function splitCss(): Plugin {
 				return;
 			}
 
-			stylesheetsFiles[ id ] = code;
-
 			return '';
 		},
 		async generateBundle( output: NormalizedOutputOptions, bundle: OutputBundle ) {
-			// Get license banner.
-			const banner = await getBanner( output, bundle );
-
-			// Import `CSS` files in same order as they were imported.
-			const filesIdsInImportOrder = getFilesIdsInImportOrder( bundle, this.getModuleInfo );
-
-			// Combine all preprocessed `CSS` files into one.
-			const cssStylesheet = getAllStylesAsSingleStyleSheet( filesIdsInImportOrder, stylesheetsFiles );
+			// Get stylesheet from output bundle.
+			const cssStylesheet = getCssStylesheet( bundle );
 
 			// Parse `CSS` string and returns an `AST` object.
 			const parsedCss = parse( cssStylesheet );
 
 			// Generate split stylesheets for editor, content, and one that contains them all.
-			const { editorStylesContent, editingViewStylesContent, allStylesContent } = getSplittedStyleSheets( parsedCss );
+			const { editorStylesContent, editingViewStylesContent } = getSplittedStyleSheets( parsedCss );
 
 			// Emit those styles ito files.
 			this.emitFile( {
 				type: 'asset',
-				fileName: 'styles.css',
-				source: unifyFileContentOutput( allStylesContent, banner )
+				fileName: options.minimize ? 'editor-styles.min.css' : 'editor-styles.css',
+				source: await unifyFileContentOutput( editorStylesContent, options.minimize )
 			} );
 			this.emitFile( {
 				type: 'asset',
-				fileName: 'editor-styles.css',
-				source: unifyFileContentOutput( editorStylesContent, banner )
-			} );
-			this.emitFile( {
-				type: 'asset',
-				fileName: 'content-styles.css',
-				source: unifyFileContentOutput( editingViewStylesContent, banner )
+				fileName: options.minimize ? 'content-styles.min.css' : 'content-styles.css',
+				source: await unifyFileContentOutput( editingViewStylesContent, options.minimize )
 			} );
 		}
 	};
 }
 
 /**
- * Get files Ids in orders files in order as they were imported.
  * @param bundle provides the full list of files being written or generated along with their details.
- * @param getModuleInfo Function that returns additional information about the module in question.
  */
-function getFilesIdsInImportOrder( bundle: OutputBundle, getModuleInfo: GetModuleInfo ) {
-	const ids: Set<string> = new Set();
+function getCssStylesheet( bundle: OutputBundle ) {
+	const cssStylesheetChunk = Object
+		.values( bundle )
+		.find( chunk => chunk.fileName && ( chunk.fileName.endsWith( '.css' ) ) );
 
-	for ( const file in bundle ) {
-		const outputChunk = bundle[ file ]! as OutputChunk;
-		const root = outputChunk.facadeModuleId!;
-		const modules = getCSSModules( root, getModuleInfo );
-
-		modules.forEach( id => ids.add( id as string ) );
+	if ( !cssStylesheetChunk ) {
+		return '';
 	}
 
-	return ids;
-}
+	const cssStylesheet = ( cssStylesheetChunk as EmittedAsset ).source as string;
 
-/**
- * Get all CSS modules in the order that they were imported
- *
- * @param id module Id.
- * @param getModuleInfo Function that returns additional information about the module in question.
- * @param modules Set of modules.
- * @param visitedModules Set of visited modules.
- */
-function getCSSModules( id: string, getModuleInfo: GetModuleInfo, modules = new Set(), visitedModules = new Set() ): Set<unknown> {
-	if ( modules.has( id ) || visitedModules.has( id ) ) {
-		return new Set();
-	}
-
-	if ( filter( id ) ) {
-		modules.add( id );
-	}
-
-	// Prevent infinite recursion with circular dependencies
-	visitedModules.add( id );
-
-	// Recursively retrieve all of imported CSS modules
-	const info = getModuleInfo( id );
-
-	if ( info ) {
-		info.importedIds.forEach( importId => {
-			modules = new Set( [
-				...Array.from( modules ),
-				...Array.from( getCSSModules( importId, getModuleInfo, modules, visitedModules ) )
-			] );
-		} );
-	}
-
-	return modules;
-}
-
-function getAllStylesAsSingleStyleSheet( ids: Set<string>, stylesheetsFiles: Record<string, string> ): string {
-	return Array.from( ids ).map( id => stylesheetsFiles[ id ] ).join( '\n' );
+	return cssStylesheet;
 }
 
 /**
@@ -137,11 +84,8 @@ function getSplittedStyleSheets( parsedCss: Stylesheet ): Record< string, string
 			rootDeclarationForEditingViewStyles
 		} = filterCssVariablesBasedOnUsage( rootDefinitions, dividedStylesheets );
 
-		const ruleDeclarationsWithSelector = wrapDefinitionsIntoSelector( ':root', rootDefinitions );
-
 		dividedStylesheets.editorStylesContent = rootDeclarationForEditorStyles + dividedStylesheets.editorStylesContent;
 		dividedStylesheets.editingViewStylesContent = rootDeclarationForEditingViewStyles + dividedStylesheets.editingViewStylesContent;
-		dividedStylesheets.allStylesContent = ruleDeclarationsWithSelector + dividedStylesheets.allStylesContent;
 	}
 
 	return dividedStylesheets;
@@ -156,7 +100,6 @@ function getDividedStyleSheetsDependingOnItsPurpose( rules: Array<Rule> ) {
 
 	let editorStylesContent = '';
 	let editingViewStylesContent = '';
-	let allStylesContent = '';
 
 	rules.forEach( rule => {
 		if ( rule.type !== 'rule' ) {
@@ -166,7 +109,6 @@ function getDividedStyleSheetsDependingOnItsPurpose( rules: Array<Rule> ) {
 
 		editorStylesContent += objectWithDividedStyles.editorStyles;
 		editingViewStylesContent += objectWithDividedStyles.editingViewStyles;
-		allStylesContent += objectWithDividedStyles.allStyles;
 
 		if ( objectWithDividedStyles.rootDefinitions.length ) {
 			rootDefinitionsList.push( ...objectWithDividedStyles.rootDefinitions );
@@ -179,8 +121,7 @@ function getDividedStyleSheetsDependingOnItsPurpose( rules: Array<Rule> ) {
 		rootDefinitions,
 		dividedStylesheets: {
 			editorStylesContent,
-			editingViewStylesContent,
-			allStylesContent
+			editingViewStylesContent
 		}
 	};
 }
@@ -254,7 +195,6 @@ function divideRuleStylesBetweenStylesheets( rule: Rule ) {
 
 	let editorStyles = '';
 	let editingViewStyles = '';
-	let allStyles = '';
 
 	const ruleDeclarations = getRuleDeclarations( rule.declarations! );
 	const ruleDeclarationsWithSelector = wrapDefinitionsIntoSelector( selector, ruleDeclarations );
@@ -264,12 +204,8 @@ function divideRuleStylesBetweenStylesheets( rule: Rule ) {
 	// `:root` selector need to be in each file at the top.
 	if ( isRootSelector ) {
 		rootDefinitions.push( ruleDeclarations );
-	}
-
-	// Dividing styles depending on purpose
-	if ( !isRootSelector ) {
-		allStyles += ruleDeclarationsWithSelector;
-
+	} else {
+		// Dividing styles depending on purpose
 		if ( isStartingWithContentSelector ) {
 			editingViewStyles += ruleDeclarationsWithSelector;
 		} else {
@@ -280,8 +216,7 @@ function divideRuleStylesBetweenStylesheets( rule: Rule ) {
 	return {
 		rootDefinitions,
 		editorStyles,
-		editingViewStyles,
-		allStyles
+		editingViewStyles
 	};
 }
 
@@ -301,18 +236,17 @@ function getRuleDeclarations( declarations: Array<Declaration> ): string {
 
 /**
  * @param content is a `CSS` content.
- * @param banner license header.
+ * @param minimize When set to `true` it will minify the content.
  */
-function unifyFileContentOutput( content: string | undefined, banner: string ): string {
-	const bundle = new Bundle();
+async function unifyFileContentOutput( content: string = '', minimize: boolean ): Promise<string> {
+	if ( !minimize ) {
+		return content;
+	}
 
-	bundle.addSource( {
-		content: new MagicString( content ? content : '' )
-	} );
+	const minifier = cssnano() as Processor;
+	const minifiedResult = await minifier.process( content );
 
-	bundle.prepend( `${ banner }\n` );
-
-	return bundle.toString();
+	return minifiedResult.css;
 }
 
 /**
@@ -320,4 +254,14 @@ function unifyFileContentOutput( content: string | undefined, banner: string ): 
  */
 function wrapDefinitionsIntoSelector( selector: string, definitions: string ): string {
 	return `${ selector } {\n${ definitions }}\n`;
+}
+
+export interface RollupSplitCssOptions {
+
+	/**
+	 * Flag to choose if the output should be minimized or not.
+	 *
+	 * @default false
+	 */
+	minimize?: boolean;
 }

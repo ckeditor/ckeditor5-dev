@@ -4,4 +4,4 @@
  */
 
 export { translations, type RollupTranslationsOptions } from './plugins/translations.js';
-export { splitCss } from './plugins/splitCss.js';
+export { splitCss, type RollupSplitCssOptions } from './plugins/splitCss.js';
