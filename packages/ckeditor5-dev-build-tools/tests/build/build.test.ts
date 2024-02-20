@@ -177,11 +177,11 @@ test( 'Minify', async () => {
 	expect( output[ 0 ].code ).toContain( 'export{colors}from"chalk";' );
 } );
 
-test( 'Minify doesnt remove comments starting with !', async () => {
+test( 'Minification doesnt remove banner', async () => {
 	const { output } = await build( {
 		input: 'src/input.js',
-		minify: true,
-		banner: 'src/banner.js'
+		banner: 'src/banner.js',
+		minify: true
 	} );
 
 	expect( output[ 0 ].code ).toContain( 'TEST BANNER' );

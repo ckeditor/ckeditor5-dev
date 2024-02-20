@@ -11,24 +11,21 @@ import { verifyChunk } from '../../_utils/utils.js';
 import { translations, type RollupTranslationsOptions } from '../../../src/index.js';
 
 // eslint-disable-next-line max-len
-const ALL_POLISH_TRANSLATIONS = '\nexport default {"pl":{"dictionary":{"Hello world":"Witaj świecie","%0 files":["%0 plik","%0 pliki","%0 plików","%0 plików"]},getPluralForm(n){return (n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);}}}';
+const ALL_POLISH_TRANSLATIONS = 'export default {"pl":{"dictionary":{"Hello world":"Witaj świecie","%0 files":["%0 plik","%0 pliki","%0 plików","%0 plików"]},getPluralForm(n){return (n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);}}}';
 
 // eslint-disable-next-line max-len
-const POLISH_TRANSLATIONS_FROM_ROOT = '\nexport default {"pl":{"dictionary":{"Hello world":"Witaj świecie"},getPluralForm(n){return (n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);}}}';
+const POLISH_TRANSLATIONS_FROM_ROOT = 'export default {"pl":{"dictionary":{"Hello world":"Witaj świecie"},getPluralForm(n){return (n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);}}}';
 
 // eslint-disable-next-line max-len
-const GERMAN_TRANSLATIONS_FROM_ROOT = '\nexport default {"de":{"dictionary":{"Hello world":"Hallo Welt"},getPluralForm(n){return (n != 1);}}}';
+const GERMAN_TRANSLATIONS_FROM_ROOT = 'export default {"de":{"dictionary":{"Hello world":"Hallo Welt"},getPluralForm(n){return (n != 1);}}}';
 
 // eslint-disable-next-line max-len
-const ENGLISH_TRANSLATIONS_FROM_ROOT = '\nexport default {"en":{"dictionary":{"Hello world":"Hello world"},"getPluralForm":null}}';
+const ENGLISH_TRANSLATIONS_FROM_ROOT = 'export default {"en":{"dictionary":{"Hello world":"Hello world"},"getPluralForm":null}}';
 
 /**
  * Helper function for creating a bundle that won't be written to the file system.
  */
-async function generateBundle(
-	options?: RollupTranslationsOptions,
-	banner?: string
-): Promise<RollupOutput['output']> {
+async function generateBundle( options?: RollupTranslationsOptions ): Promise<RollupOutput['output']> {
 	const bundle = await rollup( {
 		input: join( import.meta.dirname, './fixtures/input.js' ),
 		plugins: [
@@ -36,7 +33,10 @@ async function generateBundle(
 		]
 	} );
 
-	const { output } = await bundle.generate( { format: 'esm', banner } );
+	const { output } = await bundle.generate( {
+		format: 'esm',
+		file: 'input.js'
+	} );
 
 	return output;
 }
@@ -50,18 +50,6 @@ test( 'default options', async () => {
 	verifyChunk( output, 'translations/pl.js', ALL_POLISH_TRANSLATIONS );
 	verifyChunk( output, 'translations/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
 	verifyChunk( output, 'translations/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
-} );
-
-/**
- * Ensure that the banner is added to the top of the generated bundle.
- */
-test( 'banner', async () => {
-	const banner = 'BANNER';
-	const output = await generateBundle( undefined, banner );
-
-	verifyChunk( output, 'translations/pl.js', banner + ALL_POLISH_TRANSLATIONS );
-	verifyChunk( output, 'translations/de.js', banner + GERMAN_TRANSLATIONS_FROM_ROOT );
-	verifyChunk( output, 'translations/en.js', banner + ENGLISH_TRANSLATIONS_FROM_ROOT );
 } );
 
 /**

@@ -16,34 +16,33 @@ export interface RollupReplaceOptions {
 	 *   [ 'find', 'replace' ],
 	 *   [ /find/g, 'replace' ]
 	 * ]
+	 *
+	 * @default []
 	 */
 	replace: Array<[ RegExp | string, string ]>;
-
-	/**
-	 * Whether to generate a source map.
-	 *
-	 * @default false
-	 */
-	sourceMap?: boolean;
 }
 
 export function replace( pluginOptions: RollupReplaceOptions ): Plugin {
-	const options: Required<RollupReplaceOptions> = Object.assign( {
-		replace: [],
-		sourceMap: false
-	}, pluginOptions );
+	const options: Required<RollupReplaceOptions> = Object.assign(
+		{ replace: [] },
+		pluginOptions
+	);
 
 	return {
 		name: 'cke5-replace',
 
-		renderChunk( source ) {
+		renderChunk( source, chunk ) {
 			const magic = new MagicString( source );
 
 			options.replace.forEach( replace => magic.replaceAll( ...replace ) );
 
 			return {
 				code: magic.toString(),
-				map: options.sourceMap ? magic.generateMap() : null
+				map: magic.generateMap( {
+					source: chunk.fileName,
+					includeContent: true,
+					hires: true
+				} )
 			};
 		}
 	};

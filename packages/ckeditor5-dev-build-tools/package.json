@@ -32,6 +32,7 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
+    "@rollup/pluginutils": "^5.1.0",
     "chalk": "^5.3.0",
     "glob": "^10.3.10",
     "lodash-es": "^4.17.21",
@@ -43,6 +44,7 @@
     "rollup": "^4.9.5",
     "rollup-plugin-styles": "^4.0.0",
     "rollup-plugin-svg-import": "^3.0.0",
+    "source-map": "^0.7.4",
     "upath": "^2.0.1"
   },
   "devDependencies": {

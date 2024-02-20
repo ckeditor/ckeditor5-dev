@@ -12,7 +12,7 @@ import { getRollupOutputs } from './config.js';
 export interface BuildOptions {
 	input: string;
 	tsconfig: string;
-	banner: string | false;
+	banner: string;
 	external: Array<string> | false;
 	declarations: boolean;
 	translations: boolean;
@@ -25,7 +25,7 @@ export interface BuildOptions {
 export const defaultOptions: BuildOptions = {
 	input: 'src/index.ts',
 	tsconfig: 'tsconfig.json',
-	banner: false,
+	banner: '',
 	external: false,
 	declarations: false,
 	translations: false,
@@ -67,12 +67,16 @@ function getCliArguments(): Partial<BuildOptions> {
  * Merges user provided options with the defaults
  * and transforms relative paths to absolute paths.
  */
-function normalizeOptions( options: Partial<BuildOptions> ) {
+async function normalizeOptions( options: Partial<BuildOptions> ): Promise<BuildOptions> {
 	const normalized = Object.assign( {}, defaultOptions, options );
 
 	normalized.input = getPath( normalized.input );
 	normalized.tsconfig = getPath( normalized.tsconfig );
-	normalized.banner = normalized.banner && getPath( normalized.banner );
+
+	if ( normalized.banner ) {
+		const path = getPath( normalized.banner );
+		normalized.banner = ( await import( path ) ).default;
+	}
 
 	return normalized;
 }
@@ -85,9 +89,8 @@ export async function build(
 ): Promise<RollupOutput> {
 	const {
 		clean,
-		banner,
 		...args
-	}: BuildOptions = normalizeOptions( options );
+	}: BuildOptions = await normalizeOptions( options );
 
 	/**
 	 * Create Rollup configuration based on provided arguments.
@@ -113,7 +116,6 @@ export async function build(
 		format: 'esm',
 		file: getPath( 'dist', args.minify ? 'index.min.js' : 'index.js' ),
 		assetFileNames: '[name][extname]',
-		sourcemap: args.sourceMap,
-		banner: banner && ( await import( banner ) ).default
+		sourcemap: args.sourceMap
 	} );
 }

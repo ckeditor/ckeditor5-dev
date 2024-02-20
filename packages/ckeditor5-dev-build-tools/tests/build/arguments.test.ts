@@ -10,20 +10,18 @@ import * as config from '../../src/config.js';
 import { build } from '../../src/build.js';
 
 /**
+ * Mock `rollup`, so it doesn't try to build anything.
+ */
+vi
+	.spyOn( rollup, 'rollup' )
+	.mockResolvedValue( { write() { } } as any );
+
+/**
  * Mock function for generating rollup configuration.
  */
 const spy = vi
 	.spyOn( config, 'getRollupOutputs' )
 	.mockImplementation( (): any => {} );
-
-/**
- * Mock `rollup`, so it doesn't try to build anything.
- */
-const spyWrite = vi.fn();
-
-vi
-	.spyOn( rollup, 'rollup' )
-	.mockResolvedValue( { write: spyWrite } as any );
 
 /**
  * Mock `fs.rmSync`, so it doesn't try to delete anything.
@@ -131,12 +129,10 @@ test( '--clean', async () => {
 } );
 
 test( '--banner', async () => {
-	spyWrite.mockClear();
-
 	mockCliArgs( '--banner=tests/build/fixtures/src/banner.js' );
 	await build();
 
-	expect( spyWrite ).toHaveBeenCalledWith( expect.objectContaining( { banner: '/*! TEST BANNER */' } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { banner: '/*! TEST BANNER */' } ) );
 } );
 
 /**
@@ -200,5 +196,5 @@ test( '.clean', async () => {
 test( '.banner', async () => {
 	await build( { banner: 'tests/build/fixtures/src/banner.js' } );
 
-	expect( spyWrite ).toHaveBeenCalledWith( expect.objectContaining( { banner: '/*! TEST BANNER */' } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { banner: '/*! TEST BANNER */' } ) );
 } );

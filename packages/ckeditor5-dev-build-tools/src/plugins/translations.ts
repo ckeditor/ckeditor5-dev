@@ -10,7 +10,7 @@ import path from 'upath';
 import PO from 'pofile';
 import { groupBy, merge } from 'lodash-es';
 import { glob } from 'glob';
-import type { Plugin, NormalizedOutputOptions, OutputBundle, OutputChunk } from 'rollup';
+import type { Plugin } from 'rollup';
 
 export interface RollupTranslationsOptions {
 
@@ -57,11 +57,7 @@ function getPluralFunction( content: PO ): string | null {
 /**
  * Returns the code of the output translations file.
  */
-function getCode(
-	language: string,
-	translation: Translation,
-	banner: string
-): string {
+function getCode( language: string, translation: Translation ): string {
 	let translations = JSON.stringify( {
 		[ language ]: translation
 	} );
@@ -71,7 +67,7 @@ function getCode(
 		'getPluralForm(n){return $1}'
 	);
 
-	return banner + '\nexport default ' + translations;
+	return `export default ${ translations }`;
 }
 
 /**
@@ -86,15 +82,7 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 	return {
 		name: 'cke5-translations',
 
-		async generateBundle( output: NormalizedOutputOptions, bundle: OutputBundle ) {
-			// Get `banner` from the Rollup configuration object.
-			const mainChunk = Object
-				.values( bundle )
-				.filter( ( output ): output is OutputChunk => output.type === 'chunk' )
-				.find( chunk => chunk.isEntry )!;
-
-			const banner = await output.banner( mainChunk );
-
+		async generateBundle() {
 			// Get the paths to the PO files based on provided pattern.
 			const filePaths = await glob( options.source, {
 				cwd: process.cwd(),
@@ -128,7 +116,7 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 				this.emitFile( {
 					type: 'prebuilt-chunk',
 					fileName: path.join( options.destination, `${ language }.js` ),
-					code: getCode( language, translation, banner ),
+					code: getCode( language, translation ),
 					exports: [ 'default' ]
 				} );
 			}

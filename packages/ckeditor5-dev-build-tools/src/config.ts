@@ -20,7 +20,8 @@ import svg from 'rollup-plugin-svg-import';
 import commonjs from '@rollup/plugin-commonjs';
 import typescriptPlugin from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
-import { replace } from './plugins/replace.js';
+import { banner as bannerPlugin } from './plugins/banner.js';
+import { replace as replacePlugin } from './plugins/replace.js';
 import { translations as translationsPlugin } from './plugins/translations.js';
 
 /**
@@ -87,10 +88,11 @@ const defaultExternals: Array<string> = Object.keys(
  * Generates Rollup configurations.
  */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function getRollupOutputs( options: Omit<BuildOptions, 'clean' | 'banner'> ) {
+export async function getRollupOutputs( options: Omit<BuildOptions, 'clean'> ) {
 	const {
 		input,
 		tsconfig,
+		banner,
 		external,
 		declarations,
 		translations,
@@ -176,7 +178,7 @@ export async function getRollupOutputs( options: Omit<BuildOptions, 'clean' | 'b
 			/**
 			 * Replaces parts of the source code with the provided values.
 			 */
-			replace( {
+			replacePlugin( {
 				replace: [
 					/**
 					 * Replaces the following imports with '@ckeditor/ckeditor5-core/dist/index.js':
@@ -188,8 +190,7 @@ export async function getRollupOutputs( options: Omit<BuildOptions, 'clean' | 'b
 					 * - '@ckeditor/ckeditor5-core/src/index.js';
 					 */
 					[ /(@ckeditor\/ckeditor5-|ckeditor5\/src\/)([a-z-]+)(?:[a-z\-/.]+)?/g, '@ckeditor/ckeditor5-$2/dist/index.js' ]
-				],
-				sourceMap
+				]
 			} ),
 
 			/**
@@ -198,7 +199,17 @@ export async function getRollupOutputs( options: Omit<BuildOptions, 'clean' | 'b
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore
 			minify && terser( {
-				sourceMap
+				sourceMap,
+				format: {
+					comments: false
+				}
+			} ),
+
+			/**
+			 * Adds provided banner to the top of output JavaScript and CSS files.
+			 */
+			banner && bannerPlugin( {
+				banner
 			} )
 		]
 	} as const satisfies RollupOptions;
@@ -231,6 +242,7 @@ function getTypeScriptPlugin( {
 	return typescriptPlugin( {
 		tsconfig,
 		sourceMap,
+		inlineSources: sourceMap, // https://github.com/rollup/plugins/issues/260
 		typescript: require( typescriptPath ),
 		declaration: declarations,
 		declarationDir: declarations ? getPath( 'dist', 'types' ) : undefined,

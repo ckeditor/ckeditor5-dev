@@ -21,7 +21,11 @@ async function generateBundle(
 		]
 	} );
 
-	const { output } = await bundle.generate( { format: 'esm', sourcemap } );
+	const { output } = await bundle.generate( {
+		format: 'esm',
+		file: 'input.js',
+		sourcemap
+	} );
 
 	return output;
 }
@@ -65,16 +69,14 @@ test( 'Accepts string and RegExp', async () => {
 
 test( 'Updates the source map', async () => {
 	const unmodifiedOutput = await generateBundle( {
-		replace: [],
-		sourceMap: true
+		replace: []
 	}, true );
 
 	const output = await generateBundle( {
 		replace: [
 			[ 'test', 'temp' ],
 			[ /123/g, '456' ]
-		],
-		sourceMap: true
+		]
 	}, true );
 
 	expect( ( unmodifiedOutput[ 1 ] as OutputAsset ).source ).not.toBe( ( output[ 1 ] as OutputAsset ).source );
