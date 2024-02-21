@@ -75,7 +75,9 @@ async function normalizeOptions( options: Partial<BuildOptions> ): Promise<Build
 
 	if ( normalized.banner ) {
 		const path = getPath( normalized.banner );
-		normalized.banner = ( await import( path ) ).default;
+		const { banner } = await import( path );
+
+		normalized.banner = banner;
 	}
 
 	return normalized;
