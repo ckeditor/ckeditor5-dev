@@ -20,6 +20,7 @@ import svg from 'rollup-plugin-svg-import';
 import commonjs from '@rollup/plugin-commonjs';
 import typescriptPlugin from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+import { splitCss } from './plugins/splitCss.js';
 import { banner as bannerPlugin } from './plugins/banner.js';
 import { replace as replacePlugin } from './plugins/replace.js';
 import { translations as translationsPlugin } from './plugins/translations.js';
@@ -27,7 +28,6 @@ import { translations as translationsPlugin } from './plugins/translations.js';
 /**
  * PostCSS plugins
  */
-import postcssImport from 'postcss-import';
 import postcssMixins from 'postcss-mixins';
 import postcssNesting from 'postcss-nesting';
 
@@ -159,12 +159,18 @@ export async function getRollupConfig( options: Omit<BuildOptions, 'clean'> ) {
 					minify ? 'styles.min.css' : 'styles.css'
 				],
 				plugins: [
-					postcssImport,
 					postcssMixins,
 					postcssNesting
 				],
 				minimize: minify,
 				sourceMap
+			} ),
+
+			/**
+			 * Generates CSS files containing only content and only editor styles.
+			 */
+			splitCss( {
+				minimize: minify
 			} ),
 
 			/**
@@ -205,7 +211,7 @@ export async function getRollupConfig( options: Omit<BuildOptions, 'clean'> ) {
 			/**
 			 * Adds provided banner to the top of output JavaScript and CSS files.
 			 */
-			banner && bannerPlugin( {
+			Boolean( banner ) && bannerPlugin( {
 				banner
 			} )
 		]
