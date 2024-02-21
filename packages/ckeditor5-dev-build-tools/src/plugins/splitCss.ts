@@ -9,6 +9,16 @@ import type { Plugin, OutputBundle, NormalizedOutputOptions, EmittedAsset } from
 import type { Processor } from 'postcss';
 import cssnano from 'cssnano';
 
+export interface RollupSplitCssOptions {
+
+	/**
+	 * Flag to choose if the output should be minimized or not.
+	 *
+	 * @default false
+	 */
+	minimize?: boolean;
+}
+
 /**
  * Filter files only with `css` extension.
  */
@@ -59,15 +69,13 @@ export function splitCss( pluginOptions?: RollupSplitCssOptions ): Plugin {
 function getCssStylesheet( bundle: OutputBundle ) {
 	const cssStylesheetChunk = Object
 		.values( bundle )
-		.find( chunk => chunk.fileName && ( chunk.fileName.endsWith( '.css' ) ) );
+		.find( chunk => filter( chunk.fileName ) );
 
 	if ( !cssStylesheetChunk ) {
 		return '';
 	}
 
-	const cssStylesheet = ( cssStylesheetChunk as EmittedAsset ).source as string;
-
-	return cssStylesheet;
+	return ( cssStylesheetChunk as EmittedAsset ).source?.toString();
 }
 
 /**
@@ -254,14 +262,4 @@ async function unifyFileContentOutput( content: string = '', minimize: boolean )
  */
 function wrapDefinitionsIntoSelector( selector: string, definitions: string ): string {
 	return `${ selector } {\n${ definitions }}\n`;
-}
-
-export interface RollupSplitCssOptions {
-
-	/**
-	 * Flag to choose if the output should be minimized or not.
-	 *
-	 * @default false
-	 */
-	minimize?: boolean;
 }
