@@ -4,10 +4,10 @@
  */
 
 import { test, expect } from 'vitest';
-import { getPath, camelize, camelizeObjectKeys } from '../src/utils.js';
+import { getCwdPath, camelize, camelizeObjectKeys } from '../src/utils.js';
 
 test( 'getPath()', () => {
-	expect( getPath( 'dist', 'index.js' ) ).toBe( process.cwd() + '/dist/index.js' );
+	expect( getCwdPath( 'dist', 'index.js' ) ).toBe( process.cwd() + '/dist/index.js' );
 } );
 
 test( 'camelize()', () => {

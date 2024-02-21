@@ -7,7 +7,7 @@ import { existsSync, readFileSync } from 'fs';
 import { createRequire } from 'module';
 import type { PackageJson } from 'type-fest';
 import { type Plugin, type RollupOptions } from 'rollup';
-import { getPath } from './utils.js';
+import { getCwdPath } from './utils.js';
 import type { BuildOptions } from './build.js';
 
 /**
@@ -68,7 +68,7 @@ import postcssNesting from 'postcss-nesting';
  * Contents of the `package.json` in the current working directory.
  */
 const pkg: PackageJson = JSON.parse(
-	readFileSync( getPath( 'package.json' ), { encoding: 'utf-8' } )
+	readFileSync( getCwdPath( 'package.json' ), { encoding: 'utf-8' } )
 );
 
 /**
@@ -76,19 +76,16 @@ const pkg: PackageJson = JSON.parse(
  * packages defined in `dependencies` and `peerDependencies` of the package
  * and all packages starting with `@ckeditor` will be treated as externals.
  */
-const defaultExternals: Array<string> = Object.keys(
-	Object.assign(
-		{ '@ckeditor': true },
-		pkg.dependencies,
-		pkg.peerDependencies
-	)
-);
+const defaultExternals: Array<string> = Object.keys( {
+	...pkg.dependencies,
+	...pkg.peerDependencies
+} );
 
 /**
  * Generates Rollup configurations.
  */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function getRollupOutputs( options: Omit<BuildOptions, 'clean'> ) {
+export async function getRollupConfig( options: Omit<BuildOptions, 'clean'> ) {
 	const {
 		input,
 		tsconfig,
@@ -245,10 +242,9 @@ function getTypeScriptPlugin( {
 		inlineSources: sourceMap, // https://github.com/rollup/plugins/issues/260
 		typescript: require( typescriptPath ),
 		declaration: declarations,
-		declarationDir: declarations ? getPath( 'dist', 'types' ) : undefined,
-		declarationMap: false, // TODO: Do we need this?
+		declarationDir: declarations ? getCwdPath( 'dist', 'types' ) : undefined,
 		compilerOptions: {
-			rootDir: declarations ? getPath( 'src' ) : undefined
+			rootDir: declarations ? getCwdPath( 'src' ) : undefined
 		}
 	} );
 }

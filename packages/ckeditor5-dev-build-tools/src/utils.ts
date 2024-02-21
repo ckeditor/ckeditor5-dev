@@ -9,7 +9,7 @@ import type { CamelCase, CamelCasedProperties } from 'type-fest';
 /**
  * Returns path relative to the current working directory.
  */
-export function getPath( ...paths: Array<string> ): string {
+export function getCwdPath( ...paths: Array<string> ): string {
 	return path.join( process.cwd(), ...paths );
 }
 

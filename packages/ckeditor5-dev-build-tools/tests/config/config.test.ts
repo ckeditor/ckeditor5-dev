@@ -4,9 +4,9 @@
  */
 
 import { test, expect } from 'vitest';
-import { getRollupOutputs } from '../../src/config.js';
+import { getRollupConfig } from '../../src/config.js';
 
-type Options = Parameters<typeof getRollupOutputs>[0];
+type Options = Parameters<typeof getRollupConfig>[0];
 
 const defaults: Options = {
 	input: '',
@@ -20,7 +20,7 @@ const defaults: Options = {
 };
 
 function getConfig( config: Partial<Options> = {} ) {
-	return getRollupOutputs( Object.assign( {}, defaults, config ) );
+	return getRollupConfig( Object.assign( {}, defaults, config ) );
 }
 
 test( '--input', async () => {

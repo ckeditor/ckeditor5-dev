@@ -6,8 +6,8 @@
 import fs from 'fs';
 import util from 'util';
 import { rollup, type RollupOutput } from 'rollup';
-import { getPath, camelizeObjectKeys } from './utils.js';
-import { getRollupOutputs } from './config.js';
+import { getCwdPath, camelizeObjectKeys } from './utils.js';
+import { getRollupConfig } from './config.js';
 
 export interface BuildOptions {
 	input: string;
@@ -70,11 +70,11 @@ function getCliArguments(): Partial<BuildOptions> {
 async function normalizeOptions( options: Partial<BuildOptions> ): Promise<BuildOptions> {
 	const normalized = Object.assign( {}, defaultOptions, options );
 
-	normalized.input = getPath( normalized.input );
-	normalized.tsconfig = getPath( normalized.tsconfig );
+	normalized.input = getCwdPath( normalized.input );
+	normalized.tsconfig = getCwdPath( normalized.tsconfig );
 
 	if ( normalized.banner ) {
-		const path = getPath( normalized.banner );
+		const path = getCwdPath( normalized.banner );
 		const { banner } = await import( path );
 
 		normalized.banner = banner;
@@ -97,26 +97,26 @@ export async function build(
 	/**
 	 * Create Rollup configuration based on provided arguments.
 	 */
-	const output = await getRollupOutputs( args );
+	const config = await getRollupConfig( args );
 
 	/**
 	 * Remove old build directory.
 	 */
 	if ( clean ) {
-		fs.rmSync( getPath( 'dist' ), { recursive: true, force: true } );
+		fs.rmSync( getCwdPath( 'dist' ), { recursive: true, force: true } );
 	}
 
 	/**
 	 * Run Rollup to generate bundles.
 	 */
-	const build = await rollup( output );
+	const build = await rollup( config );
 
 	/**
 	 * Write bundles to the filesystem.
 	 */
 	return build.write( {
 		format: 'esm',
-		file: getPath( 'dist', args.minify ? 'index.min.js' : 'index.js' ),
+		file: getCwdPath( 'dist', args.minify ? 'index.min.js' : 'index.js' ),
 		assetFileNames: '[name][extname]',
 		sourcemap: args.sourceMap
 	} );

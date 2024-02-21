@@ -20,7 +20,7 @@ vi
  * Mock function for generating rollup configuration.
  */
 const spy = vi
-	.spyOn( config, 'getRollupOutputs' )
+	.spyOn( config, 'getRollupConfig' )
 	.mockImplementation( (): any => {} );
 
 /**
