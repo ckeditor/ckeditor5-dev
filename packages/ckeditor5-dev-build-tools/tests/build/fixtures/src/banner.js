@@ -3,4 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-export default '/*! TEST BANNER */';
+export const banner = '/*! TEST BANNER */';
