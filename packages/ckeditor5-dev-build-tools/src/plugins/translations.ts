@@ -12,6 +12,8 @@ import { groupBy, merge } from 'lodash-es';
 import { glob } from 'glob';
 import type { Plugin, NormalizedOutputOptions, OutputBundle, OutputChunk } from 'rollup';
 
+import { getBanner } from './utils.js';
+
 export interface RollupTranslationsOptions {
 
 	/**
@@ -87,13 +89,7 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 		name: 'cke5-po2js',
 
 		async generateBundle( output: NormalizedOutputOptions, bundle: OutputBundle ) {
-			// Get `banner` from the Rollup configuration object.
-			const mainChunk = Object
-				.values( bundle )
-				.filter( ( output ): output is OutputChunk => output.type === 'chunk' )
-				.find( chunk => chunk.isEntry )!;
-
-			const banner = await output.banner( mainChunk );
+			const banner = await getBanner( output, bundle );
 
 			// Get the paths to the PO files based on provided pattern.
 			const filePaths = await glob( options.source, { ignore: 'node_modules/**' } );
