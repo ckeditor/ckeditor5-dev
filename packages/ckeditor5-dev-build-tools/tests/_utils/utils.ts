@@ -35,3 +35,39 @@ export function verifyChunk(
 	expect( chunk!.type ).toBe( 'chunk' );
 	expect( ( chunk as OutputChunk ).code ).includes( code );
 }
+
+/**
+ * Helper function for verifying `CSS` output.
+ */
+export function verifyDividedStyleSheet(
+	output: RollupOutput['output'],
+	outputFileName: cssOutputFileName,
+	expectedResult: string
+): void {
+	const styles = output.find( output => output.fileName === outputFileName );
+
+	expect( styles ).toBeDefined();
+	expect( styles!.type ).toBe( 'asset' );
+
+	const source = ( styles as OutputAsset )!.source as string;
+
+	expect( removeWhitespace( source ) ).toEqual( expectedResult );
+}
+
+/**
+ * Returns string without whitespace.
+ */
+export function removeWhitespace( text: string ): string {
+	return text.replaceAll( /\n\s+/gm, '\n' );
+}
+
+/**
+ * Possible `CSS` file name for output.
+ */
+export type cssOutputFileName =
+	| 'styles.css'
+	| 'editor-styles.css'
+	| 'content-styles.css'
+	| 'styles.min.css'
+	| 'editor-styles.min.css'
+	| 'content-styles.min.css';
