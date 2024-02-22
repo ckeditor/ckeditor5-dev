@@ -205,7 +205,7 @@ test( 'Minification doesnt remove banner', async () => {
  */
 test( 'Overriding', async () => {
 	const { output } = await build( {
-		input: 'src/overriding.ts'
+		input: 'src/overriding.js'
 	} );
 
 	expect( output[ 0 ].code ).toContain( '@ckeditor/ckeditor5-utils/dist/index.js' );
