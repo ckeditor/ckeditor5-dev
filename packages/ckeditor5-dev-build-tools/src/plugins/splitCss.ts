@@ -30,7 +30,7 @@ export function splitCss( pluginOptions?: RollupSplitCssOptions ): Plugin {
 	}, pluginOptions || {} );
 
 	return {
-		name: 'cke5-styles',
+		name: 'cke5-split-css',
 		transform( code, id ) {
 			if ( !filter( id ) ) {
 				return;
