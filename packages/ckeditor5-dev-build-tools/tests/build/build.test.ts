@@ -58,7 +58,7 @@ test( 'TypeScript input', async () => {
 		'index.js',
 		'styles.css',
 		'editor-styles.css',
-		'content-styles.css',
+		'content-styles.css'
 	] );
 } );
 

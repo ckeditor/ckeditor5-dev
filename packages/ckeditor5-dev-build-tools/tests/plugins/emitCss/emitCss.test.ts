@@ -40,7 +40,7 @@ async function generateBundle( input: string ): Promise<RollupOutput['output']> 
 	const { output } = await bundle.generate( {
 		format: 'esm',
 		file: 'input.js',
-		assetFileNames: '[name][extname]',
+		assetFileNames: '[name][extname]'
 	} );
 
 	return output;
@@ -51,7 +51,6 @@ test( 'Emits file if it wasnt already', async () => {
 
 	verifyAsset( output, 'styles.css', '' );
 } );
-
 
 test( 'Doesnt override file if it was emitted', async () => {
 	const output = await generateBundle( './fixtures/input-css.ts' );
