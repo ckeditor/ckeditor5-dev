@@ -64,5 +64,10 @@ export function removeWhitespace( text: string ): string {
 /**
  * Possible `CSS` file name for output.
  */
-export type cssOutputFileName = 'styles.css' | 'editor-styles.css' | 'content-styles.css' |
-	'styles.min.css' | 'editor-styles.min.css' | 'content-styles.min.css';
+export type cssOutputFileName =
+	| 'styles.css'
+	| 'editor-styles.css'
+	| 'content-styles.css'
+	| 'styles.min.css'
+	| 'editor-styles.min.css'
+	| 'content-styles.min.css';

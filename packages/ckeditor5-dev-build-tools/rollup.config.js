@@ -4,7 +4,6 @@
  */
 
 import { readFileSync } from 'fs';
-
 import path from 'upath';
 import { defineConfig } from 'rollup';
 import commonjs from '@rollup/plugin-commonjs';
@@ -36,8 +35,11 @@ export default defineConfig( {
 	plugins: [
 		commonjs(),
 		nodeResolve( {
+			extensions: [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ],
 			preferBuiltins: true
 		} ),
-		typescript()
+		typescript( {
+			rootDir: './src'
+		} )
 	]
 } );

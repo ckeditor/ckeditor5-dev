@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-build-tools",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Rollup-based tools used to build CKEditor 5 packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -20,38 +20,48 @@
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "files": [
+    "bin",
     "dist"
   ],
+  "bin": {
+    "ckeditor5-build-package": "bin/build-project.js"
+  },
   "dependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
     "@rollup/pluginutils": "^5.1.0",
+    "chalk": "^5.3.0",
     "css": "^3.0.0",
     "cssnano": "^6.0.3",
     "glob": "^10.3.10",
-    "magic-string": "^0.30.7",
+    "lodash-es": "^4.17.21",
+    "magic-string": "^0.30.6",
     "pofile": "^1.1.4",
+    "postcss-mixins": "^9.0.4",
+    "postcss-nesting": "^12.0.2",
     "rollup": "^4.9.5",
     "rollup-plugin-styles": "^4.0.0",
+    "rollup-plugin-svg-import": "^3.0.0",
+    "source-map": "^0.7.4",
     "upath": "^2.0.1"
   },
   "devDependencies": {
+    "@ckeditor/ckeditor5-utils": "^41.1.0",
     "@types/css": "^0.0.37",
     "@types/node": "^20.11.5",
+    "@types/postcss-mixins": "^9.0.5",
     "@vitest/coverage-v8": "^1.2.1",
-    "lodash-es": "^4.17.21",
+    "type-fest": "^4.10.2",
     "typescript": "^5.3.3",
     "vitest": "^1.2.1"
-  },
-  "peerDependencies": {
-    "typescript": "^4.8.2|^5.0.0"
   },
   "scripts": {
     "build": "rollup -c rollup.config.js",
     "dev": "rollup -c rollup.config.js --watch",
-    "test": "vitest run --coverage",
+    "test": "vitest run --config vitest.config.ts",
     "test:dev": "vitest dev"
   }
 }

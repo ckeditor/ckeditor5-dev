@@ -10,9 +10,7 @@ import path from 'upath';
 import PO from 'pofile';
 import { groupBy, merge } from 'lodash-es';
 import { glob } from 'glob';
-import type { Plugin, NormalizedOutputOptions, OutputBundle, OutputChunk } from 'rollup';
-
-import { getBanner } from './utils.js';
+import type { Plugin } from 'rollup';
 
 export interface RollupTranslationsOptions {
 
@@ -59,11 +57,7 @@ function getPluralFunction( content: PO ): string | null {
 /**
  * Returns the code of the output translations file.
  */
-function getCode(
-	language: string,
-	translation: Translation,
-	banner: string
-): string {
+function getCode( language: string, translation: Translation ): string {
 	let translations = JSON.stringify( {
 		[ language ]: translation
 	} );
@@ -73,7 +67,7 @@ function getCode(
 		'getPluralForm(n){return $1}'
 	);
 
-	return banner + '\nexport default ' + translations;
+	return `export default ${ translations }`;
 }
 
 /**
@@ -86,13 +80,14 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 	}, pluginOptions || {} );
 
 	return {
-		name: 'cke5-po2js',
+		name: 'cke5-translations',
 
-		async generateBundle( output: NormalizedOutputOptions, bundle: OutputBundle ) {
-			const banner = await getBanner( output, bundle );
-
+		async generateBundle() {
 			// Get the paths to the PO files based on provided pattern.
-			const filePaths = await glob( options.source, { ignore: 'node_modules/**' } );
+			const filePaths = await glob( options.source, {
+				cwd: process.cwd(),
+				ignore: 'node_modules/**'
+			} );
 
 			// Group the translation files by the language code.
 			const grouped = groupBy( filePaths, path => parse( path ).name );
@@ -100,9 +95,15 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 			for ( const [ language, paths ] of Object.entries( grouped ) ) {
 				// Gather all translations for the given language.
 				const translations: Array<Translation> = paths
-					.map( path => readFileSync( path, 'utf-8' ) )
+					// Resolve relative paths to absolute paths.
+					.map( filePath => path.isAbsolute( filePath ) ? filePath : path.join( process.cwd(), filePath ) )
+					// Load files by path.
+					.map( filePath => readFileSync( filePath, 'utf-8' ) )
+					// Process `.po` files.
 					.map( PO.parse )
+					// Filter out empty files.
 					.filter( Boolean )
+					// Map files to desired structure.
 					.map( content => ( {
 						dictionary: getDictionary( content ),
 						getPluralForm: getPluralFunction( content )
@@ -115,7 +116,7 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 				this.emitFile( {
 					type: 'prebuilt-chunk',
 					fileName: path.join( options.destination, `${ language }.js` ),
-					code: getCode( language, translation, banner ),
+					code: getCode( language, translation ),
 					exports: [ 'default' ]
 				} );
 			}
