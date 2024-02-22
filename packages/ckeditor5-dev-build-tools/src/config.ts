@@ -159,7 +159,9 @@ export async function getRollupConfig( options: Omit<BuildOptions, 'clean'> ) {
 				],
 				plugins: [
 					postcssMixins,
-					postcssNesting
+					postcssNesting( {
+						noIsPseudoSelector: true
+					} )
 				],
 				minimize: minify,
 				sourceMap
