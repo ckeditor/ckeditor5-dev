@@ -104,7 +104,7 @@ function getSplittedStyleSheets( parsedCss: Stylesheet ): Record< string, string
  * @param rules List of `CSS` StyleSheet rules.
  */
 function getDividedStyleSheetsDependingOnItsPurpose( rules: Array<Rule> ) {
-	const rootDefinitionsList: Array<string> = [];
+	const rootDefinitionsSet: Set<string> = new Set();
 
 	let editorStylesContent = '';
 	let editingViewStylesContent = '';
@@ -119,11 +119,11 @@ function getDividedStyleSheetsDependingOnItsPurpose( rules: Array<Rule> ) {
 		editingViewStylesContent += objectWithDividedStyles.editingViewStyles;
 
 		if ( objectWithDividedStyles.rootDefinitions.length ) {
-			rootDefinitionsList.push( ...objectWithDividedStyles.rootDefinitions );
+			objectWithDividedStyles.rootDefinitions.forEach( definition => rootDefinitionsSet.add( definition ) );
 		}
 	} );
 
-	const rootDefinitions = rootDefinitionsList.join( '' );
+	const rootDefinitions = Array.from( rootDefinitionsSet.values() ).join( '' );
 
 	return {
 		rootDefinitions,
