@@ -75,7 +75,7 @@ function getCssStylesheet( bundle: OutputBundle ) {
 		return '';
 	}
 
-	return ( cssStylesheetChunk as EmittedAsset ).source?.toString()!;
+	return ( cssStylesheetChunk as EmittedAsset ).source!.toString();
 }
 
 /**
