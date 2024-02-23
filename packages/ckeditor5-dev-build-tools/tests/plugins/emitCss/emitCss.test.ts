@@ -52,7 +52,7 @@ test( 'Emits file if it wasnt already', async () => {
 	verifyAsset( output, 'styles.css', '' );
 } );
 
-test( 'Doesnt override file if it was emitted', async () => {
+test( 'Doesn\'t override file if it was emitted', async () => {
 	const output = await generateBundle( './fixtures/input-css.ts' );
 
 	verifyAsset( output, 'styles.css', 'div' );
