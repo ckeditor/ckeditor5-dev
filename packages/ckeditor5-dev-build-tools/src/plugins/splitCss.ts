@@ -75,7 +75,7 @@ function getCssStylesheet( bundle: OutputBundle ) {
 		return '';
 	}
 
-	return ( cssStylesheetChunk as EmittedAsset ).source?.toString() || '';
+	return ( cssStylesheetChunk as EmittedAsset ).source?.toString()!;
 }
 
 /**
@@ -252,7 +252,7 @@ async function unifyFileContentOutput( content: string = '', minimize: boolean )
 	}
 
 	const minifier = cssnano() as Processor;
-	const minifiedResult = await minifier.process( content );
+	const minifiedResult = await minifier.process( content, { from: undefined } );
 
 	return minifiedResult.css;
 }
