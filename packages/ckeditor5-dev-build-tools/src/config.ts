@@ -21,6 +21,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import typescriptPlugin from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { banner as bannerPlugin } from './plugins/banner.js';
+import { emitCss as emitCssPlugin } from './plugins/emitCss.js';
 import { replace as replacePlugin } from './plugins/replace.js';
 import { splitCss as splitCssPlugin } from './plugins/splitCss.js';
 import { translations as translationsPlugin } from './plugins/translations.js';
@@ -173,6 +174,13 @@ export async function getRollupConfig( options: Omit<BuildOptions, 'clean'> ) {
 			 */
 			splitCssPlugin( {
 				minimize: minify
+			} ),
+
+			/**
+			 * Ensures empty files are emitted if files of given names were not generated.
+			 */
+			emitCssPlugin( {
+				fileNames: [ minify ? 'styles.min.css' : 'styles.css' ]
 			} ),
 
 			/**
