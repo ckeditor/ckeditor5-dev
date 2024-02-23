@@ -46,7 +46,7 @@ async function generateBundle( input: string ): Promise<RollupOutput['output']> 
 	return output;
 }
 
-test( 'Emits file if it wasnt already', async () => {
+test( 'Emits file if it wasn\'t already', async () => {
 	const output = await generateBundle( './fixtures/input.ts' );
 
 	verifyAsset( output, 'styles.css', '' );
