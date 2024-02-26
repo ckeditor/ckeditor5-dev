@@ -16,7 +16,7 @@ build()
 	.then( () => process.exit( 0 ) )
 	.catch( error => {
 		if ( error.name === 'RollupError' ) {
-			console.log( chalk.red( chalk.bold( 'ERROR:' ) + `Error occured when processing the file "${ error.id }".` ) );
+			console.log( chalk.red( chalk.bold( 'ERROR:' ) + `Error occurred when processing the file "${ error.id }".` ) );
 			console.log( error.message );
 
 			if ( error.frame ) {

@@ -155,6 +155,26 @@ describe( 'splitCss', () => {
 		verifyDividedStyleSheet( output, 'content-styles.css', expectedContentResult );
 	} );
 
+	test( 'should now duplicate declaration ins `:root`', async () => {
+		const output = await generateBundle( './fixtures/duplicated-definitions/input.ts' );
+
+		const expectedResult = removeWhitespace(
+			`:root {
+				--variable1: blue;
+				--variable2: red;
+			}
+			h1 {
+				color: var(--variable1);
+			}
+			p {
+				color: var(--variable2);
+			}
+		` );
+
+		verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
+		verifyDividedStyleSheet( output, 'content-styles.css', '' );
+	} );
+
 	test( 'should omit `:root` declaration when it\'s not exist', async () => {
 		const output = await generateBundle( './fixtures/omit-root-definitions/input.ts' );
 

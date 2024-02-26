@@ -7,6 +7,7 @@ import { createFilter } from '@rollup/pluginutils';
 import { parse, type Rule, type Declaration, type Stylesheet } from 'css';
 import type { Plugin, OutputBundle, NormalizedOutputOptions, EmittedAsset } from 'rollup';
 import type { Processor } from 'postcss';
+import chalk from 'chalk';
 import cssnano from 'cssnano';
 
 export interface RollupSplitCssOptions {
@@ -119,7 +120,17 @@ function getDividedStyleSheetsDependingOnItsPurpose( rules: Array<Rule> ) {
 		editingViewStylesContent += objectWithDividedStyles.editingViewStyles;
 
 		if ( objectWithDividedStyles.rootDefinitions.length ) {
-			objectWithDividedStyles.rootDefinitions.forEach( definition => rootDefinitionsSet.add( definition ) );
+			objectWithDividedStyles.rootDefinitions.forEach( definitionText => {
+				const listOfDefinitions = definitionText.split( '\n' );
+
+				listOfDefinitions.forEach( definition => {
+					if ( definition && rootDefinitionsSet.has( definition ) ) {
+						showInfoOfDuplicatedVariableDefinition( definition );
+					} else {
+						rootDefinitionsSet.add( definition );
+					}
+				} );
+			} );
 		}
 	} );
 
@@ -262,4 +273,13 @@ async function unifyFileContentOutput( content: string = '', minimize: boolean )
  */
 function wrapDefinitionsIntoSelector( selector: string, definitions: string ): string {
 	return `${ selector } {\n${ definitions }}\n`;
+}
+
+function showInfoOfDuplicatedVariableDefinition( definition: string ): void {
+	console.log(
+		chalk.yellow(
+			chalk.bold( 'Warning: ' ) +
+				`The variable definition "${ definition.replaceAll( '\n', '' ) }" has already been declared in :root selector.`
+		)
+	);
 }
