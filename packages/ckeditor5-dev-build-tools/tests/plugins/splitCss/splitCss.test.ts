@@ -155,7 +155,7 @@ describe( 'splitCss', () => {
 		verifyDividedStyleSheet( output, 'content-styles.css', expectedContentResult );
 	} );
 
-	test( 'should now duplicate declaration ins `:root`', async () => {
+	test( 'should not duplicate declaration ins `:root`', async () => {
 		const output = await generateBundle( './fixtures/duplicated-definitions/input.ts' );
 
 		const expectedResult = removeWhitespace(
