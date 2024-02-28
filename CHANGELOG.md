@@ -1,6 +1,35 @@
 Changelog
 =========
 
+## [39.6.2](https://github.com/ckeditor/ckeditor5-dev/compare/v39.6.1...v39.6.2) (2024-02-28)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/39.6.2): v39.6.1 => v39.6.2
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/39.6.2): v39.6.1 => v39.6.2
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/39.6.2): v39.6.1 => v39.6.2
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/39.6.2): v39.6.1 => v39.6.2
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/39.6.2): v39.6.1 => v39.6.2
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/39.6.2): v39.6.1 => v39.6.2
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/39.6.2): v39.6.1 => v39.6.2
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/39.6.2): v39.6.1 => v39.6.2
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/39.6.2): v39.6.1 => v39.6.2
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/39.6.2): v39.6.1 => v39.6.2
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/39.6.2): v39.6.1 => v39.6.2
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/39.6.2): v39.6.1 => v39.6.2
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/39.6.2): v39.6.1 => v39.6.2
+</details>
+
+
 ## [39.6.1](https://github.com/ckeditor/ckeditor5-dev/compare/v39.6.0...v39.6.1) (2024-02-08)
 
 ### Bug fixes
@@ -133,47 +162,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/39.5.0): v39.4.0 => v39.5.0
 * [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/39.5.0): v39.4.0 => v39.5.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/39.5.0): v39.4.0 => v39.5.0
-</details>
-
-
-## [39.4.0](https://github.com/ckeditor/ckeditor5-dev/compare/v39.3.0...v39.4.0) (2023-12-14)
-
-### Features
-
-* **[stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot)**: Introduced a "stale" bot, which can be executed using the `yarn run ckeditor5-dev-stale-bot [<args>...]` command. It searches for issues and pull requests that are not active enough and then mark them as stale. Stale issues and pull requests are closed after a defined period of time or, if they become active again, they are unstaled by the bot. See [ckeditor/ckeditor5#15399](https://github.com/ckeditor/ckeditor5/issues/15399). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f2afff238f43a699048fbca15d432260652e963f))
-
-### Other changes
-
-* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Added support in the `Logger#error()` method to print in console an error instance, if provided as the second argument. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/f2afff238f43a699048fbca15d432260652e963f))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-New packages:
-
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/39.4.0): v39.4.0
-
-Releases containing new features:
-
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/39.4.0): v39.3.0 => v39.4.0
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/39.4.0): v39.3.0 => v39.4.0
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/39.4.0): v39.3.0 => v39.4.0
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/39.4.0): v39.3.0 => v39.4.0
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/39.4.0): v39.3.0 => v39.4.0
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/39.4.0): v39.3.0 => v39.4.0
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/39.4.0): v39.3.0 => v39.4.0
-* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/39.4.0): v39.3.0 => v39.4.0
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/39.4.0): v39.3.0 => v39.4.0
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/39.4.0): v39.3.0 => v39.4.0
-* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/39.4.0): v39.3.0 => v39.4.0
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/39.4.0): v39.3.0 => v39.4.0
 </details>
 
 ---
