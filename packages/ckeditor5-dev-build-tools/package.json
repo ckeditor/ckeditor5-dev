@@ -24,7 +24,7 @@
     "dist"
   ],
   "bin": {
-    "ckeditor5-build-package": "bin/build-project.js"
+    "ckeditor5-dev-build-tools": "bin/build-project.js"
   },
   "dependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
