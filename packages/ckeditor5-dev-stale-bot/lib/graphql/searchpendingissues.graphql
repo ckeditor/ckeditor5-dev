@@ -1,0 +1,28 @@
+query SearchPendingIssues( $query: String!, $cursor: String ) {
+	search( type: ISSUE, query: $query, first: 100, after: $cursor ) {
+		issueCount
+		nodes {
+			... on Issue {
+				id
+				type: __typename
+				title
+				url
+				comments( last: 1 ) {
+					nodes {
+						createdAt
+						authorAssociation
+					}
+				}
+				labels( first: 100 ) {
+					nodes {
+						name
+					}
+				}
+			}
+		}
+		pageInfo {
+			cursor: endCursor
+			hasNextPage
+		}
+	}
+}

@@ -23,6 +23,7 @@ main().catch( error => {
 
 /**
  * Launches the stale bot that searches the issues and pull requests to stale, unstale or close.
+ * It also may check if pending issues should be staled or have the pending labels removed.
  *
  * @returns {Promise}
  */
@@ -50,26 +51,37 @@ async function main() {
 	const {
 		issuesOrPullRequestsToStale,
 		issuesOrPullRequestsToClose,
-		issuesOrPullRequestsToUnstale
+		issuesOrPullRequestsToUnstale,
+		pendingIssuesToStale,
+		pendingIssuesToUnlabel
 	} = searchResult;
 
 	if ( !dryRun ) {
 		const staleLabels = await githubRepository.getLabels( options.repositorySlug, options.staleLabels );
 		const closeIssueLabels = await githubRepository.getLabels( options.repositorySlug, options.closeIssueLabels );
 		const closePullRequestLabels = await githubRepository.getLabels( options.repositorySlug, options.closePullRequestLabels );
+		const pendingIssueLabels = await githubRepository.getLabels( options.repositorySlug, options.pendingIssueLabels );
 
-		if ( issuesOrPullRequestsToStale.length ) {
+		if ( issuesOrPullRequestsToStale.length || pendingIssuesToStale.length ) {
 			const actions = {
 				title: 'Staling issues and pull requests...',
 				labelsToAdd() {
 					return staleLabels;
 				},
 				commentToAdd( entry ) {
+					const isPendingIssueToStale = pendingIssuesToStale.includes( entry );
+
+					if ( isPendingIssueToStale ) {
+						return options.stalePendingIssueMessage;
+					}
+
 					return entry.type === 'Issue' ? options.staleIssueMessage : options.stalePullRequestMessage;
 				}
 			};
 
-			await handleActions( githubRepository, issuesOrPullRequestsToStale, actions, spinner );
+			const entries = [ ...issuesOrPullRequestsToStale, ...pendingIssuesToStale ];
+
+			await handleActions( githubRepository, entries, actions, spinner );
 		}
 
 		if ( issuesOrPullRequestsToUnstale.length ) {
@@ -96,15 +108,25 @@ async function main() {
 
 			await handleActions( githubRepository, issuesOrPullRequestsToClose, actions, spinner );
 		}
+
+		if ( pendingIssuesToUnlabel.length ) {
+			const actions = {
+				title: 'Unlabeling pending issues...',
+				labelsToRemove: pendingIssueLabels
+			};
+
+			await handleActions( githubRepository, pendingIssuesToUnlabel, actions, spinner );
+		}
 	}
 
 	spinner.instance.stop();
 
-	printStatus( dryRun, searchResult );
+	printStatus( dryRun, searchResult, options );
 }
 
 /**
  * Searches for new issues or pull requests to stale and already staled ones that should be unstaled or closed.
+ * It also searches for pending issues that should be staled or unlabeled.
  *
  * @param {GitHubRepository} githubRepository GitHubRepository instance.
  * @param {Options} options Configuration options.
@@ -127,10 +149,23 @@ async function search( githubRepository, options, spinner ) {
 		issuesOrPullRequestsToUnstale
 	} = await githubRepository.searchStaleIssuesOrPullRequests( options, spinner.onProgress() );
 
+	let pendingIssuesToStale = [];
+	let pendingIssuesToUnlabel = [];
+
+	if ( options.shouldProcessPendingIssues ) {
+		spinner.printStatus( 'Searching for pending issues...' );
+
+		const pendingIssues = await githubRepository.searchPendingIssues( options, spinner.onProgress() );
+		pendingIssuesToStale = pendingIssues.pendingIssuesToStale;
+		pendingIssuesToUnlabel = pendingIssues.pendingIssuesToUnlabel;
+	}
+
 	return {
 		issuesOrPullRequestsToStale: [ ...issuesToStale, ...pullRequestsToStale ],
 		issuesOrPullRequestsToUnstale,
-		issuesOrPullRequestsToClose
+		issuesOrPullRequestsToClose,
+		pendingIssuesToStale,
+		pendingIssuesToUnlabel
 	};
 }
 
@@ -194,22 +229,25 @@ function printWelcomeMessage( dryRun ) {
  *
  * @param {Boolean} dryRun Indicates if dry run mode is enabled.
  * @param {SearchResult} searchResult Found issues and pull requests that require an action.
+ * @param {Options} options Configuration options.
  */
-function printStatus( dryRun, searchResult ) {
+function printStatus( dryRun, searchResult, options ) {
 	const {
 		issuesOrPullRequestsToStale,
 		issuesOrPullRequestsToClose,
-		issuesOrPullRequestsToUnstale
+		issuesOrPullRequestsToUnstale,
+		pendingIssuesToStale,
+		pendingIssuesToUnlabel
 	} = searchResult;
 
-	if ( !issuesOrPullRequestsToStale.length ) {
+	if ( !issuesOrPullRequestsToStale.length && !pendingIssuesToStale.length ) {
 		console.log( chalk.green.bold( '💡 No new issues or pull requests found that should be staled.\n' ) );
 	} else {
 		const statusMessage = dryRun ?
 			'🔖 The following issues or pull requests should be staled:\n' :
 			'🔖 The following issues or pull requests were staled:\n';
 
-		printStatusSection( statusMessage, issuesOrPullRequestsToStale );
+		printStatusSection( statusMessage, [ ...issuesOrPullRequestsToStale, ...pendingIssuesToStale ] );
 	}
 
 	if ( !issuesOrPullRequestsToUnstale.length ) {
@@ -230,6 +268,18 @@ function printStatus( dryRun, searchResult ) {
 			'🔖 The following issues or pull requests were closed:\n';
 
 		printStatusSection( statusMessage, issuesOrPullRequestsToClose );
+	}
+
+	if ( options.shouldProcessPendingIssues ) {
+		if ( !pendingIssuesToUnlabel.length ) {
+			console.log( chalk.green.bold( '💡 No pending issues can be unlabeled now.\n' ) );
+		} else {
+			const statusMessage = dryRun ?
+				'🔖 The following pending issues should be unlabeled:\n' :
+				'🔖 The following pending issues were unlabeled:\n';
+
+			printStatusSection( statusMessage, pendingIssuesToUnlabel );
+		}
 	}
 }
 
@@ -252,6 +302,8 @@ function printStatusSection( statusMessage, entries ) {
  * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToClose
  * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToStale
  * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToUnstale
+ * @property {Array.<IssueOrPullRequestResult>} pendingIssuesToStale
+ * @property {Array.<IssueOrPullRequestResult>} pendingIssuesToUnlabel
  */
 
 /**

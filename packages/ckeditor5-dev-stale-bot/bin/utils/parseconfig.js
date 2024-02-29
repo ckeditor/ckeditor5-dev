@@ -24,7 +24,10 @@ module.exports = function parseConfig( viewerLogin, config ) {
 		CLOSE_ISSUE_MESSAGE,
 		CLOSE_PR_LABELS,
 		CLOSE_PR_MESSAGE,
+		STALE_PENDING_ISSUE_MESSAGE = STALE_ISSUE_MESSAGE,
+		PENDING_ISSUE_LABELS = [],
 		DAYS_BEFORE_STALE = 365,
+		DAYS_BEFORE_STALE_PENDING_ISSUE = 14,
 		DAYS_BEFORE_CLOSE = 30,
 		IGNORE_VIEWER_ACTIVITY = true,
 		IGNORED_ISSUE_LABELS = [],
@@ -35,15 +38,19 @@ module.exports = function parseConfig( viewerLogin, config ) {
 
 	const now = new Date();
 	const staleDate = formatISO( subDays( now, DAYS_BEFORE_STALE ) );
+	const staleDatePendingIssue = formatISO( subDays( now, DAYS_BEFORE_STALE_PENDING_ISSUE ) );
 	const closeDate = formatISO( subDays( now, DAYS_BEFORE_CLOSE ) );
 
 	return {
 		repositorySlug: REPOSITORY_SLUG,
 		staleDate,
+		staleDatePendingIssue,
 		closeDate,
-		searchDate: staleDate,
 		staleLabels: STALE_LABELS,
+		shouldProcessPendingIssues: PENDING_ISSUE_LABELS.length > 0,
+		pendingIssueLabels: PENDING_ISSUE_LABELS,
 		staleIssueMessage: STALE_ISSUE_MESSAGE,
+		stalePendingIssueMessage: STALE_PENDING_ISSUE_MESSAGE,
 		stalePullRequestMessage: STALE_PR_MESSAGE,
 		closeIssueLabels: CLOSE_ISSUE_LABELS,
 		closeIssueMessage: CLOSE_ISSUE_MESSAGE,
@@ -69,7 +76,10 @@ module.exports = function parseConfig( viewerLogin, config ) {
  * @property {String} CLOSE_ISSUE_MESSAGE
  * @property {Array.<String>} CLOSE_PR_LABELS
  * @property {String} CLOSE_PR_MESSAGE
+ * @property {String} [STALE_PENDING_ISSUE_MESSAGE=STALE_ISSUE_MESSAGE]
+ * @property {Array.<String>} [PENDING_ISSUE_LABELS=[]]
  * @property {Number} [DAYS_BEFORE_STALE=365]
+ * @property {Number} [DAYS_BEFORE_STALE_PENDING_ISSUE=14]
  * @property {Number} [DAYS_BEFORE_CLOSE=30]
  * @property {Boolean} [IGNORE_VIEWER_ACTIVITY=true]
  * @property {Array.<String>} [IGNORED_ISSUE_LABELS=[]]
@@ -82,10 +92,13 @@ module.exports = function parseConfig( viewerLogin, config ) {
  * @typedef {Object} Options
  * @property {String} repositorySlug
  * @property {String} staleDate
+ * @property {String} staleDatePendingIssue
  * @property {String} closeDate
- * @property {String} searchDate
  * @property {Array.<String>} staleLabels
+ * @property {Boolean} shouldProcessPendingIssues
+ * @property {Array.<String>} pendingIssueLabels
  * @property {String} staleIssueMessage
+ * @property {String} stalePendingIssueMessage
  * @property {String} stalePullRequestMessage
  * @property {Array.<String>} closeIssueLabels
  * @property {String} closeIssueMessage

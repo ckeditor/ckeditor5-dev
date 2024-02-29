@@ -10,7 +10,7 @@
  *
  * @param {Object} options
  * @param {String} options.repositorySlug
- * @param {String} options.searchDate
+ * @param {String} [options.searchDate]
  * @param {'Issue'|'PullRequest'} [options.type]
  * @param {Array.<String>} [options.labels=[]]
  * @param {Array.<String>} [options.ignoredLabels=[]]
@@ -29,7 +29,7 @@ module.exports = function prepareSearchQuery( options ) {
 
 	return [
 		`repo:${ repositorySlug }`,
-		`created:<${ searchDate }`,
+		searchDate ? `created:<${ searchDate }` : '',
 		resourceType ? `type:${ resourceType }` : '',
 		'state:open',
 		'sort:created-desc',
