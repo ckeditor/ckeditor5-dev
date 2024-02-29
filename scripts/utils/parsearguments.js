@@ -20,13 +20,16 @@ module.exports = function parseArguments( cliArguments ) {
 		],
 
 		string: [
-			'packages',
-			'npm-tag'
+			'branch',
+			'from',
+			'npm-tag',
+			'packages'
 		],
 
 		default: {
 			concurrency: require( 'os' ).cpus().length / 2,
 			packages: null,
+			branch: 'master',
 			'npm-tag': 'latest'
 		}
 	};
@@ -51,4 +54,8 @@ module.exports = function parseArguments( cliArguments ) {
  * @property {String} [npmTag='staging']
  *
  * @property {Array.<String>|null} packages
+ *
+ * @property {String} [from]
+ *
+ * @property {String} [branch='master']
  */
