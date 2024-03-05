@@ -229,7 +229,7 @@ export async function getRollupConfig( options: BuildOptions ) {
  * Returns plugin if condition is truthy. This is used only to get the types right.
  */
 function getOptionalPlugin<T extends Plugin>( condition: unknown, plugin: T ): T | undefined {
-	return Boolean( condition ) ? plugin : undefined;
+	return condition ? plugin : undefined;
 }
 
 /**
