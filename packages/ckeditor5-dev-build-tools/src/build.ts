@@ -11,6 +11,7 @@ import { getRollupConfig } from './config.js';
 
 export interface BuildOptions {
 	input: string;
+	output: string;
 	tsconfig: string;
 	banner: string;
 	external: Array<string> | false;
@@ -24,6 +25,7 @@ export interface BuildOptions {
 
 export const defaultOptions: BuildOptions = {
 	input: 'src/index.ts',
+	output: 'dist/index.js',
 	tsconfig: 'tsconfig.json',
 	banner: '',
 	external: false,
@@ -42,6 +44,7 @@ function getCliArguments(): Partial<BuildOptions> {
 	const { values } = util.parseArgs( {
 		options: {
 			'input': { type: 'string' },
+			'output': { type: 'string' },
 			'tsconfig': { type: 'string' },
 			'banner': { type: 'string' },
 			'external': { type: 'string', multiple: true },
@@ -71,6 +74,7 @@ async function normalizeOptions( options: Partial<BuildOptions> ): Promise<Build
 	const normalized = Object.assign( {}, defaultOptions, options );
 
 	normalized.input = getCwdPath( normalized.input );
+	normalized.output = getCwdPath( normalized.output );
 	normalized.tsconfig = getCwdPath( normalized.tsconfig );
 
 	if ( normalized.banner ) {
@@ -89,10 +93,7 @@ async function normalizeOptions( options: Partial<BuildOptions> ): Promise<Build
 export async function build(
 	options: Partial<BuildOptions> = getCliArguments()
 ): Promise<RollupOutput> {
-	const {
-		clean,
-		...args
-	}: BuildOptions = await normalizeOptions( options );
+	const args: BuildOptions = await normalizeOptions( options );
 
 	/**
 	 * Create Rollup configuration based on provided arguments.
@@ -102,7 +103,7 @@ export async function build(
 	/**
 	 * Remove old build directory.
 	 */
-	if ( clean ) {
+	if ( args.clean ) {
 		fs.rmSync( getCwdPath( 'dist' ), { recursive: true, force: true } );
 	}
 
@@ -116,7 +117,7 @@ export async function build(
 	 */
 	return build.write( {
 		format: 'esm',
-		file: getCwdPath( 'dist', args.minify ? 'index.min.js' : 'index.js' ),
+		file: args.output,
 		assetFileNames: '[name][extname]',
 		sourcemap: args.sourceMap
 	} );

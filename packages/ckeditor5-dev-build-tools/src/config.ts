@@ -3,6 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import path from 'upath';
 import { existsSync, readFileSync } from 'fs';
 import { createRequire } from 'module';
 import type { PackageJson } from 'type-fest';
@@ -86,9 +87,10 @@ const defaultExternals: Array<string> = Object.keys( {
  * Generates Rollup configurations.
  */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function getRollupConfig( options: Omit<BuildOptions, 'clean'> ) {
+export async function getRollupConfig( options: BuildOptions ) {
 	const {
 		input,
+		output,
 		tsconfig,
 		banner,
 		external,
@@ -102,6 +104,11 @@ export async function getRollupConfig( options: Omit<BuildOptions, 'clean'> ) {
 		external: options.external || defaultExternals
 	};
 
+	/**
+	 * Get the name of the output CSS file based on the name of the "output" file.
+	 */
+	const cssFileName = `${ path.parse( output ).name }.css`;
+
 	return {
 		input,
 
@@ -114,8 +121,6 @@ export async function getRollupConfig( options: Omit<BuildOptions, 'clean'> ) {
 			/**
 			 * Converts CommonJS modules to ES6.
 			 */
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			commonjs( {
 				sourceMap,
 				defaultIsModuleExports: true
@@ -133,8 +138,6 @@ export async function getRollupConfig( options: Omit<BuildOptions, 'clean'> ) {
 			/**
 			 * Allows importing JSON files.
 			 */
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			json(),
 
 			/**
@@ -147,18 +150,13 @@ export async function getRollupConfig( options: Omit<BuildOptions, 'clean'> ) {
 			/**
 			 * Builds translation from the `.po` files.
 			 */
-			translations && translationsPlugin(),
+			getOptionalPlugin( translations, translationsPlugin() ),
 
 			/**
 			 * Allows using imports, mixins and nesting in CSS and exctacts output CSS to a separate file.
 			 */
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			styles( {
-				mode: [
-					'extract',
-					minify ? 'styles.min.css' : 'styles.css'
-				],
+				mode: [ 'extract', cssFileName ],
 				plugins: [
 					postcssMixins,
 					postcssNesting( {
@@ -173,6 +171,7 @@ export async function getRollupConfig( options: Omit<BuildOptions, 'clean'> ) {
 			 * Generates CSS files containing only content and only editor styles.
 			 */
 			splitCssPlugin( {
+				baseFileName: cssFileName,
 				minimize: minify
 			} ),
 
@@ -180,7 +179,7 @@ export async function getRollupConfig( options: Omit<BuildOptions, 'clean'> ) {
 			 * Ensures empty files are emitted if files of given names were not generated.
 			 */
 			emitCssPlugin( {
-				fileNames: [ minify ? 'styles.min.css' : 'styles.css' ]
+				fileNames: [ cssFileName ]
 			} ),
 
 			/**
@@ -209,23 +208,28 @@ export async function getRollupConfig( options: Omit<BuildOptions, 'clean'> ) {
 			/**
 			 * Minifies and mangles the output. It also removes all code comments except for license comments.
 			 */
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			minify && terser( {
+			getOptionalPlugin( minify, terser( {
 				sourceMap,
 				format: {
 					comments: false
 				}
-			} ),
+			} ) ),
 
 			/**
 			 * Adds provided banner to the top of output JavaScript and CSS files.
 			 */
-			Boolean( banner ) && bannerPlugin( {
+			getOptionalPlugin( banner, bannerPlugin( {
 				banner
-			} )
+			} ) )
 		]
 	} as const satisfies RollupOptions;
+}
+
+/**
+ * Returns plugin if condition is truthy. This is used only to get the types right.
+ */
+function getOptionalPlugin<T extends Plugin>( condition: unknown, plugin: T ): T | undefined {
+	return condition ? plugin : undefined;
 }
 
 /**
@@ -250,8 +254,6 @@ function getTypeScriptPlugin( {
 		{ paths: [ process.cwd() ] }
 	);
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	return typescriptPlugin( {
 		tsconfig,
 		sourceMap,

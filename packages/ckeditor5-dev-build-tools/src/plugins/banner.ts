@@ -32,7 +32,7 @@ export interface RollupBannerOptions {
 	exclude?: FilterPattern;
 }
 
-export function banner( pluginOptions: RollupBannerOptions ): Plugin | undefined {
+export function banner( pluginOptions: RollupBannerOptions ): Plugin {
 	const options: Required<RollupBannerOptions> = Object.assign( {
 		include: [ '**/*.js', '**/*.css' ],
 		exclude: null
