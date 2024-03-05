@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-build-tools",
-  "version": "0.1.0",
+  "version": "39.7.0-alpha.0",
   "description": "Rollup-based tools used to build CKEditor 5 packages.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -24,7 +24,7 @@
     "dist"
   ],
   "bin": {
-    "ckeditor5-build-package": "bin/build-project.js"
+    "ckeditor5-dev-build-tools": "bin/build-project.js"
   },
   "dependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",

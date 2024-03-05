@@ -31,7 +31,7 @@ const tasks = new Listr( [
 			const errors = await releaseTools.validateRepositoryToRelease( {
 				version: latestVersion,
 				changes: versionChangelog,
-				branch: 'master'
+				branch: cliArguments.branch
 			} );
 
 			if ( !errors.length ) {
