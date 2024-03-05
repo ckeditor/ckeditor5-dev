@@ -32,7 +32,7 @@ const filter = createFilter( [ '**/*.css' ] );
 export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {
 	const options: Required<RollupSplitCssOptions> = Object.assign( {
 		minimize: false
-	}, pluginOptions || {} );
+	}, pluginOptions );
 
 	return {
 		name: 'cke5-split-css',

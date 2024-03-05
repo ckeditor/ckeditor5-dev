@@ -41,7 +41,7 @@ export function verifyChunk(
  */
 export function verifyDividedStyleSheet(
 	output: RollupOutput['output'],
-	outputFileName: cssOutputFileName,
+	outputFileName: string,
 	expectedResult: string
 ): void {
 	const styles = output.find( output => output.fileName === outputFileName );
@@ -60,14 +60,3 @@ export function verifyDividedStyleSheet(
 export function removeWhitespace( text: string ): string {
 	return text.replaceAll( /\n\s+/gm, '\n' );
 }
-
-/**
- * Possible `CSS` file name for output.
- */
-export type cssOutputFileName =
-	| 'styles.css'
-	| 'editor-styles.css'
-	| 'content-styles.css'
-	| 'styles.min.css'
-	| 'editor-styles.min.css'
-	| 'content-styles.min.css';
