@@ -56,9 +56,9 @@ test( 'TypeScript input', async () => {
 
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
 		'index.js',
-		'styles.css',
-		'editor-styles.css',
-		'content-styles.css'
+		'index.css',
+		'editor-index.css',
+		'content-index.css'
 	] );
 } );
 
@@ -73,9 +73,9 @@ test( 'TypeScript declarations', async () => {
 
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
 		'index.js',
-		'styles.css',
-		'editor-styles.css',
-		'content-styles.css',
+		'index.css',
+		'editor-index.css',
+		'content-index.css',
 		'types/input.d.ts'
 	] );
 } );
@@ -124,9 +124,9 @@ test( 'No translations', async () => {
 
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
 		'index.js',
-		'editor-styles.css',
-		'content-styles.css',
-		'styles.css'
+		'editor-index.css',
+		'content-index.css',
+		'index.css'
 	] );
 } );
 
@@ -141,9 +141,9 @@ test( 'Translations', async () => {
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
 		'index.js',
 		'translations/en.js',
-		'styles.css',
-		'editor-styles.css',
-		'content-styles.css'
+		'index.css',
+		'editor-index.css',
+		'content-index.css'
 	] );
 } );
 
@@ -159,10 +159,10 @@ test( 'Source map', async () => {
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
 		'index.js',
 		'index.js.map',
-		'styles.css',
-		'styles.css.map',
-		'editor-styles.css',
-		'content-styles.css'
+		'index.css',
+		'index.css.map',
+		'editor-index.css',
+		'content-index.css'
 	] );
 } );
 

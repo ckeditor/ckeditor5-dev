@@ -43,7 +43,7 @@ function mockCliArgs( ...args: Array<string> ) {
 /**
  * Returns an absolute path to the file.
  */
-function path( fileName: string ) {
+function getCwdPath( fileName: string ) {
 	return process.cwd() + fileName;
 }
 
@@ -69,14 +69,21 @@ test( '--input', async () => {
 	mockCliArgs( '--input=main.js' );
 	await build();
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { input: path( '/main.js' ) } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { input: getCwdPath( '/main.js' ) } ) );
+} );
+
+test( '--output', async () => {
+	mockCliArgs( '--output=dist/test.js' );
+	await build();
+
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { output: getCwdPath( '/dist/test.js' ) } ) );
 } );
 
 test( '--tsconfig', async () => {
 	mockCliArgs( '--tsconfig=tsconf.json' );
 	await build();
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { tsconfig: path( '/tsconf.json' ) } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { tsconfig: getCwdPath( '/tsconf.json' ) } ) );
 } );
 
 test( '--external', async () => {
@@ -142,13 +149,19 @@ test( '--banner', async () => {
 test( '.input', async () => {
 	await build( { input: 'main.js' } );
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { input: path( '/main.js' ) } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { input: getCwdPath( '/main.js' ) } ) );
+} );
+
+test( '.output', async () => {
+	await build( { input: 'dist/test.js' } );
+
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { input: getCwdPath( '/dist/test.js' ) } ) );
 } );
 
 test( '.tsconfig', async () => {
 	await build( { tsconfig: 'tsconf.json' } );
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { tsconfig: path( '/tsconf.json' ) } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { tsconfig: getCwdPath( '/tsconf.json' ) } ) );
 } );
 
 test( '.external', async () => {

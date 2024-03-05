@@ -19,7 +19,7 @@ import { splitCss, type RollupSplitCssOptions } from '../../../src/index.js';
  */
 async function generateBundle(
 	input: string,
-	options?: RollupSplitCssOptions,
+	options: RollupSplitCssOptions,
 	banner?: string
 ): Promise<RollupOutput['output']> {
 	const bundle = await rollup( {
@@ -48,7 +48,11 @@ async function generateBundle(
 
 describe( 'splitCss', () => {
 	test( 'should import a single `CSS` file', async () => {
-		const output = await generateBundle( './fixtures/single-import/input.ts' );
+		const output = await generateBundle(
+			'./fixtures/single-import/input.ts',
+			{ baseFileName: 'styles.css' }
+		);
+
 		const expectedResult = removeWhitespace(
 			`body {
 				color: '#000';
@@ -60,7 +64,10 @@ describe( 'splitCss', () => {
 	} );
 
 	test( 'should import multiple `CSS` files', async () => {
-		const output = await generateBundle( './fixtures/multiple-import/input.ts' );
+		const output = await generateBundle(
+			'./fixtures/multiple-import/input.ts',
+			{ baseFileName: 'styles.css' }
+		);
 
 		const expectedResult = removeWhitespace(
 			`body {
@@ -76,7 +83,10 @@ describe( 'splitCss', () => {
 	} );
 
 	test( 'should import `CSS` file only once (without duplication)', async () => {
-		const output = await generateBundle( './fixtures/import-only-once/input.ts' );
+		const output = await generateBundle(
+			'./fixtures/import-only-once/input.ts',
+			{ baseFileName: 'styles.css' }
+		);
 
 		const expectedEditorResult = removeWhitespace(
 			`.ck-feature {
@@ -95,7 +105,11 @@ describe( 'splitCss', () => {
 	} );
 
 	test( 'should ignore `CSS` comments', async () => {
-		const output = await generateBundle( './fixtures/ignore-comments/input.ts' );
+		const output = await generateBundle(
+			'./fixtures/ignore-comments/input.ts',
+			{ baseFileName: 'styles.css' }
+		);
+
 		const expectedResult = removeWhitespace(
 			`body {
 				color: '#000';
@@ -107,7 +121,10 @@ describe( 'splitCss', () => {
 	} );
 
 	test( 'should combine `:root` declarations from multiple entries into one', async () => {
-		const output = await generateBundle( './fixtures/combine-root-definitions/input.ts' );
+		const output = await generateBundle(
+			'./fixtures/combine-root-definitions/input.ts',
+			{ baseFileName: 'styles.css' }
+		);
 
 		const expectedResult = removeWhitespace(
 			`:root {
@@ -127,7 +144,10 @@ describe( 'splitCss', () => {
 	} );
 
 	test( 'should filter `:root` declaration based on `CSS` variables usage', async () => {
-		const output = await generateBundle( './fixtures/filter-root-definitions/input.ts' );
+		const output = await generateBundle(
+			'./fixtures/filter-root-definitions/input.ts',
+			{ baseFileName: 'styles.css' }
+		);
 
 		const expectedEditorResult = removeWhitespace(
 			`:root {
@@ -156,7 +176,10 @@ describe( 'splitCss', () => {
 	} );
 
 	test( 'should omit `:root` declaration when it\'s not exist', async () => {
-		const output = await generateBundle( './fixtures/omit-root-definitions/input.ts' );
+		const output = await generateBundle(
+			'./fixtures/omit-root-definitions/input.ts',
+			{ baseFileName: 'styles.css' }
+		);
 
 		const expectedEditorResult = removeWhitespace(
 			`:root {
@@ -181,7 +204,10 @@ describe( 'splitCss', () => {
 	} );
 
 	test( 'should divide classes into files based on its purpose', async () => {
-		const output = await generateBundle( './fixtures/divide-classes/input.ts' );
+		const output = await generateBundle(
+			'./fixtures/divide-classes/input.ts',
+			{ baseFileName: 'styles.css' }
+		);
 
 		const expectedEditorResult = removeWhitespace(
 			`.ck-feature {
@@ -200,14 +226,21 @@ describe( 'splitCss', () => {
 	} );
 
 	test( 'should prepare empty `CSS` files when no styles imported', async () => {
-		const output = await generateBundle( './fixtures/no-styles/input.ts' );
+		const output = await generateBundle(
+			'./fixtures/no-styles/input.ts',
+			{ baseFileName: 'styles.css' }
+		);
 
 		verifyDividedStyleSheet( output, 'editor-styles.css', '' );
 		verifyDividedStyleSheet( output, 'content-styles.css', '' );
 	} );
 
 	test( 'should minify the content output', async () => {
-		const output = await generateBundle( './fixtures/single-import/input.ts', { minimize: true } );
+		const output = await generateBundle(
+			'./fixtures/single-import/input.ts',
+			{ baseFileName: 'styles.min.css', minimize: true }
+		);
+
 		const expectedResult = 'body{color:"#000"}';
 
 		verifyDividedStyleSheet( output, 'editor-styles.min.css', expectedResult );

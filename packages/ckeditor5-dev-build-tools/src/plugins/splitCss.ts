@@ -12,6 +12,11 @@ import cssnano from 'cssnano';
 export interface RollupSplitCssOptions {
 
 	/**
+	 * Base name of the output css file. This name will be prefixed with `content-` and `editor-`.
+	 */
+	baseFileName: string;
+
+	/**
 	 * Flag to choose if the output should be minimized or not.
 	 *
 	 * @default false
@@ -24,13 +29,14 @@ export interface RollupSplitCssOptions {
  */
 const filter = createFilter( [ '**/*.css' ] );
 
-export function splitCss( pluginOptions?: RollupSplitCssOptions ): Plugin {
+export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {
 	const options: Required<RollupSplitCssOptions> = Object.assign( {
 		minimize: false
 	}, pluginOptions || {} );
 
 	return {
 		name: 'cke5-split-css',
+
 		transform( code, id ) {
 			if ( !filter( id ) ) {
 				return;
@@ -38,6 +44,7 @@ export function splitCss( pluginOptions?: RollupSplitCssOptions ): Plugin {
 
 			return '';
 		},
+
 		async generateBundle( output: NormalizedOutputOptions, bundle: OutputBundle ) {
 			// Get stylesheet from output bundle.
 			const cssStylesheet = getCssStylesheet( bundle );
@@ -51,12 +58,13 @@ export function splitCss( pluginOptions?: RollupSplitCssOptions ): Plugin {
 			// Emit those styles ito files.
 			this.emitFile( {
 				type: 'asset',
-				fileName: options.minimize ? 'editor-styles.min.css' : 'editor-styles.css',
+				fileName: `editor-${ options.baseFileName }`,
 				source: await unifyFileContentOutput( editorStylesContent, options.minimize )
 			} );
+
 			this.emitFile( {
 				type: 'asset',
-				fileName: options.minimize ? 'content-styles.min.css' : 'content-styles.css',
+				fileName: `content-${ options.baseFileName }`,
 				source: await unifyFileContentOutput( editingViewStylesContent, options.minimize )
 			} );
 		}

@@ -9,14 +9,17 @@ import { getRollupConfig } from '../../src/config.js';
 type Options = Parameters<typeof getRollupConfig>[0];
 
 const defaults: Options = {
-	input: '',
+	input: 'src/index.js',
+	output: 'dist/index.js',
 	tsconfig: '',
+	banner: '',
 	external: [],
 	declarations: false,
 	translations: false,
 	sourceMap: false,
 	bundle: false,
-	minify: false
+	minify: false,
+	clean: false
 };
 
 function getConfig( config: Partial<Options> = {} ) {
