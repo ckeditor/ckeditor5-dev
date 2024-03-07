@@ -3,9 +3,9 @@ Changelog
 
 ## [39.7.0-alpha.1](https://github.com/ckeditor/ckeditor5-dev/compare/v39.7.0-alpha.0...v39.7.0-alpha.1) (2024-03-07)
 
-### Features
+### Other changes
 
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Create a new `@ckeditor/ckeditor5-dev-build-tools` package containing a plugin for preparing CKEditor 5 translations using Rollup. See [ckeditor/ckeditor5#15712](https://github.com/ckeditor/ckeditor5/issues/15712). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/c395f710d1afba3520c437a3ea4b0d8193683bfe))
+* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Added `--output` argument that allows defining the output file name (for both, JS and CSS files). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/9d6412cdbb53c193d22531b7707e72f8a829c240))
 
 ### Released packages
 
@@ -14,13 +14,9 @@ Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/fra
 <details>
 <summary>Released packages (summary)</summary>
 
-Releases containing new features:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/39.7.0-alpha.1): v39.7.0-alpha.0 => v39.7.0-alpha.1
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/39.7.0-alpha.1): v39.7.0-alpha.0 => v39.7.0-alpha.1
-
 Other releases:
 
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/39.7.0-alpha.1): v39.7.0-alpha.0 => v39.7.0-alpha.1
 * [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/39.7.0-alpha.1): v39.7.0-alpha.0 => v39.7.0-alpha.1
 * [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/39.7.0-alpha.1): v39.7.0-alpha.0 => v39.7.0-alpha.1
 * [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/39.7.0-alpha.1): v39.7.0-alpha.0 => v39.7.0-alpha.1
@@ -32,6 +28,7 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/39.7.0-alpha.1): v39.7.0-alpha.0 => v39.7.0-alpha.1
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/39.7.0-alpha.1): v39.7.0-alpha.0 => v39.7.0-alpha.1
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/39.7.0-alpha.1): v39.7.0-alpha.0 => v39.7.0-alpha.1
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/39.7.0-alpha.1): v39.7.0-alpha.0 => v39.7.0-alpha.1
 * [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/39.7.0-alpha.1): v39.7.0-alpha.0 => v39.7.0-alpha.1
 </details>
 
