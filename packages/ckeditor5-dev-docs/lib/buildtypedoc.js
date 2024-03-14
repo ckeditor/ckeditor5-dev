@@ -6,7 +6,7 @@
 'use strict';
 
 const glob = require( 'fast-glob' );
-const TypeDoc = require( 'typedoc' );
+const { Application, TSConfigReader, TypeDocReader } = require( 'typedoc' );
 const { plugins } = require( '@ckeditor/typedoc-plugins' );
 
 const validators = require( './validators' );
@@ -24,12 +24,8 @@ module.exports = async function build( config ) {
 	const validatorOptions = config.validatorOptions || {};
 
 	const files = await glob( sourceFilePatterns );
-	const typeDoc = new TypeDoc.Application();
 
-	typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
-	typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
-
-	typeDoc.bootstrap( {
+	const typeDoc = await Application.bootstrap( {
 		tsconfig: config.tsconfig,
 		excludeExternals: true,
 		entryPoints: files,
@@ -70,9 +66,12 @@ module.exports = async function build( config ) {
 		]
 	} );
 
+	typeDoc.options.addReader( new TSConfigReader() );
+	typeDoc.options.addReader( new TypeDocReader() );
+
 	console.log( 'Typedoc started...' );
 
-	const conversionResult = typeDoc.convert();
+	const conversionResult = await typeDoc.convert();
 
 	if ( !conversionResult ) {
 		throw 'Something went wrong with TypeDoc.';
