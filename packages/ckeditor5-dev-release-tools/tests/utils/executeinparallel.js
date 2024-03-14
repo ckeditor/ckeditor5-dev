@@ -26,7 +26,7 @@ describe( 'dev-release-tools/utils', () => {
 				this.on = sinon.stub();
 				this.terminate = sinon.stub();
 
-				expect( script.endsWith( 'parallelworker.js' ) ).to.equal( true );
+				expect( script.endsWith( 'parallelworker.cjs' ) ).to.equal( true );
 			}
 		};
 
@@ -112,16 +112,16 @@ describe( 'dev-release-tools/utils', () => {
 			expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.have.property( 'absolute', true );
 
 			expect( stubs.fs.writeFile.callCount ).to.equal( 1 );
-			expect( stubs.fs.writeFile.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.js' );
+			expect( stubs.fs.writeFile.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.cjs' );
 			expect( stubs.fs.writeFile.firstCall.args[ 1 ] ).to.equal(
 				'\'use strict\';\nmodule.exports = packagePath => console.log( \'pwd\', packagePath );'
 			);
 			expect( firstWorker.workerData ).to.be.an( 'object' );
-			expect( firstWorker.workerData ).to.have.property( 'callbackModule', '/home/ckeditor/uuid-4.js' );
+			expect( firstWorker.workerData ).to.have.property( 'callbackModule', '/home/ckeditor/uuid-4.cjs' );
 			expect( firstWorker.workerData ).to.have.property( 'packages' );
 
 			expect( secondWorker.workerData ).to.be.an( 'object' );
-			expect( secondWorker.workerData ).to.have.property( 'callbackModule', '/home/ckeditor/uuid-4.js' );
+			expect( secondWorker.workerData ).to.have.property( 'callbackModule', '/home/ckeditor/uuid-4.cjs' );
 			expect( secondWorker.workerData ).to.have.property( 'packages' );
 
 			// Workers did not emit an error.
@@ -300,7 +300,7 @@ describe( 'dev-release-tools/utils', () => {
 			await delay( 0 );
 
 			expect( stubs.fs.writeFile.callCount ).to.equal( 1 );
-			expect( stubs.fs.writeFile.firstCall.args[ 0 ] ).to.equal( 'C:/Users/ckeditor/uuid-4.js' );
+			expect( stubs.fs.writeFile.firstCall.args[ 0 ] ).to.equal( 'C:/Users/ckeditor/uuid-4.cjs' );
 			expect( stubs.fs.writeFile.firstCall.args[ 1 ] ).to.equal(
 				'\'use strict\';\nmodule.exports = packagePath => console.log( \'pwd\', packagePath );'
 			);
@@ -311,11 +311,11 @@ describe( 'dev-release-tools/utils', () => {
 			const [ firstWorker, secondWorker ] = WorkerMock.instances;
 
 			expect( firstWorker.workerData ).to.be.an( 'object' );
-			expect( firstWorker.workerData ).to.have.property( 'callbackModule', 'C:/Users/ckeditor/uuid-4.js' );
+			expect( firstWorker.workerData ).to.have.property( 'callbackModule', 'C:/Users/ckeditor/uuid-4.cjs' );
 			expect( firstWorker.workerData ).to.have.property( 'packages' );
 
 			expect( secondWorker.workerData ).to.be.an( 'object' );
-			expect( secondWorker.workerData ).to.have.property( 'callbackModule', 'C:/Users/ckeditor/uuid-4.js' );
+			expect( secondWorker.workerData ).to.have.property( 'callbackModule', 'C:/Users/ckeditor/uuid-4.cjs' );
 			expect( secondWorker.workerData ).to.have.property( 'packages' );
 
 			// Workers did not emit an error.
@@ -451,7 +451,7 @@ describe( 'dev-release-tools/utils', () => {
 			await promise;
 
 			expect( stubs.fs.unlink.callCount ).to.equal( 1 );
-			expect( stubs.fs.unlink.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.js' );
+			expect( stubs.fs.unlink.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.cjs' );
 		} );
 
 		it( 'should remove the temporary module if the process is aborted', async () => {
@@ -469,7 +469,7 @@ describe( 'dev-release-tools/utils', () => {
 			await promise;
 
 			expect( stubs.fs.unlink.callCount ).to.equal( 1 );
-			expect( stubs.fs.unlink.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.js' );
+			expect( stubs.fs.unlink.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.cjs' );
 		} );
 
 		it( 'should remove the temporary module if the promise rejected', async () => {
@@ -488,7 +488,7 @@ describe( 'dev-release-tools/utils', () => {
 					},
 					() => {
 						expect( stubs.fs.unlink.callCount ).to.equal( 1 );
-						expect( stubs.fs.unlink.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.js' );
+						expect( stubs.fs.unlink.firstCall.args[ 0 ] ).to.equal( '/home/ckeditor/uuid-4.cjs' );
 					}
 				);
 		} );
