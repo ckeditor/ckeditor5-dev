@@ -141,6 +141,7 @@ test( 'Translations', async () => {
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
 		'index.js',
 		'translations/en.js',
+		'translations/en.d.ts',
 		'index.css',
 		'editor-index.css',
 		'content-index.css'
@@ -172,7 +173,7 @@ test( 'Source map', async () => {
 test( 'Bundle', async () => {
 	const { output } = await build( {
 		input: 'src/input.js',
-		bundle: true
+		external: []
 	} );
 
 	expect( output[ 0 ].code ).not.toContain( 'chalk' );
@@ -183,11 +184,11 @@ test( 'Bundle', async () => {
  */
 test( 'Minify', async () => {
 	const { output } = await build( {
-		input: 'src/input.js',
+		input: 'src/banner.js',
 		minify: true
 	} );
 
-	expect( output[ 0 ].code ).toContain( 'export{colors}from"chalk";' );
+	expect( output[ 0 ].code ).toContain( 'export{' );
 } );
 
 test( 'Minification doesnt remove banner', async () => {
@@ -205,8 +206,69 @@ test( 'Minification doesnt remove banner', async () => {
  */
 test( 'Overriding', async () => {
 	const { output } = await build( {
-		input: 'src/overriding.js'
+		input: 'src/overriding.js',
+		external: [
+			'ckeditor5'
+		]
 	} );
 
-	expect( output[ 0 ].code ).toContain( '@ckeditor/ckeditor5-utils/dist/index.js' );
+	expect( output[ 0 ].code ).toContain( 'ckeditor5' );
+} );
+
+/**
+ * Error handling
+ */
+test( 'Throws error with nicely formatter message when build fails', async () => {
+	vi
+		.spyOn( rollup, 'rollup' )
+		.mockImplementationOnce( (): any => ( {
+			write() {
+				throw new Error( 'REASON' );
+			}
+		} ) );
+	
+	const fn = () => build( { input: 'src/input.js' } );
+
+	expect( fn ).rejects.toThrow( /The build process failed with the following error(.*)REASON/s );
+} );
+
+test( 'Throws Rollup error with nicely formatter message when build fails', async () => {
+	vi
+		.spyOn( rollup, 'rollup' )
+		.mockImplementationOnce( (): any => ( {
+			write() {
+				const err = new Error() as any;
+
+				err.name = 'RollupError';
+				err.id = 'FILENAME';
+				err.message = 'REASON';
+
+				throw err;
+			}
+		} ) );
+
+	const fn = () => build( { input: 'src/input.js' } );
+
+	expect( fn ).rejects.toThrow( /Error occured when processing the file(.*)FILENAME(.*)REASON/s );
+} )
+
+test( 'Rollup error includes frame if provided', async () => {
+	vi
+		.spyOn( rollup, 'rollup' )
+		.mockImplementationOnce( (): any => ( {
+			write() {
+				const err = new Error() as any;
+
+				err.name = 'RollupError';
+				err.id = 'FILENAME';
+				err.message = 'REASON';
+				err.frame = 'FRAME';
+
+				throw err;
+			}
+		} ) );
+
+	const fn = () => build( { input: 'src/input.js' } );
+
+	expect( fn ).rejects.toThrow( /Error occured when processing the file(.*)FRAME/s );
 } );
