@@ -159,7 +159,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 		/**
 		 * List of packages that will not be bundled, but their imports will be left as they are.
 		 */
-		external: mappedExternals,
+		external: ( id: string ) => mappedExternals.some( name => id.startsWith( name ) ),
 
 		plugins: [
 			/**
@@ -335,6 +335,7 @@ function getTypeScriptPlugin({
 	return typescriptPlugin( {
 		tsconfig,
 		sourceMap,
+		noEmitOnError: true,
 		inlineSources: sourceMap, // https://github.com/rollup/plugins/issues/260
 		typescript: require( typescriptPath ),
 		declaration: declarations,
