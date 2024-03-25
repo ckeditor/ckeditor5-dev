@@ -241,7 +241,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 			 */
 			getOptionalPlugin(
 				translations,
-				translationsPlugin()
+				translationsPlugin( { source: translations } )
 			),
 
 			/**

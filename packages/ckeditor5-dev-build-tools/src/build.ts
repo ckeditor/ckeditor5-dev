@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
+import fs, { existsSync } from 'fs';
 import util from 'util';
 import chalk from 'chalk';
 import { rollup, type RollupOutput } from 'rollup';
@@ -17,7 +17,7 @@ export interface BuildOptions {
 	banner: string;
 	external: Array<string>;
 	declarations: boolean;
-	translations: boolean;
+	translations: string;
 	sourceMap: boolean;
 	minify: boolean;
 	clean: boolean;
@@ -30,7 +30,7 @@ export const defaultOptions: BuildOptions = {
 	banner: '',
 	external: [],
 	declarations: false,
-	translations: false,
+	translations: 'lang',
 	sourceMap: false,
 	minify: false,
 	clean: false
@@ -48,7 +48,7 @@ function getCliArguments(): Partial<BuildOptions> {
 			'banner': { type: 'string' },
 			'external': { type: 'string', multiple: true },
 			'declarations': { type: 'boolean' },
-			'translations': { type: 'boolean' },
+			'translations': { type: 'string' },
 			'source-map': { type: 'boolean' },
 			'bundle': { type: 'boolean' },
 			'minify': { type: 'boolean' },
@@ -66,19 +66,33 @@ function getCliArguments(): Partial<BuildOptions> {
 }
 
 /**
- * Merges user provided options with the defaults
- * and transforms relative paths to absolute paths.
+ * Merges user-provided options with the defaults and converts relative paths
+ * to absolute paths. Paths to non-existent files are also removed.
  */
 async function normalizeOptions( options: Partial<BuildOptions> ): Promise<BuildOptions> {
-	const normalized = Object.assign( {}, defaultOptions, options );
+	const normalized: BuildOptions = Object.assign( {}, defaultOptions, options );
 
-	normalized.input = getCwdPath( normalized.input );
-	normalized.output = getCwdPath( normalized.output );
-	normalized.tsconfig = getCwdPath( normalized.tsconfig );
+	const paths = [
+		'input',
+		'output',
+		'tsconfig',
+		'translations',
+		'banner'
+	] as const;
 
+	paths.forEach( path => {
+		if ( !normalized[ path ] ) {
+			return;
+		}
+
+		normalized[ path ] = getCwdPath( normalized[ path ] );
+	} );
+
+	/**
+	 * Load banner 
+	 */
 	if ( normalized.banner ) {
-		const path = getCwdPath( normalized.banner );
-		const { banner } = await import( path );
+		const { banner } = await import( normalized.banner );
 
 		normalized.banner = banner;
 	}
