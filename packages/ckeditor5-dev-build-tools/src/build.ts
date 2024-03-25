@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs, { existsSync } from 'fs';
+import fs from 'fs';
 import util from 'util';
 import chalk from 'chalk';
 import { rollup, type RollupOutput } from 'rollup';
