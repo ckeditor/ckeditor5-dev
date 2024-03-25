@@ -30,7 +30,7 @@ export const defaultOptions: BuildOptions = {
 	banner: '',
 	external: [],
 	declarations: false,
-	translations: 'lang',
+	translations: '**/*.po',
 	sourceMap: false,
 	minify: false,
 	clean: false
