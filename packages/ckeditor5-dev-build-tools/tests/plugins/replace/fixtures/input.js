@@ -3,5 +3,5 @@
  * For licensing, see LICENSE.md.
  */
 
-export * from './dependency';
-export * from 'some-dependency';
+export * from './dependency.js';
+export * from 'fs';

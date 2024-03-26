@@ -17,7 +17,7 @@ async function generateBundle(
 	const bundle = await rollup( {
 		input: join( import.meta.dirname, './fixtures/input.js' ),
 		external: [
-			'some-dependency'
+			'fs'
 		],
 		plugins: [
 			replaceImports( options )
@@ -42,7 +42,7 @@ test( 'Doesnt replace anything by default', async () => {
 test( 'Accepts string', async () => {
 	const output = await generateBundle( {
 		replace: [
-			[ 'some-dependency', 'another-dependency' ]
+			[ 'fs', 'another-dependency' ]
 		]
 	} );
 
@@ -52,7 +52,7 @@ test( 'Accepts string', async () => {
 test( 'Accepts RegExp', async () => {
 	const output = await generateBundle( {
 		replace: [
-			[ /some-dependency/, 'another-dependency' ]
+			[ /fs/, 'another-dependency' ]
 		]
 	} );
 
@@ -66,7 +66,7 @@ test( 'Updates the source map', async () => {
 
 	const output = await generateBundle( {
 		replace: [
-			[ 'some-dependency', 'another-dependency' ]
+			[ 'fs', 'another-dependency' ]
 		]
 	}, true );
 
@@ -77,7 +77,7 @@ test( 'Updates the source map', async () => {
 test( 'Replacing happens after the code is parsed and tree-shaken', async () => {
 	const output = await generateBundle( {
 		replace: [
-			[ './dependency', 'some-dependency' ]
+			[ './dependency.js', 'fs' ]
 		]
 	} );
 
