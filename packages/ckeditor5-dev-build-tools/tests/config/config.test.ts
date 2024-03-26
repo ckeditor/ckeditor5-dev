@@ -15,7 +15,7 @@ const defaults: Options = {
 	banner: '',
 	external: [],
 	declarations: false,
-	translations: false,
+	translations: '',
 	sourceMap: false,
 	minify: false,
 	clean: false
@@ -56,30 +56,34 @@ test( '--external', async () => {
 		external: [ 'foo' ]
 	} );
 
-	expect( config.external.includes( 'foo' ) ).toBe( true );
-	expect( config.external.includes( 'bar' ) ).toBe( false );
+	expect( config.external( 'foo' ) ).toBe( true );
+	expect( config.external( 'bar' ) ).toBe( false );
 } );
 
-test( '--external automatically adds packages that make up the "ckeditor5" and "ckeditor5-premium-features"', async () => {
-	const config1 = await getConfig( {
+test( '--external automatically adds packages that make up the "ckeditor5"', async () => {
+	const config = await getConfig( {
 		external: [ 'ckeditor5' ]
 	} );
 
-	const config2 = await getConfig( {
+	expect( config.external( 'ckeditor5' ) ).toBe( true );
+	expect( config.external( 'ckeditor5/src/ui.js' ) ).toBe( true );
+	expect( config.external( '@ckeditor/ckeditor5-core' ) ).toBe( true );
+} );
+
+test( '--external automatically adds packages that make up the "ckeditor5-premium-features"', async () => {
+	const config = await getConfig( {
 		external: [ 'ckeditor5-premium-features' ]
 	} );
 
-	expect( config1.external.includes( 'ckeditor5' ) ).toBe( true );
-	expect( config1.external.includes( '@ckeditor/ckeditor5-core' ) ).toBe( true );
-
-	expect( config2.external.includes( 'ckeditor5-premium-features' ) ).toBe( true );
-	expect( config2.external.includes( '@ckeditor/ckeditor5-case-change' ) ).toBe( true );
+	expect( config.external( 'ckeditor5-premium-features' ) ).toBe( true );
+	expect( config.external( 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( true );
+	expect( config.external( '@ckeditor/ckeditor5-case-change' ) ).toBe( true );
 } );
 
 test( '--translations', async () => {
 	const withoutTranslations = await getConfig();
 	const withTranslations = await getConfig( {
-		translations: true
+		translations: '**/*.po'
 	} );
 
 	expect( withoutTranslations.plugins.some( plugin => plugin?.name === 'cke5-translations' ) ).toBe( false );

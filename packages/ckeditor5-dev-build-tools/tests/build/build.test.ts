@@ -117,23 +117,10 @@ test( 'Externals', async () => {
 /**
  * Translations
  */
-test( 'No translations', async () => {
-	const { output } = await build( {
-		input: 'src/input.js'
-	} );
-
-	expect( output.map( o => o.fileName ) ).toMatchObject( [
-		'index.js',
-		'editor-index.css',
-		'content-index.css',
-		'index.css'
-	] );
-} );
-
 test( 'Translations', async () => {
 	const { output } = await build( {
 		input: 'src/input.ts',
-		translations: true
+		translations: '**/*.po'
 	} );
 
 	expect( ( output[ 1 ] as rollup.OutputChunk ).code ).toContain( 'Hello world' );
@@ -226,7 +213,7 @@ test( 'Throws error with nicely formatter message when build fails', async () =>
 				throw new Error( 'REASON' );
 			}
 		} ) );
-	
+
 	const fn = () => build( { input: 'src/input.js' } );
 
 	expect( fn ).rejects.toThrow( /The build process failed with the following error(.*)REASON/s );
@@ -250,7 +237,7 @@ test( 'Throws Rollup error with nicely formatter message when build fails', asyn
 	const fn = () => build( { input: 'src/input.js' } );
 
 	expect( fn ).rejects.toThrow( /Error occured when processing the file(.*)FILENAME(.*)REASON/s );
-} )
+} );
 
 test( 'Rollup error includes frame if provided', async () => {
 	vi

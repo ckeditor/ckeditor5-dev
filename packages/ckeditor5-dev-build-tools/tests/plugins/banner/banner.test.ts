@@ -10,7 +10,7 @@ import styles from 'rollup-plugin-styles';
 import { rollup, type RollupOutput, type OutputAsset } from 'rollup';
 import { verifyAsset, verifyChunk } from '../../_utils/utils.js';
 
-import { banner, type RollupBannerOptions } from '../../../src/index.js';
+import { addBanner, type RollupBannerOptions } from '../../../src/index.js';
 
 /**
  * Helper function for creating a bundle that won't be written to the file system.
@@ -40,7 +40,7 @@ async function generateBundle( options: RollupBannerOptions, sourcemap: boolean 
 				]
 			} ),
 
-			banner( options )
+			addBanner( options )
 		]
 	} );
 

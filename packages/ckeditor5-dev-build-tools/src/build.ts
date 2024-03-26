@@ -30,7 +30,7 @@ export const defaultOptions: BuildOptions = {
 	banner: '',
 	external: [],
 	declarations: false,
-	translations: '**/*.po',
+	translations: '',
 	sourceMap: false,
 	minify: false,
 	clean: false
@@ -89,7 +89,7 @@ async function normalizeOptions( options: Partial<BuildOptions> ): Promise<Build
 	} );
 
 	/**
-	 * Load banner 
+	 * Replace banner path with the actual banner contents.
 	 */
 	if ( normalized.banner ) {
 		const { banner } = await import( normalized.banner );

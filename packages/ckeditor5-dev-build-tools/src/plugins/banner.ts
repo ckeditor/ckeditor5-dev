@@ -32,7 +32,7 @@ export interface RollupBannerOptions {
 	exclude?: FilterPattern;
 }
 
-export function banner( pluginOptions: RollupBannerOptions ): Plugin {
+export function addBanner( pluginOptions: RollupBannerOptions ): Plugin {
 	const options: Required<RollupBannerOptions> = Object.assign( {
 		include: [ '**/*.js', '**/*.css', '**/*.d.ts' ],
 		exclude: null
@@ -41,7 +41,7 @@ export function banner( pluginOptions: RollupBannerOptions ): Plugin {
 	const filter = createFilter( options.include, options.exclude );
 
 	return {
-		name: 'cke5-banner',
+		name: 'cke5-add-banner',
 
 		async generateBundle( outputOptions, bundle ) {
 			/**

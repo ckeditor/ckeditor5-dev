@@ -20,10 +20,10 @@ import svg from 'rollup-plugin-svg-import';
 import commonjs from '@rollup/plugin-commonjs';
 import typescriptPlugin from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
-import { banner as bannerPlugin } from './plugins/banner.js';
-import { emitCss as emitCssPlugin } from './plugins/emitCss.js';
-import { replace as replacePlugin } from './plugins/replace.js';
-import { splitCss as splitCssPlugin } from './plugins/splitCss.js';
+import { addBanner } from './plugins/banner.js';
+import { emitCss } from './plugins/emitCss.js';
+import { replaceImports } from './plugins/replace.js';
+import { splitCss } from './plugins/splitCss.js';
 import { translations as translationsPlugin } from './plugins/translations.js';
 
 /**
@@ -96,7 +96,7 @@ const REWRITES: Record<string, Array<string>> = {
 		'@ckeditor/ckeditor5-watchdog',
 		'@ckeditor/ckeditor5-widget',
 		'@ckeditor/ckeditor5-word-count',
-		'@ckeditor/ckeditor5-show-blocks',
+		'@ckeditor/ckeditor5-show-blocks'
 	],
 	'ckeditor5-premium-features': [
 		'@ckeditor/ckeditor5-ai',
@@ -140,13 +140,15 @@ export async function getRollupConfig( options: BuildOptions ) {
 	 * Until we deprecate old installation methods, integrators can use "old" (e.g. "@ckeditor/ckeditor5-core" or "ckeditor5/src/core")
 	 * and "new" (e.g. "ckeditor5") imports. Therefore, we need to extend the list of external libraries to include all packages
 	 * that make up "ckeditor5" and "ckeditor5-premium-features" whenever any of them are added to the `external` array.
-	 * 
+	 *
 	 * Example: When "ckeditor5" is added to the "external" array, we will update it to also include "@ckeditor/ckeditor5-core",
 	 * "@ckeditor/ckeditor5-table" and every other package that's included in the "ckeditor5" bundle.
-	 * 
+	 *
 	 * This mapping can be removed when old installation methods are deprecated.
 	 */
 	const mappedExternals = external.reduce( ( carry, pkg ) => carry.concat( REWRITES[ pkg ] || [] ), external );
+	const ckeditor5Import = new RegExp( 'ckeditor5/src/([a-z-]+)(?:[a-z-/.]+)?' );
+	const collaborationImport = new RegExp( 'ckeditor5-collaboration/src/([a-z-]+)(?:[a-z-/.]+)?' );
 
 	/**
 	 * Get the name of the output CSS file based on the name of the "output" file.
@@ -159,7 +161,11 @@ export async function getRollupConfig( options: BuildOptions ) {
 		/**
 		 * List of packages that will not be bundled, but their imports will be left as they are.
 		 */
-		external: ( id: string ) => mappedExternals.some( name => id.startsWith( name ) ),
+		external: ( id: string ) => {
+			return mappedExternals.includes( id ) ||
+				( mappedExternals.includes( 'ckeditor5' ) && ckeditor5Import.test( id ) ) ||
+				( mappedExternals.includes( 'ckeditor5-premium-features' ) && collaborationImport.test( id ) );
+		},
 
 		plugins: [
 			/**
@@ -209,7 +215,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 			/**
 			 * Generates CSS files containing only content and only editor styles.
 			 */
-			splitCssPlugin( {
+			splitCss( {
 				baseFileName: cssFileName,
 				minimize: minify
 			} ),
@@ -217,7 +223,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 			/**
 			 * Ensures empty files are emitted if files of given names were not generated.
 			 */
-			emitCssPlugin( {
+			emitCss( {
 				fileNames: [ cssFileName ]
 			} ),
 
@@ -248,36 +254,39 @@ export async function getRollupConfig( options: BuildOptions ) {
 			 * Does type checking and generates `.d.ts` files.
 			 */
 			getOptionalPlugin(
-				declarations, 
+				declarations,
 				getTypeScriptPlugin( { tsconfig, output, sourceMap, declarations } )
 			),
 
 			/**
 			 * Replaces parts of the source code with the provided values.
 			 */
-			replacePlugin( {
+			replaceImports( {
 				replace: [
 					/**
 					 * Matches:
 					 * - ckeditor5/src/XXX (optionally with `.js` or `.ts` extension).
 					 * - ckeditor5-collaboration/src/XXX (optionally with `.js` or `.ts` extension).
 					 */
-					[ new RegExp( 'ckeditor5/src/([a-z-]+)(?:[a-z\-/.]+)?', 'g' ), 'ckeditor5' ],
-					[ new RegExp( 'ckeditor5-collaboration/src/([a-z-]+)(?:[a-z\-/.]+)?', 'g' ), 'ckeditor5-premium-features' ],
+					[ ckeditor5Import, 'ckeditor5' ],
+					[ collaborationImport, 'ckeditor5-premium-features' ],
 
 					/**
 					 * Rewrite "old" imports to imports used in new installation methods.
-					 * 
+					 *
 					 * Examples:
 					 * [ '@ckeditor/ckeditor5-core', 'ckeditor5' ],
-					 * [ '@ckeditor/ckeditor5-utils', 'ckeditor5' ],
+					 * [ '@ckeditor/ckeditor5-table', 'ckeditor5' ],
 					 * [ '@ckeditor/ckeditor5-ai', 'ckeditor5-premium-features' ],
 					 * [ '@ckeditor/ckeditor5-case-change', 'ckeditor5-premium-features' ],
 					 */
 					...Object
 						.entries( REWRITES )
 						.filter( ( [ rewrite ] ) => external.includes( rewrite ) )
-						.reduce( ( carry, [ rewrite, packages ] ) => carry.concat( packages.map( pkg => [ pkg, rewrite ] ) ), [] as Array<[ string, string ]> )
+						.reduce(
+							( carry, [ rewrite, packages ] ) => carry.concat( packages.map( pkg => [ pkg, rewrite ] ) ),
+							[] as Array<[ string, string ]>
+						)
 				]
 			} ),
 
@@ -296,7 +305,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 			 */
 			getOptionalPlugin(
 				banner,
-				bannerPlugin( { banner } )
+				addBanner( { banner } )
 			)
 		]
 	} as const satisfies RollupOptions;
@@ -312,12 +321,12 @@ function getOptionalPlugin<T extends Plugin | undefined>( condition: unknown, pl
 /**
  * Returns the TypeScript plugin if tsconfig file exists, otherwise doesn't return anything.
  */
-function getTypeScriptPlugin({
+function getTypeScriptPlugin( {
 	tsconfig,
 	output,
 	sourceMap,
 	declarations
-}: Pick<BuildOptions, 'tsconfig' | 'output' | 'sourceMap' | 'declarations'>): Plugin | undefined {
+}: Pick<BuildOptions, 'tsconfig' | 'output' | 'sourceMap' | 'declarations'> ): Plugin | undefined {
 	if ( !existsSync( tsconfig ) ) {
 		return;
 	}
