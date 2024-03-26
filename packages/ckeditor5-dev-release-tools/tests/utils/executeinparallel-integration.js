@@ -13,7 +13,7 @@ const glob = require( 'glob' );
 
 const REPOSITORY_ROOT = path.join( __dirname, '..', '..', '..', '..' );
 
-// This file covers the "parallelworker.js" file.
+// This file covers the "parallelworker.cjs" file.
 
 describe( 'dev-release-tools/utils', () => {
 	let executeInParallel, abortController;
