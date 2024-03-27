@@ -14,7 +14,7 @@ import type { Plugin } from 'rollup';
 import { removeWhitespace } from '../utils';
 
 const TYPINGS = removeWhitespace( `
-	import { type Translations } from 'ckeditor5';
+	import type { Translations } from 'ckeditor5';
 
 	declare const translations: Translations;
 	export default translations;
