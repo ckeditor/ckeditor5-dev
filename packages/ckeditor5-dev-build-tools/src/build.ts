@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { rmSync } from 'fs';
+import fs from 'fs';
 import util from 'util';
 import chalk from 'chalk';
 import { rollup, type RollupOutput } from 'rollup';
@@ -118,7 +118,7 @@ export async function build(
 		 * Remove old build directory.
 		 */
 		if ( args.clean ) {
-			rmSync( getCwdPath( 'dist' ), { recursive: true, force: true } );
+			fs.rmSync( getCwdPath( 'dist' ), { recursive: true, force: true } );
 		}
 
 		/**
