@@ -52,14 +52,15 @@ export async function getRollupConfig( options: BuildOptions ) {
 	} = options;
 
 	/**
-	 * Until we deprecate old installation methods, integrators can either use "old" imports (e.g. "@ckeditor/ckeditor5-core", "ckeditor5/src/core", etc.)
-	 * or "new" one (e.g. "ckeditor5") in their source code. To make this work with new installation methods, we need to override the old imports by:
+	 * Until we deprecate the old installation methods, integrators can use either old import paths
+	 * (e.g. "@ckeditor/ckeditor5-core", "ckeditor5/src/core", etc.) or the new one (e.g. "ckeditor5")
+	 * in their source code. To make this work with the new installation methods, the `external` array
+	 * must be extended to include all packages that make up "ckeditor5" and "ckeditor5-premium-features"
+	 * whenever any of them are present in that array. Then, in the final step of generating the bundle,
+	 * we replace the old import paths with the new one.
 	 *
-	 * 1. extending the `external` array to include all packages that make up "ckeditor5" and "ckeditor5-premium-features" whenever any of them is present.
-	 * 2. replacing the old imports with the new one in the final step of generating the bundle.
-	 *
-	 * Example: When "ckeditor5" is added to the "external" array, we will update it to also include "@ckeditor/ckeditor5-core",
-	 * "@ckeditor/ckeditor5-table" and every other package that's included in the "ckeditor5" bundle.
+	 * Example: When "ckeditor5" is added to the "external" array, it will be extended to also include
+	 * "@ckeditor/ckeditor5-core", "@ckeditor/ckeditor5-table" and any other package included in the "ckeditor5" bundle.
 	 *
 	 * This mapping can be removed when old installation methods are deprecated.
 	 */
