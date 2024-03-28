@@ -11,8 +11,9 @@ import styles from 'rollup-plugin-styles';
 import postcssNesting from 'postcss-nesting';
 import postcssMixins from 'postcss-mixins';
 
-import { verifyDividedStyleSheet, removeWhitespace } from '../../_utils/utils.js';
+import { verifyDividedStyleSheet } from '../../_utils/utils.js';
 import { splitCss, type RollupSplitCssOptions } from '../../../src/index.js';
+import { removeWhitespace } from '../../../src/utils.js';
 
 /**
  * Helper function for creating a bundle that won't be written to the file system.

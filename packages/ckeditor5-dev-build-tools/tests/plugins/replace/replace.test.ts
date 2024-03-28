@@ -8,7 +8,7 @@ import { expect, test } from 'vitest';
 import { rollup, type RollupOutput, type OutputAsset } from 'rollup';
 import { verifyChunk } from '../../_utils/utils.js';
 
-import { replace, type RollupReplaceOptions } from '../../../src/index.js';
+import { replaceImports, type RollupReplaceOptions } from '../../../src/index.js';
 
 async function generateBundle(
 	options: RollupReplaceOptions,
@@ -16,8 +16,11 @@ async function generateBundle(
 ): Promise<RollupOutput['output']> {
 	const bundle = await rollup( {
 		input: join( import.meta.dirname, './fixtures/input.js' ),
+		external: [
+			'fs'
+		],
 		plugins: [
-			replace( options )
+			replaceImports( options )
 		]
 	} );
 
@@ -39,32 +42,21 @@ test( 'Doesnt replace anything by default', async () => {
 test( 'Accepts string', async () => {
 	const output = await generateBundle( {
 		replace: [
-			[ 'test', 'temp' ]
+			[ 'fs', 'another-dependency' ]
 		]
 	} );
 
-	verifyChunk( output, 'input.js', 'const temp = 123;' );
+	verifyChunk( output, 'input.js', 'export * from \'another-dependency\';' );
 } );
 
 test( 'Accepts RegExp', async () => {
 	const output = await generateBundle( {
 		replace: [
-			[ /test/g, 'temp' ]
+			[ /fs/, 'another-dependency' ]
 		]
 	} );
 
-	verifyChunk( output, 'input.js', 'const temp = 123;' );
-} );
-
-test( 'Accepts string and RegExp', async () => {
-	const output = await generateBundle( {
-		replace: [
-			[ 'test', 'temp' ],
-			[ /123/g, '456' ]
-		]
-	} );
-
-	verifyChunk( output, 'input.js', 'const temp = 456;' );
+	verifyChunk( output, 'input.js', 'export * from \'another-dependency\';' );
 } );
 
 test( 'Updates the source map', async () => {
@@ -74,19 +66,18 @@ test( 'Updates the source map', async () => {
 
 	const output = await generateBundle( {
 		replace: [
-			[ 'test', 'temp' ],
-			[ /123/g, '456' ]
+			[ 'fs', 'another-dependency' ]
 		]
 	}, true );
 
 	expect( ( unmodifiedOutput[ 1 ] as OutputAsset ).source ).not.toBe( ( output[ 1 ] as OutputAsset ).source );
-	verifyChunk( output, 'input.js', 'const temp = 456;' );
+	verifyChunk( output, 'input.js', 'another-dependency' );
 } );
 
 test( 'Replacing happens after the code is parsed and tree-shaken', async () => {
 	const output = await generateBundle( {
 		replace: [
-			[ './dependency.js', './non-existing-file.js' ]
+			[ './dependency.js', 'fs' ]
 		]
 	} );
 

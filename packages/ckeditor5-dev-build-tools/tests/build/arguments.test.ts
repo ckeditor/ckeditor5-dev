@@ -101,10 +101,10 @@ test( '--declarations', async () => {
 } );
 
 test( '--translations', async () => {
-	mockCliArgs( '--translations' );
+	mockCliArgs( '--translations=translations/**/*.po' );
 	await build();
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { translations: true } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { translations: getCwdPath( '/translations/**/*.po' ) } ) );
 } );
 
 test( '--source-map', async () => {
@@ -177,21 +177,15 @@ test( '.declarations', async () => {
 } );
 
 test( '.translations', async () => {
-	await build( { translations: true } );
+	await build( { translations: 'translations/**/*.po' } );
 
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { translations: true } ) );
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { translations: getCwdPath( '/translations/**/*.po' ) } ) );
 } );
 
 test( '.sourceMap', async () => {
 	await build( { sourceMap: true } );
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { sourceMap: true } ) );
-} );
-
-test( '.bundle', async () => {
-	await build( { bundle: true } );
-
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { bundle: true } ) );
 } );
 
 test( '.minify', async () => {

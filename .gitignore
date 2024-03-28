@@ -12,3 +12,6 @@ executeinparallel-integration.log
 
 # Prepared files to publish to npm.
 /release/
+
+# Compiled TS.
+packages/ckeditor5-dev-build-tools/dist

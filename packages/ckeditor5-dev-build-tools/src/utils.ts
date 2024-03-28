@@ -10,7 +10,7 @@ import type { CamelCase, CamelCasedProperties } from 'type-fest';
  * Returns path relative to the current working directory.
  */
 export function getCwdPath( ...paths: Array<string> ): string {
-	return path.join( process.cwd(), ...paths );
+	return path.resolve( process.cwd(), ...paths );
 }
 
 /**
@@ -29,4 +29,11 @@ export function camelizeObjectKeys<T extends Record<string, any>>( obj: T ): Cam
 			.entries( obj )
 			.map( ( [ key, value ] ) => [ camelize( key ), value ] )
 	) as CamelCasedProperties<T>;
+}
+
+/**
+ * Returns string without whitespace.
+ */
+export function removeWhitespace( text: string ): string {
+	return text.replaceAll( /\n\s+/gm, '\n' );
 }

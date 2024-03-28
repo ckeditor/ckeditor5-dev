@@ -19,7 +19,7 @@ export interface RollupBannerOptions {
 	 * A valid [picomatch](https://github.com/micromatch/picomatch#globbing-features) pattern,
 	 * or array of patterns. If omitted or has zero length, all files will have banner added.
 	 *
-	 * @default [ '**\/*.js', ' **\/*.css' ]
+	 * @default [ '**\/*.js', '**\/*.css', '**\/*.d.ts ]
 	 */
 	include?: FilterPattern;
 
@@ -32,16 +32,16 @@ export interface RollupBannerOptions {
 	exclude?: FilterPattern;
 }
 
-export function banner( pluginOptions: RollupBannerOptions ): Plugin {
+export function addBanner( pluginOptions: RollupBannerOptions ): Plugin {
 	const options: Required<RollupBannerOptions> = Object.assign( {
-		include: [ '**/*.js', '**/*.css' ],
+		include: [ '**/*.js', '**/*.css', '**/*.d.ts' ],
 		exclude: null
 	}, pluginOptions );
 
 	const filter = createFilter( options.include, options.exclude );
 
 	return {
-		name: 'cke5-banner',
+		name: 'cke5-add-banner',
 
 		async generateBundle( outputOptions, bundle ) {
 			/**

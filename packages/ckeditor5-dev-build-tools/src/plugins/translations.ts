@@ -11,6 +11,14 @@ import PO from 'pofile';
 import { groupBy, merge } from 'lodash-es';
 import { glob } from 'glob';
 import type { Plugin } from 'rollup';
+import { removeWhitespace } from '../utils';
+
+const TYPINGS = removeWhitespace( `
+	import type { Translations } from 'ckeditor5';
+
+	declare const translations: Translations;
+	export default translations;
+` );
 
 export interface RollupTranslationsOptions {
 
@@ -118,6 +126,13 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 					fileName: path.join( options.destination, `${ language }.js` ),
 					code: getCode( language, translation ),
 					exports: [ 'default' ]
+				} );
+
+				this.emitFile( {
+					type: 'prebuilt-chunk',
+					fileName: path.join( options.destination, `${ language }.d.ts` ),
+					code: TYPINGS,
+					exports: []
 				} );
 			}
 		}

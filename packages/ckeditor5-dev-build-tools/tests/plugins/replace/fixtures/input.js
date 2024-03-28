@@ -4,3 +4,4 @@
  */
 
 export * from './dependency.js';
+export * from 'fs';

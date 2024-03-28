@@ -5,12 +5,12 @@
 
 import { join } from 'path';
 import { test, expect } from 'vitest';
+import swc from '@rollup/plugin-swc';
 import styles from 'rollup-plugin-styles';
-import typescript from '@rollup/plugin-typescript';
 import { rollup, type RollupOutput, type OutputAsset } from 'rollup';
 import { verifyAsset, verifyChunk } from '../../_utils/utils.js';
 
-import { banner, type RollupBannerOptions } from '../../../src/index.js';
+import { addBanner, type RollupBannerOptions } from '../../../src/index.js';
 
 /**
  * Helper function for creating a bundle that won't be written to the file system.
@@ -19,10 +19,16 @@ async function generateBundle( options: RollupBannerOptions, sourcemap: boolean 
 	const bundle = await rollup( {
 		input: join( import.meta.dirname, './fixtures/input.ts' ),
 		plugins: [
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			typescript( {
-				tsconfig: join( import.meta.dirname, './fixtures/tsconfig.json' )
+			swc( {
+				include: [ '**/*.[jt]s' ],
+				swc: {
+					jsc: {
+						target: 'es2019'
+					},
+					module: {
+						type: 'es6'
+					}
+				}
 			} ),
 
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -34,7 +40,7 @@ async function generateBundle( options: RollupBannerOptions, sourcemap: boolean 
 				]
 			} ),
 
-			banner( options )
+			addBanner( options )
 		]
 	} );
 

@@ -5,6 +5,7 @@
 
 import { expect } from 'vitest';
 import type { RollupOutput, OutputChunk, OutputAsset } from 'rollup';
+import { removeWhitespace } from '../../src/utils';
 
 /**
  * Helper function for validating Rollup asset.
@@ -52,11 +53,4 @@ export function verifyDividedStyleSheet(
 	const source = ( styles as OutputAsset )!.source as string;
 
 	expect( removeWhitespace( source ) ).toEqual( expectedResult );
-}
-
-/**
- * Returns string without whitespace.
- */
-export function removeWhitespace( text: string ): string {
-	return text.replaceAll( /\n\s+/gm, '\n' );
 }

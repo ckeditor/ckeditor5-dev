@@ -15,9 +15,8 @@ const defaults: Options = {
 	banner: '',
 	external: [],
 	declarations: false,
-	translations: false,
+	translations: '',
 	sourceMap: false,
-	bundle: false,
 	minify: false,
 	clean: false
 };
@@ -35,14 +34,21 @@ test( '--input', async () => {
 
 test( '--tsconfig', async () => {
 	const fileExists = await getConfig( {
-		tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json'
+		tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json',
+		declarations: true
 	} );
 	const fileDoesntExist = await getConfig( {
-		tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.non-existing.json'
+		tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.non-existing.json',
+		declarations: true
+	} );
+	const declarationsFalse = await getConfig( {
+		tsconfig: process.cwd() + '/tests/config/fixtures/tsconfig.fixture.json',
+		declarations: false
 	} );
 
-	expect( fileDoesntExist.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( false );
 	expect( fileExists.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( true );
+	expect( fileDoesntExist.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( false );
+	expect( declarationsFalse.plugins.some( plugin => plugin?.name === 'typescript' ) ).toBe( false );
 } );
 
 test( '--external', async () => {
@@ -54,20 +60,30 @@ test( '--external', async () => {
 	expect( config.external( 'bar' ) ).toBe( false );
 } );
 
-test( '--bundle', async () => {
+test( '--external automatically adds packages that make up the "ckeditor5"', async () => {
 	const config = await getConfig( {
-		external: [ 'foo' ],
-		bundle: true
+		external: [ 'ckeditor5' ]
 	} );
 
-	expect( config.external( 'foo' ) ).toBe( false );
-	expect( config.external( 'bar' ) ).toBe( false );
+	expect( config.external( 'ckeditor5' ) ).toBe( true );
+	expect( config.external( 'ckeditor5/src/ui.js' ) ).toBe( true );
+	expect( config.external( '@ckeditor/ckeditor5-core' ) ).toBe( true );
+} );
+
+test( '--external automatically adds packages that make up the "ckeditor5-premium-features"', async () => {
+	const config = await getConfig( {
+		external: [ 'ckeditor5-premium-features' ]
+	} );
+
+	expect( config.external( 'ckeditor5-premium-features' ) ).toBe( true );
+	expect( config.external( 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( true );
+	expect( config.external( '@ckeditor/ckeditor5-case-change' ) ).toBe( true );
 } );
 
 test( '--translations', async () => {
 	const withoutTranslations = await getConfig();
 	const withTranslations = await getConfig( {
-		translations: true
+		translations: '**/*.po'
 	} );
 
 	expect( withoutTranslations.plugins.some( plugin => plugin?.name === 'cke5-translations' ) ).toBe( false );
