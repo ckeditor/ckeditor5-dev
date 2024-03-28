@@ -39,7 +39,7 @@ export function replaceImports( pluginOptions: RollupReplaceOptions ): Plugin {
 	}
 
 	return {
-		name: 'cke5-import-replace',
+		name: 'cke5-replace-import',
 
 		renderChunk( source, chunk ) {
 			const magic = new MagicString( source );
