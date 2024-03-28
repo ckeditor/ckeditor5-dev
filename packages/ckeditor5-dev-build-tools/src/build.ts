@@ -110,16 +110,16 @@ export async function build(
 		const args: BuildOptions = await normalizeOptions( options );
 
 		/**
-		 * Create Rollup configuration based on provided arguments.
-		 */
-		const config = await getRollupConfig( args );
-
-		/**
 		 * Remove old build directory.
 		 */
 		if ( args.clean ) {
 			fs.rmSync( getCwdPath( 'dist' ), { recursive: true, force: true } );
 		}
+
+		/**
+		 * Create Rollup configuration based on provided arguments.
+		 */
+		const config = await getRollupConfig( args );
 
 		/**
 		 * Run Rollup to generate bundles.
