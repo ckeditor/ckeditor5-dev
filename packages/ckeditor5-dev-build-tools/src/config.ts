@@ -64,7 +64,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 	 *
 	 * This mapping can be removed when old installation methods are deprecated.
 	 */
-	const rewrites: Record<string, Array<string>> = await import(
+	const { default: rewrites }: { default: Record<string, Array<string>> } = await import(
 		resolveUserDependency( 'ckeditor5/packages-lists.json' ),
 		{ with: { type: 'json' } }
 	);
