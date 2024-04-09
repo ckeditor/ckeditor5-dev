@@ -6,7 +6,7 @@
 import fs from 'fs';
 import util from 'util';
 import chalk from 'chalk';
-import { rollup, type RollupOutput } from 'rollup';
+import { rollup, type RollupOutput, type ModuleFormat } from 'rollup';
 import { getRollupConfig } from './config.js';
 import { getCwdPath, camelizeObjectKeys, removeWhitespace } from './utils.js';
 
@@ -14,6 +14,7 @@ export interface BuildOptions {
 	input: string;
 	output: string;
 	tsconfig: string;
+	format: string;
 	banner: string;
 	external: Array<string>;
 	declarations: boolean;
@@ -27,6 +28,7 @@ export const defaultOptions: BuildOptions = {
 	input: 'src/index.ts',
 	output: 'dist/index.js',
 	tsconfig: 'tsconfig.json',
+	format: 'esm',
 	banner: '',
 	external: [],
 	declarations: false,
@@ -45,6 +47,7 @@ function getCliArguments(): Partial<BuildOptions> {
 			'input': { type: 'string' },
 			'output': { type: 'string' },
 			'tsconfig': { type: 'string' },
+			'format': { type: 'string' },
 			'banner': { type: 'string' },
 			'external': { type: 'string', multiple: true },
 			'declarations': { type: 'boolean' },
@@ -130,10 +133,11 @@ export async function build(
 		 * Write bundles to the filesystem.
 		 */
 		return await build.write( {
-			format: 'esm',
+			format: args.format as ModuleFormat,
 			file: args.output,
 			assetFileNames: '[name][extname]',
-			sourcemap: args.sourceMap
+			sourcemap: args.sourceMap,
+			...( args.format === 'umd' && { name: 'CKEDITOR5' } ),
 		} );
 	} catch ( error: any ) {
 		let message: string;
