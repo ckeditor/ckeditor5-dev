@@ -81,9 +81,48 @@ test( 'TypeScript declarations', async () => {
 } );
 
 /**
+ * Format
+ */
+test( 'Format', async () => {
+	const { output } = await build( {
+		input: 'src/input.ts',
+		tsconfig: 'tsconfig.json',
+		format: 'umd',
+		outputName: 'EXAMPLE_OUTPUT_NAME'
+	} );
+
+	expect( output.map( o => o.fileName ) ).toMatchObject( [
+		'index.js',
+		'index.css',
+		'editor-index.css',
+		'content-index.css'
+	] );
+} );
+
+/**
+ * Output Name
+ */
+test( 'Output name', async () => {
+	const { output } = await build( {
+		input: 'src/input.ts',
+		tsconfig: 'tsconfig.json',
+		format: 'umd',
+		outputName: 'EXAMPLE_OUTPUT_NAME'
+	} );
+
+	expect( output[ 0 ].code ).toContain( 'EXAMPLE_OUTPUT_NAME' );
+
+	expect( output.map( o => o.fileName ) ).toMatchObject( [
+		'index.js',
+		'index.css',
+		'editor-index.css',
+		'content-index.css'
+	] );
+} );
+
+/**
  * Banner
  */
-
 test( 'Banner', async () => {
 	const { output } = await build( {
 		input: 'src/input.js',

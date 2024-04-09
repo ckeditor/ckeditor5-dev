@@ -15,6 +15,7 @@ export interface BuildOptions {
 	output: string;
 	tsconfig: string;
 	format: string;
+	outputName: string,
 	banner: string;
 	external: Array<string>;
 	declarations: boolean;
@@ -29,6 +30,7 @@ export const defaultOptions: BuildOptions = {
 	output: 'dist/index.js',
 	tsconfig: 'tsconfig.json',
 	format: 'esm',
+	outputName: '',
 	banner: '',
 	external: [],
 	declarations: false,
@@ -137,7 +139,7 @@ export async function build(
 			file: args.output,
 			assetFileNames: '[name][extname]',
 			sourcemap: args.sourceMap,
-			...( args.format === 'umd' && { name: 'CKEDITOR5' } )
+			name: args.outputName
 		} );
 	} catch ( error: any ) {
 		let message: string;
