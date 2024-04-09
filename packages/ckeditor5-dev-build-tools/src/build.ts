@@ -137,7 +137,7 @@ export async function build(
 			file: args.output,
 			assetFileNames: '[name][extname]',
 			sourcemap: args.sourceMap,
-			...( args.format === 'umd' && { name: 'CKEDITOR5' } ),
+			...( args.format === 'umd' && { name: 'CKEDITOR5' } )
 		} );
 	} catch ( error: any ) {
 		let message: string;
