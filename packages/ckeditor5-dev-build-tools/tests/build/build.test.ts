@@ -83,7 +83,22 @@ test( 'TypeScript declarations', async () => {
 /**
  * Format
  */
-test( 'Format', async () => {
+test( 'Format esm', async () => {
+	const { output } = await build( {
+		input: 'src/input.ts',
+		tsconfig: 'tsconfig.json',
+		format: 'esm'
+	} );
+
+	expect( output.map( o => o.fileName ) ).toMatchObject( [
+		'index.js',
+		'index.css',
+		'editor-index.css',
+		'content-index.css'
+	] );
+} );
+
+test( 'Format umd', async () => {
 	const { output } = await build( {
 		input: 'src/input.ts',
 		tsconfig: 'tsconfig.json',
