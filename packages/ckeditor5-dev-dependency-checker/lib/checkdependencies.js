@@ -389,7 +389,7 @@ async function isDevDependency( packageName, absolutePaths ) {
 
 		if ( absolutePath.endsWith( '.ts' ) ) {
 			// Verify kind of imports in TypeScript file.
-			const importKinds = await getImportKinds( packageName, absolutePath );
+			const importKinds = await getImportAndExportKinds( packageName, absolutePath );
 
 			// There is any non type kind of import from that package so not a dev dependency.
 			if ( importKinds.some( importKind => importKind != 'type' ) ) {
@@ -406,26 +406,29 @@ async function isDevDependency( packageName, absolutePaths ) {
 }
 
 /**
- * Parses TS file from `absolutePath` and returns a list of import types from `packageName`.
+ * Parses TS file from `absolutePath` and returns a list of import and export types from `packageName`.
  *
  * @param {String} packageName
  * @param {String} absolutePath File where a given package has been imported.
  * @returns {Promise.<Array.<String>>} Array of import kinds.
  */
-async function getImportKinds( packageName, absolutePath ) {
+async function getImportAndExportKinds( packageName, absolutePath ) {
 	const astContent = await depCheck.parser.typescript( absolutePath );
 
 	if ( !astContent || !astContent.program || !astContent.program.body ) {
 		return [];
 	}
 
+	const types = [
+		'ImportDeclaration',
+		'ExportAllDeclaration',
+		'ExportNamedDeclaration'
+	];
+
 	return astContent.program.body
-		.filter( astNode => (
-			astNode.type == 'ImportDeclaration' &&
-			astNode.source && astNode.source.value &&
-			astNode.source.value.startsWith( packageName )
-		) )
-		.map( astNode => astNode.importKind );
+		.filter( node => types.includes( node.type ) )
+		.filter( node => node.source?.value?.startsWith( packageName ) )
+		.map( node => node.importKind || node.exportKind );
 }
 
 /**
