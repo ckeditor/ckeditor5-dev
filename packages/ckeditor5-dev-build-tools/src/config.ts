@@ -97,7 +97,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 				.split( '/' )
 				.slice( 0, id.startsWith( '@' ) ? 2 : 1 )
 				.join( '/' );
-			
+
 			const extension = path.extname( id );
 
 			return mappedExternals.includes( packageName ) && ( !extension || extensions.includes( extension ) );
