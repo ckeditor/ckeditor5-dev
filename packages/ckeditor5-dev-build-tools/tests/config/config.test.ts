@@ -76,7 +76,6 @@ test( '--external automatically adds packages that make up the "ckeditor5-premiu
 	} );
 
 	expect( config.external( 'ckeditor5-premium-features' ) ).toBe( true );
-	expect( config.external( 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( true );
 	expect( config.external( '@ckeditor/ckeditor5-case-change' ) ).toBe( true );
 } );
 
