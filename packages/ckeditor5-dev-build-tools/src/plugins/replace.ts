@@ -52,13 +52,20 @@ export function replaceImports( pluginOptions: RollupReplaceOptions ): Plugin {
 					}
 
 					const path = node.source.value as string;
-					const replacer = options.replace.find( ( [ pattern ] ) => RegExp( pattern ).test( path ) );
+
+					const replacer = options.replace.find( ( [ pattern ] ) => {
+						if ( typeof pattern === 'string' ) {
+							return pattern === path;
+						}
+
+						return pattern.test( path );
+					} );
 
 					if ( replacer ) {
 						magic.overwrite(
 							( node.source as any ).start + 1, // Skip opening quote
 							( node.source as any ).end - 1, // Skip closing quote
-							replacer[ 1 ]
+							path.replace( ...replacer )
 						);
 					}
 				}

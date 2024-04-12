@@ -77,6 +77,11 @@ export async function getRollupConfig( options: BuildOptions ) {
 	 */
 	const cssFileName = `${ path.parse( output ).name }.css`;
 
+	/**
+	 * Valid extensions for JavaScript and TypeScript files.
+	 */
+	const extensions = [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ];
+
 	return {
 		input,
 
@@ -84,9 +89,18 @@ export async function getRollupConfig( options: BuildOptions ) {
 		 * List of packages that will not be bundled, but their imports will be left as they are.
 		 */
 		external: ( id: string ) => {
-			return mappedExternals.includes( id ) ||
-				( mappedExternals.includes( 'ckeditor5' ) && ckeditor5Import.test( id ) ) ||
-				( mappedExternals.includes( 'ckeditor5-premium-features' ) && collaborationImport.test( id ) );
+			if ( id.startsWith( '.' ) || id.startsWith( '/' ) ) {
+				return false; // Relative or absolute import
+			}
+
+			const packageName = id
+				.split( '/' )
+				.slice( 0, id.startsWith( '@' ) ? 2 : 1 )
+				.join( '/' );
+			
+			const extension = path.extname( id );
+
+			return mappedExternals.includes( packageName ) && ( !extension || extensions.includes( extension ) );
 		},
 
 		plugins: [
@@ -102,7 +116,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 			 * Resolves imports using the Node resolution algorithm.
 			 */
 			nodeResolve( {
-				extensions: [ '.mjs', '.js', '.json', '.node', '.ts', '.mts' ],
+				extensions,
 				browser: true,
 				preferBuiltins: false
 			} ),
@@ -156,7 +170,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 				include: [ '**/*.[jt]s' ],
 				swc: {
 					jsc: {
-						target: 'es2019'
+						target: 'es2022'
 					},
 					module: {
 						type: 'es6'
@@ -190,8 +204,8 @@ export async function getRollupConfig( options: BuildOptions ) {
 					 * - ckeditor5/src/XXX (optionally with `.js` or `.ts` extension).
 					 * - ckeditor5-collaboration/src/XXX (optionally with `.js` or `.ts` extension).
 					 */
-					[ ckeditor5Import, 'ckeditor5' ],
-					[ collaborationImport, 'ckeditor5-premium-features' ],
+					[ ckeditor5Import, '@ckeditor/ckeditor5-$1/dist/index.js' ],
+					[ collaborationImport, 'ckeditor5-collaboration/dist/index.js' ],
 
 					/**
 					 * Rewrite "old" imports to imports used in new installation methods.
@@ -203,12 +217,9 @@ export async function getRollupConfig( options: BuildOptions ) {
 					 * [ '@ckeditor/ckeditor5-case-change', 'ckeditor5-premium-features' ],
 					 */
 					...Object
-						.entries( rewrites )
-						.filter( ( [ rewrite ] ) => external.includes( rewrite ) )
-						.reduce(
-							( carry, [ rewrite, packages ] ) => carry.concat( packages.map( pkg => [ pkg, rewrite ] ) ),
-							[] as Array<[ string, string ]>
-						)
+						.values( rewrites )
+						.flat()
+						.map( pkg => [ pkg, `${ pkg }/dist/index.js` ] as [ string, string ] )
 				]
 			} ),
 
