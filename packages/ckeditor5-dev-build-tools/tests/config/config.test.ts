@@ -68,6 +68,7 @@ test( '--external automatically adds packages that make up the "ckeditor5"', asy
 	expect( config.external( 'ckeditor5' ) ).toBe( true );
 	expect( config.external( 'ckeditor5/src/ui.js' ) ).toBe( true );
 	expect( config.external( '@ckeditor/ckeditor5-core' ) ).toBe( true );
+	expect( config.external( '@ckeditor/ckeditor5-code-block/theme/codeblock.css' ) ).toBe( false );
 } );
 
 test( '--external automatically adds packages that make up the "ckeditor5-premium-features"', async () => {
@@ -76,7 +77,9 @@ test( '--external automatically adds packages that make up the "ckeditor5-premiu
 	} );
 
 	expect( config.external( 'ckeditor5-premium-features' ) ).toBe( true );
+	expect( config.external( 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( true );
 	expect( config.external( '@ckeditor/ckeditor5-case-change' ) ).toBe( true );
+	expect( config.external( '@ckeditor/ckeditor5-real-time-collaboration/theme/usermarkers.css' ) ).toBe( false );
 } );
 
 test( '--translations', async () => {

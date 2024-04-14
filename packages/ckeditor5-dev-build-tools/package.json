@@ -52,12 +52,13 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "@ckeditor/ckeditor5-utils": "alpha",
+    "@ckeditor/ckeditor5-utils": "^41.3.0",
     "@types/css": "^0.0.37",
     "@types/node": "^20.11.5",
     "@types/postcss-mixins": "^9.0.5",
     "@vitest/coverage-v8": "^1.2.1",
-    "ckeditor5": "alpha",
+    "ckeditor5": "^41.3.0",
+    "ckeditor5-premium-features": "^41.3.0",
     "type-fest": "^4.10.2",
     "typescript": "^5.3.3",
     "vitest": "^1.2.1"

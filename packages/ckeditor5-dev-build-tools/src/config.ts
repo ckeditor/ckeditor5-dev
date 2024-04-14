@@ -6,6 +6,7 @@
 import path from 'upath';
 import { existsSync } from 'fs';
 import { createRequire } from 'module';
+import type { PackageJson } from 'type-fest';
 import type { InputPluginOption, Plugin, RollupOptions } from 'rollup';
 import type { BuildOptions } from './build.js';
 
@@ -64,13 +65,12 @@ export async function getRollupConfig( options: BuildOptions ) {
 	 *
 	 * This mapping can be removed when old installation methods are deprecated.
 	 */
-	const { default: rewrites }: { default: Record<string, Array<string>> } = await import(
-		resolveUserDependency( 'ckeditor5/packages-lists.json' ),
-		{ with: { type: 'json' } }
-	);
-	const mappedExternals = external.reduce( ( carry, pkg ) => carry.concat( rewrites[ pkg ] || [] ), external );
-	const ckeditor5Import = new RegExp( 'ckeditor5/src/([a-z-]+)(?:[a-z-/.]+)?' );
-	const collaborationImport = new RegExp( 'ckeditor5-collaboration/src/([a-z-]+)(?:[a-z-/.]+)?' );
+	const rewrites = [
+		...( external.includes( 'ckeditor5' ) ? await getPackageDependencies( 'ckeditor5' ) : [] ),
+		...( external.includes( 'ckeditor5-premium-features' ) ? await getPackageDependencies( 'ckeditor5-premium-features' ) : [] )
+	];
+
+	external.push( ...rewrites );
 
 	/**
 	 * Get the name of the output CSS file based on the name of the "output" file.
@@ -100,7 +100,8 @@ export async function getRollupConfig( options: BuildOptions ) {
 
 			const extension = path.extname( id );
 
-			return mappedExternals.includes( packageName ) && ( !extension || extensions.includes( extension ) );
+			// Don't bundle, unless the import has non-JS or non-TS file extension (for example `.css`).
+			return external.includes( packageName ) && ( !extension || extensions.includes( extension ) );
 		},
 
 		plugins: [
@@ -204,8 +205,8 @@ export async function getRollupConfig( options: BuildOptions ) {
 					 * - ckeditor5/src/XXX (optionally with `.js` or `.ts` extension).
 					 * - ckeditor5-collaboration/src/XXX (optionally with `.js` or `.ts` extension).
 					 */
-					[ ckeditor5Import, '@ckeditor/ckeditor5-$1/dist/index.js' ],
-					[ collaborationImport, 'ckeditor5-collaboration/dist/index.js' ],
+					[ /ckeditor5\/src\/([a-z-]+)(?:[a-z-/.]+)?/, '@ckeditor/ckeditor5-$1/dist/index.js' ],
+					[ /ckeditor5-collaboration\/src\/([a-z-]+)(?:[a-z-/.]+)?/, 'ckeditor5-collaboration/dist/index.js' ],
 
 					/**
 					 * Rewrite "old" imports to imports used in new installation methods.
@@ -216,10 +217,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 					 * [ '@ckeditor/ckeditor5-ai', 'ckeditor5-premium-features' ],
 					 * [ '@ckeditor/ckeditor5-case-change', 'ckeditor5-premium-features' ],
 					 */
-					...Object
-						.values( rewrites )
-						.flat()
-						.map( pkg => [ pkg, `${ pkg }/dist/index.js` ] as [ string, string ] )
+					...rewrites.map( pkg => [ pkg, `${ pkg }/dist/index.js` ] as [ string, string ] )
 				]
 			} ),
 
@@ -260,6 +258,23 @@ function resolveUserDependency( dependencyName: string ): string {
 		dependencyName,
 		{ paths: [ process.cwd() ] }
 	);
+}
+
+/**
+ * Returns a list of keys in `package.json` file of a given dependency.
+ */
+async function getPackageDependencies( packageName: string ): Promise<Array<string>> {
+	try {
+		const { default: pkg }: { default: PackageJson } = await import(
+			resolveUserDependency( `${ packageName }/package.json` ),
+			{ with: { type: 'json' } }
+		);
+
+		return Object.keys( pkg.dependencies || {} );
+	} catch {
+		// Dependency is not installed, so return an empty array.
+		return Promise.resolve( [] );
+	}
 }
 
 /**
