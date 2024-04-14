@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { test, expect, beforeEach, vi } from 'vitest';
+import { test, expect, vi } from 'vitest';
 import * as rollup from 'rollup';
 import { build } from '../../src/build.js';
 
@@ -29,11 +29,6 @@ vi
 			write: bundle.generate
 		} as any;
 	} );
-
-// eslint-disable-next-line mocha/no-top-level-hooks
-beforeEach( () => {
-	vi.clearAllMocks();
-} );
 
 /**
  * Input

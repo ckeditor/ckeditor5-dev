@@ -46,6 +46,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 		tsconfig,
 		banner,
 		external,
+		rewrite,
 		declarations,
 		translations,
 		sourceMap,
@@ -65,12 +66,12 @@ export async function getRollupConfig( options: BuildOptions ) {
 	 *
 	 * This mapping can be removed when old installation methods are deprecated.
 	 */
-	const rewrites = [
+	const autoRewrites = [
 		...( external.includes( 'ckeditor5' ) ? await getPackageDependencies( 'ckeditor5' ) : [] ),
 		...( external.includes( 'ckeditor5-premium-features' ) ? await getPackageDependencies( 'ckeditor5-premium-features' ) : [] )
 	];
 
-	external.push( ...rewrites );
+	external.push( ...autoRewrites );
 
 	/**
 	 * Get the name of the output CSS file based on the name of the "output" file.
@@ -217,7 +218,12 @@ export async function getRollupConfig( options: BuildOptions ) {
 					 * [ '@ckeditor/ckeditor5-ai', 'ckeditor5-premium-features' ],
 					 * [ '@ckeditor/ckeditor5-case-change', 'ckeditor5-premium-features' ],
 					 */
-					...rewrites.map( pkg => [ pkg, `${ pkg }/dist/index.js` ] as [ string, string ] )
+					...autoRewrites.map( pkg => [ pkg, `${ pkg }/dist/index.js` ] as [ string, string ] ),
+
+					/**
+					 * Rewrites provided in the config.
+					 */
+					...rewrite
 				]
 			} ),
 

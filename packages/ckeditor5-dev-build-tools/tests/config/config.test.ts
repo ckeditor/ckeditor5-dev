@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { test, expect } from 'vitest';
+import { test, expect, vi } from 'vitest';
 import { getRollupConfig } from '../../src/config.js';
 
 type Options = Parameters<typeof getRollupConfig>[0];
@@ -14,6 +14,7 @@ const defaults: Options = {
 	tsconfig: '',
 	banner: '',
 	external: [],
+	rewrite: [],
 	declarations: false,
 	translations: '',
 	sourceMap: false,
@@ -80,6 +81,34 @@ test( '--external automatically adds packages that make up the "ckeditor5-premiu
 	expect( config.external( 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( true );
 	expect( config.external( '@ckeditor/ckeditor5-case-change' ) ).toBe( true );
 	expect( config.external( '@ckeditor/ckeditor5-real-time-collaboration/theme/usermarkers.css' ) ).toBe( false );
+} );
+
+test( '--external doesnt fail when "ckeditor5-premium-features" is not installed', async () => {
+	vi.doMock( 'ckeditor5-premium-features/package.json', () => {
+		throw new Error( 'Module doesn\'t exist' );
+	} );
+
+	const config = await getConfig( {
+		external: [ 'ckeditor5-premium-features' ]
+	} );
+
+	expect( config.external( 'ckeditor5-premium-features' ) ).toBe( true );
+	expect( config.external( 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( false );
+	expect( config.external( '@ckeditor/ckeditor5-case-change' ) ).toBe( false );
+} );
+
+test( '--external doesnt fail when "ckeditor5-premium-features" doesnt have any dependencies', async () => {
+	vi.doMock( 'ckeditor5-premium-features/package.json', () => ( {
+		default: JSON.stringify( { name: 'mocked' } )
+	} ) );
+
+	const config = await getConfig( {
+		external: [ 'ckeditor5-premium-features' ]
+	} );
+
+	expect( config.external( 'ckeditor5-premium-features' ) ).toBe( true );
+	expect( config.external( 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( false );
+	expect( config.external( '@ckeditor/ckeditor5-case-change' ) ).toBe( false );
 } );
 
 test( '--translations', async () => {

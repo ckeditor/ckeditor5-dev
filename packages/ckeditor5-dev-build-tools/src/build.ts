@@ -16,6 +16,7 @@ export interface BuildOptions {
 	tsconfig: string;
 	banner: string;
 	external: Array<string>;
+	rewrite: Array<[string, string]>;
 	declarations: boolean;
 	translations: string;
 	sourceMap: boolean;
@@ -29,6 +30,7 @@ export const defaultOptions: BuildOptions = {
 	tsconfig: 'tsconfig.json',
 	banner: '',
 	external: [],
+	rewrite: [],
 	declarations: false,
 	translations: '',
 	sourceMap: false,
@@ -50,7 +52,6 @@ function getCliArguments(): Partial<BuildOptions> {
 			'declarations': { type: 'boolean' },
 			'translations': { type: 'string' },
 			'source-map': { type: 'boolean' },
-			'bundle': { type: 'boolean' },
 			'minify': { type: 'boolean' },
 			'clean': { type: 'boolean' }
 		},

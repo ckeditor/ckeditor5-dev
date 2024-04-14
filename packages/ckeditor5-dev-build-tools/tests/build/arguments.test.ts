@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { test, expect, beforeEach, vi } from 'vitest';
+import { test, expect, vi } from 'vitest';
 import fs from 'fs';
 import * as rollup from 'rollup';
 import * as config from '../../src/config.js';
@@ -46,11 +46,6 @@ function mockCliArgs( ...args: Array<string> ) {
 function getCwdPath( fileName: string ) {
 	return process.cwd() + fileName;
 }
-
-// eslint-disable-next-line mocha/no-top-level-hooks
-beforeEach( () => {
-	vi.clearAllMocks();
-} );
 
 test( 'paths are normalized', async () => {
 	await build();
@@ -114,13 +109,6 @@ test( '--source-map', async () => {
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { sourceMap: true } ) );
 } );
 
-test( '--bundle', async () => {
-	mockCliArgs( '--bundle' );
-	await build();
-
-	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { bundle: true } ) );
-} );
-
 test( '--minify', async () => {
 	mockCliArgs( '--minify' );
 	await build();
@@ -168,6 +156,12 @@ test( '.external', async () => {
 	await build( { external: [ 'foo', 'bar' ] } );
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { external: [ 'foo', 'bar' ] } ) );
+} );
+
+test( '.rewrite', async () => {
+	await build( { rewrite: [ [ 'foo', 'bar' ] ] } );
+
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { rewrite: [ [ 'foo', 'bar' ] ] } ) );
 } );
 
 test( '.declarations', async () => {
