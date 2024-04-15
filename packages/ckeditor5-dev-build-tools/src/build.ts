@@ -6,6 +6,7 @@
 import fs from 'fs';
 import util from 'util';
 import chalk from 'chalk';
+import upath from 'upath';
 import { rollup, type RollupOutput, type ModuleFormat } from 'rollup';
 import { getRollupConfig } from './config.js';
 import { getCwdPath, camelizeObjectKeys, removeWhitespace } from './utils.js';
@@ -23,6 +24,7 @@ export interface BuildOptions {
 	sourceMap: boolean;
 	minify: boolean;
 	clean: boolean;
+	browser: boolean
 }
 
 export const defaultOptions: BuildOptions = {
@@ -37,7 +39,8 @@ export const defaultOptions: BuildOptions = {
 	translations: '',
 	sourceMap: false,
 	minify: false,
-	clean: false
+	clean: false,
+	browser: false
 };
 
 /**
@@ -57,7 +60,8 @@ function getCliArguments(): Partial<BuildOptions> {
 			'source-map': { type: 'boolean' },
 			'bundle': { type: 'boolean' },
 			'minify': { type: 'boolean' },
-			'clean': { type: 'boolean' }
+			'clean': { type: 'boolean' },
+			'browser': { type: 'boolean' }
 		},
 
 		// Skip `node ckeditor5-build-package`.
@@ -134,13 +138,33 @@ export async function build(
 		/**
 		 * Write bundles to the filesystem.
 		 */
-		return await build.write( {
+		const bundle = await build.write( {
 			format: args.format as ModuleFormat,
 			file: args.output,
 			assetFileNames: '[name][extname]',
 			sourcemap: args.sourceMap,
 			name: args.outputName
 		} );
+
+		if ( args.browser ) {
+			args.input = args.output;
+			args.format = 'umd';
+			args.sourceMap = false;
+
+			const configUmd = await getRollupConfig( args );
+			const { plugins, ...configWithoutPlugins } = configUmd;
+			const umdBundle = await rollup( configWithoutPlugins );
+
+			return await umdBundle.write( {
+				format: args.format as ModuleFormat,
+				file: upath.join( upath.dirname( args.output ), 'index.umd.js' ),
+				assetFileNames: '[name][extname]',
+				sourcemap: args.sourceMap,
+				name: args.outputName
+			} );
+		}
+
+		return bundle;
 	} catch ( error: any ) {
 		let message: string;
 
