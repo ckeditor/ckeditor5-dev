@@ -7,7 +7,7 @@ import fs from 'fs';
 import util from 'util';
 import chalk from 'chalk';
 import upath from 'upath';
-import { rollup, type RollupOutput, type ModuleFormat } from 'rollup';
+import { rollup, type RollupOutput } from 'rollup';
 import { getRollupConfig } from './config.js';
 import { getCwdPath, camelizeObjectKeys, removeWhitespace } from './utils.js';
 
@@ -15,8 +15,7 @@ export interface BuildOptions {
 	input: string;
 	output: string;
 	tsconfig: string;
-	format: string;
-	outputName: string,
+	outputName: string;
 	banner: string;
 	external: Array<string>;
 	declarations: boolean;
@@ -24,14 +23,13 @@ export interface BuildOptions {
 	sourceMap: boolean;
 	minify: boolean;
 	clean: boolean;
-	browser: boolean
+	browser: boolean;
 }
 
 export const defaultOptions: BuildOptions = {
 	input: 'src/index.ts',
 	output: 'dist/index.js',
 	tsconfig: 'tsconfig.json',
-	format: 'esm',
 	outputName: '',
 	banner: '',
 	external: [],
@@ -52,7 +50,6 @@ function getCliArguments(): Partial<BuildOptions> {
 			'input': { type: 'string' },
 			'output': { type: 'string' },
 			'tsconfig': { type: 'string' },
-			'format': { type: 'string' },
 			'banner': { type: 'string' },
 			'external': { type: 'string', multiple: true },
 			'declarations': { type: 'boolean' },
@@ -139,7 +136,7 @@ export async function build(
 		 * Write bundles to the filesystem.
 		 */
 		const bundle = await build.write( {
-			format: args.format as ModuleFormat,
+			format: 'esm',
 			file: args.output,
 			assetFileNames: '[name][extname]',
 			sourcemap: args.sourceMap,
@@ -148,7 +145,6 @@ export async function build(
 
 		if ( args.browser ) {
 			args.input = args.output;
-			args.format = 'umd';
 			args.sourceMap = false;
 
 			const configUmd = await getRollupConfig( args );
@@ -156,7 +152,7 @@ export async function build(
 			const umdBundle = await rollup( configWithoutPlugins );
 
 			return await umdBundle.write( {
-				format: args.format as ModuleFormat,
+				format: 'umd',
 				file: upath.join( upath.dirname( args.output ), 'index.umd.js' ),
 				assetFileNames: '[name][extname]',
 				sourcemap: args.sourceMap,
