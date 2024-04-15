@@ -4,7 +4,7 @@
  */
 
 import { test, expect, vi } from 'vitest';
-import * as Rollup from 'rollup';
+import type * as Rollup from 'rollup';
 import { build } from '../../src/build.js';
 
 /**
