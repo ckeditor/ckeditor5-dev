@@ -5,16 +5,19 @@
 
 import { test, expect, vi } from 'vitest';
 import fs from 'fs';
-import * as rollup from 'rollup';
 import * as config from '../../src/config.js';
 import { build } from '../../src/build.js';
 
 /**
  * Mock `rollup`, so it doesn't try to build anything.
  */
-vi
-	.spyOn( rollup, 'rollup' )
-	.mockResolvedValue( { write() { } } as any );
+vi.mock( 'rollup', () => ( {
+	rollup() {
+		return {
+			write: () => {}
+		};
+	}
+} ) );
 
 /**
  * Mock function for generating rollup configuration.

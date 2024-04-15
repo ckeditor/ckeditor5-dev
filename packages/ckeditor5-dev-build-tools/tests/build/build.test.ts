@@ -4,10 +4,8 @@
  */
 
 import { test, expect, vi } from 'vitest';
-import * as rollup from 'rollup';
+import * as Rollup from 'rollup';
 import { build } from '../../src/build.js';
-
-const rp = rollup.rollup;
 
 /**
  * Mock `process.cwd()` to point to the 'fixtures' directory.
@@ -20,15 +18,20 @@ vi
  * Mock `rollup.write` to run `rollup.generate` instead. This
  * will prevent Rollup from writing to filesystem.
  */
-vi
-	.spyOn( rollup, 'rollup' )
-	.mockImplementation( async options => {
-		const bundle = await rp( options );
+const mocks = vi.hoisted( () => ( {
+	rollup: vi.fn().mockImplementation( async ( rollupOptions: Rollup.RollupOptions ) => {
+		const { rollup } = await vi.importActual<typeof Rollup>( 'rollup' );
+		const build = await rollup( rollupOptions );
 
 		return {
-			write: bundle.generate
-		} as any;
-	} );
+			write: build.generate
+		};
+	} )
+} ) );
+
+vi.mock( 'rollup', () => ( {
+	rollup: mocks.rollup
+} ) );
 
 /**
  * Input
@@ -118,7 +121,7 @@ test( 'Translations', async () => {
 		translations: '**/*.po'
 	} );
 
-	expect( ( output[ 1 ] as rollup.OutputChunk ).code ).toContain( 'Hello world' );
+	expect( ( output[ 1 ] as Rollup.OutputChunk ).code ).toContain( 'Hello world' );
 
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
 		'index.js',
@@ -201,13 +204,11 @@ test( 'Overriding', async () => {
  * Error handling
  */
 test( 'Throws error with nicely formatter message when build fails', async () => {
-	vi
-		.spyOn( rollup, 'rollup' )
-		.mockImplementationOnce( (): any => ( {
-			write() {
-				throw new Error( 'REASON' );
-			}
-		} ) );
+	mocks.rollup.mockImplementationOnce( () => ( {
+		write() {
+			throw new Error( 'REASON' );
+		}
+	} ) );
 
 	const fn = () => build( { input: 'src/input.js' } );
 
@@ -215,19 +216,17 @@ test( 'Throws error with nicely formatter message when build fails', async () =>
 } );
 
 test( 'Throws Rollup error with nicely formatter message when build fails', async () => {
-	vi
-		.spyOn( rollup, 'rollup' )
-		.mockImplementationOnce( (): any => ( {
-			write() {
-				const err = new Error() as any;
+	mocks.rollup.mockImplementationOnce( () => ( {
+		write() {
+			const err = new Error() as any;
 
-				err.name = 'RollupError';
-				err.id = 'FILENAME';
-				err.message = 'REASON';
+			err.name = 'RollupError';
+			err.id = 'FILENAME';
+			err.message = 'REASON';
 
-				throw err;
-			}
-		} ) );
+			throw err;
+		}
+	} ) );
 
 	const fn = () => build( { input: 'src/input.js' } );
 
@@ -235,20 +234,18 @@ test( 'Throws Rollup error with nicely formatter message when build fails', asyn
 } );
 
 test( 'Rollup error includes frame if provided', async () => {
-	vi
-		.spyOn( rollup, 'rollup' )
-		.mockImplementationOnce( (): any => ( {
-			write() {
-				const err = new Error() as any;
+	mocks.rollup.mockImplementationOnce( () => ( {
+		write() {
+			const err = new Error() as any;
 
-				err.name = 'RollupError';
-				err.id = 'FILENAME';
-				err.message = 'REASON';
-				err.frame = 'FRAME';
+			err.name = 'RollupError';
+			err.id = 'FILENAME';
+			err.message = 'REASON';
+			err.frame = 'FRAME';
 
-				throw err;
-			}
-		} ) );
+			throw err;
+		}
+	} ) );
 
 	const fn = () => build( { input: 'src/input.js' } );
 
