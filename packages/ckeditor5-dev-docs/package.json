@@ -1,13 +1,13 @@
 {
   "name": "@ckeditor/ckeditor5-dev-docs",
-  "version": "39.6.3",
+  "version": "39.7.0-alpha.3",
   "description": "Tasks used to build and verify the documentation for CKEditor 5.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^39.6.3",
-    "@ckeditor/jsdoc-plugins": "^39.6.3",
-    "@ckeditor/typedoc-plugins": "^39.6.3",
+    "@ckeditor/ckeditor5-dev-utils": "^39.7.0-alpha.3",
+    "@ckeditor/jsdoc-plugins": "^39.7.0-alpha.3",
+    "@ckeditor/typedoc-plugins": "^39.7.0-alpha.3",
     "fast-glob": "^3.2.4",
     "fs-extra": "^9.0.0",
     "jsdoc": "ckeditor/jsdoc#fixed-trailing-comment-doclets",
