@@ -145,7 +145,6 @@ export async function build(
 
 		if ( args.browser ) {
 			args.input = args.output;
-			args.sourceMap = false;
 
 			const configUmd = await getRollupConfig( args );
 			const { plugins, ...configWithoutPlugins } = configUmd;
