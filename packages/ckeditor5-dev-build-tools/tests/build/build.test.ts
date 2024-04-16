@@ -132,7 +132,7 @@ test( 'Output name', async () => {
 		if ( item.type === 'chunk' && item.fileName === 'index.umd.js' ) {
 			code = item.code;
 		}
-	})
+	} );
 
 	if ( code ) {
 		expect( code ).toContain( 'EXAMPLE_OUTPUT_NAME' );

@@ -150,7 +150,7 @@ export async function build(
 			const { plugins, ...configWithoutPlugins } = configUmd;
 			const umdBuild = await rollup( configWithoutPlugins );
 
-			const umdBndle = await umdBuild.write( {
+			const umdBundle = await umdBuild.write( {
 				format: 'umd',
 				file: upath.join( upath.dirname( args.output ), 'index.umd.js' ),
 				assetFileNames: '[name][extname]',
@@ -159,10 +159,9 @@ export async function build(
 			} );
 
 			return { output: [
-					...bundle.output,
-					...umdBndle.output,
-				]
-			};
+				...bundle.output,
+				...umdBundle.output
+			] };
 		}
 
 		return bundle;
