@@ -81,13 +81,13 @@ test( 'TypeScript declarations', async () => {
 } );
 
 /**
- * Format
+ * Browser
  */
-test( 'Format esm', async () => {
+test( 'Browser parameter set to `false`', async () => {
 	const { output } = await build( {
 		input: 'src/input.ts',
 		tsconfig: 'tsconfig.json',
-		format: 'esm'
+		browser: false
 	} );
 
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
@@ -98,11 +98,11 @@ test( 'Format esm', async () => {
 	] );
 } );
 
-test( 'Format umd', async () => {
+test( 'Browser parameter set to `true`', async () => {
 	const { output } = await build( {
 		input: 'src/input.ts',
 		tsconfig: 'tsconfig.json',
-		format: 'umd',
+		browser: true,
 		outputName: 'EXAMPLE_OUTPUT_NAME'
 	} );
 
@@ -110,7 +110,8 @@ test( 'Format umd', async () => {
 		'index.js',
 		'index.css',
 		'editor-index.css',
-		'content-index.css'
+		'content-index.css',
+		'index.umd.js'
 	] );
 } );
 
@@ -121,17 +122,28 @@ test( 'Output name', async () => {
 	const { output } = await build( {
 		input: 'src/input.ts',
 		tsconfig: 'tsconfig.json',
-		format: 'umd',
+		browser: true,
 		outputName: 'EXAMPLE_OUTPUT_NAME'
 	} );
 
-	expect( output[ 0 ].code ).toContain( 'EXAMPLE_OUTPUT_NAME' );
+	let code;
+
+	output.forEach( item => {
+		if ( item.type === 'chunk' && item.fileName === 'index.umd.js' ) {
+			code = item.code;
+		}
+	})
+
+	if ( code ) {
+		expect( code ).toContain( 'EXAMPLE_OUTPUT_NAME' );
+	}
 
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
 		'index.js',
 		'index.css',
 		'editor-index.css',
-		'content-index.css'
+		'content-index.css',
+		'index.umd.js'
 	] );
 } );
 
