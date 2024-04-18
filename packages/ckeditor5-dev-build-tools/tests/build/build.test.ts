@@ -55,8 +55,8 @@ test( 'TypeScript input', async () => {
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
 		'index.js',
 		'index.css',
-		'editor-index.css',
-		'content-index.css'
+		'index-editor.css',
+		'index-content.css'
 	] );
 } );
 
@@ -72,8 +72,8 @@ test( 'TypeScript declarations', async () => {
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
 		'index.js',
 		'index.css',
-		'editor-index.css',
-		'content-index.css',
+		'index-editor.css',
+		'index-content.css',
 		'types/input.d.ts'
 	] );
 } );
@@ -91,8 +91,8 @@ test( 'Browser parameter set to `false`', async () => {
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
 		'index.js',
 		'index.css',
-		'editor-index.css',
-		'content-index.css'
+		'index-editor.css',
+		'index-content.css'
 	] );
 } );
 
@@ -107,8 +107,8 @@ test( 'Browser parameter set to `true`', async () => {
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
 		'index.js',
 		'index.css',
-		'editor-index.css',
-		'content-index.css',
+		'index-editor.css',
+		'index-content.css',
 		'index.umd.js'
 	] );
 } );
@@ -139,8 +139,8 @@ test( 'Output name', async () => {
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
 		'index.js',
 		'index.css',
-		'editor-index.css',
-		'content-index.css',
+		'index-editor.css',
+		'index-content.css',
 		'index.umd.js'
 	] );
 } );
@@ -194,8 +194,8 @@ test( 'Translations', async () => {
 		'translations/en.js',
 		'translations/en.d.ts',
 		'index.css',
-		'editor-index.css',
-		'content-index.css'
+		'index-editor.css',
+		'index-content.css'
 	] );
 } );
 
@@ -213,8 +213,8 @@ test( 'Source map', async () => {
 		'index.js.map',
 		'index.css',
 		'index.css.map',
-		'editor-index.css',
-		'content-index.css'
+		'index-editor.css',
+		'index-content.css'
 	] );
 } );
 

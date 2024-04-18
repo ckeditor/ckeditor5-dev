@@ -76,7 +76,8 @@ export async function getRollupConfig( options: BuildOptions ) {
 	/**
 	 * Get the name of the output CSS file based on the name of the "output" file.
 	 */
-	const cssFileName = `${ path.parse( output ).name }.css`;
+	const baseFileName = path.parse( output ).name;
+	const cssFileName = `${ baseFileName }.css`;
 
 	/**
 	 * Valid extensions for JavaScript and TypeScript files.
@@ -151,20 +152,19 @@ export async function getRollupConfig( options: BuildOptions ) {
 			} ),
 
 			/**
-			 * Generates CSS files containing only content and only editor styles.
-			 */
-			splitCss( {
-				baseFileName: cssFileName,
-				minimize: minify
-			} ),
-
-			/**
 			 * Ensures empty files are emitted if files of given names were not generated.
 			 */
 			emitCss( {
 				fileNames: [ cssFileName ]
 			} ),
 
+			/**
+			 * Generates CSS files containing only content and only editor styles.
+			 */
+			splitCss( {
+				baseFileName,
+				minimize: minify
+			} ),
 			/**
 			 * Transpiles TypeScript to JavaScript.
 			 */

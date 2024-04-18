@@ -58,13 +58,13 @@ export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {
 			// Emit those styles ito files.
 			this.emitFile( {
 				type: 'asset',
-				fileName: `editor-${ options.baseFileName }`,
+				fileName: `${ options.baseFileName }-editor.css`,
 				source: await unifyFileContentOutput( editorStylesContent, options.minimize )
 			} );
 
 			this.emitFile( {
 				type: 'asset',
-				fileName: `content-${ options.baseFileName }`,
+				fileName: `${ options.baseFileName }-content.css`,
 				source: await unifyFileContentOutput( editingViewStylesContent, options.minimize )
 			} );
 		}

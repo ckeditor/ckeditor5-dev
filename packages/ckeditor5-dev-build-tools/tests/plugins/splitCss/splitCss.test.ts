@@ -4,7 +4,7 @@
  */
 
 import { join } from 'path';
-import { describe, test } from 'vitest';
+import { test } from 'vitest';
 import { rollup, type RollupOutput } from 'rollup';
 
 import styles from 'rollup-plugin-styles';
@@ -47,204 +47,202 @@ async function generateBundle(
 	return output;
 }
 
-describe( 'splitCss', () => {
-	test( 'should import a single `CSS` file', async () => {
-		const output = await generateBundle(
-			'./fixtures/single-import/input.ts',
-			{ baseFileName: 'styles.css' }
-		);
+test( 'should import a single `CSS` file', async () => {
+	const output = await generateBundle(
+		'./fixtures/single-import/input.ts',
+		{ baseFileName: 'styles' }
+	);
 
-		const expectedResult = removeWhitespace(
-			`body {
-				color: '#000';
-			}
-		` );
+	const expectedResult = removeWhitespace(
+		`body {
+			color: '#000';
+		}
+	` );
 
-		verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
-		verifyDividedStyleSheet( output, 'content-styles.css', '' );
-	} );
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedResult );
+	verifyDividedStyleSheet( output, 'styles-content.css', '' );
+} );
 
-	test( 'should import multiple `CSS` files', async () => {
-		const output = await generateBundle(
-			'./fixtures/multiple-import/input.ts',
-			{ baseFileName: 'styles.css' }
-		);
+test( 'should import multiple `CSS` files', async () => {
+	const output = await generateBundle(
+		'./fixtures/multiple-import/input.ts',
+		{ baseFileName: 'styles' }
+	);
 
-		const expectedResult = removeWhitespace(
-			`body {
-				color: '#000';
-			}
-			div {
-				display: grid;
-			}
-		` );
+	const expectedResult = removeWhitespace(
+		`body {
+			color: '#000';
+		}
+		div {
+			display: grid;
+		}
+	` );
 
-		verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
-		verifyDividedStyleSheet( output, 'content-styles.css', '' );
-	} );
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedResult );
+	verifyDividedStyleSheet( output, 'styles-content.css', '' );
+} );
 
-	test( 'should import `CSS` file only once (without duplication)', async () => {
-		const output = await generateBundle(
-			'./fixtures/import-only-once/input.ts',
-			{ baseFileName: 'styles.css' }
-		);
+test( 'should import `CSS` file only once (without duplication)', async () => {
+	const output = await generateBundle(
+		'./fixtures/import-only-once/input.ts',
+		{ baseFileName: 'styles' }
+	);
 
-		const expectedEditorResult = removeWhitespace(
-			`.ck-feature {
-				display: grid;
-			}
-		` );
+	const expectedEditorResult = removeWhitespace(
+		`.ck-feature {
+			display: grid;
+		}
+	` );
 
-		const expectedContentResult = removeWhitespace(
-			`.ck-content.ck-feature {
-				display: block;
-			}
-		` );
+	const expectedContentResult = removeWhitespace(
+		`.ck-content.ck-feature {
+			display: block;
+		}
+	` );
 
-		verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
-		verifyDividedStyleSheet( output, 'content-styles.css', expectedContentResult );
-	} );
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedEditorResult );
+	verifyDividedStyleSheet( output, 'styles-content.css', expectedContentResult );
+} );
 
-	test( 'should ignore `CSS` comments', async () => {
-		const output = await generateBundle(
-			'./fixtures/ignore-comments/input.ts',
-			{ baseFileName: 'styles.css' }
-		);
+test( 'should ignore `CSS` comments', async () => {
+	const output = await generateBundle(
+		'./fixtures/ignore-comments/input.ts',
+		{ baseFileName: 'styles' }
+	);
 
-		const expectedResult = removeWhitespace(
-			`body {
-				color: '#000';
-			}
-		` );
+	const expectedResult = removeWhitespace(
+		`body {
+			color: '#000';
+		}
+	` );
 
-		verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
-		verifyDividedStyleSheet( output, 'content-styles.css', '' );
-	} );
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedResult );
+	verifyDividedStyleSheet( output, 'styles-content.css', '' );
+} );
 
-	test( 'should combine `:root` declarations from multiple entries into one', async () => {
-		const output = await generateBundle(
-			'./fixtures/combine-root-definitions/input.ts',
-			{ baseFileName: 'styles.css' }
-		);
+test( 'should combine `:root` declarations from multiple entries into one', async () => {
+	const output = await generateBundle(
+		'./fixtures/combine-root-definitions/input.ts',
+		{ baseFileName: 'styles' }
+	);
 
-		const expectedResult = removeWhitespace(
-			`:root {
-				--variable1: blue;
-				--variable2: red;
-			}
-			h1 {
-				color: var(--variable1);
-			}
-			p {
-				color: var(--variable2);
-			}
-		` );
+	const expectedResult = removeWhitespace(
+		`:root {
+			--variable1: blue;
+			--variable2: red;
+		}
+		h1 {
+			color: var(--variable1);
+		}
+		p {
+			color: var(--variable2);
+		}
+	` );
 
-		verifyDividedStyleSheet( output, 'editor-styles.css', expectedResult );
-		verifyDividedStyleSheet( output, 'content-styles.css', '' );
-	} );
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedResult );
+	verifyDividedStyleSheet( output, 'styles-content.css', '' );
+} );
 
-	test( 'should filter `:root` declaration based on `CSS` variables usage', async () => {
-		const output = await generateBundle(
-			'./fixtures/filter-root-definitions/input.ts',
-			{ baseFileName: 'styles.css' }
-		);
+test( 'should filter `:root` declaration based on `CSS` variables usage', async () => {
+	const output = await generateBundle(
+		'./fixtures/filter-root-definitions/input.ts',
+		{ baseFileName: 'styles' }
+	);
 
-		const expectedEditorResult = removeWhitespace(
-			`:root {
-				--variable1: blue;
-				--variable2: red;
-			}
-			.ck-feature {
-				color: var(--variable1);
-				background-color: var(--variable2);
-			}
-		` );
+	const expectedEditorResult = removeWhitespace(
+		`:root {
+			--variable1: blue;
+			--variable2: red;
+		}
+		.ck-feature {
+			color: var(--variable1);
+			background-color: var(--variable2);
+		}
+	` );
 
-		const expectedContentResult = removeWhitespace(
-			`:root {
-				--variable3: red;
-				--variable4: pink;
-			}
-			.ck-content.ck-feature {
-				color: var(--variable3);
-				background-color: var(--variable4);
-			}
-		` );
+	const expectedContentResult = removeWhitespace(
+		`:root {
+			--variable3: red;
+			--variable4: pink;
+		}
+		.ck-content.ck-feature {
+			color: var(--variable3);
+			background-color: var(--variable4);
+		}
+	` );
 
-		verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
-		verifyDividedStyleSheet( output, 'content-styles.css', expectedContentResult );
-	} );
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedEditorResult );
+	verifyDividedStyleSheet( output, 'styles-content.css', expectedContentResult );
+} );
 
-	test( 'should omit `:root` declaration when it\'s not exist', async () => {
-		const output = await generateBundle(
-			'./fixtures/omit-root-definitions/input.ts',
-			{ baseFileName: 'styles.css' }
-		);
+test( 'should omit `:root` declaration when it\'s not exist', async () => {
+	const output = await generateBundle(
+		'./fixtures/omit-root-definitions/input.ts',
+		{ baseFileName: 'styles' }
+	);
 
-		const expectedEditorResult = removeWhitespace(
-			`:root {
-				--variable1: blue;
-				--variable2: red;
-			}
-			.ck-feature {
-				color: var(--variable1);
-				background-color: var(--variable2);
-			}
-		` );
+	const expectedEditorResult = removeWhitespace(
+		`:root {
+			--variable1: blue;
+			--variable2: red;
+		}
+		.ck-feature {
+			color: var(--variable1);
+			background-color: var(--variable2);
+		}
+	` );
 
-		const expectedContentResult = removeWhitespace(
-			`.ck-content.ck-feature {
-				color: red;
-				background-color: blue;
-			}
-		` );
+	const expectedContentResult = removeWhitespace(
+		`.ck-content.ck-feature {
+			color: red;
+			background-color: blue;
+		}
+	` );
 
-		verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
-		verifyDividedStyleSheet( output, 'content-styles.css', expectedContentResult );
-	} );
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedEditorResult );
+	verifyDividedStyleSheet( output, 'styles-content.css', expectedContentResult );
+} );
 
-	test( 'should divide classes into files based on its purpose', async () => {
-		const output = await generateBundle(
-			'./fixtures/divide-classes/input.ts',
-			{ baseFileName: 'styles.css' }
-		);
+test( 'should divide classes into files based on its purpose', async () => {
+	const output = await generateBundle(
+		'./fixtures/divide-classes/input.ts',
+		{ baseFileName: 'styles' }
+	);
 
-		const expectedEditorResult = removeWhitespace(
-			`.ck-feature {
-				display: grid;
-			}
-		` );
+	const expectedEditorResult = removeWhitespace(
+		`.ck-feature {
+			display: grid;
+		}
+	` );
 
-		const expectedContentResult = removeWhitespace(
-			`.ck-content.ck-feature {
-				display: block;
-			}
-		` );
+	const expectedContentResult = removeWhitespace(
+		`.ck-content.ck-feature {
+			display: block;
+		}
+	` );
 
-		verifyDividedStyleSheet( output, 'editor-styles.css', expectedEditorResult );
-		verifyDividedStyleSheet( output, 'content-styles.css', expectedContentResult );
-	} );
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedEditorResult );
+	verifyDividedStyleSheet( output, 'styles-content.css', expectedContentResult );
+} );
 
-	test( 'should prepare empty `CSS` files when no styles imported', async () => {
-		const output = await generateBundle(
-			'./fixtures/no-styles/input.ts',
-			{ baseFileName: 'styles.css' }
-		);
+test( 'should prepare empty `CSS` files when no styles imported', async () => {
+	const output = await generateBundle(
+		'./fixtures/no-styles/input.ts',
+		{ baseFileName: 'styles' }
+	);
 
-		verifyDividedStyleSheet( output, 'editor-styles.css', '' );
-		verifyDividedStyleSheet( output, 'content-styles.css', '' );
-	} );
+	verifyDividedStyleSheet( output, 'styles-editor.css', '' );
+	verifyDividedStyleSheet( output, 'styles-content.css', '' );
+} );
 
-	test( 'should minify the content output', async () => {
-		const output = await generateBundle(
-			'./fixtures/single-import/input.ts',
-			{ baseFileName: 'styles.min.css', minimize: true }
-		);
+test( 'should minify the content output', async () => {
+	const output = await generateBundle(
+		'./fixtures/single-import/input.ts',
+		{ baseFileName: 'styles', minimize: true }
+	);
 
-		const expectedResult = 'body{color:"#000"}';
+	const expectedResult = 'body{color:"#000"}';
 
-		verifyDividedStyleSheet( output, 'editor-styles.min.css', expectedResult );
-		verifyDividedStyleSheet( output, 'content-styles.min.css', '' );
-	} );
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedResult );
+	verifyDividedStyleSheet( output, 'styles-content.css', '' );
 } );

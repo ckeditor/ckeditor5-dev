@@ -174,6 +174,9 @@ export async function build(
 			return bundle;
 		}
 
+		/**
+		 * Generate UMD bundle if the `browser` parameter is set to `true`.
+		 */
 		return generateUmdBuild( args, bundle );
 	} catch ( error: any ) {
 		let message: string;
