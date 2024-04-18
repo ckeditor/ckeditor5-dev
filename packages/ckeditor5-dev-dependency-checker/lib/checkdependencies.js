@@ -69,7 +69,7 @@ async function checkDependenciesInPackage( packagePath, options ) {
 			'**/*.ts': depCheck.parser.typescript,
 			'**/*.vue': depCheck.parser.vue
 		},
-		ignorePatterns: [ 'docs', 'build' ],
+		ignorePatterns: [ 'docs', 'build', 'dist' ],
 		ignoreMatches: [ 'eslint*', 'webpack*', 'husky', 'lint-staged' ]
 	};
 
