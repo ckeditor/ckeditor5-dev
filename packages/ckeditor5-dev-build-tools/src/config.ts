@@ -165,6 +165,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 				baseFileName,
 				minimize: minify
 			} ),
+
 			/**
 			 * Transpiles TypeScript to JavaScript.
 			 */
