@@ -79,9 +79,75 @@ test( 'TypeScript declarations', async () => {
 } );
 
 /**
+ * Browser
+ */
+test( 'Browser parameter set to `false`', async () => {
+	const { output } = await build( {
+		input: 'src/input.ts',
+		tsconfig: 'tsconfig.json',
+		browser: false
+	} );
+
+	expect( output.map( o => o.fileName ) ).toMatchObject( [
+		'index.js',
+		'index.css',
+		'editor-index.css',
+		'content-index.css'
+	] );
+} );
+
+test( 'Browser parameter set to `true`', async () => {
+	const { output } = await build( {
+		input: 'src/input.ts',
+		tsconfig: 'tsconfig.json',
+		browser: true,
+		outputName: 'EXAMPLE_OUTPUT_NAME'
+	} );
+
+	expect( output.map( o => o.fileName ) ).toMatchObject( [
+		'index.js',
+		'index.css',
+		'editor-index.css',
+		'content-index.css',
+		'index.umd.js'
+	] );
+} );
+
+/**
+ * Output Name
+ */
+test( 'Output name', async () => {
+	const { output } = await build( {
+		input: 'src/input.ts',
+		tsconfig: 'tsconfig.json',
+		browser: true,
+		outputName: 'EXAMPLE_OUTPUT_NAME'
+	} );
+
+	let code;
+
+	output.forEach( item => {
+		if ( item.type === 'chunk' && item.fileName === 'index.umd.js' ) {
+			code = item.code;
+		}
+	} );
+
+	if ( code ) {
+		expect( code ).toContain( 'EXAMPLE_OUTPUT_NAME' );
+	}
+
+	expect( output.map( o => o.fileName ) ).toMatchObject( [
+		'index.js',
+		'index.css',
+		'editor-index.css',
+		'content-index.css',
+		'index.umd.js'
+	] );
+} );
+
+/**
  * Banner
  */
-
 test( 'Banner', async () => {
 	const { output } = await build( {
 		input: 'src/input.js',

@@ -6,6 +6,7 @@
 import fs from 'fs';
 import util from 'util';
 import chalk from 'chalk';
+import upath from 'upath';
 import { rollup, type RollupOutput } from 'rollup';
 import { getRollupConfig } from './config.js';
 import { getCwdPath, camelizeObjectKeys, removeWhitespace } from './utils.js';
@@ -14,6 +15,7 @@ export interface BuildOptions {
 	input: string;
 	output: string;
 	tsconfig: string;
+	outputName: string;
 	banner: string;
 	external: Array<string>;
 	rewrite: Array<[string, string]>;
@@ -22,12 +24,14 @@ export interface BuildOptions {
 	sourceMap: boolean;
 	minify: boolean;
 	clean: boolean;
+	browser: boolean;
 }
 
 export const defaultOptions: BuildOptions = {
 	input: 'src/index.ts',
 	output: 'dist/index.js',
 	tsconfig: 'tsconfig.json',
+	outputName: '',
 	banner: '',
 	external: [],
 	rewrite: [],
@@ -35,7 +39,8 @@ export const defaultOptions: BuildOptions = {
 	translations: '',
 	sourceMap: false,
 	minify: false,
-	clean: false
+	clean: false,
+	browser: false
 };
 
 /**
@@ -53,7 +58,8 @@ function getCliArguments(): Partial<BuildOptions> {
 			'translations': { type: 'string' },
 			'source-map': { type: 'boolean' },
 			'minify': { type: 'boolean' },
-			'clean': { type: 'boolean' }
+			'clean': { type: 'boolean' },
+			'browser': { type: 'boolean' }
 		},
 
 		// Skip `node ckeditor5-build-package`.
@@ -64,6 +70,30 @@ function getCliArguments(): Partial<BuildOptions> {
 	} );
 
 	return camelizeObjectKeys( values );
+}
+
+/**
+ * Generates `UMD` build based on previous `ESM` build.
+ */
+async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Promise<RollupOutput> {
+	args.input = args.output;
+
+	const configUmd = await getRollupConfig( args );
+	const { plugins, ...configWithoutPlugins } = configUmd;
+	const umdBuild = await rollup( configWithoutPlugins );
+
+	const umdBundle = await umdBuild.write( {
+		format: 'umd',
+		file: upath.join( upath.dirname( args.output ), 'index.umd.js' ),
+		assetFileNames: '[name][extname]',
+		sourcemap: args.sourceMap,
+		name: args.outputName
+	} );
+
+	return { output: [
+		...bundle.output,
+		...umdBundle.output
+	] };
 }
 
 /**
@@ -130,12 +160,19 @@ export async function build(
 		/**
 		 * Write bundles to the filesystem.
 		 */
-		return await build.write( {
+		const bundle = await build.write( {
 			format: 'esm',
 			file: args.output,
 			assetFileNames: '[name][extname]',
-			sourcemap: args.sourceMap
+			sourcemap: args.sourceMap,
+			name: args.outputName
 		} );
+
+		if ( args.browser ) {
+			return generateUmdBuild( args, bundle );
+		}
+
+		return bundle;
 	} catch ( error: any ) {
 		let message: string;
 
