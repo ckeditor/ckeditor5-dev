@@ -101,7 +101,7 @@ test( 'Browser parameter set to `true`', async () => {
 		input: 'src/input.ts',
 		tsconfig: 'tsconfig.json',
 		browser: true,
-		outputName: 'EXAMPLE_OUTPUT_NAME'
+		name: 'EXAMPLE_OUTPUT_NAME'
 	} );
 
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
@@ -121,7 +121,7 @@ test( 'Output name', async () => {
 		input: 'src/input.ts',
 		tsconfig: 'tsconfig.json',
 		browser: true,
-		outputName: 'EXAMPLE_OUTPUT_NAME'
+		name: 'EXAMPLE_OUTPUT_NAME'
 	} );
 
 	let code;

@@ -15,7 +15,7 @@ export interface BuildOptions {
 	input: string;
 	output: string;
 	tsconfig: string;
-	outputName: string;
+	name: string;
 	banner: string;
 	external: Array<string>;
 	rewrite: Array<[string, string]>;
@@ -31,7 +31,7 @@ export const defaultOptions: BuildOptions = {
 	input: 'src/index.ts',
 	output: 'dist/index.js',
 	tsconfig: 'tsconfig.json',
-	outputName: '',
+	name: '',
 	banner: '',
 	external: [],
 	rewrite: [],
@@ -59,7 +59,8 @@ function getCliArguments(): Partial<BuildOptions> {
 			'source-map': { type: 'boolean' },
 			'minify': { type: 'boolean' },
 			'clean': { type: 'boolean' },
-			'browser': { type: 'boolean' }
+			'browser': { type: 'boolean' },
+			'name': { type: 'string' }
 		},
 
 		// Skip `node ckeditor5-build-package`.
@@ -78,22 +79,23 @@ function getCliArguments(): Partial<BuildOptions> {
 async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Promise<RollupOutput> {
 	args.input = args.output;
 
-	const configUmd = await getRollupConfig( args );
-	const { plugins, ...configWithoutPlugins } = configUmd;
-	const umdBuild = await rollup( configWithoutPlugins );
+	const { plugins, ...config } = await getRollupConfig( args );
+	const build = await rollup( config );
 
-	const umdBundle = await umdBuild.write( {
+	const umdBundle = await build.write( {
 		format: 'umd',
 		file: upath.join( upath.dirname( args.output ), 'index.umd.js' ),
 		assetFileNames: '[name][extname]',
 		sourcemap: args.sourceMap,
-		name: args.outputName
+		name: args.name
 	} );
 
-	return { output: [
-		...bundle.output,
-		...umdBundle.output
-	] };
+	return {
+		output: [
+			...bundle.output,
+			...umdBundle.output
+		]
+	};
 }
 
 /**
@@ -144,7 +146,7 @@ export async function build(
 		 * Remove old build directory.
 		 */
 		if ( args.clean ) {
-			fs.rmSync( getCwdPath( 'dist' ), { recursive: true, force: true } );
+			fs.rmSync( getCwdPath( 'dist' ), { recursive: true, force: true } ); // TODO
 		}
 
 		/**
@@ -165,14 +167,14 @@ export async function build(
 			file: args.output,
 			assetFileNames: '[name][extname]',
 			sourcemap: args.sourceMap,
-			name: args.outputName
+			name: args.name
 		} );
 
-		if ( args.browser ) {
-			return generateUmdBuild( args, bundle );
+		if ( !args.browser ) {
+			return bundle;
 		}
 
-		return bundle;
+		return generateUmdBuild( args, bundle );
 	} catch ( error: any ) {
 		let message: string;
 
