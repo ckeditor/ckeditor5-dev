@@ -146,7 +146,9 @@ export async function build(
 		 * Remove old build directory.
 		 */
 		if ( args.clean ) {
-			fs.rmSync( getCwdPath( 'dist' ), { recursive: true, force: true } ); // TODO
+			const { dir } = upath.parse( args.output );
+
+			fs.rmSync(dir, { recursive: true, force: true } );
 		}
 
 		/**

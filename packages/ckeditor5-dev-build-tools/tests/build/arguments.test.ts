@@ -197,6 +197,15 @@ test( '.clean', async () => {
 	expect( spyRmSync ).toHaveBeenCalled();
 } );
 
+test( '.clean removes directory based on .output', async () => {
+	await build( { output: 'custom/index.js', clean: true } );
+
+	expect( spyRmSync ).toHaveBeenCalledWith(
+		getCwdPath( '/custom' ),
+		{ force: true, recursive: true }
+	);
+} );
+
 test( '.banner', async () => {
 	await build( { banner: 'tests/build/fixtures/src/banner.js' } );
 
