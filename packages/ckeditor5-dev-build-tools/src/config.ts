@@ -50,7 +50,8 @@ export async function getRollupConfig( options: BuildOptions ) {
 		declarations,
 		translations,
 		sourceMap,
-		minify
+		minify,
+		browser
 	} = options;
 
 	/**
@@ -66,12 +67,10 @@ export async function getRollupConfig( options: BuildOptions ) {
 	 *
 	 * This mapping can be removed when old installation methods are deprecated.
 	 */
-	const autoRewrites = [
-		...( external.includes( 'ckeditor5' ) ? await getPackageDependencies( 'ckeditor5' ) : [] ),
-		...( external.includes( 'ckeditor5-premium-features' ) ? await getPackageDependencies( 'ckeditor5-premium-features' ) : [] )
-	];
+	const coreRewrites = external.includes( 'ckeditor5' ) ? await getPackageDependencies( 'ckeditor5' ) : [];
+	const commercialRewrites = external.includes( 'ckeditor5-premium-features' ) ? await getPackageDependencies( 'ckeditor5-premium-features' ) : [];
 
-	external.push( ...autoRewrites );
+	external.push( ...coreRewrites, ...commercialRewrites );
 
 	/**
 	 * Get the name of the output CSS file based on the name of the "output" file.
@@ -173,7 +172,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 				include: [ '**/*.[jt]s' ],
 				swc: {
 					jsc: {
-						target: 'es2022'
+						target: 'es2019'
 					},
 					module: {
 						type: 'es6'
@@ -203,12 +202,23 @@ export async function getRollupConfig( options: BuildOptions ) {
 			replaceImports( {
 				replace: [
 					/**
+					 * Rewrites provided in the config.
+					 */
+					...rewrite,
+
+					/**
 					 * Matches:
 					 * - ckeditor5/src/XXX (optionally with `.js` or `.ts` extension).
 					 * - ckeditor5-collaboration/src/XXX (optionally with `.js` or `.ts` extension).
 					 */
-					[ /ckeditor5\/src\/([a-z-]+)(?:[a-z-/.]+)?/, '@ckeditor/ckeditor5-$1/dist/index.js' ],
-					[ /ckeditor5-collaboration\/src\/([a-z-]+)(?:[a-z-/.]+)?/, 'ckeditor5-collaboration/dist/index.js' ],
+					[
+						/ckeditor5\/src\/([a-z-]+)(?:[a-z-/.]+)?/,
+						browser ? 'ckeditor5' : '@ckeditor/ckeditor5-$1/dist/index.js'
+					],
+					[
+						/ckeditor5-collaboration\/src\/([a-z-]+)(?:[a-z-/.]+)?/,
+						browser ? 'ckeditor5-premium-features' : 'ckeditor5-collaboration/dist/index.js'
+					],
 
 					/**
 					 * Rewrite "old" imports to imports used in new installation methods.
@@ -219,12 +229,15 @@ export async function getRollupConfig( options: BuildOptions ) {
 					 * [ '@ckeditor/ckeditor5-ai', 'ckeditor5-premium-features' ],
 					 * [ '@ckeditor/ckeditor5-case-change', 'ckeditor5-premium-features' ],
 					 */
-					...autoRewrites.map( pkg => [ pkg, `${ pkg }/dist/index.js` ] as [ string, string ] ),
+					...coreRewrites.map( pkg => [
+						pkg,
+						browser ? 'ckeditor5' : `${ pkg }/dist/index.js`
+					] as [ string, string ] ),
 
-					/**
-					 * Rewrites provided in the config.
-					 */
-					...rewrite
+					...commercialRewrites.map( pkg => [
+						pkg,
+						browser ? 'ckeditor5-premium-features' : `${ pkg }/dist/index.js`
+					] as [ string, string ] ),
 				]
 			} ),
 
