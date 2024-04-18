@@ -148,7 +148,7 @@ export async function build(
 		if ( args.clean ) {
 			const { dir } = upath.parse( args.output );
 
-			fs.rmSync(dir, { recursive: true, force: true } );
+			fs.rmSync( dir, { recursive: true, force: true } );
 		}
 
 		/**
