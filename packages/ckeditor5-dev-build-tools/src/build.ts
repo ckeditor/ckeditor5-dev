@@ -72,6 +72,30 @@ function getCliArguments(): Partial<BuildOptions> {
 }
 
 /**
+ * Generates `UMD` build based on previous `ESM` build.
+ */
+async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Promise<RollupOutput> {
+	args.input = args.output;
+
+	const configUmd = await getRollupConfig( args );
+	const { plugins, ...configWithoutPlugins } = configUmd;
+	const umdBuild = await rollup( configWithoutPlugins );
+
+	const umdBundle = await umdBuild.write( {
+		format: 'umd',
+		file: upath.join( upath.dirname( args.output ), 'index.umd.js' ),
+		assetFileNames: '[name][extname]',
+		sourcemap: args.sourceMap,
+		name: args.outputName
+	} );
+
+	return { output: [
+		...bundle.output,
+		...umdBundle.output
+	] };
+}
+
+/**
  * Merges user-provided options with the defaults and converts relative paths
  * to absolute paths. Paths to non-existent files are also removed.
  */
@@ -144,24 +168,7 @@ export async function build(
 		} );
 
 		if ( args.browser ) {
-			args.input = args.output;
-
-			const configUmd = await getRollupConfig( args );
-			const { plugins, ...configWithoutPlugins } = configUmd;
-			const umdBuild = await rollup( configWithoutPlugins );
-
-			const umdBundle = await umdBuild.write( {
-				format: 'umd',
-				file: upath.join( upath.dirname( args.output ), 'index.umd.js' ),
-				assetFileNames: '[name][extname]',
-				sourcemap: args.sourceMap,
-				name: args.outputName
-			} );
-
-			return { output: [
-				...bundle.output,
-				...umdBundle.output
-			] };
+			return generateUmdBuild( args, bundle );
 		}
 
 		return bundle;
