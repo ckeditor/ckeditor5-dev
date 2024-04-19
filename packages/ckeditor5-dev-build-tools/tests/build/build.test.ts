@@ -5,6 +5,8 @@
 
 import { test, expect, vi } from 'vitest';
 import type * as Rollup from 'rollup';
+import { readFileSync } from 'fs';
+import upath from 'upath';
 import { build } from '../../src/build.js';
 
 /**
@@ -316,4 +318,63 @@ test( 'Rollup error includes frame if provided', async () => {
 	const fn = () => build( { input: 'src/input.js' } );
 
 	expect( fn ).rejects.toThrow( /Error occured when processing the file(.*)FRAME/s );
+} );
+
+/**
+ * Mock real CKE5 packages and test the replace plugin.
+ */
+
+test( 'Bundle core (NPM)', async () => {
+	const inputFileContent = readFileSync( upath.join( process.cwd(), 'src', 'core.js' ), 'utf-8' );
+
+	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-adapter-ckfinder\'' );
+	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-core\'' );
+
+	const { output } = await build( {
+		input: 'src/core.js',
+		external: [
+			'ckeditor5'
+		]
+	} );
+
+	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-adapter-ckfinder/dist/index.js\'' );
+	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-core/dist/index.js\'' );
+} );
+
+test( 'Bundle commercial (NPM)', async () => {
+	const inputFileContent = readFileSync( upath.join( process.cwd(), 'src', 'commercial.js' ), 'utf-8' );
+
+	expect( inputFileContent ).toContain( 'export { icons } from \'ckeditor5-collaboration/src/index.js\'' );
+	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
+	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-case-change\'' );
+
+	const { output } = await build( {
+		input: 'src/commercial.js',
+		external: [
+			'ckeditor5',
+			'ckeditor5-premium-features'
+		]
+	} );
+
+	expect( output[ 0 ].code ).toContain( 'export { icons } from \'ckeditor5-collaboration/dist/index.js\'' );
+	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-ai/dist/index.js\'' );
+	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-case-change/dist/index.js\'' );
+} );
+
+test( 'Bundle commercial (CDN)', async () => {
+	const inputFileContent = readFileSync( upath.join( process.cwd(), 'src', 'commercial.js' ), 'utf-8' );
+
+	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
+	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-case-change\'' );
+
+	const { output } = await build( {
+		input: 'src/commercial.js',
+		external: [
+			'ckeditor5'
+		],
+		browser: true,
+		name: 'ckeditor5-premium-features'
+	} );
+
+	expect( output[ 0 ].code ).toContain( ' from \'ckeditor5\';' );
 } );
