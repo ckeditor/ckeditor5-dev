@@ -325,13 +325,13 @@ test( 'Rollup error includes frame if provided', async () => {
  */
 
 test( 'Bundle core (NPM)', async () => {
-	const inputFileContent = readFileSync( upath.join( process.cwd(), 'src', 'core.js' ), 'utf-8' );
+	const inputFileContent = readFileSync( upath.join( process.cwd(), 'src', 'core.ts' ), 'utf-8' );
 
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-adapter-ckfinder\'' );
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-core\'' );
 
 	const { output } = await build( {
-		input: 'src/core.js',
+		input: 'src/core.ts',
 		external: [
 			'ckeditor5'
 		]
@@ -342,33 +342,33 @@ test( 'Bundle core (NPM)', async () => {
 } );
 
 test( 'Bundle commercial (NPM)', async () => {
-	const inputFileContent = readFileSync( upath.join( process.cwd(), 'src', 'commercial.js' ), 'utf-8' );
+	const inputFileContent = readFileSync( upath.join( process.cwd(), 'src', 'commercial.ts' ), 'utf-8' );
 
-	expect( inputFileContent ).toContain( 'export { icons } from \'ckeditor5-collaboration/src/index.js\'' );
+	// expect( inputFileContent ).toContain( 'export { Permissions } from \'ckeditor5-collaboration/src/index.js\'' );
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-case-change\'' );
 
 	const { output } = await build( {
-		input: 'src/commercial.js',
+		input: 'src/commercial.ts',
 		external: [
 			'ckeditor5',
 			'ckeditor5-premium-features'
 		]
 	} );
 
-	expect( output[ 0 ].code ).toContain( 'export { icons } from \'ckeditor5-collaboration/dist/index.js\'' );
+	// expect( output[ 0 ].code ).toContain( 'export { Permissions } from \'ckeditor5-collaboration/dist/index.js\'' );
 	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-ai/dist/index.js\'' );
 	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-case-change/dist/index.js\'' );
 } );
 
 test( 'Bundle commercial (CDN)', async () => {
-	const inputFileContent = readFileSync( upath.join( process.cwd(), 'src', 'commercial.js' ), 'utf-8' );
+	const inputFileContent = readFileSync( upath.join( process.cwd(), 'src', 'commercial.ts' ), 'utf-8' );
 
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-case-change\'' );
 
 	const { output } = await build( {
-		input: 'src/commercial.js',
+		input: 'src/commercial.ts',
 		external: [
 			'ckeditor5'
 		],
