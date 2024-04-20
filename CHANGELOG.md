@@ -1,6 +1,42 @@
 Changelog
 =========
 
+## [39.7.0-alpha.4](https://github.com/ckeditor/ckeditor5-dev/compare/v39.7.0-alpha.3...v39.7.0-alpha.4) (2024-04-18)
+
+### Features
+
+* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Ability to set parameters `browser` and `name` for a build. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/671c2699239d975c0f1b5e214e761cc50534aedc))
+
+### Bug fixes
+
+* **[dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker)**: Ignore the `dist/` directory in the dependency checker. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/41c0828a034ef79bcf0167326803b1991268720c))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/39.7.0-alpha.4): v39.7.0-alpha.3 => v39.7.0-alpha.4
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/39.7.0-alpha.4): v39.7.0-alpha.3 => v39.7.0-alpha.4
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/39.7.0-alpha.4): v39.7.0-alpha.3 => v39.7.0-alpha.4
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/39.7.0-alpha.4): v39.7.0-alpha.3 => v39.7.0-alpha.4
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/39.7.0-alpha.4): v39.7.0-alpha.3 => v39.7.0-alpha.4
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/39.7.0-alpha.4): v39.7.0-alpha.3 => v39.7.0-alpha.4
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/39.7.0-alpha.4): v39.7.0-alpha.3 => v39.7.0-alpha.4
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/39.7.0-alpha.4): v39.7.0-alpha.3 => v39.7.0-alpha.4
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/39.7.0-alpha.4): v39.7.0-alpha.3 => v39.7.0-alpha.4
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/39.7.0-alpha.4): v39.7.0-alpha.3 => v39.7.0-alpha.4
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/39.7.0-alpha.4): v39.7.0-alpha.3 => v39.7.0-alpha.4
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/39.7.0-alpha.4): v39.7.0-alpha.3 => v39.7.0-alpha.4
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/39.7.0-alpha.4): v39.7.0-alpha.3 => v39.7.0-alpha.4
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/39.7.0-alpha.4): v39.7.0-alpha.3 => v39.7.0-alpha.4
+</details>
+
+
 ## [39.7.0-alpha.3](https://github.com/ckeditor/ckeditor5-dev/compare/v39.6.3...v39.7.0-alpha.3) (2024-04-15)
 
 ### Features
@@ -137,37 +173,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/39.7.0-alpha.0): v39.6.2 => v39.7.0-alpha.0
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/39.7.0-alpha.0): v39.6.2 => v39.7.0-alpha.0
 * [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/39.7.0-alpha.0): v39.6.2 => v39.7.0-alpha.0
-</details>
-
-
-## [39.6.3](https://github.com/ckeditor/ckeditor5-dev/compare/v39.6.2...v39.6.3) (2024-03-14)
-
-### Bug fixes
-
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Fixed an invalid extension of created JavaScript files when using the release tools inside an ESM project. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/c1250ea65e7a4fe04ea0f438a1168f0ae4c98ae8))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/39.6.3): v39.6.2 => v39.6.3
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/39.6.3): v39.6.2 => v39.6.3
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/39.6.3): v39.6.2 => v39.6.3
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/39.6.3): v39.6.2 => v39.6.3
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/39.6.3): v39.6.2 => v39.6.3
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/39.6.3): v39.6.2 => v39.6.3
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/39.6.3): v39.6.2 => v39.6.3
-* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/39.6.3): v39.6.2 => v39.6.3
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/39.6.3): v39.6.2 => v39.6.3
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/39.6.3): v39.6.2 => v39.6.3
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/39.6.3): v39.6.2 => v39.6.3
-* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/39.6.3): v39.6.2 => v39.6.3
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/39.6.3): v39.6.2 => v39.6.3
 </details>
 
 ---
