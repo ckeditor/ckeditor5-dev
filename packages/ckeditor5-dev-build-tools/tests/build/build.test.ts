@@ -3,35 +3,42 @@
  * For licensing, see LICENSE.md.
  */
 
-import { test, expect, vi } from 'vitest';
-import type * as Rollup from 'rollup';
+import { test, expect, vi, beforeEach } from 'vitest';
+import upath from 'upath';
+import * as Rollup from 'rollup';
 import { build } from '../../src/build.js';
 
 /**
- * Mock `process.cwd()` to point to the 'fixtures' directory.
+ * Mock `rollup` to replace `rollup.write` with `rollup.generate`.
  */
-vi
-	.spyOn( process, 'cwd' )
-	.mockImplementation( () => import.meta.dirname + '/fixtures' );
-
-/**
- * Mock `rollup.write` to run `rollup.generate` instead. This
- * will prevent Rollup from writing to filesystem.
- */
-const mocks = vi.hoisted( () => ( {
-	rollup: vi.fn().mockImplementation( async ( rollupOptions: Rollup.RollupOptions ) => {
+vi.mock( 'rollup', () => ( {
+	async rollup( rollupOptions: Rollup.RollupOptions ) {
 		const { rollup } = await vi.importActual<typeof Rollup>( 'rollup' );
 		const build = await rollup( rollupOptions );
 
 		return {
 			write: build.generate
 		};
-	} )
+	}
 } ) );
 
-vi.mock( 'rollup', () => ( {
-	rollup: mocks.rollup
-} ) );
+/**
+ * Mocks Rollup.
+ */
+function setRollupMock( mock: any ) {
+	vi.spyOn( Rollup, 'rollup' ).mockImplementationOnce( mock );
+}
+
+/**
+ * Mocks `process.cwd` to return the fixtures directory.
+ */
+function setProcessCwdMock() {
+	vi.spyOn( process, 'cwd' ).mockImplementation( () => upath.join( import.meta.dirname, 'fixtures' ) );
+}
+
+beforeEach( () => {
+	setProcessCwdMock();
+});
 
 /**
  * Input
@@ -270,7 +277,7 @@ test( 'Overriding', async () => {
  * Error handling
  */
 test( 'Throws error with nicely formatter message when build fails', async () => {
-	mocks.rollup.mockImplementationOnce( () => ( {
+	setRollupMock( () => ( {
 		write() {
 			throw new Error( 'REASON' );
 		}
@@ -282,7 +289,7 @@ test( 'Throws error with nicely formatter message when build fails', async () =>
 } );
 
 test( 'Throws Rollup error with nicely formatter message when build fails', async () => {
-	mocks.rollup.mockImplementationOnce( () => ( {
+	setRollupMock( () => ( {
 		write() {
 			const err = new Error() as any;
 
@@ -300,7 +307,7 @@ test( 'Throws Rollup error with nicely formatter message when build fails', asyn
 } );
 
 test( 'Rollup error includes frame if provided', async () => {
-	mocks.rollup.mockImplementationOnce( () => ( {
+	setRollupMock( () => ( {
 		write() {
 			const err = new Error() as any;
 

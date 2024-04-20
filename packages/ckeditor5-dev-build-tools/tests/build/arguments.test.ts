@@ -14,24 +14,44 @@ import { build } from '../../src/build.js';
 vi.mock( 'rollup', () => ( {
 	rollup() {
 		return {
-			write: () => {}
+			write() {}
 		};
 	}
 } ) );
 
 /**
- * Mock function for generating rollup configuration.
- */
-const spy = vi
-	.spyOn( config, 'getRollupConfig' )
-	.mockImplementation( (): any => {} );
-
-/**
  * Mock `fs.rmSync`, so it doesn't try to delete anything.
  */
-const spyRmSync = vi
-	.spyOn( fs, 'rmSync' )
-	.mockImplementation( () => {} );
+vi.mock( 'fs', () => ({
+	default: {
+		rmSync() { }
+	}
+}) );
+
+/**
+ * Mock function for generating rollup configuration.
+ */
+vi.mock( '../../src/config.ts', () => ({
+	getRollupConfig() {}
+}) );
+
+/**
+ * Returns spy for the `getRollupConfig` function.
+ */
+function getConfigMock() {
+	return vi
+		.spyOn( config, 'getRollupConfig' )
+		.mockImplementationOnce( (): any => { } );
+}
+
+/**
+ * Returns spy for the `fs.rmSync` function.
+ */
+function getRmMock() {
+	return vi
+		.spyOn( fs, 'rmSync' )
+		.mockImplementationOnce( () => { } );
+}
 
 /**
  * Mocks arguments passed via the CLI.
@@ -51,6 +71,8 @@ function getCwdPath( fileName: string ) {
 }
 
 test( 'paths are normalized', async () => {
+	const spy = getConfigMock();
+
 	await build();
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( {
@@ -64,6 +86,8 @@ test( 'paths are normalized', async () => {
  */
 
 test( '--input', async () => {
+	const spy = getConfigMock();
+
 	mockCliArgs( '--input=main.js' );
 	await build();
 
@@ -71,6 +95,8 @@ test( '--input', async () => {
 } );
 
 test( '--output', async () => {
+	const spy = getConfigMock();
+
 	mockCliArgs( '--output=dist/test.js' );
 	await build();
 
@@ -78,6 +104,8 @@ test( '--output', async () => {
 } );
 
 test( '--tsconfig', async () => {
+	const spy = getConfigMock();
+
 	mockCliArgs( '--tsconfig=tsconf.json' );
 	await build();
 
@@ -85,6 +113,8 @@ test( '--tsconfig', async () => {
 } );
 
 test( '--external', async () => {
+	const spy = getConfigMock();
+
 	mockCliArgs( '--external=foo', '--external=bar' );
 	await build();
 
@@ -92,6 +122,8 @@ test( '--external', async () => {
 } );
 
 test( '--declarations', async () => {
+	const spy = getConfigMock();
+
 	mockCliArgs( '--declarations' );
 	await build();
 
@@ -99,6 +131,8 @@ test( '--declarations', async () => {
 } );
 
 test( '--translations', async () => {
+	const spy = getConfigMock();
+
 	mockCliArgs( '--translations=translations/**/*.po' );
 	await build();
 
@@ -106,6 +140,8 @@ test( '--translations', async () => {
 } );
 
 test( '--source-map', async () => {
+	const spy = getConfigMock();
+
 	mockCliArgs( '--source-map' );
 	await build();
 
@@ -113,6 +149,8 @@ test( '--source-map', async () => {
 } );
 
 test( '--minify', async () => {
+	const spy = getConfigMock();
+
 	mockCliArgs( '--minify' );
 	await build();
 
@@ -120,13 +158,17 @@ test( '--minify', async () => {
 } );
 
 test( '--clean', async () => {
+	const spy = getRmMock();
+
 	mockCliArgs( '--clean' );
 	await build();
 
-	expect( spyRmSync ).toHaveBeenCalled();
+	expect( spy ).toHaveBeenCalled();
 } );
 
 test( '--banner', async () => {
+	const spy = getConfigMock();
+
 	mockCliArgs( '--banner=tests/build/fixtures/src/banner.js' );
 	await build();
 
@@ -138,75 +180,99 @@ test( '--banner', async () => {
  */
 
 test( '.input', async () => {
+	const spy = getConfigMock();
+
 	await build( { input: 'main.js' } );
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { input: getCwdPath( '/main.js' ) } ) );
 } );
 
 test( '.output', async () => {
+	const spy = getConfigMock();
+
 	await build( { input: 'dist/test.js' } );
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { input: getCwdPath( '/dist/test.js' ) } ) );
 } );
 
 test( '.tsconfig', async () => {
+	const spy = getConfigMock();
+
 	await build( { tsconfig: 'tsconf.json' } );
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { tsconfig: getCwdPath( '/tsconf.json' ) } ) );
 } );
 
 test( '.external', async () => {
+	const spy = getConfigMock();
+
 	await build( { external: [ 'foo', 'bar' ] } );
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { external: [ 'foo', 'bar' ] } ) );
 } );
 
 test( '.rewrite', async () => {
+	const spy = getConfigMock();
+
 	await build( { rewrite: [ [ 'foo', 'bar' ] ] } );
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { rewrite: [ [ 'foo', 'bar' ] ] } ) );
 } );
 
 test( '.declarations', async () => {
+	const spy = getConfigMock();
+
 	await build( { declarations: true } );
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { declarations: true } ) );
 } );
 
 test( '.translations', async () => {
+	const spy = getConfigMock();
+
 	await build( { translations: 'translations/**/*.po' } );
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { translations: getCwdPath( '/translations/**/*.po' ) } ) );
 } );
 
 test( '.sourceMap', async () => {
+	const spy = getConfigMock();
+
 	await build( { sourceMap: true } );
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { sourceMap: true } ) );
 } );
 
 test( '.minify', async () => {
+	const spy = getConfigMock();
+
 	await build( { minify: true } );
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { minify: true } ) );
 } );
 
 test( '.clean', async () => {
+	const spy = getRmMock();
+
 	await build( { clean: true } );
 
-	expect( spyRmSync ).toHaveBeenCalled();
+	expect( spy ).toHaveBeenCalled();
 } );
 
 test( '.clean removes directory based on .output', async () => {
+	const spy = getRmMock();
+
 	await build( { output: 'custom/index.js', clean: true } );
 
-	expect( spyRmSync ).toHaveBeenCalledWith(
+	expect( spy ).toHaveBeenCalledWith(
 		getCwdPath( '/custom' ),
 		{ force: true, recursive: true }
 	);
 } );
 
 test( '.banner', async () => {
+	const spy = getConfigMock();
+
 	await build( { banner: 'tests/build/fixtures/src/banner.js' } );
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { banner: '/*! TEST BANNER */' } ) );
