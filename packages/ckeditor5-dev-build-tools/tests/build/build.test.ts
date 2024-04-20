@@ -76,6 +76,8 @@ test( 'TypeScript declarations', async () => {
 		'index.css',
 		'index-editor.css',
 		'index-content.css',
+		'types/commercial.d.ts',
+		'types/core.d.ts',
 		'types/input.d.ts'
 	] );
 } );
