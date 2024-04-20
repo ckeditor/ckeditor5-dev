@@ -4,6 +4,7 @@
  */
 
 import { test, expect, vi } from 'vitest';
+import * as utils from '../../src/utils.js';
 import { getRollupConfig } from '../../src/config.js';
 
 type Options = Parameters<typeof getRollupConfig>[0];
@@ -19,8 +20,22 @@ const defaults: Options = {
 	translations: '',
 	sourceMap: false,
 	minify: false,
-	clean: false
+	clean: false,
+	browser: false,
+	name: ''
 };
+
+function mockUseRequire( path: string, cb: () => any ) {
+	vi
+		.spyOn( utils, 'useRequire' )
+		.mockImplementation( ( url: string ) => {
+			if ( url === path ) {
+				return cb();
+			}
+
+			return utils.useRequire( url );
+		} );
+}
 
 function getConfig( config: Partial<Options> = {} ) {
 	return getRollupConfig( Object.assign( {}, defaults, config ) );
@@ -84,9 +99,10 @@ test( '--external automatically adds packages that make up the "ckeditor5-premiu
 } );
 
 test( '--external doesnt fail when "ckeditor5-premium-features" is not installed', async () => {
-	vi.doMock( 'ckeditor5-premium-features/package.json', () => {
-		throw new Error( 'Module doesn\'t exist' );
-	} );
+	mockUseRequire(
+		utils.resolveUserDependency( 'ckeditor5-premium-features/package.json' ),
+		() => { throw new Error( 'Module doesn\'t exist' ); }
+	);
 
 	const config = await getConfig( {
 		external: [ 'ckeditor5-premium-features' ]
@@ -98,9 +114,10 @@ test( '--external doesnt fail when "ckeditor5-premium-features" is not installed
 } );
 
 test( '--external doesnt fail when "ckeditor5-premium-features" doesnt have any dependencies', async () => {
-	vi.doMock( 'ckeditor5-premium-features/package.json', () => ( {
-		default: JSON.stringify( { name: 'mocked' } )
-	} ) );
+	mockUseRequire(
+		utils.resolveUserDependency( 'ckeditor5-premium-features/package.json' ),
+		() => ( { name: 'mocked' } )
+	);
 
 	const config = await getConfig( {
 		external: [ 'ckeditor5-premium-features' ]

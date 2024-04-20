@@ -49,7 +49,7 @@ export function addBanner( pluginOptions: RollupBannerOptions ): Plugin {
 			 * the old source map must be removed from the bundle,
 			 * and the new source map with the same name must be added.
 			 *
-			 * https://github.com/rollup/rollup/issues/4665
+			 * See: https://github.com/rollup/rollup/issues/4665.
 			 */
 			const updateSourceMap = async ( fileName: string, magic: MagicString ): Promise<void> => {
 				if ( !outputOptions.sourcemap ) {

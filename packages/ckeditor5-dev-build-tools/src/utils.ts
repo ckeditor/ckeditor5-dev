@@ -3,8 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
+import { createRequire } from 'module';
 import path from 'upath';
 import type { CamelCase, CamelCasedProperties } from 'type-fest';
+
+const require = createRequire( import.meta.url );
 
 /**
  * Returns path relative to the current working directory.
@@ -36,4 +39,22 @@ export function camelizeObjectKeys<T extends Record<string, any>>( obj: T ): Cam
  */
 export function removeWhitespace( text: string ): string {
 	return text.replaceAll( /\n\s+/gm, '\n' );
+}
+
+/**
+ * Returns the path to the provided dependency relative to the current working directory. This is needed
+ * to ensure that the dependency of this package itself (which may be in a different version) is not used.
+ */
+export function resolveUserDependency( dependencyName: string ): string {
+	return require.resolve(
+		dependencyName,
+		{ paths: [ process.cwd() ] }
+	);
+}
+
+/**
+ * Uses ESM-compatible `require` function to load a module.
+ */
+export function useRequire( mod: string ): any {
+	return require( mod );
 }
