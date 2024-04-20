@@ -1,11 +1,11 @@
 {
   "name": "@ckeditor/ckeditor5-dev-utils",
-  "version": "39.7.0-alpha.3",
+  "version": "39.6.3",
   "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-translations": "^39.7.0-alpha.3",
+    "@ckeditor/ckeditor5-dev-translations": "^39.6.3",
     "chalk": "^3.0.0",
     "cli-cursor": "^3.1.0",
     "cli-spinners": "^2.6.1",
