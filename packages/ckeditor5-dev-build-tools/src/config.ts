@@ -277,7 +277,7 @@ function getOptionalPlugin<T extends InputPluginOption>( condition: unknown, plu
  */
 async function getPackageDependencies( packageName: string ): Promise<Array<string>> {
 	try {
-		const pkg = useRequire<PackageJson>(
+		const pkg: PackageJson = useRequire(
 			resolveUserDependency( `${ packageName }/package.json` )
 		);
 

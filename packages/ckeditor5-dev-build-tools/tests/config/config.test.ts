@@ -34,7 +34,7 @@ function mockUseRequire( path: string, cb: () => any ) {
 			}
 
 			return utils.useRequire( url );
-		} )
+		} );
 }
 
 function getConfig( config: Partial<Options> = {} ) {

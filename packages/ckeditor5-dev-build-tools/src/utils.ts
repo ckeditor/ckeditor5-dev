@@ -55,6 +55,6 @@ export function resolveUserDependency( dependencyName: string ): string {
 /**
  * Uses ESM-compatible `require` function to load a module.
  */
-export function useRequire<T extends any>( mod: string ): T {
+export function useRequire( mod: string ): any {
 	return require( mod );
 }

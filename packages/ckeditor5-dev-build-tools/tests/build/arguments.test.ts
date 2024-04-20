@@ -23,18 +23,18 @@ vi.mock( 'rollup', () => ( {
 /**
  * Mock `fs.rmSync`, so it doesn't try to delete anything.
  */
-vi.mock( 'fs', () => ({
+vi.mock( 'fs', () => ( {
 	default: {
 		rmSync() { }
 	}
-}) );
+} ) );
 
 /**
  * Mock function for generating rollup configuration.
  */
-vi.mock( '../../src/config.ts', () => ({
+vi.mock( '../../src/config.ts', () => ( {
 	getRollupConfig() {}
-}) );
+} ) );
 
 /**
  * Returns spy for the `getRollupConfig` function.

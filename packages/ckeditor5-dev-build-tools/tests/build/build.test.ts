@@ -36,9 +36,10 @@ function setProcessCwdMock() {
 	vi.spyOn( process, 'cwd' ).mockImplementation( () => upath.join( import.meta.dirname, 'fixtures' ) );
 }
 
+// eslint-disable-next-line mocha/no-top-level-hooks
 beforeEach( () => {
 	setProcessCwdMock();
-});
+} );
 
 /**
  * Input
