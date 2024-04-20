@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { join } from 'path';
+import upath from 'upath';
 import { test } from 'vitest';
 import { rollup, type RollupOutput } from 'rollup';
 import { verifyChunk } from '../../_utils/utils.js';
@@ -27,7 +27,7 @@ const ENGLISH_TRANSLATIONS_FROM_ROOT = 'export default {"en":{"dictionary":{"Hel
  */
 async function generateBundle( options?: RollupTranslationsOptions ): Promise<RollupOutput['output']> {
 	const bundle = await rollup( {
-		input: join( import.meta.dirname, './fixtures/input.js' ),
+		input: upath.join( import.meta.dirname, '/fixtures/input.js' ),
 		plugins: [
 			translations( options )
 		]
@@ -57,7 +57,7 @@ test( 'default options', async () => {
  */
 test( 'source', async () => {
 	const output = await generateBundle( {
-		source: join( import.meta.dirname, './fixtures/*.po' )
+		source: upath.join( import.meta.dirname, '/fixtures/*.po' )
 	} );
 
 	verifyChunk( output, 'translations/pl.js', POLISH_TRANSLATIONS_FROM_ROOT );

@@ -4,6 +4,7 @@
  */
 
 import { test, expect, vi } from 'vitest';
+import upath from 'upath';
 import fs from 'fs';
 import * as config from '../../src/config.js';
 import { build } from '../../src/build.js';
@@ -67,7 +68,7 @@ function mockCliArgs( ...args: Array<string> ) {
  * Returns an absolute path to the file.
  */
 function getCwdPath( fileName: string ) {
-	return process.cwd() + fileName;
+	return upath.join( process.cwd(), fileName );
 }
 
 test( 'paths are normalized', async () => {
@@ -76,8 +77,8 @@ test( 'paths are normalized', async () => {
 	await build();
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( {
-		input: process.cwd() + '/src/index.ts',
-		tsconfig: process.cwd() + '/tsconfig.json'
+		input: upath.join( process.cwd(), '/src/index.ts' ),
+		tsconfig: upath.join( process.cwd(), '/tsconfig.json' )
 	} ) );
 } );
 
