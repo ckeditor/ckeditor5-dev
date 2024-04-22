@@ -387,3 +387,22 @@ test( 'Bundle commercial (CDN)', async () => {
 
 	expect( output[ 0 ].code ).toContain( ' from \'ckeditor5\';' );
 } );
+
+test( 'Bundle (CDN) - for integrators relaying on `ckeditor5` and `ckeditor5-premium-features`', async () => {
+	const inputFileContent = readFileSync( upath.join( process.cwd(), 'src', 'commercial.ts' ), 'utf-8' );
+
+	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
+	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-case-change\'' );
+
+	const { output } = await build( {
+		input: 'src/commercial.ts',
+		external: [
+			'ckeditor5',
+			'ckeditor5-premium-features'
+		],
+		browser: true,
+		name: 'ckeditor5-premium-features'
+	} );
+
+	expect( output[ 0 ].code ).toContain( ' from \'ckeditor5-premium-features\';' );
+} );

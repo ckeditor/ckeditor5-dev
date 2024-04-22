@@ -239,7 +239,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 
 					...commercialRewrites.map( pkg => [
 						pkg,
-						`${ pkg }/dist/index.js`
+						browser ? 'ckeditor5-premium-features' : `${ pkg }/dist/index.js`
 					] as [ string, string ] )
 				]
 			} ),
