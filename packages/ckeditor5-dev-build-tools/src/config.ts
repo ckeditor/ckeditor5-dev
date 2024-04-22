@@ -275,7 +275,7 @@ function getOptionalPlugin<T extends InputPluginOption>( condition: unknown, plu
 /**
  * Returns a list of keys in `package.json` file of a given dependency.
  */
-async function getPackageDependencies( packageName: string ): Promise<Array<string>> {
+function getPackageDependencies( packageName: string ): Array<string> {
 	try {
 		const pkg: PackageJson = useRequire(
 			resolveUserDependency( `${ packageName }/package.json` )
@@ -284,7 +284,7 @@ async function getPackageDependencies( packageName: string ): Promise<Array<stri
 		return Object.keys( pkg.dependencies || {} );
 	} catch {
 		// Dependency is not installed, so return an empty array.
-		return Promise.resolve( [] );
+		return [];
 	}
 }
 

@@ -25,7 +25,11 @@ const defaults: Options = {
 	name: ''
 };
 
-function mockUseRequire( path: string, cb: () => any ) {
+function mockUseRequire( path: string, cb: () => any ): void {
+	vi
+		.spyOn( utils, 'resolveUserDependency' )
+		.mockImplementation( name => name );
+
 	vi
 		.spyOn( utils, 'useRequire' )
 		.mockImplementation( ( url: string ) => {
@@ -77,6 +81,17 @@ test( '--external', async () => {
 } );
 
 test( '--external automatically adds packages that make up the "ckeditor5"', async () => {
+	mockUseRequire(
+		'ckeditor5/package.json',
+		() => ( {
+			name: 'ckeditor5',
+			dependencies: {
+				'@ckeditor/ckeditor5-core': '*',
+				'@ckeditor/ckeditor5-code-block': '*'
+			}
+		} )
+	);
+
 	const config = await getConfig( {
 		external: [ 'ckeditor5' ]
 	} );
@@ -88,6 +103,18 @@ test( '--external automatically adds packages that make up the "ckeditor5"', asy
 } );
 
 test( '--external automatically adds packages that make up the "ckeditor5-premium-features"', async () => {
+	mockUseRequire(
+		'ckeditor5-premium-features/package.json',
+		() => ( {
+			name: 'ckeditor5',
+			dependencies: {
+				'ckeditor5-collaboration': '*',
+				'@ckeditor/ckeditor5-case-change': '*',
+				'@ckeditor/ckeditor5-real-time-collaboration': '*'
+			}
+		} )
+	);
+
 	const config = await getConfig( {
 		external: [ 'ckeditor5-premium-features' ]
 	} );
@@ -100,7 +127,7 @@ test( '--external automatically adds packages that make up the "ckeditor5-premiu
 
 test( '--external doesnt fail when "ckeditor5-premium-features" is not installed', async () => {
 	mockUseRequire(
-		utils.resolveUserDependency( 'ckeditor5-premium-features/package.json' ),
+		'ckeditor5-premium-features/package.json',
 		() => { throw new Error( 'Module doesn\'t exist' ); }
 	);
 
@@ -115,7 +142,7 @@ test( '--external doesnt fail when "ckeditor5-premium-features" is not installed
 
 test( '--external doesnt fail when "ckeditor5-premium-features" doesnt have any dependencies', async () => {
 	mockUseRequire(
-		utils.resolveUserDependency( 'ckeditor5-premium-features/package.json' ),
+		'ckeditor5-premium-features/package.json',
 		() => ( { name: 'mocked' } )
 	);
 
