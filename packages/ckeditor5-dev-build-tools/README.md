@@ -41,6 +41,7 @@ await build( {
 #### `input` / `--input=[path]`
 
 **Type:** `string`
+
 **Default value:** `src/index.ts`
 
 The path to the input file.
@@ -48,6 +49,7 @@ The path to the input file.
 #### `output` / `--output=[path]`
 
 **Type:** `string`
+
 **Default value:** `dist/index.js`
 
 The path to the output file. All other assets like CSS files, translations, source maps, etc. will be saved in the same directory. When used with the `clean` options, this path will be used to determine the directory to delete.
@@ -55,6 +57,7 @@ The path to the output file. All other assets like CSS files, translations, sour
 #### `tsconfig` / `--tsconfig=[path]`
 
 **Type:** `string`
+
 **Default value:** `tsconfig.json`
 
 The path to the TypeScript configuration file. This option can be ignored if the project does not use TypeScript.
@@ -62,6 +65,7 @@ The path to the TypeScript configuration file. This option can be ignored if the
 #### `banner` / `--banner=[path]`
 
 **Type:** `string`
+
 **Default value:** `''`
 
 The path to the banner file. This file must export a variable named `banner`, which is a string that is added to the beginning of the `.js`, `.css`, and `.d.ts` files. The banner content must not violate JavaScript or CSS syntax.
@@ -79,6 +83,7 @@ export const banner =
 #### `translations` / `--translations=[path]`
 
 **Type:** `string`
+
 **Default value:** `''`
 
 Glob-compliant path to the translation files. This option can be ignored if the plugin doesn't provide translations.
@@ -88,6 +93,7 @@ Glob-compliant path to the translation files. This option can be ignored if the 
 #### `declarations` / `--declarations`
 
 **Type:** `boolean`
+
 **Default value:** `false`
 
 Whether to generate TypeScript declaration files.
@@ -95,6 +101,7 @@ Whether to generate TypeScript declaration files.
 #### `sourceMap` / `--source-map`
 
 **Type:** `boolean`
+
 **Default value:** `false`
 
 Whether to generate a source map.
@@ -102,6 +109,7 @@ Whether to generate a source map.
 #### `minify` / `--minify`
 
 **Type:** `boolean`
+
 **Default value:** `false`
 
 Whether to minify the output.
@@ -109,6 +117,7 @@ Whether to minify the output.
 #### `clean` / `--clean`
 
 **Type:** `boolean`
+
 **Default value:** `false`
 
 Whether to clean the output directory before building. The directory to clean is based on the `output` option.
@@ -116,6 +125,7 @@ Whether to clean the output directory before building. The directory to clean is
 #### `browser` / `--browser`
 
 **Type:** `boolean`
+
 **Default value:** `false`
 
 Whether to build the CKEditor5 plugin for the browser. This option will cause the tool to output an ESM and UMD bundles that can be used in the browser. Additionally, some of the imports in the output files will be slightly different compared to the Node.js build.
@@ -125,6 +135,7 @@ If this option is enabled, the `name` option must be specified.
 #### `name` / `--name=[name]`
 
 **Type:** `string`
+
 **Default value:** `''`
 
 The name of the UMD bundle. This name will be used as the global variable name when the bundle is loaded in the browser.
@@ -134,6 +145,7 @@ This option is required if the `browser' option is enabled.
 #### `external` / `--external=[path]`
 
 **Type:** `string[]` | `string`
+
 **Default value:** `[]`
 
 A list of external dependencies that should not be bundled.
@@ -151,6 +163,7 @@ When using the JavaScript API, the option must be an array.
 #### `rewrite`
 
 **Type:** `string[]`
+
 **Default value:** `[]`
 
 A list of imports to rewrite in the output file. This option can be used if one of the dependencies provided in `external` has a separate build for the new install methods that should be used instead of the one used in the source code.
