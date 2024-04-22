@@ -3,9 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-import { test, expect, vi } from 'vitest';
-import * as utils from '../../src/utils.js';
+import { test, expect } from 'vitest';
 import { getRollupConfig } from '../../src/config.js';
+import { mockGetUserDependency } from '../_utils/utils.js';
 
 type Options = Parameters<typeof getRollupConfig>[0];
 
@@ -24,22 +24,6 @@ const defaults: Options = {
 	browser: false,
 	name: ''
 };
-
-function mockUseRequire( path: string, cb: () => any ): void {
-	vi
-		.spyOn( utils, 'resolveUserDependency' )
-		.mockImplementation( name => name );
-
-	vi
-		.spyOn( utils, 'useRequire' )
-		.mockImplementation( ( url: string ) => {
-			if ( url === path ) {
-				return cb();
-			}
-
-			return utils.useRequire( url );
-		} );
-}
 
 function getConfig( config: Partial<Options> = {} ) {
 	return getRollupConfig( Object.assign( {}, defaults, config ) );
@@ -81,7 +65,7 @@ test( '--external', async () => {
 } );
 
 test( '--external automatically adds packages that make up the "ckeditor5"', async () => {
-	mockUseRequire(
+	await mockGetUserDependency(
 		'ckeditor5/package.json',
 		() => ( {
 			name: 'ckeditor5',
@@ -103,7 +87,7 @@ test( '--external automatically adds packages that make up the "ckeditor5"', asy
 } );
 
 test( '--external automatically adds packages that make up the "ckeditor5-premium-features"', async () => {
-	mockUseRequire(
+	await mockGetUserDependency(
 		'ckeditor5-premium-features/package.json',
 		() => ( {
 			name: 'ckeditor5',
@@ -123,36 +107,6 @@ test( '--external automatically adds packages that make up the "ckeditor5-premiu
 	expect( config.external( 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( true );
 	expect( config.external( '@ckeditor/ckeditor5-case-change' ) ).toBe( true );
 	expect( config.external( '@ckeditor/ckeditor5-real-time-collaboration/theme/usermarkers.css' ) ).toBe( false );
-} );
-
-test( '--external doesnt fail when "ckeditor5-premium-features" is not installed', async () => {
-	mockUseRequire(
-		'ckeditor5-premium-features/package.json',
-		() => { throw new Error( 'Module doesn\'t exist' ); }
-	);
-
-	const config = await getConfig( {
-		external: [ 'ckeditor5-premium-features' ]
-	} );
-
-	expect( config.external( 'ckeditor5-premium-features' ) ).toBe( true );
-	expect( config.external( 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( false );
-	expect( config.external( '@ckeditor/ckeditor5-case-change' ) ).toBe( false );
-} );
-
-test( '--external doesnt fail when "ckeditor5-premium-features" doesnt have any dependencies', async () => {
-	mockUseRequire(
-		'ckeditor5-premium-features/package.json',
-		() => ( { name: 'mocked' } )
-	);
-
-	const config = await getConfig( {
-		external: [ 'ckeditor5-premium-features' ]
-	} );
-
-	expect( config.external( 'ckeditor5-premium-features' ) ).toBe( true );
-	expect( config.external( 'ckeditor5-collaboration/src/collaboration-core.js' ) ).toBe( false );
-	expect( config.external( '@ckeditor/ckeditor5-case-change' ) ).toBe( false );
 } );
 
 test( '--translations', async () => {

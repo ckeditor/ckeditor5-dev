@@ -3,9 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-import { expect } from 'vitest';
+import { expect, vi } from 'vitest';
 import type { RollupOutput, OutputChunk, OutputAsset } from 'rollup';
-import { removeWhitespace } from '../../src/utils';
+import * as utils from '../../src/utils';
 
 /**
  * Helper function for validating Rollup asset.
@@ -52,5 +52,22 @@ export function verifyDividedStyleSheet(
 
 	const source = ( styles as OutputAsset )!.source as string;
 
-	expect( removeWhitespace( source ) ).toEqual( expectedResult );
+	expect( utils.removeWhitespace( source ) ).toEqual( expectedResult );
+}
+
+/**
+ * Helper function for mocking `getUserDependency` function.
+ */
+export async function mockGetUserDependency( path: string, cb: () => any ): Promise<void> {
+	const actualImport = utils.getUserDependency;
+
+	vi
+		.spyOn( utils, 'getUserDependency' )
+		.mockImplementation( ( url: string ) => {
+			if ( url === path ) {
+				return cb();
+			}
+
+			return actualImport( url );
+		} );
 }

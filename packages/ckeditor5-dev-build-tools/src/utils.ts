@@ -42,19 +42,13 @@ export function removeWhitespace( text: string ): string {
 }
 
 /**
- * Returns the path to the provided dependency relative to the current working directory. This is needed
- * to ensure that the dependency of this package itself (which may be in a different version) is not used.
+ * Returns dependency resolved relative to the current working directory. This is needed to ensure
+ * that the dependency of this package itself (which may be in a different version) is not used.
  */
-export function resolveUserDependency( dependencyName: string ): string {
-	return require.resolve(
-		dependencyName,
-		{ paths: [ process.cwd() ] }
-	);
-}
+export function getUserDependency( name: string ): any {
+	const path = require.resolve( name, {
+		paths: [ process.cwd() ]
+	} );
 
-/**
- * Uses ESM-compatible `require` function to load a module.
- */
-export function useRequire( mod: string ): any {
-	return require( mod );
+	return require( path );
 }

@@ -5,7 +5,7 @@
 
 import path from 'upath';
 import { existsSync } from 'fs';
-import { resolveUserDependency, useRequire } from './utils.js';
+import { getUserDependency } from './utils.js';
 import type { PackageJson } from 'type-fest';
 import type { InputPluginOption, Plugin, RollupOptions } from 'rollup';
 import type { BuildOptions } from './build.js';
@@ -276,16 +276,9 @@ function getOptionalPlugin<T extends InputPluginOption>( condition: unknown, plu
  * Returns a list of keys in `package.json` file of a given dependency.
  */
 function getPackageDependencies( packageName: string ): Array<string> {
-	try {
-		const pkg: PackageJson = useRequire(
-			resolveUserDependency( `${ packageName }/package.json` )
-		);
+	const pkg: PackageJson = getUserDependency( `${ packageName }/package.json` );
 
-		return Object.keys( pkg.dependencies || {} );
-	} catch {
-		// Dependency is not installed, so return an empty array.
-		return [];
-	}
+	return Object.keys( pkg.dependencies! );
 }
 
 /**
@@ -301,14 +294,12 @@ function getTypeScriptPlugin( {
 		return;
 	}
 
-	const typescriptPath = resolveUserDependency( 'typescript' );
-
 	return typescriptPlugin( {
 		tsconfig,
 		sourceMap,
 		noEmitOnError: true,
 		inlineSources: sourceMap, // https://github.com/rollup/plugins/issues/260
-		typescript: useRequire( typescriptPath ),
+		typescript: getUserDependency( 'typescript' ),
 		declaration: declarations,
 		declarationDir: declarations ? path.join( path.parse( output ).dir, 'types' ) : undefined,
 		compilerOptions: {
