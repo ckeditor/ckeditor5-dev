@@ -30,7 +30,7 @@
     "postinstall": "node ./scripts/postinstall.js",
     "test": "yarn run test:build-tools && yarn run test:js",
     "test:build-tools": "yarn workspace @ckeditor/ckeditor5-dev-build-tools run test",
-    "test:js": "mocha 'packages/*/tests/**/*.js' --timeout 10000",
+    "test:js": "mocha 'packages/*/tests/**/*.js' --timeout 10000 --ignore 'packages/ckeditor5-dev-build-tools/**'",
     "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test",
     "changelog": "node ./scripts/changelog.js",
     "release:prepare-packages": "node ./scripts/preparepackages.js",
