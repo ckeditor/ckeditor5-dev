@@ -3,3 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
+export { version } from '@ckeditor/ckeditor5-utils';

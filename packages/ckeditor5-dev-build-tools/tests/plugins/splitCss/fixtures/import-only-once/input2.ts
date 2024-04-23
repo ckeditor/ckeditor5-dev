@@ -3,3 +3,5 @@
  * For licensing, see LICENSE.md.
  */
 
+import './file2.css';
+import './file1.css';

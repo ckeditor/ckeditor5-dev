@@ -22,4 +22,9 @@ if ( fs.existsSync( path.join( ROOT_DIRECTORY, '.git' ) ) ) {
 		cwd: path.join( ROOT_DIRECTORY, 'packages', 'ckeditor5-dev-tests' ),
 		stdio: 'inherit'
 	} );
+
+	execSync( 'npm run build', {
+		cwd: path.join( ROOT_DIRECTORY, 'packages', 'ckeditor5-dev-build-tools' ),
+		stdio: 'inherit'
+	} );
 }

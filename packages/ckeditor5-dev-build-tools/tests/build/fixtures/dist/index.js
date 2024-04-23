@@ -3,3 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
+// It's a mock file, for testing the `UMD` build.
+
+export const foo = 'bar';

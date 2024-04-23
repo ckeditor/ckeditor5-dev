@@ -3,3 +3,5 @@
  * For licensing, see LICENSE.md.
  */
 
+// Test importing and bundling external dependencies.
+export { colors } from 'chalk';

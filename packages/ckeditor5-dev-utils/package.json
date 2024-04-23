@@ -10,7 +10,7 @@
     "cli-cursor": "^3.1.0",
     "cli-spinners": "^2.6.1",
     "css-loader": "^5.2.7",
-    "cssnano": "^5.0.0",
+    "cssnano": "^6.0.3",
     "del": "^5.0.0",
     "esbuild-loader": "~3.0.1",
     "fs-extra": "^9.1.0",

@@ -3,3 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
+import './body.css';
+import './div.css';
+
+export const test = 123;
