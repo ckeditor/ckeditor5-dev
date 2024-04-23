@@ -89,11 +89,11 @@ function getEsmCode( code: string ): string {
 function getUmdCode( language: string, code: string ): string {
 	return removeWhitespace( `
 		( e => {
-			const { ${ language }: { dictionary, getPluralForm } } = ${ code };
+			const { [ '${ language }' ]: { dictionary, getPluralForm } } = ${ code };
 
-			e.${ language } ||= { dictionary: {}, getPluralForm: null };
-			e.${ language }.dictionary = Object.assign( e.${ language }.dictionary, dictionary );
-			e.${ language }.getPluralForm = getPluralForm;
+			e[ '${ language }' ] ||= { dictionary: {}, getPluralForm: null };
+			e[ '${ language }' ].dictionary = Object.assign( e[ '${ language }' ].dictionary, dictionary );
+			e[ '${ language }' ].getPluralForm = getPluralForm;
 		} )( window.CKEDITOR_TRANSLATIONS ||= {} );
 	` );
 }
