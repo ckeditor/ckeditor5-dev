@@ -63,19 +63,39 @@ function getPluralFunction( content: PO ): string | null {
 }
 
 /**
- * Returns the code of the output translations file.
+ * Returns the code of the translations.
  */
 function getCode( language: string, translation: Translation ): string {
-	let translations = JSON.stringify( {
+	const translations = JSON.stringify( {
 		[ language ]: translation
 	} );
 
-	translations = translations.replace(
+	return translations.replace(
 		/"getPluralForm":"(.*)"/,
 		'getPluralForm(n){return $1}'
 	);
+}
 
-	return `export default ${ translations }`;
+/**
+ * Outputs the code for the ESM translation file.
+ */
+function getEsmCode( code: string ): string {
+	return `export default ${ code }`;
+}
+
+/**
+ * Outputs the code for the UMD translation file.
+ */
+function getUmdCode( language: string, code: string ): string {
+	return removeWhitespace( `
+		( e => {
+			const { [ '${ language }' ]: { dictionary, getPluralForm } } = ${ code };
+
+			e[ '${ language }' ] ||= { dictionary: {}, getPluralForm: null };
+			e[ '${ language }' ].dictionary = Object.assign( e[ '${ language }' ].dictionary, dictionary );
+			e[ '${ language }' ].getPluralForm = getPluralForm;
+		} )( window.CKEDITOR_TRANSLATIONS ||= {} );
+	` );
 }
 
 /**
@@ -120,14 +140,25 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 				// Merge all translations into a single object.
 				const translation = merge( {}, ...translations );
 
-				// Emit translation file for the current language.
+				const code = getCode( language, translation );
+
+				// Emit ESM translations file.
 				this.emitFile( {
 					type: 'prebuilt-chunk',
 					fileName: path.join( options.destination, `${ language }.js` ),
-					code: getCode( language, translation ),
+					code: getEsmCode( code ),
 					exports: [ 'default' ]
 				} );
 
+				// Emit UMD translations file.
+				this.emitFile( {
+					type: 'prebuilt-chunk',
+					fileName: path.join( options.destination, `${ language }.umd.js` ),
+					code: getUmdCode( language, code ),
+					exports: []
+				} );
+
+				// Emit typings file.
 				this.emitFile( {
 					type: 'prebuilt-chunk',
 					fileName: path.join( options.destination, `${ language }.d.ts` ),

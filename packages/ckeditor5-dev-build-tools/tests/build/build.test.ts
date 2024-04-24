@@ -201,6 +201,7 @@ test( 'Translations', async () => {
 	expect( output.map( o => o.fileName ) ).toMatchObject( [
 		'index.js',
 		'translations/en.js',
+		'translations/en.umd.js',
 		'translations/en.d.ts',
 		'index.css',
 		'index-editor.css',
