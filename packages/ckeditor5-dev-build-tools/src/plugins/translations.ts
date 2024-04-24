@@ -142,7 +142,7 @@ export function translations( pluginOptions?: RollupTranslationsOptions ): Plugi
 
 				const code = getCode( language, translation );
 
-				// Emit ESM translation file.
+				// Emit ESM translations file.
 				this.emitFile( {
 					type: 'prebuilt-chunk',
 					fileName: path.join( options.destination, `${ language }.js` ),
