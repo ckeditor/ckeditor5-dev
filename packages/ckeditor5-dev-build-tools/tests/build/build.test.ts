@@ -374,7 +374,7 @@ test( 'Bundle commercial (NPM)', async () => {
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
 
 	await mockGetUserDependency(
-		'ckeditor5/package.json',
+		'ckeditor5-premium-features/package.json',
 		() => ( {
 			name: 'ckeditor5-premium-features',
 			dependencies: {
@@ -394,10 +394,20 @@ test( 'Bundle commercial (NPM)', async () => {
 	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-ai/dist/index.js\'' );
 } );
 
-test.skip( 'Bundle commercial (CDN)', async () => {
+test( 'Bundle commercial (CDN)', async () => {
 	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'commercial.js' ), 'utf-8' );
 
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
+
+	await mockGetUserDependency(
+		'ckeditor5-premium-features/package.json',
+		() => ( {
+			name: 'ckeditor5-premium-features',
+			dependencies: {
+				'@ckeditor/ckeditor5-ai': '*'
+			}
+		} )
+	);
 
 	const { output } = await build( {
 		input: 'data-for-rewrites-tests/commercial.js',
