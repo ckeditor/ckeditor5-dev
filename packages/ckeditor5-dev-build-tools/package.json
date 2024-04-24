@@ -52,18 +52,11 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "@ckeditor/ckeditor5-utils": "*",
-    "@ckeditor/ckeditor5-adapter-ckfinder": "41.4.0-alpha.0",
-    "@ckeditor/ckeditor5-core": "41.4.0-alpha.0",
-    "@ckeditor/ckeditor5-ai": "41.4.0-alpha.0",
-    "@ckeditor/ckeditor5-case-change": "41.4.0-alpha.0",
     "@types/css": "^0.0.37",
+    "@types/lodash-es": "^4.17.12",
     "@types/node": "^20.11.5",
     "@types/postcss-mixins": "^9.0.5",
     "@vitest/coverage-v8": "^1.2.1",
-    "ckeditor5": "*",
-    "ckeditor5-collaboration": "41.4.0-alpha.0",
-    "ckeditor5-premium-features": "*",
     "type-fest": "^4.10.2",
     "typescript": "^5.3.3",
     "vitest": "^1.2.1"

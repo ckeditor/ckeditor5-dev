@@ -5,7 +5,7 @@
 
 import path from 'upath';
 import { existsSync } from 'fs';
-import { resolveUserDependency, useRequire } from './utils.js';
+import { getUserDependency } from './utils.js';
 import type { PackageJson } from 'type-fest';
 import type { InputPluginOption, Plugin, RollupOptions } from 'rollup';
 import type { BuildOptions } from './build.js';
@@ -66,11 +66,11 @@ export async function getRollupConfig( options: BuildOptions ) {
 	 * This mapping can be removed when old installation methods are deprecated.
 	 */
 	const coreRewrites = external.includes( 'ckeditor5' ) ?
-		await getPackageDependencies( 'ckeditor5' ) :
+		getPackageDependencies( 'ckeditor5' ) :
 		[];
 
 	const commercialRewrites = external.includes( 'ckeditor5-premium-features' ) ?
-		await getPackageDependencies( 'ckeditor5-premium-features' ) :
+		getPackageDependencies( 'ckeditor5-premium-features' ) :
 		[];
 
 	external.push( ...coreRewrites, ...commercialRewrites );
@@ -275,17 +275,10 @@ function getOptionalPlugin<T extends InputPluginOption>( condition: unknown, plu
 /**
  * Returns a list of keys in `package.json` file of a given dependency.
  */
-async function getPackageDependencies( packageName: string ): Promise<Array<string>> {
-	try {
-		const pkg: PackageJson = useRequire(
-			resolveUserDependency( `${ packageName }/package.json` )
-		);
+function getPackageDependencies( packageName: string ): Array<string> {
+	const pkg: PackageJson = getUserDependency( `${ packageName }/package.json` );
 
-		return Object.keys( pkg.dependencies || {} );
-	} catch {
-		// Dependency is not installed, so return an empty array.
-		return Promise.resolve( [] );
-	}
+	return Object.keys( pkg.dependencies! );
 }
 
 /**
@@ -301,14 +294,12 @@ function getTypeScriptPlugin( {
 		return;
 	}
 
-	const typescriptPath = resolveUserDependency( 'typescript' );
-
 	return typescriptPlugin( {
 		tsconfig,
 		sourceMap,
 		noEmitOnError: true,
 		inlineSources: sourceMap, // https://github.com/rollup/plugins/issues/260
-		typescript: useRequire( typescriptPath ),
+		typescript: getUserDependency( 'typescript' ),
 		declaration: declarations,
 		declarationDir: declarations ? path.join( path.parse( output ).dir, 'types' ) : undefined,
 		compilerOptions: {

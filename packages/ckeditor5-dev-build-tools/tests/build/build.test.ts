@@ -8,6 +8,7 @@ import upath from 'upath';
 import * as Rollup from 'rollup';
 import { readFileSync } from 'fs';
 import { build } from '../../src/build.js';
+import { mockGetUserDependency } from '../_utils/utils.js';
 
 /**
  * Mock `rollup` to replace `rollup.write` with `rollup.generate`.
@@ -267,6 +268,16 @@ test( 'Minification doesnt remove banner', async () => {
  * Overriding
  */
 test( 'Overriding', async () => {
+	await mockGetUserDependency(
+		'ckeditor5/package.json',
+		() => ( {
+			name: 'ckeditor5',
+			dependencies: {
+				'@ckeditor/ckeditor5-utils': '*'
+			}
+		} )
+	);
+
 	const { output } = await build( {
 		input: 'src/overriding.js',
 		external: [
