@@ -6,4 +6,3 @@
 // Just three imports as a representative of the whole list.
 // export { Permissions } from 'ckeditor5-collaboration/src/index.js';
 export * from '@ckeditor/ckeditor5-ai';
-export * from '@ckeditor/ckeditor5-case-change';

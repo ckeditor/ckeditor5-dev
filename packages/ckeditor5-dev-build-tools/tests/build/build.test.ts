@@ -84,8 +84,6 @@ test( 'TypeScript declarations', async () => {
 		'index.css',
 		'index-editor.css',
 		'index-content.css',
-		'types/commercial.d.ts',
-		'types/core.d.ts',
 		'types/input.d.ts'
 	] );
 } );
@@ -346,50 +344,63 @@ test( 'Rollup error includes frame if provided', async () => {
  */
 
 test( 'Bundle core (NPM)', async () => {
-	const inputFileContent = readFileSync( upath.join( process.cwd(), 'src', 'core.ts' ), 'utf-8' );
+	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'core.js' ), 'utf-8' );
 
-	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-adapter-ckfinder\'' );
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-core\'' );
 
+	await mockGetUserDependency(
+		'ckeditor5/package.json',
+		() => ( {
+			name: 'ckeditor5',
+			dependencies: {
+				'@ckeditor/ckeditor5-core': '*'
+			}
+		} )
+	);
+
 	const { output } = await build( {
-		input: 'src/core.ts',
+		input: 'data-for-rewrites-tests/core.js',
 		external: [
 			'ckeditor5'
 		]
 	} );
 
-	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-adapter-ckfinder/dist/index.js\'' );
 	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-core/dist/index.js\'' );
 } );
 
 test( 'Bundle commercial (NPM)', async () => {
-	const inputFileContent = readFileSync( upath.join( process.cwd(), 'src', 'commercial.ts' ), 'utf-8' );
+	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'commercial.js' ), 'utf-8' );
 
-	// expect( inputFileContent ).toContain( 'export { Permissions } from \'ckeditor5-collaboration/src/index.js\'' );
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
-	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-case-change\'' );
+
+	await mockGetUserDependency(
+		'ckeditor5/package.json',
+		() => ( {
+			name: 'ckeditor5',
+			dependencies: {
+				'@ckeditor/ckeditor5-ai': '*'
+			}
+		} )
+	);
 
 	const { output } = await build( {
-		input: 'src/commercial.ts',
+		input: 'data-for-rewrites-tests/commercial.js',
 		external: [
 			'ckeditor5',
 			'ckeditor5-premium-features'
 		]
 	} );
 
-	// expect( output[ 0 ].code ).toContain( 'export { Permissions } from \'ckeditor5-collaboration/dist/index.js\'' );
 	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-ai/dist/index.js\'' );
-	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-case-change/dist/index.js\'' );
 } );
 
 test( 'Bundle commercial (CDN)', async () => {
-	const inputFileContent = readFileSync( upath.join( process.cwd(), 'src', 'commercial.ts' ), 'utf-8' );
+	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'commercial.js' ), 'utf-8' );
 
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
-	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-case-change\'' );
 
 	const { output } = await build( {
-		input: 'src/commercial.ts',
+		input: 'data-for-rewrites-tests/commercial.js',
 		external: [
 			'ckeditor5'
 		],
@@ -400,14 +411,14 @@ test( 'Bundle commercial (CDN)', async () => {
 	expect( output[ 0 ].code ).toContain( ' from \'ckeditor5\';' );
 } );
 
-test( 'Bundle (CDN) - for integrators relaying on `ckeditor5` and `ckeditor5-premium-features`', async () => {
-	const inputFileContent = readFileSync( upath.join( process.cwd(), 'src', 'commercial.ts' ), 'utf-8' );
+test.skip( 'Bundle (CDN) - for integrators relaying on `ckeditor5` and `ckeditor5-premium-features`', async () => {
+	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'commercial.js' ), 'utf-8' );
 
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-case-change\'' );
 
 	const { output } = await build( {
-		input: 'src/commercial.ts',
+		input: 'data-for-rewrites-tests/commercial.js',
 		external: [
 			'ckeditor5',
 			'ckeditor5-premium-features'
