@@ -446,6 +446,12 @@ test( 'Replace - import from core and from commercial (browse = true)', async ()
 	expect( inputFileContent ).toContain( 'import { Plugin } from \'ckeditor5/src/core.js\'' );
 	expect( output[ 0 ].code ).toContain( 'import { Plugin } from \'ckeditor5\'' );
 
+	expect( inputFileContent ).toContain( 'import { Command } from \'@ckeditor/ckeditor5-core\'' );
+	expect( output[ 0 ].code ).toContain( 'import { Plugin } from \'ckeditor5\'' );
+
 	expect( inputFileContent ).toContain( 'import * as AI from \'@ckeditor/ckeditor5-ai\'' );
 	expect( output[ 0 ].code ).toContain( 'import * as AI from \'ckeditor5-premium-features\'' );
+
+	expect( inputFileContent ).toContain( 'import { Users } from \'ckeditor5-collaboration/src/collaboration-core.js\'' );
+	expect( output[ 0 ].code ).toContain( 'import { Users } from \'ckeditor5-premium-features\'' );
 } );
