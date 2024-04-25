@@ -340,11 +340,11 @@ test( 'Rollup error includes frame if provided', async () => {
 } );
 
 /**
- * Mock real CKE5 packages and test the replace plugin.
+ * Mocking real CKE5 packages and test the `Replace' plugin.
  */
 
-test( 'Bundle core (NPM)', async () => {
-	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'core.js' ), 'utf-8' );
+test( 'Replace - export from core (browse = false)', async () => {
+	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'export-from-core.js' ), 'utf-8' );
 
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-core\'' );
 
@@ -359,7 +359,7 @@ test( 'Bundle core (NPM)', async () => {
 	);
 
 	const { output } = await build( {
-		input: 'data-for-rewrites-tests/core.js',
+		input: 'data-for-rewrites-tests/export-from-core.js',
 		external: [
 			'ckeditor5'
 		]
@@ -368,8 +368,8 @@ test( 'Bundle core (NPM)', async () => {
 	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-core/dist/index.js\'' );
 } );
 
-test( 'Bundle commercial (NPM)', async () => {
-	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'commercial.js' ), 'utf-8' );
+test( 'Replace - export from commercial (browse = false)', async () => {
+	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'export-from-commercial.js' ), 'utf-8' );
 
 	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
 
@@ -394,7 +394,7 @@ test( 'Bundle commercial (NPM)', async () => {
 	);
 
 	const { output } = await build( {
-		input: 'data-for-rewrites-tests/commercial.js',
+		input: 'data-for-rewrites-tests/export-from-commercial.js',
 		external: [
 			'ckeditor5',
 			'ckeditor5-premium-features'
@@ -404,10 +404,39 @@ test( 'Bundle commercial (NPM)', async () => {
 	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-ai/dist/index.js\'' );
 } );
 
-test( 'Bundle commercial (CDN)', async () => {
-	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'commercial.js' ), 'utf-8' );
+test( 'Replace - import from core (browse = true)', async () => {
+	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'import-from-core.js' ), 'utf-8' );
 
-	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
+	expect( inputFileContent ).toContain( 'import { Plugin } from \'ckeditor5/src/core.js\'' );
+
+	await mockGetUserDependency(
+		'ckeditor5/package.json',
+		() => ( {
+			name: 'ckeditor5',
+			dependencies: {
+				'@ckeditor/ckeditor5-core': '*'
+			}
+		} )
+	);
+
+	const { output } = await build( {
+		input: 'data-for-rewrites-tests/import-from-core.js',
+		external: [
+			'ckeditor5'
+			// 'ckeditor5-premium-features'
+		],
+		browser: true,
+		name: 'ckeditor5-premium-features'
+	} );
+
+	expect( output[ 0 ].code ).toContain( 'import { Plugin } from \'ckeditor5\'' );
+} );
+
+test( 'Replace - import from core and from commercial (browse = true)', async () => {
+	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'import-from-both.js' ), 'utf-8' );
+
+	expect( inputFileContent ).toContain( 'import { Plugin } from \'ckeditor5/src/core.js\'' );
+	expect( inputFileContent ).toContain( 'import * as AI from \'@ckeditor/ckeditor5-ai\'' );
 
 	await mockGetUserDependency(
 		'ckeditor5/package.json',
@@ -430,25 +459,7 @@ test( 'Bundle commercial (CDN)', async () => {
 	);
 
 	const { output } = await build( {
-		input: 'data-for-rewrites-tests/commercial.js',
-		external: [
-			'ckeditor5'
-		],
-		browser: true,
-		name: 'ckeditor5-premium-features'
-	} );
-
-	expect( output[ 0 ].code ).toContain( ' from \'ckeditor5\';' );
-} );
-
-test.skip( 'Bundle (CDN) - for integrators relaying on `ckeditor5` and `ckeditor5-premium-features`', async () => {
-	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'commercial.js' ), 'utf-8' );
-
-	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
-	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-case-change\'' );
-
-	const { output } = await build( {
-		input: 'data-for-rewrites-tests/commercial.js',
+		input: 'data-for-rewrites-tests/import-from-both.js',
 		external: [
 			'ckeditor5',
 			'ckeditor5-premium-features'
@@ -457,5 +468,6 @@ test.skip( 'Bundle (CDN) - for integrators relaying on `ckeditor5` and `ckeditor
 		name: 'ckeditor5-premium-features'
 	} );
 
-	expect( output[ 0 ].code ).toContain( ' from \'ckeditor5-premium-features\';' );
+	expect( output[ 0 ].code ).toContain( 'import { Plugin } from \'ckeditor5\'' );
+	expect( output[ 0 ].code ).toContain( 'import * as AI from \'ckeditor5-premium-features\'' );
 } );
