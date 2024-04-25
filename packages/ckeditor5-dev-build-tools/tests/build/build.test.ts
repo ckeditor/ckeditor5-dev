@@ -38,6 +38,38 @@ function setProcessCwdMock() {
 	vi.spyOn( process, 'cwd' ).mockImplementation( () => upath.join( import.meta.dirname, 'fixtures' ) );
 }
 
+/**
+ * Mock `core` dependencies.
+ */
+
+async function mockCoreDependencies() {
+	await mockGetUserDependency(
+		'ckeditor5/package.json',
+		() => ( {
+			name: 'ckeditor5',
+			dependencies: {
+				'@ckeditor/ckeditor5-core': '*'
+			}
+		} )
+	);
+}
+
+/**
+ * Mock `commercial` dependencies.
+ */
+
+async function mockCommercialDependencies() {
+	await mockGetUserDependency(
+		'ckeditor5-premium-features/package.json',
+		() => ( {
+			name: 'ckeditor5-premium-features',
+			dependencies: {
+				'@ckeditor/ckeditor5-ai': '*'
+			}
+		} )
+	);
+}
+
 // eslint-disable-next-line mocha/no-top-level-hooks
 beforeEach( () => {
 	setProcessCwdMock();
@@ -346,17 +378,7 @@ test( 'Rollup error includes frame if provided', async () => {
 test( 'Replace - export from core (browse = false)', async () => {
 	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'export-from-core.js' ), 'utf-8' );
 
-	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-core\'' );
-
-	await mockGetUserDependency(
-		'ckeditor5/package.json',
-		() => ( {
-			name: 'ckeditor5',
-			dependencies: {
-				'@ckeditor/ckeditor5-core': '*'
-			}
-		} )
-	);
+	await mockCoreDependencies();
 
 	const { output } = await build( {
 		input: 'data-for-rewrites-tests/export-from-core.js',
@@ -365,33 +387,15 @@ test( 'Replace - export from core (browse = false)', async () => {
 		]
 	} );
 
+	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-core\'' );
 	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-core/dist/index.js\'' );
 } );
 
 test( 'Replace - export from commercial (browse = false)', async () => {
 	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'export-from-commercial.js' ), 'utf-8' );
 
-	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
-
-	await mockGetUserDependency(
-		'ckeditor5/package.json',
-		() => ( {
-			name: 'ckeditor5',
-			dependencies: {
-				'@ckeditor/ckeditor5-core': '*'
-			}
-		} )
-	);
-
-	await mockGetUserDependency(
-		'ckeditor5-premium-features/package.json',
-		() => ( {
-			name: 'ckeditor5-premium-features',
-			dependencies: {
-				'@ckeditor/ckeditor5-ai': '*'
-			}
-		} )
-	);
+	await mockCoreDependencies();
+	await mockCommercialDependencies();
 
 	const { output } = await build( {
 		input: 'data-for-rewrites-tests/export-from-commercial.js',
@@ -401,62 +405,33 @@ test( 'Replace - export from commercial (browse = false)', async () => {
 		]
 	} );
 
+	expect( inputFileContent ).toContain( 'export * from \'@ckeditor/ckeditor5-ai\'' );
 	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-ai/dist/index.js\'' );
 } );
 
 test( 'Replace - import from core (browse = true)', async () => {
 	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'import-from-core.js' ), 'utf-8' );
 
-	expect( inputFileContent ).toContain( 'import { Plugin } from \'ckeditor5/src/core.js\'' );
-
-	await mockGetUserDependency(
-		'ckeditor5/package.json',
-		() => ( {
-			name: 'ckeditor5',
-			dependencies: {
-				'@ckeditor/ckeditor5-core': '*'
-			}
-		} )
-	);
+	await mockCoreDependencies();
 
 	const { output } = await build( {
 		input: 'data-for-rewrites-tests/import-from-core.js',
 		external: [
 			'ckeditor5'
-			// 'ckeditor5-premium-features'
 		],
 		browser: true,
 		name: 'ckeditor5-premium-features'
 	} );
 
+	expect( inputFileContent ).toContain( 'import { Plugin } from \'ckeditor5/src/core.js\'' );
 	expect( output[ 0 ].code ).toContain( 'import { Plugin } from \'ckeditor5\'' );
 } );
 
 test( 'Replace - import from core and from commercial (browse = true)', async () => {
 	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'import-from-both.js' ), 'utf-8' );
 
-	expect( inputFileContent ).toContain( 'import { Plugin } from \'ckeditor5/src/core.js\'' );
-	expect( inputFileContent ).toContain( 'import * as AI from \'@ckeditor/ckeditor5-ai\'' );
-
-	await mockGetUserDependency(
-		'ckeditor5/package.json',
-		() => ( {
-			name: 'ckeditor5',
-			dependencies: {
-				'@ckeditor/ckeditor5-core': '*'
-			}
-		} )
-	);
-
-	await mockGetUserDependency(
-		'ckeditor5-premium-features/package.json',
-		() => ( {
-			name: 'ckeditor5-premium-features',
-			dependencies: {
-				'@ckeditor/ckeditor5-ai': '*'
-			}
-		} )
-	);
+	await mockCoreDependencies();
+	await mockCommercialDependencies();
 
 	const { output } = await build( {
 		input: 'data-for-rewrites-tests/import-from-both.js',
@@ -468,6 +443,9 @@ test( 'Replace - import from core and from commercial (browse = true)', async ()
 		name: 'ckeditor5-premium-features'
 	} );
 
+	expect( inputFileContent ).toContain( 'import { Plugin } from \'ckeditor5/src/core.js\'' );
 	expect( output[ 0 ].code ).toContain( 'import { Plugin } from \'ckeditor5\'' );
+
+	expect( inputFileContent ).toContain( 'import * as AI from \'@ckeditor/ckeditor5-ai\'' );
 	expect( output[ 0 ].code ).toContain( 'import * as AI from \'ckeditor5-premium-features\'' );
 } );
