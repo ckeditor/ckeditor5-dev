@@ -5,7 +5,7 @@
 
 import { Plugin } from 'ckeditor5/src/core.js';
 import { Command } from '@ckeditor/ckeditor5-core';
-import * as AI from '@ckeditor/ckeditor5-ai';
+import { AIAssistant } from '@ckeditor/ckeditor5-ai';
 import { Users } from 'ckeditor5-collaboration/src/collaboration-core.js';
 
-console.log( Plugin, Command, AI, Users );
+console.log( Plugin, Command, AIAssistant, Users );

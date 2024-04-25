@@ -349,7 +349,7 @@ test( 'Throws Rollup error with nicely formatter message when build fails', asyn
 
 	const fn = () => build( { input: 'src/input.js' } );
 
-	expect( fn ).rejects.toThrow( /Error occured when processing the file(.*)FILENAME(.*)REASON/s );
+	expect( fn ).rejects.toThrow( /Error occurred when processing the file(.*)FILENAME(.*)REASON/s );
 } );
 
 test( 'Rollup error includes frame if provided', async () => {
@@ -368,7 +368,7 @@ test( 'Rollup error includes frame if provided', async () => {
 
 	const fn = () => build( { input: 'src/input.js' } );
 
-	expect( fn ).rejects.toThrow( /Error occured when processing the file(.*)FRAME/s );
+	expect( fn ).rejects.toThrow( /Error occurred when processing the file(.*)FRAME/s );
 } );
 
 /**
@@ -449,8 +449,8 @@ test( 'Replace - import from core and from commercial (browser = true)', async (
 	expect( inputFileContent ).toContain( 'import { Command } from \'@ckeditor/ckeditor5-core\'' );
 	expect( output[ 0 ].code ).toContain( 'import { Plugin } from \'ckeditor5\'' );
 
-	expect( inputFileContent ).toContain( 'import * as AI from \'@ckeditor/ckeditor5-ai\'' );
-	expect( output[ 0 ].code ).toContain( 'import * as AI from \'ckeditor5-premium-features\'' );
+	expect( inputFileContent ).toContain( 'import { AIAssistant } from \'@ckeditor/ckeditor5-ai\'' );
+	expect( output[ 0 ].code ).toContain( 'import { AIAssistant } from \'ckeditor5-premium-features\'' );
 
 	expect( inputFileContent ).toContain( 'import { Users } from \'ckeditor5-collaboration/src/collaboration-core.js\'' );
 	expect( output[ 0 ].code ).toContain( 'import { Users } from \'ckeditor5-premium-features\'' );

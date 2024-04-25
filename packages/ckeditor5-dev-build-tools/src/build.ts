@@ -185,7 +185,7 @@ export async function build(
 
 		if ( error.name === 'RollupError' ) {
 			message = `
-				${ chalk.red( 'ERROR: Error occured when processing the file ' + error.id ) }.
+				${ chalk.red( 'ERROR: Error occurred when processing the file ' + error.id ) }.
 				${ error.message }
 				${ error.frame ?? '' }
 			`;
