@@ -375,7 +375,7 @@ test( 'Rollup error includes frame if provided', async () => {
  * Mocking real CKE5 packages and test the `Replace' plugin.
  */
 
-test( 'Replace - export from core (browse = false)', async () => {
+test( 'Replace - export from core (browser = false)', async () => {
 	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'export-from-core.js' ), 'utf-8' );
 
 	await mockCoreDependencies();
@@ -391,7 +391,7 @@ test( 'Replace - export from core (browse = false)', async () => {
 	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-core/dist/index.js\'' );
 } );
 
-test( 'Replace - export from commercial (browse = false)', async () => {
+test( 'Replace - export from commercial (browser = false)', async () => {
 	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'export-from-commercial.js' ), 'utf-8' );
 
 	await mockCoreDependencies();
@@ -409,7 +409,7 @@ test( 'Replace - export from commercial (browse = false)', async () => {
 	expect( output[ 0 ].code ).toContain( 'export * from \'@ckeditor/ckeditor5-ai/dist/index.js\'' );
 } );
 
-test( 'Replace - import from core (browse = true)', async () => {
+test( 'Replace - import from core (browser = true)', async () => {
 	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'import-from-core.js' ), 'utf-8' );
 
 	await mockCoreDependencies();
@@ -427,7 +427,7 @@ test( 'Replace - import from core (browse = true)', async () => {
 	expect( output[ 0 ].code ).toContain( 'import { Plugin } from \'ckeditor5\'' );
 } );
 
-test( 'Replace - import from core and from commercial (browse = true)', async () => {
+test( 'Replace - import from core and from commercial (browser = true)', async () => {
 	const inputFileContent = readFileSync( upath.join( process.cwd(), 'data-for-rewrites-tests', 'import-from-both.js' ), 'utf-8' );
 
 	await mockCoreDependencies();
