@@ -175,7 +175,8 @@ export async function getRollupConfig( options: BuildOptions ) {
 				include: [ '**/*.[jt]s' ],
 				swc: {
 					jsc: {
-						target: 'es2019'
+						target: 'es2022',
+						loose: false
 					},
 					module: {
 						type: 'es6'
@@ -295,6 +296,7 @@ function getTypeScriptPlugin( {
 	}
 
 	return typescriptPlugin( {
+		noForceEmit: true,
 		tsconfig,
 		sourceMap,
 		noEmitOnError: true,
