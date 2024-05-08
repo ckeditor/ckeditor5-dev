@@ -31,7 +31,10 @@ module.exports = {
 			use: [
 				{
 					loader: 'esbuild-loader',
-					options: { tsconfig: configFile }
+					options: {
+						target: 'es2022',
+						tsconfig: configFile
+					}
 				},
 				includeDebugLoader ? getDebugLoader( debugFlags ) : null
 			].filter( Boolean )
