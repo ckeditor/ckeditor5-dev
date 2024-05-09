@@ -1,6 +1,36 @@
 Changelog
 =========
 
+## [39.9.1](https://github.com/ckeditor/ckeditor5-dev/compare/v39.8.0...v39.9.1) (2024-05-09)
+
+This release aims to revert the previous one ([`v39.0.0`](https://github.com/ckeditor/ckeditor5-dev/releases/tag/v39.9.0)) that was published as a new minor instead of a major.
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/39.9.1): v39.8.0 => v39.9.1
+</details>
+
+
 ## [39.9.0](https://github.com/ckeditor/ckeditor5-dev/compare/v39.8.0...v39.9.0) (2024-05-09)
 
 ### Features
