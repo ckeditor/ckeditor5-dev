@@ -3,15 +3,20 @@ Changelog
 
 ## [40.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v39.9.1...v40.0.0) (2024-05-09)
 
+This release brings the updated configuration for the build tools. As it might produce output that is incompatible with the previous settings, this release is marked as a major bump.
+
 ### Features
 
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Set `target:es2022` and `loose:false` in swc plugin to avoid syntax lowering and unnecessary code transformation. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/66c6a4d77ceccac04f9a435e6e679de71ed1ad33))
-* **[dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dev-utils)**: Update `esbuild-loader` to ^4.1.0. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/cd7ea352a90a389c6720c91944971418c8f9c627))
+* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Set `target:es2022` and `loose:false` in the `swc` plugin to avoid syntax lowering and unnecessary code transformation. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/66c6a4d77ceccac04f9a435e6e679de71ed1ad33))
 * **[dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dev-utils)**: Set `target: es2022` in `esbuild-loader`. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/cd7ea352a90a389c6720c91944971418c8f9c627))
 
 ### Bug fixes
 
 * **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Prevent TypeScript plugin from processing the source code (which is already done by the swc plugin). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/66c6a4d77ceccac04f9a435e6e679de71ed1ad33))
+
+### Other changes
+
+* **[dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dev-utils)**: Update `esbuild-loader` to `^4.1.0`. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/cd7ea352a90a389c6720c91944971418c8f9c627))
 
 ### Released packages
 
