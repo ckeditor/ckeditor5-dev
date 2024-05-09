@@ -1,13 +1,13 @@
 {
   "name": "@ckeditor/ckeditor5-dev-tests",
-  "version": "39.9.1",
+  "version": "40.0.0",
   "description": "Testing environment for CKEditor 5.",
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
     "@babel/core": "^7.10.5",
-    "@ckeditor/ckeditor5-dev-translations": "^39.9.1",
-    "@ckeditor/ckeditor5-dev-utils": "^39.9.1",
+    "@ckeditor/ckeditor5-dev-translations": "^40.0.0",
+    "@ckeditor/ckeditor5-dev-utils": "^40.0.0",
     "@ckeditor/ckeditor5-inspector": "^4.0.0",
     "@types/chai": "^4.3.5",
     "@types/karma-sinon-chai": "^2.0.2",
