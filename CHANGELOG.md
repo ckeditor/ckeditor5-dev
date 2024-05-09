@@ -1,6 +1,36 @@
 Changelog
 =========
 
+## [39.9.1](https://github.com/ckeditor/ckeditor5-dev/compare/v39.8.0...v39.9.1) (2024-05-09)
+
+Internal changes only (updated dependencies, documentation, etc.).
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/39.9.1): v39.8.0 => v39.9.1
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/39.9.1): v39.8.0 => v39.9.1
+</details>
+
+
 ## [39.8.0](https://github.com/ckeditor/ckeditor5-dev/compare/v39.7.0...v39.8.0) (2024-04-24)
 
 ### Features
@@ -147,40 +177,6 @@ Releases containing new features:
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/39.7.0-alpha.3): v39.6.3 => v39.7.0-alpha.3
 * [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/39.7.0-alpha.3): v39.6.3 => v39.7.0-alpha.3
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/39.7.0-alpha.3): v39.6.3 => v39.7.0-alpha.3
-</details>
-
-
-## [39.7.0-alpha.2](https://github.com/ckeditor/ckeditor5-dev/compare/v39.6.3...v39.7.0-alpha.2) (2024-04-02)
-
-### Features
-
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Improve error messages when using JavaScript API of the tool. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/0fb811159af78951f6da3e9867d5dc425195e3a8))
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Improve import rewriting in the generated bundle. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/0fb811159af78951f6da3e9867d5dc425195e3a8))
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Generate TypeScript typings for translations. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/0fb811159af78951f6da3e9867d5dc425195e3a8))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Releases containing new features:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/v39.7.0-alpha.2): v39.7.0-alpha.1 => vv39.7.0-alpha.2
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/v39.7.0-alpha.2): v39.6.3 => vv39.7.0-alpha.2
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/v39.7.0-alpha.2): v39.6.3 => vv39.7.0-alpha.2
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/v39.7.0-alpha.2): v39.6.3 => vv39.7.0-alpha.2
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/v39.7.0-alpha.2): v39.6.3 => vv39.7.0-alpha.2
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/v39.7.0-alpha.2): v39.6.3 => vv39.7.0-alpha.2
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/v39.7.0-alpha.2): v39.6.3 => vv39.7.0-alpha.2
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/v39.7.0-alpha.2): v39.6.3 => vv39.7.0-alpha.2
-* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/v39.7.0-alpha.2): v39.6.3 => vv39.7.0-alpha.2
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/v39.7.0-alpha.2): v39.6.3 => vv39.7.0-alpha.2
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/v39.7.0-alpha.2): v39.6.3 => vv39.7.0-alpha.2
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/v39.7.0-alpha.2): v39.6.3 => vv39.7.0-alpha.2
-* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/v39.7.0-alpha.2): v39.6.3 => vv39.7.0-alpha.2
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/v39.7.0-alpha.2): v39.6.3 => vv39.7.0-alpha.2
 </details>
 
 ---
