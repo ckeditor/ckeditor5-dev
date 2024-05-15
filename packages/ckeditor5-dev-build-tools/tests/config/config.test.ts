@@ -57,10 +57,14 @@ test( '--tsconfig', async () => {
 
 test( '--external', async () => {
 	const config = await getConfig( {
-		external: [ 'foo' ]
+		external: [
+			'foo',
+			'socket.io-client'
+		]
 	} );
 
 	expect( config.external( 'foo' ) ).toBe( true );
+	expect( config.external( 'socket.io-client' ) ).toBe( true );
 	expect( config.external( 'bar' ) ).toBe( false );
 } );
 

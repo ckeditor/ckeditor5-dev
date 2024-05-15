@@ -93,8 +93,14 @@ export async function getRollupConfig( options: BuildOptions ) {
 		 * List of packages that will not be bundled, but their imports will be left as they are.
 		 */
 		external: ( id: string ) => {
+			// Bundle relative and absolute imports.
 			if ( id.startsWith( '.' ) || id.startsWith( '/' ) ) {
-				return false; // Relative or absolute import
+				return false; 
+			}
+
+			// Don't bundle imports that exactly match the `external` list.
+			if ( external.includes( id ) ) {
+				return true;
 			}
 
 			const packageName = id
