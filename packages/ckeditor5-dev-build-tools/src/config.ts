@@ -94,7 +94,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 		 */
 		external: ( id: string ) => {
 			// Bundle relative and absolute imports.
-			if ( id.startsWith( '.' ) || id.startsWith( '/' ) ) {
+			if ( id.startsWith( '.' ) || path.isAbsolute( id ) ) {
 				return false;
 			}
 
