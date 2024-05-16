@@ -127,6 +127,21 @@ test( '--external automatically adds packages that make up the "ckeditor5-premiu
 	expect( config.external( '@ckeditor/ckeditor5-real-time-collaboration/theme/usermarkers.css' ) ).toBe( false );
 } );
 
+test( '--external doesn\'t fail when "ckeditor5-premium-features" is not installed', async () => {
+	await mockGetUserDependency(
+		'ckeditor5-premium-features/package.json',
+		() => {
+			throw new Error( 'Cannot find module' );
+		}
+	);
+
+	const config = await getConfig( {
+		external: [ 'ckeditor5-premium-features' ]
+	} );
+
+	expect( config.external( 'ckeditor5-premium-features' ) ).toBe( true );
+} );
+
 test( '--translations', async () => {
 	const withoutTranslations = await getConfig();
 	const withTranslations = await getConfig( {
