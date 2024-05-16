@@ -63,8 +63,22 @@ test( '--external', async () => {
 		]
 	} );
 
+	// Exclude simple package names.
 	expect( config.external( 'foo' ) ).toBe( true );
+
+	// Exclude package names that contain a dot (which might be treated as a file extension).
 	expect( config.external( 'socket.io-client' ) ).toBe( true );
+
+	// Exclude packages with a code file extension (.ts, .js, .json, etc.).
+	expect( config.external( 'socket.io-client/src/index.js' ) ).toBe( true );
+
+	// Don't exclude CSS files.
+	expect( config.external( 'socket.io-client/src/index.css' ) ).toBe( false );
+
+	// Don't exclude SVG files.
+	expect( config.external( 'socket.io-client/theme/icon.svg' ) ).toBe( false );
+
+	// Don't exclude packages not listed in the "external" option.
 	expect( config.external( 'bar' ) ).toBe( false );
 } );
 
