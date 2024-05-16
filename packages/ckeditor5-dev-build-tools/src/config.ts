@@ -65,13 +65,8 @@ export async function getRollupConfig( options: BuildOptions ) {
 	 *
 	 * This mapping can be removed when old installation methods are deprecated.
 	 */
-	const coreRewrites = external.includes( 'ckeditor5' ) ?
-		getPackageDependencies( 'ckeditor5' ) :
-		[];
-
-	const commercialRewrites = external.includes( 'ckeditor5-premium-features' ) ?
-		getPackageDependencies( 'ckeditor5-premium-features' ) :
-		[];
+	const coreRewrites = getPackageDependencies( 'ckeditor5' );
+	const commercialRewrites = getPackageDependencies( 'ckeditor5-premium-features' );
 
 	external.push( ...coreRewrites, ...commercialRewrites );
 
@@ -283,9 +278,13 @@ function getOptionalPlugin<T extends InputPluginOption>( condition: unknown, plu
  * Returns a list of keys in `package.json` file of a given dependency.
  */
 function getPackageDependencies( packageName: string ): Array<string> {
-	const pkg: PackageJson = getUserDependency( `${ packageName }/package.json` );
+	try {
+		const pkg: PackageJson = getUserDependency( `${ packageName }/package.json` );
 
-	return Object.keys( pkg.dependencies! );
+		return Object.keys( pkg.dependencies! );
+	} catch {
+		return [];
+	}
 }
 
 /**
