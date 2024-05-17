@@ -65,8 +65,13 @@ export async function getRollupConfig( options: BuildOptions ) {
 	 *
 	 * This mapping can be removed when old installation methods are deprecated.
 	 */
-	const coreRewrites = getPackageDependencies( 'ckeditor5' );
-	const commercialRewrites = getPackageDependencies( 'ckeditor5-premium-features' );
+	const coreRewrites = external.includes( 'ckeditor5' ) ?
+		getPackageDependencies( 'ckeditor5' ) :
+		[];
+
+	const commercialRewrites = external.includes( 'ckeditor5-premium-features' ) ?
+		getPackageDependencies( 'ckeditor5-premium-features' ) :
+		[];
 
 	external.push( ...coreRewrites, ...commercialRewrites );
 
