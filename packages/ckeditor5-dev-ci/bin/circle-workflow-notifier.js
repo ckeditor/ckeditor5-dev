@@ -46,7 +46,7 @@ const {
 	CIRCLE_JOB
 } = process.env;
 
-const { task } = parseArguments( process.argv.slice( 2 ) );
+const { task, ignore } = parseArguments( process.argv.slice( 2 ) );
 
 waitForOtherJobsAndSendNotification()
 	.catch( err => {
@@ -56,11 +56,12 @@ waitForOtherJobsAndSendNotification()
 	} );
 
 async function waitForOtherJobsAndSendNotification() {
-	const jobs = processJobStatuses(
-		await getOtherJobsData()
-	);
+	const jobs = processJobStatuses( await getOtherJobsData() )
+		.filter( job => !ignore.includes( job.name ) );
 
 	const workflowFinished = jobs.every( job => [ 'success', 'failed', 'failed_parent' ].includes( job.status ) );
+
+	// If any ignored job failed, all of its children will be marked as 'failed_parent', and thus will not trigger this check.
 	const anyJobsFailed = jobs.some( job => job.status === 'failed' );
 
 	if ( !workflowFinished ) {
@@ -97,7 +98,8 @@ async function getOtherJobsData() {
 function parseArguments( args ) {
 	const config = {
 		string: [
-			'task'
+			'task',
+			'ignore'
 		],
 
 		default: {
