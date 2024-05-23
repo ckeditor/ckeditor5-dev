@@ -31,9 +31,34 @@ const processJobStatuses = require( '../lib/process-job-statuses' );
 //
 // Job A triggers Job B, and Job C has no dependencies. When all jobs are done, we would like to execute Notifier.
 //
-// The Notifier job should also be executed when Job A ends with an error. In such a case, Job B is still blocked.
+// The notifier job should also be executed when Job A ends with an error. In such a case, Job B is still blocked.
 // Hence, we need to iterate over all jobs and verify if their dependencies ended with an error to unlock
 // executing the final part of the workflow.
+//
+// When using an approval-based job, the notifier will be waiting for all jobs by default. Finally, it leads to the timeout error.
+// See: https://github.com/ckeditor/ckeditor5/issues/16403.
+//
+// By defining the `--ignore` option, you can skip waiting for particular jobs.
+// You can also specify jobs to ignore
+//
+// Let's consider the example below:
+//   ┌─────┐     ┌─────┐
+//   │Job A├────►│Job B├──────────┐
+//   └─────┘     └─────┘          ▼
+//                           ┌────────┐
+//                           │Notifier│
+//                           └────────┘
+//   ┌─────┐                      ▲
+//   │Job C├──────────────────────┘
+//   └─────┘                      |
+//   ┌─────┐     ┌─────┐          |
+//   │Job D├────►│Job E├──────────┘
+//   └─────┘     └─────┘
+//
+// The assumption is that "Job D" is the approval job. To ignore it and its children, you can execute
+// the notifier like this:
+//
+// $ ckeditor5-dev-ci-circle-workflow-notifier --ignore "Job D" --ignore "Job E"
 
 const {
 	/**
@@ -46,7 +71,7 @@ const {
 	CIRCLE_JOB
 } = process.env;
 
-const { task } = parseArguments( process.argv.slice( 2 ) );
+const { task, ignore } = parseArguments( process.argv.slice( 2 ) );
 
 waitForOtherJobsAndSendNotification()
 	.catch( err => {
@@ -56,11 +81,12 @@ waitForOtherJobsAndSendNotification()
 	} );
 
 async function waitForOtherJobsAndSendNotification() {
-	const jobs = processJobStatuses(
-		await getOtherJobsData()
-	);
+	const jobs = processJobStatuses( await getOtherJobsData() )
+		.filter( job => !ignore.includes( job.name ) );
 
 	const workflowFinished = jobs.every( job => [ 'success', 'failed', 'failed_parent' ].includes( job.status ) );
+
+	// If any ignored job failed, all of its children will be marked as 'failed_parent', and thus will not trigger this check.
 	const anyJobsFailed = jobs.some( job => job.status === 'failed' );
 
 	if ( !workflowFinished ) {
@@ -93,17 +119,28 @@ async function getOtherJobsData() {
  * @param {Array.<String>} args
  * @returns {Object} result
  * @returns {String} result.task
+ * @returns {Array<String>} result.ignore
  */
 function parseArguments( args ) {
 	const config = {
 		string: [
-			'task'
+			'task',
+			'ignore'
 		],
 
 		default: {
-			task: 'yarn ckeditor5-dev-ci-notify-circle-status'
+			task: 'yarn ckeditor5-dev-ci-notify-circle-status',
+			ignore: []
 		}
 	};
 
-	return minimist( args, config );
+	let { task, ignore } = minimist( args, config );
+
+	if ( typeof ignore === 'string' ) {
+		ignore = [ ignore ];
+	}
+
+	ignore = ignore.flatMap( item => item.split( ',' ) );
+
+	return { task, ignore };
 }
