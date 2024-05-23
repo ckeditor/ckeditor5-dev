@@ -31,9 +31,34 @@ const processJobStatuses = require( '../lib/process-job-statuses' );
 //
 // Job A triggers Job B, and Job C has no dependencies. When all jobs are done, we would like to execute Notifier.
 //
-// The Notifier job should also be executed when Job A ends with an error. In such a case, Job B is still blocked.
+// The notifier job should also be executed when Job A ends with an error. In such a case, Job B is still blocked.
 // Hence, we need to iterate over all jobs and verify if their dependencies ended with an error to unlock
 // executing the final part of the workflow.
+//
+// When using an approval-based job, the notifier will be waiting for all jobs by default. Finally, it leads to the timeout error.
+// See: https://github.com/ckeditor/ckeditor5/issues/16403.
+//
+// By defining the `--ignore` option, you can skip waiting for particular jobs.
+// You can also specify jobs to ignore
+//
+// Let's consider the example below:
+//   ┌─────┐     ┌─────┐
+//   │Job A├────►│Job B├──────────┐
+//   └─────┘     └─────┘          ▼
+//                           ┌────────┐
+//                           │Notifier│
+//                           └────────┘
+//   ┌─────┐                      ▲
+//   │Job C├──────────────────────┘
+//   └─────┘                      |
+//   ┌─────┐     ┌─────┐
+//   │Job D├────►│Job E├──────────┘
+//   └─────┘     └─────┘
+//
+// The assumption is that "Job D" is the approval job. To ignore it and its children, you can execute
+// the notifier like this:
+//
+// $ ckeditor5-dev-ci-circle-workflow-notifier --ignore "Job D" --ignore "Job E"
 
 const {
 	/**
