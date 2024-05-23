@@ -94,6 +94,7 @@ async function getOtherJobsData() {
  * @param {Array.<String>} args
  * @returns {Object} result
  * @returns {String} result.task
+ * @returns {Array<String>} result.ignore
  */
 function parseArguments( args ) {
 	const config = {
@@ -103,9 +104,18 @@ function parseArguments( args ) {
 		],
 
 		default: {
-			task: 'yarn ckeditor5-dev-ci-notify-circle-status'
+			task: 'yarn ckeditor5-dev-ci-notify-circle-status',
+			ignore: []
 		}
 	};
 
-	return minimist( args, config );
+	let { task, ignore } = minimist( args, config );
+
+	if ( typeof ignore === 'string' ) {
+		ignore = [ ignore ];
+	}
+
+	ignore = ignore.flatMap( item => item.split( ',' ) );
+
+	return { task, ignore };
 }
