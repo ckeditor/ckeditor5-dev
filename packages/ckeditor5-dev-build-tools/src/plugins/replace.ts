@@ -19,9 +19,12 @@ export interface RollupReplaceOptions {
 	 *   [ /find/g, 'replace' ]
 	 * ]
 	 *
+	 * If the third element is set to `true`, the replacement will be done BEFORE bundling,
+	 * meaning that the import will be replaced in the source code, not only in the resulting bundle.
+	 *
 	 * @default []
 	 */
-	replace: Array<[ RegExp | string, string ]>;
+	replace: Array<[ RegExp | string, string, true? ]>;
 }
 
 export function replaceImports( pluginOptions: RollupReplaceOptions ): Plugin {
@@ -38,8 +41,33 @@ export function replaceImports( pluginOptions: RollupReplaceOptions ): Plugin {
 		].includes( node.type );
 	}
 
+	const transformReplace: Array<[ RegExp | string, string ]> = [];
+	const renderReplace: Array<[ RegExp | string, string ]> = [];
+
+	options.replace.forEach( ( [ pattern, replacement, transformOnly ] ) => {
+		if ( transformOnly === true ) {
+			transformReplace.push( [ pattern, replacement ] );
+		} else {
+			renderReplace.push( [ pattern, replacement ] );
+		}
+	} );
+
 	return {
 		name: 'cke5-replace-import',
+
+		transform( source ) {
+			const magic = new MagicString( source );
+
+			transformReplace.forEach( replace => magic.replaceAll( ...replace ) );
+
+			return {
+				code: magic.toString(),
+				map: magic.generateMap( {
+					includeContent: true,
+					hires: true
+				} )
+			};
+		},
 
 		renderChunk( source, chunk ) {
 			const magic = new MagicString( source );
@@ -53,7 +81,7 @@ export function replaceImports( pluginOptions: RollupReplaceOptions ): Plugin {
 
 					const path = node.source.value as string;
 
-					const replacer = options.replace.find( ( [ pattern ] ) => {
+					const replacer = renderReplace.find( ( [ pattern ] ) => {
 						if ( typeof pattern === 'string' ) {
 							return pattern === path;
 						}
