@@ -190,6 +190,7 @@ test( 'Output name', async () => {
 test( 'Custom output name', async () => {
 	const { output } = await build( {
 		input: 'src/input.ts',
+
 		/**
 		 * Because we mocked rollup to use `rollup.generate` instead of `rollup.write`, the output of the
 		 * first ESM build is not saved to the disk, so the UMD build cannot be based on it. That's why the
