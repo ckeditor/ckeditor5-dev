@@ -64,7 +64,7 @@ export function replaceImports( pluginOptions: RollupReplaceOptions ): Plugin {
 				code: magic.toString(),
 				map: magic.generateMap( {
 					includeContent: true,
-					hires: true
+					hires: 'boundary'
 				} )
 			};
 		},
