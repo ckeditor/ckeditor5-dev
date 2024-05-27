@@ -79,13 +79,13 @@ function getCliArguments(): Partial<BuildOptions> {
 async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Promise<RollupOutput> {
 	args.input = args.output;
 
-	const { name } = path.parse( args.input );
+	const { dir, name } = path.parse( args.output );
 	const { plugins, ...config } = await getRollupConfig( args );
 	const build = await rollup( config );
 
 	const umdBundle = await build.write( {
 		format: 'umd',
-		file: path.join( path.dirname( args.output ), `${ name }.umd.js` ),
+		file: path.join( dir, `${ name }.umd.js` ),
 		assetFileNames: '[name][extname]',
 		sourcemap: args.sourceMap,
 		name: args.name
