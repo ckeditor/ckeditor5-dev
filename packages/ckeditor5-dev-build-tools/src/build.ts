@@ -88,7 +88,11 @@ async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Pro
 		file: path.join( dir, `${ name }.umd.js` ),
 		assetFileNames: '[name][extname]',
 		sourcemap: args.sourceMap,
-		name: args.name
+		name: args.name,
+		globals: {
+			ckeditor5: 'ckeditor5',
+			'ckeditor5-premium-features': 'ckeditor5-premium-features'
+		}
 	} );
 
 	return {
