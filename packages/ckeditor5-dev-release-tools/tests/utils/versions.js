@@ -109,7 +109,7 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 		} );
 
-		describe( 'getLastNightly()', () => {
+		describe( 'getLastPreRelease()', () => {
 			let shExecStub;
 
 			beforeEach( () => {
@@ -117,24 +117,161 @@ describe( 'dev-release-tools/utils', () => {
 				getPackageJsonStub.returns( { name: 'ckeditor5' } );
 			} );
 
-			it( 'asks npm for the last nightly version', () => {
-				shExecStub.resolves( '0.0.0-nightly-20230615.0' );
+			it( 'asks npm for all versions of a package', () => {
+				shExecStub.resolves( JSON.stringify( [] ) );
 
+				return version.getLastPreRelease( '42.0.0-alpha' )
+					.then( () => {
+						expect( shExecStub.callCount ).to.equal( 1 );
+						expect( shExecStub.firstCall.args[ 0 ] ).to.equal( 'npm view ckeditor5 versions --json' );
+					} );
+			} );
+
+			it( 'returns null if there is no version for a package', () => {
+				shExecStub.rejects();
+
+				return version.getLastPreRelease( '42.0.0-alpha' )
+					.then( result => {
+						expect( result ).to.equal( null );
+					} );
+			} );
+
+			it( 'returns null if there is no pre-release version matching the release identifier', () => {
+				shExecStub.resolves( JSON.stringify( [
+					'0.0.0-nightly-20230615.0',
+					'37.0.0-alpha.0',
+					'37.0.0-alpha.1',
+					'41.0.0',
+					'42.0.0'
+				] ) );
+
+				return version.getLastPreRelease( '42.0.0-alpha' )
+					.then( result => {
+						expect( result ).to.equal( null );
+					} );
+			} );
+
+			it( 'returns last pre-release version matching the release identifier', () => {
+				shExecStub.resolves( JSON.stringify( [
+					'0.0.0-nightly-20230615.0',
+					'37.0.0-alpha.0',
+					'37.0.0-alpha.1',
+					'41.0.0',
+					'42.0.0'
+				] ) );
+
+				return version.getLastPreRelease( '37.0.0-alpha' )
+					.then( result => {
+						expect( result ).to.equal( '37.0.0-alpha.1' );
+					} );
+			} );
+
+			it( 'returns last pre-release version matching the release identifier (non-chronological versions order)', () => {
+				shExecStub.resolves( JSON.stringify( [
+					'0.0.0-nightly-20230615.0',
+					'37.0.0-alpha.0',
+					'37.0.0-alpha.2',
+					'41.0.0',
+					'42.0.0',
+					'37.0.0-alpha.1'
+				] ) );
+
+				return version.getLastPreRelease( '37.0.0-alpha' )
+					.then( result => {
+						expect( result ).to.equal( '37.0.0-alpha.2' );
+					} );
+			} );
+
+			it( 'returns last nightly version', () => {
+				shExecStub.resolves( JSON.stringify( [
+					'0.0.0-nightly-20230614.0',
+					'0.0.0-nightly-20230615.0',
+					'0.0.0-nightly-20230615.1',
+					'0.0.0-nightly-20230615.2',
+					'0.0.0-nightly-20230616.0',
+					'37.0.0-alpha.0',
+					'37.0.0-alpha.2',
+					'41.0.0',
+					'42.0.0'
+				] ) );
+
+				return version.getLastPreRelease( '0.0.0-nightly' )
+					.then( result => {
+						expect( result ).to.equal( '0.0.0-nightly-20230616.0' );
+					} );
+			} );
+
+			it( 'returns last nightly version from a specified day', () => {
+				shExecStub.resolves( JSON.stringify( [
+					'0.0.0-nightly-20230614.0',
+					'0.0.0-nightly-20230615.0',
+					'0.0.0-nightly-20230615.1',
+					'0.0.0-nightly-20230615.2',
+					'0.0.0-nightly-20230616.0',
+					'37.0.0-alpha.0',
+					'37.0.0-alpha.2',
+					'41.0.0',
+					'42.0.0'
+				] ) );
+
+				return version.getLastPreRelease( '0.0.0-nightly-20230615' )
+					.then( result => {
+						expect( result ).to.equal( '0.0.0-nightly-20230615.2' );
+					} );
+			} );
+		} );
+
+		describe( 'getLastNightly()', () => {
+			beforeEach( () => {
+				sandbox.stub( version, 'getLastPreRelease' ).resolves( '0.0.0-nightly-20230615.0' );
+			} );
+
+			it( 'asks for a last nightly pre-release version', () => {
 				return version.getLastNightly()
 					.then( result => {
-						expect( shExecStub.callCount ).to.equal( 1 );
-						expect( shExecStub.firstCall.args[ 0 ] ).to.equal( 'npm view ckeditor5@nightly version' );
+						expect( version.getLastPreRelease.callCount ).to.equal( 1 );
+						expect( version.getLastPreRelease.firstCall.args[ 0 ] ).to.equal( '0.0.0-nightly' );
 
 						expect( result ).to.equal( '0.0.0-nightly-20230615.0' );
 					} );
 			} );
+		} );
 
-			it( 'returns null if there is no nightly version for a package', () => {
-				shExecStub.rejects();
+		describe( 'getNextPreRelease()', () => {
+			it( 'asks for a last pre-release version', () => {
+				sandbox.stub( version, 'getLastPreRelease' ).resolves( null );
 
-				return version.getLastNightly()
+				return version.getNextPreRelease( '42.0.0-alpha' )
+					.then( () => {
+						expect( version.getLastPreRelease.calledOnce ).to.equal( true );
+						expect( version.getLastPreRelease.firstCall.args[ 0 ] ).to.equal( '42.0.0-alpha' );
+					} );
+			} );
+
+			it( 'returns pre-release version with id = 0 if pre-release version was never published for the package yet', () => {
+				sandbox.stub( version, 'getLastPreRelease' ).resolves( null );
+
+				return version.getNextPreRelease( '42.0.0-alpha' )
 					.then( result => {
-						expect( result ).to.equal( null );
+						expect( result ).to.equal( '42.0.0-alpha.0' );
+					} );
+			} );
+
+			it( 'returns pre-release version with incremented id if older pre-release version was already published', () => {
+				sandbox.stub( version, 'getLastPreRelease' ).resolves( '42.0.0-alpha.5' );
+
+				return version.getNextPreRelease( '42.0.0-alpha' )
+					.then( result => {
+						expect( result ).to.equal( '42.0.0-alpha.6' );
+					} );
+			} );
+
+			it( 'returns nightly version with incremented id if older nightly version was already published', () => {
+				sandbox.stub( version, 'getLastPreRelease' ).resolves( '0.0.0-nightly-20230615.5' );
+
+				return version.getNextPreRelease( '0.0.0-nightly' )
+					.then( result => {
+						expect( result ).to.equal( '0.0.0-nightly-20230615.6' );
 					} );
 			} );
 		} );
@@ -143,6 +280,8 @@ describe( 'dev-release-tools/utils', () => {
 			let clock;
 
 			beforeEach( () => {
+				sandbox.stub( version, 'getNextPreRelease' ).resolves( '0.0.0-nightly-20230615.1' );
+
 				clock = sinon.useFakeTimers( {
 					now: new Date( '2023-06-15 12:00:00' )
 				} );
@@ -152,30 +291,13 @@ describe( 'dev-release-tools/utils', () => {
 				clock.restore();
 			} );
 
-			it( 'return nightly version with id = 0 if nightly version was never published for the package yet', () => {
-				sandbox.stub( version, 'getLastNightly' ).resolves( null );
-
+			it( 'asks for a last nightly pre-release version', () => {
 				return version.getNextNightly()
 					.then( result => {
-						expect( result ).to.equal( '0.0.0-nightly-20230615.0' );
-					} );
-			} );
+						expect( version.getNextPreRelease.calledOnce ).to.equal( true );
+						expect( version.getNextPreRelease.firstCall.args[ 0 ] ).to.equal( '0.0.0-nightly-20230615' );
 
-			it( 'return nightly version with id = 0 if today no nightly version was published', () => {
-				sandbox.stub( version, 'getLastNightly' ).resolves( '0.0.0-nightly-20230614.7' );
-
-				return version.getNextNightly()
-					.then( result => {
-						expect( result ).to.equal( '0.0.0-nightly-20230615.0' );
-					} );
-			} );
-
-			it( 'return incremented nightly version id if today another nightly was published', () => {
-				sandbox.stub( version, 'getLastNightly' ).resolves( '0.0.0-nightly-20230615.10' );
-
-				return version.getNextNightly()
-					.then( result => {
-						expect( result ).to.equal( '0.0.0-nightly-20230615.11' );
+						expect( result ).to.equal( '0.0.0-nightly-20230615.1' );
 					} );
 			} );
 		} );
