@@ -4,6 +4,7 @@
  */
 
 import fs from 'fs';
+import url from 'url';
 import util from 'util';
 import chalk from 'chalk';
 import path from 'upath';
@@ -130,7 +131,8 @@ async function normalizeOptions( options: Partial<BuildOptions> ): Promise<Build
 	 * Replace banner path with the actual banner contents.
 	 */
 	if ( normalized.banner ) {
-		const { banner } = await import( normalized.banner );
+		const { href } = url.pathToFileURL( normalized.banner );
+		const { banner } = await import( href );
 
 		normalized.banner = banner;
 	}
