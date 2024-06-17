@@ -44,7 +44,7 @@ const versions = {
 			.then( result => {
 				const lastVersion = JSON.parse( result )
 					.filter( version => version.startsWith( releaseIdentifier ) )
-					.sort()
+					.sort( ( a, b ) => a.localeCompare( b, undefined, { numeric: true } ) )
 					.pop();
 
 				return lastVersion || null;
