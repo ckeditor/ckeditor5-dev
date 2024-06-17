@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/jsdoc-plugins",
-  "version": "40.2.1",
+  "version": "40.2.2",
   "description": "Various JSDoc plugins developed by the CKEditor 5 team.",
   "keywords": [
     "jsdoc",
