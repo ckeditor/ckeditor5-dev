@@ -1,6 +1,38 @@
 Changelog
 =========
 
+## [40.2.2](https://github.com/ckeditor/ckeditor5-dev/compare/v40.2.1...v40.2.2) (2024-06-17)
+
+### Bug fixes
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Fixed the `getLastPreRelease()` function to handle pre-release versions with a multi-digit sequence number correctly. Closes [ckeditor/ckeditor5#16576](https://github.com/ckeditor/ckeditor5/issues/16576). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/a4be357b0ba4479fd27b5e356fd0d649cc3e7cca))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/40.2.2): v40.2.1 => v40.2.2
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/40.2.2): v40.2.1 => v40.2.2
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/40.2.2): v40.2.1 => v40.2.2
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/40.2.2): v40.2.1 => v40.2.2
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/40.2.2): v40.2.1 => v40.2.2
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/40.2.2): v40.2.1 => v40.2.2
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/40.2.2): v40.2.1 => v40.2.2
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/40.2.2): v40.2.1 => v40.2.2
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/40.2.2): v40.2.1 => v40.2.2
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/40.2.2): v40.2.1 => v40.2.2
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/40.2.2): v40.2.1 => v40.2.2
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/40.2.2): v40.2.1 => v40.2.2
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/40.2.2): v40.2.1 => v40.2.2
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/40.2.2): v40.2.1 => v40.2.2
+</details>
+
+
 ## [40.2.1](https://github.com/ckeditor/ckeditor5-dev/compare/v40.2.0...v40.2.1) (2024-06-03)
 
 ### Other changes
@@ -139,52 +171,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/40.0.1): v40.0.0 => v40.0.1
 * [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/40.0.1): v40.0.0 => v40.0.1
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/40.0.1): v40.0.0 => v40.0.1
-</details>
-
-
-## [40.0.0](https://github.com/ckeditor/ckeditor5-dev/compare/v39.9.1...v40.0.0) (2024-05-09)
-
-This release brings the updated configuration for the build tools. As it might produce output that is incompatible with the previous settings, this release is marked as a major bump.
-
-### Features
-
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Set `target:es2022` and `loose:false` in the `swc` plugin to avoid syntax lowering and unnecessary code transformation. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/66c6a4d77ceccac04f9a435e6e679de71ed1ad33))
-* **[dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dev-utils)**: Set `target: es2022` in `esbuild-loader`. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/cd7ea352a90a389c6720c91944971418c8f9c627))
-
-### Bug fixes
-
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Prevent TypeScript plugin from processing the source code (which is already done by the swc plugin). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/66c6a4d77ceccac04f9a435e6e679de71ed1ad33))
-
-### Other changes
-
-* **[dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dev-utils)**: Update `esbuild-loader` to `^4.1.0`. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/cd7ea352a90a389c6720c91944971418c8f9c627))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Releases containing new features:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/40.0.0): v39.9.1 => v40.0.0
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/40.0.0): v39.9.1 => v40.0.0
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/40.0.0): v39.9.1 => v40.0.0
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/40.0.0): v39.9.1 => v40.0.0
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/40.0.0): v39.9.1 => v40.0.0
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/40.0.0): v39.9.1 => v40.0.0
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/40.0.0): v39.9.1 => v40.0.0
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/40.0.0): v39.9.1 => v40.0.0
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/40.0.0): v39.9.1 => v40.0.0
-* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/40.0.0): v39.9.1 => v40.0.0
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/40.0.0): v39.9.1 => v40.0.0
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/40.0.0): v39.9.1 => v40.0.0
-* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/40.0.0): v39.9.1 => v40.0.0
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/40.0.0): v39.9.1 => v40.0.0
 </details>
 
 ---
