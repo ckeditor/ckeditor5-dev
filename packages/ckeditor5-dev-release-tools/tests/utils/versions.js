@@ -182,6 +182,23 @@ describe( 'dev-release-tools/utils', () => {
 					} );
 			} );
 
+			it( 'returns last pre-release version matching the release identifier (sequence numbers greater than 10)', () => {
+				shExecStub.resolves( JSON.stringify( [
+					'0.0.0-nightly-20230615.0',
+					'37.0.0-alpha.1',
+					'37.0.0-alpha.2',
+					'37.0.0-alpha.3',
+					'41.0.0',
+					'37.0.0-alpha.10',
+					'37.0.0-alpha.11'
+				] ) );
+
+				return version.getLastPreRelease( '37.0.0-alpha' )
+					.then( result => {
+						expect( result ).to.equal( '37.0.0-alpha.11' );
+					} );
+			} );
+
 			it( 'returns last nightly version', () => {
 				shExecStub.resolves( JSON.stringify( [
 					'0.0.0-nightly-20230614.0',
