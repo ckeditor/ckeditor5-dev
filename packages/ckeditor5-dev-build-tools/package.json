@@ -51,6 +51,10 @@
     "source-map": "^0.7.4",
     "upath": "^2.0.1"
   },
+  "optionalDependencies": {
+    "ckeditor5": ">=42.0.0 || ^0.0.0-nightly",
+    "ckeditor5-premium-features": ">=42.0.0 || ^0.0.0-nightly"
+  },
   "devDependencies": {
     "@types/css": "^0.0.37",
     "@types/lodash-es": "^4.17.12",
