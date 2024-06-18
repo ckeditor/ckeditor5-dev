@@ -7,7 +7,7 @@
     "@ckeditor/ckeditor5-dev-release-tools": "^40.2.2",
     "coveralls": "^3.1.1",
     "eslint": "^7.0.0",
-    "eslint-config-ckeditor5": "^5.0.1",
+    "eslint-config-ckeditor5": "^6.0.0",
     "glob": "^10.2.5",
     "husky": "^8.0.2",
     "lint-staged": "^10.2.4",
