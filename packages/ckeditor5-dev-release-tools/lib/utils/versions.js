@@ -30,26 +30,68 @@ const versions = {
 	},
 
 	/**
-	 * Returns the current (latest) nightly version in the format of "0.0.0-nightly-YYYYMMDD.X", where the "YYYYMMDD" is the date of the
-	 * last nightly release and the "X" is the sequential number starting from 0. If the package does not have any nightly releases yet,
-	 * `null` is returned.
+	 * Returns the current (latest) pre-release version that matches the provided release identifier.
+	 * If the package does not have any pre-releases with the provided identifier yet, `null` is returned.
 	 *
-	 * @params {String} [cwd=process.cwd()]
+	 * @param {ReleaseIdentifier} releaseIdentifier
+	 * @param {String} [cwd=process.cwd()]
 	 * @returns {Promise.<String|null>}
 	 */
-	getLastNightly( cwd = process.cwd() ) {
+	getLastPreRelease( releaseIdentifier, cwd = process.cwd() ) {
 		const packageName = getPackageJson( cwd ).name;
 
-		return tools.shExec( `npm view ${ packageName }@nightly version`, { verbosity: 'silent', async: true } )
+		return tools.shExec( `npm view ${ packageName } versions --json`, { verbosity: 'silent', async: true } )
+			.then( result => {
+				const lastVersion = JSON.parse( result )
+					.filter( version => version.startsWith( releaseIdentifier ) )
+					.sort( ( a, b ) => a.localeCompare( b, undefined, { numeric: true } ) )
+					.pop();
+
+				return lastVersion || null;
+			} )
 			.catch( () => null );
 	},
 
 	/**
-	 * Returns the next available nightly version matching the following format: "0.0.0-nightly-YYYYMMDD.X",
-	 * where "YYYYMMDD" is the date of the latest nightly release,
-	 * and "X" is the following available sequential number starting from 0.
+	 * Returns the current (latest) nightly version in the format of "0.0.0-nightly-YYYYMMDD.X", where the "YYYYMMDD" is the date of the
+	 * last nightly release and the "X" is the sequential number starting from 0. If the package does not have any nightly releases yet,
+	 * `null` is returned.
 	 *
-	 * @params {String} [cwd=process.cwd()]
+	 * @param {String} [cwd=process.cwd()]
+	 * @returns {Promise.<String|null>}
+	 */
+	getLastNightly( cwd = process.cwd() ) {
+		return versions.getLastPreRelease( '0.0.0-nightly', cwd );
+	},
+
+	/**
+	 * Returns the next available pre-release version that matches the following format: "<releaseIdentifier>.X", where "X" is the
+	 * next available pre-release sequential number starting from 0.
+	 *
+	 * @param {ReleaseIdentifier} releaseIdentifier
+	 * @param {String} [cwd=process.cwd()]
+	 * @returns {Promise<String>}
+	 */
+	async getNextPreRelease( releaseIdentifier, cwd = process.cwd() ) {
+		const currentPreReleaseVersion = await versions.getLastPreRelease( releaseIdentifier, cwd );
+
+		if ( !currentPreReleaseVersion ) {
+			return `${ releaseIdentifier }.0`;
+		}
+
+		const currentPreReleaseVersionTokens = currentPreReleaseVersion.split( '.' );
+		const currentPreReleaseSequenceNumber = currentPreReleaseVersionTokens.pop();
+		const currentPreReleaseIdentifier = currentPreReleaseVersionTokens.join( '.' );
+		const nextPreReleaseSequenceNumber = Number( currentPreReleaseSequenceNumber ) + 1;
+
+		return `${ currentPreReleaseIdentifier }.${ nextPreReleaseSequenceNumber }`;
+	},
+
+	/**
+	 * Returns the next available nightly version in the format of "0.0.0-nightly-YYYYMMDD.X", where the "YYYYMMDD" is the current date for
+	 * the nightly release and the "X" is the sequential number starting from 0.
+	 *
+	 * @param {String} [cwd=process.cwd()]
 	 * @returns {Promise<String>}
 	 */
 	async getNextNightly( cwd = process.cwd() ) {
@@ -58,21 +100,9 @@ const versions = {
 		const month = ( today.getMonth() + 1 ).toString().padStart( 2, '0' );
 		const day = today.getDate().toString().padStart( 2, '0' );
 
-		const nextNightlyVersion = `0.0.0-nightly-${ year }${ month }${ day }`;
-		const currentNightlyVersion = await versions.getLastNightly( cwd );
+		const nextNightlyReleaseIdentifier = `0.0.0-nightly-${ year }${ month }${ day }`;
 
-		if ( !currentNightlyVersion ) {
-			return `${ nextNightlyVersion }.0`;
-		}
-
-		if ( !currentNightlyVersion.startsWith( nextNightlyVersion ) ) {
-			return `${ nextNightlyVersion }.0`;
-		}
-
-		const currentNightlyVersionId = currentNightlyVersion.split( '.' ).pop();
-		const nextNightlyVersionId = Number( currentNightlyVersionId ) + 1;
-
-		return `${ nextNightlyVersion }.${ nextNightlyVersionId }`;
+		return versions.getNextPreRelease( nextNightlyReleaseIdentifier, cwd );
 	},
 
 	/**
@@ -103,3 +133,13 @@ const versions = {
 };
 
 module.exports = versions;
+
+/**
+ * @typedef {String} ReleaseIdentifier The pre-release identifier without the last dynamic part (the pre-release sequential number).
+ * It consists of the core base version ("<major>.<minor>.<path>"), a hyphen ("-"), and a pre-release identifier name (e.g. "alpha").
+ *
+ * Examples:
+ * 	* "0.0.0-nightly" - matches the last nightly version regardless of the publication date.
+ * 	* "0.0.0-nightly-20230615" - matches the last nightly version from the 2023-06-15 day.
+ * 	* "42.0.0-alpha" - matches the last alpha version for the 42.0.0 version.
+ */

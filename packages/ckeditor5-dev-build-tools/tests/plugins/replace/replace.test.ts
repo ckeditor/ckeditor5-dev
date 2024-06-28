@@ -59,6 +59,16 @@ test( 'Accepts RegExp', async () => {
 	verifyChunk( output, 'input.js', 'export * from \'another-dependency\';' );
 } );
 
+test( 'Replaces import BEFORE bundling when 3rd parameter is set to true', async () => {
+	const output = await generateBundle( {
+		replace: [
+			[ './dependency.js', './replaced-dependency.js', true ]
+		]
+	} );
+
+	verifyChunk( output, 'input.js', 'const test = 456;' );
+} );
+
 test( 'Updates the source map', async () => {
 	const unmodifiedOutput = await generateBundle( {
 		replace: []
@@ -72,6 +82,21 @@ test( 'Updates the source map', async () => {
 
 	expect( ( unmodifiedOutput[ 1 ] as OutputAsset ).source ).not.toBe( ( output[ 1 ] as OutputAsset ).source );
 	verifyChunk( output, 'input.js', 'another-dependency' );
+} );
+
+test( 'Updates the source map when 3rd parameter is set to true', async () => {
+	const unmodifiedOutput = await generateBundle( {
+		replace: []
+	}, true );
+
+	const output = await generateBundle( {
+		replace: [
+			[ './dependency.js', './replaced-dependency.js', true ]
+		]
+	}, true );
+
+	expect( ( unmodifiedOutput[ 1 ] as OutputAsset ).source ).not.toBe( ( output[ 1 ] as OutputAsset ).source );
+	verifyChunk( output, 'input.js', 'const test = 456;' );
 } );
 
 test( 'Replacing happens after the code is parsed and tree-shaken', async () => {

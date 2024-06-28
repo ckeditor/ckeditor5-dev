@@ -42,6 +42,10 @@ describe( 'dev-release-tools/index', () => {
 				cleanUpPackages: sandbox.stub(),
 				version: {
 					getLastFromChangelog: sandbox.stub(),
+					getLastPreRelease: sandbox.stub(),
+					getNextPreRelease: sandbox.stub(),
+					getLastNightly: sandbox.stub(),
+					getNextNightly: sandbox.stub(),
 					getCurrent: sandbox.stub(),
 					getLastTagFromGit: sandbox.stub()
 				},
@@ -160,6 +164,30 @@ describe( 'dev-release-tools/index', () => {
 	describe( 'getCurrent()', () => {
 		it( 'should be a function', () => {
 			expect( index.getCurrent ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'getLastPreRelease()', () => {
+		it( 'should be a function', () => {
+			expect( index.getLastPreRelease ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'getNextPreRelease()', () => {
+		it( 'should be a function', () => {
+			expect( index.getNextPreRelease ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'getLastNightly()', () => {
+		it( 'should be a function', () => {
+			expect( index.getLastNightly ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'getNextNightly()', () => {
+		it( 'should be a function', () => {
+			expect( index.getNextNightly ).to.be.a( 'function' );
 		} );
 	} );
 

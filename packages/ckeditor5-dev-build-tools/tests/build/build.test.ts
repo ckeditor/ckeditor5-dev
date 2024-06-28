@@ -187,6 +187,31 @@ test( 'Output name', async () => {
 	] );
 } );
 
+test( 'Custom output name', async () => {
+	const { output } = await build( {
+		input: 'src/input.ts',
+
+		/**
+		 * Because we mocked rollup to use `rollup.generate` instead of `rollup.write`, the output of the
+		 * first ESM build is not saved to the disk, so the UMD build cannot be based on it. That's why the
+		 * `output` filename matches the `input` filename. However, because the default output name is `index`,
+		 * this is still a valid test.
+		 */
+		output: 'src/input.js',
+		tsconfig: 'tsconfig.json',
+		browser: true,
+		name: 'custom'
+	} );
+
+	expect( output.map( o => o.fileName ) ).toMatchObject( [
+		'input.js',
+		'input.css',
+		'input-editor.css',
+		'input-content.css',
+		'input.umd.js'
+	] );
+} );
+
 /**
  * Banner
  */

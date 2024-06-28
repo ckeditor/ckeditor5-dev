@@ -4,9 +4,10 @@
  */
 
 import fs from 'fs';
+import url from 'url';
 import util from 'util';
 import chalk from 'chalk';
-import upath from 'upath';
+import path from 'upath';
 import { rollup, type RollupOutput } from 'rollup';
 import { getRollupConfig } from './config.js';
 import { getCwdPath, camelizeObjectKeys, removeWhitespace } from './utils.js';
@@ -79,15 +80,20 @@ function getCliArguments(): Partial<BuildOptions> {
 async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Promise<RollupOutput> {
 	args.input = args.output;
 
+	const { dir, name } = path.parse( args.output );
 	const { plugins, ...config } = await getRollupConfig( args );
 	const build = await rollup( config );
 
 	const umdBundle = await build.write( {
 		format: 'umd',
-		file: upath.join( upath.dirname( args.output ), 'index.umd.js' ),
+		file: path.join( dir, `${ name }.umd.js` ),
 		assetFileNames: '[name][extname]',
 		sourcemap: args.sourceMap,
-		name: args.name
+		name: args.name,
+		globals: {
+			ckeditor5: 'ckeditor5',
+			'ckeditor5-premium-features': 'ckeditor5-premium-features'
+		}
 	} );
 
 	return {
@@ -125,7 +131,8 @@ async function normalizeOptions( options: Partial<BuildOptions> ): Promise<Build
 	 * Replace banner path with the actual banner contents.
 	 */
 	if ( normalized.banner ) {
-		const { banner } = await import( normalized.banner );
+		const { href } = url.pathToFileURL( normalized.banner );
+		const { banner } = await import( href );
 
 		normalized.banner = banner;
 	}
@@ -146,7 +153,7 @@ export async function build(
 		 * Remove old build directory.
 		 */
 		if ( args.clean ) {
-			const { dir } = upath.parse( args.output );
+			const { dir } = path.parse( args.output );
 
 			fs.rmSync( dir, { recursive: true, force: true } );
 		}
