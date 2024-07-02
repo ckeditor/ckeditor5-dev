@@ -69,7 +69,7 @@ async function checkDependenciesInPackage( packagePath, options ) {
 			'**/*.ts': depCheck.parser.typescript,
 			'**/*.vue': depCheck.parser.vue
 		},
-		ignorePatterns: [ 'docs', 'build', 'dist' ],
+		ignorePatterns: [ 'docs', 'build' ],
 		ignoreMatches: [ 'eslint*', 'webpack*', 'husky', 'lint-staged' ]
 	};
 
@@ -383,7 +383,7 @@ async function isDevDependency( packageName, absolutePaths ) {
 
 	for ( const absolutePath of absolutePaths ) {
 		// Only imports in files in src/ or theme/ could be non dev dependency.
-		if ( !absolutePath.match( /[/\\](src|theme)[/\\]/ ) ) {
+		if ( !absolutePath.match( /[/\\](src|theme|dist)[/\\]/ ) ) {
 			continue;
 		}
 
