@@ -29,6 +29,7 @@ const { getChangesForVersion, getChangelog, saveChangelog } = require( './utils/
 const executeInParallel = require( './utils/executeinparallel' );
 const validateRepositoryToRelease = require( './utils/validaterepositorytorelease' );
 const checkVersionAvailability = require( './utils/checkversionavailability' );
+const verifyPackagesPublishedCorrectly = require( './tasks/verifypackagespublishedcorrectly' );
 
 module.exports = {
 	generateChangelogForSinglePackage,
@@ -54,5 +55,6 @@ module.exports = {
 	getChangelog,
 	saveChangelog,
 	validateRepositoryToRelease,
+	verifyPackagesPublishedCorrectly,
 	checkVersionAvailability
 };
