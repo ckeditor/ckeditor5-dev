@@ -8,6 +8,7 @@ import { parse, type Rule, type Declaration, type Stylesheet } from 'css';
 import type { Plugin, OutputBundle, NormalizedOutputOptions, EmittedAsset } from 'rollup';
 import type { Processor } from 'postcss';
 import cssnano from 'cssnano';
+import { removeNewline } from '../utils';
 
 export interface RollupSplitCssOptions {
 
@@ -269,5 +270,13 @@ async function unifyFileContentOutput( content: string = '', minimize: boolean )
  * Wraps `declarations` list into passed `selector`;
  */
 function wrapDefinitionsIntoSelector( selector: string, definitions: string ): string {
+	// When definition contains `data:image` it should be in one line following the specification.
+	// Currently used tool responsible for parsing definitions tries to split each definition into new line.
+	// When `data:image` contains `SVG` with style attribute which contains CSS definitions it splits it into new lines,
+	// which breaks the CSS.
+	if ( definitions.includes( 'data:image' ) ) {
+		definitions = removeNewline( definitions );
+	}
+
 	return `${ selector } {\n${ definitions }}\n`;
 }
