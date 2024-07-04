@@ -34,7 +34,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'should resolve to true if version does not exist (npm >= 8.13.0)', () => {
-			stubs.shExec.rejects( new Error( 'npm ERR! code E404' ) );
+			stubs.shExec.rejects( new Error( 'code E404' ) );
 
 			return checkVersionAvailability( '1.0.1', 'stub-package' )
 				.then( result => {

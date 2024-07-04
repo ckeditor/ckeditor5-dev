@@ -31,7 +31,7 @@ module.exports = async function checkVersionAvailability( version, packageName )
 		} )
 		.catch( error => {
 			// All errors except the "E404" are re-thrown.
-			if ( !error.toString().includes( 'npm ERR! code E404' ) ) {
+			if ( !error.toString().includes( 'code E404' ) ) {
 				throw error;
 			}
 
