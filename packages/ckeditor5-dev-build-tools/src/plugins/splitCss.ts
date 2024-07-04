@@ -270,7 +270,7 @@ async function unifyFileContentOutput( content: string = '', minimize: boolean )
  * Wraps `declarations` list into passed `selector`;
  */
 function wrapDefinitionsIntoSelector( selector: string, definitions: string ): string {
-	// When definition contains `data:image` it should be in one following the specification.
+	// When definition contains `data:image` it should be in one line following the specification.
 	// Currently used tool responsible for parsing definitions tries to split each definition into new line.
 	// When `data:image` contains `SVG` with style attribute which contains CSS definitions it splits it into new lines,
 	// which breaks the CSS.
