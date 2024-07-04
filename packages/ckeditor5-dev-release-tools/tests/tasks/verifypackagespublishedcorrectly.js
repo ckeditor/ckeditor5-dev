@@ -1,0 +1,122 @@
+/**
+ * @license Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md.
+ */
+
+'use strict';
+
+const expect = require( 'chai' ).expect;
+const sinon = require( 'sinon' );
+const mockery = require( 'mockery' );
+
+describe( 'dev-release-tools/utils', () => {
+	describe( 'verifyPackagesPublishedCorrectly()', () => {
+		let verifyPackagesPublishedCorrectly, sandbox, stubs;
+
+		beforeEach( () => {
+			sandbox = sinon.createSandbox();
+
+			stubs = {
+				fs: {
+					remove: sandbox.stub().resolves(),
+					readJson: sandbox.stub().resolves()
+				},
+				devUtils: {
+					tools: {
+						shExec: sandbox.stub().resolves()
+					}
+				},
+				glob: {
+					globSync: sandbox.stub().returns( [] )
+				},
+				chalk: {
+					get bold() {
+						return stubs.chalk;
+					},
+					green: sandbox.stub().callsFake( str => str ),
+					yellow: sandbox.stub().callsFake( str => str ),
+					red: sandbox.stub().callsFake( str => str )
+				},
+				console: {
+					log: sandbox.stub( console, 'log' ),
+					error: sandbox.stub( console, 'error' )
+				}
+			};
+
+			mockery.enable( {
+				useCleanCache: true,
+				warnOnReplace: false,
+				warnOnUnregistered: false
+			} );
+
+			mockery.registerMock( 'fs-extra', stubs.fs );
+			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', stubs.devUtils );
+			mockery.registerMock( 'glob', stubs.glob );
+			mockery.registerMock( 'chalk', stubs.chalk );
+
+			verifyPackagesPublishedCorrectly = require( '../../lib/tasks/verifypackagespublishedcorrectly' );
+		} );
+
+		afterEach( () => {
+			mockery.deregisterAll();
+			mockery.disable();
+			sandbox.restore();
+		} );
+
+		it( 'should not verify packages if there are no packages in the release directory', async () => {
+			stubs.glob.globSync.returns( [] );
+
+			const packagesDirectory = '/workspace/ckeditor5/release/npm';
+			const version = 'latest';
+
+			await verifyPackagesPublishedCorrectly( { packagesDirectory, version } );
+
+			expect( stubs.console.log.firstCall.args[ 0 ] ).to.equal( 'No packages found to check for upload error 409.' );
+			expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 0 );
+		} );
+
+		it( 'should verify packages and remove them from the release directory on "npm show" command success', async () => {
+			stubs.glob.globSync.returns( [ 'package1', 'package2' ] );
+			stubs.fs.readJson
+				.onCall( 0 ).resolves( { name: '@namespace/package1' } )
+				.onCall( 1 ).resolves( { name: '@namespace/package2' } );
+
+			const packagesDirectory = '/workspace/ckeditor5/release/npm';
+			const version = 'latest';
+
+			await verifyPackagesPublishedCorrectly( { packagesDirectory, version } );
+
+			expect( stubs.devUtils.tools.shExec.firstCall.args[ 0 ] ).to.equal( 'npm show @namespace/package1@latest' );
+			expect( stubs.fs.remove.firstCall.args[ 0 ] ).to.equal( 'package1' );
+
+			expect( stubs.devUtils.tools.shExec.secondCall.args[ 0 ] ).to.equal( 'npm show @namespace/package2@latest' );
+			expect( stubs.fs.remove.secondCall.args[ 0 ] ).to.equal( 'package2' );
+
+			expect( stubs.console.log.firstCall.args[ 0 ] ).to.equal( 'All packages that returned 409 were uploaded correctly.' );
+		} );
+
+		it( 'should not remove package from release directory on on error', async () => {
+			stubs.glob.globSync.returns( [ 'package1', 'package2' ] );
+			stubs.fs.readJson
+				.onCall( 0 ).resolves( { name: '@namespace/package1' } )
+				.onCall( 1 ).resolves( { name: '@namespace/package2' } );
+			stubs.devUtils.tools.shExec
+				.onCall( 0 ).rejects()
+				.onCall( 1 ).resolves();
+			sandbox.stub( process, 'exit' );
+
+			const packagesDirectory = '/workspace/ckeditor5/release/npm';
+			const version = 'latest';
+
+			await verifyPackagesPublishedCorrectly( { packagesDirectory, version } );
+
+			expect( stubs.fs.remove.callCount ).to.equal( 1 );
+			expect( stubs.fs.remove.firstCall.args[ 0 ] ).to.equal( 'package2' );
+
+			expect( stubs.console.error.firstCall.args[ 0 ] ).to.equal(
+				'Packages that were uploaded incorrectly, and need manual verification:\n@namespace/package1'
+			);
+			expect( process.exit.callCount ).to.equal( 1 );
+		} );
+	} );
+} );

@@ -20,7 +20,7 @@ module.exports = async function publishPackageOnNpmCallback( packagePath, taskOp
 	const upath = require( 'upath' );
 	const fs = require( 'fs-extra' );
 
-	const { shouldKeepDirectory } = await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, {
+	const result = await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, {
 		cwd: packagePath,
 		async: true,
 		verbosity: 'error'
@@ -35,7 +35,7 @@ module.exports = async function publishPackageOnNpmCallback( packagePath, taskOp
 			throw new Error( `Unable to publish "${ packageName }" package.` );
 		} );
 
-	if ( !shouldKeepDirectory ) {
+	if ( !result || !result.shouldKeepDirectory ) {
 		await fs.remove( packagePath );
 	}
 };

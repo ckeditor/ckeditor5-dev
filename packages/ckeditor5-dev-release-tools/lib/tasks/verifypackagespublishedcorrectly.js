@@ -26,7 +26,7 @@ module.exports = async function verifyPackagesPublishedCorrectly( options ) {
 	const errors = [];
 
 	if ( !packagesToVerify.length ) {
-		console.log( chalk.bold.green( 'No packages to check for upload error 409 found.' ) );
+		console.log( chalk.bold.green( 'No packages found to check for upload error 409.' ) );
 
 		return;
 	}
