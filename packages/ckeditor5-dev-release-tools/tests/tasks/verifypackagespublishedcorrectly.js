@@ -38,7 +38,6 @@ describe( 'dev-release-tools/utils', () => {
 			mockery.registerMock( 'fs-extra', stubs.fs );
 			mockery.registerMock( '../utils/checkversionavailability', stubs.devUtils );
 			mockery.registerMock( 'glob', stubs.glob );
-			mockery.registerMock( 'chalk', stubs.chalk );
 
 			verifyPackagesPublishedCorrectly = require( '../../lib/tasks/verifypackagespublishedcorrectly' );
 		} );
