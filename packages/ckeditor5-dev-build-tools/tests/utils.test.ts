@@ -5,7 +5,7 @@
 
 import { test, expect } from 'vitest';
 import upath from 'upath';
-import { getCwdPath, camelize, camelizeObjectKeys, removeNewlines } from '../src/utils.js';
+import { getCwdPath, camelize, camelizeObjectKeys, removeNewline } from '../src/utils.js';
 
 test( 'getPath()', () => {
 	expect( getCwdPath( 'dist', 'index.js' ) ).toBe( upath.join( process.cwd(), '/dist/index.js' ) );
@@ -15,10 +15,10 @@ test( 'camelize()', () => {
 	expect( camelize( 'this-is-a-test' ) ).toBe( 'thisIsATest' );
 } );
 
-test( 'removeNewlines()', () => {
+test( 'removeNewline()', () => {
 	const newLines = `line1;
-line2;`
-	expect( removeNewlines( newLines ) ).toBe( 'line1;line2;' );
+line2;`;
+	expect( removeNewline( newLines ) ).toBe( 'line1;line2;' );
 } );
 
 test( 'camelizeObjectKeys()', () => {

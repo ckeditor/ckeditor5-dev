@@ -254,9 +254,13 @@ test( 'should correctly parse the `data:image` style definition (should do not a
 	);
 
 	const expectedResult = removeWhitespace(
-		`.ck {
-background-image: url("data:image/svg+xml;utf8,<svg width='120' height='12' xmlns='http://www.w3.org/2000/svg' ><text style='paint-order:stroke fill; clip-path: inset(-3px);transform: translate(-2px, 0)' stroke='%23EAEAEA' stroke-width='13' dominant-baseline='middle' fill='black' x='100%' text-anchor='end' y='7' font-size='9px' font-family='Consolas, %22Lucida Console%22, %22Lucida Sans Typewriter%22, %22DejaVu Sans Mono%22, %22Bitstream Vera Sans Mono%22, %22Liberation Mono%22, Monaco, %22Courier New%22, Courier, monospace'>FIGCAPTION</text></svg>");background-position: calc(100% - 1px) 1px;}
-	` );
+		'.ck {\n' +
+			'background-image: url("data:image/svg+xml;utf8,<svg width=\'120\' height=\'12\' xmlns=\'http://www.w3.org/2000/svg\' >' +
+			'<text style=\'paint-order:stroke fill; clip-path: inset(-3px);transform: translate(-2px, 0)\' stroke=\'%23EAEAEA\' ' +
+			'stroke-width=\'13\' dominant-baseline=\'middle\' fill=\'black\' x=\'100%\' text-anchor=\'end\' y=\'7\' font-size=\'9px\' ' +
+			'font-family=\'Consolas, %22Lucida Console%22, %22Lucida Sans Typewriter%22, %22DejaVu Sans Mono%22, ' +
+			'%22Bitstream Vera Sans Mono%22, %22Liberation Mono%22, Monaco, %22Courier New%22, Courier, monospace\'>' +
+			'FIGCAPTION</text></svg>");background-position: calc(100% - 1px) 1px;}\n' );
 
 	verifyDividedStyleSheet( output, 'styles-editor.css', expectedResult );
 	verifyDividedStyleSheet( output, 'styles-content.css', '' );

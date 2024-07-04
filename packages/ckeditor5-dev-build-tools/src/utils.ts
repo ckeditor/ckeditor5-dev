@@ -42,10 +42,10 @@ export function removeWhitespace( text: string ): string {
 }
 
 /**
- * Returns string without newlines.
+ * Returns string without newline.
  */
 
-export function removeNewlines( text: string ): string {
+export function removeNewline( text: string ): string {
 	return text.replaceAll( /\r?\n|\r/g, '' );
 }
 
