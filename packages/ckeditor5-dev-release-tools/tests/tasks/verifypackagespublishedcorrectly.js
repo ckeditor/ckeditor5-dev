@@ -97,8 +97,8 @@ describe( 'dev-release-tools/utils', () => {
 			const version = 'latest';
 			const onSuccess = sandbox.stub();
 
-			await verifyPackagesPublishedCorrectly( { packagesDirectory, version, onSuccess } ).
-				then(
+			await verifyPackagesPublishedCorrectly( { packagesDirectory, version, onSuccess } )
+				.then(
 					() => {
 						throw new Error( 'this should not be thrown!' );
 					},
@@ -107,7 +107,7 @@ describe( 'dev-release-tools/utils', () => {
 							'Packages that were uploaded incorrectly, and need manual verification:\n@namespace/package1'
 						);
 					}
-				)
+				);
 
 			expect( stubs.fs.remove.callCount ).to.equal( 1 );
 			expect( stubs.fs.remove.firstCall.args[ 0 ] ).to.equal( 'package2' );
