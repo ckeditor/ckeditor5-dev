@@ -22,24 +22,10 @@ describe( 'dev-release-tools/utils', () => {
 					readJson: sandbox.stub().resolves()
 				},
 				devUtils: {
-					tools: {
-						shExec: sandbox.stub().resolves()
-					}
+					checkVersionAvailability: sandbox.stub().resolves()
 				},
 				glob: {
 					globSync: sandbox.stub().returns( [] )
-				},
-				chalk: {
-					get bold() {
-						return stubs.chalk;
-					},
-					green: sandbox.stub().callsFake( str => str ),
-					yellow: sandbox.stub().callsFake( str => str ),
-					red: sandbox.stub().callsFake( str => str )
-				},
-				console: {
-					log: sandbox.stub( console, 'log' ),
-					error: sandbox.stub( console, 'error' )
 				}
 			};
 
@@ -50,7 +36,7 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			mockery.registerMock( 'fs-extra', stubs.fs );
-			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', stubs.devUtils );
+			mockery.registerMock( '../utils/checkversionavailability', stubs.devUtils );
 			mockery.registerMock( 'glob', stubs.glob );
 			mockery.registerMock( 'chalk', stubs.chalk );
 
@@ -68,11 +54,12 @@ describe( 'dev-release-tools/utils', () => {
 
 			const packagesDirectory = '/workspace/ckeditor5/release/npm';
 			const version = 'latest';
+			const onSuccess = sandbox.stub();
 
-			await verifyPackagesPublishedCorrectly( { packagesDirectory, version } );
+			await verifyPackagesPublishedCorrectly( { packagesDirectory, version, onSuccess } );
 
-			expect( stubs.console.log.firstCall.args[ 0 ] ).to.equal( 'No packages found to check for upload error 409.' );
-			expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 0 );
+			expect( onSuccess.firstCall.args[ 0 ] ).to.equal( '✅ No packages found to check for upload error 409.' );
+			expect( stubs.devUtils.checkVersionAvailability.callCount ).to.equal( 0 );
 		} );
 
 		it( 'should verify packages and remove them from the release directory on "npm show" command success', async () => {
@@ -83,16 +70,19 @@ describe( 'dev-release-tools/utils', () => {
 
 			const packagesDirectory = '/workspace/ckeditor5/release/npm';
 			const version = 'latest';
+			const onSuccess = sandbox.stub();
 
-			await verifyPackagesPublishedCorrectly( { packagesDirectory, version } );
+			await verifyPackagesPublishedCorrectly( { packagesDirectory, version, onSuccess } );
 
-			expect( stubs.devUtils.tools.shExec.firstCall.args[ 0 ] ).to.equal( 'npm show @namespace/package1@latest' );
+			expect( stubs.devUtils.checkVersionAvailability.firstCall.args[ 0 ] ).to.equal( 'latest' );
+			expect( stubs.devUtils.checkVersionAvailability.firstCall.args[ 1 ] ).to.equal( '@namespace/package1' );
 			expect( stubs.fs.remove.firstCall.args[ 0 ] ).to.equal( 'package1' );
 
-			expect( stubs.devUtils.tools.shExec.secondCall.args[ 0 ] ).to.equal( 'npm show @namespace/package2@latest' );
+			expect( stubs.devUtils.checkVersionAvailability.secondCall.args[ 0 ] ).to.equal( 'latest' );
+			expect( stubs.devUtils.checkVersionAvailability.secondCall.args[ 1 ] ).to.equal( '@namespace/package2' );
 			expect( stubs.fs.remove.secondCall.args[ 0 ] ).to.equal( 'package2' );
 
-			expect( stubs.console.log.firstCall.args[ 0 ] ).to.equal( 'All packages that returned 409 were uploaded correctly.' );
+			expect( onSuccess.firstCall.args[ 0 ] ).to.equal( '✅ All packages that returned 409 were uploaded correctly.' );
 		} );
 
 		it( 'should not remove package from release directory on on error', async () => {
@@ -100,23 +90,28 @@ describe( 'dev-release-tools/utils', () => {
 			stubs.fs.readJson
 				.onCall( 0 ).resolves( { name: '@namespace/package1' } )
 				.onCall( 1 ).resolves( { name: '@namespace/package2' } );
-			stubs.devUtils.tools.shExec
+			stubs.devUtils.checkVersionAvailability
 				.onCall( 0 ).rejects()
 				.onCall( 1 ).resolves();
-			sandbox.stub( process, 'exit' );
 
 			const packagesDirectory = '/workspace/ckeditor5/release/npm';
 			const version = 'latest';
+			const onSuccess = sandbox.stub();
 
-			await verifyPackagesPublishedCorrectly( { packagesDirectory, version } );
+			await verifyPackagesPublishedCorrectly( { packagesDirectory, version, onSuccess } ).
+				then(
+					() => {
+						throw new Error( 'this should not be thrown!' );
+					},
+					e => {
+						expect( e.message ).to.equal(
+							'Packages that were uploaded incorrectly, and need manual verification:\n@namespace/package1'
+						);
+					}
+				)
 
 			expect( stubs.fs.remove.callCount ).to.equal( 1 );
 			expect( stubs.fs.remove.firstCall.args[ 0 ] ).to.equal( 'package2' );
-
-			expect( stubs.console.error.firstCall.args[ 0 ] ).to.equal(
-				'Packages that were uploaded incorrectly, and need manual verification:\n@namespace/package1'
-			);
-			expect( process.exit.callCount ).to.equal( 1 );
 		} );
 	} );
 } );

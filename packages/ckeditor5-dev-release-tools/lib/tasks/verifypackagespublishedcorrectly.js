@@ -7,9 +7,8 @@
 
 const upath = require( 'upath' );
 const { globSync } = require( 'glob' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const chalk = require( 'chalk' );
 const fs = require( 'fs-extra' );
+const { checkVersionAvailability } = require( '../utils/checkversionavailability' );
 
 /**
  * Npm sometimes throws incorrect error 409 while publishing, while the package uploads correctly.
@@ -18,15 +17,16 @@ const fs = require( 'fs-extra' );
  * @param {Object} options
  * @param {String} options.packagesDirectory Relative path to a location of packages to release.
  * @param {String} options.version Version of the current release.
+ * @param {Function} options.onSuccess Callback fired when function is successful.
  * @returns {Promise}
  */
 module.exports = async function verifyPackagesPublishedCorrectly( options ) {
-	const { packagesDirectory, version } = options;
+	const { packagesDirectory, version, onSuccess } = options;
 	const packagesToVerify = globSync( upath.join( packagesDirectory, '*' ), { absolute: true } );
 	const errors = [];
 
 	if ( !packagesToVerify.length ) {
-		console.log( chalk.bold.green( 'No packages found to check for upload error 409.' ) );
+		onSuccess( '✅ No packages found to check for upload error 409.' );
 
 		return;
 	}
@@ -35,11 +35,7 @@ module.exports = async function verifyPackagesPublishedCorrectly( options ) {
 		const packageJson = await fs.readJson( upath.join( packageToVerify, 'package.json' ) );
 
 		try {
-			await tools.shExec( `npm show ${ packageJson.name }@${ version }`, {
-				async: true,
-				verbosity: 'silent'
-			} );
-
+			await checkVersionAvailability( version, packageJson.name );
 			await fs.remove( packageToVerify );
 		} catch {
 			errors.push( packageJson.name );
@@ -47,9 +43,8 @@ module.exports = async function verifyPackagesPublishedCorrectly( options ) {
 	}
 
 	if ( errors.length ) {
-		console.error( chalk.bold.red( 'Packages that were uploaded incorrectly, and need manual verification:\n' + errors.join( '\n' ) ) );
-		process.exit( 1 );
+		throw new Error( 'Packages that were uploaded incorrectly, and need manual verification:\n' + errors.join( '\n' ) );
 	}
 
-	console.log( chalk.bold.green( 'All packages that returned 409 were uploaded correctly.' ) );
+	onSuccess( '✅ All packages that returned 409 were uploaded correctly.' );
 };

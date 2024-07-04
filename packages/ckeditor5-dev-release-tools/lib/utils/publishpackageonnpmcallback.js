@@ -28,7 +28,7 @@ module.exports = async function publishPackageOnNpmCallback( packagePath, taskOp
 		.catch( e => {
 			const packageName = upath.basename( packagePath );
 
-			if ( e.message.includes( 'code E409' ) ) {
+			if ( e.toString().includes( 'code E409' ) ) {
 				return { shouldKeepDirectory: true };
 			}
 
