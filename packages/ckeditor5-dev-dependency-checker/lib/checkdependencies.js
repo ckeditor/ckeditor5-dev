@@ -381,9 +381,30 @@ async function isDevDependency( packageName, absolutePaths ) {
 		return true;
 	}
 
+	/**
+	 * These folders contain code that will be shipped to npm and run in the final projects.
+	 * This means that all dependencies used in these folders are production dependencies.
+	 */
+	const foldersContainingProductionCode = [
+		/**
+		 * These folders contain the source code of the packages.
+		 */
+		/[/\\]src[/\\]/,
+		/[/\\]theme[/\\]/,
+
+		/**
+		 * This folder contains the compiled code of the packages. Most of this code is the same
+		 * as the source, but during the build process some of the imports are replaced with those
+		 * compatible with the "new installation methods", which may use different dependencies.
+		 *
+		 * For example, the `ckeditor5/src/core.js` import is replaced with `@ckeditor/ckeditor5-core/dist/index.js`.
+		 *                   ^^^^^^^^^                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+		 */
+		/[/\\]dist[/\\]/
+	];
+
 	for ( const absolutePath of absolutePaths ) {
-		// Only imports in files in src/ or theme/ could be non dev dependency.
-		if ( !absolutePath.match( /[/\\](src|theme|dist)[/\\]/ ) ) {
+		if ( !foldersContainingProductionCode.some( folder => absolutePath.match( folder ) ) ) {
 			continue;
 		}
 
