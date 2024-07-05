@@ -6,7 +6,7 @@
 'use strict';
 
 const upath = require( 'upath' );
-const { globSync } = require( 'glob' );
+const { glob } = require( 'glob' );
 const fs = require( 'fs-extra' );
 const { checkVersionAvailability } = require( '../utils/checkversionavailability' );
 
@@ -22,7 +22,7 @@ const { checkVersionAvailability } = require( '../utils/checkversionavailability
  */
 module.exports = async function verifyPackagesPublishedCorrectly( options ) {
 	const { packagesDirectory, version, onSuccess } = options;
-	const packagesToVerify = globSync( upath.join( packagesDirectory, '*' ), { absolute: true } );
+	const packagesToVerify = await glob( upath.join( packagesDirectory, '*' ), { absolute: true } );
 	const errors = [];
 
 	if ( !packagesToVerify.length ) {

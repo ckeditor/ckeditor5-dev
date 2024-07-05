@@ -25,7 +25,7 @@ describe( 'dev-release-tools/utils', () => {
 					checkVersionAvailability: sandbox.stub().resolves()
 				},
 				glob: {
-					globSync: sandbox.stub().returns( [] )
+					glob: sandbox.stub().resolves( [] )
 				}
 			};
 
@@ -49,7 +49,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'should not verify packages if there are no packages in the release directory', async () => {
-			stubs.glob.globSync.returns( [] );
+			stubs.glob.glob.resolves( [] );
 
 			const packagesDirectory = '/workspace/ckeditor5/release/npm';
 			const version = 'latest';
@@ -62,7 +62,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'should verify packages and remove them from the release directory on "npm show" command success', async () => {
-			stubs.glob.globSync.returns( [ 'package1', 'package2' ] );
+			stubs.glob.glob.resolves( [ 'package1', 'package2' ] );
 			stubs.fs.readJson
 				.onCall( 0 ).resolves( { name: '@namespace/package1' } )
 				.onCall( 1 ).resolves( { name: '@namespace/package2' } );
@@ -85,7 +85,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'should not remove package from release directory on on error', async () => {
-			stubs.glob.globSync.returns( [ 'package1', 'package2' ] );
+			stubs.glob.glob.resolves( [ 'package1', 'package2' ] );
 			stubs.fs.readJson
 				.onCall( 0 ).resolves( { name: '@namespace/package1' } )
 				.onCall( 1 ).resolves( { name: '@namespace/package2' } );
