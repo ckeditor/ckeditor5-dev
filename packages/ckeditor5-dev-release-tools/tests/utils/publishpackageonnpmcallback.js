@@ -124,7 +124,7 @@ describe( 'dev-release-tools/utils', () => {
 
 			const packagePath = '/workspace/ckeditor5/packages/ckeditor5-foo';
 
-			await publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } )
+			await publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } );
 
 			expect( stubs.fs.remove.callCount ).to.equal( 0 );
 		} );
