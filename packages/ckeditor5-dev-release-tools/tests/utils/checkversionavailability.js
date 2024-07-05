@@ -33,8 +33,22 @@ describe( 'dev-release-tools/utils', () => {
 			sandbox.restore();
 		} );
 
-		it( 'should resolve to true if version does not exist (npm >= 8.13.0)', () => {
+		it( 'should resolve to true if version does not exist (npm >= 8.13.0 && npm < 10.0.0)', () => {
 			stubs.shExec.rejects( new Error( 'npm ERR! code E404' ) );
+
+			return checkVersionAvailability( '1.0.1', 'stub-package' )
+				.then( result => {
+					expect( stubs.shExec.callCount ).to.equal( 1 );
+					expect( stubs.shExec.firstCall.args[ 0 ] ).to.equal( 'npm show stub-package@1.0.1 version' );
+					expect( result ).to.be.true;
+				} )
+				.catch( () => {
+					throw new Error( 'Expected to be resolved.' );
+				} );
+		} );
+
+		it( 'should resolve to true if version does not exist (npm >= 10.0.0)', () => {
+			stubs.shExec.rejects( new Error( 'npm error code E404' ) );
 
 			return checkVersionAvailability( '1.0.1', 'stub-package' )
 				.then( result => {
