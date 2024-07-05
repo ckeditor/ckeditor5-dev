@@ -118,5 +118,15 @@ describe( 'dev-release-tools/utils', () => {
 					}
 				);
 		} );
+
+		it( 'should not remove a package directory and not throw error when publishing on npm failed with code 409', async () => {
+			stubs.devUtils.tools.shExec.rejects( new Error( 'code E409' ) );
+
+			const packagePath = '/workspace/ckeditor5/packages/ckeditor5-foo';
+
+			await publishPackageOnNpmCallback( packagePath, { npmTag: 'nightly' } );
+
+			expect( stubs.fs.remove.callCount ).to.equal( 0 );
+		} );
 	} );
 } );

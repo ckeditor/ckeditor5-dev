@@ -20,12 +20,22 @@ module.exports = async function publishPackageOnNpmCallback( packagePath, taskOp
 	const upath = require( 'upath' );
 	const fs = require( 'fs-extra' );
 
-	await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, { cwd: packagePath, async: true, verbosity: 'error' } )
-		.catch( () => {
+	const result = await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, {
+		cwd: packagePath,
+		async: true,
+		verbosity: 'error'
+	} )
+		.catch( e => {
 			const packageName = upath.basename( packagePath );
+
+			if ( e.toString().includes( 'code E409' ) ) {
+				return { shouldKeepDirectory: true };
+			}
 
 			throw new Error( `Unable to publish "${ packageName }" package.` );
 		} );
 
-	await fs.remove( packagePath );
+	if ( !result || !result.shouldKeepDirectory ) {
+		await fs.remove( packagePath );
+	}
 };
