@@ -35,8 +35,13 @@ module.exports = async function verifyPackagesPublishedCorrectly( options ) {
 		const packageJson = await fs.readJson( upath.join( packageToVerify, 'package.json' ) );
 
 		try {
-			await checkVersionAvailability( version, packageJson.name );
-			await fs.remove( packageToVerify );
+			const packageWasUploadedCorrectly = !await checkVersionAvailability( version, packageJson.name );
+
+			if ( packageWasUploadedCorrectly ) {
+				await fs.remove( packageToVerify );
+			} else {
+				errors.push( packageJson.name );
+			}
 		} catch {
 			errors.push( packageJson.name );
 		}
