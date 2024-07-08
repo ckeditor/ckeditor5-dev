@@ -9,8 +9,8 @@ Changelog
 
 ### Bug fixes
 
+* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Should not corrupt the CSS code during splitting CSS into editor and content files. See [ckeditor/ckeditor5#16670](https://github.com/ckeditor/ckeditor5/issues/16670). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e196d783a3bbc363cceb50141970d289319c36cd))
 * **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The release tools is now compatible with npm 10. Closes [ckeditor/ckeditor5#16610](https://github.com/ckeditor/ckeditor5/issues/16610). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/a83a2814a4f0e0c0274ca6a7e2f7881d3d850085))
-* Should not corrupt the CSS code during splitting CSS into editor and content files. See https://github.com/ckeditor/ckeditor5/issues/16670. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e196d783a3bbc363cceb50141970d289319c36cd))
 
 ### Released packages
 
