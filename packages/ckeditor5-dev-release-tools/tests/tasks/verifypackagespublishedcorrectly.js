@@ -84,7 +84,36 @@ describe( 'dev-release-tools/utils', () => {
 			expect( onSuccess.firstCall.args[ 0 ] ).to.equal( '✅ All packages that returned 409 were uploaded correctly.' );
 		} );
 
-		it( 'should not remove package from release directory on on error', async () => {
+		it( 'should not remove package from release directory when package is not available on npm', async () => {
+			stubs.glob.glob.resolves( [ 'package1', 'package2' ] );
+			stubs.fs.readJson
+				.onCall( 0 ).resolves( { name: '@namespace/package1' } )
+				.onCall( 1 ).resolves( { name: '@namespace/package2' } );
+			stubs.devUtils.checkVersionAvailability
+				.onCall( 0 ).resolves( true )
+				.onCall( 1 ).resolves( false );
+
+			const packagesDirectory = '/workspace/ckeditor5/release/npm';
+			const version = 'latest';
+			const onSuccess = sandbox.stub();
+
+			await verifyPackagesPublishedCorrectly( { packagesDirectory, version, onSuccess } )
+				.then(
+					() => {
+						throw new Error( 'this should not be thrown!' );
+					},
+					e => {
+						expect( e.message ).to.equal(
+							'Packages that were uploaded incorrectly, and need manual verification:\n@namespace/package1'
+						);
+					}
+				);
+
+			expect( stubs.fs.remove.callCount ).to.equal( 1 );
+			expect( stubs.fs.remove.firstCall.args[ 0 ] ).to.equal( 'package2' );
+		} );
+
+		it( 'should not remove package from release directory when checking version on npm throws error', async () => {
 			stubs.glob.glob.resolves( [ 'package1', 'package2' ] );
 			stubs.fs.readJson
 				.onCall( 0 ).resolves( { name: '@namespace/package1' } )
