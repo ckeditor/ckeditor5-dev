@@ -1,6 +1,46 @@
 Changelog
 =========
 
+## [40.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/v40.2.3...v40.3.0) (2024-07-08)
+
+### Features
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Added a new task to verify if packages were published correctly to npm. See [ckeditor/ckeditor5#16625](https://github.com/ckeditor/ckeditor5/issues/16625). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/73016ca82e98826fb5ed2e9ea17a3eccb08051be))
+
+### Bug fixes
+
+* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: The release tools is now compatible with npm 10. Closes [ckeditor/ckeditor5#16610](https://github.com/ckeditor/ckeditor5/issues/16610). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/a83a2814a4f0e0c0274ca6a7e2f7881d3d850085))
+* Should not corrupt the CSS code during splitting CSS into editor and content files. See https://github.com/ckeditor/ckeditor5/issues/16670. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e196d783a3bbc363cceb50141970d289319c36cd))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Releases containing new features:
+
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/40.3.0): v40.2.3 => v40.3.0
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/40.3.0): v40.2.3 => v40.3.0
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/40.3.0): v40.2.3 => v40.3.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/40.3.0): v40.2.3 => v40.3.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/40.3.0): v40.2.3 => v40.3.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/40.3.0): v40.2.3 => v40.3.0
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/40.3.0): v40.2.3 => v40.3.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/40.3.0): v40.2.3 => v40.3.0
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/40.3.0): v40.2.3 => v40.3.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/40.3.0): v40.2.3 => v40.3.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/40.3.0): v40.2.3 => v40.3.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/40.3.0): v40.2.3 => v40.3.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/40.3.0): v40.2.3 => v40.3.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/40.3.0): v40.2.3 => v40.3.0
+</details>
+
+
 ## [40.2.3](https://github.com/ckeditor/ckeditor5-dev/compare/v40.2.2...v40.2.3) (2024-07-02)
 
 Internal changes only (updated dependencies, documentation, etc.).
@@ -132,41 +172,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/40.2.0): v40.1.0 => v40.2.0
 * [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/40.2.0): v40.1.0 => v40.2.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/40.2.0): v40.1.0 => v40.2.0
-</details>
-
-
-## [40.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v40.0.1...v40.1.0) (2024-05-23)
-
-### Features
-
-* **[ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci)**: Added `--ignore` option to the `ckeditor5-dev-ci-circle-workflow-notifier` task that allows ignoring jobs while calculating whether the notification should be sent. Closes [ckeditor/ckeditor5#16403](https://github.com/ckeditor/ckeditor5/issues/16403). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/8b20eda9954a1808e0cd80a63739ffeb4010b71e))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Releases containing new features:
-
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/40.1.0): v40.0.1 => v40.1.0
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/40.1.0): v40.0.1 => v40.1.0
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/40.1.0): v40.0.1 => v40.1.0
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/40.1.0): v40.0.1 => v40.1.0
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/40.1.0): v40.0.1 => v40.1.0
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/40.1.0): v40.0.1 => v40.1.0
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/40.1.0): v40.0.1 => v40.1.0
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/40.1.0): v40.0.1 => v40.1.0
-* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/40.1.0): v40.0.1 => v40.1.0
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/40.1.0): v40.0.1 => v40.1.0
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/40.1.0): v40.0.1 => v40.1.0
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/40.1.0): v40.0.1 => v40.1.0
-* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/40.1.0): v40.0.1 => v40.1.0
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/40.1.0): v40.0.1 => v40.1.0
 </details>
 
 ---
