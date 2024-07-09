@@ -26,7 +26,8 @@
     "ckeditor5-dev-ci-notify-circle-status": "bin/notify-circle-status.js",
     "ckeditor5-dev-ci-circle-workflow-notifier": "bin/circle-workflow-notifier.js",
     "ckeditor5-dev-ci-allocate-swap-memory": "bin/allocate-swap-memory.sh",
-    "ckeditor5-dev-ci-install-latest-chrome": "bin/install-latest-chrome.sh"
+    "ckeditor5-dev-ci-install-latest-chrome": "bin/install-latest-chrome.sh",
+    "ckeditor5-dev-ci-is-job-triggered-by-member": "bin/is-job-triggered-by-member.js"
   },
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
