@@ -10,8 +10,8 @@
  * @param {String} options.circleToken
  * @param {String} options.commit
  * @param {String} options.branch
- * @param {String} options.releaseBranch Define a branch that leads the release process.
  * @param {String} options.repositorySlug A repository slug (org/name) where a new build will be started.
+ * @param {String|null} [options.releaseBranch=null] Define a branch that leads the release process.
  * @param {String|null} [options.triggerRepositorySlug=null] A repository slug (org/name) that triggers a new build.
  * @return {Promise}
  */
@@ -20,17 +20,20 @@ module.exports = async function triggerCircleBuild( options ) {
 		circleToken,
 		commit,
 		branch,
-		releaseBranch,
 		repositorySlug,
+		releaseBranch = null,
 		triggerRepositorySlug = null
 	} = options;
 
 	const requestUrl = `https://circleci.com/api/v2/project/github/${ repositorySlug }/pipeline`;
 
 	const parameters = {
-		triggerCommitHash: commit,
-		isRelease: branch === releaseBranch
+		triggerCommitHash: commit
 	};
+
+	if ( releaseBranch ) {
+		parameters.isRelease = branch === releaseBranch;
+	}
 
 	if ( triggerRepositorySlug ) {
 		parameters.triggerRepositorySlug = triggerRepositorySlug;

@@ -15,9 +15,9 @@ const triggerCircleBuild = require( '../lib/trigger-circle-build' );
  *   - CIRCLE_SHA1 - provided by default by CircleCI and keeps the git commit of processed build.
  *   - CIRCLE_BRANCH - provided by default by CircleCI and keeps the git branch of processed build.
  *   - CKE5_CIRCLE_TOKEN - an authorization token to talk to CircleCI REST API.
- *   - CKE5_GITHUB_RELEASE_BRANCH - define a branch that leads the release process.
  *   - CKE5_GITHUB_REPOSITORY_SLUG - a repository slug (org/name) where a new build will be started.
- *   - CKE5_GITHUB_TRIGGER_REPOSITORY_SLUG - a repository slug (org/name) that triggers a new build.
+ *   - CKE5_GITHUB_RELEASE_BRANCH - (optional) define a branch that leads the release process.
+ *   - CKE5_GITHUB_TRIGGER_REPOSITORY_SLUG - (optional) a repository slug (org/name) that triggers a new build.
  *
  * Example usage:
  * CKE5_CIRCLE_TOKEN=... ckeditor5-dev-ci-trigger-circle-build
