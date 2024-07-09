@@ -12,8 +12,8 @@ const triggerCircleBuild = require( '../lib/trigger-circle-build' );
  *
  * In order to integrate the action in your pipeline, you need prepare a few environment variables:
  *
- *   - CIRCLE_SHA1 - provided by default by CircleCI and keeps the git commit of processed build.
  *   - CIRCLE_BRANCH - provided by default by CircleCI and keeps the git branch of processed build.
+ *   - CKE5_COMMIT_SHA1 - a full commit identifier of the processed the build.
  *   - CKE5_CIRCLE_TOKEN - an authorization token to talk to CircleCI REST API.
  *   - CKE5_GITHUB_REPOSITORY_SLUG - a repository slug (org/name) where a new build will be started.
  *   - CKE5_GITHUB_RELEASE_BRANCH - (optional) define a branch that leads the release process.
@@ -24,7 +24,7 @@ const triggerCircleBuild = require( '../lib/trigger-circle-build' );
  */
 
 const {
-	CIRCLE_SHA1,
+	CKE5_COMMIT_SHA1,
 	CIRCLE_BRANCH,
 	CKE5_CIRCLE_TOKEN,
 	CKE5_GITHUB_RELEASE_BRANCH,
@@ -34,7 +34,7 @@ const {
 
 const options = {
 	circleToken: CKE5_CIRCLE_TOKEN,
-	commit: CIRCLE_SHA1,
+	commit: CKE5_COMMIT_SHA1,
 	branch: CIRCLE_BRANCH,
 	releaseBranch: CKE5_GITHUB_RELEASE_BRANCH,
 	repositorySlug: CKE5_GITHUB_REPOSITORY_SLUG,
