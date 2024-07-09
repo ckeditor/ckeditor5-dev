@@ -6,5 +6,6 @@
 'use strict';
 
 module.exports = {
-	getJobApprover: require( './utils/get-job-approver' )
+	getJobApprover: require( './utils/get-job-approver' ),
+	members: require( './data/members.json' )
 };
