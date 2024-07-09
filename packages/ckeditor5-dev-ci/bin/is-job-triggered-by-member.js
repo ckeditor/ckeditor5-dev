@@ -9,6 +9,22 @@
 
 const isJobTriggeredByMember = require( '../lib/is-job-triggered-by-member' );
 
+/**
+ * This script checks if a user that approved an approval job could do that.
+ *
+ * In order to integrate the action in your pipeline, you need prepare a few environment variables:
+ *
+ *   - CIRCLE_WORKFLOW_ID - provided by default by CircleCI and keeps a unique id of the CI build.
+ *   - CKE5_CIRCLE_TOKEN - an authorization token to talk to CircleCI REST API.
+ *   - CKE5_CIRCLE_APPROVAL_JOB_NAME - a job name to verify.
+ *   - CKE5_GITHUB_TOKEN - a GitHub token used for authorization a request.
+ *   - CKE5_GITHUB_TEAM_SLUG - a GitHub team slug that defines accounts that could approve the job.
+ *   - CKE5_GITHUB_ORGANIZATION - your GitHub organization.
+ *
+ * Example usage:
+ * CKE5_CIRCLE_TOKEN=... ckeditor5-dev-ci-is-job-triggered-by-member
+ */
+
 const {
 	CIRCLE_WORKFLOW_ID,
 	CKE5_CIRCLE_TOKEN,
