@@ -260,8 +260,31 @@ test( 'should correctly parse the `data:image` style definition (should do not a
 			'stroke-width=\'13\' dominant-baseline=\'middle\' fill=\'black\' x=\'100%\' text-anchor=\'end\' y=\'7\' font-size=\'9px\' ' +
 			'font-family=\'Consolas, %22Lucida Console%22, %22Lucida Sans Typewriter%22, %22DejaVu Sans Mono%22, ' +
 			'%22Bitstream Vera Sans Mono%22, %22Liberation Mono%22, Monaco, %22Courier New%22, Courier, monospace\'>' +
-			'FIGCAPTION</text></svg>");background-position: calc(100% - 1px) 1px;}\n' );
+			'FIGCAPTION</text></svg>");background-position: calc(100% - 1px) 1px;\n}\n' );
 
 	verifyDividedStyleSheet( output, 'styles-editor.css', expectedResult );
 	verifyDividedStyleSheet( output, 'styles-content.css', '' );
+} );
+
+test( 'should keep CSS variables used by other CSS variables', async () => {
+	const output = await generateBundle(
+		'./fixtures/nested-css-variables/input.ts',
+		{ baseFileName: 'styles' }
+	);
+
+	const expectedResult = removeWhitespace(
+		`:root {
+			--ck-spacing-unit: var(--ck-variable-1);
+			--ck-variable-1: var(--ck-variable-2);
+			--ck-variable-2: var(--ck-variable-3);
+			--ck-variable-3: var(--ck-variable-4);
+			--ck-variable-4: var(--ck-variable-5);
+			--ck-variable-5: 0.6em;
+		}
+		.ck {
+			margin: var(--ck-spacing-unit);
+		}
+	` );
+
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedResult );
 } );
