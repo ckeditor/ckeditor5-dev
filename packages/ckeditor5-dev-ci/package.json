@@ -3,6 +3,7 @@
   "version": "40.3.0",
   "description": "Utils used on various Continuous Integration services.",
   "keywords": [],
+  "main": "lib/index.js",
   "dependencies": {
     "minimist": "^1.2.5",
     "node-fetch": "^2.6.7",
