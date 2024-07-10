@@ -276,10 +276,8 @@ test( 'should keep CSS variables used by other CSS variables', async () => {
 		`:root {
 			--ck-spacing-unit: var(--ck-variable-1);
 			--ck-variable-1: var(--ck-variable-2);
-			--ck-variable-2: var(--ck-variable-3);
-			--ck-variable-3: var(--ck-variable-4);
-			--ck-variable-4: var(--ck-variable-5);
-			--ck-variable-5: 0.6em;
+			--ck-variable-2: var(--ck-nonexistent-variable, var(--ck-variable-3));
+			--ck-variable-3: 0.6em;
 		}
 		.ck {
 			margin: var(--ck-spacing-unit);
