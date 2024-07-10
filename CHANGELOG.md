@@ -1,6 +1,38 @@
 Changelog
 =========
 
+## [40.3.1](https://github.com/ckeditor/ckeditor5-dev/compare/v40.3.0...v40.3.1) (2024-07-10)
+
+### Bug fixes
+
+* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Preserve CSS variables used by other CSS variables when splitting styles into editor- or content-only stylesheets. Fixes [[ckeditor/ckeditor5#16689](https://github.com/ckeditor/ckeditor5/issues/16689)](https://github.com/ckeditor/ckeditor5/issues/16689). ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/9481eacf673d5b291cec3f69e61a847f775a95eb))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/40.3.1): v40.3.0 => v40.3.1
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/40.3.1): v40.3.0 => v40.3.1
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/40.3.1): v40.3.0 => v40.3.1
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/40.3.1): v40.3.0 => v40.3.1
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/40.3.1): v40.3.0 => v40.3.1
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/40.3.1): v40.3.0 => v40.3.1
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/40.3.1): v40.3.0 => v40.3.1
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/40.3.1): v40.3.0 => v40.3.1
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/40.3.1): v40.3.0 => v40.3.1
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/40.3.1): v40.3.0 => v40.3.1
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/40.3.1): v40.3.0 => v40.3.1
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/40.3.1): v40.3.0 => v40.3.1
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/40.3.1): v40.3.0 => v40.3.1
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/40.3.1): v40.3.0 => v40.3.1
+</details>
+
+
 ## [40.3.0](https://github.com/ckeditor/ckeditor5-dev/compare/v40.2.3...v40.3.0) (2024-07-08)
 
 ### Features
@@ -132,46 +164,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/40.2.1): v40.2.0 => v40.2.1
 * [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/40.2.1): v40.2.0 => v40.2.1
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/40.2.1): v40.2.0 => v40.2.1
-</details>
-
-
-## [40.2.0](https://github.com/ckeditor/ckeditor5-dev/compare/v40.1.0...v40.2.0) (2024-05-28)
-
-### Features
-
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Allow replacing imports before bundling. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/4feeeb8c55ebf625efab68f1741be96a73e58502))
-
-### Bug fixes
-
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: Globals names for `ckeditor5` and `ckeditor5-premium-features` will not need to be guessed during UMD build. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/baf7bf011fb6ae37566e77335cd17878506a486a))
-* **[build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools)**: UMD should respect output filename. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/6d6c8ed7e96519f0f8b188f765098d68fcd41686))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Releases containing new features:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/40.2.0): v40.1.0 => v40.2.0
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/40.2.0): v40.1.0 => v40.2.0
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/40.2.0): v40.1.0 => v40.2.0
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/40.2.0): v40.1.0 => v40.2.0
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/40.2.0): v40.1.0 => v40.2.0
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/40.2.0): v40.1.0 => v40.2.0
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/40.2.0): v40.1.0 => v40.2.0
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/40.2.0): v40.1.0 => v40.2.0
-* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/40.2.0): v40.1.0 => v40.2.0
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/40.2.0): v40.1.0 => v40.2.0
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/40.2.0): v40.1.0 => v40.2.0
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/40.2.0): v40.1.0 => v40.2.0
-* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/40.2.0): v40.1.0 => v40.2.0
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/40.2.0): v40.1.0 => v40.2.0
 </details>
 
 ---
