@@ -5,6 +5,8 @@
 
 /* eslint-env node */
 
+const fetch = require( 'node-fetch' );
+
 /**
  * @param options
  * @param {String} options.circleToken

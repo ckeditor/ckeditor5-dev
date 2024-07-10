@@ -5,21 +5,31 @@
 
 'use strict';
 
-const triggerCircleBuild = require( '../lib/trigger-circle-build' );
 const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
+const mockery = require( 'mockery' );
 
 describe( 'lib/triggerCircleBuild', () => {
-	let stubs;
+	let stubs, triggerCircleBuild;
 
 	beforeEach( () => {
+		mockery.enable( {
+			useCleanCache: true,
+			warnOnReplace: false,
+			warnOnUnregistered: false
+		} );
+
 		stubs = {
-			fetch: sinon.stub( global, 'fetch' )
+			fetch: sinon.stub()
 		};
+
+		mockery.registerMock( 'node-fetch', stubs.fetch );
+
+		triggerCircleBuild = require( '../lib/trigger-circle-build' );
 	} );
 
 	afterEach( () => {
-		sinon.restore();
+		mockery.disable();
 	} );
 
 	it( 'should send a POST request to the CircleCI service', async () => {

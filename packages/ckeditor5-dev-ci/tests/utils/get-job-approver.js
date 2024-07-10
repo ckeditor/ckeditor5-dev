@@ -5,21 +5,31 @@
 
 'use strict';
 
-const getJobApprover = require( '../../lib/utils/get-job-approver' );
 const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
+const mockery = require( 'mockery' );
 
 describe( 'lib/utils/getJobApprover', () => {
-	let stubs;
+	let stubs, getJobApprover;
 
 	beforeEach( () => {
+		mockery.enable( {
+			useCleanCache: true,
+			warnOnReplace: false,
+			warnOnUnregistered: false
+		} );
+
 		stubs = {
-			fetch: sinon.stub( global, 'fetch' )
+			fetch: sinon.stub()
 		};
+
+		mockery.registerMock( 'node-fetch', stubs.fetch );
+
+		getJobApprover = require( '../../lib/utils/get-job-approver' );
 	} );
 
 	afterEach( () => {
-		sinon.restore();
+		mockery.disable();
 	} );
 
 	it( 'should return a GitHub login name of a user who approved a job in given workflow', async () => {

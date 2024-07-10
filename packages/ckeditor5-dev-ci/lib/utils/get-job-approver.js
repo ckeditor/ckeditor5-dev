@@ -5,6 +5,8 @@
 
 'use strict';
 
+const fetch = require( 'node-fetch' );
+
 /**
  * Returns a promise that resolves to GitHub name of a developer who approved the `jobName` job.
  *
