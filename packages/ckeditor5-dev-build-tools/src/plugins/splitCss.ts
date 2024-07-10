@@ -30,6 +30,11 @@ export interface RollupSplitCssOptions {
  */
 const filter = createFilter( [ '**/*.css' ] );
 
+/**
+ * Regular expression to match CSS variables.
+ */
+const VARIABLE_DEFINITION_REGEXP = /--([\w-]+)/gm;
+
 export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {
 	const options: Required<RollupSplitCssOptions> = Object.assign( {
 		minimize: false
@@ -144,30 +149,55 @@ function getDividedStyleSheetsDependingOnItsPurpose( rules: Array<Rule> ) {
 }
 
 /**
+ * Extracts all `CSS` variables from passed `styles`.
+ */
+function getCssVariables(
+	styles: string
+): Set<string> {
+	return new Set( styles.match( VARIABLE_DEFINITION_REGEXP ) );
+}
+
+/**
+ * Recursively gets all used CSS variables from the `allDeclarations` list.
+ * This is required, because CSS variables can contain other CSS variables.
+ */
+function recursivelyGetCssVariables(
+	variables: Set<string>,
+	allDeclarations: Array<Declaration>
+): Array<Declaration> {
+	return allDeclarations
+		// Filter out declarations of unused CSS variables.
+		.filter( ( declaration: Declaration ) => variables.has( declaration.property! ) )
+		// Because CSS variables can themselves contain other CSS variables, we need to recursively get all of them.
+		.reduce( ( acc: Array<Declaration>, declaration: Declaration ) => {
+			const nestedVariables = recursivelyGetCssVariables(
+				getCssVariables( declaration.value! ),
+				allDeclarations
+			);
+
+			acc.push( declaration, ...nestedVariables );
+
+			return acc;
+		}, [] )
+		// Flatten the array of arrays.
+		.flat( 20 ); // `20` instead of `Infinity` so that TypeScript doesn't complain.
+}
+
+/**
  * Returns `:root` declarations for editor and content stylesheets.
  */
 function filterCssVariablesBasedOnUsage(
 	rootDefinitions: string,
 	dividedStylesheets: { [key: string]: string }
 ): Record<string, string> {
-	const VARIABLE_DEFINITION_REGEXP = /--([\w-]+)/gm;
-
-	const variablesUsedInEditorStylesContent: Set<string> = new Set(
-		dividedStylesheets.editorStylesContent!.match( VARIABLE_DEFINITION_REGEXP )
-	);
-
-	const variablesUsedInEditingViewStylesContent: Set<string> = new Set(
-		dividedStylesheets.editingViewStylesContent!.match( VARIABLE_DEFINITION_REGEXP )
-	);
-
 	const rootDeclarationForEditorStyles = createRootDeclarationOfUsedVariables(
 		rootDefinitions,
-		variablesUsedInEditorStylesContent
+		getCssVariables( dividedStylesheets.editorStylesContent! )
 	);
 
 	const rootDeclarationForEditingViewStyles = createRootDeclarationOfUsedVariables(
 		rootDefinitions,
-		variablesUsedInEditingViewStylesContent
+		getCssVariables( dividedStylesheets.editingViewStylesContent! )
 	);
 
 	return {
@@ -178,29 +208,29 @@ function filterCssVariablesBasedOnUsage(
 
 /**
  * Returns filtered `:root` declaration based on list of used `CSS` variables in stylesheet content.
- * @param rootDeclaration
- * @param listOfUsedVariables
  */
-function createRootDeclarationOfUsedVariables( rootDefinition: string, listOfUsedVariables: Set<string> ): string {
-	if ( rootDefinition.length === 0 || listOfUsedVariables.size === 0 ) {
+function createRootDeclarationOfUsedVariables(
+	rootDefinition: string,
+	usedVariables: Set<string>
+): string {
+	if ( rootDefinition.length === 0 || usedVariables.size === 0 ) {
 		return '';
 	}
 
 	const rootDeclarationWithSelector = wrapDefinitionsIntoSelector( ':root', rootDefinition );
 	const parsedRootDeclaration = parse( rootDeclarationWithSelector );
 	const firstRule = parsedRootDeclaration.stylesheet!.rules[ 0 ] as Rule;
-	const listOfDeclarations = firstRule.declarations as Array<Declaration>;
+	const allDeclarations = firstRule.declarations as Array<Declaration>;
 
-	const variablesDefinitions = listOfDeclarations.reduce( ( acc: string, currentDeclaration ) => {
-		if ( !listOfUsedVariables.has( currentDeclaration.property! ) ) {
-			return acc;
-		}
+	const variables: string = recursivelyGetCssVariables( usedVariables, allDeclarations )
+		// Convert declarations to CSS string.
+		.map( ( declaration: Declaration ) => `${ declaration.property }: ${ declaration.value };` )
+		// Remove duplicates.
+		.filter( ( item, pos, self ) => self.indexOf( item ) == pos )
+		// Join declarations into a single string.
+		.join( '\n' );
 
-		const property = `${ currentDeclaration.property }: ${ currentDeclaration.value };\n`;
-		return acc + property;
-	}, '' );
-
-	return wrapDefinitionsIntoSelector( ':root', variablesDefinitions );
+	return wrapDefinitionsIntoSelector( ':root', variables );
 }
 
 /**
@@ -278,5 +308,5 @@ function wrapDefinitionsIntoSelector( selector: string, definitions: string ): s
 		definitions = removeNewline( definitions );
 	}
 
-	return `${ selector } {\n${ definitions }}\n`;
+	return `${ selector } {\n${ definitions }\n}\n`;
 }
