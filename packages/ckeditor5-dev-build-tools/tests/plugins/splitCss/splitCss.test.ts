@@ -286,3 +286,20 @@ test( 'should keep CSS variables used by other CSS variables', async () => {
 
 	verifyDividedStyleSheet( output, 'styles-editor.css', expectedResult );
 } );
+
+test( 'should preserve all selectors', async () => {
+	const output = await generateBundle(
+		'./fixtures/more-than-one-selector/input.ts',
+		{ baseFileName: 'styles' }
+	);
+
+	const expectedResult = removeWhitespace(
+		`.ck,
+		.second-selector,
+		.third-selector p {
+			color: red;
+		}
+	` );
+
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedResult );
+} );

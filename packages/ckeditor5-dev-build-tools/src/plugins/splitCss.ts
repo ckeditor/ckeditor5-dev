@@ -237,7 +237,7 @@ function createRootDeclarationOfUsedVariables(
  * Decides to which stylesheet should passed `rule` be placed or it should be in `:root` definition.
  */
 function divideRuleStylesBetweenStylesheets( rule: Rule ) {
-	const selector = rule.selectors![ 0 ]!;
+	const selector = rule.selectors!.join( ',\n' );
 	const rootDefinitions = [];
 
 	let editorStyles = '';
