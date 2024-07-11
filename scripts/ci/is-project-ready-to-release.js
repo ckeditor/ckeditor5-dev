@@ -13,7 +13,7 @@ const { execSync } = require( 'child_process' );
 const releaseTools = require( '@ckeditor/ckeditor5-dev-release-tools' );
 const semver = require( 'semver' );
 
-const latestPublishedVersion = execSync( 'npm view @ckeditor/ckeditor5-dev-release-tool@latest version', { encoding: 'utf-8' } ).trim();
+const latestPublishedVersion = execSync( 'npm view @ckeditor/ckeditor5-dev-release-tools@latest version', { encoding: 'utf-8' } ).trim();
 const changelogVersion = releaseTools.getLastFromChangelog();
 
 if ( getVersionTag( changelogVersion ) !== 'latest' ) {
