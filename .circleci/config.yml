@@ -134,7 +134,7 @@ jobs:
       - run:
           name: Trigger the release pipeline
           command: |
-            export CKE5_GITHUB_REPOSITORY_SLUG=$( CIRCLE_PROJECT_USERNAME )/$( CIRCLE_PROJECT_REPONAME )
+            export CKE5_GITHUB_REPOSITORY_SLUG="ckeditor/ckeditor5-dev"
             export CKE5_GITHUB_RELEASE_BRANCH="master"
             export CKE5_COMMIT_SHA1=$CIRCLE_SHA1
 
@@ -180,6 +180,9 @@ jobs:
             fi
       - run:
           name: Disable the redundant workflows option
+          environment:
+            CKE5_GITHUB_ORGANIZATION: ckeditor
+            CKE5_GITHUB_REPOSITORY: ckeditor5-dev
           command: ckeditor5-dev-ci-circle-disable-auto-cancel-builds
       - run:
           name: Prepare the new version to release
@@ -189,6 +192,9 @@ jobs:
           command: yarn run release:publish-packages --verbose
       - run:
           name: Enable the redundant workflows option
+          environment:
+            CKE5_GITHUB_ORGANIZATION: ckeditor
+            CKE5_GITHUB_REPOSITORY: ckeditor5-dev
           command: ckeditor5-dev-ci-circle-enable-auto-cancel-builds
           when: always
       - run:
@@ -200,38 +206,6 @@ jobs:
           path: ./release.zip
           when: always
 
-  test_job:
-    machine: true
-    steps:
-      - run:
-          name: Testing command.
-          environment:
-            CKE5_ENVIRONMENT_GITHUB_REPOSITORY_SLUG: $( CIRCLE_PROJECT_USERNAME )/$( CIRCLE_PROJECT_REPONAME )
-            CKE5_ENVIRONMENT_GITHUB_ORGANIZATION: $( CIRCLE_PROJECT_USERNAME )
-            CKE5_ENVIRONMENT_GITHUB_REPOSITORY: $( CIRCLE_PROJECT_REPONAME )
-            CKE5_ENVIRONMENT_GITHUB_RELEASE_BRANCH: "master"
-            CKE5_ENVIRONMENT_COMMIT_SHA1: $CIRCLE_SHA1
-          command: |
-            #!/bin/bash
-            
-            export CKE5_SCRIPT_GITHUB_REPOSITORY_SLUG=$( CIRCLE_PROJECT_USERNAME )/$( CIRCLE_PROJECT_REPONAME )
-            export CKE5_SCRIPT_GITHUB_ORGANIZATION=$( CIRCLE_PROJECT_USERNAME )
-            export CKE5_SCRIPT_GITHUB_REPOSITORY=$( CIRCLE_PROJECT_REPONAME )
-            export CKE5_SCRIPT_GITHUB_RELEASE_BRANCH="master"
-            export CKE5_SCRIPT_COMMIT_SHA1=$CIRCLE_SHA1
-            
-            echo CKE5_SCRIPT_GITHUB_REPOSITORY_SLUG=$CKE5_SCRIPT_GITHUB_REPOSITORY_SLUG
-            echo CKE5_SCRIPT_GITHUB_ORGANIZATION=$CKE5_SCRIPT_GITHUB_ORGANIZATION
-            echo CKE5_SCRIPT_GITHUB_REPOSITORY=$CKE5_SCRIPT_GITHUB_REPOSITORY
-            echo CKE5_SCRIPT_GITHUB_RELEASE_BRANCH=$CKE5_SCRIPT_GITHUB_RELEASE_BRANCH
-            echo CKE5_SCRIPT_COMMIT_SHA1=$CKE5_SCRIPT_COMMIT_SHA1
-            
-            echo CKE5_ENVIRONMENT_GITHUB_REPOSITORY_SLUG=$CKE5_ENVIRONMENT_GITHUB_REPOSITORY_SLUG
-            echo CKE5_ENVIRONMENT_GITHUB_ORGANIZATION=$CKE5_ENVIRONMENT_GITHUB_ORGANIZATION
-            echo CKE5_ENVIRONMENT_GITHUB_REPOSITORY=$CKE5_ENVIRONMENT_GITHUB_REPOSITORY
-            echo CKE5_ENVIRONMENT_GITHUB_RELEASE_BRANCH=$CKE5_ENVIRONMENT_GITHUB_RELEASE_BRANCH
-            echo CKE5_ENVIRONMENT_COMMIT_SHA1=$CKE5_ENVIRONMENT_COMMIT_SHA1
-
 workflows:
   version: 2
   main:
@@ -240,7 +214,21 @@ workflows:
         - equal: [ false, << pipeline.parameters.isNightly >> ]
         - equal: [ false, << pipeline.parameters.isRelease >> ]
     jobs:
-      - test_job
+      - validate_and_tests
+      - release_prepare
+      - trigger_release_process:
+          requires:
+            - validate_and_tests
+            - release_prepare
+          filters:
+            branches:
+              only:
+                - master
+      - notify_ci_failure:
+          filters:
+            branches:
+              only:
+                - master
 
   release:
     when:
