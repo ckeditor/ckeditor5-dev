@@ -37,8 +37,7 @@ const options = {
 	commit: CKE5_COMMIT_SHA1,
 	branch: CIRCLE_BRANCH,
 	releaseBranch: CKE5_GITHUB_RELEASE_BRANCH,
-	repositorySlug: CKE5_GITHUB_REPOSITORY_SLUG,
-	triggerRepositorySlug: CKE5_GITHUB_TRIGGER_REPOSITORY_SLUG
+	repositorySlug: CKE5_GITHUB_REPOSITORY_SLUG
 };
 
 if ( CKE5_GITHUB_TRIGGER_REPOSITORY_SLUG ) {
