@@ -26,7 +26,7 @@ module.exports = async function verifyPackagesPublishedCorrectly( options ) {
 	const errors = [];
 
 	if ( !packagesToVerify.length ) {
-		onSuccess( '✅ No packages found to check for upload error 409.' );
+		onSuccess( 'No packages found to check for upload error 409.' );
 
 		return;
 	}
@@ -51,5 +51,5 @@ module.exports = async function verifyPackagesPublishedCorrectly( options ) {
 		throw new Error( 'Packages that were uploaded incorrectly, and need manual verification:\n' + errors.join( '\n' ) );
 	}
 
-	onSuccess( '✅ All packages that returned 409 were uploaded correctly.' );
+	onSuccess( 'All packages that returned 409 were uploaded correctly.' );
 };
