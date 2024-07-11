@@ -57,7 +57,7 @@ describe( 'dev-release-tools/utils', () => {
 
 			await verifyPackagesPublishedCorrectly( { packagesDirectory, version, onSuccess } );
 
-			expect( onSuccess.firstCall.args[ 0 ] ).to.equal( '✅ No packages found to check for upload error 409.' );
+			expect( onSuccess.firstCall.args[ 0 ] ).to.equal( 'No packages found to check for upload error 409.' );
 			expect( stubs.devUtils.checkVersionAvailability.callCount ).to.equal( 0 );
 		} );
 
@@ -81,7 +81,7 @@ describe( 'dev-release-tools/utils', () => {
 			expect( stubs.devUtils.checkVersionAvailability.secondCall.args[ 1 ] ).to.equal( '@namespace/package2' );
 			expect( stubs.fs.remove.secondCall.args[ 0 ] ).to.equal( 'package2' );
 
-			expect( onSuccess.firstCall.args[ 0 ] ).to.equal( '✅ All packages that returned 409 were uploaded correctly.' );
+			expect( onSuccess.firstCall.args[ 0 ] ).to.equal( 'All packages that returned 409 were uploaded correctly.' );
 		} );
 
 		it( 'should not remove package from release directory when package is not available on npm', async () => {
