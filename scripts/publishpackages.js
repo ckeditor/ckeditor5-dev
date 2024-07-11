@@ -93,6 +93,8 @@ const tasks = new Listr( [
 
 		await tasks.run();
 	} catch ( err ) {
+		process.exitCode = 1;
+
 		console.error( err );
 	}
 } )();
