@@ -140,65 +140,65 @@ jobs:
 
             ckeditor5-dev-ci-trigger-circle-build
 
-release_project:
-  machine: true
-  steps:
-    - checkout
-    - bootstrap_repository_command
-    - run:
-        name: Verify the trigger commit from the repository
-        command: |
-          #!/bin/bash
-
-          CKE5_LATEST_COMMIT_HASH=$( git log -n 1 --pretty=format:%H origin/master )
-          CKE5_TRIGGER_COMMIT_HASH=<< pipeline.parameters.triggerCommitHash >>
-
-          if [[ "${CKE5_LATEST_COMMIT_HASH}" != "${CKE5_TRIGGER_COMMIT_HASH}" ]]; then
-            echo "There is a newer commit in the repository on the \`#master\` branch. Use its build to start the release."
-            circleci-agent step halt
-          fi
-    - npm_login_command
-    - git_credentials_command
-    - run:
-        name: Verify if a releaser triggered the job
-        environment:
-          CKE5_CIRCLE_APPROVAL_JOB_NAME: release_approval
-          CKE5_GITHUB_ORGANIZATION: ckeditor
-        command: |
-          #!/bin/bash
-
-          # Do not fail if the Node script ends with non-zero exit code.
-          set +e
-
-          ckeditor5-dev-ci-is-job-triggered-by-member
-          EXIT_CODE=$( echo $? )
-
-          if [ ${EXIT_CODE} -ne 0 ];
-          then
-            echo "Aborting the release due to failed verification of the approver (no rights to release)."
-            circleci-agent step halt
-          fi
-    - run:
-        name: Disable the redundant workflows option
-        command: ckeditor5-dev-ci-circle-disable-auto-cancel-builds
-    - run:
-        name: Prepare the new version to release
-        command: yarn run release:prepare-packages --verbose
-    - run:
-        name: Publish the packages
-        command: yarn run release:publish-packages --verbose
-    - run:
-        name: Enable the redundant workflows option
-        command: ckeditor5-dev-ci-circle-enable-auto-cancel-builds
-        when: always
-    - run:
-        name: Pack the "release/" directory (in case of failure)
-        command: |
-          zip -r ./release.zip ./release
-        when: always
-    - store_artifacts:
-        path: ./release.zip
-        when: always
+  release_project:
+    machine: true
+    steps:
+      - checkout
+      - bootstrap_repository_command
+      - run:
+          name: Verify the trigger commit from the repository
+          command: |
+            #!/bin/bash
+  
+            CKE5_LATEST_COMMIT_HASH=$( git log -n 1 --pretty=format:%H origin/master )
+            CKE5_TRIGGER_COMMIT_HASH=<< pipeline.parameters.triggerCommitHash >>
+  
+            if [[ "${CKE5_LATEST_COMMIT_HASH}" != "${CKE5_TRIGGER_COMMIT_HASH}" ]]; then
+              echo "There is a newer commit in the repository on the \`#master\` branch. Use its build to start the release."
+              circleci-agent step halt
+            fi
+      - npm_login_command
+      - git_credentials_command
+      - run:
+          name: Verify if a releaser triggered the job
+          environment:
+            CKE5_CIRCLE_APPROVAL_JOB_NAME: release_approval
+            CKE5_GITHUB_ORGANIZATION: ckeditor
+          command: |
+            #!/bin/bash
+  
+            # Do not fail if the Node script ends with non-zero exit code.
+            set +e
+  
+            ckeditor5-dev-ci-is-job-triggered-by-member
+            EXIT_CODE=$( echo $? )
+  
+            if [ ${EXIT_CODE} -ne 0 ];
+            then
+              echo "Aborting the release due to failed verification of the approver (no rights to release)."
+              circleci-agent step halt
+            fi
+      - run:
+          name: Disable the redundant workflows option
+          command: ckeditor5-dev-ci-circle-disable-auto-cancel-builds
+      - run:
+          name: Prepare the new version to release
+          command: yarn run release:prepare-packages --verbose
+      - run:
+          name: Publish the packages
+          command: yarn run release:publish-packages --verbose
+      - run:
+          name: Enable the redundant workflows option
+          command: ckeditor5-dev-ci-circle-enable-auto-cancel-builds
+          when: always
+      - run:
+          name: Pack the "release/" directory (in case of failure)
+          command: |
+            zip -r ./release.zip ./release
+          when: always
+      - store_artifacts:
+          path: ./release.zip
+          when: always
 
 workflows:
   version: 2
