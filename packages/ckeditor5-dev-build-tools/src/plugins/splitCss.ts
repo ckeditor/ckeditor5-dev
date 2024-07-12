@@ -4,7 +4,15 @@
  */
 
 import { createFilter } from '@rollup/pluginutils';
-import { parse, type Rule, type Declaration, type Stylesheet, type KeyFrames, type KeyFrame, type Media } from 'css';
+import {
+	parse,
+	type Rule,
+	type Declaration,
+	type Stylesheet,
+	type KeyFrames,
+	type KeyFrame,
+	type Media
+} from 'css';
 import type { Plugin, OutputBundle, NormalizedOutputOptions, EmittedAsset } from 'rollup';
 import type { Processor } from 'postcss';
 import cssnano from 'cssnano';
@@ -415,7 +423,6 @@ function getSplittedStyleKeyframes( keyframesRules: Array<KeyFrames>, allRulesCo
 					if ( selectorStartsWithoutCkContent ) {
 						editorStyles += ruleDeclarationsWithSelector;
 					}
-
 				}
 			} );
 		} );
@@ -519,10 +526,15 @@ function getKeyframesEntries( rule: KeyFrames ) {
 	let keyframeEntries = '';
 
 	rule.keyframes!.forEach( keyframe => {
-		keyframeEntries += ` ${ ( keyframe as KeyFrame ) .values!.join(',\n') } { ${ getRuleDeclarations( ( keyframe as KeyFrame ).declarations! ) } }`;
+		if ( 'comment' in keyframe ) {
+			return;
+		}
+		const keyFrameSelector = ( keyframe as KeyFrame ).values!.join( ',\n' );
+		const keyFrameDeclarations = getRuleDeclarations( ( keyframe as KeyFrame ).declarations! );
+		keyframeEntries += ` ${ keyFrameSelector } { ${ keyFrameDeclarations } }`;
 	} );
 
-	return keyframeEntries
+	return keyframeEntries;
 }
 
 function isSelectorStartsWithCkContent( rule: Rule ) {
