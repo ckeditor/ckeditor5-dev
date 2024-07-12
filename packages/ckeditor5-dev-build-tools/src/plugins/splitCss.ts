@@ -277,8 +277,8 @@ function divideRuleStylesBetweenStylesheets( rule: Rule | Media | KeyFrames ) {
 			editorStyles: '',
 			editingViewStyles: '',
 			keyframesRules: ''
-		}
-	};
+		};
+	}
 }
 
 /**
