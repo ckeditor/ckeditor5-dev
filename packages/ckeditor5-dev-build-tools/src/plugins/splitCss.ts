@@ -154,10 +154,13 @@ function getDividedStyleSheetsDependingOnItsPurpose( rules: Array<Rule> ) {
 
 	const rootDefinitions = rootDefinitionsList.join( '' );
 
+	// Parse all gathered `@keyframe` rules as a full CSS AST tree.
 	const parsedKeyframesRules = parse( keyframesRules );
+	// Get all `@keyframe` rules.
 	const allKeyframesRules: Array<KeyFrames> = parsedKeyframesRules.stylesheet!.rules;
+	// Get all rules containing `animation` or `animation-name` properties.
 	const allRulesContainingAnimations = getAllRulesContainingAnimations( rules );
-
+	// Gel all `@keyframe` styles divided between editor and content stylesheets.
 	const { editorStyles, editingViewStyles } = getSplittedStyleKeyframes( allKeyframesRules, allRulesContainingAnimations );
 
 	editorStylesContent += editorStyles;
@@ -264,21 +267,17 @@ function createRootDeclarationOfUsedVariables(
 function divideRuleStylesBetweenStylesheets( rule: Rule | Media | KeyFrames ) {
 	if ( rule.type === 'rule' ) {
 		return divideStylesBetweenStylesheetsByRule( rule as Rule );
-	}
-
-	if ( rule.type === 'media' ) {
+	} else if ( rule.type === 'media' ) {
 		return divideStylesBetweenStylesheetsByMedia( rule as Media );
-	}
-
-	if ( rule.type === 'keyframes' ) {
+	} else if ( rule.type === 'keyframes' ) {
 		return divideStylesBetweenStylesheetsByKeyframes( rule as KeyFrames );
-	}
-
-	return {
-		rootDefinitions: [],
-		editorStyles: '',
-		editingViewStyles: '',
-		keyframesRules: ''
+	} else {
+		return {
+			rootDefinitions: [],
+			editorStyles: '',
+			editingViewStyles: '',
+			keyframesRules: ''
+		}
 	};
 }
 
@@ -366,6 +365,7 @@ function getAllRulesContainingAnimationsFromMediaRules( rules: Array<Rule | Medi
  * Returns `true` if passed `rule` contains `animation` or `animation-name` property.
  */
 function getAnimationDeclarations( rule: Rule ) {
+	// Filtering potential comments.
 	if ( rule.type !== 'rule' ) {
 		return false;
 	}
@@ -374,9 +374,11 @@ function getAnimationDeclarations( rule: Rule ) {
 
 	return declarations.some(
 		declaration => {
+			// Filtering potential comments.
 			if ( declaration.type !== 'declaration' ) {
 				return false;
 			}
+
 			return declaration.property!.includes( 'animation' ) || declaration.property!.includes( 'animation-name' );
 		}
 	);
@@ -400,6 +402,7 @@ function getSplittedStyleKeyframes( keyframesRules: Array<KeyFrames>, allRulesCo
 			const selectorStartsWithoutCkContent = isSelectorStartsWithoutCkContent( rule );
 
 			declarations.forEach( declaration => {
+				// Filtering potential comments.
 				if ( declaration.type !== 'declaration' ) {
 					return;
 				}
@@ -433,10 +436,12 @@ function getSplittedStyleKeyframes( keyframesRules: Array<KeyFrames>, allRulesCo
 function divideStylesBetweenStylesheetsByRule( rule: Rule ) {
 	const rootDefinitions = [];
 	const selector = rule.selectors!.join( ',\n' );
-	const selectorWithCkContent = rule.selectors?.filter( selector => selector.startsWith( '.ck-content' ) ).join( ',\n' );
-	const selectorWithoutCkContent = rule.selectors?.filter( selector => !selector.startsWith( '.ck-content' ) ).join( ',\n' );
 	const ruleDeclarations = getRuleDeclarations( rule.declarations! );
 	const isRootSelector = selector.includes( ':root' );
+	// Filtering selectors that started with `.ck-content` prefix and concatenate it into string separated by a comma.
+	const selectorWithCkContent = rule.selectors!.filter( selector => selector.startsWith( '.ck-content' ) ).join( ',\n' );
+	// Filtering selectors that aren't started with `.ck-content` prefix and concatenate it into string separated by a comma.
+	const selectorWithoutCkContent = rule.selectors!.filter( selector => !selector.startsWith( '.ck-content' ) ).join( ',\n' );
 
 	let editorStyles = '';
 	let editingViewStyles = '';
@@ -519,6 +524,7 @@ function getKeyframesEntries( rule: KeyFrames ) {
 	let keyframeEntries = '';
 
 	rule.keyframes!.forEach( keyframe => {
+		// Filtering potential comments.
 		if ( 'comment' in keyframe ) {
 			return;
 		}
