@@ -1,0 +1,17 @@
+@media (forced-colors: none) {
+	/* This is a comment */
+	.ck-content.animation-in-media-query {
+		/* This is a comment */
+		animation: ck-animation 1s ease-out;
+	}
+}
+
+@keyframes ck-animation {
+	0% {
+		background-color: white;
+	}
+
+	100% {
+		background-color: black;
+	}
+}

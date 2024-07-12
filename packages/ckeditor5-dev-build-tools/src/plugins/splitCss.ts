@@ -394,14 +394,7 @@ function getSplittedStyleKeyframes( keyframesRules: Array<KeyFrames>, allRulesCo
 	keyframesRules.forEach( keyframeRule => {
 		const animationName = keyframeRule.name;
 
-		if ( !animationName ) {
-			return;
-		}
-
 		allRulesContainingAnimations.forEach( rule => {
-			if ( rule.type !== 'rule' ) {
-				return;
-			}
 			const declarations = rule.declarations as Array<Declaration>;
 			const selectorStartsWithCkContent = isSelectorStartsWithCkContent( rule );
 			const selectorStartsWithoutCkContent = isSelectorStartsWithoutCkContent( rule );
@@ -411,7 +404,7 @@ function getSplittedStyleKeyframes( keyframesRules: Array<KeyFrames>, allRulesCo
 					return;
 				}
 
-				if ( declaration.value!.includes( animationName ) ) {
+				if ( declaration.value!.includes( animationName! ) ) {
 					const selector = `@keyframes ${ animationName }`;
 					const keyframeEntries = getKeyframesEntries( keyframeRule );
 					const ruleDeclarationsWithSelector = wrapDefinitionsIntoSelector( selector, keyframeEntries );

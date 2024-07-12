@@ -303,3 +303,68 @@ test( 'should preserve all selectors', async () => {
 
 	verifyDividedStyleSheet( output, 'styles-editor.css', expectedResult );
 } );
+
+test( 'should preserve all `@media` queries and split it correctly', async () => {
+	const output = await generateBundle(
+		'./fixtures/media-query/input.ts',
+		{ baseFileName: 'styles' }
+	);
+
+	const expectedEditorResult = removeWhitespace(
+		`@media (prefers-reduced-motion: reduce) {
+			.ck-image-upload-complete-icon {
+				animation-duration: 0ms;
+			}
+		}
+	` );
+
+	const expectedContentResult = removeWhitespace(
+		`@media print {
+			.ck-content .page-break {
+				padding: 0;
+			}
+		}
+		@media screen and (max-width: 600px) {
+			.ck-content {
+				width: 100%;
+			}
+		}
+	` );
+
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedEditorResult );
+	verifyDividedStyleSheet( output, 'styles-content.css', expectedContentResult );
+} );
+
+test( 'should preserve all `@keyframes` queries and split it correctly', async () => {
+	const output = await generateBundle(
+		'./fixtures/keyframes/input.ts',
+		{ baseFileName: 'styles' }
+	);
+
+	const expectedEditorResult = removeWhitespace(
+		`.animation {
+			animation: fadeIn 1s;
+		}
+		@keyframes fadeIn {
+			from { opacity: 0;
+			} to { opacity: 1;
+			}
+		}
+	` );
+
+	const expectedContentResult = removeWhitespace(
+		`@media (forced-colors: none) {
+			.ck-content.animation-in-media-query {
+				animation: ck-animation 1s ease-out;
+			}
+		}
+		@keyframes ck-animation {
+			0% { background-color: white;
+			} 100% { background-color: black;
+		}
+	}
+	` );
+
+	verifyDividedStyleSheet( output, 'styles-editor.css', expectedEditorResult );
+	verifyDividedStyleSheet( output, 'styles-content.css', expectedContentResult );
+} );
