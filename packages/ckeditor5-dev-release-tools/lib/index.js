@@ -30,6 +30,7 @@ const executeInParallel = require( './utils/executeinparallel' );
 const validateRepositoryToRelease = require( './utils/validaterepositorytorelease' );
 const checkVersionAvailability = require( './utils/checkversionavailability' );
 const verifyPackagesPublishedCorrectly = require( './tasks/verifypackagespublishedcorrectly' );
+const getNpmTagFromVersion = require( './utils/getnpmtagfromversion' );
 
 module.exports = {
 	generateChangelogForSinglePackage,
@@ -51,6 +52,7 @@ module.exports = {
 	getNextNightly,
 	getCurrent,
 	getLastTagFromGit,
+	getNpmTagFromVersion,
 	getChangesForVersion,
 	getChangelog,
 	saveChangelog,

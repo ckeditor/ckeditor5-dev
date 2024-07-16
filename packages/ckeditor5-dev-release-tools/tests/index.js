@@ -55,7 +55,8 @@ describe( 'dev-release-tools/index', () => {
 					saveChangelog: sandbox.stub()
 				},
 				executeInParallel: sandbox.stub(),
-				validateRepositoryToRelease: sandbox.stub()
+				validateRepositoryToRelease: sandbox.stub(),
+				getNpmTagFromVersion: sandbox.stub()
 			}
 		};
 
@@ -71,6 +72,7 @@ describe( 'dev-release-tools/index', () => {
 		mockery.registerMock( './tasks/updateversions', stubs.release.updateVersions );
 		mockery.registerMock( './tasks/cleanuppackages', stubs.release.cleanUpPackages );
 		mockery.registerMock( './utils/versions', stubs.release.version );
+		mockery.registerMock( './utils/getnpmtagfromversion', stubs.release.getNpmTagFromVersion );
 		mockery.registerMock( './utils/changelog', stubs.release.changelog );
 		mockery.registerMock( './utils/executeinparallel', stubs.release.executeInParallel );
 		mockery.registerMock( './utils/validaterepositorytorelease', stubs.release.validateRepositoryToRelease );
@@ -194,6 +196,12 @@ describe( 'dev-release-tools/index', () => {
 	describe( 'getLastTagFromGit()', () => {
 		it( 'should be a function', () => {
 			expect( index.getLastTagFromGit ).to.be.a( 'function' );
+		} );
+	} );
+
+	describe( 'getNpmTagFromVersion()', () => {
+		it( 'should be a function', () => {
+			expect( index.getNpmTagFromVersion ).to.be.a( 'function' );
 		} );
 	} );
 
