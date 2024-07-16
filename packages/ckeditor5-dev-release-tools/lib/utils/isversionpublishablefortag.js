@@ -14,7 +14,7 @@ const semver = require( 'semver' );
  * @param {String} npmTag
  * @return {Promise.<Boolean>}
  */
-module.exports = async function isVersionPublishable( packageName, version, npmTag ) {
+module.exports = async function isVersionPublishableForTag( packageName, version, npmTag ) {
 	const npmVersion = await tools.shExec( `npm view ${ packageName }@${ npmTag } version --silent`, { async: true, verbosity: 'silent' } )
 		.then( value => value.trim() )
 		// An `npmTag` does not exist.

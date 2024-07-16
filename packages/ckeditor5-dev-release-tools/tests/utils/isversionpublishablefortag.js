@@ -9,8 +9,8 @@ const expect = require( 'chai' ).expect;
 const sinon = require( 'sinon' );
 const mockery = require( 'mockery' );
 
-describe( 'dev-release-tools/isVersionPublishable', () => {
-	let stub, isVersionPublishable;
+describe( 'dev-release-tools/isVersionPublishableForTag', () => {
+	let stub, isVersionPublishableForTag;
 
 	beforeEach( () => {
 		stub = {
@@ -33,7 +33,7 @@ describe( 'dev-release-tools/isVersionPublishable', () => {
 		mockery.registerMock( 'semver', stub.semver );
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', stub.devUtils );
 
-		isVersionPublishable = require( '../../lib/utils/isversionpublishable' );
+		isVersionPublishableForTag = require( '../../lib/utils/isversionpublishablefortag' );
 	} );
 
 	afterEach( () => {
@@ -45,7 +45,7 @@ describe( 'dev-release-tools/isVersionPublishable', () => {
 		stub.semver.lte.returns( false );
 		stub.devUtils.tools.shExec.resolves( '1.0.0\n' );
 
-		const result = await isVersionPublishable( 'package-name', '1.0.1', 'latest' );
+		const result = await isVersionPublishableForTag( 'package-name', '1.0.1', 'latest' );
 
 		expect( result ).to.equal( true );
 		expect( stub.semver.lte.callCount ).to.equal( 1 );
@@ -58,7 +58,7 @@ describe( 'dev-release-tools/isVersionPublishable', () => {
 		stub.semver.lte.returns( true );
 		stub.devUtils.tools.shExec.resolves( '1.0.0\n' );
 
-		const result = await isVersionPublishable( 'package-name', '1.0.0', 'latest' );
+		const result = await isVersionPublishableForTag( 'package-name', '1.0.0', 'latest' );
 
 		expect( result ).to.equal( false );
 		expect( stub.semver.lte.callCount ).to.equal( 1 );
@@ -70,7 +70,7 @@ describe( 'dev-release-tools/isVersionPublishable', () => {
 	it( 'should return true if given npm tag is not published yet', async () => {
 		stub.devUtils.tools.shExec.rejects( 'E404' );
 
-		const result = await isVersionPublishable( 'package-name', '1.0.0', 'alpha' );
+		const result = await isVersionPublishableForTag( 'package-name', '1.0.0', 'alpha' );
 
 		expect( result ).to.equal( true );
 		expect( stub.semver.lte.callCount ).to.equal( 0 );

@@ -57,7 +57,7 @@ describe( 'dev-release-tools/index', () => {
 				executeInParallel: sandbox.stub(),
 				validateRepositoryToRelease: sandbox.stub(),
 				getNpmTagFromVersion: sandbox.stub(),
-				isVersionPublishable: sandbox.stub()
+				isVersionPublishableForTag: sandbox.stub()
 			}
 		};
 
@@ -77,7 +77,7 @@ describe( 'dev-release-tools/index', () => {
 		mockery.registerMock( './utils/changelog', stubs.release.changelog );
 		mockery.registerMock( './utils/executeinparallel', stubs.release.executeInParallel );
 		mockery.registerMock( './utils/validaterepositorytorelease', stubs.release.validateRepositoryToRelease );
-		mockery.registerMock( './utils/isversionpublishable', stubs.release.isVersionPublishable );
+		mockery.registerMock( './utils/isversionpublishablefortag', stubs.release.isVersionPublishableForTag );
 
 		index = proxyquire( '../lib/index', {
 			'@ckeditor/ckeditor5-dev-utils': {
@@ -243,9 +243,9 @@ describe( 'dev-release-tools/index', () => {
 		} );
 	} );
 
-	describe( 'isVersionPublishable()', () => {
+	describe( 'isVersionPublishableForTag()', () => {
 		it( 'should be a function', () => {
-			expect( index.isVersionPublishable ).to.be.a( 'function' );
+			expect( index.isVersionPublishableForTag ).to.be.a( 'function' );
 		} );
 	} );
 } );

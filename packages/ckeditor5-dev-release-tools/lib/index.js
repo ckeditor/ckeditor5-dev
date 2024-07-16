@@ -31,7 +31,7 @@ const validateRepositoryToRelease = require( './utils/validaterepositorytoreleas
 const checkVersionAvailability = require( './utils/checkversionavailability' );
 const verifyPackagesPublishedCorrectly = require( './tasks/verifypackagespublishedcorrectly' );
 const getNpmTagFromVersion = require( './utils/getnpmtagfromversion' );
-const isVersionPublishable = require( './utils/isversionpublishable' );
+const isVersionPublishableForTag = require( './utils/isversionpublishablefortag' );
 
 module.exports = {
 	generateChangelogForSinglePackage,
@@ -60,5 +60,5 @@ module.exports = {
 	validateRepositoryToRelease,
 	verifyPackagesPublishedCorrectly,
 	checkVersionAvailability,
-	isVersionPublishable
+	isVersionPublishableForTag
 };
