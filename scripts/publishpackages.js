@@ -22,6 +22,10 @@ const versionChangelog = releaseTools.getChangesForVersion( latestVersion );
 
 let githubToken;
 
+if ( !cliArguments.npmTag ) {
+	cliArguments.npmTag = releaseTools.getNpmTagFromVersion( latestVersion );
+}
+
 const tasks = new Listr( [
 	{
 		title: 'Publishing packages.',
