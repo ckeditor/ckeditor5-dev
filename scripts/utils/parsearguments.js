@@ -39,7 +39,7 @@ module.exports = function parseArguments( cliArguments ) {
 			verbose: false,
 			'compile-only': false,
 			branch: 'master',
-			'npm-tag': 'latest'
+			'npm-tag': null
 		}
 	};
 
@@ -67,7 +67,7 @@ module.exports = function parseArguments( cliArguments ) {
  *
  * @property {Number} concurrency
  *
- * @property {String} [npmTag='latest']
+ * @property {String|null} [npmTag=null]
  *
  * @property {Array.<String>|null} packages
  *
