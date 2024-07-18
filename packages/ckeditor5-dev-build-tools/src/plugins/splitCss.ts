@@ -169,12 +169,11 @@ async function getSplittedStyleSheets( cssStylesheet: string, filename: string )
 }
 
 /**
- * @param content is a `CSS` content.
- * @param minimize When set to `true` it will minify the content.
+ * Returns minified stylesheet content.
  */
-async function minifyContent( content: string = '' ): Promise<string> {
+async function minifyContent( stylesheetContent: string = '' ): Promise<string> {
 	const minifier = cssnano() as Processor;
-	const minifiedResult = await minifier.process( content, { from: undefined } );
+	const minifiedResult = await minifier.process( stylesheetContent, { from: undefined } );
 
 	return minifiedResult.css;
 }
