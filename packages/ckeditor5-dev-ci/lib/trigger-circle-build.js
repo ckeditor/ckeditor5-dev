@@ -57,5 +57,9 @@ module.exports = async function triggerCircleBuild( options ) {
 			if ( response.error_message ) {
 				throw new Error( `CI trigger failed: "${ response.error_message }".` );
 			}
+
+			if ( response.message ) {
+				throw new Error( `CI trigger failed: "${ response.message }".` );
+			}
 		} );
 };
