@@ -47,10 +47,24 @@ const purgeCssOptionsForEditor = {
 	...commonPurgeCssOptions,
 	// Pseudo class`:where` is preserved only if the appropriate html structure matches the CSS selector.
 	// It's a temporary solution to avoid removing selectors for Show blocks styles where `:where` occurs.
+	// For example this structure will be omitted without the HTML content:
+	//
+	// ```css
+	// .ck.ck-editor__editable.ck-editor__editable_inline.ck-show-blocks:not(.ck-widget)
+	//     :where(figure.image, figure.table) figcaption { /* ... */ }
+	// ```
+	//
 	// See: https://github.com/FullHuman/purgecss/issues/978
 	content: [ {
-		raw: '<html><body><div class="ck ck-editor__editable ck-editor__editable_inline ck-show-blocks">' +
-			'<figure class="image"><figcaption></figcaption></figure></div></body></html>',
+		raw: `<html>
+				<body>
+					<div class="ck ck-editor__editable ck-editor__editable_inline ck-show-blocks">
+						<figure class="image">
+							<figcaption></figcaption>
+						</figure>
+					</div>
+				</body>
+			</html>`,
 		extension: 'html'
 	} ],
 	safelist: {
@@ -97,13 +111,13 @@ export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {
 			this.emitFile( {
 				type: 'asset',
 				fileName: `${ options.baseFileName }-editor.css`,
-				source: await unifyFileContentOutput( editingViewStylesheet, options.minimize )
+				source: options.minimize ? await minifyContent( editingViewStylesheet ) : editingViewStylesheet
 			} );
 
 			this.emitFile( {
 				type: 'asset',
 				fileName: `${ options.baseFileName }-content.css`,
-				source: await unifyFileContentOutput( contentStylesheet, options.minimize )
+				source: options.minimize ? await minifyContent( contentStylesheet ) : contentStylesheet
 			} );
 		}
 	};
@@ -158,11 +172,7 @@ async function getSplittedStyleSheets( cssStylesheet: string, filename: string )
  * @param content is a `CSS` content.
  * @param minimize When set to `true` it will minify the content.
  */
-async function unifyFileContentOutput( content: string = '', minimize: boolean ): Promise<string> {
-	if ( !minimize ) {
-		return content;
-	}
-
+async function minifyContent( content: string = '' ): Promise<string> {
 	const minifier = cssnano() as Processor;
 	const minifiedResult = await minifier.process( content, { from: undefined } );
 
@@ -170,7 +180,7 @@ async function unifyFileContentOutput( content: string = '', minimize: boolean )
 }
 
 /**
- * Returns normalized stylesheet content.
+ * Safe and minimum CSS stylesheet transformation with just removing line breaks, comments and empty rules.
  */
 async function normalizeStylesheet( content: string ): Promise<string> {
 	const normalizeContent = await cssnano( { preset: litePreset( {
