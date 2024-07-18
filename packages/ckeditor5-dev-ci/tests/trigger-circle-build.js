@@ -140,7 +140,7 @@ describe( 'lib/triggerCircleBuild', () => {
 		expect( body.parameters ).to.have.property( 'triggerRepositorySlug', 'ckeditor/ckeditor5' );
 	} );
 
-	it( 'should reject a promise when CircleCI responds with an error', async () => {
+	it( 'should reject a promise when CircleCI responds with an error containing error_message property', async () => {
 		stubs.fetch.resolves( {
 			json: () => Promise.resolve( {
 				error_message: 'HTTP 404'
@@ -155,6 +155,32 @@ describe( 'lib/triggerCircleBuild', () => {
 		};
 
 		return triggerCircleBuild( data )
+			.then( () => {
+				throw new Error( 'This error should not be thrown!' );
+			} )
+			.catch( err => {
+				expect( err.message ).to.equal( 'CI trigger failed: "HTTP 404".' );
+			} );
+	} );
+
+	it( 'should reject a promise when CircleCI responds with an error containing message property', async () => {
+		stubs.fetch.resolves( {
+			json: () => Promise.resolve( {
+				message: 'HTTP 404'
+			} )
+		} );
+
+		const data = {
+			circleToken: 'circle-token',
+			commit: 'abcd1234',
+			branch: 'master',
+			repositorySlug: 'ckeditor/ckeditor5-dev'
+		};
+
+		return triggerCircleBuild( data )
+			.then( () => {
+				throw new Error( 'This error should not be thrown!' );
+			} )
 			.catch( err => {
 				expect( err.message ).to.equal( 'CI trigger failed: "HTTP 404".' );
 			} );
