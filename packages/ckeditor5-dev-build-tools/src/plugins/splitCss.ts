@@ -8,7 +8,7 @@ import type { Plugin, OutputBundle, NormalizedOutputOptions, EmittedAsset } from
 import type { Processor } from 'postcss';
 import cssnano from 'cssnano';
 import litePreset from 'cssnano-preset-lite';
-import { PurgeCSS } from 'purgecss'
+import { PurgeCSS } from 'purgecss';
 
 export interface RollupSplitCssOptions {
 
@@ -33,32 +33,32 @@ const filter = createFilter( [ '**/*.css' ] );
 const commonPurgeCssOptions = {
 	fontFace: true,
 	keyframes: true,
-	variables: true,
-}
+	variables: true
+};
 
 const purgeCssOptionsForContent = {
 	...commonPurgeCssOptions,
 	content: [],
-	safelist: { deep: [/^ck-content/] },
+	safelist: { deep: [ /^ck-content/ ] },
 	blocklist: []
-}
+};
 
 const purgeCssOptionsForEditor = {
 	...commonPurgeCssOptions,
 	// Pseudo class`:where` is preserved only if the appropriate html structure matches the CSS selector.
 	// It's a temporary solution to avoid removing selectors for Show blocks styles where `:where` occurs.
 	// See: https://github.com/FullHuman/purgecss/issues/978
-    content: [ {
+	content: [ {
 		raw: '<html><body><div class="ck ck-editor__editable ck-editor__editable_inline ck-show-blocks">' +
 			'<figure class="image"><figcaption></figcaption></figure></div></body></html>',
-      extension: 'html'
-    } ],
-    safelist: {
-		deep: [ /ck(?!-content)/, /^(?!.*ck)/ ],
-    },
+		extension: 'html'
+	} ],
+	safelist: {
+		deep: [ /ck(?!-content)/, /^(?!.*ck)/ ]
+	},
 	// Option to preserve all CSS selectors that starts with `[dir=ltr/rtl]` attribute.
-    dynamicAttributes: [ 'dir' ]
-}
+	dynamicAttributes: [ 'dir' ]
+};
 
 export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {
 	const options: Required<RollupSplitCssOptions> = Object.assign( {
@@ -134,24 +134,24 @@ async function getSplittedStyleSheets( cssStylesheet: string, filename: string )
 			{
 				raw: cssStylesheet
 			},
-			`${ filename }-content.css`,
+			`${ filename }-content.css`
 		]
 	} );
 
-	const purgeCSSResultForEditingView = await new PurgeCSS().purge({
+	const purgeCSSResultForEditingView = await new PurgeCSS().purge( {
 		...purgeCssOptionsForEditor,
 		css: [
 			{
 				raw: cssStylesheet
 			},
-			`${ filename }-editor.css`,
+			`${ filename }-editor.css`
 		]
 	} );
 
 	return {
 		editorStylesContent: purgeCSSResultForContent[ 0 ]!.css,
 		editingViewStylesContent: purgeCSSResultForEditingView[ 0 ]!.css
-	}
+	};
 }
 
 /**
@@ -174,7 +174,7 @@ async function unifyFileContentOutput( content: string = '', minimize: boolean )
  */
 async function normalizeStylesheet( content: string ): Promise<string> {
 	const normalizeContent = await cssnano( { preset: litePreset( {
-		normalizeWhitespace: false,
+		normalizeWhitespace: false
 	} ) } ).process( content!, { from: undefined } );
 
 	return normalizeContent.css;
