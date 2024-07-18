@@ -179,7 +179,7 @@ async function minifyContent( stylesheetContent: string = '' ): Promise<string> 
 }
 
 /**
- * Safe and minimum CSS stylesheet transformation with just removing line breaks, comments and empty rules.
+ * Safe and minimum CSS stylesheet transformation with removing comments and empty rules.
  */
 async function normalizeStylesheet( content: string ): Promise<string> {
 	const normalizeContent = await cssnano( { preset: litePreset( {
