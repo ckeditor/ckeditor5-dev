@@ -9,8 +9,17 @@
 	--ck-unused-primary: green;
 	--ck-unused-secondary: red;
 	--ck-unused-variable-2: var(--ck-unused-primary, var(--ck-unused-secondary));
+
+	/* Test CSS variables with calc() function. */
+	--ck-variable-4: 1px;
+	--ck-variable-5: 1em;
+	--ck-calc-variables: calc( var(--ck-variable-4) + var(--ck-variable-5));
 }
 
 .ck {
 	margin: var(--ck-spacing-unit);
+}
+
+.ck {
+	transform: translateX( var( --ck-calc-variables ));
 }

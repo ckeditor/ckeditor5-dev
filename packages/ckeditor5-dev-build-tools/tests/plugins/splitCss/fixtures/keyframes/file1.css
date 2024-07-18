@@ -1,0 +1,12 @@
+.animation {
+	/* This is a comment */
+	animation: fadeIn 1s;
+}
+@keyframes fadeIn {
+	from {
+		/* This is a comment */
+		opacity: 0;
+	}
+	/* This is a comment */
+	to { opacity: 1; }
+}
