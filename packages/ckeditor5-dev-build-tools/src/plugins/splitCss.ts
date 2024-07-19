@@ -8,7 +8,7 @@ import type { Plugin, OutputBundle, NormalizedOutputOptions, EmittedAsset } from
 import type { Processor } from 'postcss';
 import cssnano from 'cssnano';
 import litePreset from 'cssnano-preset-lite';
-import { PurgeCSS } from 'purgecss';
+import { PurgeCSS, type UserDefinedOptions } from 'purgecss';
 
 export interface RollupSplitCssOptions {
 
@@ -25,26 +25,25 @@ export interface RollupSplitCssOptions {
 	minimize?: boolean;
 }
 
-/**
- * Filter files only with `css` extension.
- */
 const filter = createFilter( [ '**/*.css' ] );
 
-const commonPurgeCssOptions = {
+const REGEX_FOR_REMOVING_VAR_WHITESPACE = /(?<=var\()\s+|\s+(?=\))/g;
+
+const COMMON_PURGE_OPTIONS = {
 	fontFace: true,
 	keyframes: true,
 	variables: true
 };
 
-const purgeCssOptionsForContent = {
-	...commonPurgeCssOptions,
+const CONTENT_PURGE_OPTIONS = {
+	...COMMON_PURGE_OPTIONS,
 	content: [],
 	safelist: { deep: [ /^ck-content/ ] },
 	blocklist: []
 };
 
-const purgeCssOptionsForEditor = {
-	...commonPurgeCssOptions,
+const EDITOR_PURGE_OPTIONS = {
+	...COMMON_PURGE_OPTIONS,
 	// Pseudo class`:where` is preserved only if the appropriate html structure matches the CSS selector.
 	// It's a temporary solution to avoid removing selectors for Show blocks styles where `:where` occurs.
 	// For example this structure will be omitted without the HTML content:
@@ -82,7 +81,7 @@ export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {
 	return {
 		name: 'cke5-split-css',
 
-		transform( code, id ) {
+		transform( code: string, id: string ): string | undefined {
 			if ( !filter( id ) ) {
 				return;
 			}
@@ -90,9 +89,9 @@ export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {
 			return '';
 		},
 
-		async generateBundle( output: NormalizedOutputOptions, bundle: OutputBundle ) {
+		async generateBundle( output: NormalizedOutputOptions, bundle: OutputBundle ): Promise<void> {
 			// Get stylesheet from output bundle.
-			const cssStylesheetFromBundle = getCssStylesheet( bundle );
+			const css = getCssStylesheet( bundle );
 
 			// Some of CSS variables are used with spaces after/before brackets:
 			// var( --var-name )
@@ -100,31 +99,30 @@ export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {
 			// See: https://github.com/FullHuman/purgecss/issues/1264
 			//
 			// Till it's not solved we need to remove spaces from variables.
-			const cssStylesheet = removeWhitespaceFromVars( cssStylesheetFromBundle! );
+			const normalizedCss = css.replace( REGEX_FOR_REMOVING_VAR_WHITESPACE, '' );
 
-			// Generate split stylesheets for editor, content, and one that contains them all.
-			const { editorStylesContent, editingViewStylesContent } = await getSplittedStyleSheets( cssStylesheet, options.baseFileName );
-			const contentStylesheet = await normalizeStylesheet( editorStylesContent! );
-			const editingViewStylesheet = await normalizeStylesheet( editingViewStylesContent! );
+			// Generate stylesheets for editor and content.
+			const editorStyles = await getStyles( normalizedCss, EDITOR_PURGE_OPTIONS );
+			const contentStyles = await getStyles( normalizedCss, CONTENT_PURGE_OPTIONS );
 
 			// Emit those styles into files.
 			this.emitFile( {
 				type: 'asset',
 				fileName: `${ options.baseFileName }-editor.css`,
-				source: options.minimize ? await minifyContent( editingViewStylesheet ) : editingViewStylesheet
+				source: options.minimize ? await minifyContent( editorStyles ) : editorStyles
 			} );
 
 			this.emitFile( {
 				type: 'asset',
 				fileName: `${ options.baseFileName }-content.css`,
-				source: options.minimize ? await minifyContent( contentStylesheet ) : contentStylesheet
+				source: options.minimize ? await minifyContent( contentStyles ) : contentStyles
 			} );
 		}
 	};
 }
 
 /**
- * @param bundle provides the full list of files being written or generated along with their details.
+ * Returns CSS stylesheet from the output bundle.
  */
 function getCssStylesheet( bundle: OutputBundle ) {
 	const cssStylesheetChunk = Object
@@ -139,33 +137,28 @@ function getCssStylesheet( bundle: OutputBundle ) {
 }
 
 /**
- * Returns split stylesheets for editor, content, and one that contains all styles.
+ * Returns stylesheets content after removing comments and unused or empty CSS rules.
  */
-async function getSplittedStyleSheets( cssStylesheet: string, filename: string ): Promise<Record<string, string>> {
-	const purgeCSSResultForContent = await new PurgeCSS().purge( {
-		...purgeCssOptionsForContent,
-		css: [
-			{
-				raw: cssStylesheet
-			},
-			`${ filename }-content.css`
-		]
+async function getStyles( styles: string, purgeConfig: Omit<UserDefinedOptions, 'css'> ): Promise<string> {
+	const result = await new PurgeCSS().purge( {
+		...purgeConfig,
+		css: [ { raw: styles } ]
 	} );
 
-	const purgeCSSResultForEditingView = await new PurgeCSS().purge( {
-		...purgeCssOptionsForEditor,
-		css: [
-			{
-				raw: cssStylesheet
-			},
-			`${ filename }-editor.css`
-		]
-	} );
+	return cleanContent( result[ 0 ]!.css );
+}
 
-	return {
-		editorStylesContent: purgeCSSResultForContent[ 0 ]!.css,
-		editingViewStylesContent: purgeCSSResultForEditingView[ 0 ]!.css
-	};
+/**
+ * Safe and minimum CSS stylesheet transformation with removing comments and empty rules.
+ */
+async function cleanContent( content: string ): Promise<string> {
+	const normalizeContent = await cssnano( {
+		preset: litePreset( {
+			normalizeWhitespace: false
+		} )
+	} ).process( content!, { from: undefined } );
+
+	return normalizeContent.css;
 }
 
 /**
@@ -176,24 +169,4 @@ async function minifyContent( stylesheetContent: string = '' ): Promise<string> 
 	const minifiedResult = await minifier.process( stylesheetContent, { from: undefined } );
 
 	return minifiedResult.css;
-}
-
-/**
- * Safe and minimum CSS stylesheet transformation with removing comments and empty rules.
- */
-async function normalizeStylesheet( content: string ): Promise<string> {
-	const normalizeContent = await cssnano( { preset: litePreset( {
-		normalizeWhitespace: false
-	} ) } ).process( content!, { from: undefined } );
-
-	return normalizeContent.css;
-}
-
-/*
- * Removes whitespace between brackets from CSS variables.
- */
-function removeWhitespaceFromVars( content: string ): string {
-	const regex = /(?<=var\()\s+|\s+(?=\))/g;
-
-	return content.replace( regex, '' );
 }
