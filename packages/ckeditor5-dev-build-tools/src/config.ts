@@ -145,7 +145,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 			} ),
 
 			/**
-			 * Allows using imports, mixins and nesting in CSS and exctacts output CSS to a separate file.
+			 * Allows using imports, mixins and nesting in CSS and extracts output CSS to a separate file.
 			 */
 			styles( {
 				mode: [ 'extract', cssFileName ],

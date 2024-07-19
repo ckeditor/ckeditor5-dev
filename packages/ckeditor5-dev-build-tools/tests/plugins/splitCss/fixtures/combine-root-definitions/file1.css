@@ -1,7 +1,0 @@
-:root {
-	--variable1: blue;
-}
-
-h1 {
-	color: var(--variable1);
-}

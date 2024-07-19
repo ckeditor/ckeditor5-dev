@@ -1,0 +1,12 @@
+@media print {
+	.ck-content .page-break {
+		padding: 0;
+	}
+}
+
+@media screen and (max-width: 600px) {
+	/* This is a comment */
+	.ck-content {
+		width: 100%;
+	}
+}
