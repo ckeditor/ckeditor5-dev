@@ -29,24 +29,16 @@ const filter = createFilter( [ '**/*.css' ] );
 
 const REGEX_FOR_REMOVING_VAR_WHITESPACE = /(?<=var\()\s+|\s+(?=\))/g;
 
-// We must preserve all variables, keyframes and font faces in splitted stylesheets.
-// For example this is caused by case when some of them can be defined in the `ckeditor5`
-// but used in `ckeditor5-premium-features` stylesheet and vice versa.
-const COMMON_PURGE_OPTIONS = {
-	fontFace: false,
-	keyframes: false,
-	variables: false
-};
-
 const CONTENT_PURGE_OPTIONS = {
-	...COMMON_PURGE_OPTIONS,
 	content: [],
 	safelist: { deep: [ /^ck-content/ ] },
-	blocklist: []
+	blocklist: [],
+	fontFace: true,
+	keyframes: true,
+	variables: true
 };
 
 const EDITOR_PURGE_OPTIONS = {
-	...COMMON_PURGE_OPTIONS,
 	// Pseudo class`:where` is preserved only if the appropriate html structure matches the CSS selector.
 	// It's a temporary solution to avoid removing selectors for Show blocks styles where `:where` occurs.
 	// For example this structure will be omitted without the HTML content:
@@ -73,7 +65,13 @@ const EDITOR_PURGE_OPTIONS = {
 		deep: [ /ck(?!-content)/, /^(?!.*ck)/ ]
 	},
 	// Option to preserve all CSS selectors that starts with `[dir=ltr/rtl]` attribute.
-	dynamicAttributes: [ 'dir' ]
+	dynamicAttributes: [ 'dir' ],
+	// We must preserve all variables, keyframes and font faces in splitted stylesheets.
+	// For example this is caused by case when some of them can be defined in the `ckeditor5`
+	// but used in `ckeditor5-premium-features` stylesheet and vice versa.
+	fontFace: false,
+	keyframes: false,
+	variables: false
 };
 
 export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {

@@ -120,7 +120,7 @@ test( 'should ignore `CSS` comments', async () => {
 	verifyDividedStyleSheet( output, 'styles-content.css', '\n' );
 } );
 
-test( 'should not filter `:root` declaration based on `CSS` variables usage', async () => {
+test( 'should filter `:root` declaration based on `CSS` variables usage only for `content` stylesheet', async () => {
 	const output = await generateBundle(
 		'./fixtures/filter-root-definitions/input.ts',
 		{ baseFileName: 'styles' }
@@ -141,8 +141,6 @@ test( 'should not filter `:root` declaration based on `CSS` variables usage', as
 
 	const expectedContentResult = removeWhitespace(
 		`:root{
-			--variable1:blue;
-			--variable2:red;
 			--variable3:red;
 			--variable4:pink;
 		}
@@ -318,7 +316,7 @@ test( 'should preserve all `@media` queries and split it correctly', async () =>
 	verifyDividedStyleSheet( output, 'styles-content.css', expectedContentResult );
 } );
 
-test( 'should preserve all `@keyframes` queries across splitted stylesheet files', async () => {
+test( 'should filter `@keyframes` queries based on class names usage only for `content` stylesheet', async () => {
 	const output = await generateBundle(
 		'./fixtures/keyframes/input.ts',
 		{ baseFileName: 'styles' }
@@ -345,13 +343,7 @@ test( 'should preserve all `@keyframes` queries across splitted stylesheet files
 	` );
 
 	const expectedContentResult = removeWhitespace(
-		`@keyframes fadeIn{
-			from{
-				opacity:0;
-			}
-			to{ opacity:1; }
-		}
-		@media (forced-colors: none){
+		`@media (forced-colors: none){
 			.ck-content.animation-in-media-query{
 				animation:ck-animation 1s ease-out;
 			}
