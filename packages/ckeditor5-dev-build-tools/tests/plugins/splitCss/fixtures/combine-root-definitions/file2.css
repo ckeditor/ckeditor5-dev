@@ -1,7 +1,0 @@
-:root {
-	--variable2: red;
-}
-
-p {
-	color: var(--variable2);
-}

@@ -120,32 +120,7 @@ test( 'should ignore `CSS` comments', async () => {
 	verifyDividedStyleSheet( output, 'styles-content.css', '\n' );
 } );
 
-test( 'should combine `:root` declarations from multiple entries into one', async () => {
-	const output = await generateBundle(
-		'./fixtures/combine-root-definitions/input.ts',
-		{ baseFileName: 'styles' }
-	);
-
-	const expectedResult = removeWhitespace(
-		`:root{
-			--variable1:blue;
-		}
-		h1{
-			color:var(--variable1);
-		}
-		:root{
-			--variable2:red;
-		}
-		p{
-			color:var(--variable2);
-		}
-	` );
-
-	verifyDividedStyleSheet( output, 'styles-editor.css', expectedResult );
-	verifyDividedStyleSheet( output, 'styles-content.css', '\n' );
-} );
-
-test( 'should filter `:root` declaration based on `CSS` variables usage', async () => {
+test( 'should not filter `:root` declaration based on `CSS` variables usage', async () => {
 	const output = await generateBundle(
 		'./fixtures/filter-root-definitions/input.ts',
 		{ baseFileName: 'styles' }
@@ -155,6 +130,8 @@ test( 'should filter `:root` declaration based on `CSS` variables usage', async 
 		`:root{
 			--variable1:blue;
 			--variable2:red;
+			--variable3:red;
+			--variable4:pink;
 		}
 		.ck-feature{
 			color:var(--variable1);
@@ -164,6 +141,8 @@ test( 'should filter `:root` declaration based on `CSS` variables usage', async 
 
 	const expectedContentResult = removeWhitespace(
 		`:root{
+			--variable1:blue;
+			--variable2:red;
 			--variable3:red;
 			--variable4:pink;
 		}
@@ -177,20 +156,16 @@ test( 'should filter `:root` declaration based on `CSS` variables usage', async 
 	verifyDividedStyleSheet( output, 'styles-content.css', expectedContentResult );
 } );
 
-test( 'should omit `:root` declaration when it\'s not exist', async () => {
+test( 'should omit `:root` declaration when it\'s empty', async () => {
 	const output = await generateBundle(
 		'./fixtures/omit-root-definitions/input.ts',
 		{ baseFileName: 'styles' }
 	);
 
 	const expectedEditorResult = removeWhitespace(
-		`:root{
-			--variable1:blue;
-			--variable2:red;
-		}
-		.ck-feature{
-			color:var(--variable1);
-			background-color:var(--variable2);
+		`.ck-feature{
+			color:red;
+			background-color:blue;
 		}
 	` );
 
@@ -343,7 +318,7 @@ test( 'should preserve all `@media` queries and split it correctly', async () =>
 	verifyDividedStyleSheet( output, 'styles-content.css', expectedContentResult );
 } );
 
-test( 'should preserve all `@keyframes` queries and split it correctly', async () => {
+test( 'should preserve all `@keyframes` queries across splitted stylesheet files', async () => {
 	const output = await generateBundle(
 		'./fixtures/keyframes/input.ts',
 		{ baseFileName: 'styles' }
@@ -359,10 +334,24 @@ test( 'should preserve all `@keyframes` queries and split it correctly', async (
 			}
 			to{ opacity:1; }
 		}
+		@keyframes ck-animation{
+			0%{
+				background-color:white;
+			}
+			100%{
+				background-color:black;
+			}
+		}
 	` );
 
 	const expectedContentResult = removeWhitespace(
-		`@media (forced-colors: none){
+		`@keyframes fadeIn{
+			from{
+				opacity:0;
+			}
+			to{ opacity:1; }
+		}
+		@media (forced-colors: none){
 			.ck-content.animation-in-media-query{
 				animation:ck-animation 1s ease-out;
 			}

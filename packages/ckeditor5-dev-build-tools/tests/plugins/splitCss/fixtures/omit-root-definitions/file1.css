@@ -1,12 +1,9 @@
 :root {
-	--variable1: blue;
-	--variable2: red;
-	--variable3: red;
-	--variable4: pink;
+	/* empty */
 }
 
 .ck-feature {
-	color: var(--variable1);
-	background-color: var(--variable2);
+	color: red;
+	background-color: blue;
 }
 
