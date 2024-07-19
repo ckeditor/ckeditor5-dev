@@ -370,7 +370,8 @@ async function findMisplacedDependencies( options ) {
 }
 
 /**
- * Checks if a package is a development dependency: a package not used in the source and theme.
+ * Checks if a given package is a development-only dependency. Package is considered a dev dependency
+ * if it is used only in files that are not used in the final build, such as tests, demos or typings.
  *
  * @param {String} packageName
  * @param {Array.<String>} absolutePaths Files where a given package has been imported.
