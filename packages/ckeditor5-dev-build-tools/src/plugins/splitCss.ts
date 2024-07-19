@@ -29,7 +29,7 @@ const filter = createFilter( [ '**/*.css' ] );
 
 const REGEX_FOR_REMOVING_VAR_WHITESPACE = /(?<=var\()\s+|\s+(?=\))/g;
 
-// We must preserve all variables, keyframes and font faces.
+// We must preserve all variables, keyframes and font faces in splitted stylesheets.
 // For example this is caused by case when some of them can be defined in the `ckeditor5`
 // but used in `ckeditor5-premium-features` stylesheet and vice versa.
 const COMMON_PURGE_OPTIONS = {
