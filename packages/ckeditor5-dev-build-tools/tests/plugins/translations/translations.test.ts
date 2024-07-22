@@ -77,3 +77,14 @@ test( 'destination', async () => {
 	verifyChunk( output, 'languages/de.js', GERMAN_TRANSLATIONS_FROM_ROOT );
 	verifyChunk( output, 'languages/en.js', ENGLISH_TRANSLATIONS_FROM_ROOT );
 } );
+
+/**
+ * Ensure that the typings are generated and that the `Translations` type is imported from `@ckeditor/ckeditor5-utils`.
+ */
+test( 'typings', async () => {
+	const output = await generateBundle( {
+		destination: 'languages'
+	} );
+
+	verifyChunk( output, 'languages/en.d.ts', 'import type { Translations } from \'@ckeditor/ckeditor5-utils\'' );
+} );

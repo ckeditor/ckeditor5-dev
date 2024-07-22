@@ -69,7 +69,7 @@ async function checkDependenciesInPackage( packagePath, options ) {
 			'**/*.ts': depCheck.parser.typescript,
 			'**/*.vue': depCheck.parser.vue
 		},
-		ignorePatterns: [ 'docs', 'build', 'dist' ],
+		ignorePatterns: [ 'docs', 'build', 'dist/browser' ],
 		ignoreMatches: [ 'eslint*', 'webpack*', 'husky', 'lint-staged' ]
 	};
 
@@ -370,7 +370,8 @@ async function findMisplacedDependencies( options ) {
 }
 
 /**
- * Checks if a package is a development dependency: a package not used in the source and theme.
+ * Checks if a given package is a development-only dependency. Package is considered a dev dependency
+ * if it is used only in files that are not used in the final build, such as tests, demos or typings.
  *
  * @param {String} packageName
  * @param {Array.<String>} absolutePaths Files where a given package has been imported.
@@ -381,9 +382,30 @@ async function isDevDependency( packageName, absolutePaths ) {
 		return true;
 	}
 
+	/**
+	 * These folders contain code that will be shipped to npm and run in the final projects.
+	 * This means that all dependencies used in these folders are production dependencies.
+	 */
+	const foldersContainingProductionCode = [
+		/**
+		 * These folders contain the source code of the packages.
+		 */
+		/[/\\]src[/\\]/,
+		/[/\\]theme[/\\]/,
+
+		/**
+		 * This folder contains the compiled code of the packages. Most of this code is the same
+		 * as the source, but during the build process some of the imports are replaced with those
+		 * compatible with the "new installation methods", which may use different dependencies.
+		 *
+		 * For example, the `ckeditor5/src/core.js` import is replaced with `@ckeditor/ckeditor5-core/dist/index.js`.
+		 *                   ^^^^^^^^^                                       ^^^^^^^^^^^^^^^^^^^^^^^^
+		 */
+		/[/\\]dist[/\\]/
+	];
+
 	for ( const absolutePath of absolutePaths ) {
-		// Only imports in files in src/ or theme/ could be non dev dependency.
-		if ( !absolutePath.match( /[/\\](src|theme)[/\\]/ ) ) {
+		if ( !foldersContainingProductionCode.some( folder => absolutePath.match( folder ) ) ) {
 			continue;
 		}
 
