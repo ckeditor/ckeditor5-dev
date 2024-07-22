@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-ci",
-  "version": "40.5.0",
+  "version": "41.0.0",
   "description": "Utils used on various Continuous Integration services.",
   "keywords": [],
   "main": "lib/index.js",
