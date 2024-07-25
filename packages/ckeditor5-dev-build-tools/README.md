@@ -148,9 +148,9 @@ This option is required if the `browser' option is enabled.
 
 **Default value:** `{}`
 
-A list of pairs necessary for external imports in `umd` bundles.
+Pairs of external package names and associated global variables used in the `umd` build.
 
-The list of `globals` already contains `ckeditor5` and `ckeditor5-premium-features` which are mapped to `CKEDITOR` and `CKEDITOR_PREMIUM_FEATURES`.
+The list already contains `ckeditor5` and `ckeditor5-premium-features` which are mapped to `CKEDITOR` and `CKEDITOR_PREMIUM_FEATURES`.
 
 When using the CLI, this option can be used multiple times.
 
