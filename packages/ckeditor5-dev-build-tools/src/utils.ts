@@ -42,6 +42,14 @@ export function removeWhitespace( text: string ): string {
 }
 
 /**
+ * Returns string without newline.
+ */
+
+export function removeNewline( text: string ): string {
+	return text.replaceAll( /\r?\n|\r/g, '' );
+}
+
+/**
  * Returns dependency resolved relative to the current working directory. This is needed to ensure
  * that the dependency of this package itself (which may be in a different version) is not used.
  */

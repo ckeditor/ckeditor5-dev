@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-translations",
-  "version": "40.2.2",
+  "version": "41.0.0",
   "description": "CKEditor 5 translations plugin for webpack.",
   "keywords": [],
   "main": "lib/index.js",

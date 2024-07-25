@@ -12,9 +12,8 @@ export default defineConfig( {
 		coverage: {
 			enabled: true,
 			provider: 'v8',
-			exclude: [
-				'bin/**',
-				'tests/**'
+			include: [
+				'src/**'
 			]
 		}
 	}

@@ -116,7 +116,7 @@ test( 'TypeScript declarations', async () => {
 		'index.css',
 		'index-editor.css',
 		'index-content.css',
-		'types/input.d.ts'
+		'input.d.ts'
 	] );
 } );
 

@@ -4,10 +4,11 @@
  */
 
 import { createFilter } from '@rollup/pluginutils';
-import { parse, type Rule, type Declaration, type Stylesheet } from 'css';
 import type { Plugin, OutputBundle, NormalizedOutputOptions, EmittedAsset } from 'rollup';
 import type { Processor } from 'postcss';
 import cssnano from 'cssnano';
+import litePreset from 'cssnano-preset-lite';
+import { PurgeCSS, type UserDefinedOptions } from 'purgecss';
 
 export interface RollupSplitCssOptions {
 
@@ -24,10 +25,54 @@ export interface RollupSplitCssOptions {
 	minimize?: boolean;
 }
 
-/**
- * Filter files only with `css` extension.
- */
 const filter = createFilter( [ '**/*.css' ] );
+
+const REGEX_FOR_REMOVING_VAR_WHITESPACE = /(?<=var\()\s+|\s+(?=\))/g;
+
+const CONTENT_PURGE_OPTIONS = {
+	content: [],
+	safelist: { deep: [ /^ck-content/ ] },
+	blocklist: [],
+	fontFace: true,
+	keyframes: true,
+	variables: true
+};
+
+const EDITOR_PURGE_OPTIONS = {
+	// Pseudo class`:where` is preserved only if the appropriate html structure matches the CSS selector.
+	// It's a temporary solution to avoid removing selectors for Show blocks styles where `:where` occurs.
+	// For example this structure will be omitted without the HTML content:
+	//
+	// ```css
+	// .ck.ck-editor__editable.ck-editor__editable_inline.ck-show-blocks:not(.ck-widget)
+	//     :where(figure.image, figure.table) figcaption { /* ... */ }
+	// ```
+	//
+	// See: https://github.com/FullHuman/purgecss/issues/978
+	content: [ {
+		raw: `<html>
+				<body>
+					<div class="ck ck-editor__editable ck-editor__editable_inline ck-show-blocks">
+						<figure class="image">
+							<figcaption></figcaption>
+						</figure>
+					</div>
+				</body>
+			</html>`,
+		extension: 'html'
+	} ],
+	safelist: {
+		deep: [ /ck(?!-content)/, /^(?!.*ck)/ ]
+	},
+	// Option to preserve all CSS selectors that starts with `[dir=ltr/rtl]` attribute.
+	dynamicAttributes: [ 'dir' ],
+	// We must preserve all variables, keyframes and font faces in splitted stylesheets.
+	// For example this is caused by case when some of them can be defined in the `ckeditor5`
+	// but used in `ckeditor5-premium-features` stylesheet and vice versa.
+	fontFace: false,
+	keyframes: false,
+	variables: false
+};
 
 export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {
 	const options: Required<RollupSplitCssOptions> = Object.assign( {
@@ -37,7 +82,7 @@ export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {
 	return {
 		name: 'cke5-split-css',
 
-		transform( code, id ) {
+		transform( code: string, id: string ): string | undefined {
 			if ( !filter( id ) ) {
 				return;
 			}
@@ -45,34 +90,40 @@ export function splitCss( pluginOptions: RollupSplitCssOptions ): Plugin {
 			return '';
 		},
 
-		async generateBundle( output: NormalizedOutputOptions, bundle: OutputBundle ) {
+		async generateBundle( output: NormalizedOutputOptions, bundle: OutputBundle ): Promise<void> {
 			// Get stylesheet from output bundle.
-			const cssStylesheet = getCssStylesheet( bundle );
+			const css = getCssStylesheet( bundle );
 
-			// Parse `CSS` string and returns an `AST` object.
-			const parsedCss = parse( cssStylesheet );
+			// Some of CSS variables are used with spaces after/before brackets:
+			// var( --var-name )
+			// PurgeCss parser currently doesn't respect this syntax and removes this variable from definitions.
+			// See: https://github.com/FullHuman/purgecss/issues/1264
+			//
+			// Till it's not solved we need to remove spaces from variables.
+			const normalizedCss = css.replace( REGEX_FOR_REMOVING_VAR_WHITESPACE, '' );
 
-			// Generate split stylesheets for editor, content, and one that contains them all.
-			const { editorStylesContent, editingViewStylesContent } = getSplittedStyleSheets( parsedCss );
+			// Generate stylesheets for editor and content.
+			const editorStyles = await getStyles( normalizedCss, EDITOR_PURGE_OPTIONS );
+			const contentStyles = await getStyles( normalizedCss, CONTENT_PURGE_OPTIONS );
 
-			// Emit those styles ito files.
+			// Emit those styles into files.
 			this.emitFile( {
 				type: 'asset',
 				fileName: `${ options.baseFileName }-editor.css`,
-				source: await unifyFileContentOutput( editorStylesContent, options.minimize )
+				source: options.minimize ? await minifyContent( editorStyles ) : editorStyles
 			} );
 
 			this.emitFile( {
 				type: 'asset',
 				fileName: `${ options.baseFileName }-content.css`,
-				source: await unifyFileContentOutput( editingViewStylesContent, options.minimize )
+				source: options.minimize ? await minifyContent( contentStyles ) : contentStyles
 			} );
 		}
 	};
 }
 
 /**
- * @param bundle provides the full list of files being written or generated along with their details.
+ * Returns CSS stylesheet from the output bundle.
  */
 function getCssStylesheet( bundle: OutputBundle ) {
 	const cssStylesheetChunk = Object
@@ -87,187 +138,36 @@ function getCssStylesheet( bundle: OutputBundle ) {
 }
 
 /**
- * Returns split stylesheets for editor, content, and one that contains all styles.
+ * Returns stylesheets content after removing comments and unused or empty CSS rules.
  */
-function getSplittedStyleSheets( parsedCss: Stylesheet ): Record< string, string> {
-	const rules: Array<Rule> = parsedCss.stylesheet!.rules;
-
-	const { rootDefinitions, dividedStylesheets } = getDividedStyleSheetsDependingOnItsPurpose( rules );
-
-	if ( rootDefinitions.length ) {
-		const {
-			rootDeclarationForEditorStyles,
-			rootDeclarationForEditingViewStyles
-		} = filterCssVariablesBasedOnUsage( rootDefinitions, dividedStylesheets );
-
-		dividedStylesheets.editorStylesContent = rootDeclarationForEditorStyles + dividedStylesheets.editorStylesContent;
-		dividedStylesheets.editingViewStylesContent = rootDeclarationForEditingViewStyles + dividedStylesheets.editingViewStylesContent;
-	}
-
-	return dividedStylesheets;
-}
-
-/**
- * Returns `:root` definitions and divided Stylesheets.
- * @param rules List of `CSS` StyleSheet rules.
- */
-function getDividedStyleSheetsDependingOnItsPurpose( rules: Array<Rule> ) {
-	const rootDefinitionsList: Array<string> = [];
-
-	let editorStylesContent = '';
-	let editingViewStylesContent = '';
-
-	rules.forEach( rule => {
-		if ( rule.type !== 'rule' ) {
-			return;
-		}
-		const objectWithDividedStyles = divideRuleStylesBetweenStylesheets( rule );
-
-		editorStylesContent += objectWithDividedStyles.editorStyles;
-		editingViewStylesContent += objectWithDividedStyles.editingViewStyles;
-
-		if ( objectWithDividedStyles.rootDefinitions.length ) {
-			rootDefinitionsList.push( ...objectWithDividedStyles.rootDefinitions );
-		}
+async function getStyles( styles: string, purgeConfig: Omit<UserDefinedOptions, 'css'> ): Promise<string> {
+	const result = await new PurgeCSS().purge( {
+		...purgeConfig,
+		css: [ { raw: styles } ]
 	} );
 
-	const rootDefinitions = rootDefinitionsList.join( '' );
-
-	return {
-		rootDefinitions,
-		dividedStylesheets: {
-			editorStylesContent,
-			editingViewStylesContent
-		}
-	};
+	return cleanContent( result[ 0 ]!.css );
 }
 
 /**
- * Returns `:root` declarations for editor and content stylesheets.
+ * Safe and minimum CSS stylesheet transformation with removing comments and empty rules.
  */
-function filterCssVariablesBasedOnUsage(
-	rootDefinitions: string,
-	dividedStylesheets: { [key: string]: string }
-): Record<string, string> {
-	const VARIABLE_DEFINITION_REGEXP = /--([\w-]+)/gm;
+async function cleanContent( content: string ): Promise<string> {
+	const normalizeContent = await cssnano( {
+		preset: litePreset( {
+			normalizeWhitespace: false
+		} )
+	} ).process( content!, { from: undefined } );
 
-	const variablesUsedInEditorStylesContent: Set<string> = new Set(
-		dividedStylesheets.editorStylesContent!.match( VARIABLE_DEFINITION_REGEXP )
-	);
-
-	const variablesUsedInEditingViewStylesContent: Set<string> = new Set(
-		dividedStylesheets.editingViewStylesContent!.match( VARIABLE_DEFINITION_REGEXP )
-	);
-
-	const rootDeclarationForEditorStyles = createRootDeclarationOfUsedVariables(
-		rootDefinitions,
-		variablesUsedInEditorStylesContent
-	);
-
-	const rootDeclarationForEditingViewStyles = createRootDeclarationOfUsedVariables(
-		rootDefinitions,
-		variablesUsedInEditingViewStylesContent
-	);
-
-	return {
-		rootDeclarationForEditorStyles,
-		rootDeclarationForEditingViewStyles
-	};
+	return normalizeContent.css;
 }
 
 /**
- * Returns filtered `:root` declaration based on list of used `CSS` variables in stylesheet content.
- * @param rootDeclaration
- * @param listOfUsedVariables
+ * Returns minified stylesheet content.
  */
-function createRootDeclarationOfUsedVariables( rootDefinition: string, listOfUsedVariables: Set<string> ): string {
-	if ( rootDefinition.length === 0 || listOfUsedVariables.size === 0 ) {
-		return '';
-	}
-
-	const rootDeclarationWithSelector = wrapDefinitionsIntoSelector( ':root', rootDefinition );
-	const parsedRootDeclaration = parse( rootDeclarationWithSelector );
-	const firstRule = parsedRootDeclaration.stylesheet!.rules[ 0 ] as Rule;
-	const listOfDeclarations = firstRule.declarations as Array<Declaration>;
-
-	const variablesDefinitions = listOfDeclarations.reduce( ( acc: string, currentDeclaration ) => {
-		if ( !listOfUsedVariables.has( currentDeclaration.property! ) ) {
-			return acc;
-		}
-
-		const property = `${ currentDeclaration.property }: ${ currentDeclaration.value };\n`;
-		return acc + property;
-	}, '' );
-
-	return wrapDefinitionsIntoSelector( ':root', variablesDefinitions );
-}
-
-/**
- * Decides to which stylesheet should passed `rule` be placed or it should be in `:root` definition.
- */
-function divideRuleStylesBetweenStylesheets( rule: Rule ) {
-	const selector = rule.selectors![ 0 ]!;
-	const rootDefinitions = [];
-
-	let editorStyles = '';
-	let editingViewStyles = '';
-
-	const ruleDeclarations = getRuleDeclarations( rule.declarations! );
-	const ruleDeclarationsWithSelector = wrapDefinitionsIntoSelector( selector, ruleDeclarations );
-	const isRootSelector = selector.includes( ':root' );
-	const isStartingWithContentSelector = selector.startsWith( '.ck-content' );
-
-	// `:root` selector need to be in each file at the top.
-	if ( isRootSelector ) {
-		rootDefinitions.push( ruleDeclarations );
-	} else {
-		// Dividing styles depending on purpose
-		if ( isStartingWithContentSelector ) {
-			editingViewStyles += ruleDeclarationsWithSelector;
-		} else {
-			editorStyles += ruleDeclarationsWithSelector;
-		}
-	}
-
-	return {
-		rootDefinitions,
-		editorStyles,
-		editingViewStyles
-	};
-}
-
-/**
- * Returns all `rule` declarations as a concatenated string.
- */
-function getRuleDeclarations( declarations: Array<Declaration> ): string {
-	return declarations.reduce( ( acc, currentDeclaration ) => {
-		if ( currentDeclaration.type !== 'declaration' ) {
-			return acc;
-		}
-
-		const property = `${ currentDeclaration.property }: ${ currentDeclaration.value };\n`;
-		return acc + property;
-	}, '' );
-}
-
-/**
- * @param content is a `CSS` content.
- * @param minimize When set to `true` it will minify the content.
- */
-async function unifyFileContentOutput( content: string = '', minimize: boolean ): Promise<string> {
-	if ( !minimize ) {
-		return content;
-	}
-
+async function minifyContent( stylesheetContent: string = '' ): Promise<string> {
 	const minifier = cssnano() as Processor;
-	const minifiedResult = await minifier.process( content, { from: undefined } );
+	const minifiedResult = await minifier.process( stylesheetContent, { from: undefined } );
 
 	return minifiedResult.css;
-}
-
-/**
- * Wraps `declarations` list into passed `selector`;
- */
-function wrapDefinitionsIntoSelector( selector: string, definitions: string ): string {
-	return `${ selector } {\n${ definitions }}\n`;
 }

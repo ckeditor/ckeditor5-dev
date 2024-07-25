@@ -57,31 +57,22 @@ yarn run coverage
 
 ## Releasing packages
 
-### Changelog
+CircleCI automates the release process and can release both channels: stable (`X.Y.Z`) and pre-releases (`X.Y.Z-alpha.X`, etc.).
 
-1. Fetch all changes and switch to `master`!
-2. Execute `npm run changelog`:
-  * This task checks what changed in each package and bumps the version accordingly. If nothing changed at all, it won't create a new changelog entry. If changes were irrelevant (e.g. only depedencies) it will create an "internal changes" entry.
-  * Scan the logs which are printed by the tool in search for errors (incorrect changelog entries). Incorrect entries (e.g. ones without the type) are being ignored. You may need to create entries for them manually. This is done directly in `CHANGELOG.md` (in the root directory). Make sure to verify the proposed version after you modify the changelog.
-    * When unsure what has really changed in this version of a specific package, use `git diff <hash of previous release> packages/ckeditor5-dev-<name>/`.
+Before you start, you need to prepare the changelog entries.
 
-### Publishing
+1. Make sure the `#master` branch is up-to-date: `git fetch && git checkout master && git pull`.
+1. Prepare a release branch: `git checkout -b release-[YYYYMMDD]` where `YYYYMMDD` is the current day.
+1. Generate the changelog entries: `yarn run changelog --branch release-[YYYYMMDD] [--from [GIT_TAG]]`.
+    * By default, the changelog generator uses the latest published tag as a starting point for collecting commits to process.
 
-After generating the changelog, you are able to release the package.
+      The `--from` modifier option allows overriding the default behavior. It is required when preparing the changelog entries for the next stable release while the previous one was marked as a prerelease, e.g., `@alpha`.
 
-First, you need to bump the version:
-
-```bash
-npm run release:prepare-packages
-```
-
-After bumping the version, you can publish the changes:
-
-```bash
-npm run release:publish-packages
-```
-
-Your job's done. You can go now to `ckeditor5`, remove `yarn.lock`, potentially update entries in `package.json`, run `yarn install` and commit that as `"Internal: Updated dependencies."`.
+      **Example**: Let's assume that the `v40.5.0-alpha.0` tag is our latest and that we want to release it on a stable channel. The `--from` modifier should be equal to `--from v40.4.0`.
+    * This task checks what changed in each package and bumps the version accordingly. It won't create a new changelog entry if nothing changes at all. If changes were irrelevant (e.g., only dependencies), it would make an "_internal changes_" entry.
+    * Scan the logs printed by the tool to search for errors (incorrect changelog entries). Incorrect entries (e.g., ones without the type) should be addressed. You may need to create entries for them manually. This is done directly in CHANGELOG.md (in the root directory). Make sure to verify the proposed version after you modify the changelog.
+1. Commit all changes and prepare a new pull request targeting the `#master` branch.
+1. Ping the `@ckeditor/ckeditor-5-devops` team to review the pull request and trigger the release process.
 
 ## License
 

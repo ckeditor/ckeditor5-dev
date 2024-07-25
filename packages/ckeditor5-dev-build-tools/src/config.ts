@@ -145,7 +145,7 @@ export async function getRollupConfig( options: BuildOptions ) {
 			} ),
 
 			/**
-			 * Allows using imports, mixins and nesting in CSS and exctacts output CSS to a separate file.
+			 * Allows using imports, mixins and nesting in CSS and extracts output CSS to a separate file.
 			 */
 			styles( {
 				mode: [ 'extract', cssFileName ],
@@ -313,7 +313,7 @@ function getTypeScriptPlugin( {
 		inlineSources: sourceMap, // https://github.com/rollup/plugins/issues/260
 		typescript: getUserDependency( 'typescript' ),
 		declaration: declarations,
-		declarationDir: declarations ? path.join( path.parse( output ).dir, 'types' ) : undefined,
+		declarationDir: declarations ? path.parse( output ).dir : undefined,
 		compilerOptions: {
 			emitDeclarationOnly: true
 		}

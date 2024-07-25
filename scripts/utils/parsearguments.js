@@ -15,6 +15,12 @@ const minimist = require( 'minimist' );
  */
 module.exports = function parseArguments( cliArguments ) {
 	const config = {
+		boolean: [
+			'verbose',
+			'compile-only',
+			'ci'
+		],
+
 		number: [
 			'concurrency'
 		],
@@ -29,8 +35,11 @@ module.exports = function parseArguments( cliArguments ) {
 		default: {
 			concurrency: require( 'os' ).cpus().length / 2,
 			packages: null,
+			ci: false,
+			verbose: false,
+			'compile-only': false,
 			branch: 'master',
-			'npm-tag': 'latest'
+			'npm-tag': null
 		}
 	};
 
@@ -43,6 +52,13 @@ module.exports = function parseArguments( cliArguments ) {
 	options.npmTag = options[ 'npm-tag' ];
 	delete options[ 'npm-tag' ];
 
+	options.compileOnly = options[ 'compile-only' ];
+	delete options[ 'compile-only' ];
+
+	if ( process.env.CI ) {
+		options.ci = true;
+	}
+
 	return options;
 };
 
@@ -51,11 +67,17 @@ module.exports = function parseArguments( cliArguments ) {
  *
  * @property {Number} concurrency
  *
- * @property {String} [npmTag='staging']
+ * @property {String|null} [npmTag=null]
  *
  * @property {Array.<String>|null} packages
  *
  * @property {String} [from]
  *
  * @property {String} [branch='master']
+ *
+ * @property {Boolean} [compileOnly=false]
+ *
+ * @property {Boolean} [verbose=false]
+ *
+ * @property {Boolean} [ci=false]
  */
