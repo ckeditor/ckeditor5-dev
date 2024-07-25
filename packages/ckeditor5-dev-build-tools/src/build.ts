@@ -10,7 +10,7 @@ import chalk from 'chalk';
 import path from 'upath';
 import { rollup, type RollupOutput, type GlobalsOption } from 'rollup';
 import { getRollupConfig } from './config.js';
-import { getCwdPath, camelizeObjectKeys, removeWhitespace } from './utils.js';
+import { getCwdPath, camelizeObjectKeys, removeWhitespace, CKEDITOR_GLOBALS } from './utils.js';
 
 export interface BuildOptions {
 	input: string;
@@ -97,6 +97,10 @@ async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Pro
 	const { dir, name } = path.parse( args.output );
 	const { plugins, ...config } = await getRollupConfig( args );
 	const build = await rollup( config );
+	const globals = {
+		...CKEDITOR_GLOBALS,
+		...args.globals as GlobalsOption
+	};
 
 	const umdBundle = await build.write( {
 		format: 'umd',
@@ -104,7 +108,7 @@ async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Pro
 		assetFileNames: '[name][extname]',
 		sourcemap: args.sourceMap,
 		name: args.name,
-		globals: args.globals as GlobalsOption | undefined
+		globals
 	} );
 
 	return {
