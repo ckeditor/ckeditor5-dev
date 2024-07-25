@@ -10,7 +10,7 @@ import chalk from 'chalk';
 import path from 'upath';
 import { rollup, type RollupOutput, type GlobalsOption } from 'rollup';
 import { getRollupConfig } from './config.js';
-import { getCwdPath, camelizeObjectKeys, removeWhitespace, CKEDITOR_GLOBALS } from './utils.js';
+import { getCwdPath, camelizeObjectKeys, removeWhitespace } from './utils.js';
 
 export interface BuildOptions {
 	input: string;
@@ -44,6 +44,14 @@ export const defaultOptions: BuildOptions = {
 	minify: false,
 	clean: false,
 	browser: false
+};
+
+/**
+ * `ckeditor5` and `ckeditor5-premium-features` globals.
+ */
+const CKEDITOR_GLOBALS: GlobalsOption = {
+	ckeditor5: 'CKEDITOR',
+	'ckeditor5-premium-features': 'CKEDITOR_PREMIUM_FEATURES'
 };
 
 /**

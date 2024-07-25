@@ -6,7 +6,6 @@
 import { createRequire } from 'module';
 import path from 'upath';
 import type { CamelCase, CamelCasedProperties } from 'type-fest';
-import type { GlobalsOption } from 'rollup';
 
 const require = createRequire( import.meta.url );
 
@@ -61,11 +60,3 @@ export function getUserDependency( name: string ): any {
 
 	return require( path );
 }
-
-/**
- * `ckeditor5` and `ckeditor5-premium-features` globals.
- */
-export const CKEDITOR_GLOBALS: GlobalsOption = {
-	ckeditor5: 'CKEDITOR',
-	'ckeditor5-premium-features': 'CKEDITOR_PREMIUM_FEATURES'
-};
