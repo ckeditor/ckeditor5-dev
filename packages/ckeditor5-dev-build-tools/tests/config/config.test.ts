@@ -16,6 +16,7 @@ const defaults: Options = {
 	banner: '',
 	external: [],
 	rewrite: [],
+	globals: [],
 	declarations: false,
 	translations: '',
 	sourceMap: false,
