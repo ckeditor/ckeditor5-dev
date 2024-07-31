@@ -204,6 +204,7 @@ describe( 'getKarmaConfig()', () => {
 			'--js-flags="--expose-gc"',
 			'--disable-renderer-backgrounding',
 			'--disable-backgrounding-occluded-windows',
+			'--disable-search-engine-choice-screen',
 			'--no-sandbox'
 		] );
 
@@ -214,6 +215,7 @@ describe( 'getKarmaConfig()', () => {
 			'--js-flags="--expose-gc"',
 			'--disable-renderer-backgrounding',
 			'--disable-backgrounding-occluded-windows',
+			'--disable-search-engine-choice-screen',
 			'--remote-debugging-port=9222'
 		] );
 	} );
