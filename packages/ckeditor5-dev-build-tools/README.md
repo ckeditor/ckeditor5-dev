@@ -142,6 +142,30 @@ The name of the UMD bundle. This name will be used as the global variable name w
 
 This option is required if the `browser' option is enabled.
 
+#### `globals` / `--globals=[moduleID:Global]`
+
+**Type:** `{ [ name: string ]: string } | ( ( name: string ) => string )` | `string[]`
+
+**Default value:** `{}`
+
+Pairs of external package names and associated global variables used in the `umd` build.
+
+The list already contains `ckeditor5` and `ckeditor5-premium-features` which are mapped to `CKEDITOR` and `CKEDITOR_PREMIUM_FEATURES`.
+
+When using the CLI, this option can be used multiple times.
+
+**Example value:** `--globals=external-id:variableName --globals=another-external-id:anotherVariableName`
+
+When using the JavaScript API, the option must be an object.
+
+**Example value:**
+```js
+globals: {
+	'external-id': 'variableName',
+	'another-external-id': 'anotherVariableName'
+}
+```
+
 #### `external` / `--external=[path]`
 
 **Type:** `string[]` | `string`

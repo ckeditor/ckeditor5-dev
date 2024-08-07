@@ -122,6 +122,15 @@ test( '--external', async () => {
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { external: [ 'foo', 'bar' ] } ) );
 } );
 
+test( '--globals', async () => {
+	const spy = getConfigMock();
+
+	mockCliArgs( '--globals=foo:bar', '--globals=baz:faz' );
+	await build();
+
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { globals: { foo: 'bar', baz: 'faz' } } ) );
+} );
+
 test( '--declarations', async () => {
 	const spy = getConfigMock();
 
@@ -210,6 +219,22 @@ test( '.external', async () => {
 	await build( { external: [ 'foo', 'bar' ] } );
 
 	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { external: [ 'foo', 'bar' ] } ) );
+} );
+
+test( '.globals', async () => {
+	const spy = getConfigMock();
+
+	await build( { globals: { foo: 'bar' } } );
+
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { globals: { foo: 'bar' } } ) );
+} );
+
+test( '.globals (empty object)', async () => {
+	const spy = getConfigMock();
+
+	await build( { globals: {} } );
+
+	expect( spy ).toHaveBeenCalledWith( expect.objectContaining( { globals: {} } ) );
 } );
 
 test( '.rewrite', async () => {

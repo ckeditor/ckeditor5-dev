@@ -310,7 +310,7 @@ test( 'Minify', async () => {
 	expect( output[ 0 ].code ).toContain( 'export{' );
 } );
 
-test( 'Minification doesnt remove banner', async () => {
+test( 'Minification doesn\'t remove banner', async () => {
 	const { output } = await build( {
 		input: 'src/input.js',
 		banner: 'src/banner.js',

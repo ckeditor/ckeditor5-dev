@@ -8,7 +8,7 @@ import url from 'url';
 import util from 'util';
 import chalk from 'chalk';
 import path from 'upath';
-import { rollup, type RollupOutput } from 'rollup';
+import { rollup, type RollupOutput, type GlobalsOption } from 'rollup';
 import { getRollupConfig } from './config.js';
 import { getCwdPath, camelizeObjectKeys, removeWhitespace } from './utils.js';
 
@@ -17,6 +17,7 @@ export interface BuildOptions {
 	output: string;
 	tsconfig: string;
 	name: string;
+	globals: GlobalsOption | Array<string>;
 	banner: string;
 	external: Array<string>;
 	rewrite: Array<[string, string]>;
@@ -33,6 +34,7 @@ export const defaultOptions: BuildOptions = {
 	output: 'dist/index.js',
 	tsconfig: 'tsconfig.json',
 	name: '',
+	globals: {},
 	banner: '',
 	external: [],
 	rewrite: [],
@@ -42,6 +44,14 @@ export const defaultOptions: BuildOptions = {
 	minify: false,
 	clean: false,
 	browser: false
+};
+
+/**
+ * `ckeditor5` and `ckeditor5-premium-features` globals.
+ */
+const CKEDITOR_GLOBALS: GlobalsOption = {
+	ckeditor5: 'CKEDITOR',
+	'ckeditor5-premium-features': 'CKEDITOR_PREMIUM_FEATURES'
 };
 
 /**
@@ -61,7 +71,8 @@ function getCliArguments(): Partial<BuildOptions> {
 			'minify': { type: 'boolean' },
 			'clean': { type: 'boolean' },
 			'browser': { type: 'boolean' },
-			'name': { type: 'string' }
+			'name': { type: 'string' },
+			'globals': { type: 'string', multiple: true }
 		},
 
 		// Skip `node ckeditor5-build-package`.
@@ -75,6 +86,17 @@ function getCliArguments(): Partial<BuildOptions> {
 }
 
 /**
+ * Convert `globals` parameter to object when it's passed via CLI as `<external-id:variableName,another-external-id:anotherVariableName, >`
+ */
+function normalizeGlobalsParameter( globals: GlobalsOption | Array<string> ): GlobalsOption | Array<string> {
+	if ( Array.isArray( globals ) ) {
+		return Object.fromEntries( globals.map( item => item.split( ':' ) ) );
+	}
+
+	return globals;
+}
+
+/**
  * Generates `UMD` build based on previous `ESM` build.
  */
 async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Promise<RollupOutput> {
@@ -83,6 +105,10 @@ async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Pro
 	const { dir, name } = path.parse( args.output );
 	const { plugins, ...config } = await getRollupConfig( args );
 	const build = await rollup( config );
+	const globals = {
+		...CKEDITOR_GLOBALS,
+		...args.globals as GlobalsOption
+	};
 
 	const umdBundle = await build.write( {
 		format: 'umd',
@@ -90,10 +116,7 @@ async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Pro
 		assetFileNames: '[name][extname]',
 		sourcemap: args.sourceMap,
 		name: args.name,
-		globals: {
-			ckeditor5: 'ckeditor5',
-			'ckeditor5-premium-features': 'ckeditor5-premium-features'
-		}
+		globals
 	} );
 
 	return {
@@ -135,6 +158,10 @@ async function normalizeOptions( options: Partial<BuildOptions> ): Promise<Build
 		const { banner } = await import( href );
 
 		normalized.banner = banner;
+	}
+
+	if ( normalized.globals ) {
+		normalized.globals = normalizeGlobalsParameter( normalized.globals );
 	}
 
 	return normalized;
