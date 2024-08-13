@@ -33,8 +33,11 @@ jobs:
         build-mode: ${{ matrix.build-mode }}
         config: |
           paths:
-            - 'packages/*/@(bin|src|lib)/**/*.@(js|ts)'
-
+            - 'packages/*/bin/*.js'
+            - 'packages/*/src/**/*.ts'
+            - 'packages/*/src/**/*.js'
+            - 'packages/*/lib/**/*.ts'
+            - 'packages/*/lib/**/*.js'
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
