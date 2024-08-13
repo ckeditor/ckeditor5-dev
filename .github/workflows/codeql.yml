@@ -32,10 +32,9 @@ jobs:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
         config: |
-          paths:
-            - 'packages/*/bin'
-            - 'packages/*/src'
-            - 'packages/*/lib'
+          paths-ignore:
+            - 'packages/*/tests'
+            - scripts
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
