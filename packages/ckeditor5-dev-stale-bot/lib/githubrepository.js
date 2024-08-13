@@ -323,7 +323,12 @@ module.exports = class GitHubRepository {
 		};
 
 		return this.sendRequest( await queries.getLabels, variables )
-			.then( data => data.repository.labels.nodes.map( label => label.id ) )
+			.then( data => {
+				return data.repository.labels.nodes
+					// Additional filtering is needed, because GitHub endpoint may return many more results than match the query.
+					.filter( label => labelNames.includes( label.name ) )
+					.map( label => label.id );
+			} )
 			.catch( error => {
 				this.logger.error( 'Unexpected error when executing "#getLabels()".', error );
 

@@ -1893,6 +1893,16 @@ describe( 'dev-stale-bot/lib', () => {
 		} );
 
 		describe( '#getLabels()', () => {
+			let labels;
+
+			beforeEach( () => {
+				labels = [
+					{ id: 'LabelId1', name: 'type:bug' },
+					{ id: 'LabelId2', name: 'type:task' },
+					{ id: 'LabelId3', name: 'type:feature' }
+				];
+			} );
+
 			it( 'should be a function', () => {
 				expect( githubRepository.getLabels ).to.be.a( 'function' );
 			} );
@@ -1905,12 +1915,6 @@ describe( 'dev-stale-bot/lib', () => {
 			} );
 
 			it( 'should return labels', () => {
-				const labels = [
-					{ id: 'LabelId1' },
-					{ id: 'LabelId2' },
-					{ id: 'LabelId3' }
-				];
-
 				stubs.GraphQLClient.request.resolves( {
 					repository: {
 						labels: {
@@ -1928,13 +1932,31 @@ describe( 'dev-stale-bot/lib', () => {
 				} );
 			} );
 
-			it( 'should send one request for labels', () => {
-				const labels = [
-					{ id: 'LabelId1' },
-					{ id: 'LabelId2' },
-					{ id: 'LabelId3' }
-				];
+			it( 'should return only requested labels even if GitHub endpoint returned additional ones', () => {
+				stubs.GraphQLClient.request.resolves( {
+					repository: {
+						labels: {
+							nodes: [
+								...labels,
+								{ id: 'LabelId4', name: 'type:docs' },
+								{ id: 'LabelId5', name: 'type:debt' },
+								{ id: 'LabelId6', name: 'type:question' },
+								{ id: 'LabelId7', name: 'intro' }
+							]
+						}
+					}
+				} );
 
+				return githubRepository.getLabels( 'ckeditor/ckeditor5', [ 'type:bug', 'type:task', 'type:feature' ] ).then( result => {
+					expect( result ).to.be.an( 'array' );
+					expect( result ).to.have.length( 3 );
+					expect( result[ 0 ] ).to.equal( 'LabelId1' );
+					expect( result[ 1 ] ).to.equal( 'LabelId2' );
+					expect( result[ 2 ] ).to.equal( 'LabelId3' );
+				} );
+			} );
+
+			it( 'should send one request for labels', () => {
 				stubs.GraphQLClient.request.resolves( {
 					repository: {
 						labels: {
