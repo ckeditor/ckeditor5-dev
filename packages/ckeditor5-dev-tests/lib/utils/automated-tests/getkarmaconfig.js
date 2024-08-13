@@ -226,7 +226,8 @@ function getFlagsForBrowser( browser ) {
 		'--disable-background-timer-throttling',
 		'--js-flags="--expose-gc"',
 		'--disable-renderer-backgrounding',
-		'--disable-backgrounding-occluded-windows'
+		'--disable-backgrounding-occluded-windows',
+		'--disable-search-engine-choice-screen'
 	];
 
 	if ( browser === 'CHROME_CI' ) {
