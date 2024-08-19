@@ -1,8 +1,5 @@
 name: "CodeQL config"
 paths:
-  - './packages/*/src'
-  - './packages/*/lib'
-  - './packages/*/bin'
+  - 'packages'
 paths-ignore:
-  - './packages/*/tests'
-  - './scripts'
+  - '**/tests'
