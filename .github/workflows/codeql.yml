@@ -31,11 +31,7 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
-        config: |
-          paths:
-            - packages/*/bin
-            - packages/*/lib
-            - packages/*/src
+        config-file: ./.github/codeql/codeql-config.yml
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:

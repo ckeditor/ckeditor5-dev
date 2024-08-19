@@ -1,0 +1,4 @@
+paths:
+  - packages/*/bin
+  - packages/*/lib
+  - packages/*/src
