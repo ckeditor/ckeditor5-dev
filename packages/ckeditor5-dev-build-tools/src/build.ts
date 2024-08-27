@@ -116,17 +116,14 @@ async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Pro
 		plugins: [
 			{
 				name: 'load-source-map',
-				async load( id: string ) {
+				load( id: string ) {
 					if ( !args.sourceMap ) {
 						return;
 					}
 
-					const code = fs.readFileSync( id, 'utf-8' );
-					const map = fs.readFileSync( `${ id }.map`, 'utf-8' );
-
 					return {
-						code,
-						map
+						code: fs.readFileSync( id, 'utf-8' ),
+						map: fs.readFileSync( `${ id }.map`, 'utf-8' )
 					};
 				}
 			}
