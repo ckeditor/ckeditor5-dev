@@ -9,8 +9,9 @@ import util from 'util';
 import chalk from 'chalk';
 import path from 'upath';
 import { rollup, type RollupOutput, type GlobalsOption } from 'rollup';
+import { loadSourcemaps } from './plugins/loadSourcemaps.js';
 import { getRollupConfig } from './config.js';
-import { getCwdPath, camelizeObjectKeys, removeWhitespace } from './utils.js';
+import { getCwdPath, camelizeObjectKeys, removeWhitespace, getOptionalPlugin } from './utils.js';
 
 export interface BuildOptions {
 	input: string;
@@ -114,19 +115,10 @@ async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Pro
 	const build = await rollup( {
 		...config,
 		plugins: [
-			{
-				name: 'load-source-map',
-				load( id: string ) {
-					if ( !args.sourceMap ) {
-						return;
-					}
-
-					return {
-						code: fs.readFileSync( id, 'utf-8' ),
-						map: fs.readFileSync( `${ id }.map`, 'utf-8' )
-					};
-				}
-			}
+			getOptionalPlugin(
+				args.sourceMap,
+				loadSourcemaps()
+			)
 		]
 	} );
 

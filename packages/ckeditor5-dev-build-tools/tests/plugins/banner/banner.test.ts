@@ -5,10 +5,9 @@
 
 import { join } from 'path';
 import { test, expect } from 'vitest';
-import swc from '@rollup/plugin-swc';
 import styles from 'rollup-plugin-styles';
 import { rollup, type RollupOutput, type OutputAsset } from 'rollup';
-import { verifyAsset, verifyChunk } from '../../_utils/utils.js';
+import { swcPlugin, verifyAsset, verifyChunk } from '../../_utils/utils.js';
 
 import { addBanner, type RollupBannerOptions } from '../../../src/index.js';
 
@@ -19,17 +18,7 @@ async function generateBundle( options: RollupBannerOptions, sourcemap: boolean 
 	const bundle = await rollup( {
 		input: join( import.meta.dirname, './fixtures/input.ts' ),
 		plugins: [
-			swc( {
-				include: [ '**/*.[jt]s' ],
-				swc: {
-					jsc: {
-						target: 'es2019'
-					},
-					module: {
-						type: 'es6'
-					}
-				}
-			} ),
+			swcPlugin,
 
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore

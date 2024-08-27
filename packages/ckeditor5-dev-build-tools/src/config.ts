@@ -5,9 +5,9 @@
 
 import path from 'upath';
 import { existsSync } from 'fs';
-import { getUserDependency } from './utils.js';
+import { getOptionalPlugin, getUserDependency } from './utils.js';
 import type { PackageJson } from 'type-fest';
-import type { InputPluginOption, Plugin, RollupOptions } from 'rollup';
+import type { Plugin, RollupOptions } from 'rollup';
 import type { BuildOptions } from './build.js';
 
 /**
@@ -270,13 +270,6 @@ export async function getRollupConfig( options: BuildOptions ) {
 			)
 		]
 	} as const satisfies RollupOptions;
-}
-
-/**
- * Returns plugin if condition is truthy. This is used only to get the types right.
- */
-function getOptionalPlugin<T extends InputPluginOption>( condition: unknown, plugin: T ): T | undefined {
-	return condition ? plugin : undefined;
 }
 
 /**

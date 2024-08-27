@@ -4,7 +4,8 @@
  */
 
 import { expect, vi } from 'vitest';
-import type { RollupOutput, OutputChunk, OutputAsset } from 'rollup';
+import swc from '@rollup/plugin-swc';
+import type { RollupOutput, OutputChunk, OutputAsset, Plugin } from 'rollup';
 import * as utils from '../../src/utils';
 
 /**
@@ -70,4 +71,21 @@ export async function mockGetUserDependency( path: string, cb: () => any ): Prom
 
 			return actualImport( url );
 		} );
+}
+
+/**
+ * Helper function for getting a preconfigured `swc` plugin.
+ */
+export function swcPlugin(): Plugin {
+	return swc( {
+		include: [ '**/*.[jt]s' ],
+		swc: {
+			jsc: {
+				target: 'es2019'
+			},
+			module: {
+				type: 'es6'
+			}
+		}
+	} );
 }
