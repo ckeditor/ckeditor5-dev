@@ -104,11 +104,34 @@ async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Pro
 
 	const { dir, name } = path.parse( args.output );
 	const { plugins, ...config } = await getRollupConfig( args );
-	const build = await rollup( config );
-	const globals = {
-		...CKEDITOR_GLOBALS,
-		...args.globals as GlobalsOption
-	};
+
+	/**
+	 * Ignore the plugins we used for the ESM build. Instead, add a new plugin to not only
+	 * load the source code of the dependencies (which is the default in Rollup for better
+	 * performance), but also their source maps to generate a proper final source map for
+	 * the UMD bundle.
+	 */
+	const build = await rollup( {
+		...config,
+		plugins: [
+			{
+				name: 'load-source-map',
+				async load( id: string ) {
+					if ( !args.sourceMap ) {
+						return;
+					}
+
+					const code = fs.readFileSync( id, 'utf-8' );
+					const map = fs.readFileSync( `${ id }.map`, 'utf-8' );
+
+					return {
+						code,
+						map
+					};
+				}
+			}
+		]
+	} );
 
 	const umdBundle = await build.write( {
 		format: 'umd',
@@ -116,7 +139,10 @@ async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Pro
 		assetFileNames: '[name][extname]',
 		sourcemap: args.sourceMap,
 		name: args.name,
-		globals
+		globals: {
+			...CKEDITOR_GLOBALS,
+			...args.globals as GlobalsOption
+		}
 	} );
 
 	return {
