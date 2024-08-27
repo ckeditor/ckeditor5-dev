@@ -8,7 +8,7 @@ import type { Plugin } from 'rollup';
 
 export function loadSourcemaps(): Plugin {
 	return {
-		name: 'load-sourcemaps',
+		name: 'cke5-load-sourcemaps',
 		load( id: string ) {
 			const sourceMapId = id + '.map';
 
