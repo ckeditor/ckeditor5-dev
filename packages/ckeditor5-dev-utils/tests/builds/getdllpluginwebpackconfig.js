@@ -13,7 +13,7 @@ const TerserPlugin = require( 'terser-webpack-plugin' );
 const expect = chai.expect;
 
 describe( 'builds/getDllPluginWebpackConfig()', () => {
-	let sandbox, stubs, getDllPluginWebpackConfig, packageName;
+	let sandbox, stubs, getDllPluginWebpackConfig;
 
 	const manifest = {
 		content: {
@@ -34,7 +34,8 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 
 		stubs = {
 			fs: {
-				existsSync: sandbox.stub()
+				existsSync: sandbox.stub(),
+				readJsonSync: sandbox.stub()
 			},
 			webpack: {
 				BannerPlugin: sandbox.stub(),
@@ -47,6 +48,10 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			}
 		};
 
+		stubs.fs.readJsonSync.returns( {
+			name: '@ckeditor/ckeditor5-dev'
+		} );
+
 		sandbox.stub( path, 'join' ).callsFake( ( ...args ) => args.join( '/' ) );
 
 		mockery.enable( {
@@ -55,16 +60,9 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 			warnOnUnregistered: false
 		} );
 
-		packageName = '@ckeditor/ckeditor5-dev';
-
 		mockery.registerMock( 'fs-extra', stubs.fs );
 		mockery.registerMock( '../loaders', stubs.loaders );
 		mockery.registerMock( '/manifest/path', manifest );
-		mockery.registerMock( '/package/path/package.json', {
-			get name() {
-				return packageName;
-			}
-		} );
 
 		getDllPluginWebpackConfig = require( '../../lib/builds/getdllpluginwebpackconfig' );
 	} );
@@ -101,7 +99,9 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 	} );
 
 	it( 'transforms package with many dashes in its name', () => {
-		packageName = '@ckeditor/ckeditor5-html-embed';
+		stubs.fs.readJsonSync.returns( {
+			name: '@ckeditor/ckeditor5-html-embed'
+		} );
 
 		const webpackConfig = getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
@@ -231,10 +231,6 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 	} );
 
 	describe( '#loaders', () => {
-		beforeEach( () => {
-			packageName = '@ckeditor/ckeditor5-html-embed';
-		} );
-
 		describe( 'getTypeScriptLoader()', () => {
 			it( 'it should use the default tsconfig.json if the "options.tsconfigPath" option is not specified', () => {
 				getDllPluginWebpackConfig( stubs.webpack, {

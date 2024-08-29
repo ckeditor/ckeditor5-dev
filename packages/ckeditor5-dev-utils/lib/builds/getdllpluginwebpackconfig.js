@@ -32,7 +32,7 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 	// See: https://github.com/ckeditor/ckeditor5/issues/13136.
 	const TerserPlugin = require( 'terser-webpack-plugin' );
 
-	const { name: packageName } = require( path.join( options.packagePath, 'package.json' ) );
+	const { name: packageName } = fs.readJsonSync( path.join( options.packagePath, 'package.json' ) );
 	const langDirExists = fs.existsSync( path.join( options.packagePath, 'lang' ) );
 	const indexJsExists = fs.existsSync( path.join( options.packagePath, 'src', 'index.js' ) );
 
