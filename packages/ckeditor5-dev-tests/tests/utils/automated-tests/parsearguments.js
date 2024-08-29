@@ -7,6 +7,7 @@
 
 const fs = require( 'fs' );
 const path = require( 'path' );
+const mockery = require( 'mockery' );
 const { expect } = require( 'chai' );
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
@@ -14,25 +15,44 @@ const proxyquire = require( 'proxyquire' );
 const originalPosixJoin = path.posix.join;
 
 describe( 'parseArguments()', () => {
-	let parseArguments, sandbox, stubs;
+	let parseArguments, sandbox, stubs, packageName;
 
 	beforeEach( () => {
 		sandbox = sinon.createSandbox();
+
+		mockery.enable( {
+			useCleanCache: true,
+			warnOnReplace: false,
+			warnOnUnregistered: false
+		} );
 
 		stubs = {
 			cwd: sandbox.stub( process, 'cwd' ).callsFake( () => '/' ),
 			existsSync: sandbox.stub( fs, 'existsSync' ),
 			tools: {
-				isDirectory: sandbox.stub(),
-				readPackageName: sandbox.stub(),
 				getDirectories: sandbox.stub()
 			},
 			logger: {
 				warning: sandbox.stub()
 			},
+			fs: {
+				statSync: sandbox.stub()
+			},
 			// To force unix paths in tests.
 			pathJoin: sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => originalPosixJoin( ...chunks ) )
 		};
+
+		stubs.cwd.returns( '/home/project' );
+
+		packageName = 'ckeditor5';
+
+		mockery.registerMock( '/home/project/package.json', {
+			get name() {
+				return packageName;
+			}
+		} );
+
+		// mockery.registerMock( 'fs', stubs.fs );
 
 		parseArguments = proxyquire( '../../../lib/utils/automated-tests/parsearguments', {
 			'@ckeditor/ckeditor5-dev-utils': {
@@ -40,12 +60,14 @@ describe( 'parseArguments()', () => {
 					return stubs.logger;
 				},
 				tools: stubs.tools
-			}
+			},
+			'fs': stubs.fs
 		} );
 	} );
 
 	afterEach( () => {
 		sandbox.restore();
+		mockery.disable();
 	} );
 
 	it( 'replaces kebab-case strings with camelCase values', () => {
@@ -172,10 +194,10 @@ describe( 'parseArguments()', () => {
 			'returns an array of packages to tests when `--repositories` is specified ' +
 			'(root directory check)',
 			() => {
-				stubs.cwd.returns( '/home/project' );
+				packageName = 'ckeditor5';
 
-				stubs.tools.isDirectory.withArgs( '/home/project/external' ).returns( false );
-				stubs.tools.readPackageName.withArgs( '/home/project' ).returns( 'ckeditor5' );
+				stubs.fs.statSync.withArgs( '/home/project/external' ).throws( 'ENOENT: no such file or directory' );
+
 				stubs.tools.getDirectories.withArgs( '/home/project/packages' ).returns( [
 					'ckeditor5-core',
 					'ckeditor5-engine'
@@ -199,12 +221,9 @@ describe( 'parseArguments()', () => {
 			'returns an array of packages to tests when `--repositories` is specified ' +
 			'(external directory check)',
 			() => {
-				stubs.cwd.returns( '/home/project' );
+				packageName = 'foo';
 
-				stubs.tools.isDirectory.withArgs( '/home/project/external' ).returns( true );
-				stubs.tools.isDirectory.withArgs( '/home/project/external/ckeditor5' ).returns( true );
-
-				stubs.tools.readPackageName.withArgs( '/home/project' ).returns( 'foo' );
+				stubs.fs.statSync.returns( { isDirectory: () => true } );
 				stubs.tools.getDirectories.withArgs( '/home/project/external/ckeditor5/packages' ).returns( [
 					'ckeditor5-core',
 					'ckeditor5-engine'
@@ -216,7 +235,6 @@ describe( 'parseArguments()', () => {
 				] );
 
 				expect( options.files ).to.deep.equal( [ 'core', 'engine' ] );
-
 				expect( stubs.logger.warning.callCount ).to.equal( 0 );
 			}
 		);
@@ -225,12 +243,10 @@ describe( 'parseArguments()', () => {
 			'returns an array of packages to tests when `--repositories` is specified ' +
 			'(external directory check, specified repository does not exist)',
 			() => {
-				stubs.cwd.returns( '/home/project' );
+				packageName = 'foo';
 
-				stubs.tools.isDirectory.withArgs( '/home/project/external' ).returns( true );
-				stubs.tools.isDirectory.withArgs( '/home/project/external/ckeditor5' ).returns( false );
-
-				stubs.tools.readPackageName.withArgs( '/home/project' ).returns( 'foo' );
+				stubs.fs.statSync.withArgs( '/home/project/external' ).returns( { isDirectory: () => true } );
+				stubs.fs.statSync.withArgs( '/home/project/external/ckeditor5' ).throws( 'ENOENT: no such file or directory' );
 
 				const options = parseArguments( [
 					'--repositories',
@@ -250,11 +266,9 @@ describe( 'parseArguments()', () => {
 			'returns an array of packages (unique list) to tests when `--repositories` is specified ' +
 			'(root directory check + `--files` specified)',
 			() => {
-				stubs.cwd.returns( '/home/project' );
+				packageName = 'ckeditor5';
 
-				stubs.tools.isDirectory.withArgs( '/home/project/external' ).returns( true );
-
-				stubs.tools.readPackageName.withArgs( '/home/project' ).returns( 'ckeditor5' );
+				stubs.fs.statSync.withArgs( '/home/project/external' ).returns( { isDirectory: () => true } );
 				stubs.tools.getDirectories.withArgs( '/home/project/packages' ).returns( [
 					'ckeditor5-core',
 					'ckeditor5-engine',
@@ -276,12 +290,11 @@ describe( 'parseArguments()', () => {
 			'returns an array of packages to tests when `--repositories` is specified ' +
 			'(root and external directories check)',
 			() => {
-				stubs.cwd.returns( '/home/project' );
+				packageName = 'ckeditor5';
 
-				stubs.tools.isDirectory.withArgs( '/home/project/external' ).returns( true );
-				stubs.tools.isDirectory.withArgs( '/home/project/external/foo' ).returns( true );
-				stubs.tools.isDirectory.withArgs( '/home/project/external/bar' ).returns( true );
-				stubs.tools.readPackageName.withArgs( '/home/project' ).returns( 'ckeditor5' );
+				stubs.fs.statSync.withArgs( '/home/project/external' ).returns( { isDirectory: () => true } );
+				stubs.fs.statSync.withArgs( '/home/project/external/foo' ).returns( { isDirectory: () => true } );
+				stubs.fs.statSync.withArgs( '/home/project/external/bar' ).returns( { isDirectory: () => true } );
 				stubs.tools.getDirectories.withArgs( '/home/project/packages' ).returns( [
 					'ckeditor5-core',
 					'ckeditor5-engine'

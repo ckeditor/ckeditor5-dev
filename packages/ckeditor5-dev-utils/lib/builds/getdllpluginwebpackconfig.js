@@ -9,7 +9,6 @@ const path = require( 'path' );
 const fs = require( 'fs-extra' );
 const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
 const bundler = require( '../bundler' );
-const tools = require( '../tools' );
 const loaders = require( '../loaders' );
 
 /**
@@ -33,7 +32,7 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 	// See: https://github.com/ckeditor/ckeditor5/issues/13136.
 	const TerserPlugin = require( 'terser-webpack-plugin' );
 
-	const packageName = tools.readPackageName( options.packagePath );
+	const { name: packageName } = require( path.join( options.packagePath, 'package.json' ) );
 	const langDirExists = fs.existsSync( path.join( options.packagePath, 'lang' ) );
 	const indexJsExists = fs.existsSync( path.join( options.packagePath, 'src', 'index.js' ) );
 
