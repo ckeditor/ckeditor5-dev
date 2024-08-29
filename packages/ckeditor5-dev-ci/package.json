@@ -5,7 +5,7 @@
   "keywords": [],
   "main": "lib/index.js",
   "dependencies": {
-    "minimist": "^1.2.5",
+    "minimist": "^1.2.8",
     "node-fetch": "^2.6.7",
     "slack-notify": "^2.0.6"
   },
