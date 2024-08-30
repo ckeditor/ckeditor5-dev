@@ -3,11 +3,23 @@
   "version": "42.1.0",
   "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
-  "main": "lib/index.js",
+  "author": "CKSource (http://cksource.com/)",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-utils",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ckeditor/ckeditor5-dev.git",
+    "directory": "packages/ckeditor5-dev-utils"
+  },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=5.7.1"
   },
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "dependencies": {
     "@ckeditor/ckeditor5-dev-translations": "^42.1.0",
     "chalk": "^3.0.0",
@@ -17,7 +29,7 @@
     "cssnano": "^6.0.3",
     "del": "^5.0.0",
     "esbuild-loader": "~3.0.1",
-    "fs-extra": "^9.1.0",
+    "fs-extra": "^11.2.0",
     "is-interactive": "^1.0.0",
     "javascript-stringify": "^1.6.0",
     "mini-css-extract-plugin": "^2.4.2",
@@ -34,7 +46,7 @@
     "through2": "^3.0.1"
   },
   "devDependencies": {
-    "chai": "^4.1.2",
+    "chai": "^4.2.0",
     "mockery": "^2.1.0",
     "sinon": "^9.2.4",
     "vinyl": "^2.1.0"
@@ -43,16 +55,13 @@
     "test": "mocha './tests/**/*.js' --timeout 10000",
     "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test"
   },
-  "files": [
-    "lib"
-  ],
-  "author": "CKSource (http://cksource.com/)",
-  "license": "GPL-2.0-or-later",
-  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-utils",
-  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ckeditor/ckeditor5-dev.git",
-    "directory": "packages/ckeditor5-dev-utils"
-  }
+  "depcheckIgnore": [
+    "css-loader",
+    "del",
+    "esbuild-loader",
+    "postcss-loader",
+    "raw-loader",
+    "style-loader",
+    "mocha"
+  ]
 }

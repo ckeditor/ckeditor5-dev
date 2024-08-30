@@ -1,10 +1,10 @@
 {
   "name": "ckeditor5-dev",
-  "version": "41.0.0",
+  "version": "42.1.0",
   "private": true,
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
-  "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/ckeditor/ckeditor5-dev.git"
@@ -14,17 +14,21 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-ci": "^41.0.0",
-    "@ckeditor/ckeditor5-dev-release-tools": "^41.0.0",
+    "@ckeditor/ckeditor5-dev-ci": "^42.1.0",
+    "@ckeditor/ckeditor5-dev-release-tools": "^42.1.0",
+    "@ckeditor/ckeditor5-dev-bump-year": "^42.1.0",
     "coveralls": "^3.1.1",
     "eslint": "^7.0.0",
     "eslint-config-ckeditor5": "^6.0.0",
+    "fs-extra": "^11.2.0",
     "glob": "^10.2.5",
     "husky": "^8.0.2",
     "lint-staged": "^10.2.4",
     "listr2": "^6.5.0",
+    "minimist": "^1.2.8",
     "nyc": "^15.1.0",
-    "semver": "^7.5.3"
+    "semver": "^7.5.3",
+    "upath": "^2.0.1"
   },
   "scripts": {
     "postinstall": "node ./scripts/postinstall.js",

@@ -3,13 +3,25 @@
   "version": "42.1.0",
   "description": "Used to download and upload translations using the Transifex service.",
   "keywords": [],
-  "main": "lib/index.js",
+  "author": "CKSource (http://cksource.com/)",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-transifex",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ckeditor/ckeditor5-dev.git",
+    "directory": "packages/ckeditor5-dev-transifex"
+  },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=5.7.1"
   },
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "dependencies": {
-    "fs-extra": "^9.0.0",
+    "fs-extra": "^11.2.0",
     "del": "^5.1.0",
     "@ckeditor/ckeditor5-dev-utils": "^42.1.0",
     "@ckeditor/ckeditor5-dev-translations": "^42.1.0",
@@ -28,17 +40,5 @@
   "scripts": {
     "test": "mocha './tests/**/*.js' --timeout 10000",
     "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test"
-  },
-  "files": [
-    "lib"
-  ],
-  "author": "CKSource (http://cksource.com/)",
-  "license": "GPL-2.0-or-later",
-  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-transifex",
-  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ckeditor/ckeditor5-dev.git",
-    "directory": "packages/ckeditor5-dev-transifex"
   }
 }

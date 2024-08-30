@@ -3,13 +3,14 @@
   "version": "42.1.0",
   "description": "Contains tools for validating dependencies specified in package.json.",
   "keywords": [],
-  "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^42.1.0",
-    "chalk": "^4.1.0",
-    "depcheck": "^1.3.1",
-    "glob": "^10.2.5",
-    "minimist": "^1.2.8",
-    "upath": "^2.0.1"
+  "author": "CKSource (http://cksource.com/)",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-dependency-checker",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ckeditor/ckeditor5-dev.git",
+    "directory": "packages/ckeditor5-dev-dependency-checker"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -22,13 +23,12 @@
   "bin": {
     "ckeditor5-dev-dependency-checker": "bin/dependencychecker.js"
   },
-  "author": "CKSource (http://cksource.com/)",
-  "license": "GPL-2.0-or-later",
-  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-dependency-checker",
-  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ckeditor/ckeditor5-dev.git",
-    "directory": "packages/ckeditor5-dev-dependency-checker"
+  "dependencies": {
+    "@ckeditor/ckeditor5-dev-utils": "^42.1.0",
+    "chalk": "^4.1.0",
+    "depcheck": "^1.3.1",
+    "glob": "^10.2.5",
+    "minimist": "^1.2.8",
+    "upath": "^2.0.1"
   }
 }
