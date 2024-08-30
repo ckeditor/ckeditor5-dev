@@ -3,6 +3,10 @@
   "version": "42.1.0",
   "description": "A stale bot is used to mark issues and pull requests that have not recently been updated.",
   "keywords": [],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=5.7.1"
+  },
   "dependencies": {
     "chalk": "^4.1.0",
     "date-fns": "^2.30.0",
@@ -13,9 +17,9 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {},
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=5.7.1"
+  "scripts": {
+    "test": "mocha './tests/**/*.js' --timeout 10000",
+    "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test"
   },
   "files": [
     "bin",

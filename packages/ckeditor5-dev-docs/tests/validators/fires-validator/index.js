@@ -3,10 +3,13 @@
  * For licensing, see LICENSE.md.
  */
 
-const { expect } = require( 'chai' );
+const chai = require( 'chai' );
 const sinon = require( 'sinon' );
 const proxyquire = require( 'proxyquire' );
 const testUtils = require( '../../utils' );
+
+const { expect } = chai;
+chai.use( require( 'sinon-chai' ) );
 
 describe( 'dev-docs/validators/fires-validator', function() {
 	this.timeout( 10 * 1000 );

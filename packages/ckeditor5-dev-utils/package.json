@@ -4,6 +4,10 @@
   "description": "Utils for CKEditor 5 development tools packages.",
   "keywords": [],
   "main": "lib/index.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=5.7.1"
+  },
   "dependencies": {
     "@ckeditor/ckeditor5-dev-translations": "^42.1.0",
     "chalk": "^3.0.0",
@@ -17,6 +21,7 @@
     "is-interactive": "^1.0.0",
     "javascript-stringify": "^1.6.0",
     "mini-css-extract-plugin": "^2.4.2",
+    "mocha": "^7.1.2",
     "postcss": "^8.4.12",
     "postcss-import": "^14.1.0",
     "postcss-loader": "^4.3.0",
@@ -34,9 +39,9 @@
     "sinon": "^9.2.4",
     "vinyl": "^2.1.0"
   },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=5.7.1"
+  "scripts": {
+    "test": "mocha './tests/**/*.js' --timeout 10000",
+    "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test"
   },
   "files": [
     "lib"

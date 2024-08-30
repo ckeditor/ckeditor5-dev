@@ -2,6 +2,17 @@
   "name": "ckeditor5-dev",
   "version": "41.0.0",
   "private": true,
+  "author": "CKSource (http://cksource.com/)",
+  "license": "GPL-2.0-or-later",
+  "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ckeditor/ckeditor5-dev.git"
+  },
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "devDependencies": {
     "@ckeditor/ckeditor5-dev-ci": "^41.0.0",
     "@ckeditor/ckeditor5-dev-release-tools": "^41.0.0",
@@ -12,27 +23,13 @@
     "husky": "^8.0.2",
     "lint-staged": "^10.2.4",
     "listr2": "^6.5.0",
-    "mocha": "^7.1.2",
     "nyc": "^15.1.0",
     "semver": "^7.5.3"
   },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "author": "CKSource (http://cksource.com/)",
-  "license": "GPL-2.0-or-later",
-  "bugs": "https://github.com/ckeditor/ckeditor5-dev/issues",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ckeditor/ckeditor5-dev.git"
-  },
-  "homepage": "https://github.com/ckeditor/ckeditor5-dev#readme",
   "scripts": {
     "postinstall": "node ./scripts/postinstall.js",
-    "test": "yarn run test:build-tools && yarn run test:js",
-    "test:build-tools": "yarn workspace @ckeditor/ckeditor5-dev-build-tools run test",
-    "test:js": "mocha 'packages/*/tests/**/*.js' --timeout 10000 --ignore 'packages/ckeditor5-dev-build-tools/**'",
-    "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test",
+    "test": "node ./scripts/runtest.js",
+    "coverage": "node ./scripts/runtest.js --coverage",
     "changelog": "node ./scripts/changelog.js",
     "release:prepare-packages": "node ./scripts/preparepackages.js",
     "release:publish-packages": "node ./scripts/publishpackages.js",
