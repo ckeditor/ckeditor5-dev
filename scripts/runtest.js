@@ -39,7 +39,7 @@ function main() {
 		const testScript = coverage ? 'coverage' : 'test';
 
 		try {
-			execSync( `npm run ${ testScript } --silent`, {
+			execSync( `npm run  --silent ${ testScript }`, {
 				stdio: 'inherit',
 				cwd: path.join( cwd, relativePath )
 			} );
@@ -60,6 +60,8 @@ function main() {
 
 			fs.writeFileSync( coverageFile, content, { flag: 'as' } );
 		}
+
+		console.log( chalk.cyan( `\nCoverage status stored in "${ chalk.underline( coverageFile ) }".` ) );
 	}
 
 	if ( ignoredPackages.length ) {
