@@ -38,11 +38,13 @@
     "lodash": "^4.17.15",
     "minimatch": "^3.0.4",
     "semver": "^7.5.3",
+    "shell-escape": "^0.2.0",
     "upath": "^2.0.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "handlebars": "^4.7.6",
+    "mocha": "^7.1.2",
     "mockery": "^2.1.0",
     "mock-fs": "^5.1.2",
     "proxyquire": "^2.1.3",

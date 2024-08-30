@@ -25,13 +25,15 @@ describe( 'commitAndTag()', () => {
 			},
 			glob: {
 				glob: sinon.stub().returns( [] )
-			}
+			},
+			shellEscape: sinon.stub().callsFake( v => v[ 0 ] )
 		};
 
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
 			tools: stubs.tools
 		} );
 		mockery.registerMock( 'glob', stubs.glob );
+		mockery.registerMock( 'shell-escape', stubs.shellEscape );
 
 		commitAndTag = require( '../../lib/tasks/commitandtag' );
 	} );
@@ -92,5 +94,26 @@ describe( 'commitAndTag()', () => {
 		await commitAndTag( { version: '1.0.0', packagesDirectory: 'packages' } );
 
 		expect( stubs.tools.shExec.thirdCall.args[ 0 ] ).to.equal( 'git tag v1.0.0' );
+	} );
+
+	it( 'should escape arguments passed to a shell command', async () => {
+		stubs.glob.glob.resolves( [
+			'package.json',
+			'README.md',
+			'packages/custom-package/package.json',
+			'packages/custom-package/README.md'
+		] );
+
+		await commitAndTag( {
+			version: '1.0.0',
+			files: [ 'package.json', 'README.md', 'packages/*/package.json', 'packages/*/README.md' ]
+		} );
+
+		expect( stubs.shellEscape.callCount ).to.equal( 5 );
+		expect( stubs.shellEscape.getCall( 0 ).args[ 0 ] ).to.deep.equal( [ 'package.json' ] );
+		expect( stubs.shellEscape.getCall( 1 ).args[ 0 ] ).to.deep.equal( [ 'README.md' ] );
+		expect( stubs.shellEscape.getCall( 2 ).args[ 0 ] ).to.deep.equal( [ 'packages/custom-package/package.json' ] );
+		expect( stubs.shellEscape.getCall( 3 ).args[ 0 ] ).to.deep.equal( [ 'packages/custom-package/README.md' ] );
+		expect( stubs.shellEscape.getCall( 4 ).args[ 0 ] ).to.deep.equal( [ '1.0.0' ] );
 	} );
 } );

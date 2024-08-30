@@ -21,7 +21,8 @@ describe( 'dev-release-tools/isVersionPublishableForTag', () => {
 				tools: {
 					shExec: sinon.stub()
 				}
-			}
+			},
+			shellEscape: sinon.stub().callsFake( v => v[ 0 ] )
 		};
 
 		mockery.enable( {
@@ -31,6 +32,7 @@ describe( 'dev-release-tools/isVersionPublishableForTag', () => {
 		} );
 
 		mockery.registerMock( 'semver', stub.semver );
+		mockery.registerMock( 'shell-escape', stub.shellEscape );
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', stub.devUtils );
 
 		isVersionPublishableForTag = require( '../../lib/utils/isversionpublishablefortag' );
@@ -76,5 +78,16 @@ describe( 'dev-release-tools/isVersionPublishableForTag', () => {
 		expect( stub.semver.lte.callCount ).to.equal( 0 );
 		expect( stub.devUtils.tools.shExec.callCount ).to.equal( 1 );
 		expect( stub.devUtils.tools.shExec.firstCall.firstArg ).to.equal( 'npm view package-name@alpha version --silent' );
+	} );
+
+	it( 'should escape arguments passed to a shell command', async () => {
+		stub.semver.lte.returns( false );
+		stub.devUtils.tools.shExec.resolves( '1.0.0\n' );
+
+		await isVersionPublishableForTag( 'package-name', '1.0.0', 'alpha' );
+
+		expect( stub.shellEscape.callCount ).to.equal( 2 );
+		expect( stub.shellEscape.firstCall.firstArg ).to.deep.equal( [ 'package-name' ] );
+		expect( stub.shellEscape.secondCall.firstArg ).to.deep.equal( [ 'alpha' ] );
 	} );
 } );

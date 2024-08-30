@@ -28,7 +28,8 @@ describe( 'dev-release-tools/tasks', () => {
 				},
 				process: {
 					cwd: sinon.stub( process, 'cwd' ).returns( 'current/working/dir' )
-				}
+				},
+				shellEscape: sinon.stub().callsFake( v => v[ 0 ] )
 			};
 
 			mockery.enable( {
@@ -38,6 +39,7 @@ describe( 'dev-release-tools/tasks', () => {
 			} );
 
 			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', stubs.devUtils );
+			mockery.registerMock( 'shell-escape', stubs.shellEscape );
 
 			push = require( '../../lib/tasks/push' );
 		} );
@@ -80,6 +82,15 @@ describe( 'dev-release-tools/tasks', () => {
 				verbosity: 'error',
 				async: true
 			} );
+		} );
+
+		it( 'should escape arguments passed to a shell command', async () => {
+			stubs.devUtils.tools.shExec.resolves();
+			await push( options );
+
+			expect( stubs.shellEscape.callCount ).to.equal( 2 );
+			expect( stubs.shellEscape.firstCall.firstArg ).to.deep.equal( [ 'release' ] );
+			expect( stubs.shellEscape.secondCall.firstArg ).to.deep.equal( [ '1.3.5' ] );
 		} );
 	} );
 } );
