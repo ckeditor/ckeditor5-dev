@@ -49,7 +49,8 @@ function main() {
 	}
 
 	if ( coverage ) {
-		fs.emptyDir( path.join( coverageFile, '..' ) );
+		fs.emptyDirSync( path.join( coverageFile, '..' ) );
+		fs.ensureFileSync( path.join( coverageFile ) );
 
 		// Merge separate reports into a single file that would be sent to Coveralls.
 		for ( const lcovPath of globSync( './packages/*/coverage/lcov.info' ) ) {
