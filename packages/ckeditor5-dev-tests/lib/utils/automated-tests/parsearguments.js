@@ -163,7 +163,7 @@ module.exports = function parseArguments( args ) {
 		}
 
 		const cwd = process.cwd();
-		const shouldCheckExternalDirectory = tools.isDirectory( path.join( cwd, 'external' ) );
+		const shouldCheckExternalDirectory = isDirectory( path.join( cwd, 'external' ) );
 
 		if ( !shouldCheckExternalDirectory ) {
 			log.warning( 'The `external/` directory does not exist. Only the root repository will be checked.' );
@@ -172,8 +172,10 @@ module.exports = function parseArguments( args ) {
 		const files = new Set( options.files );
 
 		for ( const repositoryName of options.repositories ) {
+			const cwdPackageJson = require( path.join( cwd, 'package.json' ) );
+
 			// Check the main repository.
-			if ( repositoryName === tools.readPackageName( cwd ) ) {
+			if ( repositoryName === cwdPackageJson.name ) {
 				addPackagesToCollection( files, path.join( cwd, 'packages' ) );
 
 				continue;
@@ -187,7 +189,7 @@ module.exports = function parseArguments( args ) {
 			const externalRepositoryPath = path.join( cwd, 'external', repositoryName );
 
 			// Check the "external" directory.
-			if ( tools.isDirectory( externalRepositoryPath ) ) {
+			if ( isDirectory( externalRepositoryPath ) ) {
 				addPackagesToCollection( files, path.join( externalRepositoryPath, 'packages' ) );
 			} else {
 				log.warning( `Did not find the repository "${ repositoryName }" in the root repository or the "external/" directory.` );
@@ -251,5 +253,17 @@ module.exports = function parseArguments( args ) {
 				return item.charAt( 0 ).toUpperCase() + item.slice( 1 ).toLowerCase();
 			} )
 			.join( '' );
+	}
+
+	/**
+	 * @param {String} path
+	 * @returns {Boolean}
+	 */
+	function isDirectory( path ) {
+		try {
+			return fs.statSync( path ).isDirectory();
+		} catch ( e ) {
+			return false;
+		}
 	}
 };

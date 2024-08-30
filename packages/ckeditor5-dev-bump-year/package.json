@@ -3,18 +3,6 @@
   "version": "42.1.0",
   "description": "Used to bump year in the licence text specified at the top of the file.",
   "keywords": [],
-  "main": "lib/index.js",
-  "dependencies": {
-    "chalk": "^4.1.0",
-    "glob": "^10.2.5"
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=5.7.1"
-  },
-  "files": [
-    "lib"
-  ],
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-bump-year",
@@ -23,5 +11,17 @@
     "type": "git",
     "url": "https://github.com/ckeditor/ckeditor5-dev.git",
     "directory": "packages/ckeditor5-dev-bump-year"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=5.7.1"
+  },
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "glob": "^10.2.5"
   }
 }

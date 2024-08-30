@@ -12,24 +12,6 @@
     "short references",
     "inheritance"
   ],
-  "dependencies": {
-    "fs-extra": "^9.1.0",
-    "lodash": "^4.17.15",
-    "jsdoc": "ckeditor/jsdoc#fixed-trailing-comment-doclets",
-    "upath": "^2.0.1"
-  },
-  "devDependencies": {
-    "chai": "^4.1.2",
-    "glob": "^10.2.5",
-    "tmp": "^0.2.1"
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=5.7.1"
-  },
-  "files": [
-    "lib"
-  ],
   "author": "CKSource (http://cksource.com/)",
   "license": "MIT",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/jsdoc-plugins",
@@ -38,5 +20,28 @@
     "type": "git",
     "url": "https://github.com/ckeditor/ckeditor5-dev.git",
     "directory": "packages/jsdoc-plugins"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=5.7.1"
+  },
+  "files": [
+    "lib"
+  ],
+  "dependencies": {
+    "fs-extra": "^11.2.0",
+    "lodash": "^4.17.15",
+    "jsdoc": "ckeditor/jsdoc#fixed-trailing-comment-doclets"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "glob": "^10.2.5",
+    "mocha": "^7.1.2",
+    "tmp": "^0.2.1",
+    "upath": "^2.0.1"
+  },
+  "scripts": {
+    "test": "mocha './tests/**/*.js' --timeout 10000",
+    "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test"
   }
 }

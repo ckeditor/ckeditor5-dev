@@ -3,7 +3,23 @@
   "version": "42.1.0",
   "description": "CKEditor 5 translations plugin for webpack.",
   "keywords": [],
+  "author": "CKSource (http://cksource.com/)",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-translations",
+  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ckeditor/ckeditor5-dev.git",
+    "directory": "packages/ckeditor5-dev-translations"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=5.7.1"
+  },
   "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "dependencies": {
     "@babel/parser": "^7.18.9",
     "@babel/traverse": "^7.18.9",
@@ -14,23 +30,12 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "mocha": "^7.1.2",
     "proxyquire": "^2.1.3",
     "sinon": "^9.2.4"
   },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=5.7.1"
-  },
-  "files": [
-    "lib"
-  ],
-  "author": "CKSource (http://cksource.com/)",
-  "license": "GPL-2.0-or-later",
-  "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-translations",
-  "bugs": "https://github.com/ckeditor/ckeditor5/issues",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ckeditor/ckeditor5-dev.git",
-    "directory": "packages/ckeditor5-dev-translations"
+  "scripts": {
+    "test": "mocha './tests/**/*.js' --timeout 10000",
+    "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test"
   }
 }

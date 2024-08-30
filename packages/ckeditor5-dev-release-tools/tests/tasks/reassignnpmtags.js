@@ -46,7 +46,8 @@ describe( 'reassignNpmTags()', () => {
 			util: {
 				promisify: sinon.stub().callsFake( () => stubs.exec )
 			},
-			exec: sinon.stub()
+			exec: sinon.stub(),
+			shellEscape: sinon.stub().callsFake( v => v[ 0 ] )
 		};
 
 		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', { tools: stubs.tools } );
@@ -54,6 +55,7 @@ describe( 'reassignNpmTags()', () => {
 		mockery.registerMock( 'cli-columns', stubs.columns );
 		mockery.registerMock( 'chalk', stubs.chalk );
 		mockery.registerMock( 'util', stubs.util );
+		mockery.registerMock( 'shell-escape', stubs.shellEscape );
 
 		reassignNpmTags = require( '../../lib/tasks/reassignnpmtags' );
 	} );
@@ -105,6 +107,16 @@ describe( 'reassignNpmTags()', () => {
 
 		expect( npmDistTagAdd.firstCall.args[ 0 ] ).to.equal( 'npm dist-tag add package1@1.0.1 latest' );
 		expect( npmDistTagAdd.secondCall.args[ 0 ] ).to.equal( 'npm dist-tag add package2@1.0.1 latest' );
+	} );
+
+	it( 'should escape arguments passed to a shell command', async () => {
+		stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) ).resolves( { stdout: '+latest' } );
+
+		await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1' ] } );
+
+		expect( stubs.shellEscape.callCount ).to.equal( 2 );
+		expect( stubs.shellEscape.firstCall.firstArg ).to.deep.equal( [ 'package1' ] );
+		expect( stubs.shellEscape.secondCall.firstArg ).to.deep.equal( [ '1.0.1' ] );
 	} );
 
 	describe( 'UX', () => {

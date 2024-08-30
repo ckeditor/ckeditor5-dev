@@ -4,8 +4,8 @@
 
 .idea
 **/node_modules/**
-.nyc_output/**
-coverage/**
+.nyc_output/
+coverage/
 npm-debug.log
 yarn.lock
 executeinparallel-integration.log

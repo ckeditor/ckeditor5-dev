@@ -8,6 +8,7 @@
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 const { toUnix } = require( 'upath' );
 const { glob } = require( 'glob' );
+const shellEscape = require( 'shell-escape' );
 
 /**
  * Creates a commit and a tag for specified version.
@@ -34,9 +35,10 @@ module.exports = async function commitAndTag( { version, files, cwd = process.cw
 
 	// Run the command separately for each file to avoid exceeding the maximum command length on Windows, which is 32767 characters.
 	for ( const filePath of filePathsToAdd ) {
-		await tools.shExec( `git add ${ filePath }`, shExecOptions );
+		await tools.shExec( `git add ${ shellEscape( [ filePath ] ) }`, shExecOptions );
 	}
 
-	await tools.shExec( `git commit --message "Release: v${ version }." --no-verify`, shExecOptions );
-	await tools.shExec( `git tag v${ version }`, shExecOptions );
+	const escapedVersion = shellEscape( [ version ] );
+	await tools.shExec( `git commit --message "Release: v${ escapedVersion }." --no-verify`, shExecOptions );
+	await tools.shExec( `git tag v${ escapedVersion }`, shExecOptions );
 };

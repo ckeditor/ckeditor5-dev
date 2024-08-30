@@ -5,6 +5,7 @@
 
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 const semver = require( 'semver' );
+const shellEscape = require( 'shell-escape' );
 
 /**
  * This util aims to verify if the given `packageName` can be published with the given `version` on the `npmTag`.
@@ -15,7 +16,8 @@ const semver = require( 'semver' );
  * @return {Promise.<Boolean>}
  */
 module.exports = async function isVersionPublishableForTag( packageName, version, npmTag ) {
-	const npmVersion = await tools.shExec( `npm view ${ packageName }@${ npmTag } version --silent`, { async: true, verbosity: 'silent' } )
+	const command = `npm view ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ npmTag ] ) } version --silent`;
+	const npmVersion = await tools.shExec( command, { async: true, verbosity: 'silent' } )
 		.then( value => value.trim() )
 		// An `npmTag` does not exist.
 		.catch( () => null );

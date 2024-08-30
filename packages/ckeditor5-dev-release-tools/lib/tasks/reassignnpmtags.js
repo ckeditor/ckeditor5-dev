@@ -13,6 +13,7 @@ const chalk = require( 'chalk' );
 const columns = require( 'cli-columns' );
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
 const util = require( 'util' );
+const shellEscape = require( 'shell-escape' );
 const exec = util.promisify( require( 'child_process' ).exec );
 const assertNpmAuthorization = require( '../utils/assertnpmauthorization' );
 
@@ -37,7 +38,8 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
 	counter.start();
 
 	const updateTagPromises = packages.map( async packageName => {
-		const updateLatestTagRetryable = retry( () => exec( `npm dist-tag add ${ packageName }@${ version } latest` ) );
+		const command = `npm dist-tag add ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ version ] ) } latest`;
+		const updateLatestTagRetryable = retry( () => exec( command ) );
 		await updateLatestTagRetryable()
 			.then( response => {
 				if ( response.stdout ) {
