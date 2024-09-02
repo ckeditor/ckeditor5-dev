@@ -1,6 +1,58 @@
 Changelog
 =========
 
+## [43.0.0-alpha.0](https://github.com/ckeditor/ckeditor5-dev/compare/v42.1.0...v43.0.0-alpha.0) (2024-09-02)
+
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The `git` and `workspace` objects are no longer exported from the package. Also, the following functions are no longer available in the `tools` object:
+
+* `isDirectory()`
+* `isFile()`
+* `isSymlink()`
+* `sortObject()`
+* `readPackageName()`
+* `npmInstall()`
+* `npmUninstall()`
+* `npmUpdate()`
+* `copyTemplateFile()`
+* `copyFile()`
+* `getGitUrlFromNpm()`
+* `removeSymlink()`
+* `clean()`
+
+### Other changes
+
+* **[dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker)**: The dependency checker analyzes dependencies by including the `lib/` and `bin/` directories as production code. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e84c7019a61fa31c233e961afed014c1c9303989))
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: Removed several utilities functions non-used in the CKEditor 5 environment. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e84c7019a61fa31c233e961afed014c1c9303989))
+* Added several missing `dependencies` and `devDependencies` in packages. Also, removed non-used ones. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/e84c7019a61fa31c233e961afed014c1c9303989))
+
+### Released packages
+
+Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
+
+<details>
+<summary>Released packages (summary)</summary>
+
+Other releases:
+
+* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/43.0.0-alpha.0): v42.1.0 => v43.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/43.0.0-alpha.0): v42.1.0 => v43.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/43.0.0-alpha.0): v42.1.0 => v43.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/43.0.0-alpha.0): v42.1.0 => v43.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/43.0.0-alpha.0): v42.1.0 => v43.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/43.0.0-alpha.0): v42.1.0 => v43.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/43.0.0-alpha.0): v42.1.0 => v43.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/43.0.0-alpha.0): v42.1.0 => v43.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/43.0.0-alpha.0): v42.1.0 => v43.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/43.0.0-alpha.0): v42.1.0 => v43.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/43.0.0-alpha.0): v42.1.0 => v43.0.0-alpha.0
+* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/43.0.0-alpha.0): v42.1.0 => v43.0.0-alpha.0
+* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/43.0.0-alpha.0): v42.1.0 => v43.0.0-alpha.0
+* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/43.0.0-alpha.0): v42.1.0 => v43.0.0-alpha.0
+</details>
+
+
 ## [42.1.0](https://github.com/ckeditor/ckeditor5-dev/compare/v42.0.1...v42.1.0) (2024-08-29)
 
 ### Features
@@ -177,42 +229,6 @@ Other releases:
 * [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/41.0.0): v40.5.0 => v41.0.0
 * [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/41.0.0): v40.5.0 => v41.0.0
 * [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/41.0.0): v40.5.0 => v41.0.0
-</details>
-
-
-## [40.5.0](https://github.com/ckeditor/ckeditor5-dev/compare/v40.4.0...v40.5.0) (2024-07-16)
-
-### Features
-
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Create a util for extracting an npm tag from the specified version. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/784ab36187b5eaddd2bc53135bf58df664870b47))
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Add util to check if a given package and its version are available on npm. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/784ab36187b5eaddd2bc53135bf58df664870b47))
-
-### Released packages
-
-Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
-
-<details>
-<summary>Released packages (summary)</summary>
-
-Releases containing new features:
-
-* [@ckeditor/ckeditor5-dev-release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools/v/40.5.0): v40.4.0 => v40.5.0
-
-Other releases:
-
-* [@ckeditor/ckeditor5-dev-build-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-build-tools/v/40.5.0): v40.4.0 => v40.5.0
-* [@ckeditor/ckeditor5-dev-bump-year](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-bump-year/v/40.5.0): v40.4.0 => v40.5.0
-* [@ckeditor/ckeditor5-dev-ci](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-ci/v/40.5.0): v40.4.0 => v40.5.0
-* [@ckeditor/ckeditor5-dev-dependency-checker](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-dependency-checker/v/40.5.0): v40.4.0 => v40.5.0
-* [@ckeditor/ckeditor5-dev-docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs/v/40.5.0): v40.4.0 => v40.5.0
-* [@ckeditor/ckeditor5-dev-stale-bot](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-stale-bot/v/40.5.0): v40.4.0 => v40.5.0
-* [@ckeditor/ckeditor5-dev-tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests/v/40.5.0): v40.4.0 => v40.5.0
-* [@ckeditor/ckeditor5-dev-transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex/v/40.5.0): v40.4.0 => v40.5.0
-* [@ckeditor/ckeditor5-dev-translations](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-translations/v/40.5.0): v40.4.0 => v40.5.0
-* [@ckeditor/ckeditor5-dev-utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils/v/40.5.0): v40.4.0 => v40.5.0
-* [@ckeditor/ckeditor5-dev-web-crawler](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-web-crawler/v/40.5.0): v40.4.0 => v40.5.0
-* [@ckeditor/jsdoc-plugins](https://www.npmjs.com/package/@ckeditor/jsdoc-plugins/v/40.5.0): v40.4.0 => v40.5.0
-* [@ckeditor/typedoc-plugins](https://www.npmjs.com/package/@ckeditor/typedoc-plugins/v/40.5.0): v40.4.0 => v40.5.0
 </details>
 
 ---
