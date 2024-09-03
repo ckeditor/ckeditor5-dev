@@ -5,7 +5,4 @@
 
 /* global window */
 
-// eslint-disable-next-line mocha/no-top-level-hooks
-before( function() {
-	window.CKEDITOR_GLOBAL_LICENSE_KEY = 'GPL';
-} );
+window.CKEDITOR_IS_TEST_ENV = true;

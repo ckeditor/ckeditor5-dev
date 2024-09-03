@@ -134,7 +134,7 @@ function compileHtmlFile( buildDir, options ) {
 		'<script src="/assets/websocket.js"></script>' +
 		'<script src="/assets/inspector.js"></script>' +
 		'<script src="/assets/attachinspector.js"></script>' +
-		'<script src="/assets/globallicensekey.js"></script>' +
+		'<script src="/assets/globalsettings.js"></script>' +
 		`${ languagesToLoad.map( language => {
 			return `<script src="/translations/${ language }.js"></script>`;
 		} ).join( '' ) }` +
