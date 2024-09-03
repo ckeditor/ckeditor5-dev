@@ -3,10 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const shellEscape = require( 'shell-escape' );
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import shellEscape from 'shell-escape';
 
 /**
  * Checks if the provided version for the package exists in the npm registry.
@@ -18,7 +16,7 @@ const shellEscape = require( 'shell-escape' );
  * @param {String} packageName
  * @returns {Promise}
  */
-module.exports = async function checkVersionAvailability( version, packageName ) {
+export async function checkVersionAvailability( version, packageName ) {
 	const command = `npm show ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ version ] ) } version`;
 
 	return tools.shExec( command, { verbosity: 'silent', async: true } )
@@ -42,4 +40,4 @@ module.exports = async function checkVersionAvailability( version, packageName )
 			// Npm < 8.13.0 should never reach this line.
 			return true;
 		} );
-};
+}

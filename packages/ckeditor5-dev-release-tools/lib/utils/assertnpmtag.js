@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs-extra' );
-const upath = require( 'upath' );
-const semver = require( 'semver' );
+import fs from 'fs-extra';
+import upath from 'upath';
+import semver from 'semver';
 
 /**
  * Checks if the npm tag matches the tag calculated from the package version. Verification takes place for all packages.
@@ -16,7 +14,7 @@ const semver = require( 'semver' );
  * @param {String} npmTag
  * @returns {Promise}
  */
-module.exports = async function assertNpmTag( packagePaths, npmTag ) {
+export async function assertNpmTag( packagePaths, npmTag ) {
 	const errors = [];
 
 	for ( const packagePath of packagePaths ) {
@@ -38,7 +36,7 @@ module.exports = async function assertNpmTag( packagePaths, npmTag ) {
 	if ( errors.length ) {
 		throw new Error( errors.join( '\n' ) );
 	}
-};
+}
 
 /**
  * Returns the version tag for the package.

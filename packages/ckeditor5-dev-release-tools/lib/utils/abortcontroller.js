@@ -3,10 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
-'use strict';
-
 /**
  * Creates an AbortController instance and registers the listener function on SIGINT event that aborts the asynchronous process.
  *
@@ -41,7 +37,7 @@ function deregisterAbortController( abortController ) {
 	process.removeListener( 'SIGINT', abortController._listener );
 }
 
-module.exports = {
+export {
 	registerAbortController,
 	deregisterAbortController
 };

@@ -3,12 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const chalk = require( 'chalk' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const utils = require( './transformcommitutils' );
-const { INDENT_SIZE, COMMIT_INDENT_SIZE } = require( './cli' );
+import chalk from 'chalk';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import utils from './transformcommitutils';
+import { INDENT_SIZE, COMMIT_INDENT_SIZE } from './cli';
 
 /**
  * @param {Array.<Commit>|Set.<Commit>} commits
@@ -16,7 +14,7 @@ const { INDENT_SIZE, COMMIT_INDENT_SIZE } = require( './cli' );
  * @param {Boolean} [options.attachLinkToCommit=false] Whether to attach a link to parsed commit.
  * @param {Number} [options.indentLevel=1] The indent level.
  */
-module.exports = function displayCommits( commits, options = {} ) {
+export function displayCommits( commits, options = {} ) {
 	const log = logger();
 
 	const attachLinkToCommit = options.attachLinkToCommit || false;
@@ -102,4 +100,4 @@ module.exports = function displayCommits( commits, options = {} ) {
 
 		return commitGroups.get( commit.hash );
 	}
-};
+}

@@ -3,26 +3,24 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs' );
-const path = require( 'path' );
-const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const compareFunc = require( 'compare-func' );
-const chalk = require( 'chalk' );
-const semver = require( 'semver' );
-const changelogUtils = require( '../utils/changelog' );
-const cli = require( '../utils/cli' );
-const displayCommits = require( '../utils/displaycommits' );
-const displaySkippedPackages = require( '../utils/displayskippedpackages' );
-const generateChangelog = require( '../utils/generatechangelog' );
-const getPackageJson = require( '../utils/getpackagejson' );
-const getPackagesPaths = require( '../utils/getpackagespaths' );
-const getCommits = require( '../utils/getcommits' );
-const getNewVersionType = require( '../utils/getnewversiontype' );
-const getWriterOptions = require( '../utils/getwriteroptions' );
-const { getRepositoryUrl } = require( '../utils/transformcommitutils' );
-const transformCommitFactory = require( '../utils/transformcommitfactory' );
+import fs from 'fs';
+import path from 'path';
+import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
+import compareFunc from 'compare-func';
+import chalk from 'chalk';
+import semver from 'semver';
+import changelogUtils from '../utils/changelog';
+import cli from '../utils/cli';
+import displayCommits from '../utils/displaycommits';
+import displaySkippedPackages from '../utils/displayskippedpackages';
+import generateChangelog from '../utils/generatechangelog';
+import getPackageJson from '../utils/getpackagejson';
+import getPackagesPaths from '../utils/getpackagespaths';
+import getCommits from '../utils/getcommits';
+import getNewVersionType from '../utils/getnewversiontype';
+import getWriterOptions from '../utils/getwriteroptions';
+import { getRepositoryUrl } from '../utils/transformcommitutils';
+import transformCommitFactory from '../utils/transformcommitfactory';
 
 const VERSIONING_POLICY_URL = 'https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html';
 const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)`;
@@ -63,7 +61,7 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
  *
  * @returns {Promise.<undefined|String>}
  */
-module.exports = async function generateChangelogForMonoRepository( options ) {
+export async function generateChangelogForMonoRepository( options ) {
 	const log = logger();
 	const cwd = process.cwd();
 	const rootPkgJson = getPackageJson( options.cwd );
@@ -723,7 +721,7 @@ module.exports = async function generateChangelogForMonoRepository( options ) {
 
 		log[ method ]( `${ startWithNewLine ? '\n' : '' }${ ' '.repeat( indentLevel * cli.INDENT_SIZE ) }` + message );
 	}
-};
+}
 
 /**
  * @typedef {Object} Version

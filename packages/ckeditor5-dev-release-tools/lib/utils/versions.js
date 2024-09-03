@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const changelogUtils = require( './changelog' );
-const getPackageJson = require( './getpackagejson' );
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import changelogUtils from './changelog';
+import getPackageJson from './getpackagejson';
 
 const versions = {
 	/**
@@ -132,7 +130,7 @@ const versions = {
 	}
 };
 
-module.exports = versions;
+export default versions;
 
 /**
  * @typedef {String} ReleaseIdentifier The pre-release identifier without the last dynamic part (the pre-release sequential number).

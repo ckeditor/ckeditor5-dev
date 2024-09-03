@@ -5,17 +5,15 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
+import chalk from 'chalk';
+import columns from 'cli-columns';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import util from 'util';
+import shellEscape from 'shell-escape';
+import assertNpmAuthorization from '../utils/assertnpmauthorization';
+import { exec } from 'child_process';
 
-'use strict';
-
-const chalk = require( 'chalk' );
-const columns = require( 'cli-columns' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const util = require( 'util' );
-const shellEscape = require( 'shell-escape' );
-const exec = util.promisify( require( 'child_process' ).exec );
-const assertNpmAuthorization = require( '../utils/assertnpmauthorization' );
+const execPromise = util.promisify( exec );
 
 /**
  * Used to switch the tags from `staging` to `latest` for specified array of packages.
@@ -27,7 +25,7 @@ const assertNpmAuthorization = require( '../utils/assertnpmauthorization' );
  * @param {Array.<String>} options.packages Array of packages' names to reassign tags for.
  * @returns {Promise}
  */
-module.exports = async function reassignNpmTags( { npmOwner, version, packages } ) {
+export async function reassignNpmTags( { npmOwner, version, packages } ) {
 	const errors = [];
 	const packagesSkipped = [];
 	const packagesUpdated = [];
@@ -39,7 +37,7 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
 
 	const updateTagPromises = packages.map( async packageName => {
 		const command = `npm dist-tag add ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ version ] ) } latest`;
-		const updateLatestTagRetryable = retry( () => exec( command ) );
+		const updateLatestTagRetryable = retry( () => execPromise( command ) );
 		await updateLatestTagRetryable()
 			.then( response => {
 				if ( response.stdout ) {
@@ -78,7 +76,7 @@ module.exports = async function reassignNpmTags( { npmOwner, version, packages }
 		console.log( chalk.bold.red( '🐛 Errors found:' ) );
 		errors.forEach( msg => console.log( `* ${ msg }` ) );
 	}
-};
+}
 
 /**
  * @param {String} message

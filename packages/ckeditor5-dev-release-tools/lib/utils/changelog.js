@@ -3,12 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs' );
-const path = require( 'path' );
-const { format } = require( 'date-fns' );
-const { getRepositoryUrl } = require( './transformcommitutils' );
+import fs from 'fs';
+import path from 'path';
+import { format } from 'date-fns';
+import { getRepositoryUrl } from './transformcommitutils';
 
 const utils = {
 	/**
@@ -106,4 +104,4 @@ const utils = {
 	}
 };
 
-module.exports = utils;
+export default utils;

@@ -3,12 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const upath = require( 'upath' );
-const { glob } = require( 'glob' );
-const fs = require( 'fs-extra' );
-const { checkVersionAvailability } = require( '../utils/checkversionavailability' );
+import upath from 'upath';
+import { glob } from 'glob';
+import fs from 'fs-extra';
+import { checkVersionAvailability } from '../utils/checkversionavailability';
 
 /**
  * Npm sometimes throws incorrect error 409 while publishing, while the package uploads correctly.
@@ -20,7 +18,7 @@ const { checkVersionAvailability } = require( '../utils/checkversionavailability
  * @param {Function} options.onSuccess Callback fired when function is successful.
  * @returns {Promise}
  */
-module.exports = async function verifyPackagesPublishedCorrectly( options ) {
+export async function verifyPackagesPublishedCorrectly( options ) {
 	const { packagesDirectory, version, onSuccess } = options;
 	const packagesToVerify = await glob( upath.join( packagesDirectory, '*' ), { absolute: true } );
 	const errors = [];
@@ -52,4 +50,4 @@ module.exports = async function verifyPackagesPublishedCorrectly( options ) {
 	}
 
 	onSuccess( 'All packages that returned 409 were uploaded correctly.' );
-};
+}

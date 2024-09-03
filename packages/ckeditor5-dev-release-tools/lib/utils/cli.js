@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const inquirer = require( 'inquirer' );
-const semver = require( 'semver' );
-const chalk = require( 'chalk' );
+import inquirer from 'inquirer';
+import semver from 'semver';
+import chalk from 'chalk';
 
 const QUESTION_MARK = chalk.cyan( '?' );
 
@@ -342,7 +340,7 @@ const cli = {
 	}
 };
 
-module.exports = cli;
+export default cli;
 
 function getPrefix( indent ) {
 	return ' '.repeat( indent * cli.INDENT_SIZE ) + QUESTION_MARK;

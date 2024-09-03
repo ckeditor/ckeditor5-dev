@@ -3,16 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const upath = require( 'upath' );
-const { glob } = require( 'glob' );
-const assertNpmAuthorization = require( '../utils/assertnpmauthorization' );
-const assertPackages = require( '../utils/assertpackages' );
-const assertNpmTag = require( '../utils/assertnpmtag' );
-const assertFilesToPublish = require( '../utils/assertfilestopublish' );
-const executeInParallel = require( '../utils/executeinparallel' );
-const publishPackageOnNpmCallback = require( '../utils/publishpackageonnpmcallback' );
+import upath from 'upath';
+import { glob } from 'glob';
+import assertNpmAuthorization from '../utils/assertnpmauthorization';
+import assertPackages from '../utils/assertpackages';
+import assertNpmTag from '../utils/assertnpmtag';
+import assertFilesToPublish from '../utils/assertfilestopublish';
+import executeInParallel from '../utils/executeinparallel';
+import publishPackageOnNpmCallback from '../utils/publishpackageonnpmcallback';
 
 /**
  * The purpose of the script is to validate the packages prepared for the release and then release them on npm.
@@ -46,7 +44,7 @@ const publishPackageOnNpmCallback = require( '../utils/publishpackageonnpmcallba
  * @param {Number} [options.concurrency=4] Number of CPUs that will execute the task.
  * @returns {Promise}
  */
-module.exports = async function publishPackages( options ) {
+export async function publishPackages( options ) {
 	const {
 		packagesDirectory,
 		npmOwner,
@@ -87,4 +85,4 @@ module.exports = async function publishPackages( options ) {
 			concurrency
 		} );
 	}
-};
+}

@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs-extra' );
-const glob = require( 'glob' );
-const upath = require( 'upath' );
+import fs from 'fs-extra';
+import glob from 'glob';
+import upath from 'upath';
 
 /**
  * The goal is to prepare the release directory containing the packages we want to publish.
@@ -23,7 +21,7 @@ const upath = require( 'upath' );
  * If not specified, the root package will not be created.
  * @returns {Promise}
  */
-module.exports = async function prepareRepository( options ) {
+export async function prepareRepository( options ) {
 	const {
 		outputDirectory,
 		packagesDirectory,
@@ -70,7 +68,7 @@ module.exports = async function prepareRepository( options ) {
 	}
 
 	return Promise.all( copyPromises );
-};
+}
 
 /**
  * @param {Object} packageJson

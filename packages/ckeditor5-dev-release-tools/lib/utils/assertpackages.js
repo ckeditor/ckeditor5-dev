@@ -3,10 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs-extra' );
-const upath = require( 'upath' );
+import fs from 'fs-extra';
+import upath from 'upath';
 
 /**
  * Checks if all packages in the provided directories contain the `package.json` file.
@@ -19,7 +17,7 @@ const upath = require( 'upath' );
  * this array contains a list of packages that will not be checked. In other words, they do not have to define the entry point.
  * @returns {Promise}
  */
-module.exports = async function assertPackages( packagePaths, options ) {
+export async function assertPackages( packagePaths, options ) {
 	const errors = [];
 	const { requireEntryPoint, optionalEntryPointPackages } = options;
 
@@ -49,4 +47,4 @@ module.exports = async function assertPackages( packagePaths, options ) {
 	if ( errors.length ) {
 		throw new Error( errors.join( '\n' ) );
 	}
-};
+}

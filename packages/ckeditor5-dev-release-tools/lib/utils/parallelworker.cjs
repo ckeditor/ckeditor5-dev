@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 // This file is covered by the "executeInParallel() - integration" test cases.
 
 // Required due to top-level await.
@@ -13,7 +11,9 @@
 	 * @param {String} callbackModule
 	 * @param {Array.<String>} packages
 	 */
-	const { parentPort, workerData } = require( 'worker_threads' );
+	import { parentPort, workerData } from 'worker_threads';
+
+	// TODO: To decide what to do.
 	const callback = require( workerData.callbackModule );
 
 	for ( const packagePath of workerData.packages ) {

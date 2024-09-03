@@ -5,14 +5,13 @@
 
 /* eslint-env node */
 
-'use strict';
-
-const crypto = require( 'crypto' );
-const upath = require( 'upath' );
-const fs = require( 'fs/promises' );
-const { Worker } = require( 'worker_threads' );
-const { glob } = require( 'glob' );
-const { registerAbortController, deregisterAbortController } = require( './abortcontroller' );
+import crypto from 'crypto';
+import upath from 'upath';
+import os from 'os';
+import fs from 'fs/promises';
+import { Worker } from 'worker_threads';
+import { glob } from 'glob';
+import { registerAbortController, deregisterAbortController } from './abortcontroller';
 
 const WORKER_SCRIPT = upath.join( __dirname, 'parallelworker.cjs' );
 
@@ -37,7 +36,7 @@ const WORKER_SCRIPT = upath.join( __dirname, 'parallelworker.cjs' );
  * @param {Number} [options.concurrency=require( 'os' ).cpus().length / 2] Number of CPUs that will execute the task.
  * @returns {Promise}
  */
-module.exports = async function executeInParallel( options ) {
+export async function executeInParallel( options ) {
 	const {
 		packagesDirectory,
 		taskToExecute,
@@ -46,7 +45,7 @@ module.exports = async function executeInParallel( options ) {
 		taskOptions = null,
 		packagesDirectoryFilter = null,
 		cwd = process.cwd(),
-		concurrency = require( 'os' ).cpus().length / 2
+		concurrency = os.cpus().length / 2
 	} = options;
 
 	const normalizedCwd = upath.toUnix( cwd );
@@ -62,7 +61,7 @@ module.exports = async function executeInParallel( options ) {
 	const packagesInThreads = getPackagesGroupedByThreads( packagesToProcess, concurrency );
 
 	const callbackModule = upath.join( cwd, crypto.randomUUID() + '.cjs' );
-	await fs.writeFile( callbackModule, `'use strict';\nmodule.exports = ${ taskToExecute };`, 'utf-8' );
+	await fs.writeFile( callbackModule, `'use strict';\nexport ${ taskToExecute };`, 'utf-8' );
 
 	const onPackageDone = progressFactory( listrTask, packagesToProcess.length );
 
@@ -96,7 +95,7 @@ module.exports = async function executeInParallel( options ) {
 				deregisterAbortController( defaultAbortController );
 			}
 		} );
-};
+}
 
 /**
  * @param {ListrTaskObject} listrTask

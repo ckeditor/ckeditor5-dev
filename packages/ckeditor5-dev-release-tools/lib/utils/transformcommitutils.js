@@ -3,9 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const getPackageJson = require( './getpackagejson' );
+import getPackageJson from './getpackagejson';
 
 const transformCommitUtils = {
 	/**
@@ -160,4 +158,4 @@ const transformCommitUtils = {
 	}
 };
 
-module.exports = transformCommitUtils;
+export default transformCommitUtils;

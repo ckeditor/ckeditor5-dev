@@ -3,9 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
  * @param {Object} options
@@ -15,7 +13,7 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {String} [options.branch='master'] A name of the branch that should be used for releasing packages.
  * @returns {Promise.<Array.<String>>}
  */
-module.exports = async function validateRepositoryToRelease( options ) {
+export async function validateRepositoryToRelease( options ) {
 	const {
 		version,
 		changes,
@@ -56,4 +54,4 @@ module.exports = async function validateRepositoryToRelease( options ) {
 	async function exec( command ) {
 		return tools.shExec( command, { verbosity: 'error', async: true } );
 	}
-};
+}

@@ -3,12 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const path = require( 'path' );
-const minimatch = require( 'minimatch' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const getPackageJson = require( './getpackagejson' );
+import path from 'path';
+import minimatch from 'minimatch';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import getPackageJson from './getpackagejson';
 
 /**
  * Returns an object with two collections of paths to packages which are located in single repository.
@@ -28,7 +26,7 @@ const getPackageJson = require( './getpackagejson' );
  * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in `options.cwd` will be skipped.
  * @returns {PathsCollection}
  */
-module.exports = function getPackagesPaths( options ) {
+export function getPackagesPaths( options ) {
 	const pathsCollection = {
 		matched: new Set(),
 		skipped: new Set()
@@ -79,7 +77,7 @@ module.exports = function getPackagesPaths( options ) {
 
 		return true;
 	}
-};
+}
 
 /**
  * @typedef {Object} PathsCollection

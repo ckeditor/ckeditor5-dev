@@ -3,9 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
-'use strict';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import upath from 'upath';
+import fs from 'fs-extra';
 
 /**
  * Calls the npm command to publish the package. When a package is successfully published, it is removed from the filesystem.
@@ -15,11 +15,7 @@
  * @param {String} taskOptions.npmTag
  * @returns {Promise}
  */
-module.exports = async function publishPackageOnNpmCallback( packagePath, taskOptions ) {
-	const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-	const upath = require( 'upath' );
-	const fs = require( 'fs-extra' );
-
+export async function publishPackageOnNpmCallback( packagePath, taskOptions ) {
 	const result = await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, {
 		cwd: packagePath,
 		async: true,
@@ -38,4 +34,4 @@ module.exports = async function publishPackageOnNpmCallback( packagePath, taskOp
 	if ( !result || !result.shouldKeepDirectory ) {
 		await fs.remove( packagePath );
 	}
-};
+}

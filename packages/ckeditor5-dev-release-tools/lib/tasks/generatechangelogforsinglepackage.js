@@ -3,22 +3,20 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs' );
-const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const chalk = require( 'chalk' );
-const semver = require( 'semver' );
-const cli = require( '../utils/cli' );
-const changelogUtils = require( '../utils/changelog' );
-const displayCommits = require( '../utils/displaycommits' );
-const generateChangelog = require( '../utils/generatechangelog' );
-const getPackageJson = require( '../utils/getpackagejson' );
-const getNewVersionType = require( '../utils/getnewversiontype' );
-const getCommits = require( '../utils/getcommits' );
-const getWriterOptions = require( '../utils/getwriteroptions' );
-const { getRepositoryUrl } = require( '../utils/transformcommitutils' );
-const transformCommitFactory = require( '../utils/transformcommitfactory' );
+import fs from 'fs';
+import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
+import chalk from 'chalk';
+import semver from 'semver';
+import cli from '../utils/cli';
+import changelogUtils from '../utils/changelog';
+import displayCommits from '../utils/displaycommits';
+import generateChangelog from '../utils/generatechangelog';
+import getPackageJson from '../utils/getpackagejson';
+import getNewVersionType from '../utils/getnewversiontype';
+import getCommits from '../utils/getcommits';
+import getWriterOptions from '../utils/getwriteroptions';
+import { getRepositoryUrl } from '../utils/transformcommitutils';
+import transformCommitFactory from '../utils/transformcommitfactory';
 
 const SKIP_GENERATE_CHANGELOG = 'Typed "skip" as a new version. Aborting.';
 
@@ -40,7 +38,7 @@ const SKIP_GENERATE_CHANGELOG = 'Typed "skip" as a new version. Aborting.';
  *
  * @returns {Promise}
  */
-module.exports = async function generateChangelogForSinglePackage( options = {} ) {
+export async function generateChangelogForSinglePackage( options = {} ) {
 	const log = logger();
 	const pkgJson = getPackageJson();
 
@@ -195,7 +193,7 @@ module.exports = async function generateChangelogForSinglePackage( options = {} 
 
 		log[ method ]( `${ startWithNewLine ? '\n' : '' }${ ' '.repeat( indentLevel * cli.INDENT_SIZE ) }` + message );
 	}
-};
+}
 
 /**
  * @callback FormatDateCallback
