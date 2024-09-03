@@ -1,24 +1,8 @@
 {
   "name": "@ckeditor/typedoc-plugins",
-  "version": "42.0.0",
+  "version": "43.0.0-alpha.0",
   "description": "Various TypeDoc plugins developed by the CKEditor 5 team.",
   "keywords": [],
-  "main": "lib/index.js",
-  "devDependencies": {
-    "chai": "^4.2.0",
-    "fast-glob": "^3.2.4",
-    "typedoc": "^0.23.15"
-  },
-  "peerDependencies": {
-    "typedoc": "^0.23.15"
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=5.7.1"
-  },
-  "files": [
-    "lib"
-  ],
   "author": "CKSource (http://cksource.com/)",
   "license": "MIT",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/typedoc-plugins",
@@ -27,5 +11,30 @@
     "type": "git",
     "url": "https://github.com/ckeditor/ckeditor5-dev.git",
     "directory": "packages/typedoc-plugins"
-  }
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=5.7.1"
+  },
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "fast-glob": "^3.2.4",
+    "mocha": "^7.1.2",
+    "sinon": "^9.2.4",
+    "typedoc": "^0.23.15"
+  },
+  "peerDependencies": {
+    "typedoc": "^0.23.15"
+  },
+  "scripts": {
+    "test": "mocha './tests/**/*.js' --timeout 10000",
+    "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test"
+  },
+  "depcheckIgnore": [
+    "typedoc"
+  ]
 }

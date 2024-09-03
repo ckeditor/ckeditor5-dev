@@ -1,32 +1,8 @@
 {
   "name": "@ckeditor/ckeditor5-dev-docs",
-  "version": "42.0.0",
+  "version": "43.0.0-alpha.0",
   "description": "Tasks used to build and verify the documentation for CKEditor 5.",
   "keywords": [],
-  "main": "lib/index.js",
-  "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^42.0.0",
-    "@ckeditor/jsdoc-plugins": "^42.0.0",
-    "@ckeditor/typedoc-plugins": "^42.0.0",
-    "fast-glob": "^3.2.4",
-    "fs-extra": "^9.0.0",
-    "jsdoc": "ckeditor/jsdoc#fixed-trailing-comment-doclets",
-    "tmp": "^0.2.1",
-    "typedoc": "^0.23.15",
-    "typedoc-plugin-rename-defaults": "0.6.6"
-  },
-  "devDependencies": {
-    "chai": "^4.2.0",
-    "proxyquire": "^2.1.3",
-    "sinon": "^9.2.4"
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=5.7.1"
-  },
-  "files": [
-    "lib"
-  ],
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
   "homepage": "https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-docs",
@@ -35,5 +11,38 @@
     "type": "git",
     "url": "https://github.com/ckeditor/ckeditor5-dev.git",
     "directory": "packages/ckeditor5-dev-docs"
-  }
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=5.7.1"
+  },
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "dependencies": {
+    "@ckeditor/ckeditor5-dev-utils": "^43.0.0-alpha.0",
+    "@ckeditor/jsdoc-plugins": "^43.0.0-alpha.0",
+    "@ckeditor/typedoc-plugins": "^43.0.0-alpha.0",
+    "fast-glob": "^3.2.4",
+    "fs-extra": "^11.2.0",
+    "jsdoc": "ckeditor/jsdoc#fixed-trailing-comment-doclets",
+    "tmp": "^0.2.1",
+    "typedoc": "^0.23.15",
+    "typedoc-plugin-rename-defaults": "0.6.6"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^7.1.2",
+    "proxyquire": "^2.1.3",
+    "sinon": "^9.2.4",
+    "sinon-chai": "^3.7.0"
+  },
+  "scripts": {
+    "test": "mocha './tests/**/*.js' --timeout 10000",
+    "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test"
+  },
+  "depcheckIgnore": [
+    "typedoc-plugin-rename-defaults"
+  ]
 }

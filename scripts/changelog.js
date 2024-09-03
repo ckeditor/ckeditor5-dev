@@ -7,7 +7,7 @@
 
 'use strict';
 
-const { generateChangelogForMonoRepository } = require( '../packages/ckeditor5-dev-release-tools' );
+const { generateChangelogForMonoRepository } = require( '@ckeditor/ckeditor5-dev-release-tools' );
 const parseArguments = require( './utils/parsearguments' );
 
 const cliArguments = parseArguments( process.argv.slice( 2 ) );

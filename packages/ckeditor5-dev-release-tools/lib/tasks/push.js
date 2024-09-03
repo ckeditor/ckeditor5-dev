@@ -6,6 +6,7 @@
 'use strict';
 
 const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+const shellEscape = require( 'shell-escape' );
 
 /**
  * Push the local changes to a remote server.
@@ -23,7 +24,7 @@ module.exports = async function push( options ) {
 		cwd = process.cwd()
 	} = options;
 
-	const command = `git push origin ${ releaseBranch } v${ version }`;
+	const command = `git push origin ${ shellEscape( [ releaseBranch ] ) } v${ shellEscape( [ version ] ) }`;
 
 	return tools.shExec( command, { cwd, verbosity: 'error', async: true } );
 };

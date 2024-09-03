@@ -10,11 +10,11 @@ export default defineConfig( {
 		testTimeout: 10000,
 		restoreMocks: true,
 		coverage: {
-			enabled: true,
 			provider: 'v8',
 			include: [
 				'src/**'
-			]
+			],
+			reporter: [ 'text', 'json', 'html', 'lcov' ]
 		}
 	}
 } );

@@ -6,7 +6,7 @@
 'use strict';
 
 const fs = require( 'fs' );
-const upath = require( 'path' );
+const upath = require( 'upath' );
 const { globSync } = require( 'glob' );
 const depCheck = require( 'depcheck' );
 const chalk = require( 'chalk' );
@@ -390,7 +390,9 @@ async function isDevDependency( packageName, absolutePaths ) {
 		/**
 		 * These folders contain the source code of the packages.
 		 */
+		/[/\\]bin[/\\]/,
 		/[/\\]src[/\\]/,
+		/[/\\]lib[/\\]/,
 		/[/\\]theme[/\\]/,
 
 		/**

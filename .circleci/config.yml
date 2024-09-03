@@ -57,7 +57,7 @@ commands:
             CKE5_GITHUB_REPOSITORY="ckeditor5-dev"
             CKE5_CIRCLE_APPROVAL_JOB_NAME="release_approval"
             CKE5_GITHUB_RELEASE_BRANCH="master"
-  
+
             echo export CKE5_CIRCLE_APPROVAL_JOB_NAME=$CKE5_CIRCLE_APPROVAL_JOB_NAME >> $BASH_ENV
             echo export CKE5_GITHUB_RELEASE_BRANCH=$CKE5_GITHUB_RELEASE_BRANCH >> $BASH_ENV
             echo export CKE5_GITHUB_ORGANIZATION=$CKE5_GITHUB_ORGANIZATION >> $BASH_ENV
@@ -96,6 +96,7 @@ jobs:
 
   validate_and_tests:
     machine: true
+    resource_class: large
     steps:
       - checkout
       - bootstrap_repository_command
@@ -126,6 +127,7 @@ jobs:
 
   release_prepare:
     machine: true
+    resource_class: large
     steps:
       - checkout
       - bootstrap_repository_command
@@ -135,6 +137,7 @@ jobs:
 
   trigger_release_process:
     machine: true
+    resource_class: large
     steps:
       - checkout
       - bootstrap_repository_command
@@ -159,6 +162,7 @@ jobs:
 
   release_project:
     machine: true
+    resource_class: large
     steps:
       - checkout
       - bootstrap_repository_command
@@ -166,10 +170,10 @@ jobs:
           name: Verify the trigger commit from the repository
           command: |
             #!/bin/bash
-  
+
             CKE5_LATEST_COMMIT_HASH=$( git log -n 1 --pretty=format:%H origin/master )
             CKE5_TRIGGER_COMMIT_HASH=<< pipeline.parameters.triggerCommitHash >>
-  
+
             if [[ "${CKE5_LATEST_COMMIT_HASH}" != "${CKE5_TRIGGER_COMMIT_HASH}" ]]; then
               echo "There is a newer commit in the repository on the \`#master\` branch. Use its build to start the release."
               circleci-agent step halt
@@ -180,13 +184,13 @@ jobs:
           name: Verify if a releaser triggered the job
           command: |
             #!/bin/bash
-  
+
             # Do not fail if the Node script ends with non-zero exit code.
             set +e
 
             yarn ckeditor5-dev-ci-is-job-triggered-by-member
             EXIT_CODE=$( echo $? )
-  
+
             if [ ${EXIT_CODE} -ne 0 ];
             then
               echo "Aborting the release due to failed verification of the approver (no rights to release)."
