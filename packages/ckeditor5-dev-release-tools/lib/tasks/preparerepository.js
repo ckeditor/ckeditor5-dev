@@ -21,7 +21,7 @@ import upath from 'upath';
  * If not specified, the root package will not be created.
  * @returns {Promise}
  */
-export async function prepareRepository( options ) {
+export default async function prepareRepository( options ) {
 	const {
 		outputDirectory,
 		packagesDirectory,

@@ -61,7 +61,7 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
  *
  * @returns {Promise.<undefined|String>}
  */
-export async function generateChangelogForMonoRepository( options ) {
+export default async function generateChangelogForMonoRepository( options ) {
 	const log = logger();
 	const cwd = process.cwd();
 	const rootPkgJson = getPackageJson( options.cwd );

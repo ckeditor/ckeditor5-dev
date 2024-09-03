@@ -13,7 +13,7 @@ import { tools } from '@ckeditor/ckeditor5-dev-utils';
  * @param {String} [options.branch='master'] A name of the branch that should be used for releasing packages.
  * @returns {Promise.<Array.<String>>}
  */
-export async function validateRepositoryToRelease( options ) {
+export default async function validateRepositoryToRelease( options ) {
 	const {
 		version,
 		changes,

@@ -15,7 +15,7 @@ import shellEscape from 'shell-escape';
  * @param {String} npmTag
  * @return {Promise.<Boolean>}
  */
-export async function isVersionPublishableForTag( packageName, version, npmTag ) {
+export default async function isVersionPublishableForTag( packageName, version, npmTag ) {
 	const command = `npm view ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ npmTag ] ) } version --silent`;
 	const npmVersion = await tools.shExec( command, { async: true, verbosity: 'silent' } )
 		.then( value => value.trim() )

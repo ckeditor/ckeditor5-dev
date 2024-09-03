@@ -17,7 +17,7 @@ import { getRepositoryUrl } from '../utils/transformcommitutils';
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @returns {Promise.<String>}
  */
-export async function createGithubRelease( options ) {
+export default async function createGithubRelease( options ) {
 	const {
 		token,
 		version,

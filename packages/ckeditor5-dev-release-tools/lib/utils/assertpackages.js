@@ -17,7 +17,7 @@ import upath from 'upath';
  * this array contains a list of packages that will not be checked. In other words, they do not have to define the entry point.
  * @returns {Promise}
  */
-export async function assertPackages( packagePaths, options ) {
+export default async function assertPackages( packagePaths, options ) {
 	const errors = [];
 	const { requireEntryPoint, optionalEntryPointPackages } = options;
 

@@ -25,7 +25,7 @@ const execPromise = util.promisify( exec );
  * @param {Array.<String>} options.packages Array of packages' names to reassign tags for.
  * @returns {Promise}
  */
-export async function reassignNpmTags( { npmOwner, version, packages } ) {
+export default async function reassignNpmTags( { npmOwner, version, packages } ) {
 	const errors = [];
 	const packagesSkipped = [];
 	const packagesUpdated = [];

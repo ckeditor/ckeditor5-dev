@@ -17,7 +17,7 @@ import shellEscape from 'shell-escape';
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @returns {Promise}
  */
-export async function commitAndTag( { version, files, cwd = process.cwd() } ) {
+export default async function commitAndTag( { version, files, cwd = process.cwd() } ) {
 	const normalizedCwd = toUnix( cwd );
 	const filePathsToAdd = await glob( files, { cwd: normalizedCwd, absolute: true, nodir: true } );
 

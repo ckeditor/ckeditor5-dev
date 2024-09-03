@@ -15,7 +15,7 @@ import fs from 'fs-extra';
  * @param {String} taskOptions.npmTag
  * @returns {Promise}
  */
-export async function publishPackageOnNpmCallback( packagePath, taskOptions ) {
+export default async function publishPackageOnNpmCallback( packagePath, taskOptions ) {
 	const result = await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, {
 		cwd: packagePath,
 		async: true,

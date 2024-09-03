@@ -44,7 +44,7 @@ import publishPackageOnNpmCallback from '../utils/publishpackageonnpmcallback';
  * @param {Number} [options.concurrency=4] Number of CPUs that will execute the task.
  * @returns {Promise}
  */
-export async function publishPackages( options ) {
+export default async function publishPackages( options ) {
 	const {
 		packagesDirectory,
 		npmOwner,

@@ -16,7 +16,7 @@ import shellEscape from 'shell-escape';
  * @param {String} packageName
  * @returns {Promise}
  */
-export async function checkVersionAvailability( version, packageName ) {
+export default async function checkVersionAvailability( version, packageName ) {
 	const command = `npm show ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ version ] ) } version`;
 
 	return tools.shExec( command, { verbosity: 'silent', async: true } )

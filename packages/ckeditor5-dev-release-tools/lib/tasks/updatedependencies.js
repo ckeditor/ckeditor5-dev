@@ -29,7 +29,7 @@ import upath from 'upath';
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @returns {Promise}
  */
-export async function updateDependencies( options ) {
+export default async function updateDependencies( options ) {
 	const {
 		version,
 		packagesDirectory,

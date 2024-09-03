@@ -14,7 +14,7 @@ import semver from 'semver';
  * @param {String} npmTag
  * @returns {Promise}
  */
-export async function assertNpmTag( packagePaths, npmTag ) {
+export default async function assertNpmTag( packagePaths, npmTag ) {
 	const errors = [];
 
 	for ( const packagePath of packagePaths ) {

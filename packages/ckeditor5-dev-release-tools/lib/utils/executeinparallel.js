@@ -36,7 +36,7 @@ const WORKER_SCRIPT = upath.join( __dirname, 'parallelworker.cjs' );
  * @param {Number} [options.concurrency=require( 'os' ).cpus().length / 2] Number of CPUs that will execute the task.
  * @returns {Promise}
  */
-export async function executeInParallel( options ) {
+export default async function executeInParallel( options ) {
 	const {
 		packagesDirectory,
 		taskToExecute,

@@ -29,7 +29,7 @@ import checkVersionAvailability from '../utils/checkversionavailability';
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @returns {Promise}
  */
-export async function updateVersions( options ) {
+export default async function updateVersions( options ) {
 	const {
 		packagesDirectory,
 		version,

@@ -38,7 +38,7 @@ const SKIP_GENERATE_CHANGELOG = 'Typed "skip" as a new version. Aborting.';
  *
  * @returns {Promise}
  */
-export async function generateChangelogForSinglePackage( options = {} ) {
+export default async function generateChangelogForSinglePackage( options = {} ) {
 	const log = logger();
 	const pkgJson = getPackageJson();
 

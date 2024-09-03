@@ -18,7 +18,7 @@ import { checkVersionAvailability } from '../utils/checkversionavailability';
  * @param {Function} options.onSuccess Callback fired when function is successful.
  * @returns {Promise}
  */
-export async function verifyPackagesPublishedCorrectly( options ) {
+export default async function verifyPackagesPublishedCorrectly( options ) {
 	const { packagesDirectory, version, onSuccess } = options;
 	const packagesToVerify = await glob( upath.join( packagesDirectory, '*' ), { absolute: true } );
 	const errors = [];

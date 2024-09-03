@@ -15,7 +15,7 @@ import shellEscape from 'shell-escape';
  * @param {String} [options.cwd] Root of the repository to prepare. `process.cwd()` by default.
  * @returns {Promise}
  */
-export async function push( options ) {
+export default async function push( options ) {
 	const {
 		releaseBranch,
 		version,

@@ -14,7 +14,7 @@ import { glob } from 'glob';
  * @param {Object.<String, Array.<String>>|null} optionalEntries
  * @returns {Promise}
  */
-export async function assertFilesToPublish( packagePaths, optionalEntries ) {
+export default async function assertFilesToPublish( packagePaths, optionalEntries ) {
 	const errors = [];
 
 	for ( const packagePath of packagePaths ) {
