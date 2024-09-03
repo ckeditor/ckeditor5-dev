@@ -29,6 +29,8 @@ const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
 module.exports = function getWebpackConfigForManualTests( options ) {
 	const definitions = Object.assign( {}, getDefinitionsFromFile( options.identityFile ) );
 
+	definitions[ 'window.CKEDITOR_GLOBAL_LICENSE_KEY' ] = JSON.stringify( 'GPL' );
+
 	const webpackConfig = {
 		mode: 'none',
 
