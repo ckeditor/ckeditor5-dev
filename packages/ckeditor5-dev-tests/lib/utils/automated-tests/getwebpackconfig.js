@@ -18,8 +18,6 @@ const TreatWarningsAsErrorsWebpackPlugin = require( './treatwarningsaserrorswebp
 module.exports = function getWebpackConfigForAutomatedTests( options ) {
 	const definitions = Object.assign( {}, getDefinitionsFromFile( options.identityFile ) );
 
-	definitions[ 'window.CKEDITOR_GLOBAL_LICENSE_KEY' ] = JSON.stringify( 'GPL' );
-
 	const config = {
 		mode: 'development',
 
