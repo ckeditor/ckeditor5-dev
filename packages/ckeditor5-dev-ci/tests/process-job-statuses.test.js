@@ -5,17 +5,10 @@
 
 /* eslint-env node */
 
-'use strict';
-
-const expect = require( 'chai' ).expect;
+import { describe, expect, it } from 'vitest';
+import processJobStatuses from '../lib/process-job-statuses';
 
 describe( 'lib/process-job-statuses', () => {
-	let processJobStatuses;
-
-	beforeEach( () => {
-		processJobStatuses = require( '../lib/process-job-statuses' );
-	} );
-
 	describe( 'processJobStatuses()', () => {
 		it( 'should be a function', () => {
 			expect( processJobStatuses ).to.be.a( 'function' );
@@ -38,7 +31,7 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: []
 			} ];
 
-			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
 		} );
 
 		// Workflow:
@@ -69,7 +62,7 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: [ 'id1' ]
 			} ];
 
-			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
 		} );
 
 		// Workflow:
@@ -97,7 +90,7 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: [ 'id1' ]
 			} ];
 
-			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
 		} );
 
 		// Workflow:
@@ -125,7 +118,7 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: [ 'id1' ]
 			} ];
 
-			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
 		} );
 
 		// Workflow:
@@ -169,7 +162,7 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: [ 'id3' ]
 			} ];
 
-			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
 		} );
 
 		// Workflow:
@@ -223,7 +216,7 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: [ 'id_2', 'id_3' ]
 			} ];
 
-			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
 		} );
 
 		// Workflow:
@@ -277,7 +270,7 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: [ 'id_2', 'id_3' ]
 			} ];
 
-			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
 		} );
 
 		// Workflow:
@@ -351,7 +344,7 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: [ 'id_2', 'id_3', 'id_4', 'id_5' ]
 			} ];
 
-			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
 		} );
 
 		// Workflow:
@@ -425,7 +418,7 @@ describe( 'lib/process-job-statuses', () => {
 				dependencies: [ 'id_2', 'id_3', 'id_4', 'id_5' ]
 			} ];
 
-			expect( processJobStatuses( jobs ) ).to.deep.equal( expectedOutput );
+			expect( processJobStatuses( jobs ) ).toEqual( expectedOutput );
 		} );
 	} );
 } );

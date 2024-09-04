@@ -3,41 +3,20 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, expect, it, vi } from 'vitest';
+import circleUpdateAutoCancelBuilds from '../lib/circle-update-auto-cancel-builds';
+import nodeFetch from 'node-fetch';
 
-const { expect } = require( 'chai' );
-const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
+vi.mock( 'node-fetch' );
 
 describe( 'lib/circleUpdateAutoCancelBuilds', () => {
-	let stubs, circleUpdateAutoCancelBuilds;
-
-	beforeEach( () => {
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
-		} );
-
-		stubs = {
-			fetch: sinon.stub()
-		};
-
-		mockery.registerMock( 'node-fetch', stubs.fetch );
-
-		circleUpdateAutoCancelBuilds = require( '../lib/circle-update-auto-cancel-builds' );
-	} );
-
-	afterEach( () => {
-		mockery.disable();
-	} );
-
 	it( 'should send a request to CircleCI to update the redundant workflows option', async () => {
 		const response = {};
 
-		stubs.fetch.resolves( {
-			json: () => Promise.resolve( response )
-		} );
+		vi.mocked( nodeFetch )
+			.mockResolvedValue( {
+				json: () => Promise.resolve( response )
+			} );
 
 		const results = await circleUpdateAutoCancelBuilds( {
 			circleToken: 'circle-token',
@@ -46,10 +25,10 @@ describe( 'lib/circleUpdateAutoCancelBuilds', () => {
 			newValue: true
 		} );
 
-		expect( stubs.fetch.callCount ).to.equal( 1 );
+		expect( vi.mocked( nodeFetch ) ).toHaveBeenCalledTimes( 1 );
 		expect( results ).to.deep.equal( response );
 
-		const [ url, options ] = stubs.fetch.firstCall.args;
+		const [ url, options ] = vi.mocked( nodeFetch ).mock.calls[ 0 ];
 
 		expect( url ).to.equal( 'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-foo/settings' );
 		expect( options ).to.have.property( 'method', 'patch' );

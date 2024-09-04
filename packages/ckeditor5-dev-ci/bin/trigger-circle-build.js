@@ -5,9 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const triggerCircleBuild = require( '../lib/trigger-circle-build' );
+import triggerCircleBuild from '../lib/trigger-circle-build';
 
 /**
  * This script triggers a new CircleCI build.

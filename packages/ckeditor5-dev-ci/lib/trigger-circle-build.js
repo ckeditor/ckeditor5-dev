@@ -5,7 +5,7 @@
 
 /* eslint-env node */
 
-const fetch = require( 'node-fetch' );
+import nodeFetch from 'node-fetch';
 
 /**
  * @param options
@@ -17,7 +17,7 @@ const fetch = require( 'node-fetch' );
  * @param {String|null} [options.triggerRepositorySlug=null] A repository slug (org/name) that triggers a new build.
  * @return {Promise}
  */
-module.exports = async function triggerCircleBuild( options ) {
+export default async function triggerCircleBuild( options ) {
 	const {
 		circleToken,
 		commit,
@@ -51,7 +51,7 @@ module.exports = async function triggerCircleBuild( options ) {
 		body: JSON.stringify( { branch, parameters } )
 	};
 
-	return fetch( requestUrl, requestOptions )
+	return nodeFetch( requestUrl, requestOptions )
 		.then( res => res.json() )
 		.then( response => {
 			if ( response.error_message ) {
@@ -62,4 +62,4 @@ module.exports = async function triggerCircleBuild( options ) {
 				throw new Error( `CI trigger failed: "${ response.message }".` );
 			}
 		} );
-};
+}

@@ -5,9 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const isJobTriggeredByMember = require( '../lib/is-job-triggered-by-member' );
+import isJobTriggeredByMember from '../lib/is-job-triggered-by-member';
 
 /**
  * This script checks if a user that approved an approval job could do that.

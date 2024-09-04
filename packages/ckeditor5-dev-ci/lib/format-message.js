@@ -5,11 +5,9 @@
 
 /* eslint-env node */
 
-'use strict';
-
-const fetch = require( 'node-fetch' );
-const bots = require( './data/bots.json' );
-const members = require( './data/members.json' );
+import nodeFetch from 'node-fetch';
+import bots from './data/bots.json';
+import members from './data/members.json';
 
 const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
 
@@ -29,7 +27,7 @@ const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
  * @param {Number} options.endTime
  * @param {Boolean} options.shouldHideAuthor
  */
-module.exports = async function formatMessage( options ) {
+export default async function formatMessage( options ) {
 	const commitDetails = await getCommitDetails( options.triggeringCommitUrl, options.githubToken );
 	const repoUrl = `https://github.com/${ options.repositoryOwner }/${ options.repositoryName }`;
 
@@ -63,7 +61,7 @@ module.exports = async function formatMessage( options ) {
 			} ]
 		} ]
 	};
-};
+}
 
 /**
  * Returns the additional message that will be added to the notifier post.
@@ -196,7 +194,7 @@ function getCommitDetails( triggeringCommitUrl, githubToken ) {
 		}
 	};
 
-	return fetch( apiGithubUrlCommit, options )
+	return nodeFetch( apiGithubUrlCommit, options )
 		.then( response => response.json() )
 		.then( json => ( {
 			githubAccount: json.author ? json.author.login : null,

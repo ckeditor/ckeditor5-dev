@@ -7,9 +7,9 @@
 
 /* eslint-env node */
 
-const fetch = require( 'node-fetch' );
-const slackNotify = require( 'slack-notify' );
-const formatMessage = require( '../lib/format-message' );
+import fetch from 'node-fetch';
+import slackNotify from 'slack-notify';
+import formatMessage from '../lib/format-message';
 
 // This script assumes that is being executed on Circle CI.
 // Step it is used on should have set value: `when: on_fail`, since it does not

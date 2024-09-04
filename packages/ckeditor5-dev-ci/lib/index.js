@@ -3,9 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-module.exports = {
+export default {
 	getJobApprover: require( './utils/get-job-approver' ),
 	members: require( './data/members.json' )
 };
