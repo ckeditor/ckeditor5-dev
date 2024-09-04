@@ -11,7 +11,7 @@ vi.mock( 'node-fetch' );
 
 describe( 'lib/circleUpdateAutoCancelBuilds', () => {
 	it( 'should send a request to CircleCI to update the redundant workflows option', async () => {
-		const response = {};
+		const response = { foo: 'bar' };
 
 		vi.mocked( nodeFetch )
 			.mockResolvedValue( {
@@ -25,19 +25,23 @@ describe( 'lib/circleUpdateAutoCancelBuilds', () => {
 			newValue: true
 		} );
 
-		expect( vi.mocked( nodeFetch ) ).toHaveBeenCalledTimes( 1 );
 		expect( results ).to.deep.equal( response );
 
-		const [ url, options ] = vi.mocked( nodeFetch ).mock.calls[ 0 ];
-
-		expect( url ).to.equal( 'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-foo/settings' );
-		expect( options ).to.have.property( 'method', 'patch' );
-		expect( options ).to.have.property( 'headers' );
-		expect( options.headers ).to.have.property( 'Circle-Token', 'circle-token' );
-		expect( options ).to.have.property( 'body' );
-
-		const body = JSON.parse( options.body );
-		expect( body ).to.have.property( 'advanced' );
-		expect( body.advanced ).to.have.property( 'autocancel_builds', true );
+		expect( vi.mocked( nodeFetch ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( nodeFetch ) ).toHaveBeenCalledWith(
+			'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-foo/settings',
+			{
+				method: 'patch',
+				headers: {
+					'Circle-Token': 'circle-token',
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify( {
+					advanced: {
+						'autocancel_builds': true
+					}
+				} )
+			}
+		);
 	} );
 } );
