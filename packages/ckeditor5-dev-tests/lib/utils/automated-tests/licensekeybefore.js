@@ -5,4 +5,7 @@
 
 /* global window */
 
-window.CKEDITOR_IS_TEST_ENV = true;
+// eslint-disable-next-line mocha/no-top-level-hooks
+before( function() {
+	window.CKEDITOR_GLOBAL_LICENSE_KEY = 'GPL';
+} );
