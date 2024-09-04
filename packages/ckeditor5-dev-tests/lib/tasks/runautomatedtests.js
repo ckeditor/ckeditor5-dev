@@ -95,6 +95,9 @@ function createEntryFile( globPatterns, production ) {
 		throw new Error( 'Not found files to tests. Specified patterns are invalid.' );
 	}
 
+	// Inject the initialization settings to be executed in the `before` hook such as global variables, etc.
+	allFiles.unshift( path.join( __dirname, '..', 'utils', 'automated-tests', 'beforetestsetup.js' ).replace( /\\/g, '/' ) );
+
 	// Inject the leak detector root hooks. Need to be split into two parts due to #598.
 	allFiles.splice( 0, 0, path.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorbefore.js' ).replace( /\\/g, '/' ) );
 	allFiles.push( path.join( __dirname, '..', 'utils', 'automated-tests', 'leaksdetectorafter.js' ).replace( /\\/g, '/' ) );
