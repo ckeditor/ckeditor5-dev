@@ -4,7 +4,7 @@
  */
 
 import fs from 'fs-extra';
-import glob from 'glob';
+import { glob } from 'glob';
 import upath from 'upath';
 
 /**
@@ -100,12 +100,13 @@ async function processRootPackage( { cwd, rootPackageJson, outputDirectoryPath }
 	await fs.ensureDir( rootPackageOutputPath );
 	await fs.writeJson( pkgJsonOutputPath, rootPackageJson, { spaces: 2, EOL: '\n' } );
 
-	return glob.sync( rootPackageJson.files ).map( absoluteFilePath => {
-		const relativeFilePath = upath.relative( cwd, absoluteFilePath );
-		const absoluteFileOutputPath = upath.join( rootPackageOutputPath, relativeFilePath );
+	return ( await glob( rootPackageJson.files ) )
+		.map( absoluteFilePath => {
+			const relativeFilePath = upath.relative( cwd, absoluteFilePath );
+			const absoluteFileOutputPath = upath.join( rootPackageOutputPath, relativeFilePath );
 
-		return fs.copy( absoluteFilePath, absoluteFileOutputPath );
-	} );
+			return fs.copy( absoluteFilePath, absoluteFileOutputPath );
+		} );
 }
 
 /**

@@ -5,7 +5,9 @@
 
 import { Octokit } from '@octokit/rest';
 import semver from 'semver';
-import { getRepositoryUrl } from '../utils/transformcommitutils';
+import transformCommitUtils from '../utils/transformcommitutils';
+
+const { getRepositoryUrl } = transformCommitUtils;
 
 /**
  * Create a GitHub release.

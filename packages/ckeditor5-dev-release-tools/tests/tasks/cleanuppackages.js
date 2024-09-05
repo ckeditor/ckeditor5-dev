@@ -11,7 +11,7 @@ import upath from 'upath';
 import { glob } from 'glob';
 import mockFs from 'mock-fs';
 
-describe( 'dev-release-tools/tasks/cleanUpPackages()', () => {
+describe( 'cleanUpPackages()', () => {
 	let cleanUpPackages, stubs;
 
 	beforeEach( async () => {
