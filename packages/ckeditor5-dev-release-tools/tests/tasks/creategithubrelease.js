@@ -4,29 +4,28 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Octokit } from '@octokit/rest';
 import createGithubRelease from '../../lib/tasks/creategithubrelease';
 import transformCommitUtils from '../../lib/utils/transformcommitutils';
 
-vi.mock( '@octokit/rest', () => {
-	const stubs = {
-		getLatestRelease: vi.fn(),
-		createRelease: vi.fn()
-	};
+const stubs = vi.hoisted( () => ( {
+	constructor: vi.fn(),
+	getLatestRelease: vi.fn(),
+	createRelease: vi.fn()
+} ) );
 
-	const octokitMock = vi.fn( () => ( {
-		repos: {
-			getLatestRelease: stubs.getLatestRelease,
-			createRelease: stubs.createRelease
+vi.mock( '@octokit/rest', () => ( {
+	Octokit: class {
+		constructor( ...args ) {
+			stubs.constructor( ...args );
+
+			this.repos = {
+				getLatestRelease: stubs.getLatestRelease,
+				createRelease: stubs.createRelease
+			};
 		}
-	} ) );
+	}
+} ) );
 
-	octokitMock.__stubs = stubs;
-
-	return {
-		Octokit: octokitMock
-	};
-} );
 vi.mock( '../../lib/utils/transformcommitutils' );
 
 describe( 'createGithubRelease()', () => {
@@ -41,14 +40,11 @@ describe( 'createGithubRelease()', () => {
 			description: 'Very important release.'
 		};
 
-		vi.mocked( Octokit ).__stubs.getLatestRelease.mockRejectedValue( { status: 404 } );
-		vi.mocked( Octokit ).__stubs.createRelease.mockResolvedValue();
+		stubs.getLatestRelease.mockRejectedValue( { status: 404 } );
+		stubs.createRelease.mockResolvedValue();
 
 		vi.mocked( transformCommitUtils.getRepositoryUrl ).mockReturnValue( 'https://github.com/ckeditor/ckeditor5-dev' );
 	} );
-
-	// afterEach( () => {
-	// } );
 
 	it( 'should be a function', () => {
 		expect( createGithubRelease ).to.be.a( 'function' );
@@ -57,8 +53,8 @@ describe( 'createGithubRelease()', () => {
 	it( 'creates new Octokit instance with correct arguments', async () => {
 		await createGithubRelease( options );
 
-		expect( vi.mocked( Octokit ) ).toHaveBeenCalledOnce();
-		expect( vi.mocked( Octokit ) ).toHaveBeenCalledWith( expect.objectContaining( {
+		expect( stubs.constructor ).toHaveBeenCalledOnce();
+		expect( stubs.constructor ).toHaveBeenCalledWith( expect.objectContaining( {
 			version: '3.0.0',
 			auth: 'token abc123'
 		} ) );
@@ -73,7 +69,7 @@ describe( 'createGithubRelease()', () => {
 	it( 'creates a non-prerelease page when passing a major.minor.patch version', async () => {
 		await createGithubRelease( options );
 
-		const createReleaseMock = vi.mocked( Octokit ).__stubs.createRelease;
+		const createReleaseMock = stubs.createRelease;
 
 		expect( createReleaseMock ).toHaveBeenCalledOnce();
 		expect( createReleaseMock ).toHaveBeenCalledWith( expect.objectContaining( {
@@ -89,7 +85,7 @@ describe( 'createGithubRelease()', () => {
 		options.version = '1.3.5-alpha.0';
 		await createGithubRelease( options );
 
-		const createReleaseMock = vi.mocked( Octokit ).__stubs.createRelease;
+		const createReleaseMock = stubs.createRelease;
 
 		expect( createReleaseMock ).toHaveBeenCalledOnce();
 		expect( createReleaseMock ).toHaveBeenCalledWith( expect.objectContaining( {
@@ -102,29 +98,27 @@ describe( 'createGithubRelease()', () => {
 	} );
 
 	it( 'creates a new release if the previous release version are different', async () => {
-		vi.mocked( Octokit ).__stubs.getLatestRelease.mockResolvedValue( {
+		stubs.getLatestRelease.mockResolvedValue( {
 			data: {
 				tag_name: 'v1.3.4'
 			}
 		} );
 
 		await createGithubRelease( options );
-		const createReleaseMock = vi.mocked( Octokit ).__stubs.createRelease;
 
-		expect( createReleaseMock ).toHaveBeenCalledOnce();
+		expect( stubs.createRelease ).toHaveBeenCalledOnce();
 	} );
 
 	it( 'does not create a new release if the previous release version are the same', async () => {
-		vi.mocked( Octokit ).__stubs.getLatestRelease.mockResolvedValue( {
+		stubs.getLatestRelease.mockResolvedValue( {
 			data: {
 				tag_name: 'v1.3.5'
 			}
 		} );
 
 		const url = await createGithubRelease( options );
-		const createReleaseMock = vi.mocked( Octokit ).__stubs.createRelease;
 
 		expect( url ).to.equal( 'https://github.com/ckeditor/ckeditor5-dev/releases/tag/v1.3.5' );
-		expect( createReleaseMock ).not.toHaveBeenCalled();
+		expect( stubs.createRelease ).not.toHaveBeenCalled();
 	} );
 } );
