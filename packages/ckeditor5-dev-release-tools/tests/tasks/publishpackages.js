@@ -5,410 +5,377 @@
 
 'use strict';
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
-const upath = require( 'upath' );
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import upath from 'upath';
+import { glob } from 'glob';
+import assertNpmAuthorization from '../../lib/utils/assertnpmauthorization';
+import assertPackages from '../../lib/utils/assertpackages';
+import assertNpmTag from '../../lib/utils/assertnpmtag';
+import assertFilesToPublish from '../../lib/utils/assertfilestopublish';
+import executeInParallel from '../../lib/utils/executeinparallel';
+import publishPackageOnNpmCallback from '../../lib/utils/publishpackageonnpmcallback';
+import publishPackages from '../../lib/tasks/publishpackages';
 
-describe( 'dev-release-tools/tasks', () => {
-	describe( 'publishPackages()', () => {
-		let publishPackages, sandbox, stubs;
+vi.mock( 'glob' );
+vi.mock( '../../lib/utils/assertnpmauthorization' );
+vi.mock( '../../lib/utils/assertpackages' );
+vi.mock( '../../lib/utils/assertnpmtag' );
+vi.mock( '../../lib/utils/assertfilestopublish' );
+vi.mock( '../../lib/utils/executeinparallel' );
+vi.mock( '../../lib/utils/publishpackageonnpmcallback' );
 
-		beforeEach( () => {
-			sandbox = sinon.createSandbox();
+describe( 'publishPackages()', () => {
+	beforeEach( () => {
+		vi.mocked( glob ).mockResolvedValue( [] );
+		vi.mocked( assertNpmAuthorization ).mockResolvedValue();
+		vi.mocked( assertPackages ).mockResolvedValue();
+		vi.mocked( assertNpmTag ).mockResolvedValue();
+		vi.mocked( assertFilesToPublish ).mockResolvedValue();
+		vi.mocked( executeInParallel ).mockResolvedValue();
+		vi.mocked( publishPackageOnNpmCallback ).mockResolvedValue();
+	} );
 
-			stubs = {
-				glob: {
-					glob: sandbox.stub().resolves( [] )
-				},
-				assertNpmAuthorization: sandbox.stub().resolves(),
-				assertPackages: sandbox.stub().resolves(),
-				assertNpmTag: sandbox.stub().resolves(),
-				assertFilesToPublish: sandbox.stub().resolves(),
-				executeInParallel: sandbox.stub().resolves(),
-				publishPackageOnNpmCallback: sandbox.stub().resolves()
-			};
+	it( 'should not throw if all assertion passes', async () => {
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe'
+		} );
+	} );
 
-			mockery.enable( {
-				useCleanCache: true,
-				warnOnReplace: false,
-				warnOnUnregistered: false
-			} );
-
-			mockery.registerMock( 'glob', stubs.glob );
-			mockery.registerMock( '../utils/assertnpmauthorization', stubs.assertNpmAuthorization );
-			mockery.registerMock( '../utils/assertpackages', stubs.assertPackages );
-			mockery.registerMock( '../utils/assertnpmtag', stubs.assertNpmTag );
-			mockery.registerMock( '../utils/assertfilestopublish', stubs.assertFilesToPublish );
-			mockery.registerMock( '../utils/executeinparallel', stubs.executeInParallel );
-			mockery.registerMock( '../utils/publishpackageonnpmcallback', stubs.publishPackageOnNpmCallback );
-
-			publishPackages = require( '../../lib/tasks/publishpackages' );
+	it( 'should read the package directory (default `cwd`)', async () => {
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe'
 		} );
 
-		afterEach( () => {
-			mockery.deregisterAll();
-			mockery.disable();
-			sandbox.restore();
+		expect( vi.mocked( glob ) ).toHaveBeenCalledOnce();
+		expect( vi.mocked( glob ) ).toHaveBeenCalledWith(
+			'*/',
+			expect.objectContaining( {
+				cwd: upath.join( process.cwd(), 'packages' ),
+				absolute: true
+			} ) );
+	} );
+
+	it( 'should read the package directory (custom `cwd`)', async () => {
+		vi.spyOn( process, 'cwd' ).mockReturnValue( '/work/project' );
+
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe'
 		} );
 
-		it( 'should not throw if all assertion passes', () => {
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
-			} );
+		expect( vi.mocked( glob ) ).toHaveBeenCalledOnce();
+		expect( vi.mocked( glob ) ).toHaveBeenCalledWith(
+			'*/',
+			expect.objectContaining( {
+				cwd: '/work/project/packages',
+				absolute: true
+			} ) );
+	} );
+
+	it( 'should assert npm authorization', async () => {
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe'
 		} );
 
-		it( 'should read the package directory (default `cwd`)', () => {
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
-			} ).then( () => {
-				expect( stubs.glob.glob.callCount ).to.equal( 1 );
-				expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.equal( '*/' );
-				expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.have.property( 'cwd', upath.join( process.cwd(), 'packages' ) );
-				expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.have.property( 'absolute', true );
-			} );
+		expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledOnce();
+		expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledWith( 'pepe' );
+	} );
+
+	it( 'should throw if npm authorization assertion failed', async () => {
+		vi.mocked( assertNpmAuthorization ).mockRejectedValue(
+			new Error( 'You must be logged to npm as "pepe" to execute this release step.' )
+		);
+
+		await expect( publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'fake-pepe'
+		} ) ).rejects.toThrow( 'You must be logged to npm as "pepe" to execute this release step.' );
+	} );
+
+	it( 'should assert that each found directory is a package', async () => {
+		vi.mocked( glob ).mockResolvedValue( [
+			'/work/project/packages/ckeditor5-foo',
+			'/work/project/packages/ckeditor5-bar'
+		] );
+
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe'
 		} );
 
-		it( 'should read the package directory (custom `cwd`)', () => {
-			sandbox.stub( process, 'cwd' ).returns( '/work/project' );
-
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
-			} ).then( () => {
-				expect( stubs.glob.glob.callCount ).to.equal( 1 );
-				expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.equal( '*/' );
-				expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.have.property( 'cwd', '/work/project/packages' );
-				expect( stubs.glob.glob.firstCall.args[ 1 ] ).to.have.property( 'absolute', true );
-			} );
-		} );
-
-		it( 'should assert npm authorization', () => {
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
-			} ).then( () => {
-				expect( stubs.assertNpmAuthorization.callCount ).to.equal( 1 );
-				expect( stubs.assertNpmAuthorization.firstCall.args[ 0 ] ).to.equal( 'pepe' );
-			} );
-		} );
-
-		it( 'should throw if npm authorization assertion failed', () => {
-			stubs.assertNpmAuthorization.throws( new Error( 'You must be logged to npm as "pepe" to execute this release step.' ) );
-
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
-			} ).then(
-				() => {
-					throw new Error( 'Expected to be rejected.' );
-				},
-				error => {
-					expect( error ).to.be.an( 'Error' );
-					expect( error.message ).to.equal(
-						'You must be logged to npm as "pepe" to execute this release step.'
-					);
-				} );
-		} );
-
-		it( 'should assert that each found directory is a package', () => {
-			stubs.glob.glob.resolves( [
+		expect( vi.mocked( assertPackages ) ).toHaveBeenCalledOnce();
+		expect( vi.mocked( assertPackages ) ).toHaveBeenCalledWith(
+			[
 				'/work/project/packages/ckeditor5-foo',
 				'/work/project/packages/ckeditor5-bar'
-			] );
+			],
+			{
+				requireEntryPoint: false,
+				optionalEntryPointPackages: []
+			}
+		);
+	} );
 
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
-			} ).then( () => {
-				expect( stubs.assertPackages.callCount ).to.equal( 1 );
-				expect( stubs.assertPackages.firstCall.args[ 0 ] ).to.deep.equal( [
-					'/work/project/packages/ckeditor5-foo',
-					'/work/project/packages/ckeditor5-bar'
-				] );
-				expect( stubs.assertPackages.firstCall.args[ 1 ] ).to.deep.equal( {
-					requireEntryPoint: false,
-					optionalEntryPointPackages: []
-				} );
-			} );
+	// See: https://github.com/ckeditor/ckeditor5/issues/15127.
+	it( 'should allow enabling the "package entry point" validator', async () => {
+		vi.mocked( glob ).mockResolvedValue( [
+			'/work/project/packages/ckeditor5-foo',
+			'/work/project/packages/ckeditor5-bar'
+		] );
+
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe',
+			requireEntryPoint: true,
+			optionalEntryPointPackages: [
+				'ckeditor5-foo'
+			]
 		} );
 
-		// See: https://github.com/ckeditor/ckeditor5/issues/15127.
-		it( 'should allow enabling the "package entry point" validator', () => {
-			stubs.glob.glob.resolves( [
+		expect( vi.mocked( assertPackages ) ).toHaveBeenCalledOnce();
+		expect( vi.mocked( assertPackages ) ).toHaveBeenCalledWith(
+			[
 				'/work/project/packages/ckeditor5-foo',
 				'/work/project/packages/ckeditor5-bar'
-			] );
-
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe',
+			],
+			{
 				requireEntryPoint: true,
 				optionalEntryPointPackages: [
 					'ckeditor5-foo'
 				]
-			} ).then( () => {
-				expect( stubs.assertPackages.callCount ).to.equal( 1 );
-				expect( stubs.assertPackages.firstCall.args[ 0 ] ).to.deep.equal( [
-					'/work/project/packages/ckeditor5-foo',
-					'/work/project/packages/ckeditor5-bar'
-				] );
-				expect( stubs.assertPackages.firstCall.args[ 1 ] ).to.deep.equal( {
-					requireEntryPoint: true,
-					optionalEntryPointPackages: [
-						'ckeditor5-foo'
-					]
-				} );
-			} );
+			}
+		);
+	} );
+
+	it( 'should throw if package assertion failed', async () => {
+		vi.mocked( assertPackages ).mockRejectedValue(
+			new Error( 'The "package.json" file is missing in the "ckeditor5-foo" package.' )
+		);
+
+		await expect( publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe'
+		} ) ).rejects.toThrow( 'The "package.json" file is missing in the "ckeditor5-foo" package.' );
+	} );
+
+	it( 'should assert that each required file exists in the package directory (no optional entries)', async () => {
+		vi.mocked( glob ).mockResolvedValue( [
+			'/work/project/packages/ckeditor5-foo',
+			'/work/project/packages/ckeditor5-bar'
+		] );
+
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe'
 		} );
 
-		it( 'should throw if package assertion failed', () => {
-			stubs.assertPackages.throws( new Error( 'The "package.json" file is missing in the "ckeditor5-foo" package.' ) );
-
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
-			} ).then(
-				() => {
-					throw new Error( 'Expected to be rejected.' );
-				},
-				error => {
-					expect( error ).to.be.an( 'Error' );
-					expect( error.message ).to.equal(
-						'The "package.json" file is missing in the "ckeditor5-foo" package.'
-					);
-				} );
-		} );
-
-		it( 'should assert that each required file exists in the package directory (no optional entries)', () => {
-			stubs.glob.glob.resolves( [
+		expect( vi.mocked( assertFilesToPublish ) ).toHaveBeenCalledOnce();
+		expect( vi.mocked( assertFilesToPublish ) ).toHaveBeenCalledWith(
+			[
 				'/work/project/packages/ckeditor5-foo',
 				'/work/project/packages/ckeditor5-bar'
-			] );
+			],
+			null
+		);
+	} );
 
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
-			} ).then( () => {
-				expect( stubs.assertFilesToPublish.callCount ).to.equal( 1 );
-				expect( stubs.assertFilesToPublish.firstCall.args[ 0 ] ).to.deep.equal( [
-					'/work/project/packages/ckeditor5-foo',
-					'/work/project/packages/ckeditor5-bar'
-				] );
-				expect( stubs.assertFilesToPublish.firstCall.args[ 1 ] ).to.equal( null );
-			} );
+	it( 'should assert that each required file exists in the package directory (with optional entries)', async () => {
+		vi.mocked( glob ).mockResolvedValue( [
+			'/work/project/packages/ckeditor5-foo',
+			'/work/project/packages/ckeditor5-bar'
+		] );
+
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe',
+			optionalEntries: {
+				'ckeditor5-foo': [ 'src' ]
+			}
 		} );
 
-		it( 'should assert that each required file exists in the package directory (with optional entries)', () => {
-			stubs.glob.glob.resolves( [
+		expect( vi.mocked( assertFilesToPublish ) ).toHaveBeenCalledOnce();
+		expect( vi.mocked( assertFilesToPublish ) ).toHaveBeenCalledWith(
+			[
 				'/work/project/packages/ckeditor5-foo',
 				'/work/project/packages/ckeditor5-bar'
-			] );
+			],
+			{
+				'ckeditor5-foo': [ 'src' ]
+			}
+		);
+	} );
 
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe',
-				optionalEntries: {
-					'ckeditor5-foo': [ 'src' ]
-				}
-			} ).then( () => {
-				expect( stubs.assertFilesToPublish.callCount ).to.equal( 1 );
-				expect( stubs.assertFilesToPublish.firstCall.args[ 0 ] ).to.deep.equal( [
-					'/work/project/packages/ckeditor5-foo',
-					'/work/project/packages/ckeditor5-bar'
-				] );
-				expect( stubs.assertFilesToPublish.firstCall.args[ 1 ] ).to.deep.equal( {
-					'ckeditor5-foo': [ 'src' ]
-				} );
-			} );
+	it( 'should throw if not all required files exist in the package directory', async () => {
+		vi.mocked( assertFilesToPublish ).mockRejectedValue(
+			new Error( 'Missing files in "ckeditor5-foo" package for entries: "src"' )
+		);
+
+		await expect( publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe'
+		} ) ).rejects.toThrow( 'Missing files in "ckeditor5-foo" package for entries: "src"' );
+	} );
+
+	it( 'should assert that version tag matches the npm tag (default npm tag)', async () => {
+		vi.mocked( glob ).mockResolvedValue( [
+			'/work/project/packages/ckeditor5-foo',
+			'/work/project/packages/ckeditor5-bar'
+		] );
+
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe'
 		} );
 
-		it( 'should throw if not all required files exist in the package directory', () => {
-			stubs.assertFilesToPublish.throws( new Error( 'Missing files in "ckeditor5-foo" package for entries: "src"' ) );
-
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
-			} ).then(
-				() => {
-					throw new Error( 'Expected to be rejected.' );
-				},
-				error => {
-					expect( error ).to.be.an( 'Error' );
-					expect( error.message ).to.equal(
-						'Missing files in "ckeditor5-foo" package for entries: "src"'
-					);
-				} );
-		} );
-
-		it( 'should assert that version tag matches the npm tag (default npm tag)', () => {
-			stubs.glob.glob.resolves( [
+		expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledOnce();
+		expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledWith(
+			[
 				'/work/project/packages/ckeditor5-foo',
 				'/work/project/packages/ckeditor5-bar'
-			] );
+			],
+			'staging'
+		);
+	} );
 
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
-			} ).then( () => {
-				expect( stubs.assertNpmTag.callCount ).to.equal( 1 );
-				expect( stubs.assertNpmTag.firstCall.args[ 0 ] ).to.deep.equal( [
-					'/work/project/packages/ckeditor5-foo',
-					'/work/project/packages/ckeditor5-bar'
-				] );
-				expect( stubs.assertNpmTag.firstCall.args[ 1 ] ).to.equal( 'staging' );
-			} );
+	it( 'should assert that version tag matches the npm tag (custom npm tag)', async () => {
+		vi.mocked( glob ).mockResolvedValue( [
+			'/work/project/packages/ckeditor5-foo',
+			'/work/project/packages/ckeditor5-bar'
+		] );
+
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe',
+			npmTag: 'nightly'
 		} );
 
-		it( 'should assert that version tag matches the npm tag (custom npm tag)', () => {
-			stubs.glob.glob.resolves( [
+		expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledOnce();
+		expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledWith(
+			[
 				'/work/project/packages/ckeditor5-foo',
 				'/work/project/packages/ckeditor5-bar'
-			] );
+			],
+			'nightly'
+		);
+	} );
 
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe',
-				npmTag: 'nightly'
-			} ).then( () => {
-				expect( stubs.assertNpmTag.callCount ).to.equal( 1 );
-				expect( stubs.assertNpmTag.firstCall.args[ 0 ] ).to.deep.equal( [
-					'/work/project/packages/ckeditor5-foo',
-					'/work/project/packages/ckeditor5-bar'
-				] );
-				expect( stubs.assertNpmTag.firstCall.args[ 1 ] ).to.equal( 'nightly' );
-			} );
+	it( 'should throw if version tag does not match the npm tag', async () => {
+		vi.mocked( assertNpmTag ).mockRejectedValue(
+			new Error( 'The version tag "rc" from "ckeditor5-foo" package does not match the npm tag "staging".' )
+		);
+
+		await expect( publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe'
+		} ) ).rejects.toThrow( 'The version tag "rc" from "ckeditor5-foo" package does not match the npm tag "staging".' );
+	} );
+
+	it( 'should pass parameters for publishing packages', async () => {
+		const listrTask = {};
+		const abortController = new AbortController();
+
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe',
+			npmTag: 'nightly',
+			listrTask,
+			signal: abortController.signal,
+			concurrency: 3,
+			cwd: '/home/cwd'
 		} );
 
-		it( 'should throw if version tag does not match the npm tag', () => {
-			stubs.assertNpmTag.throws(
-				new Error( 'The version tag "rc" from "ckeditor5-foo" package does not match the npm tag "staging".' )
-			);
-
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
-			} ).then(
-				() => {
-					throw new Error( 'Expected to be rejected.' );
-				},
-				error => {
-					expect( error ).to.be.an( 'Error' );
-					expect( error.message ).to.equal(
-						'The version tag "rc" from "ckeditor5-foo" package does not match the npm tag "staging".'
-					);
-				} );
-		} );
-
-		it( 'should pass parameters for publishing packages', () => {
-			const listrTask = {};
-			const abortController = new AbortController();
-			const taskToExecute = stubs.publishPackageOnNpmCallback;
-
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe',
-				npmTag: 'nightly',
-				listrTask,
-				signal: abortController.signal,
-				concurrency: 3,
-				cwd: '/home/cwd'
-			} ).then( () => {
-				expect( stubs.executeInParallel.callCount ).to.equal( 1 );
-				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'packagesDirectory', 'packages' );
-				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'listrTask', listrTask );
-				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'taskToExecute', taskToExecute );
-				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.deep.property( 'taskOptions', { npmTag: 'nightly' } );
-				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'signal', abortController.signal );
-				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'concurrency', 3 );
-				expect( stubs.executeInParallel.firstCall.args[ 0 ] ).to.have.property( 'cwd', '/home/cwd' );
-			} );
-		} );
-
-		it( 'should publish packages on npm if confirmation callback is not set', () => {
-			const listrTask = {};
-
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe',
-				listrTask
-			} ).then( () => {
-				expect( stubs.executeInParallel.callCount ).to.equal( 1 );
-			} );
-		} );
-
-		it( 'should publish packages on npm if synchronous confirmation callback returns truthy value', () => {
-			const confirmationCallback = sandbox.stub().returns( true );
-			const listrTask = {};
-
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe',
-				confirmationCallback,
-				listrTask
-			} ).then( () => {
-				expect( stubs.executeInParallel.callCount ).to.equal( 1 );
-				expect( confirmationCallback.callCount ).to.equal( 1 );
-			} );
-		} );
-
-		it( 'should publish packages on npm if asynchronous confirmation callback returns truthy value', () => {
-			const confirmationCallback = sandbox.stub().resolves( true );
-			const listrTask = {};
-
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe',
-				confirmationCallback,
-				listrTask
-			} ).then( () => {
-				expect( stubs.executeInParallel.callCount ).to.equal( 1 );
-				expect( confirmationCallback.callCount ).to.equal( 1 );
-			} );
-		} );
-
-		it( 'should not publish packages on npm if synchronous confirmation callback returns falsy value', () => {
-			const confirmationCallback = sandbox.stub().returns( false );
-
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe',
-				confirmationCallback
-			} ).then( () => {
-				expect( stubs.executeInParallel.callCount ).to.equal( 0 );
-				expect( confirmationCallback.callCount ).to.equal( 1 );
-			} );
-		} );
-
-		it( 'should not publish packages on npm if asynchronous confirmation callback returns falsy value', () => {
-			const confirmationCallback = sandbox.stub().resolves( false );
-
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe',
-				confirmationCallback
-			} ).then( () => {
-				expect( stubs.executeInParallel.callCount ).to.equal( 0 );
-				expect( confirmationCallback.callCount ).to.equal( 1 );
-			} );
-		} );
-
-		it( 'should throw if publishing packages on npm failed', () => {
-			stubs.executeInParallel.throws( new Error( 'Unable to publish "ckeditor5-foo" package.' ) );
-
-			return publishPackages( {
-				packagesDirectory: 'packages',
-				npmOwner: 'pepe'
-			} ).then(
-				() => {
-					throw new Error( 'Expected to be rejected.' );
-				},
-				error => {
-					expect( error ).to.be.an( 'Error' );
-					expect( error.message ).to.equal( 'Unable to publish "ckeditor5-foo" package.' );
-				} );
+		expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledOnce();
+		expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledWith( {
+			packagesDirectory: 'packages',
+			listrTask,
+			taskToExecute: publishPackageOnNpmCallback,
+			taskOptions: { npmTag: 'nightly' },
+			signal: abortController.signal,
+			concurrency: 3,
+			cwd: '/home/cwd'
 		} );
 	} );
-} );
+
+	it( 'should publish packages on npm if confirmation callback is not set', async () => {
+		const listrTask = {};
+
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe',
+			listrTask
+		} );
+
+		expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledOnce();
+	} );
+
+	it( 'should publish packages on npm if synchronous confirmation callback returns truthy value', async () => {
+		const confirmationCallback = vi.fn().mockReturnValue( true );
+		const listrTask = {};
+
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe',
+			confirmationCallback,
+			listrTask
+		} );
+
+		expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledOnce();
+	} );
+
+	it( 'should publish packages on npm if asynchronous confirmation callback returns truthy value', async () => {
+		const confirmationCallback = vi.fn().mockResolvedValue( true );
+		const listrTask = {};
+
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe',
+			confirmationCallback,
+			listrTask
+		} );
+
+		expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledOnce();
+	} );
+
+	it( 'should not publish packages on npm if synchronous confirmation callback returns falsy value', async () => {
+		const confirmationCallback = vi.fn().mockReturnValue( false );
+
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe',
+			confirmationCallback
+		} );
+
+		expect( vi.mocked( executeInParallel ) ).not.toHaveBeenCalledOnce();
+		expect( confirmationCallback ).toHaveBeenCalledOnce();
+	} );
+
+	it( 'should not publish packages on npm if asynchronous confirmation callback returns falsy value', async () => {
+		const confirmationCallback = vi.fn().mockResolvedValue( false );
+
+		await publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe',
+			confirmationCallback
+		} );
+
+		expect( vi.mocked( executeInParallel ) ).not.toHaveBeenCalledOnce();
+		expect( confirmationCallback ).toHaveBeenCalledOnce();
+	} );
+
+	it( 'should throw if publishing packages on npm failed', async () => {
+		vi.mocked( executeInParallel ).mockRejectedValue(
+			new Error( 'Unable to publish "ckeditor5-foo" package.' )
+		);
+
+		await expect( publishPackages( {
+			packagesDirectory: 'packages',
+			npmOwner: 'pepe'
+		} ) ).rejects.toThrow(
+			'Unable to publish "ckeditor5-foo" package.'
+		);
+	} );
+} )
+;

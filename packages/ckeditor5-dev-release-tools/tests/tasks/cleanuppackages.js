@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs-extra';
 import upath from 'upath';
