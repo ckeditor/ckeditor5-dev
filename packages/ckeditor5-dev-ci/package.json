@@ -44,6 +44,6 @@
   },
   "scripts": {
     "test": "vitest run --config vitest.config.js",
-    "coverage": "vitest run --config vitest.config.ts --coverage"
+    "coverage": "vitest run --config vitest.config.js --coverage"
   }
 }
