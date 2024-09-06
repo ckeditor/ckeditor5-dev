@@ -10,7 +10,7 @@ export default defineConfig( {
 		testTimeout: 10000,
 		restoreMocks: true,
 		include: [
-			'./tests/githubrepository.js'
+			'tests/**/*.js'
 		],
 		coverage: {
 			provider: 'v8',

@@ -32,7 +32,7 @@ async function main() {
 		throw new Error( 'Missing or invalid CLI argument: --config-path' );
 	}
 
-	const config = require( configPath );
+	const config = await import( configPath );
 
 	validateConfig( config );
 

@@ -7,12 +7,12 @@ import upath from 'upath';
 import fs from 'fs-extra';
 import { GraphQLClient } from 'graphql-request';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
-const {
+import {
 	addSeconds,
 	fromUnixTime,
 	formatDistanceToNow,
 	differenceInSeconds
-} = require( 'date-fns' );
+} from 'date-fns';
 import prepareSearchQuery from './utils/preparesearchquery';
 import isIssueOrPullRequestToStale from './utils/isissueorpullrequesttostale';
 import isIssueOrPullRequestToUnstale from './utils/isissueorpullrequesttounstale';
