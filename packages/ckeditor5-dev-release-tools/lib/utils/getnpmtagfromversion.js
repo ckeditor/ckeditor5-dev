@@ -9,7 +9,7 @@ import semver from 'semver';
  * @param {String} version
  * @returns {String}
  */
-export function getNpmTagFromVersion( version ) {
+export default function getNpmTagFromVersion( version ) {
 	const [ versionTag ] = semver.prerelease( version ) || [ 'latest' ];
 
 	return versionTag;
