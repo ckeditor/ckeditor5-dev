@@ -33,7 +33,7 @@ describe( 'cleanUpPackages()', () => {
 			...( await import( 'fs-extra' ) ).default
 		};
 
-		cleanUpPackages = ( await import( '../../lib/tasks/cleanuppackages' ) ).default;
+		cleanUpPackages = ( await import( '../../lib/tasks/cleanuppackages.js' ) ).default;
 	} );
 
 	afterEach( () => {

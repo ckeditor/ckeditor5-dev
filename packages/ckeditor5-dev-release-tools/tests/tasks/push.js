@@ -8,7 +8,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import shellEscape from 'shell-escape';
-import push from '../../lib/tasks/push';
+import push from '../../lib/tasks/push.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( 'shell-escape' );

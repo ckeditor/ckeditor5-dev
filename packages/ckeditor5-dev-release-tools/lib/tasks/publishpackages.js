@@ -5,12 +5,12 @@
 
 import upath from 'upath';
 import { glob } from 'glob';
-import assertNpmAuthorization from '../utils/assertnpmauthorization';
-import assertPackages from '../utils/assertpackages';
-import assertNpmTag from '../utils/assertnpmtag';
-import assertFilesToPublish from '../utils/assertfilestopublish';
-import executeInParallel from '../utils/executeinparallel';
-import publishPackageOnNpmCallback from '../utils/publishpackageonnpmcallback';
+import assertNpmAuthorization from '../utils/assertnpmauthorization.js';
+import assertPackages from '../utils/assertpackages.js';
+import assertNpmTag from '../utils/assertnpmtag.js';
+import assertFilesToPublish from '../utils/assertfilestopublish.js';
+import executeInParallel from '../utils/executeinparallel.js';
+import publishPackageOnNpmCallback from '../utils/publishpackageonnpmcallback.js';
 
 /**
  * The purpose of the script is to validate the packages prepared for the release and then release them on npm.

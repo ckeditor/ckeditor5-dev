@@ -17,7 +17,6 @@ module.exports = {
 	],
 	rules: {
 		'no-console': 'off',
-		'ckeditor5-rules/require-file-extensions-in-imports': 'off',
 		'ckeditor5-rules/license-header': [ 'error', {
 			headerLines: [
 				'/**',
@@ -25,7 +24,13 @@ module.exports = {
 				' * For licensing, see LICENSE.md.',
 				' */'
 			]
-		} ]
+		} ],
+		'ckeditor5-rules/require-file-extensions-in-imports': [
+			'error',
+			{
+				extensions: [ '.ts', '.js', '.json' ]
+			}
+		]
 	},
 	overrides: [
 		{

@@ -3,26 +3,24 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import upath from 'upath';
 import { glob } from 'glob';
-import assertNpmAuthorization from '../../lib/utils/assertnpmauthorization';
-import assertPackages from '../../lib/utils/assertpackages';
-import assertNpmTag from '../../lib/utils/assertnpmtag';
-import assertFilesToPublish from '../../lib/utils/assertfilestopublish';
-import executeInParallel from '../../lib/utils/executeinparallel';
-import publishPackageOnNpmCallback from '../../lib/utils/publishpackageonnpmcallback';
-import publishPackages from '../../lib/tasks/publishpackages';
+import assertNpmAuthorization from '../../lib/utils/assertnpmauthorization.js';
+import assertPackages from '../../lib/utils/assertpackages.js';
+import assertNpmTag from '../../lib/utils/assertnpmtag.js';
+import assertFilesToPublish from '../../lib/utils/assertfilestopublish.js';
+import executeInParallel from '../../lib/utils/executeinparallel.js';
+import publishPackageOnNpmCallback from '../../lib/utils/publishpackageonnpmcallback.js';
+import publishPackages from '../../lib/tasks/publishpackages.js';
 
 vi.mock( 'glob' );
-vi.mock( '../../lib/utils/assertnpmauthorization' );
-vi.mock( '../../lib/utils/assertpackages' );
-vi.mock( '../../lib/utils/assertnpmtag' );
-vi.mock( '../../lib/utils/assertfilestopublish' );
-vi.mock( '../../lib/utils/executeinparallel' );
-vi.mock( '../../lib/utils/publishpackageonnpmcallback' );
+vi.mock( '../../lib/utils/assertnpmauthorization.js' );
+vi.mock( '../../lib/utils/assertpackages.js' );
+vi.mock( '../../lib/utils/assertnpmtag.js' );
+vi.mock( '../../lib/utils/assertfilestopublish.js' );
+vi.mock( '../../lib/utils/executeinparallel.js' );
+vi.mock( '../../lib/utils/publishpackageonnpmcallback.js' );
 
 describe( 'publishPackages()', () => {
 	beforeEach( () => {

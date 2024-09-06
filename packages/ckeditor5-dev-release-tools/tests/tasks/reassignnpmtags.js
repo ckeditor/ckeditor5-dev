@@ -10,8 +10,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import columns from 'cli-columns';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import shellEscape from 'shell-escape';
-import assertNpmAuthorization from '../../lib/utils/assertnpmauthorization';
-import reassignNpmTags from '../../lib/tasks/reassignnpmtags';
+import assertNpmAuthorization from '../../lib/utils/assertnpmauthorization.js';
+import reassignNpmTags from '../../lib/tasks/reassignnpmtags.js';
 
 const stubs = vi.hoisted( () => {
 	const values = {
@@ -61,7 +61,7 @@ vi.mock( 'chalk', () => ( {
 	default: stubs.chalk
 } ) );
 vi.mock( 'shell-escape' );
-vi.mock( '../../lib/utils/assertnpmauthorization' );
+vi.mock( '../../lib/utils/assertnpmauthorization.js' );
 
 describe( 'reassignNpmTags()', () => {
 	beforeEach( () => {

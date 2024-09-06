@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import upath from 'upath';
-import updateDependencies from '../../lib/tasks/updatedependencies';
+import updateDependencies from '../../lib/tasks/updatedependencies.js';
 
 vi.mock( 'fs-extra' );
 vi.mock( 'glob' );

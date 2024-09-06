@@ -7,7 +7,7 @@ import { glob } from 'glob';
 import fs from 'fs-extra';
 import semver from 'semver';
 import { normalizeTrim, toUnix, dirname, join } from 'upath';
-import checkVersionAvailability from '../utils/checkversionavailability';
+import checkVersionAvailability from '../utils/checkversionavailability.js';
 
 /**
  * The purpose of the script is to update the version of a root package found in the current working

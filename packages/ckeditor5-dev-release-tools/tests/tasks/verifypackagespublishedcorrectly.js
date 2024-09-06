@@ -8,8 +8,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { glob } from 'glob';
 import fs from 'fs-extra';
-import verifyPackagesPublishedCorrectly from '../../lib/tasks/verifypackagespublishedcorrectly';
-import checkVersionAvailability from '../../lib/utils/checkversionavailability';
+import verifyPackagesPublishedCorrectly from '../../lib/tasks/verifypackagespublishedcorrectly.js';
+import checkVersionAvailability from '../../lib/utils/checkversionavailability.js';
 
 vi.mock( 'fs-extra' );
 vi.mock( '../../lib/utils/checkversionavailability' );

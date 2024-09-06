@@ -9,12 +9,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { glob } from 'glob';
 import upath from 'upath';
 import fs from 'fs-extra';
-import checkVersionAvailability from '../../lib/utils/checkversionavailability';
+import checkVersionAvailability from '../../lib/utils/checkversionavailability.js';
 import updateVersions from '../../lib/tasks/updateversions.js';
 
 vi.mock( 'fs-extra' );
 vi.mock( 'glob' );
-vi.mock( '../../lib/utils/checkversionavailability' );
+vi.mock( '../../lib/utils/checkversionavailability.js' );
 
 describe( 'updateVersions()', () => {
 	beforeEach( () => {

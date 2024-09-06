@@ -4,8 +4,8 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import createGithubRelease from '../../lib/tasks/creategithubrelease';
-import transformCommitUtils from '../../lib/utils/transformcommitutils';
+import createGithubRelease from '../../lib/tasks/creategithubrelease.js';
+import transformCommitUtils from '../../lib/utils/transformcommitutils.js';
 
 const stubs = vi.hoisted( () => ( {
 	constructor: vi.fn(),

@@ -8,7 +8,7 @@
  *
  * @returns {AbortController}
  */
-function registerAbortController() {
+export function registerAbortController() {
 	const abortController = new AbortController();
 
 	const listener = () => {
@@ -29,15 +29,10 @@ function registerAbortController() {
  *
  * @param {AbortController} abortController
  */
-function deregisterAbortController( abortController ) {
+export function deregisterAbortController( abortController ) {
 	if ( !abortController || !abortController._listener ) {
 		return;
 	}
 
 	process.removeListener( 'SIGINT', abortController._listener );
 }
-
-export {
-	registerAbortController,
-	deregisterAbortController
-};
