@@ -3,4 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-export { default as build } from './build';
+export { default as build } from './build.js';

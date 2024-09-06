@@ -4,9 +4,9 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import testUtils from '../../utils';
+import testUtils from '../../utils.js';
 
-import build from '../../../lib/buildtypedoc';
+import build from '../../../lib/buildtypedoc.js';
 
 const stubs = vi.hoisted( () => {
 	return {

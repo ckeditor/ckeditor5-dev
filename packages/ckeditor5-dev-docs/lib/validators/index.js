@@ -4,11 +4,11 @@
  */
 
 import { utils } from '@ckeditor/typedoc-plugins';
-import seeValidator from './see-validator';
-import linkValidator from './link-validator';
-import firesValidator from './fires-validator';
-import moduleValidator from './module-validator';
-import overloadsValidator from './overloads-validator';
+import seeValidator from './see-validator/index.js';
+import linkValidator from './link-validator/index.js';
+import firesValidator from './fires-validator/index.js';
+import moduleValidator from './module-validator/index.js';
+import overloadsValidator from './overloads-validator/index.js';
 
 /**
  * Validates the CKEditor 5 documentation.

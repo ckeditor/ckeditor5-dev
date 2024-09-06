@@ -7,7 +7,7 @@ import glob from 'fast-glob';
 import TypeDoc from 'typedoc';
 import { plugins } from '@ckeditor/typedoc-plugins';
 
-import validators from './validators';
+import validators from './validators/index.js';
 
 /**
  * Builds CKEditor 5 documentation using `typedoc`.
