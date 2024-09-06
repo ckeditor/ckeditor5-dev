@@ -29,7 +29,7 @@ export function registerAbortController() {
  *
  * @param {AbortController} abortController
  */
-export function deregisterAbortController( abortController ) {
+export function deregisterAbortController( abortController = undefined ) {
 	if ( !abortController || !abortController._listener ) {
 		return;
 	}
