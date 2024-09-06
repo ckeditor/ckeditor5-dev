@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import testUtils from '../../utils.js';
+import testUtils from '../../_utils.js';
 
 import build from '../../../lib/buildtypedoc.js';
 
