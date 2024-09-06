@@ -6,7 +6,7 @@
 import upath from 'upath';
 import { glob } from 'glob';
 import fs from 'fs-extra';
-import { checkVersionAvailability } from '../utils/checkversionavailability';
+import checkVersionAvailability from '../utils/checkversionavailability';
 
 /**
  * Npm sometimes throws incorrect error 409 while publishing, while the package uploads correctly.
