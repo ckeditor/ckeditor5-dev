@@ -13,9 +13,9 @@ export default async function build( config ) {
 	const type = config.type || 'jsdoc';
 
 	if ( type === 'jsdoc' ) {
-		return ( await import( './buildjsdoc' ) ).default( config );
+		return ( await import( './buildjsdoc.js' ) ).default( config );
 	} else if ( type === 'typedoc' ) {
-		return ( await import( './buildtypedoc' ) ).default( config );
+		return ( await import( './buildtypedoc.js' ) ).default( config );
 	} else {
 		throw new Error( `Unknown documentation tool (${ type }).` );
 	}
