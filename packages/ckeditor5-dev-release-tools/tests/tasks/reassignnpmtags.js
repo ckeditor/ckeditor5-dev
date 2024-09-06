@@ -5,200 +5,198 @@
 
 'use strict';
 
-const { expect } = require( 'chai' );
-const mockery = require( 'mockery' );
-const sinon = require( 'sinon' );
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import columns from 'cli-columns';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import shellEscape from 'shell-escape';
+import assertNpmAuthorization from '../../lib/utils/assertnpmauthorization';
+import reassignNpmTags from '../../lib/tasks/reassignnpmtags';
+
+const stubs = vi.hoisted( () => {
+	const values = {
+		spinner: {
+			start: vi.fn(),
+			increase: vi.fn(),
+			finish: vi.fn()
+		},
+		exec: vi.fn(),
+		chalk: {
+			bold: vi.fn( () => stubs.chalk ),
+			green: vi.fn( input => input ),
+			yellow: vi.fn( input => input ),
+			red: vi.fn( input => input )
+		}
+	};
+
+	// To make `chalk.bold.yellow.red()` working.
+	for ( const rootKey of Object.keys( values.chalk ) ) {
+		for ( const nestedKey of Object.keys( values.chalk ) ) {
+			values.chalk[ rootKey ][ nestedKey ] = values.chalk[ nestedKey ];
+		}
+	}
+
+	return values;
+} );
+
+vi.stubGlobal( 'console', {
+	log: vi.fn(),
+	warn: vi.fn(),
+	error: vi.fn()
+} );
+
+vi.mock( '@ckeditor/ckeditor5-dev-utils', () => ( {
+	tools: {
+		createSpinner: vi.fn( () => stubs.spinner )
+	}
+} ) );
+vi.mock( 'util', () => ( {
+	default: {
+		promisify: vi.fn( () => stubs.exec )
+	}
+} ) );
+vi.mock( 'shell-escape' );
+vi.mock( 'cli-columns' );
+vi.mock( 'chalk', () => ( {
+	default: stubs.chalk
+} ) );
+vi.mock( 'shell-escape' );
+vi.mock( '../../lib/utils/assertnpmauthorization' );
 
 describe( 'reassignNpmTags()', () => {
-	let stubs, reassignNpmTags;
-
 	beforeEach( () => {
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
-		} );
-
-		stubs = {
-			tools: {
-				createSpinner: sinon.stub().callsFake( () => {
-					return stubs.spinner;
-				} )
-			},
-			assertNpmAuthorization: sinon.stub().resolves( true ),
-			spinner: {
-				start: sinon.stub(),
-				increase: sinon.stub(),
-				finish: sinon.stub()
-			},
-			chalk: {
-				get bold() {
-					return stubs.chalk;
-				},
-				green: sinon.stub().callsFake( str => str ),
-				yellow: sinon.stub().callsFake( str => str ),
-				red: sinon.stub().callsFake( str => str )
-			},
-			columns: sinon.stub(),
-			console: {
-				log: sinon.stub( console, 'log' )
-			},
-			util: {
-				promisify: sinon.stub().callsFake( () => stubs.exec )
-			},
-			exec: sinon.stub(),
-			shellEscape: sinon.stub().callsFake( v => v[ 0 ] )
-		};
-
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', { tools: stubs.tools } );
-		mockery.registerMock( '../utils/assertnpmauthorization', stubs.assertNpmAuthorization );
-		mockery.registerMock( 'cli-columns', stubs.columns );
-		mockery.registerMock( 'chalk', stubs.chalk );
-		mockery.registerMock( 'util', stubs.util );
-		mockery.registerMock( 'shell-escape', stubs.shellEscape );
-
-		reassignNpmTags = require( '../../lib/tasks/reassignnpmtags' );
-	} );
-
-	afterEach( () => {
-		mockery.deregisterAll();
-		mockery.disable();
-		sinon.restore();
+		vi.mocked( shellEscape ).mockImplementation( v => v[ 0 ] );
+		vi.mocked( assertNpmAuthorization ).mockResolvedValue( true );
 	} );
 
 	it( 'should throw an error when assertNpmAuthorization throws error', async () => {
-		stubs.assertNpmAuthorization.throws( new Error( 'User not logged in error' ) );
-		const npmDistTagAdd = stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) );
+		vi.mocked( assertNpmAuthorization ).mockRejectedValue(
+			new Error( 'User not logged in error' )
+		);
+		await expect( reassignNpmTags( { npmOwner: 'correct-npm-user', version: '1.0.1', packages: [ 'package1' ] } ) )
+			.rejects.toThrow( 'User not logged in error' );
 
-		try {
-			await reassignNpmTags( { npmOwner: 'correct-npm-user', version: '1.0.1', packages: [ 'package1' ] } );
-			throw new Error( 'Expected to throw' );
-		} catch ( e ) {
-			expect( e.message ).to.equal( 'User not logged in error' );
-		}
-
-		expect( npmDistTagAdd.callCount ).to.equal( 0 );
+		expect( stubs.exec ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should skip updating tags when provided version matches existing version for tag latest', async () => {
-		stubs.columns.returns( 'package1 | package2' );
-		stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) ).throws( new Error( 'is already set to version' ) );
+		vi.mocked( columns ).mockReturnValue( 'package1 | package2' );
+		stubs.exec.mockRejectedValue( new Error( 'is already set to version' ) );
 
 		await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.0', packages: [ 'package1', 'package2' ] } );
 
-		expect( stubs.console.log.firstCall.args[ 0 ] ).to.equal( '⬇️ Packages skipped:' );
-		expect( stubs.console.log.secondCall.args[ 0 ] ).to.deep.equal( 'package1 | package2' );
+		expect( vi.mocked( console ).log ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( console ).log ).toHaveBeenCalledWith( '⬇️ Packages skipped:' );
+		expect( vi.mocked( console ).log ).toHaveBeenCalledWith( 'package1 | package2' );
 	} );
 
 	it( 'should update tags when tag latest for provided version does not yet exist', async () => {
-		const npmDistTagAdd = stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) ).resolves( { stdout: '+latest' } );
+		stubs.exec.mockResolvedValue( { stdout: '+latest' } );
 
 		await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
 
-		expect( npmDistTagAdd.firstCall.args[ 0 ] ).to.equal( 'npm dist-tag add package1@1.0.1 latest' );
-		expect( npmDistTagAdd.secondCall.args[ 0 ] ).to.equal( 'npm dist-tag add package2@1.0.1 latest' );
+		expect( stubs.exec ).toHaveBeenCalledTimes( 2 );
+		expect( stubs.exec ).toHaveBeenCalledWith( 'npm dist-tag add package1@1.0.1 latest' );
+		expect( stubs.exec ).toHaveBeenCalledWith( 'npm dist-tag add package2@1.0.1 latest' );
 	} );
 
 	it( 'should continue updating packages even if first package update fails', async () => {
-		const npmDistTagAdd = stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) );
-		npmDistTagAdd.onFirstCall().throws( new Error( 'Npm error while updating tag.' ) );
+		stubs.exec
+			.mockRejectedValueOnce( new Error( 'is already set to version' ) )
+			.mockResolvedValueOnce( { stdout: '+latest' } );
 
 		await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
 
-		expect( npmDistTagAdd.firstCall.args[ 0 ] ).to.equal( 'npm dist-tag add package1@1.0.1 latest' );
-		expect( npmDistTagAdd.secondCall.args[ 0 ] ).to.equal( 'npm dist-tag add package2@1.0.1 latest' );
+		expect( stubs.exec ).toHaveBeenCalledWith( 'npm dist-tag add package1@1.0.1 latest' );
+		expect( stubs.exec ).toHaveBeenCalledWith( 'npm dist-tag add package2@1.0.1 latest' );
 	} );
 
 	it( 'should escape arguments passed to a shell command', async () => {
-		stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) ).resolves( { stdout: '+latest' } );
+		stubs.exec.mockResolvedValue( { stdout: '+latest' } );
 
 		await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1' ] } );
 
-		expect( stubs.shellEscape.callCount ).to.equal( 2 );
-		expect( stubs.shellEscape.firstCall.firstArg ).to.deep.equal( [ 'package1' ] );
-		expect( stubs.shellEscape.secondCall.firstArg ).to.deep.equal( [ '1.0.1' ] );
+		expect( vi.mocked( shellEscape ) ).toHaveBeenCalledWith( [ 'package1' ] );
+		expect( vi.mocked( shellEscape ) ).toHaveBeenCalledWith( [ '1.0.1' ] );
 	} );
 
 	describe( 'UX', () => {
 		it( 'should create a spinner before starting processing packages', async () => {
 			await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [] } );
 
-			expect( stubs.tools.createSpinner.callCount ).to.equal( 1 );
-			expect( stubs.tools.createSpinner.firstCall.args[ 0 ] ).to.equal( 'Reassigning npm tags...' );
-			expect( stubs.tools.createSpinner.firstCall.args[ 1 ] ).to.be.an( 'object' );
-			expect( stubs.tools.createSpinner.firstCall.args[ 1 ] ).to.have.property( 'total', 0 );
-
-			expect( stubs.spinner.start.callCount ).to.equal( 1 );
+			expect( vi.mocked( tools ).createSpinner ).toHaveBeenCalledExactlyOnceWith(
+				'Reassigning npm tags...',
+				{
+					total: 0
+				}
+			);
+			expect( stubs.spinner.start ).toHaveBeenCalledOnce();
 		} );
 
 		it( 'should increase the spinner counter after successfully processing a package', async () => {
 			await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1' ] } );
 
-			expect( stubs.spinner.increase.callCount ).to.equal( 1 );
+			expect( stubs.spinner.increase ).toHaveBeenCalledTimes( 1 );
 		} );
 
 		it( 'should increase the spinner counter after failure processing a package', async () => {
-			const npmDistTagAdd = stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) );
-			npmDistTagAdd.onFirstCall().throws( new Error( 'Npm error while updating tag.' ) );
+			stubs.exec.mockRejectedValue( new Error( 'is already set to version' ) );
 
 			await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1' ] } );
 
-			expect( stubs.spinner.increase.callCount ).to.equal( 1 );
+			expect( stubs.spinner.increase ).toHaveBeenCalledTimes( 1 );
 		} );
 
 		it( 'should finish the spinner once all packages have been processed', async () => {
-			const npmDistTagAdd = stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) );
-			npmDistTagAdd.onFirstCall().throws( new Error( 'Npm error while updating tag.' ) );
+			stubs.exec
+				.mockRejectedValueOnce( new Error( 'is already set to version' ) )
+				.mockResolvedValueOnce( { stdout: '+latest' } );
 
 			await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
 
-			sinon.assert.callOrder(
-				stubs.spinner.start,
-				stubs.spinner.increase,
-				stubs.spinner.increase,
-				stubs.spinner.finish
-			);
+			expect( stubs.spinner.start ).toHaveBeenCalledTimes( 1 );
+			expect( stubs.spinner.increase ).toHaveBeenCalledTimes( 2 );
+			expect( stubs.spinner.finish ).toHaveBeenCalledTimes( 1 );
+
+			expect( stubs.spinner.start ).toHaveBeenCalledBefore( stubs.spinner.increase );
+			expect( stubs.spinner.start ).toHaveBeenCalledBefore( stubs.spinner.finish );
+			expect( stubs.spinner.increase ).toHaveBeenCalledBefore( stubs.spinner.finish );
 		} );
 
 		it( 'should display skipped packages in a column', async () => {
-			stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) ).throws( new Error( 'is already set to version' ) );
-			stubs.columns.returns( '1 | 2 | 3' );
+			stubs.exec.mockRejectedValue( new Error( 'is already set to version' ) );
+			vi.mocked( columns ).mockReturnValue( '1 | 2 | 3' );
 
 			await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.0', packages: [ 'package1', 'package2' ] } );
 
-			expect( stubs.columns.callCount ).to.equal( 1 );
-			expect( stubs.columns.firstCall.args[ 0 ] ).to.be.an( 'array' );
-			expect( stubs.columns.firstCall.args[ 0 ] ).to.include( 'package1' );
-			expect( stubs.columns.firstCall.args[ 0 ] ).to.include( 'package2' );
-			expect( stubs.console.log.callCount ).to.equal( 2 );
-			expect( stubs.console.log.firstCall.args[ 0 ] ).to.equal( '⬇️ Packages skipped:' );
-			expect( stubs.console.log.secondCall.args[ 0 ] ).to.equal( '1 | 2 | 3' );
+			expect( vi.mocked( columns ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( columns ) ).toHaveBeenCalledWith( [ 'package1', 'package2' ] );
+			expect( vi.mocked( console ).log ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( console ).log ).toHaveBeenCalledWith( '⬇️ Packages skipped:' );
+			expect( vi.mocked( console ).log ).toHaveBeenCalledWith( '1 | 2 | 3' );
 		} );
 
 		it( 'should display processed packages in a column', async () => {
-			stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) ).resolves( { stdout: '+latest' } );
-			stubs.columns.returns( '1 | 2 | 3' );
+			stubs.exec.mockResolvedValue( { stdout: '+latest' } );
+			vi.mocked( columns ).mockReturnValue( '1 | 2 | 3' );
 
 			await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1', 'package2' ] } );
 
-			expect( stubs.columns.callCount ).to.equal( 1 );
-			expect( stubs.columns.firstCall.args[ 0 ] ).to.be.an( 'array' );
-			expect( stubs.columns.firstCall.args[ 0 ] ).to.include( 'package1' );
-			expect( stubs.columns.firstCall.args[ 0 ] ).to.include( 'package2' );
-			expect( stubs.console.log.callCount ).to.equal( 2 );
-			expect( stubs.console.log.firstCall.args[ 0 ] ).to.equal( '✨ Tags updated:' );
-			expect( stubs.console.log.secondCall.args[ 0 ] ).to.equal( '1 | 2 | 3' );
+			expect( vi.mocked( columns ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( columns ) ).toHaveBeenCalledWith( [ 'package1', 'package2' ] );
+			expect( vi.mocked( console ).log ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( console ).log ).toHaveBeenCalledWith( '✨ Tags updated:' );
+			expect( vi.mocked( console ).log ).toHaveBeenCalledWith( '1 | 2 | 3' );
 		} );
 
 		it( 'should display errors found during processing a package', async () => {
-			const npmDistTagAdd = stubs.exec.withArgs( sinon.match( 'npm dist-tag add' ) );
-			npmDistTagAdd.throws( new Error( 'Npm error while updating tag.' ) );
+			stubs.exec.mockRejectedValue( new Error( 'Npm error while updating tag.' ) );
 
 			await reassignNpmTags( { npmOwner: 'authorized-user', version: '1.0.1', packages: [ 'package1' ] } );
 
-			expect( stubs.console.log.callCount ).to.equal( 2 );
-			expect( stubs.console.log.firstCall.args[ 0 ] ).to.equal( '🐛 Errors found:' );
-			expect( stubs.console.log.secondCall.args[ 0 ] ).to.equal( '* Npm error while updating tag.' );
+			expect( vi.mocked( console ).log ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( console ).log ).toHaveBeenCalledWith( '🐛 Errors found:' );
+			expect( vi.mocked( console ).log ).toHaveBeenCalledWith( '* Npm error while updating tag.' );
 		} );
 	} );
 } );

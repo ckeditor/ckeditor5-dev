@@ -7,7 +7,11 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig( {
 	test: {
+		setupFiles: [
+			'./tests/_utils/testsetup.js'
+		],
 		testTimeout: 10000,
+		mockReset: true,
 		restoreMocks: true,
 		include: [
 			'tests/**/*.js'

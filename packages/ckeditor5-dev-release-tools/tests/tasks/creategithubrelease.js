@@ -53,8 +53,7 @@ describe( 'createGithubRelease()', () => {
 	it( 'creates new Octokit instance with correct arguments', async () => {
 		await createGithubRelease( options );
 
-		expect( stubs.constructor ).toHaveBeenCalledOnce();
-		expect( stubs.constructor ).toHaveBeenCalledWith( expect.objectContaining( {
+		expect( stubs.constructor ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
 			version: '3.0.0',
 			auth: 'token abc123'
 		} ) );
@@ -71,8 +70,7 @@ describe( 'createGithubRelease()', () => {
 
 		const createReleaseMock = stubs.createRelease;
 
-		expect( createReleaseMock ).toHaveBeenCalledOnce();
-		expect( createReleaseMock ).toHaveBeenCalledWith( expect.objectContaining( {
+		expect( createReleaseMock ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
 			tag_name: 'v1.3.5',
 			owner: 'ckeditor',
 			repo: 'ckeditor5-dev',
@@ -87,8 +85,7 @@ describe( 'createGithubRelease()', () => {
 
 		const createReleaseMock = stubs.createRelease;
 
-		expect( createReleaseMock ).toHaveBeenCalledOnce();
-		expect( createReleaseMock ).toHaveBeenCalledWith( expect.objectContaining( {
+		expect( createReleaseMock ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
 			tag_name: 'v1.3.5-alpha.0',
 			owner: 'ckeditor',
 			repo: 'ckeditor5-dev',

@@ -117,8 +117,7 @@ describe( 'prepareRepository()', () => {
 
 			await prepareRepository( options );
 
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledOnce();
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledExactlyOnceWith(
 				'current/working/dir/release/ckeditor5/package.json',
 				expect.objectContaining( {
 					name: 'ckeditor5',
@@ -141,8 +140,7 @@ describe( 'prepareRepository()', () => {
 
 			await prepareRepository( options );
 
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledOnce();
-			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs ).writeJson ).toHaveBeenCalledExactlyOnceWith(
 				'current/working/dir/release/ckeditor5-example/package.json',
 				expect.any( Object ),
 				expect.any( Object )

@@ -50,8 +50,7 @@ describe( 'push()', () => {
 
 		await push( options );
 
-		expect( vi.mocked( tools.shExec ) ).toHaveBeenCalledOnce();
-		expect( vi.mocked( tools.shExec ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( tools.shExec ) ).toHaveBeenCalledExactlyOnceWith(
 			'git push origin release v1.3.5',
 			{
 				cwd: 'current/working/dir',

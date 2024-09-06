@@ -51,8 +51,7 @@ describe( 'cleanUpPackages()', () => {
 				cwd: '/work/another/project'
 			} );
 
-			expect( stubs.glob ).toHaveBeenCalledOnce();
-			expect( stubs.glob ).toHaveBeenCalledWith( expect.any( String ), expect.objectContaining( {
+			expect( stubs.glob ).toHaveBeenCalledExactlyOnceWith( expect.any( String ), expect.objectContaining( {
 				cwd: '/work/another/project/release'
 			} ) );
 		} );
@@ -64,8 +63,7 @@ describe( 'cleanUpPackages()', () => {
 				packagesDirectory: 'release'
 			} );
 
-			expect( stubs.glob ).toHaveBeenCalledOnce();
-			expect( stubs.glob ).toHaveBeenCalledWith( expect.any( String ), expect.objectContaining( {
+			expect( stubs.glob ).toHaveBeenCalledExactlyOnceWith( expect.any( String ), expect.objectContaining( {
 				cwd: '/work/project/release'
 			} ) );
 		} );
@@ -75,8 +73,7 @@ describe( 'cleanUpPackages()', () => {
 				packagesDirectory: 'release'
 			} );
 
-			expect( stubs.glob ).toHaveBeenCalledOnce();
-			expect( stubs.glob ).toHaveBeenCalledWith( expect.any( String ), expect.objectContaining( {
+			expect( stubs.glob ).toHaveBeenCalledExactlyOnceWith( expect.any( String ), expect.objectContaining( {
 				nodir: true
 			} ) );
 		} );
@@ -86,8 +83,7 @@ describe( 'cleanUpPackages()', () => {
 				packagesDirectory: 'release'
 			} );
 
-			expect( stubs.glob ).toHaveBeenCalledOnce();
-			expect( stubs.glob ).toHaveBeenCalledWith( expect.any( String ), expect.objectContaining( {
+			expect( stubs.glob ).toHaveBeenCalledExactlyOnceWith( expect.any( String ), expect.objectContaining( {
 				absolute: true
 			} ) );
 		} );
@@ -97,8 +93,7 @@ describe( 'cleanUpPackages()', () => {
 				packagesDirectory: 'release'
 			} );
 
-			expect( stubs.glob ).toHaveBeenCalledOnce();
-			expect( stubs.glob ).toHaveBeenCalledWith( '*/package.json', expect.any( Object ) );
+			expect( stubs.glob ).toHaveBeenCalledExactlyOnceWith( '*/package.json', expect.any( Object ) );
 		} );
 	} );
 

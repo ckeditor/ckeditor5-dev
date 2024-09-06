@@ -48,8 +48,7 @@ describe( 'publishPackages()', () => {
 			npmOwner: 'pepe'
 		} );
 
-		expect( vi.mocked( glob ) ).toHaveBeenCalledOnce();
-		expect( vi.mocked( glob ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( glob ) ).toHaveBeenCalledExactlyOnceWith(
 			'*/',
 			expect.objectContaining( {
 				cwd: upath.join( process.cwd(), 'packages' ),
@@ -65,8 +64,7 @@ describe( 'publishPackages()', () => {
 			npmOwner: 'pepe'
 		} );
 
-		expect( vi.mocked( glob ) ).toHaveBeenCalledOnce();
-		expect( vi.mocked( glob ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( glob ) ).toHaveBeenCalledExactlyOnceWith(
 			'*/',
 			expect.objectContaining( {
 				cwd: '/work/project/packages',
@@ -80,8 +78,7 @@ describe( 'publishPackages()', () => {
 			npmOwner: 'pepe'
 		} );
 
-		expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledOnce();
-		expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledWith( 'pepe' );
+		expect( vi.mocked( assertNpmAuthorization ) ).toHaveBeenCalledExactlyOnceWith( 'pepe' );
 	} );
 
 	it( 'should throw if npm authorization assertion failed', async () => {
@@ -106,8 +103,7 @@ describe( 'publishPackages()', () => {
 			npmOwner: 'pepe'
 		} );
 
-		expect( vi.mocked( assertPackages ) ).toHaveBeenCalledOnce();
-		expect( vi.mocked( assertPackages ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( assertPackages ) ).toHaveBeenCalledExactlyOnceWith(
 			[
 				'/work/project/packages/ckeditor5-foo',
 				'/work/project/packages/ckeditor5-bar'
@@ -135,8 +131,7 @@ describe( 'publishPackages()', () => {
 			]
 		} );
 
-		expect( vi.mocked( assertPackages ) ).toHaveBeenCalledOnce();
-		expect( vi.mocked( assertPackages ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( assertPackages ) ).toHaveBeenCalledExactlyOnceWith(
 			[
 				'/work/project/packages/ckeditor5-foo',
 				'/work/project/packages/ckeditor5-bar'
@@ -172,8 +167,7 @@ describe( 'publishPackages()', () => {
 			npmOwner: 'pepe'
 		} );
 
-		expect( vi.mocked( assertFilesToPublish ) ).toHaveBeenCalledOnce();
-		expect( vi.mocked( assertFilesToPublish ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( assertFilesToPublish ) ).toHaveBeenCalledExactlyOnceWith(
 			[
 				'/work/project/packages/ckeditor5-foo',
 				'/work/project/packages/ckeditor5-bar'
@@ -196,8 +190,7 @@ describe( 'publishPackages()', () => {
 			}
 		} );
 
-		expect( vi.mocked( assertFilesToPublish ) ).toHaveBeenCalledOnce();
-		expect( vi.mocked( assertFilesToPublish ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( assertFilesToPublish ) ).toHaveBeenCalledExactlyOnceWith(
 			[
 				'/work/project/packages/ckeditor5-foo',
 				'/work/project/packages/ckeditor5-bar'
@@ -230,8 +223,7 @@ describe( 'publishPackages()', () => {
 			npmOwner: 'pepe'
 		} );
 
-		expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledOnce();
-		expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledExactlyOnceWith(
 			[
 				'/work/project/packages/ckeditor5-foo',
 				'/work/project/packages/ckeditor5-bar'
@@ -252,8 +244,7 @@ describe( 'publishPackages()', () => {
 			npmTag: 'nightly'
 		} );
 
-		expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledOnce();
-		expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( assertNpmTag ) ).toHaveBeenCalledExactlyOnceWith(
 			[
 				'/work/project/packages/ckeditor5-foo',
 				'/work/project/packages/ckeditor5-bar'
@@ -287,8 +278,7 @@ describe( 'publishPackages()', () => {
 			cwd: '/home/cwd'
 		} );
 
-		expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledOnce();
-		expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledWith( {
+		expect( vi.mocked( executeInParallel ) ).toHaveBeenCalledExactlyOnceWith( {
 			packagesDirectory: 'packages',
 			listrTask,
 			taskToExecute: publishPackageOnNpmCallback,
