@@ -3,14 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { utils } = require( '@ckeditor/typedoc-plugins' );
-const seeValidator = require( './see-validator' );
-const linkValidator = require( './link-validator' );
-const firesValidator = require( './fires-validator' );
-const moduleValidator = require( './module-validator' );
-const overloadsValidator = require( './overloads-validator' );
+import { utils } from '@ckeditor/typedoc-plugins';
+import seeValidator from './see-validator';
+import linkValidator from './link-validator';
+import firesValidator from './fires-validator';
+import moduleValidator from './module-validator';
+import overloadsValidator from './overloads-validator';
 
 /**
  * Validates the CKEditor 5 documentation.
@@ -20,7 +18,7 @@ const overloadsValidator = require( './overloads-validator' );
  * @param {TypedocValidator} [options={}] A configuration object.
  * @returns {Boolean}
  */
-module.exports = {
+export default {
 	validate( project, typeDoc, options = {} ) {
 		const validators = [
 			seeValidator,

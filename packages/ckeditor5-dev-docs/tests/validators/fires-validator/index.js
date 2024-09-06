@@ -3,37 +3,37 @@
  * For licensing, see LICENSE.md.
  */
 
-const chai = require( 'chai' );
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
-const testUtils = require( '../../utils' );
+import { describe, it, expect, vi } from 'vitest';
+import testUtils from '../../utils';
 
-const { expect } = chai;
-chai.use( require( 'sinon-chai' ) );
+import build from '../../../lib/buildtypedoc';
+
+const stubs = vi.hoisted( () => {
+	return {
+		onErrorCallback: vi.fn()
+	};
+} );
+
+vi.stubGlobal( 'console', {
+	log: vi.fn(),
+	warn: vi.fn(),
+	error: vi.fn()
+} );
+
+vi.mock( '../../../lib/validators/fires-validator', async () => {
+	const { default: validator } = await vi.importActual( '../../../lib/validators/fires-validator' );
+
+	return {
+		default: project => validator( project, ( ...args ) => stubs.onErrorCallback( ...args ) )
+	};
+} );
 
 describe( 'dev-docs/validators/fires-validator', function() {
-	this.timeout( 10 * 1000 );
-
 	const FIXTURES_PATH = testUtils.normalizePath( __dirname, 'fixtures' );
 	const SOURCE_FILES = testUtils.normalizePath( FIXTURES_PATH, '**', '*.ts' );
 	const TSCONFIG_PATH = testUtils.normalizePath( FIXTURES_PATH, 'tsconfig.json' );
 
-	const onErrorCallback = sinon.stub();
-
-	before( async () => {
-		const validators = proxyquire( '../../../lib/validators', {
-			'./fires-validator': project => {
-				return require( '../../../lib/validators/fires-validator' )( project, onErrorCallback );
-			},
-			'./module-validator': sinon.spy()
-		} );
-
-		const build = proxyquire( '../../../lib/buildtypedoc', {
-			'./validators': validators
-		} );
-
-		const logStub = sinon.stub( console, 'log' );
-
+	it( 'should warn if fired event does not exist', async () => {
 		await build( {
 			type: 'typedoc',
 			cwd: FIXTURES_PATH,
@@ -42,10 +42,6 @@ describe( 'dev-docs/validators/fires-validator', function() {
 			strict: false
 		} );
 
-		logStub.restore();
-	} );
-
-	it( 'should warn if fired event does not exist', () => {
 		const expectedErrors = [
 			{
 				identifier: 'event-non-existing',
@@ -81,13 +77,24 @@ describe( 'dev-docs/validators/fires-validator', function() {
 			}
 		];
 
-		expect( onErrorCallback.callCount ).to.equal( expectedErrors.length );
+		expect( stubs.onErrorCallback ).toHaveBeenCalledTimes( expectedErrors.length );
 
-		for ( const error of expectedErrors ) {
-			expect( onErrorCallback ).to.be.calledWith(
-				`Incorrect event name: "${ error.identifier }" in the @fires tag`,
-				sinon.match( reflection => error.source === testUtils.getSource( reflection ) )
-			);
+		for ( const call of stubs.onErrorCallback.mock.calls ) {
+			expect( call ).toSatisfy( call => {
+				const [ message, reflection ] = call;
+
+				return expectedErrors.some( error => {
+					if ( message !== `Incorrect event name: "${ error.identifier }" in the @fires tag` ) {
+						return false;
+					}
+
+					if ( testUtils.getSource( reflection ) !== error.source ) {
+						return false;
+					}
+
+					return true;
+				} );
+			} );
 		}
 	} );
 } );

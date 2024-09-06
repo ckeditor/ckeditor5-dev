@@ -3,10 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { ReflectionKind } = require( 'typedoc' );
-const { utils } = require( '@ckeditor/typedoc-plugins' );
+import { ReflectionKind } from 'typedoc';
+import { utils } from '@ckeditor/typedoc-plugins';
 
 /**
  * Validates the output produced by TypeDoc.
@@ -16,7 +14,7 @@ const { utils } = require( '@ckeditor/typedoc-plugins' );
  * @param {Object} project Generated output from TypeDoc to validate.
  * @param {Function} onError A callback that is executed when a validation error is detected.
  */
-module.exports = function validate( project, onError ) {
+export default function validate( project, onError ) {
 	const reflections = project
 		.getReflectionsByKind( ReflectionKind.Class | ReflectionKind.CallSignature )
 		.filter( utils.isReflectionValid );
@@ -38,7 +36,7 @@ module.exports = function validate( project, onError ) {
 			}
 		}
 	}
-};
+}
 
 function getIdentifiersFromFiresTag( reflection ) {
 	if ( !reflection.comment ) {

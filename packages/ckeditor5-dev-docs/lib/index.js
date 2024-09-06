@@ -3,10 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const build = require( './build' );
-
-module.exports = {
-	build
-};
+export { default as build } from './build';
