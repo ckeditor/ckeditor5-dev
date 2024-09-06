@@ -5,9 +5,7 @@
 
 /* eslint-env node */
 
-import nodeFetch from 'node-fetch';
-import bots from './data/bots.json';
-import members from './data/members.json';
+import { bots, members } from './data/index';
 
 const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
 
@@ -194,7 +192,7 @@ function getCommitDetails( triggeringCommitUrl, githubToken ) {
 		}
 	};
 
-	return nodeFetch( apiGithubUrlCommit, options )
+	return fetch( apiGithubUrlCommit, options )
 		.then( response => response.json() )
 		.then( json => ( {
 			githubAccount: json.author ? json.author.login : null,

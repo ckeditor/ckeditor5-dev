@@ -3,15 +3,19 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, it, vi } from 'vitest';
-import nodeFetch from 'node-fetch';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import triggerCircleBuild from '../lib/trigger-circle-build';
 
-vi.mock( 'node-fetch' );
-
 describe( 'lib/triggerCircleBuild', () => {
+	let fetchMock;
+
+	beforeEach( () => {
+		fetchMock = vi.fn();
+		vi.stubGlobal( 'fetch', fetchMock );
+	} );
+
 	it( 'should send a POST request to the CircleCI service', async () => {
-		vi.mocked( nodeFetch ).mockResolvedValue( {
+		vi.mocked( fetchMock ).mockResolvedValue( {
 			json: () => Promise.resolve( {
 				error_message: null
 			} )
@@ -24,8 +28,8 @@ describe( 'lib/triggerCircleBuild', () => {
 			repositorySlug: 'ckeditor/ckeditor5-dev'
 		} );
 
-		expect( vi.mocked( nodeFetch ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( nodeFetch ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledWith(
 			'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-dev/pipeline',
 			{
 				method: 'post',
@@ -45,7 +49,7 @@ describe( 'lib/triggerCircleBuild', () => {
 	} );
 
 	it( 'should include the "isRelease=true" parameter when passing the `releaseBranch` option (the same release branch)', async () => {
-		vi.mocked( nodeFetch ).mockResolvedValue( {
+		vi.mocked( fetchMock ).mockResolvedValue( {
 			json: () => Promise.resolve( {
 				error_message: null
 			} )
@@ -59,8 +63,8 @@ describe( 'lib/triggerCircleBuild', () => {
 			releaseBranch: 'master'
 		} );
 
-		expect( vi.mocked( nodeFetch ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( nodeFetch ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledWith(
 			'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-dev/pipeline',
 			{
 				method: 'post',
@@ -81,7 +85,7 @@ describe( 'lib/triggerCircleBuild', () => {
 	} );
 
 	it( 'should include the "isRelease=false" parameter when passing the `releaseBranch` option', async () => {
-		vi.mocked( nodeFetch ).mockResolvedValue( {
+		vi.mocked( fetchMock ).mockResolvedValue( {
 			json: () => Promise.resolve( {
 				error_message: null
 			} )
@@ -95,8 +99,8 @@ describe( 'lib/triggerCircleBuild', () => {
 			releaseBranch: 'release'
 		} );
 
-		expect( vi.mocked( nodeFetch ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( nodeFetch ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledWith(
 			'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-dev/pipeline',
 			{
 				method: 'post',
@@ -117,7 +121,7 @@ describe( 'lib/triggerCircleBuild', () => {
 	} );
 
 	it( 'should include the "triggerRepositorySlug" parameter when passing the `releaseBranch` option', async () => {
-		vi.mocked( nodeFetch ).mockResolvedValue( {
+		vi.mocked( fetchMock ).mockResolvedValue( {
 			json: () => Promise.resolve( {
 				error_message: null
 			} )
@@ -131,8 +135,8 @@ describe( 'lib/triggerCircleBuild', () => {
 			triggerRepositorySlug: 'ckeditor/ckeditor5'
 		} );
 
-		expect( vi.mocked( nodeFetch ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( nodeFetch ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledWith(
 			'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-dev/pipeline',
 			{
 				method: 'post',
@@ -153,7 +157,7 @@ describe( 'lib/triggerCircleBuild', () => {
 	} );
 
 	it( 'should reject a promise when CircleCI responds with an error containing error_message property', async () => {
-		vi.mocked( nodeFetch ).mockResolvedValue( {
+		vi.mocked( fetchMock ).mockResolvedValue( {
 			json: () => Promise.resolve( {
 				error_message: 'HTTP 404'
 			} )
@@ -176,7 +180,7 @@ describe( 'lib/triggerCircleBuild', () => {
 	} );
 
 	it( 'should reject a promise when CircleCI responds with an error containing message property', async () => {
-		vi.mocked( nodeFetch ).mockResolvedValue( {
+		vi.mocked( fetchMock ).mockResolvedValue( {
 			json: () => Promise.resolve( {
 				message: 'HTTP 404'
 			} )

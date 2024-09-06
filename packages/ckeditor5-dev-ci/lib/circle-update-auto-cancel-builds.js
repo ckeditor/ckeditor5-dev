@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-import nodeFetch from 'node-fetch';
-
 /**
  * @param options
  * @param {String} options.circleToken
@@ -36,6 +34,6 @@ export default async function circleUpdateAutoCancelBuilds( options ) {
 
 	const settingsUpdateUrl = `https://circleci.com/api/v2/project/github/${ githubOrganization }/${ githubRepository }/settings`;
 
-	return nodeFetch( settingsUpdateUrl, circleRequestOptions )
+	return fetch( settingsUpdateUrl, circleRequestOptions )
 		.then( r => r.json() );
 }

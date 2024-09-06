@@ -5,8 +5,6 @@
 
 /* eslint-env node */
 
-import nodeFetch from 'node-fetch';
-
 /**
  * @param options
  * @param {String} options.circleToken
@@ -51,7 +49,7 @@ export default async function triggerCircleBuild( options ) {
 		body: JSON.stringify( { branch, parameters } )
 	};
 
-	return nodeFetch( requestUrl, requestOptions )
+	return fetch( requestUrl, requestOptions )
 		.then( res => res.json() )
 		.then( response => {
 			if ( response.error_message ) {

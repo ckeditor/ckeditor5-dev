@@ -36,7 +36,6 @@
   "dependencies": {
     "@octokit/rest": "^19.0.0",
     "minimist": "^1.2.8",
-    "node-fetch": "^2.6.7",
     "slack-notify": "^2.0.6"
   },
   "devDependencies": {

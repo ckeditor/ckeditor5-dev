@@ -5,26 +5,36 @@
 
 /* eslint-env node */
 
-import { describe, expect, it, vi } from 'vitest';
-import nodeFetch from 'node-fetch';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+
 import formatMessage from '../lib/format-message';
 
-vi.mock( 'node-fetch' );
-
-vi.mock( './data/members.json', () => {
+vi.mock( '../lib/data', () => {
 	return {
-		ExampleNick: 'slackId'
+		members: {
+			ExampleNick: 'slackId'
+		},
+		bots: [
+			'CKCSBot'
+		]
 	};
 } );
 
 describe( 'lib/format-message', () => {
 	describe( 'formatMessage()', () => {
+		let fetchMock;
+
+		beforeEach( () => {
+			fetchMock = vi.fn();
+			vi.stubGlobal( 'fetch', fetchMock );
+		} );
+
 		it( 'should be a function', () => {
 			expect( formatMessage ).toBeInstanceOf( Function );
 		} );
 
 		it( 'should display a message for bot if a login is included in the "bots" array', async () => {
-			vi.mocked( nodeFetch ).mockResolvedValueOnce( {
+			vi.mocked( fetchMock ).mockResolvedValueOnce( {
 				json() {
 					return Promise.resolve( {
 						author: {
@@ -63,7 +73,7 @@ describe( 'lib/format-message', () => {
 		} );
 
 		it( 'should display a message for bot if a login is unavailable but author name is included in the "bots" array', async () => {
-			vi.mocked( nodeFetch ).mockResolvedValueOnce( {
+			vi.mocked( fetchMock ).mockResolvedValueOnce( {
 				json() {
 					return Promise.resolve( {
 						author: null,
@@ -100,7 +110,7 @@ describe( 'lib/format-message', () => {
 		} );
 
 		it( 'should mention the channel if a login is unavailable and author name is not included in the "bots" array', async () => {
-			vi.mocked( nodeFetch ).mockResolvedValueOnce( {
+			vi.mocked( fetchMock ).mockResolvedValueOnce( {
 				json() {
 					return Promise.resolve( {
 						author: null,
@@ -137,7 +147,7 @@ describe( 'lib/format-message', () => {
 		} );
 
 		it( 'should find a Slack account based on a GitHub account case-insensitive', async () => {
-			vi.mocked( nodeFetch ).mockResolvedValueOnce( {
+			vi.mocked( fetchMock ).mockResolvedValueOnce( {
 				json() {
 					return Promise.resolve( {
 						author: {
@@ -172,7 +182,7 @@ describe( 'lib/format-message', () => {
 
 			expect( message ).to.be.an( 'object' );
 			expect( message ).to.have.property( 'text' );
-			expect( message.text ).toEqual( '<!channel> (Example Nick), could you take a look?' );
+			expect( message.text ).toEqual( '<@slackId>, could you take a look?' );
 		} );
 	} );
 } );

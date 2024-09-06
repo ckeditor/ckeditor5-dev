@@ -7,7 +7,6 @@
 
 /* eslint-env node */
 
-import fetch from 'node-fetch';
 import slackNotify from 'slack-notify';
 import formatMessage from '../lib/format-message';
 
