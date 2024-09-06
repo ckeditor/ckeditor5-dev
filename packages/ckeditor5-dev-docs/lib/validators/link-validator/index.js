@@ -4,7 +4,7 @@
  */
 
 import { ReflectionKind } from 'typedoc';
-import { utils } from '@ckeditor/typedoc-plugins';
+import typedocPlugins from '@ckeditor/typedoc-plugins';
 
 /**
  * Validates the output produced by TypeDoc.
@@ -15,6 +15,7 @@ import { utils } from '@ckeditor/typedoc-plugins';
  * @param {Function} onError A callback that is executed when a validation error is detected.
  */
 export default function validate( project, onError ) {
+	const { utils } = typedocPlugins;
 	const reflections = project.getReflectionsByKind( ReflectionKind.All ).filter( utils.isReflectionValid );
 
 	for ( const reflection of reflections ) {

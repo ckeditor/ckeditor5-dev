@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { utils } from '@ckeditor/typedoc-plugins';
+import typedocPlugins from '@ckeditor/typedoc-plugins';
 import seeValidator from './see-validator/index.js';
 import linkValidator from './link-validator/index.js';
 import firesValidator from './fires-validator/index.js';
@@ -20,6 +20,7 @@ import overloadsValidator from './overloads-validator/index.js';
  */
 export default {
 	validate( project, typeDoc, options = {} ) {
+		const { utils } = typedocPlugins;
 		const validators = [
 			seeValidator,
 			linkValidator,

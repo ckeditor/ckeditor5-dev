@@ -4,7 +4,7 @@
  */
 
 import { ReflectionKind } from 'typedoc';
-import { utils } from '@ckeditor/typedoc-plugins';
+import typedocPlugins from '@ckeditor/typedoc-plugins';
 
 // The `@label` validator is currently not used.
 // See: https://github.com/ckeditor/ckeditor5/issues/13591.
@@ -20,6 +20,7 @@ import { utils } from '@ckeditor/typedoc-plugins';
  * @param {Function} onError A callback that is executed when a validation error is detected.
  */
 export default function validate( project, onError ) {
+	const { utils } = typedocPlugins;
 	const kinds = ReflectionKind.Method | ReflectionKind.Constructor | ReflectionKind.Function;
 	const reflections = project.getReflectionsByKind( kinds ).filter( utils.isReflectionValid );
 

@@ -4,7 +4,7 @@
  */
 
 import { ReflectionKind } from 'typedoc';
-import { utils } from '@ckeditor/typedoc-plugins';
+import typedocPlugins from '@ckeditor/typedoc-plugins';
 
 const AUGMENTATION_MODULE_REGEXP = /[^\\/]+[\\/]src[\\/]augmentation/;
 
@@ -17,6 +17,7 @@ const AUGMENTATION_MODULE_REGEXP = /[^\\/]+[\\/]src[\\/]augmentation/;
  * @param {Function} onError A callback that is executed when a validation error is detected.
  */
 export default function validate( project, onError ) {
+	const { utils } = typedocPlugins;
 	const reflections = project.getReflectionsByKind( ReflectionKind.Module );
 
 	for ( const reflection of reflections ) {

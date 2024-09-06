@@ -5,7 +5,7 @@
 
 import glob from 'fast-glob';
 import TypeDoc from 'typedoc';
-import { plugins } from '@ckeditor/typedoc-plugins';
+import typedocPlugins from '@ckeditor/typedoc-plugins';
 
 import validators from './validators/index.js';
 
@@ -16,6 +16,7 @@ import validators from './validators/index.js';
  * @returns {Promise}
  */
 export default async function build( config ) {
+	const { plugins } = typedocPlugins;
 	const sourceFilePatterns = config.sourceFiles.filter( Boolean );
 	const strictMode = config.strict || false;
 	const extraPlugins = config.extraPlugins || [];
