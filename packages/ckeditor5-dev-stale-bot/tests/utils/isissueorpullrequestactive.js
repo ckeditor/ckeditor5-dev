@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-const expect = require( 'chai' ).expect;
-const isIssueOrPullRequestActive = require( '../../lib/utils/isissueorpullrequestactive' );
+import { describe, it, expect, beforeEach } from 'vitest';
+import isIssueOrPullRequestActive from '../../lib/utils/isissueorpullrequestactive';
 
 describe( 'dev-stale-bot/lib/utils', () => {
 	describe( 'isIssueOrPullRequestActive', () => {
@@ -29,7 +29,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 		} );
 
 		it( 'should be a function', () => {
-			expect( isIssueOrPullRequestActive ).to.be.a( 'function' );
+			expect( isIssueOrPullRequestActive ).toBeInstanceOf( Function );
 		} );
 
 		it( 'should return true for issue created after stale date', () => {
@@ -38,7 +38,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				createdAt: afterStaleDate
 			};
 
-			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).to.be.true;
+			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).toEqual( true );
 		} );
 
 		it( 'should return false for issue created before stale date', () => {
@@ -47,7 +47,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				createdAt: beforeStaleDate
 			};
 
-			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).to.be.false;
+			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).toEqual( false );
 		} );
 
 		it( 'should return true for issue edited after stale date', () => {
@@ -56,7 +56,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				lastEditedAt: afterStaleDate
 			};
 
-			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).to.be.true;
+			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).toEqual( true );
 		} );
 
 		it( 'should return false for issue edited before stale date', () => {
@@ -65,7 +65,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				lastEditedAt: beforeStaleDate
 			};
 
-			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).to.be.false;
+			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).toEqual( false );
 		} );
 
 		it( 'should return true for issue with reaction after stale date', () => {
@@ -74,7 +74,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				lastReactedAt: afterStaleDate
 			};
 
-			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).to.be.true;
+			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).toEqual( true );
 		} );
 
 		it( 'should return false for issue with reaction before stale date', () => {
@@ -83,7 +83,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				lastReactedAt: beforeStaleDate
 			};
 
-			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).to.be.false;
+			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).toEqual( false );
 		} );
 
 		it( 'should return true for issue with activity after stale date', () => {
@@ -95,7 +95,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				]
 			};
 
-			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).to.be.true;
+			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).toEqual( true );
 		} );
 
 		it( 'should return false for issue without activity after stale date', () => {
@@ -107,7 +107,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				]
 			};
 
-			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).to.be.false;
+			expect( isIssueOrPullRequestActive( issue, staleDate, optionsBase ) ).toEqual( false );
 		} );
 
 		it( 'should return true for issue with activity after stale date and its author is not ignored', () => {
@@ -124,7 +124,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				ignoredActivityLogins: [ 'CKEditorBot' ]
 			};
 
-			expect( isIssueOrPullRequestActive( issue, staleDate, options ) ).to.be.true;
+			expect( isIssueOrPullRequestActive( issue, staleDate, options ) ).toEqual( true );
 		} );
 
 		it( 'should return false for issue with activity after stale date but its author is ignored', () => {
@@ -141,7 +141,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				ignoredActivityLogins: [ 'CKEditorBot' ]
 			};
 
-			expect( isIssueOrPullRequestActive( issue, staleDate, options ) ).to.be.false;
+			expect( isIssueOrPullRequestActive( issue, staleDate, options ) ).toEqual( false );
 		} );
 
 		it( 'should return true for issue with activity after stale date and label is not ignored', () => {
@@ -158,7 +158,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				ignoredActivityLabels: [ 'status:stale' ]
 			};
 
-			expect( isIssueOrPullRequestActive( issue, staleDate, options ) ).to.be.true;
+			expect( isIssueOrPullRequestActive( issue, staleDate, options ) ).toEqual( true );
 		} );
 
 		it( 'should return false for issue with activity after stale date but label is ignored', () => {
@@ -175,7 +175,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				ignoredActivityLabels: [ 'status:stale' ]
 			};
 
-			expect( isIssueOrPullRequestActive( issue, staleDate, options ) ).to.be.false;
+			expect( isIssueOrPullRequestActive( issue, staleDate, options ) ).toEqual( false );
 		} );
 	} );
 } );

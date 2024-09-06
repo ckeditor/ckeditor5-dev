@@ -3,13 +3,17 @@
  * For licensing, see LICENSE.md.
  */
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import isIssueOrPullRequestToClose from '../../lib/utils/isissueorpullrequesttoclose';
+import findStaleDate from '../../lib/utils/findstaledate';
+import isIssueOrPullRequestActive from '../../lib/utils/isissueorpullrequestactive';
+
+vi.mock( '../../lib/utils/findstaledate' );
+vi.mock( '../../lib/utils/isissueorpullrequestactive' );
 
 describe( 'dev-stale-bot/lib/utils', () => {
 	describe( 'isIssueOrPullRequestToClose', () => {
-		let isIssueOrPullRequestToClose, staleDate, afterStaleDate, beforeStaleDate, issueBase, optionsBase, stubs;
+		let staleDate, afterStaleDate, beforeStaleDate, issueBase, optionsBase;
 
 		beforeEach( () => {
 			staleDate = '2022-12-01T00:00:00Z';
@@ -22,27 +26,18 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				closeDate: staleDate
 			};
 
-			stubs = {
-				findStaleDate: sinon.stub().returns( staleDate ),
-				isIssueOrPullRequestActive: sinon.stub()
-			};
-
-			isIssueOrPullRequestToClose = proxyquire( '../../lib/utils/isissueorpullrequesttoclose', {
-				'./findstaledate': stubs.findStaleDate,
-				'./isissueorpullrequestactive': stubs.isIssueOrPullRequestActive
-			} );
+			vi.mocked( findStaleDate ).mockReturnValue( staleDate );
 		} );
 
 		it( 'should be a function', () => {
-			expect( isIssueOrPullRequestToClose ).to.be.a( 'function' );
+			expect( isIssueOrPullRequestToClose ).toBeInstanceOf( Function );
 		} );
 
 		it( 'should get the stale date from issue activity', () => {
 			isIssueOrPullRequestToClose( issueBase, optionsBase );
 
-			expect( stubs.findStaleDate.calledOnce ).to.equal( true );
-			expect( stubs.findStaleDate.getCall( 0 ).args[ 0 ] ).to.equal( issueBase );
-			expect( stubs.findStaleDate.getCall( 0 ).args[ 1 ] ).to.equal( optionsBase );
+			expect( vi.mocked( findStaleDate ) ).toHaveBeenCalledOnce();
+			expect( vi.mocked( findStaleDate ) ).toHaveBeenCalledWith( issueBase, optionsBase );
 		} );
 
 		it( 'should not check issue activity if time to close has not passed', () => {
@@ -50,7 +45,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 
 			isIssueOrPullRequestToClose( issueBase, optionsBase );
 
-			expect( stubs.isIssueOrPullRequestActive.called ).to.equal( false );
+			expect( vi.mocked( isIssueOrPullRequestActive ) ).not.toHaveBeenCalled();
 		} );
 
 		it( 'should check issue activity if time to close has passed', () => {
@@ -58,38 +53,36 @@ describe( 'dev-stale-bot/lib/utils', () => {
 
 			isIssueOrPullRequestToClose( issueBase, optionsBase );
 
-			expect( stubs.isIssueOrPullRequestActive.calledOnce ).to.equal( true );
-			expect( stubs.isIssueOrPullRequestActive.getCall( 0 ).args[ 0 ] ).to.equal( issueBase );
-			expect( stubs.isIssueOrPullRequestActive.getCall( 0 ).args[ 1 ] ).to.equal( staleDate );
-			expect( stubs.isIssueOrPullRequestActive.getCall( 0 ).args[ 2 ] ).to.equal( optionsBase );
+			expect( vi.mocked( isIssueOrPullRequestActive ) ).toHaveBeenCalledOnce();
+			expect( vi.mocked( isIssueOrPullRequestActive ) ).toHaveBeenCalledWith( issueBase, staleDate, optionsBase );
 		} );
 
 		it( 'should return true if issue is not active after stale date and time to close has passed', () => {
 			optionsBase.closeDate = afterStaleDate;
-			stubs.isIssueOrPullRequestActive.returns( false );
+			vi.mocked( isIssueOrPullRequestActive ).mockReturnValue( false );
 
-			expect( isIssueOrPullRequestToClose( issueBase, optionsBase ) ).to.be.true;
+			expect( isIssueOrPullRequestToClose( issueBase, optionsBase ) ).toEqual( true );
 		} );
 
 		it( 'should return false if issue is not active after stale date and time to close has not passed', () => {
 			optionsBase.closeDate = beforeStaleDate;
-			stubs.isIssueOrPullRequestActive.returns( false );
+			vi.mocked( isIssueOrPullRequestActive ).mockReturnValue( false );
 
-			expect( isIssueOrPullRequestToClose( issueBase, optionsBase ) ).to.be.false;
+			expect( isIssueOrPullRequestToClose( issueBase, optionsBase ) ).toEqual( false );
 		} );
 
 		it( 'should return false if issue is active after stale date and time to close has passed', () => {
 			optionsBase.closeDate = afterStaleDate;
-			stubs.isIssueOrPullRequestActive.returns( true );
+			vi.mocked( isIssueOrPullRequestActive ).mockReturnValue( true );
 
-			expect( isIssueOrPullRequestToClose( issueBase, optionsBase ) ).to.be.false;
+			expect( isIssueOrPullRequestToClose( issueBase, optionsBase ) ).toEqual( false );
 		} );
 
 		it( 'should return false if issue is active after stale date and time to close has not passed', () => {
 			optionsBase.closeDate = beforeStaleDate;
-			stubs.isIssueOrPullRequestActive.returns( true );
+			vi.mocked( isIssueOrPullRequestActive ).mockReturnValue( true );
 
-			expect( isIssueOrPullRequestToClose( issueBase, optionsBase ) ).to.be.false;
+			expect( isIssueOrPullRequestToClose( issueBase, optionsBase ) ).toEqual( false );
 		} );
 	} );
 } );

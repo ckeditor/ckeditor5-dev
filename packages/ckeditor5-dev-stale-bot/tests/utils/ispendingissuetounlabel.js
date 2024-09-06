@@ -3,13 +3,13 @@
  * For licensing, see LICENSE.md.
  */
 
-const expect = require( 'chai' ).expect;
-const isPendingIssueToUnlabel = require( '../../lib/utils/ispendingissuetounlabel' );
+import { describe, it, expect } from 'vitest';
+import isPendingIssueToUnlabel from '../../lib/utils/ispendingissuetounlabel';
 
 describe( 'dev-stale-bot/lib/utils', () => {
 	describe( 'isPendingIssueToUnlabel', () => {
 		it( 'should be a function', () => {
-			expect( isPendingIssueToUnlabel ).to.be.a( 'function' );
+			expect( isPendingIssueToUnlabel ).toBeInstanceOf( Function );
 		} );
 
 		it( 'should return false if issue does not have any comment', () => {
@@ -17,7 +17,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				lastComment: null
 			};
 
-			expect( isPendingIssueToUnlabel( issue ) ).to.be.false;
+			expect( isPendingIssueToUnlabel( issue ) ).toEqual( false );
 		} );
 
 		it( 'should return false if last comment was created by a team member', () => {
@@ -27,7 +27,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				}
 			};
 
-			expect( isPendingIssueToUnlabel( issue ) ).to.be.false;
+			expect( isPendingIssueToUnlabel( issue ) ).toEqual( false );
 		} );
 
 		it( 'should return true if last comment was created by a community member', () => {
@@ -37,7 +37,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				}
 			};
 
-			expect( isPendingIssueToUnlabel( issue ) ).to.be.true;
+			expect( isPendingIssueToUnlabel( issue ) ).toEqual( true );
 		} );
 	} );
 } );

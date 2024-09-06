@@ -3,9 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const isIssueOrPullRequestActive = require( './isissueorpullrequestactive' );
+import isIssueOrPullRequestActive from './isissueorpullrequestactive';
 
 /**
  * Checks whether issue or pull request should be staled, because it was not active since the defined moment of time.
@@ -14,8 +12,8 @@ const isIssueOrPullRequestActive = require( './isissueorpullrequestactive' );
  * @param {Options} options Configuration options.
  * @returns {Boolean}
  */
-module.exports = function isIssueOrPullRequestToStale( issueOrPullRequest, options ) {
+export default function isIssueOrPullRequestToStale( issueOrPullRequest, options ) {
 	const { staleDate } = options;
 
 	return !isIssueOrPullRequestActive( issueOrPullRequest, staleDate, options );
-};
+}

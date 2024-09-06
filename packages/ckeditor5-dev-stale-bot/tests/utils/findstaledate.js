@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-const expect = require( 'chai' ).expect;
-const findStaleDate = require( '../../lib/utils/findstaledate' );
+import { describe, it, expect, beforeEach } from 'vitest';
+import findStaleDate from '../../lib/utils/findstaledate';
 
 describe( 'dev-stale-bot/lib/utils', () => {
 	describe( 'findStaleDate', () => {
@@ -17,7 +17,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 		} );
 
 		it( 'should be a function', () => {
-			expect( findStaleDate ).to.be.a( 'function' );
+			expect( findStaleDate ).toBeInstanceOf( Function );
 		} );
 
 		it( 'should return date when stale label was set', () => {
@@ -27,7 +27,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				]
 			};
 
-			expect( findStaleDate( issue, optionsBase ) ).to.equal( '2022-12-01T00:00:00Z' );
+			expect( findStaleDate( issue, optionsBase ) ).toEqual( '2022-12-01T00:00:00Z' );
 		} );
 
 		it( 'should return date when stale label was set if issue has multiple different events', () => {
@@ -42,7 +42,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				]
 			};
 
-			expect( findStaleDate( issue, optionsBase ) ).to.equal( '2022-12-01T00:00:00Z' );
+			expect( findStaleDate( issue, optionsBase ) ).toEqual( '2022-12-01T00:00:00Z' );
 		} );
 
 		it( 'should return most recent date when stale label was set if issue has multiple stale label events', () => {
@@ -57,7 +57,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				]
 			};
 
-			expect( findStaleDate( issue, optionsBase ) ).to.equal( '2022-12-06T00:00:00Z' );
+			expect( findStaleDate( issue, optionsBase ) ).toEqual( '2022-12-06T00:00:00Z' );
 		} );
 	} );
 } );

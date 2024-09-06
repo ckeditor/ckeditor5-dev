@@ -3,9 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { isAfter, parseISO } = require( 'date-fns' );
+import { isAfter, parseISO } from 'date-fns';
 
 /**
  * Finds the most recent event date of the stale label assignment to issue or pull request.
@@ -14,7 +12,7 @@ const { isAfter, parseISO } = require( 'date-fns' );
  * @param {Options} options Configuration options.
  * @returns {String}
  */
-module.exports = function findStaleDate( issueOrPullRequest, options ) {
+export default function findStaleDate( issueOrPullRequest, options ) {
 	const { staleLabels } = options;
 
 	return issueOrPullRequest.timelineItems
@@ -27,4 +25,4 @@ module.exports = function findStaleDate( issueOrPullRequest, options ) {
 		} )
 		.find( entry => staleLabels.includes( entry.label ) )
 		.eventDate;
-};
+}

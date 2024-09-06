@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 /**
  * Checks whether pending issue is already stale.
  *
@@ -12,6 +10,6 @@
  * @param {Options} options Configuration options.
  * @returns {Boolean}
  */
-module.exports = function isPendingIssueStale( pendingIssue, options ) {
+export default function isPendingIssueStale( pendingIssue, options ) {
 	return options.staleLabels.every( staleLabel => pendingIssue.labels.includes( staleLabel ) );
-};
+}

@@ -3,48 +3,84 @@
  * For licensing, see LICENSE.md.
  */
 
-const upath = require( 'upath' );
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
+import upath from 'upath';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import prepareSearchQuery from '../lib/utils/preparesearchquery';
+import isIssueOrPullRequestToStale from '../lib/utils/isissueorpullrequesttostale';
+import isIssueOrPullRequestToUnstale from '../lib/utils/isissueorpullrequesttounstale';
+import isIssueOrPullRequestToClose from '../lib/utils/isissueorpullrequesttoclose';
+import isPendingIssueToStale from '../lib/utils/ispendingissuetostale';
+import isPendingIssueToUnlabel from '../lib/utils/ispendingissuetounlabel';
+import GitHubRepository from '../lib/githubrepository';
 
-const GRAPHQL_PATH = upath.join( __dirname, '..', 'lib', 'graphql' );
+vi.mock( '../lib/utils/preparesearchquery' );
+vi.mock( '../lib/utils/isissueorpullrequesttostale' );
+vi.mock( '../lib/utils/isissueorpullrequesttounstale' );
+vi.mock( '../lib/utils/isissueorpullrequesttoclose' );
+vi.mock( '../lib/utils/ispendingissuetostale' );
+vi.mock( '../lib/utils/ispendingissuetounlabel' );
+
+const {
+	fsReadFileMock,
+	loggerInfoMock,
+	loggerErrorMock,
+	graphQLClientConstructorSpy,
+	graphQLClientRequestMock
+} = vi.hoisted( () => {
+	return {
+		fsReadFileMock: vi.fn(),
+		loggerInfoMock: vi.fn(),
+		loggerErrorMock: vi.fn(),
+		graphQLClientConstructorSpy: vi.fn(),
+		graphQLClientRequestMock: vi.fn()
+
+	};
+} );
+
+vi.mock( 'fs-extra', () => {
+	return {
+		default: {
+			readFile: fsReadFileMock
+		}
+	};
+} );
+
+vi.mock( '@ckeditor/ckeditor5-dev-utils', () => {
+	return {
+		logger: () => {
+			return {
+				info: loggerInfoMock,
+				error: loggerErrorMock
+			};
+		}
+	};
+} );
+
+vi.mock( 'graphql-request', () => {
+	return {
+		GraphQLClient: class {
+			constructor( ...args ) {
+				graphQLClientConstructorSpy( ...args );
+
+				this.request = graphQLClientRequestMock;
+			}
+		}
+	};
+} );
 
 describe( 'dev-stale-bot/lib', () => {
 	describe( 'GitHubRepository', () => {
-		let githubRepository, pageInfoNoNextPage, pageInfoWithNextPage, stubs, sandbox;
+		let githubRepository, pageInfoNoNextPage, pageInfoWithNextPage;
 
 		beforeEach( () => {
-			sandbox = sinon.createSandbox();
+			vi.mocked( prepareSearchQuery ).mockReturnValue( 'search query' );
+			vi.mocked( isIssueOrPullRequestToStale ).mockReturnValue( true );
+			vi.mocked( isIssueOrPullRequestToUnstale ).mockReturnValue( true );
+			vi.mocked( isIssueOrPullRequestToClose ).mockReturnValue( true );
+			vi.mocked( isPendingIssueToStale ).mockReturnValue( true );
+			vi.mocked( isPendingIssueToUnlabel ).mockReturnValue( true );
 
-			stubs = {
-				fs: {
-					readFile: sinon.stub()
-				},
-				logger: {
-					error: sinon.stub(),
-					info: sinon.stub()
-				},
-				GraphQLClient: {
-					class: class {
-						constructor( ...args ) {
-							stubs.GraphQLClient.constructor( ...args );
-						}
-
-						request( ...args ) {
-							return stubs.GraphQLClient.request( ...args );
-						}
-					},
-					constructor: sinon.stub(),
-					request: sinon.stub()
-				},
-				prepareSearchQuery: sinon.stub().returns( 'search query' ),
-				isIssueOrPullRequestToStale: sinon.stub().returns( true ),
-				isIssueOrPullRequestToUnstale: sinon.stub().returns( true ),
-				isIssueOrPullRequestToClose: sinon.stub().returns( true ),
-				isPendingIssueToStale: sinon.stub().returns( true ),
-				isPendingIssueToUnlabel: sinon.stub().returns( true )
-			};
+			vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {} );
 
 			pageInfoWithNextPage = {
 				hasNextPage: true,
@@ -57,117 +93,113 @@ describe( 'dev-stale-bot/lib', () => {
 			};
 
 			const queries = {
-				getviewerlogin: 'query GetViewerLogin',
-				searchissuesorpullrequests: 'query SearchIssuesOrPullRequests',
-				searchpendingissues: 'query SearchPendingIssues',
-				getissueorpullrequesttimelineitems: 'query GetIssueOrPullRequestTimelineItems',
-				addcomment: 'mutation AddComment',
-				getlabels: 'query GetLabels',
-				addlabels: 'mutation AddLabels',
-				removelabels: 'mutation RemoveLabels',
-				closeissue: 'mutation CloseIssue',
-				closepullrequest: 'mutation ClosePullRequest'
+				'getviewerlogin.graphql': 'query GetViewerLogin',
+				'searchissuesorpullrequests.graphql': 'query SearchIssuesOrPullRequests',
+				'searchpendingissues.graphql': 'query SearchPendingIssues',
+				'getissueorpullrequesttimelineitems.graphql': 'query GetIssueOrPullRequestTimelineItems',
+				'addcomment.graphql': 'mutation AddComment',
+				'getlabels.graphql': 'query GetLabels',
+				'addlabels.graphql': 'mutation AddLabels',
+				'removelabels.graphql': 'mutation RemoveLabels',
+				'closeissue.graphql': 'mutation CloseIssue',
+				'closepullrequest.graphql': 'mutation ClosePullRequest'
 			};
 
-			for ( const [ file, query ] of Object.entries( queries ) ) {
-				const absolutePath = upath.join( GRAPHQL_PATH, `${ file }.graphql` );
-
-				stubs.fs.readFile.withArgs( absolutePath, 'utf-8' ).resolves( query );
-			}
-
-			const GitHubRepository = proxyquire( '../lib/githubrepository', {
-				'fs-extra': stubs.fs,
-				'graphql-request': {
-					GraphQLClient: stubs.GraphQLClient.class
-				},
-				'@ckeditor/ckeditor5-dev-utils': {
-					logger() {
-						return stubs.logger;
-					}
-				},
-				'./utils/preparesearchquery': stubs.prepareSearchQuery,
-				'./utils/isissueorpullrequesttostale': stubs.isIssueOrPullRequestToStale,
-				'./utils/isissueorpullrequesttounstale': stubs.isIssueOrPullRequestToUnstale,
-				'./utils/isissueorpullrequesttoclose': stubs.isIssueOrPullRequestToClose,
-				'./utils/ispendingissuetostale': stubs.isPendingIssueToStale,
-				'./utils/ispendingissuetounlabel': stubs.isPendingIssueToUnlabel
-			} );
+			vi.mocked( fsReadFileMock ).mockImplementation( path => queries[ upath.basename( path ) ] );
 
 			githubRepository = new GitHubRepository( 'authorization-token' );
 		} );
 
-		afterEach( () => {
-			sandbox.restore();
-		} );
-
 		describe( '#constructor()', () => {
 			it( 'should create a new instance of GraphQLClient', () => {
-				expect( stubs.GraphQLClient.constructor.callCount ).to.equal( 1 );
+				expect( graphQLClientConstructorSpy ).toHaveBeenCalledTimes( 1 );
 			} );
 
 			it( 'should pass the API URL to the GraphQLClient instance', () => {
-				expect( stubs.GraphQLClient.constructor.getCall( 0 ).args[ 0 ] ).to.equal( 'https://api.github.com/graphql' );
+				expect( graphQLClientConstructorSpy ).toHaveBeenCalledWith(
+					'https://api.github.com/graphql',
+					expect.any( Object )
+				);
 			} );
 
 			it( 'should pass the authorization token to the GraphQLClient instance', () => {
-				expect( stubs.GraphQLClient.constructor.getCall( 0 ).args[ 1 ] ).to.have.property( 'headers' );
-				expect( stubs.GraphQLClient.constructor.getCall( 0 ).args[ 1 ].headers ).to.have.property(
-					'Authorization',
-					'Bearer authorization-token'
+				expect( graphQLClientConstructorSpy ).toHaveBeenCalledWith(
+					expect.any( String ),
+					expect.objectContaining( {
+						headers: expect.objectContaining( {
+							Authorization: 'Bearer authorization-token'
+						} )
+					} )
 				);
 			} );
 
 			it( 'should pass a proper "Accept" header to the GraphQLClient instance', () => {
-				expect( stubs.GraphQLClient.constructor.getCall( 0 ).args[ 1 ] ).to.have.property( 'headers' );
-				expect( stubs.GraphQLClient.constructor.getCall( 0 ).args[ 1 ].headers ).to.have.property(
-					'Accept',
-					'application/vnd.github.bane-preview+json'
+				expect( graphQLClientConstructorSpy ).toHaveBeenCalledWith(
+					expect.any( String ),
+					expect.objectContaining( {
+						headers: expect.objectContaining( {
+							Accept: 'application/vnd.github.bane-preview+json'
+						} )
+					} )
 				);
 			} );
 
 			it( 'should switch to the new global GitHub ID namespace in the GraphQLClient instance', () => {
-				expect( stubs.GraphQLClient.constructor.getCall( 0 ).args[ 1 ] ).to.have.property( 'headers' );
-				expect( stubs.GraphQLClient.constructor.getCall( 0 ).args[ 1 ].headers ).to.have.property( 'X-Github-Next-Global-ID', 1 );
+				expect( graphQLClientConstructorSpy ).toHaveBeenCalledWith(
+					expect.any( String ),
+					expect.objectContaining( {
+						headers: expect.objectContaining( {
+							'X-Github-Next-Global-ID': 1
+						} )
+					} )
+				);
 			} );
 
 			it( 'should disable the cache in the GraphQLClient instance', () => {
-				expect( stubs.GraphQLClient.constructor.getCall( 0 ).args[ 1 ] ).to.have.property( 'cache', 'no-store' );
+				expect( graphQLClientConstructorSpy ).toHaveBeenCalledWith(
+					expect.any( String ),
+					expect.objectContaining( {
+						cache: 'no-store'
+					} )
+				);
 			} );
 		} );
 
 		describe( '#getViewerLogin()', () => {
 			it( 'should be a function', () => {
-				expect( githubRepository.getViewerLogin ).to.be.a( 'function' );
+				expect( githubRepository.getViewerLogin ).toBeInstanceOf( Function );
 			} );
 
-			it( 'should return viewer login', () => {
-				stubs.GraphQLClient.request.resolves( {
+			it( 'should return viewer login', async () => {
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 					viewer: {
 						login: 'CKEditorBot'
 					}
 				} );
 
-				return githubRepository.getViewerLogin().then( result => {
-					expect( result ).to.equal( 'CKEditorBot' );
-				} );
+				const result = await githubRepository.getViewerLogin();
+
+				expect( result ).toEqual( 'CKEditorBot' );
 			} );
 
-			it( 'should send one request for viewer login', () => {
-				stubs.GraphQLClient.request.resolves( {
+			it( 'should send one request for viewer login', async () => {
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 					viewer: {
 						login: 'CKEditorBot'
 					}
 				} );
 
-				return githubRepository.getViewerLogin().then( () => {
-					expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query GetViewerLogin' );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( {} );
-				} );
+				await githubRepository.getViewerLogin();
+
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 1 );
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledWith(
+					'query GetViewerLogin',
+					{}
+				);
 			} );
 
 			it( 'should reject if request failed', () => {
-				stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( new Error( '500 Internal Server Error' ) );
 
 				return githubRepository.getViewerLogin().then(
 					() => {
@@ -182,18 +214,18 @@ describe( 'dev-stale-bot/lib', () => {
 			it( 'should log an error if request failed', () => {
 				const error = new Error( '500 Internal Server Error' );
 
-				stubs.GraphQLClient.request.rejects( error );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( error );
 
 				return githubRepository.getViewerLogin().then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					() => {
-						expect( stubs.logger.error.callCount ).to.equal( 1 );
-						expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal(
-							'Unexpected error when executing "#getViewerLogin()".'
+						expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledTimes( 1 );
+						expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledWith(
+							'Unexpected error when executing "#getViewerLogin()".',
+							error
 						);
-						expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
 					}
 				);
 			} );
@@ -201,17 +233,17 @@ describe( 'dev-stale-bot/lib', () => {
 
 		describe( '#getIssueOrPullRequestTimelineItems()', () => {
 			it( 'should be a function', () => {
-				expect( githubRepository.getIssueOrPullRequestTimelineItems ).to.be.a( 'function' );
+				expect( githubRepository.getIssueOrPullRequestTimelineItems ).toBeInstanceOf( Function );
 			} );
 
-			it( 'should return all timeline events if they are not paginated', () => {
+			it( 'should return all timeline events if they are not paginated', async () => {
 				const timelineItems = [
 					{ createdAt: '2022-12-01T09:00:00Z' },
 					{ createdAt: '2022-12-02T09:00:00Z' },
 					{ createdAt: '2022-12-03T09:00:00Z' }
 				];
 
-				stubs.GraphQLClient.request.resolves( {
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 					node: {
 						timelineItems: {
 							nodes: timelineItems,
@@ -220,16 +252,16 @@ describe( 'dev-stale-bot/lib', () => {
 					}
 				} );
 
-				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then( result => {
-					expect( result ).to.be.an( 'array' );
-					expect( result ).to.have.length( 3 );
-					expect( result[ 0 ] ).to.deep.equal( { eventDate: '2022-12-01T09:00:00Z' } );
-					expect( result[ 1 ] ).to.deep.equal( { eventDate: '2022-12-02T09:00:00Z' } );
-					expect( result[ 2 ] ).to.deep.equal( { eventDate: '2022-12-03T09:00:00Z' } );
-				} );
+				const result = await githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' );
+
+				expect( result ).toEqual( [
+					{ eventDate: '2022-12-01T09:00:00Z' },
+					{ eventDate: '2022-12-02T09:00:00Z' },
+					{ eventDate: '2022-12-03T09:00:00Z' }
+				] );
 			} );
 
-			it( 'should return all timeline events if they are paginated', () => {
+			it( 'should return all timeline events if they are paginated', async () => {
 				const timelineItems = [
 					{ createdAt: '2022-12-01T09:00:00Z' },
 					{ createdAt: '2022-12-02T09:00:00Z' },
@@ -247,23 +279,23 @@ describe( 'dev-stale-bot/lib', () => {
 					};
 				} );
 
-				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then( result => {
-					expect( result ).to.be.an( 'array' );
-					expect( result ).to.have.length( 3 );
-					expect( result[ 0 ] ).to.deep.equal( { eventDate: '2022-12-01T09:00:00Z' } );
-					expect( result[ 1 ] ).to.deep.equal( { eventDate: '2022-12-02T09:00:00Z' } );
-					expect( result[ 2 ] ).to.deep.equal( { eventDate: '2022-12-03T09:00:00Z' } );
-				} );
+				const result = await githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' );
+
+				expect( result ).toEqual( [
+					{ eventDate: '2022-12-01T09:00:00Z' },
+					{ eventDate: '2022-12-02T09:00:00Z' },
+					{ eventDate: '2022-12-03T09:00:00Z' }
+				] );
 			} );
 
-			it( 'should send one request for all timeline events if they are not paginated', () => {
+			it( 'should send one request for all timeline events if they are not paginated', async () => {
 				const timelineItems = [
 					{ createdAt: '2022-12-01T09:00:00Z' },
 					{ createdAt: '2022-12-02T09:00:00Z' },
 					{ createdAt: '2022-12-03T09:00:00Z' }
 				];
 
-				stubs.GraphQLClient.request.resolves( {
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 					node: {
 						timelineItems: {
 							nodes: timelineItems,
@@ -272,14 +304,16 @@ describe( 'dev-stale-bot/lib', () => {
 					}
 				} );
 
-				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then( () => {
-					expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query GetIssueOrPullRequestTimelineItems' );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( { nodeId: 'IssueId', cursor: null } );
-				} );
+				await githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' );
+
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 1 );
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledWith(
+					'query GetIssueOrPullRequestTimelineItems',
+					{ nodeId: 'IssueId', cursor: null }
+				);
 			} );
 
-			it( 'should send multiple requests for all timeline events if they are paginated', () => {
+			it( 'should send multiple requests for all timeline events if they are paginated', async () => {
 				const timelineItems = [
 					{ createdAt: '2022-12-01T09:00:00Z' },
 					{ createdAt: '2022-12-02T09:00:00Z' },
@@ -297,21 +331,27 @@ describe( 'dev-stale-bot/lib', () => {
 					};
 				} );
 
-				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then( () => {
-					expect( stubs.GraphQLClient.request.callCount ).to.equal( 3 );
+				await githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' );
 
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query GetIssueOrPullRequestTimelineItems' );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( { nodeId: 'IssueId', cursor: null } );
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 3 );
 
-					expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 0 ] ).to.equal( 'query GetIssueOrPullRequestTimelineItems' );
-					expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 1 ] ).to.deep.equal( { nodeId: 'IssueId', cursor: 'cursor' } );
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenNthCalledWith( 1,
+					'query GetIssueOrPullRequestTimelineItems',
+					{ nodeId: 'IssueId', cursor: null }
+				);
 
-					expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 0 ] ).to.equal( 'query GetIssueOrPullRequestTimelineItems' );
-					expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 1 ] ).to.deep.equal( { nodeId: 'IssueId', cursor: 'cursor' } );
-				} );
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenNthCalledWith( 2,
+					'query GetIssueOrPullRequestTimelineItems',
+					{ nodeId: 'IssueId', cursor: 'cursor' }
+				);
+
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenNthCalledWith( 3,
+					'query GetIssueOrPullRequestTimelineItems',
+					{ nodeId: 'IssueId', cursor: 'cursor' }
+				);
 			} );
 
-			it( 'should return event date, event author and label if any of these exist', () => {
+			it( 'should return event date, event author and label if any of these exist', async () => {
 				const timelineItems = [
 					{ createdAt: '2022-12-01T09:00:00Z' },
 					{ updatedAt: '2022-12-02T09:00:00Z' },
@@ -320,7 +360,7 @@ describe( 'dev-stale-bot/lib', () => {
 					{ createdAt: '2022-12-05T09:00:00Z', label: { name: 'type:bug' } }
 				];
 
-				stubs.GraphQLClient.request.resolves( {
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 					node: {
 						timelineItems: {
 							nodes: timelineItems,
@@ -329,19 +369,19 @@ describe( 'dev-stale-bot/lib', () => {
 					}
 				} );
 
-				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then( result => {
-					expect( result ).to.be.an( 'array' );
-					expect( result ).to.have.length( 5 );
-					expect( result[ 0 ] ).to.deep.equal( { eventDate: '2022-12-01T09:00:00Z' } );
-					expect( result[ 1 ] ).to.deep.equal( { eventDate: '2022-12-02T09:00:00Z' } );
-					expect( result[ 2 ] ).to.deep.equal( { eventDate: '2022-12-03T09:00:00Z', author: 'RandomUser' } );
-					expect( result[ 3 ] ).to.deep.equal( { eventDate: '2022-12-04T09:00:00Z', author: 'RandomUser' } );
-					expect( result[ 4 ] ).to.deep.equal( { eventDate: '2022-12-05T09:00:00Z', label: 'type:bug' } );
-				} );
+				const result = await githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' );
+
+				expect( result ).toEqual( [
+					{ eventDate: '2022-12-01T09:00:00Z' },
+					{ eventDate: '2022-12-02T09:00:00Z' },
+					{ eventDate: '2022-12-03T09:00:00Z', author: 'RandomUser' },
+					{ eventDate: '2022-12-04T09:00:00Z', author: 'RandomUser' },
+					{ eventDate: '2022-12-05T09:00:00Z', label: 'type:bug' }
+				] );
 			} );
 
 			it( 'should reject if request failed', () => {
-				stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( new Error( '500 Internal Server Error' ) );
 
 				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then(
 					() => {
@@ -357,7 +397,7 @@ describe( 'dev-stale-bot/lib', () => {
 				const timelineItems = [
 					{ createdAt: '2022-12-01T09:00:00Z' },
 					{ createdAt: '2022-12-02T09:00:00Z' },
-					{ createdAt: '2022-12-03T09:00:00Z' }
+					{ error: new Error( '500 Internal Server Error' ) }
 				];
 
 				paginateRequest( timelineItems, ( { nodes, pageInfo } ) => {
@@ -370,8 +410,6 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					};
 				} );
-
-				stubs.GraphQLClient.request.onCall( 2 ).rejects( new Error( '500 Internal Server Error' ) );
 
 				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then(
 					() => {
@@ -386,18 +424,17 @@ describe( 'dev-stale-bot/lib', () => {
 			it( 'should log an error if request failed', () => {
 				const error = new Error( '500 Internal Server Error' );
 
-				stubs.GraphQLClient.request.rejects( error );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( error );
 
 				return githubRepository.getIssueOrPullRequestTimelineItems( 'IssueId' ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					() => {
-						expect( stubs.logger.error.callCount ).to.equal( 1 );
-						expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal(
-							'Unexpected error when executing "#getIssueOrPullRequestTimelineItems()".'
+						expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledTimes( 1 );
+						expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledWith(
+							'Unexpected error when executing "#getIssueOrPullRequestTimelineItems()".', error
 						);
-						expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
 					}
 				);
 			} );
@@ -407,7 +444,7 @@ describe( 'dev-stale-bot/lib', () => {
 			let onProgress, optionsBase, issueBase;
 
 			beforeEach( () => {
-				onProgress = sinon.stub();
+				onProgress = vi.fn();
 
 				optionsBase = {
 					repositorySlug: 'ckeditor/ckeditor5',
@@ -447,10 +484,10 @@ describe( 'dev-stale-bot/lib', () => {
 
 			describe( '#searchIssuesOrPullRequestsToStale()', () => {
 				it( 'should be a function', () => {
-					expect( githubRepository.searchIssuesOrPullRequestsToStale ).to.be.a( 'function' );
+					expect( githubRepository.searchIssuesOrPullRequestsToStale ).toBeInstanceOf( Function );
 				} );
 
-				it( 'should ask for issue search query', () => {
+				it( 'should ask for issue search query', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -462,7 +499,7 @@ describe( 'dev-stale-bot/lib', () => {
 						ignoredIssueLabels: [ 'support:1', 'support:2', 'support:3' ]
 					};
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: issues.length,
 							nodes: issues,
@@ -470,18 +507,18 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', options, onProgress ).then( () => {
-						expect( stubs.prepareSearchQuery.calledOnce ).to.equal( true );
-						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.deep.equal( {
-							type: 'Issue',
-							searchDate: '2022-12-01',
-							repositorySlug: 'ckeditor/ckeditor5',
-							ignoredLabels: [ 'status:stale', 'support:1', 'support:2', 'support:3' ]
-						} );
+					await githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', options, onProgress );
+
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledTimes( 1 );
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledWith( {
+						type: 'Issue',
+						searchDate: '2022-12-01',
+						repositorySlug: 'ckeditor/ckeditor5',
+						ignoredLabels: [ 'status:stale', 'support:1', 'support:2', 'support:3' ]
 					} );
 				} );
 
-				it( 'should ask for pull request search query', () => {
+				it( 'should ask for pull request search query', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -493,7 +530,7 @@ describe( 'dev-stale-bot/lib', () => {
 						ignoredPullRequestLabels: [ 'support:1', 'support:2', 'support:3' ]
 					};
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: issues.length,
 							nodes: issues,
@@ -501,25 +538,25 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					return githubRepository.searchIssuesOrPullRequestsToStale( 'PullRequest', options, onProgress ).then( () => {
-						expect( stubs.prepareSearchQuery.calledOnce ).to.equal( true );
-						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.deep.equal( {
-							type: 'PullRequest',
-							searchDate: '2022-12-01',
-							repositorySlug: 'ckeditor/ckeditor5',
-							ignoredLabels: [ 'status:stale', 'support:1', 'support:2', 'support:3' ]
-						} );
+					await githubRepository.searchIssuesOrPullRequestsToStale( 'PullRequest', options, onProgress );
+
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledTimes( 1 );
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledWith( {
+						type: 'PullRequest',
+						searchDate: '2022-12-01',
+						repositorySlug: 'ckeditor/ckeditor5',
+						ignoredLabels: [ 'status:stale', 'support:1', 'support:2', 'support:3' ]
 					} );
 				} );
 
-				it( 'should start the search from stale date if search date is not set', () => {
+				it( 'should start the search from stale date if search date is not set', async () => {
 					const options = {
 						...optionsBase,
 						searchDate: undefined,
 						staleDate: '2023-01-01'
 					};
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: 0,
 							nodes: [],
@@ -527,20 +564,22 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', options, onProgress ).then( () => {
-						expect( stubs.prepareSearchQuery.calledOnce ).to.equal( true );
-						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.have.property( 'searchDate', '2023-01-01' );
-					} );
+					await githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', options, onProgress );
+
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledTimes( 1 );
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledWith(
+						expect.objectContaining( { 'searchDate': '2023-01-01' } )
+					);
 				} );
 
-				it( 'should return all issues to stale if they are not paginated', () => {
+				it( 'should return all issues to stale if they are not paginated', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
 						{ ...issueBase, number: 3 }
 					];
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: issues.length,
 							nodes: issues,
@@ -548,22 +587,16 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( result => {
-						expect( result ).to.be.an( 'array' );
-						expect( result ).to.have.length( 3 );
-						expect( result[ 0 ] ).to.deep.equal(
-							{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
-						);
-						expect( result[ 1 ] ).to.deep.equal(
-							{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
-						);
-						expect( result[ 2 ] ).to.deep.equal(
-							{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
-						);
-					} );
+					const result = await githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress );
+
+					expect( result ).toEqual( [
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' },
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' },
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
+					] );
 				} );
 
-				it( 'should return all issues to stale if they are paginated', () => {
+				it( 'should return all issues to stale if they are paginated', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -580,29 +613,23 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( result => {
-						expect( result ).to.be.an( 'array' );
-						expect( result ).to.have.length( 3 );
-						expect( result[ 0 ] ).to.deep.equal(
-							{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
-						);
-						expect( result[ 1 ] ).to.deep.equal(
-							{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
-						);
-						expect( result[ 2 ] ).to.deep.equal(
-							{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
-						);
-					} );
+					const result = await githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress );
+
+					expect( result ).toEqual( [
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' },
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' },
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
+					] );
 				} );
 
-				it( 'should send one request for all issues to stale if they are not paginated', () => {
+				it( 'should send one request for all issues to stale if they are not paginated', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
 						{ ...issueBase, number: 3 }
 					];
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: issues.length,
 							nodes: issues,
@@ -610,16 +637,15 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( () => {
-						expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
-						expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
-						expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal(
-							{ query: 'search query', cursor: null }
-						);
-					} );
+					await githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress );
+
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 1 );
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledWith(
+						'query SearchIssuesOrPullRequests', { query: 'search query', cursor: null }
+					);
 				} );
 
-				it( 'should send multiple requests for all issues to stale if they are paginated', () => {
+				it( 'should send multiple requests for all issues to stale if they are paginated', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -636,27 +662,20 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( () => {
-						expect( stubs.GraphQLClient.request.callCount ).to.equal( 3 );
-
-						expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
-						expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal(
-							{ query: 'search query', cursor: null }
-						);
-
-						expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
-						expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 1 ] ).to.deep.equal(
-							{ query: 'search query', cursor: 'cursor' }
-						);
-
-						expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
-						expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 1 ] ).to.deep.equal(
-							{ query: 'search query', cursor: 'cursor' }
-						);
-					} );
+					await githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress );
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 3 );
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenNthCalledWith(
+						1, 'query SearchIssuesOrPullRequests', { query: 'search query', cursor: null }
+					);
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenNthCalledWith(
+						2, 'query SearchIssuesOrPullRequests', { query: 'search query', cursor: 'cursor' }
+					);
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenNthCalledWith(
+						3, 'query SearchIssuesOrPullRequests', { query: 'search query', cursor: 'cursor' }
+					);
 				} );
 
-				it( 'should fetch all timeline events for any issue if they are paginated', () => {
+				it( 'should fetch all timeline events for any issue if they are paginated', async () => {
 					const issues = [
 						{ ...issueBase, number: 1, timelineItems: {
 							nodes: [],
@@ -664,9 +683,9 @@ describe( 'dev-stale-bot/lib', () => {
 						} }
 					];
 
-					sinon.stub( githubRepository, 'getIssueOrPullRequestTimelineItems' ).resolves( [] );
+					githubRepository.getIssueOrPullRequestTimelineItems = vi.fn().mockResolvedValue( [] );
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: issues.length,
 							nodes: issues,
@@ -674,18 +693,15 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( () => {
-						expect( githubRepository.getIssueOrPullRequestTimelineItems.callCount ).to.equal( 1 );
+					await githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress );
 
-						expect( githubRepository.getIssueOrPullRequestTimelineItems.getCall( 0 ).args[ 0 ] ).to.equal( 'IssueId' );
-						expect( githubRepository.getIssueOrPullRequestTimelineItems.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
-							hasNextPage: true,
-							cursor: 'cursor'
-						} );
-					} );
+					expect( vi.mocked( githubRepository.getIssueOrPullRequestTimelineItems ) ).toHaveBeenCalledTimes( 1 );
+					expect( vi.mocked( githubRepository.getIssueOrPullRequestTimelineItems ) ).toHaveBeenCalledWith(
+						'IssueId', { hasNextPage: true, cursor: 'cursor' }
+					);
 				} );
 
-				it( 'should ask for a new search query with new offset if GitHub prevents going to the next page', () => {
+				it( 'should ask for a new search query with new offset if GitHub prevents going to the next page', async () => {
 					const issues = [
 						{ ...issueBase, number: 1, createdAt: '2022-11-01T09:00:00Z' },
 						{ ...issueBase, number: 2, createdAt: '2022-10-01T09:00:00Z' },
@@ -702,15 +718,21 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( () => {
-						expect( stubs.prepareSearchQuery.callCount ).to.equal( 3 );
-						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-12-01' );
-						expect( stubs.prepareSearchQuery.getCall( 1 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-11-01T09:00:00Z' );
-						expect( stubs.prepareSearchQuery.getCall( 2 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-10-01T09:00:00Z' );
-					} );
+					await githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress );
+
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledTimes( 3 );
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenNthCalledWith(
+						1, expect.objectContaining( { searchDate: '2022-12-01' } )
+					);
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenNthCalledWith(
+						2, expect.objectContaining( { searchDate: '2022-11-01T09:00:00Z' } )
+					);
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenNthCalledWith(
+						3, expect.objectContaining( { searchDate: '2022-10-01T09:00:00Z' } )
+					);
 				} );
 
-				it( 'should return all issues to stale if GitHub prevents going to the next page', () => {
+				it( 'should return all issues to stale if GitHub prevents going to the next page', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -727,29 +749,25 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( result => {
-						expect( result ).to.be.an( 'array' );
-						expect( result ).to.have.length( 3 );
-						expect( result[ 0 ] ).to.deep.equal(
-							{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
-						);
-						expect( result[ 1 ] ).to.deep.equal(
-							{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
-						);
-						expect( result[ 2 ] ).to.deep.equal(
-							{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
-						);
-					} );
+					const result = await githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress );
+
+					expect( result ).toBeInstanceOf( Array );
+					expect( result.length ).toEqual( 3 );
+					expect( result ).toEqual( [
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' },
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' },
+						{ id: 'IssueId', title: 'IssueTitle', type: 'Issue', url: 'https://github.com/' }
+					] );
 				} );
 
-				it( 'should check each issue if it is stale', () => {
+				it( 'should check each issue if it is stale', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
 						{ ...issueBase, number: 3 }
 					];
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: issues.length,
 							nodes: issues,
@@ -757,32 +775,33 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					stubs.isIssueOrPullRequestToStale.onCall( 1 ).returns( false );
+					vi.mocked( isIssueOrPullRequestToStale ).mockReturnValueOnce( true );
+					vi.mocked( isIssueOrPullRequestToStale ).mockReturnValueOnce( false );
 
-					return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( result => {
-						const expectedIssue = {
-							...issueBase,
-							lastReactedAt: null,
-							timelineItems: []
-						};
+					const result = await githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress );
 
-						expect( stubs.isIssueOrPullRequestToStale.callCount ).to.equal( 3 );
+					const expectedIssue = {
+						...issueBase,
+						lastReactedAt: null,
+						timelineItems: []
+					};
 
-						expect( stubs.isIssueOrPullRequestToStale.getCall( 0 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 1 } );
-						expect( stubs.isIssueOrPullRequestToStale.getCall( 0 ).args[ 1 ] ).to.deep.equal( optionsBase );
+					expect( vi.mocked( isIssueOrPullRequestToStale ) ).toHaveBeenCalledTimes( 3 );
+					expect( vi.mocked( isIssueOrPullRequestToStale ) ).toHaveBeenNthCalledWith(
+						1, { ...expectedIssue, number: 1 }, optionsBase
+					);
+					expect( vi.mocked( isIssueOrPullRequestToStale ) ).toHaveBeenNthCalledWith(
+						2, { ...expectedIssue, number: 2 }, optionsBase
+					);
+					expect( vi.mocked( isIssueOrPullRequestToStale ) ).toHaveBeenNthCalledWith(
+						3, { ...expectedIssue, number: 3 }, optionsBase
+					);
 
-						expect( stubs.isIssueOrPullRequestToStale.getCall( 1 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 2 } );
-						expect( stubs.isIssueOrPullRequestToStale.getCall( 1 ).args[ 1 ] ).to.deep.equal( optionsBase );
-
-						expect( stubs.isIssueOrPullRequestToStale.getCall( 2 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 3 } );
-						expect( stubs.isIssueOrPullRequestToStale.getCall( 2 ).args[ 1 ] ).to.deep.equal( optionsBase );
-
-						expect( result ).to.be.an( 'array' );
-						expect( result ).to.have.length( 2 );
-					} );
+					expect( result ).toBeInstanceOf( Array );
+					expect( result.length ).toEqual( 2 );
 				} );
 
-				it( 'should call on progress callback', () => {
+				it( 'should call on progress callback', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -799,16 +818,15 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( () => {
-						expect( onProgress.callCount ).to.equal( 3 );
+					await githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress );
 
-						expect( onProgress.getCall( 0 ).args[ 0 ] ).to.deep.equal( { done: 1, total: 3 } );
-						expect( onProgress.getCall( 1 ).args[ 0 ] ).to.deep.equal( { done: 2, total: 3 } );
-						expect( onProgress.getCall( 2 ).args[ 0 ] ).to.deep.equal( { done: 3, total: 3 } );
-					} );
+					expect( vi.mocked( onProgress ) ).toHaveBeenCalledTimes( 3 );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 1, { done: 1, total: 3 } );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 2, { done: 2, total: 3 } );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 3, { done: 3, total: 3 } );
 				} );
 
-				it( 'should count total hits only once using the value from first response', () => {
+				it( 'should count total hits only once using the value from first response', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -825,17 +843,16 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then( () => {
-						expect( onProgress.callCount ).to.equal( 3 );
+					await githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress );
 
-						expect( onProgress.getCall( 0 ).args[ 0 ] ).to.deep.equal( { done: 1, total: 3 } );
-						expect( onProgress.getCall( 1 ).args[ 0 ] ).to.deep.equal( { done: 2, total: 3 } );
-						expect( onProgress.getCall( 2 ).args[ 0 ] ).to.deep.equal( { done: 3, total: 3 } );
-					} );
+					expect( vi.mocked( onProgress ) ).toHaveBeenCalledTimes( 3 );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 1, { done: 1, total: 3 } );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 2, { done: 2, total: 3 } );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 3, { done: 3, total: 3 } );
 				} );
 
 				it( 'should reject if request failed', () => {
-					stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+					vi.mocked( graphQLClientRequestMock ).mockRejectedValue( new Error( '500 Internal Server Error' ) );
 
 					return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then(
 						() => {
@@ -851,7 +868,7 @@ describe( 'dev-stale-bot/lib', () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
-						{ ...issueBase, number: 3 }
+						{ error: new Error( '500 Internal Server Error' ) }
 					];
 
 					paginateRequest( issues, ( { nodes, pageInfo } ) => {
@@ -863,8 +880,6 @@ describe( 'dev-stale-bot/lib', () => {
 							}
 						};
 					} );
-
-					stubs.GraphQLClient.request.onCall( 2 ).rejects( new Error( '500 Internal Server Error' ) );
 
 					return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then(
 						() => {
@@ -879,18 +894,17 @@ describe( 'dev-stale-bot/lib', () => {
 				it( 'should log an error if request failed', () => {
 					const error = new Error( '500 Internal Server Error' );
 
-					stubs.GraphQLClient.request.rejects( error );
+					vi.mocked( graphQLClientRequestMock ).mockRejectedValue( error );
 
 					return githubRepository.searchIssuesOrPullRequestsToStale( 'Issue', optionsBase, onProgress ).then(
 						() => {
 							throw new Error( 'Expected to be rejected.' );
 						},
 						() => {
-							expect( stubs.logger.error.callCount ).to.equal( 1 );
-							expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal(
-								'Unexpected error when executing "#searchIssuesOrPullRequestsToStale()".'
+							expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledTimes( 1 );
+							expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledWith(
+								'Unexpected error when executing "#searchIssuesOrPullRequestsToStale()".', error
 							);
-							expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
 						}
 					);
 				} );
@@ -898,17 +912,17 @@ describe( 'dev-stale-bot/lib', () => {
 
 			describe( '#searchStaleIssuesOrPullRequests()', () => {
 				it( 'should be a function', () => {
-					expect( githubRepository.searchStaleIssuesOrPullRequests ).to.be.a( 'function' );
+					expect( githubRepository.searchStaleIssuesOrPullRequests ).toBeInstanceOf( Function );
 				} );
 
-				it( 'should ask for search query', () => {
+				it( 'should ask for search query', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
 						{ ...issueBase, number: 3 }
 					];
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: issues.length,
 							nodes: issues,
@@ -916,24 +930,24 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
-						expect( stubs.prepareSearchQuery.calledOnce ).to.equal( true );
-						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.deep.equal( {
-							searchDate: undefined,
-							repositorySlug: 'ckeditor/ckeditor5',
-							labels: [ 'status:stale' ]
-						} );
+					await githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress );
+
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledTimes( 1 );
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledWith( {
+						searchDate: undefined,
+						repositorySlug: 'ckeditor/ckeditor5',
+						labels: [ 'status:stale' ]
 					} );
 				} );
 
-				it( 'should not set the initial start date', () => {
+				it( 'should not set the initial start date', async () => {
 					const options = {
 						...optionsBase,
 						searchDate: undefined,
 						staleDate: '2023-01-01'
 					};
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: 0,
 							nodes: [],
@@ -941,20 +955,22 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					return githubRepository.searchStaleIssuesOrPullRequests( options, onProgress ).then( () => {
-						expect( stubs.prepareSearchQuery.calledOnce ).to.equal( true );
-						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.have.property( 'searchDate', undefined );
-					} );
+					await githubRepository.searchStaleIssuesOrPullRequests( options, onProgress );
+
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledTimes( 1 );
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledWith(
+						expect.objectContaining( { 'searchDate': undefined } )
+					);
 				} );
 
-				it( 'should return all stale issues if they are not paginated', () => {
+				it( 'should return all stale issues if they are not paginated', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
 						{ ...issueBase, number: 3 }
 					];
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: issues.length,
 							nodes: issues,
@@ -962,37 +978,23 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( result => {
-						expect( result ).to.have.property( 'issuesOrPullRequestsToClose' );
-						expect( result ).to.have.property( 'issuesOrPullRequestsToUnstale' );
+					const result = await githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress );
 
-						expect( result.issuesOrPullRequestsToClose ).to.be.an( 'array' );
-						expect( result.issuesOrPullRequestsToClose ).to.have.length( 3 );
-						expect( result.issuesOrPullRequestsToClose[ 0 ] ).to.deep.equal(
+					expect( result ).toEqual( {
+						issuesOrPullRequestsToClose: [
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
 							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.issuesOrPullRequestsToClose[ 1 ] ).to.deep.equal(
+						],
+						issuesOrPullRequestsToUnstale: [
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
 							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.issuesOrPullRequestsToClose[ 2 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-
-						expect( result.issuesOrPullRequestsToUnstale ).to.be.an( 'array' );
-						expect( result.issuesOrPullRequestsToUnstale ).to.have.length( 3 );
-						expect( result.issuesOrPullRequestsToUnstale[ 0 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.issuesOrPullRequestsToUnstale[ 1 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.issuesOrPullRequestsToUnstale[ 2 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
+						]
 					} );
 				} );
 
-				it( 'should return all stale issues if they are paginated', () => {
+				it( 'should return all stale issues if they are paginated', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -1009,44 +1011,30 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( result => {
-						expect( result ).to.have.property( 'issuesOrPullRequestsToClose' );
-						expect( result ).to.have.property( 'issuesOrPullRequestsToUnstale' );
+					const result = await githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress );
 
-						expect( result.issuesOrPullRequestsToClose ).to.be.an( 'array' );
-						expect( result.issuesOrPullRequestsToClose ).to.have.length( 3 );
-						expect( result.issuesOrPullRequestsToClose[ 0 ] ).to.deep.equal(
+					expect( result ).toEqual( {
+						issuesOrPullRequestsToClose: [
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
 							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.issuesOrPullRequestsToClose[ 1 ] ).to.deep.equal(
+						],
+						issuesOrPullRequestsToUnstale: [
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
 							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.issuesOrPullRequestsToClose[ 2 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-
-						expect( result.issuesOrPullRequestsToUnstale ).to.be.an( 'array' );
-						expect( result.issuesOrPullRequestsToUnstale ).to.have.length( 3 );
-						expect( result.issuesOrPullRequestsToUnstale[ 0 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.issuesOrPullRequestsToUnstale[ 1 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.issuesOrPullRequestsToUnstale[ 2 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
+						]
 					} );
 				} );
 
-				it( 'should send one request for all stale issues if they are not paginated', () => {
+				it( 'should send one request for all stale issues if they are not paginated', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
 						{ ...issueBase, number: 3 }
 					];
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: issues.length,
 							nodes: issues,
@@ -1054,16 +1042,15 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
-						expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
-						expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
-						expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal(
-							{ query: 'search query', cursor: null }
-						);
-					} );
+					await githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress );
+
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 1 );
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledWith(
+						'query SearchIssuesOrPullRequests', { query: 'search query', cursor: null }
+					);
 				} );
 
-				it( 'should send multiple requests for all stale issues if they are paginated', () => {
+				it( 'should send multiple requests for all stale issues if they are paginated', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -1080,27 +1067,22 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
-						expect( stubs.GraphQLClient.request.callCount ).to.equal( 3 );
+					await githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress );
 
-						expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
-						expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal(
-							{ query: 'search query', cursor: null }
-						);
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 3 );
 
-						expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
-						expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 1 ] ).to.deep.equal(
-							{ query: 'search query', cursor: 'cursor' }
-						);
-
-						expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 0 ] ).to.equal( 'query SearchIssuesOrPullRequests' );
-						expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 1 ] ).to.deep.equal(
-							{ query: 'search query', cursor: 'cursor' }
-						);
-					} );
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenNthCalledWith(
+						1, 'query SearchIssuesOrPullRequests', { query: 'search query', cursor: null }
+					);
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenNthCalledWith(
+						2, 'query SearchIssuesOrPullRequests', { query: 'search query', cursor: 'cursor' }
+					);
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenNthCalledWith(
+						3, 'query SearchIssuesOrPullRequests', { query: 'search query', cursor: 'cursor' }
+					);
 				} );
 
-				it( 'should fetch all timeline events for any issue if they are paginated', () => {
+				it( 'should fetch all timeline events for any issue if they are paginated', async () => {
 					const issues = [
 						{ ...issueBase, number: 1, timelineItems: {
 							nodes: [],
@@ -1108,9 +1090,9 @@ describe( 'dev-stale-bot/lib', () => {
 						} }
 					];
 
-					sinon.stub( githubRepository, 'getIssueOrPullRequestTimelineItems' ).resolves( [] );
+					githubRepository.getIssueOrPullRequestTimelineItems = vi.fn().mockResolvedValue( [] );
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: issues.length,
 							nodes: issues,
@@ -1118,18 +1100,15 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
-						expect( githubRepository.getIssueOrPullRequestTimelineItems.callCount ).to.equal( 1 );
+					await githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress );
 
-						expect( githubRepository.getIssueOrPullRequestTimelineItems.getCall( 0 ).args[ 0 ] ).to.equal( 'IssueId' );
-						expect( githubRepository.getIssueOrPullRequestTimelineItems.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
-							hasNextPage: true,
-							cursor: 'cursor'
-						} );
-					} );
+					expect( vi.mocked( githubRepository.getIssueOrPullRequestTimelineItems ) ).toHaveBeenCalledTimes( 1 );
+					expect( vi.mocked( githubRepository.getIssueOrPullRequestTimelineItems ) ).toHaveBeenCalledWith(
+						'IssueId', { hasNextPage: true, cursor: 'cursor' }
+					);
 				} );
 
-				it( 'should ask for a new search query with new offset if GitHub prevents going to the next page', () => {
+				it( 'should ask for a new search query with new offset if GitHub prevents going to the next page', async () => {
 					const issues = [
 						{ ...issueBase, number: 1, createdAt: '2022-11-01T09:00:00Z' },
 						{ ...issueBase, number: 2, createdAt: '2022-10-01T09:00:00Z' },
@@ -1146,15 +1125,21 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
-						expect( stubs.prepareSearchQuery.callCount ).to.equal( 3 );
-						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.have.property( 'searchDate', undefined );
-						expect( stubs.prepareSearchQuery.getCall( 1 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-11-01T09:00:00Z' );
-						expect( stubs.prepareSearchQuery.getCall( 2 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-10-01T09:00:00Z' );
-					} );
+					await githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress );
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledTimes( 3 );
+
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenNthCalledWith(
+						1, expect.objectContaining( { searchDate: undefined } )
+					);
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenNthCalledWith(
+						2, expect.objectContaining( { searchDate: '2022-11-01T09:00:00Z' } )
+					);
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenNthCalledWith(
+						3, expect.objectContaining( { searchDate: '2022-10-01T09:00:00Z' } )
+					);
 				} );
 
-				it( 'should return all stale issues if GitHub prevents going to the next page', () => {
+				it( 'should return all stale issues if GitHub prevents going to the next page', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -1171,44 +1156,30 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( result => {
-						expect( result ).to.have.property( 'issuesOrPullRequestsToClose' );
-						expect( result ).to.have.property( 'issuesOrPullRequestsToUnstale' );
+					const result = await githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress );
 
-						expect( result.issuesOrPullRequestsToClose ).to.be.an( 'array' );
-						expect( result.issuesOrPullRequestsToClose ).to.have.length( 3 );
-						expect( result.issuesOrPullRequestsToClose[ 0 ] ).to.deep.equal(
+					expect( result ).toEqual( {
+						issuesOrPullRequestsToClose: [
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
 							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.issuesOrPullRequestsToClose[ 1 ] ).to.deep.equal(
+						],
+						issuesOrPullRequestsToUnstale: [
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
 							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.issuesOrPullRequestsToClose[ 2 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-
-						expect( result.issuesOrPullRequestsToUnstale ).to.be.an( 'array' );
-						expect( result.issuesOrPullRequestsToUnstale ).to.have.length( 3 );
-						expect( result.issuesOrPullRequestsToUnstale[ 0 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.issuesOrPullRequestsToUnstale[ 1 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.issuesOrPullRequestsToUnstale[ 2 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
+						]
 					} );
 				} );
 
-				it( 'should check each issue if it should be unstaled or closed', () => {
+				it( 'should check each issue if it should be unstaled or closed', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
 						{ ...issueBase, number: 3 }
 					];
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: issues.length,
 							nodes: issues,
@@ -1216,52 +1187,46 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					stubs.isIssueOrPullRequestToUnstale.onCall( 1 ).returns( false );
-					stubs.isIssueOrPullRequestToClose.onCall( 1 ).returns( false );
+					vi.mocked( isIssueOrPullRequestToUnstale ).mockReturnValueOnce( false );
+					vi.mocked( isIssueOrPullRequestToClose ).mockReturnValueOnce( false );
 
-					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( result => {
-						const expectedIssue = {
-							...issueBase,
-							lastReactedAt: null,
-							timelineItems: []
-						};
+					const result = await githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress );
 
-						expect( stubs.isIssueOrPullRequestToUnstale.callCount ).to.equal( 3 );
+					const expectedIssue = {
+						...issueBase,
+						lastReactedAt: null,
+						timelineItems: []
+					};
 
-						expect( stubs.isIssueOrPullRequestToUnstale.getCall( 0 ).args[ 0 ] ).to.deep.equal(
-							{ ...expectedIssue, number: 1 }
-						);
-						expect( stubs.isIssueOrPullRequestToUnstale.getCall( 0 ).args[ 1 ] ).to.deep.equal( optionsBase );
+					expect( vi.mocked( isIssueOrPullRequestToUnstale ) ).toHaveBeenCalledTimes( 3 );
+					expect( vi.mocked( isIssueOrPullRequestToUnstale ) ).toHaveBeenNthCalledWith(
+						1, { ...expectedIssue, number: 1 }, optionsBase
+					);
+					expect( vi.mocked( isIssueOrPullRequestToUnstale ) ).toHaveBeenNthCalledWith(
+						2, { ...expectedIssue, number: 2 }, optionsBase
+					);
+					expect( vi.mocked( isIssueOrPullRequestToUnstale ) ).toHaveBeenNthCalledWith(
+						3, { ...expectedIssue, number: 3 }, optionsBase
+					);
 
-						expect( stubs.isIssueOrPullRequestToUnstale.getCall( 1 ).args[ 0 ] ).to.deep.equal(
-							{ ...expectedIssue, number: 2 }
-						);
-						expect( stubs.isIssueOrPullRequestToUnstale.getCall( 1 ).args[ 1 ] ).to.deep.equal( optionsBase );
+					expect( vi.mocked( isIssueOrPullRequestToClose ) ).toHaveBeenCalledTimes( 3 );
+					expect( vi.mocked( isIssueOrPullRequestToClose ) ).toHaveBeenNthCalledWith(
+						1, { ...expectedIssue, number: 1 }, optionsBase
+					);
+					expect( vi.mocked( isIssueOrPullRequestToClose ) ).toHaveBeenNthCalledWith(
+						2, { ...expectedIssue, number: 2 }, optionsBase
+					);
+					expect( vi.mocked( isIssueOrPullRequestToClose ) ).toHaveBeenNthCalledWith(
+						3, { ...expectedIssue, number: 3 }, optionsBase
+					);
 
-						expect( stubs.isIssueOrPullRequestToUnstale.getCall( 2 ).args[ 0 ] ).to.deep.equal(
-							{ ...expectedIssue, number: 3 }
-						);
-						expect( stubs.isIssueOrPullRequestToUnstale.getCall( 2 ).args[ 1 ] ).to.deep.equal( optionsBase );
-
-						expect( stubs.isIssueOrPullRequestToClose.callCount ).to.equal( 3 );
-
-						expect( stubs.isIssueOrPullRequestToClose.getCall( 0 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 1 } );
-						expect( stubs.isIssueOrPullRequestToClose.getCall( 0 ).args[ 1 ] ).to.deep.equal( optionsBase );
-
-						expect( stubs.isIssueOrPullRequestToClose.getCall( 1 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 2 } );
-						expect( stubs.isIssueOrPullRequestToClose.getCall( 1 ).args[ 1 ] ).to.deep.equal( optionsBase );
-
-						expect( stubs.isIssueOrPullRequestToClose.getCall( 2 ).args[ 0 ] ).to.deep.equal( { ...expectedIssue, number: 3 } );
-						expect( stubs.isIssueOrPullRequestToClose.getCall( 2 ).args[ 1 ] ).to.deep.equal( optionsBase );
-
-						expect( result.issuesOrPullRequestsToUnstale ).to.be.an( 'array' );
-						expect( result.issuesOrPullRequestsToUnstale ).to.have.length( 2 );
-						expect( result.issuesOrPullRequestsToClose ).to.be.an( 'array' );
-						expect( result.issuesOrPullRequestsToClose ).to.have.length( 2 );
+					expect( result ).toEqual( {
+						issuesOrPullRequestsToUnstale: [ expect.anything(), expect.anything() ],
+						issuesOrPullRequestsToClose: [ expect.anything(), expect.anything() ]
 					} );
 				} );
 
-				it( 'should call on progress callback', () => {
+				it( 'should call on progress callback', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -1278,16 +1243,16 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
-						expect( onProgress.callCount ).to.equal( 3 );
+					await githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress );
 
-						expect( onProgress.getCall( 0 ).args[ 0 ] ).to.deep.equal( { done: 1, total: 3 } );
-						expect( onProgress.getCall( 1 ).args[ 0 ] ).to.deep.equal( { done: 2, total: 3 } );
-						expect( onProgress.getCall( 2 ).args[ 0 ] ).to.deep.equal( { done: 3, total: 3 } );
-					} );
+					expect( vi.mocked( onProgress ) ).toHaveBeenCalledTimes( 3 );
+
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 1, { done: 1, total: 3 } );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 2, { done: 2, total: 3 } );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 3, { done: 3, total: 3 } );
 				} );
 
-				it( 'should count total hits only once using the value from first response', () => {
+				it( 'should count total hits only once using the value from first response', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -1304,17 +1269,17 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then( () => {
-						expect( onProgress.callCount ).to.equal( 3 );
+					await githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress );
 
-						expect( onProgress.getCall( 0 ).args[ 0 ] ).to.deep.equal( { done: 1, total: 3 } );
-						expect( onProgress.getCall( 1 ).args[ 0 ] ).to.deep.equal( { done: 2, total: 3 } );
-						expect( onProgress.getCall( 2 ).args[ 0 ] ).to.deep.equal( { done: 3, total: 3 } );
-					} );
+					expect( vi.mocked( onProgress ) ).toHaveBeenCalledTimes( 3 );
+
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 1, { done: 1, total: 3 } );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 2, { done: 2, total: 3 } );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 3, { done: 3, total: 3 } );
 				} );
 
 				it( 'should reject if request failed', () => {
-					stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+					vi.mocked( graphQLClientRequestMock ).mockRejectedValue( new Error( '500 Internal Server Error' ) );
 
 					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then(
 						() => {
@@ -1330,7 +1295,7 @@ describe( 'dev-stale-bot/lib', () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
-						{ ...issueBase, number: 3 }
+						{ error: new Error( '500 Internal Server Error' ) }
 					];
 
 					paginateRequest( issues, ( { nodes, pageInfo } ) => {
@@ -1342,8 +1307,6 @@ describe( 'dev-stale-bot/lib', () => {
 							}
 						};
 					} );
-
-					stubs.GraphQLClient.request.onCall( 2 ).rejects( new Error( '500 Internal Server Error' ) );
 
 					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then(
 						() => {
@@ -1358,18 +1321,17 @@ describe( 'dev-stale-bot/lib', () => {
 				it( 'should log an error if request failed', () => {
 					const error = new Error( '500 Internal Server Error' );
 
-					stubs.GraphQLClient.request.rejects( error );
+					vi.mocked( graphQLClientRequestMock ).mockRejectedValue( error );
 
 					return githubRepository.searchStaleIssuesOrPullRequests( optionsBase, onProgress ).then(
 						() => {
 							throw new Error( 'Expected to be rejected.' );
 						},
 						() => {
-							expect( stubs.logger.error.callCount ).to.equal( 1 );
-							expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal(
-								'Unexpected error when executing "#searchStaleIssuesOrPullRequests()".'
+							expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledTimes( 1 );
+							expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledWith(
+								'Unexpected error when executing "#searchStaleIssuesOrPullRequests()".', error
 							);
-							expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
 						}
 					);
 				} );
@@ -1383,10 +1345,10 @@ describe( 'dev-stale-bot/lib', () => {
 				} );
 
 				it( 'should be a function', () => {
-					expect( githubRepository.searchPendingIssues ).to.be.a( 'function' );
+					expect( githubRepository.searchPendingIssues ).toBeInstanceOf( Function );
 				} );
 
-				it( 'should ask for search query', () => {
+				it( 'should ask for search query', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -1398,7 +1360,7 @@ describe( 'dev-stale-bot/lib', () => {
 						ignoredIssueLabels: [ 'support:1', 'support:2', 'support:3' ]
 					};
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: issues.length,
 							nodes: issues,
@@ -1406,26 +1368,26 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					return githubRepository.searchPendingIssues( options, onProgress ).then( () => {
-						expect( stubs.prepareSearchQuery.calledOnce ).to.equal( true );
-						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.deep.equal( {
-							type: 'Issue',
-							searchDate: undefined,
-							repositorySlug: 'ckeditor/ckeditor5',
-							labels: [ 'pending:feedback' ],
-							ignoredLabels: [ 'support:1', 'support:2', 'support:3' ]
-						} );
+					await githubRepository.searchPendingIssues( options, onProgress );
+
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledTimes( 1 );
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledWith( {
+						type: 'Issue',
+						searchDate: undefined,
+						repositorySlug: 'ckeditor/ckeditor5',
+						labels: [ 'pending:feedback' ],
+						ignoredLabels: [ 'support:1', 'support:2', 'support:3' ]
 					} );
 				} );
 
-				it( 'should not set the initial start date', () => {
+				it( 'should not set the initial start date', async () => {
 					const options = {
 						...optionsBase,
 						searchDate: undefined,
 						staleDate: '2023-01-01'
 					};
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: 0,
 							nodes: [],
@@ -1433,20 +1395,22 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					return githubRepository.searchPendingIssues( options, onProgress ).then( () => {
-						expect( stubs.prepareSearchQuery.calledOnce ).to.equal( true );
-						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.have.property( 'searchDate', undefined );
-					} );
+					await githubRepository.searchPendingIssues( options, onProgress );
+
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledTimes( 1 );
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledWith(
+						expect.objectContaining( { searchDate: undefined } )
+					);
 				} );
 
-				it( 'should return all pending issues if they are not paginated', () => {
+				it( 'should return all pending issues if they are not paginated', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
 						{ ...issueBase, number: 3 }
 					];
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: issues.length,
 							nodes: issues,
@@ -1454,37 +1418,23 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					return githubRepository.searchPendingIssues( optionsBase, onProgress ).then( result => {
-						expect( result ).to.have.property( 'pendingIssuesToStale' );
-						expect( result ).to.have.property( 'pendingIssuesToUnlabel' );
+					const result = await githubRepository.searchPendingIssues( optionsBase, onProgress );
 
-						expect( result.pendingIssuesToStale ).to.be.an( 'array' );
-						expect( result.pendingIssuesToStale ).to.have.length( 3 );
-						expect( result.pendingIssuesToStale[ 0 ] ).to.deep.equal(
+					expect( result ).toEqual( {
+						pendingIssuesToStale: [
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
 							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.pendingIssuesToStale[ 1 ] ).to.deep.equal(
+						],
+						pendingIssuesToUnlabel: [
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
 							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.pendingIssuesToStale[ 2 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-
-						expect( result.pendingIssuesToUnlabel ).to.be.an( 'array' );
-						expect( result.pendingIssuesToUnlabel ).to.have.length( 3 );
-						expect( result.pendingIssuesToUnlabel[ 0 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.pendingIssuesToUnlabel[ 1 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.pendingIssuesToUnlabel[ 2 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
+						]
 					} );
 				} );
 
-				it( 'should return all pending issues if they are paginated', () => {
+				it( 'should return all pending issues if they are paginated', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -1501,44 +1451,30 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchPendingIssues( optionsBase, onProgress ).then( result => {
-						expect( result ).to.have.property( 'pendingIssuesToStale' );
-						expect( result ).to.have.property( 'pendingIssuesToUnlabel' );
+					const result = await githubRepository.searchPendingIssues( optionsBase, onProgress );
 
-						expect( result.pendingIssuesToStale ).to.be.an( 'array' );
-						expect( result.pendingIssuesToStale ).to.have.length( 3 );
-						expect( result.pendingIssuesToStale[ 0 ] ).to.deep.equal(
+					expect( result ).toEqual( {
+						pendingIssuesToStale: [
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
 							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.pendingIssuesToStale[ 1 ] ).to.deep.equal(
+						],
+						pendingIssuesToUnlabel: [
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
 							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.pendingIssuesToStale[ 2 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-
-						expect( result.pendingIssuesToUnlabel ).to.be.an( 'array' );
-						expect( result.pendingIssuesToUnlabel ).to.have.length( 3 );
-						expect( result.pendingIssuesToUnlabel[ 0 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.pendingIssuesToUnlabel[ 1 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.pendingIssuesToUnlabel[ 2 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
+						]
 					} );
 				} );
 
-				it( 'should send one request for all pending issues if they are not paginated', () => {
+				it( 'should send one request for all pending issues if they are not paginated', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
 						{ ...issueBase, number: 3 }
 					];
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: issues.length,
 							nodes: issues,
@@ -1546,16 +1482,15 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					return githubRepository.searchPendingIssues( optionsBase, onProgress ).then( () => {
-						expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
-						expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query SearchPendingIssues' );
-						expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal(
-							{ query: 'search query', cursor: null }
-						);
-					} );
+					await githubRepository.searchPendingIssues( optionsBase, onProgress );
+
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 1 );
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledWith(
+						'query SearchPendingIssues', { query: 'search query', cursor: null }
+					);
 				} );
 
-				it( 'should send multiple requests for all pending issues if they are paginated', () => {
+				it( 'should send multiple requests for all pending issues if they are paginated', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -1572,27 +1507,21 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchPendingIssues( optionsBase, onProgress ).then( () => {
-						expect( stubs.GraphQLClient.request.callCount ).to.equal( 3 );
+					await githubRepository.searchPendingIssues( optionsBase, onProgress );
 
-						expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query SearchPendingIssues' );
-						expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal(
-							{ query: 'search query', cursor: null }
-						);
-
-						expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 0 ] ).to.equal( 'query SearchPendingIssues' );
-						expect( stubs.GraphQLClient.request.getCall( 1 ).args[ 1 ] ).to.deep.equal(
-							{ query: 'search query', cursor: 'cursor' }
-						);
-
-						expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 0 ] ).to.equal( 'query SearchPendingIssues' );
-						expect( stubs.GraphQLClient.request.getCall( 2 ).args[ 1 ] ).to.deep.equal(
-							{ query: 'search query', cursor: 'cursor' }
-						);
-					} );
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 3 );
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenNthCalledWith(
+						1, 'query SearchPendingIssues', { query: 'search query', cursor: null }
+					);
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenNthCalledWith(
+						2, 'query SearchPendingIssues', { query: 'search query', cursor: 'cursor' }
+					);
+					expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenNthCalledWith(
+						3, 'query SearchPendingIssues', { query: 'search query', cursor: 'cursor' }
+					);
 				} );
 
-				it( 'should ask for a new search query with new offset if GitHub prevents going to the next page', () => {
+				it( 'should ask for a new search query with new offset if GitHub prevents going to the next page', async () => {
 					const issues = [
 						{ ...issueBase, number: 1, createdAt: '2022-11-01T09:00:00Z' },
 						{ ...issueBase, number: 2, createdAt: '2022-10-01T09:00:00Z' },
@@ -1609,15 +1538,21 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchPendingIssues( optionsBase, onProgress ).then( () => {
-						expect( stubs.prepareSearchQuery.callCount ).to.equal( 3 );
-						expect( stubs.prepareSearchQuery.getCall( 0 ).args[ 0 ] ).to.have.property( 'searchDate', undefined );
-						expect( stubs.prepareSearchQuery.getCall( 1 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-11-01T09:00:00Z' );
-						expect( stubs.prepareSearchQuery.getCall( 2 ).args[ 0 ] ).to.have.property( 'searchDate', '2022-10-01T09:00:00Z' );
-					} );
+					await githubRepository.searchPendingIssues( optionsBase, onProgress );
+
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenCalledTimes( 3 );
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenNthCalledWith(
+						1, expect.objectContaining( { searchDate: undefined } )
+					);
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenNthCalledWith(
+						2, expect.objectContaining( { searchDate: '2022-11-01T09:00:00Z' } )
+					);
+					expect( vi.mocked( prepareSearchQuery ) ).toHaveBeenNthCalledWith(
+						3, expect.objectContaining( { searchDate: '2022-10-01T09:00:00Z' } )
+					);
 				} );
 
-				it( 'should return all pending issues if GitHub prevents going to the next page', () => {
+				it( 'should return all pending issues if GitHub prevents going to the next page', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -1634,37 +1569,23 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchPendingIssues( optionsBase, onProgress ).then( result => {
-						expect( result ).to.have.property( 'pendingIssuesToStale' );
-						expect( result ).to.have.property( 'pendingIssuesToUnlabel' );
+					const result = await githubRepository.searchPendingIssues( optionsBase, onProgress );
 
-						expect( result.pendingIssuesToStale ).to.be.an( 'array' );
-						expect( result.pendingIssuesToStale ).to.have.length( 3 );
-						expect( result.pendingIssuesToStale[ 0 ] ).to.deep.equal(
+					expect( result ).toEqual( {
+						pendingIssuesToStale: [
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
 							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.pendingIssuesToStale[ 1 ] ).to.deep.equal(
+						],
+						pendingIssuesToUnlabel: [
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
+							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' },
 							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.pendingIssuesToStale[ 2 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-
-						expect( result.pendingIssuesToUnlabel ).to.be.an( 'array' );
-						expect( result.pendingIssuesToUnlabel ).to.have.length( 3 );
-						expect( result.pendingIssuesToUnlabel[ 0 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.pendingIssuesToUnlabel[ 1 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
-						expect( result.pendingIssuesToUnlabel[ 2 ] ).to.deep.equal(
-							{ id: 'IssueId', type: 'Issue', title: 'IssueTitle', url: 'https://github.com/' }
-						);
+						]
 					} );
 				} );
 
-				it( 'should check each issue if it should be staled or unlabeled', () => {
+				it( 'should check each issue if it should be staled or unlabeled', async () => {
 					const commentMember = {
 						createdAt: '2022-11-30T23:59:59Z',
 						authorAssociation: 'MEMBER'
@@ -1681,7 +1602,7 @@ describe( 'dev-stale-bot/lib', () => {
 						{ ...issueBase, number: 3, comments: { nodes: [ commentNonMember ] } }
 					];
 
-					stubs.GraphQLClient.request.resolves( {
+					vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 						search: {
 							issueCount: issues.length,
 							nodes: issues,
@@ -1689,47 +1610,61 @@ describe( 'dev-stale-bot/lib', () => {
 						}
 					} );
 
-					stubs.isPendingIssueToStale.onCall( 1 ).returns( false );
-					stubs.isPendingIssueToUnlabel.onCall( 1 ).returns( false );
+					vi.mocked( isPendingIssueToStale ).mockReturnValueOnce( false );
+					vi.mocked( isPendingIssueToUnlabel ).mockReturnValueOnce( false );
 
-					return githubRepository.searchPendingIssues( optionsBase, onProgress ).then( result => {
-						expect( stubs.isPendingIssueToStale.callCount ).to.equal( 3 );
+					const result = await githubRepository.searchPendingIssues( optionsBase, onProgress );
 
-						expect( stubs.isPendingIssueToStale.getCall( 0 ).args[ 0 ] ).to.have.deep.property( 'lastComment', {
-							createdAt: '2022-11-30T23:59:59Z', isExternal: false
-						} );
-						expect( stubs.isPendingIssueToStale.getCall( 0 ).args[ 1 ] ).to.deep.equal( optionsBase );
+					expect( vi.mocked( isPendingIssueToStale ) ).toHaveBeenCalledTimes( 3 );
+					expect( vi.mocked( isPendingIssueToStale ) ).toHaveBeenNthCalledWith(
+						1,
+						expect.objectContaining( {
+							lastComment: { createdAt: '2022-11-30T23:59:59Z', isExternal: false }
+						} ),
+						optionsBase
+					);
+					expect( vi.mocked( isPendingIssueToStale ) ).toHaveBeenNthCalledWith(
+						2,
+						expect.objectContaining( {
+							lastComment: { createdAt: '2022-11-30T23:59:59Z', isExternal: false }
+						} ),
+						optionsBase
+					);
+					expect( vi.mocked( isPendingIssueToStale ) ).toHaveBeenNthCalledWith(
+						3,
+						expect.objectContaining( {
+							lastComment: { createdAt: '2022-11-30T23:59:59Z', isExternal: true }
+						} ),
+						optionsBase
+					);
 
-						expect( stubs.isPendingIssueToStale.getCall( 1 ).args[ 0 ] ).to.have.deep.property( 'lastComment', {
-							createdAt: '2022-11-30T23:59:59Z', isExternal: false
-						} );
-						expect( stubs.isPendingIssueToStale.getCall( 1 ).args[ 1 ] ).to.deep.equal( optionsBase );
+					expect( vi.mocked( isPendingIssueToUnlabel ) ).toHaveBeenCalledTimes( 3 );
+					expect( vi.mocked( isPendingIssueToUnlabel ) ).toHaveBeenNthCalledWith(
+						1,
+						expect.objectContaining( {
+							lastComment: { createdAt: '2022-11-30T23:59:59Z', isExternal: false }
+						} )
+					);
+					expect( vi.mocked( isPendingIssueToUnlabel ) ).toHaveBeenNthCalledWith(
+						2,
+						expect.objectContaining( {
+							lastComment: { createdAt: '2022-11-30T23:59:59Z', isExternal: false }
+						} )
+					);
+					expect( vi.mocked( isPendingIssueToUnlabel ) ).toHaveBeenNthCalledWith(
+						3,
+						expect.objectContaining( {
+							lastComment: { createdAt: '2022-11-30T23:59:59Z', isExternal: true }
+						} )
+					);
 
-						expect( stubs.isPendingIssueToStale.getCall( 2 ).args[ 0 ] ).to.have.deep.property( 'lastComment', {
-							createdAt: '2022-11-30T23:59:59Z', isExternal: true
-						} );
-						expect( stubs.isPendingIssueToStale.getCall( 2 ).args[ 1 ] ).to.deep.equal( optionsBase );
-
-						expect( stubs.isPendingIssueToUnlabel.callCount ).to.equal( 3 );
-
-						expect( stubs.isPendingIssueToUnlabel.getCall( 0 ).args[ 0 ] ).to.have.deep.property( 'lastComment', {
-							createdAt: '2022-11-30T23:59:59Z', isExternal: false
-						} );
-						expect( stubs.isPendingIssueToUnlabel.getCall( 1 ).args[ 0 ] ).to.have.deep.property( 'lastComment', {
-							createdAt: '2022-11-30T23:59:59Z', isExternal: false
-						} );
-						expect( stubs.isPendingIssueToUnlabel.getCall( 2 ).args[ 0 ] ).to.have.deep.property( 'lastComment', {
-							createdAt: '2022-11-30T23:59:59Z', isExternal: true
-						} );
-
-						expect( result.pendingIssuesToStale ).to.be.an( 'array' );
-						expect( result.pendingIssuesToStale ).to.have.length( 2 );
-						expect( result.pendingIssuesToUnlabel ).to.be.an( 'array' );
-						expect( result.pendingIssuesToUnlabel ).to.have.length( 2 );
+					expect( result ).toEqual( {
+						pendingIssuesToStale: [ expect.anything(), expect.anything() ],
+						pendingIssuesToUnlabel: [ expect.anything(), expect.anything() ]
 					} );
 				} );
 
-				it( 'should call on progress callback', () => {
+				it( 'should call on progress callback', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -1746,16 +1681,15 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchPendingIssues( optionsBase, onProgress ).then( () => {
-						expect( onProgress.callCount ).to.equal( 3 );
+					await githubRepository.searchPendingIssues( optionsBase, onProgress );
 
-						expect( onProgress.getCall( 0 ).args[ 0 ] ).to.deep.equal( { done: 1, total: 3 } );
-						expect( onProgress.getCall( 1 ).args[ 0 ] ).to.deep.equal( { done: 2, total: 3 } );
-						expect( onProgress.getCall( 2 ).args[ 0 ] ).to.deep.equal( { done: 3, total: 3 } );
-					} );
+					expect( vi.mocked( onProgress ) ).toHaveBeenCalledTimes( 3 );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 1, { done: 1, total: 3 } );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 2, { done: 2, total: 3 } );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 3, { done: 3, total: 3 } );
 				} );
 
-				it( 'should count total hits only once using the value from first response', () => {
+				it( 'should count total hits only once using the value from first response', async () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
@@ -1772,17 +1706,16 @@ describe( 'dev-stale-bot/lib', () => {
 						};
 					} );
 
-					return githubRepository.searchPendingIssues( optionsBase, onProgress ).then( () => {
-						expect( onProgress.callCount ).to.equal( 3 );
+					await githubRepository.searchPendingIssues( optionsBase, onProgress );
 
-						expect( onProgress.getCall( 0 ).args[ 0 ] ).to.deep.equal( { done: 1, total: 3 } );
-						expect( onProgress.getCall( 1 ).args[ 0 ] ).to.deep.equal( { done: 2, total: 3 } );
-						expect( onProgress.getCall( 2 ).args[ 0 ] ).to.deep.equal( { done: 3, total: 3 } );
-					} );
+					expect( vi.mocked( onProgress ) ).toHaveBeenCalledTimes( 3 );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 1, { done: 1, total: 3 } );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 2, { done: 2, total: 3 } );
+					expect( vi.mocked( onProgress ) ).toHaveBeenNthCalledWith( 3, { done: 3, total: 3 } );
 				} );
 
 				it( 'should reject if request failed', () => {
-					stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+					vi.mocked( graphQLClientRequestMock ).mockRejectedValue( new Error( '500 Internal Server Error' ) );
 
 					return githubRepository.searchPendingIssues( optionsBase, onProgress ).then(
 						() => {
@@ -1798,7 +1731,7 @@ describe( 'dev-stale-bot/lib', () => {
 					const issues = [
 						{ ...issueBase, number: 1 },
 						{ ...issueBase, number: 2 },
-						{ ...issueBase, number: 3 }
+						{ error: new Error( '500 Internal Server Error' ) }
 					];
 
 					paginateRequest( issues, ( { nodes, pageInfo } ) => {
@@ -1810,8 +1743,6 @@ describe( 'dev-stale-bot/lib', () => {
 							}
 						};
 					} );
-
-					stubs.GraphQLClient.request.onCall( 2 ).rejects( new Error( '500 Internal Server Error' ) );
 
 					return githubRepository.searchPendingIssues( optionsBase, onProgress ).then(
 						() => {
@@ -1826,18 +1757,17 @@ describe( 'dev-stale-bot/lib', () => {
 				it( 'should log an error if request failed', () => {
 					const error = new Error( '500 Internal Server Error' );
 
-					stubs.GraphQLClient.request.rejects( error );
+					vi.mocked( graphQLClientRequestMock ).mockRejectedValue( error );
 
 					return githubRepository.searchPendingIssues( optionsBase, onProgress ).then(
 						() => {
 							throw new Error( 'Expected to be rejected.' );
 						},
 						() => {
-							expect( stubs.logger.error.callCount ).to.equal( 1 );
-							expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal(
-								'Unexpected error when executing "#searchPendingIssues()".'
+							expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledTimes( 1 );
+							expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledWith(
+								'Unexpected error when executing "#searchPendingIssues()".', error
 							);
-							expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
 						}
 					);
 				} );
@@ -1846,23 +1776,22 @@ describe( 'dev-stale-bot/lib', () => {
 
 		describe( '#addComment()', () => {
 			it( 'should be a function', () => {
-				expect( githubRepository.addComment ).to.be.a( 'function' );
+				expect( githubRepository.addComment ).toBeInstanceOf( Function );
 			} );
 
-			it( 'should add a comment', () => {
-				stubs.GraphQLClient.request.resolves();
+			it( 'should add a comment', async () => {
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValue();
 
-				return githubRepository.addComment( 'IssueId', 'A comment.' ).then( () => {
-					expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'mutation AddComment' );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal(
-						{ nodeId: 'IssueId', comment: 'A comment.' }
-					);
-				} );
+				await githubRepository.addComment( 'IssueId', 'A comment.' );
+
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 1 );
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledWith(
+					'mutation AddComment', { nodeId: 'IssueId', comment: 'A comment.' }
+				);
 			} );
 
 			it( 'should reject if request failed', () => {
-				stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( new Error( '500 Internal Server Error' ) );
 
 				return githubRepository.addComment( 'IssueId', 'A comment.' ).then(
 					() => {
@@ -1877,16 +1806,17 @@ describe( 'dev-stale-bot/lib', () => {
 			it( 'should log an error if request failed', () => {
 				const error = new Error( '500 Internal Server Error' );
 
-				stubs.GraphQLClient.request.rejects( error );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( error );
 
 				return githubRepository.addComment( 'IssueId', 'A comment.' ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					() => {
-						expect( stubs.logger.error.callCount ).to.equal( 1 );
-						expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal( 'Unexpected error when executing "#addComment()".' );
-						expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
+						expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledTimes( 1 );
+						expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledWith(
+							'Unexpected error when executing "#addComment()".', error
+						);
 					}
 				);
 			} );
@@ -1904,18 +1834,17 @@ describe( 'dev-stale-bot/lib', () => {
 			} );
 
 			it( 'should be a function', () => {
-				expect( githubRepository.getLabels ).to.be.a( 'function' );
+				expect( githubRepository.getLabels ).toBeInstanceOf( Function );
 			} );
 
-			it( 'should return an empty array if no labels are provided', () => {
-				return githubRepository.getLabels( 'ckeditor/ckeditor5', [] ).then( result => {
-					expect( result ).to.be.an( 'array' );
-					expect( result ).to.have.length( 0 );
-				} );
+			it( 'should return an empty array if no labels are provided', async () => {
+				const result = await githubRepository.getLabels( 'ckeditor/ckeditor5', [] );
+
+				expect( result ).toEqual( [] );
 			} );
 
-			it( 'should return labels', () => {
-				stubs.GraphQLClient.request.resolves( {
+			it( 'should return labels', async () => {
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 					repository: {
 						labels: {
 							nodes: labels
@@ -1923,17 +1852,15 @@ describe( 'dev-stale-bot/lib', () => {
 					}
 				} );
 
-				return githubRepository.getLabels( 'ckeditor/ckeditor5', [ 'type:bug', 'type:task', 'type:feature' ] ).then( result => {
-					expect( result ).to.be.an( 'array' );
-					expect( result ).to.have.length( 3 );
-					expect( result[ 0 ] ).to.equal( 'LabelId1' );
-					expect( result[ 1 ] ).to.equal( 'LabelId2' );
-					expect( result[ 2 ] ).to.equal( 'LabelId3' );
-				} );
+				const result = await githubRepository.getLabels( 'ckeditor/ckeditor5', [ 'type:bug', 'type:task', 'type:feature' ] );
+
+				expect( result ).toEqual( [
+					'LabelId1', 'LabelId2', 'LabelId3'
+				] );
 			} );
 
-			it( 'should return only requested labels even if GitHub endpoint returned additional ones', () => {
-				stubs.GraphQLClient.request.resolves( {
+			it( 'should return only requested labels even if GitHub endpoint returned additional ones', async () => {
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 					repository: {
 						labels: {
 							nodes: [
@@ -1947,17 +1874,15 @@ describe( 'dev-stale-bot/lib', () => {
 					}
 				} );
 
-				return githubRepository.getLabels( 'ckeditor/ckeditor5', [ 'type:bug', 'type:task', 'type:feature' ] ).then( result => {
-					expect( result ).to.be.an( 'array' );
-					expect( result ).to.have.length( 3 );
-					expect( result[ 0 ] ).to.equal( 'LabelId1' );
-					expect( result[ 1 ] ).to.equal( 'LabelId2' );
-					expect( result[ 2 ] ).to.equal( 'LabelId3' );
-				} );
+				const result = await githubRepository.getLabels( 'ckeditor/ckeditor5', [ 'type:bug', 'type:task', 'type:feature' ] );
+
+				expect( result ).toEqual( [
+					'LabelId1', 'LabelId2', 'LabelId3'
+				] );
 			} );
 
-			it( 'should send one request for labels', () => {
-				stubs.GraphQLClient.request.resolves( {
+			it( 'should send one request for labels', async () => {
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValue( {
 					repository: {
 						labels: {
 							nodes: labels
@@ -1965,19 +1890,16 @@ describe( 'dev-stale-bot/lib', () => {
 					}
 				} );
 
-				return githubRepository.getLabels( 'ckeditor/ckeditor5', [ 'type:bug', 'type:task', 'type:feature' ] ).then( () => {
-					expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'query GetLabels' );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
-						repositoryOwner: 'ckeditor',
-						repositoryName: 'ckeditor5',
-						labelNames: 'type:bug type:task type:feature'
-					} );
-				} );
+				await githubRepository.getLabels( 'ckeditor/ckeditor5', [ 'type:bug', 'type:task', 'type:feature' ] );
+
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 1 );
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledWith(
+					'query GetLabels',
+					{ repositoryOwner: 'ckeditor', repositoryName: 'ckeditor5', labelNames: 'type:bug type:task type:feature' } );
 			} );
 
 			it( 'should reject if request failed', () => {
-				stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( new Error( '500 Internal Server Error' ) );
 
 				return githubRepository.getLabels( 'ckeditor/ckeditor5', [ 'type:bug', 'type:task', 'type:feature' ] ).then(
 					() => {
@@ -1992,16 +1914,17 @@ describe( 'dev-stale-bot/lib', () => {
 			it( 'should log an error if request failed', () => {
 				const error = new Error( '500 Internal Server Error' );
 
-				stubs.GraphQLClient.request.rejects( error );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( error );
 
 				return githubRepository.getLabels( 'ckeditor/ckeditor5', [ 'type:bug', 'type:task', 'type:feature' ] ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					() => {
-						expect( stubs.logger.error.callCount ).to.equal( 1 );
-						expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal( 'Unexpected error when executing "#getLabels()".' );
-						expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
+						expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledTimes( 1 );
+						expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledWith(
+							'Unexpected error when executing "#getLabels()".', error
+						);
 					}
 				);
 			} );
@@ -2009,24 +1932,22 @@ describe( 'dev-stale-bot/lib', () => {
 
 		describe( '#addLabels()', () => {
 			it( 'should be a function', () => {
-				expect( githubRepository.addLabels ).to.be.a( 'function' );
+				expect( githubRepository.addLabels ).toBeInstanceOf( Function );
 			} );
 
-			it( 'should add a comment', () => {
-				stubs.GraphQLClient.request.resolves();
+			it( 'should add a comment', async () => {
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValue();
 
-				return githubRepository.addLabels( 'IssueId', [ 'LabelId' ] ).then( () => {
-					expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'mutation AddLabels' );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
-						nodeId: 'IssueId',
-						labelIds: [ 'LabelId' ]
-					} );
-				} );
+				await githubRepository.addLabels( 'IssueId', [ 'LabelId' ] );
+
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 1 );
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledWith(
+					'mutation AddLabels', { nodeId: 'IssueId', labelIds: [ 'LabelId' ] }
+				);
 			} );
 
 			it( 'should reject if request failed', () => {
-				stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( new Error( '500 Internal Server Error' ) );
 
 				return githubRepository.addLabels( 'IssueId', [ 'LabelId' ] ).then(
 					() => {
@@ -2041,16 +1962,17 @@ describe( 'dev-stale-bot/lib', () => {
 			it( 'should log an error if request failed', () => {
 				const error = new Error( '500 Internal Server Error' );
 
-				stubs.GraphQLClient.request.rejects( error );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( error );
 
 				return githubRepository.addLabels( 'IssueId', [ 'LabelId' ] ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					() => {
-						expect( stubs.logger.error.callCount ).to.equal( 1 );
-						expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal( 'Unexpected error when executing "#addLabels()".' );
-						expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
+						expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledTimes( 1 );
+						expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledWith(
+							'Unexpected error when executing "#addLabels()".', error
+						);
 					}
 				);
 			} );
@@ -2058,24 +1980,22 @@ describe( 'dev-stale-bot/lib', () => {
 
 		describe( '#removeLabels()', () => {
 			it( 'should be a function', () => {
-				expect( githubRepository.removeLabels ).to.be.a( 'function' );
+				expect( githubRepository.removeLabels ).toBeInstanceOf( Function );
 			} );
 
-			it( 'should add a comment', () => {
-				stubs.GraphQLClient.request.resolves();
+			it( 'should add a comment', async () => {
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValue();
 
-				return githubRepository.removeLabels( 'IssueId', [ 'LabelId' ] ).then( () => {
-					expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'mutation RemoveLabels' );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
-						nodeId: 'IssueId',
-						labelIds: [ 'LabelId' ]
-					} );
-				} );
+				await githubRepository.removeLabels( 'IssueId', [ 'LabelId' ] );
+
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 1 );
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledWith(
+					'mutation RemoveLabels', { nodeId: 'IssueId', labelIds: [ 'LabelId' ] }
+				);
 			} );
 
 			it( 'should reject if request failed', () => {
-				stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( new Error( '500 Internal Server Error' ) );
 
 				return githubRepository.removeLabels( 'IssueId', [ 'LabelId' ] ).then(
 					() => {
@@ -2090,18 +2010,17 @@ describe( 'dev-stale-bot/lib', () => {
 			it( 'should log an error if request failed', () => {
 				const error = new Error( '500 Internal Server Error' );
 
-				stubs.GraphQLClient.request.rejects( error );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( error );
 
 				return githubRepository.removeLabels( 'IssueId', [ 'LabelId' ] ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					() => {
-						expect( stubs.logger.error.callCount ).to.equal( 1 );
-						expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal(
-							'Unexpected error when executing "#removeLabels()".'
+						expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledTimes( 1 );
+						expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledWith(
+							'Unexpected error when executing "#removeLabels()".', error
 						);
-						expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
 					}
 				);
 			} );
@@ -2109,31 +2028,33 @@ describe( 'dev-stale-bot/lib', () => {
 
 		describe( '#closeIssueOrPullRequest()', () => {
 			it( 'should be a function', () => {
-				expect( githubRepository.closeIssueOrPullRequest ).to.be.a( 'function' );
+				expect( githubRepository.closeIssueOrPullRequest ).toBeInstanceOf( Function );
 			} );
 
-			it( 'should close issue', () => {
-				stubs.GraphQLClient.request.resolves();
+			it( 'should close issue', async () => {
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValue();
 
-				return githubRepository.closeIssueOrPullRequest( 'Issue', 'IssueId' ).then( () => {
-					expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'mutation CloseIssue' );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( { nodeId: 'IssueId' } );
-				} );
+				await githubRepository.closeIssueOrPullRequest( 'Issue', 'IssueId' );
+
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 1 );
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledWith(
+					'mutation CloseIssue', { nodeId: 'IssueId' }
+				);
 			} );
 
-			it( 'should close pull request', () => {
-				stubs.GraphQLClient.request.resolves();
+			it( 'should close pull request', async () => {
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValue();
 
-				return githubRepository.closeIssueOrPullRequest( 'PullRequest', 'PullRequestId' ).then( () => {
-					expect( stubs.GraphQLClient.request.calledOnce ).to.equal( true );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 0 ] ).to.equal( 'mutation ClosePullRequest' );
-					expect( stubs.GraphQLClient.request.getCall( 0 ).args[ 1 ] ).to.deep.equal( { nodeId: 'PullRequestId' } );
-				} );
+				await githubRepository.closeIssueOrPullRequest( 'PullRequest', 'PullRequestId' );
+
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 1 );
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledWith(
+					'mutation ClosePullRequest', { nodeId: 'PullRequestId' }
+				);
 			} );
 
 			it( 'should reject if request failed', () => {
-				stubs.GraphQLClient.request.rejects( new Error( '500 Internal Server Error' ) );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( new Error( '500 Internal Server Error' ) );
 
 				return githubRepository.closeIssueOrPullRequest( 'Issue', 'IssueId' ).then(
 					() => {
@@ -2148,18 +2069,17 @@ describe( 'dev-stale-bot/lib', () => {
 			it( 'should log an error if request failed', () => {
 				const error = new Error( '500 Internal Server Error' );
 
-				stubs.GraphQLClient.request.rejects( error );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( error );
 
 				return githubRepository.closeIssueOrPullRequest( 'Issue', 'IssueId' ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					() => {
-						expect( stubs.logger.error.callCount ).to.equal( 1 );
-						expect( stubs.logger.error.getCall( 0 ).args[ 0 ] ).to.equal(
-							'Unexpected error when executing "#closeIssueOrPullRequest()".'
+						expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledTimes( 1 );
+						expect( vi.mocked( loggerErrorMock ) ).toHaveBeenCalledWith(
+							'Unexpected error when executing "#closeIssueOrPullRequest()".', error
 						);
-						expect( stubs.logger.error.getCall( 0 ).args[ 1 ] ).to.equal( error );
 					}
 				);
 			} );
@@ -2172,39 +2092,37 @@ describe( 'dev-stale-bot/lib', () => {
 				}
 			};
 
-			let clock;
-
 			beforeEach( () => {
-				clock = sinon.useFakeTimers();
+				vi.useFakeTimers();
 			} );
 
 			afterEach( () => {
-				clock.restore();
+				vi.useRealTimers();
 			} );
 
 			it( 'should be a function', () => {
-				expect( githubRepository.sendRequest ).to.be.a( 'function' );
+				expect( githubRepository.sendRequest ).toBeInstanceOf( Function );
 			} );
 
-			it( 'should resolve with the payload if no error occurred', () => {
-				stubs.GraphQLClient.request.resolves( payload );
+			it( 'should resolve with the payload if no error occurred', async () => {
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValue( payload );
 
-				return githubRepository.sendRequest( 'query' ).then( result => {
-					expect( result ).to.equal( payload );
-				} );
+				const result = await githubRepository.sendRequest( 'query' );
+
+				expect( result ).toEqual( payload );
 			} );
 
 			it( 'should reject with the error - no custom properties', () => {
 				const error = new Error();
 
-				stubs.GraphQLClient.request.rejects( error );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( error );
 
 				return githubRepository.sendRequest( 'query' ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					err => {
-						expect( err ).to.equal( error );
+						expect( err ).toEqual( error );
 					}
 				);
 			} );
@@ -2213,14 +2131,14 @@ describe( 'dev-stale-bot/lib', () => {
 				const error = new Error();
 				error.response = {};
 
-				stubs.GraphQLClient.request.rejects( error );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( error );
 
 				return githubRepository.sendRequest( 'query' ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					err => {
-						expect( err ).to.equal( error );
+						expect( err ).toEqual( error );
 					}
 				);
 			} );
@@ -2231,14 +2149,14 @@ describe( 'dev-stale-bot/lib', () => {
 					errors: []
 				};
 
-				stubs.GraphQLClient.request.rejects( error );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( error );
 
 				return githubRepository.sendRequest( 'query' ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					err => {
-						expect( err ).to.equal( error );
+						expect( err ).toEqual( error );
 					}
 				);
 			} );
@@ -2251,14 +2169,14 @@ describe( 'dev-stale-bot/lib', () => {
 					]
 				};
 
-				stubs.GraphQLClient.request.rejects( error );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValue( error );
 
 				return githubRepository.sendRequest( 'query' ).then(
 					() => {
 						throw new Error( 'Expected to be rejected.' );
 					},
 					err => {
-						expect( err ).to.equal( error );
+						expect( err ).toEqual( error );
 					}
 				);
 			} );
@@ -2276,15 +2194,16 @@ describe( 'dev-stale-bot/lib', () => {
 					headers: new Map( [ [ 'x-ratelimit-reset', resetTimestamp ] ] )
 				};
 
-				stubs.GraphQLClient.request.onCall( 0 ).rejects( error ).onCall( 1 ).resolves( payload );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValueOnce( error );
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValueOnce( payload );
 
 				const sendPromise = githubRepository.sendRequest( 'query' );
 
-				expect( stubs.GraphQLClient.request.callCount ).to.equal( 1 );
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 1 );
 
-				await clock.tickAsync( timeToWait * 1000 );
+				await vi.advanceTimersByTimeAsync( timeToWait * 1000 );
 
-				expect( stubs.GraphQLClient.request.callCount ).to.equal( 2 );
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 2 );
 
 				return sendPromise;
 			} );
@@ -2297,17 +2216,18 @@ describe( 'dev-stale-bot/lib', () => {
 					headers: new Map( [ [ 'retry-after', timeToWait ] ] )
 				};
 
-				stubs.GraphQLClient.request.onCall( 0 ).rejects( error ).onCall( 1 ).resolves( payload );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValueOnce( error );
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValueOnce( payload );
 
 				const sendPromise = githubRepository.sendRequest( 'query' );
 
-				expect( stubs.GraphQLClient.request.callCount ).to.equal( 1 );
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 1 );
 
-				await clock.tickAsync( timeToWait * 1000 );
+				await vi.advanceTimersByTimeAsync( timeToWait * 1000 );
 
-				expect( stubs.GraphQLClient.request.callCount ).to.equal( 2 );
+				expect( vi.mocked( graphQLClientRequestMock ) ).toHaveBeenCalledTimes( 2 );
 
-				return sendPromise;
+				await sendPromise;
 			} );
 
 			it( 'should log the progress and resolve with the payload after API rate is reset', async () => {
@@ -2323,30 +2243,34 @@ describe( 'dev-stale-bot/lib', () => {
 					headers: new Map( [ [ 'x-ratelimit-reset', resetTimestamp ] ] )
 				};
 
-				stubs.GraphQLClient.request.onCall( 0 ).rejects( error ).onCall( 1 ).resolves( payload );
+				vi.mocked( graphQLClientRequestMock ).mockRejectedValueOnce( error );
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValueOnce( payload );
 
 				const sendPromise = githubRepository.sendRequest( 'query' );
 
-				await clock.tickAsync( 0 );
+				await vi.advanceTimersByTimeAsync( 0 );
 
-				expect( stubs.logger.info.callCount ).to.equal( 1 );
-				expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.equal(
+				expect( vi.mocked( loggerInfoMock ) ).toHaveBeenCalledTimes( 1 );
+				expect( vi.mocked( loggerInfoMock ) ).toHaveBeenLastCalledWith(
 					'⛔ The API limit is exceeded. Request is paused for 28 minutes.'
 				);
 
-				await clock.tickAsync( timeToWait * 1000 );
+				await vi.advanceTimersByTimeAsync( timeToWait * 1000 );
 
-				expect( stubs.logger.info.callCount ).to.equal( 2 );
-				expect( stubs.logger.info.getCall( 1 ).args[ 0 ] ).to.equal( '📍 Re-sending postponed request.' );
+				expect( vi.mocked( loggerInfoMock ) ).toHaveBeenCalledTimes( 2 );
+				expect( vi.mocked( loggerInfoMock ) ).toHaveBeenLastCalledWith( '📍 Re-sending postponed request.' );
 
-				return sendPromise.then( result => {
-					expect( result ).to.equal( payload );
-				} );
+				const result = await sendPromise;
+				expect( result ).toEqual( payload );
 			} );
 		} );
 
 		function paginateRequest( dataToPaginate, paginator ) {
 			for ( const entry of dataToPaginate ) {
+				if ( entry.error ) {
+					vi.mocked( graphQLClientRequestMock ).mockRejectedValueOnce( entry.error );
+				}
+
 				const entryIndex = dataToPaginate.indexOf( entry );
 				const isLastEntry = entryIndex === dataToPaginate.length - 1;
 				const pageInfo = isLastEntry ? pageInfoNoNextPage : pageInfoWithNextPage;
@@ -2357,7 +2281,7 @@ describe( 'dev-stale-bot/lib', () => {
 					entryIndex
 				} );
 
-				stubs.GraphQLClient.request.onCall( entryIndex ).resolves( result );
+				vi.mocked( graphQLClientRequestMock ).mockResolvedValueOnce( result );
 			}
 		}
 	} );

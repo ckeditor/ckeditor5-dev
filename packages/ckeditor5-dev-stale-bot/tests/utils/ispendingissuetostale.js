@@ -3,14 +3,15 @@
  * For licensing, see LICENSE.md.
  */
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import isPendingIssueToStale from '../../lib/utils/ispendingissuetostale';
+import isPendingIssueStale from '../../lib/utils/ispendingissuestale';
+
+vi.mock( '../../lib/utils/ispendingissuestale' );
 
 describe( 'dev-stale-bot/lib/utils', () => {
 	describe( 'isPendingIssueToStale', () => {
-		let isPendingIssueToStale, issueBase, optionsBase, stubs;
-		let staleDatePendingIssue, afterStaleDatePendingIssue, beforeStaleDatePendingIssue;
+		let issueBase, optionsBase, staleDatePendingIssue, afterStaleDatePendingIssue, beforeStaleDatePendingIssue;
 
 		beforeEach( () => {
 			staleDatePendingIssue = '2022-12-01T00:00:00Z';
@@ -24,67 +25,58 @@ describe( 'dev-stale-bot/lib/utils', () => {
 			optionsBase = {
 				staleDatePendingIssue
 			};
-
-			stubs = {
-				isPendingIssueStale: sinon.stub()
-			};
-
-			isPendingIssueToStale = proxyquire( '../../lib/utils/ispendingissuetostale', {
-				'./ispendingissuestale': stubs.isPendingIssueStale
-			} );
 		} );
 
 		it( 'should be a function', () => {
-			expect( isPendingIssueToStale ).to.be.a( 'function' );
+			expect( isPendingIssueToStale ).toBeInstanceOf( Function );
 		} );
 
 		it( 'should check if issue is stale', () => {
 			isPendingIssueToStale( issueBase, optionsBase );
 
-			expect( stubs.isPendingIssueStale.calledOnce ).to.equal( true );
-			expect( stubs.isPendingIssueStale.getCall( 0 ).args[ 0 ] ).to.equal( issueBase );
-			expect( stubs.isPendingIssueStale.getCall( 0 ).args[ 1 ] ).to.equal( optionsBase );
+			expect( vi.mocked( isPendingIssueStale ) ).toHaveBeenCalledOnce();
+			expect( vi.mocked( isPendingIssueStale ) ).toHaveBeenCalledWith( issueBase, optionsBase );
 		} );
 
 		it( 'should return false if issue is already stale', () => {
-			stubs.isPendingIssueStale.returns( true );
+			vi.mocked( isPendingIssueStale ).mockReturnValue( true );
 
-			expect( isPendingIssueToStale( issueBase, optionsBase ) ).to.be.false;
+			expect( isPendingIssueToStale( issueBase, optionsBase ) ).toEqual( false );
 		} );
 
 		it( 'should return false if issue does not have any comment', () => {
-			stubs.isPendingIssueStale.returns( false );
+			vi.mocked( isPendingIssueStale ).mockReturnValue( false );
 
-			expect( isPendingIssueToStale( issueBase, optionsBase ) ).to.be.false;
+			expect( isPendingIssueToStale( issueBase, optionsBase ) ).toEqual( false );
 		} );
 
 		it( 'should return false if last comment was created by a community member', () => {
-			stubs.isPendingIssueStale.returns( false );
+			vi.mocked( isPendingIssueStale ).mockReturnValue( false );
 			issueBase.lastComment = {
 				isExternal: true
 			};
 
-			expect( isPendingIssueToStale( issueBase, optionsBase ) ).to.be.false;
+			expect( isPendingIssueToStale( issueBase, optionsBase ) ).toEqual( false );
 		} );
 
 		it( 'should return false if last comment was created by a team member and time to stale has not passed', () => {
-			stubs.isPendingIssueStale.returns( false );
+			vi.mocked( isPendingIssueStale ).mockReturnValue( false );
 			issueBase.lastComment = {
 				isExternal: false,
 				createdAt: afterStaleDatePendingIssue
 			};
 
-			expect( isPendingIssueToStale( issueBase, optionsBase ) ).to.be.false;
+			expect( isPendingIssueToStale( issueBase, optionsBase ) ).toEqual( false );
 		} );
 
 		it( 'should return true if last comment was created by a team member and time to stale has passed', () => {
-			stubs.isPendingIssueStale.returns( false );
+			vi.mocked( isPendingIssueStale ).mockReturnValue( false );
 			issueBase.lastComment = {
 				isExternal: false,
 				createdAt: beforeStaleDatePendingIssue
 			};
 
-			expect( isPendingIssueToStale( issueBase, optionsBase ) ).to.be.true;
+			expect( isPendingIssueToStale( issueBase, optionsBase ) ).toEqual( true );
 		} );
 	} );
 } );

@@ -3,13 +3,17 @@
  * For licensing, see LICENSE.md.
  */
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import findStaleDate from '../../lib/utils/findstaledate';
+import isIssueOrPullRequestActive from '../../lib/utils/isissueorpullrequestactive';
+import isIssueOrPullRequestToUnstale from '../../lib/utils/isissueorpullrequesttounstale';
+
+vi.mock( '../../lib/utils/findstaledate' );
+vi.mock( '../../lib/utils/isissueorpullrequestactive' );
 
 describe( 'dev-stale-bot/lib/utils', () => {
 	describe( 'isIssueOrPullRequestToUnstale', () => {
-		let isIssueOrPullRequestToUnstale, staleDate, issueBase, optionsBase, stubs;
+		let staleDate, issueBase, optionsBase;
 
 		beforeEach( () => {
 			staleDate = '2022-12-01T00:00:00Z';
@@ -18,48 +22,37 @@ describe( 'dev-stale-bot/lib/utils', () => {
 
 			optionsBase = {};
 
-			stubs = {
-				findStaleDate: sinon.stub().returns( staleDate ),
-				isIssueOrPullRequestActive: sinon.stub()
-			};
-
-			isIssueOrPullRequestToUnstale = proxyquire( '../../lib/utils/isissueorpullrequesttounstale', {
-				'./findstaledate': stubs.findStaleDate,
-				'./isissueorpullrequestactive': stubs.isIssueOrPullRequestActive
-			} );
+			vi.mocked( findStaleDate ).mockReturnValue( staleDate );
 		} );
 
 		it( 'should be a function', () => {
-			expect( isIssueOrPullRequestToUnstale ).to.be.a( 'function' );
+			expect( isIssueOrPullRequestToUnstale ).toBeInstanceOf( Function );
 		} );
 
 		it( 'should get the stale date from issue activity', () => {
 			isIssueOrPullRequestToUnstale( issueBase, optionsBase );
 
-			expect( stubs.findStaleDate.calledOnce ).to.equal( true );
-			expect( stubs.findStaleDate.getCall( 0 ).args[ 0 ] ).to.equal( issueBase );
-			expect( stubs.findStaleDate.getCall( 0 ).args[ 1 ] ).to.equal( optionsBase );
+			expect( vi.mocked( findStaleDate ) ).toHaveBeenCalledOnce();
+			expect( vi.mocked( findStaleDate ) ).toHaveBeenCalledWith( issueBase, optionsBase );
 		} );
 
 		it( 'should check issue activity', () => {
 			isIssueOrPullRequestToUnstale( issueBase, optionsBase );
 
-			expect( stubs.isIssueOrPullRequestActive.calledOnce ).to.equal( true );
-			expect( stubs.isIssueOrPullRequestActive.getCall( 0 ).args[ 0 ] ).to.equal( issueBase );
-			expect( stubs.isIssueOrPullRequestActive.getCall( 0 ).args[ 1 ] ).to.equal( staleDate );
-			expect( stubs.isIssueOrPullRequestActive.getCall( 0 ).args[ 2 ] ).to.equal( optionsBase );
+			expect( vi.mocked( isIssueOrPullRequestActive ) ).toHaveBeenCalledOnce();
+			expect( vi.mocked( isIssueOrPullRequestActive ) ).toHaveBeenCalledWith( issueBase, staleDate, optionsBase );
 		} );
 
 		it( 'should return true if issue is active after stale date', () => {
-			stubs.isIssueOrPullRequestActive.returns( true );
+			vi.mocked( isIssueOrPullRequestActive ).mockReturnValue( true );
 
-			expect( isIssueOrPullRequestToUnstale( issueBase, optionsBase ) ).to.be.true;
+			expect( isIssueOrPullRequestToUnstale( issueBase, optionsBase ) ).toEqual( true );
 		} );
 
 		it( 'should return false if issue is active after stale date', () => {
-			stubs.isIssueOrPullRequestActive.returns( false );
+			vi.mocked( isIssueOrPullRequestActive ).mockReturnValue( false );
 
-			expect( isIssueOrPullRequestToUnstale( issueBase, optionsBase ) ).to.be.false;
+			expect( isIssueOrPullRequestToUnstale( issueBase, optionsBase ) ).toEqual( false );
 		} );
 	} );
 } );

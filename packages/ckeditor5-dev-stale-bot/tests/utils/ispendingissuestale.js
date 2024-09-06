@@ -3,13 +3,13 @@
  * For licensing, see LICENSE.md.
  */
 
-const expect = require( 'chai' ).expect;
-const isPendingIssueStale = require( '../../lib/utils/ispendingissuestale' );
+import { describe, it, expect } from 'vitest';
+import isPendingIssueStale from '../../lib/utils/ispendingissuestale';
 
 describe( 'dev-stale-bot/lib/utils', () => {
 	describe( 'isPendingIssueStale', () => {
 		it( 'should be a function', () => {
-			expect( isPendingIssueStale ).to.be.a( 'function' );
+			expect( isPendingIssueStale ).toBeInstanceOf( Function );
 		} );
 
 		it( 'should return false if issue does not have any label', () => {
@@ -20,7 +20,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				staleLabels: [ 'pending:feedback' ]
 			};
 
-			expect( isPendingIssueStale( issue, options ) ).to.be.false;
+			expect( isPendingIssueStale( issue, options ) ).toEqual( false );
 		} );
 
 		it( 'should return false if issue does not have a pending label', () => {
@@ -31,7 +31,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				staleLabels: [ 'pending:feedback' ]
 			};
 
-			expect( isPendingIssueStale( issue, options ) ).to.be.false;
+			expect( isPendingIssueStale( issue, options ) ).toEqual( false );
 		} );
 
 		it( 'should return false if issue does not have all pending labels', () => {
@@ -42,7 +42,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				staleLabels: [ 'pending:feedback', 'pending:even-more-feedback' ]
 			};
 
-			expect( isPendingIssueStale( issue, options ) ).to.be.false;
+			expect( isPendingIssueStale( issue, options ) ).toEqual( false );
 		} );
 
 		it( 'should return true if issue have all pending labels - single label', () => {
@@ -53,7 +53,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				staleLabels: [ 'pending:feedback' ]
 			};
 
-			expect( isPendingIssueStale( issue, options ) ).to.be.true;
+			expect( isPendingIssueStale( issue, options ) ).toEqual( true );
 		} );
 
 		it( 'should return true if issue have all pending labels - multiple labels', () => {
@@ -64,7 +64,7 @@ describe( 'dev-stale-bot/lib/utils', () => {
 				staleLabels: [ 'pending:feedback', 'pending:even-more-feedback' ]
 			};
 
-			expect( isPendingIssueStale( issue, options ) ).to.be.true;
+			expect( isPendingIssueStale( issue, options ) ).toEqual( true );
 		} );
 	} );
 } );
