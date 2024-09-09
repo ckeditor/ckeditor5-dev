@@ -4,7 +4,7 @@
  */
 
 import { isBefore, parseISO } from 'date-fns';
-import isPendingIssueStale from './ispendingissuestale';
+import isPendingIssueStale from './ispendingissuestale.js';
 
 /**
  * Checks whether pending issue should be staled, because it was not answered by a community member since the defined moment of time.

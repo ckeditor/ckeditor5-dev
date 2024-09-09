@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import isPendingIssueToUnlabel from '../../lib/utils/ispendingissuetounlabel';
+import isPendingIssueToUnlabel from '../../lib/utils/ispendingissuetounlabel.js';
 
 describe( 'dev-stale-bot/lib/utils', () => {
 	describe( 'isPendingIssueToUnlabel', () => {

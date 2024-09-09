@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import isIssueOrPullRequestActive from './isissueorpullrequestactive';
-import findStaleDate from './findstaledate';
+import isIssueOrPullRequestActive from './isissueorpullrequestactive.js';
+import findStaleDate from './findstaledate.js';
 
 /**
  * Checks whether issue or pull request should be unstaled, because it was active after it was staled.

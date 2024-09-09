@@ -4,8 +4,8 @@
  */
 
 import { isAfter, parseISO } from 'date-fns';
-import isIssueOrPullRequestActive from './isissueorpullrequestactive';
-import findStaleDate from './findstaledate';
+import isIssueOrPullRequestActive from './isissueorpullrequestactive.js';
+import findStaleDate from './findstaledate.js';
 
 /**
  * Checks whether the time to close a stale issue or pull request has passed and whether it is still inactive.

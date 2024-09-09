@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import findStaleDate from '../../lib/utils/findstaledate';
+import findStaleDate from '../../lib/utils/findstaledate.js';
 
 describe( 'dev-stale-bot/lib/utils', () => {
 	describe( 'findStaleDate', () => {

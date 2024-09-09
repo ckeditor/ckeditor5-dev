@@ -7,11 +7,11 @@
 
 import fs from 'fs-extra';
 import chalk from 'chalk';
-import createSpinner from './utils/createspinner';
-import parseArguments from './utils/parsearguments';
-import validateConfig from './utils/validateconfig';
-import parseConfig from './utils/parseconfig';
-import GitHubRepository from '../lib/githubrepository';
+import createSpinner from './utils/createspinner.js';
+import parseArguments from './utils/parsearguments.js';
+import validateConfig from './utils/validateconfig.js';
+import parseConfig from './utils/parseconfig.js';
+import GitHubRepository from '../lib/githubrepository.js';
 
 main().catch( error => {
 	console.error( '\n🔥 Unable to process stale issues and pull requests.\n', error );

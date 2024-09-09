@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import isPendingIssueToStale from '../../lib/utils/ispendingissuetostale';
-import isPendingIssueStale from '../../lib/utils/ispendingissuestale';
+import isPendingIssueToStale from '../../lib/utils/ispendingissuetostale.js';
+import isPendingIssueStale from '../../lib/utils/ispendingissuestale.js';
 
 vi.mock( '../../lib/utils/ispendingissuestale' );
 

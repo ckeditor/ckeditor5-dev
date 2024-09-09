@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import isPendingIssueStale from '../../lib/utils/ispendingissuestale';
+import isPendingIssueStale from '../../lib/utils/ispendingissuestale.js';
 
 describe( 'dev-stale-bot/lib/utils', () => {
 	describe( 'isPendingIssueStale', () => {

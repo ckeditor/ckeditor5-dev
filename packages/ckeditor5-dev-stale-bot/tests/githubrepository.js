@@ -5,13 +5,13 @@
 
 import upath from 'upath';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import prepareSearchQuery from '../lib/utils/preparesearchquery';
-import isIssueOrPullRequestToStale from '../lib/utils/isissueorpullrequesttostale';
-import isIssueOrPullRequestToUnstale from '../lib/utils/isissueorpullrequesttounstale';
-import isIssueOrPullRequestToClose from '../lib/utils/isissueorpullrequesttoclose';
-import isPendingIssueToStale from '../lib/utils/ispendingissuetostale';
-import isPendingIssueToUnlabel from '../lib/utils/ispendingissuetounlabel';
-import GitHubRepository from '../lib/githubrepository';
+import prepareSearchQuery from '../lib/utils/preparesearchquery.js';
+import isIssueOrPullRequestToStale from '../lib/utils/isissueorpullrequesttostale.js';
+import isIssueOrPullRequestToUnstale from '../lib/utils/isissueorpullrequesttounstale.js';
+import isIssueOrPullRequestToClose from '../lib/utils/isissueorpullrequesttoclose.js';
+import isPendingIssueToStale from '../lib/utils/ispendingissuetostale.js';
+import isPendingIssueToUnlabel from '../lib/utils/ispendingissuetounlabel.js';
+import GitHubRepository from '../lib/githubrepository.js';
 
 vi.mock( '../lib/utils/preparesearchquery' );
 vi.mock( '../lib/utils/isissueorpullrequesttostale' );

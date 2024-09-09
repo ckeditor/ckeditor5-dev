@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import isIssueOrPullRequestActive from '../../lib/utils/isissueorpullrequestactive';
+import isIssueOrPullRequestActive from '../../lib/utils/isissueorpullrequestactive.js';
 
 describe( 'dev-stale-bot/lib/utils', () => {
 	describe( 'isIssueOrPullRequestActive', () => {

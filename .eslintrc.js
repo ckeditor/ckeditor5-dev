@@ -18,6 +18,7 @@ module.exports = {
 	rules: {
 		'no-console': 'off',
 		'ckeditor5-rules/require-file-extensions-in-imports': 'off',
+		'mocha/no-global-tests': 'off', // TODO: remove when all mocha tests are removed.
 		'ckeditor5-rules/license-header': [ 'error', {
 			headerLines: [
 				'/**',
@@ -29,9 +30,18 @@ module.exports = {
 	},
 	overrides: [
 		{
-			files: [ './packages/ckeditor5-dev-build-tools/tests/**/*' ],
+			files: [
+				// TODO: add packages as they are migrated to ESM.
+				'./packages/ckeditor5-dev-stale-bot/**/*'
+			],
 			rules: {
-				'mocha/no-global-tests': 'off'
+				'mocha/no-global-tests': 'error',
+				'ckeditor5-rules/require-file-extensions-in-imports': [
+					'error',
+					{
+						extensions: [ '.ts', '.js', '.json' ]
+					}
+				]
 			}
 		}
 	]

@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import prepareSearchQuery from '../../lib/utils/preparesearchquery';
+import prepareSearchQuery from '../../lib/utils/preparesearchquery.js';
 
 describe( 'dev-stale-bot/lib/utils', () => {
 	describe( 'prepareSearchQuery', () => {

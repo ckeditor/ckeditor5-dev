@@ -4,9 +4,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import findStaleDate from '../../lib/utils/findstaledate';
-import isIssueOrPullRequestActive from '../../lib/utils/isissueorpullrequestactive';
-import isIssueOrPullRequestToUnstale from '../../lib/utils/isissueorpullrequesttounstale';
+import findStaleDate from '../../lib/utils/findstaledate.js';
+import isIssueOrPullRequestActive from '../../lib/utils/isissueorpullrequestactive.js';
+import isIssueOrPullRequestToUnstale from '../../lib/utils/isissueorpullrequesttounstale.js';
 
 vi.mock( '../../lib/utils/findstaledate' );
 vi.mock( '../../lib/utils/isissueorpullrequestactive' );

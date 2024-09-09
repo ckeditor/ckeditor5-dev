@@ -13,12 +13,12 @@ import {
 	formatDistanceToNow,
 	differenceInSeconds
 } from 'date-fns';
-import prepareSearchQuery from './utils/preparesearchquery';
-import isIssueOrPullRequestToStale from './utils/isissueorpullrequesttostale';
-import isIssueOrPullRequestToUnstale from './utils/isissueorpullrequesttounstale';
-import isIssueOrPullRequestToClose from './utils/isissueorpullrequesttoclose';
-import isPendingIssueToStale from './utils/ispendingissuetostale';
-import isPendingIssueToUnlabel from './utils/ispendingissuetounlabel';
+import prepareSearchQuery from './utils/preparesearchquery.js';
+import isIssueOrPullRequestToStale from './utils/isissueorpullrequesttostale.js';
+import isIssueOrPullRequestToUnstale from './utils/isissueorpullrequesttounstale.js';
+import isIssueOrPullRequestToClose from './utils/isissueorpullrequesttoclose.js';
+import isPendingIssueToStale from './utils/ispendingissuetostale.js';
+import isPendingIssueToUnlabel from './utils/ispendingissuetounlabel.js';
 
 const GRAPHQL_PATH = upath.join( __dirname, 'graphql' );
 

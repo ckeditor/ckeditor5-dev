@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import isIssueOrPullRequestActive from '../../lib/utils/isissueorpullrequestactive';
-import isIssueOrPullRequestToStale from '../../lib/utils/isissueorpullrequesttostale';
+import isIssueOrPullRequestActive from '../../lib/utils/isissueorpullrequestactive.js';
+import isIssueOrPullRequestToStale from '../../lib/utils/isissueorpullrequesttostale.js';
 
 vi.mock( '../../lib/utils/isissueorpullrequestactive' );
 

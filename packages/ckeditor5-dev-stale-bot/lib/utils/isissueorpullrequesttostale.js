@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import isIssueOrPullRequestActive from './isissueorpullrequestactive';
+import isIssueOrPullRequestActive from './isissueorpullrequestactive.js';
 
 /**
  * Checks whether issue or pull request should be staled, because it was not active since the defined moment of time.
