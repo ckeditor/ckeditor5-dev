@@ -3,10 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import bumpYear from './bumpyear.js';
 
-const bumpYear = require( './bumpyear' );
-
-module.exports = {
+export default {
 	bumpYear
 };
