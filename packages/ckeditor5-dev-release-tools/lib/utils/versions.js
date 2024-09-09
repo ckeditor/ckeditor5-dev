@@ -4,8 +4,8 @@
  */
 
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import changelogUtils from './changelog';
-import getPackageJson from './getpackagejson';
+import { getChangelog } from './changelog.js';
+import { getPackageJson } from './getpackagejson.js';
 
 /**
  * Returns a last created version in changelog file.
@@ -14,7 +14,7 @@ import getPackageJson from './getpackagejson';
  * @returns {String|null}
  */
 export function getLastFromChangelog( cwd = process.cwd() ) {
-	const changelog = changelogUtils.getChangelog( cwd );
+	const changelog = getChangelog( cwd );
 
 	if ( !changelog ) {
 		return null;

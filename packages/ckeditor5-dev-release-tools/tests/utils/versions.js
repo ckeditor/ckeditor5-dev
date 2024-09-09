@@ -3,141 +3,127 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import { getChangelog } from '../../lib/utils/changelog.js';
+import { getPackageJson } from '../../lib/utils/getpackagejson.js';
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+import {
+	getLastFromChangelog,
+	getLastPreRelease,
+	getLastNightly,
+	getNextPreRelease,
+	getNextNightly,
+	getLastTagFromGit,
+	getCurrent
+} from '../../lib/utils/versions.js';
+
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( '../../lib/utils/changelog.js' );
+vi.mock( '../../lib/utils/getpackagejson.js' );
 
 describe( 'dev-release-tools/utils', () => {
-	let version, sandbox, changelogStub, getPackageJsonStub;
-
 	describe( 'versions', () => {
-		beforeEach( () => {
-			sandbox = sinon.createSandbox();
-
-			changelogStub = sandbox.stub();
-			getPackageJsonStub = sandbox.stub();
-
-			version = proxyquire( '../../lib/utils/versions', {
-				'@ckeditor/ckeditor5-dev-utils': {
-					tools
-				},
-				'./getpackagejson': getPackageJsonStub,
-				'./changelog': {
-					getChangelog: changelogStub
-				}
-			} );
-		} );
-
-		afterEach( () => {
-			sandbox.restore();
-		} );
-
 		describe( 'getLastFromChangelog()', () => {
 			it( 'returns null if the changelog is invalid', () => {
-				changelogStub.returns( 'Example changelog.' );
+				vi.mocked( getChangelog ).mockReturnValue( 'Example changelog.' );
 
-				expect( version.getLastFromChangelog() ).to.equal( null );
+				expect( getLastFromChangelog() ).to.equal( null );
 			} );
 
 			it( 'returns version from changelog #1', () => {
-				changelogStub.returns( '\n## [1.0.0](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1' );
+				vi.mocked( getChangelog ).mockReturnValue( '\n## [1.0.0](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1' );
 
-				expect( version.getLastFromChangelog() ).to.equal( '1.0.0' );
+				expect( getLastFromChangelog() ).to.equal( '1.0.0' );
 			} );
 
 			it( 'returns version from changelog #2', () => {
-				changelogStub.returns( '\n## 1.0.0 (2017-04-05)\nSome changelog entry.' );
+				vi.mocked( getChangelog ).mockReturnValue( '\n## 1.0.0 (2017-04-05)\nSome changelog entry.' );
 
-				expect( version.getLastFromChangelog() ).to.equal( '1.0.0' );
+				expect( getLastFromChangelog() ).to.equal( '1.0.0' );
 			} );
 
 			it( 'returns version from changelog #3', () => {
-				changelogStub.returns( '\n## [1.0.0-alpha](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1' );
+				vi.mocked( getChangelog ).mockReturnValue( '\n## [1.0.0-alpha](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1' );
 
-				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-alpha' );
+				expect( getLastFromChangelog() ).to.equal( '1.0.0-alpha' );
 			} );
 
 			it( 'returns version from changelog #4', () => {
-				changelogStub.returns( '\n## 1.0.0-alpha (2017-04-05)\nSome changelog entry.' );
+				vi.mocked( getChangelog ).mockReturnValue( '\n## 1.0.0-alpha (2017-04-05)\nSome changelog entry.' );
 
-				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-alpha' );
+				expect( getLastFromChangelog() ).to.equal( '1.0.0-alpha' );
 			} );
 
 			it( 'returns version from changelog #5', () => {
-				changelogStub.returns( '\n## [1.0.0-alpha+001](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1' );
+				vi.mocked( getChangelog ).mockReturnValue( '\n## [1.0.0-alpha+001](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1' );
 
-				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-alpha+001' );
+				expect( getLastFromChangelog() ).to.equal( '1.0.0-alpha+001' );
 			} );
 
 			it( 'returns version from changelog #6', () => {
-				changelogStub.returns( '\n## 1.0.0-alpha+001 (2017-04-05)\nSome changelog entry.' );
+				vi.mocked( getChangelog ).mockReturnValue( '\n## 1.0.0-alpha+001 (2017-04-05)\nSome changelog entry.' );
 
-				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-alpha+001' );
+				expect( getLastFromChangelog() ).to.equal( '1.0.0-alpha+001' );
 			} );
 
 			it( 'returns version from changelog #7', () => {
-				changelogStub.returns( '\n## [1.0.0-beta.2](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1' );
+				vi.mocked( getChangelog ).mockReturnValue( '\n## [1.0.0-beta.2](...) (2017-04-05)\nSome changelog entry.\n\n## 0.0.1' );
 
-				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-beta.2' );
+				expect( getLastFromChangelog() ).to.equal( '1.0.0-beta.2' );
 			} );
 
 			it( 'returns version from changelog #8', () => {
-				changelogStub.returns( '\n## 1.0.0-beta.2 (2017-04-05)\nSome changelog entry.' );
+				vi.mocked( getChangelog ).mockReturnValue( '\n## 1.0.0-beta.2 (2017-04-05)\nSome changelog entry.' );
 
-				expect( version.getLastFromChangelog() ).to.equal( '1.0.0-beta.2' );
+				expect( getLastFromChangelog() ).to.equal( '1.0.0-beta.2' );
 			} );
 
 			it( 'returns version from changelog #9', () => {
-				changelogStub.returns( '\n## 1.0.0\nSome changelog entry.' );
+				vi.mocked( getChangelog ).mockReturnValue( '\n## 1.0.0\nSome changelog entry.' );
 
-				expect( version.getLastFromChangelog() ).to.equal( '1.0.0' );
+				expect( getLastFromChangelog() ).to.equal( '1.0.0' );
 			} );
 
 			it( 'returns null for empty changelog', () => {
-				changelogStub.returns( '' );
+				vi.mocked( getChangelog ).mockReturnValue( '' );
 
-				expect( version.getLastFromChangelog() ).to.equal( null );
+				expect( getLastFromChangelog() ).to.equal( null );
 			} );
 
 			it( 'returns null if changelog does not exist', () => {
-				changelogStub.returns( null );
+				vi.mocked( getChangelog ).mockReturnValue( null );
 
-				expect( version.getLastFromChangelog() ).to.equal( null );
+				expect( getLastFromChangelog() ).to.equal( null );
 			} );
 		} );
 
 		describe( 'getLastPreRelease()', () => {
-			let shExecStub;
-
 			beforeEach( () => {
-				shExecStub = sandbox.stub( tools, 'shExec' );
-				getPackageJsonStub.returns( { name: 'ckeditor5' } );
+				vi.mocked( getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
 			} );
 
 			it( 'asks npm for all versions of a package', () => {
-				shExecStub.resolves( JSON.stringify( [] ) );
+				vi.mocked( tools.shExec ).mockResolvedValue( JSON.stringify( [] ) );
 
-				return version.getLastPreRelease( '42.0.0-alpha' )
+				return getLastPreRelease( '42.0.0-alpha' )
 					.then( () => {
-						expect( shExecStub.callCount ).to.equal( 1 );
-						expect( shExecStub.firstCall.args[ 0 ] ).to.equal( 'npm view ckeditor5 versions --json' );
+						expect( tools.shExec ).toHaveBeenCalledTimes( 1 );
+						expect( tools.shExec ).toHaveBeenCalledWith( 'npm view ckeditor5 versions --json', expect.anything() );
 					} );
 			} );
 
 			it( 'returns null if there is no version for a package', () => {
-				shExecStub.rejects();
+				vi.mocked( tools.shExec ).mockRejectedValue();
 
-				return version.getLastPreRelease( '42.0.0-alpha' )
+				return getLastPreRelease( '42.0.0-alpha' )
 					.then( result => {
 						expect( result ).to.equal( null );
 					} );
 			} );
 
 			it( 'returns null if there is no pre-release version matching the release identifier', () => {
-				shExecStub.resolves( JSON.stringify( [
+				vi.mocked( tools.shExec ).mockResolvedValue( JSON.stringify( [
 					'0.0.0-nightly-20230615.0',
 					'37.0.0-alpha.0',
 					'37.0.0-alpha.1',
@@ -145,14 +131,14 @@ describe( 'dev-release-tools/utils', () => {
 					'42.0.0'
 				] ) );
 
-				return version.getLastPreRelease( '42.0.0-alpha' )
+				return getLastPreRelease( '42.0.0-alpha' )
 					.then( result => {
 						expect( result ).to.equal( null );
 					} );
 			} );
 
 			it( 'returns last pre-release version matching the release identifier', () => {
-				shExecStub.resolves( JSON.stringify( [
+				vi.mocked( tools.shExec ).mockResolvedValue( JSON.stringify( [
 					'0.0.0-nightly-20230615.0',
 					'37.0.0-alpha.0',
 					'37.0.0-alpha.1',
@@ -160,14 +146,14 @@ describe( 'dev-release-tools/utils', () => {
 					'42.0.0'
 				] ) );
 
-				return version.getLastPreRelease( '37.0.0-alpha' )
+				return getLastPreRelease( '37.0.0-alpha' )
 					.then( result => {
 						expect( result ).to.equal( '37.0.0-alpha.1' );
 					} );
 			} );
 
 			it( 'returns last pre-release version matching the release identifier (non-chronological versions order)', () => {
-				shExecStub.resolves( JSON.stringify( [
+				vi.mocked( tools.shExec ).mockResolvedValue( JSON.stringify( [
 					'0.0.0-nightly-20230615.0',
 					'37.0.0-alpha.0',
 					'37.0.0-alpha.2',
@@ -176,14 +162,14 @@ describe( 'dev-release-tools/utils', () => {
 					'37.0.0-alpha.1'
 				] ) );
 
-				return version.getLastPreRelease( '37.0.0-alpha' )
+				return getLastPreRelease( '37.0.0-alpha' )
 					.then( result => {
 						expect( result ).to.equal( '37.0.0-alpha.2' );
 					} );
 			} );
 
 			it( 'returns last pre-release version matching the release identifier (sequence numbers greater than 10)', () => {
-				shExecStub.resolves( JSON.stringify( [
+				vi.mocked( tools.shExec ).mockResolvedValue( JSON.stringify( [
 					'0.0.0-nightly-20230615.0',
 					'37.0.0-alpha.1',
 					'37.0.0-alpha.2',
@@ -193,14 +179,14 @@ describe( 'dev-release-tools/utils', () => {
 					'37.0.0-alpha.11'
 				] ) );
 
-				return version.getLastPreRelease( '37.0.0-alpha' )
+				return getLastPreRelease( '37.0.0-alpha' )
 					.then( result => {
 						expect( result ).to.equal( '37.0.0-alpha.11' );
 					} );
 			} );
 
 			it( 'returns last nightly version', () => {
-				shExecStub.resolves( JSON.stringify( [
+				vi.mocked( tools.shExec ).mockResolvedValue( JSON.stringify( [
 					'0.0.0-nightly-20230614.0',
 					'0.0.0-nightly-20230615.0',
 					'0.0.0-nightly-20230615.1',
@@ -212,14 +198,14 @@ describe( 'dev-release-tools/utils', () => {
 					'42.0.0'
 				] ) );
 
-				return version.getLastPreRelease( '0.0.0-nightly' )
+				return getLastPreRelease( '0.0.0-nightly' )
 					.then( result => {
 						expect( result ).to.equal( '0.0.0-nightly-20230616.0' );
 					} );
 			} );
 
 			it( 'returns last nightly version from a specified day', () => {
-				shExecStub.resolves( JSON.stringify( [
+				vi.mocked( tools.shExec ).mockResolvedValue( JSON.stringify( [
 					'0.0.0-nightly-20230614.0',
 					'0.0.0-nightly-20230615.0',
 					'0.0.0-nightly-20230615.1',
@@ -231,7 +217,7 @@ describe( 'dev-release-tools/utils', () => {
 					'42.0.0'
 				] ) );
 
-				return version.getLastPreRelease( '0.0.0-nightly-20230615' )
+				return getLastPreRelease( '0.0.0-nightly-20230615' )
 					.then( result => {
 						expect( result ).to.equal( '0.0.0-nightly-20230615.2' );
 					} );
@@ -239,54 +225,67 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		describe( 'getLastNightly()', () => {
-			beforeEach( () => {
-				sandbox.stub( version, 'getLastPreRelease' ).resolves( '0.0.0-nightly-20230615.0' );
+			beforeEach( async () => {
+				vi.mocked( getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
 			} );
 
-			it( 'asks for a last nightly pre-release version', () => {
-				return version.getLastNightly()
-					.then( result => {
-						expect( version.getLastPreRelease.callCount ).to.equal( 1 );
-						expect( version.getLastPreRelease.firstCall.args[ 0 ] ).to.equal( '0.0.0-nightly' );
+			it( 'returns last nightly pre-release version', () => {
+				vi.mocked( tools.shExec ).mockResolvedValue( JSON.stringify( [
+					'0.0.0-nightly-20230613.0',
+					'0.0.0-nightly-20230614.0',
+					'0.0.0-nightly-20230614.1',
+					'0.0.0-nightly-20230614.2',
+					'0.0.0-nightly-20230615.0',
+					'37.0.0-alpha.0',
+					'42.0.0'
+				] ) );
 
+				return getLastNightly()
+					.then( result => {
 						expect( result ).to.equal( '0.0.0-nightly-20230615.0' );
 					} );
 			} );
 		} );
 
 		describe( 'getNextPreRelease()', () => {
-			it( 'asks for a last pre-release version', () => {
-				sandbox.stub( version, 'getLastPreRelease' ).resolves( null );
-
-				return version.getNextPreRelease( '42.0.0-alpha' )
-					.then( () => {
-						expect( version.getLastPreRelease.calledOnce ).to.equal( true );
-						expect( version.getLastPreRelease.firstCall.args[ 0 ] ).to.equal( '42.0.0-alpha' );
-					} );
+			beforeEach( async () => {
+				vi.mocked( getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
 			} );
 
 			it( 'returns pre-release version with id = 0 if pre-release version was never published for the package yet', () => {
-				sandbox.stub( version, 'getLastPreRelease' ).resolves( null );
+				vi.mocked( tools.shExec ).mockResolvedValue( JSON.stringify( [
+					'0.0.0-nightly-20230615.0',
+					'37.0.0-alpha.0',
+					'42.0.0'
+				] ) );
 
-				return version.getNextPreRelease( '42.0.0-alpha' )
+				return getNextPreRelease( '42.0.0-alpha' )
 					.then( result => {
 						expect( result ).to.equal( '42.0.0-alpha.0' );
 					} );
 			} );
 
 			it( 'returns pre-release version with incremented id if older pre-release version was already published', () => {
-				sandbox.stub( version, 'getLastPreRelease' ).resolves( '42.0.0-alpha.5' );
+				vi.mocked( tools.shExec ).mockResolvedValue( JSON.stringify( [
+					'0.0.0-nightly-20230615.0',
+					'37.0.0-alpha.0',
+					'42.0.0-alpha.5'
+				] ) );
 
-				return version.getNextPreRelease( '42.0.0-alpha' )
+				return getNextPreRelease( '42.0.0-alpha' )
 					.then( result => {
 						expect( result ).to.equal( '42.0.0-alpha.6' );
 					} );
 			} );
 
 			it( 'returns nightly version with incremented id if older nightly version was already published', () => {
-				sandbox.stub( version, 'getLastPreRelease' ).resolves( '0.0.0-nightly-20230615.5' );
+				vi.mocked( tools.shExec ).mockResolvedValue( JSON.stringify( [
+					'0.0.0-nightly-20230615.5',
+					'37.0.0-alpha.0',
+					'42.0.0'
+				] ) );
 
-				return version.getNextPreRelease( '0.0.0-nightly' )
+				return getNextPreRelease( '0.0.0-nightly' )
 					.then( result => {
 						expect( result ).to.equal( '0.0.0-nightly-20230615.6' );
 					} );
@@ -294,26 +293,26 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		describe( 'getNextNightly()', () => {
-			let clock;
-
 			beforeEach( () => {
-				sandbox.stub( version, 'getNextPreRelease' ).resolves( '0.0.0-nightly-20230615.1' );
+				vi.mocked( getPackageJson ).mockReturnValue( { name: 'ckeditor5' } );
 
-				clock = sinon.useFakeTimers( {
-					now: new Date( '2023-06-15 12:00:00' )
-				} );
+				vi.useFakeTimers();
+				vi.setSystemTime( new Date( '2023-06-15 12:00:00' ) );
 			} );
 
 			afterEach( () => {
-				clock.restore();
+				vi.useRealTimers();
 			} );
 
 			it( 'asks for a last nightly pre-release version', () => {
-				return version.getNextNightly()
-					.then( result => {
-						expect( version.getNextPreRelease.calledOnce ).to.equal( true );
-						expect( version.getNextPreRelease.firstCall.args[ 0 ] ).to.equal( '0.0.0-nightly-20230615' );
+				vi.mocked( tools.shExec ).mockResolvedValue( JSON.stringify( [
+					'0.0.0-nightly-20230615.0',
+					'37.0.0-alpha.0',
+					'42.0.0'
+				] ) );
 
+				return getNextNightly()
+					.then( result => {
 						expect( result ).to.equal( '0.0.0-nightly-20230615.1' );
 					} );
 			} );
@@ -321,23 +320,23 @@ describe( 'dev-release-tools/utils', () => {
 
 		describe( 'getLastTagFromGit()', () => {
 			it( 'returns last tag if exists', () => {
-				sandbox.stub( tools, 'shExec' ).returns( 'v1.0.0' );
+				vi.mocked( tools.shExec ).mockReturnValue( 'v1.0.0' );
 
-				expect( version.getLastTagFromGit() ).to.equal( '1.0.0' );
+				expect( getLastTagFromGit() ).to.equal( '1.0.0' );
 			} );
 
 			it( 'returns null if tags do not exist', () => {
-				sandbox.stub( tools, 'shExec' ).returns( '' );
+				vi.mocked( tools.shExec ).mockReturnValue( '' );
 
-				expect( version.getLastTagFromGit() ).to.equal( null );
+				expect( getLastTagFromGit() ).to.equal( null );
 			} );
 		} );
 
 		describe( 'getCurrent()', () => {
 			it( 'returns current version from "package.json"', () => {
-				getPackageJsonStub.returns( { version: '0.1.2' } );
+				vi.mocked( getPackageJson ).mockReturnValue( { version: '0.1.2' } );
 
-				expect( version.getCurrent() ).to.equal( '0.1.2' );
+				expect( getCurrent() ).to.equal( '0.1.2' );
 			} );
 		} );
 	} );
