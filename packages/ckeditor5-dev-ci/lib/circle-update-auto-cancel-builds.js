@@ -3,10 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fetch = require( 'node-fetch' );
-
 /**
  * @param options
  * @param {String} options.circleToken
@@ -15,7 +11,7 @@ const fetch = require( 'node-fetch' );
  * @param {Boolean} options.newValue
  * @return {Promise.<Boolean>}
  */
-module.exports = async function circleUpdateAutoCancelBuilds( options ) {
+export default async function circleUpdateAutoCancelBuilds( options ) {
 	const {
 		circleToken,
 		githubOrganization,
@@ -40,4 +36,4 @@ module.exports = async function circleUpdateAutoCancelBuilds( options ) {
 
 	return fetch( settingsUpdateUrl, circleRequestOptions )
 		.then( r => r.json() );
-};
+}

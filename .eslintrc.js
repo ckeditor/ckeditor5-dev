@@ -13,7 +13,11 @@ module.exports = {
 	ignorePatterns: [
 		'**/dist/*',
 		'**/coverage/**',
-		'**/node_modules/**'
+		'**/node_modules/**',
+
+		// ESLint does not understand `import ... with { ... }`.
+		// See: https://github.com/eslint/eslint/discussions/15305.
+		'packages/ckeditor5-dev-ci/lib/data/index.js'
 	],
 	rules: {
 		'no-console': 'off',
@@ -32,7 +36,8 @@ module.exports = {
 		{
 			files: [
 				// TODO: add packages as they are migrated to ESM.
-				'./packages/ckeditor5-dev-stale-bot/**/*'
+				'./packages/ckeditor5-dev-stale-bot/**/*',
+				'./packages/ckeditor5-dev-ci/**/*'
 			],
 			rules: {
 				'mocha/no-global-tests': 'error',

@@ -5,35 +5,36 @@
 
 /* eslint-env node */
 
-'use strict';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
+import formatMessage from '../lib/format-message.js';
+
+vi.mock( '../lib/data', () => {
+	return {
+		members: {
+			ExampleNick: 'slackId'
+		},
+		bots: [
+			'CKCSBot'
+		]
+	};
+} );
 
 describe( 'lib/format-message', () => {
-	let formatMessage, stubs;
-
-	beforeEach( () => {
-		stubs = {
-			nodeFetch: sinon.stub()
-		};
-
-		formatMessage = proxyquire( '../lib/format-message', {
-			'node-fetch': stubs.nodeFetch,
-			'./data/members.json': {
-				ExampleNick: 'slackId'
-			}
-		} );
-	} );
-
 	describe( 'formatMessage()', () => {
+		let fetchMock;
+
+		beforeEach( () => {
+			fetchMock = vi.fn();
+			vi.stubGlobal( 'fetch', fetchMock );
+		} );
+
 		it( 'should be a function', () => {
-			expect( formatMessage ).to.be.a( 'function' );
+			expect( formatMessage ).toBeInstanceOf( Function );
 		} );
 
 		it( 'should display a message for bot if a login is included in the "bots" array', async () => {
-			stubs.nodeFetch.resolves( {
+			vi.mocked( fetchMock ).mockResolvedValueOnce( {
 				json() {
 					return Promise.resolve( {
 						author: {
@@ -72,7 +73,7 @@ describe( 'lib/format-message', () => {
 		} );
 
 		it( 'should display a message for bot if a login is unavailable but author name is included in the "bots" array', async () => {
-			stubs.nodeFetch.resolves( {
+			vi.mocked( fetchMock ).mockResolvedValueOnce( {
 				json() {
 					return Promise.resolve( {
 						author: null,
@@ -109,7 +110,7 @@ describe( 'lib/format-message', () => {
 		} );
 
 		it( 'should mention the channel if a login is unavailable and author name is not included in the "bots" array', async () => {
-			stubs.nodeFetch.resolves( {
+			vi.mocked( fetchMock ).mockResolvedValueOnce( {
 				json() {
 					return Promise.resolve( {
 						author: null,
@@ -146,7 +147,7 @@ describe( 'lib/format-message', () => {
 		} );
 
 		it( 'should find a Slack account based on a GitHub account case-insensitive', async () => {
-			stubs.nodeFetch.resolves( {
+			vi.mocked( fetchMock ).mockResolvedValueOnce( {
 				json() {
 					return Promise.resolve( {
 						author: {
@@ -181,7 +182,7 @@ describe( 'lib/format-message', () => {
 
 			expect( message ).to.be.an( 'object' );
 			expect( message ).to.have.property( 'text' );
-			expect( message.text ).to.equal( '<@slackId>, could you take a look?' );
+			expect( message.text ).toEqual( '<@slackId>, could you take a look?' );
 		} );
 	} );
 } );
