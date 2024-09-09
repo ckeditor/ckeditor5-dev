@@ -13,11 +13,16 @@ module.exports = {
 	ignorePatterns: [
 		'**/dist/*',
 		'**/coverage/**',
-		'**/node_modules/**'
+		'**/node_modules/**',
+
+		// ESLint does not understand `import ... with { ... }`.
+		// See: https://github.com/eslint/eslint/discussions/15305.
+		'packages/ckeditor5-dev-ci/lib/data/index.js'
 	],
 	rules: {
 		'no-console': 'off',
 		'ckeditor5-rules/require-file-extensions-in-imports': 'off',
+		'mocha/no-global-tests': 'off', // TODO: remove when all mocha tests are removed.
 		'ckeditor5-rules/license-header': [ 'error', {
 			headerLines: [
 				'/**',
@@ -29,9 +34,18 @@ module.exports = {
 	},
 	overrides: [
 		{
-			files: [ './packages/ckeditor5-dev-build-tools/tests/**/*' ],
+			files: [
+				// TODO: add packages as they are migrated to ESM.
+				'./packages/ckeditor5-dev-ci/**/*'
+			],
 			rules: {
-				'mocha/no-global-tests': 'off'
+				'mocha/no-global-tests': 'error',
+				'ckeditor5-rules/require-file-extensions-in-imports': [
+					'error',
+					{
+						extensions: [ '.ts', '.js', '.json' ]
+					}
+				]
 			}
 		}
 	]

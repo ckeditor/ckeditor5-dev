@@ -5,11 +5,7 @@
 
 /* eslint-env node */
 
-'use strict';
-
-const fetch = require( 'node-fetch' );
-const bots = require( './data/bots.json' );
-const members = require( './data/members.json' );
+import { bots, members } from './data/index.js';
 
 const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
 
@@ -29,7 +25,7 @@ const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
  * @param {Number} options.endTime
  * @param {Boolean} options.shouldHideAuthor
  */
-module.exports = async function formatMessage( options ) {
+export default async function formatMessage( options ) {
 	const commitDetails = await getCommitDetails( options.triggeringCommitUrl, options.githubToken );
 	const repoUrl = `https://github.com/${ options.repositoryOwner }/${ options.repositoryName }`;
 
@@ -63,7 +59,7 @@ module.exports = async function formatMessage( options ) {
 			} ]
 		} ]
 	};
-};
+}
 
 /**
  * Returns the additional message that will be added to the notifier post.
