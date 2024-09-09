@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 import bumpYear from './bumpyear.js';
 
 export default {

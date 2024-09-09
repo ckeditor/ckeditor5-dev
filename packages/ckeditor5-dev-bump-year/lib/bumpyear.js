@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 import chalk from 'chalk';
 import fs from 'fs';
 import { globSync } from 'glob';
