@@ -5,8 +5,8 @@
 
 'use strict';
 
-const bumpYear = require( './bumpyear' );
+import bumpYear from './bumpyear.js';
 
-module.exports = {
+export default {
 	bumpYear
 };
