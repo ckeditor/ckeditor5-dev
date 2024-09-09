@@ -3,42 +3,36 @@
  * For licensing, see LICENSE.md.
  */
 
-const { expect } = require( 'chai' );
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
-const testUtils = require( '../../utils' );
+import { describe, it, expect, vi } from 'vitest';
+import testUtils from '../../_utils.js';
+
+import build from '../../../lib/buildtypedoc.js';
+
+const stubs = vi.hoisted( () => {
+	return {
+		onErrorCallback: vi.fn()
+	};
+} );
+
+vi.stubGlobal( 'console', {
+	log: vi.fn(),
+	warn: vi.fn(),
+	error: vi.fn()
+} );
+
+vi.mock( '../../../lib/validators/link-validator', async () => {
+	const { default: validator } = await vi.importActual( '../../../lib/validators/link-validator' );
+
+	return {
+		default: project => validator( project, ( ...args ) => stubs.onErrorCallback( ...args ) )
+	};
+} );
 
 describe( 'dev-docs/validators/link-validator', function() {
-	this.timeout( 10 * 1000 );
-
 	const FIXTURES_PATH = testUtils.normalizePath( __dirname, 'fixtures' );
 	const SOURCE_FILES = testUtils.normalizePath( FIXTURES_PATH, '*.ts' );
 	const DERIVED_FILE = testUtils.normalizePath( FIXTURES_PATH, 'inheritance', 'derivedclass.ts' );
 	const TSCONFIG_PATH = testUtils.normalizePath( FIXTURES_PATH, 'tsconfig.json' );
-
-	let build, logStub, warnStub, onErrorCallback;
-
-	beforeEach( async () => {
-		const validators = proxyquire( '../../../lib/validators', {
-			'./link-validator': project => {
-				return require( '../../../lib/validators/link-validator' )( project, onErrorCallback );
-			},
-			'./module-validator': sinon.spy()
-		} );
-
-		build = proxyquire( '../../../lib/buildtypedoc', {
-			'./validators': validators
-		} );
-
-		logStub = sinon.stub( console, 'log' );
-		warnStub = sinon.stub( console, 'warn' );
-		onErrorCallback = sinon.stub();
-	} );
-
-	afterEach( () => {
-		logStub.restore();
-		warnStub.restore();
-	} );
 
 	it( 'should warn if link is not valid', async () => {
 		await build( {
@@ -112,13 +106,24 @@ describe( 'dev-docs/validators/link-validator', function() {
 			}
 		];
 
-		expect( onErrorCallback.callCount ).to.equal( expectedErrors.length );
+		expect( stubs.onErrorCallback ).toHaveBeenCalledTimes( expectedErrors.length );
 
-		for ( const error of expectedErrors ) {
-			expect( onErrorCallback ).to.be.calledWith(
-				`Incorrect link: "${ error.identifier }"`,
-				sinon.match( reflection => error.source === testUtils.getSource( reflection ) )
-			);
+		for ( const call of stubs.onErrorCallback.mock.calls ) {
+			expect( call ).toSatisfy( call => {
+				const [ message, reflection ] = call;
+
+				return expectedErrors.some( error => {
+					if ( message !== `Incorrect link: "${ error.identifier }"` ) {
+						return false;
+					}
+
+					if ( testUtils.getSource( reflection ) !== error.source ) {
+						return false;
+					}
+
+					return true;
+				} );
+			} );
 		}
 	} );
 
@@ -131,6 +136,6 @@ describe( 'dev-docs/validators/link-validator', function() {
 			strict: false
 		} );
 
-		expect( onErrorCallback.callCount ).to.equal( 0 );
+		expect( stubs.onErrorCallback ).toHaveBeenCalledTimes( 0 );
 	} );
 } );

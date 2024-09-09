@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 /**
  * Replaces Windows style paths to Unix.
  *
@@ -18,7 +16,7 @@ function normalizePath( ...value ) {
 /**
  * Returns the source file path with line number from a reflection.
  *
- * @param {require('typedoc').Reflection} reflection
+ * @param {import('typedoc').Reflection} reflection
  * @returns {String}
  */
 function getSource( reflection ) {
@@ -31,7 +29,7 @@ function getSource( reflection ) {
 	return getSource( reflection.parent );
 }
 
-module.exports = {
+export default {
 	normalizePath,
 	getSource
 };

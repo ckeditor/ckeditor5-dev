@@ -3,10 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { ReflectionKind } = require( 'typedoc' );
-const { utils } = require( '@ckeditor/typedoc-plugins' );
+import { ReflectionKind } from 'typedoc';
+import typedocPlugins from '@ckeditor/typedoc-plugins';
 
 const AUGMENTATION_MODULE_REGEXP = /[^\\/]+[\\/]src[\\/]augmentation/;
 
@@ -18,7 +16,8 @@ const AUGMENTATION_MODULE_REGEXP = /[^\\/]+[\\/]src[\\/]augmentation/;
  * @param {Object} project Generated output from TypeDoc to validate.
  * @param {Function} onError A callback that is executed when a validation error is detected.
  */
-module.exports = function validate( project, onError ) {
+export default function validate( project, onError ) {
+	const { utils } = typedocPlugins;
 	const reflections = project.getReflectionsByKind( ReflectionKind.Module );
 
 	for ( const reflection of reflections ) {
@@ -53,4 +52,4 @@ module.exports = function validate( project, onError ) {
 			onError( `Invalid module name: "${ reflection.name }"`, reflection );
 		}
 	}
-};
+}

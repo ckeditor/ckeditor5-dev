@@ -3,34 +3,37 @@
  * For licensing, see LICENSE.md.
  */
 
-const { expect } = require( 'chai' );
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
-const testUtils = require( '../../utils' );
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import testUtils from '../../_utils.js';
+
+import build from '../../../lib/buildtypedoc.js';
+
+const stubs = vi.hoisted( () => {
+	return {
+		onErrorCallback: vi.fn()
+	};
+} );
+
+vi.stubGlobal( 'console', {
+	log: vi.fn(),
+	warn: vi.fn(),
+	error: vi.fn()
+} );
+
+vi.mock( '../../../lib/validators/overloads-validator', async () => {
+	const { default: validator } = await vi.importActual( '../../../lib/validators/overloads-validator' );
+
+	return {
+		default: project => validator( project, ( ...args ) => stubs.onErrorCallback( ...args ) )
+	};
+} );
 
 describe( 'dev-docs/validators/overloads-validator', function() {
-	this.timeout( 10 * 1000 );
-
 	const FIXTURES_PATH = testUtils.normalizePath( __dirname, 'fixtures' );
 	const SOURCE_FILES = testUtils.normalizePath( FIXTURES_PATH, '**', '*.ts' );
 	const TSCONFIG_PATH = testUtils.normalizePath( FIXTURES_PATH, 'tsconfig.json' );
 
-	const onErrorCallback = sinon.stub();
-
-	before( async () => {
-		const validators = proxyquire( '../../../lib/validators', {
-			'./overloads-validator': project => {
-				return require( '../../../lib/validators/overloads-validator' )( project, onErrorCallback );
-			},
-			'./module-validator': sinon.spy()
-		} );
-
-		const build = proxyquire( '../../../lib/buildtypedoc', {
-			'./validators': validators
-		} );
-
-		const logStub = sinon.stub( console, 'log' );
-
+	beforeEach( async () => {
 		await build( {
 			type: 'typedoc',
 			cwd: FIXTURES_PATH,
@@ -41,8 +44,6 @@ describe( 'dev-docs/validators/overloads-validator', function() {
 				enableOverloadValidator: true
 			}
 		} );
-
-		logStub.restore();
 	} );
 
 	it( 'should warn if overloaded signature does not have "@label" tag', () => {
@@ -53,17 +54,21 @@ describe( 'dev-docs/validators/overloads-validator', function() {
 			{ source: 'overloadsinvalid.ts:24' }
 		];
 
-		const errorCalls = onErrorCallback.getCalls().filter( call => {
-			return call.args[ 0 ] === 'Overloaded signature misses the @label tag';
+		const errorCalls = stubs.onErrorCallback.mock.calls.filter( ( [ message ] ) => {
+			return message === 'Overloaded signature misses the @label tag';
 		} );
 
 		expect( errorCalls.length ).to.equal( expectedErrors.length );
 
-		expectedErrors.forEach( ( { source }, index ) => {
-			const currentValue = testUtils.getSource( errorCalls[ index ].args[ 1 ] );
+		for ( const call of errorCalls ) {
+			expect( call ).toSatisfy( call => {
+				const [ , reflection ] = call;
 
-			expect( currentValue ).to.equal( source );
-		} );
+				return expectedErrors.some( error => {
+					return testUtils.getSource( reflection ) === error.source;
+				} );
+			} );
+		}
 	} );
 
 	it( 'should warn if overloaded signatures use the same identifier', () => {
@@ -71,18 +76,28 @@ describe( 'dev-docs/validators/overloads-validator', function() {
 			{ source: 'overloadsinvalid.ts:51', error: 'Duplicated name: "NOT_SO_UNIQUE" in the @label tag' }
 		];
 
-		const errorCalls = onErrorCallback.getCalls().filter( call => {
-			return call.args[ 0 ].startsWith( 'Duplicated name' );
+		const errorCalls = stubs.onErrorCallback.mock.calls.filter( ( [ message ] ) => {
+			return message.startsWith( 'Duplicated name' );
 		} );
 
 		expect( errorCalls.length ).to.equal( expectedErrors.length );
 
-		expectedErrors.forEach( ( { source, error }, index ) => {
-			const [ message, reflection ] = errorCalls[ index ].args;
-			const currentValue = testUtils.getSource( reflection );
+		for ( const call of errorCalls ) {
+			expect( call ).toSatisfy( call => {
+				const [ message, reflection ] = call;
 
-			expect( message ).to.equal( error );
-			expect( currentValue ).to.equal( source );
-		} );
+				return expectedErrors.some( ( { source, error } ) => {
+					if ( message !== error ) {
+						return false;
+					}
+
+					if ( testUtils.getSource( reflection ) !== source ) {
+						return false;
+					}
+
+					return true;
+				} );
+			} );
+		}
 	} );
 } );
