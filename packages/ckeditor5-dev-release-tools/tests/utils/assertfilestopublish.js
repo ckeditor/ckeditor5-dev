@@ -126,7 +126,7 @@ describe( 'assertFilesToPublish()', () => {
 				return Promise.resolve( [ 'src/index.ts' ] );
 			}
 
-			return Promise.resolve( [ ] );
+			return Promise.resolve( [] );
 		} );
 
 		const optionalEntries = {
@@ -193,7 +193,7 @@ describe( 'assertFilesToPublish()', () => {
 		);
 	} );
 
-	it( 'should consider entry as required if there are not matches in optional entries', () => {
+	it( 'should consider entry as required if there are not matches in optional entries', async () => {
 		vi.mocked( fs ).readJson.mockResolvedValue( {
 			name: 'ckeditor5-foo',
 			files: [
@@ -217,15 +217,20 @@ describe( 'assertFilesToPublish()', () => {
 			]
 		};
 
-		return assertFilesToPublish( [ 'ckeditor5-foo' ], optionalEntries )
-			.then( () => {
-				expect( stubs.glob.glob.callCount ).to.equal( 2 );
-				expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.deep.equal( [ 'src', 'src/**' ] );
-				expect( stubs.glob.glob.secondCall.args[ 0 ] ).to.deep.equal( [ 'README.md', 'README.md/**' ] );
-			} );
+		await assertFilesToPublish( [ 'ckeditor5-foo' ], optionalEntries );
+
+		expect( vi.mocked( glob ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( glob ) ).toHaveBeenCalledWith(
+			[ 'src', 'src/**' ],
+			expect.any( Object )
+		);
+		expect( vi.mocked( glob ) ).toHaveBeenCalledWith(
+			[ 'README.md', 'README.md/**' ],
+			expect.any( Object )
+		);
 	} );
 
-	it( 'should not throw if `main` file exists', () => {
+	it( 'should not throw if `main` file exists', async () => {
 		vi.mocked( fs ).readJson.mockResolvedValue( {
 			name: 'ckeditor5-foo',
 			main: 'src/index.ts',
@@ -235,21 +240,35 @@ describe( 'assertFilesToPublish()', () => {
 			]
 		} );
 
-		stubs.glob.glob
-			.withArgs( [ 'src', 'src/**' ] ).resolves( [ 'src/index.ts' ] )
-			.withArgs( [ 'src/index.ts', 'src/index.ts/**' ] ).resolves( [ 'src/index.ts' ] )
-			.withArgs( [ 'README.md', 'README.md/**' ] ).resolves( [ 'README.md' ] );
+		vi.mocked( glob ).mockImplementation( input => {
+			if ( input[ 0 ] === 'src' ) {
+				return Promise.resolve( [ 'src/index.ts' ] );
+			}
+			if ( input[ 0 ] === 'src/index.ts' ) {
+				return Promise.resolve( [ 'src/index.ts' ] );
+			}
 
-		return assertFilesToPublish( [ 'ckeditor5-foo' ] )
-			.then( () => {
-				expect( stubs.glob.glob.callCount ).to.equal( 3 );
-				expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.deep.equal( [ 'src/index.ts', 'src/index.ts/**' ] );
-				expect( stubs.glob.glob.secondCall.args[ 0 ] ).to.deep.equal( [ 'src', 'src/**' ] );
-				expect( stubs.glob.glob.thirdCall.args[ 0 ] ).to.deep.equal( [ 'README.md', 'README.md/**' ] );
-			} );
+			return Promise.resolve( [ 'README.md' ] );
+		} );
+
+		await assertFilesToPublish( [ 'ckeditor5-foo' ] );
+
+		expect( vi.mocked( glob ) ).toHaveBeenCalledTimes( 3 );
+		expect( vi.mocked( glob ) ).toHaveBeenCalledWith(
+			[ 'src', 'src/**' ],
+			expect.any( Object )
+		);
+		expect( vi.mocked( glob ) ).toHaveBeenCalledWith(
+			[ 'src/index.ts', 'src/index.ts/**' ],
+			expect.any( Object )
+		);
+		expect( vi.mocked( glob ) ).toHaveBeenCalledWith(
+			[ 'README.md', 'README.md/**' ],
+			expect.any( Object )
+		);
 	} );
 
-	it( 'should not throw if `types` file exists', () => {
+	it( 'should not throw if `types` file exists', async () => {
 		vi.mocked( fs ).readJson.mockResolvedValue( {
 			name: 'ckeditor5-foo',
 			types: 'src/index.d.ts',
@@ -259,21 +278,35 @@ describe( 'assertFilesToPublish()', () => {
 			]
 		} );
 
-		stubs.glob.glob
-			.withArgs( [ 'src', 'src/**' ] ).resolves( [ 'src/index.ts' ] )
-			.withArgs( [ 'src/index.d.ts', 'src/index.d.ts/**' ] ).resolves( [ 'src/index.d.ts' ] )
-			.withArgs( [ 'README.md', 'README.md/**' ] ).resolves( [ 'README.md' ] );
+		vi.mocked( glob ).mockImplementation( input => {
+			if ( input[ 0 ] === 'src' ) {
+				return Promise.resolve( [ 'src/index.ts' ] );
+			}
+			if ( input[ 0 ] === 'src/index.d.ts' ) {
+				return Promise.resolve( [ 'src/index.d.ts' ] );
+			}
 
-		return assertFilesToPublish( [ 'ckeditor5-foo' ] )
-			.then( () => {
-				expect( stubs.glob.glob.callCount ).to.equal( 3 );
-				expect( stubs.glob.glob.firstCall.args[ 0 ] ).to.deep.equal( [ 'src/index.d.ts', 'src/index.d.ts/**' ] );
-				expect( stubs.glob.glob.secondCall.args[ 0 ] ).to.deep.equal( [ 'src', 'src/**' ] );
-				expect( stubs.glob.glob.thirdCall.args[ 0 ] ).to.deep.equal( [ 'README.md', 'README.md/**' ] );
-			} );
+			return Promise.resolve( [ 'README.md' ] );
+		} );
+
+		await assertFilesToPublish( [ 'ckeditor5-foo' ] );
+
+		expect( vi.mocked( glob ) ).toHaveBeenCalledTimes( 3 );
+		expect( vi.mocked( glob ) ).toHaveBeenCalledWith(
+			[ 'src', 'src/**' ],
+			expect.any( Object )
+		);
+		expect( vi.mocked( glob ) ).toHaveBeenCalledWith(
+			[ 'src/index.d.ts', 'src/index.d.ts/**' ],
+			expect.any( Object )
+		);
+		expect( vi.mocked( glob ) ).toHaveBeenCalledWith(
+			[ 'README.md', 'README.md/**' ],
+			expect.any( Object )
+		);
 	} );
 
-	it( 'should throw if not all files from `files` field exist', () => {
+	it( 'should throw if not all files from `files` field exist', async () => {
 		vi.mocked( fs ).readJson.mockResolvedValue( {
 			name: 'ckeditor5-foo',
 			files: [
@@ -283,101 +316,74 @@ describe( 'assertFilesToPublish()', () => {
 			]
 		} );
 
-		stubs.glob.glob.resolves( [] );
+		vi.mocked( glob ).mockResolvedValue( [] );
 
-		return assertFilesToPublish( [ 'ckeditor5-foo' ] )
-			.then(
-				() => {
-					throw new Error( 'Expected to be rejected.' );
-				},
-				error => {
-					expect( error ).to.be.an( 'Error' );
-					expect( error.message ).to.equal(
-						'Missing files in "ckeditor5-foo" package for entries: "src", "LICENSE.md", "README.md"'
-					);
-				} );
+		await expect( assertFilesToPublish( [ 'ckeditor5-foo' ] ) )
+			.rejects.toThrow( 'Missing files in "ckeditor5-foo" package for entries: "src", "LICENSE.md", "README.md"' );
 	} );
 
-	it( 'should throw if file from `main` field does not exist', () => {
+	it( 'should throw if file from `main` field does not exist', async () => {
 		vi.mocked( fs ).readJson.mockResolvedValue( {
 			name: 'ckeditor5-foo',
 			main: 'src/index.ts'
 		} );
 
-		stubs.glob.glob.resolves( [] );
+		vi.mocked( glob ).mockResolvedValue( [] );
 
-		return assertFilesToPublish( [ 'ckeditor5-foo' ] )
-			.then(
-				() => {
-					throw new Error( 'Expected to be rejected.' );
-				},
-				error => {
-					expect( error ).to.be.an( 'Error' );
-					expect( error.message ).to.equal(
-						'Missing files in "ckeditor5-foo" package for entries: "src/index.ts"'
-					);
-				} );
+		await expect( assertFilesToPublish( [ 'ckeditor5-foo' ] ) )
+			.rejects.toThrow( 'Missing files in "ckeditor5-foo" package for entries: "src/index.ts"' );
 	} );
 
-	it( 'should throw if file from `types` field does not exist', () => {
+	it( 'should throw if file from `types` field does not exist', async () => {
 		vi.mocked( fs ).readJson.mockResolvedValue( {
 			name: 'ckeditor5-foo',
 			types: 'src/index.d.ts'
 		} );
 
-		stubs.glob.glob.resolves( [] );
+		vi.mocked( glob ).mockResolvedValue( [] );
 
-		return assertFilesToPublish( [ 'ckeditor5-foo' ] )
-			.then(
-				() => {
-					throw new Error( 'Expected to be rejected.' );
-				},
-				error => {
-					expect( error ).to.be.an( 'Error' );
-					expect( error.message ).to.equal(
-						'Missing files in "ckeditor5-foo" package for entries: "src/index.d.ts"'
-					);
-				} );
+		await expect( assertFilesToPublish( [ 'ckeditor5-foo' ] ) )
+			.rejects.toThrow( 'Missing files in "ckeditor5-foo" package for entries: "src/index.d.ts"' );
 	} );
 
-	it( 'should throw one error for all packages with missing files', () => {
-		stubs.fs.readJson
-			.withArgs( 'ckeditor5-foo/package.json' ).resolves( {
-				name: 'ckeditor5-foo',
-				files: [
-					'src'
-				]
-			} )
-			.withArgs( 'ckeditor5-bar/package.json' ).resolves( {
-				name: 'ckeditor5-bar',
+	it( 'should throw one error for all packages with missing files', async () => {
+		vi.mocked( fs ).readJson.mockImplementation( input => {
+			if ( input === 'ckeditor5-foo/package.json' ) {
+				return Promise.resolve( {
+					name: 'ckeditor5-foo',
+					files: [
+						'src'
+					]
+				} );
+			}
+
+			if ( input === 'ckeditor5-bar/package.json' ) {
+				return Promise.resolve( {
+					name: 'ckeditor5-bar',
+					files: [
+						'src',
+						'README.md'
+					]
+				} );
+			}
+
+			return Promise.resolve( {
+				name: 'ckeditor5-baz',
 				files: [
 					'src',
+					'LICENSE.md',
 					'README.md'
 				]
-			} )
-			.withArgs( 'ckeditor5-baz/package.json' ).resolves( {
-			name: 'ckeditor5-baz',
-			files: [
-				'src',
-				'LICENSE.md',
-				'README.md'
-			]
+			} );
 		} );
 
-		stubs.glob.glob.resolves( [] );
+		vi.mocked( glob ).mockResolvedValue( [] );
 
-		return assertFilesToPublish( [ 'ckeditor5-foo', 'ckeditor5-bar', 'ckeditor5-baz' ] )
-			.then(
-				() => {
-					throw new Error( 'Expected to be rejected.' );
-				},
-				error => {
-					expect( error ).to.be.an( 'Error' );
-					expect( error.message ).to.equal(
-						'Missing files in "ckeditor5-foo" package for entries: "src"\n' +
-						'Missing files in "ckeditor5-bar" package for entries: "src", "README.md"\n' +
-						'Missing files in "ckeditor5-baz" package for entries: "src", "LICENSE.md", "README.md"'
-					);
-				} );
+		const errorMessage = 'Missing files in "ckeditor5-foo" package for entries: "src"\n' +
+			'Missing files in "ckeditor5-bar" package for entries: "src", "README.md"\n' +
+			'Missing files in "ckeditor5-baz" package for entries: "src", "LICENSE.md", "README.md"';
+
+		await expect( assertFilesToPublish( [ 'ckeditor5-foo', 'ckeditor5-bar', 'ckeditor5-baz' ] ) )
+			.rejects.toThrow( errorMessage );
 	} );
 } );
