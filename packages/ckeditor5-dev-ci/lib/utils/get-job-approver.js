@@ -3,10 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fetch = require( 'node-fetch' );
-
 /**
  * Returns a promise that resolves to GitHub name of a developer who approved the `jobName` job.
  *
@@ -15,7 +11,7 @@ const fetch = require( 'node-fetch' );
  * @param {String} jobName
  * @returns {Promise.<String>}
  */
-module.exports = async function getJobApprover( circleCiToken, workflowId, jobName ) {
+export default async function getJobApprover( circleCiToken, workflowId, jobName ) {
 	const circleRequestOptions = {
 		method: 'get',
 		headers: {
@@ -35,4 +31,4 @@ module.exports = async function getJobApprover( circleCiToken, workflowId, jobNa
 	const { login } = await fetch( userDetailsUrl, circleRequestOptions ).then( r => r.json() );
 
 	return login;
-};
+}

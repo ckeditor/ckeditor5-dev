@@ -5,15 +5,13 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs-extra' );
-const chalk = require( 'chalk' );
-const createSpinner = require( './utils/createspinner' );
-const parseArguments = require( './utils/parsearguments' );
-const validateConfig = require( './utils/validateconfig' );
-const parseConfig = require( './utils/parseconfig' );
-const GitHubRepository = require( '../lib/githubrepository' );
+import fs from 'fs-extra';
+import chalk from 'chalk';
+import createSpinner from './utils/createspinner.js';
+import parseArguments from './utils/parsearguments.js';
+import validateConfig from './utils/validateconfig.js';
+import parseConfig from './utils/parseconfig.js';
+import GitHubRepository from '../lib/githubrepository.js';
 
 main().catch( error => {
 	console.error( '\n🔥 Unable to process stale issues and pull requests.\n', error );
@@ -34,7 +32,7 @@ async function main() {
 		throw new Error( 'Missing or invalid CLI argument: --config-path' );
 	}
 
-	const config = require( configPath );
+	const config = await import( configPath );
 
 	validateConfig( config );
 
@@ -286,7 +284,7 @@ function printStatus( dryRun, searchResult, options ) {
 /**
  * Prints in the console issues and pull requests from a single section.
  *
- * @param {String} statusMessage Seaction header.
+ * @param {String} statusMessage Section header.
  * @param {Array.<IssueOrPullRequestResult>} entries Found issues and pull requests.
  */
 function printStatusSection( statusMessage, entries ) {

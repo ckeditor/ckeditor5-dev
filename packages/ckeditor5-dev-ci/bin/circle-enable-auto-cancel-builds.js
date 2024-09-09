@@ -5,9 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const circleUpdateAutoCancelBuilds = require( '../lib/circle-update-auto-cancel-builds' );
+import circleUpdateAutoCancelBuilds from '../lib/circle-update-auto-cancel-builds.js';
 
 /**
  * This script updates CircleCI settings to enable the "Auto-cancel redundant workflows" option.

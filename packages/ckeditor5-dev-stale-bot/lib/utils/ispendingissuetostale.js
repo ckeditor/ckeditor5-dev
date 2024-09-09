@@ -3,10 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { isBefore, parseISO } = require( 'date-fns' );
-const isPendingIssueStale = require( './ispendingissuestale' );
+import { isBefore, parseISO } from 'date-fns';
+import isPendingIssueStale from './ispendingissuestale.js';
 
 /**
  * Checks whether pending issue should be staled, because it was not answered by a community member since the defined moment of time.
@@ -15,7 +13,7 @@ const isPendingIssueStale = require( './ispendingissuestale' );
  * @param {Options} options Configuration options.
  * @returns {Boolean}
  */
-module.exports = function isPendingIssueToStale( pendingIssue, options ) {
+export default function isPendingIssueToStale( pendingIssue, options ) {
 	const { lastComment } = pendingIssue;
 	const { staleDatePendingIssue } = options;
 
@@ -32,4 +30,4 @@ module.exports = function isPendingIssueToStale( pendingIssue, options ) {
 	}
 
 	return isBefore( parseISO( lastComment.createdAt ), parseISO( staleDatePendingIssue ) );
-};
+}

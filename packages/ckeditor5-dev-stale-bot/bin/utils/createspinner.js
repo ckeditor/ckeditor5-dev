@@ -3,17 +3,15 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const ora = require( 'ora' );
-const chalk = require( 'chalk' );
+import ora from 'ora';
+import chalk from 'chalk';
 
 /**
  * Creates the spinner instance with methods to update spinner text.
  *
  * @returns {Spinner}
  */
-module.exports = function createSpinner() {
+export default function createSpinner() {
 	const instance = ora();
 
 	const printStatus = text => {
@@ -40,7 +38,7 @@ module.exports = function createSpinner() {
 		printStatus,
 		onProgress
 	};
-};
+}
 
 /**
  * @typedef {Object} Spinner
