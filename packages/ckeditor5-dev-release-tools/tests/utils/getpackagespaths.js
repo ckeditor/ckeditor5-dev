@@ -3,45 +3,32 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, it, expect, vi } from 'vitest';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import { getPackageJson } from '../../lib/utils/getpackagejson.js';
+import { getPackagesPaths } from '../../lib/utils/getpackagespaths.js';
 
-const path = require( 'path' );
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
+vi.mock( 'path', () => ( {
+	default: {
+		join: vi.fn( ( ...chunks ) => chunks.join( '/' ) )
+	}
+} ) );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( '../../lib/utils/getpackagejson.js' );
 
 describe( 'dev-release-tools/utils', () => {
 	describe( 'getPackagesPaths()', () => {
-		let getPackagesPaths, sandbox, getPackageJsonStub, getDirectoriesStub;
-
-		beforeEach( () => {
-			sandbox = sinon.createSandbox();
-
-			getPackageJsonStub = sandbox.stub();
-			getDirectoriesStub = sandbox.stub();
-
-			sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
-
-			getPackagesPaths = proxyquire( '../../lib/utils/getpackagespaths', {
-				'./getpackagejson': getPackageJsonStub,
-				'@ckeditor/ckeditor5-dev-utils': {
-					tools: {
-						getDirectories: getDirectoriesStub
-					}
-				}
-			} );
-		} );
-
-		afterEach( () => {
-			sandbox.restore();
-		} );
-
 		it( 'returns all found packages', () => {
-			getDirectoriesStub.returns( [
+			vi.mocked( tools.getDirectories ).mockReturnValue( [
 				'ckeditor5-core',
 				'ckeditor5-engine',
 				'ckeditor5-utils'
 			] );
+
+			vi.mocked( getPackageJson )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-core' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-engine' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-utils' } );
 
 			const options = {
 				cwd: '/tmp',
@@ -50,29 +37,30 @@ describe( 'dev-release-tools/utils', () => {
 				skipMainRepository: true
 			};
 
-			getPackageJsonStub.onCall( 0 ).returns( { name: '@ckeditor/ckeditor5-core' } );
-			getPackageJsonStub.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-engine' } );
-			getPackageJsonStub.onCall( 2 ).returns( { name: '@ckeditor/ckeditor5-utils' } );
-
 			const pathsCollection = getPackagesPaths( options );
 
-			expect( pathsCollection.matched ).to.be.instanceof( Set );
-			expect( pathsCollection.matched.size ).to.equal( 3 );
-			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-core' ) ).to.equal( true );
-			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-engine' ) ).to.equal( true );
-			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-utils' ) ).to.equal( true );
+			expect( pathsCollection.matched ).toBeInstanceOf( Set );
+			expect( pathsCollection.matched.size ).toEqual( 3 );
+			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-core' ) ).toEqual( true );
+			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-engine' ) ).toEqual( true );
+			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-utils' ) ).toEqual( true );
 
-			expect( pathsCollection.skipped ).to.be.instanceof( Set );
-			expect( pathsCollection.skipped.size ).to.equal( 1 );
-			expect( pathsCollection.skipped.has( '/tmp' ) ).to.equal( true );
+			expect( pathsCollection.skipped ).toBeInstanceOf( Set );
+			expect( pathsCollection.skipped.size ).toEqual( 1 );
+			expect( pathsCollection.skipped.has( '/tmp' ) ).toEqual( true );
 		} );
 
 		it( 'allows ignoring specified packages (specified as array)', () => {
-			getDirectoriesStub.returns( [
+			vi.mocked( tools.getDirectories ).mockReturnValue( [
 				'ckeditor5-core',
 				'ckeditor5-engine',
 				'ckeditor5-utils'
 			] );
+
+			vi.mocked( getPackageJson )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-core' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-engine' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-utils' } );
 
 			const options = {
 				cwd: '/tmp',
@@ -83,27 +71,28 @@ describe( 'dev-release-tools/utils', () => {
 				skipMainRepository: true
 			};
 
-			getPackageJsonStub.onCall( 0 ).returns( { name: '@ckeditor/ckeditor5-core' } );
-			getPackageJsonStub.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-engine' } );
-			getPackageJsonStub.onCall( 2 ).returns( { name: '@ckeditor/ckeditor5-utils' } );
-
 			const pathsCollection = getPackagesPaths( options );
 
-			expect( pathsCollection.matched ).to.be.instanceof( Set );
-			expect( pathsCollection.matched.size ).to.equal( 2 );
+			expect( pathsCollection.matched ).toBeInstanceOf( Set );
+			expect( pathsCollection.matched.size ).toEqual( 2 );
 
-			expect( pathsCollection.skipped ).to.be.instanceof( Set );
-			expect( pathsCollection.skipped.size ).to.equal( 2 );
-			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).to.equal( true );
-			expect( pathsCollection.skipped.has( '/tmp' ) ).to.equal( true );
+			expect( pathsCollection.skipped ).toBeInstanceOf( Set );
+			expect( pathsCollection.skipped.size ).toEqual( 2 );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).toEqual( true );
+			expect( pathsCollection.skipped.has( '/tmp' ) ).toEqual( true );
 		} );
 
 		it( 'allows ignoring specified packages (specified as string)', () => {
-			getDirectoriesStub.returns( [
+			vi.mocked( tools.getDirectories ).mockReturnValue( [
 				'ckeditor5-core',
 				'ckeditor5-engine',
 				'ckeditor5-utils'
 			] );
+
+			vi.mocked( getPackageJson )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-core' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-engine' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-utils' } );
 
 			const options = {
 				cwd: '/tmp',
@@ -111,29 +100,33 @@ describe( 'dev-release-tools/utils', () => {
 				skipPackages: '@ckeditor/ckeditor5-u*',
 				skipMainRepository: true
 			};
-			getPackageJsonStub.onCall( 0 ).returns( { name: '@ckeditor/ckeditor5-core' } );
-			getPackageJsonStub.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-engine' } );
-			getPackageJsonStub.onCall( 2 ).returns( { name: '@ckeditor/ckeditor5-utils' } );
 
 			const pathsCollection = getPackagesPaths( options );
 
-			expect( pathsCollection.matched ).to.be.instanceof( Set );
-			expect( pathsCollection.matched.size ).to.equal( 2 );
+			expect( pathsCollection.matched ).toBeInstanceOf( Set );
+			expect( pathsCollection.matched.size ).toEqual( 2 );
 
-			expect( pathsCollection.skipped ).to.be.instanceof( Set );
-			expect( pathsCollection.skipped.size ).to.equal( 2 );
-			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).to.equal( true );
-			expect( pathsCollection.skipped.has( '/tmp' ) ).to.equal( true );
+			expect( pathsCollection.skipped ).toBeInstanceOf( Set );
+			expect( pathsCollection.skipped.size ).toEqual( 2 );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).toEqual( true );
+			expect( pathsCollection.skipped.has( '/tmp' ) ).toEqual( true );
 		} );
 
 		it( 'allows restricting the scope for packages', () => {
-			getDirectoriesStub.returns( [
+			vi.mocked( tools.getDirectories ).mockReturnValue( [
 				'ckeditor5-core',
 				'ckeditor5-engine',
 				'ckeditor5-utils',
 				'ckeditor5-build-classic',
 				'ckeditor5-build-inline'
 			] );
+
+			vi.mocked( getPackageJson )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-core' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-engine' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-utils' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-build-classic' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-build-inline' } );
 
 			const options = {
 				cwd: '/tmp',
@@ -143,35 +136,36 @@ describe( 'dev-release-tools/utils', () => {
 				skipMainRepository: true
 			};
 
-			getPackageJsonStub.onCall( 0 ).returns( { name: '@ckeditor/ckeditor5-core' } );
-			getPackageJsonStub.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-engine' } );
-			getPackageJsonStub.onCall( 2 ).returns( { name: '@ckeditor/ckeditor5-utils' } );
-			getPackageJsonStub.onCall( 3 ).returns( { name: '@ckeditor/ckeditor5-build-classic' } );
-			getPackageJsonStub.onCall( 4 ).returns( { name: '@ckeditor/ckeditor5-build-inline' } );
-
 			const pathsCollection = getPackagesPaths( options );
 
-			expect( pathsCollection.matched ).to.be.instanceof( Set );
-			expect( pathsCollection.matched.size ).to.equal( 2 );
-			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-build-classic' ) ).to.equal( true );
-			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-build-inline' ) ).to.equal( true );
+			expect( pathsCollection.matched ).toBeInstanceOf( Set );
+			expect( pathsCollection.matched.size ).toEqual( 2 );
+			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-build-classic' ) ).toEqual( true );
+			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-build-inline' ) ).toEqual( true );
 
-			expect( pathsCollection.skipped ).to.be.instanceof( Set );
-			expect( pathsCollection.skipped.size ).to.equal( 4 );
-			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-core' ) ).to.equal( true );
-			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-engine' ) ).to.equal( true );
-			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).to.equal( true );
-			expect( pathsCollection.skipped.has( '/tmp' ) ).to.equal( true );
+			expect( pathsCollection.skipped ).toBeInstanceOf( Set );
+			expect( pathsCollection.skipped.size ).toEqual( 4 );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-core' ) ).toEqual( true );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-engine' ) ).toEqual( true );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).toEqual( true );
+			expect( pathsCollection.skipped.has( '/tmp' ) ).toEqual( true );
 		} );
 
 		it( 'allows restricting the scope for packages and works fine with "skipPackages" option', () => {
-			getDirectoriesStub.returns( [
+			vi.mocked( tools.getDirectories ).mockReturnValue( [
 				'ckeditor5-core',
 				'ckeditor5-engine',
 				'ckeditor5-utils',
 				'ckeditor5-build-classic',
 				'ckeditor5-build-inline'
 			] );
+
+			vi.mocked( getPackageJson )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-core' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-engine' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-utils' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-build-classic' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-build-inline' } );
 
 			const options = {
 				cwd: '/tmp',
@@ -183,35 +177,36 @@ describe( 'dev-release-tools/utils', () => {
 				skipMainRepository: true
 			};
 
-			getPackageJsonStub.onCall( 0 ).returns( { name: '@ckeditor/ckeditor5-core' } );
-			getPackageJsonStub.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-engine' } );
-			getPackageJsonStub.onCall( 2 ).returns( { name: '@ckeditor/ckeditor5-utils' } );
-			getPackageJsonStub.onCall( 3 ).returns( { name: '@ckeditor/ckeditor5-build-classic' } );
-			getPackageJsonStub.onCall( 4 ).returns( { name: '@ckeditor/ckeditor5-build-inline' } );
-
 			const pathsCollection = getPackagesPaths( options );
 
-			expect( pathsCollection.matched ).to.be.instanceof( Set );
-			expect( pathsCollection.matched.size ).to.equal( 1 );
-			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-build-classic' ) ).to.equal( true );
+			expect( pathsCollection.matched ).toBeInstanceOf( Set );
+			expect( pathsCollection.matched.size ).toEqual( 1 );
+			expect( pathsCollection.matched.has( '/tmp/packages/ckeditor5-build-classic' ) ).toEqual( true );
 
-			expect( pathsCollection.skipped ).to.be.instanceof( Set );
-			expect( pathsCollection.skipped.size ).to.equal( 5 );
-			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-core' ) ).to.equal( true );
-			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-engine' ) ).to.equal( true );
-			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).to.equal( true );
-			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-build-inline' ) ).to.equal( true );
-			expect( pathsCollection.skipped.has( '/tmp' ) ).to.equal( true );
+			expect( pathsCollection.skipped ).toBeInstanceOf( Set );
+			expect( pathsCollection.skipped.size ).toEqual( 5 );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-core' ) ).toEqual( true );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-engine' ) ).toEqual( true );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).toEqual( true );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-build-inline' ) ).toEqual( true );
+			expect( pathsCollection.skipped.has( '/tmp' ) ).toEqual( true );
 		} );
 
 		it( 'allows returning the main repository', () => {
-			getDirectoriesStub.returns( [
+			vi.mocked( tools.getDirectories ).mockReturnValue( [
 				'ckeditor5-core',
 				'ckeditor5-engine',
 				'ckeditor5-utils',
 				'ckeditor5-build-classic',
 				'ckeditor5-build-inline'
 			] );
+
+			vi.mocked( getPackageJson )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-core' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-engine' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-utils' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-build-classic' } )
+				.mockReturnValueOnce( { name: '@ckeditor/ckeditor5-build-inline' } );
 
 			const options = {
 				cwd: '/tmp',
@@ -222,25 +217,19 @@ describe( 'dev-release-tools/utils', () => {
 				skipMainRepository: false
 			};
 
-			getPackageJsonStub.onCall( 0 ).returns( { name: '@ckeditor/ckeditor5-core' } );
-			getPackageJsonStub.onCall( 1 ).returns( { name: '@ckeditor/ckeditor5-engine' } );
-			getPackageJsonStub.onCall( 2 ).returns( { name: '@ckeditor/ckeditor5-utils' } );
-			getPackageJsonStub.onCall( 3 ).returns( { name: '@ckeditor/ckeditor5-build-classic' } );
-			getPackageJsonStub.onCall( 4 ).returns( { name: '@ckeditor/ckeditor5-build-inline' } );
-
 			const pathsCollection = getPackagesPaths( options );
 
-			expect( pathsCollection.matched ).to.be.instanceof( Set );
-			expect( pathsCollection.matched.size ).to.equal( 1 );
-			expect( pathsCollection.matched.has( '/tmp' ) ).to.equal( true );
+			expect( pathsCollection.matched ).toBeInstanceOf( Set );
+			expect( pathsCollection.matched.size ).toEqual( 1 );
+			expect( pathsCollection.matched.has( '/tmp' ) ).toEqual( true );
 
-			expect( pathsCollection.skipped ).to.be.instanceof( Set );
-			expect( pathsCollection.skipped.size ).to.equal( 5 );
-			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-core' ) ).to.equal( true );
-			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-engine' ) ).to.equal( true );
-			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).to.equal( true );
-			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-build-inline' ) ).to.equal( true );
-			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-build-classic' ) ).to.equal( true );
+			expect( pathsCollection.skipped ).toBeInstanceOf( Set );
+			expect( pathsCollection.skipped.size ).toEqual( 5 );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-core' ) ).toEqual( true );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-engine' ) ).toEqual( true );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-utils' ) ).toEqual( true );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-build-inline' ) ).toEqual( true );
+			expect( pathsCollection.skipped.has( '/tmp/packages/ckeditor5-build-classic' ) ).toEqual( true );
 		} );
 
 		it( 'allows returning the main repository only (skipMainRepository=false)', () => {
@@ -251,12 +240,12 @@ describe( 'dev-release-tools/utils', () => {
 
 			const pathsCollection = getPackagesPaths( options );
 
-			expect( pathsCollection.matched ).to.be.instanceof( Set );
-			expect( pathsCollection.matched.size ).to.equal( 1 );
-			expect( pathsCollection.matched.has( '/tmp' ) ).to.equal( true );
+			expect( pathsCollection.matched ).toBeInstanceOf( Set );
+			expect( pathsCollection.matched.size ).toEqual( 1 );
+			expect( pathsCollection.matched.has( '/tmp' ) ).toEqual( true );
 
-			expect( pathsCollection.skipped ).to.be.instanceof( Set );
-			expect( pathsCollection.skipped.size ).to.equal( 0 );
+			expect( pathsCollection.skipped ).toBeInstanceOf( Set );
+			expect( pathsCollection.skipped.size ).toEqual( 0 );
 		} );
 
 		it( 'allows returning the main repository only (skipMainRepository=true)', () => {
@@ -268,12 +257,12 @@ describe( 'dev-release-tools/utils', () => {
 
 			const pathsCollection = getPackagesPaths( options );
 
-			expect( pathsCollection.matched ).to.be.instanceof( Set );
-			expect( pathsCollection.matched.size ).to.equal( 0 );
+			expect( pathsCollection.matched ).toBeInstanceOf( Set );
+			expect( pathsCollection.matched.size ).toEqual( 0 );
 
-			expect( pathsCollection.skipped ).to.be.instanceof( Set );
-			expect( pathsCollection.skipped.size ).to.equal( 1 );
-			expect( pathsCollection.skipped.has( '/tmp' ) ).to.equal( true );
+			expect( pathsCollection.skipped ).toBeInstanceOf( Set );
+			expect( pathsCollection.skipped.size ).toEqual( 1 );
+			expect( pathsCollection.skipped.has( '/tmp' ) ).toEqual( true );
 		} );
 	} );
 } );
