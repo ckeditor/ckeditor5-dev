@@ -3,5 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-export { default as getJobApprover } from './utils/get-job-approver.js';
-export { members } from './data/index.js';
+/* global window */
+
+window.CKEDITOR_GLOBAL_LICENSE_KEY = 'GPL';

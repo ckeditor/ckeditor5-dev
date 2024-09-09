@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-docs",
-  "version": "43.0.0-alpha.0",
+  "version": "43.0.0",
   "description": "Tasks used to build and verify the documentation for CKEditor 5.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -16,14 +16,15 @@
     "node": ">=18.0.0",
     "npm": ">=5.7.1"
   },
+  "type": "module",
   "main": "lib/index.js",
   "files": [
     "lib"
   ],
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^43.0.0-alpha.0",
-    "@ckeditor/jsdoc-plugins": "^43.0.0-alpha.0",
-    "@ckeditor/typedoc-plugins": "^43.0.0-alpha.0",
+    "@ckeditor/ckeditor5-dev-utils": "^43.0.0",
+    "@ckeditor/jsdoc-plugins": "^43.0.0",
+    "@ckeditor/typedoc-plugins": "^43.0.0",
     "fast-glob": "^3.2.4",
     "fs-extra": "^11.2.0",
     "jsdoc": "ckeditor/jsdoc#fixed-trailing-comment-doclets",
@@ -32,15 +33,11 @@
     "typedoc-plugin-rename-defaults": "0.6.6"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "mocha": "^7.1.2",
-    "proxyquire": "^2.1.3",
-    "sinon": "^9.2.4",
-    "sinon-chai": "^3.7.0"
+    "vitest": "^2.0.5"
   },
   "scripts": {
-    "test": "mocha './tests/**/*.js' --timeout 10000",
-    "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test"
+    "test": "vitest run --config vitest.config.js",
+    "coverage": "vitest run --config vitest.config.js --coverage"
   },
   "depcheckIgnore": [
     "typedoc-plugin-rename-defaults"

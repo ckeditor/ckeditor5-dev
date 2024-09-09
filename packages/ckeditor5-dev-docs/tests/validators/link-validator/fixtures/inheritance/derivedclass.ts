@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import BaseCLass from './baseclass';
+import BaseCLass from './baseclass.js';
 
 /**
  * @module fixtures/inheritance/derivedclass

@@ -1,6 +1,6 @@
 {
   "name": "@ckeditor/ckeditor5-dev-stale-bot",
-  "version": "43.0.0-alpha.0",
+  "version": "43.0.0",
   "description": "A stale bot is used to mark issues and pull requests that have not recently been updated.",
   "keywords": [],
   "author": "CKSource (http://cksource.com/)",
@@ -16,6 +16,7 @@
     "node": ">=18.0.0",
     "npm": ">=5.7.1"
   },
+  "type": "module",
   "files": [
     "bin",
     "lib"
@@ -24,7 +25,7 @@
     "ckeditor5-dev-stale-bot": "bin/stale-bot.js"
   },
   "dependencies": {
-    "@ckeditor/ckeditor5-dev-utils": "^43.0.0-alpha.0",
+    "@ckeditor/ckeditor5-dev-utils": "^43.0.0",
     "chalk": "^4.1.0",
     "date-fns": "^2.30.0",
     "fs-extra": "^11.2.0",
@@ -35,14 +36,11 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "mocha": "^7.1.2",
-    "sinon": "^9.2.4",
-    "proxyquire": "^2.1.3"
+    "vitest": "^2.0.5"
   },
   "scripts": {
-    "test": "mocha './tests/**/*.js' --timeout 10000",
-    "coverage": "nyc --reporter=lcov --reporter=text-summary yarn run test"
+    "test": "vitest run --config vitest.config.js",
+    "coverage": "vitest run --config vitest.config.js --coverage"
   },
   "depcheckIgnore": [
     "graphql"

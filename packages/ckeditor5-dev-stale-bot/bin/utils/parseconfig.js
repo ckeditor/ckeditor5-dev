@@ -3,9 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { subDays, formatISO } = require( 'date-fns' );
+import { subDays, formatISO } from 'date-fns';
 
 /**
  * Converts configuration options into format required by the GitHubRepository.
@@ -14,7 +12,7 @@ const { subDays, formatISO } = require( 'date-fns' );
  * @param {Config} config Configuration options.
  * @returns {Options}
  */
-module.exports = function parseConfig( viewerLogin, config ) {
+export default function parseConfig( viewerLogin, config ) {
 	const {
 		REPOSITORY_SLUG,
 		STALE_LABELS,
@@ -63,7 +61,7 @@ module.exports = function parseConfig( viewerLogin, config ) {
 			[ ...IGNORED_ACTIVITY_LOGINS, viewerLogin ] :
 			IGNORED_ACTIVITY_LOGINS
 	};
-};
+}
 
 /**
  * @typedef {Object} Config

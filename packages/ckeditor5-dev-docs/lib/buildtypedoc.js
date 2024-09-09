@@ -3,13 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import glob from 'fast-glob';
+import TypeDoc from 'typedoc';
+import typedocPlugins from '@ckeditor/typedoc-plugins';
 
-const glob = require( 'fast-glob' );
-const TypeDoc = require( 'typedoc' );
-const { plugins } = require( '@ckeditor/typedoc-plugins' );
-
-const validators = require( './validators' );
+import validators from './validators/index.js';
 
 /**
  * Builds CKEditor 5 documentation using `typedoc`.
@@ -17,7 +15,8 @@ const validators = require( './validators' );
  * @param {TypedocConfig} config
  * @returns {Promise}
  */
-module.exports = async function build( config ) {
+export default async function build( config ) {
+	const { plugins } = typedocPlugins;
 	const sourceFilePatterns = config.sourceFiles.filter( Boolean );
 	const strictMode = config.strict || false;
 	const extraPlugins = config.extraPlugins || [];
@@ -89,4 +88,4 @@ module.exports = async function build( config ) {
 	}
 
 	console.log( `Documented ${ files.length } files!` );
-};
+}

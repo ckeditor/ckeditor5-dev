@@ -7,8 +7,8 @@
 
 /* eslint-env node */
 
-const formatMessage = require( '../lib/format-message' );
-const slackNotify = require( 'slack-notify' );
+import formatMessage from '../lib/format-message.js';
+import slackNotify from 'slack-notify';
 
 const ALLOWED_BRANCHES = [
 	'stable',

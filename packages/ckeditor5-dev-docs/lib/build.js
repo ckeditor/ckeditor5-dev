@@ -3,25 +3,23 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 /**
  * Builds CKEditor 5 documentation.
  *
  * @param {JSDocConfig|TypedocConfig} config
  * @returns {Promise}
  */
-module.exports = async function build( config ) {
+export default async function build( config ) {
 	const type = config.type || 'jsdoc';
 
 	if ( type === 'jsdoc' ) {
-		return require( './buildjsdoc' )( config );
+		return ( await import( './buildjsdoc.js' ) ).default( config );
 	} else if ( type === 'typedoc' ) {
-		return require( './buildtypedoc' )( config );
+		return ( await import( './buildtypedoc.js' ) ).default( config );
 	} else {
 		throw new Error( `Unknown documentation tool (${ type }).` );
 	}
-};
+}
 
 /**
  * @typedef {Object} JSDocConfig

@@ -3,12 +3,13 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { createRequire } from 'module';
+import fs from 'fs-extra';
+import tmp from 'tmp';
+import glob from 'fast-glob';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
-const fs = require( 'fs-extra' );
-const tmp = require( 'tmp' );
-const glob = require( 'fast-glob' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+const require = createRequire( import.meta.url );
 
 /**
  * Builds CKEditor 5 documentation using `jsdoc`.
@@ -16,7 +17,7 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {JSDocConfig} config
  * @returns {Promise}
  */
-module.exports = async function build( config ) {
+export default async function build( config ) {
 	const sourceFilePatterns = [
 		config.readmePath,
 		...config.sourceFiles
@@ -90,4 +91,4 @@ module.exports = async function build( config ) {
 	}
 
 	console.log( `Documented ${ files.length } files!` );
-};
+}
