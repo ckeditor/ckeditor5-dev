@@ -3,45 +3,17 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, it, expect, vi } from 'vitest';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
+import validateRepositoryToRelease from '../../lib/utils/validaterepositorytorelease.js';
+
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'dev-release-tools/utils', () => {
 	describe( 'validateRepositoryToRelease()', () => {
-		let validateRepositoryToRelease, sandbox, stubs;
-
-		beforeEach( () => {
-			sandbox = sinon.createSandbox();
-
-			stubs = {
-				devUtils: {
-					tools: {
-						shExec: sandbox.stub()
-					}
-				}
-			};
-
-			mockery.enable( {
-				useCleanCache: true,
-				warnOnReplace: false,
-				warnOnUnregistered: false
-			} );
-
-			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', stubs.devUtils );
-
-			validateRepositoryToRelease = require( '../../lib/utils/validaterepositorytorelease' );
-		} );
-
-		afterEach( () => {
-			sandbox.restore();
-			mockery.disable();
-		} );
-
 		it( 'resolves an empty array if validation passes (remote branch exists)', async () => {
-			stubs.devUtils.tools.shExec.resolves( '## master...origin/master' );
+			vi.mocked( tools.shExec ).mockResolvedValue( '## master...origin/master' );
 
 			const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0' } );
 
@@ -50,7 +22,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'resolves an empty array if validation passes (missing remote branch)', async () => {
-			stubs.devUtils.tools.shExec.resolves( '## master' );
+			vi.mocked( tools.shExec ).mockResolvedValue( '## master' );
 
 			const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0' } );
 
@@ -59,7 +31,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'resolves an array with errors if the release changes are not defined', async () => {
-			stubs.devUtils.tools.shExec.resolves( '## master...origin/master' );
+			vi.mocked( tools.shExec ).mockResolvedValue( '## master...origin/master' );
 
 			const errors = await validateRepositoryToRelease( { changes: null, version: '1.0.0' } );
 
@@ -68,7 +40,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'resolves an array with errors if the specified version is not a string', async () => {
-			stubs.devUtils.tools.shExec.resolves( '## master...origin/master' );
+			vi.mocked( tools.shExec ).mockResolvedValue( '## master...origin/master' );
 
 			const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: null } );
 
@@ -77,7 +49,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'resolves an array with errors if the specified version is empty string', async () => {
-			stubs.devUtils.tools.shExec.resolves( '## master...origin/master' );
+			vi.mocked( tools.shExec ).mockResolvedValue( '## master...origin/master' );
 
 			const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '' } );
 
@@ -86,7 +58,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'resolves an array with errors if current branch is not "master" (remote branch exists)', async () => {
-			stubs.devUtils.tools.shExec.resolves( '## develop...origin/develop' );
+			vi.mocked( tools.shExec ).mockResolvedValue( '## develop...origin/develop' );
 
 			const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0' } );
 
@@ -95,7 +67,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'resolves an array with errors if current branch is not "master" (missing remote branch)', async () => {
-			stubs.devUtils.tools.shExec.resolves( '## develop' );
+			vi.mocked( tools.shExec ).mockResolvedValue( '## develop' );
 
 			const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0' } );
 
@@ -104,7 +76,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'resolves an array with errors if master is behind with origin (remote branch exists)', async () => {
-			stubs.devUtils.tools.shExec.resolves( '## master...origin/master [behind 2]' );
+			vi.mocked( tools.shExec ).mockResolvedValue( '## master...origin/master [behind 2]' );
 
 			const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0' } );
 
@@ -113,7 +85,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'resolves an array with errors if master is behind with origin (missing remote branch)', async () => {
-			stubs.devUtils.tools.shExec.resolves( '## master [behind 2]' );
+			vi.mocked( tools.shExec ).mockResolvedValue( '## master [behind 2]' );
 
 			const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0' } );
 
@@ -122,7 +94,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'allows skipping the branch check', async () => {
-			stubs.devUtils.tools.shExec.resolves( '## develop...origin/develop' );
+			vi.mocked( tools.shExec ).mockResolvedValue( '## develop...origin/develop' );
 
 			const errors = await validateRepositoryToRelease( { changes: 'Some changes.', version: '1.0.0', ignoreBranchCheck: true } );
 
@@ -130,7 +102,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'uses non-master branch for releasing if specified', async () => {
-			stubs.devUtils.tools.shExec.resolves( '## release...origin/release' );
+			vi.mocked( tools.shExec ).mockResolvedValue( '## release...origin/release' );
 
 			const errors = await validateRepositoryToRelease( { branch: 'release', changes: 'Some changes.', version: '1.0.0' } );
 
@@ -139,7 +111,7 @@ describe( 'dev-release-tools/utils', () => {
 		} );
 
 		it( 'allows skipping the branch check (even if specified)', async () => {
-			stubs.devUtils.tools.shExec.resolves( '## develop...origin/develop' );
+			vi.mocked( tools.shExec ).mockResolvedValue( '## develop...origin/develop' );
 
 			const errors = await validateRepositoryToRelease( {
 				branch: 'release',
