@@ -7,8 +7,8 @@
 
 /* eslint-env node */
 
-const chalk = require( 'chalk' );
-const ora = require( 'ora' );
+import chalk from 'chalk';
+import ora from 'ora';
 
 /**
  * Creates nice-looking CLI spinner.
@@ -51,7 +51,7 @@ function getProgressHandler( spinner, { verbose } ) {
 	};
 }
 
-module.exports = {
+export default {
 	createSpinner,
 	getProgressHandler
 };
