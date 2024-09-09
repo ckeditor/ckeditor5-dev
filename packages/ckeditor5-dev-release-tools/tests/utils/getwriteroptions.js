@@ -3,26 +3,13 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
+import { describe, it, expect, vi } from 'vitest';
+import { getWriterOptions } from '../../lib/utils/getwriteroptions.js';
 
 describe( 'dev-release-tools/utils', () => {
-	let getWriterOptions, sandbox, transformSpy;
-
-	beforeEach( () => {
-		transformSpy = sinon.spy();
-		sandbox = sinon.createSandbox();
-
-		getWriterOptions = require( '../../lib/utils/getwriteroptions' );
-	} );
-
-	afterEach( () => {
-		sandbox.restore();
-	} );
-
 	describe( 'getWriterOptions()', () => {
+		const transformSpy = vi.fn();
+
 		it( 'returns an object with writer options', () => {
 			const writerOptions = getWriterOptions( transformSpy );
 

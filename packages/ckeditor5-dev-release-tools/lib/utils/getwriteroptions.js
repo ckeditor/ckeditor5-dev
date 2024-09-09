@@ -5,8 +5,9 @@
 
 import fs from 'fs';
 import path from 'path';
+import utils from './transformcommitutils.js';
+
 const templatePath = path.join( __dirname, '..', 'templates' );
-import { getTypeOrder } from './transformcommitutils';
 
 /**
  * @param {Function|Object} transform
@@ -27,5 +28,5 @@ export function getWriterOptions( transform ) {
 }
 
 function sortFunction( a, b ) {
-	return getTypeOrder( a.title ) - getTypeOrder( b.title );
+	return utils.getTypeOrder( a.title ) - utils.getTypeOrder( b.title );
 }
