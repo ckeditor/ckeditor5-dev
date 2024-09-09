@@ -3,17 +3,17 @@
  * For licensing, see LICENSE.md.
  */
 
-export { default as generateChangelogForSinglePackage } from './tasks/generatechangelogforsinglepackage';
-export { default as generateChangelogForMonoRepository } from './tasks/generatechangelogformonorepository';
-export { default as updateDependencies } from './tasks/updatedependencies';
-export { default as commitAndTag } from './tasks/commitandtag';
-export { default as createGithubRelease } from './tasks/creategithubrelease';
-export { default as reassignNpmTags } from './tasks/reassignnpmtags';
-export { default as prepareRepository } from './tasks/preparerepository';
-export { default as push } from './tasks/push';
-export { default as publishPackages } from './tasks/publishpackages';
-export { default as updateVersions } from './tasks/updateversions';
-export { default as cleanUpPackages } from './tasks/cleanuppackages';
+export { default as generateChangelogForSinglePackage } from './tasks/generatechangelogforsinglepackage.js';
+export { default as generateChangelogForMonoRepository } from './tasks/generatechangelogformonorepository.js';
+export { default as updateDependencies } from './tasks/updatedependencies.js';
+export { default as commitAndTag } from './tasks/commitandtag.js';
+export { default as createGithubRelease } from './tasks/creategithubrelease.js';
+export { default as reassignNpmTags } from './tasks/reassignnpmtags.js';
+export { default as prepareRepository } from './tasks/preparerepository.js';
+export { default as push } from './tasks/push.js';
+export { default as publishPackages } from './tasks/publishpackages.js';
+export { default as updateVersions } from './tasks/updateversions.js';
+export { default as cleanUpPackages } from './tasks/cleanuppackages.js';
 export {
 	getLastFromChangelog,
 	getLastPreRelease,
@@ -22,11 +22,11 @@ export {
 	getNextNightly,
 	getCurrent,
 	getLastTagFromGit
-} from './utils/versions';
-export { getChangesForVersion, getChangelog, saveChangelog } from './utils/changelog';
-export { default as executeInParallel } from './utils/executeinparallel';
-export { default as validateRepositoryToRelease } from './utils/validaterepositorytorelease';
-export { default as checkVersionAvailability } from './utils/checkversionavailability';
-export { default as verifyPackagesPublishedCorrectly } from './tasks/verifypackagespublishedcorrectly';
-export { default as getNpmTagFromVersion } from './utils/getnpmtagfromversion';
-export { default as isVersionPublishableForTag } from './utils/isversionpublishablefortag';
+} from './utils/versions.js';
+export { getChangesForVersion, getChangelog, saveChangelog } from './utils/changelog.js';
+export { default as executeInParallel } from './utils/executeinparallel.js';
+export { default as validateRepositoryToRelease } from './utils/validaterepositorytorelease.js';
+export { default as checkVersionAvailability } from './utils/checkversionavailability.js';
+export { default as verifyPackagesPublishedCorrectly } from './tasks/verifypackagespublishedcorrectly.js';
+export { default as getNpmTagFromVersion } from './utils/getnpmtagfromversion.js';
+export { default as isVersionPublishableForTag } from './utils/isversionpublishablefortag.js';
