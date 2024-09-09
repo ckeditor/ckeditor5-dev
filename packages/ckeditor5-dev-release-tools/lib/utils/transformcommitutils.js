@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import getPackageJson from './getpackagejson';
+import { getPackageJson } from './getpackagejson.js';
 
 const transformCommitUtils = {
 	/**

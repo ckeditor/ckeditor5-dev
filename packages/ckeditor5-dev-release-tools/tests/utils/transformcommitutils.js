@@ -3,32 +3,15 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, it, expect, vi } from 'vitest';
+import { getPackageJson } from '../../lib/utils/getpackagejson.js';
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
+import transformCommitUtils from '../../lib/utils/transformcommitutils.js';
+
+vi.mock( '../../lib/utils/getpackagejson.js' );
 
 describe( 'dev-release-tools/utils', () => {
-	let transformCommitUtils, sandbox, stubs;
-
 	describe( 'transformCommitUtils', () => {
-		beforeEach( () => {
-			sandbox = sinon.createSandbox();
-
-			stubs = {
-				getPackageJson: sandbox.stub()
-			};
-
-			transformCommitUtils = proxyquire( '../../lib/utils/transformcommitutils', {
-				'./getpackagejson': stubs.getPackageJson
-			} );
-		} );
-
-		afterEach( () => {
-			sandbox.restore();
-		} );
-
 		describe( 'availableTypes', () => {
 			it( 'should be defined', () => {
 				expect( transformCommitUtils.availableCommitTypes ).to.be.a( 'Map' );
@@ -125,7 +108,7 @@ describe( 'dev-release-tools/utils', () => {
 
 		describe( 'linkToGithubIssue()', () => {
 			it( 'replaces "#ID" with a link to GitHub issue (packageJson.repository as a string)', () => {
-				stubs.getPackageJson.returns( {
+				vi.mocked( getPackageJson ).mockReturnValue( {
 					name: 'test-package',
 					repository: 'https://github.com/ckeditor/ckeditor5-dev'
 				} );
@@ -155,21 +138,11 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			it( 'does not make a link from a comment which contains color hex code with letters and numbers', () => {
-				stubs.getPackageJson.returns( {
-					name: 'test-package',
-					repository: 'https://github.com/ckeditor/ckeditor5-dev'
-				} );
-
 				expect( transformCommitUtils.linkToGithubIssue( 'Colors: first: `#8da47e`, second: `#f7ce76`.' ) )
 					.to.equal( 'Colors: first: `#8da47e`, second: `#f7ce76`.' );
 			} );
 
 			it( 'does not make a link from a comment which contains color hex code with letters or numbers only', () => {
-				stubs.getPackageJson.returns( {
-					name: 'test-package',
-					repository: 'https://github.com/ckeditor/ckeditor5-dev'
-				} );
-
 				expect( transformCommitUtils.linkToGithubIssue( 'Colors: first: `#000000`, second: `#ffffff`.' ) )
 					.to.equal( 'Colors: first: `#000000`, second: `#ffffff`.' );
 			} );
@@ -204,7 +177,7 @@ describe( 'dev-release-tools/utils', () => {
 
 		describe( 'getRepositoryUrl()', () => {
 			it( 'throws an error if package.json does not contain the "repository" property', () => {
-				stubs.getPackageJson.returns( {
+				vi.mocked( getPackageJson ).mockReturnValue( {
 					name: 'test-package'
 				} );
 
@@ -213,19 +186,19 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			it( 'passes specified `cwd` to `getPackageJson()` util', () => {
-				stubs.getPackageJson.returns( {
+				vi.mocked( getPackageJson ).mockReturnValue( {
 					name: 'test-package',
 					repository: 'https://github.com/ckeditor/ckeditor5-dev/issues'
 				} );
 
 				transformCommitUtils.getRepositoryUrl( 'foo' );
 
-				expect( stubs.getPackageJson.calledOnce ).to.equal( true );
-				expect( stubs.getPackageJson.firstCall.args[ 0 ] ).to.equal( 'foo' );
+				expect( getPackageJson ).toHaveBeenCalledTimes( 1 );
+				expect( getPackageJson ).toHaveBeenCalledWith( 'foo' );
 			} );
 
 			it( 'returns the repository URL (packageJson.repository as a string, contains "/issues")', () => {
-				stubs.getPackageJson.returns( {
+				vi.mocked( getPackageJson ).mockReturnValue( {
 					name: 'test-package',
 					repository: 'https://github.com/ckeditor/ckeditor5-dev/issues'
 				} );
@@ -234,7 +207,7 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			it( 'returns the repository URL (packageJson.repository as a string, ends with ".git")', () => {
-				stubs.getPackageJson.returns( {
+				vi.mocked( getPackageJson ).mockReturnValue( {
 					name: 'test-package',
 					repository: 'https://github.com/ckeditor/ckeditor5-dev.git'
 				} );
@@ -243,7 +216,7 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			it( 'returns the repository URL (packageJson.repository as an object)', () => {
-				stubs.getPackageJson.returns( {
+				vi.mocked( getPackageJson ).mockReturnValue( {
 					name: 'test-package',
 					repository: {
 						url: 'https://github.com/ckeditor/ckeditor5-dev'
@@ -254,7 +227,7 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			it( 'returns the repository URL (packageJson.repository as an object, contains "/issues")', () => {
-				stubs.getPackageJson.returns( {
+				vi.mocked( getPackageJson ).mockReturnValue( {
 					name: 'test-package',
 					repository: {
 						url: 'https://github.com/ckeditor/ckeditor5-dev/issues',
@@ -266,7 +239,7 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			it( 'returns the repository URL (packageJson.repository as an object, ends with ".git")', () => {
-				stubs.getPackageJson.returns( {
+				vi.mocked( getPackageJson ).mockReturnValue( {
 					name: 'test-package',
 					repository: {
 						url: 'https://github.com/ckeditor/ckeditor5-dev.git',
