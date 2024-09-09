@@ -3,39 +3,24 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const upath = require( 'upath' );
-const fs = require( 'fs-extra' );
-const { GraphQLClient } = require( 'graphql-request' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const {
+import upath from 'upath';
+import fs from 'fs-extra';
+import { GraphQLClient } from 'graphql-request';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import {
 	addSeconds,
 	fromUnixTime,
 	formatDistanceToNow,
 	differenceInSeconds
-} = require( 'date-fns' );
-const prepareSearchQuery = require( './utils/preparesearchquery' );
-const isIssueOrPullRequestToStale = require( './utils/isissueorpullrequesttostale' );
-const isIssueOrPullRequestToUnstale = require( './utils/isissueorpullrequesttounstale' );
-const isIssueOrPullRequestToClose = require( './utils/isissueorpullrequesttoclose' );
-const isPendingIssueToStale = require( './utils/ispendingissuetostale' );
-const isPendingIssueToUnlabel = require( './utils/ispendingissuetounlabel' );
+} from 'date-fns';
+import prepareSearchQuery from './utils/preparesearchquery.js';
+import isIssueOrPullRequestToStale from './utils/isissueorpullrequesttostale.js';
+import isIssueOrPullRequestToUnstale from './utils/isissueorpullrequesttounstale.js';
+import isIssueOrPullRequestToClose from './utils/isissueorpullrequesttoclose.js';
+import isPendingIssueToStale from './utils/ispendingissuetostale.js';
+import isPendingIssueToUnlabel from './utils/ispendingissuetounlabel.js';
 
 const GRAPHQL_PATH = upath.join( __dirname, 'graphql' );
-
-const queries = {
-	getViewerLogin: readGraphQL( 'getviewerlogin' ),
-	searchIssuesOrPullRequests: readGraphQL( 'searchissuesorpullrequests' ),
-	searchPendingIssues: readGraphQL( 'searchpendingissues' ),
-	getIssueOrPullRequestTimelineItems: readGraphQL( 'getissueorpullrequesttimelineitems' ),
-	addComment: readGraphQL( 'addcomment' ),
-	getLabels: readGraphQL( 'getlabels' ),
-	addLabels: readGraphQL( 'addlabels' ),
-	removeLabels: readGraphQL( 'removelabels' ),
-	closeIssue: readGraphQL( 'closeissue' ),
-	closePullRequest: readGraphQL( 'closepullrequest' )
-};
 
 /**
  * A GitHub client containing methods used to interact with GitHub using its GraphQL API.
@@ -43,7 +28,7 @@ const queries = {
  * All methods handles paginated data and it supports a case when a request has exceeded the GitHub API rate limit.
  * In such a case, the request waits until the limit is reset and it is automatically sent again.
  */
-module.exports = class GitHubRepository {
+export default class GitHubRepository {
 	constructor( authToken ) {
 		/**
 		 * @private
@@ -63,6 +48,22 @@ module.exports = class GitHubRepository {
 		 * @property {Logger}
 		 */
 		this.logger = logger();
+
+		/**
+		 * @private
+		 */
+		this.queries = {
+			getViewerLogin: readGraphQL( 'getviewerlogin' ),
+			searchIssuesOrPullRequests: readGraphQL( 'searchissuesorpullrequests' ),
+			searchPendingIssues: readGraphQL( 'searchpendingissues' ),
+			getIssueOrPullRequestTimelineItems: readGraphQL( 'getissueorpullrequesttimelineitems' ),
+			addComment: readGraphQL( 'addcomment' ),
+			getLabels: readGraphQL( 'getlabels' ),
+			addLabels: readGraphQL( 'addlabels' ),
+			removeLabels: readGraphQL( 'removelabels' ),
+			closeIssue: readGraphQL( 'closeissue' ),
+			closePullRequest: readGraphQL( 'closepullrequest' )
+		};
 	}
 
 	/**
@@ -71,7 +72,7 @@ module.exports = class GitHubRepository {
 	 * @returns {Promise.<String>}
 	 */
 	async getViewerLogin() {
-		return this.sendRequest( await queries.getViewerLogin )
+		return this.sendRequest( await this.queries.getViewerLogin )
 			.then( data => data.viewer.login )
 			.catch( error => {
 				this.logger.error( 'Unexpected error when executing "#getViewerLogin()".', error );
@@ -105,7 +106,7 @@ module.exports = class GitHubRepository {
 			cursor: pageInfo.cursor || null
 		};
 
-		return this.sendRequest( await queries.searchIssuesOrPullRequests, variables )
+		return this.sendRequest( await this.queries.searchIssuesOrPullRequests, variables )
 			.then( async data => {
 				const issuesOrPullRequests = await this.parseIssuesOrPullRequests( data.search );
 
@@ -151,7 +152,7 @@ module.exports = class GitHubRepository {
 			cursor: pageInfo.cursor || null
 		};
 
-		return this.sendRequest( await queries.searchIssuesOrPullRequests, variables )
+		return this.sendRequest( await this.queries.searchIssuesOrPullRequests, variables )
 			.then( async data => {
 				const issuesOrPullRequests = await this.parseIssuesOrPullRequests( data.search );
 
@@ -217,7 +218,7 @@ module.exports = class GitHubRepository {
 			cursor: pageInfo.cursor || null
 		};
 
-		return this.sendRequest( await queries.searchPendingIssues, variables )
+		return this.sendRequest( await this.queries.searchPendingIssues, variables )
 			.then( async data => {
 				const pendingIssues = this.parsePendingIssues( data.search );
 
@@ -263,7 +264,7 @@ module.exports = class GitHubRepository {
 			cursor: pageInfo.cursor || null
 		};
 
-		return this.sendRequest( await queries.getIssueOrPullRequestTimelineItems, variables )
+		return this.sendRequest( await this.queries.getIssueOrPullRequestTimelineItems, variables )
 			.then( async data => {
 				pageInfo = data.node.timelineItems.pageInfo;
 
@@ -295,7 +296,7 @@ module.exports = class GitHubRepository {
 			comment
 		};
 
-		return this.sendRequest( await queries.addComment, variables )
+		return this.sendRequest( await this.queries.addComment, variables )
 			.catch( error => {
 				this.logger.error( 'Unexpected error when executing "#addComment()".', error );
 
@@ -322,7 +323,7 @@ module.exports = class GitHubRepository {
 			labelNames: labelNames.join( ' ' )
 		};
 
-		return this.sendRequest( await queries.getLabels, variables )
+		return this.sendRequest( await this.queries.getLabels, variables )
 			.then( data => {
 				return data.repository.labels.nodes
 					// Additional filtering is needed, because GitHub endpoint may return many more results than match the query.
@@ -349,7 +350,7 @@ module.exports = class GitHubRepository {
 			labelIds
 		};
 
-		return this.sendRequest( await queries.addLabels, variables )
+		return this.sendRequest( await this.queries.addLabels, variables )
 			.catch( error => {
 				this.logger.error( 'Unexpected error when executing "#addLabels()".', error );
 
@@ -370,7 +371,7 @@ module.exports = class GitHubRepository {
 			labelIds
 		};
 
-		return this.sendRequest( await queries.removeLabels, variables )
+		return this.sendRequest( await this.queries.removeLabels, variables )
 			.catch( error => {
 				this.logger.error( 'Unexpected error when executing "#removeLabels()".', error );
 
@@ -390,7 +391,7 @@ module.exports = class GitHubRepository {
 			nodeId
 		};
 
-		const query = type === 'Issue' ? await queries.closeIssue : await queries.closePullRequest;
+		const query = type === 'Issue' ? await this.queries.closeIssue : await this.queries.closePullRequest;
 
 		return this.sendRequest( query, variables )
 			.catch( error => {
@@ -556,7 +557,7 @@ module.exports = class GitHubRepository {
 				return Promise.reject( error );
 			} );
 	}
-};
+}
 
 /**
  * Reads the GraphQL query from filesystem.

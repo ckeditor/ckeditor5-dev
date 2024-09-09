@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 /**
  * Creates a query to search for issues or pull requests.
  *
@@ -16,7 +14,7 @@
  * @param {Array.<String>} [options.ignoredLabels=[]]
  * @returns {String}
  */
-module.exports = function prepareSearchQuery( options ) {
+export default function prepareSearchQuery( options ) {
 	const {
 		repositorySlug,
 		searchDate,
@@ -36,7 +34,7 @@ module.exports = function prepareSearchQuery( options ) {
 		...labels.map( label => `label:${ label }` ),
 		...ignoredLabels.map( label => `-label:${ label }` )
 	].filter( Boolean ).join( ' ' );
-};
+}
 
 function mapGitHubResourceType( type ) {
 	const resourceMap = {
