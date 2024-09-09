@@ -3,10 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import checkDependencies from './checkdependencies.js';
 
-const checkDependencies = require( './checkdependencies' );
-
-module.exports = {
+export default {
 	checkDependencies
 };
