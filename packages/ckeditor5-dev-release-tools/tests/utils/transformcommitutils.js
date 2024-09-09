@@ -6,7 +6,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { getPackageJson } from '../../lib/utils/getpackagejson.js';
 
-import transformCommitUtils from '../../lib/utils/transformcommitutils.js';
+import * as transformCommitUtils from '../../lib/utils/transformcommitutils.js';
 
 vi.mock( '../../lib/utils/getpackagejson.js' );
 
