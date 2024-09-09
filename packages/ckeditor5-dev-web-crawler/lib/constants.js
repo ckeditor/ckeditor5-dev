@@ -7,7 +7,9 @@
 
 /* eslint-env node */
 
-const DEFAULT_CONCURRENCY = require( 'os' ).cpus().length / 2;
+import { cpus } from 'os';
+
+const DEFAULT_CONCURRENCY = cpus().length / 2;
 
 const DEFAULT_TIMEOUT = 15 * 1000;
 
@@ -58,7 +60,7 @@ const META_TAG_NAME = 'x-cke-crawler-ignore-patterns';
 
 const DATA_ATTRIBUTE_NAME = 'data-cke-crawler-skip';
 
-module.exports = {
+export default {
 	DEFAULT_CONCURRENCY,
 	DEFAULT_TIMEOUT,
 	DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT,

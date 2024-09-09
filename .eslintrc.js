@@ -37,8 +37,10 @@ module.exports = {
 			files: [
 				// TODO: add packages as they are migrated to ESM.
 				'./packages/ckeditor5-dev-bump-year/**/*',
+				'./packages/ckeditor5-dev-dependency-checker/**/*',
 				'./packages/ckeditor5-dev-stale-bot/**/*',
 				'./packages/ckeditor5-dev-ci/**/*',
+				'./packages/ckeditor5-dev-web-crawler/**/*',
 				'./packages/ckeditor5-dev-docs/**/*'
 			],
 			rules: {
