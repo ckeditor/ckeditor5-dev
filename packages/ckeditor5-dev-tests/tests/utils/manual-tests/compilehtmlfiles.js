@@ -160,6 +160,7 @@ describe( 'compileHtmlFiles', () => {
 						'<script src="/assets/websocket.js"></script>' +
 						'<script src="/assets/inspector.js"></script>' +
 						'<script src="/assets/attachinspector.js"></script>' +
+						'<script src="/assets/globallicensekey.js"></script>' +
 						'<script src="/path/to/manual/file.js"></script>' +
 					'</body>'
 				].join( '\n' )
@@ -207,6 +208,7 @@ describe( 'compileHtmlFiles', () => {
 						'<script src="/assets/websocket.js"></script>' +
 						'<script src="/assets/inspector.js"></script>' +
 						'<script src="/assets/attachinspector.js"></script>' +
+						'<script src="/assets/globallicensekey.js"></script>' +
 						'<script src="/translations/en.js"></script>' +
 						'<script src="/translations/pl.js"></script>' +
 						'<script src="/translations/ar.js"></script>' +
@@ -251,6 +253,7 @@ describe( 'compileHtmlFiles', () => {
 						'<script src="/assets/websocket.js"></script>' +
 						'<script src="/assets/inspector.js"></script>' +
 						'<script src="/assets/attachinspector.js"></script>' +
+						'<script src="/assets/globallicensekey.js"></script>' +
 						'<script src="/path/to/manual/file.abc.js"></script>' +
 					'</body>'
 				].join( '\n' )
@@ -324,6 +327,7 @@ describe( 'compileHtmlFiles', () => {
 						'<script src="/assets/websocket.js"></script>' +
 						'<script src="/assets/inspector.js"></script>' +
 						'<script src="/assets/attachinspector.js"></script>' +
+						'<script src="/assets/globallicensekey.js"></script>' +
 						'<script src="/path/to/manual/file.js"></script>' +
 					'</body>'
 				].join( '\n' )
@@ -404,6 +408,7 @@ describe( 'compileHtmlFiles', () => {
 						'<script src="/assets/websocket.js"></script>' +
 						'<script src="/assets/inspector.js"></script>' +
 						'<script src="/assets/attachinspector.js"></script>' +
+						'<script src="/assets/globallicensekey.js"></script>' +
 						'<script src="/path/to/manual/file.js"></script>' +
 					'</body>'
 				].join( '\n' )

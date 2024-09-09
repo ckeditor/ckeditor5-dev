@@ -7,14 +7,14 @@
 
 /* eslint-env node */
 
-const puppeteer = require( 'puppeteer' );
-const chalk = require( 'chalk' );
-const util = require( 'util' );
-const stripAnsiEscapeCodes = require( 'strip-ansi' );
-const { getBaseUrl, toArray } = require( './utils' );
-const { createSpinner, getProgressHandler } = require( './spinner' );
+import puppeteer from 'puppeteer';
+import chalk from 'chalk';
+import util from 'util';
+import stripAnsiEscapeCodes from 'strip-ansi';
+import { getBaseUrl, toArray } from './utils.js';
+import { createSpinner, getProgressHandler } from './spinner.js';
 
-const {
+import {
 	DEFAULT_TIMEOUT,
 	DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT,
 	DEFAULT_REMAINING_ATTEMPTS,
@@ -23,7 +23,7 @@ const {
 	IGNORE_ALL_ERRORS_WILDCARD,
 	META_TAG_NAME,
 	DATA_ATTRIBUTE_NAME
-} = require( './constants' );
+} from './constants.js';
 
 /**
  * Main crawler function. Its purpose is to:
@@ -42,7 +42,7 @@ const {
  * @param {Boolean} [options.ignoreHTTPSErrors=false] Whether the browser should ignore invalid (self-signed) certificates.
  * @returns {Promise} Promise is resolved, when the crawler has finished the whole crawling procedure.
  */
-module.exports = async function runCrawler( options ) {
+export default async function runCrawler( options ) {
 	const {
 		url,
 		depth = Infinity,
@@ -101,7 +101,7 @@ module.exports = async function runCrawler( options ) {
 
 	// Always exit the script because `spinner` can freeze the process of the crawler if it is executed in the `noSpinner:true` mode.
 	process.exit( errors.size ? 1 : 0 );
-};
+}
 
 /**
  * Creates a new browser instance and closes the default blank page.
