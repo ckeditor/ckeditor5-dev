@@ -3,45 +3,20 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { getChangedFilesForCommit } from '../../lib/utils/getchangedfilesforcommit.js';
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
+import { transformCommitFactory } from '../../lib/utils/transformcommitfactory.js';
+
+vi.mock( '../../lib/utils/getchangedfilesforcommit.js' );
+vi.mock( '../../lib/utils/getpackagejson.js', () => ( {
+	getPackageJson: vi.fn( () => ( {
+		repository: 'https://github.com/ckeditor/ckeditor5-dev'
+	} ) )
+} ) );
 
 describe( 'dev-release-tools/utils', () => {
 	describe( 'transformCommitFactory()', () => {
-		let transformCommitFactory, sandbox, stubs;
-
-		beforeEach( () => {
-			sandbox = sinon.createSandbox();
-
-			mockery.enable( {
-				useCleanCache: true,
-				warnOnReplace: false,
-				warnOnUnregistered: false
-			} );
-
-			stubs = {
-				getPackageJson: () => {
-					return {
-						repository: 'https://github.com/ckeditor/ckeditor5-dev'
-					};
-				},
-				getChangedFilesForCommit: sandbox.stub()
-			};
-
-			mockery.registerMock( './getpackagejson', stubs.getPackageJson );
-			mockery.registerMock( './getchangedfilesforcommit', stubs.getChangedFilesForCommit );
-
-			transformCommitFactory = require( '../../lib/utils/transformcommitfactory' );
-		} );
-
-		afterEach( () => {
-			sandbox.restore();
-			mockery.disable();
-		} );
-
 		it( 'returns a function', () => {
 			expect( transformCommitFactory() ).to.be.a( 'function' );
 		} );
@@ -119,11 +94,11 @@ describe( 'dev-release-tools/utils', () => {
 					'c/d/z.md'
 				];
 
-				stubs.getChangedFilesForCommit.returns( files );
+				vi.mocked( getChangedFilesForCommit ).mockReturnValue( files );
 
 				const commit = transformCommit( rawCommit );
 
-				expect( stubs.getChangedFilesForCommit.calledOnce ).to.equal( true );
+				expect( getChangedFilesForCommit ).toHaveBeenCalledTimes( 1 );
 				expect( commit.files ).to.deep.equal( files );
 			} );
 
@@ -1053,7 +1028,7 @@ describe( 'dev-release-tools/utils', () => {
 				it( 'copies an array with changed files across all commits', () => {
 					const files = [ 'a', 'b', 'c' ];
 
-					stubs.getChangedFilesForCommit.returns( files );
+					vi.mocked( getChangedFilesForCommit ).mockReturnValue( files );
 
 					const rawCommit = {
 						hash: '76b9e058fb1c3fa00b50059cdc684997d0eb2eca',
