@@ -5,12 +5,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const path = require( 'path' );
-const minimist = require( 'minimist' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const checkDependencies = require( '../lib/checkdependencies' );
+import path from 'path';
+import minimist from 'minimist';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import checkDependencies from '../lib/checkdependencies.js';
 
 const { packagePaths, options } = parseArguments( process.argv.slice( 2 ) );
 
