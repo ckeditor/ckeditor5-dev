@@ -4,7 +4,7 @@
  */
 
 import { Octokit } from '@octokit/rest';
-import getJobApprover from './utils/get-job-approver';
+import getJobApprover from './utils/get-job-approver.js';
 
 /**
  * @param options

@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import triggerCircleBuild from '../lib/trigger-circle-build';
+import triggerCircleBuild from '../lib/trigger-circle-build.js';
 
 describe( 'lib/triggerCircleBuild', () => {
 	let fetchMock;

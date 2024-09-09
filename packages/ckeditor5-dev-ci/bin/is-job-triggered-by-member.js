@@ -5,7 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import isJobTriggeredByMember from '../lib/is-job-triggered-by-member';
+import isJobTriggeredByMember from '../lib/is-job-triggered-by-member.js';
 
 /**
  * This script checks if a user that approved an approval job could do that.

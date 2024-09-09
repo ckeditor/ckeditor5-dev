@@ -8,7 +8,7 @@
 /* eslint-env node */
 
 import slackNotify from 'slack-notify';
-import formatMessage from '../lib/format-message';
+import formatMessage from '../lib/format-message.js';
 
 // This script assumes that is being executed on Circle CI.
 // Step it is used on should have set value: `when: on_fail`, since it does not

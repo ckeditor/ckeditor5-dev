@@ -5,7 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import circleUpdateAutoCancelBuilds from '../lib/circle-update-auto-cancel-builds';
+import circleUpdateAutoCancelBuilds from '../lib/circle-update-auto-cancel-builds.js';
 
 /**
  * This script updates CircleCI settings to disable the "Auto-cancel redundant workflows" option.

@@ -4,8 +4,8 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import isJobTriggeredByMember from '../lib/is-job-triggered-by-member';
-import getJobApprover from '../lib/utils/get-job-approver';
+import isJobTriggeredByMember from '../lib/is-job-triggered-by-member.js';
+import getJobApprover from '../lib/utils/get-job-approver.js';
 
 const {
 	octokitRequestMock,

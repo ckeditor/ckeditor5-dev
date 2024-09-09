@@ -5,7 +5,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import triggerCircleBuild from '../lib/trigger-circle-build';
+import triggerCircleBuild from '../lib/trigger-circle-build.js';
 
 /**
  * This script triggers a new CircleCI build.

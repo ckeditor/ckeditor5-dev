@@ -9,7 +9,7 @@
 
 import { execSync } from 'child_process';
 import minimist from 'minimist';
-import processJobStatuses from '../lib/process-job-statuses';
+import processJobStatuses from '../lib/process-job-statuses.js';
 
 // This script allows the creation of a new job within a workflow that will be executed
 // in the end, when all other jobs will be finished or errored.

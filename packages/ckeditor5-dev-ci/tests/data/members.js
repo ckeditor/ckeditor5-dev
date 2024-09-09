@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { members } from '../../lib/data/index';
+import { members } from '../../lib/data/index.js';
 
 describe( 'lib/data/members', () => {
 	it( 'should be an object', () => {

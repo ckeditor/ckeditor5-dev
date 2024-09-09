@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import getJobApprover from '../../lib/utils/get-job-approver';
+import getJobApprover from '../../lib/utils/get-job-approver.js';
 
 describe( 'lib/utils/getJobApprover', () => {
 	it( 'should return a GitHub login name of a user who approved a job in given workflow', async () => {

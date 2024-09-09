@@ -6,7 +6,7 @@
 /* eslint-env node */
 
 import { describe, expect, it } from 'vitest';
-import processJobStatuses from '../lib/process-job-statuses';
+import processJobStatuses from '../lib/process-job-statuses.js';
 
 describe( 'lib/process-job-statuses', () => {
 	describe( 'processJobStatuses()', () => {

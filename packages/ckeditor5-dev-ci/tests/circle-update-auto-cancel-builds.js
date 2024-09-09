@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import circleUpdateAutoCancelBuilds from '../lib/circle-update-auto-cancel-builds';
+import circleUpdateAutoCancelBuilds from '../lib/circle-update-auto-cancel-builds.js';
 
 describe( 'lib/circleUpdateAutoCancelBuilds', () => {
 	it( 'should send a request to CircleCI to update the redundant workflows option', async () => {

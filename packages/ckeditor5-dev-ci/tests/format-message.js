@@ -7,7 +7,7 @@
 
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-import formatMessage from '../lib/format-message';
+import formatMessage from '../lib/format-message.js';
 
 vi.mock( '../lib/data', () => {
 	return {

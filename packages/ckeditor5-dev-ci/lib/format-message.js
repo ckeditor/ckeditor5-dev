@@ -5,7 +5,7 @@
 
 /* eslint-env node */
 
-import { bots, members } from './data/index';
+import { bots, members } from './data/index.js';
 
 const REPOSITORY_REGEXP = /github\.com\/([^/]+)\/([^/]+)/;
 
