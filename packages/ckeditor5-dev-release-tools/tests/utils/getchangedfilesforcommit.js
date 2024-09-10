@@ -3,26 +3,23 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
+import fs from 'fs';
+import path from 'path';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import { getChangedFilesForCommit } from '../../lib/utils/getchangedfilesforcommit.js';
 
-const fs = require( 'fs' );
-const path = require( 'path' );
-const expect = require( 'chai' ).expect;
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+describe( 'dev-release-tools/utils', () => {
+	let tmpCwd, cwd;
 
-describe( 'dev-release-tools/utils/transform-commit', () => {
-	let tmpCwd, cwd, getChangedFilesForCommit;
-
-	describe( 'getChangedFilesForCommit()', function() {
-		this.timeout( 15 * 1000 );
-
-		before( () => {
+	describe( 'getChangedFilesForCommit()', { timeout: 15000 }, function() {
+		beforeAll( () => {
 			cwd = process.cwd();
 			tmpCwd = fs.mkdtempSync( __dirname + path.sep );
 			process.chdir( tmpCwd );
 		} );
 
-		after( () => {
+		afterAll( () => {
 			process.chdir( cwd );
 			fs.rmdirSync( tmpCwd );
 		} );
@@ -34,8 +31,6 @@ describe( 'dev-release-tools/utils/transform-commit', () => {
 				exec( 'git config user.email "ckeditor5@ckeditor.com"' );
 				exec( 'git config user.name "CKEditor5 CI"' );
 			}
-
-			getChangedFilesForCommit = require( '../../lib/utils/getchangedfilesforcommit' );
 		} );
 
 		afterEach( () => {
@@ -54,7 +49,7 @@ describe( 'dev-release-tools/utils/transform-commit', () => {
 
 			const files = getChangedFilesForCommit( getLastCommit() );
 
-			expect( files ).to.deep.equal( [
+			expect( files ).toEqual( [
 				'1.txt',
 				'2.txt',
 				'3.txt',
@@ -80,7 +75,7 @@ describe( 'dev-release-tools/utils/transform-commit', () => {
 
 			const files = getChangedFilesForCommit( getLastCommit() );
 
-			expect( files ).to.deep.equal( [
+			expect( files ).toEqual( [
 				'2.js',
 				'3.js',
 				'4.js'
@@ -110,7 +105,7 @@ describe( 'dev-release-tools/utils/transform-commit', () => {
 
 			const files = getChangedFilesForCommit( getLastCommit() );
 
-			expect( files ).to.deep.equal( [
+			expect( files ).toEqual( [
 				'5.json',
 				'6.json'
 			] );
@@ -149,7 +144,7 @@ describe( 'dev-release-tools/utils/transform-commit', () => {
 
 			const files = getChangedFilesForCommit( getLastCommit() );
 
-			expect( files ).to.deep.equal( [
+			expect( files ).toEqual( [
 				'5.json',
 				'6.json'
 			] );

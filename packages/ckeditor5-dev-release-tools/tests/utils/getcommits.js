@@ -285,13 +285,13 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 		} );
 	} );
+
+	function exec( command ) {
+		return tools.shExec( command, { verbosity: 'error' } );
+	}
+
+	// Do not modify the commit.
+	function transformCommit( commit ) {
+		return commit;
+	}
 } );
-
-function exec( command ) {
-	return tools.shExec( command, { verbosity: 'error' } );
-}
-
-// Do not modify the commit.
-function transformCommit( commit ) {
-	return commit;
-}
