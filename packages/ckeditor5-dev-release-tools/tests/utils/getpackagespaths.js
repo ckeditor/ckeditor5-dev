@@ -5,8 +5,8 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import { getPackageJson } from '../../lib/utils/getpackagejson.js';
-import { getPackagesPaths } from '../../lib/utils/getpackagespaths.js';
+import getPackageJson from '../../lib/utils/getpackagejson.js';
+import getPackagesPaths from '../../lib/utils/getpackagespaths.js';
 
 vi.mock( 'path', () => ( {
 	default: {

@@ -11,7 +11,7 @@ import { tools } from '@ckeditor/ckeditor5-dev-utils';
  * @param {String} commitId
  * @returns {Array.<String>}
  */
-export function getChangedFilesForCommit( commitId ) {
+export default function getChangedFilesForCommit( commitId ) {
 	const gitCommand = `git log -m -1 --name-only --pretty="format:" ${ commitId }`;
 	const changedFiles = tools.shExec( gitCommand, { verbosity: 'error' } ).trim();
 

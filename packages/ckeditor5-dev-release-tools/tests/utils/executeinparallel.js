@@ -100,16 +100,16 @@ describe( 'dev-release-tools/utils', () => {
 
 			expect( fs.writeFile ).toHaveBeenCalledTimes( 1 );
 			expect( fs.writeFile ).toHaveBeenCalledWith(
-				'/home/ckeditor/uuid-4.js',
+				'/home/ckeditor/uuid-4.mjs',
 				'export default packagePath => console.log( \'pwd\', packagePath );',
 				'utf-8'
 			);
 			expect( firstWorker.workerData ).toBeInstanceOf( Object );
-			expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', '/home/ckeditor/uuid-4.js' );
+			expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', '/home/ckeditor/uuid-4.mjs' );
 			expect( firstWorker.workerData ).toHaveProperty( 'packages' );
 
 			expect( secondWorker.workerData ).toBeInstanceOf( Object );
-			expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', '/home/ckeditor/uuid-4.js' );
+			expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', '/home/ckeditor/uuid-4.mjs' );
 			expect( secondWorker.workerData ).toHaveProperty( 'packages' );
 
 			// Workers did not emit an error.
@@ -292,7 +292,7 @@ describe( 'dev-release-tools/utils', () => {
 
 			expect( fs.writeFile ).toHaveBeenCalledTimes( 1 );
 			expect( fs.writeFile ).toHaveBeenCalledWith(
-				'C:/Users/ckeditor/uuid-4.js',
+				'C:/Users/ckeditor/uuid-4.mjs',
 				'export default packagePath => console.log( \'pwd\', packagePath );',
 				'utf-8'
 			);
@@ -303,11 +303,11 @@ describe( 'dev-release-tools/utils', () => {
 			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
 			expect( firstWorker.workerData ).toBeInstanceOf( Object );
-			expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', 'C:/Users/ckeditor/uuid-4.js' );
+			expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', 'C:/Users/ckeditor/uuid-4.mjs' );
 			expect( firstWorker.workerData ).toHaveProperty( 'packages' );
 
 			expect( secondWorker.workerData ).toBeInstanceOf( Object );
-			expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', 'C:/Users/ckeditor/uuid-4.js' );
+			expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', 'C:/Users/ckeditor/uuid-4.mjs' );
 			expect( secondWorker.workerData ).toHaveProperty( 'packages' );
 
 			// Workers did not emit an error.
@@ -443,7 +443,7 @@ describe( 'dev-release-tools/utils', () => {
 			await promise;
 
 			expect( fs.unlink ).toHaveBeenCalledTimes( 1 );
-			expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/uuid-4.js' );
+			expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/uuid-4.mjs' );
 		} );
 
 		it( 'should remove the temporary module if the process is aborted', async () => {
@@ -461,7 +461,7 @@ describe( 'dev-release-tools/utils', () => {
 			await promise;
 
 			expect( fs.unlink ).toHaveBeenCalledTimes( 1 );
-			expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/uuid-4.js' );
+			expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/uuid-4.mjs' );
 		} );
 
 		it( 'should remove the temporary module if the promise rejected', async () => {
@@ -480,7 +480,7 @@ describe( 'dev-release-tools/utils', () => {
 					},
 					() => {
 						expect( fs.unlink ).toHaveBeenCalledTimes( 1 );
-						expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/uuid-4.js' );
+						expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/uuid-4.mjs' );
 					}
 				);
 		} );

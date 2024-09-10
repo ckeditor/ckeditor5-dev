@@ -17,7 +17,7 @@ export default defineConfig( {
 			'tests/**/*.js'
 		],
 		exclude: [
-			'./tests/_utils/**/*.j'
+			'./tests/_utils/**/*.js'
 		],
 		coverage: {
 			provider: 'v8',

@@ -7,7 +7,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from
 import fs from 'fs';
 import path from 'path';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import { getChangedFilesForCommit } from '../../lib/utils/getchangedfilesforcommit.js';
+import getChangedFilesForCommit from '../../lib/utils/getchangedfilesforcommit.js';
 
 describe( 'dev-release-tools/utils', () => {
 	let tmpCwd, cwd;

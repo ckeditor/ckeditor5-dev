@@ -10,7 +10,7 @@ import columns from 'cli-columns';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import util from 'util';
 import shellEscape from 'shell-escape';
-import assertNpmAuthorization from '../utils/assertnpmauthorization';
+import assertNpmAuthorization from '../utils/assertnpmauthorization.js';
 import { exec } from 'child_process';
 
 const execPromise = util.promisify( exec );

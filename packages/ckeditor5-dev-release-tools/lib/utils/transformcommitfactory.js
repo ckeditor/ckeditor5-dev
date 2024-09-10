@@ -5,7 +5,7 @@
 
 import { cloneDeepWith } from 'lodash';
 import * as utils from './transformcommitutils.js';
-import { getChangedFilesForCommit } from './getchangedfilesforcommit.js';
+import getChangedFilesForCommit from './getchangedfilesforcommit.js';
 
 // Squash commit follows the pattern: "A pull request title (#{number})".
 const SQUASH_COMMIT_REGEXP = /^[\W\w]+ \(#\d+\)$/;
@@ -29,7 +29,7 @@ const SQUASH_COMMIT_REGEXP = /^[\W\w]+ \(#\d+\)$/;
  * as "BREAKING CHANGES".
  * @returns {TransformCommit}
  */
-export function transformCommitFactory( options = {} ) {
+export default function transformCommitFactory( options = {} ) {
 	return rawCommit => {
 		const commit = transformCommit( rawCommit );
 

@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { getPackageJson } from '../../lib/utils/getpackagejson.js';
+import getPackageJson from '../../lib/utils/getpackagejson.js';
 
 import * as transformCommitUtils from '../../lib/utils/transformcommitutils.js';
 

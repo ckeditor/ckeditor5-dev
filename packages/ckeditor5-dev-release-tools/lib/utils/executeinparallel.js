@@ -60,7 +60,7 @@ export default async function executeInParallel( options ) {
 
 	const packagesInThreads = getPackagesGroupedByThreads( packagesToProcess, concurrency );
 
-	const callbackModule = upath.join( cwd, crypto.randomUUID() + '.js' );
+	const callbackModule = upath.join( cwd, crypto.randomUUID() + '.mjs' );
 	await fs.writeFile( callbackModule, `export default ${ taskToExecute };`, 'utf-8' );
 
 	const onPackageDone = progressFactory( listrTask, packagesToProcess.length );

@@ -6,7 +6,7 @@
 import path from 'path';
 import minimatch from 'minimatch';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import { getPackageJson } from './getpackagejson.js';
+import getPackageJson from './getpackagejson.js';
 
 /**
  * Returns an object with two collections of paths to packages which are located in single repository.
@@ -26,7 +26,7 @@ import { getPackageJson } from './getpackagejson.js';
  * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in `options.cwd` will be skipped.
  * @returns {PathsCollection}
  */
-export function getPackagesPaths( options ) {
+export default function getPackagesPaths( options ) {
 	const pathsCollection = {
 		matched: new Set(),
 		skipped: new Set()

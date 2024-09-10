@@ -12,7 +12,7 @@
 	 * @param {Array.<String>} packages
 	 */
 	const { parentPort, workerData } = await import( 'worker_threads' );
-	const callback = await import( workerData.callbackModule );
+	const { default: callback } = await import( workerData.callbackModule );
 
 	for ( const packagePath of workerData.packages ) {
 		await callback( packagePath, workerData.taskOptions );

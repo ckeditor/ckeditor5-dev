@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { getPackageJson } from './getpackagejson.js';
+import getPackageJson from './getpackagejson.js';
 
 /**
  * A regexp for extracting additional changelog entries from the single commit.

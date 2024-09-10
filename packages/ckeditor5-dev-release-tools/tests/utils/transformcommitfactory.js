@@ -4,16 +4,10 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getChangedFilesForCommit } from '../../lib/utils/getchangedfilesforcommit.js';
-
-import { transformCommitFactory } from '../../lib/utils/transformcommitfactory.js';
+import getChangedFilesForCommit from '../../lib/utils/getchangedfilesforcommit.js';
+import transformCommitFactory from '../../lib/utils/transformcommitfactory.js';
 
 vi.mock( '../../lib/utils/getchangedfilesforcommit.js' );
-vi.mock( '../../lib/utils/getpackagejson.js', () => ( {
-	getPackageJson: vi.fn( () => ( {
-		repository: 'https://github.com/ckeditor/ckeditor5-dev'
-	} ) )
-} ) );
 
 describe( 'dev-release-tools/utils', () => {
 	describe( 'transformCommitFactory()', () => {
