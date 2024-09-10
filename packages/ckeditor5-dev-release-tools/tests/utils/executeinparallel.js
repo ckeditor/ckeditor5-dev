@@ -23,7 +23,7 @@ const stubs = vi.hoisted( () => ( {
 			this.on = vi.fn();
 			this.terminate = vi.fn();
 
-			expect( script.endsWith( 'parallelworker.js' ) ).toEqual( true );
+			expect( script.toString().endsWith( 'parallelworker.js' ) ).toEqual( true );
 		}
 	}
 } ) );

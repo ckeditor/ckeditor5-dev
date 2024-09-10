@@ -13,7 +13,7 @@ import { Worker } from 'worker_threads';
 import { glob } from 'glob';
 import { registerAbortController, deregisterAbortController } from './abortcontroller.js';
 
-const WORKER_SCRIPT = new URL( './abortcontroller.js', import.meta.url );
+const WORKER_SCRIPT = new URL( './parallelworker.js', import.meta.url );
 
 /**
  * This util allows executing a specified task in parallel using Workers. It can be helpful when executing a not resource-consuming
