@@ -3,12 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const expect = require( 'chai' ).expect;
-const compareFunc = require( 'compare-func' );
-const getWriterOptions = require( '../../lib/utils/getwriteroptions' );
-const generateChangelog = require( '../../lib/utils/generatechangelog' );
+import { describe, it, expect } from 'vitest';
+import compareFunc from 'compare-func';
+import { getWriterOptions } from '../../lib/utils/getwriteroptions.js';
+import { generateChangelog } from '../../lib/utils/generatechangelog.js';
 
 describe( 'dev-release-tools/utils', () => {
 	const url = 'https://github.com/ckeditor/ckeditor5-package';
@@ -56,16 +54,16 @@ describe( 'dev-release-tools/utils', () => {
 							.map( line => line.trim() )
 							.filter( line => line.length );
 
-						expect( changesAsArray[ 0 ] ).to.equal(
+						expect( changesAsArray[ 0 ] ).toEqual(
 							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
 						);
-						expect( changesAsArray[ 1 ] ).to.equal(
+						expect( changesAsArray[ 1 ] ).toEqual(
 							'### Features'
 						);
-						expect( changesAsArray[ 2 ] ).to.equal(
+						expect( changesAsArray[ 2 ] ).toEqual(
 							'* The first an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/xxxxxxx))'
 						);
-						expect( changesAsArray[ 3 ] ).to.equal(
+						expect( changesAsArray[ 3 ] ).toEqual(
 							'* The second an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
 						);
 					} );
@@ -108,16 +106,16 @@ describe( 'dev-release-tools/utils', () => {
 							.map( line => line.trim() )
 							.filter( line => line.length );
 
-						expect( changesAsArray[ 0 ] ).to.equal(
+						expect( changesAsArray[ 0 ] ).toEqual(
 							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
 						);
-						expect( changesAsArray[ 1 ] ).to.equal(
+						expect( changesAsArray[ 1 ] ).toEqual(
 							'### Bug fixes'
 						);
-						expect( changesAsArray[ 2 ] ).to.equal(
+						expect( changesAsArray[ 2 ] ).toEqual(
 							'* The first an amazing bug fix. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/xxxxxxx))'
 						);
-						expect( changesAsArray[ 3 ] ).to.equal(
+						expect( changesAsArray[ 3 ] ).toEqual(
 							'* The second an amazing bug fix. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
 						);
 					} );
@@ -160,16 +158,16 @@ describe( 'dev-release-tools/utils', () => {
 							.map( line => line.trim() )
 							.filter( line => line.length );
 
-						expect( changesAsArray[ 0 ] ).to.equal(
+						expect( changesAsArray[ 0 ] ).toEqual(
 							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
 						);
-						expect( changesAsArray[ 1 ] ).to.equal(
+						expect( changesAsArray[ 1 ] ).toEqual(
 							'### Other changes'
 						);
-						expect( changesAsArray[ 2 ] ).to.equal(
+						expect( changesAsArray[ 2 ] ).toEqual(
 							'* The first an amazing commit. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/xxxxxxx))'
 						);
-						expect( changesAsArray[ 3 ] ).to.equal(
+						expect( changesAsArray[ 3 ] ).toEqual(
 							'* The second an amazing commit. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
 						);
 					} );
@@ -219,25 +217,25 @@ describe( 'dev-release-tools/utils', () => {
 							.map( line => line.trim() )
 							.filter( line => line.length );
 
-						expect( changesAsArray[ 0 ] ).to.equal(
+						expect( changesAsArray[ 0 ] ).toEqual(
 							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
 						);
-						expect( changesAsArray[ 1 ] ).to.equal(
+						expect( changesAsArray[ 1 ] ).toEqual(
 							'### Features'
 						);
-						expect( changesAsArray[ 2 ] ).to.equal(
+						expect( changesAsArray[ 2 ] ).toEqual(
 							'* An amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/xxxxxxx))'
 						);
-						expect( changesAsArray[ 3 ] ).to.equal(
+						expect( changesAsArray[ 3 ] ).toEqual(
 							'### Bug fixes'
 						);
-						expect( changesAsArray[ 4 ] ).to.equal(
+						expect( changesAsArray[ 4 ] ).toEqual(
 							'* An amazing bug fix. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
 						);
-						expect( changesAsArray[ 5 ] ).to.equal(
+						expect( changesAsArray[ 5 ] ).toEqual(
 							'### Other changes'
 						);
-						expect( changesAsArray[ 6 ] ).to.equal(
+						expect( changesAsArray[ 6 ] ).toEqual(
 							'* An amazing commit. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/yyyyyyy))'
 						);
 					} );
@@ -280,16 +278,16 @@ describe( 'dev-release-tools/utils', () => {
 							.map( line => line.trim() )
 							.filter( line => line.length );
 
-						expect( changesAsArray[ 0 ] ).to.equal(
+						expect( changesAsArray[ 0 ] ).toEqual(
 							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
 						);
-						expect( changesAsArray[ 1 ] ).to.equal(
+						expect( changesAsArray[ 1 ] ).toEqual(
 							'### Features'
 						);
-						expect( changesAsArray[ 2 ] ).to.equal(
+						expect( changesAsArray[ 2 ] ).toEqual(
 							'* The first an amazing feature.'
 						);
-						expect( changesAsArray[ 3 ] ).to.equal(
+						expect( changesAsArray[ 3 ] ).toEqual(
 							'* The second an amazing feature.'
 						);
 					} );
@@ -316,7 +314,7 @@ describe( 'dev-release-tools/utils', () => {
 							.map( line => line.trim() )
 							.filter( line => line.length );
 
-						expect( changesAsArray[ 0 ] ).to.equal(
+						expect( changesAsArray[ 0 ] ).toEqual(
 							'## 1.0.0 (0000-00-00)'
 						);
 					} );
@@ -388,7 +386,7 @@ describe( 'dev-release-tools/utils', () => {
 							'* The third an amazing commit. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/yyyyyyy))'
 						].join( '\n' );
 
-						expect( changes.trim() ).to.equal( changelog );
+						expect( changes.trim() ).toEqual( changelog );
 					} );
 			} );
 
@@ -443,14 +441,14 @@ describe( 'dev-release-tools/utils', () => {
 							.map( line => line.trim() )
 							.filter( line => line.length );
 
-						expect( changesAsArray[ 0 ] ).to.equal(
+						expect( changesAsArray[ 0 ] ).toEqual(
 							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
 						);
-						expect( changesAsArray[ 1 ] ).to.equal(
+						expect( changesAsArray[ 1 ] ).toEqual(
 							'### Other changes'
 						);
 						/* eslint-disable max-len */
-						expect( changesAsArray[ 2 ] ).to.equal(
+						expect( changesAsArray[ 2 ] ).toEqual(
 							'* Updated translations. ([commit](https://github.com/ckeditor/ckeditor5-package/c/aa), [commit](https://github.com/ckeditor/ckeditor5-package/c/bb), [commit](https://github.com/ckeditor/ckeditor5-package/c/cc), [commit](https://github.com/ckeditor/ckeditor5-package/c/dd))'
 						);
 						/* eslint-enable max-len */
@@ -508,13 +506,13 @@ describe( 'dev-release-tools/utils', () => {
 							.map( line => line.trim() )
 							.filter( line => line.length );
 
-						expect( changesAsArray[ 0 ] ).to.equal(
+						expect( changesAsArray[ 0 ] ).toEqual(
 							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
 						);
-						expect( changesAsArray[ 1 ] ).to.equal(
+						expect( changesAsArray[ 1 ] ).toEqual(
 							'### Other changes'
 						);
-						expect( changesAsArray[ 2 ] ).to.equal(
+						expect( changesAsArray[ 2 ] ).toEqual(
 							'* Updated translations.'
 						);
 					} );
@@ -591,14 +589,14 @@ describe( 'dev-release-tools/utils', () => {
 								.map( line => line.trim() )
 								.filter( line => line.length );
 
-							expect( changesAsArray[ 0 ] ).to.equal(
+							expect( changesAsArray[ 0 ] ).toEqual(
 								'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
 							);
-							expect( changesAsArray[ 1 ] ).to.equal(
+							expect( changesAsArray[ 1 ] ).toEqual(
 								'### Other changes'
 							);
 							/* eslint-disable max-len */
-							expect( changesAsArray[ 2 ] ).to.equal(
+							expect( changesAsArray[ 2 ] ).toEqual(
 								'* Updated translations. ([commit](https://github.com/ckeditor/ckeditor5-package/c/aa), [commit](https://github.com/ckeditor/ckeditor5-package/c/bb), [commit](https://github.com/ckeditor/ckeditor5-package/c/cc), [commit](https://github.com/ckeditor/ckeditor5-package/c/dd))'
 							);
 							/* eslint-enable max-len */
@@ -676,14 +674,14 @@ describe( 'dev-release-tools/utils', () => {
 								.map( line => line.trim() )
 								.filter( line => line.length );
 
-							expect( changesAsArray[ 0 ] ).to.equal(
+							expect( changesAsArray[ 0 ] ).toEqual(
 								'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
 							);
-							expect( changesAsArray[ 1 ] ).to.equal(
+							expect( changesAsArray[ 1 ] ).toEqual(
 								'### Other changes'
 							);
 							/* eslint-disable max-len */
-							expect( changesAsArray[ 2 ] ).to.equal(
+							expect( changesAsArray[ 2 ] ).toEqual(
 								'* Updated translations. ([commit](https://github.com/ckeditor/ckeditor5-package/c/aa), [commit](https://github.com/ckeditor/ckeditor5-package/c/bb), [commit](https://github.com/ckeditor/ckeditor5-package/c/cc), [commit](https://github.com/ckeditor/ckeditor5-package/c/dd))'
 							);
 							/* eslint-enable max-len */
@@ -749,14 +747,14 @@ describe( 'dev-release-tools/utils', () => {
 								.map( line => line.trim() )
 								.filter( line => line.length );
 
-							expect( changesAsArray[ 0 ] ).to.equal(
+							expect( changesAsArray[ 0 ] ).toEqual(
 								'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
 							);
-							expect( changesAsArray[ 1 ] ).to.equal(
+							expect( changesAsArray[ 1 ] ).toEqual(
 								'### Other changes'
 							);
 							/* eslint-disable max-len */
-							expect( changesAsArray[ 2 ] ).to.equal(
+							expect( changesAsArray[ 2 ] ).toEqual(
 								'* Updated translations.'
 							);
 							/* eslint-enable max-len */
@@ -809,19 +807,19 @@ describe( 'dev-release-tools/utils', () => {
 							.map( line => line.trim() )
 							.filter( line => line.length );
 
-						expect( changesAsArray[ 0 ] ).to.equal(
+						expect( changesAsArray[ 0 ] ).toEqual(
 							'## [1.0.0](https://github.com/ckeditor/ckeditor5-package/tree/v1.0.0) (0000-00-00)'
 						);
-						expect( changesAsArray[ 1 ] ).to.equal(
+						expect( changesAsArray[ 1 ] ).toEqual(
 							'### Features'
 						);
-						expect( changesAsArray[ 2 ] ).to.equal(
+						expect( changesAsArray[ 2 ] ).toEqual(
 							'* (a) The first an amazing feature.'
 						);
-						expect( changesAsArray[ 3 ] ).to.equal(
+						expect( changesAsArray[ 3 ] ).toEqual(
 							'* (b) The second an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/commit/zzzzzzz))'
 						);
-						expect( changesAsArray[ 4 ] ).to.equal(
+						expect( changesAsArray[ 4 ] ).toEqual(
 							'* (c) The last one an amazing feature.'
 						);
 					} );
@@ -861,10 +859,10 @@ describe( 'dev-release-tools/utils', () => {
 							.map( line => line.trim() )
 							.filter( line => line.length );
 
-						expect( changesAsArray[ 0 ] ).to.equal(
+						expect( changesAsArray[ 0 ] ).toEqual(
 							'## [1.1.0](https://github.com/ckeditor/ckeditor5-package/compare/v1.0.0...v1.1.0) (0000-00-00)'
 						);
-						expect( changesAsArray[ 1 ] ).to.equal(
+						expect( changesAsArray[ 1 ] ).toEqual(
 							'Internal changes only (updated dependencies, documentation, etc.).'
 						);
 					} );
@@ -891,10 +889,10 @@ describe( 'dev-release-tools/utils', () => {
 							.map( line => line.trim() )
 							.filter( line => line.length );
 
-						expect( changesAsArray[ 0 ] ).to.equal(
+						expect( changesAsArray[ 0 ] ).toEqual(
 							'## [1.1.0](https://github.com/ckeditor/ckeditor5-package/compare/v1.0.0...v1.1.0) (0000-00-00)'
 						);
-						expect( changesAsArray[ 1 ] ).to.equal(
+						expect( changesAsArray[ 1 ] ).toEqual(
 							'Internal changes only (updated dependencies, documentation, etc.).'
 						);
 					} );
@@ -996,46 +994,46 @@ describe( 'dev-release-tools/utils', () => {
 							.map( line => line.trim() )
 							.filter( line => line.length );
 
-						expect( changesAsArray[ 0 ] ).to.equal(
+						expect( changesAsArray[ 0 ] ).toEqual(
 							'## [1.1.0](https://github.com/ckeditor/ckeditor5-package/compare/v1.0.0...v1.1.0) (0000-00-00)'
 						);
-						expect( changesAsArray[ 1 ] ).to.equal(
+						expect( changesAsArray[ 1 ] ).toEqual(
 							'### MAJOR BREAKING CHANGES'
 						);
-						expect( changesAsArray[ 2 ] ).to.equal(
+						expect( changesAsArray[ 2 ] ).toEqual(
 							'* This change should be scoped too but the script should work if the scope is being missed.'
 						);
-						expect( changesAsArray[ 3 ] ).to.equal(
+						expect( changesAsArray[ 3 ] ).toEqual(
 							'### MINOR BREAKING CHANGES'
 						);
-						expect( changesAsArray[ 4 ] ).to.equal(
+						expect( changesAsArray[ 4 ] ).toEqual(
 							'* **engine**: Nothing but I would like to use the note - engine.'
 						);
-						expect( changesAsArray[ 5 ] ).to.equal(
+						expect( changesAsArray[ 5 ] ).toEqual(
 							'* **ui**: Nothing but I would like to use the note - ui.'
 						);
-						expect( changesAsArray[ 6 ] ).to.equal(
+						expect( changesAsArray[ 6 ] ).toEqual(
 							'### Features'
 						);
-						expect( changesAsArray[ 7 ] ).to.equal(
+						expect( changesAsArray[ 7 ] ).toEqual(
 							'* **autoformat**: It just works. ([commit](https://github.com/ckeditor/ckeditor5-package/c/bb))'
 						);
-						expect( changesAsArray[ 8 ] ).to.equal(
+						expect( changesAsArray[ 8 ] ).toEqual(
 							'* **engine**: The first an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/c/xx))'
 						);
-						expect( changesAsArray[ 9 ] ).to.equal(
+						expect( changesAsArray[ 9 ] ).toEqual(
 							'* The second an amazing feature. ([commit](https://github.com/ckeditor/ckeditor5-package/c/zz))'
 						);
-						expect( changesAsArray[ 10 ] ).to.equal(
+						expect( changesAsArray[ 10 ] ).toEqual(
 							'### Bug fixes'
 						);
-						expect( changesAsArray[ 11 ] ).to.equal(
+						expect( changesAsArray[ 11 ] ).toEqual(
 							'* **ui**: The first amazing bug fix. ([commit](https://github.com/ckeditor/ckeditor5-package/c/yy))'
 						);
-						expect( changesAsArray[ 12 ] ).to.equal(
+						expect( changesAsArray[ 12 ] ).toEqual(
 							'### Other changes'
 						);
-						expect( changesAsArray[ 13 ] ).to.equal(
+						expect( changesAsArray[ 13 ] ).toEqual(
 							'* Use the newest version of Node.js on CI. ([commit](https://github.com/ckeditor/ckeditor5-package/c/aa))'
 						);
 					} );
@@ -1062,7 +1060,7 @@ describe( 'dev-release-tools/utils', () => {
 							.map( line => line.trim() )
 							.filter( line => line.length );
 
-						expect( changesAsArray[ 0 ] ).to.equal(
+						expect( changesAsArray[ 0 ] ).toEqual(
 							'## 1.1.0 (0000-00-00)'
 						);
 					} );
