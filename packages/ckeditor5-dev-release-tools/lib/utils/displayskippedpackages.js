@@ -13,7 +13,7 @@ import { CLI_INDENT_SIZE } from './constants.js';
  *
  * @param {Set} skippedPackagesPaths
  */
-export function displaySkippedPackages( skippedPackagesPaths ) {
+export default function displaySkippedPackages( skippedPackagesPaths ) {
 	if ( !skippedPackagesPaths.size ) {
 		return;
 	}
