@@ -3,20 +3,21 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 import { describe, expect, it, vi } from 'vitest';
-import generateChangelogForSinglePackage from '../lib/tasks/generatechangelogforsinglepackage';
-import generateChangelogForMonoRepository from '../lib/tasks/generatechangelogformonorepository';
-import updateDependencies from '../lib/tasks/updatedependencies';
-import commitAndTag from '../lib/tasks/commitandtag';
-import createGithubRelease from '../lib/tasks/creategithubrelease';
-import reassignNpmTags from '../lib/tasks/reassignnpmtags';
-import prepareRepository from '../lib/tasks/preparerepository';
-import push from '../lib/tasks/push';
-import publishPackages from '../lib/tasks/publishpackages';
-import updateVersions from '../lib/tasks/updateversions';
-import cleanUpPackages from '../lib/tasks/cleanuppackages';
+import generateChangelogForSinglePackage from '../lib/tasks/generatechangelogforsinglepackage.js';
+import generateChangelogForMonoRepository from '../lib/tasks/generatechangelogformonorepository.js';
+import updateDependencies from '../lib/tasks/updatedependencies.js';
+import commitAndTag from '../lib/tasks/commitandtag.js';
+import createGithubRelease from '../lib/tasks/creategithubrelease.js';
+import reassignNpmTags from '../lib/tasks/reassignnpmtags.js';
+import prepareRepository from '../lib/tasks/preparerepository.js';
+import push from '../lib/tasks/push.js';
+import publishPackages from '../lib/tasks/publishpackages.js';
+import updateVersions from '../lib/tasks/updateversions.js';
+import cleanUpPackages from '../lib/tasks/cleanuppackages.js';
+import getChangesForVersion from '../lib/utils/getchangesforversion.js';
+import getChangelog from '../lib/utils/getchangelog.js';
+import saveChangelog from '../lib/utils/savechangelog.js';
 import {
 	getLastFromChangelog,
 	getLastPreRelease,
@@ -25,20 +26,15 @@ import {
 	getNextNightly,
 	getCurrent,
 	getLastTagFromGit
-} from '../lib/utils/versions';
-import {
-	getChangesForVersion,
-	getChangelog,
-	saveChangelog
-} from '../lib/utils/changelog';
-import executeInParallel from '../lib/utils/executeinparallel';
-import validateRepositoryToRelease from '../lib/utils/validaterepositorytorelease';
-import checkVersionAvailability from '../lib/utils/checkversionavailability';
-import verifyPackagesPublishedCorrectly from '../lib/tasks/verifypackagespublishedcorrectly';
-import getNpmTagFromVersion from '../lib/utils/getnpmtagfromversion';
-import isVersionPublishableForTag from '../lib/utils/isversionpublishablefortag';
+} from '../lib/utils/versions.js';
+import executeInParallel from '../lib/utils/executeinparallel.js';
+import validateRepositoryToRelease from '../lib/utils/validaterepositorytorelease.js';
+import checkVersionAvailability from '../lib/utils/checkversionavailability.js';
+import verifyPackagesPublishedCorrectly from '../lib/tasks/verifypackagespublishedcorrectly.js';
+import getNpmTagFromVersion from '../lib/utils/getnpmtagfromversion.js';
+import isVersionPublishableForTag from '../lib/utils/isversionpublishablefortag.js';
 
-import * as index from '../lib/index';
+import * as index from '../lib/index.js';
 
 vi.mock( '../lib/tasks/generatechangelogforsinglepackage' );
 vi.mock( '../lib/tasks/generatechangelogformonorepository' );

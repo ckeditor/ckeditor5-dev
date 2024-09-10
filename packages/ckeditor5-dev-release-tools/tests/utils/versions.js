@@ -5,7 +5,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import { getChangelog } from '../../lib/utils/changelog.js';
+import getChangelog from '../../lib/utils/getchangelog.js';
 import { getPackageJson } from '../../lib/utils/getpackagejson.js';
 
 import {
@@ -19,7 +19,7 @@ import {
 } from '../../lib/utils/versions.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
-vi.mock( '../../lib/utils/changelog.js' );
+vi.mock( '../../lib/utils/getchangelog.js' );
 vi.mock( '../../lib/utils/getpackagejson.js' );
 
 describe( 'dev-release-tools/utils', () => {

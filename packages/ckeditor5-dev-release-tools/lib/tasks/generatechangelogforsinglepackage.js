@@ -7,16 +7,19 @@ import fs from 'fs';
 import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
 import chalk from 'chalk';
 import semver from 'semver';
-import cli from '../utils/cli';
-import changelogUtils from '../utils/changelog';
-import displayCommits from '../utils/displaycommits';
-import generateChangelog from '../utils/generatechangelog';
-import getPackageJson from '../utils/getpackagejson';
-import getNewVersionType from '../utils/getnewversiontype';
-import getCommits from '../utils/getcommits';
-import getWriterOptions from '../utils/getwriteroptions';
-import { getRepositoryUrl } from '../utils/transformcommitutils';
-import transformCommitFactory from '../utils/transformcommitfactory';
+import cli from '../utils/cli.js';
+import displayCommits from '../utils/displaycommits.js';
+import generateChangelog from '../utils/generatechangelog.js';
+import getPackageJson from '../utils/getpackagejson.js';
+import getNewVersionType from '../utils/getnewversiontype.js';
+import getCommits from '../utils/getcommits.js';
+import getWriterOptions from '../utils/getwriteroptions.js';
+import { getRepositoryUrl } from '../utils/transformcommitutils.js';
+import transformCommitFactory from '../utils/transformcommitfactory.js';
+import getFormattedDate from '../utils/getformatteddate.js';
+import saveChangelog from '../utils/savechangelog.js';
+import getChangelog from '../utils/getchangelog.js';
+import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../utils/constants.js';
 
 const SKIP_GENERATE_CHANGELOG = 'Typed "skip" as a new version. Aborting.';
 
@@ -104,7 +107,7 @@ export default async function generateChangelogForSinglePackage( options = {} ) 
 				isInternalRelease,
 				skipCommitsLink: Boolean( options.skipLinks ),
 				skipCompareLink: Boolean( options.skipLinks ),
-				date: options.formatDate ? options.formatDate( new Date() ) : changelogUtils.getFormattedDate()
+				date: options.formatDate ? options.formatDate( new Date() ) : getFormattedDate()
 			};
 
 			const writerOptions = getWriterOptions( {
@@ -135,25 +138,25 @@ export default async function generateChangelogForSinglePackage( options = {} ) 
 		.then( changesFromCommits => {
 			logProcess( 'Saving changelog...' );
 
-			if ( !fs.existsSync( changelogUtils.changelogFile ) ) {
+			if ( !fs.existsSync( CHANGELOG_FILE ) ) {
 				logInfo( 'Changelog file does not exist. Creating...', { isWarning: true, indentLevel: 1 } );
 
-				changelogUtils.saveChangelog( changelogUtils.changelogHeader );
+				saveChangelog( CHANGELOG_HEADER );
 			}
 
-			let currentChangelog = changelogUtils.getChangelog();
+			let currentChangelog = getChangelog();
 
 			// Remove header from current changelog.
-			currentChangelog = currentChangelog.replace( changelogUtils.changelogHeader, '' );
+			currentChangelog = currentChangelog.replace( CHANGELOG_HEADER, '' );
 
 			// Concat header, new and current changelog.
-			let newChangelog = changelogUtils.changelogHeader + changesFromCommits + currentChangelog.trim();
+			let newChangelog = CHANGELOG_HEADER + changesFromCommits + currentChangelog.trim();
 			newChangelog = newChangelog.trim() + '\n';
 
 			// Save the changelog.
-			changelogUtils.saveChangelog( newChangelog );
+			saveChangelog( newChangelog );
 
-			tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
+			tools.shExec( `git add ${ CHANGELOG_FILE }`, { verbosity: 'error' } );
 			tools.shExec( 'git commit -m "Docs: Changelog. [skip ci]"', { verbosity: 'error' } );
 
 			logInfo( 'Saved.', { indentLevel: 1 } );

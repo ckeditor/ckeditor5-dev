@@ -5,8 +5,8 @@
 
 import chalk from 'chalk';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
-import utils from './transformcommitutils';
-import { INDENT_SIZE, COMMIT_INDENT_SIZE } from './cli';
+import * as utils from './transformcommitutils.js';
+import { INDENT_SIZE, COMMIT_INDENT_SIZE } from './cli.js';
 
 /**
  * @param {Array.<Commit>|Set.<Commit>} commits

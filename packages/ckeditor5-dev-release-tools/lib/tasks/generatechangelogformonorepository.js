@@ -9,18 +9,22 @@ import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
 import compareFunc from 'compare-func';
 import chalk from 'chalk';
 import semver from 'semver';
-import changelogUtils from '../utils/changelog';
-import cli from '../utils/cli';
-import displayCommits from '../utils/displaycommits';
-import displaySkippedPackages from '../utils/displayskippedpackages';
-import generateChangelog from '../utils/generatechangelog';
-import getPackageJson from '../utils/getpackagejson';
-import getPackagesPaths from '../utils/getpackagespaths';
-import getCommits from '../utils/getcommits';
-import getNewVersionType from '../utils/getnewversiontype';
-import getWriterOptions from '../utils/getwriteroptions';
-import { getRepositoryUrl } from '../utils/transformcommitutils';
-import transformCommitFactory from '../utils/transformcommitfactory';
+import cli from '../utils/cli.js';
+import displayCommits from '../utils/displaycommits.js';
+import displaySkippedPackages from '../utils/displayskippedpackages.js';
+import generateChangelog from '../utils/generatechangelog.js';
+import getPackageJson from '../utils/getpackagejson.js';
+import getPackagesPaths from '../utils/getpackagespaths.js';
+import getCommits from '../utils/getcommits.js';
+import getNewVersionType from '../utils/getnewversiontype.js';
+import getWriterOptions from '../utils/getwriteroptions.js';
+import getFormattedDate from '../utils/getformatteddate.js';
+import getChangelog from '../utils/getchangelog.js';
+import saveChangelog from '../utils/savechangelog.js';
+import truncateChangelog from '../utils/truncatechangelog.js';
+import transformCommitFactory from '../utils/transformcommitfactory.js';
+import { getRepositoryUrl } from '../utils/transformcommitutils.js';
+import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../utils/constants.js';
 
 const VERSIONING_POLICY_URL = 'https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html';
 const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)`;
@@ -123,11 +127,11 @@ export default async function generateChangelogForMonoRepository( options ) {
 	}
 
 	if ( !skipFileSave ) {
-		await saveChangelog();
+		await saveChangelogToFile();
 
 		// Make a commit from the repository where we started.
 		process.chdir( options.cwd );
-		tools.shExec( `git add ${ changelogUtils.changelogFile }`, { verbosity: 'error' } );
+		tools.shExec( `git add ${ CHANGELOG_FILE }`, { verbosity: 'error' } );
 		tools.shExec( 'git commit -m "Docs: Changelog. [skip ci]"', { verbosity: 'error' } );
 		logInfo( 'Committed.', { indentLevel: 1 } );
 	}
@@ -408,7 +412,7 @@ export default async function generateChangelogForMonoRepository( options ) {
 			isPatch: semver.diff( version, rootPkgJson.version ) === 'patch',
 			skipCommitsLink: Boolean( options.skipLinks ),
 			skipCompareLink: Boolean( options.skipLinks ),
-			date: options.formatDate ? options.formatDate( new Date() ) : changelogUtils.getFormattedDate()
+			date: options.formatDate ? options.formatDate( new Date() ) : getFormattedDate()
 		};
 
 		const writerOptions = getWriterOptions( {
@@ -462,7 +466,7 @@ export default async function generateChangelogForMonoRepository( options ) {
 		const dependenciesSummary = generateSummaryOfChangesInPackages();
 
 		return [
-			changelogUtils.changelogHeader,
+			CHANGELOG_HEADER,
 			changesFromCommits.trim(),
 			'\n\n',
 			dependenciesSummary
@@ -472,26 +476,24 @@ export default async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Combines the generated changes based on commits and summary of version changes in packages.
 	 * Appends those changes at the beginning of the changelog file.
-	 *
-	 * @param {String} changesFromCommits Generated entries based on commits.
 	 */
-	async function saveChangelog() {
+	async function saveChangelogToFile() {
 		logProcess( 'Saving changelog...' );
 
-		if ( !fs.existsSync( changelogUtils.changelogFile ) ) {
+		if ( !fs.existsSync( CHANGELOG_FILE ) ) {
 			logInfo( 'Changelog file does not exist. Creating...', { isWarning: true, indentLevel: 1 } );
 
-			changelogUtils.saveChangelog( changelogUtils.changelogHeader );
+			saveChangelog( CHANGELOG_FILE );
 		}
 
 		logInfo( 'Preparing a summary of version changes in packages.', { indentLevel: 1 } );
 
-		let currentChangelog = changelogUtils.getChangelog();
+		let currentChangelog = getChangelog();
 
 		const nextVersionChangelog = await getChangelogForNextVersion();
 
 		// Remove header from current changelog.
-		currentChangelog = currentChangelog.replace( changelogUtils.changelogHeader, '' ).trim();
+		currentChangelog = currentChangelog.replace( CHANGELOG_HEADER, '' ).trim();
 
 		// Concat header, new entries and old changelog to single string.
 		let newChangelog = nextVersionChangelog + '\n\n\n' + currentChangelog;
@@ -499,10 +501,10 @@ export default async function generateChangelogForMonoRepository( options ) {
 		newChangelog = newChangelog.trim() + '\n';
 
 		// Save the changelog.
-		changelogUtils.saveChangelog( newChangelog );
+		saveChangelog( newChangelog );
 
 		// Truncate the changelog to keep the latest five release entries.
-		changelogUtils.truncateChangelog( 5 );
+		truncateChangelog( 5 );
 
 		logInfo( 'Saved.', { indentLevel: 1 } );
 	}

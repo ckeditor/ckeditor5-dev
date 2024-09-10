@@ -23,7 +23,9 @@ export {
 	getCurrent,
 	getLastTagFromGit
 } from './utils/versions.js';
-export { getChangesForVersion, getChangelog, saveChangelog } from './utils/changelog.js';
+export { default as getChangesForVersion } from './utils/getchangesforversion.js';
+export { default as getChangelog } from './utils/getchangelog.js';
+export { default as saveChangelog } from './utils/savechangelog.js';
 export { default as executeInParallel } from './utils/executeinparallel.js';
 export { default as validateRepositoryToRelease } from './utils/validaterepositorytorelease.js';
 export { default as checkVersionAvailability } from './utils/checkversionavailability.js';

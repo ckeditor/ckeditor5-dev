@@ -5,7 +5,7 @@
 
 import { Octokit } from '@octokit/rest';
 import semver from 'semver';
-import transformCommitUtils from '../utils/transformcommitutils.js';
+import * as transformCommitUtils from '../utils/transformcommitutils.js';
 
 const { getRepositoryUrl } = transformCommitUtils;
 

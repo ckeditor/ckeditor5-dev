@@ -4,7 +4,7 @@
  */
 
 import { cloneDeepWith } from 'lodash';
-import utils from './transformcommitutils.js';
+import * as utils from './transformcommitutils.js';
 import { getChangedFilesForCommit } from './getchangedfilesforcommit.js';
 
 // Squash commit follows the pattern: "A pull request title (#{number})".

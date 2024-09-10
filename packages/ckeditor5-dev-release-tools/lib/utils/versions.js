@@ -4,7 +4,7 @@
  */
 
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import { getChangelog } from './changelog.js';
+import getChangelog from './getchangelog.js';
 import { getPackageJson } from './getpackagejson.js';
 
 /**
