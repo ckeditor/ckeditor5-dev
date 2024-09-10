@@ -3,29 +3,26 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs' );
-const path = require( 'path' );
-const sinon = require( 'sinon' );
-const expect = require( 'chai' ).expect;
-const mockery = require( 'mockery' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+import { describe, it, expect, vi, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
+import fs from 'fs';
+import path from 'path';
+import gitRawCommits from 'git-raw-commits';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 describe( 'dev-release-tools/utils', () => {
-	let tmpCwd, cwd, stubs, sandbox, getCommits;
+	let tmpCwd, cwd, getCommits, stubs;
 
 	describe( 'getCommits()', () => {
-		before( () => {
+		beforeAll( () => {
 			cwd = process.cwd();
 			tmpCwd = fs.mkdtempSync( __dirname + path.sep );
 		} );
 
-		after( () => {
+		afterAll( () => {
 			fs.rmdirSync( tmpCwd );
 		} );
 
-		beforeEach( () => {
+		beforeEach( async () => {
 			process.chdir( tmpCwd );
 
 			exec( 'git init' );
@@ -35,49 +32,30 @@ describe( 'dev-release-tools/utils', () => {
 				exec( 'git config user.name "CKEditor5 CI"' );
 			}
 
-			sandbox = sinon.createSandbox();
+			vi.doMock( 'git-raw-commits', () => ( {
+				default: vi.fn( gitRawCommits )
+			} ) );
 
-			mockery.enable( {
-				useCleanCache: true,
-				warnOnReplace: false,
-				warnOnUnregistered: false
-			} );
+			vi.doMock( '@ckeditor/ckeditor5-dev-utils' );
 
 			stubs = {
-				shExec: sandbox.stub(),
-				gitRawCommits: sandbox.stub()
+				gitRawCommits: ( await import( 'git-raw-commits' ) ).default,
+				devTools: ( await import( '@ckeditor/ckeditor5-dev-utils' ) ).tools
 			};
 
-			// Other kinds of mocking the `git-raw-commits` package end with an error.
-			// But this way it works.
-			stubs.gitRawCommits.callsFake( options => {
-				const modulePath = require.resolve( 'git-raw-commits' );
-
-				return require( modulePath )( options );
-			} );
-
-			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-				tools: {
-					shExec: stubs.shExec
-				}
-			} );
-
-			mockery.registerMock( 'git-raw-commits', stubs.gitRawCommits );
-
-			getCommits = require( '../../lib/utils/getcommits' );
+			getCommits = ( await import( '../../lib/utils/getcommits.js' ) ).getCommits;
 		} );
 
 		afterEach( () => {
 			process.chdir( cwd );
 			fs.rmSync( path.join( tmpCwd, '.git' ), { recursive: true } );
 
-			sandbox.restore();
-			mockery.disable();
+			vi.resetModules();
 		} );
 
 		describe( 'branch for releasing is the same as the main branch', () => {
-			beforeEach( () => {
-				stubs.shExec.onFirstCall().returns( 'master\n' );
+			beforeEach( async () => {
+				vi.mocked( stubs.devTools.shExec ).mockReturnValueOnce( 'master\n' );
 			} );
 
 			it( 'throws an error when the specified release branch is not equal to the current checked out branch', () => {
@@ -87,7 +65,7 @@ describe( 'dev-release-tools/utils', () => {
 							throw new Error( 'Supposed to be rejected.' );
 						},
 						err => {
-							expect( err.message ).to.equal(
+							expect( err.message ).toEqual(
 								'Expected to be checked out on the release branch ("release") instead of "master". Aborting.'
 							);
 						}
@@ -95,8 +73,8 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 
 			it( 'throws an error when the default release branch is not equal to the current checked out branch', () => {
-				stubs.shExec.reset();
-				stubs.shExec.onFirstCall().returns( 'release\n' );
+				vi.mocked( stubs.devTools.shExec ).mockReset();
+				vi.mocked( stubs.devTools.shExec ).mockReturnValueOnce( 'release\n' );
 
 				return getCommits( transformCommit )
 					.then(
@@ -104,7 +82,7 @@ describe( 'dev-release-tools/utils', () => {
 							throw new Error( 'Supposed to be rejected.' );
 						},
 						err => {
-							expect( err.message ).to.equal(
+							expect( err.message ).toEqual(
 								'Expected to be checked out on the release branch ("master") instead of "release". Aborting.'
 							);
 						}
@@ -118,7 +96,7 @@ describe( 'dev-release-tools/utils', () => {
 							throw new Error( 'Supposed to be rejected.' );
 						},
 						err => {
-							expect( err.message ).to.equal( 'Given repository is empty.' );
+							expect( err.message ).toEqual( 'Given repository is empty.' );
 						}
 					);
 			} );
@@ -130,7 +108,7 @@ describe( 'dev-release-tools/utils', () => {
 							throw new Error( 'Supposed to be rejected.' );
 						},
 						err => {
-							expect( err.message ).to.equal( 'Cannot find tag or commit "foobar" in given repository.' );
+							expect( err.message ).toEqual( 'Cannot find tag or commit "foobar" in given repository.' );
 						}
 					);
 			} );
@@ -141,15 +119,15 @@ describe( 'dev-release-tools/utils', () => {
 
 				return getCommits( transformCommit )
 					.then( commits => {
-						expect( commits.length ).to.equal( 2 );
-						expect( commits[ 0 ].header ).to.equal( 'Second.' );
-						expect( commits[ 1 ].header ).to.equal( 'First.' );
+						expect( commits.length ).toEqual( 2 );
+						expect( commits[ 0 ].header ).toEqual( 'Second.' );
+						expect( commits[ 1 ].header ).toEqual( 'First.' );
 					} );
 			} );
 
 			it( 'returns an array of commits after "git init" (main branch is not equal to "master")', () => {
-				stubs.shExec.reset();
-				stubs.shExec.onFirstCall().returns( 'main-branch\n' );
+				vi.mocked( stubs.devTools.shExec ).mockReset();
+				vi.mocked( stubs.devTools.shExec ).mockReturnValueOnce( 'main-branch\n' );
 
 				exec( 'git checkout -b main-branch' );
 				exec( 'git commit --allow-empty --message "First."' );
@@ -157,9 +135,9 @@ describe( 'dev-release-tools/utils', () => {
 
 				return getCommits( transformCommit, { mainBranch: 'main-branch', releaseBranch: 'main-branch' } )
 					.then( commits => {
-						expect( commits.length ).to.equal( 2 );
-						expect( commits[ 0 ].header ).to.equal( 'Second.' );
-						expect( commits[ 1 ].header ).to.equal( 'First.' );
+						expect( commits.length ).toEqual( 2 );
+						expect( commits[ 0 ].header ).toEqual( 'Second.' );
+						expect( commits[ 1 ].header ).toEqual( 'First.' );
 					} );
 			} );
 
@@ -172,11 +150,11 @@ describe( 'dev-release-tools/utils', () => {
 
 				return getCommits( transformCommit )
 					.then( commits => {
-						expect( commits.length ).to.equal( 4 );
-						expect( commits[ 0 ].header ).to.equal( 'Fourth.' );
-						expect( commits[ 1 ].header ).to.equal( 'Third.' );
-						expect( commits[ 2 ].header ).to.equal( 'Second.' );
-						expect( commits[ 3 ].header ).to.equal( 'First.' );
+						expect( commits.length ).toEqual( 4 );
+						expect( commits[ 0 ].header ).toEqual( 'Fourth.' );
+						expect( commits[ 1 ].header ).toEqual( 'Third.' );
+						expect( commits[ 2 ].header ).toEqual( 'Second.' );
+						expect( commits[ 3 ].header ).toEqual( 'First.' );
 					} );
 			} );
 
@@ -189,9 +167,9 @@ describe( 'dev-release-tools/utils', () => {
 
 				return getCommits( transformCommit, { from: 'v1.0.0' } )
 					.then( commits => {
-						expect( commits.length ).to.equal( 2 );
-						expect( commits[ 0 ].header ).to.equal( 'Fourth.' );
-						expect( commits[ 1 ].header ).to.equal( 'Third.' );
+						expect( commits.length ).toEqual( 2 );
+						expect( commits[ 0 ].header ).toEqual( 'Fourth.' );
+						expect( commits[ 1 ].header ).toEqual( 'Third.' );
 					} );
 			} );
 
@@ -207,49 +185,47 @@ describe( 'dev-release-tools/utils', () => {
 
 				return getCommits( transformCommit, { from: commitId } )
 					.then( commits => {
-						expect( commits.length ).to.equal( 1 );
-						expect( commits[ 0 ].header ).to.equal( 'Fourth.' );
+						expect( commits.length ).toEqual( 1 );
+						expect( commits[ 0 ].header ).toEqual( 'Fourth.' );
 					} );
 			} );
 
 			it( 'ignores false values returned by the "transformCommit" mapper', () => {
-				const transformCommit = sinon.stub();
-
-				transformCommit.onFirstCall().callsFake( commit => commit );
-				transformCommit.onSecondCall().callsFake( () => null );
+				const transformCommit = vi.fn()
+					.mockImplementationOnce( commit => commit )
+					.mockImplementationOnce( () => null );
 
 				exec( 'git commit --allow-empty --message "First."' );
 				exec( 'git commit --allow-empty --message "Second."' );
 
 				return getCommits( transformCommit )
 					.then( commits => {
-						expect( commits.length ).to.equal( 1 );
-						expect( commits[ 0 ].header ).to.equal( 'Second.' );
+						expect( commits.length ).toEqual( 1 );
+						expect( commits[ 0 ].header ).toEqual( 'Second.' );
 					} );
 			} );
 
 			it( 'handles arrays returned by the "transformCommit" mapper', () => {
-				const transformCommit = sinon.stub();
-
-				transformCommit.onFirstCall().callsFake( commit => {
-					return [ commit, commit ];
-				} );
+				const transformCommit = vi.fn()
+					.mockImplementationOnce( commit => {
+						return [ commit, commit ];
+					} );
 
 				exec( 'git commit --allow-empty --message "First."' );
 
 				return getCommits( transformCommit )
 					.then( commits => {
-						expect( commits.length ).to.equal( 2 );
-						expect( commits[ 0 ].header ).to.equal( 'First.' );
-						expect( commits[ 1 ].header ).to.equal( 'First.' );
+						expect( commits.length ).toEqual( 2 );
+						expect( commits[ 0 ].header ).toEqual( 'First.' );
+						expect( commits[ 1 ].header ).toEqual( 'First.' );
 					} );
 			} );
 		} );
 
 		describe( 'branch for releasing is other than the main branch', () => {
 			it( 'collects commits from the main branch and the release branch', () => {
-				stubs.shExec.onFirstCall().returns( 'release\n' );
-				stubs.shExec.onSecondCall().callsFake( exec );
+				vi.mocked( stubs.devTools.shExec ).mockReturnValueOnce( 'release\n' );
+				vi.mocked( stubs.devTools.shExec ).mockImplementationOnce( exec );
 
 				exec( 'git commit --allow-empty --message "Type: master: 1."' );
 				exec( 'git tag v1.0.0' );
@@ -288,9 +264,9 @@ describe( 'dev-release-tools/utils', () => {
 
 				return getCommits( transformCommit, { from: 'v1.0.0', releaseBranch: 'release' } )
 					.then( commits => {
-						expect( commits.length ).to.equal( 8 );
+						expect( commits.length ).toEqual( 8 );
 
-						expect( stubs.gitRawCommits.firstCall.args[ 0 ] ).to.deep.equal( {
+						expect( stubs.gitRawCommits ).toHaveBeenNthCalledWith( 1, {
 							from: 'v1.0.0',
 							to: baseCommit,
 							format: '%B%n-hash-%n%H',
@@ -298,7 +274,7 @@ describe( 'dev-release-tools/utils', () => {
 							firstParent: true
 						} );
 
-						expect( stubs.gitRawCommits.secondCall.args[ 0 ] ).to.deep.equal( {
+						expect( stubs.gitRawCommits ).toHaveBeenNthCalledWith( 2, {
 							to: 'HEAD',
 							from: baseCommit,
 							format: '%B%n-hash-%n%H',
@@ -309,13 +285,13 @@ describe( 'dev-release-tools/utils', () => {
 			} );
 		} );
 	} );
-
-	function exec( command ) {
-		return tools.shExec( command, { verbosity: 'error' } );
-	}
-
-	// Do not modify the commit.
-	function transformCommit( commit ) {
-		return commit;
-	}
 } );
+
+function exec( command ) {
+	return tools.shExec( command, { verbosity: 'error' } );
+}
+
+// Do not modify the commit.
+function transformCommit( commit ) {
+	return commit;
+}

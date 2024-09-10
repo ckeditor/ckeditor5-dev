@@ -7,7 +7,7 @@ import conventionalCommitsParser from 'conventional-commits-parser';
 import conventionalCommitsFilter from 'conventional-commits-filter';
 import gitRawCommits from 'git-raw-commits';
 import concat from 'concat-stream';
-import parserOptions from './parseroptions';
+import parserOptions from './parseroptions.js';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
