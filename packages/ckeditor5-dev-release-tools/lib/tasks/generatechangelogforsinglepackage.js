@@ -7,7 +7,6 @@ import fs from 'fs';
 import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
 import chalk from 'chalk';
 import semver from 'semver';
-import cli from '../utils/cli.js';
 import displayCommits from '../utils/displaycommits.js';
 import generateChangelog from '../utils/generatechangelog.js';
 import getPackageJson from '../utils/getpackagejson.js';
@@ -19,7 +18,8 @@ import transformCommitFactory from '../utils/transformcommitfactory.js';
 import getFormattedDate from '../utils/getformatteddate.js';
 import saveChangelog from '../utils/savechangelog.js';
 import getChangelog from '../utils/getchangelog.js';
-import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../utils/constants.js';
+import provideVersion from '../utils/provideversion.js';
+import { CHANGELOG_FILE, CHANGELOG_HEADER, CLI_INDENT_SIZE } from '../utils/constants.js';
 
 const SKIP_GENERATE_CHANGELOG = 'Typed "skip" as a new version. Aborting.';
 
@@ -80,7 +80,7 @@ export default async function generateChangelogForSinglePackage( options = {} ) 
 
 			displayCommits( allCommits, { indentLevel: 1 } );
 
-			return cli.provideVersion( pkgJson.version, releaseType, { indentLevel: 1 } );
+			return provideVersion( pkgJson.version, releaseType, { indentLevel: 1 } );
 		} )
 		.then( version => {
 			if ( version === 'skip' ) {
@@ -194,7 +194,7 @@ export default async function generateChangelogForSinglePackage( options = {} ) 
 		const startWithNewLine = options.startWithNewLine || false;
 		const method = options.isWarning ? 'warning' : 'info';
 
-		log[ method ]( `${ startWithNewLine ? '\n' : '' }${ ' '.repeat( indentLevel * cli.INDENT_SIZE ) }` + message );
+		log[ method ]( `${ startWithNewLine ? '\n' : '' }${ ' '.repeat( indentLevel * CLI_INDENT_SIZE ) }` + message );
 	}
 }
 

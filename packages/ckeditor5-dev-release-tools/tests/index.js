@@ -33,6 +33,7 @@ import checkVersionAvailability from '../lib/utils/checkversionavailability.js';
 import verifyPackagesPublishedCorrectly from '../lib/tasks/verifypackagespublishedcorrectly.js';
 import getNpmTagFromVersion from '../lib/utils/getnpmtagfromversion.js';
 import isVersionPublishableForTag from '../lib/utils/isversionpublishablefortag.js';
+import provideToken from '../lib/utils/providetoken.js';
 
 import * as index from '../lib/index.js';
 
@@ -53,6 +54,7 @@ vi.mock( '../lib/utils/changelog' );
 vi.mock( '../lib/utils/executeinparallel' );
 vi.mock( '../lib/utils/validaterepositorytorelease' );
 vi.mock( '../lib/utils/isversionpublishablefortag' );
+vi.mock( '../lib/utils/provideToken' );
 
 describe( 'dev-release-tools/index', () => {
 	describe( 'generateChangelogForSinglePackage()', () => {
@@ -241,6 +243,13 @@ describe( 'dev-release-tools/index', () => {
 		it( 'should be a function', () => {
 			expect( verifyPackagesPublishedCorrectly ).to.be.a( 'function' );
 			expect( index.verifyPackagesPublishedCorrectly ).to.equal( verifyPackagesPublishedCorrectly );
+		} );
+	} );
+
+	describe( 'provideToken()', () => {
+		it( 'should be a function', () => {
+			expect( provideToken ).to.be.a( 'function' );
+			expect( index.provideToken ).to.equal( provideToken );
 		} );
 	} );
 } );

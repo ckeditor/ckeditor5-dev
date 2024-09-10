@@ -5,8 +5,8 @@
 
 import chalk from 'chalk';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
-import getPackageJson from './getpackagejson';
-import { INDENT_SIZE } from './cli';
+import getPackageJson from './getpackagejson.js';
+import { CLI_INDENT_SIZE } from './constants.js';
 
 /**
  * Displays skipped packages.
@@ -18,7 +18,7 @@ export function displaySkippedPackages( skippedPackagesPaths ) {
 		return;
 	}
 
-	const indent = ' '.repeat( INDENT_SIZE );
+	const indent = ' '.repeat( CLI_INDENT_SIZE );
 
 	const packageNames = Array.from( skippedPackagesPaths )
 		.map( packagePath => getPackageJson( packagePath ).name );

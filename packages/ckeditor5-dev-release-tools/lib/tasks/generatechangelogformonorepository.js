@@ -9,7 +9,6 @@ import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
 import compareFunc from 'compare-func';
 import chalk from 'chalk';
 import semver from 'semver';
-import cli from '../utils/cli.js';
 import displayCommits from '../utils/displaycommits.js';
 import displaySkippedPackages from '../utils/displayskippedpackages.js';
 import generateChangelog from '../utils/generatechangelog.js';
@@ -24,7 +23,8 @@ import saveChangelog from '../utils/savechangelog.js';
 import truncateChangelog from '../utils/truncatechangelog.js';
 import transformCommitFactory from '../utils/transformcommitfactory.js';
 import { getRepositoryUrl } from '../utils/transformcommitutils.js';
-import { CHANGELOG_FILE, CHANGELOG_HEADER } from '../utils/constants.js';
+import provideNewVersionForMonoRepository from '../utils/providenewversionformonorepository.js';
+import { CHANGELOG_FILE, CHANGELOG_HEADER, CLI_INDENT_SIZE } from '../utils/constants.js';
 
 const VERSIONING_POLICY_URL = 'https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html';
 const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-changes)`;
@@ -297,7 +297,7 @@ export default async function generateChangelogForMonoRepository( options ) {
 			bumpType = 'patch';
 		}
 
-		return cli.provideNewVersionForMonoRepository( highestVersion, packageHighestVersion, bumpType, { indentLevel: 1 } )
+		return provideNewVersionForMonoRepository( highestVersion, packageHighestVersion, bumpType, { indentLevel: 1 } )
 			.then( version => {
 				nextVersion = version;
 
@@ -721,7 +721,7 @@ export default async function generateChangelogForMonoRepository( options ) {
 		const startWithNewLine = options.startWithNewLine || false;
 		const method = options.isWarning ? 'warning' : 'info';
 
-		log[ method ]( `${ startWithNewLine ? '\n' : '' }${ ' '.repeat( indentLevel * cli.INDENT_SIZE ) }` + message );
+		log[ method ]( `${ startWithNewLine ? '\n' : '' }${ ' '.repeat( indentLevel * CLI_INDENT_SIZE ) }` + message );
 	}
 }
 

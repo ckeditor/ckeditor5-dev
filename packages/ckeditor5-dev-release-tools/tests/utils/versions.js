@@ -6,7 +6,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import getChangelog from '../../lib/utils/getchangelog.js';
-import { getPackageJson } from '../../lib/utils/getpackagejson.js';
+import getPackageJson from '../../lib/utils/getpackagejson.js';
 
 import {
 	getLastFromChangelog,

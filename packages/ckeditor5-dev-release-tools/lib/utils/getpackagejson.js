@@ -15,7 +15,7 @@ import upath from 'upath';
  * @param {String} [cwd=process.cwd()] Where to look for package.json.
  * @returns {Object}
  */
-export function getPackageJson( cwd = process.cwd() ) {
+export default function getPackageJson( cwd = process.cwd() ) {
 	let pkgJsonPath = cwd;
 
 	if ( !pkgJsonPath.endsWith( 'package.json' ) ) {

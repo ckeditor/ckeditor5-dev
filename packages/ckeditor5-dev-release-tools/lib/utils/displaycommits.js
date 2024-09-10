@@ -6,7 +6,7 @@
 import chalk from 'chalk';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import * as utils from './transformcommitutils.js';
-import { INDENT_SIZE, COMMIT_INDENT_SIZE } from './cli.js';
+import { CLI_COMMIT_INDENT_SIZE, CLI_INDENT_SIZE } from './constants.js';
 
 /**
  * @param {Array.<Commit>|Set.<Commit>} commits
@@ -19,7 +19,7 @@ export function displayCommits( commits, options = {} ) {
 
 	const attachLinkToCommit = options.attachLinkToCommit || false;
 	const indentLevel = options.indentLevel || 1;
-	const listIndent = ' '.repeat( INDENT_SIZE * indentLevel );
+	const listIndent = ' '.repeat( CLI_INDENT_SIZE * indentLevel );
 
 	if ( !( commits.length || commits.size ) ) {
 		log.info( listIndent + chalk.italic( 'No commits to display.' ) );
@@ -49,7 +49,7 @@ export function displayCommits( commits, options = {} ) {
 			const isCommitIncluded = utils.availableCommitTypes.get( singleCommit.rawType );
 
 			const indent = commits.size > 1 ? listIndent.slice( 0, listIndent.length - 1 ) + chalk.gray( '|' ) : listIndent;
-			const noteIndent = indent + ' '.repeat( COMMIT_INDENT_SIZE );
+			const noteIndent = indent + ' '.repeat( CLI_COMMIT_INDENT_SIZE );
 
 			let logMessage = `${ indent }* ${ chalk.yellow( hash.slice( 0, 7 ) ) } "${ utils.truncate( singleCommit.header, 100 ) }" `;
 

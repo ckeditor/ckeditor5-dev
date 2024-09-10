@@ -45,7 +45,7 @@ describe( 'checkVersionAvailability()', () => {
 		await expect( checkVersionAvailability( '1.0.1', 'stub-package' ) ).resolves.toBe( false );
 	} );
 
-	it( 'should re-throw an error if unknown error occured', async () => {
+	it( 'should re-throw an error if unknown error occurred', async () => {
 		vi.mocked( tools ).shExec.mockRejectedValue( new Error( 'Unknown error.' ) );
 
 		await expect( checkVersionAvailability( '1.0.1', 'stub-package' ) )

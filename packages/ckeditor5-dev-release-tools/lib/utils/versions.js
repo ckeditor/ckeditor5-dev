@@ -5,7 +5,7 @@
 
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import getChangelog from './getchangelog.js';
-import { getPackageJson } from './getpackagejson.js';
+import getPackageJson from './getpackagejson.js';
 
 /**
  * Returns a last created version in changelog file.
