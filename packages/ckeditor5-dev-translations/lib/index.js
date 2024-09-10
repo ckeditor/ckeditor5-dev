@@ -3,15 +3,13 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import findMessages from './findmessages.js';
+import cleanPoFileContent from './cleanpofilecontent.js';
+import MultipleLanguageTranslationService from './multiplelanguagetranslationservice.js';
+import createDictionaryFromPoFileContent from './createdictionaryfrompofilecontent.js';
+import CKEditorTranslationsPlugin from './ckeditortranslationsplugin.js';
 
-const findMessages = require( './findmessages' );
-const cleanPoFileContent = require( './cleanpofilecontent' );
-const MultipleLanguageTranslationService = require( './multiplelanguagetranslationservice' );
-const createDictionaryFromPoFileContent = require( './createdictionaryfrompofilecontent' );
-const CKEditorTranslationsPlugin = require( './ckeditortranslationsplugin' );
-
-module.exports = {
+export default {
 	findMessages,
 	cleanPoFileContent,
 	MultipleLanguageTranslationService,

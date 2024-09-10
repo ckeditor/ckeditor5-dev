@@ -3,13 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const chalk = require( 'chalk' );
-const rimraf = require( 'rimraf' );
-const fs = require( 'fs' );
-const path = require( 'path' );
-const { RawSource, ConcatSource } = require( 'webpack-sources' );
+import chalk from 'chalk';
+import rimraf from 'rimraf';
+import fs from 'fs';
+import path from 'path';
+import { RawSource, ConcatSource } from 'webpack-sources';
 
 /**
  * Serve translations depending on the used translation service and passed options.
@@ -29,7 +27,7 @@ const { RawSource, ConcatSource } = require( 'webpack-sources' );
  * @param {TranslationService} translationService Translation service that will load PO files, replace translation keys and generate assets.
  * ckeditor5 - independent without hard-to-test logic.
  */
-module.exports = function serveTranslations( compiler, options, translationService ) {
+export default function serveTranslations( compiler, options, translationService ) {
 	const cwd = process.cwd();
 
 	// A set of unique messages that prevents message duplications.
@@ -176,7 +174,7 @@ module.exports = function serveTranslations( compiler, options, translationServi
 			console.warn( chalk.yellow( `[CKEditorTranslationsPlugin] Warning: ${ warning }` ) );
 		}
 	}
-};
+}
 
 /**
  * Return path to the package if the resource comes from `ckeditor5-*` package.

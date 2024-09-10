@@ -5,16 +5,22 @@
 
 /* eslint-disable no-eval */
 
-'use strict';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import path from 'path';
+import fs from 'fs';
+import MultipleLanguageTranslationService from '../lib/multiplelanguagetranslationservice.js';
 
-const { expect } = require( 'chai' );
-const sinon = require( 'sinon' );
-const path = require( 'path' );
-const proxyquire = require( 'proxyquire' );
+vi.mock( 'fs', () => ( {
+	default: {
+		existsSync: vi.fn(),
+		readFileSync: vi.fn(),
+		readdirSync: vi.fn()
+	}
+} ) );
 
 describe( 'translations', () => {
 	describe( 'MultipleLanguageTranslationService', () => {
-		let MultipleLanguageTranslationService, stubs, filesAndDirs, fileContents, dirContents;
+		let filesAndDirs, fileContents, dirContents;
 		let window;
 
 		beforeEach( () => {
@@ -22,23 +28,11 @@ describe( 'translations', () => {
 			fileContents = {};
 			dirContents = {};
 
-			stubs = {
-				fs: {
-					existsSync: path => filesAndDirs.includes( path ),
-					readFileSync: path => fileContents[ path ],
-					readdirSync: dir => dirContents[ dir ]
-				}
-			};
-
-			MultipleLanguageTranslationService = proxyquire( '../lib/multiplelanguagetranslationservice', {
-				'fs': stubs.fs
-			} );
+			vi.mocked( fs.existsSync ).mockImplementation( path => filesAndDirs.includes( path ) );
+			vi.mocked( fs.readFileSync ).mockImplementation( path => fileContents[ path ] );
+			vi.mocked( fs.readdirSync ).mockImplementation( dir => dirContents[ dir ] );
 
 			window = {};
-		} );
-
-		afterEach( () => {
-			sinon.restore();
 		} );
 
 		describe( 'constructor()', () => {
@@ -95,7 +89,7 @@ describe( 'translations', () => {
 
 			it( 'should load PO file from the package only once per language', () => {
 				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [ 'de' ] } );
-				const loadPoFileSpy = sinon.stub( translationService, '_loadPoFile' );
+				const loadPoFileSpy = vi.spyOn( translationService, '_loadPoFile' );
 
 				const pathToTranslationsDirectory = path.join( 'pathToPackage', 'lang', 'translations' );
 
@@ -105,7 +99,7 @@ describe( 'translations', () => {
 				translationService.loadPackage( 'pathToPackage' );
 				translationService.loadPackage( 'pathToPackage' );
 
-				sinon.assert.calledTwice( loadPoFileSpy );
+				expect( loadPoFileSpy ).toBeCalledTimes( 2 );
 			} );
 
 			it( 'should load all PO files for the current package and add languages to the language list', () => {
@@ -447,7 +441,7 @@ describe( 'translations', () => {
 					additionalLanguages: [ 'xxx' ]
 				} );
 
-				const spy = sinon.spy();
+				const spy = vi.fn();
 
 				translationService.on( 'error', spy );
 
@@ -482,7 +476,7 @@ describe( 'translations', () => {
 					additionalLanguages: [ 'xxx' ]
 				} );
 
-				const spy = sinon.spy();
+				const spy = vi.fn();
 
 				translationService.on( 'error', spy );
 
@@ -525,7 +519,7 @@ describe( 'translations', () => {
 					mainLanguage: 'pl',
 					additionalLanguages: [ 'xxx' ]
 				} );
-				const spy = sinon.spy();
+				const spy = vi.fn();
 
 				translationService.on( 'error', spy );
 
@@ -546,8 +540,8 @@ describe( 'translations', () => {
 					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
-				sinon.assert.calledOnce( spy );
-				sinon.assert.calledWithExactly( spy, 'No translation has been found for the xxx language.' );
+				expect( spy ).toHaveBeenCalledOnce();
+				expect( spy ).toBeCalledWith( 'No translation has been found for the xxx language.' );
 			} );
 
 			it( 'should emit an error if translations for the main language are missing', () => {
@@ -556,7 +550,7 @@ describe( 'translations', () => {
 					additionalLanguages: [ 'pl' ]
 				} );
 
-				const errorSpy = sinon.spy();
+				const errorSpy = vi.fn();
 
 				translationService.on( 'error', errorSpy );
 
@@ -577,8 +571,8 @@ describe( 'translations', () => {
 					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
-				sinon.assert.calledOnce( errorSpy );
-				sinon.assert.calledWithExactly( errorSpy, 'No translation has been found for the xxx language.' );
+				expect( errorSpy ).toHaveBeenCalledOnce();
+				expect( errorSpy ).toBeCalledWith( 'No translation has been found for the xxx language.' );
 			} );
 
 			it( 'should emit a warning if the translation is missing', () => {
@@ -586,7 +580,7 @@ describe( 'translations', () => {
 					mainLanguage: 'pl',
 					additionalLanguages: []
 				} );
-				const warningSpy = sinon.spy();
+				const warningSpy = vi.fn();
 
 				translationService.on( 'warning', warningSpy );
 
@@ -608,13 +602,13 @@ describe( 'translations', () => {
 					compilationAssetNames: [ 'ckeditor.js' ]
 				} );
 
-				sinon.assert.calledOnce( warningSpy );
-				sinon.assert.calledWithExactly( warningSpy, 'A translation is missing for \'Save\' in the \'pl\' language.' );
+				expect( warningSpy ).toHaveBeenCalledOnce();
+				expect( warningSpy ).toBeCalledWith( 'A translation is missing for \'Save\' in the \'pl\' language.' );
 			} );
 
 			it( 'should emit an error when there are multiple JS assets', () => {
 				const translationService = new MultipleLanguageTranslationService( { mainLanguage: 'pl', additionalLanguages: [] } );
-				const errorSpy = sinon.spy();
+				const errorSpy = vi.fn();
 
 				translationService.on( 'error', errorSpy );
 
@@ -635,8 +629,8 @@ describe( 'translations', () => {
 					compilationAssetNames: [ 'ckeditor.js', 'ckeditor1.js' ]
 				} );
 
-				sinon.assert.calledOnce( errorSpy );
-				expect( errorSpy.getCalls()[ 0 ] ).to.match(
+				expect( errorSpy ).toHaveBeenCalledOnce();
+				expect( errorSpy.mock.calls[ 0 ] ).to.match(
 					/Too many JS assets has been found during the compilation./
 				);
 
@@ -652,7 +646,7 @@ describe( 'translations', () => {
 					addMainLanguageTranslationsToAllAssets: true
 				} );
 
-				const errorSpy = sinon.spy();
+				const errorSpy = vi.fn();
 
 				translationService.on( 'error', errorSpy );
 
@@ -673,7 +667,7 @@ describe( 'translations', () => {
 					compilationAssetNames: [ 'foo.js', 'bar.js' ]
 				} );
 
-				sinon.assert.notCalled( errorSpy );
+				expect( errorSpy ).not.toHaveBeenCalled();
 
 				expect( assets ).to.have.length( 2 );
 
@@ -691,7 +685,7 @@ describe( 'translations', () => {
 					buildAllTranslationsToSeparateFiles: true
 				} );
 
-				const errorSpy = sinon.spy();
+				const errorSpy = vi.fn();
 
 				translationService.on( 'error', errorSpy );
 
@@ -712,7 +706,7 @@ describe( 'translations', () => {
 					compilationAssetNames: []
 				} );
 
-				sinon.assert.notCalled( errorSpy );
+				expect( errorSpy ).not.toHaveBeenCalled();
 
 				expect( assets ).to.have.length( 0 );
 			} );
@@ -724,8 +718,8 @@ describe( 'translations', () => {
 					translationsOutputFile: 'foo/bar'
 				} );
 
-				const errorSpy = sinon.spy();
-				const warningSpy = sinon.spy();
+				const errorSpy = vi.fn();
+				const warningSpy = vi.fn();
 
 				translationService.on( 'error', errorSpy );
 				translationService.on( 'warning', warningSpy );
@@ -757,8 +751,8 @@ describe( 'translations', () => {
 				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
 				expect( assets[ 0 ].outputBody ).to.have.length.greaterThan( 0 );
 
-				expect( warningSpy.called ).to.equal( false );
-				expect( errorSpy.called ).to.equal( false );
+				expect( warningSpy ).not.toHaveBeenCalled();
+				expect( errorSpy ).not.toHaveBeenCalled();
 			} );
 
 			it( 'should emit all files to a file specified by the `translationsOutputFile` option when it is specified (as regexp)', () => {
@@ -768,8 +762,8 @@ describe( 'translations', () => {
 					translationsOutputFile: /app\.js/
 				} );
 
-				const errorSpy = sinon.spy();
-				const warningSpy = sinon.spy();
+				const errorSpy = vi.fn();
+				const warningSpy = vi.fn();
 
 				translationService.on( 'error', errorSpy );
 				translationService.on( 'warning', warningSpy );
@@ -802,8 +796,8 @@ describe( 'translations', () => {
 				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
 				expect( assets[ 0 ].outputBody ).to.have.length.greaterThan( 0 );
 
-				expect( warningSpy.called ).to.equal( false );
-				expect( errorSpy.called ).to.equal( false );
+				expect( warningSpy ).not.toHaveBeenCalled();
+				expect( errorSpy ).not.toHaveBeenCalled();
 			} );
 
 			it( 'should emit all files to a file specified by the `translationsOutputFile` option when it is specified (as func.)', () => {
@@ -813,8 +807,8 @@ describe( 'translations', () => {
 					translationsOutputFile: name => /app\.js/.test( name )
 				} );
 
-				const errorSpy = sinon.spy();
-				const warningSpy = sinon.spy();
+				const errorSpy = vi.fn();
+				const warningSpy = vi.fn();
 
 				translationService.on( 'error', errorSpy );
 				translationService.on( 'warning', warningSpy );
@@ -847,8 +841,8 @@ describe( 'translations', () => {
 				expect( assets[ 0 ] ).to.have.property( 'outputBody' );
 				expect( assets[ 0 ].outputBody ).to.have.length.greaterThan( 0 );
 
-				expect( warningSpy.called ).to.equal( false );
-				expect( errorSpy.called ).to.equal( false );
+				expect( warningSpy ).not.toHaveBeenCalled();
+				expect( errorSpy ).not.toHaveBeenCalled();
 			} );
 
 			it( 'should use the `outputDirectory` option for translation assets generated as new files', () => {
@@ -857,8 +851,8 @@ describe( 'translations', () => {
 					additionalLanguages: [ 'en' ]
 				} );
 
-				const warningSpy = sinon.spy();
-				const errorSpy = sinon.spy();
+				const warningSpy = vi.fn();
+				const errorSpy = vi.fn();
 
 				translationService.on( 'warning', warningSpy );
 				translationService.on( 'error', errorSpy );
@@ -886,8 +880,8 @@ describe( 'translations', () => {
 				expect( assets[ 0 ].outputPath ).to.equal( 'ckeditor.js' );
 				expect( assets[ 1 ].outputPath ).to.equal( path.join( 'custom-lang-path', 'en.js' ) );
 
-				expect( warningSpy.called ).to.equal( false );
-				expect( errorSpy.called ).to.equal( false );
+				expect( warningSpy ).not.toHaveBeenCalled();
+				expect( errorSpy ).not.toHaveBeenCalled();
 			} );
 
 			it(

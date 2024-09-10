@@ -3,19 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { expect } = require( 'chai' );
-const sinon = require( 'sinon' );
-const findMessages = require( '../lib/findmessages' );
+import { describe, expect, it } from 'vitest';
+import findMessages from '../lib/findmessages.js';
 
 describe( 'findMessages', () => {
-	const sandbox = sinon.createSandbox();
-
-	afterEach( () => {
-		sandbox.restore();
-	} );
-
 	it( 'should parse provided code and find messages from `t()` function calls on string literals', () => {
 		const messages = [];
 

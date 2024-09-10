@@ -3,10 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const parser = require( '@babel/parser' );
-const traverse = require( '@babel/traverse' ).default;
+import parser from '@babel/parser';
+import traverse from '@babel/traverse';
 
 /**
  * Parses source and finds messages from the first argument of `t()` calls.
@@ -17,7 +15,7 @@ const traverse = require( '@babel/traverse' ).default;
  * @param {(err: string) => void} onErrorFound
  * @returns {String} Transformed source.
  */
-module.exports = function findMessages( source, sourceFile, onMessageFound, onErrorFound ) {
+export default function findMessages( source, sourceFile, onMessageFound, onErrorFound ) {
 	const ast = parser.parse( source, {
 		sourceType: 'module',
 		ranges: true,
@@ -111,7 +109,7 @@ module.exports = function findMessages( source, sourceFile, onMessageFound, onEr
 			`First t() call argument should be a string literal or an object literal (${ sourceFile }).`
 		);
 	}
-};
+}
 
 // Get property from the list of properties
 // It supports both forms: `{ propertyName: foo }` and `{ 'propertyName': 'foo' }`
