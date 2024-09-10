@@ -11,10 +11,8 @@
 	 * @param {String} callbackModule
 	 * @param {Array.<String>} packages
 	 */
-	import { parentPort, workerData } from 'worker_threads';
-
-	// TODO: To decide what to do.
-	const callback = require( workerData.callbackModule );
+	const { parentPort, workerData } = await import( 'worker_threads' );
+	const callback = await import( workerData.callbackModule );
 
 	for ( const packagePath of workerData.packages ) {
 		await callback( packagePath, workerData.taskOptions );

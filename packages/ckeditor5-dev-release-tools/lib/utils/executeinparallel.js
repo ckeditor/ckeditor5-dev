@@ -11,9 +11,9 @@ import os from 'os';
 import fs from 'fs/promises';
 import { Worker } from 'worker_threads';
 import { glob } from 'glob';
-import { registerAbortController, deregisterAbortController } from './abortcontroller';
+import { registerAbortController, deregisterAbortController } from './abortcontroller.js';
 
-const WORKER_SCRIPT = upath.join( __dirname, 'parallelworker.cjs' );
+const WORKER_SCRIPT = new URL( './abortcontroller.js', import.meta.url );
 
 /**
  * This util allows executing a specified task in parallel using Workers. It can be helpful when executing a not resource-consuming
@@ -60,8 +60,8 @@ export default async function executeInParallel( options ) {
 
 	const packagesInThreads = getPackagesGroupedByThreads( packagesToProcess, concurrency );
 
-	const callbackModule = upath.join( cwd, crypto.randomUUID() + '.cjs' );
-	await fs.writeFile( callbackModule, `'use strict';\nexport ${ taskToExecute };`, 'utf-8' );
+	const callbackModule = upath.join( cwd, crypto.randomUUID() + '.js' );
+	await fs.writeFile( callbackModule, `export default ${ taskToExecute };`, 'utf-8' );
 
 	const onPackageDone = progressFactory( listrTask, packagesToProcess.length );
 
