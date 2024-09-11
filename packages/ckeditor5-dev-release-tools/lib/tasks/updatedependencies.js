@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs-extra' );
-const { glob } = require( 'glob' );
-const upath = require( 'upath' );
+import fs from 'fs-extra';
+import { glob } from 'glob';
+import upath from 'upath';
 
 /**
  * The purpose of this script is to update all eligible dependencies to a version specified in the `options.version`. The following packages
@@ -31,7 +29,7 @@ const upath = require( 'upath' );
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @returns {Promise}
  */
-module.exports = async function updateDependencies( options ) {
+export default async function updateDependencies( options ) {
 	const {
 		version,
 		packagesDirectory,
@@ -59,7 +57,7 @@ module.exports = async function updateDependencies( options ) {
 
 		await fs.writeJson( pkgJsonPath, pkgJson, { spaces: 2 } );
 	}
-};
+}
 
 /**
  * Updates the version for each eligible dependency.

@@ -3,99 +3,84 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { deregisterAbortController, registerAbortController } from '../../lib/utils/abortcontroller.js';
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
+vi.stubGlobal( 'process', {
+	prependOnceListener: vi.fn(),
+	removeListener: vi.fn()
+} );
 
-describe( 'dev-release-tools/utils', () => {
-	describe( 'abortController()', () => {
-		let abortController, listeners, sandbox, stubs;
+describe( 'abortcontroller', () => {
+	let listeners;
 
-		beforeEach( () => {
-			sandbox = sinon.createSandbox();
+	beforeEach( () => {
+		listeners = {};
 
-			listeners = {};
-
-			stubs = {
-				process: {
-					prependOnceListener: sandbox.stub().callsFake( ( eventName, listener ) => {
-						listeners[ eventName ] = new Set( [
-							listener,
-							...listeners[ eventName ] || []
-						] );
-					} ),
-					removeListener: sandbox.stub().callsFake( ( eventName, listener ) => {
-						if ( listeners[ eventName ] ) {
-							listeners[ eventName ].delete( listener );
-						}
-					} )
-				}
-			};
-
-			sandbox.stub( process, 'prependOnceListener' ).callsFake( stubs.process.prependOnceListener );
-			sandbox.stub( process, 'removeListener' ).callsFake( stubs.process.removeListener );
-
-			abortController = require( '../../lib/utils/abortcontroller' );
+		vi.mocked( process ).prependOnceListener.mockImplementation( ( eventName, listener ) => {
+			listeners[ eventName ] = new Set( [
+				listener,
+				...listeners[ eventName ] || []
+			] );
 		} );
-
-		afterEach( () => {
-			sandbox.restore();
+		vi.mocked( process ).removeListener.mockImplementation( ( eventName, listener ) => {
+			if ( listeners[ eventName ] ) {
+				listeners[ eventName ].delete( listener );
+			}
 		} );
+	} );
 
+	describe( 'registerAbortController()', () => {
 		it( 'should return AbortController instance', () => {
-			const abortControllerInstance = abortController.registerAbortController();
+			const abortControllerInstance = registerAbortController();
 
 			expect( abortControllerInstance ).to.be.instanceof( global.AbortController );
 		} );
 
 		it( 'should store listener in internal property for further use', () => {
-			const abortControllerInstance = abortController.registerAbortController();
+			const abortControllerInstance = registerAbortController();
 
 			expect( abortControllerInstance._listener ).to.be.a( 'function' );
 		} );
 
 		it( 'should register listener on SIGINT event', () => {
-			const abortControllerInstance = abortController.registerAbortController();
+			const abortControllerInstance = registerAbortController();
 
-			expect( stubs.process.prependOnceListener.callCount ).to.equal( 1 );
-			expect( stubs.process.prependOnceListener.firstCall.args[ 0 ] ).to.equal( 'SIGINT' );
-			expect( stubs.process.prependOnceListener.firstCall.args[ 1 ] ).to.equal( abortControllerInstance._listener );
+			expect(
+				vi.mocked( process ).prependOnceListener
+			).toHaveBeenCalledExactlyOnceWith( 'SIGINT', abortControllerInstance._listener );
 		} );
 
 		it( 'should call abort method on SIGINT event', () => {
-			const abortControllerInstance = abortController.registerAbortController();
+			const abortControllerInstance = registerAbortController();
 
-			sandbox.spy( abortControllerInstance, 'abort' );
+			vi.spyOn( abortControllerInstance, 'abort' );
 
 			listeners.SIGINT.forEach( listener => listener() );
 
-			expect( abortControllerInstance.abort.callCount ).to.equal( 1 );
-			expect( abortControllerInstance.abort.firstCall.args[ 0 ] ).to.equal( 'SIGINT' );
+			expect( abortControllerInstance.abort ).toHaveBeenCalledExactlyOnceWith( 'SIGINT' );
 		} );
+	} );
 
+	describe( 'deregisterAbortController()', () => {
 		it( 'should not deregister listener if AbortController instance is not set', () => {
-			abortController.deregisterAbortController();
-
-			expect( stubs.process.removeListener.callCount ).to.equal( 0 );
+			deregisterAbortController();
+			expect( vi.mocked( process ).removeListener ).not.toHaveBeenCalled();
 		} );
 
 		it( 'should not deregister listener if AbortController instance is not registered', () => {
 			const abortControllerInstance = new AbortController();
+			deregisterAbortController( abortControllerInstance );
 
-			abortController.deregisterAbortController( abortControllerInstance );
-
-			expect( stubs.process.removeListener.callCount ).to.equal( 0 );
+			expect( vi.mocked( process ).removeListener ).not.toHaveBeenCalled();
 		} );
 
 		it( 'should deregister listener if AbortController instance is registered', () => {
-			const abortControllerInstance = abortController.registerAbortController();
+			const abortControllerInstance = registerAbortController();
 
-			abortController.deregisterAbortController( abortControllerInstance );
+			deregisterAbortController( abortControllerInstance );
 
-			expect( stubs.process.removeListener.callCount ).to.equal( 1 );
-			expect( stubs.process.removeListener.firstCall.args[ 0 ] ).to.equal( 'SIGINT' );
-			expect( stubs.process.removeListener.firstCall.args[ 1 ] ).to.equal( abortControllerInstance._listener );
+			expect( vi.mocked( process ).removeListener ).toHaveBeenCalledExactlyOnceWith( 'SIGINT', abortControllerInstance._listener );
 		} );
 	} );
 } );

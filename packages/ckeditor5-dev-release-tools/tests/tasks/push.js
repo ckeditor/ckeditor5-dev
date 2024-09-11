@@ -5,92 +5,66 @@
 
 'use strict';
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import shellEscape from 'shell-escape';
+import push from '../../lib/tasks/push.js';
 
-describe( 'dev-release-tools/tasks', () => {
-	describe( 'push()', () => {
-		let options, stubs, push;
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( 'shell-escape' );
 
-		beforeEach( () => {
-			options = {
-				releaseBranch: 'release',
-				version: '1.3.5',
-				cwd: 'custom/working/dir'
-			};
+describe( 'push()', () => {
+	let options;
+	beforeEach( () => {
+		vi.spyOn( process, 'cwd' ).mockReturnValue( 'current/working/dir' );
+		vi.mocked( shellEscape ).mockImplementation( v => v[ 0 ] );
+		vi.mocked( tools.shExec ).mockResolvedValue();
 
-			stubs = {
-				devUtils: {
-					tools: {
-						shExec: sinon.stub()
-					}
-				},
-				process: {
-					cwd: sinon.stub( process, 'cwd' ).returns( 'current/working/dir' )
-				},
-				shellEscape: sinon.stub().callsFake( v => v[ 0 ] )
-			};
+		options = {
+			releaseBranch: 'release',
+			version: '1.3.5',
+			cwd: 'custom-modified/working/dir'
+		};
+	} );
 
-			mockery.enable( {
-				useCleanCache: true,
-				warnOnReplace: false,
-				warnOnUnregistered: false
-			} );
+	it( 'should be a function', () => {
+		expect( push ).to.be.a( 'function' );
+	} );
 
-			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', stubs.devUtils );
-			mockery.registerMock( 'shell-escape', stubs.shellEscape );
+	it( 'should execute command with correct arguments', async () => {
+		await push( options );
 
-			push = require( '../../lib/tasks/push' );
-		} );
-
-		afterEach( () => {
-			mockery.deregisterAll();
-			mockery.disable();
-			sinon.restore();
-		} );
-
-		it( 'should be a function', () => {
-			expect( push ).to.be.a( 'function' );
-		} );
-
-		it( 'should execute command with correct arguments', async () => {
-			stubs.devUtils.tools.shExec.resolves();
-			await push( options );
-
-			expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 1 );
-			expect( stubs.devUtils.tools.shExec.getCall( 0 ).args.length ).to.equal( 2 );
-			expect( stubs.devUtils.tools.shExec.getCall( 0 ).args[ 0 ] ).to.equal( 'git push origin release v1.3.5' );
-			expect( stubs.devUtils.tools.shExec.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
-				cwd: 'custom/working/dir',
+		expect( vi.mocked( tools.shExec ) ).toHaveBeenCalledOnce();
+		expect( vi.mocked( tools.shExec ) ).toHaveBeenCalledWith(
+			'git push origin release v1.3.5',
+			{
+				cwd: 'custom-modified/working/dir',
 				verbosity: 'error',
 				async: true
-			} );
-		} );
+			}
+		);
+	} );
 
-		it( 'should use "process.cwd()" if the "cwd" option was not used', async () => {
-			delete options.cwd;
+	it( 'should use "process.cwd()" if the "cwd" option was not used', async () => {
+		delete options.cwd;
 
-			stubs.devUtils.tools.shExec.resolves();
-			await push( options );
+		await push( options );
 
-			expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 1 );
-			expect( stubs.devUtils.tools.shExec.getCall( 0 ).args.length ).to.equal( 2 );
-			expect( stubs.devUtils.tools.shExec.getCall( 0 ).args[ 0 ] ).to.equal( 'git push origin release v1.3.5' );
-			expect( stubs.devUtils.tools.shExec.getCall( 0 ).args[ 1 ] ).to.deep.equal( {
+		expect( vi.mocked( tools.shExec ) ).toHaveBeenCalledExactlyOnceWith(
+			'git push origin release v1.3.5',
+			{
 				cwd: 'current/working/dir',
 				verbosity: 'error',
 				async: true
-			} );
-		} );
+			}
+		);
+	} );
 
-		it( 'should escape arguments passed to a shell command', async () => {
-			stubs.devUtils.tools.shExec.resolves();
-			await push( options );
+	it( 'should escape arguments passed to a shell command', async () => {
+		await push( options );
 
-			expect( stubs.shellEscape.callCount ).to.equal( 2 );
-			expect( stubs.shellEscape.firstCall.firstArg ).to.deep.equal( [ 'release' ] );
-			expect( stubs.shellEscape.secondCall.firstArg ).to.deep.equal( [ '1.3.5' ] );
-		} );
+		expect( vi.mocked( shellEscape ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( shellEscape ) ).toHaveBeenCalledWith( [ 'release' ] );
+		expect( vi.mocked( shellEscape ) ).toHaveBeenCalledWith( [ '1.3.5' ] );
 	} );
 } );

@@ -3,105 +3,90 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, it, expect, vi } from 'vitest';
+import getWriterOptions from '../../lib/utils/getwriteroptions.js';
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
+describe( 'getWriterOptions()', () => {
+	const transformSpy = vi.fn();
 
-describe( 'dev-release-tools/utils', () => {
-	let getWriterOptions, sandbox, transformSpy;
+	it( 'returns an object with writer options', () => {
+		const writerOptions = getWriterOptions( transformSpy );
 
-	beforeEach( () => {
-		transformSpy = sinon.spy();
-		sandbox = sinon.createSandbox();
+		expect( writerOptions ).to.have.property( 'transform', transformSpy );
+		expect( writerOptions ).to.have.property( 'groupBy' );
+		expect( writerOptions ).to.have.property( 'commitGroupsSort' );
+		expect( writerOptions ).to.have.property( 'commitsSort' );
+		expect( writerOptions ).to.have.property( 'noteGroupsSort' );
+		expect( writerOptions ).to.have.property( 'mainTemplate' );
+		expect( writerOptions ).to.have.property( 'headerPartial' );
+		expect( writerOptions ).to.have.property( 'footerPartial' );
 
-		getWriterOptions = require( '../../lib/utils/getwriteroptions' );
+		expect( writerOptions.commitsSort ).to.be.a( 'array' );
+		expect( writerOptions.commitGroupsSort ).to.be.a( 'function' );
+		expect( writerOptions.noteGroupsSort ).to.be.a( 'function' );
 	} );
 
-	afterEach( () => {
-		sandbox.restore();
+	it( 'sorts notes properly', () => {
+		const writerOptions = getWriterOptions( transformSpy );
+
+		const noteGroups = [
+			{ title: 'BREAKING CHANGES', notes: [] },
+			{ title: 'MINOR BREAKING CHANGES', notes: [] },
+			{ title: 'MAJOR BREAKING CHANGES', notes: [] }
+		];
+
+		expect( noteGroups.sort( writerOptions.noteGroupsSort ) ).to.deep.equal( [
+			{ title: 'MAJOR BREAKING CHANGES', notes: [] },
+			{ title: 'MINOR BREAKING CHANGES', notes: [] },
+			{ title: 'BREAKING CHANGES', notes: [] }
+		] );
 	} );
 
-	describe( 'getWriterOptions()', () => {
-		it( 'returns an object with writer options', () => {
-			const writerOptions = getWriterOptions( transformSpy );
+	it( 'sorts notes properly (titles with emojis)', () => {
+		const writerOptions = getWriterOptions( transformSpy );
 
-			expect( writerOptions ).to.have.property( 'transform', transformSpy );
-			expect( writerOptions ).to.have.property( 'groupBy' );
-			expect( writerOptions ).to.have.property( 'commitGroupsSort' );
-			expect( writerOptions ).to.have.property( 'commitsSort' );
-			expect( writerOptions ).to.have.property( 'noteGroupsSort' );
-			expect( writerOptions ).to.have.property( 'mainTemplate' );
-			expect( writerOptions ).to.have.property( 'headerPartial' );
-			expect( writerOptions ).to.have.property( 'footerPartial' );
+		const noteGroups = [
+			{ title: 'BREAKING CHANGES [ℹ](url)', notes: [] },
+			{ title: 'MINOR BREAKING CHANGES [ℹ](url)', notes: [] },
+			{ title: 'MAJOR BREAKING CHANGES [ℹ](url)', notes: [] }
+		];
 
-			expect( writerOptions.commitsSort ).to.be.a( 'array' );
-			expect( writerOptions.commitGroupsSort ).to.be.a( 'function' );
-			expect( writerOptions.noteGroupsSort ).to.be.a( 'function' );
-		} );
+		expect( noteGroups.sort( writerOptions.noteGroupsSort ) ).to.deep.equal( [
+			{ title: 'MAJOR BREAKING CHANGES [ℹ](url)', notes: [] },
+			{ title: 'MINOR BREAKING CHANGES [ℹ](url)', notes: [] },
+			{ title: 'BREAKING CHANGES [ℹ](url)', notes: [] }
+		] );
+	} );
 
-		it( 'sorts notes properly', () => {
-			const writerOptions = getWriterOptions( transformSpy );
+	it( 'sorts groups properly', () => {
+		const writerOptions = getWriterOptions( transformSpy );
 
-			const noteGroups = [
-				{ title: 'BREAKING CHANGES', notes: [] },
-				{ title: 'MINOR BREAKING CHANGES', notes: [] },
-				{ title: 'MAJOR BREAKING CHANGES', notes: [] }
-			];
+		const commitGroups = [
+			{ title: 'Other changes', commits: [] },
+			{ title: 'Features', commits: [] },
+			{ title: 'Bug fixes', commits: [] }
+		];
 
-			expect( noteGroups.sort( writerOptions.noteGroupsSort ) ).to.deep.equal( [
-				{ title: 'MAJOR BREAKING CHANGES', notes: [] },
-				{ title: 'MINOR BREAKING CHANGES', notes: [] },
-				{ title: 'BREAKING CHANGES', notes: [] }
-			] );
-		} );
+		expect( commitGroups.sort( writerOptions.commitGroupsSort ) ).to.deep.equal( [
+			{ title: 'Features', commits: [] },
+			{ title: 'Bug fixes', commits: [] },
+			{ title: 'Other changes', commits: [] }
+		] );
+	} );
 
-		it( 'sorts notes properly (titles with emojis)', () => {
-			const writerOptions = getWriterOptions( transformSpy );
+	it( 'sorts groups properly (titles with emojis)', () => {
+		const writerOptions = getWriterOptions( transformSpy );
 
-			const noteGroups = [
-				{ title: 'BREAKING CHANGES [ℹ](url)', notes: [] },
-				{ title: 'MINOR BREAKING CHANGES [ℹ](url)', notes: [] },
-				{ title: 'MAJOR BREAKING CHANGES [ℹ](url)', notes: [] }
-			];
+		const commitGroups = [
+			{ title: 'Other changes [ℹ](url)', commits: [] },
+			{ title: 'Features [ℹ](url)', commits: [] },
+			{ title: 'Bug fixes [ℹ](url)', commits: [] }
+		];
 
-			expect( noteGroups.sort( writerOptions.noteGroupsSort ) ).to.deep.equal( [
-				{ title: 'MAJOR BREAKING CHANGES [ℹ](url)', notes: [] },
-				{ title: 'MINOR BREAKING CHANGES [ℹ](url)', notes: [] },
-				{ title: 'BREAKING CHANGES [ℹ](url)', notes: [] }
-			] );
-		} );
-
-		it( 'sorts groups properly', () => {
-			const writerOptions = getWriterOptions( transformSpy );
-
-			const commitGroups = [
-				{ title: 'Other changes', commits: [] },
-				{ title: 'Features', commits: [] },
-				{ title: 'Bug fixes', commits: [] }
-			];
-
-			expect( commitGroups.sort( writerOptions.commitGroupsSort ) ).to.deep.equal( [
-				{ title: 'Features', commits: [] },
-				{ title: 'Bug fixes', commits: [] },
-				{ title: 'Other changes', commits: [] }
-			] );
-		} );
-
-		it( 'sorts groups properly (titles with emojis)', () => {
-			const writerOptions = getWriterOptions( transformSpy );
-
-			const commitGroups = [
-				{ title: 'Other changes [ℹ](url)', commits: [] },
-				{ title: 'Features [ℹ](url)', commits: [] },
-				{ title: 'Bug fixes [ℹ](url)', commits: [] }
-			];
-
-			expect( commitGroups.sort( writerOptions.commitGroupsSort ) ).to.deep.equal( [
-				{ title: 'Features [ℹ](url)', commits: [] },
-				{ title: 'Bug fixes [ℹ](url)', commits: [] },
-				{ title: 'Other changes [ℹ](url)', commits: [] }
-			] );
-		} );
+		expect( commitGroups.sort( writerOptions.commitGroupsSort ) ).to.deep.equal( [
+			{ title: 'Features [ℹ](url)', commits: [] },
+			{ title: 'Bug fixes [ℹ](url)', commits: [] },
+			{ title: 'Other changes [ℹ](url)', commits: [] }
+		] );
 	} );
 } );

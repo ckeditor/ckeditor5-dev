@@ -3,19 +3,17 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const path = require( 'path' );
-const minimatch = require( 'minimatch' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const getPackageJson = require( './getpackagejson' );
+import path from 'path';
+import minimatch from 'minimatch';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import getPackageJson from './getpackagejson.js';
 
 /**
  * Returns an object with two collections of paths to packages which are located in single repository.
  * Those packages must be defined as dependencies in the repository found in `options.cwd`.
  *
  *   - The first one is marked as `matched` and means that packages specified in a path (which is a combination of values specified as
- *     `options.cwd` and  `options.packages`) match to given criteria.
+ *     `options.cwd` and `options.packages`) match to given criteria.
  *   - The second one is marked as `skipped` and means that packages should not be processed. They were listed as packages to skip
  *     (`options.skipPackages` or don't mach to `options.scope`).
  *
@@ -28,7 +26,7 @@ const getPackageJson = require( './getpackagejson' );
  * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in `options.cwd` will be skipped.
  * @returns {PathsCollection}
  */
-module.exports = function getPackagesPaths( options ) {
+export default function getPackagesPaths( options ) {
 	const pathsCollection = {
 		matched: new Set(),
 		skipped: new Set()
@@ -79,7 +77,7 @@ module.exports = function getPackagesPaths( options ) {
 
 		return true;
 	}
-};
+}
 
 /**
  * @typedef {Object} PathsCollection

@@ -3,24 +3,22 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const chalk = require( 'chalk' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const getPackageJson = require( './getpackagejson' );
-const { INDENT_SIZE } = require( './cli' );
+import chalk from 'chalk';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import getPackageJson from './getpackagejson.js';
+import { CLI_INDENT_SIZE } from './constants.js';
 
 /**
  * Displays skipped packages.
  *
  * @param {Set} skippedPackagesPaths
  */
-module.exports = function displaySkippedPackages( skippedPackagesPaths ) {
+export default function displaySkippedPackages( skippedPackagesPaths ) {
 	if ( !skippedPackagesPaths.size ) {
 		return;
 	}
 
-	const indent = ' '.repeat( INDENT_SIZE );
+	const indent = ' '.repeat( CLI_INDENT_SIZE );
 
 	const packageNames = Array.from( skippedPackagesPaths )
 		.map( packagePath => getPackageJson( packagePath ).name );
@@ -29,4 +27,4 @@ module.exports = function displaySkippedPackages( skippedPackagesPaths ) {
 	message += packageNames.map( line => indent + `  * ${ line }` ).join( '\n' );
 
 	logger().info( message );
-};
+}
