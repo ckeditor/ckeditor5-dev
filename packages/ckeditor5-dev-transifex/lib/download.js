@@ -3,16 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const path = require( 'path' );
-const fs = require( 'fs-extra' );
-const chalk = require( 'chalk' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const { cleanPoFileContent, createDictionaryFromPoFileContent } = require( '@ckeditor/ckeditor5-dev-translations' );
-const transifexService = require( './transifexservice' );
-const { verifyProperties, createLogger } = require( './utils' );
-const languageCodeMap = require( './languagecodemap.json' );
+import path from 'path';
+import fs from 'fs-extra';
+import chalk from 'chalk';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import { cleanPoFileContent, createDictionaryFromPoFileContent } from '@ckeditor/ckeditor5-dev-translations';
+import transifexService from './transifexservice.js';
+import { verifyProperties, createLogger } from './utils.js';
+import languageCodeMap from './languagecodemap.json';
 
 const logger = createLogger();
 
@@ -33,7 +31,7 @@ const logger = createLogger();
  * @param {String} config.cwd Current work directory.
  * @param {Boolean} [config.simplifyLicenseHeader=false] Whether to skip adding the contribute guide URL in the output `*.po` files.
  */
-module.exports = async function downloadTranslations( config ) {
+export default async function downloadTranslations( config ) {
 	verifyProperties( config, [ 'organizationName', 'projectName', 'token', 'packages', 'cwd' ] );
 
 	transifexService.init( config.token );
@@ -106,7 +104,7 @@ module.exports = async function downloadTranslations( config ) {
 	} else {
 		logger.progress( 'Saved all translations.' );
 	}
-};
+}
 
 /**
  * Saves all valid translations on the filesystem. For each translation entry:

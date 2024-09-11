@@ -3,15 +3,13 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs/promises' );
-const path = require( 'path' );
-const Table = require( 'cli-table' );
-const chalk = require( 'chalk' );
-const transifexService = require( './transifexservice' );
-const { verifyProperties, createLogger } = require( './utils' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+import fs from 'fs/promises';
+import path from 'path';
+import Table from 'cli-table';
+import chalk from 'chalk';
+import transifexService from './transifexservice.js';
+import { verifyProperties, createLogger } from './utils.js';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 const RESOURCE_REGEXP = /r:(?<resourceName>[a-z0-9_-]+)$/i;
 
@@ -38,7 +36,7 @@ const TRANSIFEX_RESOURCE_ERRORS = {};
  * @param {Map.<String,String>} config.packages A resource name -> package path map for which translations should be uploaded.
  * @returns {Promise}
  */
-module.exports = async function upload( config ) {
+export default async function upload( config ) {
 	verifyProperties( config, [ 'token', 'organizationName', 'projectName', 'cwd', 'packages' ] );
 
 	const logger = createLogger();
@@ -53,7 +51,7 @@ module.exports = async function upload( config ) {
 		logger.warning( 'Found the file containing a list of packages that failed during the last script execution.' );
 		logger.warning( 'The script will process only packages listed in the file instead of all passed as "config.packages".' );
 
-		failedPackages = Object.keys( require( pathToFailedUploads ) );
+		failedPackages = Object.keys( await import( pathToFailedUploads ) );
 	}
 
 	logger.progress( 'Fetching project information...' );
@@ -171,7 +169,7 @@ module.exports = async function upload( config ) {
 	else if ( isFailedUploadFileAvailable ) {
 		await fs.unlink( pathToFailedUploads );
 	}
-};
+}
 
 /**
  * Returns a factory function that process a response from Transifex and prepares a single resource

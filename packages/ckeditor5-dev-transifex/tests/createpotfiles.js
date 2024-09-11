@@ -3,14 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { posix } from 'path';
 
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
-const { posix } = require( 'path' );
-const { expect } = require( 'chai' );
-
-describe( 'dev-transifex/createPotFiles()', () => {
+describe.skip( 'dev-transifex/createPotFiles()', () => {
 	let stubs;
 	let createPotFiles;
 

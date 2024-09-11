@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-const { transifexApi } = require( '@transifex/api' );
-const fetch = require( 'node-fetch' );
+import { transifexApi } from '@transifex/api';
+import fetch from 'node-fetch';
 
 const MAX_REQUEST_ATTEMPTS = 10;
 const REQUEST_RETRY_TIMEOUT = 3000; // In milliseconds.
@@ -18,7 +18,7 @@ const REQUEST_START_OFFSET_TIMEOUT = 100;
  *
  * @see https://docs.transifex.com/api-3-0/introduction-to-api-3-0 for API documentation.
  */
-module.exports = {
+export default {
 	init,
 	getProjectData,
 	getTranslations,

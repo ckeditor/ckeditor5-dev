@@ -3,10 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const chalk = require( 'chalk' );
-const { logger: loggerFactory } = require( '@ckeditor/ckeditor5-dev-utils' );
+import chalk from 'chalk';
+import { logger as loggerFactory } from '@ckeditor/ckeditor5-dev-utils';
 
 const utils = {
 	/**
@@ -50,4 +48,4 @@ const utils = {
 	}
 };
 
-module.exports = utils;
+export default utils;

@@ -3,15 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import path from 'path';
+import fs from 'fs-extra';
+import del from 'del';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import { findMessages } from '@ckeditor/ckeditor5-dev-translations';
+import { verifyProperties } from './utils.js';
 
-const path = require( 'path' );
-const fs = require( 'fs-extra' );
-const del = require( 'del' );
-const defaultLogger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
-const { findMessages } = require( '@ckeditor/ckeditor5-dev-translations' );
-const { verifyProperties } = require( './utils' );
-
+const defaultLogger = logger();
 const langContextSuffix = path.join( 'lang', 'contexts.json' );
 const corePackageName = 'ckeditor5-core';
 
@@ -29,7 +28,7 @@ const corePackageName = 'ckeditor5-core';
  * @param {Boolean} [options.skipLicenseHeader=false] Whether to skip the license header in created `*.pot` files.
  * @param {Logger} [options.logger] A logger.
  */
-module.exports = function createPotFiles( options ) {
+export default function createPotFiles( options ) {
 	verifyProperties( options, [ 'sourceFiles', 'packagePaths', 'corePackagePath', 'translationsDirectory' ] );
 
 	const {
@@ -83,7 +82,7 @@ module.exports = function createPotFiles( options ) {
 			translationsDirectory
 		} );
 	}
-};
+}
 
 /**
  * Traverses all packages and returns a map of all found language contexts

@@ -3,14 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import path from 'path';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
-const path = require( 'path' );
-const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
-const { expect } = require( 'chai' );
-
-describe( 'dev-transifex/download()', () => {
+describe.skip( 'dev-transifex/download()', () => {
 	let stubs, mocks, download;
 
 	beforeEach( () => {

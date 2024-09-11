@@ -3,16 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import createPotFiles from './createpotfiles.js';
+import uploadPotFiles from './upload.js';
+import downloadTranslations from './download.js';
+import getToken from './gettoken.js';
+import transifexService from './transifexservice.js';
+import transifexUtils from './utils.js';
 
-const createPotFiles = require( './createpotfiles' );
-const uploadPotFiles = require( './upload' );
-const downloadTranslations = require( './download' );
-const getToken = require( './gettoken' );
-const transifexService = require( './transifexservice' );
-const transifexUtils = require( './utils' );
-
-module.exports = {
+export default {
 	createPotFiles,
 	uploadPotFiles,
 	downloadTranslations,
