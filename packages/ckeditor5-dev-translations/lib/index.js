@@ -3,16 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import findMessages from './findmessages.js';
-import cleanPoFileContent from './cleanpofilecontent.js';
-import MultipleLanguageTranslationService from './multiplelanguagetranslationservice.js';
-import createDictionaryFromPoFileContent from './createdictionaryfrompofilecontent.js';
-import CKEditorTranslationsPlugin from './ckeditortranslationsplugin.js';
-
-export default {
-	findMessages,
-	cleanPoFileContent,
-	MultipleLanguageTranslationService,
-	createDictionaryFromPoFileContent,
-	CKEditorTranslationsPlugin
-};
+export { default as findMessages } from './findmessages.js';
+export { default as cleanPoFileContent } from './cleanpofilecontent.js';
+export { default as MultipleLanguageTranslationService } from './multiplelanguagetranslationservice.js';
+export { default as createDictionaryFromPoFileContent } from './createdictionaryfrompofilecontent.js';
+export { default as CKEditorTranslationsPlugin } from './ckeditortranslationsplugin.js';

@@ -3,11 +3,17 @@
  * For licensing, see LICENSE.md.
  */
 
-import chalk from 'chalk';
-import rimraf from 'rimraf';
 import fs from 'fs';
 import path from 'path';
-import { RawSource, ConcatSource } from 'webpack-sources';
+import { fileURLToPath } from 'url';
+import chalk from 'chalk';
+import rimraf from 'rimraf';
+import webpackSources from 'webpack-sources';
+
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
+
+const { RawSource, ConcatSource } = webpackSources;
 
 /**
  * Serve translations depending on the used translation service and passed options.
