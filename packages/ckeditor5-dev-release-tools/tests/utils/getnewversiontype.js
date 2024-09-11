@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { getNewVersionType } from '../../lib/utils/getnewversiontype.js';
+import getNewVersionType from '../../lib/utils/getnewversiontype.js';
 
 describe( 'dev-release-tools/utils', () => {
 	describe( 'getSubPackagesPaths()', () => {

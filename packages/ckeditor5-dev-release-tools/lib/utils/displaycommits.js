@@ -14,7 +14,7 @@ import { CLI_COMMIT_INDENT_SIZE, CLI_INDENT_SIZE } from './constants.js';
  * @param {Boolean} [options.attachLinkToCommit=false] Whether to attach a link to parsed commit.
  * @param {Number} [options.indentLevel=1] The indent level.
  */
-export function displayCommits( commits, options = {} ) {
+export default function displayCommits( commits, options = {} ) {
 	const log = logger();
 
 	const attachLinkToCommit = options.attachLinkToCommit || false;

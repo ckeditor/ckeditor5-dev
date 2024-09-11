@@ -9,7 +9,7 @@
  * @param {Array.<Commit>} commits
  * @returns {String|null}
  */
-export function getNewVersionType( commits ) {
+export default function getNewVersionType( commits ) {
 	// No commits = no changes.
 	if ( !commits.length ) {
 		return 'skip';

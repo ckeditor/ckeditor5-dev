@@ -43,7 +43,7 @@ describe( 'dev-release-tools/utils', () => {
 				devTools: ( await import( '@ckeditor/ckeditor5-dev-utils' ) ).tools
 			};
 
-			getCommits = ( await import( '../../lib/utils/getcommits.js' ) ).getCommits;
+			getCommits = ( await import( '../../lib/utils/getcommits.js' ) ).default;
 		} );
 
 		afterEach( () => {

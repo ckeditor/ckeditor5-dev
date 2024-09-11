@@ -20,7 +20,7 @@ import { tools } from '@ckeditor/ckeditor5-dev-utils';
  * @param {String} [options.mainBranch='master'] A name of the main branch in the repository.
  * @returns {Promise.<Array.<Commit>>}
  */
-export function getCommits( transformCommit, options = {} ) {
+export default function getCommits( transformCommit, options = {} ) {
 	const releaseBranch = options.releaseBranch || 'master';
 	const mainBranch = options.mainBranch || 'master';
 

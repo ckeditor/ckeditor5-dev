@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { getWriterOptions } from '../../lib/utils/getwriteroptions.js';
+import getWriterOptions from '../../lib/utils/getwriteroptions.js';
 
 describe( 'dev-release-tools/utils', () => {
 	describe( 'getWriterOptions()', () => {

@@ -5,8 +5,8 @@
 
 import { describe, it, expect } from 'vitest';
 import compareFunc from 'compare-func';
-import { getWriterOptions } from '../../lib/utils/getwriteroptions.js';
-import { generateChangelog } from '../../lib/utils/generatechangelog.js';
+import getWriterOptions from '../../lib/utils/getwriteroptions.js';
+import generateChangelog from '../../lib/utils/generatechangelog.js';
 
 describe( 'dev-release-tools/utils', () => {
 	const url = 'https://github.com/ckeditor/ckeditor5-package';

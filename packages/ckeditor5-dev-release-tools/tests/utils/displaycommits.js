@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { displayCommits } from '../../lib/utils/displaycommits.js';
+import displayCommits from '../../lib/utils/displaycommits.js';
 
 const stubs = vi.hoisted( () => {
 	const values = {

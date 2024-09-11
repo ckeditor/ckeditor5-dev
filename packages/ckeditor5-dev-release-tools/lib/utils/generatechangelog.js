@@ -36,7 +36,7 @@ const UPDATED_TRANSLATION_COMMIT = '* Updated translations.';
  *
  * @returns {Promise.<String>}
  */
-export function generateChangelog( commits, context, options ) {
+export default function generateChangelog( commits, context, options ) {
 	const commitStream = new Readable( { objectMode: true } );
 	/* istanbul ignore next */
 	commitStream._read = function() {};

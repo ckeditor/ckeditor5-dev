@@ -13,7 +13,7 @@ const templatePath = path.join( __dirname, '..', 'templates' );
  * @param {Function|Object} transform
  * @returns {Object}
  */
-export function getWriterOptions( transform ) {
+export default function getWriterOptions( transform ) {
 	return {
 		transform,
 		groupBy: 'type',
