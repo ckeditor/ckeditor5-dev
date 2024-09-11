@@ -44,7 +44,7 @@ function toArray( data ) {
 	return Array.isArray( data ) ? data : [ data ];
 }
 
-module.exports = {
+export default {
 	getBaseUrl,
 	isUrlValid,
 	toArray

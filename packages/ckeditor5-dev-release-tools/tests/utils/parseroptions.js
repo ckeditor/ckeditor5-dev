@@ -3,20 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, it, expect } from 'vitest';
+import parserOptions from '../../lib/utils/parseroptions.js';
 
-const expect = require( 'chai' ).expect;
-
-describe( 'dev-release-tools/utils', () => {
-	let parserOptions;
-
-	beforeEach( () => {
-		parserOptions = require( '../../lib/utils/parseroptions' );
-	} );
-
-	describe( 'parser-options', () => {
-		it( 'should not hoist closed tickets', () => {
-			expect( parserOptions.referenceActions ).to.deep.equal( [] );
-		} );
+describe( 'parser-options', () => {
+	it( 'should not hoist closed tickets', () => {
+		expect( parserOptions.referenceActions ).to.deep.equal( [] );
 	} );
 } );

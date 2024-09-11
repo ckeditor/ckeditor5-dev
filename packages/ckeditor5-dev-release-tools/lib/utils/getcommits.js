@@ -3,14 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const conventionalCommitsParser = require( 'conventional-commits-parser' );
-const conventionalCommitsFilter = require( 'conventional-commits-filter' );
-const gitRawCommits = require( 'git-raw-commits' );
-const concat = require( 'concat-stream' );
-const parserOptions = require( './parseroptions' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+import conventionalCommitsParser from 'conventional-commits-parser';
+import conventionalCommitsFilter from 'conventional-commits-filter';
+import gitRawCommits from 'git-raw-commits';
+import concat from 'concat-stream';
+import parserOptions from './parseroptions.js';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
  * Returns a promise that resolves an array of commits since the last tag specified as `options.from`.
@@ -22,7 +20,7 @@ const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {String} [options.mainBranch='master'] A name of the main branch in the repository.
  * @returns {Promise.<Array.<Commit>>}
  */
-module.exports = function getCommits( transformCommit, options = {} ) {
+export default function getCommits( transformCommit, options = {} ) {
 	const releaseBranch = options.releaseBranch || 'master';
 	const mainBranch = options.mainBranch || 'master';
 
@@ -101,4 +99,4 @@ module.exports = function getCommits( transformCommit, options = {} ) {
 	function exec( command ) {
 		return tools.shExec( command, { verbosity: 'error' } );
 	}
-};
+}

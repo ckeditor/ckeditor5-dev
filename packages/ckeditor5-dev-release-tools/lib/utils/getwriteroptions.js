@@ -3,18 +3,17 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import fs from 'fs';
+import path from 'path';
+import { getTypeOrder } from './transformcommitutils.js';
 
-const fs = require( 'fs' );
-const path = require( 'path' );
 const templatePath = path.join( __dirname, '..', 'templates' );
-const { getTypeOrder } = require( './transformcommitutils' );
 
 /**
  * @param {Function|Object} transform
  * @returns {Object}
  */
-module.exports = function getWriterOptions( transform ) {
+export default function getWriterOptions( transform ) {
 	return {
 		transform,
 		groupBy: 'type',
@@ -26,7 +25,7 @@ module.exports = function getWriterOptions( transform ) {
 		commitPartial: fs.readFileSync( path.join( templatePath, 'commit.hbs' ), 'utf-8' ),
 		footerPartial: fs.readFileSync( path.join( templatePath, 'footer.hbs' ), 'utf-8' )
 	};
-};
+}
 
 function sortFunction( a, b ) {
 	return getTypeOrder( a.title ) - getTypeOrder( b.title );

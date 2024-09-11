@@ -3,9 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
-const semver = require( 'semver' );
-const shellEscape = require( 'shell-escape' );
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import semver from 'semver';
+import shellEscape from 'shell-escape';
 
 /**
  * This util aims to verify if the given `packageName` can be published with the given `version` on the `npmTag`.
@@ -15,7 +15,7 @@ const shellEscape = require( 'shell-escape' );
  * @param {String} npmTag
  * @return {Promise.<Boolean>}
  */
-module.exports = async function isVersionPublishableForTag( packageName, version, npmTag ) {
+export default async function isVersionPublishableForTag( packageName, version, npmTag ) {
 	const command = `npm view ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ npmTag ] ) } version --silent`;
 	const npmVersion = await tools.shExec( command, { async: true, verbosity: 'silent' } )
 		.then( value => value.trim() )
@@ -27,4 +27,4 @@ module.exports = async function isVersionPublishableForTag( packageName, version
 	}
 
 	return true;
-};
+}

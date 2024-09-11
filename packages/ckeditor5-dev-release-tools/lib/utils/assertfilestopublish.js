@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs-extra' );
-const upath = require( 'upath' );
-const { glob } = require( 'glob' );
+import fs from 'fs-extra';
+import upath from 'upath';
+import { glob } from 'glob';
 
 /**
  * Checks if all files expected to be released actually exist in the package directory. Verification takes place for all packages.
@@ -16,7 +14,7 @@ const { glob } = require( 'glob' );
  * @param {Object.<String, Array.<String>>|null} optionalEntries
  * @returns {Promise}
  */
-module.exports = async function assertFilesToPublish( packagePaths, optionalEntries ) {
+export default async function assertFilesToPublish( packagePaths, optionalEntries = null ) {
 	const errors = [];
 
 	for ( const packagePath of packagePaths ) {
@@ -59,7 +57,7 @@ module.exports = async function assertFilesToPublish( packagePaths, optionalEntr
 	if ( errors.length ) {
 		throw new Error( errors.join( '\n' ) );
 	}
-};
+}
 
 /**
  * Filters out the optional entries from the `files` field and returns only the required ones.
