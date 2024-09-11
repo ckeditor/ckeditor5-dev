@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { parentPort } from 'worker_threads';
 import virtual from 'virtual:parallelworker-integration-module';
 
@@ -36,7 +36,7 @@ describe( 'parallelWorker (worker defined in executeInParallel())', () => {
 		// an asynchronous loop. We must wait until the current JavaScript loop ends. Adding a new promise at the end
 		// forces it.
 		await new Promise( resolve => {
-			setTimeout( resolve, 0 );
+			setTimeout( resolve, 100 );
 		} );
 
 		expect( vi.mocked( parentPort ).postMessage ).toHaveBeenCalledTimes( 2 );
