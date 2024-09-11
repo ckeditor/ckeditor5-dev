@@ -3,13 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs' );
-const upath = require( 'upath' );
-const { globSync } = require( 'glob' );
-const depCheck = require( 'depcheck' );
-const chalk = require( 'chalk' );
+import fs from 'fs';
+import upath from 'upath';
+import { globSync } from 'glob';
+import depCheck from 'depcheck';
+import chalk from 'chalk';
 
 /**
  * Checks dependencies sequentially in all provided packages.
@@ -19,7 +17,7 @@ const chalk = require( 'chalk' );
  * @param {Boolean} [options.quiet=false] Whether to inform about the progress.
  * @returns {Promise.<Boolean>} Resolves a promise with a flag informing whether detected an error.
  */
-module.exports = async function checkDependencies( packagePaths, options ) {
+export default async function checkDependencies( packagePaths, options ) {
 	let foundError = false;
 
 	for ( const packagePath of packagePaths ) {
@@ -34,7 +32,7 @@ module.exports = async function checkDependencies( packagePaths, options ) {
 	}
 
 	return Promise.resolve( foundError );
-};
+}
 
 /**
  * Checks dependencies in provided package. If the folder does not contain a package.json file the function quits with success.

@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const chalk = require( 'chalk' );
-const fs = require( 'fs' );
-const { globSync } = require( 'glob' );
+import chalk from 'chalk';
+import fs from 'fs';
+import { globSync } from 'glob';
 
 /**
  * Updates year in all licenses in the provided directory, based on provided glob patterns.
@@ -24,7 +22,7 @@ const { globSync } = require( 'glob' );
  * and optionally `options` property for this `glob` pattern.
  * @param {String} [params.initialYear='2003'] Year from which the licenses should begin.
  */
-module.exports = function bumpYear( params ) {
+export default function bumpYear( params ) {
 	if ( !params.initialYear ) {
 		params.initialYear = '2003';
 	}
@@ -92,7 +90,7 @@ module.exports = function bumpYear( params ) {
 			console.log( file );
 		}
 	}
-};
+}
 
 /**
  * License headers are only required in JS and TS files.
