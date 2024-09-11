@@ -87,7 +87,7 @@ describe( 'prepareRepository()', () => {
 
 	it( 'should normalize Windows slashes "\\" from "process.cwd()"', async () => {
 		vi.mocked( fs ).readdir.mockResolvedValue( [] );
-		vi.spyOn( process, 'cwd' ).mockReturnValue( 'C:\\windows\\working\\dir' );
+		process.cwd.mockReturnValue( 'C:\\windows\\working\\dir' );
 		options.packagesDirectory = 'packages';
 
 		await prepareRepository( options );
