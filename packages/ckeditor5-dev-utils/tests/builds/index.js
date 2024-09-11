@@ -9,7 +9,7 @@ import getDllPluginWebpackConfig from '../../lib/builds/getdllpluginwebpackconfi
 
 vi.mock( '../../lib/builds/getdllpluginwebpackconfig.js' );
 
-describe( 'builds', () => {
+describe( 'builds/index.js', () => {
 	describe( 'getDllPluginWebpackConfig()', () => {
 		it( 'should be a function', () => {
 			expect( tasks.getDllPluginWebpackConfig ).to.be.a( 'function' );

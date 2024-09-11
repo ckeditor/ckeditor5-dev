@@ -3,10 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-export { default as logger } from './logger.js';
-export { default as tools } from './tools.js';
-export { default as loaders } from './loaders/index.js';
-export { default as stream } from './stream.js';
-export { default as bundler } from './bundler/index.js';
-export { default as builds } from './builds/index.js';
-export { default as styles } from './styles/index.js';
+export * as logger from './logger.js';
+export * as tools from './tools.js';
+export * as loaders from './loaders/index.js';
+export * as stream from './stream.js';
+export * as bundler from './bundler/index.js';
+export * as builds from './builds/index.js';
+export * as styles from './styles/index.js';

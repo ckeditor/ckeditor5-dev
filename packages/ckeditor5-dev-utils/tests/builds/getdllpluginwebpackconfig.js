@@ -6,7 +6,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'fs-extra';
 import getDllPluginWebpackConfig from '../../lib/builds/getdllpluginwebpackconfig.js';
-import { getLicenseBanner } from '../../lib/bundler/index.js';
 import { getIconsLoader, getStylesLoader, getTypeScriptLoader } from '../../lib/loaders/index.js';
 
 const stubs = vi.hoisted( () => ( {
@@ -44,21 +43,23 @@ vi.mock( 'path', () => ( {
 	}
 } ) );
 vi.mock( '@ckeditor/ckeditor5-dev-translations', () => ( {
-	CKEditorTranslationsPlugin: class {
+	CKEditorTranslationsPlugin: class CKEditorTranslationsPlugin {
 		constructor( ...args ) {
+			this.name = 'CKEditorTranslationsPlugin';
+
 			stubs.CKEditorTranslationsPlugin.constructor( ...args );
 		}
 	}
 } ) );
 vi.mock( 'terser-webpack-plugin', () => ( {
-	default: class TerserPluginMock {
+	default: class TerserPlugin {
 		constructor( ...args ) {
 			stubs.TerserPlugin.constructor( ...args );
 		}
 	}
 } ) );
 
-describe( 'builds/getDllPluginWebpackConfig()', () => {
+describe( 'getDllPluginWebpackConfig()', () => {
 	beforeEach( () => {
 		vi.mocked( fs ).readJsonSync.mockImplementation( input => {
 			if ( input === '/manifest/path' ) {
@@ -99,7 +100,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 		expect( webpackConfig.optimization.minimizer.length ).to.equal( 1 );
 
 		// Due to versions mismatch, the `instanceof` check does not pass.
-		expect( webpackConfig.optimization.minimizer[ 0 ].constructor.name ).to.equal( 'TerserPluginMock' );
+		expect( webpackConfig.optimization.minimizer[ 0 ].constructor.name ).to.equal( 'TerserPlugin' );
 	} );
 
 	it( 'transforms package with many dashes in its name', async () => {
@@ -138,7 +139,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 	} );
 
 	it( 'uses index.ts entry file by default', async () => {
-		vi.mocked( fs ).existsSync.mockImplementation( file => file == '/package/path/src/index.ts' )
+		vi.mocked( fs ).existsSync.mockImplementation( file => file === '/package/path/src/index.ts' );
 
 		const webpackConfig = await getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
@@ -150,7 +151,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 	} );
 
 	it( 'uses index.js entry file if exists (over its TS version)', async () => {
-		vi.mocked( fs ).existsSync.mockImplementation( file => file == '/package/path/src/index.js' );
+		vi.mocked( fs ).existsSync.mockImplementation( file => file === '/package/path/src/index.js' );
 
 		const webpackConfig = await getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
@@ -162,7 +163,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 	} );
 
 	it( 'loads JavaScript files over TypeScript when building for a JavaScript package', async () => {
-		vi.mocked( fs ).existsSync.mockImplementation( file => file == '/package/path/src/index.js' );
+		vi.mocked( fs ).existsSync.mockImplementation( file => file === '/package/path/src/index.js' );
 
 		const webpackConfig = await getDllPluginWebpackConfig( stubs.webpack, {
 			packagePath: '/package/path',
@@ -192,7 +193,7 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 		} );
 
 		it( 'loads the CKEditorTranslationsPlugin plugin when lang dir exists', async () => {
-			stubs.fs.existsSync.returns( true );
+			vi.mocked( fs ).existsSync.mockReturnValue( true );
 
 			const webpackConfig = await getDllPluginWebpackConfig( stubs.webpack, {
 				packagePath: '/package/path',
@@ -205,17 +206,24 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 				.find( plugin => plugin.constructor.name === 'CKEditorTranslationsPlugin' );
 
 			expect( ckeditor5TranslationsPlugin ).to.not.be.undefined;
-			expect( ckeditor5TranslationsPlugin.options.language ).to.equal( 'en' );
-			expect( ckeditor5TranslationsPlugin.options.additionalLanguages ).to.equal( 'all' );
-			expect( ckeditor5TranslationsPlugin.options.skipPluralFormFunction ).to.equal( true );
-			expect( 'src/bold.js' ).to.match( ckeditor5TranslationsPlugin.options.sourceFilesPattern );
-			expect( 'src/bold.ts' ).to.match( ckeditor5TranslationsPlugin.options.sourceFilesPattern );
-			expect( 'ckeditor5-basic-styles/src/bold.js' ).to.not.match( ckeditor5TranslationsPlugin.options.sourceFilesPattern );
-			expect( 'ckeditor5-basic-styles/src/bold.ts' ).to.not.match( ckeditor5TranslationsPlugin.options.sourceFilesPattern );
+
+			expect( stubs.CKEditorTranslationsPlugin.constructor ).toHaveBeenCalledExactlyOnceWith( expect.objectContaining( {
+				language: 'en',
+				additionalLanguages: 'all',
+				skipPluralFormFunction: true
+			} ) );
+
+			const [ firstCall ] = stubs.CKEditorTranslationsPlugin.constructor.mock.calls;
+			const { sourceFilesPattern } = firstCall[ 0 ];
+
+			expect( 'src/bold.js' ).to.match( sourceFilesPattern );
+			expect( 'src/bold.ts' ).to.match( sourceFilesPattern );
+			expect( 'ckeditor5-basic-styles/src/bold.js' ).to.not.match( sourceFilesPattern );
+			expect( 'ckeditor5-basic-styles/src/bold.ts' ).to.not.match( sourceFilesPattern );
 		} );
 
 		it( 'does not load the CKEditorTranslationsPlugin plugin when lang dir does not exist', async () => {
-			stubs.fs.existsSync.returns( false );
+			vi.mocked( fs ).existsSync.mockReturnValue( false );
 
 			const webpackConfig = await getDllPluginWebpackConfig( stubs.webpack, {
 				packagePath: '/package/path',
@@ -234,61 +242,57 @@ describe( 'builds/getDllPluginWebpackConfig()', () => {
 	describe( '#loaders', () => {
 		describe( 'getTypeScriptLoader()', () => {
 			it( 'it should use the default tsconfig.json if the "options.tsconfigPath" option is not specified', async () => {
-				getDllPluginWebpackConfig( stubs.webpack, {
+				await getDllPluginWebpackConfig( stubs.webpack, {
 					packagePath: '/package/path',
 					themePath: '/theme/path',
 					manifestPath: '/manifest/path'
 				} );
 
-				expect( stubs.loaders.getTypeScriptLoader.calledOnce ).to.equal( true );
-
-				const options = stubs.loaders.getTypeScriptLoader.firstCall.args[ 0 ];
-				expect( options ).to.have.property( 'configFile', 'tsconfig.json' );
+				expect( vi.mocked( getTypeScriptLoader ) ).toHaveBeenCalledExactlyOnceWith( {
+					configFile: 'tsconfig.json'
+				} );
 			} );
 
 			it( 'it should the specified "options.tsconfigPath" value', async () => {
-				getDllPluginWebpackConfig( stubs.webpack, {
+				await getDllPluginWebpackConfig( stubs.webpack, {
 					packagePath: '/package/path',
 					themePath: '/theme/path',
 					manifestPath: '/manifest/path',
 					tsconfigPath: '/config/tsconfig.json'
 				} );
 
-				expect( stubs.loaders.getTypeScriptLoader.calledOnce ).to.equal( true );
-
-				const options = stubs.loaders.getTypeScriptLoader.firstCall.args[ 0 ];
-				expect( options ).to.have.property( 'configFile', '/config/tsconfig.json' );
+				expect( vi.mocked( getTypeScriptLoader ) ).toHaveBeenCalledExactlyOnceWith( {
+					configFile: '/config/tsconfig.json'
+				} );
 			} );
 		} );
 
 		describe( 'getIconsLoader()', () => {
 			it( 'it should get the loader', async () => {
-				getDllPluginWebpackConfig( stubs.webpack, {
+				await getDllPluginWebpackConfig( stubs.webpack, {
 					packagePath: '/package/path',
 					themePath: '/theme/path',
 					manifestPath: '/manifest/path'
 				} );
 
-				expect( stubs.loaders.getIconsLoader.calledOnce ).to.equal( true );
-
-				const options = stubs.loaders.getIconsLoader.firstCall.args[ 0 ];
-				expect( options ).to.have.property( 'matchExtensionOnly', true );
+				expect( vi.mocked( getIconsLoader ) ).toHaveBeenCalledExactlyOnceWith( {
+					matchExtensionOnly: true
+				} );
 			} );
 		} );
 
 		describe( 'getStylesLoader()', () => {
 			it( 'it should get the loader', async () => {
-				getDllPluginWebpackConfig( stubs.webpack, {
+				await getDllPluginWebpackConfig( stubs.webpack, {
 					packagePath: '/package/path',
 					themePath: '/theme/path',
 					manifestPath: '/manifest/path'
 				} );
 
-				expect( stubs.loaders.getStylesLoader.calledOnce ).to.equal( true );
-
-				const options = stubs.loaders.getStylesLoader.firstCall.args[ 0 ];
-				expect( options ).to.have.property( 'minify', true );
-				expect( options ).to.have.property( 'themePath', '/theme/path' );
+				expect( vi.mocked( getStylesLoader ) ).toHaveBeenCalledExactlyOnceWith( {
+					minify: true,
+					themePath: '/theme/path'
+				} );
 			} );
 		} );
 	} );
