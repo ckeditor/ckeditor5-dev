@@ -48,7 +48,7 @@ vi.mock( 'glob' );
 vi.mock( 'fs/promises' );
 vi.mock( '../../lib/utils/abortcontroller.js' );
 
-describe( 'dev-release-tools/utils', () => {
+describe( 'executeInParallel()', () => {
 	let abortController, defaultOptions, outputHistory;
 
 	beforeEach( () => {
@@ -82,557 +82,555 @@ describe( 'dev-release-tools/utils', () => {
 		stubs.WorkerMock.instances = [];
 	} );
 
-	describe( 'executeInParallel()', () => {
-		it( 'should execute the specified `taskToExecute` on all packages found in the `packagesDirectory`', async () => {
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
+	it( 'should execute the specified `taskToExecute` on all packages found in the `packagesDirectory`', async () => {
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
 
-			// By default the helper uses a half of available CPUs.
-			expect( stubs.WorkerMock.instances ).toHaveLength( 2 );
+		// By default the helper uses a half of available CPUs.
+		expect( stubs.WorkerMock.instances ).toHaveLength( 2 );
 
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
-			expect( glob ).toHaveBeenCalledTimes( 1 );
-			expect( glob ).toHaveBeenCalledWith( 'my-packages/*/', expect.objectContaining( {
-				cwd: '/home/ckeditor',
-				absolute: true
-			} ) );
+		expect( glob ).toHaveBeenCalledTimes( 1 );
+		expect( glob ).toHaveBeenCalledWith( 'my-packages/*/', expect.objectContaining( {
+			cwd: '/home/ckeditor',
+			absolute: true
+		} ) );
 
-			expect( fs.writeFile ).toHaveBeenCalledTimes( 1 );
-			expect( fs.writeFile ).toHaveBeenCalledWith(
-				'/home/ckeditor/uuid-4.mjs',
-				'export default packagePath => console.log( \'pwd\', packagePath );',
-				'utf-8'
-			);
-			expect( firstWorker.workerData ).toBeInstanceOf( Object );
-			expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', '/home/ckeditor/uuid-4.mjs' );
-			expect( firstWorker.workerData ).toHaveProperty( 'packages' );
+		expect( fs.writeFile ).toHaveBeenCalledTimes( 1 );
+		expect( fs.writeFile ).toHaveBeenCalledWith(
+			'/home/ckeditor/uuid-4.mjs',
+			'export default packagePath => console.log( \'pwd\', packagePath );',
+			'utf-8'
+		);
+		expect( firstWorker.workerData ).toBeInstanceOf( Object );
+		expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', '/home/ckeditor/uuid-4.mjs' );
+		expect( firstWorker.workerData ).toHaveProperty( 'packages' );
 
-			expect( secondWorker.workerData ).toBeInstanceOf( Object );
-			expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', '/home/ckeditor/uuid-4.mjs' );
-			expect( secondWorker.workerData ).toHaveProperty( 'packages' );
+		expect( secondWorker.workerData ).toBeInstanceOf( Object );
+		expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', '/home/ckeditor/uuid-4.mjs' );
+		expect( secondWorker.workerData ).toHaveProperty( 'packages' );
 
-			// Workers did not emit an error.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
+		// Workers did not emit an error.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
 
-			await promise;
+		await promise;
+	} );
+
+	it( 'should execute the specified `taskToExecute` on packages found in the `packagesDirectory` that are not filtered', async () => {
+		const options = Object.assign( {}, defaultOptions, {
+			// Skip "package-02".
+			packagesDirectoryFilter: packageDirectory => !packageDirectory.endsWith( 'package-02' )
 		} );
 
-		it( 'should execute the specified `taskToExecute` on packages found in the `packagesDirectory` that are not filtered', async () => {
-			const options = Object.assign( {}, defaultOptions, {
-				// Skip "package-02".
-				packagesDirectoryFilter: packageDirectory => !packageDirectory.endsWith( 'package-02' )
-			} );
+		const promise = executeInParallel( options );
+		await delay( 0 );
 
-			const promise = executeInParallel( options );
-			await delay( 0 );
+		// By default the helper uses a half of available CPUs.
+		expect( stubs.WorkerMock.instances ).toHaveLength( 2 );
 
-			// By default the helper uses a half of available CPUs.
-			expect( stubs.WorkerMock.instances ).toHaveLength( 2 );
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+		expect( firstWorker.workerData.packages ).toEqual( [
+			'/home/ckeditor/my-packages/package-01',
+			'/home/ckeditor/my-packages/package-04'
+		] );
 
-			expect( firstWorker.workerData.packages ).toEqual( [
-				'/home/ckeditor/my-packages/package-01',
-				'/home/ckeditor/my-packages/package-04'
-			] );
+		expect( secondWorker.workerData.packages ).toEqual( [
+			'/home/ckeditor/my-packages/package-03'
+		] );
 
-			expect( secondWorker.workerData.packages ).toEqual( [
-				'/home/ckeditor/my-packages/package-03'
-			] );
+		// Workers did not emit an error.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
 
-			// Workers did not emit an error.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
+		await promise;
+	} );
 
-			await promise;
+	it( 'should use the specified `cwd` when looking for packages', async () => {
+		const options = Object.assign( {}, defaultOptions, {
+			cwd: '/custom/cwd'
 		} );
 
-		it( 'should use the specified `cwd` when looking for packages', async () => {
-			const options = Object.assign( {}, defaultOptions, {
-				cwd: '/custom/cwd'
-			} );
+		const promise = executeInParallel( options );
+		await delay( 0 );
 
-			const promise = executeInParallel( options );
-			await delay( 0 );
+		expect( glob ).toHaveBeenCalledTimes( 1 );
+		expect( glob ).toHaveBeenCalledWith( 'my-packages/*/', expect.objectContaining( {
+			cwd: '/custom/cwd',
+			absolute: true
+		} ) );
 
-			expect( glob ).toHaveBeenCalledTimes( 1 );
-			expect( glob ).toHaveBeenCalledWith( 'my-packages/*/', expect.objectContaining( {
-				cwd: '/custom/cwd',
-				absolute: true
-			} ) );
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+		// Workers did not emit an error.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
 
-			// Workers did not emit an error.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
+		await promise;
+	} );
 
-			await promise;
+	it( 'should normalize the current working directory to unix-style (default value, Windows path)', async () => {
+		process.cwd.mockReturnValue( 'C:\\Users\\ckeditor' );
+
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
+
+		expect( glob ).toHaveBeenCalledTimes( 1 );
+		expect( glob ).toHaveBeenCalledWith( 'my-packages/*/', expect.objectContaining( {
+			cwd: 'C:/Users/ckeditor',
+			absolute: true
+		} ) );
+
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+
+		// Workers did not emit an error.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
+
+		await promise;
+	} );
+
+	it( 'should normalize the current working directory to unix-style (`options.cwd`, Windows path)', async () => {
+		const options = Object.assign( {}, defaultOptions, {
+			cwd: 'C:\\Users\\ckeditor'
 		} );
 
-		it( 'should normalize the current working directory to unix-style (default value, Windows path)', async () => {
-			process.cwd.mockReturnValue( 'C:\\Users\\ckeditor' );
+		const promise = executeInParallel( options );
+		await delay( 0 );
 
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
+		expect( glob ).toHaveBeenCalledTimes( 1 );
+		expect( glob ).toHaveBeenCalledWith( 'my-packages/*/', expect.objectContaining( {
+			cwd: 'C:/Users/ckeditor',
+			absolute: true
+		} ) );
 
-			expect( glob ).toHaveBeenCalledTimes( 1 );
-			expect( glob ).toHaveBeenCalledWith( 'my-packages/*/', expect.objectContaining( {
-				cwd: 'C:/Users/ckeditor',
-				absolute: true
-			} ) );
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+		// Workers did not emit an error.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
 
-			// Workers did not emit an error.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
+		await promise;
+	} );
 
-			await promise;
-		} );
+	it( 'should work on normalized paths to packages', async () => {
+		vi.mocked( glob ).mockResolvedValue( [
+			'C:/Users/workspace/ckeditor/my-packages/package-01',
+			'C:/Users/workspace/ckeditor/my-packages/package-02',
+			'C:/Users/workspace/ckeditor/my-packages/package-03',
+			'C:/Users/workspace/ckeditor/my-packages/package-04'
+		] );
 
-		it( 'should normalize the current working directory to unix-style (`options.cwd`, Windows path)', async () => {
-			const options = Object.assign( {}, defaultOptions, {
-				cwd: 'C:\\Users\\ckeditor'
-			} );
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
 
-			const promise = executeInParallel( options );
-			await delay( 0 );
+		// By default the helper uses a half of available CPUs.
+		expect( stubs.WorkerMock.instances ).toHaveLength( 2 );
 
-			expect( glob ).toHaveBeenCalledTimes( 1 );
-			expect( glob ).toHaveBeenCalledWith( 'my-packages/*/', expect.objectContaining( {
-				cwd: 'C:/Users/ckeditor',
-				absolute: true
-			} ) );
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+		expect( firstWorker.workerData.packages ).toEqual( [
+			'C:/Users/workspace/ckeditor/my-packages/package-01',
+			'C:/Users/workspace/ckeditor/my-packages/package-03'
+		] );
 
-			// Workers did not emit an error.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
+		expect( secondWorker.workerData.packages ).toEqual( [
+			'C:/Users/workspace/ckeditor/my-packages/package-02',
+			'C:/Users/workspace/ckeditor/my-packages/package-04'
+		] );
 
-			await promise;
-		} );
+		// Workers did not emit an error.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
 
-		it( 'should work on normalized paths to packages', async () => {
-			vi.mocked( glob ).mockResolvedValue( [
-				'C:/Users/workspace/ckeditor/my-packages/package-01',
-				'C:/Users/workspace/ckeditor/my-packages/package-02',
-				'C:/Users/workspace/ckeditor/my-packages/package-03',
-				'C:/Users/workspace/ckeditor/my-packages/package-04'
-			] );
+		await promise;
+	} );
 
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
-
-			// By default the helper uses a half of available CPUs.
-			expect( stubs.WorkerMock.instances ).toHaveLength( 2 );
-
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
-
-			expect( firstWorker.workerData.packages ).toEqual( [
-				'C:/Users/workspace/ckeditor/my-packages/package-01',
-				'C:/Users/workspace/ckeditor/my-packages/package-03'
-			] );
-
-			expect( secondWorker.workerData.packages ).toEqual( [
-				'C:/Users/workspace/ckeditor/my-packages/package-02',
-				'C:/Users/workspace/ckeditor/my-packages/package-04'
-			] );
-
-			// Workers did not emit an error.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
-
-			await promise;
-		} );
-
-		it( 'should pass task options to all workers', async () => {
-			const taskOptions = {
-				property: 'Example of the property.',
-				some: {
-					deeply: {
-						nested: {
-							property: 'Example the deeply nested property.'
-						}
+	it( 'should pass task options to all workers', async () => {
+		const taskOptions = {
+			property: 'Example of the property.',
+			some: {
+				deeply: {
+					nested: {
+						property: 'Example the deeply nested property.'
 					}
 				}
-			};
-
-			const options = Object.assign( {}, defaultOptions, { taskOptions } );
-
-			const promise = executeInParallel( options );
-			await delay( 0 );
-
-			// By default the helper uses a half of available CPUs.
-			expect( stubs.WorkerMock.instances ).toHaveLength( 2 );
-
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
-
-			expect( firstWorker.workerData ).toBeInstanceOf( Object );
-			expect( firstWorker.workerData ).toHaveProperty( 'taskOptions', taskOptions );
-
-			expect( secondWorker.workerData ).toBeInstanceOf( Object );
-			expect( secondWorker.workerData ).toHaveProperty( 'taskOptions', taskOptions );
-
-			// Workers did not emit an error.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
-
-			await promise;
-		} );
-
-		it( 'should create the temporary module properly when using Windows-style paths', async () => {
-			process.cwd.mockReturnValue( 'C:\\Users\\ckeditor' );
-
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
-
-			expect( fs.writeFile ).toHaveBeenCalledTimes( 1 );
-			expect( fs.writeFile ).toHaveBeenCalledWith(
-				'C:/Users/ckeditor/uuid-4.mjs',
-				'export default packagePath => console.log( \'pwd\', packagePath );',
-				'utf-8'
-			);
-
-			// By default the helper uses a half of available CPUs.
-			expect( stubs.WorkerMock.instances ).toHaveLength( 2 );
-
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
-
-			expect( firstWorker.workerData ).toBeInstanceOf( Object );
-			expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', 'C:/Users/ckeditor/uuid-4.mjs' );
-			expect( firstWorker.workerData ).toHaveProperty( 'packages' );
-
-			expect( secondWorker.workerData ).toBeInstanceOf( Object );
-			expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', 'C:/Users/ckeditor/uuid-4.mjs' );
-			expect( secondWorker.workerData ).toHaveProperty( 'packages' );
-
-			// Workers did not emit an error.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
-
-			await promise;
-		} );
-
-		it( 'should use the specified number of threads (`concurrency`)', async () => {
-			const options = Object.assign( {}, defaultOptions, {
-				concurrency: 4
-			} );
-
-			const promise = executeInParallel( options );
-			await delay( 0 );
-
-			expect( stubs.WorkerMock.instances ).toHaveLength( 4 );
-
-			// Workers did not emit an error.
-			for ( const worker of stubs.WorkerMock.instances ) {
-				getExitCallback( worker )( 0 );
 			}
+		};
 
-			await promise;
+		const options = Object.assign( {}, defaultOptions, { taskOptions } );
+
+		const promise = executeInParallel( options );
+		await delay( 0 );
+
+		// By default the helper uses a half of available CPUs.
+		expect( stubs.WorkerMock.instances ).toHaveLength( 2 );
+
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+
+		expect( firstWorker.workerData ).toBeInstanceOf( Object );
+		expect( firstWorker.workerData ).toHaveProperty( 'taskOptions', taskOptions );
+
+		expect( secondWorker.workerData ).toBeInstanceOf( Object );
+		expect( secondWorker.workerData ).toHaveProperty( 'taskOptions', taskOptions );
+
+		// Workers did not emit an error.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
+
+		await promise;
+	} );
+
+	it( 'should create the temporary module properly when using Windows-style paths', async () => {
+		process.cwd.mockReturnValue( 'C:\\Users\\ckeditor' );
+
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
+
+		expect( fs.writeFile ).toHaveBeenCalledTimes( 1 );
+		expect( fs.writeFile ).toHaveBeenCalledWith(
+			'C:/Users/ckeditor/uuid-4.mjs',
+			'export default packagePath => console.log( \'pwd\', packagePath );',
+			'utf-8'
+		);
+
+		// By default the helper uses a half of available CPUs.
+		expect( stubs.WorkerMock.instances ).toHaveLength( 2 );
+
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+
+		expect( firstWorker.workerData ).toBeInstanceOf( Object );
+		expect( firstWorker.workerData ).toHaveProperty( 'callbackModule', 'C:/Users/ckeditor/uuid-4.mjs' );
+		expect( firstWorker.workerData ).toHaveProperty( 'packages' );
+
+		expect( secondWorker.workerData ).toBeInstanceOf( Object );
+		expect( secondWorker.workerData ).toHaveProperty( 'callbackModule', 'C:/Users/ckeditor/uuid-4.mjs' );
+		expect( secondWorker.workerData ).toHaveProperty( 'packages' );
+
+		// Workers did not emit an error.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
+
+		await promise;
+	} );
+
+	it( 'should use the specified number of threads (`concurrency`)', async () => {
+		const options = Object.assign( {}, defaultOptions, {
+			concurrency: 4
 		} );
 
-		it( 'should resolve the promise if a worker finished (aborted) with a non-zero exit code (first worker)', async () => {
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
+		const promise = executeInParallel( options );
+		await delay( 0 );
 
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+		expect( stubs.WorkerMock.instances ).toHaveLength( 4 );
 
-			getExitCallback( firstWorker )( 1 );
-			getExitCallback( secondWorker )( 0 );
+		// Workers did not emit an error.
+		for ( const worker of stubs.WorkerMock.instances ) {
+			getExitCallback( worker )( 0 );
+		}
 
-			await promise;
-		} );
+		await promise;
+	} );
 
-		it( 'should resolve the promise if a worker finished (aborted) with a non-zero exit code (second worker)', async () => {
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
+	it( 'should resolve the promise if a worker finished (aborted) with a non-zero exit code (first worker)', async () => {
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
 
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 1 );
+		getExitCallback( firstWorker )( 1 );
+		getExitCallback( secondWorker )( 0 );
 
-			await promise;
-		} );
+		await promise;
+	} );
 
-		it( 'should reject the promise if a worker emitted an error (first worker)', async () => {
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
+	it( 'should resolve the promise if a worker finished (aborted) with a non-zero exit code (second worker)', async () => {
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
 
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
-			const error = new Error( 'Example error from a worker.' );
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
-			getErrorCallback( firstWorker )( error );
-			getExitCallback( secondWorker )( 0 );
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 1 );
 
-			return promise
-				.then(
-					() => {
-						throw new Error( 'Expected to be rejected.' );
-					},
-					err => {
-						expect( err ).toEqual( error );
-					}
-				);
-		} );
+		await promise;
+	} );
 
-		it( 'should reject the promise if a worker emitted an error (second worker)', async () => {
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
+	it( 'should reject the promise if a worker emitted an error (first worker)', async () => {
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
 
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
-			const error = new Error( 'Example error from a worker.' );
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+		const error = new Error( 'Example error from a worker.' );
 
-			getExitCallback( firstWorker )( 0 );
-			getErrorCallback( secondWorker )( error );
+		getErrorCallback( firstWorker )( error );
+		getExitCallback( secondWorker )( 0 );
 
-			return promise
-				.then(
-					() => {
-						throw new Error( 'Expected to be rejected.' );
-					},
-					err => {
-						expect( err ).toEqual( error );
-					}
-				);
-		} );
-
-		it( 'should split packages into threads one by one', async () => {
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
-
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
-
-			expect( firstWorker.workerData ).toBeInstanceOf( Object );
-			expect( firstWorker.workerData ).toHaveProperty( 'packages' );
-			expect( firstWorker.workerData.packages ).toBeInstanceOf( Array );
-			expect( firstWorker.workerData.packages ).toEqual( [
-				'/home/ckeditor/my-packages/package-01',
-				'/home/ckeditor/my-packages/package-03'
-			] );
-
-			expect( secondWorker.workerData ).toBeInstanceOf( Object );
-			expect( secondWorker.workerData ).toHaveProperty( 'packages' );
-			expect( secondWorker.workerData.packages ).toBeInstanceOf( Array );
-			expect( secondWorker.workerData.packages ).toEqual( [
-				'/home/ckeditor/my-packages/package-02',
-				'/home/ckeditor/my-packages/package-04'
-			] );
-
-			// Workers did not emit an error.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
-
-			await promise;
-		} );
-
-		it( 'should remove the temporary module after execution', async () => {
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
-
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
-
-			// Workers did not emit an error.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
-
-			await promise;
-
-			expect( fs.unlink ).toHaveBeenCalledTimes( 1 );
-			expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/uuid-4.mjs' );
-		} );
-
-		it( 'should remove the temporary module if the process is aborted', async () => {
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
-
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
-
-			abortController.abort( 'SIGINT' );
-
-			// Simulate the "Worker#terminate()" behavior.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
-
-			await promise;
-
-			expect( fs.unlink ).toHaveBeenCalledTimes( 1 );
-			expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/uuid-4.mjs' );
-		} );
-
-		it( 'should remove the temporary module if the promise rejected', async () => {
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
-
-			const [ firstWorker ] = stubs.WorkerMock.instances;
-			const error = new Error( 'Example error from a worker.' );
-
-			getErrorCallback( firstWorker )( error );
-
-			return promise
-				.then(
-					() => {
-						throw new Error( 'Expected to be rejected.' );
-					},
-					() => {
-						expect( fs.unlink ).toHaveBeenCalledTimes( 1 );
-						expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/uuid-4.mjs' );
-					}
-				);
-		} );
-
-		it( 'should terminate threads if the process is aborted', async () => {
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
-
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
-
-			abortController.abort( 'SIGINT' );
-
-			// Simulate the "Worker#terminate()" behavior.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
-
-			await promise;
-
-			expect( firstWorker.terminate ).toHaveBeenCalledTimes( 1 );
-			expect( secondWorker.terminate ).toHaveBeenCalledTimes( 1 );
-		} );
-
-		it( 'should attach listener to a worker that executes a callback once per worker', async () => {
-			const signalEvent = vi.spyOn( abortController.signal, 'addEventListener' );
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
-
-			expect( registerAbortController ).toHaveBeenCalledTimes( 0 );
-
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
-
-			abortController.abort( 'SIGINT' );
-
-			// Simulate the "Worker#terminate()" behavior.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
-
-			await promise;
-
-			expect( signalEvent ).toHaveBeenCalledTimes( 2 );
-			expect( signalEvent ).toHaveBeenNthCalledWith(
-				1,
-				'abort',
-				expect.any( Function ),
-				expect.objectContaining( {
-					once: true
-				} )
+		return promise
+			.then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				err => {
+					expect( err ).toEqual( error );
+				}
 			);
-			expect( signalEvent ).toHaveBeenNthCalledWith(
-				2,
-				'abort',
-				expect.any( Function ),
-				expect.objectContaining( {
-					once: true
-				} )
+	} );
+
+	it( 'should reject the promise if a worker emitted an error (second worker)', async () => {
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
+
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+		const error = new Error( 'Example error from a worker.' );
+
+		getExitCallback( firstWorker )( 0 );
+		getErrorCallback( secondWorker )( error );
+
+		return promise
+			.then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				err => {
+					expect( err ).toEqual( error );
+				}
 			);
+	} );
 
-			expect( deregisterAbortController ).toHaveBeenCalledTimes( 0 );
-		} );
+	it( 'should split packages into threads one by one', async () => {
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
 
-		it( 'should register and deregister default abort controller if signal is not provided', async () => {
-			const abortController = new AbortController();
-			const signalEvent = vi.spyOn( abortController.signal, 'addEventListener' );
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
-			registerAbortController.mockReturnValue( abortController );
+		expect( firstWorker.workerData ).toBeInstanceOf( Object );
+		expect( firstWorker.workerData ).toHaveProperty( 'packages' );
+		expect( firstWorker.workerData.packages ).toBeInstanceOf( Array );
+		expect( firstWorker.workerData.packages ).toEqual( [
+			'/home/ckeditor/my-packages/package-01',
+			'/home/ckeditor/my-packages/package-03'
+		] );
 
-			const options = Object.assign( {}, defaultOptions );
-			delete options.signal;
+		expect( secondWorker.workerData ).toBeInstanceOf( Object );
+		expect( secondWorker.workerData ).toHaveProperty( 'packages' );
+		expect( secondWorker.workerData.packages ).toBeInstanceOf( Array );
+		expect( secondWorker.workerData.packages ).toEqual( [
+			'/home/ckeditor/my-packages/package-02',
+			'/home/ckeditor/my-packages/package-04'
+		] );
 
-			const promise = executeInParallel( options );
-			await delay( 0 );
+		// Workers did not emit an error.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
 
-			expect( registerAbortController ).toHaveBeenCalledTimes( 1 );
+		await promise;
+	} );
 
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+	it( 'should remove the temporary module after execution', async () => {
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
 
-			abortController.abort( 'SIGINT' );
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
-			// Simulate the "Worker#terminate()" behavior.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
+		// Workers did not emit an error.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
 
-			await promise;
+		await promise;
 
-			expect( signalEvent ).toHaveBeenCalledTimes( 2 );
-			expect( signalEvent ).toHaveBeenNthCalledWith(
-				1,
-				'abort',
-				expect.any( Function ),
-				expect.objectContaining( {
-					once: true
-				} )
+		expect( fs.unlink ).toHaveBeenCalledTimes( 1 );
+		expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/uuid-4.mjs' );
+	} );
+
+	it( 'should remove the temporary module if the process is aborted', async () => {
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
+
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+
+		abortController.abort( 'SIGINT' );
+
+		// Simulate the "Worker#terminate()" behavior.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
+
+		await promise;
+
+		expect( fs.unlink ).toHaveBeenCalledTimes( 1 );
+		expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/uuid-4.mjs' );
+	} );
+
+	it( 'should remove the temporary module if the promise rejected', async () => {
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
+
+		const [ firstWorker ] = stubs.WorkerMock.instances;
+		const error = new Error( 'Example error from a worker.' );
+
+		getErrorCallback( firstWorker )( error );
+
+		return promise
+			.then(
+				() => {
+					throw new Error( 'Expected to be rejected.' );
+				},
+				() => {
+					expect( fs.unlink ).toHaveBeenCalledTimes( 1 );
+					expect( fs.unlink ).toHaveBeenCalledWith( '/home/ckeditor/uuid-4.mjs' );
+				}
 			);
-			expect( signalEvent ).toHaveBeenNthCalledWith(
-				2,
-				'abort',
-				expect.any( Function ),
-				expect.objectContaining( {
-					once: true
-				} )
-			);
+	} );
 
-			expect( deregisterAbortController ).toHaveBeenCalledTimes( 1 );
-		} );
+	it( 'should terminate threads if the process is aborted', async () => {
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
 
-		it( 'should update the progress when a package finished executing the callback', async () => {
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+		abortController.abort( 'SIGINT' );
 
-			const firstWorkerPackageDone = getMessageCallback( firstWorker );
-			const secondWorkerPackageDone = getMessageCallback( secondWorker );
+		// Simulate the "Worker#terminate()" behavior.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
 
-			expect( outputHistory ).toHaveLength( 0 );
-			firstWorkerPackageDone( 'done:package' );
-			expect( outputHistory ).toContain( 'Status: 1/4.' );
-			expect( outputHistory ).toHaveLength( 1 );
-			secondWorkerPackageDone( 'done:package' );
-			expect( outputHistory ).toContain( 'Status: 2/4.' );
-			expect( outputHistory ).toHaveLength( 2 );
-			secondWorkerPackageDone( 'done:package' );
-			expect( outputHistory ).toHaveLength( 3 );
-			expect( outputHistory ).toContain( 'Status: 3/4.' );
-			firstWorkerPackageDone( 'done:package' );
-			expect( outputHistory ).toHaveLength( 4 );
-			expect( outputHistory ).toContain( 'Status: 4/4.' );
+		await promise;
 
-			// Workers did not emit an error.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
+		expect( firstWorker.terminate ).toHaveBeenCalledTimes( 1 );
+		expect( secondWorker.terminate ).toHaveBeenCalledTimes( 1 );
+	} );
 
-			await promise;
-		} );
+	it( 'should attach listener to a worker that executes a callback once per worker', async () => {
+		const signalEvent = vi.spyOn( abortController.signal, 'addEventListener' );
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
 
-		it( 'should ignore messages from threads unrelated to the progress', async () => {
-			const promise = executeInParallel( defaultOptions );
-			await delay( 0 );
+		expect( registerAbortController ).toHaveBeenCalledTimes( 0 );
 
-			const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
-			const firstWorkerPackageDone = getMessageCallback( firstWorker );
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
 
-			expect( outputHistory ).toHaveLength( 0 );
-			firstWorkerPackageDone( 'foo' );
-			expect( outputHistory ).toHaveLength( 0 );
+		abortController.abort( 'SIGINT' );
 
-			// Workers did not emit an error.
-			getExitCallback( firstWorker )( 0 );
-			getExitCallback( secondWorker )( 0 );
+		// Simulate the "Worker#terminate()" behavior.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
 
-			await promise;
-		} );
+		await promise;
+
+		expect( signalEvent ).toHaveBeenCalledTimes( 2 );
+		expect( signalEvent ).toHaveBeenNthCalledWith(
+			1,
+			'abort',
+			expect.any( Function ),
+			expect.objectContaining( {
+				once: true
+			} )
+		);
+		expect( signalEvent ).toHaveBeenNthCalledWith(
+			2,
+			'abort',
+			expect.any( Function ),
+			expect.objectContaining( {
+				once: true
+			} )
+		);
+
+		expect( deregisterAbortController ).toHaveBeenCalledTimes( 0 );
+	} );
+
+	it( 'should register and deregister default abort controller if signal is not provided', async () => {
+		const abortController = new AbortController();
+		const signalEvent = vi.spyOn( abortController.signal, 'addEventListener' );
+
+		registerAbortController.mockReturnValue( abortController );
+
+		const options = Object.assign( {}, defaultOptions );
+		delete options.signal;
+
+		const promise = executeInParallel( options );
+		await delay( 0 );
+
+		expect( registerAbortController ).toHaveBeenCalledTimes( 1 );
+
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+
+		abortController.abort( 'SIGINT' );
+
+		// Simulate the "Worker#terminate()" behavior.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
+
+		await promise;
+
+		expect( signalEvent ).toHaveBeenCalledTimes( 2 );
+		expect( signalEvent ).toHaveBeenNthCalledWith(
+			1,
+			'abort',
+			expect.any( Function ),
+			expect.objectContaining( {
+				once: true
+			} )
+		);
+		expect( signalEvent ).toHaveBeenNthCalledWith(
+			2,
+			'abort',
+			expect.any( Function ),
+			expect.objectContaining( {
+				once: true
+			} )
+		);
+
+		expect( deregisterAbortController ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'should update the progress when a package finished executing the callback', async () => {
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
+
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+
+		const firstWorkerPackageDone = getMessageCallback( firstWorker );
+		const secondWorkerPackageDone = getMessageCallback( secondWorker );
+
+		expect( outputHistory ).toHaveLength( 0 );
+		firstWorkerPackageDone( 'done:package' );
+		expect( outputHistory ).toContain( 'Status: 1/4.' );
+		expect( outputHistory ).toHaveLength( 1 );
+		secondWorkerPackageDone( 'done:package' );
+		expect( outputHistory ).toContain( 'Status: 2/4.' );
+		expect( outputHistory ).toHaveLength( 2 );
+		secondWorkerPackageDone( 'done:package' );
+		expect( outputHistory ).toHaveLength( 3 );
+		expect( outputHistory ).toContain( 'Status: 3/4.' );
+		firstWorkerPackageDone( 'done:package' );
+		expect( outputHistory ).toHaveLength( 4 );
+		expect( outputHistory ).toContain( 'Status: 4/4.' );
+
+		// Workers did not emit an error.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
+
+		await promise;
+	} );
+
+	it( 'should ignore messages from threads unrelated to the progress', async () => {
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
+
+		const [ firstWorker, secondWorker ] = stubs.WorkerMock.instances;
+		const firstWorkerPackageDone = getMessageCallback( firstWorker );
+
+		expect( outputHistory ).toHaveLength( 0 );
+		firstWorkerPackageDone( 'foo' );
+		expect( outputHistory ).toHaveLength( 0 );
+
+		// Workers did not emit an error.
+		getExitCallback( firstWorker )( 0 );
+		getExitCallback( secondWorker )( 0 );
+
+		await promise;
 	} );
 } );
 

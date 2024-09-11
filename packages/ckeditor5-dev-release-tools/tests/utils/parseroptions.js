@@ -6,10 +6,8 @@
 import { describe, it, expect } from 'vitest';
 import parserOptions from '../../lib/utils/parseroptions.js';
 
-describe( 'dev-release-tools/utils', () => {
-	describe( 'parser-options', () => {
-		it( 'should not hoist closed tickets', () => {
-			expect( parserOptions.referenceActions ).to.deep.equal( [] );
-		} );
+describe( 'parser-options', () => {
+	it( 'should not hoist closed tickets', () => {
+		expect( parserOptions.referenceActions ).to.deep.equal( [] );
 	} );
 } );

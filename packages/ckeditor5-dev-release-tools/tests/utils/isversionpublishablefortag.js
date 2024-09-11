@@ -14,7 +14,7 @@ vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 vi.mock( 'semver' );
 vi.mock( 'shell-escape' );
 
-describe( 'dev-release-tools/isVersionPublishableForTag', () => {
+describe( 'isVersionPublishableForTag()', () => {
 	beforeEach( () => {
 		vi.mocked( shellEscape ).mockImplementation( v => v[ 0 ] );
 	} );

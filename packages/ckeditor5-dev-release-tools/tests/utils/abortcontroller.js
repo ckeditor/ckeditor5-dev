@@ -11,7 +11,7 @@ vi.stubGlobal( 'process', {
 	removeListener: vi.fn()
 } );
 
-describe( 'abortController()', () => {
+describe( 'abortcontroller', () => {
 	let listeners;
 
 	beforeEach( () => {
@@ -30,51 +30,57 @@ describe( 'abortController()', () => {
 		} );
 	} );
 
-	it( 'should return AbortController instance', () => {
-		const abortControllerInstance = registerAbortController();
+	describe( 'registerAbortController()', () => {
+		it( 'should return AbortController instance', () => {
+			const abortControllerInstance = registerAbortController();
 
-		expect( abortControllerInstance ).to.be.instanceof( global.AbortController );
+			expect( abortControllerInstance ).to.be.instanceof( global.AbortController );
+		} );
+
+		it( 'should store listener in internal property for further use', () => {
+			const abortControllerInstance = registerAbortController();
+
+			expect( abortControllerInstance._listener ).to.be.a( 'function' );
+		} );
+
+		it( 'should register listener on SIGINT event', () => {
+			const abortControllerInstance = registerAbortController();
+
+			expect(
+				vi.mocked( process ).prependOnceListener
+			).toHaveBeenCalledExactlyOnceWith( 'SIGINT', abortControllerInstance._listener );
+		} );
+
+		it( 'should call abort method on SIGINT event', () => {
+			const abortControllerInstance = registerAbortController();
+
+			vi.spyOn( abortControllerInstance, 'abort' );
+
+			listeners.SIGINT.forEach( listener => listener() );
+
+			expect( abortControllerInstance.abort ).toHaveBeenCalledExactlyOnceWith( 'SIGINT' );
+		} );
 	} );
 
-	it( 'should store listener in internal property for further use', () => {
-		const abortControllerInstance = registerAbortController();
+	describe( 'deregisterAbortController()', () => {
+		it( 'should not deregister listener if AbortController instance is not set', () => {
+			deregisterAbortController();
+			expect( vi.mocked( process ).removeListener ).not.toHaveBeenCalled();
+		} );
 
-		expect( abortControllerInstance._listener ).to.be.a( 'function' );
-	} );
+		it( 'should not deregister listener if AbortController instance is not registered', () => {
+			const abortControllerInstance = new AbortController();
+			deregisterAbortController( abortControllerInstance );
 
-	it( 'should register listener on SIGINT event', () => {
-		const abortControllerInstance = registerAbortController();
+			expect( vi.mocked( process ).removeListener ).not.toHaveBeenCalled();
+		} );
 
-		expect( vi.mocked( process ).prependOnceListener ).toHaveBeenCalledExactlyOnceWith( 'SIGINT', abortControllerInstance._listener );
-	} );
+		it( 'should deregister listener if AbortController instance is registered', () => {
+			const abortControllerInstance = registerAbortController();
 
-	it( 'should call abort method on SIGINT event', () => {
-		const abortControllerInstance = registerAbortController();
+			deregisterAbortController( abortControllerInstance );
 
-		vi.spyOn( abortControllerInstance, 'abort' );
-
-		listeners.SIGINT.forEach( listener => listener() );
-
-		expect( abortControllerInstance.abort ).toHaveBeenCalledExactlyOnceWith( 'SIGINT' );
-	} );
-
-	it( 'should not deregister listener if AbortController instance is not set', () => {
-		deregisterAbortController();
-		expect( vi.mocked( process ).removeListener ).not.toHaveBeenCalled();
-	} );
-
-	it( 'should not deregister listener if AbortController instance is not registered', () => {
-		const abortControllerInstance = new AbortController();
-		deregisterAbortController( abortControllerInstance );
-
-		expect( vi.mocked( process ).removeListener ).not.toHaveBeenCalled();
-	} );
-
-	it( 'should deregister listener if AbortController instance is registered', () => {
-		const abortControllerInstance = registerAbortController();
-
-		deregisterAbortController( abortControllerInstance );
-
-		expect( vi.mocked( process ).removeListener ).toHaveBeenCalledExactlyOnceWith( 'SIGINT', abortControllerInstance._listener );
+			expect( vi.mocked( process ).removeListener ).toHaveBeenCalledExactlyOnceWith( 'SIGINT', abortControllerInstance._listener );
+		} );
 	} );
 } );

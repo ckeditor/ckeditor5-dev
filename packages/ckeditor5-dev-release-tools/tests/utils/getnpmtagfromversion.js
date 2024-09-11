@@ -10,7 +10,7 @@ import getNpmTagFromVersion from '../../lib/utils/getnpmtagfromversion.js';
 
 vi.mock( 'semver' );
 
-describe( 'dev-release-tools/getNpmTagFromVersion', () => {
+describe( 'getNpmTagFromVersion()', () => {
 	it( 'should return "latest" when processing a X.Y.Z version', () => {
 		expect( getNpmTagFromVersion( '1.0.0' ) ).to.equal( 'latest' );
 		expect( getNpmTagFromVersion( '2.1.0' ) ).to.equal( 'latest' );
