@@ -3,35 +3,15 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, expect, it, vi } from 'vitest';
+import CKEditorTranslationsPlugin from '../lib/ckeditortranslationsplugin.js';
+import serveTranslations from '../lib/servetranslations.js';
+import MultipleLanguageTranslationService from '../lib/multiplelanguagetranslationservice.js';
 
-const { expect } = require( 'chai' );
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
+vi.mock( '../lib/servetranslations' );
+vi.mock( '../lib/multiplelanguagetranslationservice', () => ( { default: vi.fn() } ) );
 
 describe( 'dev-translations/CKEditorTranslationsPlugin', () => {
-	let sandbox, CKEditorTranslationsPlugin, stubs;
-
-	beforeEach( () => {
-		sandbox = sinon.createSandbox();
-
-		stubs = {
-			serveTranslations: sandbox.stub().returns( {} ),
-			MultipleLanguageTranslationService: sandbox.stub().returns( {} )
-		};
-
-		CKEditorTranslationsPlugin = proxyquire( '../lib/ckeditortranslationsplugin', {
-			'./servetranslations': stubs.serveTranslations,
-			'./multiplelanguagetranslationservice': stubs.MultipleLanguageTranslationService
-		} );
-
-		sandbox.stub( console, 'warn' );
-	} );
-
-	afterEach( () => {
-		sandbox.restore();
-	} );
-
 	describe( 'constructor()', () => {
 		it( 'should initialize with passed options', () => {
 			const options = { language: 'pl' };
@@ -128,7 +108,7 @@ describe( 'dev-translations/CKEditorTranslationsPlugin', () => {
 			const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( options );
 			ckEditorTranslationsPlugin.apply( compiler );
 
-			sinon.assert.calledOnce( stubs.serveTranslations );
+			expect( serveTranslations ).toHaveBeenCalledOnce();
 		} );
 
 		describe( 'should create an instance of `MultipleLanguageTranslationService`', () => {
@@ -140,21 +120,18 @@ describe( 'dev-translations/CKEditorTranslationsPlugin', () => {
 				const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( options );
 				ckEditorTranslationsPlugin.apply( {} );
 
-				sinon.assert.calledOnce( stubs.serveTranslations );
+				expect( serveTranslations ).toHaveBeenCalledOnce();
 
-				sinon.assert.calledOnce( stubs.MultipleLanguageTranslationService );
-				sinon.assert.calledWithExactly(
-					stubs.MultipleLanguageTranslationService,
-					{
-						mainLanguage: 'pl',
-						compileAllLanguages: false,
-						additionalLanguages: [],
-						buildAllTranslationsToSeparateFiles: false,
-						addMainLanguageTranslationsToAllAssets: false,
-						translationsOutputFile: undefined,
-						skipPluralFormFunction: false
-					}
-				);
+				expect( MultipleLanguageTranslationService ).toHaveBeenCalledOnce();
+				expect( MultipleLanguageTranslationService ).toHaveBeenCalledWith( expect.objectContaining( {
+					mainLanguage: 'pl',
+					compileAllLanguages: false,
+					additionalLanguages: [],
+					buildAllTranslationsToSeparateFiles: false,
+					addMainLanguageTranslationsToAllAssets: false,
+					translationsOutputFile: undefined,
+					skipPluralFormFunction: false
+				} ) );
 			} );
 
 			it( 'for additional languages provided', () => {
@@ -166,24 +143,23 @@ describe( 'dev-translations/CKEditorTranslationsPlugin', () => {
 				const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( options );
 				ckEditorTranslationsPlugin.apply( {} );
 
-				sinon.assert.calledOnce( stubs.serveTranslations );
+				expect( serveTranslations ).toHaveBeenCalledOnce();
 
-				sinon.assert.calledOnce( stubs.MultipleLanguageTranslationService );
-				sinon.assert.calledWithExactly(
-					stubs.MultipleLanguageTranslationService,
-					{
-						mainLanguage: 'pl',
-						compileAllLanguages: false,
-						additionalLanguages: [ 'en' ],
-						buildAllTranslationsToSeparateFiles: false,
-						addMainLanguageTranslationsToAllAssets: false,
-						translationsOutputFile: undefined,
-						skipPluralFormFunction: false
-					}
-				);
+				expect( MultipleLanguageTranslationService ).toHaveBeenCalledOnce();
+				expect( MultipleLanguageTranslationService ).toHaveBeenCalledWith( expect.objectContaining( {
+					mainLanguage: 'pl',
+					compileAllLanguages: false,
+					additionalLanguages: [ 'en' ],
+					buildAllTranslationsToSeparateFiles: false,
+					addMainLanguageTranslationsToAllAssets: false,
+					translationsOutputFile: undefined,
+					skipPluralFormFunction: false
+				} ) );
 			} );
 
 			it( 'for `additionalLanguages` set to `all`', () => {
+				const consoleWarnSpy = vi.spyOn( console, 'warn' );
+
 				const options = {
 					language: 'en',
 					additionalLanguages: 'all'
@@ -192,23 +168,20 @@ describe( 'dev-translations/CKEditorTranslationsPlugin', () => {
 				const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( options );
 				ckEditorTranslationsPlugin.apply( {} );
 
-				sinon.assert.calledOnce( stubs.serveTranslations );
+				expect( serveTranslations ).toHaveBeenCalledOnce();
 
-				sinon.assert.calledOnce( stubs.MultipleLanguageTranslationService );
-				sinon.assert.calledWithExactly(
-					stubs.MultipleLanguageTranslationService,
-					{
-						mainLanguage: 'en',
-						compileAllLanguages: true,
-						additionalLanguages: [],
-						buildAllTranslationsToSeparateFiles: false,
-						addMainLanguageTranslationsToAllAssets: false,
-						translationsOutputFile: undefined,
-						skipPluralFormFunction: false
-					}
-				);
+				expect( MultipleLanguageTranslationService ).toHaveBeenCalledOnce();
+				expect( MultipleLanguageTranslationService ).toHaveBeenCalledWith( expect.objectContaining( {
+					mainLanguage: 'en',
+					compileAllLanguages: true,
+					additionalLanguages: [],
+					buildAllTranslationsToSeparateFiles: false,
+					addMainLanguageTranslationsToAllAssets: false,
+					translationsOutputFile: undefined,
+					skipPluralFormFunction: false
+				} ) );
 
-				sinon.assert.notCalled( console.warn );
+				expect( consoleWarnSpy ).not.toBeCalled();
 			} );
 
 			it( 'passes the skipPluralFormFunction option to the translation service', () => {
@@ -220,21 +193,18 @@ describe( 'dev-translations/CKEditorTranslationsPlugin', () => {
 				const ckEditorTranslationsPlugin = new CKEditorTranslationsPlugin( options );
 				ckEditorTranslationsPlugin.apply( {} );
 
-				sinon.assert.calledOnce( stubs.serveTranslations );
+				expect( serveTranslations ).toHaveBeenCalledOnce();
 
-				sinon.assert.calledOnce( stubs.MultipleLanguageTranslationService );
-				sinon.assert.calledWithExactly(
-					stubs.MultipleLanguageTranslationService,
-					{
-						mainLanguage: 'pl',
-						compileAllLanguages: false,
-						additionalLanguages: [],
-						buildAllTranslationsToSeparateFiles: false,
-						addMainLanguageTranslationsToAllAssets: false,
-						translationsOutputFile: undefined,
-						skipPluralFormFunction: true
-					}
-				);
+				expect( MultipleLanguageTranslationService ).toHaveBeenCalledOnce();
+				expect( MultipleLanguageTranslationService ).toHaveBeenCalledWith( expect.objectContaining( {
+					mainLanguage: 'pl',
+					compileAllLanguages: false,
+					additionalLanguages: [],
+					buildAllTranslationsToSeparateFiles: false,
+					addMainLanguageTranslationsToAllAssets: false,
+					translationsOutputFile: undefined,
+					skipPluralFormFunction: true
+				} ) );
 			} );
 		} );
 

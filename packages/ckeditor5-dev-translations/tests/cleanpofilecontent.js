@@ -3,11 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const chai = require( 'chai' );
-const expect = chai.expect;
-const cleanPoFileContent = require( '../lib/cleanpofilecontent' );
+import { describe, expect, it } from 'vitest';
+import cleanPoFileContent from '../lib/cleanpofilecontent.js';
 
 describe( 'translations', () => {
 	describe( 'cleanPoFileContent()', () => {

@@ -3,9 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const PO = require( 'pofile' );
+import PO from 'pofile';
 
 /**
  * Returns translations stripped from the personal data, but with an added banner
@@ -16,7 +14,7 @@ const PO = require( 'pofile' );
  * @param {Boolean} [options.simplifyLicenseHeader] Whether to skip adding the contribute URL in the header.
  * @returns {String}
  */
-module.exports = function cleanPoFileContent( poFileContent, options = {} ) {
+export default function cleanPoFileContent( poFileContent, options = {} ) {
 	const po = PO.parse( poFileContent );
 
 	// Remove personal data from headers.
@@ -53,4 +51,4 @@ module.exports = function cleanPoFileContent( poFileContent, options = {} ) {
 	}
 
 	return po.toString();
-};
+}
