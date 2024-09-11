@@ -56,7 +56,7 @@ export function displayCommits( commits, options = {} ) {
 			if ( hasCorrectType && isCommitIncluded ) {
 				logMessage += chalk.green( 'INCLUDED' );
 			} else if ( hasCorrectType && !isCommitIncluded ) {
-				logMessage += chalk.grey( 'SKIPPED' );
+				logMessage += chalk.gray( 'SKIPPED' );
 			} else {
 				logMessage += chalk.red( 'INVALID' );
 			}

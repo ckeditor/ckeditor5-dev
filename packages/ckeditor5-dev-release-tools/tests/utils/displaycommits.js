@@ -3,45 +3,53 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, expect, it, vi } from 'vitest';
+import { displayCommits } from '../../lib/utils/displaycommits.js';
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
+const stubs = vi.hoisted( () => {
+	const values = {
+		logger: {
+			info: vi.fn()
+		},
+		chalk: {
+			bold: vi.fn( input => input ),
+			italic: vi.fn( input => input ),
+			underline: vi.fn( input => input ),
+			gray: vi.fn( input => input ),
+			green: vi.fn( input => input ),
+			yellow: vi.fn( input => input ),
+			red: vi.fn( input => input )
+		}
+	};
+
+	// To make `chalk.bold.yellow.red()` working.
+	for ( const rootKey of Object.keys( values.chalk ) ) {
+		for ( const nestedKey of Object.keys( values.chalk ) ) {
+			values.chalk[ rootKey ][ nestedKey ] = values.chalk[ nestedKey ];
+		}
+	}
+
+	return values;
+} );
+
+vi.mock( 'chalk', () => ( {
+	default: stubs.chalk
+} ) );
+vi.mock( '@ckeditor/ckeditor5-dev-utils', () => ( {
+	logger: vi.fn( () => stubs.logger )
+} ) );
 
 describe( 'dev-release-tools/utils', () => {
-	let displayCommits, sandbox, stubs;
-
-	beforeEach( () => {
-		sandbox = sinon.createSandbox();
-
-		stubs = {
-			logger: {
-				info: sandbox.spy(),
-				warning: sandbox.spy(),
-				error: sandbox.spy()
-			}
-		};
-
-		displayCommits = proxyquire( '../../lib/utils/displaycommits', {
-			'@ckeditor/ckeditor5-dev-utils': {
-				logger() {
-					return stubs.logger;
-				}
-			}
-		} );
-	} );
-
-	afterEach( () => {
-		sandbox.restore();
-	} );
-
 	describe( 'displayCommits()', () => {
 		it( 'prints if there is no commit to display', () => {
 			displayCommits( [] );
 
-			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).includes( 'No commits to display.' );
+			expect( stubs.logger.info ).toHaveBeenCalledTimes( 1 );
+
+			const [ firstCall ] = stubs.logger.info.mock.calls;
+			const [ firstArgument ] = firstCall;
+
+			expect( firstArgument ).toContain( 'No commits to display.' );
 		} );
 
 		it( 'attaches valid "external" commit to the changelog (as Array)', () => {
@@ -58,9 +66,13 @@ describe( 'dev-release-tools/utils', () => {
 
 			displayCommits( [ commit ] );
 
-			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'Fix: Simple fix.' ) ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'INCLUDED' ) ).to.equal( true );
+			expect( stubs.logger.info ).toHaveBeenCalledTimes( 1 );
+
+			const [ firstCall ] = stubs.logger.info.mock.calls;
+			const [ firstArgument ] = firstCall;
+
+			expect( firstArgument ).toContain( 'Fix: Simple fix.' );
+			expect( firstArgument ).toContain( 'INCLUDED' );
 		} );
 
 		it( 'attaches valid "external" commit to the changelog (as Set)', () => {
@@ -77,9 +89,13 @@ describe( 'dev-release-tools/utils', () => {
 
 			displayCommits( new Set( [ commit ] ) );
 
-			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'Fix: Simple fix.' ) ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'INCLUDED' ) ).to.equal( true );
+			expect( stubs.logger.info ).toHaveBeenCalledTimes( 1 );
+
+			const [ firstCall ] = stubs.logger.info.mock.calls;
+			const [ firstArgument ] = firstCall;
+
+			expect( firstArgument ).toContain( 'Fix: Simple fix.' );
+			expect( firstArgument ).toContain( 'INCLUDED' );
 		} );
 
 		it( 'truncates too long commit\'s subject', () => {
@@ -98,11 +114,15 @@ describe( 'dev-release-tools/utils', () => {
 
 			displayCommits( [ commit ] );
 
-			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ].includes(
+			expect( stubs.logger.info ).toHaveBeenCalledTimes( 1 );
+
+			const [ firstCall ] = stubs.logger.info.mock.calls;
+			const [ firstArgument ] = firstCall;
+
+			expect( firstArgument ).toContain(
 				'Fix: Reference site about Lorem Ipsum, giving information on its origins, as well as a random Lip...'
-			) ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'INCLUDED' ) ).to.equal( true );
+			);
+			expect( firstArgument ).toContain( 'INCLUDED' );
 		} );
 
 		it( 'does not attach valid "internal" commit to the changelog', () => {
@@ -119,9 +139,13 @@ describe( 'dev-release-tools/utils', () => {
 
 			displayCommits( [ commit ] );
 
-			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'Docs: README.' ) ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'SKIPPED' ) ).to.equal( true );
+			expect( stubs.logger.info ).toHaveBeenCalledTimes( 1 );
+
+			const [ firstCall ] = stubs.logger.info.mock.calls;
+			const [ firstArgument ] = firstCall;
+
+			expect( firstArgument ).toContain( 'Docs: README.' );
+			expect( firstArgument ).toContain( 'SKIPPED' );
 		} );
 
 		it( 'does not attach invalid commit to the changelog', () => {
@@ -137,9 +161,13 @@ describe( 'dev-release-tools/utils', () => {
 
 			displayCommits( [ commit ] );
 
-			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'Invalid commit.' ) ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ].includes( 'INVALID' ) ).to.equal( true );
+			expect( stubs.logger.info ).toHaveBeenCalledTimes( 1 );
+
+			const [ firstCall ] = stubs.logger.info.mock.calls;
+			const [ firstArgument ] = firstCall;
+
+			expect( firstArgument ).toContain( 'Invalid commit.' );
+			expect( firstArgument ).toContain( 'INVALID' );
 		} );
 
 		it( 'attaches additional subject for merge commits to the commit list', () => {
@@ -158,16 +186,15 @@ describe( 'dev-release-tools/utils', () => {
 
 			displayCommits( [ commit ] );
 
-			expect( stubs.logger.info.calledOnce ).to.equal( true );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.be.a( 'string' );
+			expect( stubs.logger.info ).toHaveBeenCalledTimes( 1 );
 
-			const logMessageAsArray = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
+			const [ firstCall ] = stubs.logger.info.mock.calls;
+			const [ firstArgument ] = firstCall;
+			const logMessageAsArray = firstArgument.split( '\n' );
 
-			expect( logMessageAsArray[ 0 ].includes(
-				'Feature: Introduced a brand new release tools with a new set of requirements.'
-			) ).to.equal( true );
-			expect( logMessageAsArray[ 0 ].includes( 'INCLUDED' ) ).to.equal( true );
-			expect( logMessageAsArray[ 1 ].includes( 'Merge pull request #75 from ckeditor/t/64' ) ).to.equal( true );
+			expect( logMessageAsArray[ 0 ] ).toContain( 'Feature: Introduced a brand new release tools with a new set of requirements.' );
+			expect( logMessageAsArray[ 0 ] ).toContain( 'INCLUDED' );
+			expect( logMessageAsArray[ 1 ] ).toContain( 'Merge pull request #75 from ckeditor/t/64' );
 		} );
 
 		it( 'displays proper log if commit does not contain the second line', () => {
@@ -192,11 +219,14 @@ describe( 'dev-release-tools/utils', () => {
 
 			displayCommits( [ commit ] );
 
+			const [ firstCall ] = stubs.logger.info.mock.calls;
+			const [ firstArgument ] = firstCall;
+
 			// The merge commit displays two lines:
 			// Prefix: Changes.
 			// Merge ...
 			// If the merge commit does not contain the second line, it should display only the one.
-			expect( stubs.logger.info.firstCall.args[ 0 ].split( '\n' ) ).length( 1 );
+			expect( firstArgument.split( '\n' ) ).toHaveLength( 1 );
 		} );
 
 		it( 'attaches breaking changes notes to displayed message', () => {
@@ -229,13 +259,15 @@ describe( 'dev-release-tools/utils', () => {
 
 			displayCommits( [ commit ] );
 
-			const message = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
+			const [ firstCall ] = stubs.logger.info.mock.calls;
+			const [ firstArgument ] = firstCall;
+			const message = firstArgument.split( '\n' );
 
 			/* eslint-disable max-len */
-			expect( message[ 0 ].includes( 'Feature: Simple foo.' ) ).to.equal( true );
-			expect( message[ 1 ].includes( 'MAJOR BREAKING CHANGES: 1 - Reference site about Lorem Ipsum, giving information on its origins, as...' ) ).to.equal( true );
-			expect( message[ 2 ].includes( 'MAJOR BREAKING CHANGES: 2 - Reference site about Lorem Ipsum, giving information on its origins, as...' ) ).to.equal( true );
-			expect( message[ 3 ].includes( 'MINOR BREAKING CHANGES: 3 - Reference site about Lorem Ipsum, giving information on its origins, as...' ) ).to.equal( true );
+			expect( message[ 0 ] ).toContain( 'Feature: Simple foo.' );
+			expect( message[ 1 ] ).toContain( 'MAJOR BREAKING CHANGES: 1 - Reference site about Lorem Ipsum, giving information on its origins, as...' );
+			expect( message[ 2 ] ).toContain( 'MAJOR BREAKING CHANGES: 2 - Reference site about Lorem Ipsum, giving information on its origins, as...' );
+			expect( message[ 3 ] ).toContain( 'MINOR BREAKING CHANGES: 3 - Reference site about Lorem Ipsum, giving information on its origins, as...' );
 			/* eslint-enable max-len */
 		} );
 
@@ -255,13 +287,15 @@ describe( 'dev-release-tools/utils', () => {
 
 				displayCommits( [ commit ], { attachLinkToCommit: true } );
 
-				expect( stubs.logger.info.calledOnce ).to.equal( true );
+				expect( stubs.logger.info ).toHaveBeenCalledTimes( 1 );
 
-				const logMessage = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
+				const [ firstCall ] = stubs.logger.info.mock.calls;
+				const [ firstArgument ] = firstCall;
+				const logMessage = firstArgument.split( '\n' );
 
-				expect( logMessage[ 0 ].includes( 'Fix: Simple fix.' ) ).to.equal( true );
-				expect( logMessage[ 0 ].includes( 'INCLUDED' ) ).to.equal( true );
-				expect( logMessage[ 1 ].includes( 'https://github.com/ckeditor/ckeditor5-foo/commit/684997d' ) ).to.equal( true );
+				expect( logMessage[ 0 ] ).toContain( 'Fix: Simple fix.' );
+				expect( logMessage[ 0 ] ).toContain( 'INCLUDED' );
+				expect( logMessage[ 1 ] ).toContain( 'https://github.com/ckeditor/ckeditor5-foo/commit/684997d' );
 			} );
 		} );
 
@@ -280,11 +314,12 @@ describe( 'dev-release-tools/utils', () => {
 
 				displayCommits( [ commit ] );
 
-				expect( stubs.logger.info.calledOnce ).to.equal( true );
+				expect( stubs.logger.info ).toHaveBeenCalledTimes( 1 );
 
-				const logMessage = stubs.logger.info.firstCall.args[ 0 ];
+				const [ firstCall ] = stubs.logger.info.mock.calls;
+				const [ firstArgument ] = firstCall;
 
-				expect( logMessage.substring( 0, 3 ) ).to.equal( '   ' );
+				expect( firstArgument.substring( 0, 3 ) ).toEqual( '   ' );
 			} );
 
 			it( 'indents second line properly', () => {
@@ -302,12 +337,14 @@ describe( 'dev-release-tools/utils', () => {
 
 				displayCommits( [ commit ] );
 
-				expect( stubs.logger.info.calledOnce ).to.equal( true );
+				expect( stubs.logger.info ).toHaveBeenCalledTimes( 1 );
 
-				const [ firstLine, secondLine ] = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
+				const [ firstCall ] = stubs.logger.info.mock.calls;
+				const [ firstArgument ] = firstCall;
+				const [ firstLine, secondLine ] = firstArgument.split( '\n' );
 
-				expect( firstLine.substring( 0, 3 ) ).to.equal( ' '.repeat( 3 ) );
-				expect( secondLine.substring( 0, 13 ) ).to.equal( ' '.repeat( 13 ) );
+				expect( firstLine.substring( 0, 3 ) ).toEqual( ' '.repeat( 3 ) );
+				expect( secondLine.substring( 0, 13 ) ).toEqual( ' '.repeat( 13 ) );
 			} );
 
 			it( 'works with "options.attachLinkToCommit"', () => {
@@ -326,13 +363,15 @@ describe( 'dev-release-tools/utils', () => {
 
 				displayCommits( [ commit ], { attachLinkToCommit: true, indentLevel: 2 } );
 
-				expect( stubs.logger.info.calledOnce ).to.equal( true );
+				expect( stubs.logger.info ).toHaveBeenCalledTimes( 1 );
 
-				const [ firstLine, secondLine, thirdLine ] = stubs.logger.info.firstCall.args[ 0 ].split( '\n' );
+				const [ firstCall ] = stubs.logger.info.mock.calls;
+				const [ firstArgument ] = firstCall;
+				const [ firstLine, secondLine, thirdLine ] = firstArgument.split( '\n' );
 
-				expect( firstLine.substring( 0, 6 ) ).to.equal( ' '.repeat( 6 ) );
-				expect( secondLine.substring( 0, 16 ) ).to.equal( ' '.repeat( 16 ) );
-				expect( thirdLine.substring( 0, 16 ) ).to.equal( ' '.repeat( 16 ) );
+				expect( firstLine.substring( 0, 6 ) ).toEqual( ' '.repeat( 6 ) );
+				expect( secondLine.substring( 0, 16 ) ).toEqual( ' '.repeat( 16 ) );
+				expect( thirdLine.substring( 0, 16 ) ).toEqual( ' '.repeat( 16 ) );
 			} );
 		} );
 
@@ -390,10 +429,15 @@ describe( 'dev-release-tools/utils', () => {
 					}
 				] );
 
+				expect( stubs.logger.info ).toHaveBeenCalledTimes( 6 );
+
+				const [ , secondCall, , , fifthCall ] = stubs.logger.info.mock.calls;
+				const [ secondCallfirstArgument ] = secondCall;
+				const [ fifthCallfirstArgument ] = fifthCall;
+
 				// Calls: 0, 2, 3, and 5 display the commit data.
-				expect( stubs.logger.info.callCount ).to.equal( 6 );
-				expect( stubs.logger.info.getCall( 1 ).args[ 0 ] ).to.match( /-----/ );
-				expect( stubs.logger.info.getCall( 4 ).args[ 0 ] ).to.match( /-----/ );
+				expect( secondCallfirstArgument ).toMatch( /-----/ );
+				expect( fifthCallfirstArgument ).toMatch( /-----/ );
 			} );
 
 			it( 'works for a group of two commits that follows a single commit group', () => {
@@ -437,10 +481,15 @@ describe( 'dev-release-tools/utils', () => {
 					}
 				] );
 
+				expect( stubs.logger.info ).toHaveBeenCalledTimes( 5 );
+
+				const [ , secondCall, , , fifthCall ] = stubs.logger.info.mock.calls;
+				const [ secondCallfirstArgument ] = secondCall;
+				const [ fifthCallfirstArgument ] = fifthCall;
+
 				// Calls: 0, 2, and 3  display the commit data.
-				expect( stubs.logger.info.callCount ).to.equal( 5 );
-				expect( stubs.logger.info.getCall( 1 ).args[ 0 ] ).to.match( /-----/ );
-				expect( stubs.logger.info.getCall( 4 ).args[ 0 ] ).to.match( /-----/ );
+				expect( secondCallfirstArgument ).toMatch( /-----/ );
+				expect( fifthCallfirstArgument ).toMatch( /-----/ );
 			} );
 
 			it( 'works for a single commit group that follows group of two commits ', () => {
@@ -485,10 +534,15 @@ describe( 'dev-release-tools/utils', () => {
 					}
 				] );
 
+				expect( stubs.logger.info ).toHaveBeenCalledTimes( 5 );
+
+				const [ firstCall, , , fourthCall ] = stubs.logger.info.mock.calls;
+				const [ firstCallfirstArgument ] = firstCall;
+				const [ fourthCallfirstArgument ] = fourthCall;
+
 				// Calls: 1, 2, and 4 display the commit data.
-				expect( stubs.logger.info.callCount ).to.equal( 5 );
-				expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.match( /-----/ );
-				expect( stubs.logger.info.getCall( 3 ).args[ 0 ] ).to.match( /-----/ );
+				expect( firstCallfirstArgument ).toMatch( /-----/ );
+				expect( fourthCallfirstArgument ).toMatch( /-----/ );
 			} );
 
 			it( 'does not duplicate the separator for commit groups', () => {
@@ -545,12 +599,19 @@ describe( 'dev-release-tools/utils', () => {
 					}
 				] );
 
+				expect( stubs.logger.info ).toHaveBeenCalledTimes( 7 );
+
+				const [ firstCall, , , fourthCall, fifthCall, , seventhCall ] = stubs.logger.info.mock.calls;
+				const [ firstCallfirstArgument ] = firstCall;
+				const [ fourthCallfirstArgument ] = fourthCall;
+				const [ fifthCallfirstArgument ] = fifthCall;
+				const [ seventhCallfirstArgument ] = seventhCall;
+
 				// Calls: 1, 2, 4, and 5 display the commit data.
-				expect( stubs.logger.info.callCount ).to.equal( 7 );
-				expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.match( /-----/ );
-				expect( stubs.logger.info.getCall( 3 ).args[ 0 ] ).to.match( /-----/ );
-				expect( stubs.logger.info.getCall( 4 ).args[ 0 ] ).to.not.match( /-----/ );
-				expect( stubs.logger.info.getCall( 6 ).args[ 0 ] ).to.match( /-----/ );
+				expect( firstCallfirstArgument ).toMatch( /-----/ );
+				expect( fourthCallfirstArgument ).toMatch( /-----/ );
+				expect( fifthCallfirstArgument ).not.toMatch( /-----/ );
+				expect( seventhCallfirstArgument ).toMatch( /-----/ );
 			} );
 
 			it( 'groups two groups of commits separated by a single commit group', () => {
@@ -619,13 +680,20 @@ describe( 'dev-release-tools/utils', () => {
 					}
 				] );
 
-				// Calls: 1, 2, 4, 6, and 7 display the commit data.
-				expect( stubs.logger.info.callCount ).to.equal( 9 );
-				expect( stubs.logger.info.getCall( 0 ).args[ 0 ] ).to.match( /-----/ );
-				expect( stubs.logger.info.getCall( 3 ).args[ 0 ] ).to.match( /-----/ );
+				expect( stubs.logger.info ).toHaveBeenCalledTimes( 9 );
 
-				expect( stubs.logger.info.getCall( 5 ).args[ 0 ] ).to.match( /-----/ );
-				expect( stubs.logger.info.getCall( 8 ).args[ 0 ] ).to.match( /-----/ );
+				const [ firstCall, , , fourthCall, , sixthCall, , , ninethCall ] = stubs.logger.info.mock.calls;
+				const [ firstCallfirstArgument ] = firstCall;
+				const [ fourthCallfirstArgument ] = fourthCall;
+				const [ sixthCallfirstArgument ] = sixthCall;
+				const [ ninethCallfirstArgument ] = ninethCall;
+
+				// Calls: 1, 2, 4, 6, and 7 display the commit data.
+				expect( firstCallfirstArgument ).to.match( /-----/ );
+				expect( fourthCallfirstArgument ).to.match( /-----/ );
+
+				expect( sixthCallfirstArgument ).to.match( /-----/ );
+				expect( ninethCallfirstArgument ).to.match( /-----/ );
 			} );
 		} );
 	} );
