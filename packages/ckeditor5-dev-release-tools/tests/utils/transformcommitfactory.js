@@ -202,7 +202,6 @@ describe( 'dev-release-tools/utils', () => {
 				const expectedFirstNoteText = 'See [ckeditor/ckeditor5#1](https://github.com/ckeditor/ckeditor5/issues/1). ' +
 					'Thanks to [@CKEditor](https://github.com/CKEditor).';
 
-				// eslint-disable-next-line max-len
 				const expectedSecondNodeText = 'Read more [#2](https://github.com/ckeditor/ckeditor5-dev/issues/2).';
 
 				expect( commit.notes[ 0 ].text ).to.equal( expectedFirstNoteText );

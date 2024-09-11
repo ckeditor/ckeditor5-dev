@@ -11,4 +11,3 @@ import { format } from 'date-fns';
 export default function getFormattedDate() {
 	return format( new Date(), 'yyyy-MM-dd' );
 }
-
