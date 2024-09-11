@@ -3,155 +3,150 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const path = require( 'path' );
-const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
-const { getPostCssConfig } = require( '../styles' );
+import path from 'path';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import { getPostCssConfig } from '../styles/index.js';
 
 const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
 
-module.exports = {
-	/**
-	 * @param {Object} [options]
-	 * @param {String} [options.configFile]
-	 * @param {Array.<String>} [options.debugFlags]
-	 * @param {Boolean} [options.includeDebugLoader]
-	 * @returns {Object}
-	 */
-	getTypeScriptLoader( options = {} ) {
-		const {
-			configFile = 'tsconfig.json',
-			debugFlags = [],
-			includeDebugLoader = false
-		} = options;
+/**
+ * @param {Object} [options]
+ * @param {String} [options.configFile]
+ * @param {Array.<String>} [options.debugFlags]
+ * @param {Boolean} [options.includeDebugLoader]
+ * @returns {Object}
+ */
+export function getTypeScriptLoader( options = {} ) {
+	const {
+		configFile = 'tsconfig.json',
+		debugFlags = [],
+		includeDebugLoader = false
+	} = options;
 
-		return {
-			test: /\.ts$/,
-			use: [
-				{
-					loader: 'esbuild-loader',
-					options: {
-						target: 'es2022',
-						tsconfig: configFile
-					}
-				},
-				includeDebugLoader ? getDebugLoader( debugFlags ) : null
-			].filter( Boolean )
-		};
-	},
+	return {
+		test: /\.ts$/,
+		use: [
+			{
+				loader: 'esbuild-loader',
+				options: {
+					target: 'es2022',
+					tsconfig: configFile
+				}
+			},
+			includeDebugLoader ? getDebugLoader( debugFlags ) : null
+		].filter( Boolean )
+	};
+}
 
-	/**
-	 * @param {Object} options
-	 * @param {Array.<String>} options.debugFlags
-	 * @returns {Object}
-	 */
-	getJavaScriptLoader( { debugFlags } ) {
-		return {
-			test: /\.js$/,
-			...getDebugLoader( debugFlags )
-		};
-	},
+/**
+ * @param {Object} options
+ * @param {Array.<String>} options.debugFlags
+ * @returns {Object}
+ */
+export function getJavaScriptLoader( { debugFlags } ) {
+	return {
+		test: /\.js$/,
+		...getDebugLoader( debugFlags )
+	};
+}
 
-	/**
-	 * @param {Object} options
-	 * @param {String} options.themePath
-	 * @param {Boolean} [options.minify]
-	 * @param {Boolean} [options.sourceMap]
-	 * @param {Boolean} [options.extractToSeparateFile]
-	 * @param {Boolean} [options.skipPostCssLoader]
-	 * @returns {Object}
-	 */
-	getStylesLoader( options ) {
-		const {
-			themePath,
-			minify = false,
-			sourceMap = false,
-			extractToSeparateFile = false,
-			skipPostCssLoader = false
-		} = options;
+/**
+ * @param {Object} options
+ * @param {String} options.themePath
+ * @param {Boolean} [options.minify]
+ * @param {Boolean} [options.sourceMap]
+ * @param {Boolean} [options.extractToSeparateFile]
+ * @param {Boolean} [options.skipPostCssLoader]
+ * @returns {Object}
+ */
+export function getStylesLoader( options ) {
+	const {
+		themePath,
+		minify = false,
+		sourceMap = false,
+		extractToSeparateFile = false,
+		skipPostCssLoader = false
+	} = options;
 
-		const getBundledLoader = () => ( {
-			loader: 'style-loader',
-			options: {
-				injectType: 'singletonStyleTag',
-				attributes: {
-					'data-cke': true
+	const getBundledLoader = () => ( {
+		loader: 'style-loader',
+		options: {
+			injectType: 'singletonStyleTag',
+			attributes: {
+				'data-cke': true
+			}
+		}
+	} );
+
+	const getExtractedLoader = () => {
+		return MiniCssExtractPlugin.loader;
+	};
+
+	return {
+		test: /\.css$/,
+		use: [
+			extractToSeparateFile ? getExtractedLoader() : getBundledLoader(),
+			'css-loader',
+			skipPostCssLoader ? null : {
+				loader: 'postcss-loader',
+				options: {
+					postcssOptions: getPostCssConfig( {
+						themeImporter: { themePath },
+						minify,
+						sourceMap
+					} )
 				}
 			}
-		} );
+		].filter( Boolean )
+	};
+}
 
-		const getExtractedLoader = () => {
-			return MiniCssExtractPlugin.loader;
-		};
+/**
+ * @param {Object} [options]
+ * @param {Boolean} [options.matchExtensionOnly]
+ * @returns {Object}
+ */
+export function getIconsLoader( { matchExtensionOnly = false } = {} ) {
+	return {
+		test: matchExtensionOnly ? /\.svg$/ : /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
+		use: [ 'raw-loader' ]
+	};
+}
 
-		return {
-			test: /\.css$/,
-			use: [
-				extractToSeparateFile ? getExtractedLoader() : getBundledLoader(),
-				'css-loader',
-				skipPostCssLoader ? null : {
-					loader: 'postcss-loader',
-					options: {
-						postcssOptions: getPostCssConfig( {
-							themeImporter: { themePath },
-							minify,
-							sourceMap
-						} )
-					}
+/**
+ * @returns {Object}
+ */
+export function getFormattedTextLoader() {
+	return {
+		test: /\.(txt|html|rtf)$/,
+		use: [ 'raw-loader' ]
+	};
+}
+
+/**
+ * @param {Object} options]
+ * @param {Array.<String>} options.files
+ * @returns {Object}
+ */
+export function getCoverageLoader( { files } ) {
+	return {
+		test: /\.[jt]s$/,
+		use: [
+			{
+				loader: 'babel-loader',
+				options: {
+					plugins: [
+						'babel-plugin-istanbul'
+					]
 				}
-			].filter( Boolean )
-		};
-	},
-
-	/**
-	 * @param {Object} [options]
-	 * @param {Boolean} [options.matchExtensionOnly]
-	 * @returns {Object}
-	 */
-	getIconsLoader( { matchExtensionOnly = false } = {} ) {
-		return {
-			test: matchExtensionOnly ? /\.svg$/ : /ckeditor5-[^/\\]+[/\\]theme[/\\]icons[/\\][^/\\]+\.svg$/,
-			use: [ 'raw-loader' ]
-		};
-	},
-
-	/**
-	 * @returns {Object}
-	 */
-	getFormattedTextLoader() {
-		return {
-			test: /\.(txt|html|rtf)$/,
-			use: [ 'raw-loader' ]
-		};
-	},
-
-	/**
-	 * @param {Object} options]
-	 * @param {Array.<String>} options.files
-	 * @returns {Object}
-	 */
-	getCoverageLoader( { files } ) {
-		return {
-			test: /\.[jt]s$/,
-			use: [
-				{
-					loader: 'babel-loader',
-					options: {
-						plugins: [
-							'babel-plugin-istanbul'
-						]
-					}
-				}
-			],
-			include: getPathsToIncludeForCoverage( files ),
-			exclude: [
-				new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
-			]
-		};
-	}
-};
-
+			}
+		],
+		include: getPathsToIncludeForCoverage( files ),
+		exclude: [
+			new RegExp( `${ escapedPathSep }(lib)${ escapedPathSep }` )
+		]
+	};
+}
 /**
  * @param {Array.<String>} debugFlags
  * @returns {Object}

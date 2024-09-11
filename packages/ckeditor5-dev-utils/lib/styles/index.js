@@ -3,10 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-module.exports = {
-	getPostCssConfig: require( './getpostcssconfig' ),
-	themeImporter: require( './themeimporter' ),
-	themeLogger: require( './themelogger' )
-};
+export { default as getPostCssConfig } from './getpostcssconfig.js';
+export { default as themeImporter } from './themeimporter.js';
+export { default as themeLogger } from './themelogger.js';

@@ -3,9 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const path = require( 'path' );
+import path from 'path';
 
 /**
  * Transforms specified an array of plugin paths to an object contains plugin names
@@ -20,7 +18,7 @@ const path = require( 'path' );
  * @param {Array.<String>} pluginPaths
  * @returns {Object}
  */
-module.exports = function getPlugins( pluginPaths ) {
+export default function getPlugins( pluginPaths ) {
 	const plugins = {};
 
 	pluginPaths.forEach( pathToFile => {
@@ -36,7 +34,7 @@ module.exports = function getPlugins( pluginPaths ) {
 	} );
 
 	return plugins;
-};
+}
 
 function capitalize( string ) {
 	return string.charAt( 0 ).toUpperCase() + string.slice( 1 );

@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs' );
-const getPlugins = require( './getplugins' );
-const getEditorConfig = require( './geteditorconfig' );
+import fs from 'fs';
+import getPlugins from './getplugins.js';
+import getEditorConfig from './geteditorconfig.js';
 
 /**
  * Generates an entry file which can be compiled by bundler, e.g. Webpack or Rollup.
@@ -19,11 +17,11 @@ const getEditorConfig = require( './geteditorconfig' );
  * @param {String} options.editor A path to class which defined the editor.
  * @param {Object} options.config Additional editor's configuration which will be built-in.
  */
-module.exports = function createEntryFile( destinationPath, options ) {
+export default function createEntryFile( destinationPath, options ) {
 	const entryFileContent = renderEntryFile( options );
 
 	fs.writeFileSync( destinationPath, entryFileContent );
-};
+}
 
 function renderEntryFile( options ) {
 	const plugins = getPlugins( options.plugins );
@@ -49,7 +47,7 @@ ${ options.moduleName }.build = {
 		${ Object.keys( plugins ).join( ',\n\t\t' ) }
 	],
 	config: ${ getEditorConfig( options.config ) }
-};
+}
 `;
 
 	return content;

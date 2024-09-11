@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const path = require( 'path' );
-const PassThrough = require( 'stream' ).PassThrough;
-const through = require( 'through2' );
+import path from 'path';
+import { PassThrough } from 'stream';
+import through from 'through2';
 
 const stream = {
 	/**
@@ -79,4 +77,4 @@ const stream = {
 	}
 };
 
-module.exports = stream;
+export default stream;

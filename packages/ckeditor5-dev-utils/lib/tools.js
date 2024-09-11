@@ -3,12 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import chalk from 'chalk';
+import createSpinner from './tools/createspinner.js';
+import logger from './logger.js';
+import sh from 'shelljs';
+import fs from 'fs';
+import pth from 'path';
 
-const chalk = require( 'chalk' );
-const createSpinner = require( './tools/createspinner' );
-
-module.exports = {
+export default {
 	createSpinner,
 
 	/**
@@ -29,9 +31,7 @@ module.exports = {
 			async = false
 		} = options;
 
-		const logger = require( './logger' );
 		const log = logger( verbosity );
-		const sh = require( 'shelljs' );
 
 		sh.config.silent = true;
 
@@ -89,9 +89,6 @@ module.exports = {
 	 * @returns {Array}
 	 */
 	getDirectories( path ) {
-		const fs = require( 'fs' );
-		const pth = require( 'path' );
-
 		const isDirectory = path => {
 			try {
 				return fs.statSync( path ).isDirectory();
@@ -112,8 +109,6 @@ module.exports = {
 	 * modified JSON object to save.
 	 */
 	updateJSONFile( path, updateFunction ) {
-		const fs = require( 'fs' );
-
 		const contents = fs.readFileSync( path, 'utf-8' );
 		let json = JSON.parse( contents );
 		json = updateFunction( json );

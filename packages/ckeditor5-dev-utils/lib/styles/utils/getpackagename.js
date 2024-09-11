@@ -3,8 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 /* eslint-env node */
 
 /**
@@ -33,7 +31,7 @@
  * @param {String} inputFilePath A path to the file.
  * @returns {String} The name of the package.
  */
-module.exports = function getPackageName( inputFilePath ) {
+export default function getPackageName( inputFilePath ) {
 	const match = inputFilePath.match( /^.+[/\\](ckeditor5-[^/\\]+)/ );
 
 	if ( match ) {
@@ -41,4 +39,4 @@ module.exports = function getPackageName( inputFilePath ) {
 	} else {
 		return null;
 	}
-};
+}

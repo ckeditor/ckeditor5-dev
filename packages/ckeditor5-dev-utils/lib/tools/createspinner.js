@@ -3,12 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const readline = require( 'readline' );
-const isInteractive = require( 'is-interactive' );
-const cliSpinners = require( 'cli-spinners' );
-const cliCursor = require( 'cli-cursor' );
+import readline from 'readline';
+import isInteractive from 'is-interactive';
+import cliSpinners from 'cli-spinners';
+import cliCursor from 'cli-cursor';
 
 // A size of default indent for a log.
 const INDENT_SIZE = 3;
@@ -29,7 +27,7 @@ const INDENT_SIZE = 3;
  * this option allows customizing the displayed line.
  * @returns {CKEditor5Spinner}
  */
-module.exports = function createSpinner( title, options = {} ) {
+export default function createSpinner( title, options = {} ) {
 	const isEnabled = !options.isDisabled && isInteractive();
 	const indentLevel = options.indentLevel || 0;
 	const indent = ' '.repeat( indentLevel * INDENT_SIZE );
@@ -113,7 +111,7 @@ module.exports = function createSpinner( title, options = {} ) {
 		readline.clearLine( process.stdout, 1 );
 		readline.cursorTo( process.stdout, 0 );
 	}
-};
+}
 
 /**
  * @typedef {Object} CKEditor5Spinner

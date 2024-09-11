@@ -3,9 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const javascriptStringify = require( 'javascript-stringify' );
+import javascriptStringify from 'javascript-stringify';
 
 /**
  * Transforms specified configuration to a string that match to our code style.
@@ -13,7 +11,7 @@ const javascriptStringify = require( 'javascript-stringify' );
  * @param {Object} config
  * @returns {String}
  */
-module.exports = function getEditorConfig( config ) {
+export default function getEditorConfig( config ) {
 	if ( !config ) {
 		return '{}';
 	}
@@ -21,4 +19,4 @@ module.exports = function getEditorConfig( config ) {
 	return javascriptStringify( config, null, '\t' )
 		// Indent all but the first line (so it can be easily concatenated with `config = ${ editorConfig }`).
 		.replace( /\n/g, '\n\t' );
-};
+}

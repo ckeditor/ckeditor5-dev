@@ -3,21 +3,17 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, expect, it, vi } from 'vitest';
+import * as tasks from '../../lib/builds/index.js';
+import getDllPluginWebpackConfig from '../../lib/builds/getdllpluginwebpackconfig.js';
 
-const chai = require( 'chai' );
-const expect = chai.expect;
+vi.mock( '../../lib/builds/getdllpluginwebpackconfig.js' );
 
 describe( 'builds', () => {
-	let tasks;
-
-	beforeEach( () => {
-		tasks = require( '../../lib/builds/index' );
-	} );
-
 	describe( 'getDllPluginWebpackConfig()', () => {
 		it( 'should be a function', () => {
 			expect( tasks.getDllPluginWebpackConfig ).to.be.a( 'function' );
+			expect( tasks.getDllPluginWebpackConfig ).toEqual( getDllPluginWebpackConfig );
 		} );
 	} );
 } );

@@ -3,4 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-export { default as getDllPluginWebpackConfig } from './getdllpluginwebpackconfig.js';
+import { expect } from 'vitest';
+import * as matchers from 'jest-extended';
+
+expect.extend( matchers );

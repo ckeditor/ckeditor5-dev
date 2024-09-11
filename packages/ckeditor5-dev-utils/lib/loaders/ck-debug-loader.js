@@ -12,7 +12,7 @@
  * @param {String} source
  * @param {any} map
  */
-module.exports = function ckDebugLoader( source, map ) {
+export default function ckDebugLoader( source, map ) {
 	source = source.replace( /\/\/ @if (!?[\w]+) \/\/(.+)/g, ( match, flagName, body ) => {
 		// `this.query` comes from the webpack loader configuration specified as the loader options.
 		// {
@@ -32,4 +32,4 @@ module.exports = function ckDebugLoader( source, map ) {
 	} );
 
 	this.callback( null, source, map );
-};
+}
