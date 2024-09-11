@@ -15,7 +15,7 @@ describe( 'dev-release-tools/utils', () => {
 	describe( 'getCommits()', () => {
 		beforeAll( () => {
 			cwd = process.cwd();
-			tmpCwd = fs.mkdtempSync( __dirname + path.sep );
+			tmpCwd = fs.mkdtempSync( path.join( __dirname, '..', 'test-fixtures' ) + path.sep );
 		} );
 
 		afterAll( () => {
