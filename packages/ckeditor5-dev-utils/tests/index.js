@@ -4,10 +4,10 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
+import logger from '../lib/logger/index.js';
 import * as packageUtils from '../lib/index.js';
 import * as bundler from '../lib/bundler/index.js';
 import * as loaders from '../lib/loaders/index.js';
-import * as logger from '../lib/logger/index.js';
 import * as builds from '../lib/builds/index.js';
 import * as stream from '../lib/stream/index.js';
 import * as styles from '../lib/styles/index.js';
