@@ -4,28 +4,38 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
+import getStylesLoader from '../../lib/loaders/getstylesloader.js';
+import { getPostCssConfig } from '../../lib/styles/index.js';
 
+vi.mock( 'mini-css-extract-plugin', () => ( {
+	default: class {
+		static get loader() {
+			return '/path/to/mini-css-extract-plugin/loader';
+		}
+	}
+} ) );
+vi.mock( '../../lib/styles/index.js' );
 
 describe( 'getStylesLoader()', () => {
 	it( 'should be a function', () => {
-		expect( loaders.getStylesLoader ).to.be.a( 'function' );
+		expect( getStylesLoader ).to.be.a( 'function' );
 	} );
 
 	it( 'should return a definition that allow saving the produced CSS into a file using `mini-css-extract-plugin#loader`', () => {
-		const loader = loaders.getStylesLoader( {
+		const loader = getStylesLoader( {
 			extractToSeparateFile: true,
 			themePath: 'path/to/theme'
 		} );
 
 		expect( loader ).to.be.an( 'object' );
 
-		const cssLoader = loader.use[ 0 ];
+		const cssLoader = loader.use.at( 0 );
 
 		expect( cssLoader ).to.be.equal( '/path/to/mini-css-extract-plugin/loader' );
 	} );
 
 	it( 'should return a definition that allow attaching the produced CSS on a site using `style-loader`', () => {
-		const loader = loaders.getStylesLoader( {
+		const loader = getStylesLoader( {
 			themePath: 'path/to/theme'
 		} );
 
@@ -42,14 +52,15 @@ describe( 'getStylesLoader()', () => {
 	} );
 
 	it( 'should return a definition containing the correct setup of the `postcss-loader`', () => {
-		const loader = loaders.getStylesLoader( {
+		vi.mocked( getPostCssConfig ).mockReturnValue( 'styles.getPostCssConfig()' );
+
+		const loader = getStylesLoader( {
 			themePath: 'path/to/theme'
 		} );
 
 		expect( loader ).to.be.an( 'object' );
 
-		// Array.at() is available since Node 16.6.
-		const postCssLoader = loader.use.pop();
+		const postCssLoader = loader.use.at( -1 );
 
 		expect( postCssLoader ).to.be.an( 'object' );
 		expect( postCssLoader ).to.have.property( 'loader', 'postcss-loader' );
@@ -57,16 +68,17 @@ describe( 'getStylesLoader()', () => {
 		expect( postCssLoader.options ).to.be.an( 'object' );
 		expect( postCssLoader.options ).to.have.property( 'postcssOptions', 'styles.getPostCssConfig()' );
 
-		expect( postCssOptions ).to.be.an( 'object' );
-		expect( postCssOptions ).to.have.property( 'themeImporter' );
-		expect( postCssOptions ).to.have.property( 'minify', false );
-		expect( postCssOptions ).to.have.property( 'sourceMap', false );
-		expect( postCssOptions.themeImporter ).to.be.an( 'object' );
-		expect( postCssOptions.themeImporter ).to.have.property( 'themePath', 'path/to/theme' );
+		expect( vi.mocked( getPostCssConfig ) ).toHaveBeenCalledExactlyOnceWith( {
+			minify: false,
+			sourceMap: false,
+			themeImporter: {
+				themePath: 'path/to/theme'
+			}
+		} );
 	} );
 
 	it( 'should return a definition containing the correct setup of the `css-loader`', () => {
-		const loader = loaders.getStylesLoader( {
+		const loader = getStylesLoader( {
 			skipPostCssLoader: true
 		} );
 
@@ -76,12 +88,11 @@ describe( 'getStylesLoader()', () => {
 	} );
 
 	it( 'should allow skipping adding the postcss-loader', () => {
-		const loader = loaders.getStylesLoader( {
+		const loader = getStylesLoader( {
 			skipPostCssLoader: true
 		} );
 
-		// Array.at() is available since Node 16.6.
-		const cssLoader = loader.use.pop();
+		const cssLoader = loader.use.at( -1 );
 
 		expect( cssLoader ).to.be.equal( 'css-loader' );
 	} );

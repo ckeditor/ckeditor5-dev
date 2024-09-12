@@ -3,16 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, it, vi } from 'vitest';
-
+import { describe, expect, it } from 'vitest';
+import getFormattedTextLoader from '../../lib/loaders/getformattedtextloader.js';
 
 describe( 'getFormattedTextLoader()', () => {
 	it( 'should be a function', () => {
-		expect( loaders.getFormattedTextLoader ).to.be.a( 'function' );
+		expect( getFormattedTextLoader ).to.be.a( 'function' );
 	} );
 
 	it( 'should return a definition accepting files that store readable content', () => {
-		const textLoader = loaders.getFormattedTextLoader();
+		const textLoader = getFormattedTextLoader();
 
 		expect( textLoader ).to.be.an( 'object' );
 		expect( textLoader ).to.have.property( 'use' );

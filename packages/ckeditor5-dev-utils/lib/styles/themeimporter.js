@@ -10,7 +10,7 @@ import path from 'path';
 import postcss from 'postcss';
 import postCssImport from 'postcss-import';
 import chalk from 'chalk';
-import logger from '../logger.js';
+import logger from '../logger/index.js';
 import themeLogger from './themelogger.js';
 import getPackageName from './utils/getpackagename.js';
 

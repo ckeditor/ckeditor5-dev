@@ -3,14 +3,22 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import getDebugLoader from '../../lib/loaders/getdebugloader.js';
 
-describe( 'getCoverageLoader()', () => {
+describe( 'getDebugLoader()', () => {
 	it( 'should be a function', () => {
-		expect( loaders.getCoverageLoader ).to.be.a( 'function' );
+		expect( getDebugLoader ).to.be.a( 'function' );
 	} );
 
 	it( 'should return a definition containing a loader for measuring the coverage', () => {
+		const loader = getDebugLoader( [ 'CK_DEBUG_ENGINE' ] );
 
+		expect( loader ).toEqual( {
+			loader: expect.stringMatching( /ck-debug-loader\.js$/ ),
+			options: {
+				debugFlags: [ 'CK_DEBUG_ENGINE' ]
+			}
+		} );
 	} );
 } );

@@ -3,16 +3,19 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import path from 'path';
+import { describe, expect, it } from 'vitest';
+import getCoverageLoader from '../../lib/loaders/getcoverageloader.js';
 
+const escapedPathSep = path.sep == '/' ? '/' : '\\\\';
 
 describe( 'getCoverageLoader()', () => {
 	it( 'should be a function', () => {
-		expect( loaders.getCoverageLoader ).to.be.a( 'function' );
+		expect( getCoverageLoader ).to.be.a( 'function' );
 	} );
 
 	it( 'should return a definition containing a loader for measuring the coverage', () => {
-		const coverageLoader = loaders.getCoverageLoader( {
+		const coverageLoader = getCoverageLoader( {
 			files: []
 		} );
 
@@ -34,7 +37,7 @@ describe( 'getCoverageLoader()', () => {
 	} );
 
 	it( 'should return a definition containing a loader for measuring the coverage (include glob check)', () => {
-		const coverageLoader = loaders.getCoverageLoader( {
+		const coverageLoader = getCoverageLoader( {
 			files: [
 				// -f utils
 				[ 'node_modules/ckeditor5-utils/tests/**/*.js' ]
@@ -50,7 +53,7 @@ describe( 'getCoverageLoader()', () => {
 	} );
 
 	it( 'should return a definition containing a loader for measuring the coverage (exclude glob check)', () => {
-		const coverageLoader = loaders.getCoverageLoader( {
+		const coverageLoader = getCoverageLoader( {
 			files: [
 				// -f !utils
 				[ 'node_modules/ckeditor5-!(utils)/tests/**/*.js' ]
@@ -66,7 +69,7 @@ describe( 'getCoverageLoader()', () => {
 	} );
 
 	it( 'should return a definition containing a loader for measuring the coverage (for root named ckeditor5-*)', () => {
-		const coverageLoader = loaders.getCoverageLoader( {
+		const coverageLoader = getCoverageLoader( {
 			files: [
 				[ '/ckeditor5-collab/packages/ckeditor5-alignment/tests/**/*.{js,ts}' ]
 			]

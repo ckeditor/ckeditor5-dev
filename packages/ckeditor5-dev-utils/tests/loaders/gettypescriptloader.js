@@ -4,15 +4,18 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
+import getTypeScriptLoader from '../../lib/loaders/gettypescriptloader.js';
+import getDebugLoader from '../../lib/loaders/getdebugloader.js';
 
+vi.mock( '../../lib/loaders/getdebugloader.js' );
 
 describe( 'getTypeScriptLoader()', () => {
 	it( 'should be a function', () => {
-		expect( loaders.getTypeScriptLoader ).to.be.a( 'function' );
+		expect( getTypeScriptLoader ).to.be.a( 'function' );
 	} );
 
 	it( 'should return a definition that allows processing `*.ts` files using esbuild-loader', () => {
-		const tsLoader = loaders.getTypeScriptLoader( {
+		const tsLoader = getTypeScriptLoader( {
 			configFile: '/home/project/configs/tsconfig.json'
 		} );
 
@@ -30,7 +33,7 @@ describe( 'getTypeScriptLoader()', () => {
 	} );
 
 	it( 'should return a definition that allows processing `*.ts` files using esbuild-loader (skipping `options.configFile`)', () => {
-		const tsLoader = loaders.getTypeScriptLoader();
+		const tsLoader = getTypeScriptLoader();
 
 		expect( tsLoader ).to.be.an( 'object' );
 		expect( tsLoader ).to.have.property( 'test' );
@@ -46,7 +49,11 @@ describe( 'getTypeScriptLoader()', () => {
 	} );
 
 	it( 'should return a definition that enables the debug loader before the typescript files', () => {
-		const tsLoader = loaders.getTypeScriptLoader( {
+		vi.mocked( getDebugLoader ).mockReturnValue( {
+			loader: 'ck-debug-loader'
+		} );
+
+		const tsLoader = getTypeScriptLoader( {
 			configFile: '/home/project/configs/tsconfig.json',
 			includeDebugLoader: true,
 			debugFlags: [ 'ENGINE' ]
@@ -61,7 +68,14 @@ describe( 'getTypeScriptLoader()', () => {
 	} );
 
 	it( 'should pass the debug options into the debug loader', () => {
-		const tsLoader = loaders.getTypeScriptLoader( {
+		vi.mocked( getDebugLoader ).mockReturnValue( {
+			loader: 'ck-debug-loader',
+			options: {
+				debug: true
+			}
+		} );
+
+		const tsLoader = getTypeScriptLoader( {
 			configFile: '/home/project/configs/tsconfig.json',
 			includeDebugLoader: true,
 			debugFlags: [ 'ENGINE' ]
@@ -69,12 +83,14 @@ describe( 'getTypeScriptLoader()', () => {
 
 		const debugLoader = tsLoader.use.find( item => item.loader.endsWith( 'ck-debug-loader' ) );
 
+		expect( vi.mocked( getDebugLoader ) ).toHaveBeenCalledExactlyOnceWith( [ 'ENGINE' ] );
+
 		expect( debugLoader ).to.be.an( 'object' );
+
 		expect( debugLoader ).to.have.property( 'loader' );
+		expect( debugLoader.loader ).to.equal( 'ck-debug-loader' );
 		expect( debugLoader ).to.have.property( 'options' );
 		expect( debugLoader.options ).to.be.an( 'object' );
-		expect( debugLoader.options ).to.have.property( 'debugFlags' );
-		expect( debugLoader.options.debugFlags ).to.be.an( 'array' );
-		expect( debugLoader.options.debugFlags ).to.include( 'ENGINE' );
+		expect( debugLoader.options ).to.have.property( 'debug', true );
 	} );
 } );
