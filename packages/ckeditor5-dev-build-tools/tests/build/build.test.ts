@@ -64,7 +64,8 @@ async function mockCommercialDependencies() {
 		() => ( {
 			name: 'ckeditor5-premium-features',
 			dependencies: {
-				'@ckeditor/ckeditor5-ai': '*'
+				'@ckeditor/ckeditor5-ai': '*',
+				'ckeditor5-collaboration': '*'
 			}
 		} )
 	);
