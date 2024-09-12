@@ -39,7 +39,8 @@ vi.mock( '../../lib/bundler/index.js' );
 vi.mock( 'fs-extra' );
 vi.mock( 'path', () => ( {
 	default: {
-		join: vi.fn( ( ...chunks ) => chunks.join( '/' ) )
+		join: vi.fn( ( ...chunks ) => chunks.join( '/' ) ),
+		dirname: vi.fn()
 	}
 } ) );
 vi.mock( '@ckeditor/ckeditor5-dev-translations', () => ( {
