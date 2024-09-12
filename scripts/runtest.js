@@ -7,14 +7,12 @@
 
 /* eslint-env node */
 
-'use strict';
-
-const path = require( 'path' );
-const { execSync } = require( 'child_process' );
-const fs = require( 'fs-extra' );
-const { globSync } = require( 'glob' );
-const minimist = require( 'minimist' );
-const chalk = require( 'chalk' );
+import path from 'path';
+import { execSync } from 'child_process';
+import fs from 'fs-extra';
+import { globSync } from 'glob';
+import minimist from 'minimist';
+import chalk from 'chalk';
 
 main();
 
