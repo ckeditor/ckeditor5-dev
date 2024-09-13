@@ -12,7 +12,7 @@ import transifexService from './transifexservice.js';
 import { verifyProperties, createLogger } from './utils.js';
 import languageCodeMap from './languagecodemap.json';
 
-const logger = createLogger();
+let logger;
 
 /**
  * Downloads translations from the Transifex for each localizable package. It creates `*.po` files out of the translations and replaces old
@@ -32,6 +32,8 @@ const logger = createLogger();
  * @param {Boolean} [config.simplifyLicenseHeader=false] Whether to skip adding the contribute guide URL in the output `*.po` files.
  */
 export default async function downloadTranslations( config ) {
+	logger = createLogger();
+
 	verifyProperties( config, [ 'organizationName', 'projectName', 'token', 'packages', 'cwd' ] );
 
 	transifexService.init( config.token );

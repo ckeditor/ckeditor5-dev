@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import upload from '../lib/upload.js';
 
 const {
@@ -150,9 +150,7 @@ describe( 'dev-transifex/upload()', () => {
 		loggerErrorMock = vi.fn();
 		loggerErrorMock = vi.fn();
 
-		vi.mocked( fsLstatMock ).mockImplementation( async () => {
-			return Promise.reject();
-		} );
+		vi.mocked( fsLstatMock ).mockRejectedValue();
 
 		vi.mocked( utilsCreateLoggerMock ).mockImplementation( () => {
 			return {
@@ -163,6 +161,10 @@ describe( 'dev-transifex/upload()', () => {
 				_log: loggerLogMock
 			};
 		} );
+	} );
+
+	afterEach( () => {
+		vi.resetAllMocks();
 	} );
 
 	it( 'should reject a promise if required properties are not specified', () => {
@@ -431,13 +433,7 @@ describe( 'dev-transifex/upload()', () => {
 				projectName: 'ckeditor5'
 			};
 
-			vi.mocked( fsLstatMock ).mockImplementation( async path => {
-				if ( path === '/home/ckeditor5-with-errors/.transifex-failed-uploads.json' ) {
-					return Promise.resolves();
-				}
-
-				return Promise.reject();
-			} );
+			vi.mocked( fsLstatMock ).mockResolvedValueOnce();
 
 			vi.mocked( transifexServiceGetProjectDataMock ).mockResolvedValue( {
 				resources: []
@@ -491,7 +487,7 @@ describe( 'dev-transifex/upload()', () => {
 			} );
 		} );
 
-		it.skip( 'should process packages specified in the ".transifex-failed-uploads.json" file', async () => {
+		it( 'should process packages specified in the ".transifex-failed-uploads.json" file', async () => {
 			await upload( config );
 
 			expect( vi.mocked( loggerWarningMock ) ).toHaveBeenCalledTimes( 2 );
@@ -508,14 +504,14 @@ describe( 'dev-transifex/upload()', () => {
 			expect( vi.mocked( transifexServiceGetResourceUploadDetailsMock ) ).toHaveBeenCalledTimes( 2 );
 		} );
 
-		it.skip( 'should remove the ".transifex-failed-uploads.json" file if finished with no errors', async () => {
+		it( 'should remove the ".transifex-failed-uploads.json" file if finished with no errors', async () => {
 			await upload( config );
 
 			expect( vi.mocked( fsUnlinkMock ) ).toHaveBeenCalledTimes( 1 );
 			expect( vi.mocked( fsUnlinkMock ) ).toHaveBeenCalledWith( '/home/ckeditor5-with-errors/.transifex-failed-uploads.json' );
 		} );
 
-		it.skip( 'should store an error in the ".transifex-failed-uploads.json" file (cannot create a resource)', async () => {
+		it( 'should store an error in the ".transifex-failed-uploads.json" file (cannot create a resource)', async () => {
 			const firstSpinner = {
 				start: vi.fn(),
 				finish: vi.fn()
@@ -556,11 +552,12 @@ describe( 'dev-transifex/upload()', () => {
 				'/home/ckeditor5-with-errors/.transifex-failed-uploads.json',
 				JSON.stringify( {
 					'ckeditor5-non-existing-01': [ 'Resource with this Slug and Project already exists.' ]
-				} )
+				}, null, 2 ) + '\n',
+				'utf-8'
 			);
 		} );
 
-		it.skip( 'should store an error in the ".transifex-failed-uploads.json" file (cannot upload a translation)', async () => {
+		it( 'should store an error in the ".transifex-failed-uploads.json" file (cannot upload a translation)', async () => {
 			const firstSpinner = {
 				start: vi.fn(),
 				finish: vi.fn()
@@ -577,13 +574,7 @@ describe( 'dev-transifex/upload()', () => {
 				]
 			};
 
-			vi.mocked( transifexServiceCreateSourceFileMock ).mockImplementation( options => {
-				if ( options.resourceName === 'ckeditor5-non-existing-01' ) {
-					return Promise.reject( error );
-				}
-
-				return Promise.resolve( 'uuid-11' );
-			} );
+			vi.mocked( transifexServiceCreateSourceFileMock ).mockRejectedValueOnce( error );
 
 			await upload( config );
 
@@ -598,53 +589,52 @@ describe( 'dev-transifex/upload()', () => {
 				5, 'Re-running the script will process only packages specified in the file.'
 			);
 
+			expect( vi.mocked( fsWriteFileMock ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fsWriteFileMock ) ).toHaveBeenCalledWith(
+				'/home/ckeditor5-with-errors/.transifex-failed-uploads.json',
+				JSON.stringify( {
+					'ckeditor5-non-existing-01': [ 'Object not found. It may have been deleted or not been created yet.' ]
+				}, null, 2 ) + '\n',
+				'utf-8'
+			);
+
 			expect( firstSpinner.finish ).toHaveBeenCalledTimes( 1 );
 			expect( firstSpinner.finish ).toHaveBeenCalledWith( { emoji: '❌' } );
+		} );
+
+		it( 'should store an error in the ".transifex-failed-uploads.json" file (cannot get a status of upload)', async () => {
+			const error = {
+				message: 'JsonApiError: 409',
+				errors: [
+					{
+						detail: 'Object not found. It may have been deleted or not been created yet.'
+					}
+				]
+			};
+
+			vi.mocked( transifexServiceGetResourceUploadDetailsMock ).mockRejectedValueOnce( error );
+
+			await upload( config );
+
+			expect( loggerWarningMock ).toHaveBeenCalledTimes( 5 );
+			expect( loggerWarningMock ).toHaveBeenNthCalledWith(
+				3, 'Not all translations were uploaded due to errors in Transifex API.'
+			);
+			expect( loggerWarningMock ).toHaveBeenNthCalledWith(
+				4, 'Review the "/home/ckeditor5-with-errors/.transifex-failed-uploads.json" file for more details.'
+			);
+			expect( loggerWarningMock ).toHaveBeenNthCalledWith(
+				5, 'Re-running the script will process only packages specified in the file.'
+			);
 
 			expect( vi.mocked( fsWriteFileMock ) ).toHaveBeenCalledTimes( 1 );
 			expect( vi.mocked( fsWriteFileMock ) ).toHaveBeenCalledWith(
 				'/home/ckeditor5-with-errors/.transifex-failed-uploads.json',
 				JSON.stringify( {
 					'ckeditor5-non-existing-01': [ 'Object not found. It may have been deleted or not been created yet.' ]
-				} )
+				}, null, 2 ) + '\n',
+				'utf-8'
 			);
-		} );
-
-		it.skip( 'should store an error in the ".transifex-failed-uploads.json" file (cannot get a status of upload)', async () => {
-			// const error = {
-			// 	message: 'JsonApiError: 409',
-			// 	errors: [
-			// 		{
-			// 			detail: 'Object not found. It may have been deleted or not been created yet.'
-			// 		}
-			// 	]
-			// };
-
-			// TODO
-			// stubs.transifexService.getResourceUploadDetails.withArgs( 'uuid-01' ).rejects( error );
-
-			await upload( config );
-
-			// expect( stubs.logger.warning.callCount ).to.equal( 5 );
-			// expect( stubs.logger.warning.getCall( 2 ).args[ 0 ] ).to.equal(
-			// 	'Not all translations were uploaded due to errors in Transifex API.'
-			// );
-			// expect( stubs.logger.warning.getCall( 3 ).args[ 0 ] ).to.equal(
-			// 	'Review the "/home/ckeditor5-with-errors/.transifex-failed-uploads.json" file for more details.'
-			// );
-			// expect( stubs.logger.warning.getCall( 4 ).args[ 0 ] ).to.equal(
-			// 	'Re-running the script will process only packages specified in the file.'
-			// );
-
-			// expect( stubs.fs.writeFile.callCount ).to.equal( 1 );
-			// expect( stubs.fs.writeFile.firstCall.args[ 0 ] ).to.equal(
-			// 	'/home/ckeditor5-with-errors/.transifex-failed-uploads.json'
-			// );
-
-			// const storedErrors = JSON.parse( stubs.fs.writeFile.firstCall.args[ 1 ] );
-			// expect( storedErrors ).to.deep.equal( {
-			// 	'ckeditor5-non-existing-01': [ 'Object not found. It may have been deleted or not been created yet.' ]
-			// } );
 		} );
 	} );
 
@@ -687,13 +677,13 @@ describe( 'dev-transifex/upload()', () => {
 			vi.mocked( transifexServiceCreateResourceMock ).mockResolvedValue();
 
 			vi.mocked( transifexServiceGetResourceUploadDetailsMock )
-				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-non-existing-01', 3, 0, 0 ) )
-				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-non-existing-02', 0, 0, 0 ) )
-				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-non-existing-03', 1, 0, 0 ) )
 				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-existing-11', 0, 0, 0 ) )
-				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-existing-12', 0, 1, 1 ) )
+				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-existing-14', 0, 0, 0 ) )
+				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-non-existing-03', 1, 0, 0 ) )
+				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-non-existing-01', 3, 0, 0 ) )
 				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-existing-13', 2, 0, 0 ) )
-				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-existing-14', 0, 0, 0 ) );
+				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-non-existing-02', 0, 0, 0 ) )
+				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-existing-12', 0, 1, 1 ) );
 
 			vi.mocked( toolsCreateSpinnerMock ).mockReturnValue( {
 				start: vi.fn(),

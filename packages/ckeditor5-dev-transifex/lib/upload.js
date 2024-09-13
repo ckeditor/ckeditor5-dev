@@ -13,7 +13,7 @@ import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 const RESOURCE_REGEXP = /r:(?<resourceName>[a-z0-9_-]+)$/i;
 
-const TRANSIFEX_RESOURCE_ERRORS = {};
+let TRANSIFEX_RESOURCE_ERRORS;
 
 /**
  * Uploads translations to the Transifex.
@@ -37,6 +37,8 @@ const TRANSIFEX_RESOURCE_ERRORS = {};
  * @returns {Promise}
  */
 export default async function upload( config ) {
+	TRANSIFEX_RESOURCE_ERRORS = {};
+
 	verifyProperties( config, [ 'token', 'organizationName', 'projectName', 'cwd', 'packages' ] );
 
 	const logger = createLogger();
@@ -51,7 +53,9 @@ export default async function upload( config ) {
 		logger.warning( 'Found the file containing a list of packages that failed during the last script execution.' );
 		logger.warning( 'The script will process only packages listed in the file instead of all passed as "config.packages".' );
 
-		failedPackages = Object.keys( await import( pathToFailedUploads ) );
+		failedPackages = Object.keys(
+			( await import( pathToFailedUploads ) ).default
+		);
 	}
 
 	logger.progress( 'Fetching project information...' );
