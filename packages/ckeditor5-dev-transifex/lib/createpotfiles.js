@@ -6,12 +6,12 @@
 import path from 'path';
 import fs from 'fs-extra';
 import del from 'del';
-import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import { logger as utilsLogger } from '@ckeditor/ckeditor5-dev-utils';
 import { findMessages } from '@ckeditor/ckeditor5-dev-translations';
 import { verifyProperties } from './utils.js';
 
-const defaultLogger = logger();
-const langContextSuffix = path.join( 'lang', 'contexts.json' );
+let defaultLogger;
+let langContextSuffix;
 const corePackageName = 'ckeditor5-core';
 
 /**
@@ -29,6 +29,9 @@ const corePackageName = 'ckeditor5-core';
  * @param {Logger} [options.logger] A logger.
  */
 export default function createPotFiles( options ) {
+	defaultLogger = utilsLogger();
+	langContextSuffix = path.join( 'lang', 'contexts.json' );
+
 	verifyProperties( options, [ 'sourceFiles', 'packagePaths', 'corePackagePath', 'translationsDirectory' ] );
 
 	const {
