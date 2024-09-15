@@ -257,10 +257,6 @@ describe( 'dev-transifex/download()', () => {
 			2,
 			path.normalize( '/workspace/.transifex-failed-downloads.json' )
 		);
-
-		// TODO: https://github.com/vitest-dev/vitest/issues/2287 - do we want to add jest-extended just to test mock execution order?
-		// expect( stubs.fs.removeSync.firstCall.calledBefore( stubs.fs.outputFileSync.firstCall ) ).to.be.true;
-		// expect( stubs.fs.removeSync.secondCall.calledAfter( stubs.fs.outputFileSync.firstCall ) ).to.be.true;
 	} );
 
 	it( 'should download translations for non-empty resources', async () => {
@@ -695,9 +691,6 @@ describe( 'dev-transifex/download()', () => {
 			expect( vi.mocked( fsRemoveSyncMock ) ).toHaveBeenCalledWith(
 				path.normalize( '/workspace/.transifex-failed-downloads.json' )
 			);
-
-			// TODO
-			// expect( stubs.fs.removeSync.calledAfter( stubs.fs.outputFileSync ) ).to.be.true;
 		} );
 
 		it( 'should download translations for existing resources but only for previously failed ones', async () => {

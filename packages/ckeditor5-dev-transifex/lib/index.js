@@ -3,18 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-import createPotFiles from './createpotfiles.js';
-import uploadPotFiles from './upload.js';
-import downloadTranslations from './download.js';
-import getToken from './gettoken.js';
-import transifexService from './transifexservice.js';
-import transifexUtils from './utils.js';
-
-export default {
-	createPotFiles,
-	uploadPotFiles,
-	downloadTranslations,
-	getToken,
-	transifexService,
-	transifexUtils
-};
+export { default as createPotFiles } from './createpotfiles.js';
+export { default as uploadPotFiles } from './upload.js';
+export { default as downloadTranslations } from './download.js';
+export { default as getToken } from './gettoken.js';
+export { default as transifexService } from './transifexservice.js';
+export { default as transifexUtils } from './utils.js';

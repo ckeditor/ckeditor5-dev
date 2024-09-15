@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import { transifexApi } from '@transifex/api';
 import fetch from 'node-fetch';
+import { transifexApi } from '@transifex/api';
 
 const MAX_REQUEST_ATTEMPTS = 10;
 const REQUEST_RETRY_TIMEOUT = 3000; // In milliseconds.
