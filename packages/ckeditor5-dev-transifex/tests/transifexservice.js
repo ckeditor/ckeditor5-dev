@@ -7,18 +7,10 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import transifexService from '../lib/transifexservice.js';
 
 const {
-	nodeFetchMock,
 	transifexApiMock
 } = vi.hoisted( () => {
 	return {
-		nodeFetchMock: vi.fn(),
 		transifexApiMock: {}
-	};
-} );
-
-vi.mock( 'node-fetch', () => {
-	return {
-		default: nodeFetchMock
 	};
 } );
 
@@ -30,6 +22,8 @@ vi.mock( '@transifex/api', () => {
 
 describe( 'dev-transifex/transifex-service', () => {
 	let testData;
+
+	let fetchMock;
 
 	let createResourceMock;
 	let createResourceStringsAsyncUploadMock;
@@ -45,6 +39,10 @@ describe( 'dev-transifex/transifex-service', () => {
 	let includeResourceTranslationsMock;
 
 	beforeEach( () => {
+		fetchMock = vi.fn();
+
+		vi.stubGlobal( 'fetch', fetchMock );
+
 		createResourceMock = vi.fn();
 		createResourceStringsAsyncUploadMock = vi.fn();
 		fetchResourceTranslationsMock = vi.fn();
@@ -240,7 +238,7 @@ describe( 'dev-transifex/transifex-service', () => {
 		} );
 
 		it( 'should return requested translations if no retries are needed', async () => {
-			vi.mocked( nodeFetchMock ).mockImplementation( url => Promise.resolve( {
+			vi.mocked( fetchMock ).mockImplementation( url => Promise.resolve( {
 				ok: true,
 				redirected: true,
 				text: () => Promise.resolve( testData.translations[ url ] )
@@ -287,21 +285,21 @@ describe( 'dev-transifex/transifex-service', () => {
 				type: 'resource_translations_async_downloads'
 			} );
 
-			expect( nodeFetchMock ).toHaveBeenCalledTimes( 3 );
+			expect( fetchMock ).toHaveBeenCalledTimes( 3 );
 
-			expect( nodeFetchMock ).toHaveBeenNthCalledWith( 1, 'https://example.com/ckeditor5-core/en', {
+			expect( fetchMock ).toHaveBeenNthCalledWith( 1, 'https://example.com/ckeditor5-core/en', {
 				headers: {
 					Authorization: 'Bearer secretToken'
 				}
 			} );
 
-			expect( nodeFetchMock ).toHaveBeenNthCalledWith( 2, 'https://example.com/ckeditor5-core/pl', {
+			expect( fetchMock ).toHaveBeenNthCalledWith( 2, 'https://example.com/ckeditor5-core/pl', {
 				headers: {
 					Authorization: 'Bearer secretToken'
 				}
 			} );
 
-			expect( nodeFetchMock ).toHaveBeenNthCalledWith( 3, 'https://example.com/ckeditor5-core/de', {
+			expect( fetchMock ).toHaveBeenNthCalledWith( 3, 'https://example.com/ckeditor5-core/de', {
 				headers: {
 					Authorization: 'Bearer secretToken'
 				}
@@ -325,7 +323,7 @@ describe( 'dev-transifex/transifex-service', () => {
 				de: 7
 			};
 
-			nodeFetchMock.mockImplementation( url => {
+			fetchMock.mockImplementation( url => {
 				const language = url.split( '/' ).pop();
 
 				if ( languageCallsBeforeResolving[ language ] > 0 ) {
@@ -352,7 +350,7 @@ describe( 'dev-transifex/transifex-service', () => {
 
 			const { translations, failedDownloads } = await translationsPromise;
 
-			expect( nodeFetchMock ).toHaveBeenCalledTimes( 23 );
+			expect( fetchMock ).toHaveBeenCalledTimes( 23 );
 
 			expect( [ ...translations.entries() ] ).toEqual( [
 				[ 'en', 'ckeditor5-core-en-content' ],
@@ -364,7 +362,7 @@ describe( 'dev-transifex/transifex-service', () => {
 		} );
 
 		it( 'should return failed requests if all file downloads failed', async () => {
-			vi.mocked( nodeFetchMock ).mockResolvedValue( {
+			vi.mocked( fetchMock ).mockResolvedValue( {
 				ok: false,
 				status: 500,
 				statusText: 'Internal Server Error'
@@ -387,7 +385,7 @@ describe( 'dev-transifex/transifex-service', () => {
 		it( 'should return failed requests if the retry limit has been reached for all requests', async () => {
 			vi.useFakeTimers();
 
-			vi.mocked( nodeFetchMock ).mockResolvedValue( {
+			vi.mocked( fetchMock ).mockResolvedValue( {
 				ok: true,
 				redirected: false
 			} );
@@ -450,7 +448,7 @@ describe( 'dev-transifex/transifex-service', () => {
 				de: 8
 			};
 
-			nodeFetchMock.mockImplementation( url => {
+			fetchMock.mockImplementation( url => {
 				const language = url.split( '/' ).pop();
 
 				if ( languageCallsBeforeResolving[ language ] > 0 ) {
@@ -487,7 +485,7 @@ describe( 'dev-transifex/transifex-service', () => {
 
 			const { translations, failedDownloads } = await translationsPromise;
 
-			expect( nodeFetchMock ).toHaveBeenCalledTimes( 14 );
+			expect( fetchMock ).toHaveBeenCalledTimes( 14 );
 
 			expect( [ ...translations.entries() ] ).toEqual( [
 				[ 'pl', 'ckeditor5-core-pl-content' ]

@@ -10,9 +10,7 @@ import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import { cleanPoFileContent, createDictionaryFromPoFileContent } from '@ckeditor/ckeditor5-dev-translations';
 import transifexService from './transifexservice.js';
 import { verifyProperties, createLogger } from './utils.js';
-import languageCodeMap from './languagecodemap.json';
-
-let logger;
+import { languageCodeMap } from './data/index.js';
 
 /**
  * Downloads translations from the Transifex for each localizable package. It creates `*.po` files out of the translations and replaces old
@@ -32,7 +30,7 @@ let logger;
  * @param {Boolean} [config.simplifyLicenseHeader=false] Whether to skip adding the contribute guide URL in the output `*.po` files.
  */
 export default async function downloadTranslations( config ) {
-	logger = createLogger();
+	const logger = createLogger();
 
 	verifyProperties( config, [ 'organizationName', 'projectName', 'token', 'packages', 'cwd' ] );
 

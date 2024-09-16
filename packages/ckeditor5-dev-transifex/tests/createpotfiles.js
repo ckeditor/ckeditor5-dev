@@ -6,63 +6,17 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import createPotFiles from '../lib/createpotfiles.js';
 
-const {
-	pathJoinMock,
-	fsExistsSyncMock,
-	fsOutputFileSyncMock,
-	fsReadFileSyncMock,
-	delSyncMock,
-	findMessagesMock,
-	utilsVerifyPropertiesMock
-} = vi.hoisted( () => {
-	return {
-		pathJoinMock: vi.fn(),
-		fsExistsSyncMock: vi.fn(),
-		fsOutputFileSyncMock: vi.fn(),
-		fsReadFileSyncMock: vi.fn(),
-		delSyncMock: vi.fn(),
-		findMessagesMock: vi.fn(),
-		utilsVerifyPropertiesMock: vi.fn()
-	};
-} );
+import { findMessages } from '@ckeditor/ckeditor5-dev-translations';
+import { verifyProperties } from '../lib/utils.js';
+import del from 'del';
+import fs from 'fs-extra';
+import path from 'path';
 
-vi.mock( 'path', () => {
-	return {
-		default: {
-			join: pathJoinMock
-		}
-	};
-} );
-
-vi.mock( 'fs-extra', () => {
-	return {
-		default: {
-			existsSync: fsExistsSyncMock,
-			outputFileSync: fsOutputFileSyncMock,
-			readFileSync: fsReadFileSyncMock
-		}
-	};
-} );
-
-vi.mock( 'del', () => {
-	return {
-		default: {
-			sync: delSyncMock
-		}
-	};
-} );
-
-vi.mock( '@ckeditor/ckeditor5-dev-translations', () => {
-	return {
-		findMessages: findMessagesMock
-	};
-} );
-
-vi.mock( '../lib/utils.js', () => {
-	return {
-		verifyProperties: utilsVerifyPropertiesMock
-	};
-} );
+vi.mock( '../lib/utils.js' );
+vi.mock( '@ckeditor/ckeditor5-dev-translations' );
+vi.mock( 'del' );
+vi.mock( 'fs-extra' );
+vi.mock( 'path' );
 
 describe( 'dev-transifex/createPotFiles()', () => {
 	let loggerMocks;
@@ -74,7 +28,8 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			error: vi.fn()
 		};
 
-		vi.mocked( pathJoinMock ).mockImplementation( ( ...args ) => args.join( '/' ) );
+		vi.mocked( verifyProperties ).mockImplementation( vi.fn() );
+		vi.mocked( path.join ).mockImplementation( ( ...args ) => args.join( '/' ) );
 	} );
 
 	it( 'should not create any POT file if no package is passed', () => {
@@ -86,7 +41,7 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			logger: loggerMocks
 		} );
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 0 );
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 0 );
 	} );
 
 	it( 'should delete the build directory before creating POT files', () => {
@@ -98,18 +53,18 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			logger: loggerMocks
 		} );
 
-		expect( vi.mocked( delSyncMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( delSyncMock ) ).toHaveBeenCalledWith( '/cwd/build/.transifex' );
+		expect( vi.mocked( del.sync ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( del.sync ) ).toHaveBeenCalledWith( '/cwd/build/.transifex' );
 	} );
 
 	it( 'should create a POT file entry for one message with a corresponding context', () => {
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( true );
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( false );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( true );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( false );
 
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context' } ) );
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context' } ) );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
 
-		vi.mocked( findMessagesMock ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
+		vi.mocked( findMessages ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
 			const messages = [
 				{ string: 'foo', id: 'foo_id' }
 			];
@@ -125,32 +80,32 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			logger: loggerMocks
 		} );
 
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json'
 		);
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-core/lang/contexts.json'
 		);
 
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json', 'utf-8'
 		);
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-foo/src/foo.js', 'utf-8'
 		);
 
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledWith(
 			'packages/ckeditor5-foo/src/foo.js_content',
 			'packages/ckeditor5-foo/src/foo.js',
 			expect.any( Function ),
 			expect.any( Function )
 		);
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledWith(
 			'/cwd/build/.transifex/ckeditor5-foo/en.pot',
 			[
 				`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.`,
@@ -164,12 +119,12 @@ describe( 'dev-transifex/createPotFiles()', () => {
 	} );
 
 	it( 'should warn if the message context is missing', () => {
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( false );
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( false );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( false );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( false );
 
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
 
-		vi.mocked( findMessagesMock ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
+		vi.mocked( findMessages ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
 			const messages = [
 				{ string: 'foo', id: 'foo_id' }
 			];
@@ -185,21 +140,21 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			logger: loggerMocks
 		} );
 
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json'
 		);
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-core/lang/contexts.json'
 		);
 
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/src/foo.js', 'utf-8'
 		);
 
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledWith(
 			'packages/ckeditor5-foo/src/foo.js_content',
 			'packages/ckeditor5-foo/src/foo.js',
 			expect.any( Function ),
@@ -211,23 +166,23 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			'Context for the message id is missing (\'foo_id\' from packages/ckeditor5-foo/src/foo.js).'
 		);
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 0 );
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 0 );
 
 		// Mark the process as failed in case of the error.
 		expect( process.exitCode ).toEqual( 1 );
 	} );
 
 	it( 'should create a POT file entry for every defined package', () => {
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( true );
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( true );
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( false );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( true );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( true );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( false );
 
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context' } ) );
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( JSON.stringify( { 'bar_id': 'bar_context' } ) );
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( 'packages/ckeditor5-bar/src/bar.js_content' );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context' } ) );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( JSON.stringify( { 'bar_id': 'bar_context' } ) );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( 'packages/ckeditor5-bar/src/bar.js_content' );
 
-		vi.mocked( findMessagesMock ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
+		vi.mocked( findMessages ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
 			const messages = [
 				{ string: 'foo', id: 'foo_id' }
 			];
@@ -235,7 +190,7 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			messages.forEach( message => onFoundMessage( message ) );
 		} );
 
-		vi.mocked( findMessagesMock ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
+		vi.mocked( findMessages ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
 			const messages = [
 				{ string: 'bar', id: 'bar_id' }
 			];
@@ -251,40 +206,40 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			logger: loggerMocks
 		} );
 
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenCalledTimes( 3 );
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenCalledTimes( 3 );
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json'
 		);
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-bar/lang/contexts.json'
 		);
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			3, 'packages/ckeditor5-core/lang/contexts.json'
 		);
 
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenCalledTimes( 4 );
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenCalledTimes( 4 );
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json', 'utf-8'
 		);
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-bar/lang/contexts.json', 'utf-8'
 		);
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			3, 'packages/ckeditor5-foo/src/foo.js', 'utf-8'
 		);
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			4, 'packages/ckeditor5-bar/src/bar.js', 'utf-8'
 		);
 
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( findMessages ) ).toHaveBeenNthCalledWith(
 			1,
 			'packages/ckeditor5-foo/src/foo.js_content',
 			'packages/ckeditor5-foo/src/foo.js',
 			expect.any( Function ),
 			expect.any( Function )
 		);
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( findMessages ) ).toHaveBeenNthCalledWith(
 			2,
 			'packages/ckeditor5-bar/src/bar.js_content',
 			'packages/ckeditor5-bar/src/bar.js',
@@ -292,8 +247,8 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			expect.any( Function )
 		);
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenNthCalledWith(
 			1,
 			'/cwd/build/.transifex/ckeditor5-foo/en.pot',
 			[
@@ -305,7 +260,7 @@ describe( 'dev-transifex/createPotFiles()', () => {
 				''
 			].join( '\n' )
 		);
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenNthCalledWith(
 			2,
 			'/cwd/build/.transifex/ckeditor5-bar/en.pot',
 			[
@@ -320,14 +275,14 @@ describe( 'dev-transifex/createPotFiles()', () => {
 	} );
 
 	it( 'should create one POT file entry from multiple files in the same package', () => {
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( true );
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( false );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( true );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( false );
 
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context', 'bar_id': 'bar_context' } ) );
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/bar.js_content' );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context', 'bar_id': 'bar_context' } ) );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/bar.js_content' );
 
-		vi.mocked( findMessagesMock ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
+		vi.mocked( findMessages ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
 			const messages = [
 				{ string: 'foo', id: 'foo_id' }
 			];
@@ -335,7 +290,7 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			messages.forEach( message => onFoundMessage( message ) );
 		} );
 
-		vi.mocked( findMessagesMock ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
+		vi.mocked( findMessages ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
 			const messages = [
 				{ string: 'bar', id: 'bar_id' }
 			];
@@ -351,34 +306,34 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			logger: loggerMocks
 		} );
 
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json'
 		);
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-core/lang/contexts.json'
 		);
 
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenCalledTimes( 3 );
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenCalledTimes( 3 );
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json', 'utf-8'
 		);
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-foo/src/foo.js', 'utf-8'
 		);
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			3, 'packages/ckeditor5-foo/src/bar.js', 'utf-8'
 		);
 
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( findMessages ) ).toHaveBeenNthCalledWith(
 			1,
 			'packages/ckeditor5-foo/src/foo.js_content',
 			'packages/ckeditor5-foo/src/foo.js',
 			expect.any( Function ),
 			expect.any( Function )
 		);
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( findMessages ) ).toHaveBeenNthCalledWith(
 			2,
 			'packages/ckeditor5-foo/src/bar.js_content',
 			'packages/ckeditor5-foo/src/bar.js',
@@ -386,8 +341,8 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			expect.any( Function )
 		);
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledWith(
 			'/cwd/build/.transifex/ckeditor5-foo/en.pot',
 			[
 				`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.`,
@@ -405,13 +360,13 @@ describe( 'dev-transifex/createPotFiles()', () => {
 	} );
 
 	it( 'should create a POT entry filled with plural forms for message that contains has defined plural forms', () => {
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( true );
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( false );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( true );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( false );
 
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context' } ) );
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context' } ) );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
 
-		vi.mocked( findMessagesMock ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
+		vi.mocked( findMessages ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
 			const messages = [
 				{ string: 'foo', id: 'foo_id', plural: 'foo_plural' }
 			];
@@ -427,32 +382,32 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			logger: loggerMocks
 		} );
 
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json'
 		);
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-core/lang/contexts.json'
 		);
 
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json', 'utf-8'
 		);
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-foo/src/foo.js', 'utf-8'
 		);
 
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledWith(
 			'packages/ckeditor5-foo/src/foo.js_content',
 			'packages/ckeditor5-foo/src/foo.js',
 			expect.any( Function ),
 			expect.any( Function )
 		);
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledWith(
 			'/cwd/build/.transifex/ckeditor5-foo/en.pot',
 			[
 				`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.`,
@@ -468,13 +423,13 @@ describe( 'dev-transifex/createPotFiles()', () => {
 	} );
 
 	it( 'should load the core context file once and use its contexts', () => {
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( false );
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( true );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( false );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( true );
 
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context' } ) );
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context' } ) );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
 
-		vi.mocked( findMessagesMock ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
+		vi.mocked( findMessages ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
 			const messages = [
 				{ string: 'foo', id: 'foo_id' }
 			];
@@ -490,24 +445,24 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			logger: loggerMocks
 		} );
 
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json'
 		);
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-core/lang/contexts.json'
 		);
 
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-core/lang/contexts.json', 'utf-8'
 		);
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-foo/src/foo.js', 'utf-8'
 		);
 
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledWith(
 			'packages/ckeditor5-foo/src/foo.js_content',
 			'packages/ckeditor5-foo/src/foo.js',
 			expect.any( Function ),
@@ -516,8 +471,8 @@ describe( 'dev-transifex/createPotFiles()', () => {
 
 		expect( loggerMocks.error ).toHaveBeenCalledTimes( 0 );
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledWith(
 			'/cwd/build/.transifex/ckeditor5-core/en.pot',
 			[
 				`# Copyright (c) 2003-${ new Date().getFullYear() }, CKSource Holding sp. z o.o. All rights reserved.`,
@@ -531,13 +486,13 @@ describe( 'dev-transifex/createPotFiles()', () => {
 	} );
 
 	it( 'should not create a POT file for the context file if that was not added to the list of packages', () => {
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( false );
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( true );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( false );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( true );
 
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context' } ) );
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context' } ) );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
 
-		vi.mocked( findMessagesMock ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
+		vi.mocked( findMessages ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
 			const messages = [
 				{ string: 'foo', id: 'foo_id' }
 			];
@@ -553,24 +508,24 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			logger: loggerMocks
 		} );
 
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json'
 		);
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-core/lang/contexts.json'
 		);
 
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-core/lang/contexts.json', 'utf-8'
 		);
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-foo/src/foo.js', 'utf-8'
 		);
 
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledWith(
 			'packages/ckeditor5-foo/src/foo.js_content',
 			'packages/ckeditor5-foo/src/foo.js',
 			expect.any( Function ),
@@ -578,16 +533,16 @@ describe( 'dev-transifex/createPotFiles()', () => {
 		);
 
 		expect( loggerMocks.error ).toHaveBeenCalledTimes( 0 );
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 0 );
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 0 );
 	} );
 
 	it( 'should log an error if the file contains a message that cannot be parsed', () => {
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( false );
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( false );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( false );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( false );
 
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
 
-		vi.mocked( findMessagesMock ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage, onErrorFound ) => {
+		vi.mocked( findMessages ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage, onErrorFound ) => {
 			const errors = [
 				'parse_error'
 			];
@@ -603,21 +558,21 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			logger: loggerMocks
 		} );
 
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json'
 		);
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-core/lang/contexts.json'
 		);
 
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenCalledWith(
 			'packages/ckeditor5-foo/src/foo.js', 'utf-8'
 		);
 
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledWith(
 			'packages/ckeditor5-foo/src/foo.js_content',
 			'packages/ckeditor5-foo/src/foo.js',
 			expect.any( Function ),
@@ -632,14 +587,14 @@ describe( 'dev-transifex/createPotFiles()', () => {
 	} );
 
 	it( 'should log an error if two context files contain contexts the same id', () => {
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( true );
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( true );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( true );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( true );
 
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context1' } ) );
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context2' } ) );
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context1' } ) );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context2' } ) );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
 
-		vi.mocked( findMessagesMock ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
+		vi.mocked( findMessages ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
 			const messages = [
 				{ string: 'foo', id: 'foo_id' }
 			];
@@ -655,27 +610,27 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			logger: loggerMocks
 		} );
 
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json'
 		);
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-core/lang/contexts.json'
 		);
 
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenCalledTimes( 3 );
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenCalledTimes( 3 );
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json', 'utf-8'
 		);
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-core/lang/contexts.json', 'utf-8'
 		);
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			3, 'packages/ckeditor5-foo/src/foo.js', 'utf-8'
 		);
 
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledWith(
 			'packages/ckeditor5-foo/src/foo.js_content',
 			'packages/ckeditor5-foo/src/foo.js',
 			expect.any( Function ),
@@ -693,13 +648,13 @@ describe( 'dev-transifex/createPotFiles()', () => {
 	} );
 
 	it( 'should log an error if a context is unused', () => {
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( true );
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( false );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( true );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( false );
 
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context', 'bar_id': 'foo_context' } ) );
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context', 'bar_id': 'foo_context' } ) );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
 
-		vi.mocked( findMessagesMock ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
+		vi.mocked( findMessages ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
 			const messages = [
 				{ string: 'foo', id: 'foo_id' }
 			];
@@ -715,24 +670,24 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			logger: loggerMocks
 		} );
 
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json'
 		);
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-core/lang/contexts.json'
 		);
 
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json', 'utf-8'
 		);
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-foo/src/foo.js', 'utf-8'
 		);
 
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledWith(
 			'packages/ckeditor5-foo/src/foo.js_content',
 			'packages/ckeditor5-foo/src/foo.js',
 			expect.any( Function ),
@@ -749,7 +704,7 @@ describe( 'dev-transifex/createPotFiles()', () => {
 	} );
 
 	it( 'should fail with an error describing missing properties if the required were not passed to the function', () => {
-		vi.mocked( utilsVerifyPropertiesMock ).mockImplementationOnce( ( options, requiredProperties ) => {
+		vi.mocked( verifyProperties ).mockImplementationOnce( ( options, requiredProperties ) => {
 			throw new Error( `The specified object misses the following properties: ${ requiredProperties.join( ', ' ) }.` );
 		} );
 
@@ -765,14 +720,14 @@ describe( 'dev-transifex/createPotFiles()', () => {
 	} );
 
 	it( 'should not log an error if a context from the core package is unused when ignoreUnusedCorePackageContexts=true', () => {
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( true );
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( true );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( true );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( true );
 
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context', 'bar_id': 'foo_context' } ) );
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( JSON.stringify( { 'custom_id': 'foo_context' } ) );
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context', 'bar_id': 'foo_context' } ) );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( JSON.stringify( { 'custom_id': 'foo_context' } ) );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
 
-		vi.mocked( findMessagesMock ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
+		vi.mocked( findMessages ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
 			const messages = [
 				{ string: 'foo', id: 'foo_id' }
 			];
@@ -789,27 +744,27 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			ignoreUnusedCorePackageContexts: true
 		} );
 
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json'
 		);
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-core/lang/contexts.json'
 		);
 
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenCalledTimes( 3 );
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenCalledTimes( 3 );
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json', 'utf-8'
 		);
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-core/lang/contexts.json', 'utf-8'
 		);
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			3, 'packages/ckeditor5-foo/src/foo.js', 'utf-8'
 		);
 
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledWith(
 			'packages/ckeditor5-foo/src/foo.js_content',
 			'packages/ckeditor5-foo/src/foo.js',
 			expect.any( Function ),
@@ -826,13 +781,13 @@ describe( 'dev-transifex/createPotFiles()', () => {
 	} );
 
 	it( 'should not add the license header in the created a POT file entry when skipLicenseHeader=true', () => {
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( true );
-		vi.mocked( fsExistsSyncMock ).mockReturnValueOnce( false );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( true );
+		vi.mocked( fs.existsSync ).mockReturnValueOnce( false );
 
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context' } ) );
-		vi.mocked( fsReadFileSyncMock ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( JSON.stringify( { 'foo_id': 'foo_context' } ) );
+		vi.mocked( fs.readFileSync ).mockReturnValueOnce( 'packages/ckeditor5-foo/src/foo.js_content' );
 
-		vi.mocked( findMessagesMock ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
+		vi.mocked( findMessages ).mockImplementationOnce( ( fileContent, filePath, onFoundMessage ) => {
 			const messages = [
 				{ string: 'foo', id: 'foo_id' }
 			];
@@ -849,32 +804,32 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			skipLicenseHeader: true
 		} );
 
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json'
 		);
-		expect( vi.mocked( fsExistsSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.existsSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-core/lang/contexts.json'
 		);
 
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			1, 'packages/ckeditor5-foo/lang/contexts.json', 'utf-8'
 		);
-		expect( vi.mocked( fsReadFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.readFileSync ) ).toHaveBeenNthCalledWith(
 			2, 'packages/ckeditor5-foo/src/foo.js', 'utf-8'
 		);
 
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( findMessagesMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( findMessages ) ).toHaveBeenCalledWith(
 			'packages/ckeditor5-foo/src/foo.js_content',
 			'packages/ckeditor5-foo/src/foo.js',
 			expect.any( Function ),
 			expect.any( Function )
 		);
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledWith(
 			'/cwd/build/.transifex/ckeditor5-foo/en.pot',
 			[
 				'msgctxt "foo_context"',

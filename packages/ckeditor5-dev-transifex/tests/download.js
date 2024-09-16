@@ -7,104 +7,28 @@ import path from 'path';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import download from '../lib/download.js';
 
-const {
-	fsOutputFileSyncMock,
-	fsRemoveSyncMock,
-	fsExistsSyncMock,
-	fsReadJsonSyncMock,
-	fsWriteJsonSyncMock,
-	chalkGrayMock,
-	chalkUnderlineMock,
-	toolsCreateSpinnerMock,
-	cleanPoFileContentMock,
-	createDictionaryFromPoFileContentMock,
-	transifexInitMock,
-	transifexGetResourceNameMock,
-	transifexGetLanguageCodeMock,
-	transifexGetProjectDataMock,
-	transifexGetTranslationsMock,
-	utilsVerifyPropertiesMock,
-	utilsCreateLoggerMock
-} = vi.hoisted( () => {
-	return {
-		fsOutputFileSyncMock: vi.fn(),
-		fsRemoveSyncMock: vi.fn(),
-		fsExistsSyncMock: vi.fn(),
-		fsReadJsonSyncMock: vi.fn(),
-		fsWriteJsonSyncMock: vi.fn(),
-		chalkGrayMock: vi.fn(),
-		chalkUnderlineMock: vi.fn(),
-		toolsCreateSpinnerMock: vi.fn(),
-		cleanPoFileContentMock: vi.fn(),
-		createDictionaryFromPoFileContentMock: vi.fn(),
-		transifexInitMock: vi.fn(),
-		transifexGetResourceNameMock: vi.fn(),
-		transifexGetLanguageCodeMock: vi.fn(),
-		transifexGetProjectDataMock: vi.fn(),
-		transifexGetTranslationsMock: vi.fn(),
-		utilsVerifyPropertiesMock: vi.fn(),
-		utilsCreateLoggerMock: vi.fn()
-	};
-} );
+import { cleanPoFileContent, createDictionaryFromPoFileContent } from '@ckeditor/ckeditor5-dev-translations';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import { verifyProperties, createLogger } from '../lib/utils.js';
+import fs from 'fs-extra';
+import transifexService from '../lib/transifexservice.js';
 
-vi.mock( 'fs-extra', () => {
-	return {
-		default: {
-			outputFileSync: fsOutputFileSyncMock,
-			removeSync: fsRemoveSyncMock,
-			existsSync: fsExistsSyncMock,
-			readJsonSync: fsReadJsonSyncMock,
-			writeJsonSync: fsWriteJsonSyncMock
-		}
-	};
-} );
+vi.mock( '../lib/transifexservice.js' );
+vi.mock( '../lib/utils.js' );
+vi.mock( '@ckeditor/ckeditor5-dev-translations' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( 'fs-extra' );
 
-vi.mock( 'chalk', () => {
-	return {
-		default: {
-			gray: chalkGrayMock,
-			underline: chalkUnderlineMock
-		}
-	};
-} );
+vi.mock( 'chalk', () => ( {
+	default: {
+		underline: vi.fn( string => string ),
+		gray: vi.fn( string => string )
+	}
+} ) );
 
-vi.mock( '@ckeditor/ckeditor5-dev-utils', () => {
+vi.mock( '../lib/data/index.js', () => {
 	return {
-		tools: {
-			createSpinner: toolsCreateSpinnerMock
-		}
-	};
-} );
-
-vi.mock( '@ckeditor/ckeditor5-dev-translations', () => {
-	return {
-		cleanPoFileContent: cleanPoFileContentMock,
-		createDictionaryFromPoFileContent: createDictionaryFromPoFileContentMock
-	};
-} );
-
-vi.mock( '../lib/transifexservice.js', () => {
-	return {
-		default: {
-			init: transifexInitMock,
-			getResourceName: transifexGetResourceNameMock,
-			getLanguageCode: transifexGetLanguageCodeMock,
-			getProjectData: transifexGetProjectDataMock,
-			getTranslations: transifexGetTranslationsMock
-		}
-	};
-} );
-
-vi.mock( '../lib/utils.js', () => {
-	return {
-		verifyProperties: utilsVerifyPropertiesMock,
-		createLogger: utilsCreateLoggerMock
-	};
-} );
-
-vi.mock( '../lib/languagecodemap.json', () => {
-	return {
-		default: {
+		languageCodeMap: {
 			ne_NP: 'ne'
 		}
 	};
@@ -122,7 +46,7 @@ describe( 'dev-transifex/download()', () => {
 		loggerErrorMock = vi.fn();
 		loggerErrorMock = vi.fn();
 
-		vi.mocked( utilsCreateLoggerMock ).mockImplementation( () => {
+		vi.mocked( createLogger ).mockImplementation( () => {
 			return {
 				progress: loggerProgressMock,
 				info: loggerInfoMock,
@@ -135,31 +59,20 @@ describe( 'dev-transifex/download()', () => {
 		spinnerStartMock = vi.fn();
 		spinnerFinishMock = vi.fn();
 
-		vi.mocked( toolsCreateSpinnerMock ).mockReturnValue( {
+		vi.mocked( tools.createSpinner ).mockReturnValue( {
 			start: spinnerStartMock,
 			finish: spinnerFinishMock
 		} );
 
-		// 	existsSync: sinon.stub()
-		// 		.withArgs( path.normalize( '/workspace/.transifex-failed-downloads.json' ) )
-		// 		.callsFake( () => Boolean( mocks.oldFailedDownloads ) ),
+		vi.mocked( fs.existsSync ).mockImplementation( () => Boolean( mocks.oldFailedDownloads ) );
+		vi.mocked( fs.readJsonSync ).mockImplementation( () => mocks.oldFailedDownloads );
 
-		// 	readJsonSync: sinon.stub()
-		// 		.withArgs( path.normalize( '/workspace/.transifex-failed-downloads.json' ) )
-		// 		.callsFake( () => mocks.oldFailedDownloads ),
+		vi.mocked( createDictionaryFromPoFileContent ).mockImplementation( fileContent => mocks.fileContents[ fileContent ] );
+		vi.mocked( cleanPoFileContent ).mockImplementation( fileContent => fileContent );
 
-		vi.mocked( fsExistsSyncMock ).mockImplementation( () => Boolean( mocks.oldFailedDownloads ) );
-		vi.mocked( fsReadJsonSyncMock ).mockImplementation( () => mocks.oldFailedDownloads );
-
-		vi.mocked( createDictionaryFromPoFileContentMock ).mockImplementation( fileContent => mocks.fileContents[ fileContent ] );
-		vi.mocked( cleanPoFileContentMock ).mockImplementation( fileContent => fileContent );
-
-		vi.mocked( chalkUnderlineMock ).mockImplementation( string => string );
-		vi.mocked( chalkGrayMock ).mockImplementation( string => string );
-
-		vi.mocked( transifexGetResourceNameMock ).mockImplementation( resource => resource.attributes.slug );
-		vi.mocked( transifexGetLanguageCodeMock ).mockImplementation( language => language.attributes.code );
-		vi.mocked( transifexGetProjectDataMock ).mockImplementation( ( organizationName, projectName, localizablePackageNames ) => {
+		vi.mocked( transifexService.getResourceName ).mockImplementation( resource => resource.attributes.slug );
+		vi.mocked( transifexService.getLanguageCode ).mockImplementation( language => language.attributes.code );
+		vi.mocked( transifexService.getProjectData ).mockImplementation( ( organizationName, projectName, localizablePackageNames ) => {
 			const projectData = {
 				resources: mocks.resources.filter( resource => localizablePackageNames.includes( resource.attributes.slug ) ),
 				languages: mocks.languages
@@ -167,7 +80,7 @@ describe( 'dev-transifex/download()', () => {
 
 			return Promise.resolve( projectData );
 		} );
-		vi.mocked( transifexGetTranslationsMock ).mockImplementation( ( resource, languages ) => {
+		vi.mocked( transifexService.getTranslations ).mockImplementation( ( resource, languages ) => {
 			const translationData = {
 				translations: new Map(
 					languages.map( language => [
@@ -198,7 +111,7 @@ describe( 'dev-transifex/download()', () => {
 			token: 'secretToken'
 		};
 
-		vi.mocked( utilsVerifyPropertiesMock ).mockImplementation( () => {
+		vi.mocked( verifyProperties ).mockImplementation( () => {
 			throw new Error( error );
 		} );
 
@@ -210,8 +123,8 @@ describe( 'dev-transifex/download()', () => {
 				caughtError => {
 					expect( caughtError.message.endsWith( error.message ) ).toEqual( true );
 
-					expect( vi.mocked( utilsVerifyPropertiesMock ) ).toHaveBeenCalledTimes( 1 );
-					expect( vi.mocked( utilsVerifyPropertiesMock ) ).toHaveBeenCalledWith(
+					expect( vi.mocked( verifyProperties ) ).toHaveBeenCalledTimes( 1 );
+					expect( vi.mocked( verifyProperties ) ).toHaveBeenCalledWith(
 						config, [ 'organizationName', 'projectName', 'token', 'packages', 'cwd' ]
 					);
 				}
@@ -246,17 +159,24 @@ describe( 'dev-transifex/download()', () => {
 			] )
 		} );
 
-		expect( vi.mocked( fsRemoveSyncMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fs.removeSync ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 1 );
 
-		expect( vi.mocked( fsRemoveSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.removeSync ) ).toHaveBeenNthCalledWith(
 			1,
 			path.normalize( '/workspace/foo/ckeditor5-core/lang/translations' )
 		);
-		expect( vi.mocked( fsRemoveSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.removeSync ) ).toHaveBeenNthCalledWith(
 			2,
 			path.normalize( '/workspace/.transifex-failed-downloads.json' )
 		);
+
+		const removeSyncMockFirstCallOrder = vi.mocked( fs.removeSync ).mock.invocationCallOrder[ 0 ];
+		const removeSyncMockSecondCallOrder = vi.mocked( fs.removeSync ).mock.invocationCallOrder[ 1 ];
+		const outputFileSyncMockFirstCallOrder = vi.mocked( fs.outputFileSync ).mock.invocationCallOrder[ 0 ];
+
+		expect( removeSyncMockFirstCallOrder < outputFileSyncMockFirstCallOrder ).toEqual( true );
+		expect( outputFileSyncMockFirstCallOrder < removeSyncMockSecondCallOrder ).toEqual( true );
 	} );
 
 	it( 'should download translations for non-empty resources', async () => {
@@ -298,21 +218,21 @@ describe( 'dev-transifex/download()', () => {
 			] )
 		} );
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 3 );
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 3 );
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenNthCalledWith(
 			1,
 			path.normalize( '/workspace/foo/ckeditor5-core/lang/translations/pl.po' ),
 			'ckeditor5-core-pl-content'
 		);
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenNthCalledWith(
 			2,
 			path.normalize( '/workspace/foo/ckeditor5-core/lang/translations/de.po' ),
 			'ckeditor5-core-de-content'
 		);
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenNthCalledWith(
 			3,
 			path.normalize( '/workspace/bar/ckeditor5-ui/lang/translations/pl.po' ),
 			'ckeditor5-ui-pl-content'
@@ -376,9 +296,9 @@ describe( 'dev-transifex/download()', () => {
 			] )
 		} );
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 1 );
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledWith(
 			path.normalize( '/workspace/bar/ckeditor5-ui/lang/translations/pl.po' ),
 			'ckeditor5-ui-pl-content'
 		);
@@ -423,17 +343,17 @@ describe( 'dev-transifex/download()', () => {
 			] )
 		} );
 
-		expect( vi.mocked( toolsCreateSpinnerMock ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( tools.createSpinner ) ).toHaveBeenCalledTimes( 2 );
 		expect( vi.mocked( spinnerStartMock ) ).toHaveBeenCalledTimes( 2 );
 		expect( vi.mocked( spinnerFinishMock ) ).toHaveBeenCalledTimes( 2 );
 
-		expect( vi.mocked( toolsCreateSpinnerMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( tools.createSpinner ) ).toHaveBeenNthCalledWith(
 			1,
 			'Processing "ckeditor5-core"...',
 			{ indentLevel: 1, emoji: '👉' }
 		);
 
-		expect( vi.mocked( toolsCreateSpinnerMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( tools.createSpinner ) ).toHaveBeenNthCalledWith(
 			2,
 			'Processing "ckeditor5-ui"...',
 			{ indentLevel: 1, emoji: '👉' }
@@ -458,7 +378,7 @@ describe( 'dev-transifex/download()', () => {
 			] )
 		} );
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 0 );
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 0 );
 	} );
 
 	it( 'should save failed downloads', async () => {
@@ -503,9 +423,9 @@ describe( 'dev-transifex/download()', () => {
 			] )
 		} );
 
-		expect( vi.mocked( fsWriteJsonSyncMock ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fs.writeJSONSync ) ).toHaveBeenCalledTimes( 1 );
 
-		expect( vi.mocked( fsWriteJsonSyncMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( fs.writeJSONSync ) ).toHaveBeenCalledWith(
 			path.normalize( '/workspace/.transifex-failed-downloads.json' ),
 			[ { resourceName: 'ckeditor5-ui', languages: [ { code: 'de', errorMessage: 'An example error.' } ] } ],
 			{ spaces: 2 }
@@ -569,21 +489,21 @@ describe( 'dev-transifex/download()', () => {
 			] )
 		} );
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 3 );
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 3 );
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenNthCalledWith(
 			1,
 			path.normalize( '/workspace/foo/ckeditor5-core/lang/translations/pl.po' ),
 			'ckeditor5-core-pl-content'
 		);
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenNthCalledWith(
 			2,
 			path.normalize( '/workspace/foo/ckeditor5-core/lang/translations/en_AU.po' ),
 			'ckeditor5-core-en_AU-content'
 		);
 
-		expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenNthCalledWith(
 			3,
 			path.normalize( '/workspace/foo/ckeditor5-core/lang/translations/ne.po' ),
 			'ckeditor5-core-ne_NP-content'
@@ -593,7 +513,7 @@ describe( 'dev-transifex/download()', () => {
 	it( 'should fail with an error when the transifex service responses with an error', async () => {
 		const error = new Error( 'An example error.' );
 
-		vi.mocked( transifexGetProjectDataMock ).mockRejectedValue( error );
+		vi.mocked( transifexService.getProjectData ).mockRejectedValue( error );
 
 		try {
 			await download( {
@@ -610,7 +530,7 @@ describe( 'dev-transifex/download()', () => {
 			expect( err ).to.equal( error );
 		}
 
-		expect( vi.mocked( transifexGetProjectDataMock ) ).toHaveBeenCalled();
+		expect( vi.mocked( transifexService.getProjectData ) ).toHaveBeenCalled();
 	} );
 
 	it( 'should pass the "simplifyLicenseHeader" flag to the "cleanPoFileContent()" function when set to `true`', async () => {
@@ -643,9 +563,9 @@ describe( 'dev-transifex/download()', () => {
 			simplifyLicenseHeader: true
 		} );
 
-		expect( vi.mocked( cleanPoFileContentMock ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( cleanPoFileContent ) ).toHaveBeenCalledTimes( 1 );
 
-		expect( vi.mocked( cleanPoFileContentMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( cleanPoFileContent ) ).toHaveBeenCalledWith(
 			'ckeditor5-core-pl-content',
 			{
 				simplifyLicenseHeader: true
@@ -685,12 +605,17 @@ describe( 'dev-transifex/download()', () => {
 				] )
 			} );
 
-			expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 1 );
-			expect( vi.mocked( fsRemoveSyncMock ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs.removeSync ) ).toHaveBeenCalledTimes( 1 );
 
-			expect( vi.mocked( fsRemoveSyncMock ) ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs.removeSync ) ).toHaveBeenCalledWith(
 				path.normalize( '/workspace/.transifex-failed-downloads.json' )
 			);
+
+			const outputFileSyncMockFirstCallOrder = vi.mocked( fs.outputFileSync ).mock.invocationCallOrder[ 0 ];
+			const removeSyncMockFirstCallOrder = vi.mocked( fs.removeSync ).mock.invocationCallOrder[ 0 ];
+
+			expect( outputFileSyncMockFirstCallOrder < removeSyncMockFirstCallOrder ).toEqual( true );
 		} );
 
 		it( 'should download translations for existing resources but only for previously failed ones', async () => {
@@ -736,9 +661,9 @@ describe( 'dev-transifex/download()', () => {
 				] )
 			} );
 
-			expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledTimes( 1 );
 
-			expect( vi.mocked( fsOutputFileSyncMock ) ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs.outputFileSync ) ).toHaveBeenCalledWith(
 				path.normalize( '/workspace/foo/ckeditor5-core/lang/translations/pl.po' ),
 				'ckeditor5-core-pl-content'
 			);
@@ -805,9 +730,9 @@ describe( 'dev-transifex/download()', () => {
 				] )
 			} );
 
-			expect( vi.mocked( fsWriteJsonSyncMock ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs.writeJSONSync ) ).toHaveBeenCalledTimes( 1 );
 
-			expect( vi.mocked( fsWriteJsonSyncMock ) ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs.writeJSONSync ) ).toHaveBeenCalledWith(
 				path.normalize( '/workspace/.transifex-failed-downloads.json' ),
 				[ { resourceName: 'ckeditor5-core', languages: [ { code: 'de', errorMessage: 'An example error.' } ] } ],
 				{ spaces: 2 }
