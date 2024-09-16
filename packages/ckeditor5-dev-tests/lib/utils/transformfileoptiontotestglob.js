@@ -3,10 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs' );
-const path = require( 'path' );
+import fs from 'fs';
+import path from 'path';
 
 const EXTERNAL_DIR_PATH = path.join( process.cwd(), 'external' );
 
@@ -24,7 +22,7 @@ const EXTERNAL_DIR_PATH = path.join( process.cwd(), 'external' );
  * @param {Boolean} [isManualTest=false] Whether the tests are manual or automated.
  * @returns {Array.<String>}
  */
-module.exports = function transformFileOptionToTestGlob( pattern, isManualTest = false ) {
+export default function transformFileOptionToTestGlob( pattern, isManualTest = false ) {
 	if ( doesPatternMatchExternalRepositoryName( pattern ) ) {
 		return getExternalRepositoryGlob( pattern, { isManualTest } );
 	}
@@ -54,7 +52,7 @@ module.exports = function transformFileOptionToTestGlob( pattern, isManualTest =
 			transformedPathForExternalPackagesWithCKEditorPrefix
 		] )
 	];
-};
+}
 
 /**
  * @param {String} pattern

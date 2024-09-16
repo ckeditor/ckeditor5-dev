@@ -3,10 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-module.exports = {
-	runAutomatedTests: require( './tasks/runautomatedtests' ),
-	runManualTests: require( './tasks/runmanualtests' ),
-	parseArguments: require( './utils/automated-tests/parsearguments' )
-};
+export { default as runAutomatedTests } from './tasks/runautomatedtests.js';
+export { default as runManualTests } from './tasks/runmanualtests.js';
+export { default as parseArguments } from './utils/automated-tests/parsearguments.js';

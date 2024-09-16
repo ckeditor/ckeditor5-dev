@@ -3,15 +3,15 @@
  * For licensing, see LICENSE.md.
  */
 
-const AssertionError = require( 'assertion-error' );
-const { html_beautify: beautify } = require( 'js-beautify/js/lib/beautify-html' );
+import AssertionError from 'assertion-error';
+import { html_beautify as beautify } from 'js-beautify/js/lib/beautify-html.js';
 
 /**
  * Factory function that registers the `equalMarkup` assertion.
  *
  * @param {Chai} chai
  */
-module.exports = chai => {
+export default chai => {
 	/**
 	 * Custom assertion that tests whether two given strings containing markup language are equal.
 	 * Unlike `expect().to.equal()` form Chai assertion library, this assertion formats the markup before showing a diff.

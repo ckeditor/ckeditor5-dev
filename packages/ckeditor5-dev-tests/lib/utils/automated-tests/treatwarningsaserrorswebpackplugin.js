@@ -6,7 +6,7 @@
 /**
  * Webpack plugin that reassigns warnings as errors and stops the process if any errors or warnings detected.
  */
-module.exports = class TreatWarningsAsErrorsWebpackPlugin {
+export default class TreatWarningsAsErrorsWebpackPlugin {
 	apply( compiler ) {
 		compiler.hooks.shouldEmit.tap( 'TreatWarningsAsErrorsWebpackPlugin', compilation => {
 			compilation.errors = [
@@ -21,4 +21,4 @@ module.exports = class TreatWarningsAsErrorsWebpackPlugin {
 			}
 		} );
 	}
-};
+}

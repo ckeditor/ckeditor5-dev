@@ -3,14 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import path from 'path';
+import webpack from 'webpack';
+import { CKEditorTranslationsPlugin } from '@ckeditor/ckeditor5-dev-translations';
+import { loaders } from '@ckeditor/ckeditor5-dev-utils';
+import WebpackNotifierPlugin from './webpacknotifierplugin.js';
+import getDefinitionsFromFile from '../getdefinitionsfromfile.js';
+import { fileURLToPath } from 'url';
 
-const path = require( 'path' );
-const webpack = require( 'webpack' );
-const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
-const { loaders } = require( '@ckeditor/ckeditor5-dev-utils' );
-const WebpackNotifierPlugin = require( './webpacknotifierplugin' );
-const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
 
 /**
  * @param {Object} options
@@ -26,7 +28,7 @@ const getDefinitionsFromFile = require( '../getdefinitionsfromfile' );
  * @param {String|null} [options.identityFile]
  * @returns {Object}
  */
-module.exports = function getWebpackConfigForManualTests( options ) {
+export default function getWebpackConfigForManualTests( options ) {
 	const definitions = Object.assign( {}, getDefinitionsFromFile( options.identityFile ) );
 
 	const webpackConfig = {
@@ -149,5 +151,5 @@ module.exports = function getWebpackConfigForManualTests( options ) {
 	}
 
 	return webpackConfig;
-};
+}
 

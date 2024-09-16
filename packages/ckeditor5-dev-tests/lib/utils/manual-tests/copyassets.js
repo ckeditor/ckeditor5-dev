@@ -3,8 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-const path = require( 'path' );
-const fs = require( 'fs-extra' );
+import path from 'path';
+import fs from 'fs-extra';
+import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
+
+const require = createRequire( import.meta.url );
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
 
 const assets = [
 	path.join( __dirname, 'togglesidebar.js' ),
@@ -23,9 +29,9 @@ const assets = [
  *		│   └── ...
  *		...
  */
-module.exports = function copyAssets( buildDir ) {
+export default function copyAssets( buildDir ) {
 	for ( const assetPath of assets ) {
 		const outputFilePath = path.join( buildDir, 'assets', path.basename( assetPath ) );
 		fs.copySync( assetPath, outputFilePath );
 	}
-};
+}

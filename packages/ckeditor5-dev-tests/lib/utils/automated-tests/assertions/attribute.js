@@ -8,7 +8,7 @@
  *
  * @param {Chai} chai
  */
-module.exports = chai => {
+export default chai => {
 	/**
 	 * Asserts that the target has an attribute with the given key name.
 	 *

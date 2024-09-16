@@ -3,15 +3,13 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const path = require( 'path' );
+import path from 'path';
 
 /**
  * @param {String|null} definitionSource
  * @returns {Object}
  */
-module.exports = function getDefinitionsFromFile( definitionSource ) {
+export default function getDefinitionsFromFile( definitionSource ) {
 	if ( !definitionSource ) {
 		return {};
 	}
@@ -31,7 +29,7 @@ module.exports = function getDefinitionsFromFile( definitionSource ) {
 
 		return {};
 	}
-};
+}
 
 /**
  * @param {String|null} definitionSource

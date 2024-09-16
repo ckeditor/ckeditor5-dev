@@ -3,8 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
-const path = require( 'path' );
-const notifier = require( 'node-notifier' );
+import path from 'path';
+import notifier from 'node-notifier';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
 
 const ckeditor5icon = path.join( __dirname, '..', 'icons', 'ckeditor5.png' );
 
@@ -14,7 +18,7 @@ const defaultNotifyOptions = {
 	icon: ckeditor5icon
 };
 
-module.exports = { 'reporter:karmanotifier': [ 'type', karmaNotifier ] };
+export default { 'reporter:karmanotifier': [ 'type', karmaNotifier ] };
 karmaNotifier.$inject = [ 'helper' ];
 
 function karmaNotifier( helper ) {
