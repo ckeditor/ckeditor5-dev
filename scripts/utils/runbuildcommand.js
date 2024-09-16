@@ -3,21 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
-/* eslint-env node */
-
-'use strict';
-
 /**
  * @param {String} packagePath
  * @returns {Promise}
  */
-module.exports = async function runBuildCommand( packagePath ) {
-	const path = require( 'upath' );
-	const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+export default async function runBuildCommand( packagePath ) {
+	const path = ( await import( 'upath' ) ).default;
+	const { readJson } = ( await import( 'fs-extra' ) ).default;
+	const { tools } = await import( '@ckeditor/ckeditor5-dev-utils' );
 
-	const packageJson = require(
-		path.join( packagePath, 'package.json' )
-	);
+	const packageJson = await readJson( path.join( packagePath, 'package.json' ) );
 
 	if ( !packageJson.scripts?.build ) {
 		return;
@@ -28,5 +23,5 @@ module.exports = async function runBuildCommand( packagePath ) {
 		verbosity: 'error',
 		async: true
 	} );
-};
+}
 
