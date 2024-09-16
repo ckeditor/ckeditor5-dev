@@ -13,7 +13,7 @@
 //
 // See: https://circleci.com/docs/using-dynamic-configuration/.
 
-import fs from 'fs/promises';
+import fs from 'fs-extra';
 import { fileURLToPath } from 'url';
 import upath from 'upath';
 import { glob } from 'glob';
@@ -27,8 +27,15 @@ const CIRCLECI_CONFIGURATION_DIRECTORY = upath.join( ROOT_DIRECTORY, '.circleci'
 
 ( async () => {
 	const packages = await glob( '*/', { cwd: upath.join( ROOT_DIRECTORY, 'packages' ) } );
+	const packagesWithTests = await asyncFilter( packages, async packageName => {
+		const pkgJson = await fs.readJson(
+			upath.join( ROOT_DIRECTORY, 'packages', packageName, 'package.json' )
+		);
 
-	packages.sort();
+		return pkgJson?.scripts?.coverage;
+	} );
+
+	packagesWithTests.sort();
 
 	/**
 	 * @type CircleCIConfiguration
@@ -37,7 +44,7 @@ const CIRCLECI_CONFIGURATION_DIRECTORY = upath.join( ROOT_DIRECTORY, '.circleci'
 		await fs.readFile( upath.join( CIRCLECI_CONFIGURATION_DIRECTORY, 'template.yml' ) )
 	);
 
-	config.jobs.validate_and_tests.steps.splice( 3, 0, ...generateTestSteps( packages ) );
+	config.jobs.validate_and_tests.steps.splice( 3, 0, ...generateTestSteps( packagesWithTests ) );
 	config.jobs.validate_and_tests.steps.splice( -1, 0, {
 		run: {
 			name: 'Combine coverage reports into a single file',
@@ -50,6 +57,15 @@ const CIRCLECI_CONFIGURATION_DIRECTORY = upath.join( ROOT_DIRECTORY, '.circleci'
 		yaml.dump( config, { lineWidth: -1 } )
 	);
 } )();
+
+async function asyncFilter( items, predicate ) {
+	return items.reduce( async ( results, item ) => {
+		return [
+			...await results,
+			...await predicate( item ) ? [ item ] : []
+		];
+	}, [] );
+}
 
 function generateTestSteps( packages ) {
 	return packages.map( packageName => {
