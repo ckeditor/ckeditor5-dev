@@ -4,7 +4,7 @@
  */
 
 import parser from '@babel/parser';
-import traverse from '@babel/traverse';
+import { default as traverse } from '@babel/traverse';
 
 /**
  * Parses source and finds messages from the first argument of `t()` calls.
@@ -24,7 +24,10 @@ export default function findMessages( source, sourceFile, onMessageFound, onErro
 		]
 	} );
 
-	traverse( ast, {
+	// Support for a non-`type=module` project.
+	const traverseCallable = typeof traverse === 'function' ? traverse : traverse.default;
+
+	traverseCallable( ast, {
 		CallExpression: ( { node } ) => {
 			try {
 				findMessagesInNode( node );
