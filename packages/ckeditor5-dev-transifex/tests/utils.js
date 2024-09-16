@@ -3,131 +3,120 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { verifyProperties, createLogger } from '../lib/utils.js';
 
-const sinon = require( 'sinon' );
-const chai = require( 'chai' );
-const expect = chai.expect;
-const mockery = require( 'mockery' );
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import chalk from 'chalk';
+
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( 'chalk', () => ( {
+	default: {
+		cyan: vi.fn( string => string )
+	}
+} ) );
 
 describe( 'dev-transifex/utils', () => {
-	let stubs, utils;
+	let loggerInfoMock, loggerWarningMock, loggerErrorMock, loggerLogMock;
 
-	beforeEach( () => {
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
+	beforeEach( async () => {
+		loggerInfoMock = vi.fn();
+		loggerWarningMock = vi.fn();
+		loggerErrorMock = vi.fn();
+		loggerLogMock = vi.fn();
+
+		vi.mocked( logger ).mockImplementation( () => {
+			return {
+				info: loggerInfoMock,
+				warning: loggerWarningMock,
+				error: loggerErrorMock,
+				_log: loggerLogMock
+			};
 		} );
-
-		stubs = {
-			chalk: {
-				cyan: sinon.stub().callsFake( msg => msg )
-			},
-			logger: sinon.stub().returns( {
-				info: sinon.stub(),
-				warning: sinon.stub(),
-				error: sinon.stub(),
-				_log: sinon.stub()
-			} )
-		};
-
-		mockery.registerMock( 'chalk', stubs.chalk );
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-			logger: stubs.logger
-		} );
-
-		utils = require( '../lib/utils' );
-	} );
-
-	afterEach( () => {
-		sinon.restore();
-		mockery.deregisterAll();
-		mockery.disable();
 	} );
 
 	describe( 'verifyProperties()', () => {
 		it( 'should throw an error if the specified property is not specified in an object', () => {
 			expect( () => {
-				utils.verifyProperties( {}, [ 'foo' ] );
+				verifyProperties( {}, [ 'foo' ] );
 			} ).to.throw( Error, 'The specified object misses the following properties: foo.' );
 		} );
 
 		it( 'should throw an error if the value of the property is `undefined`', () => {
 			expect( () => {
-				utils.verifyProperties( { foo: undefined }, [ 'foo' ] );
+				verifyProperties( { foo: undefined }, [ 'foo' ] );
 			} ).to.throw( Error, 'The specified object misses the following properties: foo.' );
 		} );
 
 		it( 'should throw an error containing all The specified object misses the following properties', () => {
 			expect( () => {
-				utils.verifyProperties( { foo: true, bar: 0 }, [ 'foo', 'bar', 'baz', 'xxx' ] );
+				verifyProperties( { foo: true, bar: 0 }, [ 'foo', 'bar', 'baz', 'xxx' ] );
 			} ).to.throw( Error, 'The specified object misses the following properties: baz, xxx.' );
 		} );
 
 		it( 'should not throw an error if the value of the property is `null`', () => {
 			expect( () => {
-				utils.verifyProperties( { foo: null }, [ 'foo' ] );
+				verifyProperties( { foo: null }, [ 'foo' ] );
 			} ).to.not.throw( Error );
 		} );
 
 		it( 'should not throw an error if the value of the property is a boolean (`false`)', () => {
 			expect( () => {
-				utils.verifyProperties( { foo: false }, [ 'foo' ] );
+				verifyProperties( { foo: false }, [ 'foo' ] );
 			} ).to.not.throw( Error );
 		} );
 
 		it( 'should not throw an error if the value of the property is a boolean (`true`)', () => {
 			expect( () => {
-				utils.verifyProperties( { foo: true }, [ 'foo' ] );
+				verifyProperties( { foo: true }, [ 'foo' ] );
 			} ).to.not.throw( Error );
 		} );
 
 		it( 'should not throw an error if the value of the property is a number', () => {
 			expect( () => {
-				utils.verifyProperties( { foo: 1 }, [ 'foo' ] );
+				verifyProperties( { foo: 1 }, [ 'foo' ] );
 			} ).to.not.throw( Error );
 		} );
 
 		it( 'should not throw an error if the value of the property is a number (falsy value)', () => {
 			expect( () => {
-				utils.verifyProperties( { foo: 0 }, [ 'foo' ] );
+				verifyProperties( { foo: 0 }, [ 'foo' ] );
 			} ).to.not.throw( Error );
 		} );
 
 		it( 'should not throw an error if the value of the property is a NaN', () => {
 			expect( () => {
-				utils.verifyProperties( { foo: NaN }, [ 'foo' ] );
+				verifyProperties( { foo: NaN }, [ 'foo' ] );
 			} ).to.not.throw( Error );
 		} );
 
 		it( 'should not throw an error if the value of the property is a non-empty string', () => {
 			expect( () => {
-				utils.verifyProperties( { foo: 'foo' }, [ 'foo' ] );
+				verifyProperties( { foo: 'foo' }, [ 'foo' ] );
 			} ).to.not.throw( Error );
 		} );
 
 		it( 'should not throw an error if the value of the property is an empty string', () => {
 			expect( () => {
-				utils.verifyProperties( { foo: '' }, [ 'foo' ] );
+				verifyProperties( { foo: '' }, [ 'foo' ] );
 			} ).to.not.throw( Error );
 		} );
 
 		it( 'should not throw an error if the value of the property is an array', () => {
 			expect( () => {
-				utils.verifyProperties( { foo: [] }, [ 'foo' ] );
+				verifyProperties( { foo: [] }, [ 'foo' ] );
 			} ).to.not.throw( Error );
 		} );
 
 		it( 'should not throw an error if the value of the property is an object', () => {
 			expect( () => {
-				utils.verifyProperties( { foo: {} }, [ 'foo' ] );
+				verifyProperties( { foo: {} }, [ 'foo' ] );
 			} ).to.not.throw( Error );
 		} );
 
 		it( 'should not throw an error if the value of the property is a function', () => {
 			expect( () => {
-				utils.verifyProperties( {
+				verifyProperties( {
 					foo: () => {}
 				}, [ 'foo' ] );
 			} ).to.not.throw( Error );
@@ -136,39 +125,39 @@ describe( 'dev-transifex/utils', () => {
 
 	describe( 'createLogger()', () => {
 		it( 'should be a function', () => {
-			expect( utils.createLogger ).to.be.a( 'function' );
+			expect( createLogger ).toBeInstanceOf( Function );
 		} );
 
 		it( 'should return an object with methods', () => {
-			const logger = utils.createLogger();
+			const logger = createLogger();
 
-			expect( logger ).to.be.an( 'object' );
-			expect( logger.progress ).to.be.a( 'function' );
-			expect( logger.info ).to.be.a( 'function' );
-			expect( logger.warning ).to.be.a( 'function' );
-			expect( logger.error ).to.be.a( 'function' );
-			expect( logger._log ).to.be.a( 'function' );
+			expect( logger ).toBeInstanceOf( Object );
+			expect( logger.progress ).toBeInstanceOf( Function );
+			expect( logger.info ).toBeInstanceOf( Function );
+			expect( logger.warning ).toBeInstanceOf( Function );
+			expect( logger.error ).toBeInstanceOf( Function );
+			expect( logger._log ).toBeInstanceOf( Function );
 		} );
 
 		it( 'should call the info method for a non-empty progress message', () => {
-			const logger = utils.createLogger();
+			const logger = createLogger();
 
 			logger.progress( 'Example step.' );
 
-			expect( logger.info.callCount ).to.equal( 1 );
-			expect( logger.info.firstCall.args[ 0 ] ).to.equal( '\n📍 Example step.' );
-			expect( stubs.chalk.cyan.callCount ).to.equal( 1 );
-			expect( stubs.chalk.cyan.firstCall.args[ 0 ] ).to.equal( 'Example step.' );
+			expect( loggerInfoMock ).toHaveBeenCalledTimes( 1 );
+			expect( loggerInfoMock ).toHaveBeenCalledWith( '\n📍 Example step.' );
+			expect( chalk.cyan ).toHaveBeenCalledTimes( 1 );
+			expect( chalk.cyan ).toHaveBeenCalledWith( 'Example step.' );
 		} );
 
 		it( 'should call the info method with an empty message for an empty progress message', () => {
-			const logger = utils.createLogger();
+			const logger = createLogger();
 
 			logger.progress();
 
-			expect( logger.info.callCount ).to.equal( 1 );
-			expect( logger.info.firstCall.args[ 0 ] ).to.equal( '' );
-			expect( stubs.chalk.cyan.called ).to.equal( false );
+			expect( loggerInfoMock ).toHaveBeenCalledTimes( 1 );
+			expect( loggerInfoMock ).toHaveBeenCalledWith( '' );
+			expect( chalk.cyan ).toHaveBeenCalledTimes( 0 );
 		} );
 	} );
 } );

@@ -3,19 +3,15 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs/promises' );
-const path = require( 'path' );
-const Table = require( 'cli-table' );
-const chalk = require( 'chalk' );
-const transifexService = require( './transifexservice' );
-const { verifyProperties, createLogger } = require( './utils' );
-const { tools } = require( '@ckeditor/ckeditor5-dev-utils' );
+import fs from 'fs/promises';
+import path from 'path';
+import Table from 'cli-table';
+import chalk from 'chalk';
+import transifexService from './transifexservice.js';
+import { verifyProperties, createLogger } from './utils.js';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 const RESOURCE_REGEXP = /r:(?<resourceName>[a-z0-9_-]+)$/i;
-
-const TRANSIFEX_RESOURCE_ERRORS = {};
 
 /**
  * Uploads translations to the Transifex.
@@ -38,7 +34,9 @@ const TRANSIFEX_RESOURCE_ERRORS = {};
  * @param {Map.<String,String>} config.packages A resource name -> package path map for which translations should be uploaded.
  * @returns {Promise}
  */
-module.exports = async function upload( config ) {
+export default async function upload( config ) {
+	const TRANSIFEX_RESOURCE_ERRORS = {};
+
 	verifyProperties( config, [ 'token', 'organizationName', 'projectName', 'cwd', 'packages' ] );
 
 	const logger = createLogger();
@@ -53,7 +51,9 @@ module.exports = async function upload( config ) {
 		logger.warning( 'Found the file containing a list of packages that failed during the last script execution.' );
 		logger.warning( 'The script will process only packages listed in the file instead of all passed as "config.packages".' );
 
-		failedPackages = Object.keys( require( pathToFailedUploads ) );
+		failedPackages = Object.keys(
+			( await import( pathToFailedUploads ) ).default
+		);
 	}
 
 	logger.progress( 'Fetching project information...' );
@@ -104,11 +104,11 @@ module.exports = async function upload( config ) {
 		// For new packages, before uploading their translations, we need to create a dedicated resource.
 		if ( isNew ) {
 			await transifexService.createResource( { organizationName, projectName, resourceName } )
-				.catch( errorHandlerFactory( resourceName, spinner ) );
+				.catch( errorHandlerFactory( TRANSIFEX_RESOURCE_ERRORS, resourceName, spinner ) );
 		}
 
 		// Abort if creating the resource ended with an error.
-		if ( hasError( resourceName ) ) {
+		if ( hasError( TRANSIFEX_RESOURCE_ERRORS, resourceName ) ) {
 			continue;
 		}
 
@@ -119,7 +119,7 @@ module.exports = async function upload( config ) {
 				uploadIds.push( { resourceName, uuid } );
 				spinner.finish();
 			} )
-			.catch( errorHandlerFactory( resourceName, spinner ) );
+			.catch( errorHandlerFactory( TRANSIFEX_RESOURCE_ERRORS, resourceName, spinner ) );
 	}
 
 	// An empty line for making a space between list of resources and the new process info.
@@ -133,7 +133,7 @@ module.exports = async function upload( config ) {
 
 	const uploadDetails = uploadIds.map( async ( { resourceName, uuid } ) => {
 		return transifexService.getResourceUploadDetails( uuid )
-			.catch( errorHandlerFactory( resourceName ) );
+			.catch( errorHandlerFactory( TRANSIFEX_RESOURCE_ERRORS, resourceName ) );
 	} );
 
 	const summary = ( await Promise.all( uploadDetails ) )
@@ -157,7 +157,7 @@ module.exports = async function upload( config ) {
 		logger.info( table.toString() );
 	}
 
-	if ( hasError() ) {
+	if ( hasError( TRANSIFEX_RESOURCE_ERRORS ) ) {
 		// An empty line for making a space between steps and the warning message.
 		logger.info( '' );
 		logger.warning( 'Not all translations were uploaded due to errors in Transifex API.' );
@@ -171,7 +171,7 @@ module.exports = async function upload( config ) {
 	else if ( isFailedUploadFileAvailable ) {
 		await fs.unlink( pathToFailedUploads );
 	}
-};
+}
 
 /**
  * Returns a factory function that process a response from Transifex and prepares a single resource
@@ -266,10 +266,11 @@ function formatTableRow() {
  *
  * If the `packageName` is not specified, returns `true` if any error occurs.
  *
+ * @param {Object} [TRANSIFEX_RESOURCE_ERRORS]
  * @param {String|null} [packageName=null]
  * @returns {Boolean}
  */
-function hasError( packageName = null ) {
+function hasError( TRANSIFEX_RESOURCE_ERRORS, packageName = null ) {
 	if ( !packageName ) {
 		return Boolean( Object.keys( TRANSIFEX_RESOURCE_ERRORS ).length );
 	}
@@ -280,11 +281,12 @@ function hasError( packageName = null ) {
 /**
  * Creates a callback that stores errors from Transifex for the given `packageName`.
  *
+ * @param {Object} [TRANSIFEX_RESOURCE_ERRORS]
  * @param {String} packageName
  * @param {CKEditor5Spinner|null} [spinner=null]
  * @returns {Function}
  */
-function errorHandlerFactory( packageName, spinner ) {
+function errorHandlerFactory( TRANSIFEX_RESOURCE_ERRORS, packageName, spinner ) {
 	return errorResponse => {
 		if ( spinner ) {
 			spinner.finish( { emoji: '❌' } );

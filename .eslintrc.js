@@ -17,7 +17,8 @@ module.exports = {
 
 		// ESLint does not understand `import ... with { ... }`.
 		// See: https://github.com/eslint/eslint/discussions/15305.
-		'packages/ckeditor5-dev-ci/lib/data/index.js'
+		'packages/ckeditor5-dev-ci/lib/data/index.js',
+		'packages/ckeditor5-dev-transifex/lib/data/index.js'
 	],
 	rules: {
 		'no-console': 'off',
@@ -42,6 +43,7 @@ module.exports = {
 				'./packages/ckeditor5-dev-bump-year/**/*',
 				'./packages/ckeditor5-dev-dependency-checker/**/*',
 				'./packages/ckeditor5-dev-stale-bot/**/*',
+				'./packages/ckeditor5-dev-transifex/**/*',
 				'./packages/ckeditor5-dev-ci/**/*',
 				'./packages/ckeditor5-dev-web-crawler/**/*',
 				'./packages/ckeditor5-dev-docs/**/*'

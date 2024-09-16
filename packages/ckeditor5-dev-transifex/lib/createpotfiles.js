@@ -3,16 +3,13 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import path from 'path';
+import fs from 'fs-extra';
+import del from 'del';
+import { logger as utilsLogger } from '@ckeditor/ckeditor5-dev-utils';
+import { findMessages } from '@ckeditor/ckeditor5-dev-translations';
+import { verifyProperties } from './utils.js';
 
-const path = require( 'path' );
-const fs = require( 'fs-extra' );
-const del = require( 'del' );
-const defaultLogger = require( '@ckeditor/ckeditor5-dev-utils' ).logger();
-const { findMessages } = require( '@ckeditor/ckeditor5-dev-translations' );
-const { verifyProperties } = require( './utils' );
-
-const langContextSuffix = path.join( 'lang', 'contexts.json' );
 const corePackageName = 'ckeditor5-core';
 
 /**
@@ -29,7 +26,10 @@ const corePackageName = 'ckeditor5-core';
  * @param {Boolean} [options.skipLicenseHeader=false] Whether to skip the license header in created `*.pot` files.
  * @param {Logger} [options.logger] A logger.
  */
-module.exports = function createPotFiles( options ) {
+export default function createPotFiles( options ) {
+	const defaultLogger = utilsLogger();
+	const langContextSuffix = path.join( 'lang', 'contexts.json' );
+
 	verifyProperties( options, [ 'sourceFiles', 'packagePaths', 'corePackagePath', 'translationsDirectory' ] );
 
 	const {
@@ -42,12 +42,12 @@ module.exports = function createPotFiles( options ) {
 		logger = defaultLogger
 	} = options;
 
-	const packageContexts = getPackageContexts( packagePaths, corePackagePath );
+	const packageContexts = getPackageContexts( packagePaths, corePackagePath, langContextSuffix );
 	const sourceMessages = collectSourceMessages( { sourceFiles, logger } );
 
 	const errors = [].concat(
 		assertNoMissingContext( { packageContexts, sourceMessages } ),
-		assertAllContextUsed( { packageContexts, sourceMessages, ignoreUnusedCorePackageContexts, corePackagePath } ),
+		assertAllContextUsed( { packageContexts, sourceMessages, ignoreUnusedCorePackageContexts, corePackagePath, langContextSuffix } ),
 		assertNoRepeatedContext( { packageContexts } )
 	);
 
@@ -83,7 +83,7 @@ module.exports = function createPotFiles( options ) {
 			translationsDirectory
 		} );
 	}
-};
+}
 
 /**
  * Traverses all packages and returns a map of all found language contexts
@@ -92,14 +92,14 @@ module.exports = function createPotFiles( options ) {
  * @param {Array.<String>} packagePaths An array of paths to packages, which will be used to find message contexts.
  * @returns {Map.<String, Context>}
  */
-function getPackageContexts( packagePaths, corePackagePath ) {
+function getPackageContexts( packagePaths, corePackagePath, langContextSuffix ) {
 	// Add path to core package if not included in the package paths.
 	if ( !packagePaths.includes( corePackagePath ) ) {
 		packagePaths = [ ...packagePaths, corePackagePath ];
 	}
 
 	const mapEntries = packagePaths
-		.filter( packagePath => containsContextFile( packagePath ) )
+		.filter( packagePath => containsContextFile( packagePath, langContextSuffix ) )
 		.map( packagePath => {
 			const pathToContext = path.join( packagePath, langContextSuffix );
 			const packageName = packagePath.split( /[\\/]/ ).pop();
@@ -168,7 +168,7 @@ function assertNoMissingContext( { packageContexts, sourceMessages } ) {
  * @returns {Array.<String>}
  */
 function assertAllContextUsed( options ) {
-	const { packageContexts, sourceMessages, ignoreUnusedCorePackageContexts, corePackagePath } = options;
+	const { packageContexts, sourceMessages, ignoreUnusedCorePackageContexts, corePackagePath, langContextSuffix } = options;
 
 	const usedContextMap = new Map();
 	const errors = [];
@@ -324,7 +324,7 @@ function createPotFileContent( messages ) {
 /**
  * @param {String} packageDirectory
  */
-function containsContextFile( packageDirectory ) {
+function containsContextFile( packageDirectory, langContextSuffix ) {
 	return fs.existsSync( path.join( packageDirectory, langContextSuffix ) );
 }
 
