@@ -4,9 +4,13 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
+import { fileURLToPath } from 'url';
+import path from 'path';
 import testUtils from '../../_utils.js';
-
 import build from '../../../lib/buildtypedoc.js';
+
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
 
 const stubs = vi.hoisted( () => {
 	return {

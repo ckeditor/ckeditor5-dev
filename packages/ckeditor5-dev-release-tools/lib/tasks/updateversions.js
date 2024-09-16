@@ -3,13 +3,13 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import upath from 'upath';
+import fs from 'fs-extra';
+import { glob } from 'glob';
+import semver from 'semver';
+import checkVersionAvailability from '../utils/checkversionavailability.js';
 
-const { glob } = require( 'glob' );
-const fs = require( 'fs-extra' );
-const semver = require( 'semver' );
-const { normalizeTrim, toUnix, dirname, join } = require( 'upath' );
-const checkVersionAvailability = require( '../utils/checkversionavailability' );
+const { normalizeTrim, toUnix, dirname, join } = upath;
 
 /**
  * The purpose of the script is to update the version of a root package found in the current working
@@ -31,7 +31,7 @@ const checkVersionAvailability = require( '../utils/checkversionavailability' );
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @returns {Promise}
  */
-module.exports = async function updateVersions( options ) {
+export default async function updateVersions( options ) {
 	const {
 		packagesDirectory,
 		version,
@@ -63,7 +63,7 @@ module.exports = async function updateVersions( options ) {
 		pkgJson.version = version;
 		await fs.writeJson( pkgJsonPath, pkgJson, { spaces: 2 } );
 	}
-};
+}
 
 /**
  * @param {String} cwd

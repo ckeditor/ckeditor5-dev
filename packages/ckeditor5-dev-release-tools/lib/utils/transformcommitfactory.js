@@ -3,11 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import lodash from 'lodash';
+import * as utils from './transformcommitutils.js';
+import getChangedFilesForCommit from './getchangedfilesforcommit.js';
 
-const { cloneDeepWith } = require( 'lodash' );
-const utils = require( './transformcommitutils' );
-const getChangedFilesForCommit = require( './getchangedfilesforcommit' );
+const { cloneDeepWith } = lodash;
 
 // Squash commit follows the pattern: "A pull request title (#{number})".
 const SQUASH_COMMIT_REGEXP = /^[\W\w]+ \(#\d+\)$/;
@@ -31,7 +31,7 @@ const SQUASH_COMMIT_REGEXP = /^[\W\w]+ \(#\d+\)$/;
  * as "BREAKING CHANGES".
  * @returns {TransformCommit}
  */
-module.exports = function transformCommitFactory( options = {} ) {
+export default function transformCommitFactory( options = {} ) {
 	return rawCommit => {
 		const commit = transformCommit( rawCommit );
 
@@ -484,7 +484,7 @@ module.exports = function transformCommitFactory( options = {} ) {
 
 		return !!squashCommit.header.match( SQUASH_COMMIT_REGEXP );
 	}
-};
+}
 
 /**
  * @callback TransformCommit

@@ -104,6 +104,8 @@ jobs:
           name: Execute ESLint
           command: yarn run lint
       - run:
+          environment:
+            TZ: Europe/Warsaw
           name: Run unit tests
           command: yarn run coverage
       - unless:

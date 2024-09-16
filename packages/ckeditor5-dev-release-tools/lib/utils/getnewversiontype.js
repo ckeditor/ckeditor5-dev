@@ -3,15 +3,13 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
 /**
  * Proposes new version based on commits.
  *
  * @param {Array.<Commit>} commits
  * @returns {String|null}
  */
-module.exports = function getNewVersionType( commits ) {
+export default function getNewVersionType( commits ) {
 	// No commits = no changes.
 	if ( !commits.length ) {
 		return 'skip';
@@ -50,4 +48,4 @@ module.exports = function getNewVersionType( commits ) {
 	}
 
 	return 'patch';
-};
+}

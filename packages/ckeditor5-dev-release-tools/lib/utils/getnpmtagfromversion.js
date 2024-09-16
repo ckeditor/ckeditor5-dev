@@ -3,16 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const semver = require( 'semver' );
+import semver from 'semver';
 
 /**
  * @param {String} version
  * @returns {String}
  */
-module.exports = function getNpmTagFromVersion( version ) {
+export default function getNpmTagFromVersion( version ) {
 	const [ versionTag ] = semver.prerelease( version ) || [ 'latest' ];
 
 	return versionTag;
-};
+}

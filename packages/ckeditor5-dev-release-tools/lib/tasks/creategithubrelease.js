@@ -3,11 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { Octokit } from '@octokit/rest';
+import semver from 'semver';
+import * as transformCommitUtils from '../utils/transformcommitutils.js';
 
-const { Octokit } = require( '@octokit/rest' );
-const semver = require( 'semver' );
-const { getRepositoryUrl } = require( '../utils/transformcommitutils' );
+const { getRepositoryUrl } = transformCommitUtils;
 
 /**
  * Create a GitHub release.
@@ -19,7 +19,7 @@ const { getRepositoryUrl } = require( '../utils/transformcommitutils' );
  * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @returns {Promise.<String>}
  */
-module.exports = async function createGithubRelease( options ) {
+export default async function createGithubRelease( options ) {
 	const {
 		token,
 		version,
@@ -46,7 +46,7 @@ module.exports = async function createGithubRelease( options ) {
 	}
 
 	return `https://github.com/${ repositoryOwner }/${ repositoryName }/releases/tag/v${ version }`;
-};
+}
 
 /**
  * Returns an npm tag based on the specified release version.

@@ -3,18 +3,17 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const path = require( 'path' );
-const fs = require( 'fs' );
-const findMessages = require( './findmessages' );
-const { EventEmitter } = require( 'events' );
-const PO = require( 'pofile' );
+import path from 'path';
+import fs from 'fs';
+import findMessages from './findmessages.js';
+import { EventEmitter } from 'events';
+import PO from 'pofile';
 
 /**
  * A service that serves translations assets based on the found PO files in the registered packages.
  */
-module.exports = class MultipleLanguageTranslationService extends EventEmitter {
+export default class MultipleLanguageTranslationService extends EventEmitter {
+	// TODO maybe fix the jsdoc types
 	/**
 	 * @param {Object} options
 	 * @param {String} options.mainLanguage The target language that will be bundled into the main webpack asset.
@@ -418,7 +417,7 @@ module.exports = class MultipleLanguageTranslationService extends EventEmitter {
 
 		return path.join( 'lang', 'translations' );
 	}
-};
+}
 
 /**
  * @param {String|Function|RegExp} predicate

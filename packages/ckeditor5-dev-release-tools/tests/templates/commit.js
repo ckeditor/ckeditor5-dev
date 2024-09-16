@@ -3,12 +3,14 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+import path from 'upath';
+import handlebars from 'handlebars';
 
-const fs = require( 'fs' );
-const path = require( 'path' );
-const handlebars = require( 'handlebars' );
-const expect = require( 'chai' ).expect;
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
 
 const templatePath = path.resolve( __dirname, '..', '..', 'lib', 'templates', 'commit.hbs' );
 const templateContent = fs.readFileSync( templatePath, 'utf-8' );

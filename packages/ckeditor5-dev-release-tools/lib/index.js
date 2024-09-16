@@ -3,20 +3,18 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const generateChangelogForSinglePackage = require( './tasks/generatechangelogforsinglepackage' );
-const generateChangelogForMonoRepository = require( './tasks/generatechangelogformonorepository' );
-const updateDependencies = require( './tasks/updatedependencies' );
-const commitAndTag = require( './tasks/commitandtag' );
-const createGithubRelease = require( './tasks/creategithubrelease' );
-const reassignNpmTags = require( './tasks/reassignnpmtags' );
-const prepareRepository = require( './tasks/preparerepository' );
-const push = require( './tasks/push' );
-const publishPackages = require( './tasks/publishpackages' );
-const updateVersions = require( './tasks/updateversions' );
-const cleanUpPackages = require( './tasks/cleanuppackages' );
-const {
+export { default as generateChangelogForSinglePackage } from './tasks/generatechangelogforsinglepackage.js';
+export { default as generateChangelogForMonoRepository } from './tasks/generatechangelogformonorepository.js';
+export { default as updateDependencies } from './tasks/updatedependencies.js';
+export { default as commitAndTag } from './tasks/commitandtag.js';
+export { default as createGithubRelease } from './tasks/creategithubrelease.js';
+export { default as reassignNpmTags } from './tasks/reassignnpmtags.js';
+export { default as prepareRepository } from './tasks/preparerepository.js';
+export { default as push } from './tasks/push.js';
+export { default as publishPackages } from './tasks/publishpackages.js';
+export { default as updateVersions } from './tasks/updateversions.js';
+export { default as cleanUpPackages } from './tasks/cleanuppackages.js';
+export {
 	getLastFromChangelog,
 	getLastPreRelease,
 	getNextPreRelease,
@@ -24,41 +22,14 @@ const {
 	getNextNightly,
 	getCurrent,
 	getLastTagFromGit
-} = require( './utils/versions' );
-const { getChangesForVersion, getChangelog, saveChangelog } = require( './utils/changelog' );
-const executeInParallel = require( './utils/executeinparallel' );
-const validateRepositoryToRelease = require( './utils/validaterepositorytorelease' );
-const checkVersionAvailability = require( './utils/checkversionavailability' );
-const verifyPackagesPublishedCorrectly = require( './tasks/verifypackagespublishedcorrectly' );
-const getNpmTagFromVersion = require( './utils/getnpmtagfromversion' );
-const isVersionPublishableForTag = require( './utils/isversionpublishablefortag' );
-
-module.exports = {
-	generateChangelogForSinglePackage,
-	generateChangelogForMonoRepository,
-	updateDependencies,
-	updateVersions,
-	prepareRepository,
-	commitAndTag,
-	createGithubRelease,
-	push,
-	cleanUpPackages,
-	publishPackages,
-	reassignNpmTags,
-	executeInParallel,
-	getLastFromChangelog,
-	getLastPreRelease,
-	getNextPreRelease,
-	getLastNightly,
-	getNextNightly,
-	getCurrent,
-	getLastTagFromGit,
-	getNpmTagFromVersion,
-	getChangesForVersion,
-	getChangelog,
-	saveChangelog,
-	validateRepositoryToRelease,
-	verifyPackagesPublishedCorrectly,
-	checkVersionAvailability,
-	isVersionPublishableForTag
-};
+} from './utils/versions.js';
+export { default as getChangesForVersion } from './utils/getchangesforversion.js';
+export { default as getChangelog } from './utils/getchangelog.js';
+export { default as saveChangelog } from './utils/savechangelog.js';
+export { default as executeInParallel } from './utils/executeinparallel.js';
+export { default as validateRepositoryToRelease } from './utils/validaterepositorytorelease.js';
+export { default as checkVersionAvailability } from './utils/checkversionavailability.js';
+export { default as verifyPackagesPublishedCorrectly } from './tasks/verifypackagespublishedcorrectly.js';
+export { default as getNpmTagFromVersion } from './utils/getnpmtagfromversion.js';
+export { default as isVersionPublishableForTag } from './utils/isversionpublishablefortag.js';
+export { default as provideToken } from './utils/providetoken.js';

@@ -3,12 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const chalk = require( 'chalk' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const utils = require( './transformcommitutils' );
-const { INDENT_SIZE, COMMIT_INDENT_SIZE } = require( './cli' );
+import chalk from 'chalk';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import * as utils from './transformcommitutils.js';
+import { CLI_COMMIT_INDENT_SIZE, CLI_INDENT_SIZE } from './constants.js';
 
 /**
  * @param {Array.<Commit>|Set.<Commit>} commits
@@ -16,12 +14,12 @@ const { INDENT_SIZE, COMMIT_INDENT_SIZE } = require( './cli' );
  * @param {Boolean} [options.attachLinkToCommit=false] Whether to attach a link to parsed commit.
  * @param {Number} [options.indentLevel=1] The indent level.
  */
-module.exports = function displayCommits( commits, options = {} ) {
+export default function displayCommits( commits, options = {} ) {
 	const log = logger();
 
 	const attachLinkToCommit = options.attachLinkToCommit || false;
 	const indentLevel = options.indentLevel || 1;
-	const listIndent = ' '.repeat( INDENT_SIZE * indentLevel );
+	const listIndent = ' '.repeat( CLI_INDENT_SIZE * indentLevel );
 
 	if ( !( commits.length || commits.size ) ) {
 		log.info( listIndent + chalk.italic( 'No commits to display.' ) );
@@ -51,14 +49,14 @@ module.exports = function displayCommits( commits, options = {} ) {
 			const isCommitIncluded = utils.availableCommitTypes.get( singleCommit.rawType );
 
 			const indent = commits.size > 1 ? listIndent.slice( 0, listIndent.length - 1 ) + chalk.gray( '|' ) : listIndent;
-			const noteIndent = indent + ' '.repeat( COMMIT_INDENT_SIZE );
+			const noteIndent = indent + ' '.repeat( CLI_COMMIT_INDENT_SIZE );
 
 			let logMessage = `${ indent }* ${ chalk.yellow( hash.slice( 0, 7 ) ) } "${ utils.truncate( singleCommit.header, 100 ) }" `;
 
 			if ( hasCorrectType && isCommitIncluded ) {
 				logMessage += chalk.green( 'INCLUDED' );
 			} else if ( hasCorrectType && !isCommitIncluded ) {
-				logMessage += chalk.grey( 'SKIPPED' );
+				logMessage += chalk.gray( 'SKIPPED' );
 			} else {
 				logMessage += chalk.red( 'INVALID' );
 			}
@@ -102,4 +100,4 @@ module.exports = function displayCommits( commits, options = {} ) {
 
 		return commitGroups.get( commit.hash );
 	}
-};
+}

@@ -3,13 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const path = require( 'path' );
-const fs = require( 'fs-extra' );
-const { CKEditorTranslationsPlugin } = require( '@ckeditor/ckeditor5-dev-translations' );
-const bundler = require( '../bundler' );
-const loaders = require( '../loaders' );
+import path from 'path';
+import fs from 'fs-extra';
+import { CKEditorTranslationsPlugin } from '@ckeditor/ckeditor5-dev-translations';
+import { getLicenseBanner } from '../bundler/index.js';
+import { getIconsLoader, getStylesLoader, getTypeScriptLoader } from '../loaders/index.js';
 
 /**
  * Returns a webpack configuration that creates a bundle file for the specified package. Thanks to that, plugins exported
@@ -26,11 +24,11 @@ const loaders = require( '../loaders' );
  * @param {Boolean} [options.isDevelopmentMode=false] Whether to build a dev mode of the package.
  * @returns {Object}
  */
-module.exports = function getDllPluginWebpackConfig( webpack, options ) {
+export default async function getDllPluginWebpackConfig( webpack, options ) {
 	// Terser requires webpack. However, it's needed in runtime. To avoid the "Cannot find module 'webpack'" error,
 	// let's load the Terser dependency when `getDllPluginWebpackConfig()` is executed.
 	// See: https://github.com/ckeditor/ckeditor5/issues/13136.
-	const TerserPlugin = require( 'terser-webpack-plugin' );
+	const TerserPlugin = ( await import( 'terser-webpack-plugin' ) ).default;
 
 	const { name: packageName } = fs.readJsonSync( path.join( options.packagePath, 'package.json' ) );
 	const langDirExists = fs.existsSync( path.join( options.packagePath, 'lang' ) );
@@ -58,11 +56,11 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 
 		plugins: [
 			new webpack.BannerPlugin( {
-				banner: bundler.getLicenseBanner(),
+				banner: getLicenseBanner(),
 				raw: true
 			} ),
 			new webpack.DllReferencePlugin( {
-				manifest: require( options.manifestPath ),
+				manifest: fs.readJsonSync( options.manifestPath ),
 				scope: 'ckeditor5/src',
 				name: 'CKEditor5.dll'
 			} )
@@ -77,12 +75,12 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 
 		module: {
 			rules: [
-				loaders.getIconsLoader( { matchExtensionOnly: true } ),
-				loaders.getStylesLoader( {
+				getIconsLoader( { matchExtensionOnly: true } ),
+				getStylesLoader( {
 					themePath: options.themePath,
 					minify: true
 				} ),
-				loaders.getTypeScriptLoader( {
+				getTypeScriptLoader( {
 					configFile: options.tsconfigPath || 'tsconfig.json'
 				} )
 			]
@@ -127,7 +125,7 @@ module.exports = function getDllPluginWebpackConfig( webpack, options ) {
 	}
 
 	return webpackConfig;
-};
+}
 
 /**
  * Transforms the package name (`@ckeditor/ckeditor5-foo-bar`) to the name that will be used while

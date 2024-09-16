@@ -3,205 +3,142 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, expect, it, vi } from 'vitest';
+import fs from 'fs-extra';
+import assertNpmTag from '../../lib/utils/assertnpmtag.js';
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
+vi.mock( 'fs-extra' );
 
-describe( 'dev-release-tools/utils', () => {
-	describe( 'assertNpmTag()', () => {
-		let assertNpmTag, sandbox, stubs;
+describe( 'assertNpmTag()', () => {
+	it( 'should resolve the promise if list of packages is empty', async () => {
+		await assertNpmTag( [] );
+	} );
 
-		beforeEach( () => {
-			sandbox = sinon.createSandbox();
-
-			stubs = {
-				fs: {
-					readJson: sandbox.stub()
-				}
-			};
-
-			mockery.enable( {
-				useCleanCache: true,
-				warnOnReplace: false,
-				warnOnUnregistered: false
-			} );
-
-			mockery.registerMock( 'fs-extra', stubs.fs );
-
-			assertNpmTag = require( '../../lib/utils/assertnpmtag' );
-		} );
-
-		afterEach( () => {
-			mockery.deregisterAll();
-			mockery.disable();
-			sandbox.restore();
-		} );
-
-		it( 'should resolve the promise if list of packages is empty', () => {
-			return assertNpmTag( [] );
-		} );
-
-		it( 'should read `package.json` from each package', () => {
-			stubs.fs.readJson
-				.withArgs( 'ckeditor5-foo/package.json' ).resolves( {
+	it( 'should read `package.json` from each package', async () => {
+		vi.mocked( fs ).readJson.mockImplementation( input => {
+			if ( input === 'ckeditor5-foo/package.json' ) {
+				return Promise.resolve( {
 					name: 'ckeditor5-foo',
 					version: '1.0.0'
-				} )
-				.withArgs( 'ckeditor5-bar/package.json' ).resolves( {
-					name: 'ckeditor5-bar',
-					version: '0.0.1'
 				} );
+			}
 
-			return assertNpmTag( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'latest' )
-				.then( () => {
-					expect( stubs.fs.readJson.callCount ).to.equal( 2 );
-					expect( stubs.fs.readJson.firstCall.args[ 0 ] ).to.equal( 'ckeditor5-foo/package.json' );
-					expect( stubs.fs.readJson.secondCall.args[ 0 ] ).to.equal( 'ckeditor5-bar/package.json' );
-				} );
-		} );
-
-		it( 'should not throw if version tag matches npm tag (both "latest")', () => {
-			stubs.fs.readJson.withArgs( 'ckeditor5-foo/package.json' ).resolves( {
-				name: 'ckeditor5-foo',
-				version: '1.0.0'
+			return Promise.resolve( {
+				name: 'ckeditor5-bar',
+				version: '0.0.1'
 			} );
-
-			return assertNpmTag( [ 'ckeditor5-foo' ], 'latest' );
 		} );
 
-		it( 'should not throw if version tag matches npm tag (version tag = "latest", npm tag = "staging")', () => {
-			stubs.fs.readJson.withArgs( 'ckeditor5-foo/package.json' ).resolves( {
-				name: 'ckeditor5-foo',
-				version: '1.0.0'
-			} );
+		await assertNpmTag( [ 'ckeditor5-foo', 'ckeditor5-bar' ], 'latest' );
 
-			return assertNpmTag( [ 'ckeditor5-foo' ], 'staging' );
+		expect( vi.mocked( fs ).readJson ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( fs ).readJson ).toHaveBeenCalledWith( 'ckeditor5-foo/package.json' );
+		expect( vi.mocked( fs ).readJson ).toHaveBeenCalledWith( 'ckeditor5-bar/package.json' );
+	} );
+
+	it( 'should not throw if version tag matches npm tag (both "latest")', async () => {
+		vi.mocked( fs ).readJson.mockResolvedValue( {
+			name: 'ckeditor5-foo',
+			version: '1.0.0'
 		} );
 
-		it( 'should not throw if version tag matches npm tag (both "alpha")', () => {
-			stubs.fs.readJson.withArgs( 'ckeditor5-foo/package.json' ).resolves( {
-				name: 'ckeditor5-foo',
-				version: '1.0.0-alpha.0'
-			} );
+		await assertNpmTag( [ 'ckeditor5-foo' ], 'latest' );
+	} );
 
-			return assertNpmTag( [ 'ckeditor5-foo' ], 'alpha' );
+	it( 'should not throw if version tag matches npm tag (version tag = "latest", npm tag = "staging")', async () => {
+		vi.mocked( fs ).readJson.mockResolvedValue( {
+			name: 'ckeditor5-foo',
+			version: '1.0.0'
 		} );
 
-		it( 'should not throw if version tag matches npm tag (both "nightly")', () => {
-			stubs.fs.readJson.withArgs( 'ckeditor5-foo/package.json' ).resolves( {
-				name: 'ckeditor5-foo',
-				version: '0.0.0-nightly-20230517.0'
-			} );
+		await assertNpmTag( [ 'ckeditor5-foo' ], 'staging' );
+	} );
 
-			return assertNpmTag( [ 'ckeditor5-foo' ], 'nightly' );
+	it( 'should not throw if version tag matches npm tag (both "alpha")', async () => {
+		vi.mocked( fs ).readJson.mockResolvedValue( {
+			name: 'ckeditor5-foo',
+			version: '1.0.0-alpha.0'
 		} );
 
-		it( 'should throw if version tag does not match npm tag (version tag = "latest", npm tag = "alpha")', () => {
-			stubs.fs.readJson.withArgs( 'ckeditor5-foo/package.json' ).resolves( {
-				name: 'ckeditor5-foo',
-				version: '1.0.0'
-			} );
+		await assertNpmTag( [ 'ckeditor5-foo' ], 'alpha' );
+	} );
 
-			return assertNpmTag( [ 'ckeditor5-foo' ], 'alpha' )
-				.then(
-					() => {
-						throw new Error( 'Expected to be rejected.' );
-					},
-					error => {
-						expect( error ).to.be.an( 'Error' );
-						expect( error.message ).to.equal(
-							'The version tag "latest" from "ckeditor5-foo" package does not match the npm tag "alpha".'
-						);
-					} );
+	it( 'should not throw if version tag matches npm tag (both "nightly")', async () => {
+		vi.mocked( fs ).readJson.mockResolvedValue( {
+			name: 'ckeditor5-foo',
+			version: '0.0.0-nightly-20230517.0'
 		} );
 
-		it( 'should throw if version tag does not match npm tag (version tag = "latest", npm tag = "nightly")', () => {
-			stubs.fs.readJson.withArgs( 'ckeditor5-foo/package.json' ).resolves( {
-				name: 'ckeditor5-foo',
-				version: '1.0.0'
-			} );
+		await assertNpmTag( [ 'ckeditor5-foo' ], 'nightly' );
+	} );
 
-			return assertNpmTag( [ 'ckeditor5-foo' ], 'nightly' )
-				.then(
-					() => {
-						throw new Error( 'Expected to be rejected.' );
-					},
-					error => {
-						expect( error ).to.be.an( 'Error' );
-						expect( error.message ).to.equal(
-							'The version tag "latest" from "ckeditor5-foo" package does not match the npm tag "nightly".'
-						);
-					} );
+	it( 'should throw if version tag does not match npm tag (version tag = "latest", npm tag = "alpha")', async () => {
+		vi.mocked( fs ).readJson.mockResolvedValue( {
+			name: 'ckeditor5-foo',
+			version: '1.0.0'
 		} );
 
-		it( 'should throw if version tag does not match npm tag (version tag = "alpha", npm tag = "staging")', () => {
-			stubs.fs.readJson.withArgs( 'ckeditor5-foo/package.json' ).resolves( {
-				name: 'ckeditor5-foo',
-				version: '1.0.0-alpha.0'
-			} );
+		await expect( assertNpmTag( [ 'ckeditor5-foo' ], 'alpha' ) )
+			.rejects.toThrow( 'The version tag "latest" from "ckeditor5-foo" package does not match the npm tag "alpha".' );
+	} );
 
-			return assertNpmTag( [ 'ckeditor5-foo' ], 'staging' )
-				.then(
-					() => {
-						throw new Error( 'Expected to be rejected.' );
-					},
-					error => {
-						expect( error ).to.be.an( 'Error' );
-						expect( error.message ).to.equal(
-							'The version tag "alpha" from "ckeditor5-foo" package does not match the npm tag "staging".'
-						);
-					} );
+	it( 'should throw if version tag does not match npm tag (version tag = "latest", npm tag = "nightly")', async () => {
+		vi.mocked( fs ).readJson.mockResolvedValue( {
+			name: 'ckeditor5-foo',
+			version: '1.0.0'
 		} );
 
-		it( 'should throw if version tag does not match npm tag (version tag = "nightly", npm tag = "staging")', () => {
-			stubs.fs.readJson.withArgs( 'ckeditor5-foo/package.json' ).resolves( {
-				name: 'ckeditor5-foo',
-				version: '0.0.0-nightly-20230517.0'
-			} );
+		await expect( assertNpmTag( [ 'ckeditor5-foo' ], 'nightly' ) )
+			.rejects.toThrow( 'The version tag "latest" from "ckeditor5-foo" package does not match the npm tag "nightly".' );
+	} );
 
-			return assertNpmTag( [ 'ckeditor5-foo' ], 'staging' )
-				.then(
-					() => {
-						throw new Error( 'Expected to be rejected.' );
-					},
-					error => {
-						expect( error ).to.be.an( 'Error' );
-						expect( error.message ).to.equal(
-							'The version tag "nightly" from "ckeditor5-foo" package does not match the npm tag "staging".'
-						);
-					} );
+	it( 'should throw if version tag does not match npm tag (version tag = "alpha", npm tag = "staging")', async () => {
+		vi.mocked( fs ).readJson.mockResolvedValue( {
+			name: 'ckeditor5-foo',
+			version: '1.0.0-alpha.0'
 		} );
 
-		it( 'should throw one error for all packages with incorrect tags', () => {
-			stubs.fs.readJson
-				.withArgs( 'ckeditor5-foo/package.json' ).resolves( {
+		await expect( assertNpmTag( [ 'ckeditor5-foo' ], 'staging' ) )
+			.rejects.toThrow( 'The version tag "alpha" from "ckeditor5-foo" package does not match the npm tag "staging".' );
+	} );
+
+	it( 'should throw if version tag does not match npm tag (version tag = "nightly", npm tag = "staging")', async () => {
+		vi.mocked( fs ).readJson.mockResolvedValue( {
+			name: 'ckeditor5-foo',
+			version: '0.0.0-nightly-20230517.0'
+		} );
+
+		await expect( assertNpmTag( [ 'ckeditor5-foo' ], 'staging' ) )
+			.rejects.toThrow( 'The version tag "nightly" from "ckeditor5-foo" package does not match the npm tag "staging".' );
+	} );
+
+	it( 'should throw one error for all packages with incorrect tags', async () => {
+		vi.mocked( fs ).readJson.mockImplementation( input => {
+			if ( input === 'ckeditor5-foo/package.json' ) {
+				return Promise.resolve( {
 					name: 'ckeditor5-foo',
 					version: '1.0.0-alpha'
-				} )
-				.withArgs( 'ckeditor5-bar/package.json' ).resolves( {
+				} );
+			}
+
+			if ( input === 'ckeditor5-bar/package.json' ) {
+				return Promise.resolve( {
 					name: 'ckeditor5-bar',
 					version: '0.0.0-nightly-20230517.0'
-				} )
-				.withArgs( 'ckeditor5-baz/package.json' ).resolves( {
-					name: 'ckeditor5-baz',
-					version: '0.0.1-rc.5'
 				} );
+			}
 
-			return assertNpmTag( [ 'ckeditor5-foo', 'ckeditor5-bar', 'ckeditor5-baz' ], 'latest' )
-				.then(
-					() => {
-						throw new Error( 'Expected to be rejected.' );
-					},
-					error => {
-						expect( error ).to.be.an( 'Error' );
-						expect( error.message ).to.equal(
-							'The version tag "alpha" from "ckeditor5-foo" package does not match the npm tag "latest".\n' +
-							'The version tag "nightly" from "ckeditor5-bar" package does not match the npm tag "latest".\n' +
-							'The version tag "rc" from "ckeditor5-baz" package does not match the npm tag "latest".'
-						);
-					} );
+			return Promise.resolve( {
+				name: 'ckeditor5-baz',
+				version: '0.0.1-rc.5'
+			} );
 		} );
+
+		const errorMessage = 'The version tag "alpha" from "ckeditor5-foo" package does not match the npm tag "latest".\n' +
+			'The version tag "nightly" from "ckeditor5-bar" package does not match the npm tag "latest".\n' +
+			'The version tag "rc" from "ckeditor5-baz" package does not match the npm tag "latest".';
+
+		await expect( assertNpmTag( [ 'ckeditor5-foo', 'ckeditor5-bar', 'ckeditor5-baz' ], 'latest' ) )
+			.rejects.toThrow( errorMessage );
 	} );
 } );

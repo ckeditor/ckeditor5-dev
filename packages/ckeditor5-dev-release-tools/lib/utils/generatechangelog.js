@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { Readable } = require( 'stream' );
-const { stream } = require( '@ckeditor/ckeditor5-dev-utils' );
-const conventionalChangelogWriter = require( 'conventional-changelog-writer' );
+import { Readable } from 'stream';
+import { stream } from '@ckeditor/ckeditor5-dev-utils';
+import conventionalChangelogWriter from 'conventional-changelog-writer';
 
 const UPDATED_TRANSLATION_COMMIT = '* Updated translations.';
 
@@ -38,7 +36,7 @@ const UPDATED_TRANSLATION_COMMIT = '* Updated translations.';
  *
  * @returns {Promise.<String>}
  */
-module.exports = function generateChangelog( commits, context, options ) {
+export default function generateChangelog( commits, context, options ) {
 	const commitStream = new Readable( { objectMode: true } );
 	/* istanbul ignore next */
 	commitStream._read = function() {};
@@ -61,7 +59,7 @@ module.exports = function generateChangelog( commits, context, options ) {
 			} ) )
 			.on( 'error', reject );
 	} );
-};
+}
 
 /**
  * Merges multiple "Updated translations." entries into the single commit.

@@ -3,13 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, expect, it } from 'vitest';
+import getLicenseBanner from '../../lib/bundler/getlicensebanner.js';
 
-const expect = require( 'chai' ).expect;
-const getLicenseBanner = require( '../../lib/bundler/getlicensebanner' );
-
-describe( 'bundler', () => {
-	describe( 'getLicenseBanner()', () => {
+describe( 'getLicenseBanner()', () => {
+	it( 'should return a banner', () => {
 		expect( getLicenseBanner() ).to.match( /\/\*![\S\s]+\*\//g );
 	} );
 } );

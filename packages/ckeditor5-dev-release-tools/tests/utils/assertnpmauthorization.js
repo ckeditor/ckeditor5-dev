@@ -3,92 +3,45 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, expect, it, vi } from 'vitest';
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import assertNpmAuthorization from '../../lib/utils/assertnpmauthorization.js';
 
-const expect = require( 'chai' ).expect;
-const sinon = require( 'sinon' );
-const mockery = require( 'mockery' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
-describe( 'dev-release-tools/utils', () => {
-	describe( 'assertNpmAuthorization()', () => {
-		let assertNpmAuthorization, sandbox, stubs;
+describe( 'assertNpmAuthorization()', () => {
+	it( 'should not throw if user is logged to npm as the provided account name', async () => {
+		vi.mocked( tools ).shExec.mockResolvedValue( 'pepe' );
 
-		beforeEach( () => {
-			sandbox = sinon.createSandbox();
+		await assertNpmAuthorization( 'pepe' );
 
-			stubs = {
-				devUtils: {
-					tools: {
-						shExec: sandbox.stub().resolves()
-					}
-				}
-			};
-
-			mockery.enable( {
-				useCleanCache: true,
-				warnOnReplace: false,
-				warnOnUnregistered: false
-			} );
-
-			mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', stubs.devUtils );
-
-			assertNpmAuthorization = require( '../../lib/utils/assertnpmauthorization' );
-		} );
-
-		afterEach( () => {
-			mockery.deregisterAll();
-			mockery.disable();
-			sandbox.restore();
-		} );
-
-		it( 'should not throw if user is logged to npm as the provided account name', () => {
-			stubs.devUtils.tools.shExec.resolves( 'pepe' );
-
-			return assertNpmAuthorization( 'pepe' )
-				.then( () => {
-					expect( stubs.devUtils.tools.shExec.callCount ).to.equal( 1 );
-					expect( stubs.devUtils.tools.shExec.firstCall.args[ 0 ] ).to.equal( 'npm whoami' );
-					expect( stubs.devUtils.tools.shExec.firstCall.args[ 1 ] ).to.have.property( 'verbosity', 'error' );
-					expect( stubs.devUtils.tools.shExec.firstCall.args[ 1 ] ).to.have.property( 'async', true );
-				} );
-		} );
-
-		it( 'should trim whitespace characters from the command output before checking the name', () => {
-			stubs.devUtils.tools.shExec.resolves( '\t pepe \n' );
-
-			return assertNpmAuthorization( 'pepe' );
-		} );
-
-		it( 'should throw if user is not logged to npm', () => {
-			stubs.devUtils.tools.shExec.rejects();
-
-			return assertNpmAuthorization( 'pepe' )
-				.then(
-					() => {
-						throw new Error( 'Expected to be rejected.' );
-					},
-					error => {
-						expect( error ).to.be.an( 'Error' );
-						expect( error.message ).to.equal(
-							'You must be logged to npm as "pepe" to execute this release step.'
-						);
-					} );
-		} );
-
-		it( 'should throw if user is logged to npm on different account name', () => {
-			stubs.devUtils.tools.shExec.resolves( 'john' );
-
-			return assertNpmAuthorization( 'pepe' )
-				.then(
-					() => {
-						throw new Error( 'Expected to be rejected.' );
-					},
-					error => {
-						expect( error ).to.be.an( 'Error' );
-						expect( error.message ).to.equal(
-							'You must be logged to npm as "pepe" to execute this release step.'
-						);
-					} );
-		} );
+		expect( vi.mocked( tools ).shExec ).toHaveBeenCalledExactlyOnceWith(
+			'npm whoami',
+			expect.objectContaining( {
+				verbosity: 'error',
+				async: true
+			} )
+		);
 	} );
-} );
+
+	it( 'should trim whitespace characters from the command output before checking the name', async () => {
+		vi.mocked( tools ).shExec.mockResolvedValue( '\t pepe \n' );
+
+		await assertNpmAuthorization( 'pepe' );
+	} );
+
+	it( 'should throw if user is not logged to npm', async () => {
+		vi.mocked( tools ).shExec.mockRejectedValue( new Error( 'not logged' ) );
+
+		await expect( assertNpmAuthorization( 'pepe' ) )
+			.rejects.toThrow( 'You must be logged to npm as "pepe" to execute this release step.' );
+	} );
+
+	it( 'should throw if user is logged to npm on different account name', async () => {
+		vi.mocked( tools ).shExec.mockResolvedValue( 'john' );
+
+		await expect( assertNpmAuthorization( 'pepe' ) )
+			.rejects.toThrow( 'You must be logged to npm as "pepe" to execute this release step.' );
+	} );
+} )
+;

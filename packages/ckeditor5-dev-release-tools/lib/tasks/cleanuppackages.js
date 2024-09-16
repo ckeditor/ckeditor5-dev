@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs-extra' );
-const upath = require( 'upath' );
-const { glob } = require( 'glob' );
+import fs from 'fs-extra';
+import upath from 'upath';
+import { glob } from 'glob';
 
 /**
  * The purpose of the script is to clean all packages prepared for the release. The cleaning consists of two stages:
@@ -29,7 +27,7 @@ const { glob } = require( 'glob' );
  * @param {String} [options.cwd] Current working directory from which all paths will be resolved.
  * @returns {Promise}
  */
-module.exports = async function cleanUpPackages( options ) {
+export default async function cleanUpPackages( options ) {
 	const { packagesDirectory, packageJsonFieldsToRemove, preservePostInstallHook, cwd } = parseOptions( options );
 
 	const packageJsonPaths = await glob( '*/package.json', {
@@ -47,7 +45,7 @@ module.exports = async function cleanUpPackages( options ) {
 
 		await fs.writeJson( packageJsonPath, packageJson, { spaces: 2 } );
 	}
-};
+}
 
 /**
  * Prepares the configuration options for the script.

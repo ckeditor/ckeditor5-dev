@@ -3,11 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const chalk = require( 'chalk' );
-const serveTranslations = require( './servetranslations' );
-const MultipleLanguageTranslationService = require( './multiplelanguagetranslationservice' );
+import chalk from 'chalk';
+import serveTranslations from './servetranslations.js';
+import MultipleLanguageTranslationService from './multiplelanguagetranslationservice.js';
 
 /**
  * CKEditorTranslationsPlugin, for now, consists only of the translation mechanism (@ckeditor/ckeditor5#624, @ckeditor/ckeditor5#387,
@@ -29,7 +27,7 @@ const MultipleLanguageTranslationService = require( './multiplelanguagetranslati
  * This plugin tries to clean the output translation directory before each build to make sure, that all translations are correct.
  * See https://github.com/ckeditor/ckeditor5/issues/700 for more information.
  */
-module.exports = class CKEditorTranslationsPlugin {
+export default class CKEditorTranslationsPlugin {
 	/**
 	 * @param {CKEditorTranslationsPluginOptions} options Plugin options.
 	 */
@@ -102,7 +100,7 @@ module.exports = class CKEditorTranslationsPlugin {
 
 		serveTranslations( compiler, this.options, translationService );
 	}
-};
+}
 
 /**
  * @callback AssetNamesFilter
