@@ -3,10 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
+import upath from 'upath';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import { toUnix } from 'upath';
 import { glob } from 'glob';
 import shellEscape from 'shell-escape';
+
+const { toUnix } = upath;
 
 /**
  * Creates a commit and a tag for specified version.

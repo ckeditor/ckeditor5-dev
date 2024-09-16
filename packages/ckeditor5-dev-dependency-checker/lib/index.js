@@ -3,8 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-import checkDependencies from './checkdependencies.js';
-
-export default {
-	checkDependencies
-};
+export { default as checkDependencies } from './checkdependencies.js';

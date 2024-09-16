@@ -3,9 +3,11 @@
  * For licensing, see LICENSE.md.
  */
 
-import { cloneDeepWith } from 'lodash';
+import lodash from 'lodash';
 import * as utils from './transformcommitutils.js';
 import getChangedFilesForCommit from './getchangedfilesforcommit.js';
+
+const { cloneDeepWith } = lodash;
 
 // Squash commit follows the pattern: "A pull request title (#{number})".
 const SQUASH_COMMIT_REGEXP = /^[\W\w]+ \(#\d+\)$/;

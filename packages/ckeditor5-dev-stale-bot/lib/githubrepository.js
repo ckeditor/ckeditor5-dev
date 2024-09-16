@@ -5,6 +5,7 @@
 
 import upath from 'upath';
 import fs from 'fs-extra';
+import { fileURLToPath } from 'url';
 import { GraphQLClient } from 'graphql-request';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import {
@@ -19,6 +20,9 @@ import isIssueOrPullRequestToUnstale from './utils/isissueorpullrequesttounstale
 import isIssueOrPullRequestToClose from './utils/isissueorpullrequesttoclose.js';
 import isPendingIssueToStale from './utils/ispendingissuetostale.js';
 import isPendingIssueToUnlabel from './utils/ispendingissuetounlabel.js';
+
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = upath.dirname( __filename );
 
 const GRAPHQL_PATH = upath.join( __dirname, 'graphql' );
 

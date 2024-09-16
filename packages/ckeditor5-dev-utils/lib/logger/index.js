@@ -3,9 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import chalk from 'chalk';
 
-const chalk = require( 'chalk' );
 const levels = new Map();
 
 // Displays everything.
@@ -27,7 +26,7 @@ levels.set( 'error', new Set( [ 'info', 'warning', 'error' ] ) );
  *
  * Usage:
  *
- *      const logger = require( '@ckeditor/ckeditor5-dev-utils' ).logger;
+ *      import { logger } from '@ckeditor/ckeditor5-dev-utils';
  *
  *      const infoLog = logger( 'info' );
  *      infoLog.info( 'Message.' ); // This message will be always displayed.
@@ -52,7 +51,7 @@ levels.set( 'error', new Set( [ 'info', 'warning', 'error' ] ) );
  * @returns {Function} logger.warning
  * @returns {Function} logger.error
  */
-module.exports = ( moduleVerbosity = 'info' ) => {
+export default function logger( moduleVerbosity = 'info' ) {
 	return {
 		/**
 		 * Displays a message when verbosity level is equal to 'info'.
@@ -100,4 +99,4 @@ module.exports = ( moduleVerbosity = 'info' ) => {
 			}
 		}
 	};
-};
+}

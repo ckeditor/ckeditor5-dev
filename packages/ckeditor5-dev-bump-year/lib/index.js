@@ -3,8 +3,4 @@
  * For licensing, see LICENSE.md.
  */
 
-import bumpYear from './bumpyear.js';
-
-export default {
-	bumpYear
-};
+export { default as bumpYear } from './bumpyear.js';

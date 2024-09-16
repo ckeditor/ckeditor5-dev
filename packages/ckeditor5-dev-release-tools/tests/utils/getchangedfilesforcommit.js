@@ -4,10 +4,14 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
+import { fileURLToPath } from 'url';
 import fs from 'fs';
 import path from 'path';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 import getChangedFilesForCommit from '../../lib/utils/getchangedfilesforcommit.js';
+
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
 
 describe( 'getChangedFilesForCommit()', { timeout: 15000 }, function() {
 	let tmpCwd, cwd;

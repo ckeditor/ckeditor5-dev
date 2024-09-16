@@ -4,10 +4,14 @@
  */
 
 import { describe, it, expect, vi, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
+import { fileURLToPath } from 'url';
 import fs from 'fs';
 import path from 'path';
 import gitRawCommits from 'git-raw-commits';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
+
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
 
 describe( 'getCommits()', () => {
 	let tmpCwd, cwd, getCommits, stubs;

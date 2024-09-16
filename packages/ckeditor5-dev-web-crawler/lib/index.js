@@ -7,14 +7,6 @@
 
 /* eslint-env node */
 
-import runCrawler from './runcrawler.js';
-import { getBaseUrl, isUrlValid, toArray } from './utils.js';
-import { DEFAULT_CONCURRENCY } from './constants.js';
-
-export default {
-	DEFAULT_CONCURRENCY,
-	runCrawler,
-	getBaseUrl,
-	isUrlValid,
-	toArray
-};
+export { default as runCrawler } from './runcrawler.js';
+export { getBaseUrl, isUrlValid, toArray } from './utils.js';
+export { DEFAULT_CONCURRENCY } from './constants.js';
