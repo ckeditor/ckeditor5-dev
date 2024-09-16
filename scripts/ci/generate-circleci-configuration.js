@@ -61,7 +61,7 @@ function generateTestSteps( packages ) {
 				// When a previous package failed, we still want to check the entire repository.
 				when: 'always',
 				name: `Execute tests for "${ packageName }"`,
-				cwd: upath.join( 'packages', packageName ),
+				working_directory: upath.join( 'packages', packageName ),
 				command: 'yarn run coverage'
 			}
 		};
