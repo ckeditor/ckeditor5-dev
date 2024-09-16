@@ -6,70 +6,39 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import upload from '../lib/upload.js';
 
+import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import { verifyProperties, createLogger } from '../lib/utils.js';
+import chalk from 'chalk';
+import fs from 'fs/promises';
+import path from 'path';
+import transifexService from '../lib/transifexservice.js';
+
 const {
-	fsReadFileMock,
-	fsWriteFileMock,
-	fsUnlinkMock,
-	fsLstatMock,
-	pathJoinMock,
 	tableConstructorSpy,
 	tablePushMock,
-	tableToStringMock,
-	chalkGrayMock,
-	chalkCyanMock,
-	chalkItalicMock,
-	chalkUnderlineMock,
-	transifexServiceInitMock,
-	transifexServiceGetProjectDataMock,
-	transifexServiceCreateResourceMock,
-	transifexServiceCreateSourceFileMock,
-	transifexServiceGetResourceUploadDetailsMock,
-	utilsVerifyPropertiesMock,
-	utilsCreateLoggerMock,
-	toolsCreateSpinnerMock
+	tableToStringMock
 } = vi.hoisted( () => {
 	return {
-		fsReadFileMock: vi.fn(),
-		fsWriteFileMock: vi.fn(),
-		fsUnlinkMock: vi.fn(),
-		fsLstatMock: vi.fn(),
-		pathJoinMock: vi.fn(),
 		tableConstructorSpy: vi.fn(),
 		tablePushMock: vi.fn(),
-		tableToStringMock: vi.fn(),
-		chalkGrayMock: vi.fn(),
-		chalkCyanMock: vi.fn(),
-		chalkItalicMock: vi.fn(),
-		chalkUnderlineMock: vi.fn(),
-		transifexServiceInitMock: vi.fn(),
-		transifexServiceGetProjectDataMock: vi.fn(),
-		transifexServiceCreateResourceMock: vi.fn(),
-		transifexServiceCreateSourceFileMock: vi.fn(),
-		transifexServiceGetResourceUploadDetailsMock: vi.fn(),
-		utilsVerifyPropertiesMock: vi.fn(),
-		utilsCreateLoggerMock: vi.fn(),
-		toolsCreateSpinnerMock: vi.fn()
+		tableToStringMock: vi.fn()
 	};
 } );
 
-vi.mock( 'fs/promises', () => {
-	return {
-		default: {
-			readFile: fsReadFileMock,
-			writeFile: fsWriteFileMock,
-			unlink: fsUnlinkMock,
-			lstat: fsLstatMock
-		}
-	};
-} );
+vi.mock( '../lib/transifexservice.js' );
+vi.mock( '../lib/utils.js' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( 'fs/promises' );
+vi.mock( 'path' );
 
-vi.mock( 'path', () => {
-	return {
-		default: {
-			join: pathJoinMock
-		}
-	};
-} );
+vi.mock( 'chalk', () => ( {
+	default: {
+		cyan: vi.fn( string => string ),
+		gray: vi.fn( string => string ),
+		italic: vi.fn( string => string ),
+		underline: vi.fn( string => string )
+	}
+} ) );
 
 vi.mock( 'cli-table', () => {
 	return {
@@ -80,44 +49,6 @@ vi.mock( 'cli-table', () => {
 				this.push = tablePushMock;
 				this.toString = tableToStringMock;
 			}
-		}
-	};
-} );
-
-vi.mock( 'chalk', () => {
-	return {
-		default: {
-			gray: chalkGrayMock,
-			cyan: chalkCyanMock,
-			italic: chalkItalicMock,
-			underline: chalkUnderlineMock
-		}
-	};
-} );
-
-vi.mock( '../lib/transifexservice.js', () => {
-	return {
-		default: {
-			init: transifexServiceInitMock,
-			getProjectData: transifexServiceGetProjectDataMock,
-			createResource: transifexServiceCreateResourceMock,
-			createSourceFile: transifexServiceCreateSourceFileMock,
-			getResourceUploadDetails: transifexServiceGetResourceUploadDetailsMock
-		}
-	};
-} );
-
-vi.mock( '../lib/utils.js', () => {
-	return {
-		verifyProperties: utilsVerifyPropertiesMock,
-		createLogger: utilsCreateLoggerMock
-	};
-} );
-
-vi.mock( '@ckeditor/ckeditor5-dev-utils', () => {
-	return {
-		tools: {
-			createSpinner: toolsCreateSpinnerMock
 		}
 	};
 } );
@@ -137,12 +68,7 @@ describe( 'dev-transifex/upload()', () => {
 	let loggerProgressMock, loggerInfoMock, loggerWarningMock, loggerErrorMock, loggerLogMock;
 
 	beforeEach( () => {
-		vi.mocked( chalkGrayMock ).mockImplementation( string => string );
-		vi.mocked( chalkCyanMock ).mockImplementation( string => string );
-		vi.mocked( chalkItalicMock ).mockImplementation( string => string );
-		vi.mocked( chalkUnderlineMock ).mockImplementation( string => string );
-
-		vi.mocked( pathJoinMock ).mockImplementation( ( ...args ) => args.join( '/' ) );
+		vi.mocked( path.join ).mockImplementation( ( ...args ) => args.join( '/' ) );
 
 		loggerProgressMock = vi.fn();
 		loggerInfoMock = vi.fn();
@@ -150,9 +76,9 @@ describe( 'dev-transifex/upload()', () => {
 		loggerErrorMock = vi.fn();
 		loggerErrorMock = vi.fn();
 
-		vi.mocked( fsLstatMock ).mockRejectedValue();
+		vi.mocked( fs.lstat ).mockRejectedValue();
 
-		vi.mocked( utilsCreateLoggerMock ).mockImplementation( () => {
+		vi.mocked( createLogger ).mockImplementation( () => {
 			return {
 				progress: loggerProgressMock,
 				info: loggerInfoMock,
@@ -176,7 +102,7 @@ describe( 'dev-transifex/upload()', () => {
 			projectName: 'ckeditor5'
 		};
 
-		vi.mocked( utilsVerifyPropertiesMock ).mockImplementation( () => {
+		vi.mocked( verifyProperties ).mockImplementation( () => {
 			throw new Error( error );
 		} );
 
@@ -188,8 +114,8 @@ describe( 'dev-transifex/upload()', () => {
 				caughtError => {
 					expect( caughtError.message.endsWith( error.message ) ).toEqual( true );
 
-					expect( vi.mocked( utilsVerifyPropertiesMock ) ).toHaveBeenCalledTimes( 1 );
-					expect( vi.mocked( utilsVerifyPropertiesMock ) ).toHaveBeenCalledWith(
+					expect( vi.mocked( verifyProperties ) ).toHaveBeenCalledTimes( 1 );
+					expect( vi.mocked( verifyProperties ) ).toHaveBeenCalledWith(
 						config, [ 'token', 'organizationName', 'projectName', 'cwd', 'packages' ]
 					);
 				}
@@ -201,7 +127,7 @@ describe( 'dev-transifex/upload()', () => {
 			[ 'ckeditor5-existing-11', 'build/.transifex/ckeditor5-existing-11' ]
 		] );
 
-		vi.mocked( transifexServiceGetProjectDataMock ).mockRejectedValue( new Error( 'Invalid auth' ) );
+		vi.mocked( transifexService.getProjectData ).mockRejectedValue( new Error( 'Invalid auth' ) );
 
 		const config = {
 			packages,
@@ -221,12 +147,12 @@ describe( 'dev-transifex/upload()', () => {
 			2, 'Make sure you specified a valid auth token or an organization/project names.'
 		);
 
-		expect( vi.mocked( transifexServiceGetProjectDataMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( transifexServiceGetProjectDataMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( transifexService.getProjectData ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( transifexService.getProjectData ) ).toHaveBeenCalledWith(
 			'ckeditor', 'ckeditor5', [ ...packages.keys() ]
 		);
 
-		expect( vi.mocked( transifexServiceCreateResourceMock ) ).toHaveBeenCalledTimes( 0 );
+		expect( vi.mocked( transifexService.createResource ) ).toHaveBeenCalledTimes( 0 );
 	} );
 
 	it( 'should create a new resource if the package is processed for the first time', async () => {
@@ -242,22 +168,22 @@ describe( 'dev-transifex/upload()', () => {
 			projectName: 'ckeditor5'
 		};
 
-		vi.mocked( transifexServiceGetProjectDataMock ).mockResolvedValue( { resources: [] } );
-		vi.mocked( transifexServiceCreateResourceMock ).mockResolvedValue();
-		vi.mocked( transifexServiceCreateSourceFileMock ).mockResolvedValue( 'uuid-01' );
-		vi.mocked( transifexServiceGetResourceUploadDetailsMock ).mockResolvedValue(
+		vi.mocked( transifexService.getProjectData ).mockResolvedValue( { resources: [] } );
+		vi.mocked( transifexService.createResource ).mockResolvedValue();
+		vi.mocked( transifexService.createSourceFile ).mockResolvedValue( 'uuid-01' );
+		vi.mocked( transifexService.getResourceUploadDetails ).mockResolvedValue(
 			createResourceUploadDetailsResponse( 'ckeditor5-non-existing-01', 0, 0, 0 )
 		);
 
-		vi.mocked( toolsCreateSpinnerMock ).mockReturnValue( {
+		vi.mocked( tools.createSpinner ).mockReturnValue( {
 			start: vi.fn(),
 			finish: vi.fn()
 		} );
 
 		await upload( config );
 
-		expect( vi.mocked( transifexServiceCreateResourceMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( transifexServiceCreateResourceMock ) ).toHaveBeenCalledWith( {
+		expect( vi.mocked( transifexService.createResource ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( transifexService.createResource ) ).toHaveBeenCalledWith( {
 			organizationName: 'ckeditor',
 			projectName: 'ckeditor5',
 			resourceName: 'ckeditor5-non-existing-01'
@@ -277,26 +203,26 @@ describe( 'dev-transifex/upload()', () => {
 			projectName: 'ckeditor5'
 		};
 
-		vi.mocked( transifexServiceGetProjectDataMock ).mockResolvedValue( {
+		vi.mocked( transifexService.getProjectData ).mockResolvedValue( {
 			resources: [
 				{ attributes: { name: 'ckeditor5-existing-11' } }
 			]
 		} );
 
-		vi.mocked( transifexServiceCreateSourceFileMock ).mockResolvedValue( 'uuid-11' );
+		vi.mocked( transifexService.createSourceFile ).mockResolvedValue( 'uuid-11' );
 
-		vi.mocked( transifexServiceGetResourceUploadDetailsMock ).mockResolvedValue(
+		vi.mocked( transifexService.getResourceUploadDetails ).mockResolvedValue(
 			createResourceUploadDetailsResponse( 'ckeditor5-existing-11', 0, 0, 0 )
 		);
 
-		vi.mocked( toolsCreateSpinnerMock ).mockReturnValue( {
+		vi.mocked( tools.createSpinner ).mockReturnValue( {
 			start: vi.fn(),
 			finish: vi.fn()
 		} );
 
 		await upload( config );
 
-		expect( vi.mocked( transifexServiceCreateResourceMock ) ).toHaveBeenCalledTimes( 0 );
+		expect( vi.mocked( transifexService.createResource ) ).toHaveBeenCalledTimes( 0 );
 	} );
 
 	it( 'should send a new translation source to Transifex', async () => {
@@ -312,42 +238,42 @@ describe( 'dev-transifex/upload()', () => {
 			projectName: 'ckeditor5'
 		};
 
-		vi.mocked( transifexServiceGetProjectDataMock ).mockResolvedValue( {
+		vi.mocked( transifexService.getProjectData ).mockResolvedValue( {
 			resources: [
 				{ attributes: { name: 'ckeditor5-existing-11' } }
 			]
 		} );
 
-		vi.mocked( transifexServiceCreateSourceFileMock ).mockResolvedValue( 'uuid-11' );
+		vi.mocked( transifexService.createSourceFile ).mockResolvedValue( 'uuid-11' );
 
-		vi.mocked( transifexServiceGetResourceUploadDetailsMock ).mockResolvedValue(
+		vi.mocked( transifexService.getResourceUploadDetails ).mockResolvedValue(
 			createResourceUploadDetailsResponse( 'ckeditor5-existing-11', 0, 0, 0 )
 		);
 
-		vi.mocked( fsReadFileMock ).mockResolvedValue( '# Example file.' );
+		vi.mocked( fs.readFile ).mockResolvedValue( '# Example file.' );
 
-		vi.mocked( toolsCreateSpinnerMock ).mockReturnValue( {
+		vi.mocked( tools.createSpinner ).mockReturnValue( {
 			start: vi.fn(),
 			finish: vi.fn()
 		} );
 
 		await upload( config );
 
-		expect( vi.mocked( fsReadFileMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( fsReadFileMock ) ).toHaveBeenCalledWith(
+		expect( vi.mocked( fs.readFile ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( fs.readFile ) ).toHaveBeenCalledWith(
 			'/home/ckeditor5/build/.transifex/ckeditor5-existing-11/en.pot', 'utf-8'
 		);
 
-		expect( vi.mocked( transifexServiceCreateSourceFileMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( transifexServiceCreateSourceFileMock ) ).toHaveBeenCalledWith( {
+		expect( vi.mocked( transifexService.createSourceFile ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( transifexService.createSourceFile ) ).toHaveBeenCalledWith( {
 			organizationName: 'ckeditor',
 			projectName: 'ckeditor5',
 			resourceName: 'ckeditor5-existing-11',
 			content: '# Example file.'
 		} );
 
-		expect( vi.mocked( transifexServiceGetResourceUploadDetailsMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( transifexServiceGetResourceUploadDetailsMock ) ).toHaveBeenCalledWith( 'uuid-11' );
+		expect( vi.mocked( transifexService.getResourceUploadDetails ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( transifexService.getResourceUploadDetails ) ).toHaveBeenCalledWith( 'uuid-11' );
 	} );
 
 	it( 'should keep informed a developer what the script does', async () => {
@@ -363,13 +289,13 @@ describe( 'dev-transifex/upload()', () => {
 			projectName: 'ckeditor5'
 		};
 
-		vi.mocked( transifexServiceGetProjectDataMock ).mockResolvedValue( {
+		vi.mocked( transifexService.getProjectData ).mockResolvedValue( {
 			resources: []
 		} );
 
-		vi.mocked( transifexServiceCreateResourceMock ).mockResolvedValue();
-		vi.mocked( transifexServiceCreateSourceFileMock ).mockResolvedValue( 'uuid-01' );
-		vi.mocked( transifexServiceGetResourceUploadDetailsMock ).mockResolvedValue(
+		vi.mocked( transifexService.createResource ).mockResolvedValue();
+		vi.mocked( transifexService.createSourceFile ).mockResolvedValue( 'uuid-01' );
+		vi.mocked( transifexService.getResourceUploadDetails ).mockResolvedValue(
 			createResourceUploadDetailsResponse( 'ckeditor5-non-existing-01', 0, 0, 0 )
 		);
 
@@ -382,8 +308,8 @@ describe( 'dev-transifex/upload()', () => {
 			finish: vi.fn()
 		};
 
-		vi.mocked( toolsCreateSpinnerMock ).mockReturnValueOnce( packageSpinner );
-		vi.mocked( toolsCreateSpinnerMock ).mockReturnValueOnce( processSpinner );
+		vi.mocked( tools.createSpinner ).mockReturnValueOnce( packageSpinner );
+		vi.mocked( tools.createSpinner ).mockReturnValueOnce( processSpinner );
 
 		vi.mocked( tableToStringMock ).mockReturnValue( '┻━┻' );
 
@@ -398,11 +324,11 @@ describe( 'dev-transifex/upload()', () => {
 		expect( vi.mocked( loggerProgressMock ) ).toHaveBeenNthCalledWith( 3 );
 		expect( vi.mocked( loggerProgressMock ) ).toHaveBeenNthCalledWith( 4, 'Done.' );
 
-		expect( vi.mocked( toolsCreateSpinnerMock ) ).toHaveBeenCalledTimes( 2 );
-		expect( vi.mocked( toolsCreateSpinnerMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( tools.createSpinner ) ).toHaveBeenCalledTimes( 2 );
+		expect( vi.mocked( tools.createSpinner ) ).toHaveBeenNthCalledWith(
 			1, 'Processing "ckeditor5-non-existing-01"', { emoji: '👉', indentLevel: 1 }
 		);
-		expect( vi.mocked( toolsCreateSpinnerMock ) ).toHaveBeenNthCalledWith(
+		expect( vi.mocked( tools.createSpinner ) ).toHaveBeenNthCalledWith(
 			2, 'Collecting responses... It takes a while.'
 		);
 
@@ -410,8 +336,8 @@ describe( 'dev-transifex/upload()', () => {
 		expect( packageSpinner.finish ).toHaveBeenCalled();
 		expect( processSpinner.start ).toHaveBeenCalled();
 		expect( processSpinner.finish ).toHaveBeenCalled();
-		expect( vi.mocked( chalkGrayMock ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( chalkItalicMock ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( chalk.gray ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( chalk.italic ) ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	describe( 'error handling', () => {
@@ -433,15 +359,15 @@ describe( 'dev-transifex/upload()', () => {
 				projectName: 'ckeditor5'
 			};
 
-			vi.mocked( fsLstatMock ).mockResolvedValueOnce();
+			vi.mocked( fs.lstat ).mockResolvedValueOnce();
 
-			vi.mocked( transifexServiceGetProjectDataMock ).mockResolvedValue( {
+			vi.mocked( transifexService.getProjectData ).mockResolvedValue( {
 				resources: []
 			} );
 
-			vi.mocked( transifexServiceCreateResourceMock ).mockResolvedValue();
+			vi.mocked( transifexService.createResource ).mockResolvedValue();
 
-			vi.mocked( transifexServiceCreateSourceFileMock ).mockImplementation( options => {
+			vi.mocked( transifexService.createSourceFile ).mockImplementation( options => {
 				if ( options.resourceName === 'ckeditor5-non-existing-01' ) {
 					return Promise.resolve( 'uuid-01' );
 				}
@@ -453,7 +379,7 @@ describe( 'dev-transifex/upload()', () => {
 				return Promise.reject( { errors: [] } );
 			} );
 
-			vi.mocked( fsReadFileMock ).mockImplementation( path => {
+			vi.mocked( fs.readFile ).mockImplementation( path => {
 				if ( path === config.cwd + '/build/.transifex/ckeditor5-non-existing-01/en.pot' ) {
 					return Promise.resolve( '# ckeditor5-non-existing-01' );
 				}
@@ -465,7 +391,7 @@ describe( 'dev-transifex/upload()', () => {
 				return Promise.resolve( '' );
 			} );
 
-			vi.mocked( transifexServiceGetResourceUploadDetailsMock ).mockImplementation( id => {
+			vi.mocked( transifexService.getResourceUploadDetails ).mockImplementation( id => {
 				if ( id === 'uuid-01' ) {
 					return Promise.resolve(
 						createResourceUploadDetailsResponse( 'ckeditor5-non-existing-01', 3, 0, 0 )
@@ -481,7 +407,7 @@ describe( 'dev-transifex/upload()', () => {
 				return Promise.reject();
 			} );
 
-			vi.mocked( toolsCreateSpinnerMock ).mockReturnValue( {
+			vi.mocked( tools.createSpinner ).mockReturnValue( {
 				start: vi.fn(),
 				finish: vi.fn()
 			} );
@@ -498,17 +424,17 @@ describe( 'dev-transifex/upload()', () => {
 				2, 'The script will process only packages listed in the file instead of all passed as "config.packages".'
 			);
 
-			expect( vi.mocked( fsReadFileMock ) ).toHaveBeenCalledTimes( 2 );
-			expect( vi.mocked( transifexServiceCreateResourceMock ) ).toHaveBeenCalledTimes( 2 );
-			expect( vi.mocked( transifexServiceCreateSourceFileMock ) ).toHaveBeenCalledTimes( 2 );
-			expect( vi.mocked( transifexServiceGetResourceUploadDetailsMock ) ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( fs.readFile ) ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( transifexService.createResource ) ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( transifexService.createSourceFile ) ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( transifexService.getResourceUploadDetails ) ).toHaveBeenCalledTimes( 2 );
 		} );
 
 		it( 'should remove the ".transifex-failed-uploads.json" file if finished with no errors', async () => {
 			await upload( config );
 
-			expect( vi.mocked( fsUnlinkMock ) ).toHaveBeenCalledTimes( 1 );
-			expect( vi.mocked( fsUnlinkMock ) ).toHaveBeenCalledWith( '/home/ckeditor5-with-errors/.transifex-failed-uploads.json' );
+			expect( vi.mocked( fs.unlink ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs.unlink ) ).toHaveBeenCalledWith( '/home/ckeditor5-with-errors/.transifex-failed-uploads.json' );
 		} );
 
 		it( 'should store an error in the ".transifex-failed-uploads.json" file (cannot create a resource)', async () => {
@@ -517,7 +443,7 @@ describe( 'dev-transifex/upload()', () => {
 				finish: vi.fn()
 			};
 
-			vi.mocked( toolsCreateSpinnerMock ).mockReturnValueOnce( firstSpinner );
+			vi.mocked( tools.createSpinner ).mockReturnValueOnce( firstSpinner );
 
 			const error = {
 				message: 'JsonApiError: 409',
@@ -528,8 +454,8 @@ describe( 'dev-transifex/upload()', () => {
 				]
 			};
 
-			vi.mocked( transifexServiceCreateResourceMock ).mockRejectedValueOnce( error );
-			vi.mocked( transifexServiceCreateResourceMock ).mockResolvedValueOnce();
+			vi.mocked( transifexService.createResource ).mockRejectedValueOnce( error );
+			vi.mocked( transifexService.createResource ).mockResolvedValueOnce();
 
 			await upload( config );
 
@@ -547,8 +473,8 @@ describe( 'dev-transifex/upload()', () => {
 			expect( firstSpinner.finish ).toHaveBeenCalledTimes( 1 );
 			expect( firstSpinner.finish ).toHaveBeenCalledWith( { emoji: '❌' } );
 
-			expect( vi.mocked( fsWriteFileMock ) ).toHaveBeenCalledTimes( 1 );
-			expect( vi.mocked( fsWriteFileMock ) ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs.writeFile ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs.writeFile ) ).toHaveBeenCalledWith(
 				'/home/ckeditor5-with-errors/.transifex-failed-uploads.json',
 				JSON.stringify( {
 					'ckeditor5-non-existing-01': [ 'Resource with this Slug and Project already exists.' ]
@@ -563,7 +489,7 @@ describe( 'dev-transifex/upload()', () => {
 				finish: vi.fn()
 			};
 
-			vi.mocked( toolsCreateSpinnerMock ).mockReturnValueOnce( firstSpinner );
+			vi.mocked( tools.createSpinner ).mockReturnValueOnce( firstSpinner );
 
 			const error = {
 				message: 'JsonApiError: 409',
@@ -574,7 +500,7 @@ describe( 'dev-transifex/upload()', () => {
 				]
 			};
 
-			vi.mocked( transifexServiceCreateSourceFileMock ).mockRejectedValueOnce( error );
+			vi.mocked( transifexService.createSourceFile ).mockRejectedValueOnce( error );
 
 			await upload( config );
 
@@ -589,8 +515,8 @@ describe( 'dev-transifex/upload()', () => {
 				5, 'Re-running the script will process only packages specified in the file.'
 			);
 
-			expect( vi.mocked( fsWriteFileMock ) ).toHaveBeenCalledTimes( 1 );
-			expect( vi.mocked( fsWriteFileMock ) ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs.writeFile ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs.writeFile ) ).toHaveBeenCalledWith(
 				'/home/ckeditor5-with-errors/.transifex-failed-uploads.json',
 				JSON.stringify( {
 					'ckeditor5-non-existing-01': [ 'Object not found. It may have been deleted or not been created yet.' ]
@@ -612,7 +538,7 @@ describe( 'dev-transifex/upload()', () => {
 				]
 			};
 
-			vi.mocked( transifexServiceGetResourceUploadDetailsMock ).mockRejectedValueOnce( error );
+			vi.mocked( transifexService.getResourceUploadDetails ).mockRejectedValueOnce( error );
 
 			await upload( config );
 
@@ -627,8 +553,8 @@ describe( 'dev-transifex/upload()', () => {
 				5, 'Re-running the script will process only packages specified in the file.'
 			);
 
-			expect( vi.mocked( fsWriteFileMock ) ).toHaveBeenCalledTimes( 1 );
-			expect( vi.mocked( fsWriteFileMock ) ).toHaveBeenCalledWith(
+			expect( vi.mocked( fs.writeFile ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( fs.writeFile ) ).toHaveBeenCalledWith(
 				'/home/ckeditor5-with-errors/.transifex-failed-uploads.json',
 				JSON.stringify( {
 					'ckeditor5-non-existing-01': [ 'Object not found. It may have been deleted or not been created yet.' ]
@@ -660,12 +586,12 @@ describe( 'dev-transifex/upload()', () => {
 				projectName: 'ckeditor5'
 			};
 
-			vi.mocked( transifexServiceCreateSourceFileMock ).mockResolvedValue( 'uuid-xx' );
+			vi.mocked( transifexService.createSourceFile ).mockResolvedValue( 'uuid-xx' );
 
-			vi.mocked( transifexServiceCreateSourceFileMock ).mockResolvedValue( 'uuid-xx' );
+			vi.mocked( transifexService.createSourceFile ).mockResolvedValue( 'uuid-xx' );
 
 			// Mock resources on Transifex.
-			vi.mocked( transifexServiceGetProjectDataMock ).mockResolvedValue( {
+			vi.mocked( transifexService.getProjectData ).mockResolvedValue( {
 				resources: [
 					{ attributes: { name: 'ckeditor5-existing-11' } },
 					{ attributes: { name: 'ckeditor5-existing-12' } },
@@ -674,9 +600,9 @@ describe( 'dev-transifex/upload()', () => {
 				]
 			} );
 
-			vi.mocked( transifexServiceCreateResourceMock ).mockResolvedValue();
+			vi.mocked( transifexService.createResource ).mockResolvedValue();
 
-			vi.mocked( transifexServiceGetResourceUploadDetailsMock )
+			vi.mocked( transifexService.getResourceUploadDetails )
 				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-existing-11', 0, 0, 0 ) )
 				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-existing-14', 0, 0, 0 ) )
 				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-non-existing-03', 1, 0, 0 ) )
@@ -685,7 +611,7 @@ describe( 'dev-transifex/upload()', () => {
 				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-non-existing-02', 0, 0, 0 ) )
 				.mockResolvedValueOnce( createResourceUploadDetailsResponse( 'ckeditor5-existing-12', 0, 1, 1 ) );
 
-			vi.mocked( toolsCreateSpinnerMock ).mockReturnValue( {
+			vi.mocked( tools.createSpinner ).mockReturnValue( {
 				start: vi.fn(),
 				finish: vi.fn()
 			} );
@@ -694,11 +620,11 @@ describe( 'dev-transifex/upload()', () => {
 		it( 'should handle all packages', async () => {
 			await upload( config );
 
-			expect( vi.mocked( transifexServiceGetProjectDataMock ) ).toHaveBeenCalledTimes( 1 );
-			expect( vi.mocked( transifexServiceCreateResourceMock ) ).toHaveBeenCalledTimes( 3 );
-			expect( vi.mocked( transifexServiceCreateSourceFileMock ) ).toHaveBeenCalledTimes( 7 );
-			expect( vi.mocked( transifexServiceGetResourceUploadDetailsMock ) ).toHaveBeenCalledTimes( 7 );
-			expect( vi.mocked( toolsCreateSpinnerMock ) ).toHaveBeenCalledTimes( 8 );
+			expect( vi.mocked( transifexService.getProjectData ) ).toHaveBeenCalledTimes( 1 );
+			expect( vi.mocked( transifexService.createResource ) ).toHaveBeenCalledTimes( 3 );
+			expect( vi.mocked( transifexService.createSourceFile ) ).toHaveBeenCalledTimes( 7 );
+			expect( vi.mocked( transifexService.getResourceUploadDetails ) ).toHaveBeenCalledTimes( 7 );
+			expect( vi.mocked( tools.createSpinner ) ).toHaveBeenCalledTimes( 8 );
 		} );
 
 		it( 'should display a summary table with sorted packages (new, has changes, A-Z)', async () => {
@@ -717,7 +643,7 @@ describe( 'dev-transifex/upload()', () => {
 
 			// 1x for printing "It takes a while",
 			// 5x for each column, x2 for each resource.
-			expect( vi.mocked( chalkGrayMock ) ).toHaveBeenCalledTimes( 11 );
+			expect( vi.mocked( chalk.gray ) ).toHaveBeenCalledTimes( 11 );
 		} );
 
 		it( 'should not display a summary table if none of the packages were processed', async () => {

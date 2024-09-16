@@ -10,8 +10,6 @@ import { logger as utilsLogger } from '@ckeditor/ckeditor5-dev-utils';
 import { findMessages } from '@ckeditor/ckeditor5-dev-translations';
 import { verifyProperties } from './utils.js';
 
-let defaultLogger;
-let langContextSuffix;
 const corePackageName = 'ckeditor5-core';
 
 /**
@@ -29,8 +27,8 @@ const corePackageName = 'ckeditor5-core';
  * @param {Logger} [options.logger] A logger.
  */
 export default function createPotFiles( options ) {
-	defaultLogger = utilsLogger();
-	langContextSuffix = path.join( 'lang', 'contexts.json' );
+	const defaultLogger = utilsLogger();
+	const langContextSuffix = path.join( 'lang', 'contexts.json' );
 
 	verifyProperties( options, [ 'sourceFiles', 'packagePaths', 'corePackagePath', 'translationsDirectory' ] );
 
@@ -44,12 +42,12 @@ export default function createPotFiles( options ) {
 		logger = defaultLogger
 	} = options;
 
-	const packageContexts = getPackageContexts( packagePaths, corePackagePath );
+	const packageContexts = getPackageContexts( packagePaths, corePackagePath, langContextSuffix );
 	const sourceMessages = collectSourceMessages( { sourceFiles, logger } );
 
 	const errors = [].concat(
 		assertNoMissingContext( { packageContexts, sourceMessages } ),
-		assertAllContextUsed( { packageContexts, sourceMessages, ignoreUnusedCorePackageContexts, corePackagePath } ),
+		assertAllContextUsed( { packageContexts, sourceMessages, ignoreUnusedCorePackageContexts, corePackagePath, langContextSuffix } ),
 		assertNoRepeatedContext( { packageContexts } )
 	);
 
@@ -94,14 +92,14 @@ export default function createPotFiles( options ) {
  * @param {Array.<String>} packagePaths An array of paths to packages, which will be used to find message contexts.
  * @returns {Map.<String, Context>}
  */
-function getPackageContexts( packagePaths, corePackagePath ) {
+function getPackageContexts( packagePaths, corePackagePath, langContextSuffix ) {
 	// Add path to core package if not included in the package paths.
 	if ( !packagePaths.includes( corePackagePath ) ) {
 		packagePaths = [ ...packagePaths, corePackagePath ];
 	}
 
 	const mapEntries = packagePaths
-		.filter( packagePath => containsContextFile( packagePath ) )
+		.filter( packagePath => containsContextFile( packagePath, langContextSuffix ) )
 		.map( packagePath => {
 			const pathToContext = path.join( packagePath, langContextSuffix );
 			const packageName = packagePath.split( /[\\/]/ ).pop();
@@ -170,7 +168,7 @@ function assertNoMissingContext( { packageContexts, sourceMessages } ) {
  * @returns {Array.<String>}
  */
 function assertAllContextUsed( options ) {
-	const { packageContexts, sourceMessages, ignoreUnusedCorePackageContexts, corePackagePath } = options;
+	const { packageContexts, sourceMessages, ignoreUnusedCorePackageContexts, corePackagePath, langContextSuffix } = options;
 
 	const usedContextMap = new Map();
 	const errors = [];
@@ -326,7 +324,7 @@ function createPotFileContent( messages ) {
 /**
  * @param {String} packageDirectory
  */
-function containsContextFile( packageDirectory ) {
+function containsContextFile( packageDirectory, langContextSuffix ) {
 	return fs.existsSync( path.join( packageDirectory, langContextSuffix ) );
 }
 
