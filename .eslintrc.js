@@ -43,6 +43,7 @@ module.exports = {
 				'./packages/ckeditor5-dev-bump-year/**/*',
 				'./packages/ckeditor5-dev-dependency-checker/**/*',
 				'./packages/ckeditor5-dev-stale-bot/**/*',
+				'./packages/ckeditor5-dev-transifex/**/*',
 				'./packages/ckeditor5-dev-ci/**/*',
 				'./packages/ckeditor5-dev-web-crawler/**/*',
 				'./packages/ckeditor5-dev-docs/**/*'
