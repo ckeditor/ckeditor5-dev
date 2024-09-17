@@ -63,7 +63,7 @@ vi.mock( 'karma/lib/logger.js' );
 vi.mock( '../../lib/utils/automated-tests/getkarmaconfig.js' );
 vi.mock( '../../lib/utils/transformfileoptiontotestglob.js' );
 
-describe( 'runAutomatedTests', () => {
+describe( 'runAutomatedTests()', () => {
 	let runAutomatedTests;
 
 	beforeEach( async () => {

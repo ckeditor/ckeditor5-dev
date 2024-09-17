@@ -5,9 +5,9 @@
 
 import fs from 'fs';
 import path from 'path';
+import { spawn } from 'child_process';
 import chalk from 'chalk';
 import { globSync } from 'glob';
-import { spawn } from 'child_process';
 import inquirer from 'inquirer';
 import isInteractive from 'is-interactive';
 import { Server as SocketServer } from 'socket.io';

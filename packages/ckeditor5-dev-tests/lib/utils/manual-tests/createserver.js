@@ -27,7 +27,7 @@ export default function createManualTestServer( sourcePath, port = 8125, onCreat
 			onRequest( sourcePath, request, response );
 		} ).listen( port );
 
-		// SIGINT isn't caught on Windows in process. However CTRL+C can be catch
+		// SIGINT isn't caught on Windows in process. However, `CTRL+C` can be caught
 		// by `readline` module. After that we can emit SIGINT to the process manually.
 		if ( process.platform === 'win32' ) {
 			const readline = require( 'readline' ).createInterface( {
