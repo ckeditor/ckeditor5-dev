@@ -93,8 +93,6 @@ export default async function build( config ) {
 /**
  * @typedef {Object} TypedocConfig
  *
- * @property {'typedoc'} type
- *
  * @property {Object} config
  *
  * @property {String} cwd
