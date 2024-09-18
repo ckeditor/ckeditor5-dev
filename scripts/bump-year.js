@@ -17,26 +17,27 @@ git commit -am "Internal: Bumped the year." && git push
 
 */
 
-require( '@ckeditor/ckeditor5-dev-bump-year' )
-	.bumpYear( {
-		cwd: process.cwd(),
-		globPatterns: [
-			{ // LICENSE.md, .eslintrc.js, etc.
-				pattern: '*',
-				options: {
-					dot: true
-				}
-			},
-			{
-				pattern: '.husky/*'
-			},
-			{
-				pattern: '!(coverage|.nyc_output)/**',
-				options: {
-					ignore: [
-						'**/typedoc-plugins/tests/module-fixer/fixtures/emptyfile.ts'
-					]
-				}
+import { bumpYear } from '@ckeditor/ckeditor5-dev-bump-year';
+
+bumpYear( {
+	cwd: process.cwd(),
+	globPatterns: [
+		{ // LICENSE.md, .eslintrc.js, etc.
+			pattern: '*',
+			options: {
+				dot: true
 			}
-		]
-	} );
+		},
+		{
+			pattern: '.husky/*'
+		},
+		{
+			pattern: '!(coverage|.nyc_output)/**',
+			options: {
+				ignore: [
+					'**/typedoc-plugins/tests/module-fixer/fixtures/emptyfile.ts'
+				]
+			}
+		}
+	]
+} );
