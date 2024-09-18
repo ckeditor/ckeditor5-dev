@@ -12,7 +12,7 @@ import TreatWarningsAsErrorsWebpackPlugin from '../../../lib/utils/automated-tes
 const __filename = fileURLToPath( import.meta.url );
 const __dirname = path.dirname( __filename );
 
-describe( 'TreatWarningsAsErrorsWebpackPlugin()', () => {
+describe( 'TreatWarningsAsErrorsWebpackPlugin', () => {
 	it( 'should reassign warnings to errors and not emit the code when errors are present', () => {
 		return new Promise( ( resolve, reject ) => {
 			runCompiler(

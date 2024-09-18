@@ -45,7 +45,7 @@ export default function compileHtmlFiles( options ) {
 
 	const staticFiles = sourceDirs
 		.flatMap( sourceDir => {
-			const globPattern = path.join( sourceDir, '**', '*.!(js|html|md)' ).split( path.sep ).join( '/' );
+			const globPattern = path.join( sourceDir, '**', '*.!(js|html|md)' ).split( /[\\/]/ ).join( '/' );
 
 			return globSync( globPattern );
 		} )
