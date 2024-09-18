@@ -3,43 +3,92 @@
  * For licensing, see LICENSE.md.
  */
 
+import glob from 'fast-glob';
+import TypeDoc from 'typedoc';
+import typedocPlugins from '@ckeditor/typedoc-plugins';
+
+import validators from './validators/index.js';
+
 /**
- * Builds CKEditor 5 documentation.
+ * Builds CKEditor 5 documentation using `typedoc`.
  *
- * @param {JSDocConfig|TypedocConfig} config
+ * @param {TypedocConfig} config
  * @returns {Promise}
  */
 export default async function build( config ) {
-	const type = config.type || 'jsdoc';
+	const { plugins } = typedocPlugins;
+	const sourceFilePatterns = config.sourceFiles.filter( Boolean );
+	const strictMode = config.strict || false;
+	const extraPlugins = config.extraPlugins || [];
+	const validatorOptions = config.validatorOptions || {};
 
-	if ( type === 'jsdoc' ) {
-		return ( await import( './buildjsdoc.js' ) ).default( config );
-	} else if ( type === 'typedoc' ) {
-		return ( await import( './buildtypedoc.js' ) ).default( config );
-	} else {
-		throw new Error( `Unknown documentation tool (${ type }).` );
+	const files = await glob( sourceFilePatterns );
+	const typeDoc = new TypeDoc.Application();
+
+	typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
+	typeDoc.options.addReader( new TypeDoc.TypeDocReader() );
+
+	typeDoc.bootstrap( {
+		tsconfig: config.tsconfig,
+		excludeExternals: true,
+		entryPoints: files,
+		logLevel: 'Warn',
+		basePath: config.cwd,
+		blockTags: [
+			'@eventName',
+			'@default'
+		],
+		inlineTags: [
+			'@link',
+			'@glink'
+		],
+		modifierTags: [
+			'@publicApi',
+			'@skipSource',
+			'@internal'
+		],
+		plugin: [
+			// Fixes `"name": 'default" in the output project.
+			'typedoc-plugin-rename-defaults',
+
+			plugins[ 'typedoc-plugin-module-fixer' ],
+			plugins[ 'typedoc-plugin-symbol-fixer' ],
+			plugins[ 'typedoc-plugin-interface-augmentation-fixer' ],
+			plugins[ 'typedoc-plugin-tag-error' ],
+			plugins[ 'typedoc-plugin-tag-event' ],
+			plugins[ 'typedoc-plugin-tag-observable' ],
+			plugins[ 'typedoc-plugin-purge-private-api-docs' ],
+
+			// The `event-inheritance-fixer` plugin must be loaded after `tag-event` plugin, as it depends on its output.
+			plugins[ 'typedoc-plugin-event-inheritance-fixer' ],
+
+			// The `event-param-fixer` plugin must be loaded after `tag-event` and `tag-observable` plugins, as it depends on their output.
+			plugins[ 'typedoc-plugin-event-param-fixer' ],
+
+			...extraPlugins
+		]
+	} );
+
+	console.log( 'Typedoc started...' );
+
+	const conversionResult = typeDoc.convert();
+
+	if ( !conversionResult ) {
+		throw 'Something went wrong with TypeDoc.';
 	}
-}
 
-/**
- * @typedef {Object} JSDocConfig
- *
- * @property {'jsdoc'} type
- *
- * @property {Array.<String>} sourceFiles Glob pattern with source files.
- *
- * @property {String} readmePath Path to `README.md`.
- *
- * @property {Boolean} [validateOnly=false] Whether JSDoc should only validate the documentation and finish
- * with error code `1`. If not passed, the errors will be printed to the console but the task will finish with `0`.
- *
- * @property {Boolean} [strict=false] If `true`, errors found during the validation will finish the process
- * and exit code will be changed to `1`.
- *
- * @property {String} [outputPath='docs/api/output.json'] A path to the place where extracted doclets will be saved.
- *
- * @property {String} [extraPlugins=[]] An array of path to extra plugins that will be added to JSDoc.
- */
+	const validationResult = validators.validate( conversionResult, typeDoc, validatorOptions );
+
+	if ( !validationResult && strictMode ) {
+		throw 'Something went wrong with TypeDoc.';
+	}
+
+	if ( config.outputPath ) {
+		await typeDoc.generateJson( conversionResult, config.outputPath );
+	}
+
+	console.log( `Documented ${ files.length } files!` );
+}
 
 /**
  * @typedef {Object} TypedocConfig
