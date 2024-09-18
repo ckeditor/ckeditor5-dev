@@ -24,5 +24,5 @@ tests.runManualTests( options )
 		// Mark result of this task as invalid.
 		process.exitCode = 1;
 
-		console.log( chalk.red( error ) );
+		console.log( chalk.red( error.stack ) );
 	} );

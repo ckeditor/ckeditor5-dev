@@ -6,7 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const EXTERNAL_DIR_PATH = path.join( process.cwd(), 'external' );
+const EXTERNAL_DIR_NAME = 'external';
 
 /**
  * Converts values of `--files` argument to proper globs. Handles both JS and TS files. These are the supported types of values:
@@ -61,9 +61,11 @@ export default function transformFileOptionToTestGlob( pattern, isManualTest = f
  * @returns {Array.<String>}
  */
 function getExternalRepositoryGlob( pattern, { isManualTest } ) {
+	const externalPath = path.join( process.cwd(), EXTERNAL_DIR_NAME );
+
 	const repositoryGlob = isManualTest ?
-		path.join( EXTERNAL_DIR_PATH, pattern, 'tests', 'manual', '**', '*' ) + '.{js,ts}' :
-		path.join( EXTERNAL_DIR_PATH, pattern, 'tests', '**', '*' ) + '.{js,ts}';
+		path.join( externalPath, pattern, 'tests', 'manual', '**', '*' ) + '.{js,ts}' :
+		path.join( externalPath, pattern, 'tests', '**', '*' ) + '.{js,ts}';
 
 	return [
 		repositoryGlob.split( path.sep ).join( path.posix.sep )
@@ -75,12 +77,14 @@ function getExternalRepositoryGlob( pattern, { isManualTest } ) {
  * @returns {Boolean}
  */
 function doesPatternMatchExternalRepositoryName( pattern ) {
-	if ( !fs.existsSync( EXTERNAL_DIR_PATH ) ) {
+	const externalPath = path.join( process.cwd(), EXTERNAL_DIR_NAME );
+
+	if ( !fs.existsSync( externalPath ) ) {
 		return false;
 	}
 
-	return fs.readdirSync( EXTERNAL_DIR_PATH )
-		.filter( externalDir => fs.statSync( path.join( EXTERNAL_DIR_PATH, externalDir ) ).isDirectory() )
+	return fs.readdirSync( externalPath )
+		.filter( externalDir => fs.statSync( path.join( externalPath, externalDir ) ).isDirectory() )
 		.includes( pattern );
 }
 

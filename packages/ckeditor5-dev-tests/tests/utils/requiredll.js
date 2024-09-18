@@ -3,103 +3,83 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, expect, it } from 'vitest';
+import requireDll from '../../lib/utils/requiredll.js';
 
-const sinon = require( 'sinon' );
-const { expect } = require( 'chai' );
+describe( 'requireDll()', () => {
+	it( 'should return true when loads JavaScript DLL file (Unix)', () => {
+		const files = [
+			'/workspace/ckeditor5/tests/manual/all-features-dll.js'
+		];
 
-describe( 'dev-tests/utils', () => {
-	let requireDll;
-
-	beforeEach( () => {
-		requireDll = require( '../../lib/utils/requiredll' );
+		expect( requireDll( files ) ).to.equal( true );
 	} );
 
-	describe( 'requireDll()', () => {
-		let sandbox;
+	it( 'should return true when loads single JavaScript DLL file (Unix)', () => {
+		const file = '/workspace/ckeditor5/tests/manual/all-features-dll.js';
 
-		beforeEach( () => {
-			sandbox = sinon.createSandbox();
-		} );
+		expect( requireDll( file ) ).to.equal( true );
+	} );
 
-		afterEach( () => {
-			sandbox.restore();
-		} );
+	it( 'should return true when loads TypeScript DLL file (Unix)', () => {
+		const files = [
+			'/workspace/ckeditor5/tests/manual/all-features-dll.ts'
+		];
 
-		it( 'should return true when loads JavaScript DLL file (Unix)', () => {
-			const files = [
-				'/workspace/ckeditor5/tests/manual/all-features-dll.js'
-			];
+		expect( requireDll( files ) ).to.equal( true );
+	} );
 
-			expect( requireDll( files ) ).to.equal( true );
-		} );
+	it( 'should return true when loads JavaScript DLL file (Windows)', () => {
+		const files = [
+			'C:\\workspace\\ckeditor5\\tests\\manual\\all-features-dll.js'
+		];
 
-		it( 'should return true when loads single JavaScript DLL file (Unix)', () => {
-			const file = '/workspace/ckeditor5/tests/manual/all-features-dll.js';
+		expect( requireDll( files ) ).to.equal( true );
+	} );
 
-			expect( requireDll( file ) ).to.equal( true );
-		} );
+	it( 'should return true when loads TypeScript DLL file (Windows)', () => {
+		const files = [
+			'C:\\workspace\\ckeditor5\\tests\\manual\\all-features-dll.ts'
+		];
 
-		it( 'should return true when loads TypeScript DLL file (Unix)', () => {
-			const files = [
-				'/workspace/ckeditor5/tests/manual/all-features-dll.ts'
-			];
+		expect( requireDll( files ) ).to.equal( true );
+	} );
 
-			expect( requireDll( files ) ).to.equal( true );
-		} );
+	it( 'should return false when loads JavaScript non-DLL file (Unix)', () => {
+		const files = [
+			'/workspace/ckeditor5/tests/manual/article.js'
+		];
 
-		it( 'should return true when loads JavaScript DLL file (Windows)', () => {
-			const files = [
-				'C:\\workspace\\ckeditor5\\tests\\manual\\all-features-dll.js'
-			];
+		expect( requireDll( files ) ).to.equal( false );
+	} );
 
-			expect( requireDll( files ) ).to.equal( true );
-		} );
+	it( 'should return false when loads single JavaScript non-DLL file (Unix)', () => {
+		const file = '/workspace/ckeditor5/tests/manual/article.js';
 
-		it( 'should return true when loads TypeScript DLL file (Windows)', () => {
-			const files = [
-				'C:\\workspace\\ckeditor5\\tests\\manual\\all-features-dll.ts'
-			];
+		expect( requireDll( file ) ).to.equal( false );
+	} );
 
-			expect( requireDll( files ) ).to.equal( true );
-		} );
+	it( 'should return false when loads TypeScript non-DLL file (Unix)', () => {
+		const files = [
+			'/workspace/ckeditor5/tests/manual/article.ts'
+		];
 
-		it( 'should return false when loads JavaScript non-DLL file (Unix)', () => {
-			const files = [
-				'/workspace/ckeditor5/tests/manual/article.js'
-			];
+		expect( requireDll( files ) ).to.equal( false );
+	} );
 
-			expect( requireDll( files ) ).to.equal( false );
-		} );
+	it( 'should return false when loads JavaScript non-DLL file (Windows)', () => {
+		const files = [
+			'C:\\workspace\\ckeditor5\\tests\\manual\\article.js'
+		];
 
-		it( 'should return false when loads single JavaScript non-DLL file (Unix)', () => {
-			const file = '/workspace/ckeditor5/tests/manual/article.js';
+		expect( requireDll( files ) ).to.equal( false );
+	} );
 
-			expect( requireDll( file ) ).to.equal( false );
-		} );
+	it( 'should return false when loads TypeScript non-DLL file (Windows)', () => {
+		const files = [
+			'C:\\workspace\\ckeditor5\\tests\\manual\\article.ts'
+		];
 
-		it( 'should return false when loads TypeScript non-DLL file (Unix)', () => {
-			const files = [
-				'/workspace/ckeditor5/tests/manual/article.ts'
-			];
-
-			expect( requireDll( files ) ).to.equal( false );
-		} );
-
-		it( 'should return false when loads JavaScript non-DLL file (Windows)', () => {
-			const files = [
-				'C:\\workspace\\ckeditor5\\tests\\manual\\article.js'
-			];
-
-			expect( requireDll( files ) ).to.equal( false );
-		} );
-
-		it( 'should return false when loads TypeScript non-DLL file (Windows)', () => {
-			const files = [
-				'C:\\workspace\\ckeditor5\\tests\\manual\\article.ts'
-			];
-
-			expect( requireDll( files ) ).to.equal( false );
-		} );
+		expect( requireDll( files ) ).to.equal( false );
 	} );
 } );

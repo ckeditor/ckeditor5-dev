@@ -5,8 +5,11 @@
 
 import fs from 'fs';
 import path from 'path';
+import { createRequire } from 'module';
 import minimist from 'minimist';
 import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
+
+const require = createRequire( import.meta.url );
 
 /**
  * @param {Array.<String>} args

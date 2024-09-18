@@ -204,8 +204,7 @@ describe( 'runAutomatedTests()', () => {
 			production: false
 		};
 
-		const consoleWarnStub = vi.spyOn( console, 'warn' ).mockImplementation( () => {
-		} );
+		const consoleWarnStub = vi.spyOn( console, 'warn' ).mockImplementation( () => {} );
 
 		vi.mocked( chalk ).yellow.mockReturnValue( 'chalk.yellow: warn' );
 		vi.mocked( fs ).readdirSync.mockReturnValue( [] );

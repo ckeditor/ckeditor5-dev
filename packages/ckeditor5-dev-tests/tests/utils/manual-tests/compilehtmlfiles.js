@@ -3,16 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createRequire } from 'module';
 
-const path = require( 'path' );
-const mockery = require( 'mockery' );
-const sinon = require( 'sinon' );
-const { use, expect } = require( 'chai' );
-const chokidar = require( 'chokidar' );
-const sinonChai = require( 'sinon-chai' );
-
-use( sinonChai );
+const require = createRequire( import.meta.url );
 
 const fakeDirname = path.dirname( require.resolve( '../../../lib/utils/manual-tests/compilehtmlfiles' ) );
 

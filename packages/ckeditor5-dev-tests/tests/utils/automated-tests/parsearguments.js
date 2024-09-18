@@ -3,28 +3,18 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs' );
-const path = require( 'path' );
-const mockery = require( 'mockery' );
-const { expect } = require( 'chai' );
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
+import { describe, expect, it, vi } from 'vitest';
 
 const originalPosixJoin = path.posix.join;
+
+vi.mock( 'fs' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'parseArguments()', () => {
 	let parseArguments, sandbox, stubs, packageName;
 
 	beforeEach( () => {
-		sandbox = sinon.createSandbox();
-
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
-		} );
+		vi.spyOn( process, 'cwd' ).mockReturnValue( '/' );
 
 		stubs = {
 			cwd: sandbox.stub( process, 'cwd' ).callsFake( () => '/' ),

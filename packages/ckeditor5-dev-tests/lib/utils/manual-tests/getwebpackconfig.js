@@ -4,15 +4,18 @@
  */
 
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 import webpack from 'webpack';
 import { CKEditorTranslationsPlugin } from '@ckeditor/ckeditor5-dev-translations';
 import { loaders } from '@ckeditor/ckeditor5-dev-utils';
 import WebpackNotifierPlugin from './webpacknotifierplugin.js';
 import getDefinitionsFromFile from '../getdefinitionsfromfile.js';
-import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath( import.meta.url );
 const __dirname = path.dirname( __filename );
+
+const require = createRequire( import.meta.url );
 
 /**
  * @param {Object} options
