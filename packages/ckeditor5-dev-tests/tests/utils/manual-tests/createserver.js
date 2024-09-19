@@ -4,11 +4,13 @@
  */
 
 import http from 'http';
+import readline from 'readline';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import createManualTestServer from '../../../lib/utils/manual-tests/createserver.js';
 
 vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( 'readline' );
 
 describe( 'createManualTestServer()', () => {
 	let loggerStub, server;
@@ -33,13 +35,6 @@ describe( 'createManualTestServer()', () => {
 
 	afterEach( () => {
 		server.close();
-
-		// To avoid false positives and encourage better testing practices, Mocha will no longer automatically
-		// kill itself via `process.exit()` when it thinks it should be done running. Hence, we must close the stream
-		// before leaving the test. See: https://stackoverflow.com/a/52143003.
-		if ( server._readline ) {
-			server._readline.close();
-		}
 	} );
 
 	it( 'should start http server', () => {
@@ -76,5 +71,19 @@ describe( 'createManualTestServer()', () => {
 		createManualTestServer( 'workspace/build/.manual-tests', 1234, spy );
 
 		expect( spy ).toHaveBeenCalledExactlyOnceWith( server );
+	} );
+
+	it( 'should use "readline" to listen to the SIGINT event on Windows', () => {
+		const readlineInterface = {
+			on: vi.fn()
+		};
+
+		vi.mocked( readline ).createInterface.mockReturnValue( readlineInterface );
+		vi.spyOn( process, 'platform', 'get' ).mockReturnValue( 'win32' );
+
+		createManualTestServer( 'workspace/build/.manual-tests' );
+
+		expect( vi.mocked( readline ).createInterface ).toHaveBeenCalledOnce();
+		expect( readlineInterface.on ).toHaveBeenCalledExactlyOnceWith( 'SIGINT', expect.any( Function ) );
 	} );
 } );

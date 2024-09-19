@@ -4,12 +4,13 @@
  */
 
 import http from 'http';
-import path from 'path';
-import { globSync } from 'glob';
 import fs from 'fs';
+import path from 'path';
+import readline from 'readline';
+import { fileURLToPath } from 'url';
+import { globSync } from 'glob';
 import combine from 'dom-combiner';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
-import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath( import.meta.url );
 const __dirname = path.dirname( __filename );
@@ -30,15 +31,12 @@ export default function createManualTestServer( sourcePath, port = 8125, onCreat
 		// SIGINT isn't caught on Windows in process. However, `CTRL+C` can be caught
 		// by `readline` module. After that we can emit SIGINT to the process manually.
 		if ( process.platform === 'win32' ) {
-			const readline = require( 'readline' ).createInterface( {
+			const readlineInterface = readline.createInterface( {
 				input: process.stdin,
 				output: process.stdout
 			} );
 
-			// Save the reference of the stream to be able to close it in tests.
-			server._readline = readline;
-
-			readline.on( 'SIGINT', () => {
+			readlineInterface.on( 'SIGINT', () => {
 				process.emit( 'SIGINT' );
 			} );
 		}
