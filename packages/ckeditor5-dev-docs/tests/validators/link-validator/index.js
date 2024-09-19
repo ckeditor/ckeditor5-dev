@@ -7,7 +7,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import testUtils from '../../_utils.js';
-import build from '../../../lib/buildtypedoc.js';
+import build from '../../../lib/build.js';
 
 const __filename = fileURLToPath( import.meta.url );
 const __dirname = path.dirname( __filename );
@@ -40,7 +40,6 @@ describe( 'dev-docs/validators/link-validator', function() {
 
 	it( 'should warn if link is not valid', async () => {
 		await build( {
-			type: 'typedoc',
 			cwd: FIXTURES_PATH,
 			tsconfig: TSCONFIG_PATH,
 			sourceFiles: [ SOURCE_FILES ],
@@ -133,7 +132,6 @@ describe( 'dev-docs/validators/link-validator', function() {
 
 	it( 'should not call error callback for derived class when there are errors in inherited class', async () => {
 		await build( {
-			type: 'typedoc',
 			cwd: FIXTURES_PATH,
 			tsconfig: TSCONFIG_PATH,
 			sourceFiles: [ DERIVED_FILE ],

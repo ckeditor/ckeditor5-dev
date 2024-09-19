@@ -7,7 +7,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import testUtils from '../../_utils.js';
-import build from '../../../lib/buildtypedoc.js';
+import build from '../../../lib/build.js';
 
 const __filename = fileURLToPath( import.meta.url );
 const __dirname = path.dirname( __filename );
@@ -39,7 +39,6 @@ describe( 'dev-docs/validators/fires-validator', function() {
 
 	it( 'should warn if fired event does not exist', async () => {
 		await build( {
-			type: 'typedoc',
 			cwd: FIXTURES_PATH,
 			tsconfig: TSCONFIG_PATH,
 			sourceFiles: [ SOURCE_FILES ],

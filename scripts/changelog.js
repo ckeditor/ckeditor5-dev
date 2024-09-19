@@ -15,10 +15,6 @@ const changelogOptions = {
 	packages: 'packages',
 	releaseBranch: cliArguments.branch,
 	transformScope: name => {
-		if ( name === 'jsdoc-plugins' ) {
-			return 'https://www.npmjs.com/package/@ckeditor/jsdoc-plugins';
-		}
-
 		if ( name === 'typedoc-plugins' ) {
 			return 'https://www.npmjs.com/package/@ckeditor/typedoc-plugins';
 		}
