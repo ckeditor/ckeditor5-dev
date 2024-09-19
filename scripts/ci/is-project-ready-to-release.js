@@ -7,7 +7,7 @@
 
 /* eslint-env node */
 
-import releaseTools from '@ckeditor/ckeditor5-dev-release-tools';
+import * as releaseTools from '@ckeditor/ckeditor5-dev-release-tools';
 
 const changelogVersion = releaseTools.getLastFromChangelog();
 const npmTag = releaseTools.getNpmTagFromVersion( changelogVersion );
