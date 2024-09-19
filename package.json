@@ -15,8 +15,6 @@
   },
   "type": "module",
   "devDependencies": {
-    "@babel/core": "^7.25.1",
-    "@babel/eslint-parser": "^7.25.1",
     "@ckeditor/ckeditor5-dev-ci": "^43.0.0",
     "@ckeditor/ckeditor5-dev-release-tools": "^43.0.0",
     "@ckeditor/ckeditor5-dev-bump-year": "^43.0.0",

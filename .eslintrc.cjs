@@ -10,19 +10,15 @@ module.exports = {
 	env: {
 		node: true
 	},
-	parser: '@babel/eslint-parser',
-	parserOptions: {
-		requireConfigFile: false,
-		babelOptions: {
-			parserOpts: {
-				plugins: [ 'importAttributes' ]
-			}
-		}
-	},
 	ignorePatterns: [
 		'**/dist/*',
 		'**/coverage/**',
-		'**/node_modules/**'
+		'**/node_modules/**',
+
+		// ESLint does not understand `import ... with { ... }`.
+		// See: https://github.com/eslint/eslint/discussions/15305.
+		'packages/ckeditor5-dev-ci/lib/data/index.js',
+		'packages/ckeditor5-dev-transifex/lib/data/index.js'
 	],
 	rules: {
 		'no-console': 'off',
