@@ -23,11 +23,9 @@
   ],
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "^43.0.0",
-    "@ckeditor/jsdoc-plugins": "^43.0.0",
     "@ckeditor/typedoc-plugins": "^43.0.0",
     "fast-glob": "^3.2.4",
     "fs-extra": "^11.2.0",
-    "jsdoc": "ckeditor/jsdoc#fixed-trailing-comment-doclets",
     "tmp": "^0.2.1",
     "typedoc": "^0.23.15",
     "typedoc-plugin-rename-defaults": "0.6.6"
