@@ -3,49 +3,41 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import getWebpackConfigForAutomatedTests from '../../../lib/utils/automated-tests/getwebpackconfig.js';
+import getKarmaConfig from '../../../lib/utils/automated-tests/getkarmaconfig.js';
 
-const mockery = require( 'mockery' );
-const { expect } = require( 'chai' );
-const sinon = require( 'sinon' );
-const path = require( 'path' );
+vi.mock( 'path', () => ( {
+	default: {
+		join: vi.fn( ( ...chunks ) => chunks.join( '/' ) ),
+		dirname: vi.fn()
+	}
+} ) );
+vi.mock( '../../../lib/utils/automated-tests/getwebpackconfig.js' );
 
 describe( 'getKarmaConfig()', () => {
-	let getKarmaConfig, sandbox, karmaConfigOverrides;
-
 	const originalEnv = process.env;
+	const karmaConfigOverrides = {
+		// A relative path according to the tested file.
+		// From: /ckeditor5-dev/packages/ckeditor5-dev-tests/lib/utils/automated-tests/getkarmaconfig.js
+		// To: /ckeditor5-dev/packages/ckeditor5-dev-tests/tests/utils/automated-tests/fixtures/karma-config-overrides/*.cjs
+		noop: '../../../tests/fixtures/karma-config-overrides/noop.cjs',
+		removeCoverage: '../../../tests/fixtures/karma-config-overrides/removecoverage.cjs'
+	};
 
 	beforeEach( () => {
-		sandbox = sinon.createSandbox();
+		vi.spyOn( process, 'cwd' ).mockReturnValue( 'workspace' );
 
-		karmaConfigOverrides = sandbox.spy();
-		sandbox.stub( process, 'cwd' ).returns( 'workspace' );
-		sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => chunks.join( '/' ) );
-
-		// Sinon cannot stub non-existing props.
 		process.env = Object.assign( {}, originalEnv, { CI: false } );
-
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
-		} );
-
-		mockery.registerMock( './getwebpackconfig', options => options );
-		mockery.registerMock( 'karma-config-overrides', karmaConfigOverrides );
-
-		getKarmaConfig = require( '../../../lib/utils/automated-tests/getkarmaconfig' );
 	} );
 
 	afterEach( () => {
-		sandbox.restore();
-		mockery.disable();
-		mockery.deregisterAll();
-
 		process.env = originalEnv;
 	} );
 
 	it( 'should return basic karma config for all tested files', () => {
+		vi.mocked( getWebpackConfigForAutomatedTests ).mockReturnValue( { webpackConfig: true } );
+
 		const options = {
 			files: [ '*' ],
 			reporter: 'mocha',
@@ -63,16 +55,28 @@ describe( 'getKarmaConfig()', () => {
 
 		const karmaConfig = getKarmaConfig( options );
 
-		expect( karmaConfig ).to.have.own.property( 'basePath', 'workspace' );
-		expect( karmaConfig ).to.have.own.property( 'frameworks' );
-		expect( karmaConfig ).to.have.own.property( 'files' );
-		expect( karmaConfig ).to.have.own.property( 'preprocessors' );
-		expect( karmaConfig ).to.have.own.property( 'webpack' );
-		expect( karmaConfig.webpack ).to.deep.equal( { ...options, files: [ 'workspace/packages/ckeditor5-*/tests/**/*.js' ] } );
-		expect( karmaConfig ).to.have.own.property( 'webpackMiddleware' );
-		expect( karmaConfig ).to.have.own.property( 'reporters' );
-		expect( karmaConfig ).to.have.own.property( 'browsers' );
-		expect( karmaConfig ).to.have.own.property( 'singleRun', true );
+		expect( vi.mocked( getWebpackConfigForAutomatedTests ) ).toHaveBeenCalledExactlyOnceWith( {
+			...options,
+			files: [
+				'workspace/packages/ckeditor5-*/tests/**/*.js'
+			]
+		} );
+
+		expect( karmaConfig ).toEqual( expect.objectContaining( {
+			basePath: 'workspace',
+			frameworks: expect.any( Array ),
+			files: expect.any( Array ),
+			preprocessors: expect.any( Object ),
+			webpack: expect.any( Object ),
+			webpackMiddleware: expect.any( Object ),
+			reporters: expect.any( Array ),
+			browsers: expect.any( Array ),
+			singleRun: true
+		} ) );
+
+		expect( karmaConfig.webpack ).toEqual( expect.objectContaining( {
+			webpackConfig: true
+		} ) );
 	} );
 
 	// See: https://github.com/ckeditor/ckeditor5/issues/8823
@@ -92,15 +96,23 @@ describe( 'getKarmaConfig()', () => {
 			}
 		} );
 
-		expect( karmaConfig ).to.have.own.property( 'proxies' );
-		expect( karmaConfig.proxies ).to.have.own.property( '/assets/' );
-		expect( karmaConfig.proxies ).to.have.own.property( '/example.com/image.png' );
-		expect( karmaConfig.proxies ).to.have.own.property( '/www.example.com/image.png' );
+		expect( karmaConfig ).toEqual( expect.objectContaining( {
+			proxies: expect.any( Object ),
+			files: expect.any( Array )
+		} ) );
+		expect( karmaConfig.proxies ).toEqual( expect.objectContaining( {
+			'/assets/': expect.any( String ),
+			'/example.com/image.png': expect.any( String ),
+			'/www.example.com/image.png': expect.any( String )
+		} ) );
 
-		expect( karmaConfig.files ).to.be.an( 'array' );
-		expect( karmaConfig.files.length ).to.equal( 2 );
-		expect( karmaConfig.files[ 0 ] ).to.equal( 'workspace/entry-file.js' );
-		expect( karmaConfig.files[ 1 ].pattern ).to.equal( 'packages/ckeditor5-utils/tests/_assets/**/*' );
+		expect( karmaConfig.files ).toHaveLength( 2 );
+		expect( karmaConfig.files ).toEqual( expect.arrayContaining( [
+			'workspace/entry-file.js',
+			expect.objectContaining( {
+				pattern: 'packages/ckeditor5-utils/tests/_assets/**/*'
+			} )
+		] ) );
 	} );
 
 	it( 'should contain a list of available plugins', () => {
@@ -119,50 +131,53 @@ describe( 'getKarmaConfig()', () => {
 			}
 		} );
 
-		expect( karmaConfig.plugins ).to.be.an( 'array' );
-		expect( karmaConfig.plugins ).to.have.lengthOf.above( 0 );
+		expect( karmaConfig ).toEqual( expect.objectContaining( {
+			files: expect.any( Array )
+		} ) );
+		expect( karmaConfig.files ).not.toHaveLength( 0 );
 	} );
 
 	it( 'should enable webpack watcher when passed the "karmaConfigOverrides" option (execute in Intellij)', () => {
+		vi.mocked( getWebpackConfigForAutomatedTests ).mockReturnValue( { watch: null } );
+
 		const karmaConfig = getKarmaConfig( {
 			files: [ '*' ],
 			reporter: 'mocha',
-			karmaConfigOverrides: 'karma-config-overrides',
+			karmaConfigOverrides: karmaConfigOverrides.noop,
 			globPatterns: {
 				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
 			}
 		} );
 
-		expect( karmaConfig.webpack ).to.contain.property( 'watch', true );
+		expect( karmaConfig.webpack ).toEqual( expect.objectContaining( {
+			watch: true
+		} ) );
 	} );
 
 	it( 'should configure coverage reporter', () => {
+		vi.mocked( getWebpackConfigForAutomatedTests ).mockReturnValue( { } );
+
 		const karmaConfig = getKarmaConfig( {
 			files: [ '*' ],
 			reporter: 'mocha',
-			karmaConfigOverrides: 'karma-config-overrides',
+			karmaConfigOverrides: karmaConfigOverrides.noop,
 			globPatterns: {
 				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
 			},
 			coverage: true
 		} );
 
-		expect( karmaConfig.reporters ).to.contain( 'coverage' );
-		expect( karmaConfig.coverageReporter ).to.contain.property( 'reporters' );
+		expect( karmaConfig ).toEqual( expect.objectContaining( {
+			reporters: expect.arrayContaining( [ 'coverage' ] ),
+			coverageReporter: {
+				reporters: expect.any( Array ),
+				watermarks: expect.any( Object )
+			}
+		} ) );
 	} );
 
 	it( 'should remove webpack babel-loader if coverage reporter is removed by overrides', () => {
-		mockery.registerMock( 'karma-config-overrides-remove-coverage', config => {
-			config.reporters.splice( config.reporters.indexOf( 'coverage' ), 1 );
-		} );
-
-		const karmaConfig = getKarmaConfig( {
-			files: [ '*' ],
-			reporter: 'mocha',
-			karmaConfigOverrides: 'karma-config-overrides-remove-coverage',
-			globPatterns: {
-				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
-			},
+		vi.mocked( getWebpackConfigForAutomatedTests ).mockReturnValue( {
 			module: {
 				rules: [
 					{
@@ -172,20 +187,33 @@ describe( 'getKarmaConfig()', () => {
 						loader: 'other-loader'
 					}
 				]
+			}
+		} );
+
+		const karmaConfig = getKarmaConfig( {
+			files: [ '*' ],
+			reporter: 'mocha',
+			karmaConfigOverrides: karmaConfigOverrides.removeCoverage,
+			globPatterns: {
+				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
 			},
 			coverage: true
 		} );
 
 		const loaders = karmaConfig.webpack.module.rules.map( rule => rule.loader );
 
-		expect( karmaConfig.reporters ).to.not.contain( 'coverage' );
-		expect( loaders ).to.not.contain( 'babel-loader' );
-		expect( loaders ).to.contain( 'other-loader' );
+		expect( karmaConfig ).not.toEqual( expect.objectContaining( {
+			reporters: expect.arrayContaining( [ 'coverage' ] )
+		} ) );
+
+		expect( loaders ).not.toEqual( expect.arrayContaining( [ 'babel-loader' ] ) );
+		expect( loaders ).toEqual( expect.arrayContaining( [ 'other-loader' ] ) );
 	} );
 
-	it( 'should return custom launchers with flags', () => {
+	it( 'should return custom browser launchers with flags', () => {
 		const options = {
 			reporter: 'mocha',
+			files: [ '*' ],
 			globPatterns: {
 				'*': 'workspace/packages/ckeditor5-*/tests/**/*.js'
 			}
@@ -193,30 +221,36 @@ describe( 'getKarmaConfig()', () => {
 
 		const karmaConfig = getKarmaConfig( options );
 
-		expect( karmaConfig ).to.have.own.property( 'customLaunchers' );
-		expect( karmaConfig.customLaunchers ).to.have.own.property( 'CHROME_CI' );
-		expect( karmaConfig.customLaunchers ).to.have.own.property( 'CHROME_LOCAL' );
+		expect( karmaConfig ).toEqual( expect.objectContaining( {
+			customLaunchers: expect.any( Object )
+		} ) );
 
-		expect( karmaConfig.customLaunchers.CHROME_CI ).to.have.own.property( 'base', 'Chrome' );
-		expect( karmaConfig.customLaunchers.CHROME_CI ).to.have.own.property( 'flags' );
-		expect( karmaConfig.customLaunchers.CHROME_CI.flags ).to.deep.equal( [
-			'--disable-background-timer-throttling',
-			'--js-flags="--expose-gc"',
-			'--disable-renderer-backgrounding',
-			'--disable-backgrounding-occluded-windows',
-			'--disable-search-engine-choice-screen',
-			'--no-sandbox'
-		] );
+		expect( karmaConfig.customLaunchers ).toEqual( expect.objectContaining( {
+			CHROME_CI: expect.objectContaining( {
+				base: 'Chrome',
+				flags: [
+					'--disable-background-timer-throttling',
+					'--js-flags="--expose-gc"',
+					'--disable-renderer-backgrounding',
+					'--disable-backgrounding-occluded-windows',
+					'--disable-search-engine-choice-screen',
+					'--no-sandbox'
+				]
+			} )
+		} ) );
 
-		expect( karmaConfig.customLaunchers.CHROME_LOCAL ).to.have.own.property( 'base', 'Chrome' );
-		expect( karmaConfig.customLaunchers.CHROME_LOCAL ).to.have.own.property( 'flags' );
-		expect( karmaConfig.customLaunchers.CHROME_LOCAL.flags ).to.deep.equal( [
-			'--disable-background-timer-throttling',
-			'--js-flags="--expose-gc"',
-			'--disable-renderer-backgrounding',
-			'--disable-backgrounding-occluded-windows',
-			'--disable-search-engine-choice-screen',
-			'--remote-debugging-port=9222'
-		] );
+		expect( karmaConfig.customLaunchers ).toEqual( expect.objectContaining( {
+			CHROME_LOCAL: expect.objectContaining( {
+				base: 'Chrome',
+				flags: [
+					'--disable-background-timer-throttling',
+					'--js-flags="--expose-gc"',
+					'--disable-renderer-backgrounding',
+					'--disable-backgrounding-occluded-windows',
+					'--disable-search-engine-choice-screen',
+					'--remote-debugging-port=9222'
+				]
+			} )
+		} ) );
 	} );
 } );

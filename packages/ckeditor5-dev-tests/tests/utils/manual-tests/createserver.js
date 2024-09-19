@@ -3,92 +3,87 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import http from 'http';
+import readline from 'readline';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import createManualTestServer from '../../../lib/utils/manual-tests/createserver.js';
 
-const http = require( 'http' );
-const { use, expect } = require( 'chai' );
-const sinon = require( 'sinon' );
-const sinonChai = require( 'sinon-chai' );
-const mockery = require( 'mockery' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( 'readline' );
 
-use( sinonChai );
+describe( 'createManualTestServer()', () => {
+	let loggerStub, server;
 
-describe( 'createManualTestServer', () => {
-	let sandbox, httpCreateServerStub, createManualTestServer, server, loggerStub;
+	beforeEach( async () => {
+		const { createServer } = http;
 
-	beforeEach( () => {
-		sandbox = sinon.createSandbox();
+		loggerStub = vi.fn();
 
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
+		vi.mocked( logger ).mockReturnValue( {
+			info: loggerStub
 		} );
 
-		loggerStub = sinon.stub();
+		vi.spyOn( http, 'createServer' ).mockImplementation( ( ...theArgs ) => {
+			server = createServer( ...theArgs );
 
-		httpCreateServerStub = sandbox.stub( http, 'createServer' ).callsFake( function stubbedCreateServer( ...theArgs ) {
-			server = httpCreateServerStub.wrappedMethod( ...theArgs );
-			sandbox.spy( server, 'listen' );
+			vi.spyOn( server, 'listen' );
 
 			return server;
 		} );
-
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-			logger() {
-				return {
-					info: loggerStub
-				};
-			}
-		} );
-
-		createManualTestServer = require( '../../../lib/utils/manual-tests/createserver' );
 	} );
 
 	afterEach( () => {
 		server.close();
-		sandbox.restore();
-
-		// To avoid false positives and encourage better testing practices, Mocha will no longer automatically
-		// kill itself via `process.exit()` when it thinks it should be done running. Hence, we must close the stream
-		// before leaving the test. See: https://stackoverflow.com/a/52143003.
-		if ( server._readline ) {
-			server._readline.close();
-		}
-
-		mockery.disable();
 	} );
 
 	it( 'should start http server', () => {
 		createManualTestServer( 'workspace/build/.manual-tests' );
 
-		expect( httpCreateServerStub ).to.be.calledOnce;
+		expect( vi.mocked( http ).createServer ).toHaveBeenCalledOnce();
 	} );
 
 	it( 'should listen on given port', () => {
 		createManualTestServer( 'workspace/build/.manual-tests', 8888 );
 
-		expect( httpCreateServerStub.returnValues[ 0 ].listen ).to.be.calledOnceWith( 8888 );
+		expect( server ).toEqual( expect.objectContaining( {
+			listen: expect.any( Function )
+		} ) );
 
-		expect( loggerStub.calledOnce ).to.equal( true );
-		expect( loggerStub.firstCall.firstArg ).to.equal( '[Server] Server running at http://localhost:8888/' );
+		expect( server.listen ).toHaveBeenCalledExactlyOnceWith( 8888 );
+		expect( loggerStub ).toHaveBeenCalledExactlyOnceWith( '[Server] Server running at http://localhost:8888/' );
 	} );
 
 	it( 'should listen on 8125 port if no specific port was given', () => {
 		createManualTestServer( 'workspace/build/.manual-tests' );
 
-		expect( httpCreateServerStub.returnValues[ 0 ].listen ).to.be.calledOnceWith( 8125 );
+		expect( server ).toEqual( expect.objectContaining( {
+			listen: expect.any( Function )
+		} ) );
 
-		expect( loggerStub.calledOnce ).to.equal( true );
-		expect( loggerStub.firstCall.firstArg ).to.equal( '[Server] Server running at http://localhost:8125/' );
+		expect( server.listen ).toHaveBeenCalledExactlyOnceWith( 8125 );
+		expect( loggerStub ).toHaveBeenCalledExactlyOnceWith( '[Server] Server running at http://localhost:8125/' );
 	} );
 
-	it( 'should call the specificed callback when the server is running (e.g. to allow running web sockets)', () => {
-		const spy = sinon.spy();
+	it( 'should call the specified callback when the server is running (e.g. to allow running web sockets)', () => {
+		const spy = vi.fn();
 
 		createManualTestServer( 'workspace/build/.manual-tests', 1234, spy );
 
-		sinon.assert.calledOnce( spy );
-		sinon.assert.calledWithExactly( spy, server );
+		expect( spy ).toHaveBeenCalledExactlyOnceWith( server );
+	} );
+
+	it( 'should use "readline" to listen to the SIGINT event on Windows', () => {
+		const readlineInterface = {
+			on: vi.fn()
+		};
+
+		vi.mocked( readline ).createInterface.mockReturnValue( readlineInterface );
+		vi.spyOn( process, 'platform', 'get' ).mockReturnValue( 'win32' );
+
+		createManualTestServer( 'workspace/build/.manual-tests' );
+
+		expect( vi.mocked( readline ).createInterface ).toHaveBeenCalledOnce();
+		expect( readlineInterface.on ).toHaveBeenCalledExactlyOnceWith( 'SIGINT', expect.any( Function ) );
 	} );
 } );

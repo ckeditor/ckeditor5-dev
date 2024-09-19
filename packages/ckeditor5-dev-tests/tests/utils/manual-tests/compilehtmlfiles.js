@@ -3,128 +3,109 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import path from 'path';
+import fs from 'fs-extra';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import { globSync } from 'glob';
+import chokidar from 'chokidar';
+import chalk from 'chalk';
+import domCombiner from 'dom-combiner';
+import compileHtmlFiles from '../../../lib/utils/manual-tests/compilehtmlfiles.js';
+import getRelativeFilePath from '../../../lib/utils/getrelativefilepath.js';
 
-const path = require( 'path' );
-const mockery = require( 'mockery' );
-const sinon = require( 'sinon' );
-const { use, expect } = require( 'chai' );
-const chokidar = require( 'chokidar' );
-const sinonChai = require( 'sinon-chai' );
+const stubs = vi.hoisted( () => ( {
+	commonmark: {
+		parser: {
+			parse: vi.fn()
+		},
+		htmlRenderer: {
+			render: vi.fn()
+		}
+	},
+	log: {
+		info: vi.fn()
+	}
+} ) );
 
-use( sinonChai );
+vi.mock( 'path' );
+vi.mock( 'commonmark', () => ( {
+	Parser: class Parser {
+		parse( ...args ) {
+			return stubs.commonmark.parser.parse( ...args );
+		}
+	},
 
-const fakeDirname = path.dirname( require.resolve( '../../../lib/utils/manual-tests/compilehtmlfiles' ) );
+	HtmlRenderer: class HtmlRenderer {
+		render( ...args ) {
+			return stubs.commonmark.htmlRenderer.render( ...args );
+		}
+	}
+} ) );
+vi.mock( 'path' );
+vi.mock( 'glob' );
+vi.mock( 'fs-extra' );
+vi.mock( 'chokidar' );
+vi.mock( 'chalk', () => ( {
+	default: {
+		cyan: vi.fn()
+	}
+} ) );
+vi.mock( 'dom-combiner' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( '../../../lib/utils/getrelativefilepath.js' );
 
-describe( 'compileHtmlFiles', () => {
-	let sandbox, stubs, files, compileHtmlFiles;
+describe( 'compileHtmlFiles()', () => {
+	let files;
 	let patternFiles = {};
 	let separator = '/';
 
 	beforeEach( () => {
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
+		stubs.commonmark.htmlRenderer.render.mockReturnValue( '<h2>Markdown header</h2>' );
+		vi.mocked( logger ).mockReturnValue( stubs.log );
+		vi.mocked( chalk ).cyan.mockImplementation( input => input );
+		vi.mocked( fs ).readFileSync.mockImplementation( pathToFile => files[ pathToFile ] );
+		vi.mocked( path ).join.mockImplementation( ( ...chunks ) => chunks.join( separator ) );
+		vi.mocked( path ).parse.mockImplementation( pathToParse => {
+			const chunks = pathToParse.split( separator );
+			const fileName = chunks.pop();
+
+			return {
+				dir: chunks.join( separator ),
+				name: fileName.split( '.' ).slice( 0, -1 ).join( '.' )
+			};
 		} );
-
-		sandbox = sinon.createSandbox();
-
-		stubs = {
-			fs: {
-				readFileSync: sandbox.spy( pathToFile => files[ pathToFile ] ),
-				ensureDirSync: sandbox.stub(),
-				outputFileSync: sandbox.stub(),
-				copySync: sandbox.stub()
-			},
-
-			path: {
-				join: sandbox.stub().callsFake( ( ...chunks ) => chunks.join( separator ) ),
-				parse: sandbox.stub().callsFake( pathToParse => {
-					const chunks = pathToParse.split( separator );
-					const fileName = chunks.pop();
-
-					return {
-						dir: chunks.join( separator ),
-						name: fileName.split( '.' ).slice( 0, -1 ).join( '.' )
-					};
-				} ),
-				dirname: sandbox.stub().callsFake( pathToParse => {
-					return pathToParse.split( separator ).slice( 0, -1 ).join( separator );
-				} ),
-				sep: separator
-			},
-
-			logger: {
-				info: sandbox.stub(),
-				warning: sandbox.stub(),
-				error: sandbox.stub()
-			},
-
-			commonmark: {
-				parse: sandbox.spy(),
-				render: sandbox.spy( () => '<h2>Markdown header</h2>' )
-			},
-
-			chalk: {
-				cyan: sandbox.spy( text => text )
-			},
-
-			chokidar: {
-				watch: sandbox.stub( chokidar, 'watch' ).callsFake( () => ( {
-					on: () => {
-					}
-				} ) )
-			},
-
-			getRelativeFilePath: sandbox.spy( pathToFile => pathToFile ),
-			glob: {
-				globSync: sandbox.spy( pattern => patternFiles[ pattern ] )
-			},
-			domCombiner: sandbox.spy( ( ...args ) => args.join( '\n' ) )
-		};
-
-		mockery.registerMock( 'path', stubs.path );
-		mockery.registerMock( 'commonmark', {
-			Parser: class Parser {
-				parse( ...args ) {
-					return stubs.commonmark.parse( ...args );
-				}
-			},
-
-			HtmlRenderer: class HtmlRenderer {
-				render( ...args ) {
-					return stubs.commonmark.render( ...args );
-				}
-			}
+		vi.mocked( path ).dirname.mockImplementation( pathToParse => {
+			return pathToParse.split( separator ).slice( 0, -1 ).join( separator );
 		} );
-		mockery.registerMock( 'glob', stubs.glob );
-		mockery.registerMock( 'fs-extra', stubs.fs );
-		mockery.registerMock( 'chokidar', stubs.chokidar );
-		mockery.registerMock( 'dom-combiner', stubs.domCombiner );
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', {
-			logger() {
-				return stubs.logger;
-			}
-		} );
-		mockery.registerMock( '../getrelativefilepath', stubs.getRelativeFilePath );
-	} );
-
-	afterEach( () => {
-		sandbox.restore();
-		mockery.deregisterAll();
-		mockery.disable();
+		vi.mocked( chokidar ).watch.mockImplementation( () => ( {
+			on: vi.fn()
+		} ) );
+		vi.mocked( getRelativeFilePath ).mockImplementation( pathToFile => pathToFile );
+		vi.mocked( globSync ).mockImplementation( pattern => patternFiles[ pattern ] );
+		vi.mocked( domCombiner ).mockImplementation( ( ...args ) => args.join( '\n' ) );
 	} );
 
 	describe( 'Unix environment', () => {
 		beforeEach( () => {
 			separator = '/';
-			compileHtmlFiles = require( '../../../lib/utils/manual-tests/compilehtmlfiles' );
+		} );
+
+		it( 'creates a build directory where compiled files are saved', () => {
+			files = {};
+
+			compileHtmlFiles( {
+				buildDir: 'buildDir',
+				language: 'en',
+				sourceFiles: []
+			} );
+
+			expect( vi.mocked( fs ).ensureDirSync ).toHaveBeenCalledExactlyOnceWith( 'buildDir' );
 		} );
 
 		it( 'should compile md and html files to the output html file', () => {
 			files = {
-				[ `${ fakeDirname }/template.html` ]: '<div>template html content</div>',
+				'/template.html': '<div>template html content</div>',
 				'path/to/manual/file.md': '## Markdown header',
 				'path/to/manual/file.html': '<div>html file content</div>'
 			};
@@ -139,50 +120,93 @@ describe( 'compileHtmlFiles', () => {
 				sourceFiles: [ 'path/to/manual/file.js' ]
 			} );
 
-			expect( stubs.commonmark.parse ).to.be.calledWithExactly( '## Markdown header' );
-			expect( stubs.fs.ensureDirSync ).to.be.calledWithExactly( 'buildDir' );
+			expect( stubs.commonmark.parser.parse ).toHaveBeenCalledExactlyOnceWith( '## Markdown header' );
 
-			/* eslint-disable max-len */
-			expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
+			expect( vi.mocked( fs ).outputFileSync ).toHaveBeenCalledExactlyOnceWith(
 				'buildDir/path/to/manual/file.html', [
 					'<div>template html content</div>',
 					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 					'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
-						'<span></span><span></span><span></span>' +
+					'<span></span><span></span><span></span>' +
 					'</button>',
 					'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
-						'<span></span><span></span><span></span><span></span>' +
+					'<span></span><span></span><span></span><span></span>' +
 					'</button>',
 					'<div>html file content</div>',
 					'<body class="manual-test-container manual-test-container_no-transitions">' +
-						'<script src="/assets/togglesidebar.js"></script>' +
-						'<script src="/socket.io/socket.io.js"></script>' +
-						'<script src="/assets/websocket.js"></script>' +
-						'<script src="/assets/inspector.js"></script>' +
-						'<script src="/assets/attachinspector.js"></script>' +
-						'<script src="/assets/globallicensekey.js"></script>' +
-						'<script src="/path/to/manual/file.js"></script>' +
+					'<script src="/assets/togglesidebar.js"></script>' +
+					'<script src="/socket.io/socket.io.js"></script>' +
+					'<script src="/assets/websocket.js"></script>' +
+					'<script src="/assets/inspector.js"></script>' +
+					'<script src="/assets/attachinspector.js"></script>' +
+					'<script src="/assets/globallicensekey.js"></script>' +
+					'<script src="/path/to/manual/file.js"></script>' +
 					'</body>'
 				].join( '\n' )
 			);
-			/* eslint-enable max-len */
 
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly(
+			expect( stubs.log.info ).toHaveBeenCalledTimes( 2 );
+			expect( stubs.log.info ).toHaveBeenCalledWith( expect.stringMatching( /^Processing/ ) );
+			expect( stubs.log.info ).toHaveBeenCalledWith( expect.stringMatching( /^Finished writing/ ) );
+		} );
+
+		it( 'should listen to changes in source files', () => {
+			files = {
+				'/template.html': '<div>template html content</div>',
+				'path/to/manual/file.md': '## Markdown header',
+				'path/to/manual/file.html': '<div>html file content</div>'
+			};
+
+			patternFiles = {
+				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ]
+			};
+
+			compileHtmlFiles( {
+				buildDir: 'buildDir',
+				language: 'en',
+				sourceFiles: [ 'path/to/manual/file.js' ]
+			} );
+
+			expect( vi.mocked( chokidar ).watch ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( chokidar ).watch ).toHaveBeenCalledWith(
 				'path/to/manual/file.md', { ignoreInitial: true }
 			);
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly(
+			expect( vi.mocked( chokidar ).watch ).toHaveBeenCalledWith(
 				'path/to/manual/file.html', { ignoreInitial: true }
 			);
-			expect( stubs.fs.copySync ).to.be.calledWithExactly(
-				'static-file.png', 'buildDir/static-file.png'
-			);
+		} );
 
-			expect( stubs.logger.info.callCount ).to.equal( 2 );
-			expect( stubs.logger.info.firstCall.args[ 0 ] ).to.match( /^Processing/ );
-			expect( stubs.logger.info.secondCall.args[ 0 ] ).to.match( /^Finished writing/ );
+		it( 'should copy static resources', () => {
+			files = {
+				'/template.html': '<div>template html content</div>',
+				'path/to/manual/file.md': '## Markdown header',
+				'path/to/manual/file.html': '<div>html file content</div>'
+			};
+
+			patternFiles = {
+				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ]
+			};
+
+			compileHtmlFiles( {
+				buildDir: 'buildDir',
+				language: 'en',
+				sourceFiles: [ 'path/to/manual/file.js' ]
+			} );
+
+			expect( vi.mocked( fs ).copySync ).toHaveBeenCalledExactlyOnceWith( 'static-file.png', 'buildDir/static-file.png' );
 		} );
 
 		it( 'should compile files with options#language specified', () => {
+			files = {
+				'/template.html': '<div>template html content</div>',
+				'path/to/manual/file.md': '## Markdown header',
+				'path/to/manual/file.html': '<div>html file content</div>'
+			};
+
+			patternFiles = {
+				'path/to/manual/**/*.!(js|html|md)': []
+			};
+
 			compileHtmlFiles( {
 				buildDir: 'buildDir',
 				language: 'en',
@@ -190,38 +214,36 @@ describe( 'compileHtmlFiles', () => {
 				sourceFiles: [ 'path/to/manual/file.js' ]
 			} );
 
-			/* eslint-disable max-len */
-			expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
+			expect( vi.mocked( fs ).outputFileSync ).toHaveBeenCalledExactlyOnceWith(
 				'buildDir/path/to/manual/file.html', [
 					'<div>template html content</div>',
 					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 					'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
-						'<span></span><span></span><span></span>' +
+					'<span></span><span></span><span></span>' +
 					'</button>',
 					'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
-						'<span></span><span></span><span></span><span></span>' +
+					'<span></span><span></span><span></span><span></span>' +
 					'</button>',
 					'<div>html file content</div>',
 					'<body class="manual-test-container manual-test-container_no-transitions">' +
-						'<script src="/assets/togglesidebar.js"></script>' +
-						'<script src="/socket.io/socket.io.js"></script>' +
-						'<script src="/assets/websocket.js"></script>' +
-						'<script src="/assets/inspector.js"></script>' +
-						'<script src="/assets/attachinspector.js"></script>' +
-						'<script src="/assets/globallicensekey.js"></script>' +
-						'<script src="/translations/en.js"></script>' +
-						'<script src="/translations/pl.js"></script>' +
-						'<script src="/translations/ar.js"></script>' +
-						'<script src="/path/to/manual/file.js"></script>' +
+					'<script src="/assets/togglesidebar.js"></script>' +
+					'<script src="/socket.io/socket.io.js"></script>' +
+					'<script src="/assets/websocket.js"></script>' +
+					'<script src="/assets/inspector.js"></script>' +
+					'<script src="/assets/attachinspector.js"></script>' +
+					'<script src="/assets/globallicensekey.js"></script>' +
+					'<script src="/translations/en.js"></script>' +
+					'<script src="/translations/pl.js"></script>' +
+					'<script src="/translations/ar.js"></script>' +
+					'<script src="/path/to/manual/file.js"></script>' +
 					'</body>'
 				].join( '\n' )
 			);
-			/* eslint-enable max-len */
 		} );
 
 		it( 'should work with files containing dots in their names', () => {
 			files = {
-				[ `${ fakeDirname }/template.html` ]: '<div>template html content</div>',
+				'/template.html': '<div>template html content</div>',
 				'path/to/manual/file.abc.md': '## Markdown header',
 				'path/to/manual/file.abc.html': '<div>html file content</div>'
 			};
@@ -235,35 +257,15 @@ describe( 'compileHtmlFiles', () => {
 				sourceFiles: [ 'path/to/manual/file.abc.js' ]
 			} );
 
-			/* eslint-disable max-len */
-			expect( stubs.fs.outputFileSync ).to.be.calledWith(
-				'buildDir/path/to/manual/file.abc.html', [
-					'<div>template html content</div>',
-					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
-					'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
-						'<span></span><span></span><span></span>' +
-					'</button>',
-					'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
-						'<span></span><span></span><span></span><span></span>' +
-					'</button>',
-					'<div>html file content</div>',
-					'<body class="manual-test-container manual-test-container_no-transitions">' +
-						'<script src="/assets/togglesidebar.js"></script>' +
-						'<script src="/socket.io/socket.io.js"></script>' +
-						'<script src="/assets/websocket.js"></script>' +
-						'<script src="/assets/inspector.js"></script>' +
-						'<script src="/assets/attachinspector.js"></script>' +
-						'<script src="/assets/globallicensekey.js"></script>' +
-						'<script src="/path/to/manual/file.abc.js"></script>' +
-					'</body>'
-				].join( '\n' )
+			expect( vi.mocked( fs ).outputFileSync ).toHaveBeenCalledExactlyOnceWith(
+				'buildDir/path/to/manual/file.abc.html',
+				expect.stringContaining( '<script src="/path/to/manual/file.abc.js"></script>' )
 			);
-			/* eslint-enable max-len */
 		} );
 
 		it( 'should work with a few entry points patterns', () => {
 			files = {
-				[ `${ fakeDirname }/template.html` ]: '<div>template html content</div>',
+				'/template.html': '<div>template html content</div>',
 				'path/to/manual/file.md': '## Markdown header',
 				'path/to/manual/file.html': '<div>html file content</div>',
 				'path/to/another/manual/file.md': '## Markdown header',
@@ -283,15 +285,22 @@ describe( 'compileHtmlFiles', () => {
 				]
 			} );
 
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/manual/file.md', { ignoreInitial: true } );
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/manual/file.html', { ignoreInitial: true } );
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/another/manual/file.html', { ignoreInitial: true } );
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/another/manual/file.html', { ignoreInitial: true } );
+			expect( vi.mocked( fs ).outputFileSync ).toHaveBeenCalledTimes( 2 );
+
+			expect( vi.mocked( fs ).outputFileSync ).toHaveBeenCalledWith(
+				'buildDir/path/to/manual/file.html',
+				expect.stringContaining( '<script src="/path/to/manual/file.js"></script>' )
+			);
+
+			expect( vi.mocked( fs ).outputFileSync ).toHaveBeenCalledWith(
+				'buildDir/path/to/another/manual/file.html',
+				expect.stringContaining( '<script src="/path/to/another/manual/file.js"></script>' )
+			);
 		} );
 
 		it( 'should not copy md files containing dots in their file names', () => {
 			files = {
-				[ `${ fakeDirname }/template.html` ]: '<div>template html content</div>',
+				'/template.html': '<div>template html content</div>',
 				'path/to/manual/file.md': '## Markdown header',
 				'path/to/manual/file.html': '<div>html file content</div>'
 			};
@@ -306,42 +315,12 @@ describe( 'compileHtmlFiles', () => {
 				sourceFiles: [ 'path/to/manual/file.js' ]
 			} );
 
-			expect( stubs.commonmark.parse ).to.be.calledWithExactly( '## Markdown header' );
-			expect( stubs.fs.ensureDirSync ).to.be.calledWithExactly( 'buildDir' );
-
-			/* eslint-disable max-len */
-			expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
-				'buildDir/path/to/manual/file.html', [
-					'<div>template html content</div>',
-					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
-					'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
-						'<span></span><span></span><span></span>' +
-					'</button>',
-					'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
-						'<span></span><span></span><span></span><span></span>' +
-					'</button>',
-					'<div>html file content</div>',
-					'<body class="manual-test-container manual-test-container_no-transitions">' +
-						'<script src="/assets/togglesidebar.js"></script>' +
-						'<script src="/socket.io/socket.io.js"></script>' +
-						'<script src="/assets/websocket.js"></script>' +
-						'<script src="/assets/inspector.js"></script>' +
-						'<script src="/assets/attachinspector.js"></script>' +
-						'<script src="/assets/globallicensekey.js"></script>' +
-						'<script src="/path/to/manual/file.js"></script>' +
-					'</body>'
-				].join( '\n' )
-			);
-			/* eslint-enable max-len */
-
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/manual/file.md', { ignoreInitial: true } );
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly( 'path/to/manual/file.html', { ignoreInitial: true } );
-			expect( stubs.fs.copySync ).not.to.be.calledWith( 'some.file.md', 'buildDir/some.file.md' );
+			expect( vi.mocked( fs ).copySync ).not.toHaveBeenCalled();
 		} );
 
 		it( 'should compile the manual test and do not inform about the processed file', () => {
 			files = {
-				[ `${ fakeDirname }/template.html` ]: '<div>template html content</div>',
+				'/template.html': '<div>template html content</div>',
 				'path/to/manual/file.md': '## Markdown header',
 				'path/to/manual/file.html': '<div>html file content</div>'
 			};
@@ -357,27 +336,22 @@ describe( 'compileHtmlFiles', () => {
 				silent: true
 			} );
 
-			expect( stubs.commonmark.parse ).to.be.calledWithExactly( '## Markdown header' );
-			expect( stubs.fs.ensureDirSync ).to.be.calledWithExactly( 'buildDir' );
-
-			expect( stubs.logger.info.callCount ).to.equal( 0 );
+			expect( stubs.log.info ).not.toHaveBeenCalled();
 		} );
 	} );
 
 	describe( 'Windows environment', () => {
 		beforeEach( () => {
 			separator = '\\';
-			compileHtmlFiles = require( '../../../lib/utils/manual-tests/compilehtmlfiles' );
 		} );
 
 		it( 'should work on Windows environments', () => {
-			// Our wrapper on Glob returns proper paths for Unix and Windows.
 			patternFiles = {
-				'path\\to\\manual\\**\\*.!(js|html|md)': [ 'static-file.png' ]
+				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ]
 			};
 
 			files = {
-				[ fakeDirname + '\\template.html' ]: '<div>template html content</div>',
+				'\\template.html': '<div>template html content</div>',
 				'path\\to\\manual\\file.md': '## Markdown header',
 				'path\\to\\manual\\file.html': '<div>html file content</div>'
 			};
@@ -387,43 +361,72 @@ describe( 'compileHtmlFiles', () => {
 				sourceFiles: [ 'path\\to\\manual\\file.js' ]
 			} );
 
-			expect( stubs.commonmark.parse ).to.be.calledWithExactly( '## Markdown header' );
-			expect( stubs.fs.ensureDirSync ).to.be.calledWithExactly( 'buildDir' );
-
-			/* eslint-disable max-len */
-			expect( stubs.fs.outputFileSync ).to.be.calledWithExactly(
+			expect( vi.mocked( fs ).outputFileSync ).toHaveBeenCalledExactlyOnceWith(
 				'buildDir\\path\\to\\manual\\file.html', [
 					'<div>template html content</div>',
 					'<div class="manual-test-sidebar"><h2>Markdown header</h2></div>',
 					'<button class="manual-test-sidebar__toggle" type="button" title="Toggle sidebar">' +
-						'<span></span><span></span><span></span>' +
+					'<span></span><span></span><span></span>' +
 					'</button>',
 					'<a href="/" class="manual-test-sidebar__root-link-button" title="Back to the list">' +
-						'<span></span><span></span><span></span><span></span>' +
+					'<span></span><span></span><span></span><span></span>' +
 					'</button>',
 					'<div>html file content</div>',
 					'<body class="manual-test-container manual-test-container_no-transitions">' +
-						'<script src="/assets/togglesidebar.js"></script>' +
-						'<script src="/socket.io/socket.io.js"></script>' +
-						'<script src="/assets/websocket.js"></script>' +
-						'<script src="/assets/inspector.js"></script>' +
-						'<script src="/assets/attachinspector.js"></script>' +
-						'<script src="/assets/globallicensekey.js"></script>' +
-						'<script src="/path/to/manual/file.js"></script>' +
+					'<script src="/assets/togglesidebar.js"></script>' +
+					'<script src="/socket.io/socket.io.js"></script>' +
+					'<script src="/assets/websocket.js"></script>' +
+					'<script src="/assets/inspector.js"></script>' +
+					'<script src="/assets/attachinspector.js"></script>' +
+					'<script src="/assets/globallicensekey.js"></script>' +
+					'<script src="/path/to/manual/file.js"></script>' +
 					'</body>'
 				].join( '\n' )
 			);
-			/* eslint-enable max-len */
+		} );
 
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly(
+		it( 'should listen to changes in source files', () => {
+			patternFiles = {
+				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ]
+			};
+
+			files = {
+				'\\template.html': '<div>template html content</div>',
+				'path\\to\\manual\\file.md': '## Markdown header',
+				'path\\to\\manual\\file.html': '<div>html file content</div>'
+			};
+
+			compileHtmlFiles( {
+				buildDir: 'buildDir',
+				sourceFiles: [ 'path\\to\\manual\\file.js' ]
+			} );
+
+			expect( vi.mocked( chokidar ).watch ).toHaveBeenCalledTimes( 2 );
+			expect( vi.mocked( chokidar ).watch ).toHaveBeenCalledWith(
 				'path\\to\\manual\\file.md', { ignoreInitial: true }
 			);
-			expect( stubs.chokidar.watch ).to.be.calledWithExactly(
+			expect( vi.mocked( chokidar ).watch ).toHaveBeenCalledWith(
 				'path\\to\\manual\\file.html', { ignoreInitial: true }
 			);
-			expect( stubs.fs.copySync ).to.be.calledWithExactly(
-				'static-file.png', 'buildDir\\static-file.png'
-			);
+		} );
+
+		it( 'should copy static resources', () => {
+			patternFiles = {
+				'path/to/manual/**/*.!(js|html|md)': [ 'static-file.png' ]
+			};
+
+			files = {
+				'\\template.html': '<div>template html content</div>',
+				'path\\to\\manual\\file.md': '## Markdown header',
+				'path\\to\\manual\\file.html': '<div>html file content</div>'
+			};
+
+			compileHtmlFiles( {
+				buildDir: 'buildDir',
+				sourceFiles: [ 'path\\to\\manual\\file.js' ]
+			} );
+
+			expect( vi.mocked( fs ).copySync ).toHaveBeenCalledExactlyOnceWith( 'static-file.png', 'buildDir\\static-file.png' );
 		} );
 	} );
 } );

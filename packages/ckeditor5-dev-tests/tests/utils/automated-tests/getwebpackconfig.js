@@ -3,54 +3,22 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { describe, expect, it, vi } from 'vitest';
+import { loaders } from '@ckeditor/ckeditor5-dev-utils';
+import TreatWarningsAsErrorsWebpackPlugin from '../../../lib/utils/automated-tests/treatwarningsaserrorswebpackplugin.js';
+import getWebpackConfigForAutomatedTests from '../../../lib/utils/automated-tests/getwebpackconfig.js';
+import getDefinitionsFromFile from '../../../lib/utils/getdefinitionsfromfile.js';
 
-const mockery = require( 'mockery' );
-const sinon = require( 'sinon' );
-const { expect } = require( 'chai' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
+vi.mock( '../../../lib/utils/getdefinitionsfromfile.js' );
+vi.mock( '../../../lib/utils/automated-tests/treatwarningsaserrorswebpackplugin', () => ( {
+	default: class TreatWarningsAsErrorsWebpackPlugin {}
+} ) );
 
 describe( 'getWebpackConfigForAutomatedTests()', () => {
-	let getWebpackConfigForAutomatedTests, stubs;
-
-	beforeEach( () => {
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
-		} );
-
-		stubs = {
-			getDefinitionsFromFile: sinon.stub().returns( {} ),
-			loaders: {
-				getIconsLoader: sinon.stub().returns( {} ),
-				getStylesLoader: sinon.stub().returns( {} ),
-				getTypeScriptLoader: sinon.stub().returns( {} ),
-				getFormattedTextLoader: sinon.stub().returns( {} ),
-				getCoverageLoader: sinon.stub().returns( {} ),
-				getJavaScriptLoader: sinon.stub().returns( {} )
-			},
-			TreatWarningsAsErrorsWebpackPlugin: class TreatWarningsAsErrorsWebpackPlugin {}
-		};
-
-		mockery.registerMock( '@ckeditor/ckeditor5-dev-utils', { loaders: stubs.loaders } );
-
-		mockery.registerMock( '../getdefinitionsfromfile', stubs.getDefinitionsFromFile );
-
-		mockery.registerMock( './treatwarningsaserrorswebpackplugin', stubs.TreatWarningsAsErrorsWebpackPlugin );
-
-		getWebpackConfigForAutomatedTests = require( '../../../lib/utils/automated-tests/getwebpackconfig' );
-	} );
-
-	afterEach( () => {
-		sinon.restore();
-		mockery.disable();
-		mockery.deregisterAll();
-	} );
-
 	it( 'should return basic webpack configuration object', () => {
-		const debug = [];
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
-			debug,
+			debug: [],
 			themePath: '/theme/path',
 			tsconfig: '/tsconfig/path'
 		} );
@@ -58,18 +26,16 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		expect( webpackConfig.resolve.extensions ).to.deep.equal( [ '.ts', '.js', '.json' ] );
 		expect( webpackConfig.resolve.fallback.timers ).to.equal( false );
 
-		expect( stubs.loaders.getIconsLoader.calledOnce ).to.equal( true );
-
-		expect( stubs.loaders.getStylesLoader.calledOnce ).to.equal( true );
-		expect( stubs.loaders.getStylesLoader.firstCall.args[ 0 ] ).to.have.property( 'themePath', '/theme/path' );
-		expect( stubs.loaders.getStylesLoader.firstCall.args[ 0 ] ).to.have.property( 'minify', true );
-
-		expect( stubs.loaders.getTypeScriptLoader.calledOnce ).to.equal( true );
-		expect( stubs.loaders.getTypeScriptLoader.firstCall.args[ 0 ] ).to.have.property( 'configFile', '/tsconfig/path' );
-
-		expect( stubs.loaders.getFormattedTextLoader.calledOnce ).to.equal( true );
-
-		expect( stubs.loaders.getCoverageLoader.called ).to.equal( false );
+		expect( vi.mocked( loaders.getIconsLoader ) ).toHaveBeenCalledOnce();
+		expect( vi.mocked( loaders.getFormattedTextLoader ) ).toHaveBeenCalledOnce();
+		expect( vi.mocked( loaders.getCoverageLoader ) ).not.toHaveBeenCalledOnce();
+		expect( vi.mocked( loaders.getStylesLoader ) ).toHaveBeenCalledExactlyOnceWith( {
+			themePath: '/theme/path',
+			minify: true
+		} );
+		expect( vi.mocked( loaders.getTypeScriptLoader ) ).toHaveBeenCalledExactlyOnceWith( {
+			configFile: '/tsconfig/path'
+		} );
 
 		expect( webpackConfig.resolveLoader.modules[ 0 ] ).to.equal( 'node_modules' );
 		expect( webpackConfig.devtool ).to.equal( undefined );
@@ -87,7 +53,8 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 		getWebpackConfigForAutomatedTests( {
 			files: [ '**/*.js' ]
 		} );
-		expect( stubs.loaders.getJavaScriptLoader.called ).to.equal( false );
+
+		expect( vi.mocked( loaders.getJavaScriptLoader ) ).not.toHaveBeenCalledOnce();
 	} );
 
 	it( 'should return webpack configuration containing a loader for measuring the coverage', () => {
@@ -96,7 +63,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			files: [ '**/*.js' ]
 		} );
 
-		expect( stubs.loaders.getCoverageLoader.called ).to.equal( true );
+		expect( vi.mocked( loaders.getCoverageLoader ) ).toHaveBeenCalledOnce();
 	} );
 
 	it( 'should return webpack configuration with source map support', () => {
@@ -124,7 +91,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 	} );
 
 	it( 'should return webpack configuration with loaded identity file', () => {
-		stubs.getDefinitionsFromFile.returns( { LICENSE_KEY: 'secret' } );
+		vi.mocked( getDefinitionsFromFile ).mockReturnValue( { LICENSE_KEY: 'secret' } );
 
 		const webpackConfig = getWebpackConfigForAutomatedTests( {
 			identityFile: 'path/to/secrets.js'
@@ -132,7 +99,7 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 
 		const plugin = webpackConfig.plugins[ 0 ];
 
-		expect( stubs.getDefinitionsFromFile.firstCall.args[ 0 ] ).to.equal( 'path/to/secrets.js' );
+		expect( vi.mocked( getDefinitionsFromFile ) ).toHaveBeenCalledExactlyOnceWith( 'path/to/secrets.js' );
 		expect( plugin.definitions.LICENSE_KEY ).to.equal( 'secret' );
 	} );
 
@@ -169,8 +136,9 @@ describe( 'getWebpackConfigForAutomatedTests()', () => {
 			production: true
 		} );
 
-		expect( webpackConfig.plugins.filter( plugin => plugin instanceof stubs.TreatWarningsAsErrorsWebpackPlugin ) )
-			.to.have.lengthOf( 1 );
+		const plugin = webpackConfig.plugins.find( plugin => plugin instanceof TreatWarningsAsErrorsWebpackPlugin );
+
+		expect( plugin ).toBeTruthy();
 	} );
 
 	it( 'should load TypeScript files first when importing JS files', () => {

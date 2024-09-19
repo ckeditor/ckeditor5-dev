@@ -13,6 +13,7 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "type": "module",
   "devDependencies": {
     "@ckeditor/ckeditor5-dev-ci": "^43.0.0",
     "@ckeditor/ckeditor5-dev-release-tools": "^43.0.0",
@@ -23,6 +24,7 @@
     "fs-extra": "^11.2.0",
     "glob": "^10.2.5",
     "husky": "^8.0.2",
+    "js-yaml": "^4.1.0",
     "lint-staged": "^10.2.4",
     "listr2": "^6.5.0",
     "minimist": "^1.2.8",

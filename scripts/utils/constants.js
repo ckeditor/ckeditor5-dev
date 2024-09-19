@@ -3,10 +3,12 @@
  * For licensing, see LICENSE.md.
  */
 
-const upath = require( 'upath' );
+import upath from 'upath';
+import { fileURLToPath } from 'url';
 
-module.exports = {
-	PACKAGES_DIRECTORY: 'packages',
-	RELEASE_DIRECTORY: 'release',
-	CKEDITOR5_DEV_ROOT: upath.join( __dirname, '..', '..' )
-};
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = upath.dirname( __filename );
+
+export const PACKAGES_DIRECTORY = 'packages';
+export const RELEASE_DIRECTORY = 'release';
+export const CKEDITOR5_DEV_ROOT = upath.join( __dirname, '..', '..' );

@@ -7,16 +7,14 @@
 
 /* eslint-env node */
 
-'use strict';
-
-const upath = require( 'upath' );
-const { Listr } = require( 'listr2' );
-const { globSync } = require( 'glob' );
-const releaseTools = require( '@ckeditor/ckeditor5-dev-release-tools' );
-const parseArguments = require( './utils/parsearguments' );
-const getListrOptions = require( './utils/getlistroptions' );
-const runBuildCommand = require( './utils/runbuildcommand' );
-const { CKEDITOR5_DEV_ROOT, PACKAGES_DIRECTORY, RELEASE_DIRECTORY } = require( './utils/constants' );
+import upath from 'upath';
+import { Listr } from 'listr2';
+import { globSync } from 'glob';
+import * as releaseTools from '@ckeditor/ckeditor5-dev-release-tools';
+import parseArguments from './utils/parsearguments.js';
+import getListrOptions from './utils/getlistroptions.js';
+import runBuildCommand from './utils/runbuildcommand.js';
+import { CKEDITOR5_DEV_ROOT, PACKAGES_DIRECTORY, RELEASE_DIRECTORY } from './utils/constants.js';
 
 const cliArguments = parseArguments( process.argv.slice( 2 ) );
 const latestVersion = releaseTools.getLastFromChangelog();

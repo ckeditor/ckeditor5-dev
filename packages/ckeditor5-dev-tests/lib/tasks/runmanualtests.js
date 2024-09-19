@@ -3,24 +3,22 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs' );
-const path = require( 'path' );
-const chalk = require( 'chalk' );
-const { globSync } = require( 'glob' );
-const { spawn } = require( 'child_process' );
-const inquirer = require( 'inquirer' );
-const isInteractive = require( 'is-interactive' );
-const { Server: SocketServer } = require( 'socket.io' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const createManualTestServer = require( '../utils/manual-tests/createserver' );
-const compileManualTestScripts = require( '../utils/manual-tests/compilescripts' );
-const compileManualTestHtmlFiles = require( '../utils/manual-tests/compilehtmlfiles' );
-const copyAssets = require( '../utils/manual-tests/copyassets' );
-const removeDir = require( '../utils/manual-tests/removedir' );
-const transformFileOptionToTestGlob = require( '../utils/transformfileoptiontotestglob' );
-const requireDll = require( '../utils/requiredll' );
+import fs from 'fs';
+import path from 'path';
+import { spawn } from 'child_process';
+import chalk from 'chalk';
+import { globSync } from 'glob';
+import inquirer from 'inquirer';
+import isInteractive from 'is-interactive';
+import { Server as SocketServer } from 'socket.io';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import createManualTestServer from '../utils/manual-tests/createserver.js';
+import compileManualTestScripts from '../utils/manual-tests/compilescripts.js';
+import compileManualTestHtmlFiles from '../utils/manual-tests/compilehtmlfiles.js';
+import copyAssets from '../utils/manual-tests/copyassets.js';
+import removeDir from '../utils/manual-tests/removedir.js';
+import transformFileOptionToTestGlob from '../utils/transformfileoptiontotestglob.js';
+import requireDll from '../utils/requiredll.js';
 
 /**
  * Main function that runs manual tests.
@@ -41,7 +39,7 @@ const requireDll = require( '../utils/requiredll' );
  * @param {Boolean} [options.silent=false] Whether to hide files that will be processed by the script.
  * @returns {Promise}
  */
-module.exports = function runManualTests( options ) {
+export default function runManualTests( options ) {
 	const log = logger();
 	const cwd = process.cwd();
 	const buildDir = path.join( cwd, 'build', '.manual-tests' );
@@ -217,4 +215,4 @@ module.exports = function runManualTests( options ) {
 				} );
 		} );
 	}
-};
+}

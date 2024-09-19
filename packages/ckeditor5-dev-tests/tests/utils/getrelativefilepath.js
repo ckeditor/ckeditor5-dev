@@ -3,142 +3,122 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import path from 'path';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import getRelativeFilePath from '../../lib/utils/getrelativefilepath.js';
 
-const path = require( 'path' );
-const sinon = require( 'sinon' );
-const { expect } = require( 'chai' );
-
-describe( 'dev-tests/utils', () => {
-	let getRelativeFilePath;
-
-	beforeEach( () => {
-		getRelativeFilePath = require( '../../lib/utils/getrelativefilepath' );
-	} );
-
-	describe( 'getRelativeFilePath()', () => {
-		let sandbox;
-
+describe( 'getRelativeFilePath()', () => {
+	describe( 'Unix paths', () => {
 		beforeEach( () => {
-			sandbox = sinon.createSandbox();
+			vi.spyOn( path, 'join' ).mockImplementation( ( ...args ) => args.join( '/' ) );
 		} );
 
-		afterEach( () => {
-			sandbox.restore();
+		it( 'returns path which starts with package name (simple check)', () => {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( '/Users/foo' );
+
+			checkPath( '/Users/foo/packages/ckeditor5-foo/tests/manual/foo.js', 'ckeditor5-foo/tests/manual/foo.js' );
 		} );
 
-		describe( 'Unix paths', () => {
-			beforeEach( () => {
-				sandbox.stub( path, 'join' ).callsFake( ( ...args ) => args.join( '/' ) );
-			} );
+		it( 'returns path which starts with package name (workspace directory looks like package name)', () => {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( '/Users/foo/ckeditor5-workspace/ckeditor5' );
 
-			it( 'returns path which starts with package name (simple check)', () => {
-				sandbox.stub( process, 'cwd' ).returns( '/Users/foo' );
-
-				checkPath( '/Users/foo/packages/ckeditor5-foo/tests/manual/foo.js', 'ckeditor5-foo/tests/manual/foo.js' );
-			} );
-
-			it( 'returns path which starts with package name (workspace directory looks like package name)', () => {
-				sandbox.stub( process, 'cwd' ).returns( '/Users/foo/ckeditor5-workspace/ckeditor5' );
-
-				checkPath(
-					'/Users/foo/ckeditor5-workspace/ckeditor5/packages/ckeditor5-foo/tests/manual/foo.js',
-					'ckeditor5-foo/tests/manual/foo.js'
-				);
-			} );
-
-			it( 'returns a proper path for "ckeditor-" prefix', () => {
-				sandbox.stub( process, 'cwd' ).returns( '/work/space' );
-
-				checkPath( '/work/space/packages/ckeditor-foo/tests/manual/foo.js', 'ckeditor-foo/tests/manual/foo.js' );
-			} );
-
-			it( 'returns a proper path for "ckeditor-" prefix and "ckeditor.js" file', () => {
-				sandbox.stub( process, 'cwd' ).returns( '/work/space' );
-
-				checkPath( '/work/space/packages/ckeditor-foo/tests/manual/ckeditor.js', 'ckeditor-foo/tests/manual/ckeditor.js' );
-			} );
-
-			it( 'returns a proper path to from the main (root) package', () => {
-				sandbox.stub( process, 'cwd' ).returns( '/work/space' );
-				checkPath( '/work/space/packages/ckeditor5/tests/manual/foo.js', 'ckeditor5/tests/manual/foo.js' );
-			} );
-
-			it( 'returns a proper path for "ckeditor5.js" file', () => {
-				sandbox.stub( process, 'cwd' ).returns( '/work/space' );
-				checkPath(
-					'/work/space/packages/ckeditor5-build-a/tests/manual/ckeditor5.js',
-					'ckeditor5-build-a/tests/manual/ckeditor5.js'
-				);
-			} );
-
-			it( 'returns a proper path for "ckeditor.js" file', () => {
-				sandbox.stub( process, 'cwd' ).returns( '/work/space' );
-				checkPath(
-					'/work/space/packages/ckeditor5-build-a/tests/manual/ckeditor.js',
-					'ckeditor5-build-a/tests/manual/ckeditor.js' );
-			} );
+			checkPath(
+				'/Users/foo/ckeditor5-workspace/ckeditor5/packages/ckeditor5-foo/tests/manual/foo.js',
+				'ckeditor5-foo/tests/manual/foo.js'
+			);
 		} );
 
-		describe( 'Windows paths', () => {
-			beforeEach( () => {
-				sandbox.stub( path, 'join' ).callsFake( ( ...args ) => args.join( '\\' ) );
-			} );
+		it( 'returns a proper path for "ckeditor-" prefix', () => {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( '/work/space' );
 
-			it( 'returns path which starts with package name (simple check)', () => {
-				sandbox.stub( process, 'cwd' ).returns( 'C:\\work\\space' );
+			checkPath( '/work/space/packages/ckeditor-foo/tests/manual/foo.js', 'ckeditor-foo/tests/manual/foo.js' );
+		} );
 
-				checkPath( 'C:\\work\\space\\packages\\ckeditor5-foo\\tests\\manual\\foo.js', 'ckeditor5-foo\\tests\\manual\\foo.js' );
-			} );
+		it( 'returns a proper path for "ckeditor-" prefix and "ckeditor.js" file', () => {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( '/work/space' );
 
-			it( 'returns path which starts with package name (workspace directory looks like package name)', () => {
-				sandbox.stub( process, 'cwd' ).returns( 'C:\\Document and settings\\foo\\ckeditor5-workspace\\ckeditor5' );
+			checkPath( '/work/space/packages/ckeditor-foo/tests/manual/ckeditor.js', 'ckeditor-foo/tests/manual/ckeditor.js' );
+		} );
 
-				checkPath(
-					'C:\\Document and settings\\foo\\ckeditor5-workspace\\ckeditor5\\packages\\ckeditor5-foo\\tests\\manual\\foo.js',
-					'ckeditor5-foo\\tests\\manual\\foo.js'
-				);
-			} );
+		it( 'returns a proper path to from the main (root) package', () => {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( '/work/space' );
+			checkPath( '/work/space/packages/ckeditor5/tests/manual/foo.js', 'ckeditor5/tests/manual/foo.js' );
+		} );
 
-			it( 'returns a proper path for "ckeditor-" prefix', () => {
-				sandbox.stub( process, 'cwd' ).returns( 'C:\\work\\space' );
+		it( 'returns a proper path for "ckeditor5.js" file', () => {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( '/work/space' );
+			checkPath(
+				'/work/space/packages/ckeditor5-build-a/tests/manual/ckeditor5.js',
+				'ckeditor5-build-a/tests/manual/ckeditor5.js'
+			);
+		} );
 
-				checkPath( 'C:\\work\\space\\packages\\ckeditor-foo\\tests\\manual\\foo.js', 'ckeditor-foo\\tests\\manual\\foo.js' );
-			} );
-
-			it( 'returns a proper path for "ckeditor-" prefix and "ckeditor.js" file', () => {
-				sandbox.stub( process, 'cwd' ).returns( 'C:\\work\\space' );
-
-				checkPath(
-					'C:\\work\\space\\packages\\ckeditor-foo\\tests\\manual\\ckeditor.js',
-					'ckeditor-foo\\tests\\manual\\ckeditor.js'
-				);
-			} );
-
-			it( 'returns a proper path to from the main (root) package', () => {
-				sandbox.stub( process, 'cwd' ).returns( 'C:\\work\\space' );
-				checkPath( 'C:\\work\\space\\tests\\manual\\foo.js', 'ckeditor5\\tests\\manual\\foo.js' );
-			} );
-
-			it( 'returns a proper path for "ckeditor5.js" file', () => {
-				sandbox.stub( process, 'cwd' ).returns( 'C:\\work\\space' );
-				checkPath(
-					'C:\\work\\space\\packages\\ckeditor5-build-a\\tests\\manual\\ckeditor5.js',
-					'ckeditor5-build-a\\tests\\manual\\ckeditor5.js'
-				);
-			} );
-
-			it( 'returns a proper path for "ckeditor.js" file', () => {
-				sandbox.stub( process, 'cwd' ).returns( 'C:\\work\\space' );
-				checkPath(
-					'C:\\work\\space\\packages\\ckeditor5-build-a\\tests\\manual\\ckeditor.js',
-					'ckeditor5-build-a\\tests\\manual\\ckeditor.js'
-				);
-			} );
+		it( 'returns a proper path for "ckeditor.js" file', () => {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( '/work/space' );
+			checkPath(
+				'/work/space/packages/ckeditor5-build-a/tests/manual/ckeditor.js',
+				'ckeditor5-build-a/tests/manual/ckeditor.js' );
 		} );
 	} );
 
-	function checkPath( filePath, expectedPath ) {
-		expect( getRelativeFilePath( filePath ) ).to.equal( expectedPath );
-	}
+	describe( 'Windows paths', () => {
+		beforeEach( () => {
+			vi.spyOn( path, 'join' ).mockImplementation( ( ...args ) => args.join( '\\' ) );
+		} );
+
+		it( 'returns path which starts with package name (simple check)', () => {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( 'C:\\work\\space' );
+
+			checkPath( 'C:\\work\\space\\packages\\ckeditor5-foo\\tests\\manual\\foo.js', 'ckeditor5-foo\\tests\\manual\\foo.js' );
+		} );
+
+		it( 'returns path which starts with package name (workspace directory looks like package name)', () => {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( 'C:\\Document and settings\\foo\\ckeditor5-workspace\\ckeditor5' );
+
+			checkPath(
+				'C:\\Document and settings\\foo\\ckeditor5-workspace\\ckeditor5\\packages\\ckeditor5-foo\\tests\\manual\\foo.js',
+				'ckeditor5-foo\\tests\\manual\\foo.js'
+			);
+		} );
+
+		it( 'returns a proper path for "ckeditor-" prefix', () => {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( 'C:\\work\\space' );
+
+			checkPath( 'C:\\work\\space\\packages\\ckeditor-foo\\tests\\manual\\foo.js', 'ckeditor-foo\\tests\\manual\\foo.js' );
+		} );
+
+		it( 'returns a proper path for "ckeditor-" prefix and "ckeditor.js" file', () => {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( 'C:\\work\\space' );
+
+			checkPath(
+				'C:\\work\\space\\packages\\ckeditor-foo\\tests\\manual\\ckeditor.js',
+				'ckeditor-foo\\tests\\manual\\ckeditor.js'
+			);
+		} );
+
+		it( 'returns a proper path to from the main (root) package', () => {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( 'C:\\work\\space' );
+			checkPath( 'C:\\work\\space\\tests\\manual\\foo.js', 'ckeditor5\\tests\\manual\\foo.js' );
+		} );
+
+		it( 'returns a proper path for "ckeditor5.js" file', () => {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( 'C:\\work\\space' );
+			checkPath(
+				'C:\\work\\space\\packages\\ckeditor5-build-a\\tests\\manual\\ckeditor5.js',
+				'ckeditor5-build-a\\tests\\manual\\ckeditor5.js'
+			);
+		} );
+
+		it( 'returns a proper path for "ckeditor.js" file', () => {
+			vi.spyOn( process, 'cwd' ).mockReturnValue( 'C:\\work\\space' );
+			checkPath(
+				'C:\\work\\space\\packages\\ckeditor5-build-a\\tests\\manual\\ckeditor.js',
+				'ckeditor5-build-a\\tests\\manual\\ckeditor.js'
+			);
+		} );
+	} );
 } );
+
+function checkPath( filePath, expectedPath ) {
+	expect( getRelativeFilePath( filePath ) ).to.equal( expectedPath );
+}

@@ -3,18 +3,16 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const fs = require( 'fs' );
-const path = require( 'path' );
-const minimist = require( 'minimist' );
-const { tools, logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+import fs from 'fs-extra';
+import path from 'path';
+import minimist from 'minimist';
+import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
  * @param {Array.<String>} args
  * @returns {Object}
  */
-module.exports = function parseArguments( args ) {
+export default function parseArguments( args ) {
 	const log = logger();
 
 	const minimistConfig = {
@@ -172,7 +170,7 @@ module.exports = function parseArguments( args ) {
 		const files = new Set( options.files );
 
 		for ( const repositoryName of options.repositories ) {
-			const cwdPackageJson = require( path.join( cwd, 'package.json' ) );
+			const cwdPackageJson = fs.readJsonSync( path.join( cwd, 'package.json' ) );
 
 			// Check the main repository.
 			if ( repositoryName === cwdPackageJson.name ) {
@@ -266,4 +264,4 @@ module.exports = function parseArguments( args ) {
 			return false;
 		}
 	}
-};
+}

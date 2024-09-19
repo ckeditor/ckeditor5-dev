@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
+import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import chalk from 'chalk';
@@ -88,7 +88,7 @@ export default function serveTranslations( compiler, options, translationService
 				}
 
 				// Add all context messages found in the core package.
-				const contexts = require( pathToResource );
+				const contexts = fs.readJsonSync( pathToResource );
 
 				for ( const item of Object.keys( contexts ) ) {
 					translationService.addIdMessage( item );
@@ -107,6 +107,7 @@ export default function serveTranslations( compiler, options, translationService
 				// after any potential TypeScript file has already been compiled.
 				module.loaders.unshift( {
 					loader: path.join( __dirname, 'translatesourceloader.js' ),
+					type: 'module',
 					options: { translateSource }
 				} );
 

@@ -5,10 +5,8 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const { generateChangelogForMonoRepository } = require( '@ckeditor/ckeditor5-dev-release-tools' );
-const parseArguments = require( './utils/parsearguments' );
+import { generateChangelogForMonoRepository } from '@ckeditor/ckeditor5-dev-release-tools';
+import parseArguments from './utils/parsearguments.js';
 
 const cliArguments = parseArguments( process.argv.slice( 2 ) );
 

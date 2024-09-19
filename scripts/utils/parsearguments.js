@@ -5,15 +5,14 @@
 
 /* eslint-env node */
 
-'use strict';
-
-const minimist = require( 'minimist' );
+import minimist from 'minimist';
+import os from 'os';
 
 /**
  * @param {Array.<String>} cliArguments
  * @returns {ReleaseOptions} options
  */
-module.exports = function parseArguments( cliArguments ) {
+export default function parseArguments( cliArguments ) {
 	const config = {
 		boolean: [
 			'verbose',
@@ -33,7 +32,7 @@ module.exports = function parseArguments( cliArguments ) {
 		],
 
 		default: {
-			concurrency: require( 'os' ).cpus().length / 2,
+			concurrency: os.cpus().length / 2,
 			packages: null,
 			ci: false,
 			verbose: false,
@@ -60,7 +59,7 @@ module.exports = function parseArguments( cliArguments ) {
 	}
 
 	return options;
-};
+}
 
 /**
  * @typedef {Object} ReleaseOptions

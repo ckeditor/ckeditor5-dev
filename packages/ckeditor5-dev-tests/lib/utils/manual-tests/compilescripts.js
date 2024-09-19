@@ -3,12 +3,10 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
-
-const webpack = require( 'webpack' );
-const getWebpackConfigForManualTests = require( './getwebpackconfig' );
-const getRelativeFilePath = require( '../getrelativefilepath' );
-const requireDll = require( '../requiredll' );
+import webpack from 'webpack';
+import getWebpackConfigForManualTests from './getwebpackconfig.js';
+import getRelativeFilePath from '../getrelativefilepath.js';
+import requireDll from '../requiredll.js';
 
 /**
  * @param {Object} options
@@ -25,7 +23,7 @@ const requireDll = require( '../requiredll' );
  * @param {String} [options.identityFile] A file that provides secret keys used in the test scripts.
  * @returns {Promise}
  */
-module.exports = function compileManualTestScripts( options ) {
+export default function compileManualTestScripts( options ) {
 	const entryFiles = options.sourceFiles;
 	const entryFilesDLL = entryFiles.filter( entryFile => requireDll( entryFile ) );
 	const entryFilesNonDll = entryFiles.filter( entryFile => !requireDll( entryFile ) );
@@ -71,7 +69,7 @@ module.exports = function compileManualTestScripts( options ) {
 	const webpackPromises = webpackConfigs.map( config => runWebpack( config ) );
 
 	return Promise.all( webpackPromises );
-};
+}
 
 /**
  * @returns {Promise}

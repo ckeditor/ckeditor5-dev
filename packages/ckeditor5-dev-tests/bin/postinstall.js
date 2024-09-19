@@ -5,10 +5,11 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import isWsl from 'is-wsl';
+import { execSync } from 'child_process';
+import { createRequire } from 'module';
 
-const isWsl = require( 'is-wsl' );
-const { execSync } = require( 'child_process' );
+const require = createRequire( import.meta.url );
 
 if ( isWsl ) {
 	const executables = [

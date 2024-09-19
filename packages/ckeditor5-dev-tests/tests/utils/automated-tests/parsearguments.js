@@ -3,74 +3,35 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import fs from 'fs-extra';
+import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
+import parseArguments from '../../../lib/utils/automated-tests/parsearguments.js';
 
-const fs = require( 'fs' );
-const path = require( 'path' );
-const mockery = require( 'mockery' );
-const { expect } = require( 'chai' );
-const sinon = require( 'sinon' );
-const proxyquire = require( 'proxyquire' );
-
-const originalPosixJoin = path.posix.join;
+vi.mock( 'path', () => ( {
+	default: {
+		join: vi.fn( ( ...chunks ) => chunks.join( '/' ) ),
+		dirname: vi.fn()
+	}
+} ) );
+vi.mock( 'fs-extra' );
+vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 
 describe( 'parseArguments()', () => {
-	let parseArguments, sandbox, stubs, packageName;
+	let logWarningStub;
 
 	beforeEach( () => {
-		sandbox = sinon.createSandbox();
+		logWarningStub = vi.fn();
 
-		mockery.enable( {
-			useCleanCache: true,
-			warnOnReplace: false,
-			warnOnUnregistered: false
+		vi.spyOn( process, 'cwd' ).mockReturnValue( '/home/project' );
+		vi.mocked( logger ).mockReturnValue( {
+			warning: logWarningStub
 		} );
-
-		stubs = {
-			cwd: sandbox.stub( process, 'cwd' ).callsFake( () => '/' ),
-			existsSync: sandbox.stub( fs, 'existsSync' ),
-			tools: {
-				getDirectories: sandbox.stub()
-			},
-			logger: {
-				warning: sandbox.stub()
-			},
-			fs: {
-				statSync: sandbox.stub()
-			},
-			// To force unix paths in tests.
-			pathJoin: sandbox.stub( path, 'join' ).callsFake( ( ...chunks ) => originalPosixJoin( ...chunks ) )
-		};
-
-		stubs.cwd.returns( '/home/project' );
-
-		packageName = 'ckeditor5';
-
-		mockery.registerMock( '/home/project/package.json', {
-			get name() {
-				return packageName;
-			}
-		} );
-
-		// mockery.registerMock( 'fs', stubs.fs );
-
-		parseArguments = proxyquire( '../../../lib/utils/automated-tests/parsearguments', {
-			'@ckeditor/ckeditor5-dev-utils': {
-				logger() {
-					return stubs.logger;
-				},
-				tools: stubs.tools
-			},
-			'fs': stubs.fs
-		} );
-	} );
-
-	afterEach( () => {
-		sandbox.restore();
-		mockery.disable();
 	} );
 
 	it( 'replaces kebab-case strings with camelCase values', () => {
+		vi.mocked( fs ).readJsonSync.mockReturnValue( {} );
+
 		const options = parseArguments( [
 			'--source-map',
 			'true',
@@ -97,6 +58,8 @@ describe( 'parseArguments()', () => {
 	} );
 
 	it( 'deletes all aliases keys from returned object', () => {
+		vi.mocked( fs ).readJsonSync.mockReturnValue( {} );
+
 		const options = parseArguments( [
 			'-b',
 			'Chrome,Firefox',
@@ -190,63 +153,67 @@ describe( 'parseArguments()', () => {
 			expect( options.repositories ).to.deep.equal( [] );
 		} );
 
-		it(
-			'returns an array of packages to tests when `--repositories` is specified ' +
-			'(root directory check)',
-			() => {
-				packageName = 'ckeditor5';
+		it( 'returns an array of packages to tests when `--repositories` is specified (root directory check)', () => {
+			vi.mocked( fs ).readJsonSync.mockReturnValue( { name: 'ckeditor5' } );
+			vi.mocked( fs ).statSync.mockImplementation( input => {
+				if ( input === '/home/project/external' ) {
+					throw new Error( 'ENOENT: no such file or directory' );
+				}
+			} );
+			vi.mocked( tools ).getDirectories.mockImplementation( input => {
+				if ( input === '/home/project/packages' ) {
+					return [
+						'ckeditor5-core',
+						'ckeditor5-engine'
+					];
+				}
+			} );
 
-				stubs.fs.statSync.withArgs( '/home/project/external' ).throws( 'ENOENT: no such file or directory' );
+			const options = parseArguments( [
+				'--repositories',
+				'ckeditor5'
+			] );
 
-				stubs.tools.getDirectories.withArgs( '/home/project/packages' ).returns( [
-					'ckeditor5-core',
-					'ckeditor5-engine'
-				] );
+			expect( options.files ).to.deep.equal( [ 'core', 'engine' ] );
 
-				const options = parseArguments( [
-					'--repositories',
-					'ckeditor5'
-				] );
+			expect( logWarningStub ).toHaveBeenCalledExactlyOnceWith(
+				'The `external/` directory does not exist. Only the root repository will be checked.'
+			);
+		} );
 
-				expect( options.files ).to.deep.equal( [ 'core', 'engine' ] );
+		it( 'returns an array of packages to tests when `--repositories` is specified (external directory check)', () => {
+			vi.mocked( fs ).readJsonSync.mockReturnValue( { name: 'foo' } );
+			vi.mocked( fs ).statSync.mockReturnValue( { isDirectory: () => true } );
+			vi.mocked( tools ).getDirectories.mockImplementation( input => {
+				if ( input === '/home/project/external/ckeditor5/packages' ) {
+					return [
+						'ckeditor5-core',
+						'ckeditor5-engine'
+					];
+				}
+			} );
 
-				expect( stubs.logger.warning.callCount ).to.equal( 1 );
-				expect( stubs.logger.warning.firstCall.args[ 0 ] ).to.equal(
-					'The `external/` directory does not exist. Only the root repository will be checked.'
-				);
-			}
-		);
+			const options = parseArguments( [
+				'--repositories',
+				'ckeditor5'
+			] );
 
-		it(
-			'returns an array of packages to tests when `--repositories` is specified ' +
-			'(external directory check)',
-			() => {
-				packageName = 'foo';
-
-				stubs.fs.statSync.returns( { isDirectory: () => true } );
-				stubs.tools.getDirectories.withArgs( '/home/project/external/ckeditor5/packages' ).returns( [
-					'ckeditor5-core',
-					'ckeditor5-engine'
-				] );
-
-				const options = parseArguments( [
-					'--repositories',
-					'ckeditor5'
-				] );
-
-				expect( options.files ).to.deep.equal( [ 'core', 'engine' ] );
-				expect( stubs.logger.warning.callCount ).to.equal( 0 );
-			}
-		);
+			expect( options.files ).to.deep.equal( [ 'core', 'engine' ] );
+			expect( logWarningStub ).not.toHaveBeenCalled();
+		} );
 
 		it(
 			'returns an array of packages to tests when `--repositories` is specified ' +
 			'(external directory check, specified repository does not exist)',
 			() => {
-				packageName = 'foo';
+				vi.mocked( fs ).readJsonSync.mockReturnValue( { name: 'foo' } );
+				vi.mocked( fs ).statSync.mockImplementation( input => {
+					if ( input === '/home/project/external' ) {
+						return { isDirectory: () => true };
+					}
 
-				stubs.fs.statSync.withArgs( '/home/project/external' ).returns( { isDirectory: () => true } );
-				stubs.fs.statSync.withArgs( '/home/project/external/ckeditor5' ).throws( 'ENOENT: no such file or directory' );
+					throw new Error( 'ENOENT: no such file or directory' );
+				} );
 
 				const options = parseArguments( [
 					'--repositories',
@@ -254,9 +221,7 @@ describe( 'parseArguments()', () => {
 				] );
 
 				expect( options.files ).to.deep.equal( [] );
-
-				expect( stubs.logger.warning.callCount ).to.equal( 1 );
-				expect( stubs.logger.warning.firstCall.args[ 0 ] ).to.equal(
+				expect( logWarningStub ).toHaveBeenCalledExactlyOnceWith(
 					'Did not find the repository "ckeditor5" in the root repository or the "external/" directory.'
 				);
 			}
@@ -266,14 +231,23 @@ describe( 'parseArguments()', () => {
 			'returns an array of packages (unique list) to tests when `--repositories` is specified ' +
 			'(root directory check + `--files` specified)',
 			() => {
-				packageName = 'ckeditor5';
+				vi.mocked( fs ).readJsonSync.mockReturnValue( { name: 'ckeditor5' } );
+				vi.mocked( fs ).statSync.mockImplementation( input => {
+					if ( input === '/home/project/external' ) {
+						return { isDirectory: () => true };
+					}
 
-				stubs.fs.statSync.withArgs( '/home/project/external' ).returns( { isDirectory: () => true } );
-				stubs.tools.getDirectories.withArgs( '/home/project/packages' ).returns( [
-					'ckeditor5-core',
-					'ckeditor5-engine',
-					'ckeditor5-utils'
-				] );
+					throw new Error( 'ENOENT: no such file or directory' );
+				} );
+				vi.mocked( tools ).getDirectories.mockImplementation( input => {
+					if ( input === '/home/project/packages' ) {
+						return [
+							'ckeditor5-core',
+							'ckeditor5-engine',
+							'ckeditor5-utils'
+						];
+					}
+				} );
 
 				const options = parseArguments( [
 					'--repositories',
@@ -290,23 +264,28 @@ describe( 'parseArguments()', () => {
 			'returns an array of packages to tests when `--repositories` is specified ' +
 			'(root and external directories check)',
 			() => {
-				packageName = 'ckeditor5';
-
-				stubs.fs.statSync.withArgs( '/home/project/external' ).returns( { isDirectory: () => true } );
-				stubs.fs.statSync.withArgs( '/home/project/external/foo' ).returns( { isDirectory: () => true } );
-				stubs.fs.statSync.withArgs( '/home/project/external/bar' ).returns( { isDirectory: () => true } );
-				stubs.tools.getDirectories.withArgs( '/home/project/packages' ).returns( [
-					'ckeditor5-core',
-					'ckeditor5-engine'
-				] );
-				stubs.tools.getDirectories.withArgs( '/home/project/external/foo/packages' ).returns( [
-					'ckeditor5-foo-1',
-					'ckeditor5-foo-2'
-				] );
-				stubs.tools.getDirectories.withArgs( '/home/project/external/bar/packages' ).returns( [
-					'ckeditor5-bar-1',
-					'ckeditor5-bar-2'
-				] );
+				vi.mocked( fs ).readJsonSync.mockReturnValue( { name: 'ckeditor5' } );
+				vi.mocked( fs ).statSync.mockReturnValue( { isDirectory: () => true } );
+				vi.mocked( tools ).getDirectories.mockImplementation( input => {
+					if ( input === '/home/project/packages' ) {
+						return [
+							'ckeditor5-core',
+							'ckeditor5-engine'
+						];
+					}
+					if ( input === '/home/project/external/foo/packages' ) {
+						return [
+							'ckeditor5-foo-1',
+							'ckeditor5-foo-2'
+						];
+					}
+					if ( input === '/home/project/external/bar/packages' ) {
+						return [
+							'ckeditor5-bar-1',
+							'ckeditor5-bar-2'
+						];
+					}
+				} );
 
 				const options = parseArguments( [
 					'--repositories',
@@ -340,7 +319,7 @@ describe( 'parseArguments()', () => {
 
 	describe( 'tsconfig', () => {
 		it( 'should be null by default, if `tsconfig.test.json` does not exist', () => {
-			stubs.existsSync.returns( false );
+			vi.mocked( fs ).existsSync.mockReturnValue( false );
 
 			const options = parseArguments( [] );
 
@@ -348,8 +327,7 @@ describe( 'parseArguments()', () => {
 		} );
 
 		it( 'should use `tsconfig.test.json` from `cwd` if it is available by default', () => {
-			stubs.cwd.returns( '/home/project' );
-			stubs.existsSync.returns( true );
+			vi.mocked( fs ).existsSync.mockReturnValue( true );
 
 			const options = parseArguments( [] );
 
@@ -357,16 +335,16 @@ describe( 'parseArguments()', () => {
 		} );
 
 		it( 'should parse `--tsconfig` to absolute path if it is set and it exists', () => {
-			stubs.cwd.returns( '/home/project' );
-			stubs.existsSync.returns( true );
-			const options = parseArguments( [ '--tsconfig', './configs/tsconfig.json' ] );
+			vi.mocked( fs ).existsSync.mockReturnValue( true );
+
+			const options = parseArguments( [ '--tsconfig', 'configs/tsconfig.json' ] );
 
 			expect( options.tsconfig ).to.be.equal( '/home/project/configs/tsconfig.json' );
 		} );
 
 		it( 'should be null if `--tsconfig` points to non-existing file', () => {
-			stubs.cwd.returns( '/home/project' );
-			stubs.existsSync.returns( false );
+			vi.mocked( fs ).existsSync.mockReturnValue( false );
+
 			const options = parseArguments( [ '--tsconfig', './configs/tsconfig.json' ] );
 
 			expect( options.tsconfig ).to.equal( null );

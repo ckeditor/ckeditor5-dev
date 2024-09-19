@@ -3,14 +3,17 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import readline from 'readline';
+import { fileURLToPath } from 'url';
+import { globSync } from 'glob';
+import combine from 'dom-combiner';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
 
-const http = require( 'http' );
-const path = require( 'path' );
-const { globSync } = require( 'glob' );
-const fs = require( 'fs' );
-const combine = require( 'dom-combiner' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
 
 /**
  * Basic HTTP server.
@@ -19,24 +22,21 @@ const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
  * @param {Number} [port=8125] Port to listen at.
  * @param {Function} [onCreate] A callback called with the reference to the HTTP server when it is up and running.
  */
-module.exports = function createManualTestServer( sourcePath, port = 8125, onCreate ) {
+export default function createManualTestServer( sourcePath, port = 8125, onCreate ) {
 	return new Promise( resolve => {
 		const server = http.createServer( ( request, response ) => {
 			onRequest( sourcePath, request, response );
 		} ).listen( port );
 
-		// SIGINT isn't caught on Windows in process. However CTRL+C can be catch
+		// SIGINT isn't caught on Windows in process. However, `CTRL+C` can be caught
 		// by `readline` module. After that we can emit SIGINT to the process manually.
 		if ( process.platform === 'win32' ) {
-			const readline = require( 'readline' ).createInterface( {
+			const readlineInterface = readline.createInterface( {
 				input: process.stdin,
 				output: process.stdout
 			} );
 
-			// Save the reference of the stream to be able to close it in tests.
-			server._readline = readline;
-
-			readline.on( 'SIGINT', () => {
+			readlineInterface.on( 'SIGINT', () => {
 				process.emit( 'SIGINT' );
 			} );
 		}
@@ -56,7 +56,7 @@ module.exports = function createManualTestServer( sourcePath, port = 8125, onCre
 			onCreate( server );
 		}
 	} );
-};
+}
 
 function onRequest( sourcePath, request, response ) {
 	response.writeHead( 200, {

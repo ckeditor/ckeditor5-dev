@@ -3,18 +3,20 @@
  * For licensing, see LICENSE.md.
  */
 
-'use strict';
+import path from 'path';
+import fs from 'fs-extra';
+import { globSync } from 'glob';
+import _ from 'lodash';
+import chalk from 'chalk';
+import * as commonmark from 'commonmark';
+import combine from 'dom-combiner';
+import chokidar from 'chokidar';
+import { logger } from '@ckeditor/ckeditor5-dev-utils';
+import getRelativeFilePath from '../getrelativefilepath.js';
+import { fileURLToPath } from 'url';
 
-const path = require( 'path' );
-const fs = require( 'fs-extra' );
-const { globSync } = require( 'glob' );
-const _ = require( 'lodash' );
-const chalk = require( 'chalk' );
-const commonmark = require( 'commonmark' );
-const combine = require( 'dom-combiner' );
-const chokidar = require( 'chokidar' );
-const { logger } = require( '@ckeditor/ckeditor5-dev-utils' );
-const getRelativeFilePath = require( '../getrelativefilepath' );
+const __filename = fileURLToPath( import.meta.url );
+const __dirname = path.dirname( __filename );
 
 const reader = new commonmark.Parser();
 const writer = new commonmark.HtmlRenderer();
@@ -30,7 +32,7 @@ const writer = new commonmark.HtmlRenderer();
  * @param {Boolean} [options.silent=false] Whether to hide files that will be processed by the script.
  * @returns {Promise}
  */
-module.exports = function compileHtmlFiles( options ) {
+export default function compileHtmlFiles( options ) {
 	const buildDir = options.buildDir;
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 	const silent = options.silent || false;
@@ -43,7 +45,7 @@ module.exports = function compileHtmlFiles( options ) {
 
 	const staticFiles = sourceDirs
 		.flatMap( sourceDir => {
-			const globPattern = path.join( sourceDir, '**', '*.!(js|html|md)' ).split( path.sep ).join( '/' );
+			const globPattern = path.join( sourceDir, '**', '*.!(js|html|md)' ).split( /[\\/]/ ).join( '/' );
 
 			return globSync( globPattern );
 		} )
@@ -80,7 +82,7 @@ module.exports = function compileHtmlFiles( options ) {
 			} );
 		}, options.onTestCompilationStatus );
 	}
-};
+}
 
 /**
  * @param {String} buildDir An absolute path to the directory where the processed file should be saved.
