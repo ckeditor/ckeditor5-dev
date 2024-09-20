@@ -3,10 +3,32 @@ Changelog
 
 ## [44.0.0-alpha.0](https://github.com/ckeditor/ckeditor5-dev/compare/v43.0.0...v44.0.0-alpha.0) (2024-09-20)
 
+### MAJOR BREAKING CHANGES [ℹ️](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html#major-and-minor-breaking-changes)
+
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The `builds.getDllPluginWebpackConfig()` function is now asynchronous now.
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The following functions from the `bundler` object are no longer available: `createEntryFile()`, `getEditorConfig()`, `getPlugins()`.
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The following functions from the `stream` object are no longer available: `isTestFile()`, `isSourceFile()`, `isJSFile()`.
+* **[utils](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-utils)**: The `styles.themeLogger()` function is no longer exposed publicly.
+* **[tests](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-tests)**: The IntelliJ Karma configuration path needs to be updated. Now, it ends with the `cjs` suffix instead of `js`.
+* **[docs](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-docs)**: The package uses only TypeDoc to build the documentation. The `build()` function no longer supports `type` property in the configuration.
+* The following packages have been converted to ESM. To load them, use an `import` statement instead of `require()`.
+  * [`@ckeditor/ckeditor5-dev-build-tools`](https://www.npmjs.com/package/@ckeditor/@ckeditor/ckeditor5-dev-build-tools)
+  * [`@ckeditor/ckeditor5-dev-bump-year`](https://www.npmjs.com/package/@ckeditor/@ckeditor/ckeditor5-dev-bump-year)
+  * [`@ckeditor/ckeditor5-dev-ci`](https://www.npmjs.com/package/@ckeditor/@ckeditor/ckeditor5-dev-ci)
+  * [`@ckeditor/ckeditor5-dev-dependency-checker`](https://www.npmjs.com/package/@ckeditor/@ckeditor/ckeditor5-dev-dependency-checker)
+  * [`@ckeditor/ckeditor5-dev-docs`](https://www.npmjs.com/package/@ckeditor/@ckeditor/ckeditor5-dev-docs)
+  * [`@ckeditor/ckeditor5-dev-release-tools`](https://www.npmjs.com/package/@ckeditor/@ckeditor/ckeditor5-dev-release-tools)
+  * [`@ckeditor/ckeditor5-dev-stale-bot`](https://www.npmjs.com/package/@ckeditor/@ckeditor/ckeditor5-dev-stale-bot)
+  * [`@ckeditor/ckeditor5-dev-tests`](https://www.npmjs.com/package/@ckeditor/@ckeditor/ckeditor5-dev-tests)
+  * [`@ckeditor/ckeditor5-dev-transifex`](https://www.npmjs.com/package/@ckeditor/@ckeditor/ckeditor5-dev-transifex)
+  * [`@ckeditor/ckeditor5-dev-translations`](https://www.npmjs.com/package/@ckeditor/@ckeditor/ckeditor5-dev-translations)
+  * [`@ckeditor/ckeditor5-dev-utils`](https://www.npmjs.com/package/@ckeditor/@ckeditor/ckeditor5-dev-utils)
+  * [`@ckeditor/ckeditor5-dev-web-crawler`](https://www.npmjs.com/package/@ckeditor/@ckeditor/ckeditor5-dev-web-crawler)
+
 ### Other changes
 
-* **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Convert ckeditor5-dev-release-tools to ESM. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/22d7d9d98de7983aa43f749a5b3697862c2c43c9))
-* **[transifex](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-transifex)**: Converted ckeditor5-dev-transifex to ESM. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/a37d6430b973ead4627fd51b0f4d0a8c24335455))
+* The CKEditor 5 Dev packages are now ESM.
+* The `@ckeditor/jsdoc-plugins` package is no longer available as CKEditor 5 documentation uses TypeScript sources to prepare API docs. The package is no longer use by us anywhere. Hence, we decided to remove a dead code.
 
 ### Released packages
 
