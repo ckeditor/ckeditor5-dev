@@ -40,7 +40,7 @@ export default async function triggerCircleBuild( options ) {
 	}
 
 	const requestOptions = {
-		method: 'post',
+		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 			'Accept': 'application/json',

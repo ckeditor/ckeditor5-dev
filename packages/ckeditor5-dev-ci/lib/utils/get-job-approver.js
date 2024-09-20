@@ -13,7 +13,7 @@
  */
 export default async function getJobApprover( circleCiToken, workflowId, jobName ) {
 	const circleRequestOptions = {
-		method: 'get',
+		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
 			'Accept': 'application/json',

@@ -32,7 +32,7 @@ describe( 'lib/triggerCircleBuild', () => {
 		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledWith(
 			'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-dev/pipeline',
 			{
-				method: 'post',
+				method: 'POST',
 				headers: {
 					Accept: 'application/json',
 					'Circle-Token': 'circle-token',
@@ -67,7 +67,7 @@ describe( 'lib/triggerCircleBuild', () => {
 		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledWith(
 			'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-dev/pipeline',
 			{
-				method: 'post',
+				method: 'POST',
 				headers: {
 					Accept: 'application/json',
 					'Circle-Token': 'circle-token',
@@ -103,7 +103,7 @@ describe( 'lib/triggerCircleBuild', () => {
 		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledWith(
 			'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-dev/pipeline',
 			{
-				method: 'post',
+				method: 'POST',
 				headers: {
 					Accept: 'application/json',
 					'Circle-Token': 'circle-token',
@@ -139,7 +139,7 @@ describe( 'lib/triggerCircleBuild', () => {
 		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledWith(
 			'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-dev/pipeline',
 			{
-				method: 'post',
+				method: 'POST',
 				headers: {
 					Accept: 'application/json',
 					'Circle-Token': 'circle-token',

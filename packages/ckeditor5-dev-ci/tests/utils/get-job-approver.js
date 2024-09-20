@@ -34,7 +34,7 @@ describe( 'lib/utils/getJobApprover', () => {
 		expect( vi.mocked( fetchMock ) ).toHaveBeenNthCalledWith( 1,
 			'https://circleci.com/api/v2/workflow/abc-123-abc-456/job',
 			{
-				'method': 'get',
+				'method': 'GET',
 				'headers': expect.objectContaining( {
 					'Circle-Token': 'circle-token'
 				} )
@@ -43,7 +43,7 @@ describe( 'lib/utils/getJobApprover', () => {
 		expect( vi.mocked( fetchMock ) ).toHaveBeenNthCalledWith( 2,
 			'https://circleci.com/api/v2/user/foo-unique-id',
 			{
-				'method': 'get',
+				'method': 'GET',
 				'headers': expect.objectContaining( {
 					'Circle-Token': 'circle-token'
 				} )

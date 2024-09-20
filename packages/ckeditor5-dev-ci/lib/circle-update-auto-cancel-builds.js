@@ -20,7 +20,7 @@ export default async function circleUpdateAutoCancelBuilds( options ) {
 	} = options;
 
 	const circleRequestOptions = {
-		method: 'patch',
+		method: 'PATCH',
 		headers: {
 			'Content-Type': 'application/json',
 			'Circle-Token': circleToken

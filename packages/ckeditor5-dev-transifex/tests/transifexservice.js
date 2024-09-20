@@ -288,18 +288,21 @@ describe( 'dev-transifex/transifex-service', () => {
 			expect( fetchMock ).toHaveBeenCalledTimes( 3 );
 
 			expect( fetchMock ).toHaveBeenNthCalledWith( 1, 'https://example.com/ckeditor5-core/en', {
+				method: 'GET',
 				headers: {
 					Authorization: 'Bearer secretToken'
 				}
 			} );
 
 			expect( fetchMock ).toHaveBeenNthCalledWith( 2, 'https://example.com/ckeditor5-core/pl', {
+				method: 'GET',
 				headers: {
 					Authorization: 'Bearer secretToken'
 				}
 			} );
 
 			expect( fetchMock ).toHaveBeenNthCalledWith( 3, 'https://example.com/ckeditor5-core/de', {
+				method: 'GET',
 				headers: {
 					Authorization: 'Bearer secretToken'
 				}

@@ -338,6 +338,7 @@ async function downloadFile( downloadRequest, numberOfAttempts = 1 ) {
 	const { url, resourceName, languageCode } = downloadRequest;
 
 	const response = await fetch( url, {
+		method: 'GET',
 		headers: {
 			...transifexApi.auth()
 		}

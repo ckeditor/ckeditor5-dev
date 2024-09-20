@@ -28,7 +28,7 @@ describe( 'lib/circleUpdateAutoCancelBuilds', () => {
 		expect( vi.mocked( fetchMock ) ).toHaveBeenCalledWith(
 			'https://circleci.com/api/v2/project/github/ckeditor/ckeditor5-foo/settings',
 			{
-				method: 'patch',
+				method: 'PATCH',
 				headers: {
 					'Circle-Token': 'circle-token',
 					'Content-Type': 'application/json'

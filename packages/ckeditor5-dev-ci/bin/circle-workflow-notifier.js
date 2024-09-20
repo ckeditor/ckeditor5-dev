@@ -104,7 +104,12 @@ async function waitForOtherJobsAndSendNotification() {
  */
 async function getOtherJobsData() {
 	const url = `https://circleci.com/api/v2/workflow/${ CIRCLE_WORKFLOW_ID }/job`;
-	const options = { headers: { 'Circle-Token': CKE5_CIRCLE_TOKEN } };
+	const options = {
+		method: 'GET',
+		headers: {
+			'Circle-Token': CKE5_CIRCLE_TOKEN
+		}
+	};
 
 	const response = await fetch( url, options );
 	const data = await response.json();
