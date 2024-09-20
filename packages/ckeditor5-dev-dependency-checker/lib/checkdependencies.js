@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import fs from 'fs';
+import fs from 'fs-extra';
 import upath from 'upath';
 import { globSync } from 'glob';
 import depCheck from 'depcheck';
@@ -52,7 +52,7 @@ async function checkDependenciesInPackage( packagePath, options ) {
 		return true;
 	}
 
-	const packageJson = require( packageJsonPath );
+	const packageJson = await fs.readJson( packageJsonPath );
 
 	const missingCSSFiles = [];
 	const onMissingCSSFile = file => missingCSSFiles.push( file );
@@ -62,6 +62,7 @@ async function checkDependenciesInPackage( packagePath, options ) {
 		parsers: {
 			'**/*.css': filePath => parsePostCSS( filePath, onMissingCSSFile ),
 			'**/*.cjs': depCheck.parser.es6,
+			'**/*.mjs': depCheck.parser.es6,
 			'**/*.js': depCheck.parser.es6,
 			'**/*.jsx': depCheck.parser.jsx,
 			'**/*.ts': depCheck.parser.typescript,
@@ -163,7 +164,7 @@ async function checkDependenciesInPackage( packagePath, options ) {
  * @returns {Array.<String>}
  */
 function getInvalidItselfImports( repositoryPath ) {
-	const packageJson = require( upath.join( repositoryPath, 'package.json' ) );
+	const packageJson = fs.readJsonSync( upath.join( repositoryPath, 'package.json' ) );
 	const globPattern = upath.join( repositoryPath, '@(src|tests)/**/*.js' );
 	const invalidImportsItself = new Set();
 
