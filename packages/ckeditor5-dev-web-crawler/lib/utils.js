@@ -14,7 +14,7 @@
  * @param {String} url Page URL.
  * @returns {String} Base URL from page URL.
  */
-function getBaseUrl( url ) {
+export function getBaseUrl( url ) {
 	const { origin, pathname } = new URL( url );
 
 	return `${ origin }${ pathname }`;
@@ -26,7 +26,7 @@ function getBaseUrl( url ) {
  * @param {String} url The URL to validate.
  * @returns {Boolean}
  */
-function isUrlValid( url ) {
+export function isUrlValid( url ) {
 	try {
 		return [ 'http:', 'https:' ].includes( new URL( url ).protocol );
 	} catch ( error ) {
@@ -40,12 +40,6 @@ function isUrlValid( url ) {
  * @param {*} data The value to transform to an array.
  * @returns {Array.<*>} An array created from data.
  */
-function toArray( data ) {
+export function toArray( data ) {
 	return Array.isArray( data ) ? data : [ data ];
 }
-
-export default {
-	getBaseUrl,
-	isUrlValid,
-	toArray
-};

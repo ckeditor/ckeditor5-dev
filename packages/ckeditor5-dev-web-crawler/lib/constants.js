@@ -9,15 +9,15 @@
 
 import { cpus } from 'os';
 
-const DEFAULT_CONCURRENCY = cpus().length / 2;
+export const DEFAULT_CONCURRENCY = cpus().length / 2;
 
-const DEFAULT_TIMEOUT = 15 * 1000;
+export const DEFAULT_TIMEOUT = 15 * 1000;
 
-const DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT = 1000;
+export const DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT = 1000;
 
-const DEFAULT_REMAINING_ATTEMPTS = 3;
+export const DEFAULT_REMAINING_ATTEMPTS = 3;
 
-const ERROR_TYPES = {
+export const ERROR_TYPES = {
 	PAGE_CRASH: {
 		event: 'error',
 		description: 'Page crash'
@@ -45,7 +45,7 @@ const ERROR_TYPES = {
 	}
 };
 
-const PATTERN_TYPE_TO_ERROR_TYPE_MAP = {
+export const PATTERN_TYPE_TO_ERROR_TYPE_MAP = {
 	'page-crash': ERROR_TYPES.PAGE_CRASH,
 	'uncaught-exception': ERROR_TYPES.UNCAUGHT_EXCEPTION,
 	'request-failure': ERROR_TYPES.REQUEST_FAILURE,
@@ -54,20 +54,8 @@ const PATTERN_TYPE_TO_ERROR_TYPE_MAP = {
 	'navigation-error': ERROR_TYPES.NAVIGATION_ERROR
 };
 
-const IGNORE_ALL_ERRORS_WILDCARD = '*';
+export const IGNORE_ALL_ERRORS_WILDCARD = '*';
 
-const META_TAG_NAME = 'x-cke-crawler-ignore-patterns';
+export const META_TAG_NAME = 'x-cke-crawler-ignore-patterns';
 
-const DATA_ATTRIBUTE_NAME = 'data-cke-crawler-skip';
-
-export default {
-	DEFAULT_CONCURRENCY,
-	DEFAULT_TIMEOUT,
-	DEFAULT_RESPONSIVENESS_CHECK_TIMEOUT,
-	DEFAULT_REMAINING_ATTEMPTS,
-	ERROR_TYPES,
-	PATTERN_TYPE_TO_ERROR_TYPE_MAP,
-	IGNORE_ALL_ERRORS_WILDCARD,
-	META_TAG_NAME,
-	DATA_ATTRIBUTE_NAME
-};
+export const DATA_ATTRIBUTE_NAME = 'data-cke-crawler-skip';

@@ -15,7 +15,7 @@ import ora from 'ora';
  * @param {Object} options
  * @param {Boolean} [options.noSpinner=false] Whether to display the spinner with progress or a message with current progress.
  */
-function createSpinner( { noSpinner } ) {
+export function createSpinner( { noSpinner } ) {
 	return ora( {
 		spinner: {
 			frames: [ '⣾', '⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽' ]
@@ -34,7 +34,7 @@ function createSpinner( { noSpinner } ) {
  * @param {Boolean} [options.verbose] Whether to display raw log instead of modifying the spinner instance.
  * @returns {Function} Progress handler.
  */
-function getProgressHandler( spinner, { verbose } ) {
+export function getProgressHandler( spinner, { verbose } ) {
 	let current = 0;
 
 	return ( { total } ) => {
@@ -50,8 +50,3 @@ function getProgressHandler( spinner, { verbose } ) {
 		}
 	};
 }
-
-export default {
-	createSpinner,
-	getProgressHandler
-};
