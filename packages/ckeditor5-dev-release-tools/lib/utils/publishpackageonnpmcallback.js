@@ -3,10 +3,6 @@
  * For licensing, see LICENSE.md.
  */
 
-import { tools } from '@ckeditor/ckeditor5-dev-utils';
-import upath from 'upath';
-import fs from 'fs-extra';
-
 /**
  * Calls the npm command to publish the package. When a package is successfully published, it is removed from the filesystem.
  *
@@ -16,13 +12,19 @@ import fs from 'fs-extra';
  * @returns {Promise}
  */
 export default async function publishPackageOnNpmCallback( packagePath, taskOptions ) {
-	const result = await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, {
+	const { tools } = await import( '@ckeditor/ckeditor5-dev-utils' );
+	const { default: fs } = await import( 'fs-extra' );
+	const { default: path } = await import( 'upath' );
+
+	const options = {
 		cwd: packagePath,
 		async: true,
 		verbosity: 'error'
-	} )
+	};
+
+	const result = await tools.shExec( `npm publish --access=public --tag ${ taskOptions.npmTag }`, options )
 		.catch( e => {
-			const packageName = upath.basename( packagePath );
+			const packageName = path.basename( packagePath );
 
 			if ( e.toString().includes( 'code E409' ) ) {
 				return { shouldKeepDirectory: true };
