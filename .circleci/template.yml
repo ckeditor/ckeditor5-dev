@@ -56,7 +56,8 @@ commands:
             CKE5_GITHUB_ORGANIZATION="ckeditor"
             CKE5_GITHUB_REPOSITORY="ckeditor5-dev"
             CKE5_CIRCLE_APPROVAL_JOB_NAME="release_approval"
-            CKE5_GITHUB_RELEASE_BRANCH="master"
+            # CKE5_GITHUB_RELEASE_BRANCH="master"
+            CKE5_GITHUB_RELEASE_BRANCH="epic/3757-esm"
 
             echo export CKE5_CIRCLE_APPROVAL_JOB_NAME=$CKE5_CIRCLE_APPROVAL_JOB_NAME >> $BASH_ENV
             echo export CKE5_GITHUB_RELEASE_BRANCH=$CKE5_GITHUB_RELEASE_BRANCH >> $BASH_ENV
@@ -130,7 +131,8 @@ jobs:
       - bootstrap_repository_command
       - run:
           name: Check if packages are ready to be released
-          command: yarn run release:prepare-packages --verbose --compile-only
+          # command: yarn run release:prepare-packages --verbose --compile-only
+          command: yarn run release:prepare-packages --verbose --compile-only --branch=epic/3757-esm
 
   trigger_release_process:
     machine: true
@@ -168,11 +170,13 @@ jobs:
           command: |
             #!/bin/bash
 
-            CKE5_LATEST_COMMIT_HASH=$( git log -n 1 --pretty=format:%H origin/master )
+            # CKE5_LATEST_COMMIT_HASH=$( git log -n 1 --pretty=format:%H origin/master )
+            CKE5_LATEST_COMMIT_HASH=$( git log -n 1 --pretty=format:%H origin/epic/3757-esm )
             CKE5_TRIGGER_COMMIT_HASH=<< pipeline.parameters.triggerCommitHash >>
 
             if [[ "${CKE5_LATEST_COMMIT_HASH}" != "${CKE5_TRIGGER_COMMIT_HASH}" ]]; then
-              echo "There is a newer commit in the repository on the \`#master\` branch. Use its build to start the release."
+              # echo "There is a newer commit in the repository on the \`#master\` branch. Use its build to start the release."
+              echo "There is a newer commit in the repository on the \`#epic/3757-esm\` branch. Use its build to start the release."
               circleci-agent step halt
             fi
       - npm_login_command
@@ -198,10 +202,12 @@ jobs:
           command: yarn ckeditor5-dev-ci-circle-disable-auto-cancel-builds
       - run:
           name: Prepare the new version to release
-          command: npm run release:prepare-packages -- --verbose
+          # command: npm run release:prepare-packages -- --verbose
+          command: npm run release:prepare-packages -- --verbose --branch=epic/3757-esm
       - run:
           name: Publish the packages
-          command: npm run release:publish-packages -- --verbose
+          # command: npm run release:publish-packages -- --verbose
+          command: npm run release:publish-packages -- --verbose --branch=epic/3757-esm
       - run:
           name: Enable the redundant workflows option
           command: yarn ckeditor5-dev-ci-circle-enable-auto-cancel-builds
@@ -232,7 +238,8 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                # - master
+                - epic/3757-esm
       - notify_ci_failure:
           filters:
             branches:
