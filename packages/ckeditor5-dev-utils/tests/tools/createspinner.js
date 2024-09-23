@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import { show as cliCursorShow, hide as cliCursorHide } from 'cli-cursor';
+import cliCursor from 'cli-cursor';
 import isInteractive from 'is-interactive';
 import createSpinner from '../../lib/tools/createspinner.js';
 import readline from 'readline';
@@ -128,7 +128,7 @@ describe( 'createSpinner()', () => {
 
 				spinner.start();
 
-				expect( vi.mocked( cliCursorHide ) ).toHaveBeenCalledOnce();
+				expect( vi.mocked( cliCursor ).hide ).toHaveBeenCalledOnce();
 			} );
 
 			it( 'allows indenting messages by specifying the "options.indentLevel" option', () => {
@@ -212,7 +212,7 @@ describe( 'createSpinner()', () => {
 				spinner.start();
 				spinner.finish();
 
-				expect( vi.mocked( cliCursorShow ) ).toHaveBeenCalledOnce();
+				expect( vi.mocked( cliCursor ).show ).toHaveBeenCalledOnce();
 			} );
 
 			it( 'allows indenting messages by specifying the "options.indentLevel" option', () => {

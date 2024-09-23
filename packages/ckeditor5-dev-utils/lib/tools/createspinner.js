@@ -6,7 +6,7 @@
 import readline from 'readline';
 import isInteractive from 'is-interactive';
 import cliSpinners from 'cli-spinners';
-import { show as cliCursorShow, hide as cliCursorHide } from 'cli-cursor';
+import cliCursor from 'cli-cursor';
 
 // A size of default indent for a log.
 const INDENT_SIZE = 3;
@@ -64,7 +64,7 @@ export default function createSpinner( title, options = {} ) {
 			let index = 0;
 			let shouldClearLastLine = false;
 
-			cliCursorHide();
+			cliCursor.hide();
 
 			timerId = setInterval( () => {
 				if ( index === frames.length ) {
@@ -102,7 +102,7 @@ export default function createSpinner( title, options = {} ) {
 				clearLastLine();
 			}
 
-			cliCursorShow();
+			cliCursor.show();
 			console.log( `${ indent }${ finishEmoji } ${ title }` );
 		}
 	};
