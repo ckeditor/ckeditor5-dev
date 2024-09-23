@@ -6,7 +6,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import { globSync } from 'glob';
-import _ from 'lodash';
+import { uniq, debounce } from 'lodash-es';
 import chalk from 'chalk';
 import * as commonmark from 'commonmark';
 import combine from 'dom-combiner';
@@ -40,7 +40,7 @@ export default function compileHtmlFiles( options ) {
 	const sourceMDFiles = options.sourceFiles.map( jsFile => setExtension( jsFile, 'md' ) );
 	const sourceHtmlFiles = sourceMDFiles.map( mdFile => setExtension( mdFile, 'html' ) );
 
-	const sourceDirs = _.uniq( sourceMDFiles.map( file => path.dirname( file ) ) );
+	const sourceDirs = uniq( sourceMDFiles.map( file => path.dirname( file ) ) );
 	const sourceFilePathBases = sourceMDFiles.map( mdFile => getFilePathWithoutExtension( mdFile ) );
 
 	const staticFiles = sourceDirs
@@ -183,7 +183,7 @@ function getFilePathWithoutExtension( file ) {
 
 function watchFiles( filePaths, onChange, onTestCompilationStatus ) {
 	for ( const filePath of filePaths ) {
-		const debouncedOnChange = _.debounce( () => {
+		const debouncedOnChange = debounce( () => {
 			onChange( filePath );
 			onTestCompilationStatus( 'finished' );
 		}, 500 );

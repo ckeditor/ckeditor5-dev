@@ -7,7 +7,7 @@ import path from 'path';
 import fs from 'fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { globSync } from 'glob';
-import mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
 import chalk from 'chalk';
 import karma from 'karma';
 import karmaLogger from 'karma/lib/logger.js';

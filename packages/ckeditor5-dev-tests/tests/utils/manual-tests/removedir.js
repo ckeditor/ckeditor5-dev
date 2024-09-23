@@ -4,7 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import del from 'del';
+import { deleteAsync } from 'del';
 import { logger } from '@ckeditor/ckeditor5-dev-utils';
 import chalk from 'chalk';
 import removeDir from '../../../lib/utils/manual-tests/removedir.js';
@@ -22,7 +22,7 @@ describe( 'removeDir()', () => {
 	beforeEach( () => {
 		logInfo = vi.fn();
 
-		vi.mocked( del ).mockResolvedValue();
+		vi.mocked( deleteAsync ).mockResolvedValue();
 		vi.mocked( chalk ).cyan.mockImplementation( input => input );
 		vi.mocked( logger ).mockReturnValue( {
 			info: logInfo
@@ -33,14 +33,14 @@ describe( 'removeDir()', () => {
 		await removeDir( 'workspace/directory' );
 
 		expect( vi.mocked( chalk ).cyan ).toHaveBeenCalledOnce();
-		expect( vi.mocked( del ) ).toHaveBeenCalledExactlyOnceWith( 'workspace/directory' );
+		expect( vi.mocked( deleteAsync ) ).toHaveBeenCalledExactlyOnceWith( 'workspace/directory' );
 		expect( logInfo ).toHaveBeenCalledExactlyOnceWith( 'Removed directory \'workspace/directory\'' );
 	} );
 
 	it( 'should remove directory and does not inform about it', async () => {
 		await removeDir( 'workspace/directory', { silent: true } );
 
-		expect( vi.mocked( del ) ).toHaveBeenCalledExactlyOnceWith( 'workspace/directory' );
+		expect( vi.mocked( deleteAsync ) ).toHaveBeenCalledExactlyOnceWith( 'workspace/directory' );
 
 		expect( vi.mocked( chalk ).cyan ).not.toHaveBeenCalled();
 		expect( logInfo ).not.toHaveBeenCalled();
