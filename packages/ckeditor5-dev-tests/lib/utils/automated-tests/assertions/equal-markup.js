@@ -3,8 +3,8 @@
  * For licensing, see LICENSE.md.
  */
 
-import AssertionError from 'assertion-error';
-import { html_beautify as beautify } from 'js-beautify/js/lib/beautify-html.js';
+import { AssertionError } from 'assertion-error';
+import { html_beautify as beautify } from 'js-beautify';
 
 /**
  * Factory function that registers the `equalMarkup` assertion.
