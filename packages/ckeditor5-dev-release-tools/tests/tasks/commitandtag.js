@@ -16,7 +16,7 @@ vi.mock( '@ckeditor/ckeditor5-dev-utils' );
 describe( 'commitAndTag()', () => {
 	beforeEach( () => {
 		vi.mocked( glob ).mockResolvedValue( [] );
-		vi.mocked( shellEscape ).mockImplementation( v => v[ 0 ] );
+		vi.mocked( shellEscape ).mockImplementation( v => `'${ v[ 0 ] }'` );
 	} );
 
 	it( 'should not create a commit and tag if there are no files modified', async () => {
@@ -49,10 +49,10 @@ describe( 'commitAndTag()', () => {
 		} );
 
 		expect( vi.mocked( tools.shExec ) ).toHaveBeenCalledTimes( 6 );
-		expect( vi.mocked( tools.shExec ).mock.calls[ 0 ][ 0 ] ).to.equal( 'git add package.json' );
-		expect( vi.mocked( tools.shExec ).mock.calls[ 1 ][ 0 ] ).to.equal( 'git add README.md' );
-		expect( vi.mocked( tools.shExec ).mock.calls[ 2 ][ 0 ] ).to.equal( 'git add packages/custom-package/package.json' );
-		expect( vi.mocked( tools.shExec ).mock.calls[ 3 ][ 0 ] ).to.equal( 'git add packages/custom-package/README.md' );
+		expect( vi.mocked( tools.shExec ).mock.calls[ 0 ][ 0 ] ).to.equal( 'git add \'package.json\'' );
+		expect( vi.mocked( tools.shExec ).mock.calls[ 1 ][ 0 ] ).to.equal( 'git add \'README.md\'' );
+		expect( vi.mocked( tools.shExec ).mock.calls[ 2 ][ 0 ] ).to.equal( 'git add \'packages/custom-package/package.json\'' );
+		expect( vi.mocked( tools.shExec ).mock.calls[ 3 ][ 0 ] ).to.equal( 'git add \'packages/custom-package/README.md\'' );
 	} );
 
 	it( 'should set correct commit message', async () => {
@@ -60,7 +60,7 @@ describe( 'commitAndTag()', () => {
 
 		await commitAndTag( { version: '1.0.0', packagesDirectory: 'packages' } );
 
-		expect( vi.mocked( tools.shExec ).mock.calls[ 1 ][ 0 ] ).to.equal( 'git commit --message "Release: v1.0.0." --no-verify' );
+		expect( vi.mocked( tools.shExec ).mock.calls[ 1 ][ 0 ] ).to.equal( 'git commit --message \'Release: v1.0.0.\' --no-verify' );
 	} );
 
 	it( 'should set correct tag', async () => {
@@ -68,7 +68,7 @@ describe( 'commitAndTag()', () => {
 
 		await commitAndTag( { version: '1.0.0', packagesDirectory: 'packages' } );
 
-		expect( vi.mocked( tools.shExec ).mock.calls[ 2 ][ 0 ] ).to.equal( 'git tag v1.0.0' );
+		expect( vi.mocked( tools.shExec ).mock.calls[ 2 ][ 0 ] ).to.equal( 'git tag \'v1.0.0\'' );
 	} );
 
 	it( 'should escape arguments passed to a shell command', async () => {
@@ -84,11 +84,12 @@ describe( 'commitAndTag()', () => {
 			files: [ 'package.json', 'README.md', 'packages/*/package.json', 'packages/*/README.md' ]
 		} );
 
-		expect( vi.mocked( shellEscape ) ).toHaveBeenCalledTimes( 5 );
+		expect( vi.mocked( shellEscape ) ).toHaveBeenCalledTimes( 6 );
 		expect( vi.mocked( shellEscape ).mock.calls[ 0 ][ 0 ] ).to.deep.equal( [ 'package.json' ] );
 		expect( vi.mocked( shellEscape ).mock.calls[ 1 ][ 0 ] ).to.deep.equal( [ 'README.md' ] );
 		expect( vi.mocked( shellEscape ).mock.calls[ 2 ][ 0 ] ).to.deep.equal( [ 'packages/custom-package/package.json' ] );
 		expect( vi.mocked( shellEscape ).mock.calls[ 3 ][ 0 ] ).to.deep.equal( [ 'packages/custom-package/README.md' ] );
-		expect( vi.mocked( shellEscape ).mock.calls[ 4 ][ 0 ] ).to.deep.equal( [ '1.0.0' ] );
+		expect( vi.mocked( shellEscape ).mock.calls[ 4 ][ 0 ] ).to.deep.equal( [ 'Release: v1.0.0.' ] );
+		expect( vi.mocked( shellEscape ).mock.calls[ 5 ][ 0 ] ).to.deep.equal( [ 'v1.0.0' ] );
 	} );
 } );

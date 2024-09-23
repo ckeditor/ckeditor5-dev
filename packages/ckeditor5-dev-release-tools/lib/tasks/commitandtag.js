@@ -38,7 +38,11 @@ export default async function commitAndTag( { version, files, cwd = process.cwd(
 		await tools.shExec( `git add ${ shellEscape( [ filePath ] ) }`, shExecOptions );
 	}
 
-	const escapedVersion = shellEscape( [ version ] );
-	await tools.shExec( `git commit --message "Release: v${ escapedVersion }." --no-verify`, shExecOptions );
-	await tools.shExec( `git tag v${ escapedVersion }`, shExecOptions );
+	const escapedVersion = {
+		commit: shellEscape( [ `Release: v${ version }.` ] ),
+		tag: shellEscape( [ `v${ version }` ] )
+	};
+
+	await tools.shExec( `git commit --message ${ escapedVersion.commit } --no-verify`, shExecOptions );
+	await tools.shExec( `git tag ${ escapedVersion.tag }`, shExecOptions );
 }
