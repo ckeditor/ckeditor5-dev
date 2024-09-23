@@ -1,6 +1,6 @@
 {
   "name": "ckeditor5-dev",
-  "version": "44.0.0-alpha.2",
+  "version": "44.0.0-alpha.3",
   "private": true,
   "author": "CKSource (http://cksource.com/)",
   "license": "GPL-2.0-or-later",
@@ -15,9 +15,9 @@
   },
   "type": "module",
   "devDependencies": {
-    "@ckeditor/ckeditor5-dev-ci": "^44.0.0-alpha.2",
-    "@ckeditor/ckeditor5-dev-release-tools": "^44.0.0-alpha.2",
-    "@ckeditor/ckeditor5-dev-bump-year": "^44.0.0-alpha.2",
+    "@ckeditor/ckeditor5-dev-ci": "^44.0.0-alpha.3",
+    "@ckeditor/ckeditor5-dev-release-tools": "^44.0.0-alpha.3",
+    "@ckeditor/ckeditor5-dev-bump-year": "^44.0.0-alpha.3",
     "eslint": "^8.21.0",
     "eslint-config-ckeditor5": "^7.0.0",
     "fs-extra": "^11.0.0",
