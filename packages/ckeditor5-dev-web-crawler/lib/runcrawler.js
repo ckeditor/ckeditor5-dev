@@ -577,9 +577,9 @@ function registerErrorHandlers( page, { link, onError } ) {
 			return argument;
 		};
 
-		const serializeArguments = argument => argument
-			.executionContext()
-			.evaluate( serializeArgumentInPageContext, argument );
+		const serializeArguments = argument => {
+			return argument.evaluate( serializeArgumentInPageContext, argument );
+		};
 
 		const serializedArguments = await Promise.all( message.args().map( serializeArguments ) );
 
