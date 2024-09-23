@@ -7,7 +7,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import chalk from 'chalk';
-import rimraf from 'rimraf';
+import { rimraf } from 'rimraf';
 import webpackSources from 'webpack-sources';
 
 const __filename = fileURLToPath( import.meta.url );
