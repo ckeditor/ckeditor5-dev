@@ -20,9 +20,12 @@ export default async function build( config ) {
 	const sourceFilePatterns = config.sourceFiles.filter( Boolean );
 	const strictMode = config.strict || false;
 	const extraPlugins = config.extraPlugins || [];
+	const ignoreFiles = config.ignoreFiles || [];
 	const validatorOptions = config.validatorOptions || {};
 
-	const files = await glob( sourceFilePatterns );
+	const files = await glob( sourceFilePatterns, {
+		ignore: ignoreFiles
+	} );
 	const typeDoc = new TypeDoc.Application();
 
 	typeDoc.options.addReader( new TypeDoc.TSConfigReader() );
@@ -100,6 +103,8 @@ export default async function build( config ) {
  * @property {String} tsconfig
  *
  * @property {Array.<String>} sourceFiles Glob pattern with source files.
+ *
+ * @property {Array.<String>} [ignoreFiles=[]] Glob pattern with files to ignore.
  *
  * @property {Boolean} [strict=false] If `true`, errors found during the validation will finish the process
  * and exit code will be changed to `1`.
