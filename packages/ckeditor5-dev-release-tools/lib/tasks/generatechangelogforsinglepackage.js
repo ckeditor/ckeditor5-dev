@@ -36,6 +36,8 @@ const SKIP_GENERATE_CHANGELOG = 'Typed "skip" as a new version. Aborting.';
  *
  * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
  *
+ * @param {String} [options.mainBranch='master'] A name of the main branch in the repository.
+ *
  * @param {FormatDateCallback} [options.formatDate] A callback allowing defining a custom format of the date inserted into the changelog.
  * If not specified, the default date matches the `YYYY-MM-DD` pattern.
  *
@@ -53,7 +55,8 @@ export default async function generateChangelogForSinglePackage( options = {} ) 
 
 	const commitOptions = {
 		from: options.from ? options.from : 'v' + pkgJson.version,
-		releaseBranch: options.releaseBranch
+		releaseBranch: options.releaseBranch || 'master',
+		mainBranch: options.mainBranch || 'master'
 	};
 
 	// Initial release.

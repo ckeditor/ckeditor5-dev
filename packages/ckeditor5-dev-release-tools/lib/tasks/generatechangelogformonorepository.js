@@ -53,6 +53,8 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
  *
  * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
  *
+ * @param {String} [options.mainBranch='master'] A name of the main branch in the repository.
+ *
  * @param {Array.<ExternalRepository>} [options.externalRepositories=[]] An array of object with additional repositories
  * that the function takes into consideration while gathering commits. It assumes that those directories are also mono repositories.
  *
@@ -85,6 +87,7 @@ export default async function generateChangelogForMonoRepository( options ) {
 		cwd: options.cwd,
 		from: options.from ? options.from : 'v' + rootPkgJson.version,
 		releaseBranch: options.releaseBranch || 'master',
+		mainBranch: options.mainBranch || 'master',
 		externalRepositories: options.externalRepositories || []
 	};
 
@@ -225,7 +228,8 @@ export default async function generateChangelogForMonoRepository( options ) {
 
 		const commitOptions = {
 			from: options.from,
-			releaseBranch: options.releaseBranch
+			releaseBranch: options.releaseBranch,
+			mainBranch: options.mainBranch
 		};
 
 		let promise = getCommits( transformCommit, commitOptions )
