@@ -58,7 +58,8 @@ describe( 'getPostCssConfig()', () => {
 		getPostCssConfig();
 
 		expect( vi.mocked( postCssNesting ) ).toHaveBeenCalledExactlyOnceWith( {
-			noIsPseudoSelector: true
+			noIsPseudoSelector: true,
+			edition: '2021'
 		} );
 	} );
 

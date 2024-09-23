@@ -30,7 +30,8 @@ export default function getPostCssConfig( options = {} ) {
 			postCssMixins(),
 			postCssNesting( {
 				// https://github.com/ckeditor/ckeditor5/issues/11730
-				noIsPseudoSelector: true
+				noIsPseudoSelector: true,
+				edition: '2021'
 			} ),
 			themeLogger()
 		]
