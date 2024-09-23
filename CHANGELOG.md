@@ -7,6 +7,10 @@ Changelog
 
 * **[release-tools](https://www.npmjs.com/package/@ckeditor/ckeditor5-dev-release-tools)**: Allow defining a main branch when generating the changelog entries. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/8b5078e67ebbbe9e8a5a952fa18646dfca6a2563))
 
+### Other changes
+
+* Almost all dependencies of `ckeditor5-dev-*` packages have been bumped to their latest versions. ([commit](https://github.com/ckeditor/ckeditor5-dev/commit/2358a19113eb80f6204f39a1d0e0411810283ef2))
+
 ### Released packages
 
 Check out the [Versioning policy](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/support/versioning-policy.html) guide for more information.
