@@ -5,7 +5,7 @@
 
 import { Readable } from 'stream';
 import { stream } from '@ckeditor/ckeditor5-dev-utils';
-import conventionalChangelogWriter from 'conventional-changelog-writer';
+import { writeChangelogStream } from 'conventional-changelog-writer';
 
 const UPDATED_TRANSLATION_COMMIT = '* Updated translations.';
 
@@ -49,7 +49,7 @@ export default function generateChangelog( commits, context, options ) {
 
 	return new Promise( ( resolve, reject ) => {
 		commitStream
-			.pipe( conventionalChangelogWriter( context, options ) )
+			.pipe( writeChangelogStream( context, options ) )
 			.pipe( stream.noop( changes => {
 				changes = mergeUpdateTranslationsCommits( changes.toString(), {
 					skipCommitsLink: context.skipCommitsLink

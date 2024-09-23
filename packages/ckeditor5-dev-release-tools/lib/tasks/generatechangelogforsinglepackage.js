@@ -110,9 +110,9 @@ export default async function generateChangelogForSinglePackage( options = {} ) 
 				date: options.formatDate ? options.formatDate( new Date() ) : getFormattedDate()
 			};
 
-			const writerOptions = getWriterOptions( {
+			const writerOptions = getWriterOptions( commit => {
 				// We do not allow modifying the commit hash value by the generator itself.
-				hash: hash => hash
+				return commit;
 			} );
 
 			const publicCommits = [ ...allCommits ]

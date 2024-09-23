@@ -41,9 +41,7 @@ describe( 'generateChangelog()', () => {
 				commit: 'commit'
 			};
 
-			const options = getWriterOptions( {
-				hash: hash => hash.slice( 0, 7 )
-			} );
+			const options = getWriterOptions( transformCommitCallback( 7 ) );
 
 			return generateChangelog( commits, context, options )
 				.then( changes => {
@@ -93,9 +91,7 @@ describe( 'generateChangelog()', () => {
 				commit: 'commit'
 			};
 
-			const options = getWriterOptions( {
-				hash: hash => hash.slice( 0, 7 )
-			} );
+			const options = getWriterOptions( transformCommitCallback( 7 ) );
 
 			return generateChangelog( commits, context, options )
 				.then( changes => {
@@ -145,9 +141,7 @@ describe( 'generateChangelog()', () => {
 				commit: 'commit'
 			};
 
-			const options = getWriterOptions( {
-				hash: hash => hash.slice( 0, 7 )
-			} );
+			const options = getWriterOptions( transformCommitCallback( 7 ) );
 
 			return generateChangelog( commits, context, options )
 				.then( changes => {
@@ -204,9 +198,7 @@ describe( 'generateChangelog()', () => {
 				commit: 'commit'
 			};
 
-			const options = getWriterOptions( {
-				hash: hash => hash.slice( 0, 7 )
-			} );
+			const options = getWriterOptions( transformCommitCallback( 7 ) );
 
 			return generateChangelog( commits, context, options )
 				.then( changes => {
@@ -265,9 +257,7 @@ describe( 'generateChangelog()', () => {
 				skipCommitsLink: true
 			};
 
-			const options = getWriterOptions( {
-				hash: hash => hash.slice( 0, 7 )
-			} );
+			const options = getWriterOptions( transformCommitCallback( 7 ) );
 
 			return generateChangelog( commits, context, options )
 				.then( changes => {
@@ -301,9 +291,7 @@ describe( 'generateChangelog()', () => {
 				skipCompareLink: true
 			};
 
-			const options = getWriterOptions( {
-				hash: hash => hash.slice( 0, 7 )
-			} );
+			const options = getWriterOptions( transformCommitCallback( 7 ) );
 
 			return generateChangelog( [], context, options )
 				.then( changes => {
@@ -360,9 +348,7 @@ describe( 'generateChangelog()', () => {
 				commit: 'commit'
 			};
 
-			const options = getWriterOptions( {
-				hash: hash => hash.slice( 0, 7 )
-			} );
+			const options = getWriterOptions( transformCommitCallback( 7 ) );
 
 			return generateChangelog( commits, context, options )
 				.then( changes => {
@@ -428,9 +414,7 @@ describe( 'generateChangelog()', () => {
 				commit: 'c'
 			};
 
-			const options = getWriterOptions( {
-				hash: hash => hash.slice( 0, 2 )
-			} );
+			const options = getWriterOptions( transformCommitCallback( 2 ) );
 
 			return generateChangelog( commits, context, options )
 				.then( changes => {
@@ -493,9 +477,7 @@ describe( 'generateChangelog()', () => {
 				skipCommitsLink: true
 			};
 
-			const options = getWriterOptions( {
-				hash: hash => hash.slice( 0, 2 )
-			} );
+			const options = getWriterOptions( transformCommitCallback( 2 ) );
 
 			return generateChangelog( commits, context, options )
 				.then( changes => {
@@ -576,9 +558,7 @@ describe( 'generateChangelog()', () => {
 					commit: 'c'
 				};
 
-				const options = getWriterOptions( {
-					hash: hash => hash.slice( 0, 2 )
-				} );
+				const options = getWriterOptions( transformCommitCallback( 2 ) );
 
 				return generateChangelog( commits, context, options )
 					.then( changes => {
@@ -661,9 +641,7 @@ describe( 'generateChangelog()', () => {
 					commit: 'c'
 				};
 
-				const options = getWriterOptions( {
-					hash: hash => hash.slice( 0, 2 )
-				} );
+				const options = getWriterOptions( transformCommitCallback( 2 ) );
 
 				return generateChangelog( commits, context, options )
 					.then( changes => {
@@ -734,9 +712,7 @@ describe( 'generateChangelog()', () => {
 					commit: 'c'
 				};
 
-				const options = getWriterOptions( {
-					hash: hash => hash.slice( 0, 2 )
-				} );
+				const options = getWriterOptions( transformCommitCallback( 2 ) );
 
 				return generateChangelog( commits, context, options )
 					.then( changes => {
@@ -794,9 +770,7 @@ describe( 'generateChangelog()', () => {
 				commit: 'commit'
 			};
 
-			const options = getWriterOptions( {
-				hash: hash => hash.slice( 0, 7 )
-			} );
+			const options = getWriterOptions( transformCommitCallback( 7 ) );
 
 			return generateChangelog( commits, context, options )
 				.then( changes => {
@@ -846,9 +820,7 @@ describe( 'generateChangelog()', () => {
 				isInternalRelease: true
 			};
 
-			const options = getWriterOptions( {
-				hash: hash => hash.slice( 0, 7 )
-			} );
+			const options = getWriterOptions( transformCommitCallback( 7 ) );
 
 			return generateChangelog( commits, context, options )
 				.then( changes => {
@@ -876,9 +848,7 @@ describe( 'generateChangelog()', () => {
 				commit: 'commit'
 			};
 
-			const options = getWriterOptions( {
-				hash: hash => hash.slice( 0, 7 )
-			} );
+			const options = getWriterOptions( transformCommitCallback( 7 ) );
 
 			return generateChangelog( [], context, options )
 				.then( changes => {
@@ -969,9 +939,7 @@ describe( 'generateChangelog()', () => {
 				commit: 'c'
 			};
 
-			const options = getWriterOptions( {
-				hash: hash => hash.slice( 0, 2 )
-			} );
+			const options = getWriterOptions( transformCommitCallback( 2 ) );
 
 			const sortFunction = compareFunc( item => {
 				if ( Array.isArray( item.scope ) ) {
@@ -1047,9 +1015,7 @@ describe( 'generateChangelog()', () => {
 				skipCompareLink: true
 			};
 
-			const options = getWriterOptions( {
-				hash: hash => hash.slice( 0, 7 )
-			} );
+			const options = getWriterOptions( transformCommitCallback( 7 ) );
 
 			return generateChangelog( [], context, options )
 				.then( changes => {
@@ -1071,4 +1037,15 @@ describe( 'generateChangelog()', () => {
 // which don't depend on the date.
 function replaceDates( changelog ) {
 	return changelog.replace( /\d{4}-\d{2}-\d{2}/g, '0000-00-00' );
+}
+
+/**
+ * @param {Number} length
+ * @returns {WriterOptionsTransformCallback}
+ */
+function transformCommitCallback( length ) {
+	return commit => ( {
+		...commit,
+		hash: commit.hash.slice( 0, length )
+	} );
 }

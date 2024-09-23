@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeAll, afterAll, beforeEach, afterEach } 
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import path from 'path';
-import gitRawCommits from 'git-raw-commits';
+import { getRawCommitsStream } from 'git-raw-commits';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 const __filename = fileURLToPath( import.meta.url );
@@ -36,13 +36,13 @@ describe( 'getCommits()', () => {
 		}
 
 		vi.doMock( 'git-raw-commits', () => ( {
-			default: vi.fn( gitRawCommits )
+			getRawCommitsStream: vi.fn( getRawCommitsStream )
 		} ) );
 
 		vi.doMock( '@ckeditor/ckeditor5-dev-utils' );
 
 		stubs = {
-			gitRawCommits: ( await import( 'git-raw-commits' ) ).default,
+			getRawCommitsStream: ( await import( 'git-raw-commits' ) ).getRawCommitsStream,
 			devTools: ( await import( '@ckeditor/ckeditor5-dev-utils' ) ).tools
 		};
 
@@ -269,7 +269,7 @@ describe( 'getCommits()', () => {
 				.then( commits => {
 					expect( commits.length ).toEqual( 8 );
 
-					expect( stubs.gitRawCommits ).toHaveBeenNthCalledWith( 1, {
+					expect( stubs.getRawCommitsStream ).toHaveBeenNthCalledWith( 1, {
 						from: 'v1.0.0',
 						to: baseCommit,
 						format: '%B%n-hash-%n%H',
@@ -277,7 +277,7 @@ describe( 'getCommits()', () => {
 						firstParent: true
 					} );
 
-					expect( stubs.gitRawCommits ).toHaveBeenNthCalledWith( 2, {
+					expect( stubs.getRawCommitsStream ).toHaveBeenNthCalledWith( 2, {
 						to: 'HEAD',
 						from: baseCommit,
 						format: '%B%n-hash-%n%H',
