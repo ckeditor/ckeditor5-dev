@@ -104,6 +104,7 @@ async function generateUmdBuild( args: BuildOptions, bundle: RollupOutput ): Pro
 	args.input = args.output;
 
 	const { dir, name } = path.parse( args.output );
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { plugins, ...config } = await getRollupConfig( args );
 
 	/**

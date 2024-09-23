@@ -7,6 +7,10 @@
 
 module.exports = {
 	extends: 'ckeditor5',
+	parserOptions: {
+		ecmaVersion: 'latest',
+		sourceType: 'module'
+	},
 	env: {
 		node: true
 	},
