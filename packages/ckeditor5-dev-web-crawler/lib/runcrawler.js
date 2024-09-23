@@ -129,10 +129,14 @@ async function createBrowser( options ) {
 
 	const browser = await puppeteer.launch( browserOptions );
 
-	const [ defaultBlankPage ] = await browser.pages();
+	// For unknown reasons, in order to be able to visit pages in Puppeteer on CI, we must close the default page that is opened when the
+	// browser starts.
+	if ( process.env.CI ) {
+		const [ defaultBlankPage ] = await browser.pages();
 
-	if ( defaultBlankPage ) {
-		await defaultBlankPage.close();
+		if ( defaultBlankPage ) {
+			await defaultBlankPage.close();
+		}
 	}
 
 	return browser;

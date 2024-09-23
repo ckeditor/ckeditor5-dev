@@ -3,7 +3,7 @@
  * For licensing, see LICENSE.md.
  */
 
-import glob from 'fast-glob';
+import { glob } from 'glob';
 import TypeDoc from 'typedoc';
 import typedocPlugins from '@ckeditor/typedoc-plugins';
 

@@ -8,7 +8,7 @@ import createPotFiles from '../lib/createpotfiles.js';
 
 import { findMessages } from '@ckeditor/ckeditor5-dev-translations';
 import { verifyProperties } from '../lib/utils.js';
-import del from 'del';
+import { deleteSync } from 'del';
 import fs from 'fs-extra';
 import path from 'path';
 
@@ -53,8 +53,8 @@ describe( 'dev-transifex/createPotFiles()', () => {
 			logger: loggerMocks
 		} );
 
-		expect( vi.mocked( del.sync ) ).toHaveBeenCalledTimes( 1 );
-		expect( vi.mocked( del.sync ) ).toHaveBeenCalledWith( '/cwd/build/.transifex' );
+		expect( vi.mocked( deleteSync ) ).toHaveBeenCalledTimes( 1 );
+		expect( vi.mocked( deleteSync ) ).toHaveBeenCalledWith( '/cwd/build/.transifex' );
 	} );
 
 	it( 'should create a POT file entry for one message with a corresponding context', () => {

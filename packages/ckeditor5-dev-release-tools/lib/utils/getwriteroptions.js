@@ -14,7 +14,7 @@ const __dirname = path.dirname( __filename );
 const templatePath = path.join( __dirname, '..', 'templates' );
 
 /**
- * @param {Function|Object} transform
+ * @param {WriterOptionsTransformCallback} transform
  * @returns {Object}
  */
 export default function getWriterOptions( transform ) {
@@ -34,3 +34,9 @@ export default function getWriterOptions( transform ) {
 function sortFunction( a, b ) {
 	return getTypeOrder( a.title ) - getTypeOrder( b.title );
 }
+
+/**
+ * @callback WriterOptionsTransformCallback
+ * @param {Commit}
+ * @returns {Commit}
+ */

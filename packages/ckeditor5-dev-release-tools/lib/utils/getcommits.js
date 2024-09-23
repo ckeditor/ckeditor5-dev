@@ -3,9 +3,9 @@
  * For licensing, see LICENSE.md.
  */
 
-import conventionalCommitsParser from 'conventional-commits-parser';
-import conventionalCommitsFilter from 'conventional-commits-filter';
-import gitRawCommits from 'git-raw-commits';
+import { parseCommitsStream } from 'conventional-commits-parser';
+import { filterRevertedCommitsSync } from 'conventional-commits-filter';
+import { getRawCommitsStream } from 'git-raw-commits';
 import concat from 'concat-stream';
 import parserOptions from './parseroptions.js';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
@@ -45,7 +45,7 @@ export default function getCommits( transformCommit, options = {} ) {
 			// 1. Commits from the last release and to the point where the release branch was created (the merge-base commit).
 			findCommits( { from: options.from, to: baseCommit } ),
 			// 2. Commits from the merge-base commit to HEAD.
-			findCommits( { from: baseCommit } )
+			findCommits( { from: baseCommit, to: 'HEAD' } )
 		];
 
 		return Promise.all( commitPromises )
@@ -60,7 +60,7 @@ export default function getCommits( transformCommit, options = {} ) {
 		} );
 
 		return new Promise( ( resolve, reject ) => {
-			const stream = gitRawCommits( gitRawCommitsOpts )
+			const stream = getRawCommitsStream( gitRawCommitsOpts )
 				.on( 'error', err => {
 					/* istanbul ignore else */
 					if ( err.message.match( /'HEAD': unknown/ ) ) {
@@ -74,9 +74,9 @@ export default function getCommits( transformCommit, options = {} ) {
 					}
 				} );
 
-			stream.pipe( conventionalCommitsParser( parserOptions ) )
+			stream.pipe( parseCommitsStream( parserOptions ) )
 				.pipe( concat( data => {
-					const commits = conventionalCommitsFilter( data )
+					const commits = [ ...filterRevertedCommitsSync( data ) ]
 						.map( commit => transformCommit( commit ) )
 						.reduce( ( allCommits, commit ) => {
 							if ( Array.isArray( commit ) ) {

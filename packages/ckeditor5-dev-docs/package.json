@@ -24,8 +24,8 @@
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "^44.0.0-alpha.0",
     "@ckeditor/typedoc-plugins": "^44.0.0-alpha.0",
-    "fast-glob": "^3.2.4",
-    "fs-extra": "^11.2.0",
+    "glob": "^10.0.0",
+    "fs-extra": "^11.0.0",
     "tmp": "^0.2.1",
     "typedoc": "^0.23.15",
     "typedoc-plugin-rename-defaults": "0.6.6"

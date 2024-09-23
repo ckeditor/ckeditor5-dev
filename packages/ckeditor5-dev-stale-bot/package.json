@@ -26,13 +26,13 @@
   },
   "dependencies": {
     "@ckeditor/ckeditor5-dev-utils": "^44.0.0-alpha.0",
-    "chalk": "^4.1.0",
-    "date-fns": "^2.30.0",
-    "fs-extra": "^11.2.0",
+    "chalk": "^5.0.0",
+    "date-fns": "^4.0.0",
+    "fs-extra": "^11.0.0",
     "graphql": "^16.8.1",
-    "graphql-request": "^6.1.0",
+    "graphql-request": "^7.0.0",
     "minimist": "^1.2.8",
-    "ora": "^5.2.0",
+    "ora": "^8.0.0",
     "upath": "^2.0.1"
   },
   "devDependencies": {
