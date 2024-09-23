@@ -5,7 +5,7 @@
 
 import path from 'path';
 import fs from 'fs-extra';
-import { deleteAsync } from 'del';
+import { deleteSync } from 'del';
 import { logger as utilsLogger } from '@ckeditor/ckeditor5-dev-utils';
 import { findMessages } from '@ckeditor/ckeditor5-dev-translations';
 import { verifyProperties } from './utils.js';
@@ -229,7 +229,7 @@ function assertNoRepeatedContext( { packageContexts } ) {
 }
 
 function removeExistingPotFiles( translationsDirectory ) {
-	deleteAsync.sync( translationsDirectory );
+	deleteSync( translationsDirectory );
 }
 
 /**
