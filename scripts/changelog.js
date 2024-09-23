@@ -13,6 +13,7 @@ const cliArguments = parseArguments( process.argv.slice( 2 ) );
 const changelogOptions = {
 	cwd: process.cwd(),
 	packages: 'packages',
+	mainBranch: 'epic/3757-esm',
 	releaseBranch: cliArguments.branch,
 	transformScope: name => {
 		if ( name === 'typedoc-plugins' ) {
