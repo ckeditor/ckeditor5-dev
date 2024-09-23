@@ -5,7 +5,7 @@
 
 const { expect } = require( 'chai' );
 const TypeDoc = require( 'typedoc' );
-const glob = require( 'fast-glob' );
+const { glob } = require( 'glob' );
 
 const utils = require( '../utils' );
 const { plugins } = require( '../../lib' );
