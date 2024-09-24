@@ -26,8 +26,7 @@ module.exports = {
 	],
 	rules: {
 		'no-console': 'off',
-		'ckeditor5-rules/require-file-extensions-in-imports': 'off',
-		'mocha/no-global-tests': 'off', // TODO: remove when all mocha tests are removed.
+		'mocha/no-global-tests': 'off',
 		'ckeditor5-rules/license-header': [ 'error', {
 			headerLines: [
 				'/**',
@@ -40,28 +39,10 @@ module.exports = {
 	overrides: [
 		{
 			files: [
-				// TODO: add packages as they are migrated to ESM.
-				'./scripts/**/*',
-				'./packages/ckeditor5-dev-tests/**/*',
-				'./packages/ckeditor5-dev-utils/**/*',
-				'./packages/ckeditor5-dev-translations/**/*',
-				'./packages/ckeditor5-dev-release-tools/**/*',
-				'./packages/ckeditor5-dev-bump-year/**/*',
-				'./packages/ckeditor5-dev-dependency-checker/**/*',
-				'./packages/ckeditor5-dev-stale-bot/**/*',
-				'./packages/ckeditor5-dev-transifex/**/*',
-				'./packages/ckeditor5-dev-ci/**/*',
-				'./packages/ckeditor5-dev-web-crawler/**/*',
-				'./packages/ckeditor5-dev-docs/**/*'
+				'./packages/typedoc-plugins/**/*'
 			],
 			rules: {
-				'mocha/no-global-tests': 'error',
-				'ckeditor5-rules/require-file-extensions-in-imports': [
-					'error',
-					{
-						extensions: [ '.ts', '.js', '.json' ]
-					}
-				]
+				'ckeditor5-rules/require-file-extensions-in-imports': 'off',
 			}
 		}
 	]

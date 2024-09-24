@@ -11,7 +11,7 @@ import PO from 'pofile';
 import { groupBy, merge } from 'lodash-es';
 import { glob } from 'glob';
 import type { Plugin } from 'rollup';
-import { removeWhitespace } from '../utils';
+import { removeWhitespace } from '../utils.js';
 
 const TYPINGS = removeWhitespace( `
 	import type { Translations } from '@ckeditor/ckeditor5-utils';
