@@ -9,6 +9,7 @@ import { getRawCommitsStream } from 'git-raw-commits';
 import concat from 'concat-stream';
 import parserOptions from './parseroptions.js';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import shellEscape from 'shell-escape';
 
 /**
  * Returns a promise that resolves an array of commits since the last tag specified as `options.from`.
@@ -39,7 +40,7 @@ export default function getCommits( transformCommit, options = {} ) {
 	} else {
 		// Otherwise, (release branch is other than the main branch) we need to merge arrays of commits.
 		// See: https://github.com/ckeditor/ckeditor5/issues/7492.
-		const baseCommit = exec( `git merge-base ${ releaseBranch } ${ mainBranch }` ).trim();
+		const baseCommit = exec( `git merge-base ${ shellEscape( [ releaseBranch, mainBranch ] ) }` ).trim();
 
 		const commitPromises = [
 			// 1. Commits from the last release and to the point where the release branch was created (the merge-base commit).

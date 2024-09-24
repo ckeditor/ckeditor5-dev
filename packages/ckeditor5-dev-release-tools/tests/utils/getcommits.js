@@ -9,9 +9,12 @@ import fs from 'fs';
 import path from 'path';
 import { getRawCommitsStream } from 'git-raw-commits';
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
+import shellEscape from 'shell-escape';
 
 const __filename = fileURLToPath( import.meta.url );
 const __dirname = path.dirname( __filename );
+
+vi.mock( 'shell-escape' );
 
 describe( 'getCommits()', () => {
 	let tmpCwd, cwd, getCommits, stubs;
@@ -34,6 +37,8 @@ describe( 'getCommits()', () => {
 			exec( 'git config user.email "ckeditor5@ckeditor.com"' );
 			exec( 'git config user.name "CKEditor5 CI"' );
 		}
+
+		vi.mocked( shellEscape ).mockImplementation( input => input.map( v => `'${ v }'` ).join( ' ' ) );
 
 		vi.doMock( 'git-raw-commits', () => ( {
 			getRawCommitsStream: vi.fn( getRawCommitsStream )
@@ -284,6 +289,8 @@ describe( 'getCommits()', () => {
 						merges: undefined,
 						firstParent: true
 					} );
+
+					expect( vi.mocked( shellEscape ) ).toHaveBeenCalledExactlyOnceWith( [ 'release', 'master' ] );
 				} );
 		} );
 	} );
