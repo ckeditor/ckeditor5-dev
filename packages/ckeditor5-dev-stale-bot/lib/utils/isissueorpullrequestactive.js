@@ -19,9 +19,9 @@ import { isAfter, parseISO } from 'date-fns';
  * Some activity entries may be ignored and not used in the calculation, if so specified in the configuration (e.g. the author of an event).
  *
  * @param {IssueOrPullRequest} issueOrPullRequest Issue or pull request to check.
- * @param {String} staleDate Date specifying the moment of checking the activity in the issue or pull request.
+ * @param {string} staleDate Date specifying the moment of checking the activity in the issue or pull request.
  * @param {Options} options Configuration options.
- * @returns {Boolean}
+ * @returns {boolean}
  */
 export default function isIssueOrPullRequestActive( issueOrPullRequest, staleDate, options ) {
 	const { ignoredActivityLogins, ignoredActivityLabels } = options;

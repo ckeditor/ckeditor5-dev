@@ -41,7 +41,7 @@ export default function createSpinner() {
 }
 
 /**
- * @typedef {Object} Spinner
+ * @typedef {object} Spinner
  * @property {ora.Ora} instance
  * @property {Function} printStatus
  * @property {Function} onProgress

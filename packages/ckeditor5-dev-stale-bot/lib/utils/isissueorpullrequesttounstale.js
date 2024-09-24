@@ -11,7 +11,7 @@ import findStaleDate from './findstaledate.js';
  *
  * @param {IssueOrPullRequest} issueOrPullRequest Issue or pull request to check.
  * @param {Options} options Configuration options.
- * @returns {Boolean}
+ * @returns {boolean}
  */
 export default function isIssueOrPullRequestToUnstale( issueOrPullRequest, options ) {
 	const staleDate = findStaleDate( issueOrPullRequest, options );

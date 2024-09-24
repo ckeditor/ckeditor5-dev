@@ -7,7 +7,7 @@
  * Proposes new version based on commits.
  *
  * @param {Array.<Commit>} commits
- * @returns {String|null}
+ * @returns {string|null}
  */
 export default function getNewVersionType( commits ) {
 	// No commits = no changes.

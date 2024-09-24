@@ -8,7 +8,7 @@ import inquirer from 'inquirer';
 /**
  * Takes username and password from prompt and returns promise that resolves with object that contains them.
  *
- * @returns {Promise.<String>}
+ * @returns {Promise.<string>}
  */
 export default async function getToken() {
 	const { token } = await inquirer.prompt( [ {

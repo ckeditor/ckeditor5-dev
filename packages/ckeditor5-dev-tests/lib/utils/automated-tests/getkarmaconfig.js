@@ -18,8 +18,8 @@ const AVAILABLE_REPORTERS = [
 ];
 
 /**
- * @param {Object} options
- * @returns {Object}
+ * @param {object} options
+ * @returns {object}
  */
 export default function getKarmaConfig( options ) {
 	if ( !AVAILABLE_REPORTERS.includes( options.reporter ) ) {
@@ -223,8 +223,8 @@ function getBrowsers( options ) {
 
 // Returns the array of configuration flags for given browser.
 //
-// @param {String} browser
-// @returns {Array.<String>}
+// @param {string} browser
+// @returns {Array.<string>}
 function getFlagsForBrowser( browser ) {
 	const commonFlags = [
 		'--disable-background-timer-throttling',

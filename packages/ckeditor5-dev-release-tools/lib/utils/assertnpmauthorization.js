@@ -8,7 +8,7 @@ import { tools } from '@ckeditor/ckeditor5-dev-utils';
 /**
  * Checks whether a user is logged to npm as the provided account name.
  *
- * @param {String} npmOwner Expected npm account name that should be logged into npm.
+ * @param {string} npmOwner Expected npm account name that should be logged into npm.
  * @returns {Promise}
  */
 export default async function assertNpmAuthorization( npmOwner ) {

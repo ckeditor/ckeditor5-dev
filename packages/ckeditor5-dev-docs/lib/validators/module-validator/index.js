@@ -13,8 +13,8 @@ const AUGMENTATION_MODULE_REGEXP = /[^\\/]+[\\/]src[\\/]augmentation/;
  *
  * It checks if the module name matches the path to the file where the module is defined.
  *
- * @param {Object} project Generated output from TypeDoc to validate.
- * @param {Function} onError A callback that is executed when a validation error is detected.
+ * @param {object} project Generated output from TypeDoc to validate.
+ * @param {function} onError A callback that is executed when a validation error is detected.
  */
 export default function validate( project, onError ) {
 	const { utils } = typedocPlugins;

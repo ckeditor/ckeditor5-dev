@@ -7,7 +7,7 @@
  * Replaces Windows style paths to Unix.
  *
  * @param value
- * @returns {String}
+ * @returns {string}
  */
 function normalizePath( ...value ) {
 	return value.join( '/' ).replace( /\\/g, '/' );
@@ -17,7 +17,7 @@ function normalizePath( ...value ) {
  * Returns the source file path with line number from a reflection.
  *
  * @param {import('typedoc').Reflection} reflection
- * @returns {String}
+ * @returns {string}
  */
 function getSource( reflection ) {
 	if ( reflection.sources ) {

@@ -5,11 +5,11 @@
 
 /**
  * @param options
- * @param {String} options.circleToken
- * @param {String} options.githubOrganization
- * @param {String} options.githubRepository
- * @param {Boolean} options.newValue
- * @return {Promise.<Boolean>}
+ * @param {string} options.circleToken
+ * @param {string} options.githubOrganization
+ * @param {string} options.githubRepository
+ * @param {boolean} options.newValue
+ * @returns {Promise.<boolean>}
  */
 export default async function circleUpdateAutoCancelBuilds( options ) {
 	const {

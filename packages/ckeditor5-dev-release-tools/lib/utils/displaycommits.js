@@ -10,9 +10,9 @@ import { CLI_COMMIT_INDENT_SIZE, CLI_INDENT_SIZE } from './constants.js';
 
 /**
  * @param {Array.<Commit>|Set.<Commit>} commits
- * @param {Object} [options={}]
- * @param {Boolean} [options.attachLinkToCommit=false] Whether to attach a link to parsed commit.
- * @param {Number} [options.indentLevel=1] The indent level.
+ * @param {object} [options={}]
+ * @param {boolean} [options.attachLinkToCommit=false] Whether to attach a link to parsed commit.
+ * @param {number} [options.indentLevel=1] The indent level.
  */
 export default function displayCommits( commits, options = {} ) {
 	const log = logger();
@@ -28,7 +28,7 @@ export default function displayCommits( commits, options = {} ) {
 	const COMMITS_SEPARATOR = listIndent + chalk.gray( '-'.repeat( 112 ) );
 
 	// Group of commits by the commit's hash.
-	/** @type {Map.<String, Set.<Commit>>} */
+	/** @type {Map.<string, Set.<Commit>>} */
 	const commitGroups = new Map();
 
 	for ( const singleCommit of commits ) {

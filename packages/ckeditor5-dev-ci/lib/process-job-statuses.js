@@ -57,7 +57,7 @@ export default function processJobStatuses( jobs ) {
 
 /**
  * @param {WorkflowJob} job
- * @returns {Boolean}
+ * @returns {boolean}
  */
 function isJobFailed( job ) {
 	if ( job.status === 'failed' ) {
@@ -81,11 +81,11 @@ function clone( obj ) {
 }
 
 /**
- * @typedef {Object} WorkflowJob
+ * @typedef {object} WorkflowJob
  *
- * @property {String} id
+ * @property {string} id
  *
  * @property {'blocked'|'running'|'failed'|'failed_parent'|'success'} status
  *
- * @property {Array.<String>} dependencies
+ * @property {Array.<string>} dependencies
  */

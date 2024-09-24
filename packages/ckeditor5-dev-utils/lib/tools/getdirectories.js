@@ -9,7 +9,7 @@ import path from 'path';
 /**
  * Returns array with all directories under specified path.
  *
- * @param {String} directoryPath
+ * @param {string} directoryPath
  * @returns {Array}
  */
 export default function getDirectories( directoryPath ) {

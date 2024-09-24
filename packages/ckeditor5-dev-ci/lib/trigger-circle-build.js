@@ -7,13 +7,13 @@
 
 /**
  * @param options
- * @param {String} options.circleToken
- * @param {String} options.commit
- * @param {String} options.branch
- * @param {String} options.repositorySlug A repository slug (org/name) where a new build will be started.
- * @param {String|null} [options.releaseBranch=null] Define a branch that leads the release process.
- * @param {String|null} [options.triggerRepositorySlug=null] A repository slug (org/name) that triggers a new build.
- * @return {Promise}
+ * @param {string} options.circleToken
+ * @param {string} options.commit
+ * @param {string} options.branch
+ * @param {string} options.repositorySlug A repository slug (org/name) where a new build will be started.
+ * @param {string|null} [options.releaseBranch=null] Define a branch that leads the release process.
+ * @param {string|null} [options.triggerRepositorySlug=null] A repository slug (org/name) that triggers a new build.
+ * @returns {Promise}
  */
 export default async function triggerCircleBuild( options ) {
 	const {

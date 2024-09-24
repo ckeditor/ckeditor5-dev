@@ -105,7 +105,7 @@ function onEventEnd( context ) {
  * Checks if the found owner reflection for an event is either an interface or a class.
  *
  * @param {require('typedoc').Reflection} reflection The found owner reflection for an event.
- * @returns {Boolean}
+ * @returns {boolean}
  */
 function isClassOrInterface( reflection ) {
 	if ( !reflection ) {
@@ -124,7 +124,7 @@ function isClassOrInterface( reflection ) {
  *
  * @param {require('typedoc').Context} ownerContext
  * @param {require('typedoc').Reflection} reflection
- * @param {String} eventName
+ * @param {string} eventName
  */
 function createNewEventReflection( ownerContext, reflection, eventName ) {
 	// Create a new reflection object for the event from the provided scope.
@@ -265,8 +265,8 @@ function getTargetTypeReflections( reflectionType ) {
 /**
  * Returns the normalized event name to make sure that it always starts with the "event:" prefix.
  *
- * @param {String} eventName
- * @returns {String}
+ * @param {string} eventName
+ * @returns {string}
  */
 function normalizeEventName( eventName ) {
 	if ( eventName.startsWith( 'event:' ) ) {

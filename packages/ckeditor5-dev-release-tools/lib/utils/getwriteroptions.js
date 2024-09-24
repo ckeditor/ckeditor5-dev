@@ -15,7 +15,7 @@ const templatePath = path.join( __dirname, '..', 'templates' );
 
 /**
  * @param {WriterOptionsTransformCallback} transform
- * @returns {Object}
+ * @returns {object}
  */
 export default function getWriterOptions( transform ) {
 	return {

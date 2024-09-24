@@ -10,9 +10,9 @@ import { logger } from '@ckeditor/ckeditor5-dev-utils';
  */
 export default class WebpackNotifierPlugin {
 	/**
-	 * @param {Object} options
-	 * @param {Function} options.onTestCompilationStatus
-	 * @param {String} options.processName
+	 * @param {object} options
+	 * @param {function} options.onTestCompilationStatus
+	 * @param {string} options.processName
 	 */
 	constructor( options ) {
 		this.log = logger();

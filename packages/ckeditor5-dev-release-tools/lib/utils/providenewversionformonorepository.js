@@ -11,12 +11,12 @@ import { CLI_INDENT_SIZE } from './constants.js';
 /**
  * Asks a user for providing the new version for a major release.
  *
- * @param {String} version
- * @param {String} foundPackage
- * @param {String} bumpType
- * @param {Object} [options={}]
- * @param {Number} [options.indentLevel=0] The indent level.
- * @returns {Promise.<String>}
+ * @param {string} version
+ * @param {string} foundPackage
+ * @param {string} bumpType
+ * @param {object} [options={}]
+ * @param {number} [options.indentLevel=0] The indent level.
+ * @returns {Promise.<string>}
  */
 export default async function provideNewVersionForMonoRepository( version, foundPackage, bumpType, options = {} ) {
 	const indentLevel = options.indentLevel || 0;

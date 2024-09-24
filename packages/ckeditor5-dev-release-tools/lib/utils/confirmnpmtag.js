@@ -9,9 +9,9 @@ import chalk from 'chalk';
 /**
  * Asks a user for a confirmation for updating and tagging versions of the packages.
  *
- * @param {String} versionTag A version tag based on a package version specified in `package.json`.
- * @param {String} npmTag A tag typed by the user when using the release tools.
- * @returns {Promise.<Boolean>}
+ * @param {string} versionTag A version tag based on a package version specified in `package.json`.
+ * @param {string} npmTag A tag typed by the user when using the release tools.
+ * @returns {Promise.<boolean>}
  */
 export default function confirmNpmTag( versionTag, npmTag ) {
 	const areVersionsEqual = versionTag === npmTag;

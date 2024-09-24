@@ -28,8 +28,8 @@
  *
  *        "ckeditor5-bar"
  *
- * @param {String} inputFilePath A path to the file.
- * @returns {String} The name of the package.
+ * @param {string} inputFilePath A path to the file.
+ * @returns {string} The name of the package.
  */
 export default function getPackageName( inputFilePath ) {
 	const match = inputFilePath.match( /^.+[/\\](ckeditor5-[^/\\]+)/ );

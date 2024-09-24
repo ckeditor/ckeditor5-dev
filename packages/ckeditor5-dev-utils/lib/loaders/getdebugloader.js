@@ -10,8 +10,8 @@ const __filename = fileURLToPath( import.meta.url );
 const __dirname = path.dirname( __filename );
 
 /**
- * @param {Array.<String>} debugFlags
- * @returns {Object}
+ * @param {Array.<string>} debugFlags
+ * @returns {object}
  */
 export default function getDebugLoader( debugFlags ) {
 	return {

@@ -11,8 +11,8 @@
  * Extracts base URL from the provided page URL. Base URL consists of a protocol, a host, a port, and a path.
  * A hash and search parts are omitted, because they would have navigated to the same page if they were set.
  *
- * @param {String} url Page URL.
- * @returns {String} Base URL from page URL.
+ * @param {string} url Page URL.
+ * @returns {string} Base URL from page URL.
  */
 export function getBaseUrl( url ) {
 	const { origin, pathname } = new URL( url );
@@ -23,8 +23,8 @@ export function getBaseUrl( url ) {
 /**
  * Checks, if provided string is a valid URL utilizing the HTTP or HTTPS protocols.
  *
- * @param {String} url The URL to validate.
- * @returns {Boolean}
+ * @param {string} url The URL to validate.
+ * @returns {boolean}
  */
 export function isUrlValid( url ) {
 	try {

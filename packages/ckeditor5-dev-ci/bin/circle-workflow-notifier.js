@@ -118,10 +118,10 @@ async function getOtherJobsData() {
 }
 
 /**
- * @param {Array.<String>} args
- * @returns {Object} result
- * @returns {String} result.task
- * @returns {Array<String>} result.ignore
+ * @param {Array.<string>} args
+ * @returns {object} result
+ * @returns {string} result.task
+ * @returns {Array.<string>} result.ignore
  */
 function parseArguments( args ) {
 	const config = {

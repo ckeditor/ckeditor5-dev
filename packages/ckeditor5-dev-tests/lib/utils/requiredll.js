@@ -6,8 +6,8 @@
 /**
  * Returns `true` if any of the source files represent a DLL test.
  *
- * @param {String|Array.<String>} sourceFiles
- * @returns {Boolean}
+ * @param {string|Array.<string>} sourceFiles
+ * @returns {boolean}
  */
 export default function requireDll( sourceFiles ) {
 	sourceFiles = Array.isArray( sourceFiles ) ? sourceFiles : [ sourceFiles ];

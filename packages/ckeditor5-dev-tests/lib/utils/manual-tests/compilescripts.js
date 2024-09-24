@@ -9,18 +9,18 @@ import getRelativeFilePath from '../getrelativefilepath.js';
 import requireDll from '../requiredll.js';
 
 /**
- * @param {Object} options
- * @param {String} options.cwd Current working directory. Usually it points to the CKEditor 5 root directory.
- * @param {String} options.buildDir A path where compiled files will be saved.
- * @param {Array.<String>} options.sourceFiles An array of paths to JavaScript files from manual tests to be compiled.
- * @param {String} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
- * @param {String} options.language A language passed to `CKEditorTranslationsPlugin`.
- * @param {Boolean} options.disableWatch Whether to disable the watch mechanism. If set to true, changes in source files
+ * @param {object} options
+ * @param {string} options.cwd Current working directory. Usually it points to the CKEditor 5 root directory.
+ * @param {string} options.buildDir A path where compiled files will be saved.
+ * @param {Array.<string>} options.sourceFiles An array of paths to JavaScript files from manual tests to be compiled.
+ * @param {string} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
+ * @param {string} options.language A language passed to `CKEditorTranslationsPlugin`.
+ * @param {boolean} options.disableWatch Whether to disable the watch mechanism. If set to true, changes in source files
  * will not trigger webpack.
- * @param {Function} options.onTestCompilationStatus A callback called whenever the script compilation occurrs.
- * @param {String} [options.tsconfig] Path the TypeScript configuration file.
- * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorTranslationsPlugin`.
- * @param {String} [options.identityFile] A file that provides secret keys used in the test scripts.
+ * @param {function} options.onTestCompilationStatus A callback called whenever the script compilation occurrs.
+ * @param {string} [options.tsconfig] Path the TypeScript configuration file.
+ * @param {Array.<string>} [options.additionalLanguages] Additional languages passed to `CKEditorTranslationsPlugin`.
+ * @param {string} [options.identityFile] A file that provides secret keys used in the test scripts.
  * @returns {Promise}
  */
 export default function compileManualTestScripts( options ) {

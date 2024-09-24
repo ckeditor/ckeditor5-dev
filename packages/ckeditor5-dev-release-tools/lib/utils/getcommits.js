@@ -14,11 +14,11 @@ import shellEscape from 'shell-escape';
 /**
  * Returns a promise that resolves an array of commits since the last tag specified as `options.from`.
  *
- * @param {Function} transformCommit
- * @param {Object} options
- * @param {String} [options.from] A commit or tag name that will be the first param of the range of commits to collect.
- * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
- * @param {String} [options.mainBranch='master'] A name of the main branch in the repository.
+ * @param {function} transformCommit
+ * @param {object} options
+ * @param {string} [options.from] A commit or tag name that will be the first param of the range of commits to collect.
+ * @param {string} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
+ * @param {string} [options.mainBranch='master'] A name of the main branch in the repository.
  * @returns {Promise.<Array.<Commit>>}
  */
 export default function getCommits( transformCommit, options = {} ) {

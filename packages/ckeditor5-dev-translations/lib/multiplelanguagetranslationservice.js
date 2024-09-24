@@ -15,16 +15,16 @@ import PO from 'pofile';
 export default class MultipleLanguageTranslationService extends EventEmitter {
 	// TODO maybe fix the jsdoc types
 	/**
-	 * @param {Object} options
-	 * @param {String} options.mainLanguage The target language that will be bundled into the main webpack asset.
-	 * @param {Array.<String>} [options.additionalLanguages] Additional languages which files will be emitted.
+	 * @param {object} options
+	 * @param {string} options.mainLanguage The target language that will be bundled into the main webpack asset.
+	 * @param {Array.<string>} [options.additionalLanguages] Additional languages which files will be emitted.
 	 * When option is set to 'all', all languages found during the compilation will be added.
-	 * @param {Boolean} [options.compileAllLanguages] When set to `true` languages will be found at runtime.
-	 * @param {Boolean} [options.addMainLanguageTranslationsToAllAssets] When set to `true` the service will not complain
+	 * @param {boolean} [options.compileAllLanguages] When set to `true` languages will be found at runtime.
+	 * @param {boolean} [options.addMainLanguageTranslationsToAllAssets] When set to `true` the service will not complain
 	 * about multiple JS assets and will output translations for the main language to all found assets.
-	 * @param {Boolean} [options.buildAllTranslationsToSeparateFiles] When set to `true` the service will output all translations
+	 * @param {boolean} [options.buildAllTranslationsToSeparateFiles] When set to `true` the service will output all translations
 	 * to separate files.
-	 * @param {String|Function|RegExp} [options.translationsOutputFile] An option allowing outputting all translation file
+	 * @param {string|Function|RegExp} [options.translationsOutputFile] An option allowing outputting all translation file
 	 * to the given file. If a file specified by a path (string) does not exist, then it will be created. Otherwise, translations
 	 * will be outputted to the file.
 	 */
@@ -43,7 +43,7 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 		 * Main language that should be built in to the bundle.
 		 *
 		 * @private
-		 * @type {String}
+		 * @type {string}
 		 */
 		this._mainLanguage = mainLanguage;
 
@@ -52,7 +52,7 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 		 * if the `compileAllLanguages` flag is turned on.
 		 *
 		 * @private
-		 * @type {Set.<String>}
+		 * @type {Set.<string>}
 		 */
 		this._languages = new Set( [ mainLanguage, ...additionalLanguages ] );
 
@@ -60,7 +60,7 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 		 * An option indicating if the languages should be found at runtime.
 		 *
 		 * @private
-		 * @type {Boolean}
+		 * @type {boolean}
 		 */
 		this._compileAllLanguages = compileAllLanguages;
 
@@ -69,7 +69,7 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 		 * and will add translation for the main language to all of them. Useful option for manual tests, etc.
 		 *
 		 * @private
-		 * @type {Boolean}
+		 * @type {boolean}
 		 */
 		this._addMainLanguageTranslationsToAllAssets = addMainLanguageTranslationsToAllAssets;
 
@@ -77,7 +77,7 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 		 * A boolean option. When set to `true` outputs all translations to separate files.
 		 *
 		 * @private
-		 * @type {Boolean}
+		 * @type {boolean}
 		 */
 		this._buildAllTranslationsToSeparateFiles = buildAllTranslationsToSeparateFiles;
 
@@ -85,7 +85,7 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 		 * A set of handled packages that speeds up the translation process.
 		 *
 		 * @private
-		 * @type {Set.<String>}
+		 * @type {Set.<string>}
 		 */
 		this._handledPackages = new Set();
 
@@ -93,7 +93,7 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 		 * A map of translation dictionaries in the `language -> messageId -> single & plural forms` format.
 		 *
 		 * @private
-		 * @type {Object.<String, Object.<String,Array.<String>>>}
+		 * @type {Object.<string, Object.<String,Array.<string>>>}
 		 */
 		this._translationDictionaries = {};
 
@@ -101,7 +101,7 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 		 * Plural form rules that will be added to generated translation assets.
 		 *
 		 * @private
-		 * @type {Object.<String, String>}
+		 * @type {Object.<string, String>}
 		 */
 		this._pluralFormsRules = {};
 
@@ -110,7 +110,7 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 		 * (with a single and possible plural forms) should be found for the target languages.
 		 *
 		 * @private
-		 * @type {Set.<String>}
+		 * @type {Set.<string>}
 		 */
 		this._foundMessageIds = new Set();
 
@@ -118,7 +118,7 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 		 * Whether the `getPluralForm` function should be added in the bundle file.
 		 *
 		 * @private
-		 * @type {Boolean}
+		 * @type {boolean}
 		 */
 		this._skipPluralFormFunction = skipPluralFormFunction;
 
@@ -130,9 +130,9 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 	 * (e.g. an incorrect `t()` call).
 	 *
 	 * @fires warning
-	 * @param {String} source Content of the source file.
-	 * @param {String} fileName Source file name
-	 * @returns {String}
+	 * @param {string} source Content of the source file.
+	 * @param {string} fileName Source file name
+	 * @returns {string}
 	 */
 	translateSource( source, fileName ) {
 		findMessages(
@@ -150,7 +150,7 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 	 * If the `compileAllLanguages` flag is set to `true`, then the language set will be expanded to all found languages.
 	 *
 	 * @fires warning
-	 * @param {String} pathToPackage A path to the package containing translations.
+	 * @param {string} pathToPackage A path to the package containing translations.
 	 */
 	loadPackage( pathToPackage ) {
 		if ( this._handledPackages.has( pathToPackage ) ) {
@@ -198,10 +198,10 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 	 *
 	 * @fires warning
 	 * @fires error
-	 * @param {Object} options
-	 * @param {String} options.outputDirectory Output directory for the translation files relative to the output.
-	 * @param {Array.<String>} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
-	 * @returns {Array.<Object>} Returns new and modified assets that will be added to original ones.
+	 * @param {object} options
+	 * @param {string} options.outputDirectory Output directory for the translation files relative to the output.
+	 * @param {Array.<string>} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
+	 * @returns {Array.<object>} Returns new and modified assets that will be added to original ones.
 	 */
 	getAssets( { outputDirectory, compilationAssetNames } ) {
 		let bundledLanguage = this._mainLanguage;
@@ -250,17 +250,17 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 	/**
 	 * Adds the specified `id` to the collection which will be translated to the specified language.
 	 *
-	 * @param {String} id
+	 * @param {string} id
 	 */
 	addIdMessage( id ) {
 		this._foundMessageIds.add( id );
 	}
 
 	/**
-	 * @param {Object} options
-	 * @param {String} options.outputDirectory Output directory for the translation files relative to the output.
-	 * @param {Array.<String>} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
-	 * @returns {Array.<Object>} Returns an array with one asset that
+	 * @param {object} options
+	 * @param {string} options.outputDirectory Output directory for the translation files relative to the output.
+	 * @param {Array.<string>} options.compilationAssetNames Original asset names from the compiler (e.g. Webpack).
+	 * @returns {Array.<object>} Returns an array with one asset that
 	 */
 	_getAssetsWithTranslationsBundledToTheOutputFile( { outputDirectory, compilationAssetNames } ) {
 		const assetName = match( this._translationsOutputFile, compilationAssetNames );
@@ -285,8 +285,8 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 	 * Returns assets for the given directory and languages.
 	 *
 	 * @private
-	 * @param {String} outputDirectory The output directory for assets.
-	 * @param {Array.<String>} languages Languages for assets.
+	 * @param {string} outputDirectory The output directory for assets.
+	 * @param {Array.<string>} languages Languages for assets.
 	 */
 	_getTranslationAssets( outputDirectory, languages ) {
 		// Sort the array of message ids to provide deterministic results.
@@ -307,7 +307,7 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 			// pluralForms="nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2)"
 			// pluralForms="nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2"
 
-			/** @type {String} */
+			/** @type {string} */
 			const pluralFormsRule = this._pluralFormsRules[ language ];
 
 			let pluralFormFunction;
@@ -349,9 +349,9 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 	 * Skips messages that lacks their translations.
 	 *
 	 * @private
-	 * @param {String} language The target language
-	 * @param {Array.<String>} sortedMessageIds An array of sorted message ids.
-	 * @returns {Object.<String,String|String[]>}
+	 * @param {string} language The target language
+	 * @param {Array.<string>} sortedMessageIds An array of sorted message ids.
+	 * @returns {Object.<String,String|string[]>}
 	 */
 	_getTranslations( language, sortedMessageIds ) {
 		const langDictionary = this._translationDictionaries[ language ];
@@ -379,8 +379,8 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 	 * Loads translations from the PO file if that file exists.
 	 *
 	 * @private
-	 * @param {String} language PO file's language.
-	 * @param {String} pathToPoFile Path to the target PO file.
+	 * @param {string} language PO file's language.
+	 * @param {string} pathToPoFile Path to the target PO file.
 	 */
 	_loadPoFile( language, pathToPoFile ) {
 		if ( !fs.existsSync( pathToPoFile ) ) {
@@ -406,8 +406,8 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 	 * Returns a path to the translation directory depending on the path to the package.
 	 *
 	 * @protected
-	 * @param {String|null} relativePathToPackage
-	 * @returns {String}
+	 * @param {string|null} relativePathToPackage
+	 * @returns {string}
 	 */
 	_getPathToTranslationDirectory( relativePathToPackage ) {
 		// If the `relativePathToPackage` is not specified, translations for a single package are processed.
@@ -420,9 +420,9 @@ export default class MultipleLanguageTranslationService extends EventEmitter {
 }
 
 /**
- * @param {String|Function|RegExp} predicate
- * @param {Array.<String>} options
- * @returns {String|undefined}
+ * @param {string|Function|RegExp} predicate
+ * @param {Array.<string>} options
+ * @returns {string|undefined}
  */
 function match( predicate, options ) {
 	if ( typeof predicate === 'function' ) {

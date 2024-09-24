@@ -10,8 +10,8 @@ import getPackageJson from './getpackagejson.js';
 /**
  * Returns a last created version in changelog file.
  *
- * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
- * @returns {String|null}
+ * @param {string} [cwd=process.cwd()] Where to look for the changelog file.
+ * @returns {string|null}
  */
 export function getLastFromChangelog( cwd = process.cwd() ) {
 	const changelog = getChangelog( cwd );
@@ -31,8 +31,8 @@ export function getLastFromChangelog( cwd = process.cwd() ) {
  * If the package does not have any pre-releases with the provided identifier yet, `null` is returned.
  *
  * @param {ReleaseIdentifier} releaseIdentifier
- * @param {String} [cwd=process.cwd()]
- * @returns {Promise.<String|null>}
+ * @param {string} [cwd=process.cwd()]
+ * @returns {Promise.<string|null>}
  */
 export function getLastPreRelease( releaseIdentifier, cwd = process.cwd() ) {
 	const packageName = getPackageJson( cwd ).name;
@@ -54,8 +54,8 @@ export function getLastPreRelease( releaseIdentifier, cwd = process.cwd() ) {
  * last nightly release and the "X" is the sequential number starting from 0. If the package does not have any nightly releases yet,
  * `null` is returned.
  *
- * @param {String} [cwd=process.cwd()]
- * @returns {Promise.<String|null>}
+ * @param {string} [cwd=process.cwd()]
+ * @returns {Promise.<string|null>}
  */
 export function getLastNightly( cwd = process.cwd() ) {
 	return getLastPreRelease( '0.0.0-nightly', cwd );
@@ -66,8 +66,8 @@ export function getLastNightly( cwd = process.cwd() ) {
  * next available pre-release sequential number starting from 0.
  *
  * @param {ReleaseIdentifier} releaseIdentifier
- * @param {String} [cwd=process.cwd()]
- * @returns {Promise<String>}
+ * @param {string} [cwd=process.cwd()]
+ * @returns {Promise<string>}
  */
 export async function getNextPreRelease( releaseIdentifier, cwd = process.cwd() ) {
 	const currentPreReleaseVersion = await getLastPreRelease( releaseIdentifier, cwd );
@@ -88,8 +88,8 @@ export async function getNextPreRelease( releaseIdentifier, cwd = process.cwd() 
  * Returns the next available nightly version in the format of "0.0.0-nightly-YYYYMMDD.X", where the "YYYYMMDD" is the current date for
  * the nightly release and the "X" is the sequential number starting from 0.
  *
- * @param {String} [cwd=process.cwd()]
- * @returns {Promise<String>}
+ * @param {string} [cwd=process.cwd()]
+ * @returns {Promise<string>}
  */
 export async function getNextNightly( cwd = process.cwd() ) {
 	const today = new Date();
@@ -105,7 +105,7 @@ export async function getNextNightly( cwd = process.cwd() ) {
 /**
  * Returns a name of the last created tag.
  *
- * @returns {String|null}
+ * @returns {string|null}
  */
 export function getLastTagFromGit() {
 	try {
@@ -121,15 +121,15 @@ export function getLastTagFromGit() {
 /**
  * Returns version of current package from `package.json`.
  *
- * @param {String} [cwd=process.cwd()] Current work directory.
- * @returns {String}
+ * @param {string} [cwd=process.cwd()] Current work directory.
+ * @returns {string}
  */
 export function getCurrent( cwd = process.cwd() ) {
 	return getPackageJson( cwd ).version;
 }
 
 /**
- * @typedef {String} ReleaseIdentifier The pre-release identifier without the last dynamic part (the pre-release sequential number).
+ * @typedef {string} ReleaseIdentifier The pre-release identifier without the last dynamic part (the pre-release sequential number).
  * It consists of the core base version ("<major>.<minor>.<path>"), a hyphen ("-"), and a pre-release identifier name (e.g. "alpha").
  *
  * Examples:

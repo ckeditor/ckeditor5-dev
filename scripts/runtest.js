@@ -67,16 +67,16 @@ function main() {
 
 /**
  * @param {Object} packageJson
- * @returns {Boolean}
+ * @returns {boolean}
  */
 function isTestable( packageJson ) {
 	return !!packageJson?.scripts?.test;
 }
 
 /**
- * @param {Array.<String>} args
- * @returns {Object} result
- * @returns {Boolean} result.coverage
+ * @param {Array.<string>} args
+ * @returns {object} result
+ * @returns {boolean} result.coverage
  */
 function parseArguments( args ) {
 	const config = {

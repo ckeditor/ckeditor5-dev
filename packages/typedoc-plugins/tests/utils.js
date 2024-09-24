@@ -14,7 +14,7 @@ const ROOT_TEST_DIRECTORY = path.join( ROOT_DIRECTORY, 'tests' );
  * Replaces Windows style paths to Unix.
  *
  * @param value
- * @returns {String}
+ * @returns {string}
  */
 function normalizePath( ...value ) {
 	return value.join( '/' ).replace( /\\/g, '/' );

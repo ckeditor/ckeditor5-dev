@@ -6,9 +6,9 @@
 import getDebugLoader from './getdebugloader.js';
 
 /**
- * @param {Object} options
- * @param {Array.<String>} options.debugFlags
- * @returns {Object}
+ * @param {object} options
+ * @param {Array.<string>} options.debugFlags
+ * @returns {object}
  */
 export default function getJavaScriptLoader( { debugFlags } ) {
 	return {

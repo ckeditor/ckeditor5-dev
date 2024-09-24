@@ -94,29 +94,29 @@ export default async function build( config ) {
 }
 
 /**
- * @typedef {Object} TypedocConfig
+ * @typedef {object} TypedocConfig
  *
- * @property {Object} config
+ * @property {object} config
  *
- * @property {String} cwd
+ * @property {string} cwd
  *
- * @property {String} tsconfig
+ * @property {string} tsconfig
  *
- * @property {Array.<String>} sourceFiles Glob pattern with source files.
+ * @property {Array.<string>} sourceFiles Glob pattern with source files.
  *
- * @property {Array.<String>} [ignoreFiles=[]] Glob pattern with files to ignore.
+ * @property {Array.<string>} [ignoreFiles=[]] Glob pattern with files to ignore.
  *
- * @property {Boolean} [strict=false] If `true`, errors found during the validation will finish the process
+ * @property {boolean} [strict=false] If `true`, errors found during the validation will finish the process
  * and exit code will be changed to `1`.
- * @property {String} [outputPath] A path to the place where extracted doclets will be saved. Is an optional value due to tests.
+ * @property {string} [outputPath] A path to the place where extracted doclets will be saved. Is an optional value due to tests.
  *
- * @property {String} [extraPlugins=[]] An array of path to extra plugins that will be added to Typedoc.
+ * @property {string} [extraPlugins=[]] An array of path to extra plugins that will be added to Typedoc.
  *
  * @property {TypedocValidator} [validatorOptions={}] An optional configuration object for validator.
  */
 
 /**
- * @typedef {Object} TypedocValidator
+ * @typedef {object} TypedocValidator
  *
- * @property {Boolean} [enableOverloadValidator=false] If set to `true`, the overloads validator will be enabled.
+ * @property {boolean} [enableOverloadValidator=false] If set to `true`, the overloads validator will be enabled.
  */

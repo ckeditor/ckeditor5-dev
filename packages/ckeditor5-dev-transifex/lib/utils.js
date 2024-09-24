@@ -11,8 +11,8 @@ import { logger as loggerFactory } from '@ckeditor/ckeditor5-dev-utils';
  *
  * Throws an error if any property is missing.
  *
- * @param {Object} objectToCheck
- * @param {Array.<String>} properties
+ * @param {object} objectToCheck
+ * @param {Array.<string>} properties
  */
 export function verifyProperties( objectToCheck, properties ) {
 	const nonExistingProperties = properties.filter( property => objectToCheck[ property ] === undefined );
@@ -25,7 +25,7 @@ export function verifyProperties( objectToCheck, properties ) {
 /**
  * Creates logger instance.
  *
- * @returns {Object} logger
+ * @returns {object} logger
  * @returns {Function} logger.progress
  * @returns {Function} logger.info
  * @returns {Function} logger.warning

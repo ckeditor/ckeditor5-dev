@@ -19,10 +19,10 @@ const execPromise = util.promisify( exec );
  * Used to switch the tags from `staging` to `latest` for specified array of packages.
  * Each operation will be retried up to 3 times in case of failure.
  *
- * @param {Object} options
- * @param {String} options.npmOwner User that is authorized to release packages.
- * @param {String} options.version Specifies the version of packages to reassign the tags for.
- * @param {Array.<String>} options.packages Array of packages' names to reassign tags for.
+ * @param {object} options
+ * @param {string} options.npmOwner User that is authorized to release packages.
+ * @param {string} options.version Specifies the version of packages to reassign the tags for.
+ * @param {Array.<string>} options.packages Array of packages' names to reassign tags for.
  * @returns {Promise}
  */
 export default async function reassignNpmTags( { npmOwner, version, packages } ) {
@@ -79,16 +79,16 @@ export default async function reassignNpmTags( { npmOwner, version, packages } )
 }
 
 /**
- * @param {String} message
- * @returns {String}
+ * @param {string} message
+ * @returns {string}
  */
 function trimErrorMessage( message ) {
 	return message.replace( /npm ERR!.*\n/g, '' ).trim();
 }
 
 /**
- * @param {Function} callback
- * @param {Number} times
+ * @param {function} callback
+ * @param {number} times
  * @returns {RetryCallback}
  */
 function retry( callback, times = 3 ) {

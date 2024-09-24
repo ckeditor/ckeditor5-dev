@@ -208,7 +208,7 @@ async function handleActions( githubRepository, entries, actions, spinner ) {
 /**
  * Prints in the console a welcome message.
  *
- * @param {Boolean} dryRun Indicates if dry run mode is enabled.
+ * @param {boolean} dryRun Indicates if dry run mode is enabled.
  */
 function printWelcomeMessage( dryRun ) {
 	const message = [
@@ -225,7 +225,7 @@ function printWelcomeMessage( dryRun ) {
 /**
  * Prints in the console status messages about actions required to be executed on found issues and pull requests.
  *
- * @param {Boolean} dryRun Indicates if dry run mode is enabled.
+ * @param {boolean} dryRun Indicates if dry run mode is enabled.
  * @param {SearchResult} searchResult Found issues and pull requests that require an action.
  * @param {Options} options Configuration options.
  */
@@ -284,7 +284,7 @@ function printStatus( dryRun, searchResult, options ) {
 /**
  * Prints in the console issues and pull requests from a single section.
  *
- * @param {String} statusMessage Section header.
+ * @param {string} statusMessage Section header.
  * @param {Array.<IssueOrPullRequestResult>} entries Found issues and pull requests.
  */
 function printStatusSection( statusMessage, entries ) {
@@ -296,7 +296,7 @@ function printStatusSection( statusMessage, entries ) {
 }
 
 /**
- * @typedef {Object} SearchResult
+ * @typedef {object} SearchResult
  * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToClose
  * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToStale
  * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToUnstale
@@ -305,21 +305,21 @@ function printStatusSection( statusMessage, entries ) {
  */
 
 /**
- * @typedef {Object} Actions
+ * @typedef {object} Actions
  * @property {HandleActionsCommentToAdd} [commentToAdd]
  * @property {HandleActionsLabelsToAdd} [labelsToAdd]
- * @property {Array.<String>} [labelsToRemove]
- * @property {Boolean} [close]
+ * @property {Array.<string>} [labelsToRemove]
+ * @property {boolean} [close]
  */
 
 /**
  * @callback HandleActionsLabelsToAdd
  * @param {IssueOrPullRequestResult} entry
- * @returns {Array.<String>}
+ * @returns {Array.<string>}
  */
 
 /**
  * @callback HandleActionsCommentToAdd
  * @param {IssueOrPullRequestResult} entry
- * @returns {String}
+ * @returns {string}
  */

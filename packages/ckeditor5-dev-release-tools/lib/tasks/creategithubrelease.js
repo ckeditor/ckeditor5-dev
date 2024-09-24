@@ -12,12 +12,12 @@ const { getRepositoryUrl } = transformCommitUtils;
 /**
  * Create a GitHub release.
  *
- * @param {Object} options
- * @param {String} options.token Token used to authenticate with GitHub.
- * @param {String} options.version Name of tag connected with the release.
- * @param {String} options.description Description of the release.
- * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
- * @returns {Promise.<String>}
+ * @param {object} options
+ * @param {string} options.token Token used to authenticate with GitHub.
+ * @param {string} options.version Name of tag connected with the release.
+ * @param {string} options.description Description of the release.
+ * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
+ * @returns {Promise.<string>}
  */
 export default async function createGithubRelease( options ) {
 	const {
@@ -51,8 +51,8 @@ export default async function createGithubRelease( options ) {
 /**
  * Returns an npm tag based on the specified release version.
  *
- * @param {String} version
- * @returns {String}
+ * @param {string} version
+ * @returns {string}
  */
 function getVersionTag( version ) {
 	const [ versionTag ] = semver.prerelease( version ) || [ 'latest' ];
@@ -64,9 +64,9 @@ function getVersionTag( version ) {
  * Resolves a promise containing a flag if the GitHub contains the release page for given version.
  *
  * @param {Octokit} github
- * @param {String} repositoryOwner
- * @param {String} repositoryName
- * @param {String} version
+ * @param {string} repositoryOwner
+ * @param {string} repositoryName
+ * @param {string} version
  * @returns {Promise.<boolean>}
  */
 async function shouldCreateRelease( github, repositoryOwner, repositoryName, version ) {

@@ -10,8 +10,8 @@ import semver from 'semver';
 /**
  * Checks if the npm tag matches the tag calculated from the package version. Verification takes place for all packages.
  *
- * @param {Array.<String>} packagePaths
- * @param {String} npmTag
+ * @param {Array.<string>} packagePaths
+ * @param {string} npmTag
  * @returns {Promise}
  */
 export default async function assertNpmTag( packagePaths, npmTag ) {
@@ -44,8 +44,8 @@ export default async function assertNpmTag( packagePaths, npmTag ) {
  * For the official release, returns the "latest" tag. For a non-official release (pre-release), returns the version tag extracted from
  * the package version.
  *
- * @param {String} version
- * @returns {String}
+ * @param {string} version
+ * @returns {string}
  */
 function getVersionTag( version ) {
 	const [ versionTag ] = semver.prerelease( version ) || [ 'latest' ];

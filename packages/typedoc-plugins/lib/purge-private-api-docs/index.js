@@ -86,16 +86,16 @@ function removeNonPublicMembersFromReflection( reflection, context ) {
 }
 
 /**
- * @param {Object} reflection
- * @returns {Boolean}
+ * @param {object} reflection
+ * @returns {boolean}
  */
 function isNonPublicReflection( reflection ) {
 	return reflection.flags.isPrivate || reflection.flags.isProtected || hasInternalTag( reflection );
 }
 
 /**
- * @param {Object} reflection
- * @returns {Boolean}
+ * @param {object} reflection
+ * @returns {boolean}
  */
 function hasInternalTag( reflection ) {
 	if ( !reflection ) {
@@ -114,17 +114,17 @@ function hasInternalTag( reflection ) {
 }
 
 /**
- * @param {Object} reflection
- * @returns {Boolean}
+ * @param {object} reflection
+ * @returns {boolean}
  */
 function isInheritedReflectionFromPrivatePackage( reflection ) {
 	return isPrivatePackageFile( reflection.sources[ 0 ].fullFileName );
 }
 
 /**
- * @param {Object} reflection
+ * @param {object} reflection
  * @param {Array} reflection.sources
- * @param {Function} reflection.traverse
+ * @param {function} reflection.traverse
  * @param {Array} [reflection.children]
  */
 function removeUrlSourcesFromReflection( reflection ) {
@@ -140,8 +140,8 @@ function removeUrlSourcesFromReflection( reflection ) {
 }
 
 /**
- * @param {String} fileName
- * @returns {Boolean}
+ * @param {string} fileName
+ * @returns {boolean}
  */
 function isPrivatePackageFile( fileName ) {
 	// Normalize the input path.
@@ -166,8 +166,8 @@ function isPrivatePackageFile( fileName ) {
 }
 
 /**
- * @param {Object} node
- * @returns {Boolean}
+ * @param {object} node
+ * @returns {boolean}
  */
 function isPublicApi( node ) {
 	return node.statements.some( statement => {
@@ -196,8 +196,8 @@ function isPublicApi( node ) {
 }
 
 /**
- * @param {String} value
- * @returns {String}
+ * @param {string} value
+ * @returns {string}
  */
 function normalizePath( value ) {
 	return value.replace( /\\/g, '/' );

@@ -24,24 +24,24 @@ import publishPackageOnNpmCallback from '../utils/publishpackageonnpmcallback.js
  * When the validation for each package passes, packages are published on npm. Optional callback is called for confirmation whether to
  * continue.
  *
- * @param {Object} options
- * @param {String} options.packagesDirectory Relative path to a location of packages to release.
- * @param {String} options.npmOwner The account name on npm, which should be used to publish the packages.
+ * @param {object} options
+ * @param {string} options.packagesDirectory Relative path to a location of packages to release.
+ * @param {string} options.npmOwner The account name on npm, which should be used to publish the packages.
  * @param {ListrTaskObject} options.listrTask An instance of `ListrTask`.
  * @param {AbortSignal|null} [options.signal=null] Signal to abort the asynchronous process.
- * @param {String} [options.npmTag='staging'] The npm distribution tag.
- * @param {Object.<String, Array.<String>>|null} [options.optionalEntries=null] Specifies which entries from the `files` field in the
+ * @param {string} [options.npmTag='staging'] The npm distribution tag.
+ * @param {Object.<string, Array.<string>>|null} [options.optionalEntries=null] Specifies which entries from the `files` field in the
  * `package.json` are optional. The key is a package name, and its value is an array of optional entries from the `files` field, for which
  * it is allowed not to match any file. The `options.optionalEntries` object may also contain the `default` key, which is used for all
  * packages that do not have own definition.
- * @param {String} [options.confirmationCallback=null] An callback whose response decides to continue the publishing packages. Synchronous
+ * @param {string} [options.confirmationCallback=null] An callback whose response decides to continue the publishing packages. Synchronous
  * and asynchronous callbacks are supported.
- * @param {Boolean} [options.requireEntryPoint=false] Whether to verify if packages to publish define an entry point. In other words,
+ * @param {boolean} [options.requireEntryPoint=false] Whether to verify if packages to publish define an entry point. In other words,
  * whether their `package.json` define the `main` field.
- * @param {Array.<String>} [options.optionalEntryPointPackages=[]] If the entry point validator is enabled (`requireEntryPoint=true`),
+ * @param {Array.<string>} [options.optionalEntryPointPackages=[]] If the entry point validator is enabled (`requireEntryPoint=true`),
  * this array contains a list of packages that will not be checked. In other words, they do not have to define the entry point.
- * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
- * @param {Number} [options.concurrency=4] Number of CPUs that will execute the task.
+ * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
+ * @param {number} [options.concurrency=4] Number of CPUs that will execute the task.
  * @returns {Promise}
  */
 export default async function publishPackages( options ) {

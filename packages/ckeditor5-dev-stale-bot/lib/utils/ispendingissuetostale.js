@@ -11,7 +11,7 @@ import isPendingIssueStale from './ispendingissuestale.js';
  *
  * @param {PendingIssue} pendingIssue Pending issue to check.
  * @param {Options} options Configuration options.
- * @returns {Boolean}
+ * @returns {boolean}
  */
 export default function isPendingIssueToStale( pendingIssue, options ) {
 	const { lastComment } = pendingIssue;

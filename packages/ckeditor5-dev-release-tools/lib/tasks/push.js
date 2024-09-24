@@ -9,10 +9,10 @@ import shellEscape from 'shell-escape';
 /**
  * Push the local changes to a remote server.
  *
- * @param {Object} options
- * @param {String} options.releaseBranch A name of the branch that should be used for releasing packages.
- * @param {String} options.version Name of tag connected with the release.
- * @param {String} [options.cwd] Root of the repository to prepare. `process.cwd()` by default.
+ * @param {object} options
+ * @param {string} options.releaseBranch A name of the branch that should be used for releasing packages.
+ * @param {string} options.version Name of tag connected with the release.
+ * @param {string} [options.cwd] Root of the repository to prepare. `process.cwd()` by default.
  * @returns {Promise}
  */
 export default async function push( options ) {

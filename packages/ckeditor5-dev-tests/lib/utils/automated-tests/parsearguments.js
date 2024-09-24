@@ -9,8 +9,8 @@ import minimist from 'minimist';
 import { tools, logger } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
- * @param {Array.<String>} args
- * @returns {Object}
+ * @param {Array.<string>} args
+ * @returns {object}
  */
 export default function parseArguments( args ) {
 	const log = logger();
@@ -115,8 +115,8 @@ export default function parseArguments( args ) {
 	 * Replaces all kebab-case keys in the `options` object with camelCase entries.
 	 * Kebab-case keys will be removed.
 	 *
-	 * @param {Object} options
-	 * @param {Array.<String>} keys Kebab-case keys in `options` object.
+	 * @param {object} options
+	 * @param {Array.<string>} keys Kebab-case keys in `options` object.
 	 */
 	function replaceKebabCaseWithCamelCase( options, keys ) {
 		for ( const key of keys ) {
@@ -130,7 +130,7 @@ export default function parseArguments( args ) {
 	/**
 	 * Parses the `--debug` option.
 	 *
-	 * @param {Object} options
+	 * @param {object} options
 	 */
 	function parseDebugOption( options ) {
 		if ( options.debug === 'false' || options.debug === false ) {
@@ -153,7 +153,7 @@ export default function parseArguments( args ) {
 	 *
 	 * The `ckeditor5-` prefix will be removed.
 	 *
-	 * @param {Object} options
+	 * @param {object} options
 	 */
 	function parseRepositoriesOption( options ) {
 		if ( !options.repositories.length ) {
@@ -207,7 +207,7 @@ export default function parseArguments( args ) {
 	 * Parses the `--tsconfig` options to be an absolute path. If argument is not provided,
 	 * it will check if `tsconfig.test.json` file exists and use it if it does.
 	 *
-	 * @param {Object} options
+	 * @param {object} options
 	 */
 	function parseTsconfigPath( options ) {
 		if ( options.tsconfig ) {
@@ -224,8 +224,8 @@ export default function parseArguments( args ) {
 	/**
 	 * Splits by a comma (`,`) all values specified under keys to array.
 	 *
-	 * @param {Object} options
-	 * @param {Array.<String>} keys Kebab-case keys in `options` object.
+	 * @param {object} options
+	 * @param {Array.<string>} keys Kebab-case keys in `options` object.
 	 */
 	function splitOptionsToArray( options, keys ) {
 		for ( const key of keys ) {
@@ -238,8 +238,8 @@ export default function parseArguments( args ) {
 	/**
 	 * Returns a camel case value for specified kebab-case `value`.
 	 *
-	 * @param {String} value Kebab-case string.
-	 * @returns {String}
+	 * @param {string} value Kebab-case string.
+	 * @returns {string}
 	 */
 	function toCamelCase( value ) {
 		return value.split( '-' )
@@ -254,8 +254,8 @@ export default function parseArguments( args ) {
 	}
 
 	/**
-	 * @param {String} path
-	 * @returns {Boolean}
+	 * @param {string} path
+	 * @returns {boolean}
 	 */
 	function isDirectory( path ) {
 		try {

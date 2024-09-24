@@ -26,12 +26,12 @@ const RESOURCE_REGEXP = /r:(?<resourceName>[a-z0-9_-]+)$/i;
  * The Transifex API may end with an error at any stage. In such a case, the resource is not processed anymore.
  * It is saved to a file (`.transifex-failed-uploads.json`). Rerunning the script will process only packages specified in the file.
  *
- * @param {Object} config
- * @param {String} config.token Token to the Transifex API.
- * @param {String} config.organizationName Name of the organization to which the project belongs.
- * @param {String} config.projectName Name of the project for downloading the translations.
- * @param {String} config.cwd Current work directory.
- * @param {Map.<String,String>} config.packages A resource name -> package path map for which translations should be uploaded.
+ * @param {object} config
+ * @param {string} config.token Token to the Transifex API.
+ * @param {string} config.organizationName Name of the organization to which the project belongs.
+ * @param {string} config.projectName Name of the project for downloading the translations.
+ * @param {string} config.cwd Current work directory.
+ * @param {Map.<string, string>} config.packages A resource name -> package path map for which translations should be uploaded.
  * @returns {Promise}
  */
 export default async function upload( config ) {
@@ -266,9 +266,9 @@ function formatTableRow() {
  *
  * If the `packageName` is not specified, returns `true` if any error occurs.
  *
- * @param {Object} [TRANSIFEX_RESOURCE_ERRORS]
- * @param {String|null} [packageName=null]
- * @returns {Boolean}
+ * @param {object} [TRANSIFEX_RESOURCE_ERRORS]
+ * @param {string|null} [packageName=null]
+ * @returns {boolean}
  */
 function hasError( TRANSIFEX_RESOURCE_ERRORS, packageName = null ) {
 	if ( !packageName ) {
@@ -281,8 +281,8 @@ function hasError( TRANSIFEX_RESOURCE_ERRORS, packageName = null ) {
 /**
  * Creates a callback that stores errors from Transifex for the given `packageName`.
  *
- * @param {Object} [TRANSIFEX_RESOURCE_ERRORS]
- * @param {String} packageName
+ * @param {object} [TRANSIFEX_RESOURCE_ERRORS]
+ * @param {string} packageName
  * @param {CKEditor5Spinner|null} [spinner=null]
  * @returns {Function}
  */
@@ -299,8 +299,8 @@ function errorHandlerFactory( TRANSIFEX_RESOURCE_ERRORS, packageName, spinner ) 
 }
 
 /**
- * @param {String} pathToFile
- * @returns {Promise.<Boolean>}
+ * @param {string} pathToFile
+ * @returns {Promise.<boolean>}
  */
 function isFile( pathToFile ) {
 	return fs.lstat( pathToFile )

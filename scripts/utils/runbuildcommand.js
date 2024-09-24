@@ -4,7 +4,7 @@
  */
 
 /**
- * @param {String} packagePath
+ * @param {string} packagePath
  * @returns {Promise}
  */
 export default async function runBuildCommand( packagePath ) {

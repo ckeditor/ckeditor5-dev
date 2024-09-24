@@ -23,17 +23,17 @@ const WORKER_SCRIPT = new URL( './parallelworker.js', import.meta.url );
  * Functions cannot be passed to workers. Hence, we store the callback as a Node.js file loaded by workers.
  *
  * @see https://nodejs.org/api/worker_threads.html
- * @param {Object} options
- * @param {String} options.packagesDirectory Relative path to a location of packages to execute a task.
- * @param {Function} options.taskToExecute A callback that is executed on all found packages.
+ * @param {object} options
+ * @param {string} options.packagesDirectory Relative path to a location of packages to execute a task.
+ * @param {function} options.taskToExecute A callback that is executed on all found packages.
  * It receives an absolute path to a package as an argument. It can be synchronous or may return a promise.
  * @param {ListrTaskObject} [options.listrTask={}] An instance of `ListrTask`.
  * @param {AbortSignal|null} [options.signal=null] Signal to abort the asynchronous process. If not set, default AbortController is created.
- * @param {Object} [options.taskOptions=null] Optional data required by the task.
+ * @param {object} [options.taskOptions=null] Optional data required by the task.
  * @param {ExecuteInParallelPackagesDirectoryFilter|null} [options.packagesDirectoryFilter=null] An optional callback allowing filtering out
  * directories/packages that should not be touched by the task.
- * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
- * @param {Number} [options.concurrency=require( 'os' ).cpus().length / 2] Number of CPUs that will execute the task.
+ * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
+ * @param {number} [options.concurrency=require( 'os' ).cpus().length / 2] Number of CPUs that will execute the task.
  * @returns {Promise}
  */
 export default async function executeInParallel( options ) {
@@ -99,7 +99,7 @@ export default async function executeInParallel( options ) {
 
 /**
  * @param {ListrTaskObject} listrTask
- * @param {Number} total
+ * @param {number} total
  * @returns {Function}
  */
 function progressFactory( listrTask, total ) {
@@ -112,10 +112,10 @@ function progressFactory( listrTask, total ) {
 }
 
 /**
- * @param {Object} options
+ * @param {object} options
  * @param {AbortSignal} options.signal
- * @param {Function} options.onPackageDone
- * @param {Object} options.workerData
+ * @param {function} options.onPackageDone
+ * @param {object} options.workerData
  * @returns {Promise}
  */
 function createWorker( { signal, onPackageDone, workerData } ) {
@@ -149,9 +149,9 @@ function createWorker( { signal, onPackageDone, workerData } ) {
  *
  * To avoid having packages with a common prefix in a single thread, use a loop for attaching packages to threads.
  *
- * @param {Array.<String>} packages An array of absolute paths to packages.
- * @param {Number} concurrency A number of threads.
- * @returns {Array.<Array.<String>>}
+ * @param {Array.<string>} packages An array of absolute paths to packages.
+ * @param {number} concurrency A number of threads.
+ * @returns {Array.<Array.<string>>}
  */
 function getPackagesGroupedByThreads( packages, concurrency ) {
 	return packages.reduce( ( collection, packageItem, index ) => {
@@ -168,19 +168,19 @@ function getPackagesGroupedByThreads( packages, concurrency ) {
 }
 
 /**
- * @typedef {Object} ListrTaskObject
+ * @typedef {object} ListrTaskObject
  *
  * @see https://listr2.kilic.dev/api/classes/ListrTaskObject.html
  *
- * @property {String} title Title of the task.
+ * @property {string} title Title of the task.
  *
- * @property {String} output Update the current output of the task.
+ * @property {string} output Update the current output of the task.
  */
 
 /**
  * @callback ExecuteInParallelPackagesDirectoryFilter
  *
- * @param {String} directoryPath An absolute path to a directory.
+ * @param {string} directoryPath An absolute path to a directory.
  *
- * @returns {Boolean} Whether to include (`true`) or skip (`false`) processing the given directory.
+ * @returns {boolean} Whether to include (`true`) or skip (`false`) processing the given directory.
  */

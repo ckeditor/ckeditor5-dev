@@ -9,8 +9,8 @@ import saveChangelog from './savechangelog.js';
 import getChangelog from './getchangelog.js';
 
 /**
- * @param {Number} length
- * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
+ * @param {number} length
+ * @param {string} [cwd=process.cwd()] Where to look for the changelog file.
  */
 export default function truncateChangelog( length, cwd = process.cwd() ) {
 	const changelog = getChangelog( cwd );

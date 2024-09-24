@@ -158,9 +158,9 @@ function importFile( options ) {
  * `/foo/bar/ckeditor5-theme-foo/ckeditor5-qux/theme/components/button.css`
  *
  * @private
- * @param {String} themePath Path to the theme.
- * @param {String} inputFilePath Path to the CSS file which is to be themed.
- * @returns {String}
+ * @param {string} themePath Path to the theme.
+ * @param {string} inputFilePath Path to the CSS file which is to be themed.
+ * @returns {string}
  */
 function getThemeFilePath( themePath, inputFilePath ) {
 	// ckeditor5-theme-foo/theme/theme.css -> ckeditor5-theme-foo/theme
@@ -202,11 +202,11 @@ function getThemeFilePath( themePath, inputFilePath ) {
  *		...
  *	}
  *
- * @member {String} [ThemeImporterOptions#themePath]
+ * @member {string} [ThemeImporterOptions#themePath]
  */
 
 /**
  * When `true` it enables debug logs in the console.
  *
- * @member {String} [ThemeImporterOptions#debug=false]
+ * @member {string} [ThemeImporterOptions#debug=false]
  */

@@ -17,13 +17,13 @@ import getPackageJson from './getpackagejson.js';
  *   - The second one is marked as `skipped` and means that packages should not be processed. They were listed as packages to skip
  *     (`options.skipPackages` or don't mach to `options.scope`).
  *
- * @param {Object} options
- * @param {String} options.cwd Current work directory.
- * @param {String|null} options.packages Name of directory where to look for packages. If `null`, only repository specified under
+ * @param {object} options
+ * @param {string} options.cwd Current work directory.
+ * @param {string|null} options.packages Name of directory where to look for packages. If `null`, only repository specified under
  * `options.cwd` will be returned.
- * @param {String|Array.<String>} options.skipPackages Glob pattern(s) which describes which packages should be skipped.
- * @param {String} [options.scope] Package names have to match to specified glob pattern.
- * @param {Boolean} [options.skipMainRepository=false] If set on true, package found in `options.cwd` will be skipped.
+ * @param {string|Array.<string>} options.skipPackages Glob pattern(s) which describes which packages should be skipped.
+ * @param {string} [options.scope] Package names have to match to specified glob pattern.
+ * @param {boolean} [options.skipMainRepository=false] If set on true, package found in `options.cwd` will be skipped.
  * @returns {PathsCollection}
  */
 export default function getPackagesPaths( options ) {
@@ -80,9 +80,9 @@ export default function getPackagesPaths( options ) {
 }
 
 /**
- * @typedef {Object} PathsCollection
+ * @typedef {object} PathsCollection
  *
- * @property {Set.<String>} matched Packages that match given criteria.
+ * @property {Set.<string>} matched Packages that match given criteria.
  *
- * @property {Set.<String>} skipped Packages that do not match given criteria.
+ * @property {Set.<string>} skipped Packages that do not match given criteria.
  */

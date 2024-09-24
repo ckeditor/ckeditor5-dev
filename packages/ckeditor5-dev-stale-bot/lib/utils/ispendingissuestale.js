@@ -8,7 +8,7 @@
  *
  * @param {PendingIssue} pendingIssue Pending issue to check.
  * @param {Options} options Configuration options.
- * @returns {Boolean}
+ * @returns {boolean}
  */
 export default function isPendingIssueStale( pendingIssue, options ) {
 	return options.staleLabels.every( staleLabel => pendingIssue.labels.includes( staleLabel ) );

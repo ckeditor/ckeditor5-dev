@@ -11,13 +11,13 @@ import { CLI_INDENT_SIZE } from './constants.js';
 /**
  * Asks a user for providing the new version.
  *
- * @param {String} packageVersion
- * @param {String|null} releaseTypeOrNewVersion
- * @param {Object} [options]
- * @param {Boolean} [options.disableInternalVersion=false] Whether to "internal" version is enabled.
- * @param {Boolean} [options.disableSkipVersion=false] Whether to "skip" version is enabled.
- * @param {Number} [options.indentLevel=0] The indent level.
- * @returns {Promise.<String>}
+ * @param {string} packageVersion
+ * @param {string|null} releaseTypeOrNewVersion
+ * @param {object} [options]
+ * @param {boolean} [options.disableInternalVersion=false] Whether to "internal" version is enabled.
+ * @param {boolean} [options.disableSkipVersion=false] Whether to "skip" version is enabled.
+ * @param {number} [options.indentLevel=0] The indent level.
+ * @returns {Promise.<string>}
  */
 export default function provideVersion( packageVersion, releaseTypeOrNewVersion, options = {} ) {
 	const indentLevel = options.indentLevel || 0;
@@ -66,11 +66,11 @@ export default function provideVersion( packageVersion, releaseTypeOrNewVersion,
 }
 
 /**
- * @param {Object} options
- * @param {String} options.packageVersion
- * @param {String|null} options.releaseTypeOrNewVersion
- * @param {Boolean} options.disableInternalVersion
- * @return {String}
+ * @param {object} options
+ * @param {string} options.packageVersion
+ * @param {string|null} options.releaseTypeOrNewVersion
+ * @param {boolean} options.disableInternalVersion
+ * @returns {string}
  */
 function getSuggestedVersion( { packageVersion, releaseTypeOrNewVersion, disableInternalVersion } ) {
 	if ( !releaseTypeOrNewVersion || releaseTypeOrNewVersion === 'skip' ) {

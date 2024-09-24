@@ -45,8 +45,8 @@ levels.set( 'error', new Set( [ 'info', 'warning', 'error' ] ) );
  *
  * Additionally, the `logger#error()` method prints the error instance if provided as the second argument.
  *
- * @param {String} moduleVerbosity='info' Level of the verbosity for all log methods.
- * @returns {Object} logger
+ * @param {string} moduleVerbosity='info' Level of the verbosity for all log methods.
+ * @returns {object} logger
  * @returns {Function} logger.info
  * @returns {Function} logger.warning
  * @returns {Function} logger.error
@@ -56,7 +56,7 @@ export default function logger( moduleVerbosity = 'info' ) {
 		/**
 		 * Displays a message when verbosity level is equal to 'info'.
 		 *
-		 * @param {String} message Message to log.
+		 * @param {string} message Message to log.
 		 */
 		info( message ) {
 			this._log( 'info', message );
@@ -65,7 +65,7 @@ export default function logger( moduleVerbosity = 'info' ) {
 		/**
 		 * Displays a warning message when verbosity level is equal to 'info' or 'warning'.
 		 *
-		 * @param {String} message Message to log.
+		 * @param {string} message Message to log.
 		 */
 		warning( message ) {
 			this._log( 'warning', chalk.yellow( message ) );
@@ -74,7 +74,7 @@ export default function logger( moduleVerbosity = 'info' ) {
 		/**
 		 * Displays an error message.
 		 *
-		 * @param {String} message Message to log.
+		 * @param {string} message Message to log.
 		 * @param {Error} [error] An error instance to log in the console.
 		 */
 		error( message, error ) {
@@ -83,8 +83,8 @@ export default function logger( moduleVerbosity = 'info' ) {
 
 		/**
 		 * @private
-		 * @param {String} messageVerbosity Verbosity of particular message.
-		 * @param {String} message Message to log.
+		 * @param {string} messageVerbosity Verbosity of particular message.
+		 * @param {string} message Message to log.
 		 * @param {Error} [error] An error instance to log in the console.
 		 */
 		_log( messageVerbosity, message, error ) {

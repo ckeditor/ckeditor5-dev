@@ -6,7 +6,7 @@
 import { format } from 'date-fns';
 
 /**
- * @returns {String}
+ * @returns {string}
  */
 export default function getFormattedDate() {
 	return format( new Date(), 'yyyy-MM-dd' );

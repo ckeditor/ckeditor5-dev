@@ -9,7 +9,7 @@
  * E.g. if the `CK_DEBUG_ENGINE` flag is set to true, then all lines starting with
  * `// @if CK_DEBUG_ENGINE //` will be uncommented.
  *
- * @param {String} source
+ * @param {string} source
  * @param {any} map
  */
 export default function ckDebugLoader( source, map ) {

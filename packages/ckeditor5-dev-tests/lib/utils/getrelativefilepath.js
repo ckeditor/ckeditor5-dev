@@ -15,9 +15,9 @@ import path from 'path';
  *   - /work/space/packages/ckeditor5-foo/tests/manual/foo.js -> ckeditor5-foo/tests/manual/foo.js
  *   - /work/space/packages/ckeditor-foo/tests/manual/foo.js -> ckeditor-foo/tests/manual/foo.js
  *
- * @param {String} filePath
- * @param {String} [cwd=process.cwd()]
- * @returns {String}
+ * @param {string} filePath
+ * @param {string} [cwd=process.cwd()]
+ * @returns {string}
  */
 export default function getRelativeFilePath( filePath, cwd = process.cwd() ) {
 	// The path ends with the directory separator.

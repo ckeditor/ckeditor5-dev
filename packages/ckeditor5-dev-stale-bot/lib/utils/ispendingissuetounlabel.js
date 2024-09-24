@@ -7,7 +7,7 @@
  * Checks whether pending issue should be unlabeled, because it was answered by a community member.
  *
  * @param {PendingIssue} pendingIssue Pending issue to check.
- * @returns {Boolean}
+ * @returns {boolean}
  */
 export default function isPendingIssueToUnlabel( pendingIssue ) {
 	if ( !pendingIssue.lastComment ) {

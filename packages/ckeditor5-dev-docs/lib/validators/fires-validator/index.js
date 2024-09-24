@@ -11,8 +11,8 @@ import typedocPlugins from '@ckeditor/typedoc-plugins';
  *
  * It checks if the event in the "@fires" tag exists.
  *
- * @param {Object} project Generated output from TypeDoc to validate.
- * @param {Function} onError A callback that is executed when a validation error is detected.
+ * @param {object} project Generated output from TypeDoc to validate.
+ * @param {function} onError A callback that is executed when a validation error is detected.
  */
 export default function validate( project, onError ) {
 	const { utils } = typedocPlugins;

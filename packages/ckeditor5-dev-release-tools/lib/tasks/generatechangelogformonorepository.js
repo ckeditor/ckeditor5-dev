@@ -35,37 +35,37 @@ const noteInfo = `[ℹ️](${ VERSIONING_POLICY_URL }#major-and-minor-breaking-c
  *
  * The typed version will be the same for all packages. See: https://github.com/ckeditor/ckeditor5/issues/7323.
  *
- * @param {Object} options
+ * @param {object} options
  *
- * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
+ * @param {string} options.cwd Current working directory (packages) from which all paths will be resolved.
  *
- * @param {String} options.packages Where to look for packages.
+ * @param {string} options.packages Where to look for packages.
  *
- * @param {Function} options.transformScope A function that returns a URL to a package from a scope of a commit.
+ * @param {function} options.transformScope A function that returns a URL to a package from a scope of a commit.
  *
- * @param {String} [options.scope] Package names have to match to specified glob pattern in order to be processed.
+ * @param {string} [options.scope] Package names have to match to specified glob pattern in order to be processed.
  *
- * @param {Array.<String>} [options.skipPackages=[]] Name of packages which won't be touched.
+ * @param {Array.<string>} [options.skipPackages=[]] Name of packages which won't be touched.
  *
- * @param {Boolean} [options.skipLinks=false] If set on true, links to release or commits will be omitted.
+ * @param {boolean} [options.skipLinks=false] If set on true, links to release or commits will be omitted.
  *
- * @param {String} [options.from] A commit or tag name that will be the first param of the range of commits to collect.
+ * @param {string} [options.from] A commit or tag name that will be the first param of the range of commits to collect.
  *
- * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
+ * @param {string} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
  *
- * @param {String} [options.mainBranch='master'] A name of the main branch in the repository.
+ * @param {string} [options.mainBranch='master'] A name of the main branch in the repository.
  *
  * @param {Array.<ExternalRepository>} [options.externalRepositories=[]] An array of object with additional repositories
  * that the function takes into consideration while gathering commits. It assumes that those directories are also mono repositories.
  *
- * @param {Boolean} [options.skipFileSave=false] Whether to resolve the changes instead of saving it to a file.
+ * @param {boolean} [options.skipFileSave=false] Whether to resolve the changes instead of saving it to a file.
  *
- * @param {String|null} [options.nextVersion=null] Next version to use. If not provided, a user needs to provide via CLI.
+ * @param {string|null} [options.nextVersion=null] Next version to use. If not provided, a user needs to provide via CLI.
  *
  * @param {FormatDateCallback} [options.formatDate] A callback allowing defining a custom format of the date inserted into the changelog.
  * If not specified, the default date matches the `YYYY-MM-DD` pattern.
  *
- * @returns {Promise.<undefined|String>}
+ * @returns {Promise.<undefined|string>}
  */
 export default async function generateChangelogForMonoRepository( options ) {
 	const log = logger();
@@ -161,11 +161,11 @@ export default async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Returns collections with packages found in the `options.cwd` directory and the external repositories.
 	 *
-	 * @param {Object} options
-	 * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
-	 * @param {String} options.packages Where to look for packages.
-	 * @param {String} options.scope Package names have to match to specified glob pattern in order to be processed.
-	 * @param {Array.<String>} options.skipPackages Name of packages which won't be touched.
+	 * @param {object} options
+	 * @param {string} options.cwd Current working directory (packages) from which all paths will be resolved.
+	 * @param {string} options.packages Where to look for packages.
+	 * @param {string} options.scope Package names have to match to specified glob pattern in order to be processed.
+	 * @param {Array.<string>} options.skipPackages Name of packages which won't be touched.
 	 * @param {Array.<ExternalRepository>} options.externalRepositories An array of object with additional repositories
 	 * that the function takes into consideration while gathering packages.
 	 * @returns {PathsCollection}
@@ -210,10 +210,10 @@ export default async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Returns a promise that resolves an array of commits since the last tag specified as `options.from`.
 	 *
-	 * @param {Object} options
-	 * @param {String} options.cwd Current working directory (packages) from which all paths will be resolved.
-	 * @param {String} options.from A commit or tag name that will be the first param of the range of commits to collect.
-	 * @param {String} options.releaseBranch A name of the branch that should be used for releasing packages.
+	 * @param {object} options
+	 * @param {string} options.cwd Current working directory (packages) from which all paths will be resolved.
+	 * @param {string} options.from A commit or tag name that will be the first param of the range of commits to collect.
+	 * @param {string} options.releaseBranch A name of the branch that should be used for releasing packages.
 	 * @param {Array.<ExternalRepository>} options.externalRepositories An array of object with additional repositories
 	 * that the function takes into consideration while gathering commits.
 	 * @returns {Promise.<Array.<Commit>>}
@@ -378,7 +378,7 @@ export default async function generateChangelogForMonoRepository( options ) {
 	 * Finds commits that touched the package under `packagePath` directory.
 	 *
 	 * @param {Array.<Commit>} commits
-	 * @param {String} packagePath
+	 * @param {string} packagePath
 	 * @returns {Array.<Commit>}
 	 */
 	function filterCommitsByPath( commits, packagePath ) {
@@ -400,7 +400,7 @@ export default async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Generates a list of changes based on the commits in the main repository.
 	 *
-	 * @returns {Promise.<String>}
+	 * @returns {Promise.<string>}
 	 */
 	function generateChangelogFromCommits() {
 		logProcess( 'Generating the changelog...' );
@@ -516,7 +516,7 @@ export default async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Prepares a summary that describes what has changed in all dependencies.
 	 *
-	 * @returns {String}
+	 * @returns {string}
 	 */
 	function generateSummaryOfChangesInPackages() {
 		const dependencies = new Map();
@@ -597,8 +597,8 @@ export default async function generateChangelogForMonoRepository( options ) {
 	}
 
 	/**
-	 * @param {Map.<String, Version>} dependencies
-	 * @returns {Map.<String, Version>}
+	 * @param {Map.<string, Version>} dependencies
+	 * @returns {Map.<string, Version>}
 	 */
 	function getNewPackages( dependencies ) {
 		const packages = new Map();
@@ -616,9 +616,9 @@ export default async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Returns packages where scope of changes described in the commits' notes match to packages' names.
 	 *
-	 * @param {Map.<String, Version>} dependencies
-	 * @param {String} noteTitle
-	 * @returns {Map.<String, Version>}
+	 * @param {Map.<string, Version>} dependencies
+	 * @param {string} noteTitle
+	 * @returns {Map.<string, Version>}
 	 */
 	function getPackagesMatchedToScopesFromNotes( dependencies, noteTitle ) {
 		const packages = new Map();
@@ -649,8 +649,8 @@ export default async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Returns packages that contain new features.
 	 *
-	 * @param {Map.<String, Version>} dependencies
-	 * @returns {Map.<String, Version>}
+	 * @param {Map.<string, Version>} dependencies
+	 * @returns {Map.<string, Version>}
 	 */
 	function getPackagesWithNewFeatures( dependencies ) {
 		const packages = new Map();
@@ -672,10 +672,10 @@ export default async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Returns a formatted entry (string) for the changelog.
 	 *
-	 * @param {String} packageName
-	 * @param {String} nextVersion
-	 * @param {String} currentVersion
-	 * @returns {String}
+	 * @param {string} packageName
+	 * @param {string} nextVersion
+	 * @param {string} currentVersion
+	 * @returns {string}
 	 */
 	function formatChangelogEntry( packageName, nextVersion, currentVersion = null ) {
 		const npmUrl = `https://www.npmjs.com/package/${ packageName }/v/${ nextVersion }`;
@@ -690,7 +690,7 @@ export default async function generateChangelogForMonoRepository( options ) {
 	/**
 	 * Returns a function that is being used when sorting commits.
 	 *
-	 * @param {String} scopeField A name of the field that saves the commit's scope.
+	 * @param {string} scopeField A name of the field that saves the commit's scope.
 	 * @returns {Function}
 	 */
 	function sortFunctionFactory( scopeField ) {
@@ -714,11 +714,11 @@ export default async function generateChangelogForMonoRepository( options ) {
 	}
 
 	/**
-	 * @param {String} message
-	 * @param {Object} [options={}]
-	 * @param {Number} [options.indentLevel=0]
-	 * @param {Boolean} [options.startWithNewLine=false] Whether to append a new line before the message.
-	 * @param {Boolean} [options.isWarning=false] Whether to use `warning` method instead of `log`.
+	 * @param {string} message
+	 * @param {object} [options={}]
+	 * @param {number} [options.indentLevel=0]
+	 * @param {boolean} [options.startWithNewLine=false] Whether to append a new line before the message.
+	 * @param {boolean} [options.isWarning=false] Whether to use `warning` method instead of `log`.
 	 */
 	function logInfo( message, options = {} ) {
 		const indentLevel = options.indentLevel || 0;
@@ -730,30 +730,30 @@ export default async function generateChangelogForMonoRepository( options ) {
 }
 
 /**
- * @typedef {Object} Version
+ * @typedef {object} Version
  *
- * @param {Boolean} current The current version defined in the `package.json` file.
+ * @param {boolean} current The current version defined in the `package.json` file.
  *
- * @param {Boolean} next The next version defined during generating the changelog file.
+ * @param {boolean} next The next version defined during generating the changelog file.
  */
 
 /**
- * @typedef {Object} ExternalRepository
+ * @typedef {object} ExternalRepository
  *
- * @param {String} cwd An absolute path to the repository.
+ * @param {string} cwd An absolute path to the repository.
  *
- * @param {String} packages Subdirectory in a given `cwd` that should searched for packages. E.g. `'packages'`.
+ * @param {string} packages Subdirectory in a given `cwd` that should searched for packages. E.g. `'packages'`.
  *
- * @param {String} [scope] Glob pattern for package names to be processed.
+ * @param {string} [scope] Glob pattern for package names to be processed.
  *
- * @param {Array.<String>} [skipPackages] Name of packages which won't be touched.
+ * @param {Array.<string>} [skipPackages] Name of packages which won't be touched.
  *
- * @param {Boolean} [skipLinks] If set on `true`, a URL to commit (hash) will be omitted.
+ * @param {boolean} [skipLinks] If set on `true`, a URL to commit (hash) will be omitted.
  *
- * @param {String} [from] A commit or tag name that will be the first param of the range of commits to collect. If not specified,
+ * @param {string} [from] A commit or tag name that will be the first param of the range of commits to collect. If not specified,
  * the option will inherit its value from the function's `options` object.
  *
- * @param {String} [releaseBranch] A name of the branch that should be used for releasing packages. If not specified, the branch
+ * @param {string} [releaseBranch] A name of the branch that should be used for releasing packages. If not specified, the branch
  * used for the main repository will be used.
  */
 
@@ -762,5 +762,5 @@ export default async function generateChangelogForMonoRepository( options ) {
  *
  * @param {Date} now The current date.
  *
- * @returns {String} The formatted date inserted into the changelog.
+ * @returns {string} The formatted date inserted into the changelog.
  */

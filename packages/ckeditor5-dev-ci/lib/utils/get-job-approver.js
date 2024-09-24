@@ -6,10 +6,10 @@
 /**
  * Returns a promise that resolves to GitHub name of a developer who approved the `jobName` job.
  *
- * @param {String} circleCiToken
- * @param {String} workflowId
- * @param {String} jobName
- * @returns {Promise.<String>}
+ * @param {string} circleCiToken
+ * @param {string} workflowId
+ * @param {string} jobName
+ * @returns {Promise.<string>}
  */
 export default async function getJobApprover( circleCiToken, workflowId, jobName ) {
 	const circleRequestOptions = {

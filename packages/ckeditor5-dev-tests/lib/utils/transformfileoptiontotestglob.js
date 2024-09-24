@@ -18,9 +18,9 @@ const EXTERNAL_DIR_NAME = 'external';
  *  * "foo/bar/" - matches all tests from a package and a subdirectory.
  *  * "foo/bar" - matches all tests from a package (or root) with specific filename.
  *
- * @param {String} pattern A path or pattern to determine the tests to execute.
- * @param {Boolean} [isManualTest=false] Whether the tests are manual or automated.
- * @returns {Array.<String>}
+ * @param {string} pattern A path or pattern to determine the tests to execute.
+ * @param {boolean} [isManualTest=false] Whether the tests are manual or automated.
+ * @returns {Array.<string>}
  */
 export default function transformFileOptionToTestGlob( pattern, isManualTest = false ) {
 	if ( doesPatternMatchExternalRepositoryName( pattern ) ) {
@@ -55,10 +55,10 @@ export default function transformFileOptionToTestGlob( pattern, isManualTest = f
 }
 
 /**
- * @param {String} pattern
- * @param {Object} [options]
- * @param {Boolean} [options.isManualTest] Controlls the path for manual and automated tests.
- * @returns {Array.<String>}
+ * @param {string} pattern
+ * @param {object} [options]
+ * @param {boolean} [options.isManualTest] Controlls the path for manual and automated tests.
+ * @returns {Array.<string>}
  */
 function getExternalRepositoryGlob( pattern, { isManualTest } ) {
 	const externalPath = path.join( process.cwd(), EXTERNAL_DIR_NAME );
@@ -73,8 +73,8 @@ function getExternalRepositoryGlob( pattern, { isManualTest } ) {
 }
 
 /**
- * @param {String} pattern
- * @returns {Boolean}
+ * @param {string} pattern
+ * @returns {boolean}
  */
 function doesPatternMatchExternalRepositoryName( pattern ) {
 	const externalPath = path.join( process.cwd(), EXTERNAL_DIR_NAME );
@@ -89,12 +89,12 @@ function doesPatternMatchExternalRepositoryName( pattern ) {
 }
 
 /**
- * @param {String} pattern
- * @param {Object} [options={}]
- * @param {Boolean} [options.isManualTest=false] Whether the tests are manual or automated.
- * @param {Boolean} [options.useCKEditorPrefix=false] If true, the returned path will use 'ckeditor' prefix instead of 'ckeditor5'.
- * @param {Boolean} [options.externalPackages] If true, the returned path will contain "external\/**\/packages".
- * @returns {String}
+ * @param {string} pattern
+ * @param {object} [options={}]
+ * @param {boolean} [options.isManualTest=false] Whether the tests are manual or automated.
+ * @param {boolean} [options.useCKEditorPrefix=false] If true, the returned path will use 'ckeditor' prefix instead of 'ckeditor5'.
+ * @param {boolean} [options.externalPackages] If true, the returned path will contain "external\/**\/packages".
+ * @returns {string}
  */
 function transformSinglePattern( pattern, options ) {
 	const chunks = pattern.match( /[a-z1-9|*-]+/g );

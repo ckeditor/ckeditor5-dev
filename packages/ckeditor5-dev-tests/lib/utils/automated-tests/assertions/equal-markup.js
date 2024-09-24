@@ -35,7 +35,7 @@ export default chai => {
 	 *			'<paragraph>[]foo</paragraph><paragraph>bar</paragraph >'
 	 *		);
 	 *
-	 * @param {String} expected Markup to compare.
+	 * @param {string} expected Markup to compare.
 	 */
 	chai.Assertion.addMethod( 'equalMarkup', function( expected ) {
 		const actual = this._obj;

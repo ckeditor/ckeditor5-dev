@@ -9,10 +9,10 @@ import upath from 'upath';
 /**
  * Parses CLI arguments.
  *
- * @param {Array.<String>} args
- * @returns {Object} result
- * @returns {Boolean} result.dryRun
- * @returns {String} result.configPath
+ * @param {Array.<string>} args
+ * @returns {object} result
+ * @returns {boolean} result.dryRun
+ * @returns {string} result.configPath
  */
 export default function parseArguments( args ) {
 	const config = {

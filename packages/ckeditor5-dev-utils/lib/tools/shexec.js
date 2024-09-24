@@ -10,13 +10,13 @@ import logger from '../logger/index.js';
 /**
  * Executes a shell command.
  *
- * @param {String} command The command to be executed.
- * @param {Object} options
+ * @param {string} command The command to be executed.
+ * @param {object} options
  * @param {'info'|'warning'|'error'|'silent'} [options.verbosity='info'] Level of the verbosity. If set as 'info'
  * both outputs (stdout and stderr) will be logged. If set as 'error', only stderr output will be logged.
- * @param {String} [options.cwd=process.cwd()]
- * @param {Boolean} [options.async=false] If set, the command execution is asynchronous. The execution is synchronous by default.
- * @returns {String|Promise.<String>} The command output.
+ * @param {string} [options.cwd=process.cwd()]
+ * @param {boolean} [options.async=false] If set, the command execution is asynchronous. The execution is synchronous by default.
+ * @returns {string|Promise.<string>} The command output.
  */
 export default function shExec( command, options = {} ) {
 	const {
@@ -49,13 +49,13 @@ export default function shExec( command, options = {} ) {
 }
 
 /**
- * @param {Object} options
- * @param {Number} options.code
- * @param {String} options.stdout
- * @param {String} options.stderr
+ * @param {object} options
+ * @param {number} options.code
+ * @param {string} options.stdout
+ * @param {string} options.stderr
  * @param {'info'|'warning'|'error'|'silent'} options.verbosity
- * @param {String} options.command
- * @returns {String}
+ * @param {string} options.command
+ * @returns {string}
  */
 function execHandler( { code, stdout, stderr, verbosity, command } ) {
 	const log = logger( verbosity );

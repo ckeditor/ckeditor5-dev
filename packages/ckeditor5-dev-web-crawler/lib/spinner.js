@@ -12,8 +12,8 @@ import ora from 'ora';
 
 /**
  * Creates nice-looking CLI spinner.
- * @param {Object} options
- * @param {Boolean} [options.noSpinner=false] Whether to display the spinner with progress or a message with current progress.
+ * @param {object} options
+ * @param {boolean} [options.noSpinner=false] Whether to display the spinner with progress or a message with current progress.
  */
 export function createSpinner( { noSpinner } ) {
 	return ora( {
@@ -29,9 +29,9 @@ export function createSpinner( { noSpinner } ) {
 /**
  * Returns a progress handler, which is called every time just before opening a new link.
  *
- * @param {Object} spinner Spinner instance
- * @param {Object} options
- * @param {Boolean} [options.verbose] Whether to display raw log instead of modifying the spinner instance.
+ * @param {object} spinner Spinner instance
+ * @param {object} options
+ * @param {boolean} [options.verbose] Whether to display raw log instead of modifying the spinner instance.
  * @returns {Function} Progress handler.
  */
 export function getProgressHandler( spinner, { verbose } ) {

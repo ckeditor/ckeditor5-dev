@@ -6,12 +6,12 @@
 import { tools } from '@ckeditor/ckeditor5-dev-utils';
 
 /**
- * @param {Object} options
- * @param {String|null} options.version Version of the current release.
- * @param {String} options.changes Changelog entries for the current release.
- * @param {Boolean} [options.ignoreBranchCheck=false] If set on true, branch checking will be skipped.
- * @param {String} [options.branch='master'] A name of the branch that should be used for releasing packages.
- * @returns {Promise.<Array.<String>>}
+ * @param {object} options
+ * @param {string|null} options.version Version of the current release.
+ * @param {string} options.changes Changelog entries for the current release.
+ * @param {boolean} [options.ignoreBranchCheck=false] If set on true, branch checking will be skipped.
+ * @param {string} [options.branch='master'] A name of the branch that should be used for releasing packages.
+ * @returns {Promise.<Array.<string>>}
  */
 export default async function validateRepositoryToRelease( options ) {
 	const {

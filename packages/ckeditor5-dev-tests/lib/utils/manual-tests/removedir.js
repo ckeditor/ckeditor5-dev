@@ -12,9 +12,9 @@ import chalk from 'chalk';
  *
  * The `del` package protects you against deleting the current working directory and above.
  *
- * @param {String} dir Directory to remove.
- * @param {Object} [options={}] options
- * @param {Boolean} [options.silent=false] Whether to hide the path to the directory on the console.
+ * @param {string} dir Directory to remove.
+ * @param {object} [options={}] options
+ * @param {boolean} [options.silent=false] Whether to hide the path to the directory on the console.
  * @returns {Promise}
  */
 export default function removeDir( dir, options = {} ) {

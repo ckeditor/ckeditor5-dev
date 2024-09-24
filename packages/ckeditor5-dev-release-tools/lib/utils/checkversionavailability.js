@@ -12,8 +12,8 @@ import shellEscape from 'shell-escape';
  * Returns a promise that resolves to `true` if the provided version does not exist or resolves the promise to `false` otherwise.
  * If the `npm show` command exits with an error, it is re-thrown.
  *
- * @param {String} version
- * @param {String} packageName
+ * @param {string} version
+ * @param {string} packageName
  * @returns {Promise}
  */
 export default async function checkVersionAvailability( version, packageName ) {

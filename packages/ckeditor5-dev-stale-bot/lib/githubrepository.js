@@ -73,7 +73,7 @@ export default class GitHubRepository {
 	/**
 	 * Returns the GitHub login of the currently authenticated user.
 	 *
-	 * @returns {Promise.<String>}
+	 * @returns {Promise.<string>}
 	 */
 	async getViewerLogin() {
 		return this.sendRequest( await this.queries.getViewerLogin )
@@ -90,7 +90,7 @@ export default class GitHubRepository {
 	 *
 	 * @param {'Issue'|'PullRequest'} type Type of resource to search.
 	 * @param {Options} options Configuration options.
-	 * @param {Function} onProgress Callback function called each time a response is received.
+	 * @param {function} onProgress Callback function called each time a response is received.
 	 * @param {PageInfo} [pageInfo] Describes the current page of the returned result.
 	 * @returns {Promise.<SearchIssuesOrPullRequestsToStaleResult>}
 	 */
@@ -140,7 +140,7 @@ export default class GitHubRepository {
 	 * Searches for all stale issues and pull requests that should be closed or unstaled.
 	 *
 	 * @param {Options} options Configuration options.
-	 * @param {Function} onProgress Callback function called each time a response is received.
+	 * @param {function} onProgress Callback function called each time a response is received.
 	 * @param {PageInfo} [pageInfo] Describes the current page of the returned result.
 	 * @returns {Promise.<SearchStaleIssuesOrPullRequestsResult>}
 	 */
@@ -202,7 +202,7 @@ export default class GitHubRepository {
 	 * Searches for all pending issues that should be staled or unlabeled.
 	 *
 	 * @param {Options} options Configuration options.
-	 * @param {Function} onProgress Callback function called each time a response is received.
+	 * @param {function} onProgress Callback function called each time a response is received.
 	 * @param {PageInfo} [pageInfo] Describes the current page of the returned result.
 	 * @returns {Promise.<SearchIssuesOrPullRequestsToStaleResult>}
 	 */
@@ -258,7 +258,7 @@ export default class GitHubRepository {
 	/**
 	 * Fetches all timeline items for provided issue or pull request.
 	 *
-	 * @param {String} nodeId Issue or pull request identifier for which we want to fetch timeline items.
+	 * @param {string} nodeId Issue or pull request identifier for which we want to fetch timeline items.
 	 * @param {PageInfo} [pageInfo] Describes the current page of the returned result.
 	 * @returns {Promise.<Array.<TimelineItem>>}
 	 */
@@ -290,8 +290,8 @@ export default class GitHubRepository {
 	/**
 	 * Adds new comment to the specified issue or pull request on GitHub.
 	 *
-	 * @param {String} nodeId Issue or pull request identifier for which we want to add new comment.
-	 * @param {String} comment Comment to add.
+	 * @param {string} nodeId Issue or pull request identifier for which we want to add new comment.
+	 * @param {string} comment Comment to add.
 	 * @returns {Promise}
 	 */
 	async addComment( nodeId, comment ) {
@@ -311,9 +311,9 @@ export default class GitHubRepository {
 	/**
 	 * Fetches the specified labels from GitHub.
 	 *
-	 * @param {String} repositorySlug Identifies the repository, where the provided labels exist.
-	 * @param {Array.<String>} labelNames Label names to fetch.
-	 * @returns {Promise.<Array.<String>>}
+	 * @param {string} repositorySlug Identifies the repository, where the provided labels exist.
+	 * @param {Array.<string>} labelNames Label names to fetch.
+	 * @returns {Promise.<Array.<string>>}
 	 */
 	async getLabels( repositorySlug, labelNames ) {
 		if ( !labelNames.length ) {
@@ -344,8 +344,8 @@ export default class GitHubRepository {
 	/**
 	 * Adds new labels to the specified issue or pull request on GitHub.
 	 *
-	 * @param {String} nodeId Issue or pull request identifier for which we want to add labels.
-	 * @param {Array.<String>} labelIds Labels to add.
+	 * @param {string} nodeId Issue or pull request identifier for which we want to add labels.
+	 * @param {Array.<string>} labelIds Labels to add.
 	 * @returns {Promise}
 	 */
 	async addLabels( nodeId, labelIds ) {
@@ -365,8 +365,8 @@ export default class GitHubRepository {
 	/**
 	 * Removes labels from the specified issue or pull request on GitHub.
 	 *
-	 * @param {String} nodeId Issue or pull request identifier for which we want to remove labels.
-	 * @param {Array.<String>} labelIds Labels to remove.
+	 * @param {string} nodeId Issue or pull request identifier for which we want to remove labels.
+	 * @param {Array.<string>} labelIds Labels to remove.
 	 * @returns {Promise}
 	 */
 	async removeLabels( nodeId, labelIds ) {
@@ -387,7 +387,7 @@ export default class GitHubRepository {
 	 * Closes issue or pull request.
 	 *
 	 * @param {'Issue'|'PullRequest'} type Type of resource to close.
-	 * @param {String} nodeId Issue or pull request identifier to close.
+	 * @param {string} nodeId Issue or pull request identifier to close.
 	 * @returns {Promise}
 	 */
 	async closeIssueOrPullRequest( type, nodeId ) {
@@ -409,10 +409,10 @@ export default class GitHubRepository {
 	 * Prepares the page pointers and search options for the next search request.
 	 *
 	 * @private
-	 * @param {Object} data Received response to parse.
+	 * @param {object} data Received response to parse.
 	 * @param {Options} options Configuration options.
 	 * @param {PageInfo} pageInfo Describes the current page of the returned result.
-	 * @returns {Object} result
+	 * @returns {object} result
 	 * @returns {PageInfo} result.nextPageInfo
 	 * @returns {Options} result.nextOptions
 	 */
@@ -457,7 +457,7 @@ export default class GitHubRepository {
 	 * initial request.
 	 *
 	 * @private
-	 * @param {Object} data Received response to parse.
+	 * @param {object} data Received response to parse.
 	 * @returns {Promise.<Array.<IssueOrPullRequest>>}
 	 */
 	parseIssuesOrPullRequests( data ) {
@@ -484,7 +484,7 @@ export default class GitHubRepository {
 	 * Parses the received array of timeline items for an issue or pull request.
 	 *
 	 * @private
-	 * @param {Object} data Received response to parse.
+	 * @param {object} data Received response to parse.
 	 * @returns {Array.<TimelineItem>}
 	 */
 	parseIssueOrPullRequestTimelineItems( data ) {
@@ -514,7 +514,7 @@ export default class GitHubRepository {
 	 * initial request.
 	 *
 	 * @private
-	 * @param {Object} data Received response to parse.
+	 * @param {object} data Received response to parse.
 	 * @returns {Array.<PendingIssue>}
 	 */
 	parsePendingIssues( data ) {
@@ -537,9 +537,9 @@ export default class GitHubRepository {
 	 * Then, the request is sent again.
 	 *
 	 * @private
-	 * @param {String} query The GraphQL query to send.
-	 * @param {Object} [variables={}] Variables required by the GraphQL query.
-	 * @returns {Promise.<Object>}
+	 * @param {string} query The GraphQL query to send.
+	 * @param {object} [variables={}] Variables required by the GraphQL query.
+	 * @returns {Promise.<object>}
 	 */
 	async sendRequest( query, variables = {} ) {
 		return this.graphql.request( query, variables )
@@ -566,8 +566,8 @@ export default class GitHubRepository {
 /**
  * Reads the GraphQL query from filesystem.
  *
- * @param {String} queryName Filename of the GraphQL query to read.
- * @returns {Promise.<String>}
+ * @param {string} queryName Filename of the GraphQL query to read.
+ * @returns {Promise.<string>}
  */
 function readGraphQL( queryName ) {
 	return fs.readFile( upath.join( GRAPHQL_PATH, `${ queryName }.graphql` ), 'utf-8' );
@@ -577,7 +577,7 @@ function readGraphQL( queryName ) {
  * Parses the received error from GitHub API and checks if it concerns exceeding the API rate limit. If yes, it returns information when the
  * rate limit will be reset.
  *
- * @param {Object} error An error that was received from the GitHub API.
+ * @param {object} error An error that was received from the GitHub API.
  * @returns {RateLimitExceeded}
  */
 function checkApiRateLimit( error ) {
@@ -632,69 +632,69 @@ function mapNodeToResult( node ) {
 }
 
 /**
- * @typedef {Object} TimelineItem
- * @property {String} eventDate
- * @property {String} [author]
- * @property {String} [label]
+ * @typedef {object} TimelineItem
+ * @property {string} eventDate
+ * @property {string} [author]
+ * @property {string} [label]
  */
 
 /**
- * @typedef {Object} Comment
- * @property {String} createdAt
- * @property {Boolean} isExternal
+ * @typedef {object} Comment
+ * @property {string} createdAt
+ * @property {boolean} isExternal
  */
 
 /**
- * @typedef {Object} IssueOrPullRequest
- * @property {String} id
+ * @typedef {object} IssueOrPullRequest
+ * @property {string} id
  * @property {'Issue'|'PullRequest'} type
- * @property {Number} number
- * @property {String} title
- * @property {String} url
- * @property {String} createdAt
- * @property {String|null} lastEditedAt
- * @property {String|null} lastReactedAt
+ * @property {number} number
+ * @property {string} title
+ * @property {string} url
+ * @property {string} createdAt
+ * @property {string|null} lastEditedAt
+ * @property {string|null} lastReactedAt
  * @property {Array.<TimelineItem>} timelineItems
  */
 
 /**
- * @typedef {Object} PendingIssue
- * @property {String} id
+ * @typedef {object} PendingIssue
+ * @property {string} id
  * @property {'Issue'} type
- * @property {String} title
- * @property {String} url
- * @property {Array.<String>} labels
+ * @property {string} title
+ * @property {string} url
+ * @property {Array.<string>} labels
  * @property {Comment|null} lastComment
  */
 
 /**
- * @typedef {Object} IssueOrPullRequestResult
- * @property {String} id
+ * @typedef {object} IssueOrPullRequestResult
+ * @property {string} id
  * @property {'Issue'|'PullRequest'} type
- * @property {String} url
- * @property {String} title
+ * @property {string} url
+ * @property {string} title
  */
 
 /**
- * @typedef {Object} PageInfo
- * @property {Boolean} [hasNextPage]
- * @property {String} [cursor]
- * @property {Number} [done]
- * @property {Number} [total]
+ * @typedef {object} PageInfo
+ * @property {boolean} [hasNextPage]
+ * @property {string} [cursor]
+ * @property {number} [done]
+ * @property {number} [total]
  */
 
 /**
- * @typedef {Object} Logger
+ * @typedef {object} Logger
  * @property {Function} info
  * @property {Function} warning
  * @property {Function} error
  */
 
 /**
- * @typedef {Object} RateLimitExceeded
- * @property {Boolean} isExceeded
- * @property {String} [resetDate]
- * @property {Number} [timeToWait]
+ * @typedef {object} RateLimitExceeded
+ * @property {boolean} isExceeded
+ * @property {string} [resetDate]
+ * @property {number} [timeToWait]
  */
 
 /**
@@ -702,7 +702,7 @@ function mapNodeToResult( node ) {
  */
 
 /**
- * @typedef {Object} SearchStaleIssuesOrPullRequestsResult
+ * @typedef {object} SearchStaleIssuesOrPullRequestsResult
  * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToClose
  * @property {Array.<IssueOrPullRequestResult>} issuesOrPullRequestsToUnstale
  */

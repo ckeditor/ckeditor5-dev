@@ -14,27 +14,27 @@ const UPDATED_TRANSLATION_COMMIT = '* Updated translations.';
  *
  * @param {Array.<Commit>} commits
  *
- * @param {Object} context
- * @param {String} context.version Current version for the release.
- * @param {String} context.repoUrl The repository URL.
- * @param {String} context.currentTag A tag for the current version.
- * @param {String} context.commit Commit keyword in the URL.
- * @param {String} [context.previousTag] A tag for the previous version.
- * @param {Boolean} [context.skipCommitsLink=false] Whether to skip adding links to commit.
- * @param {Boolean} [context.skipCompareLink=false] Whether to remove the compare URL in the header.
+ * @param {object} context
+ * @param {string} context.version Current version for the release.
+ * @param {string} context.repoUrl The repository URL.
+ * @param {string} context.currentTag A tag for the current version.
+ * @param {string} context.commit Commit keyword in the URL.
+ * @param {string} [context.previousTag] A tag for the previous version.
+ * @param {boolean} [context.skipCommitsLink=false] Whether to skip adding links to commit.
+ * @param {boolean} [context.skipCompareLink=false] Whether to remove the compare URL in the header.
  *
- * @param {Object} options
- * @param {Object} options.transform
- * @param {Function} options.transform.hash A function for mapping the commit's hash.
- * @param {Array.<String>|String} options.groupBy A key for grouping the commits.
- * @param {Function} options.commitGroupsSort A sort function for the groups.
- * @param {Function} options.noteGroupsSort A soft function for the notes.
- * @param {String} options.mainTemplate The main template for the changelog.
- * @param {String} options.headerPartial The "header" partial used in the main template.
- * @param {String} options.commitPartial The "commit" partial used in the main template.
- * @param {String} options.footerPartial The "footer" partial used in the main template.
+ * @param {object} options
+ * @param {object} options.transform
+ * @param {function} options.transform.hash A function for mapping the commit's hash.
+ * @param {Array.<string>|string} options.groupBy A key for grouping the commits.
+ * @param {function} options.commitGroupsSort A sort function for the groups.
+ * @param {function} options.noteGroupsSort A soft function for the notes.
+ * @param {string} options.mainTemplate The main template for the changelog.
+ * @param {string} options.headerPartial The "header" partial used in the main template.
+ * @param {string} options.commitPartial The "commit" partial used in the main template.
+ * @param {string} options.footerPartial The "footer" partial used in the main template.
  *
- * @returns {Promise.<String>}
+ * @returns {Promise.<string>}
  */
 export default function generateChangelog( commits, context, options ) {
 	const commitStream = new Readable( { objectMode: true } );
@@ -64,10 +64,10 @@ export default function generateChangelog( commits, context, options ) {
 /**
  * Merges multiple "Updated translations." entries into the single commit.
  *
- * @param {String} changelog Generated changelog.
- * @param {Object} [options={}]
- * @param {Boolean} [options.skipCommitsLink=false] Whether to skip adding links to commit.
- * @returns {String}
+ * @param {string} changelog Generated changelog.
+ * @param {object} [options={}]
+ * @param {boolean} [options.skipCommitsLink=false] Whether to skip adding links to commit.
+ * @returns {string}
  */
 function mergeUpdateTranslationsCommits( changelog, options = {} ) {
 	let foundUpdatedTranslationCommit = false;

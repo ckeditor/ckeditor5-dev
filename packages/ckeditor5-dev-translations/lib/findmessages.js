@@ -9,11 +9,11 @@ import { default as traverse } from '@babel/traverse';
 /**
  * Parses source and finds messages from the first argument of `t()` calls.
  *
- * @param {String} source A content of the JS file that will be translated.
- * @param {String} sourceFile A path to source file, used only for creating error messages.
+ * @param {string} source A content of the JS file that will be translated.
+ * @param {string} sourceFile A path to source file, used only for creating error messages.
  * @param {(msg: Message) => void} onMessageFound
  * @param {(err: string) => void} onErrorFound
- * @returns {String} Transformed source.
+ * @returns {string} Transformed source.
  */
 export default function findMessages( source, sourceFile, onMessageFound, onErrorFound ) {
 	const ast = parser.parse( source, {
@@ -144,9 +144,9 @@ function isTMethodCallExpression( node ) {
 }
 
 /**
- * @typedef {Object} Message
+ * @typedef {object} Message
  *
- * @property {String} id
- * @property {String} string
- * @property {String} [plural]
+ * @property {string} id
+ * @property {string} string
+ * @property {string} [plural]
  */

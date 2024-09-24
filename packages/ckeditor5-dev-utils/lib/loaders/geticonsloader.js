@@ -4,9 +4,9 @@
  */
 
 /**
- * @param {Object} [options]
- * @param {Boolean} [options.matchExtensionOnly]
- * @returns {Object}
+ * @param {object} [options]
+ * @param {boolean} [options.matchExtensionOnly]
+ * @returns {object}
  */
 export default function getIconsLoader( { matchExtensionOnly = false } = {} ) {
 	return {

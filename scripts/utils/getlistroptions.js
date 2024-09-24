@@ -7,7 +7,7 @@
 
 /**
  * @param {ReleaseOptions} cliArguments
- * @returns {Object}
+ * @returns {object}
  */
 export default function getListrOptions( cliArguments ) {
 	return {

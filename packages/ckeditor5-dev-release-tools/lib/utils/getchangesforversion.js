@@ -9,9 +9,9 @@ import getChangelog from './getchangelog.js';
 /**
  * Retrieves changes from the changelog for the given version (tag).
  *
- * @param {String} version
- * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
- * @returns {String|null}
+ * @param {string} version
+ * @param {string} [cwd=process.cwd()] Where to look for the changelog file.
+ * @returns {string|null}
  */
 export default function getChangesForVersion( version, cwd = process.cwd() ) {
 	version = version.replace( /^v/, '' );

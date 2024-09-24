@@ -12,10 +12,10 @@ import checkVersionAvailability from '../utils/checkversionavailability.js';
  * Npm sometimes throws incorrect error 409 while publishing, while the package uploads correctly.
  * The purpose of the script is to validate if packages that threw 409 are uploaded correctly to npm.
  *
- * @param {Object} options
- * @param {String} options.packagesDirectory Relative path to a location of packages to release.
- * @param {String} options.version Version of the current release.
- * @param {Function} options.onSuccess Callback fired when function is successful.
+ * @param {object} options
+ * @param {string} options.packagesDirectory Relative path to a location of packages to release.
+ * @param {string} options.version Version of the current release.
+ * @param {function} options.onSuccess Callback fired when function is successful.
  * @returns {Promise}
  */
 export default async function verifyPackagesPublishedCorrectly( options ) {

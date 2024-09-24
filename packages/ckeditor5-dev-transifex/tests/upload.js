@@ -659,11 +659,11 @@ describe( 'dev-transifex/upload()', () => {
 /**
  * Returns an object that looks like a response from Transifex API.
  *
- * @param {String} packageName
- * @param {Number} created
- * @param {Number} updated
- * @param {Number} deleted
- * @returns {Object}
+ * @param {string} packageName
+ * @param {number} created
+ * @param {number} updated
+ * @param {number} deleted
+ * @returns {object}
  */
 function createResourceUploadDetailsResponse( packageName, created, updated, deleted ) {
 	return {

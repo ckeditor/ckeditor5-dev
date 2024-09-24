@@ -8,8 +8,8 @@ import path from 'path';
 import { CHANGELOG_FILE } from './constants.js';
 
 /**
- * @param {String} content
- * @param {String} [cwd=process.cwd()] Where to look for the changelog file.
+ * @param {string} content
+ * @param {string} [cwd=process.cwd()] Where to look for the changelog file.
  */
 export default function saveChangelog( content, cwd = process.cwd() ) {
 	const changelogFile = path.join( cwd, CHANGELOG_FILE );

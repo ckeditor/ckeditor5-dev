@@ -18,9 +18,9 @@ const __dirname = path.dirname( __filename );
 /**
  * Basic HTTP server.
  *
- * @param {String} sourcePath Base path where the compiler saved the files.
- * @param {Number} [port=8125] Port to listen at.
- * @param {Function} [onCreate] A callback called with the reference to the HTTP server when it is up and running.
+ * @param {string} sourcePath Base path where the compiler saved the files.
+ * @param {number} [port=8125] Port to listen at.
+ * @param {function} [onCreate] A callback called with the reference to the HTTP server when it is up and running.
  */
 export default function createManualTestServer( sourcePath, port = 8125, onCreate ) {
 	return new Promise( resolve => {
@@ -94,8 +94,8 @@ function onRequest( sourcePath, request, response ) {
 
 // Returns content type based on file extension.
 //
-// @params {String} fileExtension
-// @returns {String}
+// @params {string} fileExtension
+// @returns {string}
 function getContentType( fileExtension ) {
 	switch ( fileExtension ) {
 		case '.js':
@@ -124,8 +124,8 @@ function getContentType( fileExtension ) {
 
 // Generates a list with available manual tests.
 //
-// @param {String} sourcePath Base path that will be used to resolve all patterns.
-// @returns {String}
+// @param {string} sourcePath Base path that will be used to resolve all patterns.
+// @returns {string}
 function generateIndex( sourcePath ) {
 	const viewTemplate = fs.readFileSync( path.join( __dirname, 'template.html' ), 'utf-8' );
 	const globPattern = path.join( sourcePath, '**', '*.html' ).replace( /\\/g, '/' );

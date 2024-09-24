@@ -4,7 +4,7 @@
  */
 
 /**
- * @returns {Object}
+ * @returns {object}
  */
 export default function getFormattedTextLoader() {
 	return {

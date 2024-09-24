@@ -11,7 +11,7 @@ import provideToken from './providetoken.js';
  *
  * If the user choices a GitHub, required token also has to be provided.
  *
- * @returns {Promise.<Object>}
+ * @returns {Promise.<object>}
  */
 export default async function configureReleaseOptions() {
 	const options = {};

@@ -90,7 +90,7 @@ function generateTestSteps( packages ) {
  *
  * @typedef {Object} CircleCIConfiguration
  *
- * @property {String} version
+ * @property {string} version
  *
  * @property {Object.<String, CircleCIParameter>} parameters
  *
@@ -100,7 +100,7 @@ function generateTestSteps( packages ) {
  *
  * @property {Object} workflows
  *
- * @property {Boolean} [setup]
+ * @property {boolean} [setup]
  */
 
 /**
@@ -108,15 +108,15 @@ function generateTestSteps( packages ) {
  *
  * @property {'string'|'boolean'|'integer'|'enum'} type
  *
- * @property {String|Number|Boolean} default
+ * @property {string|Number|Boolean} default
  */
 
 /**
  * @typedef {Object} CircleCIJob
  *
- * @property {Boolean} machine
+ * @property {boolean} machine
  *
- * @property {Array.<String|CircleCITask>} steps
+ * @property {Array.<string|CircleCITask>} steps
  *
  * @property {Object.<String, CircleCIParameter>} [parameters]
  */
@@ -124,9 +124,9 @@ function generateTestSteps( packages ) {
 /**
  * @typedef {Object} CircleCICommand
  *
- * @property {String} description
+ * @property {string} description
  *
- * @property {Array.<String|CircleCITask>} steps
+ * @property {Array.<string|CircleCITask>} steps
  *
  * @property {Object.<String, CircleCIParameter>} [parameters]
  */
@@ -136,17 +136,17 @@ function generateTestSteps( packages ) {
  *
  * @property {Object} [persist_to_workspace]
  *
- * @property {String} [persist_to_workspace.root]
+ * @property {string} [persist_to_workspace.root]
  *
- * @property {Array.<String>} [persist_to_workspace.paths]
+ * @property {Array.<string>} [persist_to_workspace.paths]
  *
  * @property {Object} [run]
  *
- * @property {String} [run.name]
+ * @property {string} [run.name]
  *
- * @property {String} [run.command]
+ * @property {string} [run.command]
  *
- * @property {String} [run.when]
+ * @property {string} [run.when]
  *
- * @property {String} [run.working_directory]
+ * @property {string} [run.working_directory]
  */

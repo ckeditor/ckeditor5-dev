@@ -8,7 +8,7 @@ import PO from 'pofile';
 /**
  * Returns object with key-value pairs from parsed po file.
  *
- * @param {String} poFileContent Content of the translation file.
+ * @param {string} poFileContent Content of the translation file.
  * @returns {Object.<String,String[]>}
  */
 export default function createDictionaryFromPoFileContent( poFileContent ) {

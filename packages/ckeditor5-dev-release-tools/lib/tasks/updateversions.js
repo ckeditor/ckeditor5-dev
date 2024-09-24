@@ -22,13 +22,13 @@ const { normalizeTrim, toUnix, dirname, join } = upath;
  *   Exception: passing a version starting with the `0.0.0-nightly` string. It is used for publishing
  *   a nightly release.
  *
- * @param {Object} options
- * @param {String} options.version Version to store in a `package.json` file under the `version` key.
+ * @param {object} options
+ * @param {string} options.version Version to store in a `package.json` file under the `version` key.
  * @param {UpdateVersionsPackagesDirectoryFilter|null} [options.packagesDirectoryFilter=null] An optional callback allowing filtering out
  * directories/packages that should not be touched by the task.
- * @param {String} [options.packagesDirectory] Relative path to a location of packages to update. If not specified,
+ * @param {string} [options.packagesDirectory] Relative path to a location of packages to update. If not specified,
  * only the root package is checked.
- * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
+ * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @returns {Promise}
  */
 export default async function updateVersions( options ) {
@@ -66,10 +66,10 @@ export default async function updateVersions( options ) {
 }
 
 /**
- * @param {String} cwd
- * @param {Array.<String>} globPatterns
+ * @param {string} cwd
+ * @param {Array.<string>} globPatterns
  * @param {UpdateVersionsPackagesDirectoryFilter|null} packagesDirectoryFilter
- * @returns {Promise.<Array.<String>>}
+ * @returns {Promise.<Array.<string>>}
  */
 async function getPackageJsonPaths( cwd, globPatterns, packagesDirectoryFilter ) {
 	const pkgJsonPaths = await glob( globPatterns, {
@@ -86,8 +86,8 @@ async function getPackageJsonPaths( cwd, globPatterns, packagesDirectoryFilter )
 }
 
 /**
- * @param {String} packagesDirectory
- * @returns {Promise.<Object>}
+ * @param {string} packagesDirectory
+ * @returns {Promise.<object>}
  */
 function readPackageJson( packagesDirectory ) {
 	const packageJsonPath = join( packagesDirectory, 'package.json' );
@@ -96,8 +96,8 @@ function readPackageJson( packagesDirectory ) {
 }
 
 /**
- * @param {String|null} packagesDirectory
- * @returns {Array.<String>}
+ * @param {string|null} packagesDirectory
+ * @returns {Array.<string>}
  */
 function getGlobPatterns( packagesDirectory ) {
 	const patterns = [ 'package.json' ];
@@ -110,9 +110,9 @@ function getGlobPatterns( packagesDirectory ) {
 }
 
 /**
- * @param {Array.<String>} pkgJsonPaths
- * @param {String|null} packagesDirectory
- * @returns {Object}
+ * @param {Array.<string>} pkgJsonPaths
+ * @param {string|null} packagesDirectory
+ * @returns {object}
  */
 function getRandomPackagePath( pkgJsonPaths, packagesDirectory ) {
 	const randomPkgJsonPaths = packagesDirectory ?
@@ -128,8 +128,8 @@ function getRandomPackagePath( pkgJsonPaths, packagesDirectory ) {
  *
  * A nightly version is always considered as valid.
  *
- * @param {String} newVersion
- * @param {String} currentVersion
+ * @param {string} newVersion
+ * @param {string} currentVersion
  */
 function checkIfVersionIsValid( newVersion, currentVersion ) {
 	if ( newVersion.startsWith( '0.0.0-nightly' ) ) {
@@ -144,7 +144,7 @@ function checkIfVersionIsValid( newVersion, currentVersion ) {
 /**
  * @callback UpdateVersionsPackagesDirectoryFilter
  *
- * @param {String} packageJsonPath An absolute path to a `package.json` file.
+ * @param {string} packageJsonPath An absolute path to a `package.json` file.
  *
- * @returns {Boolean} Whether to include (`true`) or skip (`false`) processing the given directory/package.
+ * @returns {boolean} Whether to include (`true`) or skip (`false`) processing the given directory/package.
  */

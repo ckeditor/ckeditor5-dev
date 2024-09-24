@@ -14,8 +14,8 @@ const __filename = fileURLToPath( import.meta.url );
 const __dirname = path.dirname( __filename );
 
 /**
- * @param {Object} options
- * @returns {Object}
+ * @param {object} options
+ * @returns {object}
  */
 export default function getWebpackConfigForAutomatedTests( options ) {
 	const definitions = Object.assign( {}, getDefinitionsFromFile( options.identityFile ) );

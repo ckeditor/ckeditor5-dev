@@ -16,14 +16,14 @@ const corePackageName = 'ckeditor5-core';
  * Collects i18n messages for all packages using source messages from `t()` calls
  * and context files and saves them as POT files in the `build/.transifex` directory.
  *
- * @param {Object} options
- * @param {Array.<String>} options.sourceFiles An array of source files that contain messages to translate.
- * @param {Array.<String>} options.packagePaths An array of paths to packages, which will be used to find message contexts.
- * @param {String} options.corePackagePath A relative to `process.cwd()` path to the `@ckeditor/ckeditor5-core` package.
- * @param {String} options.translationsDirectory An absolute path to the directory where the results should be saved.
- * @param {Boolean} [options.ignoreUnusedCorePackageContexts=false] Whether to hide unused context errors related to
+ * @param {object} options
+ * @param {Array.<string>} options.sourceFiles An array of source files that contain messages to translate.
+ * @param {Array.<string>} options.packagePaths An array of paths to packages, which will be used to find message contexts.
+ * @param {string} options.corePackagePath A relative to `process.cwd()` path to the `@ckeditor/ckeditor5-core` package.
+ * @param {string} options.translationsDirectory An absolute path to the directory where the results should be saved.
+ * @param {boolean} [options.ignoreUnusedCorePackageContexts=false] Whether to hide unused context errors related to
  * the `@ckeditor/ckeditor5-core` package.
- * @param {Boolean} [options.skipLicenseHeader=false] Whether to skip the license header in created `*.pot` files.
+ * @param {boolean} [options.skipLicenseHeader=false] Whether to skip the license header in created `*.pot` files.
  * @param {Logger} [options.logger] A logger.
  */
 export default function createPotFiles( options ) {
@@ -89,8 +89,8 @@ export default function createPotFiles( options ) {
  * Traverses all packages and returns a map of all found language contexts
  * (file content and file name).
  *
- * @param {Array.<String>} packagePaths An array of paths to packages, which will be used to find message contexts.
- * @returns {Map.<String, Context>}
+ * @param {Array.<string>} packagePaths An array of paths to packages, which will be used to find message contexts.
+ * @returns {Map.<string, Context>}
  */
 function getPackageContexts( packagePaths, corePackagePath, langContextSuffix ) {
 	// Add path to core package if not included in the package paths.
@@ -137,10 +137,10 @@ function collectSourceMessages( { sourceFiles, logger } ) {
 }
 
 /**
- * @param {Object} options
- * @param {Map.<String, Context>} options.packageContexts A map of language contexts.
+ * @param {object} options
+ * @param {Map.<string, Context>} options.packageContexts A map of language contexts.
  * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
- * @returns {Array.<String>}
+ * @returns {Array.<string>}
  */
 function assertNoMissingContext( { packageContexts, sourceMessages } ) {
 	const errors = [];
@@ -162,10 +162,10 @@ function assertNoMissingContext( { packageContexts, sourceMessages } ) {
 }
 
 /**
- * @param {Object} options
- * @param {Map.<String, Context>} options.packageContexts A map of language contexts.
+ * @param {object} options
+ * @param {Map.<string, Context>} options.packageContexts A map of language contexts.
  * @param {Array.<Message>} options.sourceMessages An array of i18n source messages.
- * @returns {Array.<String>}
+ * @returns {Array.<string>}
  */
 function assertAllContextUsed( options ) {
 	const { packageContexts, sourceMessages, ignoreUnusedCorePackageContexts, corePackagePath, langContextSuffix } = options;
@@ -207,9 +207,9 @@ function assertAllContextUsed( options ) {
 }
 
 /**
- * @param {Object} options
- * @param {Map.<String, Context>} options.packageContexts A map of language contexts.
- * @returns {Array.<String>}
+ * @param {object} options
+ * @param {Map.<string, Context>} options.packageContexts A map of language contexts.
+ * @returns {Array.<string>}
  */
 function assertNoRepeatedContext( { packageContexts } ) {
 	const errors = [];
@@ -236,11 +236,11 @@ function removeExistingPotFiles( translationsDirectory ) {
  * Creates a POT file for the given package and POT file content.
  * The default place is `build/.transifex/[packageName]/en.pot`.
  *
- * @param {Object} options
+ * @param {object} options
  * @param {Logger} options.logger
- * @param {String} options.packageName
- * @param {String} options.translationsDirectory
- * @param {String} options.fileContent
+ * @param {string} options.packageName
+ * @param {string} options.translationsDirectory
+ * @param {string} options.fileContent
  */
 function savePotFile( { packageName, fileContent, translationsDirectory, logger } ) {
 	const outputFilePath = path.join( translationsDirectory, packageName, 'en.pot' );
@@ -253,7 +253,7 @@ function savePotFile( { packageName, fileContent, translationsDirectory, logger 
 /**
  * Creates a POT file header.
  *
- * @returns {String}
+ * @returns {string}
  */
 function createPotFileHeader() {
 	const year = new Date().getFullYear();
@@ -264,8 +264,8 @@ function createPotFileHeader() {
 /**
  * Returns source messages found in the given file with additional data (`filePath` and `packageName`).
  *
- * @param {String} filePath
- * @param {String} fileContent
+ * @param {string} filePath
+ * @param {string} fileContent
  * @returns {Array.<Message>}
  */
 function getSourceMessagesFromFile( { filePath, fileContent, logger } ) {
@@ -291,7 +291,7 @@ function getSourceMessagesFromFile( { filePath, fileContent, logger } ) {
  * Creates a POT file from the given i18n messages.
  *
  * @param {Array.<Message>} messages
- * @returns {String}
+ * @returns {string}
  */
 function createPotFileContent( messages ) {
 	return messages.map( message => {
@@ -322,28 +322,28 @@ function createPotFileContent( messages ) {
 }
 
 /**
- * @param {String} packageDirectory
+ * @param {string} packageDirectory
  */
 function containsContextFile( packageDirectory, langContextSuffix ) {
 	return fs.existsSync( path.join( packageDirectory, langContextSuffix ) );
 }
 
 /**
- * @typedef {Object} Message
+ * @typedef {object} Message
  *
- * @property {String} id
- * @property {String} string
- * @property {String} filePath
- * @property {String} packagePath
- * @property {String} context
- * @property {String} [plural]
+ * @property {string} id
+ * @property {string} string
+ * @property {string} filePath
+ * @property {string} packagePath
+ * @property {string} context
+ * @property {string} [plural]
  */
 
 /**
- * @typedef {Object} Context
+ * @typedef {object} Context
  *
- * @property {String} filePath A path to the context file.
- * @property {Object} content The context file content - a map of messageId->messageContext records.
- * @property {String} packagePath The owner of the context file.
- * @property {String} packageName The owner package name.
+ * @property {string} filePath A path to the context file.
+ * @property {object} content The context file content - a map of messageId->messageContext records.
+ * @property {string} packagePath The owner of the context file.
+ * @property {string} packageName The owner package name.
  */

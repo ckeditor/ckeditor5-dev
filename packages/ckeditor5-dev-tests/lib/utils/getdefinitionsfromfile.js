@@ -9,8 +9,8 @@ import { createRequire } from 'module';
 const require = createRequire( import.meta.url );
 
 /**
- * @param {String|null} definitionSource
- * @returns {Object}
+ * @param {string|null} definitionSource
+ * @returns {object}
  */
 export default function getDefinitionsFromFile( definitionSource ) {
 	if ( !definitionSource ) {
@@ -35,8 +35,8 @@ export default function getDefinitionsFromFile( definitionSource ) {
 }
 
 /**
- * @param {String|null} definitionSource
- * @returns {String|null}
+ * @param {string|null} definitionSource
+ * @returns {string|null}
  */
 function normalizeDefinitionSource( definitionSource ) {
 	// Passed an absolute path.

@@ -28,15 +28,15 @@ const SKIP_GENERATE_CHANGELOG = 'Typed "skip" as a new version. Aborting.';
  *
  * If the package does not have any commit, the user has to confirm whether the changelog should be generated.
  *
- * @param {Object} [options={}] Additional options.
+ * @param {object} [options={}] Additional options.
  *
- * @param {Boolean} [options.skipLinks=false] If set on true, links to release or commits will be omitted.
+ * @param {boolean} [options.skipLinks=false] If set on true, links to release or commits will be omitted.
  *
- * @param {String} [options.from] A commit or tag name that will be the first param of the range of commits to collect.
+ * @param {string} [options.from] A commit or tag name that will be the first param of the range of commits to collect.
  *
- * @param {String} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
+ * @param {string} [options.releaseBranch='master'] A name of the branch that should be used for releasing packages.
  *
- * @param {String} [options.mainBranch='master'] A name of the main branch in the repository.
+ * @param {string} [options.mainBranch='master'] A name of the main branch in the repository.
  *
  * @param {FormatDateCallback} [options.formatDate] A callback allowing defining a custom format of the date inserted into the changelog.
  * If not specified, the default date matches the `YYYY-MM-DD` pattern.
@@ -186,11 +186,11 @@ export default async function generateChangelogForSinglePackage( options = {} ) 
 	}
 
 	/**
-	 * @param {String} message
-	 * @param {Object} [options={}]
-	 * @param {Number} [options.indentLevel=0]
-	 * @param {Boolean} [options.startWithNewLine=false] Whether to append a new line before the message.
-	 * @param {Boolean} [options.isWarning=false] Whether to use `warning` method instead of `log`.
+	 * @param {string} message
+	 * @param {object} [options={}]
+	 * @param {number} [options.indentLevel=0]
+	 * @param {boolean} [options.startWithNewLine=false] Whether to append a new line before the message.
+	 * @param {boolean} [options.isWarning=false] Whether to use `warning` method instead of `log`.
 	 */
 	function logInfo( message, options = {} ) {
 		const indentLevel = options.indentLevel || 0;
@@ -206,5 +206,5 @@ export default async function generateChangelogForSinglePackage( options = {} ) 
  *
  * @param {Date} now The current date.
  *
- * @returns {String} The formatted date inserted into the changelog.
+ * @returns {string} The formatted date inserted into the changelog.
  */

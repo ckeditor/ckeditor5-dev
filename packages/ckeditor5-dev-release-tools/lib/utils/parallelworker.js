@@ -10,8 +10,8 @@ import { parentPort, workerData } from 'worker_threads';
 // Required due to top-level await.
 ( async () => {
 	/**
-	 * @param {String} callbackModule
-	 * @param {Array.<String>} packages
+	 * @param {string} callbackModule
+	 * @param {Array.<string>} packages
 	 */
 	const { default: callback } = await import( workerData.callbackModule );
 

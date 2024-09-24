@@ -1040,7 +1040,7 @@ function replaceDates( changelog ) {
 }
 
 /**
- * @param {Number} length
+ * @param {number} length
  * @returns {WriterOptionsTransformCallback}
  */
 function transformCommitCallback( length ) {

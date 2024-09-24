@@ -6,9 +6,9 @@
 /**
  * Calls the npm command to publish the package. When a package is successfully published, it is removed from the filesystem.
  *
- * @param {String} packagePath
- * @param {Object} taskOptions
- * @param {String} taskOptions.npmTag
+ * @param {string} packagePath
+ * @param {object} taskOptions
+ * @param {string} taskOptions.npmTag
  * @returns {Promise}
  */
 export default async function publishPackageOnNpmCallback( packagePath, taskOptions ) {

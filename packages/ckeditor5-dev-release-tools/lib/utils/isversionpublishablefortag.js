@@ -10,10 +10,10 @@ import shellEscape from 'shell-escape';
 /**
  * This util aims to verify if the given `packageName` can be published with the given `version` on the `npmTag`.
  *
- * @param {String} packageName
- * @param {String} version
- * @param {String} npmTag
- * @return {Promise.<Boolean>}
+ * @param {string} packageName
+ * @param {string} version
+ * @param {string} npmTag
+ * @returns {Promise.<boolean>}
  */
 export default async function isVersionPublishableForTag( packageName, version, npmTag ) {
 	const command = `npm view ${ shellEscape( [ packageName ] ) }@${ shellEscape( [ npmTag ] ) } version --silent`;

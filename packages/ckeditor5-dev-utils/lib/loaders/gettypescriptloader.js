@@ -6,11 +6,11 @@
 import getDebugLoader from './getdebugloader.js';
 
 /**
- * @param {Object} [options]
- * @param {String} [options.configFile]
- * @param {Array.<String>} [options.debugFlags]
- * @param {Boolean} [options.includeDebugLoader]
- * @returns {Object}
+ * @param {object} [options]
+ * @param {string} [options.configFile]
+ * @param {Array.<string>} [options.debugFlags]
+ * @param {boolean} [options.includeDebugLoader]
+ * @returns {object}
  */
 export default function getTypeScriptLoader( options = {} ) {
 	const {

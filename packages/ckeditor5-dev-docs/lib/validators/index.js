@@ -13,10 +13,10 @@ import overloadsValidator from './overloads-validator/index.js';
 /**
  * Validates the CKEditor 5 documentation.
  *
- * @param {Object} project Generated output from TypeDoc to validate.
- * @param {Object} typeDoc A TypeDoc application instance.
+ * @param {object} project Generated output from TypeDoc to validate.
+ * @param {object} typeDoc A TypeDoc application instance.
  * @param {TypedocValidator} [options={}] A configuration object.
- * @returns {Boolean}
+ * @returns {boolean}
  */
 export default {
 	validate( project, typeDoc, options = {} ) {

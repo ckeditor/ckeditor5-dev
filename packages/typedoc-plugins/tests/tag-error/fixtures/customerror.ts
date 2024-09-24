@@ -25,8 +25,8 @@
  *
  * @error customerror-after-module
  *
- * @param {Number} exampleNumber Number description.
- * @param {String} exampleString String `description`.
+ * @param {number} exampleNumber Number description.
+ * @param {string} exampleString String `description`.
  */
 
 import Error from './error';
@@ -50,7 +50,7 @@ export default class CustomError extends Error {
 		 *
 		 * @error customerror-inside-method
 		 *
-		 * @param {String} errorName Description of the error. Please, see {@link ~CustomError}.
+		 * @param {string} errorName Description of the error. Please, see {@link ~CustomError}.
 		 * @param {module:utils/object~Object} exampleModule Just a module.
 		 * @param exampleObject A name {@link module:utils/object~Object} `description`.
 		 */
@@ -66,9 +66,9 @@ export function create( errorName: string ): CustomError {
 	 *
 	 * @error customerror-inside-function
 	 *
-	 * @param {String} errorName Description of the error.
-	 * @param {Object} priority The priority of this error.
-	 * @param {Number} priority.value A raw value of the priority.
+	 * @param {string} errorName Description of the error.
+	 * @param {object} priority The priority of this error.
+	 * @param {number} priority.value A raw value of the priority.
 	 */
 	return new CustomError( errorName );
 }

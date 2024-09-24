@@ -8,7 +8,7 @@ import { subDays, formatISO } from 'date-fns';
 /**
  * Converts configuration options into format required by the GitHubRepository.
  *
- * @param {String} viewerLogin The GitHub login of the currently authenticated user.
+ * @param {string} viewerLogin The GitHub login of the currently authenticated user.
  * @param {Config} config Configuration options.
  * @returns {Options}
  */
@@ -64,46 +64,46 @@ export default function parseConfig( viewerLogin, config ) {
 }
 
 /**
- * @typedef {Object} Config
- * @property {String} GITHUB_TOKEN
- * @property {String} REPOSITORY_SLUG
- * @property {Array.<String>} STALE_LABELS
- * @property {String} STALE_ISSUE_MESSAGE
- * @property {String} STALE_PR_MESSAGE
- * @property {Array.<String>} CLOSE_ISSUE_LABELS
- * @property {String} CLOSE_ISSUE_MESSAGE
- * @property {Array.<String>} CLOSE_PR_LABELS
- * @property {String} CLOSE_PR_MESSAGE
- * @property {String} [STALE_PENDING_ISSUE_MESSAGE=STALE_ISSUE_MESSAGE]
- * @property {Array.<String>} [PENDING_ISSUE_LABELS=[]]
- * @property {Number} [DAYS_BEFORE_STALE=365]
- * @property {Number} [DAYS_BEFORE_STALE_PENDING_ISSUE=14]
- * @property {Number} [DAYS_BEFORE_CLOSE=30]
- * @property {Boolean} [IGNORE_VIEWER_ACTIVITY=true]
- * @property {Array.<String>} [IGNORED_ISSUE_LABELS=[]]
- * @property {Array.<String>} [IGNORED_PR_LABELS=[]]
- * @property {Array.<String>} [IGNORED_ACTIVITY_LABELS=[]]
- * @property {Array.<String>} [IGNORED_ACTIVITY_LOGINS=[]]
+ * @typedef {object} Config
+ * @property {string} GITHUB_TOKEN
+ * @property {string} REPOSITORY_SLUG
+ * @property {Array.<string>} STALE_LABELS
+ * @property {string} STALE_ISSUE_MESSAGE
+ * @property {string} STALE_PR_MESSAGE
+ * @property {Array.<string>} CLOSE_ISSUE_LABELS
+ * @property {string} CLOSE_ISSUE_MESSAGE
+ * @property {Array.<string>} CLOSE_PR_LABELS
+ * @property {string} CLOSE_PR_MESSAGE
+ * @property {string} [STALE_PENDING_ISSUE_MESSAGE=STALE_ISSUE_MESSAGE]
+ * @property {Array.<string>} [PENDING_ISSUE_LABELS=[]]
+ * @property {number} [DAYS_BEFORE_STALE=365]
+ * @property {number} [DAYS_BEFORE_STALE_PENDING_ISSUE=14]
+ * @property {number} [DAYS_BEFORE_CLOSE=30]
+ * @property {boolean} [IGNORE_VIEWER_ACTIVITY=true]
+ * @property {Array.<string>} [IGNORED_ISSUE_LABELS=[]]
+ * @property {Array.<string>} [IGNORED_PR_LABELS=[]]
+ * @property {Array.<string>} [IGNORED_ACTIVITY_LABELS=[]]
+ * @property {Array.<string>} [IGNORED_ACTIVITY_LOGINS=[]]
  */
 
 /**
- * @typedef {Object} Options
- * @property {String} repositorySlug
- * @property {String} staleDate
- * @property {String} staleDatePendingIssue
- * @property {String} closeDate
- * @property {Array.<String>} staleLabels
- * @property {Boolean} shouldProcessPendingIssues
- * @property {Array.<String>} pendingIssueLabels
- * @property {String} staleIssueMessage
- * @property {String} stalePendingIssueMessage
- * @property {String} stalePullRequestMessage
- * @property {Array.<String>} closeIssueLabels
- * @property {String} closeIssueMessage
- * @property {Array.<String>} closePullRequestLabels
- * @property {String} closePullRequestMessage
- * @property {Array.<String>} ignoredIssueLabels
- * @property {Array.<String>} ignoredPullRequestLabels
- * @property {Array.<String>} ignoredActivityLabels
- * @property {Array.<String>} ignoredActivityLogins
+ * @typedef {object} Options
+ * @property {string} repositorySlug
+ * @property {string} staleDate
+ * @property {string} staleDatePendingIssue
+ * @property {string} closeDate
+ * @property {Array.<string>} staleLabels
+ * @property {boolean} shouldProcessPendingIssues
+ * @property {Array.<string>} pendingIssueLabels
+ * @property {string} staleIssueMessage
+ * @property {string} stalePendingIssueMessage
+ * @property {string} stalePullRequestMessage
+ * @property {Array.<string>} closeIssueLabels
+ * @property {string} closeIssueMessage
+ * @property {Array.<string>} closePullRequestLabels
+ * @property {string} closePullRequestMessage
+ * @property {Array.<string>} ignoredIssueLabels
+ * @property {Array.<string>} ignoredPullRequestLabels
+ * @property {Array.<string>} ignoredActivityLabels
+ * @property {Array.<string>} ignoredActivityLogins
  */

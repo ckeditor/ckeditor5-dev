@@ -10,7 +10,7 @@ import isIssueOrPullRequestActive from './isissueorpullrequestactive.js';
  *
  * @param {IssueOrPullRequest} issueOrPullRequest Issue or pull request to check.
  * @param {Options} options Configuration options.
- * @returns {Boolean}
+ * @returns {boolean}
  */
 export default function isIssueOrPullRequestToStale( issueOrPullRequest, options ) {
 	const { staleDate } = options;

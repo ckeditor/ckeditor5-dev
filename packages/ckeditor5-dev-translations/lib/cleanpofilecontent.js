@@ -9,10 +9,10 @@ import PO from 'pofile';
  * Returns translations stripped from the personal data, but with an added banner
  * containing information where to add new translations or fix the existing ones.
  *
- * @param {String} poFileContent Content of the translation file.
- * @param {Object} [options={}]
- * @param {Boolean} [options.simplifyLicenseHeader] Whether to skip adding the contribute URL in the header.
- * @returns {String}
+ * @param {string} poFileContent Content of the translation file.
+ * @param {object} [options={}]
+ * @param {boolean} [options.simplifyLicenseHeader] Whether to skip adding the contribute URL in the header.
+ * @returns {string}
  */
 export default function cleanPoFileContent( poFileContent, options = {} ) {
 	const po = PO.parse( poFileContent );

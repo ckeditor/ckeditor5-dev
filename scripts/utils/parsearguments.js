@@ -9,7 +9,7 @@ import minimist from 'minimist';
 import os from 'os';
 
 /**
- * @param {Array.<String>} cliArguments
+ * @param {Array.<string>} cliArguments
  * @returns {ReleaseOptions} options
  */
 export default function parseArguments( cliArguments ) {
@@ -64,19 +64,19 @@ export default function parseArguments( cliArguments ) {
 /**
  * @typedef {Object} ReleaseOptions
  *
- * @property {Number} concurrency
+ * @property {number} concurrency
  *
- * @property {String|null} [npmTag=null]
+ * @property {string|null} [npmTag=null]
  *
- * @property {Array.<String>|null} packages
+ * @property {Array.<string>|null} packages
  *
- * @property {String} [from]
+ * @property {string} [from]
  *
- * @property {String} [branch='master']
+ * @property {string} [branch='master']
  *
- * @property {Boolean} [compileOnly=false]
+ * @property {boolean} [compileOnly=false]
  *
- * @property {Boolean} [verbose=false]
+ * @property {boolean} [verbose=false]
  *
- * @property {Boolean} [ci=false]
+ * @property {boolean} [ci=false]
  */

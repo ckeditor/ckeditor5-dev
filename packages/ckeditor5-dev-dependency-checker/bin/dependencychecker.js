@@ -22,10 +22,10 @@ checkDependencies( packagePaths, options )
 /**
  * Parses CLI arguments and options.
  *
- * @param {Array.<String>} args CLI arguments containing package paths and options.
- * @returns {Object} result
- * @returns {Set.<String>} result.packagePaths Relative package paths.
- * @returns {Object.<String, Boolean>} result.options Configuration options.
+ * @param {Array.<string>} args CLI arguments containing package paths and options.
+ * @returns {object} result
+ * @returns {Set.<string>} result.packagePaths Relative package paths.
+ * @returns {Object.<string, Boolean>} result.options Configuration options.
  */
 function parseArguments( args ) {
 	const config = {
@@ -56,8 +56,8 @@ function parseArguments( args ) {
  * Returns relative (to the current work directory) paths to packages. If the provided `args` array is empty,
  * the packages will be read from the `packages/` directory.
  *
- * @param {Array.<String>} args CLI arguments with relative or absolute package paths.
- * @returns {Set.<String>} Relative package paths.
+ * @param {Array.<string>} args CLI arguments with relative or absolute package paths.
+ * @returns {Set.<string>} Relative package paths.
  */
 function getPackagePaths( args ) {
 	if ( !args.length ) {

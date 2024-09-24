@@ -10,7 +10,7 @@ import { isAfter, parseISO } from 'date-fns';
  *
  * @param {IssueOrPullRequest} issueOrPullRequest Issue or pull request to check.
  * @param {Options} options Configuration options.
- * @returns {String}
+ * @returns {string}
  */
 export default function findStaleDate( issueOrPullRequest, options ) {
 	const { staleLabels } = options;

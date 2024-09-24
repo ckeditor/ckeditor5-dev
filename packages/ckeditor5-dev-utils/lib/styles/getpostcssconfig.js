@@ -15,12 +15,12 @@ import themeImporter from './themeimporter.js';
 /**
  * Returns a PostCSS configuration to build the editor styles (e.g. used by postcss-loader).
  *
- * @param {Object} options
- * @param {Boolean} options.sourceMap When true, an inline source map will be built into the output CSS.
- * @param {Boolean} options.minify When true, the output CSS will be minified.
+ * @param {object} options
+ * @param {boolean} options.sourceMap When true, an inline source map will be built into the output CSS.
+ * @param {boolean} options.minify When true, the output CSS will be minified.
  * @param {ThemeImporterOptions} options.themeImporter Configuration of the theme-importer PostCSS plugin.
  * See the plugin to learn more.
- * @returns {Object} A PostCSS configuration object, e.g. to be used by the postcss-loader.
+ * @returns {object} A PostCSS configuration object, e.g. to be used by the postcss-loader.
  */
 export default function getPostCssConfig( options = {} ) {
 	const config = {

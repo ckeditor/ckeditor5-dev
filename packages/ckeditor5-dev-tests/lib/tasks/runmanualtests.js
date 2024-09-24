@@ -23,20 +23,20 @@ import requireDll from '../utils/requiredll.js';
 /**
  * Main function that runs manual tests.
  *
- * @param {Object} options
- * @param {Array.<String>} options.files Glob patterns specifying which tests to run.
- * @param {String} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
- * @param {Boolean} [options.disableWatch=false] Whether to disable the watch mechanism. If set to true, changes in source files
+ * @param {object} options
+ * @param {Array.<string>} options.files Glob patterns specifying which tests to run.
+ * @param {string} options.themePath A path to the theme the PostCSS theme-importer plugin is supposed to load.
+ * @param {boolean} [options.disableWatch=false] Whether to disable the watch mechanism. If set to true, changes in source files
  * will not trigger webpack.
- * @param {String} [options.language] A language passed to `CKEditorTranslationsPlugin`.
- * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorTranslationsPlugin`.
- * @param {Number} [options.port] A port number used by the `createManualTestServer`.
- * @param {String} [options.identityFile] A file that provides secret keys used in the test scripts.
- * @param {String} [options.tsconfig] Path the TypeScript configuration file.
- * @param {Boolean|null} [options.dll=null] If `null`, user is asked to create DLL builds, if they are required by test files.
+ * @param {string} [options.language] A language passed to `CKEditorTranslationsPlugin`.
+ * @param {Array.<string>} [options.additionalLanguages] Additional languages passed to `CKEditorTranslationsPlugin`.
+ * @param {number} [options.port] A port number used by the `createManualTestServer`.
+ * @param {string} [options.identityFile] A file that provides secret keys used in the test scripts.
+ * @param {string} [options.tsconfig] Path the TypeScript configuration file.
+ * @param {boolean|null} [options.dll=null] If `null`, user is asked to create DLL builds, if they are required by test files.
  * If `true`, DLL builds are created automatically, if required by test files. User is not asked.
  * If `false`, DLL builds are not created. User is not asked.
- * @param {Boolean} [options.silent=false] Whether to hide files that will be processed by the script.
+ * @param {boolean} [options.silent=false] Whether to hide files that will be processed by the script.
  * @returns {Promise}
  */
 export default function runManualTests( options ) {
@@ -111,7 +111,7 @@ export default function runManualTests( options ) {
 	/**
 	 * Checks if building the DLLs is needed.
 	 *
-	 * @param {Array.<String>} sourceFiles
+	 * @param {Array.<string>} sourceFiles
 	 * @returns {Promise}
 	 */
 	function isDllBuildRequired( sourceFiles ) {
@@ -189,7 +189,7 @@ export default function runManualTests( options ) {
 	/**
 	 * Executes the script for building DLLs in the specified repository.
 	 *
-	 * @param {String} repositoryPath
+	 * @param {string} repositoryPath
 	 * @returns {Promise}
 	 */
 	function buildDllInRepository( repositoryPath ) {

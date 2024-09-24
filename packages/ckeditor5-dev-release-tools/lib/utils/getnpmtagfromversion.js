@@ -6,8 +6,8 @@
 import semver from 'semver';
 
 /**
- * @param {String} version
- * @returns {String}
+ * @param {string} version
+ * @returns {string}
  */
 export default function getNpmTagFromVersion( version ) {
 	const [ versionTag ] = semver.prerelease( version ) || [ 'latest' ];

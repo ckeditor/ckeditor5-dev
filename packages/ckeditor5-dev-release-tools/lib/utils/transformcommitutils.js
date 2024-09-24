@@ -43,8 +43,8 @@ export const typesOrder = {
 /**
  * Returns an order of a message in the changelog.
  *
- * @param {String} title
- * @returns {Number}
+ * @param {string} title
+ * @returns {number}
  */
 export function getTypeOrder( title ) {
 	for ( const typeTitle of Object.keys( typesOrder ) ) {
@@ -59,8 +59,8 @@ export function getTypeOrder( title ) {
 /**
  * Replaces reference to the user (`@name`) with a link to the user's profile.
  *
- * @param {String} comment
- * @returns {String}
+ * @param {string} comment
+ * @returns {string}
  */
 export function linkToGithubUser( comment ) {
 	return comment.replace( /(^|[\s(])@([\w-]+)(?![/\w-])/ig, ( matchedText, charBefore, nickName ) => {
@@ -72,8 +72,8 @@ export function linkToGithubUser( comment ) {
  * Replaces reference to issue (#ID) with a link to the issue.
  * If comment matches to "organization/repository#ID", link will lead to the specified repository.
  *
- * @param {String} comment
- * @returns {String}
+ * @param {string} comment
+ * @returns {string}
  */
 export function linkToGithubIssue( comment ) {
 	return comment.replace( /(\/?[\w-]+\/[\w-]+)?#([\d]+)(?=$|[\s,.)\]])/igm, ( matchedText, maybeRepository, issueId ) => {
@@ -97,8 +97,8 @@ export function linkToGithubIssue( comment ) {
  *
  * The switch cases must be synchronized with the `MULTI_ENTRIES_COMMIT_REGEXP` regexp.
  *
- * @param {String} commitType
- * @returns {String}
+ * @param {string} commitType
+ * @returns {string}
  */
 export function getCommitType( commitType ) {
 	switch ( commitType ) {
@@ -117,9 +117,9 @@ export function getCommitType( commitType ) {
 }
 
 /**
- * @param {String} sentence
- * @param {Number} length
- * @returns {String}
+ * @param {string} sentence
+ * @param {number} length
+ * @returns {string}
  */
 export function truncate( sentence, length ) {
 	if ( sentence.length <= length ) {
@@ -132,8 +132,8 @@ export function truncate( sentence, length ) {
 /**
  * Returns a URL to the repository whether the commit is being parsed.
  *
- * @param {String} [cwd=process.cwd()]
- * @returns {String}
+ * @param {string} [cwd=process.cwd()]
+ * @returns {string}
  */
 export function getRepositoryUrl( cwd = process.cwd() ) {
 	const packageJson = getPackageJson( cwd );

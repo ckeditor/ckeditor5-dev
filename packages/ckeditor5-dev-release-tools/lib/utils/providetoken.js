@@ -8,7 +8,7 @@ import inquirer from 'inquirer';
 /**
  * Asks a user for providing the GitHub token.
  *
- * @returns {Promise.<String>}
+ * @returns {Promise.<string>}
  */
 export default async function provideToken() {
 	const tokenQuestion = {

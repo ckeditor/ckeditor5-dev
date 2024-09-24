@@ -8,8 +8,8 @@ import fs from 'fs';
 /**
  * Updates JSON file under specified path.
  *
- * @param {String} filePath Path to file on disk.
- * @param {Function} updateFunction Function that will be called with parsed JSON object. It should return
+ * @param {string} filePath Path to file on disk.
+ * @param {function} updateFunction Function that will be called with parsed JSON object. It should return
  * modified JSON object to save.
  */
 export default function updateJSONFile( filePath, updateFunction ) {

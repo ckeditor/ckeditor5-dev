@@ -7,13 +7,13 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { getPostCssConfig } from '../styles/index.js';
 
 /**
- * @param {Object} options
- * @param {String} options.themePath
- * @param {Boolean} [options.minify]
- * @param {Boolean} [options.sourceMap]
- * @param {Boolean} [options.extractToSeparateFile]
- * @param {Boolean} [options.skipPostCssLoader]
- * @returns {Object}
+ * @param {object} options
+ * @param {string} options.themePath
+ * @param {boolean} [options.minify]
+ * @param {boolean} [options.sourceMap]
+ * @param {boolean} [options.extractToSeparateFile]
+ * @param {boolean} [options.skipPostCssLoader]
+ * @returns {object}
  */
 export default function getStylesLoader( options ) {
 	const {

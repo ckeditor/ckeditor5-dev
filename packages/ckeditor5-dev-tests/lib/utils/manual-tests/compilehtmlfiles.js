@@ -22,14 +22,14 @@ const reader = new commonmark.Parser();
 const writer = new commonmark.HtmlRenderer();
 
 /**
- * @param {Object} options
- * @param {String} options.buildDir A path where compiled files will be saved.
- * @param {Array.<String>} options.sourceFiles An array of paths to JavaScript files from manual tests to be compiled.
- * @param {String} options.language A language passed to `CKEditorTranslationsPlugin`.
- * @param {Boolean} options.disableWatch Whether to disable the watch mechanism. If set to true, changes in source files
+ * @param {object} options
+ * @param {string} options.buildDir A path where compiled files will be saved.
+ * @param {Array.<string>} options.sourceFiles An array of paths to JavaScript files from manual tests to be compiled.
+ * @param {string} options.language A language passed to `CKEditorTranslationsPlugin`.
+ * @param {boolean} options.disableWatch Whether to disable the watch mechanism. If set to true, changes in source files
  * will not trigger webpack.
- * @param {Array.<String>} [options.additionalLanguages] Additional languages passed to `CKEditorTranslationsPlugin`.
- * @param {Boolean} [options.silent=false] Whether to hide files that will be processed by the script.
+ * @param {Array.<string>} [options.additionalLanguages] Additional languages passed to `CKEditorTranslationsPlugin`.
+ * @param {boolean} [options.silent=false] Whether to hide files that will be processed by the script.
  * @returns {Promise}
  */
 export default function compileHtmlFiles( options ) {
@@ -85,12 +85,12 @@ export default function compileHtmlFiles( options ) {
 }
 
 /**
- * @param {String} buildDir An absolute path to the directory where the processed file should be saved.
- * @param {Object} options
- * @param {String} options.filePath An absolute path to the manual test assets without the extension.
- * @param {String} options.template The HTML template which will be merged with the manual test HTML file.
- * @param {Array.<String>} options.languages Name of translations that should be added to the manual test.
- * @param {Boolean} options.silent Whether to hide files that will be processed by the script.
+ * @param {string} buildDir An absolute path to the directory where the processed file should be saved.
+ * @param {object} options
+ * @param {string} options.filePath An absolute path to the manual test assets without the extension.
+ * @param {string} options.template The HTML template which will be merged with the manual test HTML file.
+ * @param {Array.<string>} options.languages Name of translations that should be added to the manual test.
+ * @param {boolean} options.silent Whether to hide files that will be processed by the script.
  */
 function compileHtmlFile( buildDir, options ) {
 	const sourceFilePathBase = options.filePath;

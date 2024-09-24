@@ -18,18 +18,18 @@ const __dirname = path.dirname( __filename );
 const require = createRequire( import.meta.url );
 
 /**
- * @param {Object} options
- * @param {String} options.cwd Current working directory. Usually it points to the CKEditor 5 root directory.
- * @param {Boolean} options.requireDll A flag describing whether DLL builds are required for starting the manual test server.
- * @param {Object} options.entries
- * @param {String} options.buildDir
- * @param {String} options.themePath
- * @param {Boolean} options.disableWatch
- * @param {String} [options.tsconfig]
- * @param {String} [options.language]
- * @param {Array.<String>} [options.additionalLanguages]
- * @param {String|null} [options.identityFile]
- * @returns {Object}
+ * @param {object} options
+ * @param {string} options.cwd Current working directory. Usually it points to the CKEditor 5 root directory.
+ * @param {boolean} options.requireDll A flag describing whether DLL builds are required for starting the manual test server.
+ * @param {object} options.entries
+ * @param {string} options.buildDir
+ * @param {string} options.themePath
+ * @param {boolean} options.disableWatch
+ * @param {string} [options.tsconfig]
+ * @param {string} [options.language]
+ * @param {Array.<string>} [options.additionalLanguages]
+ * @param {string|null} [options.identityFile]
+ * @returns {object}
  */
 export default function getWebpackConfigForManualTests( options ) {
 	const definitions = Object.assign( {}, getDefinitionsFromFile( options.identityFile ) );

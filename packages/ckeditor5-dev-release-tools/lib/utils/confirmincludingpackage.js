@@ -8,7 +8,7 @@ import inquirer from 'inquirer';
 /**
  * Asks a user for a confirmation for including a package that does not contain all required files.
  *
- * @returns {Promise.<Boolean>}
+ * @returns {Promise.<boolean>}
  */
 export default async function confirmIncludingPackage() {
 	const confirmQuestion = {

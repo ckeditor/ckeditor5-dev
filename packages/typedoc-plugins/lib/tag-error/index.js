@@ -124,7 +124,7 @@ function findDescendant( sourceFileOrNode, callback ) {
 
 /**
  * Transforms a node or array of node to an array of objects that follow
- * @param {String|Object|null} commentChildrenOrValue
+ * @param {string|Object|null} commentChildrenOrValue
  * @returns {Array.<require('typedoc').CommentDisplayPart> }
  */
 function getCommentDisplayPart( commentChildrenOrValue ) {

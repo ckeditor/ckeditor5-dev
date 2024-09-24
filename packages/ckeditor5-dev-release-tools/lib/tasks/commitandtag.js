@@ -13,10 +13,10 @@ const { toUnix } = upath;
 /**
  * Creates a commit and a tag for specified version.
  *
- * @param {Object} options
- * @param {String} options.version The commit will contain this param in its message and the tag will have a `v` prefix.
- * @param {Array.<String>} options.files Array of glob patterns for files to be added to the release commit.
- * @param {String} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
+ * @param {object} options
+ * @param {string} options.version The commit will contain this param in its message and the tag will have a `v` prefix.
+ * @param {Array.<string>} options.files Array of glob patterns for files to be added to the release commit.
+ * @param {string} [options.cwd=process.cwd()] Current working directory from which all paths will be resolved.
  * @returns {Promise}
  */
 export default async function commitAndTag( { version, files, cwd = process.cwd() } ) {
