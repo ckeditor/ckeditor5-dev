@@ -561,7 +561,25 @@ function registerErrorHandlers( page, { link, onError } ) {
 			return;
 		}
 
-		const serializeArguments = argument => argument.jsonValue();
+		const serializeArgumentInPageContext = argument => {
+			// Since errors are not serializable, return the message with the call stack as the output text.
+			if ( argument instanceof Error ) {
+				return argument.stack;
+			}
+
+			// Cast non-string iterable argument to an array.
+			if ( typeof argument !== 'string' && argument[ Symbol.iterator ] ) {
+				return [ ...argument ];
+			}
+
+			// Return argument right away. Since we use `executionContext().evaluate()`, it'll return JSON value of the
+			// argument if possible, or `undefined` if it fails to stringify it.
+			return argument;
+		};
+
+		const serializeArguments = argument => {
+			return argument.evaluate( serializeArgumentInPageContext, argument );
+		};
 
 		const serializedArguments = await Promise.all( message.args().map( serializeArguments ) );
 
