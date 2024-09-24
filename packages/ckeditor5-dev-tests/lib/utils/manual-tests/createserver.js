@@ -59,17 +59,19 @@ export default function createManualTestServer( sourcePath, port = 8125, onCreat
 }
 
 function onRequest( sourcePath, request, response ) {
-	response.writeHead( 200, {
-		'Content-Type': getContentType( request.url.endsWith( '/' ) ? '.html' : path.extname( request.url ) )
-	} );
+	const contentType = getContentType( request.url.endsWith( '/' ) ? '.html' : path.extname( request.url ) );
 
 	// Ignore a 'favicon' request.
 	if ( request.url === '/favicon.ico' ) {
+		response.writeHead( 200, { 'Content-Type': contentType } );
+
 		return response.end( null, 'utf-8' );
 	}
 
 	// Generate index.html with list of the tests.
 	if ( request.url === '/' ) {
+		response.writeHead( 200, { 'Content-Type': contentType } );
+
 		return response.end( generateIndex( sourcePath ), 'utf-8' );
 	}
 
@@ -79,7 +81,9 @@ function onRequest( sourcePath, request, response ) {
 		const url = request.url.replace( /\?.+$/, '' );
 		const content = fs.readFileSync( path.join( sourcePath, url ) );
 
-		response.end( content, 'utf-8' );
+		response.writeHead( 200, { 'Content-Type': contentType } );
+
+		return response.end( content, 'utf-8' );
 	} catch ( error ) {
 		logger().error( `[Server] Cannot find file '${ request.url }'.` );
 
@@ -101,6 +105,7 @@ function getContentType( fileExtension ) {
 			return 'text/css';
 
 		case '.json':
+		case '.map':
 			return 'application/json';
 
 		case '.png':
@@ -151,6 +156,8 @@ function generateIndex( sourcePath ) {
 			.join( '' );
 		testList += '</ul></li>';
 	}
+
+	testList += '</ul>';
 
 	const headerHtml = '<body class="manual-test-list-container"><h1>CKEditor 5 manual tests</h1></body>';
 
