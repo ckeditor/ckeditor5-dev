@@ -8,6 +8,7 @@ import { glob } from 'glob';
 import fs from 'fs/promises';
 import { registerAbortController, deregisterAbortController } from '../../lib/utils/abortcontroller.js';
 import executeInParallel from '../../lib/utils/executeinparallel.js';
+import os from 'os';
 
 const stubs = vi.hoisted( () => ( {
 	WorkerMock: class {
@@ -325,6 +326,58 @@ describe( 'executeInParallel()', () => {
 		await delay( 0 );
 
 		expect( stubs.WorkerMock.instances ).toHaveLength( 4 );
+
+		// Workers did not emit an error.
+		for ( const worker of stubs.WorkerMock.instances ) {
+			getExitCallback( worker )( 0 );
+		}
+
+		await promise;
+	} );
+
+	it( 'should use number of cores divided by two as default (`concurrency`)', async () => {
+		vi.mocked( os.cpus ).mockReturnValue( new Array( 7 ) );
+
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
+
+		expect( stubs.WorkerMock.instances ).toHaveLength( 3 );
+
+		// Workers did not emit an error.
+		for ( const worker of stubs.WorkerMock.instances ) {
+			getExitCallback( worker )( 0 );
+		}
+
+		await promise;
+	} );
+
+	it( 'should round down to the closest integer (`concurrency`)', async () => {
+		const options = Object.assign( {}, defaultOptions, {
+			concurrency: 3.5
+		} );
+
+		const promise = executeInParallel( options );
+		await delay( 0 );
+
+		expect( stubs.WorkerMock.instances ).toHaveLength( 3 );
+
+		// Workers did not emit an error.
+		for ( const worker of stubs.WorkerMock.instances ) {
+			getExitCallback( worker )( 0 );
+		}
+
+		await promise;
+	} );
+
+	it( 'should assign at least one thread even if concurrency is 0 (`concurrency`)', async () => {
+		const options = Object.assign( {}, defaultOptions, {
+			concurrency: 0
+		} );
+
+		const promise = executeInParallel( options );
+		await delay( 0 );
+
+		expect( stubs.WorkerMock.instances ).toHaveLength( 1 );
 
 		// Workers did not emit an error.
 		for ( const worker of stubs.WorkerMock.instances ) {
