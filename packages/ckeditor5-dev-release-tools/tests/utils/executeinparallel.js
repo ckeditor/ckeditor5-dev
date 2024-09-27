@@ -334,6 +334,56 @@ describe( 'executeInParallel()', () => {
 		await promise;
 	} );
 
+	it( 'should use number of cores divided by two as default (`concurrency`)', async () => {
+		const promise = executeInParallel( defaultOptions );
+		await delay( 0 );
+
+		expect( stubs.WorkerMock.instances ).toHaveLength( 2 );
+
+		// Workers did not emit an error.
+		for ( const worker of stubs.WorkerMock.instances ) {
+			getExitCallback( worker )( 0 );
+		}
+
+		await promise;
+	} );
+
+	it( 'should round down to the closest integer (`concurrency`)', async () => {
+		const options = Object.assign( {}, defaultOptions, {
+			concurrency: 3.5
+		} );
+
+		const promise = executeInParallel( options );
+		await delay( 0 );
+
+		expect( stubs.WorkerMock.instances ).toHaveLength( 3 );
+
+		// Workers did not emit an error.
+		for ( const worker of stubs.WorkerMock.instances ) {
+			getExitCallback( worker )( 0 );
+		}
+
+		await promise;
+	} );
+
+	it( 'should assign at least one thread even if concurrency is 0 (`concurrency`)', async () => {
+		const options = Object.assign( {}, defaultOptions, {
+			concurrency: 0
+		} );
+
+		const promise = executeInParallel( options );
+		await delay( 0 );
+
+		expect( stubs.WorkerMock.instances ).toHaveLength( 1 );
+
+		// Workers did not emit an error.
+		for ( const worker of stubs.WorkerMock.instances ) {
+			getExitCallback( worker )( 0 );
+		}
+
+		await promise;
+	} );
+
 	it( 'should resolve the promise if a worker finished (aborted) with a non-zero exit code (first worker)', async () => {
 		const promise = executeInParallel( defaultOptions );
 		await delay( 0 );
