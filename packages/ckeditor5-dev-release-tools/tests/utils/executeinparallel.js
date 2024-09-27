@@ -8,6 +8,7 @@ import { glob } from 'glob';
 import fs from 'fs/promises';
 import { registerAbortController, deregisterAbortController } from '../../lib/utils/abortcontroller.js';
 import executeInParallel from '../../lib/utils/executeinparallel.js';
+import os from 'os';
 
 const stubs = vi.hoisted( () => ( {
 	WorkerMock: class {
@@ -335,10 +336,12 @@ describe( 'executeInParallel()', () => {
 	} );
 
 	it( 'should use number of cores divided by two as default (`concurrency`)', async () => {
+		vi.mocked( os.cpus ).mockReturnValue( new Array( 7 ) );
+
 		const promise = executeInParallel( defaultOptions );
 		await delay( 0 );
 
-		expect( stubs.WorkerMock.instances ).toHaveLength( 2 );
+		expect( stubs.WorkerMock.instances ).toHaveLength( 3 );
 
 		// Workers did not emit an error.
 		for ( const worker of stubs.WorkerMock.instances ) {
