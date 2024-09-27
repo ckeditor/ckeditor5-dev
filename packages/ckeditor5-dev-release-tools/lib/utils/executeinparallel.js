@@ -48,6 +48,7 @@ export default async function executeInParallel( options ) {
 		concurrency = os.cpus().length / 2
 	} = options;
 
+	const concurrencyAsInteger = Math.floor( concurrency ) || 1;
 	const normalizedCwd = upath.toUnix( cwd );
 	const packages = ( await glob( `${ packagesDirectory }/*/`, {
 		cwd: normalizedCwd,
@@ -58,7 +59,7 @@ export default async function executeInParallel( options ) {
 		packages.filter( packagesDirectoryFilter ) :
 		packages;
 
-	const packagesInThreads = getPackagesGroupedByThreads( packagesToProcess, concurrency );
+	const packagesInThreads = getPackagesGroupedByThreads( packagesToProcess, concurrencyAsInteger );
 
 	const callbackModule = upath.join( cwd, crypto.randomUUID() + '.mjs' );
 	await fs.writeFile( callbackModule, `export default ${ taskToExecute };`, 'utf-8' );
