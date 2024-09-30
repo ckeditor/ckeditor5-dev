@@ -104,6 +104,9 @@ jobs:
           name: Execute ESLint
           command: yarn run lint
       - run:
+          name: Check if the workflow is restarted
+          command: yarn ckeditor5-dev-ci-is-workflow-restarted
+      - run:
           name: Run unit tests
           command: yarn run coverage
       - unless:
